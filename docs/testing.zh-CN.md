@@ -51,5 +51,11 @@
 
 ## 3. 测试媒体
 
-`tools/fixtures` 用 `ffmpeg -f lavfi`（`testsrc2`、`sine` 等）确定性地生成测试媒体：多种容器与编解码器、HDR10 / 杜比视界元数据、多音轨与多字幕轨、隔行扫描片源、非常规时长。生成的文件放在 `.fixtures/`（已加入 git 忽略），不提交二进制媒体文件。依赖这些文件的测试在文件缺失时跳过，并给出明确的提示信息。
+`tools/fixtures` 用 `ffmpeg -f lavfi`（`testsrc2`、`sine`）确定性地生成测试媒体：一组短片段，覆盖多种容器与编解码器（H.264、HEVC Main10、MPEG-2、VP9、AV1、AAC、AC-3、MP2、Opus、FLAC）、HDR10 标记与元数据、隔行扫描、带语言与 disposition 的多音轨和多字幕轨、章节、音乐标签，以及非整数帧率与时长。
+
+* `pnpm nx run fixtures:generate` 把样本生成到仓库根目录的 `.fixtures/`（已加入 git 忽略；可用 `MAVIO_FIXTURES` 覆盖）。不提交二进制媒体文件。
+* 增量生成：`.fixtures/manifest.json` 为每个样本记录一个 key（ffmpeg 版本、参数与辅助文件的哈希），只重新生成缺失或有变化的样本。
+* 本机 ffmpeg 缺少所需编码器的样本会被跳过，并给出警告。
+* 测试通过 `github.com/mavioai/mavio/tools/fixtures` 的 `fixtures.Require(t, "<name>")` 获取样本路径；样本未生成时自动跳过测试。
+* 在 `tools/fixtures` 下运行 `go run ./cmd/fixtures -list` 可列出全部样本。
 

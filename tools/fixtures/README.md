@@ -2,11 +2,19 @@
 
 > English | [简体中文](README.zh-CN.md)
 
-Deterministically generates test media with `ffmpeg -f lavfi` (`testsrc2`,
-`sine`, …): multiple containers and codecs, HDR10 / Dolby Vision metadata,
-multiple audio and subtitle tracks, interlaced sources, odd durations.
+Deterministically generates test media with `ffmpeg -f lavfi` and lets tests locate it. See `docs/testing.md` §3.
 
-Generated files go to `.fixtures/` (git-ignored) and are never committed.
-Tests that need them must skip with a clear message when they are missing.
+```bash
+pnpm nx run fixtures:generate          # generate missing or changed fixtures into .fixtures/
+go run ./cmd/fixtures -list            # list the catalog
+go run ./cmd/fixtures -only a.mkv,b.ts # generate selected fixtures
+go run ./cmd/fixtures -force           # regenerate everything
+```
 
-Status: not implemented yet (P0).
+The catalog lives in `catalog.go`; each `Spec` declares the ffmpeg arguments, the encoders it needs and any auxiliary input files.
+
+In tests:
+
+```go
+path := fixtures.Require(t, "multi_track.mkv") // skips the test if not generated
+```

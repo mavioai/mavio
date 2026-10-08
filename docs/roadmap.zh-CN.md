@@ -63,7 +63,7 @@ flowchart TD
 - [x] buf 与首个契约 `mavio.system.v1.SystemService`；`apps/server` 提供 Connect 健康检查接口
 - [x] golangci-lint 与 depguard 依赖方向规则
 - [x] CI 工作流：受影响项目检查、生成代码一致性检查、`buf breaking`、多平台测试矩阵
-- [ ] `tools/fixtures`：测试媒体生成
+- [x] `tools/fixtures`：测试媒体生成
 - [ ] `tools/testport`：Jellyfin 测试用例提取
 
 ### P1 契约、存储与插件运行时

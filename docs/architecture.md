@@ -103,7 +103,7 @@ mavio/
 │
 ├── tools/
 │   ├── nx-go/                   # Local Nx plugin: infers projects from go.mod and builds the dependency graph
-│   ├── fixtures/                # Deterministic test media generation with ffmpeg lavfi (HDR10 / DV metadata, multiple audio and subtitle tracks)
+│   ├── fixtures/                # Deterministic test media generation with ffmpeg lavfi (HDR10, interlacing, multiple audio and subtitle tracks)
 │   └── testport/                # One-off tool that extracts cases from Jellyfin's C# tests into testdata
 │
 └── docs/

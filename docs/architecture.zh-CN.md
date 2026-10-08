@@ -103,7 +103,7 @@ mavio/
 │
 ├── tools/
 │   ├── nx-go/                   # 本地 Nx 插件：把 go.mod 推断为项目，并生成依赖图
-│   ├── fixtures/                # 用 ffmpeg lavfi 确定性生成测试媒体（HDR10 / DV 元数据、多音轨、多字幕）
+│   ├── fixtures/                # 用 ffmpeg lavfi 确定性生成测试媒体（HDR10、隔行扫描、多音轨、多字幕）
 │   └── testport/                # 从 Jellyfin C# 测试中提取用例并生成 testdata 的一次性工具
 │
 └── docs/

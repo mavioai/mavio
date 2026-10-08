@@ -51,5 +51,11 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 
 ## 3. Test Media
 
-`tools/fixtures` deterministically generates test media with `ffmpeg -f lavfi` (`testsrc2`, `sine`, …): multiple containers and codecs, HDR10 / Dolby Vision metadata, multiple audio and subtitle tracks, interlaced sources, odd durations. Generated files go to `.fixtures/` (git-ignored); binary media files are never committed. Tests that need them skip with a clear message when they are missing.
+`tools/fixtures` deterministically generates test media with `ffmpeg -f lavfi` (`testsrc2`, `sine`): a catalog of short clips covering multiple containers and codecs (H.264, HEVC Main10, MPEG-2, VP9, AV1, AAC, AC-3, MP2, Opus, FLAC), HDR10 signaling and metadata, interlacing, multiple audio and subtitle tracks with languages and dispositions, chapters, music tags and non-integer frame rates and durations.
+
+* `pnpm nx run fixtures:generate` writes the catalog to `.fixtures/` at the repository root (git-ignored; override with `MAVIO_FIXTURES`). Binary media files are never committed.
+* Generation is incremental: `.fixtures/manifest.json` records a key per fixture (a hash of the ffmpeg version, arguments and auxiliary files), and only missing or changed fixtures are regenerated.
+* Fixtures whose encoders the local ffmpeg build lacks are skipped with a warning.
+* Tests get a fixture path with `fixtures.Require(t, "<name>")` from `github.com/mavioai/mavio/tools/fixtures`, which skips the test when the fixture has not been generated.
+* `go run ./cmd/fixtures -list` (in `tools/fixtures`) lists the catalog.
 

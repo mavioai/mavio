@@ -108,7 +108,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 ## 测试约定
 - 测试优先写成表驱动测试；断言失败信息使用 `got = …, want = …` 格式。
 - 单元测试不访问网络、不依赖真实 ffmpeg 或硬件；需要这些的测试放在集成测试中，条件不满足时 `t.Skip` 并写明原因。
-- 测试媒体由 `tools/fixtures` 生成到 `.fixtures/`，不提交二进制媒体文件。
+- 测试媒体由 `pnpm nx run fixtures:generate` 生成到 `.fixtures/`，不提交二进制媒体文件。测试通过 `fixtures.Require(t, name)` 获取样本，样本缺失时自动跳过。
 - 涉及超时、定时器、空闲回收的并发逻辑，用 `testing/synctest` 写成确定性测试。
 - 编写基准测试时使用 `b.Loop()`；基准测试不纳入 CI。
 - **从 Jellyfin 移植的测试用例与测试数据**放在对应库的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），**不得创建以 Jellyfin 命名的目录**。每个文件或用例都在元数据中记录来源（Jellyfin 测试文件路径与测试名）。跳过的用例必须标记 `skip` 并写明原因，不允许静默丢弃。移植规则见 [docs/testing.zh-CN.md](docs/testing.zh-CN.md) §2。

@@ -1,0 +1,13 @@
+{
+  "name": "fixtures",
+  "targets": {
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "go run ./cmd/fixtures",
+        "cwd": "{projectRoot}"
+      },
+      "cache": false
+    }
+  }
+}

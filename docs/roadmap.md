@@ -63,7 +63,7 @@ flowchart TD
 - [x] buf and the first contract `mavio.system.v1.SystemService`; `apps/server` serves a Connect health check
 - [x] golangci-lint and depguard dependency-direction rules
 - [x] CI workflow: affected-project checks, generated-code check, `buf breaking`, multi-platform test matrix
-- [ ] `tools/fixtures`: test media generation
+- [x] `tools/fixtures`: test media generation
 - [ ] `tools/testport`: Jellyfin test case extraction
 
 ### P1 Contracts, Storage and Plugin Runtimes
