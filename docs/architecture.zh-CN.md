@@ -144,7 +144,7 @@ libs/proto/
 └── gen/ts/                     # (后期) 生成的 protobuf-es + connect-es（npm 包）
 ```
 
-* 客户端能力用 Mavio 自己的 `ClientCapabilities` 消息表达（容器、编解码器、等级、HDR 能力、字幕交付方式、带宽），替代 Jellyfin 的 `DeviceProfile`；移植 StreamBuilder 测试时把 Jellyfin 的 profile 转换成该消息。
+* 客户端能力用 Mavio 自己的 `ClientCapabilities` 表达（容器、编解码器、等级、HDR 能力、字幕交付方式、带宽），替代 Jellyfin 的 `DeviceProfile`。Go 类型位于 `libs/media/decision`，该包不依赖 `libs/proto`；`playback/v1` 中的消息与之对应，由 `apps/server` 负责二者转换。移植 StreamBuilder 测试时把 Jellyfin 的 profile 转换成该类型。
 * 媒体流（直放、HLS 播放列表与分片、图片）不经过 Connect，走普通 HTTP，以便利用 Range、缓存与 CDN 语义。
 * API 消息与领域模型（[领域模型](domain.zh-CN.md)）对应，但从不暴露图片路径、密码哈希等文件系统与内部细节。
 * `plugin/v1` 对插件作者发布，自成一体：它定义自己的精简消息（`Lookup`、`Metadata`、`PersonCredit`、`RemoteImage` 等），而不引用 `library/v1`，两份契约可以各自演进。

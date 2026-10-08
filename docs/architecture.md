@@ -144,7 +144,7 @@ libs/proto/
 └── gen/ts/                     # (later) Generated protobuf-es + connect-es (npm package)
 ```
 
-* Client capabilities are expressed with Mavio's own `ClientCapabilities` message (containers, codecs, levels, HDR capabilities, subtitle delivery methods, bandwidth), in place of Jellyfin's `DeviceProfile`; when porting the StreamBuilder tests, Jellyfin profiles are converted into this message.
+* Client capabilities are expressed with Mavio's own `ClientCapabilities` (containers, codecs, levels, HDR capabilities, subtitle delivery methods, bandwidth), in place of Jellyfin's `DeviceProfile`. The Go type lives in `libs/media/decision`, which stays free of `libs/proto`; the `playback/v1` message mirrors it and `apps/server` converts between them. When porting the StreamBuilder tests, Jellyfin profiles are converted into this type.
 * Media streams (direct play, HLS playlists and segments, images) do not go through Connect but over plain HTTP, to benefit from Range, caching and CDN semantics.
 * API messages mirror the domain model ([Domain Model](domain.md)) but never expose file system internals such as image paths or password hashes.
 * `plugin/v1` is published to plugin authors and is self-contained: it defines its own lean messages (`Lookup`, `Metadata`, `PersonCredit`, `RemoteImage`, …) instead of importing `library/v1`, so the two contracts can evolve independently.
