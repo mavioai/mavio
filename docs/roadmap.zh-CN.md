@@ -41,7 +41,7 @@ flowchart TD
 | :--- | :--- | :--- |
 | P0 | 工程地基 | ✅ 已完成 |
 | P1 | 契约、存储与插件运行时 | ✅ 已完成 |
-| P2 | 纯计算库 | 未开始 |
+| P2 | 纯计算库 | 进行中 |
 | P3 | 媒体管线 | 未开始 |
 | P4 | 扫描与插件落地 | 未开始 |
 | P5 | 流媒体与 API | 未开始 |
@@ -82,6 +82,12 @@ flowchart TD
 **范围**：`naming`、`subtitle`、`metadata`（NFO）、`imaging`。
 
 **完成标准**：对应的移植用例全部通过。
+
+**进展**：
+- [x] `libs/naming`：Jellyfin 的命名规则，覆盖电影、剧集、季、剧集系列、分段、多版本、附加内容、音乐、有声书、图书与外部文件；移植用例全部通过或带原因跳过
+- [ ] `libs/subtitle`
+- [ ] `libs/metadata`（NFO）
+- [ ] `libs/imaging`
 
 ### P3 媒体管线
 **范围**：`probe`、`keyframes`、`hwaccel`、`decision`、`planner`、`supervisor`。

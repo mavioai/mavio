@@ -45,6 +45,7 @@ Mavio 采用 **GPL-3.0**（`GPL-3.0-only`）。GPL-3.0 与 Apache-2.0 兼容，�
 | 图像 | **纯 Go + wazero WASM 编解码器 + ffmpeg** | 见 §6 |
 | 流媒体 | **HLS + fMP4（CMAF）**；直放走 HTTP Range | hls.js / Media3 / AVPlayer 均原生支持 |
 | 插件 | **wazero WASM + 子进程（统一 UDS）** | 见 §7 |
+| 文件名规则 | **Jellyfin 的命名规则，基于 `dlclark/regexp2`** | 规则使用 .NET 正则（环视、原子组），`regexp2` 可原样执行；每次匹配限时一秒 |
 | 并发 | `errgroup.SetLimit` + `iter.Seq` | |
 | 变更检测 | **全量对账扫描**（定时、启动时、手动 / API 触发），以目录 mtime 剪枝 | 见 §9 |
 | 后台任务 | 自建数据库任务队列（租约 + 重试） | 同时支持 SQLite / PostgreSQL |

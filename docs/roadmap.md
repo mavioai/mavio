@@ -41,7 +41,7 @@ flowchart TD
 | :--- | :--- | :--- |
 | P0 | Engineering foundation | ✅ Done |
 | P1 | Contracts, storage and plugin runtimes | ✅ Done |
-| P2 | Pure computation libraries | Not started |
+| P2 | Pure computation libraries | In progress |
 | P3 | Media pipeline | Not started |
 | P4 | Scanning and first plugin | Not started |
 | P5 | Streaming and API | Not started |
@@ -82,6 +82,12 @@ flowchart TD
 **Scope**: `naming`, `subtitle`, `metadata` (NFO), `imaging`.
 
 **Done when**: all corresponding ported cases pass.
+
+**Progress**:
+- [x] `libs/naming`: Jellyfin's naming rules for movies, episodes, seasons, series, stacks, versions, extras, music, audiobooks, books and external files; all ported cases pass or are skipped with a reason
+- [ ] `libs/subtitle`
+- [ ] `libs/metadata` (NFO)
+- [ ] `libs/imaging`
 
 ### P3 Media Pipeline
 **Scope**: `probe`, `keyframes`, `hwaccel`, `decision`, `planner`, `supervisor`.

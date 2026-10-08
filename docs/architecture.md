@@ -45,6 +45,7 @@ Mavio is licensed under **GPL-3.0** (`GPL-3.0-only`). GPL-3.0 is compatible with
 | Imaging | **Pure Go + wazero WASM codecs + ffmpeg** | See §6 |
 | Streaming | **HLS + fMP4 (CMAF)**; direct play over HTTP Range | Natively supported by hls.js / Media3 / AVPlayer |
 | Plugins | **wazero WASM + child processes (UDS everywhere)** | See §7 |
+| File name rules | **Jellyfin's naming rules on `dlclark/regexp2`** | The rules use .NET regular expressions (lookaround, atomic groups), which `regexp2` runs unchanged; each match has a one-second timeout |
 | Concurrency | `errgroup.SetLimit` + `iter.Seq` | |
 | Change detection | **Full reconciliation scans** (scheduled, on startup, manual / API-triggered), pruned by directory mtime | See §9 |
 | Background jobs | In-house database job queue (leases + retries) | Works on both SQLite and PostgreSQL |

@@ -80,6 +80,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 - SQLite 驱动使用 `ncruces/go-sqlite3`；媒体库变更检测通过全量对账扫描实现（架构文档 §9）。
 - 许可证必须兼容 GPL-3.0：MIT、BSD、ISC、Apache-2.0、MPL-2.0、LGPL、GPL-3.0 可用；**禁止 GPL-2.0-only**。
 - 能用标准库或 `golang.org/x/*` 解决的，不引入第三方库（例如并发用 `errgroup.SetLimit`）。
+- 从 Jellyfin 移植的文件名规则保留 .NET 正则语法，基于 `dlclark/regexp2` 执行；不要改写为 `regexp`。
 
 ### 代码风格
 - 格式化：gofumpt + goimports（本仓库导入单独分组）。由 golangci-lint 检查。

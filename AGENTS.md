@@ -80,6 +80,7 @@ Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test
 - The SQLite driver is `ncruces/go-sqlite3`; library change detection is done with full reconciliation scans (architecture document §9).
 - Licenses must be compatible with GPL-3.0: MIT, BSD, ISC, Apache-2.0, MPL-2.0, LGPL and GPL-3.0 are fine; **GPL-2.0-only is not allowed**.
 - Do not add a third-party library for anything the standard library or `golang.org/x/*` can do (e.g. use `errgroup.SetLimit` for concurrency).
+- File name rules ported from Jellyfin keep their .NET regular expression syntax and run on `dlclark/regexp2`; do not rewrite them for `regexp`.
 
 ### Code Style
 - Formatting: gofumpt + goimports (this repository's imports in their own group), checked by golangci-lint.
