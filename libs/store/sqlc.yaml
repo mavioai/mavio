@@ -1,0 +1,39 @@
+# sqlc generates the dialect-specific job queue SQL. The schema is read from
+# the migrations, which ent and Atlas produce.
+version: "2"
+sql:
+  - engine: sqlite
+    schema: migrations/sqlite
+    queries: queries/sqlite
+    gen:
+      go:
+        package: sqlcsqlite
+        out: internal/sqlcsqlite
+        omit_unused_structs: true
+        overrides:
+          - db_type: uuid
+            go_type: github.com/mavioai/mavio/libs/core.ID
+          # SQLite's type affinity leaves nullable columns untyped.
+          - column: jobs.lease_expires_at
+            go_type:
+              import: database/sql
+              type: NullTime
+          - column: jobs.finished_at
+            go_type:
+              import: database/sql
+              type: NullTime
+          - column: jobs.payload
+            go_type:
+              type: "[]byte"
+  - engine: postgresql
+    schema: migrations/postgres
+    queries: queries/postgres
+    gen:
+      go:
+        package: sqlcpg
+        out: internal/sqlcpg
+        omit_unused_structs: true
+        sql_package: database/sql
+        overrides:
+          - db_type: uuid
+            go_type: github.com/mavioai/mavio/libs/core.ID

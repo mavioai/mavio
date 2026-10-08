@@ -1,0 +1,14 @@
+{
+  "name": "store",
+  "targets": {
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["go generate ./internal/ent", "sqlc generate"],
+        "parallel": false,
+        "cwd": "{projectRoot}"
+      },
+      "cache": false
+    }
+  }
+}

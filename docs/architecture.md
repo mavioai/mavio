@@ -155,29 +155,39 @@ libs/proto/
 ### 5.1 Responsibilities
 | ent | sqlc |
 | :--- | :--- |
-| **Single source of truth for the schema** | Hot read paths: library browsing, multi-criteria filtering / sorting / pagination |
-| Write-heavy CRUD with complex relations: users, permissions, settings, plugin registry, jobs | Aggregate statistics |
-| Relationship traversal (series → season → episode, people, genres) | Bulk upserts during scans (both databases support `INSERT … ON CONFLICT`) |
-| | Full-text search (SQLite FTS5 / PostgreSQL `tsvector` + `pg_trgm`) |
+| **Single source of truth for the schema** (`internal/ent/schema`) | Dialect-specific SQL that ent cannot express portably: the job queue (`INSERT … ON CONFLICT … WHERE` deduplication, atomic leasing with `FOR UPDATE SKIP LOCKED` on PostgreSQL) |
+| CRUD, batch upserts (`CreateBulk` + `ON CONFLICT`), relationship traversal | |
+| Dynamic item queries: optional filters, recursive descendants (a recursive CTE both dialects support), user-data joins, sorting, paging | |
+
+Item queries are built with ent rather than sqlc because their filters and sort orders combine dynamically; static SQL with optional parameters would defeat the query planner. sqlc queries are written once per dialect, so they stay limited to the cases above (budget ≤ 30 queries).
 
 ### 5.2 Generation Pipeline
 ```text
-ent schema ──atlas migrate diff (sqlite)────▶ migrations/sqlite/*.sql   ──▶ sqlc (engine: sqlite)     ──▶ internal/sqlcsqlite
-           └─atlas migrate diff (postgres)──▶ migrations/postgres/*.sql ──▶ sqlc (engine: postgresql) ──▶ internal/sqlcpg
+ent schema ──go generate──────────────────────▶ internal/ent (generated client)
+     │
+     └──migrategen -dialect sqlite / postgres──▶ migrations/<dialect>/*.sql + atlas.sum
+                                                        │
+                                   sqlc generate ◀──────┘ (reads migrations as schema)
+                                        │
+                                        ▼
+                         internal/sqlcsqlite, internal/sqlcpg
 ```
-* The two migration directories are versioned separately and reviewed by a human before committing. Dialect-specific objects (FTS5 virtual tables, GIN indexes, triggers) are added through hand-written migrations.
-* sqlc reads the corresponding migration directory as its schema.
+* `internal/cmd/migrategen` writes versioned migrations: it replays the existing migration directory on an empty development database (in-memory SQLite, or a throwaway PostgreSQL container), diffs it against the ent schema with Atlas, and writes the difference as a new migration in Atlas format. SQLite migrations use standard double-quoted identifiers, which sqlc's parser requires.
+* The two migration directories are versioned separately and reviewed by a human before committing; merged migrations are never edited.
+* The server applies pending migrations on startup (`store.Open`): each file runs in its own transaction and is recorded in `schema_migrations`.
 
-### 5.3 Dual-dialect Constraints and Practices
-* **Shared transactions**: enable ent's `sql/execquery` feature so that `ent.Client` / `ent.Tx` gain `ExecContext` / `QueryContext` and can be passed directly as sqlc's `DBTX`; ent and sqlc can then be mixed within one transaction. sqlc's PostgreSQL engine therefore uses `sql_package: database/sql`.
-* **Containing the cost of maintaining queries twice**: sqlc queries are written once per dialect and used only for genuinely hot paths (initial budget ≤ 30 queries); everything else goes through ent.
-* **Unified types**: sqlc `overrides` map UUIDs, times, JSON and so on to the same Go types, so both sets of generated row structs are identical.
-* **Repository ports**: `store` exposes only the repository interfaces defined in `core`; all dialect differences are absorbed in the adapter layer.
-* **Difference checklist** (handled uniformly during schema design): UUID storage (`uuid` vs `BLOB`/`TEXT`), case-insensitive comparison (`NOCASE` vs `citext` / ICU collations), JSON (`json1` vs `jsonb`), full-text search, time precision.
-* **Conformance tests**: the same repository test suite runs on SQLite (in-memory / temp file) and PostgreSQL (testcontainers-go); a change passes only if both pass.
+### 5.3 Dual-dialect Practices
+* **Shared transactions**: `Store.InTx` begins a `*sql.Tx` and binds both an ent client (through a driver whose nested transactions are no-ops) and the sqlc queries to it, so repositories can be combined freely within one transaction.
+* **Unified types**: `core.ID` implements `sql.Scanner` / `driver.Valuer` and is stored as `uuid` (PostgreSQL) or text (SQLite); sqlc `overrides` map it and the nullable columns to the same Go types in both packages, so the PostgreSQL adapter converts structs directly.
+* **Multi-valued attributes** (genres, tags, studios, artists, album artists) live in an `item_values` table, so "matches any of" filters are portable and indexable.
+* **Search and sorting** use folded keys computed in Go (`fold`: half-width, no diacritics, lower case): `search_key` (name and original title) is matched by substring, which works for CJK titles and short queries alike; `sort_key` orders names case- and accent-insensitively.
+* **Case-insensitive uniqueness** (user names) uses a lower-cased `name_key` column with a unique index.
+* **Times** are stored with microsecond precision (`timestamptz` on PostgreSQL, integer microseconds on SQLite) and returned in UTC.
+* **Repository ports**: `store` exposes only the interfaces defined in `core`; ent and sqlc types never leave the package.
+* **Conformance tests**: the same repository test suite runs on SQLite (temporary file) and PostgreSQL (testcontainers-go, or `MAVIO_TEST_POSTGRES_DSN`); a change passes only if both pass.
 
 ### 5.4 SQLite Runtime Settings
-WAL mode, `synchronous=NORMAL`, `busy_timeout`, foreign keys on; a single writer connection plus a pool of reader connections; periodic `PRAGMA optimize`.
+WAL mode, `synchronous=NORMAL`, `busy_timeout`, foreign keys on. A single-connection writer pool runs writes and transactions with `_txlock=immediate` (the write lock is taken when a transaction begins, avoiding upgrade deadlocks); a separate pool serves reads. Time values use `_timefmt=unixepoch_micro`. `PRAGMA optimize` runs on close.
 
 ---
 

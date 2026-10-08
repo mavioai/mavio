@@ -74,7 +74,7 @@ flowchart TD
 **Progress**:
 - [x] `libs/core`: domain model and repository ports ([Domain Model](domain.md))
 - [x] `libs/proto`: first version of the contracts (library, user, system, plugin)
-- [ ] `libs/store`: SQLite and PostgreSQL implementation of the ports, including the job queue
+- [x] `libs/store`: SQLite and PostgreSQL implementation of the ports, including the job queue
 - [ ] `libs/plugin`: WASM and child-process runtimes
 
 ### P2 Pure Computation Libraries

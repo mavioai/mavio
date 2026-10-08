@@ -16,13 +16,14 @@
 | node + pnpm | Nx，以及后续的 TS 应用 |
 | buf | Protobuf 的 lint、格式化、破坏性变更检查与代码生成 |
 | golangci-lint | Go 代码检查与格式检查 |
+| sqlc | 生成 `libs/store` 中的方言专属查询代码 |
 
 ```bash
 mise install            # 安装锁定版本的工具链
 pnpm install            # 安装 Nx
 ```
 
-`atlas` 在 P1 随 `libs/store` 一起加入 `mise.toml`。
+迁移由 `libs/store/internal/cmd/migrategen` 生成，它以库的形式使用 Atlas，不需要 Atlas CLI。生成 PostgreSQL 迁移和运行 PostgreSQL 一致性测试需要 Docker。
 
 ---
 
@@ -102,7 +103,16 @@ GOWORK=off go mod tidy
 * 请求校验使用 protovalidate 注解（`buf.validate`）。edition 2023 下每个字段都跟踪是否设置，规则只对已设置的字段生效，因此**必填字段必须标注 `(buf.validate.field).required = true`**。`libs/proto/validate_test.go` 检查这些规则。
 
 ### 4.2 数据库 Schema 与查询
-ent → Atlas → sqlc 的生成流水线见[架构 §5.2](architecture.zh-CN.md#52-生成流水线)。对应的 Nx 目标在 P1 随 `libs/store` 一起加入。已合并的迁移文件不得修改，只能追加新迁移。
+流水线见[架构 §5.2](architecture.zh-CN.md#52-生成流水线)。修改 `libs/store/internal/ent/schema` 中的 ent schema 之后：
+
+```bash
+pnpm nx run store:generate                                   # 生成 ent 客户端与 sqlc 代码
+# 在 libs/store 下
+go run ./internal/cmd/migrategen -dialect sqlite -name <名称>
+go run ./internal/cmd/migrategen -dialect postgres -name <名称>  # 会启动 PostgreSQL 容器，需要 Docker
+```
+
+审核两份迁移，并与 schema 修改一起提交。已合并的迁移文件不得修改，只能追加新迁移。方言专属查询放在 `libs/store/queries/<dialect>/` 中，由 `sqlc`（版本锁定在 `mise.toml`）在 `store:generate` 中生成。
 
 ---
 

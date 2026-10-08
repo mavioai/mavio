@@ -155,29 +155,39 @@ libs/proto/
 ### 5.1 职责划分
 | ent 负责 | sqlc 负责 |
 | :--- | :--- |
-| **Schema 的唯一来源** | 热点读路径：媒体库浏览、多条件过滤 / 排序 / 分页 |
-| 用户、权限、设置、插件注册、任务等写多、关系复杂的 CRUD | 聚合统计 |
-| 关系遍历（剧集 → 季 → 集、人物、流派） | 扫描时的批量 upsert（两种数据库都支持 `INSERT … ON CONFLICT`） |
-| | 全文检索（SQLite FTS5 / PostgreSQL `tsvector` + `pg_trgm`） |
+| **Schema 的唯一来源**（`internal/ent/schema`） | ent 无法以可移植方式表达的方言专属 SQL：任务队列（`INSERT … ON CONFLICT … WHERE` 去重；PostgreSQL 上用 `FOR UPDATE SKIP LOCKED` 原子租用） |
+| 增删改查、批量 upsert（`CreateBulk` + `ON CONFLICT`）、关系遍历 | |
+| 动态条目查询：可选过滤条件、递归后代（两种方言都支持的递归 CTE）、关联用户数据、排序、分页 | |
+
+条目查询用 ent 而不用 sqlc 构建，因为它的过滤条件与排序方式是动态组合的；用带可选参数的静态 SQL 会让查询计划失效。sqlc 查询按方言各写一份，因此只用于上述场景（预算 ≤ 30 条）。
 
 ### 5.2 生成流水线
 ```text
-ent schema ──atlas migrate diff (sqlite)────▶ migrations/sqlite/*.sql   ──▶ sqlc (engine: sqlite)     ──▶ internal/sqlcsqlite
-           └─atlas migrate diff (postgres)──▶ migrations/postgres/*.sql ──▶ sqlc (engine: postgresql) ──▶ internal/sqlcpg
+ent schema ──go generate──────────────────────▶ internal/ent（生成的客户端）
+     │
+     └──migrategen -dialect sqlite / postgres──▶ migrations/<dialect>/*.sql + atlas.sum
+                                                        │
+                                   sqlc generate ◀──────┘（把迁移当作 schema 读入）
+                                        │
+                                        ▼
+                         internal/sqlcsqlite、internal/sqlcpg
 ```
-* 两套迁移目录各自版本化，提交前人工审核。数据库方言专属对象（FTS5 虚表、GIN 索引、触发器）以手写迁移补充。
-* sqlc 把对应的迁移目录当作 schema 读入。
+* `internal/cmd/migrategen` 生成版本化迁移：在空的开发数据库（内存 SQLite，或临时的 PostgreSQL 容器）上重放已有迁移目录，用 Atlas 与 ent schema 比较差异，并把差异写成 Atlas 格式的新迁移。SQLite 迁移使用标准的双引号标识符，这是 sqlc 解析器的要求。
+* 两套迁移目录各自版本化，提交前人工审核；已合并的迁移不得修改。
+* 服务端启动时（`store.Open`）执行待应用的迁移：每个文件在独立事务中执行，并记录到 `schema_migrations`。
 
-### 5.3 双方言的约束与做法
-* **统一事务**：开启 ent 的 `sql/execquery` 特性，`ent.Client` / `ent.Tx` 因此具备 `ExecContext` / `QueryContext`，可直接作为 sqlc 的 `DBTX` 传入；同一事务内可以混用 ent 与 sqlc。sqlc 的 PostgreSQL 引擎因此使用 `sql_package: database/sql`。
-* **查询双份维护的成本控制**：sqlc 查询按方言各写一份，只用于真正的热点路径（初期预算 ≤ 30 条）；其余一律走 ent。
-* **统一类型**：通过 sqlc `overrides` 把 UUID、时间、JSON 等映射到相同的 Go 类型，使两份生成代码的行结构一致。
-* **仓储端口**：`store` 对上只暴露 `core` 定义的仓储接口，方言差异全部在适配层内消化。
-* **差异清单**（需在 schema 设计时统一处理）：UUID 存储（`uuid` vs `BLOB`/`TEXT`）、大小写不敏感比较（`NOCASE` vs `citext` / ICU 排序规则）、JSON（`json1` vs `jsonb`）、全文检索、时间精度。
-* **一致性测试**：同一套仓储测试分别跑在 SQLite（内存 / 临时文件）与 PostgreSQL（testcontainers-go）上，两者都通过才算通过。
+### 5.3 双方言的做法
+* **统一事务**：`Store.InTx` 开启一个 `*sql.Tx`，把 ent 客户端（通过嵌套事务为空操作的驱动）和 sqlc 查询都绑定到它上面，因此一个事务内可以任意组合各个仓储。
+* **统一类型**：`core.ID` 实现了 `sql.Scanner` / `driver.Valuer`，在 PostgreSQL 中存为 `uuid`、在 SQLite 中存为文本；sqlc 的 `overrides` 把它和可空列映射为两个包中相同的 Go 类型，因此 PostgreSQL 适配层可以直接转换结构体。
+* **多值属性**（流派、标签、工作室、艺人、专辑艺人）存放在 `item_values` 表中，使"匹配任意一个"的过滤可移植且可索引。
+* **搜索与排序**使用在 Go 中计算的折叠键（`fold`：全角转半角、去除变音符号、转小写）：`search_key`（名称与原始标题）按子串匹配，对中日韩标题和短关键词同样有效；`sort_key` 实现不区分大小写和重音的名称排序。
+* **不区分大小写的唯一性**（用户名）通过带唯一索引的小写 `name_key` 列实现。
+* **时间**以微秒精度存储（PostgreSQL 用 `timestamptz`，SQLite 用整数微秒），读出时为 UTC。
+* **仓储端口**：`store` 只暴露 `core` 中定义的接口；ent 与 sqlc 的类型不会离开本包。
+* **一致性测试**：同一套仓储测试分别跑在 SQLite（临时文件）与 PostgreSQL（testcontainers-go，或 `MAVIO_TEST_POSTGRES_DSN`）上，两者都通过才算通过。
 
 ### 5.4 SQLite 运行参数
-WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启；单写连接 + 多读连接池；定期 `PRAGMA optimize`。
+WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的写池执行写入与事务，并使用 `_txlock=immediate`（事务开始时即获取写锁，避免锁升级死锁）；另一个连接池负责读取。时间值使用 `_timefmt=unixepoch_micro`。关闭时执行 `PRAGMA optimize`。
 
 ---
 
