@@ -104,11 +104,59 @@ type Provider string
 
 // Well-known providers. Plugins may use other names.
 const (
-	ProviderTMDB        Provider = "tmdb"
-	ProviderIMDb        Provider = "imdb"
-	ProviderTVDB        Provider = "tvdb"
-	ProviderMusicBrainz Provider = "musicbrainz"
+	ProviderTMDB Provider = "tmdb"
+	// ProviderTMDBCollection is the TMDB collection a movie belongs to.
+	ProviderTMDBCollection    Provider = "tmdb_collection"
+	ProviderIMDb              Provider = "imdb"
+	ProviderTVDB              Provider = "tvdb"
+	ProviderMusicBrainzArtist Provider = "musicbrainz_artist"
 )
+
+// Video3DFormat is the stereoscopic layout of a 3D video.
+type Video3DFormat string
+
+// 3D formats.
+const (
+	Video3DHalfSideBySide   Video3DFormat = "half_sbs"
+	Video3DFullSideBySide   Video3DFormat = "full_sbs"
+	Video3DHalfTopAndBottom Video3DFormat = "half_tab"
+	Video3DFullTopAndBottom Video3DFormat = "full_tab"
+	Video3DMVC              Video3DFormat = "mvc"
+)
+
+// Video3DFormats lists every 3D format.
+var Video3DFormats = []Video3DFormat{
+	Video3DHalfSideBySide, Video3DFullSideBySide, Video3DHalfTopAndBottom, Video3DFullTopAndBottom, Video3DMVC,
+}
+
+// Valid reports whether f is a known 3D format.
+func (f Video3DFormat) Valid() bool { return slices.Contains(Video3DFormats, f) }
+
+// MetadataField names a group of item fields that metadata refreshes can
+// be prevented from changing; see Item.LockedFields.
+type MetadataField string
+
+// Lockable field groups.
+const (
+	FieldCast                MetadataField = "cast"
+	FieldGenres              MetadataField = "genres"
+	FieldProductionLocations MetadataField = "production_locations"
+	FieldStudios             MetadataField = "studios"
+	FieldTags                MetadataField = "tags"
+	FieldName                MetadataField = "name"
+	FieldOverview            MetadataField = "overview"
+	FieldRuntime             MetadataField = "runtime"
+	FieldOfficialRating      MetadataField = "official_rating"
+)
+
+// MetadataFields lists every lockable field group.
+var MetadataFields = []MetadataField{
+	FieldCast, FieldGenres, FieldProductionLocations, FieldStudios, FieldTags,
+	FieldName, FieldOverview, FieldRuntime, FieldOfficialRating,
+}
+
+// Valid reports whether f is a known field group.
+func (f MetadataField) Valid() bool { return slices.Contains(MetadataFields, f) }
 
 // Item is a node in a library: a playable media item, a container such as a
 // series or album, or a user-curated collection or playlist.
@@ -144,6 +192,9 @@ type Item struct {
 	EndDate        *time.Time
 	Runtime        time.Duration
 	OfficialRating string // content rating, e.g. "PG-13"
+	// CustomRating is a content rating set by the user, which takes
+	// precedence over OfficialRating.
+	CustomRating string
 	// ParentalRating is the score of OfficialRating in its country's rating
 	// system, used by rating filters; zero means unrated.
 	ParentalRating  int
@@ -154,17 +205,53 @@ type Item struct {
 	Tags        []string
 	Studios     []string
 	ExternalIDs map[Provider]string
+	// ProductionLocations are the countries the item was produced in.
+	ProductionLocations []string
+	// RemoteTrailers are URLs of trailers hosted elsewhere, such as
+	// YouTube.
+	RemoteTrailers []string
+
+	// Movie.
+	// CollectionName is the collection (movie set) the movie belongs to.
+	CollectionName string
+
+	// Video.
+	AspectRatio   string // display aspect ratio, e.g. "16:9" or "2.35:1"
+	Video3DFormat Video3DFormat
 
 	// Music.
 	Artists      []string
 	AlbumArtists []string
+	Album        string // tracks and music videos
 
-	SeriesStatus SeriesStatus // series only
+	// Series.
+	SeriesStatus SeriesStatus
+	AirDays      []time.Weekday
+	AirTime      string // as published, e.g. "9 PM"
+	// DisplayOrder is the episode order of a series, e.g. "aired", "dvd"
+	// or "absolute"; empty means aired order.
+	DisplayOrder string
+
+	// Episode. A special airs before season AirsBeforeSeasonNumber, before
+	// episode AirsBeforeEpisodeNumber of it, or after season
+	// AirsAfterSeasonNumber.
+	AirsBeforeSeasonNumber  *int
+	AirsAfterSeasonNumber   *int
+	AirsBeforeEpisodeNumber *int
 
 	// Extra is set for trailers, featurettes and other extras; OwnerID is the
 	// item they belong to.
 	Extra   ExtraKind
 	OwnerID ID
+
+	// MetadataLanguage (ISO 639-1) and MetadataCountry (ISO 3166-1
+	// alpha-2) override the library's settings for this item.
+	MetadataLanguage string
+	MetadataCountry  string
+	// Locked keeps metadata refreshes from changing the item;
+	// LockedFields protects only some field groups.
+	Locked       bool
+	LockedFields []MetadataField
 
 	// DateAdded is when the item first appeared in the library; FileModified
 	// is the media file's modification time, used to detect changes.
@@ -196,6 +283,18 @@ func (it *Item) Validate() error {
 		return fmt.Errorf("%w: item %s has a negative parental rating", ErrInvalid, it.ID)
 	case it.CriticRating < 0 || it.CriticRating > 100:
 		return fmt.Errorf("%w: item %s critic rating %v out of range", ErrInvalid, it.ID, it.CriticRating)
+	case it.Video3DFormat != "" && !it.Video3DFormat.Valid():
+		return fmt.Errorf("%w: item %s has unknown 3D format %q", ErrInvalid, it.ID, it.Video3DFormat)
+	}
+	for _, f := range it.LockedFields {
+		if !f.Valid() {
+			return fmt.Errorf("%w: item %s locks unknown field %q", ErrInvalid, it.ID, f)
+		}
+	}
+	for _, d := range it.AirDays {
+		if d < time.Sunday || d > time.Saturday {
+			return fmt.Errorf("%w: item %s has invalid air day %d", ErrInvalid, it.ID, d)
+		}
 	}
 	return nil
 }

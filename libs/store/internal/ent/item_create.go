@@ -270,6 +270,20 @@ func (_c *ItemCreate) SetNillableOfficialRating(v *string) *ItemCreate {
 	return _c
 }
 
+// SetCustomRating sets the "custom_rating" field.
+func (_c *ItemCreate) SetCustomRating(v string) *ItemCreate {
+	_c.mutation.SetCustomRating(v)
+	return _c
+}
+
+// SetNillableCustomRating sets the "custom_rating" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableCustomRating(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetCustomRating(*v)
+	}
+	return _c
+}
+
 // SetParentalRating sets the "parental_rating" field.
 func (_c *ItemCreate) SetParentalRating(v int) *ItemCreate {
 	_c.mutation.SetParentalRating(v)
@@ -318,6 +332,74 @@ func (_c *ItemCreate) SetExternalIds(v map[string]string) *ItemCreate {
 	return _c
 }
 
+// SetProductionLocations sets the "production_locations" field.
+func (_c *ItemCreate) SetProductionLocations(v []string) *ItemCreate {
+	_c.mutation.SetProductionLocations(v)
+	return _c
+}
+
+// SetRemoteTrailers sets the "remote_trailers" field.
+func (_c *ItemCreate) SetRemoteTrailers(v []string) *ItemCreate {
+	_c.mutation.SetRemoteTrailers(v)
+	return _c
+}
+
+// SetCollectionName sets the "collection_name" field.
+func (_c *ItemCreate) SetCollectionName(v string) *ItemCreate {
+	_c.mutation.SetCollectionName(v)
+	return _c
+}
+
+// SetNillableCollectionName sets the "collection_name" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableCollectionName(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetCollectionName(*v)
+	}
+	return _c
+}
+
+// SetAspectRatio sets the "aspect_ratio" field.
+func (_c *ItemCreate) SetAspectRatio(v string) *ItemCreate {
+	_c.mutation.SetAspectRatio(v)
+	return _c
+}
+
+// SetNillableAspectRatio sets the "aspect_ratio" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableAspectRatio(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetAspectRatio(*v)
+	}
+	return _c
+}
+
+// SetVideo3dFormat sets the "video_3d_format" field.
+func (_c *ItemCreate) SetVideo3dFormat(v string) *ItemCreate {
+	_c.mutation.SetVideo3dFormat(v)
+	return _c
+}
+
+// SetNillableVideo3dFormat sets the "video_3d_format" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableVideo3dFormat(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetVideo3dFormat(*v)
+	}
+	return _c
+}
+
+// SetAlbum sets the "album" field.
+func (_c *ItemCreate) SetAlbum(v string) *ItemCreate {
+	_c.mutation.SetAlbum(v)
+	return _c
+}
+
+// SetNillableAlbum sets the "album" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableAlbum(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetAlbum(*v)
+	}
+	return _c
+}
+
 // SetSeriesStatus sets the "series_status" field.
 func (_c *ItemCreate) SetSeriesStatus(v string) *ItemCreate {
 	_c.mutation.SetSeriesStatus(v)
@@ -329,6 +411,130 @@ func (_c *ItemCreate) SetNillableSeriesStatus(v *string) *ItemCreate {
 	if v != nil {
 		_c.SetSeriesStatus(*v)
 	}
+	return _c
+}
+
+// SetAirDays sets the "air_days" field.
+func (_c *ItemCreate) SetAirDays(v []int) *ItemCreate {
+	_c.mutation.SetAirDays(v)
+	return _c
+}
+
+// SetAirTime sets the "air_time" field.
+func (_c *ItemCreate) SetAirTime(v string) *ItemCreate {
+	_c.mutation.SetAirTime(v)
+	return _c
+}
+
+// SetNillableAirTime sets the "air_time" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableAirTime(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetAirTime(*v)
+	}
+	return _c
+}
+
+// SetDisplayOrder sets the "display_order" field.
+func (_c *ItemCreate) SetDisplayOrder(v string) *ItemCreate {
+	_c.mutation.SetDisplayOrder(v)
+	return _c
+}
+
+// SetNillableDisplayOrder sets the "display_order" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableDisplayOrder(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetDisplayOrder(*v)
+	}
+	return _c
+}
+
+// SetAirsBeforeSeasonNumber sets the "airs_before_season_number" field.
+func (_c *ItemCreate) SetAirsBeforeSeasonNumber(v int) *ItemCreate {
+	_c.mutation.SetAirsBeforeSeasonNumber(v)
+	return _c
+}
+
+// SetNillableAirsBeforeSeasonNumber sets the "airs_before_season_number" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableAirsBeforeSeasonNumber(v *int) *ItemCreate {
+	if v != nil {
+		_c.SetAirsBeforeSeasonNumber(*v)
+	}
+	return _c
+}
+
+// SetAirsAfterSeasonNumber sets the "airs_after_season_number" field.
+func (_c *ItemCreate) SetAirsAfterSeasonNumber(v int) *ItemCreate {
+	_c.mutation.SetAirsAfterSeasonNumber(v)
+	return _c
+}
+
+// SetNillableAirsAfterSeasonNumber sets the "airs_after_season_number" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableAirsAfterSeasonNumber(v *int) *ItemCreate {
+	if v != nil {
+		_c.SetAirsAfterSeasonNumber(*v)
+	}
+	return _c
+}
+
+// SetAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field.
+func (_c *ItemCreate) SetAirsBeforeEpisodeNumber(v int) *ItemCreate {
+	_c.mutation.SetAirsBeforeEpisodeNumber(v)
+	return _c
+}
+
+// SetNillableAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableAirsBeforeEpisodeNumber(v *int) *ItemCreate {
+	if v != nil {
+		_c.SetAirsBeforeEpisodeNumber(*v)
+	}
+	return _c
+}
+
+// SetMetadataLanguage sets the "metadata_language" field.
+func (_c *ItemCreate) SetMetadataLanguage(v string) *ItemCreate {
+	_c.mutation.SetMetadataLanguage(v)
+	return _c
+}
+
+// SetNillableMetadataLanguage sets the "metadata_language" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableMetadataLanguage(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetMetadataLanguage(*v)
+	}
+	return _c
+}
+
+// SetMetadataCountry sets the "metadata_country" field.
+func (_c *ItemCreate) SetMetadataCountry(v string) *ItemCreate {
+	_c.mutation.SetMetadataCountry(v)
+	return _c
+}
+
+// SetNillableMetadataCountry sets the "metadata_country" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableMetadataCountry(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetMetadataCountry(*v)
+	}
+	return _c
+}
+
+// SetLocked sets the "locked" field.
+func (_c *ItemCreate) SetLocked(v bool) *ItemCreate {
+	_c.mutation.SetLocked(v)
+	return _c
+}
+
+// SetNillableLocked sets the "locked" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableLocked(v *bool) *ItemCreate {
+	if v != nil {
+		_c.SetLocked(*v)
+	}
+	return _c
+}
+
+// SetLockedFields sets the "locked_fields" field.
+func (_c *ItemCreate) SetLockedFields(v []string) *ItemCreate {
+	_c.mutation.SetLockedFields(v)
 	return _c
 }
 
@@ -599,6 +805,10 @@ func (_c *ItemCreate) defaults() {
 		v := item.DefaultOfficialRating
 		_c.mutation.SetOfficialRating(v)
 	}
+	if _, ok := _c.mutation.CustomRating(); !ok {
+		v := item.DefaultCustomRating
+		_c.mutation.SetCustomRating(v)
+	}
 	if _, ok := _c.mutation.ParentalRating(); !ok {
 		v := item.DefaultParentalRating
 		_c.mutation.SetParentalRating(v)
@@ -611,9 +821,45 @@ func (_c *ItemCreate) defaults() {
 		v := item.DefaultCriticRating
 		_c.mutation.SetCriticRating(v)
 	}
+	if _, ok := _c.mutation.CollectionName(); !ok {
+		v := item.DefaultCollectionName
+		_c.mutation.SetCollectionName(v)
+	}
+	if _, ok := _c.mutation.AspectRatio(); !ok {
+		v := item.DefaultAspectRatio
+		_c.mutation.SetAspectRatio(v)
+	}
+	if _, ok := _c.mutation.Video3dFormat(); !ok {
+		v := item.DefaultVideo3dFormat
+		_c.mutation.SetVideo3dFormat(v)
+	}
+	if _, ok := _c.mutation.Album(); !ok {
+		v := item.DefaultAlbum
+		_c.mutation.SetAlbum(v)
+	}
 	if _, ok := _c.mutation.SeriesStatus(); !ok {
 		v := item.DefaultSeriesStatus
 		_c.mutation.SetSeriesStatus(v)
+	}
+	if _, ok := _c.mutation.AirTime(); !ok {
+		v := item.DefaultAirTime
+		_c.mutation.SetAirTime(v)
+	}
+	if _, ok := _c.mutation.DisplayOrder(); !ok {
+		v := item.DefaultDisplayOrder
+		_c.mutation.SetDisplayOrder(v)
+	}
+	if _, ok := _c.mutation.MetadataLanguage(); !ok {
+		v := item.DefaultMetadataLanguage
+		_c.mutation.SetMetadataLanguage(v)
+	}
+	if _, ok := _c.mutation.MetadataCountry(); !ok {
+		v := item.DefaultMetadataCountry
+		_c.mutation.SetMetadataCountry(v)
+	}
+	if _, ok := _c.mutation.Locked(); !ok {
+		v := item.DefaultLocked
+		_c.mutation.SetLocked(v)
 	}
 	if _, ok := _c.mutation.Extra(); !ok {
 		v := item.DefaultExtra
@@ -669,6 +915,9 @@ func (_c *ItemCreate) check() error {
 	if _, ok := _c.mutation.OfficialRating(); !ok {
 		return &ValidationError{Name: "official_rating", err: errors.New(`ent: missing required field "Item.official_rating"`)}
 	}
+	if _, ok := _c.mutation.CustomRating(); !ok {
+		return &ValidationError{Name: "custom_rating", err: errors.New(`ent: missing required field "Item.custom_rating"`)}
+	}
 	if _, ok := _c.mutation.ParentalRating(); !ok {
 		return &ValidationError{Name: "parental_rating", err: errors.New(`ent: missing required field "Item.parental_rating"`)}
 	}
@@ -678,8 +927,35 @@ func (_c *ItemCreate) check() error {
 	if _, ok := _c.mutation.CriticRating(); !ok {
 		return &ValidationError{Name: "critic_rating", err: errors.New(`ent: missing required field "Item.critic_rating"`)}
 	}
+	if _, ok := _c.mutation.CollectionName(); !ok {
+		return &ValidationError{Name: "collection_name", err: errors.New(`ent: missing required field "Item.collection_name"`)}
+	}
+	if _, ok := _c.mutation.AspectRatio(); !ok {
+		return &ValidationError{Name: "aspect_ratio", err: errors.New(`ent: missing required field "Item.aspect_ratio"`)}
+	}
+	if _, ok := _c.mutation.Video3dFormat(); !ok {
+		return &ValidationError{Name: "video_3d_format", err: errors.New(`ent: missing required field "Item.video_3d_format"`)}
+	}
+	if _, ok := _c.mutation.Album(); !ok {
+		return &ValidationError{Name: "album", err: errors.New(`ent: missing required field "Item.album"`)}
+	}
 	if _, ok := _c.mutation.SeriesStatus(); !ok {
 		return &ValidationError{Name: "series_status", err: errors.New(`ent: missing required field "Item.series_status"`)}
+	}
+	if _, ok := _c.mutation.AirTime(); !ok {
+		return &ValidationError{Name: "air_time", err: errors.New(`ent: missing required field "Item.air_time"`)}
+	}
+	if _, ok := _c.mutation.DisplayOrder(); !ok {
+		return &ValidationError{Name: "display_order", err: errors.New(`ent: missing required field "Item.display_order"`)}
+	}
+	if _, ok := _c.mutation.MetadataLanguage(); !ok {
+		return &ValidationError{Name: "metadata_language", err: errors.New(`ent: missing required field "Item.metadata_language"`)}
+	}
+	if _, ok := _c.mutation.MetadataCountry(); !ok {
+		return &ValidationError{Name: "metadata_country", err: errors.New(`ent: missing required field "Item.metadata_country"`)}
+	}
+	if _, ok := _c.mutation.Locked(); !ok {
+		return &ValidationError{Name: "locked", err: errors.New(`ent: missing required field "Item.locked"`)}
 	}
 	if _, ok := _c.mutation.Extra(); !ok {
 		return &ValidationError{Name: "extra", err: errors.New(`ent: missing required field "Item.extra"`)}
@@ -798,6 +1074,10 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 		_spec.SetField(item.FieldOfficialRating, field.TypeString, value)
 		_node.OfficialRating = value
 	}
+	if value, ok := _c.mutation.CustomRating(); ok {
+		_spec.SetField(item.FieldCustomRating, field.TypeString, value)
+		_node.CustomRating = value
+	}
 	if value, ok := _c.mutation.ParentalRating(); ok {
 		_spec.SetField(item.FieldParentalRating, field.TypeInt, value)
 		_node.ParentalRating = value
@@ -814,9 +1094,73 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 		_spec.SetField(item.FieldExternalIds, field.TypeJSON, value)
 		_node.ExternalIds = value
 	}
+	if value, ok := _c.mutation.ProductionLocations(); ok {
+		_spec.SetField(item.FieldProductionLocations, field.TypeJSON, value)
+		_node.ProductionLocations = value
+	}
+	if value, ok := _c.mutation.RemoteTrailers(); ok {
+		_spec.SetField(item.FieldRemoteTrailers, field.TypeJSON, value)
+		_node.RemoteTrailers = value
+	}
+	if value, ok := _c.mutation.CollectionName(); ok {
+		_spec.SetField(item.FieldCollectionName, field.TypeString, value)
+		_node.CollectionName = value
+	}
+	if value, ok := _c.mutation.AspectRatio(); ok {
+		_spec.SetField(item.FieldAspectRatio, field.TypeString, value)
+		_node.AspectRatio = value
+	}
+	if value, ok := _c.mutation.Video3dFormat(); ok {
+		_spec.SetField(item.FieldVideo3dFormat, field.TypeString, value)
+		_node.Video3dFormat = value
+	}
+	if value, ok := _c.mutation.Album(); ok {
+		_spec.SetField(item.FieldAlbum, field.TypeString, value)
+		_node.Album = value
+	}
 	if value, ok := _c.mutation.SeriesStatus(); ok {
 		_spec.SetField(item.FieldSeriesStatus, field.TypeString, value)
 		_node.SeriesStatus = value
+	}
+	if value, ok := _c.mutation.AirDays(); ok {
+		_spec.SetField(item.FieldAirDays, field.TypeJSON, value)
+		_node.AirDays = value
+	}
+	if value, ok := _c.mutation.AirTime(); ok {
+		_spec.SetField(item.FieldAirTime, field.TypeString, value)
+		_node.AirTime = value
+	}
+	if value, ok := _c.mutation.DisplayOrder(); ok {
+		_spec.SetField(item.FieldDisplayOrder, field.TypeString, value)
+		_node.DisplayOrder = value
+	}
+	if value, ok := _c.mutation.AirsBeforeSeasonNumber(); ok {
+		_spec.SetField(item.FieldAirsBeforeSeasonNumber, field.TypeInt, value)
+		_node.AirsBeforeSeasonNumber = &value
+	}
+	if value, ok := _c.mutation.AirsAfterSeasonNumber(); ok {
+		_spec.SetField(item.FieldAirsAfterSeasonNumber, field.TypeInt, value)
+		_node.AirsAfterSeasonNumber = &value
+	}
+	if value, ok := _c.mutation.AirsBeforeEpisodeNumber(); ok {
+		_spec.SetField(item.FieldAirsBeforeEpisodeNumber, field.TypeInt, value)
+		_node.AirsBeforeEpisodeNumber = &value
+	}
+	if value, ok := _c.mutation.MetadataLanguage(); ok {
+		_spec.SetField(item.FieldMetadataLanguage, field.TypeString, value)
+		_node.MetadataLanguage = value
+	}
+	if value, ok := _c.mutation.MetadataCountry(); ok {
+		_spec.SetField(item.FieldMetadataCountry, field.TypeString, value)
+		_node.MetadataCountry = value
+	}
+	if value, ok := _c.mutation.Locked(); ok {
+		_spec.SetField(item.FieldLocked, field.TypeBool, value)
+		_node.Locked = value
+	}
+	if value, ok := _c.mutation.LockedFields(); ok {
+		_spec.SetField(item.FieldLockedFields, field.TypeJSON, value)
+		_node.LockedFields = value
 	}
 	if value, ok := _c.mutation.Extra(); ok {
 		_spec.SetField(item.FieldExtra, field.TypeString, value)
@@ -1355,6 +1699,18 @@ func (u *ItemUpsert) UpdateOfficialRating() *ItemUpsert {
 	return u
 }
 
+// SetCustomRating sets the "custom_rating" field.
+func (u *ItemUpsert) SetCustomRating(v string) *ItemUpsert {
+	u.Set(item.FieldCustomRating, v)
+	return u
+}
+
+// UpdateCustomRating sets the "custom_rating" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateCustomRating() *ItemUpsert {
+	u.SetExcluded(item.FieldCustomRating)
+	return u
+}
+
 // SetParentalRating sets the "parental_rating" field.
 func (u *ItemUpsert) SetParentalRating(v int) *ItemUpsert {
 	u.Set(item.FieldParentalRating, v)
@@ -1427,6 +1783,90 @@ func (u *ItemUpsert) ClearExternalIds() *ItemUpsert {
 	return u
 }
 
+// SetProductionLocations sets the "production_locations" field.
+func (u *ItemUpsert) SetProductionLocations(v []string) *ItemUpsert {
+	u.Set(item.FieldProductionLocations, v)
+	return u
+}
+
+// UpdateProductionLocations sets the "production_locations" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateProductionLocations() *ItemUpsert {
+	u.SetExcluded(item.FieldProductionLocations)
+	return u
+}
+
+// ClearProductionLocations clears the value of the "production_locations" field.
+func (u *ItemUpsert) ClearProductionLocations() *ItemUpsert {
+	u.SetNull(item.FieldProductionLocations)
+	return u
+}
+
+// SetRemoteTrailers sets the "remote_trailers" field.
+func (u *ItemUpsert) SetRemoteTrailers(v []string) *ItemUpsert {
+	u.Set(item.FieldRemoteTrailers, v)
+	return u
+}
+
+// UpdateRemoteTrailers sets the "remote_trailers" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateRemoteTrailers() *ItemUpsert {
+	u.SetExcluded(item.FieldRemoteTrailers)
+	return u
+}
+
+// ClearRemoteTrailers clears the value of the "remote_trailers" field.
+func (u *ItemUpsert) ClearRemoteTrailers() *ItemUpsert {
+	u.SetNull(item.FieldRemoteTrailers)
+	return u
+}
+
+// SetCollectionName sets the "collection_name" field.
+func (u *ItemUpsert) SetCollectionName(v string) *ItemUpsert {
+	u.Set(item.FieldCollectionName, v)
+	return u
+}
+
+// UpdateCollectionName sets the "collection_name" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateCollectionName() *ItemUpsert {
+	u.SetExcluded(item.FieldCollectionName)
+	return u
+}
+
+// SetAspectRatio sets the "aspect_ratio" field.
+func (u *ItemUpsert) SetAspectRatio(v string) *ItemUpsert {
+	u.Set(item.FieldAspectRatio, v)
+	return u
+}
+
+// UpdateAspectRatio sets the "aspect_ratio" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateAspectRatio() *ItemUpsert {
+	u.SetExcluded(item.FieldAspectRatio)
+	return u
+}
+
+// SetVideo3dFormat sets the "video_3d_format" field.
+func (u *ItemUpsert) SetVideo3dFormat(v string) *ItemUpsert {
+	u.Set(item.FieldVideo3dFormat, v)
+	return u
+}
+
+// UpdateVideo3dFormat sets the "video_3d_format" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateVideo3dFormat() *ItemUpsert {
+	u.SetExcluded(item.FieldVideo3dFormat)
+	return u
+}
+
+// SetAlbum sets the "album" field.
+func (u *ItemUpsert) SetAlbum(v string) *ItemUpsert {
+	u.Set(item.FieldAlbum, v)
+	return u
+}
+
+// UpdateAlbum sets the "album" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateAlbum() *ItemUpsert {
+	u.SetExcluded(item.FieldAlbum)
+	return u
+}
+
 // SetSeriesStatus sets the "series_status" field.
 func (u *ItemUpsert) SetSeriesStatus(v string) *ItemUpsert {
 	u.Set(item.FieldSeriesStatus, v)
@@ -1436,6 +1876,174 @@ func (u *ItemUpsert) SetSeriesStatus(v string) *ItemUpsert {
 // UpdateSeriesStatus sets the "series_status" field to the value that was provided on create.
 func (u *ItemUpsert) UpdateSeriesStatus() *ItemUpsert {
 	u.SetExcluded(item.FieldSeriesStatus)
+	return u
+}
+
+// SetAirDays sets the "air_days" field.
+func (u *ItemUpsert) SetAirDays(v []int) *ItemUpsert {
+	u.Set(item.FieldAirDays, v)
+	return u
+}
+
+// UpdateAirDays sets the "air_days" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateAirDays() *ItemUpsert {
+	u.SetExcluded(item.FieldAirDays)
+	return u
+}
+
+// ClearAirDays clears the value of the "air_days" field.
+func (u *ItemUpsert) ClearAirDays() *ItemUpsert {
+	u.SetNull(item.FieldAirDays)
+	return u
+}
+
+// SetAirTime sets the "air_time" field.
+func (u *ItemUpsert) SetAirTime(v string) *ItemUpsert {
+	u.Set(item.FieldAirTime, v)
+	return u
+}
+
+// UpdateAirTime sets the "air_time" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateAirTime() *ItemUpsert {
+	u.SetExcluded(item.FieldAirTime)
+	return u
+}
+
+// SetDisplayOrder sets the "display_order" field.
+func (u *ItemUpsert) SetDisplayOrder(v string) *ItemUpsert {
+	u.Set(item.FieldDisplayOrder, v)
+	return u
+}
+
+// UpdateDisplayOrder sets the "display_order" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateDisplayOrder() *ItemUpsert {
+	u.SetExcluded(item.FieldDisplayOrder)
+	return u
+}
+
+// SetAirsBeforeSeasonNumber sets the "airs_before_season_number" field.
+func (u *ItemUpsert) SetAirsBeforeSeasonNumber(v int) *ItemUpsert {
+	u.Set(item.FieldAirsBeforeSeasonNumber, v)
+	return u
+}
+
+// UpdateAirsBeforeSeasonNumber sets the "airs_before_season_number" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateAirsBeforeSeasonNumber() *ItemUpsert {
+	u.SetExcluded(item.FieldAirsBeforeSeasonNumber)
+	return u
+}
+
+// AddAirsBeforeSeasonNumber adds v to the "airs_before_season_number" field.
+func (u *ItemUpsert) AddAirsBeforeSeasonNumber(v int) *ItemUpsert {
+	u.Add(item.FieldAirsBeforeSeasonNumber, v)
+	return u
+}
+
+// ClearAirsBeforeSeasonNumber clears the value of the "airs_before_season_number" field.
+func (u *ItemUpsert) ClearAirsBeforeSeasonNumber() *ItemUpsert {
+	u.SetNull(item.FieldAirsBeforeSeasonNumber)
+	return u
+}
+
+// SetAirsAfterSeasonNumber sets the "airs_after_season_number" field.
+func (u *ItemUpsert) SetAirsAfterSeasonNumber(v int) *ItemUpsert {
+	u.Set(item.FieldAirsAfterSeasonNumber, v)
+	return u
+}
+
+// UpdateAirsAfterSeasonNumber sets the "airs_after_season_number" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateAirsAfterSeasonNumber() *ItemUpsert {
+	u.SetExcluded(item.FieldAirsAfterSeasonNumber)
+	return u
+}
+
+// AddAirsAfterSeasonNumber adds v to the "airs_after_season_number" field.
+func (u *ItemUpsert) AddAirsAfterSeasonNumber(v int) *ItemUpsert {
+	u.Add(item.FieldAirsAfterSeasonNumber, v)
+	return u
+}
+
+// ClearAirsAfterSeasonNumber clears the value of the "airs_after_season_number" field.
+func (u *ItemUpsert) ClearAirsAfterSeasonNumber() *ItemUpsert {
+	u.SetNull(item.FieldAirsAfterSeasonNumber)
+	return u
+}
+
+// SetAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field.
+func (u *ItemUpsert) SetAirsBeforeEpisodeNumber(v int) *ItemUpsert {
+	u.Set(item.FieldAirsBeforeEpisodeNumber, v)
+	return u
+}
+
+// UpdateAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateAirsBeforeEpisodeNumber() *ItemUpsert {
+	u.SetExcluded(item.FieldAirsBeforeEpisodeNumber)
+	return u
+}
+
+// AddAirsBeforeEpisodeNumber adds v to the "airs_before_episode_number" field.
+func (u *ItemUpsert) AddAirsBeforeEpisodeNumber(v int) *ItemUpsert {
+	u.Add(item.FieldAirsBeforeEpisodeNumber, v)
+	return u
+}
+
+// ClearAirsBeforeEpisodeNumber clears the value of the "airs_before_episode_number" field.
+func (u *ItemUpsert) ClearAirsBeforeEpisodeNumber() *ItemUpsert {
+	u.SetNull(item.FieldAirsBeforeEpisodeNumber)
+	return u
+}
+
+// SetMetadataLanguage sets the "metadata_language" field.
+func (u *ItemUpsert) SetMetadataLanguage(v string) *ItemUpsert {
+	u.Set(item.FieldMetadataLanguage, v)
+	return u
+}
+
+// UpdateMetadataLanguage sets the "metadata_language" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateMetadataLanguage() *ItemUpsert {
+	u.SetExcluded(item.FieldMetadataLanguage)
+	return u
+}
+
+// SetMetadataCountry sets the "metadata_country" field.
+func (u *ItemUpsert) SetMetadataCountry(v string) *ItemUpsert {
+	u.Set(item.FieldMetadataCountry, v)
+	return u
+}
+
+// UpdateMetadataCountry sets the "metadata_country" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateMetadataCountry() *ItemUpsert {
+	u.SetExcluded(item.FieldMetadataCountry)
+	return u
+}
+
+// SetLocked sets the "locked" field.
+func (u *ItemUpsert) SetLocked(v bool) *ItemUpsert {
+	u.Set(item.FieldLocked, v)
+	return u
+}
+
+// UpdateLocked sets the "locked" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateLocked() *ItemUpsert {
+	u.SetExcluded(item.FieldLocked)
+	return u
+}
+
+// SetLockedFields sets the "locked_fields" field.
+func (u *ItemUpsert) SetLockedFields(v []string) *ItemUpsert {
+	u.Set(item.FieldLockedFields, v)
+	return u
+}
+
+// UpdateLockedFields sets the "locked_fields" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateLockedFields() *ItemUpsert {
+	u.SetExcluded(item.FieldLockedFields)
+	return u
+}
+
+// ClearLockedFields clears the value of the "locked_fields" field.
+func (u *ItemUpsert) ClearLockedFields() *ItemUpsert {
+	u.SetNull(item.FieldLockedFields)
 	return u
 }
 
@@ -1922,6 +2530,20 @@ func (u *ItemUpsertOne) UpdateOfficialRating() *ItemUpsertOne {
 	})
 }
 
+// SetCustomRating sets the "custom_rating" field.
+func (u *ItemUpsertOne) SetCustomRating(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetCustomRating(v)
+	})
+}
+
+// UpdateCustomRating sets the "custom_rating" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateCustomRating() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateCustomRating()
+	})
+}
+
 // SetParentalRating sets the "parental_rating" field.
 func (u *ItemUpsertOne) SetParentalRating(v int) *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
@@ -2006,6 +2628,104 @@ func (u *ItemUpsertOne) ClearExternalIds() *ItemUpsertOne {
 	})
 }
 
+// SetProductionLocations sets the "production_locations" field.
+func (u *ItemUpsertOne) SetProductionLocations(v []string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetProductionLocations(v)
+	})
+}
+
+// UpdateProductionLocations sets the "production_locations" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateProductionLocations() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateProductionLocations()
+	})
+}
+
+// ClearProductionLocations clears the value of the "production_locations" field.
+func (u *ItemUpsertOne) ClearProductionLocations() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearProductionLocations()
+	})
+}
+
+// SetRemoteTrailers sets the "remote_trailers" field.
+func (u *ItemUpsertOne) SetRemoteTrailers(v []string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetRemoteTrailers(v)
+	})
+}
+
+// UpdateRemoteTrailers sets the "remote_trailers" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateRemoteTrailers() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateRemoteTrailers()
+	})
+}
+
+// ClearRemoteTrailers clears the value of the "remote_trailers" field.
+func (u *ItemUpsertOne) ClearRemoteTrailers() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearRemoteTrailers()
+	})
+}
+
+// SetCollectionName sets the "collection_name" field.
+func (u *ItemUpsertOne) SetCollectionName(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetCollectionName(v)
+	})
+}
+
+// UpdateCollectionName sets the "collection_name" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateCollectionName() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateCollectionName()
+	})
+}
+
+// SetAspectRatio sets the "aspect_ratio" field.
+func (u *ItemUpsertOne) SetAspectRatio(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAspectRatio(v)
+	})
+}
+
+// UpdateAspectRatio sets the "aspect_ratio" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateAspectRatio() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAspectRatio()
+	})
+}
+
+// SetVideo3dFormat sets the "video_3d_format" field.
+func (u *ItemUpsertOne) SetVideo3dFormat(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetVideo3dFormat(v)
+	})
+}
+
+// UpdateVideo3dFormat sets the "video_3d_format" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateVideo3dFormat() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateVideo3dFormat()
+	})
+}
+
+// SetAlbum sets the "album" field.
+func (u *ItemUpsertOne) SetAlbum(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAlbum(v)
+	})
+}
+
+// UpdateAlbum sets the "album" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateAlbum() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAlbum()
+	})
+}
+
 // SetSeriesStatus sets the "series_status" field.
 func (u *ItemUpsertOne) SetSeriesStatus(v string) *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
@@ -2017,6 +2737,202 @@ func (u *ItemUpsertOne) SetSeriesStatus(v string) *ItemUpsertOne {
 func (u *ItemUpsertOne) UpdateSeriesStatus() *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
 		s.UpdateSeriesStatus()
+	})
+}
+
+// SetAirDays sets the "air_days" field.
+func (u *ItemUpsertOne) SetAirDays(v []int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAirDays(v)
+	})
+}
+
+// UpdateAirDays sets the "air_days" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateAirDays() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAirDays()
+	})
+}
+
+// ClearAirDays clears the value of the "air_days" field.
+func (u *ItemUpsertOne) ClearAirDays() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAirDays()
+	})
+}
+
+// SetAirTime sets the "air_time" field.
+func (u *ItemUpsertOne) SetAirTime(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAirTime(v)
+	})
+}
+
+// UpdateAirTime sets the "air_time" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateAirTime() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAirTime()
+	})
+}
+
+// SetDisplayOrder sets the "display_order" field.
+func (u *ItemUpsertOne) SetDisplayOrder(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetDisplayOrder(v)
+	})
+}
+
+// UpdateDisplayOrder sets the "display_order" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateDisplayOrder() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateDisplayOrder()
+	})
+}
+
+// SetAirsBeforeSeasonNumber sets the "airs_before_season_number" field.
+func (u *ItemUpsertOne) SetAirsBeforeSeasonNumber(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAirsBeforeSeasonNumber(v)
+	})
+}
+
+// AddAirsBeforeSeasonNumber adds v to the "airs_before_season_number" field.
+func (u *ItemUpsertOne) AddAirsBeforeSeasonNumber(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddAirsBeforeSeasonNumber(v)
+	})
+}
+
+// UpdateAirsBeforeSeasonNumber sets the "airs_before_season_number" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateAirsBeforeSeasonNumber() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAirsBeforeSeasonNumber()
+	})
+}
+
+// ClearAirsBeforeSeasonNumber clears the value of the "airs_before_season_number" field.
+func (u *ItemUpsertOne) ClearAirsBeforeSeasonNumber() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAirsBeforeSeasonNumber()
+	})
+}
+
+// SetAirsAfterSeasonNumber sets the "airs_after_season_number" field.
+func (u *ItemUpsertOne) SetAirsAfterSeasonNumber(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAirsAfterSeasonNumber(v)
+	})
+}
+
+// AddAirsAfterSeasonNumber adds v to the "airs_after_season_number" field.
+func (u *ItemUpsertOne) AddAirsAfterSeasonNumber(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddAirsAfterSeasonNumber(v)
+	})
+}
+
+// UpdateAirsAfterSeasonNumber sets the "airs_after_season_number" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateAirsAfterSeasonNumber() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAirsAfterSeasonNumber()
+	})
+}
+
+// ClearAirsAfterSeasonNumber clears the value of the "airs_after_season_number" field.
+func (u *ItemUpsertOne) ClearAirsAfterSeasonNumber() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAirsAfterSeasonNumber()
+	})
+}
+
+// SetAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field.
+func (u *ItemUpsertOne) SetAirsBeforeEpisodeNumber(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAirsBeforeEpisodeNumber(v)
+	})
+}
+
+// AddAirsBeforeEpisodeNumber adds v to the "airs_before_episode_number" field.
+func (u *ItemUpsertOne) AddAirsBeforeEpisodeNumber(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddAirsBeforeEpisodeNumber(v)
+	})
+}
+
+// UpdateAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateAirsBeforeEpisodeNumber() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAirsBeforeEpisodeNumber()
+	})
+}
+
+// ClearAirsBeforeEpisodeNumber clears the value of the "airs_before_episode_number" field.
+func (u *ItemUpsertOne) ClearAirsBeforeEpisodeNumber() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAirsBeforeEpisodeNumber()
+	})
+}
+
+// SetMetadataLanguage sets the "metadata_language" field.
+func (u *ItemUpsertOne) SetMetadataLanguage(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetMetadataLanguage(v)
+	})
+}
+
+// UpdateMetadataLanguage sets the "metadata_language" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateMetadataLanguage() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateMetadataLanguage()
+	})
+}
+
+// SetMetadataCountry sets the "metadata_country" field.
+func (u *ItemUpsertOne) SetMetadataCountry(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetMetadataCountry(v)
+	})
+}
+
+// UpdateMetadataCountry sets the "metadata_country" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateMetadataCountry() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateMetadataCountry()
+	})
+}
+
+// SetLocked sets the "locked" field.
+func (u *ItemUpsertOne) SetLocked(v bool) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetLocked(v)
+	})
+}
+
+// UpdateLocked sets the "locked" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateLocked() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateLocked()
+	})
+}
+
+// SetLockedFields sets the "locked_fields" field.
+func (u *ItemUpsertOne) SetLockedFields(v []string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetLockedFields(v)
+	})
+}
+
+// UpdateLockedFields sets the "locked_fields" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateLockedFields() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateLockedFields()
+	})
+}
+
+// ClearLockedFields clears the value of the "locked_fields" field.
+func (u *ItemUpsertOne) ClearLockedFields() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearLockedFields()
 	})
 }
 
@@ -2683,6 +3599,20 @@ func (u *ItemUpsertBulk) UpdateOfficialRating() *ItemUpsertBulk {
 	})
 }
 
+// SetCustomRating sets the "custom_rating" field.
+func (u *ItemUpsertBulk) SetCustomRating(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetCustomRating(v)
+	})
+}
+
+// UpdateCustomRating sets the "custom_rating" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateCustomRating() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateCustomRating()
+	})
+}
+
 // SetParentalRating sets the "parental_rating" field.
 func (u *ItemUpsertBulk) SetParentalRating(v int) *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
@@ -2767,6 +3697,104 @@ func (u *ItemUpsertBulk) ClearExternalIds() *ItemUpsertBulk {
 	})
 }
 
+// SetProductionLocations sets the "production_locations" field.
+func (u *ItemUpsertBulk) SetProductionLocations(v []string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetProductionLocations(v)
+	})
+}
+
+// UpdateProductionLocations sets the "production_locations" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateProductionLocations() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateProductionLocations()
+	})
+}
+
+// ClearProductionLocations clears the value of the "production_locations" field.
+func (u *ItemUpsertBulk) ClearProductionLocations() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearProductionLocations()
+	})
+}
+
+// SetRemoteTrailers sets the "remote_trailers" field.
+func (u *ItemUpsertBulk) SetRemoteTrailers(v []string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetRemoteTrailers(v)
+	})
+}
+
+// UpdateRemoteTrailers sets the "remote_trailers" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateRemoteTrailers() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateRemoteTrailers()
+	})
+}
+
+// ClearRemoteTrailers clears the value of the "remote_trailers" field.
+func (u *ItemUpsertBulk) ClearRemoteTrailers() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearRemoteTrailers()
+	})
+}
+
+// SetCollectionName sets the "collection_name" field.
+func (u *ItemUpsertBulk) SetCollectionName(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetCollectionName(v)
+	})
+}
+
+// UpdateCollectionName sets the "collection_name" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateCollectionName() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateCollectionName()
+	})
+}
+
+// SetAspectRatio sets the "aspect_ratio" field.
+func (u *ItemUpsertBulk) SetAspectRatio(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAspectRatio(v)
+	})
+}
+
+// UpdateAspectRatio sets the "aspect_ratio" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateAspectRatio() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAspectRatio()
+	})
+}
+
+// SetVideo3dFormat sets the "video_3d_format" field.
+func (u *ItemUpsertBulk) SetVideo3dFormat(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetVideo3dFormat(v)
+	})
+}
+
+// UpdateVideo3dFormat sets the "video_3d_format" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateVideo3dFormat() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateVideo3dFormat()
+	})
+}
+
+// SetAlbum sets the "album" field.
+func (u *ItemUpsertBulk) SetAlbum(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAlbum(v)
+	})
+}
+
+// UpdateAlbum sets the "album" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateAlbum() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAlbum()
+	})
+}
+
 // SetSeriesStatus sets the "series_status" field.
 func (u *ItemUpsertBulk) SetSeriesStatus(v string) *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
@@ -2778,6 +3806,202 @@ func (u *ItemUpsertBulk) SetSeriesStatus(v string) *ItemUpsertBulk {
 func (u *ItemUpsertBulk) UpdateSeriesStatus() *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
 		s.UpdateSeriesStatus()
+	})
+}
+
+// SetAirDays sets the "air_days" field.
+func (u *ItemUpsertBulk) SetAirDays(v []int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAirDays(v)
+	})
+}
+
+// UpdateAirDays sets the "air_days" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateAirDays() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAirDays()
+	})
+}
+
+// ClearAirDays clears the value of the "air_days" field.
+func (u *ItemUpsertBulk) ClearAirDays() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAirDays()
+	})
+}
+
+// SetAirTime sets the "air_time" field.
+func (u *ItemUpsertBulk) SetAirTime(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAirTime(v)
+	})
+}
+
+// UpdateAirTime sets the "air_time" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateAirTime() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAirTime()
+	})
+}
+
+// SetDisplayOrder sets the "display_order" field.
+func (u *ItemUpsertBulk) SetDisplayOrder(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetDisplayOrder(v)
+	})
+}
+
+// UpdateDisplayOrder sets the "display_order" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateDisplayOrder() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateDisplayOrder()
+	})
+}
+
+// SetAirsBeforeSeasonNumber sets the "airs_before_season_number" field.
+func (u *ItemUpsertBulk) SetAirsBeforeSeasonNumber(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAirsBeforeSeasonNumber(v)
+	})
+}
+
+// AddAirsBeforeSeasonNumber adds v to the "airs_before_season_number" field.
+func (u *ItemUpsertBulk) AddAirsBeforeSeasonNumber(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddAirsBeforeSeasonNumber(v)
+	})
+}
+
+// UpdateAirsBeforeSeasonNumber sets the "airs_before_season_number" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateAirsBeforeSeasonNumber() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAirsBeforeSeasonNumber()
+	})
+}
+
+// ClearAirsBeforeSeasonNumber clears the value of the "airs_before_season_number" field.
+func (u *ItemUpsertBulk) ClearAirsBeforeSeasonNumber() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAirsBeforeSeasonNumber()
+	})
+}
+
+// SetAirsAfterSeasonNumber sets the "airs_after_season_number" field.
+func (u *ItemUpsertBulk) SetAirsAfterSeasonNumber(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAirsAfterSeasonNumber(v)
+	})
+}
+
+// AddAirsAfterSeasonNumber adds v to the "airs_after_season_number" field.
+func (u *ItemUpsertBulk) AddAirsAfterSeasonNumber(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddAirsAfterSeasonNumber(v)
+	})
+}
+
+// UpdateAirsAfterSeasonNumber sets the "airs_after_season_number" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateAirsAfterSeasonNumber() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAirsAfterSeasonNumber()
+	})
+}
+
+// ClearAirsAfterSeasonNumber clears the value of the "airs_after_season_number" field.
+func (u *ItemUpsertBulk) ClearAirsAfterSeasonNumber() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAirsAfterSeasonNumber()
+	})
+}
+
+// SetAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field.
+func (u *ItemUpsertBulk) SetAirsBeforeEpisodeNumber(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAirsBeforeEpisodeNumber(v)
+	})
+}
+
+// AddAirsBeforeEpisodeNumber adds v to the "airs_before_episode_number" field.
+func (u *ItemUpsertBulk) AddAirsBeforeEpisodeNumber(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddAirsBeforeEpisodeNumber(v)
+	})
+}
+
+// UpdateAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateAirsBeforeEpisodeNumber() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAirsBeforeEpisodeNumber()
+	})
+}
+
+// ClearAirsBeforeEpisodeNumber clears the value of the "airs_before_episode_number" field.
+func (u *ItemUpsertBulk) ClearAirsBeforeEpisodeNumber() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAirsBeforeEpisodeNumber()
+	})
+}
+
+// SetMetadataLanguage sets the "metadata_language" field.
+func (u *ItemUpsertBulk) SetMetadataLanguage(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetMetadataLanguage(v)
+	})
+}
+
+// UpdateMetadataLanguage sets the "metadata_language" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateMetadataLanguage() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateMetadataLanguage()
+	})
+}
+
+// SetMetadataCountry sets the "metadata_country" field.
+func (u *ItemUpsertBulk) SetMetadataCountry(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetMetadataCountry(v)
+	})
+}
+
+// UpdateMetadataCountry sets the "metadata_country" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateMetadataCountry() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateMetadataCountry()
+	})
+}
+
+// SetLocked sets the "locked" field.
+func (u *ItemUpsertBulk) SetLocked(v bool) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetLocked(v)
+	})
+}
+
+// UpdateLocked sets the "locked" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateLocked() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateLocked()
+	})
+}
+
+// SetLockedFields sets the "locked_fields" field.
+func (u *ItemUpsertBulk) SetLockedFields(v []string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetLockedFields(v)
+	})
+}
+
+// UpdateLockedFields sets the "locked_fields" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateLockedFields() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateLockedFields()
+	})
+}
+
+// ClearLockedFields clears the value of the "locked_fields" field.
+func (u *ItemUpsertBulk) ClearLockedFields() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearLockedFields()
 	})
 }
 

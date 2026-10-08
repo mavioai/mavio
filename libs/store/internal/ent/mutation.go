@@ -1807,75 +1807,99 @@ func (m *ImageMutation) ResetEdge(name string) error {
 // ItemMutation represents an operation that mutates the Item nodes in the graph.
 type ItemMutation struct {
 	config
-	op                     Op
-	typ                    string
-	id                     *core.ID
-	kind                   *string
-	name                   *string
-	sort_name              *string
-	sort_key               *string
-	original_title         *string
-	search_key             *string
-	original_key           *string
-	overview               *string
-	tagline                *string
-	_path                  *string
-	index_number           *int
-	addindex_number        *int
-	parent_index_number    *int
-	addparent_index_number *int
-	index_number_end       *int
-	addindex_number_end    *int
-	production_year        *int
-	addproduction_year     *int
-	premiere_date          *time.Time
-	end_date               *time.Time
-	runtime                *time.Duration
-	addruntime             *time.Duration
-	official_rating        *string
-	parental_rating        *int
-	addparental_rating     *int
-	community_rating       *float64
-	addcommunity_rating    *float64
-	critic_rating          *float64
-	addcritic_rating       *float64
-	external_ids           *map[string]string
-	series_status          *string
-	extra                  *string
-	date_added             *time.Time
-	file_modified          *time.Time
-	metadata_refreshed_at  *time.Time
-	clearedFields          map[string]struct{}
-	library                *core.ID
-	clearedlibrary         bool
-	parent                 *core.ID
-	clearedparent          bool
-	children               map[core.ID]struct{}
-	removedchildren        map[core.ID]struct{}
-	clearedchildren        bool
-	owner                  *core.ID
-	clearedowner           bool
-	extras                 map[core.ID]struct{}
-	removedextras          map[core.ID]struct{}
-	clearedextras          bool
-	values                 map[int]struct{}
-	removedvalues          map[int]struct{}
-	clearedvalues          bool
-	media_sources          map[core.ID]struct{}
-	removedmedia_sources   map[core.ID]struct{}
-	clearedmedia_sources   bool
-	images                 map[core.ID]struct{}
-	removedimages          map[core.ID]struct{}
-	clearedimages          bool
-	credits                map[int]struct{}
-	removedcredits         map[int]struct{}
-	clearedcredits         bool
-	user_data              map[int]struct{}
-	removeduser_data       map[int]struct{}
-	cleareduser_data       bool
-	done                   bool
-	oldValue               func(context.Context) (*Item, error)
-	predicates             []predicate.Item
+	op                            Op
+	typ                           string
+	id                            *core.ID
+	kind                          *string
+	name                          *string
+	sort_name                     *string
+	sort_key                      *string
+	original_title                *string
+	search_key                    *string
+	original_key                  *string
+	overview                      *string
+	tagline                       *string
+	_path                         *string
+	index_number                  *int
+	addindex_number               *int
+	parent_index_number           *int
+	addparent_index_number        *int
+	index_number_end              *int
+	addindex_number_end           *int
+	production_year               *int
+	addproduction_year            *int
+	premiere_date                 *time.Time
+	end_date                      *time.Time
+	runtime                       *time.Duration
+	addruntime                    *time.Duration
+	official_rating               *string
+	custom_rating                 *string
+	parental_rating               *int
+	addparental_rating            *int
+	community_rating              *float64
+	addcommunity_rating           *float64
+	critic_rating                 *float64
+	addcritic_rating              *float64
+	external_ids                  *map[string]string
+	production_locations          *[]string
+	appendproduction_locations    []string
+	remote_trailers               *[]string
+	appendremote_trailers         []string
+	collection_name               *string
+	aspect_ratio                  *string
+	video_3d_format               *string
+	album                         *string
+	series_status                 *string
+	air_days                      *[]int
+	appendair_days                []int
+	air_time                      *string
+	display_order                 *string
+	airs_before_season_number     *int
+	addairs_before_season_number  *int
+	airs_after_season_number      *int
+	addairs_after_season_number   *int
+	airs_before_episode_number    *int
+	addairs_before_episode_number *int
+	metadata_language             *string
+	metadata_country              *string
+	locked                        *bool
+	locked_fields                 *[]string
+	appendlocked_fields           []string
+	extra                         *string
+	date_added                    *time.Time
+	file_modified                 *time.Time
+	metadata_refreshed_at         *time.Time
+	clearedFields                 map[string]struct{}
+	library                       *core.ID
+	clearedlibrary                bool
+	parent                        *core.ID
+	clearedparent                 bool
+	children                      map[core.ID]struct{}
+	removedchildren               map[core.ID]struct{}
+	clearedchildren               bool
+	owner                         *core.ID
+	clearedowner                  bool
+	extras                        map[core.ID]struct{}
+	removedextras                 map[core.ID]struct{}
+	clearedextras                 bool
+	values                        map[int]struct{}
+	removedvalues                 map[int]struct{}
+	clearedvalues                 bool
+	media_sources                 map[core.ID]struct{}
+	removedmedia_sources          map[core.ID]struct{}
+	clearedmedia_sources          bool
+	images                        map[core.ID]struct{}
+	removedimages                 map[core.ID]struct{}
+	clearedimages                 bool
+	credits                       map[int]struct{}
+	removedcredits                map[int]struct{}
+	clearedcredits                bool
+	user_data                     map[int]struct{}
+	removeduser_data              map[int]struct{}
+	cleareduser_data              bool
+	done                          bool
+	oldValue                      func(context.Context) (*Item, error)
+	predicates                    []predicate.Item
 }
 
 var _ ent.Mutation = (*ItemMutation)(nil)
@@ -2883,6 +2907,42 @@ func (m *ItemMutation) ResetOfficialRating() {
 	m.official_rating = nil
 }
 
+// SetCustomRating sets the "custom_rating" field.
+func (m *ItemMutation) SetCustomRating(s string) {
+	m.custom_rating = &s
+}
+
+// CustomRating returns the value of the "custom_rating" field in the mutation.
+func (m *ItemMutation) CustomRating() (r string, exists bool) {
+	v := m.custom_rating
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCustomRating returns the old "custom_rating" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldCustomRating(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCustomRating is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCustomRating requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCustomRating: %w", err)
+	}
+	return oldValue.CustomRating, nil
+}
+
+// ResetCustomRating resets all changes to the "custom_rating" field.
+func (m *ItemMutation) ResetCustomRating() {
+	m.custom_rating = nil
+}
+
 // SetParentalRating sets the "parental_rating" field.
 func (m *ItemMutation) SetParentalRating(i int) {
 	m.parental_rating = &i
@@ -3100,6 +3160,280 @@ func (m *ItemMutation) ResetExternalIds() {
 	delete(m.clearedFields, item.FieldExternalIds)
 }
 
+// SetProductionLocations sets the "production_locations" field.
+func (m *ItemMutation) SetProductionLocations(s []string) {
+	m.production_locations = &s
+	m.appendproduction_locations = nil
+}
+
+// ProductionLocations returns the value of the "production_locations" field in the mutation.
+func (m *ItemMutation) ProductionLocations() (r []string, exists bool) {
+	v := m.production_locations
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProductionLocations returns the old "production_locations" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldProductionLocations(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProductionLocations is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProductionLocations requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProductionLocations: %w", err)
+	}
+	return oldValue.ProductionLocations, nil
+}
+
+// AppendProductionLocations adds s to the "production_locations" field.
+func (m *ItemMutation) AppendProductionLocations(s []string) {
+	m.appendproduction_locations = append(m.appendproduction_locations, s...)
+}
+
+// AppendedProductionLocations returns the list of values that were appended to the "production_locations" field in this mutation.
+func (m *ItemMutation) AppendedProductionLocations() ([]string, bool) {
+	if len(m.appendproduction_locations) == 0 {
+		return nil, false
+	}
+	return m.appendproduction_locations, true
+}
+
+// ClearProductionLocations clears the value of the "production_locations" field.
+func (m *ItemMutation) ClearProductionLocations() {
+	m.production_locations = nil
+	m.appendproduction_locations = nil
+	m.clearedFields[item.FieldProductionLocations] = struct{}{}
+}
+
+// ProductionLocationsCleared returns if the "production_locations" field was cleared in this mutation.
+func (m *ItemMutation) ProductionLocationsCleared() bool {
+	_, ok := m.clearedFields[item.FieldProductionLocations]
+	return ok
+}
+
+// ResetProductionLocations resets all changes to the "production_locations" field.
+func (m *ItemMutation) ResetProductionLocations() {
+	m.production_locations = nil
+	m.appendproduction_locations = nil
+	delete(m.clearedFields, item.FieldProductionLocations)
+}
+
+// SetRemoteTrailers sets the "remote_trailers" field.
+func (m *ItemMutation) SetRemoteTrailers(s []string) {
+	m.remote_trailers = &s
+	m.appendremote_trailers = nil
+}
+
+// RemoteTrailers returns the value of the "remote_trailers" field in the mutation.
+func (m *ItemMutation) RemoteTrailers() (r []string, exists bool) {
+	v := m.remote_trailers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemoteTrailers returns the old "remote_trailers" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldRemoteTrailers(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemoteTrailers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemoteTrailers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemoteTrailers: %w", err)
+	}
+	return oldValue.RemoteTrailers, nil
+}
+
+// AppendRemoteTrailers adds s to the "remote_trailers" field.
+func (m *ItemMutation) AppendRemoteTrailers(s []string) {
+	m.appendremote_trailers = append(m.appendremote_trailers, s...)
+}
+
+// AppendedRemoteTrailers returns the list of values that were appended to the "remote_trailers" field in this mutation.
+func (m *ItemMutation) AppendedRemoteTrailers() ([]string, bool) {
+	if len(m.appendremote_trailers) == 0 {
+		return nil, false
+	}
+	return m.appendremote_trailers, true
+}
+
+// ClearRemoteTrailers clears the value of the "remote_trailers" field.
+func (m *ItemMutation) ClearRemoteTrailers() {
+	m.remote_trailers = nil
+	m.appendremote_trailers = nil
+	m.clearedFields[item.FieldRemoteTrailers] = struct{}{}
+}
+
+// RemoteTrailersCleared returns if the "remote_trailers" field was cleared in this mutation.
+func (m *ItemMutation) RemoteTrailersCleared() bool {
+	_, ok := m.clearedFields[item.FieldRemoteTrailers]
+	return ok
+}
+
+// ResetRemoteTrailers resets all changes to the "remote_trailers" field.
+func (m *ItemMutation) ResetRemoteTrailers() {
+	m.remote_trailers = nil
+	m.appendremote_trailers = nil
+	delete(m.clearedFields, item.FieldRemoteTrailers)
+}
+
+// SetCollectionName sets the "collection_name" field.
+func (m *ItemMutation) SetCollectionName(s string) {
+	m.collection_name = &s
+}
+
+// CollectionName returns the value of the "collection_name" field in the mutation.
+func (m *ItemMutation) CollectionName() (r string, exists bool) {
+	v := m.collection_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollectionName returns the old "collection_name" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldCollectionName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollectionName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollectionName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollectionName: %w", err)
+	}
+	return oldValue.CollectionName, nil
+}
+
+// ResetCollectionName resets all changes to the "collection_name" field.
+func (m *ItemMutation) ResetCollectionName() {
+	m.collection_name = nil
+}
+
+// SetAspectRatio sets the "aspect_ratio" field.
+func (m *ItemMutation) SetAspectRatio(s string) {
+	m.aspect_ratio = &s
+}
+
+// AspectRatio returns the value of the "aspect_ratio" field in the mutation.
+func (m *ItemMutation) AspectRatio() (r string, exists bool) {
+	v := m.aspect_ratio
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAspectRatio returns the old "aspect_ratio" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldAspectRatio(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAspectRatio is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAspectRatio requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAspectRatio: %w", err)
+	}
+	return oldValue.AspectRatio, nil
+}
+
+// ResetAspectRatio resets all changes to the "aspect_ratio" field.
+func (m *ItemMutation) ResetAspectRatio() {
+	m.aspect_ratio = nil
+}
+
+// SetVideo3dFormat sets the "video_3d_format" field.
+func (m *ItemMutation) SetVideo3dFormat(s string) {
+	m.video_3d_format = &s
+}
+
+// Video3dFormat returns the value of the "video_3d_format" field in the mutation.
+func (m *ItemMutation) Video3dFormat() (r string, exists bool) {
+	v := m.video_3d_format
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVideo3dFormat returns the old "video_3d_format" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldVideo3dFormat(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVideo3dFormat is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVideo3dFormat requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVideo3dFormat: %w", err)
+	}
+	return oldValue.Video3dFormat, nil
+}
+
+// ResetVideo3dFormat resets all changes to the "video_3d_format" field.
+func (m *ItemMutation) ResetVideo3dFormat() {
+	m.video_3d_format = nil
+}
+
+// SetAlbum sets the "album" field.
+func (m *ItemMutation) SetAlbum(s string) {
+	m.album = &s
+}
+
+// Album returns the value of the "album" field in the mutation.
+func (m *ItemMutation) Album() (r string, exists bool) {
+	v := m.album
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAlbum returns the old "album" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldAlbum(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAlbum is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAlbum requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAlbum: %w", err)
+	}
+	return oldValue.Album, nil
+}
+
+// ResetAlbum resets all changes to the "album" field.
+func (m *ItemMutation) ResetAlbum() {
+	m.album = nil
+}
+
 // SetSeriesStatus sets the "series_status" field.
 func (m *ItemMutation) SetSeriesStatus(s string) {
 	m.series_status = &s
@@ -3134,6 +3468,526 @@ func (m *ItemMutation) OldSeriesStatus(ctx context.Context) (v string, err error
 // ResetSeriesStatus resets all changes to the "series_status" field.
 func (m *ItemMutation) ResetSeriesStatus() {
 	m.series_status = nil
+}
+
+// SetAirDays sets the "air_days" field.
+func (m *ItemMutation) SetAirDays(i []int) {
+	m.air_days = &i
+	m.appendair_days = nil
+}
+
+// AirDays returns the value of the "air_days" field in the mutation.
+func (m *ItemMutation) AirDays() (r []int, exists bool) {
+	v := m.air_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAirDays returns the old "air_days" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldAirDays(ctx context.Context) (v []int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAirDays is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAirDays requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAirDays: %w", err)
+	}
+	return oldValue.AirDays, nil
+}
+
+// AppendAirDays adds i to the "air_days" field.
+func (m *ItemMutation) AppendAirDays(i []int) {
+	m.appendair_days = append(m.appendair_days, i...)
+}
+
+// AppendedAirDays returns the list of values that were appended to the "air_days" field in this mutation.
+func (m *ItemMutation) AppendedAirDays() ([]int, bool) {
+	if len(m.appendair_days) == 0 {
+		return nil, false
+	}
+	return m.appendair_days, true
+}
+
+// ClearAirDays clears the value of the "air_days" field.
+func (m *ItemMutation) ClearAirDays() {
+	m.air_days = nil
+	m.appendair_days = nil
+	m.clearedFields[item.FieldAirDays] = struct{}{}
+}
+
+// AirDaysCleared returns if the "air_days" field was cleared in this mutation.
+func (m *ItemMutation) AirDaysCleared() bool {
+	_, ok := m.clearedFields[item.FieldAirDays]
+	return ok
+}
+
+// ResetAirDays resets all changes to the "air_days" field.
+func (m *ItemMutation) ResetAirDays() {
+	m.air_days = nil
+	m.appendair_days = nil
+	delete(m.clearedFields, item.FieldAirDays)
+}
+
+// SetAirTime sets the "air_time" field.
+func (m *ItemMutation) SetAirTime(s string) {
+	m.air_time = &s
+}
+
+// AirTime returns the value of the "air_time" field in the mutation.
+func (m *ItemMutation) AirTime() (r string, exists bool) {
+	v := m.air_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAirTime returns the old "air_time" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldAirTime(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAirTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAirTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAirTime: %w", err)
+	}
+	return oldValue.AirTime, nil
+}
+
+// ResetAirTime resets all changes to the "air_time" field.
+func (m *ItemMutation) ResetAirTime() {
+	m.air_time = nil
+}
+
+// SetDisplayOrder sets the "display_order" field.
+func (m *ItemMutation) SetDisplayOrder(s string) {
+	m.display_order = &s
+}
+
+// DisplayOrder returns the value of the "display_order" field in the mutation.
+func (m *ItemMutation) DisplayOrder() (r string, exists bool) {
+	v := m.display_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisplayOrder returns the old "display_order" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldDisplayOrder(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisplayOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisplayOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisplayOrder: %w", err)
+	}
+	return oldValue.DisplayOrder, nil
+}
+
+// ResetDisplayOrder resets all changes to the "display_order" field.
+func (m *ItemMutation) ResetDisplayOrder() {
+	m.display_order = nil
+}
+
+// SetAirsBeforeSeasonNumber sets the "airs_before_season_number" field.
+func (m *ItemMutation) SetAirsBeforeSeasonNumber(i int) {
+	m.airs_before_season_number = &i
+	m.addairs_before_season_number = nil
+}
+
+// AirsBeforeSeasonNumber returns the value of the "airs_before_season_number" field in the mutation.
+func (m *ItemMutation) AirsBeforeSeasonNumber() (r int, exists bool) {
+	v := m.airs_before_season_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAirsBeforeSeasonNumber returns the old "airs_before_season_number" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldAirsBeforeSeasonNumber(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAirsBeforeSeasonNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAirsBeforeSeasonNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAirsBeforeSeasonNumber: %w", err)
+	}
+	return oldValue.AirsBeforeSeasonNumber, nil
+}
+
+// AddAirsBeforeSeasonNumber adds i to the "airs_before_season_number" field.
+func (m *ItemMutation) AddAirsBeforeSeasonNumber(i int) {
+	if m.addairs_before_season_number != nil {
+		*m.addairs_before_season_number += i
+	} else {
+		m.addairs_before_season_number = &i
+	}
+}
+
+// AddedAirsBeforeSeasonNumber returns the value that was added to the "airs_before_season_number" field in this mutation.
+func (m *ItemMutation) AddedAirsBeforeSeasonNumber() (r int, exists bool) {
+	v := m.addairs_before_season_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAirsBeforeSeasonNumber clears the value of the "airs_before_season_number" field.
+func (m *ItemMutation) ClearAirsBeforeSeasonNumber() {
+	m.airs_before_season_number = nil
+	m.addairs_before_season_number = nil
+	m.clearedFields[item.FieldAirsBeforeSeasonNumber] = struct{}{}
+}
+
+// AirsBeforeSeasonNumberCleared returns if the "airs_before_season_number" field was cleared in this mutation.
+func (m *ItemMutation) AirsBeforeSeasonNumberCleared() bool {
+	_, ok := m.clearedFields[item.FieldAirsBeforeSeasonNumber]
+	return ok
+}
+
+// ResetAirsBeforeSeasonNumber resets all changes to the "airs_before_season_number" field.
+func (m *ItemMutation) ResetAirsBeforeSeasonNumber() {
+	m.airs_before_season_number = nil
+	m.addairs_before_season_number = nil
+	delete(m.clearedFields, item.FieldAirsBeforeSeasonNumber)
+}
+
+// SetAirsAfterSeasonNumber sets the "airs_after_season_number" field.
+func (m *ItemMutation) SetAirsAfterSeasonNumber(i int) {
+	m.airs_after_season_number = &i
+	m.addairs_after_season_number = nil
+}
+
+// AirsAfterSeasonNumber returns the value of the "airs_after_season_number" field in the mutation.
+func (m *ItemMutation) AirsAfterSeasonNumber() (r int, exists bool) {
+	v := m.airs_after_season_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAirsAfterSeasonNumber returns the old "airs_after_season_number" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldAirsAfterSeasonNumber(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAirsAfterSeasonNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAirsAfterSeasonNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAirsAfterSeasonNumber: %w", err)
+	}
+	return oldValue.AirsAfterSeasonNumber, nil
+}
+
+// AddAirsAfterSeasonNumber adds i to the "airs_after_season_number" field.
+func (m *ItemMutation) AddAirsAfterSeasonNumber(i int) {
+	if m.addairs_after_season_number != nil {
+		*m.addairs_after_season_number += i
+	} else {
+		m.addairs_after_season_number = &i
+	}
+}
+
+// AddedAirsAfterSeasonNumber returns the value that was added to the "airs_after_season_number" field in this mutation.
+func (m *ItemMutation) AddedAirsAfterSeasonNumber() (r int, exists bool) {
+	v := m.addairs_after_season_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAirsAfterSeasonNumber clears the value of the "airs_after_season_number" field.
+func (m *ItemMutation) ClearAirsAfterSeasonNumber() {
+	m.airs_after_season_number = nil
+	m.addairs_after_season_number = nil
+	m.clearedFields[item.FieldAirsAfterSeasonNumber] = struct{}{}
+}
+
+// AirsAfterSeasonNumberCleared returns if the "airs_after_season_number" field was cleared in this mutation.
+func (m *ItemMutation) AirsAfterSeasonNumberCleared() bool {
+	_, ok := m.clearedFields[item.FieldAirsAfterSeasonNumber]
+	return ok
+}
+
+// ResetAirsAfterSeasonNumber resets all changes to the "airs_after_season_number" field.
+func (m *ItemMutation) ResetAirsAfterSeasonNumber() {
+	m.airs_after_season_number = nil
+	m.addairs_after_season_number = nil
+	delete(m.clearedFields, item.FieldAirsAfterSeasonNumber)
+}
+
+// SetAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field.
+func (m *ItemMutation) SetAirsBeforeEpisodeNumber(i int) {
+	m.airs_before_episode_number = &i
+	m.addairs_before_episode_number = nil
+}
+
+// AirsBeforeEpisodeNumber returns the value of the "airs_before_episode_number" field in the mutation.
+func (m *ItemMutation) AirsBeforeEpisodeNumber() (r int, exists bool) {
+	v := m.airs_before_episode_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAirsBeforeEpisodeNumber returns the old "airs_before_episode_number" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldAirsBeforeEpisodeNumber(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAirsBeforeEpisodeNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAirsBeforeEpisodeNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAirsBeforeEpisodeNumber: %w", err)
+	}
+	return oldValue.AirsBeforeEpisodeNumber, nil
+}
+
+// AddAirsBeforeEpisodeNumber adds i to the "airs_before_episode_number" field.
+func (m *ItemMutation) AddAirsBeforeEpisodeNumber(i int) {
+	if m.addairs_before_episode_number != nil {
+		*m.addairs_before_episode_number += i
+	} else {
+		m.addairs_before_episode_number = &i
+	}
+}
+
+// AddedAirsBeforeEpisodeNumber returns the value that was added to the "airs_before_episode_number" field in this mutation.
+func (m *ItemMutation) AddedAirsBeforeEpisodeNumber() (r int, exists bool) {
+	v := m.addairs_before_episode_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAirsBeforeEpisodeNumber clears the value of the "airs_before_episode_number" field.
+func (m *ItemMutation) ClearAirsBeforeEpisodeNumber() {
+	m.airs_before_episode_number = nil
+	m.addairs_before_episode_number = nil
+	m.clearedFields[item.FieldAirsBeforeEpisodeNumber] = struct{}{}
+}
+
+// AirsBeforeEpisodeNumberCleared returns if the "airs_before_episode_number" field was cleared in this mutation.
+func (m *ItemMutation) AirsBeforeEpisodeNumberCleared() bool {
+	_, ok := m.clearedFields[item.FieldAirsBeforeEpisodeNumber]
+	return ok
+}
+
+// ResetAirsBeforeEpisodeNumber resets all changes to the "airs_before_episode_number" field.
+func (m *ItemMutation) ResetAirsBeforeEpisodeNumber() {
+	m.airs_before_episode_number = nil
+	m.addairs_before_episode_number = nil
+	delete(m.clearedFields, item.FieldAirsBeforeEpisodeNumber)
+}
+
+// SetMetadataLanguage sets the "metadata_language" field.
+func (m *ItemMutation) SetMetadataLanguage(s string) {
+	m.metadata_language = &s
+}
+
+// MetadataLanguage returns the value of the "metadata_language" field in the mutation.
+func (m *ItemMutation) MetadataLanguage() (r string, exists bool) {
+	v := m.metadata_language
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetadataLanguage returns the old "metadata_language" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldMetadataLanguage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetadataLanguage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetadataLanguage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetadataLanguage: %w", err)
+	}
+	return oldValue.MetadataLanguage, nil
+}
+
+// ResetMetadataLanguage resets all changes to the "metadata_language" field.
+func (m *ItemMutation) ResetMetadataLanguage() {
+	m.metadata_language = nil
+}
+
+// SetMetadataCountry sets the "metadata_country" field.
+func (m *ItemMutation) SetMetadataCountry(s string) {
+	m.metadata_country = &s
+}
+
+// MetadataCountry returns the value of the "metadata_country" field in the mutation.
+func (m *ItemMutation) MetadataCountry() (r string, exists bool) {
+	v := m.metadata_country
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetadataCountry returns the old "metadata_country" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldMetadataCountry(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetadataCountry is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetadataCountry requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetadataCountry: %w", err)
+	}
+	return oldValue.MetadataCountry, nil
+}
+
+// ResetMetadataCountry resets all changes to the "metadata_country" field.
+func (m *ItemMutation) ResetMetadataCountry() {
+	m.metadata_country = nil
+}
+
+// SetLocked sets the "locked" field.
+func (m *ItemMutation) SetLocked(b bool) {
+	m.locked = &b
+}
+
+// Locked returns the value of the "locked" field in the mutation.
+func (m *ItemMutation) Locked() (r bool, exists bool) {
+	v := m.locked
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLocked returns the old "locked" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldLocked(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLocked is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLocked requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLocked: %w", err)
+	}
+	return oldValue.Locked, nil
+}
+
+// ResetLocked resets all changes to the "locked" field.
+func (m *ItemMutation) ResetLocked() {
+	m.locked = nil
+}
+
+// SetLockedFields sets the "locked_fields" field.
+func (m *ItemMutation) SetLockedFields(s []string) {
+	m.locked_fields = &s
+	m.appendlocked_fields = nil
+}
+
+// LockedFields returns the value of the "locked_fields" field in the mutation.
+func (m *ItemMutation) LockedFields() (r []string, exists bool) {
+	v := m.locked_fields
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLockedFields returns the old "locked_fields" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldLockedFields(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLockedFields is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLockedFields requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLockedFields: %w", err)
+	}
+	return oldValue.LockedFields, nil
+}
+
+// AppendLockedFields adds s to the "locked_fields" field.
+func (m *ItemMutation) AppendLockedFields(s []string) {
+	m.appendlocked_fields = append(m.appendlocked_fields, s...)
+}
+
+// AppendedLockedFields returns the list of values that were appended to the "locked_fields" field in this mutation.
+func (m *ItemMutation) AppendedLockedFields() ([]string, bool) {
+	if len(m.appendlocked_fields) == 0 {
+		return nil, false
+	}
+	return m.appendlocked_fields, true
+}
+
+// ClearLockedFields clears the value of the "locked_fields" field.
+func (m *ItemMutation) ClearLockedFields() {
+	m.locked_fields = nil
+	m.appendlocked_fields = nil
+	m.clearedFields[item.FieldLockedFields] = struct{}{}
+}
+
+// LockedFieldsCleared returns if the "locked_fields" field was cleared in this mutation.
+func (m *ItemMutation) LockedFieldsCleared() bool {
+	_, ok := m.clearedFields[item.FieldLockedFields]
+	return ok
+}
+
+// ResetLockedFields resets all changes to the "locked_fields" field.
+func (m *ItemMutation) ResetLockedFields() {
+	m.locked_fields = nil
+	m.appendlocked_fields = nil
+	delete(m.clearedFields, item.FieldLockedFields)
 }
 
 // SetExtra sets the "extra" field.
@@ -3848,7 +4702,7 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 30)
+	fields := make([]string, 0, 47)
 	if m.library != nil {
 		fields = append(fields, item.FieldLibraryID)
 	}
@@ -3909,6 +4763,9 @@ func (m *ItemMutation) Fields() []string {
 	if m.official_rating != nil {
 		fields = append(fields, item.FieldOfficialRating)
 	}
+	if m.custom_rating != nil {
+		fields = append(fields, item.FieldCustomRating)
+	}
 	if m.parental_rating != nil {
 		fields = append(fields, item.FieldParentalRating)
 	}
@@ -3921,8 +4778,56 @@ func (m *ItemMutation) Fields() []string {
 	if m.external_ids != nil {
 		fields = append(fields, item.FieldExternalIds)
 	}
+	if m.production_locations != nil {
+		fields = append(fields, item.FieldProductionLocations)
+	}
+	if m.remote_trailers != nil {
+		fields = append(fields, item.FieldRemoteTrailers)
+	}
+	if m.collection_name != nil {
+		fields = append(fields, item.FieldCollectionName)
+	}
+	if m.aspect_ratio != nil {
+		fields = append(fields, item.FieldAspectRatio)
+	}
+	if m.video_3d_format != nil {
+		fields = append(fields, item.FieldVideo3dFormat)
+	}
+	if m.album != nil {
+		fields = append(fields, item.FieldAlbum)
+	}
 	if m.series_status != nil {
 		fields = append(fields, item.FieldSeriesStatus)
+	}
+	if m.air_days != nil {
+		fields = append(fields, item.FieldAirDays)
+	}
+	if m.air_time != nil {
+		fields = append(fields, item.FieldAirTime)
+	}
+	if m.display_order != nil {
+		fields = append(fields, item.FieldDisplayOrder)
+	}
+	if m.airs_before_season_number != nil {
+		fields = append(fields, item.FieldAirsBeforeSeasonNumber)
+	}
+	if m.airs_after_season_number != nil {
+		fields = append(fields, item.FieldAirsAfterSeasonNumber)
+	}
+	if m.airs_before_episode_number != nil {
+		fields = append(fields, item.FieldAirsBeforeEpisodeNumber)
+	}
+	if m.metadata_language != nil {
+		fields = append(fields, item.FieldMetadataLanguage)
+	}
+	if m.metadata_country != nil {
+		fields = append(fields, item.FieldMetadataCountry)
+	}
+	if m.locked != nil {
+		fields = append(fields, item.FieldLocked)
+	}
+	if m.locked_fields != nil {
+		fields = append(fields, item.FieldLockedFields)
 	}
 	if m.extra != nil {
 		fields = append(fields, item.FieldExtra)
@@ -3987,6 +4892,8 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 		return m.Runtime()
 	case item.FieldOfficialRating:
 		return m.OfficialRating()
+	case item.FieldCustomRating:
+		return m.CustomRating()
 	case item.FieldParentalRating:
 		return m.ParentalRating()
 	case item.FieldCommunityRating:
@@ -3995,8 +4902,40 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 		return m.CriticRating()
 	case item.FieldExternalIds:
 		return m.ExternalIds()
+	case item.FieldProductionLocations:
+		return m.ProductionLocations()
+	case item.FieldRemoteTrailers:
+		return m.RemoteTrailers()
+	case item.FieldCollectionName:
+		return m.CollectionName()
+	case item.FieldAspectRatio:
+		return m.AspectRatio()
+	case item.FieldVideo3dFormat:
+		return m.Video3dFormat()
+	case item.FieldAlbum:
+		return m.Album()
 	case item.FieldSeriesStatus:
 		return m.SeriesStatus()
+	case item.FieldAirDays:
+		return m.AirDays()
+	case item.FieldAirTime:
+		return m.AirTime()
+	case item.FieldDisplayOrder:
+		return m.DisplayOrder()
+	case item.FieldAirsBeforeSeasonNumber:
+		return m.AirsBeforeSeasonNumber()
+	case item.FieldAirsAfterSeasonNumber:
+		return m.AirsAfterSeasonNumber()
+	case item.FieldAirsBeforeEpisodeNumber:
+		return m.AirsBeforeEpisodeNumber()
+	case item.FieldMetadataLanguage:
+		return m.MetadataLanguage()
+	case item.FieldMetadataCountry:
+		return m.MetadataCountry()
+	case item.FieldLocked:
+		return m.Locked()
+	case item.FieldLockedFields:
+		return m.LockedFields()
 	case item.FieldExtra:
 		return m.Extra()
 	case item.FieldOwnerID:
@@ -4056,6 +4995,8 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldRuntime(ctx)
 	case item.FieldOfficialRating:
 		return m.OldOfficialRating(ctx)
+	case item.FieldCustomRating:
+		return m.OldCustomRating(ctx)
 	case item.FieldParentalRating:
 		return m.OldParentalRating(ctx)
 	case item.FieldCommunityRating:
@@ -4064,8 +5005,40 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCriticRating(ctx)
 	case item.FieldExternalIds:
 		return m.OldExternalIds(ctx)
+	case item.FieldProductionLocations:
+		return m.OldProductionLocations(ctx)
+	case item.FieldRemoteTrailers:
+		return m.OldRemoteTrailers(ctx)
+	case item.FieldCollectionName:
+		return m.OldCollectionName(ctx)
+	case item.FieldAspectRatio:
+		return m.OldAspectRatio(ctx)
+	case item.FieldVideo3dFormat:
+		return m.OldVideo3dFormat(ctx)
+	case item.FieldAlbum:
+		return m.OldAlbum(ctx)
 	case item.FieldSeriesStatus:
 		return m.OldSeriesStatus(ctx)
+	case item.FieldAirDays:
+		return m.OldAirDays(ctx)
+	case item.FieldAirTime:
+		return m.OldAirTime(ctx)
+	case item.FieldDisplayOrder:
+		return m.OldDisplayOrder(ctx)
+	case item.FieldAirsBeforeSeasonNumber:
+		return m.OldAirsBeforeSeasonNumber(ctx)
+	case item.FieldAirsAfterSeasonNumber:
+		return m.OldAirsAfterSeasonNumber(ctx)
+	case item.FieldAirsBeforeEpisodeNumber:
+		return m.OldAirsBeforeEpisodeNumber(ctx)
+	case item.FieldMetadataLanguage:
+		return m.OldMetadataLanguage(ctx)
+	case item.FieldMetadataCountry:
+		return m.OldMetadataCountry(ctx)
+	case item.FieldLocked:
+		return m.OldLocked(ctx)
+	case item.FieldLockedFields:
+		return m.OldLockedFields(ctx)
 	case item.FieldExtra:
 		return m.OldExtra(ctx)
 	case item.FieldOwnerID:
@@ -4225,6 +5198,13 @@ func (m *ItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetOfficialRating(v)
 		return nil
+	case item.FieldCustomRating:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCustomRating(v)
+		return nil
 	case item.FieldParentalRating:
 		v, ok := value.(int)
 		if !ok {
@@ -4253,12 +5233,124 @@ func (m *ItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetExternalIds(v)
 		return nil
+	case item.FieldProductionLocations:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProductionLocations(v)
+		return nil
+	case item.FieldRemoteTrailers:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemoteTrailers(v)
+		return nil
+	case item.FieldCollectionName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollectionName(v)
+		return nil
+	case item.FieldAspectRatio:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAspectRatio(v)
+		return nil
+	case item.FieldVideo3dFormat:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVideo3dFormat(v)
+		return nil
+	case item.FieldAlbum:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAlbum(v)
+		return nil
 	case item.FieldSeriesStatus:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSeriesStatus(v)
+		return nil
+	case item.FieldAirDays:
+		v, ok := value.([]int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAirDays(v)
+		return nil
+	case item.FieldAirTime:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAirTime(v)
+		return nil
+	case item.FieldDisplayOrder:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisplayOrder(v)
+		return nil
+	case item.FieldAirsBeforeSeasonNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAirsBeforeSeasonNumber(v)
+		return nil
+	case item.FieldAirsAfterSeasonNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAirsAfterSeasonNumber(v)
+		return nil
+	case item.FieldAirsBeforeEpisodeNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAirsBeforeEpisodeNumber(v)
+		return nil
+	case item.FieldMetadataLanguage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetadataLanguage(v)
+		return nil
+	case item.FieldMetadataCountry:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetadataCountry(v)
+		return nil
+	case item.FieldLocked:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLocked(v)
+		return nil
+	case item.FieldLockedFields:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLockedFields(v)
 		return nil
 	case item.FieldExtra:
 		v, ok := value.(string)
@@ -4327,6 +5419,15 @@ func (m *ItemMutation) AddedFields() []string {
 	if m.addcritic_rating != nil {
 		fields = append(fields, item.FieldCriticRating)
 	}
+	if m.addairs_before_season_number != nil {
+		fields = append(fields, item.FieldAirsBeforeSeasonNumber)
+	}
+	if m.addairs_after_season_number != nil {
+		fields = append(fields, item.FieldAirsAfterSeasonNumber)
+	}
+	if m.addairs_before_episode_number != nil {
+		fields = append(fields, item.FieldAirsBeforeEpisodeNumber)
+	}
 	return fields
 }
 
@@ -4351,6 +5452,12 @@ func (m *ItemMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCommunityRating()
 	case item.FieldCriticRating:
 		return m.AddedCriticRating()
+	case item.FieldAirsBeforeSeasonNumber:
+		return m.AddedAirsBeforeSeasonNumber()
+	case item.FieldAirsAfterSeasonNumber:
+		return m.AddedAirsAfterSeasonNumber()
+	case item.FieldAirsBeforeEpisodeNumber:
+		return m.AddedAirsBeforeEpisodeNumber()
 	}
 	return nil, false
 }
@@ -4416,6 +5523,27 @@ func (m *ItemMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddCriticRating(v)
 		return nil
+	case item.FieldAirsBeforeSeasonNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAirsBeforeSeasonNumber(v)
+		return nil
+	case item.FieldAirsAfterSeasonNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAirsAfterSeasonNumber(v)
+		return nil
+	case item.FieldAirsBeforeEpisodeNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAirsBeforeEpisodeNumber(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Item numeric field %s", name)
 }
@@ -4444,6 +5572,27 @@ func (m *ItemMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(item.FieldExternalIds) {
 		fields = append(fields, item.FieldExternalIds)
+	}
+	if m.FieldCleared(item.FieldProductionLocations) {
+		fields = append(fields, item.FieldProductionLocations)
+	}
+	if m.FieldCleared(item.FieldRemoteTrailers) {
+		fields = append(fields, item.FieldRemoteTrailers)
+	}
+	if m.FieldCleared(item.FieldAirDays) {
+		fields = append(fields, item.FieldAirDays)
+	}
+	if m.FieldCleared(item.FieldAirsBeforeSeasonNumber) {
+		fields = append(fields, item.FieldAirsBeforeSeasonNumber)
+	}
+	if m.FieldCleared(item.FieldAirsAfterSeasonNumber) {
+		fields = append(fields, item.FieldAirsAfterSeasonNumber)
+	}
+	if m.FieldCleared(item.FieldAirsBeforeEpisodeNumber) {
+		fields = append(fields, item.FieldAirsBeforeEpisodeNumber)
+	}
+	if m.FieldCleared(item.FieldLockedFields) {
+		fields = append(fields, item.FieldLockedFields)
 	}
 	if m.FieldCleared(item.FieldOwnerID) {
 		fields = append(fields, item.FieldOwnerID)
@@ -4488,6 +5637,27 @@ func (m *ItemMutation) ClearField(name string) error {
 		return nil
 	case item.FieldExternalIds:
 		m.ClearExternalIds()
+		return nil
+	case item.FieldProductionLocations:
+		m.ClearProductionLocations()
+		return nil
+	case item.FieldRemoteTrailers:
+		m.ClearRemoteTrailers()
+		return nil
+	case item.FieldAirDays:
+		m.ClearAirDays()
+		return nil
+	case item.FieldAirsBeforeSeasonNumber:
+		m.ClearAirsBeforeSeasonNumber()
+		return nil
+	case item.FieldAirsAfterSeasonNumber:
+		m.ClearAirsAfterSeasonNumber()
+		return nil
+	case item.FieldAirsBeforeEpisodeNumber:
+		m.ClearAirsBeforeEpisodeNumber()
+		return nil
+	case item.FieldLockedFields:
+		m.ClearLockedFields()
 		return nil
 	case item.FieldOwnerID:
 		m.ClearOwnerID()
@@ -4566,6 +5736,9 @@ func (m *ItemMutation) ResetField(name string) error {
 	case item.FieldOfficialRating:
 		m.ResetOfficialRating()
 		return nil
+	case item.FieldCustomRating:
+		m.ResetCustomRating()
+		return nil
 	case item.FieldParentalRating:
 		m.ResetParentalRating()
 		return nil
@@ -4578,8 +5751,56 @@ func (m *ItemMutation) ResetField(name string) error {
 	case item.FieldExternalIds:
 		m.ResetExternalIds()
 		return nil
+	case item.FieldProductionLocations:
+		m.ResetProductionLocations()
+		return nil
+	case item.FieldRemoteTrailers:
+		m.ResetRemoteTrailers()
+		return nil
+	case item.FieldCollectionName:
+		m.ResetCollectionName()
+		return nil
+	case item.FieldAspectRatio:
+		m.ResetAspectRatio()
+		return nil
+	case item.FieldVideo3dFormat:
+		m.ResetVideo3dFormat()
+		return nil
+	case item.FieldAlbum:
+		m.ResetAlbum()
+		return nil
 	case item.FieldSeriesStatus:
 		m.ResetSeriesStatus()
+		return nil
+	case item.FieldAirDays:
+		m.ResetAirDays()
+		return nil
+	case item.FieldAirTime:
+		m.ResetAirTime()
+		return nil
+	case item.FieldDisplayOrder:
+		m.ResetDisplayOrder()
+		return nil
+	case item.FieldAirsBeforeSeasonNumber:
+		m.ResetAirsBeforeSeasonNumber()
+		return nil
+	case item.FieldAirsAfterSeasonNumber:
+		m.ResetAirsAfterSeasonNumber()
+		return nil
+	case item.FieldAirsBeforeEpisodeNumber:
+		m.ResetAirsBeforeEpisodeNumber()
+		return nil
+	case item.FieldMetadataLanguage:
+		m.ResetMetadataLanguage()
+		return nil
+	case item.FieldMetadataCountry:
+		m.ResetMetadataCountry()
+		return nil
+	case item.FieldLocked:
+		m.ResetLocked()
+		return nil
+	case item.FieldLockedFields:
+		m.ResetLockedFields()
 		return nil
 	case item.FieldExtra:
 		m.ResetExtra()

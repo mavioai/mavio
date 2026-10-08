@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"iter"
 	"slices"
+	"time"
 
 	entsql "entgo.io/ent/dialect/sql"
 
@@ -378,11 +379,28 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 		SetNillableEndDate(it.EndDate).
 		SetRuntime(it.Runtime).
 		SetOfficialRating(it.OfficialRating).
+		SetCustomRating(it.CustomRating).
 		SetParentalRating(it.ParentalRating).
 		SetCommunityRating(it.CommunityRating).
 		SetCriticRating(it.CriticRating).
 		SetExternalIds(fromProviderMap(it.ExternalIDs)).
+		SetProductionLocations(it.ProductionLocations).
+		SetRemoteTrailers(it.RemoteTrailers).
+		SetCollectionName(it.CollectionName).
+		SetAspectRatio(it.AspectRatio).
+		SetVideo3dFormat(string(it.Video3DFormat)).
+		SetAlbum(it.Album).
 		SetSeriesStatus(string(it.SeriesStatus)).
+		SetAirDays(fromWeekdays(it.AirDays)).
+		SetAirTime(it.AirTime).
+		SetDisplayOrder(it.DisplayOrder).
+		SetNillableAirsBeforeSeasonNumber(it.AirsBeforeSeasonNumber).
+		SetNillableAirsAfterSeasonNumber(it.AirsAfterSeasonNumber).
+		SetNillableAirsBeforeEpisodeNumber(it.AirsBeforeEpisodeNumber).
+		SetMetadataLanguage(it.MetadataLanguage).
+		SetMetadataCountry(it.MetadataCountry).
+		SetLocked(it.Locked).
+		SetLockedFields(fromFields(it.LockedFields)).
 		SetExtra(string(it.Extra)).
 		SetDateAdded(orNow(it.DateAdded)).
 		SetNillableFileModified(nonZero(it.FileModified)).
@@ -414,32 +432,49 @@ func itemValueCreates(c *ent.Client, it core.Item) []*ent.ItemValueCreate {
 
 func toItem(e *ent.Item) core.Item {
 	it := core.Item{
-		ID:                  e.ID,
-		LibraryID:           e.LibraryID,
-		Kind:                core.ItemKind(e.Kind),
-		Name:                e.Name,
-		SortName:            e.SortName,
-		OriginalTitle:       e.OriginalTitle,
-		Overview:            e.Overview,
-		Tagline:             e.Tagline,
-		Path:                e.Path,
-		IndexNumber:         e.IndexNumber,
-		ParentIndexNumber:   e.ParentIndexNumber,
-		IndexNumberEnd:      e.IndexNumberEnd,
-		ProductionYear:      e.ProductionYear,
-		PremiereDate:        utcPtr(e.PremiereDate),
-		EndDate:             utcPtr(e.EndDate),
-		Runtime:             e.Runtime,
-		OfficialRating:      e.OfficialRating,
-		ParentalRating:      e.ParentalRating,
-		CommunityRating:     e.CommunityRating,
-		CriticRating:        e.CriticRating,
-		ExternalIDs:         toProviderMap(e.ExternalIds),
-		SeriesStatus:        core.SeriesStatus(e.SeriesStatus),
-		Extra:               core.ExtraKind(e.Extra),
-		DateAdded:           e.DateAdded.UTC(),
-		FileModified:        zeroIfNil(e.FileModified),
-		MetadataRefreshedAt: zeroIfNil(e.MetadataRefreshedAt),
+		ID:                      e.ID,
+		LibraryID:               e.LibraryID,
+		Kind:                    core.ItemKind(e.Kind),
+		Name:                    e.Name,
+		SortName:                e.SortName,
+		OriginalTitle:           e.OriginalTitle,
+		Overview:                e.Overview,
+		Tagline:                 e.Tagline,
+		Path:                    e.Path,
+		IndexNumber:             e.IndexNumber,
+		ParentIndexNumber:       e.ParentIndexNumber,
+		IndexNumberEnd:          e.IndexNumberEnd,
+		ProductionYear:          e.ProductionYear,
+		PremiereDate:            utcPtr(e.PremiereDate),
+		EndDate:                 utcPtr(e.EndDate),
+		Runtime:                 e.Runtime,
+		OfficialRating:          e.OfficialRating,
+		CustomRating:            e.CustomRating,
+		ParentalRating:          e.ParentalRating,
+		CommunityRating:         e.CommunityRating,
+		CriticRating:            e.CriticRating,
+		ExternalIDs:             toProviderMap(e.ExternalIds),
+		ProductionLocations:     e.ProductionLocations,
+		RemoteTrailers:          e.RemoteTrailers,
+		CollectionName:          e.CollectionName,
+		AspectRatio:             e.AspectRatio,
+		Video3DFormat:           core.Video3DFormat(e.Video3dFormat),
+		Album:                   e.Album,
+		SeriesStatus:            core.SeriesStatus(e.SeriesStatus),
+		AirDays:                 toWeekdays(e.AirDays),
+		AirTime:                 e.AirTime,
+		DisplayOrder:            e.DisplayOrder,
+		AirsBeforeSeasonNumber:  e.AirsBeforeSeasonNumber,
+		AirsAfterSeasonNumber:   e.AirsAfterSeasonNumber,
+		AirsBeforeEpisodeNumber: e.AirsBeforeEpisodeNumber,
+		MetadataLanguage:        e.MetadataLanguage,
+		MetadataCountry:         e.MetadataCountry,
+		Locked:                  e.Locked,
+		LockedFields:            toFields(e.LockedFields),
+		Extra:                   core.ExtraKind(e.Extra),
+		DateAdded:               e.DateAdded.UTC(),
+		FileModified:            zeroIfNil(e.FileModified),
+		MetadataRefreshedAt:     zeroIfNil(e.MetadataRefreshedAt),
 	}
 	if e.ParentID != nil {
 		it.ParentID = *e.ParentID
@@ -484,6 +519,50 @@ func toProviderMap(m map[string]string) map[core.Provider]string {
 	out := make(map[core.Provider]string, len(m))
 	for k, v := range m {
 		out[core.Provider(k)] = v
+	}
+	return out
+}
+
+func fromWeekdays(days []time.Weekday) []int {
+	if len(days) == 0 {
+		return nil
+	}
+	out := make([]int, len(days))
+	for i, d := range days {
+		out[i] = int(d)
+	}
+	return out
+}
+
+func toWeekdays(days []int) []time.Weekday {
+	if len(days) == 0 {
+		return nil
+	}
+	out := make([]time.Weekday, len(days))
+	for i, d := range days {
+		out[i] = time.Weekday(d)
+	}
+	return out
+}
+
+func fromFields(fields []core.MetadataField) []string {
+	if len(fields) == 0 {
+		return nil
+	}
+	out := make([]string, len(fields))
+	for i, f := range fields {
+		out[i] = string(f)
+	}
+	return out
+}
+
+func toFields(fields []string) []core.MetadataField {
+	if len(fields) == 0 {
+		return nil
+	}
+	out := make([]core.MetadataField, len(fields))
+	for i, f := range fields {
+		out[i] = core.MetadataField(f)
 	}
 	return out
 }

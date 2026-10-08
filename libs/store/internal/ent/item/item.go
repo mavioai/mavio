@@ -55,6 +55,8 @@ const (
 	FieldRuntime = "runtime"
 	// FieldOfficialRating holds the string denoting the official_rating field in the database.
 	FieldOfficialRating = "official_rating"
+	// FieldCustomRating holds the string denoting the custom_rating field in the database.
+	FieldCustomRating = "custom_rating"
 	// FieldParentalRating holds the string denoting the parental_rating field in the database.
 	FieldParentalRating = "parental_rating"
 	// FieldCommunityRating holds the string denoting the community_rating field in the database.
@@ -63,8 +65,40 @@ const (
 	FieldCriticRating = "critic_rating"
 	// FieldExternalIds holds the string denoting the external_ids field in the database.
 	FieldExternalIds = "external_ids"
+	// FieldProductionLocations holds the string denoting the production_locations field in the database.
+	FieldProductionLocations = "production_locations"
+	// FieldRemoteTrailers holds the string denoting the remote_trailers field in the database.
+	FieldRemoteTrailers = "remote_trailers"
+	// FieldCollectionName holds the string denoting the collection_name field in the database.
+	FieldCollectionName = "collection_name"
+	// FieldAspectRatio holds the string denoting the aspect_ratio field in the database.
+	FieldAspectRatio = "aspect_ratio"
+	// FieldVideo3dFormat holds the string denoting the video_3d_format field in the database.
+	FieldVideo3dFormat = "video_3d_format"
+	// FieldAlbum holds the string denoting the album field in the database.
+	FieldAlbum = "album"
 	// FieldSeriesStatus holds the string denoting the series_status field in the database.
 	FieldSeriesStatus = "series_status"
+	// FieldAirDays holds the string denoting the air_days field in the database.
+	FieldAirDays = "air_days"
+	// FieldAirTime holds the string denoting the air_time field in the database.
+	FieldAirTime = "air_time"
+	// FieldDisplayOrder holds the string denoting the display_order field in the database.
+	FieldDisplayOrder = "display_order"
+	// FieldAirsBeforeSeasonNumber holds the string denoting the airs_before_season_number field in the database.
+	FieldAirsBeforeSeasonNumber = "airs_before_season_number"
+	// FieldAirsAfterSeasonNumber holds the string denoting the airs_after_season_number field in the database.
+	FieldAirsAfterSeasonNumber = "airs_after_season_number"
+	// FieldAirsBeforeEpisodeNumber holds the string denoting the airs_before_episode_number field in the database.
+	FieldAirsBeforeEpisodeNumber = "airs_before_episode_number"
+	// FieldMetadataLanguage holds the string denoting the metadata_language field in the database.
+	FieldMetadataLanguage = "metadata_language"
+	// FieldMetadataCountry holds the string denoting the metadata_country field in the database.
+	FieldMetadataCountry = "metadata_country"
+	// FieldLocked holds the string denoting the locked field in the database.
+	FieldLocked = "locked"
+	// FieldLockedFields holds the string denoting the locked_fields field in the database.
+	FieldLockedFields = "locked_fields"
 	// FieldExtra holds the string denoting the extra field in the database.
 	FieldExtra = "extra"
 	// FieldOwnerID holds the string denoting the owner_id field in the database.
@@ -180,11 +214,28 @@ var Columns = []string{
 	FieldEndDate,
 	FieldRuntime,
 	FieldOfficialRating,
+	FieldCustomRating,
 	FieldParentalRating,
 	FieldCommunityRating,
 	FieldCriticRating,
 	FieldExternalIds,
+	FieldProductionLocations,
+	FieldRemoteTrailers,
+	FieldCollectionName,
+	FieldAspectRatio,
+	FieldVideo3dFormat,
+	FieldAlbum,
 	FieldSeriesStatus,
+	FieldAirDays,
+	FieldAirTime,
+	FieldDisplayOrder,
+	FieldAirsBeforeSeasonNumber,
+	FieldAirsAfterSeasonNumber,
+	FieldAirsBeforeEpisodeNumber,
+	FieldMetadataLanguage,
+	FieldMetadataCountry,
+	FieldLocked,
+	FieldLockedFields,
 	FieldExtra,
 	FieldOwnerID,
 	FieldDateAdded,
@@ -221,14 +272,34 @@ var (
 	DefaultRuntime time.Duration
 	// DefaultOfficialRating holds the default value on creation for the "official_rating" field.
 	DefaultOfficialRating string
+	// DefaultCustomRating holds the default value on creation for the "custom_rating" field.
+	DefaultCustomRating string
 	// DefaultParentalRating holds the default value on creation for the "parental_rating" field.
 	DefaultParentalRating int
 	// DefaultCommunityRating holds the default value on creation for the "community_rating" field.
 	DefaultCommunityRating float64
 	// DefaultCriticRating holds the default value on creation for the "critic_rating" field.
 	DefaultCriticRating float64
+	// DefaultCollectionName holds the default value on creation for the "collection_name" field.
+	DefaultCollectionName string
+	// DefaultAspectRatio holds the default value on creation for the "aspect_ratio" field.
+	DefaultAspectRatio string
+	// DefaultVideo3dFormat holds the default value on creation for the "video_3d_format" field.
+	DefaultVideo3dFormat string
+	// DefaultAlbum holds the default value on creation for the "album" field.
+	DefaultAlbum string
 	// DefaultSeriesStatus holds the default value on creation for the "series_status" field.
 	DefaultSeriesStatus string
+	// DefaultAirTime holds the default value on creation for the "air_time" field.
+	DefaultAirTime string
+	// DefaultDisplayOrder holds the default value on creation for the "display_order" field.
+	DefaultDisplayOrder string
+	// DefaultMetadataLanguage holds the default value on creation for the "metadata_language" field.
+	DefaultMetadataLanguage string
+	// DefaultMetadataCountry holds the default value on creation for the "metadata_country" field.
+	DefaultMetadataCountry string
+	// DefaultLocked holds the default value on creation for the "locked" field.
+	DefaultLocked bool
 	// DefaultExtra holds the default value on creation for the "extra" field.
 	DefaultExtra string
 	// DefaultID holds the default value on creation for the "id" field.
@@ -343,6 +414,11 @@ func ByOfficialRating(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOfficialRating, opts...).ToFunc()
 }
 
+// ByCustomRating orders the results by the custom_rating field.
+func ByCustomRating(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCustomRating, opts...).ToFunc()
+}
+
 // ByParentalRating orders the results by the parental_rating field.
 func ByParentalRating(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentalRating, opts...).ToFunc()
@@ -358,9 +434,69 @@ func ByCriticRating(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCriticRating, opts...).ToFunc()
 }
 
+// ByCollectionName orders the results by the collection_name field.
+func ByCollectionName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCollectionName, opts...).ToFunc()
+}
+
+// ByAspectRatio orders the results by the aspect_ratio field.
+func ByAspectRatio(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAspectRatio, opts...).ToFunc()
+}
+
+// ByVideo3dFormat orders the results by the video_3d_format field.
+func ByVideo3dFormat(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVideo3dFormat, opts...).ToFunc()
+}
+
+// ByAlbum orders the results by the album field.
+func ByAlbum(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAlbum, opts...).ToFunc()
+}
+
 // BySeriesStatus orders the results by the series_status field.
 func BySeriesStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSeriesStatus, opts...).ToFunc()
+}
+
+// ByAirTime orders the results by the air_time field.
+func ByAirTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAirTime, opts...).ToFunc()
+}
+
+// ByDisplayOrder orders the results by the display_order field.
+func ByDisplayOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayOrder, opts...).ToFunc()
+}
+
+// ByAirsBeforeSeasonNumber orders the results by the airs_before_season_number field.
+func ByAirsBeforeSeasonNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAirsBeforeSeasonNumber, opts...).ToFunc()
+}
+
+// ByAirsAfterSeasonNumber orders the results by the airs_after_season_number field.
+func ByAirsAfterSeasonNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAirsAfterSeasonNumber, opts...).ToFunc()
+}
+
+// ByAirsBeforeEpisodeNumber orders the results by the airs_before_episode_number field.
+func ByAirsBeforeEpisodeNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAirsBeforeEpisodeNumber, opts...).ToFunc()
+}
+
+// ByMetadataLanguage orders the results by the metadata_language field.
+func ByMetadataLanguage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMetadataLanguage, opts...).ToFunc()
+}
+
+// ByMetadataCountry orders the results by the metadata_country field.
+func ByMetadataCountry(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMetadataCountry, opts...).ToFunc()
+}
+
+// ByLocked orders the results by the locked field.
+func ByLocked(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLocked, opts...).ToFunc()
 }
 
 // ByExtra orders the results by the extra field.

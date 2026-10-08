@@ -62,10 +62,12 @@ erDiagram
 | `ImageKind` | `primary`、`backdrop`、`logo`、`thumb`、`banner`、`art`、`disc`、`screenshot` |
 | `CreditKind` | `actor`、`guest_star`、`director`、`writer`、`producer`、`creator`、`composer`、`conductor`、`lyricist`、`artist`、`author`、`narrator`、`other` |
 | `SeriesStatus` | `continuing`、`ended`、`unreleased` |
+| `Video3DFormat` | `half_sbs`、`full_sbs`、`half_tab`、`full_tab`、`mvc` |
+| `MetadataField` | `cast`、`genres`、`production_locations`、`studios`、`tags`、`name`、`overview`、`runtime`、`official_rating` |
 | `SubtitleMode` | `""`（遵循流标记）、`always`、`foreign`、`forced`、`none`、`smart` |
 | `SortField` | `name`、`date_added`、`premiere_date`、`production_year`、`community_rating`、`runtime`、`index`、`random`、`last_played`、`play_count` |
 | `JobState` | `pending`、`running`、`succeeded`、`failed` |
-| `Provider` | `tmdb`、`imdb`、`tvdb`、`musicbrainz`（常用取值；插件可使用其他名称） |
+| `Provider` | `tmdb`、`tmdb_collection`、`imdb`、`tvdb`、`musicbrainz_artist`（常用取值；插件可使用其他名称） |
 
 ---
 
@@ -83,12 +85,17 @@ erDiagram
 | 标识与层级 | `ID`、`LibraryID`、`ParentID`、`Kind`、`Path` |
 | 标题与文本 | `Name`、`SortName`、`OriginalTitle`、`Overview`、`Tagline` |
 | 编号 | `IndexNumber`、`ParentIndexNumber`、`IndexNumberEnd` |
-| 日期与评分 | `ProductionYear`、`PremiereDate`、`EndDate`、`Runtime`、`OfficialRating`、`ParentalRating`、`CommunityRating`（0–10）、`CriticRating`（0–100） |
-| 分类 | `Genres`、`Tags`、`Studios`、`ExternalIDs`（按 `Provider`） |
-| 音乐 | `Artists`、`AlbumArtists` |
-| 剧集 | `SeriesStatus` |
+| 日期与评分 | `ProductionYear`、`PremiereDate`、`EndDate`、`Runtime`、`OfficialRating`、`CustomRating`、`ParentalRating`、`CommunityRating`（0–10）、`CriticRating`（0–100） |
+| 分类 | `Genres`、`Tags`、`Studios`、`ExternalIDs`（按 `Provider`）、`ProductionLocations`（制片国家）、`RemoteTrailers`（预告片 URL） |
+| 电影与视频 | `CollectionName`（电影系列）、`AspectRatio`、`Video3DFormat` |
+| 音乐 | `Artists`、`AlbumArtists`、`Album` |
+| 剧集 | `SeriesStatus`、`AirDays`、`AirTime`、`DisplayOrder` |
+| 单集 | `AirsBeforeSeasonNumber`、`AirsAfterSeasonNumber`、`AirsBeforeEpisodeNumber`（特别篇的插播位置） |
 | 附加内容 | `Extra`（`ExtraKind`）、`OwnerID` |
+| 元数据控制 | `MetadataLanguage`、`MetadataCountry`（覆盖媒体库的设置）、`Locked`、`LockedFields`（`MetadataField`） |
 | 记账字段 | `DateAdded`、`FileModified`、`MetadataRefreshedAt` |
+
+模型以 Jellyfin 为参照，并随路线图演进：某个阶段需要时才加入相应字段。`SortName` 是用户指定的排序名（即 Jellyfin 的 `ForcedSortName`），计算出的排序形式是存储层的键。单集所属的剧集和季是它的祖先条目，不复制名称。锁定的条目或被锁定的字段分组不会被元数据刷新修改。
 
 ### 4.3 层级
 层级通过 `ParentID` 表达；编号使用 `IndexNumber` / `ParentIndexNumber`：
@@ -112,9 +119,10 @@ erDiagram
 * 必须有 `ID`、`LibraryID`、合法的 `Kind` 和非空的 `Name`；条目不能是自己的父级。
 * 设置了 `Extra` 的条目必须使用合法的 `ExtraKind`，并有 `OwnerID`。
 * `CommunityRating` 在 0–10 之间，`CriticRating` 在 0–100 之间，`ParentalRating` 不能为负。
+* `Video3DFormat` 与 `LockedFields` 必须是已知取值；`AirDays` 必须是星期几。
 
 ### 4.6 分级
-`OfficialRating` 是公布的内容分级（如 "PG-13"）；`ParentalRating` 是它在该国分级体系中的分数，由元数据提供者设置，为零表示未分级。分级过滤（`ItemQuery.MaxRating`、`UserPolicy.MaxParentalRating`）比较的是分数。
+`OfficialRating` 是公布的内容分级（如 "PG-13"）；用户设置的 `CustomRating` 优先于它；`ParentalRating` 是它在该国分级体系中的分数，由元数据提供者设置，为零表示未分级。分级过滤（`ItemQuery.MaxRating`、`UserPolicy.MaxParentalRating`）比较的是分数。
 
 ---
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"sync"
 	"testing"
@@ -132,6 +133,34 @@ func TestItemRoundTrip(t *testing.T) {
 			got.Runtime != movie.Runtime || got.ParentalRating != 17 || !got.FileModified.Equal(modified) {
 			t.Errorf("Get = %+v", got)
 		}
+
+		// Metadata fields from NFO files round-trip.
+		meta := newItem(lib, core.KindEpisode, "Pilot")
+		meta.CustomRating = "TV-MA"
+		meta.ProductionLocations = []string{"US", "CA"}
+		meta.RemoteTrailers = []string{"https://www.youtube.com/watch?v=x"}
+		meta.CollectionName = "Set"
+		meta.AspectRatio = "2.35:1"
+		meta.Video3DFormat = core.Video3DHalfSideBySide
+		meta.Album = "Arrival"
+		meta.AirDays = []time.Weekday{time.Friday, time.Sunday}
+		meta.AirTime = "9 PM"
+		meta.DisplayOrder = "dvd"
+		meta.AirsBeforeSeasonNumber, meta.AirsAfterSeasonNumber, meta.AirsBeforeEpisodeNumber = ptr(3), ptr(2), ptr(1)
+		meta.MetadataLanguage, meta.MetadataCountry = "en", "us"
+		meta.Locked = true
+		meta.LockedFields = []core.MetadataField{core.FieldCast, core.FieldOverview}
+		upsert(t, s, meta)
+		gotMeta, err := s.Items().Get(ctx, meta.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		meta.SortName = "Pilot"
+		meta.DateAdded, gotMeta.DateAdded = time.Time{}, time.Time{}
+		if !reflect.DeepEqual(gotMeta, meta) {
+			t.Errorf("metadata fields: got = %+v\nwant = %+v", gotMeta, meta)
+		}
+
 		if byPath, err := s.Items().GetByPath(ctx, lib.ID, movie.Path); err != nil || byPath.ID != movie.ID {
 			t.Errorf("GetByPath = %v, %v", byPath.ID, err)
 		}

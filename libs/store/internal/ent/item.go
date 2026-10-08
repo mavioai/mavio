@@ -60,6 +60,8 @@ type Item struct {
 	Runtime time.Duration `json:"runtime,omitempty"`
 	// OfficialRating holds the value of the "official_rating" field.
 	OfficialRating string `json:"official_rating,omitempty"`
+	// CustomRating holds the value of the "custom_rating" field.
+	CustomRating string `json:"custom_rating,omitempty"`
 	// ParentalRating holds the value of the "parental_rating" field.
 	ParentalRating int `json:"parental_rating,omitempty"`
 	// CommunityRating holds the value of the "community_rating" field.
@@ -68,8 +70,40 @@ type Item struct {
 	CriticRating float64 `json:"critic_rating,omitempty"`
 	// ExternalIds holds the value of the "external_ids" field.
 	ExternalIds map[string]string `json:"external_ids,omitempty"`
+	// ProductionLocations holds the value of the "production_locations" field.
+	ProductionLocations []string `json:"production_locations,omitempty"`
+	// RemoteTrailers holds the value of the "remote_trailers" field.
+	RemoteTrailers []string `json:"remote_trailers,omitempty"`
+	// CollectionName holds the value of the "collection_name" field.
+	CollectionName string `json:"collection_name,omitempty"`
+	// AspectRatio holds the value of the "aspect_ratio" field.
+	AspectRatio string `json:"aspect_ratio,omitempty"`
+	// Video3dFormat holds the value of the "video_3d_format" field.
+	Video3dFormat string `json:"video_3d_format,omitempty"`
+	// Album holds the value of the "album" field.
+	Album string `json:"album,omitempty"`
 	// SeriesStatus holds the value of the "series_status" field.
 	SeriesStatus string `json:"series_status,omitempty"`
+	// AirDays holds the value of the "air_days" field.
+	AirDays []int `json:"air_days,omitempty"`
+	// AirTime holds the value of the "air_time" field.
+	AirTime string `json:"air_time,omitempty"`
+	// DisplayOrder holds the value of the "display_order" field.
+	DisplayOrder string `json:"display_order,omitempty"`
+	// AirsBeforeSeasonNumber holds the value of the "airs_before_season_number" field.
+	AirsBeforeSeasonNumber *int `json:"airs_before_season_number,omitempty"`
+	// AirsAfterSeasonNumber holds the value of the "airs_after_season_number" field.
+	AirsAfterSeasonNumber *int `json:"airs_after_season_number,omitempty"`
+	// AirsBeforeEpisodeNumber holds the value of the "airs_before_episode_number" field.
+	AirsBeforeEpisodeNumber *int `json:"airs_before_episode_number,omitempty"`
+	// MetadataLanguage holds the value of the "metadata_language" field.
+	MetadataLanguage string `json:"metadata_language,omitempty"`
+	// MetadataCountry holds the value of the "metadata_country" field.
+	MetadataCountry string `json:"metadata_country,omitempty"`
+	// Locked holds the value of the "locked" field.
+	Locked bool `json:"locked,omitempty"`
+	// LockedFields holds the value of the "locked_fields" field.
+	LockedFields []string `json:"locked_fields,omitempty"`
 	// Extra holds the value of the "extra" field.
 	Extra string `json:"extra,omitempty"`
 	// OwnerID holds the value of the "owner_id" field.
@@ -216,15 +250,17 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case item.FieldParentID, item.FieldOwnerID:
 			values[i] = &sql.NullScanner{S: new(core.ID)}
-		case item.FieldExternalIds:
+		case item.FieldExternalIds, item.FieldProductionLocations, item.FieldRemoteTrailers, item.FieldAirDays, item.FieldLockedFields:
 			values[i] = new([]byte)
 		case item.FieldID, item.FieldLibraryID:
 			values[i] = new(core.ID)
+		case item.FieldLocked:
+			values[i] = new(sql.NullBool)
 		case item.FieldCommunityRating, item.FieldCriticRating:
 			values[i] = new(sql.NullFloat64)
-		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating:
+		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber:
 			values[i] = new(sql.NullInt64)
-		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldSeriesStatus, item.FieldExtra:
+		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldCustomRating, item.FieldCollectionName, item.FieldAspectRatio, item.FieldVideo3dFormat, item.FieldAlbum, item.FieldSeriesStatus, item.FieldAirTime, item.FieldDisplayOrder, item.FieldMetadataLanguage, item.FieldMetadataCountry, item.FieldExtra:
 			values[i] = new(sql.NullString)
 		case item.FieldPremiereDate, item.FieldEndDate, item.FieldDateAdded, item.FieldFileModified, item.FieldMetadataRefreshedAt:
 			values[i] = new(sql.NullTime)
@@ -375,6 +411,12 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.OfficialRating = value.String
 			}
+		case item.FieldCustomRating:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field custom_rating", values[i])
+			} else if value.Valid {
+				_m.CustomRating = value.String
+			}
 		case item.FieldParentalRating:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parental_rating", values[i])
@@ -401,11 +443,118 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field external_ids: %w", err)
 				}
 			}
+		case item.FieldProductionLocations:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field production_locations", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ProductionLocations); err != nil {
+					return fmt.Errorf("unmarshal field production_locations: %w", err)
+				}
+			}
+		case item.FieldRemoteTrailers:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field remote_trailers", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.RemoteTrailers); err != nil {
+					return fmt.Errorf("unmarshal field remote_trailers: %w", err)
+				}
+			}
+		case item.FieldCollectionName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field collection_name", values[i])
+			} else if value.Valid {
+				_m.CollectionName = value.String
+			}
+		case item.FieldAspectRatio:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field aspect_ratio", values[i])
+			} else if value.Valid {
+				_m.AspectRatio = value.String
+			}
+		case item.FieldVideo3dFormat:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field video_3d_format", values[i])
+			} else if value.Valid {
+				_m.Video3dFormat = value.String
+			}
+		case item.FieldAlbum:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field album", values[i])
+			} else if value.Valid {
+				_m.Album = value.String
+			}
 		case item.FieldSeriesStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field series_status", values[i])
 			} else if value.Valid {
 				_m.SeriesStatus = value.String
+			}
+		case item.FieldAirDays:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field air_days", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.AirDays); err != nil {
+					return fmt.Errorf("unmarshal field air_days: %w", err)
+				}
+			}
+		case item.FieldAirTime:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field air_time", values[i])
+			} else if value.Valid {
+				_m.AirTime = value.String
+			}
+		case item.FieldDisplayOrder:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_order", values[i])
+			} else if value.Valid {
+				_m.DisplayOrder = value.String
+			}
+		case item.FieldAirsBeforeSeasonNumber:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field airs_before_season_number", values[i])
+			} else if value.Valid {
+				_m.AirsBeforeSeasonNumber = new(int)
+				*_m.AirsBeforeSeasonNumber = int(value.Int64)
+			}
+		case item.FieldAirsAfterSeasonNumber:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field airs_after_season_number", values[i])
+			} else if value.Valid {
+				_m.AirsAfterSeasonNumber = new(int)
+				*_m.AirsAfterSeasonNumber = int(value.Int64)
+			}
+		case item.FieldAirsBeforeEpisodeNumber:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field airs_before_episode_number", values[i])
+			} else if value.Valid {
+				_m.AirsBeforeEpisodeNumber = new(int)
+				*_m.AirsBeforeEpisodeNumber = int(value.Int64)
+			}
+		case item.FieldMetadataLanguage:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata_language", values[i])
+			} else if value.Valid {
+				_m.MetadataLanguage = value.String
+			}
+		case item.FieldMetadataCountry:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata_country", values[i])
+			} else if value.Valid {
+				_m.MetadataCountry = value.String
+			}
+		case item.FieldLocked:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field locked", values[i])
+			} else if value.Valid {
+				_m.Locked = value.Bool
+			}
+		case item.FieldLockedFields:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field locked_fields", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.LockedFields); err != nil {
+					return fmt.Errorf("unmarshal field locked_fields: %w", err)
+				}
 			}
 		case item.FieldExtra:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -598,6 +747,9 @@ func (_m *Item) String() string {
 	builder.WriteString("official_rating=")
 	builder.WriteString(_m.OfficialRating)
 	builder.WriteString(", ")
+	builder.WriteString("custom_rating=")
+	builder.WriteString(_m.CustomRating)
+	builder.WriteString(", ")
 	builder.WriteString("parental_rating=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ParentalRating))
 	builder.WriteString(", ")
@@ -610,8 +762,62 @@ func (_m *Item) String() string {
 	builder.WriteString("external_ids=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ExternalIds))
 	builder.WriteString(", ")
+	builder.WriteString("production_locations=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProductionLocations))
+	builder.WriteString(", ")
+	builder.WriteString("remote_trailers=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RemoteTrailers))
+	builder.WriteString(", ")
+	builder.WriteString("collection_name=")
+	builder.WriteString(_m.CollectionName)
+	builder.WriteString(", ")
+	builder.WriteString("aspect_ratio=")
+	builder.WriteString(_m.AspectRatio)
+	builder.WriteString(", ")
+	builder.WriteString("video_3d_format=")
+	builder.WriteString(_m.Video3dFormat)
+	builder.WriteString(", ")
+	builder.WriteString("album=")
+	builder.WriteString(_m.Album)
+	builder.WriteString(", ")
 	builder.WriteString("series_status=")
 	builder.WriteString(_m.SeriesStatus)
+	builder.WriteString(", ")
+	builder.WriteString("air_days=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AirDays))
+	builder.WriteString(", ")
+	builder.WriteString("air_time=")
+	builder.WriteString(_m.AirTime)
+	builder.WriteString(", ")
+	builder.WriteString("display_order=")
+	builder.WriteString(_m.DisplayOrder)
+	builder.WriteString(", ")
+	if v := _m.AirsBeforeSeasonNumber; v != nil {
+		builder.WriteString("airs_before_season_number=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.AirsAfterSeasonNumber; v != nil {
+		builder.WriteString("airs_after_season_number=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.AirsBeforeEpisodeNumber; v != nil {
+		builder.WriteString("airs_before_episode_number=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("metadata_language=")
+	builder.WriteString(_m.MetadataLanguage)
+	builder.WriteString(", ")
+	builder.WriteString("metadata_country=")
+	builder.WriteString(_m.MetadataCountry)
+	builder.WriteString(", ")
+	builder.WriteString("locked=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Locked))
+	builder.WriteString(", ")
+	builder.WriteString("locked_fields=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LockedFields))
 	builder.WriteString(", ")
 	builder.WriteString("extra=")
 	builder.WriteString(_m.Extra)

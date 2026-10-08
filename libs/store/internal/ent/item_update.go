@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
@@ -387,6 +388,20 @@ func (_u *ItemUpdate) SetNillableOfficialRating(v *string) *ItemUpdate {
 	return _u
 }
 
+// SetCustomRating sets the "custom_rating" field.
+func (_u *ItemUpdate) SetCustomRating(v string) *ItemUpdate {
+	_u.mutation.SetCustomRating(v)
+	return _u
+}
+
+// SetNillableCustomRating sets the "custom_rating" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableCustomRating(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetCustomRating(*v)
+	}
+	return _u
+}
+
 // SetParentalRating sets the "parental_rating" field.
 func (_u *ItemUpdate) SetParentalRating(v int) *ItemUpdate {
 	_u.mutation.ResetParentalRating()
@@ -462,6 +477,98 @@ func (_u *ItemUpdate) ClearExternalIds() *ItemUpdate {
 	return _u
 }
 
+// SetProductionLocations sets the "production_locations" field.
+func (_u *ItemUpdate) SetProductionLocations(v []string) *ItemUpdate {
+	_u.mutation.SetProductionLocations(v)
+	return _u
+}
+
+// AppendProductionLocations appends value to the "production_locations" field.
+func (_u *ItemUpdate) AppendProductionLocations(v []string) *ItemUpdate {
+	_u.mutation.AppendProductionLocations(v)
+	return _u
+}
+
+// ClearProductionLocations clears the value of the "production_locations" field.
+func (_u *ItemUpdate) ClearProductionLocations() *ItemUpdate {
+	_u.mutation.ClearProductionLocations()
+	return _u
+}
+
+// SetRemoteTrailers sets the "remote_trailers" field.
+func (_u *ItemUpdate) SetRemoteTrailers(v []string) *ItemUpdate {
+	_u.mutation.SetRemoteTrailers(v)
+	return _u
+}
+
+// AppendRemoteTrailers appends value to the "remote_trailers" field.
+func (_u *ItemUpdate) AppendRemoteTrailers(v []string) *ItemUpdate {
+	_u.mutation.AppendRemoteTrailers(v)
+	return _u
+}
+
+// ClearRemoteTrailers clears the value of the "remote_trailers" field.
+func (_u *ItemUpdate) ClearRemoteTrailers() *ItemUpdate {
+	_u.mutation.ClearRemoteTrailers()
+	return _u
+}
+
+// SetCollectionName sets the "collection_name" field.
+func (_u *ItemUpdate) SetCollectionName(v string) *ItemUpdate {
+	_u.mutation.SetCollectionName(v)
+	return _u
+}
+
+// SetNillableCollectionName sets the "collection_name" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableCollectionName(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetCollectionName(*v)
+	}
+	return _u
+}
+
+// SetAspectRatio sets the "aspect_ratio" field.
+func (_u *ItemUpdate) SetAspectRatio(v string) *ItemUpdate {
+	_u.mutation.SetAspectRatio(v)
+	return _u
+}
+
+// SetNillableAspectRatio sets the "aspect_ratio" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableAspectRatio(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetAspectRatio(*v)
+	}
+	return _u
+}
+
+// SetVideo3dFormat sets the "video_3d_format" field.
+func (_u *ItemUpdate) SetVideo3dFormat(v string) *ItemUpdate {
+	_u.mutation.SetVideo3dFormat(v)
+	return _u
+}
+
+// SetNillableVideo3dFormat sets the "video_3d_format" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableVideo3dFormat(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetVideo3dFormat(*v)
+	}
+	return _u
+}
+
+// SetAlbum sets the "album" field.
+func (_u *ItemUpdate) SetAlbum(v string) *ItemUpdate {
+	_u.mutation.SetAlbum(v)
+	return _u
+}
+
+// SetNillableAlbum sets the "album" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableAlbum(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetAlbum(*v)
+	}
+	return _u
+}
+
 // SetSeriesStatus sets the "series_status" field.
 func (_u *ItemUpdate) SetSeriesStatus(v string) *ItemUpdate {
 	_u.mutation.SetSeriesStatus(v)
@@ -473,6 +580,193 @@ func (_u *ItemUpdate) SetNillableSeriesStatus(v *string) *ItemUpdate {
 	if v != nil {
 		_u.SetSeriesStatus(*v)
 	}
+	return _u
+}
+
+// SetAirDays sets the "air_days" field.
+func (_u *ItemUpdate) SetAirDays(v []int) *ItemUpdate {
+	_u.mutation.SetAirDays(v)
+	return _u
+}
+
+// AppendAirDays appends value to the "air_days" field.
+func (_u *ItemUpdate) AppendAirDays(v []int) *ItemUpdate {
+	_u.mutation.AppendAirDays(v)
+	return _u
+}
+
+// ClearAirDays clears the value of the "air_days" field.
+func (_u *ItemUpdate) ClearAirDays() *ItemUpdate {
+	_u.mutation.ClearAirDays()
+	return _u
+}
+
+// SetAirTime sets the "air_time" field.
+func (_u *ItemUpdate) SetAirTime(v string) *ItemUpdate {
+	_u.mutation.SetAirTime(v)
+	return _u
+}
+
+// SetNillableAirTime sets the "air_time" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableAirTime(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetAirTime(*v)
+	}
+	return _u
+}
+
+// SetDisplayOrder sets the "display_order" field.
+func (_u *ItemUpdate) SetDisplayOrder(v string) *ItemUpdate {
+	_u.mutation.SetDisplayOrder(v)
+	return _u
+}
+
+// SetNillableDisplayOrder sets the "display_order" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableDisplayOrder(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetDisplayOrder(*v)
+	}
+	return _u
+}
+
+// SetAirsBeforeSeasonNumber sets the "airs_before_season_number" field.
+func (_u *ItemUpdate) SetAirsBeforeSeasonNumber(v int) *ItemUpdate {
+	_u.mutation.ResetAirsBeforeSeasonNumber()
+	_u.mutation.SetAirsBeforeSeasonNumber(v)
+	return _u
+}
+
+// SetNillableAirsBeforeSeasonNumber sets the "airs_before_season_number" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableAirsBeforeSeasonNumber(v *int) *ItemUpdate {
+	if v != nil {
+		_u.SetAirsBeforeSeasonNumber(*v)
+	}
+	return _u
+}
+
+// AddAirsBeforeSeasonNumber adds value to the "airs_before_season_number" field.
+func (_u *ItemUpdate) AddAirsBeforeSeasonNumber(v int) *ItemUpdate {
+	_u.mutation.AddAirsBeforeSeasonNumber(v)
+	return _u
+}
+
+// ClearAirsBeforeSeasonNumber clears the value of the "airs_before_season_number" field.
+func (_u *ItemUpdate) ClearAirsBeforeSeasonNumber() *ItemUpdate {
+	_u.mutation.ClearAirsBeforeSeasonNumber()
+	return _u
+}
+
+// SetAirsAfterSeasonNumber sets the "airs_after_season_number" field.
+func (_u *ItemUpdate) SetAirsAfterSeasonNumber(v int) *ItemUpdate {
+	_u.mutation.ResetAirsAfterSeasonNumber()
+	_u.mutation.SetAirsAfterSeasonNumber(v)
+	return _u
+}
+
+// SetNillableAirsAfterSeasonNumber sets the "airs_after_season_number" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableAirsAfterSeasonNumber(v *int) *ItemUpdate {
+	if v != nil {
+		_u.SetAirsAfterSeasonNumber(*v)
+	}
+	return _u
+}
+
+// AddAirsAfterSeasonNumber adds value to the "airs_after_season_number" field.
+func (_u *ItemUpdate) AddAirsAfterSeasonNumber(v int) *ItemUpdate {
+	_u.mutation.AddAirsAfterSeasonNumber(v)
+	return _u
+}
+
+// ClearAirsAfterSeasonNumber clears the value of the "airs_after_season_number" field.
+func (_u *ItemUpdate) ClearAirsAfterSeasonNumber() *ItemUpdate {
+	_u.mutation.ClearAirsAfterSeasonNumber()
+	return _u
+}
+
+// SetAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field.
+func (_u *ItemUpdate) SetAirsBeforeEpisodeNumber(v int) *ItemUpdate {
+	_u.mutation.ResetAirsBeforeEpisodeNumber()
+	_u.mutation.SetAirsBeforeEpisodeNumber(v)
+	return _u
+}
+
+// SetNillableAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableAirsBeforeEpisodeNumber(v *int) *ItemUpdate {
+	if v != nil {
+		_u.SetAirsBeforeEpisodeNumber(*v)
+	}
+	return _u
+}
+
+// AddAirsBeforeEpisodeNumber adds value to the "airs_before_episode_number" field.
+func (_u *ItemUpdate) AddAirsBeforeEpisodeNumber(v int) *ItemUpdate {
+	_u.mutation.AddAirsBeforeEpisodeNumber(v)
+	return _u
+}
+
+// ClearAirsBeforeEpisodeNumber clears the value of the "airs_before_episode_number" field.
+func (_u *ItemUpdate) ClearAirsBeforeEpisodeNumber() *ItemUpdate {
+	_u.mutation.ClearAirsBeforeEpisodeNumber()
+	return _u
+}
+
+// SetMetadataLanguage sets the "metadata_language" field.
+func (_u *ItemUpdate) SetMetadataLanguage(v string) *ItemUpdate {
+	_u.mutation.SetMetadataLanguage(v)
+	return _u
+}
+
+// SetNillableMetadataLanguage sets the "metadata_language" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableMetadataLanguage(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetMetadataLanguage(*v)
+	}
+	return _u
+}
+
+// SetMetadataCountry sets the "metadata_country" field.
+func (_u *ItemUpdate) SetMetadataCountry(v string) *ItemUpdate {
+	_u.mutation.SetMetadataCountry(v)
+	return _u
+}
+
+// SetNillableMetadataCountry sets the "metadata_country" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableMetadataCountry(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetMetadataCountry(*v)
+	}
+	return _u
+}
+
+// SetLocked sets the "locked" field.
+func (_u *ItemUpdate) SetLocked(v bool) *ItemUpdate {
+	_u.mutation.SetLocked(v)
+	return _u
+}
+
+// SetNillableLocked sets the "locked" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableLocked(v *bool) *ItemUpdate {
+	if v != nil {
+		_u.SetLocked(*v)
+	}
+	return _u
+}
+
+// SetLockedFields sets the "locked_fields" field.
+func (_u *ItemUpdate) SetLockedFields(v []string) *ItemUpdate {
+	_u.mutation.SetLockedFields(v)
+	return _u
+}
+
+// AppendLockedFields appends value to the "locked_fields" field.
+func (_u *ItemUpdate) AppendLockedFields(v []string) *ItemUpdate {
+	_u.mutation.AppendLockedFields(v)
+	return _u
+}
+
+// ClearLockedFields clears the value of the "locked_fields" field.
+func (_u *ItemUpdate) ClearLockedFields() *ItemUpdate {
+	_u.mutation.ClearLockedFields()
 	return _u
 }
 
@@ -991,6 +1285,9 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.OfficialRating(); ok {
 		_spec.SetField(item.FieldOfficialRating, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.CustomRating(); ok {
+		_spec.SetField(item.FieldCustomRating, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.ParentalRating(); ok {
 		_spec.SetField(item.FieldParentalRating, field.TypeInt, value)
 	}
@@ -1015,8 +1312,106 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.ExternalIdsCleared() {
 		_spec.ClearField(item.FieldExternalIds, field.TypeJSON)
 	}
+	if value, ok := _u.mutation.ProductionLocations(); ok {
+		_spec.SetField(item.FieldProductionLocations, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedProductionLocations(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldProductionLocations, value)
+		})
+	}
+	if _u.mutation.ProductionLocationsCleared() {
+		_spec.ClearField(item.FieldProductionLocations, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.RemoteTrailers(); ok {
+		_spec.SetField(item.FieldRemoteTrailers, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRemoteTrailers(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldRemoteTrailers, value)
+		})
+	}
+	if _u.mutation.RemoteTrailersCleared() {
+		_spec.ClearField(item.FieldRemoteTrailers, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.CollectionName(); ok {
+		_spec.SetField(item.FieldCollectionName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AspectRatio(); ok {
+		_spec.SetField(item.FieldAspectRatio, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Video3dFormat(); ok {
+		_spec.SetField(item.FieldVideo3dFormat, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Album(); ok {
+		_spec.SetField(item.FieldAlbum, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.SeriesStatus(); ok {
 		_spec.SetField(item.FieldSeriesStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AirDays(); ok {
+		_spec.SetField(item.FieldAirDays, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedAirDays(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldAirDays, value)
+		})
+	}
+	if _u.mutation.AirDaysCleared() {
+		_spec.ClearField(item.FieldAirDays, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.AirTime(); ok {
+		_spec.SetField(item.FieldAirTime, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayOrder(); ok {
+		_spec.SetField(item.FieldDisplayOrder, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AirsBeforeSeasonNumber(); ok {
+		_spec.SetField(item.FieldAirsBeforeSeasonNumber, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAirsBeforeSeasonNumber(); ok {
+		_spec.AddField(item.FieldAirsBeforeSeasonNumber, field.TypeInt, value)
+	}
+	if _u.mutation.AirsBeforeSeasonNumberCleared() {
+		_spec.ClearField(item.FieldAirsBeforeSeasonNumber, field.TypeInt)
+	}
+	if value, ok := _u.mutation.AirsAfterSeasonNumber(); ok {
+		_spec.SetField(item.FieldAirsAfterSeasonNumber, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAirsAfterSeasonNumber(); ok {
+		_spec.AddField(item.FieldAirsAfterSeasonNumber, field.TypeInt, value)
+	}
+	if _u.mutation.AirsAfterSeasonNumberCleared() {
+		_spec.ClearField(item.FieldAirsAfterSeasonNumber, field.TypeInt)
+	}
+	if value, ok := _u.mutation.AirsBeforeEpisodeNumber(); ok {
+		_spec.SetField(item.FieldAirsBeforeEpisodeNumber, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAirsBeforeEpisodeNumber(); ok {
+		_spec.AddField(item.FieldAirsBeforeEpisodeNumber, field.TypeInt, value)
+	}
+	if _u.mutation.AirsBeforeEpisodeNumberCleared() {
+		_spec.ClearField(item.FieldAirsBeforeEpisodeNumber, field.TypeInt)
+	}
+	if value, ok := _u.mutation.MetadataLanguage(); ok {
+		_spec.SetField(item.FieldMetadataLanguage, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.MetadataCountry(); ok {
+		_spec.SetField(item.FieldMetadataCountry, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Locked(); ok {
+		_spec.SetField(item.FieldLocked, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.LockedFields(); ok {
+		_spec.SetField(item.FieldLockedFields, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedLockedFields(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldLockedFields, value)
+		})
+	}
+	if _u.mutation.LockedFieldsCleared() {
+		_spec.ClearField(item.FieldLockedFields, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Extra(); ok {
 		_spec.SetField(item.FieldExtra, field.TypeString, value)
@@ -1811,6 +2206,20 @@ func (_u *ItemUpdateOne) SetNillableOfficialRating(v *string) *ItemUpdateOne {
 	return _u
 }
 
+// SetCustomRating sets the "custom_rating" field.
+func (_u *ItemUpdateOne) SetCustomRating(v string) *ItemUpdateOne {
+	_u.mutation.SetCustomRating(v)
+	return _u
+}
+
+// SetNillableCustomRating sets the "custom_rating" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableCustomRating(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetCustomRating(*v)
+	}
+	return _u
+}
+
 // SetParentalRating sets the "parental_rating" field.
 func (_u *ItemUpdateOne) SetParentalRating(v int) *ItemUpdateOne {
 	_u.mutation.ResetParentalRating()
@@ -1886,6 +2295,98 @@ func (_u *ItemUpdateOne) ClearExternalIds() *ItemUpdateOne {
 	return _u
 }
 
+// SetProductionLocations sets the "production_locations" field.
+func (_u *ItemUpdateOne) SetProductionLocations(v []string) *ItemUpdateOne {
+	_u.mutation.SetProductionLocations(v)
+	return _u
+}
+
+// AppendProductionLocations appends value to the "production_locations" field.
+func (_u *ItemUpdateOne) AppendProductionLocations(v []string) *ItemUpdateOne {
+	_u.mutation.AppendProductionLocations(v)
+	return _u
+}
+
+// ClearProductionLocations clears the value of the "production_locations" field.
+func (_u *ItemUpdateOne) ClearProductionLocations() *ItemUpdateOne {
+	_u.mutation.ClearProductionLocations()
+	return _u
+}
+
+// SetRemoteTrailers sets the "remote_trailers" field.
+func (_u *ItemUpdateOne) SetRemoteTrailers(v []string) *ItemUpdateOne {
+	_u.mutation.SetRemoteTrailers(v)
+	return _u
+}
+
+// AppendRemoteTrailers appends value to the "remote_trailers" field.
+func (_u *ItemUpdateOne) AppendRemoteTrailers(v []string) *ItemUpdateOne {
+	_u.mutation.AppendRemoteTrailers(v)
+	return _u
+}
+
+// ClearRemoteTrailers clears the value of the "remote_trailers" field.
+func (_u *ItemUpdateOne) ClearRemoteTrailers() *ItemUpdateOne {
+	_u.mutation.ClearRemoteTrailers()
+	return _u
+}
+
+// SetCollectionName sets the "collection_name" field.
+func (_u *ItemUpdateOne) SetCollectionName(v string) *ItemUpdateOne {
+	_u.mutation.SetCollectionName(v)
+	return _u
+}
+
+// SetNillableCollectionName sets the "collection_name" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableCollectionName(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetCollectionName(*v)
+	}
+	return _u
+}
+
+// SetAspectRatio sets the "aspect_ratio" field.
+func (_u *ItemUpdateOne) SetAspectRatio(v string) *ItemUpdateOne {
+	_u.mutation.SetAspectRatio(v)
+	return _u
+}
+
+// SetNillableAspectRatio sets the "aspect_ratio" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableAspectRatio(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetAspectRatio(*v)
+	}
+	return _u
+}
+
+// SetVideo3dFormat sets the "video_3d_format" field.
+func (_u *ItemUpdateOne) SetVideo3dFormat(v string) *ItemUpdateOne {
+	_u.mutation.SetVideo3dFormat(v)
+	return _u
+}
+
+// SetNillableVideo3dFormat sets the "video_3d_format" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableVideo3dFormat(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetVideo3dFormat(*v)
+	}
+	return _u
+}
+
+// SetAlbum sets the "album" field.
+func (_u *ItemUpdateOne) SetAlbum(v string) *ItemUpdateOne {
+	_u.mutation.SetAlbum(v)
+	return _u
+}
+
+// SetNillableAlbum sets the "album" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableAlbum(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetAlbum(*v)
+	}
+	return _u
+}
+
 // SetSeriesStatus sets the "series_status" field.
 func (_u *ItemUpdateOne) SetSeriesStatus(v string) *ItemUpdateOne {
 	_u.mutation.SetSeriesStatus(v)
@@ -1897,6 +2398,193 @@ func (_u *ItemUpdateOne) SetNillableSeriesStatus(v *string) *ItemUpdateOne {
 	if v != nil {
 		_u.SetSeriesStatus(*v)
 	}
+	return _u
+}
+
+// SetAirDays sets the "air_days" field.
+func (_u *ItemUpdateOne) SetAirDays(v []int) *ItemUpdateOne {
+	_u.mutation.SetAirDays(v)
+	return _u
+}
+
+// AppendAirDays appends value to the "air_days" field.
+func (_u *ItemUpdateOne) AppendAirDays(v []int) *ItemUpdateOne {
+	_u.mutation.AppendAirDays(v)
+	return _u
+}
+
+// ClearAirDays clears the value of the "air_days" field.
+func (_u *ItemUpdateOne) ClearAirDays() *ItemUpdateOne {
+	_u.mutation.ClearAirDays()
+	return _u
+}
+
+// SetAirTime sets the "air_time" field.
+func (_u *ItemUpdateOne) SetAirTime(v string) *ItemUpdateOne {
+	_u.mutation.SetAirTime(v)
+	return _u
+}
+
+// SetNillableAirTime sets the "air_time" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableAirTime(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetAirTime(*v)
+	}
+	return _u
+}
+
+// SetDisplayOrder sets the "display_order" field.
+func (_u *ItemUpdateOne) SetDisplayOrder(v string) *ItemUpdateOne {
+	_u.mutation.SetDisplayOrder(v)
+	return _u
+}
+
+// SetNillableDisplayOrder sets the "display_order" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableDisplayOrder(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetDisplayOrder(*v)
+	}
+	return _u
+}
+
+// SetAirsBeforeSeasonNumber sets the "airs_before_season_number" field.
+func (_u *ItemUpdateOne) SetAirsBeforeSeasonNumber(v int) *ItemUpdateOne {
+	_u.mutation.ResetAirsBeforeSeasonNumber()
+	_u.mutation.SetAirsBeforeSeasonNumber(v)
+	return _u
+}
+
+// SetNillableAirsBeforeSeasonNumber sets the "airs_before_season_number" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableAirsBeforeSeasonNumber(v *int) *ItemUpdateOne {
+	if v != nil {
+		_u.SetAirsBeforeSeasonNumber(*v)
+	}
+	return _u
+}
+
+// AddAirsBeforeSeasonNumber adds value to the "airs_before_season_number" field.
+func (_u *ItemUpdateOne) AddAirsBeforeSeasonNumber(v int) *ItemUpdateOne {
+	_u.mutation.AddAirsBeforeSeasonNumber(v)
+	return _u
+}
+
+// ClearAirsBeforeSeasonNumber clears the value of the "airs_before_season_number" field.
+func (_u *ItemUpdateOne) ClearAirsBeforeSeasonNumber() *ItemUpdateOne {
+	_u.mutation.ClearAirsBeforeSeasonNumber()
+	return _u
+}
+
+// SetAirsAfterSeasonNumber sets the "airs_after_season_number" field.
+func (_u *ItemUpdateOne) SetAirsAfterSeasonNumber(v int) *ItemUpdateOne {
+	_u.mutation.ResetAirsAfterSeasonNumber()
+	_u.mutation.SetAirsAfterSeasonNumber(v)
+	return _u
+}
+
+// SetNillableAirsAfterSeasonNumber sets the "airs_after_season_number" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableAirsAfterSeasonNumber(v *int) *ItemUpdateOne {
+	if v != nil {
+		_u.SetAirsAfterSeasonNumber(*v)
+	}
+	return _u
+}
+
+// AddAirsAfterSeasonNumber adds value to the "airs_after_season_number" field.
+func (_u *ItemUpdateOne) AddAirsAfterSeasonNumber(v int) *ItemUpdateOne {
+	_u.mutation.AddAirsAfterSeasonNumber(v)
+	return _u
+}
+
+// ClearAirsAfterSeasonNumber clears the value of the "airs_after_season_number" field.
+func (_u *ItemUpdateOne) ClearAirsAfterSeasonNumber() *ItemUpdateOne {
+	_u.mutation.ClearAirsAfterSeasonNumber()
+	return _u
+}
+
+// SetAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field.
+func (_u *ItemUpdateOne) SetAirsBeforeEpisodeNumber(v int) *ItemUpdateOne {
+	_u.mutation.ResetAirsBeforeEpisodeNumber()
+	_u.mutation.SetAirsBeforeEpisodeNumber(v)
+	return _u
+}
+
+// SetNillableAirsBeforeEpisodeNumber sets the "airs_before_episode_number" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableAirsBeforeEpisodeNumber(v *int) *ItemUpdateOne {
+	if v != nil {
+		_u.SetAirsBeforeEpisodeNumber(*v)
+	}
+	return _u
+}
+
+// AddAirsBeforeEpisodeNumber adds value to the "airs_before_episode_number" field.
+func (_u *ItemUpdateOne) AddAirsBeforeEpisodeNumber(v int) *ItemUpdateOne {
+	_u.mutation.AddAirsBeforeEpisodeNumber(v)
+	return _u
+}
+
+// ClearAirsBeforeEpisodeNumber clears the value of the "airs_before_episode_number" field.
+func (_u *ItemUpdateOne) ClearAirsBeforeEpisodeNumber() *ItemUpdateOne {
+	_u.mutation.ClearAirsBeforeEpisodeNumber()
+	return _u
+}
+
+// SetMetadataLanguage sets the "metadata_language" field.
+func (_u *ItemUpdateOne) SetMetadataLanguage(v string) *ItemUpdateOne {
+	_u.mutation.SetMetadataLanguage(v)
+	return _u
+}
+
+// SetNillableMetadataLanguage sets the "metadata_language" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableMetadataLanguage(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetMetadataLanguage(*v)
+	}
+	return _u
+}
+
+// SetMetadataCountry sets the "metadata_country" field.
+func (_u *ItemUpdateOne) SetMetadataCountry(v string) *ItemUpdateOne {
+	_u.mutation.SetMetadataCountry(v)
+	return _u
+}
+
+// SetNillableMetadataCountry sets the "metadata_country" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableMetadataCountry(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetMetadataCountry(*v)
+	}
+	return _u
+}
+
+// SetLocked sets the "locked" field.
+func (_u *ItemUpdateOne) SetLocked(v bool) *ItemUpdateOne {
+	_u.mutation.SetLocked(v)
+	return _u
+}
+
+// SetNillableLocked sets the "locked" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableLocked(v *bool) *ItemUpdateOne {
+	if v != nil {
+		_u.SetLocked(*v)
+	}
+	return _u
+}
+
+// SetLockedFields sets the "locked_fields" field.
+func (_u *ItemUpdateOne) SetLockedFields(v []string) *ItemUpdateOne {
+	_u.mutation.SetLockedFields(v)
+	return _u
+}
+
+// AppendLockedFields appends value to the "locked_fields" field.
+func (_u *ItemUpdateOne) AppendLockedFields(v []string) *ItemUpdateOne {
+	_u.mutation.AppendLockedFields(v)
+	return _u
+}
+
+// ClearLockedFields clears the value of the "locked_fields" field.
+func (_u *ItemUpdateOne) ClearLockedFields() *ItemUpdateOne {
+	_u.mutation.ClearLockedFields()
 	return _u
 }
 
@@ -2445,6 +3133,9 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 	if value, ok := _u.mutation.OfficialRating(); ok {
 		_spec.SetField(item.FieldOfficialRating, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.CustomRating(); ok {
+		_spec.SetField(item.FieldCustomRating, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.ParentalRating(); ok {
 		_spec.SetField(item.FieldParentalRating, field.TypeInt, value)
 	}
@@ -2469,8 +3160,106 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 	if _u.mutation.ExternalIdsCleared() {
 		_spec.ClearField(item.FieldExternalIds, field.TypeJSON)
 	}
+	if value, ok := _u.mutation.ProductionLocations(); ok {
+		_spec.SetField(item.FieldProductionLocations, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedProductionLocations(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldProductionLocations, value)
+		})
+	}
+	if _u.mutation.ProductionLocationsCleared() {
+		_spec.ClearField(item.FieldProductionLocations, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.RemoteTrailers(); ok {
+		_spec.SetField(item.FieldRemoteTrailers, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRemoteTrailers(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldRemoteTrailers, value)
+		})
+	}
+	if _u.mutation.RemoteTrailersCleared() {
+		_spec.ClearField(item.FieldRemoteTrailers, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.CollectionName(); ok {
+		_spec.SetField(item.FieldCollectionName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AspectRatio(); ok {
+		_spec.SetField(item.FieldAspectRatio, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Video3dFormat(); ok {
+		_spec.SetField(item.FieldVideo3dFormat, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Album(); ok {
+		_spec.SetField(item.FieldAlbum, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.SeriesStatus(); ok {
 		_spec.SetField(item.FieldSeriesStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AirDays(); ok {
+		_spec.SetField(item.FieldAirDays, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedAirDays(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldAirDays, value)
+		})
+	}
+	if _u.mutation.AirDaysCleared() {
+		_spec.ClearField(item.FieldAirDays, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.AirTime(); ok {
+		_spec.SetField(item.FieldAirTime, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayOrder(); ok {
+		_spec.SetField(item.FieldDisplayOrder, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AirsBeforeSeasonNumber(); ok {
+		_spec.SetField(item.FieldAirsBeforeSeasonNumber, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAirsBeforeSeasonNumber(); ok {
+		_spec.AddField(item.FieldAirsBeforeSeasonNumber, field.TypeInt, value)
+	}
+	if _u.mutation.AirsBeforeSeasonNumberCleared() {
+		_spec.ClearField(item.FieldAirsBeforeSeasonNumber, field.TypeInt)
+	}
+	if value, ok := _u.mutation.AirsAfterSeasonNumber(); ok {
+		_spec.SetField(item.FieldAirsAfterSeasonNumber, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAirsAfterSeasonNumber(); ok {
+		_spec.AddField(item.FieldAirsAfterSeasonNumber, field.TypeInt, value)
+	}
+	if _u.mutation.AirsAfterSeasonNumberCleared() {
+		_spec.ClearField(item.FieldAirsAfterSeasonNumber, field.TypeInt)
+	}
+	if value, ok := _u.mutation.AirsBeforeEpisodeNumber(); ok {
+		_spec.SetField(item.FieldAirsBeforeEpisodeNumber, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAirsBeforeEpisodeNumber(); ok {
+		_spec.AddField(item.FieldAirsBeforeEpisodeNumber, field.TypeInt, value)
+	}
+	if _u.mutation.AirsBeforeEpisodeNumberCleared() {
+		_spec.ClearField(item.FieldAirsBeforeEpisodeNumber, field.TypeInt)
+	}
+	if value, ok := _u.mutation.MetadataLanguage(); ok {
+		_spec.SetField(item.FieldMetadataLanguage, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.MetadataCountry(); ok {
+		_spec.SetField(item.FieldMetadataCountry, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Locked(); ok {
+		_spec.SetField(item.FieldLocked, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.LockedFields(); ok {
+		_spec.SetField(item.FieldLockedFields, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedLockedFields(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldLockedFields, value)
+		})
+	}
+	if _u.mutation.LockedFieldsCleared() {
+		_spec.ClearField(item.FieldLockedFields, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Extra(); ok {
 		_spec.SetField(item.FieldExtra, field.TypeString, value)

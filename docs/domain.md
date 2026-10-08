@@ -62,10 +62,12 @@ All enumerations are string types with stable lowercase values, used unchanged i
 | `ImageKind` | `primary`, `backdrop`, `logo`, `thumb`, `banner`, `art`, `disc`, `screenshot` |
 | `CreditKind` | `actor`, `guest_star`, `director`, `writer`, `producer`, `creator`, `composer`, `conductor`, `lyricist`, `artist`, `author`, `narrator`, `other` |
 | `SeriesStatus` | `continuing`, `ended`, `unreleased` |
+| `Video3DFormat` | `half_sbs`, `full_sbs`, `half_tab`, `full_tab`, `mvc` |
+| `MetadataField` | `cast`, `genres`, `production_locations`, `studios`, `tags`, `name`, `overview`, `runtime`, `official_rating` |
 | `SubtitleMode` | `""` (follow stream flags), `always`, `foreign`, `forced`, `none`, `smart` |
 | `SortField` | `name`, `date_added`, `premiere_date`, `production_year`, `community_rating`, `runtime`, `index`, `random`, `last_played`, `play_count` |
 | `JobState` | `pending`, `running`, `succeeded`, `failed` |
-| `Provider` | `tmdb`, `imdb`, `tvdb`, `musicbrainz` (well-known; plugins may add others) |
+| `Provider` | `tmdb`, `tmdb_collection`, `imdb`, `tvdb`, `musicbrainz_artist` (well-known; plugins may add others) |
 
 ---
 
@@ -83,12 +85,17 @@ There is a single `Item` type for every kind; `Kind` selects which fields are me
 | Identity and hierarchy | `ID`, `LibraryID`, `ParentID`, `Kind`, `Path` |
 | Titles and text | `Name`, `SortName`, `OriginalTitle`, `Overview`, `Tagline` |
 | Numbering | `IndexNumber`, `ParentIndexNumber`, `IndexNumberEnd` |
-| Dates and ratings | `ProductionYear`, `PremiereDate`, `EndDate`, `Runtime`, `OfficialRating`, `ParentalRating`, `CommunityRating` (0–10), `CriticRating` (0–100) |
-| Classification | `Genres`, `Tags`, `Studios`, `ExternalIDs` (by `Provider`) |
-| Music | `Artists`, `AlbumArtists` |
-| Series | `SeriesStatus` |
+| Dates and ratings | `ProductionYear`, `PremiereDate`, `EndDate`, `Runtime`, `OfficialRating`, `CustomRating`, `ParentalRating`, `CommunityRating` (0–10), `CriticRating` (0–100) |
+| Classification | `Genres`, `Tags`, `Studios`, `ExternalIDs` (by `Provider`), `ProductionLocations` (countries), `RemoteTrailers` (URLs) |
+| Movie and video | `CollectionName` (movie set), `AspectRatio`, `Video3DFormat` |
+| Music | `Artists`, `AlbumArtists`, `Album` |
+| Series | `SeriesStatus`, `AirDays`, `AirTime`, `DisplayOrder` |
+| Episode | `AirsBeforeSeasonNumber`, `AirsAfterSeasonNumber`, `AirsBeforeEpisodeNumber` (where a special airs) |
 | Extras | `Extra` (`ExtraKind`), `OwnerID` |
+| Metadata control | `MetadataLanguage`, `MetadataCountry` (override the library's), `Locked`, `LockedFields` (`MetadataField`) |
 | Bookkeeping | `DateAdded`, `FileModified`, `MetadataRefreshedAt` |
+
+The model follows Jellyfin's and grows with the roadmap: fields are added when a phase needs them. `SortName` is the user's sort name (Jellyfin's `ForcedSortName`); the computed sort form is a storage key. An episode's series and season are its ancestors, not copied names. A locked item, or a locked field group, is not changed by metadata refreshes.
 
 ### 4.3 Hierarchies
 Hierarchies use `ParentID`; numbering uses `IndexNumber` / `ParentIndexNumber`:
@@ -112,9 +119,10 @@ Trailers, featurettes, theme songs and other extras are ordinary items with `Ext
 * `ID`, `LibraryID`, a valid `Kind` and a non-empty `Name` are required; an item cannot be its own parent.
 * An item with `Extra` set must use a valid `ExtraKind` and have an `OwnerID`.
 * `CommunityRating` is within 0–10, `CriticRating` within 0–100, and `ParentalRating` is not negative.
+* `Video3DFormat` and `LockedFields` use known values; `AirDays` are weekdays.
 
 ### 4.6 Ratings
-`OfficialRating` is the content rating as published (e.g. "PG-13"); `ParentalRating` is its score in the country's rating system, set by metadata providers, with zero meaning unrated. Rating filters (`ItemQuery.MaxRating`, `UserPolicy.MaxParentalRating`) compare scores.
+`OfficialRating` is the content rating as published (e.g. "PG-13"); `CustomRating`, set by the user, takes precedence over it; `ParentalRating` is its score in the country's rating system, set by metadata providers, with zero meaning unrated. Rating filters (`ItemQuery.MaxRating`, `UserPolicy.MaxParentalRating`) compare scores.
 
 ---
 
