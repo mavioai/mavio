@@ -14,7 +14,6 @@
 | Conformance tests | The same repository test suite on SQLite (in-memory / temp file) and PostgreSQL (testcontainers-go); both must pass | `libs/store` | Every CI run (Linux) |
 | Integration tests | Real ffmpeg / ffprobe, generated test media, real hardware encoders; call `t.Skip` with a reason when prerequisites are missing | Next to the code, behind prerequisites | CI where prerequisites exist; hardware runners for vendor paths |
 | Smoke tests | Wire the libraries completed so far together inside the server (see [Roadmap §1](roadmap.md#1-principles)) | `apps/server/internal/smoke` | Every CI run |
-| Benchmarks | Performance budgets per phase (see [Roadmap §3](roadmap.md#3-phase-details)) | `*_test.go` (`Benchmark*`) | `bench` target; continuous benchmarking |
 
 Concurrency logic involving timeouts, timers or idle reaping is tested deterministically with `testing/synctest`.
 
@@ -54,10 +53,3 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 
 `tools/fixtures` deterministically generates test media with `ffmpeg -f lavfi` (`testsrc2`, `sine`, …): multiple containers and codecs, HDR10 / Dolby Vision metadata, multiple audio and subtitle tracks, interlaced sources, odd durations. Generated files go to `.fixtures/` (git-ignored); binary media files are never committed. Tests that need them skip with a clear message when they are missing.
 
----
-
-## 4. Benchmarks
-
-* Benchmarks use `b.Loop()`; performance-sensitive libraries must ship benchmarks for every budget listed in the [Roadmap](roadmap.md#3-phase-details).
-* `pnpm nx run <project>:bench` runs a project's benchmarks; `tools/bench` compares runs with `benchstat` and checks results against the budgets.
-* Continuous benchmarking records results on the main branch and shows the comparison on every PR.

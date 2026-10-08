@@ -8,8 +8,8 @@
 | :--- | :--- |
 | [docs/architecture.zh-CN.md](docs/architecture.zh-CN.md) | 系统设计：技术选型、仓库结构、依赖方向、存储、图像、插件、媒体管线、媒体库扫描 |
 | [docs/development.zh-CN.md](docs/development.zh-CN.md) | 工具链、Nx、Go 模块约定、代码生成、代码质量、CI、发布 |
-| [docs/testing.zh-CN.md](docs/testing.zh-CN.md) | 测试分层、从 Jellyfin 移植测试、测试媒体、基准测试 |
-| [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md) | 阶段划分、门禁与性能预算、当前进度、风险 |
+| [docs/testing.zh-CN.md](docs/testing.zh-CN.md) | 测试分层、从 Jellyfin 移植测试、测试媒体 |
+| [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md) | 阶段划分、完成标准、当前进度、风险 |
 
 ## 项目概览
 
@@ -34,7 +34,7 @@ libs/library/         扫描器、解析器链、任务调度
 libs/streaming/       HLS (fMP4/CMAF)
 plugins/<name>/       插件（默认编译为 wasip1 WASM）
 tools/nx-go/          本地 Nx 插件：把每个 go.mod 推断为 Nx 项目并生成依赖图
-tools/{fixtures,testport,bench}/  测试媒体生成、测试用例移植、基准编排
+tools/{fixtures,testport}/  测试媒体生成、测试用例移植
 ```
 
 `libs/` 下的库按领域命名；一个库可以同时是 Go 模块和 npm 包。
@@ -110,7 +110,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 - 单元测试不访问网络、不依赖真实 ffmpeg 或硬件；需要这些的测试放在集成测试中，条件不满足时 `t.Skip` 并写明原因。
 - 测试媒体由 `tools/fixtures` 生成到 `.fixtures/`，不提交二进制媒体文件。
 - 涉及超时、定时器、空闲回收的并发逻辑，用 `testing/synctest` 写成确定性测试。
-- 基准测试使用 `b.Loop()`；性能敏感的库必须附带基准测试，并满足 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md) §3 中的预算。
+- 编写基准测试时使用 `b.Loop()`；基准测试不纳入 CI。
 - **从 Jellyfin 移植的测试用例与测试数据**放在对应库的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），**不得创建以 Jellyfin 命名的目录**。每个文件或用例都在元数据中记录来源（Jellyfin 测试文件路径与测试名）。跳过的用例必须标记 `skip` 并写明原因，不允许静默丢弃。移植规则见 [docs/testing.zh-CN.md](docs/testing.zh-CN.md) §2。
 
 ## 文档

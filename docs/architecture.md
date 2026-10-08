@@ -11,7 +11,7 @@
 ## 1. Positioning and Principles
 
 ### 1.1 Goals
-* **Lightweight and efficient**: resident memory, cold start, scan throughput and first-segment latency are all bound by measurable budgets enforced as CI benchmark gates.
+* **Lightweight and efficient**: low resident memory, fast cold starts, high scan throughput and low first-segment latency follow from the modern stack — a single native Go binary with no runtime VM, WASM sandboxing instead of heavyweight isolation, and ffmpeg hardware pipelines.
 * **Single-binary delivery**: the server is a single `CGO_ENABLED=0` Go binary; its only external runtime dependency is `jellyfin-ffmpeg`.
 * **Strongly typed contracts**: Protobuf + Connect-RPC is used for all internal and external APIs; future Web / Expo / Desktop clients generate their SDKs directly from the contracts.
 * **Plugin isolation**: plugins never enter the host's address space. Two runtimes — a WASM (wazero) sandbox and a child process (UDS) — share one set of contracts.
@@ -22,7 +22,7 @@
 * No UI yet (Web / Mobile / Desktop), but the directory layout and contracts already reserve room for it.
 
 ### 1.3 Engineering Principles
-1. **Bottom-up**: build the low-level libraries with no business dependencies first; each library passes its correctness and performance gates when completed, before the next layer is assembled on top.
+1. **Bottom-up**: build the low-level libraries with no business dependencies first; each library passes its tests when completed, before the next layer is assembled on top.
 2. **No CGO**: any dependency that introduces CGO needs a separate justification. When native capabilities are needed, prefer an *ffmpeg child process* or a *WASM module running on wazero*.
 3. **Libraries are usable on their own**: every Go library is an independent module that can be `go test`ed / `go build`t without Nx; Nx only orchestrates and caches.
 4. **Contract first**: `libs/proto` is the single source of truth for every cross-process and cross-language boundary.
@@ -104,8 +104,7 @@ mavio/
 ├── tools/
 │   ├── nx-go/                   # Local Nx plugin: infers projects from go.mod and builds the dependency graph
 │   ├── fixtures/                # Deterministic test media generation with ffmpeg lavfi (HDR10 / DV metadata, multiple audio and subtitle tracks)
-│   ├── testport/                # One-off tool that extracts cases from Jellyfin's C# tests into testdata
-│   └── bench/                   # Benchmark orchestration, benchstat comparison, budget checks
+│   └── testport/                # One-off tool that extracts cases from Jellyfin's C# tests into testdata
 │
 └── docs/
 ```
@@ -208,7 +207,7 @@ A media server's image workload is "poster-scale": individual images are small, 
 1. **Derived-image cache**: a content-addressed cache keyed by (source content hash, processing parameters), with `singleflight` collapsing concurrent requests for the same image.
 2. **Pre-generation during scans**: common sizes are generated during scans, so request paths mostly just read from the cache.
 3. **All video-derived images go to ffmpeg**: trickplay, screenshots and chapter images are produced entirely inside ffmpeg, with hardware decoding available.
-4. **Fallback**: if the P2 benchmarks show pure-Go resizing misses its budget, large images are resized with ffmpeg's `scale` / `zscale` instead.
+4. **Fallback**: if pure-Go resizing proves too slow for large images, they are resized with ffmpeg's `scale` / `zscale` instead.
 
 ---
 

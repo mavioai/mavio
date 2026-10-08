@@ -14,7 +14,6 @@
 | 一致性测试 | 同一套仓储测试分别跑在 SQLite（内存 / 临时文件）与 PostgreSQL（testcontainers-go）上，两者都必须通过 | `libs/store` | 每次 CI（Linux） |
 | 集成测试 | 真实 ffmpeg / ffprobe、生成的测试媒体、真实硬件编码器；条件不满足时 `t.Skip` 并写明原因 | 代码旁，依赖前置条件 | 具备条件的 CI；厂商路径在硬件 runner 上运行 |
 | 冒烟测试 | 在服务端内把已完成的库串起来（见[路线图 §1](roadmap.zh-CN.md#1-推进原则)） | `apps/server/internal/smoke` | 每次 CI |
-| 基准测试 | 各阶段的性能预算（见[路线图 §3](roadmap.zh-CN.md#3-阶段详情)） | `*_test.go`（`Benchmark*`） | `bench` 目标；持续基准 |
 
 涉及超时、定时器、空闲回收的并发逻辑，用 `testing/synctest` 写成确定性测试。
 
@@ -54,10 +53,3 @@
 
 `tools/fixtures` 用 `ffmpeg -f lavfi`（`testsrc2`、`sine` 等）确定性地生成测试媒体：多种容器与编解码器、HDR10 / 杜比视界元数据、多音轨与多字幕轨、隔行扫描片源、非常规时长。生成的文件放在 `.fixtures/`（已加入 git 忽略），不提交二进制媒体文件。依赖这些文件的测试在文件缺失时跳过，并给出明确的提示信息。
 
----
-
-## 4. 基准测试
-
-* 基准测试使用 `b.Loop()`；性能敏感的库必须为[路线图](roadmap.zh-CN.md#3-阶段详情)中列出的每项预算提供基准测试。
-* `pnpm nx run <project>:bench` 运行某个项目的基准测试；`tools/bench` 用 `benchstat` 对比结果，并对照预算进行校验。
-* 持续基准记录主分支上的结果，并在每个 PR 上展示对比。
