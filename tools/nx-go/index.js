@@ -2,7 +2,10 @@
 // standard targets, and derives the project graph from in-repo `require`
 // directives in go.mod.
 const { existsSync, readFileSync } = require('node:fs');
-const { basename, dirname, join } = require('node:path');
+const { join } = require('node:path');
+// Nx identifies files by workspace-relative paths with forward slashes on every
+// platform, so project roots and source files are built with path.posix.
+const { basename, dirname, join: joinPosix } = require('node:path').posix;
 
 const MODULE_PREFIX = 'github.com/mavioai/mavio/';
 
@@ -22,7 +25,7 @@ function goTargets(root, workspaceRoot) {
   const targets = {
     build: run('go build ./...', root, { ...cached, env: { CGO_ENABLED: '0' } }),
     test: run('go test ./...', root, { ...cached, inputs: ['go', 'goTestdata', '^go'] }),
-    bench: run('go test -run=^$ -bench=. -benchmem ./...', root, { cache: false }),
+    bench: run('go test -run=NONE -bench=. -benchmem ./...', root, { cache: false }),
     lint: run('golangci-lint run ./...', root, { ...cached, inputs: ['go', 'goLintConfig'] }),
     'tidy-check': run('go mod tidy -diff', root, {
       cache: true,
@@ -86,7 +89,7 @@ function createDependencies(_options, context) {
     for (const [, required] of goMod.matchAll(REQUIRE_RE)) {
       const target = byModule.get(required);
       if (target && target !== source) {
-        deps.push({ source, target, type: 'static', sourceFile: join(root, 'go.mod') });
+        deps.push({ source, target, type: 'static', sourceFile: joinPosix(root, 'go.mod') });
       }
     }
   }

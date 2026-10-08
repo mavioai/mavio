@@ -43,7 +43,7 @@ Nx only orchestrates and caches: every Go module still works on its own with `go
 | :--- | :--- | :--- |
 | `build` | `go build ./...` with `CGO_ENABLED=0` | Yes |
 | `test` | `go test ./...` | Yes |
-| `bench` | `go test -run=^$ -bench=. -benchmem ./...` | No |
+| `bench` | `go test -run=NONE -bench=. -benchmem ./...` | No |
 | `lint` | `golangci-lint run ./...` | Yes |
 | `tidy-check` | `go mod tidy -diff` with `GOWORK=off` | Yes |
 | `generate` | `buf generate` (only projects with a `buf.yaml`) | No |

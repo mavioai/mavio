@@ -43,7 +43,7 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 | :--- | :--- | :--- |
 | `build` | `go build ./...`，`CGO_ENABLED=0` | 是 |
 | `test` | `go test ./...` | 是 |
-| `bench` | `go test -run=^$ -bench=. -benchmem ./...` | 否 |
+| `bench` | `go test -run=NONE -bench=. -benchmem ./...` | 否 |
 | `lint` | `golangci-lint run ./...` | 是 |
 | `tidy-check` | `go mod tidy -diff`，`GOWORK=off` | 是 |
 | `generate` | `buf generate`（仅限含 `buf.yaml` 的项目） | 否 |
