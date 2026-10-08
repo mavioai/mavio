@@ -5,6 +5,7 @@ go 1.27.0
 require (
 	github.com/mavioai/mavio/libs/core v0.0.0
 	github.com/mavioai/mavio/tools/fixtures v0.0.0
+	golang.org/x/sys v0.48.0
 )
 
 replace github.com/mavioai/mavio/libs/core => ../core
