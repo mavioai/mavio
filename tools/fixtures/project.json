@@ -1,7 +1,7 @@
 {
   "name": "fixtures",
   "targets": {
-    "generate": {
+    "media": {
       "executor": "nx:run-commands",
       "options": {
         "command": "go run ./cmd/fixtures",

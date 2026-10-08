@@ -18,7 +18,7 @@ import (
 const EnvDir = "MAVIO_FIXTURES"
 
 // GenerateCommand is the command that generates all fixtures.
-const GenerateCommand = "pnpm nx run fixtures:generate"
+const GenerateCommand = "pnpm nx run fixtures:media"
 
 // Dir returns the fixtures directory: $MAVIO_FIXTURES if set, otherwise
 // .fixtures in the repository root, found by walking up from the working

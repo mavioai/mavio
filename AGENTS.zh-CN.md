@@ -101,16 +101,16 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 - 媒体字节流（直放、HLS、图片）走普通 HTTP，不走 Connect。
 
 ## 存储约定（libs/store）
-- ent schema 是表结构的**唯一来源**；迁移由 Atlas 按 SQLite、PostgreSQL 各生成一套，提交前人工审核。**已合并的迁移文件不得修改**，只能追加新迁移。
-- ent 负责 CRUD 与关系遍历；sqlc 只用于热点读路径、批量 upsert、全文检索，SQL 按方言各写一份（总数预算 ≤ 30 条）。
-- 同一事务内混用两者时，把 ent 的 `Tx`（开启 `sql/execquery` 特性）作为 sqlc 的 `DBTX` 传入。
+- ent schema（`libs/store/internal/ent/schema`）是表结构的**唯一来源**。修改后运行 `pnpm nx run store:generate`，再在 `libs/store` 下运行 `go run ./internal/cmd/migrategen -dialect sqlite -name <名称>` 以及 `-dialect postgres` 的同样命令（需要 Docker），并审核两份迁移。**已合并的迁移文件不得修改**，只能追加新迁移。
+- ent 负责 CRUD、关系与动态条目查询；sqlc 只用于任务队列这类方言专属 SQL，按方言各写一份（总数预算 ≤ 30 条）。
+- 多步写入使用 `Store.InTx`，它把 ent 与 sqlc 绑定到同一个 `*sql.Tx`。
 - 所有仓储测试必须同时在 SQLite 和 PostgreSQL 上通过。
 - 对上层只暴露 `libs/core` 中定义的仓储接口，ent / sqlc 类型不得泄漏出 `libs/store`。
 
 ## 测试约定
 - 测试优先写成表驱动测试；断言失败信息使用 `got = …, want = …` 格式。
 - 单元测试不访问网络、不依赖真实 ffmpeg 或硬件；需要这些的测试放在集成测试中，条件不满足时 `t.Skip` 并写明原因。
-- 测试媒体由 `pnpm nx run fixtures:generate` 生成到 `.fixtures/`，不提交二进制媒体文件。测试通过 `fixtures.Require(t, name)` 获取样本，样本缺失时自动跳过。
+- 测试媒体由 `pnpm nx run fixtures:media` 生成到 `.fixtures/`，不提交二进制媒体文件。测试通过 `fixtures.Require(t, name)` 获取样本，样本缺失时自动跳过。
 - 涉及超时、定时器、空闲回收的并发逻辑，用 `testing/synctest` 写成确定性测试。
 - 编写基准测试时使用 `b.Loop()`；基准测试不纳入 CI。
 - **从 Jellyfin 移植的测试用例与测试数据**放在对应库的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），**不得创建以 Jellyfin 命名的目录**。这些文件由 `tools/testport` 生成并记录来源，不得手工修改；需要跳过的用例在 Go 测试中按用例 ID 跳过并写明原因，不允许静默丢弃。移植规则见 [docs/testing.zh-CN.md](docs/testing.zh-CN.md) §2。

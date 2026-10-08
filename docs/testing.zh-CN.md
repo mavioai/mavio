@@ -11,7 +11,7 @@
 | 层次 | 范围 | 位置 | 运行时机 |
 | :--- | :--- | :--- | :--- |
 | 单元测试 | 纯逻辑；不访问网络、不依赖真实 ffmpeg 或硬件。表驱动，很多用例移植自 Jellyfin | 代码旁的 `*_test.go`，数据放在 `testdata/` | 每次 CI，全部平台 |
-| 一致性测试 | 同一套仓储测试分别跑在 SQLite（内存 / 临时文件）与 PostgreSQL（testcontainers-go）上，两者都必须通过 | `libs/store` | 每次 CI（Linux） |
+| 一致性测试 | 同一套仓储测试分别跑在 SQLite（临时文件）与 PostgreSQL（testcontainers-go 容器，或 `MAVIO_TEST_POSTGRES_DSN` 指定的服务器；没有 Docker 或使用 `-short` 时跳过）上，两者都必须通过 | `libs/store` | 每次 CI（PostgreSQL 在 Linux 上运行） |
 | 集成测试 | 真实 ffmpeg / ffprobe、生成的测试媒体、真实硬件编码器；条件不满足时 `t.Skip` 并写明原因 | 代码旁，依赖前置条件 | 具备条件的 CI；厂商路径在硬件 runner 上运行 |
 | 冒烟测试 | 在服务端内把已完成的库串起来（见[路线图 §1](roadmap.zh-CN.md#1-推进原则)） | `apps/server/internal/smoke` | 每次 CI |
 
@@ -57,7 +57,7 @@
 
 `tools/fixtures` 用 `ffmpeg -f lavfi`（`testsrc2`、`sine`）确定性地生成测试媒体：一组短片段，覆盖多种容器与编解码器（H.264、HEVC Main10、MPEG-2、VP9、AV1、AAC、AC-3、MP2、Opus、FLAC）、HDR10 标记与元数据、隔行扫描、带语言与 disposition 的多音轨和多字幕轨、章节、音乐标签，以及非整数帧率与时长。
 
-* `pnpm nx run fixtures:generate` 把样本生成到仓库根目录的 `.fixtures/`（已加入 git 忽略；可用 `MAVIO_FIXTURES` 覆盖）。不提交二进制媒体文件。
+* `pnpm nx run fixtures:media` 把样本生成到仓库根目录的 `.fixtures/`（已加入 git 忽略；可用 `MAVIO_FIXTURES` 覆盖）。不提交二进制媒体文件。
 * 增量生成：`.fixtures/manifest.json` 为每个样本记录一个 key（ffmpeg 版本、参数与辅助文件的哈希），只重新生成缺失或有变化的样本。
 * 本机 ffmpeg 缺少所需编码器的样本会被跳过，并给出警告。
 * 测试通过 `github.com/mavioai/mavio/tools/fixtures` 的 `fixtures.Require(t, "<name>")` 获取样本路径；样本未生成时自动跳过测试。

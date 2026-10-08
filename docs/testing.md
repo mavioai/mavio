@@ -11,7 +11,7 @@
 | Layer | Scope | Where | Runs in |
 | :--- | :--- | :--- | :--- |
 | Unit tests | Pure logic; no network, no real ffmpeg, no hardware. Table-driven, many ported from Jellyfin | `*_test.go` next to the code, data in `testdata/` | Every CI run, all platforms |
-| Conformance tests | The same repository test suite on SQLite (in-memory / temp file) and PostgreSQL (testcontainers-go); both must pass | `libs/store` | Every CI run (Linux) |
+| Conformance tests | The same repository test suite on SQLite (temporary file) and PostgreSQL (a testcontainers-go container, or the server in `MAVIO_TEST_POSTGRES_DSN`; skipped without Docker or with `-short`); both must pass | `libs/store` | Every CI run (PostgreSQL on Linux) |
 | Integration tests | Real ffmpeg / ffprobe, generated test media, real hardware encoders; call `t.Skip` with a reason when prerequisites are missing | Next to the code, behind prerequisites | CI where prerequisites exist; hardware runners for vendor paths |
 | Smoke tests | Wire the libraries completed so far together inside the server (see [Roadmap §1](roadmap.md#1-principles)) | `apps/server/internal/smoke` | Every CI run |
 
@@ -57,7 +57,7 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 
 `tools/fixtures` deterministically generates test media with `ffmpeg -f lavfi` (`testsrc2`, `sine`): a catalog of short clips covering multiple containers and codecs (H.264, HEVC Main10, MPEG-2, VP9, AV1, AAC, AC-3, MP2, Opus, FLAC), HDR10 signaling and metadata, interlacing, multiple audio and subtitle tracks with languages and dispositions, chapters, music tags and non-integer frame rates and durations.
 
-* `pnpm nx run fixtures:generate` writes the catalog to `.fixtures/` at the repository root (git-ignored; override with `MAVIO_FIXTURES`). Binary media files are never committed.
+* `pnpm nx run fixtures:media` writes the catalog to `.fixtures/` at the repository root (git-ignored; override with `MAVIO_FIXTURES`). Binary media files are never committed.
 * Generation is incremental: `.fixtures/manifest.json` records a key per fixture (a hash of the ffmpeg version, arguments and auxiliary files), and only missing or changed fixtures are regenerated.
 * Fixtures whose encoders the local ffmpeg build lacks are skipped with a warning.
 * Tests get a fixture path with `fixtures.Require(t, "<name>")` from `github.com/mavioai/mavio/tools/fixtures`, which skips the test when the fixture has not been generated.

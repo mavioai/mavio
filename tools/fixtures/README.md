@@ -5,7 +5,7 @@
 Deterministically generates test media with `ffmpeg -f lavfi` and lets tests locate it. See `docs/testing.md` §3.
 
 ```bash
-pnpm nx run fixtures:generate          # generate missing or changed fixtures into .fixtures/
+pnpm nx run fixtures:media          # generate missing or changed fixtures into .fixtures/
 go run ./cmd/fixtures -list            # list the catalog
 go run ./cmd/fixtures -only a.mkv,b.ts # generate selected fixtures
 go run ./cmd/fixtures -force           # regenerate everything
