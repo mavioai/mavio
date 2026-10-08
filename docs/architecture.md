@@ -214,7 +214,7 @@ Requirements are derived from Jellyfin's `src/Jellyfin.Drawing.Skia`, `MediaBrow
 | Trickplay thumbnail sheets | ffmpeg: the `fps` + `scale` + `tile` filters output the sheet in one pass, with hardware decoding available |
 | Video screenshots, chapter images | ffmpeg |
 | Blurhash / Thumbhash | Pure Go, computed on a 32px thumbnail |
-| SVG | Sanitized and served to clients as-is; rasterization via a WASM build of resvg will be evaluated in P2 |
+| SVG | Checked for external references (`CheckSVG`: href, CSS `url()` and `@import`, nested data URIs, external or exploding entities) and served to clients as-is; SVGs are not rasterized |
 | Reading image dimensions | `image.DecodeConfig` |
 
 ### 6.2 Performance Strategy
