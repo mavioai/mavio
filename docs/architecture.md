@@ -88,7 +88,7 @@ mavio/
 │   ├── store/                   # [Go] ent schema, sqlc queries, Atlas migrations, repository implementations
 │   ├── naming/                  # [Go] File / directory name parsing
 │   ├── metadata/                # [Go] NFO read/write, external IDs, metadata merge strategy
-│   ├── subtitle/                # [Go] SRT / ASS / SSA subtitle parsing and conversion
+│   ├── subtitle/                # [Go] SRT / ASS / SSA / WebVTT subtitle parsing, conversion and character set detection
 │   ├── imaging/                 # [Go] Image processing, collages, blurhash / thumbhash
 │   ├── media/                   # [Go] Probing, keyframes, hardware acceleration, playback decisions, transcode planning, ffmpeg supervision
 │   ├── library/                 # [Go] Scanner, resolver chain, job scheduling

@@ -85,7 +85,7 @@ flowchart TD
 
 **Progress**:
 - [x] `libs/naming`: Jellyfin's naming rules for movies, episodes, seasons, series, stacks, versions, extras, music, audiobooks, books and external files; all ported cases pass or are skipped with a reason
-- [ ] `libs/subtitle`
+- [x] `libs/subtitle`: SRT / SSA / ASS / WebVTT parsing, conversion to SRT / SSA / ASS / WebVTT / TTML / JSON, time-window filtering and character set detection
 - [ ] `libs/metadata` (NFO)
 - [ ] `libs/imaging`
 

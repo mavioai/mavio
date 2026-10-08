@@ -85,7 +85,7 @@ flowchart TD
 
 **进展**：
 - [x] `libs/naming`：Jellyfin 的命名规则，覆盖电影、剧集、季、剧集系列、分段、多版本、附加内容、音乐、有声书、图书与外部文件；移植用例全部通过或带原因跳过
-- [ ] `libs/subtitle`
+- [x] `libs/subtitle`：SRT / SSA / ASS / WebVTT 解析，转换为 SRT / SSA / ASS / WebVTT / TTML / JSON，按时间窗口过滤，以及字符集检测
 - [ ] `libs/metadata`（NFO）
 - [ ] `libs/imaging`
 
