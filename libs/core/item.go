@@ -110,6 +110,12 @@ const (
 	ProviderIMDb              Provider = "imdb"
 	ProviderTVDB              Provider = "tvdb"
 	ProviderMusicBrainzArtist Provider = "musicbrainz_artist"
+	// MusicBrainz IDs of a track's album artist, album (release), release
+	// group and track.
+	ProviderMusicBrainzAlbumArtist  Provider = "musicbrainz_album_artist"
+	ProviderMusicBrainzAlbum        Provider = "musicbrainz_album"
+	ProviderMusicBrainzReleaseGroup Provider = "musicbrainz_release_group"
+	ProviderMusicBrainzTrack        Provider = "musicbrainz_track"
 )
 
 // Video3DFormat is the stereoscopic layout of a 3D video.

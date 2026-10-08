@@ -247,3 +247,57 @@ func TestValueAndPersonQueries(t *testing.T) {
 		t.Errorf("person limit: %v", err)
 	}
 }
+
+func TestVideoRangeType(t *testing.T) {
+	pq := MediaStream{Kind: StreamVideo, ColorTransfer: "smpte2084", ColorPrimaries: "bt2020", ColorSpace: "bt2020nc"}
+	dv := func(s MediaStream, profile, compat int) MediaStream {
+		s.DolbyVision = &DolbyVision{Profile: profile, BLCompatibilityID: compat, RPUPresent: true, BLPresent: true}
+		return s
+	}
+	plus := pq
+	plus.HDR10Plus = true
+	hlg := MediaStream{Kind: StreamVideo, ColorTransfer: "arib-std-b67", ColorPrimaries: "bt2020", ColorSpace: "bt2020nc"}
+	sdr := MediaStream{Kind: StreamVideo}
+	tests := []struct {
+		name  string
+		s     MediaStream
+		rng   VideoRange
+		rtype VideoRangeType
+	}{
+		{"sdr", sdr, RangeSDR, RangeTypeSDR},
+		{"hdr10", pq, RangeHDR, RangeTypeHDR10},
+		{"hdr10+", plus, RangeHDR, RangeTypeHDR10Plus},
+		{"hlg", hlg, RangeHDR, RangeTypeHLG},
+		{"dv 5", dv(sdr, 5, 0), RangeHDR, RangeTypeDOVI},
+		{"dv 8.1", dv(pq, 8, 1), RangeHDR, RangeTypeDOVIWithHDR10},
+		{"dv 8.1 with hdr10+", dv(plus, 8, 1), RangeHDR, RangeTypeDOVIWithHDR10Plus},
+		{"dv 8.4", dv(hlg, 8, 4), RangeHDR, RangeTypeDOVIWithHLG},
+		{"dv 8.2", dv(sdr, 8, 2), RangeSDR, RangeTypeDOVIWithSDR},
+		{"dv 7", dv(pq, 7, 6), RangeHDR, RangeTypeDOVIWithEL},
+		{"dv 8.1 without pq", dv(sdr, 8, 1), RangeSDR, RangeTypeDOVIInvalid},
+		{"dv 8.0", dv(pq, 8, 0), RangeHDR, RangeTypeDOVIInvalid},
+		{"dovi tag", MediaStream{Kind: StreamVideo, CodecTag: "dvh1"}, RangeSDR, RangeTypeSDR},
+		{"audio", MediaStream{Kind: StreamAudio}, "", ""},
+	}
+	for _, tt := range tests {
+		if r, rt := tt.s.VideoRange(), tt.s.VideoRangeType(); r != tt.rng || rt != tt.rtype {
+			t.Errorf("%s: got = %s %s, want = %s %s", tt.name, r, rt, tt.rng, tt.rtype)
+		}
+	}
+}
+
+func TestSubtitleCodecs(t *testing.T) {
+	for codec, want := range map[string][3]bool{ // text, PGS, VobSub
+		"subrip": {true, false, false}, "ass": {true, false, false}, "mov_text": {true, false, false},
+		"PGSSUB": {false, true, false}, "sup": {false, true, false}, "DVDSUB": {false, false, true},
+		"DVBSUB": {false, false, false}, "sub": {false, false, false}, "microdvd": {true, false, false},
+	} {
+		s := MediaStream{Kind: StreamSubtitle, Codec: codec}
+		if got := [3]bool{s.IsTextSubtitle(), s.IsPGSSubtitle(), s.IsVobSubSubtitle()}; got != want {
+			t.Errorf("%s: got = %v, want = %v", codec, got, want)
+		}
+	}
+	if (&MediaStream{Kind: StreamAudio, Profile: "Dolby TrueHD + Dolby Atmos"}).SpatialFormat() != SpatialDolbyAtmos {
+		t.Error("atmos: got = none")
+	}
+}

@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -14,9 +15,11 @@ type MediaSource struct {
 	ItemID ID
 	Path   string
 	// Name distinguishes versions of the same item, e.g. "4K HDR".
-	Name      string
-	Container string // ffprobe format name, e.g. "matroska,webm"
-	Size      int64  // bytes
+	Name string
+	// Container is the container format, as ffprobe names it with Matroska
+	// as "mkv" and MPEG-TS as "ts", e.g. "mkv" or "mov,mp4,m4a,3gp,3g2,mj2".
+	Container string
+	Size      int64 // bytes
 	Duration  time.Duration
 	Bitrate   int64 // bits per second, whole file
 	Streams   []MediaStream
@@ -75,16 +78,38 @@ var StreamKinds = []StreamKind{StreamVideo, StreamAudio, StreamSubtitle, StreamA
 // Valid reports whether k is a known stream kind.
 func (k StreamKind) Valid() bool { return slices.Contains(StreamKinds, k) }
 
-// VideoRange is the dynamic range format of a video stream.
+// VideoRange is the dynamic range of a video stream.
 type VideoRange string
 
 // Video ranges.
 const (
-	RangeSDR         VideoRange = "sdr"
-	RangeHDR10       VideoRange = "hdr10"
-	RangeHDR10Plus   VideoRange = "hdr10plus"
-	RangeHLG         VideoRange = "hlg"
-	RangeDolbyVision VideoRange = "dolby_vision"
+	RangeSDR VideoRange = "sdr"
+	RangeHDR VideoRange = "hdr"
+)
+
+// VideoRangeType is the dynamic range format of a video stream, telling
+// clients what they must support to play it as is.
+type VideoRangeType string
+
+// Video range types.
+const (
+	RangeTypeSDR       VideoRangeType = "sdr"
+	RangeTypeHDR10     VideoRangeType = "hdr10"
+	RangeTypeHDR10Plus VideoRangeType = "hdr10plus"
+	RangeTypeHLG       VideoRangeType = "hlg"
+	// Dolby Vision without a compatible base layer (profile 5).
+	RangeTypeDOVI VideoRangeType = "dovi"
+	// Dolby Vision with an HDR10, HLG or SDR compatible base layer.
+	RangeTypeDOVIWithHDR10 VideoRangeType = "dovi_hdr10"
+	RangeTypeDOVIWithHLG   VideoRangeType = "dovi_hlg"
+	RangeTypeDOVIWithSDR   VideoRangeType = "dovi_sdr"
+	// Dolby Vision with an enhancement layer (profile 7).
+	RangeTypeDOVIWithEL VideoRangeType = "dovi_el"
+	// Dolby Vision whose base layer also carries HDR10+.
+	RangeTypeDOVIWithHDR10Plus   VideoRangeType = "dovi_hdr10plus"
+	RangeTypeDOVIWithELHDR10Plus VideoRangeType = "dovi_el_hdr10plus"
+	// Dolby Vision signalling that does not match the stream.
+	RangeTypeDOVIInvalid VideoRangeType = "dovi_invalid"
 )
 
 // DolbyVision describes a Dolby Vision configuration record.
@@ -97,7 +122,19 @@ type DolbyVision struct {
 	RPUPresent        bool
 	ELPresent         bool // enhancement layer
 	BLPresent         bool
+	// VersionMajor and VersionMinor are the record's version.
+	VersionMajor, VersionMinor int
 }
+
+// AudioSpatialFormat is an object-based surround format carried in an
+// audio stream.
+type AudioSpatialFormat string
+
+// Spatial audio formats; empty means none.
+const (
+	SpatialDolbyAtmos AudioSpatialFormat = "dolby_atmos"
+	SpatialDTSX       AudioSpatialFormat = "dtsx"
+)
 
 // MediaStream is one elementary stream of a media source, or a sidecar
 // subtitle file presented as a stream.
@@ -111,42 +148,201 @@ type MediaStream struct {
 	CodecTag string
 	Profile  string
 	Level    int
-	Bitrate  int64  // bits per second
+	Bitrate  int64  // bits per second; zero when unknown
 	Language string // ISO 639-2/B, e.g. "eng"
 	Title    string
+	Comment  string
+	// TimeBase and CodecTimeBase are ffprobe's time bases, e.g. "1/1000".
+	TimeBase      string
+	CodecTimeBase string
 
 	Default         bool
 	Forced          bool
 	HearingImpaired bool
+	// Original marks the original-language audio track.
+	Original bool
 	// ExternalPath is set for sidecar files such as "Movie.en.srt".
 	ExternalPath string
 
 	// Video.
-	Width          int
-	Height         int
+	Width  int
+	Height int
+	// FrameRate is the average frame rate; RealFrameRate the lowest rate
+	// that represents all timestamps (ffprobe's r_frame_rate).
 	FrameRate      Rational
+	RealFrameRate  Rational
 	PixelFormat    string // e.g. "yuv420p10le"
 	BitDepth       int
 	ColorRange     string // "tv" or "pc"
 	ColorPrimaries string // e.g. "bt2020"
 	ColorTransfer  string // e.g. "smpte2084"
 	ColorSpace     string // e.g. "bt2020nc"
-	Range          VideoRange
 	DolbyVision    *DolbyVision
 	Interlaced     bool
 	Rotation       int // degrees, clockwise
 	// SampleAspectRatio is the pixel aspect ratio; zero means square pixels.
 	SampleAspectRatio Rational
+	// AspectRatio is the display aspect ratio, e.g. "16:9" or "2.40:1".
+	AspectRatio string
+	// Anamorphic is set for non-square pixels.
+	Anamorphic bool
+	// AVC is set for H.264 in length-prefixed (avcC) form, whose NAL units
+	// are NALLengthSize bytes long; Annex B streams have neither.
+	AVC           bool
+	NALLengthSize string
+	RefFrames     int
+	// HDR10Plus is set when frames carry HDR10+ dynamic metadata.
+	HDR10Plus bool
 
 	// Audio.
 	Channels      int
 	ChannelLayout string // e.g. "5.1(side)"
 	SampleRate    int    // Hz
+}
 
-	// Subtitle.
-	// TextBased is false for bitmap formats such as PGS and VobSub, which can
-	// only be burned in.
-	TextBased bool
+// VideoRange returns the dynamic range of a video stream; empty for other
+// streams.
+func (s *MediaStream) VideoRange() VideoRange {
+	r, _ := s.videoRange()
+	return r
+}
+
+// VideoRangeType returns the dynamic range format of a video stream;
+// empty for other streams. It is derived, as in Jellyfin, from the color
+// transfer, the Dolby Vision configuration and its codec tag, and the
+// HDR10+ flag.
+func (s *MediaStream) VideoRangeType() VideoRangeType {
+	_, t := s.videoRange()
+	return t
+}
+
+func (s *MediaStream) videoRange() (VideoRange, VideoRangeType) {
+	if s.Kind != StreamVideo {
+		return "", ""
+	}
+	isPQ := strings.EqualFold(s.ColorTransfer, "smpte2084")
+	isHLG := strings.EqualFold(s.ColorTransfer, "arib-std-b67")
+	// Invalid Dolby Vision keeps HDR only when the base layer signals it.
+	base := RangeSDR
+	if isPQ || isHLG {
+		base = RangeHDR
+	}
+	var dv DolbyVision
+	if s.DolbyVision != nil {
+		dv = *s.DolbyVision
+	}
+	isDoViProfile := dv.Profile == 5 || dv.Profile == 7 || dv.Profile == 8 || dv.Profile == 10
+	compat := dv.BLCompatibilityID
+	isDoViFlag := dv.RPUPresent && dv.BLPresent && (compat == 0 || compat == 1 || compat == 2 || compat == 4 || compat == 6)
+	tag := strings.ToLower(s.CodecTag)
+	if (isDoViProfile && isDoViFlag) || tag == "dovi" || tag == "dvh1" || tag == "dvhe" || tag == "dav1" {
+		r, t := RangeSDR, RangeTypeSDR
+		switch dv.Profile {
+		case 5:
+			r, t = RangeHDR, RangeTypeDOVI
+		case 7:
+			r, t = RangeHDR, RangeTypeDOVIWithEL
+		case 8, 10:
+			switch {
+			case compat == 0 && dv.Profile == 10:
+				r, t = RangeHDR, RangeTypeDOVI
+			case compat == 1:
+				r, t = RangeHDR, RangeTypeDOVIWithHDR10
+			case compat == 4:
+				r, t = RangeHDR, RangeTypeDOVIWithHLG
+			case compat == 2:
+				r, t = RangeSDR, RangeTypeDOVIWithSDR
+			default:
+				r, t = base, RangeTypeDOVIInvalid
+			}
+		}
+		expected := ""
+		switch t {
+		case RangeTypeDOVIWithHDR10, RangeTypeDOVIWithEL:
+			expected = "smpte2084"
+		case RangeTypeDOVIWithHLG:
+			expected = "arib-std-b67"
+		}
+		if expected != "" && (!strings.EqualFold(s.ColorSpace, "bt2020nc") ||
+			!strings.EqualFold(s.ColorTransfer, expected) || !strings.EqualFold(s.ColorPrimaries, "bt2020")) {
+			return base, RangeTypeDOVIInvalid
+		}
+		if s.HDR10Plus {
+			switch t {
+			case RangeTypeDOVIWithHDR10:
+				return RangeHDR, RangeTypeDOVIWithHDR10Plus
+			case RangeTypeDOVIWithEL:
+				return RangeHDR, RangeTypeDOVIWithELHDR10Plus
+			}
+		}
+		return r, t
+	}
+	switch {
+	case isPQ && s.HDR10Plus:
+		return RangeHDR, RangeTypeHDR10Plus
+	case isPQ:
+		return RangeHDR, RangeTypeHDR10
+	case isHLG:
+		return RangeHDR, RangeTypeHLG
+	}
+	return RangeSDR, RangeTypeSDR
+}
+
+// IsTextSubtitle reports whether a subtitle stream is text-based and can be
+// converted or delivered as text; bitmap formats such as PGS and VobSub can
+// only be burned in.
+func (s *MediaStream) IsTextSubtitle() bool {
+	return s.Kind == StreamSubtitle && (s.Codec != "" || s.ExternalPath != "") && IsTextSubtitleCodec(s.Codec)
+}
+
+// IsPGSSubtitle reports whether a subtitle stream is a Blu-ray PGS stream.
+func (s *MediaStream) IsPGSSubtitle() bool {
+	return s.Kind == StreamSubtitle && (s.Codec != "" || s.ExternalPath != "") && IsPGSSubtitleCodec(s.Codec)
+}
+
+// IsVobSubSubtitle reports whether a subtitle stream is a DVD VobSub
+// stream.
+func (s *MediaStream) IsVobSubSubtitle() bool {
+	return s.Kind == StreamSubtitle && (s.Codec != "" || s.ExternalPath != "") && IsVobSubSubtitleCodec(s.Codec)
+}
+
+// IsTextSubtitleCodec reports whether a subtitle codec or file format is
+// text-based. MicroDVD shares the .sub extension with VobSub but is text.
+func IsTextSubtitleCodec(codec string) bool {
+	c := strings.ToLower(codec)
+	return strings.Contains(c, "microdvd") ||
+		(!strings.Contains(c, "pgs") && !strings.Contains(c, "dvdsub") && !strings.Contains(c, "vobsub") &&
+			!strings.Contains(c, "dvbsub") && c != "sup" && c != "sub")
+}
+
+// IsPGSSubtitleCodec reports whether a subtitle codec or file format is
+// PGS.
+func IsPGSSubtitleCodec(codec string) bool {
+	c := strings.ToLower(codec)
+	return strings.Contains(c, "pgs") || c == "sup"
+}
+
+// IsVobSubSubtitleCodec reports whether a subtitle codec or file format is
+// VobSub.
+func IsVobSubSubtitleCodec(codec string) bool {
+	c := strings.ToLower(codec)
+	return strings.Contains(c, "dvdsub") || strings.Contains(c, "vobsub")
+}
+
+// SpatialFormat returns the spatial audio format named by an audio
+// stream's profile, such as "Dolby TrueHD + Dolby Atmos".
+func (s *MediaStream) SpatialFormat() AudioSpatialFormat {
+	if s.Kind != StreamAudio {
+		return ""
+	}
+	p := strings.ToLower(s.Profile)
+	switch {
+	case strings.Contains(p, "dolby atmos"):
+		return SpatialDolbyAtmos
+	case strings.Contains(p, "dts:x"):
+		return SpatialDTSX
+	}
+	return ""
 }
 
 // Validate checks the stream's invariants.
@@ -175,6 +371,15 @@ func (r Rational) Float() float64 {
 		return 0
 	}
 	return float64(r.Num) / float64(r.Den)
+}
+
+// Float32 returns the value of r in single precision, or 0 when the
+// denominator is 0.
+func (r Rational) Float32() float32 {
+	if r.Den == 0 {
+		return 0
+	}
+	return float32(r.Num) / float32(r.Den)
 }
 
 // IsZero reports whether r is unset.

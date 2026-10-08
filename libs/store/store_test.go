@@ -373,7 +373,7 @@ func TestMediaSourcesAndImages(t *testing.T) {
 				Path: "/media/Dune/Dune 4K.mkv", Name: "4K", Container: "matroska,webm", Size: 60 << 30, Duration: 155 * time.Minute,
 				Streams: []core.MediaStream{
 					{
-						Index: 0, Kind: core.StreamVideo, Codec: "hevc", Width: 3840, Height: 1600, Range: core.RangeDolbyVision,
+						Index: 0, Kind: core.StreamVideo, Codec: "hevc", Width: 3840, Height: 1600, ColorTransfer: "smpte2084", ColorPrimaries: "bt2020", ColorSpace: "bt2020nc",
 						FrameRate: core.Rational{Num: 24000, Den: 1001}, DolbyVision: &core.DolbyVision{Profile: 8, Level: 6, BLCompatibilityID: 1, RPUPresent: true, BLPresent: true},
 					},
 					{Index: 1, Kind: core.StreamAudio, Codec: "truehd", Channels: 8, Language: "eng", Default: true},
@@ -392,7 +392,7 @@ func TestMediaSourcesAndImages(t *testing.T) {
 			t.Fatalf("ListForItem = %+v, %v", got, err)
 		}
 		v := got[0].Streams[0]
-		if v.DolbyVision == nil || v.DolbyVision.Profile != 8 || v.FrameRate.Den != 1001 || len(got[0].Chapters) != 2 || len(got[0].Keyframes) != 3 {
+		if v.DolbyVision == nil || v.DolbyVision.Profile != 8 || v.VideoRangeType() != core.RangeTypeDOVIWithHDR10 || v.FrameRate.Den != 1001 || len(got[0].Chapters) != 2 || len(got[0].Keyframes) != 3 {
 			t.Errorf("source round trip = %+v", got[0])
 		}
 		if err := s.MediaSources().Replace(ctx, movie.ID, sources[1:]); err != nil {

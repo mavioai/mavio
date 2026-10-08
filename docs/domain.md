@@ -58,7 +58,9 @@ All enumerations are string types with stable lowercase values, used unchanged i
 | `ItemKind` | `movie`, `series`, `season`, `episode`, `video`, `music_artist`, `music_album`, `track`, `music_video`, `audiobook`, `book`, `photo_album`, `photo`, `folder`, `collection`, `playlist` |
 | `ExtraKind` | `trailer`, `clip`, `behind_the_scenes`, `deleted_scene`, `interview`, `scene`, `sample`, `featurette`, `short`, `theme_song`, `theme_video`, `other` |
 | `StreamKind` | `video`, `audio`, `subtitle`, `attachment`, `image`, `data` |
-| `VideoRange` | `sdr`, `hdr10`, `hdr10plus`, `hlg`, `dolby_vision` |
+| `VideoRange` | `sdr`, `hdr` |
+| `VideoRangeType` | `sdr`, `hdr10`, `hdr10plus`, `hlg`, `dovi`, `dovi_hdr10`, `dovi_hlg`, `dovi_sdr`, `dovi_el`, `dovi_hdr10plus`, `dovi_el_hdr10plus`, `dovi_invalid` |
+| `AudioSpatialFormat` | `""` (none), `dolby_atmos`, `dtsx` |
 | `ImageKind` | `primary`, `backdrop`, `logo`, `thumb`, `banner`, `art`, `disc`, `screenshot` |
 | `CreditKind` | `actor`, `guest_star`, `director`, `writer`, `producer`, `creator`, `composer`, `conductor`, `lyricist`, `artist`, `author`, `narrator`, `other` |
 | `SeriesStatus` | `continuing`, `ended`, `unreleased` |
@@ -67,7 +69,7 @@ All enumerations are string types with stable lowercase values, used unchanged i
 | `SubtitleMode` | `""` (follow stream flags), `always`, `foreign`, `forced`, `none`, `smart` |
 | `SortField` | `name`, `date_added`, `premiere_date`, `production_year`, `community_rating`, `runtime`, `index`, `random`, `last_played`, `play_count` |
 | `JobState` | `pending`, `running`, `succeeded`, `failed` |
-| `Provider` | `tmdb`, `tmdb_collection`, `imdb`, `tvdb`, `musicbrainz_artist` (well-known; plugins may add others) |
+| `Provider` | `tmdb`, `tmdb_collection`, `imdb`, `tvdb`, `musicbrainz_artist`, `musicbrainz_album_artist`, `musicbrainz_album`, `musicbrainz_release_group`, `musicbrainz_track` (well-known; plugins may add others) |
 
 ---
 
@@ -128,10 +130,12 @@ Trailers, featurettes, theme songs and other extras are ordinary items with `Ext
 
 ## 5. Media Sources, Streams and Chapters
 
-* A `MediaSource` is one playable version of an item; an item can have several (e.g. 4K and 1080p versions), distinguished by `Name`. It records `Path`, `Container` (ffprobe format name), `Size`, `Duration`, `Bitrate`, its `Streams` and `Chapters`, the video `Keyframes` used to cut HLS segments (nil until extracted) and `ProbedAt`.
+* A `MediaSource` is one playable version of an item; an item can have several (e.g. 4K and 1080p versions), distinguished by `Name`. It records `Path`, `Container` (ffprobe's format name with Matroska as `mkv` and MPEG-TS as `ts`), `Size`, `Duration`, `Bitrate`, its `Streams` and `Chapters`, the video `Keyframes` used to cut HLS segments (nil until extracted) and `ProbedAt`.
 * A `MediaStream` is one elementary stream, or a sidecar subtitle file with `ExternalPath` set and a synthetic `Index` after the embedded streams. Codec names follow ffprobe (`hevc`, `eac3`, `subrip`, …); `CodecTag` keeps the container tag (`hvc1` vs `hev1`), which matters for direct-play decisions; `Language` is ISO 639-2/B.
-* Video streams carry dimensions, `FrameRate` (`Rational`, e.g. 24000/1001), pixel format and bit depth, color description (range, primaries, transfer, space), `Range` (`VideoRange`), the Dolby Vision configuration record (`DolbyVision`: profile, level, base-layer compatibility ID, RPU / EL / BL presence), interlacing, rotation and sample aspect ratio.
-* Audio streams carry channels, channel layout and sample rate; subtitle streams carry `TextBased` (false for bitmap formats such as PGS and VobSub, which can only be burned in).
+* All streams carry codec, profile, level, bitrate (zero when unknown), language, title, comment, time bases and the default, forced, hearing-impaired and original flags.
+* Video streams carry dimensions, the average `FrameRate` and `RealFrameRate` (`Rational`, e.g. 24000/1001), pixel format and bit depth, color description (range, primaries, transfer, space), the Dolby Vision configuration record (`DolbyVision`: version, profile, level, base-layer compatibility ID, RPU / EL / BL presence), the HDR10+ flag, interlacing, rotation, sample and display aspect ratios, anamorphism, reference frames, and for H.264 whether it is length-prefixed (`AVC`, `NALLengthSize`).
+* Derived, as in Jellyfin: `VideoRange()` and `VideoRangeType()` from the color transfer, Dolby Vision record, codec tag and HDR10+ flag; `SpatialFormat()` (Dolby Atmos, DTS:X) from an audio profile; `IsTextSubtitle()`, `IsPGSSubtitle()`, `IsVobSubSubtitle()` from a subtitle codec (bitmap subtitles can only be burned in).
+* Audio streams carry channels, channel layout, sample rate and bit depth.
 * A `Chapter` is a named start position with an optional extracted thumbnail.
 * Rules: a source needs `ID`, `ItemID` and `Path`, and non-negative size, duration and bitrate; every stream needs a valid `Kind`, a non-negative index, non-negative dimensions and channel count.
 

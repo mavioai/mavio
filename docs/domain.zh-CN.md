@@ -58,7 +58,9 @@ erDiagram
 | `ItemKind` | `movie`、`series`、`season`、`episode`、`video`、`music_artist`、`music_album`、`track`、`music_video`、`audiobook`、`book`、`photo_album`、`photo`、`folder`、`collection`、`playlist` |
 | `ExtraKind` | `trailer`、`clip`、`behind_the_scenes`、`deleted_scene`、`interview`、`scene`、`sample`、`featurette`、`short`、`theme_song`、`theme_video`、`other` |
 | `StreamKind` | `video`、`audio`、`subtitle`、`attachment`、`image`、`data` |
-| `VideoRange` | `sdr`、`hdr10`、`hdr10plus`、`hlg`、`dolby_vision` |
+| `VideoRange` | `sdr`、`hdr` |
+| `VideoRangeType` | `sdr`、`hdr10`、`hdr10plus`、`hlg`、`dovi`、`dovi_hdr10`、`dovi_hlg`、`dovi_sdr`、`dovi_el`、`dovi_hdr10plus`、`dovi_el_hdr10plus`、`dovi_invalid` |
+| `AudioSpatialFormat` | `""`（无）、`dolby_atmos`、`dtsx` |
 | `ImageKind` | `primary`、`backdrop`、`logo`、`thumb`、`banner`、`art`、`disc`、`screenshot` |
 | `CreditKind` | `actor`、`guest_star`、`director`、`writer`、`producer`、`creator`、`composer`、`conductor`、`lyricist`、`artist`、`author`、`narrator`、`other` |
 | `SeriesStatus` | `continuing`、`ended`、`unreleased` |
@@ -67,7 +69,7 @@ erDiagram
 | `SubtitleMode` | `""`（遵循流标记）、`always`、`foreign`、`forced`、`none`、`smart` |
 | `SortField` | `name`、`date_added`、`premiere_date`、`production_year`、`community_rating`、`runtime`、`index`、`random`、`last_played`、`play_count` |
 | `JobState` | `pending`、`running`、`succeeded`、`failed` |
-| `Provider` | `tmdb`、`tmdb_collection`、`imdb`、`tvdb`、`musicbrainz_artist`（常用取值；插件可使用其他名称） |
+| `Provider` | `tmdb`、`tmdb_collection`、`imdb`、`tvdb`、`musicbrainz_artist`、`musicbrainz_album_artist`、`musicbrainz_album`、`musicbrainz_release_group`、`musicbrainz_track`（常用取值；插件可使用其他名称） |
 
 ---
 
@@ -128,10 +130,12 @@ erDiagram
 
 ## 5. 媒体源、流与章节
 
-* `MediaSource` 是条目的一个可播放版本；一个条目可以有多个版本（如 4K 和 1080p），以 `Name` 区分。它记录 `Path`、`Container`（ffprobe 的格式名）、`Size`、`Duration`、`Bitrate`、`Streams` 与 `Chapters`、用于切分 HLS 分片的视频 `Keyframes`（提取前为 nil）以及 `ProbedAt`。
+* `MediaSource` 是条目的一个可播放版本；一个条目可以有多个版本（如 4K 和 1080p），以 `Name` 区分。它记录 `Path`、`Container`（ffprobe 的格式名，Matroska 记为 `mkv`，MPEG-TS 记为 `ts`）、`Size`、`Duration`、`Bitrate`、`Streams` 与 `Chapters`、用于切分 HLS 分片的视频 `Keyframes`（提取前为 nil）以及 `ProbedAt`。
 * `MediaStream` 是一条基本流；外挂字幕文件也表示为流，此时设置 `ExternalPath`，`Index` 为排在内嵌流之后的合成序号。编解码器名称沿用 ffprobe（`hevc`、`eac3`、`subrip` 等）；`CodecTag` 保留容器标签（如 `hvc1` 与 `hev1`），这对直放判断很重要；`Language` 使用 ISO 639-2/B。
-* 视频流记录尺寸、`FrameRate`（`Rational`，如 24000/1001）、像素格式与位深、色彩描述（范围、原色、传递特性、色彩空间）、`Range`（`VideoRange`）、杜比视界配置记录（`DolbyVision`：profile、level、基础层兼容 ID、RPU / EL / BL 是否存在）、隔行、旋转与采样宽高比。
-* 音频流记录声道数、声道布局与采样率；字幕流记录 `TextBased`（PGS、VobSub 等位图格式为 false，只能烧录）。
+* 所有流都记录编解码器、profile、level、码率（未知时为零）、语言、标题、注释、时基，以及默认、强制、听障、原始音轨标记。
+* 视频流记录尺寸、平均帧率 `FrameRate` 与 `RealFrameRate`（`Rational`，如 24000/1001）、像素格式与位深、色彩描述（范围、原色、传递特性、色彩空间）、杜比视界配置记录（`DolbyVision`：版本、profile、level、基础层兼容 ID、RPU / EL / BL 是否存在）、HDR10+ 标记、隔行、旋转、采样与显示宽高比、是否变形像素、参考帧数，以及 H.264 是否为长度前缀格式（`AVC`、`NALLengthSize`）。
+* 与 Jellyfin 一样由字段推导：`VideoRange()` 与 `VideoRangeType()` 由传递特性、杜比视界记录、编码标签与 HDR10+ 标记得出；`SpatialFormat()`（Dolby Atmos、DTS:X）由音频 profile 得出；`IsTextSubtitle()`、`IsPGSSubtitle()`、`IsVobSubSubtitle()` 由字幕编码得出（位图字幕只能烧录）。
+* 音频流记录声道数、声道布局、采样率与位深。
 * `Chapter` 是带名称的起始位置，可附带提取出的缩略图。
 * 规则：媒体源必须有 `ID`、`ItemID` 和 `Path`，大小、时长和码率不能为负；每条流必须有合法的 `Kind`，序号、尺寸和声道数不能为负。
 
