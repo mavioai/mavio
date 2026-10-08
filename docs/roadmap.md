@@ -39,7 +39,7 @@ flowchart TD
 
 | Phase | Theme | Status |
 | :--- | :--- | :--- |
-| P0 | Engineering foundation | 🚧 In progress |
+| P0 | Engineering foundation | ✅ Done |
 | P1 | Contracts, storage and plugin runtimes | Not started |
 | P2 | Pure computation libraries | Not started |
 | P3 | Media pipeline | Not started |
@@ -64,7 +64,7 @@ flowchart TD
 - [x] golangci-lint and depguard dependency-direction rules
 - [x] CI workflow: affected-project checks, generated-code check, `buf breaking`, multi-platform test matrix
 - [x] `tools/fixtures`: test media generation
-- [ ] `tools/testport`: Jellyfin test case extraction
+- [x] `tools/testport`: Jellyfin test case extraction
 
 ### P1 Contracts, Storage and Plugin Runtimes
 **Scope**: first version of the `proto` contracts; `core` domain model; `store` (ent + Atlas + sqlc, both dialects) and the job queue; `plugin` with both runtimes and the handshake.

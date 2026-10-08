@@ -39,7 +39,7 @@ flowchart TD
 
 | 阶段 | 主题 | 状态 |
 | :--- | :--- | :--- |
-| P0 | 工程地基 | 🚧 进行中 |
+| P0 | 工程地基 | ✅ 已完成 |
 | P1 | 契约、存储与插件运行时 | 未开始 |
 | P2 | 纯计算库 | 未开始 |
 | P3 | 媒体管线 | 未开始 |
@@ -64,7 +64,7 @@ flowchart TD
 - [x] golangci-lint 与 depguard 依赖方向规则
 - [x] CI 工作流：受影响项目检查、生成代码一致性检查、`buf breaking`、多平台测试矩阵
 - [x] `tools/fixtures`：测试媒体生成
-- [ ] `tools/testport`：Jellyfin 测试用例提取
+- [x] `tools/testport`：Jellyfin 测试用例提取
 
 ### P1 契约、存储与插件运行时
 **范围**：`proto` 契约初版；`core` 领域模型；`store`（ent + Atlas + sqlc，双方言）与任务队列；`plugin` 两种运行时与握手。

@@ -111,7 +111,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 - 测试媒体由 `pnpm nx run fixtures:generate` 生成到 `.fixtures/`，不提交二进制媒体文件。测试通过 `fixtures.Require(t, name)` 获取样本，样本缺失时自动跳过。
 - 涉及超时、定时器、空闲回收的并发逻辑，用 `testing/synctest` 写成确定性测试。
 - 编写基准测试时使用 `b.Loop()`；基准测试不纳入 CI。
-- **从 Jellyfin 移植的测试用例与测试数据**放在对应库的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），**不得创建以 Jellyfin 命名的目录**。每个文件或用例都在元数据中记录来源（Jellyfin 测试文件路径与测试名）。跳过的用例必须标记 `skip` 并写明原因，不允许静默丢弃。移植规则见 [docs/testing.zh-CN.md](docs/testing.zh-CN.md) §2。
+- **从 Jellyfin 移植的测试用例与测试数据**放在对应库的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），**不得创建以 Jellyfin 命名的目录**。这些文件由 `tools/testport` 生成并记录来源，不得手工修改；需要跳过的用例在 Go 测试中按用例 ID 跳过并写明原因，不允许静默丢弃。移植规则见 [docs/testing.zh-CN.md](docs/testing.zh-CN.md) §2。
 
 ## 文档
 - 所有文档都提供英文与简体中文两个版本，内容逐节对应：英文为 `<name>.md`，中文为 `<name>.zh-CN.md`（如 `docs/architecture.md` 与 `docs/architecture.zh-CN.md`、`AGENTS.md` 与 `AGENTS.zh-CN.md`）。两个文件顶部互相链接。

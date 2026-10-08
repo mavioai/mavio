@@ -22,11 +22,15 @@
 ## 2. 从 Jellyfin 移植测试用例
 
 ### 2.1 方法
-1. `tools/testport` 从 Jellyfin 的 C# 测试中提取 `[InlineData]`、`[MemberData]`、`TheoryData` 等参数化用例，输出为 JSON / YAML，放到对应库的 `testdata/` 目录。这是一次性迁移工具，迁移后人工复核。
-2. 非参数化的测试（逻辑断言型）人工翻译成 Go 表驱动测试。
-3. 测试资产（NFO 样例、ffprobe JSON、字幕文件、关键帧数据）复制到对应库的 `testdata/` 下，按用途命名（如 `testdata/nfo/`、`testdata/probe/`）。每个用例文件或资产都在元数据中记录来源（Jellyfin 仓库中的文件路径与测试名）；仓库中不出现以 Jellyfin 命名的目录。
-4. Jellyfin 中依赖 .NET 特有行为、或与 Mavio 设计取舍不同的用例，在 testdata 中标记为 `skip` 并写明原因，**不允许静默丢弃**。
-5. 移植完成后不再依赖 Jellyfin 运行时；后续新增用例直接写在 Mavio 中。
+提取由 `tools/testport` 完成；`tools/testport/mapping.json` 把 Jellyfin 的测试工程与测试数据目录映射到 Mavio 的目标位置（即 §2.2 的映射表）。
+
+1. **参数化用例**：`[InlineData]` 用例，以及由 `TheoryData.Add(…)`、`yield return` 或集合初始化器提供数据的 `[MemberData]` 用例，按 C# 测试类各输出一个 JSON 文件，放在目标的 `testdata/cases/` 下，文件名为去掉 `Tests` 后缀的 snake_case（如 `TV/EpisodeNumberTests.cs` → `testdata/cases/tv/episode_number.json`）。参数按形参名记录，并补全声明的默认值。常量转为 JSON 值；枚举成员等符号转为 `{"$symbol": …}`，标志组合转为 `{"$flags": […]}`，构造调用转为 `{"$new": …}`，其余非常量表达式以源码原文保留为 `{"$expr": …}`。
+2. **来源记录**：每个用例文件记录 Jellyfin 仓库、提交与源文件；每条用例记录方法、行号与稳定 ID（`Method/n`）。
+3. **Jellyfin 自身的跳过**：Jellyfin 中标记跳过的用例（`Skip = …`），以及被 Jellyfin 注释掉的 `[InlineData]` 行（通常是 `// TODO:` / `// FIXME:` 标注的已知失败），保留并带上 `skip` 原因。
+4. **生成的文件不得手工修改。** 依赖 .NET 特有行为、或与 Mavio 设计取舍不同的用例，在 Go 测试中按用例 ID 跳过并写明原因；**不允许静默丢弃**。
+5. **非参数化测试**（`[Fact]`）列在每个用例文件的 `facts` 中，人工翻译成 Go 测试；运行时计算的 `[MemberData]` 与 `[ClassData]` 列在 `unsupported` 中并写明原因，人工移植。
+6. **测试资产**（NFO 样例、ffprobe JSON、字幕文件、关键帧数据、设备配置）复制到目标的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），并附带 `SOURCES.json` 记录每个文件的来源。仓库中不出现以 Jellyfin 命名的目录。
+7. 每实现一个库时按目标运行：在 `tools/testport` 下执行 `go run ./cmd/testport -jellyfin <Jellyfin 仓库路径> -only libs/naming`。一个库移植完成后，新增用例直接写在 Mavio 中。
 
 ### 2.2 映射表
 | Jellyfin 测试 | 资产与要点 | Mavio 目标 |

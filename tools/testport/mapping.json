@@ -1,0 +1,29 @@
+{
+  "repository": "https://github.com/jellyfin/jellyfin",
+  "cases": [
+    { "source": "tests/Jellyfin.Naming.Tests", "target": "libs/naming/testdata/cases" },
+    { "source": "tests/Jellyfin.Server.Implementations.Tests/Library", "target": "libs/library/testdata/cases" },
+    { "source": "tests/Jellyfin.Server.Implementations.Tests/Library/MediaStreamSelectorTests.cs", "target": "libs/media/decision/testdata/cases" },
+    { "source": "tests/Jellyfin.Server.Implementations.Tests/Trickplay", "target": "libs/imaging/testdata/cases/trickplay" },
+    { "source": "tests/Jellyfin.XbmcMetadata.Tests", "target": "libs/metadata/testdata/cases/nfo" },
+    { "source": "tests/Jellyfin.Providers.Tests", "target": "libs/metadata/testdata/cases/providers" },
+    { "source": "tests/Jellyfin.Providers.Tests/Tmdb", "target": "plugins/scraper-tmdb/testdata/cases" },
+    { "source": "tests/Jellyfin.MediaEncoding.Tests", "target": "libs/media/hwaccel/testdata/cases" },
+    { "source": "tests/Jellyfin.MediaEncoding.Tests/Probing", "target": "libs/media/probe/testdata/cases" },
+    { "source": "tests/Jellyfin.MediaEncoding.Tests/Subtitles", "target": "libs/subtitle/testdata/cases" },
+    { "source": "tests/Jellyfin.Controller.Tests/MediaEncoding", "target": "libs/media/planner/testdata/cases" },
+    { "source": "tests/Jellyfin.Model.Tests/Dlna", "target": "libs/media/decision/testdata/cases" },
+    { "source": "tests/Jellyfin.MediaEncoding.Keyframes.Tests", "target": "libs/media/keyframes/testdata/cases" },
+    { "source": "tests/Jellyfin.MediaEncoding.Hls.Tests", "target": "libs/streaming/testdata/cases" },
+    { "source": "tests/Jellyfin.Drawing.Skia.Tests", "target": "libs/imaging/testdata/cases" }
+  ],
+  "assets": [
+    { "source": "tests/Jellyfin.XbmcMetadata.Tests/Test Data", "target": "libs/metadata/testdata/nfo", "recursive": true },
+    { "source": "tests/Jellyfin.Providers.Tests/Test Data/Lyrics", "target": "libs/metadata/testdata/lyrics", "recursive": true },
+    { "source": "tests/Jellyfin.MediaEncoding.Tests/Test Data/Probing", "target": "libs/media/probe/testdata/probe", "recursive": true },
+    { "source": "tests/Jellyfin.MediaEncoding.Tests/Test Data", "target": "libs/subtitle/testdata/subtitles" },
+    { "source": "tests/Jellyfin.Model.Tests/Test Data", "target": "libs/media/decision/testdata/device_profiles", "include": "DeviceProfile-*.json" },
+    { "source": "tests/Jellyfin.Model.Tests/Test Data", "target": "libs/media/decision/testdata/media_sources", "include": "MediaSourceInfo-*.json" },
+    { "source": "tests/Jellyfin.MediaEncoding.Keyframes.Tests/FfProbe/Test Data", "target": "libs/media/keyframes/testdata/ffprobe", "recursive": true }
+  ]
+}

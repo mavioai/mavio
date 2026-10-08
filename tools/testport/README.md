@@ -2,13 +2,16 @@
 
 > English | [简体中文](README.zh-CN.md)
 
-One-off tool that extracts parameterized test cases (`[InlineData]`,
-`[MemberData]`, `TheoryData`) from Jellyfin's C# test projects into JSON/YAML
-under each library's `testdata/` directory (in subdirectories named by
-purpose, e.g. `testdata/nfo/`), recording the source file and test name for
-every case.
+Extracts parameterized test cases and test assets from a Jellyfin checkout into Mavio's `testdata/` directories. See `docs/testing.md` §2 for the format and rules.
 
-See `docs/testing.md` §2 for the mapping from Jellyfin test projects to
-Mavio libraries.
+```bash
+# in tools/testport
+go run ./cmd/testport -jellyfin ~/src/jellyfin -only libs/naming   # port one target
+go run ./cmd/testport -jellyfin ~/src/jellyfin -dry-run             # report counts for every target
+```
 
-Status: not implemented yet (P0).
+`-jellyfin` defaults to `$MAVIO_JELLYFIN`. `mapping.json` maps Jellyfin test projects and test data directories to Mavio targets; the longest matching source wins.
+
+- `internal/csharp`: a C# lexer and a parser for the subset of declarations and expressions used in xUnit tests.
+- `extract.go`: turns `[Theory]` / `[Fact]` methods into cases.
+- `port.go`: applies the mapping, writes case files and copies assets with `SOURCES.json`.

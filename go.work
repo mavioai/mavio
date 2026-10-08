@@ -15,4 +15,5 @@ use (
 	./libs/subtitle
 	./plugins/scraper-tmdb
 	./tools/fixtures
+	./tools/testport
 )
