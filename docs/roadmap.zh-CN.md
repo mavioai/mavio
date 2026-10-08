@@ -41,7 +41,7 @@ flowchart TD
 | :--- | :--- | :--- |
 | P0 | 工程地基 | ✅ 已完成 |
 | P1 | 契约、存储与插件运行时 | ✅ 已完成 |
-| P2 | 纯计算库 | 进行中 |
+| P2 | 纯计算库 | ✅ 已完成 |
 | P3 | 媒体管线 | 未开始 |
 | P4 | 扫描与插件落地 | 未开始 |
 | P5 | 流媒体与 API | 未开始 |
@@ -88,6 +88,7 @@ flowchart TD
 - [x] `libs/subtitle`：SRT / SSA / ASS / WebVTT 解析，转换为 SRT / SSA / ASS / WebVTT / TTML / JSON，按时间窗口过滤，以及字符集检测
 - [x] `libs/metadata`：读取电影、视频、音乐视频、剧集、季、单集（含多集文件）、专辑与艺人的 NFO；从 URL 中识别提供者 ID；电影 NFO 的位置。写入 NFO 留到保存元数据的阶段。
 - [x] `libs/imaging`：Jellyfin 的尺寸规则、缩小时带锐化的缩放、图片格式与 SVG 安全检查。标准库以外的编解码器、占位图（blurhash / thumbhash）与拼贴图随 P5 的图片 API 实现。
+- [x] 冒烟测试 `apps/server/internal/smoke`：解析一集的文件名，读取 NFO，连同署名写入存储并能查到；字幕转换为 WebVTT，海报缩放
 
 ### P3 媒体管线
 **范围**：`probe`、`keyframes`、`hwaccel`、`decision`、`planner`、`supervisor`。

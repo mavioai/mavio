@@ -41,7 +41,7 @@ flowchart TD
 | :--- | :--- | :--- |
 | P0 | Engineering foundation | ✅ Done |
 | P1 | Contracts, storage and plugin runtimes | ✅ Done |
-| P2 | Pure computation libraries | In progress |
+| P2 | Pure computation libraries | ✅ Done |
 | P3 | Media pipeline | Not started |
 | P4 | Scanning and first plugin | Not started |
 | P5 | Streaming and API | Not started |
@@ -88,6 +88,7 @@ flowchart TD
 - [x] `libs/subtitle`: SRT / SSA / ASS / WebVTT parsing, conversion to SRT / SSA / ASS / WebVTT / TTML / JSON, time-window filtering and character set detection
 - [x] `libs/metadata`: NFO reading for movies, videos, music videos, series, seasons, episodes (including multi-episode files), albums and artists; provider IDs in URLs; movie NFO locations. Writing NFO files is left to the phase that saves metadata.
 - [x] `libs/imaging`: Jellyfin's size rules, resizing with sharpening on downscale, image formats and SVG safety checks. Codecs beyond the standard library, placeholders (blurhash / thumbhash) and collages come with the image API in P5.
+- [x] Smoke test `apps/server/internal/smoke`: an episode's files are named, read from NFO, stored with their credits and found again; its subtitle is converted to WebVTT and its poster resized
 
 ### P3 Media Pipeline
 **Scope**: `probe`, `keyframes`, `hwaccel`, `decision`, `planner`, `supervisor`.

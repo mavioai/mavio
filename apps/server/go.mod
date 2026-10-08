@@ -4,9 +4,13 @@ go 1.27.0
 
 require (
 	github.com/mavioai/mavio/libs/core v0.0.0
+	github.com/mavioai/mavio/libs/imaging v0.0.0
+	github.com/mavioai/mavio/libs/metadata v0.0.0
+	github.com/mavioai/mavio/libs/naming v0.0.0
 	github.com/mavioai/mavio/libs/plugin v0.0.0
 	github.com/mavioai/mavio/libs/proto v0.0.0
 	github.com/mavioai/mavio/libs/store v0.0.0
+	github.com/mavioai/mavio/libs/subtitle v0.0.0
 	google.golang.org/protobuf v1.36.12
 )
 
@@ -17,6 +21,7 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
+	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -33,8 +38,10 @@ require (
 	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3 // indirect
 	github.com/tetratelabs/wazero v1.12.0 // indirect
+	github.com/wlynxg/chardet v1.0.5 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
+	golang.org/x/image v0.46.0 // indirect
 	golang.org/x/mod v0.41.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
@@ -49,3 +56,11 @@ replace github.com/mavioai/mavio/libs/core => ../../libs/core
 replace github.com/mavioai/mavio/libs/store => ../../libs/store
 
 replace github.com/mavioai/mavio/libs/plugin => ../../libs/plugin
+
+replace github.com/mavioai/mavio/libs/naming => ../../libs/naming
+
+replace github.com/mavioai/mavio/libs/metadata => ../../libs/metadata
+
+replace github.com/mavioai/mavio/libs/subtitle => ../../libs/subtitle
+
+replace github.com/mavioai/mavio/libs/imaging => ../../libs/imaging
