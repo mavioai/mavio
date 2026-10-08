@@ -1,0 +1,77 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: standard
+  enable:
+    - depguard
+    - errorlint
+    - misspell
+    - nolintlint
+    - unconvert
+    - usestdlibvars
+  settings:
+    depguard:
+      # Enforces the dependency direction in docs/architecture.md §3.2.
+      # When both allow and deny match, the longer (more specific) pattern wins.
+      rules:
+        libs-not-apps:
+          files: ["**/libs/**"]
+          deny:
+            - pkg: github.com/mavioai/mavio/apps
+              desc: "libs must not import apps"
+            - pkg: github.com/mavioai/mavio/plugins
+              desc: "libs must not import plugins"
+        core:
+          files: ["**/libs/core/**"]
+          allow: ["$gostd", github.com/mavioai/mavio/libs/core]
+        pure:
+          files: ["**/libs/naming/**", "**/libs/subtitle/**"]
+          deny:
+            - pkg: github.com/mavioai/mavio/libs
+              desc: "pure libraries may only depend on libs/core"
+          allow: ["$gostd", github.com/mavioai/mavio/libs/core, github.com/mavioai/mavio/libs/naming, github.com/mavioai/mavio/libs/subtitle]
+        leaf-libs:
+          files: ["**/libs/media/**", "**/libs/imaging/**", "**/libs/metadata/**", "**/libs/store/**"]
+          deny:
+            - pkg: github.com/mavioai/mavio/libs/library
+              desc: "dependency direction: library depends on this, not the reverse"
+            - pkg: github.com/mavioai/mavio/libs/streaming
+              desc: "dependency direction: streaming depends on media, not the reverse"
+            - pkg: github.com/mavioai/mavio/libs/plugin
+              desc: "only apps/server and library wire plugins"
+        library:
+          files: ["**/libs/library/**"]
+          deny:
+            - pkg: github.com/mavioai/mavio/libs/store
+              desc: "use repository ports from libs/core; apps/server wires store"
+            - pkg: github.com/mavioai/mavio/libs/streaming
+              desc: "library must not depend on streaming"
+        streaming:
+          files: ["**/libs/streaming/**"]
+          deny:
+            - pkg: github.com/mavioai/mavio/libs/store
+              desc: "use repository ports from libs/core"
+            - pkg: github.com/mavioai/mavio/libs/library
+              desc: "streaming must not depend on library"
+        plugin-sdk:
+          files: ["**/libs/plugin/**"]
+          deny:
+            - pkg: github.com/mavioai/mavio/libs
+              desc: "the plugin SDK is published; it may only depend on libs/proto"
+          allow: ["$gostd", github.com/mavioai/mavio/libs/plugin, github.com/mavioai/mavio/libs/proto]
+  exclusions:
+    generated: strict
+    presets:
+      - std-error-handling
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/mavioai/mavio

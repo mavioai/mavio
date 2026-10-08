@@ -1,0 +1,25 @@
+edition = "2023";
+
+package mavio.system.v1;
+
+// SystemService exposes server-level information and health.
+service SystemService {
+  // GetHealth reports whether the server is ready to serve requests.
+  rpc GetHealth(GetHealthRequest) returns (GetHealthResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message GetHealthRequest {}
+
+message GetHealthResponse {
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_SERVING = 1;
+    STATUS_NOT_SERVING = 2;
+  }
+
+  Status status = 1;
+  // Server version, e.g. "v0.1.0" or a VCS revision for development builds.
+  string version = 2;
+}

@@ -1,0 +1,18 @@
+version: v2
+clean: true
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/mavioai/mavio/libs/proto/gen/go
+plugins:
+  - local: ["go", "tool", "protoc-gen-go"]
+    out: gen/go
+    opt:
+      - paths=source_relative
+      - default_api_level=API_OPAQUE
+  - local: ["go", "tool", "protoc-gen-connect-go"]
+    out: gen/go
+    opt:
+      - paths=source_relative
+      - simple

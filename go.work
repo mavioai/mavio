@@ -1,0 +1,17 @@
+go 1.27.0
+
+use (
+	./apps/server
+	./libs/core
+	./libs/imaging
+	./libs/library
+	./libs/media
+	./libs/metadata
+	./libs/naming
+	./libs/plugin
+	./libs/proto
+	./libs/store
+	./libs/streaming
+	./libs/subtitle
+	./plugins/scraper-tmdb
+)

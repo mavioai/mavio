@@ -1,0 +1,12 @@
+version: v2
+modules:
+  - path: .
+    excludes:
+      - gen
+      - node_modules
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE

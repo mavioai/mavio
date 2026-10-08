@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# Nx
+.nx/cache/
+.nx/workspace-data/
+
+# build outputs
+dist/
+/bin/
+*.test
+*.out
+coverage/
+
+# generated test media (see tools/fixtures)
+.fixtures/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json

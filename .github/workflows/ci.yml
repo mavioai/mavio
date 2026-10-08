@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, test, build (affected)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v2
+      - run: pnpm install --frozen-lockfile
+      - uses: nrwl/nx-set-shas@v4
+      - run: pnpm nx affected -t buf-lint lint tidy-check build test --output-style=static
+      - name: Generated code is up to date
+        run: |
+          pnpm nx run-many -t generate --output-style=static
+          git diff --exit-code
+      - name: Protobuf breaking changes
+        if: github.event_name == 'pull_request'
+        working-directory: libs/proto
+        run: buf breaking --against "${{ github.server_url }}/${{ github.repository }}.git#branch=${{ github.base_ref }},subdir=libs/proto"
+
+  test:
+    name: Test (${{ matrix.os }})
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04-arm, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm nx run-many -t test build --output-style=static
