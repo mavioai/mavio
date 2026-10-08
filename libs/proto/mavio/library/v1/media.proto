@@ -1,0 +1,113 @@
+edition = "2023";
+
+package mavio.library.v1;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+// MediaSource is one playable version of an item.
+message MediaSource {
+  string id = 1;
+  string item_id = 2;
+  string path = 3;
+  // Distinguishes versions of the same item, e.g. "4K HDR".
+  string name = 4;
+  // ffprobe format name, e.g. "matroska,webm".
+  string container = 5;
+  int64 size_bytes = 6;
+  google.protobuf.Duration duration = 7;
+  // Bits per second, whole file.
+  int64 bitrate = 8;
+  repeated MediaStream streams = 9;
+  repeated Chapter chapters = 10;
+  google.protobuf.Timestamp probe_time = 11;
+}
+
+enum StreamKind {
+  STREAM_KIND_UNSPECIFIED = 0;
+  STREAM_KIND_VIDEO = 1;
+  STREAM_KIND_AUDIO = 2;
+  STREAM_KIND_SUBTITLE = 3;
+  STREAM_KIND_ATTACHMENT = 4;
+  STREAM_KIND_IMAGE = 5;
+  STREAM_KIND_DATA = 6;
+}
+
+enum VideoRange {
+  VIDEO_RANGE_UNSPECIFIED = 0;
+  VIDEO_RANGE_SDR = 1;
+  VIDEO_RANGE_HDR10 = 2;
+  VIDEO_RANGE_HDR10_PLUS = 3;
+  VIDEO_RANGE_HLG = 4;
+  VIDEO_RANGE_DOLBY_VISION = 5;
+}
+
+// DolbyVision is a Dolby Vision configuration record.
+message DolbyVision {
+  int32 profile = 1;
+  int32 level = 2;
+  // Base layer fallback: 0 none, 1 HDR10, 2 SDR, 4 HLG.
+  int32 bl_compatibility_id = 3;
+  bool rpu_present = 4;
+  bool el_present = 5;
+  bool bl_present = 6;
+}
+
+// Rational is a fraction such as 24000/1001.
+message Rational {
+  int64 num = 1;
+  int64 den = 2;
+}
+
+// MediaStream is one elementary stream, or a sidecar subtitle file.
+message MediaStream {
+  int32 index = 1;
+  StreamKind kind = 2;
+  // ffprobe codec name, e.g. "hevc", "eac3", "subrip".
+  string codec = 3;
+  // Container codec tag, e.g. "hvc1" or "hev1".
+  string codec_tag = 4;
+  string profile = 5;
+  int32 level = 6;
+  int64 bitrate = 7;
+  // ISO 639-2/B, e.g. "eng".
+  string language = 8;
+  string title = 9;
+  bool default = 10;
+  bool forced = 11;
+  bool hearing_impaired = 12;
+  // Set for sidecar files such as "Movie.en.srt".
+  string external_path = 13;
+
+  // Video.
+  int32 width = 20;
+  int32 height = 21;
+  Rational frame_rate = 22;
+  string pixel_format = 23;
+  int32 bit_depth = 24;
+  string color_range = 25;
+  string color_primaries = 26;
+  string color_transfer = 27;
+  string color_space = 28;
+  VideoRange range = 29;
+  DolbyVision dolby_vision = 30;
+  bool interlaced = 31;
+  int32 rotation = 32;
+  Rational sample_aspect_ratio = 33;
+
+  // Audio.
+  int32 channels = 40;
+  string channel_layout = 41;
+  int32 sample_rate = 42;
+
+  // Subtitle. False for bitmap formats (PGS, VobSub), which can only be
+  // burned in.
+  bool text_based = 50;
+}
+
+// Chapter is a named start position in a media source.
+message Chapter {
+  google.protobuf.Duration start = 1;
+  string title = 2;
+  bool has_image = 3;
+}

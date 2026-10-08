@@ -1,0 +1,140 @@
+edition = "2023";
+
+package mavio.library.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+// LibraryService manages libraries and their scans.
+service LibraryService {
+  rpc ListLibraries(ListLibrariesRequest) returns (ListLibrariesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc GetLibrary(GetLibraryRequest) returns (GetLibraryResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc CreateLibrary(CreateLibraryRequest) returns (CreateLibraryResponse);
+  rpc UpdateLibrary(UpdateLibraryRequest) returns (UpdateLibraryResponse);
+  // DeleteLibrary removes the library and all its items. Media files are not
+  // touched.
+  rpc DeleteLibrary(DeleteLibraryRequest) returns (DeleteLibraryResponse);
+  // ScanLibrary enqueues a reconciliation scan. A scan that is already
+  // pending or running is not enqueued again.
+  rpc ScanLibrary(ScanLibraryRequest) returns (ScanLibraryResponse);
+}
+
+// LibraryKind decides how a library's folders are interpreted.
+enum LibraryKind {
+  LIBRARY_KIND_UNSPECIFIED = 0;
+  LIBRARY_KIND_MOVIES = 1;
+  LIBRARY_KIND_SHOWS = 2;
+  LIBRARY_KIND_MUSIC = 3;
+  LIBRARY_KIND_MUSIC_VIDEOS = 4;
+  LIBRARY_KIND_HOME_VIDEOS = 5;
+  LIBRARY_KIND_BOOKS = 6;
+  LIBRARY_KIND_PHOTOS = 7;
+  LIBRARY_KIND_MIXED = 8;
+}
+
+// Library is a named set of root folders scanned as one collection.
+message Library {
+  string id = 1;
+  string name = 2;
+  LibraryKind kind = 3;
+  // Absolute root folders. A path belongs to at most one library.
+  repeated string paths = 4;
+  // Period of scheduled reconciliation scans; unset disables them.
+  google.protobuf.Duration scan_interval = 5;
+  // ISO 639-1 language and ISO 3166-1 alpha-2 country for metadata.
+  string preferred_language = 6;
+  string metadata_country = 7;
+  google.protobuf.Timestamp create_time = 8;
+  google.protobuf.Timestamp update_time = 9;
+}
+
+// LibrarySpec holds the client-settable fields of a library.
+message LibrarySpec {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+  LibraryKind kind = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  repeated string paths = 3 [(buf.validate.field).repeated = {
+    min_items: 1
+    items: {
+      string: {min_len: 1}
+    }
+  }];
+  google.protobuf.Duration scan_interval = 4 [(buf.validate.field).duration.gte = {}];
+  string preferred_language = 5 [(buf.validate.field).string.pattern = "^([a-z]{2})?$"];
+  string metadata_country = 6 [(buf.validate.field).string.pattern = "^([A-Z]{2})?$"];
+}
+
+message ListLibrariesRequest {}
+
+message ListLibrariesResponse {
+  repeated Library libraries = 1;
+}
+
+message GetLibraryRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message GetLibraryResponse {
+  Library library = 1;
+}
+
+message CreateLibraryRequest {
+  LibrarySpec spec = 1 [(buf.validate.field).required = true];
+}
+
+message CreateLibraryResponse {
+  Library library = 1;
+}
+
+message UpdateLibraryRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  LibrarySpec spec = 2 [(buf.validate.field).required = true];
+}
+
+message UpdateLibraryResponse {
+  Library library = 1;
+}
+
+message DeleteLibraryRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteLibraryResponse {}
+
+message ScanLibraryRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message ScanLibraryResponse {
+  string job_id = 1;
+  // False when a scan was already pending or running.
+  bool enqueued = 2;
+}

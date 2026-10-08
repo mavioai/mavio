@@ -73,7 +73,7 @@ flowchart TD
 
 **进度**：
 - [x] `libs/core`：领域模型与仓储端口（[领域模型](domain.zh-CN.md)）
-- [ ] `libs/proto`：第一版契约
+- [x] `libs/proto`：第一版契约（library、user、system、plugin）
 - [ ] `libs/store`：仓储端口的 SQLite 与 PostgreSQL 实现，包括任务队列
 - [ ] `libs/plugin`：WASM 与子进程两种运行时
 

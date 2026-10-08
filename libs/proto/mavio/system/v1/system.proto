@@ -2,10 +2,16 @@ edition = "2023";
 
 package mavio.system.v1;
 
+import "google/protobuf/timestamp.proto";
+
 // SystemService exposes server-level information and health.
 service SystemService {
   // GetHealth reports whether the server is ready to serve requests.
   rpc GetHealth(GetHealthRequest) returns (GetHealthResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetSystemInfo describes the running server.
+  rpc GetSystemInfo(GetSystemInfoRequest) returns (GetSystemInfoResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
 }
@@ -22,4 +28,18 @@ message GetHealthResponse {
   Status status = 1;
   // Server version, e.g. "v0.1.0" or a VCS revision for development builds.
   string version = 2;
+}
+
+message GetSystemInfoRequest {}
+
+message GetSystemInfoResponse {
+  string version = 1;
+  // GOOS and GOARCH of the server binary.
+  string os = 2;
+  string arch = 3;
+  // "sqlite" or "postgres".
+  string database = 4;
+  // First line of `ffmpeg -version`, empty when ffmpeg is unavailable.
+  string ffmpeg_version = 5;
+  google.protobuf.Timestamp start_time = 6;
 }

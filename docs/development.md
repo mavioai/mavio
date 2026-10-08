@@ -99,6 +99,7 @@ The new edge must respect the dependency direction in [Architecture §3.2](archi
 * After changing a `.proto`, run `pnpm nx run proto:generate` and **commit the generated `gen/` code**. Never edit files under `gen/` by hand.
 * `buf lint` uses the STANDARD rules and `buf breaking` the FILE rules. Published field numbers must never be reused; breaking changes go into a new `v2` package.
 * Read-only RPCs are annotated with `option idempotency_level = NO_SIDE_EFFECTS;`.
+* Request validation uses protovalidate annotations (`buf.validate`). Under edition 2023 every field tracks presence and rules apply only to fields that are set, so **mandatory fields must be marked `(buf.validate.field).required = true`**. `libs/proto/validate_test.go` checks the rules.
 
 ### 4.2 Database Schema and Queries
 The ent → Atlas → sqlc pipeline is described in [Architecture §5.2](architecture.md#52-generation-pipeline). Its Nx targets are added in P1 together with `libs/store`. Merged migration files must never be modified; only append new migrations.

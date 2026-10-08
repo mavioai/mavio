@@ -97,6 +97,7 @@ Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test
 - After changing a `.proto`, run `pnpm nx run proto:generate` and **commit the generated `gen/` code**; CI checks that generated code is up to date. Never edit files under `gen/` by hand.
 - `buf lint` (STANDARD) and `buf breaking` (FILE) must pass. Published field numbers must never be reused; breaking changes go into a new `v2` package.
 - Read-only RPCs are annotated with `option idempotency_level = NO_SIDE_EFFECTS;`.
+- Validate requests with protovalidate annotations; rules apply only to set fields, so mark mandatory fields `(buf.validate.field).required = true`.
 - Media byte streams (direct play, HLS, images) go over plain HTTP, not Connect.
 
 ## Storage Conventions (libs/store)

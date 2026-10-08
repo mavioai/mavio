@@ -97,6 +97,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 - 修改 `.proto` 后运行 `pnpm nx run proto:generate`，并**提交生成的 `gen/` 代码**；CI 会检查生成代码是否最新。不要手动编辑 `gen/` 下的文件。
 - 必须通过 `buf lint`（STANDARD）和 `buf breaking`（FILE）。已发布的字段编号不得复用；需要破坏性变更时新增 `v2` 包。
 - 只读 RPC 标注 `option idempotency_level = NO_SIDE_EFFECTS;`。
+- 用 protovalidate 注解校验请求；规则只对已设置的字段生效，因此必填字段要标注 `(buf.validate.field).required = true`。
 - 媒体字节流（直放、HLS、图片）走普通 HTTP，不走 Connect。
 
 ## 存储约定（libs/store）

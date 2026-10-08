@@ -1,0 +1,234 @@
+edition = "2023";
+
+package mavio.user.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+// UserService manages accounts. All methods except GetCurrentUser and
+// UpdatePreferences require an administrator.
+service UserService {
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  // SetPassword sets a user's password. Users may change their own password
+  // by providing the current one.
+  rpc SetPassword(SetPasswordRequest) returns (SetPasswordResponse);
+  // UpdatePreferences changes the calling user's playback preferences.
+  rpc UpdatePreferences(UpdatePreferencesRequest) returns (UpdatePreferencesResponse);
+}
+
+// UserDataService reads and updates the calling user's per-item state.
+service UserDataService {
+  rpc GetUserData(GetUserDataRequest) returns (GetUserDataResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc UpdateUserData(UpdateUserDataRequest) returns (UpdateUserDataResponse);
+}
+
+enum SubtitleMode {
+  // Follow the streams' default and forced flags.
+  SUBTITLE_MODE_UNSPECIFIED = 0;
+  SUBTITLE_MODE_ALWAYS = 1;
+  SUBTITLE_MODE_FOREIGN = 2;
+  SUBTITLE_MODE_FORCED = 3;
+  SUBTITLE_MODE_NONE = 4;
+  SUBTITLE_MODE_SMART = 5;
+}
+
+// User is an account. Credentials are never returned.
+message User {
+  string id = 1;
+  string name = 2;
+  // Empty for the built-in password check, otherwise the authenticating
+  // plugin.
+  string auth_provider = 3;
+  bool admin = 4;
+  bool disabled = 5;
+  UserPolicy policy = 6;
+  UserPreferences preferences = 7;
+  google.protobuf.Timestamp create_time = 8;
+  google.protobuf.Timestamp last_login_time = 9;
+}
+
+message UserPolicy {
+  // Accessible libraries; when all_libraries is true this list is ignored.
+  bool all_libraries = 1;
+  repeated string library_ids = 2 [(buf.validate.field).repeated.items.string.uuid = true];
+  // Highest allowed parental rating score; 0 means unrestricted.
+  int32 max_parental_rating = 3 [(buf.validate.field).int32.gte = 0];
+  bool block_unrated = 4;
+  bool allow_transcoding = 5;
+  bool allow_download = 6;
+  // Bits per second; 0 means unlimited.
+  int64 max_streaming_bitrate = 7 [(buf.validate.field).int64.gte = 0];
+  // 0 means unlimited.
+  int32 max_sessions = 8 [(buf.validate.field).int32.gte = 0];
+}
+
+message UserPreferences {
+  // ISO 639-2/B codes in order of preference.
+  repeated string audio_languages = 1 [(buf.validate.field).repeated.items.string.pattern = "^[a-z]{3}$"];
+  repeated string subtitle_languages = 2 [(buf.validate.field).repeated.items.string.pattern = "^[a-z]{3}$"];
+  SubtitleMode subtitle_mode = 3 [(buf.validate.field).enum.defined_only = true];
+  bool play_default_audio_track = 4;
+}
+
+// UserData is the calling user's state for one item.
+message UserData {
+  string item_id = 1;
+  bool played = 2;
+  int32 play_count = 3;
+  // Resume position; unset means start from the beginning.
+  google.protobuf.Duration position = 4;
+  // Last selected streams; subtitle_stream -1 means subtitles off.
+  int32 audio_stream = 5;
+  int32 subtitle_stream = 6;
+  bool favorite = 7;
+  // 0–10.
+  double rating = 8;
+  google.protobuf.Timestamp last_played_time = 9;
+}
+
+message ListUsersRequest {}
+
+message ListUsersResponse {
+  repeated User users = 1;
+}
+
+message GetUserRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message GetCurrentUserRequest {}
+
+message GetCurrentUserResponse {
+  User user = 1;
+}
+
+message CreateUserRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    }
+  ];
+  // Required unless auth_provider is set.
+  string password = 2 [(buf.validate.field).string.max_len = 1024];
+  string auth_provider = 3;
+  bool admin = 4;
+  UserPolicy policy = 5;
+  UserPreferences preferences = 6;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+message UpdateUserRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    }
+  ];
+  bool admin = 3;
+  bool disabled = 4;
+  UserPolicy policy = 5;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+}
+
+message DeleteUserRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteUserResponse {}
+
+message SetPasswordRequest {
+  string user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // Required when users change their own password.
+  string current_password = 2;
+  string new_password = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 1024
+    }
+  ];
+}
+
+message SetPasswordResponse {}
+
+message UpdatePreferencesRequest {
+  UserPreferences preferences = 1 [(buf.validate.field).required = true];
+}
+
+message UpdatePreferencesResponse {
+  UserPreferences preferences = 1;
+}
+
+message GetUserDataRequest {
+  repeated string item_ids = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 1000
+    items: {
+      string: {uuid: true}
+    }
+  }];
+}
+
+message GetUserDataResponse {
+  // Items without state are omitted.
+  repeated UserData user_data = 1;
+}
+
+// UpdateUserDataRequest changes the set fields only.
+message UpdateUserDataRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  bool played = 2;
+  bool favorite = 3;
+  google.protobuf.Duration position = 4;
+  double rating = 5 [(buf.validate.field).double = {
+    gte: 0
+    lte: 10
+  }];
+}
+
+message UpdateUserDataResponse {
+  UserData user_data = 1;
+}

@@ -133,18 +133,20 @@ plugins/* ──▶ plugin ──▶ proto
 libs/proto/
 ├── buf.yaml  buf.gen.yaml
 ├── mavio/
-│   ├── common/v1/              # 分页、错误详情、时间范围等通用类型
-│   ├── library/v1/             # 媒体库、条目查询、扫描控制
-│   ├── playback/v1/            # 客户端能力声明、播放决策、播放会话、进度上报
-│   ├── user/v1/                # 用户、认证、权限
-│   ├── system/v1/              # 配置、任务、健康检查
-│   └── plugin/v1/              # 插件契约：manifest、lifecycle、MetadataProvider、Auth、Notifier
+│   ├── library/v1/             # LibraryService、ItemService：媒体库、条目、媒体源与流、人员、扫描
+│   ├── user/v1/                # UserService、UserDataService：账户、权限、偏好、按条目的用户状态
+│   ├── system/v1/              # SystemService：健康检查、服务端信息
+│   ├── playback/v1/            # （P3）客户端能力、播放决策、播放会话、进度上报
+│   └── plugin/v1/              # 插件契约：PluginService（manifest、配置、生命周期）、
+│                               #   MetadataProviderService、AuthProviderService、NotifierService
 ├── gen/go/                     # 生成的 protobuf-go + connect-go（Go 模块）
 └── gen/ts/                     # (后期) 生成的 protobuf-es + connect-es（npm 包）
 ```
 
 * 客户端能力用 Mavio 自己的 `ClientCapabilities` 消息表达（容器、编解码器、等级、HDR 能力、字幕交付方式、带宽），替代 Jellyfin 的 `DeviceProfile`；移植 StreamBuilder 测试时把 Jellyfin 的 profile 转换成该消息。
 * 媒体流（直放、HLS 播放列表与分片、图片）不经过 Connect，走普通 HTTP，以便利用 Range、缓存与 CDN 语义。
+* API 消息与领域模型（[领域模型](domain.zh-CN.md)）对应，但从不暴露图片路径、密码哈希等文件系统与内部细节。
+* `plugin/v1` 对插件作者发布，自成一体：它定义自己的精简消息（`Lookup`、`Metadata`、`PersonCredit`、`RemoteImage` 等），而不引用 `library/v1`，两份契约可以各自演进。
 
 ---
 

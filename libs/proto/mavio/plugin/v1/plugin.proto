@@ -1,0 +1,103 @@
+edition = "2023";
+
+// Package mavio.plugin.v1 is the contract between the Mavio host and its
+// plugins. Plugins run either as WebAssembly modules or as child processes;
+// both implement the same services. Every plugin implements PluginService and
+// the capability services it declares in its manifest.
+package mavio.plugin.v1;
+
+// PluginService is the lifecycle service every plugin implements.
+service PluginService {
+  // Describe returns the plugin's manifest. The host calls it once after
+  // starting the plugin and checks it against the installed manifest.
+  rpc Describe(DescribeRequest) returns (DescribeResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // Configure delivers the plugin's configuration, validated by the host
+  // against the manifest's schema. It is called before any capability call
+  // and again whenever an administrator changes the configuration.
+  rpc Configure(ConfigureRequest) returns (ConfigureResponse);
+  // Health reports whether the plugin can serve requests.
+  rpc Health(HealthRequest) returns (HealthResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // Shutdown asks the plugin to release resources before it is stopped.
+  rpc Shutdown(ShutdownRequest) returns (ShutdownResponse);
+}
+
+enum Runtime {
+  RUNTIME_UNSPECIFIED = 0;
+  // A WebAssembly module (wasip1) run on wazero inside the host.
+  RUNTIME_WASM = 1;
+  // A native executable run as a child process, reached over a Unix domain
+  // socket.
+  RUNTIME_PROCESS = 2;
+}
+
+enum Capability {
+  CAPABILITY_UNSPECIFIED = 0;
+  // Implements MetadataProviderService.
+  CAPABILITY_METADATA_PROVIDER = 1;
+  // Implements AuthProviderService.
+  CAPABILITY_AUTH_PROVIDER = 2;
+  // Implements NotifierService.
+  CAPABILITY_NOTIFIER = 3;
+}
+
+// Manifest describes a plugin. It is shipped alongside the plugin
+// (manifest.json) and returned by Describe.
+message Manifest {
+  // Reverse-DNS identifier, e.g. "org.mavio.scraper-tmdb".
+  string id = 1;
+  string name = 2;
+  // Semantic version of the plugin.
+  string version = 3;
+  string description = 4;
+  string author = 5;
+  string homepage = 6;
+  // License as an SPDX expression.
+  string license = 7;
+  Runtime runtime = 8;
+  repeated Capability capabilities = 9;
+  Permissions permissions = 10;
+  // JSON Schema (draft 2020-12) of the configuration object.
+  string config_schema = 11;
+  // Version of this contract the plugin was built against, e.g. "1.0".
+  string api_version = 12;
+}
+
+// Permissions are the host resources a plugin requests. An administrator
+// approves them at install time; anything else is denied.
+message Permissions {
+  // Host names the plugin may reach through the host's HTTP fetch, e.g.
+  // "api.themoviedb.org". A leading "*." matches subdomains.
+  repeated string http_hosts = 1;
+  // Library-relative or absolute paths the plugin may read. WASM plugins get
+  // them mounted read-only.
+  repeated string read_paths = 2;
+}
+
+message DescribeRequest {}
+
+message DescribeResponse {
+  Manifest manifest = 1;
+}
+
+message ConfigureRequest {
+  // Configuration object as JSON, valid against Manifest.config_schema.
+  string config_json = 1;
+}
+
+message ConfigureResponse {}
+
+message HealthRequest {}
+
+message HealthResponse {
+  bool healthy = 1;
+  // Human-readable detail when unhealthy.
+  string message = 2;
+}
+
+message ShutdownRequest {}
+
+message ShutdownResponse {}

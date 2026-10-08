@@ -1,0 +1,54 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// AuthProviderService authenticates users against an external directory such
+// as LDAP. Users whose auth_provider names the plugin are checked here
+// instead of against a local password.
+service AuthProviderService {
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+}
+
+message AuthenticateRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthenticateResponse {
+  bool authenticated = 1;
+  // Directory attributes the host may apply to the account.
+  string display_name = 2;
+  bool admin = 3;
+  // Reason for a rejection, for logs; never shown to the client.
+  string message = 4;
+}
+
+// NotifierService delivers server events to an external system such as a
+// webhook or chat service.
+service NotifierService {
+  rpc Notify(NotifyRequest) returns (NotifyResponse);
+}
+
+message NotifyRequest {
+  Event event = 1;
+}
+
+message NotifyResponse {}
+
+// Event is something that happened on the server.
+message Event {
+  string id = 1;
+  // Dotted event type, e.g. "item.added", "playback.started",
+  // "user.login_failed".
+  string type = 2;
+  google.protobuf.Timestamp time = 3;
+  // Short human-readable summary.
+  string title = 4;
+  string message = 5;
+  string item_id = 6;
+  string user_id = 7;
+  // Type-specific details.
+  map<string, string> attributes = 8;
+}

@@ -16,7 +16,7 @@ import (
 // Handler returns the root handler serving all Connect services.
 func Handler(version string) http.Handler {
 	mux := http.NewServeMux()
-	mux.Handle(systemv1connect.NewSystemServiceHandler(&rpc.SystemService{Version: version}))
+	mux.Handle(systemv1connect.NewSystemServiceHandler(&rpc.SystemService{Version: version, StartTime: time.Now()}))
 	return mux
 }
 

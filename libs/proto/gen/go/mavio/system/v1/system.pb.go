@@ -9,6 +9,7 @@ package systemv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	unsafe "unsafe"
 )
@@ -218,11 +219,292 @@ func (b0 GetHealthResponse_builder) Build() *GetHealthResponse {
 	return m0
 }
 
+type GetSystemInfoRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSystemInfoRequest) Reset() {
+	*x = GetSystemInfoRequest{}
+	mi := &file_mavio_system_v1_system_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSystemInfoRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSystemInfoRequest) ProtoMessage() {}
+
+func (x *GetSystemInfoRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_system_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type GetSystemInfoRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 GetSystemInfoRequest_builder) Build() *GetSystemInfoRequest {
+	m0 := &GetSystemInfoRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type GetSystemInfoResponse struct {
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Version       *string                `protobuf:"bytes,1,opt,name=version"`
+	xxx_hidden_Os            *string                `protobuf:"bytes,2,opt,name=os"`
+	xxx_hidden_Arch          *string                `protobuf:"bytes,3,opt,name=arch"`
+	xxx_hidden_Database      *string                `protobuf:"bytes,4,opt,name=database"`
+	xxx_hidden_FfmpegVersion *string                `protobuf:"bytes,5,opt,name=ffmpeg_version,json=ffmpegVersion"`
+	xxx_hidden_StartTime     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=start_time,json=startTime"`
+	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
+	XXX_presence             [1]uint32
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *GetSystemInfoResponse) Reset() {
+	*x = GetSystemInfoResponse{}
+	mi := &file_mavio_system_v1_system_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSystemInfoResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSystemInfoResponse) ProtoMessage() {}
+
+func (x *GetSystemInfoResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_system_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetSystemInfoResponse) GetVersion() string {
+	if x != nil {
+		if x.xxx_hidden_Version != nil {
+			return *x.xxx_hidden_Version
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetSystemInfoResponse) GetOs() string {
+	if x != nil {
+		if x.xxx_hidden_Os != nil {
+			return *x.xxx_hidden_Os
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetSystemInfoResponse) GetArch() string {
+	if x != nil {
+		if x.xxx_hidden_Arch != nil {
+			return *x.xxx_hidden_Arch
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetSystemInfoResponse) GetDatabase() string {
+	if x != nil {
+		if x.xxx_hidden_Database != nil {
+			return *x.xxx_hidden_Database
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetSystemInfoResponse) GetFfmpegVersion() string {
+	if x != nil {
+		if x.xxx_hidden_FfmpegVersion != nil {
+			return *x.xxx_hidden_FfmpegVersion
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetSystemInfoResponse) GetStartTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_StartTime
+	}
+	return nil
+}
+
+func (x *GetSystemInfoResponse) SetVersion(v string) {
+	x.xxx_hidden_Version = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+}
+
+func (x *GetSystemInfoResponse) SetOs(v string) {
+	x.xxx_hidden_Os = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+}
+
+func (x *GetSystemInfoResponse) SetArch(v string) {
+	x.xxx_hidden_Arch = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
+}
+
+func (x *GetSystemInfoResponse) SetDatabase(v string) {
+	x.xxx_hidden_Database = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+}
+
+func (x *GetSystemInfoResponse) SetFfmpegVersion(v string) {
+	x.xxx_hidden_FfmpegVersion = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *GetSystemInfoResponse) SetStartTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_StartTime = v
+}
+
+func (x *GetSystemInfoResponse) HasVersion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetSystemInfoResponse) HasOs() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *GetSystemInfoResponse) HasArch() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *GetSystemInfoResponse) HasDatabase() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *GetSystemInfoResponse) HasFfmpegVersion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *GetSystemInfoResponse) HasStartTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_StartTime != nil
+}
+
+func (x *GetSystemInfoResponse) ClearVersion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Version = nil
+}
+
+func (x *GetSystemInfoResponse) ClearOs() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Os = nil
+}
+
+func (x *GetSystemInfoResponse) ClearArch() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Arch = nil
+}
+
+func (x *GetSystemInfoResponse) ClearDatabase() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Database = nil
+}
+
+func (x *GetSystemInfoResponse) ClearFfmpegVersion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_FfmpegVersion = nil
+}
+
+func (x *GetSystemInfoResponse) ClearStartTime() {
+	x.xxx_hidden_StartTime = nil
+}
+
+type GetSystemInfoResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Version *string
+	// GOOS and GOARCH of the server binary.
+	Os   *string
+	Arch *string
+	// "sqlite" or "postgres".
+	Database *string
+	// First line of `ffmpeg -version`, empty when ffmpeg is unavailable.
+	FfmpegVersion *string
+	StartTime     *timestamppb.Timestamp
+}
+
+func (b0 GetSystemInfoResponse_builder) Build() *GetSystemInfoResponse {
+	m0 := &GetSystemInfoResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Version != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		x.xxx_hidden_Version = b.Version
+	}
+	if b.Os != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		x.xxx_hidden_Os = b.Os
+	}
+	if b.Arch != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
+		x.xxx_hidden_Arch = b.Arch
+	}
+	if b.Database != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		x.xxx_hidden_Database = b.Database
+	}
+	if b.FfmpegVersion != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		x.xxx_hidden_FfmpegVersion = b.FfmpegVersion
+	}
+	x.xxx_hidden_StartTime = b.StartTime
+	return m0
+}
+
 var File_mavio_system_v1_system_proto protoreflect.FileDescriptor
 
 const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\n" +
-	"\x1cmavio/system/v1/system.proto\x12\x0fmavio.system.v1\"\x12\n" +
+	"\x1cmavio/system/v1/system.proto\x12\x0fmavio.system.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x12\n" +
 	"\x10GetHealthRequest\"\xbe\x01\n" +
 	"\x11GetHealthResponse\x12A\n" +
 	"\x06status\x18\x01 \x01(\x0e2).mavio.system.v1.GetHealthResponse.StatusR\x06status\x12\x18\n" +
@@ -230,27 +512,43 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x06Status\x12\x16\n" +
 	"\x12STATUS_UNSPECIFIED\x10\x00\x12\x12\n" +
 	"\x0eSTATUS_SERVING\x10\x01\x12\x16\n" +
-	"\x12STATUS_NOT_SERVING\x10\x022h\n" +
+	"\x12STATUS_NOT_SERVING\x10\x02\"\x16\n" +
+	"\x14GetSystemInfoRequest\"\xd3\x01\n" +
+	"\x15GetSystemInfoResponse\x12\x18\n" +
+	"\aversion\x18\x01 \x01(\tR\aversion\x12\x0e\n" +
+	"\x02os\x18\x02 \x01(\tR\x02os\x12\x12\n" +
+	"\x04arch\x18\x03 \x01(\tR\x04arch\x12\x1a\n" +
+	"\bdatabase\x18\x04 \x01(\tR\bdatabase\x12%\n" +
+	"\x0effmpeg_version\x18\x05 \x01(\tR\rffmpegVersion\x129\n" +
+	"\n" +
+	"start_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime2\xcd\x01\n" +
 	"\rSystemService\x12W\n" +
-	"\tGetHealth\x12!.mavio.system.v1.GetHealthRequest\x1a\".mavio.system.v1.GetHealthResponse\"\x03\x90\x02\x01B\xc5\x01\n" +
+	"\tGetHealth\x12!.mavio.system.v1.GetHealthRequest\x1a\".mavio.system.v1.GetHealthResponse\"\x03\x90\x02\x01\x12c\n" +
+	"\rGetSystemInfo\x12%.mavio.system.v1.GetSystemInfoRequest\x1a&.mavio.system.v1.GetSystemInfoResponse\"\x03\x90\x02\x01B\xc5\x01\n" +
 	"\x13com.mavio.system.v1B\vSystemProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1;systemv1\xa2\x02\x03MSX\xaa\x02\x0fMavio.System.V1\xca\x02\x0fMavio\\System\\V1\xe2\x02\x1bMavio\\System\\V1\\GPBMetadata\xea\x02\x11Mavio::System::V1b\beditionsp\xe8\a"
 
 var file_mavio_system_v1_system_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mavio_system_v1_system_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_mavio_system_v1_system_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_mavio_system_v1_system_proto_goTypes = []any{
 	(GetHealthResponse_Status)(0), // 0: mavio.system.v1.GetHealthResponse.Status
 	(*GetHealthRequest)(nil),      // 1: mavio.system.v1.GetHealthRequest
 	(*GetHealthResponse)(nil),     // 2: mavio.system.v1.GetHealthResponse
+	(*GetSystemInfoRequest)(nil),  // 3: mavio.system.v1.GetSystemInfoRequest
+	(*GetSystemInfoResponse)(nil), // 4: mavio.system.v1.GetSystemInfoResponse
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
 }
 var file_mavio_system_v1_system_proto_depIdxs = []int32{
 	0, // 0: mavio.system.v1.GetHealthResponse.status:type_name -> mavio.system.v1.GetHealthResponse.Status
-	1, // 1: mavio.system.v1.SystemService.GetHealth:input_type -> mavio.system.v1.GetHealthRequest
-	2, // 2: mavio.system.v1.SystemService.GetHealth:output_type -> mavio.system.v1.GetHealthResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	5, // 1: mavio.system.v1.GetSystemInfoResponse.start_time:type_name -> google.protobuf.Timestamp
+	1, // 2: mavio.system.v1.SystemService.GetHealth:input_type -> mavio.system.v1.GetHealthRequest
+	3, // 3: mavio.system.v1.SystemService.GetSystemInfo:input_type -> mavio.system.v1.GetSystemInfoRequest
+	2, // 4: mavio.system.v1.SystemService.GetHealth:output_type -> mavio.system.v1.GetHealthResponse
+	4, // 5: mavio.system.v1.SystemService.GetSystemInfo:output_type -> mavio.system.v1.GetSystemInfoResponse
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_mavio_system_v1_system_proto_init() }
@@ -264,7 +562,7 @@ func file_mavio_system_v1_system_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_system_v1_system_proto_rawDesc), len(file_mavio_system_v1_system_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

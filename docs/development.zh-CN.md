@@ -99,6 +99,7 @@ GOWORK=off go mod tidy
 * 修改 `.proto` 后运行 `pnpm nx run proto:generate`，并**提交生成的 `gen/` 代码**。不要手动编辑 `gen/` 下的文件。
 * `buf lint` 使用 STANDARD 规则，`buf breaking` 使用 FILE 规则。已发布的字段编号不得复用；破坏性变更放入新的 `v2` 包。
 * 只读 RPC 标注 `option idempotency_level = NO_SIDE_EFFECTS;`。
+* 请求校验使用 protovalidate 注解（`buf.validate`）。edition 2023 下每个字段都跟踪是否设置，规则只对已设置的字段生效，因此**必填字段必须标注 `(buf.validate.field).required = true`**。`libs/proto/validate_test.go` 检查这些规则。
 
 ### 4.2 数据库 Schema 与查询
 ent → Atlas → sqlc 的生成流水线见[架构 §5.2](architecture.zh-CN.md#52-生成流水线)。对应的 Nx 目标在 P1 随 `libs/store` 一起加入。已合并的迁移文件不得修改，只能追加新迁移。

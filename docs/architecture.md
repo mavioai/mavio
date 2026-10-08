@@ -133,18 +133,20 @@ plugins/* ──▶ plugin ──▶ proto
 libs/proto/
 ├── buf.yaml  buf.gen.yaml
 ├── mavio/
-│   ├── common/v1/              # Pagination, error details, time ranges and other shared types
-│   ├── library/v1/             # Libraries, item queries, scan control
-│   ├── playback/v1/            # Client capabilities, playback decisions, playback sessions, progress reporting
-│   ├── user/v1/                # Users, authentication, permissions
-│   ├── system/v1/              # Configuration, jobs, health checks
-│   └── plugin/v1/              # Plugin contracts: manifest, lifecycle, MetadataProvider, Auth, Notifier
+│   ├── library/v1/             # LibraryService, ItemService: libraries, items, media sources and streams, people, scans
+│   ├── user/v1/                # UserService, UserDataService: accounts, policies, preferences, per-item state
+│   ├── system/v1/              # SystemService: health, server information
+│   ├── playback/v1/            # (P3) client capabilities, playback decisions, sessions, progress reporting
+│   └── plugin/v1/              # Plugin contract: PluginService (manifest, configuration, lifecycle),
+│                               #   MetadataProviderService, AuthProviderService, NotifierService
 ├── gen/go/                     # Generated protobuf-go + connect-go (Go module)
 └── gen/ts/                     # (later) Generated protobuf-es + connect-es (npm package)
 ```
 
 * Client capabilities are expressed with Mavio's own `ClientCapabilities` message (containers, codecs, levels, HDR capabilities, subtitle delivery methods, bandwidth), in place of Jellyfin's `DeviceProfile`; when porting the StreamBuilder tests, Jellyfin profiles are converted into this message.
 * Media streams (direct play, HLS playlists and segments, images) do not go through Connect but over plain HTTP, to benefit from Range, caching and CDN semantics.
+* API messages mirror the domain model ([Domain Model](domain.md)) but never expose file system internals such as image paths or password hashes.
+* `plugin/v1` is published to plugin authors and is self-contained: it defines its own lean messages (`Lookup`, `Metadata`, `PersonCredit`, `RemoteImage`, …) instead of importing `library/v1`, so the two contracts can evolve independently.
 
 ---
 

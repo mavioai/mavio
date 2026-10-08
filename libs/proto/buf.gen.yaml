@@ -2,6 +2,8 @@ version: v2
 clean: true
 managed:
   enabled: true
+  disable:
+    - module: buf.build/bufbuild/protovalidate
   override:
     - file_option: go_package_prefix
       value: github.com/mavioai/mavio/libs/proto/gen/go

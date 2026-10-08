@@ -1,0 +1,178 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "google/protobuf/duration.proto";
+
+// MetadataProviderService finds and fetches metadata from an external source
+// such as TMDB or MusicBrainz.
+service MetadataProviderService {
+  // Search returns candidates for an item, best match first.
+  rpc Search(SearchRequest) returns (SearchResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetMetadata fetches full metadata for an item the provider knows, as
+  // identified by external IDs (typically from a Search result).
+  rpc GetMetadata(GetMetadataRequest) returns (GetMetadataResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+// MediaKind is the kind of item metadata is requested for.
+enum MediaKind {
+  MEDIA_KIND_UNSPECIFIED = 0;
+  MEDIA_KIND_MOVIE = 1;
+  MEDIA_KIND_SERIES = 2;
+  MEDIA_KIND_SEASON = 3;
+  MEDIA_KIND_EPISODE = 4;
+  MEDIA_KIND_MUSIC_ARTIST = 5;
+  MEDIA_KIND_MUSIC_ALBUM = 6;
+  MEDIA_KIND_TRACK = 7;
+  MEDIA_KIND_MUSIC_VIDEO = 8;
+  MEDIA_KIND_BOOK = 9;
+  MEDIA_KIND_AUDIOBOOK = 10;
+  MEDIA_KIND_PERSON = 11;
+}
+
+// Lookup is what the host knows about an item.
+message Lookup {
+  MediaKind kind = 1;
+  // Name parsed from the file or folder, or the current title.
+  string name = 2;
+  int32 year = 3;
+  // Known IDs keyed by provider ("tmdb", "imdb", "tvdb", "musicbrainz", …).
+  map<string, string> external_ids = 4;
+  // For seasons and episodes: the series' external IDs and numbering.
+  map<string, string> series_external_ids = 5;
+  int32 season_number = 6;
+  int32 episode_number = 7;
+  // For tracks and albums.
+  string album = 8;
+  repeated string artists = 9;
+  // ISO 639-1 language and ISO 3166-1 alpha-2 country requested by the
+  // library.
+  string language = 10;
+  string country = 11;
+}
+
+message SearchRequest {
+  Lookup lookup = 1;
+  // Maximum number of results; the provider may return fewer.
+  int32 limit = 2;
+}
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+}
+
+message SearchResult {
+  string name = 1;
+  int32 year = 2;
+  string overview = 3;
+  // IDs identifying the result; passed back in GetMetadataRequest.
+  map<string, string> external_ids = 4;
+  string image_url = 5;
+  // Provider-assigned relevance in [0, 1].
+  double score = 6;
+}
+
+message GetMetadataRequest {
+  Lookup lookup = 1;
+}
+
+message GetMetadataResponse {
+  // False when the provider has no metadata for the lookup.
+  bool found = 1;
+  Metadata metadata = 2;
+}
+
+enum SeriesStatus {
+  SERIES_STATUS_UNSPECIFIED = 0;
+  SERIES_STATUS_CONTINUING = 1;
+  SERIES_STATUS_ENDED = 2;
+  SERIES_STATUS_UNRELEASED = 3;
+}
+
+// Metadata is what a provider knows about an item. Unset fields are left
+// unchanged by the host.
+message Metadata {
+  string name = 1;
+  string original_title = 2;
+  string sort_name = 3;
+  string overview = 4;
+  string tagline = 5;
+  int32 production_year = 6;
+  // Dates as ISO 8601 calendar dates ("2019-10-20").
+  string premiere_date = 7;
+  string end_date = 8;
+  google.protobuf.Duration runtime = 9;
+  // Content rating for the requested country, e.g. "PG-13".
+  string official_rating = 10;
+  // 0–10.
+  double community_rating = 11;
+  // 0–100.
+  double critic_rating = 12;
+  repeated string genres = 13;
+  repeated string tags = 14;
+  repeated string studios = 15;
+  map<string, string> external_ids = 16;
+  SeriesStatus series_status = 17;
+  repeated string artists = 18;
+  repeated string album_artists = 19;
+  repeated PersonCredit people = 20;
+  repeated RemoteImage images = 21;
+  // For persons.
+  string birth_date = 22;
+  string death_date = 23;
+  string birth_place = 24;
+}
+
+enum CreditKind {
+  CREDIT_KIND_UNSPECIFIED = 0;
+  CREDIT_KIND_ACTOR = 1;
+  CREDIT_KIND_GUEST_STAR = 2;
+  CREDIT_KIND_DIRECTOR = 3;
+  CREDIT_KIND_WRITER = 4;
+  CREDIT_KIND_PRODUCER = 5;
+  CREDIT_KIND_CREATOR = 6;
+  CREDIT_KIND_COMPOSER = 7;
+  CREDIT_KIND_CONDUCTOR = 8;
+  CREDIT_KIND_LYRICIST = 9;
+  CREDIT_KIND_ARTIST = 10;
+  CREDIT_KIND_AUTHOR = 11;
+  CREDIT_KIND_NARRATOR = 12;
+  CREDIT_KIND_OTHER = 13;
+}
+
+message PersonCredit {
+  string name = 1;
+  CreditKind kind = 2;
+  // Character played, or a more specific job title.
+  string role = 3;
+  int32 order = 4;
+  map<string, string> external_ids = 5;
+  string image_url = 6;
+}
+
+enum ImageKind {
+  IMAGE_KIND_UNSPECIFIED = 0;
+  IMAGE_KIND_PRIMARY = 1;
+  IMAGE_KIND_BACKDROP = 2;
+  IMAGE_KIND_LOGO = 3;
+  IMAGE_KIND_THUMB = 4;
+  IMAGE_KIND_BANNER = 5;
+  IMAGE_KIND_ART = 6;
+  IMAGE_KIND_DISC = 7;
+  IMAGE_KIND_SCREENSHOT = 8;
+}
+
+message RemoteImage {
+  ImageKind kind = 1;
+  string url = 2;
+  int32 width = 3;
+  int32 height = 4;
+  // ISO 639-1; empty for images without text.
+  string language = 5;
+  // Provider-assigned quality in [0, 1].
+  double score = 6;
+}

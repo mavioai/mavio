@@ -35,12 +35,17 @@ const (
 const (
 	// SystemServiceGetHealthProcedure is the fully-qualified name of the SystemService's GetHealth RPC.
 	SystemServiceGetHealthProcedure = "/mavio.system.v1.SystemService/GetHealth"
+	// SystemServiceGetSystemInfoProcedure is the fully-qualified name of the SystemService's
+	// GetSystemInfo RPC.
+	SystemServiceGetSystemInfoProcedure = "/mavio.system.v1.SystemService/GetSystemInfo"
 )
 
 // SystemServiceClient is a client for the mavio.system.v1.SystemService service.
 type SystemServiceClient interface {
 	// GetHealth reports whether the server is ready to serve requests.
 	GetHealth(context.Context, *v1.GetHealthRequest) (*v1.GetHealthResponse, error)
+	// GetSystemInfo describes the running server.
+	GetSystemInfo(context.Context, *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error)
 }
 
 // NewSystemServiceClient constructs a client for the mavio.system.v1.SystemService service. By
@@ -61,12 +66,20 @@ func NewSystemServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getSystemInfo: connect.NewClient[v1.GetSystemInfoRequest, v1.GetSystemInfoResponse](
+			httpClient,
+			baseURL+SystemServiceGetSystemInfoProcedure,
+			connect.WithSchema(systemServiceMethods.ByName("GetSystemInfo")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // systemServiceClient implements SystemServiceClient.
 type systemServiceClient struct {
-	getHealth *connect.Client[v1.GetHealthRequest, v1.GetHealthResponse]
+	getHealth     *connect.Client[v1.GetHealthRequest, v1.GetHealthResponse]
+	getSystemInfo *connect.Client[v1.GetSystemInfoRequest, v1.GetSystemInfoResponse]
 }
 
 // GetHealth calls mavio.system.v1.SystemService.GetHealth.
@@ -78,10 +91,21 @@ func (c *systemServiceClient) GetHealth(ctx context.Context, req *v1.GetHealthRe
 	return nil, err
 }
 
+// GetSystemInfo calls mavio.system.v1.SystemService.GetSystemInfo.
+func (c *systemServiceClient) GetSystemInfo(ctx context.Context, req *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error) {
+	response, err := c.getSystemInfo.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // SystemServiceHandler is an implementation of the mavio.system.v1.SystemService service.
 type SystemServiceHandler interface {
 	// GetHealth reports whether the server is ready to serve requests.
 	GetHealth(context.Context, *v1.GetHealthRequest) (*v1.GetHealthResponse, error)
+	// GetSystemInfo describes the running server.
+	GetSystemInfo(context.Context, *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error)
 }
 
 // NewSystemServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -98,10 +122,19 @@ func NewSystemServiceHandler(svc SystemServiceHandler, opts ...connect.HandlerOp
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	systemServiceGetSystemInfoHandler := connect.NewUnaryHandlerSimple(
+		SystemServiceGetSystemInfoProcedure,
+		svc.GetSystemInfo,
+		connect.WithSchema(systemServiceMethods.ByName("GetSystemInfo")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.system.v1.SystemService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case SystemServiceGetHealthProcedure:
 			systemServiceGetHealthHandler.ServeHTTP(w, r)
+		case SystemServiceGetSystemInfoProcedure:
+			systemServiceGetSystemInfoHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -113,4 +146,8 @@ type UnimplementedSystemServiceHandler struct{}
 
 func (UnimplementedSystemServiceHandler) GetHealth(context.Context, *v1.GetHealthRequest) (*v1.GetHealthResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.GetHealth is not implemented"))
+}
+
+func (UnimplementedSystemServiceHandler) GetSystemInfo(context.Context, *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.GetSystemInfo is not implemented"))
 }

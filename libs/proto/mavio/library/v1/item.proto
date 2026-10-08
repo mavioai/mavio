@@ -1,0 +1,259 @@
+edition = "2023";
+
+package mavio.library.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "mavio/library/v1/media.proto";
+
+// ItemService browses and searches library items.
+service ItemService {
+  rpc GetItem(GetItemRequest) returns (GetItemResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc ListItems(ListItemsRequest) returns (ListItemsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+enum ItemKind {
+  ITEM_KIND_UNSPECIFIED = 0;
+  ITEM_KIND_MOVIE = 1;
+  ITEM_KIND_SERIES = 2;
+  ITEM_KIND_SEASON = 3;
+  ITEM_KIND_EPISODE = 4;
+  ITEM_KIND_VIDEO = 5;
+  ITEM_KIND_MUSIC_ARTIST = 6;
+  ITEM_KIND_MUSIC_ALBUM = 7;
+  ITEM_KIND_TRACK = 8;
+  ITEM_KIND_MUSIC_VIDEO = 9;
+  ITEM_KIND_AUDIOBOOK = 10;
+  ITEM_KIND_BOOK = 11;
+  ITEM_KIND_PHOTO_ALBUM = 12;
+  ITEM_KIND_PHOTO = 13;
+  ITEM_KIND_FOLDER = 14;
+  ITEM_KIND_COLLECTION = 15;
+  ITEM_KIND_PLAYLIST = 16;
+}
+
+enum ExtraKind {
+  EXTRA_KIND_UNSPECIFIED = 0;
+  EXTRA_KIND_TRAILER = 1;
+  EXTRA_KIND_CLIP = 2;
+  EXTRA_KIND_BEHIND_THE_SCENES = 3;
+  EXTRA_KIND_DELETED_SCENE = 4;
+  EXTRA_KIND_INTERVIEW = 5;
+  EXTRA_KIND_SCENE = 6;
+  EXTRA_KIND_SAMPLE = 7;
+  EXTRA_KIND_FEATURETTE = 8;
+  EXTRA_KIND_SHORT = 9;
+  EXTRA_KIND_THEME_SONG = 10;
+  EXTRA_KIND_THEME_VIDEO = 11;
+  EXTRA_KIND_OTHER = 12;
+}
+
+enum SeriesStatus {
+  SERIES_STATUS_UNSPECIFIED = 0;
+  SERIES_STATUS_CONTINUING = 1;
+  SERIES_STATUS_ENDED = 2;
+  SERIES_STATUS_UNRELEASED = 3;
+}
+
+enum ImageKind {
+  IMAGE_KIND_UNSPECIFIED = 0;
+  IMAGE_KIND_PRIMARY = 1;
+  IMAGE_KIND_BACKDROP = 2;
+  IMAGE_KIND_LOGO = 3;
+  IMAGE_KIND_THUMB = 4;
+  IMAGE_KIND_BANNER = 5;
+  IMAGE_KIND_ART = 6;
+  IMAGE_KIND_DISC = 7;
+  IMAGE_KIND_SCREENSHOT = 8;
+}
+
+enum CreditKind {
+  CREDIT_KIND_UNSPECIFIED = 0;
+  CREDIT_KIND_ACTOR = 1;
+  CREDIT_KIND_GUEST_STAR = 2;
+  CREDIT_KIND_DIRECTOR = 3;
+  CREDIT_KIND_WRITER = 4;
+  CREDIT_KIND_PRODUCER = 5;
+  CREDIT_KIND_CREATOR = 6;
+  CREDIT_KIND_COMPOSER = 7;
+  CREDIT_KIND_CONDUCTOR = 8;
+  CREDIT_KIND_LYRICIST = 9;
+  CREDIT_KIND_ARTIST = 10;
+  CREDIT_KIND_AUTHOR = 11;
+  CREDIT_KIND_NARRATOR = 12;
+  CREDIT_KIND_OTHER = 13;
+}
+
+enum SortField {
+  SORT_FIELD_UNSPECIFIED = 0;
+  SORT_FIELD_NAME = 1;
+  SORT_FIELD_DATE_ADDED = 2;
+  SORT_FIELD_PREMIERE_DATE = 3;
+  SORT_FIELD_PRODUCTION_YEAR = 4;
+  SORT_FIELD_COMMUNITY_RATING = 5;
+  SORT_FIELD_RUNTIME = 6;
+  SORT_FIELD_INDEX = 7;
+  SORT_FIELD_RANDOM = 8;
+  SORT_FIELD_LAST_PLAYED = 9;
+  SORT_FIELD_PLAY_COUNT = 10;
+}
+
+// Item is a node in a library. See docs/domain.md for hierarchies and
+// numbering.
+message Item {
+  string id = 1;
+  string library_id = 2;
+  // Empty for top-level items.
+  string parent_id = 3;
+  ItemKind kind = 4;
+  string name = 5;
+  string sort_name = 6;
+  string original_title = 7;
+  string overview = 8;
+  string tagline = 9;
+  string path = 10;
+
+  // Episode/track/season number; season/disc number of an episode/track; last
+  // episode of a multi-episode file.
+  int32 index_number = 11;
+  int32 parent_index_number = 12;
+  int32 index_number_end = 13;
+
+  int32 production_year = 14;
+  google.protobuf.Timestamp premiere_date = 15;
+  google.protobuf.Timestamp end_date = 16;
+  google.protobuf.Duration runtime = 17;
+  string official_rating = 18;
+  double community_rating = 19;
+  double critic_rating = 20;
+
+  repeated string genres = 21;
+  repeated string tags = 22;
+  repeated string studios = 23;
+  // Keyed by provider: "tmdb", "imdb", "tvdb", "musicbrainz", …
+  map<string, string> external_ids = 24;
+
+  repeated string artists = 25;
+  repeated string album_artists = 26;
+  SeriesStatus series_status = 27;
+
+  ExtraKind extra = 28;
+  string owner_id = 29;
+
+  google.protobuf.Timestamp date_added = 30;
+
+  // Images of the item, without file paths; clients fetch them over HTTP.
+  repeated Image images = 31;
+}
+
+// Image describes an artwork image.
+message Image {
+  string id = 1;
+  ImageKind kind = 2;
+  int32 index = 3;
+  int32 width = 4;
+  int32 height = 5;
+  string blurhash = 6;
+  bytes thumbhash = 7;
+}
+
+message Person {
+  string id = 1;
+  string name = 2;
+  string sort_name = 3;
+  string overview = 4;
+  google.protobuf.Timestamp birth_date = 5;
+  google.protobuf.Timestamp death_date = 6;
+  string birth_place = 7;
+  map<string, string> external_ids = 8;
+  repeated Image images = 9;
+}
+
+// Credit is a person credited on an item.
+message Credit {
+  Person person = 1;
+  CreditKind kind = 2;
+  // Character played, or a more specific job title.
+  string role = 3;
+  int32 order = 4;
+}
+
+message GetItemRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message GetItemResponse {
+  Item item = 1;
+  repeated MediaSource media_sources = 2;
+  repeated Credit credits = 3;
+}
+
+message SortSpec {
+  SortField field = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  bool descending = 2;
+}
+
+// ListItemsRequest filters items; unset fields do not filter. Per-user
+// filters and sorts apply to the calling user.
+message ListItemsRequest {
+  repeated string library_ids = 1 [(buf.validate.field).repeated.items.string.uuid = true];
+  string parent_id = 2 [(buf.validate.field).string.uuid = true];
+  // Include all descendants of parent_id instead of direct children.
+  bool recursive = 3;
+  repeated ItemKind kinds = 4 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  bool include_extras = 5;
+  string search = 6 [(buf.validate.field).string.max_len = 200];
+  repeated string genres = 7;
+  repeated string tags = 8;
+  repeated string studios = 9;
+  string person_id = 10 [(buf.validate.field).string.uuid = true];
+  int32 year_from = 11;
+  int32 year_to = 12;
+  bool played = 13;
+  bool favorite = 14;
+  bool resumable = 15;
+  repeated SortSpec sort = 16;
+  // 1–1000; unset means 1000.
+  int32 limit = 17 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 18 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListItemsResponse {
+  repeated Item items = 1;
+  // Number of matching items across all pages.
+  int32 total = 2;
+}
+
+message GetPersonRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message GetPersonResponse {
+  Person person = 1;
+}
