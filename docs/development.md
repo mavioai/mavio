@@ -1,0 +1,141 @@
+# Mavio Development Guide
+
+> English | [简体中文](development.zh-CN.md)
+
+> Related: [Architecture](architecture.md) · [Roadmap](roadmap.md) · [Testing](testing.md) · [AGENTS.md](../AGENTS.md)
+
+---
+
+## 1. Toolchain and Setup
+
+Tool versions are pinned in `mise.toml`:
+
+| Tool | Purpose |
+| :--- | :--- |
+| go | Server, libraries, plugins |
+| node + pnpm | Nx, and later the TS applications |
+| buf | Protobuf lint, format, breaking-change checks and code generation |
+| golangci-lint | Go linting and formatting checks |
+
+```bash
+mise install            # Install the pinned toolchain
+pnpm install            # Install Nx
+```
+
+`atlas` is added to `mise.toml` in P1 together with `libs/store`.
+
+---
+
+## 2. Monorepo and Nx
+
+### 2.1 Why Nx
+Go is the main server language; later there will also be three kinds of TS applications — Web (React + Vite), Mobile (Expo) and Desktop (Tauri 2) — sharing client code generated from `libs/proto`. This is a polyglot monorepo that needs a unified dependency graph, affected-project analysis and task caching:
+* Nx has official plugins for Expo (`@nx/expo`) and Vite / React;
+* Go projects are inferred by the in-repo local Nx plugin `tools/nx-go`: every `go.mod` automatically becomes a project, and the dependency graph is derived from in-repo `require` directives in `go.mod`;
+* Boundaries are expressed with tags: `type:app|lib|plugin`, `lang:go|ts`, `scope:server|client|shared`. The TS side is constrained by `@nx/enforce-module-boundaries`, the Go side by depguard (§5).
+
+Nx only orchestrates and caches: every Go module still works on its own with `go build` / `go test`.
+
+### 2.2 Inferred Targets
+`tools/nx-go` gives every Go project these targets (project name = directory name):
+
+| Target | Command | Cached |
+| :--- | :--- | :--- |
+| `build` | `go build ./...` with `CGO_ENABLED=0` | Yes |
+| `test` | `go test ./...` | Yes |
+| `bench` | `go test -run=^$ -bench=. -benchmem ./...` | No |
+| `lint` | `golangci-lint run ./...` | Yes |
+| `tidy-check` | `go mod tidy -diff` with `GOWORK=off` | Yes |
+| `generate` | `buf generate` (only projects with a `buf.yaml`) | No |
+| `buf-lint` | `buf lint && buf format --diff --exit-code` (only projects with a `buf.yaml`) | Yes |
+
+A project overrides a default target with a `project.json` next to its `go.mod`; for example `plugins/scraper-tmdb/project.json` builds a `wasip1` WASM module.
+
+### 2.3 Common Commands
+```bash
+pnpm nx run-many -t build test lint tidy-check     # Check everything
+pnpm nx affected -t build test lint tidy-check     # Check affected projects only
+pnpm nx run proto:generate                         # Regenerate libs/proto/gen
+pnpm nx run proto:buf-lint                         # buf lint + format check
+pnpm nx run <project>:bench                        # Run a project's benchmarks
+pnpm nx show projects                              # List projects
+pnpm nx graph                                      # Show the project graph
+```
+
+`go test ./...` does not cross module boundaries; use `nx run-many` / `nx affected` to run across modules.
+
+---
+
+## 3. Go Modules
+
+### 3.1 Conventions
+* Every Go library, application and plugin has its own `go.mod`; the module path is `github.com/mavioai/mavio/<dir>`, e.g. `github.com/mavioai/mavio/libs/media`. The `go` directive is `1.27.0` everywhere.
+* Dependencies between in-repo modules are declared both in `go.work` and in each `go.mod` as `require` + relative-path `replace`: `go.work` serves gopls and cross-module development, while `replace` keeps `go mod tidy` and builds working with `GOWORK=off` (`go mod tidy` does not read `go.work`). The `tidy-check` target validates every module's `go.mod` this way.
+* Binary tools are pinned by mise; code generation plugins (`protoc-gen-go`, `protoc-gen-connect-go`, and later `sqlc`, `ent`) are pinned through the `tool` directive in the owning module's go.mod.
+* If some modules turn out to always change together, merge them to avoid over-splitting.
+
+### 3.2 Adding a Module
+1. Create the directory and run `go mod init github.com/mavioai/mavio/<dir>`.
+2. Change the `go` directive to `1.27.0`.
+3. Add the directory to `use` in `go.work`.
+4. Add a `doc.go` with the package comment.
+
+Nx picks the new module up automatically; no `project.json` is needed.
+
+### 3.3 Adding an In-repo Dependency
+```bash
+go mod edit -require=github.com/mavioai/mavio/libs/core@v0.0.0 -replace=github.com/mavioai/mavio/libs/core=../core
+GOWORK=off go mod tidy
+```
+The new edge must respect the dependency direction in [Architecture §3.2](architecture.md#32-dependency-direction); depguard rejects violations (§5).
+
+---
+
+## 4. Code Generation
+
+### 4.1 Protobuf and Connect
+* Contract sources live in `libs/proto/mavio/<domain>/v1/` and use `edition = "2023"`; the package name is `mavio.<domain>.v1`.
+* `buf generate` (configured in `libs/proto/buf.gen.yaml`) runs `protoc-gen-go` with `default_api_level=API_OPAQUE` (fields accessed through getters/setters) and `protoc-gen-connect-go` with `simple` (handlers take and return messages directly). Managed mode sets `go_package` under `github.com/mavioai/mavio/libs/proto/gen/go`.
+* After changing a `.proto`, run `pnpm nx run proto:generate` and **commit the generated `gen/` code**. Never edit files under `gen/` by hand.
+* `buf lint` uses the STANDARD rules and `buf breaking` the FILE rules. Published field numbers must never be reused; breaking changes go into a new `v2` package.
+* Read-only RPCs are annotated with `option idempotency_level = NO_SIDE_EFFECTS;`.
+
+### 4.2 Database Schema and Queries
+The ent → Atlas → sqlc pipeline is described in [Architecture §5.2](architecture.md#52-generation-pipeline). Its Nx targets are added in P1 together with `libs/store`. Merged migration files must never be modified; only append new migrations.
+
+---
+
+## 5. Code Quality
+
+`.golangci.yml` (golangci-lint v2) applies to every Go module:
+* **Linters**: the `standard` set plus `depguard`, `errorlint`, `misspell`, `nolintlint`, `unconvert`, `usestdlibvars`; generated code is excluded.
+* **Formatters**: `gofumpt` and `goimports`, with `github.com/mavioai/mavio` imports in their own group.
+* **depguard**: encodes the dependency direction from [Architecture §3.2](architecture.md#32-dependency-direction) as rules (`core` only on the standard library, pure libraries only on `core`, the plugin SDK only on `libs/proto`, no lib importing `apps/*` or `plugins/*`, …). To change the dependency direction, update the architecture document first, then the rules.
+
+---
+
+## 6. Continuous Integration
+
+`.github/workflows/ci.yml` runs on pushes to `main` and on pull requests:
+* **check** (Linux): `nx affected -t buf-lint lint tidy-check build test`; regenerates code and fails on any diff; runs `buf breaking` against the base branch on pull requests.
+* **test**: `nx run-many -t test build` on linux arm64, macOS and Windows.
+
+Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`).
+
+---
+
+## 7. Releases and Versioning
+
+`libs/proto` and `libs/plugin` are imported by third-party plugins and are published independently with path-prefixed tags (e.g. `libs/proto/v0.1.0`, `libs/plugin/v0.1.0`). Their `replace` directives have no effect on consumers, so:
+1. Release `libs/proto` first.
+2. Update the `require` of `libs/plugin` to that version, then release `libs/plugin`.
+
+Other modules are used only inside the repository and promise no stable external API.
+
+---
+
+## 8. Commits and Documentation
+
+* Use Conventional Commits with the Nx project name as scope: `feat(naming): parse absolute episode numbers`, `build(nx): …`, `docs: …`. Keep each commit to a single purpose, and make sure `pnpm nx affected -t build test lint tidy-check` passes before committing.
+* Every document exists in English (`<name>.md`) and Simplified Chinese (`<name>.zh-CN.md`) with section-by-section correspondence; the two link to each other at the top, and both are updated in the same commit.
+* Documents describe only the approaches that were adopted.
