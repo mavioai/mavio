@@ -174,13 +174,15 @@ ent schema ──go generate─────────────────�
 ```
 * `internal/cmd/migrategen` 生成版本化迁移：在空的开发数据库（内存 SQLite，或临时的 PostgreSQL 容器）上重放已有迁移目录，用 Atlas 与 ent schema 比较差异，并把差异写成 Atlas 格式的新迁移。SQLite 迁移使用标准的双引号标识符，这是 sqlc 解析器的要求。
 * 两套迁移目录各自版本化，提交前人工审核；已合并的迁移不得修改。
-* 服务端启动时（`store.Open`）执行待应用的迁移：每个文件在独立事务中执行，并记录到 `schema_migrations`。
+* `migrategen` 会删除已移除的列和索引，并跳过仅由 PostgreSQL 规范化部分索引谓词而产生的索引变更。
+* 服务端启动时（`store.Open`）执行待应用的迁移：每个文件在独立事务中执行，并记录到 `schema_migrations`。重建表的 SQLite 迁移在其连接上关闭外键约束后执行（该 pragma 在事务内无效），并在提交前用 `PRAGMA foreign_key_check` 校验。
+* 派生的搜索键与排序键带有版本号（`keysVersion`）；版本变化时，`store.Open` 会对所有已有行重新计算一次键，并把该版本记录到 `schema_migrations`。
 
 ### 5.3 双方言的做法
 * **统一事务**：`Store.InTx` 开启一个 `*sql.Tx`，把 ent 客户端（通过嵌套事务为空操作的驱动）和 sqlc 查询都绑定到它上面，因此一个事务内可以任意组合各个仓储。
 * **统一类型**：`core.ID` 实现了 `sql.Scanner` / `driver.Valuer`，在 PostgreSQL 中存为 `uuid`、在 SQLite 中存为文本；sqlc 的 `overrides` 把它和可空列映射为两个包中相同的 Go 类型，因此 PostgreSQL 适配层可以直接转换结构体。
 * **多值属性**（流派、标签、工作室、艺人、专辑艺人）存放在 `item_values` 表中，使"匹配任意一个"的过滤可移植且可索引。
-* **搜索与排序**使用在 Go 中计算的折叠键（`fold`：全角转半角、去除变音符号、转小写）：`search_key`（名称与原始标题）按子串匹配，对中日韩标题和短关键词同样有效；`sort_key` 实现不区分大小写和重音的名称排序。
+* **搜索与排序**使用在 Go 中计算、以 `LIKE` 匹配的键。`search_key`（条目、人员）与 `value_key`（条目值）保存 Jellyfin 的名称清洗形式（`cleanValue`：去除变音符号、转小写、标点视为空格、全角转半角），用于匹配、相关度与分组；`original_key` 保存转小写的原始标题，供原始搜索模式匹配。`sort_key` 保存排序名的 Jellyfin 排序形式（去掉冠词和标点、数字补零、非拉丁文字用 go-unidecode 转写），既用于名称排序，也用于匹配搜索词的排序形式。见领域模型 §9.2。
 * **不区分大小写的唯一性**（用户名）通过带唯一索引的小写 `name_key` 列实现。
 * **时间**以微秒精度存储（PostgreSQL 用 `timestamptz`，SQLite 用整数微秒），读出时为 UTC。
 * **仓储端口**：`store` 只暴露 `core` 中定义的接口；ent 与 sqlc 的类型不会离开本包。

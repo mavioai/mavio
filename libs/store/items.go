@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"iter"
 	"slices"
 
@@ -153,6 +154,57 @@ func (r items) Walk(ctx context.Context, q core.ItemQuery) iter.Seq2[core.Item, 
 	}
 }
 
+func (r items) Values(ctx context.Context, q core.ValueQuery) ([]string, error) {
+	if err := q.Validate(); err != nil {
+		return nil, err
+	}
+	kinds := []string{string(q.Kind)}
+	if q.Kind == core.ValueArtist {
+		kinds = append(kinds, valueAlbumArtist)
+	}
+	ps := []predicate.ItemValue{itemvalue.KindIn(kinds...), itemvalue.ValueKeyNEQ("")}
+	if len(q.LibraryIDs) > 0 {
+		ps = append(ps, itemvalue.HasItemWith(item.LibraryIDIn(q.LibraryIDs...)))
+	}
+	srch, searching := parseSearch(q.Search)
+	if searching {
+		ps = append(ps, predicate.ItemValue(func(s *entsql.Selector) {
+			s.Where(srch.match(s.C(itemvalue.FieldValueKey), "", s.C(itemvalue.FieldSortKey)))
+		}))
+	}
+	limit := q.Limit
+	if limit == 0 {
+		limit = core.MaxPageSize
+	}
+	// Values with the same clean form are one value, shown in the spelling
+	// that sorts first by code point, and ordered by sort name.
+	minValue := "MIN(%s)"
+	if r.s.dialect == DialectPostgres {
+		minValue = `MIN(%s COLLATE "C")`
+	}
+	var rows []struct {
+		Key   string `sql:"value_key"`
+		Value string `sql:"value"`
+	}
+	err := r.s.read.ItemValue.Query().Where(ps...).Modify(func(s *entsql.Selector) {
+		key := s.C(itemvalue.FieldValueKey)
+		s.Select(key, entsql.As(fmt.Sprintf(minValue, s.C(itemvalue.FieldValue)), "value")).GroupBy(key)
+		if searching {
+			s.OrderExpr(srch.rank(key))
+		}
+		s.OrderExpr(entsql.Expr("MIN(" + s.C(itemvalue.FieldSortKey) + ")"))
+		s.OrderBy(key).Limit(limit)
+	}).Scan(ctx, &rows)
+	if err != nil {
+		return nil, mapErr(err, "list item values")
+	}
+	out := make([]string, len(rows))
+	for i, row := range rows {
+		out[i] = row.Value
+	}
+	return out, nil
+}
+
 // predicates translates the filters of q.
 func (r items) predicates(q core.ItemQuery) []predicate.Item {
 	var ps []predicate.Item
@@ -175,12 +227,18 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 	if !q.IncludeExtras {
 		ps = append(ps, item.Extra(""))
 	}
-	if key := fold(q.Search); key != "" {
-		ps = append(ps, item.SearchKeyContains(key))
+	if srch, ok := parseSearch(q.Search); ok {
+		ps = append(ps, predicate.Item(func(s *entsql.Selector) {
+			s.Where(srch.match(s.C(item.FieldSearchKey), s.C(item.FieldOriginalKey), s.C(item.FieldSortKey)))
+		}))
 	}
 	for kind, values := range map[string][]string{valueGenre: q.Genres, valueTag: q.Tags, valueStudio: q.Studios} {
 		if len(values) > 0 {
-			ps = append(ps, item.HasValuesWith(itemvalue.Kind(kind), itemvalue.ValueIn(values...)))
+			keys := make([]string, len(values))
+			for i, v := range values {
+				keys[i] = cleanValue(v)
+			}
+			ps = append(ps, item.HasValuesWith(itemvalue.Kind(kind), itemvalue.ValueKeyIn(keys...)))
 		}
 	}
 	if !q.PersonID.IsZero() {
@@ -234,7 +292,13 @@ func descendantsOf(parent core.ID) predicate.Item {
 }
 
 // orderItems applies q.Sort, always tie-breaking by ID for stable paging.
+// Search results are ordered by relevance first and by sort name after
+// q.Sort.
 func orderItems(s *entsql.Selector, q core.ItemQuery) {
+	srch, searching := parseSearch(q.Search)
+	if searching {
+		s.OrderExpr(srch.rank(s.C(item.FieldSearchKey)))
+	}
 	var ud *entsql.SelectTable
 	joinUserData := func() *entsql.SelectTable {
 		if ud == nil {
@@ -282,6 +346,9 @@ func orderItems(s *entsql.Selector, q core.ItemQuery) {
 			s.OrderExpr(entsql.Expr(dir("COALESCE("+t.C(userdata.FieldPlayCount)+", 0)", spec.Desc)))
 		}
 	}
+	if searching {
+		s.OrderExpr(entsql.Expr(s.C(item.FieldSortKey) + " ASC"))
+	}
 	s.OrderExpr(entsql.Expr(s.C(item.FieldID) + " ASC"))
 }
 
@@ -296,8 +363,9 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 		SetKind(string(it.Kind)).
 		SetName(it.Name).
 		SetSortName(sortName).
-		SetSortKey(fold(sortName)).
-		SetSearchKey(searchKey(it.Name, it.OriginalTitle)).
+		SetSortKey(sortKey(sortName)).
+		SetSearchKey(cleanValue(it.Name)).
+		SetOriginalKey(lowerFold(it.OriginalTitle)).
 		SetOriginalTitle(it.OriginalTitle).
 		SetOverview(it.Overview).
 		SetTagline(it.Tagline).
@@ -332,7 +400,8 @@ func itemValueCreates(c *ent.Client, it core.Item) []*ent.ItemValueCreate {
 	var out []*ent.ItemValueCreate
 	add := func(kind string, values []string) {
 		for i, v := range values {
-			out = append(out, c.ItemValue.Create().SetItemID(it.ID).SetKind(kind).SetValue(v).SetOrd(i))
+			out = append(out, c.ItemValue.Create().SetItemID(it.ID).SetKind(kind).SetValue(v).
+				SetValueKey(cleanValue(v)).SetSortKey(sortKey(v)).SetOrd(i))
 		}
 	}
 	add(valueGenre, it.Genres)

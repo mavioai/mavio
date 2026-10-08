@@ -96,6 +96,11 @@ func SearchKey(v string) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldSearchKey, v))
 }
 
+// OriginalKey applies equality check predicate on the "original_key" field. It's identical to OriginalKeyEQ.
+func OriginalKey(v string) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldOriginalKey, v))
+}
+
 // Overview applies equality check predicate on the "overview" field. It's identical to OverviewEQ.
 func Overview(v string) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldOverview, v))
@@ -635,6 +640,71 @@ func SearchKeyEqualFold(v string) predicate.Item {
 // SearchKeyContainsFold applies the ContainsFold predicate on the "search_key" field.
 func SearchKeyContainsFold(v string) predicate.Item {
 	return predicate.Item(sql.FieldContainsFold(FieldSearchKey, v))
+}
+
+// OriginalKeyEQ applies the EQ predicate on the "original_key" field.
+func OriginalKeyEQ(v string) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldOriginalKey, v))
+}
+
+// OriginalKeyNEQ applies the NEQ predicate on the "original_key" field.
+func OriginalKeyNEQ(v string) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldOriginalKey, v))
+}
+
+// OriginalKeyIn applies the In predicate on the "original_key" field.
+func OriginalKeyIn(vs ...string) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldOriginalKey, vs...))
+}
+
+// OriginalKeyNotIn applies the NotIn predicate on the "original_key" field.
+func OriginalKeyNotIn(vs ...string) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldOriginalKey, vs...))
+}
+
+// OriginalKeyGT applies the GT predicate on the "original_key" field.
+func OriginalKeyGT(v string) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldOriginalKey, v))
+}
+
+// OriginalKeyGTE applies the GTE predicate on the "original_key" field.
+func OriginalKeyGTE(v string) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldOriginalKey, v))
+}
+
+// OriginalKeyLT applies the LT predicate on the "original_key" field.
+func OriginalKeyLT(v string) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldOriginalKey, v))
+}
+
+// OriginalKeyLTE applies the LTE predicate on the "original_key" field.
+func OriginalKeyLTE(v string) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldOriginalKey, v))
+}
+
+// OriginalKeyContains applies the Contains predicate on the "original_key" field.
+func OriginalKeyContains(v string) predicate.Item {
+	return predicate.Item(sql.FieldContains(FieldOriginalKey, v))
+}
+
+// OriginalKeyHasPrefix applies the HasPrefix predicate on the "original_key" field.
+func OriginalKeyHasPrefix(v string) predicate.Item {
+	return predicate.Item(sql.FieldHasPrefix(FieldOriginalKey, v))
+}
+
+// OriginalKeyHasSuffix applies the HasSuffix predicate on the "original_key" field.
+func OriginalKeyHasSuffix(v string) predicate.Item {
+	return predicate.Item(sql.FieldHasSuffix(FieldOriginalKey, v))
+}
+
+// OriginalKeyEqualFold applies the EqualFold predicate on the "original_key" field.
+func OriginalKeyEqualFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldEqualFold(FieldOriginalKey, v))
+}
+
+// OriginalKeyContainsFold applies the ContainsFold predicate on the "original_key" field.
+func OriginalKeyContainsFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldContainsFold(FieldOriginalKey, v))
 }
 
 // OverviewEQ applies the EQ predicate on the "overview" field.

@@ -1,9 +1,12 @@
 package store
 
 import (
+	"cmp"
 	"context"
 	"slices"
 	"strings"
+
+	entsql "entgo.io/ent/dialect/sql"
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent"
@@ -50,6 +53,8 @@ func (r people) Upsert(ctx context.Context, list ...core.Person) error {
 					SetName(p.Name).
 					SetNameKey(strings.ToLower(p.Name)).
 					SetSortName(p.SortName).
+					SetSearchKey(cleanValue(p.Name)).
+					SetSortKey(sortKey(cmp.Or(p.SortName, p.Name))).
 					SetOverview(p.Overview).
 					SetNillableBirthDate(p.BirthDate).
 					SetNillableDeathDate(p.DeathDate).
@@ -63,6 +68,33 @@ func (r people) Upsert(ctx context.Context, list ...core.Person) error {
 		}
 		return nil
 	})
+}
+
+func (r people) Search(ctx context.Context, q core.PersonQuery) ([]core.Person, error) {
+	if err := q.Validate(); err != nil {
+		return nil, err
+	}
+	limit := q.Limit
+	if limit == 0 {
+		limit = core.MaxPageSize
+	}
+	srch, searching := parseSearch(q.Search)
+	list, err := r.s.read.Person.Query().Limit(limit).Modify(func(s *entsql.Selector) {
+		if searching {
+			key := s.C(person.FieldSearchKey)
+			s.Where(srch.match(key, "", s.C(person.FieldSortKey)))
+			s.OrderExpr(srch.rank(key))
+		}
+		s.OrderBy(s.C(person.FieldSortKey), s.C(person.FieldID))
+	}).All(ctx)
+	if err != nil {
+		return nil, mapErr(err, "search people")
+	}
+	out := make([]core.Person, len(list))
+	for i, p := range list {
+		out[i] = toPerson(p)
+	}
+	return out, nil
 }
 
 func (r people) CreditsForItem(ctx context.Context, itemID core.ID) ([]core.Credit, error) {

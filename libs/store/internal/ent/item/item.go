@@ -31,6 +31,8 @@ const (
 	FieldOriginalTitle = "original_title"
 	// FieldSearchKey holds the string denoting the search_key field in the database.
 	FieldSearchKey = "search_key"
+	// FieldOriginalKey holds the string denoting the original_key field in the database.
+	FieldOriginalKey = "original_key"
 	// FieldOverview holds the string denoting the overview field in the database.
 	FieldOverview = "overview"
 	// FieldTagline holds the string denoting the tagline field in the database.
@@ -166,6 +168,7 @@ var Columns = []string{
 	FieldSortKey,
 	FieldOriginalTitle,
 	FieldSearchKey,
+	FieldOriginalKey,
 	FieldOverview,
 	FieldTagline,
 	FieldPath,
@@ -204,6 +207,8 @@ var (
 	DefaultOriginalTitle string
 	// DefaultSearchKey holds the default value on creation for the "search_key" field.
 	DefaultSearchKey string
+	// DefaultOriginalKey holds the default value on creation for the "original_key" field.
+	DefaultOriginalKey string
 	// DefaultOverview holds the default value on creation for the "overview" field.
 	DefaultOverview string
 	// DefaultTagline holds the default value on creation for the "tagline" field.
@@ -276,6 +281,11 @@ func ByOriginalTitle(opts ...sql.OrderTermOption) OrderOption {
 // BySearchKey orders the results by the search_key field.
 func BySearchKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSearchKey, opts...).ToFunc()
+}
+
+// ByOriginalKey orders the results by the original_key field.
+func ByOriginalKey(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOriginalKey, opts...).ToFunc()
 }
 
 // ByOverview orders the results by the overview field.

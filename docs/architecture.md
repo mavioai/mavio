@@ -174,13 +174,15 @@ ent schema ──go generate─────────────────�
 ```
 * `internal/cmd/migrategen` writes versioned migrations: it replays the existing migration directory on an empty development database (in-memory SQLite, or a throwaway PostgreSQL container), diffs it against the ent schema with Atlas, and writes the difference as a new migration in Atlas format. SQLite migrations use standard double-quoted identifiers, which sqlc's parser requires.
 * The two migration directories are versioned separately and reviewed by a human before committing; merged migrations are never edited.
-* The server applies pending migrations on startup (`store.Open`): each file runs in its own transaction and is recorded in `schema_migrations`.
+* `migrategen` drops removed columns and indexes, and skips index changes that only reflect how PostgreSQL normalizes a partial index's predicate.
+* The server applies pending migrations on startup (`store.Open`): each file runs in its own transaction and is recorded in `schema_migrations`. SQLite migrations that rebuild tables run with foreign-key enforcement turned off on their connection (the pragma has no effect inside a transaction) and are checked with `PRAGMA foreign_key_check` before committing.
+* Derived search and sort keys carry a version (`keysVersion`); when it changes, `store.Open` recomputes the keys of all existing rows once and records the version in `schema_migrations`.
 
 ### 5.3 Dual-dialect Practices
 * **Shared transactions**: `Store.InTx` begins a `*sql.Tx` and binds both an ent client (through a driver whose nested transactions are no-ops) and the sqlc queries to it, so repositories can be combined freely within one transaction.
 * **Unified types**: `core.ID` implements `sql.Scanner` / `driver.Valuer` and is stored as `uuid` (PostgreSQL) or text (SQLite); sqlc `overrides` map it and the nullable columns to the same Go types in both packages, so the PostgreSQL adapter converts structs directly.
 * **Multi-valued attributes** (genres, tags, studios, artists, album artists) live in an `item_values` table, so "matches any of" filters are portable and indexable.
-* **Search and sorting** use folded keys computed in Go (`fold`: half-width, no diacritics, lower case): `search_key` (name and original title) is matched by substring, which works for CJK titles and short queries alike; `sort_key` orders names case- and accent-insensitively.
+* **Search and sorting** use keys computed in Go and matched with `LIKE`. `search_key` (items, people) and `value_key` (item values) hold Jellyfin's clean form of the name (`cleanValue`: no diacritics, lower case, punctuation as spaces, half-width), used for matching, relevance and grouping; `original_key` holds the lower-cased original title, matched by raw search patterns. `sort_key` holds the Jellyfin sort form of the sort name (articles and punctuation removed, numbers zero-padded, non-Latin text transliterated with go-unidecode); it orders names and matches the sort form of search terms. See domain model §9.2.
 * **Case-insensitive uniqueness** (user names) uses a lower-cased `name_key` column with a unique index.
 * **Times** are stored with microsecond precision (`timestamptz` on PostgreSQL, integer microseconds on SQLite) and returned in UTC.
 * **Repository ports**: `store` exposes only the interfaces defined in `core`; ent and sqlc types never leave the package.

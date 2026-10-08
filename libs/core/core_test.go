@@ -229,3 +229,18 @@ func TestIDSQL(t *testing.T) {
 		t.Errorf("Scan(int) error = %v, want ErrInvalid", err)
 	}
 }
+
+func TestValueAndPersonQueries(t *testing.T) {
+	if err := (&ValueQuery{Kind: ValueGenre, Search: "dra"}).Validate(); err != nil {
+		t.Errorf("valid value query: %v", err)
+	}
+	if err := (&ValueQuery{Kind: "mood"}).Validate(); !errors.Is(err, ErrInvalid) {
+		t.Errorf("unknown kind: %v", err)
+	}
+	if err := (&ValueQuery{Kind: ValueTag, Limit: MaxPageSize + 1}).Validate(); !errors.Is(err, ErrInvalid) {
+		t.Errorf("limit: %v", err)
+	}
+	if err := (&PersonQuery{Limit: -1}).Validate(); !errors.Is(err, ErrInvalid) {
+		t.Errorf("person limit: %v", err)
+	}
+}

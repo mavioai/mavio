@@ -21,7 +21,9 @@ type ItemQuery struct {
 	// IncludeExtras includes trailers and other extras, which are excluded by
 	// default.
 	IncludeExtras bool
-	// Search matches names and original titles by full-text search.
+	// Search matches names, original titles and sort names; see
+	// docs/domain.md for the matching and relevance rules. When set, results
+	// are ordered by relevance before Sort.
 	Search   string
 	Genres   []string // any of
 	Tags     []string // any of

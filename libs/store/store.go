@@ -97,7 +97,7 @@ func openSQLite(ctx context.Context, file string) (*Store, error) {
 		read:    ent.NewClient(ent.Driver(entsql.OpenDB(entdialect.SQLite, rdb))),
 		dbs:     []*sql.DB{wdb, rdb},
 	}
-	if err := migrate(ctx, wdb, DialectSQLite); err != nil {
+	if err := s.migrate(ctx); err != nil {
 		s.Close()
 		return nil, err
 	}
@@ -115,11 +115,20 @@ func openPostgres(ctx context.Context, dsn string) (*Store, error) {
 	}
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(entdialect.Postgres, db)))
 	s := &Store{dialect: DialectPostgres, write: client, read: client, dbs: []*sql.DB{db}}
-	if err := migrate(ctx, db, DialectPostgres); err != nil {
+	if err := s.migrate(ctx); err != nil {
 		s.Close()
 		return nil, err
 	}
 	return s, nil
+}
+
+// migrate applies pending schema migrations, then recomputes derived keys
+// if their derivation changed.
+func (s *Store) migrate(ctx context.Context) error {
+	if err := migrate(ctx, s.dbs[0], s.dialect); err != nil {
+		return err
+	}
+	return s.backfillKeys(ctx)
 }
 
 // Dialect returns DialectSQLite or DialectPostgres.

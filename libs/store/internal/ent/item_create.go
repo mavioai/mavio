@@ -102,6 +102,20 @@ func (_c *ItemCreate) SetNillableSearchKey(v *string) *ItemCreate {
 	return _c
 }
 
+// SetOriginalKey sets the "original_key" field.
+func (_c *ItemCreate) SetOriginalKey(v string) *ItemCreate {
+	_c.mutation.SetOriginalKey(v)
+	return _c
+}
+
+// SetNillableOriginalKey sets the "original_key" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableOriginalKey(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetOriginalKey(*v)
+	}
+	return _c
+}
+
 // SetOverview sets the "overview" field.
 func (_c *ItemCreate) SetOverview(v string) *ItemCreate {
 	_c.mutation.SetOverview(v)
@@ -557,6 +571,10 @@ func (_c *ItemCreate) defaults() {
 		v := item.DefaultSearchKey
 		_c.mutation.SetSearchKey(v)
 	}
+	if _, ok := _c.mutation.OriginalKey(); !ok {
+		v := item.DefaultOriginalKey
+		_c.mutation.SetOriginalKey(v)
+	}
 	if _, ok := _c.mutation.Overview(); !ok {
 		v := item.DefaultOverview
 		_c.mutation.SetOverview(v)
@@ -629,6 +647,9 @@ func (_c *ItemCreate) check() error {
 	}
 	if _, ok := _c.mutation.SearchKey(); !ok {
 		return &ValidationError{Name: "search_key", err: errors.New(`ent: missing required field "Item.search_key"`)}
+	}
+	if _, ok := _c.mutation.OriginalKey(); !ok {
+		return &ValidationError{Name: "original_key", err: errors.New(`ent: missing required field "Item.original_key"`)}
 	}
 	if _, ok := _c.mutation.Overview(); !ok {
 		return &ValidationError{Name: "overview", err: errors.New(`ent: missing required field "Item.overview"`)}
@@ -728,6 +749,10 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SearchKey(); ok {
 		_spec.SetField(item.FieldSearchKey, field.TypeString, value)
 		_node.SearchKey = value
+	}
+	if value, ok := _c.mutation.OriginalKey(); ok {
+		_spec.SetField(item.FieldOriginalKey, field.TypeString, value)
+		_node.OriginalKey = value
 	}
 	if value, ok := _c.mutation.Overview(); ok {
 		_spec.SetField(item.FieldOverview, field.TypeString, value)
@@ -1123,6 +1148,18 @@ func (u *ItemUpsert) SetSearchKey(v string) *ItemUpsert {
 // UpdateSearchKey sets the "search_key" field to the value that was provided on create.
 func (u *ItemUpsert) UpdateSearchKey() *ItemUpsert {
 	u.SetExcluded(item.FieldSearchKey)
+	return u
+}
+
+// SetOriginalKey sets the "original_key" field.
+func (u *ItemUpsert) SetOriginalKey(v string) *ItemUpsert {
+	u.Set(item.FieldOriginalKey, v)
+	return u
+}
+
+// UpdateOriginalKey sets the "original_key" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateOriginalKey() *ItemUpsert {
+	u.SetExcluded(item.FieldOriginalKey)
 	return u
 }
 
@@ -1644,6 +1681,20 @@ func (u *ItemUpsertOne) SetSearchKey(v string) *ItemUpsertOne {
 func (u *ItemUpsertOne) UpdateSearchKey() *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
 		s.UpdateSearchKey()
+	})
+}
+
+// SetOriginalKey sets the "original_key" field.
+func (u *ItemUpsertOne) SetOriginalKey(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetOriginalKey(v)
+	})
+}
+
+// UpdateOriginalKey sets the "original_key" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateOriginalKey() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateOriginalKey()
 	})
 }
 
@@ -2391,6 +2442,20 @@ func (u *ItemUpsertBulk) SetSearchKey(v string) *ItemUpsertBulk {
 func (u *ItemUpsertBulk) UpdateSearchKey() *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
 		s.UpdateSearchKey()
+	})
+}
+
+// SetOriginalKey sets the "original_key" field.
+func (u *ItemUpsertBulk) SetOriginalKey(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetOriginalKey(v)
+	})
+}
+
+// UpdateOriginalKey sets the "original_key" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateOriginalKey() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateOriginalKey()
 	})
 }
 

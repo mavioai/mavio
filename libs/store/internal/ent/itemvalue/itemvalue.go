@@ -18,6 +18,10 @@ const (
 	FieldKind = "kind"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
+	// FieldValueKey holds the string denoting the value_key field in the database.
+	FieldValueKey = "value_key"
+	// FieldSortKey holds the string denoting the sort_key field in the database.
+	FieldSortKey = "sort_key"
 	// FieldOrd holds the string denoting the ord field in the database.
 	FieldOrd = "ord"
 	// EdgeItem holds the string denoting the item edge name in mutations.
@@ -39,6 +43,8 @@ var Columns = []string{
 	FieldItemID,
 	FieldKind,
 	FieldValue,
+	FieldValueKey,
+	FieldSortKey,
 	FieldOrd,
 }
 
@@ -51,6 +57,13 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultValueKey holds the default value on creation for the "value_key" field.
+	DefaultValueKey string
+	// DefaultSortKey holds the default value on creation for the "sort_key" field.
+	DefaultSortKey string
+)
 
 // OrderOption defines the ordering options for the ItemValue queries.
 type OrderOption func(*sql.Selector)
@@ -73,6 +86,16 @@ func ByKind(opts ...sql.OrderTermOption) OrderOption {
 // ByValue orders the results by the value field.
 func ByValue(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldValue, opts...).ToFunc()
+}
+
+// ByValueKey orders the results by the value_key field.
+func ByValueKey(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldValueKey, opts...).ToFunc()
+}
+
+// BySortKey orders the results by the sort_key field.
+func BySortKey(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSortKey, opts...).ToFunc()
 }
 
 // ByOrd orders the results by the ord field.

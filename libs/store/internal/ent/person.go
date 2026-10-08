@@ -25,6 +25,10 @@ type Person struct {
 	NameKey string `json:"name_key,omitempty"`
 	// SortName holds the value of the "sort_name" field.
 	SortName string `json:"sort_name,omitempty"`
+	// SearchKey holds the value of the "search_key" field.
+	SearchKey string `json:"search_key,omitempty"`
+	// SortKey holds the value of the "sort_key" field.
+	SortKey string `json:"sort_key,omitempty"`
 	// Overview holds the value of the "overview" field.
 	Overview string `json:"overview,omitempty"`
 	// BirthDate holds the value of the "birth_date" field.
@@ -79,7 +83,7 @@ func (*Person) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case person.FieldID:
 			values[i] = new(core.ID)
-		case person.FieldName, person.FieldNameKey, person.FieldSortName, person.FieldOverview, person.FieldBirthPlace:
+		case person.FieldName, person.FieldNameKey, person.FieldSortName, person.FieldSearchKey, person.FieldSortKey, person.FieldOverview, person.FieldBirthPlace:
 			values[i] = new(sql.NullString)
 		case person.FieldBirthDate, person.FieldDeathDate:
 			values[i] = new(sql.NullTime)
@@ -121,6 +125,18 @@ func (_m *Person) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field sort_name", values[i])
 			} else if value.Valid {
 				_m.SortName = value.String
+			}
+		case person.FieldSearchKey:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field search_key", values[i])
+			} else if value.Valid {
+				_m.SearchKey = value.String
+			}
+		case person.FieldSortKey:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field sort_key", values[i])
+			} else if value.Valid {
+				_m.SortKey = value.String
 			}
 		case person.FieldOverview:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -210,6 +226,12 @@ func (_m *Person) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("sort_name=")
 	builder.WriteString(_m.SortName)
+	builder.WriteString(", ")
+	builder.WriteString("search_key=")
+	builder.WriteString(_m.SearchKey)
+	builder.WriteString(", ")
+	builder.WriteString("sort_key=")
+	builder.WriteString(_m.SortKey)
 	builder.WriteString(", ")
 	builder.WriteString("overview=")
 	builder.WriteString(_m.Overview)

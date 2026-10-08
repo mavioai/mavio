@@ -41,6 +41,34 @@ func (_c *ItemValueCreate) SetValue(v string) *ItemValueCreate {
 	return _c
 }
 
+// SetValueKey sets the "value_key" field.
+func (_c *ItemValueCreate) SetValueKey(v string) *ItemValueCreate {
+	_c.mutation.SetValueKey(v)
+	return _c
+}
+
+// SetNillableValueKey sets the "value_key" field if the given value is not nil.
+func (_c *ItemValueCreate) SetNillableValueKey(v *string) *ItemValueCreate {
+	if v != nil {
+		_c.SetValueKey(*v)
+	}
+	return _c
+}
+
+// SetSortKey sets the "sort_key" field.
+func (_c *ItemValueCreate) SetSortKey(v string) *ItemValueCreate {
+	_c.mutation.SetSortKey(v)
+	return _c
+}
+
+// SetNillableSortKey sets the "sort_key" field if the given value is not nil.
+func (_c *ItemValueCreate) SetNillableSortKey(v *string) *ItemValueCreate {
+	if v != nil {
+		_c.SetSortKey(*v)
+	}
+	return _c
+}
+
 // SetOrd sets the "ord" field.
 func (_c *ItemValueCreate) SetOrd(v int) *ItemValueCreate {
 	_c.mutation.SetOrd(v)
@@ -59,6 +87,7 @@ func (_c *ItemValueCreate) Mutation() *ItemValueMutation {
 
 // Save creates the ItemValue in the database.
 func (_c *ItemValueCreate) Save(ctx context.Context) (*ItemValue, error) {
+	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -84,6 +113,18 @@ func (_c *ItemValueCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *ItemValueCreate) defaults() {
+	if _, ok := _c.mutation.ValueKey(); !ok {
+		v := itemvalue.DefaultValueKey
+		_c.mutation.SetValueKey(v)
+	}
+	if _, ok := _c.mutation.SortKey(); !ok {
+		v := itemvalue.DefaultSortKey
+		_c.mutation.SetSortKey(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_c *ItemValueCreate) check() error {
 	if _, ok := _c.mutation.ItemID(); !ok {
@@ -94,6 +135,12 @@ func (_c *ItemValueCreate) check() error {
 	}
 	if _, ok := _c.mutation.Value(); !ok {
 		return &ValidationError{Name: "value", err: errors.New(`ent: missing required field "ItemValue.value"`)}
+	}
+	if _, ok := _c.mutation.ValueKey(); !ok {
+		return &ValidationError{Name: "value_key", err: errors.New(`ent: missing required field "ItemValue.value_key"`)}
+	}
+	if _, ok := _c.mutation.SortKey(); !ok {
+		return &ValidationError{Name: "sort_key", err: errors.New(`ent: missing required field "ItemValue.sort_key"`)}
 	}
 	if _, ok := _c.mutation.Ord(); !ok {
 		return &ValidationError{Name: "ord", err: errors.New(`ent: missing required field "ItemValue.ord"`)}
@@ -135,6 +182,14 @@ func (_c *ItemValueCreate) createSpec() (*ItemValue, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Value(); ok {
 		_spec.SetField(itemvalue.FieldValue, field.TypeString, value)
 		_node.Value = value
+	}
+	if value, ok := _c.mutation.ValueKey(); ok {
+		_spec.SetField(itemvalue.FieldValueKey, field.TypeString, value)
+		_node.ValueKey = value
+	}
+	if value, ok := _c.mutation.SortKey(); ok {
+		_spec.SetField(itemvalue.FieldSortKey, field.TypeString, value)
+		_node.SortKey = value
 	}
 	if value, ok := _c.mutation.Ord(); ok {
 		_spec.SetField(itemvalue.FieldOrd, field.TypeInt, value)
@@ -245,6 +300,30 @@ func (u *ItemValueUpsert) UpdateValue() *ItemValueUpsert {
 	return u
 }
 
+// SetValueKey sets the "value_key" field.
+func (u *ItemValueUpsert) SetValueKey(v string) *ItemValueUpsert {
+	u.Set(itemvalue.FieldValueKey, v)
+	return u
+}
+
+// UpdateValueKey sets the "value_key" field to the value that was provided on create.
+func (u *ItemValueUpsert) UpdateValueKey() *ItemValueUpsert {
+	u.SetExcluded(itemvalue.FieldValueKey)
+	return u
+}
+
+// SetSortKey sets the "sort_key" field.
+func (u *ItemValueUpsert) SetSortKey(v string) *ItemValueUpsert {
+	u.Set(itemvalue.FieldSortKey, v)
+	return u
+}
+
+// UpdateSortKey sets the "sort_key" field to the value that was provided on create.
+func (u *ItemValueUpsert) UpdateSortKey() *ItemValueUpsert {
+	u.SetExcluded(itemvalue.FieldSortKey)
+	return u
+}
+
 // SetOrd sets the "ord" field.
 func (u *ItemValueUpsert) SetOrd(v int) *ItemValueUpsert {
 	u.Set(itemvalue.FieldOrd, v)
@@ -345,6 +424,34 @@ func (u *ItemValueUpsertOne) UpdateValue() *ItemValueUpsertOne {
 	})
 }
 
+// SetValueKey sets the "value_key" field.
+func (u *ItemValueUpsertOne) SetValueKey(v string) *ItemValueUpsertOne {
+	return u.Update(func(s *ItemValueUpsert) {
+		s.SetValueKey(v)
+	})
+}
+
+// UpdateValueKey sets the "value_key" field to the value that was provided on create.
+func (u *ItemValueUpsertOne) UpdateValueKey() *ItemValueUpsertOne {
+	return u.Update(func(s *ItemValueUpsert) {
+		s.UpdateValueKey()
+	})
+}
+
+// SetSortKey sets the "sort_key" field.
+func (u *ItemValueUpsertOne) SetSortKey(v string) *ItemValueUpsertOne {
+	return u.Update(func(s *ItemValueUpsert) {
+		s.SetSortKey(v)
+	})
+}
+
+// UpdateSortKey sets the "sort_key" field to the value that was provided on create.
+func (u *ItemValueUpsertOne) UpdateSortKey() *ItemValueUpsertOne {
+	return u.Update(func(s *ItemValueUpsert) {
+		s.UpdateSortKey()
+	})
+}
+
 // SetOrd sets the "ord" field.
 func (u *ItemValueUpsertOne) SetOrd(v int) *ItemValueUpsertOne {
 	return u.Update(func(s *ItemValueUpsert) {
@@ -418,6 +525,7 @@ func (_c *ItemValueCreateBulk) Save(ctx context.Context) ([]*ItemValue, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ItemValueMutation)
 				if !ok {
@@ -608,6 +716,34 @@ func (u *ItemValueUpsertBulk) SetValue(v string) *ItemValueUpsertBulk {
 func (u *ItemValueUpsertBulk) UpdateValue() *ItemValueUpsertBulk {
 	return u.Update(func(s *ItemValueUpsert) {
 		s.UpdateValue()
+	})
+}
+
+// SetValueKey sets the "value_key" field.
+func (u *ItemValueUpsertBulk) SetValueKey(v string) *ItemValueUpsertBulk {
+	return u.Update(func(s *ItemValueUpsert) {
+		s.SetValueKey(v)
+	})
+}
+
+// UpdateValueKey sets the "value_key" field to the value that was provided on create.
+func (u *ItemValueUpsertBulk) UpdateValueKey() *ItemValueUpsertBulk {
+	return u.Update(func(s *ItemValueUpsert) {
+		s.UpdateValueKey()
+	})
+}
+
+// SetSortKey sets the "sort_key" field.
+func (u *ItemValueUpsertBulk) SetSortKey(v string) *ItemValueUpsertBulk {
+	return u.Update(func(s *ItemValueUpsert) {
+		s.SetSortKey(v)
+	})
+}
+
+// UpdateSortKey sets the "sort_key" field to the value that was provided on create.
+func (u *ItemValueUpsertBulk) UpdateSortKey() *ItemValueUpsertBulk {
+	return u.Update(func(s *ItemValueUpsert) {
+		s.UpdateSortKey()
 	})
 }
 

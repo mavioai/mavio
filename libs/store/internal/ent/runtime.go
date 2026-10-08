@@ -9,6 +9,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
@@ -72,54 +73,68 @@ func init() {
 	itemDescSearchKey := itemFields[8].Descriptor()
 	// item.DefaultSearchKey holds the default value on creation for the search_key field.
 	item.DefaultSearchKey = itemDescSearchKey.Default.(string)
+	// itemDescOriginalKey is the schema descriptor for original_key field.
+	itemDescOriginalKey := itemFields[9].Descriptor()
+	// item.DefaultOriginalKey holds the default value on creation for the original_key field.
+	item.DefaultOriginalKey = itemDescOriginalKey.Default.(string)
 	// itemDescOverview is the schema descriptor for overview field.
-	itemDescOverview := itemFields[9].Descriptor()
+	itemDescOverview := itemFields[10].Descriptor()
 	// item.DefaultOverview holds the default value on creation for the overview field.
 	item.DefaultOverview = itemDescOverview.Default.(string)
 	// itemDescTagline is the schema descriptor for tagline field.
-	itemDescTagline := itemFields[10].Descriptor()
+	itemDescTagline := itemFields[11].Descriptor()
 	// item.DefaultTagline holds the default value on creation for the tagline field.
 	item.DefaultTagline = itemDescTagline.Default.(string)
 	// itemDescPath is the schema descriptor for path field.
-	itemDescPath := itemFields[11].Descriptor()
+	itemDescPath := itemFields[12].Descriptor()
 	// item.DefaultPath holds the default value on creation for the path field.
 	item.DefaultPath = itemDescPath.Default.(string)
 	// itemDescProductionYear is the schema descriptor for production_year field.
-	itemDescProductionYear := itemFields[15].Descriptor()
+	itemDescProductionYear := itemFields[16].Descriptor()
 	// item.DefaultProductionYear holds the default value on creation for the production_year field.
 	item.DefaultProductionYear = itemDescProductionYear.Default.(int)
 	// itemDescRuntime is the schema descriptor for runtime field.
-	itemDescRuntime := itemFields[18].Descriptor()
+	itemDescRuntime := itemFields[19].Descriptor()
 	// item.DefaultRuntime holds the default value on creation for the runtime field.
 	item.DefaultRuntime = time.Duration(itemDescRuntime.Default.(int64))
 	// itemDescOfficialRating is the schema descriptor for official_rating field.
-	itemDescOfficialRating := itemFields[19].Descriptor()
+	itemDescOfficialRating := itemFields[20].Descriptor()
 	// item.DefaultOfficialRating holds the default value on creation for the official_rating field.
 	item.DefaultOfficialRating = itemDescOfficialRating.Default.(string)
 	// itemDescParentalRating is the schema descriptor for parental_rating field.
-	itemDescParentalRating := itemFields[20].Descriptor()
+	itemDescParentalRating := itemFields[21].Descriptor()
 	// item.DefaultParentalRating holds the default value on creation for the parental_rating field.
 	item.DefaultParentalRating = itemDescParentalRating.Default.(int)
 	// itemDescCommunityRating is the schema descriptor for community_rating field.
-	itemDescCommunityRating := itemFields[21].Descriptor()
+	itemDescCommunityRating := itemFields[22].Descriptor()
 	// item.DefaultCommunityRating holds the default value on creation for the community_rating field.
 	item.DefaultCommunityRating = itemDescCommunityRating.Default.(float64)
 	// itemDescCriticRating is the schema descriptor for critic_rating field.
-	itemDescCriticRating := itemFields[22].Descriptor()
+	itemDescCriticRating := itemFields[23].Descriptor()
 	// item.DefaultCriticRating holds the default value on creation for the critic_rating field.
 	item.DefaultCriticRating = itemDescCriticRating.Default.(float64)
 	// itemDescSeriesStatus is the schema descriptor for series_status field.
-	itemDescSeriesStatus := itemFields[24].Descriptor()
+	itemDescSeriesStatus := itemFields[25].Descriptor()
 	// item.DefaultSeriesStatus holds the default value on creation for the series_status field.
 	item.DefaultSeriesStatus = itemDescSeriesStatus.Default.(string)
 	// itemDescExtra is the schema descriptor for extra field.
-	itemDescExtra := itemFields[25].Descriptor()
+	itemDescExtra := itemFields[26].Descriptor()
 	// item.DefaultExtra holds the default value on creation for the extra field.
 	item.DefaultExtra = itemDescExtra.Default.(string)
 	// itemDescID is the schema descriptor for id field.
 	itemDescID := itemFields[0].Descriptor()
 	// item.DefaultID holds the default value on creation for the id field.
 	item.DefaultID = itemDescID.Default.(func() core.ID)
+	itemvalueFields := schema.ItemValue{}.Fields()
+	_ = itemvalueFields
+	// itemvalueDescValueKey is the schema descriptor for value_key field.
+	itemvalueDescValueKey := itemvalueFields[3].Descriptor()
+	// itemvalue.DefaultValueKey holds the default value on creation for the value_key field.
+	itemvalue.DefaultValueKey = itemvalueDescValueKey.Default.(string)
+	// itemvalueDescSortKey is the schema descriptor for sort_key field.
+	itemvalueDescSortKey := itemvalueFields[4].Descriptor()
+	// itemvalue.DefaultSortKey holds the default value on creation for the sort_key field.
+	itemvalue.DefaultSortKey = itemvalueDescSortKey.Default.(string)
 	jobFields := schema.Job{}.Fields()
 	_ = jobFields
 	// jobDescUniqueKey is the schema descriptor for unique_key field.
@@ -218,12 +233,20 @@ func init() {
 	personDescSortName := personFields[3].Descriptor()
 	// person.DefaultSortName holds the default value on creation for the sort_name field.
 	person.DefaultSortName = personDescSortName.Default.(string)
+	// personDescSearchKey is the schema descriptor for search_key field.
+	personDescSearchKey := personFields[4].Descriptor()
+	// person.DefaultSearchKey holds the default value on creation for the search_key field.
+	person.DefaultSearchKey = personDescSearchKey.Default.(string)
+	// personDescSortKey is the schema descriptor for sort_key field.
+	personDescSortKey := personFields[5].Descriptor()
+	// person.DefaultSortKey holds the default value on creation for the sort_key field.
+	person.DefaultSortKey = personDescSortKey.Default.(string)
 	// personDescOverview is the schema descriptor for overview field.
-	personDescOverview := personFields[4].Descriptor()
+	personDescOverview := personFields[6].Descriptor()
 	// person.DefaultOverview holds the default value on creation for the overview field.
 	person.DefaultOverview = personDescOverview.Default.(string)
 	// personDescBirthPlace is the schema descriptor for birth_place field.
-	personDescBirthPlace := personFields[7].Descriptor()
+	personDescBirthPlace := personFields[9].Descriptor()
 	// person.DefaultBirthPlace holds the default value on creation for the birth_place field.
 	person.DefaultBirthPlace = personDescBirthPlace.Default.(string)
 	// personDescID is the schema descriptor for id field.

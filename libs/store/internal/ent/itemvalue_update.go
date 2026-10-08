@@ -72,6 +72,34 @@ func (_u *ItemValueUpdate) SetNillableValue(v *string) *ItemValueUpdate {
 	return _u
 }
 
+// SetValueKey sets the "value_key" field.
+func (_u *ItemValueUpdate) SetValueKey(v string) *ItemValueUpdate {
+	_u.mutation.SetValueKey(v)
+	return _u
+}
+
+// SetNillableValueKey sets the "value_key" field if the given value is not nil.
+func (_u *ItemValueUpdate) SetNillableValueKey(v *string) *ItemValueUpdate {
+	if v != nil {
+		_u.SetValueKey(*v)
+	}
+	return _u
+}
+
+// SetSortKey sets the "sort_key" field.
+func (_u *ItemValueUpdate) SetSortKey(v string) *ItemValueUpdate {
+	_u.mutation.SetSortKey(v)
+	return _u
+}
+
+// SetNillableSortKey sets the "sort_key" field if the given value is not nil.
+func (_u *ItemValueUpdate) SetNillableSortKey(v *string) *ItemValueUpdate {
+	if v != nil {
+		_u.SetSortKey(*v)
+	}
+	return _u
+}
+
 // SetOrd sets the "ord" field.
 func (_u *ItemValueUpdate) SetOrd(v int) *ItemValueUpdate {
 	_u.mutation.ResetOrd()
@@ -168,6 +196,12 @@ func (_u *ItemValueUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Value(); ok {
 		_spec.SetField(itemvalue.FieldValue, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.ValueKey(); ok {
+		_spec.SetField(itemvalue.FieldValueKey, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SortKey(); ok {
+		_spec.SetField(itemvalue.FieldSortKey, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Ord(); ok {
 		_spec.SetField(itemvalue.FieldOrd, field.TypeInt, value)
 	}
@@ -263,6 +297,34 @@ func (_u *ItemValueUpdateOne) SetValue(v string) *ItemValueUpdateOne {
 func (_u *ItemValueUpdateOne) SetNillableValue(v *string) *ItemValueUpdateOne {
 	if v != nil {
 		_u.SetValue(*v)
+	}
+	return _u
+}
+
+// SetValueKey sets the "value_key" field.
+func (_u *ItemValueUpdateOne) SetValueKey(v string) *ItemValueUpdateOne {
+	_u.mutation.SetValueKey(v)
+	return _u
+}
+
+// SetNillableValueKey sets the "value_key" field if the given value is not nil.
+func (_u *ItemValueUpdateOne) SetNillableValueKey(v *string) *ItemValueUpdateOne {
+	if v != nil {
+		_u.SetValueKey(*v)
+	}
+	return _u
+}
+
+// SetSortKey sets the "sort_key" field.
+func (_u *ItemValueUpdateOne) SetSortKey(v string) *ItemValueUpdateOne {
+	_u.mutation.SetSortKey(v)
+	return _u
+}
+
+// SetNillableSortKey sets the "sort_key" field if the given value is not nil.
+func (_u *ItemValueUpdateOne) SetNillableSortKey(v *string) *ItemValueUpdateOne {
+	if v != nil {
+		_u.SetSortKey(*v)
 	}
 	return _u
 }
@@ -392,6 +454,12 @@ func (_u *ItemValueUpdateOne) sqlSave(ctx context.Context) (_node *ItemValue, er
 	}
 	if value, ok := _u.mutation.Value(); ok {
 		_spec.SetField(itemvalue.FieldValue, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ValueKey(); ok {
+		_spec.SetField(itemvalue.FieldValueKey, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SortKey(); ok {
+		_spec.SetField(itemvalue.FieldSortKey, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Ord(); ok {
 		_spec.SetField(itemvalue.FieldOrd, field.TypeInt, value)

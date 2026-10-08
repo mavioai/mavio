@@ -1816,6 +1816,7 @@ type ItemMutation struct {
 	sort_key               *string
 	original_title         *string
 	search_key             *string
+	original_key           *string
 	overview               *string
 	tagline                *string
 	_path                  *string
@@ -2280,6 +2281,42 @@ func (m *ItemMutation) OldSearchKey(ctx context.Context) (v string, err error) {
 // ResetSearchKey resets all changes to the "search_key" field.
 func (m *ItemMutation) ResetSearchKey() {
 	m.search_key = nil
+}
+
+// SetOriginalKey sets the "original_key" field.
+func (m *ItemMutation) SetOriginalKey(s string) {
+	m.original_key = &s
+}
+
+// OriginalKey returns the value of the "original_key" field in the mutation.
+func (m *ItemMutation) OriginalKey() (r string, exists bool) {
+	v := m.original_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOriginalKey returns the old "original_key" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldOriginalKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOriginalKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOriginalKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOriginalKey: %w", err)
+	}
+	return oldValue.OriginalKey, nil
+}
+
+// ResetOriginalKey resets all changes to the "original_key" field.
+func (m *ItemMutation) ResetOriginalKey() {
+	m.original_key = nil
 }
 
 // SetOverview sets the "overview" field.
@@ -3811,7 +3848,7 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 29)
+	fields := make([]string, 0, 30)
 	if m.library != nil {
 		fields = append(fields, item.FieldLibraryID)
 	}
@@ -3835,6 +3872,9 @@ func (m *ItemMutation) Fields() []string {
 	}
 	if m.search_key != nil {
 		fields = append(fields, item.FieldSearchKey)
+	}
+	if m.original_key != nil {
+		fields = append(fields, item.FieldOriginalKey)
 	}
 	if m.overview != nil {
 		fields = append(fields, item.FieldOverview)
@@ -3923,6 +3963,8 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 		return m.OriginalTitle()
 	case item.FieldSearchKey:
 		return m.SearchKey()
+	case item.FieldOriginalKey:
+		return m.OriginalKey()
 	case item.FieldOverview:
 		return m.Overview()
 	case item.FieldTagline:
@@ -3990,6 +4032,8 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldOriginalTitle(ctx)
 	case item.FieldSearchKey:
 		return m.OldSearchKey(ctx)
+	case item.FieldOriginalKey:
+		return m.OldOriginalKey(ctx)
 	case item.FieldOverview:
 		return m.OldOverview(ctx)
 	case item.FieldTagline:
@@ -4096,6 +4140,13 @@ func (m *ItemMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSearchKey(v)
+		return nil
+	case item.FieldOriginalKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOriginalKey(v)
 		return nil
 	case item.FieldOverview:
 		v, ok := value.(string)
@@ -4479,6 +4530,9 @@ func (m *ItemMutation) ResetField(name string) error {
 	case item.FieldSearchKey:
 		m.ResetSearchKey()
 		return nil
+	case item.FieldOriginalKey:
+		m.ResetOriginalKey()
+		return nil
 	case item.FieldOverview:
 		m.ResetOverview()
 		return nil
@@ -4848,6 +4902,8 @@ type ItemValueMutation struct {
 	id            *int
 	kind          *string
 	value         *string
+	value_key     *string
+	sort_key      *string
 	ord           *int
 	addord        *int
 	clearedFields map[string]struct{}
@@ -5064,6 +5120,78 @@ func (m *ItemValueMutation) ResetValue() {
 	m.value = nil
 }
 
+// SetValueKey sets the "value_key" field.
+func (m *ItemValueMutation) SetValueKey(s string) {
+	m.value_key = &s
+}
+
+// ValueKey returns the value of the "value_key" field in the mutation.
+func (m *ItemValueMutation) ValueKey() (r string, exists bool) {
+	v := m.value_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValueKey returns the old "value_key" field's value of the ItemValue entity.
+// If the ItemValue object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemValueMutation) OldValueKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValueKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValueKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValueKey: %w", err)
+	}
+	return oldValue.ValueKey, nil
+}
+
+// ResetValueKey resets all changes to the "value_key" field.
+func (m *ItemValueMutation) ResetValueKey() {
+	m.value_key = nil
+}
+
+// SetSortKey sets the "sort_key" field.
+func (m *ItemValueMutation) SetSortKey(s string) {
+	m.sort_key = &s
+}
+
+// SortKey returns the value of the "sort_key" field in the mutation.
+func (m *ItemValueMutation) SortKey() (r string, exists bool) {
+	v := m.sort_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSortKey returns the old "sort_key" field's value of the ItemValue entity.
+// If the ItemValue object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemValueMutation) OldSortKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSortKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSortKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSortKey: %w", err)
+	}
+	return oldValue.SortKey, nil
+}
+
+// ResetSortKey resets all changes to the "sort_key" field.
+func (m *ItemValueMutation) ResetSortKey() {
+	m.sort_key = nil
+}
+
 // SetOrd sets the "ord" field.
 func (m *ItemValueMutation) SetOrd(i int) {
 	m.ord = &i
@@ -5181,7 +5309,7 @@ func (m *ItemValueMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemValueMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
 	if m.item != nil {
 		fields = append(fields, itemvalue.FieldItemID)
 	}
@@ -5190,6 +5318,12 @@ func (m *ItemValueMutation) Fields() []string {
 	}
 	if m.value != nil {
 		fields = append(fields, itemvalue.FieldValue)
+	}
+	if m.value_key != nil {
+		fields = append(fields, itemvalue.FieldValueKey)
+	}
+	if m.sort_key != nil {
+		fields = append(fields, itemvalue.FieldSortKey)
 	}
 	if m.ord != nil {
 		fields = append(fields, itemvalue.FieldOrd)
@@ -5208,6 +5342,10 @@ func (m *ItemValueMutation) Field(name string) (ent.Value, bool) {
 		return m.Kind()
 	case itemvalue.FieldValue:
 		return m.Value()
+	case itemvalue.FieldValueKey:
+		return m.ValueKey()
+	case itemvalue.FieldSortKey:
+		return m.SortKey()
 	case itemvalue.FieldOrd:
 		return m.Ord()
 	}
@@ -5225,6 +5363,10 @@ func (m *ItemValueMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldKind(ctx)
 	case itemvalue.FieldValue:
 		return m.OldValue(ctx)
+	case itemvalue.FieldValueKey:
+		return m.OldValueKey(ctx)
+	case itemvalue.FieldSortKey:
+		return m.OldSortKey(ctx)
 	case itemvalue.FieldOrd:
 		return m.OldOrd(ctx)
 	}
@@ -5256,6 +5398,20 @@ func (m *ItemValueMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetValue(v)
+		return nil
+	case itemvalue.FieldValueKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValueKey(v)
+		return nil
+	case itemvalue.FieldSortKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSortKey(v)
 		return nil
 	case itemvalue.FieldOrd:
 		v, ok := value.(int)
@@ -5336,6 +5492,12 @@ func (m *ItemValueMutation) ResetField(name string) error {
 		return nil
 	case itemvalue.FieldValue:
 		m.ResetValue()
+		return nil
+	case itemvalue.FieldValueKey:
+		m.ResetValueKey()
+		return nil
+	case itemvalue.FieldSortKey:
+		m.ResetSortKey()
 		return nil
 	case itemvalue.FieldOrd:
 		m.ResetOrd()
@@ -8669,6 +8831,8 @@ type PersonMutation struct {
 	name           *string
 	name_key       *string
 	sort_name      *string
+	search_key     *string
+	sort_key       *string
 	overview       *string
 	birth_date     *time.Time
 	death_date     *time.Time
@@ -8896,6 +9060,78 @@ func (m *PersonMutation) OldSortName(ctx context.Context) (v string, err error) 
 // ResetSortName resets all changes to the "sort_name" field.
 func (m *PersonMutation) ResetSortName() {
 	m.sort_name = nil
+}
+
+// SetSearchKey sets the "search_key" field.
+func (m *PersonMutation) SetSearchKey(s string) {
+	m.search_key = &s
+}
+
+// SearchKey returns the value of the "search_key" field in the mutation.
+func (m *PersonMutation) SearchKey() (r string, exists bool) {
+	v := m.search_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSearchKey returns the old "search_key" field's value of the Person entity.
+// If the Person object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PersonMutation) OldSearchKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSearchKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSearchKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSearchKey: %w", err)
+	}
+	return oldValue.SearchKey, nil
+}
+
+// ResetSearchKey resets all changes to the "search_key" field.
+func (m *PersonMutation) ResetSearchKey() {
+	m.search_key = nil
+}
+
+// SetSortKey sets the "sort_key" field.
+func (m *PersonMutation) SetSortKey(s string) {
+	m.sort_key = &s
+}
+
+// SortKey returns the value of the "sort_key" field in the mutation.
+func (m *PersonMutation) SortKey() (r string, exists bool) {
+	v := m.sort_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSortKey returns the old "sort_key" field's value of the Person entity.
+// If the Person object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PersonMutation) OldSortKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSortKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSortKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSortKey: %w", err)
+	}
+	return oldValue.SortKey, nil
+}
+
+// ResetSortKey resets all changes to the "sort_key" field.
+func (m *PersonMutation) ResetSortKey() {
+	m.sort_key = nil
 }
 
 // SetOverview sets the "overview" field.
@@ -9259,7 +9495,7 @@ func (m *PersonMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PersonMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 10)
 	if m.name != nil {
 		fields = append(fields, person.FieldName)
 	}
@@ -9268,6 +9504,12 @@ func (m *PersonMutation) Fields() []string {
 	}
 	if m.sort_name != nil {
 		fields = append(fields, person.FieldSortName)
+	}
+	if m.search_key != nil {
+		fields = append(fields, person.FieldSearchKey)
+	}
+	if m.sort_key != nil {
+		fields = append(fields, person.FieldSortKey)
 	}
 	if m.overview != nil {
 		fields = append(fields, person.FieldOverview)
@@ -9298,6 +9540,10 @@ func (m *PersonMutation) Field(name string) (ent.Value, bool) {
 		return m.NameKey()
 	case person.FieldSortName:
 		return m.SortName()
+	case person.FieldSearchKey:
+		return m.SearchKey()
+	case person.FieldSortKey:
+		return m.SortKey()
 	case person.FieldOverview:
 		return m.Overview()
 	case person.FieldBirthDate:
@@ -9323,6 +9569,10 @@ func (m *PersonMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldNameKey(ctx)
 	case person.FieldSortName:
 		return m.OldSortName(ctx)
+	case person.FieldSearchKey:
+		return m.OldSearchKey(ctx)
+	case person.FieldSortKey:
+		return m.OldSortKey(ctx)
 	case person.FieldOverview:
 		return m.OldOverview(ctx)
 	case person.FieldBirthDate:
@@ -9362,6 +9612,20 @@ func (m *PersonMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSortName(v)
+		return nil
+	case person.FieldSearchKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSearchKey(v)
+		return nil
+	case person.FieldSortKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSortKey(v)
 		return nil
 	case person.FieldOverview:
 		v, ok := value.(string)
@@ -9476,6 +9740,12 @@ func (m *PersonMutation) ResetField(name string) error {
 		return nil
 	case person.FieldSortName:
 		m.ResetSortName()
+		return nil
+	case person.FieldSearchKey:
+		m.ResetSearchKey()
+		return nil
+	case person.FieldSortKey:
+		m.ResetSortKey()
 		return nil
 	case person.FieldOverview:
 		m.ResetOverview()

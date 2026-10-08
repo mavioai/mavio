@@ -48,7 +48,9 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 | `tests/Jellyfin.MediaEncoding.Hls.Tests` | Keyframe-based dynamic HLS playlist generation | `libs/streaming` |
 | `tests/Jellyfin.Drawing.Skia.Tests` | Resize dimension calculation, sharpening, SVG security validation | `libs/imaging` |
 | `tests/Jellyfin.Server.Implementations.Tests/Trickplay` | Trickplay generation parameters | `libs/imaging` / `libs/media` |
-| `tests/Jellyfin.Extensions.Tests`, `Jellyfin.Common.Tests` | Generic string and path utilities | Merged into the relevant libraries as needed |
+| `tests/Jellyfin.Controller.Tests/Entities/BaseItemTests.cs` | Sort names (`GetSortName`, `ModifySortChunks`) | `libs/store` |
+| `tests/Jellyfin.Extensions.Tests/StringExtensionsTests.cs` | Diacritics removal used by search keys | `libs/store` |
+| `tests/Jellyfin.Extensions.Tests`, `Jellyfin.Common.Tests` (other classes) | Generic string and path utilities | Merged into the relevant libraries as needed |
 | `Jellyfin.Api.Tests`, `Jellyfin.Server.Integration.Tests` | HTTP API behavior | Not ported for now (to be evaluated together with the shim later) |
 
 ---

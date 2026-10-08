@@ -16,9 +16,14 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"regexp"
+	"slices"
 	"strings"
 
 	atlasmigrate "ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/postgres"
+	atlasschema "ariga.io/atlas/sql/schema"
+	"ariga.io/atlas/sql/sqlite"
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
@@ -94,6 +99,9 @@ func run(ctx context.Context) error {
 		schema.WithDialect(drv),
 		schema.WithFormatter(formatter(drv)),
 		schema.WithErrNoPlan(true),
+		schema.WithDropIndex(true),
+		schema.WithDropColumn(true),
+		schema.WithDiffHook(skipEquivalentIndexes),
 	)
 	if err != nil {
 		return err
@@ -132,4 +140,69 @@ func (doubleQuoteFormatter) Format(plan *atlasmigrate.Plan) ([]atlasmigrate.File
 	quoted := *plan
 	quoted.Changes = changes
 	return atlasmigrate.DefaultFormatter.Format(&quoted)
+}
+
+// skipEquivalentIndexes drops index modifications that only reflect how the
+// database normalizes a partial index's WHERE clause (PostgreSQL adds casts
+// and parentheses and rewrites IN as = ANY), which would otherwise appear in
+// every migration. Predicates that differ after normalization are kept.
+func skipEquivalentIndexes(next schema.Differ) schema.Differ {
+	return schema.DiffFunc(func(current, desired *atlasschema.Schema) ([]atlasschema.Change, error) {
+		changes, err := next.Diff(current, desired)
+		if err != nil {
+			return nil, err
+		}
+		kept := changes[:0]
+		for _, c := range changes {
+			if mt, ok := c.(*atlasschema.ModifyTable); ok {
+				mt.Changes = slices.DeleteFunc(mt.Changes, equivalentIndex)
+				if len(mt.Changes) == 0 {
+					continue
+				}
+			}
+			kept = append(kept, c)
+		}
+		return kept, nil
+	})
+}
+
+// equivalentIndex reports whether c modifies only an index predicate into an
+// equivalent one.
+func equivalentIndex(c atlasschema.Change) bool {
+	m, ok := c.(*atlasschema.ModifyIndex)
+	if !ok || m.Change != atlasschema.ChangeAttr {
+		return false
+	}
+	from, to := predicate(m.From), predicate(m.To)
+	return from != "" && normalizePredicate(from) == normalizePredicate(to)
+}
+
+func predicate(idx *atlasschema.Index) string {
+	for _, a := range idx.Attrs {
+		switch a := a.(type) {
+		case *postgres.IndexPredicate:
+			return a.P
+		case *sqlite.IndexPredicate:
+			return a.P
+		}
+	}
+	return ""
+}
+
+var (
+	predicateCast = regexp.MustCompile(`::(text|character varying|integer|bigint|boolean)(\[\])?`)
+	predicateAny  = regexp.MustCompile(`=any\(array\[([^\]]*)\]\)`)
+)
+
+// normalizePredicate reduces a predicate to a canonical form: lower case,
+// no casts, IN lists instead of = ANY (ARRAY[…]), no parentheses or spaces.
+func normalizePredicate(p string) string {
+	p = strings.ToLower(p)
+	p = predicateCast.ReplaceAllString(p, "")
+	p = strings.Join(strings.Fields(p), "")
+	for strings.Contains(p, "((") || strings.Contains(p, "))") {
+		p = strings.ReplaceAll(strings.ReplaceAll(p, "((", "("), "))", ")")
+	}
+	p = predicateAny.ReplaceAllString(p, "in($1)")
+	return strings.NewReplacer("(", "", ")", "").Replace(p)
 }

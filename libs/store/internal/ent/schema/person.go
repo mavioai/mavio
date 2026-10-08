@@ -27,6 +27,10 @@ func (Person) Fields() []ent.Field {
 		// name_key is the lower-cased name for case-insensitive lookups.
 		field.String("name_key"),
 		field.String("sort_name").Default(""),
+		// search_key is the clean form of the name (Jellyfin's CleanName);
+		// sort_key the Jellyfin sort form of the sort name.
+		field.String("search_key").Default(""),
+		field.String("sort_key").Default(""),
 		field.Text("overview").Default(""),
 		field.Time("birth_date").Optional().Nillable(),
 		field.Time("death_date").Optional().Nillable(),

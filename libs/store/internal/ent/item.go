@@ -36,6 +36,8 @@ type Item struct {
 	OriginalTitle string `json:"original_title,omitempty"`
 	// SearchKey holds the value of the "search_key" field.
 	SearchKey string `json:"search_key,omitempty"`
+	// OriginalKey holds the value of the "original_key" field.
+	OriginalKey string `json:"original_key,omitempty"`
 	// Overview holds the value of the "overview" field.
 	Overview string `json:"overview,omitempty"`
 	// Tagline holds the value of the "tagline" field.
@@ -222,7 +224,7 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating:
 			values[i] = new(sql.NullInt64)
-		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldSeriesStatus, item.FieldExtra:
+		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldSeriesStatus, item.FieldExtra:
 			values[i] = new(sql.NullString)
 		case item.FieldPremiereDate, item.FieldEndDate, item.FieldDateAdded, item.FieldFileModified, item.FieldMetadataRefreshedAt:
 			values[i] = new(sql.NullTime)
@@ -295,6 +297,12 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field search_key", values[i])
 			} else if value.Valid {
 				_m.SearchKey = value.String
+			}
+		case item.FieldOriginalKey:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field original_key", values[i])
+			} else if value.Valid {
+				_m.OriginalKey = value.String
 			}
 		case item.FieldOverview:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -543,6 +551,9 @@ func (_m *Item) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("search_key=")
 	builder.WriteString(_m.SearchKey)
+	builder.WriteString(", ")
+	builder.WriteString("original_key=")
+	builder.WriteString(_m.OriginalKey)
 	builder.WriteString(", ")
 	builder.WriteString("overview=")
 	builder.WriteString(_m.Overview)

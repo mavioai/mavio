@@ -19,6 +19,10 @@ const (
 	FieldNameKey = "name_key"
 	// FieldSortName holds the string denoting the sort_name field in the database.
 	FieldSortName = "sort_name"
+	// FieldSearchKey holds the string denoting the search_key field in the database.
+	FieldSearchKey = "search_key"
+	// FieldSortKey holds the string denoting the sort_key field in the database.
+	FieldSortKey = "sort_key"
 	// FieldOverview holds the string denoting the overview field in the database.
 	FieldOverview = "overview"
 	// FieldBirthDate holds the string denoting the birth_date field in the database.
@@ -57,6 +61,8 @@ var Columns = []string{
 	FieldName,
 	FieldNameKey,
 	FieldSortName,
+	FieldSearchKey,
+	FieldSortKey,
 	FieldOverview,
 	FieldBirthDate,
 	FieldDeathDate,
@@ -79,6 +85,10 @@ var (
 	NameValidator func(string) error
 	// DefaultSortName holds the default value on creation for the "sort_name" field.
 	DefaultSortName string
+	// DefaultSearchKey holds the default value on creation for the "search_key" field.
+	DefaultSearchKey string
+	// DefaultSortKey holds the default value on creation for the "sort_key" field.
+	DefaultSortKey string
 	// DefaultOverview holds the default value on creation for the "overview" field.
 	DefaultOverview string
 	// DefaultBirthPlace holds the default value on creation for the "birth_place" field.
@@ -108,6 +118,16 @@ func ByNameKey(opts ...sql.OrderTermOption) OrderOption {
 // BySortName orders the results by the sort_name field.
 func BySortName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSortName, opts...).ToFunc()
+}
+
+// BySearchKey orders the results by the search_key field.
+func BySearchKey(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSearchKey, opts...).ToFunc()
+}
+
+// BySortKey orders the results by the sort_key field.
+func BySortKey(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSortKey, opts...).ToFunc()
 }
 
 // ByOverview orders the results by the overview field.

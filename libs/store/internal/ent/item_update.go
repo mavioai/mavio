@@ -154,6 +154,20 @@ func (_u *ItemUpdate) SetNillableSearchKey(v *string) *ItemUpdate {
 	return _u
 }
 
+// SetOriginalKey sets the "original_key" field.
+func (_u *ItemUpdate) SetOriginalKey(v string) *ItemUpdate {
+	_u.mutation.SetOriginalKey(v)
+	return _u
+}
+
+// SetNillableOriginalKey sets the "original_key" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableOriginalKey(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetOriginalKey(*v)
+	}
+	return _u
+}
+
 // SetOverview sets the "overview" field.
 func (_u *ItemUpdate) SetOverview(v string) *ItemUpdate {
 	_u.mutation.SetOverview(v)
@@ -911,6 +925,9 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.SearchKey(); ok {
 		_spec.SetField(item.FieldSearchKey, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.OriginalKey(); ok {
+		_spec.SetField(item.FieldOriginalKey, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Overview(); ok {
 		_spec.SetField(item.FieldOverview, field.TypeString, value)
 	}
@@ -1557,6 +1574,20 @@ func (_u *ItemUpdateOne) SetSearchKey(v string) *ItemUpdateOne {
 func (_u *ItemUpdateOne) SetNillableSearchKey(v *string) *ItemUpdateOne {
 	if v != nil {
 		_u.SetSearchKey(*v)
+	}
+	return _u
+}
+
+// SetOriginalKey sets the "original_key" field.
+func (_u *ItemUpdateOne) SetOriginalKey(v string) *ItemUpdateOne {
+	_u.mutation.SetOriginalKey(v)
+	return _u
+}
+
+// SetNillableOriginalKey sets the "original_key" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableOriginalKey(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetOriginalKey(*v)
 	}
 	return _u
 }
@@ -2347,6 +2378,9 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 	}
 	if value, ok := _u.mutation.SearchKey(); ok {
 		_spec.SetField(item.FieldSearchKey, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OriginalKey(); ok {
+		_spec.SetField(item.FieldOriginalKey, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Overview(); ok {
 		_spec.SetField(item.FieldOverview, field.TypeString, value)

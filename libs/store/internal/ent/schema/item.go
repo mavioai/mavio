@@ -31,12 +31,16 @@ func (Item) Fields() []ent.Field {
 		field.String("kind"),
 		field.String("name"),
 		field.String("sort_name"),
-		// sort_key is the folded sort name used for ordering.
+		// sort_key is the Jellyfin-style sort key of the sort name (articles
+		// and punctuation removed, numbers padded, transliterated); it orders
+		// names and matches the sort form of search terms.
 		field.String("sort_key"),
 		field.String("original_title").Default(""),
-		// search_key is the folded name and original title (lower case, no
-		// diacritics, half-width) matched by substring search.
+		// search_key is the clean form of the name (Jellyfin's CleanName),
+		// matched and ranked by search; original_key is the lower-cased
+		// original title without diacritics, matched by raw search terms.
 		field.String("search_key").Default(""),
+		field.String("original_key").Default(""),
 		field.Text("overview").Default(""),
 		field.String("tagline").Default(""),
 		field.String("path").Default(""),
@@ -106,6 +110,10 @@ func (ItemValue) Fields() []ent.Field {
 		// "genre", "tag", "studio", "artist" or "album_artist".
 		field.String("kind"),
 		field.String("value"),
+		// value_key is the clean form of the value (Jellyfin's CleanValue),
+		// for search, filters and grouping; sort_key is its sort form.
+		field.String("value_key").Default(""),
+		field.String("sort_key").Default(""),
 		// Position within the item's list, to preserve order.
 		field.Int("ord"),
 	}
@@ -122,6 +130,6 @@ func (ItemValue) Edges() []ent.Edge {
 func (ItemValue) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("item_id", "kind", "ord").Unique(),
-		index.Fields("kind", "value"),
+		index.Fields("kind", "value_key"),
 	}
 }

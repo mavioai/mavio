@@ -48,6 +48,9 @@ type ItemRepository interface {
 	// Delete removes items together with their descendants, extras, media
 	// sources, images, credits and user data.
 	Delete(ctx context.Context, ids ...ID) error
+	// Values lists distinct attribute values (genres, studios, …), ranked by
+	// relevance when q.Search is set and by name otherwise.
+	Values(ctx context.Context, q ValueQuery) ([]string, error)
 }
 
 // MediaSourceRepository stores the media sources of items.
@@ -70,6 +73,9 @@ type PersonRepository interface {
 	// FindByName matches the name case-insensitively.
 	FindByName(ctx context.Context, name string) (Person, error)
 	Upsert(ctx context.Context, people ...Person) error
+	// Search lists people ranked by relevance when q.Search is set and by
+	// sort name otherwise.
+	Search(ctx context.Context, q PersonQuery) ([]Person, error)
 	CreditsForItem(ctx context.Context, itemID ID) ([]Credit, error)
 	// ReplaceCredits sets the item's credits, removing any others.
 	ReplaceCredits(ctx context.Context, itemID ID, credits []Credit) error

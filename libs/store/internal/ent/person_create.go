@@ -52,6 +52,34 @@ func (_c *PersonCreate) SetNillableSortName(v *string) *PersonCreate {
 	return _c
 }
 
+// SetSearchKey sets the "search_key" field.
+func (_c *PersonCreate) SetSearchKey(v string) *PersonCreate {
+	_c.mutation.SetSearchKey(v)
+	return _c
+}
+
+// SetNillableSearchKey sets the "search_key" field if the given value is not nil.
+func (_c *PersonCreate) SetNillableSearchKey(v *string) *PersonCreate {
+	if v != nil {
+		_c.SetSearchKey(*v)
+	}
+	return _c
+}
+
+// SetSortKey sets the "sort_key" field.
+func (_c *PersonCreate) SetSortKey(v string) *PersonCreate {
+	_c.mutation.SetSortKey(v)
+	return _c
+}
+
+// SetNillableSortKey sets the "sort_key" field if the given value is not nil.
+func (_c *PersonCreate) SetNillableSortKey(v *string) *PersonCreate {
+	if v != nil {
+		_c.SetSortKey(*v)
+	}
+	return _c
+}
+
 // SetOverview sets the "overview" field.
 func (_c *PersonCreate) SetOverview(v string) *PersonCreate {
 	_c.mutation.SetOverview(v)
@@ -197,6 +225,14 @@ func (_c *PersonCreate) defaults() {
 		v := person.DefaultSortName
 		_c.mutation.SetSortName(v)
 	}
+	if _, ok := _c.mutation.SearchKey(); !ok {
+		v := person.DefaultSearchKey
+		_c.mutation.SetSearchKey(v)
+	}
+	if _, ok := _c.mutation.SortKey(); !ok {
+		v := person.DefaultSortKey
+		_c.mutation.SetSortKey(v)
+	}
 	if _, ok := _c.mutation.Overview(); !ok {
 		v := person.DefaultOverview
 		_c.mutation.SetOverview(v)
@@ -226,6 +262,12 @@ func (_c *PersonCreate) check() error {
 	}
 	if _, ok := _c.mutation.SortName(); !ok {
 		return &ValidationError{Name: "sort_name", err: errors.New(`ent: missing required field "Person.sort_name"`)}
+	}
+	if _, ok := _c.mutation.SearchKey(); !ok {
+		return &ValidationError{Name: "search_key", err: errors.New(`ent: missing required field "Person.search_key"`)}
+	}
+	if _, ok := _c.mutation.SortKey(); !ok {
+		return &ValidationError{Name: "sort_key", err: errors.New(`ent: missing required field "Person.sort_key"`)}
 	}
 	if _, ok := _c.mutation.Overview(); !ok {
 		return &ValidationError{Name: "overview", err: errors.New(`ent: missing required field "Person.overview"`)}
@@ -280,6 +322,14 @@ func (_c *PersonCreate) createSpec() (*Person, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SortName(); ok {
 		_spec.SetField(person.FieldSortName, field.TypeString, value)
 		_node.SortName = value
+	}
+	if value, ok := _c.mutation.SearchKey(); ok {
+		_spec.SetField(person.FieldSearchKey, field.TypeString, value)
+		_node.SearchKey = value
+	}
+	if value, ok := _c.mutation.SortKey(); ok {
+		_spec.SetField(person.FieldSortKey, field.TypeString, value)
+		_node.SortKey = value
 	}
 	if value, ok := _c.mutation.Overview(); ok {
 		_spec.SetField(person.FieldOverview, field.TypeString, value)
@@ -418,6 +468,30 @@ func (u *PersonUpsert) SetSortName(v string) *PersonUpsert {
 // UpdateSortName sets the "sort_name" field to the value that was provided on create.
 func (u *PersonUpsert) UpdateSortName() *PersonUpsert {
 	u.SetExcluded(person.FieldSortName)
+	return u
+}
+
+// SetSearchKey sets the "search_key" field.
+func (u *PersonUpsert) SetSearchKey(v string) *PersonUpsert {
+	u.Set(person.FieldSearchKey, v)
+	return u
+}
+
+// UpdateSearchKey sets the "search_key" field to the value that was provided on create.
+func (u *PersonUpsert) UpdateSearchKey() *PersonUpsert {
+	u.SetExcluded(person.FieldSearchKey)
+	return u
+}
+
+// SetSortKey sets the "sort_key" field.
+func (u *PersonUpsert) SetSortKey(v string) *PersonUpsert {
+	u.Set(person.FieldSortKey, v)
+	return u
+}
+
+// UpdateSortKey sets the "sort_key" field to the value that was provided on create.
+func (u *PersonUpsert) UpdateSortKey() *PersonUpsert {
+	u.SetExcluded(person.FieldSortKey)
 	return u
 }
 
@@ -586,6 +660,34 @@ func (u *PersonUpsertOne) SetSortName(v string) *PersonUpsertOne {
 func (u *PersonUpsertOne) UpdateSortName() *PersonUpsertOne {
 	return u.Update(func(s *PersonUpsert) {
 		s.UpdateSortName()
+	})
+}
+
+// SetSearchKey sets the "search_key" field.
+func (u *PersonUpsertOne) SetSearchKey(v string) *PersonUpsertOne {
+	return u.Update(func(s *PersonUpsert) {
+		s.SetSearchKey(v)
+	})
+}
+
+// UpdateSearchKey sets the "search_key" field to the value that was provided on create.
+func (u *PersonUpsertOne) UpdateSearchKey() *PersonUpsertOne {
+	return u.Update(func(s *PersonUpsert) {
+		s.UpdateSearchKey()
+	})
+}
+
+// SetSortKey sets the "sort_key" field.
+func (u *PersonUpsertOne) SetSortKey(v string) *PersonUpsertOne {
+	return u.Update(func(s *PersonUpsert) {
+		s.SetSortKey(v)
+	})
+}
+
+// UpdateSortKey sets the "sort_key" field to the value that was provided on create.
+func (u *PersonUpsertOne) UpdateSortKey() *PersonUpsertOne {
+	return u.Update(func(s *PersonUpsert) {
+		s.UpdateSortKey()
 	})
 }
 
@@ -934,6 +1036,34 @@ func (u *PersonUpsertBulk) SetSortName(v string) *PersonUpsertBulk {
 func (u *PersonUpsertBulk) UpdateSortName() *PersonUpsertBulk {
 	return u.Update(func(s *PersonUpsert) {
 		s.UpdateSortName()
+	})
+}
+
+// SetSearchKey sets the "search_key" field.
+func (u *PersonUpsertBulk) SetSearchKey(v string) *PersonUpsertBulk {
+	return u.Update(func(s *PersonUpsert) {
+		s.SetSearchKey(v)
+	})
+}
+
+// UpdateSearchKey sets the "search_key" field to the value that was provided on create.
+func (u *PersonUpsertBulk) UpdateSearchKey() *PersonUpsertBulk {
+	return u.Update(func(s *PersonUpsert) {
+		s.UpdateSearchKey()
+	})
+}
+
+// SetSortKey sets the "sort_key" field.
+func (u *PersonUpsertBulk) SetSortKey(v string) *PersonUpsertBulk {
+	return u.Update(func(s *PersonUpsert) {
+		s.SetSortKey(v)
+	})
+}
+
+// UpdateSortKey sets the "sort_key" field to the value that was provided on create.
+func (u *PersonUpsertBulk) UpdateSortKey() *PersonUpsertBulk {
+	return u.Update(func(s *PersonUpsert) {
+		s.UpdateSortKey()
 	})
 }
 

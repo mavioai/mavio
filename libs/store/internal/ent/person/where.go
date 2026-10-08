@@ -71,6 +71,16 @@ func SortName(v string) predicate.Person {
 	return predicate.Person(sql.FieldEQ(FieldSortName, v))
 }
 
+// SearchKey applies equality check predicate on the "search_key" field. It's identical to SearchKeyEQ.
+func SearchKey(v string) predicate.Person {
+	return predicate.Person(sql.FieldEQ(FieldSearchKey, v))
+}
+
+// SortKey applies equality check predicate on the "sort_key" field. It's identical to SortKeyEQ.
+func SortKey(v string) predicate.Person {
+	return predicate.Person(sql.FieldEQ(FieldSortKey, v))
+}
+
 // Overview applies equality check predicate on the "overview" field. It's identical to OverviewEQ.
 func Overview(v string) predicate.Person {
 	return predicate.Person(sql.FieldEQ(FieldOverview, v))
@@ -284,6 +294,136 @@ func SortNameEqualFold(v string) predicate.Person {
 // SortNameContainsFold applies the ContainsFold predicate on the "sort_name" field.
 func SortNameContainsFold(v string) predicate.Person {
 	return predicate.Person(sql.FieldContainsFold(FieldSortName, v))
+}
+
+// SearchKeyEQ applies the EQ predicate on the "search_key" field.
+func SearchKeyEQ(v string) predicate.Person {
+	return predicate.Person(sql.FieldEQ(FieldSearchKey, v))
+}
+
+// SearchKeyNEQ applies the NEQ predicate on the "search_key" field.
+func SearchKeyNEQ(v string) predicate.Person {
+	return predicate.Person(sql.FieldNEQ(FieldSearchKey, v))
+}
+
+// SearchKeyIn applies the In predicate on the "search_key" field.
+func SearchKeyIn(vs ...string) predicate.Person {
+	return predicate.Person(sql.FieldIn(FieldSearchKey, vs...))
+}
+
+// SearchKeyNotIn applies the NotIn predicate on the "search_key" field.
+func SearchKeyNotIn(vs ...string) predicate.Person {
+	return predicate.Person(sql.FieldNotIn(FieldSearchKey, vs...))
+}
+
+// SearchKeyGT applies the GT predicate on the "search_key" field.
+func SearchKeyGT(v string) predicate.Person {
+	return predicate.Person(sql.FieldGT(FieldSearchKey, v))
+}
+
+// SearchKeyGTE applies the GTE predicate on the "search_key" field.
+func SearchKeyGTE(v string) predicate.Person {
+	return predicate.Person(sql.FieldGTE(FieldSearchKey, v))
+}
+
+// SearchKeyLT applies the LT predicate on the "search_key" field.
+func SearchKeyLT(v string) predicate.Person {
+	return predicate.Person(sql.FieldLT(FieldSearchKey, v))
+}
+
+// SearchKeyLTE applies the LTE predicate on the "search_key" field.
+func SearchKeyLTE(v string) predicate.Person {
+	return predicate.Person(sql.FieldLTE(FieldSearchKey, v))
+}
+
+// SearchKeyContains applies the Contains predicate on the "search_key" field.
+func SearchKeyContains(v string) predicate.Person {
+	return predicate.Person(sql.FieldContains(FieldSearchKey, v))
+}
+
+// SearchKeyHasPrefix applies the HasPrefix predicate on the "search_key" field.
+func SearchKeyHasPrefix(v string) predicate.Person {
+	return predicate.Person(sql.FieldHasPrefix(FieldSearchKey, v))
+}
+
+// SearchKeyHasSuffix applies the HasSuffix predicate on the "search_key" field.
+func SearchKeyHasSuffix(v string) predicate.Person {
+	return predicate.Person(sql.FieldHasSuffix(FieldSearchKey, v))
+}
+
+// SearchKeyEqualFold applies the EqualFold predicate on the "search_key" field.
+func SearchKeyEqualFold(v string) predicate.Person {
+	return predicate.Person(sql.FieldEqualFold(FieldSearchKey, v))
+}
+
+// SearchKeyContainsFold applies the ContainsFold predicate on the "search_key" field.
+func SearchKeyContainsFold(v string) predicate.Person {
+	return predicate.Person(sql.FieldContainsFold(FieldSearchKey, v))
+}
+
+// SortKeyEQ applies the EQ predicate on the "sort_key" field.
+func SortKeyEQ(v string) predicate.Person {
+	return predicate.Person(sql.FieldEQ(FieldSortKey, v))
+}
+
+// SortKeyNEQ applies the NEQ predicate on the "sort_key" field.
+func SortKeyNEQ(v string) predicate.Person {
+	return predicate.Person(sql.FieldNEQ(FieldSortKey, v))
+}
+
+// SortKeyIn applies the In predicate on the "sort_key" field.
+func SortKeyIn(vs ...string) predicate.Person {
+	return predicate.Person(sql.FieldIn(FieldSortKey, vs...))
+}
+
+// SortKeyNotIn applies the NotIn predicate on the "sort_key" field.
+func SortKeyNotIn(vs ...string) predicate.Person {
+	return predicate.Person(sql.FieldNotIn(FieldSortKey, vs...))
+}
+
+// SortKeyGT applies the GT predicate on the "sort_key" field.
+func SortKeyGT(v string) predicate.Person {
+	return predicate.Person(sql.FieldGT(FieldSortKey, v))
+}
+
+// SortKeyGTE applies the GTE predicate on the "sort_key" field.
+func SortKeyGTE(v string) predicate.Person {
+	return predicate.Person(sql.FieldGTE(FieldSortKey, v))
+}
+
+// SortKeyLT applies the LT predicate on the "sort_key" field.
+func SortKeyLT(v string) predicate.Person {
+	return predicate.Person(sql.FieldLT(FieldSortKey, v))
+}
+
+// SortKeyLTE applies the LTE predicate on the "sort_key" field.
+func SortKeyLTE(v string) predicate.Person {
+	return predicate.Person(sql.FieldLTE(FieldSortKey, v))
+}
+
+// SortKeyContains applies the Contains predicate on the "sort_key" field.
+func SortKeyContains(v string) predicate.Person {
+	return predicate.Person(sql.FieldContains(FieldSortKey, v))
+}
+
+// SortKeyHasPrefix applies the HasPrefix predicate on the "sort_key" field.
+func SortKeyHasPrefix(v string) predicate.Person {
+	return predicate.Person(sql.FieldHasPrefix(FieldSortKey, v))
+}
+
+// SortKeyHasSuffix applies the HasSuffix predicate on the "sort_key" field.
+func SortKeyHasSuffix(v string) predicate.Person {
+	return predicate.Person(sql.FieldHasSuffix(FieldSortKey, v))
+}
+
+// SortKeyEqualFold applies the EqualFold predicate on the "sort_key" field.
+func SortKeyEqualFold(v string) predicate.Person {
+	return predicate.Person(sql.FieldEqualFold(FieldSortKey, v))
+}
+
+// SortKeyContainsFold applies the ContainsFold predicate on the "sort_key" field.
+func SortKeyContainsFold(v string) predicate.Person {
+	return predicate.Person(sql.FieldContainsFold(FieldSortKey, v))
 }
 
 // OverviewEQ applies the EQ predicate on the "overview" field.

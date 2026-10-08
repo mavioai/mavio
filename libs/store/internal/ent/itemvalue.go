@@ -24,6 +24,10 @@ type ItemValue struct {
 	Kind string `json:"kind,omitempty"`
 	// Value holds the value of the "value" field.
 	Value string `json:"value,omitempty"`
+	// ValueKey holds the value of the "value_key" field.
+	ValueKey string `json:"value_key,omitempty"`
+	// SortKey holds the value of the "sort_key" field.
+	SortKey string `json:"sort_key,omitempty"`
 	// Ord holds the value of the "ord" field.
 	Ord int `json:"ord,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -61,7 +65,7 @@ func (*ItemValue) scanValues(columns []string) ([]any, error) {
 			values[i] = new(core.ID)
 		case itemvalue.FieldID, itemvalue.FieldOrd:
 			values[i] = new(sql.NullInt64)
-		case itemvalue.FieldKind, itemvalue.FieldValue:
+		case itemvalue.FieldKind, itemvalue.FieldValue, itemvalue.FieldValueKey, itemvalue.FieldSortKey:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -101,6 +105,18 @@ func (_m *ItemValue) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field value", values[i])
 			} else if value.Valid {
 				_m.Value = value.String
+			}
+		case itemvalue.FieldValueKey:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field value_key", values[i])
+			} else if value.Valid {
+				_m.ValueKey = value.String
+			}
+		case itemvalue.FieldSortKey:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field sort_key", values[i])
+			} else if value.Valid {
+				_m.SortKey = value.String
 			}
 		case itemvalue.FieldOrd:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -157,6 +173,12 @@ func (_m *ItemValue) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("value=")
 	builder.WriteString(_m.Value)
+	builder.WriteString(", ")
+	builder.WriteString("value_key=")
+	builder.WriteString(_m.ValueKey)
+	builder.WriteString(", ")
+	builder.WriteString("sort_key=")
+	builder.WriteString(_m.SortKey)
 	builder.WriteString(", ")
 	builder.WriteString("ord=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Ord))

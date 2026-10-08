@@ -105,6 +105,7 @@ var (
 		{Name: "sort_key", Type: field.TypeString},
 		{Name: "original_title", Type: field.TypeString, Default: ""},
 		{Name: "search_key", Type: field.TypeString, Default: ""},
+		{Name: "original_key", Type: field.TypeString, Default: ""},
 		{Name: "overview", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "tagline", Type: field.TypeString, Default: ""},
 		{Name: "path", Type: field.TypeString, Default: ""},
@@ -137,19 +138,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "items_items_children",
-				Columns:    []*schema.Column{ItemsColumns[27]},
-				RefColumns: []*schema.Column{ItemsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "items_items_extras",
 				Columns:    []*schema.Column{ItemsColumns[28]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "items_libraries_items",
+				Symbol:     "items_items_extras",
 				Columns:    []*schema.Column{ItemsColumns[29]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "items_libraries_items",
+				Columns:    []*schema.Column{ItemsColumns[30]},
 				RefColumns: []*schema.Column{LibrariesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -158,7 +159,7 @@ var (
 			{
 				Name:    "item_library_id_path",
 				Unique:  true,
-				Columns: []*schema.Column{ItemsColumns[29], ItemsColumns[9]},
+				Columns: []*schema.Column{ItemsColumns[30], ItemsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "path <> ''",
 				},
@@ -166,22 +167,22 @@ var (
 			{
 				Name:    "item_parent_id_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[27], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[28], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_library_id_kind_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[29], ItemsColumns[1], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[30], ItemsColumns[1], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_owner_id",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[28]},
+				Columns: []*schema.Column{ItemsColumns[29]},
 			},
 			{
 				Name:    "item_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[24]},
+				Columns: []*schema.Column{ItemsColumns[25]},
 			},
 		},
 	}
@@ -190,6 +191,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "kind", Type: field.TypeString},
 		{Name: "value", Type: field.TypeString},
+		{Name: "value_key", Type: field.TypeString, Default: ""},
+		{Name: "sort_key", Type: field.TypeString, Default: ""},
 		{Name: "ord", Type: field.TypeInt},
 		{Name: "item_id", Type: field.TypeUUID},
 	}
@@ -201,7 +204,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "item_values_items_values",
-				Columns:    []*schema.Column{ItemValuesColumns[4]},
+				Columns:    []*schema.Column{ItemValuesColumns[6]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -210,12 +213,12 @@ var (
 			{
 				Name:    "itemvalue_item_id_kind_ord",
 				Unique:  true,
-				Columns: []*schema.Column{ItemValuesColumns[4], ItemValuesColumns[1], ItemValuesColumns[3]},
+				Columns: []*schema.Column{ItemValuesColumns[6], ItemValuesColumns[1], ItemValuesColumns[5]},
 			},
 			{
-				Name:    "itemvalue_kind_value",
+				Name:    "itemvalue_kind_value_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemValuesColumns[1], ItemValuesColumns[2]},
+				Columns: []*schema.Column{ItemValuesColumns[1], ItemValuesColumns[3]},
 			},
 		},
 	}
@@ -318,6 +321,8 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "name_key", Type: field.TypeString},
 		{Name: "sort_name", Type: field.TypeString, Default: ""},
+		{Name: "search_key", Type: field.TypeString, Default: ""},
+		{Name: "sort_key", Type: field.TypeString, Default: ""},
 		{Name: "overview", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "birth_date", Type: field.TypeTime, Nullable: true},
 		{Name: "death_date", Type: field.TypeTime, Nullable: true},

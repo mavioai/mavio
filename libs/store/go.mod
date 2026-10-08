@@ -8,6 +8,7 @@ require (
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/lib/pq v1.10.9
 	github.com/mavioai/mavio/libs/core v0.0.0
+	github.com/mozillazg/go-unidecode v0.2.0
 	github.com/ncruces/go-sqlite3 v0.35.6
 	github.com/testcontainers/testcontainers-go v0.44.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0

@@ -169,10 +169,10 @@ erDiagram
 | 端口 | 职责 |
 | :--- | :--- |
 | `LibraryRepository` | 增删改查；删除媒体库会删除其全部条目 |
-| `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（按 ID 顺序以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`（同一媒体库内路径唯一：`ErrConflict`）、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据） |
+| `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（按 ID 顺序以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`（同一媒体库内路径唯一：`ErrConflict`）、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据）、`Values`（去重后的流派、标签、工作室或艺人，见 §9.2） |
 | `MediaSourceRepository` | 列出并 `Replace` 条目的媒体源 |
 | `ImageRepository` | 列出并 `Replace` 所有者的图片 |
-| `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、列出并 `Replace` 条目的署名 |
+| `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、`Search`（见 §9.2）、列出并 `Replace` 条目的署名 |
 | `UserRepository` | 增删改查，以及不区分大小写的 `GetByName` |
 | `UserDataRepository` | `Get`（不存在时返回 `ErrNotFound`）、按一组条目 `GetMany`、`Put` |
 | `JobQueue` | `Enqueue`（报告是否入队）、`Lease`、`Extend`、`Complete`、`Fail` |
@@ -185,9 +185,17 @@ erDiagram
 `ItemQuery` 中零值字段表示"不过滤"：
 
 * 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`Kinds`、`IncludeExtras`。
-* 内容：`Search` 按子串匹配名称或原始标题，忽略大小写、重音和全角/半角差异（因此中日韩标题和短关键词都可用）；`Genres`、`Tags`、`Studios`（匹配任意一个）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`（未分级的条目默认包含，除非设置 `SkipUnrated`）。
-* 名称排序不区分大小写和重音；按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
+* 内容：`Search`（见 §9.2）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`（未分级的条目默认包含，除非设置 `SkipUnrated`）。
+* 名称按排序名以 Jellyfin 的方式排序：不区分大小写和重音，忽略开头、中间和结尾的冠词（"the"、"a"、"an"），去掉标点 `,&-{}'` 并把 `.+%` 视为空格，数字按数值排序（"Rocky 2" 在 "Rocky 10" 之前），非拉丁文字转写为拉丁字母（中文按拼音排序）。按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
 * 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`，以及 `last_played` / `play_count` 排序。
 * 排序：`SortSpec` 列表；结果总是以 ID 作为最后的排序键，保证分页稳定。
 * 分页：`Limit`（为零表示上限 `MaxPageSize` = 1000）与 `Offset`；`Page.Total` 为所有页的总数。
 * `Validate` 拒绝不一致的查询：超出范围的 limit、负的 offset、没有父级的 `Recursive`、空的年份区间、未知的种类或排序字段，以及没有用户的用户过滤或排序。
+
+### 9.2 搜索
+条目搜索（`ItemQuery.Search`）、人员搜索（`PersonRepository.Search`，按姓名）和值列表（`ItemRepository.Values` 与 `ValueQuery`）遵循 Jellyfin 内置搜索提供者的规则：
+
+* **清洗形式**：名称与关键词以清洗形式比较：去除变音符号、转小写、把非字母非数字的字符都替换为空格、合并空白（因此 "Spider-Man" 即 "spider man"）。全角字符也会转为半角。清洗后为空的关键词不做过滤。
+* **匹配**：满足以下任一条件即匹配：清洗后的名称包含清洗后的关键词；原始标题（仅条目；转小写、去变音符号）与去掉首尾空白的关键词按模式匹配，其中 `%` 匹配任意长度字符、`_` 匹配单个字符；或排序名（§9.1）与关键词的排序形式按同样的模式匹配。排序形式使 "spiderman" 能找到 "Spider-Man"，"hanks tom" 能找到排序名为 "Hanks, Tom" 的人员，拼音能找到中文标题。
+* **相关度**：结果先按清洗后名称的相关度排列，再应用其他排序：完全匹配最先，其次是以关键词开头的名称，然后是包含"关键词加空格"的名称，最后是其余结果。相关度相同时，条目按 `Sort` 再按排序名，人员按排序名，值列表按值的排序名排序。
+* **值列表**：`ValueQuery` 列出某个 `ValueKind`（`genre`、`tag`、`studio`，或包含专辑艺人的 `artist`）的去重值，可用 `LibraryIDs` 限定范围。清洗形式相同的值视为同一个值，`Genres`、`Tags`、`Studios` 过滤也是如此。

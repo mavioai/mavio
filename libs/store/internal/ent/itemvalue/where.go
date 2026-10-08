@@ -69,6 +69,16 @@ func Value(v string) predicate.ItemValue {
 	return predicate.ItemValue(sql.FieldEQ(FieldValue, v))
 }
 
+// ValueKey applies equality check predicate on the "value_key" field. It's identical to ValueKeyEQ.
+func ValueKey(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldEQ(FieldValueKey, v))
+}
+
+// SortKey applies equality check predicate on the "sort_key" field. It's identical to SortKeyEQ.
+func SortKey(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldEQ(FieldSortKey, v))
+}
+
 // Ord applies equality check predicate on the "ord" field. It's identical to OrdEQ.
 func Ord(v int) predicate.ItemValue {
 	return predicate.ItemValue(sql.FieldEQ(FieldOrd, v))
@@ -222,6 +232,136 @@ func ValueEqualFold(v string) predicate.ItemValue {
 // ValueContainsFold applies the ContainsFold predicate on the "value" field.
 func ValueContainsFold(v string) predicate.ItemValue {
 	return predicate.ItemValue(sql.FieldContainsFold(FieldValue, v))
+}
+
+// ValueKeyEQ applies the EQ predicate on the "value_key" field.
+func ValueKeyEQ(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldEQ(FieldValueKey, v))
+}
+
+// ValueKeyNEQ applies the NEQ predicate on the "value_key" field.
+func ValueKeyNEQ(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldNEQ(FieldValueKey, v))
+}
+
+// ValueKeyIn applies the In predicate on the "value_key" field.
+func ValueKeyIn(vs ...string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldIn(FieldValueKey, vs...))
+}
+
+// ValueKeyNotIn applies the NotIn predicate on the "value_key" field.
+func ValueKeyNotIn(vs ...string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldNotIn(FieldValueKey, vs...))
+}
+
+// ValueKeyGT applies the GT predicate on the "value_key" field.
+func ValueKeyGT(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldGT(FieldValueKey, v))
+}
+
+// ValueKeyGTE applies the GTE predicate on the "value_key" field.
+func ValueKeyGTE(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldGTE(FieldValueKey, v))
+}
+
+// ValueKeyLT applies the LT predicate on the "value_key" field.
+func ValueKeyLT(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldLT(FieldValueKey, v))
+}
+
+// ValueKeyLTE applies the LTE predicate on the "value_key" field.
+func ValueKeyLTE(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldLTE(FieldValueKey, v))
+}
+
+// ValueKeyContains applies the Contains predicate on the "value_key" field.
+func ValueKeyContains(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldContains(FieldValueKey, v))
+}
+
+// ValueKeyHasPrefix applies the HasPrefix predicate on the "value_key" field.
+func ValueKeyHasPrefix(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldHasPrefix(FieldValueKey, v))
+}
+
+// ValueKeyHasSuffix applies the HasSuffix predicate on the "value_key" field.
+func ValueKeyHasSuffix(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldHasSuffix(FieldValueKey, v))
+}
+
+// ValueKeyEqualFold applies the EqualFold predicate on the "value_key" field.
+func ValueKeyEqualFold(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldEqualFold(FieldValueKey, v))
+}
+
+// ValueKeyContainsFold applies the ContainsFold predicate on the "value_key" field.
+func ValueKeyContainsFold(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldContainsFold(FieldValueKey, v))
+}
+
+// SortKeyEQ applies the EQ predicate on the "sort_key" field.
+func SortKeyEQ(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldEQ(FieldSortKey, v))
+}
+
+// SortKeyNEQ applies the NEQ predicate on the "sort_key" field.
+func SortKeyNEQ(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldNEQ(FieldSortKey, v))
+}
+
+// SortKeyIn applies the In predicate on the "sort_key" field.
+func SortKeyIn(vs ...string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldIn(FieldSortKey, vs...))
+}
+
+// SortKeyNotIn applies the NotIn predicate on the "sort_key" field.
+func SortKeyNotIn(vs ...string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldNotIn(FieldSortKey, vs...))
+}
+
+// SortKeyGT applies the GT predicate on the "sort_key" field.
+func SortKeyGT(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldGT(FieldSortKey, v))
+}
+
+// SortKeyGTE applies the GTE predicate on the "sort_key" field.
+func SortKeyGTE(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldGTE(FieldSortKey, v))
+}
+
+// SortKeyLT applies the LT predicate on the "sort_key" field.
+func SortKeyLT(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldLT(FieldSortKey, v))
+}
+
+// SortKeyLTE applies the LTE predicate on the "sort_key" field.
+func SortKeyLTE(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldLTE(FieldSortKey, v))
+}
+
+// SortKeyContains applies the Contains predicate on the "sort_key" field.
+func SortKeyContains(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldContains(FieldSortKey, v))
+}
+
+// SortKeyHasPrefix applies the HasPrefix predicate on the "sort_key" field.
+func SortKeyHasPrefix(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldHasPrefix(FieldSortKey, v))
+}
+
+// SortKeyHasSuffix applies the HasSuffix predicate on the "sort_key" field.
+func SortKeyHasSuffix(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldHasSuffix(FieldSortKey, v))
+}
+
+// SortKeyEqualFold applies the EqualFold predicate on the "sort_key" field.
+func SortKeyEqualFold(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldEqualFold(FieldSortKey, v))
+}
+
+// SortKeyContainsFold applies the ContainsFold predicate on the "sort_key" field.
+func SortKeyContainsFold(v string) predicate.ItemValue {
+	return predicate.ItemValue(sql.FieldContainsFold(FieldSortKey, v))
 }
 
 // OrdEQ applies the EQ predicate on the "ord" field.

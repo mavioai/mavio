@@ -73,7 +73,26 @@ func migrate(ctx context.Context, db *sql.DB, dialect string) error {
 }
 
 func applyMigration(ctx context.Context, db *sql.DB, dialect, version, body string) error {
-	tx, err := db.BeginTx(ctx, nil)
+	conn, err := db.Conn(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	// SQLite migrations that rebuild tables turn foreign keys off, but the
+	// pragma is a no-op inside a transaction: dropping the old table would
+	// cascade-delete every referencing row. Turn enforcement off on this
+	// connection before the transaction, verify integrity before committing
+	// and turn it back on afterwards.
+	rebuild := dialect == DialectSQLite && strings.Contains(body, "PRAGMA foreign_keys = off")
+	if rebuild {
+		if _, err := conn.ExecContext(ctx, "PRAGMA foreign_keys = off"); err != nil {
+			return err
+		}
+		defer func() { _, _ = conn.ExecContext(context.WithoutCancel(ctx), "PRAGMA foreign_keys = on") }()
+	}
+
+	tx, err := conn.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -90,5 +109,23 @@ func applyMigration(ctx context.Context, db *sql.DB, dialect, version, body stri
 	if _, err := tx.ExecContext(ctx, insert, version, time.Now().Unix()); err != nil {
 		return err
 	}
+	if rebuild {
+		if err := foreignKeyCheck(ctx, tx); err != nil {
+			return err
+		}
+	}
 	return tx.Commit()
+}
+
+// foreignKeyCheck fails if any row violates a foreign key.
+func foreignKeyCheck(ctx context.Context, tx *sql.Tx) error {
+	rows, err := tx.QueryContext(ctx, "PRAGMA foreign_key_check")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	if rows.Next() {
+		return fmt.Errorf("migration leaves rows violating foreign keys")
+	}
+	return rows.Err()
 }

@@ -74,6 +74,34 @@ func (_u *PersonUpdate) SetNillableSortName(v *string) *PersonUpdate {
 	return _u
 }
 
+// SetSearchKey sets the "search_key" field.
+func (_u *PersonUpdate) SetSearchKey(v string) *PersonUpdate {
+	_u.mutation.SetSearchKey(v)
+	return _u
+}
+
+// SetNillableSearchKey sets the "search_key" field if the given value is not nil.
+func (_u *PersonUpdate) SetNillableSearchKey(v *string) *PersonUpdate {
+	if v != nil {
+		_u.SetSearchKey(*v)
+	}
+	return _u
+}
+
+// SetSortKey sets the "sort_key" field.
+func (_u *PersonUpdate) SetSortKey(v string) *PersonUpdate {
+	_u.mutation.SetSortKey(v)
+	return _u
+}
+
+// SetNillableSortKey sets the "sort_key" field if the given value is not nil.
+func (_u *PersonUpdate) SetNillableSortKey(v *string) *PersonUpdate {
+	if v != nil {
+		_u.SetSortKey(*v)
+	}
+	return _u
+}
+
 // SetOverview sets the "overview" field.
 func (_u *PersonUpdate) SetOverview(v string) *PersonUpdate {
 	_u.mutation.SetOverview(v)
@@ -295,6 +323,12 @@ func (_u *PersonUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.SortName(); ok {
 		_spec.SetField(person.FieldSortName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.SearchKey(); ok {
+		_spec.SetField(person.FieldSearchKey, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SortKey(); ok {
+		_spec.SetField(person.FieldSortKey, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Overview(); ok {
 		_spec.SetField(person.FieldOverview, field.TypeString, value)
 	}
@@ -469,6 +503,34 @@ func (_u *PersonUpdateOne) SetSortName(v string) *PersonUpdateOne {
 func (_u *PersonUpdateOne) SetNillableSortName(v *string) *PersonUpdateOne {
 	if v != nil {
 		_u.SetSortName(*v)
+	}
+	return _u
+}
+
+// SetSearchKey sets the "search_key" field.
+func (_u *PersonUpdateOne) SetSearchKey(v string) *PersonUpdateOne {
+	_u.mutation.SetSearchKey(v)
+	return _u
+}
+
+// SetNillableSearchKey sets the "search_key" field if the given value is not nil.
+func (_u *PersonUpdateOne) SetNillableSearchKey(v *string) *PersonUpdateOne {
+	if v != nil {
+		_u.SetSearchKey(*v)
+	}
+	return _u
+}
+
+// SetSortKey sets the "sort_key" field.
+func (_u *PersonUpdateOne) SetSortKey(v string) *PersonUpdateOne {
+	_u.mutation.SetSortKey(v)
+	return _u
+}
+
+// SetNillableSortKey sets the "sort_key" field if the given value is not nil.
+func (_u *PersonUpdateOne) SetNillableSortKey(v *string) *PersonUpdateOne {
+	if v != nil {
+		_u.SetSortKey(*v)
 	}
 	return _u
 }
@@ -723,6 +785,12 @@ func (_u *PersonUpdateOne) sqlSave(ctx context.Context) (_node *Person, err erro
 	}
 	if value, ok := _u.mutation.SortName(); ok {
 		_spec.SetField(person.FieldSortName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SearchKey(); ok {
+		_spec.SetField(person.FieldSearchKey, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SortKey(); ok {
+		_spec.SetField(person.FieldSortKey, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Overview(); ok {
 		_spec.SetField(person.FieldOverview, field.TypeString, value)
