@@ -17,7 +17,8 @@
     { "source": "tests/Jellyfin.MediaEncoding.Hls.Tests", "target": "libs/streaming/testdata/cases" },
     { "source": "tests/Jellyfin.Drawing.Skia.Tests", "target": "libs/imaging/testdata/cases" },
     { "source": "tests/Jellyfin.Controller.Tests/Entities/BaseItemTests.cs", "target": "libs/store/testdata/cases" },
-    { "source": "tests/Jellyfin.Extensions.Tests/StringExtensionsTests.cs", "target": "libs/store/testdata/cases" }
+    { "source": "tests/Jellyfin.Extensions.Tests/StringExtensionsTests.cs", "target": "libs/store/testdata/cases" },
+    { "source": "tests/Jellyfin.Common.Tests/Providers/ProviderIdParserTests.cs", "target": "libs/metadata/testdata/cases/nfo" }
   ],
   "assets": [
     { "source": "tests/Jellyfin.XbmcMetadata.Tests/Test Data", "target": "libs/metadata/testdata/nfo", "recursive": true },
