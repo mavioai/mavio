@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os/exec"
 	"runtime"
+	"slices"
 	"strings"
 )
 
@@ -86,6 +87,10 @@ func (c *Capabilities) CanEncodeAudio(codec string) bool {
 	}
 	return c.SupportsEncoder(codec)
 }
+
+// CanExtractSubtitles reports whether embedded subtitles in codec can be
+// extracted to a file: ffmpeg copies out any subtitle stream it demuxes.
+func (c *Capabilities) CanExtractSubtitles(string) bool { return true }
 
 // Vulkan device extensions required for DRM format modifiers and for DMA-BUF
 // interop with VA-API.
@@ -170,6 +175,12 @@ func (d *Detector) Detect(ctx context.Context) (*Capabilities, error) {
 		c.VAAPI.VulkanDRMModifier = containsAll(exts, vulkanDRMModifierExts)
 		c.VAAPI.VulkanDRMInterop = containsAll(exts, vulkanDRMInteropExts)
 	}
+	if c.SupportsHwaccel("videotoolbox") && !d.trialEncode(ctx, "h264_videotoolbox", "-allow_sw", "0") {
+		// Listed but unusable, as in virtual machines without a GPU.
+		d.logger().InfoContext(ctx, "VideoToolbox is listed but cannot encode; disabling it")
+		c.Hwaccels = slices.DeleteFunc(c.Hwaccels, func(h string) bool { return h == "videotoolbox" })
+		c.Encoders = slices.DeleteFunc(c.Encoders, func(e string) bool { return strings.HasSuffix(e, "_videotoolbox") })
+	}
 	if runtime.GOOS == "darwin" && c.SupportsHwaccel("videotoolbox") {
 		brand, err := CPUBrand()
 		if err != nil {
@@ -178,6 +189,14 @@ func (d *Detector) Detect(ctx context.Context) (*Capabilities, error) {
 		c.VideoToolboxAV1 = err == nil && HasAV1HardwareDecode(runtime.GOARCH, brand)
 	}
 	return c, ctx.Err()
+}
+
+// trialEncode encodes a few blank frames with encoder to check that the
+// hardware behind it works.
+func (d *Detector) trialEncode(ctx context.Context, encoder string, opts ...string) bool {
+	args := []string{"-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", "color=c=black:s=256x144:r=25:d=0.2", "-c:v", encoder}
+	args = append(args, opts...)
+	return d.succeeds(ctx, d.FFmpeg, append(args, "-f", "null", "-")...)
 }
 
 func containsAll(s string, subs []string) bool {
