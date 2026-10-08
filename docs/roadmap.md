@@ -85,7 +85,7 @@ flowchart TD
 ### P3 Media Pipeline
 **Scope**: `probe`, `keyframes`, `hwaccel`, `decision`, `planner`, `supervisor`.
 
-**Done when**: all ported StreamBuilder and EncodingHelper cases pass; real transcode smoke tests pass on each vendor path on real hardware.
+**Done when**: all ported StreamBuilder and EncodingHelper cases pass; real transcode smoke tests pass on the hardware available: the maintainers' own machines and the GitHub-hosted CI runners. Vendor paths without such hardware are covered by the ported argument-derivation cases only.
 
 ### P4 Scanning and First Plugin
 **Scope**: `library` scanner (full reconciliation, see [Architecture §9](architecture.md#9-library-scanning-and-change-detection-libslibrary)), resolver chain, job scheduling; `plugins/scraper-tmdb` (WASM).
@@ -115,5 +115,5 @@ flowchart TD
 | Cost of dual-dialect sqlc | Hot queries need two copies of the SQL | Keep the ≤ 30-query budget; rely on conformance tests |
 | Pure-Go image resizing performance | Large images may resize too slowly | Resize large images with ffmpeg ([Architecture §6.2](architecture.md#62-performance-strategy)) |
 | SVG rasterization | Pure-Go options are incomplete | Evaluate a WASM build of resvg in P2, or only serve SVGs as-is |
-| Hardware test coverage | Needs real Intel, NVIDIA, AMD, Apple and Rockchip hardware | Set up self-hosted CI runners or a hardware test pool before P3 |
+| Hardware test coverage | Only the maintainers' machines and GitHub-hosted runners are available; other vendors' encoders are untested on real hardware | Real transcode tests run where the hardware exists and skip elsewhere; other vendor paths rely on the ported EncodingHelper cases |
 | Go modules split too finely | Friction in dependency upgrades and tidying | Keep watching; merge modules when needed |

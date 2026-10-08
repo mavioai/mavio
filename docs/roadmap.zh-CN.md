@@ -85,7 +85,7 @@ flowchart TD
 ### P3 媒体管线
 **范围**：`probe`、`keyframes`、`hwaccel`、`decision`、`planner`、`supervisor`。
 
-**完成标准**：StreamBuilder 与 EncodingHelper 的移植用例全部通过；各厂商路径在真实硬件上的转码冒烟测试通过。
+**完成标准**：StreamBuilder 与 EncodingHelper 的移植用例全部通过；在现有硬件（维护者自己的机器与 GitHub 托管的 CI runner）上的真实转码冒烟测试通过；没有对应硬件的厂商路径只由移植的参数推导用例覆盖。
 
 ### P4 扫描与插件落地
 **范围**：`library` 扫描器（全量对账，见[架构 §9](architecture.zh-CN.md#9-媒体库扫描与变更检测libslibrary)）、解析器链、任务调度；`plugins/scraper-tmdb`（WASM）。
@@ -115,5 +115,5 @@ flowchart TD
 | sqlc 双方言维护成本 | 热点查询需要两份 SQL | 坚持 ≤ 30 条预算；靠一致性测试兜底 |
 | 纯 Go 图像缩放性能 | 大图缩放可能过慢 | 大图改走 ffmpeg 缩放（[架构 §6.2](architecture.zh-CN.md#62-性能策略)） |
 | SVG 栅格化 | 纯 Go 方案不完善 | P2 评估 resvg 的 WASM 版本，或只做原样下发 |
-| 硬件测试覆盖 | 需要 Intel、NVIDIA、AMD、Apple、Rockchip 实机 | P3 前搭建自托管 CI runner 或硬件测试池 |
+| 硬件测试覆盖 | 只有维护者自己的机器与 GitHub 托管 runner，其他厂商的编码器无法在实机上测试 | 真实转码测试在有硬件处运行、其余处跳过；其他厂商路径依赖移植的 EncodingHelper 用例 |
 | Go 模块拆分过细 | 依赖升级与 tidy 的摩擦 | 持续观察，必要时合并模块 |

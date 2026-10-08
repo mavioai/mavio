@@ -12,7 +12,7 @@
 | :--- | :--- | :--- | :--- |
 | Unit tests | Pure logic; no network, no real ffmpeg, no hardware. Table-driven, many ported from Jellyfin | `*_test.go` next to the code, data in `testdata/` | Every CI run, all platforms |
 | Conformance tests | The same repository test suite on SQLite (temporary file) and PostgreSQL (a testcontainers-go container, or the server in `MAVIO_TEST_POSTGRES_DSN`; skipped without Docker or with `-short`); both must pass | `libs/store` | Every CI run (PostgreSQL on Linux) |
-| Integration tests | Real ffmpeg / ffprobe, generated test media, real hardware encoders; call `t.Skip` with a reason when prerequisites are missing | Next to the code, behind prerequisites | CI where prerequisites exist; hardware runners for vendor paths |
+| Integration tests | Real ffmpeg / ffprobe, generated test media, real hardware encoders; call `t.Skip` with a reason when prerequisites are missing | Next to the code, behind prerequisites | CI where prerequisites exist; vendor paths only on the hardware available (maintainers' machines, GitHub-hosted runners) |
 | Smoke tests | Wire the libraries completed so far together inside the server (see [Roadmap §1](roadmap.md#1-principles)) | `apps/server/internal/smoke` | Every CI run |
 
 Concurrency logic involving timeouts, timers or idle reaping is tested deterministically with `testing/synctest`.
