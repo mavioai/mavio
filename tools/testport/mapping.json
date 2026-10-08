@@ -32,6 +32,7 @@
     { "source": "tests/Jellyfin.MediaEncoding.Keyframes.Tests/FfProbe/Test Data", "target": "libs/media/keyframes/testdata/ffprobe", "recursive": true }
   ],
   "constants": [
-    { "source": "tests/Jellyfin.MediaEncoding.Tests/EncoderValidatorTestsData.cs", "target": "libs/media/hwaccel/testdata/ffmpeg/version_outputs.json" }
+    { "source": "tests/Jellyfin.MediaEncoding.Tests/EncoderValidatorTestsData.cs", "target": "libs/media/hwaccel/testdata/ffmpeg/version_outputs.json" },
+    { "source": "tests/Jellyfin.Controller.Tests/MediaEncoding/EncodingHelperAudioBitStreamTests.cs", "target": "libs/media/planner/testdata/constants/audio_bit_stream.json" }
   ]
 }

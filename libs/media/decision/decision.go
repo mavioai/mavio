@@ -99,6 +99,10 @@ func (d *Decision) Option(codec, name string) string {
 	return d.options[strings.ToLower(name)]
 }
 
+// SetOption sets a target option for codec, or for any codec when codec
+// is empty.
+func (d *Decision) SetOption(codec, name, value string) { d.setOption(codec, name, value) }
+
 func (d *Decision) setOption(codec, name, value string) {
 	if d.options == nil {
 		d.options = map[string]string{}
