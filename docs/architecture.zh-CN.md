@@ -237,37 +237,40 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
 两种运行时都实现 `libs/proto/mavio/plugin/v1` 中定义的同一组服务（`MetadataProvider`、`AuthProvider`、`Notifier`……）。宿主侧通过统一的 `plugin.Host` 接口调用，不感知插件具体跑在哪种运行时。
 
 ### 7.2 WASM 运行时
-* **ABI**：直接基于 wazero 自定义精简 ABI。导出函数 `mavio_call(method_id, ptr, len) -> (ptr, len)`，参数和返回值都是 Protobuf 编码的消息；外加 `mavio_alloc` / `mavio_free`。
-* **宿主函数**（能力式授权，由 manifest 声明，安装时由管理员确认）：
-  * `http_fetch`：受域名白名单约束，由宿主代为执行请求；
-  * `kv_get` / `kv_set`：插件私有存储；
-  * `log`：接入宿主的 slog；
-  * `config_get`：读取插件配置。
-* **文件系统**：默认不挂载；确需访问时按 manifest 以只读方式挂载指定目录。
-* **资源限制**：内存页上限；每次调用的 `context` 超时（`WithCloseOnContextDone`）；编译缓存（`CompilationCache`）持久化到磁盘以加速冷启动。
-* **并发**：每个插件维护一个实例池，实例之间不共享状态。
-* **约束**：`wasip1` 下的 Go 没有真正的线程和套接字，网络请求一律通过 `http_fetch` 宿主函数完成。
+* **调用即 Connect 请求**：宿主的 Connect 客户端使用一个特殊的 HTTP transport：它不走网络连接，而是把请求（路径、头、body）编码成信封写入插件内存，再调用模块导出的 `mavio_call(ptr, len) -> (ptr << 32 | len)`；`mavio_alloc` / `mavio_free` 管理共享缓冲区。插件内部由 `guest/wasm` 把请求交给插件注册的标准 Connect handler，并返回响应信封（状态码、头、body）。因此两种运行时的插件代码完全相同。
+* **构建模式**：插件是 WASI reactor（`GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared`）；宿主为每个实例执行一次 `_initialize`。
+* **宿主函数**（模块 `mavio`）：
+  * `http_fetch(ptr, len) -> (handle << 32 | len)`：若 manifest 的 `http_hosts` 允许目标主机，由宿主代为执行 HTTP 请求；`http_read(handle, ptr)` 把结果拷贝进插件内存。分两步是为了避免在宿主函数中回调插件，Go 的 wasip1 运行时不支持这种重入。插件侧 SDK 把它们封装成普通的 `*http.Client`（`guest.HTTPClient()`）。
+  * 插件把日志写到 stderr（以及 stdout），由宿主转发到自己的日志。
+  * 配置通过 `Configure` RPC 下发，而不是宿主函数。
+* **文件系统**：默认不挂载任何目录；manifest 中 `read_paths` 列出的目录以只读方式挂载在相同路径。
+* **实例**：每个插件有自己的 wazero 运行时和一个模块实例池（实例数即并发调用数）。调用中发生 trap、panic、退出或超时的实例会被丢弃并替换，因此失败的调用不会影响宿主或后续调用。插件接受的配置会在每个实例的下一次调用前重放。
+* **资源限制**：每个实例的内存页上限；每次调用的超时（`WithCloseOnContextDone`）；编译缓存（`CompilationCache`）持久化到磁盘，因为编译模块的耗时远大于实例化。
+* **约束**：`wasip1` 下的 Go 没有套接字，所有网络访问都经过 `http_fetch`。
 
 ### 7.3 子进程运行时
-* **统一使用 Unix Domain Socket**：Linux / macOS 原生支持，Windows 10 1803 起支持 `AF_UNIX`。
-* **握手**：宿主创建一个权限为 0700 的私有临时目录，生成 socket 路径与一次性 token，通过环境变量传给子进程。子进程监听后在 stdout 输出一行就绪握手（协议版本、插件 manifest 摘要）；此后所有请求都携带 token 校验。
-* **通信**：在 UDS 上跑 Connect（HTTP/2 h2c），直接复用 `libs/proto` 生成的 handler / client。
-* **生命周期**：健康检查（`Health` RPC）、崩溃后指数退避重启、stderr 日志转发到宿主 slog、优雅退出（先发 `Shutdown` RPC，超时后 SIGTERM，再超时 SIGKILL），宿主退出时连带清理子进程（Linux 用 `Pdeathsig`，Windows 用 Job Object）。
+* **统一使用 Unix Domain Socket**：Linux / macOS 原生支持，Windows 10 1803 起支持 `AF_UNIX`。socket 位于一个权限为 0700 的私有目录中，放在较短的基础路径下，因为 socket 路径长度限制在 100 字节左右。
+* **握手**：宿主通过 `MAVIO_PLUGIN_SOCKET` / `MAVIO_PLUGIN_TOKEN` 传入 socket 路径与一次性 token。插件开始监听后在 stdout 输出一行 JSON（`{"mavio_plugin":1,"plugin_id":…}`）；宿主检查协议版本与插件 ID。此后每个请求都以 `Authorization: Bearer …` 携带 token。
+* **通信**：在 socket 上跑 Connect（HTTP/2 h2c），直接复用 `libs/proto` 生成的 handler / client。
+* **监督**：stdout 与 stderr 转发到宿主日志；定期调用 `Health` RPC（连续三次失败即结束进程）；进程退出后，监督者以指数退避（1 秒起翻倍，最长一分钟）重启插件，期间的调用会等待插件恢复。
+* **关闭**：`Close` 先发送 `Shutdown` RPC（插件侧 SDK 随后退出），然后 SIGTERM，最后 SIGKILL。在 Linux 上，宿主进程意外退出时内核也会结束插件（`Pdeathsig`）。
+* **权限**：子进程插件拥有操作系统层面的网络与文件访问能力；`http_hosts` 与 `read_paths` 只由 WASM 运行时强制执行，因此不需要这些能力的插件应以 WASM 形式发布。
 * **热插拔**：安装、更新、卸载插件都不需要重启宿主。
 
 ### 7.4 插件 SDK 结构
 ```text
 libs/plugin/
-├── manifest/        # 插件清单：id、版本、运行时类型、能力声明、配置 JSON-Schema
-├── host/            # 宿主侧：注册表、统一调用接口、安装与升级
-│   ├── wasm/        # wazero 运行时、宿主函数、实例池
-│   └── process/     # 子进程运行时、UDS 握手、监督与重启
-├── guest/           # 插件侧 SDK
-│   ├── wasm/        # //go:build wasip1：导出函数、宿主函数绑定
-│   └── process/     # 监听 UDS、完成握手、注册 Connect handler
-└── schema/          # 由 Go 结构体生成 JSON-Schema 的辅助工具（供未来的动态配置表单使用）
+├── manifest/        # manifest.json 加载与校验、主机权限、配置 JSON Schema 校验
+├── host/            # 宿主侧：Open（任一运行时，并与 Describe 结果核对）、Configure、Plugin 接口
+│   ├── wasm/        # wazero 运行时、实例池、http_fetch / http_read 宿主函数
+│   └── process/     # 子进程、socket 握手、token、监督与重启
+├── guest/           # 插件侧：Handle（注册 Connect handler）、HTTPClient
+│   ├── wasm/        # //go:build wasip1：模块导出、经宿主访问 HTTP
+│   └── process/     # Serve：监听 socket、认证、握手、收到 Shutdown 后退出
+├── internal/        # abi（WASM 信封）、proc（子进程协议）、clients、testplugin
+└── schema/          # （后期）由 Go 结构体生成配置表单用的 JSON Schema
 ```
-插件作者写的业务代码只实现 `plugin/v1` 中的服务接口，切换运行时只需更换 `guest` 的入口与构建目标。
+插件在 `init` 中用 `guest.Handle(pluginv1connect.New…ServiceHandler(impl))` 注册 handler；`wasip1` 构建导入 `guest/wasm`，原生构建调用 `process.Serve`。`internal/testplugin` 是同时为两种运行时构建的完整示例。
 
 ---
 

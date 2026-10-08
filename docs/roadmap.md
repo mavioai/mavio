@@ -40,7 +40,7 @@ flowchart TD
 | Phase | Theme | Status |
 | :--- | :--- | :--- |
 | P0 | Engineering foundation | ✅ Done |
-| P1 | Contracts, storage and plugin runtimes | 🚧 In progress |
+| P1 | Contracts, storage and plugin runtimes | ✅ Done |
 | P2 | Pure computation libraries | Not started |
 | P3 | Media pipeline | Not started |
 | P4 | Scanning and first plugin | Not started |
@@ -75,7 +75,7 @@ flowchart TD
 - [x] `libs/core`: domain model and repository ports ([Domain Model](domain.md))
 - [x] `libs/proto`: first version of the contracts (library, user, system, plugin)
 - [x] `libs/store`: SQLite and PostgreSQL implementation of the ports, including the job queue
-- [ ] `libs/plugin`: WASM and child-process runtimes
+- [x] `libs/plugin`: WASM and child-process runtimes
 
 ### P2 Pure Computation Libraries
 **Scope**: `naming`, `subtitle`, `metadata` (NFO), `imaging`.

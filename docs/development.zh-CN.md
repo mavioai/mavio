@@ -114,6 +114,16 @@ go run ./internal/cmd/migrategen -dialect postgres -name <名称>  # 会启动 P
 
 审核两份迁移，并与 schema 修改一起提交。已合并的迁移文件不得修改，只能追加新迁移。方言专属查询放在 `libs/store/queries/<dialect>/` 中，由 `sqlc`（版本锁定在 `mise.toml`）在 `store:generate` 中生成。
 
+### 4.3 插件
+插件用 `guest.Handle` 注册 Connect handler，并在构建时选择运行时（见[架构 §7.4](architecture.zh-CN.md#74-插件-sdk-结构)）：
+
+```bash
+GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared -o plugin.wasm .   # WASM 运行时
+go build -o plugin .                                                     # 子进程运行时
+```
+
+插件目录包含 `manifest.json`，以及 `plugin.wasm` 或 `plugin`（Windows 上为 `plugin.exe`）。
+
 ---
 
 ## 5. 代码质量

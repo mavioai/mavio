@@ -237,37 +237,40 @@ A media server's image workload is "poster-scale": individual images are small, 
 Both runtimes implement the same set of services defined in `libs/proto/mavio/plugin/v1` (`MetadataProvider`, `AuthProvider`, `Notifier`, …). The host calls them through a single `plugin.Host` interface and does not care which runtime a plugin runs in.
 
 ### 7.2 WASM Runtime
-* **ABI**: a minimal custom ABI built directly on wazero. The exported function `mavio_call(method_id, ptr, len) -> (ptr, len)` takes and returns Protobuf-encoded messages, together with `mavio_alloc` / `mavio_free`.
-* **Host functions** (capability-based: declared in the manifest and approved by an administrator at install time):
-  * `http_fetch`: requests executed by the host on the plugin's behalf, restricted by a domain allowlist;
-  * `kv_get` / `kv_set`: plugin-private storage;
-  * `log`: forwarded to the host's slog;
-  * `config_get`: reads the plugin configuration.
-* **File system**: nothing is mounted by default; when access is required, directories declared in the manifest are mounted read-only.
-* **Resource limits**: memory page cap; per-call `context` timeouts (`WithCloseOnContextDone`); the compilation cache (`CompilationCache`) is persisted to disk to speed up cold starts.
-* **Concurrency**: each plugin keeps an instance pool; instances share no state.
-* **Constraint**: Go under `wasip1` has no real threads or sockets, so all network requests go through the `http_fetch` host function.
+* **Calls are Connect requests**: the host's Connect clients use an HTTP transport that, instead of a network connection, writes the request (path, headers, body) as an envelope into guest memory and calls the module export `mavio_call(ptr, len) -> (ptr << 32 | len)`; `mavio_alloc` / `mavio_free` manage the shared buffers. Inside the guest, `guest/wasm` hands the request to the standard Connect handlers the plugin registered and returns the response envelope (status, headers, body). Plugin code is therefore identical for both runtimes.
+* **Build mode**: plugins are WASI reactors (`GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared`); the host runs `_initialize` once per instance.
+* **Host functions** (module `mavio`):
+  * `http_fetch(ptr, len) -> (handle << 32 | len)` performs an HTTP request on the plugin's behalf if the manifest's `http_hosts` allow the host, and `http_read(handle, ptr)` copies the result into guest memory. The two-step form avoids calling back into the guest from a host function, which Go's wasip1 runtime does not support. The guest SDK wraps them in an ordinary `*http.Client` (`guest.HTTPClient()`).
+  * Plugins log to stderr (and stdout), which the host forwards to its logger.
+  * Configuration arrives through the `Configure` RPC rather than a host function.
+* **File system**: nothing is mounted by default; directories listed in the manifest's `read_paths` are mounted read-only at the same paths.
+* **Instances**: each plugin has its own wazero runtime and a pool of module instances (the number of concurrent calls). An instance whose call traps, panics, exits or exceeds the call timeout is discarded and replaced, so a failing call never affects the host or later calls. A configuration accepted by the plugin is replayed on every instance before its next call.
+* **Resource limits**: memory page cap per instance; per-call timeouts (`WithCloseOnContextDone`); the compilation cache (`CompilationCache`) is persisted to disk, since compiling a module takes far longer than instantiating it.
+* **Constraint**: Go under `wasip1` has no sockets, so all network access goes through `http_fetch`.
 
 ### 7.3 Child-process Runtime
-* **Unix Domain Sockets everywhere**: natively supported on Linux / macOS, and on Windows via `AF_UNIX` since Windows 10 1803.
-* **Handshake**: the host creates a private temporary directory with mode 0700, generates a socket path and a one-time token, and passes them to the child through environment variables. After listening, the child prints a single readiness handshake line on stdout (protocol version, plugin manifest digest); every subsequent request carries the token for verification.
-* **Transport**: Connect over UDS (HTTP/2 h2c), reusing the handlers / clients generated from `libs/proto`.
-* **Lifecycle**: health checks (`Health` RPC), restart with exponential backoff after crashes, stderr logs forwarded to the host's slog, graceful shutdown (a `Shutdown` RPC first, then SIGTERM after a timeout, then SIGKILL), and child processes are cleaned up when the host exits (`Pdeathsig` on Linux, Job Objects on Windows).
+* **Unix Domain Sockets everywhere**: natively supported on Linux / macOS, and on Windows via `AF_UNIX` since Windows 10 1803. The socket lives in a private directory (mode 0700) under a short base path, as socket paths are limited to about 100 bytes.
+* **Handshake**: the host passes the socket path and a one-time token through `MAVIO_PLUGIN_SOCKET` / `MAVIO_PLUGIN_TOKEN`. Once listening, the plugin prints one JSON line on stdout (`{"mavio_plugin":1,"plugin_id":…}`); the host checks the protocol version and plugin ID. Every request carries the token as `Authorization: Bearer …`.
+* **Transport**: Connect over the socket (HTTP/2 h2c), reusing the handlers / clients generated from `libs/proto`.
+* **Supervision**: stdout and stderr are forwarded to the host's logger; periodic `Health` RPCs (three consecutive failures kill the process); after an exit the supervisor restarts the plugin with exponential backoff (1 s doubling up to one minute), holding calls until it is back.
+* **Shutdown**: `Close` sends the `Shutdown` RPC (after which the guest SDK exits), then SIGTERM, then SIGKILL. On Linux the kernel also kills the plugin if the host dies (`Pdeathsig`).
+* **Permissions**: process plugins have the operating system's network and file access; `http_hosts` and `read_paths` are enforced by the WASM runtime only, so capabilities that need neither should ship as WASM plugins.
 * **Hot plugging**: installing, upgrading and uninstalling plugins never requires restarting the host.
 
 ### 7.4 Plugin SDK Structure
 ```text
 libs/plugin/
-├── manifest/        # Plugin manifest: id, version, runtime kind, capability declarations, configuration JSON Schema
-├── host/            # Host side: registry, unified invocation interface, install and upgrade
-│   ├── wasm/        # wazero runtime, host functions, instance pool
-│   └── process/     # Child-process runtime, UDS handshake, supervision and restart
-├── guest/           # Plugin-side SDK
-│   ├── wasm/        # //go:build wasip1: exported functions, host function bindings
-│   └── process/     # Listens on the UDS, completes the handshake, registers Connect handlers
-└── schema/          # Generates JSON Schema from Go structs (for future dynamic configuration forms)
+├── manifest/        # manifest.json loading and validation, host permissions, configuration JSON Schema validation
+├── host/            # Host side: Open (either runtime, checked against Describe), Configure, the Plugin interface
+│   ├── wasm/        # wazero runtime, instance pool, http_fetch / http_read host functions
+│   └── process/     # Child process, socket handshake, token, supervision and restart
+├── guest/           # Plugin side: Handle (register Connect handlers), HTTPClient
+│   ├── wasm/        # //go:build wasip1: module exports, HTTP through the host
+│   └── process/     # Serve: listen on the socket, authenticate, handshake, exit after Shutdown
+├── internal/        # abi (WASM envelopes), proc (process protocol), clients, testplugin
+└── schema/          # (later) JSON Schema generation from Go structs for configuration forms
 ```
-Plugin authors' business code only implements the service interfaces in `plugin/v1`; switching runtimes only means changing the `guest` entry point and build target.
+A plugin registers its handlers in `init` with `guest.Handle(pluginv1connect.New…ServiceHandler(impl))`; a `wasip1` build imports `guest/wasm`, a native build calls `process.Serve`. `internal/testplugin` is a complete example built for both runtimes.
 
 ---
 

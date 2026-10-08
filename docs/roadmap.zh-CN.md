@@ -40,7 +40,7 @@ flowchart TD
 | 阶段 | 主题 | 状态 |
 | :--- | :--- | :--- |
 | P0 | 工程地基 | ✅ 已完成 |
-| P1 | 契约、存储与插件运行时 | 🚧 进行中 |
+| P1 | 契约、存储与插件运行时 | ✅ 已完成 |
 | P2 | 纯计算库 | 未开始 |
 | P3 | 媒体管线 | 未开始 |
 | P4 | 扫描与插件落地 | 未开始 |
@@ -75,7 +75,7 @@ flowchart TD
 - [x] `libs/core`：领域模型与仓储端口（[领域模型](domain.zh-CN.md)）
 - [x] `libs/proto`：第一版契约（library、user、system、plugin）
 - [x] `libs/store`：仓储端口的 SQLite 与 PostgreSQL 实现，包括任务队列
-- [ ] `libs/plugin`：WASM 与子进程两种运行时
+- [x] `libs/plugin`：WASM 与子进程两种运行时
 
 ### P2 纯计算库
 **范围**：`naming`、`subtitle`、`metadata`（NFO）、`imaging`。
