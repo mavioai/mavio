@@ -26,7 +26,7 @@ function goTargets(root, workspaceRoot) {
     build: run('go build ./...', root, { ...cached, env: { CGO_ENABLED: '0' } }),
     test: run('go test ./...', root, { ...cached, inputs: ['go', 'goTestdata', '^go'] }),
     bench: run('go test -run=NONE -bench=. -benchmem ./...', root, { cache: false }),
-    lint: run('golangci-lint run ./...', root, { ...cached, inputs: ['go', 'goLintConfig'] }),
+    lint: run('golangci-lint run --allow-parallel-runners ./...', root, { ...cached, inputs: ['go', 'goLintConfig'] }),
     'tidy-check': run('go mod tidy -diff', root, {
       cache: true,
       inputs: ['go'],
