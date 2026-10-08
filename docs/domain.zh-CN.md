@@ -72,7 +72,7 @@ erDiagram
 ## 4. 媒体库与条目
 
 ### 4.1 媒体库
-* `Kind` 决定扫描器如何解读目录；`Paths` 是绝对路径的根目录，一个路径最多属于一个媒体库。
+* `Kind` 决定扫描器如何解读目录；`Paths` 是绝对路径的根目录，一个路径最多属于一个媒体库：媒体库的路径不能与其他媒体库的路径相同、包含或被包含（`ErrConflict`）。
 * `ScanInterval` 是定时对账扫描的周期（为零则不定时扫描）；`PreferredLanguage`（ISO 639-1）与 `MetadataCountry`（ISO 3166-1 alpha-2）影响元数据提供者的取数。
 
 ### 4.2 条目
@@ -83,7 +83,7 @@ erDiagram
 | 标识与层级 | `ID`、`LibraryID`、`ParentID`、`Kind`、`Path` |
 | 标题与文本 | `Name`、`SortName`、`OriginalTitle`、`Overview`、`Tagline` |
 | 编号 | `IndexNumber`、`ParentIndexNumber`、`IndexNumberEnd` |
-| 日期与评分 | `ProductionYear`、`PremiereDate`、`EndDate`、`Runtime`、`OfficialRating`、`CommunityRating`（0–10）、`CriticRating`（0–100） |
+| 日期与评分 | `ProductionYear`、`PremiereDate`、`EndDate`、`Runtime`、`OfficialRating`、`ParentalRating`、`CommunityRating`（0–10）、`CriticRating`（0–100） |
 | 分类 | `Genres`、`Tags`、`Studios`、`ExternalIDs`（按 `Provider`） |
 | 音乐 | `Artists`、`AlbumArtists` |
 | 剧集 | `SeriesStatus` |
@@ -111,7 +111,10 @@ erDiagram
 ### 4.5 规则（`Item.Validate`）
 * 必须有 `ID`、`LibraryID`、合法的 `Kind` 和非空的 `Name`；条目不能是自己的父级。
 * 设置了 `Extra` 的条目必须使用合法的 `ExtraKind`，并有 `OwnerID`。
-* `CommunityRating` 在 0–10 之间，`CriticRating` 在 0–100 之间。
+* `CommunityRating` 在 0–10 之间，`CriticRating` 在 0–100 之间，`ParentalRating` 不能为负。
+
+### 4.6 分级
+`OfficialRating` 是公布的内容分级（如 "PG-13"）；`ParentalRating` 是它在该国分级体系中的分数，由元数据提供者设置，为零表示未分级。分级过滤（`ItemQuery.MaxRating`、`UserPolicy.MaxParentalRating`）比较的是分数。
 
 ---
 
@@ -152,7 +155,8 @@ erDiagram
 
 * `Kind` 标识任务类型（如 `library.scan`）；`Payload` 是该类型的参数，通常为 JSON。
 * `UniqueKey` 用于去重：若已有相同 key 的待执行或执行中任务，再次入队不做任何事（如 `library.scan:<媒体库 ID>`）。
-* 工作者按优先级**租用**到期的任务；租约在 `LeaseExpiresAt` 到期且未续租时，任务重新变为可用，因此工作者崩溃也不会丢失任务。
+* 工作者按优先级（其次按 `RunAt`）**租用**到期的任务；租约在 `LeaseExpiresAt` 到期且未续租时，任务重新变为可用，因此工作者崩溃也不会丢失任务。`Attempts` 统计的是租用次数，因此因崩溃中断的尝试也会计入。
+* `Extend`、`Complete` 与 `Fail` 要求调用者持有租约；租约已过期并被接管的工作者会得到 `ErrConflict`。
 * 一次尝试失败后，在 `RetryDelay(attempts)` 之后重试——30 秒，此后翻倍（1 分钟、2 分钟……），最长一小时——直到达到 `MaxAttempts`，此时任务变为 `failed`。
 * 状态流转：`pending` → `running` → `succeeded` / 重试时回到 `pending` / `failed`。
 
@@ -165,7 +169,7 @@ erDiagram
 | 端口 | 职责 |
 | :--- | :--- |
 | `LibraryRepository` | 增删改查；删除媒体库会删除其全部条目 |
-| `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据） |
+| `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（按 ID 顺序以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`（同一媒体库内路径唯一：`ErrConflict`）、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据） |
 | `MediaSourceRepository` | 列出并 `Replace` 条目的媒体源 |
 | `ImageRepository` | 列出并 `Replace` 所有者的图片 |
 | `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、列出并 `Replace` 条目的署名 |
@@ -181,7 +185,8 @@ erDiagram
 `ItemQuery` 中零值字段表示"不过滤"：
 
 * 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`Kinds`、`IncludeExtras`。
-* 内容：对名称与原始标题的全文检索 `Search`；`Genres`、`Tags`、`Studios`（匹配任意一个）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating` / `SkipUnrated`。
+* 内容：`Search` 按子串匹配名称或原始标题，忽略大小写、重音和全角/半角差异（因此中日韩标题和短关键词都可用）；`Genres`、`Tags`、`Studios`（匹配任意一个）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`（未分级的条目默认包含，除非设置 `SkipUnrated`）。
+* 名称排序不区分大小写和重音；按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
 * 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`，以及 `last_played` / `play_count` 排序。
 * 排序：`SortSpec` 列表；结果总是以 ID 作为最后的排序键，保证分页稳定。
 * 分页：`Limit`（为零表示上限 `MaxPageSize` = 1000）与 `Offset`；`Page.Total` 为所有页的总数。

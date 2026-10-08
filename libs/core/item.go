@@ -139,11 +139,14 @@ type Item struct {
 	// IndexNumberEnd is the last episode number of a multi-episode file.
 	IndexNumberEnd *int
 
-	ProductionYear  int
-	PremiereDate    *time.Time
-	EndDate         *time.Time
-	Runtime         time.Duration
-	OfficialRating  string  // content rating, e.g. "PG-13"
+	ProductionYear int
+	PremiereDate   *time.Time
+	EndDate        *time.Time
+	Runtime        time.Duration
+	OfficialRating string // content rating, e.g. "PG-13"
+	// ParentalRating is the score of OfficialRating in its country's rating
+	// system, used by rating filters; zero means unrated.
+	ParentalRating  int
 	CommunityRating float64 // 0–10
 	CriticRating    float64 // 0–100
 
@@ -189,6 +192,8 @@ func (it *Item) Validate() error {
 		return fmt.Errorf("%w: extra %s has no owner", ErrInvalid, it.ID)
 	case it.CommunityRating < 0 || it.CommunityRating > 10:
 		return fmt.Errorf("%w: item %s community rating %v out of range", ErrInvalid, it.ID, it.CommunityRating)
+	case it.ParentalRating < 0:
+		return fmt.Errorf("%w: item %s has a negative parental rating", ErrInvalid, it.ID)
 	case it.CriticRating < 0 || it.CriticRating > 100:
 		return fmt.Errorf("%w: item %s critic rating %v out of range", ErrInvalid, it.ID, it.CriticRating)
 	}

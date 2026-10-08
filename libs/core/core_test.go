@@ -208,3 +208,24 @@ func TestUserPolicyLibraries(t *testing.T) {
 		t.Error("explicit Libraries not enforced")
 	}
 }
+
+func TestIDSQL(t *testing.T) {
+	id := NewID()
+	v, err := id.Value()
+	if err != nil || v != id.String() {
+		t.Fatalf("Value() = %v, %v", v, err)
+	}
+	for _, src := range []any{id.String(), []byte(id.String()), id[:]} {
+		var got ID
+		if err := got.Scan(src); err != nil || got != id {
+			t.Errorf("Scan(%T) = %v, %v; want %v", src, got, err, id)
+		}
+	}
+	var got ID
+	if err := got.Scan(nil); err != nil || !got.IsZero() {
+		t.Errorf("Scan(nil) = %v, %v", got, err)
+	}
+	if err := got.Scan(42); !errors.Is(err, ErrInvalid) {
+		t.Errorf("Scan(int) error = %v, want ErrInvalid", err)
+	}
+}

@@ -72,7 +72,7 @@ All enumerations are string types with stable lowercase values, used unchanged i
 ## 4. Libraries and Items
 
 ### 4.1 Library
-* `Kind` decides how the scanner interprets the folders; `Paths` are absolute root folders, and a path belongs to at most one library.
+* `Kind` decides how the scanner interprets the folders; `Paths` are absolute root folders, and a path belongs to at most one library: a library's paths may not equal, contain or lie inside another library's paths (`ErrConflict`).
 * `ScanInterval` is the period of scheduled reconciliation scans (zero disables them); `PreferredLanguage` (ISO 639-1) and `MetadataCountry` (ISO 3166-1 alpha-2) steer metadata providers.
 
 ### 4.2 Item
@@ -83,7 +83,7 @@ There is a single `Item` type for every kind; `Kind` selects which fields are me
 | Identity and hierarchy | `ID`, `LibraryID`, `ParentID`, `Kind`, `Path` |
 | Titles and text | `Name`, `SortName`, `OriginalTitle`, `Overview`, `Tagline` |
 | Numbering | `IndexNumber`, `ParentIndexNumber`, `IndexNumberEnd` |
-| Dates and ratings | `ProductionYear`, `PremiereDate`, `EndDate`, `Runtime`, `OfficialRating`, `CommunityRating` (0–10), `CriticRating` (0–100) |
+| Dates and ratings | `ProductionYear`, `PremiereDate`, `EndDate`, `Runtime`, `OfficialRating`, `ParentalRating`, `CommunityRating` (0–10), `CriticRating` (0–100) |
 | Classification | `Genres`, `Tags`, `Studios`, `ExternalIDs` (by `Provider`) |
 | Music | `Artists`, `AlbumArtists` |
 | Series | `SeriesStatus` |
@@ -111,7 +111,10 @@ Trailers, featurettes, theme songs and other extras are ordinary items with `Ext
 ### 4.5 Rules (`Item.Validate`)
 * `ID`, `LibraryID`, a valid `Kind` and a non-empty `Name` are required; an item cannot be its own parent.
 * An item with `Extra` set must use a valid `ExtraKind` and have an `OwnerID`.
-* `CommunityRating` is within 0–10 and `CriticRating` within 0–100.
+* `CommunityRating` is within 0–10, `CriticRating` within 0–100, and `ParentalRating` is not negative.
+
+### 4.6 Ratings
+`OfficialRating` is the content rating as published (e.g. "PG-13"); `ParentalRating` is its score in the country's rating system, set by metadata providers, with zero meaning unrated. Rating filters (`ItemQuery.MaxRating`, `UserPolicy.MaxParentalRating`) compare scores.
 
 ---
 
@@ -152,7 +155,8 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 
 * `Kind` names the work (e.g. `library.scan`); `Payload` is its kind-specific argument, typically JSON.
 * `UniqueKey` deduplicates: enqueueing while a pending or running job has the same key does nothing (e.g. `library.scan:<library id>`).
-* Workers **lease** due jobs by priority; a lease expires at `LeaseExpiresAt` unless extended, after which the job becomes available again, so a crashed worker never loses work.
+* Workers **lease** due jobs by priority (then by `RunAt`); a lease expires at `LeaseExpiresAt` unless extended, after which the job becomes available again, so a crashed worker never loses work. `Attempts` counts leases, so an attempt cut short by a crash counts too.
+* `Extend`, `Complete` and `Fail` require the lease owner; a worker whose lease has expired and been taken over gets `ErrConflict`.
 * A failed attempt is retried after `RetryDelay(attempts)` — 30 s, then doubling (1 min, 2 min, …) up to one hour — until `MaxAttempts` is reached; then the job is `failed`.
 * States: `pending` → `running` → `succeeded` / back to `pending` for a retry / `failed`.
 
@@ -165,7 +169,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | Port | Responsibilities |
 | :--- | :--- |
 | `LibraryRepository` | CRUD; deleting a library deletes all its items |
-| `ItemRepository` | `Get`, `GetByPath`, `Query` (paged), `Walk` (streams all matches as `iter.Seq2`), batch `Upsert` by ID, `Delete` (cascades to descendants, extras, media sources, images, credits and user data) |
+| `ItemRepository` | `Get`, `GetByPath`, `Query` (paged), `Walk` (streams all matches in ID order as `iter.Seq2`), batch `Upsert` by ID (a path is unique per library: `ErrConflict`), `Delete` (cascades to descendants, extras, media sources, images, credits and user data) |
 | `MediaSourceRepository` | List and `Replace` an item's media sources |
 | `ImageRepository` | List and `Replace` an owner's images |
 | `PersonRepository` | `Get`, case-insensitive `FindByName`, batch `Upsert`, list and `Replace` an item's credits |
@@ -181,7 +185,8 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 `ItemQuery` filters with zero values meaning "no filter":
 
 * Scope: `LibraryIDs` (callers apply the user's library policy here), `ParentID` with optional `Recursive` (all descendants), `Kinds`, `IncludeExtras`.
-* Content: full-text `Search` over names and original titles; `Genres`, `Tags`, `Studios` (match any); `PersonID`; `YearFrom`–`YearTo`; `MaxRating` / `SkipUnrated`.
+* Content: `Search` matches a substring of the name or original title, ignoring case, accents and full-/half-width differences (so CJK titles and short queries work); `Genres`, `Tags`, `Studios` (match any); `PersonID`; `YearFrom`–`YearTo`; `MaxRating` (items without a rating are included unless `SkipUnrated`).
+* Names sort case- and accent-insensitively; undated items sort last by premiere date, and items never played sort last by last-played time.
 * Per user (require `UserID`): `Played`, `Favorite`, `Resumable`, and the `last_played` / `play_count` sorts.
 * Ordering: a list of `SortSpec`; results are always tie-broken by ID, so paging is stable.
 * Paging: `Limit` (0 means the maximum, `MaxPageSize` = 1000) and `Offset`; `Page.Total` is the count across all pages.
