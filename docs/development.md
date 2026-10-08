@@ -140,6 +140,7 @@ A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.
 `.github/workflows/ci.yml` runs on pushes to `main` and on pull requests:
 * **check** (Linux): `nx affected -t buf-lint lint tidy-check build test`; regenerates code and fails on any diff; runs `buf breaking` against the base branch on pull requests.
 * **test**: `nx run-many -t test build` on linux arm64, macOS and Windows.
+* **media** (Linux, macOS): installs ffmpeg, generates the fixtures and runs the `media` and `server` tests without the Nx cache, so the ffmpeg integration and smoke tests run on the runners' hardware.
 
 Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`).
 

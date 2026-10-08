@@ -5,12 +5,14 @@ go 1.27.0
 require (
 	github.com/mavioai/mavio/libs/core v0.0.0
 	github.com/mavioai/mavio/libs/imaging v0.0.0
+	github.com/mavioai/mavio/libs/media v0.0.0
 	github.com/mavioai/mavio/libs/metadata v0.0.0
 	github.com/mavioai/mavio/libs/naming v0.0.0
 	github.com/mavioai/mavio/libs/plugin v0.0.0
 	github.com/mavioai/mavio/libs/proto v0.0.0
 	github.com/mavioai/mavio/libs/store v0.0.0
 	github.com/mavioai/mavio/libs/subtitle v0.0.0
+	github.com/mavioai/mavio/tools/fixtures v0.0.0
 	google.golang.org/protobuf v1.36.12
 )
 
@@ -64,3 +66,7 @@ replace github.com/mavioai/mavio/libs/metadata => ../../libs/metadata
 replace github.com/mavioai/mavio/libs/subtitle => ../../libs/subtitle
 
 replace github.com/mavioai/mavio/libs/imaging => ../../libs/imaging
+
+replace github.com/mavioai/mavio/libs/media => ../../libs/media
+
+replace github.com/mavioai/mavio/tools/fixtures => ../../tools/fixtures

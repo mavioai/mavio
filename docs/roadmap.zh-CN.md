@@ -42,7 +42,7 @@ flowchart TD
 | P0 | 工程地基 | ✅ 已完成 |
 | P1 | 契约、存储与插件运行时 | ✅ 已完成 |
 | P2 | 纯计算库 | ✅ 已完成 |
-| P3 | 媒体管线 | 未开始 |
+| P3 | 媒体管线 | 进行中 |
 | P4 | 扫描与插件落地 | 未开始 |
 | P5 | 流媒体与 API | 未开始 |
 | P6 | 服务端装配与分发 | 未开始 |
@@ -94,6 +94,16 @@ flowchart TD
 **范围**：`probe`、`keyframes`、`hwaccel`、`decision`、`planner`、`supervisor`。
 
 **完成标准**：StreamBuilder 与 EncodingHelper 的移植用例全部通过；在现有硬件（维护者自己的机器与 GitHub 托管的 CI runner）上的真实转码冒烟测试通过；没有对应硬件的厂商路径只由移植的参数推导用例覆盖。
+
+**进展**：
+- [x] `probe`：按 Jellyfin 的方式规范化 ffprobe 输出，包括杜比视界、HDR10+ 与范围类型；移植用例全部通过
+- [x] `keyframes`：从 ffprobe 数据包标志得到关键帧时间
+- [x] `hwaccel`：版本检查，编解码器、滤镜与选项清单，VideoToolbox 试编码，VA-API 驱动检查
+- [x] `decision`：用 `ClientCapabilities` 替代 `DeviceProfile` 的 StreamBuilder 与流选择；StreamBuilder 的 307 个用例全部通过
+- [x] `planner`：滤镜图 IR，CMAF HLS 与渐进式命令；软件与 VideoToolbox 策略；EncodingHelper 的移植用例全部通过
+- [x] `supervisor`：生命周期、空闲回收、节流、进度、已提供分片
+- [x] 冒烟测试 `apps/server/internal/smoke`：一个 HDR10 HEVC 文件经过探测，被有能力的客户端直放，并在监管下为网页客户端从拖动位置转码为 H.264 HLS
+- [ ] 在 GitHub 托管 runner 上的真实转码（CI 任务 `media`）
 
 ### P4 扫描与插件落地
 **范围**：`library` 扫描器（全量对账，见[架构 §9](architecture.zh-CN.md#9-媒体库扫描与变更检测libslibrary)）、解析器链、任务调度；`plugins/scraper-tmdb`（WASM）。

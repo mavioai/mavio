@@ -46,3 +46,28 @@ jobs:
       - uses: jdx/mise-action@v2
       - run: pnpm install --frozen-lockfile
       - run: pnpm nx run-many -t test build --output-style=static
+
+  media:
+    name: Media integration (${{ matrix.os }})
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: pnpm install --frozen-lockfile
+      - name: Install ffmpeg
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            sudo apt-get update && sudo apt-get install -y ffmpeg
+          else
+            brew install ffmpeg
+          fi
+          ffmpeg -version | head -1
+      - run: pnpm nx run fixtures:media --output-style=static
+      # Real ffmpeg runs on the runner's hardware; the cache would replay
+      # results from runs without fixtures.
+      - run: pnpm nx run-many -t test -p media server --skip-nx-cache --output-style=static

@@ -42,7 +42,7 @@ flowchart TD
 | P0 | Engineering foundation | ✅ Done |
 | P1 | Contracts, storage and plugin runtimes | ✅ Done |
 | P2 | Pure computation libraries | ✅ Done |
-| P3 | Media pipeline | Not started |
+| P3 | Media pipeline | In progress |
 | P4 | Scanning and first plugin | Not started |
 | P5 | Streaming and API | Not started |
 | P6 | Server assembly and distribution | Not started |
@@ -94,6 +94,16 @@ flowchart TD
 **Scope**: `probe`, `keyframes`, `hwaccel`, `decision`, `planner`, `supervisor`.
 
 **Done when**: all ported StreamBuilder and EncodingHelper cases pass; real transcode smoke tests pass on the hardware available: the maintainers' own machines and the GitHub-hosted CI runners. Vendor paths without such hardware are covered by the ported argument-derivation cases only.
+
+**Progress**:
+- [x] `probe`: ffprobe output normalized as Jellyfin does, including Dolby Vision, HDR10+ and range types; all ported cases pass
+- [x] `keyframes`: keyframe times from ffprobe packet flags
+- [x] `hwaccel`: version checks, codec, filter and option listings, VideoToolbox trial encodes, VA-API driver checks
+- [x] `decision`: StreamBuilder with `ClientCapabilities` in place of `DeviceProfile`, and stream selection; all 307 StreamBuilder cases pass
+- [x] `planner`: filter graph IR, CMAF HLS and progressive commands; software and VideoToolbox strategies; all ported EncodingHelper cases pass
+- [x] `supervisor`: lifecycle, idle reaping, throttling, progress, served segments
+- [x] Smoke test `apps/server/internal/smoke`: an HDR10 HEVC file is probed, direct played by a capable client and transcoded to H.264 HLS from a seek position for a web client, under supervision
+- [ ] Real transcodes on the GitHub-hosted runners (CI job `media`)
 
 ### P4 Scanning and First Plugin
 **Scope**: `library` scanner (full reconciliation, see [Architecture §9](architecture.md#9-library-scanning-and-change-detection-libslibrary)), resolver chain, job scheduling; `plugins/scraper-tmdb` (WASM).
