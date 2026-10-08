@@ -7,6 +7,7 @@
 | 文档 | 内容 |
 | :--- | :--- |
 | [docs/architecture.zh-CN.md](docs/architecture.zh-CN.md) | 系统设计：技术选型、仓库结构、依赖方向、存储、图像、插件、媒体管线、媒体库扫描 |
+| [docs/domain.zh-CN.md](docs/domain.zh-CN.md) | 领域模型：实体、枚举、层级、规则、仓储端口 |
 | [docs/development.zh-CN.md](docs/development.zh-CN.md) | 工具链、Nx、Go 模块约定、代码生成、代码质量、CI、发布 |
 | [docs/testing.zh-CN.md](docs/testing.zh-CN.md) | 测试分层、从 Jellyfin 移植测试、测试媒体 |
 | [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md) | 阶段划分、完成标准、当前进度、风险 |
@@ -122,3 +123,4 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 - 使用 Conventional Commits，scope 为 Nx 项目名：`feat(naming): parse absolute episode numbers`、`build(nx): …`、`docs: …`。
 - 每个提交保持单一目的；提交前确保 `pnpm nx affected -t build test lint tidy-check` 通过。
 - 架构、依赖方向、技术选型的变更必须同步更新相关文档和本文件（中英文两个版本）。
+- 修改 `libs/core` 中的领域模型时，必须在同一个提交中更新 [docs/domain.zh-CN.md](docs/domain.zh-CN.md)（中英文两个版本）。

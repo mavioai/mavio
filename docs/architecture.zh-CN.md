@@ -2,7 +2,7 @@
 
 > [English](architecture.md) | 简体中文
 
-> 相关文档：[开发指南](development.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [测试策略](testing.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
+> 相关文档：[领域模型](domain.zh-CN.md) · [开发指南](development.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [测试策略](testing.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
 > Mavio 是一个以 Go 为服务端核心的新一代自托管媒体服务器。它借鉴 Jellyfin 多年沉淀的领域知识、FFmpeg 管线与测试资产，但不以兼容 Jellyfin 生态为目标，选型一律取当下最现代、最合适的方案。
 
@@ -83,7 +83,7 @@ mavio/
 ├── libs/
 │   ├── proto/                   # [Go + TS] 契约：*.proto 源文件、buf 配置、生成的 Go/TS 代码
 │   ├── plugin/                  # [Go] 插件 SDK 与宿主运行时（wasm + 子进程）
-│   ├── core/                    # [Go] 领域实体、值对象与端口接口；不依赖任何基础设施
+│   ├── core/                    # [Go] 领域模型与仓储端口（见 domain.zh-CN.md）；不依赖任何基础设施
 │   ├── store/                   # [Go] ent schema、sqlc 查询、Atlas 迁移、仓储实现
 │   ├── naming/                  # [Go] 文件名 / 目录名解析
 │   ├── metadata/                # [Go] NFO 读写、外部 ID、元数据合并策略

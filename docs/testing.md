@@ -2,7 +2,7 @@
 
 > English | [简体中文](testing.zh-CN.md)
 
-> Related: [Architecture](architecture.md) · [Development](development.md) · [Roadmap](roadmap.md) · [AGENTS.md](../AGENTS.md)
+> Related: [Architecture](architecture.md) · [Domain Model](domain.md) · [Development](development.md) · [Roadmap](roadmap.md) · [AGENTS.md](../AGENTS.md)
 
 ---
 

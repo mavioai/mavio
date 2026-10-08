@@ -2,7 +2,7 @@
 
 > English | [简体中文](roadmap.zh-CN.md)
 
-> Related: [Architecture](architecture.md) · [Development](development.md) · [Testing](testing.md) · [AGENTS.md](../AGENTS.md)
+> Related: [Architecture](architecture.md) · [Domain Model](domain.md) · [Development](development.md) · [Testing](testing.md) · [AGENTS.md](../AGENTS.md)
 
 ---
 
@@ -40,7 +40,7 @@ flowchart TD
 | Phase | Theme | Status |
 | :--- | :--- | :--- |
 | P0 | Engineering foundation | ✅ Done |
-| P1 | Contracts, storage and plugin runtimes | Not started |
+| P1 | Contracts, storage and plugin runtimes | 🚧 In progress |
 | P2 | Pure computation libraries | Not started |
 | P3 | Media pipeline | Not started |
 | P4 | Scanning and first plugin | Not started |
@@ -70,6 +70,12 @@ flowchart TD
 **Scope**: first version of the `proto` contracts; `core` domain model; `store` (ent + Atlas + sqlc, both dialects) and the job queue; `plugin` with both runtimes and the handshake.
 
 **Done when**: repository conformance tests pass on both SQLite and PostgreSQL; a crashing plugin does not affect the host and is restarted automatically.
+
+**Progress**:
+- [x] `libs/core`: domain model and repository ports ([Domain Model](domain.md))
+- [ ] `libs/proto`: first version of the contracts
+- [ ] `libs/store`: SQLite and PostgreSQL implementation of the ports, including the job queue
+- [ ] `libs/plugin`: WASM and child-process runtimes
 
 ### P2 Pure Computation Libraries
 **Scope**: `naming`, `subtitle`, `metadata` (NFO), `imaging`.

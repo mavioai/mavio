@@ -2,7 +2,7 @@
 
 > English | [简体中文](architecture.zh-CN.md)
 
-> Related: [Development](development.md) · [Roadmap](roadmap.md) · [Testing](testing.md) · [AGENTS.md](../AGENTS.md)
+> Related: [Domain Model](domain.md) · [Development](development.md) · [Roadmap](roadmap.md) · [Testing](testing.md) · [AGENTS.md](../AGENTS.md)
 
 > Mavio is a next-generation self-hosted media server with a Go server at its core. It draws on the domain knowledge, FFmpeg pipeline and test assets that Jellyfin has accumulated over many years, but it does not aim to be compatible with the Jellyfin ecosystem; every technology choice is the most modern and best-suited option available today.
 
@@ -83,7 +83,7 @@ mavio/
 ├── libs/
 │   ├── proto/                   # [Go + TS] Contracts: *.proto sources, buf config, generated Go/TS code
 │   ├── plugin/                  # [Go] Plugin SDK and host runtimes (wasm + child process)
-│   ├── core/                    # [Go] Domain entities, value objects and port interfaces; no infrastructure dependencies
+│   ├── core/                    # [Go] Domain model and repository ports (see domain.md); no infrastructure dependencies
 │   ├── store/                   # [Go] ent schema, sqlc queries, Atlas migrations, repository implementations
 │   ├── naming/                  # [Go] File / directory name parsing
 │   ├── metadata/                # [Go] NFO read/write, external IDs, metadata merge strategy

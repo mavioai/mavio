@@ -11,6 +11,7 @@ Status: early development (P0 engineering foundation). See the [roadmap](docs/ro
 | Document | Contents |
 | :--- | :--- |
 | [Architecture](docs/architecture.md) | System design: technology choices, repository structure, storage, imaging, plugins, media pipeline, library scanning |
+| [Domain Model](docs/domain.md) | Entities, enumerations, hierarchies, rules and repository ports of `libs/core` |
 | [Development](docs/development.md) | Toolchain, Nx, Go module conventions, code generation, code quality, CI, releases |
 | [Testing](docs/testing.md) | Test layers, porting tests from Jellyfin, test media |
 | [Roadmap](docs/roadmap.md) | Phases, completion criteria, current status, risks |

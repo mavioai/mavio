@@ -2,7 +2,7 @@
 
 > [English](roadmap.md) | 简体中文
 
-> 相关文档：[架构](architecture.zh-CN.md) · [开发指南](development.zh-CN.md) · [测试策略](testing.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
+> 相关文档：[架构](architecture.zh-CN.md) · [领域模型](domain.zh-CN.md) · [开发指南](development.zh-CN.md) · [测试策略](testing.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
 ---
 
@@ -40,7 +40,7 @@ flowchart TD
 | 阶段 | 主题 | 状态 |
 | :--- | :--- | :--- |
 | P0 | 工程地基 | ✅ 已完成 |
-| P1 | 契约、存储与插件运行时 | 未开始 |
+| P1 | 契约、存储与插件运行时 | 🚧 进行中 |
 | P2 | 纯计算库 | 未开始 |
 | P3 | 媒体管线 | 未开始 |
 | P4 | 扫描与插件落地 | 未开始 |
@@ -70,6 +70,12 @@ flowchart TD
 **范围**：`proto` 契约初版；`core` 领域模型；`store`（ent + Atlas + sqlc，双方言）与任务队列；`plugin` 两种运行时与握手。
 
 **完成标准**：仓储一致性测试在 SQLite 与 PostgreSQL 上均通过；插件崩溃不影响宿主，并能自动重启。
+
+**进度**：
+- [x] `libs/core`：领域模型与仓储端口（[领域模型](domain.zh-CN.md)）
+- [ ] `libs/proto`：第一版契约
+- [ ] `libs/store`：仓储端口的 SQLite 与 PostgreSQL 实现，包括任务队列
+- [ ] `libs/plugin`：WASM 与子进程两种运行时
 
 ### P2 纯计算库
 **范围**：`naming`、`subtitle`、`metadata`（NFO）、`imaging`。

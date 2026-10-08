@@ -7,6 +7,7 @@ This is the repository working guide for AI coding agents (and new developers). 
 | Document | Contents |
 | :--- | :--- |
 | [docs/architecture.md](docs/architecture.md) | System design: technology choices, repository structure, dependency direction, storage, imaging, plugins, media pipeline, library scanning |
+| [docs/domain.md](docs/domain.md) | Domain model: entities, enumerations, hierarchies, rules, repository ports |
 | [docs/development.md](docs/development.md) | Toolchain, Nx, Go module conventions, code generation, code quality, CI, releases |
 | [docs/testing.md](docs/testing.md) | Test layers, porting tests from Jellyfin, test media |
 | [docs/roadmap.md](docs/roadmap.md) | Phases, completion criteria, current status, risks |
@@ -122,3 +123,4 @@ Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test
 - Use Conventional Commits with the Nx project name as scope: `feat(naming): parse absolute episode numbers`, `build(nx): …`, `docs: …`.
 - Keep each commit to a single purpose; make sure `pnpm nx affected -t build test lint tidy-check` passes before committing.
 - Changes to the architecture, dependency direction or technology choices must update the relevant documents and this file (both language versions).
+- Changes to the domain model in `libs/core` must update [docs/domain.md](docs/domain.md) (both language versions) in the same commit.
