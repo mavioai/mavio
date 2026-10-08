@@ -83,6 +83,36 @@ func Extract(src string) ([]TestClass, error) {
 	return out, nil
 }
 
+// ExtractConstants parses a C# file and returns the values of its const
+// fields, keyed by "Class.Name" (nested classes as "Outer.Inner.Name"), in
+// source order.
+func ExtractConstants(src string) (csharp.Map, error) {
+	f, err := csharp.Parse(src)
+	if err != nil {
+		return nil, err
+	}
+	var out csharp.Map
+	var walk func(cls *csharp.Class, prefix string)
+	walk = func(cls *csharp.Class, prefix string) {
+		name := prefix + cls.Name
+		for _, m := range cls.Members {
+			if m.IsMethod || m.Body == nil || !slices.ContainsFunc(m.Header, func(t csharp.Token) bool {
+				return t.Kind == csharp.Ident && t.Text == "const"
+			}) {
+				continue
+			}
+			out = append(out, csharp.KV{Key: name + "." + m.Name, Value: f.Eval(m.Body)})
+		}
+		for _, n := range cls.Nested {
+			walk(n, name+".")
+		}
+	}
+	for _, cls := range f.Classes {
+		walk(cls, "")
+	}
+	return out, nil
+}
+
 func extractClass(f *csharp.File, cls *csharp.Class) TestClass {
 	tc := TestClass{Line: cls.Line}
 	seen := map[string]int{}

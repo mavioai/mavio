@@ -29,7 +29,7 @@
 3. **Jellyfin 自身的跳过**：Jellyfin 中标记跳过的用例（`Skip = …`），以及被 Jellyfin 注释掉的 `[InlineData]` 行（通常是 `// TODO:` / `// FIXME:` 标注的已知失败），保留并带上 `skip` 原因。
 4. **生成的文件不得手工修改。** 依赖 .NET 特有行为、或与 Mavio 设计取舍不同的用例，在 Go 测试中按用例 ID 跳过并写明原因；**不允许静默丢弃**。
 5. **非参数化测试**（`[Fact]`）列在每个用例文件的 `facts` 中，人工翻译成 Go 测试；运行时计算的 `[MemberData]` 与 `[ClassData]` 列在 `unsupported` 中并写明原因，人工移植。
-6. **测试资产**（NFO 样例、ffprobe JSON、字幕文件、关键帧数据、设备配置）复制到目标的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），并附带 `SOURCES.json` 记录每个文件的来源。仓库中不出现以 Jellyfin 命名的目录。
+6. **测试资产**（NFO 样例、ffprobe JSON、字幕文件、关键帧数据、设备配置）复制到目标的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），并附带 `SOURCES.json` 记录每个文件的来源。用例引用的、定义在其他 C# 文件中的常量（如捕获的 ffmpeg 输出）提取为一个 JSON 文件，其 `constants` 映射以 `Class.Name` 为键，测试据此解析 `{"$symbol": …}` 参数。仓库中不出现以 Jellyfin 命名的目录。
 7. 每实现一个库时按目标运行：在 `tools/testport` 下执行 `go run ./cmd/testport -jellyfin <Jellyfin 仓库路径> -only libs/naming`。一个库移植完成后，新增用例直接写在 Mavio 中。
 
 ### 2.2 映射表

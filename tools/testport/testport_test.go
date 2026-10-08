@@ -2,6 +2,7 @@ package testport
 
 import (
 	"encoding/json"
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -171,21 +172,50 @@ func TestPort(t *testing.T) {
 	write("tests/Lib.Tests/Test Data/a.nfo", "<movie/>")
 	write("tests/Lib.Tests/Test Data/Nested/b.nfo", "<tvshow/>")
 	write("tests/Lib.Tests/Test Data/c.json", "{}")
+	write("tests/Lib.Tests/OutputData.cs", `namespace Lib.Tests
+{
+    internal static class OutputData
+    {
+        public const string Banner = @"line ""1""
+line 2";
+        public const int Answer = 42;
+        public static string NotConst => "x";
+
+        public static class Inner
+        {
+            internal const bool Flag = true;
+        }
+    }
+}`)
 
 	m := Mapping{
 		Repository: "https://example.com/jellyfin",
 		Cases:      []CaseMapping{{Source: "tests/Lib.Tests", Target: "libs/x/testdata/cases"}},
 		Assets:     []AssetMapping{{Source: "tests/Lib.Tests/Test Data", Target: "libs/x/testdata/nfo", Include: "*.nfo", Recursive: true}},
+		Constants:  []ConstMapping{{Source: "tests/Lib.Tests/OutputData.cs", Target: "libs/x/testdata/outputs.json"}},
 	}
 	sum, err := Port(t.Context(), Options{Jellyfin: jellyfin, Mavio: mavio, Mapping: m})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sum.Files != 1 || sum.Assets != 2 || sum.Cases != 8 {
-		t.Errorf("summary = %+v, want 1 file, 8 cases, 2 assets", sum)
+	if sum.Files != 1 || sum.Assets != 2 || sum.Cases != 8 || sum.Constants != 3 {
+		t.Errorf("summary = %+v, want 1 file, 8 cases, 2 assets, 3 constants", sum)
 	}
 
-	data, err := os.ReadFile(filepath.Join(mavio, "libs/x/testdata/cases/sub/parser.json"))
+	data, err := os.ReadFile(filepath.Join(mavio, "libs/x/testdata/outputs.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var consts struct{ Constants map[string]any }
+	if err := json.Unmarshal(data, &consts); err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]any{"OutputData.Banner": "line \"1\"\nline 2", "OutputData.Answer": 42.0, "OutputData.Inner.Flag": true}
+	if !maps.Equal(consts.Constants, want) {
+		t.Errorf("constants: got = %v, want = %v", consts.Constants, want)
+	}
+
+	data, err = os.ReadFile(filepath.Join(mavio, "libs/x/testdata/cases/sub/parser.json"))
 	if err != nil {
 		t.Fatal(err)
 	}

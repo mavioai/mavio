@@ -59,7 +59,7 @@ func run(ctx context.Context, args []string) error {
 		return err
 	}
 	slog.InfoContext(ctx, "testport done", "dry_run", *dryRun, "case_files", sum.Files, "theories", sum.Theories,
-		"cases", sum.Cases, "facts", sum.Facts, "unsupported", sum.Unsupported, "assets", sum.Assets)
+		"cases", sum.Cases, "facts", sum.Facts, "unsupported", sum.Unsupported, "assets", sum.Assets, "constants", sum.Constants)
 	return nil
 }
 

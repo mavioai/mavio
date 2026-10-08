@@ -10,8 +10,8 @@ go run ./cmd/testport -jellyfin ~/src/jellyfin -only libs/naming   # port one ta
 go run ./cmd/testport -jellyfin ~/src/jellyfin -dry-run             # report counts for every target
 ```
 
-`-jellyfin` defaults to `$MAVIO_JELLYFIN`. `mapping.json` maps Jellyfin test projects and test data directories to Mavio targets; the longest matching source wins.
+`-jellyfin` defaults to `$MAVIO_JELLYFIN`. `mapping.json` maps Jellyfin test projects, test data directories and constant files to Mavio targets; the longest matching source wins.
 
 - `internal/csharp`: a C# lexer and a parser for the subset of declarations and expressions used in xUnit tests.
 - `extract.go`: turns `[Theory]` / `[Fact]` methods into cases.
-- `port.go`: applies the mapping, writes case files and copies assets with `SOURCES.json`.
+- `port.go`: applies the mapping, writes case files, copies assets with `SOURCES.json` and extracts the `const` fields of the mapped C# files.

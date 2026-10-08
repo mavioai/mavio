@@ -14,6 +14,8 @@ import (
 	"slices"
 	"strings"
 	"unicode"
+
+	"github.com/mavioai/mavio/tools/testport/internal/csharp"
 )
 
 // Mapping says where Jellyfin test cases and assets go in Mavio.
@@ -21,6 +23,7 @@ type Mapping struct {
 	Repository string         `json:"repository"`
 	Cases      []CaseMapping  `json:"cases"`
 	Assets     []AssetMapping `json:"assets"`
+	Constants  []ConstMapping `json:"constants"`
 }
 
 // CaseMapping maps C# test files under Source (a directory or file, relative
@@ -37,6 +40,14 @@ type AssetMapping struct {
 	Target    string `json:"target"`
 	Include   string `json:"include,omitempty"` // glob on the file name; empty means all
 	Recursive bool   `json:"recursive,omitempty"`
+}
+
+// ConstMapping extracts the constant fields of the C# file Source into the
+// JSON file Target, keyed by "Class.Name", so that case arguments naming them
+// as {"$symbol": "Class.Name"} can be resolved.
+type ConstMapping struct {
+	Source string `json:"source"`
+	Target string `json:"target"`
 }
 
 // LoadMapping reads a mapping file.
@@ -67,6 +78,7 @@ type Summary struct {
 	Facts       int
 	Unsupported int
 	Assets      int
+	Constants   int
 }
 
 // Source identifies where extracted data came from.
@@ -149,7 +161,50 @@ func Port(ctx context.Context, opts Options) (Summary, error) {
 		}
 		sum.Assets += n
 	}
+
+	for _, cm := range opts.Mapping.Constants {
+		if !selected(cm.Target) {
+			continue
+		}
+		n, err := writeConstants(opts, cm, commit)
+		if err != nil {
+			return sum, err
+		}
+		sum.Constants += n
+	}
 	return sum, nil
+}
+
+// ConstFile is the JSON document written for each constant mapping.
+type ConstFile struct {
+	Comment   string     `json:"$comment"`
+	Source    Source     `json:"source"`
+	Constants csharp.Map `json:"constants"`
+}
+
+func writeConstants(opts Options, cm ConstMapping, commit string) (int, error) {
+	src, err := os.ReadFile(filepath.Join(opts.Jellyfin, filepath.FromSlash(cm.Source)))
+	if err != nil {
+		return 0, err
+	}
+	consts, err := ExtractConstants(string(src))
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", cm.Source, err)
+	}
+	if len(consts) == 0 {
+		return 0, fmt.Errorf("constants %s: none found", cm.Source)
+	}
+	if !opts.DryRun {
+		doc := ConstFile{
+			Comment:   generatedComment,
+			Source:    Source{Repository: opts.Mapping.Repository, Commit: commit, File: cm.Source},
+			Constants: consts,
+		}
+		if err := writeJSON(filepath.Join(opts.Mavio, filepath.FromSlash(cm.Target)), doc); err != nil {
+			return 0, err
+		}
+	}
+	return len(consts), nil
 }
 
 // csharpFiles lists the .cs files under every case mapping source, as

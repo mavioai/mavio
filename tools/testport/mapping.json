@@ -30,5 +30,8 @@
     { "source": "tests/Jellyfin.Model.Tests/Test Data", "target": "libs/media/decision/testdata/device_profiles", "include": "DeviceProfile-*.json" },
     { "source": "tests/Jellyfin.Model.Tests/Test Data", "target": "libs/media/decision/testdata/media_sources", "include": "MediaSourceInfo-*.json" },
     { "source": "tests/Jellyfin.MediaEncoding.Keyframes.Tests/FfProbe/Test Data", "target": "libs/media/keyframes/testdata/ffprobe", "recursive": true }
+  ],
+  "constants": [
+    { "source": "tests/Jellyfin.MediaEncoding.Tests/EncoderValidatorTestsData.cs", "target": "libs/media/hwaccel/testdata/ffmpeg/version_outputs.json" }
   ]
 }
