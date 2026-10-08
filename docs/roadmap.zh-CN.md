@@ -76,6 +76,7 @@ flowchart TD
 - [x] `libs/proto`：第一版契约（library、user、system、plugin）
 - [x] `libs/store`：仓储端口的 SQLite 与 PostgreSQL 实现，包括任务队列
 - [x] `libs/plugin`：WASM 与子进程两种运行时
+- [x] 冒烟测试 `apps/server/internal/smoke`：排队的元数据刷新任务从插件（两种运行时）取得元数据，连同署名一起写入存储，并能被搜索到
 
 ### P2 纯计算库
 **范围**：`naming`、`subtitle`、`metadata`（NFO）、`imaging`。

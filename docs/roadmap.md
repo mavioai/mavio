@@ -76,6 +76,7 @@ flowchart TD
 - [x] `libs/proto`: first version of the contracts (library, user, system, plugin)
 - [x] `libs/store`: SQLite and PostgreSQL implementation of the ports, including the job queue
 - [x] `libs/plugin`: WASM and child-process runtimes
+- [x] Smoke test `apps/server/internal/smoke`: a queued metadata refresh fetched from a plugin (both runtimes), stored with its credits and found by search
 
 ### P2 Pure Computation Libraries
 **Scope**: `naming`, `subtitle`, `metadata` (NFO), `imaging`.
