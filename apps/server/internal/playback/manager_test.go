@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/media/decision"
 	"github.com/mavioai/mavio/libs/media/supervisor"
 	"github.com/mavioai/mavio/libs/store"
@@ -265,6 +266,29 @@ func TestStartErrors(t *testing.T) {
 	e.start(t, Request{User: limited})
 	if _, err := e.m.Start(ctx, Request{User: limited, ItemID: e.movie.ID, Client: mp4Client}); !errors.Is(err, ErrTooManyPlaybacks) {
 		t.Errorf("second playback: Start = %v, want ErrTooManyPlaybacks", err)
+	}
+}
+
+// A remux of video without keyframes encodes the video instead, and
+// queues their extraction.
+func TestNoKeyframes(t *testing.T) {
+	e := newEnv(t)
+	e.m.cfg.FFmpeg = func(context.Context, []string) (supervisor.Process, error) { return nil, errors.New("unused") }
+	hls := &decision.ClientCapabilities{
+		Name: "hls",
+		Transcoding: []decision.TranscodingProfile{{
+			Kind: decision.Video, Context: decision.Streaming, Protocol: decision.HLS, Container: "mp4", VideoCodec: "h264", AudioCodec: "aac",
+		}},
+		// Subtitles that would be burned in force encoding anyway.
+		Subtitles: []decision.SubtitleProfile{{Format: "vtt", Method: decision.SubtitleExternal}},
+	}
+	p := e.start(t, Request{Client: hls})
+	if !p.HLS() || p.Method != decision.Transcode || p.variant.Codecs[0] == "" {
+		t.Errorf("got = %s, HLS %v; want a transcode", p.Method, p.HLS())
+	}
+	job := library.KeyframesJob(e.movie.ID, time.Now(), library.KeyframesUrgent)
+	if added, err := e.store.Jobs().Enqueue(t.Context(), &job); err != nil || added {
+		t.Errorf("keyframe job queued again = %v, %v; want it pending already", added, err)
 	}
 }
 

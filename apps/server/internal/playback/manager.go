@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/media/decision"
 	"github.com/mavioai/mavio/libs/media/planner"
 	"github.com/mavioai/mavio/libs/media/supervisor"
@@ -268,7 +269,7 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 		if d.Protocol != decision.HLS {
 			return nil, fmt.Errorf("%w: progressive %s to %s; declare an HLS transcoding profile", ErrUnsupported, d.Method, d.Container)
 		}
-		if err := m.prepareHLS(p); err != nil {
+		if err := m.prepareHLS(ctx, p); err != nil {
 			return nil, err
 		}
 	}
@@ -319,7 +320,7 @@ func (m *Manager) decide(video bool, req *decision.Request) (*decision.Decision,
 
 // prepareHLS sets up the stream of a remux or transcode; ffmpeg starts
 // with the first segment requested.
-func (m *Manager) prepareHLS(p *Playback) error {
+func (m *Manager) prepareHLS(ctx context.Context, p *Playback) error {
 	d, ms := p.Decision, p.Source()
 	job := m.cfg.Planner.Job(d, 0)
 	if job.SegmentLength <= 0 {
@@ -329,6 +330,20 @@ func (m *Manager) prepareHLS(p *Playback) error {
 		job.SegmentContainer = "mp4"
 	}
 	out := m.cfg.Planner.Output(job)
+	if out.VideoCopied && len(ms.Keyframes) == 0 {
+		// Copied video is cut at its keyframes, which are not extracted
+		// yet: encode this playback's video and extract them for the next.
+		job.AllowVideoCopy = false
+		job.VideoCodec = "h264"
+		if len(d.VideoCodecs) > 0 && d.VideoCodecs[0] != "" {
+			job.VideoCodec = d.VideoCodecs[0]
+		}
+		out = m.cfg.Planner.Output(job)
+		kf := library.KeyframesJob(p.Item.ID, time.Now(), library.KeyframesUrgent)
+		if _, err := m.cfg.Store.Jobs().Enqueue(context.WithoutCancel(ctx), &kf); err != nil {
+			m.log.WarnContext(ctx, "queue keyframe extraction", "item", p.Item.ID, "err", err)
+		}
+	}
 	p.Method = decision.Transcode
 	if out.VideoCopied || (job.VideoCodec == "" && out.AudioCopied) {
 		p.Method = decision.DirectStream

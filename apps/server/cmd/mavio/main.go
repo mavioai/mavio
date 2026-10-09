@@ -3,11 +3,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
 	"net"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"syscall"
@@ -17,7 +19,11 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/buildinfo"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
+	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
+	"github.com/mavioai/mavio/libs/media/keyframes"
+	"github.com/mavioai/mavio/libs/media/probe"
 	"github.com/mavioai/mavio/libs/store"
 )
 
@@ -75,7 +81,40 @@ func run(ctx context.Context, args []string) error {
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return playbacks.Run(ctx) })
 	g.Go(func() error { return httpserver.Serve(ctx, ln, h) })
+	if worker := newLibraryWorker(ctx, db, *ffprobe); worker != nil {
+		g.Go(func() error {
+			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
+				return err
+			}
+			return nil
+		})
+	}
 	return g.Wait()
+}
+
+// newLibraryWorker returns the worker running scans, probes, keyframe
+// extractions and metadata refreshes, with a scan of every library queued,
+// or nil when there is no ffprobe to probe media with.
+func newLibraryWorker(ctx context.Context, db core.Store, ffprobe string) *library.Worker {
+	path, err := exec.LookPath(ffprobe)
+	if err != nil {
+		slog.ErrorContext(ctx, "ffprobe unavailable; libraries are not scanned", "ffprobe", ffprobe, "err", err)
+		return nil
+	}
+	jobs := &library.Jobs{
+		Store:     db,
+		Scanner:   &library.Scanner{Store: db, Resolver: library.NewResolver(), Logger: slog.Default()},
+		Prober:    providers.FFprobe{Prober: &probe.Prober{FFprobe: path}},
+		Keyframes: providers.Keyframes{Extractor: &keyframes.Extractor{FFprobe: path}},
+		Refresher: &library.Refresher{Store: db, Logger: slog.Default()},
+	}
+	if err := jobs.Schedule(ctx); err != nil {
+		slog.ErrorContext(ctx, "schedule library scans", "err", err)
+	}
+	host, _ := os.Hostname()
+	return &library.Worker{
+		Queue: db.Jobs(), Owner: fmt.Sprintf("%s:%d", host, os.Getpid()), Handlers: jobs.Handlers(), Logger: slog.Default(),
+	}
 }
 
 // newPlaybacks sets up playback with the ffmpeg found on this host, or
