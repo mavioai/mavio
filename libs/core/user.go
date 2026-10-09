@@ -62,6 +62,21 @@ func (p *UserPolicy) CanAccessLibrary(id ID) bool {
 	return p.Libraries == nil || slices.Contains(p.Libraries, id)
 }
 
+// CanAccess reports whether the policy allows the item: its library is
+// allowed and, under a maximum rating, its rating is within it, unrated
+// items only when BlockUnrated is off.
+func (p *UserPolicy) CanAccess(it *Item) bool {
+	if !p.CanAccessLibrary(it.LibraryID) {
+		return false
+	}
+	if p.MaxParentalRating > 0 {
+		if it.ParentalRating > p.MaxParentalRating || (it.ParentalRating == 0 && p.BlockUnrated) {
+			return false
+		}
+	}
+	return true
+}
+
 // SubtitleMode controls automatic subtitle selection.
 type SubtitleMode string
 

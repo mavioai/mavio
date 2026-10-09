@@ -215,6 +215,29 @@ func TestUserPolicyLibraries(t *testing.T) {
 	}
 }
 
+func TestUserPolicyCanAccess(t *testing.T) {
+	lib, other := NewID(), NewID()
+	tests := []struct {
+		name   string
+		policy UserPolicy
+		item   Item
+		want   bool
+	}{
+		{"unrestricted", UserPolicy{}, Item{LibraryID: lib, ParentalRating: 18}, true},
+		{"other library", UserPolicy{Libraries: []ID{lib}}, Item{LibraryID: other}, false},
+		{"within rating", UserPolicy{MaxParentalRating: 12}, Item{LibraryID: lib, ParentalRating: 12}, true},
+		{"above rating", UserPolicy{MaxParentalRating: 12}, Item{LibraryID: lib, ParentalRating: 13}, false},
+		{"unrated", UserPolicy{MaxParentalRating: 12}, Item{LibraryID: lib}, true},
+		{"unrated blocked", UserPolicy{MaxParentalRating: 12, BlockUnrated: true}, Item{LibraryID: lib}, false},
+		{"block without maximum", UserPolicy{BlockUnrated: true}, Item{LibraryID: lib}, true},
+	}
+	for _, tt := range tests {
+		if got := tt.policy.CanAccess(&tt.item); got != tt.want {
+			t.Errorf("%s: CanAccess = %v, want %v", tt.name, got, tt.want)
+		}
+	}
+}
+
 func TestIDSQL(t *testing.T) {
 	id := NewID()
 	v, err := id.Value()
