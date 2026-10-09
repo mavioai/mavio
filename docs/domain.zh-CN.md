@@ -184,7 +184,7 @@ erDiagram
 | 端口 | 职责 |
 | :--- | :--- |
 | `LibraryRepository` | 增删改查；删除媒体库会删除其全部条目 |
-| `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（按 ID 顺序以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`（同一媒体库内路径唯一：`ErrConflict`）、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据）、供扫描使用的 `MarkSeen`、`MarkMissing` 与 `PurgeMissing`（见 §4.7）、`Values`（去重后的流派、标签、工作室或艺人，见 §9.2） |
+| `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（按 ID 顺序以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`（同一媒体库内路径唯一：`ErrConflict`）、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据）、供扫描使用的 `MarkSeen`、`Touch`、`MarkMissing` 与 `PurgeMissing`（见 §4.7）、`Values`（去重后的流派、标签、工作室或艺人，见 §9.2） |
 | `MediaSourceRepository` | 列出并 `Replace` 条目的媒体源 |
 | `ImageRepository` | 列出并 `Replace` 所有者的图片 |
 | `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、`Search`（见 §9.2）、列出并 `Replace` 条目的署名 |

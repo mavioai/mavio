@@ -70,6 +70,17 @@ func TestScanGenerationsAndMissingItems(t *testing.T) {
 			t.Errorf("second MarkMissing = %d", n)
 		}
 
+		// Touch marks exact paths only.
+		if err := s.Items().Touch(ctx, lib.ID, 3, "/media/Seen/Seen.mkv", "/media/Disk"); err != nil {
+			t.Fatal(err)
+		}
+		if g, _ := s.Items().Get(ctx, seen.ID); g.ScanGeneration != 3 {
+			t.Errorf("touched = %d", g.ScanGeneration)
+		}
+		if g, _ := s.Items().Get(ctx, unreadable.ID); g.ScanGeneration != 2 {
+			t.Errorf("below a touched path = %d", g.ScanGeneration)
+		}
+
 		// A file back in place is seen again.
 		if err := s.Items().MarkSeen(ctx, lib.ID, "/media/Gone/Gone.mkv", 3); err != nil {
 			t.Fatal(err)

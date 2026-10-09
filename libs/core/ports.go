@@ -53,6 +53,10 @@ type ItemRepository interface {
 	// is prefix or lies below it, and clears their missing state. A scan
 	// calls it for folders it could not read, so their items stay.
 	MarkSeen(ctx context.Context, libraryID ID, prefix string, generation int64) error
+	// Touch sets the scan generation of the library's items with exactly
+	// these paths and clears their missing state, for folders a scan found
+	// unchanged.
+	Touch(ctx context.Context, libraryID ID, generation int64, paths ...string) error
 	// MarkMissing marks the library's items with a path that the scan of
 	// the given generation did not see as missing since now, and returns
 	// how many it marked.

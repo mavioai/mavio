@@ -6,6 +6,7 @@ require (
 	github.com/mavioai/mavio/libs/core v0.0.0
 	github.com/mavioai/mavio/libs/metadata v0.0.0
 	github.com/mavioai/mavio/libs/naming v0.0.0
+	golang.org/x/sync v0.23.0
 )
 
 require (

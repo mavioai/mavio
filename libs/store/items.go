@@ -126,6 +126,20 @@ func underPath(prefix string) predicate.Item {
 	}))
 }
 
+func (r items) Touch(ctx context.Context, libraryID core.ID, generation int64, paths ...string) error {
+	for chunk := range slices.Chunk(paths, upsertBatch) {
+		_, err := r.s.write.Item.Update().
+			Where(item.LibraryID(libraryID), item.PathIn(chunk...)).
+			SetScanGeneration(generation).
+			ClearMissingSince().
+			Save(ctx)
+		if err != nil {
+			return mapErr(err, "touch items")
+		}
+	}
+	return nil
+}
+
 func (r items) MarkMissing(ctx context.Context, libraryID core.ID, generation int64, now time.Time) (int, error) {
 	n, err := r.s.write.Item.Update().
 		Where(item.LibraryID(libraryID), item.PathNEQ(""), item.ScanGenerationLT(generation), item.MissingSinceIsNil()).

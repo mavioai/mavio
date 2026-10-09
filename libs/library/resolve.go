@@ -121,31 +121,46 @@ func NewResolver() *Resolver { return &Resolver{Parser: naming.Default()} }
 // Resolve resolves the folder dir with its entries.
 func (r *Resolver) Resolve(scope Scope, dir string, entries []Entry, l Lister) (Result, error) {
 	entries = r.visible(scope, dir, entries)
+	var (
+		res Result
+		err error
+	)
 	switch scope.Kind {
 	case core.LibraryMovies:
-		return r.resolveMovies(scope, dir, entries, l, core.KindMovie, true)
+		res, err = r.resolveMovies(scope, dir, entries, l, core.KindMovie, true)
 	case core.LibraryMusicVideos:
-		return r.resolveMovies(scope, dir, entries, l, core.KindMusicVideo, false)
+		res, err = r.resolveMovies(scope, dir, entries, l, core.KindMusicVideo, false)
 	case core.LibraryHomeVideos, core.LibraryPhotos:
-		return r.resolveHomeVideos(scope, dir, entries)
+		res, err = r.resolveHomeVideos(scope, dir, entries)
 	case core.LibraryShows:
-		return r.resolveShows(scope, dir, entries, l)
+		res, err = r.resolveShows(scope, dir, entries, l)
 	case core.LibraryMusic:
-		return r.resolveMusic(scope, dir, entries, l)
+		res, err = r.resolveMusic(scope, dir, entries, l)
 	case core.LibraryBooks:
-		return r.resolveBooks(scope, dir, entries)
+		res, err = r.resolveBooks(scope, dir, entries)
 	case core.LibraryMixed:
-		return r.resolveMixed(scope, dir, entries, l)
+		res, err = r.resolveMixed(scope, dir, entries, l)
+	default:
+		return Result{}, fmt.Errorf("%w: unknown library kind %q", core.ErrInvalid, scope.Kind)
 	}
-	return Result{}, fmt.Errorf("%w: unknown library kind %q", core.ErrInvalid, scope.Kind)
+	// Extras folders belong to the items beside them and are not scanned
+	// on their own, except at the top of a library.
+	top := dir == scope.Root
+	res.Subfolders = slices.DeleteFunc(res.Subfolders, func(s Subfolder) bool {
+		return r.ignored(Entry{Path: s.Path, IsDir: true}, top)
+	})
+	return res, err
 }
 
-// visible drops ignored entries: the built-in patterns, extras folders
-// below the top level, which belong to the items beside them, and theme
-// songs, which are extras.
+// visible drops ignored files: the built-in patterns and theme songs,
+// which are extras. Folders are kept for extras and disc lookups; ignored
+// ones are not descended into.
 func (r *Resolver) visible(scope Scope, dir string, entries []Entry) []Entry {
 	top := dir == scope.Root
 	return slices.DeleteFunc(slices.Clone(entries), func(e Entry) bool {
+		if e.IsDir {
+			return IgnoredPath(e.Path)
+		}
 		return r.ignored(e, top)
 	})
 }
