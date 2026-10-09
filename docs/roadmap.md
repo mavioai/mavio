@@ -42,8 +42,8 @@ flowchart TD
 | P0 | Engineering foundation | ✅ Done |
 | P1 | Contracts, storage and plugin runtimes | ✅ Done |
 | P2 | Pure computation libraries | ✅ Done |
-| P3 | Media pipeline | In progress |
-| P4 | Scanning and first plugin | Not started |
+| P3 | Media pipeline | ✅ Done |
+| P4 | Scanning and first plugin | In progress |
 | P5 | Streaming and API | Not started |
 | P6 | Server assembly and distribution | Not started |
 | P7 | Clients and ecosystem | Not started |
@@ -103,7 +103,7 @@ flowchart TD
 - [x] `planner`: filter graph IR, CMAF HLS and progressive commands; software and VideoToolbox strategies; all ported EncodingHelper cases pass
 - [x] `supervisor`: lifecycle, idle reaping, throttling, progress, served segments
 - [x] Smoke test `apps/server/internal/smoke`: an HDR10 HEVC file is probed, direct played by a capable client and transcoded to H.264 HLS from a seek position for a web client, under supervision
-- [ ] Real transcodes on the GitHub-hosted runners (CI job `media`)
+- [x] Real transcodes on the GitHub-hosted runners (CI job `media`, Linux and macOS)
 
 ### P4 Scanning and First Plugin
 **Scope**: `library` scanner (full reconciliation, see [Architecture §9](architecture.md#9-library-scanning-and-change-detection-libslibrary)), resolver chain, job scheduling; `plugins/scraper-tmdb` (WASM).

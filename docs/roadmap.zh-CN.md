@@ -42,8 +42,8 @@ flowchart TD
 | P0 | 工程地基 | ✅ 已完成 |
 | P1 | 契约、存储与插件运行时 | ✅ 已完成 |
 | P2 | 纯计算库 | ✅ 已完成 |
-| P3 | 媒体管线 | 进行中 |
-| P4 | 扫描与插件落地 | 未开始 |
+| P3 | 媒体管线 | ✅ 已完成 |
+| P4 | 扫描与插件落地 | 进行中 |
 | P5 | 流媒体与 API | 未开始 |
 | P6 | 服务端装配与分发 | 未开始 |
 | P7 | 客户端与生态 | 未开始 |
@@ -103,7 +103,7 @@ flowchart TD
 - [x] `planner`：滤镜图 IR，CMAF HLS 与渐进式命令；软件与 VideoToolbox 策略；EncodingHelper 的移植用例全部通过
 - [x] `supervisor`：生命周期、空闲回收、节流、进度、已提供分片
 - [x] 冒烟测试 `apps/server/internal/smoke`：一个 HDR10 HEVC 文件经过探测，被有能力的客户端直放，并在监管下为网页客户端从拖动位置转码为 H.264 HLS
-- [ ] 在 GitHub 托管 runner 上的真实转码（CI 任务 `media`）
+- [x] 在 GitHub 托管 runner 上的真实转码（CI 任务 `media`，Linux 与 macOS）
 
 ### P4 扫描与插件落地
 **范围**：`library` 扫描器（全量对账，见[架构 §9](architecture.zh-CN.md#9-媒体库扫描与变更检测libslibrary)）、解析器链、任务调度；`plugins/scraper-tmdb`（WASM）。
