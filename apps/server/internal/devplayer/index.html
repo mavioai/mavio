@@ -18,6 +18,8 @@
   .item img, .item .ph { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; background: var(--line); }
   .item div { padding: 6px 8px; }
   video { width: 100%; max-height: 70vh; background: #000; border-radius: 8px; }
+  h2 { font-size: 15px; margin: 24px 0 8px; }
+  #libStatus { color: var(--muted); }
   #info { color: var(--muted); white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 12px; }
   .hidden { display: none; }
 </style>
@@ -39,6 +41,21 @@
     <button id="logout">Sign out</button>
   </div>
   <div id="items"></div>
+  <div id="libraries" class="hidden">
+    <h2>Libraries</h2>
+    <ul id="libraryList"></ul>
+    <form id="addLibrary">
+      <input id="libName" placeholder="name, e.g. Movies" required>
+      <select id="libKind">
+        <option value="LIBRARY_KIND_MOVIES">Movies</option><option value="LIBRARY_KIND_SHOWS">Shows</option>
+        <option value="LIBRARY_KIND_MUSIC_VIDEOS">Music videos</option><option value="LIBRARY_KIND_HOME_VIDEOS">Home videos</option>
+        <option value="LIBRARY_KIND_MIXED">Mixed</option>
+      </select>
+      <input id="libPath" placeholder="folder on the server, e.g. /Volumes/Media/Movies" size="40" required>
+      <button>Add library</button>
+    </form>
+    <div id="libStatus"></div>
+  </div>
 </div>
 
 <div id="player" class="hidden">
@@ -113,8 +130,50 @@ async function list() {
     card.onclick = () => play(it);
     box.append(card);
   }
-  if (!resp.items) box.textContent = "No items. Create a library and let it scan.";
+  if (!resp.items) box.textContent = "Nothing to play yet. Add a library below, or wait for its scan to finish.";
+  await libraries();
 }
+
+// libraries lists the libraries with a rescan button, for administrators.
+async function libraries() {
+  let me;
+  try { me = (await rpc("mavio.user.v1.UserService/GetCurrentUser")).user; } catch (e) { return; }
+  $("libraries").classList.toggle("hidden", !me.admin);
+  if (!me.admin) return;
+  const ul = $("libraryList"); ul.textContent = "";
+  for (const lib of (await rpc("mavio.library.v1.LibraryService/ListLibraries")).libraries || []) {
+    const li = document.createElement("li");
+    li.textContent = lib.name + " — " + (lib.paths || []).join(", ") + " ";
+    const scan = document.createElement("button");
+    scan.textContent = "Scan";
+    scan.onclick = async () => {
+      const r = await rpc("mavio.library.v1.LibraryService/ScanLibrary", { id: lib.id });
+      $("libStatus").textContent = r.enqueued ? "Scan queued." : "A scan is already pending.";
+      poll();
+    };
+    li.append(scan);
+    ul.append(li);
+  }
+}
+
+// poll lists the items every few seconds for a minute, while a scan runs.
+function poll() {
+  let n = 0;
+  const t = setInterval(() => { list(); if (++n >= 12) clearInterval(t); }, 5000);
+}
+
+$("addLibrary").onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    await rpc("mavio.library.v1.LibraryService/CreateLibrary", { spec: {
+      name: $("libName").value, kind: $("libKind").value, paths: [$("libPath").value.trim()],
+    } });
+    $("libStatus").textContent = "Library added; scanning. Videos appear as they are found.";
+    $("addLibrary").reset();
+    await libraries();
+    poll();
+  } catch (err) { $("libStatus").textContent = "Could not add the library: " + err.message; }
+};
 $("refresh").onclick = list;
 $("kind").onchange = list;
 $("search").onkeydown = (e) => { if (e.key === "Enter") list(); };
