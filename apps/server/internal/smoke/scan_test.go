@@ -13,19 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/testcontainers/testcontainers-go"
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
-
 	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/store"
+	"github.com/mavioai/mavio/libs/store/pgtest"
 )
-
-// EnvPostgresDSN points TestScanReconciles at an existing PostgreSQL
-// server in which it may create databases. Without it, the test starts a
-// container when Docker is available and skips PostgreSQL otherwise.
-const EnvPostgresDSN = "MAVIO_TEST_POSTGRES_DSN"
 
 // countingProber stands in for ffprobe, whose adapter has its own test,
 // and counts the probes of each file.
@@ -375,21 +368,14 @@ func TestScanReconciles(t *testing.T) {
 // is none.
 func postgresDSN(t *testing.T) (dsn, skip string) {
 	t.Helper()
-	admin := os.Getenv(EnvPostgresDSN)
-	if admin == "" {
-		if testing.Short() {
-			return "", "skipped in -short mode"
-		}
-		ctx := context.Background()
-		container, err := tcpostgres.Run(ctx, "postgres:17-alpine", tcpostgres.BasicWaitStrategies())
-		if err != nil {
-			return "", fmt.Sprintf("container unavailable: %v", err)
-		}
-		t.Cleanup(func() { _ = testcontainers.TerminateContainer(container) })
-		if admin, err = container.ConnectionString(ctx, "sslmode=disable"); err != nil {
-			return "", err.Error()
-		}
+	if testing.Short() && os.Getenv(pgtest.EnvDSN) == "" {
+		return "", "skipped in -short mode"
 	}
+	admin, stop, err := pgtest.Start(context.Background())
+	if err != nil {
+		return "", fmt.Sprintf("PostgreSQL unavailable: %v", err)
+	}
+	t.Cleanup(stop)
 	name := fmt.Sprintf("mavio_smoke_%d", os.Getpid())
 	db, err := sql.Open("pgx", admin)
 	if err != nil {

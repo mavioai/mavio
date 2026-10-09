@@ -11,16 +11,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/testcontainers/testcontainers-go"
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
-
 	"github.com/mavioai/mavio/libs/store"
+	"github.com/mavioai/mavio/libs/store/pgtest"
 )
-
-// EnvPostgresDSN points the conformance tests at an existing PostgreSQL
-// server (a database the tests may create databases in). Without it, tests
-// start a container when Docker is available and skip PostgreSQL otherwise.
-const EnvPostgresDSN = "MAVIO_TEST_POSTGRES_DSN"
 
 var (
 	pgAdminDSN string // empty when PostgreSQL is unavailable
@@ -31,24 +24,19 @@ var (
 func TestMain(m *testing.M) {
 	flag.Parse()
 	code := func() int {
-		if dsn := os.Getenv(EnvPostgresDSN); dsn != "" {
-			pgAdminDSN = dsn
-			return m.Run()
-		}
-		if testing.Short() {
+		// PostgreSQL is pgtest.EnvDSN's server, or a container when Docker is
+		// available; without either it is skipped.
+		if testing.Short() && os.Getenv(pgtest.EnvDSN) == "" {
 			pgSkip = "PostgreSQL skipped in -short mode"
 			return m.Run()
 		}
-		ctx := context.Background()
-		container, err := tcpostgres.Run(ctx, "postgres:17-alpine", tcpostgres.BasicWaitStrategies())
+		dsn, stop, err := pgtest.Start(context.Background())
 		if err != nil {
-			pgSkip = fmt.Sprintf("PostgreSQL container unavailable: %v", err)
+			pgSkip = fmt.Sprintf("PostgreSQL unavailable: %v", err)
 			return m.Run()
 		}
-		defer func() { _ = testcontainers.TerminateContainer(container) }()
-		if pgAdminDSN, err = container.ConnectionString(ctx, "sslmode=disable"); err != nil {
-			pgSkip = err.Error()
-		}
+		defer stop()
+		pgAdminDSN = dsn
 		return m.Run()
 	}()
 	os.Exit(code)

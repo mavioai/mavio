@@ -29,10 +29,9 @@ import (
 	"entgo.io/ent/dialect/sql/schema"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/ncruces/go-sqlite3/driver"
-	"github.com/testcontainers/testcontainers-go"
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 
 	"github.com/mavioai/mavio/libs/store/internal/ent/migrate"
+	"github.com/mavioai/mavio/libs/store/pgtest"
 )
 
 func main() {
@@ -69,15 +68,11 @@ func run(ctx context.Context) error {
 		db.SetMaxOpenConns(1) // one connection keeps the in-memory database alive
 	case "postgres":
 		drv = dialect.Postgres
-		container, err := tcpostgres.Run(ctx, "postgres:17-alpine", tcpostgres.BasicWaitStrategies())
-		if err != nil {
-			return fmt.Errorf("start postgres: %w", err)
-		}
-		defer func() { _ = testcontainers.TerminateContainer(container) }()
-		dsn, err := container.ConnectionString(ctx, "sslmode=disable")
+		dsn, stop, err := pgtest.Container(ctx)
 		if err != nil {
 			return err
 		}
+		defer stop()
 		if db, err = sql.Open("pgx", dsn); err != nil {
 			return err
 		}

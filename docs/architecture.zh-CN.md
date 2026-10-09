@@ -188,7 +188,7 @@ ent schema ──go generate─────────────────�
 * **不区分大小写的唯一性**（用户名）通过带唯一索引的小写 `name_key` 列实现。
 * **时间**以微秒精度存储（PostgreSQL 用 `timestamptz`，SQLite 用整数微秒），读出时为 UTC。
 * **仓储端口**：`store` 只暴露 `core` 中定义的接口；ent 与 sqlc 的类型不会离开本包。
-* **一致性测试**：同一套仓储测试分别跑在 SQLite（临时文件）与 PostgreSQL（testcontainers-go，或 `MAVIO_TEST_POSTGRES_DSN`）上，两者都通过才算通过。
+* **一致性测试**：同一套仓储测试分别跑在 SQLite（临时文件）与 PostgreSQL（由 `libs/store/pgtest` 启动的 testcontainers-go 容器，或 `MAVIO_TEST_POSTGRES_DSN`）上，两者都通过才算通过。
 
 ### 5.4 SQLite 运行参数
 WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的写池执行写入与事务，并使用 `_txlock=immediate`（事务开始时即获取写锁，避免锁升级死锁）；另一个连接池负责读取。时间值使用 `_timefmt=unixepoch_micro`。关闭时执行 `PRAGMA optimize`。

@@ -188,7 +188,7 @@ ent schema ──go generate─────────────────�
 * **Case-insensitive uniqueness** (user names) uses a lower-cased `name_key` column with a unique index.
 * **Times** are stored with microsecond precision (`timestamptz` on PostgreSQL, integer microseconds on SQLite) and returned in UTC.
 * **Repository ports**: `store` exposes only the interfaces defined in `core`; ent and sqlc types never leave the package.
-* **Conformance tests**: the same repository test suite runs on SQLite (temporary file) and PostgreSQL (testcontainers-go, or `MAVIO_TEST_POSTGRES_DSN`); a change passes only if both pass.
+* **Conformance tests**: the same repository test suite runs on SQLite (temporary file) and PostgreSQL (a testcontainers-go container started by `libs/store/pgtest`, or `MAVIO_TEST_POSTGRES_DSN`); a change passes only if both pass.
 
 ### 5.4 SQLite Runtime Settings
 WAL mode, `synchronous=NORMAL`, `busy_timeout`, foreign keys on. A single-connection writer pool runs writes and transactions with `_txlock=immediate` (the write lock is taken when a transaction begins, avoiding upgrade deadlocks); a separate pool serves reads. Time values use `_timefmt=unixepoch_micro`. `PRAGMA optimize` runs on close.
