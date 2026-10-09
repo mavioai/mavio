@@ -183,6 +183,7 @@ flowchart TD
 - [x] Latest items (`ListLatestItems`) grouped into series, seasons and albums as in Jellyfin, and next up (`ListNextUp`) with specials in aired order; item responses name an episode's series and season and a track's album. Continue watching is `ListItems` with `resumable`, sorted by last played
 - [x] Collections (`CollectionService`, administrators) and playlists (`PlaylistService`, each user their own, with entries that can repeat items and move) in curated libraries the server creates; their items listed through `ListItems` with them as parent
 - [x] Display preferences per user, client and view (`DisplayPreferencesService`), with names and values the client chooses
+- [x] Collages of libraries, collections and playlists (`/images/collages/{id}`, `imaging.Collage`), drawn without text
 
 ### P8 Live Events and Sessions
 **Scope**: what a client learns without asking, and what one device does to another.

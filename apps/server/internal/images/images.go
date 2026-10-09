@@ -69,9 +69,12 @@ func New(cfg Config) *Server {
 // parameters width, height, maxWidth, maxHeight, fillWidth, fillHeight
 // and quality, as Jellyfin's image API takes them, and format. Renderings
 // without a format are WebP for clients that accept it, else JPEG or PNG.
+// It also serves GET /images/collages/{id}, the collage of a library,
+// collection or playlist, with the same parameters.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /images/{id}", s.serve)
+	mux.HandleFunc("GET /images/collages/{id}", s.serveCollage)
 	return mux
 }
 

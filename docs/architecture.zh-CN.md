@@ -211,7 +211,8 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
 | EXIF 方向自动校正 | 轻量 EXIF 解析（仅 Orientation 等少量标签） |
 | 锐化、模糊、背景色、前景层 | 自写卷积 / 高斯模糊（可并行分块）+ `image/draw` 合成 |
 | 未播放数 / 播放进度角标 | 由客户端渲染 |
-| 媒体库拼贴、启动屏（含文字） | `image/draw` 合成 + `go-text/typesetting` 排版，内置 Noto 字体子集覆盖 CJK |
+| 媒体库、合集与播放列表的拼贴图 | `image/draw` 合成至多四张图片（`Collage`），每张铺满其格子；不含文字，由客户端为卡片标注名称 |
+| 启动屏（含文字） | `image/draw` 合成 + `go-text/typesetting` 排版，内置 Noto 字体子集覆盖 CJK |
 | Trickplay 缩略图拼图 | ffmpeg：`fps` + `scale` + `tile` 滤镜一步输出拼图，可走硬件解码 |
 | 视频截图、章节图 | ffmpeg |
 | Blurhash / Thumbhash | 纯 Go（`bbrks/go-blurhash`、`go.n16f.net/thumbhash`）：blurhash 按 Jellyfin 的分量数在 32px 缩略图上计算，thumbhash 在 100px 缩略图上计算 |
@@ -355,6 +356,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **浏览**（`internal/browse`）：最近添加与下一集由用户媒体库与分级范围内的条目查询构建。最近添加列出叶子条目（电影、单集、曲目等），按添加时间排序；分组时与 Jellyfin 现在的服务端一样，专辑代表其新曲目，剧集代表在其最新一集前一天之内添加的单集：这些单集都在一个多季剧集的同一季时显示该季，剧集只有一季或单集跨越多季时显示剧集，只有一集时显示该集，用户无权看到容器时也显示该集。下一集按最近播放时间遍历用户的单集，按此顺序每部剧集取一次，交给 `NextEpisode`（见[领域模型](domain.zh-CN.md)）求出下一集，直到填满一页，因此最近播放的剧集排在前面。条目响应给出单集所属的剧集与季、曲目所属的专辑。
 * **合集与播放列表**（`CollectionService`、`PlaylistService`）：管理员整理合集，用户整理自己的播放列表，它们位于服务端在首次需要时创建的整理类媒体库中。每个用户都能看到播放列表媒体库，其中只有自己的播放列表；合集媒体库遵循媒体库权限。以合集或播放列表为 parent 调用 `ItemService.ListItems` 会按用户权限列出其中的条目，每个一次，未指定排序时按其顺序；`ListPlaylistEntries` 列出播放列表的条目项及其 ID。把剧集、季、专辑或合集加入播放列表时，按顺序加入其中可播放的条目。`LibraryService` 不能创建、修改或扫描整理类媒体库，启动时的扫描也跳过它们。
 * **图片**：图片在 `/images/{id}` 提供，接受 Jellyfin 的尺寸参数（`width`、`height`、`maxWidth`、`maxHeight`、`fillWidth`、`fillHeight`、`quality`）；与媒体 URL 一样，客户端从按访问权限过滤的 API 响应中得到的 ID 是唯一的凭证。本地图片在其条目所属媒体库文件夹内读取；提供者的图片只下载一次，存入缓存目录。不带尺寸参数时提供原图；`imaging.Process` 生成的图片采用请求的 `format`（`jpg`、`png`、`webp`），未指定时对 `Accept` 头接受 WebP 的客户端生成 WebP，否则为 JPEG（含透明时为 PNG）。生成的图片按源内容哈希与参数缓存，对同一结果的并发请求共享一次生成。SVG 通过 `CheckSVG` 后原样提供。
+* **拼贴图**：`/images/collages/{id}` 以相同参数合成媒体库的图片（其最近添加条目的海报并排，16:9）、合集的图片（其条目的海报，2 × 2 网格，2:3）或播放列表的图片（其条目所属剧集与专辑的海报，或条目自身的海报，正方形网格），与 Jellyfin 的动态图片一样；所有者的 ID 即凭证。拼贴图按所用图片缓存，因此会随之更新；没有可用的图片时返回未找到。
 * **开发用播放器**：带 `-dev` 启动时，服务端还提供 `/dev/player`：一个单页面，可登录、列出视频并通过 `PlaybackService` 播放，使用 hls.js 或 Safari 自带的 HLS 播放器（`?engine=native|hlsjs`），可选的串流码率上限会使视频转码（`?bitrate=<每秒比特数>`），用于在客户端完成之前于真实浏览器上检查播放。`-dev-library <dir>` 把 `pnpm nx run fixtures:dev-library` 生成的示例媒体库中的 `Movies` 与 `Shows` 文件夹添加为媒体库。
 * **字幕**：以文件交付的文本字幕在 `/media/{playback}/subtitles/{index}.{format}` 提供，由 `libs/subtitle` 从媒体库中的外挂文件或内嵌流转换而来；内嵌流由 ffmpeg 在每次播放中提取一次（ASS 保留样式，其他文本转为 SRT）。对接受清单内字幕的 HLS 客户端，每条文本字幕是主播放列表的一个字幕轨：一个 WebVTT 播放列表，语言以 BCP 47 标签表示，按视频分片切分：每个分片 `subtitles/{index}-{segment}.vtt` 包含在其期间显示的字幕，与视频一样以源文件的时间轴计时，最后一个分片还包含超出媒体结尾的字幕。图形字幕（PGS、VobSub）只能烧录；服务端无法写出的外挂文件，或没有 ffmpeg 时无法提取的内嵌字幕，将被丢弃。
 

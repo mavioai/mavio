@@ -36,17 +36,32 @@ type Options struct {
 // output of an image with transparency is PNG instead. GIFs keep only
 // their first frame.
 func Process(data []byte, o Options) ([]byte, Format, error) {
+	img, err := decode(data)
+	if err != nil {
+		return nil, "", err
+	}
+	return Render(img, o)
+}
+
+// decode decodes an image of at most MaxPixels.
+func decode(data []byte) (image.Image, error) {
 	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
 	if err != nil {
-		return nil, "", fmt.Errorf("imaging: %w", err)
+		return nil, fmt.Errorf("imaging: %w", err)
 	}
 	if cfg.Width <= 0 || cfg.Height <= 0 || int64(cfg.Width)*int64(cfg.Height) > MaxPixels {
-		return nil, "", fmt.Errorf("%w: %d×%d", ErrTooLarge, cfg.Width, cfg.Height)
+		return nil, fmt.Errorf("%w: %d×%d", ErrTooLarge, cfg.Width, cfg.Height)
 	}
 	img, _, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
-		return nil, "", fmt.Errorf("imaging: %w", err)
+		return nil, fmt.Errorf("imaging: %w", err)
 	}
+	return img, nil
+}
+
+// Render resizes an image as the options ask and encodes it, as Process
+// does after decoding.
+func Render(img image.Image, o Options) ([]byte, Format, error) {
 	b := img.Bounds()
 	size := NewSize(o.SizeOptions, Size{Width: b.Dx(), Height: b.Dy()})
 	if size.Width > 0 && size.Height > 0 {
