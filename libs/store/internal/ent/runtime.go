@@ -16,6 +16,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
+	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/schema"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -351,6 +352,16 @@ func init() {
 	personDescID := personFields[0].Descriptor()
 	// person.DefaultID holds the default value on creation for the id field.
 	person.DefaultID = personDescID.Default.(func() core.ID)
+	pluginconfigFields := schema.PluginConfig{}.Fields()
+	_ = pluginconfigFields
+	// pluginconfigDescUpdatedAt is the schema descriptor for updated_at field.
+	pluginconfigDescUpdatedAt := pluginconfigFields[3].Descriptor()
+	// pluginconfig.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	pluginconfig.DefaultUpdatedAt = pluginconfigDescUpdatedAt.Default.(func() time.Time)
+	// pluginconfigDescID is the schema descriptor for id field.
+	pluginconfigDescID := pluginconfigFields[0].Descriptor()
+	// pluginconfig.DefaultID holds the default value on creation for the id field.
+	pluginconfig.DefaultID = pluginconfigDescID.Default.(func() core.ID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.

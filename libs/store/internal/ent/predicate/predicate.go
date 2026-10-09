@@ -36,6 +36,9 @@ type MediaSource func(*sql.Selector)
 // Person is the predicate function for person builders.
 type Person func(*sql.Selector)
 
+// PluginConfig is the predicate function for pluginconfig builders.
+type PluginConfig func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 

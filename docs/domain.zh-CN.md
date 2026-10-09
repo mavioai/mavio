@@ -37,6 +37,7 @@ erDiagram
 | `User` / `UserPolicy` / `UserPreferences` | 账户、其访问权限及播放偏好 |
 | `UserData` | 某个用户对某个条目的状态：是否已播放、续播位置、收藏等 |
 | `Job` | 持久化的后台任务 |
+| `PluginConfig` | 管理员为某个插件设置的配置 |
 
 ---
 
@@ -196,6 +197,7 @@ erDiagram
 | `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`GetByTokenHash`、`ListForUser`（按最近活动排序）、`Touch`、`Delete` |
 | `JobQueue` | `Enqueue`（报告是否入队）、`Lease`、`Extend`、`Complete`、`Fail` |
 | `ScanRepository` | 媒体库扫描的 `NextGeneration`；每个已扫描文件夹的 `FolderState`（`ModTime`、`FileID`、`Entries`），由 `PutFolders` 记录，文件夹消失后由 `DeleteFolders` 移除 |
+| `PluginConfigRepository` | `Get` 某个插件的配置（从未配置时返回 `ErrNotFound`），`Put` 写入并替换之前的配置 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
 * **Replace 语义**：`Replace*` 方法设置某个所有者的完整集合，删除不在新集合中的内容——扫描与元数据刷新总是整组写入。
@@ -219,3 +221,12 @@ erDiagram
 * **匹配**：满足以下任一条件即匹配：清洗后的名称包含清洗后的关键词；原始标题（仅条目；转小写、去变音符号）与去掉首尾空白的关键词按模式匹配，其中 `%` 匹配任意长度字符、`_` 匹配单个字符；或排序名（§9.1）与关键词的排序形式按同样的模式匹配。排序形式使 "spiderman" 能找到 "Spider-Man"，"hanks tom" 能找到排序名为 "Hanks, Tom" 的人员，拼音能找到中文标题。
 * **相关度**：结果先按清洗后名称的相关度排列，再应用其他排序：完全匹配最先，其次是以关键词开头的名称，然后是包含"关键词加空格"的名称，最后是其余结果。相关度相同时，条目按 `Sort` 再按排序名，人员按排序名，值列表按值的排序名排序。
 * **值列表**：`ValueQuery` 列出某个 `ValueKind`（`genre`、`tag`、`studio`，或包含专辑艺人的 `artist`）的去重值，可用 `LibraryIDs` 限定范围。清洗形式相同的值视为同一个值，`Genres`、`Tags`、`Studios` 过滤也是如此。
+
+---
+
+## 10. 插件配置
+
+`PluginConfig` 是管理员为某个插件设置的配置：一个符合插件清单中配置 schema 的 JSON 文档（`JSON`），附带 `UpdatedAt`。
+
+* 按 `PluginID`（清单中的 ID）保存，而不是跟随已安装的文件，因此插件升级或重新安装后配置仍在。
+* `Validate` 要求有插件 ID 且 JSON 格式正确；是否符合 schema 由了解清单的服务端在保存配置之前检查。

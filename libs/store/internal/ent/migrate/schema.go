@@ -439,6 +439,19 @@ var (
 			},
 		},
 	}
+	// PluginConfigsColumns holds the columns for the "plugin_configs" table.
+	PluginConfigsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "plugin_id", Type: field.TypeString, Unique: true},
+		{Name: "config", Type: field.TypeString, Size: 2147483647},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// PluginConfigsTable holds the schema information for the "plugin_configs" table.
+	PluginConfigsTable = &schema.Table{
+		Name:       "plugin_configs",
+		Columns:    PluginConfigsColumns,
+		PrimaryKey: []*schema.Column{PluginConfigsColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -513,6 +526,7 @@ var (
 		LibrariesTable,
 		MediaSourcesTable,
 		PeopleTable,
+		PluginConfigsTable,
 		UsersTable,
 		UserDataTable,
 	}
@@ -559,6 +573,9 @@ func init() {
 	}
 	PeopleTable.Annotation = &entsql.Annotation{
 		Table: "people",
+	}
+	PluginConfigsTable.Annotation = &entsql.Annotation{
+		Table: "plugin_configs",
 	}
 	UsersTable.Annotation = &entsql.Annotation{
 		Table: "users",

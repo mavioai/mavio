@@ -37,6 +37,7 @@ erDiagram
 | `User` / `UserPolicy` / `UserPreferences` | An account, what it may access, and its playback defaults |
 | `UserData` | One user's state for one item: played, resume position, favorite, … |
 | `Job` | A durable unit of background work |
+| `PluginConfig` | The configuration an administrator gave a plugin |
 
 ---
 
@@ -196,6 +197,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `AuthSessionRepository` | `Create` (replacing the user's session on the same device), `GetByTokenHash`, `ListForUser` (most recently seen first), `Touch`, `Delete` |
 | `JobQueue` | `Enqueue` (reports whether added), `Lease`, `Extend`, `Complete`, `Fail` |
 | `ScanRepository` | `NextGeneration` of a library's scans; the `FolderState` of each scanned folder (`ModTime`, `FileID`, `Entries`), recorded with `PutFolders` and removed with `DeleteFolders` when gone |
+| `PluginConfigRepository` | `Get` a plugin's configuration (`ErrNotFound` when never configured), `Put` it, replacing the earlier one |
 
 * **Transactions**: `Store.InTx` runs a function with a `Store` bound to one transaction; returning an error rolls it back.
 * **Replace semantics**: `Replace*` methods set the complete set for an owner, removing anything not in the new set — scans and metadata refreshes always write whole sets.
@@ -219,3 +221,12 @@ Item search (`ItemQuery.Search`), person search (`PersonRepository.Search`, by n
 * **Matching**: a result matches when any of these holds: its clean name contains the clean term; its original title (items only; lower case, no diacritics) matches the trimmed term as a pattern, in which `%` matches any run of characters and `_` one character; or its sort name (§9.1) matches the sort form of the term as such a pattern. The sort form finds "Spider-Man" from "spiderman", a person sorted as "Hanks, Tom" from "hanks tom", and Chinese titles from pinyin.
 * **Relevance**: results are ranked by their clean name before any other ordering: an exact match first, then names starting with the term, then names containing the term followed by a space, then the rest. Ties follow `Sort` and then the sort name (items), the sort name (people) or the value's sort name (value lists).
 * **Value lists**: `ValueQuery` lists the distinct values of one `ValueKind` (`genre`, `tag`, `studio`, or `artist`, which includes album artists), optionally restricted to `LibraryIDs`. Values with the same clean form are one value, as they are for the `Genres`, `Tags` and `Studios` filters.
+
+---
+
+## 10. Plugin Configuration
+
+A `PluginConfig` is the configuration an administrator gave a plugin: a JSON document (`JSON`) matching the configuration schema in the plugin's manifest, with `UpdatedAt`.
+
+* It is kept by `PluginID`, the ID in the manifest, not by the installed files, so it survives upgrades and reinstalls of the plugin.
+* `Validate` requires a plugin ID and well-formed JSON; conformance to the schema is checked by the server, which knows the manifest, before the configuration is stored.

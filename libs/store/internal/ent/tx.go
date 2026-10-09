@@ -32,6 +32,8 @@ type Tx struct {
 	MediaSource *MediaSourceClient
 	// Person is the client for interacting with the Person builders.
 	Person *PersonClient
+	// PluginConfig is the client for interacting with the PluginConfig builders.
+	PluginConfig *PluginConfigClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserData is the client for interacting with the UserData builders.
@@ -177,6 +179,7 @@ func (tx *Tx) init() {
 	tx.Library = NewLibraryClient(tx.config)
 	tx.MediaSource = NewMediaSourceClient(tx.config)
 	tx.Person = NewPersonClient(tx.config)
+	tx.PluginConfig = NewPluginConfigClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserData = NewUserDataClient(tx.config)
 }

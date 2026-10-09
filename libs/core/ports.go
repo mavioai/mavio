@@ -22,6 +22,7 @@ type Store interface {
 	AuthSessions() AuthSessionRepository
 	Jobs() JobQueue
 	Scans() ScanRepository
+	PluginConfigs() PluginConfigRepository
 
 	// InTx runs fn in a transaction. The Store passed to fn is bound to the
 	// transaction; fn's error rolls it back.
@@ -190,4 +191,12 @@ type JobQueue interface {
 	// Fail records a failed attempt; the job is retried after RetryDelay
 	// until MaxAttempts is reached, then marked failed.
 	Fail(ctx context.Context, id ID, owner string, cause error) error
+}
+
+// PluginConfigRepository stores plugin configurations.
+type PluginConfigRepository interface {
+	// Get returns ErrNotFound for a plugin never configured.
+	Get(ctx context.Context, pluginID string) (PluginConfig, error)
+	// Put stores the configuration, replacing the plugin's earlier one.
+	Put(ctx context.Context, c *PluginConfig) error
 }

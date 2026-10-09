@@ -26,6 +26,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
+	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -55,6 +56,8 @@ type Client struct {
 	MediaSource *MediaSourceClient
 	// Person is the client for interacting with the Person builders.
 	Person *PersonClient
+	// PluginConfig is the client for interacting with the PluginConfig builders.
+	PluginConfig *PluginConfigClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserData is the client for interacting with the UserData builders.
@@ -80,6 +83,7 @@ func (c *Client) init() {
 	c.Library = NewLibraryClient(c.config)
 	c.MediaSource = NewMediaSourceClient(c.config)
 	c.Person = NewPersonClient(c.config)
+	c.PluginConfig = NewPluginConfigClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserData = NewUserDataClient(c.config)
 }
@@ -172,20 +176,21 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		AuthSession: NewAuthSessionClient(cfg),
-		Credit:      NewCreditClient(cfg),
-		FolderState: NewFolderStateClient(cfg),
-		Image:       NewImageClient(cfg),
-		Item:        NewItemClient(cfg),
-		ItemValue:   NewItemValueClient(cfg),
-		Job:         NewJobClient(cfg),
-		Library:     NewLibraryClient(cfg),
-		MediaSource: NewMediaSourceClient(cfg),
-		Person:      NewPersonClient(cfg),
-		User:        NewUserClient(cfg),
-		UserData:    NewUserDataClient(cfg),
+		ctx:          ctx,
+		config:       cfg,
+		AuthSession:  NewAuthSessionClient(cfg),
+		Credit:       NewCreditClient(cfg),
+		FolderState:  NewFolderStateClient(cfg),
+		Image:        NewImageClient(cfg),
+		Item:         NewItemClient(cfg),
+		ItemValue:    NewItemValueClient(cfg),
+		Job:          NewJobClient(cfg),
+		Library:      NewLibraryClient(cfg),
+		MediaSource:  NewMediaSourceClient(cfg),
+		Person:       NewPersonClient(cfg),
+		PluginConfig: NewPluginConfigClient(cfg),
+		User:         NewUserClient(cfg),
+		UserData:     NewUserDataClient(cfg),
 	}, nil
 }
 
@@ -203,20 +208,21 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		AuthSession: NewAuthSessionClient(cfg),
-		Credit:      NewCreditClient(cfg),
-		FolderState: NewFolderStateClient(cfg),
-		Image:       NewImageClient(cfg),
-		Item:        NewItemClient(cfg),
-		ItemValue:   NewItemValueClient(cfg),
-		Job:         NewJobClient(cfg),
-		Library:     NewLibraryClient(cfg),
-		MediaSource: NewMediaSourceClient(cfg),
-		Person:      NewPersonClient(cfg),
-		User:        NewUserClient(cfg),
-		UserData:    NewUserDataClient(cfg),
+		ctx:          ctx,
+		config:       cfg,
+		AuthSession:  NewAuthSessionClient(cfg),
+		Credit:       NewCreditClient(cfg),
+		FolderState:  NewFolderStateClient(cfg),
+		Image:        NewImageClient(cfg),
+		Item:         NewItemClient(cfg),
+		ItemValue:    NewItemValueClient(cfg),
+		Job:          NewJobClient(cfg),
+		Library:      NewLibraryClient(cfg),
+		MediaSource:  NewMediaSourceClient(cfg),
+		Person:       NewPersonClient(cfg),
+		PluginConfig: NewPluginConfigClient(cfg),
+		User:         NewUserClient(cfg),
+		UserData:     NewUserDataClient(cfg),
 	}, nil
 }
 
@@ -247,7 +253,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuthSession, c.Credit, c.FolderState, c.Image, c.Item, c.ItemValue, c.Job,
-		c.Library, c.MediaSource, c.Person, c.User, c.UserData,
+		c.Library, c.MediaSource, c.Person, c.PluginConfig, c.User, c.UserData,
 	} {
 		n.Use(hooks...)
 	}
@@ -258,7 +264,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuthSession, c.Credit, c.FolderState, c.Image, c.Item, c.ItemValue, c.Job,
-		c.Library, c.MediaSource, c.Person, c.User, c.UserData,
+		c.Library, c.MediaSource, c.Person, c.PluginConfig, c.User, c.UserData,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -287,6 +293,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.MediaSource.mutate(ctx, m)
 	case *PersonMutation:
 		return c.Person.mutate(ctx, m)
+	case *PluginConfigMutation:
+		return c.PluginConfig.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	case *UserDataMutation:
@@ -1978,6 +1986,139 @@ func (c *PersonClient) mutate(ctx context.Context, m *PersonMutation) (Value, er
 	}
 }
 
+// PluginConfigClient is a client for the PluginConfig schema.
+type PluginConfigClient struct {
+	config
+}
+
+// NewPluginConfigClient returns a client for the PluginConfig from the given config.
+func NewPluginConfigClient(c config) *PluginConfigClient {
+	return &PluginConfigClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pluginconfig.Hooks(f(g(h())))`.
+func (c *PluginConfigClient) Use(hooks ...Hook) {
+	c.hooks.PluginConfig = append(c.hooks.PluginConfig, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pluginconfig.Intercept(f(g(h())))`.
+func (c *PluginConfigClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PluginConfig = append(c.inters.PluginConfig, interceptors...)
+}
+
+// Create returns a builder for creating a PluginConfig entity.
+func (c *PluginConfigClient) Create() *PluginConfigCreate {
+	mutation := newPluginConfigMutation(c.config, OpCreate)
+	return &PluginConfigCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PluginConfig entities.
+func (c *PluginConfigClient) CreateBulk(builders ...*PluginConfigCreate) *PluginConfigCreateBulk {
+	return &PluginConfigCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PluginConfigClient) MapCreateBulk(slice any, setFunc func(*PluginConfigCreate, int)) *PluginConfigCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PluginConfigCreateBulk{err: fmt.Errorf("calling to PluginConfigClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PluginConfigCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PluginConfigCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PluginConfig.
+func (c *PluginConfigClient) Update() *PluginConfigUpdate {
+	mutation := newPluginConfigMutation(c.config, OpUpdate)
+	return &PluginConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PluginConfigClient) UpdateOne(_m *PluginConfig) *PluginConfigUpdateOne {
+	mutation := newPluginConfigMutation(c.config, OpUpdateOne, withPluginConfig(_m))
+	return &PluginConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PluginConfigClient) UpdateOneID(id core.ID) *PluginConfigUpdateOne {
+	mutation := newPluginConfigMutation(c.config, OpUpdateOne, withPluginConfigID(id))
+	return &PluginConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PluginConfig.
+func (c *PluginConfigClient) Delete() *PluginConfigDelete {
+	mutation := newPluginConfigMutation(c.config, OpDelete)
+	return &PluginConfigDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PluginConfigClient) DeleteOne(_m *PluginConfig) *PluginConfigDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PluginConfigClient) DeleteOneID(id core.ID) *PluginConfigDeleteOne {
+	builder := c.Delete().Where(pluginconfig.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PluginConfigDeleteOne{builder}
+}
+
+// Query returns a query builder for PluginConfig.
+func (c *PluginConfigClient) Query() *PluginConfigQuery {
+	return &PluginConfigQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePluginConfig},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PluginConfig entity by its id.
+func (c *PluginConfigClient) Get(ctx context.Context, id core.ID) (*PluginConfig, error) {
+	return c.Query().Where(pluginconfig.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PluginConfigClient) GetX(ctx context.Context, id core.ID) *PluginConfig {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PluginConfigClient) Hooks() []Hook {
+	return c.hooks.PluginConfig
+}
+
+// Interceptors returns the client interceptors.
+func (c *PluginConfigClient) Interceptors() []Interceptor {
+	return c.inters.PluginConfig
+}
+
+func (c *PluginConfigClient) mutate(ctx context.Context, m *PluginConfigMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PluginConfigCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PluginConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PluginConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PluginConfigDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PluginConfig mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -2312,10 +2453,10 @@ func (c *UserDataClient) mutate(ctx context.Context, m *UserDataMutation) (Value
 type (
 	hooks struct {
 		AuthSession, Credit, FolderState, Image, Item, ItemValue, Job, Library,
-		MediaSource, Person, User, UserData []ent.Hook
+		MediaSource, Person, PluginConfig, User, UserData []ent.Hook
 	}
 	inters struct {
 		AuthSession, Credit, FolderState, Image, Item, ItemValue, Job, Library,
-		MediaSource, Person, User, UserData []ent.Interceptor
+		MediaSource, Person, PluginConfig, User, UserData []ent.Interceptor
 	}
 )
