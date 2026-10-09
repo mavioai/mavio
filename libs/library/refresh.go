@@ -15,6 +15,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/metadata"
+	"github.com/mavioai/mavio/libs/naming"
 )
 
 // Lookup is what a metadata provider is told about an item.
@@ -78,6 +79,18 @@ func (r *Refresher) Refresh(ctx context.Context, lib core.Library, itemID core.I
 	if err != nil {
 		r.logger().WarnContext(ctx, "reading NFO failed", "item", it.ID, "err", err)
 	}
+	// Artwork beside the media comes first, then what the NFO names.
+	if art := r.localArt(lib, it); len(art) > 0 {
+		if local == nil {
+			local = &metadata.Result{}
+		}
+		for _, img := range local.LocalImages {
+			if !slices.ContainsFunc(art, func(a metadata.LocalImage) bool { return a.Kind == img.Kind }) {
+				art = append(art, img)
+			}
+		}
+		local.LocalImages = art
+	}
 	// Locks recorded in the local file hold against providers too.
 	if local != nil {
 		if len(local.Item.LockedFields) > 0 {
@@ -125,17 +138,27 @@ func (r *Refresher) Refresh(ctx context.Context, lib core.Library, itemID core.I
 				break
 			}
 		}
+		// Each kind of image comes from the most trusted source that has
+		// it.
+		var images []core.Image
 		for i := len(results) - 1; i >= 0; i-- {
-			if images := imagesOf(it.ID, results[i]); len(images) > 0 {
-				existing, err := tx.Images().ListForOwner(ctx, it.ID)
-				if err != nil {
-					return err
+			for _, img := range imagesOf(it.ID, results[i]) {
+				if !slices.ContainsFunc(images, func(have core.Image) bool { return have.Kind == img.Kind }) ||
+					(img.Kind == core.ImageBackdrop && i == len(results)-1) {
+					images = append(images, img)
 				}
-				keepImages(images, existing)
-				return tx.Images().Replace(ctx, it.ID, images)
 			}
 		}
-		return nil
+		if len(images) == 0 {
+			return nil
+		}
+		numberImages(images)
+		existing, err := tx.Images().ListForOwner(ctx, it.ID)
+		if err != nil {
+			return err
+		}
+		keepImages(images, existing)
+		return tx.Images().Replace(ctx, it.ID, images)
 	})
 }
 
@@ -292,6 +315,49 @@ func imagesOf(owner core.ID, res *metadata.Result) []core.Image {
 		if !slices.ContainsFunc(images, func(i core.Image) bool { return i.Kind == img.Kind }) {
 			images = append(images, core.Image{OwnerID: owner, Kind: img.Kind, RemoteURL: img.URL})
 		}
+	}
+	return images
+}
+
+// numberImages numbers the images of each kind in order.
+func numberImages(images []core.Image) {
+	next := map[core.ImageKind]int{}
+	for i := range images {
+		images[i].Index = next[images[i].Kind]
+		next[images[i].Kind]++
+	}
+}
+
+// localArt finds the artwork beside an item in its library folder.
+func (r *Refresher) localArt(lib core.Library, it core.Item) []metadata.LocalImage {
+	root, rel, ok := libraryRoot(lib, it.Path)
+	if !ok {
+		return nil
+	}
+	rt, err := os.OpenRoot(filepath.FromSlash(root))
+	if err != nil {
+		return nil
+	}
+	defer rt.Close()
+	info, err := fs.Stat(rt.FS(), rel)
+	if err != nil {
+		return nil
+	}
+	mixed := false
+	if !info.IsDir() {
+		// A file shares its folder when other videos lie beside it.
+		entries, _ := fs.ReadDir(rt.FS(), path.Dir(rel))
+		videos := 0
+		for _, e := range entries {
+			if !e.IsDir() && naming.Default().IsVideoFile(e.Name()) {
+				videos++
+			}
+		}
+		mixed = videos > 1
+	}
+	images := localImages(rt.FS(), &it, rel, info.IsDir(), mixed)
+	for i := range images {
+		images[i].Path = path.Join(root, images[i].Path)
 	}
 	return images
 }
