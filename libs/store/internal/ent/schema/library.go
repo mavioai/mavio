@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Library holds the schema of core.Library.
@@ -32,6 +33,15 @@ func (Library) Fields() []ent.Field {
 		field.Int64("scan_generation").Default(0),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+	}
+}
+
+// Indexes of Library.
+func (Library) Indexes() []ent.Index {
+	return []ent.Index{
+		// The server keeps one library of each curated kind.
+		index.Fields("kind").Unique().
+			Annotations(entsql.IndexWhere("kind IN ('collections', 'playlists')")),
 	}
 }
 

@@ -55,7 +55,7 @@ erDiagram
 
 | 类型 | 取值 |
 | :--- | :--- |
-| `LibraryKind` | `movies`、`shows`、`music`、`music_videos`、`home_videos`、`books`、`photos`、`mixed` |
+| `LibraryKind` | `movies`、`shows`、`music`、`music_videos`、`home_videos`、`books`、`photos`、`mixed`、`collections`、`playlists` |
 | `ItemKind` | `movie`、`series`、`season`、`episode`、`video`、`music_artist`、`music_album`、`track`、`music_video`、`audiobook`、`book`、`photo_album`、`photo`、`folder`、`collection`、`playlist` |
 | `ExtraKind` | `trailer`、`clip`、`behind_the_scenes`、`deleted_scene`、`interview`、`scene`、`sample`、`featurette`、`short`、`theme_song`、`theme_video`、`other` |
 | `StreamKind` | `video`、`audio`、`subtitle`、`attachment`、`image`、`data` |
@@ -68,7 +68,7 @@ erDiagram
 | `Video3DFormat` | `half_sbs`、`full_sbs`、`half_tab`、`full_tab`、`mvc` |
 | `MetadataField` | `cast`、`genres`、`production_locations`、`studios`、`tags`、`name`、`overview`、`runtime`、`official_rating` |
 | `SubtitleMode` | `""`（遵循流标记）、`always`、`foreign`、`forced`、`none`、`smart` |
-| `SortField` | `name`、`date_added`、`premiere_date`、`production_year`、`community_rating`、`runtime`、`index`、`random`、`last_played`、`play_count` |
+| `SortField` | `name`、`date_added`、`premiere_date`、`production_year`、`community_rating`、`runtime`、`index`、`random`、`last_played`、`play_count`、`list_order` |
 | `JobState` | `pending`、`running`、`succeeded`、`failed` |
 | `Provider` | `tmdb`、`tmdb_collection`、`imdb`、`tvdb`、`tvmaze`、`anidb`、`anilist`、`anisearch`（动画数据库，每季一个条目）、`musicbrainz_artist`、`musicbrainz_album_artist`、`musicbrainz_album`、`musicbrainz_release_group`、`musicbrainz_track`（常用取值；插件可使用其他名称） |
 
@@ -77,7 +77,7 @@ erDiagram
 ## 4. 媒体库与条目
 
 ### 4.1 媒体库
-* `Kind` 决定扫描器如何解读目录；`Paths` 是绝对路径的根目录，一个路径最多属于一个媒体库：媒体库的路径不能与其他媒体库的路径相同、包含或被包含（`ErrConflict`）。
+* `Kind` 决定扫描器如何解读目录；`Paths` 是绝对路径的根目录，一个路径最多属于一个媒体库：媒体库的路径不能与其他媒体库的路径相同、包含或被包含（`ErrConflict`）。整理类种类（`LibraryKind.Curated`），即 `collections` 与 `playlists`，存放用户整理的合集与播放列表而非扫描的目录：它们没有路径，从不扫描，每种至多一个媒体库（`ErrConflict`），由服务端在首次需要时创建。
 * `ScanInterval` 是定时对账扫描的周期（为零则不定时扫描）；`PreferredLanguage`（ISO 639-1）与 `MetadataCountry`（ISO 3166-1 alpha-2）影响元数据提供者的取数。
 
 ### 4.2 条目
@@ -85,7 +85,7 @@ erDiagram
 
 | 字段分组 | 字段 |
 | :--- | :--- |
-| 标识与层级 | `ID`、`LibraryID`、`ParentID`、`Kind`、`Path` |
+| 标识与层级 | `ID`、`LibraryID`、`ParentID`、`Kind`、`Path`、`UserID`（播放列表所属的用户） |
 | 标题与文本 | `Name`、`SortName`、`OriginalTitle`、`Overview`、`Tagline` |
 | 编号 | `IndexNumber`、`ParentIndexNumber`、`IndexNumberEnd` |
 | 日期与评分 | `ProductionYear`、`PremiereDate`、`EndDate`、`Runtime`、`OfficialRating`、`CustomRating`、`ParentalRating`、`InheritedRating`、`CommunityRating`（0–10）、`CriticRating`（0–100） |
@@ -110,7 +110,7 @@ erDiagram
 | `movies`、`music_videos`、`home_videos`、`books` | 顶层条目，可放在 `folder` 条目中 | — |
 | `photos` | `photo_album` → `photo` | — |
 
-`collection` 和 `playlist` 是用户整理的容器，没有 `Path`。
+`collection` 和 `playlist` 条目（`ItemKind.IsCurated`）是用户整理的容器，没有 `Path`，位于 `collections` 与 `playlists` 媒体库中。它们没有子条目：条目以有序条目项链接进来（`Link`：条目项 `ID`、`ContainerID` 与 `ItemID`），因此一个条目可以属于多个合集与播放列表，一个播放列表也可以多次包含同一条目。合集是共享的；播放列表属于其 `UserID`，只有播放列表有此字段且必须有。删除条目会删除它的条目项；删除用户会删除其播放列表。
 
 * `ItemKind.IsContainer()` 对用于归组其他条目的种类返回 true（剧集、季、艺人、专辑、相册、文件夹、合集、播放列表）。
 * `ItemKind.HasMedia()` 对有可播放文件的种类返回 true（电影、单集、视频、音轨、音乐视频、有声书）；这些条目拥有媒体源。
@@ -160,7 +160,7 @@ erDiagram
   * `Libraries` 把访问限制在列出的媒体库内（nil 表示全部）；由 `CanAccessLibrary` 判断。
   * `MaxParentalRating` 是允许的最高分级分数（"PG-13" 这类内容分级按国家分级体系映射为分数；为零表示不限制）；设置了上限时，`BlockUnrated` 会隐藏没有分级的条目。
   * `AllowTranscoding`、`AllowDownload`、`MaxStreamingBitrate`（比特每秒，为零表示不限）与 `MaxSessions`（为零表示不限）。
-* `UserPolicy.CanAccess` 在条目所属媒体库被允许、且设置了最高分级时其分级分数（`ParentalRating`，没有时取 `InheritedRating`）不超过该值时允许访问；未分级条目除非设置了 `BlockUnrated` 否则放行，与条目查询的分级过滤一致。
+* `UserPolicy.CanAccess` 在条目所属媒体库被允许、且设置了最高分级时其分级分数（`ParentalRating`，没有时取 `InheritedRating`）不超过该值时允许访问；未分级条目除非设置了 `BlockUnrated` 否则放行，与条目查询的分级过滤一致。`User.CanAccess` 允许用户访问自己的播放列表、不允许访问他人的播放列表，与媒体库权限无关；对其他条目则应用权限策略。
 * `UserPreferences`：按偏好顺序排列的音频与字幕语言（ISO 639-2/B）、`SubtitleMode`，以及是否优先选择默认音轨而非偏好语言。
 * `UserData` 是某个用户对某个条目的状态：`Played`、`PlayCount`、续播位置 `Position`、上次选择的音频/字幕流（字幕为 `-1` 表示关闭）、`Favorite`、可选的 0–10 分 `Rating` 以及时间戳。没有记录表示"从未交互"。
 * 播放条目时按 Jellyfin 的规则更新其 `UserData`（`RecordPosition`）：位于时长前 5% 的位置不保留；超过 90% 或距结尾不足一秒时标记为已播放并清除位置；短于五分钟的条目越过前 5% 即标记为已播放。有声书改用距开头与距结尾各五分钟。没有时长的条目任何一次播放都算播完。只有视频、有声书与书籍保留续播位置；音乐曲目只标记已播放；其他类型两者都不支持。每次播放到结束，`PlayCount` 加一。
@@ -199,6 +199,7 @@ erDiagram
 | `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`GetByTokenHash`、`ListForUser`（按最近活动排序）、`Touch`、`Delete` |
 | `JobQueue` | `Enqueue`（报告是否入队）、`Lease`、`Extend`、`Complete`、`Fail` |
 | `ScanRepository` | 媒体库扫描的 `NextGeneration`；每个已扫描文件夹的 `FolderState`（`ModTime`、`FileID`、`Entries`），由 `PutFolders` 记录，文件夹消失后由 `DeleteFolders` 移除 |
+| `ItemRepository`（整理类） | `Links` 按顺序列出合集或播放列表的条目项；`ReplaceLinks` 设置它们，保留给定的 ID，并为没有 ID 的条目项分配新 ID |
 | `PluginConfigRepository` | `Get` 某个插件的配置（从未配置时返回 `ErrNotFound`），`Put` 写入并替换之前的配置 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
@@ -208,10 +209,11 @@ erDiagram
 ### 9.1 条目查询
 `ItemQuery` 中零值字段表示"不过滤"：
 
-* 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`Kinds`、`IncludeExtras`、`IncludeMissing`。
+* 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代），或 `MemberOf`（链接进合集或播放列表的条目，每个一次）、`Kinds`、`IncludeExtras`、`IncludeMissing`。
 * 内容：`Search`（见 §9.2）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`，与 `InheritedRating` 比较（未分级的条目默认包含，除非设置 `SkipUnrated`）。
 * 名称按排序名以 Jellyfin 的方式排序：不区分大小写和重音，忽略开头、中间和结尾的冠词（"the"、"a"、"an"），去掉标点 `,&-{}'` 并把 `.+%` 视为空格，数字按数值排序（"Rocky 2" 在 "Rocky 10" 之前），非拉丁文字转写为拉丁字母（中文按拼音排序）。按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
-* 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`，以及 `last_played` / `play_count` 排序。
+* 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`，以及 `last_played` / `play_count` 排序。设置了 `UserID` 时，其他用户的播放列表不在结果中。
+* `list_order` 按在 `MemberOf` 所指合集或播放列表中的位置排序，出现两次的条目按其第一个条目项排序。
 * 排序：`SortSpec` 列表；结果总是以 ID 作为最后的排序键，保证分页稳定。
 * 分页：`Limit`（为零表示上限 `MaxPageSize` = 1000）与 `Offset`；`Page.Total` 为所有页的总数。
 * `Validate` 拒绝不一致的查询：超出范围的 limit、负的 offset、没有父级的 `Recursive`、空的年份区间、未知的种类或排序字段，以及没有用户的用户过滤或排序。

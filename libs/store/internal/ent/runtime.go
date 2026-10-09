@@ -11,6 +11,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
@@ -213,13 +214,19 @@ func init() {
 	// item.DefaultExtra holds the default value on creation for the extra field.
 	item.DefaultExtra = itemDescExtra.Default.(string)
 	// itemDescScanGeneration is the schema descriptor for scan_generation field.
-	itemDescScanGeneration := itemFields[49].Descriptor()
+	itemDescScanGeneration := itemFields[50].Descriptor()
 	// item.DefaultScanGeneration holds the default value on creation for the scan_generation field.
 	item.DefaultScanGeneration = itemDescScanGeneration.Default.(int64)
 	// itemDescID is the schema descriptor for id field.
 	itemDescID := itemFields[0].Descriptor()
 	// item.DefaultID holds the default value on creation for the id field.
 	item.DefaultID = itemDescID.Default.(func() core.ID)
+	itemlinkFields := schema.ItemLink{}.Fields()
+	_ = itemlinkFields
+	// itemlinkDescID is the schema descriptor for id field.
+	itemlinkDescID := itemlinkFields[0].Descriptor()
+	// itemlink.DefaultID holds the default value on creation for the id field.
+	itemlink.DefaultID = itemlinkDescID.Default.(func() core.ID)
 	itemvalueFields := schema.ItemValue{}.Fields()
 	_ = itemvalueFields
 	// itemvalueDescValueKey is the schema descriptor for value_key field.

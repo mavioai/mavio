@@ -17,7 +17,10 @@ type ItemQuery struct {
 	// all descendants.
 	ParentID  ID
 	Recursive bool
-	Kinds     []ItemKind
+	// MemberOf restricts results to the items linked into a collection or
+	// playlist, each once.
+	MemberOf ID
+	Kinds    []ItemKind
 	// IncludeExtras includes trailers and other extras, which are excluded by
 	// default.
 	IncludeExtras bool
@@ -39,7 +42,8 @@ type ItemQuery struct {
 	MaxRating   int
 	SkipUnrated bool
 
-	// UserID enables the per-user filters and sorts below.
+	// UserID enables the per-user filters and sorts below, and leaves out
+	// other users' playlists.
 	UserID    ID
 	Played    *bool
 	Favorite  *bool
@@ -65,12 +69,15 @@ const (
 	SortRandom          SortField = "random"
 	SortLastPlayed      SortField = "last_played" // requires UserID
 	SortPlayCount       SortField = "play_count"  // requires UserID
+	// SortListOrder is the order of a collection or playlist; it requires
+	// MemberOf.
+	SortListOrder SortField = "list_order"
 )
 
 // SortFields lists every sort field.
 var SortFields = []SortField{
 	SortName, SortDateAdded, SortPremiereDate, SortProductionYear, SortCommunityRating,
-	SortRuntime, SortIndex, SortRandom, SortLastPlayed, SortPlayCount,
+	SortRuntime, SortIndex, SortRandom, SortLastPlayed, SortPlayCount, SortListOrder,
 }
 
 // SortSpec is one ordering key. Results are always tie-broken by ID.
@@ -88,6 +95,8 @@ func (q *ItemQuery) Validate() error {
 		return fmt.Errorf("%w: negative offset", ErrInvalid)
 	case q.Recursive && q.ParentID.IsZero():
 		return fmt.Errorf("%w: recursive query without a parent", ErrInvalid)
+	case !q.MemberOf.IsZero() && !q.ParentID.IsZero():
+		return fmt.Errorf("%w: query for both children and members", ErrInvalid)
 	case q.YearFrom != 0 && q.YearTo != 0 && q.YearFrom > q.YearTo:
 		return fmt.Errorf("%w: year range %d–%d is empty", ErrInvalid, q.YearFrom, q.YearTo)
 	case q.UserID.IsZero() && (q.Played != nil || q.Favorite != nil || q.Resumable):
@@ -104,6 +113,9 @@ func (q *ItemQuery) Validate() error {
 		}
 		if q.UserID.IsZero() && (s.Field == SortLastPlayed || s.Field == SortPlayCount) {
 			return fmt.Errorf("%w: sort by %s requires a user", ErrInvalid, s.Field)
+		}
+		if q.MemberOf.IsZero() && s.Field == SortListOrder {
+			return fmt.Errorf("%w: sort by %s requires a collection or playlist", ErrInvalid, s.Field)
 		}
 	}
 	return nil

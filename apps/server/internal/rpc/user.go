@@ -277,7 +277,7 @@ func (s *UserDataService) UpdateUserData(ctx context.Context, req *userv1.Update
 		if err != nil {
 			return err
 		}
-		if !p.User.Policy.CanAccess(&item) {
+		if !p.User.CanAccess(&item) {
 			return core.ErrNotFound
 		}
 		update := func(it *core.Item, fields bool) (core.UserData, error) {

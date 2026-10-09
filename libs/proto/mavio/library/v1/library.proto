@@ -35,6 +35,12 @@ enum LibraryKind {
   LIBRARY_KIND_BOOKS = 6;
   LIBRARY_KIND_PHOTOS = 7;
   LIBRARY_KIND_MIXED = 8;
+  // The collections and the playlists users curate, in two libraries the
+  // server creates when first needed. They have no folders, cannot be
+  // created, changed or scanned through LibraryService, and the playlists
+  // library is open to every user, each seeing their own playlists.
+  LIBRARY_KIND_COLLECTIONS = 9;
+  LIBRARY_KIND_PLAYLISTS = 10;
 }
 
 // Library is a named set of root folders scanned as one collection.

@@ -105,6 +105,10 @@ func (r memItems) Values(context.Context, core.ValueQuery) ([]core.ValueCount, e
 	panic("unused")
 }
 
+func (r memItems) Links(context.Context, core.ID) ([]core.Link, error) { panic("unused") }
+
+func (r memItems) ReplaceLinks(context.Context, core.ID, []core.Link) error { panic("unused") }
+
 func (r memItems) Upsert(_ context.Context, items ...core.Item) error {
 	r.m.mu.Lock()
 	defer r.m.mu.Unlock()

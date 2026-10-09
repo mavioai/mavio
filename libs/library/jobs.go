@@ -111,9 +111,9 @@ func (j *Jobs) Handlers() map[string]Handler {
 	}
 }
 
-// Schedule enqueues a scan of every library now, as on server startup, and
-// for libraries with a scan interval the scheduled scan after it, unless
-// one is pending; each scheduled scan enqueues the next.
+// Schedule enqueues a scan of every library with folders now, as on server
+// startup, and for libraries with a scan interval the scheduled scan after
+// it, unless one is pending; each scheduled scan enqueues the next.
 func (j *Jobs) Schedule(ctx context.Context) error {
 	libs, err := j.Store.Libraries().List(ctx)
 	if err != nil {
@@ -121,6 +121,9 @@ func (j *Jobs) Schedule(ctx context.Context) error {
 	}
 	now := j.now()
 	for _, lib := range libs {
+		if lib.Kind.Curated() {
+			continue
+		}
 		jobs := []core.Job{ScanJob(lib, now, false)}
 		if lib.ScanInterval > 0 {
 			jobs = append(jobs, ScanJob(lib, now.Add(lib.ScanInterval), true))
@@ -154,7 +157,7 @@ func (j *Jobs) scan(ctx context.Context, job core.Job) ([]core.Job, error) {
 		return nil, fmt.Errorf("scan payload: %w", err)
 	}
 	lib, err := j.Store.Libraries().Get(ctx, p.LibraryID)
-	if err != nil {
+	if err != nil || lib.Kind.Curated() {
 		return nil, err
 	}
 	lock := j.libraryLock(lib.ID)

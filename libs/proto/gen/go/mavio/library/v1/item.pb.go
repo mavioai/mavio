@@ -383,6 +383,8 @@ const (
 	SortField_SORT_FIELD_RANDOM           SortField = 8
 	SortField_SORT_FIELD_LAST_PLAYED      SortField = 9
 	SortField_SORT_FIELD_PLAY_COUNT       SortField = 10
+	// The order of the collection or playlist given as parent.
+	SortField_SORT_FIELD_LIST_ORDER SortField = 11
 )
 
 // Enum value maps for SortField.
@@ -399,6 +401,7 @@ var (
 		8:  "SORT_FIELD_RANDOM",
 		9:  "SORT_FIELD_LAST_PLAYED",
 		10: "SORT_FIELD_PLAY_COUNT",
+		11: "SORT_FIELD_LIST_ORDER",
 	}
 	SortField_value = map[string]int32{
 		"SORT_FIELD_UNSPECIFIED":      0,
@@ -412,6 +415,7 @@ var (
 		"SORT_FIELD_RANDOM":           8,
 		"SORT_FIELD_LAST_PLAYED":      9,
 		"SORT_FIELD_PLAY_COUNT":       10,
+		"SORT_FIELD_LIST_ORDER":       11,
 	}
 )
 
@@ -4807,7 +4811,7 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x12\x16\n" +
 	"\x12CREDIT_KIND_AUTHOR\x10\v\x12\x18\n" +
 	"\x14CREDIT_KIND_NARRATOR\x10\f\x12\x15\n" +
-	"\x11CREDIT_KIND_OTHER\x10\r*\xb2\x02\n" +
+	"\x11CREDIT_KIND_OTHER\x10\r*\xcd\x02\n" +
 	"\tSortField\x12\x1a\n" +
 	"\x16SORT_FIELD_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fSORT_FIELD_NAME\x10\x01\x12\x19\n" +
@@ -4820,7 +4824,8 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x11SORT_FIELD_RANDOM\x10\b\x12\x1a\n" +
 	"\x16SORT_FIELD_LAST_PLAYED\x10\t\x12\x19\n" +
 	"\x15SORT_FIELD_PLAY_COUNT\x10\n" +
-	"*\x94\x01\n" +
+	"\x12\x19\n" +
+	"\x15SORT_FIELD_LIST_ORDER\x10\v*\x94\x01\n" +
 	"\tValueKind\x12\x1a\n" +
 	"\x16VALUE_KIND_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10VALUE_KIND_GENRE\x10\x01\x12\x12\n" +

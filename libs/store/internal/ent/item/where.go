@@ -257,6 +257,11 @@ func OwnerID(v core.ID) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldOwnerID, v))
 }
 
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v core.ID) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldUserID, v))
+}
+
 // DateAdded applies equality check predicate on the "date_added" field. It's identical to DateAddedEQ.
 func DateAdded(v time.Time) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldDateAdded, v))
@@ -2506,6 +2511,36 @@ func OwnerIDNotNil() predicate.Item {
 	return predicate.Item(sql.FieldNotNull(FieldOwnerID))
 }
 
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v core.ID) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldUserID, v))
+}
+
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v core.ID) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldUserID, v))
+}
+
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...core.ID) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldUserID, vs...))
+}
+
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...core.ID) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// UserIDIsNil applies the IsNil predicate on the "user_id" field.
+func UserIDIsNil() predicate.Item {
+	return predicate.Item(sql.FieldIsNull(FieldUserID))
+}
+
+// UserIDNotNil applies the NotNil predicate on the "user_id" field.
+func UserIDNotNil() predicate.Item {
+	return predicate.Item(sql.FieldNotNull(FieldUserID))
+}
+
 // DateAddedEQ applies the EQ predicate on the "date_added" field.
 func DateAddedEQ(v time.Time) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldDateAdded, v))
@@ -2958,6 +2993,75 @@ func HasUserData() predicate.Item {
 func HasUserDataWith(preds ...predicate.UserData) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
 		step := newUserDataStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLinks applies the HasEdge predicate on the "links" edge.
+func HasLinks() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LinksTable, LinksColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLinksWith applies the HasEdge predicate on the "links" edge with a given conditions (other predicates).
+func HasLinksWith(preds ...predicate.ItemLink) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newLinksStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLinkedIn applies the HasEdge predicate on the "linked_in" edge.
+func HasLinkedIn() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LinkedInTable, LinkedInColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLinkedInWith applies the HasEdge predicate on the "linked_in" edge with a given conditions (other predicates).
+func HasLinkedInWith(preds ...predicate.ItemLink) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newLinkedInStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

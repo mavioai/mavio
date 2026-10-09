@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
@@ -42,6 +43,7 @@ const (
 	TypeFolderState  = "FolderState"
 	TypeImage        = "Image"
 	TypeItem         = "Item"
+	TypeItemLink     = "ItemLink"
 	TypeItemValue    = "ItemValue"
 	TypeJob          = "Job"
 	TypeLibrary      = "Library"
@@ -3403,6 +3405,14 @@ type ItemMutation struct {
 	user_data                     map[int]struct{}
 	removeduser_data              map[int]struct{}
 	cleareduser_data              bool
+	user                          *core.ID
+	cleareduser                   bool
+	links                         map[core.ID]struct{}
+	removedlinks                  map[core.ID]struct{}
+	clearedlinks                  bool
+	linked_in                     map[core.ID]struct{}
+	removedlinked_in              map[core.ID]struct{}
+	clearedlinked_in              bool
 	done                          bool
 	oldValue                      func(context.Context) (*Item, error)
 	predicates                    []predicate.Item
@@ -5637,6 +5647,55 @@ func (m *ItemMutation) ResetOwnerID() {
 	delete(m.clearedFields, item.FieldOwnerID)
 }
 
+// SetUserID sets the "user_id" field.
+func (m *ItemMutation) SetUserID(c core.ID) {
+	m.user = &c
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *ItemMutation) UserID() (r core.ID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldUserID(ctx context.Context) (v *core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (m *ItemMutation) ClearUserID() {
+	m.user = nil
+	m.clearedFields[item.FieldUserID] = struct{}{}
+}
+
+// UserIDCleared returns if the "user_id" field was cleared in this mutation.
+func (m *ItemMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[item.FieldUserID]
+	return ok
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *ItemMutation) ResetUserID() {
+	m.user = nil
+	delete(m.clearedFields, item.FieldUserID)
+}
+
 // SetDateAdded sets the "date_added" field.
 func (m *ItemMutation) SetDateAdded(t time.Time) {
 	m.date_added = &t
@@ -6335,6 +6394,141 @@ func (m *ItemMutation) ResetUserData() {
 	m.removeduser_data = nil
 }
 
+// ClearUser clears the "user" edge to the User entity.
+func (m *ItemMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[item.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *ItemMutation) UserCleared() bool {
+	return m.UserIDCleared() || m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *ItemMutation) UserIDs() (ids []core.ID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *ItemMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// AddLinkIDs adds the "links" edge to the ItemLink entity by ids.
+func (m *ItemMutation) AddLinkIDs(ids ...core.ID) {
+	if m.links == nil {
+		m.links = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.links[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLinks clears the "links" edge to the ItemLink entity.
+func (m *ItemMutation) ClearLinks() {
+	m.clearedlinks = true
+}
+
+// LinksCleared reports if the "links" edge to the ItemLink entity was cleared.
+func (m *ItemMutation) LinksCleared() bool {
+	return m.clearedlinks
+}
+
+// RemoveLinkIDs removes the "links" edge to the ItemLink entity by IDs.
+func (m *ItemMutation) RemoveLinkIDs(ids ...core.ID) {
+	if m.removedlinks == nil {
+		m.removedlinks = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.links, ids[i])
+		m.removedlinks[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLinks returns the removed IDs of the "links" edge to the ItemLink entity.
+func (m *ItemMutation) RemovedLinksIDs() (ids []core.ID) {
+	for id := range m.removedlinks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LinksIDs returns the "links" edge IDs in the mutation.
+func (m *ItemMutation) LinksIDs() (ids []core.ID) {
+	for id := range m.links {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLinks resets all changes to the "links" edge.
+func (m *ItemMutation) ResetLinks() {
+	m.links = nil
+	m.clearedlinks = false
+	m.removedlinks = nil
+}
+
+// AddLinkedInIDs adds the "linked_in" edge to the ItemLink entity by ids.
+func (m *ItemMutation) AddLinkedInIDs(ids ...core.ID) {
+	if m.linked_in == nil {
+		m.linked_in = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.linked_in[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLinkedIn clears the "linked_in" edge to the ItemLink entity.
+func (m *ItemMutation) ClearLinkedIn() {
+	m.clearedlinked_in = true
+}
+
+// LinkedInCleared reports if the "linked_in" edge to the ItemLink entity was cleared.
+func (m *ItemMutation) LinkedInCleared() bool {
+	return m.clearedlinked_in
+}
+
+// RemoveLinkedInIDs removes the "linked_in" edge to the ItemLink entity by IDs.
+func (m *ItemMutation) RemoveLinkedInIDs(ids ...core.ID) {
+	if m.removedlinked_in == nil {
+		m.removedlinked_in = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.linked_in, ids[i])
+		m.removedlinked_in[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLinkedIn returns the removed IDs of the "linked_in" edge to the ItemLink entity.
+func (m *ItemMutation) RemovedLinkedInIDs() (ids []core.ID) {
+	for id := range m.removedlinked_in {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LinkedInIDs returns the "linked_in" edge IDs in the mutation.
+func (m *ItemMutation) LinkedInIDs() (ids []core.ID) {
+	for id := range m.linked_in {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLinkedIn resets all changes to the "linked_in" edge.
+func (m *ItemMutation) ResetLinkedIn() {
+	m.linked_in = nil
+	m.clearedlinked_in = false
+	m.removedlinked_in = nil
+}
+
 // Where appends a list predicates to the ItemMutation builder.
 func (m *ItemMutation) Where(ps ...predicate.Item) {
 	m.predicates = append(m.predicates, ps...)
@@ -6369,7 +6563,7 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 50)
+	fields := make([]string, 0, 51)
 	if m.library != nil {
 		fields = append(fields, item.FieldLibraryID)
 	}
@@ -6505,6 +6699,9 @@ func (m *ItemMutation) Fields() []string {
 	if m.owner != nil {
 		fields = append(fields, item.FieldOwnerID)
 	}
+	if m.user != nil {
+		fields = append(fields, item.FieldUserID)
+	}
 	if m.date_added != nil {
 		fields = append(fields, item.FieldDateAdded)
 	}
@@ -6618,6 +6815,8 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 		return m.Extra()
 	case item.FieldOwnerID:
 		return m.OwnerID()
+	case item.FieldUserID:
+		return m.UserID()
 	case item.FieldDateAdded:
 		return m.DateAdded()
 	case item.FieldFileModified:
@@ -6727,6 +6926,8 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldExtra(ctx)
 	case item.FieldOwnerID:
 		return m.OldOwnerID(ctx)
+	case item.FieldUserID:
+		return m.OldUserID(ctx)
 	case item.FieldDateAdded:
 		return m.OldDateAdded(ctx)
 	case item.FieldFileModified:
@@ -7061,6 +7262,13 @@ func (m *ItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetOwnerID(v)
 		return nil
+	case item.FieldUserID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
 	case item.FieldDateAdded:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -7330,6 +7538,9 @@ func (m *ItemMutation) ClearedFields() []string {
 	if m.FieldCleared(item.FieldOwnerID) {
 		fields = append(fields, item.FieldOwnerID)
 	}
+	if m.FieldCleared(item.FieldUserID) {
+		fields = append(fields, item.FieldUserID)
+	}
 	if m.FieldCleared(item.FieldFileModified) {
 		fields = append(fields, item.FieldFileModified)
 	}
@@ -7397,6 +7608,9 @@ func (m *ItemMutation) ClearField(name string) error {
 		return nil
 	case item.FieldOwnerID:
 		m.ClearOwnerID()
+		return nil
+	case item.FieldUserID:
+		m.ClearUserID()
 		return nil
 	case item.FieldFileModified:
 		m.ClearFileModified()
@@ -7550,6 +7764,9 @@ func (m *ItemMutation) ResetField(name string) error {
 	case item.FieldOwnerID:
 		m.ResetOwnerID()
 		return nil
+	case item.FieldUserID:
+		m.ResetUserID()
+		return nil
 	case item.FieldDateAdded:
 		m.ResetDateAdded()
 		return nil
@@ -7571,7 +7788,7 @@ func (m *ItemMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ItemMutation) AddedEdges() []string {
-	edges := make([]string, 0, 10)
+	edges := make([]string, 0, 13)
 	if m.library != nil {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -7601,6 +7818,15 @@ func (m *ItemMutation) AddedEdges() []string {
 	}
 	if m.user_data != nil {
 		edges = append(edges, item.EdgeUserData)
+	}
+	if m.user != nil {
+		edges = append(edges, item.EdgeUser)
+	}
+	if m.links != nil {
+		edges = append(edges, item.EdgeLinks)
+	}
+	if m.linked_in != nil {
+		edges = append(edges, item.EdgeLinkedIn)
 	}
 	return edges
 }
@@ -7663,13 +7889,29 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case item.EdgeLinks:
+		ids := make([]ent.Value, 0, len(m.links))
+		for id := range m.links {
+			ids = append(ids, id)
+		}
+		return ids
+	case item.EdgeLinkedIn:
+		ids := make([]ent.Value, 0, len(m.linked_in))
+		for id := range m.linked_in {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ItemMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 10)
+	edges := make([]string, 0, 13)
 	if m.removedchildren != nil {
 		edges = append(edges, item.EdgeChildren)
 	}
@@ -7690,6 +7932,12 @@ func (m *ItemMutation) RemovedEdges() []string {
 	}
 	if m.removeduser_data != nil {
 		edges = append(edges, item.EdgeUserData)
+	}
+	if m.removedlinks != nil {
+		edges = append(edges, item.EdgeLinks)
+	}
+	if m.removedlinked_in != nil {
+		edges = append(edges, item.EdgeLinkedIn)
 	}
 	return edges
 }
@@ -7740,13 +7988,25 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeLinks:
+		ids := make([]ent.Value, 0, len(m.removedlinks))
+		for id := range m.removedlinks {
+			ids = append(ids, id)
+		}
+		return ids
+	case item.EdgeLinkedIn:
+		ids := make([]ent.Value, 0, len(m.removedlinked_in))
+		for id := range m.removedlinked_in {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ItemMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 10)
+	edges := make([]string, 0, 13)
 	if m.clearedlibrary {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -7777,6 +8037,15 @@ func (m *ItemMutation) ClearedEdges() []string {
 	if m.cleareduser_data {
 		edges = append(edges, item.EdgeUserData)
 	}
+	if m.cleareduser {
+		edges = append(edges, item.EdgeUser)
+	}
+	if m.clearedlinks {
+		edges = append(edges, item.EdgeLinks)
+	}
+	if m.clearedlinked_in {
+		edges = append(edges, item.EdgeLinkedIn)
+	}
 	return edges
 }
 
@@ -7804,6 +8073,12 @@ func (m *ItemMutation) EdgeCleared(name string) bool {
 		return m.clearedcredits
 	case item.EdgeUserData:
 		return m.cleareduser_data
+	case item.EdgeUser:
+		return m.cleareduser
+	case item.EdgeLinks:
+		return m.clearedlinks
+	case item.EdgeLinkedIn:
+		return m.clearedlinked_in
 	}
 	return false
 }
@@ -7820,6 +8095,9 @@ func (m *ItemMutation) ClearEdge(name string) error {
 		return nil
 	case item.EdgeOwner:
 		m.ClearOwner()
+		return nil
+	case item.EdgeUser:
+		m.ClearUser()
 		return nil
 	}
 	return fmt.Errorf("unknown Item unique edge %s", name)
@@ -7859,8 +8137,593 @@ func (m *ItemMutation) ResetEdge(name string) error {
 	case item.EdgeUserData:
 		m.ResetUserData()
 		return nil
+	case item.EdgeUser:
+		m.ResetUser()
+		return nil
+	case item.EdgeLinks:
+		m.ResetLinks()
+		return nil
+	case item.EdgeLinkedIn:
+		m.ResetLinkedIn()
+		return nil
 	}
 	return fmt.Errorf("unknown Item edge %s", name)
+}
+
+// ItemLinkMutation represents an operation that mutates the ItemLink nodes in the graph.
+type ItemLinkMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *core.ID
+	ord              *int
+	addord           *int
+	clearedFields    map[string]struct{}
+	container        *core.ID
+	clearedcontainer bool
+	item             *core.ID
+	cleareditem      bool
+	done             bool
+	oldValue         func(context.Context) (*ItemLink, error)
+	predicates       []predicate.ItemLink
+}
+
+var _ ent.Mutation = (*ItemLinkMutation)(nil)
+
+// itemlinkOption allows management of the mutation configuration using functional options.
+type itemlinkOption func(*ItemLinkMutation)
+
+// newItemLinkMutation creates new mutation for the ItemLink entity.
+func newItemLinkMutation(c config, op Op, opts ...itemlinkOption) *ItemLinkMutation {
+	m := &ItemLinkMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeItemLink,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withItemLinkID sets the ID field of the mutation.
+func withItemLinkID(id core.ID) itemlinkOption {
+	return func(m *ItemLinkMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ItemLink
+		)
+		m.oldValue = func(ctx context.Context) (*ItemLink, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ItemLink.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withItemLink sets the old ItemLink of the mutation.
+func withItemLink(node *ItemLink) itemlinkOption {
+	return func(m *ItemLinkMutation) {
+		m.oldValue = func(context.Context) (*ItemLink, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ItemLinkMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ItemLinkMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ItemLink entities.
+func (m *ItemLinkMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ItemLinkMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ItemLinkMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ItemLink.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetContainerID sets the "container_id" field.
+func (m *ItemLinkMutation) SetContainerID(c core.ID) {
+	m.container = &c
+}
+
+// ContainerID returns the value of the "container_id" field in the mutation.
+func (m *ItemLinkMutation) ContainerID() (r core.ID, exists bool) {
+	v := m.container
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContainerID returns the old "container_id" field's value of the ItemLink entity.
+// If the ItemLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLinkMutation) OldContainerID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContainerID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContainerID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContainerID: %w", err)
+	}
+	return oldValue.ContainerID, nil
+}
+
+// ResetContainerID resets all changes to the "container_id" field.
+func (m *ItemLinkMutation) ResetContainerID() {
+	m.container = nil
+}
+
+// SetItemID sets the "item_id" field.
+func (m *ItemLinkMutation) SetItemID(c core.ID) {
+	m.item = &c
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *ItemLinkMutation) ItemID() (r core.ID, exists bool) {
+	v := m.item
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the ItemLink entity.
+// If the ItemLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLinkMutation) OldItemID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *ItemLinkMutation) ResetItemID() {
+	m.item = nil
+}
+
+// SetOrd sets the "ord" field.
+func (m *ItemLinkMutation) SetOrd(i int) {
+	m.ord = &i
+	m.addord = nil
+}
+
+// Ord returns the value of the "ord" field in the mutation.
+func (m *ItemLinkMutation) Ord() (r int, exists bool) {
+	v := m.ord
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrd returns the old "ord" field's value of the ItemLink entity.
+// If the ItemLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemLinkMutation) OldOrd(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrd: %w", err)
+	}
+	return oldValue.Ord, nil
+}
+
+// AddOrd adds i to the "ord" field.
+func (m *ItemLinkMutation) AddOrd(i int) {
+	if m.addord != nil {
+		*m.addord += i
+	} else {
+		m.addord = &i
+	}
+}
+
+// AddedOrd returns the value that was added to the "ord" field in this mutation.
+func (m *ItemLinkMutation) AddedOrd() (r int, exists bool) {
+	v := m.addord
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOrd resets all changes to the "ord" field.
+func (m *ItemLinkMutation) ResetOrd() {
+	m.ord = nil
+	m.addord = nil
+}
+
+// ClearContainer clears the "container" edge to the Item entity.
+func (m *ItemLinkMutation) ClearContainer() {
+	m.clearedcontainer = true
+	m.clearedFields[itemlink.FieldContainerID] = struct{}{}
+}
+
+// ContainerCleared reports if the "container" edge to the Item entity was cleared.
+func (m *ItemLinkMutation) ContainerCleared() bool {
+	return m.clearedcontainer
+}
+
+// ContainerIDs returns the "container" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ContainerID instead. It exists only for internal usage by the builders.
+func (m *ItemLinkMutation) ContainerIDs() (ids []core.ID) {
+	if id := m.container; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetContainer resets all changes to the "container" edge.
+func (m *ItemLinkMutation) ResetContainer() {
+	m.container = nil
+	m.clearedcontainer = false
+}
+
+// ClearItem clears the "item" edge to the Item entity.
+func (m *ItemLinkMutation) ClearItem() {
+	m.cleareditem = true
+	m.clearedFields[itemlink.FieldItemID] = struct{}{}
+}
+
+// ItemCleared reports if the "item" edge to the Item entity was cleared.
+func (m *ItemLinkMutation) ItemCleared() bool {
+	return m.cleareditem
+}
+
+// ItemIDs returns the "item" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemID instead. It exists only for internal usage by the builders.
+func (m *ItemLinkMutation) ItemIDs() (ids []core.ID) {
+	if id := m.item; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItem resets all changes to the "item" edge.
+func (m *ItemLinkMutation) ResetItem() {
+	m.item = nil
+	m.cleareditem = false
+}
+
+// Where appends a list predicates to the ItemLinkMutation builder.
+func (m *ItemLinkMutation) Where(ps ...predicate.ItemLink) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ItemLinkMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ItemLinkMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ItemLink, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ItemLinkMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ItemLinkMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ItemLink).
+func (m *ItemLinkMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ItemLinkMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.container != nil {
+		fields = append(fields, itemlink.FieldContainerID)
+	}
+	if m.item != nil {
+		fields = append(fields, itemlink.FieldItemID)
+	}
+	if m.ord != nil {
+		fields = append(fields, itemlink.FieldOrd)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ItemLinkMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case itemlink.FieldContainerID:
+		return m.ContainerID()
+	case itemlink.FieldItemID:
+		return m.ItemID()
+	case itemlink.FieldOrd:
+		return m.Ord()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ItemLinkMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case itemlink.FieldContainerID:
+		return m.OldContainerID(ctx)
+	case itemlink.FieldItemID:
+		return m.OldItemID(ctx)
+	case itemlink.FieldOrd:
+		return m.OldOrd(ctx)
+	}
+	return nil, fmt.Errorf("unknown ItemLink field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ItemLinkMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case itemlink.FieldContainerID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContainerID(v)
+		return nil
+	case itemlink.FieldItemID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case itemlink.FieldOrd:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrd(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ItemLink field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ItemLinkMutation) AddedFields() []string {
+	var fields []string
+	if m.addord != nil {
+		fields = append(fields, itemlink.FieldOrd)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ItemLinkMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case itemlink.FieldOrd:
+		return m.AddedOrd()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ItemLinkMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case itemlink.FieldOrd:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOrd(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ItemLink numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ItemLinkMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ItemLinkMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ItemLinkMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown ItemLink nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ItemLinkMutation) ResetField(name string) error {
+	switch name {
+	case itemlink.FieldContainerID:
+		m.ResetContainerID()
+		return nil
+	case itemlink.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case itemlink.FieldOrd:
+		m.ResetOrd()
+		return nil
+	}
+	return fmt.Errorf("unknown ItemLink field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ItemLinkMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.container != nil {
+		edges = append(edges, itemlink.EdgeContainer)
+	}
+	if m.item != nil {
+		edges = append(edges, itemlink.EdgeItem)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ItemLinkMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case itemlink.EdgeContainer:
+		if id := m.container; id != nil {
+			return []ent.Value{*id}
+		}
+	case itemlink.EdgeItem:
+		if id := m.item; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ItemLinkMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ItemLinkMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ItemLinkMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedcontainer {
+		edges = append(edges, itemlink.EdgeContainer)
+	}
+	if m.cleareditem {
+		edges = append(edges, itemlink.EdgeItem)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ItemLinkMutation) EdgeCleared(name string) bool {
+	switch name {
+	case itemlink.EdgeContainer:
+		return m.clearedcontainer
+	case itemlink.EdgeItem:
+		return m.cleareditem
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ItemLinkMutation) ClearEdge(name string) error {
+	switch name {
+	case itemlink.EdgeContainer:
+		m.ClearContainer()
+		return nil
+	case itemlink.EdgeItem:
+		m.ClearItem()
+		return nil
+	}
+	return fmt.Errorf("unknown ItemLink unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ItemLinkMutation) ResetEdge(name string) error {
+	switch name {
+	case itemlink.EdgeContainer:
+		m.ResetContainer()
+		return nil
+	case itemlink.EdgeItem:
+		m.ResetItem()
+		return nil
+	}
+	return fmt.Errorf("unknown ItemLink edge %s", name)
 }
 
 // ItemValueMutation represents an operation that mutates the ItemValue nodes in the graph.
@@ -13695,6 +14558,9 @@ type UserMutation struct {
 	auth_sessions        map[core.ID]struct{}
 	removedauth_sessions map[core.ID]struct{}
 	clearedauth_sessions bool
+	playlists            map[core.ID]struct{}
+	removedplaylists     map[core.ID]struct{}
+	clearedplaylists     bool
 	done                 bool
 	oldValue             func(context.Context) (*User, error)
 	predicates           []predicate.User
@@ -14285,6 +15151,60 @@ func (m *UserMutation) ResetAuthSessions() {
 	m.removedauth_sessions = nil
 }
 
+// AddPlaylistIDs adds the "playlists" edge to the Item entity by ids.
+func (m *UserMutation) AddPlaylistIDs(ids ...core.ID) {
+	if m.playlists == nil {
+		m.playlists = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.playlists[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPlaylists clears the "playlists" edge to the Item entity.
+func (m *UserMutation) ClearPlaylists() {
+	m.clearedplaylists = true
+}
+
+// PlaylistsCleared reports if the "playlists" edge to the Item entity was cleared.
+func (m *UserMutation) PlaylistsCleared() bool {
+	return m.clearedplaylists
+}
+
+// RemovePlaylistIDs removes the "playlists" edge to the Item entity by IDs.
+func (m *UserMutation) RemovePlaylistIDs(ids ...core.ID) {
+	if m.removedplaylists == nil {
+		m.removedplaylists = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.playlists, ids[i])
+		m.removedplaylists[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlaylists returns the removed IDs of the "playlists" edge to the Item entity.
+func (m *UserMutation) RemovedPlaylistsIDs() (ids []core.ID) {
+	for id := range m.removedplaylists {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PlaylistsIDs returns the "playlists" edge IDs in the mutation.
+func (m *UserMutation) PlaylistsIDs() (ids []core.ID) {
+	for id := range m.playlists {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPlaylists resets all changes to the "playlists" edge.
+func (m *UserMutation) ResetPlaylists() {
+	m.playlists = nil
+	m.clearedplaylists = false
+	m.removedplaylists = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -14580,12 +15500,15 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.user_data != nil {
 		edges = append(edges, user.EdgeUserData)
 	}
 	if m.auth_sessions != nil {
 		edges = append(edges, user.EdgeAuthSessions)
+	}
+	if m.playlists != nil {
+		edges = append(edges, user.EdgePlaylists)
 	}
 	return edges
 }
@@ -14606,18 +15529,27 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgePlaylists:
+		ids := make([]ent.Value, 0, len(m.playlists))
+		for id := range m.playlists {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removeduser_data != nil {
 		edges = append(edges, user.EdgeUserData)
 	}
 	if m.removedauth_sessions != nil {
 		edges = append(edges, user.EdgeAuthSessions)
+	}
+	if m.removedplaylists != nil {
+		edges = append(edges, user.EdgePlaylists)
 	}
 	return edges
 }
@@ -14638,18 +15570,27 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgePlaylists:
+		ids := make([]ent.Value, 0, len(m.removedplaylists))
+		for id := range m.removedplaylists {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.cleareduser_data {
 		edges = append(edges, user.EdgeUserData)
 	}
 	if m.clearedauth_sessions {
 		edges = append(edges, user.EdgeAuthSessions)
+	}
+	if m.clearedplaylists {
+		edges = append(edges, user.EdgePlaylists)
 	}
 	return edges
 }
@@ -14662,6 +15603,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.cleareduser_data
 	case user.EdgeAuthSessions:
 		return m.clearedauth_sessions
+	case user.EdgePlaylists:
+		return m.clearedplaylists
 	}
 	return false
 }
@@ -14683,6 +15626,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeAuthSessions:
 		m.ResetAuthSessions()
+		return nil
+	case user.EdgePlaylists:
+		m.ResetPlaylists()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

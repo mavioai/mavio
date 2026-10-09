@@ -67,6 +67,11 @@ type ItemRepository interface {
 	// PurgeMissing deletes the library's items missing since before, with
 	// what Delete removes, and returns their IDs.
 	PurgeMissing(ctx context.Context, libraryID ID, before time.Time) ([]ID, error)
+	// Links lists the entries of a collection or playlist in order.
+	Links(ctx context.Context, containerID ID) ([]Link, error)
+	// ReplaceLinks sets the entries of a collection or playlist, in order,
+	// removing any others.
+	ReplaceLinks(ctx context.Context, containerID ID, links []Link) error
 	// Values lists distinct attribute values (genres, studios, …) or
 	// production years with their item counts, ranked by relevance when
 	// q.Search is set and by name otherwise.

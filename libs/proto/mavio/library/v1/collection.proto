@@ -1,0 +1,93 @@
+edition = "2023";
+
+package mavio.library.v1;
+
+import "buf/validate/validate.proto";
+import "mavio/library/v1/item.proto";
+
+// CollectionService lets administrators curate collections: named sets of
+// items across libraries, such as a film series. Collections are items of
+// the collections library; users with access to it list them with
+// ItemService.ListItems and their members with its parent_id, seeing the
+// members their policy allows.
+service CollectionService {
+  rpc CreateCollection(CreateCollectionRequest) returns (CreateCollectionResponse);
+  rpc UpdateCollection(UpdateCollectionRequest) returns (UpdateCollectionResponse);
+  rpc DeleteCollection(DeleteCollectionRequest) returns (DeleteCollectionResponse);
+  // AddToCollection appends items not yet in the collection.
+  rpc AddToCollection(AddToCollectionRequest) returns (AddToCollectionResponse);
+  rpc RemoveFromCollection(RemoveFromCollectionRequest) returns (RemoveFromCollectionResponse);
+}
+
+message CreateCollectionRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+  // Items of other kinds than collections and playlists.
+  repeated string item_ids = 2 [(buf.validate.field).repeated.items.string.uuid = true];
+}
+
+message CreateCollectionResponse {
+  Item collection = 1;
+}
+
+message UpdateCollectionRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+}
+
+message UpdateCollectionResponse {
+  Item collection = 1;
+}
+
+message DeleteCollectionRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteCollectionResponse {}
+
+message AddToCollectionRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  repeated string item_ids = 2 [(buf.validate.field).repeated = {
+    min_items: 1
+    items: {
+      string: {uuid: true}
+    }
+  }];
+}
+
+message AddToCollectionResponse {}
+
+message RemoveFromCollectionRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  repeated string item_ids = 2 [(buf.validate.field).repeated = {
+    min_items: 1
+    items: {
+      string: {uuid: true}
+    }
+  }];
+}
+
+message RemoveFromCollectionResponse {}

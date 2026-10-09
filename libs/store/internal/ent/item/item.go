@@ -105,6 +105,8 @@ const (
 	FieldExtra = "extra"
 	// FieldOwnerID holds the string denoting the owner_id field in the database.
 	FieldOwnerID = "owner_id"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
 	// FieldDateAdded holds the string denoting the date_added field in the database.
 	FieldDateAdded = "date_added"
 	// FieldFileModified holds the string denoting the file_modified field in the database.
@@ -135,6 +137,12 @@ const (
 	EdgeCredits = "credits"
 	// EdgeUserData holds the string denoting the user_data edge name in mutations.
 	EdgeUserData = "user_data"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
+	// EdgeLinks holds the string denoting the links edge name in mutations.
+	EdgeLinks = "links"
+	// EdgeLinkedIn holds the string denoting the linked_in edge name in mutations.
+	EdgeLinkedIn = "linked_in"
 	// Table holds the table name of the item in the database.
 	Table = "items"
 	// LibraryTable is the table that holds the library relation/edge.
@@ -195,6 +203,27 @@ const (
 	UserDataInverseTable = "user_data"
 	// UserDataColumn is the table column denoting the user_data relation/edge.
 	UserDataColumn = "item_id"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "items"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_id"
+	// LinksTable is the table that holds the links relation/edge.
+	LinksTable = "item_links"
+	// LinksInverseTable is the table name for the ItemLink entity.
+	// It exists in this package in order to avoid circular dependency with the "itemlink" package.
+	LinksInverseTable = "item_links"
+	// LinksColumn is the table column denoting the links relation/edge.
+	LinksColumn = "container_id"
+	// LinkedInTable is the table that holds the linked_in relation/edge.
+	LinkedInTable = "item_links"
+	// LinkedInInverseTable is the table name for the ItemLink entity.
+	// It exists in this package in order to avoid circular dependency with the "itemlink" package.
+	LinkedInInverseTable = "item_links"
+	// LinkedInColumn is the table column denoting the linked_in relation/edge.
+	LinkedInColumn = "item_id"
 )
 
 // Columns holds all SQL columns for item fields.
@@ -245,6 +274,7 @@ var Columns = []string{
 	FieldLockedFields,
 	FieldExtra,
 	FieldOwnerID,
+	FieldUserID,
 	FieldDateAdded,
 	FieldFileModified,
 	FieldMetadataRefreshedAt,
@@ -527,6 +557,11 @@ func ByOwnerID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOwnerID, opts...).ToFunc()
 }
 
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
 // ByDateAdded orders the results by the date_added field.
 func ByDateAdded(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDateAdded, opts...).ToFunc()
@@ -670,6 +705,41 @@ func ByUserData(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserDataStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLinksCount orders the results by links count.
+func ByLinksCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLinksStep(), opts...)
+	}
+}
+
+// ByLinks orders the results by links terms.
+func ByLinks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLinksStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByLinkedInCount orders the results by linked_in count.
+func ByLinkedInCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLinkedInStep(), opts...)
+	}
+}
+
+// ByLinkedIn orders the results by linked_in terms.
+func ByLinkedIn(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLinkedInStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newLibraryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -738,5 +808,26 @@ func newUserDataStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserDataInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, UserDataTable, UserDataColumn),
+	)
+}
+func newUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}
+func newLinksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LinksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LinksTable, LinksColumn),
+	)
+}
+func newLinkedInStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LinkedInInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LinkedInTable, LinkedInColumn),
 	)
 }

@@ -16,9 +16,11 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
+	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
 
@@ -580,6 +582,20 @@ func (_c *ItemCreate) SetNillableOwnerID(v *core.ID) *ItemCreate {
 	return _c
 }
 
+// SetUserID sets the "user_id" field.
+func (_c *ItemCreate) SetUserID(v core.ID) *ItemCreate {
+	_c.mutation.SetUserID(v)
+	return _c
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableUserID(v *core.ID) *ItemCreate {
+	if v != nil {
+		_c.SetUserID(*v)
+	}
+	return _c
+}
+
 // SetDateAdded sets the "date_added" field.
 func (_c *ItemCreate) SetDateAdded(v time.Time) *ItemCreate {
 	_c.mutation.SetDateAdded(v)
@@ -774,6 +790,41 @@ func (_c *ItemCreate) AddUserData(v ...*UserData) *ItemCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddUserDatumIDs(ids...)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (_c *ItemCreate) SetUser(v *User) *ItemCreate {
+	return _c.SetUserID(v.ID)
+}
+
+// AddLinkIDs adds the "links" edge to the ItemLink entity by IDs.
+func (_c *ItemCreate) AddLinkIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddLinkIDs(ids...)
+	return _c
+}
+
+// AddLinks adds the "links" edges to the ItemLink entity.
+func (_c *ItemCreate) AddLinks(v ...*ItemLink) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLinkIDs(ids...)
+}
+
+// AddLinkedInIDs adds the "linked_in" edge to the ItemLink entity by IDs.
+func (_c *ItemCreate) AddLinkedInIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddLinkedInIDs(ids...)
+	return _c
+}
+
+// AddLinkedIn adds the "linked_in" edges to the ItemLink entity.
+func (_c *ItemCreate) AddLinkedIn(v ...*ItemLink) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLinkedInIDs(ids...)
 }
 
 // Mutation returns the ItemMutation object of the builder.
@@ -1402,6 +1453,55 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userdata.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   item.UserTable,
+			Columns: []string{item.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LinksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinksTable,
+			Columns: []string{item.LinksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LinkedInIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinkedInTable,
+			Columns: []string{item.LinkedInColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -2160,6 +2260,24 @@ func (u *ItemUpsert) UpdateOwnerID() *ItemUpsert {
 // ClearOwnerID clears the value of the "owner_id" field.
 func (u *ItemUpsert) ClearOwnerID() *ItemUpsert {
 	u.SetNull(item.FieldOwnerID)
+	return u
+}
+
+// SetUserID sets the "user_id" field.
+func (u *ItemUpsert) SetUserID(v core.ID) *ItemUpsert {
+	u.Set(item.FieldUserID, v)
+	return u
+}
+
+// UpdateUserID sets the "user_id" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateUserID() *ItemUpsert {
+	u.SetExcluded(item.FieldUserID)
+	return u
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (u *ItemUpsert) ClearUserID() *ItemUpsert {
+	u.SetNull(item.FieldUserID)
 	return u
 }
 
@@ -3111,6 +3229,27 @@ func (u *ItemUpsertOne) UpdateOwnerID() *ItemUpsertOne {
 func (u *ItemUpsertOne) ClearOwnerID() *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearOwnerID()
+	})
+}
+
+// SetUserID sets the "user_id" field.
+func (u *ItemUpsertOne) SetUserID(v core.ID) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetUserID(v)
+	})
+}
+
+// UpdateUserID sets the "user_id" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateUserID() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateUserID()
+	})
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (u *ItemUpsertOne) ClearUserID() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearUserID()
 	})
 }
 
@@ -4243,6 +4382,27 @@ func (u *ItemUpsertBulk) UpdateOwnerID() *ItemUpsertBulk {
 func (u *ItemUpsertBulk) ClearOwnerID() *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearOwnerID()
+	})
+}
+
+// SetUserID sets the "user_id" field.
+func (u *ItemUpsertBulk) SetUserID(v core.ID) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetUserID(v)
+	})
+}
+
+// UpdateUserID sets the "user_id" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateUserID() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateUserID()
+	})
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (u *ItemUpsertBulk) ClearUserID() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearUserID()
 	})
 }
 

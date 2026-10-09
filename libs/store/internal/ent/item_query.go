@@ -16,10 +16,12 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
 
@@ -40,6 +42,9 @@ type ItemQuery struct {
 	withImages       *ImageQuery
 	withCredits      *CreditQuery
 	withUserData     *UserDataQuery
+	withUser         *UserQuery
+	withLinks        *ItemLinkQuery
+	withLinkedIn     *ItemLinkQuery
 	modifiers        []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -297,6 +302,72 @@ func (_q *ItemQuery) QueryUserData() *UserDataQuery {
 	return query
 }
 
+// QueryUser chains the current query on the "user" edge.
+func (_q *ItemQuery) QueryUser() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, item.UserTable, item.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLinks chains the current query on the "links" edge.
+func (_q *ItemQuery) QueryLinks() *ItemLinkQuery {
+	query := (&ItemLinkClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(itemlink.Table, itemlink.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.LinksTable, item.LinksColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLinkedIn chains the current query on the "linked_in" edge.
+func (_q *ItemQuery) QueryLinkedIn() *ItemLinkQuery {
+	query := (&ItemLinkClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(itemlink.Table, itemlink.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.LinkedInTable, item.LinkedInColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Item entity from the query.
 // Returns a *NotFoundError when no Item was found.
 func (_q *ItemQuery) First(ctx context.Context) (*Item, error) {
@@ -499,6 +570,9 @@ func (_q *ItemQuery) Clone() *ItemQuery {
 		withImages:       _q.withImages.Clone(),
 		withCredits:      _q.withCredits.Clone(),
 		withUserData:     _q.withUserData.Clone(),
+		withUser:         _q.withUser.Clone(),
+		withLinks:        _q.withLinks.Clone(),
+		withLinkedIn:     _q.withLinkedIn.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -616,6 +690,39 @@ func (_q *ItemQuery) WithUserData(opts ...func(*UserDataQuery)) *ItemQuery {
 	return _q
 }
 
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithUser(opts ...func(*UserQuery)) *ItemQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withUser = query
+	return _q
+}
+
+// WithLinks tells the query-builder to eager-load the nodes that are connected to
+// the "links" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithLinks(opts ...func(*ItemLinkQuery)) *ItemQuery {
+	query := (&ItemLinkClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLinks = query
+	return _q
+}
+
+// WithLinkedIn tells the query-builder to eager-load the nodes that are connected to
+// the "linked_in" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithLinkedIn(opts ...func(*ItemLinkQuery)) *ItemQuery {
+	query := (&ItemLinkClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLinkedIn = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -694,7 +801,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	var (
 		nodes       = []*Item{}
 		_spec       = _q.querySpec()
-		loadedTypes = [10]bool{
+		loadedTypes = [13]bool{
 			_q.withLibrary != nil,
 			_q.withParent != nil,
 			_q.withChildren != nil,
@@ -705,6 +812,9 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 			_q.withImages != nil,
 			_q.withCredits != nil,
 			_q.withUserData != nil,
+			_q.withUser != nil,
+			_q.withLinks != nil,
+			_q.withLinkedIn != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -792,6 +902,26 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 		if err := _q.loadUserData(ctx, query, nodes,
 			func(n *Item) { n.Edges.UserData = []*UserData{} },
 			func(n *Item, e *UserData) { n.Edges.UserData = append(n.Edges.UserData, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withUser; query != nil {
+		if err := _q.loadUser(ctx, query, nodes, nil,
+			func(n *Item, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLinks; query != nil {
+		if err := _q.loadLinks(ctx, query, nodes,
+			func(n *Item) { n.Edges.Links = []*ItemLink{} },
+			func(n *Item, e *ItemLink) { n.Edges.Links = append(n.Edges.Links, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLinkedIn; query != nil {
+		if err := _q.loadLinkedIn(ctx, query, nodes,
+			func(n *Item) { n.Edges.LinkedIn = []*ItemLink{} },
+			func(n *Item, e *ItemLink) { n.Edges.LinkedIn = append(n.Edges.LinkedIn, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1110,6 +1240,98 @@ func (_q *ItemQuery) loadUserData(ctx context.Context, query *UserDataQuery, nod
 	}
 	return nil
 }
+func (_q *ItemQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Item, init func(*Item), assign func(*Item, *User)) error {
+	ids := make([]core.ID, 0, len(nodes))
+	nodeids := make(map[core.ID][]*Item)
+	for i := range nodes {
+		if nodes[i].UserID == nil {
+			continue
+		}
+		fk := *nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *ItemQuery) loadLinks(ctx context.Context, query *ItemLinkQuery, nodes []*Item, init func(*Item), assign func(*Item, *ItemLink)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(itemlink.FieldContainerID)
+	}
+	query.Where(predicate.ItemLink(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.LinksColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ContainerID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "container_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadLinkedIn(ctx context.Context, query *ItemLinkQuery, nodes []*Item, init func(*Item), assign func(*Item, *ItemLink)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(itemlink.FieldItemID)
+	}
+	query.Where(predicate.ItemLink(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.LinkedInColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (_q *ItemQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
@@ -1147,6 +1369,9 @@ func (_q *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withOwner != nil {
 			_spec.Node.AddColumnOnce(item.FieldOwnerID)
+		}
+		if _q.withUser != nil {
+			_spec.Node.AddColumnOnce(item.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

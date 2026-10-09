@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -194,6 +195,21 @@ func (_u *UserUpdate) AddAuthSessions(v ...*AuthSession) *UserUpdate {
 	return _u.AddAuthSessionIDs(ids...)
 }
 
+// AddPlaylistIDs adds the "playlists" edge to the Item entity by IDs.
+func (_u *UserUpdate) AddPlaylistIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.AddPlaylistIDs(ids...)
+	return _u
+}
+
+// AddPlaylists adds the "playlists" edges to the Item entity.
+func (_u *UserUpdate) AddPlaylists(v ...*Item) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPlaylistIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -239,6 +255,27 @@ func (_u *UserUpdate) RemoveAuthSessions(v ...*AuthSession) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAuthSessionIDs(ids...)
+}
+
+// ClearPlaylists clears all "playlists" edges to the Item entity.
+func (_u *UserUpdate) ClearPlaylists() *UserUpdate {
+	_u.mutation.ClearPlaylists()
+	return _u
+}
+
+// RemovePlaylistIDs removes the "playlists" edge to Item entities by IDs.
+func (_u *UserUpdate) RemovePlaylistIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.RemovePlaylistIDs(ids...)
+	return _u
+}
+
+// RemovePlaylists removes "playlists" edges to Item entities.
+func (_u *UserUpdate) RemovePlaylists(v ...*Item) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePlaylistIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -409,6 +446,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(authsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PlaylistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PlaylistsTable,
+			Columns: []string{user.PlaylistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPlaylistsIDs(); len(nodes) > 0 && !_u.mutation.PlaylistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PlaylistsTable,
+			Columns: []string{user.PlaylistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PlaylistsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PlaylistsTable,
+			Columns: []string{user.PlaylistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -600,6 +682,21 @@ func (_u *UserUpdateOne) AddAuthSessions(v ...*AuthSession) *UserUpdateOne {
 	return _u.AddAuthSessionIDs(ids...)
 }
 
+// AddPlaylistIDs adds the "playlists" edge to the Item entity by IDs.
+func (_u *UserUpdateOne) AddPlaylistIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.AddPlaylistIDs(ids...)
+	return _u
+}
+
+// AddPlaylists adds the "playlists" edges to the Item entity.
+func (_u *UserUpdateOne) AddPlaylists(v ...*Item) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPlaylistIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -645,6 +742,27 @@ func (_u *UserUpdateOne) RemoveAuthSessions(v ...*AuthSession) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAuthSessionIDs(ids...)
+}
+
+// ClearPlaylists clears all "playlists" edges to the Item entity.
+func (_u *UserUpdateOne) ClearPlaylists() *UserUpdateOne {
+	_u.mutation.ClearPlaylists()
+	return _u
+}
+
+// RemovePlaylistIDs removes the "playlists" edge to Item entities by IDs.
+func (_u *UserUpdateOne) RemovePlaylistIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.RemovePlaylistIDs(ids...)
+	return _u
+}
+
+// RemovePlaylists removes "playlists" edges to Item entities.
+func (_u *UserUpdateOne) RemovePlaylists(v ...*Item) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePlaylistIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -845,6 +963,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(authsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PlaylistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PlaylistsTable,
+			Columns: []string{user.PlaylistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPlaylistsIDs(); len(nodes) > 0 && !_u.mutation.PlaylistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PlaylistsTable,
+			Columns: []string{user.PlaylistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PlaylistsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PlaylistsTable,
+			Columns: []string{user.PlaylistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

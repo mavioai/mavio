@@ -13,6 +13,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
+	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 )
 
 // Item is the model entity for the Item schema.
@@ -110,6 +111,8 @@ type Item struct {
 	Extra string `json:"extra,omitempty"`
 	// OwnerID holds the value of the "owner_id" field.
 	OwnerID *core.ID `json:"owner_id,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID *core.ID `json:"user_id,omitempty"`
 	// DateAdded holds the value of the "date_added" field.
 	DateAdded time.Time `json:"date_added,omitempty"`
 	// FileModified holds the value of the "file_modified" field.
@@ -148,9 +151,15 @@ type ItemEdges struct {
 	Credits []*Credit `json:"credits,omitempty"`
 	// UserData holds the value of the user_data edge.
 	UserData []*UserData `json:"user_data,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
+	// Links holds the value of the links edge.
+	Links []*ItemLink `json:"links,omitempty"`
+	// LinkedIn holds the value of the linked_in edge.
+	LinkedIn []*ItemLink `json:"linked_in,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [10]bool
+	loadedTypes [13]bool
 }
 
 // LibraryOrErr returns the Library value or an error if the edge
@@ -249,12 +258,41 @@ func (e ItemEdges) UserDataOrErr() ([]*UserData, error) {
 	return nil, &NotLoadedError{edge: "user_data"}
 }
 
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ItemEdges) UserOrErr() (*User, error) {
+	if e.User != nil {
+		return e.User, nil
+	} else if e.loadedTypes[10] {
+		return nil, &NotFoundError{label: user.Label}
+	}
+	return nil, &NotLoadedError{edge: "user"}
+}
+
+// LinksOrErr returns the Links value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) LinksOrErr() ([]*ItemLink, error) {
+	if e.loadedTypes[11] {
+		return e.Links, nil
+	}
+	return nil, &NotLoadedError{edge: "links"}
+}
+
+// LinkedInOrErr returns the LinkedIn value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) LinkedInOrErr() ([]*ItemLink, error) {
+	if e.loadedTypes[12] {
+		return e.LinkedIn, nil
+	}
+	return nil, &NotLoadedError{edge: "linked_in"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Item) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case item.FieldParentID, item.FieldOwnerID:
+		case item.FieldParentID, item.FieldOwnerID, item.FieldUserID:
 			values[i] = &sql.NullScanner{S: new(core.ID)}
 		case item.FieldExternalIds, item.FieldProductionLocations, item.FieldRemoteTrailers, item.FieldAirDays, item.FieldLockedFields:
 			values[i] = new([]byte)
@@ -581,6 +619,13 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 				_m.OwnerID = new(core.ID)
 				*_m.OwnerID = *value.S.(*core.ID)
 			}
+		case item.FieldUserID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
+			} else if value.Valid {
+				_m.UserID = new(core.ID)
+				*_m.UserID = *value.S.(*core.ID)
+			}
 		case item.FieldDateAdded:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field date_added", values[i])
@@ -675,6 +720,21 @@ func (_m *Item) QueryCredits() *CreditQuery {
 // QueryUserData queries the "user_data" edge of the Item entity.
 func (_m *Item) QueryUserData() *UserDataQuery {
 	return NewItemClient(_m.config).QueryUserData(_m)
+}
+
+// QueryUser queries the "user" edge of the Item entity.
+func (_m *Item) QueryUser() *UserQuery {
+	return NewItemClient(_m.config).QueryUser(_m)
+}
+
+// QueryLinks queries the "links" edge of the Item entity.
+func (_m *Item) QueryLinks() *ItemLinkQuery {
+	return NewItemClient(_m.config).QueryLinks(_m)
+}
+
+// QueryLinkedIn queries the "linked_in" edge of the Item entity.
+func (_m *Item) QueryLinkedIn() *ItemLinkQuery {
+	return NewItemClient(_m.config).QueryLinkedIn(_m)
 }
 
 // Update returns a builder for updating this Item.
@@ -852,6 +912,11 @@ func (_m *Item) String() string {
 	builder.WriteString(", ")
 	if v := _m.OwnerID; v != nil {
 		builder.WriteString("owner_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.UserID; v != nil {
+		builder.WriteString("user_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")

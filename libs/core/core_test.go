@@ -344,3 +344,42 @@ func TestSubtitleCodecs(t *testing.T) {
 		t.Error("atmos: got = none")
 	}
 }
+
+func TestCuratedItems(t *testing.T) {
+	user := User{ID: NewID(), Policy: UserPolicy{Libraries: []ID{}}}
+	lib := NewID()
+	playlist := Item{ID: NewID(), LibraryID: lib, Kind: KindPlaylist, Name: "Road trip", UserID: user.ID}
+	tests := []struct {
+		name string
+		err  error
+		want error
+	}{
+		{"collections library", (&Library{Name: "Collections", Kind: LibraryCollections}).Validate(), nil},
+		{"collections library with paths", (&Library{Name: "Collections", Kind: LibraryCollections, Paths: []string{"/x"}}).Validate(), ErrInvalid},
+		{"films without paths", (&Library{Name: "Films", Kind: LibraryMovies}).Validate(), ErrInvalid},
+		{"playlist", playlist.Validate(), nil},
+		{"playlist without user", (&Item{ID: NewID(), LibraryID: lib, Kind: KindPlaylist, Name: "x"}).Validate(), ErrInvalid},
+		{"movie with user", (&Item{ID: NewID(), LibraryID: lib, Kind: KindMovie, Name: "x", UserID: user.ID}).Validate(), ErrInvalid},
+		{"members and children", (&ItemQuery{MemberOf: NewID(), ParentID: NewID()}).Validate(), ErrInvalid},
+		{"list order without list", (&ItemQuery{Sort: []SortSpec{{Field: SortListOrder}}}).Validate(), ErrInvalid},
+		{"list order", (&ItemQuery{MemberOf: NewID(), Sort: []SortSpec{{Field: SortListOrder}}}).Validate(), nil},
+	}
+	for _, tt := range tests {
+		if !errors.Is(tt.err, tt.want) || (tt.want == nil && tt.err != nil) {
+			t.Errorf("%s: got = %v, want = %v", tt.name, tt.err, tt.want)
+		}
+	}
+
+	// A user's own playlists are theirs whatever their library policy.
+	if !user.CanAccess(&playlist) {
+		t.Error("CanAccess(own playlist) = false")
+	}
+	other := playlist
+	other.UserID = NewID()
+	if user.CanAccess(&other) {
+		t.Error("CanAccess(other's playlist) = true")
+	}
+	if !KindCollection.IsCurated() || !KindPlaylist.IsCurated() || KindFolder.IsCurated() {
+		t.Error("IsCurated")
+	}
+}

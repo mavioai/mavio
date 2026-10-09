@@ -127,6 +127,8 @@ enum SortField {
   SORT_FIELD_RANDOM = 8;
   SORT_FIELD_LAST_PLAYED = 9;
   SORT_FIELD_PLAY_COUNT = 10;
+  // The order of the collection or playlist given as parent.
+  SORT_FIELD_LIST_ORDER = 11;
 }
 
 // ValueKind names an item attribute listed by ListValues.

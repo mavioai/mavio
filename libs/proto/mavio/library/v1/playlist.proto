@@ -1,0 +1,163 @@
+edition = "2023";
+
+package mavio.library.v1;
+
+import "buf/validate/validate.proto";
+import "mavio/library/v1/item.proto";
+
+// PlaylistService manages the caller's playlists: ordered lists of media
+// items in which an item may appear several times, each entry with its own
+// ID. Playlists are items of the playlists library that only their owner
+// sees; ItemService.GetItem returns them and ListItems with their ID as
+// parent_id lists their items once each.
+service PlaylistService {
+  rpc ListPlaylists(ListPlaylistsRequest) returns (ListPlaylistsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListPlaylistEntries lists a playlist's entries in order, leaving out
+  // items the caller may no longer access.
+  rpc ListPlaylistEntries(ListPlaylistEntriesRequest) returns (ListPlaylistEntriesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc CreatePlaylist(CreatePlaylistRequest) returns (CreatePlaylistResponse);
+  rpc UpdatePlaylist(UpdatePlaylistRequest) returns (UpdatePlaylistResponse);
+  rpc DeletePlaylist(DeletePlaylistRequest) returns (DeletePlaylistResponse);
+  // AddToPlaylist inserts entries for items; a series, season, album or
+  // other container adds its playable items in order.
+  rpc AddToPlaylist(AddToPlaylistRequest) returns (AddToPlaylistResponse);
+  rpc RemoveFromPlaylist(RemoveFromPlaylistRequest) returns (RemoveFromPlaylistResponse);
+  // MovePlaylistEntry moves an entry to another position.
+  rpc MovePlaylistEntry(MovePlaylistEntryRequest) returns (MovePlaylistEntryResponse);
+}
+
+// PlaylistEntry is an item at a position of a playlist.
+message PlaylistEntry {
+  string id = 1;
+  Item item = 2;
+}
+
+message ListPlaylistsRequest {
+  // 1–1000; unset means 1000.
+  int32 limit = 1 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 2 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListPlaylistsResponse {
+  // By name.
+  repeated Item playlists = 1;
+  int32 total = 2;
+}
+
+message ListPlaylistEntriesRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // 1–1000; unset means 1000.
+  int32 limit = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 3 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListPlaylistEntriesResponse {
+  repeated PlaylistEntry entries = 1;
+  int32 total = 2;
+}
+
+message CreatePlaylistRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+  // Added as by AddToPlaylist.
+  repeated string item_ids = 2 [(buf.validate.field).repeated.items.string.uuid = true];
+}
+
+message CreatePlaylistResponse {
+  Item playlist = 1;
+}
+
+message UpdatePlaylistRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+}
+
+message UpdatePlaylistResponse {
+  Item playlist = 1;
+}
+
+message DeletePlaylistRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeletePlaylistResponse {}
+
+message AddToPlaylistRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  repeated string item_ids = 2 [(buf.validate.field).repeated = {
+    min_items: 1
+    items: {
+      string: {uuid: true}
+    }
+  }];
+  // Position of the first new entry; unset appends.
+  int32 position = 3 [(buf.validate.field).int32.gte = 0];
+}
+
+message AddToPlaylistResponse {
+  // The new entries, in order.
+  repeated string entry_ids = 1;
+}
+
+message RemoveFromPlaylistRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  repeated string entry_ids = 2 [(buf.validate.field).repeated = {
+    min_items: 1
+    items: {
+      string: {uuid: true}
+    }
+  }];
+}
+
+message RemoveFromPlaylistResponse {}
+
+message MovePlaylistEntryRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  string entry_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // The entry's new position; past the end moves it last.
+  int32 position = 3 [(buf.validate.field).int32.gte = 0];
+}
+
+message MovePlaylistEntryResponse {}

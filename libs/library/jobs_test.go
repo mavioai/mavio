@@ -66,6 +66,10 @@ func TestJobs(t *testing.T) {
 	if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
 		t.Fatal(err)
 	}
+	// The collections library has no folders to scan.
+	if err := f.store.Libraries().Create(t.Context(), &core.Library{Name: "Collections", Kind: core.LibraryCollections}); err != nil {
+		t.Fatal(err)
+	}
 	f.store.clock = func() time.Time { return f.clock }
 	prober, provider := &fakeProber{}, &fakeProvider{}
 	jobs := &Jobs{

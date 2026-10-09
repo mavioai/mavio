@@ -80,6 +80,8 @@ func (Item) Fields() []ent.Field {
 		field.JSON("locked_fields", []string{}).Optional(),
 		field.String("extra").Default(""),
 		field.UUID("owner_id", core.ID{}).Optional().Nillable(),
+		// user_id is the user a playlist belongs to.
+		field.UUID("user_id", core.ID{}).Optional().Nillable(),
 		field.Time("date_added"),
 		field.Time("file_modified").Optional().Nillable(),
 		field.Time("metadata_refreshed_at").Optional().Nillable(),
@@ -101,6 +103,11 @@ func (Item) Edges() []ent.Edge {
 		edge.To("images", Image.Type).Annotations(cascade()),
 		edge.To("credits", Credit.Type).Annotations(cascade()),
 		edge.To("user_data", UserData.Type).Annotations(cascade()),
+		edge.From("user", User.Type).Ref("playlists").Field("user_id").Unique(),
+		// links are the entries of a collection or playlist; linked_in the
+		// entries linking an item.
+		edge.To("links", ItemLink.Type).Annotations(cascade()),
+		edge.To("linked_in", ItemLink.Type).Annotations(cascade()),
 	}
 }
 
@@ -155,5 +162,40 @@ func (ItemValue) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("item_id", "kind", "ord").Unique(),
 		index.Fields("kind", "value_key"),
+	}
+}
+
+// ItemLink is an entry of a collection or playlist.
+type ItemLink struct{ ent.Schema }
+
+// Annotations of ItemLink.
+func (ItemLink) Annotations() []schema.Annotation {
+	return []schema.Annotation{entsql.Annotation{Table: "item_links"}}
+}
+
+// Fields of ItemLink.
+func (ItemLink) Fields() []ent.Field {
+	return []ent.Field{
+		idField(),
+		field.UUID("container_id", core.ID{}),
+		field.UUID("item_id", core.ID{}),
+		// Position within the container.
+		field.Int("ord"),
+	}
+}
+
+// Edges of ItemLink.
+func (ItemLink) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("container", Item.Type).Ref("links").Field("container_id").Unique().Required(),
+		edge.From("item", Item.Type).Ref("linked_in").Field("item_id").Unique().Required(),
+	}
+}
+
+// Indexes of ItemLink.
+func (ItemLink) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("container_id", "ord"),
+		index.Fields("item_id"),
 	}
 }

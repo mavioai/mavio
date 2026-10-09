@@ -21,6 +21,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
@@ -46,6 +47,8 @@ type Client struct {
 	Image *ImageClient
 	// Item is the client for interacting with the Item builders.
 	Item *ItemClient
+	// ItemLink is the client for interacting with the ItemLink builders.
+	ItemLink *ItemLinkClient
 	// ItemValue is the client for interacting with the ItemValue builders.
 	ItemValue *ItemValueClient
 	// Job is the client for interacting with the Job builders.
@@ -78,6 +81,7 @@ func (c *Client) init() {
 	c.FolderState = NewFolderStateClient(c.config)
 	c.Image = NewImageClient(c.config)
 	c.Item = NewItemClient(c.config)
+	c.ItemLink = NewItemLinkClient(c.config)
 	c.ItemValue = NewItemValueClient(c.config)
 	c.Job = NewJobClient(c.config)
 	c.Library = NewLibraryClient(c.config)
@@ -183,6 +187,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		FolderState:  NewFolderStateClient(cfg),
 		Image:        NewImageClient(cfg),
 		Item:         NewItemClient(cfg),
+		ItemLink:     NewItemLinkClient(cfg),
 		ItemValue:    NewItemValueClient(cfg),
 		Job:          NewJobClient(cfg),
 		Library:      NewLibraryClient(cfg),
@@ -215,6 +220,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		FolderState:  NewFolderStateClient(cfg),
 		Image:        NewImageClient(cfg),
 		Item:         NewItemClient(cfg),
+		ItemLink:     NewItemLinkClient(cfg),
 		ItemValue:    NewItemValueClient(cfg),
 		Job:          NewJobClient(cfg),
 		Library:      NewLibraryClient(cfg),
@@ -252,8 +258,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AuthSession, c.Credit, c.FolderState, c.Image, c.Item, c.ItemValue, c.Job,
-		c.Library, c.MediaSource, c.Person, c.PluginConfig, c.User, c.UserData,
+		c.AuthSession, c.Credit, c.FolderState, c.Image, c.Item, c.ItemLink,
+		c.ItemValue, c.Job, c.Library, c.MediaSource, c.Person, c.PluginConfig, c.User,
+		c.UserData,
 	} {
 		n.Use(hooks...)
 	}
@@ -263,8 +270,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AuthSession, c.Credit, c.FolderState, c.Image, c.Item, c.ItemValue, c.Job,
-		c.Library, c.MediaSource, c.Person, c.PluginConfig, c.User, c.UserData,
+		c.AuthSession, c.Credit, c.FolderState, c.Image, c.Item, c.ItemLink,
+		c.ItemValue, c.Job, c.Library, c.MediaSource, c.Person, c.PluginConfig, c.User,
+		c.UserData,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -283,6 +291,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Image.mutate(ctx, m)
 	case *ItemMutation:
 		return c.Item.mutate(ctx, m)
+	case *ItemLinkMutation:
+		return c.ItemLink.mutate(ctx, m)
 	case *ItemValueMutation:
 		return c.ItemValue.mutate(ctx, m)
 	case *JobMutation:
@@ -1200,6 +1210,54 @@ func (c *ItemClient) QueryUserData(_m *Item) *UserDataQuery {
 	return query
 }
 
+// QueryUser queries the user edge of a Item.
+func (c *ItemClient) QueryUser(_m *Item) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, item.UserTable, item.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLinks queries the links edge of a Item.
+func (c *ItemClient) QueryLinks(_m *Item) *ItemLinkQuery {
+	query := (&ItemLinkClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(itemlink.Table, itemlink.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.LinksTable, item.LinksColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLinkedIn queries the linked_in edge of a Item.
+func (c *ItemClient) QueryLinkedIn(_m *Item) *ItemLinkQuery {
+	query := (&ItemLinkClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(itemlink.Table, itemlink.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.LinkedInTable, item.LinkedInColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ItemClient) Hooks() []Hook {
 	return c.hooks.Item
@@ -1222,6 +1280,171 @@ func (c *ItemClient) mutate(ctx context.Context, m *ItemMutation) (Value, error)
 		return (&ItemDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Item mutation op: %q", m.Op())
+	}
+}
+
+// ItemLinkClient is a client for the ItemLink schema.
+type ItemLinkClient struct {
+	config
+}
+
+// NewItemLinkClient returns a client for the ItemLink from the given config.
+func NewItemLinkClient(c config) *ItemLinkClient {
+	return &ItemLinkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `itemlink.Hooks(f(g(h())))`.
+func (c *ItemLinkClient) Use(hooks ...Hook) {
+	c.hooks.ItemLink = append(c.hooks.ItemLink, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `itemlink.Intercept(f(g(h())))`.
+func (c *ItemLinkClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ItemLink = append(c.inters.ItemLink, interceptors...)
+}
+
+// Create returns a builder for creating a ItemLink entity.
+func (c *ItemLinkClient) Create() *ItemLinkCreate {
+	mutation := newItemLinkMutation(c.config, OpCreate)
+	return &ItemLinkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ItemLink entities.
+func (c *ItemLinkClient) CreateBulk(builders ...*ItemLinkCreate) *ItemLinkCreateBulk {
+	return &ItemLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ItemLinkClient) MapCreateBulk(slice any, setFunc func(*ItemLinkCreate, int)) *ItemLinkCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ItemLinkCreateBulk{err: fmt.Errorf("calling to ItemLinkClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ItemLinkCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ItemLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ItemLink.
+func (c *ItemLinkClient) Update() *ItemLinkUpdate {
+	mutation := newItemLinkMutation(c.config, OpUpdate)
+	return &ItemLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ItemLinkClient) UpdateOne(_m *ItemLink) *ItemLinkUpdateOne {
+	mutation := newItemLinkMutation(c.config, OpUpdateOne, withItemLink(_m))
+	return &ItemLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ItemLinkClient) UpdateOneID(id core.ID) *ItemLinkUpdateOne {
+	mutation := newItemLinkMutation(c.config, OpUpdateOne, withItemLinkID(id))
+	return &ItemLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ItemLink.
+func (c *ItemLinkClient) Delete() *ItemLinkDelete {
+	mutation := newItemLinkMutation(c.config, OpDelete)
+	return &ItemLinkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ItemLinkClient) DeleteOne(_m *ItemLink) *ItemLinkDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ItemLinkClient) DeleteOneID(id core.ID) *ItemLinkDeleteOne {
+	builder := c.Delete().Where(itemlink.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ItemLinkDeleteOne{builder}
+}
+
+// Query returns a query builder for ItemLink.
+func (c *ItemLinkClient) Query() *ItemLinkQuery {
+	return &ItemLinkQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeItemLink},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ItemLink entity by its id.
+func (c *ItemLinkClient) Get(ctx context.Context, id core.ID) (*ItemLink, error) {
+	return c.Query().Where(itemlink.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ItemLinkClient) GetX(ctx context.Context, id core.ID) *ItemLink {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryContainer queries the container edge of a ItemLink.
+func (c *ItemLinkClient) QueryContainer(_m *ItemLink) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(itemlink.Table, itemlink.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, itemlink.ContainerTable, itemlink.ContainerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryItem queries the item edge of a ItemLink.
+func (c *ItemLinkClient) QueryItem(_m *ItemLink) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(itemlink.Table, itemlink.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, itemlink.ItemTable, itemlink.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ItemLinkClient) Hooks() []Hook {
+	return c.hooks.ItemLink
+}
+
+// Interceptors returns the client interceptors.
+func (c *ItemLinkClient) Interceptors() []Interceptor {
+	return c.inters.ItemLink
+}
+
+func (c *ItemLinkClient) mutate(ctx context.Context, m *ItemLinkMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ItemLinkCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ItemLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ItemLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ItemLinkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ItemLink mutation op: %q", m.Op())
 	}
 }
 
@@ -2259,6 +2482,22 @@ func (c *UserClient) QueryAuthSessions(_m *User) *AuthSessionQuery {
 	return query
 }
 
+// QueryPlaylists queries the playlists edge of a User.
+func (c *UserClient) QueryPlaylists(_m *User) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PlaylistsTable, user.PlaylistsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -2452,11 +2691,11 @@ func (c *UserDataClient) mutate(ctx context.Context, m *UserDataMutation) (Value
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AuthSession, Credit, FolderState, Image, Item, ItemValue, Job, Library,
-		MediaSource, Person, PluginConfig, User, UserData []ent.Hook
+		AuthSession, Credit, FolderState, Image, Item, ItemLink, ItemValue, Job,
+		Library, MediaSource, Person, PluginConfig, User, UserData []ent.Hook
 	}
 	inters struct {
-		AuthSession, Credit, FolderState, Image, Item, ItemValue, Job, Library,
-		MediaSource, Person, PluginConfig, User, UserData []ent.Interceptor
+		AuthSession, Credit, FolderState, Image, Item, ItemLink, ItemValue, Job,
+		Library, MediaSource, Person, PluginConfig, User, UserData []ent.Interceptor
 	}
 )

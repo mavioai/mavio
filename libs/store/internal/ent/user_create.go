@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -176,6 +177,21 @@ func (_c *UserCreate) AddAuthSessions(v ...*AuthSession) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddAuthSessionIDs(ids...)
+}
+
+// AddPlaylistIDs adds the "playlists" edge to the Item entity by IDs.
+func (_c *UserCreate) AddPlaylistIDs(ids ...core.ID) *UserCreate {
+	_c.mutation.AddPlaylistIDs(ids...)
+	return _c
+}
+
+// AddPlaylists adds the "playlists" edges to the Item entity.
+func (_c *UserCreate) AddPlaylists(v ...*Item) *UserCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPlaylistIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -374,6 +390,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(authsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PlaylistsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PlaylistsTable,
+			Columns: []string{user.PlaylistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

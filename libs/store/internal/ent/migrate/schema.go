@@ -218,6 +218,7 @@ var (
 		{Name: "parent_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "owner_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "library_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// ItemsTable holds the schema information for the "items" table.
 	ItemsTable = &schema.Table{
@@ -241,6 +242,12 @@ var (
 				Symbol:     "items_libraries_items",
 				Columns:    []*schema.Column{ItemsColumns[50]},
 				RefColumns: []*schema.Column{LibrariesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "items_users_playlists",
+				Columns:    []*schema.Column{ItemsColumns[51]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -277,6 +284,45 @@ var (
 				Name:    "item_library_id_scan_generation",
 				Unique:  false,
 				Columns: []*schema.Column{ItemsColumns[50], ItemsColumns[46]},
+			},
+		},
+	}
+	// ItemLinksColumns holds the columns for the "item_links" table.
+	ItemLinksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "ord", Type: field.TypeInt},
+		{Name: "container_id", Type: field.TypeUUID},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// ItemLinksTable holds the schema information for the "item_links" table.
+	ItemLinksTable = &schema.Table{
+		Name:       "item_links",
+		Columns:    ItemLinksColumns,
+		PrimaryKey: []*schema.Column{ItemLinksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "item_links_items_links",
+				Columns:    []*schema.Column{ItemLinksColumns[2]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "item_links_items_linked_in",
+				Columns:    []*schema.Column{ItemLinksColumns[3]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "itemlink_container_id_ord",
+				Unique:  false,
+				Columns: []*schema.Column{ItemLinksColumns[2], ItemLinksColumns[1]},
+			},
+			{
+				Name:    "itemlink_item_id",
+				Unique:  false,
+				Columns: []*schema.Column{ItemLinksColumns[3]},
 			},
 		},
 	}
@@ -372,6 +418,16 @@ var (
 		Name:       "libraries",
 		Columns:    LibrariesColumns,
 		PrimaryKey: []*schema.Column{LibrariesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "library_kind",
+				Unique:  true,
+				Columns: []*schema.Column{LibrariesColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "kind IN ('collections', 'playlists')",
+				},
+			},
+		},
 	}
 	// MediaSourcesColumns holds the columns for the "media_sources" table.
 	MediaSourcesColumns = []*schema.Column{
@@ -522,6 +578,7 @@ var (
 		FolderStatesTable,
 		ImagesTable,
 		ItemsTable,
+		ItemLinksTable,
 		ItemValuesTable,
 		JobsTable,
 		LibrariesTable,
@@ -555,8 +612,14 @@ func init() {
 	ItemsTable.ForeignKeys[0].RefTable = ItemsTable
 	ItemsTable.ForeignKeys[1].RefTable = ItemsTable
 	ItemsTable.ForeignKeys[2].RefTable = LibrariesTable
+	ItemsTable.ForeignKeys[3].RefTable = UsersTable
 	ItemsTable.Annotation = &entsql.Annotation{
 		Table: "items",
+	}
+	ItemLinksTable.ForeignKeys[0].RefTable = ItemsTable
+	ItemLinksTable.ForeignKeys[1].RefTable = ItemsTable
+	ItemLinksTable.Annotation = &entsql.Annotation{
+		Table: "item_links",
 	}
 	ItemValuesTable.ForeignKeys[0].RefTable = ItemsTable
 	ItemValuesTable.Annotation = &entsql.Annotation{

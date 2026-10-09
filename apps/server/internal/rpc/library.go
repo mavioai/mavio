@@ -27,7 +27,13 @@ var libraryKinds = map[core.LibraryKind]libraryv1.LibraryKind{
 	core.LibraryBooks:       libraryv1.LibraryKind_LIBRARY_KIND_BOOKS,
 	core.LibraryPhotos:      libraryv1.LibraryKind_LIBRARY_KIND_PHOTOS,
 	core.LibraryMixed:       libraryv1.LibraryKind_LIBRARY_KIND_MIXED,
+	core.LibraryCollections: libraryv1.LibraryKind_LIBRARY_KIND_COLLECTIONS,
+	core.LibraryPlaylists:   libraryv1.LibraryKind_LIBRARY_KIND_PLAYLISTS,
 }
+
+// errCurated rejects managing the curated libraries, which the server
+// keeps.
+var errCurated = errors.New("the collections and playlists libraries are managed by the server")
 
 // LibraryService implements mavio.library.v1.LibraryService. Users see the
 // libraries their policy allows; only administrators see folder paths and
@@ -56,7 +62,7 @@ func (s *LibraryService) ListLibraries(ctx context.Context, _ *libraryv1.ListLib
 	}
 	var out []*libraryv1.Library
 	for i := range libs {
-		if p.User.Policy.CanAccessLibrary(libs[i].ID) {
+		if canAccessLibrary(&p.User, &libs[i]) {
 			out = append(out, libraryToProto(&libs[i], p.User.Admin))
 		}
 	}
@@ -69,15 +75,20 @@ func (s *LibraryService) GetLibrary(ctx context.Context, req *libraryv1.GetLibra
 	if err != nil {
 		return nil, err
 	}
-	id := core.MustParseID(req.GetId())
-	if !p.User.Policy.CanAccessLibrary(id) {
+	lib, err := s.store.Libraries().Get(ctx, core.MustParseID(req.GetId()))
+	if errors.Is(err, core.ErrNotFound) || err == nil && !canAccessLibrary(&p.User, &lib) {
 		return nil, connect.NewError(connect.CodeNotFound, errors.New("no such library"))
 	}
-	lib, err := s.store.Libraries().Get(ctx, id)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
 	return libraryv1.GetLibraryResponse_builder{Library: libraryToProto(&lib, p.User.Admin)}.Build(), nil
+}
+
+// canAccessLibrary reports whether the user may see a library: every user
+// has the playlists library, where they find their own playlists.
+func canAccessLibrary(u *core.User, lib *core.Library) bool {
+	return lib.Kind == core.LibraryPlaylists || u.Policy.CanAccessLibrary(lib.ID)
 }
 
 // CreateLibrary creates a library and queues its first scan.
@@ -114,6 +125,9 @@ func (s *LibraryService) UpdateLibrary(ctx context.Context, req *libraryv1.Updat
 	err = s.store.InTx(ctx, func(tx core.Store) error {
 		if lib, err = tx.Libraries().Get(ctx, core.MustParseID(req.GetId())); err != nil {
 			return err
+		}
+		if lib.Kind.Curated() {
+			return connect.NewError(connect.CodeFailedPrecondition, errCurated)
 		}
 		lib.Name, lib.Kind, lib.Paths, lib.ScanInterval = spec.Name, spec.Kind, spec.Paths, spec.ScanInterval
 		lib.PreferredLanguage, lib.MetadataCountry = spec.PreferredLanguage, spec.MetadataCountry
@@ -164,6 +178,9 @@ func (s *LibraryService) ScanLibrary(ctx context.Context, req *libraryv1.ScanLib
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
+	if lib.Kind.Curated() {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errCurated)
+	}
 	job := library.ScanJob(lib, s.now(), false)
 	added, err := s.store.Jobs().Enqueue(ctx, &job)
 	if err != nil {
@@ -187,6 +204,9 @@ func libraryFromSpec(spec *libraryv1.LibrarySpec) (core.Library, error) {
 		if v == spec.GetKind() {
 			lib.Kind = k
 		}
+	}
+	if lib.Kind.Curated() {
+		return lib, connect.NewError(connect.CodeInvalidArgument, errCurated)
 	}
 	if spec.HasScanInterval() {
 		lib.ScanInterval = spec.GetScanInterval().AsDuration()

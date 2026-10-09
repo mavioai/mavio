@@ -21,6 +21,9 @@ type Image func(*sql.Selector)
 // Item is the predicate function for item builders.
 type Item func(*sql.Selector)
 
+// ItemLink is the predicate function for itemlink builders.
+type ItemLink func(*sql.Selector)
+
 // ItemValue is the predicate function for itemvalue builders.
 type ItemValue func(*sql.Selector)
 

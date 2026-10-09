@@ -1,4 +1,4 @@
-h1:vqrKp8dZmFdTiTL4kJlPjsgulhcvSF5wvTJHTLDvIjM=
+h1:Qd85jSPFuSlwNzIYqMxQCZCjffl90JGgjaQhGZXgKzM=
 20261008102924_init.sql h1:G/Rj5DYvL8d2Ra0Bi/qkQWaGqYrPZ5mHqGRLhqN3KZQ=
 20261008120153_search_keys.sql h1:p3u6v+vWWMIOwjq0sPLNTzjUlcpjG8CnpiehBZkfPY0=
 20261008125127_item_metadata.sql h1:M0cTAm2BUR8dOVOZMyAmGvJC+Z+o+sMF5GNpixJhkbw=
@@ -6,3 +6,4 @@ h1:vqrKp8dZmFdTiTL4kJlPjsgulhcvSF5wvTJHTLDvIjM=
 20261009061143_auth_sessions.sql h1:kd11hYoCuKhCrmZNeD3N6e/F75zVVaW1dUcJ3aAZYFA=
 20261009120727_plugin_configs.sql h1:ao3IRvHXBihJ9IsKSc+ACF02sHyIs7nEndVh9ZGtA/Q=
 20261009133125_inherited_ratings.sql h1:GV9D4pY7IeWNNeY511FaVGtL5gzafpFo58DKcCo4jv4=
+20261009135440_curated_items.sql h1:LnmOYl0+tsOxyHmJSmX7T0NMOhxVIYEx4l0D5nbe4Io=

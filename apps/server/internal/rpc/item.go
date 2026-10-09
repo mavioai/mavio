@@ -66,6 +66,7 @@ var (
 		libraryv1.SortField_SORT_FIELD_COMMUNITY_RATING: core.SortCommunityRating, libraryv1.SortField_SORT_FIELD_RUNTIME: core.SortRuntime,
 		libraryv1.SortField_SORT_FIELD_INDEX: core.SortIndex, libraryv1.SortField_SORT_FIELD_RANDOM: core.SortRandom,
 		libraryv1.SortField_SORT_FIELD_LAST_PLAYED: core.SortLastPlayed, libraryv1.SortField_SORT_FIELD_PLAY_COUNT: core.SortPlayCount,
+		libraryv1.SortField_SORT_FIELD_LIST_ORDER: core.SortListOrder,
 	}
 	streamKinds = map[core.StreamKind]libraryv1.StreamKind{
 		core.StreamVideo: libraryv1.StreamKind_STREAM_KIND_VIDEO, core.StreamAudio: libraryv1.StreamKind_STREAM_KIND_AUDIO,
@@ -106,7 +107,7 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	if !p.User.Policy.CanAccess(&item) {
+	if !p.User.CanAccess(&item) {
 		return nil, connect.NewError(connect.CodeNotFound, errors.New("no such item"))
 	}
 	sources, err := s.store.MediaSources().ListForItem(ctx, item.ID)
@@ -179,6 +180,20 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	}
 	if req.HasParentId() {
 		q.ParentID = core.MustParseID(req.GetParentId())
+		// The items of a collection or playlist are linked into it and
+		// listed in its order unless sorted otherwise.
+		parent, err := s.store.Items().Get(ctx, q.ParentID)
+		switch {
+		case errors.Is(err, core.ErrNotFound) || err == nil && !p.User.CanAccess(&parent):
+			return nil, connect.NewError(connect.CodeNotFound, errors.New("no such parent"))
+		case err != nil:
+			return nil, connectError(ctx, err)
+		case parent.Kind.IsCurated():
+			q.ParentID, q.MemberOf = core.NilID, parent.ID
+			if len(req.GetSort()) == 0 {
+				q.Sort = []core.SortSpec{{Field: core.SortListOrder}}
+			}
+		}
 	}
 	if req.HasPersonId() {
 		q.PersonID = core.MustParseID(req.GetPersonId())
@@ -200,7 +215,7 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := s.itemsToProto(ctx, page.Items, p.User.Admin)
+	out, err := itemsToProto(ctx, s.store, page.Items, p.User.Admin)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -229,7 +244,7 @@ func (s *ItemService) ListLatestItems(ctx context.Context, req *libraryv1.ListLa
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := s.itemsToProto(ctx, items, p.User.Admin)
+	out, err := itemsToProto(ctx, s.store, items, p.User.Admin)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -261,7 +276,7 @@ func (s *ItemService) ListNextUp(ctx context.Context, req *libraryv1.ListNextUpR
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := s.itemsToProto(ctx, items, p.User.Admin)
+	out, err := itemsToProto(ctx, s.store, items, p.User.Admin)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -282,16 +297,16 @@ func browseScope(u *core.User, libraries []string) (browse.Scope, bool) {
 
 // itemsToProto describes items with their images, series, seasons and
 // albums.
-func (s *ItemService) itemsToProto(ctx context.Context, items []core.Item, admin bool) ([]*libraryv1.Item, error) {
+func itemsToProto(ctx context.Context, store core.Store, items []core.Item, admin bool) ([]*libraryv1.Item, error) {
 	owners := make([]core.ID, len(items))
 	for i := range items {
 		owners[i] = items[i].ID
 	}
-	images, err := s.store.Images().ListForOwners(ctx, owners)
+	images, err := store.Images().ListForOwners(ctx, owners)
 	if err != nil {
 		return nil, err
 	}
-	anc := newAncestry(s.store)
+	anc := newAncestry(store)
 	out := make([]*libraryv1.Item, len(items))
 	for i := range items {
 		out[i] = itemToProto(&items[i], images[items[i].ID], admin)

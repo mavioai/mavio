@@ -260,6 +260,9 @@ type Item struct {
 	Extra   ExtraKind
 	OwnerID ID
 
+	// UserID is the user a playlist belongs to.
+	UserID ID
+
 	// MetadataLanguage (ISO 639-1) and MetadataCountry (ISO 3166-1
 	// alpha-2) override the library's settings for this item.
 	MetadataLanguage string
@@ -299,6 +302,10 @@ func (it *Item) Validate() error {
 		return fmt.Errorf("%w: item %s has unknown extra kind %q", ErrInvalid, it.ID, it.Extra)
 	case it.Extra != "" && it.OwnerID.IsZero():
 		return fmt.Errorf("%w: extra %s has no owner", ErrInvalid, it.ID)
+	case it.Kind == KindPlaylist && it.UserID.IsZero():
+		return fmt.Errorf("%w: playlist %s has no user", ErrInvalid, it.ID)
+	case it.Kind != KindPlaylist && !it.UserID.IsZero():
+		return fmt.Errorf("%w: item %s is not a playlist but has a user", ErrInvalid, it.ID)
 	case it.CommunityRating < 0 || it.CommunityRating > 10:
 		return fmt.Errorf("%w: item %s community rating %v out of range", ErrInvalid, it.ID, it.CommunityRating)
 	case it.ParentalRating < 0:
@@ -320,3 +327,15 @@ func (it *Item) Validate() error {
 	}
 	return nil
 }
+
+// Link is an entry of a collection or playlist: an item at a position.
+// A playlist may hold an item several times, each entry with its own ID.
+type Link struct {
+	ID          ID
+	ContainerID ID
+	ItemID      ID
+}
+
+// IsCurated reports whether items link other items into it rather than
+// containing them as children.
+func (k ItemKind) IsCurated() bool { return k == KindCollection || k == KindPlaylist }

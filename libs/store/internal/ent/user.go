@@ -51,9 +51,11 @@ type UserEdges struct {
 	UserData []*UserData `json:"user_data,omitempty"`
 	// AuthSessions holds the value of the auth_sessions edge.
 	AuthSessions []*AuthSession `json:"auth_sessions,omitempty"`
+	// Playlists holds the value of the playlists edge.
+	Playlists []*Item `json:"playlists,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UserDataOrErr returns the UserData value or an error if the edge
@@ -72,6 +74,15 @@ func (e UserEdges) AuthSessionsOrErr() ([]*AuthSession, error) {
 		return e.AuthSessions, nil
 	}
 	return nil, &NotLoadedError{edge: "auth_sessions"}
+}
+
+// PlaylistsOrErr returns the Playlists value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PlaylistsOrErr() ([]*Item, error) {
+	if e.loadedTypes[2] {
+		return e.Playlists, nil
+	}
+	return nil, &NotLoadedError{edge: "playlists"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -196,6 +207,11 @@ func (_m *User) QueryUserData() *UserDataQuery {
 // QueryAuthSessions queries the "auth_sessions" edge of the User entity.
 func (_m *User) QueryAuthSessions() *AuthSessionQuery {
 	return NewUserClient(_m.config).QueryAuthSessions(_m)
+}
+
+// QueryPlaylists queries the "playlists" edge of the User entity.
+func (_m *User) QueryPlaylists() *ItemQuery {
+	return NewUserClient(_m.config).QueryPlaylists(_m)
 }
 
 // Update returns a builder for updating this User.

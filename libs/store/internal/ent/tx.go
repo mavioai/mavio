@@ -22,6 +22,8 @@ type Tx struct {
 	Image *ImageClient
 	// Item is the client for interacting with the Item builders.
 	Item *ItemClient
+	// ItemLink is the client for interacting with the ItemLink builders.
+	ItemLink *ItemLinkClient
 	// ItemValue is the client for interacting with the ItemValue builders.
 	ItemValue *ItemValueClient
 	// Job is the client for interacting with the Job builders.
@@ -174,6 +176,7 @@ func (tx *Tx) init() {
 	tx.FolderState = NewFolderStateClient(tx.config)
 	tx.Image = NewImageClient(tx.config)
 	tx.Item = NewItemClient(tx.config)
+	tx.ItemLink = NewItemLinkClient(tx.config)
 	tx.ItemValue = NewItemValueClient(tx.config)
 	tx.Job = NewJobClient(tx.config)
 	tx.Library = NewLibraryClient(tx.config)

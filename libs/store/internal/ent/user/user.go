@@ -39,6 +39,8 @@ const (
 	EdgeUserData = "user_data"
 	// EdgeAuthSessions holds the string denoting the auth_sessions edge name in mutations.
 	EdgeAuthSessions = "auth_sessions"
+	// EdgePlaylists holds the string denoting the playlists edge name in mutations.
+	EdgePlaylists = "playlists"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// UserDataTable is the table that holds the user_data relation/edge.
@@ -55,6 +57,13 @@ const (
 	AuthSessionsInverseTable = "auth_sessions"
 	// AuthSessionsColumn is the table column denoting the auth_sessions relation/edge.
 	AuthSessionsColumn = "user_id"
+	// PlaylistsTable is the table that holds the playlists relation/edge.
+	PlaylistsTable = "items"
+	// PlaylistsInverseTable is the table name for the Item entity.
+	// It exists in this package in order to avoid circular dependency with the "item" package.
+	PlaylistsInverseTable = "items"
+	// PlaylistsColumn is the table column denoting the playlists relation/edge.
+	PlaylistsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -174,6 +183,20 @@ func ByAuthSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAuthSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByPlaylistsCount orders the results by playlists count.
+func ByPlaylistsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPlaylistsStep(), opts...)
+	}
+}
+
+// ByPlaylists orders the results by playlists terms.
+func ByPlaylists(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlaylistsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserDataStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -186,5 +209,12 @@ func newAuthSessionsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AuthSessionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AuthSessionsTable, AuthSessionsColumn),
+	)
+}
+func newPlaylistsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlaylistsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PlaylistsTable, PlaylistsColumn),
 	)
 }

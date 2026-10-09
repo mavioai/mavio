@@ -80,6 +80,15 @@ func (p *UserPolicy) CanAccess(it *Item) bool {
 	return true
 }
 
+// CanAccess reports whether the user may see the item: their own
+// playlists, and other items as their policy allows.
+func (u *User) CanAccess(it *Item) bool {
+	if it.Kind == KindPlaylist {
+		return it.UserID == u.ID
+	}
+	return u.Policy.CanAccess(it)
+}
+
 // SubtitleMode controls automatic subtitle selection.
 type SubtitleMode string
 

@@ -36,20 +36,28 @@ const (
 	LibraryKind_LIBRARY_KIND_BOOKS        LibraryKind = 6
 	LibraryKind_LIBRARY_KIND_PHOTOS       LibraryKind = 7
 	LibraryKind_LIBRARY_KIND_MIXED        LibraryKind = 8
+	// The collections and the playlists users curate, in two libraries the
+	// server creates when first needed. They have no folders, cannot be
+	// created, changed or scanned through LibraryService, and the playlists
+	// library is open to every user, each seeing their own playlists.
+	LibraryKind_LIBRARY_KIND_COLLECTIONS LibraryKind = 9
+	LibraryKind_LIBRARY_KIND_PLAYLISTS   LibraryKind = 10
 )
 
 // Enum value maps for LibraryKind.
 var (
 	LibraryKind_name = map[int32]string{
-		0: "LIBRARY_KIND_UNSPECIFIED",
-		1: "LIBRARY_KIND_MOVIES",
-		2: "LIBRARY_KIND_SHOWS",
-		3: "LIBRARY_KIND_MUSIC",
-		4: "LIBRARY_KIND_MUSIC_VIDEOS",
-		5: "LIBRARY_KIND_HOME_VIDEOS",
-		6: "LIBRARY_KIND_BOOKS",
-		7: "LIBRARY_KIND_PHOTOS",
-		8: "LIBRARY_KIND_MIXED",
+		0:  "LIBRARY_KIND_UNSPECIFIED",
+		1:  "LIBRARY_KIND_MOVIES",
+		2:  "LIBRARY_KIND_SHOWS",
+		3:  "LIBRARY_KIND_MUSIC",
+		4:  "LIBRARY_KIND_MUSIC_VIDEOS",
+		5:  "LIBRARY_KIND_HOME_VIDEOS",
+		6:  "LIBRARY_KIND_BOOKS",
+		7:  "LIBRARY_KIND_PHOTOS",
+		8:  "LIBRARY_KIND_MIXED",
+		9:  "LIBRARY_KIND_COLLECTIONS",
+		10: "LIBRARY_KIND_PLAYLISTS",
 	}
 	LibraryKind_value = map[string]int32{
 		"LIBRARY_KIND_UNSPECIFIED":  0,
@@ -61,6 +69,8 @@ var (
 		"LIBRARY_KIND_BOOKS":        6,
 		"LIBRARY_KIND_PHOTOS":       7,
 		"LIBRARY_KIND_MIXED":        8,
+		"LIBRARY_KIND_COLLECTIONS":  9,
+		"LIBRARY_KIND_PLAYLISTS":    10,
 	}
 )
 
@@ -1516,7 +1526,7 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\"H\n" +
 	"\x13ScanLibraryResponse\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x1a\n" +
-	"\benqueued\x18\x02 \x01(\bR\benqueued*\xfa\x01\n" +
+	"\benqueued\x18\x02 \x01(\bR\benqueued*\xb4\x02\n" +
 	"\vLibraryKind\x12\x1c\n" +
 	"\x18LIBRARY_KIND_UNSPECIFIED\x10\x00\x12\x17\n" +
 	"\x13LIBRARY_KIND_MOVIES\x10\x01\x12\x16\n" +
@@ -1526,7 +1536,10 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\x18LIBRARY_KIND_HOME_VIDEOS\x10\x05\x12\x16\n" +
 	"\x12LIBRARY_KIND_BOOKS\x10\x06\x12\x17\n" +
 	"\x13LIBRARY_KIND_PHOTOS\x10\a\x12\x16\n" +
-	"\x12LIBRARY_KIND_MIXED\x10\b2\xd7\x04\n" +
+	"\x12LIBRARY_KIND_MIXED\x10\b\x12\x1c\n" +
+	"\x18LIBRARY_KIND_COLLECTIONS\x10\t\x12\x1a\n" +
+	"\x16LIBRARY_KIND_PLAYLISTS\x10\n" +
+	"2\xd7\x04\n" +
 	"\x0eLibraryService\x12e\n" +
 	"\rListLibraries\x12&.mavio.library.v1.ListLibrariesRequest\x1a'.mavio.library.v1.ListLibrariesResponse\"\x03\x90\x02\x01\x12\\\n" +
 	"\n" +

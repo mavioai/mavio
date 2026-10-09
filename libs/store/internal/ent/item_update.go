@@ -16,10 +16,12 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
 
@@ -825,6 +827,26 @@ func (_u *ItemUpdate) ClearOwnerID() *ItemUpdate {
 	return _u
 }
 
+// SetUserID sets the "user_id" field.
+func (_u *ItemUpdate) SetUserID(v core.ID) *ItemUpdate {
+	_u.mutation.SetUserID(v)
+	return _u
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableUserID(v *core.ID) *ItemUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
+	}
+	return _u
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (_u *ItemUpdate) ClearUserID() *ItemUpdate {
+	_u.mutation.ClearUserID()
+	return _u
+}
+
 // SetDateAdded sets the "date_added" field.
 func (_u *ItemUpdate) SetDateAdded(v time.Time) *ItemUpdate {
 	_u.mutation.SetDateAdded(v)
@@ -1040,6 +1062,41 @@ func (_u *ItemUpdate) AddUserData(v ...*UserData) *ItemUpdate {
 	return _u.AddUserDatumIDs(ids...)
 }
 
+// SetUser sets the "user" edge to the User entity.
+func (_u *ItemUpdate) SetUser(v *User) *ItemUpdate {
+	return _u.SetUserID(v.ID)
+}
+
+// AddLinkIDs adds the "links" edge to the ItemLink entity by IDs.
+func (_u *ItemUpdate) AddLinkIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddLinkIDs(ids...)
+	return _u
+}
+
+// AddLinks adds the "links" edges to the ItemLink entity.
+func (_u *ItemUpdate) AddLinks(v ...*ItemLink) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLinkIDs(ids...)
+}
+
+// AddLinkedInIDs adds the "linked_in" edge to the ItemLink entity by IDs.
+func (_u *ItemUpdate) AddLinkedInIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddLinkedInIDs(ids...)
+	return _u
+}
+
+// AddLinkedIn adds the "linked_in" edges to the ItemLink entity.
+func (_u *ItemUpdate) AddLinkedIn(v ...*ItemLink) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLinkedInIDs(ids...)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_u *ItemUpdate) Mutation() *ItemMutation {
 	return _u.mutation
@@ -1208,6 +1265,54 @@ func (_u *ItemUpdate) RemoveUserData(v ...*UserData) *ItemUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserDatumIDs(ids...)
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (_u *ItemUpdate) ClearUser() *ItemUpdate {
+	_u.mutation.ClearUser()
+	return _u
+}
+
+// ClearLinks clears all "links" edges to the ItemLink entity.
+func (_u *ItemUpdate) ClearLinks() *ItemUpdate {
+	_u.mutation.ClearLinks()
+	return _u
+}
+
+// RemoveLinkIDs removes the "links" edge to ItemLink entities by IDs.
+func (_u *ItemUpdate) RemoveLinkIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveLinkIDs(ids...)
+	return _u
+}
+
+// RemoveLinks removes "links" edges to ItemLink entities.
+func (_u *ItemUpdate) RemoveLinks(v ...*ItemLink) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLinkIDs(ids...)
+}
+
+// ClearLinkedIn clears all "linked_in" edges to the ItemLink entity.
+func (_u *ItemUpdate) ClearLinkedIn() *ItemUpdate {
+	_u.mutation.ClearLinkedIn()
+	return _u
+}
+
+// RemoveLinkedInIDs removes the "linked_in" edge to ItemLink entities by IDs.
+func (_u *ItemUpdate) RemoveLinkedInIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveLinkedInIDs(ids...)
+	return _u
+}
+
+// RemoveLinkedIn removes "linked_in" edges to ItemLink entities.
+func (_u *ItemUpdate) RemoveLinkedIn(v ...*ItemLink) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLinkedInIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1906,6 +2011,125 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userdata.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   item.UserTable,
+			Columns: []string{item.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   item.UserTable,
+			Columns: []string{item.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LinksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinksTable,
+			Columns: []string{item.LinksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLinksIDs(); len(nodes) > 0 && !_u.mutation.LinksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinksTable,
+			Columns: []string{item.LinksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LinksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinksTable,
+			Columns: []string{item.LinksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LinkedInCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinkedInTable,
+			Columns: []string{item.LinkedInColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLinkedInIDs(); len(nodes) > 0 && !_u.mutation.LinkedInCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinkedInTable,
+			Columns: []string{item.LinkedInColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LinkedInIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinkedInTable,
+			Columns: []string{item.LinkedInColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -2723,6 +2947,26 @@ func (_u *ItemUpdateOne) ClearOwnerID() *ItemUpdateOne {
 	return _u
 }
 
+// SetUserID sets the "user_id" field.
+func (_u *ItemUpdateOne) SetUserID(v core.ID) *ItemUpdateOne {
+	_u.mutation.SetUserID(v)
+	return _u
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableUserID(v *core.ID) *ItemUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
+	}
+	return _u
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (_u *ItemUpdateOne) ClearUserID() *ItemUpdateOne {
+	_u.mutation.ClearUserID()
+	return _u
+}
+
 // SetDateAdded sets the "date_added" field.
 func (_u *ItemUpdateOne) SetDateAdded(v time.Time) *ItemUpdateOne {
 	_u.mutation.SetDateAdded(v)
@@ -2938,6 +3182,41 @@ func (_u *ItemUpdateOne) AddUserData(v ...*UserData) *ItemUpdateOne {
 	return _u.AddUserDatumIDs(ids...)
 }
 
+// SetUser sets the "user" edge to the User entity.
+func (_u *ItemUpdateOne) SetUser(v *User) *ItemUpdateOne {
+	return _u.SetUserID(v.ID)
+}
+
+// AddLinkIDs adds the "links" edge to the ItemLink entity by IDs.
+func (_u *ItemUpdateOne) AddLinkIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddLinkIDs(ids...)
+	return _u
+}
+
+// AddLinks adds the "links" edges to the ItemLink entity.
+func (_u *ItemUpdateOne) AddLinks(v ...*ItemLink) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLinkIDs(ids...)
+}
+
+// AddLinkedInIDs adds the "linked_in" edge to the ItemLink entity by IDs.
+func (_u *ItemUpdateOne) AddLinkedInIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddLinkedInIDs(ids...)
+	return _u
+}
+
+// AddLinkedIn adds the "linked_in" edges to the ItemLink entity.
+func (_u *ItemUpdateOne) AddLinkedIn(v ...*ItemLink) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLinkedInIDs(ids...)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_u *ItemUpdateOne) Mutation() *ItemMutation {
 	return _u.mutation
@@ -3106,6 +3385,54 @@ func (_u *ItemUpdateOne) RemoveUserData(v ...*UserData) *ItemUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserDatumIDs(ids...)
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (_u *ItemUpdateOne) ClearUser() *ItemUpdateOne {
+	_u.mutation.ClearUser()
+	return _u
+}
+
+// ClearLinks clears all "links" edges to the ItemLink entity.
+func (_u *ItemUpdateOne) ClearLinks() *ItemUpdateOne {
+	_u.mutation.ClearLinks()
+	return _u
+}
+
+// RemoveLinkIDs removes the "links" edge to ItemLink entities by IDs.
+func (_u *ItemUpdateOne) RemoveLinkIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveLinkIDs(ids...)
+	return _u
+}
+
+// RemoveLinks removes "links" edges to ItemLink entities.
+func (_u *ItemUpdateOne) RemoveLinks(v ...*ItemLink) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLinkIDs(ids...)
+}
+
+// ClearLinkedIn clears all "linked_in" edges to the ItemLink entity.
+func (_u *ItemUpdateOne) ClearLinkedIn() *ItemUpdateOne {
+	_u.mutation.ClearLinkedIn()
+	return _u
+}
+
+// RemoveLinkedInIDs removes the "linked_in" edge to ItemLink entities by IDs.
+func (_u *ItemUpdateOne) RemoveLinkedInIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveLinkedInIDs(ids...)
+	return _u
+}
+
+// RemoveLinkedIn removes "linked_in" edges to ItemLink entities.
+func (_u *ItemUpdateOne) RemoveLinkedIn(v ...*ItemLink) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLinkedInIDs(ids...)
 }
 
 // Where appends a list predicates to the ItemUpdate builder.
@@ -3834,6 +4161,125 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userdata.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   item.UserTable,
+			Columns: []string{item.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   item.UserTable,
+			Columns: []string{item.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LinksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinksTable,
+			Columns: []string{item.LinksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLinksIDs(); len(nodes) > 0 && !_u.mutation.LinksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinksTable,
+			Columns: []string{item.LinksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LinksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinksTable,
+			Columns: []string{item.LinksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LinkedInCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinkedInTable,
+			Columns: []string{item.LinkedInColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLinkedInIDs(); len(nodes) > 0 && !_u.mutation.LinkedInCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinkedInTable,
+			Columns: []string{item.LinkedInColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LinkedInIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.LinkedInTable,
+			Columns: []string{item.LinkedInColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

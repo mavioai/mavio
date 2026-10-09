@@ -16,6 +16,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
+	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -322,6 +323,42 @@ func (r items) Values(ctx context.Context, q core.ValueQuery) ([]core.ValueCount
 	return out, nil
 }
 
+func (r items) Links(ctx context.Context, containerID core.ID) ([]core.Link, error) {
+	list, err := r.s.read.ItemLink.Query().Where(itemlink.ContainerID(containerID)).
+		Order(ent.Asc(itemlink.FieldOrd), ent.Asc(itemlink.FieldID)).All(ctx)
+	if err != nil {
+		return nil, mapErr(err, "list links")
+	}
+	out := make([]core.Link, len(list))
+	for i, l := range list {
+		out[i] = core.Link{ID: l.ID, ContainerID: l.ContainerID, ItemID: l.ItemID}
+	}
+	return out, nil
+}
+
+func (r items) ReplaceLinks(ctx context.Context, containerID core.ID, links []core.Link) error {
+	return r.s.writeTx(ctx, func(tx *Store) error {
+		if _, err := tx.write.ItemLink.Delete().Where(itemlink.ContainerID(containerID)).Exec(ctx); err != nil {
+			return mapErr(err, "replace links")
+		}
+		for start := 0; start < len(links); start += upsertBatch {
+			chunk := links[start:min(start+upsertBatch, len(links))]
+			builders := make([]*ent.ItemLinkCreate, len(chunk))
+			for i, l := range chunk {
+				if l.ID.IsZero() {
+					l.ID = core.NewID()
+				}
+				builders[i] = tx.write.ItemLink.Create().SetID(l.ID).SetContainerID(containerID).
+					SetItemID(l.ItemID).SetOrd(start + i)
+			}
+			if err := tx.write.ItemLink.CreateBulk(builders...).Exec(ctx); err != nil {
+				return mapErr(err, "insert links")
+			}
+		}
+		return nil
+	})
+}
+
 // years lists the production years of the matching items, oldest first.
 func (r items) years(ctx context.Context, matching []predicate.Item, limit, offset int) ([]core.ValueCount, error) {
 	var rows []struct {
@@ -358,6 +395,8 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 		ps = append(ps, descendantsOf(q.ParentID))
 	case !q.ParentID.IsZero():
 		ps = append(ps, item.ParentID(q.ParentID))
+	case !q.MemberOf.IsZero():
+		ps = append(ps, item.HasLinkedInWith(itemlink.ContainerID(q.MemberOf)))
 	}
 	if len(q.Kinds) > 0 {
 		kinds := make([]string, len(q.Kinds))
@@ -402,6 +441,8 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 		}
 	}
 	if !q.UserID.IsZero() {
+		// Other users' playlists are theirs alone.
+		ps = append(ps, item.Or(item.KindNEQ(string(core.KindPlaylist)), item.UserID(q.UserID)))
 		mine := userdata.UserID(q.UserID)
 		if q.Played != nil {
 			played := item.HasUserDataWith(mine, userdata.Played(true))
@@ -489,6 +530,12 @@ func orderItems(s *entsql.Selector, q core.ItemQuery) {
 		case core.SortPlayCount:
 			t := joinUserData()
 			s.OrderExpr(entsql.Expr(dir("COALESCE("+t.C(userdata.FieldPlayCount)+", 0)", spec.Desc)))
+		case core.SortListOrder:
+			// An item listed twice sorts by its first entry. The ID is
+			// written as a literal: ent drops the arguments of ORDER BY
+			// expressions, and its canonical form needs no escaping.
+			s.OrderExpr(entsql.Expr(dir("(SELECT MIN(ord) FROM item_links WHERE container_id = '"+q.MemberOf.String()+
+				"' AND item_id = "+s.C(item.FieldID)+")", spec.Desc)))
 		}
 	}
 	if searching {
@@ -558,6 +605,9 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 	}
 	if !it.OwnerID.IsZero() {
 		create.SetOwnerID(it.OwnerID)
+	}
+	if !it.UserID.IsZero() {
+		create.SetUserID(it.UserID)
 	}
 	return create
 }
@@ -632,6 +682,9 @@ func toItem(e *ent.Item) core.Item {
 	}
 	if e.OwnerID != nil {
 		it.OwnerID = *e.OwnerID
+	}
+	if e.UserID != nil {
+		it.UserID = *e.UserID
 	}
 	values := slices.Clone(e.Edges.Values)
 	slices.SortFunc(values, func(a, b *ent.ItemValue) int { return a.Ord - b.Ord })
