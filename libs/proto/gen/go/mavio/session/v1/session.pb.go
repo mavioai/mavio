@@ -354,6 +354,15 @@ func (x *Event) GetPluginChanged() *PluginChanged {
 	return nil
 }
 
+func (x *Event) GetSyncPlay() *SyncPlayUpdate {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*event_SyncPlay); ok {
+			return x.SyncPlay
+		}
+	}
+	return nil
+}
+
 func (x *Event) SetTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_Time = v
 }
@@ -420,6 +429,14 @@ func (x *Event) SetPluginChanged(v *PluginChanged) {
 		return
 	}
 	x.xxx_hidden_Kind = &event_PluginChanged{v}
+}
+
+func (x *Event) SetSyncPlay(v *SyncPlayUpdate) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &event_SyncPlay{v}
 }
 
 func (x *Event) HasTime() bool {
@@ -500,6 +517,14 @@ func (x *Event) HasPluginChanged() bool {
 	return ok
 }
 
+func (x *Event) HasSyncPlay() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*event_SyncPlay)
+	return ok
+}
+
 func (x *Event) ClearTime() {
 	x.xxx_hidden_Time = nil
 }
@@ -556,6 +581,12 @@ func (x *Event) ClearPluginChanged() {
 	}
 }
 
+func (x *Event) ClearSyncPlay() {
+	if _, ok := x.xxx_hidden_Kind.(*event_SyncPlay); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
 const Event_Kind_not_set_case case_Event_Kind = 0
 const Event_Connected_case case_Event_Kind = 2
 const Event_Heartbeat_case case_Event_Kind = 3
@@ -565,6 +596,7 @@ const Event_SessionsChanged_case case_Event_Kind = 6
 const Event_Command_case case_Event_Kind = 7
 const Event_JobChanged_case case_Event_Kind = 8
 const Event_PluginChanged_case case_Event_Kind = 9
+const Event_SyncPlay_case case_Event_Kind = 10
 
 func (x *Event) WhichKind() case_Event_Kind {
 	if x == nil {
@@ -587,6 +619,8 @@ func (x *Event) WhichKind() case_Event_Kind {
 		return Event_JobChanged_case
 	case *event_PluginChanged:
 		return Event_PluginChanged_case
+	case *event_SyncPlay:
+		return Event_SyncPlay_case
 	default:
 		return Event_Kind_not_set_case
 	}
@@ -605,6 +639,7 @@ type Event_builder struct {
 	Command         *CommandReceived
 	JobChanged      *JobChanged
 	PluginChanged   *PluginChanged
+	SyncPlay        *SyncPlayUpdate
 	// -- end of xxx_hidden_Kind
 }
 
@@ -636,6 +671,9 @@ func (b0 Event_builder) Build() *Event {
 	}
 	if b.PluginChanged != nil {
 		x.xxx_hidden_Kind = &event_PluginChanged{b.PluginChanged}
+	}
+	if b.SyncPlay != nil {
+		x.xxx_hidden_Kind = &event_SyncPlay{b.SyncPlay}
 	}
 	return m0
 }
@@ -686,6 +724,10 @@ type event_PluginChanged struct {
 	PluginChanged *PluginChanged `protobuf:"bytes,9,opt,name=plugin_changed,json=pluginChanged,oneof"`
 }
 
+type event_SyncPlay struct {
+	SyncPlay *SyncPlayUpdate `protobuf:"bytes,10,opt,name=sync_play,json=syncPlay,oneof"`
+}
+
 func (*event_Connected) isEvent_Kind() {}
 
 func (*event_Heartbeat) isEvent_Kind() {}
@@ -701,6 +743,8 @@ func (*event_Command) isEvent_Kind() {}
 func (*event_JobChanged) isEvent_Kind() {}
 
 func (*event_PluginChanged) isEvent_Kind() {}
+
+func (*event_SyncPlay) isEvent_Kind() {}
 
 // Connected starts a stream.
 type Connected struct {
@@ -2905,10 +2949,10 @@ var File_mavio_session_v1_session_proto protoreflect.FileDescriptor
 
 const file_mavio_session_v1_session_proto_rawDesc = "" +
 	"\n" +
-	"\x1emavio/session/v1/session.proto\x12\x10mavio.session.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\x1a mavio/playback/v1/playback.proto\x1a\x1cmavio/system/v1/system.proto\x1a\x18mavio/user/v1/user.proto\"\x12\n" +
+	"\x1emavio/session/v1/session.proto\x12\x10mavio.session.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\x1a mavio/playback/v1/playback.proto\x1a\x1fmavio/session/v1/syncplay.proto\x1a\x1cmavio/system/v1/system.proto\x1a\x18mavio/user/v1/user.proto\"\x12\n" +
 	"\x10SubscribeRequest\"B\n" +
 	"\x11SubscribeResponse\x12-\n" +
-	"\x05event\x18\x01 \x01(\v2\x17.mavio.session.v1.EventR\x05event\"\xf1\x04\n" +
+	"\x05event\x18\x01 \x01(\v2\x17.mavio.session.v1.EventR\x05event\"\xb2\x05\n" +
 	"\x05Event\x12.\n" +
 	"\x04time\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x04time\x12;\n" +
 	"\tconnected\x18\x02 \x01(\v2\x1b.mavio.session.v1.ConnectedH\x00R\tconnected\x12;\n" +
@@ -2919,7 +2963,9 @@ const file_mavio_session_v1_session_proto_rawDesc = "" +
 	"\acommand\x18\a \x01(\v2!.mavio.session.v1.CommandReceivedH\x00R\acommand\x12?\n" +
 	"\vjob_changed\x18\b \x01(\v2\x1c.mavio.session.v1.JobChangedH\x00R\n" +
 	"jobChanged\x12H\n" +
-	"\x0eplugin_changed\x18\t \x01(\v2\x1f.mavio.session.v1.PluginChangedH\x00R\rpluginChangedB\x06\n" +
+	"\x0eplugin_changed\x18\t \x01(\v2\x1f.mavio.session.v1.PluginChangedH\x00R\rpluginChanged\x12?\n" +
+	"\tsync_play\x18\n" +
+	" \x01(\v2 .mavio.session.v1.SyncPlayUpdateH\x00R\bsyncPlayB\x06\n" +
 	"\x04kind\"*\n" +
 	"\tConnected\x12\x1d\n" +
 	"\n" +
@@ -3047,11 +3093,12 @@ var file_mavio_session_v1_session_proto_goTypes = []any{
 	(*SendCommandRequest)(nil),    // 22: mavio.session.v1.SendCommandRequest
 	(*SendCommandResponse)(nil),   // 23: mavio.session.v1.SendCommandResponse
 	(*timestamppb.Timestamp)(nil), // 24: google.protobuf.Timestamp
-	(*v1.UserData)(nil),           // 25: mavio.user.v1.UserData
-	(*v11.Plugin)(nil),            // 26: mavio.system.v1.Plugin
-	(*v12.Item)(nil),              // 27: mavio.library.v1.Item
-	(*durationpb.Duration)(nil),   // 28: google.protobuf.Duration
-	(v13.PlayMethod)(0),           // 29: mavio.playback.v1.PlayMethod
+	(*SyncPlayUpdate)(nil),        // 25: mavio.session.v1.SyncPlayUpdate
+	(*v1.UserData)(nil),           // 26: mavio.user.v1.UserData
+	(*v11.Plugin)(nil),            // 27: mavio.system.v1.Plugin
+	(*v12.Item)(nil),              // 28: mavio.library.v1.Item
+	(*durationpb.Duration)(nil),   // 29: google.protobuf.Duration
+	(v13.PlayMethod)(0),           // 30: mavio.playback.v1.PlayMethod
 }
 var file_mavio_session_v1_session_proto_depIdxs = []int32{
 	4,  // 0: mavio.session.v1.SubscribeResponse.event:type_name -> mavio.session.v1.Event
@@ -3064,36 +3111,37 @@ var file_mavio_session_v1_session_proto_depIdxs = []int32{
 	10, // 7: mavio.session.v1.Event.command:type_name -> mavio.session.v1.CommandReceived
 	11, // 8: mavio.session.v1.Event.job_changed:type_name -> mavio.session.v1.JobChanged
 	12, // 9: mavio.session.v1.Event.plugin_changed:type_name -> mavio.session.v1.PluginChanged
-	25, // 10: mavio.session.v1.UserDataChanged.user_data:type_name -> mavio.user.v1.UserData
-	15, // 11: mavio.session.v1.CommandReceived.command:type_name -> mavio.session.v1.Command
-	0,  // 12: mavio.session.v1.JobChanged.state:type_name -> mavio.session.v1.JobState
-	26, // 13: mavio.session.v1.PluginChanged.plugin:type_name -> mavio.system.v1.Plugin
-	24, // 14: mavio.session.v1.Session.last_seen_time:type_name -> google.protobuf.Timestamp
-	14, // 15: mavio.session.v1.Session.now_playing:type_name -> mavio.session.v1.NowPlaying
-	27, // 16: mavio.session.v1.NowPlaying.item:type_name -> mavio.library.v1.Item
-	28, // 17: mavio.session.v1.NowPlaying.position:type_name -> google.protobuf.Duration
-	29, // 18: mavio.session.v1.NowPlaying.method:type_name -> mavio.playback.v1.PlayMethod
-	16, // 19: mavio.session.v1.Command.play:type_name -> mavio.session.v1.Play
-	17, // 20: mavio.session.v1.Command.play_state:type_name -> mavio.session.v1.PlayState
-	18, // 21: mavio.session.v1.Command.seek:type_name -> mavio.session.v1.Seek
-	19, // 22: mavio.session.v1.Command.message:type_name -> mavio.session.v1.Message
-	28, // 23: mavio.session.v1.Play.start_position:type_name -> google.protobuf.Duration
-	1,  // 24: mavio.session.v1.PlayState.command:type_name -> mavio.session.v1.PlayStateCommand
-	28, // 25: mavio.session.v1.Seek.position:type_name -> google.protobuf.Duration
-	28, // 26: mavio.session.v1.Message.timeout:type_name -> google.protobuf.Duration
-	13, // 27: mavio.session.v1.ListSessionsResponse.sessions:type_name -> mavio.session.v1.Session
-	15, // 28: mavio.session.v1.SendCommandRequest.command:type_name -> mavio.session.v1.Command
-	2,  // 29: mavio.session.v1.EventService.Subscribe:input_type -> mavio.session.v1.SubscribeRequest
-	20, // 30: mavio.session.v1.SessionService.ListSessions:input_type -> mavio.session.v1.ListSessionsRequest
-	22, // 31: mavio.session.v1.SessionService.SendCommand:input_type -> mavio.session.v1.SendCommandRequest
-	3,  // 32: mavio.session.v1.EventService.Subscribe:output_type -> mavio.session.v1.SubscribeResponse
-	21, // 33: mavio.session.v1.SessionService.ListSessions:output_type -> mavio.session.v1.ListSessionsResponse
-	23, // 34: mavio.session.v1.SessionService.SendCommand:output_type -> mavio.session.v1.SendCommandResponse
-	32, // [32:35] is the sub-list for method output_type
-	29, // [29:32] is the sub-list for method input_type
-	29, // [29:29] is the sub-list for extension type_name
-	29, // [29:29] is the sub-list for extension extendee
-	0,  // [0:29] is the sub-list for field type_name
+	25, // 10: mavio.session.v1.Event.sync_play:type_name -> mavio.session.v1.SyncPlayUpdate
+	26, // 11: mavio.session.v1.UserDataChanged.user_data:type_name -> mavio.user.v1.UserData
+	15, // 12: mavio.session.v1.CommandReceived.command:type_name -> mavio.session.v1.Command
+	0,  // 13: mavio.session.v1.JobChanged.state:type_name -> mavio.session.v1.JobState
+	27, // 14: mavio.session.v1.PluginChanged.plugin:type_name -> mavio.system.v1.Plugin
+	24, // 15: mavio.session.v1.Session.last_seen_time:type_name -> google.protobuf.Timestamp
+	14, // 16: mavio.session.v1.Session.now_playing:type_name -> mavio.session.v1.NowPlaying
+	28, // 17: mavio.session.v1.NowPlaying.item:type_name -> mavio.library.v1.Item
+	29, // 18: mavio.session.v1.NowPlaying.position:type_name -> google.protobuf.Duration
+	30, // 19: mavio.session.v1.NowPlaying.method:type_name -> mavio.playback.v1.PlayMethod
+	16, // 20: mavio.session.v1.Command.play:type_name -> mavio.session.v1.Play
+	17, // 21: mavio.session.v1.Command.play_state:type_name -> mavio.session.v1.PlayState
+	18, // 22: mavio.session.v1.Command.seek:type_name -> mavio.session.v1.Seek
+	19, // 23: mavio.session.v1.Command.message:type_name -> mavio.session.v1.Message
+	29, // 24: mavio.session.v1.Play.start_position:type_name -> google.protobuf.Duration
+	1,  // 25: mavio.session.v1.PlayState.command:type_name -> mavio.session.v1.PlayStateCommand
+	29, // 26: mavio.session.v1.Seek.position:type_name -> google.protobuf.Duration
+	29, // 27: mavio.session.v1.Message.timeout:type_name -> google.protobuf.Duration
+	13, // 28: mavio.session.v1.ListSessionsResponse.sessions:type_name -> mavio.session.v1.Session
+	15, // 29: mavio.session.v1.SendCommandRequest.command:type_name -> mavio.session.v1.Command
+	2,  // 30: mavio.session.v1.EventService.Subscribe:input_type -> mavio.session.v1.SubscribeRequest
+	20, // 31: mavio.session.v1.SessionService.ListSessions:input_type -> mavio.session.v1.ListSessionsRequest
+	22, // 32: mavio.session.v1.SessionService.SendCommand:input_type -> mavio.session.v1.SendCommandRequest
+	3,  // 33: mavio.session.v1.EventService.Subscribe:output_type -> mavio.session.v1.SubscribeResponse
+	21, // 34: mavio.session.v1.SessionService.ListSessions:output_type -> mavio.session.v1.ListSessionsResponse
+	23, // 35: mavio.session.v1.SessionService.SendCommand:output_type -> mavio.session.v1.SendCommandResponse
+	33, // [33:36] is the sub-list for method output_type
+	30, // [30:33] is the sub-list for method input_type
+	30, // [30:30] is the sub-list for extension type_name
+	30, // [30:30] is the sub-list for extension extendee
+	0,  // [0:30] is the sub-list for field type_name
 }
 
 func init() { file_mavio_session_v1_session_proto_init() }
@@ -3101,6 +3149,7 @@ func file_mavio_session_v1_session_proto_init() {
 	if File_mavio_session_v1_session_proto != nil {
 		return
 	}
+	file_mavio_session_v1_syncplay_proto_init()
 	file_mavio_session_v1_session_proto_msgTypes[2].OneofWrappers = []any{
 		(*event_Connected)(nil),
 		(*event_Heartbeat)(nil),
@@ -3110,6 +3159,7 @@ func file_mavio_session_v1_session_proto_init() {
 		(*event_Command)(nil),
 		(*event_JobChanged)(nil),
 		(*event_PluginChanged)(nil),
+		(*event_SyncPlay)(nil),
 	}
 	file_mavio_session_v1_session_proto_msgTypes[13].OneofWrappers = []any{
 		(*command_Play)(nil),

@@ -51,6 +51,15 @@ type Hub struct {
 	removed map[core.ID]core.ID // item → library
 	// scans are the running scan jobs, by job ID.
 	scans map[core.ID]core.Job
+	// offline are told of sessions going offline.
+	offline []func(session core.ID)
+}
+
+// OnOffline registers f to learn of sessions going offline.
+func (h *Hub) OnOffline(f func(session core.ID)) {
+	h.mu.Lock()
+	h.offline = append(h.offline, f)
+	h.mu.Unlock()
 }
 
 // New returns a hub.
@@ -110,9 +119,13 @@ func (h *Hub) Unsubscribe(s *Subscriber) {
 	if current {
 		delete(h.subs, s.SessionID)
 	}
+	offline := slices.Clone(h.offline)
 	h.mu.Unlock()
 	s.close()
 	if current {
+		for _, f := range offline {
+			f(s.SessionID)
+		}
 		h.SessionsChanged(s.User.ID, s.SessionID)
 	}
 }

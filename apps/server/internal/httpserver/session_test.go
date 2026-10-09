@@ -156,3 +156,86 @@ func TestEventsAndSessions(t *testing.T) {
 	case <-time.After(300 * time.Millisecond):
 	}
 }
+
+func TestSyncPlay(t *testing.T) {
+	ctx := t.Context()
+	url, s := startServer(t, nil)
+	tvToken := signUp(t, url)
+	phoneToken := login(t, url, "admin", "secret", "phone")
+	lib := core.Library{Name: "Films", Kind: core.LibraryMovies, Paths: []string{t.TempDir()}}
+	if err := s.Libraries().Create(ctx, &lib); err != nil {
+		t.Fatal(err)
+	}
+	film := core.Item{ID: core.NewID(), LibraryID: lib.ID, Kind: core.KindMovie, Name: "Up"}
+	if err := s.Items().Upsert(ctx, film); err != nil {
+		t.Fatal(err)
+	}
+	tvSync := sessionv1connect.NewSyncPlayServiceClient(http.DefaultClient, url, withToken(tvToken))
+	phoneSync := sessionv1connect.NewSyncPlayServiceClient(http.DefaultClient, url, withToken(phoneToken))
+	isSync := func(e *sessionv1.Event) bool { return e.HasSyncPlay() }
+
+	// Joining needs an event stream to learn of the group.
+	_, err := tvSync.CreateGroup(ctx, sessionv1.CreateGroupRequest_builder{Name: new("Movie night")}.Build())
+	wantCode(t, "create a group offline", err, connect.CodeFailedPrecondition)
+	tv, phoneCtx := subscribe(t, url, tvToken), context.Background()
+	phoneCtx, hangUp := context.WithCancel(phoneCtx)
+	phoneStream, err := sessionv1connect.NewEventServiceClient(http.DefaultClient, url, withToken(phoneToken)).Subscribe(phoneCtx, &sessionv1.SubscribeRequest{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	phone := make(chan *sessionv1.Event, 64)
+	go func() {
+		defer close(phone)
+		for phoneStream.Receive() {
+			phone <- phoneStream.Msg().GetEvent()
+		}
+	}()
+	await(t, tv, "TV connected", (*sessionv1.Event).HasConnected)
+	await(t, phone, "phone connected", (*sessionv1.Event).HasConnected)
+
+	created, err := tvSync.CreateGroup(ctx, sessionv1.CreateGroupRequest_builder{Name: new("Movie night")}.Build())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := phoneSync.JoinGroup(ctx, sessionv1.JoinGroupRequest_builder{GroupId: new(created.GetGroup().GetId())}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	if list, err := phoneSync.ListGroups(ctx, &sessionv1.ListGroupsRequest{}); err != nil || len(list.GetGroups()) != 1 || len(list.GetGroups()[0].GetMembers()) != 2 {
+		t.Fatalf("ListGroups = %v, %v", list, err)
+	}
+
+	// Both get the queue, report ready, and are told to start at the same
+	// time and position.
+	if _, err := tvSync.SetQueue(ctx, sessionv1.SetQueueRequest_builder{ItemIds: []string{film.ID.String()}}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	queued := await(t, phone, "queue", func(e *sessionv1.Event) bool { return isSync(e) && len(e.GetSyncPlay().GetGroup().GetQueue()) == 1 })
+	entry := queued.GetSyncPlay().GetGroup().GetQueue()[0].GetId()
+	for _, c := range []sessionv1connect.SyncPlayServiceClient{tvSync, phoneSync} {
+		now, err := c.GetTime(ctx, &sessionv1.GetTimeRequest{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := c.ReportState(ctx, sessionv1.ReportStateRequest_builder{
+			EntryId: &entry, Position: durationpb.New(0), When: now.GetSendTime(), Ready: new(true),
+		}.Build()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	unpause := func(e *sessionv1.Event) bool {
+		return isSync(e) && e.GetSyncPlay().GetCommand().GetKind() == sessionv1.SyncPlayCommandKind_SYNC_PLAY_COMMAND_KIND_UNPAUSE
+	}
+	a, b := await(t, tv, "TV starts", unpause).GetSyncPlay().GetCommand(), await(t, phone, "phone starts", unpause).GetSyncPlay().GetCommand()
+	if !a.GetWhen().AsTime().Equal(b.GetWhen().AsTime()) || a.GetPosition().AsDuration() != b.GetPosition().AsDuration() {
+		t.Errorf("start commands differ: %v / %v", a, b)
+	}
+
+	// The phone going offline leaves the group.
+	hangUp()
+	left := await(t, tv, "phone left", func(e *sessionv1.Event) bool { return isSync(e) && len(e.GetSyncPlay().GetGroup().GetMembers()) == 1 })
+	if left.GetSyncPlay().GetGroup().GetState() != sessionv1.SyncPlayState_SYNC_PLAY_STATE_PLAYING {
+		t.Errorf("group after the phone left = %v", left)
+	}
+	_, err = phoneSync.Pause(ctx, &sessionv1.PauseRequest{})
+	wantCode(t, "pause outside a group", err, connect.CodeFailedPrecondition)
+}

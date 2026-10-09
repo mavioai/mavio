@@ -202,6 +202,7 @@ flowchart TD
 - [x] Event streams (`EventService`): library changes, item states, sessions, commands, scans and plugins, each device getting what its user may see; the store is observed so that writes reach the streams once committed
 - [x] Sessions (`SessionService`): devices online while streaming, what each plays, remote commands
 - [x] Quick Connect (`AuthService`): a new device signed in by entering its code on a signed-in one
+- [x] SyncPlay (`SyncPlayService`): groups of devices playing one queue at one position, waiting for buffering members, as in Jellyfin; timing tested with `testing/synctest`
 
 ### P9 Metadata Management
 **Scope**: correcting and completing what the library scans find.

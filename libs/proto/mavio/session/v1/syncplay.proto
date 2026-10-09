@@ -1,0 +1,228 @@
+edition = "2023";
+
+package mavio.session.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+// SyncPlayService lets online devices watch together: the members of a
+// group play the same queue at the same position, as in Jellyfin's
+// SyncPlay. Each change reaches the members as a SyncPlayUpdate event with
+// the group and, when they have to act, a command timed in server time;
+// clients keep their clocks in step with GetTime. A device is in at most
+// one group and leaves it when it goes offline.
+service SyncPlayService {
+  // GetTime returns the server's time when it received and when it
+  // answered the request, for clients to estimate their clock's offset
+  // and the round trip, as in NTP.
+  rpc GetTime(GetTimeRequest) returns (GetTimeResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListGroups lists the groups whose queue the caller may play.
+  rpc ListGroups(ListGroupsRequest) returns (ListGroupsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // CreateGroup creates a group with the calling device in it.
+  rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
+  // JoinGroup adds the calling device to a group, leaving its earlier one.
+  rpc JoinGroup(JoinGroupRequest) returns (JoinGroupResponse);
+  rpc LeaveGroup(LeaveGroupRequest) returns (LeaveGroupResponse);
+  // SetQueue plays items from a position; the group waits for every
+  // member to be ready, then plays.
+  rpc SetQueue(SetQueueRequest) returns (SetQueueResponse);
+  rpc Pause(PauseRequest) returns (PauseResponse);
+  rpc Unpause(UnpauseRequest) returns (UnpauseResponse);
+  rpc Seek(SeekRequest) returns (SeekResponse);
+  rpc Stop(StopRequest) returns (StopResponse);
+  rpc NextItem(NextItemRequest) returns (NextItemResponse);
+  rpc PreviousItem(PreviousItemRequest) returns (PreviousItemResponse);
+  // ReportState tells the group the calling device is ready to play at a
+  // position, or buffering; a buffering member makes the group wait.
+  rpc ReportState(ReportStateRequest) returns (ReportStateResponse);
+  // ReportPing tells the device's round trip to the server, from which
+  // the group delays starting to play.
+  rpc ReportPing(ReportPingRequest) returns (ReportPingResponse);
+}
+
+// SyncPlayState is what a group does.
+enum SyncPlayState {
+  SYNC_PLAY_STATE_UNSPECIFIED = 0;
+  // Nothing to play, or stopped.
+  SYNC_PLAY_STATE_IDLE = 1;
+  // Waiting for buffering members.
+  SYNC_PLAY_STATE_WAITING = 2;
+  SYNC_PLAY_STATE_PAUSED = 3;
+  SYNC_PLAY_STATE_PLAYING = 4;
+}
+
+message SyncPlayGroup {
+  string id = 1;
+  string name = 2;
+  SyncPlayState state = 3;
+  repeated SyncPlayMember members = 4;
+  repeated SyncPlayQueueEntry queue = 5;
+  // The entry of queue being played.
+  int32 current_index = 6;
+  // The group is at position at position_time; while playing, it advances
+  // from there. position_time may lie in the near future when the group
+  // starts playing after a delay for the members' latency.
+  google.protobuf.Duration position = 7;
+  google.protobuf.Timestamp position_time = 8;
+}
+
+message SyncPlayMember {
+  string session_id = 1;
+  string user_name = 2;
+  string device_name = 3;
+  bool buffering = 4;
+}
+
+// SyncPlayQueueEntry is an item of a group's queue; an item may be queued
+// several times.
+message SyncPlayQueueEntry {
+  string id = 1;
+  string item_id = 2;
+}
+
+// SyncPlayCommand tells a member to act at a time, in server time.
+message SyncPlayCommand {
+  SyncPlayCommandKind kind = 1;
+  google.protobuf.Timestamp when = 2;
+  google.protobuf.Duration position = 3;
+  // The queue entry the command is about.
+  string entry_id = 4;
+}
+
+enum SyncPlayCommandKind {
+  SYNC_PLAY_COMMAND_KIND_UNSPECIFIED = 0;
+  SYNC_PLAY_COMMAND_KIND_UNPAUSE = 1;
+  SYNC_PLAY_COMMAND_KIND_PAUSE = 2;
+  SYNC_PLAY_COMMAND_KIND_SEEK = 3;
+  SYNC_PLAY_COMMAND_KIND_STOP = 4;
+}
+
+// SyncPlayUpdate is a group's new state, sent to its members.
+message SyncPlayUpdate {
+  // Unset when the device left the group or the group ended.
+  SyncPlayGroup group = 1;
+  // What the device has to do, if anything.
+  SyncPlayCommand command = 2;
+}
+
+message GetTimeRequest {}
+
+message GetTimeResponse {
+  google.protobuf.Timestamp receive_time = 1;
+  google.protobuf.Timestamp send_time = 2;
+}
+
+message ListGroupsRequest {}
+
+message ListGroupsResponse {
+  repeated SyncPlayGroup groups = 1;
+}
+
+message CreateGroupRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+}
+
+message CreateGroupResponse {
+  SyncPlayGroup group = 1;
+}
+
+message JoinGroupRequest {
+  string group_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message JoinGroupResponse {
+  SyncPlayGroup group = 1;
+}
+
+message LeaveGroupRequest {}
+
+message LeaveGroupResponse {}
+
+message SetQueueRequest {
+  repeated string item_ids = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 1000
+    items: {
+      string: {uuid: true}
+    }
+  }];
+  int32 start_index = 2 [(buf.validate.field).int32.gte = 0];
+  google.protobuf.Duration start_position = 3 [(buf.validate.field).duration.gte = {}];
+}
+
+message SetQueueResponse {}
+
+message PauseRequest {}
+
+message PauseResponse {}
+
+message UnpauseRequest {}
+
+message UnpauseResponse {}
+
+message SeekRequest {
+  google.protobuf.Duration position = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).duration.gte = {}
+  ];
+}
+
+message SeekResponse {}
+
+message StopRequest {}
+
+message StopResponse {}
+
+message NextItemRequest {}
+
+message NextItemResponse {}
+
+message PreviousItemRequest {}
+
+message PreviousItemResponse {}
+
+message ReportStateRequest {
+  // The entry the device plays.
+  string entry_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // Where the device was at when, in server time.
+  google.protobuf.Duration position = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).duration.gte = {}
+  ];
+  google.protobuf.Timestamp when = 3 [(buf.validate.field).required = true];
+  // The device is playing, not paused.
+  bool playing = 4;
+  // The device can play on; false means it is buffering.
+  bool ready = 5;
+}
+
+message ReportStateResponse {}
+
+message ReportPingRequest {
+  google.protobuf.Duration ping = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).duration = {
+      gte: {}
+      lte: {seconds: 60}
+    }
+  ];
+}
+
+message ReportPingResponse {}

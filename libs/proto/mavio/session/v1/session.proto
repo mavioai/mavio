@@ -7,6 +7,7 @@ import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "mavio/library/v1/item.proto";
 import "mavio/playback/v1/playback.proto";
+import "mavio/session/v1/syncplay.proto";
 import "mavio/system/v1/system.proto";
 import "mavio/user/v1/user.proto";
 
@@ -53,6 +54,7 @@ message Event {
     CommandReceived command = 7;
     JobChanged job_changed = 8;
     PluginChanged plugin_changed = 9;
+    SyncPlayUpdate sync_play = 10;
   }
 }
 
