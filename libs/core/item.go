@@ -106,9 +106,15 @@ type Provider string
 const (
 	ProviderTMDB Provider = "tmdb"
 	// ProviderTMDBCollection is the TMDB collection a movie belongs to.
-	ProviderTMDBCollection    Provider = "tmdb_collection"
-	ProviderIMDb              Provider = "imdb"
-	ProviderTVDB              Provider = "tvdb"
+	ProviderTMDBCollection Provider = "tmdb_collection"
+	ProviderIMDb           Provider = "imdb"
+	ProviderTVDB           Provider = "tvdb"
+	ProviderTVMaze         Provider = "tvmaze"
+	// Anime databases, which have an entry per season rather than per
+	// series.
+	ProviderAniDB             Provider = "anidb"
+	ProviderAniList           Provider = "anilist"
+	ProviderAniSearch         Provider = "anisearch"
 	ProviderMusicBrainzArtist Provider = "musicbrainz_artist"
 	// MusicBrainz IDs of a track's album artist, album (release), release
 	// group and track.

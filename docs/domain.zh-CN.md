@@ -69,7 +69,7 @@ erDiagram
 | `SubtitleMode` | `""`（遵循流标记）、`always`、`foreign`、`forced`、`none`、`smart` |
 | `SortField` | `name`、`date_added`、`premiere_date`、`production_year`、`community_rating`、`runtime`、`index`、`random`、`last_played`、`play_count` |
 | `JobState` | `pending`、`running`、`succeeded`、`failed` |
-| `Provider` | `tmdb`、`tmdb_collection`、`imdb`、`tvdb`、`musicbrainz_artist`、`musicbrainz_album_artist`、`musicbrainz_album`、`musicbrainz_release_group`、`musicbrainz_track`（常用取值；插件可使用其他名称） |
+| `Provider` | `tmdb`、`tmdb_collection`、`imdb`、`tvdb`、`tvmaze`、`anidb`、`anilist`、`anisearch`（动画数据库，每季一个条目）、`musicbrainz_artist`、`musicbrainz_album_artist`、`musicbrainz_album`、`musicbrainz_release_group`、`musicbrainz_track`（常用取值；插件可使用其他名称） |
 
 ---
 

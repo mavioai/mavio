@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -89,4 +90,27 @@ func (a args) boolean(t *testing.T, name string) bool {
 		t.Fatalf("argument %s: %v", name, err)
 	}
 	return b
+}
+
+func (a args) strs(t *testing.T, name string) []string {
+	t.Helper()
+	var s []string
+	if err := json.Unmarshal(a[name], &s); err != nil {
+		t.Fatalf("argument %s: %v", name, err)
+	}
+	return s
+}
+
+// symbol returns the member of an enum argument ("Tvdb" for
+// {"$symbol": "MetadataProvider.Tvdb"}).
+func (a args) symbol(t *testing.T, name string) string {
+	t.Helper()
+	var sym struct {
+		Symbol string `json:"$symbol"`
+	}
+	if err := json.Unmarshal(a[name], &sym); err != nil || sym.Symbol == "" {
+		t.Fatalf("argument %s: not a symbol: %s", name, a[name])
+	}
+	_, member, _ := strings.Cut(sym.Symbol, ".")
+	return member
 }
