@@ -9,15 +9,40 @@ import (
 	"net/http"
 	"time"
 
+	"connectrpc.com/connect"
+
+	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
+	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
 
+// Options configures the handler tree.
+type Options struct {
+	Version string
+	Store   core.Store
+	// Database is "sqlite" or "postgres".
+	Database string
+}
+
 // Handler returns the root handler serving all Connect services.
-func Handler(version string) http.Handler {
+func Handler(opts Options) (http.Handler, error) {
+	validate, err := rpc.NewValidateInterceptor()
+	if err != nil {
+		return nil, err
+	}
+	public := append([]string{systemv1connect.SystemServiceGetHealthProcedure}, rpc.AuthPublicProcedures...)
+	// Authentication runs first, so that invalid requests from strangers
+	// learn nothing about the rules.
+	interceptors := connect.WithInterceptors(auth.NewInterceptor(opts.Store, public...), validate)
+
 	mux := http.NewServeMux()
-	mux.Handle(systemv1connect.NewSystemServiceHandler(&rpc.SystemService{Version: version, StartTime: time.Now()}))
-	return mux
+	mux.Handle(systemv1connect.NewSystemServiceHandler(&rpc.SystemService{
+		Version: opts.Version, StartTime: time.Now(), Database: opts.Database,
+	}, interceptors))
+	mux.Handle(authv1connect.NewAuthServiceHandler(rpc.NewAuthService(opts.Store), interceptors))
+	return mux, nil
 }
 
 // Serve serves h on ln until ctx is canceled, then shuts down gracefully.

@@ -13,6 +13,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/buildinfo"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
+	"github.com/mavioai/mavio/libs/store"
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 func run(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("mavio", flag.ContinueOnError)
 	addr := fs.String("addr", ":8686", "HTTP listen address")
+	database := fs.String("database", "sqlite:mavio.db", "database: sqlite:<path> or postgres://…")
 	showVersion := fs.Bool("version", false, "print version and exit")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -39,11 +41,25 @@ func run(ctx context.Context, args []string) error {
 		return nil
 	}
 
+	db, err := store.Open(ctx, *database)
+	if err != nil {
+		return fmt.Errorf("open database: %w", err)
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			slog.ErrorContext(ctx, "close database", "err", err)
+		}
+	}()
+	h, err := httpserver.Handler(httpserver.Options{Version: version, Store: db, Database: db.Dialect()})
+	if err != nil {
+		return err
+	}
+
 	var lc net.ListenConfig
 	ln, err := lc.Listen(ctx, "tcp", *addr)
 	if err != nil {
 		return fmt.Errorf("listen: %w", err)
 	}
 	slog.InfoContext(ctx, "starting mavio", "version", version)
-	return httpserver.Serve(ctx, ln, httpserver.Handler(version))
+	return httpserver.Serve(ctx, ln, h)
 }

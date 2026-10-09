@@ -1,22 +1,51 @@
 package httpserver_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
 
+	"connectrpc.com/connect"
+
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
+	"github.com/mavioai/mavio/libs/store"
 )
 
-func TestGetHealth(t *testing.T) {
-	srv := httptest.NewServer(httpserver.Handler("v-test"))
+// newServer serves the handler tree over a fresh SQLite database.
+func newServer(t *testing.T) string {
+	t.Helper()
+	s, err := store.Open(t.Context(), "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = s.Close() })
+	h, err := httpserver.Handler(httpserver.Options{Version: "v-test", Store: s, Database: s.Dialect()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	srv := httptest.NewServer(h)
 	t.Cleanup(srv.Close)
+	return srv.URL
+}
 
-	client := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.URL)
+// withToken sends token as the bearer token of every request.
+func withToken(token string) connect.ClientOption {
+	return connect.WithInterceptors(connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
+		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+			req.Header().Set("Authorization", "Bearer "+token)
+			return next(ctx, req)
+		}
+	}))
+}
+
+func TestGetHealth(t *testing.T) {
+	client := systemv1connect.NewSystemServiceClient(http.DefaultClient, newServer(t))
 	resp, err := client.GetHealth(t.Context(), &systemv1.GetHealthRequest{})
 	if err != nil {
 		t.Fatalf("GetHealth: %v", err)
@@ -30,15 +59,19 @@ func TestGetHealth(t *testing.T) {
 }
 
 func TestGetSystemInfo(t *testing.T) {
-	srv := httptest.NewServer(httpserver.Handler("v-test"))
-	t.Cleanup(srv.Close)
+	url := newServer(t)
+	_, err := systemv1connect.NewSystemServiceClient(http.DefaultClient, url).GetSystemInfo(t.Context(), &systemv1.GetSystemInfoRequest{})
+	if got, want := connect.CodeOf(err), connect.CodeUnauthenticated; got != want {
+		t.Errorf("GetSystemInfo without a token: code = %v, want %v", got, want)
+	}
 
-	client := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.URL)
+	token := signUp(t, url)
+	client := systemv1connect.NewSystemServiceClient(http.DefaultClient, url, withToken(token))
 	info, err := client.GetSystemInfo(t.Context(), &systemv1.GetSystemInfoRequest{})
 	if err != nil {
 		t.Fatalf("GetSystemInfo: %v", err)
 	}
-	if info.GetVersion() != "v-test" || info.GetOs() != runtime.GOOS || info.GetArch() != runtime.GOARCH {
+	if info.GetVersion() != "v-test" || info.GetOs() != runtime.GOOS || info.GetArch() != runtime.GOARCH || info.GetDatabase() != "sqlite" {
 		t.Errorf("info = %v", info)
 	}
 	if !info.HasStartTime() || info.GetStartTime().AsTime().After(time.Now()) {

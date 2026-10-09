@@ -44,7 +44,7 @@ flowchart TD
 | P2 | Pure computation libraries | ✅ Done |
 | P3 | Media pipeline | ✅ Done |
 | P4 | Scanning and first plugin | ✅ Done |
-| P5 | Streaming and API | Not started |
+| P5 | Streaming and API | In progress |
 | P6 | Server assembly and distribution | Not started |
 | P7 | Clients and ecosystem | Not started |
 
@@ -122,6 +122,10 @@ flowchart TD
 **Scope**: `streaming` (CMAF HLS, on-demand segmenting, seeking, segment cache); Connect services (library, playback, user, system).
 
 **Done when**: ported HLS cases pass; playback verified on real hls.js / AVPlayer / Media3 clients.
+
+**Progress**:
+- [x] `libs/streaming`: playlists of the whole media source, RFC 6381 codec strings, segments generated on demand with restarts on seek, segments of copied video joined from one file per group of pictures; ported HLS cases pass
+- [x] Authentication: first administrator, sign-in per device with hashed access tokens, argon2id passwords, `mavio.auth.v1.AuthService`, bearer-token and request-validation interceptors
 
 ### P6 Server Assembly and Distribution
 **Scope**: `apps/server` assembly; `CGO_ENABLED=0` cross-compilation; container images bundling jellyfin-ffmpeg.

@@ -44,7 +44,7 @@ flowchart TD
 | P2 | 纯计算库 | ✅ 已完成 |
 | P3 | 媒体管线 | ✅ 已完成 |
 | P4 | 扫描与插件落地 | ✅ 已完成 |
-| P5 | 流媒体与 API | 未开始 |
+| P5 | 流媒体与 API | 进行中 |
 | P6 | 服务端装配与分发 | 未开始 |
 | P7 | 客户端与生态 | 未开始 |
 
@@ -122,6 +122,10 @@ flowchart TD
 **范围**：`streaming`（CMAF HLS、按需分片、seek、分片缓存）；Connect 服务（库、播放、用户、系统）。
 
 **完成标准**：HLS 移植用例通过；hls.js / AVPlayer / Media3 实机播放验证。
+
+**进度**：
+- [x] `libs/streaming`：覆盖整个媒体源的播放列表、RFC 6381 编解码器字符串、按需生成分片并在拖动时重启、直接复制视频的分片由每个图像组一个文件拼接而成；HLS 移植用例通过
+- [x] 认证：首个管理员、按设备登录并以散列保存访问令牌、argon2id 密码、`mavio.auth.v1.AuthService`、Bearer 令牌与请求校验拦截器
 
 ### P6 服务端装配与分发
 **范围**：`apps/server` 装配；`CGO_ENABLED=0` 交叉编译；容器镜像内置 jellyfin-ffmpeg。

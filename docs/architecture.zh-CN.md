@@ -135,6 +135,7 @@ libs/proto/
 ├── buf.yaml  buf.gen.yaml
 ├── mavio/
 │   ├── library/v1/             # LibraryService、ItemService：媒体库、条目、媒体源与流、人员、扫描
+│   ├── auth/v1/                # AuthService：首次运行、登录与退出、已登录设备
 │   ├── user/v1/                # UserService、UserDataService：账户、权限、偏好、按条目的用户状态
 │   ├── system/v1/              # SystemService：健康检查、服务端信息
 │   ├── playback/v1/            # （P3）客户端能力、播放决策、播放会话、进度上报
@@ -331,3 +332,14 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **按需生成分片**：每个流由一次 ffmpeg 运行在客户端前方写出分片。请求尚未写出的分片时，等待该运行；若该分片位于运行起点之前，或超出已写内容 24 秒以上，则在该分片处重启 ffmpeg。已写出的分片在播放会话期间保留并可再次提供，向后拖动没有代价。对同一个流的请求逐个处理。
 * **重启后对齐**：ffmpeg 的 HLS 复用器从每次运行的起点开始计算切分间隔，拖动后会让直接复制视频的切分点错位。因此直接复制的视频每个图像组（GOP）写成一个文件，按其关键帧编号，一个分片由连续的若干文件拼接提供；无论从哪里开始运行，写出的文件都相同。重启时从分片第一个图像组的中间读取直接复制的视频，因为对含重排帧的流，ffmpeg 会把定位向前移动几帧。编码输出的运行恰好从分片边界开始，切分点自然对齐。
 * **安全替换**：ffmpeg 把每个文件先以临时名写出、完成后再重命名（`-hls_flags temp_file`）：以最终名称存在的文件即已完整，之后的运行替换它也不会截断客户端正在读取的内容。每次运行写出自己的初始化分片，保留并提供第一个。
+
+---
+
+## 11. API 与认证（apps/server）
+
+* **单一处理器树**：`apps/server/internal/httpserver` 把 Connect 服务（实现位于 `internal/rpc`）与普通 HTTP 媒体端点挂载在同一个 `http.ServeMux` 上。每个 Connect 请求在到达服务之前先按其 protovalidate 规则校验，违反规则返回 `invalid_argument`。
+* **账户**：密码以 argon2id（19 MiB、2 轮、1 条并行通道）散列为 PHC 字符串；使用其他参数的散列仍被接受，并在下一次成功登录时替换。以不存在的用户名登录与密码错误的耗时相同。通过插件认证的用户没有密码散列。
+* **首次运行**：在还没有任何用户时，`AuthService.CreateFirstUser` 无需凭据即可创建一个管理员并使其登录；此后该调用返回 `failed_precondition`。客户端通过 `AuthService.GetAuthInfo` 得知这一步是否尚未完成。
+* **会话**：登录为一台设备签发由 32 个随机字节组成（base64url）的访问令牌；服务端只把它的 SHA-256 散列作为 `AuthSession` 保存（见[领域模型](domain.zh-CN.md)）。客户端以 `Authorization: Bearer <token>` 发送令牌。令牌不会过期；在客户端退出登录、用户吊销该会话或删除账户，或同一设备再次登录时失效。会话的最近活动时间最多每分钟记录一次。
+* **授权**：拦截器把令牌解析为用户与会话并放入请求上下文；未知令牌与被禁用的用户返回 `unauthenticated`。只有 `GetAuthInfo`、`CreateFirstUser`、`Login` 以及 `SystemService` 的健康检查是公开的。管理员权限与媒体库访问权限由各服务根据上下文中的用户自行检查（`permission_denied`）。
+* **媒体 URL**：播放器并不总能给媒体请求附加请求头（AVPlayer、`<video>`），因此媒体端点不接受 Bearer 令牌。通过需认证的 `PlaybackService` 开始的播放会获得一个不可猜测的 ID，其播放列表、分片与直接播放 URL 都带有该 ID；播放结束或发起它的会话被吊销后，这些 URL 随即失效。

@@ -135,6 +135,7 @@ libs/proto/
 ├── buf.yaml  buf.gen.yaml
 ├── mavio/
 │   ├── library/v1/             # LibraryService, ItemService: libraries, items, media sources and streams, people, scans
+│   ├── auth/v1/                # AuthService: first run, sign-in and sign-out, signed-in devices
 │   ├── user/v1/                # UserService, UserDataService: accounts, policies, preferences, per-item state
 │   ├── system/v1/              # SystemService: health, server information
 │   ├── playback/v1/            # (P3) client capabilities, playback decisions, sessions, progress reporting
@@ -331,3 +332,14 @@ Mavio discovers library changes with **full reconciliation scans**, using the sa
 * **Segments on demand**: one ffmpeg run per stream writes segments ahead of the client. A request for a segment that is not written yet waits for the run, or restarts ffmpeg at that segment when it lies before where the run started or more than 24 seconds beyond what it has written. Written segments are kept for the playback session and served again, so seeking back costs nothing. Requests to one stream are served one at a time.
 * **Restarts that line up**: ffmpeg's HLS muxer spaces its cuts from where a run starts, which would misplace copied video's cuts after a seek. Copied video is therefore written one group of pictures per file, numbered by its keyframe, and a segment is served as its consecutive files; a run starting anywhere writes the same files. Restarts read copied video from the middle of the segment's first group of pictures, because ffmpeg moves seeks back by a few frames for streams with reordered frames. Encoded runs start exactly at a segment boundary, so their cuts line up by themselves.
 * **Safe replacement**: ffmpeg writes every file under a temporary name and renames it when complete (`-hls_flags temp_file`): a file under its final name is complete, and a later run replacing it never truncates what a client is reading. Each run writes its own initialization segment; the first one is kept and served.
+
+---
+
+## 11. API and Authentication (apps/server)
+
+* **One handler tree**: `apps/server/internal/httpserver` mounts the Connect services (implemented in `internal/rpc`) and the plain HTTP media endpoints on one `http.ServeMux`. Every Connect request is checked against its protovalidate rules before it reaches the service; violations are `invalid_argument`.
+* **Accounts**: passwords are hashed with argon2id (19 MiB, 2 passes, 1 lane) into a PHC string; a hash with other parameters is still accepted and replaced at the next successful sign-in. Signing in with an unknown name costs the same as a wrong password. Users that authenticate through a plugin have no password hash.
+* **First run**: while no user exists, `AuthService.CreateFirstUser` creates an administrator without credentials and signs it in; afterwards it fails with `failed_precondition`. `AuthService.GetAuthInfo` tells clients whether this step is pending.
+* **Sessions**: signing in issues an access token of 32 random bytes (base64url) for one device; the server stores only its SHA-256 hash as an `AuthSession` ([Domain Model](domain.md)). Clients send it as `Authorization: Bearer <token>`. Tokens do not expire; they end when the client signs out, the user revokes the session or deletes the account, or the same device signs in again. A session's last activity is recorded at most once a minute.
+* **Authorization**: an interceptor resolves the token to the user and session and puts them in the request context; unknown tokens and disabled users are `unauthenticated`. Only `GetAuthInfo`, `CreateFirstUser`, `Login` and the `SystemService` health check are public. Services check administrator rights and library access themselves, from the user in the context (`permission_denied`).
+* **Media URLs**: players cannot always attach headers to media requests (AVPlayer, `<video>`), so media endpoints accept no bearer tokens. A playback started through the authenticated `PlaybackService` gets an unguessable ID, and its playlist, segment and direct-play URLs carry that ID; the URLs stop working when the playback ends or the session that started it is revoked.
