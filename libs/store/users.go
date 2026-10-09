@@ -157,6 +157,22 @@ func (r userData) Put(ctx context.Context, d *core.UserData) error {
 		SetUpdatedAt(d.UpdatedAt).
 		OnConflictColumns(userdata.FieldUserID, userdata.FieldItemID).
 		UpdateNewValues().
+		Update(func(u *ent.UserDataUpsert) {
+			// Put replaces the state: unset optional fields are cleared,
+			// which UpdateNewValues alone leaves as they were.
+			if d.AudioStream == nil {
+				u.ClearAudioStream()
+			}
+			if d.SubtitleStream == nil {
+				u.ClearSubtitleStream()
+			}
+			if d.Rating == nil {
+				u.ClearRating()
+			}
+			if d.LastPlayedAt == nil {
+				u.ClearLastPlayedAt()
+			}
+		}).
 		Exec(ctx)
 	return mapErr(err, "put user data")
 }

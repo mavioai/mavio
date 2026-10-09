@@ -347,6 +347,18 @@ func TestUserScopedQueries(t *testing.T) {
 		if _, err := s.UserData().Get(ctx, bob.ID, a.ID); !errors.Is(err, core.ErrNotFound) {
 			t.Errorf("missing user data: %v", err)
 		}
+		// Put replaces the state, clearing unset optional fields.
+		reset := core.UserData{UserID: bob.ID, ItemID: c.ID, AudioStream: new(1), SubtitleStream: new(2), Rating: new(7.0), LastPlayedAt: &later}
+		if err := s.UserData().Put(ctx, &reset); err != nil {
+			t.Fatal(err)
+		}
+		reset = core.UserData{UserID: bob.ID, ItemID: c.ID}
+		if err := s.UserData().Put(ctx, &reset); err != nil {
+			t.Fatal(err)
+		}
+		if got, err := s.UserData().Get(ctx, bob.ID, c.ID); err != nil || got.Played || got.AudioStream != nil || got.SubtitleStream != nil || got.Rating != nil || got.LastPlayedAt != nil {
+			t.Errorf("after replacing with empty state = %+v, %v", got, err)
+		}
 		many, err := s.UserData().GetMany(ctx, alice.ID, []core.ID{a.ID, b.ID, c.ID})
 		if err != nil || len(many) != 2 || !many[a.ID].Played {
 			t.Errorf("GetMany = %v, %v", many, err)
