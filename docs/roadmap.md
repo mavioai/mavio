@@ -59,7 +59,7 @@ flowchart TD
 | P4 | Scanning and first plugin | ✅ Done |
 | P5 | Streaming and API | ✅ Done |
 | P6 | Server assembly and distribution | In progress |
-| P7 | Browsing | In progress |
+| P7 | Browsing | ✅ Done |
 | P8 | Live events and sessions | Not started |
 | P9 | Metadata management | Not started |
 | P10 | Administration and operations | Not started |
@@ -185,6 +185,8 @@ flowchart TD
 - [x] Collections (`CollectionService`, administrators) and playlists (`PlaylistService`, each user their own, with entries that can repeat items and move) in curated libraries the server creates; their items listed through `ListItems` with them as parent
 - [x] Display preferences per user, client and view (`DisplayPreferencesService`), with names and values the client chooses
 - [x] Collages of libraries, collections and playlists (`/images/collages/{id}`, `imaging.Collage`), drawn without text
+- [x] Scans refresh the metadata of new items without media (series, seasons, albums), which only media files' probes did before
+- [x] End-to-end test of the assembled server through its API (`internal/server`, `TestBrowsing`): films and shows scanned with their NFO files and browsed through the views, latest items, next up and genres; a user limited to PG builds a playlist and sees no episode of a TV-14 series
 
 ### P8 Live Events and Sessions
 **Scope**: what a client learns without asking, and what one device does to another.
