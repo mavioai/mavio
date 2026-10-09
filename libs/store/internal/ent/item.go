@@ -114,6 +114,10 @@ type Item struct {
 	FileModified *time.Time `json:"file_modified,omitempty"`
 	// MetadataRefreshedAt holds the value of the "metadata_refreshed_at" field.
 	MetadataRefreshedAt *time.Time `json:"metadata_refreshed_at,omitempty"`
+	// ScanGeneration holds the value of the "scan_generation" field.
+	ScanGeneration int64 `json:"scan_generation,omitempty"`
+	// MissingSince holds the value of the "missing_since" field.
+	MissingSince *time.Time `json:"missing_since,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ItemQuery when eager-loading is set.
 	Edges        ItemEdges `json:"edges"`
@@ -258,11 +262,11 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case item.FieldCommunityRating, item.FieldCriticRating:
 			values[i] = new(sql.NullFloat64)
-		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber:
+		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber, item.FieldScanGeneration:
 			values[i] = new(sql.NullInt64)
 		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldCustomRating, item.FieldCollectionName, item.FieldAspectRatio, item.FieldVideo3dFormat, item.FieldAlbum, item.FieldSeriesStatus, item.FieldAirTime, item.FieldDisplayOrder, item.FieldMetadataLanguage, item.FieldMetadataCountry, item.FieldExtra:
 			values[i] = new(sql.NullString)
-		case item.FieldPremiereDate, item.FieldEndDate, item.FieldDateAdded, item.FieldFileModified, item.FieldMetadataRefreshedAt:
+		case item.FieldPremiereDate, item.FieldEndDate, item.FieldDateAdded, item.FieldFileModified, item.FieldMetadataRefreshedAt, item.FieldMissingSince:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -589,6 +593,19 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 				_m.MetadataRefreshedAt = new(time.Time)
 				*_m.MetadataRefreshedAt = value.Time
 			}
+		case item.FieldScanGeneration:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field scan_generation", values[i])
+			} else if value.Valid {
+				_m.ScanGeneration = value.Int64
+			}
+		case item.FieldMissingSince:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field missing_since", values[i])
+			} else if value.Valid {
+				_m.MissingSince = new(time.Time)
+				*_m.MissingSince = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -837,6 +854,14 @@ func (_m *Item) String() string {
 	builder.WriteString(", ")
 	if v := _m.MetadataRefreshedAt; v != nil {
 		builder.WriteString("metadata_refreshed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("scan_generation=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ScanGeneration))
+	builder.WriteString(", ")
+	if v := _m.MissingSince; v != nil {
+		builder.WriteString("missing_since=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteByte(')')

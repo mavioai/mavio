@@ -270,6 +270,12 @@ type Item struct {
 	DateAdded           time.Time
 	FileModified        time.Time
 	MetadataRefreshedAt time.Time
+
+	// ScanGeneration is the library scan that last saw the item. Items a
+	// complete scan did not see are missing from MissingSince, hidden from
+	// queries, and purged after a grace period.
+	ScanGeneration int64
+	MissingSince   *time.Time
 }
 
 // Validate checks the item's invariants.

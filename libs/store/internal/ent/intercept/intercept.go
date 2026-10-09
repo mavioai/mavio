@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/mavioai/mavio/libs/store/internal/ent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -102,6 +103,33 @@ func (f TraverseCredit) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.CreditQuery", q)
+}
+
+// The FolderStateFunc type is an adapter to allow the use of ordinary function as a Querier.
+type FolderStateFunc func(context.Context, *ent.FolderStateQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f FolderStateFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.FolderStateQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.FolderStateQuery", q)
+}
+
+// The TraverseFolderState type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseFolderState func(context.Context, *ent.FolderStateQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseFolderState) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseFolderState) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.FolderStateQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.FolderStateQuery", q)
 }
 
 // The ImageFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -352,6 +380,8 @@ func NewQuery(q ent.Query) (Query, error) {
 	switch q := q.(type) {
 	case *ent.CreditQuery:
 		return &query[*ent.CreditQuery, predicate.Credit, credit.OrderOption]{typ: ent.TypeCredit, tq: q}, nil
+	case *ent.FolderStateQuery:
+		return &query[*ent.FolderStateQuery, predicate.FolderState, folderstate.OrderOption]{typ: ent.TypeFolderState, tq: q}, nil
 	case *ent.ImageQuery:
 		return &query[*ent.ImageQuery, predicate.Image, image.OrderOption]{typ: ent.TypeImage, tq: q}, nil
 	case *ent.ItemQuery:

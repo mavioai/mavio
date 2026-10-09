@@ -26,12 +26,18 @@ type MediaSource struct {
 	Ord int `json:"ord,omitempty"`
 	// Path holds the value of the "path" field.
 	Path string `json:"path,omitempty"`
+	// Parts holds the value of the "parts" field.
+	Parts []string `json:"parts,omitempty"`
+	// Disc holds the value of the "disc" field.
+	Disc string `json:"disc,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Container holds the value of the "container" field.
 	Container string `json:"container,omitempty"`
 	// Size holds the value of the "size" field.
 	Size int64 `json:"size,omitempty"`
+	// Modified holds the value of the "modified" field.
+	Modified *time.Time `json:"modified,omitempty"`
 	// Duration holds the value of the "duration" field.
 	Duration time.Duration `json:"duration,omitempty"`
 	// Bitrate holds the value of the "bitrate" field.
@@ -75,15 +81,15 @@ func (*MediaSource) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case mediasource.FieldStreams, mediasource.FieldChapters, mediasource.FieldKeyframes:
+		case mediasource.FieldParts, mediasource.FieldStreams, mediasource.FieldChapters, mediasource.FieldKeyframes:
 			values[i] = new([]byte)
 		case mediasource.FieldID, mediasource.FieldItemID:
 			values[i] = new(core.ID)
 		case mediasource.FieldOrd, mediasource.FieldSize, mediasource.FieldDuration, mediasource.FieldBitrate:
 			values[i] = new(sql.NullInt64)
-		case mediasource.FieldPath, mediasource.FieldName, mediasource.FieldContainer:
+		case mediasource.FieldPath, mediasource.FieldDisc, mediasource.FieldName, mediasource.FieldContainer:
 			values[i] = new(sql.NullString)
-		case mediasource.FieldProbedAt:
+		case mediasource.FieldModified, mediasource.FieldProbedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -124,6 +130,20 @@ func (_m *MediaSource) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Path = value.String
 			}
+		case mediasource.FieldParts:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field parts", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Parts); err != nil {
+					return fmt.Errorf("unmarshal field parts: %w", err)
+				}
+			}
+		case mediasource.FieldDisc:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field disc", values[i])
+			} else if value.Valid {
+				_m.Disc = value.String
+			}
 		case mediasource.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -141,6 +161,13 @@ func (_m *MediaSource) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field size", values[i])
 			} else if value.Valid {
 				_m.Size = value.Int64
+			}
+		case mediasource.FieldModified:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field modified", values[i])
+			} else if value.Valid {
+				_m.Modified = new(time.Time)
+				*_m.Modified = value.Time
 			}
 		case mediasource.FieldDuration:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -235,6 +262,12 @@ func (_m *MediaSource) String() string {
 	builder.WriteString("path=")
 	builder.WriteString(_m.Path)
 	builder.WriteString(", ")
+	builder.WriteString("parts=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Parts))
+	builder.WriteString(", ")
+	builder.WriteString("disc=")
+	builder.WriteString(_m.Disc)
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
@@ -243,6 +276,11 @@ func (_m *MediaSource) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("size=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Size))
+	builder.WriteString(", ")
+	if v := _m.Modified; v != nil {
+		builder.WriteString("modified=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("duration=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Duration))

@@ -95,7 +95,7 @@ There is a single `Item` type for every kind; `Kind` selects which fields are me
 | Episode | `AirsBeforeSeasonNumber`, `AirsAfterSeasonNumber`, `AirsBeforeEpisodeNumber` (where a special airs) |
 | Extras | `Extra` (`ExtraKind`), `OwnerID` |
 | Metadata control | `MetadataLanguage`, `MetadataCountry` (override the library's), `Locked`, `LockedFields` (`MetadataField`) |
-| Bookkeeping | `DateAdded`, `FileModified`, `MetadataRefreshedAt` |
+| Bookkeeping | `DateAdded`, `FileModified`, `MetadataRefreshedAt`, `ScanGeneration` (the scan that last saw the item), `MissingSince` (see §4.7) |
 
 The model follows Jellyfin's and grows with the roadmap: fields are added when a phase needs them. `SortName` is the user's sort name (Jellyfin's `ForcedSortName`); the computed sort form is a storage key. An episode's series and season are its ancestors, not copied names. A locked item, or a locked field group, is not changed by metadata refreshes.
 
@@ -128,9 +128,12 @@ Trailers, featurettes, theme songs and other extras are ordinary items with `Ext
 
 ---
 
+### 4.7 Missing Items
+Every library scan has a generation, one more than the last. A scan stamps the items it sees with its generation; items with a path that a complete scan did not see are marked missing (`MissingSince`) rather than deleted, so a temporarily unavailable mount point loses nothing. Folders a scan could not read keep their items seen. Missing items are hidden from queries unless `ItemQuery.IncludeMissing` is set, come back when their file reappears, and are purged after a grace period.
+
 ## 5. Media Sources, Streams and Chapters
 
-* A `MediaSource` is one playable version of an item; an item can have several (e.g. 4K and 1080p versions), distinguished by `Name`. It records `Path`, `Container` (ffprobe's format name with Matroska as `mkv` and MPEG-TS as `ts`), `Size`, `Duration`, `Bitrate`, its `Streams` and `Chapters`, the video `Keyframes` used to cut HLS segments (nil until extracted) and `ProbedAt`.
+* A `MediaSource` is one playable version of an item; an item can have several (e.g. 4K and 1080p versions), distinguished by `Name`. It records `Path` (a DVD or Blu-ray folder when `Disc` is set) with further stacked `Parts`, `Container` (ffprobe's format name with Matroska as `mkv` and MPEG-TS as `ts`), `Size` and `Modified` (which tell a scan whether the file changed), `Duration`, `Bitrate`, its `Streams` and `Chapters`, the video `Keyframes` used to cut HLS segments (nil until extracted) and `ProbedAt`.
 * A `MediaStream` is one elementary stream, or a sidecar subtitle file with `ExternalPath` set and a synthetic `Index` after the embedded streams. Codec names follow ffprobe (`hevc`, `eac3`, `subrip`, …); `CodecTag` keeps the container tag (`hvc1` vs `hev1`), which matters for direct-play decisions; `Language` is ISO 639-2/B.
 * All streams carry codec, profile, level, bitrate (zero when unknown), language, title, comment, time bases and the default, forced, hearing-impaired and original flags.
 * Video streams carry dimensions, the average `FrameRate` and `RealFrameRate` (`Rational`, e.g. 24000/1001), pixel format and bit depth, color description (range, primaries, transfer, space), the Dolby Vision configuration record (`DolbyVision`: version, profile, level, base-layer compatibility ID, RPU / EL / BL presence), the HDR10+ flag, interlacing, rotation, sample and display aspect ratios, anamorphism, reference frames, and for H.264 whether it is length-prefixed (`AVC`, `NALLengthSize`).
@@ -181,13 +184,14 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | Port | Responsibilities |
 | :--- | :--- |
 | `LibraryRepository` | CRUD; deleting a library deletes all its items |
-| `ItemRepository` | `Get`, `GetByPath`, `Query` (paged), `Walk` (streams all matches in ID order as `iter.Seq2`), batch `Upsert` by ID (a path is unique per library: `ErrConflict`), `Delete` (cascades to descendants, extras, media sources, images, credits and user data), `Values` (distinct genres, tags, studios or artists, see §9.2) |
+| `ItemRepository` | `Get`, `GetByPath`, `Query` (paged), `Walk` (streams all matches in ID order as `iter.Seq2`), batch `Upsert` by ID (a path is unique per library: `ErrConflict`), `Delete` (cascades to descendants, extras, media sources, images, credits and user data), `MarkSeen`, `MarkMissing` and `PurgeMissing` for scans (see §4.7), `Values` (distinct genres, tags, studios or artists, see §9.2) |
 | `MediaSourceRepository` | List and `Replace` an item's media sources |
 | `ImageRepository` | List and `Replace` an owner's images |
 | `PersonRepository` | `Get`, case-insensitive `FindByName`, batch `Upsert`, `Search` (see §9.2), list and `Replace` an item's credits |
 | `UserRepository` | CRUD and case-insensitive `GetByName` |
 | `UserDataRepository` | `Get` (`ErrNotFound` when absent), `GetMany` for a list of items, `Put` |
 | `JobQueue` | `Enqueue` (reports whether added), `Lease`, `Extend`, `Complete`, `Fail` |
+| `ScanRepository` | `NextGeneration` of a library's scans; the `FolderState` of each scanned folder (`ModTime`, `FileID`, `Entries`), recorded with `PutFolders` and removed with `DeleteFolders` when gone |
 
 * **Transactions**: `Store.InTx` runs a function with a `Store` bound to one transaction; returning an error rolls it back.
 * **Replace semantics**: `Replace*` methods set the complete set for an owner, removing anything not in the new set — scans and metadata refreshes always write whole sets.
@@ -196,7 +200,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 ### 9.1 Item Queries
 `ItemQuery` filters with zero values meaning "no filter":
 
-* Scope: `LibraryIDs` (callers apply the user's library policy here), `ParentID` with optional `Recursive` (all descendants), `Kinds`, `IncludeExtras`.
+* Scope: `LibraryIDs` (callers apply the user's library policy here), `ParentID` with optional `Recursive` (all descendants), `Kinds`, `IncludeExtras`, `IncludeMissing`.
 * Content: `Search` (see §9.2); `Genres`, `Tags`, `Studios` (match any, compared in clean form, see §9.2); `PersonID`; `YearFrom`–`YearTo`; `MaxRating` (items without a rating are included unless `SkipUnrated`).
 * Names sort by sort name the way Jellyfin sorts them: case- and accent-insensitive, leading, inner and trailing articles ("the", "a", "an") ignored, the punctuation `,&-{}'` removed and `.+%` treated as spaces, numbers in numeric order ("Rocky 2" before "Rocky 10"), and non-Latin text transliterated (Chinese sorts by pinyin). Undated items sort last by premiere date, and items never played sort last by last-played time.
 * Per user (require `UserID`): `Played`, `Favorite`, `Resumable`, and the `last_played` / `play_count` sorts.

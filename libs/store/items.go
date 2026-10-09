@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"iter"
 	"slices"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	entsql "entgo.io/ent/dialect/sql"
 
@@ -100,6 +102,51 @@ func (r items) Delete(ctx context.Context, ids ...core.ID) error {
 	// data go with the item through ON DELETE CASCADE.
 	_, err := r.s.write.Item.Delete().Where(item.IDIn(ids...)).Exec(ctx)
 	return mapErr(err, "delete items")
+}
+
+func (r items) MarkSeen(ctx context.Context, libraryID core.ID, prefix string, generation int64) error {
+	_, err := r.s.write.Item.Update().
+		Where(item.LibraryID(libraryID), item.PathNEQ(""), underPath(prefix)).
+		SetScanGeneration(generation).
+		ClearMissingSince().
+		Save(ctx)
+	return mapErr(err, "mark items seen")
+}
+
+// underPath matches paths equal to prefix or below it. It compares
+// exactly: LIKE ignores case in SQLite.
+func underPath(prefix string) predicate.Item {
+	prefix = strings.TrimSuffix(prefix, "/")
+	dir := prefix + "/"
+	return item.Or(item.Path(prefix), predicate.Item(func(s *entsql.Selector) {
+		s.Where(entsql.P(func(b *entsql.Builder) {
+			b.WriteString("substr(").WriteString(s.C(item.FieldPath)).WriteString(", 1, ").
+				Arg(utf8.RuneCountInString(dir)).WriteString(") = ").Arg(dir)
+		}))
+	}))
+}
+
+func (r items) MarkMissing(ctx context.Context, libraryID core.ID, generation int64, now time.Time) (int, error) {
+	n, err := r.s.write.Item.Update().
+		Where(item.LibraryID(libraryID), item.PathNEQ(""), item.ScanGenerationLT(generation), item.MissingSinceIsNil()).
+		SetMissingSince(now.UTC()).
+		Save(ctx)
+	return n, mapErr(err, "mark items missing")
+}
+
+func (r items) PurgeMissing(ctx context.Context, libraryID core.ID, before time.Time) ([]core.ID, error) {
+	var ids []core.ID
+	err := r.s.writeTx(ctx, func(tx *Store) error {
+		var err error
+		ids, err = tx.write.Item.Query().
+			Where(item.LibraryID(libraryID), item.MissingSinceLT(before.UTC())).
+			IDs(ctx)
+		if err != nil {
+			return mapErr(err, "list missing items")
+		}
+		return items{tx}.Delete(ctx, ids...)
+	})
+	return ids, err
 }
 
 func (r items) Query(ctx context.Context, q core.ItemQuery) (core.Page[core.Item], error) {
@@ -227,6 +274,9 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 	}
 	if !q.IncludeExtras {
 		ps = append(ps, item.Extra(""))
+	}
+	if !q.IncludeMissing {
+		ps = append(ps, item.MissingSinceIsNil())
 	}
 	if srch, ok := parseSearch(q.Search); ok {
 		ps = append(ps, predicate.Item(func(s *entsql.Selector) {
@@ -404,7 +454,9 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 		SetExtra(string(it.Extra)).
 		SetDateAdded(orNow(it.DateAdded)).
 		SetNillableFileModified(nonZero(it.FileModified)).
-		SetNillableMetadataRefreshedAt(nonZero(it.MetadataRefreshedAt))
+		SetNillableMetadataRefreshedAt(nonZero(it.MetadataRefreshedAt)).
+		SetScanGeneration(it.ScanGeneration).
+		SetNillableMissingSince(utcPtr(it.MissingSince))
 	if !it.ParentID.IsZero() {
 		create.SetParentID(it.ParentID)
 	}
@@ -475,6 +527,8 @@ func toItem(e *ent.Item) core.Item {
 		DateAdded:               e.DateAdded.UTC(),
 		FileModified:            zeroIfNil(e.FileModified),
 		MetadataRefreshedAt:     zeroIfNil(e.MetadataRefreshedAt),
+		ScanGeneration:          e.ScanGeneration,
+		MissingSince:            utcPtr(e.MissingSince),
 	}
 	if e.ParentID != nil {
 		it.ParentID = *e.ParentID

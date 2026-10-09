@@ -858,6 +858,47 @@ func (_u *ItemUpdate) ClearMetadataRefreshedAt() *ItemUpdate {
 	return _u
 }
 
+// SetScanGeneration sets the "scan_generation" field.
+func (_u *ItemUpdate) SetScanGeneration(v int64) *ItemUpdate {
+	_u.mutation.ResetScanGeneration()
+	_u.mutation.SetScanGeneration(v)
+	return _u
+}
+
+// SetNillableScanGeneration sets the "scan_generation" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableScanGeneration(v *int64) *ItemUpdate {
+	if v != nil {
+		_u.SetScanGeneration(*v)
+	}
+	return _u
+}
+
+// AddScanGeneration adds value to the "scan_generation" field.
+func (_u *ItemUpdate) AddScanGeneration(v int64) *ItemUpdate {
+	_u.mutation.AddScanGeneration(v)
+	return _u
+}
+
+// SetMissingSince sets the "missing_since" field.
+func (_u *ItemUpdate) SetMissingSince(v time.Time) *ItemUpdate {
+	_u.mutation.SetMissingSince(v)
+	return _u
+}
+
+// SetNillableMissingSince sets the "missing_since" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableMissingSince(v *time.Time) *ItemUpdate {
+	if v != nil {
+		_u.SetMissingSince(*v)
+	}
+	return _u
+}
+
+// ClearMissingSince clears the value of the "missing_since" field.
+func (_u *ItemUpdate) ClearMissingSince() *ItemUpdate {
+	_u.mutation.ClearMissingSince()
+	return _u
+}
+
 // SetLibrary sets the "library" edge to the Library entity.
 func (_u *ItemUpdate) SetLibrary(v *Library) *ItemUpdate {
 	return _u.SetLibraryID(v.ID)
@@ -1430,6 +1471,18 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.MetadataRefreshedAtCleared() {
 		_spec.ClearField(item.FieldMetadataRefreshedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ScanGeneration(); ok {
+		_spec.SetField(item.FieldScanGeneration, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedScanGeneration(); ok {
+		_spec.AddField(item.FieldScanGeneration, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.MissingSince(); ok {
+		_spec.SetField(item.FieldMissingSince, field.TypeTime, value)
+	}
+	if _u.mutation.MissingSinceCleared() {
+		_spec.ClearField(item.FieldMissingSince, field.TypeTime)
 	}
 	if _u.mutation.LibraryCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -2676,6 +2729,47 @@ func (_u *ItemUpdateOne) ClearMetadataRefreshedAt() *ItemUpdateOne {
 	return _u
 }
 
+// SetScanGeneration sets the "scan_generation" field.
+func (_u *ItemUpdateOne) SetScanGeneration(v int64) *ItemUpdateOne {
+	_u.mutation.ResetScanGeneration()
+	_u.mutation.SetScanGeneration(v)
+	return _u
+}
+
+// SetNillableScanGeneration sets the "scan_generation" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableScanGeneration(v *int64) *ItemUpdateOne {
+	if v != nil {
+		_u.SetScanGeneration(*v)
+	}
+	return _u
+}
+
+// AddScanGeneration adds value to the "scan_generation" field.
+func (_u *ItemUpdateOne) AddScanGeneration(v int64) *ItemUpdateOne {
+	_u.mutation.AddScanGeneration(v)
+	return _u
+}
+
+// SetMissingSince sets the "missing_since" field.
+func (_u *ItemUpdateOne) SetMissingSince(v time.Time) *ItemUpdateOne {
+	_u.mutation.SetMissingSince(v)
+	return _u
+}
+
+// SetNillableMissingSince sets the "missing_since" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableMissingSince(v *time.Time) *ItemUpdateOne {
+	if v != nil {
+		_u.SetMissingSince(*v)
+	}
+	return _u
+}
+
+// ClearMissingSince clears the value of the "missing_since" field.
+func (_u *ItemUpdateOne) ClearMissingSince() *ItemUpdateOne {
+	_u.mutation.ClearMissingSince()
+	return _u
+}
+
 // SetLibrary sets the "library" edge to the Library entity.
 func (_u *ItemUpdateOne) SetLibrary(v *Library) *ItemUpdateOne {
 	return _u.SetLibraryID(v.ID)
@@ -3278,6 +3372,18 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 	}
 	if _u.mutation.MetadataRefreshedAtCleared() {
 		_spec.ClearField(item.FieldMetadataRefreshedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ScanGeneration(); ok {
+		_spec.SetField(item.FieldScanGeneration, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedScanGeneration(); ok {
+		_spec.AddField(item.FieldScanGeneration, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.MissingSince(); ok {
+		_spec.SetField(item.FieldMissingSince, field.TypeTime, value)
+	}
+	if _u.mutation.MissingSinceCleared() {
+		_spec.ClearField(item.FieldMissingSince, field.TypeTime)
 	}
 	if _u.mutation.LibraryCleared() {
 		edge := &sqlgraph.EdgeSpec{

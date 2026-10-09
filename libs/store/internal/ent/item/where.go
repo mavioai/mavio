@@ -267,6 +267,16 @@ func MetadataRefreshedAt(v time.Time) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldMetadataRefreshedAt, v))
 }
 
+// ScanGeneration applies equality check predicate on the "scan_generation" field. It's identical to ScanGenerationEQ.
+func ScanGeneration(v int64) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldScanGeneration, v))
+}
+
+// MissingSince applies equality check predicate on the "missing_since" field. It's identical to MissingSinceEQ.
+func MissingSince(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldMissingSince, v))
+}
+
 // LibraryIDEQ applies the EQ predicate on the "library_id" field.
 func LibraryIDEQ(v core.ID) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldLibraryID, v))
@@ -2589,6 +2599,96 @@ func MetadataRefreshedAtIsNil() predicate.Item {
 // MetadataRefreshedAtNotNil applies the NotNil predicate on the "metadata_refreshed_at" field.
 func MetadataRefreshedAtNotNil() predicate.Item {
 	return predicate.Item(sql.FieldNotNull(FieldMetadataRefreshedAt))
+}
+
+// ScanGenerationEQ applies the EQ predicate on the "scan_generation" field.
+func ScanGenerationEQ(v int64) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldScanGeneration, v))
+}
+
+// ScanGenerationNEQ applies the NEQ predicate on the "scan_generation" field.
+func ScanGenerationNEQ(v int64) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldScanGeneration, v))
+}
+
+// ScanGenerationIn applies the In predicate on the "scan_generation" field.
+func ScanGenerationIn(vs ...int64) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldScanGeneration, vs...))
+}
+
+// ScanGenerationNotIn applies the NotIn predicate on the "scan_generation" field.
+func ScanGenerationNotIn(vs ...int64) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldScanGeneration, vs...))
+}
+
+// ScanGenerationGT applies the GT predicate on the "scan_generation" field.
+func ScanGenerationGT(v int64) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldScanGeneration, v))
+}
+
+// ScanGenerationGTE applies the GTE predicate on the "scan_generation" field.
+func ScanGenerationGTE(v int64) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldScanGeneration, v))
+}
+
+// ScanGenerationLT applies the LT predicate on the "scan_generation" field.
+func ScanGenerationLT(v int64) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldScanGeneration, v))
+}
+
+// ScanGenerationLTE applies the LTE predicate on the "scan_generation" field.
+func ScanGenerationLTE(v int64) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldScanGeneration, v))
+}
+
+// MissingSinceEQ applies the EQ predicate on the "missing_since" field.
+func MissingSinceEQ(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldMissingSince, v))
+}
+
+// MissingSinceNEQ applies the NEQ predicate on the "missing_since" field.
+func MissingSinceNEQ(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldMissingSince, v))
+}
+
+// MissingSinceIn applies the In predicate on the "missing_since" field.
+func MissingSinceIn(vs ...time.Time) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldMissingSince, vs...))
+}
+
+// MissingSinceNotIn applies the NotIn predicate on the "missing_since" field.
+func MissingSinceNotIn(vs ...time.Time) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldMissingSince, vs...))
+}
+
+// MissingSinceGT applies the GT predicate on the "missing_since" field.
+func MissingSinceGT(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldMissingSince, v))
+}
+
+// MissingSinceGTE applies the GTE predicate on the "missing_since" field.
+func MissingSinceGTE(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldMissingSince, v))
+}
+
+// MissingSinceLT applies the LT predicate on the "missing_since" field.
+func MissingSinceLT(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldMissingSince, v))
+}
+
+// MissingSinceLTE applies the LTE predicate on the "missing_since" field.
+func MissingSinceLTE(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldMissingSince, v))
+}
+
+// MissingSinceIsNil applies the IsNil predicate on the "missing_since" field.
+func MissingSinceIsNil() predicate.Item {
+	return predicate.Item(sql.FieldIsNull(FieldMissingSince))
+}
+
+// MissingSinceNotNil applies the NotNil predicate on the "missing_since" field.
+func MissingSinceNotNil() predicate.Item {
+	return predicate.Item(sql.FieldNotNull(FieldMissingSince))
 }
 
 // HasLibrary applies the HasEdge predicate on the "library" edge.

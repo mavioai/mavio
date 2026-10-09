@@ -9,6 +9,9 @@ import (
 // Credit is the predicate function for credit builders.
 type Credit func(*sql.Selector)
 
+// FolderState is the predicate function for folderstate builders.
+type FolderState func(*sql.Selector)
+
 // Image is the predicate function for image builders.
 type Image func(*sql.Selector)
 

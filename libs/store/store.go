@@ -203,6 +203,9 @@ func (s *Store) UserData() core.UserDataRepository { return userData{s} }
 // Jobs returns the job queue.
 func (s *Store) Jobs() core.JobQueue { return jobs{s} }
 
+// Scans returns the scan state repository.
+func (s *Store) Scans() core.ScanRepository { return scans{s} }
+
 // writeTx runs fn in a transaction, reusing the current one if any.
 func (s *Store) writeTx(ctx context.Context, fn func(tx *Store) error) error {
 	return s.InTx(ctx, func(tx core.Store) error { return fn(tx.(*Store)) })

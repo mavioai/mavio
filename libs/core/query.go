@@ -21,6 +21,9 @@ type ItemQuery struct {
 	// IncludeExtras includes trailers and other extras, which are excluded by
 	// default.
 	IncludeExtras bool
+	// IncludeMissing includes items whose files a scan did not find,
+	// which are excluded by default.
+	IncludeMissing bool
 	// Search matches names, original titles and sort names; see
 	// docs/domain.md for the matching and relevance rules. When set, results
 	// are ordered by relevance before Sort.

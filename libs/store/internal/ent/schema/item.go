@@ -80,6 +80,8 @@ func (Item) Fields() []ent.Field {
 		field.Time("date_added"),
 		field.Time("file_modified").Optional().Nillable(),
 		field.Time("metadata_refreshed_at").Optional().Nillable(),
+		field.Int64("scan_generation").Default(0),
+		field.Time("missing_since").Optional().Nillable(),
 	}
 }
 
@@ -110,6 +112,7 @@ func (Item) Indexes() []ent.Index {
 		index.Fields("library_id", "kind", "sort_key"),
 		index.Fields("owner_id"),
 		index.Fields("date_added"),
+		index.Fields("library_id", "scan_generation"),
 	}
 }
 

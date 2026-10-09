@@ -95,7 +95,7 @@ erDiagram
 | 单集 | `AirsBeforeSeasonNumber`、`AirsAfterSeasonNumber`、`AirsBeforeEpisodeNumber`（特别篇的插播位置） |
 | 附加内容 | `Extra`（`ExtraKind`）、`OwnerID` |
 | 元数据控制 | `MetadataLanguage`、`MetadataCountry`（覆盖媒体库的设置）、`Locked`、`LockedFields`（`MetadataField`） |
-| 记账字段 | `DateAdded`、`FileModified`、`MetadataRefreshedAt` |
+| 记账字段 | `DateAdded`、`FileModified`、`MetadataRefreshedAt`、`ScanGeneration`（最后看到该条目的扫描）、`MissingSince`（见 §4.7） |
 
 模型以 Jellyfin 为参照，并随路线图演进：某个阶段需要时才加入相应字段。`SortName` 是用户指定的排序名（即 Jellyfin 的 `ForcedSortName`），计算出的排序形式是存储层的键。单集所属的剧集和季是它的祖先条目，不复制名称。锁定的条目或被锁定的字段分组不会被元数据刷新修改。
 
@@ -128,9 +128,12 @@ erDiagram
 
 ---
 
+### 4.7 缺失条目
+每次媒体库扫描都有一个世代，比上一次多一。扫描为看到的条目记下自己的世代；完整扫描没有看到的、有路径的条目被标记为缺失（`MissingSince`）而不是删除，因此暂时不可用的挂载点不会丢失任何东西。扫描无法读取的文件夹，其条目仍视为已看到。缺失条目在查询中隐藏（除非设置 `ItemQuery.IncludeMissing`），文件重新出现时恢复，超过宽限期后被清除。
+
 ## 5. 媒体源、流与章节
 
-* `MediaSource` 是条目的一个可播放版本；一个条目可以有多个版本（如 4K 和 1080p），以 `Name` 区分。它记录 `Path`、`Container`（ffprobe 的格式名，Matroska 记为 `mkv`，MPEG-TS 记为 `ts`）、`Size`、`Duration`、`Bitrate`、`Streams` 与 `Chapters`、用于切分 HLS 分片的视频 `Keyframes`（提取前为 nil）以及 `ProbedAt`。
+* `MediaSource` 是条目的一个可播放版本；一个条目可以有多个版本（如 4K 和 1080p），以 `Name` 区分。它记录 `Path`（设置 `Disc` 时为 DVD 或蓝光文件夹）及其后续的分段文件 `Parts`、`Container`（ffprobe 的格式名，Matroska 记为 `mkv`，MPEG-TS 记为 `ts`）、`Size` 与 `Modified`（扫描据此判断文件是否变化）、`Duration`、`Bitrate`、`Streams` 与 `Chapters`、用于切分 HLS 分片的视频 `Keyframes`（提取前为 nil）以及 `ProbedAt`。
 * `MediaStream` 是一条基本流；外挂字幕文件也表示为流，此时设置 `ExternalPath`，`Index` 为排在内嵌流之后的合成序号。编解码器名称沿用 ffprobe（`hevc`、`eac3`、`subrip` 等）；`CodecTag` 保留容器标签（如 `hvc1` 与 `hev1`），这对直放判断很重要；`Language` 使用 ISO 639-2/B。
 * 所有流都记录编解码器、profile、level、码率（未知时为零）、语言、标题、注释、时基，以及默认、强制、听障、原始音轨标记。
 * 视频流记录尺寸、平均帧率 `FrameRate` 与 `RealFrameRate`（`Rational`，如 24000/1001）、像素格式与位深、色彩描述（范围、原色、传递特性、色彩空间）、杜比视界配置记录（`DolbyVision`：版本、profile、level、基础层兼容 ID、RPU / EL / BL 是否存在）、HDR10+ 标记、隔行、旋转、采样与显示宽高比、是否变形像素、参考帧数，以及 H.264 是否为长度前缀格式（`AVC`、`NALLengthSize`）。
@@ -181,13 +184,14 @@ erDiagram
 | 端口 | 职责 |
 | :--- | :--- |
 | `LibraryRepository` | 增删改查；删除媒体库会删除其全部条目 |
-| `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（按 ID 顺序以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`（同一媒体库内路径唯一：`ErrConflict`）、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据）、`Values`（去重后的流派、标签、工作室或艺人，见 §9.2） |
+| `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（按 ID 顺序以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`（同一媒体库内路径唯一：`ErrConflict`）、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据）、供扫描使用的 `MarkSeen`、`MarkMissing` 与 `PurgeMissing`（见 §4.7）、`Values`（去重后的流派、标签、工作室或艺人，见 §9.2） |
 | `MediaSourceRepository` | 列出并 `Replace` 条目的媒体源 |
 | `ImageRepository` | 列出并 `Replace` 所有者的图片 |
 | `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、`Search`（见 §9.2）、列出并 `Replace` 条目的署名 |
 | `UserRepository` | 增删改查，以及不区分大小写的 `GetByName` |
 | `UserDataRepository` | `Get`（不存在时返回 `ErrNotFound`）、按一组条目 `GetMany`、`Put` |
 | `JobQueue` | `Enqueue`（报告是否入队）、`Lease`、`Extend`、`Complete`、`Fail` |
+| `ScanRepository` | 媒体库扫描的 `NextGeneration`；每个已扫描文件夹的 `FolderState`（`ModTime`、`FileID`、`Entries`），由 `PutFolders` 记录，文件夹消失后由 `DeleteFolders` 移除 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
 * **Replace 语义**：`Replace*` 方法设置某个所有者的完整集合，删除不在新集合中的内容——扫描与元数据刷新总是整组写入。
@@ -196,7 +200,7 @@ erDiagram
 ### 9.1 条目查询
 `ItemQuery` 中零值字段表示"不过滤"：
 
-* 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`Kinds`、`IncludeExtras`。
+* 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`Kinds`、`IncludeExtras`、`IncludeMissing`。
 * 内容：`Search`（见 §9.2）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`（未分级的条目默认包含，除非设置 `SkipUnrated`）。
 * 名称按排序名以 Jellyfin 的方式排序：不区分大小写和重音，忽略开头、中间和结尾的冠词（"the"、"a"、"an"），去掉标点 `,&-{}'` 并把 `.+%` 视为空格，数字按数值排序（"Rocky 2" 在 "Rocky 10" 之前），非拉丁文字转写为拉丁字母（中文按拼音排序）。按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
 * 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`，以及 `last_played` / `play_count` 排序。

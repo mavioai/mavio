@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -83,6 +84,7 @@ func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			credit.Table:      credit.ValidColumn,
+			folderstate.Table: folderstate.ValidColumn,
 			image.Table:       image.ValidColumn,
 			item.Table:        item.ValidColumn,
 			itemvalue.Table:   itemvalue.ValidColumn,

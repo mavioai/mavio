@@ -21,12 +21,18 @@ const (
 	FieldOrd = "ord"
 	// FieldPath holds the string denoting the path field in the database.
 	FieldPath = "path"
+	// FieldParts holds the string denoting the parts field in the database.
+	FieldParts = "parts"
+	// FieldDisc holds the string denoting the disc field in the database.
+	FieldDisc = "disc"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldContainer holds the string denoting the container field in the database.
 	FieldContainer = "container"
 	// FieldSize holds the string denoting the size field in the database.
 	FieldSize = "size"
+	// FieldModified holds the string denoting the modified field in the database.
+	FieldModified = "modified"
 	// FieldDuration holds the string denoting the duration field in the database.
 	FieldDuration = "duration"
 	// FieldBitrate holds the string denoting the bitrate field in the database.
@@ -58,9 +64,12 @@ var Columns = []string{
 	FieldItemID,
 	FieldOrd,
 	FieldPath,
+	FieldParts,
+	FieldDisc,
 	FieldName,
 	FieldContainer,
 	FieldSize,
+	FieldModified,
 	FieldDuration,
 	FieldBitrate,
 	FieldStreams,
@@ -80,6 +89,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultDisc holds the default value on creation for the "disc" field.
+	DefaultDisc string
 	// DefaultName holds the default value on creation for the "name" field.
 	DefaultName string
 	// DefaultContainer holds the default value on creation for the "container" field.
@@ -117,6 +128,11 @@ func ByPath(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPath, opts...).ToFunc()
 }
 
+// ByDisc orders the results by the disc field.
+func ByDisc(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisc, opts...).ToFunc()
+}
+
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
@@ -130,6 +146,11 @@ func ByContainer(opts ...sql.OrderTermOption) OrderOption {
 // BySize orders the results by the size field.
 func BySize(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSize, opts...).ToFunc()
+}
+
+// ByModified orders the results by the modified field.
+func ByModified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldModified, opts...).ToFunc()
 }
 
 // ByDuration orders the results by the duration field.

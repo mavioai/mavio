@@ -71,6 +71,11 @@ func Path(v string) predicate.MediaSource {
 	return predicate.MediaSource(sql.FieldEQ(FieldPath, v))
 }
 
+// Disc applies equality check predicate on the "disc" field. It's identical to DiscEQ.
+func Disc(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldEQ(FieldDisc, v))
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.MediaSource {
 	return predicate.MediaSource(sql.FieldEQ(FieldName, v))
@@ -84,6 +89,11 @@ func Container(v string) predicate.MediaSource {
 // Size applies equality check predicate on the "size" field. It's identical to SizeEQ.
 func Size(v int64) predicate.MediaSource {
 	return predicate.MediaSource(sql.FieldEQ(FieldSize, v))
+}
+
+// Modified applies equality check predicate on the "modified" field. It's identical to ModifiedEQ.
+func Modified(v time.Time) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldEQ(FieldModified, v))
 }
 
 // Duration applies equality check predicate on the "duration" field. It's identical to DurationEQ.
@@ -225,6 +235,81 @@ func PathEqualFold(v string) predicate.MediaSource {
 // PathContainsFold applies the ContainsFold predicate on the "path" field.
 func PathContainsFold(v string) predicate.MediaSource {
 	return predicate.MediaSource(sql.FieldContainsFold(FieldPath, v))
+}
+
+// PartsIsNil applies the IsNil predicate on the "parts" field.
+func PartsIsNil() predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldIsNull(FieldParts))
+}
+
+// PartsNotNil applies the NotNil predicate on the "parts" field.
+func PartsNotNil() predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldNotNull(FieldParts))
+}
+
+// DiscEQ applies the EQ predicate on the "disc" field.
+func DiscEQ(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldEQ(FieldDisc, v))
+}
+
+// DiscNEQ applies the NEQ predicate on the "disc" field.
+func DiscNEQ(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldNEQ(FieldDisc, v))
+}
+
+// DiscIn applies the In predicate on the "disc" field.
+func DiscIn(vs ...string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldIn(FieldDisc, vs...))
+}
+
+// DiscNotIn applies the NotIn predicate on the "disc" field.
+func DiscNotIn(vs ...string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldNotIn(FieldDisc, vs...))
+}
+
+// DiscGT applies the GT predicate on the "disc" field.
+func DiscGT(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldGT(FieldDisc, v))
+}
+
+// DiscGTE applies the GTE predicate on the "disc" field.
+func DiscGTE(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldGTE(FieldDisc, v))
+}
+
+// DiscLT applies the LT predicate on the "disc" field.
+func DiscLT(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldLT(FieldDisc, v))
+}
+
+// DiscLTE applies the LTE predicate on the "disc" field.
+func DiscLTE(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldLTE(FieldDisc, v))
+}
+
+// DiscContains applies the Contains predicate on the "disc" field.
+func DiscContains(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldContains(FieldDisc, v))
+}
+
+// DiscHasPrefix applies the HasPrefix predicate on the "disc" field.
+func DiscHasPrefix(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldHasPrefix(FieldDisc, v))
+}
+
+// DiscHasSuffix applies the HasSuffix predicate on the "disc" field.
+func DiscHasSuffix(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldHasSuffix(FieldDisc, v))
+}
+
+// DiscEqualFold applies the EqualFold predicate on the "disc" field.
+func DiscEqualFold(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldEqualFold(FieldDisc, v))
+}
+
+// DiscContainsFold applies the ContainsFold predicate on the "disc" field.
+func DiscContainsFold(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldContainsFold(FieldDisc, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -395,6 +480,56 @@ func SizeLT(v int64) predicate.MediaSource {
 // SizeLTE applies the LTE predicate on the "size" field.
 func SizeLTE(v int64) predicate.MediaSource {
 	return predicate.MediaSource(sql.FieldLTE(FieldSize, v))
+}
+
+// ModifiedEQ applies the EQ predicate on the "modified" field.
+func ModifiedEQ(v time.Time) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldEQ(FieldModified, v))
+}
+
+// ModifiedNEQ applies the NEQ predicate on the "modified" field.
+func ModifiedNEQ(v time.Time) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldNEQ(FieldModified, v))
+}
+
+// ModifiedIn applies the In predicate on the "modified" field.
+func ModifiedIn(vs ...time.Time) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldIn(FieldModified, vs...))
+}
+
+// ModifiedNotIn applies the NotIn predicate on the "modified" field.
+func ModifiedNotIn(vs ...time.Time) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldNotIn(FieldModified, vs...))
+}
+
+// ModifiedGT applies the GT predicate on the "modified" field.
+func ModifiedGT(v time.Time) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldGT(FieldModified, v))
+}
+
+// ModifiedGTE applies the GTE predicate on the "modified" field.
+func ModifiedGTE(v time.Time) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldGTE(FieldModified, v))
+}
+
+// ModifiedLT applies the LT predicate on the "modified" field.
+func ModifiedLT(v time.Time) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldLT(FieldModified, v))
+}
+
+// ModifiedLTE applies the LTE predicate on the "modified" field.
+func ModifiedLTE(v time.Time) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldLTE(FieldModified, v))
+}
+
+// ModifiedIsNil applies the IsNil predicate on the "modified" field.
+func ModifiedIsNil() predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldIsNull(FieldModified))
+}
+
+// ModifiedNotNil applies the NotNil predicate on the "modified" field.
+func ModifiedNotNil() predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldNotNull(FieldModified))
 }
 
 // DurationEQ applies the EQ predicate on the "duration" field.

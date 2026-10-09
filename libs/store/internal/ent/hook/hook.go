@@ -21,6 +21,18 @@ func (f CreditFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreditMutation", m)
 }
 
+// The FolderStateFunc type is an adapter to allow the use of ordinary
+// function as FolderState mutator.
+type FolderStateFunc func(context.Context, *ent.FolderStateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FolderStateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FolderStateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FolderStateMutation", m)
+}
+
 // The ImageFunc type is an adapter to allow the use of ordinary
 // function as Image mutator.
 type ImageFunc func(context.Context, *ent.ImageMutation) (ent.Value, error)

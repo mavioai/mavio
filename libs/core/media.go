@@ -14,16 +14,24 @@ type MediaSource struct {
 	ID     ID
 	ItemID ID
 	Path   string
+	// Parts are further files of a video stacked across files, such as
+	// "movie-cd2.avi", played after Path.
+	Parts []string
+	// Disc is set when Path is a DVD or Blu-ray folder.
+	Disc DiscKind
 	// Name distinguishes versions of the same item, e.g. "4K HDR".
 	Name string
 	// Container is the container format, as ffprobe names it with Matroska
 	// as "mkv" and MPEG-TS as "ts", e.g. "mkv" or "mov,mp4,m4a,3gp,3g2,mj2".
 	Container string
 	Size      int64 // bytes
-	Duration  time.Duration
-	Bitrate   int64 // bits per second, whole file
-	Streams   []MediaStream
-	Chapters  []Chapter
+	// Modified is the file's modification time; with Size it tells a
+	// scan whether the file changed.
+	Modified time.Time
+	Duration time.Duration
+	Bitrate  int64 // bits per second, whole file
+	Streams  []MediaStream
+	Chapters []Chapter
 	// Keyframes are the video keyframe timestamps used to cut HLS segments;
 	// nil until extracted.
 	Keyframes []time.Duration
@@ -39,6 +47,8 @@ func (s *MediaSource) Validate() error {
 		return fmt.Errorf("%w: media source %s has no path", ErrInvalid, s.ID)
 	case s.Duration < 0 || s.Size < 0 || s.Bitrate < 0:
 		return fmt.Errorf("%w: media source %s has negative size, duration or bitrate", ErrInvalid, s.ID)
+	case !s.Disc.Valid():
+		return fmt.Errorf("%w: media source %s has unknown disc kind %q", ErrInvalid, s.ID, s.Disc)
 	}
 	for i := range s.Streams {
 		if err := s.Streams[i].Validate(); err != nil {
@@ -58,6 +68,18 @@ func (s *MediaSource) StreamsOf(kind StreamKind) []MediaStream {
 	}
 	return out
 }
+
+// DiscKind is the format of a disc folder.
+type DiscKind string
+
+// Disc kinds.
+const (
+	DiscDVD    DiscKind = "dvd"
+	DiscBluRay DiscKind = "bluray"
+)
+
+// Valid reports whether d is empty or a known disc kind.
+func (d DiscKind) Valid() bool { return d == "" || d == DiscDVD || d == DiscBluRay }
 
 // StreamKind is the type of a media stream.
 type StreamKind string

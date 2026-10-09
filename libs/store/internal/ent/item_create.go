@@ -600,6 +600,34 @@ func (_c *ItemCreate) SetNillableMetadataRefreshedAt(v *time.Time) *ItemCreate {
 	return _c
 }
 
+// SetScanGeneration sets the "scan_generation" field.
+func (_c *ItemCreate) SetScanGeneration(v int64) *ItemCreate {
+	_c.mutation.SetScanGeneration(v)
+	return _c
+}
+
+// SetNillableScanGeneration sets the "scan_generation" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableScanGeneration(v *int64) *ItemCreate {
+	if v != nil {
+		_c.SetScanGeneration(*v)
+	}
+	return _c
+}
+
+// SetMissingSince sets the "missing_since" field.
+func (_c *ItemCreate) SetMissingSince(v time.Time) *ItemCreate {
+	_c.mutation.SetMissingSince(v)
+	return _c
+}
+
+// SetNillableMissingSince sets the "missing_since" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableMissingSince(v *time.Time) *ItemCreate {
+	if v != nil {
+		_c.SetMissingSince(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *ItemCreate) SetID(v core.ID) *ItemCreate {
 	_c.mutation.SetID(v)
@@ -865,6 +893,10 @@ func (_c *ItemCreate) defaults() {
 		v := item.DefaultExtra
 		_c.mutation.SetExtra(v)
 	}
+	if _, ok := _c.mutation.ScanGeneration(); !ok {
+		v := item.DefaultScanGeneration
+		_c.mutation.SetScanGeneration(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := item.DefaultID()
 		_c.mutation.SetID(v)
@@ -962,6 +994,9 @@ func (_c *ItemCreate) check() error {
 	}
 	if _, ok := _c.mutation.DateAdded(); !ok {
 		return &ValidationError{Name: "date_added", err: errors.New(`ent: missing required field "Item.date_added"`)}
+	}
+	if _, ok := _c.mutation.ScanGeneration(); !ok {
+		return &ValidationError{Name: "scan_generation", err: errors.New(`ent: missing required field "Item.scan_generation"`)}
 	}
 	if len(_c.mutation.LibraryIDs()) == 0 {
 		return &ValidationError{Name: "library", err: errors.New(`ent: missing required edge "Item.library"`)}
@@ -1177,6 +1212,14 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.MetadataRefreshedAt(); ok {
 		_spec.SetField(item.FieldMetadataRefreshedAt, field.TypeTime, value)
 		_node.MetadataRefreshedAt = &value
+	}
+	if value, ok := _c.mutation.ScanGeneration(); ok {
+		_spec.SetField(item.FieldScanGeneration, field.TypeInt64, value)
+		_node.ScanGeneration = value
+	}
+	if value, ok := _c.mutation.MissingSince(); ok {
+		_spec.SetField(item.FieldMissingSince, field.TypeTime, value)
+		_node.MissingSince = &value
 	}
 	if nodes := _c.mutation.LibraryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -2125,6 +2168,42 @@ func (u *ItemUpsert) ClearMetadataRefreshedAt() *ItemUpsert {
 	return u
 }
 
+// SetScanGeneration sets the "scan_generation" field.
+func (u *ItemUpsert) SetScanGeneration(v int64) *ItemUpsert {
+	u.Set(item.FieldScanGeneration, v)
+	return u
+}
+
+// UpdateScanGeneration sets the "scan_generation" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateScanGeneration() *ItemUpsert {
+	u.SetExcluded(item.FieldScanGeneration)
+	return u
+}
+
+// AddScanGeneration adds v to the "scan_generation" field.
+func (u *ItemUpsert) AddScanGeneration(v int64) *ItemUpsert {
+	u.Add(item.FieldScanGeneration, v)
+	return u
+}
+
+// SetMissingSince sets the "missing_since" field.
+func (u *ItemUpsert) SetMissingSince(v time.Time) *ItemUpsert {
+	u.Set(item.FieldMissingSince, v)
+	return u
+}
+
+// UpdateMissingSince sets the "missing_since" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateMissingSince() *ItemUpsert {
+	u.SetExcluded(item.FieldMissingSince)
+	return u
+}
+
+// ClearMissingSince clears the value of the "missing_since" field.
+func (u *ItemUpsert) ClearMissingSince() *ItemUpsert {
+	u.SetNull(item.FieldMissingSince)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -3024,6 +3103,48 @@ func (u *ItemUpsertOne) UpdateMetadataRefreshedAt() *ItemUpsertOne {
 func (u *ItemUpsertOne) ClearMetadataRefreshedAt() *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearMetadataRefreshedAt()
+	})
+}
+
+// SetScanGeneration sets the "scan_generation" field.
+func (u *ItemUpsertOne) SetScanGeneration(v int64) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetScanGeneration(v)
+	})
+}
+
+// AddScanGeneration adds v to the "scan_generation" field.
+func (u *ItemUpsertOne) AddScanGeneration(v int64) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddScanGeneration(v)
+	})
+}
+
+// UpdateScanGeneration sets the "scan_generation" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateScanGeneration() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateScanGeneration()
+	})
+}
+
+// SetMissingSince sets the "missing_since" field.
+func (u *ItemUpsertOne) SetMissingSince(v time.Time) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetMissingSince(v)
+	})
+}
+
+// UpdateMissingSince sets the "missing_since" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateMissingSince() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateMissingSince()
+	})
+}
+
+// ClearMissingSince clears the value of the "missing_since" field.
+func (u *ItemUpsertOne) ClearMissingSince() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearMissingSince()
 	})
 }
 
@@ -4093,6 +4214,48 @@ func (u *ItemUpsertBulk) UpdateMetadataRefreshedAt() *ItemUpsertBulk {
 func (u *ItemUpsertBulk) ClearMetadataRefreshedAt() *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearMetadataRefreshedAt()
+	})
+}
+
+// SetScanGeneration sets the "scan_generation" field.
+func (u *ItemUpsertBulk) SetScanGeneration(v int64) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetScanGeneration(v)
+	})
+}
+
+// AddScanGeneration adds v to the "scan_generation" field.
+func (u *ItemUpsertBulk) AddScanGeneration(v int64) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddScanGeneration(v)
+	})
+}
+
+// UpdateScanGeneration sets the "scan_generation" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateScanGeneration() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateScanGeneration()
+	})
+}
+
+// SetMissingSince sets the "missing_since" field.
+func (u *ItemUpsertBulk) SetMissingSince(v time.Time) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetMissingSince(v)
+	})
+}
+
+// UpdateMissingSince sets the "missing_since" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateMissingSince() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateMissingSince()
+	})
+}
+
+// ClearMissingSince clears the value of the "missing_since" field.
+func (u *ItemUpsertBulk) ClearMissingSince() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearMissingSince()
 	})
 }
 

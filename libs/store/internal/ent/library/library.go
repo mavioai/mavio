@@ -27,12 +27,16 @@ const (
 	FieldPreferredLanguage = "preferred_language"
 	// FieldMetadataCountry holds the string denoting the metadata_country field in the database.
 	FieldMetadataCountry = "metadata_country"
+	// FieldScanGeneration holds the string denoting the scan_generation field in the database.
+	FieldScanGeneration = "scan_generation"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// EdgeItems holds the string denoting the items edge name in mutations.
 	EdgeItems = "items"
+	// EdgeFolderStates holds the string denoting the folder_states edge name in mutations.
+	EdgeFolderStates = "folder_states"
 	// Table holds the table name of the library in the database.
 	Table = "libraries"
 	// ItemsTable is the table that holds the items relation/edge.
@@ -42,6 +46,13 @@ const (
 	ItemsInverseTable = "items"
 	// ItemsColumn is the table column denoting the items relation/edge.
 	ItemsColumn = "library_id"
+	// FolderStatesTable is the table that holds the folder_states relation/edge.
+	FolderStatesTable = "folder_states"
+	// FolderStatesInverseTable is the table name for the FolderState entity.
+	// It exists in this package in order to avoid circular dependency with the "folderstate" package.
+	FolderStatesInverseTable = "folder_states"
+	// FolderStatesColumn is the table column denoting the folder_states relation/edge.
+	FolderStatesColumn = "library_id"
 )
 
 // Columns holds all SQL columns for library fields.
@@ -53,6 +64,7 @@ var Columns = []string{
 	FieldScanInterval,
 	FieldPreferredLanguage,
 	FieldMetadataCountry,
+	FieldScanGeneration,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -76,6 +88,8 @@ var (
 	DefaultPreferredLanguage string
 	// DefaultMetadataCountry holds the default value on creation for the "metadata_country" field.
 	DefaultMetadataCountry string
+	// DefaultScanGeneration holds the default value on creation for the "scan_generation" field.
+	DefaultScanGeneration int64
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -119,6 +133,11 @@ func ByMetadataCountry(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMetadataCountry, opts...).ToFunc()
 }
 
+// ByScanGeneration orders the results by the scan_generation field.
+func ByScanGeneration(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScanGeneration, opts...).ToFunc()
+}
+
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
@@ -142,10 +161,31 @@ func ByItems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newItemsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByFolderStatesCount orders the results by folder_states count.
+func ByFolderStatesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFolderStatesStep(), opts...)
+	}
+}
+
+// ByFolderStates orders the results by folder_states terms.
+func ByFolderStates(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFolderStatesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newItemsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ItemsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ItemsTable, ItemsColumn),
+	)
+}
+func newFolderStatesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FolderStatesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FolderStatesTable, FolderStatesColumn),
 	)
 }

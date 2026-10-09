@@ -46,6 +46,9 @@ func (r mediaSources) Replace(ctx context.Context, itemID core.ID, sources []cor
 				SetItemID(itemID).
 				SetOrd(i).
 				SetPath(m.Path).
+				SetParts(m.Parts).
+				SetDisc(string(m.Disc)).
+				SetNillableModified(nonZero(m.Modified)).
 				SetName(m.Name).
 				SetContainer(m.Container).
 				SetSize(m.Size).
@@ -65,6 +68,9 @@ func toMediaSource(m *ent.MediaSource) core.MediaSource {
 		ID:        m.ID,
 		ItemID:    m.ItemID,
 		Path:      m.Path,
+		Parts:     m.Parts,
+		Disc:      core.DiscKind(m.Disc),
+		Modified:  zeroIfNil(m.Modified),
 		Name:      m.Name,
 		Container: m.Container,
 		Size:      m.Size,

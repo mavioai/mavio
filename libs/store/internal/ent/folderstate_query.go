@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -14,60 +13,58 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
-	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 )
 
-// LibraryQuery is the builder for querying Library entities.
-type LibraryQuery struct {
+// FolderStateQuery is the builder for querying FolderState entities.
+type FolderStateQuery struct {
 	config
-	ctx              *QueryContext
-	order            []library.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.Library
-	withItems        *ItemQuery
-	withFolderStates *FolderStateQuery
-	modifiers        []func(*sql.Selector)
+	ctx         *QueryContext
+	order       []folderstate.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.FolderState
+	withLibrary *LibraryQuery
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the LibraryQuery builder.
-func (_q *LibraryQuery) Where(ps ...predicate.Library) *LibraryQuery {
+// Where adds a new predicate for the FolderStateQuery builder.
+func (_q *FolderStateQuery) Where(ps ...predicate.FolderState) *FolderStateQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *LibraryQuery) Limit(limit int) *LibraryQuery {
+func (_q *FolderStateQuery) Limit(limit int) *FolderStateQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *LibraryQuery) Offset(offset int) *LibraryQuery {
+func (_q *FolderStateQuery) Offset(offset int) *FolderStateQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *LibraryQuery) Unique(unique bool) *LibraryQuery {
+func (_q *FolderStateQuery) Unique(unique bool) *FolderStateQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *LibraryQuery) Order(o ...library.OrderOption) *LibraryQuery {
+func (_q *FolderStateQuery) Order(o ...folderstate.OrderOption) *FolderStateQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryItems chains the current query on the "items" edge.
-func (_q *LibraryQuery) QueryItems() *ItemQuery {
-	query := (&ItemClient{config: _q.config}).Query()
+// QueryLibrary chains the current query on the "library" edge.
+func (_q *FolderStateQuery) QueryLibrary() *LibraryQuery {
+	query := (&LibraryClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -77,9 +74,9 @@ func (_q *LibraryQuery) QueryItems() *ItemQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(library.Table, library.FieldID, selector),
-			sqlgraph.To(item.Table, item.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, library.ItemsTable, library.ItemsColumn),
+			sqlgraph.From(folderstate.Table, folderstate.FieldID, selector),
+			sqlgraph.To(library.Table, library.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, folderstate.LibraryTable, folderstate.LibraryColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -87,43 +84,21 @@ func (_q *LibraryQuery) QueryItems() *ItemQuery {
 	return query
 }
 
-// QueryFolderStates chains the current query on the "folder_states" edge.
-func (_q *LibraryQuery) QueryFolderStates() *FolderStateQuery {
-	query := (&FolderStateClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(library.Table, library.FieldID, selector),
-			sqlgraph.To(folderstate.Table, folderstate.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, library.FolderStatesTable, library.FolderStatesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// First returns the first Library entity from the query.
-// Returns a *NotFoundError when no Library was found.
-func (_q *LibraryQuery) First(ctx context.Context) (*Library, error) {
+// First returns the first FolderState entity from the query.
+// Returns a *NotFoundError when no FolderState was found.
+func (_q *FolderStateQuery) First(ctx context.Context) (*FolderState, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{library.Label}
+		return nil, &NotFoundError{folderstate.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *LibraryQuery) FirstX(ctx context.Context) *Library {
+func (_q *FolderStateQuery) FirstX(ctx context.Context) *FolderState {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -131,22 +106,22 @@ func (_q *LibraryQuery) FirstX(ctx context.Context) *Library {
 	return node
 }
 
-// FirstID returns the first Library ID from the query.
-// Returns a *NotFoundError when no Library ID was found.
-func (_q *LibraryQuery) FirstID(ctx context.Context) (id core.ID, err error) {
+// FirstID returns the first FolderState ID from the query.
+// Returns a *NotFoundError when no FolderState ID was found.
+func (_q *FolderStateQuery) FirstID(ctx context.Context) (id core.ID, err error) {
 	var ids []core.ID
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{library.Label}
+		err = &NotFoundError{folderstate.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *LibraryQuery) FirstIDX(ctx context.Context) core.ID {
+func (_q *FolderStateQuery) FirstIDX(ctx context.Context) core.ID {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -154,10 +129,10 @@ func (_q *LibraryQuery) FirstIDX(ctx context.Context) core.ID {
 	return id
 }
 
-// Only returns a single Library entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Library entity is found.
-// Returns a *NotFoundError when no Library entities are found.
-func (_q *LibraryQuery) Only(ctx context.Context) (*Library, error) {
+// Only returns a single FolderState entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one FolderState entity is found.
+// Returns a *NotFoundError when no FolderState entities are found.
+func (_q *FolderStateQuery) Only(ctx context.Context) (*FolderState, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -166,14 +141,14 @@ func (_q *LibraryQuery) Only(ctx context.Context) (*Library, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{library.Label}
+		return nil, &NotFoundError{folderstate.Label}
 	default:
-		return nil, &NotSingularError{library.Label}
+		return nil, &NotSingularError{folderstate.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *LibraryQuery) OnlyX(ctx context.Context) *Library {
+func (_q *FolderStateQuery) OnlyX(ctx context.Context) *FolderState {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -181,10 +156,10 @@ func (_q *LibraryQuery) OnlyX(ctx context.Context) *Library {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Library ID in the query.
-// Returns a *NotSingularError when more than one Library ID is found.
+// OnlyID is like Only, but returns the only FolderState ID in the query.
+// Returns a *NotSingularError when more than one FolderState ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *LibraryQuery) OnlyID(ctx context.Context) (id core.ID, err error) {
+func (_q *FolderStateQuery) OnlyID(ctx context.Context) (id core.ID, err error) {
 	var ids []core.ID
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -193,15 +168,15 @@ func (_q *LibraryQuery) OnlyID(ctx context.Context) (id core.ID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{library.Label}
+		err = &NotFoundError{folderstate.Label}
 	default:
-		err = &NotSingularError{library.Label}
+		err = &NotSingularError{folderstate.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *LibraryQuery) OnlyIDX(ctx context.Context) core.ID {
+func (_q *FolderStateQuery) OnlyIDX(ctx context.Context) core.ID {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -209,18 +184,18 @@ func (_q *LibraryQuery) OnlyIDX(ctx context.Context) core.ID {
 	return id
 }
 
-// All executes the query and returns a list of Libraries.
-func (_q *LibraryQuery) All(ctx context.Context) ([]*Library, error) {
+// All executes the query and returns a list of FolderStates.
+func (_q *FolderStateQuery) All(ctx context.Context) ([]*FolderState, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Library, *LibraryQuery]()
-	return withInterceptors[[]*Library](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*FolderState, *FolderStateQuery]()
+	return withInterceptors[[]*FolderState](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *LibraryQuery) AllX(ctx context.Context) []*Library {
+func (_q *FolderStateQuery) AllX(ctx context.Context) []*FolderState {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -228,20 +203,20 @@ func (_q *LibraryQuery) AllX(ctx context.Context) []*Library {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Library IDs.
-func (_q *LibraryQuery) IDs(ctx context.Context) (ids []core.ID, err error) {
+// IDs executes the query and returns a list of FolderState IDs.
+func (_q *FolderStateQuery) IDs(ctx context.Context) (ids []core.ID, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(library.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(folderstate.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *LibraryQuery) IDsX(ctx context.Context) []core.ID {
+func (_q *FolderStateQuery) IDsX(ctx context.Context) []core.ID {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -250,16 +225,16 @@ func (_q *LibraryQuery) IDsX(ctx context.Context) []core.ID {
 }
 
 // Count returns the count of the given query.
-func (_q *LibraryQuery) Count(ctx context.Context) (int, error) {
+func (_q *FolderStateQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*LibraryQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*FolderStateQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *LibraryQuery) CountX(ctx context.Context) int {
+func (_q *FolderStateQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -268,7 +243,7 @@ func (_q *LibraryQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *LibraryQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *FolderStateQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -281,7 +256,7 @@ func (_q *LibraryQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *LibraryQuery) ExistX(ctx context.Context) bool {
+func (_q *FolderStateQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -289,20 +264,19 @@ func (_q *LibraryQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the LibraryQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the FolderStateQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *LibraryQuery) Clone() *LibraryQuery {
+func (_q *FolderStateQuery) Clone() *FolderStateQuery {
 	if _q == nil {
 		return nil
 	}
-	return &LibraryQuery{
-		config:           _q.config,
-		ctx:              _q.ctx.Clone(),
-		order:            append([]library.OrderOption{}, _q.order...),
-		inters:           append([]Interceptor{}, _q.inters...),
-		predicates:       append([]predicate.Library{}, _q.predicates...),
-		withItems:        _q.withItems.Clone(),
-		withFolderStates: _q.withFolderStates.Clone(),
+	return &FolderStateQuery{
+		config:      _q.config,
+		ctx:         _q.ctx.Clone(),
+		order:       append([]folderstate.OrderOption{}, _q.order...),
+		inters:      append([]Interceptor{}, _q.inters...),
+		predicates:  append([]predicate.FolderState{}, _q.predicates...),
+		withLibrary: _q.withLibrary.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -310,25 +284,14 @@ func (_q *LibraryQuery) Clone() *LibraryQuery {
 	}
 }
 
-// WithItems tells the query-builder to eager-load the nodes that are connected to
-// the "items" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *LibraryQuery) WithItems(opts ...func(*ItemQuery)) *LibraryQuery {
-	query := (&ItemClient{config: _q.config}).Query()
+// WithLibrary tells the query-builder to eager-load the nodes that are connected to
+// the "library" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *FolderStateQuery) WithLibrary(opts ...func(*LibraryQuery)) *FolderStateQuery {
+	query := (&LibraryClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withItems = query
-	return _q
-}
-
-// WithFolderStates tells the query-builder to eager-load the nodes that are connected to
-// the "folder_states" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *LibraryQuery) WithFolderStates(opts ...func(*FolderStateQuery)) *LibraryQuery {
-	query := (&FolderStateClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withFolderStates = query
+	_q.withLibrary = query
 	return _q
 }
 
@@ -338,19 +301,19 @@ func (_q *LibraryQuery) WithFolderStates(opts ...func(*FolderStateQuery)) *Libra
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		LibraryID core.ID `json:"library_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Library.Query().
-//		GroupBy(library.FieldName).
+//	client.FolderState.Query().
+//		GroupBy(folderstate.FieldLibraryID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *LibraryQuery) GroupBy(field string, fields ...string) *LibraryGroupBy {
+func (_q *FolderStateQuery) GroupBy(field string, fields ...string) *FolderStateGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &LibraryGroupBy{build: _q}
+	grbuild := &FolderStateGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = library.Label
+	grbuild.label = folderstate.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -361,26 +324,26 @@ func (_q *LibraryQuery) GroupBy(field string, fields ...string) *LibraryGroupBy 
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		LibraryID core.ID `json:"library_id,omitempty"`
 //	}
 //
-//	client.Library.Query().
-//		Select(library.FieldName).
+//	client.FolderState.Query().
+//		Select(folderstate.FieldLibraryID).
 //		Scan(ctx, &v)
-func (_q *LibraryQuery) Select(fields ...string) *LibrarySelect {
+func (_q *FolderStateQuery) Select(fields ...string) *FolderStateSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &LibrarySelect{LibraryQuery: _q}
-	sbuild.label = library.Label
+	sbuild := &FolderStateSelect{FolderStateQuery: _q}
+	sbuild.label = folderstate.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a LibrarySelect configured with the given aggregations.
-func (_q *LibraryQuery) Aggregate(fns ...AggregateFunc) *LibrarySelect {
+// Aggregate returns a FolderStateSelect configured with the given aggregations.
+func (_q *FolderStateQuery) Aggregate(fns ...AggregateFunc) *FolderStateSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *LibraryQuery) prepareQuery(ctx context.Context) error {
+func (_q *FolderStateQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -392,7 +355,7 @@ func (_q *LibraryQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !library.ValidColumn(f) {
+		if !folderstate.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -406,20 +369,19 @@ func (_q *LibraryQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *LibraryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Library, error) {
+func (_q *FolderStateQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*FolderState, error) {
 	var (
-		nodes       = []*Library{}
+		nodes       = []*FolderState{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
-			_q.withItems != nil,
-			_q.withFolderStates != nil,
+		loadedTypes = [1]bool{
+			_q.withLibrary != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Library).scanValues(nil, columns)
+		return (*FolderState).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Library{config: _q.config}
+		node := &FolderState{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -436,85 +398,46 @@ func (_q *LibraryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Libr
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withItems; query != nil {
-		if err := _q.loadItems(ctx, query, nodes,
-			func(n *Library) { n.Edges.Items = []*Item{} },
-			func(n *Library, e *Item) { n.Edges.Items = append(n.Edges.Items, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withFolderStates; query != nil {
-		if err := _q.loadFolderStates(ctx, query, nodes,
-			func(n *Library) { n.Edges.FolderStates = []*FolderState{} },
-			func(n *Library, e *FolderState) { n.Edges.FolderStates = append(n.Edges.FolderStates, e) }); err != nil {
+	if query := _q.withLibrary; query != nil {
+		if err := _q.loadLibrary(ctx, query, nodes, nil,
+			func(n *FolderState, e *Library) { n.Edges.Library = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *LibraryQuery) loadItems(ctx context.Context, query *ItemQuery, nodes []*Library, init func(*Library), assign func(*Library, *Item)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[core.ID]*Library)
+func (_q *FolderStateQuery) loadLibrary(ctx context.Context, query *LibraryQuery, nodes []*FolderState, init func(*FolderState), assign func(*FolderState, *Library)) error {
+	ids := make([]core.ID, 0, len(nodes))
+	nodeids := make(map[core.ID][]*FolderState)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		fk := nodes[i].LibraryID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(item.FieldLibraryID)
+	if len(ids) == 0 {
+		return nil
 	}
-	query.Where(predicate.Item(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(library.ItemsColumn), fks...))
-	}))
+	query.Where(library.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.LibraryID
-		node, ok := nodeids[fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "library_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "library_id" returned %v`, n.ID)
 		}
-		assign(node, n)
-	}
-	return nil
-}
-func (_q *LibraryQuery) loadFolderStates(ctx context.Context, query *FolderStateQuery, nodes []*Library, init func(*Library), assign func(*Library, *FolderState)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[core.ID]*Library)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(folderstate.FieldLibraryID)
-	}
-	query.Where(predicate.FolderState(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(library.FolderStatesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.LibraryID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "library_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }
 
-func (_q *LibraryQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *FolderStateQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -526,8 +449,8 @@ func (_q *LibraryQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *LibraryQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(library.Table, library.Columns, sqlgraph.NewFieldSpec(library.FieldID, field.TypeUUID))
+func (_q *FolderStateQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(folderstate.Table, folderstate.Columns, sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -536,11 +459,14 @@ func (_q *LibraryQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, library.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, folderstate.FieldID)
 		for i := range fields {
-			if fields[i] != library.FieldID {
+			if fields[i] != folderstate.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withLibrary != nil {
+			_spec.Node.AddColumnOnce(folderstate.FieldLibraryID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -566,12 +492,12 @@ func (_q *LibraryQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *LibraryQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *FolderStateQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(library.Table)
+	t1 := builder.Table(folderstate.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = library.Columns
+		columns = folderstate.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -602,33 +528,33 @@ func (_q *LibraryQuery) sqlQuery(ctx context.Context) *sql.Selector {
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (_q *LibraryQuery) Modify(modifiers ...func(s *sql.Selector)) *LibrarySelect {
+func (_q *FolderStateQuery) Modify(modifiers ...func(s *sql.Selector)) *FolderStateSelect {
 	_q.modifiers = append(_q.modifiers, modifiers...)
 	return _q.Select()
 }
 
-// LibraryGroupBy is the group-by builder for Library entities.
-type LibraryGroupBy struct {
+// FolderStateGroupBy is the group-by builder for FolderState entities.
+type FolderStateGroupBy struct {
 	selector
-	build *LibraryQuery
+	build *FolderStateQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *LibraryGroupBy) Aggregate(fns ...AggregateFunc) *LibraryGroupBy {
+func (_g *FolderStateGroupBy) Aggregate(fns ...AggregateFunc) *FolderStateGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *LibraryGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *FolderStateGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*LibraryQuery, *LibraryGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*FolderStateQuery, *FolderStateGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *LibraryGroupBy) sqlScan(ctx context.Context, root *LibraryQuery, v any) error {
+func (_g *FolderStateGroupBy) sqlScan(ctx context.Context, root *FolderStateQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -655,28 +581,28 @@ func (_g *LibraryGroupBy) sqlScan(ctx context.Context, root *LibraryQuery, v any
 	return sql.ScanSlice(rows, v)
 }
 
-// LibrarySelect is the builder for selecting fields of Library entities.
-type LibrarySelect struct {
-	*LibraryQuery
+// FolderStateSelect is the builder for selecting fields of FolderState entities.
+type FolderStateSelect struct {
+	*FolderStateQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *LibrarySelect) Aggregate(fns ...AggregateFunc) *LibrarySelect {
+func (_s *FolderStateSelect) Aggregate(fns ...AggregateFunc) *FolderStateSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *LibrarySelect) Scan(ctx context.Context, v any) error {
+func (_s *FolderStateSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*LibraryQuery, *LibrarySelect](ctx, _s.LibraryQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*FolderStateQuery, *FolderStateSelect](ctx, _s.FolderStateQuery, _s, _s.inters, v)
 }
 
-func (_s *LibrarySelect) sqlScan(ctx context.Context, root *LibraryQuery, v any) error {
+func (_s *FolderStateSelect) sqlScan(ctx context.Context, root *FolderStateQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {
@@ -698,7 +624,7 @@ func (_s *LibrarySelect) sqlScan(ctx context.Context, root *LibraryQuery, v any)
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (_s *LibrarySelect) Modify(modifiers ...func(s *sql.Selector)) *LibrarySelect {
+func (_s *FolderStateSelect) Modify(modifiers ...func(s *sql.Selector)) *FolderStateSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
 }

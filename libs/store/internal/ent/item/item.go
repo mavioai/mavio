@@ -109,6 +109,10 @@ const (
 	FieldFileModified = "file_modified"
 	// FieldMetadataRefreshedAt holds the string denoting the metadata_refreshed_at field in the database.
 	FieldMetadataRefreshedAt = "metadata_refreshed_at"
+	// FieldScanGeneration holds the string denoting the scan_generation field in the database.
+	FieldScanGeneration = "scan_generation"
+	// FieldMissingSince holds the string denoting the missing_since field in the database.
+	FieldMissingSince = "missing_since"
 	// EdgeLibrary holds the string denoting the library edge name in mutations.
 	EdgeLibrary = "library"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
@@ -241,6 +245,8 @@ var Columns = []string{
 	FieldDateAdded,
 	FieldFileModified,
 	FieldMetadataRefreshedAt,
+	FieldScanGeneration,
+	FieldMissingSince,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -302,6 +308,8 @@ var (
 	DefaultLocked bool
 	// DefaultExtra holds the default value on creation for the "extra" field.
 	DefaultExtra string
+	// DefaultScanGeneration holds the default value on creation for the "scan_generation" field.
+	DefaultScanGeneration int64
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() core.ID
 )
@@ -522,6 +530,16 @@ func ByFileModified(opts ...sql.OrderTermOption) OrderOption {
 // ByMetadataRefreshedAt orders the results by the metadata_refreshed_at field.
 func ByMetadataRefreshedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMetadataRefreshedAt, opts...).ToFunc()
+}
+
+// ByScanGeneration orders the results by the scan_generation field.
+func ByScanGeneration(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScanGeneration, opts...).ToFunc()
+}
+
+// ByMissingSince orders the results by the missing_since field.
+func ByMissingSince(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMissingSince, opts...).ToFunc()
 }
 
 // ByLibraryField orders the results by library field.

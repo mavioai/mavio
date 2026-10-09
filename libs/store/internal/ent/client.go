@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -35,6 +36,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Credit is the client for interacting with the Credit builders.
 	Credit *CreditClient
+	// FolderState is the client for interacting with the FolderState builders.
+	FolderState *FolderStateClient
 	// Image is the client for interacting with the Image builders.
 	Image *ImageClient
 	// Item is the client for interacting with the Item builders.
@@ -65,6 +68,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Credit = NewCreditClient(c.config)
+	c.FolderState = NewFolderStateClient(c.config)
 	c.Image = NewImageClient(c.config)
 	c.Item = NewItemClient(c.config)
 	c.ItemValue = NewItemValueClient(c.config)
@@ -167,6 +171,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:         ctx,
 		config:      cfg,
 		Credit:      NewCreditClient(cfg),
+		FolderState: NewFolderStateClient(cfg),
 		Image:       NewImageClient(cfg),
 		Item:        NewItemClient(cfg),
 		ItemValue:   NewItemValueClient(cfg),
@@ -196,6 +201,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:         ctx,
 		config:      cfg,
 		Credit:      NewCreditClient(cfg),
+		FolderState: NewFolderStateClient(cfg),
 		Image:       NewImageClient(cfg),
 		Item:        NewItemClient(cfg),
 		ItemValue:   NewItemValueClient(cfg),
@@ -234,8 +240,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Credit, c.Image, c.Item, c.ItemValue, c.Job, c.Library, c.MediaSource,
-		c.Person, c.User, c.UserData,
+		c.Credit, c.FolderState, c.Image, c.Item, c.ItemValue, c.Job, c.Library,
+		c.MediaSource, c.Person, c.User, c.UserData,
 	} {
 		n.Use(hooks...)
 	}
@@ -245,8 +251,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Credit, c.Image, c.Item, c.ItemValue, c.Job, c.Library, c.MediaSource,
-		c.Person, c.User, c.UserData,
+		c.Credit, c.FolderState, c.Image, c.Item, c.ItemValue, c.Job, c.Library,
+		c.MediaSource, c.Person, c.User, c.UserData,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -257,6 +263,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *CreditMutation:
 		return c.Credit.mutate(ctx, m)
+	case *FolderStateMutation:
+		return c.FolderState.mutate(ctx, m)
 	case *ImageMutation:
 		return c.Image.mutate(ctx, m)
 	case *ItemMutation:
@@ -442,6 +450,155 @@ func (c *CreditClient) mutate(ctx context.Context, m *CreditMutation) (Value, er
 		return (&CreditDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Credit mutation op: %q", m.Op())
+	}
+}
+
+// FolderStateClient is a client for the FolderState schema.
+type FolderStateClient struct {
+	config
+}
+
+// NewFolderStateClient returns a client for the FolderState from the given config.
+func NewFolderStateClient(c config) *FolderStateClient {
+	return &FolderStateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `folderstate.Hooks(f(g(h())))`.
+func (c *FolderStateClient) Use(hooks ...Hook) {
+	c.hooks.FolderState = append(c.hooks.FolderState, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `folderstate.Intercept(f(g(h())))`.
+func (c *FolderStateClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FolderState = append(c.inters.FolderState, interceptors...)
+}
+
+// Create returns a builder for creating a FolderState entity.
+func (c *FolderStateClient) Create() *FolderStateCreate {
+	mutation := newFolderStateMutation(c.config, OpCreate)
+	return &FolderStateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FolderState entities.
+func (c *FolderStateClient) CreateBulk(builders ...*FolderStateCreate) *FolderStateCreateBulk {
+	return &FolderStateCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FolderStateClient) MapCreateBulk(slice any, setFunc func(*FolderStateCreate, int)) *FolderStateCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FolderStateCreateBulk{err: fmt.Errorf("calling to FolderStateClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FolderStateCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FolderStateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FolderState.
+func (c *FolderStateClient) Update() *FolderStateUpdate {
+	mutation := newFolderStateMutation(c.config, OpUpdate)
+	return &FolderStateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FolderStateClient) UpdateOne(_m *FolderState) *FolderStateUpdateOne {
+	mutation := newFolderStateMutation(c.config, OpUpdateOne, withFolderState(_m))
+	return &FolderStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FolderStateClient) UpdateOneID(id core.ID) *FolderStateUpdateOne {
+	mutation := newFolderStateMutation(c.config, OpUpdateOne, withFolderStateID(id))
+	return &FolderStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FolderState.
+func (c *FolderStateClient) Delete() *FolderStateDelete {
+	mutation := newFolderStateMutation(c.config, OpDelete)
+	return &FolderStateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FolderStateClient) DeleteOne(_m *FolderState) *FolderStateDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FolderStateClient) DeleteOneID(id core.ID) *FolderStateDeleteOne {
+	builder := c.Delete().Where(folderstate.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FolderStateDeleteOne{builder}
+}
+
+// Query returns a query builder for FolderState.
+func (c *FolderStateClient) Query() *FolderStateQuery {
+	return &FolderStateQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFolderState},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FolderState entity by its id.
+func (c *FolderStateClient) Get(ctx context.Context, id core.ID) (*FolderState, error) {
+	return c.Query().Where(folderstate.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FolderStateClient) GetX(ctx context.Context, id core.ID) *FolderState {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryLibrary queries the library edge of a FolderState.
+func (c *FolderStateClient) QueryLibrary(_m *FolderState) *LibraryQuery {
+	query := (&LibraryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(folderstate.Table, folderstate.FieldID, id),
+			sqlgraph.To(library.Table, library.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, folderstate.LibraryTable, folderstate.LibraryColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FolderStateClient) Hooks() []Hook {
+	return c.hooks.FolderState
+}
+
+// Interceptors returns the client interceptors.
+func (c *FolderStateClient) Interceptors() []Interceptor {
+	return c.inters.FolderState
+}
+
+func (c *FolderStateClient) mutate(ctx context.Context, m *FolderStateMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FolderStateCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FolderStateUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FolderStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FolderStateDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FolderState mutation op: %q", m.Op())
 	}
 }
 
@@ -1309,6 +1466,22 @@ func (c *LibraryClient) QueryItems(_m *Library) *ItemQuery {
 	return query
 }
 
+// QueryFolderStates queries the folder_states edge of a Library.
+func (c *LibraryClient) QueryFolderStates(_m *Library) *FolderStateQuery {
+	query := (&FolderStateClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(library.Table, library.FieldID, id),
+			sqlgraph.To(folderstate.Table, folderstate.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, library.FolderStatesTable, library.FolderStatesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *LibraryClient) Hooks() []Hook {
 	return c.hooks.Library
@@ -1965,11 +2138,11 @@ func (c *UserDataClient) mutate(ctx context.Context, m *UserDataMutation) (Value
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Credit, Image, Item, ItemValue, Job, Library, MediaSource, Person, User,
-		UserData []ent.Hook
+		Credit, FolderState, Image, Item, ItemValue, Job, Library, MediaSource, Person,
+		User, UserData []ent.Hook
 	}
 	inters struct {
-		Credit, Image, Item, ItemValue, Job, Library, MediaSource, Person, User,
-		UserData []ent.Interceptor
+		Credit, FolderState, Image, Item, ItemValue, Job, Library, MediaSource, Person,
+		User, UserData []ent.Interceptor
 	}
 )

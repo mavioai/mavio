@@ -81,6 +81,38 @@ func (_u *MediaSourceUpdate) SetNillablePath(v *string) *MediaSourceUpdate {
 	return _u
 }
 
+// SetParts sets the "parts" field.
+func (_u *MediaSourceUpdate) SetParts(v []string) *MediaSourceUpdate {
+	_u.mutation.SetParts(v)
+	return _u
+}
+
+// AppendParts appends value to the "parts" field.
+func (_u *MediaSourceUpdate) AppendParts(v []string) *MediaSourceUpdate {
+	_u.mutation.AppendParts(v)
+	return _u
+}
+
+// ClearParts clears the value of the "parts" field.
+func (_u *MediaSourceUpdate) ClearParts() *MediaSourceUpdate {
+	_u.mutation.ClearParts()
+	return _u
+}
+
+// SetDisc sets the "disc" field.
+func (_u *MediaSourceUpdate) SetDisc(v string) *MediaSourceUpdate {
+	_u.mutation.SetDisc(v)
+	return _u
+}
+
+// SetNillableDisc sets the "disc" field if the given value is not nil.
+func (_u *MediaSourceUpdate) SetNillableDisc(v *string) *MediaSourceUpdate {
+	if v != nil {
+		_u.SetDisc(*v)
+	}
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *MediaSourceUpdate) SetName(v string) *MediaSourceUpdate {
 	_u.mutation.SetName(v)
@@ -127,6 +159,26 @@ func (_u *MediaSourceUpdate) SetNillableSize(v *int64) *MediaSourceUpdate {
 // AddSize adds value to the "size" field.
 func (_u *MediaSourceUpdate) AddSize(v int64) *MediaSourceUpdate {
 	_u.mutation.AddSize(v)
+	return _u
+}
+
+// SetModified sets the "modified" field.
+func (_u *MediaSourceUpdate) SetModified(v time.Time) *MediaSourceUpdate {
+	_u.mutation.SetModified(v)
+	return _u
+}
+
+// SetNillableModified sets the "modified" field if the given value is not nil.
+func (_u *MediaSourceUpdate) SetNillableModified(v *time.Time) *MediaSourceUpdate {
+	if v != nil {
+		_u.SetModified(*v)
+	}
+	return _u
+}
+
+// ClearModified clears the value of the "modified" field.
+func (_u *MediaSourceUpdate) ClearModified() *MediaSourceUpdate {
+	_u.mutation.ClearModified()
 	return _u
 }
 
@@ -324,6 +376,20 @@ func (_u *MediaSourceUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.Path(); ok {
 		_spec.SetField(mediasource.FieldPath, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Parts(); ok {
+		_spec.SetField(mediasource.FieldParts, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedParts(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, mediasource.FieldParts, value)
+		})
+	}
+	if _u.mutation.PartsCleared() {
+		_spec.ClearField(mediasource.FieldParts, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Disc(); ok {
+		_spec.SetField(mediasource.FieldDisc, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(mediasource.FieldName, field.TypeString, value)
 	}
@@ -335,6 +401,12 @@ func (_u *MediaSourceUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if value, ok := _u.mutation.AddedSize(); ok {
 		_spec.AddField(mediasource.FieldSize, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.Modified(); ok {
+		_spec.SetField(mediasource.FieldModified, field.TypeTime, value)
+	}
+	if _u.mutation.ModifiedCleared() {
+		_spec.ClearField(mediasource.FieldModified, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Duration(); ok {
 		_spec.SetField(mediasource.FieldDuration, field.TypeInt64, value)
@@ -487,6 +559,38 @@ func (_u *MediaSourceUpdateOne) SetNillablePath(v *string) *MediaSourceUpdateOne
 	return _u
 }
 
+// SetParts sets the "parts" field.
+func (_u *MediaSourceUpdateOne) SetParts(v []string) *MediaSourceUpdateOne {
+	_u.mutation.SetParts(v)
+	return _u
+}
+
+// AppendParts appends value to the "parts" field.
+func (_u *MediaSourceUpdateOne) AppendParts(v []string) *MediaSourceUpdateOne {
+	_u.mutation.AppendParts(v)
+	return _u
+}
+
+// ClearParts clears the value of the "parts" field.
+func (_u *MediaSourceUpdateOne) ClearParts() *MediaSourceUpdateOne {
+	_u.mutation.ClearParts()
+	return _u
+}
+
+// SetDisc sets the "disc" field.
+func (_u *MediaSourceUpdateOne) SetDisc(v string) *MediaSourceUpdateOne {
+	_u.mutation.SetDisc(v)
+	return _u
+}
+
+// SetNillableDisc sets the "disc" field if the given value is not nil.
+func (_u *MediaSourceUpdateOne) SetNillableDisc(v *string) *MediaSourceUpdateOne {
+	if v != nil {
+		_u.SetDisc(*v)
+	}
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *MediaSourceUpdateOne) SetName(v string) *MediaSourceUpdateOne {
 	_u.mutation.SetName(v)
@@ -533,6 +637,26 @@ func (_u *MediaSourceUpdateOne) SetNillableSize(v *int64) *MediaSourceUpdateOne 
 // AddSize adds value to the "size" field.
 func (_u *MediaSourceUpdateOne) AddSize(v int64) *MediaSourceUpdateOne {
 	_u.mutation.AddSize(v)
+	return _u
+}
+
+// SetModified sets the "modified" field.
+func (_u *MediaSourceUpdateOne) SetModified(v time.Time) *MediaSourceUpdateOne {
+	_u.mutation.SetModified(v)
+	return _u
+}
+
+// SetNillableModified sets the "modified" field if the given value is not nil.
+func (_u *MediaSourceUpdateOne) SetNillableModified(v *time.Time) *MediaSourceUpdateOne {
+	if v != nil {
+		_u.SetModified(*v)
+	}
+	return _u
+}
+
+// ClearModified clears the value of the "modified" field.
+func (_u *MediaSourceUpdateOne) ClearModified() *MediaSourceUpdateOne {
+	_u.mutation.ClearModified()
 	return _u
 }
 
@@ -760,6 +884,20 @@ func (_u *MediaSourceUpdateOne) sqlSave(ctx context.Context) (_node *MediaSource
 	if value, ok := _u.mutation.Path(); ok {
 		_spec.SetField(mediasource.FieldPath, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Parts(); ok {
+		_spec.SetField(mediasource.FieldParts, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedParts(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, mediasource.FieldParts, value)
+		})
+	}
+	if _u.mutation.PartsCleared() {
+		_spec.ClearField(mediasource.FieldParts, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Disc(); ok {
+		_spec.SetField(mediasource.FieldDisc, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(mediasource.FieldName, field.TypeString, value)
 	}
@@ -771,6 +909,12 @@ func (_u *MediaSourceUpdateOne) sqlSave(ctx context.Context) (_node *MediaSource
 	}
 	if value, ok := _u.mutation.AddedSize(); ok {
 		_spec.AddField(mediasource.FieldSize, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.Modified(); ok {
+		_spec.SetField(mediasource.FieldModified, field.TypeTime, value)
+	}
+	if _u.mutation.ModifiedCleared() {
+		_spec.ClearField(mediasource.FieldModified, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Duration(); ok {
 		_spec.SetField(mediasource.FieldDuration, field.TypeInt64, value)

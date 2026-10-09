@@ -31,6 +31,8 @@ type Library struct {
 	PreferredLanguage string `json:"preferred_language,omitempty"`
 	// MetadataCountry holds the value of the "metadata_country" field.
 	MetadataCountry string `json:"metadata_country,omitempty"`
+	// ScanGeneration holds the value of the "scan_generation" field.
+	ScanGeneration int64 `json:"scan_generation,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -45,9 +47,11 @@ type Library struct {
 type LibraryEdges struct {
 	// Items holds the value of the items edge.
 	Items []*Item `json:"items,omitempty"`
+	// FolderStates holds the value of the folder_states edge.
+	FolderStates []*FolderState `json:"folder_states,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // ItemsOrErr returns the Items value or an error if the edge
@@ -59,6 +63,15 @@ func (e LibraryEdges) ItemsOrErr() ([]*Item, error) {
 	return nil, &NotLoadedError{edge: "items"}
 }
 
+// FolderStatesOrErr returns the FolderStates value or an error if the edge
+// was not loaded in eager-loading.
+func (e LibraryEdges) FolderStatesOrErr() ([]*FolderState, error) {
+	if e.loadedTypes[1] {
+		return e.FolderStates, nil
+	}
+	return nil, &NotLoadedError{edge: "folder_states"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Library) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -68,7 +81,7 @@ func (*Library) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case library.FieldID:
 			values[i] = new(core.ID)
-		case library.FieldScanInterval:
+		case library.FieldScanInterval, library.FieldScanGeneration:
 			values[i] = new(sql.NullInt64)
 		case library.FieldName, library.FieldKind, library.FieldPreferredLanguage, library.FieldMetadataCountry:
 			values[i] = new(sql.NullString)
@@ -133,6 +146,12 @@ func (_m *Library) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.MetadataCountry = value.String
 			}
+		case library.FieldScanGeneration:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field scan_generation", values[i])
+			} else if value.Valid {
+				_m.ScanGeneration = value.Int64
+			}
 		case library.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -161,6 +180,11 @@ func (_m *Library) Value(name string) (ent.Value, error) {
 // QueryItems queries the "items" edge of the Library entity.
 func (_m *Library) QueryItems() *ItemQuery {
 	return NewLibraryClient(_m.config).QueryItems(_m)
+}
+
+// QueryFolderStates queries the "folder_states" edge of the Library entity.
+func (_m *Library) QueryFolderStates() *FolderStateQuery {
+	return NewLibraryClient(_m.config).QueryFolderStates(_m)
 }
 
 // Update returns a builder for updating this Library.
@@ -203,6 +227,9 @@ func (_m *Library) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("metadata_country=")
 	builder.WriteString(_m.MetadataCountry)
+	builder.WriteString(", ")
+	builder.WriteString("scan_generation=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ScanGeneration))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

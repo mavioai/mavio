@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
@@ -121,6 +122,27 @@ func (_u *LibraryUpdate) SetNillableMetadataCountry(v *string) *LibraryUpdate {
 	return _u
 }
 
+// SetScanGeneration sets the "scan_generation" field.
+func (_u *LibraryUpdate) SetScanGeneration(v int64) *LibraryUpdate {
+	_u.mutation.ResetScanGeneration()
+	_u.mutation.SetScanGeneration(v)
+	return _u
+}
+
+// SetNillableScanGeneration sets the "scan_generation" field if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableScanGeneration(v *int64) *LibraryUpdate {
+	if v != nil {
+		_u.SetScanGeneration(*v)
+	}
+	return _u
+}
+
+// AddScanGeneration adds value to the "scan_generation" field.
+func (_u *LibraryUpdate) AddScanGeneration(v int64) *LibraryUpdate {
+	_u.mutation.AddScanGeneration(v)
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *LibraryUpdate) SetUpdatedAt(v time.Time) *LibraryUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -140,6 +162,21 @@ func (_u *LibraryUpdate) AddItems(v ...*Item) *LibraryUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddItemIDs(ids...)
+}
+
+// AddFolderStateIDs adds the "folder_states" edge to the FolderState entity by IDs.
+func (_u *LibraryUpdate) AddFolderStateIDs(ids ...core.ID) *LibraryUpdate {
+	_u.mutation.AddFolderStateIDs(ids...)
+	return _u
+}
+
+// AddFolderStates adds the "folder_states" edges to the FolderState entity.
+func (_u *LibraryUpdate) AddFolderStates(v ...*FolderState) *LibraryUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddFolderStateIDs(ids...)
 }
 
 // Mutation returns the LibraryMutation object of the builder.
@@ -166,6 +203,27 @@ func (_u *LibraryUpdate) RemoveItems(v ...*Item) *LibraryUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveItemIDs(ids...)
+}
+
+// ClearFolderStates clears all "folder_states" edges to the FolderState entity.
+func (_u *LibraryUpdate) ClearFolderStates() *LibraryUpdate {
+	_u.mutation.ClearFolderStates()
+	return _u
+}
+
+// RemoveFolderStateIDs removes the "folder_states" edge to FolderState entities by IDs.
+func (_u *LibraryUpdate) RemoveFolderStateIDs(ids ...core.ID) *LibraryUpdate {
+	_u.mutation.RemoveFolderStateIDs(ids...)
+	return _u
+}
+
+// RemoveFolderStates removes "folder_states" edges to FolderState entities.
+func (_u *LibraryUpdate) RemoveFolderStates(v ...*FolderState) *LibraryUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveFolderStateIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -258,6 +316,12 @@ func (_u *LibraryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.MetadataCountry(); ok {
 		_spec.SetField(library.FieldMetadataCountry, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.ScanGeneration(); ok {
+		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedScanGeneration(); ok {
+		_spec.AddField(library.FieldScanGeneration, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(library.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -299,6 +363,51 @@ func (_u *LibraryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.FolderStatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   library.FolderStatesTable,
+			Columns: []string{library.FolderStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedFolderStatesIDs(); len(nodes) > 0 && !_u.mutation.FolderStatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   library.FolderStatesTable,
+			Columns: []string{library.FolderStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.FolderStatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   library.FolderStatesTable,
+			Columns: []string{library.FolderStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -417,6 +526,27 @@ func (_u *LibraryUpdateOne) SetNillableMetadataCountry(v *string) *LibraryUpdate
 	return _u
 }
 
+// SetScanGeneration sets the "scan_generation" field.
+func (_u *LibraryUpdateOne) SetScanGeneration(v int64) *LibraryUpdateOne {
+	_u.mutation.ResetScanGeneration()
+	_u.mutation.SetScanGeneration(v)
+	return _u
+}
+
+// SetNillableScanGeneration sets the "scan_generation" field if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableScanGeneration(v *int64) *LibraryUpdateOne {
+	if v != nil {
+		_u.SetScanGeneration(*v)
+	}
+	return _u
+}
+
+// AddScanGeneration adds value to the "scan_generation" field.
+func (_u *LibraryUpdateOne) AddScanGeneration(v int64) *LibraryUpdateOne {
+	_u.mutation.AddScanGeneration(v)
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *LibraryUpdateOne) SetUpdatedAt(v time.Time) *LibraryUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -436,6 +566,21 @@ func (_u *LibraryUpdateOne) AddItems(v ...*Item) *LibraryUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.AddItemIDs(ids...)
+}
+
+// AddFolderStateIDs adds the "folder_states" edge to the FolderState entity by IDs.
+func (_u *LibraryUpdateOne) AddFolderStateIDs(ids ...core.ID) *LibraryUpdateOne {
+	_u.mutation.AddFolderStateIDs(ids...)
+	return _u
+}
+
+// AddFolderStates adds the "folder_states" edges to the FolderState entity.
+func (_u *LibraryUpdateOne) AddFolderStates(v ...*FolderState) *LibraryUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddFolderStateIDs(ids...)
 }
 
 // Mutation returns the LibraryMutation object of the builder.
@@ -462,6 +607,27 @@ func (_u *LibraryUpdateOne) RemoveItems(v ...*Item) *LibraryUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveItemIDs(ids...)
+}
+
+// ClearFolderStates clears all "folder_states" edges to the FolderState entity.
+func (_u *LibraryUpdateOne) ClearFolderStates() *LibraryUpdateOne {
+	_u.mutation.ClearFolderStates()
+	return _u
+}
+
+// RemoveFolderStateIDs removes the "folder_states" edge to FolderState entities by IDs.
+func (_u *LibraryUpdateOne) RemoveFolderStateIDs(ids ...core.ID) *LibraryUpdateOne {
+	_u.mutation.RemoveFolderStateIDs(ids...)
+	return _u
+}
+
+// RemoveFolderStates removes "folder_states" edges to FolderState entities.
+func (_u *LibraryUpdateOne) RemoveFolderStates(v ...*FolderState) *LibraryUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveFolderStateIDs(ids...)
 }
 
 // Where appends a list predicates to the LibraryUpdate builder.
@@ -584,6 +750,12 @@ func (_u *LibraryUpdateOne) sqlSave(ctx context.Context) (_node *Library, err er
 	if value, ok := _u.mutation.MetadataCountry(); ok {
 		_spec.SetField(library.FieldMetadataCountry, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.ScanGeneration(); ok {
+		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedScanGeneration(); ok {
+		_spec.AddField(library.FieldScanGeneration, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(library.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -625,6 +797,51 @@ func (_u *LibraryUpdateOne) sqlSave(ctx context.Context) (_node *Library, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.FolderStatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   library.FolderStatesTable,
+			Columns: []string{library.FolderStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedFolderStatesIDs(); len(nodes) > 0 && !_u.mutation.FolderStatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   library.FolderStatesTable,
+			Columns: []string{library.FolderStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.FolderStatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   library.FolderStatesTable,
+			Columns: []string{library.FolderStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

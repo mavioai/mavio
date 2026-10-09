@@ -20,6 +20,7 @@ type Store interface {
 	Users() UserRepository
 	UserData() UserDataRepository
 	Jobs() JobQueue
+	Scans() ScanRepository
 
 	// InTx runs fn in a transaction. The Store passed to fn is bound to the
 	// transaction; fn's error rolls it back.
@@ -48,6 +49,17 @@ type ItemRepository interface {
 	// Delete removes items together with their descendants, extras, media
 	// sources, images, credits and user data.
 	Delete(ctx context.Context, ids ...ID) error
+	// MarkSeen sets the scan generation of the library's items whose path
+	// is prefix or lies below it, and clears their missing state. A scan
+	// calls it for folders it could not read, so their items stay.
+	MarkSeen(ctx context.Context, libraryID ID, prefix string, generation int64) error
+	// MarkMissing marks the library's items with a path that the scan of
+	// the given generation did not see as missing since now, and returns
+	// how many it marked.
+	MarkMissing(ctx context.Context, libraryID ID, generation int64, now time.Time) (int, error)
+	// PurgeMissing deletes the library's items missing since before, with
+	// what Delete removes, and returns their IDs.
+	PurgeMissing(ctx context.Context, libraryID ID, before time.Time) ([]ID, error)
 	// Values lists distinct attribute values (genres, studios, …), ranked by
 	// relevance when q.Search is set and by name otherwise.
 	Values(ctx context.Context, q ValueQuery) ([]string, error)
@@ -100,6 +112,42 @@ type UserDataRepository interface {
 	// state.
 	GetMany(ctx context.Context, userID ID, itemIDs []ID) (map[ID]UserData, error)
 	Put(ctx context.Context, d *UserData) error
+}
+
+// ScanRepository stores the state of library scans.
+type ScanRepository interface {
+	// NextGeneration starts a scan of the library and returns its
+	// generation, one more than the last.
+	NextGeneration(ctx context.Context, libraryID ID) (int64, error)
+	// Folder returns the state a scan recorded for a folder.
+	Folder(ctx context.Context, libraryID ID, path string) (FolderState, error)
+	// PutFolders records folder states, replacing any for the same paths.
+	PutFolders(ctx context.Context, folders ...FolderState) error
+	// DeleteFolders removes the library's folder states below generation,
+	// left by folders that are gone.
+	DeleteFolders(ctx context.Context, libraryID ID, before int64) error
+}
+
+// FolderState is what a scan saw of a folder: its identity and
+// modification time, which tell the next scan whether to list it again,
+// and its entries.
+type FolderState struct {
+	LibraryID ID
+	Path      string
+	// ModTime and FileID (inode and device, or the Windows file ID) change
+	// when entries are added, removed or renamed.
+	ModTime    time.Time
+	FileID     string
+	Entries    []FolderEntry
+	Generation int64
+}
+
+// FolderEntry is a file or folder in a folder.
+type FolderEntry struct {
+	Name    string
+	IsDir   bool
+	Size    int64
+	ModTime time.Time
 }
 
 // JobQueue is a durable queue of background jobs.

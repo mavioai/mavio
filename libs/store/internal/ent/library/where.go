@@ -82,6 +82,11 @@ func MetadataCountry(v string) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldMetadataCountry, v))
 }
 
+// ScanGeneration applies equality check predicate on the "scan_generation" field. It's identical to ScanGenerationEQ.
+func ScanGeneration(v int64) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldScanGeneration, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldCreatedAt, v))
@@ -406,6 +411,46 @@ func MetadataCountryContainsFold(v string) predicate.Library {
 	return predicate.Library(sql.FieldContainsFold(FieldMetadataCountry, v))
 }
 
+// ScanGenerationEQ applies the EQ predicate on the "scan_generation" field.
+func ScanGenerationEQ(v int64) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldScanGeneration, v))
+}
+
+// ScanGenerationNEQ applies the NEQ predicate on the "scan_generation" field.
+func ScanGenerationNEQ(v int64) predicate.Library {
+	return predicate.Library(sql.FieldNEQ(FieldScanGeneration, v))
+}
+
+// ScanGenerationIn applies the In predicate on the "scan_generation" field.
+func ScanGenerationIn(vs ...int64) predicate.Library {
+	return predicate.Library(sql.FieldIn(FieldScanGeneration, vs...))
+}
+
+// ScanGenerationNotIn applies the NotIn predicate on the "scan_generation" field.
+func ScanGenerationNotIn(vs ...int64) predicate.Library {
+	return predicate.Library(sql.FieldNotIn(FieldScanGeneration, vs...))
+}
+
+// ScanGenerationGT applies the GT predicate on the "scan_generation" field.
+func ScanGenerationGT(v int64) predicate.Library {
+	return predicate.Library(sql.FieldGT(FieldScanGeneration, v))
+}
+
+// ScanGenerationGTE applies the GTE predicate on the "scan_generation" field.
+func ScanGenerationGTE(v int64) predicate.Library {
+	return predicate.Library(sql.FieldGTE(FieldScanGeneration, v))
+}
+
+// ScanGenerationLT applies the LT predicate on the "scan_generation" field.
+func ScanGenerationLT(v int64) predicate.Library {
+	return predicate.Library(sql.FieldLT(FieldScanGeneration, v))
+}
+
+// ScanGenerationLTE applies the LTE predicate on the "scan_generation" field.
+func ScanGenerationLTE(v int64) predicate.Library {
+	return predicate.Library(sql.FieldLTE(FieldScanGeneration, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldCreatedAt, v))
@@ -501,6 +546,29 @@ func HasItems() predicate.Library {
 func HasItemsWith(preds ...predicate.Item) predicate.Library {
 	return predicate.Library(func(s *sql.Selector) {
 		step := newItemsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFolderStates applies the HasEdge predicate on the "folder_states" edge.
+func HasFolderStates() predicate.Library {
+	return predicate.Library(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FolderStatesTable, FolderStatesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFolderStatesWith applies the HasEdge predicate on the "folder_states" edge with a given conditions (other predicates).
+func HasFolderStatesWith(preds ...predicate.FolderState) predicate.Library {
+	return predicate.Library(func(s *sql.Selector) {
+		step := newFolderStatesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

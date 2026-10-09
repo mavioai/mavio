@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -35,6 +36,7 @@ const (
 
 	// Node types.
 	TypeCredit      = "Credit"
+	TypeFolderState = "FolderState"
 	TypeImage       = "Image"
 	TypeItem        = "Item"
 	TypeItemValue   = "ItemValue"
@@ -722,6 +724,737 @@ func (m *CreditMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Credit edge %s", name)
+}
+
+// FolderStateMutation represents an operation that mutates the FolderState nodes in the graph.
+type FolderStateMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *core.ID
+	_path          *string
+	mod_time       *time.Time
+	file_id        *string
+	entries        *[]core.FolderEntry
+	appendentries  []core.FolderEntry
+	generation     *int64
+	addgeneration  *int64
+	clearedFields  map[string]struct{}
+	library        *core.ID
+	clearedlibrary bool
+	done           bool
+	oldValue       func(context.Context) (*FolderState, error)
+	predicates     []predicate.FolderState
+}
+
+var _ ent.Mutation = (*FolderStateMutation)(nil)
+
+// folderstateOption allows management of the mutation configuration using functional options.
+type folderstateOption func(*FolderStateMutation)
+
+// newFolderStateMutation creates new mutation for the FolderState entity.
+func newFolderStateMutation(c config, op Op, opts ...folderstateOption) *FolderStateMutation {
+	m := &FolderStateMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeFolderState,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withFolderStateID sets the ID field of the mutation.
+func withFolderStateID(id core.ID) folderstateOption {
+	return func(m *FolderStateMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *FolderState
+		)
+		m.oldValue = func(ctx context.Context) (*FolderState, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().FolderState.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withFolderState sets the old FolderState of the mutation.
+func withFolderState(node *FolderState) folderstateOption {
+	return func(m *FolderStateMutation) {
+		m.oldValue = func(context.Context) (*FolderState, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FolderStateMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FolderStateMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of FolderState entities.
+func (m *FolderStateMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *FolderStateMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *FolderStateMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().FolderState.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetLibraryID sets the "library_id" field.
+func (m *FolderStateMutation) SetLibraryID(c core.ID) {
+	m.library = &c
+}
+
+// LibraryID returns the value of the "library_id" field in the mutation.
+func (m *FolderStateMutation) LibraryID() (r core.ID, exists bool) {
+	v := m.library
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLibraryID returns the old "library_id" field's value of the FolderState entity.
+// If the FolderState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FolderStateMutation) OldLibraryID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLibraryID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLibraryID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLibraryID: %w", err)
+	}
+	return oldValue.LibraryID, nil
+}
+
+// ResetLibraryID resets all changes to the "library_id" field.
+func (m *FolderStateMutation) ResetLibraryID() {
+	m.library = nil
+}
+
+// SetPath sets the "path" field.
+func (m *FolderStateMutation) SetPath(s string) {
+	m._path = &s
+}
+
+// Path returns the value of the "path" field in the mutation.
+func (m *FolderStateMutation) Path() (r string, exists bool) {
+	v := m._path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPath returns the old "path" field's value of the FolderState entity.
+// If the FolderState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FolderStateMutation) OldPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPath: %w", err)
+	}
+	return oldValue.Path, nil
+}
+
+// ResetPath resets all changes to the "path" field.
+func (m *FolderStateMutation) ResetPath() {
+	m._path = nil
+}
+
+// SetModTime sets the "mod_time" field.
+func (m *FolderStateMutation) SetModTime(t time.Time) {
+	m.mod_time = &t
+}
+
+// ModTime returns the value of the "mod_time" field in the mutation.
+func (m *FolderStateMutation) ModTime() (r time.Time, exists bool) {
+	v := m.mod_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModTime returns the old "mod_time" field's value of the FolderState entity.
+// If the FolderState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FolderStateMutation) OldModTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModTime: %w", err)
+	}
+	return oldValue.ModTime, nil
+}
+
+// ResetModTime resets all changes to the "mod_time" field.
+func (m *FolderStateMutation) ResetModTime() {
+	m.mod_time = nil
+}
+
+// SetFileID sets the "file_id" field.
+func (m *FolderStateMutation) SetFileID(s string) {
+	m.file_id = &s
+}
+
+// FileID returns the value of the "file_id" field in the mutation.
+func (m *FolderStateMutation) FileID() (r string, exists bool) {
+	v := m.file_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFileID returns the old "file_id" field's value of the FolderState entity.
+// If the FolderState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FolderStateMutation) OldFileID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFileID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFileID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFileID: %w", err)
+	}
+	return oldValue.FileID, nil
+}
+
+// ResetFileID resets all changes to the "file_id" field.
+func (m *FolderStateMutation) ResetFileID() {
+	m.file_id = nil
+}
+
+// SetEntries sets the "entries" field.
+func (m *FolderStateMutation) SetEntries(ce []core.FolderEntry) {
+	m.entries = &ce
+	m.appendentries = nil
+}
+
+// Entries returns the value of the "entries" field in the mutation.
+func (m *FolderStateMutation) Entries() (r []core.FolderEntry, exists bool) {
+	v := m.entries
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntries returns the old "entries" field's value of the FolderState entity.
+// If the FolderState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FolderStateMutation) OldEntries(ctx context.Context) (v []core.FolderEntry, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntries is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntries requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntries: %w", err)
+	}
+	return oldValue.Entries, nil
+}
+
+// AppendEntries adds ce to the "entries" field.
+func (m *FolderStateMutation) AppendEntries(ce []core.FolderEntry) {
+	m.appendentries = append(m.appendentries, ce...)
+}
+
+// AppendedEntries returns the list of values that were appended to the "entries" field in this mutation.
+func (m *FolderStateMutation) AppendedEntries() ([]core.FolderEntry, bool) {
+	if len(m.appendentries) == 0 {
+		return nil, false
+	}
+	return m.appendentries, true
+}
+
+// ClearEntries clears the value of the "entries" field.
+func (m *FolderStateMutation) ClearEntries() {
+	m.entries = nil
+	m.appendentries = nil
+	m.clearedFields[folderstate.FieldEntries] = struct{}{}
+}
+
+// EntriesCleared returns if the "entries" field was cleared in this mutation.
+func (m *FolderStateMutation) EntriesCleared() bool {
+	_, ok := m.clearedFields[folderstate.FieldEntries]
+	return ok
+}
+
+// ResetEntries resets all changes to the "entries" field.
+func (m *FolderStateMutation) ResetEntries() {
+	m.entries = nil
+	m.appendentries = nil
+	delete(m.clearedFields, folderstate.FieldEntries)
+}
+
+// SetGeneration sets the "generation" field.
+func (m *FolderStateMutation) SetGeneration(i int64) {
+	m.generation = &i
+	m.addgeneration = nil
+}
+
+// Generation returns the value of the "generation" field in the mutation.
+func (m *FolderStateMutation) Generation() (r int64, exists bool) {
+	v := m.generation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGeneration returns the old "generation" field's value of the FolderState entity.
+// If the FolderState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FolderStateMutation) OldGeneration(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGeneration is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGeneration requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGeneration: %w", err)
+	}
+	return oldValue.Generation, nil
+}
+
+// AddGeneration adds i to the "generation" field.
+func (m *FolderStateMutation) AddGeneration(i int64) {
+	if m.addgeneration != nil {
+		*m.addgeneration += i
+	} else {
+		m.addgeneration = &i
+	}
+}
+
+// AddedGeneration returns the value that was added to the "generation" field in this mutation.
+func (m *FolderStateMutation) AddedGeneration() (r int64, exists bool) {
+	v := m.addgeneration
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetGeneration resets all changes to the "generation" field.
+func (m *FolderStateMutation) ResetGeneration() {
+	m.generation = nil
+	m.addgeneration = nil
+}
+
+// ClearLibrary clears the "library" edge to the Library entity.
+func (m *FolderStateMutation) ClearLibrary() {
+	m.clearedlibrary = true
+	m.clearedFields[folderstate.FieldLibraryID] = struct{}{}
+}
+
+// LibraryCleared reports if the "library" edge to the Library entity was cleared.
+func (m *FolderStateMutation) LibraryCleared() bool {
+	return m.clearedlibrary
+}
+
+// LibraryIDs returns the "library" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LibraryID instead. It exists only for internal usage by the builders.
+func (m *FolderStateMutation) LibraryIDs() (ids []core.ID) {
+	if id := m.library; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLibrary resets all changes to the "library" edge.
+func (m *FolderStateMutation) ResetLibrary() {
+	m.library = nil
+	m.clearedlibrary = false
+}
+
+// Where appends a list predicates to the FolderStateMutation builder.
+func (m *FolderStateMutation) Where(ps ...predicate.FolderState) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the FolderStateMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FolderStateMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.FolderState, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *FolderStateMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FolderStateMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (FolderState).
+func (m *FolderStateMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *FolderStateMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.library != nil {
+		fields = append(fields, folderstate.FieldLibraryID)
+	}
+	if m._path != nil {
+		fields = append(fields, folderstate.FieldPath)
+	}
+	if m.mod_time != nil {
+		fields = append(fields, folderstate.FieldModTime)
+	}
+	if m.file_id != nil {
+		fields = append(fields, folderstate.FieldFileID)
+	}
+	if m.entries != nil {
+		fields = append(fields, folderstate.FieldEntries)
+	}
+	if m.generation != nil {
+		fields = append(fields, folderstate.FieldGeneration)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *FolderStateMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case folderstate.FieldLibraryID:
+		return m.LibraryID()
+	case folderstate.FieldPath:
+		return m.Path()
+	case folderstate.FieldModTime:
+		return m.ModTime()
+	case folderstate.FieldFileID:
+		return m.FileID()
+	case folderstate.FieldEntries:
+		return m.Entries()
+	case folderstate.FieldGeneration:
+		return m.Generation()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *FolderStateMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case folderstate.FieldLibraryID:
+		return m.OldLibraryID(ctx)
+	case folderstate.FieldPath:
+		return m.OldPath(ctx)
+	case folderstate.FieldModTime:
+		return m.OldModTime(ctx)
+	case folderstate.FieldFileID:
+		return m.OldFileID(ctx)
+	case folderstate.FieldEntries:
+		return m.OldEntries(ctx)
+	case folderstate.FieldGeneration:
+		return m.OldGeneration(ctx)
+	}
+	return nil, fmt.Errorf("unknown FolderState field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FolderStateMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case folderstate.FieldLibraryID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLibraryID(v)
+		return nil
+	case folderstate.FieldPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPath(v)
+		return nil
+	case folderstate.FieldModTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModTime(v)
+		return nil
+	case folderstate.FieldFileID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFileID(v)
+		return nil
+	case folderstate.FieldEntries:
+		v, ok := value.([]core.FolderEntry)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntries(v)
+		return nil
+	case folderstate.FieldGeneration:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGeneration(v)
+		return nil
+	}
+	return fmt.Errorf("unknown FolderState field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *FolderStateMutation) AddedFields() []string {
+	var fields []string
+	if m.addgeneration != nil {
+		fields = append(fields, folderstate.FieldGeneration)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *FolderStateMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case folderstate.FieldGeneration:
+		return m.AddedGeneration()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FolderStateMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case folderstate.FieldGeneration:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGeneration(v)
+		return nil
+	}
+	return fmt.Errorf("unknown FolderState numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *FolderStateMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(folderstate.FieldEntries) {
+		fields = append(fields, folderstate.FieldEntries)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *FolderStateMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *FolderStateMutation) ClearField(name string) error {
+	switch name {
+	case folderstate.FieldEntries:
+		m.ClearEntries()
+		return nil
+	}
+	return fmt.Errorf("unknown FolderState nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *FolderStateMutation) ResetField(name string) error {
+	switch name {
+	case folderstate.FieldLibraryID:
+		m.ResetLibraryID()
+		return nil
+	case folderstate.FieldPath:
+		m.ResetPath()
+		return nil
+	case folderstate.FieldModTime:
+		m.ResetModTime()
+		return nil
+	case folderstate.FieldFileID:
+		m.ResetFileID()
+		return nil
+	case folderstate.FieldEntries:
+		m.ResetEntries()
+		return nil
+	case folderstate.FieldGeneration:
+		m.ResetGeneration()
+		return nil
+	}
+	return fmt.Errorf("unknown FolderState field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *FolderStateMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.library != nil {
+		edges = append(edges, folderstate.EdgeLibrary)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *FolderStateMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case folderstate.EdgeLibrary:
+		if id := m.library; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *FolderStateMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *FolderStateMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *FolderStateMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedlibrary {
+		edges = append(edges, folderstate.EdgeLibrary)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *FolderStateMutation) EdgeCleared(name string) bool {
+	switch name {
+	case folderstate.EdgeLibrary:
+		return m.clearedlibrary
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *FolderStateMutation) ClearEdge(name string) error {
+	switch name {
+	case folderstate.EdgeLibrary:
+		m.ClearLibrary()
+		return nil
+	}
+	return fmt.Errorf("unknown FolderState unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *FolderStateMutation) ResetEdge(name string) error {
+	switch name {
+	case folderstate.EdgeLibrary:
+		m.ResetLibrary()
+		return nil
+	}
+	return fmt.Errorf("unknown FolderState edge %s", name)
 }
 
 // ImageMutation represents an operation that mutates the Image nodes in the graph.
@@ -1869,6 +2602,9 @@ type ItemMutation struct {
 	date_added                    *time.Time
 	file_modified                 *time.Time
 	metadata_refreshed_at         *time.Time
+	scan_generation               *int64
+	addscan_generation            *int64
+	missing_since                 *time.Time
 	clearedFields                 map[string]struct{}
 	library                       *core.ID
 	clearedlibrary                bool
@@ -4209,6 +4945,111 @@ func (m *ItemMutation) ResetMetadataRefreshedAt() {
 	delete(m.clearedFields, item.FieldMetadataRefreshedAt)
 }
 
+// SetScanGeneration sets the "scan_generation" field.
+func (m *ItemMutation) SetScanGeneration(i int64) {
+	m.scan_generation = &i
+	m.addscan_generation = nil
+}
+
+// ScanGeneration returns the value of the "scan_generation" field in the mutation.
+func (m *ItemMutation) ScanGeneration() (r int64, exists bool) {
+	v := m.scan_generation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScanGeneration returns the old "scan_generation" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldScanGeneration(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScanGeneration is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScanGeneration requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScanGeneration: %w", err)
+	}
+	return oldValue.ScanGeneration, nil
+}
+
+// AddScanGeneration adds i to the "scan_generation" field.
+func (m *ItemMutation) AddScanGeneration(i int64) {
+	if m.addscan_generation != nil {
+		*m.addscan_generation += i
+	} else {
+		m.addscan_generation = &i
+	}
+}
+
+// AddedScanGeneration returns the value that was added to the "scan_generation" field in this mutation.
+func (m *ItemMutation) AddedScanGeneration() (r int64, exists bool) {
+	v := m.addscan_generation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetScanGeneration resets all changes to the "scan_generation" field.
+func (m *ItemMutation) ResetScanGeneration() {
+	m.scan_generation = nil
+	m.addscan_generation = nil
+}
+
+// SetMissingSince sets the "missing_since" field.
+func (m *ItemMutation) SetMissingSince(t time.Time) {
+	m.missing_since = &t
+}
+
+// MissingSince returns the value of the "missing_since" field in the mutation.
+func (m *ItemMutation) MissingSince() (r time.Time, exists bool) {
+	v := m.missing_since
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMissingSince returns the old "missing_since" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldMissingSince(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMissingSince is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMissingSince requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMissingSince: %w", err)
+	}
+	return oldValue.MissingSince, nil
+}
+
+// ClearMissingSince clears the value of the "missing_since" field.
+func (m *ItemMutation) ClearMissingSince() {
+	m.missing_since = nil
+	m.clearedFields[item.FieldMissingSince] = struct{}{}
+}
+
+// MissingSinceCleared returns if the "missing_since" field was cleared in this mutation.
+func (m *ItemMutation) MissingSinceCleared() bool {
+	_, ok := m.clearedFields[item.FieldMissingSince]
+	return ok
+}
+
+// ResetMissingSince resets all changes to the "missing_since" field.
+func (m *ItemMutation) ResetMissingSince() {
+	m.missing_since = nil
+	delete(m.clearedFields, item.FieldMissingSince)
+}
+
 // ClearLibrary clears the "library" edge to the Library entity.
 func (m *ItemMutation) ClearLibrary() {
 	m.clearedlibrary = true
@@ -4702,7 +5543,7 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 47)
+	fields := make([]string, 0, 49)
 	if m.library != nil {
 		fields = append(fields, item.FieldLibraryID)
 	}
@@ -4844,6 +5685,12 @@ func (m *ItemMutation) Fields() []string {
 	if m.metadata_refreshed_at != nil {
 		fields = append(fields, item.FieldMetadataRefreshedAt)
 	}
+	if m.scan_generation != nil {
+		fields = append(fields, item.FieldScanGeneration)
+	}
+	if m.missing_since != nil {
+		fields = append(fields, item.FieldMissingSince)
+	}
 	return fields
 }
 
@@ -4946,6 +5793,10 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 		return m.FileModified()
 	case item.FieldMetadataRefreshedAt:
 		return m.MetadataRefreshedAt()
+	case item.FieldScanGeneration:
+		return m.ScanGeneration()
+	case item.FieldMissingSince:
+		return m.MissingSince()
 	}
 	return nil, false
 }
@@ -5049,6 +5900,10 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldFileModified(ctx)
 	case item.FieldMetadataRefreshedAt:
 		return m.OldMetadataRefreshedAt(ctx)
+	case item.FieldScanGeneration:
+		return m.OldScanGeneration(ctx)
+	case item.FieldMissingSince:
+		return m.OldMissingSince(ctx)
 	}
 	return nil, fmt.Errorf("unknown Item field %s", name)
 }
@@ -5387,6 +6242,20 @@ func (m *ItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMetadataRefreshedAt(v)
 		return nil
+	case item.FieldScanGeneration:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScanGeneration(v)
+		return nil
+	case item.FieldMissingSince:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMissingSince(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Item field %s", name)
 }
@@ -5428,6 +6297,9 @@ func (m *ItemMutation) AddedFields() []string {
 	if m.addairs_before_episode_number != nil {
 		fields = append(fields, item.FieldAirsBeforeEpisodeNumber)
 	}
+	if m.addscan_generation != nil {
+		fields = append(fields, item.FieldScanGeneration)
+	}
 	return fields
 }
 
@@ -5458,6 +6330,8 @@ func (m *ItemMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedAirsAfterSeasonNumber()
 	case item.FieldAirsBeforeEpisodeNumber:
 		return m.AddedAirsBeforeEpisodeNumber()
+	case item.FieldScanGeneration:
+		return m.AddedScanGeneration()
 	}
 	return nil, false
 }
@@ -5544,6 +6418,13 @@ func (m *ItemMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddAirsBeforeEpisodeNumber(v)
 		return nil
+	case item.FieldScanGeneration:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScanGeneration(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Item numeric field %s", name)
 }
@@ -5602,6 +6483,9 @@ func (m *ItemMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(item.FieldMetadataRefreshedAt) {
 		fields = append(fields, item.FieldMetadataRefreshedAt)
+	}
+	if m.FieldCleared(item.FieldMissingSince) {
+		fields = append(fields, item.FieldMissingSince)
 	}
 	return fields
 }
@@ -5667,6 +6551,9 @@ func (m *ItemMutation) ClearField(name string) error {
 		return nil
 	case item.FieldMetadataRefreshedAt:
 		m.ClearMetadataRefreshedAt()
+		return nil
+	case item.FieldMissingSince:
+		m.ClearMissingSince()
 		return nil
 	}
 	return fmt.Errorf("unknown Item nullable field %s", name)
@@ -5816,6 +6703,12 @@ func (m *ItemMutation) ResetField(name string) error {
 		return nil
 	case item.FieldMetadataRefreshedAt:
 		m.ResetMetadataRefreshedAt()
+		return nil
+	case item.FieldScanGeneration:
+		m.ResetScanGeneration()
+		return nil
+	case item.FieldMissingSince:
+		m.ResetMissingSince()
 		return nil
 	}
 	return fmt.Errorf("unknown Item field %s", name)
@@ -7946,26 +8839,31 @@ func (m *JobMutation) ResetEdge(name string) error {
 // LibraryMutation represents an operation that mutates the Library nodes in the graph.
 type LibraryMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *core.ID
-	name               *string
-	kind               *string
-	paths              *[]string
-	appendpaths        []string
-	scan_interval      *time.Duration
-	addscan_interval   *time.Duration
-	preferred_language *string
-	metadata_country   *string
-	created_at         *time.Time
-	updated_at         *time.Time
-	clearedFields      map[string]struct{}
-	items              map[core.ID]struct{}
-	removeditems       map[core.ID]struct{}
-	cleareditems       bool
-	done               bool
-	oldValue           func(context.Context) (*Library, error)
-	predicates         []predicate.Library
+	op                   Op
+	typ                  string
+	id                   *core.ID
+	name                 *string
+	kind                 *string
+	paths                *[]string
+	appendpaths          []string
+	scan_interval        *time.Duration
+	addscan_interval     *time.Duration
+	preferred_language   *string
+	metadata_country     *string
+	scan_generation      *int64
+	addscan_generation   *int64
+	created_at           *time.Time
+	updated_at           *time.Time
+	clearedFields        map[string]struct{}
+	items                map[core.ID]struct{}
+	removeditems         map[core.ID]struct{}
+	cleareditems         bool
+	folder_states        map[core.ID]struct{}
+	removedfolder_states map[core.ID]struct{}
+	clearedfolder_states bool
+	done                 bool
+	oldValue             func(context.Context) (*Library, error)
+	predicates           []predicate.Library
 }
 
 var _ ent.Mutation = (*LibraryMutation)(nil)
@@ -8323,6 +9221,62 @@ func (m *LibraryMutation) ResetMetadataCountry() {
 	m.metadata_country = nil
 }
 
+// SetScanGeneration sets the "scan_generation" field.
+func (m *LibraryMutation) SetScanGeneration(i int64) {
+	m.scan_generation = &i
+	m.addscan_generation = nil
+}
+
+// ScanGeneration returns the value of the "scan_generation" field in the mutation.
+func (m *LibraryMutation) ScanGeneration() (r int64, exists bool) {
+	v := m.scan_generation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScanGeneration returns the old "scan_generation" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldScanGeneration(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScanGeneration is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScanGeneration requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScanGeneration: %w", err)
+	}
+	return oldValue.ScanGeneration, nil
+}
+
+// AddScanGeneration adds i to the "scan_generation" field.
+func (m *LibraryMutation) AddScanGeneration(i int64) {
+	if m.addscan_generation != nil {
+		*m.addscan_generation += i
+	} else {
+		m.addscan_generation = &i
+	}
+}
+
+// AddedScanGeneration returns the value that was added to the "scan_generation" field in this mutation.
+func (m *LibraryMutation) AddedScanGeneration() (r int64, exists bool) {
+	v := m.addscan_generation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetScanGeneration resets all changes to the "scan_generation" field.
+func (m *LibraryMutation) ResetScanGeneration() {
+	m.scan_generation = nil
+	m.addscan_generation = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *LibraryMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -8449,6 +9403,60 @@ func (m *LibraryMutation) ResetItems() {
 	m.removeditems = nil
 }
 
+// AddFolderStateIDs adds the "folder_states" edge to the FolderState entity by ids.
+func (m *LibraryMutation) AddFolderStateIDs(ids ...core.ID) {
+	if m.folder_states == nil {
+		m.folder_states = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.folder_states[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFolderStates clears the "folder_states" edge to the FolderState entity.
+func (m *LibraryMutation) ClearFolderStates() {
+	m.clearedfolder_states = true
+}
+
+// FolderStatesCleared reports if the "folder_states" edge to the FolderState entity was cleared.
+func (m *LibraryMutation) FolderStatesCleared() bool {
+	return m.clearedfolder_states
+}
+
+// RemoveFolderStateIDs removes the "folder_states" edge to the FolderState entity by IDs.
+func (m *LibraryMutation) RemoveFolderStateIDs(ids ...core.ID) {
+	if m.removedfolder_states == nil {
+		m.removedfolder_states = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.folder_states, ids[i])
+		m.removedfolder_states[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFolderStates returns the removed IDs of the "folder_states" edge to the FolderState entity.
+func (m *LibraryMutation) RemovedFolderStatesIDs() (ids []core.ID) {
+	for id := range m.removedfolder_states {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FolderStatesIDs returns the "folder_states" edge IDs in the mutation.
+func (m *LibraryMutation) FolderStatesIDs() (ids []core.ID) {
+	for id := range m.folder_states {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFolderStates resets all changes to the "folder_states" edge.
+func (m *LibraryMutation) ResetFolderStates() {
+	m.folder_states = nil
+	m.clearedfolder_states = false
+	m.removedfolder_states = nil
+}
+
 // Where appends a list predicates to the LibraryMutation builder.
 func (m *LibraryMutation) Where(ps ...predicate.Library) {
 	m.predicates = append(m.predicates, ps...)
@@ -8483,7 +9491,7 @@ func (m *LibraryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LibraryMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.name != nil {
 		fields = append(fields, library.FieldName)
 	}
@@ -8501,6 +9509,9 @@ func (m *LibraryMutation) Fields() []string {
 	}
 	if m.metadata_country != nil {
 		fields = append(fields, library.FieldMetadataCountry)
+	}
+	if m.scan_generation != nil {
+		fields = append(fields, library.FieldScanGeneration)
 	}
 	if m.created_at != nil {
 		fields = append(fields, library.FieldCreatedAt)
@@ -8528,6 +9539,8 @@ func (m *LibraryMutation) Field(name string) (ent.Value, bool) {
 		return m.PreferredLanguage()
 	case library.FieldMetadataCountry:
 		return m.MetadataCountry()
+	case library.FieldScanGeneration:
+		return m.ScanGeneration()
 	case library.FieldCreatedAt:
 		return m.CreatedAt()
 	case library.FieldUpdatedAt:
@@ -8553,6 +9566,8 @@ func (m *LibraryMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldPreferredLanguage(ctx)
 	case library.FieldMetadataCountry:
 		return m.OldMetadataCountry(ctx)
+	case library.FieldScanGeneration:
+		return m.OldScanGeneration(ctx)
 	case library.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case library.FieldUpdatedAt:
@@ -8608,6 +9623,13 @@ func (m *LibraryMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMetadataCountry(v)
 		return nil
+	case library.FieldScanGeneration:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScanGeneration(v)
+		return nil
 	case library.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -8633,6 +9655,9 @@ func (m *LibraryMutation) AddedFields() []string {
 	if m.addscan_interval != nil {
 		fields = append(fields, library.FieldScanInterval)
 	}
+	if m.addscan_generation != nil {
+		fields = append(fields, library.FieldScanGeneration)
+	}
 	return fields
 }
 
@@ -8643,6 +9668,8 @@ func (m *LibraryMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case library.FieldScanInterval:
 		return m.AddedScanInterval()
+	case library.FieldScanGeneration:
+		return m.AddedScanGeneration()
 	}
 	return nil, false
 }
@@ -8658,6 +9685,13 @@ func (m *LibraryMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddScanInterval(v)
+		return nil
+	case library.FieldScanGeneration:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScanGeneration(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Library numeric field %s", name)
@@ -8704,6 +9738,9 @@ func (m *LibraryMutation) ResetField(name string) error {
 	case library.FieldMetadataCountry:
 		m.ResetMetadataCountry()
 		return nil
+	case library.FieldScanGeneration:
+		m.ResetScanGeneration()
+		return nil
 	case library.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
@@ -8716,9 +9753,12 @@ func (m *LibraryMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *LibraryMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.items != nil {
 		edges = append(edges, library.EdgeItems)
+	}
+	if m.folder_states != nil {
+		edges = append(edges, library.EdgeFolderStates)
 	}
 	return edges
 }
@@ -8733,15 +9773,24 @@ func (m *LibraryMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case library.EdgeFolderStates:
+		ids := make([]ent.Value, 0, len(m.folder_states))
+		for id := range m.folder_states {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *LibraryMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removeditems != nil {
 		edges = append(edges, library.EdgeItems)
+	}
+	if m.removedfolder_states != nil {
+		edges = append(edges, library.EdgeFolderStates)
 	}
 	return edges
 }
@@ -8756,15 +9805,24 @@ func (m *LibraryMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case library.EdgeFolderStates:
+		ids := make([]ent.Value, 0, len(m.removedfolder_states))
+		for id := range m.removedfolder_states {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *LibraryMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleareditems {
 		edges = append(edges, library.EdgeItems)
+	}
+	if m.clearedfolder_states {
+		edges = append(edges, library.EdgeFolderStates)
 	}
 	return edges
 }
@@ -8775,6 +9833,8 @@ func (m *LibraryMutation) EdgeCleared(name string) bool {
 	switch name {
 	case library.EdgeItems:
 		return m.cleareditems
+	case library.EdgeFolderStates:
+		return m.clearedfolder_states
 	}
 	return false
 }
@@ -8794,6 +9854,9 @@ func (m *LibraryMutation) ResetEdge(name string) error {
 	case library.EdgeItems:
 		m.ResetItems()
 		return nil
+	case library.EdgeFolderStates:
+		m.ResetFolderStates()
+		return nil
 	}
 	return fmt.Errorf("unknown Library edge %s", name)
 }
@@ -8807,10 +9870,14 @@ type MediaSourceMutation struct {
 	ord             *int
 	addord          *int
 	_path           *string
+	parts           *[]string
+	appendparts     []string
+	disc            *string
 	name            *string
 	container       *string
 	size            *int64
 	addsize         *int64
+	modified        *time.Time
 	duration        *time.Duration
 	addduration     *time.Duration
 	bitrate         *int64
@@ -9062,6 +10129,107 @@ func (m *MediaSourceMutation) ResetPath() {
 	m._path = nil
 }
 
+// SetParts sets the "parts" field.
+func (m *MediaSourceMutation) SetParts(s []string) {
+	m.parts = &s
+	m.appendparts = nil
+}
+
+// Parts returns the value of the "parts" field in the mutation.
+func (m *MediaSourceMutation) Parts() (r []string, exists bool) {
+	v := m.parts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParts returns the old "parts" field's value of the MediaSource entity.
+// If the MediaSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaSourceMutation) OldParts(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParts: %w", err)
+	}
+	return oldValue.Parts, nil
+}
+
+// AppendParts adds s to the "parts" field.
+func (m *MediaSourceMutation) AppendParts(s []string) {
+	m.appendparts = append(m.appendparts, s...)
+}
+
+// AppendedParts returns the list of values that were appended to the "parts" field in this mutation.
+func (m *MediaSourceMutation) AppendedParts() ([]string, bool) {
+	if len(m.appendparts) == 0 {
+		return nil, false
+	}
+	return m.appendparts, true
+}
+
+// ClearParts clears the value of the "parts" field.
+func (m *MediaSourceMutation) ClearParts() {
+	m.parts = nil
+	m.appendparts = nil
+	m.clearedFields[mediasource.FieldParts] = struct{}{}
+}
+
+// PartsCleared returns if the "parts" field was cleared in this mutation.
+func (m *MediaSourceMutation) PartsCleared() bool {
+	_, ok := m.clearedFields[mediasource.FieldParts]
+	return ok
+}
+
+// ResetParts resets all changes to the "parts" field.
+func (m *MediaSourceMutation) ResetParts() {
+	m.parts = nil
+	m.appendparts = nil
+	delete(m.clearedFields, mediasource.FieldParts)
+}
+
+// SetDisc sets the "disc" field.
+func (m *MediaSourceMutation) SetDisc(s string) {
+	m.disc = &s
+}
+
+// Disc returns the value of the "disc" field in the mutation.
+func (m *MediaSourceMutation) Disc() (r string, exists bool) {
+	v := m.disc
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisc returns the old "disc" field's value of the MediaSource entity.
+// If the MediaSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaSourceMutation) OldDisc(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisc is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisc requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisc: %w", err)
+	}
+	return oldValue.Disc, nil
+}
+
+// ResetDisc resets all changes to the "disc" field.
+func (m *MediaSourceMutation) ResetDisc() {
+	m.disc = nil
+}
+
 // SetName sets the "name" field.
 func (m *MediaSourceMutation) SetName(s string) {
 	m.name = &s
@@ -9188,6 +10356,55 @@ func (m *MediaSourceMutation) AddedSize() (r int64, exists bool) {
 func (m *MediaSourceMutation) ResetSize() {
 	m.size = nil
 	m.addsize = nil
+}
+
+// SetModified sets the "modified" field.
+func (m *MediaSourceMutation) SetModified(t time.Time) {
+	m.modified = &t
+}
+
+// Modified returns the value of the "modified" field in the mutation.
+func (m *MediaSourceMutation) Modified() (r time.Time, exists bool) {
+	v := m.modified
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModified returns the old "modified" field's value of the MediaSource entity.
+// If the MediaSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaSourceMutation) OldModified(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModified is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModified requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModified: %w", err)
+	}
+	return oldValue.Modified, nil
+}
+
+// ClearModified clears the value of the "modified" field.
+func (m *MediaSourceMutation) ClearModified() {
+	m.modified = nil
+	m.clearedFields[mediasource.FieldModified] = struct{}{}
+}
+
+// ModifiedCleared returns if the "modified" field was cleared in this mutation.
+func (m *MediaSourceMutation) ModifiedCleared() bool {
+	_, ok := m.clearedFields[mediasource.FieldModified]
+	return ok
+}
+
+// ResetModified resets all changes to the "modified" field.
+func (m *MediaSourceMutation) ResetModified() {
+	m.modified = nil
+	delete(m.clearedFields, mediasource.FieldModified)
 }
 
 // SetDuration sets the "duration" field.
@@ -9607,7 +10824,7 @@ func (m *MediaSourceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaSourceMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 15)
 	if m.item != nil {
 		fields = append(fields, mediasource.FieldItemID)
 	}
@@ -9617,6 +10834,12 @@ func (m *MediaSourceMutation) Fields() []string {
 	if m._path != nil {
 		fields = append(fields, mediasource.FieldPath)
 	}
+	if m.parts != nil {
+		fields = append(fields, mediasource.FieldParts)
+	}
+	if m.disc != nil {
+		fields = append(fields, mediasource.FieldDisc)
+	}
 	if m.name != nil {
 		fields = append(fields, mediasource.FieldName)
 	}
@@ -9625,6 +10848,9 @@ func (m *MediaSourceMutation) Fields() []string {
 	}
 	if m.size != nil {
 		fields = append(fields, mediasource.FieldSize)
+	}
+	if m.modified != nil {
+		fields = append(fields, mediasource.FieldModified)
 	}
 	if m.duration != nil {
 		fields = append(fields, mediasource.FieldDuration)
@@ -9658,12 +10884,18 @@ func (m *MediaSourceMutation) Field(name string) (ent.Value, bool) {
 		return m.Ord()
 	case mediasource.FieldPath:
 		return m.Path()
+	case mediasource.FieldParts:
+		return m.Parts()
+	case mediasource.FieldDisc:
+		return m.Disc()
 	case mediasource.FieldName:
 		return m.Name()
 	case mediasource.FieldContainer:
 		return m.Container()
 	case mediasource.FieldSize:
 		return m.Size()
+	case mediasource.FieldModified:
+		return m.Modified()
 	case mediasource.FieldDuration:
 		return m.Duration()
 	case mediasource.FieldBitrate:
@@ -9691,12 +10923,18 @@ func (m *MediaSourceMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldOrd(ctx)
 	case mediasource.FieldPath:
 		return m.OldPath(ctx)
+	case mediasource.FieldParts:
+		return m.OldParts(ctx)
+	case mediasource.FieldDisc:
+		return m.OldDisc(ctx)
 	case mediasource.FieldName:
 		return m.OldName(ctx)
 	case mediasource.FieldContainer:
 		return m.OldContainer(ctx)
 	case mediasource.FieldSize:
 		return m.OldSize(ctx)
+	case mediasource.FieldModified:
+		return m.OldModified(ctx)
 	case mediasource.FieldDuration:
 		return m.OldDuration(ctx)
 	case mediasource.FieldBitrate:
@@ -9739,6 +10977,20 @@ func (m *MediaSourceMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPath(v)
 		return nil
+	case mediasource.FieldParts:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParts(v)
+		return nil
+	case mediasource.FieldDisc:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisc(v)
+		return nil
 	case mediasource.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -9759,6 +11011,13 @@ func (m *MediaSourceMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSize(v)
+		return nil
+	case mediasource.FieldModified:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModified(v)
 		return nil
 	case mediasource.FieldDuration:
 		v, ok := value.(time.Duration)
@@ -9883,6 +11142,12 @@ func (m *MediaSourceMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *MediaSourceMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(mediasource.FieldParts) {
+		fields = append(fields, mediasource.FieldParts)
+	}
+	if m.FieldCleared(mediasource.FieldModified) {
+		fields = append(fields, mediasource.FieldModified)
+	}
 	if m.FieldCleared(mediasource.FieldStreams) {
 		fields = append(fields, mediasource.FieldStreams)
 	}
@@ -9909,6 +11174,12 @@ func (m *MediaSourceMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *MediaSourceMutation) ClearField(name string) error {
 	switch name {
+	case mediasource.FieldParts:
+		m.ClearParts()
+		return nil
+	case mediasource.FieldModified:
+		m.ClearModified()
+		return nil
 	case mediasource.FieldStreams:
 		m.ClearStreams()
 		return nil
@@ -9938,6 +11209,12 @@ func (m *MediaSourceMutation) ResetField(name string) error {
 	case mediasource.FieldPath:
 		m.ResetPath()
 		return nil
+	case mediasource.FieldParts:
+		m.ResetParts()
+		return nil
+	case mediasource.FieldDisc:
+		m.ResetDisc()
+		return nil
 	case mediasource.FieldName:
 		m.ResetName()
 		return nil
@@ -9946,6 +11223,9 @@ func (m *MediaSourceMutation) ResetField(name string) error {
 		return nil
 	case mediasource.FieldSize:
 		m.ResetSize()
+		return nil
+	case mediasource.FieldModified:
+		m.ResetModified()
 		return nil
 	case mediasource.FieldDuration:
 		m.ResetDuration()

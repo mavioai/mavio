@@ -7,6 +7,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -33,6 +34,24 @@ func init() {
 	creditDescOrd := creditFields[4].Descriptor()
 	// credit.DefaultOrd holds the default value on creation for the ord field.
 	credit.DefaultOrd = creditDescOrd.Default.(int)
+	folderstateFields := schema.FolderState{}.Fields()
+	_ = folderstateFields
+	// folderstateDescModTime is the schema descriptor for mod_time field.
+	folderstateDescModTime := folderstateFields[3].Descriptor()
+	// folderstate.DefaultModTime holds the default value on creation for the mod_time field.
+	folderstate.DefaultModTime = folderstateDescModTime.Default.(time.Time)
+	// folderstateDescFileID is the schema descriptor for file_id field.
+	folderstateDescFileID := folderstateFields[4].Descriptor()
+	// folderstate.DefaultFileID holds the default value on creation for the file_id field.
+	folderstate.DefaultFileID = folderstateDescFileID.Default.(string)
+	// folderstateDescGeneration is the schema descriptor for generation field.
+	folderstateDescGeneration := folderstateFields[6].Descriptor()
+	// folderstate.DefaultGeneration holds the default value on creation for the generation field.
+	folderstate.DefaultGeneration = folderstateDescGeneration.Default.(int64)
+	// folderstateDescID is the schema descriptor for id field.
+	folderstateDescID := folderstateFields[0].Descriptor()
+	// folderstate.DefaultID holds the default value on creation for the id field.
+	folderstate.DefaultID = folderstateDescID.Default.(func() core.ID)
 	imageFields := schema.Image{}.Fields()
 	_ = imageFields
 	// imageDescIndex is the schema descriptor for index field.
@@ -161,6 +180,10 @@ func init() {
 	itemDescExtra := itemFields[43].Descriptor()
 	// item.DefaultExtra holds the default value on creation for the extra field.
 	item.DefaultExtra = itemDescExtra.Default.(string)
+	// itemDescScanGeneration is the schema descriptor for scan_generation field.
+	itemDescScanGeneration := itemFields[48].Descriptor()
+	// item.DefaultScanGeneration holds the default value on creation for the scan_generation field.
+	item.DefaultScanGeneration = itemDescScanGeneration.Default.(int64)
 	// itemDescID is the schema descriptor for id field.
 	itemDescID := itemFields[0].Descriptor()
 	// item.DefaultID holds the default value on creation for the id field.
@@ -223,12 +246,16 @@ func init() {
 	libraryDescMetadataCountry := libraryFields[6].Descriptor()
 	// library.DefaultMetadataCountry holds the default value on creation for the metadata_country field.
 	library.DefaultMetadataCountry = libraryDescMetadataCountry.Default.(string)
+	// libraryDescScanGeneration is the schema descriptor for scan_generation field.
+	libraryDescScanGeneration := libraryFields[7].Descriptor()
+	// library.DefaultScanGeneration holds the default value on creation for the scan_generation field.
+	library.DefaultScanGeneration = libraryDescScanGeneration.Default.(int64)
 	// libraryDescCreatedAt is the schema descriptor for created_at field.
-	libraryDescCreatedAt := libraryFields[7].Descriptor()
+	libraryDescCreatedAt := libraryFields[8].Descriptor()
 	// library.DefaultCreatedAt holds the default value on creation for the created_at field.
 	library.DefaultCreatedAt = libraryDescCreatedAt.Default.(func() time.Time)
 	// libraryDescUpdatedAt is the schema descriptor for updated_at field.
-	libraryDescUpdatedAt := libraryFields[8].Descriptor()
+	libraryDescUpdatedAt := libraryFields[9].Descriptor()
 	// library.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	library.DefaultUpdatedAt = libraryDescUpdatedAt.Default.(func() time.Time)
 	// library.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -239,24 +266,28 @@ func init() {
 	library.DefaultID = libraryDescID.Default.(func() core.ID)
 	mediasourceFields := schema.MediaSource{}.Fields()
 	_ = mediasourceFields
+	// mediasourceDescDisc is the schema descriptor for disc field.
+	mediasourceDescDisc := mediasourceFields[5].Descriptor()
+	// mediasource.DefaultDisc holds the default value on creation for the disc field.
+	mediasource.DefaultDisc = mediasourceDescDisc.Default.(string)
 	// mediasourceDescName is the schema descriptor for name field.
-	mediasourceDescName := mediasourceFields[4].Descriptor()
+	mediasourceDescName := mediasourceFields[6].Descriptor()
 	// mediasource.DefaultName holds the default value on creation for the name field.
 	mediasource.DefaultName = mediasourceDescName.Default.(string)
 	// mediasourceDescContainer is the schema descriptor for container field.
-	mediasourceDescContainer := mediasourceFields[5].Descriptor()
+	mediasourceDescContainer := mediasourceFields[7].Descriptor()
 	// mediasource.DefaultContainer holds the default value on creation for the container field.
 	mediasource.DefaultContainer = mediasourceDescContainer.Default.(string)
 	// mediasourceDescSize is the schema descriptor for size field.
-	mediasourceDescSize := mediasourceFields[6].Descriptor()
+	mediasourceDescSize := mediasourceFields[8].Descriptor()
 	// mediasource.DefaultSize holds the default value on creation for the size field.
 	mediasource.DefaultSize = mediasourceDescSize.Default.(int64)
 	// mediasourceDescDuration is the schema descriptor for duration field.
-	mediasourceDescDuration := mediasourceFields[7].Descriptor()
+	mediasourceDescDuration := mediasourceFields[10].Descriptor()
 	// mediasource.DefaultDuration holds the default value on creation for the duration field.
 	mediasource.DefaultDuration = time.Duration(mediasourceDescDuration.Default.(int64))
 	// mediasourceDescBitrate is the schema descriptor for bitrate field.
-	mediasourceDescBitrate := mediasourceFields[8].Descriptor()
+	mediasourceDescBitrate := mediasourceFields[11].Descriptor()
 	// mediasource.DefaultBitrate holds the default value on creation for the bitrate field.
 	mediasource.DefaultBitrate = mediasourceDescBitrate.Default.(int64)
 	// mediasourceDescID is the schema descriptor for id field.

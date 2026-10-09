@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Credit is the client for interacting with the Credit builders.
 	Credit *CreditClient
+	// FolderState is the client for interacting with the FolderState builders.
+	FolderState *FolderStateClient
 	// Image is the client for interacting with the Image builders.
 	Image *ImageClient
 	// Item is the client for interacting with the Item builders.
@@ -164,6 +166,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Credit = NewCreditClient(tx.config)
+	tx.FolderState = NewFolderStateClient(tx.config)
 	tx.Image = NewImageClient(tx.config)
 	tx.Item = NewItemClient(tx.config)
 	tx.ItemValue = NewItemValueClient(tx.config)

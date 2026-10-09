@@ -28,6 +28,8 @@ func (Library) Fields() []ent.Field {
 		field.Int64("scan_interval").GoType(time.Duration(0)).Default(0),
 		field.String("preferred_language").Default(""),
 		field.String("metadata_country").Default(""),
+		// scan_generation counts the library's scans.
+		field.Int64("scan_generation").Default(0),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
@@ -37,5 +39,6 @@ func (Library) Fields() []ent.Field {
 func (Library) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("items", Item.Type).Annotations(cascade()),
+		edge.To("folder_states", FolderState.Type).Annotations(cascade()),
 	}
 }

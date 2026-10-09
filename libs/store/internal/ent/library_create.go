@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 )
@@ -85,6 +86,20 @@ func (_c *LibraryCreate) SetNillableMetadataCountry(v *string) *LibraryCreate {
 	return _c
 }
 
+// SetScanGeneration sets the "scan_generation" field.
+func (_c *LibraryCreate) SetScanGeneration(v int64) *LibraryCreate {
+	_c.mutation.SetScanGeneration(v)
+	return _c
+}
+
+// SetNillableScanGeneration sets the "scan_generation" field if the given value is not nil.
+func (_c *LibraryCreate) SetNillableScanGeneration(v *int64) *LibraryCreate {
+	if v != nil {
+		_c.SetScanGeneration(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *LibraryCreate) SetCreatedAt(v time.Time) *LibraryCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -142,6 +157,21 @@ func (_c *LibraryCreate) AddItems(v ...*Item) *LibraryCreate {
 	return _c.AddItemIDs(ids...)
 }
 
+// AddFolderStateIDs adds the "folder_states" edge to the FolderState entity by IDs.
+func (_c *LibraryCreate) AddFolderStateIDs(ids ...core.ID) *LibraryCreate {
+	_c.mutation.AddFolderStateIDs(ids...)
+	return _c
+}
+
+// AddFolderStates adds the "folder_states" edges to the FolderState entity.
+func (_c *LibraryCreate) AddFolderStates(v ...*FolderState) *LibraryCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddFolderStateIDs(ids...)
+}
+
 // Mutation returns the LibraryMutation object of the builder.
 func (_c *LibraryCreate) Mutation() *LibraryMutation {
 	return _c.mutation
@@ -189,6 +219,10 @@ func (_c *LibraryCreate) defaults() {
 		v := library.DefaultMetadataCountry
 		_c.mutation.SetMetadataCountry(v)
 	}
+	if _, ok := _c.mutation.ScanGeneration(); !ok {
+		v := library.DefaultScanGeneration
+		_c.mutation.SetScanGeneration(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := library.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -227,6 +261,9 @@ func (_c *LibraryCreate) check() error {
 	}
 	if _, ok := _c.mutation.MetadataCountry(); !ok {
 		return &ValidationError{Name: "metadata_country", err: errors.New(`ent: missing required field "Library.metadata_country"`)}
+	}
+	if _, ok := _c.mutation.ScanGeneration(); !ok {
+		return &ValidationError{Name: "scan_generation", err: errors.New(`ent: missing required field "Library.scan_generation"`)}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Library.created_at"`)}
@@ -294,6 +331,10 @@ func (_c *LibraryCreate) createSpec() (*Library, *sqlgraph.CreateSpec) {
 		_spec.SetField(library.FieldMetadataCountry, field.TypeString, value)
 		_node.MetadataCountry = value
 	}
+	if value, ok := _c.mutation.ScanGeneration(); ok {
+		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
+		_node.ScanGeneration = value
+	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(library.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -311,6 +352,22 @@ func (_c *LibraryCreate) createSpec() (*Library, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.FolderStatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   library.FolderStatesTable,
+			Columns: []string{library.FolderStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -445,6 +502,24 @@ func (u *LibraryUpsert) SetMetadataCountry(v string) *LibraryUpsert {
 // UpdateMetadataCountry sets the "metadata_country" field to the value that was provided on create.
 func (u *LibraryUpsert) UpdateMetadataCountry() *LibraryUpsert {
 	u.SetExcluded(library.FieldMetadataCountry)
+	return u
+}
+
+// SetScanGeneration sets the "scan_generation" field.
+func (u *LibraryUpsert) SetScanGeneration(v int64) *LibraryUpsert {
+	u.Set(library.FieldScanGeneration, v)
+	return u
+}
+
+// UpdateScanGeneration sets the "scan_generation" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateScanGeneration() *LibraryUpsert {
+	u.SetExcluded(library.FieldScanGeneration)
+	return u
+}
+
+// AddScanGeneration adds v to the "scan_generation" field.
+func (u *LibraryUpsert) AddScanGeneration(v int64) *LibraryUpsert {
+	u.Add(library.FieldScanGeneration, v)
 	return u
 }
 
@@ -599,6 +674,27 @@ func (u *LibraryUpsertOne) SetMetadataCountry(v string) *LibraryUpsertOne {
 func (u *LibraryUpsertOne) UpdateMetadataCountry() *LibraryUpsertOne {
 	return u.Update(func(s *LibraryUpsert) {
 		s.UpdateMetadataCountry()
+	})
+}
+
+// SetScanGeneration sets the "scan_generation" field.
+func (u *LibraryUpsertOne) SetScanGeneration(v int64) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetScanGeneration(v)
+	})
+}
+
+// AddScanGeneration adds v to the "scan_generation" field.
+func (u *LibraryUpsertOne) AddScanGeneration(v int64) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.AddScanGeneration(v)
+	})
+}
+
+// UpdateScanGeneration sets the "scan_generation" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateScanGeneration() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateScanGeneration()
 	})
 }
 
@@ -922,6 +1018,27 @@ func (u *LibraryUpsertBulk) SetMetadataCountry(v string) *LibraryUpsertBulk {
 func (u *LibraryUpsertBulk) UpdateMetadataCountry() *LibraryUpsertBulk {
 	return u.Update(func(s *LibraryUpsert) {
 		s.UpdateMetadataCountry()
+	})
+}
+
+// SetScanGeneration sets the "scan_generation" field.
+func (u *LibraryUpsertBulk) SetScanGeneration(v int64) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetScanGeneration(v)
+	})
+}
+
+// AddScanGeneration adds v to the "scan_generation" field.
+func (u *LibraryUpsertBulk) AddScanGeneration(v int64) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.AddScanGeneration(v)
+	})
+}
+
+// UpdateScanGeneration sets the "scan_generation" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateScanGeneration() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateScanGeneration()
 	})
 }
 

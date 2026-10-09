@@ -43,6 +43,26 @@ func (_c *MediaSourceCreate) SetPath(v string) *MediaSourceCreate {
 	return _c
 }
 
+// SetParts sets the "parts" field.
+func (_c *MediaSourceCreate) SetParts(v []string) *MediaSourceCreate {
+	_c.mutation.SetParts(v)
+	return _c
+}
+
+// SetDisc sets the "disc" field.
+func (_c *MediaSourceCreate) SetDisc(v string) *MediaSourceCreate {
+	_c.mutation.SetDisc(v)
+	return _c
+}
+
+// SetNillableDisc sets the "disc" field if the given value is not nil.
+func (_c *MediaSourceCreate) SetNillableDisc(v *string) *MediaSourceCreate {
+	if v != nil {
+		_c.SetDisc(*v)
+	}
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *MediaSourceCreate) SetName(v string) *MediaSourceCreate {
 	_c.mutation.SetName(v)
@@ -81,6 +101,20 @@ func (_c *MediaSourceCreate) SetSize(v int64) *MediaSourceCreate {
 func (_c *MediaSourceCreate) SetNillableSize(v *int64) *MediaSourceCreate {
 	if v != nil {
 		_c.SetSize(*v)
+	}
+	return _c
+}
+
+// SetModified sets the "modified" field.
+func (_c *MediaSourceCreate) SetModified(v time.Time) *MediaSourceCreate {
+	_c.mutation.SetModified(v)
+	return _c
+}
+
+// SetNillableModified sets the "modified" field if the given value is not nil.
+func (_c *MediaSourceCreate) SetNillableModified(v *time.Time) *MediaSourceCreate {
+	if v != nil {
+		_c.SetModified(*v)
 	}
 	return _c
 }
@@ -199,6 +233,10 @@ func (_c *MediaSourceCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *MediaSourceCreate) defaults() {
+	if _, ok := _c.mutation.Disc(); !ok {
+		v := mediasource.DefaultDisc
+		_c.mutation.SetDisc(v)
+	}
 	if _, ok := _c.mutation.Name(); !ok {
 		v := mediasource.DefaultName
 		_c.mutation.SetName(v)
@@ -235,6 +273,9 @@ func (_c *MediaSourceCreate) check() error {
 	}
 	if _, ok := _c.mutation.Path(); !ok {
 		return &ValidationError{Name: "path", err: errors.New(`ent: missing required field "MediaSource.path"`)}
+	}
+	if _, ok := _c.mutation.Disc(); !ok {
+		return &ValidationError{Name: "disc", err: errors.New(`ent: missing required field "MediaSource.disc"`)}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "MediaSource.name"`)}
@@ -298,6 +339,14 @@ func (_c *MediaSourceCreate) createSpec() (*MediaSource, *sqlgraph.CreateSpec) {
 		_spec.SetField(mediasource.FieldPath, field.TypeString, value)
 		_node.Path = value
 	}
+	if value, ok := _c.mutation.Parts(); ok {
+		_spec.SetField(mediasource.FieldParts, field.TypeJSON, value)
+		_node.Parts = value
+	}
+	if value, ok := _c.mutation.Disc(); ok {
+		_spec.SetField(mediasource.FieldDisc, field.TypeString, value)
+		_node.Disc = value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(mediasource.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -309,6 +358,10 @@ func (_c *MediaSourceCreate) createSpec() (*MediaSource, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Size(); ok {
 		_spec.SetField(mediasource.FieldSize, field.TypeInt64, value)
 		_node.Size = value
+	}
+	if value, ok := _c.mutation.Modified(); ok {
+		_spec.SetField(mediasource.FieldModified, field.TypeTime, value)
+		_node.Modified = &value
 	}
 	if value, ok := _c.mutation.Duration(); ok {
 		_spec.SetField(mediasource.FieldDuration, field.TypeInt64, value)
@@ -445,6 +498,36 @@ func (u *MediaSourceUpsert) UpdatePath() *MediaSourceUpsert {
 	return u
 }
 
+// SetParts sets the "parts" field.
+func (u *MediaSourceUpsert) SetParts(v []string) *MediaSourceUpsert {
+	u.Set(mediasource.FieldParts, v)
+	return u
+}
+
+// UpdateParts sets the "parts" field to the value that was provided on create.
+func (u *MediaSourceUpsert) UpdateParts() *MediaSourceUpsert {
+	u.SetExcluded(mediasource.FieldParts)
+	return u
+}
+
+// ClearParts clears the value of the "parts" field.
+func (u *MediaSourceUpsert) ClearParts() *MediaSourceUpsert {
+	u.SetNull(mediasource.FieldParts)
+	return u
+}
+
+// SetDisc sets the "disc" field.
+func (u *MediaSourceUpsert) SetDisc(v string) *MediaSourceUpsert {
+	u.Set(mediasource.FieldDisc, v)
+	return u
+}
+
+// UpdateDisc sets the "disc" field to the value that was provided on create.
+func (u *MediaSourceUpsert) UpdateDisc() *MediaSourceUpsert {
+	u.SetExcluded(mediasource.FieldDisc)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *MediaSourceUpsert) SetName(v string) *MediaSourceUpsert {
 	u.Set(mediasource.FieldName, v)
@@ -484,6 +567,24 @@ func (u *MediaSourceUpsert) UpdateSize() *MediaSourceUpsert {
 // AddSize adds v to the "size" field.
 func (u *MediaSourceUpsert) AddSize(v int64) *MediaSourceUpsert {
 	u.Add(mediasource.FieldSize, v)
+	return u
+}
+
+// SetModified sets the "modified" field.
+func (u *MediaSourceUpsert) SetModified(v time.Time) *MediaSourceUpsert {
+	u.Set(mediasource.FieldModified, v)
+	return u
+}
+
+// UpdateModified sets the "modified" field to the value that was provided on create.
+func (u *MediaSourceUpsert) UpdateModified() *MediaSourceUpsert {
+	u.SetExcluded(mediasource.FieldModified)
+	return u
+}
+
+// ClearModified clears the value of the "modified" field.
+func (u *MediaSourceUpsert) ClearModified() *MediaSourceUpsert {
+	u.SetNull(mediasource.FieldModified)
 	return u
 }
 
@@ -692,6 +793,41 @@ func (u *MediaSourceUpsertOne) UpdatePath() *MediaSourceUpsertOne {
 	})
 }
 
+// SetParts sets the "parts" field.
+func (u *MediaSourceUpsertOne) SetParts(v []string) *MediaSourceUpsertOne {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.SetParts(v)
+	})
+}
+
+// UpdateParts sets the "parts" field to the value that was provided on create.
+func (u *MediaSourceUpsertOne) UpdateParts() *MediaSourceUpsertOne {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.UpdateParts()
+	})
+}
+
+// ClearParts clears the value of the "parts" field.
+func (u *MediaSourceUpsertOne) ClearParts() *MediaSourceUpsertOne {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.ClearParts()
+	})
+}
+
+// SetDisc sets the "disc" field.
+func (u *MediaSourceUpsertOne) SetDisc(v string) *MediaSourceUpsertOne {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.SetDisc(v)
+	})
+}
+
+// UpdateDisc sets the "disc" field to the value that was provided on create.
+func (u *MediaSourceUpsertOne) UpdateDisc() *MediaSourceUpsertOne {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.UpdateDisc()
+	})
+}
+
 // SetName sets the "name" field.
 func (u *MediaSourceUpsertOne) SetName(v string) *MediaSourceUpsertOne {
 	return u.Update(func(s *MediaSourceUpsert) {
@@ -738,6 +874,27 @@ func (u *MediaSourceUpsertOne) AddSize(v int64) *MediaSourceUpsertOne {
 func (u *MediaSourceUpsertOne) UpdateSize() *MediaSourceUpsertOne {
 	return u.Update(func(s *MediaSourceUpsert) {
 		s.UpdateSize()
+	})
+}
+
+// SetModified sets the "modified" field.
+func (u *MediaSourceUpsertOne) SetModified(v time.Time) *MediaSourceUpsertOne {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.SetModified(v)
+	})
+}
+
+// UpdateModified sets the "modified" field to the value that was provided on create.
+func (u *MediaSourceUpsertOne) UpdateModified() *MediaSourceUpsertOne {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.UpdateModified()
+	})
+}
+
+// ClearModified clears the value of the "modified" field.
+func (u *MediaSourceUpsertOne) ClearModified() *MediaSourceUpsertOne {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.ClearModified()
 	})
 }
 
@@ -1131,6 +1288,41 @@ func (u *MediaSourceUpsertBulk) UpdatePath() *MediaSourceUpsertBulk {
 	})
 }
 
+// SetParts sets the "parts" field.
+func (u *MediaSourceUpsertBulk) SetParts(v []string) *MediaSourceUpsertBulk {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.SetParts(v)
+	})
+}
+
+// UpdateParts sets the "parts" field to the value that was provided on create.
+func (u *MediaSourceUpsertBulk) UpdateParts() *MediaSourceUpsertBulk {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.UpdateParts()
+	})
+}
+
+// ClearParts clears the value of the "parts" field.
+func (u *MediaSourceUpsertBulk) ClearParts() *MediaSourceUpsertBulk {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.ClearParts()
+	})
+}
+
+// SetDisc sets the "disc" field.
+func (u *MediaSourceUpsertBulk) SetDisc(v string) *MediaSourceUpsertBulk {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.SetDisc(v)
+	})
+}
+
+// UpdateDisc sets the "disc" field to the value that was provided on create.
+func (u *MediaSourceUpsertBulk) UpdateDisc() *MediaSourceUpsertBulk {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.UpdateDisc()
+	})
+}
+
 // SetName sets the "name" field.
 func (u *MediaSourceUpsertBulk) SetName(v string) *MediaSourceUpsertBulk {
 	return u.Update(func(s *MediaSourceUpsert) {
@@ -1177,6 +1369,27 @@ func (u *MediaSourceUpsertBulk) AddSize(v int64) *MediaSourceUpsertBulk {
 func (u *MediaSourceUpsertBulk) UpdateSize() *MediaSourceUpsertBulk {
 	return u.Update(func(s *MediaSourceUpsert) {
 		s.UpdateSize()
+	})
+}
+
+// SetModified sets the "modified" field.
+func (u *MediaSourceUpsertBulk) SetModified(v time.Time) *MediaSourceUpsertBulk {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.SetModified(v)
+	})
+}
+
+// UpdateModified sets the "modified" field to the value that was provided on create.
+func (u *MediaSourceUpsertBulk) UpdateModified() *MediaSourceUpsertBulk {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.UpdateModified()
+	})
+}
+
+// ClearModified clears the value of the "modified" field.
+func (u *MediaSourceUpsertBulk) ClearModified() *MediaSourceUpsertBulk {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.ClearModified()
 	})
 }
 

@@ -50,6 +50,42 @@ var (
 			},
 		},
 	}
+	// FolderStatesColumns holds the columns for the "folder_states" table.
+	FolderStatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "path", Type: field.TypeString},
+		{Name: "mod_time", Type: field.TypeTime},
+		{Name: "file_id", Type: field.TypeString, Default: ""},
+		{Name: "entries", Type: field.TypeJSON, Nullable: true},
+		{Name: "generation", Type: field.TypeInt64, Default: 0},
+		{Name: "library_id", Type: field.TypeUUID},
+	}
+	// FolderStatesTable holds the schema information for the "folder_states" table.
+	FolderStatesTable = &schema.Table{
+		Name:       "folder_states",
+		Columns:    FolderStatesColumns,
+		PrimaryKey: []*schema.Column{FolderStatesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "folder_states_libraries_folder_states",
+				Columns:    []*schema.Column{FolderStatesColumns[6]},
+				RefColumns: []*schema.Column{LibrariesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "folderstate_library_id_path",
+				Unique:  true,
+				Columns: []*schema.Column{FolderStatesColumns[6], FolderStatesColumns[1]},
+			},
+			{
+				Name:    "folderstate_library_id_generation",
+				Unique:  false,
+				Columns: []*schema.Column{FolderStatesColumns[6], FolderStatesColumns[5]},
+			},
+		},
+	}
 	// ImagesColumns holds the columns for the "images" table.
 	ImagesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -143,6 +179,8 @@ var (
 		{Name: "date_added", Type: field.TypeTime},
 		{Name: "file_modified", Type: field.TypeTime, Nullable: true},
 		{Name: "metadata_refreshed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "scan_generation", Type: field.TypeInt64, Default: 0},
+		{Name: "missing_since", Type: field.TypeTime, Nullable: true},
 		{Name: "parent_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "owner_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "library_id", Type: field.TypeUUID},
@@ -155,19 +193,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "items_items_children",
-				Columns:    []*schema.Column{ItemsColumns[45]},
+				Columns:    []*schema.Column{ItemsColumns[47]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_items_extras",
-				Columns:    []*schema.Column{ItemsColumns[46]},
+				Columns:    []*schema.Column{ItemsColumns[48]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_libraries_items",
-				Columns:    []*schema.Column{ItemsColumns[47]},
+				Columns:    []*schema.Column{ItemsColumns[49]},
 				RefColumns: []*schema.Column{LibrariesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -176,7 +214,7 @@ var (
 			{
 				Name:    "item_library_id_path",
 				Unique:  true,
-				Columns: []*schema.Column{ItemsColumns[47], ItemsColumns[10]},
+				Columns: []*schema.Column{ItemsColumns[49], ItemsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "path <> ''",
 				},
@@ -184,22 +222,27 @@ var (
 			{
 				Name:    "item_parent_id_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[45], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[47], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_library_id_kind_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[47], ItemsColumns[1], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[49], ItemsColumns[1], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_owner_id",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[46]},
+				Columns: []*schema.Column{ItemsColumns[48]},
 			},
 			{
 				Name:    "item_date_added",
 				Unique:  false,
 				Columns: []*schema.Column{ItemsColumns[42]},
+			},
+			{
+				Name:    "item_library_id_scan_generation",
+				Unique:  false,
+				Columns: []*schema.Column{ItemsColumns[49], ItemsColumns[45]},
 			},
 		},
 	}
@@ -286,6 +329,7 @@ var (
 		{Name: "scan_interval", Type: field.TypeInt64, Default: 0},
 		{Name: "preferred_language", Type: field.TypeString, Default: ""},
 		{Name: "metadata_country", Type: field.TypeString, Default: ""},
+		{Name: "scan_generation", Type: field.TypeInt64, Default: 0},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -300,9 +344,12 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "ord", Type: field.TypeInt},
 		{Name: "path", Type: field.TypeString},
+		{Name: "parts", Type: field.TypeJSON, Nullable: true},
+		{Name: "disc", Type: field.TypeString, Default: ""},
 		{Name: "name", Type: field.TypeString, Default: ""},
 		{Name: "container", Type: field.TypeString, Default: ""},
 		{Name: "size", Type: field.TypeInt64, Default: 0},
+		{Name: "modified", Type: field.TypeTime, Nullable: true},
 		{Name: "duration", Type: field.TypeInt64, Default: 0},
 		{Name: "bitrate", Type: field.TypeInt64, Default: 0},
 		{Name: "streams", Type: field.TypeJSON, Nullable: true},
@@ -319,7 +366,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "media_sources_items_media_sources",
-				Columns:    []*schema.Column{MediaSourcesColumns[12]},
+				Columns:    []*schema.Column{MediaSourcesColumns[15]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -328,7 +375,7 @@ var (
 			{
 				Name:    "mediasource_item_id_ord",
 				Unique:  true,
-				Columns: []*schema.Column{MediaSourcesColumns[12], MediaSourcesColumns[1]},
+				Columns: []*schema.Column{MediaSourcesColumns[15], MediaSourcesColumns[1]},
 			},
 		},
 	}
@@ -424,6 +471,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CreditsTable,
+		FolderStatesTable,
 		ImagesTable,
 		ItemsTable,
 		ItemValuesTable,
@@ -441,6 +489,10 @@ func init() {
 	CreditsTable.ForeignKeys[1].RefTable = PeopleTable
 	CreditsTable.Annotation = &entsql.Annotation{
 		Table: "credits",
+	}
+	FolderStatesTable.ForeignKeys[0].RefTable = LibrariesTable
+	FolderStatesTable.Annotation = &entsql.Annotation{
+		Table: "folder_states",
 	}
 	ImagesTable.ForeignKeys[0].RefTable = ItemsTable
 	ImagesTable.ForeignKeys[1].RefTable = PeopleTable
