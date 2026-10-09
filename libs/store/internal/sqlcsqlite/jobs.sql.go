@@ -134,8 +134,10 @@ UPDATE jobs
 SET state = 'running', attempts = attempts + 1, lease_owner = ?1, lease_expires_at = ?2
 WHERE id = (
   SELECT j.id FROM jobs j
-  WHERE j.kind IN (/*SLICE:kinds*/?)
-    AND ((j.state = 'pending' AND j.run_at <= ?4) OR (j.state = 'running' AND j.lease_expires_at < ?4))
+  -- The slice comes last: sqlc expands it to unnumbered parameters, which
+  -- SQLite numbers after the highest numbered one before them.
+  WHERE ((j.state = 'pending' AND j.run_at <= ?3) OR (j.state = 'running' AND j.lease_expires_at < ?3))
+    AND j.kind IN (/*SLICE:kinds*/?)
   ORDER BY j.priority DESC, j.run_at, j.id
   LIMIT 1
 )
@@ -145,8 +147,8 @@ RETURNING id, kind, payload, unique_key, state, priority, attempts, max_attempts
 type LeaseJobParams struct {
 	Owner     string
 	ExpiresAt sql.NullTime
-	Kinds     []string
 	Now       time.Time
+	Kinds     []string
 }
 
 func (q *Queries) LeaseJob(ctx context.Context, arg LeaseJobParams) (Job, error) {
@@ -154,6 +156,7 @@ func (q *Queries) LeaseJob(ctx context.Context, arg LeaseJobParams) (Job, error)
 	var queryParams []interface{}
 	queryParams = append(queryParams, arg.Owner)
 	queryParams = append(queryParams, arg.ExpiresAt)
+	queryParams = append(queryParams, arg.Now)
 	if len(arg.Kinds) > 0 {
 		for _, v := range arg.Kinds {
 			queryParams = append(queryParams, v)
@@ -162,7 +165,6 @@ func (q *Queries) LeaseJob(ctx context.Context, arg LeaseJobParams) (Job, error)
 	} else {
 		query = strings.Replace(query, "/*SLICE:kinds*/?", "NULL", 1)
 	}
-	queryParams = append(queryParams, arg.Now)
 	row := q.db.QueryRowContext(ctx, query, queryParams...)
 	var i Job
 	err := row.Scan(

@@ -8,8 +8,10 @@ UPDATE jobs
 SET state = 'running', attempts = attempts + 1, lease_owner = @owner, lease_expires_at = @expires_at
 WHERE id = (
   SELECT j.id FROM jobs j
-  WHERE j.kind IN (sqlc.slice('kinds'))
-    AND ((j.state = 'pending' AND j.run_at <= @now) OR (j.state = 'running' AND j.lease_expires_at < @now))
+  -- The slice comes last: sqlc expands it to unnumbered parameters, which
+  -- SQLite numbers after the highest numbered one before them.
+  WHERE ((j.state = 'pending' AND j.run_at <= @now) OR (j.state = 'running' AND j.lease_expires_at < @now))
+    AND j.kind IN (sqlc.slice('kinds'))
   ORDER BY j.priority DESC, j.run_at, j.id
   LIMIT 1
 )

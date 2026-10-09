@@ -8,8 +8,10 @@ UPDATE jobs
 SET state = 'running', attempts = attempts + 1, lease_owner = @owner, lease_expires_at = @expires_at
 WHERE id = (
   SELECT j.id FROM jobs j
-  WHERE j.kind = ANY(@kinds::text[])
-    AND ((j.state = 'pending' AND j.run_at <= @now) OR (j.state = 'running' AND j.lease_expires_at < @now))
+  -- Parameters in the order of the SQLite query, so that the generated
+  -- parameter structs convert.
+  WHERE ((j.state = 'pending' AND j.run_at <= @now) OR (j.state = 'running' AND j.lease_expires_at < @now))
+    AND j.kind = ANY(@kinds::text[])
   ORDER BY j.priority DESC, j.run_at, j.id
   LIMIT 1
   FOR UPDATE SKIP LOCKED

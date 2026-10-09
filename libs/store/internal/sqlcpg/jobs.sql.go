@@ -134,8 +134,10 @@ UPDATE jobs
 SET state = 'running', attempts = attempts + 1, lease_owner = $1, lease_expires_at = $2
 WHERE id = (
   SELECT j.id FROM jobs j
-  WHERE j.kind = ANY($3::text[])
-    AND ((j.state = 'pending' AND j.run_at <= $4) OR (j.state = 'running' AND j.lease_expires_at < $4))
+  -- Parameters in the order of the SQLite query, so that the generated
+  -- parameter structs convert.
+  WHERE ((j.state = 'pending' AND j.run_at <= $3) OR (j.state = 'running' AND j.lease_expires_at < $3))
+    AND j.kind = ANY($4::text[])
   ORDER BY j.priority DESC, j.run_at, j.id
   LIMIT 1
   FOR UPDATE SKIP LOCKED
@@ -146,16 +148,16 @@ RETURNING id, kind, payload, unique_key, state, priority, attempts, max_attempts
 type LeaseJobParams struct {
 	Owner     string
 	ExpiresAt sql.NullTime
-	Kinds     []string
 	Now       time.Time
+	Kinds     []string
 }
 
 func (q *Queries) LeaseJob(ctx context.Context, arg LeaseJobParams) (Job, error) {
 	row := q.db.QueryRowContext(ctx, leaseJob,
 		arg.Owner,
 		arg.ExpiresAt,
-		pq.Array(arg.Kinds),
 		arg.Now,
+		pq.Array(arg.Kinds),
 	)
 	var i Job
 	err := row.Scan(

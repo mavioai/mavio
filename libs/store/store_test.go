@@ -579,6 +579,13 @@ func TestJobQueue(t *testing.T) {
 		if _, err := q.Lease(ctx, "w3", []string{"scan"}, time.Minute); !errors.Is(err, core.ErrNotFound) {
 			t.Errorf("third lease: %v, want ErrNotFound (remaining job not due)", err)
 		}
+		// Workers lease the kinds they handle at once.
+		if _, err := q.Lease(ctx, "w3", []string{"probe", "scan", "refresh"}, time.Minute); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("lease of several kinds: %v, want ErrNotFound (remaining job not due)", err)
+		}
+		if j, err := q.Lease(ctx, "w3", []string{"probe", "other", "refresh"}, time.Minute); err != nil || j.Kind != "other" {
+			t.Errorf("lease of several kinds = %+v, %v, want = the other job", j, err)
+		}
 
 		// While running, the unique key still deduplicates.
 		if added, _ := q.Enqueue(ctx, &core.Job{Kind: "scan", UniqueKey: "scan:lib1", MaxAttempts: 1}); added {
