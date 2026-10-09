@@ -119,7 +119,7 @@ func Catalog() []Spec {
 				[]string{
 					// Mark the frames interlaced, top field first, before interlaced encoding.
 					"-vf", "setfield=tff",
-					"-c:v", "mpeg2video", "-b:v", "4M", "-flags", "+ilme+ildct", "-top", "1", "-pix_fmt", "yuv420p",
+					"-c:v", "mpeg2video", "-b:v", "4M", "-flags", "+ilme+ildct", "-pix_fmt", "yuv420p",
 					"-c:a", "mp2", "-b:a", "192k",
 				}),
 		},
