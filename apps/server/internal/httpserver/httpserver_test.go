@@ -12,6 +12,7 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
+	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
@@ -37,7 +38,10 @@ func startServer(t *testing.T, configure func(*playback.Config)) (string, *store
 	if configure != nil {
 		configure(&cfg)
 	}
-	h, err := httpserver.Handler(httpserver.Options{Version: "v-test", Store: s, Database: s.Dialect(), Playbacks: playback.NewManager(cfg)})
+	h, err := httpserver.Handler(httpserver.Options{
+		Version: "v-test", Store: s, Database: s.Dialect(), Playbacks: playback.NewManager(cfg),
+		Images: images.New(images.Config{Store: s, Dir: t.TempDir()}),
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -18,6 +18,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/buildinfo"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
+	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/libs/core"
@@ -44,6 +45,7 @@ func run(ctx context.Context, args []string) error {
 	ffmpeg := fs.String("ffmpeg", "ffmpeg", "ffmpeg binary; without it media is only played directly")
 	ffprobe := fs.String("ffprobe", "ffprobe", "ffprobe binary")
 	transcodes := fs.String("transcode-dir", filepath.Join(os.TempDir(), "mavio-transcodes"), "directory for transcodes")
+	cacheDir := fs.String("cache-dir", defaultCacheDir(), "directory for downloaded and resized images")
 	showVersion := fs.Bool("version", false, "print version and exit")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -67,6 +69,7 @@ func run(ctx context.Context, args []string) error {
 	playbacks, ffmpegVersion := newPlaybacks(ctx, db, *ffmpeg, *ffprobe, *transcodes)
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: version, Store: db, Database: db.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
+		Images: images.New(images.Config{Store: db, Dir: filepath.Join(*cacheDir, "images"), Logger: slog.Default()}),
 	})
 	if err != nil {
 		return err
@@ -90,6 +93,15 @@ func run(ctx context.Context, args []string) error {
 		})
 	}
 	return g.Wait()
+}
+
+// defaultCacheDir is the user's cache directory for Mavio, or one in the
+// temporary directory.
+func defaultCacheDir() string {
+	if dir, err := os.UserCacheDir(); err == nil {
+		return filepath.Join(dir, "mavio")
+	}
+	return filepath.Join(os.TempDir(), "mavio-cache")
 }
 
 // newLibraryWorker returns the worker running scans, probes, keyframe

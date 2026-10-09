@@ -128,7 +128,9 @@ flowchart TD
 - [x] Authentication: first administrator, sign-in per device with hashed access tokens, argon2id passwords, `mavio.auth.v1.AuthService`, bearer-token and request-validation interceptors
 - [x] Playback: `mavio.playback.v1.PlaybackService` and media endpoints for direct play and HLS remuxes and transcodes, remembered and preferred streams, resume positions and played state; verified end to end with real ffmpeg
 - [x] Subtitle delivery: text subtitles as converted files, from external files or extracted with ffmpeg, and as HLS renditions
-- [ ] Library, item and user Connect services
+- [x] Library, item and user Connect services; the server runs the library jobs
+- [x] Image endpoint: local and provider artwork, resized with Jellyfin's size rules and cached
+- [ ] WebP and AVIF encoding, blurhash / thumbhash placeholders and library collages
 - [ ] Playback verified on real hls.js / AVPlayer / Media3 clients, including HLS subtitle renditions staying in sync after seeking: they are one WebVTT segment without `X-TIMESTAMP-MAP`; if a player misplaces them, segment the WebVTT along the video as Jellyfin does
 
 ### P6 Server Assembly and Distribution

@@ -12,6 +12,7 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/auth"
+	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/libs/core"
@@ -32,6 +33,8 @@ type Options struct {
 	FFmpegVersion string
 	// Playbacks runs playbacks; their media is served under /media/.
 	Playbacks *playback.Manager
+	// Images serves artwork under /images/.
+	Images *images.Server
 }
 
 // Handler returns the root handler serving all Connect services.
@@ -56,6 +59,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(userv1connect.NewUserDataServiceHandler(rpc.NewUserDataService(opts.Store), interceptors))
 	mux.Handle(playbackv1connect.NewPlaybackServiceHandler(rpc.NewPlaybackService(opts.Playbacks), interceptors))
 	mux.Handle("GET /media/", opts.Playbacks.Handler())
+	mux.Handle("GET /images/", opts.Images.Handler())
 	return mux, nil
 }
 

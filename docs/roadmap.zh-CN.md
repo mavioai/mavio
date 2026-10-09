@@ -128,7 +128,9 @@ flowchart TD
 - [x] 认证：首个管理员、按设备登录并以散列保存访问令牌、argon2id 密码、`mavio.auth.v1.AuthService`、Bearer 令牌与请求校验拦截器
 - [x] 播放：`mavio.playback.v1.PlaybackService` 及直接播放与 HLS 转封装、转码的媒体端点，记住的与偏好的流，续播位置与已播放状态；用真实 ffmpeg 端到端验证
 - [x] 字幕交付：文本字幕以转换后的文件交付（来自外挂文件或由 ffmpeg 提取），以及 HLS 字幕轨
-- [ ] 媒体库、条目与用户的 Connect 服务
+- [x] 媒体库、条目与用户的 Connect 服务；服务端运行媒体库任务
+- [x] 图片端点：本地与提供者的图片，按 Jellyfin 的尺寸规则缩放并缓存
+- [ ] WebP 与 AVIF 编码、blurhash / thumbhash 占位图与媒体库拼贴图
 - [ ] 在 hls.js / AVPlayer / Media3 实机客户端上验证播放，包括拖动后 HLS 字幕轨仍保持同步：字幕轨是一个不带 `X-TIMESTAMP-MAP` 的 WebVTT 分片；若有播放器错位，则像 Jellyfin 一样按视频分片切分 WebVTT
 
 ### P6 服务端装配与分发
