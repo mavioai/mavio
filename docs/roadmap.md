@@ -43,7 +43,7 @@ flowchart TD
 | P1 | Contracts, storage and plugin runtimes | ✅ Done |
 | P2 | Pure computation libraries | ✅ Done |
 | P3 | Media pipeline | ✅ Done |
-| P4 | Scanning and first plugin | In progress |
+| P4 | Scanning and first plugin | ✅ Done |
 | P5 | Streaming and API | Not started |
 | P6 | Server assembly and distribution | Not started |
 | P7 | Clients and ecosystem | Not started |
