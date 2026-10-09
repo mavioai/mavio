@@ -184,22 +184,38 @@ func TestDirectPlay(t *testing.T) {
 func TestProgressAndStop(t *testing.T) {
 	ctx := t.Context()
 	e := newEnv(t)
+	changes := 0
+	e.m.cfg.OnChange = func(user, session core.ID) {
+		if user != e.user.ID || session != e.sess.ID {
+			t.Errorf("change of user %v session %v", user, session)
+		}
+		changes++
+	}
 	p := e.start(t, Request{SourceID: e.source, AudioStream: new(2), SubtitleStream: new(3)})
+	if changes != 1 || e.m.NowPlaying(e.sess.ID) != p || e.m.NowPlaying(core.NewID()) != nil {
+		t.Errorf("after start: %d changes, now playing %v", changes, e.m.NowPlaying(e.sess.ID))
+	}
 	if d := e.userData(t); d.AudioStream == nil || *d.AudioStream != 2 || d.SubtitleStream == nil || *d.SubtitleStream != 3 {
 		t.Errorf("remembered streams = %v, %v; want 2, 3", d.AudioStream, d.SubtitleStream)
 	}
-	if err := e.m.Progress(ctx, e.user.ID, p.ID, 30*time.Minute); err != nil {
-		t.Fatal(err)
+	// Pausing is a change, reporting while paused not.
+	for range 2 {
+		if err := e.m.Progress(ctx, e.user.ID, p.ID, 30*time.Minute, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if st := p.State(); changes != 2 || !st.Paused || st.Position != 30*time.Minute {
+		t.Errorf("after pausing: %d changes, state %+v", changes, st)
 	}
 	if d := e.userData(t); d.Position != 30*time.Minute || d.Played {
 		t.Errorf("after progress: position %v, played %v", d.Position, d.Played)
 	}
-	if err := e.m.Progress(ctx, core.NewID(), p.ID, time.Minute); !errors.Is(err, core.ErrNotFound) {
+	if err := e.m.Progress(ctx, core.NewID(), p.ID, time.Minute, false); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("progress of another user's playback: %v, want ErrNotFound", err)
 	}
 	// Reports past the end count the play once.
 	for _, pos := range []time.Duration{95 * time.Minute, 97 * time.Minute} {
-		if err := e.m.Progress(ctx, e.user.ID, p.ID, pos); err != nil {
+		if err := e.m.Progress(ctx, e.user.ID, p.ID, pos, false); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -208,6 +224,9 @@ func TestProgressAndStop(t *testing.T) {
 	}
 	if d := e.userData(t); !d.Played || d.PlayCount != 1 || d.Position != 0 || d.LastPlayedAt == nil {
 		t.Errorf("after stop: %+v; want played once without a position", d)
+	}
+	if changes != 4 || e.m.NowPlaying(e.sess.ID) != nil {
+		t.Errorf("after stop: %d changes, now playing %v", changes, e.m.NowPlaying(e.sess.ID))
 	}
 	if err := e.m.Stop(ctx, e.user.ID, p.ID, nil); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("second Stop: %v, want ErrNotFound", err)

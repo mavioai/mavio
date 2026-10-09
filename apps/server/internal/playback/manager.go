@@ -65,7 +65,10 @@ type Config struct {
 	// CheckInterval is how often idle playbacks and ended sign-ins are
 	// looked for; default 30 seconds.
 	CheckInterval time.Duration
-	Logger        *slog.Logger
+	// OnChange is told when a session starts or ends a playback, or
+	// pauses or resumes it; nil tells no one.
+	OnChange func(userID, sessionID core.ID)
+	Logger   *slog.Logger
 }
 
 // Manager runs the playbacks in progress.
@@ -152,8 +155,10 @@ type Playback struct {
 	subs   map[int]*subtitle.Subtitle
 
 	mu         sync.Mutex
+	started    time.Time
 	lastActive time.Time
 	position   time.Duration
+	paused     bool
 	// counted says the play was counted, once per playback.
 	counted bool
 	ended   bool
@@ -288,12 +293,48 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 		}
 	}
 
+	p.started = time.Now()
 	m.mu.Lock()
 	m.playbacks[p.ID] = p
 	m.mu.Unlock()
 	m.log.InfoContext(ctx, "playback started", "playback", p.ID, "user", r.User.Name, "item", item.Name,
 		"method", p.Method, "reasons", d.Reasons.String(), "client", r.Client.Name)
+	m.changed(p)
 	return p, nil
+}
+
+// changed tells OnChange about a playback's session.
+func (m *Manager) changed(p *Playback) {
+	if m.cfg.OnChange != nil {
+		m.cfg.OnChange(p.UserID, p.SessionID)
+	}
+}
+
+// State is how far a playback is, as last reported.
+type State struct {
+	Position time.Duration
+	Paused   bool
+}
+
+// State returns the playback's position and pause as last reported.
+func (p *Playback) State() State {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return State{Position: p.position, Paused: p.paused}
+}
+
+// NowPlaying returns the playback a session started last, nil when it
+// plays nothing.
+func (m *Manager) NowPlaying(session core.ID) *Playback {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var last *Playback
+	for _, p := range m.playbacks {
+		if p.SessionID == session && (last == nil || p.started.After(last.started)) {
+			last = p
+		}
+	}
+	return last
 }
 
 // decide decides how to play, returning nil when no source plays.
@@ -433,13 +474,21 @@ func (m *Manager) own(userID core.ID, id string) (*Playback, error) {
 	return p, nil
 }
 
-// Progress records the position of one of the user's playbacks.
-func (m *Manager) Progress(ctx context.Context, userID core.ID, id string, pos time.Duration) error {
+// Progress records the position of one of the user's playbacks and
+// whether it is paused.
+func (m *Manager) Progress(ctx context.Context, userID core.ID, id string, pos time.Duration, paused bool) error {
 	p, err := m.own(userID, id)
 	if err != nil {
 		return err
 	}
 	p.touch(time.Now())
+	p.mu.Lock()
+	toggled := p.paused != paused
+	p.paused = paused
+	p.mu.Unlock()
+	if toggled {
+		m.changed(p)
+	}
 	if p.stream != nil {
 		if err := p.stream.ReportPosition(ctx, pos); err != nil {
 			return err
@@ -489,9 +538,13 @@ func (m *Manager) record(ctx context.Context, p *Playback, pos time.Duration) er
 // remove unregisters a playback and releases its transcode.
 func (m *Manager) remove(p *Playback) {
 	m.mu.Lock()
+	_, ok := m.playbacks[p.ID]
 	delete(m.playbacks, p.ID)
 	m.mu.Unlock()
 	p.close()
+	if ok {
+		m.changed(p)
+	}
 }
 
 func (p *Playback) close() {

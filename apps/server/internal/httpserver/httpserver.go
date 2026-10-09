@@ -13,6 +13,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/devplayer"
+	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
@@ -20,6 +21,7 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
@@ -27,7 +29,10 @@ import (
 // Options configures the handler tree.
 type Options struct {
 	Version string
-	Store   core.Store
+	// Store is observed by Hub (events.Observe).
+	Store core.Store
+	// Hub keeps the devices' event streams.
+	Hub *events.Hub
 	// Database is "sqlite" or "postgres".
 	Database string
 	// FFmpegVersion is the version of the ffmpeg in use, if any.
@@ -56,7 +61,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux := http.NewServeMux()
 	mux.Handle(systemv1connect.NewSystemServiceHandler(&rpc.SystemService{
 		Version: opts.Version, StartTime: time.Now(), Database: opts.Database, FFmpegVersion: opts.FFmpegVersion,
-		Plugins: opts.Plugins,
+		Plugins: opts.Plugins, Hub: opts.Hub,
 	}, interceptors))
 	mux.Handle(authv1connect.NewAuthServiceHandler(rpc.NewAuthService(opts.Store), interceptors))
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(rpc.NewLibraryService(opts.Store), interceptors))
@@ -67,6 +72,8 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(userv1connect.NewUserDataServiceHandler(rpc.NewUserDataService(opts.Store), interceptors))
 	mux.Handle(userv1connect.NewDisplayPreferencesServiceHandler(rpc.NewDisplayPreferencesService(opts.Store), interceptors))
 	mux.Handle(playbackv1connect.NewPlaybackServiceHandler(rpc.NewPlaybackService(opts.Playbacks), interceptors))
+	mux.Handle(sessionv1connect.NewEventServiceHandler(rpc.NewEventService(opts.Hub), interceptors))
+	mux.Handle(sessionv1connect.NewSessionServiceHandler(rpc.NewSessionService(opts.Store, opts.Hub, opts.Playbacks), interceptors))
 	mux.Handle("GET /media/", opts.Playbacks.Handler())
 	mux.Handle("GET /images/", opts.Images.Handler())
 	if opts.Dev {

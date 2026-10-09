@@ -106,7 +106,7 @@ func (s *PlaybackService) ReportProgress(ctx context.Context, req *playbackv1.Re
 	if err != nil {
 		return nil, err
 	}
-	if err := s.playbacks.Progress(ctx, p.User.ID, req.GetPlaybackId(), req.GetPosition().AsDuration()); err != nil {
+	if err := s.playbacks.Progress(ctx, p.User.ID, req.GetPlaybackId(), req.GetPosition().AsDuration(), req.GetPaused()); err != nil {
 		return nil, playbackError(ctx, err)
 	}
 	return &playbackv1.ReportProgressResponse{}, nil

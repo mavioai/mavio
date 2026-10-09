@@ -60,7 +60,7 @@ flowchart TD
 | P5 | Streaming and API | ✅ Done |
 | P6 | Server assembly and distribution | In progress |
 | P7 | Browsing | ✅ Done |
-| P8 | Live events and sessions | Not started |
+| P8 | Live events and sessions | In progress |
 | P9 | Metadata management | Not started |
 | P10 | Administration and operations | Not started |
 | P11 | Media extras | Not started |
@@ -197,6 +197,10 @@ flowchart TD
 - Signing in a new device from a signed-in one (Quick Connect)
 
 **Done when**: an end-to-end test through the API: a device receives a library change after a scan and another device's progress, and controls that device's playback; two devices in a SyncPlay group stay at the same position. Timing logic is tested with `testing/synctest`.
+
+**Progress**:
+- [x] Event streams (`EventService`): library changes, item states, sessions, commands, scans and plugins, each device getting what its user may see; the store is observed so that writes reach the streams once committed
+- [x] Sessions (`SessionService`): devices online while streaming, what each plays, remote commands
 
 ### P9 Metadata Management
 **Scope**: correcting and completing what the library scans find.

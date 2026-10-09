@@ -1,0 +1,229 @@
+edition = "2023";
+
+package mavio.session.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "mavio/library/v1/item.proto";
+import "mavio/playback/v1/playback.proto";
+import "mavio/system/v1/system.proto";
+import "mavio/user/v1/user.proto";
+
+// EventService streams what changes to signed-in devices.
+service EventService {
+  // Subscribe streams the calling device's events until it disconnects:
+  // Connected first, then events as they happen, and a heartbeat every
+  // 30 seconds. While subscribed, the device is online: it can be
+  // controlled remotely and join SyncPlay groups. A device subscribing
+  // again replaces its earlier stream, which ends.
+  rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse);
+}
+
+// SessionService lists the signed-in devices and controls them remotely.
+service SessionService {
+  // ListSessions lists the calling user's signed-in devices with what they
+  // play, online ones first; administrators may list every user's.
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SendCommand sends a command to an online device of the calling user,
+  // or of anyone for administrators, through its event stream. The device
+  // carries it out and reports its playback as usual.
+  rpc SendCommand(SendCommandRequest) returns (SendCommandResponse);
+}
+
+message SubscribeRequest {}
+
+message SubscribeResponse {
+  Event event = 1;
+}
+
+// Event is something that changed. Devices receive only what concerns
+// their user and items they may access; administrators also receive the
+// server's jobs and plugins.
+message Event {
+  google.protobuf.Timestamp time = 1;
+  oneof kind {
+    Connected connected = 2;
+    Heartbeat heartbeat = 3;
+    LibraryChanged library_changed = 4;
+    UserDataChanged user_data_changed = 5;
+    SessionsChanged sessions_changed = 6;
+    CommandReceived command = 7;
+    JobChanged job_changed = 8;
+    PluginChanged plugin_changed = 9;
+  }
+}
+
+// Connected starts a stream.
+message Connected {
+  // The calling device's session.
+  string session_id = 1;
+}
+
+message Heartbeat {}
+
+// LibraryChanged tells which items were added, changed or removed since
+// the last such event; changes are gathered for a few seconds. Clients
+// fetch the items they show again.
+message LibraryChanged {
+  // The libraries of the items, and of changes without item IDs, such as
+  // items a scan found missing.
+  repeated string library_ids = 1;
+  repeated string changed_item_ids = 2;
+  repeated string removed_item_ids = 3;
+}
+
+// UserDataChanged carries the user's new state of items, from any of
+// their devices.
+message UserDataChanged {
+  repeated mavio.user.v1.UserData user_data = 1;
+}
+
+// SessionsChanged tells that a device of the user came online, went
+// offline, or started, stopped or reported a playback. Clients showing
+// sessions list them again.
+message SessionsChanged {
+  string session_id = 1;
+}
+
+// CommandReceived asks the device to carry out a command.
+message CommandReceived {
+  // The session and user sending it.
+  string from_session_id = 1;
+  string from_user_name = 2;
+  Command command = 3;
+}
+
+// JobChanged tells administrators that a library scan started or ended.
+message JobChanged {
+  string job_id = 1;
+  string kind = 2;
+  string library_id = 3;
+  JobState state = 4;
+}
+
+enum JobState {
+  JOB_STATE_UNSPECIFIED = 0;
+  JOB_STATE_RUNNING = 1;
+  JOB_STATE_SUCCEEDED = 2;
+  // Retried later unless its attempts are used up.
+  JOB_STATE_FAILED = 3;
+}
+
+// PluginChanged tells administrators a plugin's new state.
+message PluginChanged {
+  mavio.system.v1.Plugin plugin = 1;
+}
+
+// Session is a signed-in device.
+message Session {
+  string id = 1;
+  string user_id = 2;
+  string user_name = 3;
+  string device_id = 4;
+  string device_name = 5;
+  string client = 6;
+  string client_version = 7;
+  google.protobuf.Timestamp last_seen_time = 8;
+  // The device has an event stream open.
+  bool online = 9;
+  // Unset when the device plays nothing.
+  NowPlaying now_playing = 10;
+}
+
+// NowPlaying is what a device plays.
+message NowPlaying {
+  string playback_id = 1;
+  mavio.library.v1.Item item = 2;
+  // As last reported.
+  google.protobuf.Duration position = 3;
+  bool paused = 4;
+  mavio.playback.v1.PlayMethod method = 5;
+}
+
+// Command is what one device asks another to do.
+message Command {
+  oneof kind {
+    option (buf.validate.oneof).required = true;
+    Play play = 1;
+    PlayState play_state = 2;
+    Seek seek = 3;
+    Message message = 4;
+  }
+}
+
+// Play starts playing items, as a queue.
+message Play {
+  repeated string item_ids = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 1000
+    items: {
+      string: {uuid: true}
+    }
+  }];
+  // The item of the queue to start with.
+  int32 start_index = 2 [(buf.validate.field).int32.gte = 0];
+  google.protobuf.Duration start_position = 3 [(buf.validate.field).duration.gte = {}];
+}
+
+// PlayState changes the playback.
+message PlayState {
+  PlayStateCommand command = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+}
+
+enum PlayStateCommand {
+  PLAY_STATE_COMMAND_UNSPECIFIED = 0;
+  PLAY_STATE_COMMAND_PAUSE = 1;
+  PLAY_STATE_COMMAND_UNPAUSE = 2;
+  PLAY_STATE_COMMAND_STOP = 3;
+  PLAY_STATE_COMMAND_NEXT = 4;
+  PLAY_STATE_COMMAND_PREVIOUS = 5;
+}
+
+// Seek moves the playback.
+message Seek {
+  google.protobuf.Duration position = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).duration.gte = {}
+  ];
+}
+
+// Message shows a text.
+message Message {
+  string text = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 1000
+    }
+  ];
+  // How long to show it; unset leaves it to the user.
+  google.protobuf.Duration timeout = 2 [(buf.validate.field).duration.gt = {}];
+}
+
+message ListSessionsRequest {
+  // Every user's sessions; administrators only.
+  bool all_users = 1;
+}
+
+message ListSessionsResponse {
+  repeated Session sessions = 1;
+}
+
+message SendCommandRequest {
+  string session_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  Command command = 2 [(buf.validate.field).required = true];
+}
+
+message SendCommandResponse {}

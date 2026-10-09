@@ -9,8 +9,10 @@ import (
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/core"
+	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
@@ -25,6 +27,8 @@ type SystemService struct {
 	FFmpegVersion string
 	// Plugins runs the server's plugins; nil means none.
 	Plugins PluginManager
+	// Hub tells administrators of plugin changes; nil tells no one.
+	Hub *events.Hub
 }
 
 // PluginManager runs the server's plugins; *plugins.Manager implements it.
@@ -101,7 +105,11 @@ func (s *SystemService) SetPluginConfig(ctx context.Context, req *systemv1.SetPl
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return systemv1.SetPluginConfigResponse_builder{Plugin: pluginToProto(info)}.Build(), nil
+	plugin := pluginToProto(info)
+	if s.Hub != nil {
+		s.Hub.ToAdmins(sessionv1.Event_builder{PluginChanged: sessionv1.PluginChanged_builder{Plugin: plugin}.Build()}.Build())
+	}
+	return systemv1.SetPluginConfigResponse_builder{Plugin: plugin}.Build(), nil
 }
 
 var pluginStates = map[plugins.State]systemv1.PluginState{

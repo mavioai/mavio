@@ -13,6 +13,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
 	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
@@ -54,15 +55,18 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	if log == nil {
 		log = slog.Default()
 	}
-	db, err := store.Open(ctx, cfg.Database)
+	raw, err := store.Open(ctx, cfg.Database)
 	if err != nil {
 		return fmt.Errorf("open database: %w", err)
 	}
 	defer func() {
-		if err := db.Close(); err != nil {
+		if err := raw.Close(); err != nil {
 			log.ErrorContext(ctx, "close database", "err", err)
 		}
 	}()
+	// What is written reaches the devices' event streams.
+	hub := events.New(events.Config{Store: raw, Logger: log})
+	db := events.Observe(raw, hub)
 	if cfg.DevLibrary != "" {
 		if err := addDevLibraries(ctx, log, db, cfg.DevLibrary); err != nil {
 			return err
@@ -81,10 +85,10 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			log.ErrorContext(ctx, "stop plugins", "err", err)
 		}
 	}()
-	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, cfg)
+	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, cfg)
 	imageServer := images.New(images.Config{Store: db, Dir: filepath.Join(cfg.CacheDir, "images"), Logger: log})
 	h, err := httpserver.Handler(httpserver.Options{
-		Version: cfg.Version, Store: db, Database: db.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
+		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Dev: cfg.Dev,
 	})
 	if err != nil {
@@ -166,8 +170,8 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 // newPlaybacks sets up playback with the configured ffmpeg, or for direct
 // play only without one. It returns the ffmpeg version, empty without
 // ffmpeg.
-func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, cfg Config) (*playback.Manager, string) {
-	pc := playback.Config{Store: db, Dir: cfg.TranscodeDir, Logger: log}
+func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, cfg Config) (*playback.Manager, string) {
+	pc := playback.Config{Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, Logger: log}
 	v, err := pc.UseFFmpeg(ctx, cfg.FFmpeg, cfg.FFprobe)
 	if err != nil {
 		log.WarnContext(ctx, "ffmpeg unavailable; media plays directly only", "ffmpeg", cfg.FFmpeg, "err", err)

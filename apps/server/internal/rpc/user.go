@@ -7,10 +7,9 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"google.golang.org/protobuf/types/known/durationpb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/mavioai/mavio/apps/server/internal/auth"
+	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/libs/core"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
@@ -257,7 +256,7 @@ func (s *UserDataService) GetUserData(ctx context.Context, req *userv1.GetUserDa
 	out := make([]*userv1.UserData, 0, len(data))
 	for _, id := range ids {
 		if d, ok := data[id]; ok {
-			out = append(out, userDataToProto(&d))
+			out = append(out, events.UserDataToProto(&d))
 		}
 	}
 	return userv1.GetUserDataResponse_builder{UserData: out}.Build(), nil
@@ -329,7 +328,7 @@ func (s *UserDataService) UpdateUserData(ctx context.Context, req *userv1.Update
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return userv1.UpdateUserDataResponse_builder{UserData: userDataToProto(&data)}.Build(), nil
+	return userv1.UpdateUserDataResponse_builder{UserData: events.UserDataToProto(&data)}.Build(), nil
 }
 
 // setPlayed marks an item played or unplayed as Jellyfin does: played
@@ -344,29 +343,6 @@ func (s *UserDataService) setPlayed(d *core.UserData, played bool) {
 		return
 	}
 	d.Played, d.Position, d.PlayCount, d.LastPlayedAt = false, 0, 0, nil
-}
-
-func userDataToProto(d *core.UserData) *userv1.UserData {
-	b := userv1.UserData_builder{
-		ItemId:    new(d.ItemID.String()),
-		Played:    &d.Played,
-		PlayCount: new(int32(d.PlayCount)),
-		Favorite:  &d.Favorite,
-		Rating:    d.Rating,
-	}
-	if d.Position > 0 {
-		b.Position = durationpb.New(d.Position)
-	}
-	if d.AudioStream != nil {
-		b.AudioStream = new(int32(*d.AudioStream))
-	}
-	if d.SubtitleStream != nil {
-		b.SubtitleStream = new(int32(*d.SubtitleStream))
-	}
-	if d.LastPlayedAt != nil {
-		b.LastPlayedTime = timestamppb.New(*d.LastPlayedAt)
-	}
-	return b.Build()
 }
 
 func policyFromProto(p *userv1.UserPolicy) core.UserPolicy {

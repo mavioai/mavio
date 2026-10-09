@@ -12,6 +12,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
 	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
@@ -35,13 +36,15 @@ func startServer(t *testing.T, configure func(*playback.Config)) (string, *store
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = s.Close() })
-	cfg := playback.Config{Store: s, Dir: t.TempDir()}
+	hub := events.New(events.Config{Store: s, LibraryDelay: 100 * time.Millisecond})
+	db := events.Observe(s, hub)
+	cfg := playback.Config{Store: db, Dir: t.TempDir(), OnChange: hub.SessionsChanged}
 	if configure != nil {
 		configure(&cfg)
 	}
 	h, err := httpserver.Handler(httpserver.Options{
-		Version: "v-test", Store: s, Database: s.Dialect(), Playbacks: playback.NewManager(cfg),
-		Images: images.New(images.Config{Store: s, Dir: t.TempDir()}), Dev: true,
+		Version: "v-test", Store: db, Hub: hub, Database: s.Dialect(), Playbacks: playback.NewManager(cfg),
+		Images: images.New(images.Config{Store: db, Dir: t.TempDir()}), Dev: true,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -51,14 +54,31 @@ func startServer(t *testing.T, configure func(*playback.Config)) (string, *store
 	return srv.URL, s
 }
 
-// withToken sends token as the bearer token of every request.
+// withToken sends token as the bearer token of every request, unary or
+// streaming.
 func withToken(token string) connect.ClientOption {
-	return connect.WithInterceptors(connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
-		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
-			req.Header().Set("Authorization", "Bearer "+token)
-			return next(ctx, req)
-		}
-	}))
+	return connect.WithInterceptors(bearer(token))
+}
+
+type bearer string
+
+func (b bearer) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
+	return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+		req.Header().Set("Authorization", "Bearer "+string(b))
+		return next(ctx, req)
+	}
+}
+
+func (b bearer) WrapStreamingClient(next connect.StreamingClientFunc) connect.StreamingClientFunc {
+	return func(ctx context.Context, spec connect.Spec) connect.StreamingClientConn {
+		conn := next(ctx, spec)
+		conn.RequestHeader().Set("Authorization", "Bearer "+string(b))
+		return conn
+	}
+}
+
+func (b bearer) WrapStreamingHandler(next connect.StreamingHandlerFunc) connect.StreamingHandlerFunc {
+	return next
 }
 
 func TestGetHealth(t *testing.T) {

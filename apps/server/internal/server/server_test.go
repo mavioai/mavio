@@ -201,14 +201,31 @@ func installPlugin(t *testing.T) string {
 	return root
 }
 
-// withToken sends token as the bearer token of every request.
+// withToken sends token as the bearer token of every request, unary or
+// streaming.
 func withToken(token string) connect.ClientOption {
-	return connect.WithInterceptors(connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
-		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
-			req.Header().Set("Authorization", "Bearer "+token)
-			return next(ctx, req)
-		}
-	}))
+	return connect.WithInterceptors(bearer(token))
+}
+
+type bearer string
+
+func (b bearer) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
+	return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+		req.Header().Set("Authorization", "Bearer "+string(b))
+		return next(ctx, req)
+	}
+}
+
+func (b bearer) WrapStreamingClient(next connect.StreamingClientFunc) connect.StreamingClientFunc {
+	return func(ctx context.Context, spec connect.Spec) connect.StreamingClientConn {
+		conn := next(ctx, spec)
+		conn.RequestHeader().Set("Authorization", "Bearer "+string(b))
+		return conn
+	}
+}
+
+func (b bearer) WrapStreamingHandler(next connect.StreamingHandlerFunc) connect.StreamingHandlerFunc {
+	return next
 }
 
 func get(t *testing.T, url string) []byte {
