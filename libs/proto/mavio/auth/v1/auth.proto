@@ -1,0 +1,123 @@
+edition = "2023";
+
+package mavio.auth.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "mavio/user/v1/user.proto";
+
+// AuthService signs clients in and out. GetAuthInfo, CreateFirstUser and
+// Login are public; the other methods act on the calling user.
+service AuthService {
+  // GetAuthInfo tells clients how to sign in.
+  rpc GetAuthInfo(GetAuthInfoRequest) returns (GetAuthInfoResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // CreateFirstUser creates an administrator and signs it in. It fails with
+  // FAILED_PRECONDITION once any user exists.
+  rpc CreateFirstUser(CreateFirstUserRequest) returns (CreateFirstUserResponse);
+  // Login signs a device in, replacing its previous session. Wrong
+  // credentials and disabled users fail with UNAUTHENTICATED.
+  rpc Login(LoginRequest) returns (LoginResponse);
+  // Logout ends the calling session.
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  // ListSessions lists the calling user's signed-in devices, most recently
+  // seen first.
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // RevokeSession signs one of the calling user's devices out.
+  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse);
+}
+
+// Device identifies a client installation.
+message Device {
+  // Stable for the installation; signing in again from the same device
+  // replaces its session.
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 128
+  ];
+  // Shown to the user, e.g. "Living room TV".
+  string name = 2 [(buf.validate.field).string.max_len = 128];
+  // The application, e.g. "Mavio Web".
+  string client = 3 [(buf.validate.field).string.max_len = 64];
+  string client_version = 4 [(buf.validate.field).string.max_len = 64];
+}
+
+// Session is a signed-in device.
+message Session {
+  string id = 1;
+  Device device = 2;
+  google.protobuf.Timestamp create_time = 3;
+  google.protobuf.Timestamp last_seen_time = 4;
+  // Whether this is the session making the request.
+  bool current = 5;
+}
+
+message GetAuthInfoRequest {}
+
+message GetAuthInfoResponse {
+  // True until the first user is created.
+  bool setup_required = 1;
+}
+
+message CreateFirstUserRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    }
+  ];
+  string password = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 1024
+    }
+  ];
+  Device device = 3 [(buf.validate.field).required = true];
+}
+
+message CreateFirstUserResponse {
+  // Sent as "Authorization: Bearer <access_token>".
+  string access_token = 1;
+  mavio.user.v1.User user = 2;
+  Session session = 3;
+}
+
+message LoginRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 100
+  ];
+  string password = 2 [(buf.validate.field).string.max_len = 1024];
+  Device device = 3 [(buf.validate.field).required = true];
+}
+
+message LoginResponse {
+  // Sent as "Authorization: Bearer <access_token>".
+  string access_token = 1;
+  mavio.user.v1.User user = 2;
+  Session session = 3;
+}
+
+message LogoutRequest {}
+
+message LogoutResponse {}
+
+message ListSessionsRequest {}
+
+message ListSessionsResponse {
+  repeated Session sessions = 1;
+}
+
+message RevokeSessionRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message RevokeSessionResponse {}
