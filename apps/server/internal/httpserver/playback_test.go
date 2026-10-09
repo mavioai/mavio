@@ -119,7 +119,7 @@ func TestPlaybackHLS(t *testing.T) {
 			if len(subs) != 1 || subs[0].GetStreamIndex() != 2 || subs[0].GetLanguage() != "eng" {
 				t.Fatalf("subtitles = %v", subs)
 			}
-			vtt := ""
+			vtt, subPlaylist := "", ""
 			switch sub := subs[0]; sub.GetMethod() {
 			case external:
 				if !strings.HasSuffix(sub.GetUrl(), "/subtitles/2.vtt") {
@@ -131,10 +131,15 @@ func TestPlaybackHLS(t *testing.T) {
 					!strings.Contains(master, `URI="subtitles/2.m3u8"`) || !strings.Contains(master, `SUBTITLES="subs"`) {
 					t.Errorf("master playlist without the subtitle rendition:\n%s", master)
 				}
-				if pl := string(get(t, base+"subtitles/2.m3u8")); !strings.Contains(pl, "\n2.vtt\n") {
-					t.Errorf("subtitle playlist:\n%s", pl)
+				subPlaylist = string(get(t, base+"subtitles/2.m3u8"))
+				if !strings.Contains(subPlaylist, "\n2-0.vtt\n") || strings.Contains(subPlaylist, "EXT-X-MAP") {
+					t.Errorf("subtitle playlist:\n%s", subPlaylist)
 				}
-				vtt = string(get(t, base+"subtitles/2.vtt"))
+				// Segments hold the cues shown during them.
+				vtt = string(get(t, base+"subtitles/2-0.vtt"))
+				if later := string(get(t, base+"subtitles/2-2.vtt")); later != "WEBVTT\n\n" {
+					t.Errorf("subtitle segment 2:\n%s", later)
+				}
 			default:
 				t.Fatalf("subtitle method = %v", sub.GetMethod())
 			}
@@ -145,6 +150,9 @@ func TestPlaybackHLS(t *testing.T) {
 			segments := strings.Count(media, "#EXTINF:")
 			if !strings.Contains(media, `#EXT-X-MAP:URI="init.mp4"`) || segments < 7 {
 				t.Fatalf("media playlist:\n%s", media)
+			}
+			if subPlaylist != "" && !slices.Equal(durations(subPlaylist), durations(media)) {
+				t.Errorf("subtitle segments = %v, want the video's %v", durations(subPlaylist), durations(media))
 			}
 			init := get(t, base+"init.mp4")
 			for _, i := range []int{0, segments - 1, 2} {
@@ -208,6 +216,17 @@ func addMovie(t *testing.T, s interface {
 		t.Fatal(err)
 	}
 	return item.ID
+}
+
+// durations returns the #EXTINF lines of a media playlist.
+func durations(playlist string) []string {
+	var out []string
+	for line := range strings.Lines(playlist) {
+		if strings.HasPrefix(line, "#EXTINF:") {
+			out = append(out, strings.TrimSpace(line))
+		}
+	}
+	return out
 }
 
 func get(t *testing.T, url string) []byte {

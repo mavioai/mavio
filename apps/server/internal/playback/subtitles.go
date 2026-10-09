@@ -8,9 +8,9 @@ import (
 	"io"
 	"net/http"
 	"os/exec"
+	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"golang.org/x/text/language"
 
@@ -93,9 +93,10 @@ func sourceFormat(st *core.MediaStream) string {
 }
 
 // serveSubtitle serves "{index}.{format}" or, for HLS renditions,
-// "{index}.m3u8".
+// "{index}.m3u8" and its segments "{index}-{segment}.vtt".
 func (m *Manager) serveSubtitle(w http.ResponseWriter, r *http.Request, p *Playback, file string) {
 	name, ext, _ := strings.Cut(file, ".")
+	name, segName, segmented := strings.Cut(name, "-")
 	index, err := strconv.Atoi(name)
 	var sub *Subtitle
 	for i := range p.Subtitles {
@@ -107,19 +108,30 @@ func (m *Manager) serveSubtitle(w http.ResponseWriter, r *http.Request, p *Playb
 		http.NotFound(w, r)
 		return
 	}
-	if ext == "m3u8" && sub.Method == decision.SubtitleHLS && p.HLS() {
-		// One WebVTT segment spanning the whole source.
+	rendition := sub.Method == decision.SubtitleHLS && p.HLS()
+	if ext == "m3u8" && rendition && !segmented {
+		// WebVTT segments along the video's.
 		w.Header().Set("Content-Type", playlistType)
 		_, _ = streaming.MediaPlaylist{
-			Segments:  []time.Duration{max(p.Source().Duration, time.Second)},
+			Segments:  p.layout.Segments,
 			Container: "vtt",
-			URI:       func(int) string { return name + ".vtt" },
+			URI:       func(i int) string { return name + "-" + strconv.Itoa(i) + ".vtt" },
 		}.WriteTo(w)
 		return
 	}
-	format := strings.ToLower(sub.Format)
+	format, segment := strings.ToLower(sub.Format), -1
 	if sub.Method == decision.SubtitleHLS {
+		// Renditions are served only as their segments.
 		format = subtitle.VTT
+		segment, err = strconv.Atoi(segName)
+		if err != nil || !segmented || !rendition || segment < 0 || segment >= len(p.layout.Segments) ||
+			strconv.Itoa(segment) != segName {
+			http.NotFound(w, r)
+			return
+		}
+	} else if segmented {
+		http.NotFound(w, r)
+		return
 	}
 	if ext != format || !subtitle.CanWrite(format) {
 		http.NotFound(w, r)
@@ -136,6 +148,9 @@ func (m *Manager) serveSubtitle(w http.ResponseWriter, r *http.Request, p *Playb
 		}
 		return
 	}
+	if segment >= 0 {
+		s = segmentCues(s, p.layout, segment)
+	}
 	data, err := subtitle.Write(s, format)
 	if err != nil {
 		m.log.ErrorContext(r.Context(), "write subtitle", "playback", p.ID, "stream", index, "err", err)
@@ -144,6 +159,19 @@ func (m *Manager) serveSubtitle(w http.ResponseWriter, r *http.Request, p *Playb
 	}
 	w.Header().Set("Content-Type", subtitleTypes[format])
 	_, _ = w.Write(data)
+}
+
+// segmentCues returns the cues shown during a segment, with their
+// timestamps on the source's timeline; the last segment also takes cues
+// past the end of the media.
+func segmentCues(s *subtitle.Subtitle, l streaming.Layout, i int) *subtitle.Subtitle {
+	end := l.End(i)
+	if i == len(l.Segments)-1 {
+		end = 0
+	}
+	seg := &subtitle.Subtitle{Cues: slices.Clone(s.Cues)}
+	seg.Filter(l.Start(i), end, true)
+	return seg
 }
 
 var subtitleTypes = map[string]string{
