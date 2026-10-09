@@ -129,7 +129,7 @@ flowchart TD
 - [x] Playback: `mavio.playback.v1.PlaybackService` and media endpoints for direct play and HLS remuxes and transcodes, remembered and preferred streams, resume positions and played state; verified end to end with real ffmpeg
 - [x] Subtitle delivery: text subtitles as converted files, from external files or extracted with ffmpeg, and as HLS renditions
 - [ ] Library, item and user Connect services
-- [ ] Playback verified on real hls.js / AVPlayer / Media3 clients
+- [ ] Playback verified on real hls.js / AVPlayer / Media3 clients, including HLS subtitle renditions staying in sync after seeking: they are one WebVTT segment without `X-TIMESTAMP-MAP`; if a player misplaces them, segment the WebVTT along the video as Jellyfin does
 
 ### P6 Server Assembly and Distribution
 **Scope**: `apps/server` assembly; `CGO_ENABLED=0` cross-compilation; container images bundling jellyfin-ffmpeg.
@@ -151,3 +151,5 @@ flowchart TD
 | SVG rasterization | Pure-Go options are incomplete | Decided in P2: SVGs are checked and served as-is, not rasterized |
 | Hardware test coverage | Only the maintainers' machines and GitHub-hosted runners are available; other vendors' encoders are untested on real hardware | Real transcode tests run where the hardware exists and skip elsewhere; other vendor paths rely on the ported EncodingHelper cases |
 | Go modules split too finely | Friction in dependency upgrades and tidying | Keep watching; merge modules when needed |
+| Progressive transcoding | Remuxes and transcodes are delivered as HLS only; a client declaring only progressive transcoding profiles gets `unimplemented` | When offline downloads need transcoded files |
+| Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P7); then serve the stream as `.sup` |

@@ -129,7 +129,7 @@ flowchart TD
 - [x] 播放：`mavio.playback.v1.PlaybackService` 及直接播放与 HLS 转封装、转码的媒体端点，记住的与偏好的流，续播位置与已播放状态；用真实 ffmpeg 端到端验证
 - [x] 字幕交付：文本字幕以转换后的文件交付（来自外挂文件或由 ffmpeg 提取），以及 HLS 字幕轨
 - [ ] 媒体库、条目与用户的 Connect 服务
-- [ ] 在 hls.js / AVPlayer / Media3 实机客户端上验证播放
+- [ ] 在 hls.js / AVPlayer / Media3 实机客户端上验证播放，包括拖动后 HLS 字幕轨仍保持同步：字幕轨是一个不带 `X-TIMESTAMP-MAP` 的 WebVTT 分片；若有播放器错位，则像 Jellyfin 一样按视频分片切分 WebVTT
 
 ### P6 服务端装配与分发
 **范围**：`apps/server` 装配；`CGO_ENABLED=0` 交叉编译；容器镜像内置 jellyfin-ffmpeg。
@@ -151,3 +151,5 @@ flowchart TD
 | SVG 栅格化 | 纯 Go 方案不完善 | P2 已决定：检查后原样下发，不做栅格化 |
 | 硬件测试覆盖 | 只有维护者自己的机器与 GitHub 托管 runner，其他厂商的编码器无法在实机上测试 | 真实转码测试在有硬件处运行、其余处跳过；其他厂商路径依赖移植的 EncodingHelper 用例 |
 | Go 模块拆分过细 | 依赖升级与 tidy 的摩擦 | 持续观察，必要时合并模块 |
+| 渐进式转码 | 转封装与转码只以 HLS 交付；只声明了渐进式转码配置的客户端会收到 `unimplemented` | 离线下载需要转码文件时 |
+| 图形字幕 | PGS 与 VobSub 只能烧录，因而强制视频转码 | 有客户端能自行渲染 PGS 时（P7），改为以 `.sup` 交付该流 |
