@@ -45,7 +45,7 @@
 | `tests/Jellyfin.Controller.Tests/MediaEncoding`（`EncodingHelper*Tests`） | 转码参数推导、音频比特流过滤器、杜比视界（DV）处理、音频编码器推断 | `libs/media/planner` |
 | `tests/Jellyfin.Model.Tests/Dlna`（`StreamBuilderTests` + 19 个 `DeviceProfile-*.json`） | 直放 / remux / 转码决策；把 profile 转换成 `ClientCapabilities` | `libs/media/decision` |
 | `tests/Jellyfin.MediaEncoding.Keyframes.Tests` | 关键帧提取样本 | `libs/media/keyframes` |
-| `tests/Jellyfin.MediaEncoding.Hls.Tests` | 基于关键帧的动态 HLS 播放列表生成 | `libs/streaming` |
+| `tests/Jellyfin.MediaEncoding.Hls.Tests`、`tests/Jellyfin.Api.Tests/Controllers/DynamicHlsControllerTests.cs` | 基于关键帧的动态 HLS 播放列表生成；分片长度、杜比视界编解码器标签、转码重启 | `libs/streaming` |
 | `tests/Jellyfin.Drawing.Skia.Tests` | 缩放尺寸计算、锐化、SVG 安全校验 | `libs/imaging` |
 | `tests/Jellyfin.Server.Implementations.Tests/Trickplay` | Trickplay 生成参数 | `libs/imaging` / `libs/media` |
 | `tests/Jellyfin.Controller.Tests/Entities/BaseItemTests.cs` | 排序名（`GetSortName`、`ModifySortChunks`） | `libs/store` |

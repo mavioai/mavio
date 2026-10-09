@@ -45,7 +45,7 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 | `tests/Jellyfin.Controller.Tests/MediaEncoding` (`EncodingHelper*Tests`) | Transcode argument derivation, audio bitstream filters, Dolby Vision handling, audio encoder inference | `libs/media/planner` |
 | `tests/Jellyfin.Model.Tests/Dlna` (`StreamBuilderTests` + 19 `DeviceProfile-*.json`) | Direct play / remux / transcode decisions; profiles converted into `ClientCapabilities` | `libs/media/decision` |
 | `tests/Jellyfin.MediaEncoding.Keyframes.Tests` | Keyframe extraction samples | `libs/media/keyframes` |
-| `tests/Jellyfin.MediaEncoding.Hls.Tests` | Keyframe-based dynamic HLS playlist generation | `libs/streaming` |
+| `tests/Jellyfin.MediaEncoding.Hls.Tests`, `tests/Jellyfin.Api.Tests/Controllers/DynamicHlsControllerTests.cs` | Keyframe-based dynamic HLS playlist generation; segment lengths, Dolby Vision codec tags, transcode restarts | `libs/streaming` |
 | `tests/Jellyfin.Drawing.Skia.Tests` | Resize dimension calculation, sharpening, SVG security validation | `libs/imaging` |
 | `tests/Jellyfin.Server.Implementations.Tests/Trickplay` | Trickplay generation parameters | `libs/imaging` / `libs/media` |
 | `tests/Jellyfin.Controller.Tests/Entities/BaseItemTests.cs` | Sort names (`GetSortName`, `ModifySortChunks`) | `libs/store` |
