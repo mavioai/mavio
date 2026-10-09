@@ -17,6 +17,7 @@
 | buf | Protobuf 的 lint、格式化、破坏性变更检查与代码生成 |
 | golangci-lint | Go 代码检查与格式检查 |
 | sqlc | 生成 `libs/store` 中的方言专属查询代码 |
+| jellyfin-ffmpeg | 媒体管线、测试媒体生成与集成测试（`PATH` 上的 `ffmpeg` / `ffprobe`） |
 
 ```bash
 mise install            # 安装锁定版本的工具链
@@ -140,9 +141,9 @@ go build -o plugin .                                                     # 子�
 `.github/workflows/ci.yml` 在推送到 `main` 和提交 PR 时运行：
 * **check**（Linux）：`nx affected -t buf-lint lint tidy-check build test`；重新生成代码，有任何差异即失败；PR 上对照目标分支运行 `buf breaking`。
 * **test**：在 linux arm64、macOS、Windows 上运行 `nx run-many -t test build`。
-* **media**（Linux、macOS）：安装 ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
+* **media**（Linux、macOS）：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
 
-CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）。
+CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg（`MISE_DISABLE_TOOLS`）。
 
 ---
 

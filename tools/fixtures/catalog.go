@@ -135,7 +135,7 @@ func Catalog() []Spec {
 			Description: "AV1 (SVT-AV1) video with Opus audio in Matroska.",
 			Encoders:    []string{"libsvtav1", "libopus"},
 			Args: concat(video("640x360", "24", "2"), tone("440", "2"),
-				[]string{"-c:v", "libsvtav1", "-preset", "12", "-crf", "40", "-svtav1-params", "lp=1", "-c:a", "libopus", "-b:a", "96k"}),
+				[]string{"-c:v", "libsvtav1", "-preset", "12", "-crf", "40", "-c:a", "libopus", "-b:a", "96k"}),
 		},
 		{
 			Name:        "ntsc_film_odd_duration.mp4",

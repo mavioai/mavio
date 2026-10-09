@@ -42,7 +42,7 @@ Libraries under `libs/` are named by domain; a single library can be both a Go m
 
 ## Environment and Common Commands
 
-Tool versions are pinned in `mise.toml` (go, node, pnpm, buf, golangci-lint).
+Tool versions are pinned in `mise.toml` (go, node, pnpm, buf, golangci-lint, sqlc, jellyfin-ffmpeg).
 
 ```bash
 mise install            # Install the pinned toolchain

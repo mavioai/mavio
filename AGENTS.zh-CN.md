@@ -42,7 +42,7 @@ tools/{fixtures,testport}/  测试媒体生成、测试用例移植
 
 ## 环境与常用命令
 
-工具版本由 `mise.toml` 锁定（go、node、pnpm、buf、golangci-lint）。
+工具版本由 `mise.toml` 锁定（go、node、pnpm、buf、golangci-lint、sqlc、jellyfin-ffmpeg）。
 
 ```bash
 mise install            # 安装锁定版本的工具链
