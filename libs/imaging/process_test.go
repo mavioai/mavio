@@ -45,6 +45,9 @@ func TestProcess(t *testing.T) {
 		{"opaque PNG becomes JPEG", encoded(t, 100, 50, 255, PNG), Options{}, JPEG, Size{100, 50}},
 		{"transparent PNG stays PNG", encoded(t, 100, 50, 10, PNG), Options{SizeOptions: SizeOptions{Height: 25}}, PNG, Size{50, 25}},
 		{"never enlarged", encoded(t, 100, 50, 255, JPEG), Options{SizeOptions: SizeOptions{Width: 400}}, JPEG, Size{100, 50}},
+		{"WebP", encoded(t, 400, 600, 255, JPEG), Options{SizeOptions: SizeOptions{MaxHeight: 300}, Format: WebP}, WebP, Size{200, 300}},
+		{"transparent WebP", encoded(t, 100, 50, 10, PNG), Options{Format: WebP}, WebP, Size{100, 50}},
+		{"PNG asked for", encoded(t, 100, 50, 255, JPEG), Options{Format: PNG}, PNG, Size{100, 50}},
 	}
 	for _, tt := range tests {
 		out, format, err := Process(tt.data, tt.o)
@@ -53,11 +56,14 @@ func TestProcess(t *testing.T) {
 			continue
 		}
 		cfg, name, err := image.DecodeConfig(bytes.NewReader(out))
-		if err != nil || format != tt.wantFormat || (Size{cfg.Width, cfg.Height}) != tt.wantSize || (name == "png") != (format == PNG) {
+		if err != nil || format != tt.wantFormat || (Size{cfg.Width, cfg.Height}) != tt.wantSize || name != map[Format]string{JPEG: "jpeg", PNG: "png", WebP: "webp"}[format] {
 			t.Errorf("%s: got = %s %d×%d (%s, %v), want = %s %v", tt.name, format, cfg.Width, cfg.Height, name, err, tt.wantFormat, tt.wantSize)
 		}
 	}
 
+	if _, _, err := Process(encoded(t, 10, 10, 255, JPEG), Options{Format: GIF}); err == nil {
+		t.Error("Process to GIF = nil error")
+	}
 	if _, _, err := Process([]byte("not an image"), Options{}); err == nil {
 		t.Error("Process(garbage) = nil error")
 	}

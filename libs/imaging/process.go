@@ -10,8 +10,8 @@ import (
 	"image/jpeg"
 	"image/png"
 
-	_ "golang.org/x/image/bmp"  // registers the BMP decoder
-	_ "golang.org/x/image/webp" // registers the WebP decoder
+	"github.com/gen2brain/vpx/webp" // also registers the WebP decoder
+	_ "golang.org/x/image/bmp"      // registers the BMP decoder
 )
 
 // MaxPixels bounds the images Process decodes, against decompression
@@ -24,13 +24,17 @@ var ErrTooLarge = errors.New("imaging: image too large")
 // Options are how Process renders an image.
 type Options struct {
 	SizeOptions
-	// Quality is the JPEG quality, 1–100; 0 means 90.
+	// Quality is the JPEG or WebP quality, 1–100; 0 means 90.
 	Quality int
+	// Format is JPEG, PNG or WebP; empty picks JPEG, or PNG for images
+	// with transparency.
+	Format Format
 }
 
 // Process decodes a JPEG, PNG, GIF, BMP or WebP image, resizes it as the
-// options ask (see NewSize) and encodes it as JPEG, or as PNG when it has
-// transparency. GIFs keep only their first frame.
+// options ask (see NewSize) and encodes it in the requested format; JPEG
+// output of an image with transparency is PNG instead. GIFs keep only
+// their first frame.
 func Process(data []byte, o Options) ([]byte, Format, error) {
 	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
 	if err != nil {
@@ -48,16 +52,25 @@ func Process(data []byte, o Options) ([]byte, Format, error) {
 	if size.Width > 0 && size.Height > 0 {
 		img = ResizeImage(img, size.Width, size.Height)
 	}
+	if o.Format != "" && o.Format != JPEG && o.Format != PNG && o.Format != WebP {
+		return nil, "", fmt.Errorf("imaging: cannot encode %s", o.Format)
+	}
 	var out bytes.Buffer
-	if !opaque(img) {
+	quality := o.Quality
+	if quality <= 0 || quality > 100 {
+		quality = 90
+	}
+	switch {
+	case o.Format == WebP:
+		if err := webp.Encode(&out, img, webp.EncodeOptions{Quality: quality, Method: -1}); err != nil {
+			return nil, "", fmt.Errorf("imaging: %w", err)
+		}
+		return out.Bytes(), WebP, nil
+	case o.Format == PNG || !opaque(img):
 		if err := png.Encode(&out, img); err != nil {
 			return nil, "", fmt.Errorf("imaging: %w", err)
 		}
 		return out.Bytes(), PNG, nil
-	}
-	quality := o.Quality
-	if quality <= 0 || quality > 100 {
-		quality = 90
 	}
 	if err := jpeg.Encode(&out, flatten(img), &jpeg.Options{Quality: quality}); err != nil {
 		return nil, "", fmt.Errorf("imaging: %w", err)
