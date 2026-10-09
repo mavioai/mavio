@@ -65,9 +65,10 @@ func New(cfg Config) *Server {
 	return &Server{cfg: cfg, log: log}
 }
 
-// Handler serves GET /images/{id}, optionally resized with the query
+// Handler serves GET /images/{id}, optionally rendered with the query
 // parameters width, height, maxWidth, maxHeight, fillWidth, fillHeight
-// and quality, as Jellyfin's image API takes them.
+// and quality, as Jellyfin's image API takes them, and format. Renderings
+// without a format are WebP for clients that accept it, else JPEG or PNG.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /images/{id}", s.serve)
@@ -84,6 +85,14 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
+	}
+	resize := opts != (imaging.Options{})
+	if opts.Format == "" {
+		// Renderings are WebP for clients that take it.
+		w.Header().Set("Vary", "Accept")
+		if strings.Contains(r.Header.Get("Accept"), "image/webp") {
+			opts.Format = imaging.WebP
+		}
 	}
 	img, err := s.cfg.Store.Images().Get(r.Context(), id)
 	if errors.Is(err, core.ErrNotFound) {
@@ -116,7 +125,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		data, contentType = original, "image/svg+xml"
-	case opts == (imaging.Options{}):
+	case !resize:
 		data, contentType = original, http.DetectContentType(original)
 	default:
 		key := etag + "-" + optionsKey(opts)
@@ -242,7 +251,7 @@ func (s *Server) download(ctx context.Context, rawURL, file string) ([]byte, err
 // rendered before.
 func (s *Server) render(ctx context.Context, key string, original []byte, opts imaging.Options) ([]byte, string, error) {
 	dir := filepath.Join(s.cfg.Dir, "rendered")
-	for _, f := range []imaging.Format{imaging.JPEG, imaging.PNG} {
+	for _, f := range []imaging.Format{imaging.JPEG, imaging.PNG, imaging.WebP} {
 		ext, _ := f.Extension()
 		if data, err := os.ReadFile(filepath.Join(dir, key+ext)); err == nil {
 			mime, _ := f.MimeType()
@@ -301,9 +310,19 @@ func isSVG(img *core.Image, data []byte) bool {
 	return bytes.HasPrefix(head, []byte("<svg")) || (bytes.HasPrefix(head, []byte("<?xml")) && bytes.Contains(head, []byte("<svg")))
 }
 
-// parseOptions reads the size parameters; each is 1–10000.
+// parseOptions reads the size parameters, each 1–10000, the quality and
+// the format: jpg, png or webp.
 func parseOptions(q url.Values) (imaging.Options, error) {
 	var o imaging.Options
+	switch f := strings.ToLower(q.Get("format")); f {
+	case "":
+	case "jpg", "jpeg":
+		o.Format = imaging.JPEG
+	case "png", "webp":
+		o.Format = imaging.Format(f)
+	default:
+		return o, fmt.Errorf("format must be jpg, png or webp")
+	}
 	for name, dst := range map[string]*int{
 		"width": &o.Width, "height": &o.Height, "maxWidth": &o.MaxWidth, "maxHeight": &o.MaxHeight,
 		"fillWidth": &o.FillWidth, "fillHeight": &o.FillHeight, "quality": &o.Quality,
@@ -327,5 +346,5 @@ func parseOptions(q url.Values) (imaging.Options, error) {
 
 // optionsKey names a rendering in the cache.
 func optionsKey(o imaging.Options) string {
-	return fmt.Sprintf("w%d-h%d-mw%d-mh%d-fw%d-fh%d-q%d", o.Width, o.Height, o.MaxWidth, o.MaxHeight, o.FillWidth, o.FillHeight, o.Quality)
+	return fmt.Sprintf("w%d-h%d-mw%d-mh%d-fw%d-fh%d-q%d-%s", o.Width, o.Height, o.MaxWidth, o.MaxHeight, o.FillWidth, o.FillHeight, o.Quality, o.Format)
 }

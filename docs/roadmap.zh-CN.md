@@ -87,7 +87,7 @@ flowchart TD
 - [x] `libs/naming`：Jellyfin 的命名规则，覆盖电影、剧集、季、剧集系列、分段、多版本、附加内容、音乐、有声书、图书与外部文件；移植用例全部通过或带原因跳过
 - [x] `libs/subtitle`：SRT / SSA / ASS / WebVTT 解析，转换为 SRT / SSA / ASS / WebVTT / TTML / JSON，按时间窗口过滤，以及字符集检测
 - [x] `libs/metadata`：读取电影、视频、音乐视频、剧集、季、单集（含多集文件）、专辑与艺人的 NFO；从 URL 中识别提供者 ID；电影 NFO 的位置。写入 NFO 留到保存元数据的阶段。
-- [x] `libs/imaging`：Jellyfin 的尺寸规则、缩小时带锐化的缩放、图片格式与 SVG 安全检查。标准库以外的编解码器、占位图（blurhash / thumbhash）与拼贴图随 P5 的图片 API 实现。
+- [x] `libs/imaging`：Jellyfin 的尺寸规则、缩小时带锐化的缩放、图片格式与 SVG 安全检查。WebP 编码与占位图（blurhash / thumbhash）随 P5 的图片 API 实现，拼贴图随 P7 的客户端实现。
 - [x] 冒烟测试 `apps/server/internal/smoke`：解析一集的文件名，读取 NFO，连同署名写入存储并能查到；字幕转换为 WebVTT，海报缩放
 
 ### P3 媒体管线
@@ -130,7 +130,7 @@ flowchart TD
 - [x] 字幕交付：文本字幕以转换后的文件交付（来自外挂文件或由 ffmpeg 提取），以及 HLS 字幕轨
 - [x] 媒体库、条目与用户的 Connect 服务；服务端运行媒体库任务
 - [x] 图片端点：本地与提供者的图片，按 Jellyfin 的尺寸规则缩放并缓存
-- [ ] WebP 与 AVIF 编码、blurhash / thumbhash 占位图与媒体库拼贴图
+- [x] 与客户端协商的 WebP 编码（`gen2brain/vpx`）；在媒体库任务中计算 blurhash / thumbhash 占位图
 - [ ] 在 hls.js / AVPlayer / Media3 实机客户端上验证播放，包括拖动后 HLS 字幕轨仍保持同步：字幕轨是一个不带 `X-TIMESTAMP-MAP` 的 WebVTT 分片；若有播放器错位，则像 Jellyfin 一样按视频分片切分 WebVTT
 
 ### P6 服务端装配与分发
@@ -139,7 +139,7 @@ flowchart TD
 **完成标准**：端到端冒烟测试：扫描 → 刮削 → 播放决策 → HLS 播放。
 
 ### P7 客户端与生态
-**范围**：`libs/client`、`libs/ui`；`apps/web`、`apps/desktop`、`apps/mobile`；Jellyfin API 兼容垫片（shim）评估。具体完成标准在 P6 完成后制定。
+**范围**：`libs/client`、`libs/ui`；`apps/web`、`apps/desktop`、`apps/mobile`；媒体库与合集拼贴图；Jellyfin API 兼容垫片（shim）评估。具体完成标准在 P6 完成后制定。
 
 ---
 

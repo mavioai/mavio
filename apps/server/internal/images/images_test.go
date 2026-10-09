@@ -126,6 +126,19 @@ func TestServer(t *testing.T) {
 		t.Errorf("conditional request = %d, want 304", again.StatusCode)
 	}
 
+	// Clients accepting WebP get it unless they ask for a format.
+	if resp, body := get("/images/"+id[core.ImagePrimary]+"?maxWidth=100", "Accept", "image/avif,image/webp,*/*"); resp.Header.Get("Content-Type") != "image/webp" || resp.Header.Get("Vary") != "Accept" {
+		t.Errorf("WebP negotiation = %s, Vary %q", resp.Header.Get("Content-Type"), resp.Header.Get("Vary"))
+	} else if w, h := size(body); w != 100 || h != 150 {
+		t.Errorf("WebP size = %d×%d", w, h)
+	}
+	if resp, _ := get("/images/"+id[core.ImagePrimary]+"?maxWidth=100&format=png", "Accept", "image/webp"); resp.Header.Get("Content-Type") != "image/png" {
+		t.Errorf("format=png = %s", resp.Header.Get("Content-Type"))
+	}
+	if resp, body := get("/images/"+id[core.ImagePrimary], "Accept", "image/webp"); !bytes.Equal(body, poster) {
+		t.Errorf("original with WebP accepted = %s", resp.Header.Get("Content-Type"))
+	}
+
 	// A provider image is downloaded once.
 	for range 2 {
 		resp, body := get("/images/" + id[core.ImageBackdrop] + "?fillWidth=480&fillHeight=270")
@@ -164,7 +177,7 @@ func TestServer(t *testing.T) {
 	if f, err := server.Analyze(ctx, svg); err != nil || f.Blurhash != "" {
 		t.Errorf("Analyze(SVG) = %+v, %v; want zero facts", f, err)
 	}
-	for _, q := range []string{"?width=0", "?maxWidth=x", "?quality=101"} {
+	for _, q := range []string{"?width=0", "?maxWidth=x", "?quality=101", "?format=gif"} {
 		if resp, _ := get("/images/" + id[core.ImagePrimary] + q); resp.StatusCode != http.StatusBadRequest {
 			t.Errorf("%s = %d, want 400", q, resp.StatusCode)
 		}

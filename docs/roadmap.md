@@ -87,7 +87,7 @@ flowchart TD
 - [x] `libs/naming`: Jellyfin's naming rules for movies, episodes, seasons, series, stacks, versions, extras, music, audiobooks, books and external files; all ported cases pass or are skipped with a reason
 - [x] `libs/subtitle`: SRT / SSA / ASS / WebVTT parsing, conversion to SRT / SSA / ASS / WebVTT / TTML / JSON, time-window filtering and character set detection
 - [x] `libs/metadata`: NFO reading for movies, videos, music videos, series, seasons, episodes (including multi-episode files), albums and artists; provider IDs in URLs; movie NFO locations. Writing NFO files is left to the phase that saves metadata.
-- [x] `libs/imaging`: Jellyfin's size rules, resizing with sharpening on downscale, image formats and SVG safety checks. Codecs beyond the standard library, placeholders (blurhash / thumbhash) and collages come with the image API in P5.
+- [x] `libs/imaging`: Jellyfin's size rules, resizing with sharpening on downscale, image formats and SVG safety checks. WebP encoding and placeholders (blurhash / thumbhash) come with the image API in P5, collages with the clients in P7.
 - [x] Smoke test `apps/server/internal/smoke`: an episode's files are named, read from NFO, stored with their credits and found again; its subtitle is converted to WebVTT and its poster resized
 
 ### P3 Media Pipeline
@@ -130,7 +130,7 @@ flowchart TD
 - [x] Subtitle delivery: text subtitles as converted files, from external files or extracted with ffmpeg, and as HLS renditions
 - [x] Library, item and user Connect services; the server runs the library jobs
 - [x] Image endpoint: local and provider artwork, resized with Jellyfin's size rules and cached
-- [ ] WebP and AVIF encoding, blurhash / thumbhash placeholders and library collages
+- [x] WebP encoding (`gen2brain/vpx`) negotiated with clients; blurhash / thumbhash placeholders computed in the library jobs
 - [ ] Playback verified on real hls.js / AVPlayer / Media3 clients, including HLS subtitle renditions staying in sync after seeking: they are one WebVTT segment without `X-TIMESTAMP-MAP`; if a player misplaces them, segment the WebVTT along the video as Jellyfin does
 
 ### P6 Server Assembly and Distribution
@@ -139,7 +139,7 @@ flowchart TD
 **Done when**: end-to-end smoke test: scan → scrape → playback decision → HLS playback.
 
 ### P7 Clients and Ecosystem
-**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`; evaluation of a Jellyfin API compatibility shim. Its completion criteria will be defined after P6.
+**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`; library and collection collages; evaluation of a Jellyfin API compatibility shim. Its completion criteria will be defined after P6.
 
 ---
 
