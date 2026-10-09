@@ -34,10 +34,7 @@ func (p *Planner) videoArgs(j *Job, keyframes bool) []string {
 	if encoder == Copy {
 		args := []string{"-codec:v:0", Copy}
 		args = append(args, p.BitstreamArgs(j, core.StreamVideo)...)
-		if isH265(j.Video) {
-			args = append(args, "-tag:v:0", "hvc1")
-		}
-		return args
+		return append(args, p.copyTagArgs(j)...)
 	}
 	args := []string{"-codec:v:0", encoder}
 	args = append(args, p.videoQualityArgs(j, encoder)...)
@@ -53,6 +50,33 @@ func (p *Planner) videoArgs(j *Job, keyframes bool) []string {
 		}
 	}
 	return append(args, g.Args(inFileIndex(j.Source, j.Video), subInput, subIndex)...)
+}
+
+// copyTagArgs tags copied video: Dolby Vision sample entries when the
+// client takes Dolby Vision and the stream keeps it, which needs ffmpeg's
+// experimental mode, and hvc1 rather than hev1 for other HEVC.
+func (p *Planner) copyTagArgs(j *Job) []string {
+	v := j.Video
+	dv := IsDOVI(v) && containsFold(j.requestedRangeTypes(v.Codec), string(core.RangeTypeDOVI)) && !p.DOVIRemoved(j)
+	switch {
+	case isH265(v) && dv:
+		return []string{"-tag:v:0", DolbyVisionHEVCTag(v), "-strict", "-2"}
+	case isAV1(v) && dv:
+		return []string{"-tag:v:0", "dav1", "-strict", "-2"}
+	case isH265(v):
+		return []string{"-tag:v:0", "hvc1"}
+	}
+	return nil
+}
+
+// DolbyVisionHEVCTag returns the sample entry tag of copied Dolby Vision
+// HEVC: hvc1 for profile 8, whose base layer plays without Dolby Vision,
+// dvh1 for the others.
+func DolbyVisionHEVCTag(st *core.MediaStream) string {
+	if st.DolbyVision != nil && st.DolbyVision.Profile == 8 {
+		return "hvc1"
+	}
+	return "dvh1"
 }
 
 // streamArgs returns the maps and stream options shared by all outputs.

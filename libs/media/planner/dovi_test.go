@@ -168,3 +168,33 @@ func TestValidDoviKeepsMetadata(t *testing.T) {
 		t.Errorf("got = %v", got)
 	}
 }
+
+func TestCopyTags(t *testing.T) {
+	tests := []struct {
+		name    string
+		codec   string
+		profile int
+		compat  int
+		ranges  string
+		removal bool
+		want    []string
+	}{
+		{"profile 7 to a Dolby Vision client", "hevc", 7, 6, "DOVI,DOVIWithEL,HDR10", true, []string{"-tag:v:0", "dvh1", "-strict", "-2"}},
+		{"profile 7 losing its layer for an HDR10 client", "hevc", 7, 6, "DOVI,HDR10", true, []string{"-tag:v:0", "hvc1"}},
+		{"profile 8 to a Dolby Vision client", "hevc", 8, 1, "DOVI,HDR10", true, []string{"-tag:v:0", "hvc1", "-strict", "-2"}},
+		{"AV1 to a Dolby Vision client", "av1", 10, 1, "DOVI", true, []string{"-tag:v:0", "dav1", "-strict", "-2"}},
+		{"HEVC to an HDR10 client", "hevc", 8, 1, "HDR10", true, []string{"-tag:v:0", "hvc1"}},
+		{"AV1 to an HDR10 client", "av1", 10, 1, "HDR10", true, nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			j := doviJob(tt.codec, "smpte2084")
+			j.Video.ColorSpace, j.Video.ColorPrimaries = "bt2020nc", "bt2020"
+			j.Video.DolbyVision.Profile, j.Video.DolbyVision.BLCompatibilityID = tt.profile, tt.compat
+			requestRanges(j, tt.ranges)
+			if got := doviPlanner(tt.removal).copyTagArgs(j); !slices.Equal(got, tt.want) {
+				t.Errorf("copyTagArgs() = %q, want = %q", got, tt.want)
+			}
+		})
+	}
+}
