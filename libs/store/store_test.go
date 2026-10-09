@@ -445,6 +445,17 @@ func TestMediaSourcesAndImages(t *testing.T) {
 				t.Errorf("images of %s = %+v", owner, got)
 			}
 		}
+		// Batched by owner, and by ID.
+		many, err := s.Images().ListForOwners(ctx, []core.ID{movie.ID, person.ID, core.NewID()})
+		if err != nil || len(many) != 2 || len(many[movie.ID]) != 2 || len(many[person.ID]) != 2 || many[movie.ID][0].Kind != core.ImageBackdrop {
+			t.Errorf("ListForOwners = %+v, %v", many, err)
+		}
+		if one, err := s.Images().Get(ctx, many[person.ID][1].ID); err != nil || one.OwnerID != person.ID || one.Kind != core.ImagePrimary {
+			t.Errorf("Get image = %+v, %v", one, err)
+		}
+		if _, err := s.Images().Get(ctx, core.NewID()); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("Get unknown image: %v", err)
+		}
 		if err := s.Images().Replace(ctx, core.NewID(), nil); !errors.Is(err, core.ErrNotFound) {
 			t.Errorf("images for unknown owner: %v", err)
 		}

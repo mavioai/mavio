@@ -99,6 +99,32 @@ func (r images) ListForOwner(ctx context.Context, ownerID core.ID) ([]core.Image
 	return out, nil
 }
 
+func (r images) Get(ctx context.Context, id core.ID) (core.Image, error) {
+	img, err := r.s.read.Image.Get(ctx, id)
+	if err != nil {
+		return core.Image{}, mapErr(err, "get image "+id.String())
+	}
+	return toImage(img), nil
+}
+
+func (r images) ListForOwners(ctx context.Context, ownerIDs []core.ID) (map[core.ID][]core.Image, error) {
+	out := map[core.ID][]core.Image{}
+	if len(ownerIDs) == 0 {
+		return out, nil
+	}
+	list, err := r.s.read.Image.Query().
+		Where(image.Or(image.ItemIDIn(ownerIDs...), image.PersonIDIn(ownerIDs...))).
+		Order(ent.Asc(image.FieldKind), ent.Asc(image.FieldIndex)).All(ctx)
+	if err != nil {
+		return nil, mapErr(err, "list images")
+	}
+	for _, e := range list {
+		img := toImage(e)
+		out[img.OwnerID] = append(out[img.OwnerID], img)
+	}
+	return out, nil
+}
+
 func (r images) Replace(ctx context.Context, ownerID core.ID, list []core.Image) error {
 	for i := range list {
 		if list[i].ID.IsZero() {

@@ -415,6 +415,12 @@ func (r memImages) ListForOwner(_ context.Context, id core.ID) ([]core.Image, er
 	return r.m.images[id], nil
 }
 
+func (r memImages) Get(context.Context, core.ID) (core.Image, error) { panic("unused") }
+
+func (r memImages) ListForOwners(context.Context, []core.ID) (map[core.ID][]core.Image, error) {
+	panic("unused")
+}
+
 func (r memImages) Replace(_ context.Context, id core.ID, images []core.Image) error {
 	r.m.mu.Lock()
 	defer r.m.mu.Unlock()

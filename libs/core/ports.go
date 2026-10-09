@@ -80,7 +80,12 @@ type MediaSourceRepository interface {
 
 // ImageRepository stores images of items and people.
 type ImageRepository interface {
+	// Get returns ErrNotFound for unknown images.
+	Get(ctx context.Context, id ID) (Image, error)
 	ListForOwner(ctx context.Context, ownerID ID) ([]Image, error)
+	// ListForOwners lists the images of several owners at once; owners
+	// without images are absent.
+	ListForOwners(ctx context.Context, ownerIDs []ID) (map[ID][]Image, error)
 	// Replace sets the owner's images, removing any others.
 	Replace(ctx context.Context, ownerID ID, images []Image) error
 }

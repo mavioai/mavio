@@ -189,7 +189,7 @@ erDiagram
 | `LibraryRepository` | 增删改查；删除媒体库会删除其全部条目 |
 | `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（按 ID 顺序以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`（同一媒体库内路径唯一：`ErrConflict`）、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据）、供扫描使用的 `MarkSeen`、`Touch`、`MarkMissing` 与 `PurgeMissing`（见 §4.7）、`Values`（去重后的流派、标签、工作室或艺人，见 §9.2） |
 | `MediaSourceRepository` | 列出并 `Replace` 条目的媒体源 |
-| `ImageRepository` | 列出并 `Replace` 所有者的图片 |
+| `ImageRepository` | `Get` 单张图片；列出一个所有者的图片，或一次列出多个所有者的图片（`ListForOwners`），并 `Replace` 它们 |
 | `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、`Search`（见 §9.2）、列出并 `Replace` 条目的署名 |
 | `UserRepository` | 增删改查，以及不区分大小写的 `GetByName` |
 | `UserDataRepository` | `Get`（不存在时返回 `ErrNotFound`）、按一组条目 `GetMany`、`Put` |
