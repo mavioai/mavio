@@ -153,3 +153,4 @@ flowchart TD
 | Go modules split too finely | Friction in dependency upgrades and tidying | Keep watching; merge modules when needed |
 | Progressive transcoding | Remuxes and transcodes are delivered as HLS only; a client declaring only progressive transcoding profiles gets `unimplemented` | When offline downloads need transcoded files |
 | Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P7); then serve the stream as `.sup` |
+| Inherited parental ratings | Ratings are filtered per item, so unrated episodes of a series rated above a user's limit are visible; Jellyfin filters them by the series' rating | Before clients ship parental controls: store an inherited rating with each item and filter on it |
