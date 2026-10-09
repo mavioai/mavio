@@ -16,6 +16,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
+	"github.com/mavioai/mavio/libs/library/storage"
 	"github.com/mavioai/mavio/libs/media/decision"
 	"github.com/mavioai/mavio/libs/media/planner"
 	"github.com/mavioai/mavio/libs/media/supervisor"
@@ -68,7 +69,9 @@ type Config struct {
 	// OnChange is told when a session starts or ends a playback, or
 	// pauses or resumes it; nil tells no one.
 	OnChange func(userID, sessionID core.ID)
-	Logger   *slog.Logger
+	// QuietGate pauses background library scans while playback sessions are active.
+	QuietGate *storage.QuietGate
+	Logger    *slog.Logger
 }
 
 // Manager runs the playbacks in progress.
@@ -160,8 +163,9 @@ type Playback struct {
 	position   time.Duration
 	paused     bool
 	// counted says the play was counted, once per playback.
-	counted bool
-	ended   bool
+	counted  bool
+	ended    bool
+	quietRel func()
 }
 
 // Subtitle is a subtitle stream of a playback.
@@ -291,6 +295,13 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 			p.close()
 			return nil, err
 		}
+	}
+
+	if m.cfg.QuietGate != nil {
+		p.quietRel = m.cfg.QuietGate.AcquirePlayback(p.ID)
+	}
+	if d.Source != nil && d.Source.Path != "" {
+		_ = storage.PrefetchHeadTail(d.Source.Path, 1024*1024, 256*1024)
 	}
 
 	p.started = time.Now()
@@ -551,7 +562,12 @@ func (p *Playback) close() {
 	p.mu.Lock()
 	ended := p.ended
 	p.ended = true
+	quietRel := p.quietRel
+	p.quietRel = nil
 	p.mu.Unlock()
+	if quietRel != nil {
+		quietRel()
+	}
 	if !ended && p.stream != nil {
 		_ = p.stream.Close()
 	}
