@@ -73,7 +73,8 @@ func (s *PlaybackService) StartPlayback(ctx context.Context, req *playbackv1.Sta
 	}
 
 	subs := make([]*playbackv1.SubtitleTrack, len(pb.Subtitles))
-	for i, sub := range pb.Subtitles {
+	for i := range pb.Subtitles {
+		sub := &pb.Subtitles[i]
 		st := sub.Stream
 		subs[i] = playbackv1.SubtitleTrack_builder{
 			StreamIndex: new(int32(st.Index)),
@@ -83,6 +84,7 @@ func (s *PlaybackService) StartPlayback(ctx context.Context, req *playbackv1.Sta
 			Forced:      &st.Forced,
 			Method:      new(subtitleMethodsToProto[sub.Method]),
 			Format:      &sub.Format,
+			Url:         new(pb.SubtitleURL(sub)),
 		}.Build()
 	}
 	reasons := reasonsToProto(pb.Decision.Reasons)

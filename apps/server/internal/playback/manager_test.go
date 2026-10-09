@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -52,6 +53,10 @@ func newEnv(t *testing.T) *env {
 	if err := os.WriteFile(path, e.file, 0o644); err != nil {
 		t.Fatal(err)
 	}
+	srt := filepath.Join(filepath.Dir(path), "Film.fr.srt")
+	if err := os.WriteFile(srt, []byte("1\r\n00:00:01,000 --> 00:00:02,500\r\nBonjour\r\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 	e.movie = core.Item{ID: core.NewID(), LibraryID: lib.ID, Kind: core.KindMovie, Name: "Film", Path: path, Runtime: 100 * time.Minute}
 	if err := s.Items().Upsert(ctx, e.movie); err != nil {
 		t.Fatal(err)
@@ -67,6 +72,7 @@ func newEnv(t *testing.T) *env {
 			{Index: 1, Kind: core.StreamAudio, Codec: "aac", Language: "eng", Channels: 2, SampleRate: 48000, Default: true},
 			{Index: 2, Kind: core.StreamAudio, Codec: "aac", Language: "fre", Channels: 2, SampleRate: 48000},
 			{Index: 3, Kind: core.StreamSubtitle, Codec: "subrip", Language: "eng"},
+			{Index: 4, Kind: core.StreamSubtitle, Codec: "subrip", Language: "fre", ExternalPath: srt},
 		},
 	}
 	if err := s.MediaSources().Replace(ctx, e.movie.ID, []core.MediaSource{src}); err != nil {
@@ -123,11 +129,14 @@ func (e *env) userData(t *testing.T) core.UserData {
 func TestDirectPlay(t *testing.T) {
 	e := newEnv(t)
 	p := e.start(t, Request{})
-	if p.Decision.Method != decision.DirectPlay || p.HLS() || p.AudioStream != 1 || p.SubtitleStream != -1 {
-		t.Fatalf("got = %s, audio %d, subtitle %d; want direct play of audio 1 without subtitles", p.Decision.Method, p.AudioStream, p.SubtitleStream)
+	// The default subtitle mode plays external subtitles.
+	if p.Method != decision.DirectPlay || p.HLS() || p.AudioStream != 1 || p.SubtitleStream != 4 {
+		t.Fatalf("got = %s, audio %d, subtitle %d; want direct play of audio 1 with subtitle 4", p.Method, p.AudioStream, p.SubtitleStream)
 	}
-	if len(p.Subtitles) != 1 || p.Subtitles[0].Method != decision.SubtitleExternal || p.Subtitles[0].Format != "vtt" {
-		t.Errorf("subtitles = %+v, want external vtt", p.Subtitles)
+	// Without ffmpeg, only the external file is offered as a file.
+	if len(p.Subtitles) != 2 || p.Subtitles[0].Method != decision.SubtitleDrop ||
+		p.Subtitles[1].Method != decision.SubtitleExternal || p.Subtitles[1].Format != "vtt" {
+		t.Errorf("subtitles = %+v, want the external file as vtt", p.Subtitles)
 	}
 
 	srv := httptest.NewServer(e.m.Handler())
@@ -146,7 +155,20 @@ func TestDirectPlay(t *testing.T) {
 	if resp.StatusCode != http.StatusPartialContent || string(body) != string(e.file[4:11]) || resp.Header.Get("Content-Type") != "video/mp4" {
 		t.Errorf("range request = %d %q (%s), want 206 %q", resp.StatusCode, body, resp.Header.Get("Content-Type"), e.file[4:11])
 	}
-	for _, path := range []string{"/media/unknown/stream.mp4", "/media/" + p.ID + "/master.m3u8", "/media/" + p.ID + "/stream.mkv"} {
+	sub := p.SubtitleURL(&p.Subtitles[1])
+	if sub != "media/"+p.ID+"/subtitles/4.vtt" {
+		t.Fatalf("subtitle URL = %q", sub)
+	}
+	resp, err = http.Get(srv.URL + "/" + sub)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ = io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if want := "WEBVTT\n\n00:00:01.000 --> 00:00:02.500\nBonjour\n\n"; resp.StatusCode != http.StatusOK || string(body) != want || !strings.HasPrefix(resp.Header.Get("Content-Type"), "text/vtt") {
+		t.Errorf("subtitle = %d %q (%s), want %q", resp.StatusCode, body, resp.Header.Get("Content-Type"), want)
+	}
+	for _, path := range []string{"/media/unknown/stream.mp4", "/" + strings.TrimSuffix(sub, "vtt") + "srt", "/media/" + p.ID + "/subtitles/3.vtt", "/media/" + p.ID + "/subtitles/04.vtt", "/media/" + p.ID + "/master.m3u8", "/media/" + p.ID + "/stream.mkv"} {
 		resp, err := http.Get(srv.URL + path)
 		if err != nil {
 			t.Fatal(err)

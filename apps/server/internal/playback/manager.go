@@ -19,6 +19,7 @@ import (
 	"github.com/mavioai/mavio/libs/media/planner"
 	"github.com/mavioai/mavio/libs/media/supervisor"
 	"github.com/mavioai/mavio/libs/streaming"
+	"github.com/mavioai/mavio/libs/subtitle"
 )
 
 // Errors of Start.
@@ -46,6 +47,9 @@ type Config struct {
 	Planner *planner.Planner
 	// FFmpeg starts transcodes; nil leaves direct play only.
 	FFmpeg supervisor.Starter
+	// FFmpegPath runs ffmpeg for subtitle extraction; empty serves only
+	// external subtitle files.
+	FFmpegPath string
 	// PauseKey says the ffmpeg build pauses on "p", see
 	// [supervisor.Config].
 	PauseKey bool
@@ -141,6 +145,10 @@ type Playback struct {
 	variant streaming.Variant
 	layout  streaming.Layout
 	segExt  string
+
+	// subs caches the subtitle streams read, by index.
+	subsMu sync.Mutex
+	subs   map[int]*subtitle.Subtitle
 
 	mu         sync.Mutex
 	lastActive time.Time
@@ -372,6 +380,10 @@ func (m *Manager) subtitles(d *decision.Decision, client *decision.ClientCapabil
 		sub := Subtitle{Stream: st, Method: prof.Method, Format: prof.Format}
 		if d.SubtitleStreamIndex != nil && *d.SubtitleStreamIndex == st.Index && d.SubtitleMethod != "" {
 			sub.Method, sub.Format = d.SubtitleMethod, d.SubtitleFormat
+		}
+		if sub.Method == decision.SubtitleExternal && (!servable(&sub) || (st.ExternalPath == "" && m.cfg.FFmpegPath == "")) {
+			// Files the server cannot write, or extract without ffmpeg.
+			sub.Method = decision.SubtitleDrop
 		}
 		out = append(out, sub)
 	}

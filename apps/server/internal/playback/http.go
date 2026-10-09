@@ -44,6 +44,15 @@ func directName(p *Playback) string {
 func (m *Manager) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /media/{playback}/{file}", m.serveMedia)
+	mux.HandleFunc("GET /media/{playback}/subtitles/{file}", func(w http.ResponseWriter, r *http.Request) {
+		p := m.Get(r.PathValue("playback"))
+		if p == nil {
+			http.NotFound(w, r)
+			return
+		}
+		p.touch(time.Now())
+		m.serveSubtitle(w, r, p, r.PathValue("file"))
+	})
 	return mux
 }
 
@@ -62,7 +71,11 @@ func (m *Manager) serveMedia(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", playlistType)
 		v := p.variant
 		v.URI = "main.m3u8"
-		_, _ = streaming.MasterPlaylist{Variants: []streaming.Variant{v}}.WriteTo(w)
+		subs := p.hlsSubtitles()
+		if len(subs) > 0 {
+			v.Subtitles = subtitleGroup
+		}
+		_, _ = streaming.MasterPlaylist{Variants: []streaming.Variant{v}, Subtitles: subs}.WriteTo(w)
 	case p.HLS() && file == "main.m3u8":
 		w.Header().Set("Content-Type", playlistType)
 		_, _ = streaming.MediaPlaylist{

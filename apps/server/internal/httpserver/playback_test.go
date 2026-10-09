@@ -43,9 +43,14 @@ func TestPlaybackHLS(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
 	}
+	srt := filepath.Join(t.TempDir(), "subs.srt")
+	if err := os.WriteFile(srt, []byte("1\n00:00:01,000 --> 00:00:03,000\nHello there\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 	gen := exec.CommandContext(ctx, ffmpeg, "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=320x240:rate=24",
-		"-f", "lavfi", "-i", "sine=frequency=440", "-t", "30",
-		"-c:v", "libx264", "-g", "36", "-keyint_min", "36", "-sc_threshold", "0", "-c:a", "aac", path)
+		"-f", "lavfi", "-i", "sine=frequency=440", "-i", srt, "-t", "30", "-map", "0:v", "-map", "1:a", "-map", "2:s",
+		"-c:v", "libx264", "-g", "36", "-keyint_min", "36", "-sc_threshold", "0", "-c:a", "aac",
+		"-c:s", "srt", "-metadata:s:s:0", "language=eng", path)
 	if out, err := gen.CombinedOutput(); err != nil {
 		t.Skipf("integration test: cannot generate the source: %v\n%s", err, out)
 	}
@@ -60,7 +65,7 @@ func TestPlaybackHLS(t *testing.T) {
 	client := playbackv1connect.NewPlaybackServiceClient(http.DefaultClient, url, withToken(signUp(t, url)))
 
 	video := playbackv1.MediaKind_MEDIA_KIND_VIDEO
-	hls := func(conditions ...*playbackv1.Condition) *playbackv1.ClientCapabilities {
+	hls := func(subs playbackv1.SubtitleMethod, conditions ...*playbackv1.Condition) *playbackv1.ClientCapabilities {
 		return playbackv1.ClientCapabilities_builder{
 			Name: new("web"),
 			DirectPlay: []*playbackv1.DirectPlayProfile{playbackv1.DirectPlayProfile_builder{
@@ -69,12 +74,15 @@ func TestPlaybackHLS(t *testing.T) {
 			Transcoding: []*playbackv1.TranscodingProfile{playbackv1.TranscodingProfile_builder{
 				Kind: &video, Protocol: new(playbackv1.Protocol_PROTOCOL_HLS), Container: new("mp4"),
 				VideoCodec: new("h264"), AudioCodec: new("aac"), MaxAudioChannels: new(int32(2)),
+				EnableSubtitlesInManifest: new(subs == playbackv1.SubtitleMethod_SUBTITLE_METHOD_HLS),
 			}.Build()},
+			Subtitles: []*playbackv1.SubtitleProfile{playbackv1.SubtitleProfile_builder{Format: new("vtt"), Method: &subs}.Build()},
 			Codecs: []*playbackv1.CodecProfile{playbackv1.CodecProfile_builder{
 				Kind: new(playbackv1.CodecKind_CODEC_KIND_VIDEO), Codec: new("h264"), Conditions: conditions,
 			}.Build()},
 		}.Build()
 	}
+	external, inManifest := playbackv1.SubtitleMethod_SUBTITLE_METHOD_EXTERNAL, playbackv1.SubtitleMethod_SUBTITLE_METHOD_HLS
 	narrow := playbackv1.Condition_builder{
 		Property: new(playbackv1.Property_PROPERTY_WIDTH), Op: new(playbackv1.Op_OP_LESS_THAN_EQUAL), Value: new("160"),
 	}.Build()
@@ -86,8 +94,8 @@ func TestPlaybackHLS(t *testing.T) {
 		reason playbackv1.TranscodeReason
 		width  int
 	}{
-		{"remux", hls(), playbackv1.PlayMethod_PLAY_METHOD_DIRECT_STREAM, playbackv1.TranscodeReason_TRANSCODE_REASON_CONTAINER_NOT_SUPPORTED, 320},
-		{"transcode", hls(narrow), playbackv1.PlayMethod_PLAY_METHOD_TRANSCODE, playbackv1.TranscodeReason_TRANSCODE_REASON_VIDEO_RESOLUTION_NOT_SUPPORTED, 160},
+		{"remux", hls(external), playbackv1.PlayMethod_PLAY_METHOD_DIRECT_STREAM, playbackv1.TranscodeReason_TRANSCODE_REASON_CONTAINER_NOT_SUPPORTED, 320},
+		{"transcode", hls(inManifest, narrow), playbackv1.PlayMethod_PLAY_METHOD_TRANSCODE, playbackv1.TranscodeReason_TRANSCODE_REASON_VIDEO_RESOLUTION_NOT_SUPPORTED, 160},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -101,8 +109,37 @@ func TestPlaybackHLS(t *testing.T) {
 				t.Fatalf("StartPlayback = %v %v, want %v for %v", resp.GetMethod(), resp.GetTranscodeReasons(), tt.method, tt.reason)
 			}
 			base := url + "/" + strings.TrimSuffix(resp.GetUrl(), "master.m3u8")
-			if master := string(get(t, url+"/"+resp.GetUrl())); !strings.Contains(master, `CODECS="avc1.`) || !strings.Contains(master, "\nmain.m3u8\n") {
+			master := string(get(t, url+"/"+resp.GetUrl()))
+			if !strings.Contains(master, `CODECS="avc1.`) || !strings.Contains(master, "\nmain.m3u8\n") {
 				t.Errorf("master playlist:\n%s", master)
+			}
+
+			// The embedded subtitle, extracted with ffmpeg.
+			subs := resp.GetSubtitles()
+			if len(subs) != 1 || subs[0].GetStreamIndex() != 2 || subs[0].GetLanguage() != "eng" {
+				t.Fatalf("subtitles = %v", subs)
+			}
+			vtt := ""
+			switch sub := subs[0]; sub.GetMethod() {
+			case external:
+				if !strings.HasSuffix(sub.GetUrl(), "/subtitles/2.vtt") {
+					t.Fatalf("subtitle URL = %q", sub.GetUrl())
+				}
+				vtt = string(get(t, url+"/"+sub.GetUrl()))
+			case inManifest:
+				if !strings.Contains(master, `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="eng",LANGUAGE="en"`) ||
+					!strings.Contains(master, `URI="subtitles/2.m3u8"`) || !strings.Contains(master, `SUBTITLES="subs"`) {
+					t.Errorf("master playlist without the subtitle rendition:\n%s", master)
+				}
+				if pl := string(get(t, base+"subtitles/2.m3u8")); !strings.Contains(pl, "\n2.vtt\n") {
+					t.Errorf("subtitle playlist:\n%s", pl)
+				}
+				vtt = string(get(t, base+"subtitles/2.vtt"))
+			default:
+				t.Fatalf("subtitle method = %v", sub.GetMethod())
+			}
+			if !strings.HasPrefix(vtt, "WEBVTT") || !strings.Contains(vtt, "00:00:01.000 --> 00:00:03.000\nHello there") {
+				t.Errorf("subtitle:\n%s", vtt)
 			}
 			media := string(get(t, base+"main.m3u8"))
 			segments := strings.Count(media, "#EXTINF:")
