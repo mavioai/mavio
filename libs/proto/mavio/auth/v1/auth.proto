@@ -28,6 +28,24 @@ service AuthService {
   }
   // RevokeSession signs one of the calling user's devices out.
   rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse);
+  // StartQuickConnect begins signing a device in from a signed-in one
+  // (Quick Connect): the new device shows the code, a signed-in user
+  // enters it with AuthorizeQuickConnect, and the new device, polling
+  // GetQuickConnectState, then signs in with LoginWithQuickConnect as that
+  // user. The request expires after ten minutes, or one minute after it
+  // was authorized.
+  rpc StartQuickConnect(StartQuickConnectRequest) returns (StartQuickConnectResponse);
+  // GetQuickConnectState tells whether a request was authorized; unknown
+  // and expired requests are NOT_FOUND.
+  rpc GetQuickConnectState(GetQuickConnectStateRequest) returns (GetQuickConnectStateResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // AuthorizeQuickConnect signs the device waiting with the code in as the
+  // calling user.
+  rpc AuthorizeQuickConnect(AuthorizeQuickConnectRequest) returns (AuthorizeQuickConnectResponse);
+  // LoginWithQuickConnect gives the authorized device its access token,
+  // once.
+  rpc LoginWithQuickConnect(LoginWithQuickConnectRequest) returns (LoginWithQuickConnectResponse);
 }
 
 // Device identifies a client installation.
@@ -121,3 +139,53 @@ message RevokeSessionRequest {
 }
 
 message RevokeSessionResponse {}
+
+message StartQuickConnectRequest {
+  Device device = 1 [(buf.validate.field).required = true];
+}
+
+message StartQuickConnectResponse {
+  // Kept by the new device to poll and sign in; never shown.
+  string secret = 1;
+  // Six digits the user enters on a signed-in device.
+  string code = 2;
+  google.protobuf.Timestamp expire_time = 3;
+}
+
+message GetQuickConnectStateRequest {
+  string secret = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 128
+  ];
+}
+
+message GetQuickConnectStateResponse {
+  bool authorized = 1;
+  google.protobuf.Timestamp expire_time = 2;
+}
+
+message AuthorizeQuickConnectRequest {
+  string code = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^[0-9]{6}$"
+  ];
+}
+
+message AuthorizeQuickConnectResponse {
+  // The device signed in.
+  Device device = 1;
+}
+
+message LoginWithQuickConnectRequest {
+  string secret = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 128
+  ];
+}
+
+// LoginWithQuickConnectResponse is a LoginResponse.
+message LoginWithQuickConnectResponse {
+  string access_token = 1;
+  mavio.user.v1.User user = 2;
+  Session session = 3;
+}

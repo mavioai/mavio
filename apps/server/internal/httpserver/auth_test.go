@@ -8,6 +8,8 @@ import (
 
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
+	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
 
 func device(id string) *authv1.Device {
@@ -115,4 +117,48 @@ func TestAuthFlow(t *testing.T) {
 	wantCode("after Logout", err, connect.CodeUnauthenticated)
 	_, err = public.Logout(ctx, &authv1.LogoutRequest{})
 	wantCode("Logout without a token", err, connect.CodeUnauthenticated)
+}
+
+func TestQuickConnect(t *testing.T) {
+	ctx := t.Context()
+	url := newServer(t)
+	token := signUp(t, url)
+	anon := authv1connect.NewAuthServiceClient(http.DefaultClient, url)
+	signedIn := authv1connect.NewAuthServiceClient(http.DefaultClient, url, withToken(token))
+
+	// The TV starts without credentials and shows the code.
+	started, err := anon.StartQuickConnect(ctx, authv1.StartQuickConnectRequest_builder{Device: device("tv")}.Build())
+	if err != nil || len(started.GetCode()) != 6 || started.GetSecret() == "" {
+		t.Fatalf("StartQuickConnect = %v, %v", started, err)
+	}
+	state, err := anon.GetQuickConnectState(ctx, authv1.GetQuickConnectStateRequest_builder{Secret: new(started.GetSecret())}.Build())
+	if err != nil || state.GetAuthorized() {
+		t.Errorf("state = %v, %v; want pending", state, err)
+	}
+	_, err = anon.LoginWithQuickConnect(ctx, authv1.LoginWithQuickConnectRequest_builder{Secret: new(started.GetSecret())}.Build())
+	wantCode(t, "login before authorizing", err, connect.CodeNotFound)
+	_, err = anon.AuthorizeQuickConnect(ctx, authv1.AuthorizeQuickConnectRequest_builder{Code: new(started.GetCode())}.Build())
+	wantCode(t, "authorize without signing in", err, connect.CodeUnauthenticated)
+	_, err = signedIn.AuthorizeQuickConnect(ctx, authv1.AuthorizeQuickConnectRequest_builder{Code: new("12345")}.Build())
+	wantCode(t, "malformed code", err, connect.CodeInvalidArgument)
+
+	// The signed-in phone enters the code; the TV signs in as its user.
+	authorized, err := signedIn.AuthorizeQuickConnect(ctx, authv1.AuthorizeQuickConnectRequest_builder{Code: new(started.GetCode())}.Build())
+	if err != nil || authorized.GetDevice().GetId() != "tv" {
+		t.Fatalf("AuthorizeQuickConnect = %v, %v", authorized, err)
+	}
+	if state, err := anon.GetQuickConnectState(ctx, authv1.GetQuickConnectStateRequest_builder{Secret: new(started.GetSecret())}.Build()); err != nil || !state.GetAuthorized() {
+		t.Errorf("state = %v, %v; want authorized", state, err)
+	}
+	login, err := anon.LoginWithQuickConnect(ctx, authv1.LoginWithQuickConnectRequest_builder{Secret: new(started.GetSecret())}.Build())
+	if err != nil || login.GetUser().GetName() != "admin" || login.GetSession().GetDevice().GetId() != "tv" {
+		t.Fatalf("LoginWithQuickConnect = %v, %v", login, err)
+	}
+	me, err := userv1connect.NewUserServiceClient(http.DefaultClient, url, withToken(login.GetAccessToken())).
+		GetCurrentUser(ctx, &userv1.GetCurrentUserRequest{})
+	if err != nil || me.GetUser().GetName() != "admin" {
+		t.Errorf("TV's user = %v, %v", me, err)
+	}
+	_, err = anon.LoginWithQuickConnect(ctx, authv1.LoginWithQuickConnectRequest_builder{Secret: new(started.GetSecret())}.Build())
+	wantCode(t, "second login", err, connect.CodeNotFound)
 }

@@ -48,6 +48,18 @@ const (
 	// AuthServiceRevokeSessionProcedure is the fully-qualified name of the AuthService's RevokeSession
 	// RPC.
 	AuthServiceRevokeSessionProcedure = "/mavio.auth.v1.AuthService/RevokeSession"
+	// AuthServiceStartQuickConnectProcedure is the fully-qualified name of the AuthService's
+	// StartQuickConnect RPC.
+	AuthServiceStartQuickConnectProcedure = "/mavio.auth.v1.AuthService/StartQuickConnect"
+	// AuthServiceGetQuickConnectStateProcedure is the fully-qualified name of the AuthService's
+	// GetQuickConnectState RPC.
+	AuthServiceGetQuickConnectStateProcedure = "/mavio.auth.v1.AuthService/GetQuickConnectState"
+	// AuthServiceAuthorizeQuickConnectProcedure is the fully-qualified name of the AuthService's
+	// AuthorizeQuickConnect RPC.
+	AuthServiceAuthorizeQuickConnectProcedure = "/mavio.auth.v1.AuthService/AuthorizeQuickConnect"
+	// AuthServiceLoginWithQuickConnectProcedure is the fully-qualified name of the AuthService's
+	// LoginWithQuickConnect RPC.
+	AuthServiceLoginWithQuickConnectProcedure = "/mavio.auth.v1.AuthService/LoginWithQuickConnect"
 )
 
 // AuthServiceClient is a client for the mavio.auth.v1.AuthService service.
@@ -67,6 +79,22 @@ type AuthServiceClient interface {
 	ListSessions(context.Context, *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error)
 	// RevokeSession signs one of the calling user's devices out.
 	RevokeSession(context.Context, *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error)
+	// StartQuickConnect begins signing a device in from a signed-in one
+	// (Quick Connect): the new device shows the code, a signed-in user
+	// enters it with AuthorizeQuickConnect, and the new device, polling
+	// GetQuickConnectState, then signs in with LoginWithQuickConnect as that
+	// user. The request expires after ten minutes, or one minute after it
+	// was authorized.
+	StartQuickConnect(context.Context, *v1.StartQuickConnectRequest) (*v1.StartQuickConnectResponse, error)
+	// GetQuickConnectState tells whether a request was authorized; unknown
+	// and expired requests are NOT_FOUND.
+	GetQuickConnectState(context.Context, *v1.GetQuickConnectStateRequest) (*v1.GetQuickConnectStateResponse, error)
+	// AuthorizeQuickConnect signs the device waiting with the code in as the
+	// calling user.
+	AuthorizeQuickConnect(context.Context, *v1.AuthorizeQuickConnectRequest) (*v1.AuthorizeQuickConnectResponse, error)
+	// LoginWithQuickConnect gives the authorized device its access token,
+	// once.
+	LoginWithQuickConnect(context.Context, *v1.LoginWithQuickConnectRequest) (*v1.LoginWithQuickConnectResponse, error)
 }
 
 // NewAuthServiceClient constructs a client for the mavio.auth.v1.AuthService service. By default,
@@ -118,17 +146,46 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("RevokeSession")),
 			connect.WithClientOptions(opts...),
 		),
+		startQuickConnect: connect.NewClient[v1.StartQuickConnectRequest, v1.StartQuickConnectResponse](
+			httpClient,
+			baseURL+AuthServiceStartQuickConnectProcedure,
+			connect.WithSchema(authServiceMethods.ByName("StartQuickConnect")),
+			connect.WithClientOptions(opts...),
+		),
+		getQuickConnectState: connect.NewClient[v1.GetQuickConnectStateRequest, v1.GetQuickConnectStateResponse](
+			httpClient,
+			baseURL+AuthServiceGetQuickConnectStateProcedure,
+			connect.WithSchema(authServiceMethods.ByName("GetQuickConnectState")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		authorizeQuickConnect: connect.NewClient[v1.AuthorizeQuickConnectRequest, v1.AuthorizeQuickConnectResponse](
+			httpClient,
+			baseURL+AuthServiceAuthorizeQuickConnectProcedure,
+			connect.WithSchema(authServiceMethods.ByName("AuthorizeQuickConnect")),
+			connect.WithClientOptions(opts...),
+		),
+		loginWithQuickConnect: connect.NewClient[v1.LoginWithQuickConnectRequest, v1.LoginWithQuickConnectResponse](
+			httpClient,
+			baseURL+AuthServiceLoginWithQuickConnectProcedure,
+			connect.WithSchema(authServiceMethods.ByName("LoginWithQuickConnect")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // authServiceClient implements AuthServiceClient.
 type authServiceClient struct {
-	getAuthInfo     *connect.Client[v1.GetAuthInfoRequest, v1.GetAuthInfoResponse]
-	createFirstUser *connect.Client[v1.CreateFirstUserRequest, v1.CreateFirstUserResponse]
-	login           *connect.Client[v1.LoginRequest, v1.LoginResponse]
-	logout          *connect.Client[v1.LogoutRequest, v1.LogoutResponse]
-	listSessions    *connect.Client[v1.ListSessionsRequest, v1.ListSessionsResponse]
-	revokeSession   *connect.Client[v1.RevokeSessionRequest, v1.RevokeSessionResponse]
+	getAuthInfo           *connect.Client[v1.GetAuthInfoRequest, v1.GetAuthInfoResponse]
+	createFirstUser       *connect.Client[v1.CreateFirstUserRequest, v1.CreateFirstUserResponse]
+	login                 *connect.Client[v1.LoginRequest, v1.LoginResponse]
+	logout                *connect.Client[v1.LogoutRequest, v1.LogoutResponse]
+	listSessions          *connect.Client[v1.ListSessionsRequest, v1.ListSessionsResponse]
+	revokeSession         *connect.Client[v1.RevokeSessionRequest, v1.RevokeSessionResponse]
+	startQuickConnect     *connect.Client[v1.StartQuickConnectRequest, v1.StartQuickConnectResponse]
+	getQuickConnectState  *connect.Client[v1.GetQuickConnectStateRequest, v1.GetQuickConnectStateResponse]
+	authorizeQuickConnect *connect.Client[v1.AuthorizeQuickConnectRequest, v1.AuthorizeQuickConnectResponse]
+	loginWithQuickConnect *connect.Client[v1.LoginWithQuickConnectRequest, v1.LoginWithQuickConnectResponse]
 }
 
 // GetAuthInfo calls mavio.auth.v1.AuthService.GetAuthInfo.
@@ -185,6 +242,42 @@ func (c *authServiceClient) RevokeSession(ctx context.Context, req *v1.RevokeSes
 	return nil, err
 }
 
+// StartQuickConnect calls mavio.auth.v1.AuthService.StartQuickConnect.
+func (c *authServiceClient) StartQuickConnect(ctx context.Context, req *v1.StartQuickConnectRequest) (*v1.StartQuickConnectResponse, error) {
+	response, err := c.startQuickConnect.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// GetQuickConnectState calls mavio.auth.v1.AuthService.GetQuickConnectState.
+func (c *authServiceClient) GetQuickConnectState(ctx context.Context, req *v1.GetQuickConnectStateRequest) (*v1.GetQuickConnectStateResponse, error) {
+	response, err := c.getQuickConnectState.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// AuthorizeQuickConnect calls mavio.auth.v1.AuthService.AuthorizeQuickConnect.
+func (c *authServiceClient) AuthorizeQuickConnect(ctx context.Context, req *v1.AuthorizeQuickConnectRequest) (*v1.AuthorizeQuickConnectResponse, error) {
+	response, err := c.authorizeQuickConnect.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// LoginWithQuickConnect calls mavio.auth.v1.AuthService.LoginWithQuickConnect.
+func (c *authServiceClient) LoginWithQuickConnect(ctx context.Context, req *v1.LoginWithQuickConnectRequest) (*v1.LoginWithQuickConnectResponse, error) {
+	response, err := c.loginWithQuickConnect.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // AuthServiceHandler is an implementation of the mavio.auth.v1.AuthService service.
 type AuthServiceHandler interface {
 	// GetAuthInfo tells clients how to sign in.
@@ -202,6 +295,22 @@ type AuthServiceHandler interface {
 	ListSessions(context.Context, *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error)
 	// RevokeSession signs one of the calling user's devices out.
 	RevokeSession(context.Context, *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error)
+	// StartQuickConnect begins signing a device in from a signed-in one
+	// (Quick Connect): the new device shows the code, a signed-in user
+	// enters it with AuthorizeQuickConnect, and the new device, polling
+	// GetQuickConnectState, then signs in with LoginWithQuickConnect as that
+	// user. The request expires after ten minutes, or one minute after it
+	// was authorized.
+	StartQuickConnect(context.Context, *v1.StartQuickConnectRequest) (*v1.StartQuickConnectResponse, error)
+	// GetQuickConnectState tells whether a request was authorized; unknown
+	// and expired requests are NOT_FOUND.
+	GetQuickConnectState(context.Context, *v1.GetQuickConnectStateRequest) (*v1.GetQuickConnectStateResponse, error)
+	// AuthorizeQuickConnect signs the device waiting with the code in as the
+	// calling user.
+	AuthorizeQuickConnect(context.Context, *v1.AuthorizeQuickConnectRequest) (*v1.AuthorizeQuickConnectResponse, error)
+	// LoginWithQuickConnect gives the authorized device its access token,
+	// once.
+	LoginWithQuickConnect(context.Context, *v1.LoginWithQuickConnectRequest) (*v1.LoginWithQuickConnectResponse, error)
 }
 
 // NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -249,6 +358,31 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceMethods.ByName("RevokeSession")),
 		connect.WithHandlerOptions(opts...),
 	)
+	authServiceStartQuickConnectHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceStartQuickConnectProcedure,
+		svc.StartQuickConnect,
+		connect.WithSchema(authServiceMethods.ByName("StartQuickConnect")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceGetQuickConnectStateHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceGetQuickConnectStateProcedure,
+		svc.GetQuickConnectState,
+		connect.WithSchema(authServiceMethods.ByName("GetQuickConnectState")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceAuthorizeQuickConnectHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceAuthorizeQuickConnectProcedure,
+		svc.AuthorizeQuickConnect,
+		connect.WithSchema(authServiceMethods.ByName("AuthorizeQuickConnect")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceLoginWithQuickConnectHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceLoginWithQuickConnectProcedure,
+		svc.LoginWithQuickConnect,
+		connect.WithSchema(authServiceMethods.ByName("LoginWithQuickConnect")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.auth.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AuthServiceGetAuthInfoProcedure:
@@ -263,6 +397,14 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceListSessionsHandler.ServeHTTP(w, r)
 		case AuthServiceRevokeSessionProcedure:
 			authServiceRevokeSessionHandler.ServeHTTP(w, r)
+		case AuthServiceStartQuickConnectProcedure:
+			authServiceStartQuickConnectHandler.ServeHTTP(w, r)
+		case AuthServiceGetQuickConnectStateProcedure:
+			authServiceGetQuickConnectStateHandler.ServeHTTP(w, r)
+		case AuthServiceAuthorizeQuickConnectProcedure:
+			authServiceAuthorizeQuickConnectHandler.ServeHTTP(w, r)
+		case AuthServiceLoginWithQuickConnectProcedure:
+			authServiceLoginWithQuickConnectHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -294,4 +436,20 @@ func (UnimplementedAuthServiceHandler) ListSessions(context.Context, *v1.ListSes
 
 func (UnimplementedAuthServiceHandler) RevokeSession(context.Context, *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.RevokeSession is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) StartQuickConnect(context.Context, *v1.StartQuickConnectRequest) (*v1.StartQuickConnectResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.StartQuickConnect is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) GetQuickConnectState(context.Context, *v1.GetQuickConnectStateRequest) (*v1.GetQuickConnectStateResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.GetQuickConnectState is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) AuthorizeQuickConnect(context.Context, *v1.AuthorizeQuickConnectRequest) (*v1.AuthorizeQuickConnectResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.AuthorizeQuickConnect is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) LoginWithQuickConnect(context.Context, *v1.LoginWithQuickConnectRequest) (*v1.LoginWithQuickConnectResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.LoginWithQuickConnect is not implemented"))
 }

@@ -348,6 +348,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **装配**：`apps/server/internal/server` 把存储、插件、播放、图片、媒体库后台任务与处理器树组装起来并运行到关闭；`cmd/mavio` 只把命令行参数解析为它的配置，端到端测试运行的也是同一套装配。
 * **单一处理器树**：`apps/server/internal/httpserver` 把 Connect 服务（实现位于 `internal/rpc`）与普通 HTTP 媒体端点挂载在同一个 `http.ServeMux` 上。每个 Connect 请求在到达服务之前先按其 protovalidate 规则校验，违反规则返回 `invalid_argument`。
 * **账户**：密码以 argon2id（19 MiB、2 轮、1 条并行通道）散列为 PHC 字符串；使用其他参数的散列仍被接受，并在下一次成功登录时替换。以不存在的用户名登录与密码错误的耗时相同。通过插件认证的用户没有密码散列。
+* **Quick Connect**：与 Jellyfin 一样，可以用已登录的设备让新设备登录。新设备无需凭据即可发起请求并显示六位数字代码；已登录用户输入该代码，即以该用户身份为设备登录；设备用请求的密钥（32 个随机字节，从不显示）轮询请求，随后领取一次访问令牌。请求保存在内存中，十分钟后过期，或在获得授权一分钟后过期。代码在待处理的请求中唯一。
 * **首次运行**：在还没有任何用户时，`AuthService.CreateFirstUser` 无需凭据即可创建一个管理员并使其登录；此后该调用返回 `failed_precondition`。客户端通过 `AuthService.GetAuthInfo` 得知这一步是否尚未完成。
 * **会话**：登录为一台设备签发由 32 个随机字节组成（base64url）的访问令牌；服务端只把它的 SHA-256 散列作为 `AuthSession` 保存（见[领域模型](domain.zh-CN.md)）。客户端以 `Authorization: Bearer <token>` 发送令牌。令牌不会过期；在客户端退出登录、用户吊销该会话或删除账户，或同一设备再次登录时失效。会话的最近活动时间最多每分钟记录一次。
 * **授权**：拦截器把令牌解析为用户与会话并放入请求上下文；未知令牌与被禁用的用户返回 `unauthenticated`。只有 `GetAuthInfo`、`CreateFirstUser`、`Login` 以及 `SystemService` 的健康检查是公开的。管理员权限与媒体库访问权限由各服务根据上下文中的用户自行检查（`permission_denied`）。会导致没有任何已启用管理员的更改将失败（`failed_precondition`）；修改密码会结束该用户的其他会话。媒体库、条目与媒体源的文件夹及文件路径只向管理员显示。

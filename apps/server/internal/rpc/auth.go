@@ -22,6 +22,9 @@ var AuthPublicProcedures = []string{
 	authv1connect.AuthServiceGetAuthInfoProcedure,
 	authv1connect.AuthServiceCreateFirstUserProcedure,
 	authv1connect.AuthServiceLoginProcedure,
+	authv1connect.AuthServiceStartQuickConnectProcedure,
+	authv1connect.AuthServiceGetQuickConnectStateProcedure,
+	authv1connect.AuthServiceLoginWithQuickConnectProcedure,
 }
 
 // AuthService implements mavio.auth.v1.AuthService.
@@ -31,13 +34,68 @@ type AuthService struct {
 	// firstUser serializes CreateFirstUser, so that two concurrent calls
 	// cannot both see an empty user table.
 	firstUser sync.Mutex
+	quick     *auth.QuickConnect
 }
 
 var _ authv1connect.AuthServiceHandler = (*AuthService)(nil)
 
 // NewAuthService returns an AuthService backed by store.
 func NewAuthService(store core.Store) *AuthService {
-	return &AuthService{store: store, now: time.Now}
+	return &AuthService{store: store, now: time.Now, quick: auth.NewQuickConnect()}
+}
+
+// StartQuickConnect registers a device waiting to be signed in from
+// another one.
+func (s *AuthService) StartQuickConnect(_ context.Context, req *authv1.StartQuickConnectRequest) (*authv1.StartQuickConnectResponse, error) {
+	d := req.GetDevice()
+	r := s.quick.Start(auth.Device{ID: d.GetId(), Name: d.GetName(), Client: d.GetClient(), ClientVersion: d.GetClientVersion()})
+	return authv1.StartQuickConnectResponse_builder{
+		Secret: &r.Secret, Code: &r.Code, ExpireTime: timestamppb.New(r.Expires),
+	}.Build(), nil
+}
+
+// GetQuickConnectState tells whether a request was authorized.
+func (s *AuthService) GetQuickConnectState(ctx context.Context, req *authv1.GetQuickConnectStateRequest) (*authv1.GetQuickConnectStateResponse, error) {
+	r, err := s.quick.State(req.GetSecret())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return authv1.GetQuickConnectStateResponse_builder{Authorized: &r.Authorized, ExpireTime: timestamppb.New(r.Expires)}.Build(), nil
+}
+
+// AuthorizeQuickConnect signs the device waiting with a code in as the
+// calling user.
+func (s *AuthService) AuthorizeQuickConnect(ctx context.Context, req *authv1.AuthorizeQuickConnectRequest) (*authv1.AuthorizeQuickConnectResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	d, err := s.quick.Authorize(req.GetCode(), func(d auth.Device) (core.AuthSession, string, error) {
+		return s.createSession(ctx, s.store, p.User.ID, deviceToProto(d))
+	})
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return authv1.AuthorizeQuickConnectResponse_builder{Device: deviceToProto(d)}.Build(), nil
+}
+
+// LoginWithQuickConnect gives an authorized device its access token.
+func (s *AuthService) LoginWithQuickConnect(ctx context.Context, req *authv1.LoginWithQuickConnectRequest) (*authv1.LoginWithQuickConnectResponse, error) {
+	r, err := s.quick.Claim(req.GetSecret())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	user, err := s.store.Users().Get(ctx, r.Session.UserID)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return authv1.LoginWithQuickConnectResponse_builder{
+		AccessToken: &r.Token, User: userToProto(&user), Session: sessionToProto(&r.Session, true),
+	}.Build(), nil
+}
+
+func deviceToProto(d auth.Device) *authv1.Device {
+	return authv1.Device_builder{Id: &d.ID, Name: &d.Name, Client: &d.Client, ClientVersion: &d.ClientVersion}.Build()
 }
 
 // GetAuthInfo reports whether the first user still has to be created.

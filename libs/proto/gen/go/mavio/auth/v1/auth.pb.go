@@ -1348,6 +1348,744 @@ func (b0 RevokeSessionResponse_builder) Build() *RevokeSessionResponse {
 	return m0
 }
 
+type StartQuickConnectRequest struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Device *Device                `protobuf:"bytes,1,opt,name=device"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *StartQuickConnectRequest) Reset() {
+	*x = StartQuickConnectRequest{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartQuickConnectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartQuickConnectRequest) ProtoMessage() {}
+
+func (x *StartQuickConnectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *StartQuickConnectRequest) GetDevice() *Device {
+	if x != nil {
+		return x.xxx_hidden_Device
+	}
+	return nil
+}
+
+func (x *StartQuickConnectRequest) SetDevice(v *Device) {
+	x.xxx_hidden_Device = v
+}
+
+func (x *StartQuickConnectRequest) HasDevice() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Device != nil
+}
+
+func (x *StartQuickConnectRequest) ClearDevice() {
+	x.xxx_hidden_Device = nil
+}
+
+type StartQuickConnectRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Device *Device
+}
+
+func (b0 StartQuickConnectRequest_builder) Build() *StartQuickConnectRequest {
+	m0 := &StartQuickConnectRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Device = b.Device
+	return m0
+}
+
+type StartQuickConnectResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Secret      *string                `protobuf:"bytes,1,opt,name=secret"`
+	xxx_hidden_Code        *string                `protobuf:"bytes,2,opt,name=code"`
+	xxx_hidden_ExpireTime  *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expire_time,json=expireTime"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *StartQuickConnectResponse) Reset() {
+	*x = StartQuickConnectResponse{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartQuickConnectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartQuickConnectResponse) ProtoMessage() {}
+
+func (x *StartQuickConnectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *StartQuickConnectResponse) GetSecret() string {
+	if x != nil {
+		if x.xxx_hidden_Secret != nil {
+			return *x.xxx_hidden_Secret
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *StartQuickConnectResponse) GetCode() string {
+	if x != nil {
+		if x.xxx_hidden_Code != nil {
+			return *x.xxx_hidden_Code
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *StartQuickConnectResponse) GetExpireTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_ExpireTime
+	}
+	return nil
+}
+
+func (x *StartQuickConnectResponse) SetSecret(v string) {
+	x.xxx_hidden_Secret = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *StartQuickConnectResponse) SetCode(v string) {
+	x.xxx_hidden_Code = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *StartQuickConnectResponse) SetExpireTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_ExpireTime = v
+}
+
+func (x *StartQuickConnectResponse) HasSecret() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *StartQuickConnectResponse) HasCode() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *StartQuickConnectResponse) HasExpireTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_ExpireTime != nil
+}
+
+func (x *StartQuickConnectResponse) ClearSecret() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Secret = nil
+}
+
+func (x *StartQuickConnectResponse) ClearCode() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Code = nil
+}
+
+func (x *StartQuickConnectResponse) ClearExpireTime() {
+	x.xxx_hidden_ExpireTime = nil
+}
+
+type StartQuickConnectResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Kept by the new device to poll and sign in; never shown.
+	Secret *string
+	// Six digits the user enters on a signed-in device.
+	Code       *string
+	ExpireTime *timestamppb.Timestamp
+}
+
+func (b0 StartQuickConnectResponse_builder) Build() *StartQuickConnectResponse {
+	m0 := &StartQuickConnectResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Secret != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_Secret = b.Secret
+	}
+	if b.Code != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Code = b.Code
+	}
+	x.xxx_hidden_ExpireTime = b.ExpireTime
+	return m0
+}
+
+type GetQuickConnectStateRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Secret      *string                `protobuf:"bytes,1,opt,name=secret"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetQuickConnectStateRequest) Reset() {
+	*x = GetQuickConnectStateRequest{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetQuickConnectStateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetQuickConnectStateRequest) ProtoMessage() {}
+
+func (x *GetQuickConnectStateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetQuickConnectStateRequest) GetSecret() string {
+	if x != nil {
+		if x.xxx_hidden_Secret != nil {
+			return *x.xxx_hidden_Secret
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetQuickConnectStateRequest) SetSecret(v string) {
+	x.xxx_hidden_Secret = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *GetQuickConnectStateRequest) HasSecret() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetQuickConnectStateRequest) ClearSecret() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Secret = nil
+}
+
+type GetQuickConnectStateRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Secret *string
+}
+
+func (b0 GetQuickConnectStateRequest_builder) Build() *GetQuickConnectStateRequest {
+	m0 := &GetQuickConnectStateRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Secret != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Secret = b.Secret
+	}
+	return m0
+}
+
+type GetQuickConnectStateResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Authorized  bool                   `protobuf:"varint,1,opt,name=authorized"`
+	xxx_hidden_ExpireTime  *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expire_time,json=expireTime"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetQuickConnectStateResponse) Reset() {
+	*x = GetQuickConnectStateResponse{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetQuickConnectStateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetQuickConnectStateResponse) ProtoMessage() {}
+
+func (x *GetQuickConnectStateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetQuickConnectStateResponse) GetAuthorized() bool {
+	if x != nil {
+		return x.xxx_hidden_Authorized
+	}
+	return false
+}
+
+func (x *GetQuickConnectStateResponse) GetExpireTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_ExpireTime
+	}
+	return nil
+}
+
+func (x *GetQuickConnectStateResponse) SetAuthorized(v bool) {
+	x.xxx_hidden_Authorized = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *GetQuickConnectStateResponse) SetExpireTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_ExpireTime = v
+}
+
+func (x *GetQuickConnectStateResponse) HasAuthorized() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetQuickConnectStateResponse) HasExpireTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_ExpireTime != nil
+}
+
+func (x *GetQuickConnectStateResponse) ClearAuthorized() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Authorized = false
+}
+
+func (x *GetQuickConnectStateResponse) ClearExpireTime() {
+	x.xxx_hidden_ExpireTime = nil
+}
+
+type GetQuickConnectStateResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Authorized *bool
+	ExpireTime *timestamppb.Timestamp
+}
+
+func (b0 GetQuickConnectStateResponse_builder) Build() *GetQuickConnectStateResponse {
+	m0 := &GetQuickConnectStateResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Authorized != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Authorized = *b.Authorized
+	}
+	x.xxx_hidden_ExpireTime = b.ExpireTime
+	return m0
+}
+
+type AuthorizeQuickConnectRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Code        *string                `protobuf:"bytes,1,opt,name=code"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *AuthorizeQuickConnectRequest) Reset() {
+	*x = AuthorizeQuickConnectRequest{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthorizeQuickConnectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthorizeQuickConnectRequest) ProtoMessage() {}
+
+func (x *AuthorizeQuickConnectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *AuthorizeQuickConnectRequest) GetCode() string {
+	if x != nil {
+		if x.xxx_hidden_Code != nil {
+			return *x.xxx_hidden_Code
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AuthorizeQuickConnectRequest) SetCode(v string) {
+	x.xxx_hidden_Code = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *AuthorizeQuickConnectRequest) HasCode() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *AuthorizeQuickConnectRequest) ClearCode() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Code = nil
+}
+
+type AuthorizeQuickConnectRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Code *string
+}
+
+func (b0 AuthorizeQuickConnectRequest_builder) Build() *AuthorizeQuickConnectRequest {
+	m0 := &AuthorizeQuickConnectRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Code != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Code = b.Code
+	}
+	return m0
+}
+
+type AuthorizeQuickConnectResponse struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Device *Device                `protobuf:"bytes,1,opt,name=device"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *AuthorizeQuickConnectResponse) Reset() {
+	*x = AuthorizeQuickConnectResponse{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthorizeQuickConnectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthorizeQuickConnectResponse) ProtoMessage() {}
+
+func (x *AuthorizeQuickConnectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *AuthorizeQuickConnectResponse) GetDevice() *Device {
+	if x != nil {
+		return x.xxx_hidden_Device
+	}
+	return nil
+}
+
+func (x *AuthorizeQuickConnectResponse) SetDevice(v *Device) {
+	x.xxx_hidden_Device = v
+}
+
+func (x *AuthorizeQuickConnectResponse) HasDevice() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Device != nil
+}
+
+func (x *AuthorizeQuickConnectResponse) ClearDevice() {
+	x.xxx_hidden_Device = nil
+}
+
+type AuthorizeQuickConnectResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The device signed in.
+	Device *Device
+}
+
+func (b0 AuthorizeQuickConnectResponse_builder) Build() *AuthorizeQuickConnectResponse {
+	m0 := &AuthorizeQuickConnectResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Device = b.Device
+	return m0
+}
+
+type LoginWithQuickConnectRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Secret      *string                `protobuf:"bytes,1,opt,name=secret"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *LoginWithQuickConnectRequest) Reset() {
+	*x = LoginWithQuickConnectRequest{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginWithQuickConnectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginWithQuickConnectRequest) ProtoMessage() {}
+
+func (x *LoginWithQuickConnectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *LoginWithQuickConnectRequest) GetSecret() string {
+	if x != nil {
+		if x.xxx_hidden_Secret != nil {
+			return *x.xxx_hidden_Secret
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *LoginWithQuickConnectRequest) SetSecret(v string) {
+	x.xxx_hidden_Secret = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *LoginWithQuickConnectRequest) HasSecret() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *LoginWithQuickConnectRequest) ClearSecret() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Secret = nil
+}
+
+type LoginWithQuickConnectRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Secret *string
+}
+
+func (b0 LoginWithQuickConnectRequest_builder) Build() *LoginWithQuickConnectRequest {
+	m0 := &LoginWithQuickConnectRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Secret != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Secret = b.Secret
+	}
+	return m0
+}
+
+// LoginWithQuickConnectResponse is a LoginResponse.
+type LoginWithQuickConnectResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_AccessToken *string                `protobuf:"bytes,1,opt,name=access_token,json=accessToken"`
+	xxx_hidden_User        *v1.User               `protobuf:"bytes,2,opt,name=user"`
+	xxx_hidden_Session     *Session               `protobuf:"bytes,3,opt,name=session"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *LoginWithQuickConnectResponse) Reset() {
+	*x = LoginWithQuickConnectResponse{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginWithQuickConnectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginWithQuickConnectResponse) ProtoMessage() {}
+
+func (x *LoginWithQuickConnectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *LoginWithQuickConnectResponse) GetAccessToken() string {
+	if x != nil {
+		if x.xxx_hidden_AccessToken != nil {
+			return *x.xxx_hidden_AccessToken
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *LoginWithQuickConnectResponse) GetUser() *v1.User {
+	if x != nil {
+		return x.xxx_hidden_User
+	}
+	return nil
+}
+
+func (x *LoginWithQuickConnectResponse) GetSession() *Session {
+	if x != nil {
+		return x.xxx_hidden_Session
+	}
+	return nil
+}
+
+func (x *LoginWithQuickConnectResponse) SetAccessToken(v string) {
+	x.xxx_hidden_AccessToken = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *LoginWithQuickConnectResponse) SetUser(v *v1.User) {
+	x.xxx_hidden_User = v
+}
+
+func (x *LoginWithQuickConnectResponse) SetSession(v *Session) {
+	x.xxx_hidden_Session = v
+}
+
+func (x *LoginWithQuickConnectResponse) HasAccessToken() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *LoginWithQuickConnectResponse) HasUser() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_User != nil
+}
+
+func (x *LoginWithQuickConnectResponse) HasSession() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Session != nil
+}
+
+func (x *LoginWithQuickConnectResponse) ClearAccessToken() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_AccessToken = nil
+}
+
+func (x *LoginWithQuickConnectResponse) ClearUser() {
+	x.xxx_hidden_User = nil
+}
+
+func (x *LoginWithQuickConnectResponse) ClearSession() {
+	x.xxx_hidden_Session = nil
+}
+
+type LoginWithQuickConnectResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	AccessToken *string
+	User        *v1.User
+	Session     *Session
+}
+
+func (b0 LoginWithQuickConnectResponse_builder) Build() *LoginWithQuickConnectResponse {
+	m0 := &LoginWithQuickConnectResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.AccessToken != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_AccessToken = b.AccessToken
+	}
+	x.xxx_hidden_User = b.User
+	x.xxx_hidden_Session = b.Session
+	return m0
+}
+
 var File_mavio_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_mavio_auth_v1_auth_proto_rawDesc = "" +
@@ -1393,63 +2131,115 @@ const file_mavio_auth_v1_auth_proto_rawDesc = "" +
 	"\bsessions\x18\x01 \x03(\v2\x16.mavio.auth.v1.SessionR\bsessions\"3\n" +
 	"\x14RevokeSessionRequest\x12\x1b\n" +
 	"\x02id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\"\x17\n" +
-	"\x15RevokeSessionResponse2\x8f\x04\n" +
+	"\x15RevokeSessionResponse\"Q\n" +
+	"\x18StartQuickConnectRequest\x125\n" +
+	"\x06device\x18\x01 \x01(\v2\x15.mavio.auth.v1.DeviceB\x06\xbaH\x03\xc8\x01\x01R\x06device\"\x84\x01\n" +
+	"\x19StartQuickConnectResponse\x12\x16\n" +
+	"\x06secret\x18\x01 \x01(\tR\x06secret\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\x12;\n" +
+	"\vexpire_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"expireTime\"B\n" +
+	"\x1bGetQuickConnectStateRequest\x12#\n" +
+	"\x06secret\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\x18\x80\x01R\x06secret\"{\n" +
+	"\x1cGetQuickConnectStateResponse\x12\x1e\n" +
+	"\n" +
+	"authorized\x18\x01 \x01(\bR\n" +
+	"authorized\x12;\n" +
+	"\vexpire_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"expireTime\"H\n" +
+	"\x1cAuthorizeQuickConnectRequest\x12(\n" +
+	"\x04code\x18\x01 \x01(\tB\x14\xbaH\x11\xc8\x01\x01r\f2\n" +
+	"^[0-9]{6}$R\x04code\"N\n" +
+	"\x1dAuthorizeQuickConnectResponse\x12-\n" +
+	"\x06device\x18\x01 \x01(\v2\x15.mavio.auth.v1.DeviceR\x06device\"C\n" +
+	"\x1cLoginWithQuickConnectRequest\x12#\n" +
+	"\x06secret\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\x18\x80\x01R\x06secret\"\x9d\x01\n" +
+	"\x1dLoginWithQuickConnectResponse\x12!\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12'\n" +
+	"\x04user\x18\x02 \x01(\v2\x13.mavio.user.v1.UserR\x04user\x120\n" +
+	"\asession\x18\x03 \x01(\v2\x16.mavio.auth.v1.SessionR\asession2\xd5\a\n" +
 	"\vAuthService\x12Y\n" +
 	"\vGetAuthInfo\x12!.mavio.auth.v1.GetAuthInfoRequest\x1a\".mavio.auth.v1.GetAuthInfoResponse\"\x03\x90\x02\x01\x12`\n" +
 	"\x0fCreateFirstUser\x12%.mavio.auth.v1.CreateFirstUserRequest\x1a&.mavio.auth.v1.CreateFirstUserResponse\x12B\n" +
 	"\x05Login\x12\x1b.mavio.auth.v1.LoginRequest\x1a\x1c.mavio.auth.v1.LoginResponse\x12E\n" +
 	"\x06Logout\x12\x1c.mavio.auth.v1.LogoutRequest\x1a\x1d.mavio.auth.v1.LogoutResponse\x12\\\n" +
 	"\fListSessions\x12\".mavio.auth.v1.ListSessionsRequest\x1a#.mavio.auth.v1.ListSessionsResponse\"\x03\x90\x02\x01\x12Z\n" +
-	"\rRevokeSession\x12#.mavio.auth.v1.RevokeSessionRequest\x1a$.mavio.auth.v1.RevokeSessionResponseB\xb5\x01\n" +
+	"\rRevokeSession\x12#.mavio.auth.v1.RevokeSessionRequest\x1a$.mavio.auth.v1.RevokeSessionResponse\x12f\n" +
+	"\x11StartQuickConnect\x12'.mavio.auth.v1.StartQuickConnectRequest\x1a(.mavio.auth.v1.StartQuickConnectResponse\x12t\n" +
+	"\x14GetQuickConnectState\x12*.mavio.auth.v1.GetQuickConnectStateRequest\x1a+.mavio.auth.v1.GetQuickConnectStateResponse\"\x03\x90\x02\x01\x12r\n" +
+	"\x15AuthorizeQuickConnect\x12+.mavio.auth.v1.AuthorizeQuickConnectRequest\x1a,.mavio.auth.v1.AuthorizeQuickConnectResponse\x12r\n" +
+	"\x15LoginWithQuickConnect\x12+.mavio.auth.v1.LoginWithQuickConnectRequest\x1a,.mavio.auth.v1.LoginWithQuickConnectResponseB\xb5\x01\n" +
 	"\x11com.mavio.auth.v1B\tAuthProtoP\x01Z?github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1;authv1\xa2\x02\x03MAX\xaa\x02\rMavio.Auth.V1\xca\x02\rMavio\\Auth\\V1\xe2\x02\x19Mavio\\Auth\\V1\\GPBMetadata\xea\x02\x0fMavio::Auth::V1b\beditionsp\xe8\a"
 
-var file_mavio_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_mavio_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_mavio_auth_v1_auth_proto_goTypes = []any{
-	(*Device)(nil),                  // 0: mavio.auth.v1.Device
-	(*Session)(nil),                 // 1: mavio.auth.v1.Session
-	(*GetAuthInfoRequest)(nil),      // 2: mavio.auth.v1.GetAuthInfoRequest
-	(*GetAuthInfoResponse)(nil),     // 3: mavio.auth.v1.GetAuthInfoResponse
-	(*CreateFirstUserRequest)(nil),  // 4: mavio.auth.v1.CreateFirstUserRequest
-	(*CreateFirstUserResponse)(nil), // 5: mavio.auth.v1.CreateFirstUserResponse
-	(*LoginRequest)(nil),            // 6: mavio.auth.v1.LoginRequest
-	(*LoginResponse)(nil),           // 7: mavio.auth.v1.LoginResponse
-	(*LogoutRequest)(nil),           // 8: mavio.auth.v1.LogoutRequest
-	(*LogoutResponse)(nil),          // 9: mavio.auth.v1.LogoutResponse
-	(*ListSessionsRequest)(nil),     // 10: mavio.auth.v1.ListSessionsRequest
-	(*ListSessionsResponse)(nil),    // 11: mavio.auth.v1.ListSessionsResponse
-	(*RevokeSessionRequest)(nil),    // 12: mavio.auth.v1.RevokeSessionRequest
-	(*RevokeSessionResponse)(nil),   // 13: mavio.auth.v1.RevokeSessionResponse
-	(*timestamppb.Timestamp)(nil),   // 14: google.protobuf.Timestamp
-	(*v1.User)(nil),                 // 15: mavio.user.v1.User
+	(*Device)(nil),                        // 0: mavio.auth.v1.Device
+	(*Session)(nil),                       // 1: mavio.auth.v1.Session
+	(*GetAuthInfoRequest)(nil),            // 2: mavio.auth.v1.GetAuthInfoRequest
+	(*GetAuthInfoResponse)(nil),           // 3: mavio.auth.v1.GetAuthInfoResponse
+	(*CreateFirstUserRequest)(nil),        // 4: mavio.auth.v1.CreateFirstUserRequest
+	(*CreateFirstUserResponse)(nil),       // 5: mavio.auth.v1.CreateFirstUserResponse
+	(*LoginRequest)(nil),                  // 6: mavio.auth.v1.LoginRequest
+	(*LoginResponse)(nil),                 // 7: mavio.auth.v1.LoginResponse
+	(*LogoutRequest)(nil),                 // 8: mavio.auth.v1.LogoutRequest
+	(*LogoutResponse)(nil),                // 9: mavio.auth.v1.LogoutResponse
+	(*ListSessionsRequest)(nil),           // 10: mavio.auth.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil),          // 11: mavio.auth.v1.ListSessionsResponse
+	(*RevokeSessionRequest)(nil),          // 12: mavio.auth.v1.RevokeSessionRequest
+	(*RevokeSessionResponse)(nil),         // 13: mavio.auth.v1.RevokeSessionResponse
+	(*StartQuickConnectRequest)(nil),      // 14: mavio.auth.v1.StartQuickConnectRequest
+	(*StartQuickConnectResponse)(nil),     // 15: mavio.auth.v1.StartQuickConnectResponse
+	(*GetQuickConnectStateRequest)(nil),   // 16: mavio.auth.v1.GetQuickConnectStateRequest
+	(*GetQuickConnectStateResponse)(nil),  // 17: mavio.auth.v1.GetQuickConnectStateResponse
+	(*AuthorizeQuickConnectRequest)(nil),  // 18: mavio.auth.v1.AuthorizeQuickConnectRequest
+	(*AuthorizeQuickConnectResponse)(nil), // 19: mavio.auth.v1.AuthorizeQuickConnectResponse
+	(*LoginWithQuickConnectRequest)(nil),  // 20: mavio.auth.v1.LoginWithQuickConnectRequest
+	(*LoginWithQuickConnectResponse)(nil), // 21: mavio.auth.v1.LoginWithQuickConnectResponse
+	(*timestamppb.Timestamp)(nil),         // 22: google.protobuf.Timestamp
+	(*v1.User)(nil),                       // 23: mavio.user.v1.User
 }
 var file_mavio_auth_v1_auth_proto_depIdxs = []int32{
 	0,  // 0: mavio.auth.v1.Session.device:type_name -> mavio.auth.v1.Device
-	14, // 1: mavio.auth.v1.Session.create_time:type_name -> google.protobuf.Timestamp
-	14, // 2: mavio.auth.v1.Session.last_seen_time:type_name -> google.protobuf.Timestamp
+	22, // 1: mavio.auth.v1.Session.create_time:type_name -> google.protobuf.Timestamp
+	22, // 2: mavio.auth.v1.Session.last_seen_time:type_name -> google.protobuf.Timestamp
 	0,  // 3: mavio.auth.v1.CreateFirstUserRequest.device:type_name -> mavio.auth.v1.Device
-	15, // 4: mavio.auth.v1.CreateFirstUserResponse.user:type_name -> mavio.user.v1.User
+	23, // 4: mavio.auth.v1.CreateFirstUserResponse.user:type_name -> mavio.user.v1.User
 	1,  // 5: mavio.auth.v1.CreateFirstUserResponse.session:type_name -> mavio.auth.v1.Session
 	0,  // 6: mavio.auth.v1.LoginRequest.device:type_name -> mavio.auth.v1.Device
-	15, // 7: mavio.auth.v1.LoginResponse.user:type_name -> mavio.user.v1.User
+	23, // 7: mavio.auth.v1.LoginResponse.user:type_name -> mavio.user.v1.User
 	1,  // 8: mavio.auth.v1.LoginResponse.session:type_name -> mavio.auth.v1.Session
 	1,  // 9: mavio.auth.v1.ListSessionsResponse.sessions:type_name -> mavio.auth.v1.Session
-	2,  // 10: mavio.auth.v1.AuthService.GetAuthInfo:input_type -> mavio.auth.v1.GetAuthInfoRequest
-	4,  // 11: mavio.auth.v1.AuthService.CreateFirstUser:input_type -> mavio.auth.v1.CreateFirstUserRequest
-	6,  // 12: mavio.auth.v1.AuthService.Login:input_type -> mavio.auth.v1.LoginRequest
-	8,  // 13: mavio.auth.v1.AuthService.Logout:input_type -> mavio.auth.v1.LogoutRequest
-	10, // 14: mavio.auth.v1.AuthService.ListSessions:input_type -> mavio.auth.v1.ListSessionsRequest
-	12, // 15: mavio.auth.v1.AuthService.RevokeSession:input_type -> mavio.auth.v1.RevokeSessionRequest
-	3,  // 16: mavio.auth.v1.AuthService.GetAuthInfo:output_type -> mavio.auth.v1.GetAuthInfoResponse
-	5,  // 17: mavio.auth.v1.AuthService.CreateFirstUser:output_type -> mavio.auth.v1.CreateFirstUserResponse
-	7,  // 18: mavio.auth.v1.AuthService.Login:output_type -> mavio.auth.v1.LoginResponse
-	9,  // 19: mavio.auth.v1.AuthService.Logout:output_type -> mavio.auth.v1.LogoutResponse
-	11, // 20: mavio.auth.v1.AuthService.ListSessions:output_type -> mavio.auth.v1.ListSessionsResponse
-	13, // 21: mavio.auth.v1.AuthService.RevokeSession:output_type -> mavio.auth.v1.RevokeSessionResponse
-	16, // [16:22] is the sub-list for method output_type
-	10, // [10:16] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	0,  // 10: mavio.auth.v1.StartQuickConnectRequest.device:type_name -> mavio.auth.v1.Device
+	22, // 11: mavio.auth.v1.StartQuickConnectResponse.expire_time:type_name -> google.protobuf.Timestamp
+	22, // 12: mavio.auth.v1.GetQuickConnectStateResponse.expire_time:type_name -> google.protobuf.Timestamp
+	0,  // 13: mavio.auth.v1.AuthorizeQuickConnectResponse.device:type_name -> mavio.auth.v1.Device
+	23, // 14: mavio.auth.v1.LoginWithQuickConnectResponse.user:type_name -> mavio.user.v1.User
+	1,  // 15: mavio.auth.v1.LoginWithQuickConnectResponse.session:type_name -> mavio.auth.v1.Session
+	2,  // 16: mavio.auth.v1.AuthService.GetAuthInfo:input_type -> mavio.auth.v1.GetAuthInfoRequest
+	4,  // 17: mavio.auth.v1.AuthService.CreateFirstUser:input_type -> mavio.auth.v1.CreateFirstUserRequest
+	6,  // 18: mavio.auth.v1.AuthService.Login:input_type -> mavio.auth.v1.LoginRequest
+	8,  // 19: mavio.auth.v1.AuthService.Logout:input_type -> mavio.auth.v1.LogoutRequest
+	10, // 20: mavio.auth.v1.AuthService.ListSessions:input_type -> mavio.auth.v1.ListSessionsRequest
+	12, // 21: mavio.auth.v1.AuthService.RevokeSession:input_type -> mavio.auth.v1.RevokeSessionRequest
+	14, // 22: mavio.auth.v1.AuthService.StartQuickConnect:input_type -> mavio.auth.v1.StartQuickConnectRequest
+	16, // 23: mavio.auth.v1.AuthService.GetQuickConnectState:input_type -> mavio.auth.v1.GetQuickConnectStateRequest
+	18, // 24: mavio.auth.v1.AuthService.AuthorizeQuickConnect:input_type -> mavio.auth.v1.AuthorizeQuickConnectRequest
+	20, // 25: mavio.auth.v1.AuthService.LoginWithQuickConnect:input_type -> mavio.auth.v1.LoginWithQuickConnectRequest
+	3,  // 26: mavio.auth.v1.AuthService.GetAuthInfo:output_type -> mavio.auth.v1.GetAuthInfoResponse
+	5,  // 27: mavio.auth.v1.AuthService.CreateFirstUser:output_type -> mavio.auth.v1.CreateFirstUserResponse
+	7,  // 28: mavio.auth.v1.AuthService.Login:output_type -> mavio.auth.v1.LoginResponse
+	9,  // 29: mavio.auth.v1.AuthService.Logout:output_type -> mavio.auth.v1.LogoutResponse
+	11, // 30: mavio.auth.v1.AuthService.ListSessions:output_type -> mavio.auth.v1.ListSessionsResponse
+	13, // 31: mavio.auth.v1.AuthService.RevokeSession:output_type -> mavio.auth.v1.RevokeSessionResponse
+	15, // 32: mavio.auth.v1.AuthService.StartQuickConnect:output_type -> mavio.auth.v1.StartQuickConnectResponse
+	17, // 33: mavio.auth.v1.AuthService.GetQuickConnectState:output_type -> mavio.auth.v1.GetQuickConnectStateResponse
+	19, // 34: mavio.auth.v1.AuthService.AuthorizeQuickConnect:output_type -> mavio.auth.v1.AuthorizeQuickConnectResponse
+	21, // 35: mavio.auth.v1.AuthService.LoginWithQuickConnect:output_type -> mavio.auth.v1.LoginWithQuickConnectResponse
+	26, // [26:36] is the sub-list for method output_type
+	16, // [16:26] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_mavio_auth_v1_auth_proto_init() }
@@ -1463,7 +2253,7 @@ func file_mavio_auth_v1_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_auth_v1_auth_proto_rawDesc), len(file_mavio_auth_v1_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
