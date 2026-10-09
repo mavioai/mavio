@@ -178,10 +178,16 @@ $("refresh").onclick = list;
 $("kind").onchange = list;
 $("search").onkeydown = (e) => { if (e.key === "Enter") list(); };
 
+const params = new URLSearchParams(location.search);
+
 // engine is how HLS plays: Safari's own player (AVFoundation) or hls.js;
 // ?engine=native or ?engine=hlsjs overrides it.
-const engine = new URLSearchParams(location.search).get("engine") ||
+const engine = params.get("engine") ||
   (/^((?!chrome|chromium|android).)*safari/i.test(navigator.userAgent) || !(window.Hls && Hls.isSupported()) ? "native" : "hlsjs");
+
+// maxBitrate caps streaming, in bits per second; ?bitrate=1000000 makes
+// most videos transcode.
+const maxBitrate = Number(params.get("bitrate")) || 40000000;
 
 // capabilities describes what this browser plays.
 function capabilities() {
@@ -193,7 +199,7 @@ function capabilities() {
   const codecs = video.join(",");
   return {
     name: nativeHLS ? "Safari (native HLS)" : "hls.js",
-    maxStreamingBitrate: 40000000,
+    maxStreamingBitrate: maxBitrate,
     directPlay: [
       { kind: "MEDIA_KIND_VIDEO", container: "mp4,m4v,mov", videoCodec: codecs, audioCodec: "aac,mp3,ac3,eac3,flac,opus" },
       { kind: "MEDIA_KIND_VIDEO", container: "webm", videoCodec: "vp8,vp9,av1", audioCodec: "opus,vorbis" },
