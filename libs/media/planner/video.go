@@ -3,6 +3,7 @@ package planner
 import (
 	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -369,9 +370,13 @@ func (p *Planner) profileArgs(j *Job, encoder string) []string {
 		if encoder == "libx264" {
 			args = append(args, "-pix_fmt", pixFmtFor(profile))
 		}
-		if l := j.option("h264", "level"); l != "" {
-			if n, err := strconv.ParseFloat(l, 64); err == nil {
-				args = append(args, "-level", strconv.FormatFloat(n/10, 'f', -1, 64))
+		if l, ok := h264Level(j.option("h264", "level")); ok {
+			switch {
+			case encoder != "h264_videotoolbox":
+				args = append(args, "-level", strconv.FormatFloat(float64(l)/10, 'f', -1, 64))
+			case slices.Contains(videoToolboxH264Levels, l):
+				// The encoder only knows its levels by name, e.g. "3.0".
+				args = append(args, "-level", strconv.FormatFloat(float64(l)/10, 'f', 1, 64))
 			}
 		}
 	case encoder == "libx265" || encoder == "hevc_videotoolbox":
@@ -381,6 +386,23 @@ func (p *Planner) profileArgs(j *Job, encoder string) []string {
 		}
 	}
 	return args
+}
+
+// videoToolboxH264Levels are the H.264 levels VideoToolbox encodes to;
+// for others it picks a level itself.
+var videoToolboxH264Levels = []int{30, 31, 32, 40, 41, 42, 50, 51, 52}
+
+// h264Level parses a requested H.264 level such as "41", capped at 5.1 as
+// Jellyfin does: higher levels break fMP4 playback in Safari.
+func h264Level(s string) (int, bool) {
+	n, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return 0, false
+	}
+	if n < 0 || n >= 51 {
+		return 51, true
+	}
+	return int(n), true
 }
 
 func pixFmtFor(profile string) string {
