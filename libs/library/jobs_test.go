@@ -40,7 +40,7 @@ func (p *fakeProvider) Metadata(_ context.Context, l Lookup) (*metadata.Result, 
 }
 
 const upNFO = `<?xml version="1.0" encoding="UTF-8"?>
-<movie><title>Up (Local)</title><lockedfields>Genres</lockedfields></movie>`
+<movie><title>Up (Local)</title><mpaa>Rated PG</mpaa><lockedfields>Genres</lockedfields></movie>`
 
 // drain runs the worker until no job is due.
 func drain(t *testing.T, w *Worker) int {
@@ -90,6 +90,13 @@ func TestJobs(t *testing.T) {
 	if up.Name != "Up (Local)" || up.Overview != "From the provider." || len(up.Genres) != 0 ||
 		up.ExternalIDs[core.ProviderTMDB] != "14160" || up.Runtime != 90*time.Minute || up.MetadataRefreshedAt.IsZero() {
 		t.Errorf("Up = %+v", up)
+	}
+	// The rating's score in the US system, as the library has no country.
+	if up.OfficialRating != "Rated PG" || up.ParentalRating == nil || *up.ParentalRating != 10 {
+		t.Errorf("Up rated %q, score %v; want 10", up.OfficialRating, up.ParentalRating)
+	}
+	if brazil := f.item("Brazil (1985)/Brazil (1985).mkv"); brazil.ParentalRating != nil {
+		t.Errorf("unrated Brazil has score %d", *brazil.ParentalRating)
 	}
 	if src := f.store.sources[up.ID]; len(src) != 1 || src[0].ProbedAt.IsZero() || src[0].Container != "mkv" {
 		t.Errorf("sources = %+v", src)

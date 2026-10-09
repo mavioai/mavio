@@ -371,12 +371,14 @@ func userDataToProto(d *core.UserData) *userv1.UserData {
 
 func policyFromProto(p *userv1.UserPolicy) core.UserPolicy {
 	out := core.UserPolicy{
-		MaxParentalRating:   int(p.GetMaxParentalRating()),
 		BlockUnrated:        p.GetBlockUnrated(),
 		AllowTranscoding:    p.GetAllowTranscoding(),
 		AllowDownload:       p.GetAllowDownload(),
 		MaxStreamingBitrate: p.GetMaxStreamingBitrate(),
 		MaxSessions:         int(p.GetMaxSessions()),
+	}
+	if p.HasMaxParentalRating() {
+		out.MaxParentalRating = new(int(p.GetMaxParentalRating()))
 	}
 	if !p.GetAllLibraries() {
 		// Non-nil: only the listed libraries, possibly none.

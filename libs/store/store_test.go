@@ -116,7 +116,7 @@ func TestItemRoundTrip(t *testing.T) {
 		movie.PremiereDate = &premiere
 		movie.Runtime = 170 * time.Minute
 		movie.OfficialRating = "R"
-		movie.ParentalRating = 17
+		movie.ParentalRating = ptr(17)
 		movie.CommunityRating = 8.3
 		movie.Genres = []string{"Crime", "Drama", "Action"}
 		movie.Studios = []string{"Warner Bros."}
@@ -130,7 +130,7 @@ func TestItemRoundTrip(t *testing.T) {
 		}
 		if got.SortName != "Heat" || !slices.Equal(got.Genres, movie.Genres) || !slices.Equal(got.Studios, movie.Studios) ||
 			got.ExternalIDs[core.ProviderIMDb] != "tt0113277" || !got.PremiereDate.Equal(premiere) ||
-			got.Runtime != movie.Runtime || got.ParentalRating != 17 || !got.FileModified.Equal(modified) {
+			got.Runtime != movie.Runtime || *got.ParentalRating != 17 || !got.FileModified.Equal(modified) {
 			t.Errorf("Get = %+v", got)
 		}
 
@@ -172,6 +172,14 @@ func TestItemRoundTrip(t *testing.T) {
 		got, _ = s.Items().Get(ctx, movie.ID)
 		if !slices.Equal(got.Genres, []string{"Thriller"}) || got.Overview != movie.Overview {
 			t.Errorf("after re-upsert = %+v", got)
+		}
+
+		// Writing the item again without optional fields clears them.
+		movie.PremiereDate, movie.ParentalRating, movie.FileModified = nil, nil, time.Time{}
+		upsert(t, s, movie)
+		got, _ = s.Items().Get(ctx, movie.ID)
+		if got.PremiereDate != nil || got.ParentalRating != nil || got.InheritedRating != nil || !got.FileModified.IsZero() {
+			t.Errorf("after clearing = premiere %v, rating %v, inherited %v, modified %v", got.PremiereDate, got.ParentalRating, got.InheritedRating, got.FileModified)
 		}
 
 		// A path belongs to one item per library.
@@ -220,10 +228,10 @@ func TestItemQuery(t *testing.T) {
 			newItem(lib, core.KindMovie, "千と千尋の神隠し"),
 			newItem(lib, core.KindMovie, "Ｃａｒｏｌ"),
 		}
-		movies[0].Genres, movies[0].ProductionYear, movies[0].ParentalRating = []string{"Comedy", "Romance"}, 2001, 12
-		movies[1].Genres, movies[1].ProductionYear, movies[1].ParentalRating = []string{"Drama"}, 1985, 15
+		movies[0].Genres, movies[0].ProductionYear, movies[0].ParentalRating = []string{"Comedy", "Romance"}, 2001, ptr(12)
+		movies[1].Genres, movies[1].ProductionYear, movies[1].ParentalRating = []string{"Drama"}, 1985, ptr(15)
 		movies[2].Genres, movies[2].ProductionYear, movies[2].OriginalTitle = []string{"Animation"}, 2001, "Spirited Away"
-		movies[3].ProductionYear, movies[3].ParentalRating = 2015, 15
+		movies[3].ProductionYear, movies[3].ParentalRating = 2015, ptr(15)
 		trailer := newItem(lib, core.KindVideo, "Brazil Trailer")
 		trailer.Extra, trailer.OwnerID = core.ExtraTrailer, movies[1].ID
 		upsert(t, s, append(movies, trailer)...)
@@ -247,8 +255,8 @@ func TestItemQuery(t *testing.T) {
 			{"extras included", core.ItemQuery{Search: "brazil", IncludeExtras: true, Sort: byName}, []string{"Brazil", "Brazil Trailer"}},
 			{"genres any of", core.ItemQuery{Genres: []string{"Drama", "Animation"}, Sort: byName}, []string{"Brazil", "千と千尋の神隠し"}},
 			{"year range", core.ItemQuery{Kinds: moviesOnly, YearFrom: 2000, YearTo: 2010, Sort: byName}, []string{"amélie", "千と千尋の神隠し"}},
-			{"max rating includes unrated", core.ItemQuery{Kinds: moviesOnly, MaxRating: 12, Sort: byName}, []string{"amélie", "千と千尋の神隠し"}},
-			{"max rating skips unrated", core.ItemQuery{Kinds: moviesOnly, MaxRating: 12, SkipUnrated: true}, []string{"amélie"}},
+			{"max rating includes unrated", core.ItemQuery{Kinds: moviesOnly, MaxRating: ptr(12), Sort: byName}, []string{"amélie", "千と千尋の神隠し"}},
+			{"max rating skips unrated", core.ItemQuery{Kinds: moviesOnly, MaxRating: ptr(12), SkipUnrated: true}, []string{"amélie"}},
 			{"year then name", core.ItemQuery{Kinds: moviesOnly, Sort: []core.SortSpec{{Field: core.SortProductionYear, Desc: true}, {Field: core.SortName}}}, []string{"Ｃａｒｏｌ", "amélie", "千と千尋の神隠し", "Brazil"}},
 		}
 		for _, tt := range tests {
@@ -302,23 +310,23 @@ func TestInheritedRatings(t *testing.T) {
 		series, episodes := showTree(t, s, lib)
 		allowed := func() []string {
 			t.Helper()
-			return query(t, s, core.ItemQuery{Kinds: []core.ItemKind{core.KindEpisode}, MaxRating: 12, Sort: []core.SortSpec{{Field: core.SortName}}})
+			return query(t, s, core.ItemQuery{Kinds: []core.ItemKind{core.KindEpisode}, MaxRating: ptr(12), Sort: []core.SortSpec{{Field: core.SortName}}})
 		}
 		if got := allowed(); len(got) != 4 {
 			t.Fatalf("unrated series: got %q, want all episodes", got)
 		}
 
 		// Rating the series hides its unrated episodes, not a rated one.
-		episodes[0].ParentalRating = 7 // S01E02
+		episodes[0].ParentalRating = ptr(7) // S01E02
 		upsert(t, s, episodes[0])
-		series.ParentalRating = 17
+		series.ParentalRating = ptr(17)
 		upsert(t, s, series)
 		if got, want := allowed(), []string{"S01E02"}; !slices.Equal(got, want) {
 			t.Errorf("rated series: got %q, want %q", got, want)
 		}
 		got, err := s.Items().Get(ctx, episodes[1].ID)
-		if err != nil || got.InheritedRating != 17 || got.ParentalRating != 0 {
-			t.Errorf("episode = rating %d inherited %d, %v; want 0 and 17", got.ParentalRating, got.InheritedRating, err)
+		if err != nil || got.InheritedRating == nil || *got.InheritedRating != 17 || got.ParentalRating != nil {
+			t.Errorf("episode = rating %v inherited %v, %v; want unrated and 17", got.ParentalRating, got.InheritedRating, err)
 		}
 
 		// Episodes written later inherit too, also when written with their
@@ -328,12 +336,12 @@ func TestInheritedRatings(t *testing.T) {
 		ep := newItem(lib, core.KindEpisode, "S03E01")
 		ep.ParentID = season.ID
 		upsert(t, s, ep, season)
-		if got, err := s.Items().Get(ctx, ep.ID); err != nil || got.InheritedRating != 17 {
-			t.Errorf("new episode inherited %d, %v; want 17", got.InheritedRating, err)
+		if got, err := s.Items().Get(ctx, ep.ID); err != nil || got.InheritedRating == nil || *got.InheritedRating != 17 {
+			t.Errorf("new episode inherited %v, %v; want 17", got.InheritedRating, err)
 		}
 
 		// Unrating the series clears what its episodes inherited.
-		series.ParentalRating = 0
+		series.ParentalRating = nil
 		upsert(t, s, series)
 		if got := allowed(); len(got) != 5 {
 			t.Errorf("unrated again: got %q, want all episodes", got)
@@ -559,14 +567,14 @@ func TestUsers(t *testing.T) {
 		lib := newLibrary(t, s, "/media")
 		u := core.User{
 			Name: "Alice", PasswordHash: "$argon2id$x", Admin: true,
-			Policy:      core.UserPolicy{Libraries: []core.ID{lib.ID}, MaxParentalRating: 13, AllowTranscoding: true},
+			Policy:      core.UserPolicy{Libraries: []core.ID{lib.ID}, MaxParentalRating: ptr(13), AllowTranscoding: true},
 			Preferences: core.UserPreferences{AudioLanguages: []string{"jpn", "eng"}, SubtitleMode: core.SubtitlesSmart},
 		}
 		if err := s.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)
 		}
 		got, err := s.Users().GetByName(ctx, "ALICE")
-		if err != nil || got.ID != u.ID || !got.Admin || got.Policy.MaxParentalRating != 13 ||
+		if err != nil || got.ID != u.ID || !got.Admin || *got.Policy.MaxParentalRating != 13 ||
 			!slices.Equal(got.Preferences.AudioLanguages, []string{"jpn", "eng"}) || !got.Policy.CanAccessLibrary(lib.ID) {
 			t.Errorf("GetByName = %+v, %v", got, err)
 		}

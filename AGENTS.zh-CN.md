@@ -27,7 +27,7 @@ libs/plugin/          插件 SDK 与宿主运行时（对外发布）
 libs/core/            领域模型与端口接口，只依赖标准库
 libs/store/           ent + sqlc + Atlas，SQLite 与 PostgreSQL
 libs/naming/          文件名解析（纯函数）
-libs/metadata/        NFO、外部 ID、元数据合并
+libs/metadata/        NFO、外部 ID、分级体系、元数据合并
 libs/subtitle/        字幕解析与转换（纯函数）
 libs/imaging/         图片处理（无 CGO）
 libs/media/           probe / keyframes / hwaccel / decision / planner / supervisor

@@ -1501,6 +1501,16 @@ func ParentalRatingLTE(v int) predicate.Item {
 	return predicate.Item(sql.FieldLTE(FieldParentalRating, v))
 }
 
+// ParentalRatingIsNil applies the IsNil predicate on the "parental_rating" field.
+func ParentalRatingIsNil() predicate.Item {
+	return predicate.Item(sql.FieldIsNull(FieldParentalRating))
+}
+
+// ParentalRatingNotNil applies the NotNil predicate on the "parental_rating" field.
+func ParentalRatingNotNil() predicate.Item {
+	return predicate.Item(sql.FieldNotNull(FieldParentalRating))
+}
+
 // InheritedRatingEQ applies the EQ predicate on the "inherited_rating" field.
 func InheritedRatingEQ(v int) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldInheritedRating, v))
@@ -1539,6 +1549,16 @@ func InheritedRatingLT(v int) predicate.Item {
 // InheritedRatingLTE applies the LTE predicate on the "inherited_rating" field.
 func InheritedRatingLTE(v int) predicate.Item {
 	return predicate.Item(sql.FieldLTE(FieldInheritedRating, v))
+}
+
+// InheritedRatingIsNil applies the IsNil predicate on the "inherited_rating" field.
+func InheritedRatingIsNil() predicate.Item {
+	return predicate.Item(sql.FieldIsNull(FieldInheritedRating))
+}
+
+// InheritedRatingNotNil applies the NotNil predicate on the "inherited_rating" field.
+func InheritedRatingNotNil() predicate.Item {
+	return predicate.Item(sql.FieldNotNull(FieldInheritedRating))
 }
 
 // CommunityRatingEQ applies the EQ predicate on the "community_rating" field.

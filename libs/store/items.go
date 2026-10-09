@@ -79,6 +79,9 @@ func (r items) Upsert(ctx context.Context, list ...core.Item) error {
 			if err != nil {
 				return mapErr(err, "upsert items")
 			}
+			if err := clearUnset(ctx, tx.write, chunk); err != nil {
+				return err
+			}
 			if _, err := tx.write.ItemValue.Delete().Where(itemvalue.ItemIDIn(ids...)).Exec(ctx); err != nil {
 				return mapErr(err, "replace item values")
 			}
@@ -113,18 +116,65 @@ func (r items) Upsert(ctx context.Context, list ...core.Item) error {
 	})
 }
 
+// optionalColumns are the item columns that are NULL when unset, with how
+// to tell an unset value, find a set column and clear it.
+var optionalColumns = []struct {
+	unset func(*core.Item) bool
+	set   predicate.Item
+	clear func(*ent.ItemUpdate) *ent.ItemUpdate
+}{
+	{func(it *core.Item) bool { return it.IndexNumber == nil }, item.IndexNumberNotNil(), (*ent.ItemUpdate).ClearIndexNumber},
+	{func(it *core.Item) bool { return it.ParentIndexNumber == nil }, item.ParentIndexNumberNotNil(), (*ent.ItemUpdate).ClearParentIndexNumber},
+	{func(it *core.Item) bool { return it.IndexNumberEnd == nil }, item.IndexNumberEndNotNil(), (*ent.ItemUpdate).ClearIndexNumberEnd},
+	{func(it *core.Item) bool { return it.PremiereDate == nil }, item.PremiereDateNotNil(), (*ent.ItemUpdate).ClearPremiereDate},
+	{func(it *core.Item) bool { return it.EndDate == nil }, item.EndDateNotNil(), (*ent.ItemUpdate).ClearEndDate},
+	{func(it *core.Item) bool { return it.ParentalRating == nil }, item.ParentalRatingNotNil(), (*ent.ItemUpdate).ClearParentalRating},
+	{func(it *core.Item) bool { return it.AirsBeforeSeasonNumber == nil }, item.AirsBeforeSeasonNumberNotNil(), (*ent.ItemUpdate).ClearAirsBeforeSeasonNumber},
+	{func(it *core.Item) bool { return it.AirsAfterSeasonNumber == nil }, item.AirsAfterSeasonNumberNotNil(), (*ent.ItemUpdate).ClearAirsAfterSeasonNumber},
+	{func(it *core.Item) bool { return it.AirsBeforeEpisodeNumber == nil }, item.AirsBeforeEpisodeNumberNotNil(), (*ent.ItemUpdate).ClearAirsBeforeEpisodeNumber},
+	{func(it *core.Item) bool { return it.FileModified.IsZero() }, item.FileModifiedNotNil(), (*ent.ItemUpdate).ClearFileModified},
+	{func(it *core.Item) bool { return it.MetadataRefreshedAt.IsZero() }, item.MetadataRefreshedAtNotNil(), (*ent.ItemUpdate).ClearMetadataRefreshedAt},
+	{func(it *core.Item) bool { return it.MissingSince == nil }, item.MissingSinceNotNil(), (*ent.ItemUpdate).ClearMissingSince},
+	{func(it *core.Item) bool { return it.ParentID.IsZero() }, item.ParentIDNotNil(), (*ent.ItemUpdate).ClearParentID},
+	{func(it *core.Item) bool { return it.OwnerID.IsZero() }, item.OwnerIDNotNil(), (*ent.ItemUpdate).ClearOwnerID},
+	{func(it *core.Item) bool { return it.UserID.IsZero() }, item.UserIDNotNil(), (*ent.ItemUpdate).ClearUserID},
+}
+
+// clearUnset sets the optional columns the items leave unset to NULL: an
+// upsert writes only the columns some item of its batch sets, so it would
+// keep their old values.
+func clearUnset(ctx context.Context, c *ent.Client, list []core.Item) error {
+	for _, col := range optionalColumns {
+		var ids []core.ID
+		for i := range list {
+			if col.unset(&list[i]) {
+				ids = append(ids, list[i].ID)
+			}
+		}
+		if len(ids) == 0 {
+			continue
+		}
+		if _, err := col.clear(c.Item.Update().Where(item.IDIn(ids...), col.set)).Save(ctx); err != nil {
+			return mapErr(err, "clear unset item fields")
+		}
+	}
+	return nil
+}
+
 // inheritRatings recomputes inherited_rating for the items matching seed,
 // a condition on the items table aliased c, and all their descendants: an
 // item's own parental rating, or when unrated its parent's inherited one.
 func (s *Store) inheritRatings(ctx context.Context, seed string, args ...any) error {
+	// Ratings are never negative, so -1 stands for NULL in the comparison.
 	query := `WITH RECURSIVE r(id, rating) AS (
-	SELECT c.id, CASE WHEN c.parental_rating > 0 THEN c.parental_rating ELSE COALESCE(p.inherited_rating, 0) END
+	SELECT c.id, COALESCE(c.parental_rating, p.inherited_rating)
 	FROM items c LEFT JOIN items p ON p.id = c.parent_id WHERE ` + seed + `
 	UNION ALL
-	SELECT i.id, CASE WHEN i.parental_rating > 0 THEN i.parental_rating ELSE r.rating END
+	SELECT i.id, COALESCE(i.parental_rating, r.rating)
 	FROM items i JOIN r ON i.parent_id = r.id
 )
-UPDATE items SET inherited_rating = r.rating FROM r WHERE items.id = r.id AND items.inherited_rating <> r.rating`
+UPDATE items SET inherited_rating = r.rating FROM r
+WHERE items.id = r.id AND COALESCE(items.inherited_rating, -1) <> COALESCE(r.rating, -1)`
 	_, err := s.tx.ExecContext(ctx, query, args...)
 	return mapErr(err, "inherit ratings")
 }
@@ -434,11 +484,12 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 	if q.YearTo != 0 {
 		ps = append(ps, item.ProductionYearLTE(q.YearTo))
 	}
-	if q.MaxRating > 0 {
-		ps = append(ps, item.InheritedRatingLTE(q.MaxRating))
-		if q.SkipUnrated {
-			ps = append(ps, item.InheritedRatingGT(0))
+	if q.MaxRating != nil {
+		within := item.InheritedRatingLTE(*q.MaxRating)
+		if !q.SkipUnrated {
+			within = item.Or(within, item.InheritedRatingIsNil())
 		}
+		ps = append(ps, within)
 	}
 	if !q.UserID.IsZero() {
 		// Other users' playlists are theirs alone.
@@ -571,9 +622,9 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 		SetRuntime(it.Runtime).
 		SetOfficialRating(it.OfficialRating).
 		SetCustomRating(it.CustomRating).
-		SetParentalRating(it.ParentalRating).
+		SetNillableParentalRating(it.ParentalRating).
 		// Upsert then derives it from the ancestors when unrated.
-		SetInheritedRating(it.ParentalRating).
+		SetNillableInheritedRating(it.ParentalRating).
 		SetCommunityRating(it.CommunityRating).
 		SetCriticRating(it.CriticRating).
 		SetExternalIds(fromProviderMap(it.ExternalIDs)).

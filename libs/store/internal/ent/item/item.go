@@ -313,10 +313,6 @@ var (
 	DefaultOfficialRating string
 	// DefaultCustomRating holds the default value on creation for the "custom_rating" field.
 	DefaultCustomRating string
-	// DefaultParentalRating holds the default value on creation for the "parental_rating" field.
-	DefaultParentalRating int
-	// DefaultInheritedRating holds the default value on creation for the "inherited_rating" field.
-	DefaultInheritedRating int
 	// DefaultCommunityRating holds the default value on creation for the "community_rating" field.
 	DefaultCommunityRating float64
 	// DefaultCriticRating holds the default value on creation for the "critic_rating" field.

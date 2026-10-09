@@ -20,7 +20,7 @@ const pageSize = 100
 type Scope struct {
 	UserID      core.ID
 	LibraryIDs  []core.ID
-	MaxRating   int
+	MaxRating   *int
 	SkipUnrated bool
 }
 

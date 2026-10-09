@@ -207,13 +207,14 @@ type Item struct {
 	// CustomRating is a content rating set by the user, which takes
 	// precedence over OfficialRating.
 	CustomRating string
-	// ParentalRating is the score of OfficialRating in its country's rating
-	// system, used by rating filters; zero means unrated.
-	ParentalRating int
+	// ParentalRating is the score of the rating (CustomRating, else
+	// OfficialRating) in its country's rating system: the minimum age it
+	// stands for, from zero; nil means unrated.
+	ParentalRating *int
 	// InheritedRating is the score rating filters use: ParentalRating, or
 	// for an unrated item the nearest rated ancestor's. The store computes
 	// it on every write; values given to Upsert are ignored.
-	InheritedRating int
+	InheritedRating *int
 	CommunityRating float64 // 0–10
 	CriticRating    float64 // 0–100
 
@@ -308,7 +309,7 @@ func (it *Item) Validate() error {
 		return fmt.Errorf("%w: item %s is not a playlist but has a user", ErrInvalid, it.ID)
 	case it.CommunityRating < 0 || it.CommunityRating > 10:
 		return fmt.Errorf("%w: item %s community rating %v out of range", ErrInvalid, it.ID, it.CommunityRating)
-	case it.ParentalRating < 0:
+	case it.ParentalRating != nil && *it.ParentalRating < 0:
 		return fmt.Errorf("%w: item %s has a negative parental rating", ErrInvalid, it.ID)
 	case it.CriticRating < 0 || it.CriticRating > 100:
 		return fmt.Errorf("%w: item %s critic rating %v out of range", ErrInvalid, it.ID, it.CriticRating)

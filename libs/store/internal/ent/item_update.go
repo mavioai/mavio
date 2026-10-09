@@ -425,6 +425,12 @@ func (_u *ItemUpdate) AddParentalRating(v int) *ItemUpdate {
 	return _u
 }
 
+// ClearParentalRating clears the value of the "parental_rating" field.
+func (_u *ItemUpdate) ClearParentalRating() *ItemUpdate {
+	_u.mutation.ClearParentalRating()
+	return _u
+}
+
 // SetInheritedRating sets the "inherited_rating" field.
 func (_u *ItemUpdate) SetInheritedRating(v int) *ItemUpdate {
 	_u.mutation.ResetInheritedRating()
@@ -443,6 +449,12 @@ func (_u *ItemUpdate) SetNillableInheritedRating(v *int) *ItemUpdate {
 // AddInheritedRating adds value to the "inherited_rating" field.
 func (_u *ItemUpdate) AddInheritedRating(v int) *ItemUpdate {
 	_u.mutation.AddInheritedRating(v)
+	return _u
+}
+
+// ClearInheritedRating clears the value of the "inherited_rating" field.
+func (_u *ItemUpdate) ClearInheritedRating() *ItemUpdate {
+	_u.mutation.ClearInheritedRating()
 	return _u
 }
 
@@ -1461,11 +1473,17 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedParentalRating(); ok {
 		_spec.AddField(item.FieldParentalRating, field.TypeInt, value)
 	}
+	if _u.mutation.ParentalRatingCleared() {
+		_spec.ClearField(item.FieldParentalRating, field.TypeInt)
+	}
 	if value, ok := _u.mutation.InheritedRating(); ok {
 		_spec.SetField(item.FieldInheritedRating, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedInheritedRating(); ok {
 		_spec.AddField(item.FieldInheritedRating, field.TypeInt, value)
+	}
+	if _u.mutation.InheritedRatingCleared() {
+		_spec.ClearField(item.FieldInheritedRating, field.TypeInt)
 	}
 	if value, ok := _u.mutation.CommunityRating(); ok {
 		_spec.SetField(item.FieldCommunityRating, field.TypeFloat64, value)
@@ -2545,6 +2563,12 @@ func (_u *ItemUpdateOne) AddParentalRating(v int) *ItemUpdateOne {
 	return _u
 }
 
+// ClearParentalRating clears the value of the "parental_rating" field.
+func (_u *ItemUpdateOne) ClearParentalRating() *ItemUpdateOne {
+	_u.mutation.ClearParentalRating()
+	return _u
+}
+
 // SetInheritedRating sets the "inherited_rating" field.
 func (_u *ItemUpdateOne) SetInheritedRating(v int) *ItemUpdateOne {
 	_u.mutation.ResetInheritedRating()
@@ -2563,6 +2587,12 @@ func (_u *ItemUpdateOne) SetNillableInheritedRating(v *int) *ItemUpdateOne {
 // AddInheritedRating adds value to the "inherited_rating" field.
 func (_u *ItemUpdateOne) AddInheritedRating(v int) *ItemUpdateOne {
 	_u.mutation.AddInheritedRating(v)
+	return _u
+}
+
+// ClearInheritedRating clears the value of the "inherited_rating" field.
+func (_u *ItemUpdateOne) ClearInheritedRating() *ItemUpdateOne {
+	_u.mutation.ClearInheritedRating()
 	return _u
 }
 
@@ -3611,11 +3641,17 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 	if value, ok := _u.mutation.AddedParentalRating(); ok {
 		_spec.AddField(item.FieldParentalRating, field.TypeInt, value)
 	}
+	if _u.mutation.ParentalRatingCleared() {
+		_spec.ClearField(item.FieldParentalRating, field.TypeInt)
+	}
 	if value, ok := _u.mutation.InheritedRating(); ok {
 		_spec.SetField(item.FieldInheritedRating, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedInheritedRating(); ok {
 		_spec.AddField(item.FieldInheritedRating, field.TypeInt, value)
+	}
+	if _u.mutation.InheritedRatingCleared() {
+		_spec.ClearField(item.FieldInheritedRating, field.TypeInt)
 	}
 	if value, ok := _u.mutation.CommunityRating(); ok {
 		_spec.SetField(item.FieldCommunityRating, field.TypeFloat64, value)

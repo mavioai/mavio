@@ -1,6 +1,7 @@
 package library
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -124,6 +125,7 @@ func (r *Refresher) Refresh(ctx context.Context, lib core.Library, itemID core.I
 	for _, res := range results {
 		applyMetadata(&it, res.Item)
 	}
+	it.ParentalRating = ratingScore(&it, lookup.Country)
 	it.MetadataRefreshedAt = r.now()
 	return r.Store.InTx(ctx, func(tx core.Store) error {
 		if err := tx.Items().Upsert(ctx, it); err != nil {
@@ -199,6 +201,21 @@ func (r *Refresher) lookup(ctx context.Context, lib core.Library, it core.Item) 
 		id = p.ParentID
 	}
 	return l, nil
+}
+
+// defaultRatingCountry is the rating system tried first for items and
+// libraries without a metadata country, as in Jellyfin.
+const defaultRatingCountry = "US"
+
+// ratingScore returns the score of an item's rating, its custom rating
+// before its official one, in the rating system of country; nil when
+// unrated or unknown.
+func ratingScore(it *core.Item, country string) *int {
+	score, ok := metadata.RatingScore(cmp.Or(it.CustomRating, it.OfficialRating), cmp.Or(country, defaultRatingCountry))
+	if !ok {
+		return nil
+	}
+	return &score
 }
 
 // applyMetadata copies what src knows over dst, except locked fields.

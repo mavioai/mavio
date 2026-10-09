@@ -5103,7 +5103,7 @@ func (m *ItemMutation) ParentalRating() (r int, exists bool) {
 // OldParentalRating returns the old "parental_rating" field's value of the Item entity.
 // If the Item object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ItemMutation) OldParentalRating(ctx context.Context) (v int, err error) {
+func (m *ItemMutation) OldParentalRating(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldParentalRating is only allowed on UpdateOne operations")
 	}
@@ -5135,10 +5135,24 @@ func (m *ItemMutation) AddedParentalRating() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearParentalRating clears the value of the "parental_rating" field.
+func (m *ItemMutation) ClearParentalRating() {
+	m.parental_rating = nil
+	m.addparental_rating = nil
+	m.clearedFields[item.FieldParentalRating] = struct{}{}
+}
+
+// ParentalRatingCleared returns if the "parental_rating" field was cleared in this mutation.
+func (m *ItemMutation) ParentalRatingCleared() bool {
+	_, ok := m.clearedFields[item.FieldParentalRating]
+	return ok
+}
+
 // ResetParentalRating resets all changes to the "parental_rating" field.
 func (m *ItemMutation) ResetParentalRating() {
 	m.parental_rating = nil
 	m.addparental_rating = nil
+	delete(m.clearedFields, item.FieldParentalRating)
 }
 
 // SetInheritedRating sets the "inherited_rating" field.
@@ -5159,7 +5173,7 @@ func (m *ItemMutation) InheritedRating() (r int, exists bool) {
 // OldInheritedRating returns the old "inherited_rating" field's value of the Item entity.
 // If the Item object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ItemMutation) OldInheritedRating(ctx context.Context) (v int, err error) {
+func (m *ItemMutation) OldInheritedRating(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldInheritedRating is only allowed on UpdateOne operations")
 	}
@@ -5191,10 +5205,24 @@ func (m *ItemMutation) AddedInheritedRating() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearInheritedRating clears the value of the "inherited_rating" field.
+func (m *ItemMutation) ClearInheritedRating() {
+	m.inherited_rating = nil
+	m.addinherited_rating = nil
+	m.clearedFields[item.FieldInheritedRating] = struct{}{}
+}
+
+// InheritedRatingCleared returns if the "inherited_rating" field was cleared in this mutation.
+func (m *ItemMutation) InheritedRatingCleared() bool {
+	_, ok := m.clearedFields[item.FieldInheritedRating]
+	return ok
+}
+
 // ResetInheritedRating resets all changes to the "inherited_rating" field.
 func (m *ItemMutation) ResetInheritedRating() {
 	m.inherited_rating = nil
 	m.addinherited_rating = nil
+	delete(m.clearedFields, item.FieldInheritedRating)
 }
 
 // SetCommunityRating sets the "community_rating" field.
@@ -8137,6 +8165,12 @@ func (m *ItemMutation) ClearedFields() []string {
 	if m.FieldCleared(item.FieldEndDate) {
 		fields = append(fields, item.FieldEndDate)
 	}
+	if m.FieldCleared(item.FieldParentalRating) {
+		fields = append(fields, item.FieldParentalRating)
+	}
+	if m.FieldCleared(item.FieldInheritedRating) {
+		fields = append(fields, item.FieldInheritedRating)
+	}
 	if m.FieldCleared(item.FieldExternalIds) {
 		fields = append(fields, item.FieldExternalIds)
 	}
@@ -8207,6 +8241,12 @@ func (m *ItemMutation) ClearField(name string) error {
 		return nil
 	case item.FieldEndDate:
 		m.ClearEndDate()
+		return nil
+	case item.FieldParentalRating:
+		m.ClearParentalRating()
+		return nil
+	case item.FieldInheritedRating:
+		m.ClearInheritedRating()
 		return nil
 	case item.FieldExternalIds:
 		m.ClearExternalIds()

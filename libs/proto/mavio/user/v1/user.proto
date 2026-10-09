@@ -65,7 +65,9 @@ message UserPolicy {
   // Accessible libraries; when all_libraries is true this list is ignored.
   bool all_libraries = 1;
   repeated string library_ids = 2 [(buf.validate.field).repeated.items.string.uuid = true];
-  // Highest allowed parental rating score; 0 means unrestricted.
+  // Highest allowed parental rating score, the minimum age a rating stands
+  // for (1000 and above for adult content); unset means unrestricted, 0
+  // allows only content for all ages.
   int32 max_parental_rating = 3 [(buf.validate.field).int32.gte = 0];
   bool block_unrated = 4;
   bool allow_transcoding = 5;

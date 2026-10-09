@@ -87,7 +87,7 @@ mavio/
 │   ├── core/                    # [Go] 领域模型与仓储端口（见 domain.zh-CN.md）；不依赖任何基础设施
 │   ├── store/                   # [Go] ent schema、sqlc 查询、Atlas 迁移、仓储实现
 │   ├── naming/                  # [Go] 文件名 / 目录名解析
-│   ├── metadata/                # [Go] NFO 读写、外部 ID、元数据合并策略
+│   ├── metadata/                # [Go] NFO 读写、外部 ID、分级体系、元数据合并策略
 │   ├── subtitle/                # [Go] SRT / ASS / SSA / WebVTT 字幕解析、转换与字符集检测
 │   ├── imaging/                 # [Go] 图片处理、拼贴、blurhash / thumbhash
 │   ├── media/                   # [Go] 探测、关键帧、硬件加速、播放决策、转码规划、ffmpeg 进程守护

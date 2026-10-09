@@ -34,7 +34,7 @@ type ItemFilter struct {
 	LibraryIDs []ID
 	Kinds      []ItemKind
 	// MaxRating and SkipUnrated filter like the ItemQuery fields.
-	MaxRating   int
+	MaxRating   *int
 	SkipUnrated bool
 }
 

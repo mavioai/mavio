@@ -39,17 +39,17 @@ func seedCatalog(t *testing.T, s *store.Store) catalog {
 		return core.Item{ID: core.NewID(), LibraryID: lib.ID, ParentID: parent, Kind: kind, Name: name, Path: lib.Paths[0] + "/" + name}
 	}
 	c.alien = item(c.films, core.NilID, core.KindMovie, "Alien")
-	c.alien.ProductionYear, c.alien.OfficialRating, c.alien.ParentalRating, c.alien.Runtime = 1979, "R", 17, 117*time.Minute
+	c.alien.ProductionYear, c.alien.OfficialRating, c.alien.ParentalRating, c.alien.Runtime = 1979, "R", new(17), 117*time.Minute
 	c.alien.Genres, c.alien.ExternalIDs = []string{"Horror"}, map[core.Provider]string{core.ProviderTMDB: "348"}
 	c.up = item(c.films, core.NilID, core.KindMovie, "Up")
 	c.up.ProductionYear = 2009
 	c.trailer = item(c.films, core.NilID, core.KindVideo, "Alien Trailer")
 	c.trailer.Extra, c.trailer.OwnerID = core.ExtraTrailer, c.alien.ID
 	c.series = item(c.shows, core.NilID, core.KindSeries, "Show")
-	c.series.OfficialRating, c.series.ParentalRating = "TV-MA", 17
+	c.series.OfficialRating, c.series.ParentalRating = "TV-MA", new(17)
 	c.season = item(c.shows, c.series.ID, core.KindSeason, "Season 1")
 	c.pilot = item(c.shows, c.season.ID, core.KindEpisode, "Pilot")
-	c.pilot.IndexNumber, c.pilot.ParentIndexNumber, c.pilot.OfficialRating, c.pilot.ParentalRating = new(1), new(1), "TV-Y7", 7
+	c.pilot.IndexNumber, c.pilot.ParentIndexNumber, c.pilot.OfficialRating, c.pilot.ParentalRating = new(1), new(1), "TV-Y7", new(7)
 	c.pilot.ProductionYear, c.pilot.Genres = 2008, []string{"Comedy"}
 	c.finale = item(c.shows, c.season.ID, core.KindEpisode, "Finale")
 	c.finale.IndexNumber, c.finale.ParentIndexNumber = new(2), new(1)

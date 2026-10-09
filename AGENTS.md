@@ -27,7 +27,7 @@ libs/plugin/          Plugin SDK and host runtimes (published)
 libs/core/            Domain model and port interfaces; standard library only
 libs/store/           ent + sqlc + Atlas, SQLite and PostgreSQL
 libs/naming/          File name parsing (pure functions)
-libs/metadata/        NFO, external IDs, metadata merging
+libs/metadata/        NFO, external IDs, rating systems, metadata merging
 libs/subtitle/        Subtitle parsing and conversion (pure functions)
 libs/imaging/         Image processing (no CGO)
 libs/media/           probe / keyframes / hwaccel / decision / planner / supervisor

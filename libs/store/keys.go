@@ -21,10 +21,11 @@ import (
 // version in schema_migrations.
 const keysVersion = "keys-1"
 
-// ratingsVersion identifies how inherited ratings are derived
-// (inheritRatings). Bump it whenever the derivation changes: Open then
-// recomputes them for every item once.
-const ratingsVersion = "ratings-1"
+// ratingsVersion identifies how ratings are stored and inherited
+// (inheritRatings). Bump it whenever that changes: Open then recomputes
+// the inherited ratings of every item once. Version 2 made unrated NULL
+// instead of zero, in items and in policies' maximum ratings.
+const ratingsVersion = "ratings-2"
 
 // backfillBatch is the number of rows read per backfill query.
 const backfillBatch = 500
@@ -45,6 +46,21 @@ func (s *Store) backfillKeys(ctx context.Context) error {
 		return err
 	}
 	return s.backfill(ctx, ratingsVersion, func(tx *Store) error {
+		if _, err := tx.write.Item.Update().Where(item.ParentalRating(0)).ClearParentalRating().Save(ctx); err != nil {
+			return err
+		}
+		users, err := tx.write.User.Query().All(ctx)
+		if err != nil {
+			return err
+		}
+		for _, u := range users {
+			if p := u.Policy; p.MaxParentalRating != nil && *p.MaxParentalRating == 0 {
+				p.MaxParentalRating = nil
+				if err := tx.write.User.UpdateOneID(u.ID).SetPolicy(p).Exec(ctx); err != nil {
+					return err
+				}
+			}
+		}
 		return tx.inheritRatings(ctx, "c.parent_id IS NULL")
 	})
 }

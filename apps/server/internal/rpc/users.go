@@ -35,7 +35,7 @@ func userToProto(u *core.User) *userv1.User {
 		Policy: userv1.UserPolicy_builder{
 			AllLibraries:        new(u.Policy.Libraries == nil),
 			LibraryIds:          libraries,
-			MaxParentalRating:   new(int32(u.Policy.MaxParentalRating)),
+			MaxParentalRating:   int32Ptr(u.Policy.MaxParentalRating),
 			BlockUnrated:        &u.Policy.BlockUnrated,
 			AllowTranscoding:    &u.Policy.AllowTranscoding,
 			AllowDownload:       &u.Policy.AllowDownload,

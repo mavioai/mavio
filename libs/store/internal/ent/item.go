@@ -64,9 +64,9 @@ type Item struct {
 	// CustomRating holds the value of the "custom_rating" field.
 	CustomRating string `json:"custom_rating,omitempty"`
 	// ParentalRating holds the value of the "parental_rating" field.
-	ParentalRating int `json:"parental_rating,omitempty"`
+	ParentalRating *int `json:"parental_rating,omitempty"`
 	// InheritedRating holds the value of the "inherited_rating" field.
-	InheritedRating int `json:"inherited_rating,omitempty"`
+	InheritedRating *int `json:"inherited_rating,omitempty"`
 	// CommunityRating holds the value of the "community_rating" field.
 	CommunityRating float64 `json:"community_rating,omitempty"`
 	// CriticRating holds the value of the "critic_rating" field.
@@ -465,13 +465,15 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parental_rating", values[i])
 			} else if value.Valid {
-				_m.ParentalRating = int(value.Int64)
+				_m.ParentalRating = new(int)
+				*_m.ParentalRating = int(value.Int64)
 			}
 		case item.FieldInheritedRating:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field inherited_rating", values[i])
 			} else if value.Valid {
-				_m.InheritedRating = int(value.Int64)
+				_m.InheritedRating = new(int)
+				*_m.InheritedRating = int(value.Int64)
 			}
 		case item.FieldCommunityRating:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -835,11 +837,15 @@ func (_m *Item) String() string {
 	builder.WriteString("custom_rating=")
 	builder.WriteString(_m.CustomRating)
 	builder.WriteString(", ")
-	builder.WriteString("parental_rating=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ParentalRating))
+	if v := _m.ParentalRating; v != nil {
+		builder.WriteString("parental_rating=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("inherited_rating=")
-	builder.WriteString(fmt.Sprintf("%v", _m.InheritedRating))
+	if v := _m.InheritedRating; v != nil {
+		builder.WriteString("inherited_rating=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("community_rating=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CommunityRating))

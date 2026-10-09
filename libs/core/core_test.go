@@ -224,15 +224,18 @@ func TestUserPolicyCanAccess(t *testing.T) {
 		item   Item
 		want   bool
 	}{
-		{"unrestricted", UserPolicy{}, Item{LibraryID: lib, ParentalRating: 18}, true},
+		{"unrestricted", UserPolicy{}, Item{LibraryID: lib, ParentalRating: new(18)}, true},
 		{"other library", UserPolicy{Libraries: []ID{lib}}, Item{LibraryID: other}, false},
-		{"within rating", UserPolicy{MaxParentalRating: 12}, Item{LibraryID: lib, ParentalRating: 12}, true},
-		{"above rating", UserPolicy{MaxParentalRating: 12}, Item{LibraryID: lib, ParentalRating: 13}, false},
-		{"unrated", UserPolicy{MaxParentalRating: 12}, Item{LibraryID: lib}, true},
-		{"unrated blocked", UserPolicy{MaxParentalRating: 12, BlockUnrated: true}, Item{LibraryID: lib}, false},
+		{"within rating", UserPolicy{MaxParentalRating: new(12)}, Item{LibraryID: lib, ParentalRating: new(12)}, true},
+		{"above rating", UserPolicy{MaxParentalRating: new(12)}, Item{LibraryID: lib, ParentalRating: new(13)}, false},
+		{"unrated", UserPolicy{MaxParentalRating: new(12)}, Item{LibraryID: lib}, true},
+		{"unrated blocked", UserPolicy{MaxParentalRating: new(12), BlockUnrated: true}, Item{LibraryID: lib}, false},
 		{"block without maximum", UserPolicy{BlockUnrated: true}, Item{LibraryID: lib}, true},
-		{"inherited above rating", UserPolicy{MaxParentalRating: 12}, Item{LibraryID: lib, InheritedRating: 17}, false},
-		{"inherited within rating", UserPolicy{MaxParentalRating: 12, BlockUnrated: true}, Item{LibraryID: lib, InheritedRating: 7}, true},
+		{"inherited above rating", UserPolicy{MaxParentalRating: new(12)}, Item{LibraryID: lib, InheritedRating: new(17)}, false},
+		{"inherited within rating", UserPolicy{MaxParentalRating: new(12), BlockUnrated: true}, Item{LibraryID: lib, InheritedRating: new(7)}, true},
+		{"own rating over inherited", UserPolicy{MaxParentalRating: new(12)}, Item{LibraryID: lib, ParentalRating: new(7), InheritedRating: new(17)}, true},
+		{"all ages only", UserPolicy{MaxParentalRating: new(0), BlockUnrated: true}, Item{LibraryID: lib, ParentalRating: new(0)}, true},
+		{"rated for all ages is rated", UserPolicy{MaxParentalRating: new(0), BlockUnrated: true}, Item{LibraryID: lib, ParentalRating: new(7)}, false},
 	}
 	for _, tt := range tests {
 		if got := tt.policy.CanAccess(&tt.item); got != tt.want {

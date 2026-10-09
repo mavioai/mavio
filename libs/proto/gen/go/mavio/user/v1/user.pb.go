@@ -610,7 +610,9 @@ type UserPolicy_builder struct {
 	// Accessible libraries; when all_libraries is true this list is ignored.
 	AllLibraries *bool
 	LibraryIds   []string
-	// Highest allowed parental rating score; 0 means unrestricted.
+	// Highest allowed parental rating score, the minimum age a rating stands
+	// for (1000 and above for adult content); unset means unrestricted, 0
+	// allows only content for all ages.
 	MaxParentalRating *int32
 	BlockUnrated      *bool
 	AllowTranscoding  *bool

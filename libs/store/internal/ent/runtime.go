@@ -164,14 +164,6 @@ func init() {
 	itemDescCustomRating := itemFields[21].Descriptor()
 	// item.DefaultCustomRating holds the default value on creation for the custom_rating field.
 	item.DefaultCustomRating = itemDescCustomRating.Default.(string)
-	// itemDescParentalRating is the schema descriptor for parental_rating field.
-	itemDescParentalRating := itemFields[22].Descriptor()
-	// item.DefaultParentalRating holds the default value on creation for the parental_rating field.
-	item.DefaultParentalRating = itemDescParentalRating.Default.(int)
-	// itemDescInheritedRating is the schema descriptor for inherited_rating field.
-	itemDescInheritedRating := itemFields[23].Descriptor()
-	// item.DefaultInheritedRating holds the default value on creation for the inherited_rating field.
-	item.DefaultInheritedRating = itemDescInheritedRating.Default.(int)
 	// itemDescCommunityRating is the schema descriptor for community_rating field.
 	itemDescCommunityRating := itemFields[24].Descriptor()
 	// item.DefaultCommunityRating holds the default value on creation for the community_rating field.

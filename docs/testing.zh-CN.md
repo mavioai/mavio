@@ -38,6 +38,7 @@
 | `tests/Jellyfin.Naming.Tests`（TV / Video / Music / AudioBook / Book / ExternalFiles，约 575 条参数化用例） | 剧集 / 季 / 多集 / 绝对集数 / 日期型剧集；多版本、分卷（stack）、花絮（extras）、3D、日期清理；外挂文件 | `libs/naming` |
 | `tests/Jellyfin.Server.Implementations.Tests/Library` | 电影、剧集、季、音频解析器；忽略规则（`.ignore`）；排序；媒体流选择（`MediaStreamSelectorTests`） | `libs/library`（解析器链、忽略规则）；`libs/media/decision`（流选择） |
 | `tests/Jellyfin.XbmcMetadata.Tests`（Parsers + Test Data） | 电影、剧集、季、单集、音乐专辑、艺人、音乐视频的 NFO 样例 | `libs/metadata/nfo` |
+| `tests/Jellyfin.Server.Implementations.Tests/Localization/LocalizationManagerTests.cs` | 各国分级体系中的分级分数（分级体系本身是运行时数据，连同 `SOURCES.json` 复制到 `libs/metadata/ratings`） | `libs/metadata` |
 | `tests/Jellyfin.Providers.Tests`（Tmdb / MediaInfo / Lyrics / Music / TV / ExternalId） | TMDB 工具函数与演职员处理、缺失集检测、歌词解析、外部 ID | `plugins/scraper-tmdb`、`libs/metadata` |
 | `tests/Jellyfin.MediaEncoding.Tests/Probing`（ffprobe JSON 样本） | 探测结果规范化：码率缺失、隔行扫描、时长精度等边界情况 | `libs/media/probe` |
 | `tests/Jellyfin.MediaEncoding.Tests/Subtitles` | SRT / ASS / SSA 解析与编码 | `libs/subtitle` |

@@ -80,8 +80,8 @@ func TestSQLiteUpgradeKeepsReferencingRows(t *testing.T) {
 	if err != nil || page.Total != 1 {
 		t.Errorf("search with genre after upgrade = %d items, %v", page.Total, err)
 	}
-	if child, err := s.Items().Get(ctx, trailerID); err != nil || child.InheritedRating != 13 {
-		t.Errorf("inherited rating after upgrade = %d, %v; want 13", child.InheritedRating, err)
+	if child, err := s.Items().Get(ctx, trailerID); err != nil || child.InheritedRating == nil || *child.InheritedRating != 13 {
+		t.Errorf("inherited rating after upgrade = %v, %v; want 13", child.InheritedRating, err)
 	}
 	people, err := s.People().Search(ctx, core.PersonQuery{Search: "zoe"})
 	if err != nil || len(people) != 1 {

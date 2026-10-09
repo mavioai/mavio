@@ -235,7 +235,7 @@ func TestStartErrors(t *testing.T) {
 	}{
 		{"unknown item", Request{ItemID: core.NewID()}, core.ErrNotFound},
 		{"other library", Request{User: core.User{ID: e.user.ID, Policy: core.UserPolicy{Libraries: []core.ID{core.NewID()}}}}, core.ErrNotFound},
-		{"rating", Request{User: core.User{ID: e.user.ID, Policy: core.UserPolicy{MaxParentalRating: 1, BlockUnrated: true}}}, core.ErrNotFound},
+		{"rating", Request{User: core.User{ID: e.user.ID, Policy: core.UserPolicy{MaxParentalRating: new(1), BlockUnrated: true}}}, core.ErrNotFound},
 		{"no ffmpeg", Request{Client: hevcOnly}, ErrNoSource},
 		{"stream without source", Request{AudioStream: new(1), SourceID: core.NilID}, core.ErrInvalid},
 	}

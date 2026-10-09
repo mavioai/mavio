@@ -1,7 +1,6 @@
 package core
 
 import (
-	"cmp"
 	"fmt"
 	"slices"
 	"time"
@@ -43,9 +42,9 @@ type UserPolicy struct {
 	// Libraries limits access to these libraries; nil means all libraries.
 	Libraries []ID
 	// MaxParentalRating is the highest allowed rating score; content ratings
-	// such as "PG-13" are mapped to scores per country rating system. Zero
-	// means unrestricted.
-	MaxParentalRating int
+	// such as "PG-13" are mapped to scores per country rating system. Nil
+	// means unrestricted; zero allows only content for all ages.
+	MaxParentalRating *int
 	// BlockUnrated hides items without an official rating when a maximum
 	// rating is set.
 	BlockUnrated     bool
@@ -71,11 +70,15 @@ func (p *UserPolicy) CanAccess(it *Item) bool {
 	if !p.CanAccessLibrary(it.LibraryID) {
 		return false
 	}
-	if p.MaxParentalRating > 0 {
-		score := cmp.Or(it.ParentalRating, it.InheritedRating)
-		if score > p.MaxParentalRating || (score == 0 && p.BlockUnrated) {
-			return false
+	if p.MaxParentalRating != nil {
+		score := it.ParentalRating
+		if score == nil {
+			score = it.InheritedRating
 		}
+		if score == nil {
+			return !p.BlockUnrated
+		}
+		return *score <= *p.MaxParentalRating
 	}
 	return true
 }

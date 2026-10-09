@@ -54,7 +54,7 @@ func TestItemValues(t *testing.T) {
 		ctx := t.Context()
 		films, music := newLibrary(t, s, "/films"), newLibrary(t, s, "/music")
 		a, b := newItem(films, core.KindMovie, "A"), newItem(films, core.KindMovie, "B")
-		a.Genres, a.Tags, a.ProductionYear, a.ParentalRating = []string{"Drama", "Science Fiction"}, []string{"4K"}, 1999, 17
+		a.Genres, a.Tags, a.ProductionYear, a.ParentalRating = []string{"Drama", "Science Fiction"}, []string{"4K"}, 1999, ptr(17)
 		b.Genres, b.Studios, b.ProductionYear = []string{"drama", "Documentary", "Comédie"}, []string{"A24"}, 2015
 		trailer := newItem(films, core.KindVideo, "A Trailer")
 		trailer.Extra, trailer.OwnerID, trailer.Genres, trailer.ProductionYear = core.ExtraTrailer, a.ID, []string{"Drama"}, 1999
@@ -76,7 +76,7 @@ func TestItemValues(t *testing.T) {
 			{"substring", core.ValueQuery{Kind: core.ValueGenre, Search: "fiction"}, []string{"Science Fiction 1"}},
 			{"sort form", core.ValueQuery{Kind: core.ValueGenre, Search: "scifi"}, []string{"Sci-Fi 1"}},
 			{"punctuation matches spaces", core.ValueQuery{Kind: core.ValueGenre, Search: "sci fi"}, []string{"Sci-Fi 1"}},
-			{"rating", core.ValueQuery{Kind: core.ValueGenre, Items: core.ItemFilter{LibraryIDs: []core.ID{films.ID}, MaxRating: 12}}, []string{"Comédie 1", "Documentary 1", "drama 1"}},
+			{"rating", core.ValueQuery{Kind: core.ValueGenre, Items: core.ItemFilter{LibraryIDs: []core.ID{films.ID}, MaxRating: ptr(12)}}, []string{"Comédie 1", "Documentary 1", "drama 1"}},
 			{"item kinds", core.ValueQuery{Kind: core.ValueGenre, Items: core.ItemFilter{Kinds: []core.ItemKind{core.KindTrack}}, Search: "dra"}, []string{"Melodrama 1"}},
 			{"artists include album artists", core.ValueQuery{Kind: core.ValueArtist}, []string{"Beach House 1", "Various Artists 1"}},
 			{"studios", core.ValueQuery{Kind: core.ValueStudio}, []string{"A24 1"}},
@@ -113,7 +113,7 @@ func TestPersonSearch(t *testing.T) {
 		ctx := t.Context()
 		films, shows := newLibrary(t, s, "/films"), newLibrary(t, s, "/shows")
 		movie, rated, episode := newItem(films, core.KindMovie, "Movie"), newItem(films, core.KindMovie, "Rated"), newItem(shows, core.KindEpisode, "Episode")
-		rated.ParentalRating = 17
+		rated.ParentalRating = ptr(17)
 		upsert(t, s, movie, rated, episode)
 		var list []core.Person
 		for _, p := range []struct{ name, sort string }{
@@ -160,7 +160,7 @@ func TestPersonSearch(t *testing.T) {
 			{"sort name", core.PersonQuery{Search: "hanks tom"}, []string{"Tom Hanks 2"}},
 			{"pinyin", core.PersonQuery{Search: "zhang guo"}, []string{"张国荣 1"}},
 			{"library", core.PersonQuery{Items: core.ItemFilter{LibraryIDs: []core.ID{shows.ID}}}, []string{"Thomas Newman 1"}},
-			{"rating", core.PersonQuery{Items: core.ItemFilter{MaxRating: 12}, Search: "hanks"}, []string{"Tom Hanks 1"}},
+			{"rating", core.PersonQuery{Items: core.ItemFilter{MaxRating: ptr(12)}, Search: "hanks"}, []string{"Tom Hanks 1"}},
 			{"credit kinds", core.PersonQuery{CreditKinds: []core.CreditKind{core.CreditDirector, core.CreditComposer}}, []string{"Tom Hanks 1", "Thomas Newman 1"}},
 		}
 		for _, tt := range tests {

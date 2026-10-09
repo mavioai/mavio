@@ -49,11 +49,21 @@ func TestUserService(t *testing.T) {
 	if pol := created.GetUser().GetPolicy(); pol.GetAllLibraries() || len(pol.GetLibraryIds()) != 1 || pol.GetLibraryIds()[0] != lib || pol.GetMaxParentalRating() != 12 {
 		t.Errorf("created policy = %v", pol)
 	}
+	// An unset maximum rating is unrestricted; zero allows content for all
+	// ages only.
+	for name, max := range map[string]*int32{"dave": nil, "erin": new(int32(0))} {
+		u, err := asAdmin.CreateUser(ctx, userv1.CreateUserRequest_builder{
+			Name: &name, Password: new("pw"), Policy: userv1.UserPolicy_builder{MaxParentalRating: max}.Build(),
+		}.Build())
+		if pol := u.GetUser().GetPolicy(); err != nil || pol.HasMaxParentalRating() != (max != nil) || pol.GetMaxParentalRating() != 0 {
+			t.Errorf("%s's policy = %v, %v", name, pol, err)
+		}
+	}
 	_, err = asAdmin.CreateUser(ctx, userv1.CreateUserRequest_builder{Name: new("BOB"), Password: new("x")}.Build())
 	wantCode(t, "duplicate name", err, connect.CodeAlreadyExists)
 	_, err = asAdmin.CreateUser(ctx, userv1.CreateUserRequest_builder{Name: new("carol")}.Build())
 	wantCode(t, "no password", err, connect.CodeInvalidArgument)
-	if list, err := asAdmin.ListUsers(ctx, &userv1.ListUsersRequest{}); err != nil || len(list.GetUsers()) != 2 {
+	if list, err := asAdmin.ListUsers(ctx, &userv1.ListUsersRequest{}); err != nil || len(list.GetUsers()) != 4 {
 		t.Errorf("ListUsers = %v, %v", list, err)
 	}
 

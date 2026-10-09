@@ -37,9 +37,10 @@ type ItemQuery struct {
 	PersonID ID
 	YearFrom int
 	YearTo   int
-	// MaxRating is the maximum parental rating score; zero means
-	// unrestricted. SkipUnrated also excludes items without a rating.
-	MaxRating   int
+	// MaxRating is the maximum parental rating score, compared with
+	// InheritedRating; nil means unrestricted. Under a maximum, SkipUnrated
+	// also excludes items without a rating.
+	MaxRating   *int
 	SkipUnrated bool
 
 	// UserID enables the per-user filters and sorts below, and leaves out
