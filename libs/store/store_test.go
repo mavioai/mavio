@@ -410,8 +410,16 @@ func TestMediaSourcesAndImages(t *testing.T) {
 		if err := s.MediaSources().Replace(ctx, movie.ID, sources[1:]); err != nil {
 			t.Fatal(err)
 		}
-		if got, _ := s.MediaSources().ListForItem(ctx, movie.ID); len(got) != 1 || got[0].Name != "1080p" {
+		if got, _ := s.MediaSources().ListForItem(ctx, movie.ID); len(got) != 1 || got[0].Name != "1080p" || got[0].Keyframes != nil {
 			t.Errorf("after Replace = %+v", got)
+		}
+		// Keyframes read from a file without any differ from none read.
+		sources[1].Keyframes = []time.Duration{}
+		if err := s.MediaSources().Replace(ctx, movie.ID, sources[1:]); err != nil {
+			t.Fatal(err)
+		}
+		if got, _ := s.MediaSources().ListForItem(ctx, movie.ID); len(got) != 1 || got[0].Keyframes == nil || len(got[0].Keyframes) != 0 {
+			t.Errorf("empty keyframes round trip = %#v", got[0].Keyframes)
 		}
 
 		person := core.Person{ID: core.NewID(), Name: "Denis Villeneuve"}

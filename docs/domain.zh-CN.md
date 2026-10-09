@@ -133,7 +133,7 @@ erDiagram
 
 ## 5. 媒体源、流与章节
 
-* `MediaSource` 是条目的一个可播放版本；一个条目可以有多个版本（如 4K 和 1080p），以 `Name` 区分。它记录 `Path`（设置 `Disc` 时为 DVD 或蓝光文件夹）及其后续的分段文件 `Parts`、`Container`（ffprobe 的格式名，Matroska 记为 `mkv`，MPEG-TS 记为 `ts`）、`Size` 与 `Modified`（扫描据此判断文件是否变化）、`Duration`、`Bitrate`、`Streams` 与 `Chapters`、用于切分 HLS 分片的视频 `Keyframes`（提取前为 nil）以及 `ProbedAt`。
+* `MediaSource` 是条目的一个可播放版本；一个条目可以有多个版本（如 4K 和 1080p），以 `Name` 区分。它记录 `Path`（设置 `Disc` 时为 DVD 或蓝光文件夹）及其后续的分段文件 `Parts`、`Container`（ffprobe 的格式名，Matroska 记为 `mkv`，MPEG-TS 记为 `ts`）、`Size` 与 `Modified`（扫描据此判断文件是否变化）、`Duration`、`Bitrate`、`Streams` 与 `Chapters`、用于切分 HLS 分片的视频 `Keyframes`（提取前为 nil，文件没有关键帧时为空列表）以及 `ProbedAt`。
 * `MediaStream` 是一条基本流；外挂字幕文件也表示为流，此时设置 `ExternalPath`，`Index` 为排在内嵌流之后的合成序号。编解码器名称沿用 ffprobe（`hevc`、`eac3`、`subrip` 等）；`CodecTag` 保留容器标签（如 `hvc1` 与 `hev1`），这对直放判断很重要；`Language` 使用 ISO 639-2/B。
 * 所有流都记录编解码器、profile、level、码率（未知时为零）、语言、标题、注释、时基，以及默认、强制、听障、原始音轨标记。
 * 视频流记录尺寸、平均帧率 `FrameRate` 与 `RealFrameRate`（`Rational`，如 24000/1001）、像素格式与位深、色彩描述（范围、原色、传递特性、色彩空间）、杜比视界配置记录（`DolbyVision`：版本、profile、level、基础层兼容 ID、RPU / EL / BL 是否存在）、HDR10+ 标记、隔行、旋转、采样与显示宽高比、是否变形像素、参考帧数，以及 H.264 是否为长度前缀格式（`AVC`、`NALLengthSize`）。

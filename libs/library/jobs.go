@@ -68,9 +68,12 @@ type Prober interface {
 // Jobs runs the library's background jobs: scans, probes of new and changed
 // media files, and metadata refreshes.
 type Jobs struct {
-	Store     core.Store
-	Scanner   *Scanner
-	Prober    Prober
+	Store   core.Store
+	Scanner *Scanner
+	Prober  Prober
+	// Keyframes extracts the keyframes of probed video files; nil skips
+	// them.
+	Keyframes KeyframeExtractor
 	Refresher *Refresher
 	Now       func() time.Time
 
@@ -88,9 +91,10 @@ func (j *Jobs) now() time.Time {
 // Handlers returns the handlers for a Worker.
 func (j *Jobs) Handlers() map[string]Handler {
 	return map[string]Handler{
-		JobScan:    j.scan,
-		JobProbe:   j.probe,
-		JobRefresh: j.refresh,
+		JobScan:      j.scan,
+		JobProbe:     j.probe,
+		JobRefresh:   j.refresh,
+		JobKeyframes: j.keyframes,
 	}
 }
 
@@ -221,7 +225,11 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 			return nil, ignoreGone(err)
 		}
 	}
-	return []core.Job{RefreshJob(it.ID, j.now())}, nil
+	next := []core.Job{RefreshJob(it.ID, j.now())}
+	if j.Keyframes != nil && !audio && len(probed) > 0 {
+		next = append(next, KeyframesJob(it.ID, j.now(), KeyframesBackground))
+	}
+	return next, nil
 }
 
 func (j *Jobs) refresh(ctx context.Context, job core.Job) ([]core.Job, error) {
