@@ -59,7 +59,7 @@ flowchart TD
 | P4 | Scanning and first plugin | ✅ Done |
 | P5 | Streaming and API | ✅ Done |
 | P6 | Server assembly and distribution | In progress |
-| P7 | Browsing | Not started |
+| P7 | Browsing | In progress |
 | P8 | Live events and sessions | Not started |
 | P9 | Metadata management | Not started |
 | P10 | Administration and operations | Not started |
@@ -173,9 +173,12 @@ flowchart TD
 - Collections and playlists: create, edit, reorder and delete; the domain model already has both
 - Library and collection collages
 - Display preferences per user and client, kept by the server so they follow the user across devices
-- Inherited parental ratings (§4)
+- Inherited parental ratings
 
 **Done when**: an end-to-end test through the API browses a scanned film and shows library through the views, latest items, next up and genres, builds a playlist, and does not show the episodes of a series rated above the user's limit.
+
+**Progress**:
+- [x] Inherited parental ratings: an unrated item takes its nearest rated ancestor's score, derived by the store on every write and backfilled for existing databases; rating filters and access checks use it
 
 ### P8 Live Events and Sessions
 **Scope**: what a client learns without asking, and what one device does to another.
@@ -239,5 +242,4 @@ flowchart TD
 | Progressive transcoding | Remuxes and transcodes are delivered as HLS only; a client declaring only progressive transcoding profiles gets `unimplemented` | P11, with offline downloads |
 | Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P12); then serve the stream as `.sup` |
 | Negative audio decode times in fMP4 | HLS outputs keep negative timestamps, so audio that starts before zero (AAC encoder priming) is written with a negative `tfdt`, a field the format defines as unsigned. hls.js and Safari play it, and Jellyfin writes the same for its fMP4 clients; players outside that set are unverified | If a player misplaces or drops the audio: shift only the audio to zero, keeping the video at the source's timestamps |
-| Inherited parental ratings | Ratings are filtered per item, so unrated episodes of a series rated above a user's limit are visible; Jellyfin filters them by the series' rating | P7: store an inherited rating with each item and filter on it |
 | Live TV, DVR, channels and DLNA | Large parts of Jellyfin (DLNA as a plugin there) that Mavio has neither adopted nor ruled out | Decide before P12; DLNA would be a plugin |

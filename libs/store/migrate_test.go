@@ -15,7 +15,7 @@ import (
 
 // TestSQLiteUpgradeKeepsReferencingRows upgrades a database holding data
 // in the initial schema: table rebuilds must not cascade-delete referencing
-// rows, and the derived keys must be backfilled.
+// rows, and the derived keys and inherited ratings must be backfilled.
 func TestSQLiteUpgradeKeepsReferencingRows(t *testing.T) {
 	ctx := t.Context()
 	file := filepath.Join(t.TempDir(), "mavio.db")
@@ -39,13 +39,15 @@ func TestSQLiteUpgradeKeepsReferencingRows(t *testing.T) {
 	}
 
 	now := time.Now()
-	libID, itemID, personID := core.NewID(), core.NewID(), core.NewID()
+	libID, itemID, personID, trailerID := core.NewID(), core.NewID(), core.NewID(), core.NewID()
 	for _, stmt := range []struct {
 		query string
 		args  []any
 	}{
 		{`INSERT INTO libraries (id, name, kind, paths, created_at, updated_at) VALUES (?, 'Films', 'movies', '[]', ?, ?)`, []any{libID, now, now}},
 		{`INSERT INTO items (id, kind, name, sort_name, sort_key, original_title, date_added, library_id) VALUES (?, 'movie', 'The Spider-Man', 'The Spider-Man', 'the spider-man', 'Ｓｐｉｄｅｒ', ?, ?)`, []any{itemID, now, libID}},
+		{`UPDATE items SET parental_rating = 13 WHERE id = ?`, []any{itemID}},
+		{`INSERT INTO items (id, kind, name, sort_name, sort_key, date_added, library_id, parent_id) VALUES (?, 'video', 'Trailer', 'Trailer', 'trailer', ?, ?, ?)`, []any{trailerID, now, libID, itemID}},
 		{`INSERT INTO item_values (kind, value, ord, item_id) VALUES ('genre', 'Comédie', 0, ?)`, []any{itemID}},
 		{`INSERT INTO people (id, name, name_key) VALUES (?, 'Zoë Kravitz', 'zoë kravitz')`, []any{personID}},
 		{`INSERT INTO credits (kind, item_id, person_id) VALUES ('actor', ?, ?)`, []any{itemID, personID}},
@@ -77,6 +79,9 @@ func TestSQLiteUpgradeKeepsReferencingRows(t *testing.T) {
 	page, err = s.Items().Query(ctx, core.ItemQuery{Search: "spider", Genres: []string{"comédie"}})
 	if err != nil || page.Total != 1 {
 		t.Errorf("search with genre after upgrade = %d items, %v", page.Total, err)
+	}
+	if child, err := s.Items().Get(ctx, trailerID); err != nil || child.InheritedRating != 13 {
+		t.Errorf("inherited rating after upgrade = %d, %v; want 13", child.InheritedRating, err)
 	}
 	people, err := s.People().Search(ctx, core.PersonQuery{Search: "zoe"})
 	if err != nil || len(people) != 1 {

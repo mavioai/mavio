@@ -18,9 +18,9 @@ import (
 
 // catalog holds a films and a shows library.
 type catalog struct {
-	films, shows                              core.Library
-	alien, up, trailer, series, season, pilot core.Item
-	ridley                                    core.Person
+	films, shows                                      core.Library
+	alien, up, trailer, series, season, pilot, finale core.Item
+	ridley                                            core.Person
 }
 
 func seedCatalog(t *testing.T, s *store.Store) catalog {
@@ -48,8 +48,10 @@ func seedCatalog(t *testing.T, s *store.Store) catalog {
 	c.series.OfficialRating, c.series.ParentalRating = "TV-MA", 17
 	c.season = item(c.shows, c.series.ID, core.KindSeason, "Season 1")
 	c.pilot = item(c.shows, c.season.ID, core.KindEpisode, "Pilot")
-	c.pilot.IndexNumber, c.pilot.ParentIndexNumber = new(1), new(1)
-	if err := s.Items().Upsert(ctx, c.alien, c.up, c.trailer, c.series, c.season, c.pilot); err != nil {
+	c.pilot.IndexNumber, c.pilot.ParentIndexNumber, c.pilot.OfficialRating, c.pilot.ParentalRating = new(1), new(1), "TV-Y7", 7
+	c.finale = item(c.shows, c.season.ID, core.KindEpisode, "Finale")
+	c.finale.IndexNumber, c.finale.ParentIndexNumber = new(2), new(1)
+	if err := s.Items().Upsert(ctx, c.alien, c.up, c.trailer, c.series, c.season, c.pilot, c.finale); err != nil {
 		t.Fatal(err)
 	}
 	c.ridley = core.Person{ID: core.NewID(), Name: "Ridley Scott"}
@@ -135,7 +137,7 @@ func TestItemService(t *testing.T) {
 		{"genre", libraryv1.ListItemsRequest_builder{Genres: []string{"Horror"}}, []string{"Alien"}},
 		{"year", libraryv1.ListItemsRequest_builder{YearFrom: new(int32(2000)), Kinds: movie}, []string{"Up"}},
 		{"person", libraryv1.ListItemsRequest_builder{PersonId: new(c.ridley.ID.String())}, []string{"Alien"}},
-		{"descendants", libraryv1.ListItemsRequest_builder{ParentId: new(c.series.ID.String()), Recursive: new(true), Sort: byName}, []string{"Pilot", "Season 1"}},
+		{"descendants", libraryv1.ListItemsRequest_builder{ParentId: new(c.series.ID.String()), Recursive: new(true), Sort: byName}, []string{"Finale", "Pilot", "Season 1"}},
 		{"page", libraryv1.ListItemsRequest_builder{Kinds: movie, Sort: byName, Limit: new(int32(1)), Offset: new(int32(1))}, []string{"Up"}},
 	}
 	for _, tt := range tests {
@@ -179,6 +181,13 @@ func TestItemService(t *testing.T) {
 	}
 	_, err = asKid.GetItem(ctx, libraryv1.GetItemRequest_builder{Id: new(c.alien.ID.String())}.Build())
 	wantCode(t, "kid gets a film", err, connect.CodeNotFound)
+	// Unrated episodes take the series' rating; a rated one is allowed.
+	_, err = asKid.GetItem(ctx, libraryv1.GetItemRequest_builder{Id: new(c.finale.ID.String())}.Build())
+	wantCode(t, "kid gets an unrated episode of a rated series", err, connect.CodeNotFound)
+	episodes := []libraryv1.ItemKind{libraryv1.ItemKind_ITEM_KIND_EPISODE}
+	if got := names(list(asKid, libraryv1.ListItemsRequest_builder{Kinds: episodes}).GetItems()); !slices.Equal(got, []string{"Pilot"}) {
+		t.Errorf("kid's episodes = %q", got)
+	}
 	pilot, err := asKid.GetItem(ctx, libraryv1.GetItemRequest_builder{Id: new(c.pilot.ID.String())}.Build())
 	if err != nil || pilot.GetItem().HasPath() || pilot.GetItem().GetIndexNumber() != 1 {
 		t.Errorf("kid's pilot = %v, %v", pilot, err)

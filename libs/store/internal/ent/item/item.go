@@ -59,6 +59,8 @@ const (
 	FieldCustomRating = "custom_rating"
 	// FieldParentalRating holds the string denoting the parental_rating field in the database.
 	FieldParentalRating = "parental_rating"
+	// FieldInheritedRating holds the string denoting the inherited_rating field in the database.
+	FieldInheritedRating = "inherited_rating"
 	// FieldCommunityRating holds the string denoting the community_rating field in the database.
 	FieldCommunityRating = "community_rating"
 	// FieldCriticRating holds the string denoting the critic_rating field in the database.
@@ -220,6 +222,7 @@ var Columns = []string{
 	FieldOfficialRating,
 	FieldCustomRating,
 	FieldParentalRating,
+	FieldInheritedRating,
 	FieldCommunityRating,
 	FieldCriticRating,
 	FieldExternalIds,
@@ -282,6 +285,8 @@ var (
 	DefaultCustomRating string
 	// DefaultParentalRating holds the default value on creation for the "parental_rating" field.
 	DefaultParentalRating int
+	// DefaultInheritedRating holds the default value on creation for the "inherited_rating" field.
+	DefaultInheritedRating int
 	// DefaultCommunityRating holds the default value on creation for the "community_rating" field.
 	DefaultCommunityRating float64
 	// DefaultCriticRating holds the default value on creation for the "critic_rating" field.
@@ -430,6 +435,11 @@ func ByCustomRating(opts ...sql.OrderTermOption) OrderOption {
 // ByParentalRating orders the results by the parental_rating field.
 func ByParentalRating(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentalRating, opts...).ToFunc()
+}
+
+// ByInheritedRating orders the results by the inherited_rating field.
+func ByInheritedRating(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInheritedRating, opts...).ToFunc()
 }
 
 // ByCommunityRating orders the results by the community_rating field.

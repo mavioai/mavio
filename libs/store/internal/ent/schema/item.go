@@ -54,6 +54,9 @@ func (Item) Fields() []ent.Field {
 		field.String("official_rating").Default(""),
 		field.String("custom_rating").Default(""),
 		field.Int("parental_rating").Default(0),
+		// inherited_rating is parental_rating, or for an unrated item its
+		// nearest rated ancestor's; rating filters compare it.
+		field.Int("inherited_rating").Default(0),
 		field.Float("community_rating").Default(0),
 		field.Float("critic_rating").Default(0),
 		field.JSON("external_ids", map[string]string{}).Optional(),

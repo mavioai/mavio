@@ -188,6 +188,7 @@ var (
 		{Name: "official_rating", Type: field.TypeString, Default: ""},
 		{Name: "custom_rating", Type: field.TypeString, Default: ""},
 		{Name: "parental_rating", Type: field.TypeInt, Default: 0},
+		{Name: "inherited_rating", Type: field.TypeInt, Default: 0},
 		{Name: "community_rating", Type: field.TypeFloat64, Default: 0},
 		{Name: "critic_rating", Type: field.TypeFloat64, Default: 0},
 		{Name: "external_ids", Type: field.TypeJSON, Nullable: true},
@@ -226,19 +227,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "items_items_children",
-				Columns:    []*schema.Column{ItemsColumns[47]},
-				RefColumns: []*schema.Column{ItemsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "items_items_extras",
 				Columns:    []*schema.Column{ItemsColumns[48]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "items_libraries_items",
+				Symbol:     "items_items_extras",
 				Columns:    []*schema.Column{ItemsColumns[49]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "items_libraries_items",
+				Columns:    []*schema.Column{ItemsColumns[50]},
 				RefColumns: []*schema.Column{LibrariesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -247,7 +248,7 @@ var (
 			{
 				Name:    "item_library_id_path",
 				Unique:  true,
-				Columns: []*schema.Column{ItemsColumns[49], ItemsColumns[10]},
+				Columns: []*schema.Column{ItemsColumns[50], ItemsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "path <> ''",
 				},
@@ -255,27 +256,27 @@ var (
 			{
 				Name:    "item_parent_id_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[47], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[48], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_library_id_kind_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[49], ItemsColumns[1], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[50], ItemsColumns[1], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_owner_id",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[48]},
+				Columns: []*schema.Column{ItemsColumns[49]},
 			},
 			{
 				Name:    "item_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[42]},
+				Columns: []*schema.Column{ItemsColumns[43]},
 			},
 			{
 				Name:    "item_library_id_scan_generation",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[49], ItemsColumns[45]},
+				Columns: []*schema.Column{ItemsColumns[50], ItemsColumns[46]},
 			},
 		},
 	}

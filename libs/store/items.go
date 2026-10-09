@@ -90,8 +90,57 @@ func (r items) Upsert(ctx context.Context, list ...core.Item) error {
 				}
 			}
 		}
+		// Recompute the inherited ratings below every item whose parent was
+		// not written with it.
+		written := make(map[core.ID]bool, len(list))
+		for _, it := range list {
+			written[it.ID] = true
+		}
+		var roots []any
+		for _, it := range list {
+			if !written[it.ParentID] {
+				roots = append(roots, it.ID)
+			}
+		}
+		for chunk := range slices.Chunk(roots, upsertBatch) {
+			if err := tx.inheritRatings(ctx, "c.id IN ("+tx.placeholders(len(chunk))+")", chunk...); err != nil {
+				return err
+			}
+		}
 		return nil
 	})
+}
+
+// inheritRatings recomputes inherited_rating for the items matching seed,
+// a condition on the items table aliased c, and all their descendants: an
+// item's own parental rating, or when unrated its parent's inherited one.
+func (s *Store) inheritRatings(ctx context.Context, seed string, args ...any) error {
+	query := `WITH RECURSIVE r(id, rating) AS (
+	SELECT c.id, CASE WHEN c.parental_rating > 0 THEN c.parental_rating ELSE COALESCE(p.inherited_rating, 0) END
+	FROM items c LEFT JOIN items p ON p.id = c.parent_id WHERE ` + seed + `
+	UNION ALL
+	SELECT i.id, CASE WHEN i.parental_rating > 0 THEN i.parental_rating ELSE r.rating END
+	FROM items i JOIN r ON i.parent_id = r.id
+)
+UPDATE items SET inherited_rating = r.rating FROM r WHERE items.id = r.id AND items.inherited_rating <> r.rating`
+	_, err := s.tx.ExecContext(ctx, query, args...)
+	return mapErr(err, "inherit ratings")
+}
+
+// placeholders returns n comma-separated bind parameters of the dialect.
+func (s *Store) placeholders(n int) string {
+	var b strings.Builder
+	for i := range n {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		if s.dialect == DialectPostgres {
+			fmt.Fprintf(&b, "$%d", i+1)
+		} else {
+			b.WriteString("?")
+		}
+	}
+	return b.String()
 }
 
 func (r items) Delete(ctx context.Context, ids ...core.ID) error {
@@ -315,9 +364,9 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 		ps = append(ps, item.ProductionYearLTE(q.YearTo))
 	}
 	if q.MaxRating > 0 {
-		ps = append(ps, item.ParentalRatingLTE(q.MaxRating))
+		ps = append(ps, item.InheritedRatingLTE(q.MaxRating))
 		if q.SkipUnrated {
-			ps = append(ps, item.ParentalRatingGT(0))
+			ps = append(ps, item.InheritedRatingGT(0))
 		}
 	}
 	if !q.UserID.IsZero() {
@@ -444,6 +493,8 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 		SetOfficialRating(it.OfficialRating).
 		SetCustomRating(it.CustomRating).
 		SetParentalRating(it.ParentalRating).
+		// Upsert then derives it from the ancestors when unrated.
+		SetInheritedRating(it.ParentalRating).
 		SetCommunityRating(it.CommunityRating).
 		SetCriticRating(it.CriticRating).
 		SetExternalIds(fromProviderMap(it.ExternalIDs)).
@@ -516,6 +567,7 @@ func toItem(e *ent.Item) core.Item {
 		OfficialRating:          e.OfficialRating,
 		CustomRating:            e.CustomRating,
 		ParentalRating:          e.ParentalRating,
+		InheritedRating:         e.InheritedRating,
 		CommunityRating:         e.CommunityRating,
 		CriticRating:            e.CriticRating,
 		ExternalIDs:             toProviderMap(e.ExternalIds),

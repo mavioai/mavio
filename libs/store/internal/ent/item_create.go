@@ -298,6 +298,20 @@ func (_c *ItemCreate) SetNillableParentalRating(v *int) *ItemCreate {
 	return _c
 }
 
+// SetInheritedRating sets the "inherited_rating" field.
+func (_c *ItemCreate) SetInheritedRating(v int) *ItemCreate {
+	_c.mutation.SetInheritedRating(v)
+	return _c
+}
+
+// SetNillableInheritedRating sets the "inherited_rating" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableInheritedRating(v *int) *ItemCreate {
+	if v != nil {
+		_c.SetInheritedRating(*v)
+	}
+	return _c
+}
+
 // SetCommunityRating sets the "community_rating" field.
 func (_c *ItemCreate) SetCommunityRating(v float64) *ItemCreate {
 	_c.mutation.SetCommunityRating(v)
@@ -841,6 +855,10 @@ func (_c *ItemCreate) defaults() {
 		v := item.DefaultParentalRating
 		_c.mutation.SetParentalRating(v)
 	}
+	if _, ok := _c.mutation.InheritedRating(); !ok {
+		v := item.DefaultInheritedRating
+		_c.mutation.SetInheritedRating(v)
+	}
 	if _, ok := _c.mutation.CommunityRating(); !ok {
 		v := item.DefaultCommunityRating
 		_c.mutation.SetCommunityRating(v)
@@ -952,6 +970,9 @@ func (_c *ItemCreate) check() error {
 	}
 	if _, ok := _c.mutation.ParentalRating(); !ok {
 		return &ValidationError{Name: "parental_rating", err: errors.New(`ent: missing required field "Item.parental_rating"`)}
+	}
+	if _, ok := _c.mutation.InheritedRating(); !ok {
+		return &ValidationError{Name: "inherited_rating", err: errors.New(`ent: missing required field "Item.inherited_rating"`)}
 	}
 	if _, ok := _c.mutation.CommunityRating(); !ok {
 		return &ValidationError{Name: "community_rating", err: errors.New(`ent: missing required field "Item.community_rating"`)}
@@ -1116,6 +1137,10 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ParentalRating(); ok {
 		_spec.SetField(item.FieldParentalRating, field.TypeInt, value)
 		_node.ParentalRating = value
+	}
+	if value, ok := _c.mutation.InheritedRating(); ok {
+		_spec.SetField(item.FieldInheritedRating, field.TypeInt, value)
+		_node.InheritedRating = value
 	}
 	if value, ok := _c.mutation.CommunityRating(); ok {
 		_spec.SetField(item.FieldCommunityRating, field.TypeFloat64, value)
@@ -1769,6 +1794,24 @@ func (u *ItemUpsert) UpdateParentalRating() *ItemUpsert {
 // AddParentalRating adds v to the "parental_rating" field.
 func (u *ItemUpsert) AddParentalRating(v int) *ItemUpsert {
 	u.Add(item.FieldParentalRating, v)
+	return u
+}
+
+// SetInheritedRating sets the "inherited_rating" field.
+func (u *ItemUpsert) SetInheritedRating(v int) *ItemUpsert {
+	u.Set(item.FieldInheritedRating, v)
+	return u
+}
+
+// UpdateInheritedRating sets the "inherited_rating" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateInheritedRating() *ItemUpsert {
+	u.SetExcluded(item.FieldInheritedRating)
+	return u
+}
+
+// AddInheritedRating adds v to the "inherited_rating" field.
+func (u *ItemUpsert) AddInheritedRating(v int) *ItemUpsert {
+	u.Add(item.FieldInheritedRating, v)
 	return u
 }
 
@@ -2641,6 +2684,27 @@ func (u *ItemUpsertOne) AddParentalRating(v int) *ItemUpsertOne {
 func (u *ItemUpsertOne) UpdateParentalRating() *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
 		s.UpdateParentalRating()
+	})
+}
+
+// SetInheritedRating sets the "inherited_rating" field.
+func (u *ItemUpsertOne) SetInheritedRating(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetInheritedRating(v)
+	})
+}
+
+// AddInheritedRating adds v to the "inherited_rating" field.
+func (u *ItemUpsertOne) AddInheritedRating(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddInheritedRating(v)
+	})
+}
+
+// UpdateInheritedRating sets the "inherited_rating" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateInheritedRating() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateInheritedRating()
 	})
 }
 
@@ -3752,6 +3816,27 @@ func (u *ItemUpsertBulk) AddParentalRating(v int) *ItemUpsertBulk {
 func (u *ItemUpsertBulk) UpdateParentalRating() *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
 		s.UpdateParentalRating()
+	})
+}
+
+// SetInheritedRating sets the "inherited_rating" field.
+func (u *ItemUpsertBulk) SetInheritedRating(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetInheritedRating(v)
+	})
+}
+
+// AddInheritedRating adds v to the "inherited_rating" field.
+func (u *ItemUpsertBulk) AddInheritedRating(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddInheritedRating(v)
+	})
+}
+
+// UpdateInheritedRating sets the "inherited_rating" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateInheritedRating() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateInheritedRating()
 	})
 }
 

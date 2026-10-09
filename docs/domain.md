@@ -88,7 +88,7 @@ There is a single `Item` type for every kind; `Kind` selects which fields are me
 | Identity and hierarchy | `ID`, `LibraryID`, `ParentID`, `Kind`, `Path` |
 | Titles and text | `Name`, `SortName`, `OriginalTitle`, `Overview`, `Tagline` |
 | Numbering | `IndexNumber`, `ParentIndexNumber`, `IndexNumberEnd` |
-| Dates and ratings | `ProductionYear`, `PremiereDate`, `EndDate`, `Runtime`, `OfficialRating`, `CustomRating`, `ParentalRating`, `CommunityRating` (0–10), `CriticRating` (0–100) |
+| Dates and ratings | `ProductionYear`, `PremiereDate`, `EndDate`, `Runtime`, `OfficialRating`, `CustomRating`, `ParentalRating`, `InheritedRating`, `CommunityRating` (0–10), `CriticRating` (0–100) |
 | Classification | `Genres`, `Tags`, `Studios`, `ExternalIDs` (by `Provider`), `ProductionLocations` (countries), `RemoteTrailers` (URLs) |
 | Movie and video | `CollectionName` (movie set), `AspectRatio`, `Video3DFormat` |
 | Music | `Artists`, `AlbumArtists`, `Album` |
@@ -125,7 +125,7 @@ Trailers, featurettes, theme songs and other extras are ordinary items with `Ext
 * `Video3DFormat` and `LockedFields` use known values; `AirDays` are weekdays.
 
 ### 4.6 Ratings
-`OfficialRating` is the content rating as published (e.g. "PG-13"); `CustomRating`, set by the user, takes precedence over it; `ParentalRating` is its score in the country's rating system, set by metadata providers, with zero meaning unrated. Rating filters (`ItemQuery.MaxRating`, `UserPolicy.MaxParentalRating`) compare scores.
+`OfficialRating` is the content rating as published (e.g. "PG-13"); `CustomRating`, set by the user, takes precedence over it; `ParentalRating` is its score in the country's rating system, set by metadata providers, with zero meaning unrated. `InheritedRating` is the score rating filters compare: the item's `ParentalRating`, or for an unrated item its nearest rated ancestor's, so the unrated episodes of a series rated above a user's limit are hidden as the series is, as in Jellyfin. The store derives it on every write, also for the descendants of a written item; values passed to `Upsert` are ignored. Rating filters (`ItemQuery.MaxRating`, `UserPolicy.MaxParentalRating`) compare these scores.
 
 ---
 
@@ -160,7 +160,7 @@ Every library scan has a generation, one more than the last. A scan stamps the i
   * `Libraries` limits access to listed libraries (nil means all); `CanAccessLibrary` applies it.
   * `MaxParentalRating` is the highest allowed rating score (content ratings such as "PG-13" map to scores per country rating system; zero means unrestricted); `BlockUnrated` hides unrated items when a maximum is set.
   * `AllowTranscoding`, `AllowDownload`, `MaxStreamingBitrate` (bits per second, zero means unlimited) and `MaxSessions` (zero means unlimited).
-* `UserPolicy.CanAccess` allows an item when its library is allowed and, under a maximum rating, its rating score is within it; unrated items pass unless `BlockUnrated` is set, as rating filters on item queries do.
+* `UserPolicy.CanAccess` allows an item when its library is allowed and, under a maximum rating, its rating score (`ParentalRating`, else `InheritedRating`) is within it; unrated items pass unless `BlockUnrated` is set, as rating filters on item queries do.
 * `UserPreferences`: preferred audio and subtitle languages (ISO 639-2/B, in order), `SubtitleMode`, and whether to prefer the default audio track over the preferred language.
 * `UserData` is one user's state for one item: `Played`, `PlayCount`, resume `Position`, the last selected audio/subtitle streams (subtitle `-1` means off), `Favorite`, an optional 0–10 `Rating`, and timestamps. Missing state means "never interacted".
 * Playing an item updates its `UserData` (`RecordPosition`) as Jellyfin does. A position in the first 5% of the runtime is not kept; past 90% or within a second of the end the item is played and its position cleared; items shorter than five minutes are played once past the first 5%. Audiobooks use five minutes from the start and from the end instead. Items without a runtime are played by any playback. Only videos, audiobooks and books keep a resume position; tracks are only marked played; other kinds neither. `PlayCount` grows once per playback played to completion.
@@ -207,7 +207,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 `ItemQuery` filters with zero values meaning "no filter":
 
 * Scope: `LibraryIDs` (callers apply the user's library policy here), `ParentID` with optional `Recursive` (all descendants), `Kinds`, `IncludeExtras`, `IncludeMissing`.
-* Content: `Search` (see §9.2); `Genres`, `Tags`, `Studios` (match any, compared in clean form, see §9.2); `PersonID`; `YearFrom`–`YearTo`; `MaxRating` (items without a rating are included unless `SkipUnrated`).
+* Content: `Search` (see §9.2); `Genres`, `Tags`, `Studios` (match any, compared in clean form, see §9.2); `PersonID`; `YearFrom`–`YearTo`; `MaxRating`, compared with `InheritedRating` (items without a rating are included unless `SkipUnrated`).
 * Names sort by sort name the way Jellyfin sorts them: case- and accent-insensitive, leading, inner and trailing articles ("the", "a", "an") ignored, the punctuation `,&-{}'` removed and `.+%` treated as spaces, numbers in numeric order ("Rocky 2" before "Rocky 10"), and non-Latin text transliterated (Chinese sorts by pinyin). Undated items sort last by premiere date, and items never played sort last by last-played time.
 * Per user (require `UserID`): `Played`, `Favorite`, `Resumable`, and the `last_played` / `play_count` sorts.
 * Ordering: a list of `SortSpec`; results are always tie-broken by ID, so paging is stable.

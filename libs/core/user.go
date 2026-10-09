@@ -1,6 +1,7 @@
 package core
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 	"time"
@@ -63,14 +64,16 @@ func (p *UserPolicy) CanAccessLibrary(id ID) bool {
 }
 
 // CanAccess reports whether the policy allows the item: its library is
-// allowed and, under a maximum rating, its rating is within it, unrated
-// items only when BlockUnrated is off.
+// allowed and, under a maximum rating, its rating score is within it,
+// unrated items only when BlockUnrated is off. The score is the item's own
+// ParentalRating, or its InheritedRating when it has none.
 func (p *UserPolicy) CanAccess(it *Item) bool {
 	if !p.CanAccessLibrary(it.LibraryID) {
 		return false
 	}
 	if p.MaxParentalRating > 0 {
-		if it.ParentalRating > p.MaxParentalRating || (it.ParentalRating == 0 && p.BlockUnrated) {
+		score := cmp.Or(it.ParentalRating, it.InheritedRating)
+		if score > p.MaxParentalRating || (score == 0 && p.BlockUnrated) {
 			return false
 		}
 	}

@@ -230,6 +230,8 @@ func TestUserPolicyCanAccess(t *testing.T) {
 		{"unrated", UserPolicy{MaxParentalRating: 12}, Item{LibraryID: lib}, true},
 		{"unrated blocked", UserPolicy{MaxParentalRating: 12, BlockUnrated: true}, Item{LibraryID: lib}, false},
 		{"block without maximum", UserPolicy{BlockUnrated: true}, Item{LibraryID: lib}, true},
+		{"inherited above rating", UserPolicy{MaxParentalRating: 12}, Item{LibraryID: lib, InheritedRating: 17}, false},
+		{"inherited within rating", UserPolicy{MaxParentalRating: 12, BlockUnrated: true}, Item{LibraryID: lib, InheritedRating: 7}, true},
 	}
 	for _, tt := range tests {
 		if got := tt.policy.CanAccess(&tt.item); got != tt.want {

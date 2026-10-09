@@ -167,6 +167,11 @@ func ParentalRating(v int) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldParentalRating, v))
 }
 
+// InheritedRating applies equality check predicate on the "inherited_rating" field. It's identical to InheritedRatingEQ.
+func InheritedRating(v int) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldInheritedRating, v))
+}
+
 // CommunityRating applies equality check predicate on the "community_rating" field. It's identical to CommunityRatingEQ.
 func CommunityRating(v float64) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldCommunityRating, v))
@@ -1489,6 +1494,46 @@ func ParentalRatingLT(v int) predicate.Item {
 // ParentalRatingLTE applies the LTE predicate on the "parental_rating" field.
 func ParentalRatingLTE(v int) predicate.Item {
 	return predicate.Item(sql.FieldLTE(FieldParentalRating, v))
+}
+
+// InheritedRatingEQ applies the EQ predicate on the "inherited_rating" field.
+func InheritedRatingEQ(v int) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldInheritedRating, v))
+}
+
+// InheritedRatingNEQ applies the NEQ predicate on the "inherited_rating" field.
+func InheritedRatingNEQ(v int) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldInheritedRating, v))
+}
+
+// InheritedRatingIn applies the In predicate on the "inherited_rating" field.
+func InheritedRatingIn(vs ...int) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldInheritedRating, vs...))
+}
+
+// InheritedRatingNotIn applies the NotIn predicate on the "inherited_rating" field.
+func InheritedRatingNotIn(vs ...int) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldInheritedRating, vs...))
+}
+
+// InheritedRatingGT applies the GT predicate on the "inherited_rating" field.
+func InheritedRatingGT(v int) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldInheritedRating, v))
+}
+
+// InheritedRatingGTE applies the GTE predicate on the "inherited_rating" field.
+func InheritedRatingGTE(v int) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldInheritedRating, v))
+}
+
+// InheritedRatingLT applies the LT predicate on the "inherited_rating" field.
+func InheritedRatingLT(v int) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldInheritedRating, v))
+}
+
+// InheritedRatingLTE applies the LTE predicate on the "inherited_rating" field.
+func InheritedRatingLTE(v int) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldInheritedRating, v))
 }
 
 // CommunityRatingEQ applies the EQ predicate on the "community_rating" field.

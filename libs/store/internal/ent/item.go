@@ -64,6 +64,8 @@ type Item struct {
 	CustomRating string `json:"custom_rating,omitempty"`
 	// ParentalRating holds the value of the "parental_rating" field.
 	ParentalRating int `json:"parental_rating,omitempty"`
+	// InheritedRating holds the value of the "inherited_rating" field.
+	InheritedRating int `json:"inherited_rating,omitempty"`
 	// CommunityRating holds the value of the "community_rating" field.
 	CommunityRating float64 `json:"community_rating,omitempty"`
 	// CriticRating holds the value of the "critic_rating" field.
@@ -262,7 +264,7 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case item.FieldCommunityRating, item.FieldCriticRating:
 			values[i] = new(sql.NullFloat64)
-		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber, item.FieldScanGeneration:
+		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldInheritedRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber, item.FieldScanGeneration:
 			values[i] = new(sql.NullInt64)
 		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldCustomRating, item.FieldCollectionName, item.FieldAspectRatio, item.FieldVideo3dFormat, item.FieldAlbum, item.FieldSeriesStatus, item.FieldAirTime, item.FieldDisplayOrder, item.FieldMetadataLanguage, item.FieldMetadataCountry, item.FieldExtra:
 			values[i] = new(sql.NullString)
@@ -426,6 +428,12 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field parental_rating", values[i])
 			} else if value.Valid {
 				_m.ParentalRating = int(value.Int64)
+			}
+		case item.FieldInheritedRating:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field inherited_rating", values[i])
+			} else if value.Valid {
+				_m.InheritedRating = int(value.Int64)
 			}
 		case item.FieldCommunityRating:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -769,6 +777,9 @@ func (_m *Item) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("parental_rating=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ParentalRating))
+	builder.WriteString(", ")
+	builder.WriteString("inherited_rating=")
+	builder.WriteString(fmt.Sprintf("%v", _m.InheritedRating))
 	builder.WriteString(", ")
 	builder.WriteString("community_rating=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CommunityRating))

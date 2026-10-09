@@ -209,7 +209,11 @@ type Item struct {
 	CustomRating string
 	// ParentalRating is the score of OfficialRating in its country's rating
 	// system, used by rating filters; zero means unrated.
-	ParentalRating  int
+	ParentalRating int
+	// InheritedRating is the score rating filters use: ParentalRating, or
+	// for an unrated item the nearest rated ancestor's. The store computes
+	// it on every write; values given to Upsert are ignored.
+	InheritedRating int
 	CommunityRating float64 // 0–10
 	CriticRating    float64 // 0–100
 

@@ -88,7 +88,7 @@ erDiagram
 | 标识与层级 | `ID`、`LibraryID`、`ParentID`、`Kind`、`Path` |
 | 标题与文本 | `Name`、`SortName`、`OriginalTitle`、`Overview`、`Tagline` |
 | 编号 | `IndexNumber`、`ParentIndexNumber`、`IndexNumberEnd` |
-| 日期与评分 | `ProductionYear`、`PremiereDate`、`EndDate`、`Runtime`、`OfficialRating`、`CustomRating`、`ParentalRating`、`CommunityRating`（0–10）、`CriticRating`（0–100） |
+| 日期与评分 | `ProductionYear`、`PremiereDate`、`EndDate`、`Runtime`、`OfficialRating`、`CustomRating`、`ParentalRating`、`InheritedRating`、`CommunityRating`（0–10）、`CriticRating`（0–100） |
 | 分类 | `Genres`、`Tags`、`Studios`、`ExternalIDs`（按 `Provider`）、`ProductionLocations`（制片国家）、`RemoteTrailers`（预告片 URL） |
 | 电影与视频 | `CollectionName`（电影系列）、`AspectRatio`、`Video3DFormat` |
 | 音乐 | `Artists`、`AlbumArtists`、`Album` |
@@ -125,7 +125,7 @@ erDiagram
 * `Video3DFormat` 与 `LockedFields` 必须是已知取值；`AirDays` 必须是星期几。
 
 ### 4.6 分级
-`OfficialRating` 是公布的内容分级（如 "PG-13"）；用户设置的 `CustomRating` 优先于它；`ParentalRating` 是它在该国分级体系中的分数，由元数据提供者设置，为零表示未分级。分级过滤（`ItemQuery.MaxRating`、`UserPolicy.MaxParentalRating`）比较的是分数。
+`OfficialRating` 是公布的内容分级（如 "PG-13"）；用户设置的 `CustomRating` 优先于它；`ParentalRating` 是它在该国分级体系中的分数，由元数据提供者设置，为零表示未分级。`InheritedRating` 是分级过滤比较的分数：条目自身的 `ParentalRating`；条目未分级时取最近一个有分级的祖先的分数。因此，与 Jellyfin 一样，分级高于用户上限的剧集中未分级的单集会随剧集一起被隐藏。存储层在每次写入时推导它，被写入条目的后代也一并更新；传给 `Upsert` 的值被忽略。分级过滤（`ItemQuery.MaxRating`、`UserPolicy.MaxParentalRating`）比较的是这些分数。
 
 ---
 
@@ -160,7 +160,7 @@ erDiagram
   * `Libraries` 把访问限制在列出的媒体库内（nil 表示全部）；由 `CanAccessLibrary` 判断。
   * `MaxParentalRating` 是允许的最高分级分数（"PG-13" 这类内容分级按国家分级体系映射为分数；为零表示不限制）；设置了上限时，`BlockUnrated` 会隐藏没有分级的条目。
   * `AllowTranscoding`、`AllowDownload`、`MaxStreamingBitrate`（比特每秒，为零表示不限）与 `MaxSessions`（为零表示不限）。
-* `UserPolicy.CanAccess` 在条目所属媒体库被允许、且设置了最高分级时其分级分数不超过该值时允许访问；未分级条目除非设置了 `BlockUnrated` 否则放行，与条目查询的分级过滤一致。
+* `UserPolicy.CanAccess` 在条目所属媒体库被允许、且设置了最高分级时其分级分数（`ParentalRating`，没有时取 `InheritedRating`）不超过该值时允许访问；未分级条目除非设置了 `BlockUnrated` 否则放行，与条目查询的分级过滤一致。
 * `UserPreferences`：按偏好顺序排列的音频与字幕语言（ISO 639-2/B）、`SubtitleMode`，以及是否优先选择默认音轨而非偏好语言。
 * `UserData` 是某个用户对某个条目的状态：`Played`、`PlayCount`、续播位置 `Position`、上次选择的音频/字幕流（字幕为 `-1` 表示关闭）、`Favorite`、可选的 0–10 分 `Rating` 以及时间戳。没有记录表示"从未交互"。
 * 播放条目时按 Jellyfin 的规则更新其 `UserData`（`RecordPosition`）：位于时长前 5% 的位置不保留；超过 90% 或距结尾不足一秒时标记为已播放并清除位置；短于五分钟的条目越过前 5% 即标记为已播放。有声书改用距开头与距结尾各五分钟。没有时长的条目任何一次播放都算播完。只有视频、有声书与书籍保留续播位置；音乐曲目只标记已播放；其他类型两者都不支持。每次播放到结束，`PlayCount` 加一。
@@ -207,7 +207,7 @@ erDiagram
 `ItemQuery` 中零值字段表示"不过滤"：
 
 * 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`Kinds`、`IncludeExtras`、`IncludeMissing`。
-* 内容：`Search`（见 §9.2）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`（未分级的条目默认包含，除非设置 `SkipUnrated`）。
+* 内容：`Search`（见 §9.2）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`，与 `InheritedRating` 比较（未分级的条目默认包含，除非设置 `SkipUnrated`）。
 * 名称按排序名以 Jellyfin 的方式排序：不区分大小写和重音，忽略开头、中间和结尾的冠词（"the"、"a"、"an"），去掉标点 `,&-{}'` 并把 `.+%` 视为空格，数字按数值排序（"Rocky 2" 在 "Rocky 10" 之前），非拉丁文字转写为拉丁字母（中文按拼音排序）。按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
 * 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`，以及 `last_played` / `play_count` 排序。
 * 排序：`SortSpec` 列表；结果总是以 ID 作为最后的排序键，保证分页稳定。

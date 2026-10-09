@@ -295,6 +295,52 @@ func TestItemQuery(t *testing.T) {
 	})
 }
 
+func TestInheritedRatings(t *testing.T) {
+	eachBackend(t, func(t *testing.T, s *store.Store) {
+		ctx := t.Context()
+		lib := newLibrary(t, s, "/media")
+		series, episodes := showTree(t, s, lib)
+		allowed := func() []string {
+			t.Helper()
+			return query(t, s, core.ItemQuery{Kinds: []core.ItemKind{core.KindEpisode}, MaxRating: 12, Sort: []core.SortSpec{{Field: core.SortName}}})
+		}
+		if got := allowed(); len(got) != 4 {
+			t.Fatalf("unrated series: got %q, want all episodes", got)
+		}
+
+		// Rating the series hides its unrated episodes, not a rated one.
+		episodes[0].ParentalRating = 7 // S01E02
+		upsert(t, s, episodes[0])
+		series.ParentalRating = 17
+		upsert(t, s, series)
+		if got, want := allowed(), []string{"S01E02"}; !slices.Equal(got, want) {
+			t.Errorf("rated series: got %q, want %q", got, want)
+		}
+		got, err := s.Items().Get(ctx, episodes[1].ID)
+		if err != nil || got.InheritedRating != 17 || got.ParentalRating != 0 {
+			t.Errorf("episode = rating %d inherited %d, %v; want 0 and 17", got.ParentalRating, got.InheritedRating, err)
+		}
+
+		// Episodes written later inherit too, also when written with their
+		// season.
+		season := newItem(lib, core.KindSeason, "Season 3")
+		season.ParentID = series.ID
+		ep := newItem(lib, core.KindEpisode, "S03E01")
+		ep.ParentID = season.ID
+		upsert(t, s, ep, season)
+		if got, err := s.Items().Get(ctx, ep.ID); err != nil || got.InheritedRating != 17 {
+			t.Errorf("new episode inherited %d, %v; want 17", got.InheritedRating, err)
+		}
+
+		// Unrating the series clears what its episodes inherited.
+		series.ParentalRating = 0
+		upsert(t, s, series)
+		if got := allowed(); len(got) != 5 {
+			t.Errorf("unrated again: got %q, want all episodes", got)
+		}
+	})
+}
+
 func TestUserScopedQueries(t *testing.T) {
 	eachBackend(t, func(t *testing.T, s *store.Store) {
 		ctx := t.Context()

@@ -3337,6 +3337,8 @@ type ItemMutation struct {
 	custom_rating                 *string
 	parental_rating               *int
 	addparental_rating            *int
+	inherited_rating              *int
+	addinherited_rating           *int
 	community_rating              *float64
 	addcommunity_rating           *float64
 	critic_rating                 *float64
@@ -4501,6 +4503,62 @@ func (m *ItemMutation) AddedParentalRating() (r int, exists bool) {
 func (m *ItemMutation) ResetParentalRating() {
 	m.parental_rating = nil
 	m.addparental_rating = nil
+}
+
+// SetInheritedRating sets the "inherited_rating" field.
+func (m *ItemMutation) SetInheritedRating(i int) {
+	m.inherited_rating = &i
+	m.addinherited_rating = nil
+}
+
+// InheritedRating returns the value of the "inherited_rating" field in the mutation.
+func (m *ItemMutation) InheritedRating() (r int, exists bool) {
+	v := m.inherited_rating
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInheritedRating returns the old "inherited_rating" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldInheritedRating(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInheritedRating is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInheritedRating requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInheritedRating: %w", err)
+	}
+	return oldValue.InheritedRating, nil
+}
+
+// AddInheritedRating adds i to the "inherited_rating" field.
+func (m *ItemMutation) AddInheritedRating(i int) {
+	if m.addinherited_rating != nil {
+		*m.addinherited_rating += i
+	} else {
+		m.addinherited_rating = &i
+	}
+}
+
+// AddedInheritedRating returns the value that was added to the "inherited_rating" field in this mutation.
+func (m *ItemMutation) AddedInheritedRating() (r int, exists bool) {
+	v := m.addinherited_rating
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetInheritedRating resets all changes to the "inherited_rating" field.
+func (m *ItemMutation) ResetInheritedRating() {
+	m.inherited_rating = nil
+	m.addinherited_rating = nil
 }
 
 // SetCommunityRating sets the "community_rating" field.
@@ -6311,7 +6369,7 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 49)
+	fields := make([]string, 0, 50)
 	if m.library != nil {
 		fields = append(fields, item.FieldLibraryID)
 	}
@@ -6377,6 +6435,9 @@ func (m *ItemMutation) Fields() []string {
 	}
 	if m.parental_rating != nil {
 		fields = append(fields, item.FieldParentalRating)
+	}
+	if m.inherited_rating != nil {
+		fields = append(fields, item.FieldInheritedRating)
 	}
 	if m.community_rating != nil {
 		fields = append(fields, item.FieldCommunityRating)
@@ -6511,6 +6572,8 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 		return m.CustomRating()
 	case item.FieldParentalRating:
 		return m.ParentalRating()
+	case item.FieldInheritedRating:
+		return m.InheritedRating()
 	case item.FieldCommunityRating:
 		return m.CommunityRating()
 	case item.FieldCriticRating:
@@ -6618,6 +6681,8 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCustomRating(ctx)
 	case item.FieldParentalRating:
 		return m.OldParentalRating(ctx)
+	case item.FieldInheritedRating:
+		return m.OldInheritedRating(ctx)
 	case item.FieldCommunityRating:
 		return m.OldCommunityRating(ctx)
 	case item.FieldCriticRating:
@@ -6835,6 +6900,13 @@ func (m *ItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetParentalRating(v)
 		return nil
+	case item.FieldInheritedRating:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInheritedRating(v)
+		return nil
 	case item.FieldCommunityRating:
 		v, ok := value.(float64)
 		if !ok {
@@ -7050,6 +7122,9 @@ func (m *ItemMutation) AddedFields() []string {
 	if m.addparental_rating != nil {
 		fields = append(fields, item.FieldParentalRating)
 	}
+	if m.addinherited_rating != nil {
+		fields = append(fields, item.FieldInheritedRating)
+	}
 	if m.addcommunity_rating != nil {
 		fields = append(fields, item.FieldCommunityRating)
 	}
@@ -7088,6 +7163,8 @@ func (m *ItemMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedRuntime()
 	case item.FieldParentalRating:
 		return m.AddedParentalRating()
+	case item.FieldInheritedRating:
+		return m.AddedInheritedRating()
 	case item.FieldCommunityRating:
 		return m.AddedCommunityRating()
 	case item.FieldCriticRating:
@@ -7150,6 +7227,13 @@ func (m *ItemMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddParentalRating(v)
+		return nil
+	case item.FieldInheritedRating:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddInheritedRating(v)
 		return nil
 	case item.FieldCommunityRating:
 		v, ok := value.(float64)
@@ -7396,6 +7480,9 @@ func (m *ItemMutation) ResetField(name string) error {
 		return nil
 	case item.FieldParentalRating:
 		m.ResetParentalRating()
+		return nil
+	case item.FieldInheritedRating:
+		m.ResetInheritedRating()
 		return nil
 	case item.FieldCommunityRating:
 		m.ResetCommunityRating()

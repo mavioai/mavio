@@ -21,12 +21,37 @@ import (
 // version in schema_migrations.
 const keysVersion = "keys-1"
 
+// ratingsVersion identifies how inherited ratings are derived
+// (inheritRatings). Bump it whenever the derivation changes: Open then
+// recomputes them for every item once.
+const ratingsVersion = "ratings-1"
+
 // backfillBatch is the number of rows read per backfill query.
 const backfillBatch = 500
 
-// backfillKeys recomputes the derived keys of all rows unless the current
-// keysVersion has been applied already.
+// backfillKeys recomputes the derived keys and inherited ratings of all
+// rows unless their current versions have been applied already.
 func (s *Store) backfillKeys(ctx context.Context) error {
+	err := s.backfill(ctx, keysVersion, func(tx *Store) error {
+		if err := backfillItems(ctx, tx.write); err != nil {
+			return err
+		}
+		if err := backfillValues(ctx, tx.write); err != nil {
+			return err
+		}
+		return backfillPeople(ctx, tx.write)
+	})
+	if err != nil {
+		return err
+	}
+	return s.backfill(ctx, ratingsVersion, func(tx *Store) error {
+		return tx.inheritRatings(ctx, "c.parent_id IS NULL")
+	})
+}
+
+// backfill runs fn in a transaction that records version in
+// schema_migrations, unless it is recorded already.
+func (s *Store) backfill(ctx context.Context, version string, fn func(tx *Store) error) error {
 	query := `SELECT version FROM schema_migrations WHERE version = ?`
 	insert := `INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)`
 	if s.dialect == DialectPostgres {
@@ -34,28 +59,22 @@ func (s *Store) backfillKeys(ctx context.Context) error {
 		insert = `INSERT INTO schema_migrations (version, applied_at) VALUES ($1, $2)`
 	}
 	var v string
-	err := s.dbs[0].QueryRowContext(ctx, query, keysVersion).Scan(&v)
+	err := s.dbs[0].QueryRowContext(ctx, query, version).Scan(&v)
 	switch {
 	case err == nil:
 		return nil
 	case !errors.Is(err, sql.ErrNoRows):
-		return fmt.Errorf("check %s: %w", keysVersion, err)
+		return fmt.Errorf("check %s: %w", version, err)
 	}
 	err = s.writeTx(ctx, func(tx *Store) error {
-		if err := backfillItems(ctx, tx.write); err != nil {
+		if err := fn(tx); err != nil {
 			return err
 		}
-		if err := backfillValues(ctx, tx.write); err != nil {
-			return err
-		}
-		if err := backfillPeople(ctx, tx.write); err != nil {
-			return err
-		}
-		_, err := tx.tx.ExecContext(ctx, insert, keysVersion, time.Now().Unix())
+		_, err := tx.tx.ExecContext(ctx, insert, version, time.Now().Unix())
 		return err
 	})
 	if err != nil {
-		return fmt.Errorf("backfill %s: %w", keysVersion, err)
+		return fmt.Errorf("backfill %s: %w", version, err)
 	}
 	return nil
 }
