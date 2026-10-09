@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path"
@@ -224,7 +225,7 @@ func (sc *scan) state(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, dir
 	if err != nil {
 		return core.FolderState{}, false, err
 	}
-	st := core.FolderState{LibraryID: sc.lib.ID, Path: dir, ModTime: info.ModTime().UTC(), FileID: fileID(info), Generation: sc.gen}
+	st := core.FolderState{LibraryID: sc.lib.ID, Path: dir, ModTime: modTime(info), FileID: fileID(info), Generation: sc.gen}
 	prev, err := sc.Store.Scans().Folder(ctx, sc.lib.ID, dir)
 	switch {
 	case errors.Is(err, core.ErrNotFound):
@@ -245,9 +246,9 @@ func (sc *scan) state(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, dir
 			if e.IsDir {
 				size = 0
 			}
-			if size != e.Size || !fi.ModTime().UTC().Equal(e.ModTime) {
+			if size != e.Size || !modTime(fi).Equal(e.ModTime) {
 				changed = true
-				e.Size, e.ModTime = size, fi.ModTime().UTC()
+				e.Size, e.ModTime = size, modTime(fi)
 			}
 			st.Entries = append(st.Entries, e)
 		}
@@ -272,7 +273,7 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 		if err != nil {
 			continue // gone since listed
 		}
-		fe.ModTime = fi.ModTime().UTC()
+		fe.ModTime = modTime(fi)
 		if !e.IsDir {
 			fe.Size = fi.Size()
 		}
@@ -281,6 +282,11 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 	sc.count(func(s *ScanStats) { s.Listed++ })
 	return st, true, nil
 }
+
+// modTime returns a file's modification time as the store keeps it: in UTC
+// and to the microsecond, so that an unchanged file compares equal to what
+// the previous scan recorded.
+func modTime(fi fs.FileInfo) time.Time { return fi.ModTime().UTC().Truncate(time.Microsecond) }
 
 func slashRel(rfs rootFS, p string) string { return filepath.ToSlash(rfs.rel(p)) }
 
@@ -428,7 +434,7 @@ func (p *saver) stat(path string) (core.FolderEntry, bool) {
 	if err != nil {
 		return core.FolderEntry{}, false
 	}
-	return core.FolderEntry{Size: fi.Size(), ModTime: fi.ModTime().UTC()}, true
+	return core.FolderEntry{Size: fi.Size(), ModTime: modTime(fi)}, true
 }
 
 // node writes one item and reports whether its media need probing. New

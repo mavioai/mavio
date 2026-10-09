@@ -96,6 +96,7 @@ func (r memItems) Upsert(_ context.Context, items ...core.Item) error {
 		if err := it.Validate(); err != nil {
 			return err
 		}
+		it.FileModified = stored(it.FileModified)
 		r.m.items[it.ID] = it
 	}
 	return nil
@@ -175,6 +176,9 @@ func (r memSources) Replace(_ context.Context, id core.ID, sources []core.MediaS
 	r.m.mu.Lock()
 	defer r.m.mu.Unlock()
 	r.m.sources[id] = append([]core.MediaSource(nil), sources...)
+	for i := range r.m.sources[id] {
+		r.m.sources[id][i].Modified = stored(r.m.sources[id][i].Modified)
+	}
 	return nil
 }
 
@@ -201,6 +205,7 @@ func (r memScans) PutFolders(_ context.Context, folders ...core.FolderState) err
 	r.m.mu.Lock()
 	defer r.m.mu.Unlock()
 	for _, f := range folders {
+		f.ModTime = stored(f.ModTime)
 		r.m.folders[f.LibraryID.String()+f.Path] = f
 	}
 	return nil
@@ -402,3 +407,6 @@ func (r memImages) Replace(_ context.Context, id core.ID, images []core.Image) e
 	r.m.images[id] = images
 	return nil
 }
+
+// stored returns a time as libs/store returns it: to the microsecond.
+func stored(t time.Time) time.Time { return t.Truncate(time.Microsecond) }
