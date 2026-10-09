@@ -70,4 +70,4 @@ jobs:
       - run: pnpm nx run fixtures:media --output-style=static
       # Real ffmpeg runs on the runner's hardware; the cache would replay
       # results from runs without fixtures.
-      - run: pnpm nx run-many -t test -p media server --skip-nx-cache --output-style=static
+      - run: pnpm nx run-many -t test -p media streaming server --skip-nx-cache --output-style=static
