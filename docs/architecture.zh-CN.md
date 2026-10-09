@@ -138,7 +138,7 @@ libs/proto/
 │   ├── auth/v1/                # AuthService：首次运行、登录与退出、已登录设备
 │   ├── user/v1/                # UserService、UserDataService：账户、权限、偏好、按条目的用户状态
 │   ├── system/v1/              # SystemService：健康检查、服务端信息
-│   ├── playback/v1/            # （P3）客户端能力、播放决策、播放会话、进度上报
+│   ├── playback/v1/            # PlaybackService：客户端能力、播放决策、进度上报
 │   └── plugin/v1/              # 插件契约：PluginService（manifest、配置、生命周期）、
 │                               #   MetadataProviderService、AuthProviderService、NotifierService
 ├── gen/go/                     # 生成的 protobuf-go + connect-go（Go 模块）

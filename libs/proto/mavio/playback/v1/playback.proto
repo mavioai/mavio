@@ -1,0 +1,387 @@
+edition = "2023";
+
+package mavio.playback.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+
+// PlaybackService decides how a client plays an item and tracks the
+// playback. All methods act for the calling user.
+service PlaybackService {
+  // StartPlayback picks a media source and streams, decides whether the
+  // client plays it directly, remuxed or transcoded, and returns the URLs to
+  // play it from. The URLs need no token and work until the playback stops,
+  // expires or its sign-in session ends.
+  rpc StartPlayback(StartPlaybackRequest) returns (StartPlaybackResponse);
+  // ReportProgress records the position of a playback. Playbacks without
+  // reports or media requests for a while expire.
+  rpc ReportProgress(ReportProgressRequest) returns (ReportProgressResponse);
+  // StopPlayback ends a playback and saves the resume position or marks the
+  // item played.
+  rpc StopPlayback(StopPlaybackRequest) returns (StopPlaybackResponse);
+}
+
+// ClientCapabilities describes what a client can play: which containers and
+// codecs it plays directly, which formats it can receive transcodes in, the
+// limits of its decoders and how it shows subtitles.
+//
+// Lists of containers, codecs or languages are written as clients declare
+// them: comma-separated and case-insensitive, e.g. "mp4,m4v". An empty list
+// matches anything; a leading "-" means anything but the listed names.
+message ClientCapabilities {
+  // Identifies the client in logs.
+  string name = 1 [(buf.validate.field).string.max_len = 64];
+  // Bits per second; 0 means no cap.
+  int64 max_streaming_bitrate = 2 [(buf.validate.field).int64.gte = 0];
+  // Caps downloads (CONTEXT_STATIC), in bits per second.
+  int64 max_static_bitrate = 3 [(buf.validate.field).int64.gte = 0];
+  // The bitrate audio is transcoded to for streaming.
+  int64 music_streaming_transcoding_bitrate = 4 [(buf.validate.field).int64.gte = 0];
+  // Caps audio downloads; 0 falls back to max_static_bitrate.
+  int64 max_static_music_bitrate = 5 [(buf.validate.field).int64.gte = 0];
+
+  repeated DirectPlayProfile direct_play = 6 [(buf.validate.field).repeated.max_items = 100];
+  repeated TranscodingProfile transcoding = 7 [(buf.validate.field).repeated.max_items = 100];
+  repeated ContainerProfile containers = 8 [(buf.validate.field).repeated.max_items = 100];
+  repeated CodecProfile codecs = 9 [(buf.validate.field).repeated.max_items = 100];
+  repeated SubtitleProfile subtitles = 10 [(buf.validate.field).repeated.max_items = 100];
+}
+
+enum MediaKind {
+  MEDIA_KIND_UNSPECIFIED = 0;
+  MEDIA_KIND_AUDIO = 1;
+  MEDIA_KIND_VIDEO = 2;
+  MEDIA_KIND_PHOTO = 3;
+}
+
+// Context says whether media is streamed for playback or downloaded.
+enum Context {
+  CONTEXT_UNSPECIFIED = 0;
+  CONTEXT_STREAMING = 1;
+  CONTEXT_STATIC = 2;
+}
+
+// Protocol is how transcoded media is delivered.
+enum Protocol {
+  PROTOCOL_UNSPECIFIED = 0;
+  // A progressive byte stream.
+  PROTOCOL_HTTP = 1;
+  // An HLS playlist.
+  PROTOCOL_HLS = 2;
+}
+
+// SeekInfo says how a client seeks within a transcode.
+enum SeekInfo {
+  SEEK_INFO_UNSPECIFIED = 0;
+  SEEK_INFO_AUTO = 1;
+  SEEK_INFO_BYTES = 2;
+}
+
+// SubtitleMethod is how a subtitle stream reaches the client.
+enum SubtitleMethod {
+  SUBTITLE_METHOD_UNSPECIFIED = 0;
+  // Burned into the video.
+  SUBTITLE_METHOD_ENCODE = 1;
+  // Muxed into the output container.
+  SUBTITLE_METHOD_EMBED = 2;
+  // Served as a separate file.
+  SUBTITLE_METHOD_EXTERNAL = 3;
+  // A subtitle rendition of the HLS playlist.
+  SUBTITLE_METHOD_HLS = 4;
+  // Not delivered.
+  SUBTITLE_METHOD_DROP = 5;
+}
+
+// DirectPlayProfile is a combination of container and codecs the client
+// plays as is.
+message DirectPlayProfile {
+  MediaKind kind = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  string container = 2 [(buf.validate.field).string.max_len = 1024];
+  string video_codec = 3 [(buf.validate.field).string.max_len = 1024];
+  string audio_codec = 4 [(buf.validate.field).string.max_len = 1024];
+}
+
+// TranscodingProfile is a format the client accepts transcodes in.
+message TranscodingProfile {
+  MediaKind kind = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  // Unspecified means CONTEXT_STREAMING.
+  Context context = 2 [(buf.validate.field).enum.defined_only = true];
+  // Unspecified means PROTOCOL_HTTP.
+  Protocol protocol = 3 [(buf.validate.field).enum.defined_only = true];
+  // A single container, e.g. "mp4" for fMP4 HLS segments.
+  string container = 4 [(buf.validate.field).string.max_len = 64];
+  string video_codec = 5 [(buf.validate.field).string.max_len = 1024];
+  string audio_codec = 6 [(buf.validate.field).string.max_len = 1024];
+  // Caps the transcoded audio; 0 means no cap.
+  int32 max_audio_channels = 7 [(buf.validate.field).int32.gte = 0];
+  bool estimate_content_length = 8;
+  bool enable_mpegts_m2ts_mode = 9;
+  SeekInfo seek_info = 10 [(buf.validate.field).enum.defined_only = true];
+  bool copy_timestamps = 11;
+  // Adds subtitle renditions to HLS playlists.
+  bool enable_subtitles_in_manifest = 12;
+  int32 min_segments = 13 [(buf.validate.field).int32.gte = 0];
+  // HLS segment length in seconds; 0 uses the server's.
+  int32 segment_length_seconds = 14 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 60
+  }];
+  // Limit the transcoded video, e.g. its width.
+  repeated Condition conditions = 15 [(buf.validate.field).repeated.max_items = 100];
+  // Asks for constant bitrate audio.
+  bool disable_audio_vbr = 16;
+}
+
+// ContainerProfile applies conditions to every file in a container.
+message ContainerProfile {
+  MediaKind kind = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  string container = 2 [(buf.validate.field).string.max_len = 1024];
+  string sub_container = 3 [(buf.validate.field).string.max_len = 1024];
+  repeated Condition conditions = 4 [(buf.validate.field).repeated.max_items = 100];
+}
+
+// CodecKind says which streams a codec profile applies to.
+enum CodecKind {
+  CODEC_KIND_UNSPECIFIED = 0;
+  CODEC_KIND_VIDEO = 1;
+  // Audio streams of video files.
+  CODEC_KIND_VIDEO_AUDIO = 2;
+  // Audio files.
+  CODEC_KIND_AUDIO = 3;
+}
+
+// CodecProfile limits a codec: conditions must hold for direct play, and
+// transcodes are made to satisfy them. The profile only applies to streams
+// that satisfy apply_conditions.
+message CodecProfile {
+  CodecKind kind = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  string codec = 2 [(buf.validate.field).string.max_len = 1024];
+  string container = 3 [(buf.validate.field).string.max_len = 1024];
+  // For container "hls", the segment container.
+  string sub_container = 4 [(buf.validate.field).string.max_len = 1024];
+  repeated Condition conditions = 5 [(buf.validate.field).repeated.max_items = 100];
+  repeated Condition apply_conditions = 6 [(buf.validate.field).repeated.max_items = 100];
+}
+
+// SubtitleProfile is a subtitle format the client shows and how it gets it.
+message SubtitleProfile {
+  // e.g. "vtt", "srt", "ass", "pgssub".
+  string format = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+  SubtitleMethod method = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  // ISO 639-2/B codes; empty means any language.
+  string language = 3 [(buf.validate.field).string.max_len = 1024];
+  string container = 4 [(buf.validate.field).string.max_len = 1024];
+}
+
+// Property is a stream or file property a condition tests.
+enum Property {
+  PROPERTY_UNSPECIFIED = 0;
+  PROPERTY_AUDIO_CHANNELS = 1;
+  PROPERTY_AUDIO_BITRATE = 2;
+  PROPERTY_AUDIO_PROFILE = 3;
+  PROPERTY_AUDIO_SAMPLE_RATE = 4;
+  PROPERTY_AUDIO_BIT_DEPTH = 5;
+  PROPERTY_IS_SECONDARY_AUDIO = 6;
+  PROPERTY_WIDTH = 7;
+  PROPERTY_HEIGHT = 8;
+  PROPERTY_VIDEO_BIT_DEPTH = 9;
+  PROPERTY_VIDEO_BITRATE = 10;
+  PROPERTY_VIDEO_FRAMERATE = 11;
+  PROPERTY_VIDEO_LEVEL = 12;
+  PROPERTY_VIDEO_PROFILE = 13;
+  // Values are range types: sdr, hdr10, hdr10plus, hlg, dovi, dovi_hdr10,
+  // dovi_hlg, dovi_sdr, dovi_el, dovi_hdr10plus, dovi_el_hdr10plus,
+  // dovi_invalid.
+  PROPERTY_VIDEO_RANGE_TYPE = 14;
+  PROPERTY_VIDEO_CODEC_TAG = 15;
+  PROPERTY_VIDEO_ROTATION = 16;
+  PROPERTY_IS_ANAMORPHIC = 17;
+  PROPERTY_IS_INTERLACED = 18;
+  PROPERTY_IS_AVC = 19;
+  PROPERTY_REF_FRAMES = 20;
+  PROPERTY_NUM_STREAMS = 21;
+  PROPERTY_NUM_AUDIO_STREAMS = 22;
+  PROPERTY_NUM_VIDEO_STREAMS = 23;
+}
+
+// Op is a comparison.
+enum Op {
+  OP_UNSPECIFIED = 0;
+  OP_EQUALS = 1;
+  OP_NOT_EQUALS = 2;
+  OP_LESS_THAN_EQUAL = 3;
+  OP_GREATER_THAN_EQUAL = 4;
+  // Values separated by "|".
+  OP_EQUALS_ANY = 5;
+}
+
+// Condition is a requirement on a property of a stream or file.
+message Condition {
+  Property property = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  Op op = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  string value = 3 [(buf.validate.field).string.max_len = 1024];
+  // Optional conditions hold when the property is unknown; required ones
+  // fail.
+  bool optional = 4;
+}
+
+// PlayMethod is how a media source is played.
+enum PlayMethod {
+  PLAY_METHOD_UNSPECIFIED = 0;
+  // Video or audio is re-encoded.
+  PLAY_METHOD_TRANSCODE = 1;
+  // Video, and possibly audio, is copied into a container the client plays.
+  PLAY_METHOD_DIRECT_STREAM = 2;
+  // The file is served as is.
+  PLAY_METHOD_DIRECT_PLAY = 3;
+}
+
+// TranscodeReason says why a media source is not played directly.
+enum TranscodeReason {
+  TRANSCODE_REASON_UNSPECIFIED = 0;
+  TRANSCODE_REASON_CONTAINER_NOT_SUPPORTED = 1;
+  TRANSCODE_REASON_VIDEO_CODEC_NOT_SUPPORTED = 2;
+  TRANSCODE_REASON_AUDIO_CODEC_NOT_SUPPORTED = 3;
+  TRANSCODE_REASON_SUBTITLE_CODEC_NOT_SUPPORTED = 4;
+  TRANSCODE_REASON_AUDIO_IS_EXTERNAL = 5;
+  TRANSCODE_REASON_SECONDARY_AUDIO_NOT_SUPPORTED = 6;
+  TRANSCODE_REASON_VIDEO_PROFILE_NOT_SUPPORTED = 7;
+  TRANSCODE_REASON_VIDEO_LEVEL_NOT_SUPPORTED = 8;
+  TRANSCODE_REASON_VIDEO_RESOLUTION_NOT_SUPPORTED = 9;
+  TRANSCODE_REASON_VIDEO_BIT_DEPTH_NOT_SUPPORTED = 10;
+  TRANSCODE_REASON_VIDEO_FRAMERATE_NOT_SUPPORTED = 11;
+  TRANSCODE_REASON_REF_FRAMES_NOT_SUPPORTED = 12;
+  TRANSCODE_REASON_ANAMORPHIC_VIDEO_NOT_SUPPORTED = 13;
+  TRANSCODE_REASON_INTERLACED_VIDEO_NOT_SUPPORTED = 14;
+  TRANSCODE_REASON_AUDIO_CHANNELS_NOT_SUPPORTED = 15;
+  TRANSCODE_REASON_AUDIO_PROFILE_NOT_SUPPORTED = 16;
+  TRANSCODE_REASON_AUDIO_SAMPLE_RATE_NOT_SUPPORTED = 17;
+  TRANSCODE_REASON_AUDIO_BIT_DEPTH_NOT_SUPPORTED = 18;
+  TRANSCODE_REASON_CONTAINER_BITRATE_EXCEEDS_LIMIT = 19;
+  TRANSCODE_REASON_VIDEO_BITRATE_NOT_SUPPORTED = 20;
+  TRANSCODE_REASON_AUDIO_BITRATE_NOT_SUPPORTED = 21;
+  TRANSCODE_REASON_UNKNOWN_VIDEO_STREAM_INFO = 22;
+  TRANSCODE_REASON_UNKNOWN_AUDIO_STREAM_INFO = 23;
+  TRANSCODE_REASON_DIRECT_PLAY_ERROR = 24;
+  TRANSCODE_REASON_VIDEO_RANGE_TYPE_NOT_SUPPORTED = 25;
+  TRANSCODE_REASON_VIDEO_CODEC_TAG_NOT_SUPPORTED = 26;
+  TRANSCODE_REASON_STREAM_COUNT_EXCEEDS_LIMIT = 27;
+  TRANSCODE_REASON_VIDEO_ROTATION_NOT_SUPPORTED = 28;
+}
+
+// SubtitleTrack is a subtitle stream offered with a playback.
+message SubtitleTrack {
+  // The stream's index in the media source.
+  int32 stream_index = 1;
+  string language = 2;
+  string title = 3;
+  bool default = 4;
+  bool forced = 5;
+  // How the client receives it.
+  SubtitleMethod method = 6;
+  // The delivered format, e.g. "vtt".
+  string format = 7;
+  // For SUBTITLE_METHOD_EXTERNAL, the subtitle file, relative to the
+  // server's base URL.
+  string url = 8;
+}
+
+message StartPlaybackRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // Plays this media source; empty picks the best one for the client.
+  string media_source_id = 2 [(buf.validate.field).string.uuid = true];
+  ClientCapabilities capabilities = 3 [(buf.validate.field).required = true];
+  // Stream indexes to play; unset plays the user's or the source's
+  // defaults. A subtitle index of -1 turns subtitles off. Selecting a stream
+  // requires media_source_id.
+  int32 audio_stream_index = 4 [(buf.validate.field).int32.gte = 0];
+  int32 subtitle_stream_index = 5 [(buf.validate.field).int32.gte = -1];
+  // Caps the bitrate below the client's and the user's limits, in bits per
+  // second.
+  int64 max_bitrate = 6 [(buf.validate.field).int64.gt = 0];
+  // Where playback begins; transcodes start there.
+  google.protobuf.Duration start_position = 7 [(buf.validate.field).duration.gte = {}];
+}
+
+message StartPlaybackResponse {
+  // Identifies the playback in progress reports.
+  string playback_id = 1;
+  string media_source_id = 2;
+  PlayMethod method = 3;
+  // Why the source is not played directly.
+  repeated TranscodeReason transcode_reasons = 4;
+  // The media to play, relative to the server's base URL: the file for
+  // direct play, else an HLS master playlist or a progressive stream.
+  string url = 5;
+  // The selected streams; subtitle_stream_index is -1 without subtitles.
+  int32 audio_stream_index = 6;
+  int32 subtitle_stream_index = 7;
+  repeated SubtitleTrack subtitles = 8;
+}
+
+message ReportProgressRequest {
+  string playback_id = 1 [(buf.validate.field).required = true];
+  google.protobuf.Duration position = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).duration.gte = {}
+  ];
+  bool paused = 3;
+}
+
+message ReportProgressResponse {}
+
+message StopPlaybackRequest {
+  string playback_id = 1 [(buf.validate.field).required = true];
+  // The last position; unset means the client played to the end.
+  google.protobuf.Duration position = 2 [(buf.validate.field).duration.gte = {}];
+}
+
+message StopPlaybackResponse {}

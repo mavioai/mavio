@@ -138,7 +138,7 @@ libs/proto/
 │   ├── auth/v1/                # AuthService: first run, sign-in and sign-out, signed-in devices
 │   ├── user/v1/                # UserService, UserDataService: accounts, policies, preferences, per-item state
 │   ├── system/v1/              # SystemService: health, server information
-│   ├── playback/v1/            # (P3) client capabilities, playback decisions, sessions, progress reporting
+│   ├── playback/v1/            # PlaybackService: client capabilities, playback decisions, progress reporting
 │   └── plugin/v1/              # Plugin contract: PluginService (manifest, configuration, lifecycle),
 │                               #   MetadataProviderService, AuthProviderService, NotifierService
 ├── gen/go/                     # Generated protobuf-go + connect-go (Go module)
