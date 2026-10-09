@@ -13,6 +13,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -20,6 +21,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
 	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
+	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
@@ -45,7 +47,8 @@ func run(ctx context.Context, args []string) error {
 	ffmpeg := fs.String("ffmpeg", "ffmpeg", "ffmpeg binary; without it media is only played directly")
 	ffprobe := fs.String("ffprobe", "ffprobe", "ffprobe binary")
 	transcodes := fs.String("transcode-dir", filepath.Join(os.TempDir(), "mavio-transcodes"), "directory for transcodes")
-	cacheDir := fs.String("cache-dir", defaultCacheDir(), "directory for downloaded and resized images")
+	cacheDir := fs.String("cache-dir", defaultCacheDir(), "directory for downloaded and resized images and compiled plugins")
+	pluginDir := fs.String("plugin-dir", "", "directory holding one folder per plugin, each with its manifest.json")
 	dev := fs.Bool("dev", false, "serve the development player at /dev/player")
 	devLibrary := fs.String("dev-library", "", "add the Movies and Shows folders of this directory as libraries, e.g. .fixtures/dev-library")
 	showVersion := fs.Bool("version", false, "print version and exit")
@@ -73,11 +76,24 @@ func run(ctx context.Context, args []string) error {
 			return err
 		}
 	}
+	plugs, err := plugins.Open(ctx, plugins.Config{
+		Dir: *pluginDir, CacheDir: filepath.Join(*cacheDir, "plugins"), Store: db, Logger: slog.Default(),
+	})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancel()
+		if err := plugs.Close(closeCtx); err != nil {
+			slog.ErrorContext(ctx, "stop plugins", "err", err)
+		}
+	}()
 	playbacks, ffmpegVersion := newPlaybacks(ctx, db, *ffmpeg, *ffprobe, *transcodes)
 	imageServer := images.New(images.Config{Store: db, Dir: filepath.Join(*cacheDir, "images"), Logger: slog.Default()})
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: version, Store: db, Database: db.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Dev: *dev,
+		Images: imageServer, Plugins: plugs, Dev: *dev,
 	})
 	if err != nil {
 		return err
@@ -92,7 +108,7 @@ func run(ctx context.Context, args []string) error {
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return playbacks.Run(ctx) })
 	g.Go(func() error { return httpserver.Serve(ctx, ln, h) })
-	if worker := newLibraryWorker(ctx, db, *ffprobe, imageServer); worker != nil {
+	if worker := newLibraryWorker(ctx, db, *ffprobe, imageServer, plugs.MetadataProviders()); worker != nil {
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err
@@ -143,7 +159,7 @@ func defaultCacheDir() string {
 // newLibraryWorker returns the worker running scans, probes, keyframe
 // extractions, metadata refreshes and image placeholders, with a scan of every library queued,
 // or nil when there is no ffprobe to probe media with.
-func newLibraryWorker(ctx context.Context, db core.Store, ffprobe string, analyzer library.ImageAnalyzer) *library.Worker {
+func newLibraryWorker(ctx context.Context, db core.Store, ffprobe string, analyzer library.ImageAnalyzer, metadata []library.Provider) *library.Worker {
 	path, err := exec.LookPath(ffprobe)
 	if err != nil {
 		slog.ErrorContext(ctx, "ffprobe unavailable; libraries are not scanned", "ffprobe", ffprobe, "err", err)
@@ -154,7 +170,7 @@ func newLibraryWorker(ctx context.Context, db core.Store, ffprobe string, analyz
 		Scanner:   &library.Scanner{Store: db, Resolver: library.NewResolver(), Logger: slog.Default()},
 		Prober:    providers.FFprobe{Prober: &probe.Prober{FFprobe: path}},
 		Keyframes: providers.Keyframes{Extractor: &keyframes.Extractor{FFprobe: path}},
-		Refresher: &library.Refresher{Store: db, Logger: slog.Default()},
+		Refresher: &library.Refresher{Store: db, Providers: metadata, Logger: slog.Default()},
 		Images:    analyzer,
 		Logger:    slog.Default(),
 	}

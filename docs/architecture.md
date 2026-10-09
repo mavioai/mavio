@@ -276,6 +276,12 @@ libs/plugin/
 ```
 A plugin registers its handlers in `init` with `guest.Handle(pluginv1connect.New…ServiceHandler(impl))`; a `wasip1` build imports `guest/wasm`, a native build calls `process.Serve`. `internal/testplugin` is a complete example built for both runtimes.
 
+### 7.5 Plugins in the Server
+* **Plugin folder**: the server starts every folder of its plugin folder (`-plugin-dir`) that holds a `manifest.json`, through `libs/plugin/host`. A folder that cannot be read, a duplicate plugin ID or a plugin that fails to start is reported as failed and left out; the server runs on without it.
+* **Configuration**: an administrator's configuration is stored by plugin ID ([Domain Model](domain.md) §10) and set through `SystemService.SetPluginConfig`, which validates it against the manifest's `config_schema`, delivers it with the `Configure` RPC and stores it once the plugin accepts it, without a restart. At startup each plugin gets its stored configuration again.
+* **States**: a plugin is ready when it runs with its configuration or its schema accepts an empty one; unconfigured while it waits for a configuration its schema requires; failed when it could not start or rejected its stored configuration. `SystemService.ListPlugins` reports them, with the manifest.
+* **Metadata providers**: every started metadata plugin is a provider of library refreshes; while it is not ready it knows nothing, so a plugin configured later takes part in the next refresh.
+
 ---
 
 ## 8. Media Pipeline (libs/media) and Hardware Acceleration

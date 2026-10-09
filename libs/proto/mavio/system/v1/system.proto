@@ -2,9 +2,12 @@ edition = "2023";
 
 package mavio.system.v1;
 
+import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+import "mavio/plugin/v1/plugin.proto";
 
-// SystemService exposes server-level information and health.
+// SystemService exposes server-level information and health, and the
+// plugins the server runs.
 service SystemService {
   // GetHealth reports whether the server is ready to serve requests.
   rpc GetHealth(GetHealthRequest) returns (GetHealthResponse) {
@@ -14,6 +17,19 @@ service SystemService {
   rpc GetSystemInfo(GetSystemInfoRequest) returns (GetSystemInfoResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // ListPlugins lists the plugins found in the server's plugin folder, by
+  // ID. Administrators only.
+  rpc ListPlugins(ListPluginsRequest) returns (ListPluginsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetPluginConfig returns a plugin's configuration. Administrators only.
+  rpc GetPluginConfig(GetPluginConfigRequest) returns (GetPluginConfigResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SetPluginConfig validates a configuration against the plugin's schema,
+  // delivers it to the running plugin and stores it once the plugin
+  // accepts it. Administrators only.
+  rpc SetPluginConfig(SetPluginConfigRequest) returns (SetPluginConfigResponse);
 }
 
 message GetHealthRequest {}
@@ -42,4 +58,54 @@ message GetSystemInfoResponse {
   // First line of `ffmpeg -version`, empty when ffmpeg is unavailable.
   string ffmpeg_version = 5;
   google.protobuf.Timestamp start_time = 6;
+}
+
+// PluginState is whether a plugin is in use.
+enum PluginState {
+  PLUGIN_STATE_UNSPECIFIED = 0;
+  // The plugin runs with its configuration, or needs none.
+  PLUGIN_STATE_READY = 1;
+  // The plugin runs but waits for a configuration its schema requires.
+  PLUGIN_STATE_UNCONFIGURED = 2;
+  // The plugin could not be started or rejected its stored configuration;
+  // see Plugin.error.
+  PLUGIN_STATE_FAILED = 3;
+}
+
+// Plugin is a plugin found in the server's plugin folder.
+message Plugin {
+  // The plugin's manifest. For a folder whose manifest cannot be read,
+  // only the ID is set, from the folder's name.
+  mavio.plugin.v1.Manifest manifest = 1;
+  PluginState state = 2;
+  // Why the plugin failed, for PLUGIN_STATE_FAILED.
+  string error = 3;
+}
+
+message ListPluginsRequest {}
+
+message ListPluginsResponse {
+  repeated Plugin plugins = 1;
+}
+
+message GetPluginConfigRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+}
+
+message GetPluginConfigResponse {
+  // JSON matching the manifest's config_schema; empty when the plugin was
+  // never configured.
+  string config_json = 1;
+  // When the configuration was last set; unset when never configured.
+  google.protobuf.Timestamp update_time = 2;
+}
+
+message SetPluginConfigRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+  // JSON matching the manifest's config_schema.
+  string config_json = 2 [(buf.validate.field).required = true];
+}
+
+message SetPluginConfigResponse {
+  Plugin plugin = 1;
 }

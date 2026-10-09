@@ -276,6 +276,12 @@ libs/plugin/
 ```
 插件在 `init` 中用 `guest.Handle(pluginv1connect.New…ServiceHandler(impl))` 注册 handler；`wasip1` 构建导入 `guest/wasm`，原生构建调用 `process.Serve`。`internal/testplugin` 是同时为两种运行时构建的完整示例。
 
+### 7.5 服务端中的插件
+* **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`-plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。
+* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `SystemService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。
+* **状态**：插件以其配置运行、或其 schema 接受空配置时为就绪；在等待其 schema 所要求的配置时为未配置；无法启动或拒绝已保存的配置时为失败。`SystemService.ListPlugins` 连同清单一起报告这些状态。
+* **元数据提供者**：每个已启动的元数据插件都是媒体库刷新的提供者；未就绪时它不提供任何信息，因此之后才配置的插件会参与下一次刷新。
+
 ---
 
 ## 8. 媒体管线（libs/media）与硬件加速

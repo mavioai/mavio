@@ -36,6 +36,8 @@ type Options struct {
 	Playbacks *playback.Manager
 	// Images serves artwork under /images/.
 	Images *images.Server
+	// Plugins runs the server's plugins; nil means none.
+	Plugins rpc.PluginManager
 	// Dev serves the development player at /dev/player.
 	Dev bool
 }
@@ -54,6 +56,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux := http.NewServeMux()
 	mux.Handle(systemv1connect.NewSystemServiceHandler(&rpc.SystemService{
 		Version: opts.Version, StartTime: time.Now(), Database: opts.Database, FFmpegVersion: opts.FFmpegVersion,
+		Plugins: opts.Plugins,
 	}, interceptors))
 	mux.Handle(authv1connect.NewAuthServiceHandler(rpc.NewAuthService(opts.Store), interceptors))
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(rpc.NewLibraryService(opts.Store), interceptors))

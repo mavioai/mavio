@@ -38,6 +38,15 @@ const (
 	// SystemServiceGetSystemInfoProcedure is the fully-qualified name of the SystemService's
 	// GetSystemInfo RPC.
 	SystemServiceGetSystemInfoProcedure = "/mavio.system.v1.SystemService/GetSystemInfo"
+	// SystemServiceListPluginsProcedure is the fully-qualified name of the SystemService's ListPlugins
+	// RPC.
+	SystemServiceListPluginsProcedure = "/mavio.system.v1.SystemService/ListPlugins"
+	// SystemServiceGetPluginConfigProcedure is the fully-qualified name of the SystemService's
+	// GetPluginConfig RPC.
+	SystemServiceGetPluginConfigProcedure = "/mavio.system.v1.SystemService/GetPluginConfig"
+	// SystemServiceSetPluginConfigProcedure is the fully-qualified name of the SystemService's
+	// SetPluginConfig RPC.
+	SystemServiceSetPluginConfigProcedure = "/mavio.system.v1.SystemService/SetPluginConfig"
 )
 
 // SystemServiceClient is a client for the mavio.system.v1.SystemService service.
@@ -46,6 +55,15 @@ type SystemServiceClient interface {
 	GetHealth(context.Context, *v1.GetHealthRequest) (*v1.GetHealthResponse, error)
 	// GetSystemInfo describes the running server.
 	GetSystemInfo(context.Context, *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error)
+	// ListPlugins lists the plugins found in the server's plugin folder, by
+	// ID. Administrators only.
+	ListPlugins(context.Context, *v1.ListPluginsRequest) (*v1.ListPluginsResponse, error)
+	// GetPluginConfig returns a plugin's configuration. Administrators only.
+	GetPluginConfig(context.Context, *v1.GetPluginConfigRequest) (*v1.GetPluginConfigResponse, error)
+	// SetPluginConfig validates a configuration against the plugin's schema,
+	// delivers it to the running plugin and stores it once the plugin
+	// accepts it. Administrators only.
+	SetPluginConfig(context.Context, *v1.SetPluginConfigRequest) (*v1.SetPluginConfigResponse, error)
 }
 
 // NewSystemServiceClient constructs a client for the mavio.system.v1.SystemService service. By
@@ -73,13 +91,36 @@ func NewSystemServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		listPlugins: connect.NewClient[v1.ListPluginsRequest, v1.ListPluginsResponse](
+			httpClient,
+			baseURL+SystemServiceListPluginsProcedure,
+			connect.WithSchema(systemServiceMethods.ByName("ListPlugins")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		getPluginConfig: connect.NewClient[v1.GetPluginConfigRequest, v1.GetPluginConfigResponse](
+			httpClient,
+			baseURL+SystemServiceGetPluginConfigProcedure,
+			connect.WithSchema(systemServiceMethods.ByName("GetPluginConfig")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		setPluginConfig: connect.NewClient[v1.SetPluginConfigRequest, v1.SetPluginConfigResponse](
+			httpClient,
+			baseURL+SystemServiceSetPluginConfigProcedure,
+			connect.WithSchema(systemServiceMethods.ByName("SetPluginConfig")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // systemServiceClient implements SystemServiceClient.
 type systemServiceClient struct {
-	getHealth     *connect.Client[v1.GetHealthRequest, v1.GetHealthResponse]
-	getSystemInfo *connect.Client[v1.GetSystemInfoRequest, v1.GetSystemInfoResponse]
+	getHealth       *connect.Client[v1.GetHealthRequest, v1.GetHealthResponse]
+	getSystemInfo   *connect.Client[v1.GetSystemInfoRequest, v1.GetSystemInfoResponse]
+	listPlugins     *connect.Client[v1.ListPluginsRequest, v1.ListPluginsResponse]
+	getPluginConfig *connect.Client[v1.GetPluginConfigRequest, v1.GetPluginConfigResponse]
+	setPluginConfig *connect.Client[v1.SetPluginConfigRequest, v1.SetPluginConfigResponse]
 }
 
 // GetHealth calls mavio.system.v1.SystemService.GetHealth.
@@ -100,12 +141,48 @@ func (c *systemServiceClient) GetSystemInfo(ctx context.Context, req *v1.GetSyst
 	return nil, err
 }
 
+// ListPlugins calls mavio.system.v1.SystemService.ListPlugins.
+func (c *systemServiceClient) ListPlugins(ctx context.Context, req *v1.ListPluginsRequest) (*v1.ListPluginsResponse, error) {
+	response, err := c.listPlugins.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// GetPluginConfig calls mavio.system.v1.SystemService.GetPluginConfig.
+func (c *systemServiceClient) GetPluginConfig(ctx context.Context, req *v1.GetPluginConfigRequest) (*v1.GetPluginConfigResponse, error) {
+	response, err := c.getPluginConfig.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// SetPluginConfig calls mavio.system.v1.SystemService.SetPluginConfig.
+func (c *systemServiceClient) SetPluginConfig(ctx context.Context, req *v1.SetPluginConfigRequest) (*v1.SetPluginConfigResponse, error) {
+	response, err := c.setPluginConfig.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // SystemServiceHandler is an implementation of the mavio.system.v1.SystemService service.
 type SystemServiceHandler interface {
 	// GetHealth reports whether the server is ready to serve requests.
 	GetHealth(context.Context, *v1.GetHealthRequest) (*v1.GetHealthResponse, error)
 	// GetSystemInfo describes the running server.
 	GetSystemInfo(context.Context, *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error)
+	// ListPlugins lists the plugins found in the server's plugin folder, by
+	// ID. Administrators only.
+	ListPlugins(context.Context, *v1.ListPluginsRequest) (*v1.ListPluginsResponse, error)
+	// GetPluginConfig returns a plugin's configuration. Administrators only.
+	GetPluginConfig(context.Context, *v1.GetPluginConfigRequest) (*v1.GetPluginConfigResponse, error)
+	// SetPluginConfig validates a configuration against the plugin's schema,
+	// delivers it to the running plugin and stores it once the plugin
+	// accepts it. Administrators only.
+	SetPluginConfig(context.Context, *v1.SetPluginConfigRequest) (*v1.SetPluginConfigResponse, error)
 }
 
 // NewSystemServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -129,12 +206,38 @@ func NewSystemServiceHandler(svc SystemServiceHandler, opts ...connect.HandlerOp
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	systemServiceListPluginsHandler := connect.NewUnaryHandlerSimple(
+		SystemServiceListPluginsProcedure,
+		svc.ListPlugins,
+		connect.WithSchema(systemServiceMethods.ByName("ListPlugins")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	systemServiceGetPluginConfigHandler := connect.NewUnaryHandlerSimple(
+		SystemServiceGetPluginConfigProcedure,
+		svc.GetPluginConfig,
+		connect.WithSchema(systemServiceMethods.ByName("GetPluginConfig")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	systemServiceSetPluginConfigHandler := connect.NewUnaryHandlerSimple(
+		SystemServiceSetPluginConfigProcedure,
+		svc.SetPluginConfig,
+		connect.WithSchema(systemServiceMethods.ByName("SetPluginConfig")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.system.v1.SystemService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case SystemServiceGetHealthProcedure:
 			systemServiceGetHealthHandler.ServeHTTP(w, r)
 		case SystemServiceGetSystemInfoProcedure:
 			systemServiceGetSystemInfoHandler.ServeHTTP(w, r)
+		case SystemServiceListPluginsProcedure:
+			systemServiceListPluginsHandler.ServeHTTP(w, r)
+		case SystemServiceGetPluginConfigProcedure:
+			systemServiceGetPluginConfigHandler.ServeHTTP(w, r)
+		case SystemServiceSetPluginConfigProcedure:
+			systemServiceSetPluginConfigHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -150,4 +253,16 @@ func (UnimplementedSystemServiceHandler) GetHealth(context.Context, *v1.GetHealt
 
 func (UnimplementedSystemServiceHandler) GetSystemInfo(context.Context, *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.GetSystemInfo is not implemented"))
+}
+
+func (UnimplementedSystemServiceHandler) ListPlugins(context.Context, *v1.ListPluginsRequest) (*v1.ListPluginsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.ListPlugins is not implemented"))
+}
+
+func (UnimplementedSystemServiceHandler) GetPluginConfig(context.Context, *v1.GetPluginConfigRequest) (*v1.GetPluginConfigResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.GetPluginConfig is not implemented"))
+}
+
+func (UnimplementedSystemServiceHandler) SetPluginConfig(context.Context, *v1.SetPluginConfigRequest) (*v1.SetPluginConfigResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.SetPluginConfig is not implemented"))
 }
