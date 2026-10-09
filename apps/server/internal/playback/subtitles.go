@@ -201,6 +201,7 @@ func (m *Manager) loadSubtitle(ctx context.Context, p *Playback, st *core.MediaS
 
 // extractSubtitle copies an embedded text subtitle stream out of a file,
 // converted to format: ASS keeps its styling, other text becomes SRT.
+// Cues are timed from the source's start, as HLS outputs are.
 func extractSubtitle(ctx context.Context, ffmpeg, path string, index int, format string) ([]byte, error) {
 	codec := "srt"
 	if format == subtitle.ASS {

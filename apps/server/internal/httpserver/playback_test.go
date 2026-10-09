@@ -149,9 +149,14 @@ func TestPlaybackHLS(t *testing.T) {
 			init := get(t, base+"init.mp4")
 			for _, i := range []int{0, segments - 1, 2} {
 				data := append(bytes.Clone(init), get(t, base+strconv.Itoa(i)+".mp4")...)
-				codec, width := videoStream(t, ffprobe, data)
+				codec, width, start := videoStream(t, ffprobe, data)
 				if codec != "h264" || width != tt.width {
 					t.Errorf("segment %d: video %s %dpx wide, want h264 %dpx", i, codec, width, tt.width)
+				}
+				// The video starts where the subtitle cues are timed from,
+				// not delayed by its reordered frames.
+				if i == 0 && start != 0 {
+					t.Errorf("segment 0: video starts at %v, want 0", start)
 				}
 			}
 
@@ -219,19 +224,27 @@ func get(t *testing.T, url string) []byte {
 	return body
 }
 
-// videoStream returns the codec and width of the video in an fMP4 file.
-func videoStream(t *testing.T, ffprobe string, data []byte) (string, int) {
+// videoStream returns the codec, width and start time of the video in an
+// fMP4 file.
+func videoStream(t *testing.T, ffprobe string, data []byte) (string, int, time.Duration) {
 	t.Helper()
 	file := filepath.Join(t.TempDir(), "segment.mp4")
 	if err := os.WriteFile(file, data, 0o644); err != nil {
 		t.Fatal(err)
 	}
 	out, err := exec.CommandContext(t.Context(), ffprobe, "-v", "error", "-select_streams", "v:0",
-		"-show_entries", "stream=codec_name,width", "-of", "csv=p=0", file).CombinedOutput()
+		"-show_entries", "stream=codec_name,width,start_time", "-of", "csv=p=0", file).CombinedOutput()
 	if err != nil {
 		t.Fatalf("ffprobe: %v\n%s", err, out)
 	}
-	codec, width, _ := strings.Cut(strings.TrimSpace(string(out)), ",")
-	w, _ := strconv.Atoi(width)
-	return codec, w
+	fields := strings.Split(strings.TrimSpace(string(out)), ",")
+	if len(fields) != 3 {
+		t.Fatalf("ffprobe: %s", out)
+	}
+	w, _ := strconv.Atoi(fields[1])
+	start, err := strconv.ParseFloat(fields[2], 64)
+	if err != nil {
+		t.Fatalf("ffprobe start time: %s", out)
+	}
+	return fields[0], w, time.Duration(start * float64(time.Second)).Round(time.Millisecond)
 }
