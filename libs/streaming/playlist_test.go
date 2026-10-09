@@ -40,14 +40,16 @@ func TestMediaPlaylist(t *testing.T) {
 		t.Errorf("playlist = %q, want = %q", got, want)
 	}
 
-	// MPEG-TS needs no initialization segment; the target duration rounds
-	// up.
-	b.Reset()
-	if _, err := (MediaPlaylist{Segments: []time.Duration{6500 * time.Millisecond}, Container: "ts", URI: uri}).WriteTo(&b); err != nil {
-		t.Fatal(err)
-	}
-	if got := b.String(); !strings.Contains(got, "#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:7\n") || strings.Contains(got, "EXT-X-MAP") {
-		t.Errorf("ts playlist = %q", got)
+	// MPEG-TS and WebVTT need no initialization segment; the target
+	// duration rounds up.
+	for _, container := range []string{"ts", "vtt"} {
+		b.Reset()
+		if _, err := (MediaPlaylist{Segments: []time.Duration{6500 * time.Millisecond}, Container: container, URI: uri}).WriteTo(&b); err != nil {
+			t.Fatal(err)
+		}
+		if got := b.String(); !strings.Contains(got, "#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:7\n") || strings.Contains(got, "EXT-X-MAP") {
+			t.Errorf("%s playlist = %q", container, got)
+		}
 	}
 }
 

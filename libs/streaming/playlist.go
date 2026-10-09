@@ -12,7 +12,8 @@ import (
 // MediaPlaylist is a VOD media playlist of a whole media source.
 type MediaPlaylist struct {
 	Segments []time.Duration
-	// Container is the segment container, "mp4" (fMP4) or "ts".
+	// Container is the segment container: "mp4" (fMP4), "ts" or "vtt"
+	// (WebVTT).
 	Container string
 	// URI returns the URI of a segment; index -1 is the fMP4
 	// initialization segment.
@@ -22,7 +23,7 @@ type MediaPlaylist struct {
 // WriteTo writes the playlist.
 func (p MediaPlaylist) WriteTo(w io.Writer) (int64, error) {
 	var b strings.Builder
-	fmp4 := p.Container != "ts"
+	fmp4 := p.Container != "ts" && p.Container != "vtt"
 	version := 3
 	if fmp4 {
 		version = 7
