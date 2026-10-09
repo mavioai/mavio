@@ -16,7 +16,7 @@
 
 Mavio 是以 Go 为服务端核心的自托管媒体服务器，借鉴 Jellyfin 的领域知识与测试资产，但不兼容 Jellyfin 生态。许可证为 **GPL-3.0**。
 
-当前阶段：**P0 工程地基**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。暂不实现任何 UI；`apps/web`、`apps/mobile`、`apps/desktop`、`libs/client`、`libs/ui` 尚未创建，不要提前创建。
+当前阶段：**P6 服务端装配与分发**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。暂不实现任何 UI；`apps/web`、`apps/mobile`、`apps/desktop`、`libs/client`、`libs/ui` 尚未创建，不要提前创建。
 
 ## 目录结构
 

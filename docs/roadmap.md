@@ -44,8 +44,8 @@ flowchart TD
 | P2 | Pure computation libraries | ✅ Done |
 | P3 | Media pipeline | ✅ Done |
 | P4 | Scanning and first plugin | ✅ Done |
-| P5 | Streaming and API | In progress |
-| P6 | Server assembly and distribution | Not started |
+| P5 | Streaming and API | ✅ Done |
+| P6 | Server assembly and distribution | In progress |
 | P7 | Clients and ecosystem | Not started |
 
 ---
@@ -121,7 +121,7 @@ flowchart TD
 ### P5 Streaming and API
 **Scope**: `streaming` (CMAF HLS, on-demand segmenting, seeking, segment cache); Connect services (library, playback, user, system).
 
-**Done when**: ported HLS cases pass; playback verified on real hls.js / AVPlayer / Media3 clients.
+**Done when**: ported HLS cases pass; playback verified on real hls.js and AVFoundation clients. Media3 is verified in P7, with the Android client.
 
 **Progress**:
 - [x] `libs/streaming`: playlists of the whole media source, RFC 6381 codec strings, segments generated on demand with restarts on seek, segments of copied video joined from one file per group of pictures; ported HLS cases pass
@@ -131,15 +131,16 @@ flowchart TD
 - [x] Library, item and user Connect services; the server runs the library jobs
 - [x] Image endpoint: local and provider artwork, resized with Jellyfin's size rules and cached
 - [x] WebP encoding (`gen2brain/vpx`) negotiated with clients; blurhash / thumbhash placeholders computed in the library jobs
-- [ ] Playback verified on real hls.js / AVPlayer / Media3 clients (with the development player, hls.js in Chromium passes: direct stream, seeking with restarts, an HLS subtitle rendition in sync, progress and stop; Safari's native HLS, AVFoundation's, passes direct stream and transcodes, seeking with restarts, with an HLS subtitle rendition in sync), including HLS subtitle renditions staying in sync after seeking: they are WebVTT segmented along the video without `X-TIMESTAMP-MAP`; if a player misplaces them, add one derived from the video's timestamps
+- [x] Playback verified with the development player on hls.js in Chromium: direct stream, transcodes, seeking with restarts, an HLS subtitle rendition in sync, progress and stop
+- [x] Playback verified with the development player on Safari's native HLS, which is AVFoundation's: direct stream, transcodes, seeking with restarts, an HLS subtitle rendition in sync. HLS subtitle renditions are WebVTT segmented along the video without `X-TIMESTAMP-MAP`; if a player misplaces them, add one derived from the video's timestamps
 
 ### P6 Server Assembly and Distribution
-**Scope**: `apps/server` assembly; `CGO_ENABLED=0` cross-compilation; container images bundling jellyfin-ffmpeg.
+**Scope**: `apps/server` assembly; `CGO_ENABLED=0` cross-compilation; container images bundling jellyfin-ffmpeg's portable build, the one `mise.toml` pins. Publishing images comes later.
 
 **Done when**: end-to-end smoke test: scan → scrape → playback decision → HLS playback.
 
 ### P7 Clients and Ecosystem
-**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`; library and collection collages; evaluation of a Jellyfin API compatibility shim. Its completion criteria will be defined after P6.
+**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`; playback verified on Media3 with the Android client; library and collection collages; evaluation of a Jellyfin API compatibility shim. Its completion criteria will be defined after P6.
 
 ---
 

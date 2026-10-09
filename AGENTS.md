@@ -16,7 +16,7 @@ This is the repository working guide for AI coding agents (and new developers). 
 
 Mavio is a self-hosted media server with a Go server at its core. It draws on Jellyfin's domain knowledge and test assets but is not compatible with the Jellyfin ecosystem. It is licensed under **GPL-3.0**.
 
-Current phase: **P0 engineering foundation** (see [docs/roadmap.md](docs/roadmap.md)). No UI is being built yet; `apps/web`, `apps/mobile`, `apps/desktop`, `libs/client` and `libs/ui` do not exist yet — do not create them ahead of time.
+Current phase: **P6 server assembly and distribution** (see [docs/roadmap.md](docs/roadmap.md)). No UI is being built yet; `apps/web`, `apps/mobile`, `apps/desktop`, `libs/client` and `libs/ui` do not exist yet — do not create them ahead of time.
 
 ## Directory Structure
 

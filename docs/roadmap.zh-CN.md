@@ -44,8 +44,8 @@ flowchart TD
 | P2 | 纯计算库 | ✅ 已完成 |
 | P3 | 媒体管线 | ✅ 已完成 |
 | P4 | 扫描与插件落地 | ✅ 已完成 |
-| P5 | 流媒体与 API | 进行中 |
-| P6 | 服务端装配与分发 | 未开始 |
+| P5 | 流媒体与 API | ✅ 完成 |
+| P6 | 服务端装配与分发 | 进行中 |
 | P7 | 客户端与生态 | 未开始 |
 
 ---
@@ -121,7 +121,7 @@ flowchart TD
 ### P5 流媒体与 API
 **范围**：`streaming`（CMAF HLS、按需分片、seek、分片缓存）；Connect 服务（库、播放、用户、系统）。
 
-**完成标准**：HLS 移植用例通过；hls.js / AVPlayer / Media3 实机播放验证。
+**完成标准**：HLS 移植用例通过；hls.js 与 AVFoundation 实机播放验证。Media3 在 P7 中随 Android 客户端验证。
 
 **进度**：
 - [x] `libs/streaming`：覆盖整个媒体源的播放列表、RFC 6381 编解码器字符串、按需生成分片并在拖动时重启、直接复制视频的分片由每个图像组一个文件拼接而成；HLS 移植用例通过
@@ -131,15 +131,16 @@ flowchart TD
 - [x] 媒体库、条目与用户的 Connect 服务；服务端运行媒体库任务
 - [x] 图片端点：本地与提供者的图片，按 Jellyfin 的尺寸规则缩放并缓存
 - [x] 与客户端协商的 WebP 编码（`gen2brain/vpx`）；在媒体库任务中计算 blurhash / thumbhash 占位图
-- [ ] 在 hls.js / AVPlayer / Media3 实机客户端上验证播放（已通过开发用播放器验证：Chromium 中的 hls.js 通过直接串流、拖动并重启转码、同步的 HLS 字幕轨、进度与停止；Safari 的原生 HLS（即 AVFoundation）通过直接串流与转码、拖动并重启转码，HLS 字幕轨保持同步），包括拖动后 HLS 字幕轨仍保持同步：字幕轨是按视频分片切分、不带 `X-TIMESTAMP-MAP` 的 WebVTT；若有播放器错位，则按视频的时间戳推算并加上该头
+- [x] 通过开发用播放器在 Chromium 的 hls.js 上验证播放：直接串流、转码、拖动并重启转码、同步的 HLS 字幕轨、进度与停止
+- [x] 通过开发用播放器在 Safari 的原生 HLS（即 AVFoundation）上验证播放：直接串流、转码、拖动并重启转码、同步的 HLS 字幕轨。HLS 字幕轨是按视频分片切分、不带 `X-TIMESTAMP-MAP` 的 WebVTT；若有播放器错位，则按视频的时间戳推算并加上该头
 
 ### P6 服务端装配与分发
-**范围**：`apps/server` 装配；`CGO_ENABLED=0` 交叉编译；容器镜像内置 jellyfin-ffmpeg。
+**范围**：`apps/server` 装配；`CGO_ENABLED=0` 交叉编译；容器镜像内置 jellyfin-ffmpeg 的便携版，即 `mise.toml` 锁定的那一份。镜像发布以后再做。
 
 **完成标准**：端到端冒烟测试：扫描 → 刮削 → 播放决策 → HLS 播放。
 
 ### P7 客户端与生态
-**范围**：`libs/client`、`libs/ui`；`apps/web`、`apps/desktop`、`apps/mobile`；媒体库与合集拼贴图；Jellyfin API 兼容垫片（shim）评估。具体完成标准在 P6 完成后制定。
+**范围**：`libs/client`、`libs/ui`；`apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；媒体库与合集拼贴图；Jellyfin API 兼容垫片（shim）评估。具体完成标准在 P6 完成后制定。
 
 ---
 
