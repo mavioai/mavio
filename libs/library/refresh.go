@@ -127,6 +127,11 @@ func (r *Refresher) Refresh(ctx context.Context, lib core.Library, itemID core.I
 		}
 		for i := len(results) - 1; i >= 0; i-- {
 			if images := imagesOf(it.ID, results[i]); len(images) > 0 {
+				existing, err := tx.Images().ListForOwner(ctx, it.ID)
+				if err != nil {
+					return err
+				}
+				keepImages(images, existing)
 				return tx.Images().Replace(ctx, it.ID, images)
 			}
 		}
@@ -289,6 +294,20 @@ func imagesOf(owner core.ID, res *metadata.Result) []core.Image {
 		}
 	}
 	return images
+}
+
+// keepImages carries the ID, size and placeholders of images found again
+// over to their new records, so that refreshes keep them.
+func keepImages(images, existing []core.Image) {
+	for i := range images {
+		img := &images[i]
+		for _, old := range existing {
+			if old.Kind == img.Kind && old.Index == img.Index && old.Path == img.Path && old.RemoteURL == img.RemoteURL {
+				img.ID, img.Width, img.Height, img.Blurhash, img.Thumbhash = old.ID, old.Width, old.Height, old.Blurhash, old.Thumbhash
+				break
+			}
+		}
+	}
 }
 
 // readNFO reads the item's local NFO file, through the library folder that

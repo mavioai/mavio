@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"slices"
 	"sync"
 	"time"
@@ -75,10 +76,21 @@ type Jobs struct {
 	// them.
 	Keyframes KeyframeExtractor
 	Refresher *Refresher
-	Now       func() time.Time
+	// Images measures items' images and computes their placeholders after
+	// each refresh; nil skips them.
+	Images ImageAnalyzer
+	Now    func() time.Time
+	Logger *slog.Logger
 
 	mu    sync.Mutex
 	scans map[core.ID]*sync.Mutex
+}
+
+func (j *Jobs) logger() *slog.Logger {
+	if j.Logger != nil {
+		return j.Logger
+	}
+	return slog.New(slog.DiscardHandler)
 }
 
 func (j *Jobs) now() time.Time {
@@ -91,10 +103,11 @@ func (j *Jobs) now() time.Time {
 // Handlers returns the handlers for a Worker.
 func (j *Jobs) Handlers() map[string]Handler {
 	return map[string]Handler{
-		JobScan:      j.scan,
-		JobProbe:     j.probe,
-		JobRefresh:   j.refresh,
-		JobKeyframes: j.keyframes,
+		JobScan:         j.scan,
+		JobProbe:        j.probe,
+		JobRefresh:      j.refresh,
+		JobKeyframes:    j.keyframes,
+		JobPlaceholders: j.placeholders,
 	}
 }
 
@@ -245,7 +258,13 @@ func (j *Jobs) refresh(ctx context.Context, job core.Job) ([]core.Job, error) {
 	if err != nil {
 		return nil, ignoreGone(err)
 	}
-	return nil, ignoreGone(j.Refresher.Refresh(ctx, lib, it.ID))
+	if err := j.Refresher.Refresh(ctx, lib, it.ID); err != nil {
+		return nil, ignoreGone(err)
+	}
+	if j.Images == nil {
+		return nil, nil
+	}
+	return []core.Job{PlaceholdersJob(it.ID, j.now())}, nil
 }
 
 // ignoreGone treats items deleted since the job was queued as done.
