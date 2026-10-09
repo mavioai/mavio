@@ -169,3 +169,30 @@ func TestRequestedScanBesideScheduled(t *testing.T) {
 		}
 	}
 }
+
+func TestJobsRefreshNewSeries(t *testing.T) {
+	f := newScan(t, core.LibraryShows)
+	tree(t, f.root, "Lost/Season 1/Lost S01E01.mkv")
+	write(t, filepath.Join(f.root, "Lost", "tvshow.nfo"), `<tvshow><title>Lost</title><mpaa>TV-14</mpaa><genre>Drama</genre></tvshow>`)
+	if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
+		t.Fatal(err)
+	}
+	jobs := &Jobs{
+		Store: f.store, Scanner: f.sc, Prober: &fakeProber{}, Now: func() time.Time { return f.clock },
+		Refresher: &Refresher{Store: f.store, Now: func() time.Time { return f.clock }},
+	}
+	w := &Worker{Queue: f.store.Jobs(), Owner: "test", Handlers: jobs.Handlers()}
+	if err := jobs.Schedule(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	// The scan, the series' and the season's refreshes, the episode's
+	// probe and refresh.
+	if n := drain(t, w); n != 5 {
+		t.Errorf("jobs run = %d, want 5", n)
+	}
+	series := f.item("Lost")
+	if series.OfficialRating != "TV-14" || len(series.Genres) != 1 || series.MetadataRefreshedAt.IsZero() ||
+		series.ParentalRating == nil || *series.ParentalRating != 14 {
+		t.Errorf("series = %+v", series)
+	}
+}

@@ -341,36 +341,32 @@ func (sc *scan) touch(ctx context.Context, res Result, parent core.ID) (core.ID,
 	return it.ID, err
 }
 
-// save writes the items of a folder and queues probes of new or changed
-// media files. It returns the item the folder's subfolders belong to.
+// save writes the items of a folder, queues probes of new or changed
+// media files, which refresh their items' metadata once probed, and
+// refreshes of new items without media, such as series and albums. It
+// returns the item the folder's subfolders belong to.
 func (sc *scan) save(ctx context.Context, rfs rootFS, res Result, parent core.ID, stats map[string]core.FolderEntry) (core.ID, error) {
 	folderParent := parent
-	var probes []core.ID
+	var probes, refreshes []core.ID
 	err := sc.Store.InTx(ctx, func(tx core.Store) error {
-		probes = nil
-		p := saver{scan: sc, tx: tx, rfs: rfs, stats: stats}
+		probes, refreshes = nil, nil
+		p := saver{scan: sc, tx: tx, rfs: rfs, stats: stats, probes: &probes, refreshes: &refreshes}
 		if res.Item != nil {
-			id, probe, err := p.node(ctx, *res.Item, parent, core.NilID)
+			id, err := p.node(ctx, *res.Item, parent, core.NilID)
 			if err != nil {
 				return err
 			}
-			if probe {
-				probes = append(probes, id)
-			}
 			folderParent = id
-			if err := p.extras(ctx, res.Item.Extras, id, &probes); err != nil {
+			if err := p.extras(ctx, res.Item.Extras, id); err != nil {
 				return err
 			}
 		}
 		for _, n := range res.Items {
-			id, probe, err := p.node(ctx, n, folderParent, core.NilID)
+			id, err := p.node(ctx, n, folderParent, core.NilID)
 			if err != nil {
 				return err
 			}
-			if probe {
-				probes = append(probes, id)
-			}
-			if err := p.extras(ctx, n.Extras, id, &probes); err != nil {
+			if err := p.extras(ctx, n.Extras, id); err != nil {
 				return err
 			}
 		}
@@ -396,6 +392,12 @@ func (sc *scan) save(ctx context.Context, rfs rootFS, res Result, parent core.ID
 			sc.count(func(s *ScanStats) { s.Probes++ })
 		}
 	}
+	for _, id := range refreshes {
+		job := RefreshJob(id, sc.now())
+		if _, err := sc.Store.Jobs().Enqueue(ctx, &job); err != nil {
+			return core.NilID, err
+		}
+	}
 	return folderParent, nil
 }
 
@@ -406,16 +408,14 @@ type saver struct {
 	rfs   rootFS
 	stats map[string]core.FolderEntry
 	saved int
+	// probes and refreshes collect the items to probe and to refresh.
+	probes, refreshes *[]core.ID
 }
 
-func (p *saver) extras(ctx context.Context, extras []Node, owner core.ID, probes *[]core.ID) error {
+func (p *saver) extras(ctx context.Context, extras []Node, owner core.ID) error {
 	for _, e := range extras {
-		id, probe, err := p.node(ctx, e, core.NilID, owner)
-		if err != nil {
+		if _, err := p.node(ctx, e, core.NilID, owner); err != nil {
 			return err
-		}
-		if probe {
-			*probes = append(*probes, id)
 		}
 	}
 	return nil
@@ -437,15 +437,16 @@ func (p *saver) stat(path string) (core.FolderEntry, bool) {
 	return core.FolderEntry{Size: fi.Size(), ModTime: modTime(fi)}, true
 }
 
-// node writes one item and reports whether its media need probing. New
-// items take the resolved names and numbers; known items keep their
-// metadata, which refreshes and users own, and only take the structure.
-func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.ID, bool, error) {
+// node writes one item, to be probed when its media are new or changed,
+// or refreshed when it is new and has no media. New items take the
+// resolved names and numbers; known items keep their metadata, which
+// refreshes and users own, and only take the structure.
+func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.ID, error) {
 	sc := p.scan
 	it, err := p.tx.Items().GetByPath(ctx, sc.lib.ID, n.Path)
 	isNew := errors.Is(err, core.ErrNotFound)
 	if err != nil && !isNew {
-		return core.NilID, false, err
+		return core.NilID, err
 	}
 	before := it
 	if isNew {
@@ -475,25 +476,31 @@ func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.I
 
 	sources, probe, err := p.sources(ctx, n, it.ID, isNew)
 	if err != nil {
-		return core.NilID, false, err
+		return core.NilID, err
 	}
 	if len(sources) > 0 {
 		it.FileModified = sources[0].Modified
 	}
 	if isNew || probe || changedStructure(before, it) {
 		if err := p.tx.Items().Upsert(ctx, it); err != nil {
-			return core.NilID, false, fmt.Errorf("save %s: %w", n.Path, err)
+			return core.NilID, fmt.Errorf("save %s: %w", n.Path, err)
 		}
 		p.saved++
 	} else if err := p.tx.Items().Touch(ctx, sc.lib.ID, sc.gen, n.Path); err != nil {
-		return core.NilID, false, err
+		return core.NilID, err
 	}
 	if sources != nil {
 		if err := p.tx.MediaSources().Replace(ctx, it.ID, sources); err != nil {
-			return core.NilID, false, err
+			return core.NilID, err
 		}
 	}
-	return it.ID, probe, nil
+	switch {
+	case probe:
+		*p.probes = append(*p.probes, it.ID)
+	case isNew && !playable[n.Kind]:
+		*p.refreshes = append(*p.refreshes, it.ID)
+	}
+	return it.ID, nil
 }
 
 // changedStructure reports whether a scan changed what it owns of an item.
