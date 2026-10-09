@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
@@ -24,6 +25,32 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	authsessionFields := schema.AuthSession{}.Fields()
+	_ = authsessionFields
+	// authsessionDescDeviceName is the schema descriptor for device_name field.
+	authsessionDescDeviceName := authsessionFields[4].Descriptor()
+	// authsession.DefaultDeviceName holds the default value on creation for the device_name field.
+	authsession.DefaultDeviceName = authsessionDescDeviceName.Default.(string)
+	// authsessionDescClient is the schema descriptor for client field.
+	authsessionDescClient := authsessionFields[5].Descriptor()
+	// authsession.DefaultClient holds the default value on creation for the client field.
+	authsession.DefaultClient = authsessionDescClient.Default.(string)
+	// authsessionDescClientVersion is the schema descriptor for client_version field.
+	authsessionDescClientVersion := authsessionFields[6].Descriptor()
+	// authsession.DefaultClientVersion holds the default value on creation for the client_version field.
+	authsession.DefaultClientVersion = authsessionDescClientVersion.Default.(string)
+	// authsessionDescCreatedAt is the schema descriptor for created_at field.
+	authsessionDescCreatedAt := authsessionFields[7].Descriptor()
+	// authsession.DefaultCreatedAt holds the default value on creation for the created_at field.
+	authsession.DefaultCreatedAt = authsessionDescCreatedAt.Default.(func() time.Time)
+	// authsessionDescLastSeenAt is the schema descriptor for last_seen_at field.
+	authsessionDescLastSeenAt := authsessionFields[8].Descriptor()
+	// authsession.DefaultLastSeenAt holds the default value on creation for the last_seen_at field.
+	authsession.DefaultLastSeenAt = authsessionDescLastSeenAt.Default.(func() time.Time)
+	// authsessionDescID is the schema descriptor for id field.
+	authsessionDescID := authsessionFields[0].Descriptor()
+	// authsession.DefaultID holds the default value on creation for the id field.
+	authsession.DefaultID = authsessionDescID.Default.(func() core.ID)
 	creditFields := schema.Credit{}.Fields()
 	_ = creditFields
 	// creditDescRole is the schema descriptor for role field.

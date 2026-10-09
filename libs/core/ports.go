@@ -19,6 +19,7 @@ type Store interface {
 	People() PersonRepository
 	Users() UserRepository
 	UserData() UserDataRepository
+	AuthSessions() AuthSessionRepository
 	Jobs() JobQueue
 	Scans() ScanRepository
 
@@ -106,6 +107,20 @@ type UserRepository interface {
 	List(ctx context.Context) ([]User, error)
 	Create(ctx context.Context, u *User) error
 	Update(ctx context.Context, u *User) error
+	Delete(ctx context.Context, id ID) error
+}
+
+// AuthSessionRepository stores signed-in clients.
+type AuthSessionRepository interface {
+	// Create adds a session, replacing the user's session on the same
+	// device.
+	Create(ctx context.Context, s *AuthSession) error
+	// GetByTokenHash returns ErrNotFound for unknown tokens.
+	GetByTokenHash(ctx context.Context, hash []byte) (AuthSession, error)
+	// ListForUser returns the user's sessions, most recently seen first.
+	ListForUser(ctx context.Context, userID ID) ([]AuthSession, error)
+	// Touch records activity.
+	Touch(ctx context.Context, id ID, at time.Time) error
 	Delete(ctx context.Context, id ID) error
 }
 

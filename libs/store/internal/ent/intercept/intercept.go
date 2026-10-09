@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/mavioai/mavio/libs/store/internal/ent"
+	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
@@ -76,6 +77,33 @@ func (f TraverseFunc) Traverse(ctx context.Context, q ent.Query) error {
 		return err
 	}
 	return f(ctx, query)
+}
+
+// The AuthSessionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type AuthSessionFunc func(context.Context, *ent.AuthSessionQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f AuthSessionFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.AuthSessionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.AuthSessionQuery", q)
+}
+
+// The TraverseAuthSession type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseAuthSession func(context.Context, *ent.AuthSessionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseAuthSession) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseAuthSession) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.AuthSessionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.AuthSessionQuery", q)
 }
 
 // The CreditFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -378,6 +406,8 @@ func (f TraverseUserData) Traverse(ctx context.Context, q ent.Query) error {
 // NewQuery returns the generic Query interface for the given typed query.
 func NewQuery(q ent.Query) (Query, error) {
 	switch q := q.(type) {
+	case *ent.AuthSessionQuery:
+		return &query[*ent.AuthSessionQuery, predicate.AuthSession, authsession.OrderOption]{typ: ent.TypeAuthSession, tq: q}, nil
 	case *ent.CreditQuery:
 		return &query[*ent.CreditQuery, predicate.Credit, credit.OrderOption]{typ: ent.TypeCredit, tq: q}, nil
 	case *ent.FolderStateQuery:

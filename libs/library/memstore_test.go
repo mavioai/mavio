@@ -43,6 +43,7 @@ func (m *memStore) Users() core.UserRepository                              { pa
 func (m *memStore) UserData() core.UserDataRepository                       { panic("unused") }
 func (m *memStore) Jobs() core.JobQueue                                     { return memJobs{m} }
 func (m *memStore) Scans() core.ScanRepository                              { return memScans{m} }
+func (m *memStore) AuthSessions() core.AuthSessionRepository                { panic("unused") }
 func (m *memStore) InTx(_ context.Context, fn func(core.Store) error) error { return fn(m) }
 
 // present returns the items not missing, by path.

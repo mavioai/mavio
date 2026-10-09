@@ -100,6 +100,7 @@ func TestValidate(t *testing.T) {
 		{"valid library", (&Library{Name: "Movies", Kind: LibraryMovies, Paths: []string{"/media"}}).Validate()},
 		{"valid user", (&User{ID: NewID(), Name: "alice", PasswordHash: "$argon2id$x"}).Validate()},
 		{"valid job", (&Job{ID: NewID(), Kind: "library.scan", MaxAttempts: 3}).Validate()},
+		{"valid session", (&AuthSession{ID: NewID(), UserID: NewID(), TokenHash: make([]byte, 32), DeviceID: "d"}).Validate()},
 	}
 	for _, tt := range tests {
 		if tt.err != nil {
@@ -126,6 +127,8 @@ func TestValidate(t *testing.T) {
 		{"user data rating", (&UserData{UserID: NewID(), ItemID: NewID(), Rating: &ten}).Validate()},
 		{"user data position", (&UserData{UserID: NewID(), ItemID: NewID(), Position: -time.Second}).Validate()},
 		{"job without attempts", (&Job{ID: NewID(), Kind: "x"}).Validate()},
+		{"session without device", (&AuthSession{ID: NewID(), UserID: NewID(), TokenHash: make([]byte, 32)}).Validate()},
+		{"session token", (&AuthSession{ID: NewID(), UserID: NewID(), TokenHash: []byte("token"), DeviceID: "d"}).Validate()},
 		{"image without location", (&Image{ID: NewID(), OwnerID: NewID(), Kind: ImagePrimary}).Validate()},
 		{"credit unknown kind", (&Credit{ItemID: NewID(), PersonID: NewID(), Kind: "gaffer"}).Validate()},
 		{"source bad stream", (&MediaSource{ID: NewID(), ItemID: NewID(), Path: "/a.mkv", Streams: []MediaStream{{Kind: "lyric"}}}).Validate()},

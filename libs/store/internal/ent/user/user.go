@@ -37,6 +37,8 @@ const (
 	FieldLastLoginAt = "last_login_at"
 	// EdgeUserData holds the string denoting the user_data edge name in mutations.
 	EdgeUserData = "user_data"
+	// EdgeAuthSessions holds the string denoting the auth_sessions edge name in mutations.
+	EdgeAuthSessions = "auth_sessions"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// UserDataTable is the table that holds the user_data relation/edge.
@@ -46,6 +48,13 @@ const (
 	UserDataInverseTable = "user_data"
 	// UserDataColumn is the table column denoting the user_data relation/edge.
 	UserDataColumn = "user_id"
+	// AuthSessionsTable is the table that holds the auth_sessions relation/edge.
+	AuthSessionsTable = "auth_sessions"
+	// AuthSessionsInverseTable is the table name for the AuthSession entity.
+	// It exists in this package in order to avoid circular dependency with the "authsession" package.
+	AuthSessionsInverseTable = "auth_sessions"
+	// AuthSessionsColumn is the table column denoting the auth_sessions relation/edge.
+	AuthSessionsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -151,10 +160,31 @@ func ByUserData(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserDataStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByAuthSessionsCount orders the results by auth_sessions count.
+func ByAuthSessionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAuthSessionsStep(), opts...)
+	}
+}
+
+// ByAuthSessions orders the results by auth_sessions terms.
+func ByAuthSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAuthSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserDataStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserDataInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, UserDataTable, UserDataColumn),
+	)
+}
+func newAuthSessionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AuthSessionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AuthSessionsTable, AuthSessionsColumn),
 	)
 }

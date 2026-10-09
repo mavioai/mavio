@@ -49,9 +49,11 @@ type User struct {
 type UserEdges struct {
 	// UserData holds the value of the user_data edge.
 	UserData []*UserData `json:"user_data,omitempty"`
+	// AuthSessions holds the value of the auth_sessions edge.
+	AuthSessions []*AuthSession `json:"auth_sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UserDataOrErr returns the UserData value or an error if the edge
@@ -61,6 +63,15 @@ func (e UserEdges) UserDataOrErr() ([]*UserData, error) {
 		return e.UserData, nil
 	}
 	return nil, &NotLoadedError{edge: "user_data"}
+}
+
+// AuthSessionsOrErr returns the AuthSessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) AuthSessionsOrErr() ([]*AuthSession, error) {
+	if e.loadedTypes[1] {
+		return e.AuthSessions, nil
+	}
+	return nil, &NotLoadedError{edge: "auth_sessions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -180,6 +191,11 @@ func (_m *User) Value(name string) (ent.Value, error) {
 // QueryUserData queries the "user_data" edge of the User entity.
 func (_m *User) QueryUserData() *UserDataQuery {
 	return NewUserClient(_m.config).QueryUserData(_m)
+}
+
+// QueryAuthSessions queries the "auth_sessions" edge of the User entity.
+func (_m *User) QueryAuthSessions() *AuthSessionQuery {
+	return NewUserClient(_m.config).QueryAuthSessions(_m)
 }
 
 // Update returns a builder for updating this User.

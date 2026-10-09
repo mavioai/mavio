@@ -9,6 +9,18 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent"
 )
 
+// The AuthSessionFunc type is an adapter to allow the use of ordinary
+// function as AuthSession mutator.
+type AuthSessionFunc func(context.Context, *ent.AuthSessionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AuthSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AuthSessionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuthSessionMutation", m)
+}
+
 // The CreditFunc type is an adapter to allow the use of ordinary
 // function as Credit mutator.
 type CreditFunc func(context.Context, *ent.CreditMutation) (ent.Value, error)

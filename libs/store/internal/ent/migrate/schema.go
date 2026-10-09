@@ -9,6 +9,39 @@ import (
 )
 
 var (
+	// AuthSessionsColumns holds the columns for the "auth_sessions" table.
+	AuthSessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "token_hash", Type: field.TypeBytes, Unique: true},
+		{Name: "device_id", Type: field.TypeString},
+		{Name: "device_name", Type: field.TypeString, Default: ""},
+		{Name: "client", Type: field.TypeString, Default: ""},
+		{Name: "client_version", Type: field.TypeString, Default: ""},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "last_seen_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// AuthSessionsTable holds the schema information for the "auth_sessions" table.
+	AuthSessionsTable = &schema.Table{
+		Name:       "auth_sessions",
+		Columns:    AuthSessionsColumns,
+		PrimaryKey: []*schema.Column{AuthSessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "auth_sessions_users_auth_sessions",
+				Columns:    []*schema.Column{AuthSessionsColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "authsession_user_id_device_id",
+				Unique:  true,
+				Columns: []*schema.Column{AuthSessionsColumns[8], AuthSessionsColumns[2]},
+			},
+		},
+	}
 	// CreditsColumns holds the columns for the "credits" table.
 	CreditsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -470,6 +503,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AuthSessionsTable,
 		CreditsTable,
 		FolderStatesTable,
 		ImagesTable,
@@ -485,6 +519,10 @@ var (
 )
 
 func init() {
+	AuthSessionsTable.ForeignKeys[0].RefTable = UsersTable
+	AuthSessionsTable.Annotation = &entsql.Annotation{
+		Table: "auth_sessions",
+	}
 	CreditsTable.ForeignKeys[0].RefTable = ItemsTable
 	CreditsTable.ForeignKeys[1].RefTable = PeopleTable
 	CreditsTable.Annotation = &entsql.Annotation{

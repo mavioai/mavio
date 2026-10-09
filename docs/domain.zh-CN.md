@@ -161,6 +161,7 @@ erDiagram
   * `AllowTranscoding`、`AllowDownload`、`MaxStreamingBitrate`（比特每秒，为零表示不限）与 `MaxSessions`（为零表示不限）。
 * `UserPreferences`：按偏好顺序排列的音频与字幕语言（ISO 639-2/B）、`SubtitleMode`，以及是否优先选择默认音轨而非偏好语言。
 * `UserData` 是某个用户对某个条目的状态：`Played`、`PlayCount`、续播位置 `Position`、上次选择的音频/字幕流（字幕为 `-1` 表示关闭）、`Favorite`、可选的 0–10 分 `Rating` 以及时间戳。没有记录表示"从未交互"。
+* `AuthSession` 是一个已登录的客户端：签发给用户某一台设备（`DeviceID`、`DeviceName`、`Client`、`ClientVersion`）的访问令牌，带有 `CreatedAt` 与 `LastSeenAt`。只保存令牌的 SHA-256 哈希。从同一设备再次登录会替换该设备的会话；删除用户会删除其会话。
 
 ---
 
@@ -190,6 +191,7 @@ erDiagram
 | `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、`Search`（见 §9.2）、列出并 `Replace` 条目的署名 |
 | `UserRepository` | 增删改查，以及不区分大小写的 `GetByName` |
 | `UserDataRepository` | `Get`（不存在时返回 `ErrNotFound`）、按一组条目 `GetMany`、`Put` |
+| `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`GetByTokenHash`、`ListForUser`（按最近活动排序）、`Touch`、`Delete` |
 | `JobQueue` | `Enqueue`（报告是否入队）、`Lease`、`Extend`、`Complete`、`Fail` |
 | `ScanRepository` | 媒体库扫描的 `NextGeneration`；每个已扫描文件夹的 `FolderState`（`ModTime`、`FileID`、`Entries`），由 `PutFolders` 记录，文件夹消失后由 `DeleteFolders` 移除 |
 

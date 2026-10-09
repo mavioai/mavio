@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -160,6 +161,21 @@ func (_c *UserCreate) AddUserData(v ...*UserData) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddUserDatumIDs(ids...)
+}
+
+// AddAuthSessionIDs adds the "auth_sessions" edge to the AuthSession entity by IDs.
+func (_c *UserCreate) AddAuthSessionIDs(ids ...core.ID) *UserCreate {
+	_c.mutation.AddAuthSessionIDs(ids...)
+	return _c
+}
+
+// AddAuthSessions adds the "auth_sessions" edges to the AuthSession entity.
+func (_c *UserCreate) AddAuthSessions(v ...*AuthSession) *UserCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddAuthSessionIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -342,6 +358,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userdata.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.AuthSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AuthSessionsTable,
+			Columns: []string{user.AuthSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
