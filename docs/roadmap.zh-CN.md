@@ -2,7 +2,7 @@
 
 > [English](roadmap.md) | 简体中文
 
-> 相关文档：[架构](architecture.zh-CN.md) · [领域模型](domain.zh-CN.md) · [开发指南](development.zh-CN.md) · [测试策略](testing.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
+> 相关文档：[架构](architecture.zh-CN.md) · [领域模型](domain.zh-CN.md) · [开发指南](development.zh-CN.md) · [测试策略](testing.zh-CN.md) · [存储与性能优化](optimization.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
 ---
 
@@ -10,7 +10,7 @@
 
 * **自底向上**：先实现零业务依赖的底层库，再逐层向上组装；每一层只依赖已完成的下层。
 * **完成标准**：一个阶段的库通过各自的测试即为完成，包括全部移植的测试用例（或有明确标记、写明原因的 skip），见[测试策略 §2](testing.zh-CN.md#2-从-jellyfin-移植测试用例)。
-* **服务端优先**：P7 至 P11 对照 Jellyfin 服务端（其 API 控制器与元数据提供者）补全服务端；客户端放在最后的 P12，基于完成的 API 构建。
+* **服务端优先**：P7 至 P12 对照 Jellyfin 服务端（其 API 控制器与元数据提供者）补全服务端；客户端放在最后的 P13，基于完成的 API 构建。
 * **集成冒烟**：从 P1 起，每个阶段结束时在 `apps/server/internal/smoke` 增加一个把已完成的库串起来的集成测试。它不是 MVP，只用来尽早暴露接口漂移，降低自底向上方式"后期集成才发现问题"的风险。
 
 ---
@@ -28,10 +28,11 @@ flowchart TD
     P6["P6 服务端装配与分发<br/>apps/server, 单二进制 + jellyfin-ffmpeg, 容器镜像"]
     P7["P7 浏览<br/>视图、最近添加、下一集、分类列表、合集与播放列表、拼贴图"]
     P8["P8 实时事件与会话<br/>事件流、跨设备会话、远程控制、SyncPlay、Quick Connect"]
-    P9["P9 元数据管理<br/>编辑、重新识别、图片、写回 NFO、更多元数据来源"]
-    P10["P10 管理与运维<br/>服务端设置、任务、插件热插拔与插件目录、备份、网络"]
-    P11["P11 媒体附加功能<br/>trickplay、章节图片、媒体片段、歌词、字体、音量标准化、离线下载"]
-    P12["P12 客户端与生态<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim 评估"]
+    P9["P9 存储与性能优化<br/>介质识别、防颠簸队列、静默门控、预热调度、字幕评分、杜比 P7"]
+    P10["P10 元数据管理<br/>编辑、重新识别、图片、写回 NFO、更多元数据来源"]
+    P11["P11 管理与运维<br/>服务端设置、任务、插件热插拔与插件目录、备份、网络"]
+    P12["P12 媒体附加功能<br/>trickplay、章节图片、媒体片段、歌词、字体、音量标准化、离线下载"]
+    P13["P13 客户端与生态<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim 评估"]
 
     P0 --> P1
     P1 --> P2
@@ -45,9 +46,11 @@ flowchart TD
     P8 --> P9
     P8 --> P10
     P8 --> P11
-    P9 --> P12
-    P10 --> P12
-    P11 --> P12
+    P8 --> P12
+    P9 --> P13
+    P10 --> P13
+    P11 --> P13
+    P12 --> P13
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -61,10 +64,11 @@ flowchart TD
 | P6 | 服务端装配与分发 | 进行中 |
 | P7 | 浏览 | ✅ 已完成 |
 | P8 | 实时事件与会话 | ✅ 已完成 |
-| P9 | 元数据管理 | 未开始 |
-| P10 | 管理与运维 | 未开始 |
-| P11 | 媒体附加功能 | 未开始 |
-| P12 | 客户端与生态 | 未开始 |
+| P9 | 存储与性能优化 | 进行中 |
+| P10 | 元数据管理 | 未开始 |
+| P11 | 管理与运维 | 未开始 |
+| P12 | 媒体附加功能 | 未开始 |
+| P13 | 客户端与生态 | 未开始 |
 
 ---
 
@@ -139,7 +143,7 @@ flowchart TD
 ### P5 流媒体与 API
 **范围**：`streaming`（CMAF HLS、按需分片、seek、分片缓存）；Connect 服务（库、播放、用户、系统）。
 
-**完成标准**：HLS 移植用例通过；hls.js 与 AVFoundation 实机播放验证。Media3 在 P12 中随 Android 客户端验证。
+**完成标准**：HLS 移植用例通过；hls.js 与 AVFoundation 实机播放验证。Media3 在 P13 中随 Android 客户端验证。
 
 **进度**：
 - [x] `libs/streaming`：覆盖整个媒体源的播放列表、RFC 6381 编解码器字符串、按需生成分片并在拖动时重启、直接复制视频的分片由每个图像组一个文件拼接而成；HLS 移植用例通过
@@ -205,7 +209,33 @@ flowchart TD
 - [x] SyncPlay（`SyncPlayService`）：设备分组以同一位置播放同一队列，并等待缓冲中的成员，与 Jellyfin 相同；计时逻辑用 `testing/synctest` 测试
 - [x] 通过 API 测试装配好的服务端的端到端测试（`internal/server`、`TestLiveEvents`）：电视得知扫描发现的影片以及手机的播放与状态，暂停手机，两者在 SyncPlay 分组中被告知在同一时刻、同一位置开始
 
-### P9 元数据管理
+### P9 存储与性能优化
+**范围**：端到端 I/O 延迟抑制与预热调度（[存储与性能优化](optimization.zh-CN.md)）；语言/方言感知字幕评分；高保真视频管线增强；零模糊分发验证。
+
+- 多维度存储介质与挂载协议识别：跨 Linux、Windows、macOS 原生识别本地 SSD、机械硬盘（Rotational HDD）、远程网络共享（SMB/NFS）以及云盘网盘（Dataless Mount）
+- 物理驱动器防颠簸串行化（`VolumeLedger`）：为机械硬盘建立单并发车道，消除扫描与探测时的多任务随机寻道竞争
+- 前台流媒体播放静默门控（`QuietGate`）：前台活跃播放期间自动对后台扫描与磁盘维护任务实施避让降级与暂停
+- 写入中未完成文件检测策略（`GrowthPolicy`）：基于写入窗口与尺寸稳定性轮询，避免扫描未下载完成的文件
+- 投机式索引与元数据预热调度（`PrefetchHeadTail`）：利用 Linux `posix_fadvise` 与跨平台顺序分块回退，精准预热容器头部元数据与尾部索引
+- 字幕评分与方言归一化：语言评分矩阵、中文别名与变体（繁简、地区方言）归一化，以及听障/特效字幕降权
+- 高保真视频管线适配：杜比视界 Profile 7 双层 EL 提取与回退色调映射；黑边检测（`cropdetect`）集成
+- 分发验证与安全不变量：锁定依赖零模糊验证与隐私防泄漏失败关闭测试
+
+**完成标准**：存储识别、并发串行化、静默门控与预热调度在 Linux、Windows、macOS 上的单元测试与集成测试全部通过；媒体库扫描在机械硬盘上保持顺序吞吐；播放启动干净打断后台 I/O；字幕评分正确匹配中文各方言变体。
+
+**进展**：
+- [x] 多维度介质与协议识别：`libs/library/storage` 原生实现 Linux（`sysfs`/`st_dev`）、macOS（`statfs`/`fsid`）与 Windows（`GetDriveType`/`IOCTL_STORAGE_QUERY_PROPERTY`）
+- [x] 驱动器防颠簸串行化：`VolumeLedger` 基于物理设备键的 FIFO 公平排队与可配置并发度
+- [x] 前台播放静默门控：`QuietGate` 读写锁、引用计数、扫描中断检查与空闲休眠延时
+- [x] 写入中文件检测：`GrowthPolicy` 尺寸稳定性轮询与写入时间窗口阈值
+- [x] 投机式预热调度器：`PrefetchHeadTail` 在 Linux 上使用 `posix_fadvise(WILLNEED)` 并支持跨平台顺序分块预热回退
+- [ ] 将 `libs/library/storage` 接入媒体库扫描工作池与目录遍历器
+- [ ] 将 `QuietGate` 与预热调度接入 `PlaybackService` 与流媒体交付处理器
+- [ ] `libs/subtitle` 与播放字幕选择中的字幕评分矩阵与中文别名归一化
+- [ ] `libs/media` 中的杜比视界 Profile 7 EL 提取与回退色调映射
+- [ ] 转码规划中的黑边检测（`cropdetect`）接入
+
+### P10 元数据管理
 **范围**：修正与补全媒体库扫描得到的内容。
 
 - 编辑条目并锁定字段；对照提供者重新识别条目；刷新单个条目
@@ -216,7 +246,7 @@ flowchart TD
 
 **完成标准**：通过 API 的端到端测试：管理员重新识别一部识别错误的影片并编辑它，锁定的字段在刷新后保持不变，选定的海报写到文件旁并被新的扫描读回。
 
-### P10 管理与运维
+### P11 管理与运维
 **范围**：运行服务端时无需重启或修改命令行参数。
 
 - 服务端设置保存在数据库中并通过 `SystemService` 设置，把管理员需要在运行时修改的项从命令行参数中接过来；先做转码设置（由管理员选择硬件加速、编码器预设、色调映射、转码目录）
@@ -229,7 +259,7 @@ flowchart TD
 
 **完成标准**：通过 API 的端到端测试：管理员修改一项转码设置，下一次转码即按其执行；服务端持续提供服务的同时从插件目录安装、升级并卸载一个插件；备份恢复到一个新的服务端。
 
-### P11 媒体附加功能
+### P12 媒体附加功能
 **范围**：播放媒体流之外的媒体功能。
 
 - 预览缩略图（trickplay，[架构 §6.1](architecture.zh-CN.md#61-需求与实现方案)）与章节图片
@@ -239,8 +269,8 @@ flowchart TD
 
 **完成标准**：用真实 ffmpeg 的测试生成 trickplay 拼图与章节图片，并下载、播放一个渐进式转码的文件；Jellyfin 有对应用例的部分，移植用例通过。
 
-### P12 客户端与生态
-**范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；Jellyfin API 兼容垫片（shim）评估。具体完成标准在 P11 完成后制定。
+### P13 客户端与生态
+**范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；Jellyfin API 兼容垫片（shim）评估。具体完成标准在 P12 完成后制定。
 
 ---
 
@@ -254,7 +284,7 @@ flowchart TD
 | SVG 栅格化 | 纯 Go 方案不完善 | P2 已决定：检查后原样下发，不做栅格化 |
 | 硬件测试覆盖 | 只有维护者自己的机器与 GitHub 托管 runner，其他厂商的编码器无法在实机上测试 | 真实转码测试在有硬件处运行、其余处跳过；其他厂商路径依赖移植的 EncodingHelper 用例 |
 | Go 模块拆分过细 | 依赖升级与 tidy 的摩擦 | 持续观察，必要时合并模块 |
-| 渐进式转码 | 转封装与转码只以 HLS 交付；只声明了渐进式转码配置的客户端会收到 `unimplemented` | P11，随离线下载 |
-| 图形字幕 | PGS 与 VobSub 只能烧录，因而强制视频转码 | 有客户端能自行渲染 PGS 时（P12），改为以 `.sup` 交付该流 |
+| 渐进式转码 | 转封装与转码只以 HLS 交付；只声明了渐进式转码配置的客户端会收到 `unimplemented` | P12，随离线下载 |
+| 图形字幕 | PGS 与 VobSub 只能烧录，因而强制视频转码 | 有客户端能自行渲染 PGS 时（P13），改为以 `.sup` 交付该流 |
 | fMP4 中为负的音频解码时间 | HLS 输出保留负时间戳，因此早于零点开始的音频（AAC 编码器的预填充）会以负的 `tfdt` 写出，而格式规定该字段为无符号数。hls.js 与 Safari 能正常播放，Jellyfin 对其 fMP4 客户端也写出同样的值；此外的播放器未经验证 | 若有播放器放错或丢弃音频：只把音频平移到零点，视频保持源文件的时间戳 |
-| 电视直播、录像、频道与 DLNA | Jellyfin 中体量很大的部分（DLNA 在 Jellyfin 中是插件），Mavio 既未采纳也未排除 | P12 之前决定；若做 DLNA，则以插件实现 |
+| 电视直播、录像、频道与 DLNA | Jellyfin 中体量很大的部分（DLNA 在 Jellyfin 中是插件），Mavio 既未采纳也未排除 | P13 之前决定；若做 DLNA，则以插件实现 |

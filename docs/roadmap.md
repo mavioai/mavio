@@ -2,7 +2,7 @@
 
 > English | [简体中文](roadmap.zh-CN.md)
 
-> Related: [Architecture](architecture.md) · [Domain Model](domain.md) · [Development](development.md) · [Testing](testing.md) · [AGENTS.md](../AGENTS.md)
+> Related: [Architecture](architecture.md) · [Domain Model](domain.md) · [Development](development.md) · [Testing](testing.md) · [Optimization](optimization.md) · [AGENTS.md](../AGENTS.md)
 
 ---
 
@@ -10,7 +10,7 @@
 
 * **Bottom-up**: build the low-level libraries with no business dependencies first, then assemble layer by layer; each layer depends only on completed layers below it.
 * **Definition of done**: a phase is complete when its libraries pass their tests, including all ported test cases (or cases explicitly marked skip with a reason), see [Testing §2](testing.md#2-porting-test-cases-from-jellyfin).
-* **Server first**: P7 to P11 complete the server, by comparing it with Jellyfin's server (its API controllers and providers); the clients come last, in P12, on a finished API.
+* **Server first**: P7 to P12 complete the server, by comparing it with Jellyfin's server (its API controllers and providers); the clients come last, in P13, on a finished API.
 * **Integration smoke tests**: starting from P1, the end of each phase adds an integration test in `apps/server/internal/smoke` that wires the completed libraries together. It is not an MVP; it only exposes interface drift early, reducing the bottom-up approach's risk of "discovering problems only at final integration".
 
 ---
@@ -28,10 +28,11 @@ flowchart TD
     P6["P6 Server assembly and distribution<br/>apps/server, single binary + jellyfin-ffmpeg, container images"]
     P7["P7 Browsing<br/>views, latest, next up, value lists, collections and playlists, collages"]
     P8["P8 Live events and sessions<br/>event stream, sessions across devices, remote control, SyncPlay, Quick Connect"]
-    P9["P9 Metadata management<br/>editing, identification, images, NFO writing, more providers"]
-    P10["P10 Administration and operations<br/>server settings, jobs, plugin hot plugging and catalog, backup, networking"]
-    P11["P11 Media extras<br/>trickplay, chapter images, media segments, lyrics, fonts, normalization, offline downloads"]
-    P12["P12 Clients and ecosystem<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim evaluation"]
+    P9["P9 Storage and performance optimization<br/>device detection, anti-thrashing, quiet gate, prefetching, subtitle scoring, DV P7"]
+    P10["P10 Metadata management<br/>editing, identification, images, NFO writing, more providers"]
+    P11["P11 Administration and operations<br/>server settings, jobs, plugin hot plugging and catalog, backup, networking"]
+    P12["P12 Media extras<br/>trickplay, chapter images, media segments, lyrics, fonts, normalization, offline downloads"]
+    P13["P13 Clients and ecosystem<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim evaluation"]
 
     P0 --> P1
     P1 --> P2
@@ -45,9 +46,11 @@ flowchart TD
     P8 --> P9
     P8 --> P10
     P8 --> P11
-    P9 --> P12
-    P10 --> P12
-    P11 --> P12
+    P8 --> P12
+    P9 --> P13
+    P10 --> P13
+    P11 --> P13
+    P12 --> P13
 ```
 
 | Phase | Theme | Status |
@@ -61,10 +64,11 @@ flowchart TD
 | P6 | Server assembly and distribution | In progress |
 | P7 | Browsing | ✅ Done |
 | P8 | Live events and sessions | ✅ Done |
-| P9 | Metadata management | Not started |
-| P10 | Administration and operations | Not started |
-| P11 | Media extras | Not started |
-| P12 | Clients and ecosystem | Not started |
+| P9 | Storage and performance optimization | In progress |
+| P10 | Metadata management | Not started |
+| P11 | Administration and operations | Not started |
+| P12 | Media extras | Not started |
+| P13 | Clients and ecosystem | Not started |
 
 ---
 
@@ -139,7 +143,7 @@ flowchart TD
 ### P5 Streaming and API
 **Scope**: `streaming` (CMAF HLS, on-demand segmenting, seeking, segment cache); Connect services (library, playback, user, system).
 
-**Done when**: ported HLS cases pass; playback verified on real hls.js and AVFoundation clients. Media3 is verified in P12, with the Android client.
+**Done when**: ported HLS cases pass; playback verified on real hls.js and AVFoundation clients. Media3 is verified in P13, with the Android client.
 
 **Progress**:
 - [x] `libs/streaming`: playlists of the whole media source, RFC 6381 codec strings, segments generated on demand with restarts on seek, segments of copied video joined from one file per group of pictures; ported HLS cases pass
@@ -205,7 +209,33 @@ flowchart TD
 - [x] SyncPlay (`SyncPlayService`): groups of devices playing one queue at one position, waiting for buffering members, as in Jellyfin; timing tested with `testing/synctest`
 - [x] End-to-end test of the assembled server through its API (`internal/server`, `TestLiveEvents`): a TV learns of the film a scan found and of a phone's playback and state, pauses the phone, and both are told to start a SyncPlay group at the same time and position
 
-### P9 Metadata Management
+### P9 Storage and Performance Optimization
+**Scope**: end-to-end I/O latency mitigation and speculative warming ([Optimization](optimization.md)); language/dialect-aware subtitle scoring; high-fidelity video pipeline enhancements; zero-fuzz release verification.
+
+- Multi-dimensional storage medium and protocol identification: native detection of local SSDs, rotational HDDs, remote network shares (SMB/NFS), and cloud mounts across Linux, Windows, and macOS
+- Anti-thrashing physical drive serialization (`VolumeLedger`): single-flight queues for rotational media, eliminating head contention during scans and probes
+- Foreground streaming quiet gate (`QuietGate`): automatic yielding and throttling of background library scans and disk maintenance while client playback sessions are active
+- In-progress write detection (`GrowthPolicy`): write-window and size-stability checks to avoid scanning partially downloaded or actively growing files
+- Speculative index and metadata prefetching (`PrefetchHeadTail`): targeted warming of container headers and index atoms via `posix_fadvise` and sequential fallback
+- Subtitle scoring and dialect normalization: language scoring matrix, Chinese variant normalization (Traditional/Simplified/regional dialects), and hearing-impaired downranking
+- High-fidelity video pipeline adaptations: Dolby Vision Profile 7 EL extraction and fallback tone-mapping; black border detection (`cropdetect`)
+- Security and release invariants: pinned dependency verification and fail-closed privacy checks
+
+**Done when**: cross-platform unit and integration tests pass for storage detection, concurrency serialization, quiet gates, and prefetching on Linux, Windows, and macOS; rotational disks remain sequential during scans; playback startup cleanly interrupts background I/O; subtitle scoring correctly matches Chinese regional dialects.
+
+**Progress**:
+- [x] Multi-dimensional device and protocol identification: `libs/library/storage` with native Linux (`sysfs`/`st_dev`), macOS (`statfs`/`fsid`), and Windows (`GetDriveType`/`IOCTL_STORAGE_QUERY_PROPERTY`) implementations
+- [x] Anti-thrashing volume serialization: `VolumeLedger` with physical device keying, FIFO fair queuing, and configurable concurrency
+- [x] Foreground streaming quiet gate: `QuietGate` with reader-writer locking, reference counting, scan-interruption checks, and idle spin-down delay
+- [x] In-progress write detection: `GrowthPolicy` with size-stability polling and write-window thresholds
+- [x] Speculative prefetch scheduler: `PrefetchHeadTail` with `posix_fadvise(WILLNEED)` on Linux and sequential chunk warming fallback
+- [ ] Integration of `libs/library/storage` into library scanner worker pool and directory walker
+- [ ] Integration of `QuietGate` and prefetching into `PlaybackService` and stream delivery handlers
+- [ ] Subtitle scoring matrix and Chinese alias normalization in `libs/subtitle` and playback subtitle selection
+- [ ] Dolby Vision Profile 7 EL extraction / fallback tone mapping in `libs/media`
+- [ ] Black border detection (`cropdetect`) integration in transcode planning
+
+### P10 Metadata Management
 **Scope**: correcting and completing what the library scans find.
 
 - Edit an item and lock its fields; identify an item again against the providers; refresh one item
@@ -216,7 +246,7 @@ flowchart TD
 
 **Done when**: an end-to-end test through the API: an administrator identifies a misidentified film again and edits it, the locked fields survive a refresh, and the chosen poster is written next to the file and read back by a new scan.
 
-### P10 Administration and Operations
+### P11 Administration and Operations
 **Scope**: running a server without restarting it or editing its flags.
 
 - Server settings stored in the database and set through `SystemService`, taking over from the command-line flags what an administrator changes at run time; first the transcoding settings (hardware acceleration chosen by the administrator, encoder presets, tone mapping, transcode folder)
@@ -229,7 +259,7 @@ flowchart TD
 
 **Done when**: an end-to-end test through the API: an administrator changes a transcoding setting and the next transcode uses it; a plugin is installed from a catalog, upgraded and uninstalled while the server keeps serving; a backup is restored into a new server.
 
-### P11 Media Extras
+### P12 Media Extras
 **Scope**: media features beyond playing a stream.
 
 - Trickplay thumbnail sheets ([Architecture §6.1](architecture.md#61-requirements-and-implementation)) and chapter images
@@ -239,8 +269,8 @@ flowchart TD
 
 **Done when**: tests with real ffmpeg produce trickplay sheets and chapter images, and a progressive transcode is downloaded and played; ported cases pass where Jellyfin has them.
 
-### P12 Clients and Ecosystem
-**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; evaluation of a Jellyfin API compatibility shim. Its completion criteria will be defined after P11.
+### P13 Clients and Ecosystem
+**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; evaluation of a Jellyfin API compatibility shim. Its completion criteria will be defined after P12.
 
 ---
 
@@ -254,7 +284,7 @@ flowchart TD
 | SVG rasterization | Pure-Go options are incomplete | Decided in P2: SVGs are checked and served as-is, not rasterized |
 | Hardware test coverage | Only the maintainers' machines and GitHub-hosted runners are available; other vendors' encoders are untested on real hardware | Real transcode tests run where the hardware exists and skip elsewhere; other vendor paths rely on the ported EncodingHelper cases |
 | Go modules split too finely | Friction in dependency upgrades and tidying | Keep watching; merge modules when needed |
-| Progressive transcoding | Remuxes and transcodes are delivered as HLS only; a client declaring only progressive transcoding profiles gets `unimplemented` | P11, with offline downloads |
-| Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P12); then serve the stream as `.sup` |
+| Progressive transcoding | Remuxes and transcodes are delivered as HLS only; a client declaring only progressive transcoding profiles gets `unimplemented` | P12, with offline downloads |
+| Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P13); then serve the stream as `.sup` |
 | Negative audio decode times in fMP4 | HLS outputs keep negative timestamps, so audio that starts before zero (AAC encoder priming) is written with a negative `tfdt`, a field the format defines as unsigned. hls.js and Safari play it, and Jellyfin writes the same for its fMP4 clients; players outside that set are unverified | If a player misplaces or drops the audio: shift only the audio to zero, keeping the video at the source's timestamps |
-| Live TV, DVR, channels and DLNA | Large parts of Jellyfin (DLNA as a plugin there) that Mavio has neither adopted nor ruled out | Decide before P12; DLNA would be a plugin |
+| Live TV, DVR, channels and DLNA | Large parts of Jellyfin (DLNA as a plugin there) that Mavio has neither adopted nor ruled out | Decide before P13; DLNA would be a plugin |

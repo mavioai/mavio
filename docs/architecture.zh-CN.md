@@ -2,7 +2,7 @@
 
 > [English](architecture.md) | 简体中文
 
-> 相关文档：[领域模型](domain.zh-CN.md) · [开发指南](development.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [测试策略](testing.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
+> 相关文档：[领域模型](domain.zh-CN.md) · [开发指南](development.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [测试策略](testing.zh-CN.md) · [性能与优化](optimization.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
 > Mavio 是一个以 Go 为服务端核心的新一代自托管媒体服务器。它借鉴 Jellyfin 多年沉淀的领域知识、FFmpeg 管线与测试资产，但不以兼容 Jellyfin 生态为目标，选型一律取当下最现代、最合适的方案。
 
