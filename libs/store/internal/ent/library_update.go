@@ -150,6 +150,48 @@ func (_u *LibraryUpdate) SetNillableAutoCollections(v *bool) *LibraryUpdate {
 	return _u
 }
 
+// SetExtractTrickplay sets the "extract_trickplay" field.
+func (_u *LibraryUpdate) SetExtractTrickplay(v bool) *LibraryUpdate {
+	_u.mutation.SetExtractTrickplay(v)
+	return _u
+}
+
+// SetNillableExtractTrickplay sets the "extract_trickplay" field if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableExtractTrickplay(v *bool) *LibraryUpdate {
+	if v != nil {
+		_u.SetExtractTrickplay(*v)
+	}
+	return _u
+}
+
+// SetExtractChapterImages sets the "extract_chapter_images" field.
+func (_u *LibraryUpdate) SetExtractChapterImages(v bool) *LibraryUpdate {
+	_u.mutation.SetExtractChapterImages(v)
+	return _u
+}
+
+// SetNillableExtractChapterImages sets the "extract_chapter_images" field if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableExtractChapterImages(v *bool) *LibraryUpdate {
+	if v != nil {
+		_u.SetExtractChapterImages(*v)
+	}
+	return _u
+}
+
+// SetAnalyzeLoudness sets the "analyze_loudness" field.
+func (_u *LibraryUpdate) SetAnalyzeLoudness(v bool) *LibraryUpdate {
+	_u.mutation.SetAnalyzeLoudness(v)
+	return _u
+}
+
+// SetNillableAnalyzeLoudness sets the "analyze_loudness" field if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableAnalyzeLoudness(v *bool) *LibraryUpdate {
+	if v != nil {
+		_u.SetAnalyzeLoudness(*v)
+	}
+	return _u
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_u *LibraryUpdate) SetScanGeneration(v int64) *LibraryUpdate {
 	_u.mutation.ResetScanGeneration()
@@ -349,6 +391,15 @@ func (_u *LibraryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AutoCollections(); ok {
 		_spec.SetField(library.FieldAutoCollections, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ExtractTrickplay(); ok {
+		_spec.SetField(library.FieldExtractTrickplay, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ExtractChapterImages(); ok {
+		_spec.SetField(library.FieldExtractChapterImages, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AnalyzeLoudness(); ok {
+		_spec.SetField(library.FieldAnalyzeLoudness, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
@@ -588,6 +639,48 @@ func (_u *LibraryUpdateOne) SetNillableAutoCollections(v *bool) *LibraryUpdateOn
 	return _u
 }
 
+// SetExtractTrickplay sets the "extract_trickplay" field.
+func (_u *LibraryUpdateOne) SetExtractTrickplay(v bool) *LibraryUpdateOne {
+	_u.mutation.SetExtractTrickplay(v)
+	return _u
+}
+
+// SetNillableExtractTrickplay sets the "extract_trickplay" field if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableExtractTrickplay(v *bool) *LibraryUpdateOne {
+	if v != nil {
+		_u.SetExtractTrickplay(*v)
+	}
+	return _u
+}
+
+// SetExtractChapterImages sets the "extract_chapter_images" field.
+func (_u *LibraryUpdateOne) SetExtractChapterImages(v bool) *LibraryUpdateOne {
+	_u.mutation.SetExtractChapterImages(v)
+	return _u
+}
+
+// SetNillableExtractChapterImages sets the "extract_chapter_images" field if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableExtractChapterImages(v *bool) *LibraryUpdateOne {
+	if v != nil {
+		_u.SetExtractChapterImages(*v)
+	}
+	return _u
+}
+
+// SetAnalyzeLoudness sets the "analyze_loudness" field.
+func (_u *LibraryUpdateOne) SetAnalyzeLoudness(v bool) *LibraryUpdateOne {
+	_u.mutation.SetAnalyzeLoudness(v)
+	return _u
+}
+
+// SetNillableAnalyzeLoudness sets the "analyze_loudness" field if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableAnalyzeLoudness(v *bool) *LibraryUpdateOne {
+	if v != nil {
+		_u.SetAnalyzeLoudness(*v)
+	}
+	return _u
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_u *LibraryUpdateOne) SetScanGeneration(v int64) *LibraryUpdateOne {
 	_u.mutation.ResetScanGeneration()
@@ -817,6 +910,15 @@ func (_u *LibraryUpdateOne) sqlSave(ctx context.Context) (_node *Library, err er
 	}
 	if value, ok := _u.mutation.AutoCollections(); ok {
 		_spec.SetField(library.FieldAutoCollections, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ExtractTrickplay(); ok {
+		_spec.SetField(library.FieldExtractTrickplay, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ExtractChapterImages(); ok {
+		_spec.SetField(library.FieldExtractChapterImages, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AnalyzeLoudness(); ok {
+		_spec.SetField(library.FieldAnalyzeLoudness, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)

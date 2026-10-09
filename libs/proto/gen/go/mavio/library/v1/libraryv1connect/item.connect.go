@@ -48,6 +48,8 @@ const (
 	ItemServiceListNextUpProcedure = "/mavio.library.v1.ItemService/ListNextUp"
 	// ItemServiceListPeopleProcedure is the fully-qualified name of the ItemService's ListPeople RPC.
 	ItemServiceListPeopleProcedure = "/mavio.library.v1.ItemService/ListPeople"
+	// ItemServiceGetLyricsProcedure is the fully-qualified name of the ItemService's GetLyrics RPC.
+	ItemServiceGetLyricsProcedure = "/mavio.library.v1.ItemService/GetLyrics"
 )
 
 // ItemServiceClient is a client for the mavio.library.v1.ItemService service.
@@ -70,6 +72,9 @@ type ItemServiceClient interface {
 	// ListPeople lists the people credited on the items the caller may
 	// access, with the number of items crediting each.
 	ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error)
+	// GetLyrics returns the lyrics of a track, read from the lyric file
+	// beside it (.elrc, .lrc or .txt).
+	GetLyrics(context.Context, *v1.GetLyricsRequest) (*v1.GetLyricsResponse, error)
 }
 
 // NewItemServiceClient constructs a client for the mavio.library.v1.ItemService service. By
@@ -132,6 +137,13 @@ func NewItemServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getLyrics: connect.NewClient[v1.GetLyricsRequest, v1.GetLyricsResponse](
+			httpClient,
+			baseURL+ItemServiceGetLyricsProcedure,
+			connect.WithSchema(itemServiceMethods.ByName("GetLyrics")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -144,6 +156,7 @@ type itemServiceClient struct {
 	listLatestItems *connect.Client[v1.ListLatestItemsRequest, v1.ListLatestItemsResponse]
 	listNextUp      *connect.Client[v1.ListNextUpRequest, v1.ListNextUpResponse]
 	listPeople      *connect.Client[v1.ListPeopleRequest, v1.ListPeopleResponse]
+	getLyrics       *connect.Client[v1.GetLyricsRequest, v1.GetLyricsResponse]
 }
 
 // GetItem calls mavio.library.v1.ItemService.GetItem.
@@ -209,6 +222,15 @@ func (c *itemServiceClient) ListPeople(ctx context.Context, req *v1.ListPeopleRe
 	return nil, err
 }
 
+// GetLyrics calls mavio.library.v1.ItemService.GetLyrics.
+func (c *itemServiceClient) GetLyrics(ctx context.Context, req *v1.GetLyricsRequest) (*v1.GetLyricsResponse, error) {
+	response, err := c.getLyrics.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ItemServiceHandler is an implementation of the mavio.library.v1.ItemService service.
 type ItemServiceHandler interface {
 	GetItem(context.Context, *v1.GetItemRequest) (*v1.GetItemResponse, error)
@@ -229,6 +251,9 @@ type ItemServiceHandler interface {
 	// ListPeople lists the people credited on the items the caller may
 	// access, with the number of items crediting each.
 	ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error)
+	// GetLyrics returns the lyrics of a track, read from the lyric file
+	// beside it (.elrc, .lrc or .txt).
+	GetLyrics(context.Context, *v1.GetLyricsRequest) (*v1.GetLyricsResponse, error)
 }
 
 // NewItemServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -287,6 +312,13 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	itemServiceGetLyricsHandler := connect.NewUnaryHandlerSimple(
+		ItemServiceGetLyricsProcedure,
+		svc.GetLyrics,
+		connect.WithSchema(itemServiceMethods.ByName("GetLyrics")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.library.v1.ItemService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ItemServiceGetItemProcedure:
@@ -303,6 +335,8 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 			itemServiceListNextUpHandler.ServeHTTP(w, r)
 		case ItemServiceListPeopleProcedure:
 			itemServiceListPeopleHandler.ServeHTTP(w, r)
+		case ItemServiceGetLyricsProcedure:
+			itemServiceGetLyricsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -338,4 +372,8 @@ func (UnimplementedItemServiceHandler) ListNextUp(context.Context, *v1.ListNextU
 
 func (UnimplementedItemServiceHandler) ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.ListPeople is not implemented"))
+}
+
+func (UnimplementedItemServiceHandler) GetLyrics(context.Context, *v1.GetLyricsRequest) (*v1.GetLyricsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.GetLyrics is not implemented"))
 }

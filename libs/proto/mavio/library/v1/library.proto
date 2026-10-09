@@ -63,6 +63,12 @@ message Library {
   // Put movies into collections named after the metadata providers'
   // collections (movie sets).
   bool auto_collections = 11;
+  // Make thumbnail sheets of videos for seeking, and an image of each
+  // chapter.
+  bool extract_trickplay = 12;
+  bool extract_chapter_images = 13;
+  // Measure the loudness of tracks, for normalization.
+  bool analyze_loudness = 14;
 }
 
 // LibrarySpec holds the client-settable fields of a library.
@@ -92,6 +98,9 @@ message LibrarySpec {
   string metadata_country = 6 [(buf.validate.field).string.pattern = "^([A-Z]{2})?$"];
   bool save_local_metadata = 7;
   bool auto_collections = 8;
+  bool extract_trickplay = 9;
+  bool extract_chapter_images = 10;
+  bool analyze_loudness = 11;
 }
 
 message ListLibrariesRequest {}

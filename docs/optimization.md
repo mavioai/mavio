@@ -174,7 +174,7 @@ When scanning and reading media paths, Mavio identifies the underlying storage m
 * **Transcode Cropping** (`libs/media/borders`, `libs/media/planner`): a low-priority background job (`media.borders`) samples five frames of each probed video with ffmpeg as 8-bit luma and measures them with the same detector; borders count only where every non-black sample has them, at least 2% of the frame and rounded to even pixels, and are kept on the video stream (`core.MediaStream.Crop`). When a transcode re-encodes the video, unrotated and without burned-in subtitles, the planner crops them before scaling, so letterboxed films spend no bitrate on black bars; copied video is never cropped.
 * **Thumbnail Failure Circuit Breaker**:
   * Repeatedly retrying broken GOPs during thumbnail generation can hang background queues.
-  * Introduce an in-memory `FailNote` cache (recording failed time ranges, TTL, and capacity limits); repeat extraction requests within the TTL window are suppressed, keeping background workers healthy.
+  * An in-memory cache (`library.FailNotes`) notes each file whose trickplay sheets, chapter images or loudness failed, by job kind, path, size and modification time; for a day the job skips that file, so a broken file is read once and a changed one again. At most 4,096 notes are kept, the oldest forgotten first. Trickplay sheets and chapter images crop the borders border detection found (`core.MediaStream.Crop`) before scaling.
 
 ---
 

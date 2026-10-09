@@ -146,7 +146,8 @@ libs/proto/
 │                               #   TaskService、ActivityService、BackupService、LocalizationService
 │   ├── playback/v1/            # PlaybackService：客户端能力、播放决策、进度上报
 │   └── plugin/v1/              # 插件契约：PluginService（manifest、配置、生命周期）、
-│                               #   MetadataProviderService、SubtitleProviderService、AuthProviderService、NotifierService
+│                               #   MetadataProviderService、SubtitleProviderService、MediaSegmentProviderService、
+│                               #   AuthProviderService、NotifierService
 ├── gen/go/                     # 生成的 protobuf-go + connect-go（Go 模块）
 └── gen/ts/                     # (后期) 生成的 protobuf-es + connect-es（npm 包）
 ```
@@ -291,6 +292,7 @@ libs/plugin/
 * **热插拔**：`SystemService.InstallPlugin` 从插件目录安装插件，或将其升级、降级；`UninstallPlugin` 卸载插件；期间服务端照常服务。安装时下载该版本的 zip 包，按插件目录核对其 SHA-256，解压到插件文件夹中的隐藏文件夹并检查清单；随后停止正在运行的版本，将其文件夹移到一旁，移入新版本并以已保存的配置启动；若新版本无法启动，则恢复之前的版本。卸载会停止插件并删除其文件夹与配置。各项能力在使用时查找，因此插件一旦就绪，刷新、搜索与通知即会用到它。
 * **插件目录**：插件目录是服务端设置中某个 http 或 https URL 上的 JSON 文档，列出插件及其版本：版本号、API 版本、运行时（进程插件还有 os 与 arch）、相对于目录的包 URL、SHA-256、更新说明与发布时间。`ListCatalogPlugins` 给出服务端能运行的版本（最新的在前）以及已安装的版本；同一插件以最先列出它的目录为准，无法访问的目录被跳过。
 * **认证与通知**：`AuthProvider` 指向某个插件的用户，在该插件的 `Authenticate` 接受其用户名与密码时登录。活动日志中的每项活动都作为 `Event` 发送给通知插件。
+* **片段提供者**：对每个已探测的电影与剧集，以其 ID、时长与章节询问每个已启动的片段插件。
 * **字幕提供者**：`MetadataService.SearchSubtitles` 以视频的 OpenSubtitles 哈希（`subtitle.FileHash`）、名称与 ID 搜索每个已启动的字幕插件；未就绪的插件什么也找不到。
 
 ---
@@ -338,7 +340,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **逐个文件夹解析**：解析器根据文件夹在媒体库中的位置（媒体库类型，以及它是否位于剧集、季或艺术家之下），把文件夹及其条目映射为：文件夹本身所代表的条目（自成文件夹的电影、光盘镜像、剧集、季、专辑、有声书）、由其中文件构成的条目，以及接下来要解析的子文件夹及其位置。规则遵循 Jellyfin 的命名与解析规则；附加内容从所属条目的文件夹及其附加内容文件夹中查找。由于文件夹的结果只取决于其列表与位置，未变化的文件夹无需重新解析。
 * **对账只读元数据**：对账遍历目录、比对文件 stat，只把新增或变化的文件送去 ffprobe 和刮削。
 * **并发**：按媒体库根目录和目录子树并发遍历（`errgroup.SetLimit`），网络文件系统上使用较低的并发度。
-* **任务**：扫描、探测与元数据刷新都是持久化任务，由租用它们的 worker 执行（`library.scan`、`media.probe`、`media.keyframes`、`item.refresh`、`image.placeholders`）。扫描为每个新增或变化的媒体文件排入一次探测，并为每个新增的无媒体条目（如剧集、季或专辑）排入一次元数据刷新；扫描还把每个视频旁的字幕文件作为其外部流附加上去（[优化 §4.1](optimization.zh-CN.md)）。对视频的探测还会排入一次低优先级的黑边检测（`media.borders`），转码时据此裁剪。探测排入一次元数据刷新，对视频还排入一次低优先级的关键帧提取（HLS 切分直接复制的视频需要关键帧）。刷新先应用提供者的元数据，再应用本地 NFO 文件，不改动已锁定的字段，并为得到的分级计算分数（`metadata.RatingScore`）。媒体旁的图片按 Jellyfin 的本地图片命名查找（`poster`、`folder`、`<文件名>-poster`、`fanart-1`、`season01-poster`、`<单集>-thumb` 等；多个视频共用的文件夹中只认以文件名为前缀的名称），优先于 NFO 文件指定的图片；每种图片取自拥有它的最可信来源。再次找到的图片保留其 ID、尺寸与占位图，随后由占位图任务测量新图片并计算其 blurhash 与 thumbhash。对于不保存本地元数据的媒体库，管理员为条目选择的图片保存在元数据目录（`-metadata-dir`，`<id[:2]>/<id>/<种类>.<扩展名>`），优先于其他所有图片。在保存本地元数据的媒体库中，刷新会写出条目的 NFO 文件（`metadata.WriteNFO`，Kodi 格式加 Jellyfin 的锁定元素；覆盖已找到的 NFO 文件，否则电影与视频写为旁边的 `<文件名>.nfo`，其他按 Jellyfin 的命名），并把提供者的图片按本地图片命名保存，替换同名但格式不同的文件；季、音轨与照片的图片仍留在远程。定时扫描在媒体库的扫描间隔后排入下一次；按需扫描与之并行排队，同一媒体库的扫描不会重叠。
+* **任务**：扫描、探测与元数据刷新都是持久化任务，由租用它们的 worker 执行（`library.scan`、`media.probe`、`media.keyframes`、`item.refresh`、`image.placeholders`）。扫描为每个新增或变化的媒体文件排入一次探测，并为每个新增的无媒体条目（如剧集、季或专辑）排入一次元数据刷新；扫描还把每个视频旁的字幕文件作为其外部流附加上去（[优化 §4.1](optimization.zh-CN.md)）。对视频的探测还会排入一次低优先级的黑边检测（`media.borders`），转码时据此裁剪。随后按媒体库的设置排入媒体附加内容（`libs/media/thumbnails`，在黑边检测之后）：缩略图拼图（`media.trickplay`：ffmpeg 以 fps、crop、scale 与 tile 滤镜一次完成，宽 320 像素，每 10 秒一张，每张拼图 10 × 10，先写在元数据目录的旁边再换入）、章节图片（`media.chapters`：每个章节一帧，宽 640 像素，第一个章节取开头稍后处）、由片段提供者插件给出的电影与剧集的媒体片段（`media.segments`；两个提供者的同类片段重叠时取前者），以及音轨的响度（`media.loudness`：ffmpeg `ebur128` 的积分响度；专辑在其所有音轨都测得后随之计算）。附加内容会等待静默闸门；某文件的图片或测量失败后，一天内不再读取（`FailNotes`，在内存中，至多 4,096 条）。`library.extras` 为某媒体库的每个条目排入这些任务。探测排入一次元数据刷新，对视频还排入一次低优先级的关键帧提取（HLS 切分直接复制的视频需要关键帧）。刷新先应用提供者的元数据，再应用本地 NFO 文件，不改动已锁定的字段，并为得到的分级计算分数（`metadata.RatingScore`）。媒体旁的图片按 Jellyfin 的本地图片命名查找（`poster`、`folder`、`<文件名>-poster`、`fanart-1`、`season01-poster`、`<单集>-thumb` 等；多个视频共用的文件夹中只认以文件名为前缀的名称），优先于 NFO 文件指定的图片；每种图片取自拥有它的最可信来源。再次找到的图片保留其 ID、尺寸与占位图，随后由占位图任务测量新图片并计算其 blurhash 与 thumbhash。对于不保存本地元数据的媒体库，管理员为条目选择的图片保存在元数据目录（`-metadata-dir`，`<id[:2]>/<id>/<种类>.<扩展名>`），优先于其他所有图片。在保存本地元数据的媒体库中，刷新会写出条目的 NFO 文件（`metadata.WriteNFO`，Kodi 格式加 Jellyfin 的锁定元素；覆盖已找到的 NFO 文件，否则电影与视频写为旁边的 `<文件名>.nfo`，其他按 Jellyfin 的命名），并把提供者的图片按本地图片命名保存，替换同名但格式不同的文件；季、音轨与照片的图片仍留在远程。定时扫描在媒体库的扫描间隔后排入下一次；按需扫描与之并行排队，同一媒体库的扫描不会重叠。
 * **一致性**：每次扫描在数据库中记一个"扫描代次"；扫描完成后，未被本代次看到的条目标记为缺失（先软删除，宽限期后再清理），避免挂载点暂时不可用导致整库被删。
 
 ---
@@ -378,6 +380,8 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **文件夹**（`SystemService.ListDirectory`）：管理员浏览服务端的文件夹或根目录（Windows 上为各驱动器）以选择媒体库文件夹；隐藏条目不列出。
 * **本地化数据**（`LocalizationService`）：国家、具有 ISO 639-1 代码的语言，以及某个国家分级体系中的分级，来自 `libs/metadata` 中 Jellyfin 的数据（`Countries`、`Languages`、`ParentalRatings`）。
 * **备份**（`internal/backup`、`BackupService`）：备份是 `-backup-dir` 中的一个 zip 文件，包含 `manifest.json`、数据库的行（`store.Dump`：每张表为一份由带类型值组成的 JSON 行文件，取自同一快照）、元数据目录与插件目录。管理员带着自己的 bearer 令牌在 `/system/backups/{name}` 下载。`-restore <文件>` 在新服务端启动前把备份恢复到其空数据库中（`store.Restore`：数据库类型相同，且架构包含备份所含的每个迁移；按外键顺序插入行，条目排在其父条目之后，派生键重新计算），并放回各文件夹。
+* **下载与渐进式流**：请求 `download` 的播放需要用户的下载权限，并以静态场景决策：客户端能播放文件本身时，以附件形式提供文件；否则按客户端的静态配置文件做渐进式转封装或转码，从不使用 HLS。没有 HLS 配置文件的流式客户端也得到渐进式流。ffmpeg 为每个请求把渐进式流（分片 MP4、Matroska 或 MPEG-TS）直接写入响应，因此不能跳转。
+* **媒体附加内容**：`ItemService.GetItem` 列出条目的缩略图拼图与媒体片段；拼图在 `/images/trickplay/{item}/{width}/{sheet}.jpg`、章节图片在 `/images/chapters/{item}/{source}/{index}` 提供（接受图片参数），文件取自元数据目录，ID 即凭证。条目带有由其测得响度计算出的归一化增益。`ItemService.GetLyrics` 读取音轨旁的歌词文件（`.elrc`、`.lrc` 或 `.txt`，必要时从旧字符集转换），由 `metadata.ParseLyrics` 解析：LRC 的行及其时间与 ID 标签，增强 LRC 的逐字时间作为以 UTF-16 码元计的提示，与 Jellyfin 的解析器一致。播放会列出其片源附带的文件，例如供客户端渲染 ASS 字幕的字体；ffmpeg 在 `/media/{playback}/attachments/{index}` 处各提取一次。
 * **图片**：图片在 `/images/{id}` 提供，接受 Jellyfin 的尺寸参数（`width`、`height`、`maxWidth`、`maxHeight`、`fillWidth`、`fillHeight`、`quality`）；与媒体 URL 一样，客户端从按访问权限过滤的 API 响应中得到的 ID 是唯一的凭证。本地图片在其条目所属媒体库文件夹或元数据目录内读取；提供者的图片只下载一次，存入缓存目录。不带尺寸参数时提供原图；`imaging.Process` 生成的图片采用请求的 `format`（`jpg`、`png`、`webp`），未指定时对 `Accept` 头接受 WebP 的客户端生成 WebP，否则为 JPEG（含透明时为 PNG）。生成的图片按源内容哈希与参数缓存，对同一结果的并发请求共享一次生成。SVG 通过 `CheckSVG` 后原样提供。
 * **拼贴图**：`/images/collages/{id}` 以相同参数合成媒体库的图片（其最近添加条目的海报并排，16:9）、合集的图片（其条目的海报，2 × 2 网格，2:3）或播放列表的图片（其条目所属剧集与专辑的海报，或条目自身的海报，正方形网格），与 Jellyfin 的动态图片一样；所有者的 ID 即凭证。拼贴图按所用图片缓存，因此会随之更新；没有可用的图片时返回未找到。
 * **开发用播放器**：带 `-dev` 启动时，服务端还提供 `/dev/player`：一个单页面，可登录、列出视频并通过 `PlaybackService` 播放，使用 hls.js 或 Safari 自带的 HLS 播放器（`?engine=native|hlsjs`），可选的串流码率上限会使视频转码（`?bitrate=<每秒比特数>`），用于在客户端完成之前于真实浏览器上检查播放。`-dev-library <dir>` 把 `pnpm nx run fixtures:dev-library` 生成的示例媒体库中的 `Movies` 与 `Shows` 文件夹添加为媒体库。

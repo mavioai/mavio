@@ -109,5 +109,7 @@ message MediaStream {
 message Chapter {
   google.protobuf.Duration start = 1;
   string title = 2;
+  // Its image is served at
+  // /images/chapters/{item_id}/{media_source_id}/{index}.
   bool has_image = 3;
 }

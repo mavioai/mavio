@@ -8,6 +8,7 @@
     { "source": "tests/Jellyfin.XbmcMetadata.Tests", "target": "libs/metadata/testdata/cases/nfo" },
     { "source": "tests/Jellyfin.Providers.Tests", "target": "libs/metadata/testdata/cases/providers" },
     { "source": "tests/Jellyfin.Providers.Tests/Tmdb", "target": "plugins/scraper-tmdb/testdata/cases" },
+    { "source": "tests/Jellyfin.Providers.Tests/Lyrics", "target": "libs/metadata/testdata/cases/lyrics" },
     { "source": "tests/Jellyfin.MediaEncoding.Tests", "target": "libs/media/hwaccel/testdata/cases" },
     { "source": "tests/Jellyfin.MediaEncoding.Tests/Probing", "target": "libs/media/probe/testdata/cases" },
     { "source": "tests/Jellyfin.MediaEncoding.Tests/Subtitles", "target": "libs/subtitle/testdata/cases" },

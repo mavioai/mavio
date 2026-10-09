@@ -20,11 +20,13 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
+	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
+	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -409,6 +411,33 @@ func (f TraverseLibrary) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.LibraryQuery", q)
 }
 
+// The MediaSegmentFunc type is an adapter to allow the use of ordinary function as a Querier.
+type MediaSegmentFunc func(context.Context, *ent.MediaSegmentQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f MediaSegmentFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.MediaSegmentQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.MediaSegmentQuery", q)
+}
+
+// The TraverseMediaSegment type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseMediaSegment func(context.Context, *ent.MediaSegmentQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseMediaSegment) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseMediaSegment) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.MediaSegmentQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.MediaSegmentQuery", q)
+}
+
 // The MediaSourceFunc type is an adapter to allow the use of ordinary function as a Querier.
 type MediaSourceFunc func(context.Context, *ent.MediaSourceQuery) (ent.Value, error)
 
@@ -517,6 +546,33 @@ func (f TraverseSetting) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.SettingQuery", q)
 }
 
+// The TrickplayFunc type is an adapter to allow the use of ordinary function as a Querier.
+type TrickplayFunc func(context.Context, *ent.TrickplayQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f TrickplayFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.TrickplayQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.TrickplayQuery", q)
+}
+
+// The TraverseTrickplay type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseTrickplay func(context.Context, *ent.TrickplayQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseTrickplay) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseTrickplay) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.TrickplayQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.TrickplayQuery", q)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary function as a Querier.
 type UserFunc func(context.Context, *ent.UserQuery) (ent.Value, error)
 
@@ -598,6 +654,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.JobQuery, predicate.Job, job.OrderOption]{typ: ent.TypeJob, tq: q}, nil
 	case *ent.LibraryQuery:
 		return &query[*ent.LibraryQuery, predicate.Library, library.OrderOption]{typ: ent.TypeLibrary, tq: q}, nil
+	case *ent.MediaSegmentQuery:
+		return &query[*ent.MediaSegmentQuery, predicate.MediaSegment, mediasegment.OrderOption]{typ: ent.TypeMediaSegment, tq: q}, nil
 	case *ent.MediaSourceQuery:
 		return &query[*ent.MediaSourceQuery, predicate.MediaSource, mediasource.OrderOption]{typ: ent.TypeMediaSource, tq: q}, nil
 	case *ent.PersonQuery:
@@ -606,6 +664,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.PluginConfigQuery, predicate.PluginConfig, pluginconfig.OrderOption]{typ: ent.TypePluginConfig, tq: q}, nil
 	case *ent.SettingQuery:
 		return &query[*ent.SettingQuery, predicate.Setting, setting.OrderOption]{typ: ent.TypeSetting, tq: q}, nil
+	case *ent.TrickplayQuery:
+		return &query[*ent.TrickplayQuery, predicate.Trickplay, trickplay.OrderOption]{typ: ent.TypeTrickplay, tq: q}, nil
 	case *ent.UserQuery:
 		return &query[*ent.UserQuery, predicate.User, user.OrderOption]{typ: ent.TypeUser, tq: q}, nil
 	case *ent.UserDataQuery:

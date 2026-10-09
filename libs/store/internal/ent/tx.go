@@ -36,6 +36,8 @@ type Tx struct {
 	Job *JobClient
 	// Library is the client for interacting with the Library builders.
 	Library *LibraryClient
+	// MediaSegment is the client for interacting with the MediaSegment builders.
+	MediaSegment *MediaSegmentClient
 	// MediaSource is the client for interacting with the MediaSource builders.
 	MediaSource *MediaSourceClient
 	// Person is the client for interacting with the Person builders.
@@ -44,6 +46,8 @@ type Tx struct {
 	PluginConfig *PluginConfigClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
+	// Trickplay is the client for interacting with the Trickplay builders.
+	Trickplay *TrickplayClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserData is the client for interacting with the UserData builders.
@@ -191,10 +195,12 @@ func (tx *Tx) init() {
 	tx.ItemValue = NewItemValueClient(tx.config)
 	tx.Job = NewJobClient(tx.config)
 	tx.Library = NewLibraryClient(tx.config)
+	tx.MediaSegment = NewMediaSegmentClient(tx.config)
 	tx.MediaSource = NewMediaSourceClient(tx.config)
 	tx.Person = NewPersonClient(tx.config)
 	tx.PluginConfig = NewPluginConfigClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
+	tx.Trickplay = NewTrickplayClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserData = NewUserDataClient(tx.config)
 }

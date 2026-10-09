@@ -67,7 +67,7 @@ flowchart TD
 | P9 | Storage and performance optimization | ✅ Done |
 | P10 | Metadata management | ✅ Done |
 | P11 | Administration and operations | ✅ Done |
-| P12 | Media extras | Not started |
+| P12 | Media extras | ✅ Done |
 | P13 | Clients and ecosystem | Not started |
 
 ---
@@ -288,6 +288,13 @@ flowchart TD
 
 **Done when**: tests with real ffmpeg produce trickplay sheets and chapter images, and a progressive transcode is downloaded and played; ported cases pass where Jellyfin has them.
 
+**Progress**:
+- [x] Trickplay sheets and chapter images (`libs/media/thumbnails`, jobs `media.trickplay` and `media.chapters`), cropped by the borders found, with a failure circuit breaker; served from the metadata folder
+- [x] Media segments from segment provider plugins (`MediaSegmentProviderService`, job `media.segments`)
+- [x] Lyrics (`metadata.ParseLyrics`; Jellyfin's ELRC case passes) through `ItemService.GetLyrics`; font attachments served to clients; loudness of tracks and albums (`media.loudness`) as normalization gains
+- [x] Progressive remuxes and transcodes; downloads, the file itself or a progressive transcode
+- [x] End-to-end test with real ffmpeg (`apps/server/internal/server/extras_test.go`)
+
 ### P13 Clients and Ecosystem
 **Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; evaluation of a Jellyfin API compatibility shim. Its completion criteria will be defined after P12.
 
@@ -303,7 +310,6 @@ flowchart TD
 | SVG rasterization | Pure-Go options are incomplete | Decided in P2: SVGs are checked and served as-is, not rasterized |
 | Hardware test coverage | Only the maintainers' machines and GitHub-hosted runners are available; other vendors' encoders are untested on real hardware | Real transcode tests run where the hardware exists and skip elsewhere; other vendor paths rely on the ported EncodingHelper cases |
 | Go modules split too finely | Friction in dependency upgrades and tidying | Keep watching; merge modules when needed |
-| Progressive transcoding | Remuxes and transcodes are delivered as HLS only; a client declaring only progressive transcoding profiles gets `unimplemented` | P12, with offline downloads |
 | Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P13); then serve the stream as `.sup` |
 | Negative audio decode times in fMP4 | HLS outputs keep negative timestamps, so audio that starts before zero (AAC encoder priming) is written with a negative `tfdt`, a field the format defines as unsigned. hls.js and Safari play it, and Jellyfin writes the same for its fMP4 clients; players outside that set are unverified | If a player misplaces or drops the audio: shift only the audio to zero, keeping the video at the source's timestamps |
 | Live TV, DVR, channels and DLNA | Large parts of Jellyfin (DLNA as a plugin there) that Mavio has neither adopted nor ruled out | Decide before P13; DLNA would be a plugin |

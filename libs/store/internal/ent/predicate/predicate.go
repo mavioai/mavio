@@ -42,6 +42,9 @@ type Job func(*sql.Selector)
 // Library is the predicate function for library builders.
 type Library func(*sql.Selector)
 
+// MediaSegment is the predicate function for mediasegment builders.
+type MediaSegment func(*sql.Selector)
+
 // MediaSource is the predicate function for mediasource builders.
 type MediaSource func(*sql.Selector)
 
@@ -53,6 +56,9 @@ type PluginConfig func(*sql.Selector)
 
 // Setting is the predicate function for setting builders.
 type Setting func(*sql.Selector)
+
+// Trickplay is the predicate function for trickplay builders.
+type Trickplay func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

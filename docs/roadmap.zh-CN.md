@@ -67,7 +67,7 @@ flowchart TD
 | P9 | 存储与性能优化 | ✅ 已完成 |
 | P10 | 元数据管理 | ✅ 完成 |
 | P11 | 管理与运维 | ✅ 完成 |
-| P12 | 媒体附加功能 | 未开始 |
+| P12 | 媒体附加功能 | ✅ 完成 |
 | P13 | 客户端与生态 | 未开始 |
 
 ---
@@ -288,6 +288,13 @@ flowchart TD
 
 **完成标准**：用真实 ffmpeg 的测试生成 trickplay 拼图与章节图片，并下载、播放一个渐进式转码的文件；Jellyfin 有对应用例的部分，移植用例通过。
 
+**进展**：
+- [x] 缩略图拼图与章节图片（`libs/media/thumbnails`，任务 `media.trickplay` 与 `media.chapters`），按检测到的黑边裁剪，带失败熔断；从元数据目录提供
+- [x] 来自片段提供者插件的媒体片段（`MediaSegmentProviderService`，任务 `media.segments`）
+- [x] 歌词（`metadata.ParseLyrics`；Jellyfin 的 ELRC 用例通过），通过 `ItemService.GetLyrics` 提供；向客户端提供字体附件；音轨与专辑的响度（`media.loudness`）作为归一化增益
+- [x] 渐进式转封装与转码；下载文件本身或渐进式转码结果
+- [x] 使用真实 ffmpeg 的端到端测试（`apps/server/internal/server/extras_test.go`）
+
 ### P13 客户端与生态
 **范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；Jellyfin API 兼容垫片（shim）评估。具体完成标准在 P12 完成后制定。
 
@@ -303,7 +310,6 @@ flowchart TD
 | SVG 栅格化 | 纯 Go 方案不完善 | P2 已决定：检查后原样下发，不做栅格化 |
 | 硬件测试覆盖 | 只有维护者自己的机器与 GitHub 托管 runner，其他厂商的编码器无法在实机上测试 | 真实转码测试在有硬件处运行、其余处跳过；其他厂商路径依赖移植的 EncodingHelper 用例 |
 | Go 模块拆分过细 | 依赖升级与 tidy 的摩擦 | 持续观察，必要时合并模块 |
-| 渐进式转码 | 转封装与转码只以 HLS 交付；只声明了渐进式转码配置的客户端会收到 `unimplemented` | P12，随离线下载 |
 | 图形字幕 | PGS 与 VobSub 只能烧录，因而强制视频转码 | 有客户端能自行渲染 PGS 时（P13），改为以 `.sup` 交付该流 |
 | fMP4 中为负的音频解码时间 | HLS 输出保留负时间戳，因此早于零点开始的音频（AAC 编码器的预填充）会以负的 `tfdt` 写出，而格式规定该字段为无符号数。hls.js 与 Safari 能正常播放，Jellyfin 对其 fMP4 客户端也写出同样的值；此外的播放器未经验证 | 若有播放器放错或丢弃音频：只把音频平移到零点，视频保持源文件的时间戳 |
 | 电视直播、录像、频道与 DLNA | Jellyfin 中体量很大的部分（DLNA 在 Jellyfin 中是插件），Mavio 既未采纳也未排除 | P13 之前决定；若做 DLNA，则以插件实现 |

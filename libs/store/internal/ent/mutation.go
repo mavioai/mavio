@@ -24,11 +24,13 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
+	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
+	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -54,10 +56,12 @@ const (
 	TypeItemValue          = "ItemValue"
 	TypeJob                = "Job"
 	TypeLibrary            = "Library"
+	TypeMediaSegment       = "MediaSegment"
 	TypeMediaSource        = "MediaSource"
 	TypePerson             = "Person"
 	TypePluginConfig       = "PluginConfig"
 	TypeSetting            = "Setting"
+	TypeTrickplay          = "Trickplay"
 	TypeUser               = "User"
 	TypeUserData           = "UserData"
 )
@@ -5396,6 +5400,8 @@ type ItemMutation struct {
 	locked                        *bool
 	locked_fields                 *[]string
 	appendlocked_fields           []string
+	loudness                      *float64
+	addloudness                   *float64
 	extra                         *string
 	date_added                    *time.Time
 	file_modified                 *time.Time
@@ -5425,6 +5431,12 @@ type ItemMutation struct {
 	images                        map[core.ID]struct{}
 	removedimages                 map[core.ID]struct{}
 	clearedimages                 bool
+	trickplay                     map[core.ID]struct{}
+	removedtrickplay              map[core.ID]struct{}
+	clearedtrickplay              bool
+	segments                      map[core.ID]struct{}
+	removedsegments               map[core.ID]struct{}
+	clearedsegments               bool
 	credits                       map[int]struct{}
 	removedcredits                map[int]struct{}
 	clearedcredits                bool
@@ -7616,6 +7628,76 @@ func (m *ItemMutation) ResetLockedFields() {
 	delete(m.clearedFields, item.FieldLockedFields)
 }
 
+// SetLoudness sets the "loudness" field.
+func (m *ItemMutation) SetLoudness(f float64) {
+	m.loudness = &f
+	m.addloudness = nil
+}
+
+// Loudness returns the value of the "loudness" field in the mutation.
+func (m *ItemMutation) Loudness() (r float64, exists bool) {
+	v := m.loudness
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLoudness returns the old "loudness" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldLoudness(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLoudness is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLoudness requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLoudness: %w", err)
+	}
+	return oldValue.Loudness, nil
+}
+
+// AddLoudness adds f to the "loudness" field.
+func (m *ItemMutation) AddLoudness(f float64) {
+	if m.addloudness != nil {
+		*m.addloudness += f
+	} else {
+		m.addloudness = &f
+	}
+}
+
+// AddedLoudness returns the value that was added to the "loudness" field in this mutation.
+func (m *ItemMutation) AddedLoudness() (r float64, exists bool) {
+	v := m.addloudness
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLoudness clears the value of the "loudness" field.
+func (m *ItemMutation) ClearLoudness() {
+	m.loudness = nil
+	m.addloudness = nil
+	m.clearedFields[item.FieldLoudness] = struct{}{}
+}
+
+// LoudnessCleared returns if the "loudness" field was cleared in this mutation.
+func (m *ItemMutation) LoudnessCleared() bool {
+	_, ok := m.clearedFields[item.FieldLoudness]
+	return ok
+}
+
+// ResetLoudness resets all changes to the "loudness" field.
+func (m *ItemMutation) ResetLoudness() {
+	m.loudness = nil
+	m.addloudness = nil
+	delete(m.clearedFields, item.FieldLoudness)
+}
+
 // SetExtra sets the "extra" field.
 func (m *ItemMutation) SetExtra(s string) {
 	m.extra = &s
@@ -8340,6 +8422,114 @@ func (m *ItemMutation) ResetImages() {
 	m.removedimages = nil
 }
 
+// AddTrickplayIDs adds the "trickplay" edge to the Trickplay entity by ids.
+func (m *ItemMutation) AddTrickplayIDs(ids ...core.ID) {
+	if m.trickplay == nil {
+		m.trickplay = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.trickplay[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTrickplay clears the "trickplay" edge to the Trickplay entity.
+func (m *ItemMutation) ClearTrickplay() {
+	m.clearedtrickplay = true
+}
+
+// TrickplayCleared reports if the "trickplay" edge to the Trickplay entity was cleared.
+func (m *ItemMutation) TrickplayCleared() bool {
+	return m.clearedtrickplay
+}
+
+// RemoveTrickplayIDs removes the "trickplay" edge to the Trickplay entity by IDs.
+func (m *ItemMutation) RemoveTrickplayIDs(ids ...core.ID) {
+	if m.removedtrickplay == nil {
+		m.removedtrickplay = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.trickplay, ids[i])
+		m.removedtrickplay[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTrickplay returns the removed IDs of the "trickplay" edge to the Trickplay entity.
+func (m *ItemMutation) RemovedTrickplayIDs() (ids []core.ID) {
+	for id := range m.removedtrickplay {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TrickplayIDs returns the "trickplay" edge IDs in the mutation.
+func (m *ItemMutation) TrickplayIDs() (ids []core.ID) {
+	for id := range m.trickplay {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTrickplay resets all changes to the "trickplay" edge.
+func (m *ItemMutation) ResetTrickplay() {
+	m.trickplay = nil
+	m.clearedtrickplay = false
+	m.removedtrickplay = nil
+}
+
+// AddSegmentIDs adds the "segments" edge to the MediaSegment entity by ids.
+func (m *ItemMutation) AddSegmentIDs(ids ...core.ID) {
+	if m.segments == nil {
+		m.segments = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.segments[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSegments clears the "segments" edge to the MediaSegment entity.
+func (m *ItemMutation) ClearSegments() {
+	m.clearedsegments = true
+}
+
+// SegmentsCleared reports if the "segments" edge to the MediaSegment entity was cleared.
+func (m *ItemMutation) SegmentsCleared() bool {
+	return m.clearedsegments
+}
+
+// RemoveSegmentIDs removes the "segments" edge to the MediaSegment entity by IDs.
+func (m *ItemMutation) RemoveSegmentIDs(ids ...core.ID) {
+	if m.removedsegments == nil {
+		m.removedsegments = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.segments, ids[i])
+		m.removedsegments[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSegments returns the removed IDs of the "segments" edge to the MediaSegment entity.
+func (m *ItemMutation) RemovedSegmentsIDs() (ids []core.ID) {
+	for id := range m.removedsegments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SegmentsIDs returns the "segments" edge IDs in the mutation.
+func (m *ItemMutation) SegmentsIDs() (ids []core.ID) {
+	for id := range m.segments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSegments resets all changes to the "segments" edge.
+func (m *ItemMutation) ResetSegments() {
+	m.segments = nil
+	m.clearedsegments = false
+	m.removedsegments = nil
+}
+
 // AddCreditIDs adds the "credits" edge to the Credit entity by ids.
 func (m *ItemMutation) AddCreditIDs(ids ...int) {
 	if m.credits == nil {
@@ -8617,7 +8807,7 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 51)
+	fields := make([]string, 0, 52)
 	if m.library != nil {
 		fields = append(fields, item.FieldLibraryID)
 	}
@@ -8747,6 +8937,9 @@ func (m *ItemMutation) Fields() []string {
 	if m.locked_fields != nil {
 		fields = append(fields, item.FieldLockedFields)
 	}
+	if m.loudness != nil {
+		fields = append(fields, item.FieldLoudness)
+	}
 	if m.extra != nil {
 		fields = append(fields, item.FieldExtra)
 	}
@@ -8865,6 +9058,8 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 		return m.Locked()
 	case item.FieldLockedFields:
 		return m.LockedFields()
+	case item.FieldLoudness:
+		return m.Loudness()
 	case item.FieldExtra:
 		return m.Extra()
 	case item.FieldOwnerID:
@@ -8976,6 +9171,8 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldLocked(ctx)
 	case item.FieldLockedFields:
 		return m.OldLockedFields(ctx)
+	case item.FieldLoudness:
+		return m.OldLoudness(ctx)
 	case item.FieldExtra:
 		return m.OldExtra(ctx)
 	case item.FieldOwnerID:
@@ -9302,6 +9499,13 @@ func (m *ItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLockedFields(v)
 		return nil
+	case item.FieldLoudness:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLoudness(v)
+		return nil
 	case item.FieldExtra:
 		v, ok := value.(string)
 		if !ok {
@@ -9402,6 +9606,9 @@ func (m *ItemMutation) AddedFields() []string {
 	if m.addairs_before_episode_number != nil {
 		fields = append(fields, item.FieldAirsBeforeEpisodeNumber)
 	}
+	if m.addloudness != nil {
+		fields = append(fields, item.FieldLoudness)
+	}
 	if m.addscan_generation != nil {
 		fields = append(fields, item.FieldScanGeneration)
 	}
@@ -9437,6 +9644,8 @@ func (m *ItemMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedAirsAfterSeasonNumber()
 	case item.FieldAirsBeforeEpisodeNumber:
 		return m.AddedAirsBeforeEpisodeNumber()
+	case item.FieldLoudness:
+		return m.AddedLoudness()
 	case item.FieldScanGeneration:
 		return m.AddedScanGeneration()
 	}
@@ -9532,6 +9741,13 @@ func (m *ItemMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddAirsBeforeEpisodeNumber(v)
 		return nil
+	case item.FieldLoudness:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLoudness(v)
+		return nil
 	case item.FieldScanGeneration:
 		v, ok := value.(int64)
 		if !ok {
@@ -9594,6 +9810,9 @@ func (m *ItemMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(item.FieldLockedFields) {
 		fields = append(fields, item.FieldLockedFields)
+	}
+	if m.FieldCleared(item.FieldLoudness) {
+		fields = append(fields, item.FieldLoudness)
 	}
 	if m.FieldCleared(item.FieldOwnerID) {
 		fields = append(fields, item.FieldOwnerID)
@@ -9671,6 +9890,9 @@ func (m *ItemMutation) ClearField(name string) error {
 		return nil
 	case item.FieldLockedFields:
 		m.ClearLockedFields()
+		return nil
+	case item.FieldLoudness:
+		m.ClearLoudness()
 		return nil
 	case item.FieldOwnerID:
 		m.ClearOwnerID()
@@ -9824,6 +10046,9 @@ func (m *ItemMutation) ResetField(name string) error {
 	case item.FieldLockedFields:
 		m.ResetLockedFields()
 		return nil
+	case item.FieldLoudness:
+		m.ResetLoudness()
+		return nil
 	case item.FieldExtra:
 		m.ResetExtra()
 		return nil
@@ -9854,7 +10079,7 @@ func (m *ItemMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ItemMutation) AddedEdges() []string {
-	edges := make([]string, 0, 13)
+	edges := make([]string, 0, 15)
 	if m.library != nil {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -9878,6 +10103,12 @@ func (m *ItemMutation) AddedEdges() []string {
 	}
 	if m.images != nil {
 		edges = append(edges, item.EdgeImages)
+	}
+	if m.trickplay != nil {
+		edges = append(edges, item.EdgeTrickplay)
+	}
+	if m.segments != nil {
+		edges = append(edges, item.EdgeSegments)
 	}
 	if m.credits != nil {
 		edges = append(edges, item.EdgeCredits)
@@ -9943,6 +10174,18 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeTrickplay:
+		ids := make([]ent.Value, 0, len(m.trickplay))
+		for id := range m.trickplay {
+			ids = append(ids, id)
+		}
+		return ids
+	case item.EdgeSegments:
+		ids := make([]ent.Value, 0, len(m.segments))
+		for id := range m.segments {
+			ids = append(ids, id)
+		}
+		return ids
 	case item.EdgeCredits:
 		ids := make([]ent.Value, 0, len(m.credits))
 		for id := range m.credits {
@@ -9977,7 +10220,7 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ItemMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 13)
+	edges := make([]string, 0, 15)
 	if m.removedchildren != nil {
 		edges = append(edges, item.EdgeChildren)
 	}
@@ -9992,6 +10235,12 @@ func (m *ItemMutation) RemovedEdges() []string {
 	}
 	if m.removedimages != nil {
 		edges = append(edges, item.EdgeImages)
+	}
+	if m.removedtrickplay != nil {
+		edges = append(edges, item.EdgeTrickplay)
+	}
+	if m.removedsegments != nil {
+		edges = append(edges, item.EdgeSegments)
 	}
 	if m.removedcredits != nil {
 		edges = append(edges, item.EdgeCredits)
@@ -10042,6 +10291,18 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeTrickplay:
+		ids := make([]ent.Value, 0, len(m.removedtrickplay))
+		for id := range m.removedtrickplay {
+			ids = append(ids, id)
+		}
+		return ids
+	case item.EdgeSegments:
+		ids := make([]ent.Value, 0, len(m.removedsegments))
+		for id := range m.removedsegments {
+			ids = append(ids, id)
+		}
+		return ids
 	case item.EdgeCredits:
 		ids := make([]ent.Value, 0, len(m.removedcredits))
 		for id := range m.removedcredits {
@@ -10072,7 +10333,7 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ItemMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 13)
+	edges := make([]string, 0, 15)
 	if m.clearedlibrary {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -10096,6 +10357,12 @@ func (m *ItemMutation) ClearedEdges() []string {
 	}
 	if m.clearedimages {
 		edges = append(edges, item.EdgeImages)
+	}
+	if m.clearedtrickplay {
+		edges = append(edges, item.EdgeTrickplay)
+	}
+	if m.clearedsegments {
+		edges = append(edges, item.EdgeSegments)
 	}
 	if m.clearedcredits {
 		edges = append(edges, item.EdgeCredits)
@@ -10135,6 +10402,10 @@ func (m *ItemMutation) EdgeCleared(name string) bool {
 		return m.clearedmedia_sources
 	case item.EdgeImages:
 		return m.clearedimages
+	case item.EdgeTrickplay:
+		return m.clearedtrickplay
+	case item.EdgeSegments:
+		return m.clearedsegments
 	case item.EdgeCredits:
 		return m.clearedcredits
 	case item.EdgeUserData:
@@ -10196,6 +10467,12 @@ func (m *ItemMutation) ResetEdge(name string) error {
 		return nil
 	case item.EdgeImages:
 		m.ResetImages()
+		return nil
+	case item.EdgeTrickplay:
+		m.ResetTrickplay()
+		return nil
+	case item.EdgeSegments:
+		m.ResetSegments()
 		return nil
 	case item.EdgeCredits:
 		m.ResetCredits()
@@ -12623,33 +12900,36 @@ func (m *JobMutation) ResetEdge(name string) error {
 // LibraryMutation represents an operation that mutates the Library nodes in the graph.
 type LibraryMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *core.ID
-	name                 *string
-	kind                 *string
-	paths                *[]string
-	appendpaths          []string
-	scan_interval        *time.Duration
-	addscan_interval     *time.Duration
-	preferred_language   *string
-	metadata_country     *string
-	save_local_metadata  *bool
-	auto_collections     *bool
-	scan_generation      *int64
-	addscan_generation   *int64
-	created_at           *time.Time
-	updated_at           *time.Time
-	clearedFields        map[string]struct{}
-	items                map[core.ID]struct{}
-	removeditems         map[core.ID]struct{}
-	cleareditems         bool
-	folder_states        map[core.ID]struct{}
-	removedfolder_states map[core.ID]struct{}
-	clearedfolder_states bool
-	done                 bool
-	oldValue             func(context.Context) (*Library, error)
-	predicates           []predicate.Library
+	op                     Op
+	typ                    string
+	id                     *core.ID
+	name                   *string
+	kind                   *string
+	paths                  *[]string
+	appendpaths            []string
+	scan_interval          *time.Duration
+	addscan_interval       *time.Duration
+	preferred_language     *string
+	metadata_country       *string
+	save_local_metadata    *bool
+	auto_collections       *bool
+	extract_trickplay      *bool
+	extract_chapter_images *bool
+	analyze_loudness       *bool
+	scan_generation        *int64
+	addscan_generation     *int64
+	created_at             *time.Time
+	updated_at             *time.Time
+	clearedFields          map[string]struct{}
+	items                  map[core.ID]struct{}
+	removeditems           map[core.ID]struct{}
+	cleareditems           bool
+	folder_states          map[core.ID]struct{}
+	removedfolder_states   map[core.ID]struct{}
+	clearedfolder_states   bool
+	done                   bool
+	oldValue               func(context.Context) (*Library, error)
+	predicates             []predicate.Library
 }
 
 var _ ent.Mutation = (*LibraryMutation)(nil)
@@ -13079,6 +13359,114 @@ func (m *LibraryMutation) ResetAutoCollections() {
 	m.auto_collections = nil
 }
 
+// SetExtractTrickplay sets the "extract_trickplay" field.
+func (m *LibraryMutation) SetExtractTrickplay(b bool) {
+	m.extract_trickplay = &b
+}
+
+// ExtractTrickplay returns the value of the "extract_trickplay" field in the mutation.
+func (m *LibraryMutation) ExtractTrickplay() (r bool, exists bool) {
+	v := m.extract_trickplay
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExtractTrickplay returns the old "extract_trickplay" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldExtractTrickplay(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExtractTrickplay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExtractTrickplay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExtractTrickplay: %w", err)
+	}
+	return oldValue.ExtractTrickplay, nil
+}
+
+// ResetExtractTrickplay resets all changes to the "extract_trickplay" field.
+func (m *LibraryMutation) ResetExtractTrickplay() {
+	m.extract_trickplay = nil
+}
+
+// SetExtractChapterImages sets the "extract_chapter_images" field.
+func (m *LibraryMutation) SetExtractChapterImages(b bool) {
+	m.extract_chapter_images = &b
+}
+
+// ExtractChapterImages returns the value of the "extract_chapter_images" field in the mutation.
+func (m *LibraryMutation) ExtractChapterImages() (r bool, exists bool) {
+	v := m.extract_chapter_images
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExtractChapterImages returns the old "extract_chapter_images" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldExtractChapterImages(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExtractChapterImages is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExtractChapterImages requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExtractChapterImages: %w", err)
+	}
+	return oldValue.ExtractChapterImages, nil
+}
+
+// ResetExtractChapterImages resets all changes to the "extract_chapter_images" field.
+func (m *LibraryMutation) ResetExtractChapterImages() {
+	m.extract_chapter_images = nil
+}
+
+// SetAnalyzeLoudness sets the "analyze_loudness" field.
+func (m *LibraryMutation) SetAnalyzeLoudness(b bool) {
+	m.analyze_loudness = &b
+}
+
+// AnalyzeLoudness returns the value of the "analyze_loudness" field in the mutation.
+func (m *LibraryMutation) AnalyzeLoudness() (r bool, exists bool) {
+	v := m.analyze_loudness
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAnalyzeLoudness returns the old "analyze_loudness" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldAnalyzeLoudness(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAnalyzeLoudness is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAnalyzeLoudness requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAnalyzeLoudness: %w", err)
+	}
+	return oldValue.AnalyzeLoudness, nil
+}
+
+// ResetAnalyzeLoudness resets all changes to the "analyze_loudness" field.
+func (m *LibraryMutation) ResetAnalyzeLoudness() {
+	m.analyze_loudness = nil
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (m *LibraryMutation) SetScanGeneration(i int64) {
 	m.scan_generation = &i
@@ -13349,7 +13737,7 @@ func (m *LibraryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LibraryMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 14)
 	if m.name != nil {
 		fields = append(fields, library.FieldName)
 	}
@@ -13373,6 +13761,15 @@ func (m *LibraryMutation) Fields() []string {
 	}
 	if m.auto_collections != nil {
 		fields = append(fields, library.FieldAutoCollections)
+	}
+	if m.extract_trickplay != nil {
+		fields = append(fields, library.FieldExtractTrickplay)
+	}
+	if m.extract_chapter_images != nil {
+		fields = append(fields, library.FieldExtractChapterImages)
+	}
+	if m.analyze_loudness != nil {
+		fields = append(fields, library.FieldAnalyzeLoudness)
 	}
 	if m.scan_generation != nil {
 		fields = append(fields, library.FieldScanGeneration)
@@ -13407,6 +13804,12 @@ func (m *LibraryMutation) Field(name string) (ent.Value, bool) {
 		return m.SaveLocalMetadata()
 	case library.FieldAutoCollections:
 		return m.AutoCollections()
+	case library.FieldExtractTrickplay:
+		return m.ExtractTrickplay()
+	case library.FieldExtractChapterImages:
+		return m.ExtractChapterImages()
+	case library.FieldAnalyzeLoudness:
+		return m.AnalyzeLoudness()
 	case library.FieldScanGeneration:
 		return m.ScanGeneration()
 	case library.FieldCreatedAt:
@@ -13438,6 +13841,12 @@ func (m *LibraryMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldSaveLocalMetadata(ctx)
 	case library.FieldAutoCollections:
 		return m.OldAutoCollections(ctx)
+	case library.FieldExtractTrickplay:
+		return m.OldExtractTrickplay(ctx)
+	case library.FieldExtractChapterImages:
+		return m.OldExtractChapterImages(ctx)
+	case library.FieldAnalyzeLoudness:
+		return m.OldAnalyzeLoudness(ctx)
 	case library.FieldScanGeneration:
 		return m.OldScanGeneration(ctx)
 	case library.FieldCreatedAt:
@@ -13508,6 +13917,27 @@ func (m *LibraryMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAutoCollections(v)
+		return nil
+	case library.FieldExtractTrickplay:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExtractTrickplay(v)
+		return nil
+	case library.FieldExtractChapterImages:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExtractChapterImages(v)
+		return nil
+	case library.FieldAnalyzeLoudness:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAnalyzeLoudness(v)
 		return nil
 	case library.FieldScanGeneration:
 		v, ok := value.(int64)
@@ -13630,6 +14060,15 @@ func (m *LibraryMutation) ResetField(name string) error {
 	case library.FieldAutoCollections:
 		m.ResetAutoCollections()
 		return nil
+	case library.FieldExtractTrickplay:
+		m.ResetExtractTrickplay()
+		return nil
+	case library.FieldExtractChapterImages:
+		m.ResetExtractChapterImages()
+		return nil
+	case library.FieldAnalyzeLoudness:
+		m.ResetAnalyzeLoudness()
+		return nil
 	case library.FieldScanGeneration:
 		m.ResetScanGeneration()
 		return nil
@@ -13751,6 +14190,677 @@ func (m *LibraryMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Library edge %s", name)
+}
+
+// MediaSegmentMutation represents an operation that mutates the MediaSegment nodes in the graph.
+type MediaSegmentMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *core.ID
+	kind          *string
+	start         *time.Duration
+	addstart      *time.Duration
+	end           *time.Duration
+	addend        *time.Duration
+	provider      *string
+	clearedFields map[string]struct{}
+	item          *core.ID
+	cleareditem   bool
+	done          bool
+	oldValue      func(context.Context) (*MediaSegment, error)
+	predicates    []predicate.MediaSegment
+}
+
+var _ ent.Mutation = (*MediaSegmentMutation)(nil)
+
+// mediasegmentOption allows management of the mutation configuration using functional options.
+type mediasegmentOption func(*MediaSegmentMutation)
+
+// newMediaSegmentMutation creates new mutation for the MediaSegment entity.
+func newMediaSegmentMutation(c config, op Op, opts ...mediasegmentOption) *MediaSegmentMutation {
+	m := &MediaSegmentMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMediaSegment,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMediaSegmentID sets the ID field of the mutation.
+func withMediaSegmentID(id core.ID) mediasegmentOption {
+	return func(m *MediaSegmentMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *MediaSegment
+		)
+		m.oldValue = func(ctx context.Context) (*MediaSegment, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().MediaSegment.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMediaSegment sets the old MediaSegment of the mutation.
+func withMediaSegment(node *MediaSegment) mediasegmentOption {
+	return func(m *MediaSegmentMutation) {
+		m.oldValue = func(context.Context) (*MediaSegment, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MediaSegmentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MediaSegmentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of MediaSegment entities.
+func (m *MediaSegmentMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *MediaSegmentMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *MediaSegmentMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().MediaSegment.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetItemID sets the "item_id" field.
+func (m *MediaSegmentMutation) SetItemID(c core.ID) {
+	m.item = &c
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *MediaSegmentMutation) ItemID() (r core.ID, exists bool) {
+	v := m.item
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the MediaSegment entity.
+// If the MediaSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaSegmentMutation) OldItemID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *MediaSegmentMutation) ResetItemID() {
+	m.item = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *MediaSegmentMutation) SetKind(s string) {
+	m.kind = &s
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *MediaSegmentMutation) Kind() (r string, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the MediaSegment entity.
+// If the MediaSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaSegmentMutation) OldKind(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *MediaSegmentMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetStart sets the "start" field.
+func (m *MediaSegmentMutation) SetStart(t time.Duration) {
+	m.start = &t
+	m.addstart = nil
+}
+
+// Start returns the value of the "start" field in the mutation.
+func (m *MediaSegmentMutation) Start() (r time.Duration, exists bool) {
+	v := m.start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStart returns the old "start" field's value of the MediaSegment entity.
+// If the MediaSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaSegmentMutation) OldStart(ctx context.Context) (v time.Duration, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStart: %w", err)
+	}
+	return oldValue.Start, nil
+}
+
+// AddStart adds t to the "start" field.
+func (m *MediaSegmentMutation) AddStart(t time.Duration) {
+	if m.addstart != nil {
+		*m.addstart += t
+	} else {
+		m.addstart = &t
+	}
+}
+
+// AddedStart returns the value that was added to the "start" field in this mutation.
+func (m *MediaSegmentMutation) AddedStart() (r time.Duration, exists bool) {
+	v := m.addstart
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStart resets all changes to the "start" field.
+func (m *MediaSegmentMutation) ResetStart() {
+	m.start = nil
+	m.addstart = nil
+}
+
+// SetEnd sets the "end" field.
+func (m *MediaSegmentMutation) SetEnd(t time.Duration) {
+	m.end = &t
+	m.addend = nil
+}
+
+// End returns the value of the "end" field in the mutation.
+func (m *MediaSegmentMutation) End() (r time.Duration, exists bool) {
+	v := m.end
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnd returns the old "end" field's value of the MediaSegment entity.
+// If the MediaSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaSegmentMutation) OldEnd(ctx context.Context) (v time.Duration, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnd: %w", err)
+	}
+	return oldValue.End, nil
+}
+
+// AddEnd adds t to the "end" field.
+func (m *MediaSegmentMutation) AddEnd(t time.Duration) {
+	if m.addend != nil {
+		*m.addend += t
+	} else {
+		m.addend = &t
+	}
+}
+
+// AddedEnd returns the value that was added to the "end" field in this mutation.
+func (m *MediaSegmentMutation) AddedEnd() (r time.Duration, exists bool) {
+	v := m.addend
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetEnd resets all changes to the "end" field.
+func (m *MediaSegmentMutation) ResetEnd() {
+	m.end = nil
+	m.addend = nil
+}
+
+// SetProvider sets the "provider" field.
+func (m *MediaSegmentMutation) SetProvider(s string) {
+	m.provider = &s
+}
+
+// Provider returns the value of the "provider" field in the mutation.
+func (m *MediaSegmentMutation) Provider() (r string, exists bool) {
+	v := m.provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProvider returns the old "provider" field's value of the MediaSegment entity.
+// If the MediaSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaSegmentMutation) OldProvider(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProvider: %w", err)
+	}
+	return oldValue.Provider, nil
+}
+
+// ResetProvider resets all changes to the "provider" field.
+func (m *MediaSegmentMutation) ResetProvider() {
+	m.provider = nil
+}
+
+// ClearItem clears the "item" edge to the Item entity.
+func (m *MediaSegmentMutation) ClearItem() {
+	m.cleareditem = true
+	m.clearedFields[mediasegment.FieldItemID] = struct{}{}
+}
+
+// ItemCleared reports if the "item" edge to the Item entity was cleared.
+func (m *MediaSegmentMutation) ItemCleared() bool {
+	return m.cleareditem
+}
+
+// ItemIDs returns the "item" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemID instead. It exists only for internal usage by the builders.
+func (m *MediaSegmentMutation) ItemIDs() (ids []core.ID) {
+	if id := m.item; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItem resets all changes to the "item" edge.
+func (m *MediaSegmentMutation) ResetItem() {
+	m.item = nil
+	m.cleareditem = false
+}
+
+// Where appends a list predicates to the MediaSegmentMutation builder.
+func (m *MediaSegmentMutation) Where(ps ...predicate.MediaSegment) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the MediaSegmentMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *MediaSegmentMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.MediaSegment, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *MediaSegmentMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *MediaSegmentMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (MediaSegment).
+func (m *MediaSegmentMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *MediaSegmentMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.item != nil {
+		fields = append(fields, mediasegment.FieldItemID)
+	}
+	if m.kind != nil {
+		fields = append(fields, mediasegment.FieldKind)
+	}
+	if m.start != nil {
+		fields = append(fields, mediasegment.FieldStart)
+	}
+	if m.end != nil {
+		fields = append(fields, mediasegment.FieldEnd)
+	}
+	if m.provider != nil {
+		fields = append(fields, mediasegment.FieldProvider)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *MediaSegmentMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case mediasegment.FieldItemID:
+		return m.ItemID()
+	case mediasegment.FieldKind:
+		return m.Kind()
+	case mediasegment.FieldStart:
+		return m.Start()
+	case mediasegment.FieldEnd:
+		return m.End()
+	case mediasegment.FieldProvider:
+		return m.Provider()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *MediaSegmentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case mediasegment.FieldItemID:
+		return m.OldItemID(ctx)
+	case mediasegment.FieldKind:
+		return m.OldKind(ctx)
+	case mediasegment.FieldStart:
+		return m.OldStart(ctx)
+	case mediasegment.FieldEnd:
+		return m.OldEnd(ctx)
+	case mediasegment.FieldProvider:
+		return m.OldProvider(ctx)
+	}
+	return nil, fmt.Errorf("unknown MediaSegment field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MediaSegmentMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case mediasegment.FieldItemID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case mediasegment.FieldKind:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case mediasegment.FieldStart:
+		v, ok := value.(time.Duration)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStart(v)
+		return nil
+	case mediasegment.FieldEnd:
+		v, ok := value.(time.Duration)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnd(v)
+		return nil
+	case mediasegment.FieldProvider:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProvider(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MediaSegment field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *MediaSegmentMutation) AddedFields() []string {
+	var fields []string
+	if m.addstart != nil {
+		fields = append(fields, mediasegment.FieldStart)
+	}
+	if m.addend != nil {
+		fields = append(fields, mediasegment.FieldEnd)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *MediaSegmentMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case mediasegment.FieldStart:
+		return m.AddedStart()
+	case mediasegment.FieldEnd:
+		return m.AddedEnd()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MediaSegmentMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case mediasegment.FieldStart:
+		v, ok := value.(time.Duration)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStart(v)
+		return nil
+	case mediasegment.FieldEnd:
+		v, ok := value.(time.Duration)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEnd(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MediaSegment numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *MediaSegmentMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *MediaSegmentMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MediaSegmentMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown MediaSegment nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *MediaSegmentMutation) ResetField(name string) error {
+	switch name {
+	case mediasegment.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case mediasegment.FieldKind:
+		m.ResetKind()
+		return nil
+	case mediasegment.FieldStart:
+		m.ResetStart()
+		return nil
+	case mediasegment.FieldEnd:
+		m.ResetEnd()
+		return nil
+	case mediasegment.FieldProvider:
+		m.ResetProvider()
+		return nil
+	}
+	return fmt.Errorf("unknown MediaSegment field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *MediaSegmentMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.item != nil {
+		edges = append(edges, mediasegment.EdgeItem)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *MediaSegmentMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case mediasegment.EdgeItem:
+		if id := m.item; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *MediaSegmentMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *MediaSegmentMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *MediaSegmentMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareditem {
+		edges = append(edges, mediasegment.EdgeItem)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *MediaSegmentMutation) EdgeCleared(name string) bool {
+	switch name {
+	case mediasegment.EdgeItem:
+		return m.cleareditem
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *MediaSegmentMutation) ClearEdge(name string) error {
+	switch name {
+	case mediasegment.EdgeItem:
+		m.ClearItem()
+		return nil
+	}
+	return fmt.Errorf("unknown MediaSegment unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *MediaSegmentMutation) ResetEdge(name string) error {
+	switch name {
+	case mediasegment.EdgeItem:
+		m.ResetItem()
+		return nil
+	}
+	return fmt.Errorf("unknown MediaSegment edge %s", name)
 }
 
 // MediaSourceMutation represents an operation that mutates the MediaSource nodes in the graph.
@@ -17147,6 +18257,1004 @@ func (m *SettingMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *SettingMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Setting edge %s", name)
+}
+
+// TrickplayMutation represents an operation that mutates the Trickplay nodes in the graph.
+type TrickplayMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *core.ID
+	width              *int
+	addwidth           *int
+	height             *int
+	addheight          *int
+	tile_width         *int
+	addtile_width      *int
+	tile_height        *int
+	addtile_height     *int
+	thumbnail_count    *int
+	addthumbnail_count *int
+	interval           *time.Duration
+	addinterval        *time.Duration
+	bandwidth          *int
+	addbandwidth       *int
+	clearedFields      map[string]struct{}
+	item               *core.ID
+	cleareditem        bool
+	done               bool
+	oldValue           func(context.Context) (*Trickplay, error)
+	predicates         []predicate.Trickplay
+}
+
+var _ ent.Mutation = (*TrickplayMutation)(nil)
+
+// trickplayOption allows management of the mutation configuration using functional options.
+type trickplayOption func(*TrickplayMutation)
+
+// newTrickplayMutation creates new mutation for the Trickplay entity.
+func newTrickplayMutation(c config, op Op, opts ...trickplayOption) *TrickplayMutation {
+	m := &TrickplayMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTrickplay,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTrickplayID sets the ID field of the mutation.
+func withTrickplayID(id core.ID) trickplayOption {
+	return func(m *TrickplayMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Trickplay
+		)
+		m.oldValue = func(ctx context.Context) (*Trickplay, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Trickplay.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTrickplay sets the old Trickplay of the mutation.
+func withTrickplay(node *Trickplay) trickplayOption {
+	return func(m *TrickplayMutation) {
+		m.oldValue = func(context.Context) (*Trickplay, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TrickplayMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TrickplayMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Trickplay entities.
+func (m *TrickplayMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TrickplayMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TrickplayMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Trickplay.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetItemID sets the "item_id" field.
+func (m *TrickplayMutation) SetItemID(c core.ID) {
+	m.item = &c
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *TrickplayMutation) ItemID() (r core.ID, exists bool) {
+	v := m.item
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the Trickplay entity.
+// If the Trickplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrickplayMutation) OldItemID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *TrickplayMutation) ResetItemID() {
+	m.item = nil
+}
+
+// SetWidth sets the "width" field.
+func (m *TrickplayMutation) SetWidth(i int) {
+	m.width = &i
+	m.addwidth = nil
+}
+
+// Width returns the value of the "width" field in the mutation.
+func (m *TrickplayMutation) Width() (r int, exists bool) {
+	v := m.width
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWidth returns the old "width" field's value of the Trickplay entity.
+// If the Trickplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrickplayMutation) OldWidth(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWidth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWidth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWidth: %w", err)
+	}
+	return oldValue.Width, nil
+}
+
+// AddWidth adds i to the "width" field.
+func (m *TrickplayMutation) AddWidth(i int) {
+	if m.addwidth != nil {
+		*m.addwidth += i
+	} else {
+		m.addwidth = &i
+	}
+}
+
+// AddedWidth returns the value that was added to the "width" field in this mutation.
+func (m *TrickplayMutation) AddedWidth() (r int, exists bool) {
+	v := m.addwidth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetWidth resets all changes to the "width" field.
+func (m *TrickplayMutation) ResetWidth() {
+	m.width = nil
+	m.addwidth = nil
+}
+
+// SetHeight sets the "height" field.
+func (m *TrickplayMutation) SetHeight(i int) {
+	m.height = &i
+	m.addheight = nil
+}
+
+// Height returns the value of the "height" field in the mutation.
+func (m *TrickplayMutation) Height() (r int, exists bool) {
+	v := m.height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHeight returns the old "height" field's value of the Trickplay entity.
+// If the Trickplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrickplayMutation) OldHeight(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHeight is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHeight: %w", err)
+	}
+	return oldValue.Height, nil
+}
+
+// AddHeight adds i to the "height" field.
+func (m *TrickplayMutation) AddHeight(i int) {
+	if m.addheight != nil {
+		*m.addheight += i
+	} else {
+		m.addheight = &i
+	}
+}
+
+// AddedHeight returns the value that was added to the "height" field in this mutation.
+func (m *TrickplayMutation) AddedHeight() (r int, exists bool) {
+	v := m.addheight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetHeight resets all changes to the "height" field.
+func (m *TrickplayMutation) ResetHeight() {
+	m.height = nil
+	m.addheight = nil
+}
+
+// SetTileWidth sets the "tile_width" field.
+func (m *TrickplayMutation) SetTileWidth(i int) {
+	m.tile_width = &i
+	m.addtile_width = nil
+}
+
+// TileWidth returns the value of the "tile_width" field in the mutation.
+func (m *TrickplayMutation) TileWidth() (r int, exists bool) {
+	v := m.tile_width
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTileWidth returns the old "tile_width" field's value of the Trickplay entity.
+// If the Trickplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrickplayMutation) OldTileWidth(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTileWidth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTileWidth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTileWidth: %w", err)
+	}
+	return oldValue.TileWidth, nil
+}
+
+// AddTileWidth adds i to the "tile_width" field.
+func (m *TrickplayMutation) AddTileWidth(i int) {
+	if m.addtile_width != nil {
+		*m.addtile_width += i
+	} else {
+		m.addtile_width = &i
+	}
+}
+
+// AddedTileWidth returns the value that was added to the "tile_width" field in this mutation.
+func (m *TrickplayMutation) AddedTileWidth() (r int, exists bool) {
+	v := m.addtile_width
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTileWidth resets all changes to the "tile_width" field.
+func (m *TrickplayMutation) ResetTileWidth() {
+	m.tile_width = nil
+	m.addtile_width = nil
+}
+
+// SetTileHeight sets the "tile_height" field.
+func (m *TrickplayMutation) SetTileHeight(i int) {
+	m.tile_height = &i
+	m.addtile_height = nil
+}
+
+// TileHeight returns the value of the "tile_height" field in the mutation.
+func (m *TrickplayMutation) TileHeight() (r int, exists bool) {
+	v := m.tile_height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTileHeight returns the old "tile_height" field's value of the Trickplay entity.
+// If the Trickplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrickplayMutation) OldTileHeight(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTileHeight is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTileHeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTileHeight: %w", err)
+	}
+	return oldValue.TileHeight, nil
+}
+
+// AddTileHeight adds i to the "tile_height" field.
+func (m *TrickplayMutation) AddTileHeight(i int) {
+	if m.addtile_height != nil {
+		*m.addtile_height += i
+	} else {
+		m.addtile_height = &i
+	}
+}
+
+// AddedTileHeight returns the value that was added to the "tile_height" field in this mutation.
+func (m *TrickplayMutation) AddedTileHeight() (r int, exists bool) {
+	v := m.addtile_height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTileHeight resets all changes to the "tile_height" field.
+func (m *TrickplayMutation) ResetTileHeight() {
+	m.tile_height = nil
+	m.addtile_height = nil
+}
+
+// SetThumbnailCount sets the "thumbnail_count" field.
+func (m *TrickplayMutation) SetThumbnailCount(i int) {
+	m.thumbnail_count = &i
+	m.addthumbnail_count = nil
+}
+
+// ThumbnailCount returns the value of the "thumbnail_count" field in the mutation.
+func (m *TrickplayMutation) ThumbnailCount() (r int, exists bool) {
+	v := m.thumbnail_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldThumbnailCount returns the old "thumbnail_count" field's value of the Trickplay entity.
+// If the Trickplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrickplayMutation) OldThumbnailCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldThumbnailCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldThumbnailCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldThumbnailCount: %w", err)
+	}
+	return oldValue.ThumbnailCount, nil
+}
+
+// AddThumbnailCount adds i to the "thumbnail_count" field.
+func (m *TrickplayMutation) AddThumbnailCount(i int) {
+	if m.addthumbnail_count != nil {
+		*m.addthumbnail_count += i
+	} else {
+		m.addthumbnail_count = &i
+	}
+}
+
+// AddedThumbnailCount returns the value that was added to the "thumbnail_count" field in this mutation.
+func (m *TrickplayMutation) AddedThumbnailCount() (r int, exists bool) {
+	v := m.addthumbnail_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetThumbnailCount resets all changes to the "thumbnail_count" field.
+func (m *TrickplayMutation) ResetThumbnailCount() {
+	m.thumbnail_count = nil
+	m.addthumbnail_count = nil
+}
+
+// SetInterval sets the "interval" field.
+func (m *TrickplayMutation) SetInterval(t time.Duration) {
+	m.interval = &t
+	m.addinterval = nil
+}
+
+// Interval returns the value of the "interval" field in the mutation.
+func (m *TrickplayMutation) Interval() (r time.Duration, exists bool) {
+	v := m.interval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInterval returns the old "interval" field's value of the Trickplay entity.
+// If the Trickplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrickplayMutation) OldInterval(ctx context.Context) (v time.Duration, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInterval is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInterval requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInterval: %w", err)
+	}
+	return oldValue.Interval, nil
+}
+
+// AddInterval adds t to the "interval" field.
+func (m *TrickplayMutation) AddInterval(t time.Duration) {
+	if m.addinterval != nil {
+		*m.addinterval += t
+	} else {
+		m.addinterval = &t
+	}
+}
+
+// AddedInterval returns the value that was added to the "interval" field in this mutation.
+func (m *TrickplayMutation) AddedInterval() (r time.Duration, exists bool) {
+	v := m.addinterval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetInterval resets all changes to the "interval" field.
+func (m *TrickplayMutation) ResetInterval() {
+	m.interval = nil
+	m.addinterval = nil
+}
+
+// SetBandwidth sets the "bandwidth" field.
+func (m *TrickplayMutation) SetBandwidth(i int) {
+	m.bandwidth = &i
+	m.addbandwidth = nil
+}
+
+// Bandwidth returns the value of the "bandwidth" field in the mutation.
+func (m *TrickplayMutation) Bandwidth() (r int, exists bool) {
+	v := m.bandwidth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBandwidth returns the old "bandwidth" field's value of the Trickplay entity.
+// If the Trickplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrickplayMutation) OldBandwidth(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBandwidth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBandwidth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBandwidth: %w", err)
+	}
+	return oldValue.Bandwidth, nil
+}
+
+// AddBandwidth adds i to the "bandwidth" field.
+func (m *TrickplayMutation) AddBandwidth(i int) {
+	if m.addbandwidth != nil {
+		*m.addbandwidth += i
+	} else {
+		m.addbandwidth = &i
+	}
+}
+
+// AddedBandwidth returns the value that was added to the "bandwidth" field in this mutation.
+func (m *TrickplayMutation) AddedBandwidth() (r int, exists bool) {
+	v := m.addbandwidth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBandwidth resets all changes to the "bandwidth" field.
+func (m *TrickplayMutation) ResetBandwidth() {
+	m.bandwidth = nil
+	m.addbandwidth = nil
+}
+
+// ClearItem clears the "item" edge to the Item entity.
+func (m *TrickplayMutation) ClearItem() {
+	m.cleareditem = true
+	m.clearedFields[trickplay.FieldItemID] = struct{}{}
+}
+
+// ItemCleared reports if the "item" edge to the Item entity was cleared.
+func (m *TrickplayMutation) ItemCleared() bool {
+	return m.cleareditem
+}
+
+// ItemIDs returns the "item" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemID instead. It exists only for internal usage by the builders.
+func (m *TrickplayMutation) ItemIDs() (ids []core.ID) {
+	if id := m.item; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItem resets all changes to the "item" edge.
+func (m *TrickplayMutation) ResetItem() {
+	m.item = nil
+	m.cleareditem = false
+}
+
+// Where appends a list predicates to the TrickplayMutation builder.
+func (m *TrickplayMutation) Where(ps ...predicate.Trickplay) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TrickplayMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TrickplayMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Trickplay, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TrickplayMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TrickplayMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Trickplay).
+func (m *TrickplayMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TrickplayMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.item != nil {
+		fields = append(fields, trickplay.FieldItemID)
+	}
+	if m.width != nil {
+		fields = append(fields, trickplay.FieldWidth)
+	}
+	if m.height != nil {
+		fields = append(fields, trickplay.FieldHeight)
+	}
+	if m.tile_width != nil {
+		fields = append(fields, trickplay.FieldTileWidth)
+	}
+	if m.tile_height != nil {
+		fields = append(fields, trickplay.FieldTileHeight)
+	}
+	if m.thumbnail_count != nil {
+		fields = append(fields, trickplay.FieldThumbnailCount)
+	}
+	if m.interval != nil {
+		fields = append(fields, trickplay.FieldInterval)
+	}
+	if m.bandwidth != nil {
+		fields = append(fields, trickplay.FieldBandwidth)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TrickplayMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case trickplay.FieldItemID:
+		return m.ItemID()
+	case trickplay.FieldWidth:
+		return m.Width()
+	case trickplay.FieldHeight:
+		return m.Height()
+	case trickplay.FieldTileWidth:
+		return m.TileWidth()
+	case trickplay.FieldTileHeight:
+		return m.TileHeight()
+	case trickplay.FieldThumbnailCount:
+		return m.ThumbnailCount()
+	case trickplay.FieldInterval:
+		return m.Interval()
+	case trickplay.FieldBandwidth:
+		return m.Bandwidth()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TrickplayMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case trickplay.FieldItemID:
+		return m.OldItemID(ctx)
+	case trickplay.FieldWidth:
+		return m.OldWidth(ctx)
+	case trickplay.FieldHeight:
+		return m.OldHeight(ctx)
+	case trickplay.FieldTileWidth:
+		return m.OldTileWidth(ctx)
+	case trickplay.FieldTileHeight:
+		return m.OldTileHeight(ctx)
+	case trickplay.FieldThumbnailCount:
+		return m.OldThumbnailCount(ctx)
+	case trickplay.FieldInterval:
+		return m.OldInterval(ctx)
+	case trickplay.FieldBandwidth:
+		return m.OldBandwidth(ctx)
+	}
+	return nil, fmt.Errorf("unknown Trickplay field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TrickplayMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case trickplay.FieldItemID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case trickplay.FieldWidth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWidth(v)
+		return nil
+	case trickplay.FieldHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHeight(v)
+		return nil
+	case trickplay.FieldTileWidth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTileWidth(v)
+		return nil
+	case trickplay.FieldTileHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTileHeight(v)
+		return nil
+	case trickplay.FieldThumbnailCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetThumbnailCount(v)
+		return nil
+	case trickplay.FieldInterval:
+		v, ok := value.(time.Duration)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInterval(v)
+		return nil
+	case trickplay.FieldBandwidth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBandwidth(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Trickplay field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TrickplayMutation) AddedFields() []string {
+	var fields []string
+	if m.addwidth != nil {
+		fields = append(fields, trickplay.FieldWidth)
+	}
+	if m.addheight != nil {
+		fields = append(fields, trickplay.FieldHeight)
+	}
+	if m.addtile_width != nil {
+		fields = append(fields, trickplay.FieldTileWidth)
+	}
+	if m.addtile_height != nil {
+		fields = append(fields, trickplay.FieldTileHeight)
+	}
+	if m.addthumbnail_count != nil {
+		fields = append(fields, trickplay.FieldThumbnailCount)
+	}
+	if m.addinterval != nil {
+		fields = append(fields, trickplay.FieldInterval)
+	}
+	if m.addbandwidth != nil {
+		fields = append(fields, trickplay.FieldBandwidth)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TrickplayMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case trickplay.FieldWidth:
+		return m.AddedWidth()
+	case trickplay.FieldHeight:
+		return m.AddedHeight()
+	case trickplay.FieldTileWidth:
+		return m.AddedTileWidth()
+	case trickplay.FieldTileHeight:
+		return m.AddedTileHeight()
+	case trickplay.FieldThumbnailCount:
+		return m.AddedThumbnailCount()
+	case trickplay.FieldInterval:
+		return m.AddedInterval()
+	case trickplay.FieldBandwidth:
+		return m.AddedBandwidth()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TrickplayMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case trickplay.FieldWidth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWidth(v)
+		return nil
+	case trickplay.FieldHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddHeight(v)
+		return nil
+	case trickplay.FieldTileWidth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTileWidth(v)
+		return nil
+	case trickplay.FieldTileHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTileHeight(v)
+		return nil
+	case trickplay.FieldThumbnailCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddThumbnailCount(v)
+		return nil
+	case trickplay.FieldInterval:
+		v, ok := value.(time.Duration)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddInterval(v)
+		return nil
+	case trickplay.FieldBandwidth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBandwidth(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Trickplay numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TrickplayMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TrickplayMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TrickplayMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Trickplay nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TrickplayMutation) ResetField(name string) error {
+	switch name {
+	case trickplay.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case trickplay.FieldWidth:
+		m.ResetWidth()
+		return nil
+	case trickplay.FieldHeight:
+		m.ResetHeight()
+		return nil
+	case trickplay.FieldTileWidth:
+		m.ResetTileWidth()
+		return nil
+	case trickplay.FieldTileHeight:
+		m.ResetTileHeight()
+		return nil
+	case trickplay.FieldThumbnailCount:
+		m.ResetThumbnailCount()
+		return nil
+	case trickplay.FieldInterval:
+		m.ResetInterval()
+		return nil
+	case trickplay.FieldBandwidth:
+		m.ResetBandwidth()
+		return nil
+	}
+	return fmt.Errorf("unknown Trickplay field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TrickplayMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.item != nil {
+		edges = append(edges, trickplay.EdgeItem)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TrickplayMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case trickplay.EdgeItem:
+		if id := m.item; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TrickplayMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TrickplayMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TrickplayMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareditem {
+		edges = append(edges, trickplay.EdgeItem)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TrickplayMutation) EdgeCleared(name string) bool {
+	switch name {
+	case trickplay.EdgeItem:
+		return m.cleareditem
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TrickplayMutation) ClearEdge(name string) error {
+	switch name {
+	case trickplay.EdgeItem:
+		m.ClearItem()
+		return nil
+	}
+	return fmt.Errorf("unknown Trickplay unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TrickplayMutation) ResetEdge(name string) error {
+	switch name {
+	case trickplay.EdgeItem:
+		m.ResetItem()
+		return nil
+	}
+	return fmt.Errorf("unknown Trickplay edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.

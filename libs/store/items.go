@@ -138,6 +138,7 @@ var optionalColumns = []struct {
 	{func(it *core.Item) bool { return it.ParentID.IsZero() }, item.ParentIDNotNil(), (*ent.ItemUpdate).ClearParentID},
 	{func(it *core.Item) bool { return it.OwnerID.IsZero() }, item.OwnerIDNotNil(), (*ent.ItemUpdate).ClearOwnerID},
 	{func(it *core.Item) bool { return it.UserID.IsZero() }, item.UserIDNotNil(), (*ent.ItemUpdate).ClearUserID},
+	{func(it *core.Item) bool { return it.Loudness == nil }, item.LoudnessNotNil(), (*ent.ItemUpdate).ClearLoudness},
 }
 
 // clearUnset sets the optional columns the items leave unset to NULL: an
@@ -645,6 +646,7 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 		SetMetadataCountry(it.MetadataCountry).
 		SetLocked(it.Locked).
 		SetLockedFields(fromFields(it.LockedFields)).
+		SetNillableLoudness(it.Loudness).
 		SetExtra(string(it.Extra)).
 		SetDateAdded(orNow(it.DateAdded)).
 		SetNillableFileModified(nonZero(it.FileModified)).
@@ -721,6 +723,7 @@ func toItem(e *ent.Item) core.Item {
 		MetadataCountry:         e.MetadataCountry,
 		Locked:                  e.Locked,
 		LockedFields:            toFields(e.LockedFields),
+		Loudness:                e.Loudness,
 		Extra:                   core.ExtraKind(e.Extra),
 		DateAdded:               e.DateAdded.UTC(),
 		FileModified:            zeroIfNil(e.FileModified),

@@ -100,6 +100,31 @@ func (p *subtitleProvider) DownloadSubtitle(ctx context.Context, id string) (lib
 	return pl.DownloadSubtitle(ctx, id)
 }
 
+// SegmentProviders returns the media segment providers among the started
+// plugins.
+func (m *Manager) SegmentProviders() []library.SegmentProvider {
+	var out []library.SegmentProvider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_SEGMENT_PROVIDER) {
+		out = append(out, &segmentProvider{m: m, id: id})
+	}
+	return out
+}
+
+type segmentProvider struct {
+	m  *Manager
+	id string
+}
+
+func (p *segmentProvider) Name() string { return p.id }
+
+func (p *segmentProvider) Segments(ctx context.Context, q library.SegmentQuery) ([]core.MediaSegment, error) {
+	pl, ok := p.m.running(p.id)
+	if !ok || pl.Segments() == nil {
+		return nil, nil
+	}
+	return (&providers.SegmentPlugin{ID: p.id, Client: pl.Segments()}).Segments(ctx, q)
+}
+
 // Notifiers returns the notification plugins.
 func (m *Manager) Notifiers() []activity.Notifier {
 	var out []activity.Notifier

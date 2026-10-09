@@ -24,10 +24,12 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
+	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
+	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -102,10 +104,12 @@ func checkColumn(t, c string) error {
 			itemvalue.Table:          itemvalue.ValidColumn,
 			job.Table:                job.ValidColumn,
 			library.Table:            library.ValidColumn,
+			mediasegment.Table:       mediasegment.ValidColumn,
 			mediasource.Table:        mediasource.ValidColumn,
 			person.Table:             person.ValidColumn,
 			pluginconfig.Table:       pluginconfig.ValidColumn,
 			setting.Table:            setting.ValidColumn,
+			trickplay.Table:          trickplay.ValidColumn,
 			user.Table:               user.ValidColumn,
 			userdata.Table:           userdata.ValidColumn,
 		})

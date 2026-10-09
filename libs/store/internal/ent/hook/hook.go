@@ -153,6 +153,18 @@ func (f LibraryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LibraryMutation", m)
 }
 
+// The MediaSegmentFunc type is an adapter to allow the use of ordinary
+// function as MediaSegment mutator.
+type MediaSegmentFunc func(context.Context, *ent.MediaSegmentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MediaSegmentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.MediaSegmentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MediaSegmentMutation", m)
+}
+
 // The MediaSourceFunc type is an adapter to allow the use of ordinary
 // function as MediaSource mutator.
 type MediaSourceFunc func(context.Context, *ent.MediaSourceMutation) (ent.Value, error)
@@ -199,6 +211,18 @@ func (f SettingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SettingMutation", m)
+}
+
+// The TrickplayFunc type is an adapter to allow the use of ordinary
+// function as Trickplay mutator.
+type TrickplayFunc func(context.Context, *ent.TrickplayMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TrickplayFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TrickplayMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TrickplayMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

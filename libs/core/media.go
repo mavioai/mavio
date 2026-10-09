@@ -185,6 +185,9 @@ type MediaStream struct {
 	Original bool
 	// ExternalPath is set for sidecar files such as "Movie.en.srt".
 	ExternalPath string
+	// MimeType is the type of an attachment, such as "font/ttf"; its file
+	// name is the Title.
+	MimeType string
 
 	// Video.
 	Width  int

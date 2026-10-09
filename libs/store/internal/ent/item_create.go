@@ -19,7 +19,9 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
+	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
+	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -554,6 +556,20 @@ func (_c *ItemCreate) SetLockedFields(v []string) *ItemCreate {
 	return _c
 }
 
+// SetLoudness sets the "loudness" field.
+func (_c *ItemCreate) SetLoudness(v float64) *ItemCreate {
+	_c.mutation.SetLoudness(v)
+	return _c
+}
+
+// SetNillableLoudness sets the "loudness" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableLoudness(v *float64) *ItemCreate {
+	if v != nil {
+		_c.SetLoudness(*v)
+	}
+	return _c
+}
+
 // SetExtra sets the "extra" field.
 func (_c *ItemCreate) SetExtra(v string) *ItemCreate {
 	_c.mutation.SetExtra(v)
@@ -760,6 +776,36 @@ func (_c *ItemCreate) AddImages(v ...*Image) *ItemCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddImageIDs(ids...)
+}
+
+// AddTrickplayIDs adds the "trickplay" edge to the Trickplay entity by IDs.
+func (_c *ItemCreate) AddTrickplayIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddTrickplayIDs(ids...)
+	return _c
+}
+
+// AddTrickplay adds the "trickplay" edges to the Trickplay entity.
+func (_c *ItemCreate) AddTrickplay(v ...*Trickplay) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddTrickplayIDs(ids...)
+}
+
+// AddSegmentIDs adds the "segments" edge to the MediaSegment entity by IDs.
+func (_c *ItemCreate) AddSegmentIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddSegmentIDs(ids...)
+	return _c
+}
+
+// AddSegments adds the "segments" edges to the MediaSegment entity.
+func (_c *ItemCreate) AddSegments(v ...*MediaSegment) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSegmentIDs(ids...)
 }
 
 // AddCreditIDs adds the "credits" edge to the Credit entity by IDs.
@@ -1259,6 +1305,10 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 		_spec.SetField(item.FieldLockedFields, field.TypeJSON, value)
 		_node.LockedFields = value
 	}
+	if value, ok := _c.mutation.Loudness(); ok {
+		_spec.SetField(item.FieldLoudness, field.TypeFloat64, value)
+		_node.Loudness = &value
+	}
 	if value, ok := _c.mutation.Extra(); ok {
 		_spec.SetField(item.FieldExtra, field.TypeString, value)
 		_node.Extra = value
@@ -1407,6 +1457,38 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(image.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TrickplayIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.TrickplayTable,
+			Columns: []string{item.TrickplayColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(trickplay.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SegmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SegmentsTable,
+			Columns: []string{item.SegmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediasegment.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -2228,6 +2310,30 @@ func (u *ItemUpsert) UpdateLockedFields() *ItemUpsert {
 // ClearLockedFields clears the value of the "locked_fields" field.
 func (u *ItemUpsert) ClearLockedFields() *ItemUpsert {
 	u.SetNull(item.FieldLockedFields)
+	return u
+}
+
+// SetLoudness sets the "loudness" field.
+func (u *ItemUpsert) SetLoudness(v float64) *ItemUpsert {
+	u.Set(item.FieldLoudness, v)
+	return u
+}
+
+// UpdateLoudness sets the "loudness" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateLoudness() *ItemUpsert {
+	u.SetExcluded(item.FieldLoudness)
+	return u
+}
+
+// AddLoudness adds v to the "loudness" field.
+func (u *ItemUpsert) AddLoudness(v float64) *ItemUpsert {
+	u.Add(item.FieldLoudness, v)
+	return u
+}
+
+// ClearLoudness clears the value of the "loudness" field.
+func (u *ItemUpsert) ClearLoudness() *ItemUpsert {
+	u.SetNull(item.FieldLoudness)
 	return u
 }
 
@@ -3206,6 +3312,34 @@ func (u *ItemUpsertOne) UpdateLockedFields() *ItemUpsertOne {
 func (u *ItemUpsertOne) ClearLockedFields() *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearLockedFields()
+	})
+}
+
+// SetLoudness sets the "loudness" field.
+func (u *ItemUpsertOne) SetLoudness(v float64) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetLoudness(v)
+	})
+}
+
+// AddLoudness adds v to the "loudness" field.
+func (u *ItemUpsertOne) AddLoudness(v float64) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddLoudness(v)
+	})
+}
+
+// UpdateLoudness sets the "loudness" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateLoudness() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateLoudness()
+	})
+}
+
+// ClearLoudness clears the value of the "loudness" field.
+func (u *ItemUpsertOne) ClearLoudness() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearLoudness()
 	})
 }
 
@@ -4373,6 +4507,34 @@ func (u *ItemUpsertBulk) UpdateLockedFields() *ItemUpsertBulk {
 func (u *ItemUpsertBulk) ClearLockedFields() *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearLockedFields()
+	})
+}
+
+// SetLoudness sets the "loudness" field.
+func (u *ItemUpsertBulk) SetLoudness(v float64) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetLoudness(v)
+	})
+}
+
+// AddLoudness adds v to the "loudness" field.
+func (u *ItemUpsertBulk) AddLoudness(v float64) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddLoudness(v)
+	})
+}
+
+// UpdateLoudness sets the "loudness" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateLoudness() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateLoudness()
+	})
+}
+
+// ClearLoudness clears the value of the "loudness" field.
+func (u *ItemUpsertBulk) ClearLoudness() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearLoudness()
 	})
 }
 

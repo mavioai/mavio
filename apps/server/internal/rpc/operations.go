@@ -85,6 +85,20 @@ func (s *TaskService) tasks(ctx context.Context) ([]task, error) {
 			},
 			run: func(now time.Time) core.Job { return library.ScanJob(lib, now, false) },
 		})
+		if lib.ExtractTrickplay || lib.ExtractChapterImages || lib.AnalyzeLoudness {
+			out = append(out, task{
+				proto: systemv1.Task_builder{
+					Id: new(library.JobExtras + ":" + lib.ID.String()), Name: new("Make media extras of " + lib.Name),
+					Kind:        new(library.JobExtras),
+					Description: new("Makes the trickplay sheets, chapter images and loudness measurements the library asks for, of every item."),
+				}.Build(),
+				matches: func(j *core.Job) bool {
+					var p library.LibraryPayload
+					return j.Kind == library.JobExtras && json.Unmarshal(j.Payload, &p) == nil && p.LibraryID == lib.ID
+				},
+				run: func(now time.Time) core.Job { return library.ExtrasJob(lib, now) },
+			})
+		}
 	}
 	out = append(out, task{
 		proto: systemv1.Task_builder{
@@ -106,7 +120,7 @@ func (s *TaskService) ListTasks(ctx context.Context, _ *systemv1.ListTasksReques
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	kinds := []string{library.JobScan, library.JobCleanup}
+	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras}
 	active, err := s.store.Jobs().List(ctx, core.JobQuery{Kinds: kinds, States: []core.JobState{core.JobPending, core.JobRunning}})
 	if err != nil {
 		return nil, connectError(ctx, err)

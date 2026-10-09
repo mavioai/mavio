@@ -60,6 +60,12 @@ type Library struct {
 	// AutoCollections puts movies into collections named after the
 	// providers' collections (movie sets).
 	AutoCollections bool
+	// ExtractTrickplay makes thumbnail sheets of videos for seeking, and
+	// ExtractChapterImages an image of each chapter.
+	ExtractTrickplay     bool
+	ExtractChapterImages bool
+	// AnalyzeLoudness measures the loudness of audio, for normalization.
+	AnalyzeLoudness bool
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }

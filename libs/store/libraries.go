@@ -56,6 +56,9 @@ func (r libraries) Create(ctx context.Context, lib *core.Library) error {
 			SetMetadataCountry(lib.MetadataCountry).
 			SetSaveLocalMetadata(lib.SaveLocalMetadata).
 			SetAutoCollections(lib.AutoCollections).
+			SetExtractTrickplay(lib.ExtractTrickplay).
+			SetExtractChapterImages(lib.ExtractChapterImages).
+			SetAnalyzeLoudness(lib.AnalyzeLoudness).
 			SetCreatedAt(now).
 			SetUpdatedAt(now).
 			Save(ctx)
@@ -84,6 +87,9 @@ func (r libraries) Update(ctx context.Context, lib *core.Library) error {
 			SetMetadataCountry(lib.MetadataCountry).
 			SetSaveLocalMetadata(lib.SaveLocalMetadata).
 			SetAutoCollections(lib.AutoCollections).
+			SetExtractTrickplay(lib.ExtractTrickplay).
+			SetExtractChapterImages(lib.ExtractChapterImages).
+			SetAnalyzeLoudness(lib.AnalyzeLoudness).
 			SetUpdatedAt(time.Now()).
 			Save(ctx)
 		if err != nil {
@@ -143,7 +149,11 @@ func toLibrary(l *ent.Library) core.Library {
 		MetadataCountry:   l.MetadataCountry,
 		SaveLocalMetadata: l.SaveLocalMetadata,
 		AutoCollections:   l.AutoCollections,
-		CreatedAt:         l.CreatedAt.UTC(),
-		UpdatedAt:         l.UpdatedAt.UTC(),
+
+		ExtractTrickplay:     l.ExtractTrickplay,
+		ExtractChapterImages: l.ExtractChapterImages,
+		AnalyzeLoudness:      l.AnalyzeLoudness,
+		CreatedAt:            l.CreatedAt.UTC(),
+		UpdatedAt:            l.UpdatedAt.UTC(),
 	}
 }

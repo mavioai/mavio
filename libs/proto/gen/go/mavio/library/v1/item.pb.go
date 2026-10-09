@@ -566,6 +566,59 @@ func (x ValueKind) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+type SegmentKind int32
+
+const (
+	SegmentKind_SEGMENT_KIND_UNSPECIFIED SegmentKind = 0
+	SegmentKind_SEGMENT_KIND_INTRO       SegmentKind = 1
+	SegmentKind_SEGMENT_KIND_OUTRO       SegmentKind = 2
+	SegmentKind_SEGMENT_KIND_RECAP       SegmentKind = 3
+	SegmentKind_SEGMENT_KIND_PREVIEW     SegmentKind = 4
+	SegmentKind_SEGMENT_KIND_COMMERCIAL  SegmentKind = 5
+)
+
+// Enum value maps for SegmentKind.
+var (
+	SegmentKind_name = map[int32]string{
+		0: "SEGMENT_KIND_UNSPECIFIED",
+		1: "SEGMENT_KIND_INTRO",
+		2: "SEGMENT_KIND_OUTRO",
+		3: "SEGMENT_KIND_RECAP",
+		4: "SEGMENT_KIND_PREVIEW",
+		5: "SEGMENT_KIND_COMMERCIAL",
+	}
+	SegmentKind_value = map[string]int32{
+		"SEGMENT_KIND_UNSPECIFIED": 0,
+		"SEGMENT_KIND_INTRO":       1,
+		"SEGMENT_KIND_OUTRO":       2,
+		"SEGMENT_KIND_RECAP":       3,
+		"SEGMENT_KIND_PREVIEW":     4,
+		"SEGMENT_KIND_COMMERCIAL":  5,
+	}
+)
+
+func (x SegmentKind) Enum() *SegmentKind {
+	p := new(SegmentKind)
+	*p = x
+	return p
+}
+
+func (x SegmentKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SegmentKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_library_v1_item_proto_enumTypes[8].Descriptor()
+}
+
+func (SegmentKind) Type() protoreflect.EnumType {
+	return &file_mavio_library_v1_item_proto_enumTypes[8]
+}
+
+func (x SegmentKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // Item is a node in a library. See docs/domain.md for hierarchies and
 // numbering.
 type Item struct {
@@ -612,6 +665,7 @@ type Item struct {
 	xxx_hidden_CustomRating        *string                `protobuf:"bytes,40,opt,name=custom_rating,json=customRating"`
 	xxx_hidden_ProductionLocations []string               `protobuf:"bytes,41,rep,name=production_locations,json=productionLocations"`
 	xxx_hidden_CollectionName      *string                `protobuf:"bytes,42,opt,name=collection_name,json=collectionName"`
+	xxx_hidden_NormalizationGain   float64                `protobuf:"fixed64,43,opt,name=normalization_gain,json=normalizationGain"`
 	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
 	XXX_presence                   [2]uint32
 	unknownFields                  protoimpl.UnknownFields
@@ -1002,74 +1056,81 @@ func (x *Item) GetCollectionName() string {
 	return ""
 }
 
+func (x *Item) GetNormalizationGain() float64 {
+	if x != nil {
+		return x.xxx_hidden_NormalizationGain
+	}
+	return 0
+}
+
 func (x *Item) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 43)
 }
 
 func (x *Item) SetLibraryId(v string) {
 	x.xxx_hidden_LibraryId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 43)
 }
 
 func (x *Item) SetParentId(v string) {
 	x.xxx_hidden_ParentId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 43)
 }
 
 func (x *Item) SetKind(v ItemKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 43)
 }
 
 func (x *Item) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 43)
 }
 
 func (x *Item) SetSortName(v string) {
 	x.xxx_hidden_SortName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 43)
 }
 
 func (x *Item) SetOriginalTitle(v string) {
 	x.xxx_hidden_OriginalTitle = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 43)
 }
 
 func (x *Item) SetOverview(v string) {
 	x.xxx_hidden_Overview = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 43)
 }
 
 func (x *Item) SetTagline(v string) {
 	x.xxx_hidden_Tagline = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 43)
 }
 
 func (x *Item) SetPath(v string) {
 	x.xxx_hidden_Path = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 43)
 }
 
 func (x *Item) SetIndexNumber(v int32) {
 	x.xxx_hidden_IndexNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 43)
 }
 
 func (x *Item) SetParentIndexNumber(v int32) {
 	x.xxx_hidden_ParentIndexNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 43)
 }
 
 func (x *Item) SetIndexNumberEnd(v int32) {
 	x.xxx_hidden_IndexNumberEnd = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 43)
 }
 
 func (x *Item) SetProductionYear(v int32) {
 	x.xxx_hidden_ProductionYear = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 43)
 }
 
 func (x *Item) SetPremiereDate(v *timestamppb.Timestamp) {
@@ -1086,17 +1147,17 @@ func (x *Item) SetRuntime(v *durationpb.Duration) {
 
 func (x *Item) SetOfficialRating(v string) {
 	x.xxx_hidden_OfficialRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 43)
 }
 
 func (x *Item) SetCommunityRating(v float64) {
 	x.xxx_hidden_CommunityRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 43)
 }
 
 func (x *Item) SetCriticRating(v float64) {
 	x.xxx_hidden_CriticRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 43)
 }
 
 func (x *Item) SetGenres(v []string) {
@@ -1125,17 +1186,17 @@ func (x *Item) SetAlbumArtists(v []string) {
 
 func (x *Item) SetSeriesStatus(v SeriesStatus) {
 	x.xxx_hidden_SeriesStatus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 43)
 }
 
 func (x *Item) SetExtra(v ExtraKind) {
 	x.xxx_hidden_Extra = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 43)
 }
 
 func (x *Item) SetOwnerId(v string) {
 	x.xxx_hidden_OwnerId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 43)
 }
 
 func (x *Item) SetDateAdded(v *timestamppb.Timestamp) {
@@ -1148,37 +1209,37 @@ func (x *Item) SetImages(v []*Image) {
 
 func (x *Item) SetSeriesId(v string) {
 	x.xxx_hidden_SeriesId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 31, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 31, 43)
 }
 
 func (x *Item) SetSeriesName(v string) {
 	x.xxx_hidden_SeriesName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 43)
 }
 
 func (x *Item) SetSeasonId(v string) {
 	x.xxx_hidden_SeasonId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 43)
 }
 
 func (x *Item) SetSeasonName(v string) {
 	x.xxx_hidden_SeasonName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 43)
 }
 
 func (x *Item) SetAlbumId(v string) {
 	x.xxx_hidden_AlbumId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 35, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 35, 43)
 }
 
 func (x *Item) SetAlbumName(v string) {
 	x.xxx_hidden_AlbumName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 36, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 36, 43)
 }
 
 func (x *Item) SetLocked(v bool) {
 	x.xxx_hidden_Locked = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 37, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 37, 43)
 }
 
 func (x *Item) SetLockedFields(v []MetadataField) {
@@ -1187,7 +1248,7 @@ func (x *Item) SetLockedFields(v []MetadataField) {
 
 func (x *Item) SetCustomRating(v string) {
 	x.xxx_hidden_CustomRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 39, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 39, 43)
 }
 
 func (x *Item) SetProductionLocations(v []string) {
@@ -1196,7 +1257,12 @@ func (x *Item) SetProductionLocations(v []string) {
 
 func (x *Item) SetCollectionName(v string) {
 	x.xxx_hidden_CollectionName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 41, 42)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 41, 43)
+}
+
+func (x *Item) SetNormalizationGain(v float64) {
+	x.xxx_hidden_NormalizationGain = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 42, 43)
 }
 
 func (x *Item) HasId() bool {
@@ -1430,6 +1496,13 @@ func (x *Item) HasCollectionName() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[1]), 41)
 }
 
+func (x *Item) HasNormalizationGain() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 42)
+}
+
 func (x *Item) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -1591,6 +1664,11 @@ func (x *Item) ClearCollectionName() {
 	x.xxx_hidden_CollectionName = nil
 }
 
+func (x *Item) ClearNormalizationGain() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 42)
+	x.xxx_hidden_NormalizationGain = 0
+}
+
 type Item_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1645,6 +1723,9 @@ type Item_builder struct {
 	ProductionLocations []string
 	// The collection (movie set) of a movie, as the providers name it.
 	CollectionName *string
+	// The gain in dB that brings a track or album to -18 LUFS; unset until
+	// its loudness is measured.
+	NormalizationGain *float64
 }
 
 func (b0 Item_builder) Build() *Item {
@@ -1652,74 +1733,74 @@ func (b0 Item_builder) Build() *Item {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 43)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.LibraryId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 43)
 		x.xxx_hidden_LibraryId = b.LibraryId
 	}
 	if b.ParentId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 43)
 		x.xxx_hidden_ParentId = b.ParentId
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 43)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 43)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.SortName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 43)
 		x.xxx_hidden_SortName = b.SortName
 	}
 	if b.OriginalTitle != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 43)
 		x.xxx_hidden_OriginalTitle = b.OriginalTitle
 	}
 	if b.Overview != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 43)
 		x.xxx_hidden_Overview = b.Overview
 	}
 	if b.Tagline != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 43)
 		x.xxx_hidden_Tagline = b.Tagline
 	}
 	if b.Path != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 43)
 		x.xxx_hidden_Path = b.Path
 	}
 	if b.IndexNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 43)
 		x.xxx_hidden_IndexNumber = *b.IndexNumber
 	}
 	if b.ParentIndexNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 43)
 		x.xxx_hidden_ParentIndexNumber = *b.ParentIndexNumber
 	}
 	if b.IndexNumberEnd != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 43)
 		x.xxx_hidden_IndexNumberEnd = *b.IndexNumberEnd
 	}
 	if b.ProductionYear != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 43)
 		x.xxx_hidden_ProductionYear = *b.ProductionYear
 	}
 	x.xxx_hidden_PremiereDate = b.PremiereDate
 	x.xxx_hidden_EndDate = b.EndDate
 	x.xxx_hidden_Runtime = b.Runtime
 	if b.OfficialRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 43)
 		x.xxx_hidden_OfficialRating = b.OfficialRating
 	}
 	if b.CommunityRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 43)
 		x.xxx_hidden_CommunityRating = *b.CommunityRating
 	}
 	if b.CriticRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 43)
 		x.xxx_hidden_CriticRating = *b.CriticRating
 	}
 	x.xxx_hidden_Genres = b.Genres
@@ -1729,56 +1810,60 @@ func (b0 Item_builder) Build() *Item {
 	x.xxx_hidden_Artists = b.Artists
 	x.xxx_hidden_AlbumArtists = b.AlbumArtists
 	if b.SeriesStatus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 43)
 		x.xxx_hidden_SeriesStatus = *b.SeriesStatus
 	}
 	if b.Extra != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 43)
 		x.xxx_hidden_Extra = *b.Extra
 	}
 	if b.OwnerId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 43)
 		x.xxx_hidden_OwnerId = b.OwnerId
 	}
 	x.xxx_hidden_DateAdded = b.DateAdded
 	x.xxx_hidden_Images = &b.Images
 	if b.SeriesId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 31, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 31, 43)
 		x.xxx_hidden_SeriesId = b.SeriesId
 	}
 	if b.SeriesName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 43)
 		x.xxx_hidden_SeriesName = b.SeriesName
 	}
 	if b.SeasonId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 43)
 		x.xxx_hidden_SeasonId = b.SeasonId
 	}
 	if b.SeasonName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 43)
 		x.xxx_hidden_SeasonName = b.SeasonName
 	}
 	if b.AlbumId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 35, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 35, 43)
 		x.xxx_hidden_AlbumId = b.AlbumId
 	}
 	if b.AlbumName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 36, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 36, 43)
 		x.xxx_hidden_AlbumName = b.AlbumName
 	}
 	if b.Locked != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 37, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 37, 43)
 		x.xxx_hidden_Locked = *b.Locked
 	}
 	x.xxx_hidden_LockedFields = b.LockedFields
 	if b.CustomRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 39, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 39, 43)
 		x.xxx_hidden_CustomRating = b.CustomRating
 	}
 	x.xxx_hidden_ProductionLocations = b.ProductionLocations
 	if b.CollectionName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 41, 42)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 41, 43)
 		x.xxx_hidden_CollectionName = b.CollectionName
+	}
+	if b.NormalizationGain != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 42, 43)
+		x.xxx_hidden_NormalizationGain = *b.NormalizationGain
 	}
 	return m0
 }
@@ -2590,6 +2675,8 @@ type GetItemResponse struct {
 	xxx_hidden_Item         *Item                  `protobuf:"bytes,1,opt,name=item"`
 	xxx_hidden_MediaSources *[]*MediaSource        `protobuf:"bytes,2,rep,name=media_sources,json=mediaSources"`
 	xxx_hidden_Credits      *[]*Credit             `protobuf:"bytes,3,rep,name=credits"`
+	xxx_hidden_Trickplay    *[]*Trickplay          `protobuf:"bytes,4,rep,name=trickplay"`
+	xxx_hidden_Segments     *[]*MediaSegment       `protobuf:"bytes,5,rep,name=segments"`
 	unknownFields           protoimpl.UnknownFields
 	sizeCache               protoimpl.SizeCache
 }
@@ -2644,6 +2731,24 @@ func (x *GetItemResponse) GetCredits() []*Credit {
 	return nil
 }
 
+func (x *GetItemResponse) GetTrickplay() []*Trickplay {
+	if x != nil {
+		if x.xxx_hidden_Trickplay != nil {
+			return *x.xxx_hidden_Trickplay
+		}
+	}
+	return nil
+}
+
+func (x *GetItemResponse) GetSegments() []*MediaSegment {
+	if x != nil {
+		if x.xxx_hidden_Segments != nil {
+			return *x.xxx_hidden_Segments
+		}
+	}
+	return nil
+}
+
 func (x *GetItemResponse) SetItem(v *Item) {
 	x.xxx_hidden_Item = v
 }
@@ -2654,6 +2759,14 @@ func (x *GetItemResponse) SetMediaSources(v []*MediaSource) {
 
 func (x *GetItemResponse) SetCredits(v []*Credit) {
 	x.xxx_hidden_Credits = &v
+}
+
+func (x *GetItemResponse) SetTrickplay(v []*Trickplay) {
+	x.xxx_hidden_Trickplay = &v
+}
+
+func (x *GetItemResponse) SetSegments(v []*MediaSegment) {
+	x.xxx_hidden_Segments = &v
 }
 
 func (x *GetItemResponse) HasItem() bool {
@@ -2673,6 +2786,11 @@ type GetItemResponse_builder struct {
 	Item         *Item
 	MediaSources []*MediaSource
 	Credits      []*Credit
+	// Thumbnail sheets for seeking, by width; a sheet is served at
+	// /images/trickplay/{item_id}/{width}/{sheet}.jpg.
+	Trickplay []*Trickplay
+	// Stretches clients may offer to skip, by start.
+	Segments []*MediaSegment
 }
 
 func (b0 GetItemResponse_builder) Build() *GetItemResponse {
@@ -2682,6 +2800,1001 @@ func (b0 GetItemResponse_builder) Build() *GetItemResponse {
 	x.xxx_hidden_Item = b.Item
 	x.xxx_hidden_MediaSources = &b.MediaSources
 	x.xxx_hidden_Credits = &b.Credits
+	x.xxx_hidden_Trickplay = &b.Trickplay
+	x.xxx_hidden_Segments = &b.Segments
+	return m0
+}
+
+// Trickplay describes thumbnail sheets of one width: thumbnails taken
+// every interval, row by row, tile_width across and tile_height down a
+// sheet, thumbnail_count in all.
+type Trickplay struct {
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Width          int32                  `protobuf:"varint,1,opt,name=width"`
+	xxx_hidden_Height         int32                  `protobuf:"varint,2,opt,name=height"`
+	xxx_hidden_TileWidth      int32                  `protobuf:"varint,3,opt,name=tile_width,json=tileWidth"`
+	xxx_hidden_TileHeight     int32                  `protobuf:"varint,4,opt,name=tile_height,json=tileHeight"`
+	xxx_hidden_ThumbnailCount int32                  `protobuf:"varint,5,opt,name=thumbnail_count,json=thumbnailCount"`
+	xxx_hidden_Interval       *durationpb.Duration   `protobuf:"bytes,6,opt,name=interval"`
+	xxx_hidden_Bandwidth      int32                  `protobuf:"varint,7,opt,name=bandwidth"`
+	xxx_hidden_SheetCount     int32                  `protobuf:"varint,8,opt,name=sheet_count,json=sheetCount"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *Trickplay) Reset() {
+	*x = Trickplay{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Trickplay) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Trickplay) ProtoMessage() {}
+
+func (x *Trickplay) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *Trickplay) GetWidth() int32 {
+	if x != nil {
+		return x.xxx_hidden_Width
+	}
+	return 0
+}
+
+func (x *Trickplay) GetHeight() int32 {
+	if x != nil {
+		return x.xxx_hidden_Height
+	}
+	return 0
+}
+
+func (x *Trickplay) GetTileWidth() int32 {
+	if x != nil {
+		return x.xxx_hidden_TileWidth
+	}
+	return 0
+}
+
+func (x *Trickplay) GetTileHeight() int32 {
+	if x != nil {
+		return x.xxx_hidden_TileHeight
+	}
+	return 0
+}
+
+func (x *Trickplay) GetThumbnailCount() int32 {
+	if x != nil {
+		return x.xxx_hidden_ThumbnailCount
+	}
+	return 0
+}
+
+func (x *Trickplay) GetInterval() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_Interval
+	}
+	return nil
+}
+
+func (x *Trickplay) GetBandwidth() int32 {
+	if x != nil {
+		return x.xxx_hidden_Bandwidth
+	}
+	return 0
+}
+
+func (x *Trickplay) GetSheetCount() int32 {
+	if x != nil {
+		return x.xxx_hidden_SheetCount
+	}
+	return 0
+}
+
+func (x *Trickplay) SetWidth(v int32) {
+	x.xxx_hidden_Width = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+}
+
+func (x *Trickplay) SetHeight(v int32) {
+	x.xxx_hidden_Height = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
+}
+
+func (x *Trickplay) SetTileWidth(v int32) {
+	x.xxx_hidden_TileWidth = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
+}
+
+func (x *Trickplay) SetTileHeight(v int32) {
+	x.xxx_hidden_TileHeight = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
+}
+
+func (x *Trickplay) SetThumbnailCount(v int32) {
+	x.xxx_hidden_ThumbnailCount = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+}
+
+func (x *Trickplay) SetInterval(v *durationpb.Duration) {
+	x.xxx_hidden_Interval = v
+}
+
+func (x *Trickplay) SetBandwidth(v int32) {
+	x.xxx_hidden_Bandwidth = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+}
+
+func (x *Trickplay) SetSheetCount(v int32) {
+	x.xxx_hidden_SheetCount = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
+}
+
+func (x *Trickplay) HasWidth() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *Trickplay) HasHeight() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *Trickplay) HasTileWidth() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *Trickplay) HasTileHeight() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *Trickplay) HasThumbnailCount() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *Trickplay) HasInterval() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Interval != nil
+}
+
+func (x *Trickplay) HasBandwidth() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *Trickplay) HasSheetCount() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *Trickplay) ClearWidth() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Width = 0
+}
+
+func (x *Trickplay) ClearHeight() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Height = 0
+}
+
+func (x *Trickplay) ClearTileWidth() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_TileWidth = 0
+}
+
+func (x *Trickplay) ClearTileHeight() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_TileHeight = 0
+}
+
+func (x *Trickplay) ClearThumbnailCount() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_ThumbnailCount = 0
+}
+
+func (x *Trickplay) ClearInterval() {
+	x.xxx_hidden_Interval = nil
+}
+
+func (x *Trickplay) ClearBandwidth() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_Bandwidth = 0
+}
+
+func (x *Trickplay) ClearSheetCount() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_SheetCount = 0
+}
+
+type Trickplay_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Width          *int32
+	Height         *int32
+	TileWidth      *int32
+	TileHeight     *int32
+	ThumbnailCount *int32
+	Interval       *durationpb.Duration
+	// Bits per second the sheets take while playing.
+	Bandwidth  *int32
+	SheetCount *int32
+}
+
+func (b0 Trickplay_builder) Build() *Trickplay {
+	m0 := &Trickplay{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Width != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		x.xxx_hidden_Width = *b.Width
+	}
+	if b.Height != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
+		x.xxx_hidden_Height = *b.Height
+	}
+	if b.TileWidth != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
+		x.xxx_hidden_TileWidth = *b.TileWidth
+	}
+	if b.TileHeight != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
+		x.xxx_hidden_TileHeight = *b.TileHeight
+	}
+	if b.ThumbnailCount != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		x.xxx_hidden_ThumbnailCount = *b.ThumbnailCount
+	}
+	x.xxx_hidden_Interval = b.Interval
+	if b.Bandwidth != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		x.xxx_hidden_Bandwidth = *b.Bandwidth
+	}
+	if b.SheetCount != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		x.xxx_hidden_SheetCount = *b.SheetCount
+	}
+	return m0
+}
+
+// MediaSegment is a stretch of an item, such as its intro.
+type MediaSegment struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Kind        SegmentKind            `protobuf:"varint,2,opt,name=kind,enum=mavio.library.v1.SegmentKind"`
+	xxx_hidden_Start       *durationpb.Duration   `protobuf:"bytes,3,opt,name=start"`
+	xxx_hidden_End         *durationpb.Duration   `protobuf:"bytes,4,opt,name=end"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *MediaSegment) Reset() {
+	*x = MediaSegment{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MediaSegment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MediaSegment) ProtoMessage() {}
+
+func (x *MediaSegment) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *MediaSegment) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *MediaSegment) GetKind() SegmentKind {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 1) {
+			return x.xxx_hidden_Kind
+		}
+	}
+	return SegmentKind_SEGMENT_KIND_UNSPECIFIED
+}
+
+func (x *MediaSegment) GetStart() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_Start
+	}
+	return nil
+}
+
+func (x *MediaSegment) GetEnd() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_End
+	}
+	return nil
+}
+
+func (x *MediaSegment) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+}
+
+func (x *MediaSegment) SetKind(v SegmentKind) {
+	x.xxx_hidden_Kind = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+}
+
+func (x *MediaSegment) SetStart(v *durationpb.Duration) {
+	x.xxx_hidden_Start = v
+}
+
+func (x *MediaSegment) SetEnd(v *durationpb.Duration) {
+	x.xxx_hidden_End = v
+}
+
+func (x *MediaSegment) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *MediaSegment) HasKind() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *MediaSegment) HasStart() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Start != nil
+}
+
+func (x *MediaSegment) HasEnd() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_End != nil
+}
+
+func (x *MediaSegment) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *MediaSegment) ClearKind() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Kind = SegmentKind_SEGMENT_KIND_UNSPECIFIED
+}
+
+func (x *MediaSegment) ClearStart() {
+	x.xxx_hidden_Start = nil
+}
+
+func (x *MediaSegment) ClearEnd() {
+	x.xxx_hidden_End = nil
+}
+
+type MediaSegment_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id    *string
+	Kind  *SegmentKind
+	Start *durationpb.Duration
+	End   *durationpb.Duration
+}
+
+func (b0 MediaSegment_builder) Build() *MediaSegment {
+	m0 := &MediaSegment{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		x.xxx_hidden_Id = b.Id
+	}
+	if b.Kind != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		x.xxx_hidden_Kind = *b.Kind
+	}
+	x.xxx_hidden_Start = b.Start
+	x.xxx_hidden_End = b.End
+	return m0
+}
+
+type GetLyricsRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ItemId      *string                `protobuf:"bytes,1,opt,name=item_id,json=itemId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetLyricsRequest) Reset() {
+	*x = GetLyricsRequest{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLyricsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLyricsRequest) ProtoMessage() {}
+
+func (x *GetLyricsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetLyricsRequest) GetItemId() string {
+	if x != nil {
+		if x.xxx_hidden_ItemId != nil {
+			return *x.xxx_hidden_ItemId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetLyricsRequest) SetItemId(v string) {
+	x.xxx_hidden_ItemId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *GetLyricsRequest) HasItemId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetLyricsRequest) ClearItemId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_ItemId = nil
+}
+
+type GetLyricsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	ItemId *string
+}
+
+func (b0 GetLyricsRequest_builder) Build() *GetLyricsRequest {
+	m0 := &GetLyricsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.ItemId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_ItemId = b.ItemId
+	}
+	return m0
+}
+
+// LyricCue times part of a line: the UTF-16 code units from position to
+// end_position.
+type LyricCue struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Position    int32                  `protobuf:"varint,1,opt,name=position"`
+	xxx_hidden_EndPosition int32                  `protobuf:"varint,2,opt,name=end_position,json=endPosition"`
+	xxx_hidden_Start       *durationpb.Duration   `protobuf:"bytes,3,opt,name=start"`
+	xxx_hidden_End         *durationpb.Duration   `protobuf:"bytes,4,opt,name=end"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *LyricCue) Reset() {
+	*x = LyricCue{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LyricCue) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LyricCue) ProtoMessage() {}
+
+func (x *LyricCue) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *LyricCue) GetPosition() int32 {
+	if x != nil {
+		return x.xxx_hidden_Position
+	}
+	return 0
+}
+
+func (x *LyricCue) GetEndPosition() int32 {
+	if x != nil {
+		return x.xxx_hidden_EndPosition
+	}
+	return 0
+}
+
+func (x *LyricCue) GetStart() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_Start
+	}
+	return nil
+}
+
+func (x *LyricCue) GetEnd() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_End
+	}
+	return nil
+}
+
+func (x *LyricCue) SetPosition(v int32) {
+	x.xxx_hidden_Position = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+}
+
+func (x *LyricCue) SetEndPosition(v int32) {
+	x.xxx_hidden_EndPosition = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+}
+
+func (x *LyricCue) SetStart(v *durationpb.Duration) {
+	x.xxx_hidden_Start = v
+}
+
+func (x *LyricCue) SetEnd(v *durationpb.Duration) {
+	x.xxx_hidden_End = v
+}
+
+func (x *LyricCue) HasPosition() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *LyricCue) HasEndPosition() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *LyricCue) HasStart() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Start != nil
+}
+
+func (x *LyricCue) HasEnd() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_End != nil
+}
+
+func (x *LyricCue) ClearPosition() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Position = 0
+}
+
+func (x *LyricCue) ClearEndPosition() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_EndPosition = 0
+}
+
+func (x *LyricCue) ClearStart() {
+	x.xxx_hidden_Start = nil
+}
+
+func (x *LyricCue) ClearEnd() {
+	x.xxx_hidden_End = nil
+}
+
+type LyricCue_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Position    *int32
+	EndPosition *int32
+	Start       *durationpb.Duration
+	// Unset for the last word of the lyrics.
+	End *durationpb.Duration
+}
+
+func (b0 LyricCue_builder) Build() *LyricCue {
+	m0 := &LyricCue{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Position != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		x.xxx_hidden_Position = *b.Position
+	}
+	if b.EndPosition != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		x.xxx_hidden_EndPosition = *b.EndPosition
+	}
+	x.xxx_hidden_Start = b.Start
+	x.xxx_hidden_End = b.End
+	return m0
+}
+
+// LyricLine is a line, with its start in synced lyrics and its words'
+// times in enhanced ones.
+type LyricLine struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Text        *string                `protobuf:"bytes,1,opt,name=text"`
+	xxx_hidden_Start       *durationpb.Duration   `protobuf:"bytes,2,opt,name=start"`
+	xxx_hidden_Cues        *[]*LyricCue           `protobuf:"bytes,3,rep,name=cues"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *LyricLine) Reset() {
+	*x = LyricLine{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LyricLine) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LyricLine) ProtoMessage() {}
+
+func (x *LyricLine) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *LyricLine) GetText() string {
+	if x != nil {
+		if x.xxx_hidden_Text != nil {
+			return *x.xxx_hidden_Text
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *LyricLine) GetStart() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_Start
+	}
+	return nil
+}
+
+func (x *LyricLine) GetCues() []*LyricCue {
+	if x != nil {
+		if x.xxx_hidden_Cues != nil {
+			return *x.xxx_hidden_Cues
+		}
+	}
+	return nil
+}
+
+func (x *LyricLine) SetText(v string) {
+	x.xxx_hidden_Text = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *LyricLine) SetStart(v *durationpb.Duration) {
+	x.xxx_hidden_Start = v
+}
+
+func (x *LyricLine) SetCues(v []*LyricCue) {
+	x.xxx_hidden_Cues = &v
+}
+
+func (x *LyricLine) HasText() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *LyricLine) HasStart() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Start != nil
+}
+
+func (x *LyricLine) ClearText() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Text = nil
+}
+
+func (x *LyricLine) ClearStart() {
+	x.xxx_hidden_Start = nil
+}
+
+type LyricLine_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Text  *string
+	Start *durationpb.Duration
+	Cues  []*LyricCue
+}
+
+func (b0 LyricLine_builder) Build() *LyricLine {
+	m0 := &LyricLine{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Text != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_Text = b.Text
+	}
+	x.xxx_hidden_Start = b.Start
+	x.xxx_hidden_Cues = &b.Cues
+	return m0
+}
+
+type GetLyricsResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Artist      *string                `protobuf:"bytes,1,opt,name=artist"`
+	xxx_hidden_Album       *string                `protobuf:"bytes,2,opt,name=album"`
+	xxx_hidden_Title       *string                `protobuf:"bytes,3,opt,name=title"`
+	xxx_hidden_Synced      bool                   `protobuf:"varint,4,opt,name=synced"`
+	xxx_hidden_Lines       *[]*LyricLine          `protobuf:"bytes,5,rep,name=lines"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetLyricsResponse) Reset() {
+	*x = GetLyricsResponse{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLyricsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLyricsResponse) ProtoMessage() {}
+
+func (x *GetLyricsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetLyricsResponse) GetArtist() string {
+	if x != nil {
+		if x.xxx_hidden_Artist != nil {
+			return *x.xxx_hidden_Artist
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetLyricsResponse) GetAlbum() string {
+	if x != nil {
+		if x.xxx_hidden_Album != nil {
+			return *x.xxx_hidden_Album
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetLyricsResponse) GetTitle() string {
+	if x != nil {
+		if x.xxx_hidden_Title != nil {
+			return *x.xxx_hidden_Title
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetLyricsResponse) GetSynced() bool {
+	if x != nil {
+		return x.xxx_hidden_Synced
+	}
+	return false
+}
+
+func (x *GetLyricsResponse) GetLines() []*LyricLine {
+	if x != nil {
+		if x.xxx_hidden_Lines != nil {
+			return *x.xxx_hidden_Lines
+		}
+	}
+	return nil
+}
+
+func (x *GetLyricsResponse) SetArtist(v string) {
+	x.xxx_hidden_Artist = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+}
+
+func (x *GetLyricsResponse) SetAlbum(v string) {
+	x.xxx_hidden_Album = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+}
+
+func (x *GetLyricsResponse) SetTitle(v string) {
+	x.xxx_hidden_Title = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+}
+
+func (x *GetLyricsResponse) SetSynced(v bool) {
+	x.xxx_hidden_Synced = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *GetLyricsResponse) SetLines(v []*LyricLine) {
+	x.xxx_hidden_Lines = &v
+}
+
+func (x *GetLyricsResponse) HasArtist() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetLyricsResponse) HasAlbum() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *GetLyricsResponse) HasTitle() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *GetLyricsResponse) HasSynced() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *GetLyricsResponse) ClearArtist() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Artist = nil
+}
+
+func (x *GetLyricsResponse) ClearAlbum() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Album = nil
+}
+
+func (x *GetLyricsResponse) ClearTitle() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Title = nil
+}
+
+func (x *GetLyricsResponse) ClearSynced() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Synced = false
+}
+
+type GetLyricsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Artist *string
+	Album  *string
+	Title  *string
+	// The lines have start times.
+	Synced *bool
+	Lines  []*LyricLine
+}
+
+func (b0 GetLyricsResponse_builder) Build() *GetLyricsResponse {
+	m0 := &GetLyricsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Artist != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		x.xxx_hidden_Artist = b.Artist
+	}
+	if b.Album != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		x.xxx_hidden_Album = b.Album
+	}
+	if b.Title != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		x.xxx_hidden_Title = b.Title
+	}
+	if b.Synced != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		x.xxx_hidden_Synced = *b.Synced
+	}
+	x.xxx_hidden_Lines = &b.Lines
 	return m0
 }
 
@@ -2697,7 +3810,7 @@ type SortSpec struct {
 
 func (x *SortSpec) Reset() {
 	*x = SortSpec{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[6]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2709,7 +3822,7 @@ func (x *SortSpec) String() string {
 func (*SortSpec) ProtoMessage() {}
 
 func (x *SortSpec) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[6]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2822,7 +3935,7 @@ type ListItemsRequest struct {
 
 func (x *ListItemsRequest) Reset() {
 	*x = ListItemsRequest{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[7]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2834,7 +3947,7 @@ func (x *ListItemsRequest) String() string {
 func (*ListItemsRequest) ProtoMessage() {}
 
 func (x *ListItemsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[7]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3308,7 +4421,7 @@ type ListItemsResponse struct {
 
 func (x *ListItemsResponse) Reset() {
 	*x = ListItemsResponse{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[8]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3320,7 +4433,7 @@ func (x *ListItemsResponse) String() string {
 func (*ListItemsResponse) ProtoMessage() {}
 
 func (x *ListItemsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[8]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3399,7 +4512,7 @@ type GetPersonRequest struct {
 
 func (x *GetPersonRequest) Reset() {
 	*x = GetPersonRequest{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[9]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3411,7 +4524,7 @@ func (x *GetPersonRequest) String() string {
 func (*GetPersonRequest) ProtoMessage() {}
 
 func (x *GetPersonRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[9]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3475,7 +4588,7 @@ type GetPersonResponse struct {
 
 func (x *GetPersonResponse) Reset() {
 	*x = GetPersonResponse{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[10]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3487,7 +4600,7 @@ func (x *GetPersonResponse) String() string {
 func (*GetPersonResponse) ProtoMessage() {}
 
 func (x *GetPersonResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[10]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3552,7 +4665,7 @@ type ListValuesRequest struct {
 
 func (x *ListValuesRequest) Reset() {
 	*x = ListValuesRequest{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[11]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3564,7 +4677,7 @@ func (x *ListValuesRequest) String() string {
 func (*ListValuesRequest) ProtoMessage() {}
 
 func (x *ListValuesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[11]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3751,7 +4864,7 @@ type ValueCount struct {
 
 func (x *ValueCount) Reset() {
 	*x = ValueCount{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[12]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3763,7 +4876,7 @@ func (x *ValueCount) String() string {
 func (*ValueCount) ProtoMessage() {}
 
 func (x *ValueCount) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[12]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3856,7 +4969,7 @@ type ListValuesResponse struct {
 
 func (x *ListValuesResponse) Reset() {
 	*x = ListValuesResponse{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[13]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3868,7 +4981,7 @@ func (x *ListValuesResponse) String() string {
 func (*ListValuesResponse) ProtoMessage() {}
 
 func (x *ListValuesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[13]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3926,7 +5039,7 @@ type ListPeopleRequest struct {
 
 func (x *ListPeopleRequest) Reset() {
 	*x = ListPeopleRequest{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[14]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3938,7 +5051,7 @@ func (x *ListPeopleRequest) String() string {
 func (*ListPeopleRequest) ProtoMessage() {}
 
 func (x *ListPeopleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[14]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4106,7 +5219,7 @@ type PersonCount struct {
 
 func (x *PersonCount) Reset() {
 	*x = PersonCount{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[15]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4118,7 +5231,7 @@ func (x *PersonCount) String() string {
 func (*PersonCount) ProtoMessage() {}
 
 func (x *PersonCount) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[15]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4203,7 +5316,7 @@ type ListPeopleResponse struct {
 
 func (x *ListPeopleResponse) Reset() {
 	*x = ListPeopleResponse{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[16]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4215,7 +5328,7 @@ func (x *ListPeopleResponse) String() string {
 func (*ListPeopleResponse) ProtoMessage() {}
 
 func (x *ListPeopleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[16]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4271,7 +5384,7 @@ type ListLatestItemsRequest struct {
 
 func (x *ListLatestItemsRequest) Reset() {
 	*x = ListLatestItemsRequest{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[17]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4283,7 +5396,7 @@ func (x *ListLatestItemsRequest) String() string {
 func (*ListLatestItemsRequest) ProtoMessage() {}
 
 func (x *ListLatestItemsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[17]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4438,7 +5551,7 @@ type ListLatestItemsResponse struct {
 
 func (x *ListLatestItemsResponse) Reset() {
 	*x = ListLatestItemsResponse{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[18]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4450,7 +5563,7 @@ func (x *ListLatestItemsResponse) String() string {
 func (*ListLatestItemsResponse) ProtoMessage() {}
 
 func (x *ListLatestItemsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[18]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4506,7 +5619,7 @@ type ListNextUpRequest struct {
 
 func (x *ListNextUpRequest) Reset() {
 	*x = ListNextUpRequest{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[19]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4518,7 +5631,7 @@ func (x *ListNextUpRequest) String() string {
 func (*ListNextUpRequest) ProtoMessage() {}
 
 func (x *ListNextUpRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[19]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4709,7 +5822,7 @@ type ListNextUpResponse struct {
 
 func (x *ListNextUpResponse) Reset() {
 	*x = ListNextUpResponse{}
-	mi := &file_mavio_library_v1_item_proto_msgTypes[20]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4721,7 +5834,7 @@ func (x *ListNextUpResponse) String() string {
 func (*ListNextUpResponse) ProtoMessage() {}
 
 func (x *ListNextUpResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_item_proto_msgTypes[20]
+	mi := &file_mavio_library_v1_item_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4765,7 +5878,7 @@ var File_mavio_library_v1_item_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\n" +
-	"\x1bmavio/library/v1/item.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cmavio/library/v1/media.proto\"\x95\r\n" +
+	"\x1bmavio/library/v1/item.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cmavio/library/v1/media.proto\"\xc4\r\n" +
 	"\x04Item\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
@@ -4814,7 +5927,8 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\rlocked_fields\x18' \x03(\x0e2\x1f.mavio.library.v1.MetadataFieldR\flockedFields\x12#\n" +
 	"\rcustom_rating\x18( \x01(\tR\fcustomRating\x121\n" +
 	"\x14production_locations\x18) \x03(\tR\x13productionLocations\x12'\n" +
-	"\x0fcollection_name\x18* \x01(\tR\x0ecollectionName\x1a>\n" +
+	"\x0fcollection_name\x18* \x01(\tR\x0ecollectionName\x12-\n" +
+	"\x12normalization_gain\x18+ \x01(\x01R\x11normalizationGain\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc6\x01\n" +
@@ -4848,11 +5962,47 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x04role\x18\x03 \x01(\tR\x04role\x12\x14\n" +
 	"\x05order\x18\x04 \x01(\x05R\x05order\"-\n" +
 	"\x0eGetItemRequest\x12\x1b\n" +
-	"\x02id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\"\xb5\x01\n" +
+	"\x02id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\"\xac\x02\n" +
 	"\x0fGetItemResponse\x12*\n" +
 	"\x04item\x18\x01 \x01(\v2\x16.mavio.library.v1.ItemR\x04item\x12B\n" +
 	"\rmedia_sources\x18\x02 \x03(\v2\x1d.mavio.library.v1.MediaSourceR\fmediaSources\x122\n" +
-	"\acredits\x18\x03 \x03(\v2\x18.mavio.library.v1.CreditR\acredits\"l\n" +
+	"\acredits\x18\x03 \x03(\v2\x18.mavio.library.v1.CreditR\acredits\x129\n" +
+	"\ttrickplay\x18\x04 \x03(\v2\x1b.mavio.library.v1.TrickplayR\ttrickplay\x12:\n" +
+	"\bsegments\x18\x05 \x03(\v2\x1e.mavio.library.v1.MediaSegmentR\bsegments\"\x98\x02\n" +
+	"\tTrickplay\x12\x14\n" +
+	"\x05width\x18\x01 \x01(\x05R\x05width\x12\x16\n" +
+	"\x06height\x18\x02 \x01(\x05R\x06height\x12\x1d\n" +
+	"\n" +
+	"tile_width\x18\x03 \x01(\x05R\ttileWidth\x12\x1f\n" +
+	"\vtile_height\x18\x04 \x01(\x05R\n" +
+	"tileHeight\x12'\n" +
+	"\x0fthumbnail_count\x18\x05 \x01(\x05R\x0ethumbnailCount\x125\n" +
+	"\binterval\x18\x06 \x01(\v2\x19.google.protobuf.DurationR\binterval\x12\x1c\n" +
+	"\tbandwidth\x18\a \x01(\x05R\tbandwidth\x12\x1f\n" +
+	"\vsheet_count\x18\b \x01(\x05R\n" +
+	"sheetCount\"\xaf\x01\n" +
+	"\fMediaSegment\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x121\n" +
+	"\x04kind\x18\x02 \x01(\x0e2\x1d.mavio.library.v1.SegmentKindR\x04kind\x12/\n" +
+	"\x05start\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\x05start\x12+\n" +
+	"\x03end\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\x03end\"8\n" +
+	"\x10GetLyricsRequest\x12$\n" +
+	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\"\xa7\x01\n" +
+	"\bLyricCue\x12\x1a\n" +
+	"\bposition\x18\x01 \x01(\x05R\bposition\x12!\n" +
+	"\fend_position\x18\x02 \x01(\x05R\vendPosition\x12/\n" +
+	"\x05start\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\x05start\x12+\n" +
+	"\x03end\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\x03end\"\x80\x01\n" +
+	"\tLyricLine\x12\x12\n" +
+	"\x04text\x18\x01 \x01(\tR\x04text\x12/\n" +
+	"\x05start\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\x05start\x12.\n" +
+	"\x04cues\x18\x03 \x03(\v2\x1a.mavio.library.v1.LyricCueR\x04cues\"\xa2\x01\n" +
+	"\x11GetLyricsResponse\x12\x16\n" +
+	"\x06artist\x18\x01 \x01(\tR\x06artist\x12\x14\n" +
+	"\x05album\x18\x02 \x01(\tR\x05album\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x12\x16\n" +
+	"\x06synced\x18\x04 \x01(\bR\x06synced\x121\n" +
+	"\x05lines\x18\x05 \x03(\v2\x1b.mavio.library.v1.LyricLineR\x05lines\"l\n" +
 	"\bSortSpec\x12@\n" +
 	"\x05field\x18\x01 \x01(\x0e2\x1b.mavio.library.v1.SortFieldB\r\xbaH\n" +
 	"\xc8\x01\x01\x82\x01\x04\x10\x01 \x00R\x05field\x12\x1e\n" +
@@ -5043,7 +6193,14 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x0eVALUE_KIND_TAG\x10\x02\x12\x15\n" +
 	"\x11VALUE_KIND_STUDIO\x10\x03\x12\x15\n" +
 	"\x11VALUE_KIND_ARTIST\x10\x04\x12\x13\n" +
-	"\x0fVALUE_KIND_YEAR\x10\x052\x9f\x05\n" +
+	"\x0fVALUE_KIND_YEAR\x10\x05*\xaa\x01\n" +
+	"\vSegmentKind\x12\x1c\n" +
+	"\x18SEGMENT_KIND_UNSPECIFIED\x10\x00\x12\x16\n" +
+	"\x12SEGMENT_KIND_INTRO\x10\x01\x12\x16\n" +
+	"\x12SEGMENT_KIND_OUTRO\x10\x02\x12\x16\n" +
+	"\x12SEGMENT_KIND_RECAP\x10\x03\x12\x18\n" +
+	"\x14SEGMENT_KIND_PREVIEW\x10\x04\x12\x1b\n" +
+	"\x17SEGMENT_KIND_COMMERCIAL\x10\x052\xfa\x05\n" +
 	"\vItemService\x12S\n" +
 	"\aGetItem\x12 .mavio.library.v1.GetItemRequest\x1a!.mavio.library.v1.GetItemResponse\"\x03\x90\x02\x01\x12Y\n" +
 	"\tListItems\x12\".mavio.library.v1.ListItemsRequest\x1a#.mavio.library.v1.ListItemsResponse\"\x03\x90\x02\x01\x12Y\n" +
@@ -5054,11 +6211,12 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\n" +
 	"ListNextUp\x12#.mavio.library.v1.ListNextUpRequest\x1a$.mavio.library.v1.ListNextUpResponse\"\x03\x90\x02\x01\x12\\\n" +
 	"\n" +
-	"ListPeople\x12#.mavio.library.v1.ListPeopleRequest\x1a$.mavio.library.v1.ListPeopleResponse\"\x03\x90\x02\x01B\xca\x01\n" +
+	"ListPeople\x12#.mavio.library.v1.ListPeopleRequest\x1a$.mavio.library.v1.ListPeopleResponse\"\x03\x90\x02\x01\x12Y\n" +
+	"\tGetLyrics\x12\".mavio.library.v1.GetLyricsRequest\x1a#.mavio.library.v1.GetLyricsResponse\"\x03\x90\x02\x01B\xca\x01\n" +
 	"\x14com.mavio.library.v1B\tItemProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1;libraryv1\xa2\x02\x03MLX\xaa\x02\x10Mavio.Library.V1\xca\x02\x10Mavio\\Library\\V1\xe2\x02\x1cMavio\\Library\\V1\\GPBMetadata\xea\x02\x12Mavio::Library::V1b\beditionsp\xe8\a"
 
-var file_mavio_library_v1_item_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
-var file_mavio_library_v1_item_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_mavio_library_v1_item_proto_enumTypes = make([]protoimpl.EnumInfo, 9)
+var file_mavio_library_v1_item_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
 var file_mavio_library_v1_item_proto_goTypes = []any{
 	(ItemKind)(0),                   // 0: mavio.library.v1.ItemKind
 	(ExtraKind)(0),                  // 1: mavio.library.v1.ExtraKind
@@ -5068,89 +6226,109 @@ var file_mavio_library_v1_item_proto_goTypes = []any{
 	(SortField)(0),                  // 5: mavio.library.v1.SortField
 	(MetadataField)(0),              // 6: mavio.library.v1.MetadataField
 	(ValueKind)(0),                  // 7: mavio.library.v1.ValueKind
-	(*Item)(nil),                    // 8: mavio.library.v1.Item
-	(*Image)(nil),                   // 9: mavio.library.v1.Image
-	(*Person)(nil),                  // 10: mavio.library.v1.Person
-	(*Credit)(nil),                  // 11: mavio.library.v1.Credit
-	(*GetItemRequest)(nil),          // 12: mavio.library.v1.GetItemRequest
-	(*GetItemResponse)(nil),         // 13: mavio.library.v1.GetItemResponse
-	(*SortSpec)(nil),                // 14: mavio.library.v1.SortSpec
-	(*ListItemsRequest)(nil),        // 15: mavio.library.v1.ListItemsRequest
-	(*ListItemsResponse)(nil),       // 16: mavio.library.v1.ListItemsResponse
-	(*GetPersonRequest)(nil),        // 17: mavio.library.v1.GetPersonRequest
-	(*GetPersonResponse)(nil),       // 18: mavio.library.v1.GetPersonResponse
-	(*ListValuesRequest)(nil),       // 19: mavio.library.v1.ListValuesRequest
-	(*ValueCount)(nil),              // 20: mavio.library.v1.ValueCount
-	(*ListValuesResponse)(nil),      // 21: mavio.library.v1.ListValuesResponse
-	(*ListPeopleRequest)(nil),       // 22: mavio.library.v1.ListPeopleRequest
-	(*PersonCount)(nil),             // 23: mavio.library.v1.PersonCount
-	(*ListPeopleResponse)(nil),      // 24: mavio.library.v1.ListPeopleResponse
-	(*ListLatestItemsRequest)(nil),  // 25: mavio.library.v1.ListLatestItemsRequest
-	(*ListLatestItemsResponse)(nil), // 26: mavio.library.v1.ListLatestItemsResponse
-	(*ListNextUpRequest)(nil),       // 27: mavio.library.v1.ListNextUpRequest
-	(*ListNextUpResponse)(nil),      // 28: mavio.library.v1.ListNextUpResponse
-	nil,                             // 29: mavio.library.v1.Item.ExternalIdsEntry
-	nil,                             // 30: mavio.library.v1.Person.ExternalIdsEntry
-	(*timestamppb.Timestamp)(nil),   // 31: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),     // 32: google.protobuf.Duration
-	(*MediaSource)(nil),             // 33: mavio.library.v1.MediaSource
+	(SegmentKind)(0),                // 8: mavio.library.v1.SegmentKind
+	(*Item)(nil),                    // 9: mavio.library.v1.Item
+	(*Image)(nil),                   // 10: mavio.library.v1.Image
+	(*Person)(nil),                  // 11: mavio.library.v1.Person
+	(*Credit)(nil),                  // 12: mavio.library.v1.Credit
+	(*GetItemRequest)(nil),          // 13: mavio.library.v1.GetItemRequest
+	(*GetItemResponse)(nil),         // 14: mavio.library.v1.GetItemResponse
+	(*Trickplay)(nil),               // 15: mavio.library.v1.Trickplay
+	(*MediaSegment)(nil),            // 16: mavio.library.v1.MediaSegment
+	(*GetLyricsRequest)(nil),        // 17: mavio.library.v1.GetLyricsRequest
+	(*LyricCue)(nil),                // 18: mavio.library.v1.LyricCue
+	(*LyricLine)(nil),               // 19: mavio.library.v1.LyricLine
+	(*GetLyricsResponse)(nil),       // 20: mavio.library.v1.GetLyricsResponse
+	(*SortSpec)(nil),                // 21: mavio.library.v1.SortSpec
+	(*ListItemsRequest)(nil),        // 22: mavio.library.v1.ListItemsRequest
+	(*ListItemsResponse)(nil),       // 23: mavio.library.v1.ListItemsResponse
+	(*GetPersonRequest)(nil),        // 24: mavio.library.v1.GetPersonRequest
+	(*GetPersonResponse)(nil),       // 25: mavio.library.v1.GetPersonResponse
+	(*ListValuesRequest)(nil),       // 26: mavio.library.v1.ListValuesRequest
+	(*ValueCount)(nil),              // 27: mavio.library.v1.ValueCount
+	(*ListValuesResponse)(nil),      // 28: mavio.library.v1.ListValuesResponse
+	(*ListPeopleRequest)(nil),       // 29: mavio.library.v1.ListPeopleRequest
+	(*PersonCount)(nil),             // 30: mavio.library.v1.PersonCount
+	(*ListPeopleResponse)(nil),      // 31: mavio.library.v1.ListPeopleResponse
+	(*ListLatestItemsRequest)(nil),  // 32: mavio.library.v1.ListLatestItemsRequest
+	(*ListLatestItemsResponse)(nil), // 33: mavio.library.v1.ListLatestItemsResponse
+	(*ListNextUpRequest)(nil),       // 34: mavio.library.v1.ListNextUpRequest
+	(*ListNextUpResponse)(nil),      // 35: mavio.library.v1.ListNextUpResponse
+	nil,                             // 36: mavio.library.v1.Item.ExternalIdsEntry
+	nil,                             // 37: mavio.library.v1.Person.ExternalIdsEntry
+	(*timestamppb.Timestamp)(nil),   // 38: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),     // 39: google.protobuf.Duration
+	(*MediaSource)(nil),             // 40: mavio.library.v1.MediaSource
 }
 var file_mavio_library_v1_item_proto_depIdxs = []int32{
 	0,  // 0: mavio.library.v1.Item.kind:type_name -> mavio.library.v1.ItemKind
-	31, // 1: mavio.library.v1.Item.premiere_date:type_name -> google.protobuf.Timestamp
-	31, // 2: mavio.library.v1.Item.end_date:type_name -> google.protobuf.Timestamp
-	32, // 3: mavio.library.v1.Item.runtime:type_name -> google.protobuf.Duration
-	29, // 4: mavio.library.v1.Item.external_ids:type_name -> mavio.library.v1.Item.ExternalIdsEntry
+	38, // 1: mavio.library.v1.Item.premiere_date:type_name -> google.protobuf.Timestamp
+	38, // 2: mavio.library.v1.Item.end_date:type_name -> google.protobuf.Timestamp
+	39, // 3: mavio.library.v1.Item.runtime:type_name -> google.protobuf.Duration
+	36, // 4: mavio.library.v1.Item.external_ids:type_name -> mavio.library.v1.Item.ExternalIdsEntry
 	2,  // 5: mavio.library.v1.Item.series_status:type_name -> mavio.library.v1.SeriesStatus
 	1,  // 6: mavio.library.v1.Item.extra:type_name -> mavio.library.v1.ExtraKind
-	31, // 7: mavio.library.v1.Item.date_added:type_name -> google.protobuf.Timestamp
-	9,  // 8: mavio.library.v1.Item.images:type_name -> mavio.library.v1.Image
+	38, // 7: mavio.library.v1.Item.date_added:type_name -> google.protobuf.Timestamp
+	10, // 8: mavio.library.v1.Item.images:type_name -> mavio.library.v1.Image
 	6,  // 9: mavio.library.v1.Item.locked_fields:type_name -> mavio.library.v1.MetadataField
 	3,  // 10: mavio.library.v1.Image.kind:type_name -> mavio.library.v1.ImageKind
-	31, // 11: mavio.library.v1.Person.birth_date:type_name -> google.protobuf.Timestamp
-	31, // 12: mavio.library.v1.Person.death_date:type_name -> google.protobuf.Timestamp
-	30, // 13: mavio.library.v1.Person.external_ids:type_name -> mavio.library.v1.Person.ExternalIdsEntry
-	9,  // 14: mavio.library.v1.Person.images:type_name -> mavio.library.v1.Image
-	10, // 15: mavio.library.v1.Credit.person:type_name -> mavio.library.v1.Person
+	38, // 11: mavio.library.v1.Person.birth_date:type_name -> google.protobuf.Timestamp
+	38, // 12: mavio.library.v1.Person.death_date:type_name -> google.protobuf.Timestamp
+	37, // 13: mavio.library.v1.Person.external_ids:type_name -> mavio.library.v1.Person.ExternalIdsEntry
+	10, // 14: mavio.library.v1.Person.images:type_name -> mavio.library.v1.Image
+	11, // 15: mavio.library.v1.Credit.person:type_name -> mavio.library.v1.Person
 	4,  // 16: mavio.library.v1.Credit.kind:type_name -> mavio.library.v1.CreditKind
-	8,  // 17: mavio.library.v1.GetItemResponse.item:type_name -> mavio.library.v1.Item
-	33, // 18: mavio.library.v1.GetItemResponse.media_sources:type_name -> mavio.library.v1.MediaSource
-	11, // 19: mavio.library.v1.GetItemResponse.credits:type_name -> mavio.library.v1.Credit
-	5,  // 20: mavio.library.v1.SortSpec.field:type_name -> mavio.library.v1.SortField
-	0,  // 21: mavio.library.v1.ListItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
-	14, // 22: mavio.library.v1.ListItemsRequest.sort:type_name -> mavio.library.v1.SortSpec
-	8,  // 23: mavio.library.v1.ListItemsResponse.items:type_name -> mavio.library.v1.Item
-	10, // 24: mavio.library.v1.GetPersonResponse.person:type_name -> mavio.library.v1.Person
-	7,  // 25: mavio.library.v1.ListValuesRequest.kind:type_name -> mavio.library.v1.ValueKind
-	0,  // 26: mavio.library.v1.ListValuesRequest.item_kinds:type_name -> mavio.library.v1.ItemKind
-	20, // 27: mavio.library.v1.ListValuesResponse.values:type_name -> mavio.library.v1.ValueCount
-	0,  // 28: mavio.library.v1.ListPeopleRequest.item_kinds:type_name -> mavio.library.v1.ItemKind
-	4,  // 29: mavio.library.v1.ListPeopleRequest.credit_kinds:type_name -> mavio.library.v1.CreditKind
-	10, // 30: mavio.library.v1.PersonCount.person:type_name -> mavio.library.v1.Person
-	23, // 31: mavio.library.v1.ListPeopleResponse.people:type_name -> mavio.library.v1.PersonCount
-	0,  // 32: mavio.library.v1.ListLatestItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
-	8,  // 33: mavio.library.v1.ListLatestItemsResponse.items:type_name -> mavio.library.v1.Item
-	31, // 34: mavio.library.v1.ListNextUpRequest.since:type_name -> google.protobuf.Timestamp
-	8,  // 35: mavio.library.v1.ListNextUpResponse.items:type_name -> mavio.library.v1.Item
-	12, // 36: mavio.library.v1.ItemService.GetItem:input_type -> mavio.library.v1.GetItemRequest
-	15, // 37: mavio.library.v1.ItemService.ListItems:input_type -> mavio.library.v1.ListItemsRequest
-	17, // 38: mavio.library.v1.ItemService.GetPerson:input_type -> mavio.library.v1.GetPersonRequest
-	19, // 39: mavio.library.v1.ItemService.ListValues:input_type -> mavio.library.v1.ListValuesRequest
-	25, // 40: mavio.library.v1.ItemService.ListLatestItems:input_type -> mavio.library.v1.ListLatestItemsRequest
-	27, // 41: mavio.library.v1.ItemService.ListNextUp:input_type -> mavio.library.v1.ListNextUpRequest
-	22, // 42: mavio.library.v1.ItemService.ListPeople:input_type -> mavio.library.v1.ListPeopleRequest
-	13, // 43: mavio.library.v1.ItemService.GetItem:output_type -> mavio.library.v1.GetItemResponse
-	16, // 44: mavio.library.v1.ItemService.ListItems:output_type -> mavio.library.v1.ListItemsResponse
-	18, // 45: mavio.library.v1.ItemService.GetPerson:output_type -> mavio.library.v1.GetPersonResponse
-	21, // 46: mavio.library.v1.ItemService.ListValues:output_type -> mavio.library.v1.ListValuesResponse
-	26, // 47: mavio.library.v1.ItemService.ListLatestItems:output_type -> mavio.library.v1.ListLatestItemsResponse
-	28, // 48: mavio.library.v1.ItemService.ListNextUp:output_type -> mavio.library.v1.ListNextUpResponse
-	24, // 49: mavio.library.v1.ItemService.ListPeople:output_type -> mavio.library.v1.ListPeopleResponse
-	43, // [43:50] is the sub-list for method output_type
-	36, // [36:43] is the sub-list for method input_type
-	36, // [36:36] is the sub-list for extension type_name
-	36, // [36:36] is the sub-list for extension extendee
-	0,  // [0:36] is the sub-list for field type_name
+	9,  // 17: mavio.library.v1.GetItemResponse.item:type_name -> mavio.library.v1.Item
+	40, // 18: mavio.library.v1.GetItemResponse.media_sources:type_name -> mavio.library.v1.MediaSource
+	12, // 19: mavio.library.v1.GetItemResponse.credits:type_name -> mavio.library.v1.Credit
+	15, // 20: mavio.library.v1.GetItemResponse.trickplay:type_name -> mavio.library.v1.Trickplay
+	16, // 21: mavio.library.v1.GetItemResponse.segments:type_name -> mavio.library.v1.MediaSegment
+	39, // 22: mavio.library.v1.Trickplay.interval:type_name -> google.protobuf.Duration
+	8,  // 23: mavio.library.v1.MediaSegment.kind:type_name -> mavio.library.v1.SegmentKind
+	39, // 24: mavio.library.v1.MediaSegment.start:type_name -> google.protobuf.Duration
+	39, // 25: mavio.library.v1.MediaSegment.end:type_name -> google.protobuf.Duration
+	39, // 26: mavio.library.v1.LyricCue.start:type_name -> google.protobuf.Duration
+	39, // 27: mavio.library.v1.LyricCue.end:type_name -> google.protobuf.Duration
+	39, // 28: mavio.library.v1.LyricLine.start:type_name -> google.protobuf.Duration
+	18, // 29: mavio.library.v1.LyricLine.cues:type_name -> mavio.library.v1.LyricCue
+	19, // 30: mavio.library.v1.GetLyricsResponse.lines:type_name -> mavio.library.v1.LyricLine
+	5,  // 31: mavio.library.v1.SortSpec.field:type_name -> mavio.library.v1.SortField
+	0,  // 32: mavio.library.v1.ListItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
+	21, // 33: mavio.library.v1.ListItemsRequest.sort:type_name -> mavio.library.v1.SortSpec
+	9,  // 34: mavio.library.v1.ListItemsResponse.items:type_name -> mavio.library.v1.Item
+	11, // 35: mavio.library.v1.GetPersonResponse.person:type_name -> mavio.library.v1.Person
+	7,  // 36: mavio.library.v1.ListValuesRequest.kind:type_name -> mavio.library.v1.ValueKind
+	0,  // 37: mavio.library.v1.ListValuesRequest.item_kinds:type_name -> mavio.library.v1.ItemKind
+	27, // 38: mavio.library.v1.ListValuesResponse.values:type_name -> mavio.library.v1.ValueCount
+	0,  // 39: mavio.library.v1.ListPeopleRequest.item_kinds:type_name -> mavio.library.v1.ItemKind
+	4,  // 40: mavio.library.v1.ListPeopleRequest.credit_kinds:type_name -> mavio.library.v1.CreditKind
+	11, // 41: mavio.library.v1.PersonCount.person:type_name -> mavio.library.v1.Person
+	30, // 42: mavio.library.v1.ListPeopleResponse.people:type_name -> mavio.library.v1.PersonCount
+	0,  // 43: mavio.library.v1.ListLatestItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
+	9,  // 44: mavio.library.v1.ListLatestItemsResponse.items:type_name -> mavio.library.v1.Item
+	38, // 45: mavio.library.v1.ListNextUpRequest.since:type_name -> google.protobuf.Timestamp
+	9,  // 46: mavio.library.v1.ListNextUpResponse.items:type_name -> mavio.library.v1.Item
+	13, // 47: mavio.library.v1.ItemService.GetItem:input_type -> mavio.library.v1.GetItemRequest
+	22, // 48: mavio.library.v1.ItemService.ListItems:input_type -> mavio.library.v1.ListItemsRequest
+	24, // 49: mavio.library.v1.ItemService.GetPerson:input_type -> mavio.library.v1.GetPersonRequest
+	26, // 50: mavio.library.v1.ItemService.ListValues:input_type -> mavio.library.v1.ListValuesRequest
+	32, // 51: mavio.library.v1.ItemService.ListLatestItems:input_type -> mavio.library.v1.ListLatestItemsRequest
+	34, // 52: mavio.library.v1.ItemService.ListNextUp:input_type -> mavio.library.v1.ListNextUpRequest
+	29, // 53: mavio.library.v1.ItemService.ListPeople:input_type -> mavio.library.v1.ListPeopleRequest
+	17, // 54: mavio.library.v1.ItemService.GetLyrics:input_type -> mavio.library.v1.GetLyricsRequest
+	14, // 55: mavio.library.v1.ItemService.GetItem:output_type -> mavio.library.v1.GetItemResponse
+	23, // 56: mavio.library.v1.ItemService.ListItems:output_type -> mavio.library.v1.ListItemsResponse
+	25, // 57: mavio.library.v1.ItemService.GetPerson:output_type -> mavio.library.v1.GetPersonResponse
+	28, // 58: mavio.library.v1.ItemService.ListValues:output_type -> mavio.library.v1.ListValuesResponse
+	33, // 59: mavio.library.v1.ItemService.ListLatestItems:output_type -> mavio.library.v1.ListLatestItemsResponse
+	35, // 60: mavio.library.v1.ItemService.ListNextUp:output_type -> mavio.library.v1.ListNextUpResponse
+	31, // 61: mavio.library.v1.ItemService.ListPeople:output_type -> mavio.library.v1.ListPeopleResponse
+	20, // 62: mavio.library.v1.ItemService.GetLyrics:output_type -> mavio.library.v1.GetLyricsResponse
+	55, // [55:63] is the sub-list for method output_type
+	47, // [47:55] is the sub-list for method input_type
+	47, // [47:47] is the sub-list for extension type_name
+	47, // [47:47] is the sub-list for extension extendee
+	0,  // [0:47] is the sub-list for field type_name
 }
 
 func init() { file_mavio_library_v1_item_proto_init() }
@@ -5164,8 +6342,8 @@ func file_mavio_library_v1_item_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_library_v1_item_proto_rawDesc), len(file_mavio_library_v1_item_proto_rawDesc)),
-			NumEnums:      8,
-			NumMessages:   23,
+			NumEnums:      9,
+			NumMessages:   29,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

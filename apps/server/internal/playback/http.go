@@ -1,12 +1,15 @@
 package playback
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -36,6 +39,9 @@ func (p *Playback) URL() string {
 }
 
 func directName(p *Playback) string {
+	if p.progressive != nil {
+		return "stream." + p.progExt
+	}
 	return "stream" + strings.ToLower(filepath.Ext(p.Source().Path))
 }
 
@@ -44,6 +50,15 @@ func directName(p *Playback) string {
 func (m *Manager) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /media/{playback}/{file}", m.serveMedia)
+	mux.HandleFunc("GET /media/{playback}/attachments/{index}", func(w http.ResponseWriter, r *http.Request) {
+		p := m.Get(r.PathValue("playback"))
+		if p == nil {
+			http.NotFound(w, r)
+			return
+		}
+		p.touch(time.Now())
+		m.serveAttachment(w, r, p)
+	})
 	mux.HandleFunc("GET /media/{playback}/subtitles/{file}", func(w http.ResponseWriter, r *http.Request) {
 		p := m.Get(r.PathValue("playback"))
 		if p == nil {
@@ -69,7 +84,12 @@ func (m *Manager) serveMedia(w http.ResponseWriter, r *http.Request) {
 	}
 	file := r.PathValue("file")
 	switch {
+	case p.progressive != nil && file == directName(p):
+		m.serveProgressive(w, r, p)
 	case !p.HLS() && file == directName(p):
+		if p.Download {
+			w.Header().Set("Content-Disposition", attachment(p, filepath.Ext(p.Source().Path)))
+		}
 		m.serveFile(w, r, p)
 	case p.HLS() && file == "master.m3u8":
 		w.Header().Set("Content-Type", playlistType)
@@ -180,4 +200,67 @@ func openInRoot(root, path string) (*os.File, os.FileInfo, error) {
 		return nil, nil, fmt.Errorf("%s is not a regular file", path)
 	}
 	return f, info, nil
+}
+
+// attachment names a download after its item.
+func attachment(p *Playback, ext string) string {
+	name := strings.Map(func(r rune) rune {
+		if r < ' ' || strings.ContainsRune(`"\\/:*?<>|`, r) {
+			return '_'
+		}
+		return r
+	}, p.Item.Name)
+	if name == "" {
+		name = "download"
+	}
+	return `attachment; filename*=UTF-8''` + url.PathEscape(name+ext)
+}
+
+// serveProgressive runs ffmpeg for the request, writing its output as the
+// response; such a stream cannot be seeked.
+func (m *Manager) serveProgressive(w http.ResponseWriter, r *http.Request, p *Playback) {
+	ctype := mediaTypes["."+p.progExt]
+	if ctype == "" {
+		ctype = "application/octet-stream"
+	}
+	w.Header().Set("Content-Type", ctype)
+	w.Header().Set("Accept-Ranges", "none")
+	if p.Download {
+		w.Header().Set("Content-Disposition", attachment(p, "."+p.progExt))
+	}
+	if r.Method == http.MethodHead {
+		return
+	}
+	var stderr bytes.Buffer
+	cmd := exec.CommandContext(r.Context(), m.cfg.FFmpegPath, p.planner.ProgressiveArgs(p.progressive, "pipe:1")...)
+	cmd.Stdout = &touchingWriter{w: w, p: p}
+	cmd.Stderr = &limitedBuffer{b: &stderr, max: 64 << 10}
+	if err := cmd.Run(); err != nil && r.Context().Err() == nil {
+		m.log.ErrorContext(r.Context(), "progressive transcode failed", "playback", p.ID, "err", err,
+			"ffmpeg", strings.TrimSpace(stderr.String()))
+	}
+}
+
+// touchingWriter keeps a playback alive while its stream is written.
+type touchingWriter struct {
+	w io.Writer
+	p *Playback
+}
+
+func (t *touchingWriter) Write(b []byte) (int, error) {
+	t.p.touch(time.Now())
+	return t.w.Write(b)
+}
+
+// limitedBuffer keeps the first bytes written.
+type limitedBuffer struct {
+	b   *bytes.Buffer
+	max int
+}
+
+func (l *limitedBuffer) Write(b []byte) (int, error) {
+	if room := l.max - l.b.Len(); room > 0 {
+		l.b.Write(b[:min(len(b), room)])
+	}
+	return len(b), nil
 }

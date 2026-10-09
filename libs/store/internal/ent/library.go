@@ -35,6 +35,12 @@ type Library struct {
 	SaveLocalMetadata bool `json:"save_local_metadata,omitempty"`
 	// AutoCollections holds the value of the "auto_collections" field.
 	AutoCollections bool `json:"auto_collections,omitempty"`
+	// ExtractTrickplay holds the value of the "extract_trickplay" field.
+	ExtractTrickplay bool `json:"extract_trickplay,omitempty"`
+	// ExtractChapterImages holds the value of the "extract_chapter_images" field.
+	ExtractChapterImages bool `json:"extract_chapter_images,omitempty"`
+	// AnalyzeLoudness holds the value of the "analyze_loudness" field.
+	AnalyzeLoudness bool `json:"analyze_loudness,omitempty"`
 	// ScanGeneration holds the value of the "scan_generation" field.
 	ScanGeneration int64 `json:"scan_generation,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -85,7 +91,7 @@ func (*Library) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case library.FieldID:
 			values[i] = new(core.ID)
-		case library.FieldSaveLocalMetadata, library.FieldAutoCollections:
+		case library.FieldSaveLocalMetadata, library.FieldAutoCollections, library.FieldExtractTrickplay, library.FieldExtractChapterImages, library.FieldAnalyzeLoudness:
 			values[i] = new(sql.NullBool)
 		case library.FieldScanInterval, library.FieldScanGeneration:
 			values[i] = new(sql.NullInt64)
@@ -163,6 +169,24 @@ func (_m *Library) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field auto_collections", values[i])
 			} else if value.Valid {
 				_m.AutoCollections = value.Bool
+			}
+		case library.FieldExtractTrickplay:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field extract_trickplay", values[i])
+			} else if value.Valid {
+				_m.ExtractTrickplay = value.Bool
+			}
+		case library.FieldExtractChapterImages:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field extract_chapter_images", values[i])
+			} else if value.Valid {
+				_m.ExtractChapterImages = value.Bool
+			}
+		case library.FieldAnalyzeLoudness:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field analyze_loudness", values[i])
+			} else if value.Valid {
+				_m.AnalyzeLoudness = value.Bool
 			}
 		case library.FieldScanGeneration:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -251,6 +275,15 @@ func (_m *Library) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("auto_collections=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AutoCollections))
+	builder.WriteString(", ")
+	builder.WriteString("extract_trickplay=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ExtractTrickplay))
+	builder.WriteString(", ")
+	builder.WriteString("extract_chapter_images=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ExtractChapterImages))
+	builder.WriteString(", ")
+	builder.WriteString("analyze_loudness=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AnalyzeLoudness))
 	builder.WriteString(", ")
 	builder.WriteString("scan_generation=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ScanGeneration))

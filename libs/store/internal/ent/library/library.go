@@ -31,6 +31,12 @@ const (
 	FieldSaveLocalMetadata = "save_local_metadata"
 	// FieldAutoCollections holds the string denoting the auto_collections field in the database.
 	FieldAutoCollections = "auto_collections"
+	// FieldExtractTrickplay holds the string denoting the extract_trickplay field in the database.
+	FieldExtractTrickplay = "extract_trickplay"
+	// FieldExtractChapterImages holds the string denoting the extract_chapter_images field in the database.
+	FieldExtractChapterImages = "extract_chapter_images"
+	// FieldAnalyzeLoudness holds the string denoting the analyze_loudness field in the database.
+	FieldAnalyzeLoudness = "analyze_loudness"
 	// FieldScanGeneration holds the string denoting the scan_generation field in the database.
 	FieldScanGeneration = "scan_generation"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -70,6 +76,9 @@ var Columns = []string{
 	FieldMetadataCountry,
 	FieldSaveLocalMetadata,
 	FieldAutoCollections,
+	FieldExtractTrickplay,
+	FieldExtractChapterImages,
+	FieldAnalyzeLoudness,
 	FieldScanGeneration,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -98,6 +107,12 @@ var (
 	DefaultSaveLocalMetadata bool
 	// DefaultAutoCollections holds the default value on creation for the "auto_collections" field.
 	DefaultAutoCollections bool
+	// DefaultExtractTrickplay holds the default value on creation for the "extract_trickplay" field.
+	DefaultExtractTrickplay bool
+	// DefaultExtractChapterImages holds the default value on creation for the "extract_chapter_images" field.
+	DefaultExtractChapterImages bool
+	// DefaultAnalyzeLoudness holds the default value on creation for the "analyze_loudness" field.
+	DefaultAnalyzeLoudness bool
 	// DefaultScanGeneration holds the default value on creation for the "scan_generation" field.
 	DefaultScanGeneration int64
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -151,6 +166,21 @@ func BySaveLocalMetadata(opts ...sql.OrderTermOption) OrderOption {
 // ByAutoCollections orders the results by the auto_collections field.
 func ByAutoCollections(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAutoCollections, opts...).ToFunc()
+}
+
+// ByExtractTrickplay orders the results by the extract_trickplay field.
+func ByExtractTrickplay(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExtractTrickplay, opts...).ToFunc()
+}
+
+// ByExtractChapterImages orders the results by the extract_chapter_images field.
+func ByExtractChapterImages(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExtractChapterImages, opts...).ToFunc()
+}
+
+// ByAnalyzeLoudness orders the results by the analyze_loudness field.
+func ByAnalyzeLoudness(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAnalyzeLoudness, opts...).ToFunc()
 }
 
 // ByScanGeneration orders the results by the scan_generation field.

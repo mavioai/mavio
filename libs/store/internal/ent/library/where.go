@@ -92,6 +92,21 @@ func AutoCollections(v bool) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldAutoCollections, v))
 }
 
+// ExtractTrickplay applies equality check predicate on the "extract_trickplay" field. It's identical to ExtractTrickplayEQ.
+func ExtractTrickplay(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldExtractTrickplay, v))
+}
+
+// ExtractChapterImages applies equality check predicate on the "extract_chapter_images" field. It's identical to ExtractChapterImagesEQ.
+func ExtractChapterImages(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldExtractChapterImages, v))
+}
+
+// AnalyzeLoudness applies equality check predicate on the "analyze_loudness" field. It's identical to AnalyzeLoudnessEQ.
+func AnalyzeLoudness(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldAnalyzeLoudness, v))
+}
+
 // ScanGeneration applies equality check predicate on the "scan_generation" field. It's identical to ScanGenerationEQ.
 func ScanGeneration(v int64) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldScanGeneration, v))
@@ -439,6 +454,36 @@ func AutoCollectionsEQ(v bool) predicate.Library {
 // AutoCollectionsNEQ applies the NEQ predicate on the "auto_collections" field.
 func AutoCollectionsNEQ(v bool) predicate.Library {
 	return predicate.Library(sql.FieldNEQ(FieldAutoCollections, v))
+}
+
+// ExtractTrickplayEQ applies the EQ predicate on the "extract_trickplay" field.
+func ExtractTrickplayEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldExtractTrickplay, v))
+}
+
+// ExtractTrickplayNEQ applies the NEQ predicate on the "extract_trickplay" field.
+func ExtractTrickplayNEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldNEQ(FieldExtractTrickplay, v))
+}
+
+// ExtractChapterImagesEQ applies the EQ predicate on the "extract_chapter_images" field.
+func ExtractChapterImagesEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldExtractChapterImages, v))
+}
+
+// ExtractChapterImagesNEQ applies the NEQ predicate on the "extract_chapter_images" field.
+func ExtractChapterImagesNEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldNEQ(FieldExtractChapterImages, v))
+}
+
+// AnalyzeLoudnessEQ applies the EQ predicate on the "analyze_loudness" field.
+func AnalyzeLoudnessEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldAnalyzeLoudness, v))
+}
+
+// AnalyzeLoudnessNEQ applies the NEQ predicate on the "analyze_loudness" field.
+func AnalyzeLoudnessNEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldNEQ(FieldAnalyzeLoudness, v))
 }
 
 // ScanGenerationEQ applies the EQ predicate on the "scan_generation" field.

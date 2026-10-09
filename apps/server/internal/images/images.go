@@ -74,11 +74,16 @@ func New(cfg Config) *Server {
 // and quality, as Jellyfin's image API takes them, and format. Renderings
 // without a format are WebP for clients that accept it, else JPEG or PNG.
 // It also serves GET /images/collages/{id}, the collage of a library,
-// collection or playlist, with the same parameters.
+// collection or playlist, with the same parameters, the trickplay sheets
+// of items at GET /images/trickplay/{item}/{width}/{sheet}.jpg, and their
+// chapter images at GET /images/chapters/{item}/{source}/{index}, which
+// take the parameters too; the IDs are the credentials.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /images/{id}", s.serve)
 	mux.HandleFunc("GET /images/collages/{id}", s.serveCollage)
+	mux.HandleFunc("GET /images/trickplay/{item}/{width}/{sheet}", s.serveTrickplay)
+	mux.HandleFunc("GET /images/chapters/{item}/{source}/{index}", s.serveChapter)
 	return mux
 }
 
@@ -370,4 +375,71 @@ func parseOptions(q url.Values) (imaging.Options, error) {
 // optionsKey names a rendering in the cache.
 func optionsKey(o imaging.Options) string {
 	return fmt.Sprintf("w%d-h%d-mw%d-mh%d-fw%d-fh%d-q%d-%s", o.Width, o.Height, o.MaxWidth, o.MaxHeight, o.FillWidth, o.FillHeight, o.Quality, o.Format)
+}
+
+// metadataFile reads a file of the metadata folder, given by its path.
+func (s *Server) metadataFile(file string) ([]byte, error) {
+	if s.cfg.MetadataDir == "" {
+		return nil, errUnavailable
+	}
+	rel, err := filepath.Rel(s.cfg.MetadataDir, file)
+	if err != nil || !filepath.IsLocal(rel) {
+		return nil, errUnavailable
+	}
+	f, err := os.OpenInRoot(s.cfg.MetadataDir, rel)
+	if err != nil {
+		return nil, errUnavailable
+	}
+	defer func() { _ = f.Close() }()
+	return io.ReadAll(io.LimitReader(f, maxDownload))
+}
+
+func (s *Server) serveTrickplay(w http.ResponseWriter, r *http.Request) {
+	item, err := core.ParseID(r.PathValue("item"))
+	width, werr := strconv.Atoi(r.PathValue("width"))
+	sheet, ok := strings.CutSuffix(r.PathValue("sheet"), ".jpg")
+	n, serr := strconv.Atoi(sheet)
+	if err != nil || werr != nil || serr != nil || !ok || n < 0 || width <= 0 {
+		http.NotFound(w, r)
+		return
+	}
+	data, err := s.metadataFile(filepath.Join(library.TrickplayDir(s.cfg.MetadataDir, item, width), strconv.Itoa(n)+".jpg"))
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "image/jpeg")
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	_, _ = w.Write(data)
+}
+
+func (s *Server) serveChapter(w http.ResponseWriter, r *http.Request) {
+	item, err := core.ParseID(r.PathValue("item"))
+	source, serr := core.ParseID(r.PathValue("source"))
+	index, ierr := strconv.Atoi(r.PathValue("index"))
+	if err != nil || serr != nil || ierr != nil || index < 0 {
+		http.NotFound(w, r)
+		return
+	}
+	opts, err := parseOptions(r.URL.Query())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	data, err := s.metadataFile(library.ChapterImagePath(s.cfg.MetadataDir, item, source, index))
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	contentType := "image/jpeg"
+	if opts != (imaging.Options{}) {
+		sum := sha256.Sum256(data)
+		if data, contentType, err = s.render(r.Context(), hex.EncodeToString(sum[:16])+"-"+optionsKey(opts), data, opts); err != nil {
+			http.Error(w, "image unavailable", http.StatusInternalServerError)
+			return
+		}
+	}
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	_, _ = w.Write(data)
 }

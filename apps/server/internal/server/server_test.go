@@ -179,8 +179,11 @@ func TestEndToEnd(t *testing.T) {
 
 // installPlugin builds the smoke tests' metadata provider for WASM into a
 // plugin folder, with a schema that requires an API key as TMDB's does.
-func installPlugin(t *testing.T) string {
+func installPlugin(t *testing.T, capabilities ...string) string {
 	t.Helper()
+	if len(capabilities) == 0 {
+		capabilities = []string{"CAPABILITY_METADATA_PROVIDER"}
+	}
 	root := t.TempDir()
 	dir := filepath.Join(root, "smoke")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -194,7 +197,7 @@ func installPlugin(t *testing.T) string {
 	}
 	schema := `{"type":"object","properties":{"api_key":{"type":"string","minLength":1}},"required":["api_key"]}`
 	manifest := fmt.Sprintf(`{"id":"org.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":"RUNTIME_WASM",
-		"capabilities":["CAPABILITY_METADATA_PROVIDER"],"configSchema":%q,"apiVersion":"1.0"}`, schema)
+		"capabilities":["%s"],"configSchema":%q,"apiVersion":"1.0"}`, strings.Join(capabilities, `","`), schema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatal(err)
 	}

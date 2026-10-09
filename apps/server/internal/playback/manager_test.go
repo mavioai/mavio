@@ -276,10 +276,21 @@ func TestStartErrors(t *testing.T) {
 		}
 	}
 
-	// Progressive transcodes are not served.
+	// Progressive transcodes are served as one stream.
 	e.m.cfg.FFmpeg = func(_ context.Context, _ []string) (supervisor.Process, error) { return nil, errors.New("unused") }
 	if _, err := e.m.Start(ctx, Request{User: e.user, ItemID: e.movie.ID, Client: hevcOnly}); !errors.Is(err, ErrUnsupported) {
-		t.Errorf("progressive transcode: Start = %v, want ErrUnsupported", err)
+		t.Errorf("progressive transcode without an ffmpeg path: Start = %v, want ErrUnsupported", err)
+	}
+	e.m.cfg.FFmpegPath = "ffmpeg"
+	p, err := e.m.Start(ctx, Request{User: e.user, ItemID: e.movie.ID, Client: hevcOnly})
+	if err != nil || p.Method != decision.Transcode || p.URL() != "media/"+p.ID+"/stream."+p.progExt || p.HLS() {
+		t.Errorf("progressive transcode: Start = %+v, %v", p, err)
+	}
+	_ = e.m.Stop(ctx, e.user.ID, p.ID, nil)
+	noDownloads := e.user
+	noDownloads.Policy.AllowDownload = false
+	if _, err := e.m.Start(ctx, Request{User: noDownloads, ItemID: e.movie.ID, Client: mp4Client, Download: true}); !errors.Is(err, ErrNotAllowed) {
+		t.Errorf("download without permission: Start = %v, want ErrNotAllowed", err)
 	}
 
 	limited := e.user

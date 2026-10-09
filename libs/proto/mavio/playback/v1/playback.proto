@@ -349,6 +349,10 @@ message StartPlaybackRequest {
   int64 max_bitrate = 6 [(buf.validate.field).int64.gt = 0];
   // Where playback begins; transcodes start there.
   google.protobuf.Duration start_position = 7 [(buf.validate.field).duration.gte = {}];
+  // Asks for a file to keep, which the user's policy must allow: the source
+  // as it is when the client plays it, else a progressive transcode to the
+  // client's container, never HLS. The URL serves it as an attachment.
+  bool download = 8;
 }
 
 message StartPlaybackResponse {
@@ -365,6 +369,17 @@ message StartPlaybackResponse {
   int32 audio_stream_index = 6;
   int32 subtitle_stream_index = 7;
   repeated SubtitleTrack subtitles = 8;
+  // The fonts attached to the source, for rendering its ASS subtitles.
+  repeated Attachment attachments = 9;
+}
+
+// Attachment is a file attached to a media source, such as a font.
+message Attachment {
+  int32 index = 1;
+  string file_name = 2;
+  string mime_type = 3;
+  // Relative to the server's base URL.
+  string url = 4;
 }
 
 message ReportProgressRequest {

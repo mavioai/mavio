@@ -30,6 +30,7 @@ import (
 	"github.com/mavioai/mavio/libs/media/borders"
 	"github.com/mavioai/mavio/libs/media/keyframes"
 	"github.com/mavioai/mavio/libs/media/probe"
+	"github.com/mavioai/mavio/libs/media/thumbnails"
 	"github.com/mavioai/mavio/libs/store"
 )
 
@@ -201,7 +202,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		}
 		return nil
 	})
-	if worker := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
+	if worker := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, plugs.SegmentProviders, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err
@@ -244,7 +245,7 @@ func addDevLibraries(ctx context.Context, log *slog.Logger, db core.Store, dir s
 // every library queued, or nil when there is no ffprobe to probe media
 // with.
 func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffprobe, ffmpeg string, analyzer library.ImageAnalyzer,
-	refresher *library.Refresher, quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
+	refresher *library.Refresher, segments func() []library.SegmentProvider, quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
 	growthPolicy *storage.GrowthPolicy,
 ) *library.Worker {
 	path, err := exec.LookPath(ffprobe)
@@ -265,8 +266,15 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 		Keyframes: providers.Keyframes{Extractor: &keyframes.Extractor{FFprobe: path}},
 		Refresher: refresher,
 		Borders:   bordersOf(ffmpeg),
-		Images:    analyzer,
-		Logger:    log,
+		Segments:  segments, MetadataDir: refresher.MetadataDir,
+		Fails:  library.NewFailNotes(24*time.Hour, 4096),
+		Images: analyzer,
+		Logger: log,
+	}
+	if ffmpeg, err := exec.LookPath(ffmpeg); err == nil {
+		maker := &thumbnails.Maker{FFmpeg: ffmpeg}
+		jobs.Thumbnails = providers.Thumbnails{Maker: maker, Options: thumbnails.DefaultOptions()}
+		jobs.Loudness = maker
 	}
 	if err := jobs.Schedule(ctx); err != nil {
 		log.ErrorContext(ctx, "schedule library scans", "err", err)

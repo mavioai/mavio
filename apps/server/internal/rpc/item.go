@@ -4,6 +4,10 @@ import (
 	"cmp"
 	"context"
 	"errors"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -12,8 +16,10 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/browse"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/metadata"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
+	"github.com/mavioai/mavio/libs/subtitle"
 )
 
 var (
@@ -147,7 +153,111 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 			Order:  new(int32(c.Order)),
 		}.Build())
 	}
+	tricks, err := s.store.Trickplay().List(ctx, item.ID)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	for _, t := range tricks {
+		resp.Trickplay = append(resp.Trickplay, libraryv1.Trickplay_builder{
+			Width: new(int32(t.Width)), Height: new(int32(t.Height)), TileWidth: new(int32(t.TileWidth)),
+			TileHeight: new(int32(t.TileHeight)), ThumbnailCount: new(int32(t.ThumbnailCount)),
+			Interval: durationpb.New(t.Interval), Bandwidth: new(int32(t.Bandwidth)), SheetCount: new(int32(t.Sheets())),
+		}.Build())
+	}
+	segments, err := s.store.MediaSegments().List(ctx, item.ID)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	for _, m := range segments {
+		resp.Segments = append(resp.Segments, libraryv1.MediaSegment_builder{
+			Id: new(m.ID.String()), Kind: new(segmentKinds[m.Kind]), Start: durationpb.New(m.Start), End: durationpb.New(m.End),
+		}.Build())
+	}
 	return resp.Build(), nil
+}
+
+var segmentKinds = map[core.SegmentKind]libraryv1.SegmentKind{
+	core.SegmentIntro: libraryv1.SegmentKind_SEGMENT_KIND_INTRO, core.SegmentOutro: libraryv1.SegmentKind_SEGMENT_KIND_OUTRO,
+	core.SegmentRecap: libraryv1.SegmentKind_SEGMENT_KIND_RECAP, core.SegmentPreview: libraryv1.SegmentKind_SEGMENT_KIND_PREVIEW,
+	core.SegmentCommercial: libraryv1.SegmentKind_SEGMENT_KIND_COMMERCIAL,
+}
+
+// GetLyrics reads the lyric file beside a track.
+func (s *ItemService) GetLyrics(ctx context.Context, req *libraryv1.GetLyricsRequest) (*libraryv1.GetLyricsResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	notFound := connect.NewError(connect.CodeNotFound, errors.New("no lyrics"))
+	item, err := s.store.Items().Get(ctx, core.MustParseID(req.GetItemId()))
+	if errors.Is(err, core.ErrNotFound) || err == nil && !p.User.CanAccess(&item) {
+		return nil, notFound
+	} else if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	lib, err := s.store.Libraries().Get(ctx, item.LibraryID)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	name, content, ok := lyricFile(&lib, item.Path)
+	if !ok {
+		return nil, notFound
+	}
+	l, ok := metadata.ParseLyrics(name, content)
+	if !ok {
+		return nil, notFound
+	}
+	out := libraryv1.GetLyricsResponse_builder{
+		Artist: &l.Metadata.Artist, Album: &l.Metadata.Album, Title: &l.Metadata.Title, Synced: &l.Metadata.Synced,
+	}.Build()
+	for _, line := range l.Lines {
+		pl := libraryv1.LyricLine_builder{Text: &line.Text}.Build()
+		if line.Start != nil {
+			pl.SetStart(durationpb.New(*line.Start))
+		}
+		for _, c := range line.Cues {
+			pc := libraryv1.LyricCue_builder{
+				Position: new(int32(c.Position)), EndPosition: new(int32(c.EndPosition)), Start: durationpb.New(c.Start),
+			}.Build()
+			if c.End != nil {
+				pc.SetEnd(durationpb.New(*c.End))
+			}
+			pl.SetCues(append(pl.GetCues(), pc))
+		}
+		out.SetLines(append(out.GetLines(), pl))
+	}
+	return out, nil
+}
+
+// maxLyrics bounds a lyric file read.
+const maxLyrics = 1 << 20
+
+// lyricFile reads the lyric file beside a media file within its library
+// folder, the preferred extension first.
+func lyricFile(lib *core.Library, media string) (string, string, bool) {
+	for _, root := range lib.Paths {
+		rel, err := filepath.Rel(root, filepath.FromSlash(media))
+		if err != nil || !filepath.IsLocal(rel) {
+			continue
+		}
+		stem := strings.TrimSuffix(rel, filepath.Ext(rel))
+		for _, ext := range metadata.LyricExtensions {
+			f, err := os.OpenInRoot(root, stem+ext)
+			if err != nil {
+				continue
+			}
+			data, err := io.ReadAll(io.LimitReader(f, maxLyrics))
+			_ = f.Close()
+			if err != nil {
+				continue
+			}
+			if utf8, _, err := subtitle.ToUTF8(data); err == nil {
+				data = utf8
+			}
+			return filepath.Base(stem + ext), string(data), true
+		}
+	}
+	return "", "", false
 }
 
 // ListItems lists the items matching the request among those the caller
@@ -510,27 +620,28 @@ func itemKindsFromProto(kinds []libraryv1.ItemKind) []core.ItemKind {
 
 func itemToProto(it *core.Item, images []core.Image, admin bool) *libraryv1.Item {
 	b := libraryv1.Item_builder{
-		Id:              new(it.ID.String()),
-		LibraryId:       new(it.LibraryID.String()),
-		Kind:            new(itemKinds[it.Kind]),
-		Name:            &it.Name,
-		SortName:        &it.SortName,
-		OriginalTitle:   &it.OriginalTitle,
-		Overview:        &it.Overview,
-		Tagline:         &it.Tagline,
-		ProductionYear:  new(int32(it.ProductionYear)),
-		OfficialRating:  &it.OfficialRating,
-		CommunityRating: &it.CommunityRating,
-		CriticRating:    &it.CriticRating,
-		Genres:          it.Genres,
-		Tags:            it.Tags,
-		Studios:         it.Studios,
-		Artists:         it.Artists,
-		AlbumArtists:    it.AlbumArtists,
-		DateAdded:       timestamp(it.DateAdded),
-		Images:          imagesToProto(images),
-		CustomRating:    &it.CustomRating,
-		CollectionName:  &it.CollectionName,
+		Id:                new(it.ID.String()),
+		LibraryId:         new(it.LibraryID.String()),
+		Kind:              new(itemKinds[it.Kind]),
+		Name:              &it.Name,
+		SortName:          &it.SortName,
+		OriginalTitle:     &it.OriginalTitle,
+		Overview:          &it.Overview,
+		Tagline:           &it.Tagline,
+		ProductionYear:    new(int32(it.ProductionYear)),
+		OfficialRating:    &it.OfficialRating,
+		CommunityRating:   &it.CommunityRating,
+		CriticRating:      &it.CriticRating,
+		Genres:            it.Genres,
+		Tags:              it.Tags,
+		Studios:           it.Studios,
+		Artists:           it.Artists,
+		AlbumArtists:      it.AlbumArtists,
+		DateAdded:         timestamp(it.DateAdded),
+		Images:            imagesToProto(images),
+		CustomRating:      &it.CustomRating,
+		CollectionName:    &it.CollectionName,
+		NormalizationGain: it.NormalizationGain(),
 
 		ProductionLocations: it.ProductionLocations,
 	}

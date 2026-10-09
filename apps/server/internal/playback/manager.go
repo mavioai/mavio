@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -33,6 +34,8 @@ var (
 	ErrNotPlayable = errors.New("playback: item cannot be played")
 	// ErrNoSource is returned when no media source plays on the client.
 	ErrNoSource = errors.New("playback: no media source plays on this client")
+	// ErrNotAllowed is returned for downloads the user's policy forbids.
+	ErrNotAllowed = errors.New("playback: downloads are not allowed")
 	// ErrUnsupported is returned for decisions the server cannot carry
 	// out yet, such as progressive transcodes.
 	ErrUnsupported = errors.New("playback: unsupported delivery")
@@ -176,6 +179,9 @@ type Request struct {
 	// themselves. It is the position kept should the playback expire
 	// before reporting progress.
 	Start time.Duration
+	// Download asks for a file to keep: the source as it is when the
+	// client plays it, else a progressive transcode, never HLS.
+	Download bool
 }
 
 // Playback is a playback in progress.
@@ -198,11 +204,24 @@ type Playback struct {
 
 	// root is the library folder holding the source, for direct play.
 	root string
+	// Download says the playback is a download.
+	Download bool
+	// Progressive remuxes and transcodes: the job, the planner that made
+	// it, and the output's extension.
+	progressive *planner.Job
+	planner     *planner.Planner
+	progExt     string
 	// HLS deliveries.
 	stream  *streaming.Stream
 	variant streaming.Variant
 	layout  streaming.Layout
 	segExt  string
+
+	// attachMu serializes extracting attachments.
+	attachMu sync.Mutex
+	// attachments is the folder of extracted attachments, removed at the
+	// end.
+	attachments string
 
 	// subs caches the subtitle streams read, by index.
 	subsMu sync.Mutex
@@ -256,6 +275,9 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	default:
 		return nil, fmt.Errorf("%w: %s is a %s", ErrNotPlayable, item.ID, item.Kind)
 	}
+	if r.Download && !r.User.Policy.AllowDownload {
+		return nil, ErrNotAllowed
+	}
 	if limit := r.User.Policy.MaxSessions; limit > 0 && m.countFor(r.User.ID) >= limit {
 		return nil, ErrTooManyPlaybacks
 	}
@@ -286,8 +308,12 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	if b := r.User.Policy.MaxStreamingBitrate; b > 0 && (maxBitrate == 0 || b < maxBitrate) {
 		maxBitrate = b
 	}
+	use := decision.Streaming
+	if r.Download {
+		use = decision.Static
+	}
 	req := &decision.Request{
-		Sources: sources, SourceID: r.SourceID, Client: r.Client, Context: decision.Streaming,
+		Sources: sources, SourceID: r.SourceID, Client: r.Client, Context: use,
 		MaxBitrate:       maxBitrate,
 		AudioStreamIndex: r.AudioStream, SubtitleStreamIndex: r.SubtitleStream,
 		EnableDirectPlay: true, EnableDirectStream: true,
@@ -297,9 +323,9 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	if err != nil {
 		return nil, err
 	}
-	if d != nil && d.Method == decision.DirectStream && d.Protocol != decision.HLS {
-		// A direct stream is a progressive remux, which is not served;
-		// remux into the client's HLS profile instead.
+	if d != nil && d.Method == decision.DirectStream && d.Protocol != decision.HLS && !r.Download {
+		// A progressive remux is the last resort of streaming clients:
+		// remux into the client's HLS profile instead when it has one.
 		req.EnableDirectStream = false
 		if hls, err := m.decide(video, req); err == nil && hls != nil && hls.Protocol == decision.HLS {
 			d = hls
@@ -310,7 +336,7 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	}
 
 	p := &Playback{
-		ID: newID(), UserID: r.User.ID, SessionID: r.SessionID, Item: item, Decision: d, Method: d.Method,
+		ID: newID(), UserID: r.User.ID, SessionID: r.SessionID, Item: item, Decision: d, Method: d.Method, Download: r.Download,
 		AudioStream: -1, SubtitleStream: -1, lastActive: time.Now(), position: r.Start,
 	}
 	ms := d.Source.MediaSource
@@ -324,11 +350,14 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	if p.root = libraryRoot(&lib, ms.Path); p.root == "" {
 		return nil, fmt.Errorf("%w: %s lies outside its library", ErrNotPlayable, ms.Path)
 	}
-	if d.Method != decision.DirectPlay {
-		if d.Protocol != decision.HLS {
-			return nil, fmt.Errorf("%w: progressive %s to %s; declare an HLS transcoding profile", ErrUnsupported, d.Method, d.Container)
-		}
+	switch {
+	case d.Method == decision.DirectPlay:
+	case d.Protocol == decision.HLS && !r.Download:
 		if err := m.prepareHLS(ctx, p); err != nil {
+			return nil, err
+		}
+	default:
+		if err := m.prepareProgressive(p); err != nil {
 			return nil, err
 		}
 	}
@@ -418,6 +447,27 @@ func (m *Manager) decide(video bool, req *decision.Request) (*decision.Decision,
 		return nil, nil
 	}
 	return d, nil
+}
+
+// prepareProgressive sets up a remux or transcode served as one stream,
+// which ffmpeg writes as it is requested.
+func (m *Manager) prepareProgressive(p *Playback) error {
+	if m.cfg.FFmpegPath == "" {
+		return fmt.Errorf("%w: no ffmpeg to transcode with", ErrUnsupported)
+	}
+	pl := m.planner.Load()
+	job := pl.Job(p.Decision, 0)
+	if job.Container == "" {
+		job.Container = cmp.Or(p.Decision.Container, "mp4")
+	}
+	job.Container, _, _ = strings.Cut(job.Container, ",")
+	out := pl.Output(job)
+	p.Method = decision.Transcode
+	if out.VideoCopied || (job.VideoCodec == "" && out.AudioCopied) {
+		p.Method = decision.DirectStream
+	}
+	p.progressive, p.planner, p.progExt = job, pl, job.Container
+	return nil
 }
 
 // prepareHLS sets up the stream of a remux or transcode; ffmpeg starts
@@ -615,6 +665,13 @@ func (p *Playback) close() {
 	p.mu.Unlock()
 	if !ended && p.stream != nil {
 		_ = p.stream.Close()
+	}
+	if !ended {
+		p.attachMu.Lock()
+		if p.attachments != "" {
+			_ = os.RemoveAll(p.attachments)
+		}
+		p.attachMu.Unlock()
 	}
 }
 

@@ -25,6 +25,8 @@ type memStore struct {
 	credits map[core.ID][]core.Credit
 	images  map[core.ID][]core.Image
 	links   map[core.ID][]core.Link
+	tricks  map[core.ID][]core.Trickplay
+	segs    map[core.ID][]core.MediaSegment
 	clock   func() time.Time
 }
 
@@ -32,7 +34,8 @@ func newMemStore() *memStore {
 	return &memStore{
 		items: map[core.ID]core.Item{}, sources: map[core.ID][]core.MediaSource{}, folders: map[string]core.FolderState{},
 		gens: map[core.ID]int64{}, libs: map[core.ID]core.Library{}, people: map[core.ID]core.Person{},
-		credits: map[core.ID][]core.Credit{}, images: map[core.ID][]core.Image{}, links: map[core.ID][]core.Link{}, clock: time.Now,
+		credits: map[core.ID][]core.Credit{}, images: map[core.ID][]core.Image{}, links: map[core.ID][]core.Link{},
+		tricks: map[core.ID][]core.Trickplay{}, segs: map[core.ID][]core.MediaSegment{}, clock: time.Now,
 	}
 }
 
@@ -51,6 +54,8 @@ func (m *memStore) DisplayPreferences() core.DisplayPreferencesRepository   { pa
 func (m *memStore) Settings() core.SettingsRepository                       { panic("unused") }
 func (m *memStore) APIKeys() core.APIKeyRepository                          { panic("unused") }
 func (m *memStore) Activities() core.ActivityRepository                     { panic("unused") }
+func (m *memStore) Trickplay() core.TrickplayRepository                     { return memTricks{m} }
+func (m *memStore) MediaSegments() core.MediaSegmentRepository              { return memSegs{m} }
 func (m *memStore) InTx(_ context.Context, fn func(core.Store) error) error { return fn(m) }
 
 // present returns the items not missing, by path.
@@ -110,7 +115,8 @@ func (r memItems) Walk(_ context.Context, q core.ItemQuery) iter.Seq2[core.Item,
 	r.m.mu.Lock()
 	var found []core.Item
 	for _, it := range r.m.items {
-		if (len(q.LibraryIDs) == 0 || slices.Contains(q.LibraryIDs, it.LibraryID)) && (len(q.Kinds) == 0 || slices.Contains(q.Kinds, it.Kind)) {
+		if (len(q.LibraryIDs) == 0 || slices.Contains(q.LibraryIDs, it.LibraryID)) && (len(q.Kinds) == 0 || slices.Contains(q.Kinds, it.Kind)) &&
+			(q.ParentID.IsZero() || it.ParentID == q.ParentID) {
 			found = append(found, it)
 		}
 	}
@@ -483,3 +489,41 @@ func (r memImages) Replace(_ context.Context, id core.ID, images []core.Image) e
 
 // stored returns a time as libs/store returns it: to the microsecond.
 func stored(t time.Time) time.Time { return t.Truncate(time.Microsecond) }
+
+type memTricks struct{ m *memStore }
+
+func (r memTricks) Put(_ context.Context, t *core.Trickplay) error {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	list := slices.DeleteFunc(r.m.tricks[t.ItemID], func(o core.Trickplay) bool { return o.Width == t.Width })
+	r.m.tricks[t.ItemID] = append(list, *t)
+	return t.Validate()
+}
+
+func (r memTricks) List(_ context.Context, id core.ID) ([]core.Trickplay, error) {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	return slices.Clone(r.m.tricks[id]), nil
+}
+
+func (r memTricks) Delete(_ context.Context, id core.ID) error {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	delete(r.m.tricks, id)
+	return nil
+}
+
+type memSegs struct{ m *memStore }
+
+func (r memSegs) List(_ context.Context, id core.ID) ([]core.MediaSegment, error) {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	return slices.Clone(r.m.segs[id]), nil
+}
+
+func (r memSegs) Replace(_ context.Context, id core.ID, segs []core.MediaSegment) error {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	r.m.segs[id] = slices.Clone(segs)
+	return nil
+}

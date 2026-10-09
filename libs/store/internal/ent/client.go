@@ -28,10 +28,12 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
+	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
+	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -65,6 +67,8 @@ type Client struct {
 	Job *JobClient
 	// Library is the client for interacting with the Library builders.
 	Library *LibraryClient
+	// MediaSegment is the client for interacting with the MediaSegment builders.
+	MediaSegment *MediaSegmentClient
 	// MediaSource is the client for interacting with the MediaSource builders.
 	MediaSource *MediaSourceClient
 	// Person is the client for interacting with the Person builders.
@@ -73,6 +77,8 @@ type Client struct {
 	PluginConfig *PluginConfigClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
+	// Trickplay is the client for interacting with the Trickplay builders.
+	Trickplay *TrickplayClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserData is the client for interacting with the UserData builders.
@@ -100,10 +106,12 @@ func (c *Client) init() {
 	c.ItemValue = NewItemValueClient(c.config)
 	c.Job = NewJobClient(c.config)
 	c.Library = NewLibraryClient(c.config)
+	c.MediaSegment = NewMediaSegmentClient(c.config)
 	c.MediaSource = NewMediaSourceClient(c.config)
 	c.Person = NewPersonClient(c.config)
 	c.PluginConfig = NewPluginConfigClient(c.config)
 	c.Setting = NewSettingClient(c.config)
+	c.Trickplay = NewTrickplayClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserData = NewUserDataClient(c.config)
 }
@@ -210,10 +218,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ItemValue:          NewItemValueClient(cfg),
 		Job:                NewJobClient(cfg),
 		Library:            NewLibraryClient(cfg),
+		MediaSegment:       NewMediaSegmentClient(cfg),
 		MediaSource:        NewMediaSourceClient(cfg),
 		Person:             NewPersonClient(cfg),
 		PluginConfig:       NewPluginConfigClient(cfg),
 		Setting:            NewSettingClient(cfg),
+		Trickplay:          NewTrickplayClient(cfg),
 		User:               NewUserClient(cfg),
 		UserData:           NewUserDataClient(cfg),
 	}, nil
@@ -247,10 +257,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ItemValue:          NewItemValueClient(cfg),
 		Job:                NewJobClient(cfg),
 		Library:            NewLibraryClient(cfg),
+		MediaSegment:       NewMediaSegmentClient(cfg),
 		MediaSource:        NewMediaSourceClient(cfg),
 		Person:             NewPersonClient(cfg),
 		PluginConfig:       NewPluginConfigClient(cfg),
 		Setting:            NewSettingClient(cfg),
+		Trickplay:          NewTrickplayClient(cfg),
 		User:               NewUserClient(cfg),
 		UserData:           NewUserDataClient(cfg),
 	}, nil
@@ -284,7 +296,8 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.APIKey, c.Activity, c.AuthSession, c.Credit, c.DisplayPreferences,
 		c.FolderState, c.Image, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
-		c.MediaSource, c.Person, c.PluginConfig, c.Setting, c.User, c.UserData,
+		c.MediaSegment, c.MediaSource, c.Person, c.PluginConfig, c.Setting,
+		c.Trickplay, c.User, c.UserData,
 	} {
 		n.Use(hooks...)
 	}
@@ -296,7 +309,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.APIKey, c.Activity, c.AuthSession, c.Credit, c.DisplayPreferences,
 		c.FolderState, c.Image, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
-		c.MediaSource, c.Person, c.PluginConfig, c.Setting, c.User, c.UserData,
+		c.MediaSegment, c.MediaSource, c.Person, c.PluginConfig, c.Setting,
+		c.Trickplay, c.User, c.UserData,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -329,6 +343,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Job.mutate(ctx, m)
 	case *LibraryMutation:
 		return c.Library.mutate(ctx, m)
+	case *MediaSegmentMutation:
+		return c.MediaSegment.mutate(ctx, m)
 	case *MediaSourceMutation:
 		return c.MediaSource.mutate(ctx, m)
 	case *PersonMutation:
@@ -337,6 +353,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PluginConfig.mutate(ctx, m)
 	case *SettingMutation:
 		return c.Setting.mutate(ctx, m)
+	case *TrickplayMutation:
+		return c.Trickplay.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	case *UserDataMutation:
@@ -1641,6 +1659,38 @@ func (c *ItemClient) QueryImages(_m *Item) *ImageQuery {
 	return query
 }
 
+// QueryTrickplay queries the trickplay edge of a Item.
+func (c *ItemClient) QueryTrickplay(_m *Item) *TrickplayQuery {
+	query := (&TrickplayClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(trickplay.Table, trickplay.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.TrickplayTable, item.TrickplayColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySegments queries the segments edge of a Item.
+func (c *ItemClient) QuerySegments(_m *Item) *MediaSegmentQuery {
+	query := (&MediaSegmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(mediasegment.Table, mediasegment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.SegmentsTable, item.SegmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryCredits queries the credits edge of a Item.
 func (c *ItemClient) QueryCredits(_m *Item) *CreditQuery {
 	query := (&CreditClient{config: c.config}).Query()
@@ -2358,6 +2408,155 @@ func (c *LibraryClient) mutate(ctx context.Context, m *LibraryMutation) (Value, 
 	}
 }
 
+// MediaSegmentClient is a client for the MediaSegment schema.
+type MediaSegmentClient struct {
+	config
+}
+
+// NewMediaSegmentClient returns a client for the MediaSegment from the given config.
+func NewMediaSegmentClient(c config) *MediaSegmentClient {
+	return &MediaSegmentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `mediasegment.Hooks(f(g(h())))`.
+func (c *MediaSegmentClient) Use(hooks ...Hook) {
+	c.hooks.MediaSegment = append(c.hooks.MediaSegment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `mediasegment.Intercept(f(g(h())))`.
+func (c *MediaSegmentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.MediaSegment = append(c.inters.MediaSegment, interceptors...)
+}
+
+// Create returns a builder for creating a MediaSegment entity.
+func (c *MediaSegmentClient) Create() *MediaSegmentCreate {
+	mutation := newMediaSegmentMutation(c.config, OpCreate)
+	return &MediaSegmentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MediaSegment entities.
+func (c *MediaSegmentClient) CreateBulk(builders ...*MediaSegmentCreate) *MediaSegmentCreateBulk {
+	return &MediaSegmentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MediaSegmentClient) MapCreateBulk(slice any, setFunc func(*MediaSegmentCreate, int)) *MediaSegmentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MediaSegmentCreateBulk{err: fmt.Errorf("calling to MediaSegmentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MediaSegmentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MediaSegmentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MediaSegment.
+func (c *MediaSegmentClient) Update() *MediaSegmentUpdate {
+	mutation := newMediaSegmentMutation(c.config, OpUpdate)
+	return &MediaSegmentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MediaSegmentClient) UpdateOne(_m *MediaSegment) *MediaSegmentUpdateOne {
+	mutation := newMediaSegmentMutation(c.config, OpUpdateOne, withMediaSegment(_m))
+	return &MediaSegmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MediaSegmentClient) UpdateOneID(id core.ID) *MediaSegmentUpdateOne {
+	mutation := newMediaSegmentMutation(c.config, OpUpdateOne, withMediaSegmentID(id))
+	return &MediaSegmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MediaSegment.
+func (c *MediaSegmentClient) Delete() *MediaSegmentDelete {
+	mutation := newMediaSegmentMutation(c.config, OpDelete)
+	return &MediaSegmentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MediaSegmentClient) DeleteOne(_m *MediaSegment) *MediaSegmentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MediaSegmentClient) DeleteOneID(id core.ID) *MediaSegmentDeleteOne {
+	builder := c.Delete().Where(mediasegment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MediaSegmentDeleteOne{builder}
+}
+
+// Query returns a query builder for MediaSegment.
+func (c *MediaSegmentClient) Query() *MediaSegmentQuery {
+	return &MediaSegmentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMediaSegment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a MediaSegment entity by its id.
+func (c *MediaSegmentClient) Get(ctx context.Context, id core.ID) (*MediaSegment, error) {
+	return c.Query().Where(mediasegment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MediaSegmentClient) GetX(ctx context.Context, id core.ID) *MediaSegment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryItem queries the item edge of a MediaSegment.
+func (c *MediaSegmentClient) QueryItem(_m *MediaSegment) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(mediasegment.Table, mediasegment.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, mediasegment.ItemTable, mediasegment.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MediaSegmentClient) Hooks() []Hook {
+	return c.hooks.MediaSegment
+}
+
+// Interceptors returns the client interceptors.
+func (c *MediaSegmentClient) Interceptors() []Interceptor {
+	return c.inters.MediaSegment
+}
+
+func (c *MediaSegmentClient) mutate(ctx context.Context, m *MediaSegmentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MediaSegmentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MediaSegmentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MediaSegmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MediaSegmentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown MediaSegment mutation op: %q", m.Op())
+	}
+}
+
 // MediaSourceClient is a client for the MediaSource schema.
 type MediaSourceClient struct {
 	config
@@ -2938,6 +3137,155 @@ func (c *SettingClient) mutate(ctx context.Context, m *SettingMutation) (Value, 
 	}
 }
 
+// TrickplayClient is a client for the Trickplay schema.
+type TrickplayClient struct {
+	config
+}
+
+// NewTrickplayClient returns a client for the Trickplay from the given config.
+func NewTrickplayClient(c config) *TrickplayClient {
+	return &TrickplayClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `trickplay.Hooks(f(g(h())))`.
+func (c *TrickplayClient) Use(hooks ...Hook) {
+	c.hooks.Trickplay = append(c.hooks.Trickplay, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `trickplay.Intercept(f(g(h())))`.
+func (c *TrickplayClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Trickplay = append(c.inters.Trickplay, interceptors...)
+}
+
+// Create returns a builder for creating a Trickplay entity.
+func (c *TrickplayClient) Create() *TrickplayCreate {
+	mutation := newTrickplayMutation(c.config, OpCreate)
+	return &TrickplayCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Trickplay entities.
+func (c *TrickplayClient) CreateBulk(builders ...*TrickplayCreate) *TrickplayCreateBulk {
+	return &TrickplayCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TrickplayClient) MapCreateBulk(slice any, setFunc func(*TrickplayCreate, int)) *TrickplayCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TrickplayCreateBulk{err: fmt.Errorf("calling to TrickplayClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TrickplayCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TrickplayCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Trickplay.
+func (c *TrickplayClient) Update() *TrickplayUpdate {
+	mutation := newTrickplayMutation(c.config, OpUpdate)
+	return &TrickplayUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TrickplayClient) UpdateOne(_m *Trickplay) *TrickplayUpdateOne {
+	mutation := newTrickplayMutation(c.config, OpUpdateOne, withTrickplay(_m))
+	return &TrickplayUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TrickplayClient) UpdateOneID(id core.ID) *TrickplayUpdateOne {
+	mutation := newTrickplayMutation(c.config, OpUpdateOne, withTrickplayID(id))
+	return &TrickplayUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Trickplay.
+func (c *TrickplayClient) Delete() *TrickplayDelete {
+	mutation := newTrickplayMutation(c.config, OpDelete)
+	return &TrickplayDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TrickplayClient) DeleteOne(_m *Trickplay) *TrickplayDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TrickplayClient) DeleteOneID(id core.ID) *TrickplayDeleteOne {
+	builder := c.Delete().Where(trickplay.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TrickplayDeleteOne{builder}
+}
+
+// Query returns a query builder for Trickplay.
+func (c *TrickplayClient) Query() *TrickplayQuery {
+	return &TrickplayQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTrickplay},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Trickplay entity by its id.
+func (c *TrickplayClient) Get(ctx context.Context, id core.ID) (*Trickplay, error) {
+	return c.Query().Where(trickplay.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TrickplayClient) GetX(ctx context.Context, id core.ID) *Trickplay {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryItem queries the item edge of a Trickplay.
+func (c *TrickplayClient) QueryItem(_m *Trickplay) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(trickplay.Table, trickplay.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, trickplay.ItemTable, trickplay.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TrickplayClient) Hooks() []Hook {
+	return c.hooks.Trickplay
+}
+
+// Interceptors returns the client interceptors.
+func (c *TrickplayClient) Interceptors() []Interceptor {
+	return c.inters.Trickplay
+}
+
+func (c *TrickplayClient) mutate(ctx context.Context, m *TrickplayMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TrickplayCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TrickplayUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TrickplayUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TrickplayDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Trickplay mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -3320,12 +3668,12 @@ func (c *UserDataClient) mutate(ctx context.Context, m *UserDataMutation) (Value
 type (
 	hooks struct {
 		APIKey, Activity, AuthSession, Credit, DisplayPreferences, FolderState, Image,
-		Item, ItemLink, ItemValue, Job, Library, MediaSource, Person, PluginConfig,
-		Setting, User, UserData []ent.Hook
+		Item, ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, Person,
+		PluginConfig, Setting, Trickplay, User, UserData []ent.Hook
 	}
 	inters struct {
 		APIKey, Activity, AuthSession, Credit, DisplayPreferences, FolderState, Image,
-		Item, ItemLink, ItemValue, Job, Library, MediaSource, Person, PluginConfig,
-		Setting, User, UserData []ent.Interceptor
+		Item, ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, Person,
+		PluginConfig, Setting, Trickplay, User, UserData []ent.Interceptor
 	}
 )

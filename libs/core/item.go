@@ -273,6 +273,10 @@ type Item struct {
 	Locked       bool
 	LockedFields []MetadataField
 
+	// Loudness is the integrated loudness of a track, or of an album's
+	// tracks together, in LUFS (EBU R128); nil until measured.
+	Loudness *float64
+
 	// DateAdded is when the item first appeared in the library; FileModified
 	// is the media file's modification time, used to detect changes.
 	DateAdded           time.Time
@@ -340,3 +344,17 @@ type Link struct {
 // IsCurated reports whether items link other items into it rather than
 // containing them as children.
 func (k ItemKind) IsCurated() bool { return k == KindCollection || k == KindPlaylist }
+
+// NormalizationTarget is the loudness, in LUFS, normalization brings audio
+// to, as Jellyfin's.
+const NormalizationTarget = -18.0
+
+// NormalizationGain returns the gain in dB that brings the item to
+// NormalizationTarget, nil when its loudness is unknown.
+func (it *Item) NormalizationGain() *float64 {
+	if it.Loudness == nil {
+		return nil
+	}
+	g := NormalizationTarget - *it.Loudness
+	return &g
+}

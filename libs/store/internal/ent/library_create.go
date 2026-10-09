@@ -114,6 +114,48 @@ func (_c *LibraryCreate) SetNillableAutoCollections(v *bool) *LibraryCreate {
 	return _c
 }
 
+// SetExtractTrickplay sets the "extract_trickplay" field.
+func (_c *LibraryCreate) SetExtractTrickplay(v bool) *LibraryCreate {
+	_c.mutation.SetExtractTrickplay(v)
+	return _c
+}
+
+// SetNillableExtractTrickplay sets the "extract_trickplay" field if the given value is not nil.
+func (_c *LibraryCreate) SetNillableExtractTrickplay(v *bool) *LibraryCreate {
+	if v != nil {
+		_c.SetExtractTrickplay(*v)
+	}
+	return _c
+}
+
+// SetExtractChapterImages sets the "extract_chapter_images" field.
+func (_c *LibraryCreate) SetExtractChapterImages(v bool) *LibraryCreate {
+	_c.mutation.SetExtractChapterImages(v)
+	return _c
+}
+
+// SetNillableExtractChapterImages sets the "extract_chapter_images" field if the given value is not nil.
+func (_c *LibraryCreate) SetNillableExtractChapterImages(v *bool) *LibraryCreate {
+	if v != nil {
+		_c.SetExtractChapterImages(*v)
+	}
+	return _c
+}
+
+// SetAnalyzeLoudness sets the "analyze_loudness" field.
+func (_c *LibraryCreate) SetAnalyzeLoudness(v bool) *LibraryCreate {
+	_c.mutation.SetAnalyzeLoudness(v)
+	return _c
+}
+
+// SetNillableAnalyzeLoudness sets the "analyze_loudness" field if the given value is not nil.
+func (_c *LibraryCreate) SetNillableAnalyzeLoudness(v *bool) *LibraryCreate {
+	if v != nil {
+		_c.SetAnalyzeLoudness(*v)
+	}
+	return _c
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_c *LibraryCreate) SetScanGeneration(v int64) *LibraryCreate {
 	_c.mutation.SetScanGeneration(v)
@@ -255,6 +297,18 @@ func (_c *LibraryCreate) defaults() {
 		v := library.DefaultAutoCollections
 		_c.mutation.SetAutoCollections(v)
 	}
+	if _, ok := _c.mutation.ExtractTrickplay(); !ok {
+		v := library.DefaultExtractTrickplay
+		_c.mutation.SetExtractTrickplay(v)
+	}
+	if _, ok := _c.mutation.ExtractChapterImages(); !ok {
+		v := library.DefaultExtractChapterImages
+		_c.mutation.SetExtractChapterImages(v)
+	}
+	if _, ok := _c.mutation.AnalyzeLoudness(); !ok {
+		v := library.DefaultAnalyzeLoudness
+		_c.mutation.SetAnalyzeLoudness(v)
+	}
 	if _, ok := _c.mutation.ScanGeneration(); !ok {
 		v := library.DefaultScanGeneration
 		_c.mutation.SetScanGeneration(v)
@@ -303,6 +357,15 @@ func (_c *LibraryCreate) check() error {
 	}
 	if _, ok := _c.mutation.AutoCollections(); !ok {
 		return &ValidationError{Name: "auto_collections", err: errors.New(`ent: missing required field "Library.auto_collections"`)}
+	}
+	if _, ok := _c.mutation.ExtractTrickplay(); !ok {
+		return &ValidationError{Name: "extract_trickplay", err: errors.New(`ent: missing required field "Library.extract_trickplay"`)}
+	}
+	if _, ok := _c.mutation.ExtractChapterImages(); !ok {
+		return &ValidationError{Name: "extract_chapter_images", err: errors.New(`ent: missing required field "Library.extract_chapter_images"`)}
+	}
+	if _, ok := _c.mutation.AnalyzeLoudness(); !ok {
+		return &ValidationError{Name: "analyze_loudness", err: errors.New(`ent: missing required field "Library.analyze_loudness"`)}
 	}
 	if _, ok := _c.mutation.ScanGeneration(); !ok {
 		return &ValidationError{Name: "scan_generation", err: errors.New(`ent: missing required field "Library.scan_generation"`)}
@@ -380,6 +443,18 @@ func (_c *LibraryCreate) createSpec() (*Library, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AutoCollections(); ok {
 		_spec.SetField(library.FieldAutoCollections, field.TypeBool, value)
 		_node.AutoCollections = value
+	}
+	if value, ok := _c.mutation.ExtractTrickplay(); ok {
+		_spec.SetField(library.FieldExtractTrickplay, field.TypeBool, value)
+		_node.ExtractTrickplay = value
+	}
+	if value, ok := _c.mutation.ExtractChapterImages(); ok {
+		_spec.SetField(library.FieldExtractChapterImages, field.TypeBool, value)
+		_node.ExtractChapterImages = value
+	}
+	if value, ok := _c.mutation.AnalyzeLoudness(); ok {
+		_spec.SetField(library.FieldAnalyzeLoudness, field.TypeBool, value)
+		_node.AnalyzeLoudness = value
 	}
 	if value, ok := _c.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
@@ -576,6 +651,42 @@ func (u *LibraryUpsert) SetAutoCollections(v bool) *LibraryUpsert {
 // UpdateAutoCollections sets the "auto_collections" field to the value that was provided on create.
 func (u *LibraryUpsert) UpdateAutoCollections() *LibraryUpsert {
 	u.SetExcluded(library.FieldAutoCollections)
+	return u
+}
+
+// SetExtractTrickplay sets the "extract_trickplay" field.
+func (u *LibraryUpsert) SetExtractTrickplay(v bool) *LibraryUpsert {
+	u.Set(library.FieldExtractTrickplay, v)
+	return u
+}
+
+// UpdateExtractTrickplay sets the "extract_trickplay" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateExtractTrickplay() *LibraryUpsert {
+	u.SetExcluded(library.FieldExtractTrickplay)
+	return u
+}
+
+// SetExtractChapterImages sets the "extract_chapter_images" field.
+func (u *LibraryUpsert) SetExtractChapterImages(v bool) *LibraryUpsert {
+	u.Set(library.FieldExtractChapterImages, v)
+	return u
+}
+
+// UpdateExtractChapterImages sets the "extract_chapter_images" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateExtractChapterImages() *LibraryUpsert {
+	u.SetExcluded(library.FieldExtractChapterImages)
+	return u
+}
+
+// SetAnalyzeLoudness sets the "analyze_loudness" field.
+func (u *LibraryUpsert) SetAnalyzeLoudness(v bool) *LibraryUpsert {
+	u.Set(library.FieldAnalyzeLoudness, v)
+	return u
+}
+
+// UpdateAnalyzeLoudness sets the "analyze_loudness" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateAnalyzeLoudness() *LibraryUpsert {
+	u.SetExcluded(library.FieldAnalyzeLoudness)
 	return u
 }
 
@@ -776,6 +887,48 @@ func (u *LibraryUpsertOne) SetAutoCollections(v bool) *LibraryUpsertOne {
 func (u *LibraryUpsertOne) UpdateAutoCollections() *LibraryUpsertOne {
 	return u.Update(func(s *LibraryUpsert) {
 		s.UpdateAutoCollections()
+	})
+}
+
+// SetExtractTrickplay sets the "extract_trickplay" field.
+func (u *LibraryUpsertOne) SetExtractTrickplay(v bool) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetExtractTrickplay(v)
+	})
+}
+
+// UpdateExtractTrickplay sets the "extract_trickplay" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateExtractTrickplay() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateExtractTrickplay()
+	})
+}
+
+// SetExtractChapterImages sets the "extract_chapter_images" field.
+func (u *LibraryUpsertOne) SetExtractChapterImages(v bool) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetExtractChapterImages(v)
+	})
+}
+
+// UpdateExtractChapterImages sets the "extract_chapter_images" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateExtractChapterImages() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateExtractChapterImages()
+	})
+}
+
+// SetAnalyzeLoudness sets the "analyze_loudness" field.
+func (u *LibraryUpsertOne) SetAnalyzeLoudness(v bool) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetAnalyzeLoudness(v)
+	})
+}
+
+// UpdateAnalyzeLoudness sets the "analyze_loudness" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateAnalyzeLoudness() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateAnalyzeLoudness()
 	})
 }
 
@@ -1148,6 +1301,48 @@ func (u *LibraryUpsertBulk) SetAutoCollections(v bool) *LibraryUpsertBulk {
 func (u *LibraryUpsertBulk) UpdateAutoCollections() *LibraryUpsertBulk {
 	return u.Update(func(s *LibraryUpsert) {
 		s.UpdateAutoCollections()
+	})
+}
+
+// SetExtractTrickplay sets the "extract_trickplay" field.
+func (u *LibraryUpsertBulk) SetExtractTrickplay(v bool) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetExtractTrickplay(v)
+	})
+}
+
+// UpdateExtractTrickplay sets the "extract_trickplay" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateExtractTrickplay() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateExtractTrickplay()
+	})
+}
+
+// SetExtractChapterImages sets the "extract_chapter_images" field.
+func (u *LibraryUpsertBulk) SetExtractChapterImages(v bool) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetExtractChapterImages(v)
+	})
+}
+
+// UpdateExtractChapterImages sets the "extract_chapter_images" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateExtractChapterImages() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateExtractChapterImages()
+	})
+}
+
+// SetAnalyzeLoudness sets the "analyze_loudness" field.
+func (u *LibraryUpsertBulk) SetAnalyzeLoudness(v bool) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetAnalyzeLoudness(v)
+	})
+}
+
+// UpdateAnalyzeLoudness sets the "analyze_loudness" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateAnalyzeLoudness() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateAnalyzeLoudness()
 	})
 }
 

@@ -18,11 +18,13 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
+	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/schema"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
+	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -240,11 +242,11 @@ func init() {
 	// item.DefaultLocked holds the default value on creation for the locked field.
 	item.DefaultLocked = itemDescLocked.Default.(bool)
 	// itemDescExtra is the schema descriptor for extra field.
-	itemDescExtra := itemFields[44].Descriptor()
+	itemDescExtra := itemFields[45].Descriptor()
 	// item.DefaultExtra holds the default value on creation for the extra field.
 	item.DefaultExtra = itemDescExtra.Default.(string)
 	// itemDescScanGeneration is the schema descriptor for scan_generation field.
-	itemDescScanGeneration := itemFields[50].Descriptor()
+	itemDescScanGeneration := itemFields[51].Descriptor()
 	// item.DefaultScanGeneration holds the default value on creation for the scan_generation field.
 	item.DefaultScanGeneration = itemDescScanGeneration.Default.(int64)
 	// itemDescID is the schema descriptor for id field.
@@ -323,16 +325,28 @@ func init() {
 	libraryDescAutoCollections := libraryFields[8].Descriptor()
 	// library.DefaultAutoCollections holds the default value on creation for the auto_collections field.
 	library.DefaultAutoCollections = libraryDescAutoCollections.Default.(bool)
+	// libraryDescExtractTrickplay is the schema descriptor for extract_trickplay field.
+	libraryDescExtractTrickplay := libraryFields[9].Descriptor()
+	// library.DefaultExtractTrickplay holds the default value on creation for the extract_trickplay field.
+	library.DefaultExtractTrickplay = libraryDescExtractTrickplay.Default.(bool)
+	// libraryDescExtractChapterImages is the schema descriptor for extract_chapter_images field.
+	libraryDescExtractChapterImages := libraryFields[10].Descriptor()
+	// library.DefaultExtractChapterImages holds the default value on creation for the extract_chapter_images field.
+	library.DefaultExtractChapterImages = libraryDescExtractChapterImages.Default.(bool)
+	// libraryDescAnalyzeLoudness is the schema descriptor for analyze_loudness field.
+	libraryDescAnalyzeLoudness := libraryFields[11].Descriptor()
+	// library.DefaultAnalyzeLoudness holds the default value on creation for the analyze_loudness field.
+	library.DefaultAnalyzeLoudness = libraryDescAnalyzeLoudness.Default.(bool)
 	// libraryDescScanGeneration is the schema descriptor for scan_generation field.
-	libraryDescScanGeneration := libraryFields[9].Descriptor()
+	libraryDescScanGeneration := libraryFields[12].Descriptor()
 	// library.DefaultScanGeneration holds the default value on creation for the scan_generation field.
 	library.DefaultScanGeneration = libraryDescScanGeneration.Default.(int64)
 	// libraryDescCreatedAt is the schema descriptor for created_at field.
-	libraryDescCreatedAt := libraryFields[10].Descriptor()
+	libraryDescCreatedAt := libraryFields[13].Descriptor()
 	// library.DefaultCreatedAt holds the default value on creation for the created_at field.
 	library.DefaultCreatedAt = libraryDescCreatedAt.Default.(func() time.Time)
 	// libraryDescUpdatedAt is the schema descriptor for updated_at field.
-	libraryDescUpdatedAt := libraryFields[11].Descriptor()
+	libraryDescUpdatedAt := libraryFields[14].Descriptor()
 	// library.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	library.DefaultUpdatedAt = libraryDescUpdatedAt.Default.(func() time.Time)
 	// library.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -341,6 +355,16 @@ func init() {
 	libraryDescID := libraryFields[0].Descriptor()
 	// library.DefaultID holds the default value on creation for the id field.
 	library.DefaultID = libraryDescID.Default.(func() core.ID)
+	mediasegmentFields := schema.MediaSegment{}.Fields()
+	_ = mediasegmentFields
+	// mediasegmentDescProvider is the schema descriptor for provider field.
+	mediasegmentDescProvider := mediasegmentFields[5].Descriptor()
+	// mediasegment.DefaultProvider holds the default value on creation for the provider field.
+	mediasegment.DefaultProvider = mediasegmentDescProvider.Default.(string)
+	// mediasegmentDescID is the schema descriptor for id field.
+	mediasegmentDescID := mediasegmentFields[0].Descriptor()
+	// mediasegment.DefaultID holds the default value on creation for the id field.
+	mediasegment.DefaultID = mediasegmentDescID.Default.(func() core.ID)
 	mediasourceFields := schema.MediaSource{}.Fields()
 	_ = mediasourceFields
 	// mediasourceDescDisc is the schema descriptor for disc field.
@@ -421,6 +445,16 @@ func init() {
 	settingDescID := settingFields[0].Descriptor()
 	// setting.DefaultID holds the default value on creation for the id field.
 	setting.DefaultID = settingDescID.Default.(func() core.ID)
+	trickplayFields := schema.Trickplay{}.Fields()
+	_ = trickplayFields
+	// trickplayDescBandwidth is the schema descriptor for bandwidth field.
+	trickplayDescBandwidth := trickplayFields[8].Descriptor()
+	// trickplay.DefaultBandwidth holds the default value on creation for the bandwidth field.
+	trickplay.DefaultBandwidth = trickplayDescBandwidth.Default.(int)
+	// trickplayDescID is the schema descriptor for id field.
+	trickplayDescID := trickplayFields[0].Descriptor()
+	// trickplay.DefaultID holds the default value on creation for the id field.
+	trickplay.DefaultID = trickplayDescID.Default.(func() core.ID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.

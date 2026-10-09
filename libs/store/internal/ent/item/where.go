@@ -247,6 +247,11 @@ func Locked(v bool) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldLocked, v))
 }
 
+// Loudness applies equality check predicate on the "loudness" field. It's identical to LoudnessEQ.
+func Loudness(v float64) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldLoudness, v))
+}
+
 // Extra applies equality check predicate on the "extra" field. It's identical to ExtraEQ.
 func Extra(v string) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldExtra, v))
@@ -2436,6 +2441,56 @@ func LockedFieldsNotNil() predicate.Item {
 	return predicate.Item(sql.FieldNotNull(FieldLockedFields))
 }
 
+// LoudnessEQ applies the EQ predicate on the "loudness" field.
+func LoudnessEQ(v float64) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldLoudness, v))
+}
+
+// LoudnessNEQ applies the NEQ predicate on the "loudness" field.
+func LoudnessNEQ(v float64) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldLoudness, v))
+}
+
+// LoudnessIn applies the In predicate on the "loudness" field.
+func LoudnessIn(vs ...float64) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldLoudness, vs...))
+}
+
+// LoudnessNotIn applies the NotIn predicate on the "loudness" field.
+func LoudnessNotIn(vs ...float64) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldLoudness, vs...))
+}
+
+// LoudnessGT applies the GT predicate on the "loudness" field.
+func LoudnessGT(v float64) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldLoudness, v))
+}
+
+// LoudnessGTE applies the GTE predicate on the "loudness" field.
+func LoudnessGTE(v float64) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldLoudness, v))
+}
+
+// LoudnessLT applies the LT predicate on the "loudness" field.
+func LoudnessLT(v float64) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldLoudness, v))
+}
+
+// LoudnessLTE applies the LTE predicate on the "loudness" field.
+func LoudnessLTE(v float64) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldLoudness, v))
+}
+
+// LoudnessIsNil applies the IsNil predicate on the "loudness" field.
+func LoudnessIsNil() predicate.Item {
+	return predicate.Item(sql.FieldIsNull(FieldLoudness))
+}
+
+// LoudnessNotNil applies the NotNil predicate on the "loudness" field.
+func LoudnessNotNil() predicate.Item {
+	return predicate.Item(sql.FieldNotNull(FieldLoudness))
+}
+
 // ExtraEQ applies the EQ predicate on the "extra" field.
 func ExtraEQ(v string) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldExtra, v))
@@ -2967,6 +3022,52 @@ func HasImages() predicate.Item {
 func HasImagesWith(preds ...predicate.Image) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
 		step := newImagesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTrickplay applies the HasEdge predicate on the "trickplay" edge.
+func HasTrickplay() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TrickplayTable, TrickplayColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTrickplayWith applies the HasEdge predicate on the "trickplay" edge with a given conditions (other predicates).
+func HasTrickplayWith(preds ...predicate.Trickplay) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newTrickplayStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSegments applies the HasEdge predicate on the "segments" edge.
+func HasSegments() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SegmentsTable, SegmentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSegmentsWith applies the HasEdge predicate on the "segments" edge with a given conditions (other predicates).
+func HasSegmentsWith(preds ...predicate.MediaSegment) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newSegmentsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

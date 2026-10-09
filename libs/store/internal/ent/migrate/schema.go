@@ -287,6 +287,7 @@ var (
 		{Name: "metadata_country", Type: field.TypeString, Default: ""},
 		{Name: "locked", Type: field.TypeBool, Default: false},
 		{Name: "locked_fields", Type: field.TypeJSON, Nullable: true},
+		{Name: "loudness", Type: field.TypeFloat64, Nullable: true},
 		{Name: "extra", Type: field.TypeString, Default: ""},
 		{Name: "date_added", Type: field.TypeTime},
 		{Name: "file_modified", Type: field.TypeTime, Nullable: true},
@@ -306,25 +307,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "items_items_children",
-				Columns:    []*schema.Column{ItemsColumns[48]},
-				RefColumns: []*schema.Column{ItemsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "items_items_extras",
 				Columns:    []*schema.Column{ItemsColumns[49]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "items_libraries_items",
+				Symbol:     "items_items_extras",
 				Columns:    []*schema.Column{ItemsColumns[50]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "items_libraries_items",
+				Columns:    []*schema.Column{ItemsColumns[51]},
 				RefColumns: []*schema.Column{LibrariesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_users_playlists",
-				Columns:    []*schema.Column{ItemsColumns[51]},
+				Columns:    []*schema.Column{ItemsColumns[52]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -333,7 +334,7 @@ var (
 			{
 				Name:    "item_library_id_path",
 				Unique:  true,
-				Columns: []*schema.Column{ItemsColumns[50], ItemsColumns[10]},
+				Columns: []*schema.Column{ItemsColumns[51], ItemsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "path <> ''",
 				},
@@ -341,27 +342,27 @@ var (
 			{
 				Name:    "item_parent_id_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[48], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[49], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_library_id_kind_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[50], ItemsColumns[1], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[51], ItemsColumns[1], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_owner_id",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[49]},
+				Columns: []*schema.Column{ItemsColumns[50]},
 			},
 			{
 				Name:    "item_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[43]},
+				Columns: []*schema.Column{ItemsColumns[44]},
 			},
 			{
 				Name:    "item_library_id_scan_generation",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[50], ItemsColumns[46]},
+				Columns: []*schema.Column{ItemsColumns[51], ItemsColumns[47]},
 			},
 		},
 	}
@@ -489,6 +490,9 @@ var (
 		{Name: "metadata_country", Type: field.TypeString, Default: ""},
 		{Name: "save_local_metadata", Type: field.TypeBool, Default: false},
 		{Name: "auto_collections", Type: field.TypeBool, Default: false},
+		{Name: "extract_trickplay", Type: field.TypeBool, Default: false},
+		{Name: "extract_chapter_images", Type: field.TypeBool, Default: false},
+		{Name: "analyze_loudness", Type: field.TypeBool, Default: false},
 		{Name: "scan_generation", Type: field.TypeInt64, Default: 0},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -506,6 +510,36 @@ var (
 				Annotation: &entsql.IndexAnnotation{
 					Where: "kind IN ('collections', 'playlists')",
 				},
+			},
+		},
+	}
+	// MediaSegmentsColumns holds the columns for the "media_segments" table.
+	MediaSegmentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "start", Type: field.TypeInt64},
+		{Name: "end", Type: field.TypeInt64},
+		{Name: "provider", Type: field.TypeString, Default: ""},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// MediaSegmentsTable holds the schema information for the "media_segments" table.
+	MediaSegmentsTable = &schema.Table{
+		Name:       "media_segments",
+		Columns:    MediaSegmentsColumns,
+		PrimaryKey: []*schema.Column{MediaSegmentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "media_segments_items_segments",
+				Columns:    []*schema.Column{MediaSegmentsColumns[5]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "mediasegment_item_id_start",
+				Unique:  false,
+				Columns: []*schema.Column{MediaSegmentsColumns[5], MediaSegmentsColumns[2]},
 			},
 		},
 	}
@@ -602,6 +636,39 @@ var (
 		Columns:    SettingsColumns,
 		PrimaryKey: []*schema.Column{SettingsColumns[0]},
 	}
+	// TrickplayColumns holds the columns for the "trickplay" table.
+	TrickplayColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "width", Type: field.TypeInt},
+		{Name: "height", Type: field.TypeInt},
+		{Name: "tile_width", Type: field.TypeInt},
+		{Name: "tile_height", Type: field.TypeInt},
+		{Name: "thumbnail_count", Type: field.TypeInt},
+		{Name: "interval", Type: field.TypeInt64},
+		{Name: "bandwidth", Type: field.TypeInt, Default: 0},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// TrickplayTable holds the schema information for the "trickplay" table.
+	TrickplayTable = &schema.Table{
+		Name:       "trickplay",
+		Columns:    TrickplayColumns,
+		PrimaryKey: []*schema.Column{TrickplayColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "trickplay_items_trickplay",
+				Columns:    []*schema.Column{TrickplayColumns[8]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "trickplay_item_id_width",
+				Unique:  true,
+				Columns: []*schema.Column{TrickplayColumns[8], TrickplayColumns[1]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -678,10 +745,12 @@ var (
 		ItemValuesTable,
 		JobsTable,
 		LibrariesTable,
+		MediaSegmentsTable,
 		MediaSourcesTable,
 		PeopleTable,
 		PluginConfigsTable,
 		SettingsTable,
+		TrickplayTable,
 		UsersTable,
 		UserDataTable,
 	}
@@ -739,6 +808,10 @@ func init() {
 	LibrariesTable.Annotation = &entsql.Annotation{
 		Table: "libraries",
 	}
+	MediaSegmentsTable.ForeignKeys[0].RefTable = ItemsTable
+	MediaSegmentsTable.Annotation = &entsql.Annotation{
+		Table: "media_segments",
+	}
 	MediaSourcesTable.ForeignKeys[0].RefTable = ItemsTable
 	MediaSourcesTable.Annotation = &entsql.Annotation{
 		Table: "media_sources",
@@ -751,6 +824,10 @@ func init() {
 	}
 	SettingsTable.Annotation = &entsql.Annotation{
 		Table: "settings",
+	}
+	TrickplayTable.ForeignKeys[0].RefTable = ItemsTable
+	TrickplayTable.Annotation = &entsql.Annotation{
+		Table: "trickplay",
 	}
 	UsersTable.Annotation = &entsql.Annotation{
 		Table: "users",

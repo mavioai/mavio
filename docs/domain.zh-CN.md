@@ -84,6 +84,7 @@ erDiagram
 * `Kind` 决定扫描器如何解读目录；`Paths` 是绝对路径的根目录，一个路径最多属于一个媒体库：媒体库的路径不能与其他媒体库的路径相同、包含或被包含（`ErrConflict`）。整理类种类（`LibraryKind.Curated`），即 `collections` 与 `playlists`，存放用户整理的合集与播放列表而非扫描的目录：它们没有路径，从不扫描，每种至多一个媒体库（`ErrConflict`），由服务端在首次需要时创建。
 * `ScanInterval` 是定时对账扫描的周期（为零则不定时扫描）；`PreferredLanguage`（ISO 639-1）与 `MetadataCountry`（ISO 3166-1 alpha-2）影响元数据提供者的取数。
 * `SaveLocalMetadata` 把每个条目的 NFO 文件以及为它选择或下载的图片写到媒体旁边，扫描时再读回；`AutoCollections` 把电影放入以提供者的合集（电影系列）命名的合集，先按 `tmdb_collection` ID 查找，否则按名称，首次需要时创建。
+* `ExtractTrickplay` 与 `ExtractChapterImages` 为视频生成缩略图拼图与各章节的图片；`AnalyzeLoudness` 测量音轨的响度。
 
 ### 4.2 条目
 所有种类共用一个 `Item` 类型，由 `Kind` 决定哪些字段有意义。这直接对应存储层的一张条目表，避免类型继承体系。
@@ -101,6 +102,7 @@ erDiagram
 | 单集 | `AirsBeforeSeasonNumber`、`AirsAfterSeasonNumber`、`AirsBeforeEpisodeNumber`（特别篇的插播位置） |
 | 附加内容 | `Extra`（`ExtraKind`）、`OwnerID` |
 | 元数据控制 | `MetadataLanguage`、`MetadataCountry`（覆盖媒体库的设置）、`Locked`、`LockedFields`（`MetadataField`） |
+| 音频 | `Loudness`：音轨的积分响度，或专辑各音轨按时长加权合并后的响度，单位 LUFS（EBU R128）；`NormalizationGain` 是调整到 −18 LUFS 所需的增益 |
 | 记账字段 | `DateAdded`、`FileModified`、`MetadataRefreshedAt`、`ScanGeneration`（最后看到该条目的扫描）、`MissingSince`（见 §4.7） |
 
 模型以 Jellyfin 为参照，并随路线图演进：某个阶段需要时才加入相应字段。`SortName` 是用户指定的排序名（即 Jellyfin 的 `ForcedSortName`），计算出的排序形式是存储层的键。单集所属的剧集和季是它的祖先条目，不复制名称。锁定的条目或被锁定的字段分组不会被元数据提供者修改；条目自己的 NFO 文件（其中记录了锁定）仍然生效。管理员的编辑直接设置字段，无论是否锁定。
@@ -146,7 +148,10 @@ erDiagram
 * 视频流记录尺寸、平均帧率 `FrameRate` 与 `RealFrameRate`（`Rational`，如 24000/1001）、像素格式与位深、色彩描述（范围、原色、传递特性、色彩空间）、杜比视界配置记录（`DolbyVision`：版本、profile、level、基础层兼容 ID、RPU / EL / BL 是否存在）、HDR10+ 标记、隔行、旋转、采样与显示宽高比、是否变形像素、参考帧数，以及 H.264 是否为长度前缀格式（`AVC`、`NALLengthSize`）。
 * 与 Jellyfin 一样由字段推导：`VideoRange()` 与 `VideoRangeType()` 由传递特性、杜比视界记录、编码标签与 HDR10+ 标记得出；`SpatialFormat()`（Dolby Atmos、DTS:X）由音频 profile 得出；`IsTextSubtitle()`、`IsPGSSubtitle()`、`IsVobSubSubtitle()` 由字幕编码得出（位图字幕只能烧录）。
 * 音频流记录声道数、声道布局、采样率与位深。
-* `Chapter` 是带名称的起始位置，可附带提取出的缩略图。
+* `Chapter` 是带名称的起始位置，可附带提取出的图片（`ImagePath`）。
+* 附加在容器中的文件（如 ASS 字幕所用的字体）是类型为 `attachment` 的流，`Title` 为其文件名，并记录 `MimeType`。
+* `Trickplay` 描述条目在某一宽度下的缩略图拼图：每隔 `Interval` 截取一张 `Width` × `Height` 的缩略图，每张拼图横排 `TileWidth`、竖排 `TileHeight` 张，共 `ThumbnailCount` 张（`Sheets` 张拼图），以及播放时占用的 `Bandwidth`。每个条目在每种宽度下至多一份。
+* `MediaSegment` 是客户端可提供跳过的一段：从 `Start` 到 `End` 的 `intro`、`outro`、`recap`、`preview` 或 `commercial`，并记录找到它的片段提供者。
 * 规则：媒体源必须有 `ID`、`ItemID` 和 `Path`，大小、时长和码率不能为负；每条流必须有合法的 `Kind`，序号、尺寸和声道数不能为负。
 
 ---
@@ -212,6 +217,8 @@ erDiagram
 | `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入 |
 | `APIKeyRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Touch`、`Delete`；删除用户时一并删除其密钥 |
 | `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
+| `TrickplayRepository` | `Put` 某条目在某宽度下的拼图（替换之前的）、`List` 某条目的拼图（最窄的在前）、`Delete` 删除 |
+| `MediaSegmentRepository` | `List` 某条目的片段（按开始时间）、`Replace` 替换 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
 * **Replace 语义**：`Replace*` 方法设置某个所有者的完整集合，删除不在新集合中的内容——扫描与元数据刷新总是整组写入。

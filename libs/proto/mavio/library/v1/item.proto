@@ -41,6 +41,11 @@ service ItemService {
   rpc ListPeople(ListPeopleRequest) returns (ListPeopleResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // GetLyrics returns the lyrics of a track, read from the lyric file
+  // beside it (.elrc, .lrc or .txt).
+  rpc GetLyrics(GetLyricsRequest) returns (GetLyricsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 enum ItemKind {
@@ -223,6 +228,9 @@ message Item {
   repeated string production_locations = 41;
   // The collection (movie set) of a movie, as the providers name it.
   string collection_name = 42;
+  // The gain in dB that brings a track or album to -18 LUFS; unset until
+  // its loudness is measured.
+  double normalization_gain = 43;
 }
 
 // Image describes an artwork image.
@@ -268,6 +276,77 @@ message GetItemResponse {
   Item item = 1;
   repeated MediaSource media_sources = 2;
   repeated Credit credits = 3;
+  // Thumbnail sheets for seeking, by width; a sheet is served at
+  // /images/trickplay/{item_id}/{width}/{sheet}.jpg.
+  repeated Trickplay trickplay = 4;
+  // Stretches clients may offer to skip, by start.
+  repeated MediaSegment segments = 5;
+}
+
+// Trickplay describes thumbnail sheets of one width: thumbnails taken
+// every interval, row by row, tile_width across and tile_height down a
+// sheet, thumbnail_count in all.
+message Trickplay {
+  int32 width = 1;
+  int32 height = 2;
+  int32 tile_width = 3;
+  int32 tile_height = 4;
+  int32 thumbnail_count = 5;
+  google.protobuf.Duration interval = 6;
+  // Bits per second the sheets take while playing.
+  int32 bandwidth = 7;
+  int32 sheet_count = 8;
+}
+
+enum SegmentKind {
+  SEGMENT_KIND_UNSPECIFIED = 0;
+  SEGMENT_KIND_INTRO = 1;
+  SEGMENT_KIND_OUTRO = 2;
+  SEGMENT_KIND_RECAP = 3;
+  SEGMENT_KIND_PREVIEW = 4;
+  SEGMENT_KIND_COMMERCIAL = 5;
+}
+
+// MediaSegment is a stretch of an item, such as its intro.
+message MediaSegment {
+  string id = 1;
+  SegmentKind kind = 2;
+  google.protobuf.Duration start = 3;
+  google.protobuf.Duration end = 4;
+}
+
+message GetLyricsRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+// LyricCue times part of a line: the UTF-16 code units from position to
+// end_position.
+message LyricCue {
+  int32 position = 1;
+  int32 end_position = 2;
+  google.protobuf.Duration start = 3;
+  // Unset for the last word of the lyrics.
+  google.protobuf.Duration end = 4;
+}
+
+// LyricLine is a line, with its start in synced lyrics and its words'
+// times in enhanced ones.
+message LyricLine {
+  string text = 1;
+  google.protobuf.Duration start = 2;
+  repeated LyricCue cues = 3;
+}
+
+message GetLyricsResponse {
+  string artist = 1;
+  string album = 2;
+  string title = 3;
+  // The lines have start times.
+  bool synced = 4;
+  repeated LyricLine lines = 5;
 }
 
 message SortSpec {

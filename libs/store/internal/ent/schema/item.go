@@ -79,6 +79,7 @@ func (Item) Fields() []ent.Field {
 		field.String("metadata_country").Default(""),
 		field.Bool("locked").Default(false),
 		field.JSON("locked_fields", []string{}).Optional(),
+		field.Float("loudness").Optional().Nillable(),
 		field.String("extra").Default(""),
 		field.UUID("owner_id", core.ID{}).Optional().Nillable(),
 		// user_id is the user a playlist belongs to.
@@ -102,6 +103,8 @@ func (Item) Edges() []ent.Edge {
 		edge.To("values", ItemValue.Type).Annotations(cascade()),
 		edge.To("media_sources", MediaSource.Type).Annotations(cascade()),
 		edge.To("images", Image.Type).Annotations(cascade()),
+		edge.To("trickplay", Trickplay.Type).Annotations(cascade()),
+		edge.To("segments", MediaSegment.Type).Annotations(cascade()),
 		edge.To("credits", Credit.Type).Annotations(cascade()),
 		edge.To("user_data", UserData.Type).Annotations(cascade()),
 		edge.From("user", User.Type).Ref("playlists").Field("user_id").Unique(),

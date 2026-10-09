@@ -24,6 +24,7 @@ type Plugin interface {
 	Auth() pluginv1connect.AuthProviderServiceClient
 	Notifier() pluginv1connect.NotifierServiceClient
 	Subtitles() pluginv1connect.SubtitleProviderServiceClient
+	Segments() pluginv1connect.MediaSegmentProviderServiceClient
 	// Close stops the plugin and releases its resources.
 	Close(ctx context.Context) error
 }

@@ -98,22 +98,25 @@ func (x LibraryKind) Number() protoreflect.EnumNumber {
 
 // Library is a named set of root folders scanned as one collection.
 type Library struct {
-	state                        protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id                *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Name              *string                `protobuf:"bytes,2,opt,name=name"`
-	xxx_hidden_Kind              LibraryKind            `protobuf:"varint,3,opt,name=kind,enum=mavio.library.v1.LibraryKind"`
-	xxx_hidden_Paths             []string               `protobuf:"bytes,4,rep,name=paths"`
-	xxx_hidden_ScanInterval      *durationpb.Duration   `protobuf:"bytes,5,opt,name=scan_interval,json=scanInterval"`
-	xxx_hidden_PreferredLanguage *string                `protobuf:"bytes,6,opt,name=preferred_language,json=preferredLanguage"`
-	xxx_hidden_MetadataCountry   *string                `protobuf:"bytes,7,opt,name=metadata_country,json=metadataCountry"`
-	xxx_hidden_CreateTime        *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=create_time,json=createTime"`
-	xxx_hidden_UpdateTime        *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=update_time,json=updateTime"`
-	xxx_hidden_SaveLocalMetadata bool                   `protobuf:"varint,10,opt,name=save_local_metadata,json=saveLocalMetadata"`
-	xxx_hidden_AutoCollections   bool                   `protobuf:"varint,11,opt,name=auto_collections,json=autoCollections"`
-	XXX_raceDetectHookData       protoimpl.RaceDetectHookData
-	XXX_presence                 [1]uint32
-	unknownFields                protoimpl.UnknownFields
-	sizeCache                    protoimpl.SizeCache
+	state                           protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id                   *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Name                 *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_Kind                 LibraryKind            `protobuf:"varint,3,opt,name=kind,enum=mavio.library.v1.LibraryKind"`
+	xxx_hidden_Paths                []string               `protobuf:"bytes,4,rep,name=paths"`
+	xxx_hidden_ScanInterval         *durationpb.Duration   `protobuf:"bytes,5,opt,name=scan_interval,json=scanInterval"`
+	xxx_hidden_PreferredLanguage    *string                `protobuf:"bytes,6,opt,name=preferred_language,json=preferredLanguage"`
+	xxx_hidden_MetadataCountry      *string                `protobuf:"bytes,7,opt,name=metadata_country,json=metadataCountry"`
+	xxx_hidden_CreateTime           *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=create_time,json=createTime"`
+	xxx_hidden_UpdateTime           *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=update_time,json=updateTime"`
+	xxx_hidden_SaveLocalMetadata    bool                   `protobuf:"varint,10,opt,name=save_local_metadata,json=saveLocalMetadata"`
+	xxx_hidden_AutoCollections      bool                   `protobuf:"varint,11,opt,name=auto_collections,json=autoCollections"`
+	xxx_hidden_ExtractTrickplay     bool                   `protobuf:"varint,12,opt,name=extract_trickplay,json=extractTrickplay"`
+	xxx_hidden_ExtractChapterImages bool                   `protobuf:"varint,13,opt,name=extract_chapter_images,json=extractChapterImages"`
+	xxx_hidden_AnalyzeLoudness      bool                   `protobuf:"varint,14,opt,name=analyze_loudness,json=analyzeLoudness"`
+	XXX_raceDetectHookData          protoimpl.RaceDetectHookData
+	XXX_presence                    [1]uint32
+	unknownFields                   protoimpl.UnknownFields
+	sizeCache                       protoimpl.SizeCache
 }
 
 func (x *Library) Reset() {
@@ -232,19 +235,40 @@ func (x *Library) GetAutoCollections() bool {
 	return false
 }
 
+func (x *Library) GetExtractTrickplay() bool {
+	if x != nil {
+		return x.xxx_hidden_ExtractTrickplay
+	}
+	return false
+}
+
+func (x *Library) GetExtractChapterImages() bool {
+	if x != nil {
+		return x.xxx_hidden_ExtractChapterImages
+	}
+	return false
+}
+
+func (x *Library) GetAnalyzeLoudness() bool {
+	if x != nil {
+		return x.xxx_hidden_AnalyzeLoudness
+	}
+	return false
+}
+
 func (x *Library) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 14)
 }
 
 func (x *Library) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 14)
 }
 
 func (x *Library) SetKind(v LibraryKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 14)
 }
 
 func (x *Library) SetPaths(v []string) {
@@ -257,12 +281,12 @@ func (x *Library) SetScanInterval(v *durationpb.Duration) {
 
 func (x *Library) SetPreferredLanguage(v string) {
 	x.xxx_hidden_PreferredLanguage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 14)
 }
 
 func (x *Library) SetMetadataCountry(v string) {
 	x.xxx_hidden_MetadataCountry = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 14)
 }
 
 func (x *Library) SetCreateTime(v *timestamppb.Timestamp) {
@@ -275,12 +299,27 @@ func (x *Library) SetUpdateTime(v *timestamppb.Timestamp) {
 
 func (x *Library) SetSaveLocalMetadata(v bool) {
 	x.xxx_hidden_SaveLocalMetadata = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 14)
 }
 
 func (x *Library) SetAutoCollections(v bool) {
 	x.xxx_hidden_AutoCollections = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 14)
+}
+
+func (x *Library) SetExtractTrickplay(v bool) {
+	x.xxx_hidden_ExtractTrickplay = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 14)
+}
+
+func (x *Library) SetExtractChapterImages(v bool) {
+	x.xxx_hidden_ExtractChapterImages = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 14)
+}
+
+func (x *Library) SetAnalyzeLoudness(v bool) {
+	x.xxx_hidden_AnalyzeLoudness = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 14)
 }
 
 func (x *Library) HasId() bool {
@@ -353,6 +392,27 @@ func (x *Library) HasAutoCollections() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
 }
 
+func (x *Library) HasExtractTrickplay() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
+func (x *Library) HasExtractChapterImages() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
+func (x *Library) HasAnalyzeLoudness() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
+}
+
 func (x *Library) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -400,6 +460,21 @@ func (x *Library) ClearAutoCollections() {
 	x.xxx_hidden_AutoCollections = false
 }
 
+func (x *Library) ClearExtractTrickplay() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_ExtractTrickplay = false
+}
+
+func (x *Library) ClearExtractChapterImages() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_ExtractChapterImages = false
+}
+
+func (x *Library) ClearAnalyzeLoudness() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 13)
+	x.xxx_hidden_AnalyzeLoudness = false
+}
+
 type Library_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -421,6 +496,12 @@ type Library_builder struct {
 	// Put movies into collections named after the metadata providers'
 	// collections (movie sets).
 	AutoCollections *bool
+	// Make thumbnail sheets of videos for seeking, and an image of each
+	// chapter.
+	ExtractTrickplay     *bool
+	ExtractChapterImages *bool
+	// Measure the loudness of tracks, for normalization.
+	AnalyzeLoudness *bool
 }
 
 func (b0 Library_builder) Build() *Library {
@@ -428,55 +509,70 @@ func (b0 Library_builder) Build() *Library {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 14)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 14)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 14)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	x.xxx_hidden_Paths = b.Paths
 	x.xxx_hidden_ScanInterval = b.ScanInterval
 	if b.PreferredLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 14)
 		x.xxx_hidden_PreferredLanguage = b.PreferredLanguage
 	}
 	if b.MetadataCountry != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 14)
 		x.xxx_hidden_MetadataCountry = b.MetadataCountry
 	}
 	x.xxx_hidden_CreateTime = b.CreateTime
 	x.xxx_hidden_UpdateTime = b.UpdateTime
 	if b.SaveLocalMetadata != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 14)
 		x.xxx_hidden_SaveLocalMetadata = *b.SaveLocalMetadata
 	}
 	if b.AutoCollections != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 14)
 		x.xxx_hidden_AutoCollections = *b.AutoCollections
+	}
+	if b.ExtractTrickplay != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 14)
+		x.xxx_hidden_ExtractTrickplay = *b.ExtractTrickplay
+	}
+	if b.ExtractChapterImages != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 14)
+		x.xxx_hidden_ExtractChapterImages = *b.ExtractChapterImages
+	}
+	if b.AnalyzeLoudness != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 14)
+		x.xxx_hidden_AnalyzeLoudness = *b.AnalyzeLoudness
 	}
 	return m0
 }
 
 // LibrarySpec holds the client-settable fields of a library.
 type LibrarySpec struct {
-	state                        protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Name              *string                `protobuf:"bytes,1,opt,name=name"`
-	xxx_hidden_Kind              LibraryKind            `protobuf:"varint,2,opt,name=kind,enum=mavio.library.v1.LibraryKind"`
-	xxx_hidden_Paths             []string               `protobuf:"bytes,3,rep,name=paths"`
-	xxx_hidden_ScanInterval      *durationpb.Duration   `protobuf:"bytes,4,opt,name=scan_interval,json=scanInterval"`
-	xxx_hidden_PreferredLanguage *string                `protobuf:"bytes,5,opt,name=preferred_language,json=preferredLanguage"`
-	xxx_hidden_MetadataCountry   *string                `protobuf:"bytes,6,opt,name=metadata_country,json=metadataCountry"`
-	xxx_hidden_SaveLocalMetadata bool                   `protobuf:"varint,7,opt,name=save_local_metadata,json=saveLocalMetadata"`
-	xxx_hidden_AutoCollections   bool                   `protobuf:"varint,8,opt,name=auto_collections,json=autoCollections"`
-	XXX_raceDetectHookData       protoimpl.RaceDetectHookData
-	XXX_presence                 [1]uint32
-	unknownFields                protoimpl.UnknownFields
-	sizeCache                    protoimpl.SizeCache
+	state                           protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name                 *string                `protobuf:"bytes,1,opt,name=name"`
+	xxx_hidden_Kind                 LibraryKind            `protobuf:"varint,2,opt,name=kind,enum=mavio.library.v1.LibraryKind"`
+	xxx_hidden_Paths                []string               `protobuf:"bytes,3,rep,name=paths"`
+	xxx_hidden_ScanInterval         *durationpb.Duration   `protobuf:"bytes,4,opt,name=scan_interval,json=scanInterval"`
+	xxx_hidden_PreferredLanguage    *string                `protobuf:"bytes,5,opt,name=preferred_language,json=preferredLanguage"`
+	xxx_hidden_MetadataCountry      *string                `protobuf:"bytes,6,opt,name=metadata_country,json=metadataCountry"`
+	xxx_hidden_SaveLocalMetadata    bool                   `protobuf:"varint,7,opt,name=save_local_metadata,json=saveLocalMetadata"`
+	xxx_hidden_AutoCollections      bool                   `protobuf:"varint,8,opt,name=auto_collections,json=autoCollections"`
+	xxx_hidden_ExtractTrickplay     bool                   `protobuf:"varint,9,opt,name=extract_trickplay,json=extractTrickplay"`
+	xxx_hidden_ExtractChapterImages bool                   `protobuf:"varint,10,opt,name=extract_chapter_images,json=extractChapterImages"`
+	xxx_hidden_AnalyzeLoudness      bool                   `protobuf:"varint,11,opt,name=analyze_loudness,json=analyzeLoudness"`
+	XXX_raceDetectHookData          protoimpl.RaceDetectHookData
+	XXX_presence                    [1]uint32
+	unknownFields                   protoimpl.UnknownFields
+	sizeCache                       protoimpl.SizeCache
 }
 
 func (x *LibrarySpec) Reset() {
@@ -571,14 +667,35 @@ func (x *LibrarySpec) GetAutoCollections() bool {
 	return false
 }
 
+func (x *LibrarySpec) GetExtractTrickplay() bool {
+	if x != nil {
+		return x.xxx_hidden_ExtractTrickplay
+	}
+	return false
+}
+
+func (x *LibrarySpec) GetExtractChapterImages() bool {
+	if x != nil {
+		return x.xxx_hidden_ExtractChapterImages
+	}
+	return false
+}
+
+func (x *LibrarySpec) GetAnalyzeLoudness() bool {
+	if x != nil {
+		return x.xxx_hidden_AnalyzeLoudness
+	}
+	return false
+}
+
 func (x *LibrarySpec) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
 }
 
 func (x *LibrarySpec) SetKind(v LibraryKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
 }
 
 func (x *LibrarySpec) SetPaths(v []string) {
@@ -591,22 +708,37 @@ func (x *LibrarySpec) SetScanInterval(v *durationpb.Duration) {
 
 func (x *LibrarySpec) SetPreferredLanguage(v string) {
 	x.xxx_hidden_PreferredLanguage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 11)
 }
 
 func (x *LibrarySpec) SetMetadataCountry(v string) {
 	x.xxx_hidden_MetadataCountry = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
 }
 
 func (x *LibrarySpec) SetSaveLocalMetadata(v bool) {
 	x.xxx_hidden_SaveLocalMetadata = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 11)
 }
 
 func (x *LibrarySpec) SetAutoCollections(v bool) {
 	x.xxx_hidden_AutoCollections = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 11)
+}
+
+func (x *LibrarySpec) SetExtractTrickplay(v bool) {
+	x.xxx_hidden_ExtractTrickplay = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 11)
+}
+
+func (x *LibrarySpec) SetExtractChapterImages(v bool) {
+	x.xxx_hidden_ExtractChapterImages = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 11)
+}
+
+func (x *LibrarySpec) SetAnalyzeLoudness(v bool) {
+	x.xxx_hidden_AnalyzeLoudness = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
 }
 
 func (x *LibrarySpec) HasName() bool {
@@ -658,6 +790,27 @@ func (x *LibrarySpec) HasAutoCollections() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
 }
 
+func (x *LibrarySpec) HasExtractTrickplay() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
+func (x *LibrarySpec) HasExtractChapterImages() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
+func (x *LibrarySpec) HasAnalyzeLoudness() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
 func (x *LibrarySpec) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -692,17 +845,35 @@ func (x *LibrarySpec) ClearAutoCollections() {
 	x.xxx_hidden_AutoCollections = false
 }
 
+func (x *LibrarySpec) ClearExtractTrickplay() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_ExtractTrickplay = false
+}
+
+func (x *LibrarySpec) ClearExtractChapterImages() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_ExtractChapterImages = false
+}
+
+func (x *LibrarySpec) ClearAnalyzeLoudness() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_AnalyzeLoudness = false
+}
+
 type LibrarySpec_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Name              *string
-	Kind              *LibraryKind
-	Paths             []string
-	ScanInterval      *durationpb.Duration
-	PreferredLanguage *string
-	MetadataCountry   *string
-	SaveLocalMetadata *bool
-	AutoCollections   *bool
+	Name                 *string
+	Kind                 *LibraryKind
+	Paths                []string
+	ScanInterval         *durationpb.Duration
+	PreferredLanguage    *string
+	MetadataCountry      *string
+	SaveLocalMetadata    *bool
+	AutoCollections      *bool
+	ExtractTrickplay     *bool
+	ExtractChapterImages *bool
+	AnalyzeLoudness      *bool
 }
 
 func (b0 LibrarySpec_builder) Build() *LibrarySpec {
@@ -710,30 +881,42 @@ func (b0 LibrarySpec_builder) Build() *LibrarySpec {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	x.xxx_hidden_Paths = b.Paths
 	x.xxx_hidden_ScanInterval = b.ScanInterval
 	if b.PreferredLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 11)
 		x.xxx_hidden_PreferredLanguage = b.PreferredLanguage
 	}
 	if b.MetadataCountry != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
 		x.xxx_hidden_MetadataCountry = b.MetadataCountry
 	}
 	if b.SaveLocalMetadata != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 11)
 		x.xxx_hidden_SaveLocalMetadata = *b.SaveLocalMetadata
 	}
 	if b.AutoCollections != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 11)
 		x.xxx_hidden_AutoCollections = *b.AutoCollections
+	}
+	if b.ExtractTrickplay != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 11)
+		x.xxx_hidden_ExtractTrickplay = *b.ExtractTrickplay
+	}
+	if b.ExtractChapterImages != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 11)
+		x.xxx_hidden_ExtractChapterImages = *b.ExtractChapterImages
+	}
+	if b.AnalyzeLoudness != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		x.xxx_hidden_AnalyzeLoudness = *b.AnalyzeLoudness
 	}
 	return m0
 }
@@ -1605,7 +1788,7 @@ var File_mavio_library_v1_library_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\n" +
-	"\x1emavio/library/v1/library.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe5\x03\n" +
+	"\x1emavio/library/v1/library.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf3\x04\n" +
 	"\aLibrary\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x121\n" +
@@ -1620,7 +1803,10 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"updateTime\x12.\n" +
 	"\x13save_local_metadata\x18\n" +
 	" \x01(\bR\x11saveLocalMetadata\x12)\n" +
-	"\x10auto_collections\x18\v \x01(\bR\x0fautoCollections\"\xc3\x03\n" +
+	"\x10auto_collections\x18\v \x01(\bR\x0fautoCollections\x12+\n" +
+	"\x11extract_trickplay\x18\f \x01(\bR\x10extractTrickplay\x124\n" +
+	"\x16extract_chapter_images\x18\r \x01(\bR\x14extractChapterImages\x12)\n" +
+	"\x10analyze_loudness\x18\x0e \x01(\bR\x0fanalyzeLoudness\"\xd1\x04\n" +
 	"\vLibrarySpec\x12!\n" +
 	"\x04name\x18\x01 \x01(\tB\r\xbaH\n" +
 	"\xc8\x01\x01r\x05\x10\x01\x18\xc8\x01R\x04name\x12@\n" +
@@ -1631,7 +1817,11 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\x12preferred_language\x18\x05 \x01(\tB\x14\xbaH\x11r\x0f2\r^([a-z]{2})?$R\x11preferredLanguage\x12?\n" +
 	"\x10metadata_country\x18\x06 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\x0fmetadataCountry\x12.\n" +
 	"\x13save_local_metadata\x18\a \x01(\bR\x11saveLocalMetadata\x12)\n" +
-	"\x10auto_collections\x18\b \x01(\bR\x0fautoCollections\"\x16\n" +
+	"\x10auto_collections\x18\b \x01(\bR\x0fautoCollections\x12+\n" +
+	"\x11extract_trickplay\x18\t \x01(\bR\x10extractTrickplay\x124\n" +
+	"\x16extract_chapter_images\x18\n" +
+	" \x01(\bR\x14extractChapterImages\x12)\n" +
+	"\x10analyze_loudness\x18\v \x01(\bR\x0fanalyzeLoudness\"\x16\n" +
 	"\x14ListLibrariesRequest\"P\n" +
 	"\x15ListLibrariesResponse\x127\n" +
 	"\tlibraries\x18\x01 \x03(\v2\x19.mavio.library.v1.LibraryR\tlibraries\"0\n" +

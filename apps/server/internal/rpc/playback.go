@@ -51,7 +51,7 @@ func (s *PlaybackService) StartPlayback(ctx context.Context, req *playbackv1.Sta
 	r := playback.Request{
 		User: p.User, SessionID: p.Session.ID,
 		Client:     capabilitiesFromProto(req.GetCapabilities()),
-		MaxBitrate: req.GetMaxBitrate(),
+		MaxBitrate: req.GetMaxBitrate(), Download: req.GetDownload(),
 	}
 	// The request was validated, so the IDs parse.
 	r.ItemID = core.MustParseID(req.GetItemId())
@@ -87,6 +87,12 @@ func (s *PlaybackService) StartPlayback(ctx context.Context, req *playbackv1.Sta
 			Url:         new(pb.SubtitleURL(sub)),
 		}.Build()
 	}
+	var attachments []*playbackv1.Attachment
+	for _, a := range pb.Attachments() {
+		attachments = append(attachments, playbackv1.Attachment_builder{
+			Index: new(int32(a.Index)), FileName: &a.Title, MimeType: &a.MimeType, Url: new(pb.AttachmentURL(a.Index)),
+		}.Build())
+	}
 	reasons := reasonsToProto(pb.Decision.Reasons)
 	return playbackv1.StartPlaybackResponse_builder{
 		PlaybackId:          &pb.ID,
@@ -97,6 +103,7 @@ func (s *PlaybackService) StartPlayback(ctx context.Context, req *playbackv1.Sta
 		AudioStreamIndex:    new(int32(pb.AudioStream)),
 		SubtitleStreamIndex: new(int32(pb.SubtitleStream)),
 		Subtitles:           subs,
+		Attachments:         attachments,
 	}.Build(), nil
 }
 
@@ -132,6 +139,8 @@ func playbackError(ctx context.Context, err error) error {
 	switch {
 	case errors.Is(err, playback.ErrNotPlayable), errors.Is(err, playback.ErrNoSource):
 		return connect.NewError(connect.CodeFailedPrecondition, err)
+	case errors.Is(err, playback.ErrNotAllowed):
+		return connect.NewError(connect.CodePermissionDenied, err)
 	case errors.Is(err, playback.ErrUnsupported):
 		return connect.NewError(connect.CodeUnimplemented, err)
 	case errors.Is(err, playback.ErrTooManyPlaybacks):

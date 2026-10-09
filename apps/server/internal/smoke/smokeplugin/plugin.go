@@ -14,8 +14,10 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	"github.com/mavioai/mavio/libs/plugin/guest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
@@ -62,6 +64,24 @@ func init() {
 	guest.Handle(pluginv1connect.NewMetadataProviderServiceHandler(provider{}))
 	guest.Handle(pluginv1connect.NewAuthProviderServiceHandler(authProvider{}))
 	guest.Handle(pluginv1connect.NewNotifierServiceHandler(notifier{}))
+	guest.Handle(pluginv1connect.NewMediaSegmentProviderServiceHandler(segments{}))
+}
+
+// segments finds a two-second intro and outro in every video.
+type segments struct{}
+
+func (segments) GetSegments(_ context.Context, req *pluginv1.GetSegmentsRequest) (*pluginv1.GetSegmentsResponse, error) {
+	d := req.GetDuration().AsDuration()
+	if d < 5*time.Second {
+		return &pluginv1.GetSegmentsResponse{}, nil
+	}
+	seg := func(kind pluginv1.SegmentKind, start, end time.Duration) *pluginv1.Segment {
+		return pluginv1.Segment_builder{Kind: kind.Enum(), Start: durationpb.New(start), End: durationpb.New(end)}.Build()
+	}
+	return pluginv1.GetSegmentsResponse_builder{Segments: []*pluginv1.Segment{
+		seg(pluginv1.SegmentKind_SEGMENT_KIND_INTRO, 0, 2*time.Second),
+		seg(pluginv1.SegmentKind_SEGMENT_KIND_OUTRO, d-2*time.Second, d),
+	}}.Build(), nil
 }
 
 // authProvider accepts the password "directory" of any user, as

@@ -1,0 +1,54 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "google/protobuf/duration.proto";
+import "mavio/plugin/v1/metadata.proto";
+
+// MediaSegmentProviderService finds the segments of videos, such as their
+// intros and credits, which clients offer to skip.
+service MediaSegmentProviderService {
+  rpc GetSegments(GetSegmentsRequest) returns (GetSegmentsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+enum SegmentKind {
+  SEGMENT_KIND_UNSPECIFIED = 0;
+  SEGMENT_KIND_INTRO = 1;
+  SEGMENT_KIND_OUTRO = 2;
+  SEGMENT_KIND_RECAP = 3;
+  SEGMENT_KIND_PREVIEW = 4;
+  SEGMENT_KIND_COMMERCIAL = 5;
+}
+
+// SegmentChapter is a chapter of the video.
+message SegmentChapter {
+  google.protobuf.Duration start = 1;
+  string title = 2;
+}
+
+message GetSegmentsRequest {
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_EPISODE.
+  MediaKind kind = 1;
+  string name = 2;
+  map<string, string> external_ids = 3;
+  map<string, string> series_external_ids = 4;
+  int32 season_number = 5;
+  int32 episode_number = 6;
+  // The video's file name, without folders.
+  string file_name = 7;
+  google.protobuf.Duration duration = 8;
+  repeated SegmentChapter chapters = 9;
+}
+
+// Segment is a stretch of the video.
+message Segment {
+  SegmentKind kind = 1;
+  google.protobuf.Duration start = 2;
+  google.protobuf.Duration end = 3;
+}
+
+message GetSegmentsResponse {
+  repeated Segment segments = 1;
+}

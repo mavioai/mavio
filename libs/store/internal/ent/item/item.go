@@ -101,6 +101,8 @@ const (
 	FieldLocked = "locked"
 	// FieldLockedFields holds the string denoting the locked_fields field in the database.
 	FieldLockedFields = "locked_fields"
+	// FieldLoudness holds the string denoting the loudness field in the database.
+	FieldLoudness = "loudness"
 	// FieldExtra holds the string denoting the extra field in the database.
 	FieldExtra = "extra"
 	// FieldOwnerID holds the string denoting the owner_id field in the database.
@@ -133,6 +135,10 @@ const (
 	EdgeMediaSources = "media_sources"
 	// EdgeImages holds the string denoting the images edge name in mutations.
 	EdgeImages = "images"
+	// EdgeTrickplay holds the string denoting the trickplay edge name in mutations.
+	EdgeTrickplay = "trickplay"
+	// EdgeSegments holds the string denoting the segments edge name in mutations.
+	EdgeSegments = "segments"
 	// EdgeCredits holds the string denoting the credits edge name in mutations.
 	EdgeCredits = "credits"
 	// EdgeUserData holds the string denoting the user_data edge name in mutations.
@@ -189,6 +195,20 @@ const (
 	ImagesInverseTable = "images"
 	// ImagesColumn is the table column denoting the images relation/edge.
 	ImagesColumn = "item_id"
+	// TrickplayTable is the table that holds the trickplay relation/edge.
+	TrickplayTable = "trickplay"
+	// TrickplayInverseTable is the table name for the Trickplay entity.
+	// It exists in this package in order to avoid circular dependency with the "trickplay" package.
+	TrickplayInverseTable = "trickplay"
+	// TrickplayColumn is the table column denoting the trickplay relation/edge.
+	TrickplayColumn = "item_id"
+	// SegmentsTable is the table that holds the segments relation/edge.
+	SegmentsTable = "media_segments"
+	// SegmentsInverseTable is the table name for the MediaSegment entity.
+	// It exists in this package in order to avoid circular dependency with the "mediasegment" package.
+	SegmentsInverseTable = "media_segments"
+	// SegmentsColumn is the table column denoting the segments relation/edge.
+	SegmentsColumn = "item_id"
 	// CreditsTable is the table that holds the credits relation/edge.
 	CreditsTable = "credits"
 	// CreditsInverseTable is the table name for the Credit entity.
@@ -272,6 +292,7 @@ var Columns = []string{
 	FieldMetadataCountry,
 	FieldLocked,
 	FieldLockedFields,
+	FieldLoudness,
 	FieldExtra,
 	FieldOwnerID,
 	FieldUserID,
@@ -543,6 +564,11 @@ func ByLocked(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLocked, opts...).ToFunc()
 }
 
+// ByLoudness orders the results by the loudness field.
+func ByLoudness(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLoudness, opts...).ToFunc()
+}
+
 // ByExtra orders the results by the extra field.
 func ByExtra(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExtra, opts...).ToFunc()
@@ -674,6 +700,34 @@ func ByImages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByTrickplayCount orders the results by trickplay count.
+func ByTrickplayCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTrickplayStep(), opts...)
+	}
+}
+
+// ByTrickplay orders the results by trickplay terms.
+func ByTrickplay(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTrickplayStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySegmentsCount orders the results by segments count.
+func BySegmentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSegmentsStep(), opts...)
+	}
+}
+
+// BySegments orders the results by segments terms.
+func BySegments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSegmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByCreditsCount orders the results by credits count.
 func ByCreditsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -790,6 +844,20 @@ func newImagesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ImagesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ImagesTable, ImagesColumn),
+	)
+}
+func newTrickplayStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TrickplayInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TrickplayTable, TrickplayColumn),
+	)
+}
+func newSegmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SegmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SegmentsTable, SegmentsColumn),
 	)
 }
 func newCreditsStep() *sqlgraph.Step {

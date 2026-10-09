@@ -1942,8 +1942,10 @@ func (x *Chapter) ClearHasImage() {
 type Chapter_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Start    *durationpb.Duration
-	Title    *string
+	Start *durationpb.Duration
+	Title *string
+	// Its image is served at
+	// /images/chapters/{item_id}/{media_source_id}/{index}.
 	HasImage *bool
 }
 

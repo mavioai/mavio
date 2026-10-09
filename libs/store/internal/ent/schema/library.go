@@ -31,6 +31,9 @@ func (Library) Fields() []ent.Field {
 		field.String("metadata_country").Default(""),
 		field.Bool("save_local_metadata").Default(false),
 		field.Bool("auto_collections").Default(false),
+		field.Bool("extract_trickplay").Default(false),
+		field.Bool("extract_chapter_images").Default(false),
+		field.Bool("analyze_loudness").Default(false),
 		// scan_generation counts the library's scans.
 		field.Int64("scan_generation").Default(0),
 		field.Time("created_at").Default(time.Now).Immutable(),

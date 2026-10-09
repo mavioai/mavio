@@ -107,6 +107,8 @@ type Item struct {
 	Locked bool `json:"locked,omitempty"`
 	// LockedFields holds the value of the "locked_fields" field.
 	LockedFields []string `json:"locked_fields,omitempty"`
+	// Loudness holds the value of the "loudness" field.
+	Loudness *float64 `json:"loudness,omitempty"`
 	// Extra holds the value of the "extra" field.
 	Extra string `json:"extra,omitempty"`
 	// OwnerID holds the value of the "owner_id" field.
@@ -147,6 +149,10 @@ type ItemEdges struct {
 	MediaSources []*MediaSource `json:"media_sources,omitempty"`
 	// Images holds the value of the images edge.
 	Images []*Image `json:"images,omitempty"`
+	// Trickplay holds the value of the trickplay edge.
+	Trickplay []*Trickplay `json:"trickplay,omitempty"`
+	// Segments holds the value of the segments edge.
+	Segments []*MediaSegment `json:"segments,omitempty"`
 	// Credits holds the value of the credits edge.
 	Credits []*Credit `json:"credits,omitempty"`
 	// UserData holds the value of the user_data edge.
@@ -159,7 +165,7 @@ type ItemEdges struct {
 	LinkedIn []*ItemLink `json:"linked_in,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [13]bool
+	loadedTypes [15]bool
 }
 
 // LibraryOrErr returns the Library value or an error if the edge
@@ -240,10 +246,28 @@ func (e ItemEdges) ImagesOrErr() ([]*Image, error) {
 	return nil, &NotLoadedError{edge: "images"}
 }
 
+// TrickplayOrErr returns the Trickplay value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) TrickplayOrErr() ([]*Trickplay, error) {
+	if e.loadedTypes[8] {
+		return e.Trickplay, nil
+	}
+	return nil, &NotLoadedError{edge: "trickplay"}
+}
+
+// SegmentsOrErr returns the Segments value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) SegmentsOrErr() ([]*MediaSegment, error) {
+	if e.loadedTypes[9] {
+		return e.Segments, nil
+	}
+	return nil, &NotLoadedError{edge: "segments"}
+}
+
 // CreditsOrErr returns the Credits value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) CreditsOrErr() ([]*Credit, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[10] {
 		return e.Credits, nil
 	}
 	return nil, &NotLoadedError{edge: "credits"}
@@ -252,7 +276,7 @@ func (e ItemEdges) CreditsOrErr() ([]*Credit, error) {
 // UserDataOrErr returns the UserData value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) UserDataOrErr() ([]*UserData, error) {
-	if e.loadedTypes[9] {
+	if e.loadedTypes[11] {
 		return e.UserData, nil
 	}
 	return nil, &NotLoadedError{edge: "user_data"}
@@ -263,7 +287,7 @@ func (e ItemEdges) UserDataOrErr() ([]*UserData, error) {
 func (e ItemEdges) UserOrErr() (*User, error) {
 	if e.User != nil {
 		return e.User, nil
-	} else if e.loadedTypes[10] {
+	} else if e.loadedTypes[12] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
@@ -272,7 +296,7 @@ func (e ItemEdges) UserOrErr() (*User, error) {
 // LinksOrErr returns the Links value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) LinksOrErr() ([]*ItemLink, error) {
-	if e.loadedTypes[11] {
+	if e.loadedTypes[13] {
 		return e.Links, nil
 	}
 	return nil, &NotLoadedError{edge: "links"}
@@ -281,7 +305,7 @@ func (e ItemEdges) LinksOrErr() ([]*ItemLink, error) {
 // LinkedInOrErr returns the LinkedIn value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) LinkedInOrErr() ([]*ItemLink, error) {
-	if e.loadedTypes[12] {
+	if e.loadedTypes[14] {
 		return e.LinkedIn, nil
 	}
 	return nil, &NotLoadedError{edge: "linked_in"}
@@ -300,7 +324,7 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 			values[i] = new(core.ID)
 		case item.FieldLocked:
 			values[i] = new(sql.NullBool)
-		case item.FieldCommunityRating, item.FieldCriticRating:
+		case item.FieldCommunityRating, item.FieldCriticRating, item.FieldLoudness:
 			values[i] = new(sql.NullFloat64)
 		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldInheritedRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber, item.FieldScanGeneration:
 			values[i] = new(sql.NullInt64)
@@ -608,6 +632,13 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field locked_fields: %w", err)
 				}
 			}
+		case item.FieldLoudness:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field loudness", values[i])
+			} else if value.Valid {
+				_m.Loudness = new(float64)
+				*_m.Loudness = value.Float64
+			}
 		case item.FieldExtra:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field extra", values[i])
@@ -712,6 +743,16 @@ func (_m *Item) QueryMediaSources() *MediaSourceQuery {
 // QueryImages queries the "images" edge of the Item entity.
 func (_m *Item) QueryImages() *ImageQuery {
 	return NewItemClient(_m.config).QueryImages(_m)
+}
+
+// QueryTrickplay queries the "trickplay" edge of the Item entity.
+func (_m *Item) QueryTrickplay() *TrickplayQuery {
+	return NewItemClient(_m.config).QueryTrickplay(_m)
+}
+
+// QuerySegments queries the "segments" edge of the Item entity.
+func (_m *Item) QuerySegments() *MediaSegmentQuery {
+	return NewItemClient(_m.config).QuerySegments(_m)
 }
 
 // QueryCredits queries the "credits" edge of the Item entity.
@@ -912,6 +953,11 @@ func (_m *Item) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("locked_fields=")
 	builder.WriteString(fmt.Sprintf("%v", _m.LockedFields))
+	builder.WriteString(", ")
+	if v := _m.Loudness; v != nil {
+		builder.WriteString("loudness=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("extra=")
 	builder.WriteString(_m.Extra)

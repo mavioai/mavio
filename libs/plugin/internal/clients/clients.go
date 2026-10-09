@@ -19,6 +19,7 @@ type Set struct {
 	auth      pluginv1connect.AuthProviderServiceClient
 	notifier  pluginv1connect.NotifierServiceClient
 	subtitles pluginv1connect.SubtitleProviderServiceClient
+	segments  pluginv1connect.MediaSegmentProviderServiceClient
 }
 
 // New builds the clients for m over c.
@@ -35,6 +36,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_SUBTITLE_PROVIDER) {
 		s.subtitles = pluginv1connect.NewSubtitleProviderServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_SEGMENT_PROVIDER) {
+		s.segments = pluginv1connect.NewMediaSegmentProviderServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -56,3 +60,6 @@ func (s Set) Notifier() pluginv1connect.NotifierServiceClient { return s.notifie
 
 // Subtitles returns the SubtitleProviderService client, or nil.
 func (s Set) Subtitles() pluginv1connect.SubtitleProviderServiceClient { return s.subtitles }
+
+// Segments returns the MediaSegmentProviderService client, or nil.
+func (s Set) Segments() pluginv1connect.MediaSegmentProviderServiceClient { return s.segments }

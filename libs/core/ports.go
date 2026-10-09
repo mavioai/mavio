@@ -27,6 +27,8 @@ type Store interface {
 	Settings() SettingsRepository
 	APIKeys() APIKeyRepository
 	Activities() ActivityRepository
+	Trickplay() TrickplayRepository
+	MediaSegments() MediaSegmentRepository
 
 	// InTx runs fn in a transaction. The Store passed to fn is bound to the
 	// transaction; fn's error rolls it back.
@@ -256,4 +258,22 @@ type DisplayPreferencesRepository interface {
 	// Put stores the preferences, replacing those of the same user, client
 	// and view.
 	Put(ctx context.Context, p *DisplayPreferences) error
+}
+
+// TrickplayRepository stores the trickplay sheets' descriptions.
+type TrickplayRepository interface {
+	// Put stores the description at its width, replacing the earlier one.
+	Put(ctx context.Context, t *Trickplay) error
+	// List returns an item's descriptions, narrowest first.
+	List(ctx context.Context, itemID ID) ([]Trickplay, error)
+	// Delete removes an item's descriptions.
+	Delete(ctx context.Context, itemID ID) error
+}
+
+// MediaSegmentRepository stores media segments.
+type MediaSegmentRepository interface {
+	// List returns an item's segments by start.
+	List(ctx context.Context, itemID ID) ([]MediaSegment, error)
+	// Replace sets an item's segments, removing any others.
+	Replace(ctx context.Context, itemID ID, segments []MediaSegment) error
 }

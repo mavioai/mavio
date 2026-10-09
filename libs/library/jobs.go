@@ -83,6 +83,17 @@ type Jobs struct {
 	// Images measures items' images and computes their placeholders after
 	// each refresh; nil skips them.
 	Images ImageAnalyzer
+	// Thumbnails makes trickplay sheets and chapter images in MetadataDir
+	// for libraries that ask for them; nil makes none.
+	Thumbnails  Thumbnailer
+	MetadataDir string
+	// Loudness measures the loudness of tracks for libraries that ask for
+	// it; nil measures none.
+	Loudness LoudnessMeter
+	// Segments returns the segment providers; nil asks none.
+	Segments func() []SegmentProvider
+	// Fails suppresses images of media that failed lately; nil retries.
+	Fails  *FailNotes
 	Now    func() time.Time
 	Logger *slog.Logger
 
@@ -114,6 +125,12 @@ func (j *Jobs) Handlers() map[string]Handler {
 		JobBorders:      j.borders,
 		JobPlaceholders: j.placeholders,
 		JobCleanup:      j.cleanup,
+
+		JobTrickplay:     j.trickplay,
+		JobChapterImages: j.chapterImages,
+		JobLoudness:      j.loudness,
+		JobSegments:      j.segments,
+		JobExtras:        j.extras,
 	}
 }
 
@@ -280,6 +297,18 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 	}
 	if j.Borders != nil && !audio && len(probed) > 0 {
 		next = append(next, BordersJob(it.ID, j.now()))
+	}
+	if len(probed) > 0 {
+		lib, err := j.Store.Libraries().Get(ctx, it.LibraryID)
+		if err != nil {
+			return nil, ignoreGone(err)
+		}
+		current, err := j.Store.MediaSources().ListForItem(ctx, it.ID)
+		if err != nil {
+			return nil, ignoreGone(err)
+		}
+		src, _ := videoSource(current)
+		next = append(next, j.extrasJobs(lib, it, src != nil, src != nil && len(src.Chapters) > 0)...)
 	}
 	return next, nil
 }
