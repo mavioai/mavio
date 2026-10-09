@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library/storage"
 )
 
 // Job kinds besides JobProbe.
@@ -193,6 +194,22 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 		if !src.ProbedAt.IsZero() || src.Disc != "" {
 			continue
 		}
+		if j.Scanner != nil && j.Scanner.QuietGate != nil {
+			if err := j.Scanner.QuietGate.PauseOrCancel(ctx); err != nil {
+				return nil, err
+			}
+		}
+		if j.Scanner != nil && j.Scanner.VolumeLedger != nil {
+			dev, _ := storage.DetectDevice(src.Path)
+			if dev.ID != "" {
+				rel, err := j.Scanner.VolumeLedger.Acquire(ctx, dev.ID)
+				if err != nil {
+					return nil, err
+				}
+				defer rel()
+			}
+		}
+		_ = storage.PrefetchHeadTail(src.Path, 1024*1024, 256*1024)
 		res, err := j.Prober.Probe(ctx, src.Path, audio)
 		if err != nil {
 			return nil, fmt.Errorf("probe %s: %w", src.Path, err)

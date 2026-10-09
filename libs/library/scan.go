@@ -18,6 +18,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library/storage"
 )
 
 // JobProbe is the kind of jobs that probe an item's new or changed media
@@ -44,6 +45,13 @@ type Scanner struct {
 	MissingGrace time.Duration
 	// Now returns the current time; default time.Now.
 	Now func() time.Time
+
+	// VolumeLedger serializes scans on rotational hard drives per physical device.
+	VolumeLedger *storage.VolumeLedger
+	// QuietGate pauses or throttles background scans during active client streaming.
+	QuietGate *storage.QuietGate
+	// GrowthPolicy identifies actively downloading or growing files to avoid dirty reads.
+	GrowthPolicy *storage.GrowthPolicy
 }
 
 // ScanStats summarizes a scan.
@@ -133,6 +141,16 @@ type task struct {
 
 func (sc *scan) root(ctx context.Context, base string) error {
 	base = filepath.ToSlash(filepath.Clean(base))
+	if sc.VolumeLedger != nil {
+		dev, _ := storage.DetectDevice(filepath.FromSlash(base))
+		if dev.ID != "" {
+			rel, err := sc.VolumeLedger.Acquire(ctx, dev.ID)
+			if err != nil {
+				return err
+			}
+			defer rel()
+		}
+	}
 	r, err := os.OpenRoot(filepath.FromSlash(base))
 	if err != nil {
 		// An unmounted or unreadable root keeps its items until it is back.
@@ -178,6 +196,11 @@ func (sc *scan) root(ctx context.Context, base string) error {
 func (sc *scan) folder(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, t task) ([]task, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
+	}
+	if sc.QuietGate != nil {
+		if err := sc.QuietGate.PauseOrCancel(ctx); err != nil {
+			return nil, err
+		}
 	}
 	state, changed, err := sc.state(ctx, rfs, ignores, t.dir)
 	if err != nil {
@@ -258,6 +281,11 @@ func (sc *scan) state(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, dir
 	return sc.list(rfs, ignores, st)
 }
 
+// temporaryDownloadExtensions are suffixes of partially downloaded files that should never be indexed.
+var temporaryDownloadExtensions = []string{
+	".part", ".crdownload", ".download", ".aria2", ".!qb", ".tmp",
+}
+
 // list reads a folder's entries, without those .ignore files exclude.
 func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (core.FolderState, bool, error) {
 	entries, err := rfs.List(st.Path)
@@ -265,6 +293,10 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 		return st, false, err
 	}
 	for _, e := range entries {
+		ext := strings.ToLower(path.Ext(e.Path))
+		if slices.Contains(temporaryDownloadExtensions, ext) {
+			continue
+		}
 		if ignored, err := ignores.Ignored(slashRel(rfs, e.Path), e.IsDir); err != nil || ignored {
 			continue
 		}
@@ -276,6 +308,9 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 		fe.ModTime = modTime(fi)
 		if !e.IsDir {
 			fe.Size = fi.Size()
+			if sc.GrowthPolicy != nil && sc.GrowthPolicy.IsGrowing(e.Path, fe.Size, fe.ModTime) {
+				continue
+			}
 		}
 		st.Entries = append(st.Entries, fe)
 	}
