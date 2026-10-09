@@ -45,12 +45,30 @@ type Provider interface {
 
 // Refresher fills in an item's metadata from external providers and local
 // NFO files. Local files win over providers, and both over what a scan
-// derived from file names; locked items and fields are left alone.
+// derived from file names; locked items and fields are left alone. It also
+// carries out the changes administrators make (manage.go), and writes
+// metadata next to the media in libraries saving local metadata.
 type Refresher struct {
 	Store     core.Store
 	Providers []Provider
-	Logger    *slog.Logger
-	Now       func() time.Time
+	// MetadataDir holds the artwork chosen for items whose library does
+	// not save local metadata, one folder per item; empty keeps none.
+	MetadataDir string
+	// Fetch downloads an image; nil leaves provider images where they are
+	// instead of saving them next to the media.
+	Fetch  func(ctx context.Context, url string) ([]byte, error)
+	Logger *slog.Logger
+	Now    func() time.Time
+}
+
+// RefreshOptions changes how Refresh works.
+type RefreshOptions struct {
+	// ReplaceMetadata forgets what providers gave before, except external
+	// IDs and locked fields, and ignores the item's NFO file, so that
+	// nothing stale outlives the refresh. In libraries saving local
+	// metadata, the artwork beside the media is ignored too, to be
+	// replaced by the providers'.
+	ReplaceMetadata bool
 }
 
 func (r *Refresher) logger() *slog.Logger {
@@ -69,19 +87,36 @@ func (r *Refresher) now() time.Time {
 
 // Refresh refreshes one item of lib.
 func (r *Refresher) Refresh(ctx context.Context, lib core.Library, itemID core.ID) error {
+	_, err := r.RefreshWith(ctx, lib, itemID, RefreshOptions{})
+	return err
+}
+
+// RefreshWith refreshes one item of lib and returns it.
+func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID core.ID, opts RefreshOptions) (core.Item, error) {
 	it, err := r.Store.Items().Get(ctx, itemID)
 	if err != nil {
-		return err
+		return it, err
 	}
 	if it.Locked {
-		return nil
+		return it, nil
 	}
-	local, err := r.readNFO(lib, it)
-	if err != nil {
-		r.logger().WarnContext(ctx, "reading NFO failed", "item", it.ID, "err", err)
+	var local *metadata.Result
+	if !opts.ReplaceMetadata {
+		if local, err = r.readNFO(lib, it); err != nil {
+			r.logger().WarnContext(ctx, "reading NFO failed", "item", it.ID, "err", err)
+		}
 	}
-	// Artwork beside the media comes first, then what the NFO names.
-	if art := r.localArt(lib, it); len(art) > 0 {
+	// Chosen artwork comes first, then artwork beside the media, then what
+	// the NFO names.
+	art := r.storedArt(it)
+	if !opts.ReplaceMetadata || !lib.SaveLocalMetadata {
+		for _, img := range r.localArt(lib, it) {
+			if !slices.ContainsFunc(art, func(a metadata.LocalImage) bool { return a.Kind == img.Kind && img.Kind != core.ImageBackdrop }) {
+				art = append(art, img)
+			}
+		}
+	}
+	if len(art) > 0 {
 		if local == nil {
 			local = &metadata.Result{}
 		}
@@ -99,9 +134,12 @@ func (r *Refresher) Refresh(ctx context.Context, lib core.Library, itemID core.I
 		}
 		it.Locked = it.Locked || local.Item.Locked
 	}
+	if opts.ReplaceMetadata {
+		clearMetadata(&it)
+	}
 	lookup, err := r.lookup(ctx, lib, it)
 	if err != nil {
-		return err
+		return it, err
 	}
 	var results []*metadata.Result
 	if it.Extra == "" && !it.Locked {
@@ -122,22 +160,32 @@ func (r *Refresher) Refresh(ctx context.Context, lib core.Library, itemID core.I
 	if local != nil {
 		results = append(results, local)
 	}
+	name := it.Name
 	for _, res := range results {
-		applyMetadata(&it, res.Item)
+		applyMetadata(&it, res.Item, res == local)
+	}
+	if it.Name == "" {
+		it.Name = name
 	}
 	it.ParentalRating = ratingScore(&it, lookup.Country)
 	it.MetadataRefreshedAt = r.now()
-	return r.Store.InTx(ctx, func(tx core.Store) error {
+	err = r.Store.InTx(ctx, func(tx core.Store) error {
 		if err := tx.Items().Upsert(ctx, it); err != nil {
 			return err
 		}
 		// The most trusted source with people and images provides them.
-		for i := len(results) - 1; i >= 0; i-- {
-			if len(results[i].People) > 0 && !slices.Contains(it.LockedFields, core.FieldCast) {
+		credited := slices.Contains(it.LockedFields, core.FieldCast)
+		for i := len(results) - 1; i >= 0 && !credited; i-- {
+			if len(results[i].People) > 0 {
 				if err := replaceCredits(ctx, tx, it.ID, results[i].People); err != nil {
 					return err
 				}
-				break
+				credited = true
+			}
+		}
+		if opts.ReplaceMetadata && !credited {
+			if err := tx.People().ReplaceCredits(ctx, it.ID, nil); err != nil {
+				return err
 			}
 		}
 		// Each kind of image comes from the most trusted source that has
@@ -162,6 +210,10 @@ func (r *Refresher) Refresh(ctx context.Context, lib core.Library, itemID core.I
 		keepImages(images, existing)
 		return tx.Images().Replace(ctx, it.ID, images)
 	})
+	if err != nil {
+		return it, err
+	}
+	return it, r.changed(ctx, lib, it)
 }
 
 // lookup describes an item to providers, with its series and season for
@@ -218,9 +270,10 @@ func ratingScore(it *core.Item, country string) *int {
 	return &score
 }
 
-// applyMetadata copies what src knows over dst, except locked fields.
-func applyMetadata(dst *core.Item, src core.Item) {
-	locked := func(f core.MetadataField) bool { return slices.Contains(dst.LockedFields, f) }
+// applyMetadata copies what src knows over dst, except locked fields
+// unless src is the local NFO file, which locks do not hold against.
+func applyMetadata(dst *core.Item, src core.Item, local bool) {
+	locked := func(f core.MetadataField) bool { return !local && slices.Contains(dst.LockedFields, f) }
 	str := func(d *string, s string, f core.MetadataField) {
 		if s != "" && (f == "" || !locked(f)) {
 			*d = s

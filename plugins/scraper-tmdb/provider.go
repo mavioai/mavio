@@ -245,6 +245,7 @@ func (s session) movieMetadata(ctx context.Context, l *pluginv1.Lookup) (*plugin
 	}
 	if m.Collection != nil && m.Collection.ID > 0 {
 		md.GetExternalIds()[keyTMDBCollection] = strconv.Itoa(m.Collection.ID)
+		md.SetCollectionName(m.Collection.Name)
 	}
 	ratings := map[string]string{}
 	for _, rd := range m.ReleaseDates.Results {

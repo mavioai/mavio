@@ -131,6 +131,7 @@ func (s *LibraryService) UpdateLibrary(ctx context.Context, req *libraryv1.Updat
 		}
 		lib.Name, lib.Kind, lib.Paths, lib.ScanInterval = spec.Name, spec.Kind, spec.Paths, spec.ScanInterval
 		lib.PreferredLanguage, lib.MetadataCountry = spec.PreferredLanguage, spec.MetadataCountry
+		lib.SaveLocalMetadata, lib.AutoCollections = spec.SaveLocalMetadata, spec.AutoCollections
 		if err := tx.Libraries().Update(ctx, &lib); err != nil {
 			return err
 		}
@@ -199,6 +200,7 @@ func libraryFromSpec(spec *libraryv1.LibrarySpec) (core.Library, error) {
 	lib := core.Library{
 		Name: spec.GetName(), Paths: spec.GetPaths(),
 		PreferredLanguage: spec.GetPreferredLanguage(), MetadataCountry: spec.GetMetadataCountry(),
+		SaveLocalMetadata: spec.GetSaveLocalMetadata(), AutoCollections: spec.GetAutoCollections(),
 	}
 	for k, v := range libraryKinds {
 		if v == spec.GetKind() {
@@ -230,6 +232,8 @@ func libraryToProto(lib *core.Library, admin bool) *libraryv1.Library {
 		Kind:              new(libraryKinds[lib.Kind]),
 		PreferredLanguage: &lib.PreferredLanguage,
 		MetadataCountry:   &lib.MetadataCountry,
+		SaveLocalMetadata: &lib.SaveLocalMetadata,
+		AutoCollections:   &lib.AutoCollections,
 		CreateTime:        timestamppb.New(lib.CreatedAt),
 		UpdateTime:        timestamppb.New(lib.UpdatedAt),
 	}

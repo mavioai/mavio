@@ -1,0 +1,279 @@
+edition = "2023";
+
+package mavio.library.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+import "mavio/library/v1/item.proto";
+import "mavio/library/v1/media.proto";
+
+// MetadataService corrects and completes the metadata of items:
+// administrators edit and lock it, identify items again against the
+// metadata providers, refresh them, choose their images and download
+// subtitles. In libraries saving local metadata, changes are also written
+// next to the media as NFO files and image files.
+service MetadataService {
+  // UpdateItem changes the fields of an item named by the update mask.
+  rpc UpdateItem(UpdateItemRequest) returns (UpdateItemResponse);
+  // RefreshItem reads an item's metadata again from its local files and
+  // the providers, sparing locked fields.
+  rpc RefreshItem(RefreshItemRequest) returns (RefreshItemResponse);
+  // SearchRemote searches the providers for what an item may be.
+  rpc SearchRemote(SearchRemoteRequest) returns (SearchRemoteResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // IdentifyItem sets an item's external IDs to a search result's and
+  // replaces its metadata and images with what the providers know of
+  // them, sparing locked fields.
+  rpc IdentifyItem(IdentifyItemRequest) returns (IdentifyItemResponse);
+  // ListRemoteImages lists the images the providers have of an item.
+  rpc ListRemoteImages(ListRemoteImagesRequest) returns (ListRemoteImagesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SetItemImage makes an image, downloaded from a URL or uploaded, the
+  // item's image of a kind; it replaces the first image of that kind.
+  rpc SetItemImage(SetItemImageRequest) returns (SetItemImageResponse);
+  // DeleteItemImage removes an image of an item, and its file when it lies
+  // in the library's folders.
+  rpc DeleteItemImage(DeleteItemImageRequest) returns (DeleteItemImageResponse);
+  // SearchSubtitles searches the subtitle providers for subtitles of a
+  // video in one language.
+  rpc SearchSubtitles(SearchSubtitlesRequest) returns (SearchSubtitlesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // DownloadSubtitle saves a subtitle found by SearchSubtitles next to the
+  // video, where it becomes one of the video's subtitle streams.
+  rpc DownloadSubtitle(DownloadSubtitleRequest) returns (DownloadSubtitleResponse);
+}
+
+// ItemMetadata holds the editable fields of an item.
+message ItemMetadata {
+  string name = 1 [(buf.validate.field).string.max_len = 500];
+  // Empty derives it from the name.
+  string sort_name = 2 [(buf.validate.field).string.max_len = 500];
+  string original_title = 3 [(buf.validate.field).string.max_len = 500];
+  string overview = 4 [(buf.validate.field).string.max_len = 20000];
+  string tagline = 5 [(buf.validate.field).string.max_len = 1000];
+  int32 production_year = 6 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 9999
+  }];
+  google.protobuf.Timestamp premiere_date = 7;
+  google.protobuf.Timestamp end_date = 8;
+  google.protobuf.Duration runtime = 9 [(buf.validate.field).duration.gte = {}];
+  string official_rating = 10 [(buf.validate.field).string.max_len = 50];
+  string custom_rating = 11 [(buf.validate.field).string.max_len = 50];
+  double community_rating = 12 [(buf.validate.field).double = {
+    gte: 0
+    lte: 10
+  }];
+  double critic_rating = 13 [(buf.validate.field).double = {
+    gte: 0
+    lte: 100
+  }];
+  repeated string genres = 14;
+  repeated string tags = 15;
+  repeated string studios = 16;
+  repeated string production_locations = 17;
+  // Keyed by provider: "tmdb", "imdb", "tvdb", …; replaces all of them.
+  map<string, string> external_ids = 18;
+  int32 index_number = 19 [(buf.validate.field).int32.gte = 0];
+  int32 parent_index_number = 20 [(buf.validate.field).int32.gte = 0];
+  SeriesStatus series_status = 21 [(buf.validate.field).enum.defined_only = true];
+  repeated string artists = 22;
+  repeated string album_artists = 23;
+  string album = 24 [(buf.validate.field).string.max_len = 500];
+  // Keeps refreshes from changing the item at all.
+  bool locked = 25;
+  repeated MetadataField locked_fields = 26 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+}
+
+message UpdateItemRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  ItemMetadata metadata = 2 [(buf.validate.field).required = true];
+  // The ItemMetadata fields to change, by name; unset or empty changes
+  // none.
+  google.protobuf.FieldMask update_mask = 3;
+}
+
+message UpdateItemResponse {
+  Item item = 1;
+}
+
+message RefreshItemRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // Forget the metadata the providers gave before, other than external
+  // IDs, so that nothing stale outlives the refresh.
+  bool replace_metadata = 2;
+}
+
+message RefreshItemResponse {
+  Item item = 1;
+}
+
+message SearchRemoteRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // Unset fields are taken from the item.
+  string name = 2 [(buf.validate.field).string.max_len = 500];
+  int32 year = 3;
+  map<string, string> external_ids = 4;
+  // Only search this provider (a plugin ID).
+  string provider = 5;
+}
+
+// RemoteSearchResult is what a provider found.
+message RemoteSearchResult {
+  // The plugin that found it.
+  string provider = 1;
+  string name = 2;
+  int32 year = 3;
+  string overview = 4;
+  map<string, string> external_ids = 5;
+  string image_url = 6;
+  double score = 7;
+}
+
+message SearchRemoteResponse {
+  // Each provider's results in its order, providers in turn.
+  repeated RemoteSearchResult results = 1;
+}
+
+message IdentifyItemRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // As RemoteSearchResult.external_ids.
+  map<string, string> external_ids = 2 [(buf.validate.field).map.min_pairs = 1];
+}
+
+message IdentifyItemResponse {
+  Item item = 1;
+}
+
+message ListRemoteImagesRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // Unset lists every kind.
+  ImageKind kind = 2 [(buf.validate.field).enum.defined_only = true];
+}
+
+// RemoteImage is an image a provider has.
+message RemoteImage {
+  string provider = 1;
+  ImageKind kind = 2;
+  string url = 3;
+  int32 width = 4;
+  int32 height = 5;
+  // ISO 639-1; empty for images without text.
+  string language = 6;
+  double score = 7;
+}
+
+message ListRemoteImagesResponse {
+  repeated RemoteImage images = 1;
+}
+
+message SetItemImageRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  ImageKind kind = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  oneof source {
+    option (buf.validate.oneof).required = true;
+    // An http or https URL, such as a RemoteImage's.
+    string url = 3 [(buf.validate.field).string.uri = true];
+    // An uploaded JPEG, PNG, WebP or GIF image of at most 20 MiB.
+    bytes data = 4 [(buf.validate.field).bytes.max_len = 20971520];
+  }
+}
+
+message SetItemImageResponse {
+  Image image = 1;
+}
+
+message DeleteItemImageRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  string image_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteItemImageResponse {}
+
+message SearchSubtitlesRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // ISO 639-1 code, or "zh-Hans" and "zh-Hant".
+  string language = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^[a-z]{2}(-[A-Za-z]{2,4})?$"
+  ];
+  // The media source; unset means the item's first.
+  string media_source_id = 3 [(buf.validate.field).string.uuid = true];
+  bool hearing_impaired = 4;
+  bool forced = 5;
+}
+
+// RemoteSubtitle is a subtitle a provider offers.
+message RemoteSubtitle {
+  string provider = 1;
+  // The provider's ID, passed to DownloadSubtitle.
+  string id = 2;
+  string name = 3;
+  string language = 4;
+  string format = 5;
+  bool hearing_impaired = 6;
+  bool forced = 7;
+  double score = 8;
+  int32 download_count = 9;
+  bool hash_match = 10;
+}
+
+message SearchSubtitlesResponse {
+  repeated RemoteSubtitle subtitles = 1;
+}
+
+message DownloadSubtitleRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  string media_source_id = 2 [(buf.validate.field).string.uuid = true];
+  string provider = 3 [(buf.validate.field).required = true];
+  string subtitle_id = 4 [(buf.validate.field).required = true];
+}
+
+message DownloadSubtitleResponse {
+  // The subtitle as a stream of the media source.
+  MediaStream stream = 1;
+}

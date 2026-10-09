@@ -54,8 +54,14 @@ type Library struct {
 	// ISO 639-1 and ISO 3166-1 alpha-2 codes.
 	PreferredLanguage string
 	MetadataCountry   string
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	// SaveLocalMetadata writes NFO files and chosen artwork next to the
+	// media, where scans read them back.
+	SaveLocalMetadata bool
+	// AutoCollections puts movies into collections named after the
+	// providers' collections (movie sets).
+	AutoCollections bool
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 // Validate checks the library's invariants.

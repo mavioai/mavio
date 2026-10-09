@@ -36,6 +36,7 @@ func run(ctx context.Context, args []string) error {
 	fs.StringVar(&cfg.TranscodeDir, "transcode-dir", filepath.Join(os.TempDir(), "mavio-transcodes"), "directory for transcodes")
 	fs.StringVar(&cfg.CacheDir, "cache-dir", defaultCacheDir(), "directory for downloaded and resized images and compiled plugins")
 	fs.StringVar(&cfg.PluginDir, "plugin-dir", "", "directory holding one folder per plugin, each with its manifest.json")
+	fs.StringVar(&cfg.MetadataDir, "metadata-dir", "metadata", "directory for the artwork chosen for items of libraries not saving metadata next to their media")
 	fs.BoolVar(&cfg.Dev, "dev", false, "serve the development player at /dev/player")
 	fs.StringVar(&cfg.DevLibrary, "dev-library", "", "add the Movies and Shows folders of this directory as libraries, e.g. .fixtures/dev-library")
 	showVersion := fs.Bool("version", false, "print version and exit")

@@ -82,6 +82,16 @@ func MetadataCountry(v string) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldMetadataCountry, v))
 }
 
+// SaveLocalMetadata applies equality check predicate on the "save_local_metadata" field. It's identical to SaveLocalMetadataEQ.
+func SaveLocalMetadata(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldSaveLocalMetadata, v))
+}
+
+// AutoCollections applies equality check predicate on the "auto_collections" field. It's identical to AutoCollectionsEQ.
+func AutoCollections(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldAutoCollections, v))
+}
+
 // ScanGeneration applies equality check predicate on the "scan_generation" field. It's identical to ScanGenerationEQ.
 func ScanGeneration(v int64) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldScanGeneration, v))
@@ -409,6 +419,26 @@ func MetadataCountryEqualFold(v string) predicate.Library {
 // MetadataCountryContainsFold applies the ContainsFold predicate on the "metadata_country" field.
 func MetadataCountryContainsFold(v string) predicate.Library {
 	return predicate.Library(sql.FieldContainsFold(FieldMetadataCountry, v))
+}
+
+// SaveLocalMetadataEQ applies the EQ predicate on the "save_local_metadata" field.
+func SaveLocalMetadataEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldSaveLocalMetadata, v))
+}
+
+// SaveLocalMetadataNEQ applies the NEQ predicate on the "save_local_metadata" field.
+func SaveLocalMetadataNEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldNEQ(FieldSaveLocalMetadata, v))
+}
+
+// AutoCollectionsEQ applies the EQ predicate on the "auto_collections" field.
+func AutoCollectionsEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldAutoCollections, v))
+}
+
+// AutoCollectionsNEQ applies the NEQ predicate on the "auto_collections" field.
+func AutoCollectionsNEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldNEQ(FieldAutoCollections, v))
 }
 
 // ScanGenerationEQ applies the EQ predicate on the "scan_generation" field.

@@ -35,10 +35,15 @@ type Person struct {
 	ImageURL string
 }
 
-// RemoteImage is an image at a URL.
+// RemoteImage is an image at a URL. Providers may describe it further:
+// its size in pixels, the language of its text, empty for images without
+// text, and how good it is, the best highest.
 type RemoteImage struct {
-	Kind core.ImageKind
-	URL  string
+	Kind          core.ImageKind
+	URL           string
+	Width, Height int
+	Language      string
+	Score         float64
 }
 
 // LocalImage is an image file.

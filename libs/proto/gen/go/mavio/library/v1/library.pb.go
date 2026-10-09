@@ -108,6 +108,8 @@ type Library struct {
 	xxx_hidden_MetadataCountry   *string                `protobuf:"bytes,7,opt,name=metadata_country,json=metadataCountry"`
 	xxx_hidden_CreateTime        *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=create_time,json=createTime"`
 	xxx_hidden_UpdateTime        *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=update_time,json=updateTime"`
+	xxx_hidden_SaveLocalMetadata bool                   `protobuf:"varint,10,opt,name=save_local_metadata,json=saveLocalMetadata"`
+	xxx_hidden_AutoCollections   bool                   `protobuf:"varint,11,opt,name=auto_collections,json=autoCollections"`
 	XXX_raceDetectHookData       protoimpl.RaceDetectHookData
 	XXX_presence                 [1]uint32
 	unknownFields                protoimpl.UnknownFields
@@ -216,19 +218,33 @@ func (x *Library) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Library) GetSaveLocalMetadata() bool {
+	if x != nil {
+		return x.xxx_hidden_SaveLocalMetadata
+	}
+	return false
+}
+
+func (x *Library) GetAutoCollections() bool {
+	if x != nil {
+		return x.xxx_hidden_AutoCollections
+	}
+	return false
+}
+
 func (x *Library) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
 }
 
 func (x *Library) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
 }
 
 func (x *Library) SetKind(v LibraryKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 11)
 }
 
 func (x *Library) SetPaths(v []string) {
@@ -241,12 +257,12 @@ func (x *Library) SetScanInterval(v *durationpb.Duration) {
 
 func (x *Library) SetPreferredLanguage(v string) {
 	x.xxx_hidden_PreferredLanguage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
 }
 
 func (x *Library) SetMetadataCountry(v string) {
 	x.xxx_hidden_MetadataCountry = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 11)
 }
 
 func (x *Library) SetCreateTime(v *timestamppb.Timestamp) {
@@ -255,6 +271,16 @@ func (x *Library) SetCreateTime(v *timestamppb.Timestamp) {
 
 func (x *Library) SetUpdateTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_UpdateTime = v
+}
+
+func (x *Library) SetSaveLocalMetadata(v bool) {
+	x.xxx_hidden_SaveLocalMetadata = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 11)
+}
+
+func (x *Library) SetAutoCollections(v bool) {
+	x.xxx_hidden_AutoCollections = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
 }
 
 func (x *Library) HasId() bool {
@@ -313,6 +339,20 @@ func (x *Library) HasUpdateTime() bool {
 	return x.xxx_hidden_UpdateTime != nil
 }
 
+func (x *Library) HasSaveLocalMetadata() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
+func (x *Library) HasAutoCollections() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
 func (x *Library) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -350,6 +390,16 @@ func (x *Library) ClearUpdateTime() {
 	x.xxx_hidden_UpdateTime = nil
 }
 
+func (x *Library) ClearSaveLocalMetadata() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_SaveLocalMetadata = false
+}
+
+func (x *Library) ClearAutoCollections() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_AutoCollections = false
+}
+
 type Library_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -365,6 +415,12 @@ type Library_builder struct {
 	MetadataCountry   *string
 	CreateTime        *timestamppb.Timestamp
 	UpdateTime        *timestamppb.Timestamp
+	// Write NFO files and chosen artwork next to the media, where scans read
+	// them back.
+	SaveLocalMetadata *bool
+	// Put movies into collections named after the metadata providers'
+	// collections (movie sets).
+	AutoCollections *bool
 }
 
 func (b0 Library_builder) Build() *Library {
@@ -372,29 +428,37 @@ func (b0 Library_builder) Build() *Library {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 11)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	x.xxx_hidden_Paths = b.Paths
 	x.xxx_hidden_ScanInterval = b.ScanInterval
 	if b.PreferredLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
 		x.xxx_hidden_PreferredLanguage = b.PreferredLanguage
 	}
 	if b.MetadataCountry != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 11)
 		x.xxx_hidden_MetadataCountry = b.MetadataCountry
 	}
 	x.xxx_hidden_CreateTime = b.CreateTime
 	x.xxx_hidden_UpdateTime = b.UpdateTime
+	if b.SaveLocalMetadata != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 11)
+		x.xxx_hidden_SaveLocalMetadata = *b.SaveLocalMetadata
+	}
+	if b.AutoCollections != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		x.xxx_hidden_AutoCollections = *b.AutoCollections
+	}
 	return m0
 }
 
@@ -407,6 +471,8 @@ type LibrarySpec struct {
 	xxx_hidden_ScanInterval      *durationpb.Duration   `protobuf:"bytes,4,opt,name=scan_interval,json=scanInterval"`
 	xxx_hidden_PreferredLanguage *string                `protobuf:"bytes,5,opt,name=preferred_language,json=preferredLanguage"`
 	xxx_hidden_MetadataCountry   *string                `protobuf:"bytes,6,opt,name=metadata_country,json=metadataCountry"`
+	xxx_hidden_SaveLocalMetadata bool                   `protobuf:"varint,7,opt,name=save_local_metadata,json=saveLocalMetadata"`
+	xxx_hidden_AutoCollections   bool                   `protobuf:"varint,8,opt,name=auto_collections,json=autoCollections"`
 	XXX_raceDetectHookData       protoimpl.RaceDetectHookData
 	XXX_presence                 [1]uint32
 	unknownFields                protoimpl.UnknownFields
@@ -491,14 +557,28 @@ func (x *LibrarySpec) GetMetadataCountry() string {
 	return ""
 }
 
+func (x *LibrarySpec) GetSaveLocalMetadata() bool {
+	if x != nil {
+		return x.xxx_hidden_SaveLocalMetadata
+	}
+	return false
+}
+
+func (x *LibrarySpec) GetAutoCollections() bool {
+	if x != nil {
+		return x.xxx_hidden_AutoCollections
+	}
+	return false
+}
+
 func (x *LibrarySpec) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
 func (x *LibrarySpec) SetKind(v LibraryKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
 func (x *LibrarySpec) SetPaths(v []string) {
@@ -511,12 +591,22 @@ func (x *LibrarySpec) SetScanInterval(v *durationpb.Duration) {
 
 func (x *LibrarySpec) SetPreferredLanguage(v string) {
 	x.xxx_hidden_PreferredLanguage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
 }
 
 func (x *LibrarySpec) SetMetadataCountry(v string) {
 	x.xxx_hidden_MetadataCountry = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
+}
+
+func (x *LibrarySpec) SetSaveLocalMetadata(v bool) {
+	x.xxx_hidden_SaveLocalMetadata = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+}
+
+func (x *LibrarySpec) SetAutoCollections(v bool) {
+	x.xxx_hidden_AutoCollections = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
 }
 
 func (x *LibrarySpec) HasName() bool {
@@ -554,6 +644,20 @@ func (x *LibrarySpec) HasMetadataCountry() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
+func (x *LibrarySpec) HasSaveLocalMetadata() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *LibrarySpec) HasAutoCollections() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
 func (x *LibrarySpec) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -578,6 +682,16 @@ func (x *LibrarySpec) ClearMetadataCountry() {
 	x.xxx_hidden_MetadataCountry = nil
 }
 
+func (x *LibrarySpec) ClearSaveLocalMetadata() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_SaveLocalMetadata = false
+}
+
+func (x *LibrarySpec) ClearAutoCollections() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_AutoCollections = false
+}
+
 type LibrarySpec_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -587,6 +701,8 @@ type LibrarySpec_builder struct {
 	ScanInterval      *durationpb.Duration
 	PreferredLanguage *string
 	MetadataCountry   *string
+	SaveLocalMetadata *bool
+	AutoCollections   *bool
 }
 
 func (b0 LibrarySpec_builder) Build() *LibrarySpec {
@@ -594,22 +710,30 @@ func (b0 LibrarySpec_builder) Build() *LibrarySpec {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	x.xxx_hidden_Paths = b.Paths
 	x.xxx_hidden_ScanInterval = b.ScanInterval
 	if b.PreferredLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
 		x.xxx_hidden_PreferredLanguage = b.PreferredLanguage
 	}
 	if b.MetadataCountry != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
 		x.xxx_hidden_MetadataCountry = b.MetadataCountry
+	}
+	if b.SaveLocalMetadata != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		x.xxx_hidden_SaveLocalMetadata = *b.SaveLocalMetadata
+	}
+	if b.AutoCollections != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		x.xxx_hidden_AutoCollections = *b.AutoCollections
 	}
 	return m0
 }
@@ -1481,7 +1605,7 @@ var File_mavio_library_v1_library_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\n" +
-	"\x1emavio/library/v1/library.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x8a\x03\n" +
+	"\x1emavio/library/v1/library.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe5\x03\n" +
 	"\aLibrary\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x121\n" +
@@ -1493,7 +1617,10 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\vcreate_time\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"createTime\x12;\n" +
 	"\vupdate_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"updateTime\"\xe8\x02\n" +
+	"updateTime\x12.\n" +
+	"\x13save_local_metadata\x18\n" +
+	" \x01(\bR\x11saveLocalMetadata\x12)\n" +
+	"\x10auto_collections\x18\v \x01(\bR\x0fautoCollections\"\xc3\x03\n" +
 	"\vLibrarySpec\x12!\n" +
 	"\x04name\x18\x01 \x01(\tB\r\xbaH\n" +
 	"\xc8\x01\x01r\x05\x10\x01\x18\xc8\x01R\x04name\x12@\n" +
@@ -1502,7 +1629,9 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\x05paths\x18\x03 \x03(\tB\x0e\xbaH\v\x92\x01\b\b\x01\"\x04r\x02\x10\x01R\x05paths\x12H\n" +
 	"\rscan_interval\x18\x04 \x01(\v2\x19.google.protobuf.DurationB\b\xbaH\x05\xaa\x01\x022\x00R\fscanInterval\x12C\n" +
 	"\x12preferred_language\x18\x05 \x01(\tB\x14\xbaH\x11r\x0f2\r^([a-z]{2})?$R\x11preferredLanguage\x12?\n" +
-	"\x10metadata_country\x18\x06 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\x0fmetadataCountry\"\x16\n" +
+	"\x10metadata_country\x18\x06 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\x0fmetadataCountry\x12.\n" +
+	"\x13save_local_metadata\x18\a \x01(\bR\x11saveLocalMetadata\x12)\n" +
+	"\x10auto_collections\x18\b \x01(\bR\x0fautoCollections\"\x16\n" +
 	"\x14ListLibrariesRequest\"P\n" +
 	"\x15ListLibrariesResponse\x127\n" +
 	"\tlibraries\x18\x01 \x03(\v2\x19.mavio.library.v1.LibraryR\tlibraries\"0\n" +

@@ -1,0 +1,14 @@
+{
+  "id": "org.mavio.scraper-theaudiodb",
+  "name": "TheAudioDB",
+  "version": "0.1.0",
+  "description": "Biographies, album reviews and artwork for music artists and albums from TheAudioDB.",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_WASM",
+  "capabilities": ["CAPABILITY_METADATA_PROVIDER"],
+  "permissions": { "httpHosts": ["www.theaudiodb.com", "r2.theaudiodb.com"] },
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1,\"description\":\"TheAudioDB API key\"}},\"required\":[\"api_key\"],\"additionalProperties\":false}",
+  "apiVersion": "1.0"
+}

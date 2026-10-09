@@ -3,6 +3,7 @@ package library
 import (
 	"context"
 	"iter"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -23,6 +24,7 @@ type memStore struct {
 	people  map[core.ID]core.Person
 	credits map[core.ID][]core.Credit
 	images  map[core.ID][]core.Image
+	links   map[core.ID][]core.Link
 	clock   func() time.Time
 }
 
@@ -30,7 +32,7 @@ func newMemStore() *memStore {
 	return &memStore{
 		items: map[core.ID]core.Item{}, sources: map[core.ID][]core.MediaSource{}, folders: map[string]core.FolderState{},
 		gens: map[core.ID]int64{}, libs: map[core.ID]core.Library{}, people: map[core.ID]core.Person{},
-		credits: map[core.ID][]core.Credit{}, images: map[core.ID][]core.Image{}, clock: time.Now,
+		credits: map[core.ID][]core.Credit{}, images: map[core.ID][]core.Image{}, links: map[core.ID][]core.Link{}, clock: time.Now,
 	}
 }
 
@@ -100,15 +102,41 @@ func (r memItems) Query(context.Context, core.ItemQuery) (core.Page[core.Item], 
 	panic("unused")
 }
 
-func (r memItems) Walk(context.Context, core.ItemQuery) iter.Seq2[core.Item, error] { panic("unused") }
+// Walk filters by library and kind only.
+func (r memItems) Walk(_ context.Context, q core.ItemQuery) iter.Seq2[core.Item, error] {
+	r.m.mu.Lock()
+	var found []core.Item
+	for _, it := range r.m.items {
+		if (len(q.LibraryIDs) == 0 || slices.Contains(q.LibraryIDs, it.LibraryID)) && (len(q.Kinds) == 0 || slices.Contains(q.Kinds, it.Kind)) {
+			found = append(found, it)
+		}
+	}
+	r.m.mu.Unlock()
+	return func(yield func(core.Item, error) bool) {
+		for _, it := range found {
+			if !yield(it, nil) {
+				return
+			}
+		}
+	}
+}
 
 func (r memItems) Values(context.Context, core.ValueQuery) ([]core.ValueCount, error) {
 	panic("unused")
 }
 
-func (r memItems) Links(context.Context, core.ID) ([]core.Link, error) { panic("unused") }
+func (r memItems) Links(_ context.Context, id core.ID) ([]core.Link, error) {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	return slices.Clone(r.m.links[id]), nil
+}
 
-func (r memItems) ReplaceLinks(context.Context, core.ID, []core.Link) error { panic("unused") }
+func (r memItems) ReplaceLinks(_ context.Context, id core.ID, links []core.Link) error {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	r.m.links[id] = slices.Clone(links)
+	return nil
+}
 
 func (r memItems) Upsert(_ context.Context, items ...core.Item) error {
 	r.m.mu.Lock()

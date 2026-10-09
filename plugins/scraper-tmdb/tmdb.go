@@ -229,7 +229,8 @@ type (
 		Genres        []tmdbName `json:"genres"`
 		Companies     []tmdbName `json:"production_companies"`
 		Collection    *struct {
-			ID int `json:"id"`
+			ID   int    `json:"id"`
+			Name string `json:"name"`
 		} `json:"belongs_to_collection"`
 		Credits  tmdbCredits `json:"credits"`
 		Images   tmdbImages  `json:"images"`

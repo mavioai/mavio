@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -38,6 +39,9 @@ type Config struct {
 	Store core.Store
 	// Dir caches downloaded and rendered images.
 	Dir string
+	// MetadataDir holds the images chosen for items, beside those in the
+	// library folders.
+	MetadataDir string
 	// Client downloads provider images; nil uses one with a 30 second
 	// timeout.
 	Client *http.Client
@@ -205,8 +209,12 @@ func (s *Server) local(ctx context.Context, img *core.Image) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, root := range lib.Paths {
-		rel, err := filepath.Rel(root, img.Path)
+	roots := lib.Paths
+	if s.cfg.MetadataDir != "" {
+		roots = append(slices.Clip(roots), s.cfg.MetadataDir)
+	}
+	for _, root := range roots {
+		rel, err := filepath.Rel(root, filepath.FromSlash(img.Path))
 		if err != nil || !filepath.IsLocal(rel) {
 			continue
 		}
@@ -223,6 +231,21 @@ func (s *Server) local(ctx context.Context, img *core.Image) ([]byte, error) {
 
 // download fetches a provider image into file.
 func (s *Server) download(ctx context.Context, rawURL, file string) ([]byte, error) {
+	data, err := s.Fetch(ctx, rawURL)
+	if err != nil {
+		return nil, err
+	}
+	if err := writeFile(file, data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// Fetch downloads an image of at most 50 MiB over HTTP or HTTPS.
+func (s *Server) Fetch(ctx context.Context, rawURL string) ([]byte, error) {
+	if u, err := url.Parse(rawURL); err != nil || u.Scheme != "http" && u.Scheme != "https" {
+		return nil, fmt.Errorf("download image: %q is not an http or https URL: %w", rawURL, errUnavailable)
+	}
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
@@ -243,9 +266,6 @@ func (s *Server) download(ctx context.Context, rawURL, file string) ([]byte, err
 	}
 	if len(data) > maxDownload {
 		return nil, fmt.Errorf("download image: larger than %d bytes: %w", maxDownload, errUnavailable)
-	}
-	if err := writeFile(file, data); err != nil {
-		return nil, err
 	}
 	return data, nil
 }

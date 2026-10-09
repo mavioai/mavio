@@ -42,6 +42,8 @@ enum Capability {
   CAPABILITY_AUTH_PROVIDER = 2;
   // Implements NotifierService.
   CAPABILITY_NOTIFIER = 3;
+  // Implements SubtitleProviderService.
+  CAPABILITY_SUBTITLE_PROVIDER = 4;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin

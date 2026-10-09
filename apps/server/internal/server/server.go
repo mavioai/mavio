@@ -43,6 +43,9 @@ type Config struct {
 	CacheDir string
 	// PluginDir holds one folder per plugin; empty means no plugins.
 	PluginDir string
+	// MetadataDir holds the artwork chosen for items of libraries that do
+	// not save metadata next to their media.
+	MetadataDir string
 	// Dev serves the development player at /dev/player.
 	Dev bool
 	// DevLibrary adds the Movies and Shows folders of the sample library
@@ -93,10 +96,20 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	growthPolicy := storage.NewGrowthPolicy(10 * time.Second)
 
 	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, cfg, quietGate)
-	imageServer := images.New(images.Config{Store: db, Dir: filepath.Join(cfg.CacheDir, "images"), Logger: log})
+	metadataDir, err := filepath.Abs(cfg.MetadataDir)
+	if err != nil {
+		return err
+	}
+	imageServer := images.New(images.Config{
+		Store: db, Dir: filepath.Join(cfg.CacheDir, "images"), MetadataDir: metadataDir, Logger: log,
+	})
+	refresher := &library.Refresher{
+		Store: db, Providers: plugs.MetadataProviders(), MetadataDir: filepath.ToSlash(metadataDir), Fetch: imageServer.Fetch, Logger: log,
+	}
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Dev: cfg.Dev,
+		Images: imageServer, Plugins: plugs, Refresher: refresher,
+		Subtitles: &library.Subtitles{Store: db, Providers: plugs.SubtitleProviders(), Logger: log}, Dev: cfg.Dev,
 	})
 	if err != nil {
 		return err
@@ -106,7 +119,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return playbacks.Run(ctx) })
 	g.Go(func() error { return httpserver.Serve(ctx, ln, h) })
-	if worker := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, plugs.MetadataProviders(), quietGate, volumeLedger, devices, growthPolicy); worker != nil {
+	if worker := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err
@@ -149,7 +162,7 @@ func addDevLibraries(ctx context.Context, log *slog.Logger, db core.Store, dir s
 // every library queued, or nil when there is no ffprobe to probe media
 // with.
 func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffprobe, ffmpeg string, analyzer library.ImageAnalyzer,
-	metadata []library.Provider, quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
+	refresher *library.Refresher, quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
 	growthPolicy *storage.GrowthPolicy,
 ) *library.Worker {
 	path, err := exec.LookPath(ffprobe)
@@ -168,7 +181,7 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 		},
 		Prober:    providers.FFprobe{Prober: &probe.Prober{FFprobe: path}},
 		Keyframes: providers.Keyframes{Extractor: &keyframes.Extractor{FFprobe: path}},
-		Refresher: &library.Refresher{Store: db, Providers: metadata, Logger: log},
+		Refresher: refresher,
 		Borders:   bordersOf(ffmpeg),
 		Images:    analyzer,
 		Logger:    log,

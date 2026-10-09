@@ -82,6 +82,8 @@ const (
 	Capability_CAPABILITY_AUTH_PROVIDER Capability = 2
 	// Implements NotifierService.
 	Capability_CAPABILITY_NOTIFIER Capability = 3
+	// Implements SubtitleProviderService.
+	Capability_CAPABILITY_SUBTITLE_PROVIDER Capability = 4
 )
 
 // Enum value maps for Capability.
@@ -91,12 +93,14 @@ var (
 		1: "CAPABILITY_METADATA_PROVIDER",
 		2: "CAPABILITY_AUTH_PROVIDER",
 		3: "CAPABILITY_NOTIFIER",
+		4: "CAPABILITY_SUBTITLE_PROVIDER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":       0,
 		"CAPABILITY_METADATA_PROVIDER": 1,
 		"CAPABILITY_AUTH_PROVIDER":     2,
 		"CAPABILITY_NOTIFIER":          3,
+		"CAPABILITY_SUBTITLE_PROVIDER": 4,
 	}
 )
 
@@ -1131,13 +1135,14 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\x81\x01\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\xa3\x01\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
 	"\x1cCAPABILITY_METADATA_PROVIDER\x10\x01\x12\x1c\n" +
 	"\x18CAPABILITY_AUTH_PROVIDER\x10\x02\x12\x17\n" +
-	"\x13CAPABILITY_NOTIFIER\x10\x032\xda\x02\n" +
+	"\x13CAPABILITY_NOTIFIER\x10\x03\x12 \n" +
+	"\x1cCAPABILITY_SUBTITLE_PROVIDER\x10\x042\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +

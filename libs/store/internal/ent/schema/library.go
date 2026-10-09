@@ -29,6 +29,8 @@ func (Library) Fields() []ent.Field {
 		field.Int64("scan_interval").GoType(time.Duration(0)).Default(0),
 		field.String("preferred_language").Default(""),
 		field.String("metadata_country").Default(""),
+		field.Bool("save_local_metadata").Default(false),
+		field.Bool("auto_collections").Default(false),
 		// scan_generation counts the library's scans.
 		field.Int64("scan_generation").Default(0),
 		field.Time("created_at").Default(time.Now).Immutable(),

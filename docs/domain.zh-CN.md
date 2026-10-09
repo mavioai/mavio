@@ -80,6 +80,7 @@ erDiagram
 ### 4.1 媒体库
 * `Kind` 决定扫描器如何解读目录；`Paths` 是绝对路径的根目录，一个路径最多属于一个媒体库：媒体库的路径不能与其他媒体库的路径相同、包含或被包含（`ErrConflict`）。整理类种类（`LibraryKind.Curated`），即 `collections` 与 `playlists`，存放用户整理的合集与播放列表而非扫描的目录：它们没有路径，从不扫描，每种至多一个媒体库（`ErrConflict`），由服务端在首次需要时创建。
 * `ScanInterval` 是定时对账扫描的周期（为零则不定时扫描）；`PreferredLanguage`（ISO 639-1）与 `MetadataCountry`（ISO 3166-1 alpha-2）影响元数据提供者的取数。
+* `SaveLocalMetadata` 把每个条目的 NFO 文件以及为它选择或下载的图片写到媒体旁边，扫描时再读回；`AutoCollections` 把电影放入以提供者的合集（电影系列）命名的合集，先按 `tmdb_collection` ID 查找，否则按名称，首次需要时创建。
 
 ### 4.2 条目
 所有种类共用一个 `Item` 类型，由 `Kind` 决定哪些字段有意义。这直接对应存储层的一张条目表，避免类型继承体系。
@@ -99,7 +100,7 @@ erDiagram
 | 元数据控制 | `MetadataLanguage`、`MetadataCountry`（覆盖媒体库的设置）、`Locked`、`LockedFields`（`MetadataField`） |
 | 记账字段 | `DateAdded`、`FileModified`、`MetadataRefreshedAt`、`ScanGeneration`（最后看到该条目的扫描）、`MissingSince`（见 §4.7） |
 
-模型以 Jellyfin 为参照，并随路线图演进：某个阶段需要时才加入相应字段。`SortName` 是用户指定的排序名（即 Jellyfin 的 `ForcedSortName`），计算出的排序形式是存储层的键。单集所属的剧集和季是它的祖先条目，不复制名称。锁定的条目或被锁定的字段分组不会被元数据刷新修改。
+模型以 Jellyfin 为参照，并随路线图演进：某个阶段需要时才加入相应字段。`SortName` 是用户指定的排序名（即 Jellyfin 的 `ForcedSortName`），计算出的排序形式是存储层的键。单集所属的剧集和季是它的祖先条目，不复制名称。锁定的条目或被锁定的字段分组不会被元数据提供者修改；条目自己的 NFO 文件（其中记录了锁定）仍然生效。管理员的编辑直接设置字段，无论是否锁定。
 
 ### 4.3 层级
 层级通过 `ParentID` 表达；编号使用 `IndexNumber` / `ParentIndexNumber`：

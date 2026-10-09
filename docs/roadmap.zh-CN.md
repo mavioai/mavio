@@ -65,7 +65,7 @@ flowchart TD
 | P7 | 浏览 | ✅ 已完成 |
 | P8 | 实时事件与会话 | ✅ 已完成 |
 | P9 | 存储与性能优化 | ✅ 已完成 |
-| P10 | 元数据管理 | 未开始 |
+| P10 | 元数据管理 | ✅ 完成 |
 | P11 | 管理与运维 | 未开始 |
 | P12 | 媒体附加功能 | 未开始 |
 | P13 | 客户端与生态 | 未开始 |
@@ -246,6 +246,14 @@ flowchart TD
 - 按提供者的合集自动创建电影合集
 
 **完成标准**：通过 API 的端到端测试：管理员重新识别一部识别错误的影片并编辑它，锁定的字段在刷新后保持不变，选定的海报写到文件旁并被新的扫描读回。
+
+**进展**：
+- [x] `MetadataService`：按更新掩码编辑条目（包括锁定）；刷新单个条目，可选择替换其元数据；搜索提供者并重新识别条目
+- [x] 图片：列出提供者的图片；按 URL 选择或上传图片；删除图片及其文件；选定的图片保存在媒体旁或元数据目录（`-metadata-dir`）
+- [x] 本地元数据：`metadata.WriteNFO`，可被 `ParseNFO` 读回；保存本地元数据的媒体库写出 NFO 文件，并按 Jellyfin 的本地图片命名保存提供者的图片
+- [x] 提供者插件：`scraper-musicbrainz`（艺术家、专辑、音轨，Cover Art Archive）、`scraper-theaudiodb`、`scraper-openlibrary`（图书与有声书）、`scraper-fanart`；字幕提供者契约（`SubtitleProviderService`）与 `subtitles-opensubtitles`，下载的字幕保存在视频旁
+- [x] 按提供者的合集自动创建电影合集（`AutoCollections`）
+- [x] 端到端测试（`apps/server/internal/server/metadata_test.go`）
 
 ### P11 管理与运维
 **范围**：运行服务端时无需重启或修改命令行参数。

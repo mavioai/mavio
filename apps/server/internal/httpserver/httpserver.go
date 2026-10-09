@@ -18,6 +18,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
@@ -43,6 +44,11 @@ type Options struct {
 	Images *images.Server
 	// Plugins runs the server's plugins; nil means none.
 	Plugins rpc.PluginManager
+	// Refresher carries out metadata changes; nil uses one without
+	// providers.
+	Refresher *library.Refresher
+	// Subtitles downloads subtitles; nil uses one without providers.
+	Subtitles *library.Subtitles
 	// Dev serves the development player at /dev/player.
 	Dev bool
 }
@@ -67,6 +73,14 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(rpc.NewLibraryService(opts.Store), interceptors))
 	mux.Handle(libraryv1connect.NewItemServiceHandler(rpc.NewItemService(opts.Store), interceptors))
 	mux.Handle(libraryv1connect.NewCollectionServiceHandler(rpc.NewCollectionService(opts.Store), interceptors))
+	refresher, subtitles := opts.Refresher, opts.Subtitles
+	if refresher == nil {
+		refresher = &library.Refresher{Store: opts.Store}
+	}
+	if subtitles == nil {
+		subtitles = &library.Subtitles{Store: opts.Store}
+	}
+	mux.Handle(libraryv1connect.NewMetadataServiceHandler(rpc.NewMetadataService(opts.Store, refresher, subtitles, opts.Images.Fetch), interceptors))
 	mux.Handle(libraryv1connect.NewPlaylistServiceHandler(rpc.NewPlaylistService(opts.Store), interceptors))
 	mux.Handle(userv1connect.NewUserServiceHandler(rpc.NewUserService(opts.Store), interceptors))
 	mux.Handle(userv1connect.NewUserDataServiceHandler(rpc.NewUserDataService(opts.Store), interceptors))

@@ -439,6 +439,8 @@ var (
 		{Name: "scan_interval", Type: field.TypeInt64, Default: 0},
 		{Name: "preferred_language", Type: field.TypeString, Default: ""},
 		{Name: "metadata_country", Type: field.TypeString, Default: ""},
+		{Name: "save_local_metadata", Type: field.TypeBool, Default: false},
+		{Name: "auto_collections", Type: field.TypeBool, Default: false},
 		{Name: "scan_generation", Type: field.TypeInt64, Default: 0},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},

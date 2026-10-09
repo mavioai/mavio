@@ -1,0 +1,12 @@
+{
+  "name": "scraper-openlibrary",
+  "targets": {
+    "build": {
+      "options": {
+        "command": "go build -buildmode=c-shared -o dist/plugin.wasm .",
+        "env": { "GOOS": "wasip1", "GOARCH": "wasm", "CGO_ENABLED": "0" }
+      },
+      "outputs": ["{projectRoot}/dist"]
+    }
+  }
+}

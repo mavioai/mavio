@@ -131,6 +131,23 @@ enum SortField {
   SORT_FIELD_LIST_ORDER = 11;
 }
 
+// MetadataField names a group of item fields that refreshes can be kept
+// from changing.
+enum MetadataField {
+  METADATA_FIELD_UNSPECIFIED = 0;
+  METADATA_FIELD_CAST = 1;
+  METADATA_FIELD_GENRES = 2;
+  METADATA_FIELD_PRODUCTION_LOCATIONS = 3;
+  METADATA_FIELD_STUDIOS = 4;
+  METADATA_FIELD_TAGS = 5;
+  // Name, original title and sort name.
+  METADATA_FIELD_NAME = 6;
+  METADATA_FIELD_OVERVIEW = 7;
+  METADATA_FIELD_RUNTIME = 8;
+  // Official and custom rating.
+  METADATA_FIELD_OFFICIAL_RATING = 9;
+}
+
 // ValueKind names an item attribute listed by ListValues.
 enum ValueKind {
   VALUE_KIND_UNSPECIFIED = 0;
@@ -198,6 +215,14 @@ message Item {
   string season_name = 35;
   string album_id = 36;
   string album_name = 37;
+
+  // The item's locks, given to administrators only.
+  bool locked = 38;
+  repeated MetadataField locked_fields = 39;
+  string custom_rating = 40;
+  repeated string production_locations = 41;
+  // The collection (movie set) of a movie, as the providers name it.
+  string collection_name = 42;
 }
 
 // Image describes an artwork image.

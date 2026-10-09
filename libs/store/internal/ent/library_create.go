@@ -86,6 +86,34 @@ func (_c *LibraryCreate) SetNillableMetadataCountry(v *string) *LibraryCreate {
 	return _c
 }
 
+// SetSaveLocalMetadata sets the "save_local_metadata" field.
+func (_c *LibraryCreate) SetSaveLocalMetadata(v bool) *LibraryCreate {
+	_c.mutation.SetSaveLocalMetadata(v)
+	return _c
+}
+
+// SetNillableSaveLocalMetadata sets the "save_local_metadata" field if the given value is not nil.
+func (_c *LibraryCreate) SetNillableSaveLocalMetadata(v *bool) *LibraryCreate {
+	if v != nil {
+		_c.SetSaveLocalMetadata(*v)
+	}
+	return _c
+}
+
+// SetAutoCollections sets the "auto_collections" field.
+func (_c *LibraryCreate) SetAutoCollections(v bool) *LibraryCreate {
+	_c.mutation.SetAutoCollections(v)
+	return _c
+}
+
+// SetNillableAutoCollections sets the "auto_collections" field if the given value is not nil.
+func (_c *LibraryCreate) SetNillableAutoCollections(v *bool) *LibraryCreate {
+	if v != nil {
+		_c.SetAutoCollections(*v)
+	}
+	return _c
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_c *LibraryCreate) SetScanGeneration(v int64) *LibraryCreate {
 	_c.mutation.SetScanGeneration(v)
@@ -219,6 +247,14 @@ func (_c *LibraryCreate) defaults() {
 		v := library.DefaultMetadataCountry
 		_c.mutation.SetMetadataCountry(v)
 	}
+	if _, ok := _c.mutation.SaveLocalMetadata(); !ok {
+		v := library.DefaultSaveLocalMetadata
+		_c.mutation.SetSaveLocalMetadata(v)
+	}
+	if _, ok := _c.mutation.AutoCollections(); !ok {
+		v := library.DefaultAutoCollections
+		_c.mutation.SetAutoCollections(v)
+	}
 	if _, ok := _c.mutation.ScanGeneration(); !ok {
 		v := library.DefaultScanGeneration
 		_c.mutation.SetScanGeneration(v)
@@ -261,6 +297,12 @@ func (_c *LibraryCreate) check() error {
 	}
 	if _, ok := _c.mutation.MetadataCountry(); !ok {
 		return &ValidationError{Name: "metadata_country", err: errors.New(`ent: missing required field "Library.metadata_country"`)}
+	}
+	if _, ok := _c.mutation.SaveLocalMetadata(); !ok {
+		return &ValidationError{Name: "save_local_metadata", err: errors.New(`ent: missing required field "Library.save_local_metadata"`)}
+	}
+	if _, ok := _c.mutation.AutoCollections(); !ok {
+		return &ValidationError{Name: "auto_collections", err: errors.New(`ent: missing required field "Library.auto_collections"`)}
 	}
 	if _, ok := _c.mutation.ScanGeneration(); !ok {
 		return &ValidationError{Name: "scan_generation", err: errors.New(`ent: missing required field "Library.scan_generation"`)}
@@ -330,6 +372,14 @@ func (_c *LibraryCreate) createSpec() (*Library, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.MetadataCountry(); ok {
 		_spec.SetField(library.FieldMetadataCountry, field.TypeString, value)
 		_node.MetadataCountry = value
+	}
+	if value, ok := _c.mutation.SaveLocalMetadata(); ok {
+		_spec.SetField(library.FieldSaveLocalMetadata, field.TypeBool, value)
+		_node.SaveLocalMetadata = value
+	}
+	if value, ok := _c.mutation.AutoCollections(); ok {
+		_spec.SetField(library.FieldAutoCollections, field.TypeBool, value)
+		_node.AutoCollections = value
 	}
 	if value, ok := _c.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
@@ -505,6 +555,30 @@ func (u *LibraryUpsert) UpdateMetadataCountry() *LibraryUpsert {
 	return u
 }
 
+// SetSaveLocalMetadata sets the "save_local_metadata" field.
+func (u *LibraryUpsert) SetSaveLocalMetadata(v bool) *LibraryUpsert {
+	u.Set(library.FieldSaveLocalMetadata, v)
+	return u
+}
+
+// UpdateSaveLocalMetadata sets the "save_local_metadata" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateSaveLocalMetadata() *LibraryUpsert {
+	u.SetExcluded(library.FieldSaveLocalMetadata)
+	return u
+}
+
+// SetAutoCollections sets the "auto_collections" field.
+func (u *LibraryUpsert) SetAutoCollections(v bool) *LibraryUpsert {
+	u.Set(library.FieldAutoCollections, v)
+	return u
+}
+
+// UpdateAutoCollections sets the "auto_collections" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateAutoCollections() *LibraryUpsert {
+	u.SetExcluded(library.FieldAutoCollections)
+	return u
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (u *LibraryUpsert) SetScanGeneration(v int64) *LibraryUpsert {
 	u.Set(library.FieldScanGeneration, v)
@@ -674,6 +748,34 @@ func (u *LibraryUpsertOne) SetMetadataCountry(v string) *LibraryUpsertOne {
 func (u *LibraryUpsertOne) UpdateMetadataCountry() *LibraryUpsertOne {
 	return u.Update(func(s *LibraryUpsert) {
 		s.UpdateMetadataCountry()
+	})
+}
+
+// SetSaveLocalMetadata sets the "save_local_metadata" field.
+func (u *LibraryUpsertOne) SetSaveLocalMetadata(v bool) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetSaveLocalMetadata(v)
+	})
+}
+
+// UpdateSaveLocalMetadata sets the "save_local_metadata" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateSaveLocalMetadata() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateSaveLocalMetadata()
+	})
+}
+
+// SetAutoCollections sets the "auto_collections" field.
+func (u *LibraryUpsertOne) SetAutoCollections(v bool) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetAutoCollections(v)
+	})
+}
+
+// UpdateAutoCollections sets the "auto_collections" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateAutoCollections() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateAutoCollections()
 	})
 }
 
@@ -1018,6 +1120,34 @@ func (u *LibraryUpsertBulk) SetMetadataCountry(v string) *LibraryUpsertBulk {
 func (u *LibraryUpsertBulk) UpdateMetadataCountry() *LibraryUpsertBulk {
 	return u.Update(func(s *LibraryUpsert) {
 		s.UpdateMetadataCountry()
+	})
+}
+
+// SetSaveLocalMetadata sets the "save_local_metadata" field.
+func (u *LibraryUpsertBulk) SetSaveLocalMetadata(v bool) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetSaveLocalMetadata(v)
+	})
+}
+
+// UpdateSaveLocalMetadata sets the "save_local_metadata" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateSaveLocalMetadata() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateSaveLocalMetadata()
+	})
+}
+
+// SetAutoCollections sets the "auto_collections" field.
+func (u *LibraryUpsertBulk) SetAutoCollections(v bool) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetAutoCollections(v)
+	})
+}
+
+// UpdateAutoCollections sets the "auto_collections" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateAutoCollections() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateAutoCollections()
 	})
 }
 

@@ -1,0 +1,83 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "mavio/plugin/v1/metadata.proto";
+
+// SubtitleProviderService finds and downloads subtitles from an external
+// source such as OpenSubtitles.
+service SubtitleProviderService {
+  // SearchSubtitles lists the subtitles the source has for a video in one
+  // language, best first.
+  rpc SearchSubtitles(SearchSubtitlesRequest) returns (SearchSubtitlesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // DownloadSubtitle returns a subtitle found by SearchSubtitles.
+  rpc DownloadSubtitle(DownloadSubtitleRequest) returns (DownloadSubtitleResponse);
+}
+
+// SubtitleQuery describes the video subtitles are searched for.
+message SubtitleQuery {
+  // MEDIA_KIND_MOVIE, MEDIA_KIND_EPISODE or MEDIA_KIND_MUSIC_VIDEO.
+  MediaKind kind = 1;
+  string name = 2;
+  int32 year = 3;
+  map<string, string> external_ids = 4;
+  // Episodes are found through their series.
+  string series_name = 5;
+  map<string, string> series_external_ids = 6;
+  int32 season_number = 7;
+  int32 episode_number = 8;
+  // ISO 639-1 code, or "zh-Hans" and "zh-Hant" for Chinese scripts.
+  string language = 9;
+  // The video's file name, without folders, and size.
+  string file_name = 10;
+  int64 file_size = 11;
+  // The OpenSubtitles hash of the video file, 16 lower-case hexadecimal
+  // digits: its size plus the 64-bit little-endian words of its first and
+  // last 64 KiB.
+  string file_hash = 12;
+  bool hearing_impaired = 13;
+  bool forced = 14;
+}
+
+message SearchSubtitlesRequest {
+  SubtitleQuery query = 1;
+  int32 limit = 2;
+}
+
+message SearchSubtitlesResponse {
+  repeated RemoteSubtitle subtitles = 1;
+}
+
+// RemoteSubtitle is a subtitle a source offers.
+message RemoteSubtitle {
+  // The source's ID, passed to DownloadSubtitle.
+  string id = 1;
+  // The release or file name the subtitle was made for.
+  string name = 2;
+  string language = 3;
+  // File format: "srt", "ass", "ssa", "vtt" or "sub".
+  string format = 4;
+  bool hearing_impaired = 5;
+  bool forced = 6;
+  // How well the subtitle matches, from 0 to 1.
+  double score = 7;
+  int32 download_count = 8;
+  // The subtitle was made for a file with the query's hash.
+  bool hash_match = 9;
+  string comment = 10;
+}
+
+message DownloadSubtitleRequest {
+  string id = 1;
+}
+
+message DownloadSubtitleResponse {
+  bytes data = 1;
+  // As RemoteSubtitle.format.
+  string format = 2;
+  string language = 3;
+  bool hearing_impaired = 4;
+  bool forced = 5;
+}

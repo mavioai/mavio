@@ -125,6 +125,9 @@ message Metadata {
   string birth_date = 22;
   string death_date = 23;
   string birth_place = 24;
+  // The collection (movie set) a movie belongs to; its ID is among the
+  // external IDs, such as "tmdb_collection".
+  string collection_name = 25;
 }
 
 enum CreditKind {

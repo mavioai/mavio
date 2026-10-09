@@ -1,0 +1,14 @@
+{
+  "id": "org.mavio.subtitles-opensubtitles",
+  "name": "OpenSubtitles",
+  "version": "0.1.0",
+  "description": "Subtitles for movies and episodes from OpenSubtitles.com, matched by file hash or by name and IDs.",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_WASM",
+  "capabilities": ["CAPABILITY_SUBTITLE_PROVIDER"],
+  "permissions": { "httpHosts": ["api.opensubtitles.com", "vip-api.opensubtitles.com", "www.opensubtitles.com", "dl.opensubtitles.org"] },
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1,\"description\":\"OpenSubtitles.com API consumer key\"},\"username\":{\"type\":\"string\",\"description\":\"Account, for a larger download quota\"},\"password\":{\"type\":\"string\",\"format\":\"password\"}},\"required\":[\"api_key\"],\"dependentRequired\":{\"username\":[\"password\"]},\"additionalProperties\":false}",
+  "apiVersion": "1.0"
+}

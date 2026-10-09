@@ -441,6 +441,75 @@ func (x SortField) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// MetadataField names a group of item fields that refreshes can be kept
+// from changing.
+type MetadataField int32
+
+const (
+	MetadataField_METADATA_FIELD_UNSPECIFIED          MetadataField = 0
+	MetadataField_METADATA_FIELD_CAST                 MetadataField = 1
+	MetadataField_METADATA_FIELD_GENRES               MetadataField = 2
+	MetadataField_METADATA_FIELD_PRODUCTION_LOCATIONS MetadataField = 3
+	MetadataField_METADATA_FIELD_STUDIOS              MetadataField = 4
+	MetadataField_METADATA_FIELD_TAGS                 MetadataField = 5
+	// Name, original title and sort name.
+	MetadataField_METADATA_FIELD_NAME     MetadataField = 6
+	MetadataField_METADATA_FIELD_OVERVIEW MetadataField = 7
+	MetadataField_METADATA_FIELD_RUNTIME  MetadataField = 8
+	// Official and custom rating.
+	MetadataField_METADATA_FIELD_OFFICIAL_RATING MetadataField = 9
+)
+
+// Enum value maps for MetadataField.
+var (
+	MetadataField_name = map[int32]string{
+		0: "METADATA_FIELD_UNSPECIFIED",
+		1: "METADATA_FIELD_CAST",
+		2: "METADATA_FIELD_GENRES",
+		3: "METADATA_FIELD_PRODUCTION_LOCATIONS",
+		4: "METADATA_FIELD_STUDIOS",
+		5: "METADATA_FIELD_TAGS",
+		6: "METADATA_FIELD_NAME",
+		7: "METADATA_FIELD_OVERVIEW",
+		8: "METADATA_FIELD_RUNTIME",
+		9: "METADATA_FIELD_OFFICIAL_RATING",
+	}
+	MetadataField_value = map[string]int32{
+		"METADATA_FIELD_UNSPECIFIED":          0,
+		"METADATA_FIELD_CAST":                 1,
+		"METADATA_FIELD_GENRES":               2,
+		"METADATA_FIELD_PRODUCTION_LOCATIONS": 3,
+		"METADATA_FIELD_STUDIOS":              4,
+		"METADATA_FIELD_TAGS":                 5,
+		"METADATA_FIELD_NAME":                 6,
+		"METADATA_FIELD_OVERVIEW":             7,
+		"METADATA_FIELD_RUNTIME":              8,
+		"METADATA_FIELD_OFFICIAL_RATING":      9,
+	}
+)
+
+func (x MetadataField) Enum() *MetadataField {
+	p := new(MetadataField)
+	*p = x
+	return p
+}
+
+func (x MetadataField) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (MetadataField) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_library_v1_item_proto_enumTypes[6].Descriptor()
+}
+
+func (MetadataField) Type() protoreflect.EnumType {
+	return &file_mavio_library_v1_item_proto_enumTypes[6]
+}
+
+func (x MetadataField) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // ValueKind names an item attribute listed by ListValues.
 type ValueKind int32
 
@@ -486,11 +555,11 @@ func (x ValueKind) String() string {
 }
 
 func (ValueKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_library_v1_item_proto_enumTypes[6].Descriptor()
+	return file_mavio_library_v1_item_proto_enumTypes[7].Descriptor()
 }
 
 func (ValueKind) Type() protoreflect.EnumType {
-	return &file_mavio_library_v1_item_proto_enumTypes[6]
+	return &file_mavio_library_v1_item_proto_enumTypes[7]
 }
 
 func (x ValueKind) Number() protoreflect.EnumNumber {
@@ -500,48 +569,53 @@ func (x ValueKind) Number() protoreflect.EnumNumber {
 // Item is a node in a library. See docs/domain.md for hierarchies and
 // numbering.
 type Item struct {
-	state                        protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id                *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_LibraryId         *string                `protobuf:"bytes,2,opt,name=library_id,json=libraryId"`
-	xxx_hidden_ParentId          *string                `protobuf:"bytes,3,opt,name=parent_id,json=parentId"`
-	xxx_hidden_Kind              ItemKind               `protobuf:"varint,4,opt,name=kind,enum=mavio.library.v1.ItemKind"`
-	xxx_hidden_Name              *string                `protobuf:"bytes,5,opt,name=name"`
-	xxx_hidden_SortName          *string                `protobuf:"bytes,6,opt,name=sort_name,json=sortName"`
-	xxx_hidden_OriginalTitle     *string                `protobuf:"bytes,7,opt,name=original_title,json=originalTitle"`
-	xxx_hidden_Overview          *string                `protobuf:"bytes,8,opt,name=overview"`
-	xxx_hidden_Tagline           *string                `protobuf:"bytes,9,opt,name=tagline"`
-	xxx_hidden_Path              *string                `protobuf:"bytes,10,opt,name=path"`
-	xxx_hidden_IndexNumber       int32                  `protobuf:"varint,11,opt,name=index_number,json=indexNumber"`
-	xxx_hidden_ParentIndexNumber int32                  `protobuf:"varint,12,opt,name=parent_index_number,json=parentIndexNumber"`
-	xxx_hidden_IndexNumberEnd    int32                  `protobuf:"varint,13,opt,name=index_number_end,json=indexNumberEnd"`
-	xxx_hidden_ProductionYear    int32                  `protobuf:"varint,14,opt,name=production_year,json=productionYear"`
-	xxx_hidden_PremiereDate      *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=premiere_date,json=premiereDate"`
-	xxx_hidden_EndDate           *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=end_date,json=endDate"`
-	xxx_hidden_Runtime           *durationpb.Duration   `protobuf:"bytes,17,opt,name=runtime"`
-	xxx_hidden_OfficialRating    *string                `protobuf:"bytes,18,opt,name=official_rating,json=officialRating"`
-	xxx_hidden_CommunityRating   float64                `protobuf:"fixed64,19,opt,name=community_rating,json=communityRating"`
-	xxx_hidden_CriticRating      float64                `protobuf:"fixed64,20,opt,name=critic_rating,json=criticRating"`
-	xxx_hidden_Genres            []string               `protobuf:"bytes,21,rep,name=genres"`
-	xxx_hidden_Tags              []string               `protobuf:"bytes,22,rep,name=tags"`
-	xxx_hidden_Studios           []string               `protobuf:"bytes,23,rep,name=studios"`
-	xxx_hidden_ExternalIds       map[string]string      `protobuf:"bytes,24,rep,name=external_ids,json=externalIds" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	xxx_hidden_Artists           []string               `protobuf:"bytes,25,rep,name=artists"`
-	xxx_hidden_AlbumArtists      []string               `protobuf:"bytes,26,rep,name=album_artists,json=albumArtists"`
-	xxx_hidden_SeriesStatus      SeriesStatus           `protobuf:"varint,27,opt,name=series_status,json=seriesStatus,enum=mavio.library.v1.SeriesStatus"`
-	xxx_hidden_Extra             ExtraKind              `protobuf:"varint,28,opt,name=extra,enum=mavio.library.v1.ExtraKind"`
-	xxx_hidden_OwnerId           *string                `protobuf:"bytes,29,opt,name=owner_id,json=ownerId"`
-	xxx_hidden_DateAdded         *timestamppb.Timestamp `protobuf:"bytes,30,opt,name=date_added,json=dateAdded"`
-	xxx_hidden_Images            *[]*Image              `protobuf:"bytes,31,rep,name=images"`
-	xxx_hidden_SeriesId          *string                `protobuf:"bytes,32,opt,name=series_id,json=seriesId"`
-	xxx_hidden_SeriesName        *string                `protobuf:"bytes,33,opt,name=series_name,json=seriesName"`
-	xxx_hidden_SeasonId          *string                `protobuf:"bytes,34,opt,name=season_id,json=seasonId"`
-	xxx_hidden_SeasonName        *string                `protobuf:"bytes,35,opt,name=season_name,json=seasonName"`
-	xxx_hidden_AlbumId           *string                `protobuf:"bytes,36,opt,name=album_id,json=albumId"`
-	xxx_hidden_AlbumName         *string                `protobuf:"bytes,37,opt,name=album_name,json=albumName"`
-	XXX_raceDetectHookData       protoimpl.RaceDetectHookData
-	XXX_presence                 [2]uint32
-	unknownFields                protoimpl.UnknownFields
-	sizeCache                    protoimpl.SizeCache
+	state                          protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id                  *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_LibraryId           *string                `protobuf:"bytes,2,opt,name=library_id,json=libraryId"`
+	xxx_hidden_ParentId            *string                `protobuf:"bytes,3,opt,name=parent_id,json=parentId"`
+	xxx_hidden_Kind                ItemKind               `protobuf:"varint,4,opt,name=kind,enum=mavio.library.v1.ItemKind"`
+	xxx_hidden_Name                *string                `protobuf:"bytes,5,opt,name=name"`
+	xxx_hidden_SortName            *string                `protobuf:"bytes,6,opt,name=sort_name,json=sortName"`
+	xxx_hidden_OriginalTitle       *string                `protobuf:"bytes,7,opt,name=original_title,json=originalTitle"`
+	xxx_hidden_Overview            *string                `protobuf:"bytes,8,opt,name=overview"`
+	xxx_hidden_Tagline             *string                `protobuf:"bytes,9,opt,name=tagline"`
+	xxx_hidden_Path                *string                `protobuf:"bytes,10,opt,name=path"`
+	xxx_hidden_IndexNumber         int32                  `protobuf:"varint,11,opt,name=index_number,json=indexNumber"`
+	xxx_hidden_ParentIndexNumber   int32                  `protobuf:"varint,12,opt,name=parent_index_number,json=parentIndexNumber"`
+	xxx_hidden_IndexNumberEnd      int32                  `protobuf:"varint,13,opt,name=index_number_end,json=indexNumberEnd"`
+	xxx_hidden_ProductionYear      int32                  `protobuf:"varint,14,opt,name=production_year,json=productionYear"`
+	xxx_hidden_PremiereDate        *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=premiere_date,json=premiereDate"`
+	xxx_hidden_EndDate             *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=end_date,json=endDate"`
+	xxx_hidden_Runtime             *durationpb.Duration   `protobuf:"bytes,17,opt,name=runtime"`
+	xxx_hidden_OfficialRating      *string                `protobuf:"bytes,18,opt,name=official_rating,json=officialRating"`
+	xxx_hidden_CommunityRating     float64                `protobuf:"fixed64,19,opt,name=community_rating,json=communityRating"`
+	xxx_hidden_CriticRating        float64                `protobuf:"fixed64,20,opt,name=critic_rating,json=criticRating"`
+	xxx_hidden_Genres              []string               `protobuf:"bytes,21,rep,name=genres"`
+	xxx_hidden_Tags                []string               `protobuf:"bytes,22,rep,name=tags"`
+	xxx_hidden_Studios             []string               `protobuf:"bytes,23,rep,name=studios"`
+	xxx_hidden_ExternalIds         map[string]string      `protobuf:"bytes,24,rep,name=external_ids,json=externalIds" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_Artists             []string               `protobuf:"bytes,25,rep,name=artists"`
+	xxx_hidden_AlbumArtists        []string               `protobuf:"bytes,26,rep,name=album_artists,json=albumArtists"`
+	xxx_hidden_SeriesStatus        SeriesStatus           `protobuf:"varint,27,opt,name=series_status,json=seriesStatus,enum=mavio.library.v1.SeriesStatus"`
+	xxx_hidden_Extra               ExtraKind              `protobuf:"varint,28,opt,name=extra,enum=mavio.library.v1.ExtraKind"`
+	xxx_hidden_OwnerId             *string                `protobuf:"bytes,29,opt,name=owner_id,json=ownerId"`
+	xxx_hidden_DateAdded           *timestamppb.Timestamp `protobuf:"bytes,30,opt,name=date_added,json=dateAdded"`
+	xxx_hidden_Images              *[]*Image              `protobuf:"bytes,31,rep,name=images"`
+	xxx_hidden_SeriesId            *string                `protobuf:"bytes,32,opt,name=series_id,json=seriesId"`
+	xxx_hidden_SeriesName          *string                `protobuf:"bytes,33,opt,name=series_name,json=seriesName"`
+	xxx_hidden_SeasonId            *string                `protobuf:"bytes,34,opt,name=season_id,json=seasonId"`
+	xxx_hidden_SeasonName          *string                `protobuf:"bytes,35,opt,name=season_name,json=seasonName"`
+	xxx_hidden_AlbumId             *string                `protobuf:"bytes,36,opt,name=album_id,json=albumId"`
+	xxx_hidden_AlbumName           *string                `protobuf:"bytes,37,opt,name=album_name,json=albumName"`
+	xxx_hidden_Locked              bool                   `protobuf:"varint,38,opt,name=locked"`
+	xxx_hidden_LockedFields        []MetadataField        `protobuf:"varint,39,rep,packed,name=locked_fields,json=lockedFields,enum=mavio.library.v1.MetadataField"`
+	xxx_hidden_CustomRating        *string                `protobuf:"bytes,40,opt,name=custom_rating,json=customRating"`
+	xxx_hidden_ProductionLocations []string               `protobuf:"bytes,41,rep,name=production_locations,json=productionLocations"`
+	xxx_hidden_CollectionName      *string                `protobuf:"bytes,42,opt,name=collection_name,json=collectionName"`
+	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
+	XXX_presence                   [2]uint32
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
 func (x *Item) Reset() {
@@ -887,74 +961,115 @@ func (x *Item) GetAlbumName() string {
 	return ""
 }
 
+func (x *Item) GetLocked() bool {
+	if x != nil {
+		return x.xxx_hidden_Locked
+	}
+	return false
+}
+
+func (x *Item) GetLockedFields() []MetadataField {
+	if x != nil {
+		return x.xxx_hidden_LockedFields
+	}
+	return nil
+}
+
+func (x *Item) GetCustomRating() string {
+	if x != nil {
+		if x.xxx_hidden_CustomRating != nil {
+			return *x.xxx_hidden_CustomRating
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Item) GetProductionLocations() []string {
+	if x != nil {
+		return x.xxx_hidden_ProductionLocations
+	}
+	return nil
+}
+
+func (x *Item) GetCollectionName() string {
+	if x != nil {
+		if x.xxx_hidden_CollectionName != nil {
+			return *x.xxx_hidden_CollectionName
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Item) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 42)
 }
 
 func (x *Item) SetLibraryId(v string) {
 	x.xxx_hidden_LibraryId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 42)
 }
 
 func (x *Item) SetParentId(v string) {
 	x.xxx_hidden_ParentId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 42)
 }
 
 func (x *Item) SetKind(v ItemKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 42)
 }
 
 func (x *Item) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 42)
 }
 
 func (x *Item) SetSortName(v string) {
 	x.xxx_hidden_SortName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 42)
 }
 
 func (x *Item) SetOriginalTitle(v string) {
 	x.xxx_hidden_OriginalTitle = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 42)
 }
 
 func (x *Item) SetOverview(v string) {
 	x.xxx_hidden_Overview = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 42)
 }
 
 func (x *Item) SetTagline(v string) {
 	x.xxx_hidden_Tagline = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 42)
 }
 
 func (x *Item) SetPath(v string) {
 	x.xxx_hidden_Path = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 42)
 }
 
 func (x *Item) SetIndexNumber(v int32) {
 	x.xxx_hidden_IndexNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 42)
 }
 
 func (x *Item) SetParentIndexNumber(v int32) {
 	x.xxx_hidden_ParentIndexNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 42)
 }
 
 func (x *Item) SetIndexNumberEnd(v int32) {
 	x.xxx_hidden_IndexNumberEnd = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 42)
 }
 
 func (x *Item) SetProductionYear(v int32) {
 	x.xxx_hidden_ProductionYear = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 42)
 }
 
 func (x *Item) SetPremiereDate(v *timestamppb.Timestamp) {
@@ -971,17 +1086,17 @@ func (x *Item) SetRuntime(v *durationpb.Duration) {
 
 func (x *Item) SetOfficialRating(v string) {
 	x.xxx_hidden_OfficialRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 42)
 }
 
 func (x *Item) SetCommunityRating(v float64) {
 	x.xxx_hidden_CommunityRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 42)
 }
 
 func (x *Item) SetCriticRating(v float64) {
 	x.xxx_hidden_CriticRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 42)
 }
 
 func (x *Item) SetGenres(v []string) {
@@ -1010,17 +1125,17 @@ func (x *Item) SetAlbumArtists(v []string) {
 
 func (x *Item) SetSeriesStatus(v SeriesStatus) {
 	x.xxx_hidden_SeriesStatus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 42)
 }
 
 func (x *Item) SetExtra(v ExtraKind) {
 	x.xxx_hidden_Extra = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 42)
 }
 
 func (x *Item) SetOwnerId(v string) {
 	x.xxx_hidden_OwnerId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 42)
 }
 
 func (x *Item) SetDateAdded(v *timestamppb.Timestamp) {
@@ -1033,32 +1148,55 @@ func (x *Item) SetImages(v []*Image) {
 
 func (x *Item) SetSeriesId(v string) {
 	x.xxx_hidden_SeriesId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 31, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 31, 42)
 }
 
 func (x *Item) SetSeriesName(v string) {
 	x.xxx_hidden_SeriesName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 42)
 }
 
 func (x *Item) SetSeasonId(v string) {
 	x.xxx_hidden_SeasonId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 42)
 }
 
 func (x *Item) SetSeasonName(v string) {
 	x.xxx_hidden_SeasonName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 42)
 }
 
 func (x *Item) SetAlbumId(v string) {
 	x.xxx_hidden_AlbumId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 35, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 35, 42)
 }
 
 func (x *Item) SetAlbumName(v string) {
 	x.xxx_hidden_AlbumName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 36, 37)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 36, 42)
+}
+
+func (x *Item) SetLocked(v bool) {
+	x.xxx_hidden_Locked = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 37, 42)
+}
+
+func (x *Item) SetLockedFields(v []MetadataField) {
+	x.xxx_hidden_LockedFields = v
+}
+
+func (x *Item) SetCustomRating(v string) {
+	x.xxx_hidden_CustomRating = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 39, 42)
+}
+
+func (x *Item) SetProductionLocations(v []string) {
+	x.xxx_hidden_ProductionLocations = v
+}
+
+func (x *Item) SetCollectionName(v string) {
+	x.xxx_hidden_CollectionName = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 41, 42)
 }
 
 func (x *Item) HasId() bool {
@@ -1271,6 +1409,27 @@ func (x *Item) HasAlbumName() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[1]), 36)
 }
 
+func (x *Item) HasLocked() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 37)
+}
+
+func (x *Item) HasCustomRating() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 39)
+}
+
+func (x *Item) HasCollectionName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 41)
+}
+
 func (x *Item) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -1417,6 +1576,21 @@ func (x *Item) ClearAlbumName() {
 	x.xxx_hidden_AlbumName = nil
 }
 
+func (x *Item) ClearLocked() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 37)
+	x.xxx_hidden_Locked = false
+}
+
+func (x *Item) ClearCustomRating() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 39)
+	x.xxx_hidden_CustomRating = nil
+}
+
+func (x *Item) ClearCollectionName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 41)
+	x.xxx_hidden_CollectionName = nil
+}
+
 type Item_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1464,6 +1638,13 @@ type Item_builder struct {
 	SeasonName *string
 	AlbumId    *string
 	AlbumName  *string
+	// The item's locks, given to administrators only.
+	Locked              *bool
+	LockedFields        []MetadataField
+	CustomRating        *string
+	ProductionLocations []string
+	// The collection (movie set) of a movie, as the providers name it.
+	CollectionName *string
 }
 
 func (b0 Item_builder) Build() *Item {
@@ -1471,74 +1652,74 @@ func (b0 Item_builder) Build() *Item {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 42)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.LibraryId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 42)
 		x.xxx_hidden_LibraryId = b.LibraryId
 	}
 	if b.ParentId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 42)
 		x.xxx_hidden_ParentId = b.ParentId
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 42)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 42)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.SortName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 42)
 		x.xxx_hidden_SortName = b.SortName
 	}
 	if b.OriginalTitle != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 42)
 		x.xxx_hidden_OriginalTitle = b.OriginalTitle
 	}
 	if b.Overview != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 42)
 		x.xxx_hidden_Overview = b.Overview
 	}
 	if b.Tagline != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 42)
 		x.xxx_hidden_Tagline = b.Tagline
 	}
 	if b.Path != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 42)
 		x.xxx_hidden_Path = b.Path
 	}
 	if b.IndexNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 42)
 		x.xxx_hidden_IndexNumber = *b.IndexNumber
 	}
 	if b.ParentIndexNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 42)
 		x.xxx_hidden_ParentIndexNumber = *b.ParentIndexNumber
 	}
 	if b.IndexNumberEnd != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 42)
 		x.xxx_hidden_IndexNumberEnd = *b.IndexNumberEnd
 	}
 	if b.ProductionYear != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 42)
 		x.xxx_hidden_ProductionYear = *b.ProductionYear
 	}
 	x.xxx_hidden_PremiereDate = b.PremiereDate
 	x.xxx_hidden_EndDate = b.EndDate
 	x.xxx_hidden_Runtime = b.Runtime
 	if b.OfficialRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 42)
 		x.xxx_hidden_OfficialRating = b.OfficialRating
 	}
 	if b.CommunityRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 42)
 		x.xxx_hidden_CommunityRating = *b.CommunityRating
 	}
 	if b.CriticRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 42)
 		x.xxx_hidden_CriticRating = *b.CriticRating
 	}
 	x.xxx_hidden_Genres = b.Genres
@@ -1548,42 +1729,56 @@ func (b0 Item_builder) Build() *Item {
 	x.xxx_hidden_Artists = b.Artists
 	x.xxx_hidden_AlbumArtists = b.AlbumArtists
 	if b.SeriesStatus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 42)
 		x.xxx_hidden_SeriesStatus = *b.SeriesStatus
 	}
 	if b.Extra != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 42)
 		x.xxx_hidden_Extra = *b.Extra
 	}
 	if b.OwnerId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 42)
 		x.xxx_hidden_OwnerId = b.OwnerId
 	}
 	x.xxx_hidden_DateAdded = b.DateAdded
 	x.xxx_hidden_Images = &b.Images
 	if b.SeriesId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 31, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 31, 42)
 		x.xxx_hidden_SeriesId = b.SeriesId
 	}
 	if b.SeriesName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 42)
 		x.xxx_hidden_SeriesName = b.SeriesName
 	}
 	if b.SeasonId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 42)
 		x.xxx_hidden_SeasonId = b.SeasonId
 	}
 	if b.SeasonName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 42)
 		x.xxx_hidden_SeasonName = b.SeasonName
 	}
 	if b.AlbumId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 35, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 35, 42)
 		x.xxx_hidden_AlbumId = b.AlbumId
 	}
 	if b.AlbumName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 36, 37)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 36, 42)
 		x.xxx_hidden_AlbumName = b.AlbumName
+	}
+	if b.Locked != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 37, 42)
+		x.xxx_hidden_Locked = *b.Locked
+	}
+	x.xxx_hidden_LockedFields = b.LockedFields
+	if b.CustomRating != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 39, 42)
+		x.xxx_hidden_CustomRating = b.CustomRating
+	}
+	x.xxx_hidden_ProductionLocations = b.ProductionLocations
+	if b.CollectionName != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 41, 42)
+		x.xxx_hidden_CollectionName = b.CollectionName
 	}
 	return m0
 }
@@ -4570,7 +4765,7 @@ var File_mavio_library_v1_item_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\n" +
-	"\x1bmavio/library/v1/item.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cmavio/library/v1/media.proto\"\xb6\v\n" +
+	"\x1bmavio/library/v1/item.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cmavio/library/v1/media.proto\"\x95\r\n" +
 	"\x04Item\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
@@ -4614,7 +4809,12 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"seasonName\x12\x19\n" +
 	"\balbum_id\x18$ \x01(\tR\aalbumId\x12\x1d\n" +
 	"\n" +
-	"album_name\x18% \x01(\tR\talbumName\x1a>\n" +
+	"album_name\x18% \x01(\tR\talbumName\x12\x16\n" +
+	"\x06locked\x18& \x01(\bR\x06locked\x12D\n" +
+	"\rlocked_fields\x18' \x03(\x0e2\x1f.mavio.library.v1.MetadataFieldR\flockedFields\x12#\n" +
+	"\rcustom_rating\x18( \x01(\tR\fcustomRating\x121\n" +
+	"\x14production_locations\x18) \x03(\tR\x13productionLocations\x12'\n" +
+	"\x0fcollection_name\x18* \x01(\tR\x0ecollectionName\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc6\x01\n" +
@@ -4825,7 +5025,18 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x16SORT_FIELD_LAST_PLAYED\x10\t\x12\x19\n" +
 	"\x15SORT_FIELD_PLAY_COUNT\x10\n" +
 	"\x12\x19\n" +
-	"\x15SORT_FIELD_LIST_ORDER\x10\v*\x94\x01\n" +
+	"\x15SORT_FIELD_LIST_ORDER\x10\v*\xb7\x02\n" +
+	"\rMetadataField\x12\x1e\n" +
+	"\x1aMETADATA_FIELD_UNSPECIFIED\x10\x00\x12\x17\n" +
+	"\x13METADATA_FIELD_CAST\x10\x01\x12\x19\n" +
+	"\x15METADATA_FIELD_GENRES\x10\x02\x12'\n" +
+	"#METADATA_FIELD_PRODUCTION_LOCATIONS\x10\x03\x12\x1a\n" +
+	"\x16METADATA_FIELD_STUDIOS\x10\x04\x12\x17\n" +
+	"\x13METADATA_FIELD_TAGS\x10\x05\x12\x17\n" +
+	"\x13METADATA_FIELD_NAME\x10\x06\x12\x1b\n" +
+	"\x17METADATA_FIELD_OVERVIEW\x10\a\x12\x1a\n" +
+	"\x16METADATA_FIELD_RUNTIME\x10\b\x12\"\n" +
+	"\x1eMETADATA_FIELD_OFFICIAL_RATING\x10\t*\x94\x01\n" +
 	"\tValueKind\x12\x1a\n" +
 	"\x16VALUE_KIND_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10VALUE_KIND_GENRE\x10\x01\x12\x12\n" +
@@ -4846,7 +5057,7 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"ListPeople\x12#.mavio.library.v1.ListPeopleRequest\x1a$.mavio.library.v1.ListPeopleResponse\"\x03\x90\x02\x01B\xca\x01\n" +
 	"\x14com.mavio.library.v1B\tItemProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1;libraryv1\xa2\x02\x03MLX\xaa\x02\x10Mavio.Library.V1\xca\x02\x10Mavio\\Library\\V1\xe2\x02\x1cMavio\\Library\\V1\\GPBMetadata\xea\x02\x12Mavio::Library::V1b\beditionsp\xe8\a"
 
-var file_mavio_library_v1_item_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
+var file_mavio_library_v1_item_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
 var file_mavio_library_v1_item_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_mavio_library_v1_item_proto_goTypes = []any{
 	(ItemKind)(0),                   // 0: mavio.library.v1.ItemKind
@@ -4855,89 +5066,91 @@ var file_mavio_library_v1_item_proto_goTypes = []any{
 	(ImageKind)(0),                  // 3: mavio.library.v1.ImageKind
 	(CreditKind)(0),                 // 4: mavio.library.v1.CreditKind
 	(SortField)(0),                  // 5: mavio.library.v1.SortField
-	(ValueKind)(0),                  // 6: mavio.library.v1.ValueKind
-	(*Item)(nil),                    // 7: mavio.library.v1.Item
-	(*Image)(nil),                   // 8: mavio.library.v1.Image
-	(*Person)(nil),                  // 9: mavio.library.v1.Person
-	(*Credit)(nil),                  // 10: mavio.library.v1.Credit
-	(*GetItemRequest)(nil),          // 11: mavio.library.v1.GetItemRequest
-	(*GetItemResponse)(nil),         // 12: mavio.library.v1.GetItemResponse
-	(*SortSpec)(nil),                // 13: mavio.library.v1.SortSpec
-	(*ListItemsRequest)(nil),        // 14: mavio.library.v1.ListItemsRequest
-	(*ListItemsResponse)(nil),       // 15: mavio.library.v1.ListItemsResponse
-	(*GetPersonRequest)(nil),        // 16: mavio.library.v1.GetPersonRequest
-	(*GetPersonResponse)(nil),       // 17: mavio.library.v1.GetPersonResponse
-	(*ListValuesRequest)(nil),       // 18: mavio.library.v1.ListValuesRequest
-	(*ValueCount)(nil),              // 19: mavio.library.v1.ValueCount
-	(*ListValuesResponse)(nil),      // 20: mavio.library.v1.ListValuesResponse
-	(*ListPeopleRequest)(nil),       // 21: mavio.library.v1.ListPeopleRequest
-	(*PersonCount)(nil),             // 22: mavio.library.v1.PersonCount
-	(*ListPeopleResponse)(nil),      // 23: mavio.library.v1.ListPeopleResponse
-	(*ListLatestItemsRequest)(nil),  // 24: mavio.library.v1.ListLatestItemsRequest
-	(*ListLatestItemsResponse)(nil), // 25: mavio.library.v1.ListLatestItemsResponse
-	(*ListNextUpRequest)(nil),       // 26: mavio.library.v1.ListNextUpRequest
-	(*ListNextUpResponse)(nil),      // 27: mavio.library.v1.ListNextUpResponse
-	nil,                             // 28: mavio.library.v1.Item.ExternalIdsEntry
-	nil,                             // 29: mavio.library.v1.Person.ExternalIdsEntry
-	(*timestamppb.Timestamp)(nil),   // 30: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),     // 31: google.protobuf.Duration
-	(*MediaSource)(nil),             // 32: mavio.library.v1.MediaSource
+	(MetadataField)(0),              // 6: mavio.library.v1.MetadataField
+	(ValueKind)(0),                  // 7: mavio.library.v1.ValueKind
+	(*Item)(nil),                    // 8: mavio.library.v1.Item
+	(*Image)(nil),                   // 9: mavio.library.v1.Image
+	(*Person)(nil),                  // 10: mavio.library.v1.Person
+	(*Credit)(nil),                  // 11: mavio.library.v1.Credit
+	(*GetItemRequest)(nil),          // 12: mavio.library.v1.GetItemRequest
+	(*GetItemResponse)(nil),         // 13: mavio.library.v1.GetItemResponse
+	(*SortSpec)(nil),                // 14: mavio.library.v1.SortSpec
+	(*ListItemsRequest)(nil),        // 15: mavio.library.v1.ListItemsRequest
+	(*ListItemsResponse)(nil),       // 16: mavio.library.v1.ListItemsResponse
+	(*GetPersonRequest)(nil),        // 17: mavio.library.v1.GetPersonRequest
+	(*GetPersonResponse)(nil),       // 18: mavio.library.v1.GetPersonResponse
+	(*ListValuesRequest)(nil),       // 19: mavio.library.v1.ListValuesRequest
+	(*ValueCount)(nil),              // 20: mavio.library.v1.ValueCount
+	(*ListValuesResponse)(nil),      // 21: mavio.library.v1.ListValuesResponse
+	(*ListPeopleRequest)(nil),       // 22: mavio.library.v1.ListPeopleRequest
+	(*PersonCount)(nil),             // 23: mavio.library.v1.PersonCount
+	(*ListPeopleResponse)(nil),      // 24: mavio.library.v1.ListPeopleResponse
+	(*ListLatestItemsRequest)(nil),  // 25: mavio.library.v1.ListLatestItemsRequest
+	(*ListLatestItemsResponse)(nil), // 26: mavio.library.v1.ListLatestItemsResponse
+	(*ListNextUpRequest)(nil),       // 27: mavio.library.v1.ListNextUpRequest
+	(*ListNextUpResponse)(nil),      // 28: mavio.library.v1.ListNextUpResponse
+	nil,                             // 29: mavio.library.v1.Item.ExternalIdsEntry
+	nil,                             // 30: mavio.library.v1.Person.ExternalIdsEntry
+	(*timestamppb.Timestamp)(nil),   // 31: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),     // 32: google.protobuf.Duration
+	(*MediaSource)(nil),             // 33: mavio.library.v1.MediaSource
 }
 var file_mavio_library_v1_item_proto_depIdxs = []int32{
 	0,  // 0: mavio.library.v1.Item.kind:type_name -> mavio.library.v1.ItemKind
-	30, // 1: mavio.library.v1.Item.premiere_date:type_name -> google.protobuf.Timestamp
-	30, // 2: mavio.library.v1.Item.end_date:type_name -> google.protobuf.Timestamp
-	31, // 3: mavio.library.v1.Item.runtime:type_name -> google.protobuf.Duration
-	28, // 4: mavio.library.v1.Item.external_ids:type_name -> mavio.library.v1.Item.ExternalIdsEntry
+	31, // 1: mavio.library.v1.Item.premiere_date:type_name -> google.protobuf.Timestamp
+	31, // 2: mavio.library.v1.Item.end_date:type_name -> google.protobuf.Timestamp
+	32, // 3: mavio.library.v1.Item.runtime:type_name -> google.protobuf.Duration
+	29, // 4: mavio.library.v1.Item.external_ids:type_name -> mavio.library.v1.Item.ExternalIdsEntry
 	2,  // 5: mavio.library.v1.Item.series_status:type_name -> mavio.library.v1.SeriesStatus
 	1,  // 6: mavio.library.v1.Item.extra:type_name -> mavio.library.v1.ExtraKind
-	30, // 7: mavio.library.v1.Item.date_added:type_name -> google.protobuf.Timestamp
-	8,  // 8: mavio.library.v1.Item.images:type_name -> mavio.library.v1.Image
-	3,  // 9: mavio.library.v1.Image.kind:type_name -> mavio.library.v1.ImageKind
-	30, // 10: mavio.library.v1.Person.birth_date:type_name -> google.protobuf.Timestamp
-	30, // 11: mavio.library.v1.Person.death_date:type_name -> google.protobuf.Timestamp
-	29, // 12: mavio.library.v1.Person.external_ids:type_name -> mavio.library.v1.Person.ExternalIdsEntry
-	8,  // 13: mavio.library.v1.Person.images:type_name -> mavio.library.v1.Image
-	9,  // 14: mavio.library.v1.Credit.person:type_name -> mavio.library.v1.Person
-	4,  // 15: mavio.library.v1.Credit.kind:type_name -> mavio.library.v1.CreditKind
-	7,  // 16: mavio.library.v1.GetItemResponse.item:type_name -> mavio.library.v1.Item
-	32, // 17: mavio.library.v1.GetItemResponse.media_sources:type_name -> mavio.library.v1.MediaSource
-	10, // 18: mavio.library.v1.GetItemResponse.credits:type_name -> mavio.library.v1.Credit
-	5,  // 19: mavio.library.v1.SortSpec.field:type_name -> mavio.library.v1.SortField
-	0,  // 20: mavio.library.v1.ListItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
-	13, // 21: mavio.library.v1.ListItemsRequest.sort:type_name -> mavio.library.v1.SortSpec
-	7,  // 22: mavio.library.v1.ListItemsResponse.items:type_name -> mavio.library.v1.Item
-	9,  // 23: mavio.library.v1.GetPersonResponse.person:type_name -> mavio.library.v1.Person
-	6,  // 24: mavio.library.v1.ListValuesRequest.kind:type_name -> mavio.library.v1.ValueKind
-	0,  // 25: mavio.library.v1.ListValuesRequest.item_kinds:type_name -> mavio.library.v1.ItemKind
-	19, // 26: mavio.library.v1.ListValuesResponse.values:type_name -> mavio.library.v1.ValueCount
-	0,  // 27: mavio.library.v1.ListPeopleRequest.item_kinds:type_name -> mavio.library.v1.ItemKind
-	4,  // 28: mavio.library.v1.ListPeopleRequest.credit_kinds:type_name -> mavio.library.v1.CreditKind
-	9,  // 29: mavio.library.v1.PersonCount.person:type_name -> mavio.library.v1.Person
-	22, // 30: mavio.library.v1.ListPeopleResponse.people:type_name -> mavio.library.v1.PersonCount
-	0,  // 31: mavio.library.v1.ListLatestItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
-	7,  // 32: mavio.library.v1.ListLatestItemsResponse.items:type_name -> mavio.library.v1.Item
-	30, // 33: mavio.library.v1.ListNextUpRequest.since:type_name -> google.protobuf.Timestamp
-	7,  // 34: mavio.library.v1.ListNextUpResponse.items:type_name -> mavio.library.v1.Item
-	11, // 35: mavio.library.v1.ItemService.GetItem:input_type -> mavio.library.v1.GetItemRequest
-	14, // 36: mavio.library.v1.ItemService.ListItems:input_type -> mavio.library.v1.ListItemsRequest
-	16, // 37: mavio.library.v1.ItemService.GetPerson:input_type -> mavio.library.v1.GetPersonRequest
-	18, // 38: mavio.library.v1.ItemService.ListValues:input_type -> mavio.library.v1.ListValuesRequest
-	24, // 39: mavio.library.v1.ItemService.ListLatestItems:input_type -> mavio.library.v1.ListLatestItemsRequest
-	26, // 40: mavio.library.v1.ItemService.ListNextUp:input_type -> mavio.library.v1.ListNextUpRequest
-	21, // 41: mavio.library.v1.ItemService.ListPeople:input_type -> mavio.library.v1.ListPeopleRequest
-	12, // 42: mavio.library.v1.ItemService.GetItem:output_type -> mavio.library.v1.GetItemResponse
-	15, // 43: mavio.library.v1.ItemService.ListItems:output_type -> mavio.library.v1.ListItemsResponse
-	17, // 44: mavio.library.v1.ItemService.GetPerson:output_type -> mavio.library.v1.GetPersonResponse
-	20, // 45: mavio.library.v1.ItemService.ListValues:output_type -> mavio.library.v1.ListValuesResponse
-	25, // 46: mavio.library.v1.ItemService.ListLatestItems:output_type -> mavio.library.v1.ListLatestItemsResponse
-	27, // 47: mavio.library.v1.ItemService.ListNextUp:output_type -> mavio.library.v1.ListNextUpResponse
-	23, // 48: mavio.library.v1.ItemService.ListPeople:output_type -> mavio.library.v1.ListPeopleResponse
-	42, // [42:49] is the sub-list for method output_type
-	35, // [35:42] is the sub-list for method input_type
-	35, // [35:35] is the sub-list for extension type_name
-	35, // [35:35] is the sub-list for extension extendee
-	0,  // [0:35] is the sub-list for field type_name
+	31, // 7: mavio.library.v1.Item.date_added:type_name -> google.protobuf.Timestamp
+	9,  // 8: mavio.library.v1.Item.images:type_name -> mavio.library.v1.Image
+	6,  // 9: mavio.library.v1.Item.locked_fields:type_name -> mavio.library.v1.MetadataField
+	3,  // 10: mavio.library.v1.Image.kind:type_name -> mavio.library.v1.ImageKind
+	31, // 11: mavio.library.v1.Person.birth_date:type_name -> google.protobuf.Timestamp
+	31, // 12: mavio.library.v1.Person.death_date:type_name -> google.protobuf.Timestamp
+	30, // 13: mavio.library.v1.Person.external_ids:type_name -> mavio.library.v1.Person.ExternalIdsEntry
+	9,  // 14: mavio.library.v1.Person.images:type_name -> mavio.library.v1.Image
+	10, // 15: mavio.library.v1.Credit.person:type_name -> mavio.library.v1.Person
+	4,  // 16: mavio.library.v1.Credit.kind:type_name -> mavio.library.v1.CreditKind
+	8,  // 17: mavio.library.v1.GetItemResponse.item:type_name -> mavio.library.v1.Item
+	33, // 18: mavio.library.v1.GetItemResponse.media_sources:type_name -> mavio.library.v1.MediaSource
+	11, // 19: mavio.library.v1.GetItemResponse.credits:type_name -> mavio.library.v1.Credit
+	5,  // 20: mavio.library.v1.SortSpec.field:type_name -> mavio.library.v1.SortField
+	0,  // 21: mavio.library.v1.ListItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
+	14, // 22: mavio.library.v1.ListItemsRequest.sort:type_name -> mavio.library.v1.SortSpec
+	8,  // 23: mavio.library.v1.ListItemsResponse.items:type_name -> mavio.library.v1.Item
+	10, // 24: mavio.library.v1.GetPersonResponse.person:type_name -> mavio.library.v1.Person
+	7,  // 25: mavio.library.v1.ListValuesRequest.kind:type_name -> mavio.library.v1.ValueKind
+	0,  // 26: mavio.library.v1.ListValuesRequest.item_kinds:type_name -> mavio.library.v1.ItemKind
+	20, // 27: mavio.library.v1.ListValuesResponse.values:type_name -> mavio.library.v1.ValueCount
+	0,  // 28: mavio.library.v1.ListPeopleRequest.item_kinds:type_name -> mavio.library.v1.ItemKind
+	4,  // 29: mavio.library.v1.ListPeopleRequest.credit_kinds:type_name -> mavio.library.v1.CreditKind
+	10, // 30: mavio.library.v1.PersonCount.person:type_name -> mavio.library.v1.Person
+	23, // 31: mavio.library.v1.ListPeopleResponse.people:type_name -> mavio.library.v1.PersonCount
+	0,  // 32: mavio.library.v1.ListLatestItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
+	8,  // 33: mavio.library.v1.ListLatestItemsResponse.items:type_name -> mavio.library.v1.Item
+	31, // 34: mavio.library.v1.ListNextUpRequest.since:type_name -> google.protobuf.Timestamp
+	8,  // 35: mavio.library.v1.ListNextUpResponse.items:type_name -> mavio.library.v1.Item
+	12, // 36: mavio.library.v1.ItemService.GetItem:input_type -> mavio.library.v1.GetItemRequest
+	15, // 37: mavio.library.v1.ItemService.ListItems:input_type -> mavio.library.v1.ListItemsRequest
+	17, // 38: mavio.library.v1.ItemService.GetPerson:input_type -> mavio.library.v1.GetPersonRequest
+	19, // 39: mavio.library.v1.ItemService.ListValues:input_type -> mavio.library.v1.ListValuesRequest
+	25, // 40: mavio.library.v1.ItemService.ListLatestItems:input_type -> mavio.library.v1.ListLatestItemsRequest
+	27, // 41: mavio.library.v1.ItemService.ListNextUp:input_type -> mavio.library.v1.ListNextUpRequest
+	22, // 42: mavio.library.v1.ItemService.ListPeople:input_type -> mavio.library.v1.ListPeopleRequest
+	13, // 43: mavio.library.v1.ItemService.GetItem:output_type -> mavio.library.v1.GetItemResponse
+	16, // 44: mavio.library.v1.ItemService.ListItems:output_type -> mavio.library.v1.ListItemsResponse
+	18, // 45: mavio.library.v1.ItemService.GetPerson:output_type -> mavio.library.v1.GetPersonResponse
+	21, // 46: mavio.library.v1.ItemService.ListValues:output_type -> mavio.library.v1.ListValuesResponse
+	26, // 47: mavio.library.v1.ItemService.ListLatestItems:output_type -> mavio.library.v1.ListLatestItemsResponse
+	28, // 48: mavio.library.v1.ItemService.ListNextUp:output_type -> mavio.library.v1.ListNextUpResponse
+	24, // 49: mavio.library.v1.ItemService.ListPeople:output_type -> mavio.library.v1.ListPeopleResponse
+	43, // [43:50] is the sub-list for method output_type
+	36, // [36:43] is the sub-list for method input_type
+	36, // [36:36] is the sub-list for extension type_name
+	36, // [36:36] is the sub-list for extension extendee
+	0,  // [0:36] is the sub-list for field type_name
 }
 
 func init() { file_mavio_library_v1_item_proto_init() }
@@ -4951,7 +5164,7 @@ func file_mavio_library_v1_item_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_library_v1_item_proto_rawDesc), len(file_mavio_library_v1_item_proto_rawDesc)),
-			NumEnums:      7,
+			NumEnums:      8,
 			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,

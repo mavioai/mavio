@@ -62,7 +62,7 @@ var routes = map[string]string{
 	"/3/movie/337401": `{"id":337401,"title":"Mulan","original_title":"Mulan","overview":"A young woman disguises herself.",
 		"tagline":"Loyal. Brave. True.","release_date":"2020-09-04","runtime":115,"vote_average":7.1,"imdb_id":"tt4566758",
 		"genres":[{"name":"Adventure"},{"name":"Fantasy"}],"production_companies":[{"name":"Walt Disney Pictures"}],
-		"belongs_to_collection":{"id":1166519},
+		"belongs_to_collection":{"id":1166519,"name":"Mulan Collection"},
 		"credits":{"cast":[
 			{"id":2,"name":"Donnie Yen","character":"Commander Tung","order":1},
 			{"id":1,"name":"Yifei Liu","character":"Mulan","order":0,"profile_path":"/liu.jpg"}],
@@ -200,6 +200,9 @@ func TestMovieBySearch(t *testing.T) {
 	wantIDs := map[string]string{"tmdb": "337401", "imdb": "tt4566758", "tmdb_collection": "1166519"}
 	if got := md.GetExternalIds(); !maps.Equal(got, wantIDs) {
 		t.Errorf("external IDs = %v, want = %v", got, wantIDs)
+	}
+	if got := md.GetCollectionName(); got != "Mulan Collection" {
+		t.Errorf("collection = %q, want = Mulan Collection", got)
 	}
 	if got, want := md.GetGenres(), []string{"Adventure", "Fantasy"}; !slices.Equal(got, want) {
 		t.Errorf("genres = %v, want = %v", got, want)

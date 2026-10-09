@@ -235,6 +235,25 @@ func (m *Manager) MetadataProviders() []library.Provider {
 	return out
 }
 
+// SubtitleProviders returns the subtitle providers among the started
+// plugins; like metadata providers, they find nothing until their plugin
+// is ready.
+func (m *Manager) SubtitleProviders() []library.SubtitleProvider {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []library.SubtitleProvider
+	for _, e := range m.plugins {
+		if e.plugin == nil || e.plugin.Subtitles() == nil {
+			continue
+		}
+		out = append(out, &subtitleProvider{
+			m: m, e: e,
+			p: &providers.SubtitlePlugin{ID: e.manifest.GetId(), Client: e.plugin.Subtitles()},
+		})
+	}
+	return out
+}
+
 // Close stops the plugins.
 func (m *Manager) Close(ctx context.Context) error {
 	m.mu.Lock()
@@ -259,11 +278,46 @@ type provider struct {
 func (p *provider) Name() string { return p.p.Name() }
 
 func (p *provider) Metadata(ctx context.Context, l library.Lookup) (*metadata.Result, error) {
-	p.m.mu.Lock()
-	ready := p.e.state == Ready
-	p.m.mu.Unlock()
-	if !ready {
+	if !p.m.ready(p.e) {
 		return nil, nil
 	}
 	return p.p.Metadata(ctx, l)
+}
+
+func (p *provider) Search(ctx context.Context, l library.Lookup, limit int) ([]library.SearchResult, error) {
+	if !p.m.ready(p.e) {
+		return nil, nil
+	}
+	return p.p.Search(ctx, l, limit)
+}
+
+// ready reports whether a plugin is ready.
+func (m *Manager) ready(e *entry) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return e.state == Ready
+}
+
+// subtitleProvider is a plugin's subtitle provider that finds nothing
+// until the plugin is ready.
+type subtitleProvider struct {
+	m *Manager
+	e *entry
+	p *providers.SubtitlePlugin
+}
+
+func (p *subtitleProvider) Name() string { return p.p.Name() }
+
+func (p *subtitleProvider) SearchSubtitles(ctx context.Context, q library.SubtitleQuery) ([]library.RemoteSubtitle, error) {
+	if !p.m.ready(p.e) {
+		return nil, nil
+	}
+	return p.p.SearchSubtitles(ctx, q)
+}
+
+func (p *subtitleProvider) DownloadSubtitle(ctx context.Context, id string) (library.DownloadedSubtitle, error) {
+	if !p.m.ready(p.e) {
+		return library.DownloadedSubtitle{}, fmt.Errorf("plugin %s is not configured: %w", p.p.Name(), core.ErrNotFound)
+	}
+	return p.p.DownloadSubtitle(ctx, id)
 }

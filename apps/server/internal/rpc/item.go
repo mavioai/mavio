@@ -529,12 +529,20 @@ func itemToProto(it *core.Item, images []core.Image, admin bool) *libraryv1.Item
 		AlbumArtists:    it.AlbumArtists,
 		DateAdded:       timestamp(it.DateAdded),
 		Images:          imagesToProto(images),
+		CustomRating:    &it.CustomRating,
+		CollectionName:  &it.CollectionName,
+
+		ProductionLocations: it.ProductionLocations,
 	}
 	if it.CustomRating != "" {
 		b.OfficialRating = &it.CustomRating
 	}
 	if admin {
 		b.Path = &it.Path
+		b.Locked = &it.Locked
+		for _, f := range it.LockedFields {
+			b.LockedFields = append(b.LockedFields, metadataFields[f])
+		}
 	}
 	if !it.ParentID.IsZero() {
 		b.ParentId = new(it.ParentID.String())

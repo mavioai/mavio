@@ -65,7 +65,7 @@ flowchart TD
 | P7 | Browsing | ✅ Done |
 | P8 | Live events and sessions | ✅ Done |
 | P9 | Storage and performance optimization | ✅ Done |
-| P10 | Metadata management | Not started |
+| P10 | Metadata management | ✅ Done |
 | P11 | Administration and operations | Not started |
 | P12 | Media extras | Not started |
 | P13 | Clients and ecosystem | Not started |
@@ -246,6 +246,14 @@ flowchart TD
 - Movie collections created from the providers' collections
 
 **Done when**: an end-to-end test through the API: an administrator identifies a misidentified film again and edits it, the locked fields survive a refresh, and the chosen poster is written next to the file and read back by a new scan.
+
+**Progress**:
+- [x] `MetadataService`: edit items with an update mask, locks included; refresh one item, optionally replacing its metadata; search the providers and identify an item again
+- [x] Images: list the providers' images; choose one by URL or upload it; delete images with their files; chosen artwork beside the media or in the metadata folder (`-metadata-dir`)
+- [x] Local metadata: `metadata.WriteNFO`, which `ParseNFO` reads back; libraries saving local metadata write NFO files and save provider images under Jellyfin's local image names
+- [x] Provider plugins: `scraper-musicbrainz` (artists, albums, tracks, Cover Art Archive), `scraper-theaudiodb`, `scraper-openlibrary` (books and audiobooks), `scraper-fanart`; subtitle provider contract (`SubtitleProviderService`) with `subtitles-opensubtitles`, downloads saved beside the video
+- [x] Automatic movie collections from the providers' collections (`AutoCollections`)
+- [x] End-to-end test (`apps/server/internal/server/metadata_test.go`)
 
 ### P11 Administration and Operations
 **Scope**: running a server without restarting it or editing its flags.

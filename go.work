@@ -13,7 +13,12 @@ use (
 	./libs/store
 	./libs/streaming
 	./libs/subtitle
+	./plugins/scraper-fanart
+	./plugins/scraper-musicbrainz
+	./plugins/scraper-openlibrary
+	./plugins/scraper-theaudiodb
 	./plugins/scraper-tmdb
+	./plugins/subtitles-opensubtitles
 	./tools/fixtures
 	./tools/testport
 )

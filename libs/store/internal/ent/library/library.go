@@ -27,6 +27,10 @@ const (
 	FieldPreferredLanguage = "preferred_language"
 	// FieldMetadataCountry holds the string denoting the metadata_country field in the database.
 	FieldMetadataCountry = "metadata_country"
+	// FieldSaveLocalMetadata holds the string denoting the save_local_metadata field in the database.
+	FieldSaveLocalMetadata = "save_local_metadata"
+	// FieldAutoCollections holds the string denoting the auto_collections field in the database.
+	FieldAutoCollections = "auto_collections"
 	// FieldScanGeneration holds the string denoting the scan_generation field in the database.
 	FieldScanGeneration = "scan_generation"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -64,6 +68,8 @@ var Columns = []string{
 	FieldScanInterval,
 	FieldPreferredLanguage,
 	FieldMetadataCountry,
+	FieldSaveLocalMetadata,
+	FieldAutoCollections,
 	FieldScanGeneration,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -88,6 +94,10 @@ var (
 	DefaultPreferredLanguage string
 	// DefaultMetadataCountry holds the default value on creation for the "metadata_country" field.
 	DefaultMetadataCountry string
+	// DefaultSaveLocalMetadata holds the default value on creation for the "save_local_metadata" field.
+	DefaultSaveLocalMetadata bool
+	// DefaultAutoCollections holds the default value on creation for the "auto_collections" field.
+	DefaultAutoCollections bool
 	// DefaultScanGeneration holds the default value on creation for the "scan_generation" field.
 	DefaultScanGeneration int64
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -131,6 +141,16 @@ func ByPreferredLanguage(opts ...sql.OrderTermOption) OrderOption {
 // ByMetadataCountry orders the results by the metadata_country field.
 func ByMetadataCountry(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMetadataCountry, opts...).ToFunc()
+}
+
+// BySaveLocalMetadata orders the results by the save_local_metadata field.
+func BySaveLocalMetadata(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSaveLocalMetadata, opts...).ToFunc()
+}
+
+// ByAutoCollections orders the results by the auto_collections field.
+func ByAutoCollections(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAutoCollections, opts...).ToFunc()
 }
 
 // ByScanGeneration orders the results by the scan_generation field.

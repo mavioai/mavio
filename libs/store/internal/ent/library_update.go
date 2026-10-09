@@ -122,6 +122,34 @@ func (_u *LibraryUpdate) SetNillableMetadataCountry(v *string) *LibraryUpdate {
 	return _u
 }
 
+// SetSaveLocalMetadata sets the "save_local_metadata" field.
+func (_u *LibraryUpdate) SetSaveLocalMetadata(v bool) *LibraryUpdate {
+	_u.mutation.SetSaveLocalMetadata(v)
+	return _u
+}
+
+// SetNillableSaveLocalMetadata sets the "save_local_metadata" field if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableSaveLocalMetadata(v *bool) *LibraryUpdate {
+	if v != nil {
+		_u.SetSaveLocalMetadata(*v)
+	}
+	return _u
+}
+
+// SetAutoCollections sets the "auto_collections" field.
+func (_u *LibraryUpdate) SetAutoCollections(v bool) *LibraryUpdate {
+	_u.mutation.SetAutoCollections(v)
+	return _u
+}
+
+// SetNillableAutoCollections sets the "auto_collections" field if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableAutoCollections(v *bool) *LibraryUpdate {
+	if v != nil {
+		_u.SetAutoCollections(*v)
+	}
+	return _u
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_u *LibraryUpdate) SetScanGeneration(v int64) *LibraryUpdate {
 	_u.mutation.ResetScanGeneration()
@@ -315,6 +343,12 @@ func (_u *LibraryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.MetadataCountry(); ok {
 		_spec.SetField(library.FieldMetadataCountry, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SaveLocalMetadata(); ok {
+		_spec.SetField(library.FieldSaveLocalMetadata, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AutoCollections(); ok {
+		_spec.SetField(library.FieldAutoCollections, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
@@ -522,6 +556,34 @@ func (_u *LibraryUpdateOne) SetMetadataCountry(v string) *LibraryUpdateOne {
 func (_u *LibraryUpdateOne) SetNillableMetadataCountry(v *string) *LibraryUpdateOne {
 	if v != nil {
 		_u.SetMetadataCountry(*v)
+	}
+	return _u
+}
+
+// SetSaveLocalMetadata sets the "save_local_metadata" field.
+func (_u *LibraryUpdateOne) SetSaveLocalMetadata(v bool) *LibraryUpdateOne {
+	_u.mutation.SetSaveLocalMetadata(v)
+	return _u
+}
+
+// SetNillableSaveLocalMetadata sets the "save_local_metadata" field if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableSaveLocalMetadata(v *bool) *LibraryUpdateOne {
+	if v != nil {
+		_u.SetSaveLocalMetadata(*v)
+	}
+	return _u
+}
+
+// SetAutoCollections sets the "auto_collections" field.
+func (_u *LibraryUpdateOne) SetAutoCollections(v bool) *LibraryUpdateOne {
+	_u.mutation.SetAutoCollections(v)
+	return _u
+}
+
+// SetNillableAutoCollections sets the "auto_collections" field if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableAutoCollections(v *bool) *LibraryUpdateOne {
+	if v != nil {
+		_u.SetAutoCollections(*v)
 	}
 	return _u
 }
@@ -749,6 +811,12 @@ func (_u *LibraryUpdateOne) sqlSave(ctx context.Context) (_node *Library, err er
 	}
 	if value, ok := _u.mutation.MetadataCountry(); ok {
 		_spec.SetField(library.FieldMetadataCountry, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SaveLocalMetadata(); ok {
+		_spec.SetField(library.FieldSaveLocalMetadata, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AutoCollections(); ok {
+		_spec.SetField(library.FieldAutoCollections, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)

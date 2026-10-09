@@ -288,16 +288,24 @@ func init() {
 	libraryDescMetadataCountry := libraryFields[6].Descriptor()
 	// library.DefaultMetadataCountry holds the default value on creation for the metadata_country field.
 	library.DefaultMetadataCountry = libraryDescMetadataCountry.Default.(string)
+	// libraryDescSaveLocalMetadata is the schema descriptor for save_local_metadata field.
+	libraryDescSaveLocalMetadata := libraryFields[7].Descriptor()
+	// library.DefaultSaveLocalMetadata holds the default value on creation for the save_local_metadata field.
+	library.DefaultSaveLocalMetadata = libraryDescSaveLocalMetadata.Default.(bool)
+	// libraryDescAutoCollections is the schema descriptor for auto_collections field.
+	libraryDescAutoCollections := libraryFields[8].Descriptor()
+	// library.DefaultAutoCollections holds the default value on creation for the auto_collections field.
+	library.DefaultAutoCollections = libraryDescAutoCollections.Default.(bool)
 	// libraryDescScanGeneration is the schema descriptor for scan_generation field.
-	libraryDescScanGeneration := libraryFields[7].Descriptor()
+	libraryDescScanGeneration := libraryFields[9].Descriptor()
 	// library.DefaultScanGeneration holds the default value on creation for the scan_generation field.
 	library.DefaultScanGeneration = libraryDescScanGeneration.Default.(int64)
 	// libraryDescCreatedAt is the schema descriptor for created_at field.
-	libraryDescCreatedAt := libraryFields[8].Descriptor()
+	libraryDescCreatedAt := libraryFields[10].Descriptor()
 	// library.DefaultCreatedAt holds the default value on creation for the created_at field.
 	library.DefaultCreatedAt = libraryDescCreatedAt.Default.(func() time.Time)
 	// libraryDescUpdatedAt is the schema descriptor for updated_at field.
-	libraryDescUpdatedAt := libraryFields[9].Descriptor()
+	libraryDescUpdatedAt := libraryFields[11].Descriptor()
 	// library.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	library.DefaultUpdatedAt = libraryDescUpdatedAt.Default.(func() time.Time)
 	// library.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

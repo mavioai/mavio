@@ -1,0 +1,14 @@
+{
+  "id": "org.mavio.scraper-openlibrary",
+  "name": "Open Library",
+  "version": "0.1.0",
+  "description": "Metadata and covers for books and audiobooks from Open Library, found by ISBN, Open Library ID or title and author.",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_WASM",
+  "capabilities": ["CAPABILITY_METADATA_PROVIDER"],
+  "permissions": { "httpHosts": ["openlibrary.org", "covers.openlibrary.org"] },
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",
+  "apiVersion": "1.0"
+}

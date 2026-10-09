@@ -57,6 +57,41 @@ func (p *Plugin) Metadata(ctx context.Context, l library.Lookup) (*metadata.Resu
 	return toResult(resp.GetMetadata()), nil
 }
 
+// Search asks the plugin what an item may be.
+func (p *Plugin) Search(ctx context.Context, l library.Lookup, limit int) ([]library.SearchResult, error) {
+	kind, ok := mediaKinds[l.Kind]
+	if !ok || l.Name == "" && len(l.ExternalIDs) == 0 {
+		return nil, nil
+	}
+	found, err := p.Client.Search(ctx, pluginv1.SearchRequest_builder{Lookup: toLookup(kind, l), Limit: proto.Int32(int32(limit))}.Build())
+	if err != nil {
+		return nil, fmt.Errorf("search: %w", err)
+	}
+	out := make([]library.SearchResult, 0, len(found.GetResults()))
+	for _, r := range found.GetResults() {
+		out = append(out, library.SearchResult{
+			Provider: p.ID, Name: r.GetName(), Year: int(r.GetYear()), Overview: r.GetOverview(),
+			ExternalIDs: externalIDs(r.GetExternalIds()), ImageURL: r.GetImageUrl(), Score: r.GetScore(),
+		})
+	}
+	return out, nil
+}
+
+// externalIDs converts a contract's external IDs; nil when there are none.
+func externalIDs(m map[string]string) map[core.Provider]string {
+	var out map[core.Provider]string
+	for k, v := range m {
+		if v == "" {
+			continue
+		}
+		if out == nil {
+			out = map[core.Provider]string{}
+		}
+		out[core.Provider(k)] = v
+	}
+	return out
+}
+
 var mediaKinds = map[core.ItemKind]pluginv1.MediaKind{
 	core.KindMovie:       pluginv1.MediaKind_MEDIA_KIND_MOVIE,
 	core.KindSeries:      pluginv1.MediaKind_MEDIA_KIND_SERIES,
@@ -118,6 +153,7 @@ func toResult(md *pluginv1.Metadata) *metadata.Result {
 		Artists:        md.GetArtists(),
 		AlbumArtists:   md.GetAlbumArtists(),
 		SeriesStatus:   seriesStatuses[md.GetSeriesStatus()],
+		CollectionName: md.GetCollectionName(),
 	}
 	if md.HasRuntime() {
 		it.Runtime = md.GetRuntime().AsDuration()
@@ -129,15 +165,7 @@ func toResult(md *pluginv1.Metadata) *metadata.Result {
 	if r := md.GetCriticRating(); r >= 0 && r <= 100 {
 		it.CriticRating = r
 	}
-	for k, v := range md.GetExternalIds() {
-		if v == "" {
-			continue
-		}
-		if it.ExternalIDs == nil {
-			it.ExternalIDs = map[core.Provider]string{}
-		}
-		it.ExternalIDs[core.Provider(k)] = v
-	}
+	it.ExternalIDs = externalIDs(md.GetExternalIds())
 	res := &metadata.Result{Item: it}
 	for _, pc := range md.GetPeople() {
 		if pc.GetName() == "" {
@@ -155,7 +183,10 @@ func toResult(md *pluginv1.Metadata) *metadata.Result {
 	}
 	for _, img := range md.GetImages() {
 		if kind, ok := imageKinds[img.GetKind()]; ok && img.GetUrl() != "" {
-			res.RemoteImages = append(res.RemoteImages, metadata.RemoteImage{Kind: kind, URL: img.GetUrl()})
+			res.RemoteImages = append(res.RemoteImages, metadata.RemoteImage{
+				Kind: kind, URL: img.GetUrl(), Width: int(img.GetWidth()), Height: int(img.GetHeight()),
+				Language: img.GetLanguage(), Score: img.GetScore(),
+			})
 		}
 	}
 	return res

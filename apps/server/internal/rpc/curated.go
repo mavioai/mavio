@@ -11,35 +11,10 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 )
-
-// curatedLibrary returns the library of a curated kind, creating it when
-// first needed.
-func curatedLibrary(ctx context.Context, store core.Store, kind core.LibraryKind, name string) (core.Library, error) {
-	find := func() (core.Library, bool, error) {
-		libs, err := store.Libraries().List(ctx)
-		if err != nil {
-			return core.Library{}, false, err
-		}
-		for _, lib := range libs {
-			if lib.Kind == kind {
-				return lib, true, nil
-			}
-		}
-		return core.Library{}, false, nil
-	}
-	if lib, ok, err := find(); err != nil || ok {
-		return lib, err
-	}
-	lib := core.Library{Name: name, Kind: kind}
-	err := store.Libraries().Create(ctx, &lib)
-	if errors.Is(err, core.ErrConflict) { // created concurrently
-		lib, _, err = find()
-	}
-	return lib, err
-}
 
 // curatedItem returns a collection or playlist by ID, or not_found when
 // it is none or the caller may not see it.
@@ -87,7 +62,7 @@ func (s *CollectionService) CreateCollection(ctx context.Context, req *libraryv1
 	if err != nil {
 		return nil, err
 	}
-	lib, err := curatedLibrary(ctx, s.store, core.LibraryCollections, "Collections")
+	lib, err := library.CuratedLibrary(ctx, s.store, core.LibraryCollections)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -320,7 +295,7 @@ func (s *PlaylistService) CreatePlaylist(ctx context.Context, req *libraryv1.Cre
 	if err != nil {
 		return nil, err
 	}
-	lib, err := curatedLibrary(ctx, s.store, core.LibraryPlaylists, "Playlists")
+	lib, err := library.CuratedLibrary(ctx, s.store, core.LibraryPlaylists)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}

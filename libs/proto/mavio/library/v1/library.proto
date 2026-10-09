@@ -57,6 +57,12 @@ message Library {
   string metadata_country = 7;
   google.protobuf.Timestamp create_time = 8;
   google.protobuf.Timestamp update_time = 9;
+  // Write NFO files and chosen artwork next to the media, where scans read
+  // them back.
+  bool save_local_metadata = 10;
+  // Put movies into collections named after the metadata providers'
+  // collections (movie sets).
+  bool auto_collections = 11;
 }
 
 // LibrarySpec holds the client-settable fields of a library.
@@ -84,6 +90,8 @@ message LibrarySpec {
   google.protobuf.Duration scan_interval = 4 [(buf.validate.field).duration.gte = {}];
   string preferred_language = 5 [(buf.validate.field).string.pattern = "^([a-z]{2})?$"];
   string metadata_country = 6 [(buf.validate.field).string.pattern = "^([A-Z]{2})?$"];
+  bool save_local_metadata = 7;
+  bool auto_collections = 8;
 }
 
 message ListLibrariesRequest {}

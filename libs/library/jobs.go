@@ -264,7 +264,7 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 			}
 			if audio {
 				if res, ok := probed[it.Path]; ok {
-					applyMetadata(&it, res.Tags)
+					applyMetadata(&it, res.Tags, false)
 				}
 			}
 			return tx.Items().Upsert(ctx, it)

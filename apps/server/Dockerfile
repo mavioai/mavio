@@ -48,7 +48,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 COPY --from=ffmpeg /out/ /usr/lib/jellyfin-ffmpeg/
 COPY --from=server /out/mavio /usr/local/bin/mavio
 USER mavio
-# /config holds the database and plugins, /cache images, compiled plugins
+# /config holds the database, plugins and chosen artwork, /cache images, compiled plugins
 # and transcodes; mount media libraries under /media.
 VOLUME ["/config", "/cache"]
 EXPOSE 8686
@@ -58,5 +58,6 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
 # Arguments after the image name are appended, and later flags override
 # these, e.g. `docker run … mavio:dev -database postgres://…`.
 ENTRYPOINT ["mavio", "-addr", ":8686", "-database", "sqlite:/config/mavio.db", "-plugin-dir", "/config/plugins", \
+	"-metadata-dir", "/config/metadata", \
 	"-cache-dir", "/cache", "-transcode-dir", "/cache/transcodes", \
 	"-ffmpeg", "/usr/lib/jellyfin-ffmpeg/ffmpeg", "-ffprobe", "/usr/lib/jellyfin-ffmpeg/ffprobe"]

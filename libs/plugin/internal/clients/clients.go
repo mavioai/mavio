@@ -18,6 +18,7 @@ type Set struct {
 	metadata  pluginv1connect.MetadataProviderServiceClient
 	auth      pluginv1connect.AuthProviderServiceClient
 	notifier  pluginv1connect.NotifierServiceClient
+	subtitles pluginv1connect.SubtitleProviderServiceClient
 }
 
 // New builds the clients for m over c.
@@ -31,6 +32,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_NOTIFIER) {
 		s.notifier = pluginv1connect.NewNotifierServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_SUBTITLE_PROVIDER) {
+		s.subtitles = pluginv1connect.NewSubtitleProviderServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -49,3 +53,6 @@ func (s Set) Auth() pluginv1connect.AuthProviderServiceClient { return s.auth }
 
 // Notifier returns the NotifierService client, or nil.
 func (s Set) Notifier() pluginv1connect.NotifierServiceClient { return s.notifier }
+
+// Subtitles returns the SubtitleProviderService client, or nil.
+func (s Set) Subtitles() pluginv1connect.SubtitleProviderServiceClient { return s.subtitles }

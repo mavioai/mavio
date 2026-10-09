@@ -54,6 +54,8 @@ func (r libraries) Create(ctx context.Context, lib *core.Library) error {
 			SetScanInterval(lib.ScanInterval).
 			SetPreferredLanguage(lib.PreferredLanguage).
 			SetMetadataCountry(lib.MetadataCountry).
+			SetSaveLocalMetadata(lib.SaveLocalMetadata).
+			SetAutoCollections(lib.AutoCollections).
 			SetCreatedAt(now).
 			SetUpdatedAt(now).
 			Save(ctx)
@@ -80,6 +82,8 @@ func (r libraries) Update(ctx context.Context, lib *core.Library) error {
 			SetScanInterval(lib.ScanInterval).
 			SetPreferredLanguage(lib.PreferredLanguage).
 			SetMetadataCountry(lib.MetadataCountry).
+			SetSaveLocalMetadata(lib.SaveLocalMetadata).
+			SetAutoCollections(lib.AutoCollections).
 			SetUpdatedAt(time.Now()).
 			Save(ctx)
 		if err != nil {
@@ -137,6 +141,8 @@ func toLibrary(l *ent.Library) core.Library {
 		ScanInterval:      l.ScanInterval,
 		PreferredLanguage: l.PreferredLanguage,
 		MetadataCountry:   l.MetadataCountry,
+		SaveLocalMetadata: l.SaveLocalMetadata,
+		AutoCollections:   l.AutoCollections,
 		CreatedAt:         l.CreatedAt.UTC(),
 		UpdatedAt:         l.UpdatedAt.UTC(),
 	}

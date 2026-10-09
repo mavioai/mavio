@@ -11234,6 +11234,8 @@ type LibraryMutation struct {
 	addscan_interval     *time.Duration
 	preferred_language   *string
 	metadata_country     *string
+	save_local_metadata  *bool
+	auto_collections     *bool
 	scan_generation      *int64
 	addscan_generation   *int64
 	created_at           *time.Time
@@ -11605,6 +11607,78 @@ func (m *LibraryMutation) ResetMetadataCountry() {
 	m.metadata_country = nil
 }
 
+// SetSaveLocalMetadata sets the "save_local_metadata" field.
+func (m *LibraryMutation) SetSaveLocalMetadata(b bool) {
+	m.save_local_metadata = &b
+}
+
+// SaveLocalMetadata returns the value of the "save_local_metadata" field in the mutation.
+func (m *LibraryMutation) SaveLocalMetadata() (r bool, exists bool) {
+	v := m.save_local_metadata
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSaveLocalMetadata returns the old "save_local_metadata" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldSaveLocalMetadata(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSaveLocalMetadata is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSaveLocalMetadata requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSaveLocalMetadata: %w", err)
+	}
+	return oldValue.SaveLocalMetadata, nil
+}
+
+// ResetSaveLocalMetadata resets all changes to the "save_local_metadata" field.
+func (m *LibraryMutation) ResetSaveLocalMetadata() {
+	m.save_local_metadata = nil
+}
+
+// SetAutoCollections sets the "auto_collections" field.
+func (m *LibraryMutation) SetAutoCollections(b bool) {
+	m.auto_collections = &b
+}
+
+// AutoCollections returns the value of the "auto_collections" field in the mutation.
+func (m *LibraryMutation) AutoCollections() (r bool, exists bool) {
+	v := m.auto_collections
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAutoCollections returns the old "auto_collections" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldAutoCollections(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAutoCollections is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAutoCollections requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAutoCollections: %w", err)
+	}
+	return oldValue.AutoCollections, nil
+}
+
+// ResetAutoCollections resets all changes to the "auto_collections" field.
+func (m *LibraryMutation) ResetAutoCollections() {
+	m.auto_collections = nil
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (m *LibraryMutation) SetScanGeneration(i int64) {
 	m.scan_generation = &i
@@ -11875,7 +11949,7 @@ func (m *LibraryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LibraryMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 11)
 	if m.name != nil {
 		fields = append(fields, library.FieldName)
 	}
@@ -11893,6 +11967,12 @@ func (m *LibraryMutation) Fields() []string {
 	}
 	if m.metadata_country != nil {
 		fields = append(fields, library.FieldMetadataCountry)
+	}
+	if m.save_local_metadata != nil {
+		fields = append(fields, library.FieldSaveLocalMetadata)
+	}
+	if m.auto_collections != nil {
+		fields = append(fields, library.FieldAutoCollections)
 	}
 	if m.scan_generation != nil {
 		fields = append(fields, library.FieldScanGeneration)
@@ -11923,6 +12003,10 @@ func (m *LibraryMutation) Field(name string) (ent.Value, bool) {
 		return m.PreferredLanguage()
 	case library.FieldMetadataCountry:
 		return m.MetadataCountry()
+	case library.FieldSaveLocalMetadata:
+		return m.SaveLocalMetadata()
+	case library.FieldAutoCollections:
+		return m.AutoCollections()
 	case library.FieldScanGeneration:
 		return m.ScanGeneration()
 	case library.FieldCreatedAt:
@@ -11950,6 +12034,10 @@ func (m *LibraryMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldPreferredLanguage(ctx)
 	case library.FieldMetadataCountry:
 		return m.OldMetadataCountry(ctx)
+	case library.FieldSaveLocalMetadata:
+		return m.OldSaveLocalMetadata(ctx)
+	case library.FieldAutoCollections:
+		return m.OldAutoCollections(ctx)
 	case library.FieldScanGeneration:
 		return m.OldScanGeneration(ctx)
 	case library.FieldCreatedAt:
@@ -12006,6 +12094,20 @@ func (m *LibraryMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMetadataCountry(v)
+		return nil
+	case library.FieldSaveLocalMetadata:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSaveLocalMetadata(v)
+		return nil
+	case library.FieldAutoCollections:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAutoCollections(v)
 		return nil
 	case library.FieldScanGeneration:
 		v, ok := value.(int64)
@@ -12121,6 +12223,12 @@ func (m *LibraryMutation) ResetField(name string) error {
 		return nil
 	case library.FieldMetadataCountry:
 		m.ResetMetadataCountry()
+		return nil
+	case library.FieldSaveLocalMetadata:
+		m.ResetSaveLocalMetadata()
+		return nil
+	case library.FieldAutoCollections:
+		m.ResetAutoCollections()
 		return nil
 	case library.FieldScanGeneration:
 		m.ResetScanGeneration()
