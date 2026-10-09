@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -40,7 +41,7 @@ func startServer(t *testing.T, configure func(*playback.Config)) (string, *store
 	}
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: "v-test", Store: s, Database: s.Dialect(), Playbacks: playback.NewManager(cfg),
-		Images: images.New(images.Config{Store: s, Dir: t.TempDir()}),
+		Images: images.New(images.Config{Store: s, Dir: t.TempDir()}), Dev: true,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -92,5 +93,16 @@ func TestGetSystemInfo(t *testing.T) {
 	}
 	if !info.HasStartTime() || info.GetStartTime().AsTime().After(time.Now()) {
 		t.Errorf("start time = %v", info.GetStartTime())
+	}
+}
+
+func TestDevPlayer(t *testing.T) {
+	resp, err := http.Get(newServer(t) + "/dev/player")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusOK || !strings.HasPrefix(resp.Header.Get("Content-Type"), "text/html") {
+		t.Errorf("GET /dev/player = %d %s", resp.StatusCode, resp.Header.Get("Content-Type"))
 	}
 }

@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mavio Dev Player</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js"></script>
+<style>
+  :root { color-scheme: light dark; --fg: #1d1d1f; --bg: #fafafa; --muted: #6e6e73; --card: #fff; --line: #d2d2d7; }
+  @media (prefers-color-scheme: dark) { :root { --fg: #f5f5f7; --bg: #111; --muted: #a1a1a6; --card: #1c1c1e; --line: #38383a; } }
+  body { margin: 0; padding: 16px; font: 14px/1.4 system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  h1 { font-size: 18px; margin: 0 0 12px; }
+  form, .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  input, button, select { font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); color: var(--fg); }
+  button { cursor: pointer; }
+  #items { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; cursor: pointer; }
+  .item img, .item .ph { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; background: var(--line); }
+  .item div { padding: 6px 8px; }
+  video { width: 100%; max-height: 70vh; background: #000; border-radius: 8px; }
+  #info { color: var(--muted); white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 12px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<h1>Mavio Dev Player</h1>
+
+<form id="login" class="hidden">
+  <input id="name" placeholder="user name" autocomplete="username" required>
+  <input id="password" type="password" placeholder="password" autocomplete="current-password" required>
+  <button id="loginButton">Sign in</button>
+</form>
+
+<div id="browse" class="hidden">
+  <div class="bar">
+    <select id="kind"><option value="ITEM_KIND_MOVIE">Movies</option><option value="ITEM_KIND_EPISODE">Episodes</option><option value="ITEM_KIND_MUSIC_VIDEO">Music videos</option><option value="ITEM_KIND_VIDEO">Videos</option></select>
+    <input id="search" placeholder="search">
+    <button id="refresh">List</button>
+    <button id="logout">Sign out</button>
+  </div>
+  <div id="items"></div>
+</div>
+
+<div id="player" class="hidden">
+  <div class="bar"><button id="back">← Back</button><span id="title"></span></div>
+  <video id="video" controls playsinline crossorigin="anonymous"></video>
+  <div id="info"></div>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const device = (() => {
+  let id = localStorage.getItem("mavio.device");
+  if (!id) { id = crypto.randomUUID(); localStorage.setItem("mavio.device", id); }
+  return { id, name: navigator.platform || "Browser", client: "Mavio Dev Player", clientVersion: "0" };
+})();
+let token = localStorage.getItem("mavio.token") || "";
+
+async function rpc(method, body) {
+  const resp = await fetch("/" + method, {
+    method: "POST",
+    headers: Object.assign({ "Content-Type": "application/json" }, token ? { Authorization: "Bearer " + token } : {}),
+    body: JSON.stringify(body || {}),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw Object.assign(new Error(data.message || resp.statusText), { code: data.code });
+  return data;
+}
+
+function show(view) { for (const v of ["login", "browse", "player"]) $(v).classList.toggle("hidden", v !== view); }
+
+async function start() {
+  if (token) {
+    try { await rpc("mavio.user.v1.UserService/GetCurrentUser"); show("browse"); return list(); }
+    catch (e) { token = ""; localStorage.removeItem("mavio.token"); }
+  }
+  const info = await rpc("mavio.auth.v1.AuthService/GetAuthInfo");
+  $("loginButton").textContent = info.setupRequired ? "Create administrator" : "Sign in";
+  $("login").dataset.setup = info.setupRequired ? "1" : "";
+  show("login");
+}
+
+$("login").onsubmit = async (e) => {
+  e.preventDefault();
+  const body = { name: $("name").value, password: $("password").value, device };
+  const method = $("login").dataset.setup ? "CreateFirstUser" : "Login";
+  try {
+    const resp = await rpc("mavio.auth.v1.AuthService/" + method, body);
+    token = resp.accessToken; localStorage.setItem("mavio.token", token);
+    show("browse"); list();
+  } catch (err) { alert(err.message); }
+};
+
+$("logout").onclick = async () => {
+  try { await rpc("mavio.auth.v1.AuthService/Logout"); } catch (e) {}
+  token = ""; localStorage.removeItem("mavio.token"); start();
+};
+
+async function list() {
+  const req = { kinds: [$("kind").value], sort: [{ field: "SORT_FIELD_NAME" }], limit: 200 };
+  if ($("search").value) req.search = $("search").value;
+  const resp = await rpc("mavio.library.v1.ItemService/ListItems", req);
+  const box = $("items"); box.textContent = "";
+  for (const it of resp.items || []) {
+    const card = document.createElement("div"); card.className = "item";
+    const poster = (it.images || []).find((i) => i.kind === "IMAGE_KIND_PRIMARY");
+    const img = document.createElement(poster ? "img" : "div");
+    if (poster) { img.src = "/images/" + poster.id + "?maxWidth=280"; img.loading = "lazy"; } else img.className = "ph";
+    const label = document.createElement("div");
+    label.textContent = it.name + (it.productionYear ? " (" + it.productionYear + ")" : "");
+    card.append(img, label);
+    card.onclick = () => play(it);
+    box.append(card);
+  }
+  if (!resp.items) box.textContent = "No items. Create a library and let it scan.";
+}
+$("refresh").onclick = list;
+$("kind").onchange = list;
+$("search").onkeydown = (e) => { if (e.key === "Enter") list(); };
+
+// engine is how HLS plays: Safari's own player (AVFoundation) or hls.js;
+// ?engine=native or ?engine=hlsjs overrides it.
+const engine = new URLSearchParams(location.search).get("engine") ||
+  (/^((?!chrome|chromium|android).)*safari/i.test(navigator.userAgent) || !(window.Hls && Hls.isSupported()) ? "native" : "hlsjs");
+
+// capabilities describes what this browser plays.
+function capabilities() {
+  const nativeHLS = engine === "native";
+  const mse = (type) => window.MediaSource && MediaSource.isTypeSupported(type);
+  const video = ["h264"];
+  if (mse('video/mp4; codecs="hvc1.1.6.L120.90"') || nativeHLS) video.push("hevc");
+  if (mse('video/mp4; codecs="av01.0.08M.08"')) video.push("av1");
+  const codecs = video.join(",");
+  return {
+    name: nativeHLS ? "Safari (native HLS)" : "hls.js",
+    maxStreamingBitrate: 40000000,
+    directPlay: [
+      { kind: "MEDIA_KIND_VIDEO", container: "mp4,m4v,mov", videoCodec: codecs, audioCodec: "aac,mp3,ac3,eac3,flac,opus" },
+      { kind: "MEDIA_KIND_VIDEO", container: "webm", videoCodec: "vp8,vp9,av1", audioCodec: "opus,vorbis" },
+    ],
+    transcoding: [{
+      kind: "MEDIA_KIND_VIDEO", protocol: "PROTOCOL_HLS", container: "mp4", videoCodec: codecs,
+      audioCodec: "aac,mp3,ac3,eac3,flac,opus", maxAudioChannels: 6, enableSubtitlesInManifest: true, segmentLengthSeconds: 6,
+    }],
+    subtitles: [
+      { format: "vtt", method: "SUBTITLE_METHOD_HLS" },
+      { format: "vtt", method: "SUBTITLE_METHOD_EXTERNAL" },
+    ],
+  };
+}
+
+let current = null, hls = null, timer = null;
+
+async function play(item) {
+  await stop();
+  const caps = capabilities();
+  let resp;
+  try { resp = await rpc("mavio.playback.v1.PlaybackService/StartPlayback", { itemId: item.id, capabilities: caps }); }
+  catch (err) { alert(err.message); return; }
+  current = resp;
+  $("title").textContent = item.name;
+  show("player");
+  const v = $("video");
+  v.querySelectorAll("track").forEach((t) => t.remove());
+  for (const s of resp.subtitles || []) {
+    if (s.method !== "SUBTITLE_METHOD_EXTERNAL" || !s.url) continue;
+    const t = document.createElement("track");
+    t.kind = "subtitles"; t.src = "/" + s.url; t.label = s.title || s.language || "Subtitles " + s.streamIndex;
+    t.srclang = (s.language || "und").slice(0, 2); t.default = s.streamIndex === resp.subtitleStreamIndex;
+    v.append(t);
+  }
+  const url = "/" + resp.url;
+  if (url.endsWith(".m3u8") && engine === "hlsjs") {
+    hls = new Hls({ startPosition: 0 });
+    hls.loadSource(url); hls.attachMedia(v);
+    hls.on(Hls.Events.ERROR, (_, data) => log("hls.js " + (data.fatal ? "FATAL " : "") + data.type + " " + data.details));
+  } else {
+    v.src = url;
+  }
+  v.play().catch(() => {});
+  $("info").textContent = [
+    "client:   " + caps.name,
+    "method:   " + resp.method,
+    "reasons:  " + (resp.transcodeReasons || []).join(", "),
+    "url:      " + url,
+    "audio:    " + resp.audioStreamIndex + "   subtitle: " + resp.subtitleStreamIndex,
+    "subtitles:" + (resp.subtitles || []).map((s) => " " + s.streamIndex + "/" + (s.language || "und") + "/" + s.method.replace("SUBTITLE_METHOD_", "")).join(","),
+  ].join("\n");
+  timer = setInterval(report, 10000);
+}
+
+function log(line) { $("info").textContent += "\n" + line; }
+
+// position is the playback position as a protobuf JSON duration.
+function position() { return $("video").currentTime.toFixed(3) + "s"; }
+
+async function report() {
+  if (!current) return;
+  try { await rpc("mavio.playback.v1.PlaybackService/ReportProgress", { playbackId: current.playbackId, position: position(), paused: $("video").paused }); }
+  catch (err) { log("progress: " + err.message); }
+}
+
+async function stop() {
+  clearInterval(timer);
+  const pos = position(); // before the video is torn down
+  if (hls) { hls.destroy(); hls = null; }
+  const v = $("video"); v.pause(); v.removeAttribute("src"); v.load();
+  if (!current) return;
+  const id = current.playbackId; current = null;
+  try { await rpc("mavio.playback.v1.PlaybackService/StopPlayback", { playbackId: id, position: pos }); } catch (e) {}
+}
+
+$("back").onclick = async () => { await stop(); show("browse"); };
+$("video").onended = async () => {
+  if (!current) return;
+  const id = current.playbackId; current = null; clearInterval(timer);
+  await rpc("mavio.playback.v1.PlaybackService/StopPlayback", { playbackId: id }).catch(() => {});
+};
+window.addEventListener("pagehide", () => {
+  if (!current) return;
+  fetch("/mavio.playback.v1.PlaybackService/StopPlayback", {
+    method: "POST", keepalive: true,
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+    body: JSON.stringify({ playbackId: current.playbackId, position: position() }),
+  });
+});
+
+start().catch((err) => { document.body.append(String(err)); });
+</script>
+</body>
+</html>

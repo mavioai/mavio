@@ -46,6 +46,7 @@ func run(ctx context.Context, args []string) error {
 	ffprobe := fs.String("ffprobe", "ffprobe", "ffprobe binary")
 	transcodes := fs.String("transcode-dir", filepath.Join(os.TempDir(), "mavio-transcodes"), "directory for transcodes")
 	cacheDir := fs.String("cache-dir", defaultCacheDir(), "directory for downloaded and resized images")
+	dev := fs.Bool("dev", false, "serve the development player at /dev/player")
 	showVersion := fs.Bool("version", false, "print version and exit")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -70,7 +71,7 @@ func run(ctx context.Context, args []string) error {
 	imageServer := images.New(images.Config{Store: db, Dir: filepath.Join(*cacheDir, "images"), Logger: slog.Default()})
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: version, Store: db, Database: db.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer,
+		Images: imageServer, Dev: *dev,
 	})
 	if err != nil {
 		return err

@@ -131,7 +131,7 @@ flowchart TD
 - [x] 媒体库、条目与用户的 Connect 服务；服务端运行媒体库任务
 - [x] 图片端点：本地与提供者的图片，按 Jellyfin 的尺寸规则缩放并缓存
 - [x] 与客户端协商的 WebP 编码（`gen2brain/vpx`）；在媒体库任务中计算 blurhash / thumbhash 占位图
-- [ ] 在 hls.js / AVPlayer / Media3 实机客户端上验证播放，包括拖动后 HLS 字幕轨仍保持同步：字幕轨是一个不带 `X-TIMESTAMP-MAP` 的 WebVTT 分片；若有播放器错位，则像 Jellyfin 一样按视频分片切分 WebVTT
+- [ ] 在 hls.js / AVPlayer / Media3 实机客户端上验证播放（Chromium 中的 hls.js 已通过开发用播放器验证：直接串流、拖动并重启转码、同步的 HLS 字幕轨、进度与停止），包括拖动后 HLS 字幕轨仍保持同步：字幕轨是一个不带 `X-TIMESTAMP-MAP` 的 WebVTT 分片；若有播放器错位，则像 Jellyfin 一样按视频分片切分 WebVTT
 
 ### P6 服务端装配与分发
 **范围**：`apps/server` 装配；`CGO_ENABLED=0` 交叉编译；容器镜像内置 jellyfin-ffmpeg。

@@ -131,7 +131,7 @@ flowchart TD
 - [x] Library, item and user Connect services; the server runs the library jobs
 - [x] Image endpoint: local and provider artwork, resized with Jellyfin's size rules and cached
 - [x] WebP encoding (`gen2brain/vpx`) negotiated with clients; blurhash / thumbhash placeholders computed in the library jobs
-- [ ] Playback verified on real hls.js / AVPlayer / Media3 clients, including HLS subtitle renditions staying in sync after seeking: they are one WebVTT segment without `X-TIMESTAMP-MAP`; if a player misplaces them, segment the WebVTT along the video as Jellyfin does
+- [ ] Playback verified on real hls.js / AVPlayer / Media3 clients (hls.js in Chromium passes with the development player: direct stream, seeking with restarts, an HLS subtitle rendition in sync, progress and stop), including HLS subtitle renditions staying in sync after seeking: they are one WebVTT segment without `X-TIMESTAMP-MAP`; if a player misplaces them, segment the WebVTT along the video as Jellyfin does
 
 ### P6 Server Assembly and Distribution
 **Scope**: `apps/server` assembly; `CGO_ENABLED=0` cross-compilation; container images bundling jellyfin-ffmpeg.
