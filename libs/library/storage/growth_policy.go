@@ -227,8 +227,9 @@ func (p *GrowthPolicy) IsGrowing(path string, size int64, mtime time.Time) bool 
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	prev, ok := p.lastSeen[path]
-	p.lastSeen[path] = FileStamp{Size: size, MtimeNs: mtime.UnixNano()}
+	norm := filepath.ToSlash(filepath.Clean(path))
+	prev, ok := p.lastSeen[norm]
+	p.lastSeen[norm] = FileStamp{Size: size, MtimeNs: mtime.UnixNano()}
 	if ok && (prev.Size != size || prev.MtimeNs != mtime.UnixNano()) {
 		return true
 	}

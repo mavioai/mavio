@@ -13,11 +13,12 @@ import (
 )
 
 func detectDevice(path string) (DeviceInfo, error) {
+	path = filepath.FromSlash(path)
 	volPath := filepath.VolumeName(path)
 	if volPath == "" {
 		volPath = path
 	}
-	rootPath := volPath + `\`
+	rootPath := strings.TrimRight(volPath, `\`) + `\`
 
 	rootPtr, err := syscall.UTF16PtrFromString(rootPath)
 	if err != nil {
