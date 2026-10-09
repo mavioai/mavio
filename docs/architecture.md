@@ -214,7 +214,7 @@ Requirements are derived from Jellyfin's `src/Jellyfin.Drawing.Skia`, `MediaBrow
 | Library collages, splash screens (with text) | `image/draw` compositing + `go-text/typesetting` text layout, with a bundled Noto font subset covering CJK |
 | Trickplay thumbnail sheets | ffmpeg: the `fps` + `scale` + `tile` filters output the sheet in one pass, with hardware decoding available |
 | Video screenshots, chapter images | ffmpeg |
-| Blurhash / Thumbhash | Pure Go, computed on a 32px thumbnail |
+| Blurhash / Thumbhash | Pure Go (`bbrks/go-blurhash`, `go.n16f.net/thumbhash`): blurhash on a 32px thumbnail with Jellyfin's component counts, thumbhash on a 100px one |
 | SVG | Checked for external references (`CheckSVG`: href, CSS `url()` and `@import`, nested data URIs, external or exploding entities) and served to clients as-is; SVGs are not rasterized |
 | Reading image dimensions | `image.DecodeConfig` |
 

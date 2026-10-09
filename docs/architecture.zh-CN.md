@@ -214,7 +214,7 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
 | 媒体库拼贴、启动屏（含文字） | `image/draw` 合成 + `go-text/typesetting` 排版，内置 Noto 字体子集覆盖 CJK |
 | Trickplay 缩略图拼图 | ffmpeg：`fps` + `scale` + `tile` 滤镜一步输出拼图，可走硬件解码 |
 | 视频截图、章节图 | ffmpeg |
-| Blurhash / Thumbhash | 纯 Go，在 32px 缩略图上计算 |
+| Blurhash / Thumbhash | 纯 Go（`bbrks/go-blurhash`、`go.n16f.net/thumbhash`）：blurhash 按 Jellyfin 的分量数在 32px 缩略图上计算，thumbhash 在 100px 缩略图上计算 |
 | SVG | 检查外部引用（`CheckSVG`：href、CSS `url()` 与 `@import`、嵌套 data URI、外部实体或实体爆炸）后原样下发给客户端；不做栅格化 |
 | 读取图片尺寸 | `image.DecodeConfig` |
 
