@@ -1,2 +1,6 @@
+github.com/wlynxg/chardet v1.0.5 h1:BNEolSEujJUtKwkaqNb0D6Ue+d7VTKTh5rXDyEdiipU=
+github.com/wlynxg/chardet v1.0.5/go.mod h1:q4N3YNbywQtX0u12Eh0+0LZB53Ayc7nOfHHaio+RcVA=
 golang.org/x/sys v0.48.0 h1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=
 golang.org/x/sys v0.48.0/go.mod h1:hNLxWAXmnKAxqDtdwIYC4bM9oQPEecfsnNMuSxOs3og=
+golang.org/x/text v0.42.0 h1:JbOZXgfeCPU9gacVtYliJqOhD+zhrEqK4LfdpmlUZqI=
+golang.org/x/text v0.42.0/go.mod h1:ojzP1Z+2QtioaF8DTtO8K5q7JWVVYwZKenzujK0Zd0E=

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/subtitle"
 )
 
 // SubtitleMode is when subtitles play by default.
@@ -154,7 +155,9 @@ func SubtitleScores(streams []core.MediaStream, languages []string, mode Subtitl
 // separate file, text and external.
 func StreamScore(st *core.MediaStream, languages []string) int {
 	score := 1
-	if i := slices.IndexFunc(languages, func(l string) bool { return strings.EqualFold(l, st.Language) }); i >= 0 {
+	if i := slices.IndexFunc(languages, func(l string) bool {
+		return strings.EqualFold(l, st.Language) || subtitle.MatchesLanguage(l, st.Language)
+	}); i >= 0 {
 		score = 101 - i
 	}
 	for _, v := range []bool{st.Forced, st.Default, supportsExternalStream(st), st.IsTextSubtitle(), isExternal(st)} {
@@ -164,6 +167,9 @@ func StreamScore(st *core.MediaStream, languages []string) int {
 		} else {
 			score++
 		}
+	}
+	if st.HearingImpaired {
+		score -= 5
 	}
 	return score
 }
@@ -215,7 +221,15 @@ func onlyForced(streams []*core.MediaStream, languages []string) []*core.MediaSt
 // matchesLanguage reports whether lang is preferred; no preference matches
 // any language.
 func matchesLanguage(lang string, languages []string) bool {
-	return len(languages) == 0 || containsFold(languages, lang)
+	if len(languages) == 0 {
+		return true
+	}
+	for _, l := range languages {
+		if strings.EqualFold(l, lang) || subtitle.MatchesLanguage(l, lang) {
+			return true
+		}
+	}
+	return false
 }
 
 func undefinedLanguage(lang string) bool {

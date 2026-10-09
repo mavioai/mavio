@@ -22,13 +22,15 @@ const (
 	DownmixNightmodeDialogue Downmix = "nightmode_dialogue"
 	DownmixRFC7845           Downmix = "rfc7845"
 	DownmixAC4               Downmix = "ac4"
+	DownmixITURBS775         Downmix = "itu_bs775"
 )
 
 const (
-	pan51To71Side = "pan=5.1(side)|c0=c0|c1=c1|c2=c2|c3=c3|c4=0.707*c4+0.707*c6|c5=0.707*c5+0.707*c7"
-	dave750       = "pan=stereo|c0=0.5*c2+0.707*c0+0.707*c4+0.5*c3|c1=0.5*c2+0.707*c1+0.707*c5+0.5*c3"
-	nightmode     = "pan=stereo|c0=c2+0.30*c0+0.30*c4|c1=c2+0.30*c1+0.30*c5"
-	ac4From51     = "pan=stereo|c0=c0+0.707*c2+0.707*c4|c1=c1+0.707*c2+0.707*c5"
+	pan51To71Side    = "pan=5.1(side)|c0=c0|c1=c1|c2=c2|c3=c3|c4=0.707*c4+0.707*c6|c5=0.707*c5+0.707*c7"
+	dave750          = "pan=stereo|c0=0.5*c2+0.707*c0+0.707*c4+0.5*c3|c1=0.5*c2+0.707*c1+0.707*c5+0.5*c3"
+	nightmode        = "pan=stereo|c0=c2+0.30*c0+0.30*c4|c1=c2+0.30*c1+0.30*c5"
+	ac4From51        = "pan=stereo|c0=c0+0.707*c2+0.707*c4|c1=c1+0.707*c2+0.707*c5"
+	iturbs775Boost51 = "pan=stereo|c0=0.707*c0+1.0*c2+0.707*c4|c1=0.707*c1+1.0*c2+0.707*c5"
 )
 
 // downmixFilters are the pan filters per algorithm and source layout; 7.1
@@ -56,6 +58,12 @@ var downmixFilters = map[Downmix]map[string]string{
 		"5.1": ac4From51,
 		"7.0": "pan=5.0(side)|c0=c0|c1=c1|c2=c2|c3=0.707*c3+0.707*c5|c4=0.707*c4+0.707*c6,pan=stereo|c0=c0+0.707*c2+0.707*c3|c1=c1+0.707*c2+0.707*c4",
 		"7.1": pan51To71Side + "," + ac4From51,
+	},
+	DownmixITURBS775: {
+		"3.0": "pan=stereo|c0=0.707*c0+1.0*c2|c1=0.707*c1+1.0*c2",
+		"5.0": "pan=stereo|c0=0.707*c0+1.0*c2+0.707*c3|c1=0.707*c1+1.0*c2+0.707*c4",
+		"5.1": iturbs775Boost51,
+		"7.1": pan51To71Side + "," + iturbs775Boost51,
 	},
 }
 

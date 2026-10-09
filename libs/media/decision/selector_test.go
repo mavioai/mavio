@@ -90,3 +90,31 @@ func TestDefaultSubtitleIndex(t *testing.T) {
 		t.Errorf("scores without subtitles: got = %v", s)
 	}
 }
+
+func TestChineseSubtitleSelection(t *testing.T) {
+	streams := []core.MediaStream{
+		{Index: 0, Kind: core.StreamVideo},
+		{Index: 1, Kind: core.StreamAudio, Language: "jpn"},
+		{Index: 2, Kind: core.StreamSubtitle, Codec: "subrip", Language: "chs"},
+		{Index: 3, Kind: core.StreamSubtitle, Codec: "ass", Language: "cht"},
+		{Index: 4, Kind: core.StreamSubtitle, Codec: "subrip", Language: "eng"},
+	}
+
+	// Preference "zh-Hans" should match stream 2 ("chs")
+	gotHans := DefaultSubtitleIndex(streams, []string{"zh-Hans"}, SubtitlesAlways, "jpn")
+	if gotHans == nil || *gotHans != 2 {
+		t.Errorf("zh-Hans preferred: got = %v, want = 2", gotHans)
+	}
+
+	// Preference "zh-Hant" should match stream 3 ("cht")
+	gotHant := DefaultSubtitleIndex(streams, []string{"zh-Hant"}, SubtitlesAlways, "jpn")
+	if gotHant == nil || *gotHant != 3 {
+		t.Errorf("zh-Hant preferred: got = %v, want = 3", gotHant)
+	}
+
+	// General "zh" should match Chinese subtitles
+	gotGeneral := DefaultSubtitleIndex(streams, []string{"zh"}, SubtitlesAlways, "jpn")
+	if gotGeneral == nil || (*gotGeneral != 2 && *gotGeneral != 3) {
+		t.Errorf("zh general preferred: got = %v, want = 2 or 3", gotGeneral)
+	}
+}
