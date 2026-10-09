@@ -60,7 +60,7 @@ flowchart TD
 | P5 | Streaming and API | ✅ Done |
 | P6 | Server assembly and distribution | In progress |
 | P7 | Browsing | ✅ Done |
-| P8 | Live events and sessions | In progress |
+| P8 | Live events and sessions | ✅ Done |
 | P9 | Metadata management | Not started |
 | P10 | Administration and operations | Not started |
 | P11 | Media extras | Not started |
@@ -203,6 +203,7 @@ flowchart TD
 - [x] Sessions (`SessionService`): devices online while streaming, what each plays, remote commands
 - [x] Quick Connect (`AuthService`): a new device signed in by entering its code on a signed-in one
 - [x] SyncPlay (`SyncPlayService`): groups of devices playing one queue at one position, waiting for buffering members, as in Jellyfin; timing tested with `testing/synctest`
+- [x] End-to-end test of the assembled server through its API (`internal/server`, `TestLiveEvents`): a TV learns of the film a scan found and of a phone's playback and state, pauses the phone, and both are told to start a SyncPlay group at the same time and position
 
 ### P9 Metadata Management
 **Scope**: correcting and completing what the library scans find.

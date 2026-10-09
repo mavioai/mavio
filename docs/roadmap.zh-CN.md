@@ -60,7 +60,7 @@ flowchart TD
 | P5 | 流媒体与 API | ✅ 完成 |
 | P6 | 服务端装配与分发 | 进行中 |
 | P7 | 浏览 | ✅ 已完成 |
-| P8 | 实时事件与会话 | 进行中 |
+| P8 | 实时事件与会话 | ✅ 已完成 |
 | P9 | 元数据管理 | 未开始 |
 | P10 | 管理与运维 | 未开始 |
 | P11 | 媒体附加功能 | 未开始 |
@@ -203,6 +203,7 @@ flowchart TD
 - [x] 会话（`SessionService`）：设备在事件流打开期间在线、各设备正在播放的内容、远程命令
 - [x] Quick Connect（`AuthService`）：在已登录设备上输入新设备的代码，使其登录
 - [x] SyncPlay（`SyncPlayService`）：设备分组以同一位置播放同一队列，并等待缓冲中的成员，与 Jellyfin 相同；计时逻辑用 `testing/synctest` 测试
+- [x] 通过 API 测试装配好的服务端的端到端测试（`internal/server`、`TestLiveEvents`）：电视得知扫描发现的影片以及手机的播放与状态，暂停手机，两者在 SyncPlay 分组中被告知在同一时刻、同一位置开始
 
 ### P9 元数据管理
 **范围**：修正与补全媒体库扫描得到的内容。
