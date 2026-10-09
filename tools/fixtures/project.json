@@ -8,6 +8,14 @@
         "cwd": "{projectRoot}"
       },
       "cache": false
+    },
+    "dev-library": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./dev-library.sh",
+        "cwd": "{projectRoot}"
+      },
+      "cache": false
     }
   }
 }

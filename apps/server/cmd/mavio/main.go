@@ -47,6 +47,7 @@ func run(ctx context.Context, args []string) error {
 	transcodes := fs.String("transcode-dir", filepath.Join(os.TempDir(), "mavio-transcodes"), "directory for transcodes")
 	cacheDir := fs.String("cache-dir", defaultCacheDir(), "directory for downloaded and resized images")
 	dev := fs.Bool("dev", false, "serve the development player at /dev/player")
+	devLibrary := fs.String("dev-library", "", "add the Movies and Shows folders of this directory as libraries, e.g. .fixtures/dev-library")
 	showVersion := fs.Bool("version", false, "print version and exit")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -67,6 +68,11 @@ func run(ctx context.Context, args []string) error {
 			slog.ErrorContext(ctx, "close database", "err", err)
 		}
 	}()
+	if *devLibrary != "" {
+		if err := addDevLibraries(ctx, db, *devLibrary); err != nil {
+			return err
+		}
+	}
 	playbacks, ffmpegVersion := newPlaybacks(ctx, db, *ffmpeg, *ffprobe, *transcodes)
 	imageServer := images.New(images.Config{Store: db, Dir: filepath.Join(*cacheDir, "images"), Logger: slog.Default()})
 	h, err := httpserver.Handler(httpserver.Options{
@@ -95,6 +101,34 @@ func run(ctx context.Context, args []string) error {
 		})
 	}
 	return g.Wait()
+}
+
+// addDevLibraries adds the Movies and Shows folders of dir as libraries,
+// unless libraries already hold them; the startup scan then scans them.
+func addDevLibraries(ctx context.Context, db core.Store, dir string) error {
+	dir, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	for _, l := range []struct {
+		name, folder string
+		kind         core.LibraryKind
+	}{{"Dev Movies", "Movies", core.LibraryMovies}, {"Dev Shows", "Shows", core.LibraryShows}} {
+		path := filepath.Join(dir, l.folder)
+		if info, err := os.Stat(path); err != nil || !info.IsDir() {
+			return fmt.Errorf("dev library: %s is not a folder; generate it with pnpm nx run fixtures:dev-library", path)
+		}
+		lib := core.Library{Name: l.name, Kind: l.kind, Paths: []string{path}}
+		switch err := db.Libraries().Create(ctx, &lib); {
+		case errors.Is(err, core.ErrConflict):
+			// Added before.
+		case err != nil:
+			return fmt.Errorf("dev library %s: %w", l.name, err)
+		default:
+			slog.InfoContext(ctx, "added dev library", "library", l.name, "path", path)
+		}
+	}
+	return nil
 }
 
 // defaultCacheDir is the user's cache directory for Mavio, or one in the
