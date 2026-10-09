@@ -139,6 +139,13 @@ flowchart TD
 
 **完成标准**：端到端冒烟测试：扫描 → 刮削 → 播放决策 → HLS 播放。
 
+**进度**：
+- [x] 装配位于 `apps/server/internal/server`，`cmd/mavio` 以命令行参数运行它
+- [x] 从插件目录（`-plugin-dir`）启动插件；插件配置经 `SystemService` 保存、按清单的 schema 校验并即时生效，无需重启；元数据插件就绪后参与媒体库刷新
+- [x] 端到端测试：通过 API 测试装配好的服务端，使用真实 ffmpeg 与 WASM 元数据插件：管理员配置插件，扫描媒体库，刮削其中的影片并以 HLS 直接串流播放
+- [ ] 在 CI 中检查 `CGO_ENABLED=0` 交叉编译
+- [ ] 内置 jellyfin-ffmpeg 便携版的容器镜像
+
 ### P7 客户端与生态
 **范围**：`libs/client`、`libs/ui`；`apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；媒体库与合集拼贴图；Jellyfin API 兼容垫片（shim）评估。具体完成标准在 P6 完成后制定。
 

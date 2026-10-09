@@ -344,6 +344,7 @@ Mavio discovers library changes with **full reconciliation scans**, using the sa
 
 ## 11. API and Authentication (apps/server)
 
+* **Assembly**: `apps/server/internal/server` wires storage, plugins, playback, images, the library worker and the handler tree, and runs them until shutdown; `cmd/mavio` only parses flags into its configuration, and the end-to-end test runs the same assembly.
 * **One handler tree**: `apps/server/internal/httpserver` mounts the Connect services (implemented in `internal/rpc`) and the plain HTTP media endpoints on one `http.ServeMux`. Every Connect request is checked against its protovalidate rules before it reaches the service; violations are `invalid_argument`.
 * **Accounts**: passwords are hashed with argon2id (19 MiB, 2 passes, 1 lane) into a PHC string; a hash with other parameters is still accepted and replaced at the next successful sign-in. Signing in with an unknown name costs the same as a wrong password. Users that authenticate through a plugin have no password hash.
 * **First run**: while no user exists, `AuthService.CreateFirstUser` creates an administrator without credentials and signs it in; afterwards it fails with `failed_precondition`. `AuthService.GetAuthInfo` tells clients whether this step is pending.
