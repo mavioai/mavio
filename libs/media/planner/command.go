@@ -173,6 +173,13 @@ func (p *Planner) HLSArgs(j *Job, out HLSOutput) []string {
 			// audio's initial delay, into the fragments; without a sidx
 			// ffmpeg leaves the presentation times of open-GOP boundaries
 			// as they are.
+			//
+			// Audio that starts before zero, as encoder priming does, thus
+			// gets a negative tfdt, although the format defines it as
+			// unsigned. This is deliberate, as in Jellyfin, whose fMP4
+			// clients play it, as do hls.js and Safari; shifting the
+			// output instead would delay the video against its subtitles.
+			// See the roadmap's risks.
 			args = append(args, "-hls_segment_options", "movflags=+frag_discont+skip_sidx")
 		}
 	} else {
