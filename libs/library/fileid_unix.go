@@ -3,8 +3,8 @@
 package library
 
 import (
+	"fmt"
 	"io/fs"
-	"strconv"
 	"syscall"
 )
 
@@ -15,5 +15,6 @@ func fileID(info fs.FileInfo) string {
 	if !ok {
 		return ""
 	}
-	return strconv.FormatUint(uint64(st.Dev), 10) + ":" + strconv.FormatUint(st.Ino, 10)
+	// Dev's type differs between systems.
+	return fmt.Sprintf("%d:%d", st.Dev, st.Ino)
 }
