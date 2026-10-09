@@ -16,6 +16,8 @@ type Tx struct {
 	AuthSession *AuthSessionClient
 	// Credit is the client for interacting with the Credit builders.
 	Credit *CreditClient
+	// DisplayPreferences is the client for interacting with the DisplayPreferences builders.
+	DisplayPreferences *DisplayPreferencesClient
 	// FolderState is the client for interacting with the FolderState builders.
 	FolderState *FolderStateClient
 	// Image is the client for interacting with the Image builders.
@@ -173,6 +175,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.AuthSession = NewAuthSessionClient(tx.config)
 	tx.Credit = NewCreditClient(tx.config)
+	tx.DisplayPreferences = NewDisplayPreferencesClient(tx.config)
 	tx.FolderState = NewFolderStateClient(tx.config)
 	tx.Image = NewImageClient(tx.config)
 	tx.Item = NewItemClient(tx.config)

@@ -41,6 +41,8 @@ const (
 	EdgeAuthSessions = "auth_sessions"
 	// EdgePlaylists holds the string denoting the playlists edge name in mutations.
 	EdgePlaylists = "playlists"
+	// EdgeDisplayPreferences holds the string denoting the display_preferences edge name in mutations.
+	EdgeDisplayPreferences = "display_preferences"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// UserDataTable is the table that holds the user_data relation/edge.
@@ -64,6 +66,13 @@ const (
 	PlaylistsInverseTable = "items"
 	// PlaylistsColumn is the table column denoting the playlists relation/edge.
 	PlaylistsColumn = "user_id"
+	// DisplayPreferencesTable is the table that holds the display_preferences relation/edge.
+	DisplayPreferencesTable = "display_preferences"
+	// DisplayPreferencesInverseTable is the table name for the DisplayPreferences entity.
+	// It exists in this package in order to avoid circular dependency with the "displaypreferences" package.
+	DisplayPreferencesInverseTable = "display_preferences"
+	// DisplayPreferencesColumn is the table column denoting the display_preferences relation/edge.
+	DisplayPreferencesColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -197,6 +206,20 @@ func ByPlaylists(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newPlaylistsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByDisplayPreferencesCount orders the results by display_preferences count.
+func ByDisplayPreferencesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDisplayPreferencesStep(), opts...)
+	}
+}
+
+// ByDisplayPreferences orders the results by display_preferences terms.
+func ByDisplayPreferences(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDisplayPreferencesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserDataStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -216,5 +239,12 @@ func newPlaylistsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlaylistsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, PlaylistsTable, PlaylistsColumn),
+	)
+}
+func newDisplayPreferencesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DisplayPreferencesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DisplayPreferencesTable, DisplayPreferencesColumn),
 	)
 }

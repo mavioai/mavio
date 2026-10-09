@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
@@ -41,6 +42,8 @@ type Client struct {
 	AuthSession *AuthSessionClient
 	// Credit is the client for interacting with the Credit builders.
 	Credit *CreditClient
+	// DisplayPreferences is the client for interacting with the DisplayPreferences builders.
+	DisplayPreferences *DisplayPreferencesClient
 	// FolderState is the client for interacting with the FolderState builders.
 	FolderState *FolderStateClient
 	// Image is the client for interacting with the Image builders.
@@ -78,6 +81,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.AuthSession = NewAuthSessionClient(c.config)
 	c.Credit = NewCreditClient(c.config)
+	c.DisplayPreferences = NewDisplayPreferencesClient(c.config)
 	c.FolderState = NewFolderStateClient(c.config)
 	c.Image = NewImageClient(c.config)
 	c.Item = NewItemClient(c.config)
@@ -180,22 +184,23 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		AuthSession:  NewAuthSessionClient(cfg),
-		Credit:       NewCreditClient(cfg),
-		FolderState:  NewFolderStateClient(cfg),
-		Image:        NewImageClient(cfg),
-		Item:         NewItemClient(cfg),
-		ItemLink:     NewItemLinkClient(cfg),
-		ItemValue:    NewItemValueClient(cfg),
-		Job:          NewJobClient(cfg),
-		Library:      NewLibraryClient(cfg),
-		MediaSource:  NewMediaSourceClient(cfg),
-		Person:       NewPersonClient(cfg),
-		PluginConfig: NewPluginConfigClient(cfg),
-		User:         NewUserClient(cfg),
-		UserData:     NewUserDataClient(cfg),
+		ctx:                ctx,
+		config:             cfg,
+		AuthSession:        NewAuthSessionClient(cfg),
+		Credit:             NewCreditClient(cfg),
+		DisplayPreferences: NewDisplayPreferencesClient(cfg),
+		FolderState:        NewFolderStateClient(cfg),
+		Image:              NewImageClient(cfg),
+		Item:               NewItemClient(cfg),
+		ItemLink:           NewItemLinkClient(cfg),
+		ItemValue:          NewItemValueClient(cfg),
+		Job:                NewJobClient(cfg),
+		Library:            NewLibraryClient(cfg),
+		MediaSource:        NewMediaSourceClient(cfg),
+		Person:             NewPersonClient(cfg),
+		PluginConfig:       NewPluginConfigClient(cfg),
+		User:               NewUserClient(cfg),
+		UserData:           NewUserDataClient(cfg),
 	}, nil
 }
 
@@ -213,22 +218,23 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		AuthSession:  NewAuthSessionClient(cfg),
-		Credit:       NewCreditClient(cfg),
-		FolderState:  NewFolderStateClient(cfg),
-		Image:        NewImageClient(cfg),
-		Item:         NewItemClient(cfg),
-		ItemLink:     NewItemLinkClient(cfg),
-		ItemValue:    NewItemValueClient(cfg),
-		Job:          NewJobClient(cfg),
-		Library:      NewLibraryClient(cfg),
-		MediaSource:  NewMediaSourceClient(cfg),
-		Person:       NewPersonClient(cfg),
-		PluginConfig: NewPluginConfigClient(cfg),
-		User:         NewUserClient(cfg),
-		UserData:     NewUserDataClient(cfg),
+		ctx:                ctx,
+		config:             cfg,
+		AuthSession:        NewAuthSessionClient(cfg),
+		Credit:             NewCreditClient(cfg),
+		DisplayPreferences: NewDisplayPreferencesClient(cfg),
+		FolderState:        NewFolderStateClient(cfg),
+		Image:              NewImageClient(cfg),
+		Item:               NewItemClient(cfg),
+		ItemLink:           NewItemLinkClient(cfg),
+		ItemValue:          NewItemValueClient(cfg),
+		Job:                NewJobClient(cfg),
+		Library:            NewLibraryClient(cfg),
+		MediaSource:        NewMediaSourceClient(cfg),
+		Person:             NewPersonClient(cfg),
+		PluginConfig:       NewPluginConfigClient(cfg),
+		User:               NewUserClient(cfg),
+		UserData:           NewUserDataClient(cfg),
 	}, nil
 }
 
@@ -258,9 +264,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AuthSession, c.Credit, c.FolderState, c.Image, c.Item, c.ItemLink,
-		c.ItemValue, c.Job, c.Library, c.MediaSource, c.Person, c.PluginConfig, c.User,
-		c.UserData,
+		c.AuthSession, c.Credit, c.DisplayPreferences, c.FolderState, c.Image, c.Item,
+		c.ItemLink, c.ItemValue, c.Job, c.Library, c.MediaSource, c.Person,
+		c.PluginConfig, c.User, c.UserData,
 	} {
 		n.Use(hooks...)
 	}
@@ -270,9 +276,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AuthSession, c.Credit, c.FolderState, c.Image, c.Item, c.ItemLink,
-		c.ItemValue, c.Job, c.Library, c.MediaSource, c.Person, c.PluginConfig, c.User,
-		c.UserData,
+		c.AuthSession, c.Credit, c.DisplayPreferences, c.FolderState, c.Image, c.Item,
+		c.ItemLink, c.ItemValue, c.Job, c.Library, c.MediaSource, c.Person,
+		c.PluginConfig, c.User, c.UserData,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -285,6 +291,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AuthSession.mutate(ctx, m)
 	case *CreditMutation:
 		return c.Credit.mutate(ctx, m)
+	case *DisplayPreferencesMutation:
+		return c.DisplayPreferences.mutate(ctx, m)
 	case *FolderStateMutation:
 		return c.FolderState.mutate(ctx, m)
 	case *ImageMutation:
@@ -625,6 +633,155 @@ func (c *CreditClient) mutate(ctx context.Context, m *CreditMutation) (Value, er
 		return (&CreditDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Credit mutation op: %q", m.Op())
+	}
+}
+
+// DisplayPreferencesClient is a client for the DisplayPreferences schema.
+type DisplayPreferencesClient struct {
+	config
+}
+
+// NewDisplayPreferencesClient returns a client for the DisplayPreferences from the given config.
+func NewDisplayPreferencesClient(c config) *DisplayPreferencesClient {
+	return &DisplayPreferencesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `displaypreferences.Hooks(f(g(h())))`.
+func (c *DisplayPreferencesClient) Use(hooks ...Hook) {
+	c.hooks.DisplayPreferences = append(c.hooks.DisplayPreferences, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `displaypreferences.Intercept(f(g(h())))`.
+func (c *DisplayPreferencesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DisplayPreferences = append(c.inters.DisplayPreferences, interceptors...)
+}
+
+// Create returns a builder for creating a DisplayPreferences entity.
+func (c *DisplayPreferencesClient) Create() *DisplayPreferencesCreate {
+	mutation := newDisplayPreferencesMutation(c.config, OpCreate)
+	return &DisplayPreferencesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DisplayPreferences entities.
+func (c *DisplayPreferencesClient) CreateBulk(builders ...*DisplayPreferencesCreate) *DisplayPreferencesCreateBulk {
+	return &DisplayPreferencesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DisplayPreferencesClient) MapCreateBulk(slice any, setFunc func(*DisplayPreferencesCreate, int)) *DisplayPreferencesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DisplayPreferencesCreateBulk{err: fmt.Errorf("calling to DisplayPreferencesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DisplayPreferencesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DisplayPreferencesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DisplayPreferences.
+func (c *DisplayPreferencesClient) Update() *DisplayPreferencesUpdate {
+	mutation := newDisplayPreferencesMutation(c.config, OpUpdate)
+	return &DisplayPreferencesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DisplayPreferencesClient) UpdateOne(_m *DisplayPreferences) *DisplayPreferencesUpdateOne {
+	mutation := newDisplayPreferencesMutation(c.config, OpUpdateOne, withDisplayPreferences(_m))
+	return &DisplayPreferencesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DisplayPreferencesClient) UpdateOneID(id core.ID) *DisplayPreferencesUpdateOne {
+	mutation := newDisplayPreferencesMutation(c.config, OpUpdateOne, withDisplayPreferencesID(id))
+	return &DisplayPreferencesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DisplayPreferences.
+func (c *DisplayPreferencesClient) Delete() *DisplayPreferencesDelete {
+	mutation := newDisplayPreferencesMutation(c.config, OpDelete)
+	return &DisplayPreferencesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DisplayPreferencesClient) DeleteOne(_m *DisplayPreferences) *DisplayPreferencesDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DisplayPreferencesClient) DeleteOneID(id core.ID) *DisplayPreferencesDeleteOne {
+	builder := c.Delete().Where(displaypreferences.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DisplayPreferencesDeleteOne{builder}
+}
+
+// Query returns a query builder for DisplayPreferences.
+func (c *DisplayPreferencesClient) Query() *DisplayPreferencesQuery {
+	return &DisplayPreferencesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDisplayPreferences},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DisplayPreferences entity by its id.
+func (c *DisplayPreferencesClient) Get(ctx context.Context, id core.ID) (*DisplayPreferences, error) {
+	return c.Query().Where(displaypreferences.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DisplayPreferencesClient) GetX(ctx context.Context, id core.ID) *DisplayPreferences {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a DisplayPreferences.
+func (c *DisplayPreferencesClient) QueryUser(_m *DisplayPreferences) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(displaypreferences.Table, displaypreferences.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, displaypreferences.UserTable, displaypreferences.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DisplayPreferencesClient) Hooks() []Hook {
+	return c.hooks.DisplayPreferences
+}
+
+// Interceptors returns the client interceptors.
+func (c *DisplayPreferencesClient) Interceptors() []Interceptor {
+	return c.inters.DisplayPreferences
+}
+
+func (c *DisplayPreferencesClient) mutate(ctx context.Context, m *DisplayPreferencesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DisplayPreferencesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DisplayPreferencesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DisplayPreferencesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DisplayPreferencesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DisplayPreferences mutation op: %q", m.Op())
 	}
 }
 
@@ -2498,6 +2655,22 @@ func (c *UserClient) QueryPlaylists(_m *User) *ItemQuery {
 	return query
 }
 
+// QueryDisplayPreferences queries the display_preferences edge of a User.
+func (c *UserClient) QueryDisplayPreferences(_m *User) *DisplayPreferencesQuery {
+	query := (&DisplayPreferencesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(displaypreferences.Table, displaypreferences.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DisplayPreferencesTable, user.DisplayPreferencesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -2691,11 +2864,13 @@ func (c *UserDataClient) mutate(ctx context.Context, m *UserDataMutation) (Value
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AuthSession, Credit, FolderState, Image, Item, ItemLink, ItemValue, Job,
-		Library, MediaSource, Person, PluginConfig, User, UserData []ent.Hook
+		AuthSession, Credit, DisplayPreferences, FolderState, Image, Item, ItemLink,
+		ItemValue, Job, Library, MediaSource, Person, PluginConfig, User,
+		UserData []ent.Hook
 	}
 	inters struct {
-		AuthSession, Credit, FolderState, Image, Item, ItemLink, ItemValue, Job,
-		Library, MediaSource, Person, PluginConfig, User, UserData []ent.Interceptor
+		AuthSession, Credit, DisplayPreferences, FolderState, Image, Item, ItemLink,
+		ItemValue, Job, Library, MediaSource, Person, PluginConfig, User,
+		UserData []ent.Interceptor
 	}
 )

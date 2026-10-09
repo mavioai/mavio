@@ -12,6 +12,9 @@ type AuthSession func(*sql.Selector)
 // Credit is the predicate function for credit builders.
 type Credit func(*sql.Selector)
 
+// DisplayPreferences is the predicate function for displaypreferences builders.
+type DisplayPreferences func(*sql.Selector)
+
 // FolderState is the predicate function for folderstate builders.
 type FolderState func(*sql.Selector)
 

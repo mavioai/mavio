@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -192,6 +193,21 @@ func (_c *UserCreate) AddPlaylists(v ...*Item) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddPlaylistIDs(ids...)
+}
+
+// AddDisplayPreferenceIDs adds the "display_preferences" edge to the DisplayPreferences entity by IDs.
+func (_c *UserCreate) AddDisplayPreferenceIDs(ids ...core.ID) *UserCreate {
+	_c.mutation.AddDisplayPreferenceIDs(ids...)
+	return _c
+}
+
+// AddDisplayPreferences adds the "display_preferences" edges to the DisplayPreferences entity.
+func (_c *UserCreate) AddDisplayPreferences(v ...*DisplayPreferences) *UserCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddDisplayPreferenceIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -406,6 +422,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.DisplayPreferencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DisplayPreferencesTable,
+			Columns: []string{user.DisplayPreferencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(displaypreferences.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

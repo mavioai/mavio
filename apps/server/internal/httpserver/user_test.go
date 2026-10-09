@@ -178,3 +178,29 @@ func TestUserDataService(t *testing.T) {
 	_, err = data.UpdateUserData(ctx, userv1.UpdateUserDataRequest_builder{ItemId: new(ep1.ID.String()), Rating: new(11.0)}.Build())
 	wantCode(t, "rating out of range", err, connect.CodeInvalidArgument)
 }
+
+func TestDisplayPreferencesService(t *testing.T) {
+	ctx := t.Context()
+	url := newServer(t)
+	token := signUp(t, url)
+	prefs := userv1connect.NewDisplayPreferencesServiceClient(http.DefaultClient, url, withToken(token))
+
+	got, err := prefs.GetDisplayPreferences(ctx, userv1.GetDisplayPreferencesRequest_builder{Client: new("web"), View: new("home")}.Build())
+	if err != nil || len(got.GetPreferences().GetValues()) != 0 || got.GetPreferences().HasUpdateTime() {
+		t.Errorf("unset = %v, %v", got, err)
+	}
+	set, err := prefs.SetDisplayPreferences(ctx, userv1.SetDisplayPreferencesRequest_builder{
+		Client: new("web"), View: new("home"), Values: map[string]string{"sections": "resume,nextup,latest"},
+	}.Build())
+	if err != nil || !set.GetPreferences().HasUpdateTime() {
+		t.Fatalf("set = %v, %v", set, err)
+	}
+	// Another device of the same user reads them back.
+	other := userv1connect.NewDisplayPreferencesServiceClient(http.DefaultClient, url, withToken(login(t, url, "admin", "secret", "phone")))
+	got, err = other.GetDisplayPreferences(ctx, userv1.GetDisplayPreferencesRequest_builder{Client: new("web"), View: new("home")}.Build())
+	if err != nil || got.GetPreferences().GetValues()["sections"] != "resume,nextup,latest" {
+		t.Errorf("from another device = %v, %v", got, err)
+	}
+	_, err = prefs.SetDisplayPreferences(ctx, userv1.SetDisplayPreferencesRequest_builder{Client: new("web"), View: new("home"), Values: map[string]string{"": "x"}}.Build())
+	wantCode(t, "empty name", err, connect.CodeInvalidArgument)
+}

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
@@ -86,20 +87,21 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			authsession.Table:  authsession.ValidColumn,
-			credit.Table:       credit.ValidColumn,
-			folderstate.Table:  folderstate.ValidColumn,
-			image.Table:        image.ValidColumn,
-			item.Table:         item.ValidColumn,
-			itemlink.Table:     itemlink.ValidColumn,
-			itemvalue.Table:    itemvalue.ValidColumn,
-			job.Table:          job.ValidColumn,
-			library.Table:      library.ValidColumn,
-			mediasource.Table:  mediasource.ValidColumn,
-			person.Table:       person.ValidColumn,
-			pluginconfig.Table: pluginconfig.ValidColumn,
-			user.Table:         user.ValidColumn,
-			userdata.Table:     userdata.ValidColumn,
+			authsession.Table:        authsession.ValidColumn,
+			credit.Table:             credit.ValidColumn,
+			displaypreferences.Table: displaypreferences.ValidColumn,
+			folderstate.Table:        folderstate.ValidColumn,
+			image.Table:              image.ValidColumn,
+			item.Table:               item.ValidColumn,
+			itemlink.Table:           itemlink.ValidColumn,
+			itemvalue.Table:          itemvalue.ValidColumn,
+			job.Table:                job.ValidColumn,
+			library.Table:            library.ValidColumn,
+			mediasource.Table:        mediasource.ValidColumn,
+			person.Table:             person.ValidColumn,
+			pluginconfig.Table:       pluginconfig.ValidColumn,
+			user.Table:               user.ValidColumn,
+			userdata.Table:           userdata.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

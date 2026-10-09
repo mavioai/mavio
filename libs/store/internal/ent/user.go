@@ -53,9 +53,11 @@ type UserEdges struct {
 	AuthSessions []*AuthSession `json:"auth_sessions,omitempty"`
 	// Playlists holds the value of the playlists edge.
 	Playlists []*Item `json:"playlists,omitempty"`
+	// DisplayPreferences holds the value of the display_preferences edge.
+	DisplayPreferences []*DisplayPreferences `json:"display_preferences,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // UserDataOrErr returns the UserData value or an error if the edge
@@ -83,6 +85,15 @@ func (e UserEdges) PlaylistsOrErr() ([]*Item, error) {
 		return e.Playlists, nil
 	}
 	return nil, &NotLoadedError{edge: "playlists"}
+}
+
+// DisplayPreferencesOrErr returns the DisplayPreferences value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) DisplayPreferencesOrErr() ([]*DisplayPreferences, error) {
+	if e.loadedTypes[3] {
+		return e.DisplayPreferences, nil
+	}
+	return nil, &NotLoadedError{edge: "display_preferences"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -212,6 +223,11 @@ func (_m *User) QueryAuthSessions() *AuthSessionQuery {
 // QueryPlaylists queries the "playlists" edge of the User entity.
 func (_m *User) QueryPlaylists() *ItemQuery {
 	return NewUserClient(_m.config).QueryPlaylists(_m)
+}
+
+// QueryDisplayPreferences queries the "display_preferences" edge of the User entity.
+func (_m *User) QueryDisplayPreferences() *DisplayPreferencesQuery {
+	return NewUserClient(_m.config).QueryDisplayPreferences(_m)
 }
 
 // Update returns a builder for updating this User.

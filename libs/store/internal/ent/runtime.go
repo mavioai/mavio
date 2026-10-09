@@ -8,6 +8,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
@@ -63,6 +64,16 @@ func init() {
 	creditDescOrd := creditFields[4].Descriptor()
 	// credit.DefaultOrd holds the default value on creation for the ord field.
 	credit.DefaultOrd = creditDescOrd.Default.(int)
+	displaypreferencesFields := schema.DisplayPreferences{}.Fields()
+	_ = displaypreferencesFields
+	// displaypreferencesDescUpdatedAt is the schema descriptor for updated_at field.
+	displaypreferencesDescUpdatedAt := displaypreferencesFields[5].Descriptor()
+	// displaypreferences.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	displaypreferences.DefaultUpdatedAt = displaypreferencesDescUpdatedAt.Default.(func() time.Time)
+	// displaypreferencesDescID is the schema descriptor for id field.
+	displaypreferencesDescID := displaypreferencesFields[0].Descriptor()
+	// displaypreferences.DefaultID holds the default value on creation for the id field.
+	displaypreferences.DefaultID = displaypreferencesDescID.Default.(func() core.ID)
 	folderstateFields := schema.FolderState{}.Fields()
 	_ = folderstateFields
 	// folderstateDescModTime is the schema descriptor for mod_time field.

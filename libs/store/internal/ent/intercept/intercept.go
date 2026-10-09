@@ -10,6 +10,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
@@ -133,6 +134,33 @@ func (f TraverseCredit) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.CreditQuery", q)
+}
+
+// The DisplayPreferencesFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DisplayPreferencesFunc func(context.Context, *ent.DisplayPreferencesQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f DisplayPreferencesFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.DisplayPreferencesQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.DisplayPreferencesQuery", q)
+}
+
+// The TraverseDisplayPreferences type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDisplayPreferences func(context.Context, *ent.DisplayPreferencesQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseDisplayPreferences) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseDisplayPreferences) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.DisplayPreferencesQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.DisplayPreferencesQuery", q)
 }
 
 // The FolderStateFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -466,6 +494,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.AuthSessionQuery, predicate.AuthSession, authsession.OrderOption]{typ: ent.TypeAuthSession, tq: q}, nil
 	case *ent.CreditQuery:
 		return &query[*ent.CreditQuery, predicate.Credit, credit.OrderOption]{typ: ent.TypeCredit, tq: q}, nil
+	case *ent.DisplayPreferencesQuery:
+		return &query[*ent.DisplayPreferencesQuery, predicate.DisplayPreferences, displaypreferences.OrderOption]{typ: ent.TypeDisplayPreferences, tq: q}, nil
 	case *ent.FolderStateQuery:
 		return &query[*ent.FolderStateQuery, predicate.FolderState, folderstate.OrderOption]{typ: ent.TypeFolderState, tq: q}, nil
 	case *ent.ImageQuery:

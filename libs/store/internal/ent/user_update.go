@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
@@ -210,6 +211,21 @@ func (_u *UserUpdate) AddPlaylists(v ...*Item) *UserUpdate {
 	return _u.AddPlaylistIDs(ids...)
 }
 
+// AddDisplayPreferenceIDs adds the "display_preferences" edge to the DisplayPreferences entity by IDs.
+func (_u *UserUpdate) AddDisplayPreferenceIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.AddDisplayPreferenceIDs(ids...)
+	return _u
+}
+
+// AddDisplayPreferences adds the "display_preferences" edges to the DisplayPreferences entity.
+func (_u *UserUpdate) AddDisplayPreferences(v ...*DisplayPreferences) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDisplayPreferenceIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -276,6 +292,27 @@ func (_u *UserUpdate) RemovePlaylists(v ...*Item) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemovePlaylistIDs(ids...)
+}
+
+// ClearDisplayPreferences clears all "display_preferences" edges to the DisplayPreferences entity.
+func (_u *UserUpdate) ClearDisplayPreferences() *UserUpdate {
+	_u.mutation.ClearDisplayPreferences()
+	return _u
+}
+
+// RemoveDisplayPreferenceIDs removes the "display_preferences" edge to DisplayPreferences entities by IDs.
+func (_u *UserUpdate) RemoveDisplayPreferenceIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.RemoveDisplayPreferenceIDs(ids...)
+	return _u
+}
+
+// RemoveDisplayPreferences removes "display_preferences" edges to DisplayPreferences entities.
+func (_u *UserUpdate) RemoveDisplayPreferences(v ...*DisplayPreferences) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDisplayPreferenceIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -498,6 +535,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.DisplayPreferencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DisplayPreferencesTable,
+			Columns: []string{user.DisplayPreferencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(displaypreferences.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDisplayPreferencesIDs(); len(nodes) > 0 && !_u.mutation.DisplayPreferencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DisplayPreferencesTable,
+			Columns: []string{user.DisplayPreferencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(displaypreferences.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DisplayPreferencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DisplayPreferencesTable,
+			Columns: []string{user.DisplayPreferencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(displaypreferences.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -697,6 +779,21 @@ func (_u *UserUpdateOne) AddPlaylists(v ...*Item) *UserUpdateOne {
 	return _u.AddPlaylistIDs(ids...)
 }
 
+// AddDisplayPreferenceIDs adds the "display_preferences" edge to the DisplayPreferences entity by IDs.
+func (_u *UserUpdateOne) AddDisplayPreferenceIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.AddDisplayPreferenceIDs(ids...)
+	return _u
+}
+
+// AddDisplayPreferences adds the "display_preferences" edges to the DisplayPreferences entity.
+func (_u *UserUpdateOne) AddDisplayPreferences(v ...*DisplayPreferences) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDisplayPreferenceIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -763,6 +860,27 @@ func (_u *UserUpdateOne) RemovePlaylists(v ...*Item) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemovePlaylistIDs(ids...)
+}
+
+// ClearDisplayPreferences clears all "display_preferences" edges to the DisplayPreferences entity.
+func (_u *UserUpdateOne) ClearDisplayPreferences() *UserUpdateOne {
+	_u.mutation.ClearDisplayPreferences()
+	return _u
+}
+
+// RemoveDisplayPreferenceIDs removes the "display_preferences" edge to DisplayPreferences entities by IDs.
+func (_u *UserUpdateOne) RemoveDisplayPreferenceIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.RemoveDisplayPreferenceIDs(ids...)
+	return _u
+}
+
+// RemoveDisplayPreferences removes "display_preferences" edges to DisplayPreferences entities.
+func (_u *UserUpdateOne) RemoveDisplayPreferences(v ...*DisplayPreferences) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDisplayPreferenceIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1008,6 +1126,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(item.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DisplayPreferencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DisplayPreferencesTable,
+			Columns: []string{user.DisplayPreferencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(displaypreferences.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDisplayPreferencesIDs(); len(nodes) > 0 && !_u.mutation.DisplayPreferencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DisplayPreferencesTable,
+			Columns: []string{user.DisplayPreferencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(displaypreferences.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DisplayPreferencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DisplayPreferencesTable,
+			Columns: []string{user.DisplayPreferencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(displaypreferences.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

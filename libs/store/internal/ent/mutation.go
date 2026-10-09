@@ -14,6 +14,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
@@ -38,20 +39,21 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAuthSession  = "AuthSession"
-	TypeCredit       = "Credit"
-	TypeFolderState  = "FolderState"
-	TypeImage        = "Image"
-	TypeItem         = "Item"
-	TypeItemLink     = "ItemLink"
-	TypeItemValue    = "ItemValue"
-	TypeJob          = "Job"
-	TypeLibrary      = "Library"
-	TypeMediaSource  = "MediaSource"
-	TypePerson       = "Person"
-	TypePluginConfig = "PluginConfig"
-	TypeUser         = "User"
-	TypeUserData     = "UserData"
+	TypeAuthSession        = "AuthSession"
+	TypeCredit             = "Credit"
+	TypeDisplayPreferences = "DisplayPreferences"
+	TypeFolderState        = "FolderState"
+	TypeImage              = "Image"
+	TypeItem               = "Item"
+	TypeItemLink           = "ItemLink"
+	TypeItemValue          = "ItemValue"
+	TypeJob                = "Job"
+	TypeLibrary            = "Library"
+	TypeMediaSource        = "MediaSource"
+	TypePerson             = "Person"
+	TypePluginConfig       = "PluginConfig"
+	TypeUser               = "User"
+	TypeUserData           = "UserData"
 )
 
 // AuthSessionMutation represents an operation that mutates the AuthSession nodes in the graph.
@@ -1494,6 +1496,630 @@ func (m *CreditMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Credit edge %s", name)
+}
+
+// DisplayPreferencesMutation represents an operation that mutates the DisplayPreferences nodes in the graph.
+type DisplayPreferencesMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *core.ID
+	client        *string
+	view          *string
+	values        *map[string]string
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	user          *core.ID
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*DisplayPreferences, error)
+	predicates    []predicate.DisplayPreferences
+}
+
+var _ ent.Mutation = (*DisplayPreferencesMutation)(nil)
+
+// displaypreferencesOption allows management of the mutation configuration using functional options.
+type displaypreferencesOption func(*DisplayPreferencesMutation)
+
+// newDisplayPreferencesMutation creates new mutation for the DisplayPreferences entity.
+func newDisplayPreferencesMutation(c config, op Op, opts ...displaypreferencesOption) *DisplayPreferencesMutation {
+	m := &DisplayPreferencesMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDisplayPreferences,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDisplayPreferencesID sets the ID field of the mutation.
+func withDisplayPreferencesID(id core.ID) displaypreferencesOption {
+	return func(m *DisplayPreferencesMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DisplayPreferences
+		)
+		m.oldValue = func(ctx context.Context) (*DisplayPreferences, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DisplayPreferences.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDisplayPreferences sets the old DisplayPreferences of the mutation.
+func withDisplayPreferences(node *DisplayPreferences) displaypreferencesOption {
+	return func(m *DisplayPreferencesMutation) {
+		m.oldValue = func(context.Context) (*DisplayPreferences, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DisplayPreferencesMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DisplayPreferencesMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DisplayPreferences entities.
+func (m *DisplayPreferencesMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DisplayPreferencesMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DisplayPreferencesMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().DisplayPreferences.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUserID sets the "user_id" field.
+func (m *DisplayPreferencesMutation) SetUserID(c core.ID) {
+	m.user = &c
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *DisplayPreferencesMutation) UserID() (r core.ID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the DisplayPreferences entity.
+// If the DisplayPreferences object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DisplayPreferencesMutation) OldUserID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *DisplayPreferencesMutation) ResetUserID() {
+	m.user = nil
+}
+
+// SetClient sets the "client" field.
+func (m *DisplayPreferencesMutation) SetClient(s string) {
+	m.client = &s
+}
+
+// GetClient returns the value of the "client" field in the mutation.
+func (m *DisplayPreferencesMutation) GetClient() (r string, exists bool) {
+	v := m.client
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClient returns the old "client" field's value of the DisplayPreferences entity.
+// If the DisplayPreferences object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DisplayPreferencesMutation) OldClient(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClient is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClient requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClient: %w", err)
+	}
+	return oldValue.Client, nil
+}
+
+// ResetClient resets all changes to the "client" field.
+func (m *DisplayPreferencesMutation) ResetClient() {
+	m.client = nil
+}
+
+// SetView sets the "view" field.
+func (m *DisplayPreferencesMutation) SetView(s string) {
+	m.view = &s
+}
+
+// View returns the value of the "view" field in the mutation.
+func (m *DisplayPreferencesMutation) View() (r string, exists bool) {
+	v := m.view
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldView returns the old "view" field's value of the DisplayPreferences entity.
+// If the DisplayPreferences object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DisplayPreferencesMutation) OldView(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldView is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldView requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldView: %w", err)
+	}
+	return oldValue.View, nil
+}
+
+// ResetView resets all changes to the "view" field.
+func (m *DisplayPreferencesMutation) ResetView() {
+	m.view = nil
+}
+
+// SetValues sets the "values" field.
+func (m *DisplayPreferencesMutation) SetValues(value map[string]string) {
+	m.values = &value
+}
+
+// Values returns the value of the "values" field in the mutation.
+func (m *DisplayPreferencesMutation) Values() (r map[string]string, exists bool) {
+	v := m.values
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValues returns the old "values" field's value of the DisplayPreferences entity.
+// If the DisplayPreferences object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DisplayPreferencesMutation) OldValues(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValues is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValues requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValues: %w", err)
+	}
+	return oldValue.Values, nil
+}
+
+// ClearValues clears the value of the "values" field.
+func (m *DisplayPreferencesMutation) ClearValues() {
+	m.values = nil
+	m.clearedFields[displaypreferences.FieldValues] = struct{}{}
+}
+
+// ValuesCleared returns if the "values" field was cleared in this mutation.
+func (m *DisplayPreferencesMutation) ValuesCleared() bool {
+	_, ok := m.clearedFields[displaypreferences.FieldValues]
+	return ok
+}
+
+// ResetValues resets all changes to the "values" field.
+func (m *DisplayPreferencesMutation) ResetValues() {
+	m.values = nil
+	delete(m.clearedFields, displaypreferences.FieldValues)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *DisplayPreferencesMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *DisplayPreferencesMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the DisplayPreferences entity.
+// If the DisplayPreferences object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DisplayPreferencesMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *DisplayPreferencesMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *DisplayPreferencesMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[displaypreferences.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *DisplayPreferencesMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *DisplayPreferencesMutation) UserIDs() (ids []core.ID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *DisplayPreferencesMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the DisplayPreferencesMutation builder.
+func (m *DisplayPreferencesMutation) Where(ps ...predicate.DisplayPreferences) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DisplayPreferencesMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DisplayPreferencesMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DisplayPreferences, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DisplayPreferencesMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DisplayPreferencesMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (DisplayPreferences).
+func (m *DisplayPreferencesMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DisplayPreferencesMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.user != nil {
+		fields = append(fields, displaypreferences.FieldUserID)
+	}
+	if m.client != nil {
+		fields = append(fields, displaypreferences.FieldClient)
+	}
+	if m.view != nil {
+		fields = append(fields, displaypreferences.FieldView)
+	}
+	if m.values != nil {
+		fields = append(fields, displaypreferences.FieldValues)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, displaypreferences.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DisplayPreferencesMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case displaypreferences.FieldUserID:
+		return m.UserID()
+	case displaypreferences.FieldClient:
+		return m.GetClient()
+	case displaypreferences.FieldView:
+		return m.View()
+	case displaypreferences.FieldValues:
+		return m.Values()
+	case displaypreferences.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DisplayPreferencesMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case displaypreferences.FieldUserID:
+		return m.OldUserID(ctx)
+	case displaypreferences.FieldClient:
+		return m.OldClient(ctx)
+	case displaypreferences.FieldView:
+		return m.OldView(ctx)
+	case displaypreferences.FieldValues:
+		return m.OldValues(ctx)
+	case displaypreferences.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown DisplayPreferences field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DisplayPreferencesMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case displaypreferences.FieldUserID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case displaypreferences.FieldClient:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClient(v)
+		return nil
+	case displaypreferences.FieldView:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetView(v)
+		return nil
+	case displaypreferences.FieldValues:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValues(v)
+		return nil
+	case displaypreferences.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DisplayPreferences field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DisplayPreferencesMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DisplayPreferencesMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DisplayPreferencesMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DisplayPreferences numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DisplayPreferencesMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(displaypreferences.FieldValues) {
+		fields = append(fields, displaypreferences.FieldValues)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DisplayPreferencesMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DisplayPreferencesMutation) ClearField(name string) error {
+	switch name {
+	case displaypreferences.FieldValues:
+		m.ClearValues()
+		return nil
+	}
+	return fmt.Errorf("unknown DisplayPreferences nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DisplayPreferencesMutation) ResetField(name string) error {
+	switch name {
+	case displaypreferences.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case displaypreferences.FieldClient:
+		m.ResetClient()
+		return nil
+	case displaypreferences.FieldView:
+		m.ResetView()
+		return nil
+	case displaypreferences.FieldValues:
+		m.ResetValues()
+		return nil
+	case displaypreferences.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown DisplayPreferences field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DisplayPreferencesMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, displaypreferences.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DisplayPreferencesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case displaypreferences.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DisplayPreferencesMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DisplayPreferencesMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DisplayPreferencesMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, displaypreferences.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DisplayPreferencesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case displaypreferences.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DisplayPreferencesMutation) ClearEdge(name string) error {
+	switch name {
+	case displaypreferences.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown DisplayPreferences unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DisplayPreferencesMutation) ResetEdge(name string) error {
+	switch name {
+	case displaypreferences.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown DisplayPreferences edge %s", name)
 }
 
 // FolderStateMutation represents an operation that mutates the FolderState nodes in the graph.
@@ -14538,32 +15164,35 @@ func (m *PluginConfigMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *core.ID
-	name                 *string
-	name_key             *string
-	password_hash        *string
-	auth_provider        *string
-	admin                *bool
-	disabled             *bool
-	policy               *core.UserPolicy
-	preferences          *core.UserPreferences
-	created_at           *time.Time
-	last_login_at        *time.Time
-	clearedFields        map[string]struct{}
-	user_data            map[int]struct{}
-	removeduser_data     map[int]struct{}
-	cleareduser_data     bool
-	auth_sessions        map[core.ID]struct{}
-	removedauth_sessions map[core.ID]struct{}
-	clearedauth_sessions bool
-	playlists            map[core.ID]struct{}
-	removedplaylists     map[core.ID]struct{}
-	clearedplaylists     bool
-	done                 bool
-	oldValue             func(context.Context) (*User, error)
-	predicates           []predicate.User
+	op                         Op
+	typ                        string
+	id                         *core.ID
+	name                       *string
+	name_key                   *string
+	password_hash              *string
+	auth_provider              *string
+	admin                      *bool
+	disabled                   *bool
+	policy                     *core.UserPolicy
+	preferences                *core.UserPreferences
+	created_at                 *time.Time
+	last_login_at              *time.Time
+	clearedFields              map[string]struct{}
+	user_data                  map[int]struct{}
+	removeduser_data           map[int]struct{}
+	cleareduser_data           bool
+	auth_sessions              map[core.ID]struct{}
+	removedauth_sessions       map[core.ID]struct{}
+	clearedauth_sessions       bool
+	playlists                  map[core.ID]struct{}
+	removedplaylists           map[core.ID]struct{}
+	clearedplaylists           bool
+	display_preferences        map[core.ID]struct{}
+	removeddisplay_preferences map[core.ID]struct{}
+	cleareddisplay_preferences bool
+	done                       bool
+	oldValue                   func(context.Context) (*User, error)
+	predicates                 []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -15205,6 +15834,60 @@ func (m *UserMutation) ResetPlaylists() {
 	m.removedplaylists = nil
 }
 
+// AddDisplayPreferenceIDs adds the "display_preferences" edge to the DisplayPreferences entity by ids.
+func (m *UserMutation) AddDisplayPreferenceIDs(ids ...core.ID) {
+	if m.display_preferences == nil {
+		m.display_preferences = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.display_preferences[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDisplayPreferences clears the "display_preferences" edge to the DisplayPreferences entity.
+func (m *UserMutation) ClearDisplayPreferences() {
+	m.cleareddisplay_preferences = true
+}
+
+// DisplayPreferencesCleared reports if the "display_preferences" edge to the DisplayPreferences entity was cleared.
+func (m *UserMutation) DisplayPreferencesCleared() bool {
+	return m.cleareddisplay_preferences
+}
+
+// RemoveDisplayPreferenceIDs removes the "display_preferences" edge to the DisplayPreferences entity by IDs.
+func (m *UserMutation) RemoveDisplayPreferenceIDs(ids ...core.ID) {
+	if m.removeddisplay_preferences == nil {
+		m.removeddisplay_preferences = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.display_preferences, ids[i])
+		m.removeddisplay_preferences[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDisplayPreferences returns the removed IDs of the "display_preferences" edge to the DisplayPreferences entity.
+func (m *UserMutation) RemovedDisplayPreferencesIDs() (ids []core.ID) {
+	for id := range m.removeddisplay_preferences {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DisplayPreferencesIDs returns the "display_preferences" edge IDs in the mutation.
+func (m *UserMutation) DisplayPreferencesIDs() (ids []core.ID) {
+	for id := range m.display_preferences {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDisplayPreferences resets all changes to the "display_preferences" edge.
+func (m *UserMutation) ResetDisplayPreferences() {
+	m.display_preferences = nil
+	m.cleareddisplay_preferences = false
+	m.removeddisplay_preferences = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -15500,7 +16183,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.user_data != nil {
 		edges = append(edges, user.EdgeUserData)
 	}
@@ -15509,6 +16192,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.playlists != nil {
 		edges = append(edges, user.EdgePlaylists)
+	}
+	if m.display_preferences != nil {
+		edges = append(edges, user.EdgeDisplayPreferences)
 	}
 	return edges
 }
@@ -15535,13 +16221,19 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeDisplayPreferences:
+		ids := make([]ent.Value, 0, len(m.display_preferences))
+		for id := range m.display_preferences {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removeduser_data != nil {
 		edges = append(edges, user.EdgeUserData)
 	}
@@ -15550,6 +16242,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedplaylists != nil {
 		edges = append(edges, user.EdgePlaylists)
+	}
+	if m.removeddisplay_preferences != nil {
+		edges = append(edges, user.EdgeDisplayPreferences)
 	}
 	return edges
 }
@@ -15576,13 +16271,19 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeDisplayPreferences:
+		ids := make([]ent.Value, 0, len(m.removeddisplay_preferences))
+		for id := range m.removeddisplay_preferences {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.cleareduser_data {
 		edges = append(edges, user.EdgeUserData)
 	}
@@ -15591,6 +16292,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedplaylists {
 		edges = append(edges, user.EdgePlaylists)
+	}
+	if m.cleareddisplay_preferences {
+		edges = append(edges, user.EdgeDisplayPreferences)
 	}
 	return edges
 }
@@ -15605,6 +16309,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedauth_sessions
 	case user.EdgePlaylists:
 		return m.clearedplaylists
+	case user.EdgeDisplayPreferences:
+		return m.cleareddisplay_preferences
 	}
 	return false
 }
@@ -15629,6 +16335,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgePlaylists:
 		m.ResetPlaylists()
+		return nil
+	case user.EdgeDisplayPreferences:
+		m.ResetDisplayPreferences()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

@@ -33,6 +33,18 @@ func (f CreditFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreditMutation", m)
 }
 
+// The DisplayPreferencesFunc type is an adapter to allow the use of ordinary
+// function as DisplayPreferences mutator.
+type DisplayPreferencesFunc func(context.Context, *ent.DisplayPreferencesMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DisplayPreferencesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DisplayPreferencesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DisplayPreferencesMutation", m)
+}
+
 // The FolderStateFunc type is an adapter to allow the use of ordinary
 // function as FolderState mutator.
 type FolderStateFunc func(context.Context, *ent.FolderStateMutation) (ent.Value, error)

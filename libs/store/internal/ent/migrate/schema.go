@@ -83,6 +83,36 @@ var (
 			},
 		},
 	}
+	// DisplayPreferencesColumns holds the columns for the "display_preferences" table.
+	DisplayPreferencesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "client", Type: field.TypeString},
+		{Name: "view", Type: field.TypeString},
+		{Name: "values", Type: field.TypeJSON, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// DisplayPreferencesTable holds the schema information for the "display_preferences" table.
+	DisplayPreferencesTable = &schema.Table{
+		Name:       "display_preferences",
+		Columns:    DisplayPreferencesColumns,
+		PrimaryKey: []*schema.Column{DisplayPreferencesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "display_preferences_users_display_preferences",
+				Columns:    []*schema.Column{DisplayPreferencesColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "displaypreferences_user_id_client_view",
+				Unique:  true,
+				Columns: []*schema.Column{DisplayPreferencesColumns[5], DisplayPreferencesColumns[1], DisplayPreferencesColumns[2]},
+			},
+		},
+	}
 	// FolderStatesColumns holds the columns for the "folder_states" table.
 	FolderStatesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -575,6 +605,7 @@ var (
 	Tables = []*schema.Table{
 		AuthSessionsTable,
 		CreditsTable,
+		DisplayPreferencesTable,
 		FolderStatesTable,
 		ImagesTable,
 		ItemsTable,
@@ -599,6 +630,10 @@ func init() {
 	CreditsTable.ForeignKeys[1].RefTable = PeopleTable
 	CreditsTable.Annotation = &entsql.Annotation{
 		Table: "credits",
+	}
+	DisplayPreferencesTable.ForeignKeys[0].RefTable = UsersTable
+	DisplayPreferencesTable.Annotation = &entsql.Annotation{
+		Table: "display_preferences",
 	}
 	FolderStatesTable.ForeignKeys[0].RefTable = LibrariesTable
 	FolderStatesTable.Annotation = &entsql.Annotation{

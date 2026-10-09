@@ -38,6 +38,7 @@ erDiagram
 | `UserData` | One user's state for one item: played, resume position, favorite, … |
 | `Job` | A durable unit of background work |
 | `PluginConfig` | The configuration an administrator gave a plugin |
+| `DisplayPreferences` | A user's settings for how one client shows one view |
 
 ---
 
@@ -201,6 +202,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `ScanRepository` | `NextGeneration` of a library's scans; the `FolderState` of each scanned folder (`ModTime`, `FileID`, `Entries`), recorded with `PutFolders` and removed with `DeleteFolders` when gone |
 | `ItemRepository` (curated) | `Links` lists a collection's or playlist's entries in order; `ReplaceLinks` sets them, keeping the IDs given and assigning new ones |
 | `PluginConfigRepository` | `Get` a plugin's configuration (`ErrNotFound` when never configured), `Put` it, replacing the earlier one |
+| `DisplayPreferencesRepository` | `Get` a user's preferences for a client's view (`ErrNotFound` when never set), `Put` them, replacing the earlier ones |
 
 * **Transactions**: `Store.InTx` runs a function with a `Store` bound to one transaction; returning an error rolls it back.
 * **Replace semantics**: `Replace*` methods set the complete set for an owner, removing anything not in the new set — scans and metadata refreshes always write whole sets.
@@ -236,3 +238,12 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 
 * It is kept by `PluginID`, the ID in the manifest, not by the installed files, so it survives upgrades and reinstalls of the plugin.
 * `Validate` requires a plugin ID and well-formed JSON; conformance to the schema is checked by the server, which knows the manifest, before the configuration is stored.
+
+---
+
+## 11. Display Preferences
+
+`DisplayPreferences` are a user's settings for how one client application (`Client`, e.g. "mavio-web") shows one view (`View`, e.g. "home" or a library ID): a map of `Values` whose names and contents the client chooses, such as a sort order or the sections of the home screen, with `UpdatedAt`. The server keeps them, so they follow the user across devices.
+
+* They are kept per user, client and view; putting them again replaces all values. Deleting the user deletes them.
+* `Validate` requires the user, a client and a view name of up to 200 bytes, at most 200 values with non-empty names of up to 200 bytes, and values of up to 8 KiB.

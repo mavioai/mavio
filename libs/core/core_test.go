@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 )
@@ -381,5 +382,27 @@ func TestCuratedItems(t *testing.T) {
 	}
 	if !KindCollection.IsCurated() || !KindPlaylist.IsCurated() || KindFolder.IsCurated() {
 		t.Error("IsCurated")
+	}
+}
+
+func TestDisplayPreferences(t *testing.T) {
+	user := NewID()
+	tests := []struct {
+		name string
+		p    DisplayPreferences
+		ok   bool
+	}{
+		{"valid", DisplayPreferences{UserID: user, Client: "web", View: "home", Values: map[string]string{"sort": "name"}}, true},
+		{"no values", DisplayPreferences{UserID: user, Client: "web", View: "home"}, true},
+		{"no user", DisplayPreferences{Client: "web", View: "home"}, false},
+		{"no client", DisplayPreferences{UserID: user, View: "home"}, false},
+		{"no view", DisplayPreferences{UserID: user, Client: "web"}, false},
+		{"empty name", DisplayPreferences{UserID: user, Client: "web", View: "home", Values: map[string]string{"": "x"}}, false},
+		{"long value", DisplayPreferences{UserID: user, Client: "web", View: "home", Values: map[string]string{"x": strings.Repeat("x", MaxDisplayValueBytes+1)}}, false},
+	}
+	for _, tt := range tests {
+		if err := tt.p.Validate(); (err == nil) != tt.ok || (err != nil && !errors.Is(err, ErrInvalid)) {
+			t.Errorf("%s: Validate() = %v", tt.name, err)
+		}
 	}
 }

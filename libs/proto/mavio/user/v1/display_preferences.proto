@@ -1,0 +1,88 @@
+edition = "2023";
+
+package mavio.user.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// DisplayPreferencesService keeps the calling user's display preferences:
+// for one client application and one view, such as the home screen or a
+// library, settings whose names and values the client chooses, like a sort
+// order or the sections to show. The server keeps them so they follow the
+// user across devices.
+service DisplayPreferencesService {
+  // GetDisplayPreferences returns the preferences of a client's view,
+  // without values when none were set.
+  rpc GetDisplayPreferences(GetDisplayPreferencesRequest) returns (GetDisplayPreferencesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SetDisplayPreferences replaces the preferences of a client's view.
+  rpc SetDisplayPreferences(SetDisplayPreferencesRequest) returns (SetDisplayPreferencesResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+}
+
+message DisplayPreferences {
+  // The client application, e.g. "mavio-web".
+  string client = 1;
+  // What the preferences are for, e.g. "home" or a library ID.
+  string view = 2;
+  map<string, string> values = 3;
+  // Unset when never set.
+  google.protobuf.Timestamp update_time = 4;
+}
+
+message GetDisplayPreferencesRequest {
+  string client = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+  string view = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+}
+
+message GetDisplayPreferencesResponse {
+  DisplayPreferences preferences = 1;
+}
+
+message SetDisplayPreferencesRequest {
+  string client = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+  string view = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+  // At most 200 names of up to 200 bytes, with values of up to 8 KiB.
+  map<string, string> values = 3 [(buf.validate.field).map = {
+    max_pairs: 200
+    keys: {
+      string: {
+        min_len: 1
+        max_len: 200
+      }
+    }
+    values: {
+      string: {max_bytes: 8192}
+    }
+  }];
+}
+
+message SetDisplayPreferencesResponse {
+  DisplayPreferences preferences = 1;
+}

@@ -23,6 +23,7 @@ type Store interface {
 	Jobs() JobQueue
 	Scans() ScanRepository
 	PluginConfigs() PluginConfigRepository
+	DisplayPreferences() DisplayPreferencesRepository
 
 	// InTx runs fn in a transaction. The Store passed to fn is bound to the
 	// transaction; fn's error rolls it back.
@@ -206,4 +207,14 @@ type PluginConfigRepository interface {
 	Get(ctx context.Context, pluginID string) (PluginConfig, error)
 	// Put stores the configuration, replacing the plugin's earlier one.
 	Put(ctx context.Context, c *PluginConfig) error
+}
+
+// DisplayPreferencesRepository stores display preferences.
+type DisplayPreferencesRepository interface {
+	// Get returns ErrNotFound when the user never set preferences for the
+	// client's view.
+	Get(ctx context.Context, userID ID, client, view string) (DisplayPreferences, error)
+	// Put stores the preferences, replacing those of the same user, client
+	// and view.
+	Put(ctx context.Context, p *DisplayPreferences) error
 }

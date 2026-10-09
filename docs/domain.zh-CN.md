@@ -38,6 +38,7 @@ erDiagram
 | `UserData` | 某个用户对某个条目的状态：是否已播放、续播位置、收藏等 |
 | `Job` | 持久化的后台任务 |
 | `PluginConfig` | 管理员为某个插件设置的配置 |
+| `DisplayPreferences` | 用户对某个客户端如何显示某个视图的设置 |
 
 ---
 
@@ -201,6 +202,7 @@ erDiagram
 | `ScanRepository` | 媒体库扫描的 `NextGeneration`；每个已扫描文件夹的 `FolderState`（`ModTime`、`FileID`、`Entries`），由 `PutFolders` 记录，文件夹消失后由 `DeleteFolders` 移除 |
 | `ItemRepository`（整理类） | `Links` 按顺序列出合集或播放列表的条目项；`ReplaceLinks` 设置它们，保留给定的 ID，并为没有 ID 的条目项分配新 ID |
 | `PluginConfigRepository` | `Get` 某个插件的配置（从未配置时返回 `ErrNotFound`），`Put` 写入并替换之前的配置 |
+| `DisplayPreferencesRepository` | `Get` 用户对某个客户端视图的偏好（从未设置时返回 `ErrNotFound`），`Put` 写入并替换之前的偏好 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
 * **Replace 语义**：`Replace*` 方法设置某个所有者的完整集合，删除不在新集合中的内容——扫描与元数据刷新总是整组写入。
@@ -236,3 +238,12 @@ erDiagram
 
 * 按 `PluginID`（清单中的 ID）保存，而不是跟随已安装的文件，因此插件升级或重新安装后配置仍在。
 * `Validate` 要求有插件 ID 且 JSON 格式正确；是否符合 schema 由了解清单的服务端在保存配置之前检查。
+
+---
+
+## 11. 显示偏好
+
+`DisplayPreferences` 是用户对某个客户端应用（`Client`，如 "mavio-web"）如何显示某个视图（`View`，如 "home" 或某个媒体库 ID）的设置：一组 `Values`，其名称与内容由客户端决定，例如排序方式或首页显示的栏目，并记录 `UpdatedAt`。服务端保存它们，因此会随用户跨设备。
+
+* 按用户、客户端与视图保存；再次写入会替换全部值。删除用户时一并删除。
+* `Validate` 要求有用户、不超过 200 字节的客户端名与视图名，至多 200 个值，名称非空且不超过 200 字节，值不超过 8 KiB。
