@@ -35,3 +35,8 @@ func (r pluginConfigs) Put(ctx context.Context, c *core.PluginConfig) error {
 		Exec(ctx)
 	return mapErr(err, "put plugin configuration")
 }
+
+func (r pluginConfigs) Delete(ctx context.Context, pluginID string) error {
+	_, err := r.s.write.PluginConfig.Delete().Where(pluginconfig.PluginID(pluginID)).Exec(ctx)
+	return mapErr(err, "delete plugin configuration")
+}

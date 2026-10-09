@@ -46,6 +46,16 @@ service AuthService {
   // LoginWithQuickConnect gives the authorized device its access token,
   // once.
   rpc LoginWithQuickConnect(LoginWithQuickConnectRequest) returns (LoginWithQuickConnectResponse);
+  // CreateApiKey makes a token an integration calls the API with, as the
+  // administrator creating it; the token is returned once. Administrators
+  // only.
+  rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
+  // ListApiKeys lists every API key. Administrators only.
+  rpc ListApiKeys(ListApiKeysRequest) returns (ListApiKeysResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // RevokeApiKey deletes an API key. Administrators only.
+  rpc RevokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
 }
 
 // Device identifies a client installation.
@@ -189,3 +199,44 @@ message LoginWithQuickConnectResponse {
   mavio.user.v1.User user = 2;
   Session session = 3;
 }
+
+// ApiKey is an integration's key, without its token.
+message ApiKey {
+  string id = 1;
+  string name = 2;
+  // The administrator it acts as.
+  string user_id = 3;
+  google.protobuf.Timestamp create_time = 4;
+  google.protobuf.Timestamp last_use_time = 5;
+}
+
+message CreateApiKeyRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    }
+  ];
+}
+
+message CreateApiKeyResponse {
+  ApiKey api_key = 1;
+  // Sent as "Authorization: Bearer <token>"; not shown again.
+  string token = 2;
+}
+
+message ListApiKeysRequest {}
+
+message ListApiKeysResponse {
+  repeated ApiKey api_keys = 1;
+}
+
+message RevokeApiKeyRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message RevokeApiKeyResponse {}

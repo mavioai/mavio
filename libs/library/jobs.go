@@ -113,6 +113,7 @@ func (j *Jobs) Handlers() map[string]Handler {
 		JobKeyframes:    j.keyframes,
 		JobBorders:      j.borders,
 		JobPlaceholders: j.placeholders,
+		JobCleanup:      j.cleanup,
 	}
 }
 

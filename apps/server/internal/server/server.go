@@ -13,12 +13,17 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"github.com/mavioai/mavio/apps/server/internal/activity"
+	"github.com/mavioai/mavio/apps/server/internal/backup"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
 	"github.com/mavioai/mavio/apps/server/internal/images"
+	"github.com/mavioai/mavio/apps/server/internal/logs"
+	"github.com/mavioai/mavio/apps/server/internal/network"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
+	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/library/storage"
@@ -46,6 +51,16 @@ type Config struct {
 	// MetadataDir holds the artwork chosen for items of libraries that do
 	// not save metadata next to their media.
 	MetadataDir string
+	// BackupDir holds backups; empty makes none.
+	BackupDir string
+	// Restore, when set, is a backup restored into the empty database
+	// before the server starts.
+	Restore string
+	// DiscoveryAddr is the UDP address local discovery answers on, such
+	// as ":7359"; empty answers none.
+	DiscoveryAddr string
+	// HTTPSHost is the host HTTPS listens on; empty means every interface.
+	HTTPSHost string
 	// Dev serves the development player at /dev/player.
 	Dev bool
 	// DevLibrary adds the Movies and Shows folders of the sample library
@@ -60,6 +75,13 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	if log == nil {
 		log = slog.Default()
 	}
+	// Administrators read the recent records through the API.
+	ring := logs.NewRing(2000)
+	log = slog.New(ring.Handler(log.Handler(), slog.LevelInfo))
+	metadataDir, err := filepath.Abs(cfg.MetadataDir)
+	if err != nil {
+		return err
+	}
 	raw, err := store.Open(ctx, cfg.Database)
 	if err != nil {
 		return fmt.Errorf("open database: %w", err)
@@ -69,6 +91,12 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			log.ErrorContext(ctx, "close database", "err", err)
 		}
 	}()
+	if cfg.Restore != "" {
+		if err := backup.Restore(ctx, cfg.Restore, raw, metadataDir, cfg.PluginDir); err != nil {
+			return fmt.Errorf("restore %s: %w", cfg.Restore, err)
+		}
+		log.InfoContext(ctx, "restored backup", "backup", cfg.Restore)
+	}
 	// What is written reaches the devices' event streams.
 	hub := events.New(events.Config{Store: raw, Logger: log})
 	db := events.Observe(raw, hub)
@@ -77,8 +105,13 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			return err
 		}
 	}
+	set, err := settings.Open(ctx, db)
+	if err != nil {
+		return err
+	}
 	plugs, err := plugins.Open(ctx, plugins.Config{
 		Dir: cfg.PluginDir, CacheDir: filepath.Join(cfg.CacheDir, "plugins"), Store: db, Logger: log,
+		Catalogs: func() []string { return set.Get().PluginCatalogs },
 	})
 	if err != nil {
 		return err
@@ -90,35 +123,84 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			log.ErrorContext(ctx, "stop plugins", "err", err)
 		}
 	}()
+	activityLog := activity.New(activity.Config{
+		Store: db, Logger: log,
+		Notifiers: func() []activity.Notifier { return plugs.Notifiers() },
+	})
 	quietGate := storage.NewQuietGate()
 	volumeLedger := storage.NewVolumeLedger(2*time.Second, 500*time.Millisecond)
 	devices := &storage.Detector{}
 	growthPolicy := storage.NewGrowthPolicy(10 * time.Second)
 
 	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, cfg, quietGate)
-	metadataDir, err := filepath.Abs(cfg.MetadataDir)
-	if err != nil {
-		return err
+	if err := set.Register(ctx, func(_ context.Context, s core.ServerSettings) error {
+		return playbacks.SetTranscoding(s.Transcoding)
+	}); err != nil {
+		log.ErrorContext(ctx, "stored transcoding settings do not apply; change them", "err", err)
 	}
 	imageServer := images.New(images.Config{
 		Store: db, Dir: filepath.Join(cfg.CacheDir, "images"), MetadataDir: metadataDir, Logger: log,
 	})
 	refresher := &library.Refresher{
-		Store: db, Providers: plugs.MetadataProviders(), MetadataDir: filepath.ToSlash(metadataDir), Fetch: imageServer.Fetch, Logger: log,
+		Store: db, Source: plugs.MetadataProviders, MetadataDir: filepath.ToSlash(metadataDir), Fetch: imageServer.Fetch, Logger: log,
+	}
+	var backups *backup.Manager
+	if cfg.BackupDir != "" {
+		backups = backup.New(backup.Config{
+			Store: raw, Dir: cfg.BackupDir, MetadataDir: metadataDir, PluginDir: cfg.PluginDir, Version: cfg.Version,
+		})
 	}
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Refresher: refresher,
-		Subtitles: &library.Subtitles{Store: db, Providers: plugs.SubtitleProviders(), Logger: log}, Dev: cfg.Dev,
+		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Logger: log},
+		Settings:  set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
+		Authenticate: plugs.Authenticate, Dev: cfg.Dev,
 	})
 	if err != nil {
 		return err
 	}
 
+	// The network settings decide the base URL, HTTPS and discovery.
+	prefix := network.NewPrefix(h)
+	https := &network.HTTPS{Handler: prefix, Host: cfg.HTTPSHost, Logger: log}
+	port := 0
+	if a, ok := ln.Addr().(*net.TCPAddr); ok {
+		port = a.Port
+	}
+	discovery := &network.Discovery{Addr: cfg.DiscoveryAddr, Port: port, Logger: log, Reply: func() network.DiscoveryReply {
+		name := set.Get().Network.ServerName
+		if name == "" {
+			name, _ = os.Hostname()
+		}
+		return network.DiscoveryReply{Name: name, Version: cfg.Version}
+	}}
+	defer func() {
+		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+		defer cancel()
+		_ = https.Close(closeCtx)
+		_ = discovery.Close()
+	}()
+	if err := set.Register(ctx, func(ctx context.Context, s core.ServerSettings) error {
+		if err := https.Apply(ctx, s.Network); err != nil {
+			return err
+		}
+		prefix.Set(s.Network.BaseURL)
+		return discovery.Apply(ctx, s.Network)
+	}); err != nil {
+		log.ErrorContext(ctx, "stored network settings do not apply; change them", "err", err)
+	}
+
 	log.InfoContext(ctx, "starting mavio", "version", cfg.Version, "addr", ln.Addr().String())
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return playbacks.Run(ctx) })
-	g.Go(func() error { return httpserver.Serve(ctx, ln, h) })
+	g.Go(func() error { return httpserver.Serve(ctx, ln, prefix) })
+	g.Go(func() error {
+		if err := activityLog.Run(ctx); !errors.Is(err, context.Canceled) {
+			return err
+		}
+		return nil
+	})
 	if worker := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
@@ -188,6 +270,9 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 	}
 	if err := jobs.Schedule(ctx); err != nil {
 		log.ErrorContext(ctx, "schedule library scans", "err", err)
+	}
+	if err := jobs.ScheduleHousekeeping(ctx); err != nil {
+		log.ErrorContext(ctx, "schedule housekeeping", "err", err)
 	}
 	host, _ := os.Hostname()
 	return &library.Worker{

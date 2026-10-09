@@ -1,6 +1,7 @@
 package playback
 
 import (
+	"cmp"
 	"context"
 	"crypto/rand"
 	"encoding/base64"
@@ -12,6 +13,7 @@ import (
 	"path/filepath"
 	"slices"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -82,6 +84,11 @@ type Manager struct {
 	cfg Config
 	log *slog.Logger
 
+	// planner and dir are what playbacks starting now use; settings
+	// replace them while others run.
+	planner atomic.Pointer[planner.Planner]
+	dir     atomic.Pointer[string]
+
 	mu        sync.Mutex
 	playbacks map[string]*Playback
 }
@@ -107,7 +114,48 @@ func NewManager(cfg Config) *Manager {
 	if log == nil {
 		log = slog.New(slog.DiscardHandler)
 	}
-	return &Manager{cfg: cfg, log: log, playbacks: map[string]*Playback{}}
+	m := &Manager{cfg: cfg, log: log, playbacks: map[string]*Playback{}}
+	m.planner.Store(cfg.Planner)
+	m.dir.Store(&cfg.Dir)
+	return m
+}
+
+// Accelerations lists the hardware accelerations this server can use.
+func (m *Manager) Accelerations() []core.HardwareAcceleration {
+	out := []core.HardwareAcceleration{core.HardwareAuto, core.HardwareNone}
+	if caps := m.cfg.Planner.Caps; caps != nil && caps.SupportsHwaccel("videotoolbox") {
+		out = append(out, core.HardwareVideoToolbox)
+	}
+	return out
+}
+
+// SetTranscoding applies transcoding settings to the playbacks that start
+// from now on; running ones keep theirs. An empty transcode folder keeps
+// the one the manager started with.
+func (m *Manager) SetTranscoding(t core.TranscodingSettings) error {
+	if !slices.Contains(m.Accelerations(), t.HardwareAcceleration) {
+		return fmt.Errorf("%w: hardware acceleration %s is unavailable", core.ErrInvalid, t.HardwareAcceleration)
+	}
+	dir := cmp.Or(t.TranscodeDir, m.cfg.Dir)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("%w: transcode folder: %w", core.ErrInvalid, err)
+	}
+	opts := m.cfg.Planner.Options
+	opts.Hardware = ""
+	if t.HardwareAcceleration == core.HardwareVideoToolbox ||
+		t.HardwareAcceleration == core.HardwareAuto && slices.Contains(m.Accelerations(), core.HardwareVideoToolbox) {
+		opts.Hardware = "videotoolbox"
+	}
+	opts.HardwareEncoding, opts.Preset, opts.Threads = t.HardwareEncoding, t.EncoderPreset, t.Threads
+	opts.H264CRF, opts.H265CRF = t.H264CRF, t.H265CRF
+	opts.TonemapAlgorithm, opts.TonemapRange, opts.TonemapDesat, opts.TonemapPeak = t.TonemapAlgorithm, t.TonemapRange, t.TonemapDesat, t.TonemapPeak
+	opts.DeinterlaceMethod, opts.DeinterlaceDoubleRate = t.DeinterlaceMethod, t.DeinterlaceDoubleRate
+	opts.DownmixBoost, opts.CropBlackBorders = t.DownmixBoost, t.CropBlackBorders
+	pl := *m.cfg.Planner
+	pl.Options = opts
+	m.planner.Store(&pl)
+	m.dir.Store(&dir)
+	return nil
 }
 
 // Request asks to play an item.
@@ -376,14 +424,15 @@ func (m *Manager) decide(video bool, req *decision.Request) (*decision.Decision,
 // with the first segment requested.
 func (m *Manager) prepareHLS(ctx context.Context, p *Playback) error {
 	d, ms := p.Decision, p.Source()
-	job := m.cfg.Planner.Job(d, 0)
+	pl, dir := m.planner.Load(), *m.dir.Load()
+	job := pl.Job(d, 0)
 	if job.SegmentLength <= 0 {
 		job.SegmentLength = m.cfg.SegmentLength
 	}
 	if job.SegmentContainer == "" {
 		job.SegmentContainer = "mp4"
 	}
-	out := m.cfg.Planner.Output(job)
+	out := pl.Output(job)
 	if out.VideoCopied && len(ms.Keyframes) == 0 {
 		// Copied video is cut at its keyframes, which are not extracted
 		// yet: encode this playback's video and extract them for the next.
@@ -392,7 +441,7 @@ func (m *Manager) prepareHLS(ctx context.Context, p *Playback) error {
 		if len(d.VideoCodecs) > 0 && d.VideoCodecs[0] != "" {
 			job.VideoCodec = d.VideoCodecs[0]
 		}
-		out = m.cfg.Planner.Output(job)
+		out = pl.Output(job)
 		kf := library.KeyframesJob(p.Item.ID, time.Now(), library.KeyframesUrgent)
 		if _, err := m.cfg.Store.Jobs().Enqueue(context.WithoutCancel(ctx), &kf); err != nil {
 			m.log.WarnContext(ctx, "queue keyframe extraction", "item", p.Item.ID, "err", err)
@@ -416,9 +465,8 @@ func (m *Manager) prepareHLS(ctx context.Context, p *Playback) error {
 	}
 	p.variant = streaming.VariantOf(out, int(ms.Bitrate), pixelFormat)
 	p.segExt = job.SegmentContainer
-	pl := m.cfg.Planner
 	s, err := streaming.NewStream(streaming.Config{
-		Dir: filepath.Join(m.cfg.Dir, p.ID), Layout: p.layout, Container: job.SegmentContainer,
+		Dir: filepath.Join(dir, p.ID), Layout: p.layout, Container: job.SegmentContainer,
 		Args: func(start time.Duration, out planner.HLSOutput) []string {
 			j := *job
 			j.Start = start

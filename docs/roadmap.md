@@ -66,7 +66,7 @@ flowchart TD
 | P8 | Live events and sessions | ✅ Done |
 | P9 | Storage and performance optimization | ✅ Done |
 | P10 | Metadata management | ✅ Done |
-| P11 | Administration and operations | Not started |
+| P11 | Administration and operations | ✅ Done |
 | P12 | Media extras | Not started |
 | P13 | Clients and ecosystem | Not started |
 
@@ -267,6 +267,16 @@ flowchart TD
 - Networking: HTTPS with configured certificates, a base URL behind reverse proxies, discovery of servers on the local network
 
 **Done when**: an end-to-end test through the API: an administrator changes a transcoding setting and the next transcode uses it; a plugin is installed from a catalog, upgraded and uninstalled while the server keeps serving; a backup is restored into a new server.
+
+**Progress**:
+- [x] Server settings in the database, applied at once and rolled back when a part rejects them: transcoding (hardware acceleration, encoder preset and quality, tone mapping, deinterlacing, downmix, cropping, transcode folder), network, plugin catalogs
+- [x] Folder browsing; tasks with their last and next runs, run now; the job queue; daily cleanup of finished jobs
+- [x] Plugin hot plugging from catalogs: install, upgrade with rollback, uninstall; authentication and notification plugins used by the server
+- [x] API keys; activity log sent to notification plugins; recent server logs
+- [x] Backup and restore (`store.Dump` and `store.Restore` on both databases, artwork and plugins)
+- [x] Localization data: countries, languages, rating systems; the ported Jellyfin localization cases pass, translations excepted
+- [x] Networking: base URL, HTTPS with configured certificates, local discovery
+- [x] End-to-end test (`apps/server/internal/server/admin_test.go`)
 
 ### P12 Media Extras
 **Scope**: media features beyond playing a stream.

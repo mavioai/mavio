@@ -36,6 +36,16 @@ func TestPluginConfigs(t *testing.T) {
 			t.Errorf("another plugin's Put changed this one: got = %s", got.JSON)
 		}
 
+		if err := s.PluginConfigs().Delete(ctx, "org.example.other"); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := s.PluginConfigs().Get(ctx, "org.example.other"); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("Get after Delete: %v, want ErrNotFound", err)
+		}
+		if err := s.PluginConfigs().Delete(ctx, "org.example.none"); err != nil {
+			t.Errorf("Delete of nothing: %v", err)
+		}
+
 		for _, bad := range []core.PluginConfig{{PluginID: "", JSON: `{}`}, {PluginID: id, JSON: `{"api_key":`}} {
 			if err := s.PluginConfigs().Put(ctx, &bad); !errors.Is(err, core.ErrInvalid) {
 				t.Errorf("Put(%+v) error = %v, want ErrInvalid", bad, err)

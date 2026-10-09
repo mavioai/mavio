@@ -1,0 +1,68 @@
+edition = "2023";
+
+package mavio.system.v1;
+
+import "buf/validate/validate.proto";
+
+// LocalizationService lists the countries, languages and content rating
+// systems metadata and preferences refer to, with English names.
+service LocalizationService {
+  rpc ListCountries(ListCountriesRequest) returns (ListCountriesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc ListLanguages(ListLanguagesRequest) returns (ListLanguagesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc ListRatings(ListRatingsRequest) returns (ListRatingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+// Country is an ISO 3166-1 country.
+message Country {
+  // Alpha-2, such as "DE".
+  string code = 1;
+  // Alpha-3, such as "DEU".
+  string three_letter_code = 2;
+  string name = 3;
+}
+
+// Language is a language with an ISO 639-1 code.
+message Language {
+  // ISO 639-1, such as "de".
+  string code = 1;
+  // ISO 639-2/B, such as "ger", as streams carry it.
+  string three_letter_code = 2;
+  string name = 3;
+}
+
+// Rating is a content rating of a country's rating system.
+message Rating {
+  string name = 1;
+  // The minimum age it stands for; 1000 and above for adult content.
+  int32 score = 2;
+}
+
+message ListCountriesRequest {}
+
+message ListCountriesResponse {
+  // By name.
+  repeated Country countries = 1;
+}
+
+message ListLanguagesRequest {}
+
+message ListLanguagesResponse {
+  // By name.
+  repeated Language languages = 1;
+}
+
+message ListRatingsRequest {
+  // Alpha-2; unset lists the ratings of every country.
+  string country = 1 [(buf.validate.field).string.pattern = "^([A-Z]{2})?$"];
+}
+
+message ListRatingsResponse {
+  // By score, then name.
+  repeated Rating ratings = 1;
+}

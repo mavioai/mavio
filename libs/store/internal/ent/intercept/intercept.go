@@ -8,6 +8,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/mavioai/mavio/libs/store/internal/ent"
+	"github.com/mavioai/mavio/libs/store/internal/ent/activity"
+	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
@@ -22,6 +24,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -80,6 +83,60 @@ func (f TraverseFunc) Traverse(ctx context.Context, q ent.Query) error {
 		return err
 	}
 	return f(ctx, query)
+}
+
+// The APIKeyFunc type is an adapter to allow the use of ordinary function as a Querier.
+type APIKeyFunc func(context.Context, *ent.APIKeyQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f APIKeyFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.APIKeyQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.APIKeyQuery", q)
+}
+
+// The TraverseAPIKey type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseAPIKey func(context.Context, *ent.APIKeyQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseAPIKey) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseAPIKey) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.APIKeyQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.APIKeyQuery", q)
+}
+
+// The ActivityFunc type is an adapter to allow the use of ordinary function as a Querier.
+type ActivityFunc func(context.Context, *ent.ActivityQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f ActivityFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.ActivityQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.ActivityQuery", q)
+}
+
+// The TraverseActivity type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseActivity func(context.Context, *ent.ActivityQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseActivity) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseActivity) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ActivityQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.ActivityQuery", q)
 }
 
 // The AuthSessionFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -433,6 +490,33 @@ func (f TraversePluginConfig) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.PluginConfigQuery", q)
 }
 
+// The SettingFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SettingFunc func(context.Context, *ent.SettingQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f SettingFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.SettingQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.SettingQuery", q)
+}
+
+// The TraverseSetting type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSetting func(context.Context, *ent.SettingQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSetting) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSetting) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.SettingQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.SettingQuery", q)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary function as a Querier.
 type UserFunc func(context.Context, *ent.UserQuery) (ent.Value, error)
 
@@ -490,6 +574,10 @@ func (f TraverseUserData) Traverse(ctx context.Context, q ent.Query) error {
 // NewQuery returns the generic Query interface for the given typed query.
 func NewQuery(q ent.Query) (Query, error) {
 	switch q := q.(type) {
+	case *ent.APIKeyQuery:
+		return &query[*ent.APIKeyQuery, predicate.APIKey, apikey.OrderOption]{typ: ent.TypeAPIKey, tq: q}, nil
+	case *ent.ActivityQuery:
+		return &query[*ent.ActivityQuery, predicate.Activity, activity.OrderOption]{typ: ent.TypeActivity, tq: q}, nil
 	case *ent.AuthSessionQuery:
 		return &query[*ent.AuthSessionQuery, predicate.AuthSession, authsession.OrderOption]{typ: ent.TypeAuthSession, tq: q}, nil
 	case *ent.CreditQuery:
@@ -516,6 +604,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.PersonQuery, predicate.Person, person.OrderOption]{typ: ent.TypePerson, tq: q}, nil
 	case *ent.PluginConfigQuery:
 		return &query[*ent.PluginConfigQuery, predicate.PluginConfig, pluginconfig.OrderOption]{typ: ent.TypePluginConfig, tq: q}, nil
+	case *ent.SettingQuery:
+		return &query[*ent.SettingQuery, predicate.Setting, setting.OrderOption]{typ: ent.TypeSetting, tq: q}, nil
 	case *ent.UserQuery:
 		return &query[*ent.UserQuery, predicate.User, user.OrderOption]{typ: ent.TypeUser, tq: q}, nil
 	case *ent.UserDataQuery:

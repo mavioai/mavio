@@ -6,17 +6,17 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"sync"
+	"time"
 
 	"connectrpc.com/connect"
 
-	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/libs/core"
-	"github.com/mavioai/mavio/libs/library"
-	"github.com/mavioai/mavio/libs/metadata"
 	"github.com/mavioai/mavio/libs/plugin/host"
 	"github.com/mavioai/mavio/libs/plugin/host/process"
 	"github.com/mavioai/mavio/libs/plugin/host/wasm"
@@ -52,25 +52,38 @@ type Info struct {
 // Config configures a Manager.
 type Config struct {
 	// Dir holds one folder per plugin, with its manifest.json; empty means
-	// no plugins.
+	// no plugins, and none can be installed.
 	Dir string
 	// CacheDir keeps compiled WASM modules across restarts; empty keeps
 	// them in memory.
 	CacheDir string
 	Store    core.Store
-	Logger   *slog.Logger
+	// Catalogs returns the URLs of the plugin catalogs; nil means none.
+	Catalogs func() []string
+	// Client downloads catalogs and plugin packages; nil uses one with a
+	// five-minute timeout.
+	Client *http.Client
+	Logger *slog.Logger
 }
 
-// Manager runs the plugins of a plugin folder.
+// Manager runs the plugins of a plugin folder, and installs, upgrades and
+// uninstalls them while the server runs.
 type Manager struct {
+	cfg   Config
 	store core.Store
 	log   *slog.Logger
+	opts  host.Options
+
+	// install serializes installations, which take long, apart from mu.
+	install sync.Mutex
 
 	mu      sync.Mutex
 	plugins []*entry // by ID
 }
 
 type entry struct {
+	// folder is the plugin's folder in the plugin folder.
+	folder   string
 	manifest *pluginv1.Manifest
 	plugin   host.Plugin // nil when it failed to start
 	state    State
@@ -81,7 +94,14 @@ type entry struct {
 // configurations. A plugin that fails is reported by Plugins and left out;
 // only an unreadable folder is an error.
 func Open(ctx context.Context, cfg Config) (*Manager, error) {
-	m := &Manager{store: cfg.Store, log: cmp.Or(cfg.Logger, slog.New(slog.DiscardHandler))}
+	if cfg.Client == nil {
+		cfg.Client = &http.Client{Timeout: 5 * time.Minute}
+	}
+	m := &Manager{cfg: cfg, store: cfg.Store, log: cmp.Or(cfg.Logger, slog.New(slog.DiscardHandler))}
+	m.opts = host.Options{
+		WASM:    wasm.Options{CacheDir: cfg.CacheDir, Logger: m.log},
+		Process: process.Options{Logger: m.log},
+	}
 	if cfg.Dir == "" {
 		return m, nil
 	}
@@ -89,44 +109,52 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("plugin folder: %w", err)
 	}
-	opts := host.Options{
-		WASM:    wasm.Options{CacheDir: cfg.CacheDir, Logger: m.log},
-		Process: process.Options{Logger: m.log},
-	}
 	seen := map[string]bool{}
 	for _, d := range dirs {
-		dir := filepath.Join(cfg.Dir, d.Name())
-		if !d.IsDir() {
+		// Folders of installations in progress start with a dot.
+		if !d.IsDir() || strings.HasPrefix(d.Name(), ".") {
 			continue
 		}
-		if _, err := os.Stat(filepath.Join(dir, "manifest.json")); err != nil {
+		if _, err := os.Stat(filepath.Join(cfg.Dir, d.Name(), manifest.File)); err != nil {
 			continue
 		}
-		e := &entry{}
-		e.manifest, e.err = manifest.Load(dir)
-		switch {
-		case e.err != nil:
-			e.manifest = pluginv1.Manifest_builder{Id: new(d.Name())}.Build()
-		case seen[e.manifest.GetId()]:
-			e.err = fmt.Errorf("another folder holds plugin %s", e.manifest.GetId())
-		default:
-			e.plugin, e.err = host.Open(ctx, dir, opts)
-		}
+		e := m.start(ctx, d.Name(), seen)
 		seen[e.manifest.GetId()] = true
-		if e.err == nil {
-			e.state, e.err = m.configure(ctx, e)
-		}
-		if e.err != nil {
-			e.state = Failed
-			m.log.ErrorContext(ctx, "plugin failed", "plugin", e.manifest.GetId(), "err", e.err)
-		} else {
-			m.log.InfoContext(ctx, "plugin started", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion(),
-				"configured", e.state == Ready)
-		}
 		m.plugins = append(m.plugins, e)
 	}
-	slices.SortFunc(m.plugins, func(a, b *entry) int { return cmp.Compare(a.manifest.GetId(), b.manifest.GetId()) })
+	m.sort()
 	return m, nil
+}
+
+func (m *Manager) sort() {
+	slices.SortFunc(m.plugins, func(a, b *entry) int { return cmp.Compare(a.manifest.GetId(), b.manifest.GetId()) })
+}
+
+// start starts the plugin in a folder of the plugin folder and delivers
+// its configuration; seen are the IDs other folders hold.
+func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool) *entry {
+	dir := filepath.Join(m.cfg.Dir, folder)
+	e := &entry{folder: folder}
+	e.manifest, e.err = manifest.Load(dir)
+	switch {
+	case e.err != nil:
+		e.manifest = pluginv1.Manifest_builder{Id: new(folder)}.Build()
+	case seen[e.manifest.GetId()]:
+		e.err = fmt.Errorf("another folder holds plugin %s", e.manifest.GetId())
+	default:
+		e.plugin, e.err = host.Open(ctx, dir, m.opts)
+	}
+	if e.err == nil {
+		e.state, e.err = m.configure(ctx, e)
+	}
+	if e.err != nil {
+		e.state = Failed
+		m.log.ErrorContext(ctx, "plugin failed", "plugin", e.manifest.GetId(), "err", e.err)
+	} else {
+		m.log.InfoContext(ctx, "plugin started", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion(),
+			"configured", e.state == Ready)
+	}
+	return e
 }
 
 // configure delivers the stored configuration of a started plugin. A
@@ -168,6 +196,30 @@ func (m *Manager) find(id string) (*entry, error) {
 		return nil, fmt.Errorf("plugin %s: %w", id, core.ErrNotFound)
 	}
 	return m.plugins[i], nil
+}
+
+// running returns a ready plugin by ID.
+func (m *Manager) running(id string) (host.Plugin, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	e, err := m.find(id)
+	if err != nil || e.plugin == nil || e.state != Ready {
+		return nil, false
+	}
+	return e.plugin, true
+}
+
+// withCapability lists the IDs of the started plugins declaring c.
+func (m *Manager) withCapability(c pluginv1.Capability) []string {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []string
+	for _, e := range m.plugins {
+		if e.plugin != nil && manifest.HasCapability(e.manifest, c) {
+			out = append(out, e.manifest.GetId())
+		}
+	}
+	return out
 }
 
 // Config returns a plugin's stored configuration; its JSON is empty when
@@ -216,44 +268,6 @@ func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, e
 	return e.info(), nil
 }
 
-// MetadataProviders returns the metadata providers among the started
-// plugins. A provider whose plugin is not ready knows nothing, so that a
-// plugin configured later takes part without a restart.
-func (m *Manager) MetadataProviders() []library.Provider {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	var out []library.Provider
-	for _, e := range m.plugins {
-		if e.plugin == nil || e.plugin.Metadata() == nil {
-			continue
-		}
-		out = append(out, &provider{
-			m: m, e: e,
-			p: &providers.Plugin{ID: e.manifest.GetId(), Client: e.plugin.Metadata()},
-		})
-	}
-	return out
-}
-
-// SubtitleProviders returns the subtitle providers among the started
-// plugins; like metadata providers, they find nothing until their plugin
-// is ready.
-func (m *Manager) SubtitleProviders() []library.SubtitleProvider {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	var out []library.SubtitleProvider
-	for _, e := range m.plugins {
-		if e.plugin == nil || e.plugin.Subtitles() == nil {
-			continue
-		}
-		out = append(out, &subtitleProvider{
-			m: m, e: e,
-			p: &providers.SubtitlePlugin{ID: e.manifest.GetId(), Client: e.plugin.Subtitles()},
-		})
-	}
-	return out
-}
-
 // Close stops the plugins.
 func (m *Manager) Close(ctx context.Context) error {
 	m.mu.Lock()
@@ -265,59 +279,4 @@ func (m *Manager) Close(ctx context.Context) error {
 		}
 	}
 	return errors.Join(errs...)
-}
-
-// provider is a plugin's metadata provider that knows nothing until the
-// plugin is ready.
-type provider struct {
-	m *Manager
-	e *entry
-	p *providers.Plugin
-}
-
-func (p *provider) Name() string { return p.p.Name() }
-
-func (p *provider) Metadata(ctx context.Context, l library.Lookup) (*metadata.Result, error) {
-	if !p.m.ready(p.e) {
-		return nil, nil
-	}
-	return p.p.Metadata(ctx, l)
-}
-
-func (p *provider) Search(ctx context.Context, l library.Lookup, limit int) ([]library.SearchResult, error) {
-	if !p.m.ready(p.e) {
-		return nil, nil
-	}
-	return p.p.Search(ctx, l, limit)
-}
-
-// ready reports whether a plugin is ready.
-func (m *Manager) ready(e *entry) bool {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	return e.state == Ready
-}
-
-// subtitleProvider is a plugin's subtitle provider that finds nothing
-// until the plugin is ready.
-type subtitleProvider struct {
-	m *Manager
-	e *entry
-	p *providers.SubtitlePlugin
-}
-
-func (p *subtitleProvider) Name() string { return p.p.Name() }
-
-func (p *subtitleProvider) SearchSubtitles(ctx context.Context, q library.SubtitleQuery) ([]library.RemoteSubtitle, error) {
-	if !p.m.ready(p.e) {
-		return nil, nil
-	}
-	return p.p.SearchSubtitles(ctx, q)
-}
-
-func (p *subtitleProvider) DownloadSubtitle(ctx context.Context, id string) (library.DownloadedSubtitle, error) {
-	if !p.m.ready(p.e) {
-		return library.DownloadedSubtitle{}, fmt.Errorf("plugin %s is not configured: %w", p.p.Name(), core.ErrNotFound)
-	}
-	return p.p.DownloadSubtitle(ctx, id)
 }

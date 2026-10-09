@@ -248,3 +248,30 @@ func (sizedProber) Probe(context.Context, string, bool) (ProbeResult, error) {
 		Streams: []core.MediaStream{{Index: 0, Kind: core.StreamVideo, Codec: "h264", Width: 1920, Height: 1080}},
 	}}, nil
 }
+
+func TestCleanup(t *testing.T) {
+	f := newScan(t, core.LibraryMovies)
+	jobs := &Jobs{Store: f.store, Now: func() time.Time { return f.clock }}
+	f.store.clock = func() time.Time { return f.clock }
+	old := f.clock.Add(-8 * 24 * time.Hour)
+	f.store.jobs = append(f.store.jobs,
+		core.Job{ID: core.NewID(), Kind: JobScan, State: core.JobSucceeded, FinishedAt: &old},
+		core.Job{ID: core.NewID(), Kind: JobScan, State: core.JobFailed, FinishedAt: &f.clock},
+	)
+	if err := jobs.ScheduleHousekeeping(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	f.clock = f.clock.Add(time.Minute)
+	w := &Worker{Queue: f.store.Jobs(), Owner: "test", Handlers: jobs.Handlers()}
+	if n := drain(t, w); n != 1 {
+		t.Errorf("jobs run = %d, want 1", n)
+	}
+	var kinds []string
+	for _, j := range f.store.jobs {
+		kinds = append(kinds, j.Kind+":"+string(j.State))
+	}
+	// The old job is gone, the recent one stays, and the next cleanup waits.
+	if len(kinds) != 3 || kinds[0] != "library.scan:failed" || kinds[1] != "jobs.cleanup:succeeded" || kinds[2] != "jobs.cleanup:" {
+		t.Errorf("jobs = %v", kinds)
+	}
+}

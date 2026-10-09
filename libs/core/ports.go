@@ -24,6 +24,9 @@ type Store interface {
 	Scans() ScanRepository
 	PluginConfigs() PluginConfigRepository
 	DisplayPreferences() DisplayPreferencesRepository
+	Settings() SettingsRepository
+	APIKeys() APIKeyRepository
+	Activities() ActivityRepository
 
 	// InTx runs fn in a transaction. The Store passed to fn is bound to the
 	// transaction; fn's error rolls it back.
@@ -199,6 +202,40 @@ type JobQueue interface {
 	// Fail records a failed attempt; the job is retried after RetryDelay
 	// until MaxAttempts is reached, then marked failed.
 	Fail(ctx context.Context, id ID, owner string, cause error) error
+	// List returns the jobs q selects, most recently created first.
+	List(ctx context.Context, q JobQuery) (Page[Job], error)
+	// Purge deletes the jobs that finished before a time, succeeded or
+	// failed, and reports how many.
+	Purge(ctx context.Context, before time.Time) (int, error)
+}
+
+// SettingsRepository stores the server settings.
+type SettingsRepository interface {
+	// Get returns DefaultServerSettings until settings are stored.
+	Get(ctx context.Context) (ServerSettings, error)
+	// Put validates and stores the settings, setting UpdatedAt.
+	Put(ctx context.Context, s *ServerSettings) error
+}
+
+// APIKeyRepository stores API keys.
+type APIKeyRepository interface {
+	Create(ctx context.Context, k *APIKey) error
+	// GetByTokenHash returns ErrNotFound for unknown tokens.
+	GetByTokenHash(ctx context.Context, hash []byte) (APIKey, error)
+	// List returns all keys, newest first.
+	List(ctx context.Context) ([]APIKey, error)
+	// Touch records a use.
+	Touch(ctx context.Context, id ID, at time.Time) error
+	Delete(ctx context.Context, id ID) error
+}
+
+// ActivityRepository stores the activity log.
+type ActivityRepository interface {
+	Add(ctx context.Context, a *Activity) error
+	// List returns the activities q selects, newest first.
+	List(ctx context.Context, q ActivityQuery) (Page[Activity], error)
+	// Purge deletes the activities before a time and reports how many.
+	Purge(ctx context.Context, before time.Time) (int, error)
 }
 
 // PluginConfigRepository stores plugin configurations.
@@ -207,6 +244,8 @@ type PluginConfigRepository interface {
 	Get(ctx context.Context, pluginID string) (PluginConfig, error)
 	// Put stores the configuration, replacing the plugin's earlier one.
 	Put(ctx context.Context, c *PluginConfig) error
+	// Delete removes a plugin's configuration; none is no error.
+	Delete(ctx context.Context, pluginID string) error
 }
 
 // DisplayPreferencesRepository stores display preferences.

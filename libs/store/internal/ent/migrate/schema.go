@@ -9,6 +9,54 @@ import (
 )
 
 var (
+	// APIKeysColumns holds the columns for the "api_keys" table.
+	APIKeysColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString},
+		{Name: "token_hash", Type: field.TypeBytes, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "last_used_at", Type: field.TypeTime, Nullable: true},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// APIKeysTable holds the schema information for the "api_keys" table.
+	APIKeysTable = &schema.Table{
+		Name:       "api_keys",
+		Columns:    APIKeysColumns,
+		PrimaryKey: []*schema.Column{APIKeysColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "api_keys_users_api_keys",
+				Columns:    []*schema.Column{APIKeysColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// ActivitiesColumns holds the columns for the "activities" table.
+	ActivitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "time", Type: field.TypeTime},
+		{Name: "type", Type: field.TypeString},
+		{Name: "severity", Type: field.TypeString},
+		{Name: "title", Type: field.TypeString},
+		{Name: "message", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "item_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "attributes", Type: field.TypeJSON, Nullable: true},
+	}
+	// ActivitiesTable holds the schema information for the "activities" table.
+	ActivitiesTable = &schema.Table{
+		Name:       "activities",
+		Columns:    ActivitiesColumns,
+		PrimaryKey: []*schema.Column{ActivitiesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "activity_time",
+				Unique:  false,
+				Columns: []*schema.Column{ActivitiesColumns[1]},
+			},
+		},
+	}
 	// AuthSessionsColumns holds the columns for the "auth_sessions" table.
 	AuthSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -541,6 +589,19 @@ var (
 		Columns:    PluginConfigsColumns,
 		PrimaryKey: []*schema.Column{PluginConfigsColumns[0]},
 	}
+	// SettingsColumns holds the columns for the "settings" table.
+	SettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "key", Type: field.TypeString, Unique: true},
+		{Name: "value", Type: field.TypeString, Size: 2147483647},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SettingsTable holds the schema information for the "settings" table.
+	SettingsTable = &schema.Table{
+		Name:       "settings",
+		Columns:    SettingsColumns,
+		PrimaryKey: []*schema.Column{SettingsColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -605,6 +666,8 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		APIKeysTable,
+		ActivitiesTable,
 		AuthSessionsTable,
 		CreditsTable,
 		DisplayPreferencesTable,
@@ -618,12 +681,20 @@ var (
 		MediaSourcesTable,
 		PeopleTable,
 		PluginConfigsTable,
+		SettingsTable,
 		UsersTable,
 		UserDataTable,
 	}
 )
 
 func init() {
+	APIKeysTable.ForeignKeys[0].RefTable = UsersTable
+	APIKeysTable.Annotation = &entsql.Annotation{
+		Table: "api_keys",
+	}
+	ActivitiesTable.Annotation = &entsql.Annotation{
+		Table: "activities",
+	}
 	AuthSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	AuthSessionsTable.Annotation = &entsql.Annotation{
 		Table: "auth_sessions",
@@ -677,6 +748,9 @@ func init() {
 	}
 	PluginConfigsTable.Annotation = &entsql.Annotation{
 		Table: "plugin_configs",
+	}
+	SettingsTable.Annotation = &entsql.Annotation{
+		Table: "settings",
 	}
 	UsersTable.Annotation = &entsql.Annotation{
 		Table: "users",

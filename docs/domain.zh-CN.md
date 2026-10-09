@@ -38,6 +38,9 @@ erDiagram
 | `UserData` | 某个用户对某个条目的状态：是否已播放、续播位置、收藏等 |
 | `Job` | 持久化的后台任务 |
 | `PluginConfig` | 管理员为某个插件设置的配置 |
+| `ServerSettings` | 管理员在服务端运行时修改的设置：转码、网络、插件目录 |
+| `APIKey` | 集成调用 API 所用的令牌，以创建它的管理员身份行事 |
+| `Activity` | 服务端上发生的事情，记录在活动日志中 |
 | `DisplayPreferences` | 用户对某个客户端如何显示某个视图的设置 |
 
 ---
@@ -183,6 +186,7 @@ erDiagram
 * `Extend`、`Complete` 与 `Fail` 要求调用者持有租约；租约已过期并被接管的工作者会得到 `ErrConflict`。
 * 一次尝试失败后，在 `RetryDelay(attempts)` 之后重试——30 秒，此后翻倍（1 分钟、2 分钟……），最长一小时——直到达到 `MaxAttempts`，此时任务变为 `failed`。
 * 状态流转：`pending` → `running` → `succeeded` / 重试时回到 `pending` / `failed`。
+* `JobQuery` 按类型与状态列出任务，最近创建的在前；已结束的任务在一周后由每日运行的 `jobs.cleanup` 任务清除。
 
 ---
 
@@ -200,11 +204,14 @@ erDiagram
 | `UserRepository` | 增删改查，以及不区分大小写的 `GetByName` |
 | `UserDataRepository` | `Get`（不存在时返回 `ErrNotFound`）、按一组条目 `GetMany`、`Put` |
 | `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`GetByTokenHash`、`ListForUser`（按最近活动排序）、`Touch`、`Delete` |
-| `JobQueue` | `Enqueue`（报告是否入队）、`Lease`、`Extend`、`Complete`、`Fail` |
+| `JobQueue` | `Enqueue`（报告是否入队）、`Lease`、`Extend`、`Complete`、`Fail`、`List`（分页，见 §8）、`Purge` 清除某时间之前结束的任务 |
 | `ScanRepository` | 媒体库扫描的 `NextGeneration`；每个已扫描文件夹的 `FolderState`（`ModTime`、`FileID`、`Entries`），由 `PutFolders` 记录，文件夹消失后由 `DeleteFolders` 移除 |
 | `ItemRepository`（整理类） | `Links` 按顺序列出合集或播放列表的条目项；`ReplaceLinks` 设置它们，保留给定的 ID，并为没有 ID 的条目项分配新 ID |
-| `PluginConfigRepository` | `Get` 某个插件的配置（从未配置时返回 `ErrNotFound`），`Put` 写入并替换之前的配置 |
+| `PluginConfigRepository` | `Get` 某个插件的配置（从未配置时返回 `ErrNotFound`），`Put` 写入并替换之前的配置，`Delete` 删除 |
 | `DisplayPreferencesRepository` | `Get` 用户对某个客户端视图的偏好（从未设置时返回 `ErrNotFound`），`Put` 写入并替换之前的偏好 |
+| `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入 |
+| `APIKeyRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Touch`、`Delete`；删除用户时一并删除其密钥 |
+| `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
 * **Replace 语义**：`Replace*` 方法设置某个所有者的完整集合，删除不在新集合中的内容——扫描与元数据刷新总是整组写入。
@@ -238,7 +245,7 @@ erDiagram
 
 `PluginConfig` 是管理员为某个插件设置的配置：一个符合插件清单中配置 schema 的 JSON 文档（`JSON`），附带 `UpdatedAt`。
 
-* 按 `PluginID`（清单中的 ID）保存，而不是跟随已安装的文件，因此插件升级或重新安装后配置仍在。
+* 按 `PluginID`（清单中的 ID）保存，而不是跟随已安装的文件，因此插件升级后配置仍在；卸载插件时删除。
 * `Validate` 要求有插件 ID 且 JSON 格式正确；是否符合 schema 由了解清单的服务端在保存配置之前检查。
 
 ---
@@ -249,3 +256,21 @@ erDiagram
 
 * 按用户、客户端与视图保存；再次写入会替换全部值。删除用户时一并删除。
 * `Validate` 要求有用户、不超过 200 字节的客户端名与视图名，至多 200 个值，名称非空且不超过 200 字节，值不超过 8 KiB。
+
+---
+
+## 12. 管理
+
+### 12.1 服务端设置
+`ServerSettings` 是管理员在服务端运行时修改的设置；命令行参数只提供其中一些的初始值。只保存一组设置，读取时以默认值（`DefaultServerSettings`）补全后来新增的设置。
+
+* `Transcoding`：`HardwareAcceleration`（`auto` 使用服务端 ffmpeg 与硬件所支持的加速，`none`，或 `videotoolbox`）、是否允许硬件编码器、软件编码器的 `EncoderPreset`（为空时按片源选择）、`H264CRF` 与 `H265CRF`（0–51）、`Threads`、色调映射（`TonemapAlgorithm`、`TonemapRange`、`TonemapDesat`、`TonemapPeak`）、去隔行（`yadif` 或 `bwdif`，可选倍帧率）、立体声 `DownmixBoost`（0.5–3）、`CropBlackBorders`，以及 `TranscodeDir`（绝对路径；为空时沿用服务端启动时的目录）。
+* `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort` 及其 PEM 格式的 `CertificatePath` 与 `KeyPath`，以及 `LocalDiscovery`。
+* `PluginCatalogs`：安装插件所用插件目录的 http 或 https URL。
+* `Validate` 检查已知取值与范围。
+
+### 12.2 API 密钥
+`APIKey` 让集成无需登录即可调用 API：它的令牌只显示一次，以创建它的管理员身份行事，前提是该用户仍是已启用的管理员。只保存令牌的 SHA-256 哈希（`TokenHash`），以及 `Name`、`CreatedAt` 与至多每分钟记录一次的 `LastUsedAt`。
+
+### 12.3 活动日志
+`Activity` 是发生过的一件事：点分的 `Type`、`Severity`（`info`、`warning`、`error`）、`Title` 与 `Message`、相关的 `UserID` 与 `ItemID`，以及因类型而异的 `Attributes`。日志记录登录（`user.login`）与失败的登录（`user.login_failed`，警告）、API 密钥的创建与吊销（`apikey.created`、`apikey.revoked`）、插件的安装、配置与卸载（`plugin.installed`、`plugin.configured`、`plugin.uninstalled`）、设置的修改（`settings.updated`）与备份（`backup.created`）。活动保留 90 天，并作为事件发送给通知插件。

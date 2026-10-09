@@ -10,6 +10,7 @@ import (
 	"cmp"
 	"context"
 	"encoding/json"
+	"errors"
 	"slices"
 	"strings"
 	"sync"
@@ -21,11 +22,12 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
 
-// ID and Version must match the smoke test manifest.
-const (
-	ID      = "org.mavio.smoke"
-	Version = "0.1.0"
-)
+// ID must match the smoke test manifest.
+const ID = "org.mavio.smoke"
+
+// Version must match the manifest too; builds of other versions set it
+// with -ldflags "-X main.Version=…".
+var Version = "0.1.0"
 
 // TMDBID is the external ID of "Farewell My Concubine"; OtherTMDBID that
 // of "The Concubine".
@@ -58,6 +60,30 @@ var config struct {
 func init() {
 	guest.Handle(pluginv1connect.NewPluginServiceHandler(lifecycle{}))
 	guest.Handle(pluginv1connect.NewMetadataProviderServiceHandler(provider{}))
+	guest.Handle(pluginv1connect.NewAuthProviderServiceHandler(authProvider{}))
+	guest.Handle(pluginv1connect.NewNotifierServiceHandler(notifier{}))
+}
+
+// authProvider accepts the password "directory" of any user, as
+// administrators when their name starts with "admin".
+type authProvider struct{}
+
+func (authProvider) Authenticate(_ context.Context, req *pluginv1.AuthenticateRequest) (*pluginv1.AuthenticateResponse, error) {
+	ok := req.GetPassword() == "directory"
+	return pluginv1.AuthenticateResponse_builder{
+		Authenticated: proto.Bool(ok), DisplayName: proto.String(strings.ToUpper(req.GetUsername())),
+		Admin: proto.Bool(strings.HasPrefix(req.GetUsername(), "admin")),
+	}.Build(), nil
+}
+
+// notifier rejects events without a type.
+type notifier struct{}
+
+func (notifier) Notify(_ context.Context, req *pluginv1.NotifyRequest) (*pluginv1.NotifyResponse, error) {
+	if req.GetEvent().GetType() == "" {
+		return nil, errors.New("event without a type")
+	}
+	return &pluginv1.NotifyResponse{}, nil
 }
 
 type lifecycle struct{}

@@ -1,0 +1,101 @@
+edition = "2023";
+
+package mavio.system.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+// TaskService lists the server's recurring tasks and background jobs, and
+// runs tasks now. Administrators only.
+service TaskService {
+  // ListTasks lists the tasks with their last and next runs.
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // RunTask queues a task to run now; a run already queued or running is
+  // not queued again.
+  rpc RunTask(RunTaskRequest) returns (RunTaskResponse);
+  // ListJobs lists the jobs of the job queue, most recently created first.
+  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+enum JobState {
+  JOB_STATE_UNSPECIFIED = 0;
+  JOB_STATE_PENDING = 1;
+  JOB_STATE_RUNNING = 2;
+  JOB_STATE_SUCCEEDED = 3;
+  JOB_STATE_FAILED = 4;
+}
+
+// Job is a unit of background work.
+message Job {
+  string id = 1;
+  // Such as "library.scan".
+  string kind = 2;
+  JobState state = 3;
+  int32 priority = 4;
+  int32 attempts = 5;
+  int32 max_attempts = 6;
+  // When it runs, or ran last.
+  google.protobuf.Timestamp run_time = 7;
+  google.protobuf.Timestamp create_time = 8;
+  google.protobuf.Timestamp finish_time = 9;
+  string last_error = 10;
+  // The kind-specific argument, as JSON.
+  string payload_json = 11;
+}
+
+// Task is a recurring piece of work.
+message Task {
+  // Such as "library.scan:<library ID>" or "jobs.cleanup".
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  // The job kind it runs.
+  string kind = 4;
+  // Unset for tasks that run on demand only.
+  google.protobuf.Duration interval = 5;
+  // Its last finished run; unset when it never ran.
+  Job last_run = 6;
+  // When it runs next; unset when not scheduled.
+  google.protobuf.Timestamp next_run_time = 7;
+  bool running = 8;
+}
+
+message ListTasksRequest {}
+
+message ListTasksResponse {
+  repeated Task tasks = 1;
+}
+
+message RunTaskRequest {
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message RunTaskResponse {
+  string job_id = 1;
+  // False when a run was already queued or running.
+  bool enqueued = 2;
+}
+
+message ListJobsRequest {
+  repeated string kinds = 1;
+  repeated JobState states = 2 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // 1–1000; unset means 100.
+  int32 limit = 3 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 4 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListJobsResponse {
+  repeated Job jobs = 1;
+  int32 total = 2;
+}

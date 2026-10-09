@@ -1,0 +1,54 @@
+edition = "2023";
+
+package mavio.system.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ActivityService lists the activity log: sign-ins, playbacks, changes to
+// users, plugins and settings, and failures. Administrators only.
+service ActivityService {
+  rpc ListActivities(ListActivitiesRequest) returns (ListActivitiesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+enum Severity {
+  SEVERITY_UNSPECIFIED = 0;
+  SEVERITY_INFO = 1;
+  SEVERITY_WARNING = 2;
+  SEVERITY_ERROR = 3;
+}
+
+// Activity is something that happened on the server.
+message Activity {
+  string id = 1;
+  google.protobuf.Timestamp time = 2;
+  // Dotted, such as "user.login_failed".
+  string type = 3;
+  Severity severity = 4;
+  string title = 5;
+  string message = 6;
+  string user_id = 7;
+  string item_id = 8;
+  map<string, string> attributes = 9;
+}
+
+message ListActivitiesRequest {
+  google.protobuf.Timestamp since = 1;
+  string user_id = 2 [(buf.validate.field).string.uuid = true];
+  // Leaves out less severe activities.
+  Severity min_severity = 3 [(buf.validate.field).enum.defined_only = true];
+  // 1–1000; unset means 100.
+  int32 limit = 4 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 5 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListActivitiesResponse {
+  // Newest first.
+  repeated Activity activities = 1;
+  int32 total = 2;
+}

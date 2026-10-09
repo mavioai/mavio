@@ -3,6 +3,7 @@ edition = "2023";
 package mavio.system.v1;
 
 import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "mavio/plugin/v1/plugin.proto";
 
@@ -30,6 +31,37 @@ service SystemService {
   // delivers it to the running plugin and stores it once the plugin
   // accepts it. Administrators only.
   rpc SetPluginConfig(SetPluginConfigRequest) returns (SetPluginConfigResponse);
+  // ListCatalogPlugins lists the plugins of the configured plugin
+  // catalogs, with the versions the server can run. Administrators only.
+  rpc ListCatalogPlugins(ListCatalogPluginsRequest) returns (ListCatalogPluginsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // InstallPlugin installs a plugin from a catalog, or upgrades or
+  // downgrades it to a version, while the server runs on; the plugin keeps
+  // its configuration. Administrators only.
+  rpc InstallPlugin(InstallPluginRequest) returns (InstallPluginResponse);
+  // UninstallPlugin stops a plugin and removes its folder and
+  // configuration. Administrators only.
+  rpc UninstallPlugin(UninstallPluginRequest) returns (UninstallPluginResponse);
+  // GetServerSettings returns the settings administrators change while
+  // the server runs. Administrators only.
+  rpc GetServerSettings(GetServerSettingsRequest) returns (GetServerSettingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateServerSettings replaces the settings and applies them at once.
+  // Administrators only.
+  rpc UpdateServerSettings(UpdateServerSettingsRequest) returns (UpdateServerSettingsResponse);
+  // ListDirectory lists a folder of the server's file system, to choose
+  // library folders; without a path, the file system roots. Administrators
+  // only.
+  rpc ListDirectory(ListDirectoryRequest) returns (ListDirectoryResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListLogs lists the server's recent log records, newest first.
+  // Administrators only.
+  rpc ListLogs(ListLogsRequest) returns (ListLogsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 message GetHealthRequest {}
@@ -108,4 +140,193 @@ message SetPluginConfigRequest {
 
 message SetPluginConfigResponse {
   Plugin plugin = 1;
+}
+
+// CatalogPlugin is a plugin a catalog offers.
+message CatalogPlugin {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string author = 4;
+  string homepage = 5;
+  // The catalog listing it.
+  string catalog_url = 6;
+  // Newest first; only versions the server can run.
+  repeated CatalogVersion versions = 7;
+  // Empty when not installed.
+  string installed_version = 8;
+}
+
+// CatalogVersion is a version of a catalog plugin.
+message CatalogVersion {
+  string version = 1;
+  string changelog = 2;
+  google.protobuf.Timestamp release_time = 3;
+}
+
+message ListCatalogPluginsRequest {}
+
+message ListCatalogPluginsResponse {
+  repeated CatalogPlugin plugins = 1;
+}
+
+message InstallPluginRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+  // Unset means the newest version.
+  string version = 2;
+}
+
+message InstallPluginResponse {
+  Plugin plugin = 1;
+}
+
+message UninstallPluginRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+}
+
+message UninstallPluginResponse {}
+
+enum HardwareAcceleration {
+  HARDWARE_ACCELERATION_UNSPECIFIED = 0;
+  // What the server's ffmpeg and hardware support, if anything.
+  HARDWARE_ACCELERATION_AUTO = 1;
+  HARDWARE_ACCELERATION_NONE = 2;
+  HARDWARE_ACCELERATION_VIDEOTOOLBOX = 3;
+}
+
+// TranscodingSettings steer transcodes.
+message TranscodingSettings {
+  HardwareAcceleration hardware_acceleration = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  bool hardware_encoding = 2;
+  // "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
+  // "slow", "slower" or "veryslow"; empty picks one by the source.
+  string encoder_preset = 3;
+  int32 h264_crf = 4 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 51
+  }];
+  int32 h265_crf = 5 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 51
+  }];
+  // 0 lets ffmpeg decide.
+  int32 threads = 6 [(buf.validate.field).int32.gte = 0];
+  // "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
+  string tonemap_algorithm = 7;
+  // "auto", "tv" or "pc".
+  string tonemap_range = 8;
+  double tonemap_desat = 9 [(buf.validate.field).double.gte = 0];
+  double tonemap_peak = 10 [(buf.validate.field).double.gte = 0];
+  // "yadif" or "bwdif".
+  string deinterlace_method = 11;
+  bool deinterlace_double_rate = 12;
+  double downmix_boost = 13 [(buf.validate.field).double = {
+    gte: 0.5
+    lte: 3
+  }];
+  bool crop_black_borders = 14;
+  // Absolute folder for running transcodes; empty uses the folder the
+  // server was started with.
+  string transcode_dir = 15;
+}
+
+// NetworkSettings decide how the server is reached.
+message NetworkSettings {
+  // Empty uses the host name.
+  string server_name = 1 [(buf.validate.field).string.max_len = 100];
+  // The path a reverse proxy serves the server under, such as "/mavio".
+  string base_url = 2;
+  // Serves HTTPS on this port with the PEM certificate and key; 0 serves
+  // none.
+  int32 https_port = 3 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 65535
+  }];
+  string certificate_path = 4;
+  string key_path = 5;
+  // Answers discovery requests from clients on the local network.
+  bool local_discovery = 6;
+}
+
+// ServerSettings are what administrators change while the server runs.
+message ServerSettings {
+  TranscodingSettings transcoding = 1 [(buf.validate.field).required = true];
+  NetworkSettings network = 2 [(buf.validate.field).required = true];
+  // URLs of the plugin catalogs plugins are installed from.
+  repeated string plugin_catalogs = 3 [(buf.validate.field).repeated.items.string.uri = true];
+  google.protobuf.Timestamp update_time = 4;
+}
+
+message GetServerSettingsRequest {}
+
+message GetServerSettingsResponse {
+  ServerSettings settings = 1;
+  // The accelerations this server's ffmpeg supports, AUTO and NONE
+  // included.
+  repeated HardwareAcceleration available_hardware_accelerations = 2;
+}
+
+message UpdateServerSettingsRequest {
+  ServerSettings settings = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateServerSettingsResponse {
+  ServerSettings settings = 1;
+}
+
+message ListDirectoryRequest {
+  // An absolute path; empty lists the roots.
+  string path = 1;
+  // Lists files too, not only folders.
+  bool include_files = 2;
+}
+
+// DirectoryEntry is a file or folder.
+message DirectoryEntry {
+  string name = 1;
+  string path = 2;
+  bool is_dir = 3;
+}
+
+message ListDirectoryResponse {
+  string path = 1;
+  // Empty for a root.
+  string parent = 2;
+  // Folders first, by name.
+  repeated DirectoryEntry entries = 3;
+}
+
+enum LogLevel {
+  LOG_LEVEL_UNSPECIFIED = 0;
+  LOG_LEVEL_DEBUG = 1;
+  LOG_LEVEL_INFO = 2;
+  LOG_LEVEL_WARN = 3;
+  LOG_LEVEL_ERROR = 4;
+}
+
+// LogRecord is a record of the server's log.
+message LogRecord {
+  google.protobuf.Timestamp time = 1;
+  LogLevel level = 2;
+  string message = 3;
+  map<string, string> attributes = 4;
+}
+
+message ListLogsRequest {
+  // Leaves out less severe records; unset means info.
+  LogLevel min_level = 1 [(buf.validate.field).enum.defined_only = true];
+  // Leaves out older records.
+  google.protobuf.Duration max_age = 2;
+  // 1–1000; unset means 200.
+  int32 limit = 3 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+}
+
+message ListLogsResponse {
+  repeated LogRecord records = 1;
 }

@@ -48,6 +48,9 @@ func (m *memStore) Scans() core.ScanRepository                              { re
 func (m *memStore) AuthSessions() core.AuthSessionRepository                { panic("unused") }
 func (m *memStore) PluginConfigs() core.PluginConfigRepository              { panic("unused") }
 func (m *memStore) DisplayPreferences() core.DisplayPreferencesRepository   { panic("unused") }
+func (m *memStore) Settings() core.SettingsRepository                       { panic("unused") }
+func (m *memStore) APIKeys() core.APIKeyRepository                          { panic("unused") }
+func (m *memStore) Activities() core.ActivityRepository                     { panic("unused") }
 func (m *memStore) InTx(_ context.Context, fn func(core.Store) error) error { return fn(m) }
 
 // present returns the items not missing, by path.
@@ -338,6 +341,18 @@ func (r memJobs) Complete(_ context.Context, id core.ID, owner string) error {
 		j.State = core.JobSucceeded
 	}
 	return err
+}
+
+func (r memJobs) List(context.Context, core.JobQuery) (core.Page[core.Job], error) { panic("unused") }
+
+func (r memJobs) Purge(_ context.Context, before time.Time) (int, error) {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	n := len(r.m.jobs)
+	r.m.jobs = slices.DeleteFunc(r.m.jobs, func(j core.Job) bool {
+		return (j.State == core.JobSucceeded || j.State == core.JobFailed) && j.FinishedAt != nil && j.FinishedAt.Before(before)
+	})
+	return n - len(r.m.jobs), nil
 }
 
 func (r memJobs) Fail(_ context.Context, id core.ID, owner string, cause error) error {

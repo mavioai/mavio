@@ -51,6 +51,9 @@ type Provider interface {
 type Refresher struct {
 	Store     core.Store
 	Providers []Provider
+	// Source, when set, gives the providers instead of Providers, so that
+	// providers come and go while the server runs.
+	Source func() []Provider
 	// MetadataDir holds the artwork chosen for items whose library does
 	// not save local metadata, one folder per item; empty keeps none.
 	MetadataDir string
@@ -76,6 +79,13 @@ func (r *Refresher) logger() *slog.Logger {
 		return r.Logger
 	}
 	return slog.New(slog.DiscardHandler)
+}
+
+func (r *Refresher) providers() []Provider {
+	if r.Source != nil {
+		return r.Source()
+	}
+	return r.Providers
 }
 
 func (r *Refresher) now() time.Time {
@@ -143,7 +153,7 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 	}
 	var results []*metadata.Result
 	if it.Extra == "" && !it.Locked {
-		for _, p := range r.Providers {
+		for _, p := range r.providers() {
 			res, err := p.Metadata(ctx, lookup)
 			if err != nil {
 				// One provider failing leaves the others' metadata.

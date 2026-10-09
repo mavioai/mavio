@@ -17,10 +17,13 @@ import (
 // touchInterval is how often a session's last activity is recorded.
 const touchInterval = time.Minute
 
-// Principal is the signed-in user making a request.
+// Principal is the signed-in user making a request, through a session or
+// an API key.
 type Principal struct {
 	User    core.User
 	Session core.AuthSession
+	// APIKey is the key of a request made with one; Session is zero then.
+	APIKey core.ID
 }
 
 type principalKey struct{}
@@ -94,18 +97,20 @@ func (i *Interceptor) authenticate(ctx context.Context, procedure string, h http
 	if !ok {
 		return ctx, connect.NewError(connect.CodeUnauthenticated, errors.New("missing bearer token"))
 	}
-	p, err := i.resolve(ctx, token)
+	p, err := i.Resolve(ctx, token)
 	if err != nil {
 		return ctx, err
 	}
 	return WithPrincipal(ctx, p), nil
 }
 
-func (i *Interceptor) resolve(ctx context.Context, token string) (Principal, error) {
+// Resolve returns the principal of a token: a session's, or an API key's,
+// which acts as the administrator who created it while they still are one.
+func (i *Interceptor) Resolve(ctx context.Context, token string) (Principal, error) {
 	invalid := connect.NewError(connect.CodeUnauthenticated, errors.New("invalid or revoked token"))
 	sess, err := i.store.AuthSessions().GetByTokenHash(ctx, HashToken(token))
 	if errors.Is(err, core.ErrNotFound) {
-		return Principal{}, invalid
+		return i.resolveKey(ctx, token, invalid)
 	} else if err != nil {
 		return Principal{}, fmt.Errorf("look up session: %w", err)
 	}
@@ -138,3 +143,27 @@ func bearer(h http.Header) (string, bool) {
 	token = strings.TrimSpace(token)
 	return token, token != ""
 }
+
+func (i *Interceptor) resolveKey(ctx context.Context, token string, invalid error) (Principal, error) {
+	key, err := i.store.APIKeys().GetByTokenHash(ctx, HashToken(token))
+	if errors.Is(err, core.ErrNotFound) {
+		return Principal{}, invalid
+	} else if err != nil {
+		return Principal{}, fmt.Errorf("look up API key: %w", err)
+	}
+	user, err := i.store.Users().Get(ctx, key.UserID)
+	if errors.Is(err, core.ErrNotFound) || err == nil && (user.Disabled || !user.Admin) {
+		return Principal{}, invalid
+	} else if err != nil {
+		return Principal{}, fmt.Errorf("look up user: %w", err)
+	}
+	if now := i.now(); key.LastUsedAt == nil || now.Sub(*key.LastUsedAt) >= touchInterval {
+		if err := i.store.APIKeys().Touch(ctx, key.ID, now); err != nil {
+			slog.WarnContext(ctx, "record API key use", "key", key.ID, "err", err)
+		}
+	}
+	return Principal{User: user, APIKey: key.ID}, nil
+}
+
+// Bearer returns the token of a request's "Authorization: Bearer" header.
+func Bearer(r *http.Request) (string, bool) { return bearer(r.Header) }

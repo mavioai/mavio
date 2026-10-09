@@ -23,6 +23,9 @@ var ratingFiles embed.FS
 type ratingSystem struct {
 	country string
 	scores  map[string]int
+	// list holds every rating string, the first spelling of each, in file
+	// order, with its score or nil.
+	list []ParentalRating
 }
 
 var ratingSystems = sync.OnceValue(func() []ratingSystem {
@@ -54,11 +57,19 @@ var ratingSystems = sync.OnceValue(func() []ratingSystem {
 		}
 		s := ratingSystem{country: strings.ToLower(file.CountryCode), scores: map[string]int{}}
 		for _, r := range file.Ratings {
-			if r.RatingScore == nil {
-				continue
+			var score *int
+			if r.RatingScore != nil {
+				score = &r.RatingScore.Score
 			}
 			for _, str := range r.RatingStrings {
-				s.scores[strings.ToLower(str)] = r.RatingScore.Score
+				if i := slices.IndexFunc(s.list, func(p ParentalRating) bool { return strings.EqualFold(p.Name, str) }); i >= 0 {
+					s.list[i].Score = score
+				} else {
+					s.list = append(s.list, ParentalRating{Name: str, Score: score})
+				}
+				if score != nil {
+					s.scores[strings.ToLower(str)] = *score
+				}
 			}
 		}
 		systems = append(systems, s)

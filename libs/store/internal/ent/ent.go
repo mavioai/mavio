@@ -12,6 +12,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/mavioai/mavio/libs/store/internal/ent/activity"
+	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
@@ -25,6 +27,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
+	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -87,6 +90,8 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			apikey.Table:             apikey.ValidColumn,
+			activity.Table:           activity.ValidColumn,
 			authsession.Table:        authsession.ValidColumn,
 			credit.Table:             credit.ValidColumn,
 			displaypreferences.Table: displaypreferences.ValidColumn,
@@ -100,6 +105,7 @@ func checkColumn(t, c string) error {
 			mediasource.Table:        mediasource.ValidColumn,
 			person.Table:             person.ValidColumn,
 			pluginconfig.Table:       pluginconfig.ValidColumn,
+			setting.Table:            setting.ValidColumn,
 			user.Table:               user.ValidColumn,
 			userdata.Table:           userdata.ValidColumn,
 		})

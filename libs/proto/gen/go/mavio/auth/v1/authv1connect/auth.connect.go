@@ -60,6 +60,14 @@ const (
 	// AuthServiceLoginWithQuickConnectProcedure is the fully-qualified name of the AuthService's
 	// LoginWithQuickConnect RPC.
 	AuthServiceLoginWithQuickConnectProcedure = "/mavio.auth.v1.AuthService/LoginWithQuickConnect"
+	// AuthServiceCreateApiKeyProcedure is the fully-qualified name of the AuthService's CreateApiKey
+	// RPC.
+	AuthServiceCreateApiKeyProcedure = "/mavio.auth.v1.AuthService/CreateApiKey"
+	// AuthServiceListApiKeysProcedure is the fully-qualified name of the AuthService's ListApiKeys RPC.
+	AuthServiceListApiKeysProcedure = "/mavio.auth.v1.AuthService/ListApiKeys"
+	// AuthServiceRevokeApiKeyProcedure is the fully-qualified name of the AuthService's RevokeApiKey
+	// RPC.
+	AuthServiceRevokeApiKeyProcedure = "/mavio.auth.v1.AuthService/RevokeApiKey"
 )
 
 // AuthServiceClient is a client for the mavio.auth.v1.AuthService service.
@@ -95,6 +103,14 @@ type AuthServiceClient interface {
 	// LoginWithQuickConnect gives the authorized device its access token,
 	// once.
 	LoginWithQuickConnect(context.Context, *v1.LoginWithQuickConnectRequest) (*v1.LoginWithQuickConnectResponse, error)
+	// CreateApiKey makes a token an integration calls the API with, as the
+	// administrator creating it; the token is returned once. Administrators
+	// only.
+	CreateApiKey(context.Context, *v1.CreateApiKeyRequest) (*v1.CreateApiKeyResponse, error)
+	// ListApiKeys lists every API key. Administrators only.
+	ListApiKeys(context.Context, *v1.ListApiKeysRequest) (*v1.ListApiKeysResponse, error)
+	// RevokeApiKey deletes an API key. Administrators only.
+	RevokeApiKey(context.Context, *v1.RevokeApiKeyRequest) (*v1.RevokeApiKeyResponse, error)
 }
 
 // NewAuthServiceClient constructs a client for the mavio.auth.v1.AuthService service. By default,
@@ -171,6 +187,25 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("LoginWithQuickConnect")),
 			connect.WithClientOptions(opts...),
 		),
+		createApiKey: connect.NewClient[v1.CreateApiKeyRequest, v1.CreateApiKeyResponse](
+			httpClient,
+			baseURL+AuthServiceCreateApiKeyProcedure,
+			connect.WithSchema(authServiceMethods.ByName("CreateApiKey")),
+			connect.WithClientOptions(opts...),
+		),
+		listApiKeys: connect.NewClient[v1.ListApiKeysRequest, v1.ListApiKeysResponse](
+			httpClient,
+			baseURL+AuthServiceListApiKeysProcedure,
+			connect.WithSchema(authServiceMethods.ByName("ListApiKeys")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		revokeApiKey: connect.NewClient[v1.RevokeApiKeyRequest, v1.RevokeApiKeyResponse](
+			httpClient,
+			baseURL+AuthServiceRevokeApiKeyProcedure,
+			connect.WithSchema(authServiceMethods.ByName("RevokeApiKey")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -186,6 +221,9 @@ type authServiceClient struct {
 	getQuickConnectState  *connect.Client[v1.GetQuickConnectStateRequest, v1.GetQuickConnectStateResponse]
 	authorizeQuickConnect *connect.Client[v1.AuthorizeQuickConnectRequest, v1.AuthorizeQuickConnectResponse]
 	loginWithQuickConnect *connect.Client[v1.LoginWithQuickConnectRequest, v1.LoginWithQuickConnectResponse]
+	createApiKey          *connect.Client[v1.CreateApiKeyRequest, v1.CreateApiKeyResponse]
+	listApiKeys           *connect.Client[v1.ListApiKeysRequest, v1.ListApiKeysResponse]
+	revokeApiKey          *connect.Client[v1.RevokeApiKeyRequest, v1.RevokeApiKeyResponse]
 }
 
 // GetAuthInfo calls mavio.auth.v1.AuthService.GetAuthInfo.
@@ -278,6 +316,33 @@ func (c *authServiceClient) LoginWithQuickConnect(ctx context.Context, req *v1.L
 	return nil, err
 }
 
+// CreateApiKey calls mavio.auth.v1.AuthService.CreateApiKey.
+func (c *authServiceClient) CreateApiKey(ctx context.Context, req *v1.CreateApiKeyRequest) (*v1.CreateApiKeyResponse, error) {
+	response, err := c.createApiKey.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListApiKeys calls mavio.auth.v1.AuthService.ListApiKeys.
+func (c *authServiceClient) ListApiKeys(ctx context.Context, req *v1.ListApiKeysRequest) (*v1.ListApiKeysResponse, error) {
+	response, err := c.listApiKeys.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// RevokeApiKey calls mavio.auth.v1.AuthService.RevokeApiKey.
+func (c *authServiceClient) RevokeApiKey(ctx context.Context, req *v1.RevokeApiKeyRequest) (*v1.RevokeApiKeyResponse, error) {
+	response, err := c.revokeApiKey.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // AuthServiceHandler is an implementation of the mavio.auth.v1.AuthService service.
 type AuthServiceHandler interface {
 	// GetAuthInfo tells clients how to sign in.
@@ -311,6 +376,14 @@ type AuthServiceHandler interface {
 	// LoginWithQuickConnect gives the authorized device its access token,
 	// once.
 	LoginWithQuickConnect(context.Context, *v1.LoginWithQuickConnectRequest) (*v1.LoginWithQuickConnectResponse, error)
+	// CreateApiKey makes a token an integration calls the API with, as the
+	// administrator creating it; the token is returned once. Administrators
+	// only.
+	CreateApiKey(context.Context, *v1.CreateApiKeyRequest) (*v1.CreateApiKeyResponse, error)
+	// ListApiKeys lists every API key. Administrators only.
+	ListApiKeys(context.Context, *v1.ListApiKeysRequest) (*v1.ListApiKeysResponse, error)
+	// RevokeApiKey deletes an API key. Administrators only.
+	RevokeApiKey(context.Context, *v1.RevokeApiKeyRequest) (*v1.RevokeApiKeyResponse, error)
 }
 
 // NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -383,6 +456,25 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceMethods.ByName("LoginWithQuickConnect")),
 		connect.WithHandlerOptions(opts...),
 	)
+	authServiceCreateApiKeyHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceCreateApiKeyProcedure,
+		svc.CreateApiKey,
+		connect.WithSchema(authServiceMethods.ByName("CreateApiKey")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceListApiKeysHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceListApiKeysProcedure,
+		svc.ListApiKeys,
+		connect.WithSchema(authServiceMethods.ByName("ListApiKeys")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceRevokeApiKeyHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceRevokeApiKeyProcedure,
+		svc.RevokeApiKey,
+		connect.WithSchema(authServiceMethods.ByName("RevokeApiKey")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.auth.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AuthServiceGetAuthInfoProcedure:
@@ -405,6 +497,12 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceAuthorizeQuickConnectHandler.ServeHTTP(w, r)
 		case AuthServiceLoginWithQuickConnectProcedure:
 			authServiceLoginWithQuickConnectHandler.ServeHTTP(w, r)
+		case AuthServiceCreateApiKeyProcedure:
+			authServiceCreateApiKeyHandler.ServeHTTP(w, r)
+		case AuthServiceListApiKeysProcedure:
+			authServiceListApiKeysHandler.ServeHTTP(w, r)
+		case AuthServiceRevokeApiKeyProcedure:
+			authServiceRevokeApiKeyHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -452,4 +550,16 @@ func (UnimplementedAuthServiceHandler) AuthorizeQuickConnect(context.Context, *v
 
 func (UnimplementedAuthServiceHandler) LoginWithQuickConnect(context.Context, *v1.LoginWithQuickConnectRequest) (*v1.LoginWithQuickConnectResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.LoginWithQuickConnect is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) CreateApiKey(context.Context, *v1.CreateApiKeyRequest) (*v1.CreateApiKeyResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.CreateApiKey is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) ListApiKeys(context.Context, *v1.ListApiKeysRequest) (*v1.ListApiKeysResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.ListApiKeys is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) RevokeApiKey(context.Context, *v1.RevokeApiKeyRequest) (*v1.RevokeApiKeyResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.RevokeApiKey is not implemented"))
 }

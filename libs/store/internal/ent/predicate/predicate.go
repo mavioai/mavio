@@ -6,6 +6,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// APIKey is the predicate function for apikey builders.
+type APIKey func(*sql.Selector)
+
+// Activity is the predicate function for activity builders.
+type Activity func(*sql.Selector)
+
 // AuthSession is the predicate function for authsession builders.
 type AuthSession func(*sql.Selector)
 
@@ -44,6 +50,9 @@ type Person func(*sql.Selector)
 
 // PluginConfig is the predicate function for pluginconfig builders.
 type PluginConfig func(*sql.Selector)
+
+// Setting is the predicate function for setting builders.
+type Setting func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

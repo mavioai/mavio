@@ -5,13 +5,16 @@ import (
 	"errors"
 	"log/slog"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
+	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/core"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
@@ -35,6 +38,11 @@ type AuthService struct {
 	// cannot both see an empty user table.
 	firstUser sync.Mutex
 	quick     *auth.QuickConnect
+	// Activity records sign-ins and API keys; nil records none.
+	Activity *activity.Log
+	// Authenticate checks the credentials of users of authentication
+	// plugins; nil lets none of them sign in.
+	Authenticate func(ctx context.Context, pluginID, name, password string) (plugins.AuthResult, error)
 }
 
 var _ authv1connect.AuthServiceHandler = (*AuthService)(nil)
@@ -162,19 +170,44 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 	} else if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	if user.PasswordHash == "" {
-		// Users of authentication plugins cannot sign in until plugins
-		// can be asked.
+	loginFailed := func(reason string) error {
+		s.Activity.Record(ctx, core.Activity{
+			Type: "user.login_failed", Severity: core.SeverityWarning, UserID: user.ID,
+			Title: "Failed sign-in as " + user.Name, Message: reason, Attributes: map[string]string{"device": req.GetDevice().GetName()},
+		})
+		return failed
+	}
+	var ok, rehash bool
+	switch {
+	case user.AuthProvider != "":
+		if s.Authenticate == nil {
+			auth.SpendPasswordCheck(req.GetPassword())
+			return nil, loginFailed("no authentication plugins run")
+		}
+		res, err := s.Authenticate(ctx, user.AuthProvider, user.Name, req.GetPassword())
+		if err != nil {
+			slog.WarnContext(ctx, "authentication plugin failed", "user", user.ID, "plugin", user.AuthProvider, "err", err)
+			return nil, loginFailed("the authentication plugin failed")
+		}
+		ok = res.Authenticated
+		if !ok && res.Message != "" {
+			slog.InfoContext(ctx, "authentication plugin rejected a sign-in", "user", user.ID, "reason", res.Message)
+		}
+	case user.PasswordHash == "":
 		auth.SpendPasswordCheck(req.GetPassword())
-		return nil, failed
+		return nil, loginFailed("no password")
+	default:
+		ok, rehash, err = auth.VerifyPassword(user.PasswordHash, req.GetPassword())
+		if err != nil {
+			slog.ErrorContext(ctx, "unreadable password hash", "user", user.ID, "err", err)
+			return nil, loginFailed("unreadable password hash")
+		}
 	}
-	ok, rehash, err := auth.VerifyPassword(user.PasswordHash, req.GetPassword())
-	if err != nil {
-		slog.ErrorContext(ctx, "unreadable password hash", "user", user.ID, "err", err)
-		return nil, failed
+	if !ok {
+		return nil, loginFailed("wrong password")
 	}
-	if !ok || user.Disabled {
-		return nil, failed
+	if user.Disabled {
+		return nil, loginFailed("disabled user")
 	}
 
 	var (
@@ -197,6 +230,10 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
+	s.Activity.Record(ctx, core.Activity{
+		Type: "user.login", UserID: user.ID, Title: user.Name + " signed in",
+		Attributes: map[string]string{"device": req.GetDevice().GetName(), "client": req.GetDevice().GetClient()},
+	})
 	return authv1.LoginResponse_builder{
 		AccessToken: &token,
 		User:        userToProto(&user),
@@ -299,4 +336,60 @@ func sessionToProto(s *core.AuthSession, current bool) *authv1.Session {
 		LastSeenTime: timestamppb.New(s.LastSeenAt),
 		Current:      &current,
 	}.Build()
+}
+
+// CreateApiKey makes an API key acting as the calling administrator.
+func (s *AuthService) CreateApiKey(ctx context.Context, req *authv1.CreateApiKeyRequest) (*authv1.CreateApiKeyResponse, error) { //nolint:revive // generated name
+	p, err := admin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	token, hash := auth.NewToken()
+	k := core.APIKey{UserID: p.User.ID, Name: strings.TrimSpace(req.GetName()), TokenHash: hash, CreatedAt: s.now()}
+	if err := s.store.APIKeys().Create(ctx, &k); err != nil {
+		return nil, connectError(ctx, err)
+	}
+	s.Activity.Record(ctx, core.Activity{
+		Type: "apikey.created", UserID: p.User.ID, Title: p.User.Name + " created the API key " + k.Name,
+	})
+	return authv1.CreateApiKeyResponse_builder{ApiKey: apiKeyToProto(&k), Token: &token}.Build(), nil
+}
+
+// ListApiKeys lists the API keys.
+func (s *AuthService) ListApiKeys(ctx context.Context, _ *authv1.ListApiKeysRequest) (*authv1.ListApiKeysResponse, error) { //nolint:revive // generated name
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	keys, err := s.store.APIKeys().List(ctx)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out := make([]*authv1.ApiKey, len(keys))
+	for i := range keys {
+		out[i] = apiKeyToProto(&keys[i])
+	}
+	return authv1.ListApiKeysResponse_builder{ApiKeys: out}.Build(), nil
+}
+
+// RevokeApiKey deletes an API key.
+func (s *AuthService) RevokeApiKey(ctx context.Context, req *authv1.RevokeApiKeyRequest) (*authv1.RevokeApiKeyResponse, error) { //nolint:revive // generated name
+	p, err := admin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.store.APIKeys().Delete(ctx, core.MustParseID(req.GetId())); err != nil {
+		return nil, connectError(ctx, err)
+	}
+	s.Activity.Record(ctx, core.Activity{Type: "apikey.revoked", UserID: p.User.ID, Title: p.User.Name + " revoked an API key"})
+	return &authv1.RevokeApiKeyResponse{}, nil
+}
+
+func apiKeyToProto(k *core.APIKey) *authv1.ApiKey {
+	out := authv1.ApiKey_builder{
+		Id: new(k.ID.String()), Name: &k.Name, UserId: new(k.UserID.String()), CreateTime: timestamppb.New(k.CreatedAt),
+	}.Build()
+	if k.LastUsedAt != nil {
+		out.SetLastUseTime(timestamppb.New(*k.LastUsedAt))
+	}
+	return out
 }

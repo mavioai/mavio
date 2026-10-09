@@ -55,9 +55,11 @@ type UserEdges struct {
 	Playlists []*Item `json:"playlists,omitempty"`
 	// DisplayPreferences holds the value of the display_preferences edge.
 	DisplayPreferences []*DisplayPreferences `json:"display_preferences,omitempty"`
+	// APIKeys holds the value of the api_keys edge.
+	APIKeys []*APIKey `json:"api_keys,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // UserDataOrErr returns the UserData value or an error if the edge
@@ -94,6 +96,15 @@ func (e UserEdges) DisplayPreferencesOrErr() ([]*DisplayPreferences, error) {
 		return e.DisplayPreferences, nil
 	}
 	return nil, &NotLoadedError{edge: "display_preferences"}
+}
+
+// APIKeysOrErr returns the APIKeys value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) APIKeysOrErr() ([]*APIKey, error) {
+	if e.loadedTypes[4] {
+		return e.APIKeys, nil
+	}
+	return nil, &NotLoadedError{edge: "api_keys"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -228,6 +239,11 @@ func (_m *User) QueryPlaylists() *ItemQuery {
 // QueryDisplayPreferences queries the "display_preferences" edge of the User entity.
 func (_m *User) QueryDisplayPreferences() *DisplayPreferencesQuery {
 	return NewUserClient(_m.config).QueryDisplayPreferences(_m)
+}
+
+// QueryAPIKeys queries the "api_keys" edge of the User entity.
+func (_m *User) QueryAPIKeys() *APIKeyQuery {
+	return NewUserClient(_m.config).QueryAPIKeys(_m)
 }
 
 // Update returns a builder for updating this User.

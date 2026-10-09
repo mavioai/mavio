@@ -12,6 +12,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// APIKey is the client for interacting with the APIKey builders.
+	APIKey *APIKeyClient
+	// Activity is the client for interacting with the Activity builders.
+	Activity *ActivityClient
 	// AuthSession is the client for interacting with the AuthSession builders.
 	AuthSession *AuthSessionClient
 	// Credit is the client for interacting with the Credit builders.
@@ -38,6 +42,8 @@ type Tx struct {
 	Person *PersonClient
 	// PluginConfig is the client for interacting with the PluginConfig builders.
 	PluginConfig *PluginConfigClient
+	// Setting is the client for interacting with the Setting builders.
+	Setting *SettingClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserData is the client for interacting with the UserData builders.
@@ -173,6 +179,8 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.APIKey = NewAPIKeyClient(tx.config)
+	tx.Activity = NewActivityClient(tx.config)
 	tx.AuthSession = NewAuthSessionClient(tx.config)
 	tx.Credit = NewCreditClient(tx.config)
 	tx.DisplayPreferences = NewDisplayPreferencesClient(tx.config)
@@ -186,6 +194,7 @@ func (tx *Tx) init() {
 	tx.MediaSource = NewMediaSourceClient(tx.config)
 	tx.Person = NewPersonClient(tx.config)
 	tx.PluginConfig = NewPluginConfigClient(tx.config)
+	tx.Setting = NewSettingClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserData = NewUserDataClient(tx.config)
 }
@@ -197,7 +206,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: AuthSession.QueryXXX(), the query will be executed
+// applies a query, for example: APIKey.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

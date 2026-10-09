@@ -9,6 +9,30 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent"
 )
 
+// The APIKeyFunc type is an adapter to allow the use of ordinary
+// function as APIKey mutator.
+type APIKeyFunc func(context.Context, *ent.APIKeyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f APIKeyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.APIKeyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.APIKeyMutation", m)
+}
+
+// The ActivityFunc type is an adapter to allow the use of ordinary
+// function as Activity mutator.
+type ActivityFunc func(context.Context, *ent.ActivityMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ActivityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ActivityMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ActivityMutation", m)
+}
+
 // The AuthSessionFunc type is an adapter to allow the use of ordinary
 // function as AuthSession mutator.
 type AuthSessionFunc func(context.Context, *ent.AuthSessionMutation) (ent.Value, error)
@@ -163,6 +187,18 @@ func (f PluginConfigFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PluginConfigMutation", m)
+}
+
+// The SettingFunc type is an adapter to allow the use of ordinary
+// function as Setting mutator.
+type SettingFunc func(context.Context, *ent.SettingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SettingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SettingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SettingMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

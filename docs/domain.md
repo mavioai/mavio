@@ -39,6 +39,9 @@ erDiagram
 | `Job` | A durable unit of background work |
 | `PluginConfig` | The configuration an administrator gave a plugin |
 | `DisplayPreferences` | A user's settings for how one client shows one view |
+| `ServerSettings` | What administrators change while the server runs: transcoding, network, plugin catalogs |
+| `APIKey` | A token an integration calls the API with, as the administrator who created it |
+| `Activity` | Something that happened on the server, kept in the activity log |
 
 ---
 
@@ -183,6 +186,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 * `Extend`, `Complete` and `Fail` require the lease owner; a worker whose lease has expired and been taken over gets `ErrConflict`.
 * A failed attempt is retried after `RetryDelay(attempts)` — 30 s, then doubling (1 min, 2 min, …) up to one hour — until `MaxAttempts` is reached; then the job is `failed`.
 * States: `pending` → `running` → `succeeded` / back to `pending` for a retry / `failed`.
+* `JobQuery` lists jobs by kind and state, most recently created first; finished jobs are purged after a week by the `jobs.cleanup` job, which runs daily.
 
 ---
 
@@ -200,11 +204,14 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `UserRepository` | CRUD and case-insensitive `GetByName` |
 | `UserDataRepository` | `Get` (`ErrNotFound` when absent), `GetMany` for a list of items, `Put` |
 | `AuthSessionRepository` | `Create` (replacing the user's session on the same device), `GetByTokenHash`, `ListForUser` (most recently seen first), `Touch`, `Delete` |
-| `JobQueue` | `Enqueue` (reports whether added), `Lease`, `Extend`, `Complete`, `Fail` |
+| `JobQueue` | `Enqueue` (reports whether added), `Lease`, `Extend`, `Complete`, `Fail`, `List` (paged, see §8), `Purge` of jobs finished before a time |
 | `ScanRepository` | `NextGeneration` of a library's scans; the `FolderState` of each scanned folder (`ModTime`, `FileID`, `Entries`), recorded with `PutFolders` and removed with `DeleteFolders` when gone |
 | `ItemRepository` (curated) | `Links` lists a collection's or playlist's entries in order; `ReplaceLinks` sets them, keeping the IDs given and assigning new ones |
-| `PluginConfigRepository` | `Get` a plugin's configuration (`ErrNotFound` when never configured), `Put` it, replacing the earlier one |
+| `PluginConfigRepository` | `Get` a plugin's configuration (`ErrNotFound` when never configured), `Put` it, replacing the earlier one, `Delete` it |
 | `DisplayPreferencesRepository` | `Get` a user's preferences for a client's view (`ErrNotFound` when never set), `Put` them, replacing the earlier ones |
+| `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate` |
+| `APIKeyRepository` | `Create`, `GetByTokenHash`, `List` (newest first), `Touch`, `Delete`; deleting the user deletes their keys |
+| `ActivityRepository` | `Add`, `List` (paged, newest first, by time, user and least severity), `Purge` of activities before a time |
 
 * **Transactions**: `Store.InTx` runs a function with a `Store` bound to one transaction; returning an error rolls it back.
 * **Replace semantics**: `Replace*` methods set the complete set for an owner, removing anything not in the new set — scans and metadata refreshes always write whole sets.
@@ -238,7 +245,7 @@ Item search (`ItemQuery.Search`), person search (`PersonRepository.Search`, by n
 
 A `PluginConfig` is the configuration an administrator gave a plugin: a JSON document (`JSON`) matching the configuration schema in the plugin's manifest, with `UpdatedAt`.
 
-* It is kept by `PluginID`, the ID in the manifest, not by the installed files, so it survives upgrades and reinstalls of the plugin.
+* It is kept by `PluginID`, the ID in the manifest, not by the installed files, so it survives upgrades of the plugin; uninstalling the plugin deletes it.
 * `Validate` requires a plugin ID and well-formed JSON; conformance to the schema is checked by the server, which knows the manifest, before the configuration is stored.
 
 ---
@@ -249,3 +256,21 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 
 * They are kept per user, client and view; putting them again replaces all values. Deleting the user deletes them.
 * `Validate` requires the user, a client and a view name of up to 200 bytes, at most 200 values with non-empty names of up to 200 bytes, and values of up to 8 KiB.
+
+---
+
+## 12. Administration
+
+### 12.1 Server Settings
+`ServerSettings` are what administrators change while the server runs; command-line flags give only the first values of some. One set is stored, read back with the defaults for settings added later (`DefaultServerSettings`).
+
+* `Transcoding`: the `HardwareAcceleration` (`auto` uses what the server's ffmpeg and hardware support, `none`, or `videotoolbox`), whether hardware encoders may be used, the software encoders' `EncoderPreset` (empty picks one by the source), `H264CRF` and `H265CRF` (0–51), `Threads`, tone mapping (`TonemapAlgorithm`, `TonemapRange`, `TonemapDesat`, `TonemapPeak`), deinterlacing (`yadif` or `bwdif`, optionally at double rate), the stereo `DownmixBoost` (0.5–3), `CropBlackBorders`, and the `TranscodeDir` (an absolute folder; empty keeps the one the server started with).
+* `Network`: the `ServerName` shown to clients (empty means the host name), the `BaseURL` a reverse proxy serves the server under (a clean path such as `/mavio`), an `HTTPSPort` with its PEM `CertificatePath` and `KeyPath`, and `LocalDiscovery`.
+* `PluginCatalogs`: the http or https URLs of the catalogs plugins are installed from.
+* `Validate` checks the known values and ranges.
+
+### 12.2 API Keys
+An `APIKey` lets an integration call the API without signing in: its token, shown once, acts as the administrator who created it, while that user stays an enabled administrator. Only its SHA-256 hash (`TokenHash`) is stored, with a `Name`, `CreatedAt` and `LastUsedAt`, recorded at most once a minute.
+
+### 12.3 Activity Log
+An `Activity` is something that happened: a dotted `Type`, a `Severity` (`info`, `warning`, `error`), a `Title` and `Message`, the `UserID` and `ItemID` it concerns and type-specific `Attributes`. The log keeps sign-ins (`user.login`) and failed ones (`user.login_failed`, a warning), API keys created and revoked (`apikey.created`, `apikey.revoked`), plugins installed, configured and uninstalled (`plugin.installed`, `plugin.configured`, `plugin.uninstalled`), settings changes (`settings.updated`) and backups (`backup.created`). It keeps them for 90 days, and they are sent to notification plugins as events.

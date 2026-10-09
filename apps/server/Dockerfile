@@ -48,16 +48,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 COPY --from=ffmpeg /out/ /usr/lib/jellyfin-ffmpeg/
 COPY --from=server /out/mavio /usr/local/bin/mavio
 USER mavio
-# /config holds the database, plugins and chosen artwork, /cache images, compiled plugins
+# /config holds the database, plugins, chosen artwork and backups, /cache images, compiled plugins
 # and transcodes; mount media libraries under /media.
 VOLUME ["/config", "/cache"]
-EXPOSE 8686
+EXPOSE 8686 7359/udp
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
 	CMD curl -fsS -H 'Content-Type: application/json' -d '{}' \
 		http://127.0.0.1:8686/mavio.system.v1.SystemService/GetHealth || exit 1
 # Arguments after the image name are appended, and later flags override
 # these, e.g. `docker run … mavio:dev -database postgres://…`.
 ENTRYPOINT ["mavio", "-addr", ":8686", "-database", "sqlite:/config/mavio.db", "-plugin-dir", "/config/plugins", \
-	"-metadata-dir", "/config/metadata", \
+	"-metadata-dir", "/config/metadata", "-backup-dir", "/config/backups", \
 	"-cache-dir", "/cache", "-transcode-dir", "/cache/transcodes", \
 	"-ffmpeg", "/usr/lib/jellyfin-ffmpeg/ffmpeg", "-ffprobe", "/usr/lib/jellyfin-ffmpeg/ffprobe"]

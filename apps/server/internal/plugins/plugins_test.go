@@ -6,7 +6,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/core"
@@ -155,5 +157,44 @@ func TestManagerWithoutPlugins(t *testing.T) {
 	}
 	if _, err := m.Config(t.Context(), "org.mavio.smoke"); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("Config: %v, want ErrNotFound", err)
+	}
+}
+
+func TestAuthAndNotifiers(t *testing.T) {
+	ctx := t.Context()
+	root := t.TempDir()
+	install(t, root, "smoke", `{"type":"object"}`)
+	manifest := filepath.Join(root, "smoke", "manifest.json")
+	data, _ := os.ReadFile(manifest)
+	data = []byte(strings.Replace(string(data), `"CAPABILITY_METADATA_PROVIDER"`,
+		`"CAPABILITY_METADATA_PROVIDER","CAPABILITY_AUTH_PROVIDER","CAPABILITY_NOTIFIER"`, 1))
+	if err := os.WriteFile(manifest, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	db, err := store.Open(ctx, "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	m := open(t, root, db)
+	res, err := m.Authenticate(ctx, "org.mavio.smoke", "admin-ann", "directory")
+	if err != nil || !res.Authenticated || !res.Admin || res.DisplayName != "ADMIN-ANN" {
+		t.Errorf("Authenticate = %+v, %v", res, err)
+	}
+	if res, err := m.Authenticate(ctx, "org.mavio.smoke", "bob", "wrong"); err != nil || res.Authenticated {
+		t.Errorf("Authenticate with a wrong password = %+v, %v", res, err)
+	}
+	if _, err := m.Authenticate(ctx, "org.example.none", "bob", "directory"); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("Authenticate with an unknown plugin: %v", err)
+	}
+	notifiers := m.Notifiers()
+	if len(notifiers) != 1 {
+		t.Fatalf("notifiers = %d, want 1", len(notifiers))
+	}
+	if err := notifiers[0].Notify(ctx, core.Activity{ID: core.NewID(), Type: "user.login", Title: "x", Time: time.Now()}); err != nil {
+		t.Errorf("Notify: %v", err)
+	}
+	if err := notifiers[0].Notify(ctx, core.Activity{ID: core.NewID(), Title: "x", Time: time.Now()}); err == nil {
+		t.Error("the plugin's rejection was lost")
 	}
 }

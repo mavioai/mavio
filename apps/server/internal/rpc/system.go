@@ -9,10 +9,12 @@ import (
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/events"
+	"github.com/mavioai/mavio/apps/server/internal/logs"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
+	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/core"
-	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
@@ -29,6 +31,16 @@ type SystemService struct {
 	Plugins PluginManager
 	// Hub tells administrators of plugin changes; nil tells no one.
 	Hub *events.Hub
+	// Settings keeps the server settings; nil serves the defaults and
+	// changes none.
+	Settings *settings.Manager
+	// Accelerations lists the hardware accelerations available; nil means
+	// auto and none.
+	Accelerations func() []core.HardwareAcceleration
+	// Logs keeps the recent log records; nil keeps none.
+	Logs *logs.Ring
+	// Activity records administrators' changes; nil records none.
+	Activity *activity.Log
 }
 
 // PluginManager runs the server's plugins; *plugins.Manager implements it.
@@ -36,6 +48,9 @@ type PluginManager interface {
 	Plugins() []plugins.Info
 	Config(ctx context.Context, id string) (core.PluginConfig, error)
 	SetConfig(ctx context.Context, id, configJSON string) (plugins.Info, error)
+	Catalog(ctx context.Context) ([]plugins.CatalogPlugin, error)
+	Install(ctx context.Context, id, version string) (plugins.Info, error)
+	Uninstall(ctx context.Context, id string) error
 }
 
 var _ systemv1connect.SystemServiceHandler = (*SystemService)(nil)
@@ -105,10 +120,7 @@ func (s *SystemService) SetPluginConfig(ctx context.Context, req *systemv1.SetPl
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	plugin := pluginToProto(info)
-	if s.Hub != nil {
-		s.Hub.ToAdmins(sessionv1.Event_builder{PluginChanged: sessionv1.PluginChanged_builder{Plugin: plugin}.Build()}.Build())
-	}
+	plugin := s.pluginChanged(ctx, info, "plugin.configured", "configured")
 	return systemv1.SetPluginConfigResponse_builder{Plugin: plugin}.Build(), nil
 }
 

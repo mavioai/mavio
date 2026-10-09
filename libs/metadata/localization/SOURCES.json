@@ -1,0 +1,9 @@
+{
+  "$comment": "Localization data copied from Jellyfin; regenerate by copying again, never edit by hand.",
+  "repository": "https://github.com/jellyfin/jellyfin",
+  "commit": "ca0f16eb7c195f720a1493ed469a27c4657db0c6",
+  "files": {
+    "countries.json": "Emby.Server.Implementations/Localization/countries.json",
+    "iso6392.txt": "Emby.Server.Implementations/Localization/iso6392.txt"
+  }
+}

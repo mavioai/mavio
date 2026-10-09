@@ -79,7 +79,7 @@ func (r *Refresher) Search(ctx context.Context, lib core.Library, itemID core.ID
 		limit = 10
 	}
 	var out []SearchResult
-	for _, p := range r.Providers {
+	for _, p := range r.providers() {
 		s, ok := p.(Searcher)
 		if !ok || q.Provider != "" && p.Name() != q.Provider {
 			continue
@@ -126,7 +126,7 @@ func (r *Refresher) RemoteImages(ctx context.Context, lib core.Library, itemID c
 		return nil, err
 	}
 	var out []RemoteImage
-	for _, p := range r.Providers {
+	for _, p := range r.providers() {
 		res, err := p.Metadata(ctx, l)
 		if err != nil {
 			r.logger().WarnContext(ctx, "metadata provider failed", "provider", p.Name(), "item", it.ID, "err", err)

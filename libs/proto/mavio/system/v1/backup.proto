@@ -1,0 +1,50 @@
+edition = "2023";
+
+package mavio.system.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// BackupService makes backups of the server: its database, the artwork
+// chosen for items and its plugins. A backup is downloaded at
+// /system/backups/{name} with an administrator's bearer token, and
+// restored by starting a new server with -restore. Administrators only.
+service BackupService {
+  rpc CreateBackup(CreateBackupRequest) returns (CreateBackupResponse);
+  rpc ListBackups(ListBackupsRequest) returns (ListBackupsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc DeleteBackup(DeleteBackupRequest) returns (DeleteBackupResponse);
+}
+
+// Backup is a backup file.
+message Backup {
+  // File name, such as "mavio-20261010-120000.zip".
+  string name = 1;
+  int64 size_bytes = 2;
+  google.protobuf.Timestamp create_time = 3;
+  // The server version that made it.
+  string version = 4;
+}
+
+message CreateBackupRequest {}
+
+message CreateBackupResponse {
+  Backup backup = 1;
+}
+
+message ListBackupsRequest {}
+
+message ListBackupsResponse {
+  // Newest first.
+  repeated Backup backups = 1;
+}
+
+message DeleteBackupRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^[A-Za-z0-9._-]+\\.zip$"
+  ];
+}
+
+message DeleteBackupResponse {}
