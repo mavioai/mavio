@@ -56,7 +56,7 @@ Engineering tooling — Nx, mise, buf, golangci-lint, CI — is described in [De
 ### 2.1 wazero as the Shared Native Capability Layer
 wazero hosts three kinds of workloads: SQLite (ncruces), image codecs (§6) and WASM plugins (§7). All native C library capabilities are thus obtained through WASM, and the whole server stays pure Go and freely cross-compilable.
 
-Note: wazero's compiler backend supports only amd64 / arm64; other architectures (e.g. armv7, riscv64) fall back to the interpreter. For those architectures a build tag switches to `modernc.org/sqlite` and pure-Go codec fallbacks, and the documentation marks them as degraded platforms.
+Note: wazero's compiler backend supports only amd64 / arm64; other architectures (e.g. armv7, riscv64) fall back to the interpreter, where SQLite and the WASM codecs run much slower. Releases therefore target amd64 and arm64 (§12); pure-Go fallbacks for other architectures are an open item in the [roadmap's risks](roadmap.md#4-risks-and-open-items).
 
 ---
 

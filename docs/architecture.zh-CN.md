@@ -56,7 +56,7 @@ Mavio 采用 **GPL-3.0**（`GPL-3.0-only`）。GPL-3.0 与 Apache-2.0 兼容，�
 ### 2.1 wazero 作为共享原生能力层
 wazero 同时承载三类负载：SQLite（ncruces）、图像编解码器（§6）和 WASM 插件（§7）。这样原生 C 库能力全部通过 WASM 获得，整个服务端保持纯 Go、可任意交叉编译。
 
-注意：wazero 的编译器后端只支持 amd64 / arm64，其他架构（如 armv7、riscv64）会退化为解释器。对这些架构提供 build tag，切换为 `modernc.org/sqlite` 与纯 Go 编解码兜底，并在文档中标注为降级平台。
+注意：wazero 的编译器后端只支持 amd64 / arm64，其他架构（如 armv7、riscv64）会退化为解释器，SQLite 与 WASM 编解码器在其上会慢很多。因此发布只面向 amd64 与 arm64（§12）；为其他架构提供纯 Go 兜底是[路线图风险](roadmap.zh-CN.md#4-风险与待决事项)中的待决事项。
 
 ---
 
