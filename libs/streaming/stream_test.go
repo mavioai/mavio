@@ -20,11 +20,12 @@ import (
 
 // fakeFFmpeg writes numbered files as ffmpeg's HLS muxer does: each under
 // a temporary name first, one every interval, until it has written files
-// up to last or is told to quit.
+// up to last or is told to quit. With failAt set, every run fails instead
+// of writing that file, as on corrupt input.
 type fakeFFmpeg struct {
 	last     int
 	interval time.Duration
-	fail     bool
+	failAt   int
 
 	mu   sync.Mutex
 	runs []run
@@ -89,7 +90,7 @@ func (f *fakeFFmpeg) start(_ context.Context, args []string) (supervisor.Process
 				return
 			case <-time.After(f.interval):
 			}
-			if f.fail && n > first {
+			if f.failAt > 0 && n == f.failAt {
 				p.done <- errors.New("exit status 1: Invalid data found when processing input")
 				return
 			}
@@ -276,7 +277,9 @@ func TestStreamRequestCanceled(t *testing.T) {
 }
 
 func TestStreamTranscodeFails(t *testing.T) {
-	f := &fakeFFmpeg{last: 9, interval: time.Millisecond, fail: true}
+	// Segment 1 fails whether its request waits for the first run or,
+	// once that run ended, starts another.
+	f := &fakeFFmpeg{last: 9, interval: time.Millisecond, failAt: 1}
 	s := newTestStream(t, encoded(t, 10), f)
 	read(t, s, 0)
 	if _, _, err := s.Segment(t.Context(), 1); err == nil || !strings.Contains(err.Error(), "Invalid data") {
