@@ -12,6 +12,7 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
+	"github.com/mavioai/mavio/apps/server/internal/playback"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 	"github.com/mavioai/mavio/libs/store"
@@ -19,19 +20,30 @@ import (
 
 // newServer serves the handler tree over a fresh SQLite database.
 func newServer(t *testing.T) string {
+	url, _ := startServer(t, nil)
+	return url
+}
+
+// startServer serves the handler tree over a fresh SQLite database, with
+// playback configured by configure, if given.
+func startServer(t *testing.T, configure func(*playback.Config)) (string, *store.Store) {
 	t.Helper()
 	s, err := store.Open(t.Context(), "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = s.Close() })
-	h, err := httpserver.Handler(httpserver.Options{Version: "v-test", Store: s, Database: s.Dialect()})
+	cfg := playback.Config{Store: s, Dir: t.TempDir()}
+	if configure != nil {
+		configure(&cfg)
+	}
+	h, err := httpserver.Handler(httpserver.Options{Version: "v-test", Store: s, Database: s.Dialect(), Playbacks: playback.NewManager(cfg)})
 	if err != nil {
 		t.Fatal(err)
 	}
 	srv := httptest.NewServer(h)
 	t.Cleanup(srv.Close)
-	return srv.URL
+	return srv.URL, s
 }
 
 // withToken sends token as the bearer token of every request.

@@ -342,4 +342,5 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **首次运行**：在还没有任何用户时，`AuthService.CreateFirstUser` 无需凭据即可创建一个管理员并使其登录；此后该调用返回 `failed_precondition`。客户端通过 `AuthService.GetAuthInfo` 得知这一步是否尚未完成。
 * **会话**：登录为一台设备签发由 32 个随机字节组成（base64url）的访问令牌；服务端只把它的 SHA-256 散列作为 `AuthSession` 保存（见[领域模型](domain.zh-CN.md)）。客户端以 `Authorization: Bearer <token>` 发送令牌。令牌不会过期；在客户端退出登录、用户吊销该会话或删除账户，或同一设备再次登录时失效。会话的最近活动时间最多每分钟记录一次。
 * **授权**：拦截器把令牌解析为用户与会话并放入请求上下文；未知令牌与被禁用的用户返回 `unauthenticated`。只有 `GetAuthInfo`、`CreateFirstUser`、`Login` 以及 `SystemService` 的健康检查是公开的。管理员权限与媒体库访问权限由各服务根据上下文中的用户自行检查（`permission_denied`）。
-* **媒体 URL**：播放器并不总能给媒体请求附加请求头（AVPlayer、`<video>`），因此媒体端点不接受 Bearer 令牌。通过需认证的 `PlaybackService` 开始的播放会获得一个不可猜测的 ID，其播放列表、分片与直接播放 URL 都带有该 ID；播放结束或发起它的会话被吊销后，这些 URL 随即失效。
+* **媒体 URL**：播放器并不总能给媒体请求附加请求头（AVPlayer、`<video>`），因此媒体端点不接受 Bearer 令牌。通过需认证的 `PlaybackService` 开始的播放会获得一个不可猜测的 ID，其媒体在 `/media/{playback}/` 下提供：直接播放时是文件本身（`stream.<ext>`，支持范围请求，在其媒体库文件夹内打开），否则是来自 `libs/streaming` 的 `master.m3u8`、`main.m3u8`、`init.mp4` 与编号分片。客户端停止播放、五分钟内没有进度上报或媒体请求（保留最后上报的位置），或发起播放的登录会话已不存在（每 30 秒检查一次）后，这些 URL 随即失效。
+* **播放**（`internal/playback`）：播放决策会考虑用户记住的或偏好的流、其媒体库与分级限制、转码权限与码率上限，以及用户的并发播放上限。转封装与转码只以 HLS 交付；针对渐进式转封装的决策会按客户端的 HLS 配置重新决定，复制视频的播放报告为直接串流。进度上报与停止播放通过 `UserData.RecordPosition` 记录位置（见[领域模型](domain.zh-CN.md)），每次播放至多计一次播完。没有 ffmpeg 时只能直接播放。

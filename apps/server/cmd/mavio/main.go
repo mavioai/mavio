@@ -9,10 +9,15 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/mavioai/mavio/apps/server/internal/buildinfo"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
+	"github.com/mavioai/mavio/apps/server/internal/playback"
+	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store"
 )
 
@@ -30,6 +35,9 @@ func run(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("mavio", flag.ContinueOnError)
 	addr := fs.String("addr", ":8686", "HTTP listen address")
 	database := fs.String("database", "sqlite:mavio.db", "database: sqlite:<path> or postgres://…")
+	ffmpeg := fs.String("ffmpeg", "ffmpeg", "ffmpeg binary; without it media is only played directly")
+	ffprobe := fs.String("ffprobe", "ffprobe", "ffprobe binary")
+	transcodes := fs.String("transcode-dir", filepath.Join(os.TempDir(), "mavio-transcodes"), "directory for transcodes")
 	showVersion := fs.Bool("version", false, "print version and exit")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -50,7 +58,10 @@ func run(ctx context.Context, args []string) error {
 			slog.ErrorContext(ctx, "close database", "err", err)
 		}
 	}()
-	h, err := httpserver.Handler(httpserver.Options{Version: version, Store: db, Database: db.Dialect()})
+	playbacks, ffmpegVersion := newPlaybacks(ctx, db, *ffmpeg, *ffprobe, *transcodes)
+	h, err := httpserver.Handler(httpserver.Options{
+		Version: version, Store: db, Database: db.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
+	})
 	if err != nil {
 		return err
 	}
@@ -61,5 +72,22 @@ func run(ctx context.Context, args []string) error {
 		return fmt.Errorf("listen: %w", err)
 	}
 	slog.InfoContext(ctx, "starting mavio", "version", version)
-	return httpserver.Serve(ctx, ln, h)
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error { return playbacks.Run(ctx) })
+	g.Go(func() error { return httpserver.Serve(ctx, ln, h) })
+	return g.Wait()
+}
+
+// newPlaybacks sets up playback with the ffmpeg found on this host, or
+// for direct play only without one. It returns the ffmpeg version, empty
+// without ffmpeg.
+func newPlaybacks(ctx context.Context, db core.Store, ffmpeg, ffprobe, dir string) (*playback.Manager, string) {
+	cfg := playback.Config{Store: db, Dir: dir, Logger: slog.Default()}
+	v, err := cfg.UseFFmpeg(ctx, ffmpeg, ffprobe)
+	if err != nil {
+		slog.WarnContext(ctx, "ffmpeg unavailable; media plays directly only", "ffmpeg", ffmpeg, "err", err)
+	} else {
+		slog.InfoContext(ctx, "ffmpeg found", "version", v)
+	}
+	return playback.NewManager(cfg), v
 }

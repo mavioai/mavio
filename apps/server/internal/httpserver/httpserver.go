@@ -12,9 +12,11 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/auth"
+	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
 
@@ -24,6 +26,10 @@ type Options struct {
 	Store   core.Store
 	// Database is "sqlite" or "postgres".
 	Database string
+	// FFmpegVersion is the version of the ffmpeg in use, if any.
+	FFmpegVersion string
+	// Playbacks runs playbacks; their media is served under /media/.
+	Playbacks *playback.Manager
 }
 
 // Handler returns the root handler serving all Connect services.
@@ -39,9 +45,11 @@ func Handler(opts Options) (http.Handler, error) {
 
 	mux := http.NewServeMux()
 	mux.Handle(systemv1connect.NewSystemServiceHandler(&rpc.SystemService{
-		Version: opts.Version, StartTime: time.Now(), Database: opts.Database,
+		Version: opts.Version, StartTime: time.Now(), Database: opts.Database, FFmpegVersion: opts.FFmpegVersion,
 	}, interceptors))
 	mux.Handle(authv1connect.NewAuthServiceHandler(rpc.NewAuthService(opts.Store), interceptors))
+	mux.Handle(playbackv1connect.NewPlaybackServiceHandler(rpc.NewPlaybackService(opts.Playbacks), interceptors))
+	mux.Handle("GET /media/", opts.Playbacks.Handler())
 	return mux, nil
 }
 

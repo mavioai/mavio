@@ -126,6 +126,10 @@ flowchart TD
 **Progress**:
 - [x] `libs/streaming`: playlists of the whole media source, RFC 6381 codec strings, segments generated on demand with restarts on seek, segments of copied video joined from one file per group of pictures; ported HLS cases pass
 - [x] Authentication: first administrator, sign-in per device with hashed access tokens, argon2id passwords, `mavio.auth.v1.AuthService`, bearer-token and request-validation interceptors
+- [x] Playback: `mavio.playback.v1.PlaybackService` and media endpoints for direct play and HLS remuxes and transcodes, remembered and preferred streams, resume positions and played state; verified end to end with real ffmpeg
+- [ ] Subtitle delivery: external files and HLS renditions
+- [ ] Library, item and user Connect services
+- [ ] Playback verified on real hls.js / AVPlayer / Media3 clients
 
 ### P6 Server Assembly and Distribution
 **Scope**: `apps/server` assembly; `CGO_ENABLED=0` cross-compilation; container images bundling jellyfin-ffmpeg.

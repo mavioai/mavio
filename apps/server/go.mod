@@ -14,11 +14,13 @@ require (
 	github.com/mavioai/mavio/libs/plugin v0.0.0
 	github.com/mavioai/mavio/libs/proto v0.0.0
 	github.com/mavioai/mavio/libs/store v0.0.0
+	github.com/mavioai/mavio/libs/streaming v0.0.0-20261009053433-ba7d51fbd256
 	github.com/mavioai/mavio/libs/subtitle v0.0.0
 	github.com/mavioai/mavio/tools/fixtures v0.0.0
 	github.com/testcontainers/testcontainers-go v0.44.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0
 	golang.org/x/crypto v0.57.0
+	golang.org/x/sync v0.23.0
 	google.golang.org/protobuf v1.36.12
 )
 
@@ -100,7 +102,6 @@ require (
 	golang.org/x/exp v0.0.0-20260820142414-ca536658362e // indirect
 	golang.org/x/image v0.46.0 // indirect
 	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260819154853-08b0e4226688 // indirect
