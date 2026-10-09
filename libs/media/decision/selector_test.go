@@ -118,3 +118,16 @@ func TestChineseSubtitleSelection(t *testing.T) {
 		t.Errorf("zh general preferred: got = %v, want = 2 or 3", gotGeneral)
 	}
 }
+
+func TestVideoStreamSkipsDolbyVisionEnhancement(t *testing.T) {
+	el := core.MediaStream{Index: 0, Kind: core.StreamVideo, Codec: "hevc", DolbyVision: &core.DolbyVision{Profile: 7, ELPresent: true, RPUPresent: true}}
+	bl := core.MediaStream{Index: 1, Kind: core.StreamVideo, Codec: "hevc", DolbyVision: &core.DolbyVision{Profile: 7, BLPresent: true, RPUPresent: true}}
+	src := &Source{MediaSource: &core.MediaSource{Streams: []core.MediaStream{el, bl}}}
+	if got := src.videoStream(); got == nil || got.Index != 1 {
+		t.Errorf("video stream = %+v, want the base layer", got)
+	}
+	only := &Source{MediaSource: &core.MediaSource{Streams: []core.MediaStream{el}}}
+	if got := only.videoStream(); got == nil || got.Index != 0 {
+		t.Errorf("video stream of a lone enhancement layer = %+v", got)
+	}
+}

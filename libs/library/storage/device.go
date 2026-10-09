@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 // DeviceKind classifies the physical or network characteristics of a storage device.
@@ -65,4 +66,51 @@ func isCloudPath(path string) bool {
 		strings.Contains(path, "/Library/CloudStorage") ||
 		strings.Contains(path, `\OneDrive`) ||
 		strings.Contains(path, `\iCloudDrive`)
+}
+
+// Serialized reports whether background reads of the device should run
+// one at a time: drives with a seek penalty, where concurrent reads make
+// the heads thrash, and remote or cloud volumes, whose bandwidth parallel
+// reads only share.
+func (d DeviceInfo) Serialized() bool {
+	return d.Rotational || d.Remote || d.Kind == KindLocalHDD || d.Kind == KindRemoteNAS || d.Kind == KindCloudMount
+}
+
+// detectorCap bounds the folders a Detector remembers.
+const detectorCap = 4096
+
+// Detector detects the device of each folder once.
+type Detector struct {
+	// Detect inspects a path; nil uses DetectDevice.
+	Detect func(path string) (DeviceInfo, error)
+
+	mu    sync.Mutex
+	cache map[string]DeviceInfo
+}
+
+// Device returns the device holding the folder of path; an undetectable
+// device is unknown and not serialized.
+func (d *Detector) Device(path string) DeviceInfo {
+	dir := filepath.Dir(path)
+	d.mu.Lock()
+	info, ok := d.cache[dir]
+	d.mu.Unlock()
+	if ok {
+		return info
+	}
+	detect := d.Detect
+	if detect == nil {
+		detect = DetectDevice
+	}
+	info, err := detect(path)
+	if err != nil {
+		info = DeviceInfo{Kind: KindUnknown}
+	}
+	d.mu.Lock()
+	if d.cache == nil || len(d.cache) >= detectorCap {
+		d.cache = map[string]DeviceInfo{}
+	}
+	d.cache[dir] = info
+	d.mu.Unlock()
+	return info
 }

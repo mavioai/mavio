@@ -128,14 +128,37 @@ func scaleExpr(j *Job) string {
 	return ""
 }
 
+// crop returns the borders to crop off the video: those found in its
+// frames, when the options crop them and the video is encoded unrotated,
+// without subtitles burned in, whose positions refer to the full frame.
+func (p *Planner) crop(j *Job) (core.Crop, bool) {
+	v := j.Video
+	if !p.Options.CropBlackBorders || v == nil || v.Crop == nil || v.Crop.IsZero() || v.Rotation != 0 ||
+		j.VideoCodec == Copy || p.burnsInSubtitle(j) {
+		return core.Crop{}, false
+	}
+	c := *v.Crop
+	if c.Left+c.Right >= v.Width || c.Top+c.Bottom >= v.Height {
+		return core.Crop{}, false
+	}
+	return c, true
+}
+
+// cropFilter crops the borders off the frame.
+func cropFilter(v *core.MediaStream, c core.Crop) Filter {
+	return F("crop", "w", strconv.Itoa(v.Width-c.Left-c.Right), "h", strconv.Itoa(v.Height-c.Top-c.Bottom),
+		"x", strconv.Itoa(c.Left), "y", strconv.Itoa(c.Top))
+}
+
 // outputSize returns the output dimensions for hardware scalers, which
-// take numbers: the input fitted into the bounds, at most 4096, even.
-func outputSize(j *Job) (int, int, bool) {
+// take numbers: the input, less the borders cropped, fitted into the
+// bounds, at most 4096, even.
+func outputSize(j *Job, c core.Crop) (int, int, bool) {
 	v := j.Video
 	if v == nil || v.Width == 0 || v.Height == 0 {
 		return 0, 0, false
 	}
-	w, h := v.Width, v.Height
+	w, h := v.Width-c.Left-c.Right, v.Height-c.Top-c.Bottom
 	if abs(v.Rotation) == 90 {
 		w, h = h, w
 	}
@@ -178,6 +201,9 @@ func (p *Planner) SoftwareFilters(j *Job, hwDecoded bool) VideoGraph {
 	g.Main = append(g.Main, p.colorParams(j, tonemap))
 	if j.deinterlace() {
 		g.Main = append(g.Main, p.deinterlaceFilter(j, ""))
+	}
+	if c, ok := p.crop(j); ok {
+		g.Main = append(g.Main, cropFilter(j.Video, c))
 	}
 	if expr := scaleExpr(j); expr != "" {
 		g.Main = append(g.Main, Filter{Name: "scale", Raw: expr})
@@ -290,7 +316,8 @@ func (p *Planner) VideoFilters(j *Job, encoder string) VideoGraph {
 		return p.SoftwareFilters(j, false)
 	}
 	vtEncoder := strings.HasSuffix(encoder, "_videotoolbox")
-	needsSW := p.burnsInSubtitle(j) && j.Subtitle != nil ||
+	_, crops := p.crop(j)
+	needsSW := p.burnsInSubtitle(j) && j.Subtitle != nil || crops ||
 		(j.Video.VideoRange() == core.RangeHDR && !p.vtTonemap(j)) ||
 		(j.deinterlace() && !p.caps().SupportsFilter("yadif_videotoolbox")) ||
 		!p.caps().SupportsFilter("scale_vt")
@@ -302,7 +329,7 @@ func (p *Planner) VideoFilters(j *Job, encoder string) VideoGraph {
 		g.Main = append(g.Main, p.deinterlaceFilter(j, "yadif_videotoolbox"))
 	}
 	scale := Filter{Name: "scale_vt"}
-	if w, h, ok := outputSize(j); ok && (w != j.Video.Width || h != j.Video.Height) {
+	if w, h, ok := outputSize(j, core.Crop{}); ok && (w != j.Video.Width || h != j.Video.Height) {
 		scale.Args = append(scale.Args, Arg{"w", strconv.Itoa(w)}, Arg{"h", strconv.Itoa(h)})
 	}
 	if p.vtTonemap(j) {

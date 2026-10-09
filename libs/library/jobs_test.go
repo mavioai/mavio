@@ -2,6 +2,7 @@ package library
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"testing"
 	"time"
@@ -195,4 +196,55 @@ func TestJobsRefreshNewSeries(t *testing.T) {
 		series.ParentalRating == nil || *series.ParentalRating != 14 {
 		t.Errorf("series = %+v", series)
 	}
+}
+
+type fakeBorders struct{ calls int }
+
+func (b *fakeBorders) Borders(_ context.Context, _ string, duration time.Duration, width, height int) (core.Crop, error) {
+	b.calls++
+	if duration <= 0 || width == 0 || height == 0 {
+		return core.Crop{}, errors.New("no size")
+	}
+	return core.Crop{Top: 140, Bottom: 140}, nil
+}
+
+func TestJobsBorders(t *testing.T) {
+	f := newScan(t, core.LibraryMovies)
+	tree(t, f.root, "Up (2009)/Up (2009).mkv")
+	if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
+		t.Fatal(err)
+	}
+	borders := &fakeBorders{}
+	prober := &sizedProber{}
+	jobs := &Jobs{
+		Store: f.store, Scanner: f.sc, Prober: prober, Borders: borders, Now: func() time.Time { return f.clock },
+		Refresher: &Refresher{Store: f.store, Now: func() time.Time { return f.clock }},
+	}
+	w := &Worker{Queue: f.store.Jobs(), Owner: "test", Handlers: jobs.Handlers()}
+	if err := jobs.Schedule(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	// The scan, the probe, the refresh and the borders.
+	if n := drain(t, w); n != 4 {
+		t.Errorf("jobs run = %d, want 4", n)
+	}
+	up := f.item("Up (2009)/Up (2009).mkv")
+	video := f.store.sources[up.ID][0].Streams[0]
+	if video.Crop == nil || *video.Crop != (core.Crop{Top: 140, Bottom: 140}) || borders.calls != 1 {
+		t.Errorf("crop = %v after %d detections", video.Crop, borders.calls)
+	}
+	// Looked for once: another run does nothing.
+	if _, err := jobs.borders(t.Context(), BordersJob(up.ID, f.clock)); err != nil || borders.calls != 1 {
+		t.Errorf("second run: %v, %d detections", err, borders.calls)
+	}
+}
+
+// sizedProber probes a 1080p video.
+type sizedProber struct{}
+
+func (sizedProber) Probe(context.Context, string, bool) (ProbeResult, error) {
+	return ProbeResult{Source: core.MediaSource{
+		Container: "mkv", Duration: 90 * time.Minute,
+		Streams: []core.MediaStream{{Index: 0, Kind: core.StreamVideo, Codec: "h264", Width: 1920, Height: 1080}},
+	}}, nil
 }

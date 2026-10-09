@@ -46,14 +46,22 @@ const (
 	AudioIndexUser                                  // the user's remembered choice
 )
 
-// videoStream returns the first video stream, or nil.
+// videoStream returns the first video stream that is no Dolby Vision
+// enhancement layer of another, or nil.
 func (s *Source) videoStream() *core.MediaStream {
+	var first *core.MediaStream
 	for i := range s.Streams {
-		if s.Streams[i].Kind == core.StreamVideo {
-			return &s.Streams[i]
+		if st := &s.Streams[i]; st.Kind == core.StreamVideo {
+			if !st.IsDolbyVisionEnhancement() {
+				return st
+			}
+			if first == nil {
+				first = st
+			}
 		}
 	}
-	return nil
+	// Only enhancement layers: play the first rather than nothing.
+	return first
 }
 
 // stream returns the stream of the kind with the given index, or nil.

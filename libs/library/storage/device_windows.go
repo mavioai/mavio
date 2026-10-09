@@ -71,7 +71,7 @@ func detectDevice(path string) (DeviceInfo, error) {
 const (
 	ioctlStorageQueryProperty        = 0x002D1400 // CTL_CODE(IOCTL_STORAGE_BASE, 0x0500, METHOD_BUFFERED, FILE_ANY_ACCESS)
 	storageDeviceSeekPenaltyProperty = 7
-	propertyStandardQuery           = 0
+	propertyStandardQuery            = 0
 )
 
 type storagePropertyQuery struct {

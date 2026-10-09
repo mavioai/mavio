@@ -87,7 +87,8 @@ func (p *Planner) videoOutput(j *Job, v *core.MediaStream, o *Output) {
 	o.VideoCodec = normalizeCodec(j.VideoCodec)
 	o.Range, o.RangeType, o.BitDepth = core.RangeSDR, core.RangeTypeSDR, 8
 	o.VideoBitrate = j.VideoBitrate
-	if w, h, ok := outputSize(j); ok {
+	c, _ := p.crop(j)
+	if w, h, ok := outputSize(j, c); ok {
 		o.Width, o.Height = w, h
 	}
 	switch o.VideoCodec {

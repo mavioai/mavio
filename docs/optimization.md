@@ -100,13 +100,10 @@ When scanning and reading media paths, Mavio identifies the underlying storage m
 ### 2.3 Active Streaming & Background I/O Quiet Gate
 
 * **Rationale**: During full library scans, hashing, or trickplay sprite generation, active client playback can suffer severe buffering if foreground requests contend with background tasks for disk queues.
-* **Scheduling Mechanism**:
-  * The session manager maintains an active streaming session count (`activeStreamingSessions`).
-  * When a client initiates playback, seeks, or requests HLS segments, an active quiet window is triggered (`quietUntil = now + quietPeriod`, default 3 seconds).
-  * Background tasks (scan workers, metadata fetchers, keyframe extractors) must check the gate before issuing physical I/O:
-    * While in a quiet window, workers yield via `time.Sleep` and pause disk contention;
-    * Dynamically shrink `errgroup.SetLimit` to minimum concurrency;
-    * Once all streaming sessions end and the quiet window expires, background queues resume full speed smoothly.
+* **Scheduling Mechanism** (`storage.QuietGate`, following khuaplayer's foreground storage gate):
+  * Foreground activity extends a quiet deadline (`quietUntil = max(quietUntil, now + quietPeriod)`, default 3 seconds), never shortening it, so that a burst of requests coalesces into one quiet tail without a timer per event.
+  * Starting a playback and every media request — HLS playlists and segments, direct-play range reads, seeks — note activity. Continuous streaming therefore keeps background reads paused while it reads and lets them resume in the gaps; a playback does not hold the gate for its whole duration, which would stop library scans for as long as anyone watches.
+  * Background tasks (scan walkers before each folder, probes, black border detection) wait out the quiet window before issuing physical I/O, sampling cancellation while they wait.
 
 ---
 
@@ -174,6 +171,7 @@ When scanning and reading media paths, Mavio identifies the underlying storage m
     * Samples along top, bottom, left, and right rows/columns;
     * Early-exit evaluation across the first 16 samples for instant black-line verification;
     * Crops borders or attaches crop bounds prior to sprite assembly, boosting thumbnail clarity and saving bandwidth.
+* **Transcode Cropping** (`libs/media/borders`, `libs/media/planner`): a low-priority background job (`media.borders`) samples five frames of each probed video with ffmpeg as 8-bit luma and measures them with the same detector; borders count only where every non-black sample has them, at least 2% of the frame and rounded to even pixels, and are kept on the video stream (`core.MediaStream.Crop`). When a transcode re-encodes the video, unrotated and without burned-in subtitles, the planner crops them before scaling, so letterboxed films spend no bitrate on black bars; copied video is never cropped.
 * **Thumbnail Failure Circuit Breaker**:
   * Repeatedly retrying broken GOPs during thumbnail generation can hang background queues.
   * Introduce an in-memory `FailNote` cache (recording failed time ranges, TTL, and capacity limits); repeat extraction requests within the TTL window are suppressed, keeping background workers healthy.
@@ -182,11 +180,10 @@ When scanning and reading media paths, Mavio identifies the underlying storage m
 
 ### 3.3 Dolby Vision Profile 7 Dual-Layer Dependency Handling
 
-* **UHD Blu-ray Challenges**: UHD Blu-ray discs often carry Dolby Vision Profile 7 (FEL / MEL) with two video streams: Base Layer (BL) and Enhancement Layer (EL). Passing both directly to standard FFmpeg transcode commands causes sync loss or crashes.
-* **Planner Optimizations** (`libs/media/planner/hdr.go`):
-  * Parse MPEG-TS PMT and MP4 `vdep` stream relationships, recognizing EL as a dependent stream;
-  * When clients support only HDR10, configure FFmpeg filter graphs (`-map`) to strip the EL stream cleanly, preserving the pristine Base Layer for tone-mapping and encoding;
-  * When clients support Profile 8.1, route through dedicated filters to restructure dual-layer metadata into single-layer Profile 8.1 streams.
+* **UHD Blu-ray Challenges**: UHD Blu-ray discs often carry Dolby Vision Profile 7 (FEL / MEL) with a Base Layer (BL) and an Enhancement Layer (EL), on one track or, in transport streams, on two. Treating the EL track as the video to play, or passing both layers to a transcode, breaks playback.
+* **Adopted handling**:
+  * As in khuaplayer, an EL track is recognized only from explicit signaling: its Dolby Vision configuration has an enhancement layer and no base layer (`core.MediaStream.IsDolbyVisionEnhancement`); track order, resolution or names are never used. Stream selection never picks such a track while the file has another video track, so playback, transcodes and copies use the Base Layer.
+  * A single-track Profile 7 stream goes to clients that declare Dolby Vision with an enhancement layer; for clients that take HDR10 only, the planner removes the Dolby Vision metadata and keeps the HDR10-compatible Base Layer, tone mapping it when it re-encodes for SDR clients (`libs/media/planner/hdr.go`, Jellyfin's rules).
 
 ---
 
@@ -224,13 +221,17 @@ To handle widespread variations in subtitle filenames, `libs/naming` and `libs/l
 | **`.sdh` / `.cc` / `.hi` Tag** | `-50` | Hearing-impaired commentary; secondary choice |
 | **Format Bonus** | `ASS/SSA: +20` / `SRT: +10` | Favors richer styling formats |
 
+#### Where It Applies
+* **Sidecar discovery** (`libs/library`): scans attach the subtitle files beside a video as its external streams: files whose name is the video's, or starts with it and a delimiter (a stem score of at least 500). Their language, title and default, forced and hearing-impaired flags come from the file name, with Chinese variants recognized (`zh-Hans`, `zh-Hant`, `chi`) and three-letter codes taken only for languages that also have a two-letter one, so that flags such as `sdh` stay flags. They are ordered by the score without a user's languages and numbered after the embedded streams; files added or removed later update the streams without probing the video again, and probing keeps them.
+* **Playback selection** (`libs/media/decision`): a user's preferred subtitle language matches streams by the normalized aliases, so a preference for Chinese finds simplified, traditional and regional variants, and hearing-impaired streams rank lower.
+
 ---
 
 ## 5. Deterministic Engineering & Privacy Invariants
 
 ### 5.1 Pinned Dependencies & Zero-Fuzz Patch Discipline
 
-* **Deterministic Dependency Pinning**: Official Docker images and external dependencies (`jellyfin-ffmpeg`, WASM toolchains, SQLite extensions) strictly lock archive SHA-256 checksums.
+* **Deterministic Dependency Pinning**: `jellyfin-ffmpeg` is pinned by version and by the SHA-256 of each platform's portable build, in `mise.toml` for development and CI (mise refuses a download whose checksum differs) and in `apps/server/Dockerfile` for the container image. A test (`apps/server/internal/buildinfo`) fails when the two pins disagree, so they cannot drift apart.
 * **Zero-Fuzz Patch Rule**: Downstream patches must have pinned checksums in the dependency manifest. Patches are applied with zero fuzz; any upstream line drift fails the build immediately rather than silently shifting code hunks.
 
 ### 5.2 Zero-Telemetry & Fail-Closed Privacy Model

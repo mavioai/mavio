@@ -69,7 +69,10 @@ type Config struct {
 	// OnChange is told when a session starts or ends a playback, or
 	// pauses or resumes it; nil tells no one.
 	OnChange func(userID, sessionID core.ID)
-	// QuietGate pauses background library scans while playback sessions are active.
+	// QuietGate makes background library I/O yield: starting a playback
+	// and every media request, a seek included, extend its quiet window,
+	// as khuaplayer's foreground storage gate does, so that streaming keeps
+	// background reads paused while it reads and lets them resume between.
 	QuietGate *storage.QuietGate
 	Logger    *slog.Logger
 }
@@ -163,9 +166,8 @@ type Playback struct {
 	position   time.Duration
 	paused     bool
 	// counted says the play was counted, once per playback.
-	counted  bool
-	ended    bool
-	quietRel func()
+	counted bool
+	ended   bool
 }
 
 // Subtitle is a subtitle stream of a playback.
@@ -298,7 +300,7 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	}
 
 	if m.cfg.QuietGate != nil {
-		p.quietRel = m.cfg.QuietGate.AcquirePlayback(p.ID)
+		m.cfg.QuietGate.NoteActivity(0)
 	}
 	if d.Source != nil && d.Source.Path != "" {
 		_ = storage.PrefetchHeadTail(d.Source.Path, 1024*1024, 256*1024)
@@ -562,12 +564,7 @@ func (p *Playback) close() {
 	p.mu.Lock()
 	ended := p.ended
 	p.ended = true
-	quietRel := p.quietRel
-	p.quietRel = nil
 	p.mu.Unlock()
-	if quietRel != nil {
-		quietRel()
-	}
 	if !ended && p.stream != nil {
 		_ = p.stream.Close()
 	}

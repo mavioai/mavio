@@ -204,6 +204,9 @@ type MediaStream struct {
 	Rotation       int // degrees, clockwise
 	// SampleAspectRatio is the pixel aspect ratio; zero means square pixels.
 	SampleAspectRatio Rational
+	// Crop is the black borders of a video's frames, found by sampling
+	// them; nil until looked for, zero when there are none.
+	Crop *Crop
 	// AspectRatio is the display aspect ratio, e.g. "16:9" or "2.40:1".
 	AspectRatio string
 	// Anamorphic is set for non-square pixels.
@@ -416,4 +419,22 @@ type Chapter struct {
 	Title string
 	// ImagePath is the extracted chapter thumbnail, if any.
 	ImagePath string
+}
+
+// Crop is how many pixels of black border each edge of a video's frames
+// has, letterboxing or pillarboxing the picture.
+type Crop struct {
+	Top, Bottom, Left, Right int
+}
+
+// IsZero reports whether there are no borders.
+func (c Crop) IsZero() bool { return c == Crop{} }
+
+// IsDolbyVisionEnhancement reports whether a video stream is the separate
+// enhancement layer of a dual-track Dolby Vision video (Profile 7 on UHD
+// Blu-ray): its configuration says so explicitly, with an enhancement but
+// no base layer. Such a stream depends on its base layer and is never the
+// video to play.
+func (s *MediaStream) IsDolbyVisionEnhancement() bool {
+	return s.Kind == StreamVideo && s.DolbyVision != nil && !s.DolbyVision.BLPresent && s.DolbyVision.ELPresent
 }

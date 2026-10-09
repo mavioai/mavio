@@ -46,8 +46,12 @@ type Scanner struct {
 	// Now returns the current time; default time.Now.
 	Now func() time.Time
 
-	// VolumeLedger serializes scans on rotational hard drives per physical device.
+	// VolumeLedger serializes reads of rotational hard drives and remote
+	// volumes per physical device.
 	VolumeLedger *storage.VolumeLedger
+	// Devices detects the device of each folder; nil detects anew in each
+	// scan.
+	Devices *storage.Detector
 	// QuietGate pauses or throttles background scans during active client streaming.
 	QuietGate *storage.QuietGate
 	// GrowthPolicy identifies actively downloading or growing files to avoid dirty reads.
@@ -92,7 +96,10 @@ func (s *Scanner) Scan(ctx context.Context, lib core.Library) (ScanStats, error)
 	if err != nil {
 		return ScanStats{}, err
 	}
-	sc := &scan{Scanner: s, lib: lib, gen: gen, stats: ScanStats{Generation: gen}}
+	sc := &scan{Scanner: s, lib: lib, gen: gen, devices: s.Devices, stats: ScanStats{Generation: gen}}
+	if sc.devices == nil {
+		sc.devices = &storage.Detector{}
+	}
 	for _, root := range lib.Paths {
 		if err := sc.root(ctx, root); err != nil {
 			return sc.stats, err
@@ -120,10 +127,11 @@ func (s *Scanner) Scan(ctx context.Context, lib core.Library) (ScanStats, error)
 // scan is one run of Scan.
 type scan struct {
 	*Scanner
-	lib   core.Library
-	gen   int64
-	mu    sync.Mutex
-	stats ScanStats
+	lib     core.Library
+	gen     int64
+	devices *storage.Detector
+	mu      sync.Mutex
+	stats   ScanStats
 }
 
 func (sc *scan) count(f func(*ScanStats)) {
@@ -141,16 +149,7 @@ type task struct {
 
 func (sc *scan) root(ctx context.Context, base string) error {
 	base = filepath.ToSlash(filepath.Clean(base))
-	if sc.VolumeLedger != nil {
-		dev, _ := storage.DetectDevice(filepath.FromSlash(base))
-		if dev.ID != "" {
-			rel, err := sc.VolumeLedger.Acquire(ctx, dev.ID)
-			if err != nil {
-				return err
-			}
-			defer rel()
-		}
-	}
+	dev := sc.devices.Device(filepath.Join(filepath.FromSlash(base), "."))
 	r, err := os.OpenRoot(filepath.FromSlash(base))
 	if err != nil {
 		// An unmounted or unreadable root keeps its items until it is back.
@@ -163,11 +162,7 @@ func (sc *scan) root(ctx context.Context, base string) error {
 	ignores := &IgnoreFiles{FS: r.FS()}
 
 	g, gctx := errgroup.WithContext(ctx)
-	limit := sc.Concurrency
-	if limit <= 0 {
-		limit = 4
-	}
-	g.SetLimit(limit)
+	g.SetLimit(sc.walkers(dev))
 	var visit func(t task)
 	visit = func(t task) {
 		run := func() error {
@@ -192,6 +187,18 @@ func (sc *scan) root(ctx context.Context, base string) error {
 	return g.Wait()
 }
 
+// walkers returns how many folders of a device a scan reads at once: one
+// on serialized devices, else the configured concurrency, four by default.
+func (sc *Scanner) walkers(dev storage.DeviceInfo) int {
+	if dev.Serialized() {
+		return 1
+	}
+	if sc.Concurrency > 0 {
+		return sc.Concurrency
+	}
+	return 4
+}
+
 // folder scans one folder and returns its subfolders.
 func (sc *scan) folder(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, t task) ([]task, error) {
 	if err := ctx.Err(); err != nil {
@@ -202,7 +209,17 @@ func (sc *scan) folder(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, t 
 			return nil, err
 		}
 	}
+	// On a serialized device, one folder is read at a time across scans
+	// and probes.
+	release := func() {}
+	if dev := sc.devices.Device(path.Join(t.dir, ".")); sc.VolumeLedger != nil && dev.Serialized() && dev.ID != "" {
+		var err error
+		if release, err = sc.VolumeLedger.Acquire(ctx, dev.ID); err != nil {
+			return nil, err
+		}
+	}
 	state, changed, err := sc.state(ctx, rfs, ignores, t.dir)
+	release()
 	if err != nil {
 		// An unreadable folder keeps its items.
 		sc.logger().WarnContext(ctx, "folder unreadable", "path", t.dir, "err", err)
@@ -586,6 +603,12 @@ func (p *saver) sources(ctx context.Context, n Node, itemID core.ID, isNew bool)
 		}
 		if !reused {
 			probe = true
+		}
+		// Subtitle files beside the video come and go without probing.
+		subs := sidecars(p.scan.Resolver.Parser, v.Path, p.stats)
+		if !sameSidecars(sidecarsOf(src.Streams), subs) {
+			src.Streams = withSidecars(src.Streams, subs)
+			same = false
 		}
 		same = same && reused && known[i].Path == v.Path
 		sources = append(sources, src)

@@ -110,6 +110,9 @@ type Options struct {
 	H264CRF, H265CRF int
 	// Preset is the software encoders' speed preset; "" picks one.
 	Preset string
+	// CropBlackBorders crops the black borders found in a video's frames
+	// (core.MediaStream.Crop) when it is encoded.
+	CropBlackBorders bool
 }
 
 // DefaultOptions returns the settings a new server starts with.
@@ -123,6 +126,7 @@ func DefaultOptions() Options {
 		DeinterlaceMethod: "yadif",
 		H264CRF:           23,
 		H265CRF:           28,
+		CropBlackBorders:  true,
 	}
 }
 

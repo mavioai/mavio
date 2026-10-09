@@ -76,6 +76,9 @@ type Jobs struct {
 	// Keyframes extracts the keyframes of probed video files; nil skips
 	// them.
 	Keyframes KeyframeExtractor
+	// Borders finds the black borders of video files; nil leaves them
+	// unknown.
+	Borders   BorderDetector
 	Refresher *Refresher
 	// Images measures items' images and computes their placeholders after
 	// each refresh; nil skips them.
@@ -108,6 +111,7 @@ func (j *Jobs) Handlers() map[string]Handler {
 		JobProbe:        j.probe,
 		JobRefresh:      j.refresh,
 		JobKeyframes:    j.keyframes,
+		JobBorders:      j.borders,
 		JobPlaceholders: j.placeholders,
 	}
 }
@@ -173,6 +177,26 @@ func (j *Jobs) scan(ctx context.Context, job core.Job) ([]core.Job, error) {
 	return nil, nil
 }
 
+// probeFile probes one file: on a serialized device while holding the
+// device, with its head and tail read ahead.
+func (j *Jobs) probeFile(ctx context.Context, path string, audio bool) (ProbeResult, error) {
+	if sc := j.Scanner; sc != nil && sc.VolumeLedger != nil {
+		devices := sc.Devices
+		if devices == nil {
+			devices = &storage.Detector{}
+		}
+		if dev := devices.Device(path); dev.Serialized() && dev.ID != "" {
+			release, err := sc.VolumeLedger.Acquire(ctx, dev.ID)
+			if err != nil {
+				return ProbeResult{}, err
+			}
+			defer release()
+		}
+	}
+	_ = storage.PrefetchHeadTail(path, 1024*1024, 256*1024)
+	return j.Prober.Probe(ctx, path, audio)
+}
+
 // probe probes an item's media sources that have not been probed since
 // their file changed, and queues a metadata refresh.
 func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
@@ -199,18 +223,7 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 				return nil, err
 			}
 		}
-		if j.Scanner != nil && j.Scanner.VolumeLedger != nil {
-			dev, _ := storage.DetectDevice(src.Path)
-			if dev.ID != "" {
-				rel, err := j.Scanner.VolumeLedger.Acquire(ctx, dev.ID)
-				if err != nil {
-					return nil, err
-				}
-				defer rel()
-			}
-		}
-		_ = storage.PrefetchHeadTail(src.Path, 1024*1024, 256*1024)
-		res, err := j.Prober.Probe(ctx, src.Path, audio)
+		res, err := j.probeFile(ctx, src.Path, audio)
 		if err != nil {
 			return nil, fmt.Errorf("probe %s: %w", src.Path, err)
 		}
@@ -233,7 +246,9 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 				}
 				r := res.Source
 				src.Container, src.Duration, src.Bitrate = r.Container, r.Duration, r.Bitrate
-				src.Streams, src.Chapters = r.Streams, r.Chapters
+				// Probing finds the embedded streams; the sidecar files the
+				// scan found stay after them.
+				src.Streams, src.Chapters = withSidecars(r.Streams, sidecarsOf(src.Streams)), r.Chapters
 				src.ProbedAt = j.now()
 				current[i] = src
 			}
@@ -261,6 +276,9 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 	next := []core.Job{RefreshJob(it.ID, j.now())}
 	if j.Keyframes != nil && !audio && len(probed) > 0 {
 		next = append(next, KeyframesJob(it.ID, j.now(), KeyframesBackground))
+	}
+	if j.Borders != nil && !audio && len(probed) > 0 {
+		next = append(next, BordersJob(it.ID, j.now()))
 	}
 	return next, nil
 }

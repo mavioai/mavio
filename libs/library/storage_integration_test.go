@@ -2,8 +2,10 @@ package library
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -125,5 +127,73 @@ func TestScanner_VolumeLedgerSerialization(t *testing.T) {
 		// Successfully acquired after release
 	case <-time.After(200 * time.Millisecond):
 		t.Fatalf("timed out waiting for vol:1 to be acquired after release")
+	}
+}
+
+// rotational detects every path as on one hard disk.
+func rotational(calls *atomic.Int32) *storage.Detector {
+	return &storage.Detector{Detect: func(string) (storage.DeviceInfo, error) {
+		calls.Add(1)
+		return storage.DeviceInfo{ID: "dev:8:16", Kind: storage.KindLocalHDD, Rotational: true}, nil
+	}}
+}
+
+func TestScanner_SerializedDevice(t *testing.T) {
+	var calls atomic.Int32
+	f := newScan(t, core.LibraryMovies)
+	tree(t, f.root, "Up (2009)/Up (2009).mkv", "Heat (1995)/Heat (1995).mkv", "Alien (1979)/Alien (1979).mkv")
+	ledger := storage.NewVolumeLedger(0, 0)
+	f.sc.VolumeLedger, f.sc.Devices = ledger, rotational(&calls)
+	if got := f.sc.walkers(storage.DeviceInfo{Kind: storage.KindLocalSSD}); got != 4 {
+		t.Errorf("walkers on an SSD = %d, want 4", got)
+	}
+	if got := f.sc.walkers(storage.DeviceInfo{Rotational: true}); got != 1 {
+		t.Errorf("walkers on a hard disk = %d, want 1", got)
+	}
+
+	// A scan reads the disk's folders only while it holds the disk.
+	hold, err := ledger.Acquire(t.Context(), "dev:8:16")
+	if err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan ScanStats)
+	go func() {
+		st, err := f.sc.Scan(t.Context(), f.lib)
+		if err != nil {
+			t.Error(err)
+		}
+		done <- st
+	}()
+	select {
+	case <-done:
+		t.Fatal("the scan read the disk another reader held")
+	case <-time.After(100 * time.Millisecond):
+	}
+	hold()
+	if st := <-done; st.Saved != 3 {
+		t.Errorf("saved = %d, want 3", st.Saved)
+	}
+	// Each folder's device is detected once, across scans.
+	before := calls.Load()
+	f.scan()
+	if got := calls.Load(); got != before {
+		t.Errorf("detections after another scan = %d, want %d", got, before)
+	}
+
+	// An item with two versions on the disk probes both, one at a time,
+	// without waiting for itself.
+	tree(t, f.root, "Up (2009)/Up (2009) - 4K.mkv")
+	touchLater(t, filepath.Join(f.root, "Up (2009)"), time.Minute)
+	f.scan()
+	jobs := &Jobs{Store: f.store, Scanner: f.sc, Prober: &fakeProber{}, Now: func() time.Time { return f.clock }}
+	up := f.item("Up (2009)/Up (2009).mkv")
+	if len(f.store.sources[up.ID]) != 2 {
+		t.Fatalf("versions = %+v", f.store.sources[up.ID])
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	payload, _ := json.Marshal(ProbePayload{ItemID: up.ID})
+	if _, err := jobs.probe(ctx, core.Job{ID: core.NewID(), Kind: JobProbe, Payload: payload}); err != nil {
+		t.Fatalf("probe of two versions on one disk: %v", err)
 	}
 }

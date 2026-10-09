@@ -10,10 +10,12 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
+	"github.com/mavioai/mavio/libs/library/storage"
 	"github.com/mavioai/mavio/libs/media/decision"
 	"github.com/mavioai/mavio/libs/media/supervisor"
 	"github.com/mavioai/mavio/libs/store"
@@ -334,4 +336,22 @@ func TestCheck(t *testing.T) {
 	if e.m.Get(active.ID) != nil {
 		t.Error("playback of a signed-out session kept")
 	}
+}
+
+func TestQuietWindow(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e := newEnv(t)
+		gate := storage.NewQuietGate(3 * time.Second)
+		e.m.cfg.QuietGate = gate
+		e.start(t, Request{SourceID: e.source})
+		// Starting quiets background I/O for a while, not for the whole
+		// playback.
+		if !gate.IsActive() {
+			t.Error("background I/O not quiet after starting a playback")
+		}
+		time.Sleep(4 * time.Second)
+		if gate.IsActive() {
+			t.Error("background I/O still quiet without media requests")
+		}
+	})
 }

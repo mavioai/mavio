@@ -64,7 +64,7 @@ flowchart TD
 | P6 | Server assembly and distribution | In progress |
 | P7 | Browsing | ✅ Done |
 | P8 | Live events and sessions | ✅ Done |
-| P9 | Storage and performance optimization | In progress |
+| P9 | Storage and performance optimization | ✅ Done |
 | P10 | Metadata management | Not started |
 | P11 | Administration and operations | Not started |
 | P12 | Media extras | Not started |
@@ -229,11 +229,12 @@ flowchart TD
 - [x] Foreground streaming quiet gate: `QuietGate` with reader-writer locking, reference counting, scan-interruption checks, and idle spin-down delay
 - [x] In-progress write detection: `GrowthPolicy` with size-stability polling and write-window thresholds
 - [x] Speculative prefetch scheduler: `PrefetchHeadTail` with `posix_fadvise(WILLNEED)` on Linux and sequential chunk warming fallback
-- [ ] Integration of `libs/library/storage` into library scanner worker pool and directory walker
-- [ ] Integration of `QuietGate` and prefetching into `PlaybackService` and stream delivery handlers
-- [ ] Subtitle scoring matrix and Chinese alias normalization in `libs/subtitle` and playback subtitle selection
-- [ ] Dolby Vision Profile 7 EL extraction / fallback tone mapping in `libs/media`
-- [ ] Black border detection (`cropdetect`) integration in transcode planning
+- [x] Integration of `libs/library/storage` into the scanner and probes: devices detected once per folder (`storage.Detector`); only drives with a seek penalty and remote or cloud volumes are serialized, the walker reading one folder at a time on them and each folder listing and probe holding the device; a probe of several versions on one disk no longer waits for itself
+- [x] `QuietGate` and prefetching in playback: starting a playback and every media request extend the quiet window, as khuaplayer's foreground storage gate does, instead of holding background I/O for whole playbacks
+- [x] Subtitle scoring and Chinese alias normalization: sidecar subtitle files attached to their videos by scans, with languages from their names (Chinese variants included) and ordered by the scoring model; playback selection matches preferred languages by the normalized aliases
+- [x] Dolby Vision Profile 7: separate enhancement-layer tracks, recognized only from their configuration, are never chosen as the video; HDR10 clients get the Base Layer without Dolby Vision metadata
+- [x] Black border cropping: borders found by sampling frames (`libs/media/borders`, job `media.borders`), kept on the video stream and cropped by the planner when it re-encodes
+- [x] Pinned dependencies: jellyfin-ffmpeg's SHA-256 per platform in `mise.toml`, checked against the Dockerfile's by a test
 
 ### P10 Metadata Management
 **Scope**: correcting and completing what the library scans find.

@@ -22,6 +22,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/library/storage"
+	"github.com/mavioai/mavio/libs/media/borders"
 	"github.com/mavioai/mavio/libs/media/keyframes"
 	"github.com/mavioai/mavio/libs/media/probe"
 	"github.com/mavioai/mavio/libs/store"
@@ -88,6 +89,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}()
 	quietGate := storage.NewQuietGate()
 	volumeLedger := storage.NewVolumeLedger(2*time.Second, 500*time.Millisecond)
+	devices := &storage.Detector{}
 	growthPolicy := storage.NewGrowthPolicy(10 * time.Second)
 
 	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, cfg, quietGate)
@@ -104,7 +106,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return playbacks.Run(ctx) })
 	g.Go(func() error { return httpserver.Serve(ctx, ln, h) })
-	if worker := newLibraryWorker(ctx, log, db, cfg.FFprobe, imageServer, plugs.MetadataProviders(), quietGate, volumeLedger, growthPolicy); worker != nil {
+	if worker := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, plugs.MetadataProviders(), quietGate, volumeLedger, devices, growthPolicy); worker != nil {
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err
@@ -146,8 +148,9 @@ func addDevLibraries(ctx context.Context, log *slog.Logger, db core.Store, dir s
 // extractions, metadata refreshes and image placeholders, with a scan of
 // every library queued, or nil when there is no ffprobe to probe media
 // with.
-func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffprobe string, analyzer library.ImageAnalyzer,
-	metadata []library.Provider, quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, growthPolicy *storage.GrowthPolicy,
+func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffprobe, ffmpeg string, analyzer library.ImageAnalyzer,
+	metadata []library.Provider, quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
+	growthPolicy *storage.GrowthPolicy,
 ) *library.Worker {
 	path, err := exec.LookPath(ffprobe)
 	if err != nil {
@@ -160,11 +163,13 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 			Store: db, Resolver: library.NewResolver(), Logger: log,
 			QuietGate:    quietGate,
 			VolumeLedger: volumeLedger,
+			Devices:      devices,
 			GrowthPolicy: growthPolicy,
 		},
 		Prober:    providers.FFprobe{Prober: &probe.Prober{FFprobe: path}},
 		Keyframes: providers.Keyframes{Extractor: &keyframes.Extractor{FFprobe: path}},
 		Refresher: &library.Refresher{Store: db, Providers: metadata, Logger: log},
+		Borders:   bordersOf(ffmpeg),
 		Images:    analyzer,
 		Logger:    log,
 	}
@@ -191,4 +196,14 @@ func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *eve
 		log.InfoContext(ctx, "ffmpeg found", "version", v)
 	}
 	return playback.NewManager(pc), v
+}
+
+// bordersOf returns the black border detector using ffmpeg, nil without
+// ffmpeg.
+func bordersOf(ffmpeg string) library.BorderDetector {
+	path, err := exec.LookPath(ffmpeg)
+	if ffmpeg == "" || err != nil {
+		return nil
+	}
+	return providers.Borders{Detector: &borders.Detector{FFmpeg: path}}
 }
