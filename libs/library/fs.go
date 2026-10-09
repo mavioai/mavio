@@ -7,6 +7,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/mavioai/mavio/libs/core"
 )
 
 func isNotExist(err error) bool { return errors.Is(err, fs.ErrNotExist) }
@@ -49,3 +51,5 @@ func (f rootFS) List(dir string) ([]Entry, error) {
 	}
 	return out, nil
 }
+
+func isNotFound(err error) bool { return errors.Is(err, core.ErrNotFound) }
