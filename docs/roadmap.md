@@ -25,7 +25,9 @@ flowchart TD
     P4["P4 Scanning and first plugin<br/>libs/library, plugins/scraper-tmdb"]
     P5["P5 Streaming and API<br/>libs/streaming, Connect services"]
     P6["P6 Server assembly and distribution<br/>apps/server, single binary + jellyfin-ffmpeg, container images"]
-    P7["Later<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim evaluation"]
+    P7["P7 Server API for clients<br/>browsing, live events, server settings, metadata management, plugin hot plugging"]
+    P8["P8 Clients and ecosystem<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim evaluation"]
+    P9["P9 Server features after clients<br/>media extras, offline downloads, more providers, sessions across devices, operations, networking"]
 
     P0 --> P1
     P1 --> P2
@@ -35,6 +37,8 @@ flowchart TD
     P4 --> P5
     P5 --> P6
     P6 --> P7
+    P7 --> P8
+    P8 --> P9
 ```
 
 | Phase | Theme | Status |
@@ -46,7 +50,9 @@ flowchart TD
 | P4 | Scanning and first plugin | ✅ Done |
 | P5 | Streaming and API | ✅ Done |
 | P6 | Server assembly and distribution | In progress |
-| P7 | Clients and ecosystem | Not started |
+| P7 | Server API for clients | Not started |
+| P8 | Clients and ecosystem | Not started |
+| P9 | Server features after clients | Not started |
 
 ---
 
@@ -87,7 +93,7 @@ flowchart TD
 - [x] `libs/naming`: Jellyfin's naming rules for movies, episodes, seasons, series, stacks, versions, extras, music, audiobooks, books and external files; all ported cases pass or are skipped with a reason
 - [x] `libs/subtitle`: SRT / SSA / ASS / WebVTT parsing, conversion to SRT / SSA / ASS / WebVTT / TTML / JSON, time-window filtering and character set detection
 - [x] `libs/metadata`: NFO reading for movies, videos, music videos, series, seasons, episodes (including multi-episode files), albums and artists; provider IDs in URLs; movie NFO locations. Writing NFO files is left to the phase that saves metadata.
-- [x] `libs/imaging`: Jellyfin's size rules, resizing with sharpening on downscale, image formats and SVG safety checks. WebP encoding and placeholders (blurhash / thumbhash) come with the image API in P5, collages with the clients in P7.
+- [x] `libs/imaging`: Jellyfin's size rules, resizing with sharpening on downscale, image formats and SVG safety checks. WebP encoding and placeholders (blurhash / thumbhash) come with the image API in P5, collages with the clients in P8.
 - [x] Smoke test `apps/server/internal/smoke`: an episode's files are named, read from NFO, stored with their credits and found again; its subtitle is converted to WebVTT and its poster resized
 
 ### P3 Media Pipeline
@@ -121,7 +127,7 @@ flowchart TD
 ### P5 Streaming and API
 **Scope**: `streaming` (CMAF HLS, on-demand segmenting, seeking, segment cache); Connect services (library, playback, user, system).
 
-**Done when**: ported HLS cases pass; playback verified on real hls.js and AVFoundation clients. Media3 is verified in P7, with the Android client.
+**Done when**: ported HLS cases pass; playback verified on real hls.js and AVFoundation clients. Media3 is verified in P8, with the Android client.
 
 **Progress**:
 - [x] `libs/streaming`: playlists of the whole media source, RFC 6381 codec strings, segments generated on demand with restarts on seek, segments of copied video joined from one file per group of pictures; ported HLS cases pass
@@ -146,8 +152,33 @@ flowchart TD
 - [x] `CGO_ENABLED=0` cross-compilation to Linux, macOS and Windows on amd64 and arm64 (`server:dist`), checked in CI
 - [x] Container images for linux/amd64 and linux/arm64 bundling jellyfin-ffmpeg's portable build, built and run in CI
 
-### P7 Clients and Ecosystem
-**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`; playback verified on Media3 with the Android client; library and collection collages; evaluation of a Jellyfin API compatibility shim. Its completion criteria will be defined after P6.
+### P7 Server API for Clients
+**Scope**: the server features the clients are built on. P7 to P9 come from comparing Mavio's server with Jellyfin's (its API controllers and providers): what a client cannot be designed without comes before the clients, what clients only add to comes after them.
+
+- Browsing: the user's library views; latest items per library; continue watching and next up for series; series, seasons and episodes, albums and artists; genres, studios, people and years with item counts, which `libs/store` already queries
+- Collections and playlists: create, edit, reorder and delete; the domain model already has both
+- Live events: a stream per signed-in device carrying library changes, played state and progress from the user's other devices, job progress and plugin states
+- Server settings: stored in the database and set through `SystemService`, taking over from the command-line flags what an administrator changes at run time; first the transcoding settings (hardware acceleration chosen by the administrator, encoder presets, tone mapping, transcode folder); browsing the server's folders to choose library paths
+- Metadata management: edit an item and lock its fields; identify an item again against the providers; refresh one item; list a provider's images, choose, upload and delete images
+- Jobs: list the scheduled jobs with their last runs, run one now
+- Plugin hot plugging: installing, upgrading and uninstalling plugins without restarting the server, as [Architecture §7.3](architecture.md#73-child-process-runtime) states. Today the plugin folder is read at startup only, and only configuration changes apply without a restart
+- Inherited parental ratings (§4), before the clients offer parental controls
+
+**Done when**: an end-to-end test through the API: a client receives a library change event after a scan and finds the new item through the views, latest items and genres; an administrator changes a transcoding setting and the next transcode uses it; a plugin is installed, upgraded and uninstalled while the server keeps serving.
+
+### P8 Clients and Ecosystem
+**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`; playback verified on Media3 with the Android client; library and collection collages; evaluation of a Jellyfin API compatibility shim; server features the clients turn out to need while they are built, such as display preferences synced across devices and signing in a new device from a signed-in one (Quick Connect). Its completion criteria will be defined after P7.
+
+### P9 Server Features after Clients
+**Scope**: Jellyfin server features that clients add to rather than depend on, ordered by what the clients need first.
+
+- Media extras: trickplay thumbnail sheets ([Architecture §6.1](architecture.md#61-requirements-and-implementation)), chapter images, media segments (skipping intros and credits), lyrics, attached fonts for ASS subtitles rendered by clients, audio normalization
+- Offline downloads: progressive transcoding (§4)
+- Metadata: writing NFO files and images next to the media; providers for music and books (MusicBrainz, TheAudioDB) and more artwork (fanart.tv), and subtitle downloads, all as plugins; movie collections created from the providers' collections
+- Sessions across devices: what is playing on other devices, remote control, synchronized playback (SyncPlay)
+- Plugins: a plugin catalog to install and upgrade from; authentication and notification plugins, whose contracts (`AuthProvider`, `Notifier`) already exist, used by the server
+- Operations: API keys for integrations, activity log, server logs, backup and restore, localization data (countries, languages, rating systems)
+- Networking: HTTPS with configured certificates, a base URL behind reverse proxies, discovery of servers on the local network
 
 ---
 
@@ -161,7 +192,8 @@ flowchart TD
 | SVG rasterization | Pure-Go options are incomplete | Decided in P2: SVGs are checked and served as-is, not rasterized |
 | Hardware test coverage | Only the maintainers' machines and GitHub-hosted runners are available; other vendors' encoders are untested on real hardware | Real transcode tests run where the hardware exists and skip elsewhere; other vendor paths rely on the ported EncodingHelper cases |
 | Go modules split too finely | Friction in dependency upgrades and tidying | Keep watching; merge modules when needed |
-| Progressive transcoding | Remuxes and transcodes are delivered as HLS only; a client declaring only progressive transcoding profiles gets `unimplemented` | When offline downloads need transcoded files |
-| Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P7); then serve the stream as `.sup` |
+| Progressive transcoding | Remuxes and transcodes are delivered as HLS only; a client declaring only progressive transcoding profiles gets `unimplemented` | P9, with offline downloads |
+| Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P8); then serve the stream as `.sup` |
 | Negative audio decode times in fMP4 | HLS outputs keep negative timestamps, so audio that starts before zero (AAC encoder priming) is written with a negative `tfdt`, a field the format defines as unsigned. hls.js and Safari play it, and Jellyfin writes the same for its fMP4 clients; players outside that set are unverified | If a player misplaces or drops the audio: shift only the audio to zero, keeping the video at the source's timestamps |
-| Inherited parental ratings | Ratings are filtered per item, so unrated episodes of a series rated above a user's limit are visible; Jellyfin filters them by the series' rating | Before clients ship parental controls: store an inherited rating with each item and filter on it |
+| Inherited parental ratings | Ratings are filtered per item, so unrated episodes of a series rated above a user's limit are visible; Jellyfin filters them by the series' rating | P7: store an inherited rating with each item and filter on it |
+| Live TV, DVR, channels and DLNA | Large parts of Jellyfin (DLNA as a plugin there) that Mavio has neither adopted nor ruled out | Decide before P9 is planned; DLNA would be a plugin |
