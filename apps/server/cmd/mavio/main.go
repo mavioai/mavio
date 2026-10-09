@@ -67,9 +67,10 @@ func run(ctx context.Context, args []string) error {
 		}
 	}()
 	playbacks, ffmpegVersion := newPlaybacks(ctx, db, *ffmpeg, *ffprobe, *transcodes)
+	imageServer := images.New(images.Config{Store: db, Dir: filepath.Join(*cacheDir, "images"), Logger: slog.Default()})
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: version, Store: db, Database: db.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: images.New(images.Config{Store: db, Dir: filepath.Join(*cacheDir, "images"), Logger: slog.Default()}),
+		Images: imageServer,
 	})
 	if err != nil {
 		return err
@@ -84,7 +85,7 @@ func run(ctx context.Context, args []string) error {
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return playbacks.Run(ctx) })
 	g.Go(func() error { return httpserver.Serve(ctx, ln, h) })
-	if worker := newLibraryWorker(ctx, db, *ffprobe); worker != nil {
+	if worker := newLibraryWorker(ctx, db, *ffprobe, imageServer); worker != nil {
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err
@@ -105,9 +106,9 @@ func defaultCacheDir() string {
 }
 
 // newLibraryWorker returns the worker running scans, probes, keyframe
-// extractions and metadata refreshes, with a scan of every library queued,
+// extractions, metadata refreshes and image placeholders, with a scan of every library queued,
 // or nil when there is no ffprobe to probe media with.
-func newLibraryWorker(ctx context.Context, db core.Store, ffprobe string) *library.Worker {
+func newLibraryWorker(ctx context.Context, db core.Store, ffprobe string, analyzer library.ImageAnalyzer) *library.Worker {
 	path, err := exec.LookPath(ffprobe)
 	if err != nil {
 		slog.ErrorContext(ctx, "ffprobe unavailable; libraries are not scanned", "ffprobe", ffprobe, "err", err)
@@ -119,6 +120,8 @@ func newLibraryWorker(ctx context.Context, db core.Store, ffprobe string) *libra
 		Prober:    providers.FFprobe{Prober: &probe.Prober{FFprobe: path}},
 		Keyframes: providers.Keyframes{Extractor: &keyframes.Extractor{FFprobe: path}},
 		Refresher: &library.Refresher{Store: db, Logger: slog.Default()},
+		Images:    analyzer,
+		Logger:    slog.Default(),
 	}
 	if err := jobs.Schedule(ctx); err != nil {
 		slog.ErrorContext(ctx, "schedule library scans", "err", err)

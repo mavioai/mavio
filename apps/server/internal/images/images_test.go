@@ -151,6 +151,19 @@ func TestServer(t *testing.T) {
 			t.Errorf("%s = %d, want 404", name, resp.StatusCode)
 		}
 	}
+	// Analyzing measures images and computes their placeholders.
+	img, err := s.Images().Get(ctx, core.MustParseID(id[core.ImagePrimary]))
+	if err != nil {
+		t.Fatal(err)
+	}
+	server := New(Config{Store: s, Dir: t.TempDir()})
+	if f, err := server.Analyze(ctx, img); err != nil || f.Width != 400 || f.Height != 600 || f.Blurhash == "" || len(f.Thumbhash) == 0 {
+		t.Errorf("Analyze(poster) = %+v, %v", f, err)
+	}
+	svg, _ := s.Images().Get(ctx, core.MustParseID(id[core.ImageLogo]))
+	if f, err := server.Analyze(ctx, svg); err != nil || f.Blurhash != "" {
+		t.Errorf("Analyze(SVG) = %+v, %v; want zero facts", f, err)
+	}
 	for _, q := range []string{"?width=0", "?maxWidth=x", "?quality=101"} {
 		if resp, _ := get("/images/" + id[core.ImagePrimary] + q); resp.StatusCode != http.StatusBadRequest {
 			t.Errorf("%s = %d, want 400", q, resp.StatusCode)

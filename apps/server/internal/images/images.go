@@ -24,6 +24,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/imaging"
+	"github.com/mavioai/mavio/libs/library"
 )
 
 // maxDownload bounds a downloaded provider image.
@@ -161,6 +162,23 @@ func (s *Server) original(ctx context.Context, img *core.Image) ([]byte, error) 
 		return nil, err
 	}
 	return v.([]byte), nil
+}
+
+// Analyze measures an image and computes its placeholders, as a
+// library.ImageAnalyzer; SVGs give zero facts.
+func (s *Server) Analyze(ctx context.Context, img core.Image) (library.ImageFacts, error) {
+	data, err := s.original(ctx, &img)
+	if err != nil {
+		return library.ImageFacts{}, err
+	}
+	if isSVG(&img, data) {
+		return library.ImageFacts{}, nil
+	}
+	p, err := imaging.Placeholders(data)
+	if err != nil {
+		return library.ImageFacts{}, err
+	}
+	return library.ImageFacts{Width: p.Width, Height: p.Height, Blurhash: p.Blurhash, Thumbhash: p.Thumbhash}, nil
 }
 
 func (s *Server) local(ctx context.Context, img *core.Image) ([]byte, error) {
