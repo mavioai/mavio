@@ -53,6 +53,11 @@ var (
 		core.CreditAuthor: libraryv1.CreditKind_CREDIT_KIND_AUTHOR, core.CreditNarrator: libraryv1.CreditKind_CREDIT_KIND_NARRATOR,
 		core.CreditOther: libraryv1.CreditKind_CREDIT_KIND_OTHER,
 	}
+	valueKinds = map[libraryv1.ValueKind]core.ValueKind{
+		libraryv1.ValueKind_VALUE_KIND_GENRE: core.ValueGenre, libraryv1.ValueKind_VALUE_KIND_TAG: core.ValueTag,
+		libraryv1.ValueKind_VALUE_KIND_STUDIO: core.ValueStudio, libraryv1.ValueKind_VALUE_KIND_ARTIST: core.ValueArtist,
+		libraryv1.ValueKind_VALUE_KIND_YEAR: core.ValueYear,
+	}
 	sortFields = map[libraryv1.SortField]core.SortField{
 		libraryv1.SortField_SORT_FIELD_NAME: core.SortName, libraryv1.SortField_SORT_FIELD_DATE_ADDED: core.SortDateAdded,
 		libraryv1.SortField_SORT_FIELD_PREMIERE_DATE: core.SortPremiereDate, libraryv1.SortField_SORT_FIELD_PRODUCTION_YEAR: core.SortProductionYear,
@@ -155,21 +160,8 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 		Limit:         int(req.GetLimit()),
 		Offset:        int(req.GetOffset()),
 	}
-	// Restrict to the requested libraries the user may access; a user
-	// limited to libraries never sees others.
-	ids := req.GetLibraryIds()
-	if len(ids) == 0 && policy.Libraries != nil {
-		if len(policy.Libraries) == 0 {
-			return &libraryv1.ListItemsResponse{}, nil
-		}
-		q.LibraryIDs = policy.Libraries
-	}
-	for _, id := range ids {
-		if lib := core.MustParseID(id); policy.CanAccessLibrary(lib) {
-			q.LibraryIDs = append(q.LibraryIDs, lib)
-		}
-	}
-	if len(ids) > 0 && len(q.LibraryIDs) == 0 {
+	var ok bool
+	if q.LibraryIDs, ok = libraryScope(policy, req.GetLibraryIds()); !ok {
 		return &libraryv1.ListItemsResponse{}, nil
 	}
 	if req.HasParentId() {
@@ -184,13 +176,7 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	if req.HasFavorite() {
 		q.Favorite = new(req.GetFavorite())
 	}
-	for _, k := range req.GetKinds() {
-		for ck, pk := range itemKinds {
-			if pk == k {
-				q.Kinds = append(q.Kinds, ck)
-			}
-		}
-	}
+	q.Kinds = itemKindsFromProto(req.GetKinds())
 	for _, sort := range req.GetSort() {
 		q.Sort = append(q.Sort, core.SortSpec{Field: sortFields[sort.GetField()], Desc: sort.GetDescending()})
 	}
@@ -230,6 +216,118 @@ func (s *ItemService) GetPerson(ctx context.Context, req *libraryv1.GetPersonReq
 		return nil, connectError(ctx, err)
 	}
 	return libraryv1.GetPersonResponse_builder{Person: personToProto(&person, images)}.Build(), nil
+}
+
+// ListValues lists attribute values of the items the caller may access.
+func (s *ItemService) ListValues(ctx context.Context, req *libraryv1.ListValuesRequest) (*libraryv1.ListValuesResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	filter, ok := itemFilter(&p.User.Policy, req.GetLibraryIds(), req.GetItemKinds())
+	if !ok {
+		return &libraryv1.ListValuesResponse{}, nil
+	}
+	q := core.ValueQuery{
+		Kind:   valueKinds[req.GetKind()],
+		Items:  filter,
+		Search: req.GetSearch(),
+		Limit:  int(req.GetLimit()),
+		Offset: int(req.GetOffset()),
+	}
+	if err := q.Validate(); err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+	values, err := s.store.Items().Values(ctx, q)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out := make([]*libraryv1.ValueCount, len(values))
+	for i, v := range values {
+		out[i] = libraryv1.ValueCount_builder{Value: &v.Value, ItemCount: new(int32(v.Count))}.Build()
+	}
+	return libraryv1.ListValuesResponse_builder{Values: out}.Build(), nil
+}
+
+// ListPeople lists the people credited on the items the caller may access.
+func (s *ItemService) ListPeople(ctx context.Context, req *libraryv1.ListPeopleRequest) (*libraryv1.ListPeopleResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	filter, ok := itemFilter(&p.User.Policy, req.GetLibraryIds(), req.GetItemKinds())
+	if !ok {
+		return &libraryv1.ListPeopleResponse{}, nil
+	}
+	q := core.PersonQuery{Items: filter, Search: req.GetSearch(), Limit: int(req.GetLimit()), Offset: int(req.GetOffset())}
+	for _, k := range req.GetCreditKinds() {
+		for ck, pk := range creditKinds {
+			if pk == k {
+				q.CreditKinds = append(q.CreditKinds, ck)
+			}
+		}
+	}
+	people, err := s.store.People().Search(ctx, q)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	owners := make([]core.ID, len(people))
+	for i := range people {
+		owners[i] = people[i].Person.ID
+	}
+	images, err := s.store.Images().ListForOwners(ctx, owners)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out := make([]*libraryv1.PersonCount, len(people))
+	for i := range people {
+		pc := &people[i]
+		out[i] = libraryv1.PersonCount_builder{
+			Person:    personToProto(&pc.Person, images[pc.Person.ID]),
+			ItemCount: new(int32(pc.Count)),
+		}.Build()
+	}
+	return libraryv1.ListPeopleResponse_builder{People: out}.Build(), nil
+}
+
+// libraryScope restricts the requested libraries, or all when none are
+// requested, to those the policy allows: nil means every library. It
+// reports false when no library remains.
+func libraryScope(policy *core.UserPolicy, requested []string) ([]core.ID, bool) {
+	if len(requested) == 0 {
+		return policy.Libraries, policy.Libraries == nil || len(policy.Libraries) > 0
+	}
+	var ids []core.ID
+	for _, id := range requested {
+		if lib := core.MustParseID(id); policy.CanAccessLibrary(lib) {
+			ids = append(ids, lib)
+		}
+	}
+	return ids, len(ids) > 0
+}
+
+// itemFilter selects the items of the requested libraries and kinds that
+// the policy allows; it reports false when no library remains.
+func itemFilter(policy *core.UserPolicy, libraries []string, kinds []libraryv1.ItemKind) (core.ItemFilter, bool) {
+	ids, ok := libraryScope(policy, libraries)
+	return core.ItemFilter{
+		LibraryIDs:  ids,
+		Kinds:       itemKindsFromProto(kinds),
+		MaxRating:   policy.MaxParentalRating,
+		SkipUnrated: policy.BlockUnrated,
+	}, ok
+}
+
+func itemKindsFromProto(kinds []libraryv1.ItemKind) []core.ItemKind {
+	var out []core.ItemKind
+	for _, k := range kinds {
+		for ck, pk := range itemKinds {
+			if pk == k {
+				out = append(out, ck)
+			}
+		}
+	}
+	return out
 }
 
 func itemToProto(it *core.Item, images []core.Image, admin bool) *libraryv1.Item {

@@ -2,6 +2,7 @@ package store_test
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"testing"
 
@@ -53,35 +54,47 @@ func TestItemValues(t *testing.T) {
 		ctx := t.Context()
 		films, music := newLibrary(t, s, "/films"), newLibrary(t, s, "/music")
 		a, b := newItem(films, core.KindMovie, "A"), newItem(films, core.KindMovie, "B")
-		a.Genres, a.Tags = []string{"Drama", "Science Fiction"}, []string{"4K"}
-		b.Genres, b.Studios = []string{"drama", "Documentary", "Comédie"}, []string{"A24"}
+		a.Genres, a.Tags, a.ProductionYear, a.ParentalRating = []string{"Drama", "Science Fiction"}, []string{"4K"}, 1999, 17
+		b.Genres, b.Studios, b.ProductionYear = []string{"drama", "Documentary", "Comédie"}, []string{"A24"}, 2015
+		trailer := newItem(films, core.KindVideo, "A Trailer")
+		trailer.Extra, trailer.OwnerID, trailer.Genres, trailer.ProductionYear = core.ExtraTrailer, a.ID, []string{"Drama"}, 1999
 		song := newItem(music, core.KindTrack, "Song")
-		song.Genres, song.Artists, song.AlbumArtists = []string{"Dream Pop", "Melodrama", "Sci-Fi"}, []string{"Beach House"}, []string{"Various Artists"}
-		upsert(t, s, a, b, song)
+		song.Genres, song.Artists, song.AlbumArtists, song.ProductionYear = []string{"Dream Pop", "Melodrama", "Sci-Fi"}, []string{"Beach House"}, []string{"Various Artists", "Beach House"}, 2015
+		upsert(t, s, a, b, trailer, song)
 
+		films1 := core.ItemFilter{LibraryIDs: []core.ID{films.ID}}
 		tests := []struct {
 			name string
 			q    core.ValueQuery
 			want []string
 		}{
-			{"case variants merge", core.ValueQuery{Kind: core.ValueGenre, LibraryIDs: []core.ID{films.ID}}, []string{"Comédie", "Documentary", "Drama", "Science Fiction"}},
-			{"all libraries", core.ValueQuery{Kind: core.ValueGenre, Limit: 3}, []string{"Comédie", "Documentary", "Drama"}},
-			{"search ranks prefix first", core.ValueQuery{Kind: core.ValueGenre, Search: "dr"}, []string{"Drama", "Dream Pop", "Melodrama"}},
-			{"search ignores accents", core.ValueQuery{Kind: core.ValueGenre, Search: "comedie"}, []string{"Comédie"}},
-			{"substring", core.ValueQuery{Kind: core.ValueGenre, Search: "fiction"}, []string{"Science Fiction"}},
-			{"sort form", core.ValueQuery{Kind: core.ValueGenre, Search: "scifi"}, []string{"Sci-Fi"}},
-			{"punctuation matches spaces", core.ValueQuery{Kind: core.ValueGenre, Search: "sci fi"}, []string{"Sci-Fi"}},
-			{"artists include album artists", core.ValueQuery{Kind: core.ValueArtist}, []string{"Beach House", "Various Artists"}},
-			{"studios", core.ValueQuery{Kind: core.ValueStudio}, []string{"A24"}},
-			{"tags", core.ValueQuery{Kind: core.ValueTag, LibraryIDs: []core.ID{music.ID}}, []string{}},
+			{"case variants merge, counted once per item", core.ValueQuery{Kind: core.ValueGenre, Items: films1}, []string{"Comédie 1", "Documentary 1", "Drama 2", "Science Fiction 1"}},
+			{"all libraries", core.ValueQuery{Kind: core.ValueGenre, Limit: 3}, []string{"Comédie 1", "Documentary 1", "Drama 2"}},
+			{"page", core.ValueQuery{Kind: core.ValueGenre, Limit: 2, Offset: 2}, []string{"Drama 2", "Dream Pop 1"}},
+			{"search ranks prefix first", core.ValueQuery{Kind: core.ValueGenre, Search: "dr"}, []string{"Drama 2", "Dream Pop 1", "Melodrama 1"}},
+			{"search ignores accents", core.ValueQuery{Kind: core.ValueGenre, Search: "comedie"}, []string{"Comédie 1"}},
+			{"substring", core.ValueQuery{Kind: core.ValueGenre, Search: "fiction"}, []string{"Science Fiction 1"}},
+			{"sort form", core.ValueQuery{Kind: core.ValueGenre, Search: "scifi"}, []string{"Sci-Fi 1"}},
+			{"punctuation matches spaces", core.ValueQuery{Kind: core.ValueGenre, Search: "sci fi"}, []string{"Sci-Fi 1"}},
+			{"rating", core.ValueQuery{Kind: core.ValueGenre, Items: core.ItemFilter{LibraryIDs: []core.ID{films.ID}, MaxRating: 12}}, []string{"Comédie 1", "Documentary 1", "drama 1"}},
+			{"item kinds", core.ValueQuery{Kind: core.ValueGenre, Items: core.ItemFilter{Kinds: []core.ItemKind{core.KindTrack}}, Search: "dra"}, []string{"Melodrama 1"}},
+			{"artists include album artists", core.ValueQuery{Kind: core.ValueArtist}, []string{"Beach House 1", "Various Artists 1"}},
+			{"studios", core.ValueQuery{Kind: core.ValueStudio}, []string{"A24 1"}},
+			{"tags", core.ValueQuery{Kind: core.ValueTag, Items: core.ItemFilter{LibraryIDs: []core.ID{music.ID}}}, []string{}},
+			{"years", core.ValueQuery{Kind: core.ValueYear}, []string{"1999 1", "2015 2"}},
+			{"years of a library", core.ValueQuery{Kind: core.ValueYear, Items: films1, Offset: 1}, []string{"2015 1"}},
 		}
 		for _, tt := range tests {
 			got, err := s.Items().Values(ctx, tt.q)
 			if err != nil {
 				t.Fatalf("%s: %v", tt.name, err)
 			}
-			if !slices.Equal(got, tt.want) {
-				t.Errorf("%s: got %q, want %q", tt.name, got, tt.want)
+			gotValues := []string{}
+			for _, v := range got {
+				gotValues = append(gotValues, fmt.Sprintf("%s %d", v.Value, v.Count))
+			}
+			if !slices.Equal(gotValues, tt.want) {
+				t.Errorf("%s: got = %q, want = %q", tt.name, gotValues, tt.want)
 			}
 		}
 		if _, err := s.Items().Values(ctx, core.ValueQuery{Kind: "mood"}); !errors.Is(err, core.ErrInvalid) {
@@ -98,6 +111,10 @@ func TestItemValues(t *testing.T) {
 func TestPersonSearch(t *testing.T) {
 	eachBackend(t, func(t *testing.T, s *store.Store) {
 		ctx := t.Context()
+		films, shows := newLibrary(t, s, "/films"), newLibrary(t, s, "/shows")
+		movie, rated, episode := newItem(films, core.KindMovie, "Movie"), newItem(films, core.KindMovie, "Rated"), newItem(shows, core.KindEpisode, "Episode")
+		rated.ParentalRating = 17
+		upsert(t, s, movie, rated, episode)
 		var list []core.Person
 		for _, p := range []struct{ name, sort string }{
 			{"Tom Hanks", "Hanks, Tom"},
@@ -106,23 +123,45 @@ func TestPersonSearch(t *testing.T) {
 			{"Thomas Newman", ""},
 			{"Zoë Kravitz", ""},
 			{"张国荣", ""},
+			{"Uncredited", ""},
 		} {
 			list = append(list, core.Person{ID: core.NewID(), Name: p.name, SortName: p.sort})
 		}
 		if err := s.People().Upsert(ctx, list...); err != nil {
 			t.Fatal(err)
 		}
+		// Everyone but the last is an actor in the movie; Tom Hanks also
+		// directs it and acts in the rated film, Thomas Newman scores the
+		// episode.
+		var cast []core.Credit
+		for i, p := range list[:6] {
+			cast = append(cast, core.Credit{PersonID: p.ID, Kind: core.CreditActor, Order: i})
+		}
+		cast = append(cast, core.Credit{PersonID: list[0].ID, Kind: core.CreditDirector})
+		for item, credits := range map[core.ID][]core.Credit{
+			movie.ID:   cast,
+			rated.ID:   {{PersonID: list[0].ID, Kind: core.CreditActor}},
+			episode.ID: {{PersonID: list[3].ID, Kind: core.CreditComposer}},
+		} {
+			if err := s.People().ReplaceCredits(ctx, item, credits); err != nil {
+				t.Fatal(err)
+			}
+		}
+
 		tests := []struct {
 			name string
 			q    core.PersonQuery
 			want []string
 		}{
-			{"all by sort name", core.PersonQuery{}, []string{"Atom Egoyan", "Tom Hanks", "Thomas Newman", "Tom Holland", "张国荣", "Zoë Kravitz"}},
-			{"limit", core.PersonQuery{Limit: 2}, []string{"Atom Egoyan", "Tom Hanks"}},
-			{"word prefix first", core.PersonQuery{Search: "tom"}, []string{"Tom Hanks", "Tom Holland", "Atom Egoyan"}},
-			{"accents", core.PersonQuery{Search: "zoe"}, []string{"Zoë Kravitz"}},
-			{"sort name", core.PersonQuery{Search: "hanks tom"}, []string{"Tom Hanks"}},
-			{"pinyin", core.PersonQuery{Search: "zhang guo"}, []string{"张国荣"}},
+			{"credited people by sort name", core.PersonQuery{}, []string{"Atom Egoyan 1", "Tom Hanks 2", "Thomas Newman 2", "Tom Holland 1", "张国荣 1", "Zoë Kravitz 1"}},
+			{"page", core.PersonQuery{Limit: 2, Offset: 1}, []string{"Tom Hanks 2", "Thomas Newman 2"}},
+			{"word prefix first", core.PersonQuery{Search: "tom"}, []string{"Tom Hanks 2", "Tom Holland 1", "Atom Egoyan 1"}},
+			{"accents", core.PersonQuery{Search: "zoe"}, []string{"Zoë Kravitz 1"}},
+			{"sort name", core.PersonQuery{Search: "hanks tom"}, []string{"Tom Hanks 2"}},
+			{"pinyin", core.PersonQuery{Search: "zhang guo"}, []string{"张国荣 1"}},
+			{"library", core.PersonQuery{Items: core.ItemFilter{LibraryIDs: []core.ID{shows.ID}}}, []string{"Thomas Newman 1"}},
+			{"rating", core.PersonQuery{Items: core.ItemFilter{MaxRating: 12}, Search: "hanks"}, []string{"Tom Hanks 1"}},
+			{"credit kinds", core.PersonQuery{CreditKinds: []core.CreditKind{core.CreditDirector, core.CreditComposer}}, []string{"Tom Hanks 1", "Thomas Newman 1"}},
 		}
 		for _, tt := range tests {
 			got, err := s.People().Search(ctx, tt.q)
@@ -131,10 +170,10 @@ func TestPersonSearch(t *testing.T) {
 			}
 			var gotNames []string
 			for _, p := range got {
-				gotNames = append(gotNames, p.Name)
+				gotNames = append(gotNames, fmt.Sprintf("%s %d", p.Person.Name, p.Count))
 			}
 			if !slices.Equal(gotNames, tt.want) {
-				t.Errorf("%s: got %q, want %q", tt.name, gotNames, tt.want)
+				t.Errorf("%s: got = %q, want = %q", tt.name, gotNames, tt.want)
 			}
 		}
 	})

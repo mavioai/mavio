@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"iter"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -264,30 +265,32 @@ func (r items) Walk(ctx context.Context, q core.ItemQuery) iter.Seq2[core.Item, 
 	}
 }
 
-func (r items) Values(ctx context.Context, q core.ValueQuery) ([]string, error) {
+func (r items) Values(ctx context.Context, q core.ValueQuery) ([]core.ValueCount, error) {
 	if err := q.Validate(); err != nil {
 		return nil, err
+	}
+	matching := r.filter(q.Items)
+	limit := q.Limit
+	if limit == 0 {
+		limit = core.MaxPageSize
+	}
+	if q.Kind == core.ValueYear {
+		return r.years(ctx, matching, limit, q.Offset)
 	}
 	kinds := []string{string(q.Kind)}
 	if q.Kind == core.ValueArtist {
 		kinds = append(kinds, valueAlbumArtist)
 	}
-	ps := []predicate.ItemValue{itemvalue.KindIn(kinds...), itemvalue.ValueKeyNEQ("")}
-	if len(q.LibraryIDs) > 0 {
-		ps = append(ps, itemvalue.HasItemWith(item.LibraryIDIn(q.LibraryIDs...)))
-	}
+	ps := []predicate.ItemValue{itemvalue.KindIn(kinds...), itemvalue.ValueKeyNEQ(""), itemvalue.HasItemWith(matching...)}
 	srch, searching := parseSearch(q.Search)
 	if searching {
 		ps = append(ps, predicate.ItemValue(func(s *entsql.Selector) {
 			s.Where(srch.match(s.C(itemvalue.FieldValueKey), "", s.C(itemvalue.FieldSortKey)))
 		}))
 	}
-	limit := q.Limit
-	if limit == 0 {
-		limit = core.MaxPageSize
-	}
 	// Values with the same clean form are one value, shown in the spelling
-	// that sorts first by code point, and ordered by sort name.
+	// that sorts first by code point, ordered by sort name and counted once
+	// per item.
 	minValue := "MIN(%s)"
 	if r.s.dialect == DialectPostgres {
 		minValue = `MIN(%s COLLATE "C")`
@@ -295,24 +298,53 @@ func (r items) Values(ctx context.Context, q core.ValueQuery) ([]string, error) 
 	var rows []struct {
 		Key   string `sql:"value_key"`
 		Value string `sql:"value"`
+		Count int    `sql:"item_count"`
 	}
 	err := r.s.read.ItemValue.Query().Where(ps...).Modify(func(s *entsql.Selector) {
 		key := s.C(itemvalue.FieldValueKey)
-		s.Select(key, entsql.As(fmt.Sprintf(minValue, s.C(itemvalue.FieldValue)), "value")).GroupBy(key)
+		s.Select(key,
+			entsql.As(fmt.Sprintf(minValue, s.C(itemvalue.FieldValue)), "value"),
+			entsql.As("COUNT(DISTINCT "+s.C(itemvalue.FieldItemID)+")", "item_count"),
+		).GroupBy(key)
 		if searching {
 			s.OrderExpr(srch.rank(key))
 		}
 		s.OrderExpr(entsql.Expr("MIN(" + s.C(itemvalue.FieldSortKey) + ")"))
-		s.OrderBy(key).Limit(limit)
+		s.OrderBy(key).Limit(limit).Offset(q.Offset)
 	}).Scan(ctx, &rows)
 	if err != nil {
 		return nil, mapErr(err, "list item values")
 	}
-	out := make([]string, len(rows))
+	out := make([]core.ValueCount, len(rows))
 	for i, row := range rows {
-		out[i] = row.Value
+		out[i] = core.ValueCount{Value: row.Value, Count: row.Count}
 	}
 	return out, nil
+}
+
+// years lists the production years of the matching items, oldest first.
+func (r items) years(ctx context.Context, matching []predicate.Item, limit, offset int) ([]core.ValueCount, error) {
+	var rows []struct {
+		Year  int `sql:"production_year"`
+		Count int `sql:"item_count"`
+	}
+	err := r.s.read.Item.Query().Where(append(matching, item.ProductionYearGT(0))...).Modify(func(s *entsql.Selector) {
+		year := s.C(item.FieldProductionYear)
+		s.Select(year, entsql.As(entsql.Count("*"), "item_count")).GroupBy(year).OrderBy(year).Limit(limit).Offset(offset)
+	}).Scan(ctx, &rows)
+	if err != nil {
+		return nil, mapErr(err, "list production years")
+	}
+	out := make([]core.ValueCount, len(rows))
+	for i, row := range rows {
+		out[i] = core.ValueCount{Value: strconv.Itoa(row.Year), Count: row.Count}
+	}
+	return out, nil
+}
+
+// filter translates an item filter of value and person lists.
+func (r items) filter(f core.ItemFilter) []predicate.Item {
+	return r.predicates(core.ItemQuery{LibraryIDs: f.LibraryIDs, Kinds: f.Kinds, MaxRating: f.MaxRating, SkipUnrated: f.SkipUnrated})
 }
 
 // predicates translates the filters of q.

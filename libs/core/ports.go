@@ -67,9 +67,10 @@ type ItemRepository interface {
 	// PurgeMissing deletes the library's items missing since before, with
 	// what Delete removes, and returns their IDs.
 	PurgeMissing(ctx context.Context, libraryID ID, before time.Time) ([]ID, error)
-	// Values lists distinct attribute values (genres, studios, …), ranked by
-	// relevance when q.Search is set and by name otherwise.
-	Values(ctx context.Context, q ValueQuery) ([]string, error)
+	// Values lists distinct attribute values (genres, studios, …) or
+	// production years with their item counts, ranked by relevance when
+	// q.Search is set and by name otherwise.
+	Values(ctx context.Context, q ValueQuery) ([]ValueCount, error)
 }
 
 // MediaSourceRepository stores the media sources of items.
@@ -97,9 +98,10 @@ type PersonRepository interface {
 	// FindByName matches the name case-insensitively.
 	FindByName(ctx context.Context, name string) (Person, error)
 	Upsert(ctx context.Context, people ...Person) error
-	// Search lists people ranked by relevance when q.Search is set and by
-	// sort name otherwise.
-	Search(ctx context.Context, q PersonQuery) ([]Person, error)
+	// Search lists the people credited on the items q selects, with their
+	// item counts, ranked by relevance when q.Search is set and by sort
+	// name otherwise.
+	Search(ctx context.Context, q PersonQuery) ([]PersonCount, error)
 	CreditsForItem(ctx context.Context, itemID ID) ([]Credit, error)
 	// ReplaceCredits sets the item's credits, removing any others.
 	ReplaceCredits(ctx context.Context, itemID ID, credits []Credit) error

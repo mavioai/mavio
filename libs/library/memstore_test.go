@@ -101,7 +101,9 @@ func (r memItems) Query(context.Context, core.ItemQuery) (core.Page[core.Item], 
 
 func (r memItems) Walk(context.Context, core.ItemQuery) iter.Seq2[core.Item, error] { panic("unused") }
 
-func (r memItems) Values(context.Context, core.ValueQuery) ([]string, error) { panic("unused") }
+func (r memItems) Values(context.Context, core.ValueQuery) ([]core.ValueCount, error) {
+	panic("unused")
+}
 
 func (r memItems) Upsert(_ context.Context, items ...core.Item) error {
 	r.m.mu.Lock()
@@ -393,7 +395,9 @@ func (r memPeople) Upsert(_ context.Context, people ...core.Person) error {
 	return nil
 }
 
-func (r memPeople) Search(context.Context, core.PersonQuery) ([]core.Person, error) { panic("unused") }
+func (r memPeople) Search(context.Context, core.PersonQuery) ([]core.PersonCount, error) {
+	panic("unused")
+}
 
 func (r memPeople) CreditsForItem(_ context.Context, id core.ID) ([]core.Credit, error) {
 	r.m.mu.Lock()

@@ -179,6 +179,7 @@ flowchart TD
 
 **Progress**:
 - [x] Inherited parental ratings: an unrated item takes its nearest rated ancestor's score, derived by the store on every write and backfilled for existing databases; rating filters and access checks use it
+- [x] Genres, tags, studios, artists, years and people with item counts (`ItemService.ListValues`, `ListPeople`), limited to the items the user may access
 
 ### P8 Live Events and Sessions
 **Scope**: what a client learns without asking, and what one device does to another.

@@ -18,6 +18,17 @@ service ItemService {
   rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // ListValues lists the genres, tags, studios, artists or production years
+  // of the items the caller may access, with the number of items having
+  // each.
+  rpc ListValues(ListValuesRequest) returns (ListValuesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListPeople lists the people credited on the items the caller may
+  // access, with the number of items crediting each.
+  rpc ListPeople(ListPeopleRequest) returns (ListPeopleResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 enum ItemKind {
@@ -104,6 +115,18 @@ enum SortField {
   SORT_FIELD_RANDOM = 8;
   SORT_FIELD_LAST_PLAYED = 9;
   SORT_FIELD_PLAY_COUNT = 10;
+}
+
+// ValueKind names an item attribute listed by ListValues.
+enum ValueKind {
+  VALUE_KIND_UNSPECIFIED = 0;
+  VALUE_KIND_GENRE = 1;
+  VALUE_KIND_TAG = 2;
+  VALUE_KIND_STUDIO = 3;
+  // Artists and album artists.
+  VALUE_KIND_ARTIST = 4;
+  // Production years in decimal, oldest first.
+  VALUE_KIND_YEAR = 5;
 }
 
 // Item is a node in a library. See docs/domain.md for hierarchies and
@@ -256,4 +279,77 @@ message GetPersonRequest {
 
 message GetPersonResponse {
   Person person = 1;
+}
+
+// ListValuesRequest selects the items whose values are listed: present
+// items that are not extras. Unset fields do not filter.
+message ListValuesRequest {
+  ValueKind kind = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  repeated string library_ids = 2 [(buf.validate.field).repeated.items.string.uuid = true];
+  // Count only items of these kinds.
+  repeated ItemKind item_kinds = 3 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // Matches like ListItemsRequest.search; years cannot be searched.
+  string search = 4 [(buf.validate.field).string.max_len = 200];
+  // 1–1000; unset means 1000.
+  int32 limit = 5 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 6 [(buf.validate.field).int32.gte = 0];
+}
+
+// ValueCount is a value with the number of items having it. Spellings
+// that differ only in case, accents or punctuation are one value.
+message ValueCount {
+  string value = 1;
+  int32 item_count = 2;
+}
+
+message ListValuesResponse {
+  // Ranked by relevance when searching, otherwise ordered by sort name
+  // (years by number).
+  repeated ValueCount values = 1;
+}
+
+// ListPeopleRequest selects people by the items crediting them: present
+// items that are not extras. Unset fields do not filter.
+message ListPeopleRequest {
+  repeated string library_ids = 1 [(buf.validate.field).repeated.items.string.uuid = true];
+  repeated ItemKind item_kinds = 2 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // Count only credits of these kinds, e.g. actors.
+  repeated CreditKind credit_kinds = 3 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // Matches names like ListItemsRequest.search.
+  string search = 4 [(buf.validate.field).string.max_len = 200];
+  // 1–1000; unset means 1000.
+  int32 limit = 5 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 6 [(buf.validate.field).int32.gte = 0];
+}
+
+// PersonCount is a person with the number of items crediting them.
+message PersonCount {
+  Person person = 1;
+  int32 item_count = 2;
+}
+
+message ListPeopleResponse {
+  // Ranked by relevance when searching, otherwise ordered by sort name.
+  repeated PersonCount people = 1;
 }

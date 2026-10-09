@@ -65,8 +65,8 @@ func TestSQLiteUpgradeKeepsReferencingRows(t *testing.T) {
 	defer s.Close()
 
 	values, err := s.Items().Values(ctx, core.ValueQuery{Kind: core.ValueGenre, Search: "comedie"})
-	if err != nil || !slices.Equal(values, []string{"Comédie"}) {
-		t.Errorf("genres after upgrade = %q, %v", values, err)
+	if err != nil || !slices.Equal(values, []core.ValueCount{{Value: "Comédie", Count: 1}}) {
+		t.Errorf("genres after upgrade = %v, %v", values, err)
 	}
 	credits, err := s.People().CreditsForItem(ctx, itemID)
 	if err != nil || len(credits) != 1 {

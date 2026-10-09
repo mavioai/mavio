@@ -39,6 +39,10 @@ const (
 	ItemServiceListItemsProcedure = "/mavio.library.v1.ItemService/ListItems"
 	// ItemServiceGetPersonProcedure is the fully-qualified name of the ItemService's GetPerson RPC.
 	ItemServiceGetPersonProcedure = "/mavio.library.v1.ItemService/GetPerson"
+	// ItemServiceListValuesProcedure is the fully-qualified name of the ItemService's ListValues RPC.
+	ItemServiceListValuesProcedure = "/mavio.library.v1.ItemService/ListValues"
+	// ItemServiceListPeopleProcedure is the fully-qualified name of the ItemService's ListPeople RPC.
+	ItemServiceListPeopleProcedure = "/mavio.library.v1.ItemService/ListPeople"
 )
 
 // ItemServiceClient is a client for the mavio.library.v1.ItemService service.
@@ -46,6 +50,13 @@ type ItemServiceClient interface {
 	GetItem(context.Context, *v1.GetItemRequest) (*v1.GetItemResponse, error)
 	ListItems(context.Context, *v1.ListItemsRequest) (*v1.ListItemsResponse, error)
 	GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error)
+	// ListValues lists the genres, tags, studios, artists or production years
+	// of the items the caller may access, with the number of items having
+	// each.
+	ListValues(context.Context, *v1.ListValuesRequest) (*v1.ListValuesResponse, error)
+	// ListPeople lists the people credited on the items the caller may
+	// access, with the number of items crediting each.
+	ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error)
 }
 
 // NewItemServiceClient constructs a client for the mavio.library.v1.ItemService service. By
@@ -80,14 +91,30 @@ func NewItemServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		listValues: connect.NewClient[v1.ListValuesRequest, v1.ListValuesResponse](
+			httpClient,
+			baseURL+ItemServiceListValuesProcedure,
+			connect.WithSchema(itemServiceMethods.ByName("ListValues")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		listPeople: connect.NewClient[v1.ListPeopleRequest, v1.ListPeopleResponse](
+			httpClient,
+			baseURL+ItemServiceListPeopleProcedure,
+			connect.WithSchema(itemServiceMethods.ByName("ListPeople")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // itemServiceClient implements ItemServiceClient.
 type itemServiceClient struct {
-	getItem   *connect.Client[v1.GetItemRequest, v1.GetItemResponse]
-	listItems *connect.Client[v1.ListItemsRequest, v1.ListItemsResponse]
-	getPerson *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
+	getItem    *connect.Client[v1.GetItemRequest, v1.GetItemResponse]
+	listItems  *connect.Client[v1.ListItemsRequest, v1.ListItemsResponse]
+	getPerson  *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
+	listValues *connect.Client[v1.ListValuesRequest, v1.ListValuesResponse]
+	listPeople *connect.Client[v1.ListPeopleRequest, v1.ListPeopleResponse]
 }
 
 // GetItem calls mavio.library.v1.ItemService.GetItem.
@@ -117,11 +144,36 @@ func (c *itemServiceClient) GetPerson(ctx context.Context, req *v1.GetPersonRequ
 	return nil, err
 }
 
+// ListValues calls mavio.library.v1.ItemService.ListValues.
+func (c *itemServiceClient) ListValues(ctx context.Context, req *v1.ListValuesRequest) (*v1.ListValuesResponse, error) {
+	response, err := c.listValues.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListPeople calls mavio.library.v1.ItemService.ListPeople.
+func (c *itemServiceClient) ListPeople(ctx context.Context, req *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error) {
+	response, err := c.listPeople.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ItemServiceHandler is an implementation of the mavio.library.v1.ItemService service.
 type ItemServiceHandler interface {
 	GetItem(context.Context, *v1.GetItemRequest) (*v1.GetItemResponse, error)
 	ListItems(context.Context, *v1.ListItemsRequest) (*v1.ListItemsResponse, error)
 	GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error)
+	// ListValues lists the genres, tags, studios, artists or production years
+	// of the items the caller may access, with the number of items having
+	// each.
+	ListValues(context.Context, *v1.ListValuesRequest) (*v1.ListValuesResponse, error)
+	// ListPeople lists the people credited on the items the caller may
+	// access, with the number of items crediting each.
+	ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error)
 }
 
 // NewItemServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -152,6 +204,20 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	itemServiceListValuesHandler := connect.NewUnaryHandlerSimple(
+		ItemServiceListValuesProcedure,
+		svc.ListValues,
+		connect.WithSchema(itemServiceMethods.ByName("ListValues")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	itemServiceListPeopleHandler := connect.NewUnaryHandlerSimple(
+		ItemServiceListPeopleProcedure,
+		svc.ListPeople,
+		connect.WithSchema(itemServiceMethods.ByName("ListPeople")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.library.v1.ItemService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ItemServiceGetItemProcedure:
@@ -160,6 +226,10 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 			itemServiceListItemsHandler.ServeHTTP(w, r)
 		case ItemServiceGetPersonProcedure:
 			itemServiceGetPersonHandler.ServeHTTP(w, r)
+		case ItemServiceListValuesProcedure:
+			itemServiceListValuesHandler.ServeHTTP(w, r)
+		case ItemServiceListPeopleProcedure:
+			itemServiceListPeopleHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -179,4 +249,12 @@ func (UnimplementedItemServiceHandler) ListItems(context.Context, *v1.ListItemsR
 
 func (UnimplementedItemServiceHandler) GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.GetPerson is not implemented"))
+}
+
+func (UnimplementedItemServiceHandler) ListValues(context.Context, *v1.ListValuesRequest) (*v1.ListValuesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.ListValues is not implemented"))
+}
+
+func (UnimplementedItemServiceHandler) ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.ListPeople is not implemented"))
 }

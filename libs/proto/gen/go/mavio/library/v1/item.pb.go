@@ -437,6 +437,62 @@ func (x SortField) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// ValueKind names an item attribute listed by ListValues.
+type ValueKind int32
+
+const (
+	ValueKind_VALUE_KIND_UNSPECIFIED ValueKind = 0
+	ValueKind_VALUE_KIND_GENRE       ValueKind = 1
+	ValueKind_VALUE_KIND_TAG         ValueKind = 2
+	ValueKind_VALUE_KIND_STUDIO      ValueKind = 3
+	// Artists and album artists.
+	ValueKind_VALUE_KIND_ARTIST ValueKind = 4
+	// Production years in decimal, oldest first.
+	ValueKind_VALUE_KIND_YEAR ValueKind = 5
+)
+
+// Enum value maps for ValueKind.
+var (
+	ValueKind_name = map[int32]string{
+		0: "VALUE_KIND_UNSPECIFIED",
+		1: "VALUE_KIND_GENRE",
+		2: "VALUE_KIND_TAG",
+		3: "VALUE_KIND_STUDIO",
+		4: "VALUE_KIND_ARTIST",
+		5: "VALUE_KIND_YEAR",
+	}
+	ValueKind_value = map[string]int32{
+		"VALUE_KIND_UNSPECIFIED": 0,
+		"VALUE_KIND_GENRE":       1,
+		"VALUE_KIND_TAG":         2,
+		"VALUE_KIND_STUDIO":      3,
+		"VALUE_KIND_ARTIST":      4,
+		"VALUE_KIND_YEAR":        5,
+	}
+)
+
+func (x ValueKind) Enum() *ValueKind {
+	p := new(ValueKind)
+	*p = x
+	return p
+}
+
+func (x ValueKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ValueKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_library_v1_item_proto_enumTypes[6].Descriptor()
+}
+
+func (ValueKind) Type() protoreflect.EnumType {
+	return &file_mavio_library_v1_item_proto_enumTypes[6]
+}
+
+func (x ValueKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // Item is a node in a library. See docs/domain.md for hierarchies and
 // numbering.
 type Item struct {
@@ -3079,6 +3135,726 @@ func (b0 GetPersonResponse_builder) Build() *GetPersonResponse {
 	return m0
 }
 
+// ListValuesRequest selects the items whose values are listed: present
+// items that are not extras. Unset fields do not filter.
+type ListValuesRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Kind        ValueKind              `protobuf:"varint,1,opt,name=kind,enum=mavio.library.v1.ValueKind"`
+	xxx_hidden_LibraryIds  []string               `protobuf:"bytes,2,rep,name=library_ids,json=libraryIds"`
+	xxx_hidden_ItemKinds   []ItemKind             `protobuf:"varint,3,rep,packed,name=item_kinds,json=itemKinds,enum=mavio.library.v1.ItemKind"`
+	xxx_hidden_Search      *string                `protobuf:"bytes,4,opt,name=search"`
+	xxx_hidden_Limit       int32                  `protobuf:"varint,5,opt,name=limit"`
+	xxx_hidden_Offset      int32                  `protobuf:"varint,6,opt,name=offset"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ListValuesRequest) Reset() {
+	*x = ListValuesRequest{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListValuesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListValuesRequest) ProtoMessage() {}
+
+func (x *ListValuesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListValuesRequest) GetKind() ValueKind {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 0) {
+			return x.xxx_hidden_Kind
+		}
+	}
+	return ValueKind_VALUE_KIND_UNSPECIFIED
+}
+
+func (x *ListValuesRequest) GetLibraryIds() []string {
+	if x != nil {
+		return x.xxx_hidden_LibraryIds
+	}
+	return nil
+}
+
+func (x *ListValuesRequest) GetItemKinds() []ItemKind {
+	if x != nil {
+		return x.xxx_hidden_ItemKinds
+	}
+	return nil
+}
+
+func (x *ListValuesRequest) GetSearch() string {
+	if x != nil {
+		if x.xxx_hidden_Search != nil {
+			return *x.xxx_hidden_Search
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ListValuesRequest) GetLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_Limit
+	}
+	return 0
+}
+
+func (x *ListValuesRequest) GetOffset() int32 {
+	if x != nil {
+		return x.xxx_hidden_Offset
+	}
+	return 0
+}
+
+func (x *ListValuesRequest) SetKind(v ValueKind) {
+	x.xxx_hidden_Kind = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+}
+
+func (x *ListValuesRequest) SetLibraryIds(v []string) {
+	x.xxx_hidden_LibraryIds = v
+}
+
+func (x *ListValuesRequest) SetItemKinds(v []ItemKind) {
+	x.xxx_hidden_ItemKinds = v
+}
+
+func (x *ListValuesRequest) SetSearch(v string) {
+	x.xxx_hidden_Search = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+}
+
+func (x *ListValuesRequest) SetLimit(v int32) {
+	x.xxx_hidden_Limit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *ListValuesRequest) SetOffset(v int32) {
+	x.xxx_hidden_Offset = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+}
+
+func (x *ListValuesRequest) HasKind() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ListValuesRequest) HasSearch() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *ListValuesRequest) HasLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *ListValuesRequest) HasOffset() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *ListValuesRequest) ClearKind() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Kind = ValueKind_VALUE_KIND_UNSPECIFIED
+}
+
+func (x *ListValuesRequest) ClearSearch() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Search = nil
+}
+
+func (x *ListValuesRequest) ClearLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Limit = 0
+}
+
+func (x *ListValuesRequest) ClearOffset() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_Offset = 0
+}
+
+type ListValuesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Kind       *ValueKind
+	LibraryIds []string
+	// Count only items of these kinds.
+	ItemKinds []ItemKind
+	// Matches like ListItemsRequest.search; years cannot be searched.
+	Search *string
+	// 1–1000; unset means 1000.
+	Limit  *int32
+	Offset *int32
+}
+
+func (b0 ListValuesRequest_builder) Build() *ListValuesRequest {
+	m0 := &ListValuesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Kind != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		x.xxx_hidden_Kind = *b.Kind
+	}
+	x.xxx_hidden_LibraryIds = b.LibraryIds
+	x.xxx_hidden_ItemKinds = b.ItemKinds
+	if b.Search != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		x.xxx_hidden_Search = b.Search
+	}
+	if b.Limit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		x.xxx_hidden_Limit = *b.Limit
+	}
+	if b.Offset != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		x.xxx_hidden_Offset = *b.Offset
+	}
+	return m0
+}
+
+// ValueCount is a value with the number of items having it. Spellings
+// that differ only in case, accents or punctuation are one value.
+type ValueCount struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Value       *string                `protobuf:"bytes,1,opt,name=value"`
+	xxx_hidden_ItemCount   int32                  `protobuf:"varint,2,opt,name=item_count,json=itemCount"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ValueCount) Reset() {
+	*x = ValueCount{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValueCount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValueCount) ProtoMessage() {}
+
+func (x *ValueCount) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ValueCount) GetValue() string {
+	if x != nil {
+		if x.xxx_hidden_Value != nil {
+			return *x.xxx_hidden_Value
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ValueCount) GetItemCount() int32 {
+	if x != nil {
+		return x.xxx_hidden_ItemCount
+	}
+	return 0
+}
+
+func (x *ValueCount) SetValue(v string) {
+	x.xxx_hidden_Value = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *ValueCount) SetItemCount(v int32) {
+	x.xxx_hidden_ItemCount = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *ValueCount) HasValue() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ValueCount) HasItemCount() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ValueCount) ClearValue() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Value = nil
+}
+
+func (x *ValueCount) ClearItemCount() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_ItemCount = 0
+}
+
+type ValueCount_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Value     *string
+	ItemCount *int32
+}
+
+func (b0 ValueCount_builder) Build() *ValueCount {
+	m0 := &ValueCount{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Value != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Value = b.Value
+	}
+	if b.ItemCount != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_ItemCount = *b.ItemCount
+	}
+	return m0
+}
+
+type ListValuesResponse struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Values *[]*ValueCount         `protobuf:"bytes,1,rep,name=values"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ListValuesResponse) Reset() {
+	*x = ListValuesResponse{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListValuesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListValuesResponse) ProtoMessage() {}
+
+func (x *ListValuesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListValuesResponse) GetValues() []*ValueCount {
+	if x != nil {
+		if x.xxx_hidden_Values != nil {
+			return *x.xxx_hidden_Values
+		}
+	}
+	return nil
+}
+
+func (x *ListValuesResponse) SetValues(v []*ValueCount) {
+	x.xxx_hidden_Values = &v
+}
+
+type ListValuesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Ranked by relevance when searching, otherwise ordered by sort name
+	// (years by number).
+	Values []*ValueCount
+}
+
+func (b0 ListValuesResponse_builder) Build() *ListValuesResponse {
+	m0 := &ListValuesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Values = &b.Values
+	return m0
+}
+
+// ListPeopleRequest selects people by the items crediting them: present
+// items that are not extras. Unset fields do not filter.
+type ListPeopleRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_LibraryIds  []string               `protobuf:"bytes,1,rep,name=library_ids,json=libraryIds"`
+	xxx_hidden_ItemKinds   []ItemKind             `protobuf:"varint,2,rep,packed,name=item_kinds,json=itemKinds,enum=mavio.library.v1.ItemKind"`
+	xxx_hidden_CreditKinds []CreditKind           `protobuf:"varint,3,rep,packed,name=credit_kinds,json=creditKinds,enum=mavio.library.v1.CreditKind"`
+	xxx_hidden_Search      *string                `protobuf:"bytes,4,opt,name=search"`
+	xxx_hidden_Limit       int32                  `protobuf:"varint,5,opt,name=limit"`
+	xxx_hidden_Offset      int32                  `protobuf:"varint,6,opt,name=offset"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ListPeopleRequest) Reset() {
+	*x = ListPeopleRequest{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPeopleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPeopleRequest) ProtoMessage() {}
+
+func (x *ListPeopleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListPeopleRequest) GetLibraryIds() []string {
+	if x != nil {
+		return x.xxx_hidden_LibraryIds
+	}
+	return nil
+}
+
+func (x *ListPeopleRequest) GetItemKinds() []ItemKind {
+	if x != nil {
+		return x.xxx_hidden_ItemKinds
+	}
+	return nil
+}
+
+func (x *ListPeopleRequest) GetCreditKinds() []CreditKind {
+	if x != nil {
+		return x.xxx_hidden_CreditKinds
+	}
+	return nil
+}
+
+func (x *ListPeopleRequest) GetSearch() string {
+	if x != nil {
+		if x.xxx_hidden_Search != nil {
+			return *x.xxx_hidden_Search
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ListPeopleRequest) GetLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_Limit
+	}
+	return 0
+}
+
+func (x *ListPeopleRequest) GetOffset() int32 {
+	if x != nil {
+		return x.xxx_hidden_Offset
+	}
+	return 0
+}
+
+func (x *ListPeopleRequest) SetLibraryIds(v []string) {
+	x.xxx_hidden_LibraryIds = v
+}
+
+func (x *ListPeopleRequest) SetItemKinds(v []ItemKind) {
+	x.xxx_hidden_ItemKinds = v
+}
+
+func (x *ListPeopleRequest) SetCreditKinds(v []CreditKind) {
+	x.xxx_hidden_CreditKinds = v
+}
+
+func (x *ListPeopleRequest) SetSearch(v string) {
+	x.xxx_hidden_Search = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+}
+
+func (x *ListPeopleRequest) SetLimit(v int32) {
+	x.xxx_hidden_Limit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *ListPeopleRequest) SetOffset(v int32) {
+	x.xxx_hidden_Offset = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+}
+
+func (x *ListPeopleRequest) HasSearch() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *ListPeopleRequest) HasLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *ListPeopleRequest) HasOffset() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *ListPeopleRequest) ClearSearch() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Search = nil
+}
+
+func (x *ListPeopleRequest) ClearLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Limit = 0
+}
+
+func (x *ListPeopleRequest) ClearOffset() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_Offset = 0
+}
+
+type ListPeopleRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	LibraryIds []string
+	ItemKinds  []ItemKind
+	// Count only credits of these kinds, e.g. actors.
+	CreditKinds []CreditKind
+	// Matches names like ListItemsRequest.search.
+	Search *string
+	// 1–1000; unset means 1000.
+	Limit  *int32
+	Offset *int32
+}
+
+func (b0 ListPeopleRequest_builder) Build() *ListPeopleRequest {
+	m0 := &ListPeopleRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_LibraryIds = b.LibraryIds
+	x.xxx_hidden_ItemKinds = b.ItemKinds
+	x.xxx_hidden_CreditKinds = b.CreditKinds
+	if b.Search != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		x.xxx_hidden_Search = b.Search
+	}
+	if b.Limit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		x.xxx_hidden_Limit = *b.Limit
+	}
+	if b.Offset != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		x.xxx_hidden_Offset = *b.Offset
+	}
+	return m0
+}
+
+// PersonCount is a person with the number of items crediting them.
+type PersonCount struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Person      *Person                `protobuf:"bytes,1,opt,name=person"`
+	xxx_hidden_ItemCount   int32                  `protobuf:"varint,2,opt,name=item_count,json=itemCount"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *PersonCount) Reset() {
+	*x = PersonCount{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PersonCount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PersonCount) ProtoMessage() {}
+
+func (x *PersonCount) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *PersonCount) GetPerson() *Person {
+	if x != nil {
+		return x.xxx_hidden_Person
+	}
+	return nil
+}
+
+func (x *PersonCount) GetItemCount() int32 {
+	if x != nil {
+		return x.xxx_hidden_ItemCount
+	}
+	return 0
+}
+
+func (x *PersonCount) SetPerson(v *Person) {
+	x.xxx_hidden_Person = v
+}
+
+func (x *PersonCount) SetItemCount(v int32) {
+	x.xxx_hidden_ItemCount = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *PersonCount) HasPerson() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Person != nil
+}
+
+func (x *PersonCount) HasItemCount() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *PersonCount) ClearPerson() {
+	x.xxx_hidden_Person = nil
+}
+
+func (x *PersonCount) ClearItemCount() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_ItemCount = 0
+}
+
+type PersonCount_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Person    *Person
+	ItemCount *int32
+}
+
+func (b0 PersonCount_builder) Build() *PersonCount {
+	m0 := &PersonCount{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Person = b.Person
+	if b.ItemCount != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_ItemCount = *b.ItemCount
+	}
+	return m0
+}
+
+type ListPeopleResponse struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_People *[]*PersonCount        `protobuf:"bytes,1,rep,name=people"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ListPeopleResponse) Reset() {
+	*x = ListPeopleResponse{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPeopleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPeopleResponse) ProtoMessage() {}
+
+func (x *ListPeopleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListPeopleResponse) GetPeople() []*PersonCount {
+	if x != nil {
+		if x.xxx_hidden_People != nil {
+			return *x.xxx_hidden_People
+		}
+	}
+	return nil
+}
+
+func (x *ListPeopleResponse) SetPeople(v []*PersonCount) {
+	x.xxx_hidden_People = &v
+}
+
+type ListPeopleResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Ranked by relevance when searching, otherwise ordered by sort name.
+	People []*PersonCount
+}
+
+func (b0 ListPeopleResponse_builder) Build() *ListPeopleResponse {
+	m0 := &ListPeopleResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_People = &b.People
+	return m0
+}
+
 var File_mavio_library_v1_item_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_item_proto_rawDesc = "" +
@@ -3193,7 +3969,43 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x10GetPersonRequest\x12\x1b\n" +
 	"\x02id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\"E\n" +
 	"\x11GetPersonResponse\x120\n" +
-	"\x06person\x18\x01 \x01(\v2\x18.mavio.library.v1.PersonR\x06person*\x9e\x03\n" +
+	"\x06person\x18\x01 \x01(\v2\x18.mavio.library.v1.PersonR\x06person\"\xb4\x02\n" +
+	"\x11ListValuesRequest\x12>\n" +
+	"\x04kind\x18\x01 \x01(\x0e2\x1b.mavio.library.v1.ValueKindB\r\xbaH\n" +
+	"\xc8\x01\x01\x82\x01\x04\x10\x01 \x00R\x04kind\x12.\n" +
+	"\vlibrary_ids\x18\x02 \x03(\tB\r\xbaH\n" +
+	"\x92\x01\a\"\x05r\x03\xb0\x01\x01R\n" +
+	"libraryIds\x12J\n" +
+	"\n" +
+	"item_kinds\x18\x03 \x03(\x0e2\x1a.mavio.library.v1.ItemKindB\x0f\xbaH\f\x92\x01\t\"\a\x82\x01\x04\x10\x01 \x00R\titemKinds\x12 \n" +
+	"\x06search\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\xc8\x01R\x06search\x12 \n" +
+	"\x05limit\x18\x05 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xe8\a(\x00R\x05limit\x12\x1f\n" +
+	"\x06offset\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\"A\n" +
+	"\n" +
+	"ValueCount\x12\x14\n" +
+	"\x05value\x18\x01 \x01(\tR\x05value\x12\x1d\n" +
+	"\n" +
+	"item_count\x18\x02 \x01(\x05R\titemCount\"J\n" +
+	"\x12ListValuesResponse\x124\n" +
+	"\x06values\x18\x01 \x03(\v2\x1c.mavio.library.v1.ValueCountR\x06values\"\xc6\x02\n" +
+	"\x11ListPeopleRequest\x12.\n" +
+	"\vlibrary_ids\x18\x01 \x03(\tB\r\xbaH\n" +
+	"\x92\x01\a\"\x05r\x03\xb0\x01\x01R\n" +
+	"libraryIds\x12J\n" +
+	"\n" +
+	"item_kinds\x18\x02 \x03(\x0e2\x1a.mavio.library.v1.ItemKindB\x0f\xbaH\f\x92\x01\t\"\a\x82\x01\x04\x10\x01 \x00R\titemKinds\x12P\n" +
+	"\fcredit_kinds\x18\x03 \x03(\x0e2\x1c.mavio.library.v1.CreditKindB\x0f\xbaH\f\x92\x01\t\"\a\x82\x01\x04\x10\x01 \x00R\vcreditKinds\x12 \n" +
+	"\x06search\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\xc8\x01R\x06search\x12 \n" +
+	"\x05limit\x18\x05 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xe8\a(\x00R\x05limit\x12\x1f\n" +
+	"\x06offset\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\"^\n" +
+	"\vPersonCount\x120\n" +
+	"\x06person\x18\x01 \x01(\v2\x18.mavio.library.v1.PersonR\x06person\x12\x1d\n" +
+	"\n" +
+	"item_count\x18\x02 \x01(\x05R\titemCount\"K\n" +
+	"\x12ListPeopleResponse\x125\n" +
+	"\x06people\x18\x01 \x03(\v2\x1d.mavio.library.v1.PersonCountR\x06people*\x9e\x03\n" +
 	"\bItemKind\x12\x19\n" +
 	"\x15ITEM_KIND_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fITEM_KIND_MOVIE\x10\x01\x12\x14\n" +
@@ -3272,15 +4084,26 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x11SORT_FIELD_RANDOM\x10\b\x12\x1a\n" +
 	"\x16SORT_FIELD_LAST_PLAYED\x10\t\x12\x19\n" +
 	"\x15SORT_FIELD_PLAY_COUNT\x10\n" +
-	"2\x98\x02\n" +
+	"*\x94\x01\n" +
+	"\tValueKind\x12\x1a\n" +
+	"\x16VALUE_KIND_UNSPECIFIED\x10\x00\x12\x14\n" +
+	"\x10VALUE_KIND_GENRE\x10\x01\x12\x12\n" +
+	"\x0eVALUE_KIND_TAG\x10\x02\x12\x15\n" +
+	"\x11VALUE_KIND_STUDIO\x10\x03\x12\x15\n" +
+	"\x11VALUE_KIND_ARTIST\x10\x04\x12\x13\n" +
+	"\x0fVALUE_KIND_YEAR\x10\x052\xd4\x03\n" +
 	"\vItemService\x12S\n" +
 	"\aGetItem\x12 .mavio.library.v1.GetItemRequest\x1a!.mavio.library.v1.GetItemResponse\"\x03\x90\x02\x01\x12Y\n" +
 	"\tListItems\x12\".mavio.library.v1.ListItemsRequest\x1a#.mavio.library.v1.ListItemsResponse\"\x03\x90\x02\x01\x12Y\n" +
-	"\tGetPerson\x12\".mavio.library.v1.GetPersonRequest\x1a#.mavio.library.v1.GetPersonResponse\"\x03\x90\x02\x01B\xca\x01\n" +
+	"\tGetPerson\x12\".mavio.library.v1.GetPersonRequest\x1a#.mavio.library.v1.GetPersonResponse\"\x03\x90\x02\x01\x12\\\n" +
+	"\n" +
+	"ListValues\x12#.mavio.library.v1.ListValuesRequest\x1a$.mavio.library.v1.ListValuesResponse\"\x03\x90\x02\x01\x12\\\n" +
+	"\n" +
+	"ListPeople\x12#.mavio.library.v1.ListPeopleRequest\x1a$.mavio.library.v1.ListPeopleResponse\"\x03\x90\x02\x01B\xca\x01\n" +
 	"\x14com.mavio.library.v1B\tItemProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1;libraryv1\xa2\x02\x03MLX\xaa\x02\x10Mavio.Library.V1\xca\x02\x10Mavio\\Library\\V1\xe2\x02\x1cMavio\\Library\\V1\\GPBMetadata\xea\x02\x12Mavio::Library::V1b\beditionsp\xe8\a"
 
-var file_mavio_library_v1_item_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
-var file_mavio_library_v1_item_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_mavio_library_v1_item_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
+var file_mavio_library_v1_item_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_mavio_library_v1_item_proto_goTypes = []any{
 	(ItemKind)(0),                 // 0: mavio.library.v1.ItemKind
 	(ExtraKind)(0),                // 1: mavio.library.v1.ExtraKind
@@ -3288,59 +4111,77 @@ var file_mavio_library_v1_item_proto_goTypes = []any{
 	(ImageKind)(0),                // 3: mavio.library.v1.ImageKind
 	(CreditKind)(0),               // 4: mavio.library.v1.CreditKind
 	(SortField)(0),                // 5: mavio.library.v1.SortField
-	(*Item)(nil),                  // 6: mavio.library.v1.Item
-	(*Image)(nil),                 // 7: mavio.library.v1.Image
-	(*Person)(nil),                // 8: mavio.library.v1.Person
-	(*Credit)(nil),                // 9: mavio.library.v1.Credit
-	(*GetItemRequest)(nil),        // 10: mavio.library.v1.GetItemRequest
-	(*GetItemResponse)(nil),       // 11: mavio.library.v1.GetItemResponse
-	(*SortSpec)(nil),              // 12: mavio.library.v1.SortSpec
-	(*ListItemsRequest)(nil),      // 13: mavio.library.v1.ListItemsRequest
-	(*ListItemsResponse)(nil),     // 14: mavio.library.v1.ListItemsResponse
-	(*GetPersonRequest)(nil),      // 15: mavio.library.v1.GetPersonRequest
-	(*GetPersonResponse)(nil),     // 16: mavio.library.v1.GetPersonResponse
-	nil,                           // 17: mavio.library.v1.Item.ExternalIdsEntry
-	nil,                           // 18: mavio.library.v1.Person.ExternalIdsEntry
-	(*timestamppb.Timestamp)(nil), // 19: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),   // 20: google.protobuf.Duration
-	(*MediaSource)(nil),           // 21: mavio.library.v1.MediaSource
+	(ValueKind)(0),                // 6: mavio.library.v1.ValueKind
+	(*Item)(nil),                  // 7: mavio.library.v1.Item
+	(*Image)(nil),                 // 8: mavio.library.v1.Image
+	(*Person)(nil),                // 9: mavio.library.v1.Person
+	(*Credit)(nil),                // 10: mavio.library.v1.Credit
+	(*GetItemRequest)(nil),        // 11: mavio.library.v1.GetItemRequest
+	(*GetItemResponse)(nil),       // 12: mavio.library.v1.GetItemResponse
+	(*SortSpec)(nil),              // 13: mavio.library.v1.SortSpec
+	(*ListItemsRequest)(nil),      // 14: mavio.library.v1.ListItemsRequest
+	(*ListItemsResponse)(nil),     // 15: mavio.library.v1.ListItemsResponse
+	(*GetPersonRequest)(nil),      // 16: mavio.library.v1.GetPersonRequest
+	(*GetPersonResponse)(nil),     // 17: mavio.library.v1.GetPersonResponse
+	(*ListValuesRequest)(nil),     // 18: mavio.library.v1.ListValuesRequest
+	(*ValueCount)(nil),            // 19: mavio.library.v1.ValueCount
+	(*ListValuesResponse)(nil),    // 20: mavio.library.v1.ListValuesResponse
+	(*ListPeopleRequest)(nil),     // 21: mavio.library.v1.ListPeopleRequest
+	(*PersonCount)(nil),           // 22: mavio.library.v1.PersonCount
+	(*ListPeopleResponse)(nil),    // 23: mavio.library.v1.ListPeopleResponse
+	nil,                           // 24: mavio.library.v1.Item.ExternalIdsEntry
+	nil,                           // 25: mavio.library.v1.Person.ExternalIdsEntry
+	(*timestamppb.Timestamp)(nil), // 26: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),   // 27: google.protobuf.Duration
+	(*MediaSource)(nil),           // 28: mavio.library.v1.MediaSource
 }
 var file_mavio_library_v1_item_proto_depIdxs = []int32{
 	0,  // 0: mavio.library.v1.Item.kind:type_name -> mavio.library.v1.ItemKind
-	19, // 1: mavio.library.v1.Item.premiere_date:type_name -> google.protobuf.Timestamp
-	19, // 2: mavio.library.v1.Item.end_date:type_name -> google.protobuf.Timestamp
-	20, // 3: mavio.library.v1.Item.runtime:type_name -> google.protobuf.Duration
-	17, // 4: mavio.library.v1.Item.external_ids:type_name -> mavio.library.v1.Item.ExternalIdsEntry
+	26, // 1: mavio.library.v1.Item.premiere_date:type_name -> google.protobuf.Timestamp
+	26, // 2: mavio.library.v1.Item.end_date:type_name -> google.protobuf.Timestamp
+	27, // 3: mavio.library.v1.Item.runtime:type_name -> google.protobuf.Duration
+	24, // 4: mavio.library.v1.Item.external_ids:type_name -> mavio.library.v1.Item.ExternalIdsEntry
 	2,  // 5: mavio.library.v1.Item.series_status:type_name -> mavio.library.v1.SeriesStatus
 	1,  // 6: mavio.library.v1.Item.extra:type_name -> mavio.library.v1.ExtraKind
-	19, // 7: mavio.library.v1.Item.date_added:type_name -> google.protobuf.Timestamp
-	7,  // 8: mavio.library.v1.Item.images:type_name -> mavio.library.v1.Image
+	26, // 7: mavio.library.v1.Item.date_added:type_name -> google.protobuf.Timestamp
+	8,  // 8: mavio.library.v1.Item.images:type_name -> mavio.library.v1.Image
 	3,  // 9: mavio.library.v1.Image.kind:type_name -> mavio.library.v1.ImageKind
-	19, // 10: mavio.library.v1.Person.birth_date:type_name -> google.protobuf.Timestamp
-	19, // 11: mavio.library.v1.Person.death_date:type_name -> google.protobuf.Timestamp
-	18, // 12: mavio.library.v1.Person.external_ids:type_name -> mavio.library.v1.Person.ExternalIdsEntry
-	7,  // 13: mavio.library.v1.Person.images:type_name -> mavio.library.v1.Image
-	8,  // 14: mavio.library.v1.Credit.person:type_name -> mavio.library.v1.Person
+	26, // 10: mavio.library.v1.Person.birth_date:type_name -> google.protobuf.Timestamp
+	26, // 11: mavio.library.v1.Person.death_date:type_name -> google.protobuf.Timestamp
+	25, // 12: mavio.library.v1.Person.external_ids:type_name -> mavio.library.v1.Person.ExternalIdsEntry
+	8,  // 13: mavio.library.v1.Person.images:type_name -> mavio.library.v1.Image
+	9,  // 14: mavio.library.v1.Credit.person:type_name -> mavio.library.v1.Person
 	4,  // 15: mavio.library.v1.Credit.kind:type_name -> mavio.library.v1.CreditKind
-	6,  // 16: mavio.library.v1.GetItemResponse.item:type_name -> mavio.library.v1.Item
-	21, // 17: mavio.library.v1.GetItemResponse.media_sources:type_name -> mavio.library.v1.MediaSource
-	9,  // 18: mavio.library.v1.GetItemResponse.credits:type_name -> mavio.library.v1.Credit
+	7,  // 16: mavio.library.v1.GetItemResponse.item:type_name -> mavio.library.v1.Item
+	28, // 17: mavio.library.v1.GetItemResponse.media_sources:type_name -> mavio.library.v1.MediaSource
+	10, // 18: mavio.library.v1.GetItemResponse.credits:type_name -> mavio.library.v1.Credit
 	5,  // 19: mavio.library.v1.SortSpec.field:type_name -> mavio.library.v1.SortField
 	0,  // 20: mavio.library.v1.ListItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
-	12, // 21: mavio.library.v1.ListItemsRequest.sort:type_name -> mavio.library.v1.SortSpec
-	6,  // 22: mavio.library.v1.ListItemsResponse.items:type_name -> mavio.library.v1.Item
-	8,  // 23: mavio.library.v1.GetPersonResponse.person:type_name -> mavio.library.v1.Person
-	10, // 24: mavio.library.v1.ItemService.GetItem:input_type -> mavio.library.v1.GetItemRequest
-	13, // 25: mavio.library.v1.ItemService.ListItems:input_type -> mavio.library.v1.ListItemsRequest
-	15, // 26: mavio.library.v1.ItemService.GetPerson:input_type -> mavio.library.v1.GetPersonRequest
-	11, // 27: mavio.library.v1.ItemService.GetItem:output_type -> mavio.library.v1.GetItemResponse
-	14, // 28: mavio.library.v1.ItemService.ListItems:output_type -> mavio.library.v1.ListItemsResponse
-	16, // 29: mavio.library.v1.ItemService.GetPerson:output_type -> mavio.library.v1.GetPersonResponse
-	27, // [27:30] is the sub-list for method output_type
-	24, // [24:27] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	13, // 21: mavio.library.v1.ListItemsRequest.sort:type_name -> mavio.library.v1.SortSpec
+	7,  // 22: mavio.library.v1.ListItemsResponse.items:type_name -> mavio.library.v1.Item
+	9,  // 23: mavio.library.v1.GetPersonResponse.person:type_name -> mavio.library.v1.Person
+	6,  // 24: mavio.library.v1.ListValuesRequest.kind:type_name -> mavio.library.v1.ValueKind
+	0,  // 25: mavio.library.v1.ListValuesRequest.item_kinds:type_name -> mavio.library.v1.ItemKind
+	19, // 26: mavio.library.v1.ListValuesResponse.values:type_name -> mavio.library.v1.ValueCount
+	0,  // 27: mavio.library.v1.ListPeopleRequest.item_kinds:type_name -> mavio.library.v1.ItemKind
+	4,  // 28: mavio.library.v1.ListPeopleRequest.credit_kinds:type_name -> mavio.library.v1.CreditKind
+	9,  // 29: mavio.library.v1.PersonCount.person:type_name -> mavio.library.v1.Person
+	22, // 30: mavio.library.v1.ListPeopleResponse.people:type_name -> mavio.library.v1.PersonCount
+	11, // 31: mavio.library.v1.ItemService.GetItem:input_type -> mavio.library.v1.GetItemRequest
+	14, // 32: mavio.library.v1.ItemService.ListItems:input_type -> mavio.library.v1.ListItemsRequest
+	16, // 33: mavio.library.v1.ItemService.GetPerson:input_type -> mavio.library.v1.GetPersonRequest
+	18, // 34: mavio.library.v1.ItemService.ListValues:input_type -> mavio.library.v1.ListValuesRequest
+	21, // 35: mavio.library.v1.ItemService.ListPeople:input_type -> mavio.library.v1.ListPeopleRequest
+	12, // 36: mavio.library.v1.ItemService.GetItem:output_type -> mavio.library.v1.GetItemResponse
+	15, // 37: mavio.library.v1.ItemService.ListItems:output_type -> mavio.library.v1.ListItemsResponse
+	17, // 38: mavio.library.v1.ItemService.GetPerson:output_type -> mavio.library.v1.GetPersonResponse
+	20, // 39: mavio.library.v1.ItemService.ListValues:output_type -> mavio.library.v1.ListValuesResponse
+	23, // 40: mavio.library.v1.ItemService.ListPeople:output_type -> mavio.library.v1.ListPeopleResponse
+	36, // [36:41] is the sub-list for method output_type
+	31, // [31:36] is the sub-list for method input_type
+	31, // [31:31] is the sub-list for extension type_name
+	31, // [31:31] is the sub-list for extension extendee
+	0,  // [0:31] is the sub-list for field type_name
 }
 
 func init() { file_mavio_library_v1_item_proto_init() }
@@ -3354,8 +4195,8 @@ func file_mavio_library_v1_item_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_library_v1_item_proto_rawDesc), len(file_mavio_library_v1_item_proto_rawDesc)),
-			NumEnums:      6,
-			NumMessages:   13,
+			NumEnums:      7,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

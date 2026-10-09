@@ -1,6 +1,7 @@
 package httpserver_test
 
 import (
+	"fmt"
 	"net/http"
 	"slices"
 	"testing"
@@ -49,6 +50,7 @@ func seedCatalog(t *testing.T, s *store.Store) catalog {
 	c.season = item(c.shows, c.series.ID, core.KindSeason, "Season 1")
 	c.pilot = item(c.shows, c.season.ID, core.KindEpisode, "Pilot")
 	c.pilot.IndexNumber, c.pilot.ParentIndexNumber, c.pilot.OfficialRating, c.pilot.ParentalRating = new(1), new(1), "TV-Y7", 7
+	c.pilot.ProductionYear, c.pilot.Genres = 2008, []string{"Comedy"}
 	c.finale = item(c.shows, c.season.ID, core.KindEpisode, "Finale")
 	c.finale.IndexNumber, c.finale.ParentIndexNumber = new(2), new(1)
 	if err := s.Items().Upsert(ctx, c.alien, c.up, c.trailer, c.series, c.season, c.pilot, c.finale); err != nil {
@@ -195,4 +197,55 @@ func TestItemService(t *testing.T) {
 	if p, err := asKid.GetPerson(ctx, libraryv1.GetPersonRequest_builder{Id: new(c.ridley.ID.String())}.Build()); err != nil || p.GetPerson().GetName() != "Ridley Scott" {
 		t.Errorf("GetPerson = %v, %v", p, err)
 	}
+
+	// Value and person lists count only what the caller may access.
+	values := func(client libraryv1connect.ItemServiceClient, req *libraryv1.ListValuesRequest) []string {
+		t.Helper()
+		resp, err := client.ListValues(ctx, req)
+		if err != nil {
+			t.Fatalf("ListValues: %v", err)
+		}
+		out := []string{}
+		for _, v := range resp.GetValues() {
+			out = append(out, fmt.Sprintf("%s %d", v.GetValue(), v.GetItemCount()))
+		}
+		return out
+	}
+	people := func(client libraryv1connect.ItemServiceClient, req *libraryv1.ListPeopleRequest) []string {
+		t.Helper()
+		resp, err := client.ListPeople(ctx, req)
+		if err != nil {
+			t.Fatalf("ListPeople: %v", err)
+		}
+		out := []string{}
+		for _, p := range resp.GetPeople() {
+			out = append(out, fmt.Sprintf("%s %d %d", p.GetPerson().GetName(), p.GetItemCount(), len(p.GetPerson().GetImages())))
+		}
+		return out
+	}
+	genre, year := libraryv1.ValueKind_VALUE_KIND_GENRE, libraryv1.ValueKind_VALUE_KIND_YEAR
+	director := []libraryv1.CreditKind{libraryv1.CreditKind_CREDIT_KIND_DIRECTOR}
+	listTests := []struct {
+		name string
+		got  []string
+		want []string
+	}{
+		{"admin genres", values(asAdmin, libraryv1.ListValuesRequest_builder{Kind: &genre}.Build()), []string{"Comedy 1", "Horror 1"}},
+		{"admin film genres", values(asAdmin, libraryv1.ListValuesRequest_builder{Kind: &genre, LibraryIds: []string{c.films.ID.String()}}.Build()), []string{"Horror 1"}},
+		{"admin years", values(asAdmin, libraryv1.ListValuesRequest_builder{Kind: &year}.Build()), []string{"1979 1", "2008 1", "2009 1"}},
+		{"admin episode years", values(asAdmin, libraryv1.ListValuesRequest_builder{Kind: &year, ItemKinds: episodes}.Build()), []string{"2008 1"}},
+		{"kid genres", values(asKid, libraryv1.ListValuesRequest_builder{Kind: &genre}.Build()), []string{"Comedy 1"}},
+		{"kid film genres", values(asKid, libraryv1.ListValuesRequest_builder{Kind: &genre, LibraryIds: []string{c.films.ID.String()}}.Build()), []string{}},
+		{"admin directors", people(asAdmin, libraryv1.ListPeopleRequest_builder{CreditKinds: director, Search: new("ridley")}.Build()), []string{"Ridley Scott 1 1"}},
+		{"kid people", people(asKid, libraryv1.ListPeopleRequest_builder{}.Build()), []string{}},
+	}
+	for _, tt := range listTests {
+		if !slices.Equal(tt.got, tt.want) {
+			t.Errorf("%s: got = %q, want = %q", tt.name, tt.got, tt.want)
+		}
+	}
+	_, err = asAdmin.ListValues(ctx, libraryv1.ListValuesRequest_builder{Kind: &year, Search: new("19")}.Build())
+	wantCode(t, "search years", err, connect.CodeInvalidArgument)
+	_, err = asAdmin.ListValues(ctx, libraryv1.ListValuesRequest_builder{}.Build())
+	wantCode(t, "no value kind", err, connect.CodeInvalidArgument)
 }

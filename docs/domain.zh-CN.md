@@ -188,10 +188,10 @@ erDiagram
 | 端口 | 职责 |
 | :--- | :--- |
 | `LibraryRepository` | 增删改查；删除媒体库会删除其全部条目 |
-| `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（按 ID 顺序以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`（同一媒体库内路径唯一：`ErrConflict`）、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据）、供扫描使用的 `MarkSeen`、`Touch`、`MarkMissing` 与 `PurgeMissing`（见 §4.7）、`Values`（去重后的流派、标签、工作室或艺人，见 §9.2） |
+| `ItemRepository` | `Get`、`GetByPath`、`Query`（分页）、`Walk`（按 ID 顺序以 `iter.Seq2` 流式返回全部匹配项）、按 ID 批量 `Upsert`（同一媒体库内路径唯一：`ErrConflict`）、`Delete`（级联删除后代、附加内容、媒体源、图片、署名与用户数据）、供扫描使用的 `MarkSeen`、`Touch`、`MarkMissing` 与 `PurgeMissing`（见 §4.7）、`Values`（去重后的流派、标签、工作室、艺人或出品年份及其条目数，见 §9.2） |
 | `MediaSourceRepository` | 列出并 `Replace` 条目的媒体源 |
 | `ImageRepository` | `Get` 单张图片；列出一个所有者的图片，或一次列出多个所有者的图片（`ListForOwners`），并 `Replace` 它们 |
-| `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、`Search`（见 §9.2）、列出并 `Replace` 条目的署名 |
+| `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、`Search`（有署名的人员及其条目数，见 §9.2）、列出并 `Replace` 条目的署名 |
 | `UserRepository` | 增删改查，以及不区分大小写的 `GetByName` |
 | `UserDataRepository` | `Get`（不存在时返回 `ErrNotFound`）、按一组条目 `GetMany`、`Put` |
 | `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`GetByTokenHash`、`ListForUser`（按最近活动排序）、`Touch`、`Delete` |
@@ -220,7 +220,9 @@ erDiagram
 * **清洗形式**：名称与关键词以清洗形式比较：去除变音符号、转小写、把非字母非数字的字符都替换为空格、合并空白（因此 "Spider-Man" 即 "spider man"）。全角字符也会转为半角。清洗后为空的关键词不做过滤。
 * **匹配**：满足以下任一条件即匹配：清洗后的名称包含清洗后的关键词；原始标题（仅条目；转小写、去变音符号）与去掉首尾空白的关键词按模式匹配，其中 `%` 匹配任意长度字符、`_` 匹配单个字符；或排序名（§9.1）与关键词的排序形式按同样的模式匹配。排序形式使 "spiderman" 能找到 "Spider-Man"，"hanks tom" 能找到排序名为 "Hanks, Tom" 的人员，拼音能找到中文标题。
 * **相关度**：结果先按清洗后名称的相关度排列，再应用其他排序：完全匹配最先，其次是以关键词开头的名称，然后是包含"关键词加空格"的名称，最后是其余结果。相关度相同时，条目按 `Sort` 再按排序名，人员按排序名，值列表按值的排序名排序。
-* **值列表**：`ValueQuery` 列出某个 `ValueKind`（`genre`、`tag`、`studio`，或包含专辑艺人的 `artist`）的去重值，可用 `LibraryIDs` 限定范围。清洗形式相同的值视为同一个值，`Genres`、`Tags`、`Studios` 过滤也是如此。
+* **值列表**：`ValueQuery` 列出其 `ItemFilter` 选中的条目上某个 `ValueKind`（`genre`、`tag`、`studio`、包含专辑艺人的 `artist`，或 `year`：十进制的出品年份，从早到晚，不可搜索）的去重值。被选中的是存在且不是附加内容的条目，可限定媒体库与条目类型，并限定分级（`MaxRating`、`SkipUnrated`，与条目查询相同）。每个值附带拥有它的条目数（`ValueCount`）。清洗形式相同的值视为同一个值，以按码点排序最靠前的写法显示，`Genres`、`Tags`、`Studios` 过滤也是如此。
+* **人员列表**：`PersonQuery` 列出在其 `ItemFilter` 选中的条目上有署名的人员，可只限某些 `CreditKinds`，每人附带这些条目的数量（`PersonCount`）；没有这类署名的人员不列出。
+* **分页**：值列表与人员列表接受 `Limit` 与 `Offset`。
 
 ---
 

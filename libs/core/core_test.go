@@ -274,6 +274,21 @@ func TestValueAndPersonQueries(t *testing.T) {
 	if err := (&PersonQuery{Limit: -1}).Validate(); !errors.Is(err, ErrInvalid) {
 		t.Errorf("person limit: %v", err)
 	}
+	invalid := []struct {
+		name string
+		err  error
+	}{
+		{"searched years", (&ValueQuery{Kind: ValueYear, Search: "19"}).Validate()},
+		{"negative offset", (&ValueQuery{Kind: ValueGenre, Offset: -1}).Validate()},
+		{"unknown item kind", (&ValueQuery{Kind: ValueGenre, Items: ItemFilter{Kinds: []ItemKind{"film"}}}).Validate()},
+		{"unknown credit kind", (&PersonQuery{CreditKinds: []CreditKind{"grip"}}).Validate()},
+		{"person offset", (&PersonQuery{Offset: -1}).Validate()},
+	}
+	for _, tt := range invalid {
+		if !errors.Is(tt.err, ErrInvalid) {
+			t.Errorf("%s: got = %v, want = ErrInvalid", tt.name, tt.err)
+		}
+	}
 }
 
 func TestVideoRangeType(t *testing.T) {

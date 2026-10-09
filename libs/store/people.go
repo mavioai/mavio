@@ -70,7 +70,7 @@ func (r people) Upsert(ctx context.Context, list ...core.Person) error {
 	})
 }
 
-func (r people) Search(ctx context.Context, q core.PersonQuery) ([]core.Person, error) {
+func (r people) Search(ctx context.Context, q core.PersonQuery) ([]core.PersonCount, error) {
 	if err := q.Validate(); err != nil {
 		return nil, err
 	}
@@ -78,21 +78,56 @@ func (r people) Search(ctx context.Context, q core.PersonQuery) ([]core.Person, 
 	if limit == 0 {
 		limit = core.MaxPageSize
 	}
+	ps := []predicate.Credit{credit.HasItemWith(items(r).filter(q.Items)...)}
+	if len(q.CreditKinds) > 0 {
+		kinds := make([]string, len(q.CreditKinds))
+		for i, k := range q.CreditKinds {
+			kinds[i] = string(k)
+		}
+		ps = append(ps, credit.KindIn(kinds...))
+	}
 	srch, searching := parseSearch(q.Search)
-	list, err := r.s.read.Person.Query().Limit(limit).Modify(func(s *entsql.Selector) {
+	var rows []struct {
+		ID    core.ID `sql:"person_id"`
+		Count int     `sql:"item_count"`
+	}
+	err := r.s.read.Credit.Query().Where(ps...).Modify(func(s *entsql.Selector) {
+		p := entsql.Table(person.Table).As("p")
+		s.Join(p).On(s.C(credit.FieldPersonID), p.C(person.FieldID))
+		key := p.C(person.FieldSearchKey)
 		if searching {
-			key := s.C(person.FieldSearchKey)
-			s.Where(srch.match(key, "", s.C(person.FieldSortKey)))
+			s.Where(srch.match(key, "", p.C(person.FieldSortKey)))
+		}
+		// Grouping by the people's key lets PostgreSQL order by their
+		// other columns.
+		s.Select(entsql.As(p.C(person.FieldID), "person_id"),
+			entsql.As("COUNT(DISTINCT "+s.C(credit.FieldItemID)+")", "item_count"),
+		).GroupBy(p.C(person.FieldID))
+		if searching {
 			s.OrderExpr(srch.rank(key))
 		}
-		s.OrderBy(s.C(person.FieldSortKey), s.C(person.FieldID))
-	}).All(ctx)
+		s.OrderBy(p.C(person.FieldSortKey), p.C(person.FieldID)).Limit(limit).Offset(q.Offset)
+	}).Scan(ctx, &rows)
 	if err != nil {
 		return nil, mapErr(err, "search people")
 	}
-	out := make([]core.Person, len(list))
-	for i, p := range list {
-		out[i] = toPerson(p)
+	ids := make([]core.ID, len(rows))
+	for i, row := range rows {
+		ids[i] = row.ID
+	}
+	list, err := r.s.read.Person.Query().Where(person.IDIn(ids...)).All(ctx)
+	if err != nil {
+		return nil, mapErr(err, "get people")
+	}
+	byID := make(map[core.ID]*ent.Person, len(list))
+	for _, p := range list {
+		byID[p.ID] = p
+	}
+	out := make([]core.PersonCount, 0, len(rows))
+	for _, row := range rows {
+		if p, ok := byID[row.ID]; ok {
+			out = append(out, core.PersonCount{Person: toPerson(p), Count: row.Count})
+		}
 	}
 	return out, nil
 }

@@ -152,11 +152,11 @@ func TestMetadataRefresh(t *testing.T) {
 				t.Errorf("search by original title = %+v, %v", page.Items, err)
 			}
 			genres, err := s.Items().Values(ctx, core.ValueQuery{Kind: core.ValueGenre})
-			if err != nil || !slices.Equal(genres, []string{"Drama", "Romance"}) {
-				t.Errorf("genres = %q, %v", genres, err)
+			if err != nil || !slices.Equal(genres, []core.ValueCount{{Value: "Drama", Count: 1}, {Value: "Romance", Count: 1}}) {
+				t.Errorf("genres = %v, %v", genres, err)
 			}
 			people, err := s.People().Search(ctx, core.PersonQuery{Search: "zhang guo rong"})
-			if err != nil || len(people) != 1 || people[0].Name != "张国荣" {
+			if err != nil || len(people) != 1 || people[0].Person.Name != "张国荣" {
 				t.Errorf("person search by pinyin = %+v, %v", people, err)
 			}
 			credits, err := s.People().CreditsForItem(ctx, film.ID)
