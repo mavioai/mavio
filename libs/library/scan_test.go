@@ -178,8 +178,15 @@ func TestScanMovies(t *testing.T) {
 
 func TestScanUnavailableRoot(t *testing.T) {
 	f := newScan(t, core.LibraryMovies)
-	tree(t, f.root, "A (2000)/A (2000).mkv", "B (2001)/B (2001).mkv")
+	tree(t, f.root, "A (2000)/A (2000).mkv", "B (2001)/B (2001).mkv", "C (2002)/C (2002).mkv")
 	f.scan()
+	// C goes missing before the mount point disappears, and stays missing.
+	if err := os.RemoveAll(filepath.Join(f.root, "C (2002)")); err != nil {
+		t.Fatal(err)
+	}
+	if st := f.scan(); st.Missing != 1 {
+		t.Fatalf("C deleted: stats %+v", st)
+	}
 	// The mount point disappears.
 	moved := f.root + ".away"
 	if err := os.Rename(f.root, moved); err != nil {
@@ -189,6 +196,9 @@ func TestScanUnavailableRoot(t *testing.T) {
 	st := f.scan()
 	if st.Unreadable != 1 || st.Missing != 0 || len(f.items()) != 2 {
 		t.Errorf("unavailable root: stats %+v, items %v", st, f.items())
+	}
+	if c := f.store.byPath(f.root + "/C (2002)/C (2002).mkv"); c.MissingSince == nil {
+		t.Errorf("C while unavailable = %+v, want = missing", c)
 	}
 	// It comes back.
 	if err := os.Rename(moved, f.root); err != nil {

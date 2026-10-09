@@ -106,9 +106,8 @@ func (r items) Delete(ctx context.Context, ids ...core.ID) error {
 
 func (r items) MarkSeen(ctx context.Context, libraryID core.ID, prefix string, generation int64) error {
 	_, err := r.s.write.Item.Update().
-		Where(item.LibraryID(libraryID), item.PathNEQ(""), underPath(prefix)).
+		Where(item.LibraryID(libraryID), item.PathNEQ(""), item.MissingSinceIsNil(), underPath(prefix)).
 		SetScanGeneration(generation).
-		ClearMissingSince().
 		Save(ctx)
 	return mapErr(err, "mark items seen")
 }

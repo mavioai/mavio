@@ -81,8 +81,16 @@ func TestScanGenerationsAndMissingItems(t *testing.T) {
 			t.Errorf("below a touched path = %d", g.ScanGeneration)
 		}
 
+		// An unreadable folder keeps missing items missing.
+		if err := s.Items().MarkSeen(ctx, lib.ID, "/media/Gone", 3); err != nil {
+			t.Fatal(err)
+		}
+		if g, _ := s.Items().Get(ctx, gone.ID); g.MissingSince == nil || g.ScanGeneration != 1 {
+			t.Errorf("gone in an unreadable folder = %+v", g)
+		}
+
 		// A file back in place is seen again.
-		if err := s.Items().MarkSeen(ctx, lib.ID, "/media/Gone/Gone.mkv", 3); err != nil {
+		if err := s.Items().Touch(ctx, lib.ID, 3, "/media/Gone/Gone.mkv"); err != nil {
 			t.Fatal(err)
 		}
 		if g, _ := s.Items().Get(ctx, gone.ID); g.MissingSince != nil || g.ScanGeneration != 3 {

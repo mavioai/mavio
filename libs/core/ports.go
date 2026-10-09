@@ -49,9 +49,10 @@ type ItemRepository interface {
 	// Delete removes items together with their descendants, extras, media
 	// sources, images, credits and user data.
 	Delete(ctx context.Context, ids ...ID) error
-	// MarkSeen sets the scan generation of the library's items whose path
-	// is prefix or lies below it, and clears their missing state. A scan
-	// calls it for folders it could not read, so their items stay.
+	// MarkSeen sets the scan generation of the library's present items
+	// whose path is prefix or lies below it; missing items stay missing. A
+	// scan calls it for folders it could not read, so their items stay as
+	// they were.
 	MarkSeen(ctx context.Context, libraryID ID, prefix string, generation int64) error
 	// Touch sets the scan generation of the library's items with exactly
 	// these paths and clears their missing state, for folders a scan found

@@ -58,6 +58,18 @@ func (m *memStore) present() map[string]core.Item {
 	return out
 }
 
+// byPath returns the item at a path, missing or not.
+func (m *memStore) byPath(p string) core.Item {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, it := range m.items {
+		if it.Path == p {
+			return it
+		}
+	}
+	return core.Item{}
+}
+
 type memItems struct{ m *memStore }
 
 func (r memItems) Get(_ context.Context, id core.ID) (core.Item, error) {
@@ -133,8 +145,9 @@ func (r memItems) update(lib core.ID, match func(core.Item) bool, f func(*core.I
 
 func (r memItems) MarkSeen(_ context.Context, lib core.ID, prefix string, gen int64) error {
 	prefix = strings.TrimSuffix(prefix, "/")
-	r.update(lib, func(it core.Item) bool { return it.Path == prefix || strings.HasPrefix(it.Path, prefix+"/") },
-		func(it *core.Item) { it.ScanGeneration, it.MissingSince = gen, nil })
+	r.update(lib, func(it core.Item) bool {
+		return it.MissingSince == nil && (it.Path == prefix || strings.HasPrefix(it.Path, prefix+"/"))
+	}, func(it *core.Item) { it.ScanGeneration = gen })
 	return nil
 }
 
