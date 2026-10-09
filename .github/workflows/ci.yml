@@ -70,3 +70,38 @@ jobs:
       # Real ffmpeg runs on the runner's hardware; the cache would replay
       # results from runs without fixtures.
       - run: pnpm nx run-many -t test -p media streaming server --skip-nx-cache --output-style=static
+
+  dist:
+    name: Cross-compile
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm nx run server:dist --output-style=static
+        env:
+          VERSION: ${{ github.sha }}
+
+  image:
+    name: Container image
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build for amd64 and arm64
+        run: docker buildx build -f apps/server/Dockerfile --platform linux/amd64,linux/arm64 --build-arg VERSION="${GITHUB_SHA::12}" .
+      - name: Run the amd64 image
+        run: |
+          docker buildx build -f apps/server/Dockerfile --platform linux/amd64 --build-arg VERSION="${GITHUB_SHA::12}" -t mavio:ci --load .
+          docker run -d --name mavio --health-interval 2s mavio:ci
+          for _ in $(seq 60); do
+            [ "$(docker inspect --format '{{.State.Health.Status}}' mavio)" = healthy ] && break
+            sleep 2
+          done
+          docker logs mavio
+          [ "$(docker inspect --format '{{.State.Health.Status}}' mavio)" = healthy ]
+          docker exec mavio mavio -version
+          docker exec mavio /usr/lib/jellyfin-ffmpeg/ffmpeg -version

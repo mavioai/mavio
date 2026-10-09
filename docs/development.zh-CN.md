@@ -143,6 +143,9 @@ go build -o plugin .                                                     # 子�
 * **test**：在 linux arm64、macOS、Windows 上运行 `nx run-many -t test build`。
 * **media**（Linux、macOS）：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
 
+* **dist**（Linux）：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台。
+* **image**（Linux）：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
+
 CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg（`MISE_DISABLE_TOOLS`）。
 
 ---
@@ -154,6 +157,8 @@ CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** �
 2. 把 `libs/plugin` 的 `require` 更新到该版本，再发布 `libs/plugin`。
 
 其余模块只在仓库内使用，不承诺对外 API 稳定。
+
+服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件。
 
 ---
 

@@ -4,7 +4,7 @@
 
 Mavio is a self-hosted media server with a Go server at its core: a single `CGO_ENABLED=0` binary plus `jellyfin-ffmpeg`, strongly typed Protobuf / Connect APIs, SQLite and PostgreSQL support, and sandboxed WASM and child-process plugins.
 
-Status: early development (P0 engineering foundation). See the [roadmap](docs/roadmap.md).
+Status: early development (P6 server assembly and distribution). See the [roadmap](docs/roadmap.md).
 
 ## Documentation
 
@@ -23,6 +23,20 @@ Status: early development (P0 engineering foundation). See the [roadmap](docs/ro
 mise install
 pnpm install
 pnpm nx run-many -t build test
+```
+
+Run the server with the sample library and the development player at http://localhost:8686/dev/player:
+
+```bash
+pnpm nx run fixtures:dev-library
+cd apps/server && go run ./cmd/mavio -dev -dev-library ../../.fixtures/dev-library
+```
+
+Or as a container, with media mounted under `/media`:
+
+```bash
+docker buildx build -f apps/server/Dockerfile -t mavio --load .
+docker run -p 8686:8686 -v mavio-config:/config -v mavio-cache:/cache -v /path/to/media:/media:ro mavio
 ```
 
 ## License

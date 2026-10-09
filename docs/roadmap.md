@@ -143,8 +143,8 @@ flowchart TD
 - [x] Assembly in `apps/server/internal/server`, which `cmd/mavio` runs with its flags
 - [x] Plugins started from the plugin folder (`-plugin-dir`); their configurations stored, validated against the manifest's schema and applied through `SystemService` without a restart; metadata plugins take part in library refreshes once ready
 - [x] End-to-end test of the assembled server through its API with real ffmpeg and a WASM metadata plugin: an administrator configures the plugin, a library is scanned, its film scraped and played as an HLS direct stream
-- [ ] `CGO_ENABLED=0` cross-compilation checked in CI
-- [ ] Container images bundling jellyfin-ffmpeg's portable build
+- [x] `CGO_ENABLED=0` cross-compilation to Linux, macOS and Windows on amd64 and arm64 (`server:dist`), checked in CI
+- [x] Container images for linux/amd64 and linux/arm64 bundling jellyfin-ffmpeg's portable build, built and run in CI
 
 ### P7 Clients and Ecosystem
 **Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`; playback verified on Media3 with the Android client; library and collection collages; evaluation of a Jellyfin API compatibility shim. Its completion criteria will be defined after P6.

@@ -1,0 +1,6 @@
+# Only sources go into the build context.
+.git
+**/node_modules
+.nx
+.fixtures
+**/dist

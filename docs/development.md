@@ -143,6 +143,9 @@ A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.
 * **test**: `nx run-many -t test build` on linux arm64, macOS and Windows.
 * **media** (Linux, macOS): installs jellyfin-ffmpeg, generates the fixtures and runs the `media`, `streaming` and `server` tests without the Nx cache, so the ffmpeg integration and smoke tests run on the runners' hardware.
 
+* **dist** (Linux): `nx run server:dist`, so the server cross-compiles for every supported platform.
+* **image** (Linux): builds the container image for linux/amd64 and linux/arm64 without pushing it, then runs the amd64 image until its health check passes.
+
 Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`); jobs other than **media** leave jellyfin-ffmpeg out (`MISE_DISABLE_TOOLS`).
 
 ---
@@ -154,6 +157,8 @@ Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`); jobs other 
 2. Update the `require` of `libs/plugin` to that version, then release `libs/plugin`.
 
 Other modules are used only inside the repository and promise no stable external API.
+
+The server's release binaries are built with `VERSION=v0.1.0 pnpm nx run server:dist`, and its image with `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` from the repository root. The Dockerfile pins the same jellyfin-ffmpeg version as `mise.toml`, with the SHA-256 digests of its two Linux portable builds; upgrading jellyfin-ffmpeg changes both files.
 
 ---
 

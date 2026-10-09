@@ -4,7 +4,7 @@
 
 Mavio 是以 Go 为服务端核心的自托管媒体服务器：一个 `CGO_ENABLED=0` 的单一二进制加上 `jellyfin-ffmpeg`，强类型的 Protobuf / Connect API，同时支持 SQLite 与 PostgreSQL，插件运行在 WASM 沙箱或独立子进程中。
 
-状态：早期开发（P0 工程地基），见[路线图](docs/roadmap.zh-CN.md)。
+状态：早期开发（P6 服务端装配与分发），见[路线图](docs/roadmap.zh-CN.md)。
 
 ## 文档
 
@@ -23,6 +23,20 @@ Mavio 是以 Go 为服务端核心的自托管媒体服务器：一个 `CGO_ENAB
 mise install
 pnpm install
 pnpm nx run-many -t build test
+```
+
+带示例媒体库运行服务端，开发用播放器位于 http://localhost:8686/dev/player：
+
+```bash
+pnpm nx run fixtures:dev-library
+cd apps/server && go run ./cmd/mavio -dev -dev-library ../../.fixtures/dev-library
+```
+
+或以容器运行，把媒体挂载在 `/media` 下：
+
+```bash
+docker buildx build -f apps/server/Dockerfile -t mavio --load .
+docker run -p 8686:8686 -v mavio-config:/config -v mavio-cache:/cache -v /path/to/media:/media:ro mavio
 ```
 
 ## 许可证
