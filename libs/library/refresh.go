@@ -330,7 +330,17 @@ func (r *Refresher) readNFO(lib core.Library, it core.Item) (*metadata.Result, e
 		if err != nil {
 			return nil, err
 		}
-		res, err := metadata.ParseNFO(data, it.Kind, metadata.NFOOptions{})
+		res, err := metadata.ParseNFO(data, it.Kind, metadata.NFOOptions{
+			// Local images count when they lie in the library folder.
+			FileExists: func(loc string) bool {
+				rel, ok := strings.CutPrefix(filepath.ToSlash(loc), root+"/")
+				if !ok {
+					return false
+				}
+				info, err := fs.Stat(rt.FS(), rel)
+				return err == nil && info.Mode().IsRegular()
+			},
+		})
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", p, err)
 		}
