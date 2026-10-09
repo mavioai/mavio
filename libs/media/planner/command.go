@@ -19,6 +19,11 @@ type HLSOutput struct {
 	// StartNumber is the number of the first segment written, for
 	// transcodes that start at a seek position.
 	StartNumber int
+	// KeyframeChunks cuts copied video at every keyframe instead of after
+	// each segment length, so that each file holds one group of pictures
+	// and is numbered by its keyframe whatever position the transcode
+	// started at; segments are then made of consecutive files.
+	KeyframeChunks bool
 }
 
 func (p *Planner) commonArgs() []string {
@@ -143,8 +148,15 @@ func (p *Planner) HLSArgs(j *Job, out HLSOutput) []string {
 	if j.Start > 0 {
 		args = append(args, "-output_ts_offset", formatSeconds(j.Start))
 	}
+	hlsTime := formatSeconds(length)
+	if out.KeyframeChunks {
+		// Shorter than any group of pictures: every keyframe cuts.
+		hlsTime = "0.001"
+	}
+	// Segments appear under their names once complete, and replace older
+	// copies without truncating them for readers.
 	args = append(args, "-max_muxing_queue_size", "2048", "-f", "hls", "-max_delay", "5000000",
-		"-hls_time", formatSeconds(length), "-hls_list_size", "0", "-hls_playlist_type", "vod",
+		"-hls_time", hlsTime, "-hls_flags", "temp_file", "-hls_list_size", "0", "-hls_playlist_type", "vod",
 		"-start_number", strconv.Itoa(out.StartNumber))
 	if seg == "mp4" {
 		init := out.Init
