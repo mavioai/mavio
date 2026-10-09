@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/media/decision"
@@ -64,19 +65,26 @@ func TestHLSTranscodes(t *testing.T) {
 	tests := []struct {
 		fixture string
 		hevc    bool
-		copy    bool // the video is copied
+		copy    bool          // the video is copied
+		start   time.Duration // where the transcode starts, as after seeking
+		bitrate int64         // the client's cap, when it forces a transcode
 	}{
-		{"h264_aac.mp4", false, true}, // already 640 wide
-		{"hevc_main10_hdr10.mkv", false, false},
-		{"hevc_main10_hdr10.mkv", true, true},
-		{"mpeg2_interlaced.ts", false, false},
-		{"vp9_opus.webm", false, false},
+		{"h264_aac.mp4", false, true, 0, 0}, // already 640 wide
+		// Encoded video with copied audio, which is trimmed to the start.
+		{"h264_aac.mp4", false, false, time.Second, 1_000_000},
+		{"hevc_main10_hdr10.mkv", false, false, 0, 0},
+		{"hevc_main10_hdr10.mkv", true, true, 0, 0},
+		{"mpeg2_interlaced.ts", false, false, 0, 0},
+		{"vp9_opus.webm", false, false, 0, 0},
 	}
 	for _, hw := range hardware {
 		for _, tt := range tests {
 			name := tt.fixture
 			if tt.hevc {
 				name += "/hevc-client"
+			}
+			if tt.start > 0 {
+				name += "/from-" + tt.start.String()
 			}
 			if hw != "" {
 				name += "/" + hw
@@ -90,8 +98,12 @@ func TestHLSTranscodes(t *testing.T) {
 				ms := res.Source
 				ms.ID, ms.Path = core.NewID(), path
 				src := &decision.Source{MediaSource: &ms}
+				client := hlsClient(tt.hevc)
+				if tt.bitrate > 0 {
+					client.MaxStreamingBitrate = tt.bitrate
+				}
 				d, err := (&decision.Builder{}).Video(&decision.Request{
-					Sources: []*decision.Source{src}, Client: hlsClient(tt.hevc), Context: decision.Streaming,
+					Sources: []*decision.Source{src}, Client: client, Context: decision.Streaming,
 					EnableDirectPlay: true, AllowAudioStreamCopy: true, AllowVideoStreamCopy: true,
 				})
 				if err != nil {
@@ -100,7 +112,10 @@ func TestHLSTranscodes(t *testing.T) {
 				opts := DefaultOptions()
 				opts.Hardware = hw
 				p := &Planner{Options: opts, Caps: caps}
-				j := p.Job(d, 0)
+				j := p.Job(d, tt.start)
+				if tt.start > 0 && j.AudioCodec != Copy {
+					t.Fatalf("audio codec: got = %s, want = copy", j.AudioCodec)
+				}
 				if got := j.VideoCodec == Copy; got != tt.copy {
 					t.Errorf("video copied: got = %v, want = %v (%s)", got, tt.copy, j.VideoCodec)
 				}
@@ -131,6 +146,16 @@ func TestHLSTranscodes(t *testing.T) {
 				hasVideo := strings.Contains(string(out), "h264") || strings.Contains(string(out), "hevc")
 				if !strings.Contains(string(out), "aac") || !hasVideo {
 					t.Errorf("segment streams: got = %s", out)
+				}
+				// The initialization segment lists the audio track; the media
+				// segment must also carry its packets.
+				audio, err := exec.CommandContext(t.Context(), ffprobe, "-v", "error", "-select_streams", "a",
+					"-show_entries", "packet=pts_time", "-of", "csv=p=0", joinedSeg).CombinedOutput()
+				if err != nil {
+					t.Fatalf("ffprobe audio packets: %v\n%s", err, audio)
+				}
+				if len(strings.Fields(string(audio))) == 0 {
+					t.Error("segment has no audio packets")
 				}
 				if !tt.copy {
 					for _, w := range []string{",1280", ",1920"} {

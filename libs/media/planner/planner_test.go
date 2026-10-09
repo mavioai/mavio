@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -209,6 +210,8 @@ func TestProgressiveAudio(t *testing.T) {
 	})
 }
 
+var noiseThreshold = regexp.MustCompile(`lt\(pts\*tb\\,[0-9.]+\)`)
+
 func TestAudioBitStreamCases(t *testing.T) {
 	const file, class = "audio_bit_stream.json", "EncodingHelperAudioBitStreamTests"
 	portedCases(t, "encoding_helper_audio_bit_stream.json", ported{
@@ -237,6 +240,10 @@ func TestAudioBitStreamCases(t *testing.T) {
 					Source:     &decision.Source{MediaSource: &core.MediaSource{Container: a.str(t, "inputContainer")}},
 					Start:      time.Duration(start) * 100,
 				}
+				// Jellyfin trims copied audio at the seek position on the
+				// source's timeline (-copyts); Mavio's ffmpeg sees timestamps
+				// from the seek position, so the threshold is zero.
+				expected = noiseThreshold.ReplaceAllString(expected, `lt(pts*tb\,0)`)
 				p := &Planner{Options: DefaultOptions(), Caps: &hwaccel.Capabilities{Version: v}}
 				if got := p.AudioBitstreamArgs(j, a.str(t, "segmentContainer"), a.str(t, "mediaSourceContainer")); got != expected {
 					t.Errorf("got = %q, want = %q", got, expected)

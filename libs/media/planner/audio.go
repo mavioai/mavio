@@ -335,8 +335,10 @@ func (p *Planner) AudioBitstreamArgs(j *Job, segmentContainer, sourceContainer s
 
 // copiedAudioTrim drops copied audio before the start of a seeked HLS
 // video transcode: the video decoder trims to the exact position, copied
-// audio would start at the previous keyframe. The noise filter's drop
-// option needs ffmpeg 5.0; WTV seeking breaks with it.
+// audio would start at the previous keyframe. Unlike Jellyfin's, which
+// keeps the source's timestamps (-copyts), the filter sees them from the
+// seek position, so it drops what comes before zero. The noise filter's
+// drop option needs ffmpeg 5.0; WTV seeking breaks with it.
 func (p *Planner) copiedAudioTrim(j *Job) string {
 	if j.Delivery != HLS || !j.isVideo() || j.VideoCodec == Copy || j.AudioCodec != Copy ||
 		strings.EqualFold(j.inputContainer(), "wtv") || p.caps().Version.Compare(hwaccel.NewVersion(5, 0)) < 0 {
@@ -345,7 +347,7 @@ func (p *Planner) copiedAudioTrim(j *Job) string {
 	if j.Start <= 0 {
 		return ""
 	}
-	return fmt.Sprintf(`noise=drop='lt(pts*tb\,%.3f)'`, j.Start.Seconds())
+	return `noise=drop='lt(pts*tb\,0)'`
 }
 
 func (j *Job) inputContainer() string {
