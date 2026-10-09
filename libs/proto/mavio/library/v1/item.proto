@@ -24,6 +24,18 @@ service ItemService {
   rpc ListValues(ListValuesRequest) returns (ListValuesResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // ListLatestItems lists the items added last to the libraries the caller
+  // may access, newest first.
+  rpc ListLatestItems(ListLatestItemsRequest) returns (ListLatestItemsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListNextUp lists the next episode to watch of each series the caller
+  // has played, the series played most recently first. Episodes being
+  // watched are left to continue watching: ListItems with resumable set,
+  // sorted by last played.
+  rpc ListNextUp(ListNextUpRequest) returns (ListNextUpResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   // ListPeople lists the people credited on the items the caller may
   // access, with the number of items crediting each.
   rpc ListPeople(ListPeopleRequest) returns (ListPeopleResponse) {
@@ -175,6 +187,15 @@ message Item {
 
   // Images of the item, without file paths; clients fetch them over HTTP.
   repeated Image images = 31;
+
+  // The series of an episode or season, the season of an episode and the
+  // album of a track, for display.
+  string series_id = 32;
+  string series_name = 33;
+  string season_id = 34;
+  string season_name = 35;
+  string album_id = 36;
+  string album_name = 37;
 }
 
 // Image describes an artwork image.
@@ -352,4 +373,57 @@ message PersonCount {
 message ListPeopleResponse {
   // Ranked by relevance when searching, otherwise ordered by sort name.
   repeated PersonCount people = 1;
+}
+
+// ListLatestItemsRequest selects the latest items. Unset fields do not
+// filter.
+message ListLatestItemsRequest {
+  repeated string library_ids = 1 [(buf.validate.field).repeated.items.string.uuid = true];
+  // Unset means the items played or viewed: movies, episodes, videos,
+  // tracks, music videos, audiobooks, books and photos.
+  repeated ItemKind kinds = 2 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // Filters by the caller's played state.
+  bool played = 3;
+  // Lists every new item instead of grouping them: grouped, the new tracks
+  // of an album are listed as the album, and the episodes of a series
+  // added within a day of its newest one as their season when they are
+  // all in one season of a series with several, as the series when it has
+  // one season or they span several, and as the newest episode when it
+  // came alone.
+  bool ungrouped = 4;
+  // 1–100; unset means 20.
+  int32 limit = 5 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 100
+  }];
+}
+
+message ListLatestItemsResponse {
+  repeated Item items = 1;
+}
+
+// ListNextUpRequest selects the series whose next episodes are listed.
+// Unset fields do not filter.
+message ListNextUpRequest {
+  repeated string library_ids = 1 [(buf.validate.field).repeated.items.string.uuid = true];
+  string series_id = 2 [(buf.validate.field).string.uuid = true];
+  // Leaves out series last played before this time.
+  google.protobuf.Timestamp since = 3;
+  // Also offers episodes with a resume position.
+  bool include_resumable = 4;
+  // 1–100; unset means 20.
+  int32 limit = 5 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 100
+  }];
+  int32 offset = 6 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListNextUpResponse {
+  // Each series' next episode: the first unplayed episode after the last
+  // played one, with specials placed by where they air.
+  repeated Item items = 1;
 }

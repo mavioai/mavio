@@ -49,6 +49,7 @@
 | `tests/Jellyfin.Drawing.Skia.Tests` | 缩放尺寸计算、锐化、SVG 安全校验 | `libs/imaging` |
 | `tests/Jellyfin.Server.Implementations.Tests/Trickplay` | Trickplay 生成参数 | `libs/imaging` / `libs/media` |
 | `tests/Jellyfin.Controller.Tests/Entities/BaseItemTests.cs` | 排序名（`GetSortName`、`ModifySortChunks`） | `libs/store` |
+| `tests/Jellyfin.Server.Implementations.Tests/Sorting/AiredEpisodeOrderComparerTests.cs` | 含特别篇的单集播出顺序 | `libs/core` |
 | `tests/Jellyfin.Extensions.Tests/StringExtensionsTests.cs` | 搜索键使用的去变音符号 | `libs/store` |
 | `tests/Jellyfin.Extensions.Tests`、`Jellyfin.Common.Tests`（其他测试类） | 字符串、路径等通用工具函数 | 按需并入对应库 |
 | `Jellyfin.Api.Tests`、`Jellyfin.Server.Integration.Tests` | HTTP API 行为 | 暂不移植（与后续 shim 一起评估） |

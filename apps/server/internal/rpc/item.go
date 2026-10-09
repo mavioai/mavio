@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/mavioai/mavio/apps/server/internal/browse"
 	"github.com/mavioai/mavio/libs/core"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
@@ -79,13 +81,20 @@ var (
 // ItemService implements mavio.library.v1.ItemService. Users see the
 // items their policy allows; only administrators see file paths.
 type ItemService struct {
-	store core.Store
+	store   core.Store
+	browser *browse.Browser
 }
 
 var _ libraryv1connect.ItemServiceHandler = (*ItemService)(nil)
 
+// defaultListLimit is the length of the latest and next up lists when the
+// request does not set one.
+const defaultListLimit = 20
+
 // NewItemService returns an ItemService backed by store.
-func NewItemService(store core.Store) *ItemService { return &ItemService{store: store} }
+func NewItemService(store core.Store) *ItemService {
+	return &ItemService{store: store, browser: browse.New(store)}
+}
 
 // GetItem returns an item with its media sources and credits.
 func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest) (*libraryv1.GetItemResponse, error) {
@@ -120,8 +129,12 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
+	out := itemToProto(&item, images[item.ID], p.User.Admin)
+	if err := newAncestry(s.store).describe(ctx, &item, out); err != nil {
+		return nil, connectError(ctx, err)
+	}
 
-	resp := libraryv1.GetItemResponse_builder{Item: itemToProto(&item, images[item.ID], p.User.Admin)}
+	resp := libraryv1.GetItemResponse_builder{Item: out}
 	for i := range sources {
 		resp.MediaSources = append(resp.MediaSources, mediaSourceToProto(&sources[i], p.User.Admin))
 	}
@@ -187,19 +200,169 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	owners := make([]core.ID, len(page.Items))
-	for i := range page.Items {
-		owners[i] = page.Items[i].ID
-	}
-	images, err := s.store.Images().ListForOwners(ctx, owners)
+	out, err := s.itemsToProto(ctx, page.Items, p.User.Admin)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out := make([]*libraryv1.Item, len(page.Items))
-	for i := range page.Items {
-		out[i] = itemToProto(&page.Items[i], images[page.Items[i].ID], p.User.Admin)
-	}
 	return libraryv1.ListItemsResponse_builder{Items: out, Total: new(int32(page.Total))}.Build(), nil
+}
+
+// ListLatestItems lists the items added last.
+func (s *ItemService) ListLatestItems(ctx context.Context, req *libraryv1.ListLatestItemsRequest) (*libraryv1.ListLatestItemsResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	scope, ok := browseScope(&p.User, req.GetLibraryIds())
+	if !ok {
+		return &libraryv1.ListLatestItemsResponse{}, nil
+	}
+	q := browse.LatestQuery{
+		Kinds: itemKindsFromProto(req.GetKinds()),
+		Group: !req.GetUngrouped(),
+		Limit: cmp.Or(int(req.GetLimit()), defaultListLimit),
+	}
+	if req.HasPlayed() {
+		q.Played = new(req.GetPlayed())
+	}
+	items, err := s.browser.Latest(ctx, scope, q)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out, err := s.itemsToProto(ctx, items, p.User.Admin)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return libraryv1.ListLatestItemsResponse_builder{Items: out}.Build(), nil
+}
+
+// ListNextUp lists the next episodes of the series the caller has played.
+func (s *ItemService) ListNextUp(ctx context.Context, req *libraryv1.ListNextUpRequest) (*libraryv1.ListNextUpResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	scope, ok := browseScope(&p.User, req.GetLibraryIds())
+	if !ok {
+		return &libraryv1.ListNextUpResponse{}, nil
+	}
+	q := browse.NextUpQuery{
+		IncludeResumable: req.GetIncludeResumable(),
+		Limit:            cmp.Or(int(req.GetLimit()), defaultListLimit),
+		Offset:           int(req.GetOffset()),
+	}
+	if req.HasSeriesId() {
+		q.SeriesID = core.MustParseID(req.GetSeriesId())
+	}
+	if req.HasSince() {
+		q.Since = req.GetSince().AsTime()
+	}
+	items, err := s.browser.NextUp(ctx, scope, q)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out, err := s.itemsToProto(ctx, items, p.User.Admin)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return libraryv1.ListNextUpResponse_builder{Items: out}.Build(), nil
+}
+
+// browseScope limits browsing to the requested libraries and the rating
+// the user may see; it reports false when no library remains.
+func browseScope(u *core.User, libraries []string) (browse.Scope, bool) {
+	ids, ok := libraryScope(&u.Policy, libraries)
+	return browse.Scope{
+		UserID:      u.ID,
+		LibraryIDs:  ids,
+		MaxRating:   u.Policy.MaxParentalRating,
+		SkipUnrated: u.Policy.BlockUnrated,
+	}, ok
+}
+
+// itemsToProto describes items with their images, series, seasons and
+// albums.
+func (s *ItemService) itemsToProto(ctx context.Context, items []core.Item, admin bool) ([]*libraryv1.Item, error) {
+	owners := make([]core.ID, len(items))
+	for i := range items {
+		owners[i] = items[i].ID
+	}
+	images, err := s.store.Images().ListForOwners(ctx, owners)
+	if err != nil {
+		return nil, err
+	}
+	anc := newAncestry(s.store)
+	out := make([]*libraryv1.Item, len(items))
+	for i := range items {
+		out[i] = itemToProto(&items[i], images[items[i].ID], admin)
+		if err := anc.describe(ctx, &items[i], out[i]); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
+}
+
+// ancestry looks up the series, seasons and albums of items once per
+// response.
+type ancestry struct {
+	store core.Store
+	items map[core.ID]*core.Item
+}
+
+func newAncestry(store core.Store) *ancestry {
+	return &ancestry{store: store, items: map[core.ID]*core.Item{}}
+}
+
+func (a *ancestry) get(ctx context.Context, id core.ID) (*core.Item, error) {
+	if id.IsZero() {
+		return nil, nil
+	}
+	if it, ok := a.items[id]; ok {
+		return it, nil
+	}
+	it, err := a.store.Items().Get(ctx, id)
+	switch {
+	case errors.Is(err, core.ErrNotFound):
+		a.items[id] = nil
+		return nil, nil
+	case err != nil:
+		return nil, err
+	}
+	a.items[id] = &it
+	return &it, nil
+}
+
+// describe sets the series and season of an episode or season and the
+// album of a track.
+func (a *ancestry) describe(ctx context.Context, it *core.Item, out *libraryv1.Item) error {
+	switch it.Kind {
+	case core.KindEpisode, core.KindSeason, core.KindTrack:
+	default:
+		return nil
+	}
+	parent, err := a.get(ctx, it.ParentID)
+	if err != nil || parent == nil {
+		return err
+	}
+	switch {
+	case it.Kind == core.KindTrack:
+		if parent.Kind == core.KindMusicAlbum {
+			out.SetAlbumId(parent.ID.String())
+			out.SetAlbumName(parent.Name)
+		}
+		return nil
+	case parent.Kind == core.KindSeason && it.Kind == core.KindEpisode:
+		out.SetSeasonId(parent.ID.String())
+		out.SetSeasonName(parent.Name)
+		if parent, err = a.get(ctx, parent.ParentID); err != nil || parent == nil {
+			return err
+		}
+	}
+	if parent.Kind == core.KindSeries {
+		out.SetSeriesId(parent.ID.String())
+		out.SetSeriesName(parent.Name)
+	}
+	return nil
 }
 
 // GetPerson returns a person with their images.

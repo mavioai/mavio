@@ -528,8 +528,14 @@ type Item struct {
 	xxx_hidden_OwnerId           *string                `protobuf:"bytes,29,opt,name=owner_id,json=ownerId"`
 	xxx_hidden_DateAdded         *timestamppb.Timestamp `protobuf:"bytes,30,opt,name=date_added,json=dateAdded"`
 	xxx_hidden_Images            *[]*Image              `protobuf:"bytes,31,rep,name=images"`
+	xxx_hidden_SeriesId          *string                `protobuf:"bytes,32,opt,name=series_id,json=seriesId"`
+	xxx_hidden_SeriesName        *string                `protobuf:"bytes,33,opt,name=series_name,json=seriesName"`
+	xxx_hidden_SeasonId          *string                `protobuf:"bytes,34,opt,name=season_id,json=seasonId"`
+	xxx_hidden_SeasonName        *string                `protobuf:"bytes,35,opt,name=season_name,json=seasonName"`
+	xxx_hidden_AlbumId           *string                `protobuf:"bytes,36,opt,name=album_id,json=albumId"`
+	xxx_hidden_AlbumName         *string                `protobuf:"bytes,37,opt,name=album_name,json=albumName"`
 	XXX_raceDetectHookData       protoimpl.RaceDetectHookData
-	XXX_presence                 [1]uint32
+	XXX_presence                 [2]uint32
 	unknownFields                protoimpl.UnknownFields
 	sizeCache                    protoimpl.SizeCache
 }
@@ -817,74 +823,134 @@ func (x *Item) GetImages() []*Image {
 	return nil
 }
 
+func (x *Item) GetSeriesId() string {
+	if x != nil {
+		if x.xxx_hidden_SeriesId != nil {
+			return *x.xxx_hidden_SeriesId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Item) GetSeriesName() string {
+	if x != nil {
+		if x.xxx_hidden_SeriesName != nil {
+			return *x.xxx_hidden_SeriesName
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Item) GetSeasonId() string {
+	if x != nil {
+		if x.xxx_hidden_SeasonId != nil {
+			return *x.xxx_hidden_SeasonId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Item) GetSeasonName() string {
+	if x != nil {
+		if x.xxx_hidden_SeasonName != nil {
+			return *x.xxx_hidden_SeasonName
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Item) GetAlbumId() string {
+	if x != nil {
+		if x.xxx_hidden_AlbumId != nil {
+			return *x.xxx_hidden_AlbumId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Item) GetAlbumName() string {
+	if x != nil {
+		if x.xxx_hidden_AlbumName != nil {
+			return *x.xxx_hidden_AlbumName
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Item) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 37)
 }
 
 func (x *Item) SetLibraryId(v string) {
 	x.xxx_hidden_LibraryId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 37)
 }
 
 func (x *Item) SetParentId(v string) {
 	x.xxx_hidden_ParentId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 37)
 }
 
 func (x *Item) SetKind(v ItemKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 37)
 }
 
 func (x *Item) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 37)
 }
 
 func (x *Item) SetSortName(v string) {
 	x.xxx_hidden_SortName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 37)
 }
 
 func (x *Item) SetOriginalTitle(v string) {
 	x.xxx_hidden_OriginalTitle = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 37)
 }
 
 func (x *Item) SetOverview(v string) {
 	x.xxx_hidden_Overview = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 37)
 }
 
 func (x *Item) SetTagline(v string) {
 	x.xxx_hidden_Tagline = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 37)
 }
 
 func (x *Item) SetPath(v string) {
 	x.xxx_hidden_Path = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 37)
 }
 
 func (x *Item) SetIndexNumber(v int32) {
 	x.xxx_hidden_IndexNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 37)
 }
 
 func (x *Item) SetParentIndexNumber(v int32) {
 	x.xxx_hidden_ParentIndexNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 37)
 }
 
 func (x *Item) SetIndexNumberEnd(v int32) {
 	x.xxx_hidden_IndexNumberEnd = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 37)
 }
 
 func (x *Item) SetProductionYear(v int32) {
 	x.xxx_hidden_ProductionYear = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 37)
 }
 
 func (x *Item) SetPremiereDate(v *timestamppb.Timestamp) {
@@ -901,17 +967,17 @@ func (x *Item) SetRuntime(v *durationpb.Duration) {
 
 func (x *Item) SetOfficialRating(v string) {
 	x.xxx_hidden_OfficialRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 37)
 }
 
 func (x *Item) SetCommunityRating(v float64) {
 	x.xxx_hidden_CommunityRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 37)
 }
 
 func (x *Item) SetCriticRating(v float64) {
 	x.xxx_hidden_CriticRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 37)
 }
 
 func (x *Item) SetGenres(v []string) {
@@ -940,17 +1006,17 @@ func (x *Item) SetAlbumArtists(v []string) {
 
 func (x *Item) SetSeriesStatus(v SeriesStatus) {
 	x.xxx_hidden_SeriesStatus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 37)
 }
 
 func (x *Item) SetExtra(v ExtraKind) {
 	x.xxx_hidden_Extra = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 37)
 }
 
 func (x *Item) SetOwnerId(v string) {
 	x.xxx_hidden_OwnerId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 37)
 }
 
 func (x *Item) SetDateAdded(v *timestamppb.Timestamp) {
@@ -959,6 +1025,36 @@ func (x *Item) SetDateAdded(v *timestamppb.Timestamp) {
 
 func (x *Item) SetImages(v []*Image) {
 	x.xxx_hidden_Images = &v
+}
+
+func (x *Item) SetSeriesId(v string) {
+	x.xxx_hidden_SeriesId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 31, 37)
+}
+
+func (x *Item) SetSeriesName(v string) {
+	x.xxx_hidden_SeriesName = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 37)
+}
+
+func (x *Item) SetSeasonId(v string) {
+	x.xxx_hidden_SeasonId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 37)
+}
+
+func (x *Item) SetSeasonName(v string) {
+	x.xxx_hidden_SeasonName = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 37)
+}
+
+func (x *Item) SetAlbumId(v string) {
+	x.xxx_hidden_AlbumId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 35, 37)
+}
+
+func (x *Item) SetAlbumName(v string) {
+	x.xxx_hidden_AlbumName = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 36, 37)
 }
 
 func (x *Item) HasId() bool {
@@ -1129,6 +1225,48 @@ func (x *Item) HasDateAdded() bool {
 	return x.xxx_hidden_DateAdded != nil
 }
 
+func (x *Item) HasSeriesId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 31)
+}
+
+func (x *Item) HasSeriesName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 32)
+}
+
+func (x *Item) HasSeasonId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 33)
+}
+
+func (x *Item) HasSeasonName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 34)
+}
+
+func (x *Item) HasAlbumId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 35)
+}
+
+func (x *Item) HasAlbumName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 36)
+}
+
 func (x *Item) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -1245,6 +1383,36 @@ func (x *Item) ClearDateAdded() {
 	x.xxx_hidden_DateAdded = nil
 }
 
+func (x *Item) ClearSeriesId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 31)
+	x.xxx_hidden_SeriesId = nil
+}
+
+func (x *Item) ClearSeriesName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 32)
+	x.xxx_hidden_SeriesName = nil
+}
+
+func (x *Item) ClearSeasonId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 33)
+	x.xxx_hidden_SeasonId = nil
+}
+
+func (x *Item) ClearSeasonName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 34)
+	x.xxx_hidden_SeasonName = nil
+}
+
+func (x *Item) ClearAlbumId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 35)
+	x.xxx_hidden_AlbumId = nil
+}
+
+func (x *Item) ClearAlbumName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 36)
+	x.xxx_hidden_AlbumName = nil
+}
+
 type Item_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1284,6 +1452,14 @@ type Item_builder struct {
 	DateAdded    *timestamppb.Timestamp
 	// Images of the item, without file paths; clients fetch them over HTTP.
 	Images []*Image
+	// The series of an episode or season, the season of an episode and the
+	// album of a track, for display.
+	SeriesId   *string
+	SeriesName *string
+	SeasonId   *string
+	SeasonName *string
+	AlbumId    *string
+	AlbumName  *string
 }
 
 func (b0 Item_builder) Build() *Item {
@@ -1291,74 +1467,74 @@ func (b0 Item_builder) Build() *Item {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 37)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.LibraryId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 37)
 		x.xxx_hidden_LibraryId = b.LibraryId
 	}
 	if b.ParentId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 37)
 		x.xxx_hidden_ParentId = b.ParentId
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 37)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 37)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.SortName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 37)
 		x.xxx_hidden_SortName = b.SortName
 	}
 	if b.OriginalTitle != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 37)
 		x.xxx_hidden_OriginalTitle = b.OriginalTitle
 	}
 	if b.Overview != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 37)
 		x.xxx_hidden_Overview = b.Overview
 	}
 	if b.Tagline != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 37)
 		x.xxx_hidden_Tagline = b.Tagline
 	}
 	if b.Path != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 37)
 		x.xxx_hidden_Path = b.Path
 	}
 	if b.IndexNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 37)
 		x.xxx_hidden_IndexNumber = *b.IndexNumber
 	}
 	if b.ParentIndexNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 37)
 		x.xxx_hidden_ParentIndexNumber = *b.ParentIndexNumber
 	}
 	if b.IndexNumberEnd != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 37)
 		x.xxx_hidden_IndexNumberEnd = *b.IndexNumberEnd
 	}
 	if b.ProductionYear != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 37)
 		x.xxx_hidden_ProductionYear = *b.ProductionYear
 	}
 	x.xxx_hidden_PremiereDate = b.PremiereDate
 	x.xxx_hidden_EndDate = b.EndDate
 	x.xxx_hidden_Runtime = b.Runtime
 	if b.OfficialRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 37)
 		x.xxx_hidden_OfficialRating = b.OfficialRating
 	}
 	if b.CommunityRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 37)
 		x.xxx_hidden_CommunityRating = *b.CommunityRating
 	}
 	if b.CriticRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 37)
 		x.xxx_hidden_CriticRating = *b.CriticRating
 	}
 	x.xxx_hidden_Genres = b.Genres
@@ -1368,19 +1544,43 @@ func (b0 Item_builder) Build() *Item {
 	x.xxx_hidden_Artists = b.Artists
 	x.xxx_hidden_AlbumArtists = b.AlbumArtists
 	if b.SeriesStatus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 37)
 		x.xxx_hidden_SeriesStatus = *b.SeriesStatus
 	}
 	if b.Extra != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 37)
 		x.xxx_hidden_Extra = *b.Extra
 	}
 	if b.OwnerId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 37)
 		x.xxx_hidden_OwnerId = b.OwnerId
 	}
 	x.xxx_hidden_DateAdded = b.DateAdded
 	x.xxx_hidden_Images = &b.Images
+	if b.SeriesId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 31, 37)
+		x.xxx_hidden_SeriesId = b.SeriesId
+	}
+	if b.SeriesName != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 37)
+		x.xxx_hidden_SeriesName = b.SeriesName
+	}
+	if b.SeasonId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 37)
+		x.xxx_hidden_SeasonId = b.SeasonId
+	}
+	if b.SeasonName != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 37)
+		x.xxx_hidden_SeasonName = b.SeasonName
+	}
+	if b.AlbumId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 35, 37)
+		x.xxx_hidden_AlbumId = b.AlbumId
+	}
+	if b.AlbumName != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 36, 37)
+		x.xxx_hidden_AlbumName = b.AlbumName
+	}
 	return m0
 }
 
@@ -3855,12 +4055,518 @@ func (b0 ListPeopleResponse_builder) Build() *ListPeopleResponse {
 	return m0
 }
 
+// ListLatestItemsRequest selects the latest items. Unset fields do not
+// filter.
+type ListLatestItemsRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_LibraryIds  []string               `protobuf:"bytes,1,rep,name=library_ids,json=libraryIds"`
+	xxx_hidden_Kinds       []ItemKind             `protobuf:"varint,2,rep,packed,name=kinds,enum=mavio.library.v1.ItemKind"`
+	xxx_hidden_Played      bool                   `protobuf:"varint,3,opt,name=played"`
+	xxx_hidden_Ungrouped   bool                   `protobuf:"varint,4,opt,name=ungrouped"`
+	xxx_hidden_Limit       int32                  `protobuf:"varint,5,opt,name=limit"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ListLatestItemsRequest) Reset() {
+	*x = ListLatestItemsRequest{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListLatestItemsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListLatestItemsRequest) ProtoMessage() {}
+
+func (x *ListLatestItemsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListLatestItemsRequest) GetLibraryIds() []string {
+	if x != nil {
+		return x.xxx_hidden_LibraryIds
+	}
+	return nil
+}
+
+func (x *ListLatestItemsRequest) GetKinds() []ItemKind {
+	if x != nil {
+		return x.xxx_hidden_Kinds
+	}
+	return nil
+}
+
+func (x *ListLatestItemsRequest) GetPlayed() bool {
+	if x != nil {
+		return x.xxx_hidden_Played
+	}
+	return false
+}
+
+func (x *ListLatestItemsRequest) GetUngrouped() bool {
+	if x != nil {
+		return x.xxx_hidden_Ungrouped
+	}
+	return false
+}
+
+func (x *ListLatestItemsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_Limit
+	}
+	return 0
+}
+
+func (x *ListLatestItemsRequest) SetLibraryIds(v []string) {
+	x.xxx_hidden_LibraryIds = v
+}
+
+func (x *ListLatestItemsRequest) SetKinds(v []ItemKind) {
+	x.xxx_hidden_Kinds = v
+}
+
+func (x *ListLatestItemsRequest) SetPlayed(v bool) {
+	x.xxx_hidden_Played = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+}
+
+func (x *ListLatestItemsRequest) SetUngrouped(v bool) {
+	x.xxx_hidden_Ungrouped = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *ListLatestItemsRequest) SetLimit(v int32) {
+	x.xxx_hidden_Limit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
+}
+
+func (x *ListLatestItemsRequest) HasPlayed() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *ListLatestItemsRequest) HasUngrouped() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *ListLatestItemsRequest) HasLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *ListLatestItemsRequest) ClearPlayed() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Played = false
+}
+
+func (x *ListLatestItemsRequest) ClearUngrouped() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Ungrouped = false
+}
+
+func (x *ListLatestItemsRequest) ClearLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Limit = 0
+}
+
+type ListLatestItemsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	LibraryIds []string
+	// Unset means the items played or viewed: movies, episodes, videos,
+	// tracks, music videos, audiobooks, books and photos.
+	Kinds []ItemKind
+	// Filters by the caller's played state.
+	Played *bool
+	// Lists every new item instead of grouping them: grouped, the new tracks
+	// of an album are listed as the album, and the episodes of a series
+	// added within a day of its newest one as their season when they are
+	// all in one season of a series with several, as the series when it has
+	// one season or they span several, and as the newest episode when it
+	// came alone.
+	Ungrouped *bool
+	// 1–100; unset means 20.
+	Limit *int32
+}
+
+func (b0 ListLatestItemsRequest_builder) Build() *ListLatestItemsRequest {
+	m0 := &ListLatestItemsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_LibraryIds = b.LibraryIds
+	x.xxx_hidden_Kinds = b.Kinds
+	if b.Played != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		x.xxx_hidden_Played = *b.Played
+	}
+	if b.Ungrouped != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		x.xxx_hidden_Ungrouped = *b.Ungrouped
+	}
+	if b.Limit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		x.xxx_hidden_Limit = *b.Limit
+	}
+	return m0
+}
+
+type ListLatestItemsResponse struct {
+	state            protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Items *[]*Item               `protobuf:"bytes,1,rep,name=items"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ListLatestItemsResponse) Reset() {
+	*x = ListLatestItemsResponse{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListLatestItemsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListLatestItemsResponse) ProtoMessage() {}
+
+func (x *ListLatestItemsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListLatestItemsResponse) GetItems() []*Item {
+	if x != nil {
+		if x.xxx_hidden_Items != nil {
+			return *x.xxx_hidden_Items
+		}
+	}
+	return nil
+}
+
+func (x *ListLatestItemsResponse) SetItems(v []*Item) {
+	x.xxx_hidden_Items = &v
+}
+
+type ListLatestItemsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Items []*Item
+}
+
+func (b0 ListLatestItemsResponse_builder) Build() *ListLatestItemsResponse {
+	m0 := &ListLatestItemsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Items = &b.Items
+	return m0
+}
+
+// ListNextUpRequest selects the series whose next episodes are listed.
+// Unset fields do not filter.
+type ListNextUpRequest struct {
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_LibraryIds       []string               `protobuf:"bytes,1,rep,name=library_ids,json=libraryIds"`
+	xxx_hidden_SeriesId         *string                `protobuf:"bytes,2,opt,name=series_id,json=seriesId"`
+	xxx_hidden_Since            *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=since"`
+	xxx_hidden_IncludeResumable bool                   `protobuf:"varint,4,opt,name=include_resumable,json=includeResumable"`
+	xxx_hidden_Limit            int32                  `protobuf:"varint,5,opt,name=limit"`
+	xxx_hidden_Offset           int32                  `protobuf:"varint,6,opt,name=offset"`
+	XXX_raceDetectHookData      protoimpl.RaceDetectHookData
+	XXX_presence                [1]uint32
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
+}
+
+func (x *ListNextUpRequest) Reset() {
+	*x = ListNextUpRequest{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListNextUpRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNextUpRequest) ProtoMessage() {}
+
+func (x *ListNextUpRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListNextUpRequest) GetLibraryIds() []string {
+	if x != nil {
+		return x.xxx_hidden_LibraryIds
+	}
+	return nil
+}
+
+func (x *ListNextUpRequest) GetSeriesId() string {
+	if x != nil {
+		if x.xxx_hidden_SeriesId != nil {
+			return *x.xxx_hidden_SeriesId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ListNextUpRequest) GetSince() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_Since
+	}
+	return nil
+}
+
+func (x *ListNextUpRequest) GetIncludeResumable() bool {
+	if x != nil {
+		return x.xxx_hidden_IncludeResumable
+	}
+	return false
+}
+
+func (x *ListNextUpRequest) GetLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_Limit
+	}
+	return 0
+}
+
+func (x *ListNextUpRequest) GetOffset() int32 {
+	if x != nil {
+		return x.xxx_hidden_Offset
+	}
+	return 0
+}
+
+func (x *ListNextUpRequest) SetLibraryIds(v []string) {
+	x.xxx_hidden_LibraryIds = v
+}
+
+func (x *ListNextUpRequest) SetSeriesId(v string) {
+	x.xxx_hidden_SeriesId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+}
+
+func (x *ListNextUpRequest) SetSince(v *timestamppb.Timestamp) {
+	x.xxx_hidden_Since = v
+}
+
+func (x *ListNextUpRequest) SetIncludeResumable(v bool) {
+	x.xxx_hidden_IncludeResumable = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+}
+
+func (x *ListNextUpRequest) SetLimit(v int32) {
+	x.xxx_hidden_Limit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *ListNextUpRequest) SetOffset(v int32) {
+	x.xxx_hidden_Offset = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+}
+
+func (x *ListNextUpRequest) HasSeriesId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ListNextUpRequest) HasSince() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Since != nil
+}
+
+func (x *ListNextUpRequest) HasIncludeResumable() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *ListNextUpRequest) HasLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *ListNextUpRequest) HasOffset() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *ListNextUpRequest) ClearSeriesId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_SeriesId = nil
+}
+
+func (x *ListNextUpRequest) ClearSince() {
+	x.xxx_hidden_Since = nil
+}
+
+func (x *ListNextUpRequest) ClearIncludeResumable() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_IncludeResumable = false
+}
+
+func (x *ListNextUpRequest) ClearLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Limit = 0
+}
+
+func (x *ListNextUpRequest) ClearOffset() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_Offset = 0
+}
+
+type ListNextUpRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	LibraryIds []string
+	SeriesId   *string
+	// Leaves out series last played before this time.
+	Since *timestamppb.Timestamp
+	// Also offers episodes with a resume position.
+	IncludeResumable *bool
+	// 1–100; unset means 20.
+	Limit  *int32
+	Offset *int32
+}
+
+func (b0 ListNextUpRequest_builder) Build() *ListNextUpRequest {
+	m0 := &ListNextUpRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_LibraryIds = b.LibraryIds
+	if b.SeriesId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		x.xxx_hidden_SeriesId = b.SeriesId
+	}
+	x.xxx_hidden_Since = b.Since
+	if b.IncludeResumable != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		x.xxx_hidden_IncludeResumable = *b.IncludeResumable
+	}
+	if b.Limit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		x.xxx_hidden_Limit = *b.Limit
+	}
+	if b.Offset != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		x.xxx_hidden_Offset = *b.Offset
+	}
+	return m0
+}
+
+type ListNextUpResponse struct {
+	state            protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Items *[]*Item               `protobuf:"bytes,1,rep,name=items"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ListNextUpResponse) Reset() {
+	*x = ListNextUpResponse{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListNextUpResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNextUpResponse) ProtoMessage() {}
+
+func (x *ListNextUpResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListNextUpResponse) GetItems() []*Item {
+	if x != nil {
+		if x.xxx_hidden_Items != nil {
+			return *x.xxx_hidden_Items
+		}
+	}
+	return nil
+}
+
+func (x *ListNextUpResponse) SetItems(v []*Item) {
+	x.xxx_hidden_Items = &v
+}
+
+type ListNextUpResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Each series' next episode: the first unplayed episode after the last
+	// played one, with specials placed by where they air.
+	Items []*Item
+}
+
+func (b0 ListNextUpResponse_builder) Build() *ListNextUpResponse {
+	m0 := &ListNextUpResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Items = &b.Items
+	return m0
+}
+
 var File_mavio_library_v1_item_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\n" +
-	"\x1bmavio/library/v1/item.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cmavio/library/v1/media.proto\"\x80\n" +
-	"\n" +
+	"\x1bmavio/library/v1/item.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cmavio/library/v1/media.proto\"\xb6\v\n" +
 	"\x04Item\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
@@ -3895,7 +4601,16 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\bowner_id\x18\x1d \x01(\tR\aownerId\x129\n" +
 	"\n" +
 	"date_added\x18\x1e \x01(\v2\x1a.google.protobuf.TimestampR\tdateAdded\x12/\n" +
-	"\x06images\x18\x1f \x03(\v2\x17.mavio.library.v1.ImageR\x06images\x1a>\n" +
+	"\x06images\x18\x1f \x03(\v2\x17.mavio.library.v1.ImageR\x06images\x12\x1b\n" +
+	"\tseries_id\x18  \x01(\tR\bseriesId\x12\x1f\n" +
+	"\vseries_name\x18! \x01(\tR\n" +
+	"seriesName\x12\x1b\n" +
+	"\tseason_id\x18\" \x01(\tR\bseasonId\x12\x1f\n" +
+	"\vseason_name\x18# \x01(\tR\n" +
+	"seasonName\x12\x19\n" +
+	"\balbum_id\x18$ \x01(\tR\aalbumId\x12\x1d\n" +
+	"\n" +
+	"album_name\x18% \x01(\tR\talbumName\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc6\x01\n" +
@@ -4005,7 +4720,28 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\n" +
 	"item_count\x18\x02 \x01(\x05R\titemCount\"K\n" +
 	"\x12ListPeopleResponse\x125\n" +
-	"\x06people\x18\x01 \x03(\v2\x1d.mavio.library.v1.PersonCountR\x06people*\x9e\x03\n" +
+	"\x06people\x18\x01 \x03(\v2\x1d.mavio.library.v1.PersonCountR\x06people\"\xe2\x01\n" +
+	"\x16ListLatestItemsRequest\x12.\n" +
+	"\vlibrary_ids\x18\x01 \x03(\tB\r\xbaH\n" +
+	"\x92\x01\a\"\x05r\x03\xb0\x01\x01R\n" +
+	"libraryIds\x12A\n" +
+	"\x05kinds\x18\x02 \x03(\x0e2\x1a.mavio.library.v1.ItemKindB\x0f\xbaH\f\x92\x01\t\"\a\x82\x01\x04\x10\x01 \x00R\x05kinds\x12\x16\n" +
+	"\x06played\x18\x03 \x01(\bR\x06played\x12\x1c\n" +
+	"\tungrouped\x18\x04 \x01(\bR\tungrouped\x12\x1f\n" +
+	"\x05limit\x18\x05 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x00R\x05limit\"G\n" +
+	"\x17ListLatestItemsResponse\x12,\n" +
+	"\x05items\x18\x01 \x03(\v2\x16.mavio.library.v1.ItemR\x05items\"\x8b\x02\n" +
+	"\x11ListNextUpRequest\x12.\n" +
+	"\vlibrary_ids\x18\x01 \x03(\tB\r\xbaH\n" +
+	"\x92\x01\a\"\x05r\x03\xb0\x01\x01R\n" +
+	"libraryIds\x12%\n" +
+	"\tseries_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\bseriesId\x120\n" +
+	"\x05since\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x05since\x12+\n" +
+	"\x11include_resumable\x18\x04 \x01(\bR\x10includeResumable\x12\x1f\n" +
+	"\x05limit\x18\x05 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x00R\x05limit\x12\x1f\n" +
+	"\x06offset\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\"B\n" +
+	"\x12ListNextUpResponse\x12,\n" +
+	"\x05items\x18\x01 \x03(\v2\x16.mavio.library.v1.ItemR\x05items*\x9e\x03\n" +
 	"\bItemKind\x12\x19\n" +
 	"\x15ITEM_KIND_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fITEM_KIND_MOVIE\x10\x01\x12\x14\n" +
@@ -4091,69 +4827,76 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x0eVALUE_KIND_TAG\x10\x02\x12\x15\n" +
 	"\x11VALUE_KIND_STUDIO\x10\x03\x12\x15\n" +
 	"\x11VALUE_KIND_ARTIST\x10\x04\x12\x13\n" +
-	"\x0fVALUE_KIND_YEAR\x10\x052\xd4\x03\n" +
+	"\x0fVALUE_KIND_YEAR\x10\x052\x9f\x05\n" +
 	"\vItemService\x12S\n" +
 	"\aGetItem\x12 .mavio.library.v1.GetItemRequest\x1a!.mavio.library.v1.GetItemResponse\"\x03\x90\x02\x01\x12Y\n" +
 	"\tListItems\x12\".mavio.library.v1.ListItemsRequest\x1a#.mavio.library.v1.ListItemsResponse\"\x03\x90\x02\x01\x12Y\n" +
 	"\tGetPerson\x12\".mavio.library.v1.GetPersonRequest\x1a#.mavio.library.v1.GetPersonResponse\"\x03\x90\x02\x01\x12\\\n" +
 	"\n" +
-	"ListValues\x12#.mavio.library.v1.ListValuesRequest\x1a$.mavio.library.v1.ListValuesResponse\"\x03\x90\x02\x01\x12\\\n" +
+	"ListValues\x12#.mavio.library.v1.ListValuesRequest\x1a$.mavio.library.v1.ListValuesResponse\"\x03\x90\x02\x01\x12k\n" +
+	"\x0fListLatestItems\x12(.mavio.library.v1.ListLatestItemsRequest\x1a).mavio.library.v1.ListLatestItemsResponse\"\x03\x90\x02\x01\x12\\\n" +
+	"\n" +
+	"ListNextUp\x12#.mavio.library.v1.ListNextUpRequest\x1a$.mavio.library.v1.ListNextUpResponse\"\x03\x90\x02\x01\x12\\\n" +
 	"\n" +
 	"ListPeople\x12#.mavio.library.v1.ListPeopleRequest\x1a$.mavio.library.v1.ListPeopleResponse\"\x03\x90\x02\x01B\xca\x01\n" +
 	"\x14com.mavio.library.v1B\tItemProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1;libraryv1\xa2\x02\x03MLX\xaa\x02\x10Mavio.Library.V1\xca\x02\x10Mavio\\Library\\V1\xe2\x02\x1cMavio\\Library\\V1\\GPBMetadata\xea\x02\x12Mavio::Library::V1b\beditionsp\xe8\a"
 
 var file_mavio_library_v1_item_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
-var file_mavio_library_v1_item_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_mavio_library_v1_item_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_mavio_library_v1_item_proto_goTypes = []any{
-	(ItemKind)(0),                 // 0: mavio.library.v1.ItemKind
-	(ExtraKind)(0),                // 1: mavio.library.v1.ExtraKind
-	(SeriesStatus)(0),             // 2: mavio.library.v1.SeriesStatus
-	(ImageKind)(0),                // 3: mavio.library.v1.ImageKind
-	(CreditKind)(0),               // 4: mavio.library.v1.CreditKind
-	(SortField)(0),                // 5: mavio.library.v1.SortField
-	(ValueKind)(0),                // 6: mavio.library.v1.ValueKind
-	(*Item)(nil),                  // 7: mavio.library.v1.Item
-	(*Image)(nil),                 // 8: mavio.library.v1.Image
-	(*Person)(nil),                // 9: mavio.library.v1.Person
-	(*Credit)(nil),                // 10: mavio.library.v1.Credit
-	(*GetItemRequest)(nil),        // 11: mavio.library.v1.GetItemRequest
-	(*GetItemResponse)(nil),       // 12: mavio.library.v1.GetItemResponse
-	(*SortSpec)(nil),              // 13: mavio.library.v1.SortSpec
-	(*ListItemsRequest)(nil),      // 14: mavio.library.v1.ListItemsRequest
-	(*ListItemsResponse)(nil),     // 15: mavio.library.v1.ListItemsResponse
-	(*GetPersonRequest)(nil),      // 16: mavio.library.v1.GetPersonRequest
-	(*GetPersonResponse)(nil),     // 17: mavio.library.v1.GetPersonResponse
-	(*ListValuesRequest)(nil),     // 18: mavio.library.v1.ListValuesRequest
-	(*ValueCount)(nil),            // 19: mavio.library.v1.ValueCount
-	(*ListValuesResponse)(nil),    // 20: mavio.library.v1.ListValuesResponse
-	(*ListPeopleRequest)(nil),     // 21: mavio.library.v1.ListPeopleRequest
-	(*PersonCount)(nil),           // 22: mavio.library.v1.PersonCount
-	(*ListPeopleResponse)(nil),    // 23: mavio.library.v1.ListPeopleResponse
-	nil,                           // 24: mavio.library.v1.Item.ExternalIdsEntry
-	nil,                           // 25: mavio.library.v1.Person.ExternalIdsEntry
-	(*timestamppb.Timestamp)(nil), // 26: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),   // 27: google.protobuf.Duration
-	(*MediaSource)(nil),           // 28: mavio.library.v1.MediaSource
+	(ItemKind)(0),                   // 0: mavio.library.v1.ItemKind
+	(ExtraKind)(0),                  // 1: mavio.library.v1.ExtraKind
+	(SeriesStatus)(0),               // 2: mavio.library.v1.SeriesStatus
+	(ImageKind)(0),                  // 3: mavio.library.v1.ImageKind
+	(CreditKind)(0),                 // 4: mavio.library.v1.CreditKind
+	(SortField)(0),                  // 5: mavio.library.v1.SortField
+	(ValueKind)(0),                  // 6: mavio.library.v1.ValueKind
+	(*Item)(nil),                    // 7: mavio.library.v1.Item
+	(*Image)(nil),                   // 8: mavio.library.v1.Image
+	(*Person)(nil),                  // 9: mavio.library.v1.Person
+	(*Credit)(nil),                  // 10: mavio.library.v1.Credit
+	(*GetItemRequest)(nil),          // 11: mavio.library.v1.GetItemRequest
+	(*GetItemResponse)(nil),         // 12: mavio.library.v1.GetItemResponse
+	(*SortSpec)(nil),                // 13: mavio.library.v1.SortSpec
+	(*ListItemsRequest)(nil),        // 14: mavio.library.v1.ListItemsRequest
+	(*ListItemsResponse)(nil),       // 15: mavio.library.v1.ListItemsResponse
+	(*GetPersonRequest)(nil),        // 16: mavio.library.v1.GetPersonRequest
+	(*GetPersonResponse)(nil),       // 17: mavio.library.v1.GetPersonResponse
+	(*ListValuesRequest)(nil),       // 18: mavio.library.v1.ListValuesRequest
+	(*ValueCount)(nil),              // 19: mavio.library.v1.ValueCount
+	(*ListValuesResponse)(nil),      // 20: mavio.library.v1.ListValuesResponse
+	(*ListPeopleRequest)(nil),       // 21: mavio.library.v1.ListPeopleRequest
+	(*PersonCount)(nil),             // 22: mavio.library.v1.PersonCount
+	(*ListPeopleResponse)(nil),      // 23: mavio.library.v1.ListPeopleResponse
+	(*ListLatestItemsRequest)(nil),  // 24: mavio.library.v1.ListLatestItemsRequest
+	(*ListLatestItemsResponse)(nil), // 25: mavio.library.v1.ListLatestItemsResponse
+	(*ListNextUpRequest)(nil),       // 26: mavio.library.v1.ListNextUpRequest
+	(*ListNextUpResponse)(nil),      // 27: mavio.library.v1.ListNextUpResponse
+	nil,                             // 28: mavio.library.v1.Item.ExternalIdsEntry
+	nil,                             // 29: mavio.library.v1.Person.ExternalIdsEntry
+	(*timestamppb.Timestamp)(nil),   // 30: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),     // 31: google.protobuf.Duration
+	(*MediaSource)(nil),             // 32: mavio.library.v1.MediaSource
 }
 var file_mavio_library_v1_item_proto_depIdxs = []int32{
 	0,  // 0: mavio.library.v1.Item.kind:type_name -> mavio.library.v1.ItemKind
-	26, // 1: mavio.library.v1.Item.premiere_date:type_name -> google.protobuf.Timestamp
-	26, // 2: mavio.library.v1.Item.end_date:type_name -> google.protobuf.Timestamp
-	27, // 3: mavio.library.v1.Item.runtime:type_name -> google.protobuf.Duration
-	24, // 4: mavio.library.v1.Item.external_ids:type_name -> mavio.library.v1.Item.ExternalIdsEntry
+	30, // 1: mavio.library.v1.Item.premiere_date:type_name -> google.protobuf.Timestamp
+	30, // 2: mavio.library.v1.Item.end_date:type_name -> google.protobuf.Timestamp
+	31, // 3: mavio.library.v1.Item.runtime:type_name -> google.protobuf.Duration
+	28, // 4: mavio.library.v1.Item.external_ids:type_name -> mavio.library.v1.Item.ExternalIdsEntry
 	2,  // 5: mavio.library.v1.Item.series_status:type_name -> mavio.library.v1.SeriesStatus
 	1,  // 6: mavio.library.v1.Item.extra:type_name -> mavio.library.v1.ExtraKind
-	26, // 7: mavio.library.v1.Item.date_added:type_name -> google.protobuf.Timestamp
+	30, // 7: mavio.library.v1.Item.date_added:type_name -> google.protobuf.Timestamp
 	8,  // 8: mavio.library.v1.Item.images:type_name -> mavio.library.v1.Image
 	3,  // 9: mavio.library.v1.Image.kind:type_name -> mavio.library.v1.ImageKind
-	26, // 10: mavio.library.v1.Person.birth_date:type_name -> google.protobuf.Timestamp
-	26, // 11: mavio.library.v1.Person.death_date:type_name -> google.protobuf.Timestamp
-	25, // 12: mavio.library.v1.Person.external_ids:type_name -> mavio.library.v1.Person.ExternalIdsEntry
+	30, // 10: mavio.library.v1.Person.birth_date:type_name -> google.protobuf.Timestamp
+	30, // 11: mavio.library.v1.Person.death_date:type_name -> google.protobuf.Timestamp
+	29, // 12: mavio.library.v1.Person.external_ids:type_name -> mavio.library.v1.Person.ExternalIdsEntry
 	8,  // 13: mavio.library.v1.Person.images:type_name -> mavio.library.v1.Image
 	9,  // 14: mavio.library.v1.Credit.person:type_name -> mavio.library.v1.Person
 	4,  // 15: mavio.library.v1.Credit.kind:type_name -> mavio.library.v1.CreditKind
 	7,  // 16: mavio.library.v1.GetItemResponse.item:type_name -> mavio.library.v1.Item
-	28, // 17: mavio.library.v1.GetItemResponse.media_sources:type_name -> mavio.library.v1.MediaSource
+	32, // 17: mavio.library.v1.GetItemResponse.media_sources:type_name -> mavio.library.v1.MediaSource
 	10, // 18: mavio.library.v1.GetItemResponse.credits:type_name -> mavio.library.v1.Credit
 	5,  // 19: mavio.library.v1.SortSpec.field:type_name -> mavio.library.v1.SortField
 	0,  // 20: mavio.library.v1.ListItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
@@ -4167,21 +4910,29 @@ var file_mavio_library_v1_item_proto_depIdxs = []int32{
 	4,  // 28: mavio.library.v1.ListPeopleRequest.credit_kinds:type_name -> mavio.library.v1.CreditKind
 	9,  // 29: mavio.library.v1.PersonCount.person:type_name -> mavio.library.v1.Person
 	22, // 30: mavio.library.v1.ListPeopleResponse.people:type_name -> mavio.library.v1.PersonCount
-	11, // 31: mavio.library.v1.ItemService.GetItem:input_type -> mavio.library.v1.GetItemRequest
-	14, // 32: mavio.library.v1.ItemService.ListItems:input_type -> mavio.library.v1.ListItemsRequest
-	16, // 33: mavio.library.v1.ItemService.GetPerson:input_type -> mavio.library.v1.GetPersonRequest
-	18, // 34: mavio.library.v1.ItemService.ListValues:input_type -> mavio.library.v1.ListValuesRequest
-	21, // 35: mavio.library.v1.ItemService.ListPeople:input_type -> mavio.library.v1.ListPeopleRequest
-	12, // 36: mavio.library.v1.ItemService.GetItem:output_type -> mavio.library.v1.GetItemResponse
-	15, // 37: mavio.library.v1.ItemService.ListItems:output_type -> mavio.library.v1.ListItemsResponse
-	17, // 38: mavio.library.v1.ItemService.GetPerson:output_type -> mavio.library.v1.GetPersonResponse
-	20, // 39: mavio.library.v1.ItemService.ListValues:output_type -> mavio.library.v1.ListValuesResponse
-	23, // 40: mavio.library.v1.ItemService.ListPeople:output_type -> mavio.library.v1.ListPeopleResponse
-	36, // [36:41] is the sub-list for method output_type
-	31, // [31:36] is the sub-list for method input_type
-	31, // [31:31] is the sub-list for extension type_name
-	31, // [31:31] is the sub-list for extension extendee
-	0,  // [0:31] is the sub-list for field type_name
+	0,  // 31: mavio.library.v1.ListLatestItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
+	7,  // 32: mavio.library.v1.ListLatestItemsResponse.items:type_name -> mavio.library.v1.Item
+	30, // 33: mavio.library.v1.ListNextUpRequest.since:type_name -> google.protobuf.Timestamp
+	7,  // 34: mavio.library.v1.ListNextUpResponse.items:type_name -> mavio.library.v1.Item
+	11, // 35: mavio.library.v1.ItemService.GetItem:input_type -> mavio.library.v1.GetItemRequest
+	14, // 36: mavio.library.v1.ItemService.ListItems:input_type -> mavio.library.v1.ListItemsRequest
+	16, // 37: mavio.library.v1.ItemService.GetPerson:input_type -> mavio.library.v1.GetPersonRequest
+	18, // 38: mavio.library.v1.ItemService.ListValues:input_type -> mavio.library.v1.ListValuesRequest
+	24, // 39: mavio.library.v1.ItemService.ListLatestItems:input_type -> mavio.library.v1.ListLatestItemsRequest
+	26, // 40: mavio.library.v1.ItemService.ListNextUp:input_type -> mavio.library.v1.ListNextUpRequest
+	21, // 41: mavio.library.v1.ItemService.ListPeople:input_type -> mavio.library.v1.ListPeopleRequest
+	12, // 42: mavio.library.v1.ItemService.GetItem:output_type -> mavio.library.v1.GetItemResponse
+	15, // 43: mavio.library.v1.ItemService.ListItems:output_type -> mavio.library.v1.ListItemsResponse
+	17, // 44: mavio.library.v1.ItemService.GetPerson:output_type -> mavio.library.v1.GetPersonResponse
+	20, // 45: mavio.library.v1.ItemService.ListValues:output_type -> mavio.library.v1.ListValuesResponse
+	25, // 46: mavio.library.v1.ItemService.ListLatestItems:output_type -> mavio.library.v1.ListLatestItemsResponse
+	27, // 47: mavio.library.v1.ItemService.ListNextUp:output_type -> mavio.library.v1.ListNextUpResponse
+	23, // 48: mavio.library.v1.ItemService.ListPeople:output_type -> mavio.library.v1.ListPeopleResponse
+	42, // [42:49] is the sub-list for method output_type
+	35, // [35:42] is the sub-list for method input_type
+	35, // [35:35] is the sub-list for extension type_name
+	35, // [35:35] is the sub-list for extension extendee
+	0,  // [0:35] is the sub-list for field type_name
 }
 
 func init() { file_mavio_library_v1_item_proto_init() }
@@ -4196,7 +4947,7 @@ func file_mavio_library_v1_item_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_library_v1_item_proto_rawDesc), len(file_mavio_library_v1_item_proto_rawDesc)),
 			NumEnums:      7,
-			NumMessages:   19,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -162,6 +162,29 @@ func TestItemService(t *testing.T) {
 		t.Errorf("played = %q", got)
 	}
 
+	// Next up follows the played pilot, with its series and season.
+	if _, err := data.UpdateUserData(ctx, userv1.UpdateUserDataRequest_builder{ItemId: new(c.pilot.ID.String()), Played: new(true)}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	next, err := asAdmin.ListNextUp(ctx, libraryv1.ListNextUpRequest_builder{}.Build())
+	if err != nil || len(next.GetItems()) != 1 {
+		t.Fatalf("next up = %v, %v", next, err)
+	}
+	if ep := next.GetItems()[0]; ep.GetName() != "Finale" || ep.GetSeriesId() != c.series.ID.String() || ep.GetSeriesName() != "Show" ||
+		ep.GetSeasonId() != c.season.ID.String() || ep.GetSeasonName() != "Season 1" {
+		t.Errorf("next up = %v", ep)
+	}
+	// The latest items: the series stands for its two episodes, the
+	// trailer is an extra.
+	latest, err := asAdmin.ListLatestItems(ctx, libraryv1.ListLatestItemsRequest_builder{}.Build())
+	if got := names(latest.GetItems()); err != nil || len(got) != 3 || !slices.Contains(got, "Show") || !slices.Contains(got, "Alien") || !slices.Contains(got, "Up") {
+		t.Errorf("latest = %q, %v", got, err)
+	}
+	latest, err = asAdmin.ListLatestItems(ctx, libraryv1.ListLatestItemsRequest_builder{LibraryIds: []string{c.films.ID.String()}, Played: new(true)}.Build())
+	if got := names(latest.GetItems()); err != nil || !slices.Equal(got, []string{"Up"}) {
+		t.Errorf("played latest films = %q, %v", got, err)
+	}
+
 	// A user limited to shows rated up to 12 sees neither film library nor paths.
 	users := userv1connect.NewUserServiceClient(http.DefaultClient, url, withToken(token))
 	if _, err := users.CreateUser(ctx, userv1.CreateUserRequest_builder{
@@ -196,6 +219,12 @@ func TestItemService(t *testing.T) {
 	}
 	if p, err := asKid.GetPerson(ctx, libraryv1.GetPersonRequest_builder{Id: new(c.ridley.ID.String())}.Build()); err != nil || p.GetPerson().GetName() != "Ridley Scott" {
 		t.Errorf("GetPerson = %v, %v", p, err)
+	}
+
+	// The kid's latest items: only the pilot, not its rated series.
+	latest, err = asKid.ListLatestItems(ctx, libraryv1.ListLatestItemsRequest_builder{}.Build())
+	if got := names(latest.GetItems()); err != nil || !slices.Equal(got, []string{"Pilot"}) {
+		t.Errorf("kid's latest = %q, %v", got, err)
 	}
 
 	// Value and person lists count only what the caller may access.

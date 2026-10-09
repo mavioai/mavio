@@ -41,6 +41,11 @@ const (
 	ItemServiceGetPersonProcedure = "/mavio.library.v1.ItemService/GetPerson"
 	// ItemServiceListValuesProcedure is the fully-qualified name of the ItemService's ListValues RPC.
 	ItemServiceListValuesProcedure = "/mavio.library.v1.ItemService/ListValues"
+	// ItemServiceListLatestItemsProcedure is the fully-qualified name of the ItemService's
+	// ListLatestItems RPC.
+	ItemServiceListLatestItemsProcedure = "/mavio.library.v1.ItemService/ListLatestItems"
+	// ItemServiceListNextUpProcedure is the fully-qualified name of the ItemService's ListNextUp RPC.
+	ItemServiceListNextUpProcedure = "/mavio.library.v1.ItemService/ListNextUp"
 	// ItemServiceListPeopleProcedure is the fully-qualified name of the ItemService's ListPeople RPC.
 	ItemServiceListPeopleProcedure = "/mavio.library.v1.ItemService/ListPeople"
 )
@@ -54,6 +59,14 @@ type ItemServiceClient interface {
 	// of the items the caller may access, with the number of items having
 	// each.
 	ListValues(context.Context, *v1.ListValuesRequest) (*v1.ListValuesResponse, error)
+	// ListLatestItems lists the items added last to the libraries the caller
+	// may access, newest first.
+	ListLatestItems(context.Context, *v1.ListLatestItemsRequest) (*v1.ListLatestItemsResponse, error)
+	// ListNextUp lists the next episode to watch of each series the caller
+	// has played, the series played most recently first. Episodes being
+	// watched are left to continue watching: ListItems with resumable set,
+	// sorted by last played.
+	ListNextUp(context.Context, *v1.ListNextUpRequest) (*v1.ListNextUpResponse, error)
 	// ListPeople lists the people credited on the items the caller may
 	// access, with the number of items crediting each.
 	ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error)
@@ -98,6 +111,20 @@ func NewItemServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		listLatestItems: connect.NewClient[v1.ListLatestItemsRequest, v1.ListLatestItemsResponse](
+			httpClient,
+			baseURL+ItemServiceListLatestItemsProcedure,
+			connect.WithSchema(itemServiceMethods.ByName("ListLatestItems")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		listNextUp: connect.NewClient[v1.ListNextUpRequest, v1.ListNextUpResponse](
+			httpClient,
+			baseURL+ItemServiceListNextUpProcedure,
+			connect.WithSchema(itemServiceMethods.ByName("ListNextUp")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		listPeople: connect.NewClient[v1.ListPeopleRequest, v1.ListPeopleResponse](
 			httpClient,
 			baseURL+ItemServiceListPeopleProcedure,
@@ -110,11 +137,13 @@ func NewItemServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 
 // itemServiceClient implements ItemServiceClient.
 type itemServiceClient struct {
-	getItem    *connect.Client[v1.GetItemRequest, v1.GetItemResponse]
-	listItems  *connect.Client[v1.ListItemsRequest, v1.ListItemsResponse]
-	getPerson  *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
-	listValues *connect.Client[v1.ListValuesRequest, v1.ListValuesResponse]
-	listPeople *connect.Client[v1.ListPeopleRequest, v1.ListPeopleResponse]
+	getItem         *connect.Client[v1.GetItemRequest, v1.GetItemResponse]
+	listItems       *connect.Client[v1.ListItemsRequest, v1.ListItemsResponse]
+	getPerson       *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
+	listValues      *connect.Client[v1.ListValuesRequest, v1.ListValuesResponse]
+	listLatestItems *connect.Client[v1.ListLatestItemsRequest, v1.ListLatestItemsResponse]
+	listNextUp      *connect.Client[v1.ListNextUpRequest, v1.ListNextUpResponse]
+	listPeople      *connect.Client[v1.ListPeopleRequest, v1.ListPeopleResponse]
 }
 
 // GetItem calls mavio.library.v1.ItemService.GetItem.
@@ -153,6 +182,24 @@ func (c *itemServiceClient) ListValues(ctx context.Context, req *v1.ListValuesRe
 	return nil, err
 }
 
+// ListLatestItems calls mavio.library.v1.ItemService.ListLatestItems.
+func (c *itemServiceClient) ListLatestItems(ctx context.Context, req *v1.ListLatestItemsRequest) (*v1.ListLatestItemsResponse, error) {
+	response, err := c.listLatestItems.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListNextUp calls mavio.library.v1.ItemService.ListNextUp.
+func (c *itemServiceClient) ListNextUp(ctx context.Context, req *v1.ListNextUpRequest) (*v1.ListNextUpResponse, error) {
+	response, err := c.listNextUp.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ListPeople calls mavio.library.v1.ItemService.ListPeople.
 func (c *itemServiceClient) ListPeople(ctx context.Context, req *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error) {
 	response, err := c.listPeople.CallUnary(ctx, connect.NewRequest(req))
@@ -171,6 +218,14 @@ type ItemServiceHandler interface {
 	// of the items the caller may access, with the number of items having
 	// each.
 	ListValues(context.Context, *v1.ListValuesRequest) (*v1.ListValuesResponse, error)
+	// ListLatestItems lists the items added last to the libraries the caller
+	// may access, newest first.
+	ListLatestItems(context.Context, *v1.ListLatestItemsRequest) (*v1.ListLatestItemsResponse, error)
+	// ListNextUp lists the next episode to watch of each series the caller
+	// has played, the series played most recently first. Episodes being
+	// watched are left to continue watching: ListItems with resumable set,
+	// sorted by last played.
+	ListNextUp(context.Context, *v1.ListNextUpRequest) (*v1.ListNextUpResponse, error)
 	// ListPeople lists the people credited on the items the caller may
 	// access, with the number of items crediting each.
 	ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error)
@@ -211,6 +266,20 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	itemServiceListLatestItemsHandler := connect.NewUnaryHandlerSimple(
+		ItemServiceListLatestItemsProcedure,
+		svc.ListLatestItems,
+		connect.WithSchema(itemServiceMethods.ByName("ListLatestItems")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	itemServiceListNextUpHandler := connect.NewUnaryHandlerSimple(
+		ItemServiceListNextUpProcedure,
+		svc.ListNextUp,
+		connect.WithSchema(itemServiceMethods.ByName("ListNextUp")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	itemServiceListPeopleHandler := connect.NewUnaryHandlerSimple(
 		ItemServiceListPeopleProcedure,
 		svc.ListPeople,
@@ -228,6 +297,10 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 			itemServiceGetPersonHandler.ServeHTTP(w, r)
 		case ItemServiceListValuesProcedure:
 			itemServiceListValuesHandler.ServeHTTP(w, r)
+		case ItemServiceListLatestItemsProcedure:
+			itemServiceListLatestItemsHandler.ServeHTTP(w, r)
+		case ItemServiceListNextUpProcedure:
+			itemServiceListNextUpHandler.ServeHTTP(w, r)
 		case ItemServiceListPeopleProcedure:
 			itemServiceListPeopleHandler.ServeHTTP(w, r)
 		default:
@@ -253,6 +326,14 @@ func (UnimplementedItemServiceHandler) GetPerson(context.Context, *v1.GetPersonR
 
 func (UnimplementedItemServiceHandler) ListValues(context.Context, *v1.ListValuesRequest) (*v1.ListValuesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.ListValues is not implemented"))
+}
+
+func (UnimplementedItemServiceHandler) ListLatestItems(context.Context, *v1.ListLatestItemsRequest) (*v1.ListLatestItemsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.ListLatestItems is not implemented"))
+}
+
+func (UnimplementedItemServiceHandler) ListNextUp(context.Context, *v1.ListNextUpRequest) (*v1.ListNextUpResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.ListNextUp is not implemented"))
 }
 
 func (UnimplementedItemServiceHandler) ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error) {
