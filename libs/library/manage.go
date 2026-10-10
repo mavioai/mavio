@@ -114,8 +114,8 @@ func (r *Refresher) Identify(ctx context.Context, lib core.Library, itemID core.
 	return r.RefreshWith(ctx, lib, itemID, RefreshOptions{ReplaceMetadata: true})
 }
 
-// RemoteImages lists the images the providers have of an item of lib, of
-// one kind or, when kind is empty, of all.
+// RemoteImages lists the images the metadata and image providers have of
+// an item of lib, of one kind or, when kind is empty, of all.
 func (r *Refresher) RemoteImages(ctx context.Context, lib core.Library, itemID core.ID, kind core.ImageKind) ([]RemoteImage, error) {
 	it, err := r.Store.Items().Get(ctx, itemID)
 	if err != nil {
@@ -137,6 +137,18 @@ func (r *Refresher) RemoteImages(ctx context.Context, lib core.Library, itemID c
 		}
 		l.ExternalIDs = mergeIDs(l.ExternalIDs, res.Item.ExternalIDs)
 		for _, img := range res.RemoteImages {
+			if kind == "" || img.Kind == kind {
+				out = append(out, RemoteImage{Provider: p.Name(), RemoteImage: img})
+			}
+		}
+	}
+	for _, p := range r.imageProviders() {
+		images, err := p.Images(ctx, l)
+		if err != nil {
+			r.logger().WarnContext(ctx, "image provider failed", "provider", p.Name(), "item", it.ID, "err", err)
+			continue
+		}
+		for _, img := range images {
 			if kind == "" || img.Kind == kind {
 				out = append(out, RemoteImage{Provider: p.Name(), RemoteImage: img})
 			}

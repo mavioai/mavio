@@ -12,6 +12,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
+	"github.com/mavioai/mavio/libs/metadata"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
@@ -158,5 +159,37 @@ func TestPluginKnowsNothing(t *testing.T) {
 				t.Errorf("Metadata() = %+v, %v, want = nil, nil", res, err)
 			}
 		})
+	}
+}
+
+type fakeImages struct{ got *pluginv1.Lookup }
+
+func (f *fakeImages) GetImages(_ context.Context, req *pluginv1.GetImagesRequest) (*pluginv1.GetImagesResponse, error) {
+	f.got = req.GetLookup()
+	img := func(kind pluginv1.ImageKind, url string) *pluginv1.RemoteImage {
+		return pluginv1.RemoteImage_builder{Kind: kind.Enum(), Url: proto.String(url), Width: proto.Int32(1000), Score: proto.Float64(0.5)}.Build()
+	}
+	return pluginv1.GetImagesResponse_builder{Images: []*pluginv1.RemoteImage{
+		img(pluginv1.ImageKind_IMAGE_KIND_LOGO, "https://fanart.example/logo.png"),
+		img(pluginv1.ImageKind_IMAGE_KIND_UNSPECIFIED, "https://fanart.example/what.png"),
+		img(pluginv1.ImageKind_IMAGE_KIND_BANNER, ""),
+	}}.Build(), nil
+}
+
+func TestImagePlugin(t *testing.T) {
+	f := &fakeImages{}
+	p := &ImagePlugin{ID: "fanart", Client: f}
+	got, err := p.Images(t.Context(), library.Lookup{Kind: core.KindMovie, Name: "Heat", ExternalIDs: map[core.Provider]string{core.ProviderTMDB: "949"}})
+	want := []metadata.RemoteImage{{Kind: core.ImageLogo, URL: "https://fanart.example/logo.png", Width: 1000, Score: 0.5}}
+	if err != nil || !slices.Equal(got, want) {
+		t.Errorf("Images() = %+v, %v, want %+v", got, err, want)
+	}
+	if f.got.GetExternalIds()["tmdb"] != "949" || f.got.GetKind() != pluginv1.MediaKind_MEDIA_KIND_MOVIE {
+		t.Errorf("lookup = %v", f.got)
+	}
+	// Items of kinds the contract lacks are not asked about.
+	f.got = nil
+	if got, err := p.Images(t.Context(), library.Lookup{Kind: core.KindFolder}); got != nil || err != nil || f.got != nil {
+		t.Errorf("Images(folder) = %v, %v; asked %v", got, err, f.got)
 	}
 }

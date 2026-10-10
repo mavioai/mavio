@@ -77,6 +77,28 @@ func (p *Plugin) Search(ctx context.Context, l library.Lookup, limit int) ([]lib
 	return out, nil
 }
 
+// ImagePlugin is an image provider plugin as a library.ImageProvider.
+type ImagePlugin struct {
+	ID     string
+	Client pluginv1connect.ImageProviderServiceClient
+}
+
+// Name returns the plugin's ID.
+func (p *ImagePlugin) Name() string { return p.ID }
+
+// Images asks the plugin for images of an item.
+func (p *ImagePlugin) Images(ctx context.Context, l library.Lookup) ([]metadata.RemoteImage, error) {
+	kind, ok := mediaKinds[l.Kind]
+	if !ok {
+		return nil, nil
+	}
+	resp, err := p.Client.GetImages(ctx, pluginv1.GetImagesRequest_builder{Lookup: toLookup(kind, l)}.Build())
+	if err != nil {
+		return nil, fmt.Errorf("get images: %w", err)
+	}
+	return remoteImages(resp.GetImages()), nil
+}
+
 // externalIDs converts a contract's external IDs; nil when there are none.
 func externalIDs(m map[string]string) map[core.Provider]string {
 	var out map[core.Provider]string
@@ -181,15 +203,23 @@ func toResult(md *pluginv1.Metadata) *metadata.Result {
 		}
 		res.People = append(res.People, p)
 	}
-	for _, img := range md.GetImages() {
+	res.RemoteImages = remoteImages(md.GetImages())
+	return res
+}
+
+// remoteImages converts a contract's images, leaving out those of unknown
+// kinds or without URLs.
+func remoteImages(images []*pluginv1.RemoteImage) []metadata.RemoteImage {
+	var out []metadata.RemoteImage
+	for _, img := range images {
 		if kind, ok := imageKinds[img.GetKind()]; ok && img.GetUrl() != "" {
-			res.RemoteImages = append(res.RemoteImages, metadata.RemoteImage{
+			out = append(out, metadata.RemoteImage{
 				Kind: kind, URL: img.GetUrl(), Width: int(img.GetWidth()), Height: int(img.GetHeight()),
 				Language: img.GetLanguage(), Score: img.GetScore(),
 			})
 		}
 	}
-	return res
+	return out
 }
 
 // date parses an ISO 8601 calendar date; nil when empty or malformed.

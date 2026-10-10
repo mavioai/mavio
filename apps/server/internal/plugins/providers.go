@@ -57,6 +57,30 @@ func (p *provider) Search(ctx context.Context, l library.Lookup, limit int) ([]l
 	return pl.Search(ctx, l, limit)
 }
 
+// ImageProviders returns the image providers among the started plugins.
+func (m *Manager) ImageProviders() []library.ImageProvider {
+	var out []library.ImageProvider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_IMAGE_PROVIDER) {
+		out = append(out, &imageProvider{m: m, id: id})
+	}
+	return out
+}
+
+type imageProvider struct {
+	m  *Manager
+	id string
+}
+
+func (p *imageProvider) Name() string { return p.id }
+
+func (p *imageProvider) Images(ctx context.Context, l library.Lookup) ([]metadata.RemoteImage, error) {
+	pl, ok := p.m.running(p.id)
+	if !ok || pl.Images() == nil {
+		return nil, nil
+	}
+	return (&providers.ImagePlugin{ID: p.id, Client: pl.Images()}).Images(ctx, l)
+}
+
 // SubtitleProviders returns the subtitle providers among the started
 // plugins.
 func (m *Manager) SubtitleProviders() []library.SubtitleProvider {

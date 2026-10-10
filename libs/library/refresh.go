@@ -43,6 +43,13 @@ type Provider interface {
 	Metadata(ctx context.Context, l Lookup) (*metadata.Result, error)
 }
 
+// ImageProvider finds images of items in an external source, such as an
+// image plugin.
+type ImageProvider interface {
+	Name() string
+	Images(ctx context.Context, l Lookup) ([]metadata.RemoteImage, error)
+}
+
 // Refresher fills in an item's metadata from external providers and local
 // NFO files. Local files win over providers, and both over what a scan
 // derived from file names; locked items and fields are left alone. It also
@@ -54,6 +61,9 @@ type Refresher struct {
 	// Source, when set, gives the providers instead of Providers, so that
 	// providers come and go while the server runs.
 	Source func() []Provider
+	// Images gives the image providers, which fill in the kinds of images
+	// the metadata providers and local files lack; nil means none.
+	Images func() []ImageProvider
 	// MetadataDir holds the artwork chosen for items whose library does
 	// not save local metadata, one folder per item; empty keeps none.
 	MetadataDir string
@@ -170,6 +180,10 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 	if local != nil {
 		results = append(results, local)
 	}
+	var extraImages []metadata.RemoteImage
+	if it.Extra == "" && !it.Locked {
+		extraImages = r.providerImages(ctx, lookup)
+	}
 	name := it.Name
 	for _, res := range results {
 		applyMetadata(&it, res.Item, res == local)
@@ -199,7 +213,7 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 			}
 		}
 		// Each kind of image comes from the most trusted source that has
-		// it.
+		// it, then from the image providers.
 		var images []core.Image
 		for i := len(results) - 1; i >= 0; i-- {
 			for _, img := range imagesOf(it.ID, results[i]) {
@@ -207,6 +221,11 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 					(img.Kind == core.ImageBackdrop && i == len(results)-1) {
 					images = append(images, img)
 				}
+			}
+		}
+		for _, img := range imagesOf(it.ID, &metadata.Result{RemoteImages: extraImages}) {
+			if !slices.ContainsFunc(images, func(have core.Image) bool { return have.Kind == img.Kind }) {
+				images = append(images, img)
 			}
 		}
 		if len(images) == 0 {
@@ -224,6 +243,45 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 		return it, err
 	}
 	return it, r.changed(ctx, lib, it)
+}
+
+// imageProviders returns the image providers.
+func (r *Refresher) imageProviders() []ImageProvider {
+	if r.Images == nil {
+		return nil
+	}
+	return r.Images()
+}
+
+// providerImages asks the image providers for the best image of each kind
+// they have of an item, in provider order.
+func (r *Refresher) providerImages(ctx context.Context, l Lookup) []metadata.RemoteImage {
+	var out []metadata.RemoteImage
+	for _, p := range r.imageProviders() {
+		images, err := p.Images(ctx, l)
+		if err != nil {
+			r.logger().WarnContext(ctx, "image provider failed", "provider", p.Name(), "err", err)
+			continue
+		}
+		out = append(out, bestOfEachKind(images)...)
+	}
+	return out
+}
+
+// bestOfEachKind returns the image of each kind with the highest score,
+// the first on ties, in the order the kinds come.
+func bestOfEachKind(images []metadata.RemoteImage) []metadata.RemoteImage {
+	var out []metadata.RemoteImage
+	for _, img := range images {
+		i := slices.IndexFunc(out, func(o metadata.RemoteImage) bool { return o.Kind == img.Kind })
+		switch {
+		case i < 0:
+			out = append(out, img)
+		case img.Score > out[i].Score:
+			out[i] = img
+		}
+	}
+	return out
 }
 
 // lookup describes an item to providers, with its series and season for
