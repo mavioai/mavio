@@ -10,6 +10,7 @@ use (
 	./libs/naming
 	./libs/plugin
 	./libs/proto
+	./libs/release
 	./libs/store
 	./libs/streaming
 	./libs/subtitle
