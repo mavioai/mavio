@@ -163,6 +163,8 @@ CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** �
 
 第一方进程插件用其 `dist` 目标打包：`pnpm nx run dlna:dist` 按清单中的版本为服务端的每个平台构建 DLNA 插件到 `plugins/dlna/dist/`，每个平台一个目录 zip 包，并生成列出它们及其 SHA-256 摘要的 `catalog.json`；zip 包的 URL 相对于目录。
 
+`scraper-tmdb` 的发布构建把 `MAVIO_TMDB_KEY` 设为 Mavio 自己的 TMDB API 密钥，`pnpm nx run scraper-tmdb:build` 把它编入插件，作为 TMDB 拒绝 Radarr 令牌后使用的密钥（[架构 §13.2](architecture.zh-CN.md#132-数据源与编号)）；该密钥从不提交。
+
 ---
 
 ## 8. 提交与文档

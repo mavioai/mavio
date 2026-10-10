@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync/atomic"
 )
 
 // defaultBaseURL is TMDB's API v3.
@@ -28,15 +29,34 @@ type client struct {
 	// key is an API key, sent as a query parameter, or an API read access
 	// token, a JWT sent as a bearer token.
 	key string
+	// fallback replaces key when TMDB rejects it, which is recorded in
+	// rejected.
+	fallback string
+	rejected *atomic.Bool
 }
 
 func (c *client) get(ctx context.Context, path string, query url.Values, out any) error {
-	if query == nil {
-		query = url.Values{}
+	err := c.getWith(ctx, c.key, path, query, out)
+	if errors.Is(err, errUnauthorized) && c.rejected != nil {
+		c.rejected.Store(true)
+		if c.fallback != "" {
+			err = c.getWith(ctx, c.fallback, path, query, out)
+		}
 	}
-	bearer := strings.Count(c.key, ".") == 2
+	return err
+}
+
+// errUnauthorized is TMDB's answer for rejected keys.
+var errUnauthorized = errors.New("unauthorized")
+
+func (c *client) getWith(ctx context.Context, key, path string, params url.Values, out any) error {
+	query := url.Values{}
+	for k, v := range params {
+		query[k] = v
+	}
+	bearer := strings.Count(key, ".") == 2
 	if !bearer {
-		query.Set("api_key", c.key)
+		query.Set("api_key", key)
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+path+"?"+query.Encode(), nil)
 	if err != nil {
@@ -44,7 +64,7 @@ func (c *client) get(ctx context.Context, path string, query url.Values, out any
 	}
 	req.Header.Set("Accept", "application/json")
 	if bearer {
-		req.Header.Set("Authorization", "Bearer "+c.key)
+		req.Header.Set("Authorization", "Bearer "+key)
 	}
 	resp, err := c.http.Do(req)
 	if err != nil {
@@ -64,7 +84,11 @@ func (c *client) get(ctx context.Context, path string, query url.Values, out any
 			Message string `json:"status_message"`
 		}
 		_ = json.NewDecoder(io.LimitReader(resp.Body, 1<<16)).Decode(&body)
-		return fmt.Errorf("tmdb %s: %s: %s", path, resp.Status, body.Message)
+		err := fmt.Errorf("tmdb %s: %s: %s", path, resp.Status, body.Message)
+		if resp.StatusCode == http.StatusUnauthorized {
+			err = fmt.Errorf("%w: %w", errUnauthorized, err)
+		}
+		return err
 	}
 	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
 		return fmt.Errorf("tmdb %s: %w", path, err)

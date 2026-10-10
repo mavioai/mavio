@@ -93,7 +93,7 @@ flowchart TD
 | P13 | Plugin platform | ✅ Done |
 | P14 | DLNA | ✅ Done |
 | P15 | Acquisition foundation | ✅ Done |
-| P16 | Acquisition data sources | Not started |
+| P16 | Acquisition data sources | In progress |
 | P17 | Indexers | Not started |
 | P18 | Movie acquisition | Not started |
 | P19 | Series acquisition | Not started |
@@ -383,6 +383,13 @@ flowchart TD
 - `scraper-tmdb`: Radarr's TMDB read access token unless an administrator sets a key, and Mavio's own key when TMDB rejects the token; `DISCOVERY_PROVIDER` (trending, popular, upcoming, by genre, studio, network, keyword and watch provider, recommendations and similar titles); episode groups
 
 **Done when**: with no key configured, a movie and a series are identified and refreshed, also when TMDB rejects Radarr's token, the series' wanted episodes are numbered as TVDB numbers them, and TMDB's episode metadata is attached to them through the series' display order.
+
+**Progress**:
+- [x] `scraper-tmdb` without a key: Radarr's token, Mavio's key once TMDB rejects it (built in from `MAVIO_TMDB_KEY`)
+- [ ] Mavio's own TMDB API key registered and set as `MAVIO_TMDB_KEY` in release builds (needs the project's TMDB account)
+- [ ] `DISCOVERY_PROVIDER` in `scraper-tmdb`
+- [ ] `plugins/scraper-servarr`: Radarr's movie metadata and lists, SkyHook's series and episodes, scene mappings, daily series, XEM
+- [ ] End-to-end test
 
 ### P17 Indexers
 **Scope**: `plugins/indexers`, a first-party process plugin porting Prowlarr: Newznab, Torznab, the Cardigann engine with the definitions of `indexers.prowlarr.com`, every site Prowlarr implements in code, categories and capabilities, rate limits and backoff, indexer proxies (HTTP, SOCKS, FlareSolverr). The capability `INDEXER_PROVIDER`; `ReleaseService` searches the configured indexers and parses what they return with `libs/release`.

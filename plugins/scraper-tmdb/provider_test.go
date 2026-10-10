@@ -156,11 +156,13 @@ func TestManifest(t *testing.T) {
 	if err := manifest.ValidateConfig(m, `{"api_key":"key","max_cast_members":5}`); err != nil {
 		t.Errorf("ValidateConfig() = %v, want = nil", err)
 	}
-	if err := manifest.ValidateConfig(m, `{}`); err == nil {
-		t.Error("ValidateConfig({}) = nil, want = an error for the missing key")
+	// The key is optional.
+	if err := manifest.ValidateConfig(m, `{}`); err != nil {
+		t.Errorf("ValidateConfig({}) = %v, want = nil", err)
 	}
 }
 
+// TestUnconfigured covers a plugin with no key at all.
 func TestUnconfigured(t *testing.T) {
 	p, _ := newTestPlugin(t, "")
 	h, err := p.Health(t.Context(), &pluginv1.HealthRequest{})
@@ -477,5 +479,61 @@ func TestDisplayOrderMetadata(t *testing.T) {
 	}
 	if paths := fake.paths(); paths[len(paths)-1] != "/3/tv/1396/season/1/episode/2" {
 		t.Errorf("requests = %v, want the aired S1E2 last", paths)
+	}
+}
+
+func TestKeyFallback(t *testing.T) {
+	movie := lookup(pluginv1.MediaKind_MEDIA_KIND_MOVIE, "", 0, map[string]string{"tmdb": "337401"})
+	health := func(p *plugin) bool {
+		resp, err := p.Health(t.Context(), &pluginv1.HealthRequest{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return resp.GetHealthy()
+	}
+
+	// Without a configured key, Radarr's token goes as a bearer token.
+	p, fake := newTestPlugin(t, `{}`)
+	p.radarrToken, p.mavioKey = "a.b.c", "key"
+	metadataFor(t, p, movie)
+	if got := fake.requests[0].Header.Get("Authorization"); got != "Bearer a.b.c" {
+		t.Errorf("Authorization = %q, want = Radarr's token", got)
+	}
+
+	// Once TMDB rejects it, Mavio's key is used, at once and from then on.
+	p, fake = newTestPlugin(t, `{}`)
+	p.radarrToken, p.mavioKey = "x.y.z", "key"
+	metadataFor(t, p, movie)
+	metadataFor(t, p, movie)
+	var keys []string
+	for _, r := range fake.requests {
+		keys = append(keys, r.Header.Get("Authorization")+r.URL.Query().Get("api_key"))
+	}
+	if want := []string{"Bearer x.y.z", "key", "key"}; !slices.Equal(keys, want) {
+		t.Errorf("keys sent = %v, want = %v", keys, want)
+	}
+	if !health(p) {
+		t.Error("healthy = false after falling back, want = true")
+	}
+
+	// A build without a key of its own is unhealthy once the token is
+	// rejected.
+	p, _ = newTestPlugin(t, `{}`)
+	p.radarrToken = "x.y.z"
+	if !health(p) {
+		t.Error("healthy = false before any request, want = true")
+	}
+	if _, err := p.GetMetadata(t.Context(), pluginv1.GetMetadataRequest_builder{Lookup: movie}.Build()); err == nil {
+		t.Error("GetMetadata() with a rejected token = nil error")
+	}
+	if health(p) {
+		t.Error("healthy = true with no usable key, want = false")
+	}
+
+	// An administrator's key is used alone.
+	p, fake = newTestPlugin(t, `{"api_key":"wrong"}`)
+	p.radarrToken, p.mavioKey = "a.b.c", "key"
+	if _, err := p.GetMetadata(t.Context(), pluginv1.GetMetadataRequest_builder{Lookup: movie}.Build()); err == nil || len(fake.requests) != 1 {
+		t.Errorf("GetMetadata() with a wrong configured key = %v after %d requests, want = an error after 1", err, len(fake.requests))
 	}
 }

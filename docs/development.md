@@ -163,6 +163,8 @@ The server's release binaries are built with `VERSION=v0.1.0 pnpm nx run server:
 
 First-party process plugins are packaged with their `dist` target: `pnpm nx run dlna:dist` builds the DLNA plugin, at the version in its manifest, for every server platform into `plugins/dlna/dist/`, as one catalog zip per platform and a `catalog.json` listing them with their SHA-256 digests; the zips' URLs are relative to the catalog.
 
+Release builds of `scraper-tmdb` set `MAVIO_TMDB_KEY` to Mavio's own TMDB API key, which `pnpm nx run scraper-tmdb:build` builds into the plugin as the key used once TMDB rejects Radarr's token ([Architecture §13.2](architecture.md#132-data-sources-and-numbering)); the key is never committed.
+
 ---
 
 ## 8. Commits and Documentation
