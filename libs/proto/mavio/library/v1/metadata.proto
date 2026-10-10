@@ -96,6 +96,14 @@ message ItemMetadata {
     defined_only: true
     not_in: [0]
   }];
+  // Wants the item's file: acquired when missing, and upgraded. For
+  // movies, series, seasons and episodes.
+  bool monitored = 27;
+  // For series; unspecified is standard and aired.
+  SeriesType series_type = 28 [(buf.validate.field).enum.defined_only = true];
+  DisplayOrder display_order = 29 [(buf.validate.field).enum.defined_only = true];
+  // For episodes.
+  int32 absolute_number = 30 [(buf.validate.field).int32.gte = 0];
 }
 
 message UpdateItemRequest {

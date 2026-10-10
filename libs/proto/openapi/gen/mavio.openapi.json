@@ -1135,6 +1135,22 @@
         "title": "DeletePlaylistResponse",
         "additionalProperties": false
       },
+      "mavio.library.v1.DisplayOrder": {
+        "type": "string",
+        "title": "DisplayOrder",
+        "enum": [
+          "DISPLAY_ORDER_UNSPECIFIED",
+          "DISPLAY_ORDER_AIRED",
+          "DISPLAY_ORDER_ORIGINAL_AIR_DATE",
+          "DISPLAY_ORDER_ABSOLUTE",
+          "DISPLAY_ORDER_DVD",
+          "DISPLAY_ORDER_DIGITAL",
+          "DISPLAY_ORDER_STORY_ARC",
+          "DISPLAY_ORDER_PRODUCTION",
+          "DISPLAY_ORDER_TV"
+        ],
+        "description": "DisplayOrder is the order a series' seasons and episodes are numbered\n and shown in. Every order but the aired one is a type of TMDB's episode\n groups."
+      },
       "mavio.library.v1.DolbyVision": {
         "type": "object",
         "properties": {
@@ -1837,6 +1853,39 @@
             },
             "title": "external_urls",
             "description": "Pages of the item on the sites of its external IDs; set by GetItem."
+          },
+          "virtual": {
+            "type": "boolean",
+            "title": "virtual",
+            "description": "A movie, season or episode known from metadata whose file the library\n does not have."
+          },
+          "monitored": {
+            "type": "boolean",
+            "title": "monitored",
+            "description": "The item's file is wanted: acquired when missing, and upgraded."
+          },
+          "seriesType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.SeriesType"
+              }
+            ],
+            "title": "series_type",
+            "description": "For series."
+          },
+          "displayOrder": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.DisplayOrder"
+              }
+            ],
+            "title": "display_order"
+          },
+          "absoluteNumber": {
+            "type": "integer",
+            "title": "absolute_number",
+            "format": "int32",
+            "description": "An episode's number counted across seasons; unset when unknown."
           }
         },
         "title": "Item",
@@ -2039,6 +2088,36 @@
               "$ref": "#/components/schemas/mavio.library.v1.MetadataField"
             },
             "title": "locked_fields"
+          },
+          "monitored": {
+            "type": "boolean",
+            "title": "monitored",
+            "description": "Wants the item's file: acquired when missing, and upgraded. For\n movies, series, seasons and episodes."
+          },
+          "seriesType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.SeriesType"
+              }
+            ],
+            "title": "series_type",
+            "description": "For series; unspecified is standard and aired.\nenum.defined_only = true\n"
+          },
+          "displayOrder": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.DisplayOrder"
+              }
+            ],
+            "title": "display_order",
+            "description": "enum.defined_only = true\n"
+          },
+          "absoluteNumber": {
+            "type": "integer",
+            "title": "absolute_number",
+            "minimum": 0,
+            "format": "int32",
+            "description": "For episodes."
           }
         },
         "title": "ItemMetadata",
@@ -2143,6 +2222,15 @@
             ],
             "title": "provider_order",
             "description": "The providers the library uses."
+          },
+          "virtualEpisodes": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.VirtualEpisodes"
+              }
+            ],
+            "title": "virtual_episodes",
+            "description": "The episodes a series lacks that refreshes add to it as virtual items."
           }
         },
         "title": "Library",
@@ -2249,6 +2337,14 @@
               }
             ],
             "title": "provider_order"
+          },
+          "virtualEpisodes": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.VirtualEpisodes"
+              }
+            ],
+            "title": "virtual_episodes"
           }
         },
         "title": "LibrarySpec",
@@ -2399,6 +2495,16 @@
             "type": "boolean",
             "title": "top_level",
             "description": "Only items at the top of their libraries' hierarchies, without a\n parent; not with parent_id."
+          },
+          "includeVirtual": {
+            "type": "boolean",
+            "title": "include_virtual",
+            "description": "Include virtual items: movies, seasons and episodes known from\n metadata whose files the library does not have."
+          },
+          "monitored": {
+            "type": "boolean",
+            "title": "monitored",
+            "description": "Only monitored or only unmonitored items."
           }
         },
         "title": "ListItemsRequest",
@@ -3393,6 +3499,15 @@
               }
             ],
             "title": "segments"
+          },
+          "episodes": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ProviderList"
+              }
+            ],
+            "title": "episodes",
+            "description": "Episode listers; the first that knows a series lists its episodes."
           }
         },
         "title": "ProviderOrder",
@@ -3884,6 +3999,17 @@
           "SERIES_STATUS_UNRELEASED"
         ]
       },
+      "mavio.library.v1.SeriesType": {
+        "type": "string",
+        "title": "SeriesType",
+        "enum": [
+          "SERIES_TYPE_UNSPECIFIED",
+          "SERIES_TYPE_STANDARD",
+          "SERIES_TYPE_DAILY",
+          "SERIES_TYPE_ANIME"
+        ],
+        "description": "SeriesType is how a series' episodes are numbered in release names."
+      },
       "mavio.library.v1.SetItemImageRequest": {
         "type": "object",
         "allOf": [
@@ -4319,6 +4445,37 @@
           "VIDEO_RANGE_HLG",
           "VIDEO_RANGE_DOLBY_VISION"
         ]
+      },
+      "mavio.library.v1.VirtualEpisodes": {
+        "type": "object",
+        "properties": {
+          "missing": {
+            "type": "boolean",
+            "title": "missing",
+            "description": "List episodes that have aired."
+          },
+          "unaired": {
+            "type": "boolean",
+            "title": "unaired",
+            "description": "List episodes airing today or later."
+          },
+          "specials": {
+            "type": "boolean",
+            "title": "specials",
+            "description": "List the episodes of season 0 too."
+          },
+          "graceDays": {
+            "type": "integer",
+            "title": "grace_days",
+            "maximum": 3650,
+            "minimum": 0,
+            "format": "int32",
+            "description": "Keep virtual episodes for this many days after they air when missing\n is off, for their files to arrive."
+          }
+        },
+        "title": "VirtualEpisodes",
+        "additionalProperties": false,
+        "description": "VirtualEpisodes configures which episodes refreshes list as virtual\n items in series without their files. Monitored series list every\n episode, aired or not, and keep them; their specials follow specials."
       },
       "mavio.playback.v1.Attachment": {
         "type": "object",
@@ -5264,7 +5421,8 @@
           "CAPABILITY_INTRO_PROVIDER",
           "CAPABILITY_IMAGE_GENERATOR",
           "CAPABILITY_MEDIA_SOURCE_PROVIDER",
-          "CAPABILITY_PASSWORD_RESET"
+          "CAPABILITY_PASSWORD_RESET",
+          "CAPABILITY_EPISODE_LIST_PROVIDER"
         ]
       },
       "mavio.plugin.v1.ExternalIdKind": {

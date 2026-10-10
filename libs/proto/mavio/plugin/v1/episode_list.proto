@@ -1,0 +1,49 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "mavio/plugin/v1/metadata.proto";
+
+// EpisodeListProviderService lists the seasons and episodes of series from
+// an external source, so that the host knows the episodes a series lacks.
+service EpisodeListProviderService {
+  // ListEpisodes lists a series' seasons and episodes, numbered in the
+  // lookup's display order.
+  rpc ListEpisodes(ListEpisodesRequest) returns (ListEpisodesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message ListEpisodesRequest {
+  // The series.
+  Lookup lookup = 1;
+}
+
+message ListEpisodesResponse {
+  // False when the provider does not know the series.
+  bool found = 1;
+  // The external ID that identifies the listed episodes, such as "tmdb".
+  string provider = 2;
+  repeated ListedSeason seasons = 3;
+  repeated ListedEpisode episodes = 4;
+}
+
+// ListedSeason is a season of a series.
+message ListedSeason {
+  // 0 for specials.
+  int32 season_number = 1;
+  // The name, overview, premiere date, external IDs and images.
+  Metadata metadata = 2;
+}
+
+// ListedEpisode is an episode of a series.
+message ListedEpisode {
+  int32 season_number = 1;
+  int32 episode_number = 2;
+  // The number counted across seasons, as anime releases number episodes;
+  // unset when unknown.
+  int32 absolute_number = 3;
+  // The name, overview, premiere date, runtime, external IDs and images,
+  // such as the episode's still as its primary image.
+  Metadata metadata = 4;
+}

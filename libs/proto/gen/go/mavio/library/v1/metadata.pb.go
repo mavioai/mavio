@@ -53,6 +53,10 @@ type ItemMetadata struct {
 	xxx_hidden_Album               *string                `protobuf:"bytes,24,opt,name=album"`
 	xxx_hidden_Locked              bool                   `protobuf:"varint,25,opt,name=locked"`
 	xxx_hidden_LockedFields        []MetadataField        `protobuf:"varint,26,rep,packed,name=locked_fields,json=lockedFields,enum=mavio.library.v1.MetadataField"`
+	xxx_hidden_Monitored           bool                   `protobuf:"varint,27,opt,name=monitored"`
+	xxx_hidden_SeriesType          SeriesType             `protobuf:"varint,28,opt,name=series_type,json=seriesType,enum=mavio.library.v1.SeriesType"`
+	xxx_hidden_DisplayOrder        DisplayOrder           `protobuf:"varint,29,opt,name=display_order,json=displayOrder,enum=mavio.library.v1.DisplayOrder"`
+	xxx_hidden_AbsoluteNumber      int32                  `protobuf:"varint,30,opt,name=absolute_number,json=absoluteNumber"`
 	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
 	XXX_presence                   [1]uint32
 	unknownFields                  protoimpl.UnknownFields
@@ -292,34 +296,66 @@ func (x *ItemMetadata) GetLockedFields() []MetadataField {
 	return nil
 }
 
+func (x *ItemMetadata) GetMonitored() bool {
+	if x != nil {
+		return x.xxx_hidden_Monitored
+	}
+	return false
+}
+
+func (x *ItemMetadata) GetSeriesType() SeriesType {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 27) {
+			return x.xxx_hidden_SeriesType
+		}
+	}
+	return SeriesType_SERIES_TYPE_UNSPECIFIED
+}
+
+func (x *ItemMetadata) GetDisplayOrder() DisplayOrder {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 28) {
+			return x.xxx_hidden_DisplayOrder
+		}
+	}
+	return DisplayOrder_DISPLAY_ORDER_UNSPECIFIED
+}
+
+func (x *ItemMetadata) GetAbsoluteNumber() int32 {
+	if x != nil {
+		return x.xxx_hidden_AbsoluteNumber
+	}
+	return 0
+}
+
 func (x *ItemMetadata) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 30)
 }
 
 func (x *ItemMetadata) SetSortName(v string) {
 	x.xxx_hidden_SortName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 30)
 }
 
 func (x *ItemMetadata) SetOriginalTitle(v string) {
 	x.xxx_hidden_OriginalTitle = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 30)
 }
 
 func (x *ItemMetadata) SetOverview(v string) {
 	x.xxx_hidden_Overview = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 30)
 }
 
 func (x *ItemMetadata) SetTagline(v string) {
 	x.xxx_hidden_Tagline = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 30)
 }
 
 func (x *ItemMetadata) SetProductionYear(v int32) {
 	x.xxx_hidden_ProductionYear = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 30)
 }
 
 func (x *ItemMetadata) SetPremiereDate(v *timestamppb.Timestamp) {
@@ -336,22 +372,22 @@ func (x *ItemMetadata) SetRuntime(v *durationpb.Duration) {
 
 func (x *ItemMetadata) SetOfficialRating(v string) {
 	x.xxx_hidden_OfficialRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 30)
 }
 
 func (x *ItemMetadata) SetCustomRating(v string) {
 	x.xxx_hidden_CustomRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 30)
 }
 
 func (x *ItemMetadata) SetCommunityRating(v float64) {
 	x.xxx_hidden_CommunityRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 30)
 }
 
 func (x *ItemMetadata) SetCriticRating(v float64) {
 	x.xxx_hidden_CriticRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 30)
 }
 
 func (x *ItemMetadata) SetGenres(v []string) {
@@ -376,17 +412,17 @@ func (x *ItemMetadata) SetExternalIds(v map[string]string) {
 
 func (x *ItemMetadata) SetIndexNumber(v int32) {
 	x.xxx_hidden_IndexNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 30)
 }
 
 func (x *ItemMetadata) SetParentIndexNumber(v int32) {
 	x.xxx_hidden_ParentIndexNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 30)
 }
 
 func (x *ItemMetadata) SetSeriesStatus(v SeriesStatus) {
 	x.xxx_hidden_SeriesStatus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 30)
 }
 
 func (x *ItemMetadata) SetArtists(v []string) {
@@ -399,16 +435,36 @@ func (x *ItemMetadata) SetAlbumArtists(v []string) {
 
 func (x *ItemMetadata) SetAlbum(v string) {
 	x.xxx_hidden_Album = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 30)
 }
 
 func (x *ItemMetadata) SetLocked(v bool) {
 	x.xxx_hidden_Locked = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 30)
 }
 
 func (x *ItemMetadata) SetLockedFields(v []MetadataField) {
 	x.xxx_hidden_LockedFields = v
+}
+
+func (x *ItemMetadata) SetMonitored(v bool) {
+	x.xxx_hidden_Monitored = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 30)
+}
+
+func (x *ItemMetadata) SetSeriesType(v SeriesType) {
+	x.xxx_hidden_SeriesType = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 30)
+}
+
+func (x *ItemMetadata) SetDisplayOrder(v DisplayOrder) {
+	x.xxx_hidden_DisplayOrder = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 30)
+}
+
+func (x *ItemMetadata) SetAbsoluteNumber(v int32) {
+	x.xxx_hidden_AbsoluteNumber = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 29, 30)
 }
 
 func (x *ItemMetadata) HasName() bool {
@@ -537,6 +593,34 @@ func (x *ItemMetadata) HasLocked() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 24)
 }
 
+func (x *ItemMetadata) HasMonitored() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 26)
+}
+
+func (x *ItemMetadata) HasSeriesType() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 27)
+}
+
+func (x *ItemMetadata) HasDisplayOrder() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 28)
+}
+
+func (x *ItemMetadata) HasAbsoluteNumber() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 29)
+}
+
 func (x *ItemMetadata) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -624,6 +708,26 @@ func (x *ItemMetadata) ClearLocked() {
 	x.xxx_hidden_Locked = false
 }
 
+func (x *ItemMetadata) ClearMonitored() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 26)
+	x.xxx_hidden_Monitored = false
+}
+
+func (x *ItemMetadata) ClearSeriesType() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 27)
+	x.xxx_hidden_SeriesType = SeriesType_SERIES_TYPE_UNSPECIFIED
+}
+
+func (x *ItemMetadata) ClearDisplayOrder() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 28)
+	x.xxx_hidden_DisplayOrder = DisplayOrder_DISPLAY_ORDER_UNSPECIFIED
+}
+
+func (x *ItemMetadata) ClearAbsoluteNumber() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 29)
+	x.xxx_hidden_AbsoluteNumber = 0
+}
+
 type ItemMetadata_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -656,6 +760,14 @@ type ItemMetadata_builder struct {
 	// Keeps refreshes from changing the item at all.
 	Locked       *bool
 	LockedFields []MetadataField
+	// Wants the item's file: acquired when missing, and upgraded. For
+	// movies, series, seasons and episodes.
+	Monitored *bool
+	// For series; unspecified is standard and aired.
+	SeriesType   *SeriesType
+	DisplayOrder *DisplayOrder
+	// For episodes.
+	AbsoluteNumber *int32
 }
 
 func (b0 ItemMetadata_builder) Build() *ItemMetadata {
@@ -663,46 +775,46 @@ func (b0 ItemMetadata_builder) Build() *ItemMetadata {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 30)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.SortName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 30)
 		x.xxx_hidden_SortName = b.SortName
 	}
 	if b.OriginalTitle != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 30)
 		x.xxx_hidden_OriginalTitle = b.OriginalTitle
 	}
 	if b.Overview != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 30)
 		x.xxx_hidden_Overview = b.Overview
 	}
 	if b.Tagline != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 30)
 		x.xxx_hidden_Tagline = b.Tagline
 	}
 	if b.ProductionYear != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 30)
 		x.xxx_hidden_ProductionYear = *b.ProductionYear
 	}
 	x.xxx_hidden_PremiereDate = b.PremiereDate
 	x.xxx_hidden_EndDate = b.EndDate
 	x.xxx_hidden_Runtime = b.Runtime
 	if b.OfficialRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 30)
 		x.xxx_hidden_OfficialRating = b.OfficialRating
 	}
 	if b.CustomRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 30)
 		x.xxx_hidden_CustomRating = b.CustomRating
 	}
 	if b.CommunityRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 30)
 		x.xxx_hidden_CommunityRating = *b.CommunityRating
 	}
 	if b.CriticRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 30)
 		x.xxx_hidden_CriticRating = *b.CriticRating
 	}
 	x.xxx_hidden_Genres = b.Genres
@@ -711,28 +823,44 @@ func (b0 ItemMetadata_builder) Build() *ItemMetadata {
 	x.xxx_hidden_ProductionLocations = b.ProductionLocations
 	x.xxx_hidden_ExternalIds = b.ExternalIds
 	if b.IndexNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 30)
 		x.xxx_hidden_IndexNumber = *b.IndexNumber
 	}
 	if b.ParentIndexNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 30)
 		x.xxx_hidden_ParentIndexNumber = *b.ParentIndexNumber
 	}
 	if b.SeriesStatus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 30)
 		x.xxx_hidden_SeriesStatus = *b.SeriesStatus
 	}
 	x.xxx_hidden_Artists = b.Artists
 	x.xxx_hidden_AlbumArtists = b.AlbumArtists
 	if b.Album != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 30)
 		x.xxx_hidden_Album = b.Album
 	}
 	if b.Locked != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 30)
 		x.xxx_hidden_Locked = *b.Locked
 	}
 	x.xxx_hidden_LockedFields = b.LockedFields
+	if b.Monitored != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 30)
+		x.xxx_hidden_Monitored = *b.Monitored
+	}
+	if b.SeriesType != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 30)
+		x.xxx_hidden_SeriesType = *b.SeriesType
+	}
+	if b.DisplayOrder != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 30)
+		x.xxx_hidden_DisplayOrder = *b.DisplayOrder
+	}
+	if b.AbsoluteNumber != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 29, 30)
+		x.xxx_hidden_AbsoluteNumber = *b.AbsoluteNumber
+	}
 	return m0
 }
 
@@ -3881,8 +4009,7 @@ var File_mavio_library_v1_metadata_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\n" +
-	"\x1fmavio/library/v1/metadata.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\x1a\x1cmavio/library/v1/media.proto\"\xac\n" +
-	"\n" +
+	"\x1fmavio/library/v1/metadata.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\x1a\x1cmavio/library/v1/media.proto\"\x94\f\n" +
 	"\fItemMetadata\x12\x1c\n" +
 	"\x04name\x18\x01 \x01(\tB\b\xbaH\x05r\x03\x18\xf4\x03R\x04name\x12%\n" +
 	"\tsort_name\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\xf4\x03R\bsortName\x12/\n" +
@@ -3911,7 +4038,12 @@ const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\ralbum_artists\x18\x17 \x03(\tR\falbumArtists\x12\x1e\n" +
 	"\x05album\x18\x18 \x01(\tB\b\xbaH\x05r\x03\x18\xf4\x03R\x05album\x12\x16\n" +
 	"\x06locked\x18\x19 \x01(\bR\x06locked\x12U\n" +
-	"\rlocked_fields\x18\x1a \x03(\x0e2\x1f.mavio.library.v1.MetadataFieldB\x0f\xbaH\f\x92\x01\t\"\a\x82\x01\x04\x10\x01 \x00R\flockedFields\x1a>\n" +
+	"\rlocked_fields\x18\x1a \x03(\x0e2\x1f.mavio.library.v1.MetadataFieldB\x0f\xbaH\f\x92\x01\t\"\a\x82\x01\x04\x10\x01 \x00R\flockedFields\x12\x1c\n" +
+	"\tmonitored\x18\x1b \x01(\bR\tmonitored\x12G\n" +
+	"\vseries_type\x18\x1c \x01(\x0e2\x1c.mavio.library.v1.SeriesTypeB\b\xbaH\x05\x82\x01\x02\x10\x01R\n" +
+	"seriesType\x12M\n" +
+	"\rdisplay_order\x18\x1d \x01(\x0e2\x1e.mavio.library.v1.DisplayOrderB\b\xbaH\x05\x82\x01\x02\x10\x01R\fdisplayOrder\x120\n" +
+	"\x0fabsolute_number\x18\x1e \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x0eabsoluteNumber\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xb1\x01\n" +
@@ -4074,12 +4206,14 @@ var file_mavio_library_v1_metadata_proto_goTypes = []any{
 	(*durationpb.Duration)(nil),         // 30: google.protobuf.Duration
 	(SeriesStatus)(0),                   // 31: mavio.library.v1.SeriesStatus
 	(MetadataField)(0),                  // 32: mavio.library.v1.MetadataField
-	(*fieldmaskpb.FieldMask)(nil),       // 33: google.protobuf.FieldMask
-	(*Item)(nil),                        // 34: mavio.library.v1.Item
-	(ImageKind)(0),                      // 35: mavio.library.v1.ImageKind
-	(*Image)(nil),                       // 36: mavio.library.v1.Image
-	(*MediaStream)(nil),                 // 37: mavio.library.v1.MediaStream
-	(ItemKind)(0),                       // 38: mavio.library.v1.ItemKind
+	(SeriesType)(0),                     // 33: mavio.library.v1.SeriesType
+	(DisplayOrder)(0),                   // 34: mavio.library.v1.DisplayOrder
+	(*fieldmaskpb.FieldMask)(nil),       // 35: google.protobuf.FieldMask
+	(*Item)(nil),                        // 36: mavio.library.v1.Item
+	(ImageKind)(0),                      // 37: mavio.library.v1.ImageKind
+	(*Image)(nil),                       // 38: mavio.library.v1.Image
+	(*MediaStream)(nil),                 // 39: mavio.library.v1.MediaStream
+	(ItemKind)(0),                       // 40: mavio.library.v1.ItemKind
 }
 var file_mavio_library_v1_metadata_proto_depIdxs = []int32{
 	29, // 0: mavio.library.v1.ItemMetadata.premiere_date:type_name -> google.protobuf.Timestamp
@@ -4088,50 +4222,52 @@ var file_mavio_library_v1_metadata_proto_depIdxs = []int32{
 	25, // 3: mavio.library.v1.ItemMetadata.external_ids:type_name -> mavio.library.v1.ItemMetadata.ExternalIdsEntry
 	31, // 4: mavio.library.v1.ItemMetadata.series_status:type_name -> mavio.library.v1.SeriesStatus
 	32, // 5: mavio.library.v1.ItemMetadata.locked_fields:type_name -> mavio.library.v1.MetadataField
-	0,  // 6: mavio.library.v1.UpdateItemRequest.metadata:type_name -> mavio.library.v1.ItemMetadata
-	33, // 7: mavio.library.v1.UpdateItemRequest.update_mask:type_name -> google.protobuf.FieldMask
-	34, // 8: mavio.library.v1.UpdateItemResponse.item:type_name -> mavio.library.v1.Item
-	34, // 9: mavio.library.v1.RefreshItemResponse.item:type_name -> mavio.library.v1.Item
-	26, // 10: mavio.library.v1.SearchRemoteRequest.external_ids:type_name -> mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
-	27, // 11: mavio.library.v1.RemoteSearchResult.external_ids:type_name -> mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
-	6,  // 12: mavio.library.v1.SearchRemoteResponse.results:type_name -> mavio.library.v1.RemoteSearchResult
-	28, // 13: mavio.library.v1.IdentifyItemRequest.external_ids:type_name -> mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
-	34, // 14: mavio.library.v1.IdentifyItemResponse.item:type_name -> mavio.library.v1.Item
-	35, // 15: mavio.library.v1.ListRemoteImagesRequest.kind:type_name -> mavio.library.v1.ImageKind
-	35, // 16: mavio.library.v1.RemoteImage.kind:type_name -> mavio.library.v1.ImageKind
-	11, // 17: mavio.library.v1.ListRemoteImagesResponse.images:type_name -> mavio.library.v1.RemoteImage
-	35, // 18: mavio.library.v1.SetItemImageRequest.kind:type_name -> mavio.library.v1.ImageKind
-	36, // 19: mavio.library.v1.SetItemImageResponse.image:type_name -> mavio.library.v1.Image
-	18, // 20: mavio.library.v1.SearchSubtitlesResponse.subtitles:type_name -> mavio.library.v1.RemoteSubtitle
-	37, // 21: mavio.library.v1.DownloadSubtitleResponse.stream:type_name -> mavio.library.v1.MediaStream
-	38, // 22: mavio.library.v1.ListExternalIdKindsRequest.item_kind:type_name -> mavio.library.v1.ItemKind
-	38, // 23: mavio.library.v1.ExternalIdKind.item_kinds:type_name -> mavio.library.v1.ItemKind
-	23, // 24: mavio.library.v1.ListExternalIdKindsResponse.kinds:type_name -> mavio.library.v1.ExternalIdKind
-	1,  // 25: mavio.library.v1.MetadataService.UpdateItem:input_type -> mavio.library.v1.UpdateItemRequest
-	3,  // 26: mavio.library.v1.MetadataService.RefreshItem:input_type -> mavio.library.v1.RefreshItemRequest
-	5,  // 27: mavio.library.v1.MetadataService.SearchRemote:input_type -> mavio.library.v1.SearchRemoteRequest
-	8,  // 28: mavio.library.v1.MetadataService.IdentifyItem:input_type -> mavio.library.v1.IdentifyItemRequest
-	10, // 29: mavio.library.v1.MetadataService.ListRemoteImages:input_type -> mavio.library.v1.ListRemoteImagesRequest
-	13, // 30: mavio.library.v1.MetadataService.SetItemImage:input_type -> mavio.library.v1.SetItemImageRequest
-	15, // 31: mavio.library.v1.MetadataService.DeleteItemImage:input_type -> mavio.library.v1.DeleteItemImageRequest
-	17, // 32: mavio.library.v1.MetadataService.SearchSubtitles:input_type -> mavio.library.v1.SearchSubtitlesRequest
-	20, // 33: mavio.library.v1.MetadataService.DownloadSubtitle:input_type -> mavio.library.v1.DownloadSubtitleRequest
-	22, // 34: mavio.library.v1.MetadataService.ListExternalIdKinds:input_type -> mavio.library.v1.ListExternalIdKindsRequest
-	2,  // 35: mavio.library.v1.MetadataService.UpdateItem:output_type -> mavio.library.v1.UpdateItemResponse
-	4,  // 36: mavio.library.v1.MetadataService.RefreshItem:output_type -> mavio.library.v1.RefreshItemResponse
-	7,  // 37: mavio.library.v1.MetadataService.SearchRemote:output_type -> mavio.library.v1.SearchRemoteResponse
-	9,  // 38: mavio.library.v1.MetadataService.IdentifyItem:output_type -> mavio.library.v1.IdentifyItemResponse
-	12, // 39: mavio.library.v1.MetadataService.ListRemoteImages:output_type -> mavio.library.v1.ListRemoteImagesResponse
-	14, // 40: mavio.library.v1.MetadataService.SetItemImage:output_type -> mavio.library.v1.SetItemImageResponse
-	16, // 41: mavio.library.v1.MetadataService.DeleteItemImage:output_type -> mavio.library.v1.DeleteItemImageResponse
-	19, // 42: mavio.library.v1.MetadataService.SearchSubtitles:output_type -> mavio.library.v1.SearchSubtitlesResponse
-	21, // 43: mavio.library.v1.MetadataService.DownloadSubtitle:output_type -> mavio.library.v1.DownloadSubtitleResponse
-	24, // 44: mavio.library.v1.MetadataService.ListExternalIdKinds:output_type -> mavio.library.v1.ListExternalIdKindsResponse
-	35, // [35:45] is the sub-list for method output_type
-	25, // [25:35] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	33, // 6: mavio.library.v1.ItemMetadata.series_type:type_name -> mavio.library.v1.SeriesType
+	34, // 7: mavio.library.v1.ItemMetadata.display_order:type_name -> mavio.library.v1.DisplayOrder
+	0,  // 8: mavio.library.v1.UpdateItemRequest.metadata:type_name -> mavio.library.v1.ItemMetadata
+	35, // 9: mavio.library.v1.UpdateItemRequest.update_mask:type_name -> google.protobuf.FieldMask
+	36, // 10: mavio.library.v1.UpdateItemResponse.item:type_name -> mavio.library.v1.Item
+	36, // 11: mavio.library.v1.RefreshItemResponse.item:type_name -> mavio.library.v1.Item
+	26, // 12: mavio.library.v1.SearchRemoteRequest.external_ids:type_name -> mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
+	27, // 13: mavio.library.v1.RemoteSearchResult.external_ids:type_name -> mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
+	6,  // 14: mavio.library.v1.SearchRemoteResponse.results:type_name -> mavio.library.v1.RemoteSearchResult
+	28, // 15: mavio.library.v1.IdentifyItemRequest.external_ids:type_name -> mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
+	36, // 16: mavio.library.v1.IdentifyItemResponse.item:type_name -> mavio.library.v1.Item
+	37, // 17: mavio.library.v1.ListRemoteImagesRequest.kind:type_name -> mavio.library.v1.ImageKind
+	37, // 18: mavio.library.v1.RemoteImage.kind:type_name -> mavio.library.v1.ImageKind
+	11, // 19: mavio.library.v1.ListRemoteImagesResponse.images:type_name -> mavio.library.v1.RemoteImage
+	37, // 20: mavio.library.v1.SetItemImageRequest.kind:type_name -> mavio.library.v1.ImageKind
+	38, // 21: mavio.library.v1.SetItemImageResponse.image:type_name -> mavio.library.v1.Image
+	18, // 22: mavio.library.v1.SearchSubtitlesResponse.subtitles:type_name -> mavio.library.v1.RemoteSubtitle
+	39, // 23: mavio.library.v1.DownloadSubtitleResponse.stream:type_name -> mavio.library.v1.MediaStream
+	40, // 24: mavio.library.v1.ListExternalIdKindsRequest.item_kind:type_name -> mavio.library.v1.ItemKind
+	40, // 25: mavio.library.v1.ExternalIdKind.item_kinds:type_name -> mavio.library.v1.ItemKind
+	23, // 26: mavio.library.v1.ListExternalIdKindsResponse.kinds:type_name -> mavio.library.v1.ExternalIdKind
+	1,  // 27: mavio.library.v1.MetadataService.UpdateItem:input_type -> mavio.library.v1.UpdateItemRequest
+	3,  // 28: mavio.library.v1.MetadataService.RefreshItem:input_type -> mavio.library.v1.RefreshItemRequest
+	5,  // 29: mavio.library.v1.MetadataService.SearchRemote:input_type -> mavio.library.v1.SearchRemoteRequest
+	8,  // 30: mavio.library.v1.MetadataService.IdentifyItem:input_type -> mavio.library.v1.IdentifyItemRequest
+	10, // 31: mavio.library.v1.MetadataService.ListRemoteImages:input_type -> mavio.library.v1.ListRemoteImagesRequest
+	13, // 32: mavio.library.v1.MetadataService.SetItemImage:input_type -> mavio.library.v1.SetItemImageRequest
+	15, // 33: mavio.library.v1.MetadataService.DeleteItemImage:input_type -> mavio.library.v1.DeleteItemImageRequest
+	17, // 34: mavio.library.v1.MetadataService.SearchSubtitles:input_type -> mavio.library.v1.SearchSubtitlesRequest
+	20, // 35: mavio.library.v1.MetadataService.DownloadSubtitle:input_type -> mavio.library.v1.DownloadSubtitleRequest
+	22, // 36: mavio.library.v1.MetadataService.ListExternalIdKinds:input_type -> mavio.library.v1.ListExternalIdKindsRequest
+	2,  // 37: mavio.library.v1.MetadataService.UpdateItem:output_type -> mavio.library.v1.UpdateItemResponse
+	4,  // 38: mavio.library.v1.MetadataService.RefreshItem:output_type -> mavio.library.v1.RefreshItemResponse
+	7,  // 39: mavio.library.v1.MetadataService.SearchRemote:output_type -> mavio.library.v1.SearchRemoteResponse
+	9,  // 40: mavio.library.v1.MetadataService.IdentifyItem:output_type -> mavio.library.v1.IdentifyItemResponse
+	12, // 41: mavio.library.v1.MetadataService.ListRemoteImages:output_type -> mavio.library.v1.ListRemoteImagesResponse
+	14, // 42: mavio.library.v1.MetadataService.SetItemImage:output_type -> mavio.library.v1.SetItemImageResponse
+	16, // 43: mavio.library.v1.MetadataService.DeleteItemImage:output_type -> mavio.library.v1.DeleteItemImageResponse
+	19, // 44: mavio.library.v1.MetadataService.SearchSubtitles:output_type -> mavio.library.v1.SearchSubtitlesResponse
+	21, // 45: mavio.library.v1.MetadataService.DownloadSubtitle:output_type -> mavio.library.v1.DownloadSubtitleResponse
+	24, // 46: mavio.library.v1.MetadataService.ListExternalIdKinds:output_type -> mavio.library.v1.ListExternalIdKindsResponse
+	37, // [37:47] is the sub-list for method output_type
+	27, // [27:37] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_mavio_library_v1_metadata_proto_init() }

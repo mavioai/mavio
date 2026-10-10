@@ -90,7 +90,7 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
 		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER","CAPABILITY_IMAGE_PROVIDER",
 			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR","CAPABILITY_LYRICS_PROVIDER",
-			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
+			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET","CAPABILITY_EPISODE_LIST_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
 		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, resolver, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
@@ -350,6 +350,18 @@ func TestLyrics(t *testing.T) {
 		got, err := p.Lyrics().DownloadLyrics(t.Context(), pluginv1.DownloadLyricsRequest_builder{Id: proto.String("Song")}.Build())
 		if err != nil || got.GetContent() != "[00:01.00]Song\n" || !got.GetSynced() {
 			t.Errorf("DownloadLyrics() = %v, %v", got, err)
+		}
+	})
+}
+
+func TestEpisodes(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := open(t, rt)
+		lookup := pluginv1.Lookup_builder{Kind: pluginv1.MediaKind_MEDIA_KIND_SERIES.Enum(), DisplayOrder: proto.String("dvd")}.Build()
+		got, err := p.Episodes().ListEpisodes(t.Context(), pluginv1.ListEpisodesRequest_builder{Lookup: lookup}.Build())
+		if err != nil || !got.GetFound() || len(got.GetEpisodes()) != 2 || got.GetEpisodes()[1].GetMetadata().GetName() != "dvd 2" ||
+			!got.GetEpisodes()[1].HasAbsoluteNumber() {
+			t.Errorf("ListEpisodes() = %v, %v", got, err)
 		}
 	})
 }

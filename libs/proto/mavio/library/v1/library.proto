@@ -73,6 +73,26 @@ message Library {
   bool download_lyrics = 15;
   // The providers the library uses.
   ProviderOrder provider_order = 16;
+  // The episodes a series lacks that refreshes add to it as virtual items.
+  VirtualEpisodes virtual_episodes = 17;
+}
+
+// VirtualEpisodes configures which episodes refreshes list as virtual
+// items in series without their files. Monitored series list every
+// episode, aired or not, and keep them; their specials follow specials.
+message VirtualEpisodes {
+  // List episodes that have aired.
+  bool missing = 1;
+  // List episodes airing today or later.
+  bool unaired = 2;
+  // List the episodes of season 0 too.
+  bool specials = 3;
+  // Keep virtual episodes for this many days after they air when missing
+  // is off, for their files to arrive.
+  int32 grace_days = 4 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 3650
+  }];
 }
 
 // ProviderOrder names the providers a library uses of each capability.
@@ -84,6 +104,8 @@ message ProviderOrder {
   ProviderList subtitles = 3;
   ProviderList lyrics = 4;
   ProviderList segments = 5;
+  // Episode listers; the first that knows a series lists its episodes.
+  ProviderList episodes = 6;
 }
 
 // ProviderList names providers by plugin ID, in the order they are asked.
@@ -132,6 +154,7 @@ message LibrarySpec {
   bool analyze_loudness = 11;
   bool download_lyrics = 12;
   ProviderOrder provider_order = 13;
+  VirtualEpisodes virtual_episodes = 14;
 }
 
 message ListLibrariesRequest {}
