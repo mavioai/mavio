@@ -58,6 +58,7 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 | Radarr `src/NzbDrone.Core.Test/ParserTests` (~1,060 cases) | Release and file name parsing for movies: title, year, edition, quality, language, release group, slugs, Roman numerals | `libs/release` (`testdata/cases/movie`) |
 | Sonarr / Radarr `ParserTests/ParsingServiceTests` | Matching parsed releases to library series, episodes and movies | `libs/acquire` (from P18) |
 | Prowlarr `src/NzbDrone.Core.Test/IndexerTests`, `ParserTests` and `Files/Indexers` (recorded responses) | Indexer response parsing (Newznab, Torznab, RSS, Cardigann and code-implemented sites), category mapping, backoff; number, size and date parsing | `plugins/indexers` (`testdata/cases`, `testdata/responses`) |
+| Sonarr `src/NzbDrone.Core.Test/IndexerTests/TorrentRssIndexerTests` (Prowlarr keeps the feeds but not the tests) | Generic torrent RSS feeds: detecting how to read a feed, EZRSS | `plugins/indexers` (`testdata/cases/torrent_rss_tests`) |
 
 ---
 

@@ -49,7 +49,8 @@
       "repository": "https://github.com/Sonarr/Sonarr",
       "cases": [
         { "source": "src/NzbDrone.Core.Test/ParserTests", "target": "libs/release/testdata/cases/series" },
-        { "source": "src/NzbDrone.Core.Test/ParserTests/ParsingServiceTests", "target": "libs/acquire/testdata/cases/series/parsing_service" }
+        { "source": "src/NzbDrone.Core.Test/ParserTests/ParsingServiceTests", "target": "libs/acquire/testdata/cases/series/parsing_service" },
+        { "source": "src/NzbDrone.Core.Test/IndexerTests/TorrentRssIndexerTests", "target": "plugins/indexers/testdata/cases/torrent_rss_tests" }
       ]
     },
     {
