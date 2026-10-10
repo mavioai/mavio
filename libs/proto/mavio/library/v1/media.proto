@@ -21,6 +21,9 @@ message MediaSource {
   repeated MediaStream streams = 9;
   repeated Chapter chapters = 10;
   google.protobuf.Timestamp probe_time = 11;
+  // Read over HTTP from where a media source provider plugin says, not
+  // from a file; its path is the URL.
+  bool remote = 12;
 }
 
 enum StreamKind {

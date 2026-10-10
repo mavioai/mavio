@@ -278,6 +278,33 @@ func (p *Playback) touch(now time.Time) {
 	p.mu.Unlock()
 }
 
+// sources returns an item's media sources: its files, then those read
+// over HTTP; local counts the files.
+func (m *Manager) sources(ctx context.Context, item core.Item) (sources []core.MediaSource, local int, err error) {
+	sources, err = m.cfg.Store.MediaSources().ListForItem(ctx, item.ID)
+	if err != nil {
+		return nil, 0, err
+	}
+	local = len(sources)
+	if m.cfg.RemoteSources != nil {
+		sources = append(sources, m.cfg.RemoteSources(ctx, item)...)
+	}
+	return sources, local, nil
+}
+
+// Sources returns the media sources a user may play an item from: its
+// files, then those read over HTTP, which number len(sources) - local.
+func (m *Manager) Sources(ctx context.Context, user *core.User, itemID core.ID) (sources []core.MediaSource, local int, err error) {
+	item, err := m.cfg.Store.Items().Get(ctx, itemID)
+	if err != nil {
+		return nil, 0, err
+	}
+	if !user.Policy.CanAccess(&item) {
+		return nil, 0, fmt.Errorf("item %s: %w", item.ID, core.ErrNotFound)
+	}
+	return m.sources(ctx, item)
+}
+
 // Start decides how the client plays the item and registers the playback.
 func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	st := m.cfg.Store
@@ -306,13 +333,9 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	if err != nil {
 		return nil, err
 	}
-	mediaSources, err := st.MediaSources().ListForItem(ctx, item.ID)
+	mediaSources, local, err := m.sources(ctx, item)
 	if err != nil {
 		return nil, err
-	}
-	local := len(mediaSources)
-	if m.cfg.RemoteSources != nil {
-		mediaSources = append(mediaSources, m.cfg.RemoteSources(ctx, item)...)
 	}
 	if len(mediaSources) == 0 {
 		return nil, fmt.Errorf("%w: %s has no media", ErrNotPlayable, item.ID)

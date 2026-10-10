@@ -2991,6 +2991,11 @@
               }
             ],
             "title": "probe_time"
+          },
+          "remote": {
+            "type": "boolean",
+            "title": "remote",
+            "description": "Read over HTTP from where a media source provider plugin says, not\n from a file; its path is the URL."
           }
         },
         "title": "MediaSource",
@@ -4657,6 +4662,35 @@
           }
         },
         "title": "ListIntrosResponse",
+        "additionalProperties": false
+      },
+      "mavio.playback.v1.ListMediaSourcesRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          }
+        },
+        "title": "ListMediaSourcesRequest",
+        "required": [
+          "itemId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.playback.v1.ListMediaSourcesResponse": {
+        "type": "object",
+        "properties": {
+          "mediaSources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.library.v1.MediaSource"
+            },
+            "title": "media_sources"
+          }
+        },
+        "title": "ListMediaSourcesResponse",
         "additionalProperties": false
       },
       "mavio.playback.v1.MediaKind": {
@@ -9373,14 +9407,14 @@
         }
       }
     },
-    "/mavio.system.v1.SystemService/UninstallPlugin": {
+    "/mavio.library.v1.ItemService/SearchRemoteLyrics": {
       "post": {
         "tags": [
-          "SystemService"
+          "ItemService"
         ],
-        "summary": "UninstallPlugin",
-        "description": "UninstallPlugin stops a plugin and removes its folder and\n configuration. Administrators only.",
-        "operationId": "mavio.system.v1.SystemService.UninstallPlugin",
+        "summary": "SearchRemoteLyrics",
+        "description": "SearchRemoteLyrics asks the lyrics providers for lyrics of a track;\n administrators only.",
+        "operationId": "mavio.library.v1.ItemService.SearchRemoteLyrics",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -9405,7 +9439,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.UninstallPluginRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsRequest"
               }
             }
           },
@@ -9427,7 +9461,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.UninstallPluginResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsResponse"
                 }
               }
             }
@@ -10117,14 +10151,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/StopPlayback": {
+    "/mavio.auth.v1.AuthService/StartQuickConnect": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "AuthService"
         ],
-        "summary": "StopPlayback",
-        "description": "StopPlayback ends a playback and saves the resume position or marks the\n item played.",
-        "operationId": "mavio.playback.v1.PlaybackService.StopPlayback",
+        "summary": "StartQuickConnect",
+        "description": "StartQuickConnect begins signing a device in from a signed-in one\n (Quick Connect): the new device shows the code, a signed-in user\n enters it with AuthorizeQuickConnect, and the new device, polling\n GetQuickConnectState, then signs in with LoginWithQuickConnect as that\n user. The request expires after ten minutes, or one minute after it\n was authorized.",
+        "operationId": "mavio.auth.v1.AuthService.StartQuickConnect",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -10149,7 +10183,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.StartQuickConnectRequest"
               }
             }
           },
@@ -10171,7 +10205,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.StartQuickConnectResponse"
                 }
               }
             }
@@ -11040,14 +11074,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/SearchRemoteLyrics": {
+    "/mavio.playback.v1.PlaybackService/ReportProgress": {
       "post": {
         "tags": [
-          "ItemService"
+          "PlaybackService"
         ],
-        "summary": "SearchRemoteLyrics",
-        "description": "SearchRemoteLyrics asks the lyrics providers for lyrics of a track;\n administrators only.",
-        "operationId": "mavio.library.v1.ItemService.SearchRemoteLyrics",
+        "summary": "ReportProgress",
+        "description": "ReportProgress records the position of a playback. Playbacks without\n reports or media requests for a while expire.",
+        "operationId": "mavio.playback.v1.PlaybackService.ReportProgress",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -11072,7 +11106,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressRequest"
               }
             }
           },
@@ -11094,7 +11128,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressResponse"
                 }
               }
             }
@@ -11656,14 +11690,14 @@
         }
       }
     },
-    "/mavio.library.v1.MetadataService/ListExternalIdKinds": {
+    "/mavio.playback.v1.PlaybackService/StartPlayback": {
       "post": {
         "tags": [
-          "MetadataService"
+          "PlaybackService"
         ],
-        "summary": "ListExternalIdKinds",
-        "description": "ListExternalIdKinds lists the kinds of external IDs items and persons\n carry: the built-in ones and those plugins declare.",
-        "operationId": "mavio.library.v1.MetadataService.ListExternalIdKinds",
+        "summary": "StartPlayback",
+        "description": "StartPlayback picks a media source and streams, decides whether the\n client plays it directly, remuxed or transcoded, and returns the URLs to\n play it from. The URLs need no token and work until the playback stops,\n expires or its sign-in session ends.",
+        "operationId": "mavio.playback.v1.PlaybackService.StartPlayback",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -11688,7 +11722,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListExternalIdKindsRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackRequest"
               }
             }
           },
@@ -11710,7 +11744,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListExternalIdKindsResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackResponse"
                 }
               }
             }
@@ -12152,13 +12186,14 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/CreatePlaylist": {
+    "/mavio.playback.v1.PlaybackService/ListMediaSources": {
       "post": {
         "tags": [
-          "PlaylistService"
+          "PlaybackService"
         ],
-        "summary": "CreatePlaylist",
-        "operationId": "mavio.library.v1.PlaylistService.CreatePlaylist",
+        "summary": "ListMediaSources",
+        "description": "ListMediaSources returns the media sources an item plays from: its\n files, as GetItem lists them, then those the media source provider\n plugins give, probed. StartPlayback plays one by its ID.",
+        "operationId": "mavio.playback.v1.PlaybackService.ListMediaSources",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12183,7 +12218,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.ListMediaSourcesRequest"
               }
             }
           },
@@ -12205,7 +12240,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.ListMediaSourcesResponse"
                 }
               }
             }
@@ -12643,6 +12678,67 @@
         }
       }
     },
+    "/mavio.library.v1.PlaylistService/CreatePlaylist": {
+      "post": {
+        "tags": [
+          "PlaylistService"
+        ],
+        "summary": "CreatePlaylist",
+        "operationId": "mavio.library.v1.PlaylistService.CreatePlaylist",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.auth.v1.AuthService/CreateFirstUser": {
       "post": {
         "tags": [
@@ -12705,14 +12801,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/ReportProgress": {
+    "/mavio.library.v1.MetadataService/ListExternalIdKinds": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "MetadataService"
         ],
-        "summary": "ReportProgress",
-        "description": "ReportProgress records the position of a playback. Playbacks without\n reports or media requests for a while expire.",
-        "operationId": "mavio.playback.v1.PlaybackService.ReportProgress",
+        "summary": "ListExternalIdKinds",
+        "description": "ListExternalIdKinds lists the kinds of external IDs items and persons\n carry: the built-in ones and those plugins declare.",
+        "operationId": "mavio.library.v1.MetadataService.ListExternalIdKinds",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12737,7 +12833,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListExternalIdKindsRequest"
               }
             }
           },
@@ -12759,7 +12855,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListExternalIdKindsResponse"
                 }
               }
             }
@@ -12767,14 +12863,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/StartQuickConnect": {
+    "/mavio.playback.v1.PlaybackService/StopPlayback": {
       "post": {
         "tags": [
-          "AuthService"
+          "PlaybackService"
         ],
-        "summary": "StartQuickConnect",
-        "description": "StartQuickConnect begins signing a device in from a signed-in one\n (Quick Connect): the new device shows the code, a signed-in user\n enters it with AuthorizeQuickConnect, and the new device, polling\n GetQuickConnectState, then signs in with LoginWithQuickConnect as that\n user. The request expires after ten minutes, or one minute after it\n was authorized.",
-        "operationId": "mavio.auth.v1.AuthService.StartQuickConnect",
+        "summary": "StopPlayback",
+        "description": "StopPlayback ends a playback and saves the resume position or marks the\n item played.",
+        "operationId": "mavio.playback.v1.PlaybackService.StopPlayback",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12799,7 +12895,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.StartQuickConnectRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackRequest"
               }
             }
           },
@@ -12821,7 +12917,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.StartQuickConnectResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackResponse"
                 }
               }
             }
@@ -14862,14 +14958,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/StartPlayback": {
+    "/mavio.system.v1.SystemService/UninstallPlugin": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "SystemService"
         ],
-        "summary": "StartPlayback",
-        "description": "StartPlayback picks a media source and streams, decides whether the\n client plays it directly, remuxed or transcoded, and returns the URLs to\n play it from. The URLs need no token and work until the playback stops,\n expires or its sign-in session ends.",
-        "operationId": "mavio.playback.v1.PlaybackService.StartPlayback",
+        "summary": "UninstallPlugin",
+        "description": "UninstallPlugin stops a plugin and removes its folder and\n configuration. Administrators only.",
+        "operationId": "mavio.system.v1.SystemService.UninstallPlugin",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -14894,7 +14990,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.UninstallPluginRequest"
               }
             }
           },
@@ -14916,7 +15012,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.UninstallPluginResponse"
                 }
               }
             }

@@ -145,6 +145,7 @@ type MediaSource struct {
 	xxx_hidden_Streams     *[]*MediaStream        `protobuf:"bytes,9,rep,name=streams"`
 	xxx_hidden_Chapters    *[]*Chapter            `protobuf:"bytes,10,rep,name=chapters"`
 	xxx_hidden_ProbeTime   *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=probe_time,json=probeTime"`
+	xxx_hidden_Remote      bool                   `protobuf:"varint,12,opt,name=remote"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -272,34 +273,41 @@ func (x *MediaSource) GetProbeTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *MediaSource) GetRemote() bool {
+	if x != nil {
+		return x.xxx_hidden_Remote
+	}
+	return false
+}
+
 func (x *MediaSource) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
 }
 
 func (x *MediaSource) SetItemId(v string) {
 	x.xxx_hidden_ItemId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
 }
 
 func (x *MediaSource) SetPath(v string) {
 	x.xxx_hidden_Path = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 12)
 }
 
 func (x *MediaSource) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 12)
 }
 
 func (x *MediaSource) SetContainer(v string) {
 	x.xxx_hidden_Container = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 12)
 }
 
 func (x *MediaSource) SetSizeBytes(v int64) {
 	x.xxx_hidden_SizeBytes = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 12)
 }
 
 func (x *MediaSource) SetDuration(v *durationpb.Duration) {
@@ -308,7 +316,7 @@ func (x *MediaSource) SetDuration(v *durationpb.Duration) {
 
 func (x *MediaSource) SetBitrate(v int64) {
 	x.xxx_hidden_Bitrate = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 12)
 }
 
 func (x *MediaSource) SetStreams(v []*MediaStream) {
@@ -321,6 +329,11 @@ func (x *MediaSource) SetChapters(v []*Chapter) {
 
 func (x *MediaSource) SetProbeTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_ProbeTime = v
+}
+
+func (x *MediaSource) SetRemote(v bool) {
+	x.xxx_hidden_Remote = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
 }
 
 func (x *MediaSource) HasId() bool {
@@ -386,6 +399,13 @@ func (x *MediaSource) HasProbeTime() bool {
 	return x.xxx_hidden_ProbeTime != nil
 }
 
+func (x *MediaSource) HasRemote() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
 func (x *MediaSource) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -429,6 +449,11 @@ func (x *MediaSource) ClearProbeTime() {
 	x.xxx_hidden_ProbeTime = nil
 }
 
+func (x *MediaSource) ClearRemote() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_Remote = false
+}
+
 type MediaSource_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -446,6 +471,9 @@ type MediaSource_builder struct {
 	Streams   []*MediaStream
 	Chapters  []*Chapter
 	ProbeTime *timestamppb.Timestamp
+	// Read over HTTP from where a media source provider plugin says, not
+	// from a file; its path is the URL.
+	Remote *bool
 }
 
 func (b0 MediaSource_builder) Build() *MediaSource {
@@ -453,37 +481,41 @@ func (b0 MediaSource_builder) Build() *MediaSource {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.ItemId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
 		x.xxx_hidden_ItemId = b.ItemId
 	}
 	if b.Path != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 12)
 		x.xxx_hidden_Path = b.Path
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 12)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Container != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 12)
 		x.xxx_hidden_Container = b.Container
 	}
 	if b.SizeBytes != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 12)
 		x.xxx_hidden_SizeBytes = *b.SizeBytes
 	}
 	x.xxx_hidden_Duration = b.Duration
 	if b.Bitrate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 12)
 		x.xxx_hidden_Bitrate = *b.Bitrate
 	}
 	x.xxx_hidden_Streams = &b.Streams
 	x.xxx_hidden_Chapters = &b.Chapters
 	x.xxx_hidden_ProbeTime = b.ProbeTime
+	if b.Remote != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
+		x.xxx_hidden_Remote = *b.Remote
+	}
 	return m0
 }
 
@@ -1969,7 +2001,7 @@ var File_mavio_library_v1_media_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_media_proto_rawDesc = "" +
 	"\n" +
-	"\x1cmavio/library/v1/media.proto\x12\x10mavio.library.v1\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x97\x03\n" +
+	"\x1cmavio/library/v1/media.proto\x12\x10mavio.library.v1\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xaf\x03\n" +
 	"\vMediaSource\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\aitem_id\x18\x02 \x01(\tR\x06itemId\x12\x12\n" +
@@ -1984,7 +2016,8 @@ const file_mavio_library_v1_media_proto_rawDesc = "" +
 	"\bchapters\x18\n" +
 	" \x03(\v2\x19.mavio.library.v1.ChapterR\bchapters\x129\n" +
 	"\n" +
-	"probe_time\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tprobeTime\"\xcc\x01\n" +
+	"probe_time\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tprobeTime\x12\x16\n" +
+	"\x06remote\x18\f \x01(\bR\x06remote\"\xcc\x01\n" +
 	"\vDolbyVision\x12\x18\n" +
 	"\aprofile\x18\x01 \x01(\x05R\aprofile\x12\x14\n" +
 	"\x05level\x18\x02 \x01(\x05R\x05level\x12.\n" +

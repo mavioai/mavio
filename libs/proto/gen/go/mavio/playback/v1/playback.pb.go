@@ -3939,11 +3939,148 @@ func (b0 ListIntrosResponse_builder) Build() *ListIntrosResponse {
 	return m0
 }
 
+type ListMediaSourcesRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ItemId      *string                `protobuf:"bytes,1,opt,name=item_id,json=itemId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ListMediaSourcesRequest) Reset() {
+	*x = ListMediaSourcesRequest{}
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMediaSourcesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMediaSourcesRequest) ProtoMessage() {}
+
+func (x *ListMediaSourcesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListMediaSourcesRequest) GetItemId() string {
+	if x != nil {
+		if x.xxx_hidden_ItemId != nil {
+			return *x.xxx_hidden_ItemId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ListMediaSourcesRequest) SetItemId(v string) {
+	x.xxx_hidden_ItemId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *ListMediaSourcesRequest) HasItemId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ListMediaSourcesRequest) ClearItemId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_ItemId = nil
+}
+
+type ListMediaSourcesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	ItemId *string
+}
+
+func (b0 ListMediaSourcesRequest_builder) Build() *ListMediaSourcesRequest {
+	m0 := &ListMediaSourcesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.ItemId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_ItemId = b.ItemId
+	}
+	return m0
+}
+
+type ListMediaSourcesResponse struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_MediaSources *[]*v1.MediaSource     `protobuf:"bytes,1,rep,name=media_sources,json=mediaSources"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *ListMediaSourcesResponse) Reset() {
+	*x = ListMediaSourcesResponse{}
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMediaSourcesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMediaSourcesResponse) ProtoMessage() {}
+
+func (x *ListMediaSourcesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_playback_v1_playback_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListMediaSourcesResponse) GetMediaSources() []*v1.MediaSource {
+	if x != nil {
+		if x.xxx_hidden_MediaSources != nil {
+			return *x.xxx_hidden_MediaSources
+		}
+	}
+	return nil
+}
+
+func (x *ListMediaSourcesResponse) SetMediaSources(v []*v1.MediaSource) {
+	x.xxx_hidden_MediaSources = &v
+}
+
+type ListMediaSourcesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	MediaSources []*v1.MediaSource
+}
+
+func (b0 ListMediaSourcesResponse_builder) Build() *ListMediaSourcesResponse {
+	m0 := &ListMediaSourcesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_MediaSources = &b.MediaSources
+	return m0
+}
+
 var File_mavio_playback_v1_playback_proto protoreflect.FileDescriptor
 
 const file_mavio_playback_v1_playback_proto_rawDesc = "" +
 	"\n" +
-	" mavio/playback/v1/playback.proto\x12\x11mavio.playback.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1bmavio/library/v1/item.proto\"\xc1\x05\n" +
+	" mavio/playback/v1/playback.proto\x12\x11mavio.playback.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1bmavio/library/v1/item.proto\x1a\x1cmavio/library/v1/media.proto\"\xc1\x05\n" +
 	"\x12ClientCapabilities\x12\x1b\n" +
 	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x18@R\x04name\x12;\n" +
 	"\x15max_streaming_bitrate\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02(\x00R\x13maxStreamingBitrate\x125\n" +
@@ -4074,7 +4211,11 @@ const file_mavio_playback_v1_playback_proto_rawDesc = "" +
 	"\x11ListIntrosRequest\x12$\n" +
 	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\"B\n" +
 	"\x12ListIntrosResponse\x12,\n" +
-	"\x05items\x18\x01 \x03(\v2\x16.mavio.library.v1.ItemR\x05items*i\n" +
+	"\x05items\x18\x01 \x03(\v2\x16.mavio.library.v1.ItemR\x05items\"?\n" +
+	"\x17ListMediaSourcesRequest\x12$\n" +
+	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\"^\n" +
+	"\x18ListMediaSourcesResponse\x12B\n" +
+	"\rmedia_sources\x18\x01 \x03(\v2\x1d.mavio.library.v1.MediaSourceR\fmediaSources*i\n" +
 	"\tMediaKind\x12\x1a\n" +
 	"\x16MEDIA_KIND_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MEDIA_KIND_AUDIO\x10\x01\x12\x14\n" +
@@ -4173,47 +4314,51 @@ const file_mavio_playback_v1_playback_proto_rawDesc = "" +
 	"/TRANSCODE_REASON_VIDEO_RANGE_TYPE_NOT_SUPPORTED\x10\x19\x122\n" +
 	".TRANSCODE_REASON_VIDEO_CODEC_TAG_NOT_SUPPORTED\x10\x1a\x12/\n" +
 	"+TRANSCODE_REASON_STREAM_COUNT_EXCEEDS_LIMIT\x10\x1b\x121\n" +
-	"-TRANSCODE_REASON_VIDEO_ROTATION_NOT_SUPPORTED\x10\x1c2\x9d\x03\n" +
+	"-TRANSCODE_REASON_VIDEO_ROTATION_NOT_SUPPORTED\x10\x1c2\x8f\x04\n" +
 	"\x0fPlaybackService\x12b\n" +
 	"\rStartPlayback\x12'.mavio.playback.v1.StartPlaybackRequest\x1a(.mavio.playback.v1.StartPlaybackResponse\x12e\n" +
 	"\x0eReportProgress\x12(.mavio.playback.v1.ReportProgressRequest\x1a).mavio.playback.v1.ReportProgressResponse\x12_\n" +
 	"\fStopPlayback\x12&.mavio.playback.v1.StopPlaybackRequest\x1a'.mavio.playback.v1.StopPlaybackResponse\x12^\n" +
 	"\n" +
-	"ListIntros\x12$.mavio.playback.v1.ListIntrosRequest\x1a%.mavio.playback.v1.ListIntrosResponse\"\x03\x90\x02\x01B\xd5\x01\n" +
+	"ListIntros\x12$.mavio.playback.v1.ListIntrosRequest\x1a%.mavio.playback.v1.ListIntrosResponse\"\x03\x90\x02\x01\x12p\n" +
+	"\x10ListMediaSources\x12*.mavio.playback.v1.ListMediaSourcesRequest\x1a+.mavio.playback.v1.ListMediaSourcesResponse\"\x03\x90\x02\x01B\xd5\x01\n" +
 	"\x15com.mavio.playback.v1B\rPlaybackProtoP\x01ZGgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1;playbackv1\xa2\x02\x03MPX\xaa\x02\x11Mavio.Playback.V1\xca\x02\x11Mavio\\Playback\\V1\xe2\x02\x1dMavio\\Playback\\V1\\GPBMetadata\xea\x02\x13Mavio::Playback::V1b\beditionsp\xe8\a"
 
 var file_mavio_playback_v1_playback_proto_enumTypes = make([]protoimpl.EnumInfo, 10)
-var file_mavio_playback_v1_playback_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_mavio_playback_v1_playback_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_mavio_playback_v1_playback_proto_goTypes = []any{
-	(MediaKind)(0),                 // 0: mavio.playback.v1.MediaKind
-	(Context)(0),                   // 1: mavio.playback.v1.Context
-	(Protocol)(0),                  // 2: mavio.playback.v1.Protocol
-	(SeekInfo)(0),                  // 3: mavio.playback.v1.SeekInfo
-	(SubtitleMethod)(0),            // 4: mavio.playback.v1.SubtitleMethod
-	(CodecKind)(0),                 // 5: mavio.playback.v1.CodecKind
-	(Property)(0),                  // 6: mavio.playback.v1.Property
-	(Op)(0),                        // 7: mavio.playback.v1.Op
-	(PlayMethod)(0),                // 8: mavio.playback.v1.PlayMethod
-	(TranscodeReason)(0),           // 9: mavio.playback.v1.TranscodeReason
-	(*ClientCapabilities)(nil),     // 10: mavio.playback.v1.ClientCapabilities
-	(*DirectPlayProfile)(nil),      // 11: mavio.playback.v1.DirectPlayProfile
-	(*TranscodingProfile)(nil),     // 12: mavio.playback.v1.TranscodingProfile
-	(*ContainerProfile)(nil),       // 13: mavio.playback.v1.ContainerProfile
-	(*CodecProfile)(nil),           // 14: mavio.playback.v1.CodecProfile
-	(*SubtitleProfile)(nil),        // 15: mavio.playback.v1.SubtitleProfile
-	(*Condition)(nil),              // 16: mavio.playback.v1.Condition
-	(*SubtitleTrack)(nil),          // 17: mavio.playback.v1.SubtitleTrack
-	(*StartPlaybackRequest)(nil),   // 18: mavio.playback.v1.StartPlaybackRequest
-	(*StartPlaybackResponse)(nil),  // 19: mavio.playback.v1.StartPlaybackResponse
-	(*Attachment)(nil),             // 20: mavio.playback.v1.Attachment
-	(*ReportProgressRequest)(nil),  // 21: mavio.playback.v1.ReportProgressRequest
-	(*ReportProgressResponse)(nil), // 22: mavio.playback.v1.ReportProgressResponse
-	(*StopPlaybackRequest)(nil),    // 23: mavio.playback.v1.StopPlaybackRequest
-	(*StopPlaybackResponse)(nil),   // 24: mavio.playback.v1.StopPlaybackResponse
-	(*ListIntrosRequest)(nil),      // 25: mavio.playback.v1.ListIntrosRequest
-	(*ListIntrosResponse)(nil),     // 26: mavio.playback.v1.ListIntrosResponse
-	(*durationpb.Duration)(nil),    // 27: google.protobuf.Duration
-	(*v1.Item)(nil),                // 28: mavio.library.v1.Item
+	(MediaKind)(0),                   // 0: mavio.playback.v1.MediaKind
+	(Context)(0),                     // 1: mavio.playback.v1.Context
+	(Protocol)(0),                    // 2: mavio.playback.v1.Protocol
+	(SeekInfo)(0),                    // 3: mavio.playback.v1.SeekInfo
+	(SubtitleMethod)(0),              // 4: mavio.playback.v1.SubtitleMethod
+	(CodecKind)(0),                   // 5: mavio.playback.v1.CodecKind
+	(Property)(0),                    // 6: mavio.playback.v1.Property
+	(Op)(0),                          // 7: mavio.playback.v1.Op
+	(PlayMethod)(0),                  // 8: mavio.playback.v1.PlayMethod
+	(TranscodeReason)(0),             // 9: mavio.playback.v1.TranscodeReason
+	(*ClientCapabilities)(nil),       // 10: mavio.playback.v1.ClientCapabilities
+	(*DirectPlayProfile)(nil),        // 11: mavio.playback.v1.DirectPlayProfile
+	(*TranscodingProfile)(nil),       // 12: mavio.playback.v1.TranscodingProfile
+	(*ContainerProfile)(nil),         // 13: mavio.playback.v1.ContainerProfile
+	(*CodecProfile)(nil),             // 14: mavio.playback.v1.CodecProfile
+	(*SubtitleProfile)(nil),          // 15: mavio.playback.v1.SubtitleProfile
+	(*Condition)(nil),                // 16: mavio.playback.v1.Condition
+	(*SubtitleTrack)(nil),            // 17: mavio.playback.v1.SubtitleTrack
+	(*StartPlaybackRequest)(nil),     // 18: mavio.playback.v1.StartPlaybackRequest
+	(*StartPlaybackResponse)(nil),    // 19: mavio.playback.v1.StartPlaybackResponse
+	(*Attachment)(nil),               // 20: mavio.playback.v1.Attachment
+	(*ReportProgressRequest)(nil),    // 21: mavio.playback.v1.ReportProgressRequest
+	(*ReportProgressResponse)(nil),   // 22: mavio.playback.v1.ReportProgressResponse
+	(*StopPlaybackRequest)(nil),      // 23: mavio.playback.v1.StopPlaybackRequest
+	(*StopPlaybackResponse)(nil),     // 24: mavio.playback.v1.StopPlaybackResponse
+	(*ListIntrosRequest)(nil),        // 25: mavio.playback.v1.ListIntrosRequest
+	(*ListIntrosResponse)(nil),       // 26: mavio.playback.v1.ListIntrosResponse
+	(*ListMediaSourcesRequest)(nil),  // 27: mavio.playback.v1.ListMediaSourcesRequest
+	(*ListMediaSourcesResponse)(nil), // 28: mavio.playback.v1.ListMediaSourcesResponse
+	(*durationpb.Duration)(nil),      // 29: google.protobuf.Duration
+	(*v1.Item)(nil),                  // 30: mavio.library.v1.Item
+	(*v1.MediaSource)(nil),           // 31: mavio.library.v1.MediaSource
 }
 var file_mavio_playback_v1_playback_proto_depIdxs = []int32{
 	11, // 0: mavio.playback.v1.ClientCapabilities.direct_play:type_name -> mavio.playback.v1.DirectPlayProfile
@@ -4237,28 +4382,31 @@ var file_mavio_playback_v1_playback_proto_depIdxs = []int32{
 	7,  // 18: mavio.playback.v1.Condition.op:type_name -> mavio.playback.v1.Op
 	4,  // 19: mavio.playback.v1.SubtitleTrack.method:type_name -> mavio.playback.v1.SubtitleMethod
 	10, // 20: mavio.playback.v1.StartPlaybackRequest.capabilities:type_name -> mavio.playback.v1.ClientCapabilities
-	27, // 21: mavio.playback.v1.StartPlaybackRequest.start_position:type_name -> google.protobuf.Duration
+	29, // 21: mavio.playback.v1.StartPlaybackRequest.start_position:type_name -> google.protobuf.Duration
 	8,  // 22: mavio.playback.v1.StartPlaybackResponse.method:type_name -> mavio.playback.v1.PlayMethod
 	9,  // 23: mavio.playback.v1.StartPlaybackResponse.transcode_reasons:type_name -> mavio.playback.v1.TranscodeReason
 	17, // 24: mavio.playback.v1.StartPlaybackResponse.subtitles:type_name -> mavio.playback.v1.SubtitleTrack
 	20, // 25: mavio.playback.v1.StartPlaybackResponse.attachments:type_name -> mavio.playback.v1.Attachment
-	27, // 26: mavio.playback.v1.StartPlaybackResponse.start_position:type_name -> google.protobuf.Duration
-	27, // 27: mavio.playback.v1.ReportProgressRequest.position:type_name -> google.protobuf.Duration
-	27, // 28: mavio.playback.v1.StopPlaybackRequest.position:type_name -> google.protobuf.Duration
-	28, // 29: mavio.playback.v1.ListIntrosResponse.items:type_name -> mavio.library.v1.Item
-	18, // 30: mavio.playback.v1.PlaybackService.StartPlayback:input_type -> mavio.playback.v1.StartPlaybackRequest
-	21, // 31: mavio.playback.v1.PlaybackService.ReportProgress:input_type -> mavio.playback.v1.ReportProgressRequest
-	23, // 32: mavio.playback.v1.PlaybackService.StopPlayback:input_type -> mavio.playback.v1.StopPlaybackRequest
-	25, // 33: mavio.playback.v1.PlaybackService.ListIntros:input_type -> mavio.playback.v1.ListIntrosRequest
-	19, // 34: mavio.playback.v1.PlaybackService.StartPlayback:output_type -> mavio.playback.v1.StartPlaybackResponse
-	22, // 35: mavio.playback.v1.PlaybackService.ReportProgress:output_type -> mavio.playback.v1.ReportProgressResponse
-	24, // 36: mavio.playback.v1.PlaybackService.StopPlayback:output_type -> mavio.playback.v1.StopPlaybackResponse
-	26, // 37: mavio.playback.v1.PlaybackService.ListIntros:output_type -> mavio.playback.v1.ListIntrosResponse
-	34, // [34:38] is the sub-list for method output_type
-	30, // [30:34] is the sub-list for method input_type
-	30, // [30:30] is the sub-list for extension type_name
-	30, // [30:30] is the sub-list for extension extendee
-	0,  // [0:30] is the sub-list for field type_name
+	29, // 26: mavio.playback.v1.StartPlaybackResponse.start_position:type_name -> google.protobuf.Duration
+	29, // 27: mavio.playback.v1.ReportProgressRequest.position:type_name -> google.protobuf.Duration
+	29, // 28: mavio.playback.v1.StopPlaybackRequest.position:type_name -> google.protobuf.Duration
+	30, // 29: mavio.playback.v1.ListIntrosResponse.items:type_name -> mavio.library.v1.Item
+	31, // 30: mavio.playback.v1.ListMediaSourcesResponse.media_sources:type_name -> mavio.library.v1.MediaSource
+	18, // 31: mavio.playback.v1.PlaybackService.StartPlayback:input_type -> mavio.playback.v1.StartPlaybackRequest
+	21, // 32: mavio.playback.v1.PlaybackService.ReportProgress:input_type -> mavio.playback.v1.ReportProgressRequest
+	23, // 33: mavio.playback.v1.PlaybackService.StopPlayback:input_type -> mavio.playback.v1.StopPlaybackRequest
+	25, // 34: mavio.playback.v1.PlaybackService.ListIntros:input_type -> mavio.playback.v1.ListIntrosRequest
+	27, // 35: mavio.playback.v1.PlaybackService.ListMediaSources:input_type -> mavio.playback.v1.ListMediaSourcesRequest
+	19, // 36: mavio.playback.v1.PlaybackService.StartPlayback:output_type -> mavio.playback.v1.StartPlaybackResponse
+	22, // 37: mavio.playback.v1.PlaybackService.ReportProgress:output_type -> mavio.playback.v1.ReportProgressResponse
+	24, // 38: mavio.playback.v1.PlaybackService.StopPlayback:output_type -> mavio.playback.v1.StopPlaybackResponse
+	26, // 39: mavio.playback.v1.PlaybackService.ListIntros:output_type -> mavio.playback.v1.ListIntrosResponse
+	28, // 40: mavio.playback.v1.PlaybackService.ListMediaSources:output_type -> mavio.playback.v1.ListMediaSourcesResponse
+	36, // [36:41] is the sub-list for method output_type
+	31, // [31:36] is the sub-list for method input_type
+	31, // [31:31] is the sub-list for extension type_name
+	31, // [31:31] is the sub-list for extension extendee
+	0,  // [0:31] is the sub-list for field type_name
 }
 
 func init() { file_mavio_playback_v1_playback_proto_init() }
@@ -4272,7 +4420,7 @@ func file_mavio_playback_v1_playback_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_playback_v1_playback_proto_rawDesc), len(file_mavio_playback_v1_playback_proto_rawDesc)),
 			NumEnums:      10,
-			NumMessages:   17,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

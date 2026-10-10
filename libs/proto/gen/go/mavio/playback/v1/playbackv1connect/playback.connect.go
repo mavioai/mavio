@@ -45,6 +45,9 @@ const (
 	// PlaybackServiceListIntrosProcedure is the fully-qualified name of the PlaybackService's
 	// ListIntros RPC.
 	PlaybackServiceListIntrosProcedure = "/mavio.playback.v1.PlaybackService/ListIntros"
+	// PlaybackServiceListMediaSourcesProcedure is the fully-qualified name of the PlaybackService's
+	// ListMediaSources RPC.
+	PlaybackServiceListMediaSourcesProcedure = "/mavio.playback.v1.PlaybackService/ListMediaSources"
 )
 
 // PlaybackServiceClient is a client for the mavio.playback.v1.PlaybackService service.
@@ -64,6 +67,10 @@ type PlaybackServiceClient interface {
 	// trailers, as the intro provider plugins pick them; only items the user
 	// can play.
 	ListIntros(context.Context, *v1.ListIntrosRequest) (*v1.ListIntrosResponse, error)
+	// ListMediaSources returns the media sources an item plays from: its
+	// files, as GetItem lists them, then those the media source provider
+	// plugins give, probed. StartPlayback plays one by its ID.
+	ListMediaSources(context.Context, *v1.ListMediaSourcesRequest) (*v1.ListMediaSourcesResponse, error)
 }
 
 // NewPlaybackServiceClient constructs a client for the mavio.playback.v1.PlaybackService service.
@@ -102,15 +109,23 @@ func NewPlaybackServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		listMediaSources: connect.NewClient[v1.ListMediaSourcesRequest, v1.ListMediaSourcesResponse](
+			httpClient,
+			baseURL+PlaybackServiceListMediaSourcesProcedure,
+			connect.WithSchema(playbackServiceMethods.ByName("ListMediaSources")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // playbackServiceClient implements PlaybackServiceClient.
 type playbackServiceClient struct {
-	startPlayback  *connect.Client[v1.StartPlaybackRequest, v1.StartPlaybackResponse]
-	reportProgress *connect.Client[v1.ReportProgressRequest, v1.ReportProgressResponse]
-	stopPlayback   *connect.Client[v1.StopPlaybackRequest, v1.StopPlaybackResponse]
-	listIntros     *connect.Client[v1.ListIntrosRequest, v1.ListIntrosResponse]
+	startPlayback    *connect.Client[v1.StartPlaybackRequest, v1.StartPlaybackResponse]
+	reportProgress   *connect.Client[v1.ReportProgressRequest, v1.ReportProgressResponse]
+	stopPlayback     *connect.Client[v1.StopPlaybackRequest, v1.StopPlaybackResponse]
+	listIntros       *connect.Client[v1.ListIntrosRequest, v1.ListIntrosResponse]
+	listMediaSources *connect.Client[v1.ListMediaSourcesRequest, v1.ListMediaSourcesResponse]
 }
 
 // StartPlayback calls mavio.playback.v1.PlaybackService.StartPlayback.
@@ -149,6 +164,15 @@ func (c *playbackServiceClient) ListIntros(ctx context.Context, req *v1.ListIntr
 	return nil, err
 }
 
+// ListMediaSources calls mavio.playback.v1.PlaybackService.ListMediaSources.
+func (c *playbackServiceClient) ListMediaSources(ctx context.Context, req *v1.ListMediaSourcesRequest) (*v1.ListMediaSourcesResponse, error) {
+	response, err := c.listMediaSources.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // PlaybackServiceHandler is an implementation of the mavio.playback.v1.PlaybackService service.
 type PlaybackServiceHandler interface {
 	// StartPlayback picks a media source and streams, decides whether the
@@ -166,6 +190,10 @@ type PlaybackServiceHandler interface {
 	// trailers, as the intro provider plugins pick them; only items the user
 	// can play.
 	ListIntros(context.Context, *v1.ListIntrosRequest) (*v1.ListIntrosResponse, error)
+	// ListMediaSources returns the media sources an item plays from: its
+	// files, as GetItem lists them, then those the media source provider
+	// plugins give, probed. StartPlayback plays one by its ID.
+	ListMediaSources(context.Context, *v1.ListMediaSourcesRequest) (*v1.ListMediaSourcesResponse, error)
 }
 
 // NewPlaybackServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -200,6 +228,13 @@ func NewPlaybackServiceHandler(svc PlaybackServiceHandler, opts ...connect.Handl
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	playbackServiceListMediaSourcesHandler := connect.NewUnaryHandlerSimple(
+		PlaybackServiceListMediaSourcesProcedure,
+		svc.ListMediaSources,
+		connect.WithSchema(playbackServiceMethods.ByName("ListMediaSources")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.playback.v1.PlaybackService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PlaybackServiceStartPlaybackProcedure:
@@ -210,6 +245,8 @@ func NewPlaybackServiceHandler(svc PlaybackServiceHandler, opts ...connect.Handl
 			playbackServiceStopPlaybackHandler.ServeHTTP(w, r)
 		case PlaybackServiceListIntrosProcedure:
 			playbackServiceListIntrosHandler.ServeHTTP(w, r)
+		case PlaybackServiceListMediaSourcesProcedure:
+			playbackServiceListMediaSourcesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -233,4 +270,8 @@ func (UnimplementedPlaybackServiceHandler) StopPlayback(context.Context, *v1.Sto
 
 func (UnimplementedPlaybackServiceHandler) ListIntros(context.Context, *v1.ListIntrosRequest) (*v1.ListIntrosResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.playback.v1.PlaybackService.ListIntros is not implemented"))
+}
+
+func (UnimplementedPlaybackServiceHandler) ListMediaSources(context.Context, *v1.ListMediaSourcesRequest) (*v1.ListMediaSourcesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.playback.v1.PlaybackService.ListMediaSources is not implemented"))
 }

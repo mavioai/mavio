@@ -5,6 +5,7 @@ package mavio.playback.v1;
 import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 import "mavio/library/v1/item.proto";
+import "mavio/library/v1/media.proto";
 
 // PlaybackService decides how a client plays an item and tracks the
 // playback. All methods act for the calling user.
@@ -24,6 +25,12 @@ service PlaybackService {
   // trailers, as the intro provider plugins pick them; only items the user
   // can play.
   rpc ListIntros(ListIntrosRequest) returns (ListIntrosResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListMediaSources returns the media sources an item plays from: its
+  // files, as GetItem lists them, then those the media source provider
+  // plugins give, probed. StartPlayback plays one by its ID.
+  rpc ListMediaSources(ListMediaSourcesRequest) returns (ListMediaSourcesResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
 }
@@ -425,4 +432,15 @@ message ListIntrosRequest {
 message ListIntrosResponse {
   // In the order to play them.
   repeated mavio.library.v1.Item items = 1;
+}
+
+message ListMediaSourcesRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message ListMediaSourcesResponse {
+  repeated mavio.library.v1.MediaSource media_sources = 1;
 }

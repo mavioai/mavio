@@ -13,6 +13,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/media/decision"
+	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	playbackv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 )
@@ -67,6 +68,25 @@ func (s *PlaybackService) ListIntros(ctx context.Context, req *playbackv1.ListIn
 		return nil, connectError(ctx, err)
 	}
 	return playbackv1.ListIntrosResponse_builder{Items: out}.Build(), nil
+}
+
+// ListMediaSources returns the media sources an item plays from: its
+// files, then those read over HTTP.
+func (s *PlaybackService) ListMediaSources(ctx context.Context, req *playbackv1.ListMediaSourcesRequest) (*playbackv1.ListMediaSourcesResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	sources, local, err := s.playbacks.Sources(ctx, &p.User, core.MustParseID(req.GetItemId()))
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out := make([]*libraryv1.MediaSource, len(sources))
+	for i := range sources {
+		out[i] = mediaSourceToProto(&sources[i], p.User.Admin)
+		out[i].SetRemote(i >= local)
+	}
+	return playbackv1.ListMediaSourcesResponse_builder{MediaSources: out}.Build(), nil
 }
 
 // StartPlayback decides how the client plays the item and starts the
