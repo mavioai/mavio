@@ -387,7 +387,7 @@ flowchart TD
 **进度**：
 - [x] `scraper-tmdb` 无需密钥：使用 Radarr 的令牌，TMDB 拒绝后改用 Mavio 的密钥（由 `MAVIO_TMDB_KEY` 编入）
 - [ ] 注册 Mavio 自己的 TMDB API 密钥，并在发布构建中设为 `MAVIO_TMDB_KEY`（需要项目的 TMDB 账号）
-- [ ] `scraper-tmdb` 的 `DISCOVERY_PROVIDER`
+- [x] `scraper-tmdb` 的 `DISCOVERY_PROVIDER`
 - [ ] `plugins/scraper-servarr`：Radarr 的电影元数据与列表、SkyHook 的剧集与单集、scene 映射、日播剧、XEM
 - [ ] 端到端测试
 

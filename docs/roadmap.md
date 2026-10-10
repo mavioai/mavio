@@ -387,7 +387,7 @@ flowchart TD
 **Progress**:
 - [x] `scraper-tmdb` without a key: Radarr's token, Mavio's key once TMDB rejects it (built in from `MAVIO_TMDB_KEY`)
 - [ ] Mavio's own TMDB API key registered and set as `MAVIO_TMDB_KEY` in release builds (needs the project's TMDB account)
-- [ ] `DISCOVERY_PROVIDER` in `scraper-tmdb`
+- [x] `DISCOVERY_PROVIDER` in `scraper-tmdb`
 - [ ] `plugins/scraper-servarr`: Radarr's movie metadata and lists, SkyHook's series and episodes, scene mappings, daily series, XEM
 - [ ] End-to-end test
 
