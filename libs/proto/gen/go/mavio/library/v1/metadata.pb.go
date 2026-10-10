@@ -3546,6 +3546,337 @@ func (b0 DownloadSubtitleResponse_builder) Build() *DownloadSubtitleResponse {
 	return m0
 }
 
+type ListExternalIdKindsRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ItemKind    ItemKind               `protobuf:"varint,1,opt,name=item_kind,json=itemKind,enum=mavio.library.v1.ItemKind"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ListExternalIdKindsRequest) Reset() {
+	*x = ListExternalIdKindsRequest{}
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListExternalIdKindsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListExternalIdKindsRequest) ProtoMessage() {}
+
+func (x *ListExternalIdKindsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListExternalIdKindsRequest) GetItemKind() ItemKind {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 0) {
+			return x.xxx_hidden_ItemKind
+		}
+	}
+	return ItemKind_ITEM_KIND_UNSPECIFIED
+}
+
+func (x *ListExternalIdKindsRequest) SetItemKind(v ItemKind) {
+	x.xxx_hidden_ItemKind = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *ListExternalIdKindsRequest) HasItemKind() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ListExternalIdKindsRequest) ClearItemKind() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_ItemKind = ItemKind_ITEM_KIND_UNSPECIFIED
+}
+
+type ListExternalIdKindsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Unset lists the kinds of every item kind and of persons.
+	ItemKind *ItemKind
+}
+
+func (b0 ListExternalIdKindsRequest_builder) Build() *ListExternalIdKindsRequest {
+	m0 := &ListExternalIdKindsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.ItemKind != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_ItemKind = *b.ItemKind
+	}
+	return m0
+}
+
+// ExternalIdKind is a kind of external ID.
+type ExternalIdKind struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Key         *string                `protobuf:"bytes,1,opt,name=key"`
+	xxx_hidden_Name        *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_ItemKinds   []ItemKind             `protobuf:"varint,3,rep,packed,name=item_kinds,json=itemKinds,enum=mavio.library.v1.ItemKind"`
+	xxx_hidden_Persons     bool                   `protobuf:"varint,4,opt,name=persons"`
+	xxx_hidden_PluginId    *string                `protobuf:"bytes,5,opt,name=plugin_id,json=pluginId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ExternalIdKind) Reset() {
+	*x = ExternalIdKind{}
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExternalIdKind) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExternalIdKind) ProtoMessage() {}
+
+func (x *ExternalIdKind) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ExternalIdKind) GetKey() string {
+	if x != nil {
+		if x.xxx_hidden_Key != nil {
+			return *x.xxx_hidden_Key
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ExternalIdKind) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ExternalIdKind) GetItemKinds() []ItemKind {
+	if x != nil {
+		return x.xxx_hidden_ItemKinds
+	}
+	return nil
+}
+
+func (x *ExternalIdKind) GetPersons() bool {
+	if x != nil {
+		return x.xxx_hidden_Persons
+	}
+	return false
+}
+
+func (x *ExternalIdKind) GetPluginId() string {
+	if x != nil {
+		if x.xxx_hidden_PluginId != nil {
+			return *x.xxx_hidden_PluginId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ExternalIdKind) SetKey(v string) {
+	x.xxx_hidden_Key = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+}
+
+func (x *ExternalIdKind) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+}
+
+func (x *ExternalIdKind) SetItemKinds(v []ItemKind) {
+	x.xxx_hidden_ItemKinds = v
+}
+
+func (x *ExternalIdKind) SetPersons(v bool) {
+	x.xxx_hidden_Persons = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *ExternalIdKind) SetPluginId(v string) {
+	x.xxx_hidden_PluginId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
+}
+
+func (x *ExternalIdKind) HasKey() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ExternalIdKind) HasName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ExternalIdKind) HasPersons() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *ExternalIdKind) HasPluginId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *ExternalIdKind) ClearKey() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Key = nil
+}
+
+func (x *ExternalIdKind) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Name = nil
+}
+
+func (x *ExternalIdKind) ClearPersons() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Persons = false
+}
+
+func (x *ExternalIdKind) ClearPluginId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_PluginId = nil
+}
+
+type ExternalIdKind_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Key of the IDs in external_ids maps, e.g. "tmdb".
+	Key *string
+	// Display name, e.g. "TMDB".
+	Name *string
+	// Kinds of items that carry the ID.
+	ItemKinds []ItemKind
+	// Whether persons carry the ID.
+	Persons *bool
+	// The plugin declaring the kind; empty for built-in kinds.
+	PluginId *string
+}
+
+func (b0 ExternalIdKind_builder) Build() *ExternalIdKind {
+	m0 := &ExternalIdKind{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Key != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		x.xxx_hidden_Key = b.Key
+	}
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		x.xxx_hidden_Name = b.Name
+	}
+	x.xxx_hidden_ItemKinds = b.ItemKinds
+	if b.Persons != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		x.xxx_hidden_Persons = *b.Persons
+	}
+	if b.PluginId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		x.xxx_hidden_PluginId = b.PluginId
+	}
+	return m0
+}
+
+type ListExternalIdKindsResponse struct {
+	state            protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Kinds *[]*ExternalIdKind     `protobuf:"bytes,1,rep,name=kinds"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ListExternalIdKindsResponse) Reset() {
+	*x = ListExternalIdKindsResponse{}
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListExternalIdKindsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListExternalIdKindsResponse) ProtoMessage() {}
+
+func (x *ListExternalIdKindsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListExternalIdKindsResponse) GetKinds() []*ExternalIdKind {
+	if x != nil {
+		if x.xxx_hidden_Kinds != nil {
+			return *x.xxx_hidden_Kinds
+		}
+	}
+	return nil
+}
+
+func (x *ListExternalIdKindsResponse) SetKinds(v []*ExternalIdKind) {
+	x.xxx_hidden_Kinds = &v
+}
+
+type ListExternalIdKindsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Kinds []*ExternalIdKind
+}
+
+func (b0 ListExternalIdKindsResponse_builder) Build() *ListExternalIdKindsResponse {
+	m0 := &ListExternalIdKindsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Kinds = &b.Kinds
+	return m0
+}
+
 var File_mavio_library_v1_metadata_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_metadata_proto_rawDesc = "" +
@@ -3682,7 +4013,18 @@ const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\vsubtitle_id\x18\x04 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\n" +
 	"subtitleId\"Q\n" +
 	"\x18DownloadSubtitleResponse\x125\n" +
-	"\x06stream\x18\x01 \x01(\v2\x1d.mavio.library.v1.MediaStreamR\x06stream2\x98\a\n" +
+	"\x06stream\x18\x01 \x01(\v2\x1d.mavio.library.v1.MediaStreamR\x06stream\"_\n" +
+	"\x1aListExternalIdKindsRequest\x12A\n" +
+	"\titem_kind\x18\x01 \x01(\x0e2\x1a.mavio.library.v1.ItemKindB\b\xbaH\x05\x82\x01\x02\x10\x01R\bitemKind\"\xa8\x01\n" +
+	"\x0eExternalIdKind\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"item_kinds\x18\x03 \x03(\x0e2\x1a.mavio.library.v1.ItemKindR\titemKinds\x12\x18\n" +
+	"\apersons\x18\x04 \x01(\bR\apersons\x12\x1b\n" +
+	"\tplugin_id\x18\x05 \x01(\tR\bpluginId\"U\n" +
+	"\x1bListExternalIdKindsResponse\x126\n" +
+	"\x05kinds\x18\x01 \x03(\v2 .mavio.library.v1.ExternalIdKindR\x05kinds2\x91\b\n" +
 	"\x0fMetadataService\x12W\n" +
 	"\n" +
 	"UpdateItem\x12#.mavio.library.v1.UpdateItemRequest\x1a$.mavio.library.v1.UpdateItemResponse\x12Z\n" +
@@ -3693,93 +4035,103 @@ const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\fSetItemImage\x12%.mavio.library.v1.SetItemImageRequest\x1a&.mavio.library.v1.SetItemImageResponse\x12f\n" +
 	"\x0fDeleteItemImage\x12(.mavio.library.v1.DeleteItemImageRequest\x1a).mavio.library.v1.DeleteItemImageResponse\x12k\n" +
 	"\x0fSearchSubtitles\x12(.mavio.library.v1.SearchSubtitlesRequest\x1a).mavio.library.v1.SearchSubtitlesResponse\"\x03\x90\x02\x01\x12i\n" +
-	"\x10DownloadSubtitle\x12).mavio.library.v1.DownloadSubtitleRequest\x1a*.mavio.library.v1.DownloadSubtitleResponseB\xce\x01\n" +
+	"\x10DownloadSubtitle\x12).mavio.library.v1.DownloadSubtitleRequest\x1a*.mavio.library.v1.DownloadSubtitleResponse\x12w\n" +
+	"\x13ListExternalIdKinds\x12,.mavio.library.v1.ListExternalIdKindsRequest\x1a-.mavio.library.v1.ListExternalIdKindsResponse\"\x03\x90\x02\x01B\xce\x01\n" +
 	"\x14com.mavio.library.v1B\rMetadataProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1;libraryv1\xa2\x02\x03MLX\xaa\x02\x10Mavio.Library.V1\xca\x02\x10Mavio\\Library\\V1\xe2\x02\x1cMavio\\Library\\V1\\GPBMetadata\xea\x02\x12Mavio::Library::V1b\beditionsp\xe8\a"
 
-var file_mavio_library_v1_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
+var file_mavio_library_v1_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
 var file_mavio_library_v1_metadata_proto_goTypes = []any{
-	(*ItemMetadata)(nil),             // 0: mavio.library.v1.ItemMetadata
-	(*UpdateItemRequest)(nil),        // 1: mavio.library.v1.UpdateItemRequest
-	(*UpdateItemResponse)(nil),       // 2: mavio.library.v1.UpdateItemResponse
-	(*RefreshItemRequest)(nil),       // 3: mavio.library.v1.RefreshItemRequest
-	(*RefreshItemResponse)(nil),      // 4: mavio.library.v1.RefreshItemResponse
-	(*SearchRemoteRequest)(nil),      // 5: mavio.library.v1.SearchRemoteRequest
-	(*RemoteSearchResult)(nil),       // 6: mavio.library.v1.RemoteSearchResult
-	(*SearchRemoteResponse)(nil),     // 7: mavio.library.v1.SearchRemoteResponse
-	(*IdentifyItemRequest)(nil),      // 8: mavio.library.v1.IdentifyItemRequest
-	(*IdentifyItemResponse)(nil),     // 9: mavio.library.v1.IdentifyItemResponse
-	(*ListRemoteImagesRequest)(nil),  // 10: mavio.library.v1.ListRemoteImagesRequest
-	(*RemoteImage)(nil),              // 11: mavio.library.v1.RemoteImage
-	(*ListRemoteImagesResponse)(nil), // 12: mavio.library.v1.ListRemoteImagesResponse
-	(*SetItemImageRequest)(nil),      // 13: mavio.library.v1.SetItemImageRequest
-	(*SetItemImageResponse)(nil),     // 14: mavio.library.v1.SetItemImageResponse
-	(*DeleteItemImageRequest)(nil),   // 15: mavio.library.v1.DeleteItemImageRequest
-	(*DeleteItemImageResponse)(nil),  // 16: mavio.library.v1.DeleteItemImageResponse
-	(*SearchSubtitlesRequest)(nil),   // 17: mavio.library.v1.SearchSubtitlesRequest
-	(*RemoteSubtitle)(nil),           // 18: mavio.library.v1.RemoteSubtitle
-	(*SearchSubtitlesResponse)(nil),  // 19: mavio.library.v1.SearchSubtitlesResponse
-	(*DownloadSubtitleRequest)(nil),  // 20: mavio.library.v1.DownloadSubtitleRequest
-	(*DownloadSubtitleResponse)(nil), // 21: mavio.library.v1.DownloadSubtitleResponse
-	nil,                              // 22: mavio.library.v1.ItemMetadata.ExternalIdsEntry
-	nil,                              // 23: mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
-	nil,                              // 24: mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
-	nil,                              // 25: mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
-	(*timestamppb.Timestamp)(nil),    // 26: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),      // 27: google.protobuf.Duration
-	(SeriesStatus)(0),                // 28: mavio.library.v1.SeriesStatus
-	(MetadataField)(0),               // 29: mavio.library.v1.MetadataField
-	(*fieldmaskpb.FieldMask)(nil),    // 30: google.protobuf.FieldMask
-	(*Item)(nil),                     // 31: mavio.library.v1.Item
-	(ImageKind)(0),                   // 32: mavio.library.v1.ImageKind
-	(*Image)(nil),                    // 33: mavio.library.v1.Image
-	(*MediaStream)(nil),              // 34: mavio.library.v1.MediaStream
+	(*ItemMetadata)(nil),                // 0: mavio.library.v1.ItemMetadata
+	(*UpdateItemRequest)(nil),           // 1: mavio.library.v1.UpdateItemRequest
+	(*UpdateItemResponse)(nil),          // 2: mavio.library.v1.UpdateItemResponse
+	(*RefreshItemRequest)(nil),          // 3: mavio.library.v1.RefreshItemRequest
+	(*RefreshItemResponse)(nil),         // 4: mavio.library.v1.RefreshItemResponse
+	(*SearchRemoteRequest)(nil),         // 5: mavio.library.v1.SearchRemoteRequest
+	(*RemoteSearchResult)(nil),          // 6: mavio.library.v1.RemoteSearchResult
+	(*SearchRemoteResponse)(nil),        // 7: mavio.library.v1.SearchRemoteResponse
+	(*IdentifyItemRequest)(nil),         // 8: mavio.library.v1.IdentifyItemRequest
+	(*IdentifyItemResponse)(nil),        // 9: mavio.library.v1.IdentifyItemResponse
+	(*ListRemoteImagesRequest)(nil),     // 10: mavio.library.v1.ListRemoteImagesRequest
+	(*RemoteImage)(nil),                 // 11: mavio.library.v1.RemoteImage
+	(*ListRemoteImagesResponse)(nil),    // 12: mavio.library.v1.ListRemoteImagesResponse
+	(*SetItemImageRequest)(nil),         // 13: mavio.library.v1.SetItemImageRequest
+	(*SetItemImageResponse)(nil),        // 14: mavio.library.v1.SetItemImageResponse
+	(*DeleteItemImageRequest)(nil),      // 15: mavio.library.v1.DeleteItemImageRequest
+	(*DeleteItemImageResponse)(nil),     // 16: mavio.library.v1.DeleteItemImageResponse
+	(*SearchSubtitlesRequest)(nil),      // 17: mavio.library.v1.SearchSubtitlesRequest
+	(*RemoteSubtitle)(nil),              // 18: mavio.library.v1.RemoteSubtitle
+	(*SearchSubtitlesResponse)(nil),     // 19: mavio.library.v1.SearchSubtitlesResponse
+	(*DownloadSubtitleRequest)(nil),     // 20: mavio.library.v1.DownloadSubtitleRequest
+	(*DownloadSubtitleResponse)(nil),    // 21: mavio.library.v1.DownloadSubtitleResponse
+	(*ListExternalIdKindsRequest)(nil),  // 22: mavio.library.v1.ListExternalIdKindsRequest
+	(*ExternalIdKind)(nil),              // 23: mavio.library.v1.ExternalIdKind
+	(*ListExternalIdKindsResponse)(nil), // 24: mavio.library.v1.ListExternalIdKindsResponse
+	nil,                                 // 25: mavio.library.v1.ItemMetadata.ExternalIdsEntry
+	nil,                                 // 26: mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
+	nil,                                 // 27: mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
+	nil,                                 // 28: mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
+	(*timestamppb.Timestamp)(nil),       // 29: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),         // 30: google.protobuf.Duration
+	(SeriesStatus)(0),                   // 31: mavio.library.v1.SeriesStatus
+	(MetadataField)(0),                  // 32: mavio.library.v1.MetadataField
+	(*fieldmaskpb.FieldMask)(nil),       // 33: google.protobuf.FieldMask
+	(*Item)(nil),                        // 34: mavio.library.v1.Item
+	(ImageKind)(0),                      // 35: mavio.library.v1.ImageKind
+	(*Image)(nil),                       // 36: mavio.library.v1.Image
+	(*MediaStream)(nil),                 // 37: mavio.library.v1.MediaStream
+	(ItemKind)(0),                       // 38: mavio.library.v1.ItemKind
 }
 var file_mavio_library_v1_metadata_proto_depIdxs = []int32{
-	26, // 0: mavio.library.v1.ItemMetadata.premiere_date:type_name -> google.protobuf.Timestamp
-	26, // 1: mavio.library.v1.ItemMetadata.end_date:type_name -> google.protobuf.Timestamp
-	27, // 2: mavio.library.v1.ItemMetadata.runtime:type_name -> google.protobuf.Duration
-	22, // 3: mavio.library.v1.ItemMetadata.external_ids:type_name -> mavio.library.v1.ItemMetadata.ExternalIdsEntry
-	28, // 4: mavio.library.v1.ItemMetadata.series_status:type_name -> mavio.library.v1.SeriesStatus
-	29, // 5: mavio.library.v1.ItemMetadata.locked_fields:type_name -> mavio.library.v1.MetadataField
+	29, // 0: mavio.library.v1.ItemMetadata.premiere_date:type_name -> google.protobuf.Timestamp
+	29, // 1: mavio.library.v1.ItemMetadata.end_date:type_name -> google.protobuf.Timestamp
+	30, // 2: mavio.library.v1.ItemMetadata.runtime:type_name -> google.protobuf.Duration
+	25, // 3: mavio.library.v1.ItemMetadata.external_ids:type_name -> mavio.library.v1.ItemMetadata.ExternalIdsEntry
+	31, // 4: mavio.library.v1.ItemMetadata.series_status:type_name -> mavio.library.v1.SeriesStatus
+	32, // 5: mavio.library.v1.ItemMetadata.locked_fields:type_name -> mavio.library.v1.MetadataField
 	0,  // 6: mavio.library.v1.UpdateItemRequest.metadata:type_name -> mavio.library.v1.ItemMetadata
-	30, // 7: mavio.library.v1.UpdateItemRequest.update_mask:type_name -> google.protobuf.FieldMask
-	31, // 8: mavio.library.v1.UpdateItemResponse.item:type_name -> mavio.library.v1.Item
-	31, // 9: mavio.library.v1.RefreshItemResponse.item:type_name -> mavio.library.v1.Item
-	23, // 10: mavio.library.v1.SearchRemoteRequest.external_ids:type_name -> mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
-	24, // 11: mavio.library.v1.RemoteSearchResult.external_ids:type_name -> mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
+	33, // 7: mavio.library.v1.UpdateItemRequest.update_mask:type_name -> google.protobuf.FieldMask
+	34, // 8: mavio.library.v1.UpdateItemResponse.item:type_name -> mavio.library.v1.Item
+	34, // 9: mavio.library.v1.RefreshItemResponse.item:type_name -> mavio.library.v1.Item
+	26, // 10: mavio.library.v1.SearchRemoteRequest.external_ids:type_name -> mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
+	27, // 11: mavio.library.v1.RemoteSearchResult.external_ids:type_name -> mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
 	6,  // 12: mavio.library.v1.SearchRemoteResponse.results:type_name -> mavio.library.v1.RemoteSearchResult
-	25, // 13: mavio.library.v1.IdentifyItemRequest.external_ids:type_name -> mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
-	31, // 14: mavio.library.v1.IdentifyItemResponse.item:type_name -> mavio.library.v1.Item
-	32, // 15: mavio.library.v1.ListRemoteImagesRequest.kind:type_name -> mavio.library.v1.ImageKind
-	32, // 16: mavio.library.v1.RemoteImage.kind:type_name -> mavio.library.v1.ImageKind
+	28, // 13: mavio.library.v1.IdentifyItemRequest.external_ids:type_name -> mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
+	34, // 14: mavio.library.v1.IdentifyItemResponse.item:type_name -> mavio.library.v1.Item
+	35, // 15: mavio.library.v1.ListRemoteImagesRequest.kind:type_name -> mavio.library.v1.ImageKind
+	35, // 16: mavio.library.v1.RemoteImage.kind:type_name -> mavio.library.v1.ImageKind
 	11, // 17: mavio.library.v1.ListRemoteImagesResponse.images:type_name -> mavio.library.v1.RemoteImage
-	32, // 18: mavio.library.v1.SetItemImageRequest.kind:type_name -> mavio.library.v1.ImageKind
-	33, // 19: mavio.library.v1.SetItemImageResponse.image:type_name -> mavio.library.v1.Image
+	35, // 18: mavio.library.v1.SetItemImageRequest.kind:type_name -> mavio.library.v1.ImageKind
+	36, // 19: mavio.library.v1.SetItemImageResponse.image:type_name -> mavio.library.v1.Image
 	18, // 20: mavio.library.v1.SearchSubtitlesResponse.subtitles:type_name -> mavio.library.v1.RemoteSubtitle
-	34, // 21: mavio.library.v1.DownloadSubtitleResponse.stream:type_name -> mavio.library.v1.MediaStream
-	1,  // 22: mavio.library.v1.MetadataService.UpdateItem:input_type -> mavio.library.v1.UpdateItemRequest
-	3,  // 23: mavio.library.v1.MetadataService.RefreshItem:input_type -> mavio.library.v1.RefreshItemRequest
-	5,  // 24: mavio.library.v1.MetadataService.SearchRemote:input_type -> mavio.library.v1.SearchRemoteRequest
-	8,  // 25: mavio.library.v1.MetadataService.IdentifyItem:input_type -> mavio.library.v1.IdentifyItemRequest
-	10, // 26: mavio.library.v1.MetadataService.ListRemoteImages:input_type -> mavio.library.v1.ListRemoteImagesRequest
-	13, // 27: mavio.library.v1.MetadataService.SetItemImage:input_type -> mavio.library.v1.SetItemImageRequest
-	15, // 28: mavio.library.v1.MetadataService.DeleteItemImage:input_type -> mavio.library.v1.DeleteItemImageRequest
-	17, // 29: mavio.library.v1.MetadataService.SearchSubtitles:input_type -> mavio.library.v1.SearchSubtitlesRequest
-	20, // 30: mavio.library.v1.MetadataService.DownloadSubtitle:input_type -> mavio.library.v1.DownloadSubtitleRequest
-	2,  // 31: mavio.library.v1.MetadataService.UpdateItem:output_type -> mavio.library.v1.UpdateItemResponse
-	4,  // 32: mavio.library.v1.MetadataService.RefreshItem:output_type -> mavio.library.v1.RefreshItemResponse
-	7,  // 33: mavio.library.v1.MetadataService.SearchRemote:output_type -> mavio.library.v1.SearchRemoteResponse
-	9,  // 34: mavio.library.v1.MetadataService.IdentifyItem:output_type -> mavio.library.v1.IdentifyItemResponse
-	12, // 35: mavio.library.v1.MetadataService.ListRemoteImages:output_type -> mavio.library.v1.ListRemoteImagesResponse
-	14, // 36: mavio.library.v1.MetadataService.SetItemImage:output_type -> mavio.library.v1.SetItemImageResponse
-	16, // 37: mavio.library.v1.MetadataService.DeleteItemImage:output_type -> mavio.library.v1.DeleteItemImageResponse
-	19, // 38: mavio.library.v1.MetadataService.SearchSubtitles:output_type -> mavio.library.v1.SearchSubtitlesResponse
-	21, // 39: mavio.library.v1.MetadataService.DownloadSubtitle:output_type -> mavio.library.v1.DownloadSubtitleResponse
-	31, // [31:40] is the sub-list for method output_type
-	22, // [22:31] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	37, // 21: mavio.library.v1.DownloadSubtitleResponse.stream:type_name -> mavio.library.v1.MediaStream
+	38, // 22: mavio.library.v1.ListExternalIdKindsRequest.item_kind:type_name -> mavio.library.v1.ItemKind
+	38, // 23: mavio.library.v1.ExternalIdKind.item_kinds:type_name -> mavio.library.v1.ItemKind
+	23, // 24: mavio.library.v1.ListExternalIdKindsResponse.kinds:type_name -> mavio.library.v1.ExternalIdKind
+	1,  // 25: mavio.library.v1.MetadataService.UpdateItem:input_type -> mavio.library.v1.UpdateItemRequest
+	3,  // 26: mavio.library.v1.MetadataService.RefreshItem:input_type -> mavio.library.v1.RefreshItemRequest
+	5,  // 27: mavio.library.v1.MetadataService.SearchRemote:input_type -> mavio.library.v1.SearchRemoteRequest
+	8,  // 28: mavio.library.v1.MetadataService.IdentifyItem:input_type -> mavio.library.v1.IdentifyItemRequest
+	10, // 29: mavio.library.v1.MetadataService.ListRemoteImages:input_type -> mavio.library.v1.ListRemoteImagesRequest
+	13, // 30: mavio.library.v1.MetadataService.SetItemImage:input_type -> mavio.library.v1.SetItemImageRequest
+	15, // 31: mavio.library.v1.MetadataService.DeleteItemImage:input_type -> mavio.library.v1.DeleteItemImageRequest
+	17, // 32: mavio.library.v1.MetadataService.SearchSubtitles:input_type -> mavio.library.v1.SearchSubtitlesRequest
+	20, // 33: mavio.library.v1.MetadataService.DownloadSubtitle:input_type -> mavio.library.v1.DownloadSubtitleRequest
+	22, // 34: mavio.library.v1.MetadataService.ListExternalIdKinds:input_type -> mavio.library.v1.ListExternalIdKindsRequest
+	2,  // 35: mavio.library.v1.MetadataService.UpdateItem:output_type -> mavio.library.v1.UpdateItemResponse
+	4,  // 36: mavio.library.v1.MetadataService.RefreshItem:output_type -> mavio.library.v1.RefreshItemResponse
+	7,  // 37: mavio.library.v1.MetadataService.SearchRemote:output_type -> mavio.library.v1.SearchRemoteResponse
+	9,  // 38: mavio.library.v1.MetadataService.IdentifyItem:output_type -> mavio.library.v1.IdentifyItemResponse
+	12, // 39: mavio.library.v1.MetadataService.ListRemoteImages:output_type -> mavio.library.v1.ListRemoteImagesResponse
+	14, // 40: mavio.library.v1.MetadataService.SetItemImage:output_type -> mavio.library.v1.SetItemImageResponse
+	16, // 41: mavio.library.v1.MetadataService.DeleteItemImage:output_type -> mavio.library.v1.DeleteItemImageResponse
+	19, // 42: mavio.library.v1.MetadataService.SearchSubtitles:output_type -> mavio.library.v1.SearchSubtitlesResponse
+	21, // 43: mavio.library.v1.MetadataService.DownloadSubtitle:output_type -> mavio.library.v1.DownloadSubtitleResponse
+	24, // 44: mavio.library.v1.MetadataService.ListExternalIdKinds:output_type -> mavio.library.v1.ListExternalIdKindsResponse
+	35, // [35:45] is the sub-list for method output_type
+	25, // [25:35] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_mavio_library_v1_metadata_proto_init() }
@@ -3799,7 +4151,7 @@ func file_mavio_library_v1_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_library_v1_metadata_proto_rawDesc), len(file_mavio_library_v1_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   26,
+			NumMessages:   29,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

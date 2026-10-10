@@ -18,6 +18,8 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
+	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
@@ -58,7 +60,9 @@ func TestPluginPlatform(t *testing.T) {
 	pluginDir := installSmoke(t, `"capabilities":["CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER",
 			"CAPABILITY_DEVICE_CONTROLLER"],
 		"tasks":[{"id":"count","name":"Count","description":"Counts its runs.","interval":"86400s"}],
-		"permissions":{"events":["task.*","user.created"],"api":["mavio.playback.v1.PlaybackService"],"actAsUsers":true}`)
+		"permissions":{"events":["task.*","user.created"],"api":["mavio.playback.v1.PlaybackService"],"actAsUsers":true},
+		"externalIdKinds":[{"key":"trakt","name":"Trakt","mediaKinds":["MEDIA_KIND_MOVIE","MEDIA_KIND_PERSON"],"urlTemplate":"https://trakt.tv/{id}"},
+			{"key":"imdb","name":"Not IMDb","mediaKinds":["MEDIA_KIND_MOVIE"]}]`)
 	dataDir := t.TempDir()
 	srv := start(t, server.Config{
 		Database: "sqlite:" + filepath.Join(t.TempDir(), "mavio.db"), FFprobe: "no-ffprobe", FFmpeg: "no-ffmpeg",
@@ -236,5 +240,26 @@ func TestPluginPlatform(t *testing.T) {
 	setDevices("")
 	if gone := device(); gone != nil {
 		t.Errorf("unlisted device = %v", gone)
+	}
+
+	// The plugin's kind of external IDs is listed after the built-in ones;
+	// it cannot redefine a built-in kind.
+	meta := libraryv1connect.NewMetadataServiceClient(http.DefaultClient, srv.url, withToken(first.GetAccessToken()))
+	kinds, err := meta.ListExternalIdKinds(ctx, libraryv1.ListExternalIdKindsRequest_builder{
+		ItemKind: libraryv1.ItemKind_ITEM_KIND_MOVIE.Enum(),
+	}.Build())
+	if err != nil {
+		t.Fatalf("ListExternalIdKinds: %v", err)
+	}
+	var keys []string
+	for _, k := range kinds.GetKinds() {
+		keys = append(keys, k.GetKey())
+		if k.GetKey() == "imdb" && k.GetPluginId() != "" {
+			t.Errorf("imdb kind = %v, want the built-in one", k)
+		}
+	}
+	if last := kinds.GetKinds()[len(keys)-1]; last.GetKey() != "trakt" || last.GetPluginId() != "org.mavio.smoke" || !last.GetPersons() ||
+		len(last.GetItemKinds()) != 1 || strings.Count(strings.Join(keys, ","), "imdb") != 1 {
+		t.Errorf("movie external ID kinds = %q, last = %v", keys, last)
 	}
 }

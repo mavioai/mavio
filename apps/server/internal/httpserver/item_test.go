@@ -56,7 +56,7 @@ func seedCatalog(t *testing.T, s *store.Store) catalog {
 	if err := s.Items().Upsert(ctx, c.alien, c.up, c.trailer, c.series, c.season, c.pilot, c.finale); err != nil {
 		t.Fatal(err)
 	}
-	c.ridley = core.Person{ID: core.NewID(), Name: "Ridley Scott"}
+	c.ridley = core.Person{ID: core.NewID(), Name: "Ridley Scott", ExternalIDs: map[core.Provider]string{core.ProviderIMDb: "nm0000631"}}
 	if err := s.People().Upsert(ctx, c.ridley); err != nil {
 		t.Fatal(err)
 	}
@@ -107,6 +107,9 @@ func TestItemService(t *testing.T) {
 	if it.GetName() != "Alien" || it.GetPath() == "" || it.GetOfficialRating() != "R" || it.GetExternalIds()["tmdb"] != "348" ||
 		it.GetRuntime().AsDuration() != 117*time.Minute || len(it.GetImages()) != 1 || it.GetImages()[0].GetWidth() != 400 {
 		t.Errorf("item = %v", it)
+	}
+	if u := it.GetExternalUrls(); len(u) != 1 || u[0].GetName() != "TMDB" || u[0].GetUrl() != "https://www.themoviedb.org/movie/348" {
+		t.Errorf("external URLs = %v", u)
 	}
 	if cr := got.GetCredits(); len(cr) != 1 || cr[0].GetPerson().GetName() != "Ridley Scott" || cr[0].GetKind() != libraryv1.CreditKind_CREDIT_KIND_DIRECTOR ||
 		len(cr[0].GetPerson().GetImages()) != 1 {
@@ -217,7 +220,8 @@ func TestItemService(t *testing.T) {
 	if err != nil || pilot.GetItem().HasPath() || pilot.GetItem().GetIndexNumber() != 1 {
 		t.Errorf("kid's pilot = %v, %v", pilot, err)
 	}
-	if p, err := asKid.GetPerson(ctx, libraryv1.GetPersonRequest_builder{Id: new(c.ridley.ID.String())}.Build()); err != nil || p.GetPerson().GetName() != "Ridley Scott" {
+	if p, err := asKid.GetPerson(ctx, libraryv1.GetPersonRequest_builder{Id: new(c.ridley.ID.String())}.Build()); err != nil || p.GetPerson().GetName() != "Ridley Scott" ||
+		len(p.GetPerson().GetExternalUrls()) != 1 || p.GetPerson().GetExternalUrls()[0].GetUrl() != "https://www.imdb.com/name/nm0000631" {
 		t.Errorf("GetPerson = %v, %v", p, err)
 	}
 

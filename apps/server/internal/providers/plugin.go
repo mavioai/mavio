@@ -127,6 +127,17 @@ var mediaKinds = map[core.ItemKind]pluginv1.MediaKind{
 	core.KindAudioBook:   pluginv1.MediaKind_MEDIA_KIND_AUDIOBOOK,
 }
 
+// ItemKind returns the kind of items of a media kind; persons and unknown
+// kinds have none.
+func ItemKind(kind pluginv1.MediaKind) (core.ItemKind, bool) {
+	for k, v := range mediaKinds {
+		if v == kind {
+			return k, true
+		}
+	}
+	return "", false
+}
+
 func toLookup(kind pluginv1.MediaKind, l library.Lookup) *pluginv1.Lookup {
 	lookup := pluginv1.Lookup_builder{
 		Kind:              kind.Enum(),

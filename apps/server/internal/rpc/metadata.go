@@ -12,6 +12,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
+	"github.com/mavioai/mavio/libs/metadata"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 )
@@ -54,6 +55,9 @@ type MetadataService struct {
 	now   func() time.Time
 	// Activity records subtitle downloads; nil records none.
 	Activity *activity.Log
+	// ExternalIDKinds lists the kinds of external IDs; nil lists the
+	// built-in kinds.
+	ExternalIDKinds func() []metadata.ExternalIDKind
 }
 
 var _ libraryv1connect.MetadataServiceHandler = (*MetadataService)(nil)
@@ -65,6 +69,29 @@ func NewMetadataService(store core.Store, refresher *library.Refresher, subtitle
 	fetch func(ctx context.Context, url string) ([]byte, error),
 ) *MetadataService {
 	return &MetadataService{store: store, refresher: refresher, subtitles: subtitles, fetch: fetch, now: time.Now}
+}
+
+// ListExternalIdKinds lists the kinds of external IDs, of an item kind or
+// of every kind.
+func (s *MetadataService) ListExternalIdKinds(ctx context.Context, req *libraryv1.ListExternalIdKindsRequest) (*libraryv1.ListExternalIdKindsResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	resp := &libraryv1.ListExternalIdKindsResponse{}
+	for _, k := range externalIDKinds(s.ExternalIDKinds) {
+		var kinds []libraryv1.ItemKind
+		for ik := range k.Items {
+			kinds = append(kinds, itemKinds[ik])
+		}
+		slices.Sort(kinds)
+		if req.HasItemKind() && !slices.Contains(kinds, req.GetItemKind()) {
+			continue
+		}
+		resp.SetKinds(append(resp.GetKinds(), libraryv1.ExternalIdKind_builder{
+			Key: new(string(k.Provider)), Name: &k.Name, ItemKinds: kinds, Persons: &k.Persons, PluginId: &k.Plugin,
+		}.Build()))
+	}
+	return resp, nil
 }
 
 // target returns the item an administrator names, with its library.

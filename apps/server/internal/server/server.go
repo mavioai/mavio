@@ -196,7 +196,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher,
 		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Logger: log},
 		Settings:  set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
-		Authenticate: plugs.Authenticate, PluginRoutes: plugs.Routes, Wake: warmer.Wake, Dev: cfg.Dev,
+		Authenticate: plugs.Authenticate, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Dev: cfg.Dev,
 	})
 	if err != nil {
 		return err

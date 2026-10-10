@@ -93,6 +93,9 @@ type ItemService struct {
 	// Wake is told of the media of each item a client opens, which it may
 	// play next; nil tells no one.
 	Wake func(sources []core.MediaSource)
+	// ExternalIDKinds lists the kinds of external IDs, to link items and
+	// persons to their pages; nil lists the built-in kinds.
+	ExternalIDKinds func() []metadata.ExternalIDKind
 }
 
 var _ libraryv1connect.ItemServiceHandler = (*ItemService)(nil)
@@ -143,6 +146,7 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 		return nil, connectError(ctx, err)
 	}
 	out := itemToProto(&item, images[item.ID], p.User.Admin)
+	out.SetExternalUrls(externalURLsToProto(metadata.ItemExternalURLs(externalIDKinds(s.ExternalIDKinds), item.Kind, item.ExternalIDs)))
 	if err := newAncestry(s.store).describe(ctx, &item, out); err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -509,7 +513,9 @@ func (s *ItemService) GetPerson(ctx context.Context, req *libraryv1.GetPersonReq
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return libraryv1.GetPersonResponse_builder{Person: personToProto(&person, images)}.Build(), nil
+	out := personToProto(&person, images)
+	out.SetExternalUrls(externalURLsToProto(metadata.PersonExternalURLs(externalIDKinds(s.ExternalIDKinds), person.ExternalIDs)))
+	return libraryv1.GetPersonResponse_builder{Person: out}.Build(), nil
 }
 
 // ListValues lists attribute values of the items the caller may access.
@@ -793,6 +799,23 @@ func personToProto(p *core.Person, images []core.Image) *libraryv1.Person {
 		}
 	}
 	return b.Build()
+}
+
+// externalIDKinds returns the kinds of external IDs list gives, or the
+// built-in kinds when it is nil.
+func externalIDKinds(list func() []metadata.ExternalIDKind) []metadata.ExternalIDKind {
+	if list == nil {
+		return metadata.BuiltinExternalIDKinds()
+	}
+	return list()
+}
+
+func externalURLsToProto(urls []metadata.ExternalURL) []*libraryv1.ExternalUrl {
+	out := make([]*libraryv1.ExternalUrl, len(urls))
+	for i, u := range urls {
+		out[i] = libraryv1.ExternalUrl_builder{Name: &u.Name, Url: &u.URL}.Build()
+	}
+	return out
 }
 
 // imagesToProto describes images without their file paths or source URLs;

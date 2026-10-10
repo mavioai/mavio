@@ -1155,6 +1155,59 @@
         "title": "DownloadSubtitleResponse",
         "additionalProperties": false
       },
+      "mavio.library.v1.ExternalIdKind": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "key",
+            "description": "Key of the IDs in external_ids maps, e.g. \"tmdb\"."
+          },
+          "name": {
+            "type": "string",
+            "title": "name",
+            "description": "Display name, e.g. \"TMDB\"."
+          },
+          "itemKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.library.v1.ItemKind"
+            },
+            "title": "item_kinds",
+            "description": "Kinds of items that carry the ID."
+          },
+          "persons": {
+            "type": "boolean",
+            "title": "persons",
+            "description": "Whether persons carry the ID."
+          },
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id",
+            "description": "The plugin declaring the kind; empty for built-in kinds."
+          }
+        },
+        "title": "ExternalIdKind",
+        "additionalProperties": false,
+        "description": "ExternalIdKind is a kind of external ID."
+      },
+      "mavio.library.v1.ExternalUrl": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name",
+            "description": "Display name of the site, e.g. \"IMDb\"."
+          },
+          "url": {
+            "type": "string",
+            "title": "url"
+          }
+        },
+        "title": "ExternalUrl",
+        "additionalProperties": false,
+        "description": "ExternalUrl is the page of an item or person on an external site."
+      },
       "mavio.library.v1.ExtraKind": {
         "type": "string",
         "title": "ExtraKind",
@@ -1684,6 +1737,14 @@
             "title": "normalization_gain",
             "format": "double",
             "description": "The gain in dB that brings a track or album to -18 LUFS; unset until\n its loudness is measured."
+          },
+          "externalUrls": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.library.v1.ExternalUrl"
+            },
+            "title": "external_urls",
+            "description": "Pages of the item on the sites of its external IDs; set by GetItem."
           }
         },
         "title": "Item",
@@ -2079,6 +2140,36 @@
         ],
         "additionalProperties": false,
         "description": "LibrarySpec holds the client-settable fields of a library."
+      },
+      "mavio.library.v1.ListExternalIdKindsRequest": {
+        "type": "object",
+        "properties": {
+          "itemKind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ItemKind"
+              }
+            ],
+            "title": "item_kind",
+            "description": "Unset lists the kinds of every item kind and of persons.\nenum.defined_only = true\n"
+          }
+        },
+        "title": "ListExternalIdKindsRequest",
+        "additionalProperties": false
+      },
+      "mavio.library.v1.ListExternalIdKindsResponse": {
+        "type": "object",
+        "properties": {
+          "kinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.library.v1.ExternalIdKind"
+            },
+            "title": "kinds"
+          }
+        },
+        "title": "ListExternalIdKindsResponse",
+        "additionalProperties": false
       },
       "mavio.library.v1.ListItemsRequest": {
         "type": "object",
@@ -3059,6 +3150,14 @@
               "$ref": "#/components/schemas/mavio.library.v1.Image"
             },
             "title": "images"
+          },
+          "externalUrls": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.library.v1.ExternalUrl"
+            },
+            "title": "external_urls",
+            "description": "Pages of the person on the sites of their external IDs; set by\n GetPerson."
           }
         },
         "title": "Person",
@@ -4826,6 +4925,37 @@
           "CAPABILITY_IMAGE_PROVIDER"
         ]
       },
+      "mavio.plugin.v1.ExternalIdKind": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "key",
+            "description": "Key of the IDs in external_ids maps: lowercase letters, digits and\n underscores, starting with a letter, e.g. \"trakt\"."
+          },
+          "name": {
+            "type": "string",
+            "title": "name",
+            "description": "Display name, e.g. \"Trakt\"."
+          },
+          "mediaKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.MediaKind"
+            },
+            "title": "media_kinds",
+            "description": "Kinds of media that carry the ID."
+          },
+          "urlTemplate": {
+            "type": "string",
+            "title": "url_template",
+            "description": "Absolute http(s) URL of the page of an ID, with \"{id}\" standing for it,\n e.g. \"https://trakt.tv/movies/{id}\"; empty when there is no page."
+          }
+        },
+        "title": "ExternalIdKind",
+        "additionalProperties": false,
+        "description": "ExternalIdKind is a kind of external ID, e.g. the ID of a movie on a\n metadata site."
+      },
       "mavio.plugin.v1.Manifest": {
         "type": "object",
         "properties": {
@@ -4905,11 +5035,38 @@
             "type": "string",
             "title": "config_page",
             "description": "Page among the plugin's HTTP routes that configures it, relative to\n /plugins/{id}/, e.g. \"settings\"; requires CAPABILITY_HTTP_HANDLER."
+          },
+          "externalIdKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.ExternalIdKind"
+            },
+            "title": "external_id_kinds",
+            "description": "Kinds of external IDs the plugin's providers give, beyond the built-in\n ones, so that clients can name them and link to their pages."
           }
         },
         "title": "Manifest",
         "additionalProperties": false,
         "description": "Manifest describes a plugin. It is shipped alongside the plugin\n (manifest.json) and returned by Describe."
+      },
+      "mavio.plugin.v1.MediaKind": {
+        "type": "string",
+        "title": "MediaKind",
+        "enum": [
+          "MEDIA_KIND_UNSPECIFIED",
+          "MEDIA_KIND_MOVIE",
+          "MEDIA_KIND_SERIES",
+          "MEDIA_KIND_SEASON",
+          "MEDIA_KIND_EPISODE",
+          "MEDIA_KIND_MUSIC_ARTIST",
+          "MEDIA_KIND_MUSIC_ALBUM",
+          "MEDIA_KIND_TRACK",
+          "MEDIA_KIND_MUSIC_VIDEO",
+          "MEDIA_KIND_BOOK",
+          "MEDIA_KIND_AUDIOBOOK",
+          "MEDIA_KIND_PERSON"
+        ],
+        "description": "MediaKind is the kind of item metadata is requested for."
       },
       "mavio.plugin.v1.Permissions": {
         "type": "object",
@@ -8837,13 +8994,13 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/RemoveFromPlaylist": {
+    "/mavio.library.v1.PlaylistService/UpdatePlaylist": {
       "post": {
         "tags": [
           "PlaylistService"
         ],
-        "summary": "RemoveFromPlaylist",
-        "operationId": "mavio.library.v1.PlaylistService.RemoveFromPlaylist",
+        "summary": "UpdatePlaylist",
+        "operationId": "mavio.library.v1.PlaylistService.UpdatePlaylist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -8868,7 +9025,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromPlaylistRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistRequest"
               }
             }
           },
@@ -8890,7 +9047,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromPlaylistResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistResponse"
                 }
               }
             }
@@ -8898,14 +9055,14 @@
         }
       }
     },
-    "/mavio.system.v1.SystemService/UpdateServerSettings": {
+    "/mavio.library.v1.ItemService/ListLatestItems": {
       "post": {
         "tags": [
-          "SystemService"
+          "ItemService"
         ],
-        "summary": "UpdateServerSettings",
-        "description": "UpdateServerSettings replaces the settings and applies them at once.\n Administrators only.",
-        "operationId": "mavio.system.v1.SystemService.UpdateServerSettings",
+        "summary": "ListLatestItems",
+        "description": "ListLatestItems lists the items added last to the libraries the caller\n may access, newest first.",
+        "operationId": "mavio.library.v1.ItemService.ListLatestItems",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -8930,7 +9087,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsRequest"
               }
             }
           },
@@ -8952,7 +9109,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsResponse"
                 }
               }
             }
@@ -10131,14 +10288,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListLatestItems": {
+    "/mavio.playback.v1.PlaybackService/StopPlayback": {
       "post": {
         "tags": [
-          "ItemService"
+          "PlaybackService"
         ],
-        "summary": "ListLatestItems",
-        "description": "ListLatestItems lists the items added last to the libraries the caller\n may access, newest first.",
-        "operationId": "mavio.library.v1.ItemService.ListLatestItems",
+        "summary": "StopPlayback",
+        "description": "StopPlayback ends a playback and saves the resume position or marks the\n item played.",
+        "operationId": "mavio.playback.v1.PlaybackService.StopPlayback",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -10163,7 +10320,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackRequest"
               }
             }
           },
@@ -10185,7 +10342,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackResponse"
                 }
               }
             }
@@ -10379,67 +10536,7 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/CreateLibrary": {
-      "post": {
-        "tags": [
-          "LibraryService"
-        ],
-        "summary": "CreateLibrary",
-        "operationId": "mavio.library.v1.LibraryService.CreateLibrary",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
+    "/mavio.session.v1.EventService/Subscribe": {},
     "/mavio.library.v1.LibraryService/DeleteLibrary": {
       "post": {
         "tags": [
@@ -10933,6 +11030,68 @@
         }
       }
     },
+    "/mavio.library.v1.MetadataService/ListExternalIdKinds": {
+      "post": {
+        "tags": [
+          "MetadataService"
+        ],
+        "summary": "ListExternalIdKinds",
+        "description": "ListExternalIdKinds lists the kinds of external IDs items and persons\n carry: the built-in ones and those plugins declare.",
+        "operationId": "mavio.library.v1.MetadataService.ListExternalIdKinds",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.ListExternalIdKindsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.ListExternalIdKindsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.library.v1.MetadataService/ListRemoteImages": {
       "post": {
         "tags": [
@@ -11243,14 +11402,14 @@
         }
       }
     },
-    "/mavio.library.v1.MetadataService/UpdateItem": {
+    "/mavio.playback.v1.PlaybackService/StartPlayback": {
       "post": {
         "tags": [
-          "MetadataService"
+          "PlaybackService"
         ],
-        "summary": "UpdateItem",
-        "description": "UpdateItem changes the fields of an item named by the update mask.",
-        "operationId": "mavio.library.v1.MetadataService.UpdateItem",
+        "summary": "StartPlayback",
+        "description": "StartPlayback picks a media source and streams, decides whether the\n client plays it directly, remuxed or transcoded, and returns the URLs to\n play it from. The URLs need no token and work until the playback stops,\n expires or its sign-in session ends.",
+        "operationId": "mavio.playback.v1.PlaybackService.StartPlayback",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -11275,7 +11434,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateItemRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackRequest"
               }
             }
           },
@@ -11297,7 +11456,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateItemResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackResponse"
                 }
               }
             }
@@ -11674,6 +11833,67 @@
         }
       }
     },
+    "/mavio.library.v1.PlaylistService/RemoveFromPlaylist": {
+      "post": {
+        "tags": [
+          "PlaylistService"
+        ],
+        "summary": "RemoveFromPlaylist",
+        "operationId": "mavio.library.v1.PlaylistService.RemoveFromPlaylist",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromPlaylistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromPlaylistResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.auth.v1.AuthService/CreateApiKey": {
       "post": {
         "tags": [
@@ -11729,67 +11949,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.auth.v1.CreateApiKeyResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.PlaylistService/UpdatePlaylist": {
-      "post": {
-        "tags": [
-          "PlaylistService"
-        ],
-        "summary": "UpdatePlaylist",
-        "operationId": "mavio.library.v1.PlaylistService.UpdatePlaylist",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistResponse"
                 }
               }
             }
@@ -11859,14 +12018,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/StartPlayback": {
+    "/mavio.library.v1.MetadataService/UpdateItem": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "MetadataService"
         ],
-        "summary": "StartPlayback",
-        "description": "StartPlayback picks a media source and streams, decides whether the\n client plays it directly, remuxed or transcoded, and returns the URLs to\n play it from. The URLs need no token and work until the playback stops,\n expires or its sign-in session ends.",
-        "operationId": "mavio.playback.v1.PlaybackService.StartPlayback",
+        "summary": "UpdateItem",
+        "description": "UpdateItem changes the fields of an item named by the update mask.",
+        "operationId": "mavio.library.v1.MetadataService.UpdateItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -11891,7 +12050,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateItemRequest"
               }
             }
           },
@@ -11913,7 +12072,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateItemResponse"
                 }
               }
             }
@@ -11983,14 +12142,13 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/StopPlayback": {
+    "/mavio.library.v1.LibraryService/CreateLibrary": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "LibraryService"
         ],
-        "summary": "StopPlayback",
-        "description": "StopPlayback ends a playback and saves the resume position or marks the\n item played.",
-        "operationId": "mavio.playback.v1.PlaybackService.StopPlayback",
+        "summary": "CreateLibrary",
+        "operationId": "mavio.library.v1.LibraryService.CreateLibrary",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12015,7 +12173,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryRequest"
               }
             }
           },
@@ -12037,7 +12195,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryResponse"
                 }
               }
             }
@@ -12045,14 +12203,14 @@
         }
       }
     },
-    "/mavio.system.v1.TaskService/ListJobs": {
+    "/mavio.session.v1.SessionService/ListSessions": {
       "post": {
         "tags": [
-          "TaskService"
+          "SessionService"
         ],
-        "summary": "ListJobs",
-        "description": "ListJobs lists the jobs of the job queue, most recently created first.",
-        "operationId": "mavio.system.v1.TaskService.ListJobs",
+        "summary": "ListSessions",
+        "description": "ListSessions lists the calling user's signed-in devices with what they\n play, online ones first; administrators may list every user's. The\n remote devices of plugins, such as DLNA renderers, are listed to\n everyone.",
+        "operationId": "mavio.session.v1.SessionService.ListSessions",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12077,7 +12235,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.ListJobsRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.ListSessionsRequest"
               }
             }
           },
@@ -12099,7 +12257,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.ListJobsResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.ListSessionsResponse"
                 }
               }
             }
@@ -14139,15 +14297,14 @@
         }
       }
     },
-    "/mavio.session.v1.EventService/Subscribe": {},
-    "/mavio.session.v1.SessionService/ListSessions": {
+    "/mavio.system.v1.SystemService/UpdateServerSettings": {
       "post": {
         "tags": [
-          "SessionService"
+          "SystemService"
         ],
-        "summary": "ListSessions",
-        "description": "ListSessions lists the calling user's signed-in devices with what they\n play, online ones first; administrators may list every user's. The\n remote devices of plugins, such as DLNA renderers, are listed to\n everyone.",
-        "operationId": "mavio.session.v1.SessionService.ListSessions",
+        "summary": "UpdateServerSettings",
+        "description": "UpdateServerSettings replaces the settings and applies them at once.\n Administrators only.",
+        "operationId": "mavio.system.v1.SystemService.UpdateServerSettings",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -14172,7 +14329,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.ListSessionsRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsRequest"
               }
             }
           },
@@ -14194,7 +14351,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.ListSessionsResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.TaskService/ListJobs": {
+      "post": {
+        "tags": [
+          "TaskService"
+        ],
+        "summary": "ListJobs",
+        "description": "ListJobs lists the jobs of the job queue, most recently created first.",
+        "operationId": "mavio.system.v1.TaskService.ListJobs",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.ListJobsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.ListJobsResponse"
                 }
               }
             }

@@ -112,7 +112,7 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 `ImageProviderService.GetImages` 针对一次查找返回远程图片（类型、URL、尺寸、语言、评分）。`MetadataService.ListRemoteImages` 把它们与元数据提供者的图片一起列出；刷新时按提供者顺序从中取得条目缺少的图片类型。
 
 ### 8.2 外部 ID
-manifest 声明外部 ID 类型：键、显示名称、拥有它的条目类型，以及 URL 模板，例如 `https://trakt.tv/movies/{id}`。`MetadataService.ListExternalIdKinds` 列出内置的与声明的类型，条目携带根据其 ID 生成的 `external_urls`。
+manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称、携带它的媒体类型（包括人物），以及可选的 URL 模板，例如 `https://trakt.tv/movies/{id}`。内置类型涵盖 TMDB、IMDb、TheTVDB、TVmaze、AniDB、AniList、aniSearch 与 MusicBrainz；已启动插件的类型排在其后，已列出的键不会被重新定义。`MetadataService.ListExternalIdKinds` 列出它们，可只列某一条目类型的；`ItemService.GetItem` 与 `GetPerson` 返回 `external_urls`，即条目或人物各 ID 的页面，ID 按路径段转义。
 
 ### 8.3 本地元数据与保存器
 * `LOCAL_METADATA` 插件在 manifest 中声明文件名模式。刷新条目时，宿主读取条目旁边匹配的文件（每个至多 1 MiB），把文件名与内容传给 `LocalMetadataService.Read`，后者像提供者一样返回元数据；本地元数据的优先级仅次于 NFO，高于提供者。

@@ -231,6 +231,15 @@ message Item {
   // The gain in dB that brings a track or album to -18 LUFS; unset until
   // its loudness is measured.
   double normalization_gain = 43;
+  // Pages of the item on the sites of its external IDs; set by GetItem.
+  repeated ExternalUrl external_urls = 44;
+}
+
+// ExternalUrl is the page of an item or person on an external site.
+message ExternalUrl {
+  // Display name of the site, e.g. "IMDb".
+  string name = 1;
+  string url = 2;
 }
 
 // Image describes an artwork image.
@@ -254,6 +263,9 @@ message Person {
   string birth_place = 7;
   map<string, string> external_ids = 8;
   repeated Image images = 9;
+  // Pages of the person on the sites of their external IDs; set by
+  // GetPerson.
+  repeated ExternalUrl external_urls = 10;
 }
 
 // Credit is a person credited on an item.

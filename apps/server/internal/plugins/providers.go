@@ -57,6 +57,34 @@ func (p *provider) Search(ctx context.Context, l library.Lookup, limit int) ([]l
 	return pl.Search(ctx, l, limit)
 }
 
+// ExternalIDKinds returns the built-in kinds of external IDs followed by
+// those the started plugins declare.
+func (m *Manager) ExternalIDKinds() []metadata.ExternalIDKind {
+	m.mu.Lock()
+	var declared []metadata.ExternalIDKind
+	for _, e := range m.plugins {
+		if e.plugin == nil {
+			continue
+		}
+		for _, k := range e.manifest.GetExternalIdKinds() {
+			kind := metadata.ExternalIDKind{Provider: core.Provider(k.GetKey()), Name: k.GetName(), Plugin: e.manifest.GetId()}
+			for _, mk := range k.GetMediaKinds() {
+				if mk == pluginv1.MediaKind_MEDIA_KIND_PERSON {
+					kind.Persons, kind.PersonURL = true, k.GetUrlTemplate()
+				} else if ik, ok := providers.ItemKind(mk); ok {
+					if kind.Items == nil {
+						kind.Items = map[core.ItemKind]string{}
+					}
+					kind.Items[ik] = k.GetUrlTemplate()
+				}
+			}
+			declared = append(declared, kind)
+		}
+	}
+	m.mu.Unlock()
+	return metadata.MergeExternalIDKinds(metadata.BuiltinExternalIDKinds(), declared...)
+}
+
 // ImageProviders returns the image providers among the started plugins.
 func (m *Manager) ImageProviders() []library.ImageProvider {
 	var out []library.ImageProvider

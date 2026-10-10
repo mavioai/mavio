@@ -112,7 +112,7 @@ Events are `mavio.plugin.v1.Event`: ID, type, time, title, message, item, user a
 `ImageProviderService.GetImages` returns remote images (kind, URL, size, language, rating) for a lookup. `MetadataService.ListRemoteImages` lists them with the metadata providers' images, and refreshes take images of kinds an item lacks from them in provider order.
 
 ### 8.2 External IDs
-A manifest declares external ID kinds: key, display name, the item kinds that have them, and a URL template such as `https://trakt.tv/movies/{id}`. `MetadataService.ListExternalIdKinds` lists the built-in and declared kinds, and items carry `external_urls` built from their IDs.
+A manifest declares external ID kinds in `external_id_kinds`: key, display name, the media kinds that carry them (persons included), and an optional URL template such as `https://trakt.tv/movies/{id}`. The built-in kinds cover TMDB, IMDb, TheTVDB, TVmaze, AniDB, AniList, aniSearch and MusicBrainz; a started plugin's kinds follow them, and a key already listed is not redefined. `MetadataService.ListExternalIdKinds` lists them, optionally for one item kind; `ItemService.GetItem` and `GetPerson` return `external_urls`, the pages of the item's or person's IDs, with each ID escaped as a path segment.
 
 ### 8.3 Local Metadata and Savers
 * `LOCAL_METADATA` plugins declare file name patterns in the manifest. While refreshing an item, the host reads the matching files beside it, up to 1 MiB each, and passes their names and contents to `LocalMetadataService.Read`, which returns metadata the way providers do; local metadata takes precedence over providers, after NFO.

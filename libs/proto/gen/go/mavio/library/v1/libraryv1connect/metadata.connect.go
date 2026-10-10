@@ -60,6 +60,9 @@ const (
 	// MetadataServiceDownloadSubtitleProcedure is the fully-qualified name of the MetadataService's
 	// DownloadSubtitle RPC.
 	MetadataServiceDownloadSubtitleProcedure = "/mavio.library.v1.MetadataService/DownloadSubtitle"
+	// MetadataServiceListExternalIdKindsProcedure is the fully-qualified name of the MetadataService's
+	// ListExternalIdKinds RPC.
+	MetadataServiceListExternalIdKindsProcedure = "/mavio.library.v1.MetadataService/ListExternalIdKinds"
 )
 
 // MetadataServiceClient is a client for the mavio.library.v1.MetadataService service.
@@ -89,6 +92,9 @@ type MetadataServiceClient interface {
 	// DownloadSubtitle saves a subtitle found by SearchSubtitles next to the
 	// video, where it becomes one of the video's subtitle streams.
 	DownloadSubtitle(context.Context, *v1.DownloadSubtitleRequest) (*v1.DownloadSubtitleResponse, error)
+	// ListExternalIdKinds lists the kinds of external IDs items and persons
+	// carry: the built-in ones and those plugins declare.
+	ListExternalIdKinds(context.Context, *v1.ListExternalIdKindsRequest) (*v1.ListExternalIdKindsResponse, error)
 }
 
 // NewMetadataServiceClient constructs a client for the mavio.library.v1.MetadataService service. By
@@ -159,20 +165,28 @@ func NewMetadataServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(metadataServiceMethods.ByName("DownloadSubtitle")),
 			connect.WithClientOptions(opts...),
 		),
+		listExternalIdKinds: connect.NewClient[v1.ListExternalIdKindsRequest, v1.ListExternalIdKindsResponse](
+			httpClient,
+			baseURL+MetadataServiceListExternalIdKindsProcedure,
+			connect.WithSchema(metadataServiceMethods.ByName("ListExternalIdKinds")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // metadataServiceClient implements MetadataServiceClient.
 type metadataServiceClient struct {
-	updateItem       *connect.Client[v1.UpdateItemRequest, v1.UpdateItemResponse]
-	refreshItem      *connect.Client[v1.RefreshItemRequest, v1.RefreshItemResponse]
-	searchRemote     *connect.Client[v1.SearchRemoteRequest, v1.SearchRemoteResponse]
-	identifyItem     *connect.Client[v1.IdentifyItemRequest, v1.IdentifyItemResponse]
-	listRemoteImages *connect.Client[v1.ListRemoteImagesRequest, v1.ListRemoteImagesResponse]
-	setItemImage     *connect.Client[v1.SetItemImageRequest, v1.SetItemImageResponse]
-	deleteItemImage  *connect.Client[v1.DeleteItemImageRequest, v1.DeleteItemImageResponse]
-	searchSubtitles  *connect.Client[v1.SearchSubtitlesRequest, v1.SearchSubtitlesResponse]
-	downloadSubtitle *connect.Client[v1.DownloadSubtitleRequest, v1.DownloadSubtitleResponse]
+	updateItem          *connect.Client[v1.UpdateItemRequest, v1.UpdateItemResponse]
+	refreshItem         *connect.Client[v1.RefreshItemRequest, v1.RefreshItemResponse]
+	searchRemote        *connect.Client[v1.SearchRemoteRequest, v1.SearchRemoteResponse]
+	identifyItem        *connect.Client[v1.IdentifyItemRequest, v1.IdentifyItemResponse]
+	listRemoteImages    *connect.Client[v1.ListRemoteImagesRequest, v1.ListRemoteImagesResponse]
+	setItemImage        *connect.Client[v1.SetItemImageRequest, v1.SetItemImageResponse]
+	deleteItemImage     *connect.Client[v1.DeleteItemImageRequest, v1.DeleteItemImageResponse]
+	searchSubtitles     *connect.Client[v1.SearchSubtitlesRequest, v1.SearchSubtitlesResponse]
+	downloadSubtitle    *connect.Client[v1.DownloadSubtitleRequest, v1.DownloadSubtitleResponse]
+	listExternalIdKinds *connect.Client[v1.ListExternalIdKindsRequest, v1.ListExternalIdKindsResponse]
 }
 
 // UpdateItem calls mavio.library.v1.MetadataService.UpdateItem.
@@ -256,6 +270,15 @@ func (c *metadataServiceClient) DownloadSubtitle(ctx context.Context, req *v1.Do
 	return nil, err
 }
 
+// ListExternalIdKinds calls mavio.library.v1.MetadataService.ListExternalIdKinds.
+func (c *metadataServiceClient) ListExternalIdKinds(ctx context.Context, req *v1.ListExternalIdKindsRequest) (*v1.ListExternalIdKindsResponse, error) {
+	response, err := c.listExternalIdKinds.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // MetadataServiceHandler is an implementation of the mavio.library.v1.MetadataService service.
 type MetadataServiceHandler interface {
 	// UpdateItem changes the fields of an item named by the update mask.
@@ -283,6 +306,9 @@ type MetadataServiceHandler interface {
 	// DownloadSubtitle saves a subtitle found by SearchSubtitles next to the
 	// video, where it becomes one of the video's subtitle streams.
 	DownloadSubtitle(context.Context, *v1.DownloadSubtitleRequest) (*v1.DownloadSubtitleResponse, error)
+	// ListExternalIdKinds lists the kinds of external IDs items and persons
+	// carry: the built-in ones and those plugins declare.
+	ListExternalIdKinds(context.Context, *v1.ListExternalIdKindsRequest) (*v1.ListExternalIdKindsResponse, error)
 }
 
 // NewMetadataServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -349,6 +375,13 @@ func NewMetadataServiceHandler(svc MetadataServiceHandler, opts ...connect.Handl
 		connect.WithSchema(metadataServiceMethods.ByName("DownloadSubtitle")),
 		connect.WithHandlerOptions(opts...),
 	)
+	metadataServiceListExternalIdKindsHandler := connect.NewUnaryHandlerSimple(
+		MetadataServiceListExternalIdKindsProcedure,
+		svc.ListExternalIdKinds,
+		connect.WithSchema(metadataServiceMethods.ByName("ListExternalIdKinds")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.library.v1.MetadataService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case MetadataServiceUpdateItemProcedure:
@@ -369,6 +402,8 @@ func NewMetadataServiceHandler(svc MetadataServiceHandler, opts ...connect.Handl
 			metadataServiceSearchSubtitlesHandler.ServeHTTP(w, r)
 		case MetadataServiceDownloadSubtitleProcedure:
 			metadataServiceDownloadSubtitleHandler.ServeHTTP(w, r)
+		case MetadataServiceListExternalIdKindsProcedure:
+			metadataServiceListExternalIdKindsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -412,4 +447,8 @@ func (UnimplementedMetadataServiceHandler) SearchSubtitles(context.Context, *v1.
 
 func (UnimplementedMetadataServiceHandler) DownloadSubtitle(context.Context, *v1.DownloadSubtitleRequest) (*v1.DownloadSubtitleResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.MetadataService.DownloadSubtitle is not implemented"))
+}
+
+func (UnimplementedMetadataServiceHandler) ListExternalIdKinds(context.Context, *v1.ListExternalIdKindsRequest) (*v1.ListExternalIdKindsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.MetadataService.ListExternalIdKinds is not implemented"))
 }

@@ -26,6 +26,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
+	"github.com/mavioai/mavio/libs/metadata"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
@@ -77,6 +78,9 @@ type Options struct {
 	// Wake is told of the media of each item a client opens; nil tells no
 	// one.
 	Wake func(sources []core.MediaSource)
+	// ExternalIDKinds lists the kinds of external IDs; nil lists the
+	// built-in kinds.
+	ExternalIDKinds func() []metadata.ExternalIDKind
 	// Dev serves the development player at /dev/player.
 	Dev bool
 }
@@ -115,7 +119,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle("GET /system/backups/{name}", backupDownload(authn, opts.Backups))
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(rpc.NewLibraryService(opts.Store), interceptors))
 	items := rpc.NewItemService(opts.Store)
-	items.Wake = opts.Wake
+	items.Wake, items.ExternalIDKinds = opts.Wake, opts.ExternalIDKinds
 	mux.Handle(libraryv1connect.NewItemServiceHandler(items, interceptors))
 	mux.Handle(libraryv1connect.NewCollectionServiceHandler(rpc.NewCollectionService(opts.Store), interceptors))
 	refresher, subtitles := opts.Refresher, opts.Subtitles
@@ -126,7 +130,7 @@ func Handler(opts Options) (http.Handler, error) {
 		subtitles = &library.Subtitles{Store: opts.Store}
 	}
 	metadataService := rpc.NewMetadataService(opts.Store, refresher, subtitles, opts.Images.Fetch)
-	metadataService.Activity = opts.Activity
+	metadataService.Activity, metadataService.ExternalIDKinds = opts.Activity, opts.ExternalIDKinds
 	mux.Handle(libraryv1connect.NewMetadataServiceHandler(metadataService, interceptors))
 	mux.Handle(libraryv1connect.NewPlaylistServiceHandler(rpc.NewPlaylistService(opts.Store), interceptors))
 	users := rpc.NewUserService(opts.Store)

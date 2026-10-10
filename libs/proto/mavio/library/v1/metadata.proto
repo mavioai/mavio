@@ -46,6 +46,11 @@ service MetadataService {
   // DownloadSubtitle saves a subtitle found by SearchSubtitles next to the
   // video, where it becomes one of the video's subtitle streams.
   rpc DownloadSubtitle(DownloadSubtitleRequest) returns (DownloadSubtitleResponse);
+  // ListExternalIdKinds lists the kinds of external IDs items and persons
+  // carry: the built-in ones and those plugins declare.
+  rpc ListExternalIdKinds(ListExternalIdKindsRequest) returns (ListExternalIdKindsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 // ItemMetadata holds the editable fields of an item.
@@ -276,4 +281,27 @@ message DownloadSubtitleRequest {
 message DownloadSubtitleResponse {
   // The subtitle as a stream of the media source.
   MediaStream stream = 1;
+}
+
+message ListExternalIdKindsRequest {
+  // Unset lists the kinds of every item kind and of persons.
+  ItemKind item_kind = 1 [(buf.validate.field).enum.defined_only = true];
+}
+
+// ExternalIdKind is a kind of external ID.
+message ExternalIdKind {
+  // Key of the IDs in external_ids maps, e.g. "tmdb".
+  string key = 1;
+  // Display name, e.g. "TMDB".
+  string name = 2;
+  // Kinds of items that carry the ID.
+  repeated ItemKind item_kinds = 3;
+  // Whether persons carry the ID.
+  bool persons = 4;
+  // The plugin declaring the kind; empty for built-in kinds.
+  string plugin_id = 5;
+}
+
+message ListExternalIdKindsResponse {
+  repeated ExternalIdKind kinds = 1;
 }
