@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -70,11 +71,12 @@ func TestLoadPrecedence(t *testing.T) {
 	work := t.TempDir()
 	t.Chdir(work)
 	home := filepath.Join(t.TempDir(), "home")
+	elsewhere := t.TempDir()
 	toml := strings.Join([]string{
 		`addr = ":9000"`,
-		`database = "sqlite:db/library.db"`,
-		`cache-dir = "/var/cache/mavio"`,
-		`plugin-dir = "extensions"`,
+		fmt.Sprintf("database = %q", "sqlite:"+filepath.Join(elsewhere, "db", "library.db")),
+		fmt.Sprintf("cache-dir = %q", filepath.Join(elsewhere, "unused")),
+		fmt.Sprintf("plugin-dir = %q", filepath.Join(elsewhere, "extensions")),
 		`backup-dir = ""`,
 		`metadata-dir = "art"`,
 		`dev = true`,
@@ -90,12 +92,12 @@ func TestLoadPrecedence(t *testing.T) {
 	for _, tc := range []struct{ name, got, want string }{
 		{"home from the variable", o.Home, home},
 		{"addr: the flag before the variable and file", o.Addr, ":9200"},
-		{"database: relative to the home in the file", cfg.Database, "sqlite:" + filepath.Join(home, "db", "library.db")},
+		{"database from the file", cfg.Database, "sqlite:" + filepath.Join(elsewhere, "db", "library.db")},
 		{"cache-dir: a relative flag is relative to the working directory", cfg.CacheDir, filepath.Join(work, "cache")},
 		{"transcode-dir follows cache-dir", cfg.TranscodeDir, filepath.Join(work, "cache", "transcodes")},
-		{"plugin-dir: relative to the home in the file", cfg.PluginDir, filepath.Join(home, "extensions")},
+		{"plugin-dir from the file", cfg.PluginDir, filepath.Join(elsewhere, "extensions")},
 		{"backup-dir: emptied by the file", cfg.BackupDir, ""},
-		{"metadata-dir: the variable before the file", cfg.MetadataDir, filepath.Join(work, "env-art")},
+		{"metadata-dir: the variable before the file, whose relative path is then not checked", cfg.MetadataDir, filepath.Join(work, "env-art")},
 	} {
 		if tc.got != tc.want {
 			t.Errorf("%s = %q, want %q", tc.name, tc.got, tc.want)
@@ -104,7 +106,7 @@ func TestLoadPrecedence(t *testing.T) {
 	if !cfg.Dev {
 		t.Error("dev = false, want true from the file")
 	}
-	if _, err := os.Stat(filepath.Join(home, "db")); err != nil {
+	if _, err := os.Stat(filepath.Join(elsewhere, "db")); err != nil {
 		t.Errorf("database folder not created: %v", err)
 	}
 }
@@ -116,6 +118,9 @@ func TestLoadRejects(t *testing.T) {
 		{"nested table", "[server]\naddr = \":1\""},
 		{"malformed", `addr = `},
 		{"not a boolean", `dev = "maybe"`},
+		{"relative folder", `plugin-dir = "plugins"`},
+		{"relative database", `database = "sqlite:mavio.db"`},
+		{"home-relative folder", `cache-dir = "~/cache"`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			home := t.TempDir()

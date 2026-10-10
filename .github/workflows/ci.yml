@@ -103,5 +103,5 @@ jobs:
           done
           docker logs mavio
           [ "$(docker inspect --format '{{.State.Health.Status}}' mavio)" = healthy ]
-          docker exec mavio mavio -version
+          docker exec mavio mavio version
           docker exec mavio /usr/lib/jellyfin-ffmpeg/ffmpeg -version

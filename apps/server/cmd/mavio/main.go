@@ -40,8 +40,7 @@ MAVIO_HOME says otherwise: config.toml, the SQLite database mavio.db, and
 the plugins, metadata, backups and cache folders. Each setting below may
 also be given in config.toml under its flag's name, or as a MAVIO_*
 environment variable (MAVIO_CACHE_DIR for --cache-dir); flags come first,
-then variables, then config.toml. Relative paths in config.toml are
-relative to the home.`,
+then variables, then config.toml. Paths in config.toml must be absolute.`,
 		Version:       buildinfo.Version(),
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,

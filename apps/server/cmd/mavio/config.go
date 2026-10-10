@@ -27,8 +27,8 @@ import (
 //
 // A setting comes from, in order, its flag, its MAVIO_* environment
 // variable (MAVIO_CACHE_DIR for cache-dir), config.toml and the layout
-// above. Relative paths in config.toml are relative to the home, others
-// to the working directory.
+// above. Paths in config.toml must be absolute; relative paths in flags
+// and variables are relative to the working directory.
 const (
 	homeName   = ".mavio"
 	configName = "config.toml"
@@ -121,7 +121,7 @@ func load(flags *pflag.FlagSet) (options, error) {
 		return options{}, err
 	}
 	// fromFile reports whether a setting comes from config.toml, whose
-	// relative paths are relative to the home.
+	// paths must be absolute.
 	fromFile := func(key string) bool {
 		if f := flags.Lookup(key); f != nil && f.Changed {
 			return false
@@ -140,7 +140,7 @@ func load(flags *pflag.FlagSet) (options, error) {
 		}
 		home = filepath.Join(user, homeName)
 	}
-	home, err := absolute(home, "")
+	home, err := filepath.Abs(home)
 	if err != nil {
 		return options{}, err
 	}
@@ -163,20 +163,22 @@ func load(flags *pflag.FlagSet) (options, error) {
 	for _, s := range settings {
 		v.SetDefault(s.key, s.def(home, cfg))
 		value := v.GetString(s.key)
-		base := "" // the working directory
-		if fromFile(s.key) {
-			base = home
+		file, isPath := value, s.path
+		if s.key == "database" {
+			file, isPath = strings.CutPrefix(value, "sqlite:")
 		}
-		if s.path {
-			if value, err = absolute(value, base); err != nil {
+		if isPath && file != "" {
+			if fromFile(s.key) && !filepath.IsAbs(file) {
+				return options{}, fmt.Errorf("%s: %s %q is not an absolute path", v.ConfigFileUsed(), s.key, file)
+			}
+			if file, err = filepath.Abs(file); err != nil {
 				return options{}, fmt.Errorf("%s: %w", s.key, err)
 			}
-		}
-		if file, ok := strings.CutPrefix(value, "sqlite:"); ok && s.key == "database" && file != "" {
-			if file, err = absolute(file, base); err != nil {
-				return options{}, fmt.Errorf("database: %w", err)
+			if s.key == "database" {
+				value = "sqlite:" + file
+			} else {
+				value = file
 			}
-			value = "sqlite:" + file
 		}
 		if err := assign(&o, s.key, value); err != nil {
 			return options{}, err
@@ -220,26 +222,4 @@ func assign(o *options, key, value string) error {
 	}
 	*targets[key] = value
 	return nil
-}
-
-// absolute makes path absolute against base, the working directory when
-// empty, expanding a leading ~ to the user's home. An empty path stays
-// empty.
-func absolute(path, base string) (string, error) {
-	switch {
-	case path == "":
-		return "", nil
-	case path == "~" || strings.HasPrefix(path, "~/") || strings.HasPrefix(path, `~\`):
-		user, err := os.UserHomeDir()
-		if err != nil {
-			return "", fmt.Errorf("expand %s: %w", path, err)
-		}
-		return filepath.Join(user, path[1:]), nil
-	case filepath.IsAbs(path):
-		return filepath.Clean(path), nil
-	case base != "":
-		return filepath.Join(base, path), nil
-	default:
-		return filepath.Abs(path)
-	}
 }
