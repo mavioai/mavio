@@ -79,6 +79,13 @@ message Permissions {
   // Library-relative or absolute paths the plugin may read. WASM plugins get
   // them mounted read-only.
   repeated string read_paths = 2;
+  // Server services the plugin may call through the host API, as
+  // "<package>.<Service>" for every method or "<package>.<Service>:read" for
+  // the methods without side effects, e.g. "mavio.library.v1.ItemService:read".
+  repeated string api = 3;
+  // Whether host API requests may act as a user named in the Mavio-User
+  // header.
+  bool act_as_users = 4;
 }
 
 message DescribeRequest {}

@@ -23,6 +23,7 @@ import (
 
 func init() {
 	guest.SetHTTPClient(&http.Client{Transport: fetchTransport{}})
+	guest.SetHostClient(&http.Client{Transport: fetchTransport{}})
 }
 
 // pinned keeps buffers shared with the host alive until freed.

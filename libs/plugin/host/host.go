@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/mavioai/mavio/libs/plugin/host/process"
@@ -38,6 +39,9 @@ var (
 type Options struct {
 	WASM    wasm.Options
 	Process process.Options
+	// HostAPI returns the handler serving a plugin's host API requests; it
+	// is called once per plugin, and nil serves none.
+	HostAPI func(m *pluginv1.Manifest) http.Handler
 }
 
 // Open starts the plugin in dir and checks that it describes itself as its
@@ -52,6 +56,10 @@ func Open(ctx context.Context, dir string, opts Options) (Plugin, error) {
 		return nil, fmt.Errorf("plugin %s: %w", m.GetId(), err)
 	}
 
+	if opts.HostAPI != nil {
+		h := opts.HostAPI(m)
+		opts.WASM.HostAPI, opts.Process.HostAPI = h, h
+	}
 	var p Plugin
 	switch m.GetRuntime() {
 	case pluginv1.Runtime_RUNTIME_WASM:

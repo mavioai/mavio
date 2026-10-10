@@ -13,6 +13,7 @@ import (
 	"bufio"
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -46,8 +47,11 @@ type Options struct {
 	// MaxBackoff caps the delay between restarts; zero means one minute.
 	MaxBackoff time.Duration
 	// Env is added to the plugin's environment.
-	Env    []string
-	Logger *slog.Logger
+	Env []string
+	// HostAPI serves the plugin's requests to the host API on a socket next
+	// to the plugin's; nil serves none.
+	HostAPI http.Handler
+	Logger  *slog.Logger
 }
 
 // Plugin is a supervised plugin process. It implements host.Plugin.
@@ -60,6 +64,7 @@ type Plugin struct {
 	dir      string
 	socket   string
 	token    string
+	host     *http.Server
 
 	mu     sync.Mutex
 	cmd    *exec.Cmd
@@ -108,10 +113,17 @@ func Start(ctx context.Context, path string, m *pluginv1.Manifest, opts Options)
 		ready:    make(chan struct{}),
 		done:     make(chan struct{}),
 	}
+	if opts.HostAPI != nil {
+		if err := p.serveHost(); err != nil {
+			_ = os.RemoveAll(dir)
+			return nil, err
+		}
+	}
 	transport := p.transport()
 	p.Set = clients.New(&http.Client{Transport: transport}, "http://plugin", m, connect.WithInterceptors(p.waitReady()))
 
 	if err := p.launch(ctx); err != nil {
+		p.closeHost()
 		_ = os.RemoveAll(dir)
 		return nil, err
 	}
@@ -119,6 +131,40 @@ func Start(ctx context.Context, path string, m *pluginv1.Manifest, opts Options)
 	p.stop = cancel
 	go p.supervise(superviseCtx)
 	return p, nil
+}
+
+// serveHost serves the host API on host.sock, requiring the plugin's token.
+func (p *Plugin) serveHost() error {
+	ln, err := net.Listen("unix", filepath.Join(p.dir, "host.sock"))
+	if err != nil {
+		return fmt.Errorf("host API socket: %w", err)
+	}
+	want := []byte(proc.AuthScheme + p.token)
+	var protocols http.Protocols
+	protocols.SetHTTP1(true)
+	protocols.SetUnencryptedHTTP2(true)
+	p.host = &http.Server{
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if subtle.ConstantTimeCompare([]byte(r.Header.Get("Authorization")), want) != 1 {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+			r.Header.Del("Authorization")
+			r.RemoteAddr = "plugin:" + p.manifest.GetId()
+			p.opts.HostAPI.ServeHTTP(w, r)
+		}),
+		Protocols:         &protocols,
+		ReadHeaderTimeout: 10 * time.Second,
+		ErrorLog:          slog.NewLogLogger(p.log.Handler(), slog.LevelWarn),
+	}
+	go func() { _ = p.host.Serve(ln) }()
+	return nil
+}
+
+func (p *Plugin) closeHost() {
+	if p.host != nil {
+		_ = p.host.Close()
+	}
 }
 
 // socketBase is a short directory for the socket: Unix socket paths are
@@ -181,6 +227,9 @@ func (p *Plugin) launch(ctx context.Context) error {
 	cmd := exec.Command(p.path)
 	cmd.Env = append(os.Environ(), p.opts.Env...)
 	cmd.Env = append(cmd.Env, proc.EnvSocket+"="+p.socket, proc.EnvToken+"="+p.token)
+	if p.host != nil {
+		cmd.Env = append(cmd.Env, proc.EnvHostSocket+"="+filepath.Join(p.dir, "host.sock"))
+	}
 	cmd.Dir = filepath.Dir(p.path)
 	configure(cmd)
 	stdout, err := cmd.StdoutPipe()
@@ -385,5 +434,6 @@ func (p *Plugin) Close(ctx context.Context) error {
 		}
 	}
 	<-p.done
+	p.closeHost()
 	return os.RemoveAll(p.dir)
 }

@@ -11,15 +11,29 @@
 package guest
 
 import (
+	"errors"
 	"net/http"
 	"sync"
+
+	"github.com/mavioai/mavio/libs/plugin/internal/abi"
 )
+
+// HostURL is the base URL of the host API: the server's Connect services and
+// its plain HTTP routes, reached with the client HostClient returns.
+const HostURL = "http://" + abi.HostName
 
 var (
 	mu         sync.RWMutex
 	mux        = http.NewServeMux()
 	httpClient = http.DefaultClient
+	hostClient = &http.Client{Transport: noHost{}}
 )
+
+type noHost struct{}
+
+func (noHost) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, errors.New("guest: the host API is not available outside a Mavio host")
+}
 
 // Handle registers the handler for a path, in the form returned by the
 // generated New…ServiceHandler constructors.
@@ -43,6 +57,24 @@ func HTTPClient() *http.Client {
 	mu.RLock()
 	defer mu.RUnlock()
 	return httpClient
+}
+
+// HostClient returns the client for the host API at HostURL. The host
+// authorizes its requests by the scopes of the manifest's permissions.api;
+// a request acts as the plugin itself unless it names a user in the
+// Mavio-User header and the manifest sets permissions.act_as_users.
+func HostClient() *http.Client {
+	mu.RLock()
+	defer mu.RUnlock()
+	return hostClient
+}
+
+// SetHostClient replaces the client returned by HostClient. Runtime entry
+// points call it; plugins normally do not.
+func SetHostClient(c *http.Client) {
+	mu.Lock()
+	defer mu.Unlock()
+	hostClient = c
 }
 
 // SetHTTPClient replaces the client returned by HTTPClient. Runtime entry

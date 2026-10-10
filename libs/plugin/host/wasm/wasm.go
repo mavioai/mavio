@@ -52,7 +52,10 @@ type Options struct {
 	// FetchClient performs the plugin's outbound HTTP requests; nil means a
 	// client with a 30 s timeout.
 	FetchClient *http.Client
-	Logger      *slog.Logger
+	// HostAPI serves the plugin's requests to the host API (abi.HostName);
+	// nil denies them.
+	HostAPI http.Handler
+	Logger  *slog.Logger
 }
 
 // Plugin is a running WASM plugin. It implements host.Plugin.
@@ -355,13 +358,16 @@ func (p *Plugin) fetch(ctx context.Context, in []byte) abi.FetchResponse {
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
 		return abi.FetchResponse{Error: "only http and https URLs are allowed"}
 	}
-	if !manifest.AllowsHost(p.manifest, u.Host) && !manifest.AllowsHost(p.manifest, u.Hostname()) {
-		p.log.WarnContext(ctx, "plugin request denied", "host", u.Host)
-		return abi.FetchResponse{Error: "host " + u.Host + " is not in the plugin's permissions"}
-	}
 	method := req.Method
 	if method == "" {
 		method = http.MethodGet
+	}
+	if u.Host == abi.HostName {
+		return p.serveHost(ctx, method, u, req)
+	}
+	if !manifest.AllowsHost(p.manifest, u.Host) && !manifest.AllowsHost(p.manifest, u.Hostname()) {
+		p.log.WarnContext(ctx, "plugin request denied", "host", u.Host)
+		return abi.FetchResponse{Error: "host " + u.Host + " is not in the plugin's permissions"}
 	}
 	hreq, err := http.NewRequestWithContext(ctx, method, u.String(), bytes.NewReader(req.Body))
 	if err != nil {
@@ -379,6 +385,59 @@ func (p *Plugin) fetch(ctx context.Context, in []byte) abi.FetchResponse {
 	}
 	return abi.FetchResponse{Status: resp.StatusCode, Header: resp.Header, Body: body}
 }
+
+// serveHost serves a host API request in process. It runs while the calling
+// guest holds its instance, so a host call that needs this plugin again uses
+// another instance.
+func (p *Plugin) serveHost(ctx context.Context, method string, u *url.URL, req abi.FetchRequest) abi.FetchResponse {
+	if p.opts.HostAPI == nil {
+		return abi.FetchResponse{Error: "the host API is not available"}
+	}
+	hreq, err := http.NewRequestWithContext(ctx, method, u.String(), bytes.NewReader(req.Body))
+	if err != nil {
+		return abi.FetchResponse{Error: err.Error()}
+	}
+	if req.Header != nil {
+		hreq.Header = req.Header
+	}
+	hreq.RemoteAddr = "plugin:" + p.manifest.GetId()
+	w := &recorder{header: http.Header{}}
+	p.opts.HostAPI.ServeHTTP(w, hreq)
+	if w.status == 0 {
+		w.status = http.StatusOK
+	}
+	if w.overflow {
+		return abi.FetchResponse{Error: "host API response exceeds 64 MiB"}
+	}
+	return abi.FetchResponse{Status: w.status, Header: w.header, Body: w.body.Bytes()}
+}
+
+// recorder collects a host API response, up to 64 MiB of body.
+type recorder struct {
+	header   http.Header
+	status   int
+	body     bytes.Buffer
+	overflow bool
+}
+
+func (r *recorder) Header() http.Header { return r.header }
+
+func (r *recorder) WriteHeader(status int) {
+	if r.status == 0 {
+		r.status = status
+	}
+}
+
+func (r *recorder) Write(b []byte) (int, error) {
+	r.WriteHeader(http.StatusOK)
+	if r.body.Len()+len(b) > 64<<20 {
+		r.overflow = true
+		return 0, errors.New("response too large")
+	}
+	return r.body.Write(b)
+}
+
+func (r *recorder) Flush() {}
 
 func httpResponse(req *http.Request, r abi.Response) *http.Response {
 	return &http.Response{

@@ -40,6 +40,7 @@ func TestValidate(t *testing.T) {
 		{"future api", func(m *pluginv1.Manifest) { m.SetApiVersion("2.0") }, "not compatible"},
 		{"bad host", func(m *pluginv1.Manifest) { m.GetPermissions().SetHttpHosts([]string{"https://x.org/"}) }, "http host"},
 		{"relative path", func(m *pluginv1.Manifest) { m.GetPermissions().SetReadPaths([]string{"media"}) }, "absolute"},
+		{"bad scope", func(m *pluginv1.Manifest) { m.GetPermissions().SetApi([]string{"mavio.library.v1.ItemService:write"}) }, "api scope"},
 		{"bad schema", func(m *pluginv1.Manifest) { m.SetConfigSchema(`{"type":"nope"}`) }, "config_schema"},
 	}
 	for _, tt := range tests {
@@ -83,6 +84,32 @@ func TestAllowsHost(t *testing.T) {
 		if got := AllowsHost(m, host); got != want {
 			t.Errorf("AllowsHost(%q) = %v, want %v", host, got, want)
 		}
+	}
+}
+
+func TestAllowsProcedure(t *testing.T) {
+	m := valid()
+	m.GetPermissions().SetApi([]string{"mavio.library.v1.ItemService:read", "mavio.user.v1.UserService"})
+	tests := []struct {
+		procedure string
+		readOnly  bool
+		want      bool
+	}{
+		{"/mavio.library.v1.ItemService/GetItem", true, true},
+		{"/mavio.library.v1.ItemService/UpdateItem", false, false},
+		{"/mavio.user.v1.UserService/CreateUser", false, true},
+		{"/mavio.user.v1.UserService/ListUsers", true, true},
+		{"/mavio.library.v1.LibraryService/ListLibraries", true, false},
+		{"/mavio.library.v1.ItemServiceX/GetItem", true, false},
+		{"mavio.library.v1.ItemService", true, false},
+	}
+	for _, tt := range tests {
+		if got := AllowsProcedure(m, tt.procedure, tt.readOnly); got != tt.want {
+			t.Errorf("AllowsProcedure(%q, %v) = %v, want %v", tt.procedure, tt.readOnly, got, tt.want)
+		}
+	}
+	if err := Validate(m); err != nil {
+		t.Errorf("Validate() = %v, want nil", err)
 	}
 }
 

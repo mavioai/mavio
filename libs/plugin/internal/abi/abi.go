@@ -28,6 +28,10 @@ const (
 	ImportRead  = "http_read"
 )
 
+// HostName is the host of the host API: fetches to it are served by the
+// server instead of the network.
+const HostName = "mavio.host"
+
 // ErrMalformed reports an envelope that cannot be decoded.
 var ErrMalformed = errors.New("abi: malformed envelope")
 

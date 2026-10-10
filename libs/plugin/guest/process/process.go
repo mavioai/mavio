@@ -27,6 +27,31 @@ import (
 	"github.com/mavioai/mavio/libs/plugin/internal/proc"
 )
 
+func init() {
+	socket, token := os.Getenv(proc.EnvHostSocket), os.Getenv(proc.EnvToken)
+	if socket == "" {
+		return
+	}
+	var protocols http.Protocols
+	protocols.SetUnencryptedHTTP2(true)
+	t := &http.Transport{
+		Protocols: &protocols,
+		DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+			var d net.Dialer
+			return d.DialContext(ctx, "unix", socket)
+		},
+	}
+	guest.SetHostClient(&http.Client{Transport: roundTripper(func(req *http.Request) (*http.Response, error) {
+		req = req.Clone(req.Context())
+		req.Header.Set("Authorization", proc.AuthScheme+token)
+		return t.RoundTrip(req)
+	})})
+}
+
+type roundTripper func(*http.Request) (*http.Response, error)
+
+func (f roundTripper) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+
 // Serve runs the plugin until the host shuts it down. pluginID is reported
 // in the handshake.
 func Serve(ctx context.Context, pluginID string) error {

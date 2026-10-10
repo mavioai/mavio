@@ -553,11 +553,15 @@ func (b0 Manifest_builder) Build() *Manifest {
 // Permissions are the host resources a plugin requests. An administrator
 // approves them at install time; anything else is denied.
 type Permissions struct {
-	state                protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_HttpHosts []string               `protobuf:"bytes,1,rep,name=http_hosts,json=httpHosts"`
-	xxx_hidden_ReadPaths []string               `protobuf:"bytes,2,rep,name=read_paths,json=readPaths"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_HttpHosts   []string               `protobuf:"bytes,1,rep,name=http_hosts,json=httpHosts"`
+	xxx_hidden_ReadPaths   []string               `protobuf:"bytes,2,rep,name=read_paths,json=readPaths"`
+	xxx_hidden_Api         []string               `protobuf:"bytes,3,rep,name=api"`
+	xxx_hidden_ActAsUsers  bool                   `protobuf:"varint,4,opt,name=act_as_users,json=actAsUsers"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *Permissions) Reset() {
@@ -599,12 +603,47 @@ func (x *Permissions) GetReadPaths() []string {
 	return nil
 }
 
+func (x *Permissions) GetApi() []string {
+	if x != nil {
+		return x.xxx_hidden_Api
+	}
+	return nil
+}
+
+func (x *Permissions) GetActAsUsers() bool {
+	if x != nil {
+		return x.xxx_hidden_ActAsUsers
+	}
+	return false
+}
+
 func (x *Permissions) SetHttpHosts(v []string) {
 	x.xxx_hidden_HttpHosts = v
 }
 
 func (x *Permissions) SetReadPaths(v []string) {
 	x.xxx_hidden_ReadPaths = v
+}
+
+func (x *Permissions) SetApi(v []string) {
+	x.xxx_hidden_Api = v
+}
+
+func (x *Permissions) SetActAsUsers(v bool) {
+	x.xxx_hidden_ActAsUsers = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+}
+
+func (x *Permissions) HasActAsUsers() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *Permissions) ClearActAsUsers() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_ActAsUsers = false
 }
 
 type Permissions_builder struct {
@@ -616,6 +655,13 @@ type Permissions_builder struct {
 	// Library-relative or absolute paths the plugin may read. WASM plugins get
 	// them mounted read-only.
 	ReadPaths []string
+	// Server services the plugin may call through the host API, as
+	// "<package>.<Service>" for every method or "<package>.<Service>:read" for
+	// the methods without side effects, e.g. "mavio.library.v1.ItemService:read".
+	Api []string
+	// Whether host API requests may act as a user named in the Mavio-User
+	// header.
+	ActAsUsers *bool
 }
 
 func (b0 Permissions_builder) Build() *Permissions {
@@ -624,6 +670,11 @@ func (b0 Permissions_builder) Build() *Permissions {
 	_, _ = b, x
 	x.xxx_hidden_HttpHosts = b.HttpHosts
 	x.xxx_hidden_ReadPaths = b.ReadPaths
+	x.xxx_hidden_Api = b.Api
+	if b.ActAsUsers != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_ActAsUsers = *b.ActAsUsers
+	}
 	return m0
 }
 
@@ -1117,12 +1168,15 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	" \x01(\v2\x1c.mavio.plugin.v1.PermissionsR\vpermissions\x12#\n" +
 	"\rconfig_schema\x18\v \x01(\tR\fconfigSchema\x12\x1f\n" +
 	"\vapi_version\x18\f \x01(\tR\n" +
-	"apiVersion\"K\n" +
+	"apiVersion\"\x7f\n" +
 	"\vPermissions\x12\x1d\n" +
 	"\n" +
 	"http_hosts\x18\x01 \x03(\tR\thttpHosts\x12\x1d\n" +
 	"\n" +
-	"read_paths\x18\x02 \x03(\tR\treadPaths\"\x11\n" +
+	"read_paths\x18\x02 \x03(\tR\treadPaths\x12\x10\n" +
+	"\x03api\x18\x03 \x03(\tR\x03api\x12 \n" +
+	"\fact_as_users\x18\x04 \x01(\bR\n" +
+	"actAsUsers\"\x11\n" +
 	"\x0fDescribeRequest\"I\n" +
 	"\x10DescribeResponse\x125\n" +
 	"\bmanifest\x18\x01 \x01(\v2\x19.mavio.plugin.v1.ManifestR\bmanifest\"3\n" +

@@ -102,10 +102,16 @@ func open(t *testing.T, rt string, hosts ...string) host.Plugin {
 
 func openWithTimeout(t *testing.T, rt string, callTimeout time.Duration, hosts ...string) host.Plugin {
 	t.Helper()
+	return openWith(t, rt, callTimeout, nil, hosts...)
+}
+
+func openWith(t *testing.T, rt string, callTimeout time.Duration, hostAPI func(*pluginv1.Manifest) http.Handler, hosts ...string) host.Plugin {
+	t.Helper()
 	cacheOnce.Do(func() { cacheDir, _ = os.MkdirTemp("", "mavio-wasm-cache-") })
 	opts := host.Options{
 		WASM:    wasm.Options{CacheDir: cacheDir, CallTimeout: callTimeout, Instances: 3, Logger: slog.New(slog.DiscardHandler)},
 		Process: process.Options{HealthInterval: -1, Logger: slog.New(slog.DiscardHandler)},
+		HostAPI: hostAPI,
 	}
 	p, err := host.Open(t.Context(), pluginDir(t, rt, hosts...), opts)
 	if err != nil {
@@ -182,6 +188,44 @@ func TestFetchPermissions(t *testing.T) {
 	if _, err := search(ctx, p, "fetch:"+denied+"/b"); connect.CodeOf(err) != connect.CodePermissionDenied || !strings.Contains(err.Error(), "not in the plugin's permissions") {
 		t.Errorf("denied fetch error = %v", err)
 	}
+}
+
+func TestHostAPI(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		var p host.Plugin
+		hostAPI := func(m *pluginv1.Manifest) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/reenter" {
+					// The calling plugin is busy in this request; the host
+					// may still call it.
+					got, err := search(r.Context(), p, "inner")
+					fmt.Fprintf(w, "%s %v", got, err)
+					return
+				}
+				w.WriteHeader(http.StatusTeapot)
+				fmt.Fprintf(w, "%s %s %s auth=%q", m.GetId(), r.Method, r.URL.RequestURI(), r.Header.Get("Authorization"))
+			})
+		}
+		p = openWith(t, rt, 10*time.Second, hostAPI)
+		ctx := t.Context()
+		want := `418 org.mavio.testplugin GET /a/b?c=d auth=""`
+		if got, err := search(ctx, p, "host:/a/b?c=d"); err != nil || got != want {
+			t.Errorf("host call = %q, %v; want %q", got, err, want)
+		}
+		if got, err := search(ctx, p, "host:/reenter"); err != nil || got != "200 inner <nil>" {
+			t.Errorf("reentrant host call = %q, %v", got, err)
+		}
+	})
+}
+
+func TestHostAPIUnavailable(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := open(t, rt)
+		_, err := search(t.Context(), p, "host:/a")
+		if connect.CodeOf(err) != connect.CodeUnavailable {
+			t.Errorf("host call without a host API = %v, want unavailable", err)
+		}
+	})
 }
 
 func TestWASMFailuresAreIsolated(t *testing.T) {

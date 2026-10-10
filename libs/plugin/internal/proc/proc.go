@@ -7,6 +7,9 @@ package proc
 const (
 	EnvSocket = "MAVIO_PLUGIN_SOCKET"
 	EnvToken  = "MAVIO_PLUGIN_TOKEN"
+	// EnvHostSocket names the socket serving the host API. Requests on it
+	// present the plugin's token, as the host's requests do.
+	EnvHostSocket = "MAVIO_HOST_SOCKET"
 )
 
 // ProtocolVersion is the handshake protocol version.

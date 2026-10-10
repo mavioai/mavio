@@ -35,6 +35,7 @@ var (
 	idPattern      = regexp.MustCompile(`^[a-z0-9]+(\.[a-z0-9]+(-[a-z0-9]+)*)+$`)
 	versionPattern = regexp.MustCompile(`^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$`)
 	hostPattern    = regexp.MustCompile(`^(\*\.)?([a-z0-9-]+\.)*[a-z0-9-]+(:\d+)?$`)
+	scopePattern   = regexp.MustCompile(`^mavio\.[a-z0-9]+\.v[0-9]+\.[A-Z][A-Za-z0-9]*Service(:read)?$`)
 )
 
 // Load reads and validates the manifest of the plugin in dir.
@@ -93,6 +94,11 @@ func Validate(m *pluginv1.Manifest) error {
 			add("read path %q must be absolute", p)
 		}
 	}
+	for _, scope := range m.GetPermissions().GetApi() {
+		if !scopePattern.MatchString(scope) {
+			add("api scope %q must be <package>.<Service> or <package>.<Service>:read, e.g. mavio.library.v1.ItemService:read", scope)
+		}
+	}
 	if s := m.GetConfigSchema(); s != "" {
 		if _, err := CompileSchema(s); err != nil {
 			add("config_schema: %v", err)
@@ -134,6 +140,23 @@ func AllowsHost(m *pluginv1.Manifest, host string) bool {
 			continue
 		}
 		if host == pattern {
+			return true
+		}
+	}
+	return false
+}
+
+// AllowsProcedure reports whether the manifest's API scopes cover a Connect
+// procedure ("/<package>.<Service>/<Method>"); readOnly tells whether the
+// method has no side effects, which ":read" scopes require.
+func AllowsProcedure(m *pluginv1.Manifest, procedure string, readOnly bool) bool {
+	service, _, ok := strings.Cut(strings.TrimPrefix(procedure, "/"), "/")
+	if !ok {
+		return false
+	}
+	for _, scope := range m.GetPermissions().GetApi() {
+		name, read := strings.CutSuffix(scope, ":read")
+		if name == service && (!read || readOnly) {
 			return true
 		}
 	}

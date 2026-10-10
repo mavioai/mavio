@@ -6,6 +6,8 @@
 //
 //	"config"        returns the current configuration in the overview
 //	"fetch:<url>"   GETs the URL with guest.HTTPClient and returns the body
+//	"host:<path>"   GETs the path of the host API with guest.HostClient and
+//	                returns the status and body
 //	"crash"         exits the plugin
 //	"panic"         panics in the handler
 //	"slow"          sleeps for two seconds
@@ -88,6 +90,14 @@ func (provider) Search(ctx context.Context, req *pluginv1.SearchRequest) (*plugi
 		body, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
 		overview = string(body)
+	case strings.HasPrefix(name, "host:"):
+		resp, err := guest.HostClient().Get(guest.HostURL + strings.TrimPrefix(name, "host:"))
+		if err != nil {
+			return nil, connect.NewError(connect.CodeUnavailable, err)
+		}
+		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		overview = fmt.Sprintf("%d %s", resp.StatusCode, body)
 	case name == "crash":
 		os.Exit(3)
 	case name == "panic":
