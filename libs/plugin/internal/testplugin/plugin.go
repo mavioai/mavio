@@ -5,6 +5,7 @@
 // Searches act on the lookup name:
 //
 //	"config"        returns the current configuration in the overview
+//	"os"            returns guest.HostOS in the overview
 //	"events"        returns the types of the events consumed so far, which
 //	                the data folder keeps, as WASM instances share no memory
 //	"fetch:<url>"   GETs the URL with guest.HTTPClient and returns the body
@@ -42,6 +43,10 @@
 //
 // For password resets it appends "<user name> <PIN>" to the file "resets"
 // of its data folder.
+//
+// As a scene mapping provider it maps the title "<tvdb ID> Scene" to every
+// series it is asked to number, numbers its episode 1x1 as 2x1, and lists
+// the series with TVDB ID 1 as daily.
 //
 // As a device controller it takes commands to its device "tv" and rejects
 // others, naming the device and the user.
@@ -99,6 +104,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewPasswordResetServiceHandler(resets{}))
 	guest.Handle(pluginv1connect.NewEpisodeListProviderServiceHandler(episodes{}))
 	guest.Handle(pluginv1connect.NewDiscoveryProviderServiceHandler(discovery{}))
+	guest.Handle(pluginv1connect.NewSceneMappingProviderServiceHandler(scene{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -220,6 +226,33 @@ func (discovery) ListFilterValues(_ context.Context, req *pluginv1.ListFilterVal
 	return pluginv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{pluginv1.FilterValue_builder{
 		Id: proto.String("1"), Name: proto.String(req.GetQuery()),
 	}.Build()}}.Build(), nil
+}
+
+type scene struct{}
+
+// ListSceneMappings maps "1 Scene" to the series with TVDB ID 1.
+func (scene) ListSceneMappings(context.Context, *pluginv1.ListSceneMappingsRequest) (*pluginv1.ListSceneMappingsResponse, error) {
+	return pluginv1.ListSceneMappingsResponse_builder{Mappings: []*pluginv1.SceneMapping{pluginv1.SceneMapping_builder{
+		Source: proto.String("test"), SeriesExternalIds: map[string]string{"tvdb": "1"},
+		Title: proto.String("1 Scene"), SearchTitle: proto.String("1 Scene"), SeasonNumber: proto.Int32(-1),
+	}.Build()}}.Build(), nil
+}
+
+// ListDailySeries lists the series with TVDB ID 1.
+func (scene) ListDailySeries(context.Context, *pluginv1.ListDailySeriesRequest) (*pluginv1.ListDailySeriesResponse, error) {
+	return pluginv1.ListDailySeriesResponse_builder{Series: []*pluginv1.SeriesExternalIds{
+		pluginv1.SeriesExternalIds_builder{ExternalIds: map[string]string{"tvdb": "1"}}.Build(),
+	}}.Build(), nil
+}
+
+// GetSceneNumbering numbers episode 1x1 as 2x1.
+func (scene) GetSceneNumbering(context.Context, *pluginv1.GetSceneNumberingRequest) (*pluginv1.GetSceneNumberingResponse, error) {
+	return pluginv1.GetSceneNumberingResponse_builder{Found: proto.Bool(true), Provider: proto.String("tvdb"), Episodes: []*pluginv1.SceneNumbering{
+		pluginv1.SceneNumbering_builder{
+			SeasonNumber: proto.Int32(1), EpisodeNumber: proto.Int32(1), AbsoluteNumber: proto.Int32(1),
+			SceneSeasonNumber: proto.Int32(2), SceneEpisodeNumber: proto.Int32(1), SceneAbsoluteNumber: proto.Int32(1),
+		}.Build(),
+	}}.Build(), nil
 }
 
 type resolver struct{}
@@ -379,6 +412,8 @@ func (provider) Search(ctx context.Context, req *pluginv1.SearchRequest) (*plugi
 	name := req.GetLookup().GetName()
 	overview := name
 	switch {
+	case name == "os":
+		overview = guest.HostOS()
 	case name == "config":
 		mu.Lock()
 		overview = config

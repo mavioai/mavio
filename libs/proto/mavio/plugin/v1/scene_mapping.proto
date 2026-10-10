@@ -1,0 +1,110 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "buf/validate/validate.proto";
+
+// SceneMappingProviderService tells how releases name and number series
+// otherwise than their episode lists: the titles releases use for series,
+// the series releases name by air date, and the numbering releases use
+// for episodes.
+service SceneMappingProviderService {
+  // ListSceneMappings lists the titles releases use for series.
+  rpc ListSceneMappings(ListSceneMappingsRequest) returns (ListSceneMappingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListDailySeries lists the series whose releases are named by air date.
+  rpc ListDailySeries(ListDailySeriesRequest) returns (ListDailySeriesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetSceneNumbering lists how releases number a series' episodes, where
+  // they number them otherwise than its episode list.
+  rpc GetSceneNumbering(GetSceneNumberingRequest) returns (GetSceneNumberingResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message ListSceneMappingsRequest {}
+
+message ListSceneMappingsResponse {
+  repeated SceneMapping mappings = 1;
+}
+
+// SceneMapping is a title releases use for a series, or for some of its
+// seasons.
+message SceneMapping {
+  // The source of the mapping within the provider, such as "services" or
+  // "xem"; a source's mappings replace those it listed before.
+  string source = 1;
+  // The series, by external IDs such as "tvdb".
+  map<string, string> series_external_ids = 2;
+  // The title in release names.
+  string title = 3;
+  // The title to search indexers with.
+  string search_title = 4;
+  // The season of the series' episode list the title names; unset or -1
+  // for every season.
+  int32 season_number = 5;
+  // The season releases with the title number; unset when they number
+  // seasons as the episode list does.
+  int32 scene_season_number = 6;
+  // Where the scene numbering comes from, such as "tvdb" or "unknown".
+  string scene_origin = 7;
+  // How indexers are searched for the mapping.
+  SceneSearchMode search_mode = 8;
+  // A .NET regular expression release titles must match for the mapping
+  // to apply.
+  string filter_regex = 9;
+  string comment = 10;
+}
+
+// SceneSearchMode is how indexers are searched for a scene mapping, as
+// flags.
+enum SceneSearchMode {
+  // As the series is searched.
+  SCENE_SEARCH_MODE_UNSPECIFIED = 0;
+  // By the series' IDs.
+  SCENE_SEARCH_MODE_ID = 1;
+  // By the mapping's search title.
+  SCENE_SEARCH_MODE_TITLE = 2;
+  // By both.
+  SCENE_SEARCH_MODE_ID_AND_TITLE = 3;
+}
+
+message ListDailySeriesRequest {}
+
+message ListDailySeriesResponse {
+  // The series, each by external IDs such as "tvdb".
+  repeated SeriesExternalIds series = 1;
+}
+
+// SeriesExternalIds identifies a series.
+message SeriesExternalIds {
+  map<string, string> external_ids = 1;
+}
+
+message GetSceneNumberingRequest {
+  // The series' external IDs, such as "tvdb".
+  map<string, string> series_external_ids = 1 [(buf.validate.field).map.min_pairs = 1];
+}
+
+message GetSceneNumberingResponse {
+  // False when the provider has no numbering for the series: releases
+  // number its episodes as its episode list does.
+  bool found = 1;
+  // The external ID the episode list numbers by, such as "tvdb".
+  string provider = 2;
+  repeated SceneNumbering episodes = 3;
+}
+
+// SceneNumbering is how releases number an episode.
+message SceneNumbering {
+  // The episode, numbered as the series' episode list numbers it.
+  int32 season_number = 1;
+  int32 episode_number = 2;
+  int32 absolute_number = 3;
+  // As releases number it.
+  int32 scene_season_number = 4;
+  int32 scene_episode_number = 5;
+  int32 scene_absolute_number = 6;
+}

@@ -30,6 +30,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/plugin/internal/abi"
 	"github.com/mavioai/mavio/libs/plugin/internal/clients"
+	"github.com/mavioai/mavio/libs/plugin/internal/osinfo"
 	"github.com/mavioai/mavio/libs/plugin/internal/proc"
 	"github.com/mavioai/mavio/libs/plugin/manifest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
@@ -189,7 +190,7 @@ func (p *Plugin) newInstance(ctx context.Context) (*instance, error) {
 	for _, dir := range p.manifest.GetPermissions().GetReadPaths() {
 		fsConfig = fsConfig.WithReadOnlyDirMount(dir, dir)
 	}
-	cfg := wazero.NewModuleConfig()
+	cfg := wazero.NewModuleConfig().WithEnv(proc.EnvHostOS, osinfo.String())
 	if p.opts.DataDir != "" {
 		fsConfig = fsConfig.WithDirMount(p.opts.DataDir, DataMount)
 		cfg = cfg.WithEnv(proc.EnvData, DataMount)

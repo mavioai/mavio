@@ -100,6 +100,7 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 ## 6. 任务与数据目录
 * **任务**：`TASK_RUNNER` 插件的 manifest 列出任务（ID、名称、说明、至少一分钟的间隔、超时）。它们以 `plugin:{plugin}:{task}` 出现在 `TaskService` 中，并带有插件 ID；它们作为 `plugin.task` 作业在单独的 worker 上运行，调用 `TaskRunnerService.RunTask`：自插件启动起按间隔运行，每次运行排入下一次；也可按需运行。任务的超时（至多六小时，未设置时为一小时）在该次调用中取代 WASM 的调用超时。插件未就绪时跳过定时运行；已不存在的任务的运行被丢弃。
 * **数据目录**：每个插件有一个可写目录 `<home>/plugin-data/<id>`（`--plugin-data-dir`），升级时保留，纳入备份，卸载时删除。两种运行时都通过 `MAVIO_PLUGIN_DATA` 告知插件其路径（`guest.DataDir()`）；WASM 插件在 `/data` 看到它。
+* **宿主操作系统**：两种运行时都通过 `MAVIO_HOST_OS`（`guest.HostOS()`）告知宿主的操作系统及其版本，按 Servarr 应用在 User-Agent 中的写法小写，如 `ubuntu 22.04`：Linux 上取自 `/etc/*release` 的 `ID` 与 `VERSION_ID`，macOS 上取自系统版本属性列表，Windows 上取自 `RtlGetVersion`。
 
 ## 7. 远程设备
 * `DEVICE_CONTROLLER` 插件（还需要 `permissions.act_as_users`）通过 `HostService.SetDevices` 保持其设备列表为最新：ID、名称、产品，以及每个设备接受的命令种类。任何插件都可以不经作用域调用 `mavio.plugin.v1.HostService`；其他调用者返回 `permission_denied`。其 `GetServerInfo` 给出服务端的名称、版本、HTTP 与 HTTPS 端口以及基础 URL，供插件生成交给局域网设备的 URL。
@@ -147,9 +148,10 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 设置 `download_lyrics` 后，刷新一个旁边没有歌词文件的音轨时，会搜索媒体库的歌词提供者，并保存第一个能下载的歌词，与管理员手动下载相同。
 
 ### 8.12 资源获取提供者
-资源获取（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）新增四种提供者类型，都由服务端汇集，彼此之间从不互相调用：
+资源获取（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）新增五种提供者类型，都由服务端汇集，彼此之间从不互相调用：
 * `EPISODE_LIST_PROVIDER`：`EpisodeListProviderService.ListEpisodes` 按查询的 `display_order` 编号列出剧集的季与单集，附带绝对集数、元数据，以及标识它们的外部 ID（`provider`）；刷新剧集时，从媒体库中第一个认识该剧集的集列表提供者取得列表，把剧集缺少的单集建为虚拟条目（[领域模型 §4.8](domain.zh-CN.md#48-虚拟条目)）。`scraper-tmdb` 提供它：按播出顺序，或按该显示顺序类型的第一个 TMDB episode group，以其分组作为季。
 * `DISCOVERY_PROVIDER`：`DiscoveryProviderService` 列出可供发现的电影与剧集。`ListCatalogs` 声明提供者的目录，每个目录有其种类（趋势、热门、即将上映、高分、某作品的推荐或相似作品，或别处整理的列表如榜单），针对电影、剧集或两者，并给出它接受的过滤条件与排序；`Discover` 返回目录中一页作品，附带外部 ID、日期、类型、图片与评分，可按类型、制片公司、电视网、关键词、观看平台、原始语言、上映日期、片长、评分、投票数与内容分级过滤；`ListFilterValues` 列出某个过滤条件的取值，或与查询匹配的取值。`DiscoverService` 标明服务端已有、想要或已被请求的作品。`scraper-tmdb` 按 Seerr 使用 TMDB 的方式提供它：当日趋势、通过 TMDB discover 接口的热门与即将上映作品、高分作品，以及推荐与相似作品。
+* `SCENE_MAPPING_PROVIDER`：`SceneMappingProviderService` 说明 release 以不同于集列表的方式命名和编号剧集的情况，用于把 release 匹配到剧集与单集：`ListSceneMappings` 列出 release 对剧集或其部分季使用的标题，附带其编号的季、用于搜索索引器的标题，以及 release 必须匹配的正则表达式，每条映射来自提供者的某个来源，来源新列出的映射取代它之前列出的；`ListDailySeries` 列出 release 按播出日期命名的剧集；`GetSceneNumbering` 列出 release 对剧集单集的编号与其集列表不同之处。`scraper-servarr` 根据 Sonarr 的服务与 XEM 提供它。
 * `INDEXER_PROVIDER`：`IndexerProviderService` 列出索引器及其能力，搜索它们，读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB；`ReleaseService` 搜索每个就绪的索引器提供者。由 `plugins/indexers` 提供。
 * `DOWNLOAD_CLIENT`：`DownloadClientService` 向下载客户端添加 release、列出其下载并删除下载；`DownloadService` 按 release 的类型与协议把它发送给相应的客户端。由 `plugins/download-clients` 提供。
 

@@ -33,6 +33,7 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/libs/plugin/internal/clients"
+	"github.com/mavioai/mavio/libs/plugin/internal/osinfo"
 	"github.com/mavioai/mavio/libs/plugin/internal/proc"
 	"github.com/mavioai/mavio/libs/plugin/manifest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
@@ -239,7 +240,7 @@ func (p *Plugin) launch(ctx context.Context) error {
 	_ = os.Remove(p.socket)
 	cmd := exec.Command(p.path)
 	cmd.Env = append(os.Environ(), p.opts.Env...)
-	cmd.Env = append(cmd.Env, proc.EnvSocket+"="+p.socket, proc.EnvToken+"="+p.token)
+	cmd.Env = append(cmd.Env, proc.EnvSocket+"="+p.socket, proc.EnvToken+"="+p.token, proc.EnvHostOS+"="+osinfo.String())
 	if p.host != nil {
 		cmd.Env = append(cmd.Env, proc.EnvHostSocket+"="+filepath.Join(p.dir, "host.sock"))
 	}

@@ -12,6 +12,10 @@ const (
 	EnvHostSocket = "MAVIO_HOST_SOCKET"
 	// EnvData names the plugin's writable data folder, in both runtimes.
 	EnvData = "MAVIO_PLUGIN_DATA"
+	// EnvHostOS names the host's operating system and its version, in
+	// both runtimes, as Servarr applications name them in their
+	// User-Agent, such as "ubuntu 22.04".
+	EnvHostOS = "MAVIO_HOST_OS"
 )
 
 // ProtocolVersion is the handshake protocol version.

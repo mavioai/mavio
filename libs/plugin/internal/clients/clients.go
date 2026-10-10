@@ -35,6 +35,7 @@ type Set struct {
 	reset     pluginv1connect.PasswordResetServiceClient
 	episodes  pluginv1connect.EpisodeListProviderServiceClient
 	discovery pluginv1connect.DiscoveryProviderServiceClient
+	scene     pluginv1connect.SceneMappingProviderServiceClient
 }
 
 // New builds the clients for m over c.
@@ -99,6 +100,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_DISCOVERY_PROVIDER) {
 		s.discovery = pluginv1connect.NewDiscoveryProviderServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_SCENE_MAPPING_PROVIDER) {
+		s.scene = pluginv1connect.NewSceneMappingProviderServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -168,3 +172,6 @@ func (s Set) Episodes() pluginv1connect.EpisodeListProviderServiceClient { retur
 
 // Discovery returns the DiscoveryProviderService client, or nil.
 func (s Set) Discovery() pluginv1connect.DiscoveryProviderServiceClient { return s.discovery }
+
+// SceneMappings returns the SceneMappingProviderService client, or nil.
+func (s Set) SceneMappings() pluginv1connect.SceneMappingProviderServiceClient { return s.scene }
