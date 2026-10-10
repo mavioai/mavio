@@ -4,7 +4,7 @@
 
 > Related: [Architecture](architecture.md) · [Domain Model](domain.md) · [Roadmap](roadmap.md) · [AGENTS.md](../AGENTS.md)
 
-> [Architecture §7](architecture.md#7-plugin-system-libsplugin) describes the two plugin runtimes and how the server calls plugins. This document describes how plugins reach what Jellyfin's plugins reach, apart from channels and live TV: the server's API, events, HTTP routes, tasks, a data folder, remote devices and the remaining provider types. It also describes DLNA, which Mavio ships as a first-party plugin built on them. The work is phase P13 (platform) and P14 (DLNA) of the [Roadmap](roadmap.md).
+> [Architecture §7](architecture.md#7-plugin-system-libsplugin) describes the two plugin runtimes and how the server calls plugins. This document describes how plugins reach what Jellyfin's plugins reach, apart from channels and live TV: the server's API, events, HTTP routes, tasks, a data folder, remote devices and the remaining provider types. It also describes DLNA, which Mavio ships as a first-party plugin built on them, and the provider types acquisition adds. The work is phase P13 (platform) and P14 (DLNA) of the [Roadmap](roadmap.md), and P16 to P18 for the acquisition providers.
 
 ---
 
@@ -145,6 +145,14 @@ A request carries the folder (library kind, library folder, path, what its conta
 A library stores, per capability (metadata, images, subtitles, lyrics, segments), which providers it uses and in which order, by plugin ID (`LibrarySpec.provider_order`). An unset list means every ready provider in plugin ID order; an empty one means none; IDs of plugins not running are skipped. Refreshes, metadata and image searches, subtitle and lyrics searches and downloads, and media segment jobs ask only the library's providers, in its order.
 
 With `download_lyrics` set, a refresh of a track without a lyric file beside it searches the library's lyrics providers and saves the first lyrics that download, as an administrator's download would.
+
+### 8.12 Acquisition Providers
+Acquisition ([Architecture §13](architecture.md#13-acquisition-libsacquire)) adds three provider types, all gathered by the server, never called by one another:
+* `DISCOVERY_PROVIDER`: `DiscoveryProviderService` lists movies and series to discover (trending, popular, upcoming, by genre, studio, network, keyword or watch provider, recommendations and similar titles), with their external IDs; `DiscoverService` marks what the server has, wants or was asked for. `scraper-tmdb` provides it.
+* `INDEXER_PROVIDER`: `IndexerProviderService` lists indexers with their capabilities, searches them, reads their RSS feeds and fetches a release's torrent file, magnet link or NZB; `ReleaseService` searches every ready indexer provider. `plugins/indexers` provides it.
+* `DOWNLOAD_CLIENT`: `DownloadClientService` adds releases to a download client, lists its downloads and removes them; `DownloadService` sends each release to the client its kind and protocol choose. `plugins/download-clients` provides it.
+
+Both network-facing providers are process plugins: indexers and download clients are at addresses the administrator configures, which a WASM manifest's `http_hosts` cannot list, and indexers need proxies and long-lived sessions.
 
 ## 9. Runtime Differences
 | | WASM | Process |

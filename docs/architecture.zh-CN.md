@@ -16,10 +16,10 @@
 * **强类型契约**：对内对外统一使用 Protobuf + Connect-RPC，未来的 Web / Expo / Desktop 客户端直接从契约生成 SDK。
 * **插件隔离**：插件不进入宿主地址空间，WASM（wazero）沙箱与独立子进程（UDS）两种运行时共享同一套契约。
 * **多数据库**：SQLite 与 PostgreSQL 均为一等公民。
-* **默认隐私**：没有遥测、播放统计或设备追踪，所有数据都留在主机上。未配置元数据提供者（如 TMDB API Key）时，服务端只使用本地 NFO 文件与图片，不发出元数据的外部请求。
+* **默认隐私**：没有遥测、播放统计或设备追踪，所有数据都留在主机上。没有元数据插件时，服务端只使用本地 NFO 文件与图片，不发出元数据的外部请求；访问资源获取所用服务的插件无需管理员提供密钥（§13.2）。
 
 ### 1.2 非目标（当前阶段）
-* 不兼容 Jellyfin 客户端生态、不提供 Jellyfin 数据迁移。Jellyfin API 兼容垫片（shim）的评估见 [Jellyfin 兼容性](jellyfin-compat.zh-CN.md)，在 P15 决定。
+* 不兼容 Jellyfin 客户端生态、不提供 Jellyfin 数据迁移。Jellyfin API 兼容垫片（shim）的评估见 [Jellyfin 兼容性](jellyfin-compat.zh-CN.md)，在 P21 决定。
 * 暂不实现任何 UI（Web / Mobile / Desktop），但目录与契约提前为其预留。
 
 ### 1.3 工程原则
@@ -96,6 +96,8 @@ mavio/
 │   ├── media/                   # [Go] 探测、关键帧、硬件加速、播放决策、转码规划、ffmpeg 进程守护
 │   ├── library/                 # [Go] 扫描器、解析器链、任务调度
 │   ├── streaming/               # [Go] HLS (CMAF) 播放列表、按需分片、分片缓存
+│   ├── release/                 # [Go] release 标题解析：编号、质量、语言、版本、发布组
+│   ├── acquire/                 # [Go] 资源获取引擎：档案、决策、搜索、队列、入库（movie、series）
 │   ├── client/                  # (后期) [TS] 基于 connect-es 的客户端封装与 Query hooks
 │   └── ui/                      # (后期) [TS] 跨端组件与设计 tokens
 │
@@ -106,6 +108,9 @@ mavio/
 │   ├── scraper-fanart/          # [Go → wasm] fanart.tv 图片
 │   ├── scraper-openlibrary/     # [Go → wasm] Open Library 图书元数据
 │   ├── subtitles-opensubtitles/ # [Go → wasm] OpenSubtitles.com 字幕下载
+│   ├── scraper-servarr/         # [Go → wasm] Servarr 的元数据服务：SkyHook、Radarr 元数据、scene 映射、XEM
+│   ├── indexers/                # [Go → 子进程] 索引器：Newznab、Torznab、Cardigann、Prowlarr 的站点
+│   ├── download-clients/        # [Go → 子进程] 下载客户端：qBittorrent、Transmission、SABnzbd、NZBGet 等
 │   ├── notifier-webhook/        # [Go → wasm] Webhook 通知
 │   └── auth-ldap/               # [Go → 子进程] LDAP 认证（需要原生 TCP 长连接）
 │
@@ -124,12 +129,14 @@ apps/server ──▶ streaming ──▶ media ──▶ core
      │             ▼            │
      ├──────▶ library ──▶ naming / metadata / subtitle / imaging ──▶ core
      │             │
+     ├──────▶ acquire ──▶ release / naming ──▶ core
      ├──────▶ store ──▶ core
      └──────▶ plugin ──▶ proto
 
 plugins/* ──▶ plugin ──▶ proto
 ```
-* `core` 不依赖任何其他库；`naming`、`subtitle` 是纯函数库。
+* `core` 不依赖任何其他库；`naming`、`subtitle`、`release` 是纯函数库。
+* `acquire` 与 `library` 一样，只通过 `core` 中的端口访问存储、扫描与插件，这些端口由 `apps/server` 实现。
 * `media` 只依赖 `core`，不感知数据库与插件。
 * 只有 `apps/server` 负责装配。依赖方向由 depguard 规则在 CI 中强制。
 
@@ -434,3 +441,50 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **服务端二进制**：`pnpm nx run server:dist` 以 `CGO_ENABLED=0` 和 `-trimpath` 将 `cmd/mavio` 交叉编译为 Linux、macOS、Windows 的 amd64 与 arm64 版本，输出到 `apps/server/dist/`；设置了 `$VERSION` 时将其写入 `internal/buildinfo`。所有二进制均为静态链接。
 * **容器镜像**（`apps/server/Dockerfile`，从仓库根目录构建）：服务端在构建机自身平台上交叉编译，因此构建 linux/amd64 与 linux/arm64 镜像时 Go 部分无需模拟。镜像在 `/usr/lib/jellyfin-ffmpeg` 内置 jellyfin-ffmpeg 便携版，即 `mise.toml` 锁定的版本，并按 GitHub 为该发布文件给出的 SHA-256 摘要校验；基础镜像为 Debian slim，附带 CA 证书与时区数据。
 * **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。DLNA 插件随服务端一起构建，并从 `/usr/lib/mavio/plugins` 播种；它在 UDP 1900 端口上的 SSDP 只有在 `--network host` 下才能到达容器。健康检查调用 `SystemService.GetHealth`。
+
+---
+
+## 13. 资源获取（libs/acquire）
+
+Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seerr、Radarr、Sonarr 与 Prowlarr 在 Jellyfin 旁共同完成的事，但在一个服务端之内：一份条目目录、一套用户、一份配置。这部分工作是[路线图](roadmap.zh-CN.md)的 P15 至 P20 阶段。
+
+### 13.1 组成
+| 部分 | 位置 | 对应 |
+| :--- | :--- | :--- |
+| 发现 | `DiscoverService`；列表来自 `DISCOVERY_PROVIDER` 插件（`scraper-tmdb`） | Seerr 的发现 |
+| 请求 | `RequestService` | Seerr 的请求 |
+| 资源获取引擎 | `libs/acquire`，含 `movie` 与 `series` 包；服务在 `apps/server` 中 | Radarr、Sonarr |
+| release 解析 | `libs/release` | Radarr 与 Sonarr 的解析器 |
+| Servarr 的元数据 | `plugins/scraper-servarr`（WASM） | Radarr 与 Sonarr 的元数据源、scene 映射 |
+| 索引器 | `plugins/indexers`（进程），`INDEXER_PROVIDER`；通过 `ReleaseService` 搜索 | Prowlarr |
+| 下载客户端 | `plugins/download-clients`（进程），`DOWNLOAD_CLIENT`；通过 `DownloadService` 调用 | Radarr 与 Sonarr 的下载客户端 |
+
+* **状态在服务端，网络在插件。** 想要的条目、档案、决策、队列、历史、入库与请求都属于服务端，与它们所涉及的条目和用户放在一起。与索引器和下载客户端打交道、并随它们变化的部分放在插件中，从插件目录升级，无需发布服务端。
+* **一个引擎。** 电影与剧集共用质量档案、custom formats、决策、队列与入库；`movie` 与 `series` 包的区别在于如何搜索、监控以及把 release 匹配到条目。
+* **插件之间不互相调用。** 服务端汇集各提供者插件给出的结果（与字幕提供者相同），并由自己调用索引器与下载客户端。
+
+### 13.2 数据源与编号
+* **Servarr 的服务**是默认数据源，无需密钥：Radarr 的元数据服务（`api.radarr.video`）提供电影与列表，Sonarr 的 SkyHook（`skyhook.sonarr.tv`）提供剧集与单集，Sonarr 的服务（`services.sonarr.tv`）提供 scene 映射与日播剧，以及 XEM（`thexem.info`）和 Prowlarr 的索引器定义（`indexers.prowlarr.com`）。对 Servarr 服务的请求携带该服务所属应用的 User-Agent，构造方式与该应用相同（`Sonarr/<version> (<os> <os version>)`）。
+* **TMDB**：`scraper-tmdb` 使用 Radarr 的 TMDB 只读访问令牌，管理员设置了自己的 API Key 时改用该密钥。
+* **磁盘上的编号遵循 TVDB**，与 Sonarr 一致：剧集的单集来自 SkyHook，按 TVDB 顺序，带绝对集数与播出日期；文件按这些编号命名（动漫还带绝对集数）；请求按此顺序列出季。剧集有类型：standard、daily 或 anime，决定如何匹配 release。
+* **TMDB 的元数据**通过剧集的显示顺序挂上：即 Jellyfin 的 `DisplayOrder` 加 TMDB 的 episode groups，以及 TMDB 单集上已有的 TVDB ID。
+* **命名不同的 release** 通过 Sonarr 的 scene 映射与 XEM 匹配；日播剧按播出日期匹配。
+
+### 13.3 流程
+1. **请求**：用户请求一部电影或若干季；由管理员审批，或在用户配额内自动通过，且只能在用户的分级限制之内。请求使电影或单集成为想要的条目，按某个质量档案受监控。
+2. **搜索**：想要的条目立即搜索一次；RSS 同步以及对想要的条目与可升级条目的搜索按各自的间隔作为作业运行。
+3. **release**：`ReleaseService` 按 ID、编号与分类向索引器查询电影或单集；`libs/release` 解析每个 release，再按 ID、标题与 scene 映射匹配到条目。
+4. **决策**：每个 release 经过 Radarr 与 Sonarr 决策引擎的各项规格（质量是否允许、体积、custom format 分数、语言、是否已在队列、是否允许升级、延迟、黑名单、发布时长、做种数），通过的再排序。
+5. **下载**：最优的 release 通过 `DownloadService` 发送给下载客户端，带上其类型对应的分类；队列通过轮询客户端跟踪它。
+6. **入库**：完成的下载在应用远程路径映射后再次与条目匹配，并用 ffprobe 校验；文件与媒体库在同一卷上时硬链接进媒体库，否则复制或移动，按媒体库的命名模板命名，期间占用该卷在 `VolumeLedger` 中的位置，并通过 `QuietGate` 为播放让路。随后扫描其所在目录，想要的条目成为有媒体的条目。
+7. **升级与失败**：更好的 release 会替换文件，直到达到档案的截止质量，被替换的文件移入回收目录；失败或不匹配的下载加入黑名单并重新搜索。
+8. **通知**：请求变为可用，并通过活动日志通知请求者。
+
+### 13.4 索引器（`plugins/indexers`）
+移植 Prowlarr 的第一方进程插件：Newznab 与 Torznab、在运行时从 `indexers.prowlarr.com` 拉取定义的 Cardigann 引擎，以及 Prowlarr 以代码实现的全部站点；能力与分类、限速与失败后的退避、索引器代理（HTTP、SOCKS、FlareSolverr）。其配置列出已配置的索引器；定义以及每个定义所需的字段由插件给出。`IndexerProviderService` 列出索引器及其能力，搜索它们（电影、剧集或文本，带 ID、季与集、分类），读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB。
+
+### 13.5 下载客户端（`plugins/download-clients`）
+包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件，如 qBittorrent、Transmission、Deluge、rTorrent、Aria2、SABnzbd、NZBGet 与监视目录。其配置列出已配置的客户端。`DownloadClientService` 添加 release（种子文件、磁力链接或 NZB，带分类、标签与做种限制），列出下载及其状态、进度与输出路径，并删除下载。远程路径映射属于服务端。
+
+### 13.6 存储
+想要的状态、质量定义与质量档案、custom formats、delay profile 与 release profile、队列、历史、黑名单与请求都存放在 `libs/store` 中，支持两种数据库，并通过 `core` 中的端口访问。

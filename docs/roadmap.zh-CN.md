@@ -10,7 +10,7 @@
 
 * **自底向上**：先实现零业务依赖的底层库，再逐层向上组装；每一层只依赖已完成的下层。
 * **完成标准**：一个阶段的库通过各自的测试即为完成，包括全部移植的测试用例（或有明确标记、写明原因的 skip），见[测试策略 §2](testing.zh-CN.md#2-从-jellyfin-移植测试用例)。
-* **服务端优先**：P7 至 P12 对照 Jellyfin 服务端（其 API 控制器与元数据提供者）补全服务端；P13 与 P14 让插件能力与 Jellyfin 对齐并加入 DLNA；客户端随后在 P15 基于完成的 API 构建；P16 在真实设备上端到端验证播放；P17 打包并发布版本。
+* **服务端优先**：P7 至 P12 对照 Jellyfin 服务端（其 API 控制器与元数据提供者）补全服务端；P13 与 P14 让插件能力与 Jellyfin 对齐并加入 DLNA；P15 至 P20 加入资源获取，即 Seerr、Radarr、Sonarr 与 Prowlarr 在 Jellyfin 旁所做的事（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）；客户端随后在 P21 基于完成的 API 构建；P22 在真实设备上端到端验证播放；P23 打包并发布版本。
 * **集成冒烟**：从 P1 起，每个阶段结束时在 `apps/server/internal/smoke` 增加一个把已完成的库串起来的集成测试。它不是 MVP，只用来尽早暴露接口漂移，降低自底向上方式"后期集成才发现问题"的风险。
 
 ---
@@ -34,9 +34,15 @@ flowchart TD
     P12["P12 媒体附加功能<br/>trickplay、章节图片、媒体片段、歌词、字体、音量标准化、离线下载"]
     P13["P13 插件平台<br/>宿主 API、事件、HTTP 路由、任务、远程设备、更多提供者类型"]
     P14["P14 DLNA<br/>plugins/dlna：媒体服务器、推送播放、设备 profile"]
-    P15["P15 客户端与生态<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim 决定"]
-    P16["P16 真实设备验收<br/>在真实电视与客户端上端到端播放"]
-    P17["P17 打包与发布<br/>libs/proto 与 libs/plugin 标签、服务端二进制与容器镜像"]
+    P15["P15 资源获取基础<br/>想要的条目、显示顺序、剧集类型、libs/release"]
+    P16["P16 资源获取数据源<br/>plugins/scraper-servarr、scraper-tmdb 的发现"]
+    P17["P17 索引器<br/>plugins/indexers、ReleaseService"]
+    P18["P18 电影资源获取<br/>libs/acquire、plugins/download-clients"]
+    P19["P19 剧集资源获取<br/>整季包、动漫、日播剧、scene 映射"]
+    P20["P20 发现与请求<br/>DiscoverService、RequestService"]
+    P21["P21 客户端与生态<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim 决定"]
+    P22["P22 真实设备验收<br/>在真实电视与客户端上端到端播放"]
+    P23["P23 打包与发布<br/>libs/proto 与 libs/plugin 标签、服务端二进制与容器镜像"]
 
     P0 --> P1
     P1 --> P2
@@ -56,10 +62,17 @@ flowchart TD
     P11 --> P13
     P12 --> P13
     P13 --> P14
-    P13 --> P15
-    P14 --> P16
+    P14 --> P15
     P15 --> P16
-    P16 --> P17
+    P15 --> P17
+    P16 --> P18
+    P17 --> P18
+    P18 --> P19
+    P19 --> P20
+    P20 --> P21
+    P14 --> P22
+    P21 --> P22
+    P22 --> P23
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -79,9 +92,15 @@ flowchart TD
 | P12 | 媒体附加功能 | ✅ 完成 |
 | P13 | 插件平台 | ✅ 完成 |
 | P14 | DLNA | ✅ 完成 |
-| P15 | 客户端与生态 | 未开始 |
-| P16 | 真实设备验收 | 未开始 |
-| P17 | 打包与发布 | 未开始 |
+| P15 | 资源获取基础 | 未开始 |
+| P16 | 资源获取数据源 | 未开始 |
+| P17 | 索引器 | 未开始 |
+| P18 | 电影资源获取 | 未开始 |
+| P19 | 剧集资源获取 | 未开始 |
+| P20 | 发现与请求 | 未开始 |
+| P21 | 客户端与生态 | 未开始 |
+| P22 | 真实设备验收 | 未开始 |
+| P23 | 打包与发布 | 未开始 |
 
 ---
 
@@ -156,7 +175,7 @@ flowchart TD
 ### P5 流媒体与 API
 **范围**：`streaming`（CMAF HLS、按需分片、seek、分片缓存）；Connect 服务（库、播放、用户、系统）。
 
-**完成标准**：HLS 移植用例通过；hls.js 与 AVFoundation 实机播放验证。Media3 在 P15 中随 Android 客户端验证。
+**完成标准**：HLS 移植用例通过；hls.js 与 AVFoundation 实机播放验证。Media3 在 P21 中随 Android 客户端验证。
 
 **进度**：
 - [x] `libs/streaming`：覆盖整个媒体源的播放列表、RFC 6381 编解码器字符串、按需生成分片并在拖动时重启、直接复制视频的分片由每个图像组一个文件拼接而成；HLS 移植用例通过
@@ -170,7 +189,7 @@ flowchart TD
 - [x] 通过开发用播放器在 Safari 的原生 HLS（即 AVFoundation）上验证播放：直接串流、转码、拖动并重启转码、同步的 HLS 字幕轨。HLS 字幕轨是按视频分片切分、不带 `X-TIMESTAMP-MAP` 的 WebVTT；若有播放器错位，则按视频的时间戳推算并加上该头
 
 ### P6 服务端装配与分发
-**范围**：`apps/server` 装配；`CGO_ENABLED=0` 交叉编译；容器镜像内置 jellyfin-ffmpeg 的便携版，即 `mise.toml` 锁定的那一份。镜像发布属于 P17。
+**范围**：`apps/server` 装配；`CGO_ENABLED=0` 交叉编译；容器镜像内置 jellyfin-ffmpeg 的便携版，即 `mise.toml` 锁定的那一份。镜像发布属于 P23。
 
 **完成标准**：端到端冒烟测试：扫描 → 刮削 → 播放决策 → HLS 播放。
 
@@ -330,7 +349,7 @@ flowchart TD
 ### P14 DLNA
 **范围**：`plugins/dlna`，第一方进程插件（[插件平台 §10](plugins.zh-CN.md#10-dlnapluginsdlna)）：媒体服务器（SSDP、ContentDirectory、ConnectionManager、带 DLNA 头的媒体）、推送播放（发现渲染器、AVTransport 与 RenderingControl）、设备 profile；为服务端的每个平台构建，打包为目录插件包并内置于容器镜像。
 
-**完成标准**：端到端测试在回环接口上用模拟的控制点与渲染器发现服务端、浏览媒体库、以 Range 请求播放文件，并驱动渲染器完成播放、暂停、跳转与停止且上报进度。在真实电视上的播放验证在 P16 进行。
+**完成标准**：端到端测试在回环接口上用模拟的控制点与渲染器发现服务端、浏览媒体库、以 Range 请求播放文件，并驱动渲染器完成播放、暂停、跳转与停止且上报进度。在真实电视上的播放验证在 P22 进行。
 
 **进度**：
 - [x] SSDP 与设备描述
@@ -340,10 +359,54 @@ flowchart TD
 - [x] 构建、目录插件包与容器镜像（插件种子目录）
 - [x] 端到端测试（`apps/server/internal/server/dlna_test.go`）
 
-### P15 客户端与生态
-**范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。具体完成标准在 P14 完成后制定。
+### P15 资源获取基础
+**范围**：服务端在能"想要"自己没有的媒体之前所需的东西（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）。
 
-### P16 真实设备验收
+- 想要的条目：元数据中已知、但还没有文件的电影与剧集，与[领域模型](domain.zh-CN.md) §4.7 的缺失条目分开；电影、剧集与季的监控状态和质量档案
+- 剧集：TVDB ID、剧集类型（standard、daily、anime）与显示顺序，即 Jellyfin 的 `DisplayOrder` 加 TMDB episode groups
+- `libs/release`：release 标题解析（标题、年份、季与集、绝对集数与日播日期、质量、来源、分辨率、编码、语言、版本、发布组），沿用 Radarr 与 Sonarr 解析规则的 .NET 语法，在 `regexp2` 上运行
+- `tools/testport` 读取 NUnit 测试用例，使 Radarr 与 Sonarr 的解析用例能像 Jellyfin 的一样移植
+
+**完成标准**：移植的解析用例通过或带原因跳过；P4 跳过的 `scraper-tmdb` 缺失剧集用例通过；剧集的单集按其显示顺序列出。
+
+### P16 资源获取数据源
+**范围**：资源获取所需的元数据，默认无需密钥。
+
+- `plugins/scraper-servarr`（WASM）：Radarr 的电影元数据与列表、Sonarr SkyHook 中按 TVDB 编号的剧集与单集、scene 映射、日播剧、XEM
+- `scraper-tmdb`：管理员未设置密钥时使用 Radarr 的 TMDB 只读访问令牌；`DISCOVERY_PROVIDER`（趋势、热门、即将上映，按类型、制片公司、电视网、关键词与观看平台，推荐与相似作品）；episode groups
+
+**完成标准**：在未配置任何密钥的情况下识别并刷新一部电影与一部剧集，剧集中想要的单集按 TVDB 编号，并通过剧集的显示顺序挂上 TMDB 的单集元数据。
+
+### P17 索引器
+**范围**：`plugins/indexers`，移植 Prowlarr 的第一方进程插件：Newznab、Torznab、Cardigann 引擎及 `indexers.prowlarr.com` 的定义、Prowlarr 以代码实现的全部站点、分类与能力、限速与退避、索引器代理（HTTP、SOCKS、FlareSolverr）。能力类型 `INDEXER_PROVIDER`；`ReleaseService` 搜索已配置的索引器，并用 `libs/release` 解析其结果。
+
+**完成标准**：移植的 Prowlarr 用例通过；通过装配好的服务端，对 Newznab、Torznab、Cardigann 定义与代码实现站点的录制响应进行搜索，并解析为 release。
+
+### P18 电影资源获取
+**范围**：`libs/acquire` 及其 `movie` 包，移植 Radarr；`plugins/download-clients`，包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件。
+
+- 质量定义与质量档案、custom formats、delay profile 与 release profile
+- 决策：Radarr 决策引擎的各项规格；排序
+- 以作业执行的 RSS 同步与搜索；被跟踪下载的队列；远程路径映射
+- 入库：完成的下载经 ffprobe 校验，按命名模板硬链接或移动进媒体库，并扫描其所在目录；升级到截止质量为止，被替换的文件移入回收目录；下载失败时加入黑名单并重新搜索
+- 历史
+
+**完成标准**：端到端测试在回环接口上模拟索引器与下载客户端：一部想要的电影被找到、发送、跟踪、入库并播放，随后被更好的 release 升级；失败的下载被加入黑名单并被替换。
+
+### P19 剧集资源获取
+**范围**：`libs/acquire/series`，移植 Sonarr：单集、整季与整剧搜索，整季包，多集文件，按绝对集数的动漫，按播出日期的日播剧，scene 映射与 XEM，新季与新集的监控。
+
+**完成标准**：P18 的端到端测试换成剧集：想要的单集以单集和整季包的形式被找到，动漫与日播剧按其编号匹配，每一集入库后即可播放。
+
+### P20 发现与请求
+**范围**：移植 Seerr。`DiscoverService` 列出发现提供者给出的内容，并标明已入库、想要或已请求；`RequestService`：电影与季的请求，由管理员审批或自动通过，按用户的配额，用户的分级限制同样作用于其可请求的内容，通知请求者；报告条目的问题。
+
+**完成标准**：端到端测试：限制为 PG 的用户通过发现找到一部电影与一部剧集，无法请求分级超出限制的作品，请求其余作品；管理员审批；作品被获取，用户收到可播放的通知。
+
+### P21 客户端与生态
+**范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。具体完成标准在 P20 完成后制定。
+
+### P22 真实设备验收
 **范围**：在客户端完成之后，于真实设备上端到端验证播放：在真实电视上验证 DLNA 媒体服务器与推送播放，并按其实际行为调整 profile。
 
 **完成标准**：真实电视通过媒体服务器浏览并播放媒体库，并能通过推送播放被驱动且上报进度。
@@ -351,7 +414,7 @@ flowchart TD
 **进度**：
 - [ ] 在真实电视上验证 DLNA
 
-### P17 打包与发布
+### P23 打包与发布
 **范围**：首批版本发布（[开发指南 §7](development.zh-CN.md#7-发布与版本)）：依次为 `libs/proto` 与 `libs/plugin` 打标签；发布服务端的版本二进制与容器镜像；发布包含 DLNA 插件的官方插件目录。
 
 **完成标准**：仓库外的插件以 `GOWORK=off`、不用 `replace` 基于打了标签的 `libs/proto` 与 `libs/plugin` 构建成功；某个版本的二进制与镜像已发布，且镜像能启动。
@@ -373,6 +436,9 @@ flowchart TD
 | SVG 栅格化 | 纯 Go 方案不完善 | P2 已决定：检查后原样下发，不做栅格化 |
 | 硬件测试覆盖 | 只有维护者自己的机器与 GitHub 托管 runner，其他厂商的编码器无法在实机上测试 | 真实转码测试在有硬件处运行、其余处跳过；其他厂商路径依赖移植的 EncodingHelper 用例 |
 | Go 模块拆分过细 | 依赖升级与 tidy 的摩擦 | 持续观察，必要时合并模块 |
-| 图形字幕 | PGS 与 VobSub 只能烧录，因而强制视频转码 | 有客户端能自行渲染 PGS 时（P15），改为以 `.sup` 交付该流 |
+| 图形字幕 | PGS 与 VobSub 只能烧录，因而强制视频转码 | 有客户端能自行渲染 PGS 时（P21），改为以 `.sup` 交付该流 |
 | fMP4 中为负的音频解码时间 | HLS 输出保留负时间戳，因此早于零点开始的音频（AAC 编码器的预填充）会以负的 `tfdt` 写出，而格式规定该字段为无符号数。hls.js 与 Safari 能正常播放，Jellyfin 对其 fMP4 客户端也写出同样的值；此外的播放器未经验证 | 若有播放器放错或丢弃音频：只把音频平移到零点，视频保持源文件的时间戳 |
-| 电视直播、录像与频道 | Jellyfin 中体量很大的部分，Mavio 既未采纳也未排除；插件平台不包含它们的提供者类型 | P15 之前决定 |
+| Servarr 的服务 | 资源获取使用 Radarr、Sonarr 与 Prowlarr 所用的服务及 Radarr 的 TMDB 令牌，自身不持有密钥；服务的运营方可能变更或撤回它们 | 请求携带该服务所属应用的 User-Agent；管理员可设置自己的 TMDB 密钥；`scraper-servarr` 随版本跟进这些服务 |
+| 剧集编号 | release 与文件按 TVDB 编号，TMDB 的元数据可能对同样的单集另行编号，动漫尤甚 | P15 与 P16 的显示顺序（TMDB episode groups）与单集 TVDB ID；P19 的 scene 映射与 XEM |
+| 索引器变动 | 站点会改变页面与 API | Cardigann 定义在运行时拉取；索引器插件从插件目录升级，无需发布服务端 |
+| 电视直播、录像与频道 | Jellyfin 中体量很大的部分，Mavio 既未采纳也未排除；插件平台不包含它们的提供者类型 | P21 之前决定 |

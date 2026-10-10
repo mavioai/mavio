@@ -36,6 +36,8 @@ libs/imaging/         图片处理（无 CGO）
 libs/media/           probe / keyframes / hwaccel / decision / planner / supervisor
 libs/library/         扫描器、解析器链、任务调度
 libs/streaming/       HLS (fMP4/CMAF)
+libs/release/         release 标题解析（P15 起，纯函数）
+libs/acquire/         资源获取引擎：档案、决策、搜索、队列、入库（P18 起）
 plugins/<name>/       插件（默认编译为 wasip1 WASM）
 tools/nx-go/          本地 Nx 插件：把每个 go.mod 推断为 Nx 项目并生成依赖图
 tools/{fixtures,testport}/  测试媒体生成、测试用例移植
@@ -76,7 +78,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
   ```
 - 新增模块：创建目录 → `go mod init github.com/mavioai/mavio/<dir>` → 把 `go` 指令改为 `1.27.0` → 加入 `go.work` 的 `use`。Nx 会自动识别，无需 `project.json`；只有需要覆盖默认目标时才添加（参考 `plugins/scraper-tmdb/project.json`）。
 - `libs/proto` 和 `libs/plugin` 会被第三方插件引用，需要独立打 tag（如 `libs/proto/v0.1.0`）；发布 `libs/plugin` 前先发布它依赖的 `libs/proto` 版本，并更新 `require`。其余模块不承诺对外 API 稳定。
-- 依赖方向由 `.golangci.yml` 中的 depguard 规则强制（架构文档 §3.2）：`core` 只依赖标准库；`naming`、`subtitle` 只依赖 `core`；`media`、`imaging`、`metadata`、`store` 不依赖 `library`、`streaming`、`plugin`；`library`、`streaming` 只通过 `core` 中的端口访问存储；`plugin` 只依赖 `proto`；任何 lib 都不依赖 `apps/*` 或 `plugins/*`。**只有 `apps/server` 负责装配。** 需要调整依赖方向时，先修改架构文档。
+- 依赖方向由 `.golangci.yml` 中的 depguard 规则强制（架构文档 §3.2）：`core` 只依赖标准库；`naming`、`subtitle`、`release` 只依赖 `core`；`media`、`imaging`、`metadata`、`store` 不依赖 `library`、`streaming`、`plugin`；`library`、`streaming`、`acquire` 只通过 `core` 中的端口访问存储；`plugin` 只依赖 `proto`；任何 lib 都不依赖 `apps/*` 或 `plugins/*`。**只有 `apps/server` 负责装配。** 需要调整依赖方向时，先修改架构文档。
 
 ### 第三方依赖准则
 - **禁止 CGO**：服务端以 `CGO_ENABLED=0` 构建。需要原生能力时，优先选择 ffmpeg 子进程或 wazero 运行的 WASM 模块。
