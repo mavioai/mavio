@@ -69,6 +69,9 @@ type Config struct {
 	// Client downloads catalogs and plugin packages; nil uses one with a
 	// five-minute timeout.
 	Client *http.Client
+	// Fetch performs the WASM plugins' outbound HTTP requests; nil uses a
+	// client with a 30-second timeout.
+	Fetch *http.Client
 	// HostAPI serves the plugins' host API requests, which it sees with the
 	// plugin's grant (auth.PluginHandler); nil serves none.
 	HostAPI http.Handler
@@ -127,7 +130,7 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	// Event delivery outlives the request that installs a plugin.
 	m.ctx, m.cancel = context.WithCancel(context.WithoutCancel(ctx))
 	m.opts = host.Options{
-		WASM:    wasm.Options{CacheDir: cfg.CacheDir, Logger: m.log},
+		WASM:    wasm.Options{CacheDir: cfg.CacheDir, FetchClient: cfg.Fetch, Logger: m.log},
 		Process: process.Options{Logger: m.log},
 		DataDir: cfg.DataDir,
 	}

@@ -59,6 +59,9 @@ type Config struct {
 	// PluginDataDir holds the plugins' data folders; empty gives plugins
 	// none.
 	PluginDataDir string
+	// PluginFetch performs the WASM plugins' outbound HTTP requests, which
+	// their manifests allowed; nil uses a client with a 30-second timeout.
+	PluginFetch *http.Client
 	// MetadataDir holds the artwork chosen for items of libraries that do
 	// not save metadata next to their media.
 	MetadataDir string
@@ -160,7 +163,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	plugs, err := plugins.Open(ctx, plugins.Config{
 		Dir: cfg.PluginDir, CacheDir: filepath.Join(cfg.CacheDir, "plugins"), Store: db, Logger: log, HostAPI: hostAPI,
-		DataDir: cfg.PluginDataDir, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
+		DataDir: cfg.PluginDataDir, Fetch: cfg.PluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
 		Catalogs: func() []string { return set.Get().PluginCatalogs },
 	})
 	if err != nil {
