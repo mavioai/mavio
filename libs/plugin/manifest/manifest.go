@@ -132,6 +132,9 @@ func Validate(m *pluginv1.Manifest) error {
 			add("event %q must be a type such as item.added, a category such as item.*, or *", e)
 		}
 	}
+	if HasCapability(m, pluginv1.Capability_CAPABILITY_RESOLVER) && m.GetRuntime() != pluginv1.Runtime_RUNTIME_WASM {
+		add("CAPABILITY_RESOLVER requires RUNTIME_WASM")
+	}
 	if HasCapability(m, pluginv1.Capability_CAPABILITY_DEVICE_CONTROLLER) && !m.GetPermissions().GetActAsUsers() {
 		add("CAPABILITY_DEVICE_CONTROLLER requires permissions.act_as_users")
 	}

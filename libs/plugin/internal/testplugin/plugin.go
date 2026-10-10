@@ -26,6 +26,9 @@
 //
 // As a metadata processor it adds the tag "processed".
 //
+// As a resolver it leaves out entries named "skip*" and claims folders
+// holding "claim.me", each other file of which is a movie named after it.
+//
 // As a lyrics provider it finds synced lyrics "<name>" of every track,
 // whose single line is the track's name.
 //
@@ -43,6 +46,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -72,6 +76,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewMetadataSaverServiceHandler(local{}))
 	guest.Handle(pluginv1connect.NewMetadataProcessorServiceHandler(processor{}))
 	guest.Handle(pluginv1connect.NewLyricsProviderServiceHandler(lyrics{}))
+	guest.Handle(pluginv1connect.NewResolverServiceHandler(resolver{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -144,6 +149,35 @@ func (lyrics) SearchLyrics(_ context.Context, req *pluginv1.SearchLyricsRequest)
 
 func (lyrics) DownloadLyrics(_ context.Context, req *pluginv1.DownloadLyricsRequest) (*pluginv1.DownloadLyricsResponse, error) {
 	return pluginv1.DownloadLyricsResponse_builder{Content: proto.String("[00:01.00]" + req.GetId() + "\n"), Synced: proto.Bool(true)}.Build(), nil
+}
+
+type resolver struct{}
+
+func (resolver) Ignore(_ context.Context, req *pluginv1.IgnoreRequest) (*pluginv1.IgnoreResponse, error) {
+	var names []string
+	for _, e := range req.GetFolder().GetEntries() {
+		if strings.HasPrefix(e.GetName(), "skip") {
+			names = append(names, e.GetName())
+		}
+	}
+	return pluginv1.IgnoreResponse_builder{Names: names}.Build(), nil
+}
+
+func (resolver) Resolve(_ context.Context, req *pluginv1.ResolveRequest) (*pluginv1.ResolveResponse, error) {
+	entries := req.GetFolder().GetEntries()
+	if !slices.ContainsFunc(entries, func(e *pluginv1.FolderEntry) bool { return e.GetName() == "claim.me" }) {
+		return &pluginv1.ResolveResponse{}, nil
+	}
+	var items []*pluginv1.ResolvedItem
+	for _, e := range entries {
+		if e.GetName() != "claim.me" && !e.GetIsDir() {
+			items = append(items, pluginv1.ResolvedItem_builder{
+				Kind: pluginv1.MediaKind_MEDIA_KIND_MOVIE.Enum(), Entry: proto.String(e.GetName()),
+				Name: proto.String(strings.TrimSuffix(e.GetName(), filepath.Ext(e.GetName()))),
+			}.Build())
+		}
+	}
+	return pluginv1.ResolveResponse_builder{Claimed: proto.Bool(true), Items: items}.Build(), nil
 }
 
 type devices struct{}

@@ -78,15 +78,20 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 	if err := os.WriteFile(dst, data, 0o755); err != nil {
 		t.Fatal(err)
 	}
+	// Only WASM plugins may resolve folders.
+	resolver := ""
+	if rt == "wasm" {
+		resolver = `,"CAPABILITY_RESOLVER"`
+	}
 	quoted := make([]string, len(hosts))
 	for i, h := range hosts {
 		quoted[i] = fmt.Sprintf("%q", h)
 	}
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
 		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER","CAPABILITY_IMAGE_PROVIDER",
-			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR","CAPABILITY_LYRICS_PROVIDER"],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
+			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR","CAPABILITY_LYRICS_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
-		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, strings.Join(quoted, ","), configSchema)
+		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, resolver, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -346,6 +351,29 @@ func TestLyrics(t *testing.T) {
 			t.Errorf("DownloadLyrics() = %v, %v", got, err)
 		}
 	})
+}
+
+func TestResolver(t *testing.T) {
+	p := open(t, "wasm")
+	folder := pluginv1.Folder_builder{
+		LibraryKind: pluginv1.LibraryKind_LIBRARY_KIND_MOVIES.Enum(), Root: proto.String("/m"), Path: proto.String("/m/x"),
+		Entries: []*pluginv1.FolderEntry{
+			pluginv1.FolderEntry_builder{Name: proto.String("claim.me")}.Build(),
+			pluginv1.FolderEntry_builder{Name: proto.String("skip.mkv")}.Build(),
+			pluginv1.FolderEntry_builder{Name: proto.String("Film.mkv")}.Build(),
+		},
+	}.Build()
+	ignored, err := p.Resolver().Ignore(t.Context(), pluginv1.IgnoreRequest_builder{Folder: folder}.Build())
+	if err != nil || !slices.Equal(ignored.GetNames(), []string{"skip.mkv"}) {
+		t.Errorf("Ignore() = %v, %v", ignored, err)
+	}
+	resolved, err := p.Resolver().Resolve(t.Context(), pluginv1.ResolveRequest_builder{Folder: folder}.Build())
+	if err != nil || !resolved.GetClaimed() || len(resolved.GetItems()) != 2 || resolved.GetItems()[1].GetEntry() != "Film.mkv" {
+		t.Errorf("Resolve() = %v, %v", resolved, err)
+	}
+	if open(t, "process").Resolver() != nil {
+		t.Error("a process plugin resolves folders")
+	}
 }
 
 func TestHTTPRoutes(t *testing.T) {

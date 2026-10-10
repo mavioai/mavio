@@ -1,0 +1,110 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "mavio/plugin/v1/metadata.proto";
+
+// ResolverService takes part in library scans: it leaves entries of
+// folders out and may claim folders, telling the host which items they
+// hold, before the built-in resolvers. It runs on every folder of a scan,
+// so only WASM plugins may implement it.
+service ResolverService {
+  // Ignore returns the entries of a folder to leave out of the scan.
+  rpc Ignore(IgnoreRequest) returns (IgnoreResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // Resolve claims a folder, or leaves it to the next resolver.
+  rpc Resolve(ResolveRequest) returns (ResolveResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+enum LibraryKind {
+  LIBRARY_KIND_UNSPECIFIED = 0;
+  LIBRARY_KIND_MOVIES = 1;
+  LIBRARY_KIND_SHOWS = 2;
+  LIBRARY_KIND_MUSIC = 3;
+  LIBRARY_KIND_MUSIC_VIDEOS = 4;
+  LIBRARY_KIND_HOME_VIDEOS = 5;
+  LIBRARY_KIND_BOOKS = 6;
+  LIBRARY_KIND_PHOTOS = 7;
+  LIBRARY_KIND_MIXED = 8;
+}
+
+// Container is what a folder resolved to, as its subfolders see it.
+enum Container {
+  CONTAINER_UNSPECIFIED = 0;
+  // A plain folder, or the library root.
+  CONTAINER_FOLDER = 1;
+  CONTAINER_SERIES = 2;
+  CONTAINER_SEASON = 3;
+  CONTAINER_MUSIC_ARTIST = 4;
+}
+
+// Folder is a folder of a library being scanned.
+message Folder {
+  LibraryKind library_kind = 1;
+  // The library folder it belongs to, and its path; absolute, with "/"
+  // separators.
+  string root = 2;
+  string path = 3;
+  // What the containing folder resolved to.
+  Container parent = 4;
+  // The number of the containing season, for episodes whose names have
+  // none; 0 when unknown.
+  int32 season_number = 5;
+  repeated FolderEntry entries = 6;
+}
+
+message FolderEntry {
+  string name = 1;
+  bool is_dir = 2;
+}
+
+message IgnoreRequest {
+  Folder folder = 1;
+}
+
+message IgnoreResponse {
+  // Names of the folder's entries to leave out.
+  repeated string names = 1;
+}
+
+message ResolveRequest {
+  Folder folder = 1;
+}
+
+// ResolvedItem is an item a folder holds.
+message ResolvedItem {
+  MediaKind kind = 1;
+  // Name of its media file among the folder's entries; empty for the
+  // folder itself.
+  string entry = 2;
+  string name = 3;
+  int32 year = 4;
+  // Season and episode numbers, or disc and track numbers.
+  int32 parent_index = 5;
+  int32 index = 6;
+  map<string, string> external_ids = 7;
+  // Further files of a stacked video, after entry.
+  repeated string parts = 8;
+}
+
+// Subfolder is a folder to scan next, with what this folder is to it.
+message Subfolder {
+  // Name among the folder's entries.
+  string name = 1;
+  Container parent = 2;
+  int32 season_number = 3;
+}
+
+message ResolveResponse {
+  // False leaves the folder to the next resolver.
+  bool claimed = 1;
+  // The folder itself, when it is an item such as a series or an album.
+  ResolvedItem folder_item = 2;
+  // Items made of the folder's files; they belong to folder_item, or to
+  // the folder's container.
+  repeated ResolvedItem items = 3;
+  repeated Subfolder subfolders = 4;
+}

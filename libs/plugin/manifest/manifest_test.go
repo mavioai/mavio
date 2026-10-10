@@ -139,6 +139,10 @@ func TestValidate(t *testing.T) {
 			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_LOCAL_METADATA))
 			m.SetLocalMetadataFiles([]string{"[a"})
 		}, "pattern"},
+		{"process resolver", func(m *pluginv1.Manifest) {
+			m.SetRuntime(pluginv1.Runtime_RUNTIME_PROCESS)
+			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_RESOLVER))
+		}, "requires RUNTIME_WASM"},
 		{"bad schema", func(m *pluginv1.Manifest) { m.SetConfigSchema(`{"type":"nope"}`) }, "config_schema"},
 	}
 	for _, tt := range tests {

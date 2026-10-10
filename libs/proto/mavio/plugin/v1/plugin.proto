@@ -70,6 +70,8 @@ enum Capability {
   CAPABILITY_METADATA_PROCESSOR = 13;
   // Implements LyricsProviderService.
   CAPABILITY_LYRICS_PROVIDER = 14;
+  // Implements ResolverService; WASM plugins only.
+  CAPABILITY_RESOLVER = 15;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin

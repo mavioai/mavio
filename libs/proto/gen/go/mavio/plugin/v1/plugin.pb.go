@@ -107,6 +107,8 @@ const (
 	Capability_CAPABILITY_METADATA_PROCESSOR Capability = 13
 	// Implements LyricsProviderService.
 	Capability_CAPABILITY_LYRICS_PROVIDER Capability = 14
+	// Implements ResolverService; WASM plugins only.
+	Capability_CAPABILITY_RESOLVER Capability = 15
 )
 
 // Enum value maps for Capability.
@@ -127,6 +129,7 @@ var (
 		12: "CAPABILITY_METADATA_SAVER",
 		13: "CAPABILITY_METADATA_PROCESSOR",
 		14: "CAPABILITY_LYRICS_PROVIDER",
+		15: "CAPABILITY_RESOLVER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":        0,
@@ -144,6 +147,7 @@ var (
 		"CAPABILITY_METADATA_SAVER":     12,
 		"CAPABILITY_METADATA_PROCESSOR": 13,
 		"CAPABILITY_LYRICS_PROVIDER":    14,
+		"CAPABILITY_RESOLVER":           15,
 	}
 )
 
@@ -1515,7 +1519,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\xde\x03\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\xf7\x03\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1533,7 +1537,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x19CAPABILITY_LOCAL_METADATA\x10\v\x12\x1d\n" +
 	"\x19CAPABILITY_METADATA_SAVER\x10\f\x12!\n" +
 	"\x1dCAPABILITY_METADATA_PROCESSOR\x10\r\x12\x1e\n" +
-	"\x1aCAPABILITY_LYRICS_PROVIDER\x10\x0e2\xda\x02\n" +
+	"\x1aCAPABILITY_LYRICS_PROVIDER\x10\x0e\x12\x17\n" +
+	"\x13CAPABILITY_RESOLVER\x10\x0f2\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +
