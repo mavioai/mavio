@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Mavio API</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.70.0"></script>
+    <script>
+      // The page may be served under a base URL; requests go where it is.
+      const base = new URL('.', location.href).href.replace(/\/$/, '')
+      Scalar.createApiReference('#app', {
+        url: 'spec.json',
+        servers: [{ url: base }],
+        authentication: { preferredSecurityScheme: 'bearer' },
+      })
+    </script>
+  </body>
+</html>

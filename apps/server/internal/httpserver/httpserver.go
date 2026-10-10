@@ -10,8 +10,10 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"connectrpc.com/grpcreflect"
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
+	"github.com/mavioai/mavio/apps/server/internal/apidocs"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
 	"github.com/mavioai/mavio/apps/server/internal/devplayer"
@@ -125,7 +127,31 @@ func Handler(opts Options) (http.Handler, error) {
 	if opts.Dev {
 		mux.Handle("GET /dev/", devplayer.Handler())
 	}
+
+	// The API describes itself to anyone: Connect reflection for tools such
+	// as buf curl and grpcurl, and the OpenAPI document and its reference.
+	reflector := grpcreflect.NewStaticReflector(services...)
+	mux.Handle(grpcreflect.NewHandlerV1(reflector))
+	mux.Handle(grpcreflect.NewHandlerV1Alpha(reflector))
+	docs, err := apidocs.Handler(opts.Version, public)
+	if err != nil {
+		return nil, err
+	}
+	mux.Handle("GET /spec.json", docs)
+	mux.Handle("GET /{$}", docs)
 	return mux, nil
+}
+
+// services are the Connect services the server serves.
+var services = []string{
+	authv1connect.AuthServiceName,
+	libraryv1connect.LibraryServiceName, libraryv1connect.ItemServiceName, libraryv1connect.CollectionServiceName,
+	libraryv1connect.MetadataServiceName, libraryv1connect.PlaylistServiceName,
+	playbackv1connect.PlaybackServiceName,
+	sessionv1connect.EventServiceName, sessionv1connect.SessionServiceName, sessionv1connect.SyncPlayServiceName,
+	systemv1connect.SystemServiceName, systemv1connect.TaskServiceName, systemv1connect.ActivityServiceName,
+	systemv1connect.BackupServiceName, systemv1connect.LocalizationServiceName,
+	userv1connect.UserServiceName, userv1connect.UserDataServiceName, userv1connect.DisplayPreferencesServiceName,
 }
 
 // Serve serves h on ln until ctx is canceled, then shuts down gracefully.

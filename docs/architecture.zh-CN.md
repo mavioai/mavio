@@ -40,6 +40,7 @@ Mavio 采用 **GPL-3.0**（`GPL-3.0-only`）。GPL-3.0 与 Apache-2.0 兼容，�
 | 服务端语言 | **Go（跟随最新稳定版，当前 1.27）** | 使用 `iter.Seq` 流水线、`log/slog`、`os.Root`（媒体路径沙箱）、`testing.B.Loop`、`testing/synctest`、go.mod `tool` 指令 |
 | 契约与 RPC | **Protobuf + buf + Connect**（`connect-go`；TS 端 `protobuf-es` v2 / `connect-es` v2） | `buf lint` + `buf breaking` 守护契约演进；`protovalidate` 做声明式校验 |
 | HTTP | 标准库 `net/http`（1.22+ 路由模式） | Connect handler 直接挂载；媒体流走普通 HTTP（Range / HLS） |
+| API 参考 | **protoc-gen-connect-openapi** + **Scalar** | 从契约生成一份 OpenAPI 3.1 文档；Connect gRPC 反射（`grpcreflect`）供 `buf curl`、grpcurl 等工具使用 |
 | ORM / 查询 | **ent + sqlc + Atlas** | 见 §5 |
 | 数据库 | **SQLite + PostgreSQL** | SQLite 驱动 `ncruces/go-sqlite3`（WASM + wazero，纯 Go）；PostgreSQL 驱动 `pgx/v5`（以 `database/sql` 方式接入） |
 | 音视频 | **jellyfin-ffmpeg**（外部进程） | 复用其硬件驱动补丁、色调映射滤镜与低功耗编码支持 |
@@ -419,6 +420,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **图片**：图片在 `/images/{id}` 提供，接受 Jellyfin 的尺寸参数（`width`、`height`、`maxWidth`、`maxHeight`、`fillWidth`、`fillHeight`、`quality`）；与媒体 URL 一样，客户端从按访问权限过滤的 API 响应中得到的 ID 是唯一的凭证。本地图片在其条目所属媒体库文件夹或元数据目录内读取；提供者的图片只下载一次，存入缓存目录。不带尺寸参数时提供原图；`imaging.Process` 生成的图片采用请求的 `format`（`jpg`、`png`、`webp`），未指定时对 `Accept` 头接受 WebP 的客户端生成 WebP，否则为 JPEG（含透明时为 PNG）。生成的图片按源内容哈希与参数缓存，对同一结果的并发请求共享一次生成。SVG 通过 `CheckSVG` 后原样提供。
 * **拼贴图**：`/images/collages/{id}` 以相同参数合成媒体库的图片（其最近添加条目的海报并排，16:9）、合集的图片（其条目的海报，2 × 2 网格，2:3）或播放列表的图片（其条目所属剧集与专辑的海报，或条目自身的海报，正方形网格），与 Jellyfin 的动态图片一样；所有者的 ID 即凭证。拼贴图按所用图片缓存，因此会随之更新；没有可用的图片时返回未找到。
 * **开发用播放器**：带 `--dev` 启动时，服务端还提供 `/dev/player`：一个单页面，可登录、列出视频并通过 `PlaybackService` 播放，使用 hls.js 或 Safari 自带的 HLS 播放器（`?engine=native|hlsjs`），可选的串流码率上限会使视频转码（`?bitrate=<每秒比特数>`），用于在客户端完成之前于真实浏览器上检查播放。`-dev-library <dir>` 把 `pnpm nx run fixtures:dev-library` 生成的示例媒体库中的 `Movies` 与 `Shows` 文件夹添加为媒体库。
+* **API 参考与反射**（`internal/apidocs`）：`/spec.json` 提供 `libs/proto/openapi` 中的 OpenAPI 文档（服务端提供的 Connect 服务，仅 JSON，以及 `openapi/base.yaml` 中的普通 HTTP 媒体路由），填入服务端版本，并把公开过程标为无需令牌。`/` 用 Scalar 渲染该文档，Scalar 以固定版本从 jsdelivr CDN 加载，请求发往打开页面时的地址（包括基础 URL）。服务端还为所有服务应答 gRPC 反射（v1 与 v1alpha）。三者都无需令牌：它们描述 API，但不授予任何权限。
 * **字幕**：以文件交付的文本字幕在 `/media/{playback}/subtitles/{index}.{format}` 提供，由 `libs/subtitle` 从媒体库中的外挂文件或内嵌流转换而来；内嵌流由 ffmpeg 在每次播放中提取一次（ASS 保留样式，其他文本转为 SRT）。对接受清单内字幕的 HLS 客户端，每条文本字幕是主播放列表的一个字幕轨：一个 WebVTT 播放列表，语言以 BCP 47 标签表示，按视频分片切分：每个分片 `subtitles/{index}-{segment}.vtt` 包含在其期间显示的字幕，与视频一样以源文件的时间轴计时，最后一个分片还包含超出媒体结尾的字幕。图形字幕（PGS、VobSub）只能烧录；服务端无法写出的外挂文件，或没有 ffmpeg 时无法提取的内嵌字幕，将被丢弃。
 
 ---

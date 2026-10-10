@@ -31,6 +31,16 @@ func newServer(t *testing.T) string {
 // playback configured by configure, if given.
 func startServer(t *testing.T, configure func(*playback.Config)) (string, *store.Store) {
 	t.Helper()
+	h, s := newHandler(t, configure)
+	srv := httptest.NewServer(h)
+	t.Cleanup(srv.Close)
+	return srv.URL, s
+}
+
+// newHandler returns the handler tree over a fresh SQLite database, with
+// playback configured by configure, if given.
+func newHandler(t *testing.T, configure func(*playback.Config)) (http.Handler, *store.Store) {
+	t.Helper()
 	s, err := store.Open(t.Context(), "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
 	if err != nil {
 		t.Fatal(err)
@@ -49,9 +59,7 @@ func startServer(t *testing.T, configure func(*playback.Config)) (string, *store
 	if err != nil {
 		t.Fatal(err)
 	}
-	srv := httptest.NewServer(h)
-	t.Cleanup(srv.Close)
-	return srv.URL, s
+	return h, s
 }
 
 // withToken sends token as the bearer token of every request, unary or

@@ -98,6 +98,7 @@ The new edge must respect the dependency direction in [Architecture §3.2](archi
 ### 4.1 Protobuf and Connect
 * Contract sources live in `libs/proto/mavio/<domain>/v1/` and use `edition = "2023"`; the package name is `mavio.<domain>.v1`.
 * `buf generate` (configured in `libs/proto/buf.gen.yaml`) runs `protoc-gen-go` with `default_api_level=API_OPAQUE` (fields accessed through getters/setters) and `protoc-gen-connect-go` with `simple` (handlers take and return messages directly). Managed mode sets `go_package` under `github.com/mavioai/mavio/libs/proto/gen/go`.
+* The same run generates `libs/proto/openapi/gen/mavio.openapi.json`, the OpenAPI document of the services the server serves, with `protoc-gen-connect-openapi` merging `openapi/base.yaml` (description, bearer authentication, the plain HTTP media routes). It runs through `go run` at a version pinned in `buf.gen.yaml`, so that its dependencies stay out of the go.mod third-party plugins import; package `openapi` embeds the document, which is committed like `gen/`.
 * After changing a `.proto`, run `pnpm nx run proto:generate` and **commit the generated `gen/` code**. Never edit files under `gen/` by hand.
 * `buf lint` uses the STANDARD rules and `buf breaking` the FILE rules. Published field numbers must never be reused; breaking changes go into a new `v2` package.
 * Read-only RPCs are annotated with `option idempotency_level = NO_SIDE_EFFECTS;`.
