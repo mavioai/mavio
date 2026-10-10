@@ -119,6 +119,8 @@ const (
 	Capability_CAPABILITY_PASSWORD_RESET Capability = 19
 	// Implements EpisodeListProviderService.
 	Capability_CAPABILITY_EPISODE_LIST_PROVIDER Capability = 20
+	// Implements DiscoveryProviderService.
+	Capability_CAPABILITY_DISCOVERY_PROVIDER Capability = 21
 )
 
 // Enum value maps for Capability.
@@ -145,6 +147,7 @@ var (
 		18: "CAPABILITY_MEDIA_SOURCE_PROVIDER",
 		19: "CAPABILITY_PASSWORD_RESET",
 		20: "CAPABILITY_EPISODE_LIST_PROVIDER",
+		21: "CAPABILITY_DISCOVERY_PROVIDER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":           0,
@@ -168,6 +171,7 @@ var (
 		"CAPABILITY_MEDIA_SOURCE_PROVIDER": 18,
 		"CAPABILITY_PASSWORD_RESET":        19,
 		"CAPABILITY_EPISODE_LIST_PROVIDER": 20,
+		"CAPABILITY_DISCOVERY_PROVIDER":    21,
 	}
 )
 
@@ -1539,7 +1543,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\xa1\x05\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\xc4\x05\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1563,7 +1567,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x1aCAPABILITY_IMAGE_GENERATOR\x10\x11\x12$\n" +
 	" CAPABILITY_MEDIA_SOURCE_PROVIDER\x10\x12\x12\x1d\n" +
 	"\x19CAPABILITY_PASSWORD_RESET\x10\x13\x12$\n" +
-	" CAPABILITY_EPISODE_LIST_PROVIDER\x10\x142\xda\x02\n" +
+	" CAPABILITY_EPISODE_LIST_PROVIDER\x10\x14\x12!\n" +
+	"\x1dCAPABILITY_DISCOVERY_PROVIDER\x10\x152\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +

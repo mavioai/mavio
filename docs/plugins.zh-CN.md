@@ -149,7 +149,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 ### 8.12 资源获取提供者
 资源获取（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）新增四种提供者类型，都由服务端汇集，彼此之间从不互相调用：
 * `EPISODE_LIST_PROVIDER`：`EpisodeListProviderService.ListEpisodes` 按查询的 `display_order` 编号列出剧集的季与单集，附带绝对集数、元数据，以及标识它们的外部 ID（`provider`）；刷新剧集时，从媒体库中第一个认识该剧集的集列表提供者取得列表，把剧集缺少的单集建为虚拟条目（[领域模型 §4.8](domain.zh-CN.md#48-虚拟条目)）。`scraper-tmdb` 提供它：按播出顺序，或按该显示顺序类型的第一个 TMDB episode group，以其分组作为季。
-* `DISCOVERY_PROVIDER`：`DiscoveryProviderService` 列出可供发现的电影与剧集（趋势、热门、即将上映，按类型、制片公司、电视网、关键词或观看平台，推荐与相似作品）及其外部 ID；`DiscoverService` 标明服务端已有、想要或已被请求的作品。由 `scraper-tmdb` 提供。
+* `DISCOVERY_PROVIDER`：`DiscoveryProviderService` 列出可供发现的电影与剧集。`ListCatalogs` 声明提供者的目录，每个目录有其种类（趋势、热门、即将上映、高分、某作品的推荐或相似作品，或别处整理的列表如榜单），针对电影、剧集或两者，并给出它接受的过滤条件与排序；`Discover` 返回目录中一页作品，附带外部 ID、日期、类型、图片与评分，可按类型、制片公司、电视网、关键词、观看平台、原始语言、上映日期、片长、评分、投票数与内容分级过滤；`ListFilterValues` 列出某个过滤条件的取值，或与查询匹配的取值。`DiscoverService` 标明服务端已有、想要或已被请求的作品。`scraper-tmdb` 按 Seerr 使用 TMDB 的方式提供它：当日趋势、通过 TMDB discover 接口的热门与即将上映作品、高分作品，以及推荐与相似作品。
 * `INDEXER_PROVIDER`：`IndexerProviderService` 列出索引器及其能力，搜索它们，读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB；`ReleaseService` 搜索每个就绪的索引器提供者。由 `plugins/indexers` 提供。
 * `DOWNLOAD_CLIENT`：`DownloadClientService` 向下载客户端添加 release、列出其下载并删除下载；`DownloadService` 按 release 的类型与协议把它发送给相应的客户端。由 `plugins/download-clients` 提供。
 

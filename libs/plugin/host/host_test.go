@@ -90,7 +90,7 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
 		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER","CAPABILITY_IMAGE_PROVIDER",
 			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR","CAPABILITY_LYRICS_PROVIDER",
-			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET","CAPABILITY_EPISODE_LIST_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
+			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET","CAPABILITY_EPISODE_LIST_PROVIDER","CAPABILITY_DISCOVERY_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
 		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, resolver, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
@@ -362,6 +362,26 @@ func TestEpisodes(t *testing.T) {
 		if err != nil || !got.GetFound() || len(got.GetEpisodes()) != 2 || got.GetEpisodes()[1].GetMetadata().GetName() != "dvd 2" ||
 			!got.GetEpisodes()[1].HasAbsoluteNumber() {
 			t.Errorf("ListEpisodes() = %v, %v", got, err)
+		}
+	})
+}
+
+func TestDiscovery(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := open(t, rt)
+		catalogs, err := p.Discovery().ListCatalogs(t.Context(), &pluginv1.ListCatalogsRequest{})
+		if err != nil || len(catalogs.GetCatalogs()) != 1 || catalogs.GetCatalogs()[0].GetKind() != pluginv1.CatalogKind_CATALOG_KIND_TRENDING {
+			t.Errorf("ListCatalogs() = %v, %v", catalogs, err)
+		}
+		page, err := p.Discovery().Discover(t.Context(), pluginv1.DiscoverRequest_builder{Catalog: proto.String("trending"), Page: proto.Int32(2)}.Build())
+		if err != nil || len(page.GetTitles()) != 1 || page.GetTitles()[0].GetName() != "trending 2" {
+			t.Errorf("Discover() = %v, %v", page, err)
+		}
+		values, err := p.Discovery().ListFilterValues(t.Context(), pluginv1.ListFilterValuesRequest_builder{
+			Filter: pluginv1.DiscoverFilter_DISCOVER_FILTER_KEYWORD.Enum(), Query: proto.String("heist"),
+		}.Build())
+		if err != nil || len(values.GetValues()) != 1 || values.GetValues()[0].GetName() != "heist" {
+			t.Errorf("ListFilterValues() = %v, %v", values, err)
 		}
 	})
 }

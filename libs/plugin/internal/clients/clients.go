@@ -34,6 +34,7 @@ type Set struct {
 	sources   pluginv1connect.MediaSourceProviderServiceClient
 	reset     pluginv1connect.PasswordResetServiceClient
 	episodes  pluginv1connect.EpisodeListProviderServiceClient
+	discovery pluginv1connect.DiscoveryProviderServiceClient
 }
 
 // New builds the clients for m over c.
@@ -95,6 +96,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_EPISODE_LIST_PROVIDER) {
 		s.episodes = pluginv1connect.NewEpisodeListProviderServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_DISCOVERY_PROVIDER) {
+		s.discovery = pluginv1connect.NewDiscoveryProviderServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -161,3 +165,6 @@ func (s Set) PasswordReset() pluginv1connect.PasswordResetServiceClient { return
 
 // Episodes returns the EpisodeListProviderService client, or nil.
 func (s Set) Episodes() pluginv1connect.EpisodeListProviderServiceClient { return s.episodes }
+
+// Discovery returns the DiscoveryProviderService client, or nil.
+func (s Set) Discovery() pluginv1connect.DiscoveryProviderServiceClient { return s.discovery }

@@ -98,6 +98,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewMediaSourceProviderServiceHandler(sources{}))
 	guest.Handle(pluginv1connect.NewPasswordResetServiceHandler(resets{}))
 	guest.Handle(pluginv1connect.NewEpisodeListProviderServiceHandler(episodes{}))
+	guest.Handle(pluginv1connect.NewDiscoveryProviderServiceHandler(discovery{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -191,6 +192,34 @@ func (episodes) ListEpisodes(_ context.Context, req *pluginv1.ListEpisodesReques
 		}.Build()))
 	}
 	return resp, nil
+}
+
+type discovery struct{}
+
+// ListCatalogs offers a single catalog of trending movies.
+func (discovery) ListCatalogs(context.Context, *pluginv1.ListCatalogsRequest) (*pluginv1.ListCatalogsResponse, error) {
+	return pluginv1.ListCatalogsResponse_builder{Catalogs: []*pluginv1.Catalog{pluginv1.Catalog_builder{
+		Id: proto.String("trending"), Name: proto.String("Trending"), Kind: pluginv1.CatalogKind_CATALOG_KIND_TRENDING.Enum(),
+		MediaKinds: []pluginv1.MediaKind{pluginv1.MediaKind_MEDIA_KIND_MOVIE},
+	}.Build()}}.Build(), nil
+}
+
+// Discover lists a movie named after the catalog and the page.
+func (discovery) Discover(_ context.Context, req *pluginv1.DiscoverRequest) (*pluginv1.DiscoverResponse, error) {
+	return pluginv1.DiscoverResponse_builder{
+		Titles: []*pluginv1.DiscoveredTitle{pluginv1.DiscoveredTitle_builder{
+			MediaKind: pluginv1.MediaKind_MEDIA_KIND_MOVIE.Enum(), Name: proto.String(fmt.Sprintf("%s %d", req.GetCatalog(), req.GetPage())),
+			ExternalIds: map[string]string{"tmdb": "1"},
+		}.Build()},
+		Page: proto.Int32(req.GetPage()), TotalPages: proto.Int32(1), TotalResults: proto.Int32(1),
+	}.Build(), nil
+}
+
+// ListFilterValues lists the query as the filter's only value.
+func (discovery) ListFilterValues(_ context.Context, req *pluginv1.ListFilterValuesRequest) (*pluginv1.ListFilterValuesResponse, error) {
+	return pluginv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{pluginv1.FilterValue_builder{
+		Id: proto.String("1"), Name: proto.String(req.GetQuery()),
+	}.Build()}}.Build(), nil
 }
 
 type resolver struct{}
