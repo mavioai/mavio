@@ -292,6 +292,26 @@ func MissingSince(v time.Time) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldMissingSince, v))
 }
 
+// Virtual applies equality check predicate on the "virtual" field. It's identical to VirtualEQ.
+func Virtual(v bool) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldVirtual, v))
+}
+
+// Monitored applies equality check predicate on the "monitored" field. It's identical to MonitoredEQ.
+func Monitored(v bool) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldMonitored, v))
+}
+
+// SeriesType applies equality check predicate on the "series_type" field. It's identical to SeriesTypeEQ.
+func SeriesType(v string) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldSeriesType, v))
+}
+
+// AbsoluteNumber applies equality check predicate on the "absolute_number" field. It's identical to AbsoluteNumberEQ.
+func AbsoluteNumber(v int) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldAbsoluteNumber, v))
+}
+
 // LibraryIDEQ applies the EQ predicate on the "library_id" field.
 func LibraryIDEQ(v core.ID) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldLibraryID, v))
@@ -2844,6 +2864,141 @@ func MissingSinceIsNil() predicate.Item {
 // MissingSinceNotNil applies the NotNil predicate on the "missing_since" field.
 func MissingSinceNotNil() predicate.Item {
 	return predicate.Item(sql.FieldNotNull(FieldMissingSince))
+}
+
+// VirtualEQ applies the EQ predicate on the "virtual" field.
+func VirtualEQ(v bool) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldVirtual, v))
+}
+
+// VirtualNEQ applies the NEQ predicate on the "virtual" field.
+func VirtualNEQ(v bool) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldVirtual, v))
+}
+
+// MonitoredEQ applies the EQ predicate on the "monitored" field.
+func MonitoredEQ(v bool) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldMonitored, v))
+}
+
+// MonitoredNEQ applies the NEQ predicate on the "monitored" field.
+func MonitoredNEQ(v bool) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldMonitored, v))
+}
+
+// SeriesTypeEQ applies the EQ predicate on the "series_type" field.
+func SeriesTypeEQ(v string) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldSeriesType, v))
+}
+
+// SeriesTypeNEQ applies the NEQ predicate on the "series_type" field.
+func SeriesTypeNEQ(v string) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldSeriesType, v))
+}
+
+// SeriesTypeIn applies the In predicate on the "series_type" field.
+func SeriesTypeIn(vs ...string) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldSeriesType, vs...))
+}
+
+// SeriesTypeNotIn applies the NotIn predicate on the "series_type" field.
+func SeriesTypeNotIn(vs ...string) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldSeriesType, vs...))
+}
+
+// SeriesTypeGT applies the GT predicate on the "series_type" field.
+func SeriesTypeGT(v string) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldSeriesType, v))
+}
+
+// SeriesTypeGTE applies the GTE predicate on the "series_type" field.
+func SeriesTypeGTE(v string) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldSeriesType, v))
+}
+
+// SeriesTypeLT applies the LT predicate on the "series_type" field.
+func SeriesTypeLT(v string) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldSeriesType, v))
+}
+
+// SeriesTypeLTE applies the LTE predicate on the "series_type" field.
+func SeriesTypeLTE(v string) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldSeriesType, v))
+}
+
+// SeriesTypeContains applies the Contains predicate on the "series_type" field.
+func SeriesTypeContains(v string) predicate.Item {
+	return predicate.Item(sql.FieldContains(FieldSeriesType, v))
+}
+
+// SeriesTypeHasPrefix applies the HasPrefix predicate on the "series_type" field.
+func SeriesTypeHasPrefix(v string) predicate.Item {
+	return predicate.Item(sql.FieldHasPrefix(FieldSeriesType, v))
+}
+
+// SeriesTypeHasSuffix applies the HasSuffix predicate on the "series_type" field.
+func SeriesTypeHasSuffix(v string) predicate.Item {
+	return predicate.Item(sql.FieldHasSuffix(FieldSeriesType, v))
+}
+
+// SeriesTypeEqualFold applies the EqualFold predicate on the "series_type" field.
+func SeriesTypeEqualFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldEqualFold(FieldSeriesType, v))
+}
+
+// SeriesTypeContainsFold applies the ContainsFold predicate on the "series_type" field.
+func SeriesTypeContainsFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldContainsFold(FieldSeriesType, v))
+}
+
+// AbsoluteNumberEQ applies the EQ predicate on the "absolute_number" field.
+func AbsoluteNumberEQ(v int) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldAbsoluteNumber, v))
+}
+
+// AbsoluteNumberNEQ applies the NEQ predicate on the "absolute_number" field.
+func AbsoluteNumberNEQ(v int) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldAbsoluteNumber, v))
+}
+
+// AbsoluteNumberIn applies the In predicate on the "absolute_number" field.
+func AbsoluteNumberIn(vs ...int) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldAbsoluteNumber, vs...))
+}
+
+// AbsoluteNumberNotIn applies the NotIn predicate on the "absolute_number" field.
+func AbsoluteNumberNotIn(vs ...int) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldAbsoluteNumber, vs...))
+}
+
+// AbsoluteNumberGT applies the GT predicate on the "absolute_number" field.
+func AbsoluteNumberGT(v int) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldAbsoluteNumber, v))
+}
+
+// AbsoluteNumberGTE applies the GTE predicate on the "absolute_number" field.
+func AbsoluteNumberGTE(v int) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldAbsoluteNumber, v))
+}
+
+// AbsoluteNumberLT applies the LT predicate on the "absolute_number" field.
+func AbsoluteNumberLT(v int) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldAbsoluteNumber, v))
+}
+
+// AbsoluteNumberLTE applies the LTE predicate on the "absolute_number" field.
+func AbsoluteNumberLTE(v int) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldAbsoluteNumber, v))
+}
+
+// AbsoluteNumberIsNil applies the IsNil predicate on the "absolute_number" field.
+func AbsoluteNumberIsNil() predicate.Item {
+	return predicate.Item(sql.FieldIsNull(FieldAbsoluteNumber))
+}
+
+// AbsoluteNumberNotNil applies the NotNil predicate on the "absolute_number" field.
+func AbsoluteNumberNotNil() predicate.Item {
+	return predicate.Item(sql.FieldNotNull(FieldAbsoluteNumber))
 }
 
 // HasLibrary applies the HasEdge predicate on the "library" edge.

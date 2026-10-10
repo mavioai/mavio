@@ -55,7 +55,7 @@ erDiagram
 
 ## 3. Enumerations
 
-All enumerations are string types with stable lowercase values, used unchanged in the database and in JSON. Each has a list of all values and a `Valid()` method.
+All enumerations are string types with stable lowercase values (`DisplayOrder` keeps Jellyfin's camel case), used unchanged in the database and in JSON. Each has a list of all values and a `Valid()` method.
 
 | Type | Values |
 | :--- | :--- |
@@ -69,6 +69,8 @@ All enumerations are string types with stable lowercase values, used unchanged i
 | `ImageKind` | `primary`, `backdrop`, `logo`, `thumb`, `banner`, `art`, `disc`, `screenshot` |
 | `CreditKind` | `actor`, `guest_star`, `director`, `writer`, `producer`, `creator`, `composer`, `conductor`, `lyricist`, `artist`, `author`, `narrator`, `other` |
 | `SeriesStatus` | `continuing`, `ended`, `unreleased` |
+| `SeriesType` | `""` (standard: by season and episode), `daily` (by air date), `anime` (by absolute number), as Sonarr's series types |
+| `DisplayOrder` | `""` (aired), `originalAirDate`, `absolute`, `dvd`, `digital`, `storyArc`, `production`, `tv`: Jellyfin's values, each but the aired order a type of TMDB's episode groups; `ParseDisplayOrder` reads them case-insensitively, and Kodi's `aired` |
 | `Video3DFormat` | `half_sbs`, `full_sbs`, `half_tab`, `full_tab`, `mvc` |
 | `MetadataField` | `cast`, `genres`, `production_locations`, `studios`, `tags`, `name`, `overview`, `runtime`, `official_rating` |
 | `SubtitleMode` | `""` (follow stream flags), `always`, `foreign`, `forced`, `none`, `smart` |
@@ -85,25 +87,27 @@ All enumerations are string types with stable lowercase values, used unchanged i
 * `ScanInterval` is the period of scheduled reconciliation scans (zero disables them); `PreferredLanguage` (ISO 639-1) and `MetadataCountry` (ISO 3166-1 alpha-2) steer metadata providers.
 * `SaveLocalMetadata` writes each item's NFO file and the artwork chosen or downloaded for it next to its media, where scans read them back; `AutoCollections` puts movies into collections named after the providers' collections (movie sets), found by their `tmdb_collection` ID, else by name, and created when first needed.
 * `ExtractTrickplay` and `ExtractChapterImages` make thumbnail sheets of videos and an image of each chapter; `AnalyzeLoudness` measures the loudness of tracks.
-* `Providers` (`ProviderOrder`) names, per capability (metadata, images, subtitles, lyrics, segments), the providers the library uses by plugin ID, in order: a nil list uses every provider in its default order, an empty one none; a list naming a provider twice or an empty ID is `ErrInvalid`. `DownloadLyrics` has refreshes download lyrics for tracks without a lyric file from the library's lyrics providers.
+* `Providers` (`ProviderOrder`) names, per capability (metadata, images, subtitles, lyrics, segments, episode listers), the providers the library uses by plugin ID, in order: a nil list uses every provider in its default order, an empty one none; a list naming a provider twice or an empty ID is `ErrInvalid`. `DownloadLyrics` has refreshes download lyrics for tracks without a lyric file from the library's lyrics providers.
+* `VirtualEpisodes` chooses the episodes refreshes add to series as virtual items (§4.8): `Missing` those that have aired, `Unaired` those airing today or later, `Specials` those of season 0 too; `GraceDays` (not negative) keeps virtual episodes that many days after they air when `Missing` is off, for their files to arrive.
 
 ### 4.2 Item
 There is a single `Item` type for every kind; `Kind` selects which fields are meaningful. This maps directly onto one items table and avoids a type hierarchy.
 
 | Field group | Fields |
 | :--- | :--- |
-| Identity and hierarchy | `ID`, `LibraryID`, `ParentID`, `Kind`, `Path`, `UserID` (the user a playlist belongs to) |
+| Identity and hierarchy | `ID`, `LibraryID`, `ParentID`, `Kind`, `Path`, `UserID` (the user a playlist belongs to), `Virtual` (§4.8) |
 | Titles and text | `Name`, `SortName`, `OriginalTitle`, `Overview`, `Tagline` |
-| Numbering | `IndexNumber`, `ParentIndexNumber`, `IndexNumberEnd` |
+| Numbering | `IndexNumber`, `ParentIndexNumber`, `IndexNumberEnd`, `AbsoluteNumber` (an episode's number across seasons, as anime releases number it) |
 | Dates and ratings | `ProductionYear`, `PremiereDate`, `EndDate`, `Runtime`, `OfficialRating`, `CustomRating`, `ParentalRating`, `InheritedRating`, `CommunityRating` (0–10), `CriticRating` (0–100) |
 | Classification | `Genres`, `Tags`, `Studios`, `ExternalIDs` (by `Provider`), `ProductionLocations` (countries), `RemoteTrailers` (URLs) |
 | Movie and video | `CollectionName` (movie set), `AspectRatio`, `Video3DFormat` |
 | Music | `Artists`, `AlbumArtists`, `Album` |
-| Series | `SeriesStatus`, `AirDays`, `AirTime`, `DisplayOrder` |
+| Series | `SeriesStatus`, `AirDays`, `AirTime`, `DisplayOrder`, `SeriesType` |
 | Episode | `AirsBeforeSeasonNumber`, `AirsAfterSeasonNumber`, `AirsBeforeEpisodeNumber` (where a special airs) |
 | Extras | `Extra` (`ExtraKind`), `OwnerID` |
 | Metadata control | `MetadataLanguage`, `MetadataCountry` (override the library's), `Locked`, `LockedFields` (`MetadataField`) |
 | Audio | `Loudness`, the integrated loudness of a track, or of an album's tracks together weighted by duration, in LUFS (EBU R128); `NormalizationGain` is the gain to −18 LUFS |
+| Acquisition | `Monitored`: a movie, series, season or episode is wanted, its file to be acquired when missing and upgraded |
 | Bookkeeping | `DateAdded`, `FileModified`, `MetadataRefreshedAt`, `ScanGeneration` (the scan that last saw the item), `MissingSince` (see §4.7) |
 
 The model follows Jellyfin's and grows with the roadmap: fields are added when a phase needs them. `SortName` is the user's sort name (Jellyfin's `ForcedSortName`); the computed sort form is a storage key. An episode's series and season are its ancestors, not copied names. A locked item, or a locked field group, is not changed by metadata providers; the item's own NFO file, which records the locks, still applies. Administrators' edits set fields directly, locked or not.
@@ -130,7 +134,8 @@ Trailers, featurettes, theme songs and other extras are ordinary items with `Ext
 * `ID`, `LibraryID`, a valid `Kind` and a non-empty `Name` are required; an item cannot be its own parent.
 * An item with `Extra` set must use a valid `ExtraKind` and have an `OwnerID`.
 * `CommunityRating` is within 0–10, `CriticRating` within 0–100, and `ParentalRating` is not negative.
-* `Video3DFormat` and `LockedFields` use known values; `AirDays` are weekdays.
+* `Video3DFormat`, `DisplayOrder`, `SeriesType` and `LockedFields` use known values; `AirDays` are weekdays.
+* Only movies, seasons and episodes can be `Virtual`, and a virtual item has no `Path` and is not an extra.
 
 ### 4.6 Ratings
 `OfficialRating` is the content rating as published (e.g. "PG-13"); `CustomRating`, set by the user, takes precedence over it; `ParentalRating` is the score of the rating (the custom one, else the official one) in the rating system of the item's metadata country (else its library's, else the US): the minimum age it stands for, from zero for content for all ages, 1000 and above for adult content, and nil for unrated content and ratings no rating system knows. Metadata refreshes compute it with `metadata.RatingScore`, Jellyfin's lookup over its rating systems: the country's system first, then the US system and the others; "Rated" and country prefixes ("DE:", "IT-") removed; plain ages ("16", "18+", "-12") taken as they are; lists separated by "/" taken by their first entry that resolves. Jellyfin's sub-scores (e.g. "TV-PG" versus "TV-PG-V") are not kept. `InheritedRating` is the score rating filters compare: the item's `ParentalRating`, or for an unrated item its nearest rated ancestor's, so the unrated episodes of a series rated above a user's limit are hidden as the series is, as in Jellyfin. The store derives it on every write, also for the descendants of a written item; values passed to `Upsert` are ignored. Rating filters (`ItemQuery.MaxRating`, `UserPolicy.MaxParentalRating`) compare these scores.
@@ -139,6 +144,14 @@ Trailers, featurettes, theme songs and other extras are ordinary items with `Ext
 
 ### 4.7 Missing Items
 Every library scan has a generation, one more than the last. A scan stamps the items it sees with its generation; items with a path that a complete scan did not see are marked missing (`MissingSince`) rather than deleted, so a temporarily unavailable mount point loses nothing. Folders a scan could not read keep their items as they were: present items stay present, missing ones missing. Missing items are hidden from queries unless `ItemQuery.IncludeMissing` is set, come back when their file reappears, and are purged after a grace period.
+
+### 4.8 Virtual Items
+A virtual item is a movie, season or episode known from metadata whose file the library does not have, as Jellyfin's virtual items; unlike a missing item (§4.7), the library never had it. Virtual items are hidden from queries unless `ItemQuery.IncludeVirtual` or `OnlyVirtual` is set.
+
+* Refreshing a series asks the library's episode listers (`ProviderOrder.Episodes`) in order; the first that knows the series lists its seasons and episodes, numbered in the series' `DisplayOrder`. As Jellyfin's TMDB missing episode provider, the refresh then creates a virtual episode for each listed episode that no episode of the series holds and the library's `VirtualEpisodes` wants, in its season, creating a virtual season when the series has no season of that number; it updates the virtual episodes it made before, moves them into the season of their number, and deletes them once an episode file holds them, they age out of `GraceDays`, or they are no longer wanted. Virtual seasons left empty are deleted.
+* A virtual item belongs to the lister whose provider has an external ID on it; virtual items of other listers are left alone.
+* A monitored series lists every episode, aired or not, and keeps them; its specials follow `Specials`.
+* A scan that finds the file of a virtual season or episode, by its numbers, turns that item into a physical one, keeping its ID, metadata and user data; a multi-episode file deletes the other virtual episodes it holds.
 
 ## 5. Media Sources, Streams and Chapters
 
@@ -228,8 +241,8 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 ### 9.1 Item Queries
 `ItemQuery` filters with zero values meaning "no filter":
 
-* Scope: `LibraryIDs` (callers apply the user's library policy here), `ParentID` with optional `Recursive` (all descendants), `MemberOf` (the items linked into a collection or playlist, each once), or `TopLevel` (items without a parent), `Kinds`, `IncludeExtras`, `IncludeMissing`.
-* Content: `Search` (see §9.2); `Genres`, `Tags`, `Studios` (match any, compared in clean form, see §9.2); `PersonID`; `YearFrom`–`YearTo`; `MaxRating`, compared with `InheritedRating`, nil meaning unrestricted (items without a rating are included unless `SkipUnrated`).
+* Scope: `LibraryIDs` (callers apply the user's library policy here), `ParentID` with optional `Recursive` (all descendants), `MemberOf` (the items linked into a collection or playlist, each once), or `TopLevel` (items without a parent), `Kinds`, `IncludeExtras`, `IncludeMissing`, `IncludeVirtual` or `OnlyVirtual` (§4.8).
+* Content: `Search` (see §9.2); `Monitored` (nil meaning either); `IndexNumber` and `ParentIndexNumber` (e.g. an episode of a season); `Genres`, `Tags`, `Studios` (match any, compared in clean form, see §9.2); `PersonID`; `YearFrom`–`YearTo`; `MaxRating`, compared with `InheritedRating`, nil meaning unrestricted (items without a rating are included unless `SkipUnrated`).
 * Names sort by sort name the way Jellyfin sorts them: case- and accent-insensitive, leading, inner and trailing articles ("the", "a", "an") ignored, the punctuation `,&-{}'` removed and `.+%` treated as spaces, numbers in numeric order ("Rocky 2" before "Rocky 10"), and non-Latin text transliterated (Chinese sorts by pinyin). Undated items sort last by premiere date, and items never played sort last by last-played time.
 * Per user (require `UserID`): `Played`, `Favorite`, `Resumable`, and the `last_played` / `play_count` sorts. With a `UserID`, other users' playlists are left out.
 * `list_order` sorts by position in the `MemberOf` collection or playlist, an item listed twice by its first entry.

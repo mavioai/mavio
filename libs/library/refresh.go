@@ -34,6 +34,9 @@ type Lookup struct {
 	// Language (ISO 639-1) and Country (ISO 3166-1 alpha-2) are the
 	// library's or the item's preferences.
 	Language, Country string
+	// DisplayOrder is the series' order, which numbers its seasons and
+	// episodes.
+	DisplayOrder core.DisplayOrder
 }
 
 // Provider fetches metadata from an external source, such as a metadata
@@ -77,6 +80,9 @@ type Refresher struct {
 	// Savers gives the metadata savers, which write metadata beside the
 	// media in libraries saving local metadata; nil means none.
 	Savers func() []Saver
+	// Episodes gives the episode listers, which list the episodes series
+	// lack as virtual episodes; nil means none.
+	Episodes func() []EpisodeLister
 	// Lyrics downloads lyrics for tracks without any, in libraries that
 	// download lyrics; nil downloads none.
 	Lyrics *Lyrics
@@ -290,6 +296,12 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 			r.logger().WarnContext(ctx, "download lyrics", "item", it.ID, "err", err)
 		}
 	}
+	if it.Kind == core.KindSeries {
+		lookup.ExternalIDs, lookup.DisplayOrder = it.ExternalIDs, it.DisplayOrder
+		if err := r.listEpisodes(ctx, lib, it, lookup); err != nil {
+			r.logger().WarnContext(ctx, "listing episodes failed", "series", it.ID, "err", err)
+		}
+	}
 	return it, r.changed(ctx, lib, it)
 }
 
@@ -390,6 +402,9 @@ func (r *Refresher) lookup(ctx context.Context, lib core.Library, it core.Item) 
 		l.Country = it.MetadataCountry
 	}
 	switch it.Kind {
+	case core.KindSeries:
+		l.DisplayOrder = it.DisplayOrder
+		return l, nil
 	case core.KindSeason:
 		l.SeasonNumber = it.IndexNumber
 	case core.KindEpisode:
@@ -407,7 +422,7 @@ func (r *Refresher) lookup(ctx context.Context, lib core.Library, it core.Item) 
 			return l, err
 		}
 		if p.Kind == core.KindSeries {
-			l.SeriesExternalIDs = p.ExternalIDs
+			l.SeriesExternalIDs, l.DisplayOrder = p.ExternalIDs, p.DisplayOrder
 			break
 		}
 		id = p.ParentID
@@ -454,7 +469,12 @@ func applyMetadata(dst *core.Item, src core.Item, local bool) {
 	str(&dst.Album, src.Album, "")
 	str(&dst.CollectionName, src.CollectionName, "")
 	str(&dst.AirTime, src.AirTime, "")
-	str(&dst.DisplayOrder, src.DisplayOrder, "")
+	if src.DisplayOrder != core.OrderAired {
+		dst.DisplayOrder = src.DisplayOrder
+	}
+	if src.SeriesType != core.SeriesStandard {
+		dst.SeriesType = src.SeriesType
+	}
 	list(&dst.Genres, src.Genres, core.FieldGenres)
 	list(&dst.Tags, src.Tags, core.FieldTags)
 	list(&dst.Studios, src.Studios, core.FieldStudios)

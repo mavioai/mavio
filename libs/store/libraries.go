@@ -61,6 +61,7 @@ func (r libraries) Create(ctx context.Context, lib *core.Library) error {
 			SetAnalyzeLoudness(lib.AnalyzeLoudness).
 			SetDownloadLyrics(lib.DownloadLyrics).
 			SetProviderOrder(lib.Providers).
+			SetVirtualEpisodes(lib.VirtualEpisodes).
 			SetCreatedAt(now).
 			SetUpdatedAt(now).
 			Save(ctx)
@@ -94,6 +95,7 @@ func (r libraries) Update(ctx context.Context, lib *core.Library) error {
 			SetAnalyzeLoudness(lib.AnalyzeLoudness).
 			SetDownloadLyrics(lib.DownloadLyrics).
 			SetProviderOrder(lib.Providers).
+			SetVirtualEpisodes(lib.VirtualEpisodes).
 			SetUpdatedAt(time.Now()).
 			Save(ctx)
 		if err != nil {
@@ -158,6 +160,7 @@ func toLibrary(l *ent.Library) core.Library {
 		ExtractChapterImages: l.ExtractChapterImages,
 		AnalyzeLoudness:      l.AnalyzeLoudness,
 		DownloadLyrics:       l.DownloadLyrics,
+		VirtualEpisodes:      l.VirtualEpisodes,
 		Providers:            l.ProviderOrder,
 		CreatedAt:            l.CreatedAt.UTC(),
 		UpdatedAt:            l.UpdatedAt.UTC(),

@@ -294,6 +294,10 @@ var (
 		{Name: "metadata_refreshed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "scan_generation", Type: field.TypeInt64, Default: 0},
 		{Name: "missing_since", Type: field.TypeTime, Nullable: true},
+		{Name: "virtual", Type: field.TypeBool, Default: false},
+		{Name: "monitored", Type: field.TypeBool, Default: false},
+		{Name: "series_type", Type: field.TypeString, Default: ""},
+		{Name: "absolute_number", Type: field.TypeInt, Nullable: true},
 		{Name: "parent_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "owner_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "library_id", Type: field.TypeUUID},
@@ -307,25 +311,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "items_items_children",
-				Columns:    []*schema.Column{ItemsColumns[49]},
+				Columns:    []*schema.Column{ItemsColumns[53]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_items_extras",
-				Columns:    []*schema.Column{ItemsColumns[50]},
+				Columns:    []*schema.Column{ItemsColumns[54]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_libraries_items",
-				Columns:    []*schema.Column{ItemsColumns[51]},
+				Columns:    []*schema.Column{ItemsColumns[55]},
 				RefColumns: []*schema.Column{LibrariesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_users_playlists",
-				Columns:    []*schema.Column{ItemsColumns[52]},
+				Columns:    []*schema.Column{ItemsColumns[56]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -334,7 +338,7 @@ var (
 			{
 				Name:    "item_library_id_path",
 				Unique:  true,
-				Columns: []*schema.Column{ItemsColumns[51], ItemsColumns[10]},
+				Columns: []*schema.Column{ItemsColumns[55], ItemsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "path <> ''",
 				},
@@ -342,17 +346,17 @@ var (
 			{
 				Name:    "item_parent_id_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[49], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[53], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_library_id_kind_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[51], ItemsColumns[1], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[55], ItemsColumns[1], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_owner_id",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[50]},
+				Columns: []*schema.Column{ItemsColumns[54]},
 			},
 			{
 				Name:    "item_date_added",
@@ -362,7 +366,7 @@ var (
 			{
 				Name:    "item_library_id_scan_generation",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[51], ItemsColumns[47]},
+				Columns: []*schema.Column{ItemsColumns[55], ItemsColumns[47]},
 			},
 		},
 	}
@@ -495,6 +499,7 @@ var (
 		{Name: "analyze_loudness", Type: field.TypeBool, Default: false},
 		{Name: "download_lyrics", Type: field.TypeBool, Default: false},
 		{Name: "provider_order", Type: field.TypeJSON, Nullable: true},
+		{Name: "virtual_episodes", Type: field.TypeJSON, Nullable: true},
 		{Name: "scan_generation", Type: field.TypeInt64, Default: 0},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},

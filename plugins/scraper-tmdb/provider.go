@@ -328,6 +328,19 @@ func (s session) seasonMetadata(ctx context.Context, l *pluginv1.Lookup) (*plugi
 	if err != nil || seriesID == 0 {
 		return nil, err
 	}
+	// In a display order other than the aired one, a season is a season
+	// of the order's episode group, known only by its name.
+	g, err := s.group(ctx, seriesID, l.GetDisplayOrder(), r.language)
+	if err != nil {
+		return nil, err
+	}
+	if g != nil {
+		for _, gs := range g.Groups {
+			if gs.Order == int(l.GetSeasonNumber()) {
+				return pluginv1.Metadata_builder{Name: proto.String(gs.Name)}.Build(), nil
+			}
+		}
+	}
 	t, err := s.season(ctx, seriesID, int(l.GetSeasonNumber()), r.language, r.country)
 	if err != nil {
 		return nil, err
@@ -352,7 +365,12 @@ func (s session) episodeMetadata(ctx context.Context, l *pluginv1.Lookup) (*plug
 	if err != nil || seriesID == 0 {
 		return nil, err
 	}
-	e, err := s.episode(ctx, seriesID, int(l.GetSeasonNumber()), int(l.GetEpisodeNumber()), r.language, r.country)
+	g, err := s.group(ctx, seriesID, l.GetDisplayOrder(), r.language)
+	if err != nil {
+		return nil, err
+	}
+	season, episode := g.airedNumbers(int(l.GetSeasonNumber()), int(l.GetEpisodeNumber()))
+	e, err := s.episode(ctx, seriesID, season, episode, r.language, r.country)
 	if err != nil {
 		return nil, err
 	}

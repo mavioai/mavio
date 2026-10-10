@@ -4,7 +4,7 @@
 
 > 相关文档：[系统架构](architecture.zh-CN.md) · [领域模型](domain.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
-> [架构 §7](architecture.zh-CN.md#7-插件系统libsplugin) 描述两种插件运行时，以及服务端如何调用插件。本文档描述插件如何获得 Jellyfin 插件所能获得的能力（频道与直播电视除外）：服务端 API、事件、HTTP 路由、任务、数据目录、远程设备以及其余提供者类型。本文档还描述 DLNA：Mavio 把它作为基于这些能力构建的第一方插件发布；以及资源获取新增的提供者类型。相应工作是[路线图](roadmap.zh-CN.md)的 P13（平台）与 P14（DLNA）阶段，资源获取提供者在 P16 至 P18。
+> [架构 §7](architecture.zh-CN.md#7-插件系统libsplugin) 描述两种插件运行时，以及服务端如何调用插件。本文档描述插件如何获得 Jellyfin 插件所能获得的能力（频道与直播电视除外）：服务端 API、事件、HTTP 路由、任务、数据目录、远程设备以及其余提供者类型。本文档还描述 DLNA：Mavio 把它作为基于这些能力构建的第一方插件发布；以及资源获取新增的提供者类型。相应工作是[路线图](roadmap.zh-CN.md)的 P13（平台）与 P14（DLNA）阶段，资源获取提供者在 P15 至 P18。
 
 ---
 
@@ -142,12 +142,13 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 `AuthService.ForgotPassword` 为使用密码登录的用户生成一个八位一次性 PIN，连同用户 ID、用户名与过期时间交给服务端设置中选定插件（`password_reset_plugin`）的 `PasswordResetService.StartReset`，由插件以自己的方式（邮件、聊天）投递。无论用户是否存在，它的应答都相同，投递在后台进行。服务端只在内存中保存 PIN 的哈希 30 分钟；新的 PIN 替换该用户之前的 PIN，输错五次即作废。`AuthService.ResetPassword` 凭 PIN 设置新密码，并结束该用户的所有会话。未选定插件时，`ForgotPassword` 以 `FAILED_PRECONDITION` 失败。
 
 ### 8.11 按媒体库的提供者顺序
-媒体库按能力（元数据、图片、字幕、歌词、片段）以插件 ID 保存使用哪些提供者以及顺序（`LibrarySpec.provider_order`）。未设置的列表表示按插件 ID 顺序使用所有就绪的提供者；空列表表示不使用任何提供者；未运行插件的 ID 被跳过。刷新、元数据与图片搜索、字幕与歌词的搜索和下载，以及媒体片段作业，都只按媒体库的顺序询问它的提供者。
+媒体库按能力（元数据、图片、字幕、歌词、片段、集列表）以插件 ID 保存使用哪些提供者以及顺序（`LibrarySpec.provider_order`）。未设置的列表表示按插件 ID 顺序使用所有就绪的提供者；空列表表示不使用任何提供者；未运行插件的 ID 被跳过。刷新、元数据与图片搜索、字幕与歌词的搜索和下载，以及媒体片段作业，都只按媒体库的顺序询问它的提供者。
 
 设置 `download_lyrics` 后，刷新一个旁边没有歌词文件的音轨时，会搜索媒体库的歌词提供者，并保存第一个能下载的歌词，与管理员手动下载相同。
 
 ### 8.12 资源获取提供者
-资源获取（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）新增三种提供者类型，都由服务端汇集，彼此之间从不互相调用：
+资源获取（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）新增四种提供者类型，都由服务端汇集，彼此之间从不互相调用：
+* `EPISODE_LIST_PROVIDER`：`EpisodeListProviderService.ListEpisodes` 按查询的 `display_order` 编号列出剧集的季与单集，附带绝对集数、元数据，以及标识它们的外部 ID（`provider`）；刷新剧集时，从媒体库中第一个认识该剧集的集列表提供者取得列表，把剧集缺少的单集建为虚拟条目（[领域模型 §4.8](domain.zh-CN.md#48-虚拟条目)）。`scraper-tmdb` 提供它：按播出顺序，或按该显示顺序类型的第一个 TMDB episode group，以其分组作为季。
 * `DISCOVERY_PROVIDER`：`DiscoveryProviderService` 列出可供发现的电影与剧集（趋势、热门、即将上映，按类型、制片公司、电视网、关键词或观看平台，推荐与相似作品）及其外部 ID；`DiscoverService` 标明服务端已有、想要或已被请求的作品。由 `scraper-tmdb` 提供。
 * `INDEXER_PROVIDER`：`IndexerProviderService` 列出索引器及其能力，搜索它们，读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB；`ReleaseService` 搜索每个就绪的索引器提供者。由 `plugins/indexers` 提供。
 * `DOWNLOAD_CLIENT`：`DownloadClientService` 向下载客户端添加 release、列出其下载并删除下载；`DownloadService` 按 release 的类型与协议把它发送给相应的客户端。由 `plugins/download-clients` 提供。

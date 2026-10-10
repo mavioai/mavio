@@ -42,6 +42,8 @@ var (
 	metadataFieldsFromProto = reverse(metadataFields)
 	imageKindsFromProto     = reverse(imageKinds)
 	seriesStatusesFromProto = reverse(seriesStatuses)
+	seriesTypesFromProto    = reverse(seriesTypes)
+	displayOrdersFromProto  = reverse(displayOrders)
 )
 
 // MetadataService implements mavio.library.v1.MetadataService for
@@ -201,6 +203,16 @@ var itemSetters = map[string]func(*core.Item, *libraryv1.ItemMetadata){
 	},
 	"series_status": func(it *core.Item, md *libraryv1.ItemMetadata) {
 		it.SeriesStatus = seriesStatusesFromProto[md.GetSeriesStatus()]
+	},
+	"monitored": func(it *core.Item, md *libraryv1.ItemMetadata) { it.Monitored = md.GetMonitored() },
+	"series_type": func(it *core.Item, md *libraryv1.ItemMetadata) {
+		it.SeriesType = seriesTypesFromProto[md.GetSeriesType()]
+	},
+	"display_order": func(it *core.Item, md *libraryv1.ItemMetadata) {
+		it.DisplayOrder = displayOrdersFromProto[md.GetDisplayOrder()]
+	},
+	"absolute_number": func(it *core.Item, md *libraryv1.ItemMetadata) {
+		it.AbsoluteNumber = intOf(md.HasAbsoluteNumber(), md.GetAbsoluteNumber())
 	},
 	"artists":       func(it *core.Item, md *libraryv1.ItemMetadata) { it.Artists = values(md.GetArtists()) },
 	"album_artists": func(it *core.Item, md *libraryv1.ItemMetadata) { it.AlbumArtists = values(md.GetAlbumArtists()) },

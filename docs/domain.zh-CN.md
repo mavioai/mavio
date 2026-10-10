@@ -55,7 +55,7 @@ erDiagram
 
 ## 3. 枚举
 
-所有枚举都是字符串类型，取值为稳定的小写字符串，在数据库和 JSON 中原样使用。每个枚举都提供全部取值的列表和 `Valid()` 方法。
+所有枚举都是字符串类型，取值为稳定的小写字符串（`DisplayOrder` 保留 Jellyfin 的驼峰写法），在数据库和 JSON 中原样使用。每个枚举都提供全部取值的列表和 `Valid()` 方法。
 
 | 类型 | 取值 |
 | :--- | :--- |
@@ -69,6 +69,8 @@ erDiagram
 | `ImageKind` | `primary`、`backdrop`、`logo`、`thumb`、`banner`、`art`、`disc`、`screenshot` |
 | `CreditKind` | `actor`、`guest_star`、`director`、`writer`、`producer`、`creator`、`composer`、`conductor`、`lyricist`、`artist`、`author`、`narrator`、`other` |
 | `SeriesStatus` | `continuing`、`ended`、`unreleased` |
+| `SeriesType` | `""`（标准：按季号和集号）、`daily`（按播出日期）、`anime`（按绝对集号），即 Sonarr 的剧集类型 |
+| `DisplayOrder` | `""`（播出顺序）、`originalAirDate`、`absolute`、`dvd`、`digital`、`storyArc`、`production`、`tv`：取 Jellyfin 的值，除播出顺序外都是 TMDB 剧集组（episode group）的类型；`ParseDisplayOrder` 不区分大小写地读取它们，也接受 Kodi 的 `aired` |
 | `Video3DFormat` | `half_sbs`、`full_sbs`、`half_tab`、`full_tab`、`mvc` |
 | `MetadataField` | `cast`、`genres`、`production_locations`、`studios`、`tags`、`name`、`overview`、`runtime`、`official_rating` |
 | `SubtitleMode` | `""`（遵循流标记）、`always`、`foreign`、`forced`、`none`、`smart` |
@@ -85,25 +87,27 @@ erDiagram
 * `ScanInterval` 是定时对账扫描的周期（为零则不定时扫描）；`PreferredLanguage`（ISO 639-1）与 `MetadataCountry`（ISO 3166-1 alpha-2）影响元数据提供者的取数。
 * `SaveLocalMetadata` 把每个条目的 NFO 文件以及为它选择或下载的图片写到媒体旁边，扫描时再读回；`AutoCollections` 把电影放入以提供者的合集（电影系列）命名的合集，先按 `tmdb_collection` ID 查找，否则按名称，首次需要时创建。
 * `ExtractTrickplay` 与 `ExtractChapterImages` 为视频生成缩略图拼图与各章节的图片；`AnalyzeLoudness` 测量音轨的响度。
-* `Providers`（`ProviderOrder`）按能力（元数据、图片、字幕、歌词、片段）以插件 ID 列出媒体库使用的提供者及其顺序：nil 列表按默认顺序使用所有提供者，空列表不使用任何提供者；列表中重复的提供者或空 ID 为 `ErrInvalid`。`DownloadLyrics` 让刷新为没有歌词文件的音轨从媒体库的歌词提供者下载歌词。
+* `Providers`（`ProviderOrder`）按能力（元数据、图片、字幕、歌词、片段、集列表）以插件 ID 列出媒体库使用的提供者及其顺序：nil 列表按默认顺序使用所有提供者，空列表不使用任何提供者；列表中重复的提供者或空 ID 为 `ErrInvalid`。`DownloadLyrics` 让刷新为没有歌词文件的音轨从媒体库的歌词提供者下载歌词。
+* `VirtualEpisodes` 选择刷新以虚拟条目加入剧集的集（§4.8）：`Missing` 为已播出的集，`Unaired` 为今天及以后播出的集，`Specials` 还包括第 0 季的集；`Missing` 关闭时，`GraceDays`（不能为负）让虚拟集在播出后保留这么多天，等待文件到来。
 
 ### 4.2 条目
 所有种类共用一个 `Item` 类型，由 `Kind` 决定哪些字段有意义。这直接对应存储层的一张条目表，避免类型继承体系。
 
 | 字段分组 | 字段 |
 | :--- | :--- |
-| 标识与层级 | `ID`、`LibraryID`、`ParentID`、`Kind`、`Path`、`UserID`（播放列表所属的用户） |
+| 标识与层级 | `ID`、`LibraryID`、`ParentID`、`Kind`、`Path`、`UserID`（播放列表所属的用户）、`Virtual`（§4.8） |
 | 标题与文本 | `Name`、`SortName`、`OriginalTitle`、`Overview`、`Tagline` |
-| 编号 | `IndexNumber`、`ParentIndexNumber`、`IndexNumberEnd` |
+| 编号 | `IndexNumber`、`ParentIndexNumber`、`IndexNumberEnd`、`AbsoluteNumber`（单集跨季的编号，动画发布即按它编号） |
 | 日期与评分 | `ProductionYear`、`PremiereDate`、`EndDate`、`Runtime`、`OfficialRating`、`CustomRating`、`ParentalRating`、`InheritedRating`、`CommunityRating`（0–10）、`CriticRating`（0–100） |
 | 分类 | `Genres`、`Tags`、`Studios`、`ExternalIDs`（按 `Provider`）、`ProductionLocations`（制片国家）、`RemoteTrailers`（预告片 URL） |
 | 电影与视频 | `CollectionName`（电影系列）、`AspectRatio`、`Video3DFormat` |
 | 音乐 | `Artists`、`AlbumArtists`、`Album` |
-| 剧集 | `SeriesStatus`、`AirDays`、`AirTime`、`DisplayOrder` |
+| 剧集 | `SeriesStatus`、`AirDays`、`AirTime`、`DisplayOrder`、`SeriesType` |
 | 单集 | `AirsBeforeSeasonNumber`、`AirsAfterSeasonNumber`、`AirsBeforeEpisodeNumber`（特别篇的插播位置） |
 | 附加内容 | `Extra`（`ExtraKind`）、`OwnerID` |
 | 元数据控制 | `MetadataLanguage`、`MetadataCountry`（覆盖媒体库的设置）、`Locked`、`LockedFields`（`MetadataField`） |
 | 音频 | `Loudness`：音轨的积分响度，或专辑各音轨按时长加权合并后的响度，单位 LUFS（EBU R128）；`NormalizationGain` 是调整到 −18 LUFS 所需的增益 |
+| 获取 | `Monitored`：电影、剧集、季或单集是想要的，文件缺失时要获取，并要升级 |
 | 记账字段 | `DateAdded`、`FileModified`、`MetadataRefreshedAt`、`ScanGeneration`（最后看到该条目的扫描）、`MissingSince`（见 §4.7） |
 
 模型以 Jellyfin 为参照，并随路线图演进：某个阶段需要时才加入相应字段。`SortName` 是用户指定的排序名（即 Jellyfin 的 `ForcedSortName`），计算出的排序形式是存储层的键。单集所属的剧集和季是它的祖先条目，不复制名称。锁定的条目或被锁定的字段分组不会被元数据提供者修改；条目自己的 NFO 文件（其中记录了锁定）仍然生效。管理员的编辑直接设置字段，无论是否锁定。
@@ -130,7 +134,8 @@ erDiagram
 * 必须有 `ID`、`LibraryID`、合法的 `Kind` 和非空的 `Name`；条目不能是自己的父级。
 * 设置了 `Extra` 的条目必须使用合法的 `ExtraKind`，并有 `OwnerID`。
 * `CommunityRating` 在 0–10 之间，`CriticRating` 在 0–100 之间，`ParentalRating` 不能为负。
-* `Video3DFormat` 与 `LockedFields` 必须是已知取值；`AirDays` 必须是星期几。
+* `Video3DFormat`、`DisplayOrder`、`SeriesType` 与 `LockedFields` 必须是已知取值；`AirDays` 必须是星期几。
+* 只有电影、季和单集可以是 `Virtual`；虚拟条目没有 `Path`，也不能是附加内容。
 
 ### 4.6 分级
 `OfficialRating` 是公布的内容分级（如 "PG-13"）；用户设置的 `CustomRating` 优先于它；`ParentalRating` 是分级（自定义分级，否则官方分级）在条目元数据国家（否则取媒体库的，再否则取美国）分级体系中的分数：它所代表的最低年龄，适合所有年龄的内容为零，成人内容为 1000 及以上；未分级内容以及任何分级体系都不认识的分级为 nil。元数据刷新时用 `metadata.RatingScore` 计算它，即 Jellyfin 在其各分级体系上的查找：先查该国体系，再查美国体系与其他体系；去掉 "Rated" 与国家前缀（"DE:"、"IT-"）；纯年龄（"16"、"18+"、"-12"）按原值采用；以 "/" 分隔的列表取第一个能解析的条目。Jellyfin 的子分数（如 "TV-PG" 与 "TV-PG-V" 的区别）不保留。`InheritedRating` 是分级过滤比较的分数：条目自身的 `ParentalRating`；条目未分级时取最近一个有分级的祖先的分数。因此，与 Jellyfin 一样，分级高于用户上限的剧集中未分级的单集会随剧集一起被隐藏。存储层在每次写入时推导它，被写入条目的后代也一并更新；传给 `Upsert` 的值被忽略。分级过滤（`ItemQuery.MaxRating`、`UserPolicy.MaxParentalRating`）比较的是这些分数。
@@ -139,6 +144,14 @@ erDiagram
 
 ### 4.7 缺失条目
 每次媒体库扫描都有一个世代，比上一次多一。扫描为看到的条目记下自己的世代；完整扫描没有看到的、有路径的条目被标记为缺失（`MissingSince`）而不是删除，因此暂时不可用的挂载点不会丢失任何东西。扫描无法读取的文件夹，其条目保持原状：存在的仍存在，缺失的仍缺失。缺失条目在查询中隐藏（除非设置 `ItemQuery.IncludeMissing`），文件重新出现时恢复，超过宽限期后被清除。
+
+### 4.8 虚拟条目
+虚拟条目是从元数据得知、但媒体库没有其文件的电影、季或单集，与 Jellyfin 的虚拟条目相同；与缺失条目（§4.7）不同，媒体库从未有过它。虚拟条目在查询中隐藏，除非设置 `ItemQuery.IncludeVirtual` 或 `OnlyVirtual`。
+
+* 刷新剧集时按顺序询问媒体库的集列表提供者（`ProviderOrder.Episodes`），第一个认识该剧集的提供者按剧集的 `DisplayOrder` 编号列出它的季和集。随后刷新像 Jellyfin 的 TMDB 缺失集提供者那样：为每个列出的、剧集中没有单集占据且媒体库的 `VirtualEpisodes` 想要的集，在其季中创建虚拟集，剧集没有该编号的季时创建虚拟季；更新之前创建的虚拟集，把它们移到编号所在的季，并在单集文件占据它们、超过 `GraceDays`、或不再想要时删除它们。变空的虚拟季被删除。
+* 虚拟条目属于其外部 ID 中有该提供者 ID 的集列表提供者；其他提供者的虚拟条目不受影响。
+* 被监控（monitored）的剧集列出全部集，无论是否已播出，并一直保留；其特别篇按 `Specials` 处理。
+* 扫描按编号找到虚拟季或虚拟集的文件时，把该条目变为实体条目，保留其 ID、元数据和用户数据；多集文件会删除它所包含的其他虚拟集。
 
 ## 5. 媒体源、流与章节
 
@@ -228,8 +241,8 @@ erDiagram
 ### 9.1 条目查询
 `ItemQuery` 中零值字段表示"不过滤"：
 
-* 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`MemberOf`（链接进合集或播放列表的条目，每个一次）或 `TopLevel`（没有父级的条目）、`Kinds`、`IncludeExtras`、`IncludeMissing`。
-* 内容：`Search`（见 §9.2）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`，与 `InheritedRating` 比较，nil 表示不限制（未分级的条目默认包含，除非设置 `SkipUnrated`）。
+* 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`MemberOf`（链接进合集或播放列表的条目，每个一次）或 `TopLevel`（没有父级的条目）、`Kinds`、`IncludeExtras`、`IncludeMissing`、`IncludeVirtual` 或 `OnlyVirtual`（§4.8）。
+* 内容：`Search`（见 §9.2）；`Monitored`（nil 表示不限）；`IndexNumber` 与 `ParentIndexNumber`（如某季的某一集）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`，与 `InheritedRating` 比较，nil 表示不限制（未分级的条目默认包含，除非设置 `SkipUnrated`）。
 * 名称按排序名以 Jellyfin 的方式排序：不区分大小写和重音，忽略开头、中间和结尾的冠词（"the"、"a"、"an"），去掉标点 `,&-{}'` 并把 `.+%` 视为空格，数字按数值排序（"Rocky 2" 在 "Rocky 10" 之前），非拉丁文字转写为拉丁字母（中文按拼音排序）。按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
 * 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`，以及 `last_played` / `play_count` 排序。设置了 `UserID` 时，其他用户的播放列表不在结果中。
 * `list_order` 按在 `MemberOf` 所指合集或播放列表中的位置排序，出现两次的条目按其第一个条目项排序。

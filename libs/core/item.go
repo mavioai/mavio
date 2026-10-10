@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -99,6 +100,65 @@ const (
 	SeriesUnreleased SeriesStatus = "unreleased"
 )
 
+// SeriesType is how a series' episodes are numbered in release names, as
+// Sonarr's series types.
+type SeriesType string
+
+// Series types.
+const (
+	// SeriesStandard numbers episodes by season and episode.
+	SeriesStandard SeriesType = ""
+	// SeriesDaily identifies episodes by air date.
+	SeriesDaily SeriesType = "daily"
+	// SeriesAnime numbers episodes absolutely, across seasons.
+	SeriesAnime SeriesType = "anime"
+)
+
+// SeriesTypes lists every series type.
+var SeriesTypes = []SeriesType{SeriesStandard, SeriesDaily, SeriesAnime}
+
+// Valid reports whether t is a known series type.
+func (t SeriesType) Valid() bool { return slices.Contains(SeriesTypes, t) }
+
+// DisplayOrder is the order a series' seasons and episodes are numbered
+// and shown in, with Jellyfin's values. Every order but the aired one is a
+// type of TMDB's episode groups.
+type DisplayOrder string
+
+// Display orders.
+const (
+	OrderAired           DisplayOrder = ""
+	OrderOriginalAirDate DisplayOrder = "originalAirDate"
+	OrderAbsolute        DisplayOrder = "absolute"
+	OrderDVD             DisplayOrder = "dvd"
+	OrderDigital         DisplayOrder = "digital"
+	OrderStoryArc        DisplayOrder = "storyArc"
+	OrderProduction      DisplayOrder = "production"
+	OrderTV              DisplayOrder = "tv"
+)
+
+// DisplayOrders lists every display order.
+var DisplayOrders = []DisplayOrder{
+	OrderAired, OrderOriginalAirDate, OrderAbsolute, OrderDVD, OrderDigital, OrderStoryArc, OrderProduction, OrderTV,
+}
+
+// Valid reports whether o is a known display order.
+func (o DisplayOrder) Valid() bool { return slices.Contains(DisplayOrders, o) }
+
+// ParseDisplayOrder reads a display order case-insensitively, also Kodi's
+// "aired"; ok is false for unknown orders.
+func ParseDisplayOrder(s string) (o DisplayOrder, ok bool) {
+	if strings.EqualFold(s, "aired") {
+		return OrderAired, true
+	}
+	for _, o := range DisplayOrders {
+		if strings.EqualFold(s, string(o)) {
+			return o, true
+		}
+	}
+	return "", false
+}
+
 // Provider names an external metadata source in ExternalIDs.
 type Provider string
 
@@ -189,8 +249,16 @@ type Item struct {
 	Tagline       string
 
 	// Path is the file or folder the item was resolved from; empty for
-	// virtual items such as collections.
+	// items without one, such as collections and virtual items.
 	Path string
+	// Virtual marks a movie, season or episode known from metadata whose
+	// file the library does not have. Virtual items are hidden from queries
+	// unless requested; a scan that finds the file turns the item into a
+	// physical one.
+	Virtual bool
+	// Monitored marks a movie, series, season or episode as wanted: its
+	// file is to be acquired when missing, and upgraded.
+	Monitored bool
 
 	// IndexNumber is the episode, track or season number; ParentIndexNumber
 	// is the season number of an episode or the disc number of a track.
@@ -198,6 +266,9 @@ type Item struct {
 	ParentIndexNumber *int
 	// IndexNumberEnd is the last episode number of a multi-episode file.
 	IndexNumberEnd *int
+	// AbsoluteNumber is an episode's number counted across seasons, as
+	// anime releases number episodes.
+	AbsoluteNumber *int
 
 	ProductionYear int
 	PremiereDate   *time.Time
@@ -245,9 +316,8 @@ type Item struct {
 	SeriesStatus SeriesStatus
 	AirDays      []time.Weekday
 	AirTime      string // as published, e.g. "9 PM"
-	// DisplayOrder is the episode order of a series, e.g. "aired", "dvd"
-	// or "absolute"; empty means aired order.
-	DisplayOrder string
+	DisplayOrder DisplayOrder
+	SeriesType   SeriesType
 
 	// Episode. A special airs before season AirsBeforeSeasonNumber, before
 	// episode AirsBeforeEpisodeNumber of it, or after season
@@ -319,6 +389,14 @@ func (it *Item) Validate() error {
 		return fmt.Errorf("%w: item %s critic rating %v out of range", ErrInvalid, it.ID, it.CriticRating)
 	case it.Video3DFormat != "" && !it.Video3DFormat.Valid():
 		return fmt.Errorf("%w: item %s has unknown 3D format %q", ErrInvalid, it.ID, it.Video3DFormat)
+	case !it.DisplayOrder.Valid():
+		return fmt.Errorf("%w: item %s has unknown display order %q", ErrInvalid, it.ID, it.DisplayOrder)
+	case !it.SeriesType.Valid():
+		return fmt.Errorf("%w: item %s has unknown series type %q", ErrInvalid, it.ID, it.SeriesType)
+	case it.Virtual && !virtualKinds[it.Kind]:
+		return fmt.Errorf("%w: %s %s cannot be virtual", ErrInvalid, it.Kind, it.ID)
+	case it.Virtual && (it.Path != "" || it.Extra != ""):
+		return fmt.Errorf("%w: virtual item %s has a path or is an extra", ErrInvalid, it.ID)
 	}
 	for _, f := range it.LockedFields {
 		if !f.Valid() {
@@ -332,6 +410,9 @@ func (it *Item) Validate() error {
 	}
 	return nil
 }
+
+// virtualKinds are the kinds of items that can be virtual.
+var virtualKinds = map[ItemKind]bool{KindMovie: true, KindSeason: true, KindEpisode: true}
 
 // Link is an entry of a collection or playlist: an item at a position.
 // A playlist may hold an item several times, each entry with its own ID.

@@ -983,6 +983,75 @@ func (_u *ItemUpdate) ClearMissingSince() *ItemUpdate {
 	return _u
 }
 
+// SetVirtual sets the "virtual" field.
+func (_u *ItemUpdate) SetVirtual(v bool) *ItemUpdate {
+	_u.mutation.SetVirtual(v)
+	return _u
+}
+
+// SetNillableVirtual sets the "virtual" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableVirtual(v *bool) *ItemUpdate {
+	if v != nil {
+		_u.SetVirtual(*v)
+	}
+	return _u
+}
+
+// SetMonitored sets the "monitored" field.
+func (_u *ItemUpdate) SetMonitored(v bool) *ItemUpdate {
+	_u.mutation.SetMonitored(v)
+	return _u
+}
+
+// SetNillableMonitored sets the "monitored" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableMonitored(v *bool) *ItemUpdate {
+	if v != nil {
+		_u.SetMonitored(*v)
+	}
+	return _u
+}
+
+// SetSeriesType sets the "series_type" field.
+func (_u *ItemUpdate) SetSeriesType(v string) *ItemUpdate {
+	_u.mutation.SetSeriesType(v)
+	return _u
+}
+
+// SetNillableSeriesType sets the "series_type" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableSeriesType(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetSeriesType(*v)
+	}
+	return _u
+}
+
+// SetAbsoluteNumber sets the "absolute_number" field.
+func (_u *ItemUpdate) SetAbsoluteNumber(v int) *ItemUpdate {
+	_u.mutation.ResetAbsoluteNumber()
+	_u.mutation.SetAbsoluteNumber(v)
+	return _u
+}
+
+// SetNillableAbsoluteNumber sets the "absolute_number" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableAbsoluteNumber(v *int) *ItemUpdate {
+	if v != nil {
+		_u.SetAbsoluteNumber(*v)
+	}
+	return _u
+}
+
+// AddAbsoluteNumber adds value to the "absolute_number" field.
+func (_u *ItemUpdate) AddAbsoluteNumber(v int) *ItemUpdate {
+	_u.mutation.AddAbsoluteNumber(v)
+	return _u
+}
+
+// ClearAbsoluteNumber clears the value of the "absolute_number" field.
+func (_u *ItemUpdate) ClearAbsoluteNumber() *ItemUpdate {
+	_u.mutation.ClearAbsoluteNumber()
+	return _u
+}
+
 // SetLibrary sets the "library" edge to the Library entity.
 func (_u *ItemUpdate) SetLibrary(v *Library) *ItemUpdate {
 	return _u.SetLibraryID(v.ID)
@@ -1743,6 +1812,24 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.MissingSinceCleared() {
 		_spec.ClearField(item.FieldMissingSince, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Virtual(); ok {
+		_spec.SetField(item.FieldVirtual, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Monitored(); ok {
+		_spec.SetField(item.FieldMonitored, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SeriesType(); ok {
+		_spec.SetField(item.FieldSeriesType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AbsoluteNumber(); ok {
+		_spec.SetField(item.FieldAbsoluteNumber, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAbsoluteNumber(); ok {
+		_spec.AddField(item.FieldAbsoluteNumber, field.TypeInt, value)
+	}
+	if _u.mutation.AbsoluteNumberCleared() {
+		_spec.ClearField(item.FieldAbsoluteNumber, field.TypeInt)
 	}
 	if _u.mutation.LibraryCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -3319,6 +3406,75 @@ func (_u *ItemUpdateOne) ClearMissingSince() *ItemUpdateOne {
 	return _u
 }
 
+// SetVirtual sets the "virtual" field.
+func (_u *ItemUpdateOne) SetVirtual(v bool) *ItemUpdateOne {
+	_u.mutation.SetVirtual(v)
+	return _u
+}
+
+// SetNillableVirtual sets the "virtual" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableVirtual(v *bool) *ItemUpdateOne {
+	if v != nil {
+		_u.SetVirtual(*v)
+	}
+	return _u
+}
+
+// SetMonitored sets the "monitored" field.
+func (_u *ItemUpdateOne) SetMonitored(v bool) *ItemUpdateOne {
+	_u.mutation.SetMonitored(v)
+	return _u
+}
+
+// SetNillableMonitored sets the "monitored" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableMonitored(v *bool) *ItemUpdateOne {
+	if v != nil {
+		_u.SetMonitored(*v)
+	}
+	return _u
+}
+
+// SetSeriesType sets the "series_type" field.
+func (_u *ItemUpdateOne) SetSeriesType(v string) *ItemUpdateOne {
+	_u.mutation.SetSeriesType(v)
+	return _u
+}
+
+// SetNillableSeriesType sets the "series_type" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableSeriesType(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetSeriesType(*v)
+	}
+	return _u
+}
+
+// SetAbsoluteNumber sets the "absolute_number" field.
+func (_u *ItemUpdateOne) SetAbsoluteNumber(v int) *ItemUpdateOne {
+	_u.mutation.ResetAbsoluteNumber()
+	_u.mutation.SetAbsoluteNumber(v)
+	return _u
+}
+
+// SetNillableAbsoluteNumber sets the "absolute_number" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableAbsoluteNumber(v *int) *ItemUpdateOne {
+	if v != nil {
+		_u.SetAbsoluteNumber(*v)
+	}
+	return _u
+}
+
+// AddAbsoluteNumber adds value to the "absolute_number" field.
+func (_u *ItemUpdateOne) AddAbsoluteNumber(v int) *ItemUpdateOne {
+	_u.mutation.AddAbsoluteNumber(v)
+	return _u
+}
+
+// ClearAbsoluteNumber clears the value of the "absolute_number" field.
+func (_u *ItemUpdateOne) ClearAbsoluteNumber() *ItemUpdateOne {
+	_u.mutation.ClearAbsoluteNumber()
+	return _u
+}
+
 // SetLibrary sets the "library" edge to the Library entity.
 func (_u *ItemUpdateOne) SetLibrary(v *Library) *ItemUpdateOne {
 	return _u.SetLibraryID(v.ID)
@@ -4109,6 +4265,24 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 	}
 	if _u.mutation.MissingSinceCleared() {
 		_spec.ClearField(item.FieldMissingSince, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Virtual(); ok {
+		_spec.SetField(item.FieldVirtual, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Monitored(); ok {
+		_spec.SetField(item.FieldMonitored, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SeriesType(); ok {
+		_spec.SetField(item.FieldSeriesType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AbsoluteNumber(); ok {
+		_spec.SetField(item.FieldAbsoluteNumber, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAbsoluteNumber(); ok {
+		_spec.AddField(item.FieldAbsoluteNumber, field.TypeInt, value)
+	}
+	if _u.mutation.AbsoluteNumberCleared() {
+		_spec.ClearField(item.FieldAbsoluteNumber, field.TypeInt)
 	}
 	if _u.mutation.LibraryCleared() {
 		edge := &sqlgraph.EdgeSpec{

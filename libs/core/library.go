@@ -69,6 +69,9 @@ type Library struct {
 	// DownloadLyrics has refreshes download lyrics for tracks without any
 	// from the library's lyrics providers.
 	DownloadLyrics bool
+	// VirtualEpisodes configures the episodes a series lacks that
+	// refreshes add to it as virtual items.
+	VirtualEpisodes VirtualEpisodes
 	// Providers names the providers the library uses.
 	Providers ProviderOrder
 	CreatedAt time.Time
@@ -84,11 +87,30 @@ type ProviderOrder struct {
 	Subtitles []string `json:"subtitles"`
 	Lyrics    []string `json:"lyrics"`
 	Segments  []string `json:"segments"`
+	// Episodes are the episode listers; the first that knows a series
+	// lists its episodes.
+	Episodes []string `json:"episodes"`
+}
+
+// VirtualEpisodes configures which episodes refreshes list as virtual
+// items in series without their files, as Jellyfin's options of the TMDB
+// missing episode provider. Monitored series list every episode, aired
+// or not, and keep them; their specials follow Specials.
+type VirtualEpisodes struct {
+	// Missing lists episodes that have aired; Unaired lists those airing
+	// today or later. Episodes without an air date are not listed.
+	Missing bool `json:"missing"`
+	Unaired bool `json:"unaired"`
+	// Specials lists the episodes of season 0 too.
+	Specials bool `json:"specials"`
+	// GraceDays keeps virtual episodes for this many days after they air
+	// when Missing is off, for their files to arrive.
+	GraceDays int `json:"grace_days"`
 }
 
 // validate checks that the lists name providers once each.
 func (o *ProviderOrder) validate() error {
-	for _, list := range [][]string{o.Metadata, o.Images, o.Subtitles, o.Lyrics, o.Segments} {
+	for _, list := range [][]string{o.Metadata, o.Images, o.Subtitles, o.Lyrics, o.Segments, o.Episodes} {
 		seen := make(map[string]bool, len(list))
 		for _, id := range list {
 			if id == "" || seen[id] {
@@ -113,6 +135,8 @@ func (l *Library) Validate() error {
 		return fmt.Errorf("%w: %s library %q cannot have paths", ErrInvalid, l.Kind, l.Name)
 	case l.ScanInterval < 0:
 		return fmt.Errorf("%w: negative scan interval", ErrInvalid)
+	case l.VirtualEpisodes.GraceDays < 0:
+		return fmt.Errorf("%w: negative grace period of virtual episodes", ErrInvalid)
 	}
 	return l.Providers.validate()
 }

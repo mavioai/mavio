@@ -145,7 +145,10 @@ func TestItemRoundTrip(t *testing.T) {
 		meta.Album = "Arrival"
 		meta.AirDays = []time.Weekday{time.Friday, time.Sunday}
 		meta.AirTime = "9 PM"
-		meta.DisplayOrder = "dvd"
+		meta.DisplayOrder = core.OrderDVD
+		meta.SeriesType = core.SeriesAnime
+		meta.AbsoluteNumber = ptr(25)
+		meta.Virtual, meta.Monitored = true, true
 		meta.AirsBeforeSeasonNumber, meta.AirsAfterSeasonNumber, meta.AirsBeforeEpisodeNumber = ptr(3), ptr(2), ptr(1)
 		meta.MetadataLanguage, meta.MetadataCountry = "en", "us"
 		meta.Locked = true

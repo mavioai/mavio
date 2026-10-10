@@ -98,6 +98,7 @@ func TestValidate(t *testing.T) {
 		err  error
 	}{
 		{"valid item", ptr(validItem()).Validate()},
+		{"virtual episode", (&Item{ID: NewID(), LibraryID: NewID(), Kind: KindEpisode, Name: "Pilot", Virtual: true}).Validate()},
 		{"valid library", (&Library{Name: "Movies", Kind: LibraryMovies, Paths: []string{"/media"}}).Validate()},
 		{"valid user", (&User{ID: NewID(), Name: "alice", PasswordHash: "$argon2id$x"}).Validate()},
 		{"valid job", (&Job{ID: NewID(), Kind: "library.scan", MaxAttempts: 3}).Validate()},
@@ -121,6 +122,10 @@ func TestValidate(t *testing.T) {
 		{"item 3D format", func() error { it := validItem(); it.Video3DFormat = "sbs"; return it.Validate() }()},
 		{"item locked field", func() error { it := validItem(); it.LockedFields = []MetadataField{"plot"}; return it.Validate() }()},
 		{"item air day", func() error { it := validItem(); it.AirDays = []time.Weekday{7}; return it.Validate() }()},
+		{"item display order", func() error { it := validItem(); it.DisplayOrder = "aired"; return it.Validate() }()},
+		{"item series type", func() error { it := validItem(); it.SeriesType = "standard"; return it.Validate() }()},
+		{"virtual series", func() error { it := validItem(); it.Kind, it.Virtual = KindSeries, true; return it.Validate() }()},
+		{"virtual with path", func() error { it := validItem(); it.Path, it.Virtual = "/a.mkv", true; return it.Validate() }()},
 		{"library without paths", (&Library{Name: "x", Kind: LibraryMovies}).Validate()},
 		{"library unknown kind", (&Library{Name: "x", Kind: "tv", Paths: []string{"/"}}).Validate()},
 		{"user without credentials", (&User{ID: NewID(), Name: "bob"}).Validate()},
@@ -142,6 +147,27 @@ func TestValidate(t *testing.T) {
 }
 
 func ptr[T any](v T) *T { return &v }
+
+func TestParseDisplayOrder(t *testing.T) {
+	tests := []struct {
+		in   string
+		want DisplayOrder
+		ok   bool
+	}{
+		{"", OrderAired, true},
+		{"aired", OrderAired, true},
+		{"DVD", OrderDVD, true},
+		{"originalairdate", OrderOriginalAirDate, true},
+		{"storyArc", OrderStoryArc, true},
+		{"broadcast", "", false},
+	}
+	for _, tt := range tests {
+		got, ok := ParseDisplayOrder(tt.in)
+		if got != tt.want || ok != tt.ok {
+			t.Errorf("ParseDisplayOrder(%q) = %q, %v, want = %q, %v", tt.in, got, ok, tt.want, tt.ok)
+		}
+	}
+}
 
 func TestItemQueryValidate(t *testing.T) {
 	yes := true

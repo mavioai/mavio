@@ -39,7 +39,7 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 | `tests/Jellyfin.Server.Implementations.Tests/Library` | Movie, series, season and audio resolvers; ignore rules (`.ignore`); sorting; media stream selection (`MediaStreamSelectorTests`) | `libs/library` (resolver chain, ignore rules); `libs/media/decision` (stream selection) |
 | `tests/Jellyfin.XbmcMetadata.Tests` (Parsers + Test Data) | NFO samples for movies, series, seasons, episodes, music albums, artists, music videos | `libs/metadata/nfo` |
 | `tests/Jellyfin.Server.Implementations.Tests/Localization/LocalizationManagerTests.cs` | Rating scores in the countries' rating systems (the rating systems themselves are runtime data, copied into `libs/metadata/ratings` with a `SOURCES.json`) | `libs/metadata` |
-| `tests/Jellyfin.Providers.Tests` (Tmdb / MediaInfo / Lyrics / Music / TV / ExternalId) | TMDB utilities and cast handling, missing-episode detection, lyrics parsing, external IDs | `plugins/scraper-tmdb`, `libs/metadata` |
+| `tests/Jellyfin.Providers.Tests` (Tmdb / MediaInfo / Lyrics / Music / TV / ExternalId) | TMDB utilities and cast handling, missing-episode detection, lyrics parsing, external IDs | `plugins/scraper-tmdb`, `libs/metadata`, `libs/library` (missing episodes) |
 | `tests/Jellyfin.MediaEncoding.Tests/Probing` (ffprobe JSON samples) | Probe result normalization: missing bitrates, interlacing, duration precision and other edge cases | `libs/media/probe` |
 | `tests/Jellyfin.MediaEncoding.Tests/Subtitles` | SRT / ASS / SSA parsing and encoding | `libs/subtitle` |
 | `tests/Jellyfin.MediaEncoding.Tests` (EncoderValidator, ApplePlatformHelper) | ffmpeg version parsing, encoder capability parsing, Apple platform detection | `libs/media/hwaccel` |

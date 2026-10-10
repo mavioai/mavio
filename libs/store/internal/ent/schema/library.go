@@ -38,6 +38,7 @@ func (Library) Fields() []ent.Field {
 		field.Bool("analyze_loudness").Default(false),
 		field.Bool("download_lyrics").Default(false),
 		field.JSON("provider_order", core.ProviderOrder{}).Optional(),
+		field.JSON("virtual_episodes", core.VirtualEpisodes{}).Optional(),
 		// scan_generation counts the library's scans.
 		field.Int64("scan_generation").Default(0),
 		field.Time("created_at").Default(time.Now).Immutable(),

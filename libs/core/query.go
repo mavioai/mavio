@@ -30,6 +30,16 @@ type ItemQuery struct {
 	// IncludeMissing includes items whose files a scan did not find,
 	// which are excluded by default.
 	IncludeMissing bool
+	// IncludeVirtual includes virtual items, which are excluded by
+	// default; OnlyVirtual restricts results to them.
+	IncludeVirtual bool
+	OnlyVirtual    bool
+	// Monitored restricts results to monitored or unmonitored items.
+	Monitored *bool
+	// IndexNumber and ParentIndexNumber restrict results to items with
+	// these numbers, e.g. an episode of a season.
+	IndexNumber       *int
+	ParentIndexNumber *int
 	// Search matches names, original titles and sort names; see
 	// docs/domain.md for the matching and relevance rules. When set, results
 	// are ordered by relevance before Sort.

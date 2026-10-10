@@ -518,6 +518,19 @@ func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.I
 		it.IndexNumber, it.ParentIndexNumber, it.IndexNumberEnd = n.Index, n.ParentIndex, n.IndexEnd
 		it.PremiereDate = n.Aired
 		it.Video3DFormat = n.Format3D
+		v, ok, err := p.adopt(ctx, n, parent)
+		if err != nil {
+			return core.NilID, err
+		}
+		if ok {
+			// The virtual item becomes the file's, keeping its ID, metadata
+			// and user data.
+			v.Path, v.Virtual, v.IndexNumberEnd, v.Video3DFormat = n.Path, false, n.IndexEnd, n.Format3D
+			if v.PremiereDate == nil {
+				v.PremiereDate = n.Aired
+			}
+			it = v
+		}
 	} else if n.Extra != "" {
 		it.Name = RenewExtraName(it.Name, it.Locked || slices.Contains(it.LockedFields, core.FieldName), n)
 	}
@@ -562,6 +575,78 @@ func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.I
 		*p.refreshes = append(*p.refreshes, it.ID)
 	}
 	return it.ID, nil
+}
+
+// adopt finds the virtual season or episode a new season folder or
+// episode file is: one of the same series with the same numbers. It
+// deletes the other virtual episodes a multi-episode file holds.
+func (p *saver) adopt(ctx context.Context, n Node, parent core.ID) (core.Item, bool, error) {
+	if n.Extra != "" || n.Index == nil || (n.Kind == core.KindEpisode && n.ParentIndex == nil) ||
+		(n.Kind != core.KindEpisode && n.Kind != core.KindSeason) {
+		return core.Item{}, false, nil
+	}
+	series, err := p.seriesOf(ctx, parent)
+	if err != nil || series.IsZero() {
+		return core.Item{}, false, err
+	}
+	q := core.ItemQuery{ParentID: series, Kinds: []core.ItemKind{n.Kind}, OnlyVirtual: true, IncludeMissing: true}
+	last := *n.Index
+	if n.Kind == core.KindSeason {
+		q.IndexNumber = n.Index
+	} else {
+		q.Recursive, q.ParentIndexNumber = true, n.ParentIndex
+		if n.IndexEnd != nil && *n.IndexEnd > last {
+			last = *n.IndexEnd
+		}
+	}
+	page, err := p.tx.Items().Query(ctx, q)
+	if err != nil {
+		return core.Item{}, false, err
+	}
+	var adopted core.Item
+	var found bool
+	var covered []core.ID
+	for _, v := range page.Items {
+		switch {
+		case v.IndexNumber == nil || *v.IndexNumber < *n.Index || *v.IndexNumber > last:
+		case !found && *v.IndexNumber == *n.Index:
+			adopted, found = v, true
+		default:
+			covered = append(covered, v.ID)
+		}
+	}
+	if len(covered) > 0 {
+		if err := p.tx.Items().Delete(ctx, covered...); err != nil {
+			return core.Item{}, false, err
+		}
+	}
+	return adopted, found, nil
+}
+
+// seriesOf returns the series a season or episode under parent belongs
+// to, or NilID outside series.
+func (p *saver) seriesOf(ctx context.Context, parent core.ID) (core.ID, error) {
+	for range 2 {
+		if parent.IsZero() {
+			return core.NilID, nil
+		}
+		it, err := p.tx.Items().Get(ctx, parent)
+		if errors.Is(err, core.ErrNotFound) {
+			return core.NilID, nil
+		}
+		if err != nil {
+			return core.NilID, err
+		}
+		switch it.Kind {
+		case core.KindSeries:
+			return it.ID, nil
+		case core.KindSeason:
+			parent = it.ParentID
+		default:
+			return core.NilID, nil
+		}
+	}
+	return core.NilID, nil
 }
 
 // changedStructure reports whether a scan changed what it owns of an item.

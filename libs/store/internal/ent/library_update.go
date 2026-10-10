@@ -226,6 +226,26 @@ func (_u *LibraryUpdate) ClearProviderOrder() *LibraryUpdate {
 	return _u
 }
 
+// SetVirtualEpisodes sets the "virtual_episodes" field.
+func (_u *LibraryUpdate) SetVirtualEpisodes(v core.VirtualEpisodes) *LibraryUpdate {
+	_u.mutation.SetVirtualEpisodes(v)
+	return _u
+}
+
+// SetNillableVirtualEpisodes sets the "virtual_episodes" field if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableVirtualEpisodes(v *core.VirtualEpisodes) *LibraryUpdate {
+	if v != nil {
+		_u.SetVirtualEpisodes(*v)
+	}
+	return _u
+}
+
+// ClearVirtualEpisodes clears the value of the "virtual_episodes" field.
+func (_u *LibraryUpdate) ClearVirtualEpisodes() *LibraryUpdate {
+	_u.mutation.ClearVirtualEpisodes()
+	return _u
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_u *LibraryUpdate) SetScanGeneration(v int64) *LibraryUpdate {
 	_u.mutation.ResetScanGeneration()
@@ -443,6 +463,12 @@ func (_u *LibraryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.ProviderOrderCleared() {
 		_spec.ClearField(library.FieldProviderOrder, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.VirtualEpisodes(); ok {
+		_spec.SetField(library.FieldVirtualEpisodes, field.TypeJSON, value)
+	}
+	if _u.mutation.VirtualEpisodesCleared() {
+		_spec.ClearField(library.FieldVirtualEpisodes, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
@@ -758,6 +784,26 @@ func (_u *LibraryUpdateOne) ClearProviderOrder() *LibraryUpdateOne {
 	return _u
 }
 
+// SetVirtualEpisodes sets the "virtual_episodes" field.
+func (_u *LibraryUpdateOne) SetVirtualEpisodes(v core.VirtualEpisodes) *LibraryUpdateOne {
+	_u.mutation.SetVirtualEpisodes(v)
+	return _u
+}
+
+// SetNillableVirtualEpisodes sets the "virtual_episodes" field if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableVirtualEpisodes(v *core.VirtualEpisodes) *LibraryUpdateOne {
+	if v != nil {
+		_u.SetVirtualEpisodes(*v)
+	}
+	return _u
+}
+
+// ClearVirtualEpisodes clears the value of the "virtual_episodes" field.
+func (_u *LibraryUpdateOne) ClearVirtualEpisodes() *LibraryUpdateOne {
+	_u.mutation.ClearVirtualEpisodes()
+	return _u
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_u *LibraryUpdateOne) SetScanGeneration(v int64) *LibraryUpdateOne {
 	_u.mutation.ResetScanGeneration()
@@ -1005,6 +1051,12 @@ func (_u *LibraryUpdateOne) sqlSave(ctx context.Context) (_node *Library, err er
 	}
 	if _u.mutation.ProviderOrderCleared() {
 		_spec.ClearField(library.FieldProviderOrder, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.VirtualEpisodes(); ok {
+		_spec.SetField(library.FieldVirtualEpisodes, field.TypeJSON, value)
+	}
+	if _u.mutation.VirtualEpisodesCleared() {
+		_spec.ClearField(library.FieldVirtualEpisodes, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)

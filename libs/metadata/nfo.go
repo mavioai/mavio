@@ -284,8 +284,10 @@ func (p *nfoParser) element(n *node, r *Result) {
 			it.RemoteTrailers = append(it.RemoteTrailers, url)
 		}
 	case "displayorder":
-		if v := n.value(); v != "" && (p.kind == core.KindSeries || p.kind == core.KindCollection) {
-			it.DisplayOrder = v
+		// Collections' display orders are Jellyfin's sort orders of their
+		// items, which Mavio does not keep.
+		if o, ok := core.ParseDisplayOrder(n.value()); ok && n.value() != "" && p.kind == core.KindSeries {
+			it.DisplayOrder = o
 		}
 	case "year":
 		if v, ok := parseInt(n.value()); ok && v > 1850 {

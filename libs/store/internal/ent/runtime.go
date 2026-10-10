@@ -249,6 +249,18 @@ func init() {
 	itemDescScanGeneration := itemFields[51].Descriptor()
 	// item.DefaultScanGeneration holds the default value on creation for the scan_generation field.
 	item.DefaultScanGeneration = itemDescScanGeneration.Default.(int64)
+	// itemDescVirtual is the schema descriptor for virtual field.
+	itemDescVirtual := itemFields[53].Descriptor()
+	// item.DefaultVirtual holds the default value on creation for the virtual field.
+	item.DefaultVirtual = itemDescVirtual.Default.(bool)
+	// itemDescMonitored is the schema descriptor for monitored field.
+	itemDescMonitored := itemFields[54].Descriptor()
+	// item.DefaultMonitored holds the default value on creation for the monitored field.
+	item.DefaultMonitored = itemDescMonitored.Default.(bool)
+	// itemDescSeriesType is the schema descriptor for series_type field.
+	itemDescSeriesType := itemFields[55].Descriptor()
+	// item.DefaultSeriesType holds the default value on creation for the series_type field.
+	item.DefaultSeriesType = itemDescSeriesType.Default.(string)
 	// itemDescID is the schema descriptor for id field.
 	itemDescID := itemFields[0].Descriptor()
 	// item.DefaultID holds the default value on creation for the id field.
@@ -342,15 +354,15 @@ func init() {
 	// library.DefaultDownloadLyrics holds the default value on creation for the download_lyrics field.
 	library.DefaultDownloadLyrics = libraryDescDownloadLyrics.Default.(bool)
 	// libraryDescScanGeneration is the schema descriptor for scan_generation field.
-	libraryDescScanGeneration := libraryFields[14].Descriptor()
+	libraryDescScanGeneration := libraryFields[15].Descriptor()
 	// library.DefaultScanGeneration holds the default value on creation for the scan_generation field.
 	library.DefaultScanGeneration = libraryDescScanGeneration.Default.(int64)
 	// libraryDescCreatedAt is the schema descriptor for created_at field.
-	libraryDescCreatedAt := libraryFields[15].Descriptor()
+	libraryDescCreatedAt := libraryFields[16].Descriptor()
 	// library.DefaultCreatedAt holds the default value on creation for the created_at field.
 	library.DefaultCreatedAt = libraryDescCreatedAt.Default.(func() time.Time)
 	// libraryDescUpdatedAt is the schema descriptor for updated_at field.
-	libraryDescUpdatedAt := libraryFields[16].Descriptor()
+	libraryDescUpdatedAt := libraryFields[17].Descriptor()
 	// library.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	library.DefaultUpdatedAt = libraryDescUpdatedAt.Default.(func() time.Time)
 	// library.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

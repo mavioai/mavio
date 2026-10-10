@@ -119,6 +119,14 @@ const (
 	FieldScanGeneration = "scan_generation"
 	// FieldMissingSince holds the string denoting the missing_since field in the database.
 	FieldMissingSince = "missing_since"
+	// FieldVirtual holds the string denoting the virtual field in the database.
+	FieldVirtual = "virtual"
+	// FieldMonitored holds the string denoting the monitored field in the database.
+	FieldMonitored = "monitored"
+	// FieldSeriesType holds the string denoting the series_type field in the database.
+	FieldSeriesType = "series_type"
+	// FieldAbsoluteNumber holds the string denoting the absolute_number field in the database.
+	FieldAbsoluteNumber = "absolute_number"
 	// EdgeLibrary holds the string denoting the library edge name in mutations.
 	EdgeLibrary = "library"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
@@ -301,6 +309,10 @@ var Columns = []string{
 	FieldMetadataRefreshedAt,
 	FieldScanGeneration,
 	FieldMissingSince,
+	FieldVirtual,
+	FieldMonitored,
+	FieldSeriesType,
+	FieldAbsoluteNumber,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -362,6 +374,12 @@ var (
 	DefaultExtra string
 	// DefaultScanGeneration holds the default value on creation for the "scan_generation" field.
 	DefaultScanGeneration int64
+	// DefaultVirtual holds the default value on creation for the "virtual" field.
+	DefaultVirtual bool
+	// DefaultMonitored holds the default value on creation for the "monitored" field.
+	DefaultMonitored bool
+	// DefaultSeriesType holds the default value on creation for the "series_type" field.
+	DefaultSeriesType string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() core.ID
 )
@@ -607,6 +625,26 @@ func ByScanGeneration(opts ...sql.OrderTermOption) OrderOption {
 // ByMissingSince orders the results by the missing_since field.
 func ByMissingSince(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMissingSince, opts...).ToFunc()
+}
+
+// ByVirtual orders the results by the virtual field.
+func ByVirtual(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVirtual, opts...).ToFunc()
+}
+
+// ByMonitored orders the results by the monitored field.
+func ByMonitored(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMonitored, opts...).ToFunc()
+}
+
+// BySeriesType orders the results by the series_type field.
+func BySeriesType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSeriesType, opts...).ToFunc()
+}
+
+// ByAbsoluteNumber orders the results by the absolute_number field.
+func ByAbsoluteNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAbsoluteNumber, opts...).ToFunc()
 }
 
 // ByLibraryField orders the results by library field.
