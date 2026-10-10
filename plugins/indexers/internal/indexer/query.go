@@ -50,7 +50,8 @@ type Query struct {
 
 	IMDbID                                           string
 	TMDBID, TVDBID, RID, TVMazeID, TraktID, DoubanID int
-	Season                                           int
+	// Nil for none; 0 is the specials.
+	Season *int
 	// An episode number, or a date's month and day ("03/01") with Season
 	// its year.
 	Episode string
@@ -101,21 +102,23 @@ func (q *Query) SanitizedTerm() string {
 }
 
 // EpisodeString returns the season and episode as releases write them:
-// "S01", "S01E02" or, for a date, "2024.03.01"; "" without a season.
+// "S01", "S01E02" or, for a date, "2024.03.01"; "" without a season or
+// for the specials.
 func (q *Query) EpisodeString() string {
-	if q.Season == 0 {
+	if q.Season == nil || *q.Season == 0 {
 		return ""
 	}
-	if d, err := time.Parse("2006 01/02", fmt.Sprintf("%d %s", q.Season, q.Episode)); err == nil {
+	season := *q.Season
+	if d, err := time.Parse("2006 01/02", fmt.Sprintf("%d %s", season, q.Episode)); err == nil {
 		return d.Format("2006.01.02")
 	}
 	if strings.TrimSpace(q.Episode) == "" {
-		return fmt.Sprintf("S%02d", q.Season)
+		return fmt.Sprintf("S%02d", season)
 	}
 	if n, err := parse.Int(q.Episode); err == nil {
-		return fmt.Sprintf("S%02dE%02d", q.Season, n)
+		return fmt.Sprintf("S%02dE%02d", season, n)
 	}
-	return fmt.Sprintf("S%02dE%s", q.Season, q.Episode)
+	return fmt.Sprintf("S%02dE%s", season, q.Episode)
 }
 
 // SanitizedTVString returns the sanitized term and the episode string.
