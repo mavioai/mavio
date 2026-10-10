@@ -70,7 +70,7 @@ func installWith(t *testing.T, root, folder, schema, fields string) {
 
 func open(t *testing.T, dir string, s core.Store) *plugins.Manager {
 	t.Helper()
-	m, err := plugins.Open(t.Context(), plugins.Config{Dir: dir, CacheDir: t.TempDir(), Store: s})
+	m, err := plugins.Open(t.Context(), plugins.Config{Dir: dir, CacheDir: t.TempDir(), DataDir: t.TempDir(), Store: s})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -16,10 +17,12 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/server"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/plugin/manifest"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
@@ -28,36 +31,90 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
 
-// installSmoke builds the smoke plugin for WASM into a plugin folder, with
-// the given manifest fields besides its ID, name, version, runtime and API
-// version.
-func installSmoke(t *testing.T, fields string) string {
+// smokeRoot holds the builds of the smoke plugin.
+var smokeRoot string
+
+func TestMain(m *testing.M) {
+	dir, err := os.MkdirTemp("", "smoke")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	smokeRoot = dir
+	code := m.Run()
+	_ = os.RemoveAll(dir)
+	os.Exit(code)
+}
+
+// smokeBuilds holds the smoke plugin built for each runtime, once per test
+// binary.
+var smokeBuilds = map[string]func() (string, error){
+	"wasm":    sync.OnceValues(func() (string, error) { return buildSmoke("wasm") }),
+	"process": sync.OnceValues(func() (string, error) { return buildSmoke("process") }),
+}
+
+// buildSmoke builds the smoke plugin for a runtime into smokeRoot.
+func buildSmoke(rt string) (string, error) {
+	out := filepath.Join(smokeRoot, rt)
+	args := []string{"build", "-o", out}
+	env := os.Environ()
+	if rt == "wasm" {
+		args = append(args, "-buildmode=c-shared")
+		env = append(env, "GOOS=wasip1", "GOARCH=wasm")
+	}
+	build := exec.Command("go", append(args, "github.com/mavioai/mavio/apps/server/internal/smoke/smokeplugin")...)
+	build.Env = env
+	if msg, err := build.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("build the %s plugin: %w\n%s", rt, err, msg)
+	}
+	return out, nil
+}
+
+// installSmoke installs the smoke plugin built for a runtime, "wasm" or
+// "process", into a plugin folder, with the given manifest fields besides
+// its ID, name, version, runtime and API version.
+func installSmoke(t *testing.T, rt, fields string) string {
 	t.Helper()
+	bin, err := smokeBuilds[rt]()
+	if err != nil {
+		t.Fatal(err)
+	}
 	root := t.TempDir()
 	dir := filepath.Join(root, "smoke")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	build := exec.CommandContext(t.Context(), "go", "build", "-buildmode=c-shared", "-o", filepath.Join(dir, "plugin.wasm"),
-		"github.com/mavioai/mavio/apps/server/internal/smoke/smokeplugin")
-	build.Env = append(os.Environ(), "GOOS=wasip1", "GOARCH=wasm")
-	if out, err := build.CombinedOutput(); err != nil {
-		t.Fatalf("build plugin: %v\n%s", err, out)
+	m := &pluginv1.Manifest{}
+	m.SetRuntime(pluginv1.Runtime_RUNTIME_PROCESS)
+	if rt == "wasm" {
+		m.SetRuntime(pluginv1.Runtime_RUNTIME_WASM)
 	}
-	manifest := fmt.Sprintf(`{"id":"org.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":"RUNTIME_WASM",
-		"apiVersion":"1.0",%s}`, fields)
-	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
+	data, err := os.ReadFile(bin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(manifest.Executable(dir, m), data, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	doc := fmt.Sprintf(`{"id":"org.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":%q,"apiVersion":"1.0",%s}`, m.GetRuntime().String(), fields)
+	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(doc), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	return root
 }
 
 // TestPluginPlatform runs the assembled server with a plugin using the
-// plugin platform, without ffmpeg: its tasks, data folder, events, HTTP
-// routes and remote devices.
+// plugin platform, without ffmpeg, in both runtimes: its tasks, data
+// folder, events, HTTP routes and remote devices.
 func TestPluginPlatform(t *testing.T) {
+	for _, rt := range []string{"wasm", "process"} {
+		t.Run(rt, func(t *testing.T) { testPluginPlatform(t, rt) })
+	}
+}
+
+func testPluginPlatform(t *testing.T, rt string) {
 	ctx := t.Context()
-	pluginDir := installSmoke(t, `"capabilities":["CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER",
+	pluginDir := installSmoke(t, rt, `"capabilities":["CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER",
 			"CAPABILITY_DEVICE_CONTROLLER"],
 		"tasks":[{"id":"count","name":"Count","description":"Counts its runs.","interval":"86400s"}],
 		"permissions":{"events":["task.*","user.created"],"api":["mavio.playback.v1.PlaybackService"],"actAsUsers":true},

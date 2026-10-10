@@ -318,7 +318,8 @@ flowchart TD
 - [x] 图片、歌词、本地元数据、保存器与处理器提供者；外部 ID
 - [x] 解析器、片头提供者、图片生成器、媒体源提供者、密码重置
 - [x] 按媒体库的提供者顺序
-- [ ] 端到端测试
+- [x] 端到端测试（使用真实 ffmpeg 的 `apps/server/internal/server/capabilities_test.go` 与 `plugins_test.go`），覆盖两种运行时
+- [ ] 为 `libs/proto` 与 `libs/plugin` 打发布标签
 
 ### P14 DLNA
 **范围**：`plugins/dlna`，第一方进程插件（[插件平台 §10](plugins.zh-CN.md#10-dlnapluginsdlna)）：媒体服务器（SSDP、ContentDirectory、ConnectionManager、带 DLNA 头的媒体）、推送播放（发现渲染器、AVTransport 与 RenderingControl）、设备 profile；为服务端的每个平台构建，进入官方目录与容器镜像。

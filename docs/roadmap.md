@@ -318,7 +318,8 @@ flowchart TD
 - [x] Image, lyrics, local metadata, saver and processor providers; external IDs
 - [x] Resolvers, intro providers, image generators, media source providers, password reset
 - [x] Provider order per library
-- [ ] End-to-end test
+- [x] End-to-end test (`apps/server/internal/server/capabilities_test.go` with real ffmpeg, `plugins_test.go`), in both runtimes
+- [ ] Tag `libs/proto` and `libs/plugin` releases
 
 ### P14 DLNA
 **Scope**: `plugins/dlna`, a first-party process plugin ([Plugins §10](plugins.md#10-dlna-pluginsdlna)): media server (SSDP, ContentDirectory, ConnectionManager, media with DLNA headers), Play To (renderer discovery, AVTransport and RenderingControl), device profiles; built for every server platform, in the official catalog and the container image.

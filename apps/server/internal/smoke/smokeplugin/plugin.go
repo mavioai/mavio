@@ -3,7 +3,9 @@
 // and as a native executable. It knows two films, "Farewell My Concubine"
 // and "The Concubine", and searches carelessly: shorter names first,
 // whatever the year. With "image_base" configured, it offers two posters
-// and a backdrop of each film under that URL.
+// and a backdrop of each film under that URL. It has a handler for every
+// capability; the manifest of each test picks those the server uses
+// (capabilities.go describes the rest).
 package main
 
 import (
@@ -209,12 +211,16 @@ func (authProvider) Authenticate(_ context.Context, req *pluginv1.AuthenticateRe
 	}.Build(), nil
 }
 
-// notifier rejects events without a type.
+// notifier rejects events without a type and appends the type of the
+// others to "notified" in the data folder.
 type notifier struct{}
 
 func (notifier) Notify(_ context.Context, req *pluginv1.NotifyRequest) (*pluginv1.NotifyResponse, error) {
 	if req.GetEvent().GetType() == "" {
 		return nil, errors.New("event without a type")
+	}
+	if err := appendData("notified", req.GetEvent().GetType()); err != nil {
+		return nil, err
 	}
 	return &pluginv1.NotifyResponse{}, nil
 }
