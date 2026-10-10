@@ -382,14 +382,14 @@ flowchart TD
 - `plugins/scraper-servarr` (WASM): Radarr's movie metadata and lists, Sonarr's SkyHook series and episodes in TVDB order, scene mappings, daily series, XEM
 - `scraper-tmdb`: Radarr's TMDB read access token unless an administrator sets a key, and Mavio's own key when TMDB rejects the token; `DISCOVERY_PROVIDER` (trending, popular, upcoming, by genre, studio, network, keyword and watch provider, recommendations and similar titles); episode groups
 
-**Done when**: with no key configured, a movie and a series are identified and refreshed, also when TMDB rejects Radarr's token, the series' wanted episodes are numbered as TVDB numbers them, and TMDB's episode metadata is attached to them through the series' display order.
+**Done when**: with no key configured, a movie and a series are identified and refreshed, also when TMDB rejects Radarr's token, the series' wanted episodes are numbered as TVDB numbers them, and TMDB's episode metadata is attached to them by their TVDB IDs, also where TMDB numbers them otherwise.
 
 **Progress**:
 - [x] `scraper-tmdb` without a key: Radarr's token, Mavio's key once TMDB rejects it (built in from `MAVIO_TMDB_KEY`)
 - [ ] Mavio's own TMDB API key registered and set as `MAVIO_TMDB_KEY` in release builds (needs the project's TMDB account)
 - [x] `DISCOVERY_PROVIDER` in `scraper-tmdb`
 - [x] `plugins/scraper-servarr`: Radarr's movie metadata and lists, SkyHook's series and episodes, scene mappings, daily series, XEM
-- [ ] End-to-end test
+- [x] End-to-end test (`apps/server/internal/server/sources_test.go`)
 
 ### P17 Indexers
 **Scope**: `plugins/indexers`, a first-party process plugin porting Prowlarr: Newznab, Torznab, the Cardigann engine with the definitions of `indexers.prowlarr.com`, every site Prowlarr implements in code, categories and capabilities, rate limits and backoff, indexer proxies (HTTP, SOCKS, FlareSolverr). The capability `INDEXER_PROVIDER`; `ReleaseService` searches the configured indexers and parses what they return with `libs/release`.
