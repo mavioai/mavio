@@ -12,6 +12,7 @@
 | [docs/testing.zh-CN.md](docs/testing.zh-CN.md) | 测试分层、从 Jellyfin 移植测试、测试媒体 |
 | [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md) | 阶段划分、完成标准、当前进度、风险 |
 | [docs/optimization.zh-CN.md](docs/optimization.zh-CN.md) | 优化主题，每个附落地对照索引：存储 I/O 延迟缓解与推测式预热 |
+| [docs/jellyfin-compat.zh-CN.md](docs/jellyfin-compat.zh-CN.md) | Jellyfin API 兼容垫片评估（未采用） |
 
 ## 项目概览
 

@@ -299,7 +299,7 @@ flowchart TD
 - [x] 使用真实 ffmpeg 的端到端测试（`apps/server/internal/server/extras_test.go`）
 
 ### P13 客户端与生态
-**范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；Jellyfin API 兼容垫片（shim）评估。具体完成标准在 P12 完成后制定。
+**范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。具体完成标准在 P12 完成后制定。
 
 ---
 

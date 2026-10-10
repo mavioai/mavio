@@ -19,7 +19,7 @@
 * **Private by default**: no telemetry, playback analytics or device tracking; all data stays on the host. Without configured metadata providers (such as a TMDB API key) the server works from local NFO files and images and makes no outbound metadata requests.
 
 ### 1.2 Non-goals (current phase)
-* No compatibility with the Jellyfin client ecosystem and no Jellyfin data migration. A Jellyfin API compatibility shim will be evaluated separately later.
+* No compatibility with the Jellyfin client ecosystem and no Jellyfin data migration. A Jellyfin API compatibility shim is evaluated in [Jellyfin Compatibility](jellyfin-compat.md) and decided in P13.
 * No UI yet (Web / Mobile / Desktop), but the directory layout and contracts already reserve room for it.
 
 ### 1.3 Engineering Principles

@@ -299,7 +299,7 @@ flowchart TD
 - [x] End-to-end test with real ffmpeg (`apps/server/internal/server/extras_test.go`)
 
 ### P13 Clients and Ecosystem
-**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; evaluation of a Jellyfin API compatibility shim. Its completion criteria will be defined after P12.
+**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its completion criteria will be defined after P12.
 
 ---
 

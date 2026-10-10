@@ -12,6 +12,7 @@ This is the repository working guide for AI coding agents (and new developers). 
 | [docs/testing.md](docs/testing.md) | Test layers, porting tests from Jellyfin, test media |
 | [docs/roadmap.md](docs/roadmap.md) | Phases, completion criteria, current status, risks |
 | [docs/optimization.md](docs/optimization.md) | Optimization topics, each with an implementation index: storage I/O latency mitigation and speculative warming |
+| [docs/jellyfin-compat.md](docs/jellyfin-compat.md) | Evaluation of a Jellyfin API compatibility shim (not adopted) |
 
 ## Project Overview
 

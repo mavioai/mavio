@@ -19,7 +19,7 @@
 * **默认隐私**：没有遥测、播放统计或设备追踪，所有数据都留在主机上。未配置元数据提供者（如 TMDB API Key）时，服务端只使用本地 NFO 文件与图片，不发出元数据的外部请求。
 
 ### 1.2 非目标（当前阶段）
-* 不兼容 Jellyfin 客户端生态、不提供 Jellyfin 数据迁移。Jellyfin API 兼容垫片（shim）留待后续单独评估。
+* 不兼容 Jellyfin 客户端生态、不提供 Jellyfin 数据迁移。Jellyfin API 兼容垫片（shim）的评估见 [Jellyfin 兼容性](jellyfin-compat.zh-CN.md)，在 P13 决定。
 * 暂不实现任何 UI（Web / Mobile / Desktop），但目录与契约提前为其预留。
 
 ### 1.3 工程原则
