@@ -258,6 +258,9 @@ message ServerSettings {
   // URLs of the plugin catalogs plugins are installed from.
   repeated string plugin_catalogs = 3 [(buf.validate.field).repeated.items.string.uri = true];
   google.protobuf.Timestamp update_time = 4;
+  // ID of the plugin that delivers the PINs resetting forgotten passwords;
+  // empty when users cannot reset them.
+  string password_reset_plugin = 5;
 }
 
 message GetServerSettingsRequest {}

@@ -39,7 +39,7 @@ erDiagram
 | `Job` | A durable unit of background work |
 | `PluginConfig` | The configuration an administrator gave a plugin |
 | `DisplayPreferences` | A user's settings for how one client shows one view |
-| `ServerSettings` | What administrators change while the server runs: transcoding, network, plugin catalogs |
+| `ServerSettings` | What administrators change while the server runs: transcoding, network, plugin catalogs, the password reset plugin |
 | `APIKey` | A token an integration calls the API with, as the administrator who created it |
 | `Activity` | Something that happened on the server, kept in the activity log |
 
@@ -274,6 +274,7 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 * `Transcoding`: the `HardwareAcceleration` (`auto` uses what the server's ffmpeg and hardware support, `none`, or `videotoolbox`), whether hardware encoders may be used, the software encoders' `EncoderPreset` (empty picks one by the source), `H264CRF` and `H265CRF` (0–51), `Threads`, tone mapping (`TonemapAlgorithm`, `TonemapRange`, `TonemapDesat`, `TonemapPeak`), deinterlacing (`yadif` or `bwdif`, optionally at double rate), the stereo `DownmixBoost` (0.5–3), `CropBlackBorders`, and the `TranscodeDir` (an absolute folder; empty keeps the one the server started with).
 * `Network`: the `ServerName` shown to clients (empty means the host name), the `BaseURL` a reverse proxy serves the server under (a clean path such as `/mavio`), an `HTTPSPort` with its PEM `CertificatePath` and `KeyPath`, and `LocalDiscovery`.
 * `PluginCatalogs`: the http or https URLs of the catalogs plugins are installed from.
+* `PasswordResetPlugin`: the ID of the plugin that delivers the PINs resetting forgotten passwords; empty when users cannot reset them.
 * `Validate` checks the known values and ranges.
 
 ### 12.2 API Keys

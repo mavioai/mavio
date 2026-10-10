@@ -126,7 +126,7 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 			ServerName: &n.ServerName, BaseUrl: &n.BaseURL, HttpsPort: new(int32(n.HTTPSPort)), CertificatePath: &n.CertificatePath,
 			KeyPath: &n.KeyPath, LocalDiscovery: &n.LocalDiscovery,
 		}.Build(),
-		PluginCatalogs: s.PluginCatalogs,
+		PluginCatalogs: s.PluginCatalogs, PasswordResetPlugin: &s.PasswordResetPlugin,
 	}.Build()
 	if !s.UpdatedAt.IsZero() {
 		out.SetUpdateTime(timestamppb.New(s.UpdatedAt))
@@ -154,7 +154,7 @@ func settingsFromProto(p *systemv1.ServerSettings) core.ServerSettings {
 			ServerName: n.GetServerName(), BaseURL: n.GetBaseUrl(), HTTPSPort: int(n.GetHttpsPort()),
 			CertificatePath: n.GetCertificatePath(), KeyPath: n.GetKeyPath(), LocalDiscovery: n.GetLocalDiscovery(),
 		},
-		PluginCatalogs: p.GetPluginCatalogs(),
+		PluginCatalogs: p.GetPluginCatalogs(), PasswordResetPlugin: p.GetPasswordResetPlugin(),
 	}
 }
 

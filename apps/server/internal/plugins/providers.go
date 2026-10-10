@@ -3,6 +3,10 @@ package plugins
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
@@ -379,4 +383,19 @@ func (m *Manager) ImageGenerators() []library.ImageGenerator {
 		}
 	}
 	return out
+}
+
+// StartPasswordReset has a password reset plugin deliver a PIN to a user.
+func (m *Manager) StartPasswordReset(ctx context.Context, pluginID string, user core.User, pin string, expires time.Time) error {
+	pl, ok := m.running(pluginID)
+	if !ok || pl.PasswordReset() == nil {
+		return fmt.Errorf("password reset plugin %s: %w", pluginID, core.ErrNotFound)
+	}
+	_, err := pl.PasswordReset().StartReset(ctx, pluginv1.StartResetRequest_builder{
+		UserId: proto.String(user.ID.String()), UserName: proto.String(user.Name), Pin: proto.String(pin), Expires: timestamppb.New(expires),
+	}.Build())
+	if err != nil {
+		return fmt.Errorf("password reset plugin %s: %w", pluginID, err)
+	}
+	return nil
 }

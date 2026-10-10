@@ -32,6 +32,8 @@ var AuthPublicProcedures = []string{
 	authv1connect.AuthServiceStartQuickConnectProcedure,
 	authv1connect.AuthServiceGetQuickConnectStateProcedure,
 	authv1connect.AuthServiceLoginWithQuickConnectProcedure,
+	authv1connect.AuthServiceForgotPasswordProcedure,
+	authv1connect.AuthServiceResetPasswordProcedure,
 }
 
 // UserBoundProcedures act on the caller's own state, so a plugin calls them
@@ -70,13 +72,19 @@ type AuthService struct {
 	// Authenticate checks the credentials of users of authentication
 	// plugins; nil lets none of them sign in.
 	Authenticate func(ctx context.Context, pluginID, name, password string) (plugins.AuthResult, error)
+	// ResetPlugin names the plugin delivering password reset PINs, empty
+	// when there is none; nil means none.
+	ResetPlugin func() string
+	// StartReset has a plugin deliver a password reset PIN to a user.
+	StartReset func(ctx context.Context, pluginID string, user core.User, pin string, expires time.Time) error
+	resets     *auth.PasswordResets
 }
 
 var _ authv1connect.AuthServiceHandler = (*AuthService)(nil)
 
 // NewAuthService returns an AuthService backed by store.
 func NewAuthService(store core.Store) *AuthService {
-	return &AuthService{store: store, now: time.Now, quick: auth.NewQuickConnect()}
+	return &AuthService{store: store, now: time.Now, quick: auth.NewQuickConnect(), resets: auth.NewPasswordResets()}
 }
 
 // StartQuickConnect registers a device waiting to be signed in from
@@ -419,4 +427,99 @@ func apiKeyToProto(k *core.APIKey) *authv1.ApiKey {
 		out.SetLastUseTime(timestamppb.New(*k.LastUsedAt))
 	}
 	return out
+}
+
+// ForgotPassword has the password reset plugin deliver a PIN to a user
+// who signs in with a password. It answers alike for every name, so that
+// it tells nothing about which users exist.
+func (s *AuthService) ForgotPassword(ctx context.Context, req *authv1.ForgotPasswordRequest) (*authv1.ForgotPasswordResponse, error) {
+	pluginID := ""
+	if s.ResetPlugin != nil {
+		pluginID = s.ResetPlugin()
+	}
+	if pluginID == "" || s.StartReset == nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("passwords cannot be reset; ask an administrator"))
+	}
+	expires := s.now().Add(auth.ResetTimeout)
+	resp := authv1.ForgotPasswordResponse_builder{ExpireTime: timestamppb.New(expires)}.Build()
+	user, err := s.store.Users().GetByName(ctx, req.GetName())
+	if err != nil && !errors.Is(err, core.ErrNotFound) {
+		return nil, connectError(ctx, err)
+	}
+	if err != nil || user.Disabled || user.AuthProvider != "" {
+		// As costly as starting a reset.
+		auth.SpendPasswordCheck("")
+		return resp, nil
+	}
+	pin, expires := s.resets.Start(user.ID)
+	// The PIN is delivered in the background, so that the answer takes
+	// as long for every name.
+	ctx = context.WithoutCancel(ctx)
+	go func() {
+		ctx, cancel := context.WithTimeout(ctx, time.Minute)
+		defer cancel()
+		if err := s.StartReset(ctx, pluginID, user, pin, expires); err != nil {
+			s.resets.Cancel(user.ID)
+			slog.WarnContext(ctx, "password reset plugin failed", "user", user.ID, "plugin", pluginID, "err", err)
+			s.Activity.Record(ctx, core.Activity{
+				Type: "user.password_reset_failed", Severity: core.SeverityWarning, UserID: user.ID,
+				Title: "Failed to send a password reset PIN to " + user.Name, Message: err.Error(),
+			})
+			return
+		}
+		s.Activity.Record(ctx, core.Activity{
+			Type: "user.password_reset_started", UserID: user.ID, Title: "Password reset PIN sent to " + user.Name,
+		})
+	}()
+	return resp, nil
+}
+
+// ResetPassword sets a new password with a PIN ForgotPassword delivered,
+// ending the user's sessions.
+func (s *AuthService) ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) (*authv1.ResetPasswordResponse, error) {
+	failed := connect.NewError(connect.CodeUnauthenticated, errors.New("wrong user name or PIN"))
+	user, err := s.store.Users().GetByName(ctx, req.GetName())
+	if errors.Is(err, core.ErrNotFound) {
+		auth.SpendPasswordCheck(req.GetPin())
+		return nil, failed
+	} else if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	if !s.resets.Redeem(user.ID, req.GetPin()) {
+		s.Activity.Record(ctx, core.Activity{
+			Type: "user.password_reset_failed", Severity: core.SeverityWarning, UserID: user.ID,
+			Title: "Failed password reset of " + user.Name, Message: "wrong PIN",
+		})
+		return nil, failed
+	}
+	err = s.store.InTx(ctx, func(tx core.Store) error {
+		u, err := tx.Users().Get(ctx, user.ID)
+		if err != nil {
+			return err
+		}
+		if u.Disabled || u.AuthProvider != "" {
+			return failed
+		}
+		u.PasswordHash = auth.HashPassword(req.GetNewPassword())
+		if err := tx.Users().Update(ctx, &u); err != nil {
+			return err
+		}
+		sessions, err := tx.AuthSessions().ListForUser(ctx, u.ID)
+		if err != nil {
+			return err
+		}
+		for _, sess := range sessions {
+			if err := tx.AuthSessions().Delete(ctx, sess.ID); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	s.Activity.Record(ctx, core.Activity{
+		Type: "user.password_reset", UserID: user.ID, Title: "Password of " + user.Name + " reset",
+	})
+	return &authv1.ResetPasswordResponse{}, nil
 }

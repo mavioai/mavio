@@ -397,6 +397,36 @@
         "additionalProperties": false,
         "description": "Device identifies a client installation."
       },
+      "mavio.auth.v1.ForgotPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name"
+          }
+        },
+        "title": "ForgotPasswordRequest",
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.ForgotPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "expireTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "expire_time",
+            "description": "When the PIN, if one was delivered, stops working."
+          }
+        },
+        "title": "ForgotPasswordResponse",
+        "additionalProperties": false
+      },
       "mavio.auth.v1.GetAuthInfoRequest": {
         "type": "object",
         "title": "GetAuthInfoRequest",
@@ -594,6 +624,38 @@
       "mavio.auth.v1.LogoutResponse": {
         "type": "object",
         "title": "LogoutResponse",
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.ResetPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "pin": {
+            "type": "string",
+            "title": "pin",
+            "maxLength": 64
+          },
+          "newPassword": {
+            "type": "string",
+            "title": "new_password",
+            "maxLength": 1024,
+            "minLength": 1
+          }
+        },
+        "title": "ResetPasswordRequest",
+        "required": [
+          "name",
+          "pin",
+          "newPassword"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.ResetPasswordResponse": {
+        "type": "object",
+        "title": "ResetPasswordResponse",
         "additionalProperties": false
       },
       "mavio.auth.v1.RevokeApiKeyRequest": {
@@ -7739,6 +7801,11 @@
               }
             ],
             "title": "update_time"
+          },
+          "passwordResetPlugin": {
+            "type": "string",
+            "title": "password_reset_plugin",
+            "description": "ID of the plugin that delivers the PINs resetting forgotten passwords;\n empty when users cannot reset them."
           }
         },
         "title": "ServerSettings",
@@ -9212,13 +9279,14 @@
         }
       }
     },
-    "/mavio.user.v1.UserDataService/GetUserData": {
+    "/mavio.system.v1.SystemService/UninstallPlugin": {
       "post": {
         "tags": [
-          "UserDataService"
+          "SystemService"
         ],
-        "summary": "GetUserData",
-        "operationId": "mavio.user.v1.UserDataService.GetUserData",
+        "summary": "UninstallPlugin",
+        "description": "UninstallPlugin stops a plugin and removes its folder and\n configuration. Administrators only.",
+        "operationId": "mavio.system.v1.SystemService.UninstallPlugin",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -9243,7 +9311,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.user.v1.GetUserDataRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.UninstallPluginRequest"
               }
             }
           },
@@ -9265,7 +9333,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.user.v1.GetUserDataResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.UninstallPluginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.auth.v1.AuthService/ForgotPassword": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "ForgotPassword",
+        "description": "ForgotPassword has the password reset plugin chosen in the server\n settings deliver a PIN to the user, which resets the password within\n 30 minutes. It answers the same whether or not the user exists.",
+        "operationId": "mavio.auth.v1.AuthService.ForgotPassword",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.ForgotPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.ForgotPasswordResponse"
                 }
               }
             }
@@ -9707,6 +9837,68 @@
         }
       }
     },
+    "/mavio.auth.v1.AuthService/ResetPassword": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "ResetPassword",
+        "description": "ResetPassword sets a new password with the PIN ForgotPassword\n delivered, and ends the user's sessions.",
+        "operationId": "mavio.auth.v1.AuthService.ResetPassword",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.ResetPasswordResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.auth.v1.AuthService/RevokeApiKey": {
       "post": {
         "tags": [
@@ -9831,14 +10023,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/StartQuickConnect": {
+    "/mavio.playback.v1.PlaybackService/StopPlayback": {
       "post": {
         "tags": [
-          "AuthService"
+          "PlaybackService"
         ],
-        "summary": "StartQuickConnect",
-        "description": "StartQuickConnect begins signing a device in from a signed-in one\n (Quick Connect): the new device shows the code, a signed-in user\n enters it with AuthorizeQuickConnect, and the new device, polling\n GetQuickConnectState, then signs in with LoginWithQuickConnect as that\n user. The request expires after ten minutes, or one minute after it\n was authorized.",
-        "operationId": "mavio.auth.v1.AuthService.StartQuickConnect",
+        "summary": "StopPlayback",
+        "description": "StopPlayback ends a playback and saves the resume position or marks the\n item played.",
+        "operationId": "mavio.playback.v1.PlaybackService.StopPlayback",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -9863,7 +10055,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.StartQuickConnectRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackRequest"
               }
             }
           },
@@ -9885,7 +10077,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.StartQuickConnectResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackResponse"
                 }
               }
             }
@@ -12481,14 +12673,14 @@
         }
       }
     },
-    "/mavio.session.v1.SyncPlayService/GetTime": {
+    "/mavio.auth.v1.AuthService/StartQuickConnect": {
       "post": {
         "tags": [
-          "SyncPlayService"
+          "AuthService"
         ],
-        "summary": "GetTime",
-        "description": "GetTime returns the server's time when it received and when it\n answered the request, for clients to estimate their clock's offset\n and the round trip, as in NTP.",
-        "operationId": "mavio.session.v1.SyncPlayService.GetTime",
+        "summary": "StartQuickConnect",
+        "description": "StartQuickConnect begins signing a device in from a signed-in one\n (Quick Connect): the new device shows the code, a signed-in user\n enters it with AuthorizeQuickConnect, and the new device, polling\n GetQuickConnectState, then signs in with LoginWithQuickConnect as that\n user. The request expires after ten minutes, or one minute after it\n was authorized.",
+        "operationId": "mavio.auth.v1.AuthService.StartQuickConnect",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12513,7 +12705,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.GetTimeRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.StartQuickConnectRequest"
               }
             }
           },
@@ -12535,7 +12727,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.GetTimeResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.StartQuickConnectResponse"
                 }
               }
             }
@@ -12730,14 +12922,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/StopPlayback": {
+    "/mavio.session.v1.SyncPlayService/GetTime": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "SyncPlayService"
         ],
-        "summary": "StopPlayback",
-        "description": "StopPlayback ends a playback and saves the resume position or marks the\n item played.",
-        "operationId": "mavio.playback.v1.PlaybackService.StopPlayback",
+        "summary": "GetTime",
+        "description": "GetTime returns the server's time when it received and when it\n answered the request, for clients to estimate their clock's offset\n and the round trip, as in NTP.",
+        "operationId": "mavio.session.v1.SyncPlayService.GetTime",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12762,7 +12954,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.GetTimeRequest"
               }
             }
           },
@@ -12784,7 +12976,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.GetTimeResponse"
                 }
               }
             }
@@ -14576,14 +14768,14 @@
         }
       }
     },
-    "/mavio.system.v1.SystemService/UninstallPlugin": {
+    "/mavio.playback.v1.PlaybackService/StartPlayback": {
       "post": {
         "tags": [
-          "SystemService"
+          "PlaybackService"
         ],
-        "summary": "UninstallPlugin",
-        "description": "UninstallPlugin stops a plugin and removes its folder and\n configuration. Administrators only.",
-        "operationId": "mavio.system.v1.SystemService.UninstallPlugin",
+        "summary": "StartPlayback",
+        "description": "StartPlayback picks a media source and streams, decides whether the\n client plays it directly, remuxed or transcoded, and returns the URLs to\n play it from. The URLs need no token and work until the playback stops,\n expires or its sign-in session ends.",
+        "operationId": "mavio.playback.v1.PlaybackService.StartPlayback",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -14608,7 +14800,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.UninstallPluginRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackRequest"
               }
             }
           },
@@ -14630,7 +14822,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.UninstallPluginResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackResponse"
                 }
               }
             }
@@ -15010,14 +15202,13 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/StartPlayback": {
+    "/mavio.user.v1.UserDataService/GetUserData": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "UserDataService"
         ],
-        "summary": "StartPlayback",
-        "description": "StartPlayback picks a media source and streams, decides whether the\n client plays it directly, remuxed or transcoded, and returns the URLs to\n play it from. The URLs need no token and work until the playback stops,\n expires or its sign-in session ends.",
-        "operationId": "mavio.playback.v1.PlaybackService.StartPlayback",
+        "summary": "GetUserData",
+        "operationId": "mavio.user.v1.UserDataService.GetUserData",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -15042,7 +15233,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackRequest"
+                "$ref": "#/components/schemas/mavio.user.v1.GetUserDataRequest"
               }
             }
           },
@@ -15064,7 +15255,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackResponse"
+                  "$ref": "#/components/schemas/mavio.user.v1.GetUserDataResponse"
                 }
               }
             }

@@ -199,7 +199,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Lyrics:    &library.Lyrics{Store: db, Source: plugs.LyricsProviders, Logger: log},
 		Intros:    &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
 		Settings:  set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
-		Authenticate: plugs.Authenticate, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Dev: cfg.Dev,
+		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Dev: cfg.Dev,
 	})
 	if err != nil {
 		return err

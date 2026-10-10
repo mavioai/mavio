@@ -139,7 +139,7 @@ A request carries the folder (library kind, library folder, path, what its conta
 `MediaSourceProviderService.GetMediaSources` returns extra media sources of an item: an HTTP URL with its probed streams. Playback decisions consider them with the item's files; the server direct plays them by redirect and remuxes or transcodes them with ffmpeg reading the URL.
 
 ### 8.10 Password Reset
-`AuthService.ForgotPassword` passes a user name to the `PasswordResetService.StartReset` of the plugin chosen in the server settings, which delivers a one-time PIN its own way (e-mail, chat); the server keeps the PIN's hash for 30 minutes, and `AuthService.ResetPassword` with the PIN sets a new password.
+`AuthService.ForgotPassword` makes an eight-digit one-time PIN for a user who signs in with a password and passes it, with the user's ID and name and its expiry, to the `PasswordResetService.StartReset` of the plugin chosen in the server settings (`password_reset_plugin`), which delivers it its own way (e-mail, chat). It answers alike whether or not the user exists, delivering in the background. The server keeps only the PIN's hash, in memory, for 30 minutes; a new PIN replaces the user's previous one, and five wrong PINs end it. `AuthService.ResetPassword` with the PIN sets a new password and ends the user's sessions. Without a chosen plugin, `ForgotPassword` fails with `FAILED_PRECONDITION`.
 
 ### 8.11 Provider Order per Library
 A library stores, per capability (metadata, images, subtitles, lyrics, segments), which providers it uses and in which order. Unset means every ready provider in plugin ID order, as today.

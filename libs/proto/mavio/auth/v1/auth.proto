@@ -56,6 +56,13 @@ service AuthService {
   }
   // RevokeApiKey deletes an API key. Administrators only.
   rpc RevokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
+  // ForgotPassword has the password reset plugin chosen in the server
+  // settings deliver a PIN to the user, which resets the password within
+  // 30 minutes. It answers the same whether or not the user exists.
+  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+  // ResetPassword sets a new password with the PIN ForgotPassword
+  // delivered, and ends the user's sessions.
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
 }
 
 // Device identifies a client installation.
@@ -240,3 +247,29 @@ message RevokeApiKeyRequest {
 }
 
 message RevokeApiKeyResponse {}
+
+message ForgotPasswordRequest {
+  string name = 1 [(buf.validate.field).required = true];
+}
+
+message ForgotPasswordResponse {
+  // When the PIN, if one was delivered, stops working.
+  google.protobuf.Timestamp expire_time = 1;
+}
+
+message ResetPasswordRequest {
+  string name = 1 [(buf.validate.field).required = true];
+  string pin = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+  string new_password = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 1024
+    }
+  ];
+}
+
+message ResetPasswordResponse {}

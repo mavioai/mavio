@@ -139,7 +139,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 `MediaSourceProviderService.GetMediaSources` 返回条目额外的媒体源：一个 HTTP URL 及其探测出的流。播放决策把它们与条目的文件一并考虑；服务端通过重定向直放它们，或由 ffmpeg 读取该 URL 进行转封装或转码。
 
 ### 8.10 密码重置
-`AuthService.ForgotPassword` 把用户名交给服务端设置中选定插件的 `PasswordResetService.StartReset`，由插件以自己的方式（邮件、聊天）发送一次性 PIN；服务端保存 PIN 的哈希 30 分钟，`AuthService.ResetPassword` 凭 PIN 设置新密码。
+`AuthService.ForgotPassword` 为使用密码登录的用户生成一个八位一次性 PIN，连同用户 ID、用户名与过期时间交给服务端设置中选定插件（`password_reset_plugin`）的 `PasswordResetService.StartReset`，由插件以自己的方式（邮件、聊天）投递。无论用户是否存在，它的应答都相同，投递在后台进行。服务端只在内存中保存 PIN 的哈希 30 分钟；新的 PIN 替换该用户之前的 PIN，输错五次即作废。`AuthService.ResetPassword` 凭 PIN 设置新密码，并结束该用户的所有会话。未选定插件时，`ForgotPassword` 以 `FAILED_PRECONDITION` 失败。
 
 ### 8.11 按媒体库的提供者顺序
 媒体库按能力（元数据、图片、字幕、歌词、片段）保存使用哪些提供者以及顺序。未设置时表示按插件 ID 顺序使用所有就绪的提供者，与现在一致。

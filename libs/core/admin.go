@@ -17,7 +17,10 @@ type ServerSettings struct {
 	// PluginCatalogs are the URLs of the plugin catalogs plugins are
 	// installed from.
 	PluginCatalogs []string
-	UpdatedAt      time.Time
+	// PasswordResetPlugin is the ID of the plugin that delivers the PINs
+	// resetting forgotten passwords; empty when users cannot reset them.
+	PasswordResetPlugin string
+	UpdatedAt           time.Time
 }
 
 // HardwareAcceleration chooses how video is decoded and encoded.

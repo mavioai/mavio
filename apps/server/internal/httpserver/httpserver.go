@@ -75,6 +75,10 @@ type Options struct {
 	Backups *backup.Manager
 	// Authenticate checks the credentials of plugin users.
 	Authenticate func(ctx context.Context, pluginID, name, password string) (plugins.AuthResult, error)
+	// ResetPlugin names the plugin delivering password reset PINs, empty
+	// when there is none; StartReset has it deliver one.
+	ResetPlugin func() string
+	StartReset  func(ctx context.Context, pluginID string, user core.User, pin string, expires time.Time) error
 	// Wake is told of the media of each item a client opens; nil tells no
 	// one.
 	Wake func(sources []core.MediaSource)
@@ -112,6 +116,7 @@ func Handler(opts Options) (http.Handler, error) {
 	}, interceptors))
 	authService := rpc.NewAuthService(opts.Store)
 	authService.Activity, authService.Authenticate = opts.Activity, opts.Authenticate
+	authService.ResetPlugin, authService.StartReset = opts.ResetPlugin, opts.StartReset
 	mux.Handle(authv1connect.NewAuthServiceHandler(authService, interceptors))
 	tasks := rpc.NewTaskService(opts.Store)
 	if opts.Plugins != nil {

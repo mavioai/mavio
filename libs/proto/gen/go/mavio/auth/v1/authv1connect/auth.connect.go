@@ -68,6 +68,12 @@ const (
 	// AuthServiceRevokeApiKeyProcedure is the fully-qualified name of the AuthService's RevokeApiKey
 	// RPC.
 	AuthServiceRevokeApiKeyProcedure = "/mavio.auth.v1.AuthService/RevokeApiKey"
+	// AuthServiceForgotPasswordProcedure is the fully-qualified name of the AuthService's
+	// ForgotPassword RPC.
+	AuthServiceForgotPasswordProcedure = "/mavio.auth.v1.AuthService/ForgotPassword"
+	// AuthServiceResetPasswordProcedure is the fully-qualified name of the AuthService's ResetPassword
+	// RPC.
+	AuthServiceResetPasswordProcedure = "/mavio.auth.v1.AuthService/ResetPassword"
 )
 
 // AuthServiceClient is a client for the mavio.auth.v1.AuthService service.
@@ -111,6 +117,13 @@ type AuthServiceClient interface {
 	ListApiKeys(context.Context, *v1.ListApiKeysRequest) (*v1.ListApiKeysResponse, error)
 	// RevokeApiKey deletes an API key. Administrators only.
 	RevokeApiKey(context.Context, *v1.RevokeApiKeyRequest) (*v1.RevokeApiKeyResponse, error)
+	// ForgotPassword has the password reset plugin chosen in the server
+	// settings deliver a PIN to the user, which resets the password within
+	// 30 minutes. It answers the same whether or not the user exists.
+	ForgotPassword(context.Context, *v1.ForgotPasswordRequest) (*v1.ForgotPasswordResponse, error)
+	// ResetPassword sets a new password with the PIN ForgotPassword
+	// delivered, and ends the user's sessions.
+	ResetPassword(context.Context, *v1.ResetPasswordRequest) (*v1.ResetPasswordResponse, error)
 }
 
 // NewAuthServiceClient constructs a client for the mavio.auth.v1.AuthService service. By default,
@@ -206,6 +219,18 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("RevokeApiKey")),
 			connect.WithClientOptions(opts...),
 		),
+		forgotPassword: connect.NewClient[v1.ForgotPasswordRequest, v1.ForgotPasswordResponse](
+			httpClient,
+			baseURL+AuthServiceForgotPasswordProcedure,
+			connect.WithSchema(authServiceMethods.ByName("ForgotPassword")),
+			connect.WithClientOptions(opts...),
+		),
+		resetPassword: connect.NewClient[v1.ResetPasswordRequest, v1.ResetPasswordResponse](
+			httpClient,
+			baseURL+AuthServiceResetPasswordProcedure,
+			connect.WithSchema(authServiceMethods.ByName("ResetPassword")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -224,6 +249,8 @@ type authServiceClient struct {
 	createApiKey          *connect.Client[v1.CreateApiKeyRequest, v1.CreateApiKeyResponse]
 	listApiKeys           *connect.Client[v1.ListApiKeysRequest, v1.ListApiKeysResponse]
 	revokeApiKey          *connect.Client[v1.RevokeApiKeyRequest, v1.RevokeApiKeyResponse]
+	forgotPassword        *connect.Client[v1.ForgotPasswordRequest, v1.ForgotPasswordResponse]
+	resetPassword         *connect.Client[v1.ResetPasswordRequest, v1.ResetPasswordResponse]
 }
 
 // GetAuthInfo calls mavio.auth.v1.AuthService.GetAuthInfo.
@@ -343,6 +370,24 @@ func (c *authServiceClient) RevokeApiKey(ctx context.Context, req *v1.RevokeApiK
 	return nil, err
 }
 
+// ForgotPassword calls mavio.auth.v1.AuthService.ForgotPassword.
+func (c *authServiceClient) ForgotPassword(ctx context.Context, req *v1.ForgotPasswordRequest) (*v1.ForgotPasswordResponse, error) {
+	response, err := c.forgotPassword.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ResetPassword calls mavio.auth.v1.AuthService.ResetPassword.
+func (c *authServiceClient) ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) (*v1.ResetPasswordResponse, error) {
+	response, err := c.resetPassword.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // AuthServiceHandler is an implementation of the mavio.auth.v1.AuthService service.
 type AuthServiceHandler interface {
 	// GetAuthInfo tells clients how to sign in.
@@ -384,6 +429,13 @@ type AuthServiceHandler interface {
 	ListApiKeys(context.Context, *v1.ListApiKeysRequest) (*v1.ListApiKeysResponse, error)
 	// RevokeApiKey deletes an API key. Administrators only.
 	RevokeApiKey(context.Context, *v1.RevokeApiKeyRequest) (*v1.RevokeApiKeyResponse, error)
+	// ForgotPassword has the password reset plugin chosen in the server
+	// settings deliver a PIN to the user, which resets the password within
+	// 30 minutes. It answers the same whether or not the user exists.
+	ForgotPassword(context.Context, *v1.ForgotPasswordRequest) (*v1.ForgotPasswordResponse, error)
+	// ResetPassword sets a new password with the PIN ForgotPassword
+	// delivered, and ends the user's sessions.
+	ResetPassword(context.Context, *v1.ResetPasswordRequest) (*v1.ResetPasswordResponse, error)
 }
 
 // NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -475,6 +527,18 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceMethods.ByName("RevokeApiKey")),
 		connect.WithHandlerOptions(opts...),
 	)
+	authServiceForgotPasswordHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceForgotPasswordProcedure,
+		svc.ForgotPassword,
+		connect.WithSchema(authServiceMethods.ByName("ForgotPassword")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceResetPasswordHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceResetPasswordProcedure,
+		svc.ResetPassword,
+		connect.WithSchema(authServiceMethods.ByName("ResetPassword")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.auth.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AuthServiceGetAuthInfoProcedure:
@@ -503,6 +567,10 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceListApiKeysHandler.ServeHTTP(w, r)
 		case AuthServiceRevokeApiKeyProcedure:
 			authServiceRevokeApiKeyHandler.ServeHTTP(w, r)
+		case AuthServiceForgotPasswordProcedure:
+			authServiceForgotPasswordHandler.ServeHTTP(w, r)
+		case AuthServiceResetPasswordProcedure:
+			authServiceResetPasswordHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -562,4 +630,12 @@ func (UnimplementedAuthServiceHandler) ListApiKeys(context.Context, *v1.ListApiK
 
 func (UnimplementedAuthServiceHandler) RevokeApiKey(context.Context, *v1.RevokeApiKeyRequest) (*v1.RevokeApiKeyResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.RevokeApiKey is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) ForgotPassword(context.Context, *v1.ForgotPasswordRequest) (*v1.ForgotPasswordResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.ForgotPassword is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) ResetPassword(context.Context, *v1.ResetPasswordRequest) (*v1.ResetPasswordResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.ResetPassword is not implemented"))
 }

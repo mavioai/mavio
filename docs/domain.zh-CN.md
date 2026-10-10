@@ -38,7 +38,7 @@ erDiagram
 | `UserData` | 某个用户对某个条目的状态：是否已播放、续播位置、收藏等 |
 | `Job` | 持久化的后台任务 |
 | `PluginConfig` | 管理员为某个插件设置的配置 |
-| `ServerSettings` | 管理员在服务端运行时修改的设置：转码、网络、插件目录 |
+| `ServerSettings` | 管理员在服务端运行时修改的设置：转码、网络、插件目录、密码重置插件 |
 | `APIKey` | 集成调用 API 所用的令牌，以创建它的管理员身份行事 |
 | `Activity` | 服务端上发生的事情，记录在活动日志中 |
 | `DisplayPreferences` | 用户对某个客户端如何显示某个视图的设置 |
@@ -274,6 +274,7 @@ erDiagram
 * `Transcoding`：`HardwareAcceleration`（`auto` 使用服务端 ffmpeg 与硬件所支持的加速，`none`，或 `videotoolbox`）、是否允许硬件编码器、软件编码器的 `EncoderPreset`（为空时按片源选择）、`H264CRF` 与 `H265CRF`（0–51）、`Threads`、色调映射（`TonemapAlgorithm`、`TonemapRange`、`TonemapDesat`、`TonemapPeak`）、去隔行（`yadif` 或 `bwdif`，可选倍帧率）、立体声 `DownmixBoost`（0.5–3）、`CropBlackBorders`，以及 `TranscodeDir`（绝对路径；为空时沿用服务端启动时的目录）。
 * `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort` 及其 PEM 格式的 `CertificatePath` 与 `KeyPath`，以及 `LocalDiscovery`。
 * `PluginCatalogs`：安装插件所用插件目录的 http 或 https URL。
+* `PasswordResetPlugin`：投递用于重置遗忘密码的 PIN 的插件 ID；为空时用户无法重置密码。
 * `Validate` 检查已知取值与范围。
 
 ### 12.2 API 密钥

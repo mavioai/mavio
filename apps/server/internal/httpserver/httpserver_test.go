@@ -39,7 +39,7 @@ func startServer(t *testing.T, configure func(*playback.Config)) (string, *store
 
 // newHandler returns the handler tree over a fresh SQLite database, with
 // playback configured by configure, if given.
-func newHandler(t *testing.T, configure func(*playback.Config)) (http.Handler, *store.Store) {
+func newHandler(t *testing.T, configure func(*playback.Config), options ...func(*httpserver.Options)) (http.Handler, *store.Store) {
 	t.Helper()
 	s, err := store.Open(t.Context(), "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
 	if err != nil {
@@ -52,10 +52,14 @@ func newHandler(t *testing.T, configure func(*playback.Config)) (http.Handler, *
 	if configure != nil {
 		configure(&cfg)
 	}
-	h, err := httpserver.Handler(httpserver.Options{
+	opts := httpserver.Options{
 		Version: "v-test", Store: db, Hub: hub, Database: s.Dialect(), Playbacks: playback.NewManager(cfg),
 		Images: images.New(images.Config{Store: db, Dir: t.TempDir()}), Dev: true,
-	})
+	}
+	for _, o := range options {
+		o(&opts)
+	}
+	h, err := httpserver.Handler(opts)
 	if err != nil {
 		t.Fatal(err)
 	}

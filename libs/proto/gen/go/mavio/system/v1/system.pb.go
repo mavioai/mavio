@@ -2860,13 +2860,16 @@ func (b0 NetworkSettings_builder) Build() *NetworkSettings {
 
 // ServerSettings are what administrators change while the server runs.
 type ServerSettings struct {
-	state                     protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Transcoding    *TranscodingSettings   `protobuf:"bytes,1,opt,name=transcoding"`
-	xxx_hidden_Network        *NetworkSettings       `protobuf:"bytes,2,opt,name=network"`
-	xxx_hidden_PluginCatalogs []string               `protobuf:"bytes,3,rep,name=plugin_catalogs,json=pluginCatalogs"`
-	xxx_hidden_UpdateTime     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=update_time,json=updateTime"`
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	state                          protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Transcoding         *TranscodingSettings   `protobuf:"bytes,1,opt,name=transcoding"`
+	xxx_hidden_Network             *NetworkSettings       `protobuf:"bytes,2,opt,name=network"`
+	xxx_hidden_PluginCatalogs      []string               `protobuf:"bytes,3,rep,name=plugin_catalogs,json=pluginCatalogs"`
+	xxx_hidden_UpdateTime          *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=update_time,json=updateTime"`
+	xxx_hidden_PasswordResetPlugin *string                `protobuf:"bytes,5,opt,name=password_reset_plugin,json=passwordResetPlugin"`
+	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
+	XXX_presence                   [1]uint32
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
 func (x *ServerSettings) Reset() {
@@ -2922,6 +2925,16 @@ func (x *ServerSettings) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *ServerSettings) GetPasswordResetPlugin() string {
+	if x != nil {
+		if x.xxx_hidden_PasswordResetPlugin != nil {
+			return *x.xxx_hidden_PasswordResetPlugin
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ServerSettings) SetTranscoding(v *TranscodingSettings) {
 	x.xxx_hidden_Transcoding = v
 }
@@ -2936,6 +2949,11 @@ func (x *ServerSettings) SetPluginCatalogs(v []string) {
 
 func (x *ServerSettings) SetUpdateTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_UpdateTime = v
+}
+
+func (x *ServerSettings) SetPasswordResetPlugin(v string) {
+	x.xxx_hidden_PasswordResetPlugin = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
 }
 
 func (x *ServerSettings) HasTranscoding() bool {
@@ -2959,6 +2977,13 @@ func (x *ServerSettings) HasUpdateTime() bool {
 	return x.xxx_hidden_UpdateTime != nil
 }
 
+func (x *ServerSettings) HasPasswordResetPlugin() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
 func (x *ServerSettings) ClearTranscoding() {
 	x.xxx_hidden_Transcoding = nil
 }
@@ -2971,6 +2996,11 @@ func (x *ServerSettings) ClearUpdateTime() {
 	x.xxx_hidden_UpdateTime = nil
 }
 
+func (x *ServerSettings) ClearPasswordResetPlugin() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_PasswordResetPlugin = nil
+}
+
 type ServerSettings_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -2979,6 +3009,9 @@ type ServerSettings_builder struct {
 	// URLs of the plugin catalogs plugins are installed from.
 	PluginCatalogs []string
 	UpdateTime     *timestamppb.Timestamp
+	// ID of the plugin that delivers the PINs resetting forgotten passwords;
+	// empty when users cannot reset them.
+	PasswordResetPlugin *string
 }
 
 func (b0 ServerSettings_builder) Build() *ServerSettings {
@@ -2989,6 +3022,10 @@ func (b0 ServerSettings_builder) Build() *ServerSettings {
 	x.xxx_hidden_Network = b.Network
 	x.xxx_hidden_PluginCatalogs = b.PluginCatalogs
 	x.xxx_hidden_UpdateTime = b.UpdateTime
+	if b.PasswordResetPlugin != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		x.xxx_hidden_PasswordResetPlugin = b.PasswordResetPlugin
+	}
 	return m0
 }
 
@@ -4073,14 +4110,15 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"https_port\x18\x03 \x01(\x05B\v\xbaH\b\x1a\x06\x18\xff\xff\x03(\x00R\thttpsPort\x12)\n" +
 	"\x10certificate_path\x18\x04 \x01(\tR\x0fcertificatePath\x12\x19\n" +
 	"\bkey_path\x18\x05 \x01(\tR\akeyPath\x12'\n" +
-	"\x0flocal_discovery\x18\x06 \x01(\bR\x0elocalDiscovery\"\x99\x02\n" +
+	"\x0flocal_discovery\x18\x06 \x01(\bR\x0elocalDiscovery\"\xcd\x02\n" +
 	"\x0eServerSettings\x12N\n" +
 	"\vtranscoding\x18\x01 \x01(\v2$.mavio.system.v1.TranscodingSettingsB\x06\xbaH\x03\xc8\x01\x01R\vtranscoding\x12B\n" +
 	"\anetwork\x18\x02 \x01(\v2 .mavio.system.v1.NetworkSettingsB\x06\xbaH\x03\xc8\x01\x01R\anetwork\x126\n" +
 	"\x0fplugin_catalogs\x18\x03 \x03(\tB\r\xbaH\n" +
 	"\x92\x01\a\"\x05r\x03\x88\x01\x01R\x0epluginCatalogs\x12;\n" +
 	"\vupdate_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"updateTime\"\x1a\n" +
+	"updateTime\x122\n" +
+	"\x15password_reset_plugin\x18\x05 \x01(\tR\x13passwordResetPlugin\"\x1a\n" +
 	"\x18GetServerSettingsRequest\"\xc9\x01\n" +
 	"\x19GetServerSettingsResponse\x12;\n" +
 	"\bsettings\x18\x01 \x01(\v2\x1f.mavio.system.v1.ServerSettingsR\bsettings\x12o\n" +
