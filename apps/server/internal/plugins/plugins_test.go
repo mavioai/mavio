@@ -43,6 +43,13 @@ const requiresKey = `{"type":"object","properties":{"api_key":{"type":"string","
 // configuration schema.
 func install(t *testing.T, root, folder, schema string) {
 	t.Helper()
+	installWith(t, root, folder, schema, `"capabilities":["CAPABILITY_METADATA_PROVIDER"]`)
+}
+
+// installWith lays out the smoke plugin with the given manifest fields
+// besides its ID, name, version, runtime, schema and API version.
+func installWith(t *testing.T, root, folder, schema, fields string) {
+	t.Helper()
 	dir := filepath.Join(root, folder)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
@@ -55,7 +62,7 @@ func install(t *testing.T, root, folder, schema string) {
 		t.Fatal(err)
 	}
 	manifest := fmt.Sprintf(`{"id":"org.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":"RUNTIME_WASM",
-		"capabilities":["CAPABILITY_METADATA_PROVIDER"],"configSchema":%q,"apiVersion":"1.0"}`, schema)
+		%s,"configSchema":%q,"apiVersion":"1.0"}`, fields, schema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatal(err)
 	}

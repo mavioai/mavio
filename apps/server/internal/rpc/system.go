@@ -51,6 +51,7 @@ type PluginManager interface {
 	Catalog(ctx context.Context) ([]plugins.CatalogPlugin, error)
 	Install(ctx context.Context, id, version string) (plugins.Info, error)
 	Uninstall(ctx context.Context, id string) error
+	Tasks() []plugins.Task
 }
 
 var _ systemv1connect.SystemServiceHandler = (*SystemService)(nil)

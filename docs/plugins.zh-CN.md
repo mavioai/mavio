@@ -98,8 +98,8 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 * **运行时**：进程插件通过其 socket 上的流式反向代理访问。WASM 请求会被缓冲，每个方向至多 16 MiB；ABI 请求信封在请求体之后携带方法与查询字符串，旧的 guest 会忽略它们。
 
 ## 6. 任务与数据目录
-* **任务**：manifest 列出任务（ID、名称、说明、默认间隔、超时）。它们以 `plugin:{plugin}:{task}` 出现在 `TaskService` 中，按间隔或按需作为作业队列中的作业运行，并调用 `TaskRunnerService.RunTask`。任务的超时（至多六小时）在该次调用中取代 WASM 的调用超时。
-* **数据目录**：每个插件有一个可写目录 `<home>/plugin-data/<id>`（`--plugin-data-dir`），升级时保留，纳入备份，卸载时删除。WASM 插件在 `/data` 看到它；进程插件通过 `MAVIO_PLUGIN_DATA` 得知其路径。
+* **任务**：`TASK_RUNNER` 插件的 manifest 列出任务（ID、名称、说明、至少一分钟的间隔、超时）。它们以 `plugin:{plugin}:{task}` 出现在 `TaskService` 中，并带有插件 ID；它们作为 `plugin.task` 作业在单独的 worker 上运行，调用 `TaskRunnerService.RunTask`：自插件启动起按间隔运行，每次运行排入下一次；也可按需运行。任务的超时（至多六小时，未设置时为一小时）在该次调用中取代 WASM 的调用超时。插件未就绪时跳过定时运行；已不存在的任务的运行被丢弃。
+* **数据目录**：每个插件有一个可写目录 `<home>/plugin-data/<id>`（`--plugin-data-dir`），升级时保留，纳入备份，卸载时删除。两种运行时都通过 `MAVIO_PLUGIN_DATA` 告知插件其路径（`guest.DataDir()`）；WASM 插件在 `/data` 看到它。
 
 ## 7. 远程设备
 * `DEVICE_CONTROLLER` 插件通过宿主服务 `HostService.SetDevices` 保持其设备列表为最新：ID、名称、产品、播放决策使用的客户端能力，以及每个设备接受的命令。

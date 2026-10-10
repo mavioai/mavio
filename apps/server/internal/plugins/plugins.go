@@ -58,7 +58,10 @@ type Config struct {
 	// CacheDir keeps compiled WASM modules across restarts; empty keeps
 	// them in memory.
 	CacheDir string
-	Store    core.Store
+	// DataDir holds the plugins' data folders, kept across upgrades and
+	// deleted on uninstall; empty gives plugins none.
+	DataDir string
+	Store   core.Store
 	// Catalogs returns the URLs of the plugin catalogs; nil means none.
 	Catalogs func() []string
 	// Client downloads catalogs and plugin packages; nil uses one with a
@@ -67,7 +70,9 @@ type Config struct {
 	// HostAPI serves the plugins' host API requests, which it sees with the
 	// plugin's grant (auth.PluginHandler); nil serves none.
 	HostAPI http.Handler
-	Logger  *slog.Logger
+	// Now is the clock of task schedules; nil means time.Now.
+	Now    func() time.Time
+	Logger *slog.Logger
 }
 
 // Manager runs the plugins of a plugin folder, and installs, upgrades and
@@ -105,6 +110,7 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	m.opts = host.Options{
 		WASM:    wasm.Options{CacheDir: cfg.CacheDir, Logger: m.log},
 		Process: process.Options{Logger: m.log},
+		DataDir: cfg.DataDir,
 	}
 	if cfg.HostAPI != nil {
 		m.opts.HostAPI = func(man *pluginv1.Manifest) http.Handler {
@@ -141,6 +147,13 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	return m, nil
 }
 
+func (m *Manager) now() time.Time {
+	if m.cfg.Now != nil {
+		return m.cfg.Now()
+	}
+	return time.Now()
+}
+
 func (m *Manager) sort() {
 	slices.SortFunc(m.plugins, func(a, b *entry) int { return cmp.Compare(a.manifest.GetId(), b.manifest.GetId()) })
 }
@@ -166,6 +179,7 @@ func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool
 		e.state = Failed
 		m.log.ErrorContext(ctx, "plugin failed", "plugin", e.manifest.GetId(), "err", e.err)
 	} else {
+		m.scheduleTasks(ctx, e.manifest)
 		m.log.InfoContext(ctx, "plugin started", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion(),
 			"configured", e.state == Ready)
 	}

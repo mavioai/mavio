@@ -15,6 +15,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
+	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
@@ -43,6 +44,8 @@ func jobToProto(j *core.Job) *systemv1.Job {
 type TaskService struct {
 	store core.Store
 	now   func() time.Time
+	// Plugins lists the plugins' tasks; nil lists none.
+	Plugins func() []plugins.Task
 }
 
 var _ systemv1connect.TaskServiceHandler = (*TaskService)(nil)
@@ -100,6 +103,25 @@ func (s *TaskService) tasks(ctx context.Context) ([]task, error) {
 			})
 		}
 	}
+	if s.Plugins != nil {
+		for _, pt := range s.Plugins() {
+			t := systemv1.Task_builder{
+				Id: new(plugins.TaskID(pt.Plugin, pt.Task.GetId())), Name: new(pt.Task.GetName()), Kind: new(plugins.JobTask),
+				Description: new(pt.Task.GetDescription()), PluginId: new(pt.Plugin),
+			}.Build()
+			if pt.Task.HasInterval() {
+				t.SetInterval(pt.Task.GetInterval())
+			}
+			out = append(out, task{
+				proto: t,
+				matches: func(j *core.Job) bool {
+					var p plugins.TaskPayload
+					return j.Kind == plugins.JobTask && json.Unmarshal(j.Payload, &p) == nil && p.Plugin == pt.Plugin && p.Task == pt.Task.GetId()
+				},
+				run: func(now time.Time) core.Job { return plugins.TaskJob(pt.Plugin, pt.Task.GetId(), now, false) },
+			})
+		}
+	}
 	out = append(out, task{
 		proto: systemv1.Task_builder{
 			Id: new(library.JobCleanup), Name: new("Clean up jobs"), Kind: new(library.JobCleanup),
@@ -120,7 +142,7 @@ func (s *TaskService) ListTasks(ctx context.Context, _ *systemv1.ListTasksReques
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras}
+	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask}
 	active, err := s.store.Jobs().List(ctx, core.JobQuery{Kinds: kinds, States: []core.JobState{core.JobPending, core.JobRunning}})
 	if err != nil {
 		return nil, connectError(ctx, err)

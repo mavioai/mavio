@@ -98,8 +98,8 @@ Events are `mavio.plugin.v1.Event`: ID, type, time, title, message, item, user a
 * **Runtimes**: process plugins are reached by a streaming reverse proxy over their socket. WASM requests are buffered, at most 16 MiB each way; the ABI request envelope carries the method and query after the body, which earlier guests ignore.
 
 ## 6. Tasks and Data Folder
-* **Tasks**: a manifest lists tasks (ID, name, description, default interval, timeout). They appear in `TaskService` as `plugin:{plugin}:{task}`, run on their interval or on demand as jobs of the job queue, and call `TaskRunnerService.RunTask`. A task's timeout, at most six hours, replaces the WASM call timeout for that call.
-* **Data folder**: each plugin has a writable folder `<home>/plugin-data/<id>` (`--plugin-data-dir`), kept across upgrades, included in backups and deleted on uninstall. WASM plugins see it at `/data`; process plugins are told its path in `MAVIO_PLUGIN_DATA`.
+* **Tasks**: a manifest of a `TASK_RUNNER` plugin lists tasks (ID, name, description, interval of at least a minute, timeout). They appear in `TaskService` as `plugin:{plugin}:{task}`, with the plugin's ID, and run as `plugin.task` jobs on a worker of their own, calling `TaskRunnerService.RunTask`: on their interval from the plugin's start, each run queuing the next, or on demand. A task's timeout, at most six hours and one hour when unset, replaces the WASM call timeout for that call. Scheduled runs of a plugin that is not ready are skipped; runs of tasks that are gone are dropped.
+* **Data folder**: each plugin has a writable folder `<home>/plugin-data/<id>` (`--plugin-data-dir`), kept across upgrades, included in backups and deleted on uninstall. Both runtimes tell plugins its path in `MAVIO_PLUGIN_DATA` (`guest.DataDir()`); WASM plugins see it at `/data`.
 
 ## 7. Remote Devices
 * A `DEVICE_CONTROLLER` plugin keeps its devices up to date with the host service `HostService.SetDevices`: ID, name, product, the client capabilities playback decisions use, and the commands each takes.

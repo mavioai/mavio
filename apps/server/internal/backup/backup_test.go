@@ -38,12 +38,13 @@ func TestBackupAndRestore(t *testing.T) {
 	if err := src.Users().Create(ctx, &u); err != nil {
 		t.Fatal(err)
 	}
-	meta, plugins := t.TempDir(), t.TempDir()
+	meta, plugins, data := t.TempDir(), t.TempDir(), t.TempDir()
+	write(t, filepath.Join(data, "smoke", "state.json"), "{}")
 	write(t, filepath.Join(meta, "ab", "abcd", "primary.png"), "png")
 	write(t, filepath.Join(plugins, "smoke", "manifest.json"), "{}")
 	write(t, filepath.Join(plugins, ".install-x", "manifest.json"), "{}")
 	m := New(Config{
-		Store: src, Dir: t.TempDir(), MetadataDir: meta, PluginDir: plugins, Version: "v1",
+		Store: src, Dir: t.TempDir(), Folders: Folders{Metadata: meta, Plugins: plugins, PluginData: data}, Version: "v1",
 		Now: func() time.Time { return time.Date(2026, 10, 10, 12, 0, 0, 0, time.UTC) },
 	})
 	b, err := m.Create(ctx)
@@ -59,9 +60,12 @@ func TestBackupAndRestore(t *testing.T) {
 	}
 
 	dst := open(t)
-	meta2, plugins2 := t.TempDir(), filepath.Join(t.TempDir(), "plugins")
-	if err := Restore(ctx, filepath.Join(m.cfg.Dir, b.Name), dst, meta2, plugins2); err != nil {
+	meta2, plugins2, data2 := t.TempDir(), filepath.Join(t.TempDir(), "plugins"), t.TempDir()
+	if err := Restore(ctx, filepath.Join(m.cfg.Dir, b.Name), dst, Folders{Metadata: meta2, Plugins: plugins2, PluginData: data2}); err != nil {
 		t.Fatal(err)
+	}
+	if got, err := os.ReadFile(filepath.Join(data2, "smoke", "state.json")); err != nil || string(got) != "{}" {
+		t.Errorf("restored plugin data = %q, %v", got, err)
 	}
 	if got, err := dst.Users().GetByName(ctx, "admin"); err != nil || got.ID != u.ID {
 		t.Errorf("restored user = %+v, %v", got, err)

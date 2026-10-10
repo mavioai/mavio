@@ -51,6 +51,9 @@ type Config struct {
 	CacheDir string
 	// PluginDir holds one folder per plugin; empty means no plugins.
 	PluginDir string
+	// PluginDataDir holds the plugins' data folders; empty gives plugins
+	// none.
+	PluginDataDir string
 	// MetadataDir holds the artwork chosen for items of libraries that do
 	// not save metadata next to their media.
 	MetadataDir string
@@ -95,7 +98,9 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		}
 	}()
 	if cfg.Restore != "" {
-		if err := backup.Restore(ctx, cfg.Restore, raw, metadataDir, cfg.PluginDir); err != nil {
+		if err := backup.Restore(ctx, cfg.Restore, raw, backup.Folders{
+			Metadata: metadataDir, Plugins: cfg.PluginDir, PluginData: cfg.PluginDataDir,
+		}); err != nil {
 			return fmt.Errorf("restore %s: %w", cfg.Restore, err)
 		}
 		log.InfoContext(ctx, "restored backup", "backup", cfg.Restore)
@@ -117,6 +122,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	hostAPI := newLateHandler()
 	plugs, err := plugins.Open(ctx, plugins.Config{
 		Dir: cfg.PluginDir, CacheDir: filepath.Join(cfg.CacheDir, "plugins"), Store: db, Logger: log, HostAPI: hostAPI,
+		DataDir:  cfg.PluginDataDir,
 		Catalogs: func() []string { return set.Get().PluginCatalogs },
 	})
 	if err != nil {
@@ -155,7 +161,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	var backups *backup.Manager
 	if cfg.BackupDir != "" {
 		backups = backup.New(backup.Config{
-			Store: raw, Dir: cfg.BackupDir, MetadataDir: metadataDir, PluginDir: cfg.PluginDir, Version: cfg.Version,
+			Store: raw, Dir: cfg.BackupDir, Version: cfg.Version,
+			Folders: backup.Folders{Metadata: metadataDir, Plugins: cfg.PluginDir, PluginData: cfg.PluginDataDir},
 		})
 	}
 	h, err := httpserver.Handler(httpserver.Options{
@@ -212,6 +219,19 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	g.Go(func() error { return httpserver.Serve(ctx, ln, prefix) })
 	g.Go(func() error {
 		if err := activityLog.Run(ctx); !errors.Is(err, context.Canceled) {
+			return err
+		}
+		return nil
+	})
+	// Plugin tasks have a worker of their own, so that they neither wait
+	// for library jobs nor need ffprobe.
+	hostname, _ := os.Hostname()
+	taskWorker := &library.Worker{
+		Queue: db.Jobs(), Owner: fmt.Sprintf("%s:%d:plugins", hostname, os.Getpid()),
+		Handlers: map[string]library.Handler{plugins.JobTask: plugs.RunTask}, Logger: log,
+	}
+	g.Go(func() error {
+		if err := taskWorker.Run(ctx); !errors.Is(err, context.Canceled) {
 			return err
 		}
 		return nil

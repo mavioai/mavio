@@ -44,10 +44,19 @@ type Config struct {
 	Store *store.Store
 	// Dir holds the backups.
 	Dir string
-	// MetadataDir and PluginDir are backed up; empty ones are skipped.
-	MetadataDir, PluginDir string
-	Version                string
-	Now                    func() time.Time
+	Folders
+	Version string
+	Now     func() time.Time
+}
+
+// Folders are the folders a backup holds besides the database; empty ones
+// are skipped.
+type Folders struct {
+	Metadata, Plugins, PluginData string
+}
+
+func (f Folders) byPrefix() map[string]string {
+	return map[string]string{"metadata/": f.Metadata, "plugins/": f.Plugins, "plugin-data/": f.PluginData}
 }
 
 // Manager makes and lists backups.
@@ -97,7 +106,7 @@ func (m *Manager) write(ctx context.Context, w io.Writer, now time.Time) error {
 	if err != nil {
 		return fmt.Errorf("back up the database: %w", err)
 	}
-	for prefix, dir := range map[string]string{"metadata/": m.cfg.MetadataDir, "plugins/": m.cfg.PluginDir} {
+	for prefix, dir := range m.cfg.byPrefix() {
 		if err := addFolder(ctx, zw, prefix, dir); err != nil {
 			return err
 		}
@@ -240,9 +249,9 @@ func (m *Manager) Delete(name string) error {
 }
 
 // Restore restores a backup file into an empty database and puts its
-// artwork and plugins into the folders given, over files of the same
-// names.
-func Restore(ctx context.Context, file string, st *store.Store, metadataDir, pluginDir string) error {
+// artwork, plugins and plugin data into the folders given, over files of
+// the same names.
+func Restore(ctx context.Context, file string, st *store.Store, folders Folders) error {
 	zr, err := zip.OpenReader(file)
 	if err != nil {
 		return fmt.Errorf("open backup: %w", err)
@@ -262,7 +271,7 @@ func Restore(ctx context.Context, file string, st *store.Store, metadataDir, plu
 	if err != nil {
 		return fmt.Errorf("restore the database: %w", err)
 	}
-	for prefix, dir := range map[string]string{"metadata/": metadataDir, "plugins/": pluginDir} {
+	for prefix, dir := range folders.byPrefix() {
 		if err := extract(&zr.Reader, prefix, dir); err != nil {
 			return err
 		}

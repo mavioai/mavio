@@ -311,7 +311,7 @@ flowchart TD
 
 **Progress**:
 - [x] Host API: scopes, acting as users, transport for both runtimes
-- [ ] Data folder; tasks
+- [x] Data folder; tasks
 - [ ] Events: the event types of [Plugins §4](plugins.md#4-events), event consumers, notifiers
 - [ ] HTTP routes
 - [ ] Remote devices; acting as devices

@@ -59,6 +59,7 @@ var settings = []setting{
 		return filepath.Join(cfg.CacheDir, "transcodes")
 	}},
 	{key: "plugin-dir", path: true, usage: "directory holding one folder per plugin; empty runs none", def: under("plugins")},
+	{key: "plugin-data-dir", path: true, usage: "directory holding the plugins' data folders", def: under("plugin-data")},
 	{key: "metadata-dir", path: true, usage: "directory for the artwork chosen for items of libraries not saving metadata next to their media", def: under("metadata")},
 	{key: "backup-dir", path: true, usage: "directory for backups; empty makes none", def: under("backups")},
 	{key: "discovery-addr", usage: "UDP address answering discovery requests from clients on the local network; empty answers none", def: constant(":7359")},
@@ -185,7 +186,7 @@ func load(flags *pflag.FlagSet) (options, error) {
 		}
 	}
 
-	dirs := []string{cfg.CacheDir, cfg.TranscodeDir, cfg.PluginDir, cfg.MetadataDir, cfg.BackupDir}
+	dirs := []string{cfg.CacheDir, cfg.TranscodeDir, cfg.PluginDir, cfg.PluginDataDir, cfg.MetadataDir, cfg.BackupDir}
 	if file, ok := strings.CutPrefix(cfg.Database, "sqlite:"); ok && file != "" {
 		dirs = append(dirs, filepath.Dir(file))
 	}
@@ -206,7 +207,8 @@ func assign(o *options, key, value string) error {
 	targets := map[string]*string{
 		"addr": &o.Addr, "database": &cfg.Database, "ffmpeg": &cfg.FFmpeg, "ffprobe": &cfg.FFprobe,
 		"cache-dir": &cfg.CacheDir, "transcode-dir": &cfg.TranscodeDir, "plugin-dir": &cfg.PluginDir,
-		"metadata-dir": &cfg.MetadataDir, "backup-dir": &cfg.BackupDir, "discovery-addr": &cfg.DiscoveryAddr,
+		"plugin-data-dir": &cfg.PluginDataDir,
+		"metadata-dir":    &cfg.MetadataDir, "backup-dir": &cfg.BackupDir, "discovery-addr": &cfg.DiscoveryAddr,
 		"dev-library": &cfg.DevLibrary,
 	}
 	if key == "dev" {

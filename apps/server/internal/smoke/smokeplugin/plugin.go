@@ -11,7 +11,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -65,6 +69,25 @@ func init() {
 	guest.Handle(pluginv1connect.NewAuthProviderServiceHandler(authProvider{}))
 	guest.Handle(pluginv1connect.NewNotifierServiceHandler(notifier{}))
 	guest.Handle(pluginv1connect.NewMediaSegmentProviderServiceHandler(segments{}))
+	guest.Handle(pluginv1connect.NewTaskRunnerServiceHandler(tasks{}))
+}
+
+// tasks runs "count", which counts its runs in the data folder, and
+// "fail", which fails.
+type tasks struct{}
+
+func (tasks) RunTask(_ context.Context, req *pluginv1.RunTaskRequest) (*pluginv1.RunTaskResponse, error) {
+	if req.GetTaskId() != "count" {
+		return nil, errors.New("task failed")
+	}
+	file := filepath.Join(guest.DataDir(), "runs")
+	data, _ := os.ReadFile(file)
+	runs, _ := strconv.Atoi(string(data))
+	runs++
+	if err := os.WriteFile(file, []byte(strconv.Itoa(runs)), 0o600); err != nil {
+		return nil, err
+	}
+	return pluginv1.RunTaskResponse_builder{Message: proto.String(fmt.Sprintf("run %d", runs))}.Build(), nil
 }
 
 // segments finds a two-second intro and outro in every video.

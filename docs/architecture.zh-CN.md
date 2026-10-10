@@ -260,7 +260,7 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
   * `http_fetch(ptr, len) -> (handle << 32 | len)`：若 manifest 的 `http_hosts` 允许目标主机，由宿主代为执行 HTTP 请求；`http_read(handle, ptr)` 把结果拷贝进插件内存。分两步是为了避免在宿主函数中回调插件，Go 的 wasip1 运行时不支持这种重入。插件侧 SDK 把它们封装成普通的 `*http.Client`（`guest.HTTPClient()`）。发往宿主 API（[插件平台 §3](plugins.zh-CN.md#3-宿主-api)）所在的 `mavio.host` 的请求则在进程内由服务端的处理器树处理（`guest.HostClient()`）。
   * 插件把日志写到 stderr（以及 stdout），由宿主转发到自己的日志。
   * 配置通过 `Configure` RPC 下发，而不是宿主函数。
-* **文件系统**：默认不挂载任何目录；manifest 中 `read_paths` 列出的目录以只读方式挂载在相同路径。
+* **文件系统**：manifest 中 `read_paths` 列出的目录以只读方式挂载在相同路径，插件的数据目录以可写方式挂载在 `/data`；除此之外不挂载任何目录。
 * **实例**：每个插件有自己的 wazero 运行时和一个模块实例池（实例数即并发调用数）。调用中发生 trap、panic、退出或超时的实例会被丢弃并替换，因此失败的调用不会影响宿主或后续调用。插件接受的配置会在每个实例的下一次调用前重放。
 * **资源限制**：每个实例的内存页上限；每次调用的超时（`WithCloseOnContextDone`）；编译缓存（`CompilationCache`）持久化到磁盘，因为编译模块的耗时远大于实例化。
 * **约束**：`wasip1` 下的 Go 没有套接字，所有网络访问都经过 `http_fetch`。
@@ -298,6 +298,7 @@ libs/plugin/
 * **插件目录**：插件目录是服务端设置中某个 http 或 https URL 上的 JSON 文档，列出插件及其版本：版本号、API 版本、运行时（进程插件还有 os 与 arch）、相对于目录的包 URL、SHA-256、更新说明与发布时间。`ListCatalogPlugins` 给出服务端能运行的版本（最新的在前）以及已安装的版本；同一插件以最先列出它的目录为准，无法访问的目录被跳过。
 * **宿主 API**：每个插件的宿主 API 请求带着该插件的授权（`auth.PluginHandler`）进入处理器树；认证拦截器按清单的 `permissions.api` 检查请求，并解析 `Mavio-User`（[插件平台 §3](plugins.zh-CN.md#3-宿主-api)）。
 * **认证与通知**：`AuthProvider` 指向某个插件的用户，在该插件的 `Authenticate` 接受其用户名与密码时登录。活动日志中的每项活动都作为 `Event` 发送给通知插件。
+* **任务与数据目录**：插件的任务作为 `plugin.task` 作业在单独的 worker 上运行，并出现在 `TaskService` 中；每个插件在 `--plugin-data-dir` 中有一个数据目录（[插件平台 §6](plugins.zh-CN.md#6-任务与数据目录)）。
 * **片段提供者**：对每个已探测的电影与剧集，以其 ID、时长与章节询问每个已启动的片段插件。
 * **字幕提供者**：`MetadataService.SearchSubtitles` 以视频的 OpenSubtitles 哈希（`subtitle.FileHash`）、名称与 ID 搜索每个已启动的字幕插件；未就绪的插件什么也找不到。
 
@@ -395,7 +396,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 ## 11. API 与认证（apps/server）
 
 * **装配**：`apps/server/internal/server` 把存储、插件、播放、图片、媒体库后台任务与处理器树组装起来并运行到关闭；`cmd/mavio` 只负责解析出它的配置，端到端测试运行的也是同一套装配。
-* **主目录与设置**：服务端保存的一切都在其主目录中，默认为 `~/.mavio`，可由 `--home` 或 `MAVIO_HOME` 另行指定：`config.toml`（可选）、SQLite 数据库 `mavio.db`、`plugins/`、`metadata/`（选定的图片）、`backups/` 与 `cache/`（下载与缩放后的图片、编译后的插件，以及位于 `cache/transcodes/` 的进行中转码），缺失时自动创建。约定无需配置；确实存在的设置（`addr`、`database`、`ffmpeg`、`ffprobe`、`cache-dir`、`transcode-dir`、`plugin-dir`、`metadata-dir`、`backup-dir`、`discovery-addr`、`dev`、`dev-library`）由 Viper 依次从命令的参数（`--cache-dir`）、环境变量（`MAVIO_CACHE_DIR`）与 `config.toml`（`cache-dir = "/srv/cache"`）读取，默认取上述布局；转码目录跟随缓存目录。`config.toml` 中的路径必须是绝对路径，填相对路径时服务端拒绝启动；参数与环境变量中的相对路径相对于工作目录；`plugin-dir`、`backup-dir` 或 `discovery-addr` 为空时分别关闭插件、备份或局域网发现。`config.toml` 中有未知的键时服务端拒绝启动。`mavio version` 打印版本，`--restore <备份>` 在提供服务前把备份恢复到空数据库中。
+* **主目录与设置**：服务端保存的一切都在其主目录中，默认为 `~/.mavio`，可由 `--home` 或 `MAVIO_HOME` 另行指定：`config.toml`（可选）、SQLite 数据库 `mavio.db`、`plugins/`、`plugin-data/`（插件的数据目录）、`metadata/`（选定的图片）、`backups/` 与 `cache/`（下载与缩放后的图片、编译后的插件，以及位于 `cache/transcodes/` 的进行中转码），缺失时自动创建。约定无需配置；确实存在的设置（`addr`、`database`、`ffmpeg`、`ffprobe`、`cache-dir`、`transcode-dir`、`plugin-dir`、`plugin-data-dir`、`metadata-dir`、`backup-dir`、`discovery-addr`、`dev`、`dev-library`）由 Viper 依次从命令的参数（`--cache-dir`）、环境变量（`MAVIO_CACHE_DIR`）与 `config.toml`（`cache-dir = "/srv/cache"`）读取，默认取上述布局；转码目录跟随缓存目录。`config.toml` 中的路径必须是绝对路径，填相对路径时服务端拒绝启动；参数与环境变量中的相对路径相对于工作目录；`plugin-dir`、`backup-dir` 或 `discovery-addr` 为空时分别关闭插件、备份或局域网发现。`config.toml` 中有未知的键时服务端拒绝启动。`mavio version` 打印版本，`--restore <备份>` 在提供服务前把备份恢复到空数据库中。
 * **单一处理器树**：`apps/server/internal/httpserver` 把 Connect 服务（实现位于 `internal/rpc`）与普通 HTTP 媒体端点挂载在同一个 `http.ServeMux` 上。每个 Connect 请求在到达服务之前先按其 protovalidate 规则校验，违反规则返回 `invalid_argument`。
 * **账户**：密码以 argon2id（19 MiB、2 轮、1 条并行通道）散列为 PHC 字符串；使用其他参数的散列仍被接受，并在下一次成功登录时替换。以不存在的用户名登录与密码错误的耗时相同。通过插件认证的用户没有密码散列。
 * **Quick Connect**：与 Jellyfin 一样，可以用已登录的设备让新设备登录。新设备无需凭据即可发起请求并显示六位数字代码；已登录用户输入该代码，即以该用户身份为设备登录；设备用请求的密钥（32 个随机字节，从不显示）轮询请求，随后领取一次访问令牌。请求保存在内存中，十分钟后过期，或在获得授权一分钟后过期。代码在待处理的请求中唯一。
@@ -417,7 +418,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **活动与日志**（`internal/activity`、`ActivityService`；`internal/logs`、`SystemService.ListLogs`）：活动被保存并排队发送给通知插件，90 天后清除。服务端在内存中保留最近 2,000 条 info 及以上级别的日志供 `ListLogs` 使用，日志照常输出。
 * **文件夹**（`SystemService.ListDirectory`）：管理员浏览服务端的文件夹或根目录（Windows 上为各驱动器）以选择媒体库文件夹；隐藏条目不列出。
 * **本地化数据**（`LocalizationService`）：国家、具有 ISO 639-1 代码的语言，以及某个国家分级体系中的分级，来自 `libs/metadata` 中 Jellyfin 的数据（`Countries`、`Languages`、`ParentalRatings`）。
-* **备份**（`internal/backup`、`BackupService`）：备份是 `--backup-dir` 中的一个 zip 文件，包含 `manifest.json`、数据库的行（`store.Dump`：每张表为一份由带类型值组成的 JSON 行文件，取自同一快照）、元数据目录与插件目录。管理员带着自己的 bearer 令牌在 `/system/backups/{name}` 下载。`-restore <文件>` 在新服务端启动前把备份恢复到其空数据库中（`store.Restore`：数据库类型相同，且架构包含备份所含的每个迁移；按外键顺序插入行，条目排在其父条目之后，派生键重新计算），并放回各文件夹。
+* **备份**（`internal/backup`、`BackupService`）：备份是 `--backup-dir` 中的一个 zip 文件，包含 `manifest.json`、数据库的行（`store.Dump`：每张表为一份由带类型值组成的 JSON 行文件，取自同一快照）、元数据目录、插件目录与插件的数据目录。管理员带着自己的 bearer 令牌在 `/system/backups/{name}` 下载。`-restore <文件>` 在新服务端启动前把备份恢复到其空数据库中（`store.Restore`：数据库类型相同，且架构包含备份所含的每个迁移；按外键顺序插入行，条目排在其父条目之后，派生键重新计算），并放回各文件夹。
 * **下载与渐进式流**：请求 `download` 的播放需要用户的下载权限，并以静态场景决策：客户端能播放文件本身时，以附件形式提供文件；否则按客户端的静态配置文件做渐进式转封装或转码，从不使用 HLS。没有 HLS 配置文件的流式客户端也得到渐进式流。ffmpeg 为每个请求把渐进式流（分片 MP4、Matroska 或 MPEG-TS）直接写入响应，因此不能跳转。
 * **媒体附加内容**：`ItemService.GetItem` 列出条目的缩略图拼图与媒体片段；拼图在 `/images/trickplay/{item}/{width}/{sheet}.jpg`、章节图片在 `/images/chapters/{item}/{source}/{index}` 提供（接受图片参数），文件取自元数据目录，ID 即凭证。条目带有由其测得响度计算出的归一化增益。`ItemService.GetLyrics` 读取音轨旁的歌词文件（`.elrc`、`.lrc` 或 `.txt`，必要时从旧字符集转换），由 `metadata.ParseLyrics` 解析：LRC 的行及其时间与 ID 标签，增强 LRC 的逐字时间作为以 UTF-16 码元计的提示，与 Jellyfin 的解析器一致。播放会列出其片源附带的文件，例如供客户端渲染 ASS 字幕的字体；ffmpeg 在 `/media/{playback}/attachments/{index}` 处各提取一次。
 * **图片**：图片在 `/images/{id}` 提供，接受 Jellyfin 的尺寸参数（`width`、`height`、`maxWidth`、`maxHeight`、`fillWidth`、`fillHeight`、`quality`）；与媒体 URL 一样，客户端从按访问权限过滤的 API 响应中得到的 ID 是唯一的凭证。本地图片在其条目所属媒体库文件夹或元数据目录内读取；提供者的图片只下载一次，存入缓存目录。不带尺寸参数时提供原图；`imaging.Process` 生成的图片采用请求的 `format`（`jpg`、`png`、`webp`），未指定时对 `Accept` 头接受 WebP 的客户端生成 WebP，否则为 JPEG（含透明时为 PNG）。生成的图片按源内容哈希与参数缓存，对同一结果的并发请求共享一次生成。SVG 通过 `CheckSVG` 后原样提供。

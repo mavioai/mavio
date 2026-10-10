@@ -48,6 +48,7 @@ func TestLoadDefaults(t *testing.T) {
 		{"cache-dir", cfg.CacheDir, filepath.Join(home, "cache")},
 		{"transcode-dir", cfg.TranscodeDir, filepath.Join(home, "cache", "transcodes")},
 		{"plugin-dir", cfg.PluginDir, filepath.Join(home, "plugins")},
+		{"plugin-data-dir", cfg.PluginDataDir, filepath.Join(home, "plugin-data")},
 		{"metadata-dir", cfg.MetadataDir, filepath.Join(home, "metadata")},
 		{"backup-dir", cfg.BackupDir, filepath.Join(home, "backups")},
 		{"discovery-addr", cfg.DiscoveryAddr, ":7359"},
@@ -60,7 +61,7 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.Dev {
 		t.Error("dev = true, want false")
 	}
-	for _, dir := range []string{"cache/transcodes", "plugins", "metadata", "backups"} {
+	for _, dir := range []string{"cache/transcodes", "plugins", "plugin-data", "metadata", "backups"} {
 		if fi, err := os.Stat(filepath.Join(home, dir)); err != nil || !fi.IsDir() {
 			t.Errorf("%s not created: %v", dir, err)
 		}

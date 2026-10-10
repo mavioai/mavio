@@ -26,6 +26,7 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/plugin/host"
 	"github.com/mavioai/mavio/libs/plugin/manifest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
@@ -427,6 +428,9 @@ func (m *Manager) Uninstall(ctx context.Context, id string) error {
 		errs = append(errs, e.plugin.Close(ctx))
 	}
 	errs = append(errs, os.RemoveAll(filepath.Join(m.cfg.Dir, e.folder)), m.store.PluginConfigs().Delete(ctx, id))
+	if m.cfg.DataDir != "" {
+		errs = append(errs, os.RemoveAll(host.DataDir(m.cfg.DataDir, id)))
+	}
 	if err := errors.Join(errs...); err != nil {
 		return fmt.Errorf("uninstall plugin %s: %w", id, err)
 	}

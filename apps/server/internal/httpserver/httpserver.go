@@ -98,7 +98,11 @@ func Handler(opts Options) (http.Handler, error) {
 	authService := rpc.NewAuthService(opts.Store)
 	authService.Activity, authService.Authenticate = opts.Activity, opts.Authenticate
 	mux.Handle(authv1connect.NewAuthServiceHandler(authService, interceptors))
-	mux.Handle(systemv1connect.NewTaskServiceHandler(rpc.NewTaskService(opts.Store), interceptors))
+	tasks := rpc.NewTaskService(opts.Store)
+	if opts.Plugins != nil {
+		tasks.Plugins = opts.Plugins.Tasks
+	}
+	mux.Handle(systemv1connect.NewTaskServiceHandler(tasks, interceptors))
 	mux.Handle(systemv1connect.NewActivityServiceHandler(rpc.NewActivityService(opts.Store), interceptors))
 	mux.Handle(systemv1connect.NewBackupServiceHandler(rpc.NewBackupService(opts.Backups, opts.Activity), interceptors))
 	mux.Handle(systemv1connect.NewLocalizationServiceHandler(rpc.LocalizationService{}, interceptors))
