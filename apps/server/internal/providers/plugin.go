@@ -126,6 +126,8 @@ var mediaKinds = map[core.ItemKind]pluginv1.MediaKind{
 	core.KindVideo:       pluginv1.MediaKind_MEDIA_KIND_VIDEO,
 	core.KindBook:        pluginv1.MediaKind_MEDIA_KIND_BOOK,
 	core.KindAudioBook:   pluginv1.MediaKind_MEDIA_KIND_AUDIOBOOK,
+	core.KindPhotoAlbum:  pluginv1.MediaKind_MEDIA_KIND_PHOTO_ALBUM,
+	core.KindPhoto:       pluginv1.MediaKind_MEDIA_KIND_PHOTO,
 }
 
 // ItemKind returns the kind of items of a media kind; persons and unknown

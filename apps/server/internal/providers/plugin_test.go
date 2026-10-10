@@ -148,7 +148,7 @@ func TestPluginKnowsNothing(t *testing.T) {
 		l    library.Lookup
 		c    *fakeClient
 	}{
-		{"unsupported kind", library.Lookup{Kind: core.KindPhoto, Name: "x"}, newFake()},
+		{"unsupported kind", library.Lookup{Kind: core.KindFolder, Name: "x"}, newFake()},
 		{"no name", library.Lookup{Kind: core.KindMovie}, newFake()},
 		{"no search result", library.Lookup{Kind: core.KindMovie, Name: "x"}, &fakeClient{}},
 		{"not found", library.Lookup{Kind: core.KindMovie, ExternalIDs: map[core.Provider]string{core.ProviderTMDB: "1"}}, newFake()},

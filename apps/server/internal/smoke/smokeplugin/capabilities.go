@@ -35,7 +35,8 @@ import (
 //     video, whose single cue is the video's name.
 //   - As a resolver it leaves out entries named "skip*" and claims folders
 //     holding "claim.me", each other file of which is a movie named after
-//     it, extension and all.
+//     it, extension and all; in a photos library each is a photo, in a
+//     photo album named "Claimed Album".
 //   - As an intro provider it plays first the items whose IDs the file
 //     "intros" of its data folder lists.
 //   - As an image generator it makes a 2 × 2 PNG primary image.
@@ -171,15 +172,22 @@ func (resolver) Resolve(_ context.Context, req *pluginv1.ResolveRequest) (*plugi
 	if !slices.ContainsFunc(entries, func(e *pluginv1.FolderEntry) bool { return e.GetName() == "claim.me" }) {
 		return &pluginv1.ResolveResponse{}, nil
 	}
-	var items []*pluginv1.ResolvedItem
+	resp := pluginv1.ResolveResponse_builder{Claimed: proto.Bool(true)}
+	kind := pluginv1.MediaKind_MEDIA_KIND_MOVIE
+	if req.GetFolder().GetLibraryKind() == pluginv1.LibraryKind_LIBRARY_KIND_PHOTOS {
+		kind = pluginv1.MediaKind_MEDIA_KIND_PHOTO
+		resp.FolderItem = pluginv1.ResolvedItem_builder{
+			Kind: pluginv1.MediaKind_MEDIA_KIND_PHOTO_ALBUM.Enum(), Name: proto.String("Claimed Album"),
+		}.Build()
+	}
 	for _, e := range entries {
 		if e.GetName() != "claim.me" && !e.GetIsDir() {
-			items = append(items, pluginv1.ResolvedItem_builder{
-				Kind: pluginv1.MediaKind_MEDIA_KIND_MOVIE.Enum(), Entry: proto.String(e.GetName()), Name: proto.String(e.GetName()),
+			resp.Items = append(resp.Items, pluginv1.ResolvedItem_builder{
+				Kind: kind.Enum(), Entry: proto.String(e.GetName()), Name: proto.String(e.GetName()),
 			}.Build())
 		}
 	}
-	return pluginv1.ResolveResponse_builder{Claimed: proto.Bool(true), Items: items}.Build(), nil
+	return resp.Build(), nil
 }
 
 type intros struct{}

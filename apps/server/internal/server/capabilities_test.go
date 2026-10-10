@@ -115,7 +115,7 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 	dataDir := filepath.Join(t.TempDir(), "data")
 	smokeData := filepath.Join(dataDir, "org.mavio.smoke")
 
-	films, home, music := t.TempDir(), t.TempDir(), t.TempDir()
+	films, home, music, photos := t.TempDir(), t.TempDir(), t.TempDir(), t.TempDir()
 	film := filepath.Join(films, "Farewell My Concubine (1993)", "Farewell My Concubine (1993).mkv")
 	copyFile(t, video, film)
 	if rt == "wasm" {
@@ -129,6 +129,19 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 	writeFile(t, filepath.Join(home, "clip.title"), "Local Title\n")
 	song := filepath.Join(music, "Band", "Album", "01 - Song.flac")
 	copyFile(t, track, song)
+	trip := filepath.Join(photos, "Trip")
+	photo := filepath.Join(trip, "beach.png")
+	var pic bytes.Buffer
+	if err := png.Encode(&pic, image.NewRGBA(image.Rect(0, 0, 4, 3))); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(trip, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, photo, pic.String())
+	if rt == "wasm" {
+		writeFile(t, filepath.Join(trip, "claim.me"), "")
+	}
 
 	srv := start(t, server.Config{
 		Database: "sqlite:" + filepath.Join(t.TempDir(), "mavio.db"), FFmpeg: ffmpeg, FFprobe: ffprobe,
@@ -215,6 +228,7 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 		libraryv1.LibrarySpec_builder{
 			Name: new("Home"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_HOME_VIDEOS), Paths: []string{home}, SaveLocalMetadata: new(true),
 		}.Build(),
+		libraryv1.LibrarySpec_builder{Name: new("Photos"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_PHOTOS), Paths: []string{photos}}.Build(),
 		libraryv1.LibrarySpec_builder{
 			Name: new("Music"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_MUSIC), Paths: []string{music}, DownloadLyrics: new(true),
 		}.Build(),
@@ -283,8 +297,17 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 		t.Errorf("GetLyrics = %v, %v", lyrics, err)
 	}
 
-	// The resolver claims a folder and leaves out what it ignores.
+	// Photos reach plugins too.
+	item(libraryv1.ItemKind_ITEM_KIND_PHOTO, photo, "the processed photo", func(r *libraryv1.GetItemResponse) bool {
+		return slices.Contains(r.GetItem().GetTags(), "processed")
+	})
+
+	// The resolver claims folders and leaves out what it ignores.
 	if rt == "wasm" {
+		item(libraryv1.ItemKind_ITEM_KIND_PHOTO_ALBUM, trip, "the resolver's photo album",
+			func(r *libraryv1.GetItemResponse) bool { return r.GetItem().GetName() == "Claimed Album" })
+		item(libraryv1.ItemKind_ITEM_KIND_PHOTO, photo, "the resolver's photo",
+			func(r *libraryv1.GetItemResponse) bool { return r.GetItem().GetName() == "beach.png" })
 		item(libraryv1.ItemKind_ITEM_KIND_MOVIE, filepath.Join(films, "Claimed", "Odd (2001).mkv"), "the resolver's film",
 			func(r *libraryv1.GetItemResponse) bool { return r.GetItem().GetName() == "Odd (2001).mkv" })
 		list, err := items.ListItems(ctx, libraryv1.ListItemsRequest_builder{Kinds: []libraryv1.ItemKind{libraryv1.ItemKind_ITEM_KIND_MOVIE}}.Build())

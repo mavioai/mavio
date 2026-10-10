@@ -39,7 +39,9 @@ const (
 	MediaKind_MEDIA_KIND_PERSON       MediaKind = 11
 	// A video that is none of the above, such as one of a home videos
 	// library.
-	MediaKind_MEDIA_KIND_VIDEO MediaKind = 12
+	MediaKind_MEDIA_KIND_VIDEO       MediaKind = 12
+	MediaKind_MEDIA_KIND_PHOTO_ALBUM MediaKind = 13
+	MediaKind_MEDIA_KIND_PHOTO       MediaKind = 14
 )
 
 // Enum value maps for MediaKind.
@@ -58,6 +60,8 @@ var (
 		10: "MEDIA_KIND_AUDIOBOOK",
 		11: "MEDIA_KIND_PERSON",
 		12: "MEDIA_KIND_VIDEO",
+		13: "MEDIA_KIND_PHOTO_ALBUM",
+		14: "MEDIA_KIND_PHOTO",
 	}
 	MediaKind_value = map[string]int32{
 		"MEDIA_KIND_UNSPECIFIED":  0,
@@ -73,6 +77,8 @@ var (
 		"MEDIA_KIND_AUDIOBOOK":    10,
 		"MEDIA_KIND_PERSON":       11,
 		"MEDIA_KIND_VIDEO":        12,
+		"MEDIA_KIND_PHOTO_ALBUM":  13,
+		"MEDIA_KIND_PHOTO":        14,
 	}
 )
 
@@ -2443,7 +2449,7 @@ const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"\x05width\x18\x03 \x01(\x05R\x05width\x12\x16\n" +
 	"\x06height\x18\x04 \x01(\x05R\x06height\x12\x1a\n" +
 	"\blanguage\x18\x05 \x01(\tR\blanguage\x12\x14\n" +
-	"\x05score\x18\x06 \x01(\x01R\x05score*\xca\x02\n" +
+	"\x05score\x18\x06 \x01(\x01R\x05score*\xfc\x02\n" +
 	"\tMediaKind\x12\x1a\n" +
 	"\x16MEDIA_KIND_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MEDIA_KIND_MOVIE\x10\x01\x12\x15\n" +
@@ -2458,7 +2464,9 @@ const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"\x14MEDIA_KIND_AUDIOBOOK\x10\n" +
 	"\x12\x15\n" +
 	"\x11MEDIA_KIND_PERSON\x10\v\x12\x14\n" +
-	"\x10MEDIA_KIND_VIDEO\x10\f*\x82\x01\n" +
+	"\x10MEDIA_KIND_VIDEO\x10\f\x12\x1a\n" +
+	"\x16MEDIA_KIND_PHOTO_ALBUM\x10\r\x12\x14\n" +
+	"\x10MEDIA_KIND_PHOTO\x10\x0e*\x82\x01\n" +
 	"\fSeriesStatus\x12\x1d\n" +
 	"\x19SERIES_STATUS_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SERIES_STATUS_CONTINUING\x10\x01\x12\x17\n" +

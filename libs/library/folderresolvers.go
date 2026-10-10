@@ -23,7 +23,7 @@ type FolderResolver interface {
 // resolvedKinds are the kinds of items folder resolvers may find.
 var resolvedKinds = []core.ItemKind{
 	core.KindMovie, core.KindSeries, core.KindSeason, core.KindEpisode, core.KindVideo, core.KindMusicArtist,
-	core.KindMusicAlbum, core.KindTrack, core.KindMusicVideo, core.KindAudioBook, core.KindBook, core.KindPhoto,
+	core.KindMusicAlbum, core.KindTrack, core.KindMusicVideo, core.KindAudioBook, core.KindBook, core.KindPhotoAlbum, core.KindPhoto,
 }
 
 func (sc *scan) resolvers() []FolderResolver {
