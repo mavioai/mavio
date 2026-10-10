@@ -25,6 +25,7 @@ import (
 	"github.com/mavioai/mavio/libs/plugin/host"
 	"github.com/mavioai/mavio/libs/plugin/host/process"
 	"github.com/mavioai/mavio/libs/plugin/host/wasm"
+	"github.com/mavioai/mavio/libs/plugin/internal/osinfo"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
@@ -90,7 +91,7 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
 		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER","CAPABILITY_IMAGE_PROVIDER",
 			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR","CAPABILITY_LYRICS_PROVIDER",
-			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET","CAPABILITY_EPISODE_LIST_PROVIDER","CAPABILITY_DISCOVERY_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
+			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET","CAPABILITY_EPISODE_LIST_PROVIDER","CAPABILITY_DISCOVERY_PROVIDER","CAPABILITY_SCENE_MAPPING_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
 		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, resolver, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
@@ -382,6 +383,37 @@ func TestDiscovery(t *testing.T) {
 		}.Build())
 		if err != nil || len(values.GetValues()) != 1 || values.GetValues()[0].GetName() != "heist" {
 			t.Errorf("ListFilterValues() = %v, %v", values, err)
+		}
+	})
+}
+
+func TestSceneMappings(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := open(t, rt)
+		mappings, err := p.SceneMappings().ListSceneMappings(t.Context(), &pluginv1.ListSceneMappingsRequest{})
+		if err != nil || len(mappings.GetMappings()) != 1 || mappings.GetMappings()[0].GetTitle() != "1 Scene" {
+			t.Errorf("ListSceneMappings() = %v, %v", mappings, err)
+		}
+		daily, err := p.SceneMappings().ListDailySeries(t.Context(), &pluginv1.ListDailySeriesRequest{})
+		if err != nil || len(daily.GetSeries()) != 1 || daily.GetSeries()[0].GetExternalIds()["tvdb"] != "1" {
+			t.Errorf("ListDailySeries() = %v, %v", daily, err)
+		}
+		numbering, err := p.SceneMappings().GetSceneNumbering(t.Context(), pluginv1.GetSceneNumberingRequest_builder{
+			SeriesExternalIds: map[string]string{"tvdb": "1"},
+		}.Build())
+		if err != nil || !numbering.GetFound() || numbering.GetEpisodes()[0].GetSceneSeasonNumber() != 2 {
+			t.Errorf("GetSceneNumbering() = %v, %v", numbering, err)
+		}
+	})
+}
+
+// TestHostOS checks that plugins of both runtimes learn the host's
+// operating system.
+func TestHostOS(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		got, err := search(t.Context(), open(t, rt), "os")
+		if want := osinfo.String(); err != nil || got != want {
+			t.Errorf("HostOS() = %q, %v, want = %q", got, err, want)
 		}
 	})
 }

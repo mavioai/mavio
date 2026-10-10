@@ -105,6 +105,11 @@ func SetHostClient(c *http.Client) {
 // plugin is uninstalled; it is empty when the host gives none.
 func DataDir() string { return os.Getenv(proc.EnvData) }
 
+// HostOS returns the host's operating system and its version, lowercased,
+// as Servarr applications name them in their User-Agent, such as
+// "ubuntu 22.04" or "macos 14.5"; empty outside a Mavio host.
+func HostOS() string { return os.Getenv(proc.EnvHostOS) }
+
 // SetHTTPClient replaces the client returned by HTTPClient. Runtime entry
 // points call it; plugins normally do not.
 func SetHTTPClient(c *http.Client) {
