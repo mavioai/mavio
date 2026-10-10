@@ -1,6 +1,9 @@
 package streaming
 
-import "time"
+import (
+	"sort"
+	"time"
+)
 
 // Layout is how a media source divides into segments, and into the files
 // ffmpeg writes them in.
@@ -63,6 +66,12 @@ func (l Layout) Chunked() bool { return l.chunks != nil }
 
 // Start returns the start time of segment i.
 func (l Layout) Start(i int) time.Duration { return l.starts[i] }
+
+// Index returns the segment playing at t: the last one starting at or
+// before it.
+func (l Layout) Index(t time.Duration) int {
+	return max(0, sort.Search(len(l.starts), func(i int) bool { return l.starts[i] > t })-1)
+}
 
 // End returns the end time of segment i.
 func (l Layout) End(i int) time.Duration { return l.starts[i] + l.Segments[i] }

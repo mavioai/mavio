@@ -198,6 +198,41 @@ func TestStreamSeeks(t *testing.T) {
 	}
 }
 
+func TestStreamPrepare(t *testing.T) {
+	f := &fakeFFmpeg{last: 29, interval: time.Millisecond}
+	s := newTestStream(t, encoded(t, 30), f)
+	// Resuming at 20.5 s starts the one run at segment 20, before any
+	// request; the initialization segment and segment 20 come from it.
+	if err := s.Prepare(t.Context(), 20500*time.Millisecond); err != nil {
+		t.Fatal(err)
+	}
+	if got := read(t, s, InitSegment); got != "init" {
+		t.Errorf("init = %q", got)
+	}
+	if got := read(t, s, 20); got != "file20" {
+		t.Errorf("segment 20 = %q", got)
+	}
+	if err := s.Prepare(t.Context(), 21*time.Second); err != nil {
+		t.Fatal(err)
+	}
+	if runs, want := f.runsSoFar(), []run{{20 * time.Second, 20}}; !slices.Equal(runs, want) {
+		t.Errorf("runs = %+v, want = %+v", runs, want)
+	}
+}
+
+func TestLayoutIndex(t *testing.T) {
+	l := encoded(t, 10)
+	cases := []struct {
+		at   time.Duration
+		want int
+	}{{0, 0}, {999 * time.Millisecond, 0}, {time.Second, 1}, {9500 * time.Millisecond, 9}, {time.Hour, 9}, {-time.Second, 0}}
+	for _, c := range cases {
+		if got := l.Index(c.at); got != c.want {
+			t.Errorf("Index(%v) = %d, want = %d", c.at, got, c.want)
+		}
+	}
+}
+
 func TestStreamChunked(t *testing.T) {
 	// Keyframes every 1.5 s: 4 s segments cut at 4.5, 9, 12, 16.5, …
 	var kf []time.Duration

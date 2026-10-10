@@ -57,6 +57,9 @@ type Stream struct {
 	// Guarded by sem.
 	job    *job
 	closed bool
+	// begin is the segment the stream begins at, where the
+	// initialization segment starts ffmpeg.
+	begin int
 }
 
 type job struct {
@@ -65,7 +68,8 @@ type job struct {
 	first int
 }
 
-// NewStream creates a stream; ffmpeg starts with the first request.
+// NewStream creates a stream; ffmpeg starts with Prepare or the first
+// request.
 func NewStream(cfg Config) (*Stream, error) {
 	if cfg.MaxGap <= 0 {
 		cfg.MaxGap = 24 * time.Second
@@ -160,12 +164,32 @@ func (s *Stream) Segment(ctx context.Context, index int) (io.ReadCloser, int64, 
 	return openAll(paths)
 }
 
-// init returns the initialization segment, starting ffmpeg at the
-// beginning if none was written yet.
+// Prepare starts ffmpeg at the segment playing at, where the client
+// begins, unless a run is going: the first run reads from there instead
+// of from the beginning, so that a playback resuming further on does not
+// start ffmpeg twice, and segments are being written while the client
+// fetches its playlists.
+func (s *Stream) Prepare(ctx context.Context, at time.Duration) error {
+	if err := s.lock(ctx); err != nil {
+		return err
+	}
+	defer s.unlock()
+	if s.closed {
+		return errors.New("streaming: stream closed")
+	}
+	s.begin = s.cfg.Layout.Index(at)
+	if s.job != nil && !s.ended() {
+		return nil
+	}
+	return s.startAt(ctx, s.begin)
+}
+
+// init returns the initialization segment, starting ffmpeg where the
+// stream begins if none was written yet.
 func (s *Stream) init(ctx context.Context) (io.ReadCloser, int64, error) {
 	if !exists(s.initFile()) {
 		if s.job == nil || s.ended() {
-			if err := s.startAt(ctx, 0); err != nil {
+			if err := s.startAt(ctx, s.begin); err != nil {
 				return nil, 0, err
 			}
 		}
