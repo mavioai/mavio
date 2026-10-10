@@ -347,7 +347,8 @@ message StartPlaybackRequest {
   // Caps the bitrate below the client's and the user's limits, in bits per
   // second.
   int64 max_bitrate = 6 [(buf.validate.field).int64.gt = 0];
-  // Where playback begins; transcodes start there.
+  // Where playback begins, the resume position; transcodes start there at
+  // once. The response says where the client begins.
   google.protobuf.Duration start_position = 7 [(buf.validate.field).duration.gte = {}];
   // Asks for a file to keep, which the user's policy must allow: the source
   // as it is when the client plays it, else a progressive transcode to the
@@ -371,6 +372,12 @@ message StartPlaybackResponse {
   repeated SubtitleTrack subtitles = 8;
   // The fonts attached to the source, for rendering its ASS subtitles.
   repeated Attachment attachments = 9;
+  // Where the client begins: the requested start position, or the
+  // keyframe up to five seconds before it where playback begins without
+  // decoding frames only to drop them; the start of the HLS segment playing
+  // then, or for direct play the source's keyframe. Unset from the
+  // beginning.
+  google.protobuf.Duration start_position = 10;
 }
 
 // Attachment is a file attached to a media source, such as a font.

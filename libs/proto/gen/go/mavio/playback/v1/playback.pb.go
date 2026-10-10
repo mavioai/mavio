@@ -2941,7 +2941,8 @@ type StartPlaybackRequest_builder struct {
 	// Caps the bitrate below the client's and the user's limits, in bits per
 	// second.
 	MaxBitrate *int64
-	// Where playback begins; transcodes start there.
+	// Where playback begins, the resume position; transcodes start there at
+	// once. The response says where the client begins.
 	StartPosition *durationpb.Duration
 	// Asks for a file to keep, which the user's policy must allow: the source
 	// as it is when the client plays it, else a progressive transcode to the
@@ -2993,6 +2994,7 @@ type StartPlaybackResponse struct {
 	xxx_hidden_SubtitleStreamIndex int32                  `protobuf:"varint,7,opt,name=subtitle_stream_index,json=subtitleStreamIndex"`
 	xxx_hidden_Subtitles           *[]*SubtitleTrack      `protobuf:"bytes,8,rep,name=subtitles"`
 	xxx_hidden_Attachments         *[]*Attachment         `protobuf:"bytes,9,rep,name=attachments"`
+	xxx_hidden_StartPosition       *durationpb.Duration   `protobuf:"bytes,10,opt,name=start_position,json=startPosition"`
 	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
 	XXX_presence                   [1]uint32
 	unknownFields                  protoimpl.UnknownFields
@@ -3102,19 +3104,26 @@ func (x *StartPlaybackResponse) GetAttachments() []*Attachment {
 	return nil
 }
 
+func (x *StartPlaybackResponse) GetStartPosition() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_StartPosition
+	}
+	return nil
+}
+
 func (x *StartPlaybackResponse) SetPlaybackId(v string) {
 	x.xxx_hidden_PlaybackId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
 }
 
 func (x *StartPlaybackResponse) SetMediaSourceId(v string) {
 	x.xxx_hidden_MediaSourceId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
 }
 
 func (x *StartPlaybackResponse) SetMethod(v PlayMethod) {
 	x.xxx_hidden_Method = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
 }
 
 func (x *StartPlaybackResponse) SetTranscodeReasons(v []TranscodeReason) {
@@ -3123,17 +3132,17 @@ func (x *StartPlaybackResponse) SetTranscodeReasons(v []TranscodeReason) {
 
 func (x *StartPlaybackResponse) SetUrl(v string) {
 	x.xxx_hidden_Url = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
 }
 
 func (x *StartPlaybackResponse) SetAudioStreamIndex(v int32) {
 	x.xxx_hidden_AudioStreamIndex = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
 }
 
 func (x *StartPlaybackResponse) SetSubtitleStreamIndex(v int32) {
 	x.xxx_hidden_SubtitleStreamIndex = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
 }
 
 func (x *StartPlaybackResponse) SetSubtitles(v []*SubtitleTrack) {
@@ -3142,6 +3151,10 @@ func (x *StartPlaybackResponse) SetSubtitles(v []*SubtitleTrack) {
 
 func (x *StartPlaybackResponse) SetAttachments(v []*Attachment) {
 	x.xxx_hidden_Attachments = &v
+}
+
+func (x *StartPlaybackResponse) SetStartPosition(v *durationpb.Duration) {
+	x.xxx_hidden_StartPosition = v
 }
 
 func (x *StartPlaybackResponse) HasPlaybackId() bool {
@@ -3186,6 +3199,13 @@ func (x *StartPlaybackResponse) HasSubtitleStreamIndex() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
 }
 
+func (x *StartPlaybackResponse) HasStartPosition() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_StartPosition != nil
+}
+
 func (x *StartPlaybackResponse) ClearPlaybackId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_PlaybackId = nil
@@ -3216,6 +3236,10 @@ func (x *StartPlaybackResponse) ClearSubtitleStreamIndex() {
 	x.xxx_hidden_SubtitleStreamIndex = 0
 }
 
+func (x *StartPlaybackResponse) ClearStartPosition() {
+	x.xxx_hidden_StartPosition = nil
+}
+
 type StartPlaybackResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -3234,6 +3258,12 @@ type StartPlaybackResponse_builder struct {
 	Subtitles           []*SubtitleTrack
 	// The fonts attached to the source, for rendering its ASS subtitles.
 	Attachments []*Attachment
+	// Where the client begins: the requested start position, or the
+	// keyframe up to five seconds before it where playback begins without
+	// decoding frames only to drop them; the start of the HLS segment playing
+	// then, or for direct play the source's keyframe. Unset from the
+	// beginning.
+	StartPosition *durationpb.Duration
 }
 
 func (b0 StartPlaybackResponse_builder) Build() *StartPlaybackResponse {
@@ -3241,32 +3271,33 @@ func (b0 StartPlaybackResponse_builder) Build() *StartPlaybackResponse {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.PlaybackId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
 		x.xxx_hidden_PlaybackId = b.PlaybackId
 	}
 	if b.MediaSourceId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
 		x.xxx_hidden_MediaSourceId = b.MediaSourceId
 	}
 	if b.Method != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
 		x.xxx_hidden_Method = *b.Method
 	}
 	x.xxx_hidden_TranscodeReasons = b.TranscodeReasons
 	if b.Url != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
 		x.xxx_hidden_Url = b.Url
 	}
 	if b.AudioStreamIndex != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
 		x.xxx_hidden_AudioStreamIndex = *b.AudioStreamIndex
 	}
 	if b.SubtitleStreamIndex != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
 		x.xxx_hidden_SubtitleStreamIndex = *b.SubtitleStreamIndex
 	}
 	x.xxx_hidden_Subtitles = &b.Subtitles
 	x.xxx_hidden_Attachments = &b.Attachments
+	x.xxx_hidden_StartPosition = b.StartPosition
 	return m0
 }
 
@@ -3870,7 +3901,7 @@ const file_mavio_playback_v1_playback_proto_rawDesc = "" +
 	"\vmax_bitrate\x18\x06 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"maxBitrate\x12J\n" +
 	"\x0estart_position\x18\a \x01(\v2\x19.google.protobuf.DurationB\b\xbaH\x05\xaa\x01\x022\x00R\rstartPosition\x12\x1a\n" +
-	"\bdownload\x18\b \x01(\bR\bdownload\"\xdd\x03\n" +
+	"\bdownload\x18\b \x01(\bR\bdownload\"\x9f\x04\n" +
 	"\x15StartPlaybackResponse\x12\x1f\n" +
 	"\vplayback_id\x18\x01 \x01(\tR\n" +
 	"playbackId\x12&\n" +
@@ -3881,7 +3912,9 @@ const file_mavio_playback_v1_playback_proto_rawDesc = "" +
 	"\x12audio_stream_index\x18\x06 \x01(\x05R\x10audioStreamIndex\x122\n" +
 	"\x15subtitle_stream_index\x18\a \x01(\x05R\x13subtitleStreamIndex\x12>\n" +
 	"\tsubtitles\x18\b \x03(\v2 .mavio.playback.v1.SubtitleTrackR\tsubtitles\x12?\n" +
-	"\vattachments\x18\t \x03(\v2\x1d.mavio.playback.v1.AttachmentR\vattachments\"n\n" +
+	"\vattachments\x18\t \x03(\v2\x1d.mavio.playback.v1.AttachmentR\vattachments\x12@\n" +
+	"\x0estart_position\x18\n" +
+	" \x01(\v2\x19.google.protobuf.DurationR\rstartPosition\"n\n" +
 	"\n" +
 	"Attachment\x12\x14\n" +
 	"\x05index\x18\x01 \x01(\x05R\x05index\x12\x1b\n" +
@@ -4061,19 +4094,20 @@ var file_mavio_playback_v1_playback_proto_depIdxs = []int32{
 	9,  // 23: mavio.playback.v1.StartPlaybackResponse.transcode_reasons:type_name -> mavio.playback.v1.TranscodeReason
 	17, // 24: mavio.playback.v1.StartPlaybackResponse.subtitles:type_name -> mavio.playback.v1.SubtitleTrack
 	20, // 25: mavio.playback.v1.StartPlaybackResponse.attachments:type_name -> mavio.playback.v1.Attachment
-	25, // 26: mavio.playback.v1.ReportProgressRequest.position:type_name -> google.protobuf.Duration
-	25, // 27: mavio.playback.v1.StopPlaybackRequest.position:type_name -> google.protobuf.Duration
-	18, // 28: mavio.playback.v1.PlaybackService.StartPlayback:input_type -> mavio.playback.v1.StartPlaybackRequest
-	21, // 29: mavio.playback.v1.PlaybackService.ReportProgress:input_type -> mavio.playback.v1.ReportProgressRequest
-	23, // 30: mavio.playback.v1.PlaybackService.StopPlayback:input_type -> mavio.playback.v1.StopPlaybackRequest
-	19, // 31: mavio.playback.v1.PlaybackService.StartPlayback:output_type -> mavio.playback.v1.StartPlaybackResponse
-	22, // 32: mavio.playback.v1.PlaybackService.ReportProgress:output_type -> mavio.playback.v1.ReportProgressResponse
-	24, // 33: mavio.playback.v1.PlaybackService.StopPlayback:output_type -> mavio.playback.v1.StopPlaybackResponse
-	31, // [31:34] is the sub-list for method output_type
-	28, // [28:31] is the sub-list for method input_type
-	28, // [28:28] is the sub-list for extension type_name
-	28, // [28:28] is the sub-list for extension extendee
-	0,  // [0:28] is the sub-list for field type_name
+	25, // 26: mavio.playback.v1.StartPlaybackResponse.start_position:type_name -> google.protobuf.Duration
+	25, // 27: mavio.playback.v1.ReportProgressRequest.position:type_name -> google.protobuf.Duration
+	25, // 28: mavio.playback.v1.StopPlaybackRequest.position:type_name -> google.protobuf.Duration
+	18, // 29: mavio.playback.v1.PlaybackService.StartPlayback:input_type -> mavio.playback.v1.StartPlaybackRequest
+	21, // 30: mavio.playback.v1.PlaybackService.ReportProgress:input_type -> mavio.playback.v1.ReportProgressRequest
+	23, // 31: mavio.playback.v1.PlaybackService.StopPlayback:input_type -> mavio.playback.v1.StopPlaybackRequest
+	19, // 32: mavio.playback.v1.PlaybackService.StartPlayback:output_type -> mavio.playback.v1.StartPlaybackResponse
+	22, // 33: mavio.playback.v1.PlaybackService.ReportProgress:output_type -> mavio.playback.v1.ReportProgressResponse
+	24, // 34: mavio.playback.v1.PlaybackService.StopPlayback:output_type -> mavio.playback.v1.StopPlaybackResponse
+	32, // [32:35] is the sub-list for method output_type
+	29, // [29:32] is the sub-list for method input_type
+	29, // [29:29] is the sub-list for extension type_name
+	29, // [29:29] is the sub-list for extension extendee
+	0,  // [0:29] is the sub-list for field type_name
 }
 
 func init() { file_mavio_playback_v1_playback_proto_init() }
