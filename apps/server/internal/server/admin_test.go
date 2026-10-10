@@ -151,6 +151,7 @@ func TestAdministration(t *testing.T) {
 	if out, err := gen.CombinedOutput(); err != nil {
 		t.Skipf("integration test: cannot generate the film: %v\n%s", err, out)
 	}
+	settled(t, film)
 	catalogURL := catalog(t)
 	pluginDir, backupDir := t.TempDir(), t.TempDir()
 	srv := start(t, server.Config{

@@ -3,64 +3,43 @@ package storage
 import (
 	"context"
 	"testing"
+	"testing/synctest"
 	"time"
 )
 
-func TestQuietGate_Basic(t *testing.T) {
-	gate := NewQuietGate()
+func TestQuietGate(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		g := NewQuietGate(time.Second)
+		if g.Quiet() {
+			t.Error("Quiet before activity = true, want false")
+		}
+		start := time.Now()
+		if err := g.PauseOrCancel(t.Context()); err != nil || time.Since(start) != 0 {
+			t.Errorf("PauseOrCancel without activity waited %v: %v", time.Since(start), err)
+		}
 
-	if gate.IsActive() {
-		t.Errorf("initially IsActive = true, want false")
-	}
+		// Activity during the window extends it.
+		g.NoteActivity()
+		go func() {
+			time.Sleep(600 * time.Millisecond)
+			g.NoteActivity()
+		}()
+		if !g.Quiet() {
+			t.Error("Quiet after activity = false, want true")
+		}
+		if err := g.PauseOrCancel(t.Context()); err != nil {
+			t.Fatal(err)
+		}
+		if got, want := time.Since(start), 1600*time.Millisecond; got != want {
+			t.Errorf("waited %v, want %v", got, want)
+		}
 
-	gate.NoteActivity(200 * time.Millisecond)
-	if !gate.IsActive() {
-		t.Errorf("after NoteActivity, IsActive = false, want true")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	start := time.Now()
-	err := gate.Wait(ctx)
-	if err != nil {
-		t.Fatalf("Wait failed: %v", err)
-	}
-
-	elapsed := time.Since(start)
-	if elapsed < 150*time.Millisecond {
-		t.Errorf("Wait returned after %v, want >= 150ms", elapsed)
-	}
-
-	if gate.IsActive() {
-		t.Errorf("after wait, IsActive = true, want false")
-	}
-}
-
-func TestQuietGate_CoalesceExtension(t *testing.T) {
-	gate := NewQuietGate()
-
-	gate.NoteActivity(100 * time.Millisecond)
-	d1 := gate.QuietUntil()
-
-	time.Sleep(20 * time.Millisecond)
-	gate.NoteActivity(200 * time.Millisecond)
-	d2 := gate.QuietUntil()
-
-	if !d2.After(d1) {
-		t.Errorf("subsequent NoteActivity did not extend quietUntil: d1=%v, d2=%v", d1, d2)
-	}
-}
-
-func TestQuietGate_WaitContextCancelled(t *testing.T) {
-	gate := NewQuietGate()
-	gate.NoteActivity(5 * time.Second)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
-	defer cancel()
-
-	err := gate.Wait(ctx)
-	if err == nil {
-		t.Fatalf("Wait on cancelled context got nil, want context error")
-	}
+		// A canceled wait returns at once.
+		g.NoteActivity()
+		ctx, cancel := context.WithTimeout(t.Context(), 100*time.Millisecond)
+		defer cancel()
+		if err := g.PauseOrCancel(ctx); err == nil {
+			t.Error("PauseOrCancel after cancellation = nil, want an error")
+		}
+	})
 }

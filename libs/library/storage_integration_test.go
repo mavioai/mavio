@@ -3,8 +3,10 @@ package library
 import (
 	"context"
 	"encoding/json"
+	"maps"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -13,120 +15,78 @@ import (
 	"github.com/mavioai/mavio/libs/library/storage"
 )
 
-func TestScanner_GrowthPolicyAndTempFileFilter(t *testing.T) {
-	dir := t.TempDir()
-	moviesDir := filepath.Join(dir, "Movies", "Movie (2020)")
-	if err := os.MkdirAll(moviesDir, 0o755); err != nil {
-		t.Fatal(err)
-	}
-
-	// 1. Stable media file (mtime in the past)
-	stablePath := filepath.Join(moviesDir, "Movie (2020).mkv")
-	if err := os.WriteFile(stablePath, []byte("fake video content"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	oldTime := time.Now().Add(-1 * time.Hour)
-	_ = os.Chtimes(stablePath, oldTime, oldTime)
-
-	// 2. Temporary download file
-	tempPath := filepath.Join(moviesDir, "Movie (2020).mkv.part")
-	if err := os.WriteFile(tempPath, []byte("partial content"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-
-	// 3. Actively growing file (mtime is now)
-	growingPath := filepath.Join(moviesDir, "Downloading (2020).mkv")
-	if err := os.WriteFile(growingPath, []byte("growing content"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-
-	store := newMemStore()
-	lib := core.Library{ID: core.NewID(), Name: "Movies", Kind: core.LibraryMovies, Paths: []string{filepath.Join(dir, "Movies")}}
-	if err := store.Libraries().Create(context.Background(), &lib); err != nil {
-		t.Fatal(err)
-	}
-
-	growthPolicy := storage.NewGrowthPolicy(30 * time.Second)
-	// Prime growingPath with previous size so it is detected as actively growing
-	growthPolicy.IsGrowing(growingPath, 5, oldTime)
-	scanner := &Scanner{
-		Store:        store,
-		Resolver:     NewResolver(),
-		GrowthPolicy: growthPolicy,
-	}
-
-	stats, err := scanner.Scan(context.Background(), lib)
-	if err != nil {
-		t.Fatalf("scan failed: %v", err)
-	}
-
-	// The temporary file and growing file should not be saved as items.
-	// Only the stable movie file should be listed and saved.
-	if stats.Saved != 1 {
-		t.Errorf("saved = %d, want 1 (only stable movie)", stats.Saved)
-	}
-}
-
-func TestScanner_QuietGateInterlock(t *testing.T) {
-	gate := storage.NewQuietGate(20 * time.Millisecond)
-	releasePlayback := gate.AcquirePlayback("session-123")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
-	defer cancel()
-
-	// While playback is active, PauseOrCancel should wait until timeout
-	err := gate.PauseOrCancel(ctx)
-	if err == nil {
-		t.Errorf("expected PauseOrCancel to block while playback is active, got nil")
-	}
-
-	// Now release playback
-	releasePlayback()
-
-	// Note activity with 0 to allow immediate pass in test
-	gate.NoteActivity(1 * time.Millisecond)
-	time.Sleep(5 * time.Millisecond)
-
-	ctx2, cancel2 := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	defer cancel2()
-	if err := gate.PauseOrCancel(ctx2); err != nil {
-		t.Errorf("expected PauseOrCancel to succeed after playback released, got: %v", err)
-	}
-}
-
-func TestScanner_VolumeLedgerSerialization(t *testing.T) {
-	ledger := storage.NewVolumeLedger(time.Millisecond, time.Millisecond)
-	ctx := context.Background()
-
-	rel1, err := ledger.Acquire(ctx, "vol:1")
-	if err != nil {
-		t.Fatalf("failed to acquire vol:1: %v", err)
-	}
-
-	acquiredVol2 := make(chan struct{})
-	go func() {
-		rel2, err2 := ledger.Acquire(ctx, "vol:1")
-		if err2 != nil {
-			return
+func TestScanner_GrowthPolicy(t *testing.T) {
+	f := newScan(t, core.LibraryMovies)
+	tree(t, f.root, "Movie (2020)/Movie (2020).mkv", "Film (2021)/Film (2021).mkv.part", "Growing (2022)/Growing (2022).mkv")
+	old := time.Now().Add(-time.Hour)
+	for _, p := range []string{"Movie (2020)/Movie (2020).mkv", "Film (2021)/Film (2021).mkv.part", "Movie (2020)", "Film (2021)", "Growing (2022)"} {
+		if err := os.Chtimes(filepath.Join(f.root, p), old, old); err != nil {
+			t.Fatal(err)
 		}
-		close(acquiredVol2)
-		rel2()
-	}()
+	}
+	if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
+		t.Fatal(err)
+	}
+	clock := time.Now()
+	policy := &storage.GrowthPolicy{Now: func() time.Time { return clock }}
+	f.sc.GrowthPolicy = policy
 
-	select {
-	case <-acquiredVol2:
-		t.Fatalf("vol:1 acquired concurrently without release!")
-	case <-time.After(20 * time.Millisecond):
-		// Expected: blocked waiting for rel1
+	// The download and the file still being written are left out.
+	f.scan()
+	want := map[string]core.ItemKind{"Movie (2020)/Movie (2020).mkv": core.KindMovie}
+	if got := f.items(); !maps.Equal(got, want) {
+		t.Fatalf("items = %v, want %v", got, want)
+	}
+	if got := policy.Pending(); got != 2 {
+		t.Fatalf("deferred = %d, want 2", got)
+	}
+	scans := func() int {
+		n := 0
+		for _, j := range f.store.jobs {
+			if j.Kind == JobScan {
+				n++
+			}
+		}
+		f.store.jobs = nil
+		return n
+	}
+	scans()
+	// Nothing settled yet.
+	f.sc.ReconcileDeferred(t.Context())
+	if n := scans(); n != 0 {
+		t.Fatalf("scans = %d, want none", n)
 	}
 
-	rel1()
+	// The file is written no more: once stable its library is scanned
+	// again, and the scan lists its folder although the folder's
+	// modification time is as before.
+	clock = clock.Add(time.Minute)
+	f.sc.ReconcileDeferred(t.Context())
+	clock = clock.Add(time.Minute)
+	f.sc.ReconcileDeferred(t.Context())
+	if n := scans(); n != 1 {
+		t.Fatalf("scans = %d, want 1", n)
+	}
+	f.scan()
+	want["Growing (2022)/Growing (2022).mkv"] = core.KindMovie
+	if got := f.items(); !maps.Equal(got, want) {
+		t.Fatalf("items after settling = %v, want %v", got, want)
+	}
 
-	select {
-	case <-acquiredVol2:
-		// Successfully acquired after release
-	case <-time.After(200 * time.Millisecond):
-		t.Fatalf("timed out waiting for vol:1 to be acquired after release")
+	// The download finishes: renamed, its library is scanned again.
+	part := filepath.Join(f.root, "Film (2021)", "Film (2021).mkv.part")
+	if err := os.Rename(part, strings.TrimSuffix(part, ".part")); err != nil {
+		t.Fatal(err)
+	}
+	scans()
+	f.sc.ReconcileDeferred(t.Context())
+	if n := scans(); n != 1 {
+		t.Fatalf("scans after the download = %d, want 1", n)
+	}
+	f.scan()
+	want["Film (2021)/Film (2021).mkv"] = core.KindMovie
+	if got := f.items(); !maps.Equal(got, want) {
+		t.Fatalf("items after the download = %v, want %v", got, want)
 	}
 }
 
@@ -142,7 +102,7 @@ func TestScanner_SerializedDevice(t *testing.T) {
 	var calls atomic.Int32
 	f := newScan(t, core.LibraryMovies)
 	tree(t, f.root, "Up (2009)/Up (2009).mkv", "Heat (1995)/Heat (1995).mkv", "Alien (1979)/Alien (1979).mkv")
-	ledger := storage.NewVolumeLedger(0, 0)
+	ledger := storage.NewVolumeLedger()
 	f.sc.VolumeLedger, f.sc.Devices = ledger, rotational(&calls)
 	if got := f.sc.walkers(storage.DeviceInfo{Kind: storage.KindLocalSSD}); got != 4 {
 		t.Errorf("walkers on an SSD = %d, want 4", got)

@@ -8,25 +8,12 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func prefetchPlatform(f *os.File, size, headBudget, tailBudget int64) error {
+// prefetchRanges asks the kernel to read the ranges ahead, without
+// waiting for them or buffering them in the process.
+func prefetchRanges(f *os.File, ranges []byteRange) error {
 	fd := int(f.Fd())
-
-	// Prefetch head
-	headLen := headBudget
-	if headLen > size {
-		headLen = size
+	for _, r := range ranges {
+		_ = unix.Fadvise(fd, r.off, r.n, unix.FADV_WILLNEED)
 	}
-	_ = unix.Fadvise(fd, 0, headLen, unix.FADV_WILLNEED)
-
-	// Prefetch tail
-	if size > headBudget {
-		tailLen := tailBudget
-		if tailLen > size-headBudget {
-			tailLen = size - headBudget
-		}
-		tailOffset := size - tailLen
-		_ = unix.Fadvise(fd, tailOffset, tailLen, unix.FADV_WILLNEED)
-	}
-
 	return nil
 }

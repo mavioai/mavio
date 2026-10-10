@@ -140,6 +140,17 @@ func (h *Hub) SessionUser(session core.ID) (core.User, bool) {
 	return core.User{}, false
 }
 
+// OnlineSessions returns the sessions with an event stream open, by user.
+func (h *Hub) OnlineSessions() map[core.ID][]core.ID {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	out := map[core.ID][]core.ID{}
+	for id, s := range h.subs {
+		out[s.User.ID] = append(out[s.User.ID], id)
+	}
+	return out
+}
+
 // Online reports whether a session has an event stream open.
 func (h *Hub) Online(session core.ID) bool {
 	h.mu.Lock()

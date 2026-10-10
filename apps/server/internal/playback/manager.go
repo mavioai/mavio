@@ -79,7 +79,10 @@ type Config struct {
 	// as khuaplayer's foreground storage gate does, so that streaming keeps
 	// background reads paused while it reads and lets them resume between.
 	QuietGate *storage.QuietGate
-	Logger    *slog.Logger
+	// Keeper keeps the volumes of the playbacks in progress awake; nil
+	// leaves them be.
+	Keeper *storage.Keeper
+	Logger *slog.Logger
 }
 
 // Manager runs the playbacks in progress.
@@ -201,6 +204,9 @@ type Playback struct {
 	// Subtitles are the source's subtitle streams and how each reaches
 	// the client.
 	Subtitles []Subtitle
+	// StartPosition is where the client begins: where it asked to, or a
+	// keyframe up to five seconds before.
+	StartPosition time.Duration
 
 	// root is the library folder holding the source, for direct play.
 	root string
@@ -377,11 +383,11 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	}
 
 	if m.cfg.QuietGate != nil {
-		m.cfg.QuietGate.NoteActivity(0)
+		m.cfg.QuietGate.NoteActivity()
 	}
-	if d.Source != nil && d.Source.Path != "" {
-		_ = storage.PrefetchHeadTail(d.Source.Path, 1024*1024, 256*1024)
-	}
+	p.StartPosition = p.startPosition(r.Start)
+	p.position = p.StartPosition
+	m.prepareStart(ctx, p)
 
 	p.started = time.Now()
 	m.mu.Lock()
@@ -683,8 +689,20 @@ func (m *Manager) Run(ctx context.Context) error {
 	}
 	t := time.NewTicker(m.cfg.CheckInterval)
 	defer t.Stop()
+	var beats <-chan time.Time
+	if m.cfg.Keeper != nil {
+		interval := m.cfg.Keeper.Interval
+		if interval <= 0 {
+			interval = storage.DefaultHeartbeatInterval
+		}
+		bt := time.NewTicker(interval)
+		defer bt.Stop()
+		beats = bt.C
+	}
 	for {
 		select {
+		case <-beats:
+			m.keepAwake()
 		case <-ctx.Done():
 			m.mu.Lock()
 			all := slices.Collect(maps.Values(m.playbacks))

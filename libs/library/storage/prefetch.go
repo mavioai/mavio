@@ -1,9 +1,7 @@
 package storage
 
 import (
-	"crypto/rand"
 	"fmt"
-	"math/big"
 	"os"
 )
 
@@ -39,39 +37,34 @@ func PrefetchHeadTail(path string, headBudget, tailBudget int64) error {
 		return nil
 	}
 
-	return prefetchPlatform(f, size, headBudget, tailBudget)
+	head := min(headBudget, size)
+	ranges := []byteRange{{0, head}}
+	if size > head {
+		tail := min(tailBudget, size-head)
+		ranges = append(ranges, byteRange{size - tail, tail})
+	}
+	return prefetchRanges(f, ranges)
 }
 
-// VolumeHeartbeat issues an un-cached 4KB micro-read at a random offset to prevent drive spin-down.
-func VolumeHeartbeat(path string) error {
+// PrefetchRange warms the page cache for n bytes of a file from offset,
+// clipped to the file, such as the media around where a playback resumes.
+func PrefetchRange(path string, offset, n int64) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("heartbeat open %s: %w", path, err)
+		return fmt.Errorf("prefetch open %s: %w", path, err)
 	}
 	defer f.Close()
-
 	fi, err := f.Stat()
 	if err != nil {
-		return fmt.Errorf("heartbeat stat %s: %w", path, err)
+		return fmt.Errorf("prefetch stat %s: %w", path, err)
 	}
-	size := fi.Size()
-	if size <= 0 {
+	offset = max(0, min(offset, fi.Size()))
+	n = min(n, fi.Size()-offset)
+	if n <= 0 {
 		return nil
 	}
-
-	var offset int64
-	maxOffset := size - 4096
-	if maxOffset > 0 {
-		n, err := rand.Int(rand.Reader, big.NewInt(maxOffset))
-		if err == nil {
-			offset = (n.Int64() / 4096) * 4096
-		}
-	}
-
-	buf := make([]byte, 4096)
-	_, err = f.ReadAt(buf, offset)
-	if err != nil {
-		return fmt.Errorf("heartbeat read %s: %w", path, err)
-	}
-	return nil
+	return prefetchRanges(f, []byteRange{{offset, n}})
 }
+
+// byteRange is n bytes from off.
+type byteRange struct{ off, n int64 }

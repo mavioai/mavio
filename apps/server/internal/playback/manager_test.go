@@ -357,11 +357,11 @@ func TestQuietWindow(t *testing.T) {
 		e.start(t, Request{SourceID: e.source})
 		// Starting quiets background I/O for a while, not for the whole
 		// playback.
-		if !gate.IsActive() {
+		if !gate.Quiet() {
 			t.Error("background I/O not quiet after starting a playback")
 		}
 		time.Sleep(4 * time.Second)
-		if gate.IsActive() {
+		if gate.Quiet() {
 			t.Error("background I/O still quiet without media requests")
 		}
 	})

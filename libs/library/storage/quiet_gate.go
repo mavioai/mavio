@@ -6,115 +6,64 @@ import (
 	"time"
 )
 
-// DefaultQuietPeriod is the standard duration background tasks pause following foreground activity.
+// DefaultQuietPeriod is how long background I/O waits after foreground
+// activity.
 const DefaultQuietPeriod = 3 * time.Second
 
-// QuietGate synchronizes foreground user operations (streaming, seeking) with background I/O tasks.
-// Directly implements Khua's SPBackgroundStorageGate & SPForegroundStorageQuietState:
-// When foreground activity occurs, the quiet deadline is extended (never shortened),
-// coalescing bursts of user activity into a single quiet period without timer storms.
+// QuietGate makes background I/O yield to foreground streaming, as
+// khuaplayer's foreground storage gate does: foreground activity extends
+// a quiet deadline, never shortening it, so that a burst of requests
+// makes one quiet window without a timer per request, and background
+// tasks wait the window out before reading.
 type QuietGate struct {
-	mu             sync.Mutex
-	quietUntil     time.Time
-	activeSessions int
-	period         time.Duration
+	period time.Duration
+
+	mu         sync.Mutex
+	quietUntil time.Time
 }
 
-// NewQuietGate creates a new initialized QuietGate.
-func NewQuietGate(periods ...time.Duration) *QuietGate {
-	p := DefaultQuietPeriod
-	if len(periods) > 0 && periods[0] > 0 {
-		p = periods[0]
-	}
-	return &QuietGate{period: p}
-}
-
-// NoteActivity registers foreground activity, extending the quiet deadline to at least now + period.
-func (g *QuietGate) NoteActivity(period time.Duration) {
+// NewQuietGate returns a gate whose activity quiets background I/O for
+// period, DefaultQuietPeriod when not positive.
+func NewQuietGate(period time.Duration) *QuietGate {
 	if period <= 0 {
-		period = g.period
-		if period <= 0 {
-			period = DefaultQuietPeriod
-		}
+		period = DefaultQuietPeriod
 	}
+	return &QuietGate{period: period}
+}
+
+// NoteActivity notes foreground activity: background I/O waits until a
+// period from now at least.
+func (g *QuietGate) NoteActivity() {
 	g.mu.Lock()
-	target := time.Now().Add(period)
-	if target.After(g.quietUntil) {
-		g.quietUntil = target
+	if until := time.Now().Add(g.period); until.After(g.quietUntil) {
+		g.quietUntil = until
 	}
 	g.mu.Unlock()
 }
 
-// AcquirePlayback notes an active streaming session. While any playback session
-// is active, background tasks will be blocked. When the returned release function
-// is called, a cooldown is observed before background tasks resume.
-func (g *QuietGate) AcquirePlayback(sessionID string) func() {
-	g.mu.Lock()
-	g.activeSessions++
-	g.mu.Unlock()
-
-	var once sync.Once
-	return func() {
-		once.Do(func() {
-			g.mu.Lock()
-			if g.activeSessions > 0 {
-				g.activeSessions--
-			}
-			p := g.period
-			if p <= 0 {
-				p = DefaultQuietPeriod
-			}
-			target := time.Now().Add(p)
-			if target.After(g.quietUntil) {
-				g.quietUntil = target
-			}
-			g.mu.Unlock()
-		})
-	}
-}
-
-// IsActive reports whether the gate is currently active (i.e. background I/O should pause).
-func (g *QuietGate) IsActive() bool {
+// Quiet reports whether background I/O should wait.
+func (g *QuietGate) Quiet() bool {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	return g.activeSessions > 0 || time.Now().Before(g.quietUntil)
+	return time.Now().Before(g.quietUntil)
 }
 
-// QuietUntil returns the current quiet deadline timestamp.
-func (g *QuietGate) QuietUntil() time.Time {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	return g.quietUntil
-}
-
-// Wait blocks until the current quiet window and active streaming sessions have ended or ctx is cancelled.
-// If no quiet window is active, it returns nil immediately.
-func (g *QuietGate) Wait(ctx context.Context) error {
+// PauseOrCancel waits until the quiet window, extended by any activity
+// meanwhile, has passed, or ctx is canceled.
+func (g *QuietGate) PauseOrCancel(ctx context.Context) error {
 	for {
 		g.mu.Lock()
-		active := g.activeSessions > 0
-		remaining := time.Until(g.quietUntil)
+		wait := time.Until(g.quietUntil)
 		g.mu.Unlock()
-
-		if !active && remaining <= 0 {
+		if wait <= 0 {
 			return nil
 		}
-
-		sleepDur := remaining
-		if active || sleepDur <= 0 || sleepDur > 500*time.Millisecond {
-			sleepDur = 500 * time.Millisecond
-		}
-
+		t := time.NewTimer(wait)
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(sleepDur):
-			// Loop back to recheck active sessions and updated deadline.
+			t.Stop()
+			return context.Cause(ctx)
+		case <-t.C:
 		}
 	}
-}
-
-// PauseOrCancel is an alias for Wait(ctx), checking if background tasks need to yield.
-func (g *QuietGate) PauseOrCancel(ctx context.Context) error {
-	return g.Wait(ctx)
 }

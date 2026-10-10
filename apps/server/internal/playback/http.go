@@ -80,7 +80,7 @@ func (m *Manager) serveMedia(w http.ResponseWriter, r *http.Request) {
 	p.touch(time.Now())
 	// Every media request, a seek included, keeps background I/O quiet.
 	if m.cfg.QuietGate != nil {
-		m.cfg.QuietGate.NoteActivity(0)
+		m.cfg.QuietGate.NoteActivity()
 	}
 	file := r.PathValue("file")
 	switch {

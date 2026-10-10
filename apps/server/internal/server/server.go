@@ -24,6 +24,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
+	"github.com/mavioai/mavio/apps/server/internal/warming"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/library/storage"
@@ -128,12 +129,14 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Store: db, Logger: log,
 		Notifiers: func() []activity.Notifier { return plugs.Notifiers() },
 	})
-	quietGate := storage.NewQuietGate()
-	volumeLedger := storage.NewVolumeLedger(2*time.Second, 500*time.Millisecond)
+	quietGate := storage.NewQuietGate(0)
+	volumeLedger := storage.NewVolumeLedger()
 	devices := &storage.Detector{}
-	growthPolicy := storage.NewGrowthPolicy(10 * time.Second)
+	growthPolicy := storage.NewGrowthPolicy()
+	keeper := &storage.Keeper{Devices: devices}
+	warmer := warming.New(warming.Config{Store: db, Keeper: keeper, Online: hub.OnlineSessions, Logger: log})
 
-	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, cfg, quietGate)
+	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, cfg, quietGate, keeper)
 	if err := set.Register(ctx, func(_ context.Context, s core.ServerSettings) error {
 		return playbacks.SetTranscoding(s.Transcoding)
 	}); err != nil {
@@ -156,7 +159,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Images: imageServer, Plugins: plugs, Refresher: refresher,
 		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Logger: log},
 		Settings:  set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
-		Authenticate: plugs.Authenticate, Dev: cfg.Dev,
+		Authenticate: plugs.Authenticate, Wake: warmer.Wake, Dev: cfg.Dev,
 	})
 	if err != nil {
 		return err
@@ -195,6 +198,12 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	log.InfoContext(ctx, "starting mavio", "version", cfg.Version, "addr", ln.Addr().String())
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return playbacks.Run(ctx) })
+	g.Go(func() error {
+		if err := warmer.Run(ctx); !errors.Is(err, context.Canceled) {
+			return err
+		}
+		return nil
+	})
 	g.Go(func() error { return httpserver.Serve(ctx, ln, prefix) })
 	g.Go(func() error {
 		if err := activityLog.Run(ctx); !errors.Is(err, context.Canceled) {
@@ -202,9 +211,15 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		}
 		return nil
 	})
-	if worker := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, plugs.SegmentProviders, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
+	if worker, scanner := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, plugs.SegmentProviders, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
+				return err
+			}
+			return nil
+		})
+		g.Go(func() error {
+			if err := scanner.RunDeferred(ctx, 0); !errors.Is(err, context.Canceled) {
 				return err
 			}
 			return nil
@@ -242,16 +257,16 @@ func addDevLibraries(ctx context.Context, log *slog.Logger, db core.Store, dir s
 
 // newLibraryWorker returns the worker running scans, probes, keyframe
 // extractions, metadata refreshes and image placeholders, with a scan of
-// every library queued, or nil when there is no ffprobe to probe media
-// with.
+// every library queued, and its scanner, or nil when there is no ffprobe
+// to probe media with.
 func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffprobe, ffmpeg string, analyzer library.ImageAnalyzer,
 	refresher *library.Refresher, segments func() []library.SegmentProvider, quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
 	growthPolicy *storage.GrowthPolicy,
-) *library.Worker {
+) (*library.Worker, *library.Scanner) {
 	path, err := exec.LookPath(ffprobe)
 	if err != nil {
 		log.ErrorContext(ctx, "ffprobe unavailable; libraries are not scanned", "ffprobe", ffprobe, "err", err)
-		return nil
+		return nil, nil
 	}
 	jobs := &library.Jobs{
 		Store: db,
@@ -285,15 +300,15 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 	host, _ := os.Hostname()
 	return &library.Worker{
 		Queue: db.Jobs(), Owner: fmt.Sprintf("%s:%d", host, os.Getpid()), Handlers: jobs.Handlers(), Logger: log,
-	}
+	}, jobs.Scanner
 }
 
 // newPlaybacks sets up playback with the configured ffmpeg, or for direct
 // play only without one. It returns the ffmpeg version, empty without
 // ffmpeg.
-func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, cfg Config, quietGate *storage.QuietGate) (*playback.Manager, string) {
+func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, cfg Config, quietGate *storage.QuietGate, keeper *storage.Keeper) (*playback.Manager, string) {
 	pc := playback.Config{
-		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, QuietGate: quietGate, Logger: log,
+		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, QuietGate: quietGate, Keeper: keeper, Logger: log,
 	}
 	v, err := pc.UseFFmpeg(ctx, cfg.FFmpeg, cfg.FFprobe)
 	if err != nil {

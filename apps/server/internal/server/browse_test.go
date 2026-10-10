@@ -56,6 +56,7 @@ func TestBrowsing(t *testing.T) {
 	if out, err := gen.CombinedOutput(); err != nil {
 		t.Skipf("integration test: cannot generate a video: %v\n%s", err, out)
 	}
+	settled(t, video)
 	data, err := os.ReadFile(video)
 	if err != nil {
 		t.Fatal(err)

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"google.golang.org/protobuf/types/known/durationpb"
+
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/playback"
@@ -94,6 +96,10 @@ func (s *PlaybackService) StartPlayback(ctx context.Context, req *playbackv1.Sta
 		}.Build())
 	}
 	reasons := reasonsToProto(pb.Decision.Reasons)
+	var start *durationpb.Duration
+	if pb.StartPosition > 0 {
+		start = durationpb.New(pb.StartPosition)
+	}
 	return playbackv1.StartPlaybackResponse_builder{
 		PlaybackId:          &pb.ID,
 		MediaSourceId:       new(pb.Source().ID.String()),
@@ -104,6 +110,7 @@ func (s *PlaybackService) StartPlayback(ctx context.Context, req *playbackv1.Sta
 		SubtitleStreamIndex: new(int32(pb.SubtitleStream)),
 		Subtitles:           subs,
 		Attachments:         attachments,
+		StartPosition:       start,
 	}.Build(), nil
 }
 

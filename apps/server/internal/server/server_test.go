@@ -53,6 +53,7 @@ func TestEndToEnd(t *testing.T) {
 	if out, err := gen.CombinedOutput(); err != nil {
 		t.Skipf("integration test: cannot generate the film: %v\n%s", err, out)
 	}
+	settled(t, film)
 
 	// The server, as cmd/mavio runs it.
 	ln, err := net.Listen("tcp", "127.0.0.1:0")

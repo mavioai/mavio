@@ -58,16 +58,14 @@ func TestPrefetchHeadTail_EmptyFile(t *testing.T) {
 	}
 }
 
-func TestVolumeHeartbeat(t *testing.T) {
-	tempDir := t.TempDir()
-	filePath := filepath.Join(tempDir, "heartbeat.bin")
-
-	data := make([]byte, 64<<10)
-	if err := os.WriteFile(filePath, data, 0o644); err != nil {
-		t.Fatalf("WriteFile failed: %v", err)
+func TestPrefetchRange(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "range.bin")
+	if err := os.WriteFile(p, make([]byte, 1<<20), 0o644); err != nil {
+		t.Fatal(err)
 	}
-
-	if err := VolumeHeartbeat(filePath); err != nil {
-		t.Fatalf("VolumeHeartbeat failed: %v", err)
+	for _, r := range [][2]int64{{0, 4096}, {512 << 10, 1 << 20}, {2 << 20, 10}, {-5, 10}} {
+		if err := PrefetchRange(p, r[0], r[1]); err != nil {
+			t.Errorf("PrefetchRange(%d, %d) = %v, want nil", r[0], r[1], err)
+		}
 	}
 }

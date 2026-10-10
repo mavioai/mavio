@@ -66,6 +66,9 @@ type Options struct {
 	Backups *backup.Manager
 	// Authenticate checks the credentials of plugin users.
 	Authenticate func(ctx context.Context, pluginID, name, password string) (plugins.AuthResult, error)
+	// Wake is told of the media of each item a client opens; nil tells no
+	// one.
+	Wake func(sources []core.MediaSource)
 	// Dev serves the development player at /dev/player.
 	Dev bool
 }
@@ -97,7 +100,9 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(systemv1connect.NewLocalizationServiceHandler(rpc.LocalizationService{}, interceptors))
 	mux.Handle("GET /system/backups/{name}", backupDownload(authn, opts.Backups))
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(rpc.NewLibraryService(opts.Store), interceptors))
-	mux.Handle(libraryv1connect.NewItemServiceHandler(rpc.NewItemService(opts.Store), interceptors))
+	items := rpc.NewItemService(opts.Store)
+	items.Wake = opts.Wake
+	mux.Handle(libraryv1connect.NewItemServiceHandler(items, interceptors))
 	mux.Handle(libraryv1connect.NewCollectionServiceHandler(rpc.NewCollectionService(opts.Store), interceptors))
 	refresher, subtitles := opts.Refresher, opts.Subtitles
 	if refresher == nil {

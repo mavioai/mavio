@@ -52,6 +52,7 @@ func TestMetadataManagement(t *testing.T) {
 	if out, err := gen.CombinedOutput(); err != nil {
 		t.Skipf("integration test: cannot generate the film: %v\n%s", err, out)
 	}
+	settled(t, film)
 	// The plugin's images.
 	artwork := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("\xff\xd8\xff\xe0" + r.URL.Path))

@@ -31,6 +31,19 @@ func run(t *testing.T, name string, args ...string) {
 	}
 }
 
+// settled moves the modification time of files written by the test an
+// hour back, so that scans do not leave them for later as files still
+// being written.
+func settled(t *testing.T, paths ...string) {
+	t.Helper()
+	old := time.Now().Add(-time.Hour)
+	for _, p := range paths {
+		if err := os.Chtimes(p, old, old); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
 // TestMediaExtras runs the assembled server with real ffmpeg: a film with
 // chapters and an attached font gets trickplay sheets, chapter images and
 // segments from a plugin, and downloads as a progressive transcode that
@@ -65,6 +78,7 @@ func TestMediaExtras(t *testing.T) {
 	track := filepath.Join(music, "Band", "Album", "01 - Song.flac")
 	_ = os.MkdirAll(filepath.Dir(track), 0o755)
 	run(t, ffmpeg, "-v", "error", "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=44100", "-t", "5", track)
+	settled(t, film, track)
 	if err := os.WriteFile(strings.TrimSuffix(track, ".flac")+".lrc", []byte("[ti:Song]\n[00:01.00]Hello\n[00:03.00]World\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}

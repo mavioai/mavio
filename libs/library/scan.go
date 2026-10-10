@@ -54,7 +54,9 @@ type Scanner struct {
 	Devices *storage.Detector
 	// QuietGate pauses or throttles background scans during active client streaming.
 	QuietGate *storage.QuietGate
-	// GrowthPolicy identifies actively downloading or growing files to avoid dirty reads.
+	// GrowthPolicy leaves files still being written, such as downloads,
+	// for a later scan; RunDeferred scans their libraries once they
+	// settle. Without it only files with download suffixes are left out.
 	GrowthPolicy *storage.GrowthPolicy
 }
 
@@ -298,11 +300,6 @@ func (sc *scan) state(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, dir
 	return sc.list(rfs, ignores, st)
 }
 
-// temporaryDownloadExtensions are suffixes of partially downloaded files that should never be indexed.
-var temporaryDownloadExtensions = []string{
-	".part", ".crdownload", ".download", ".aria2", ".!qb", ".tmp",
-}
-
 // list reads a folder's entries, without those .ignore files exclude.
 func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (core.FolderState, bool, error) {
 	entries, err := rfs.List(st.Path)
@@ -310,8 +307,7 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 		return st, false, err
 	}
 	for _, e := range entries {
-		ext := strings.ToLower(path.Ext(e.Path))
-		if slices.Contains(temporaryDownloadExtensions, ext) {
+		if !e.IsDir && sc.GrowthPolicy == nil && storage.HasDownloadSuffix(e.Path) {
 			continue
 		}
 		if ignored, err := ignores.Ignored(slashRel(rfs, e.Path), e.IsDir); err != nil || ignored {
@@ -325,7 +321,11 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 		fe.ModTime = modTime(fi)
 		if !e.IsDir {
 			fe.Size = fi.Size()
-			if sc.GrowthPolicy != nil && sc.GrowthPolicy.IsGrowing(e.Path, fe.Size, fe.ModTime) {
+			if sc.GrowthPolicy != nil && sc.GrowthPolicy.Growing(sc.lib.ID.String(), e.Path, storage.FileStamp{Size: fe.Size, ModTime: fe.ModTime}) {
+				// Files still being written are left for a later scan,
+				// which must list the folder again: its modification time
+				// does not change when they are written to.
+				st.ModTime = time.Time{}
 				continue
 			}
 		}

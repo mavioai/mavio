@@ -90,6 +90,9 @@ var (
 type ItemService struct {
 	store   core.Store
 	browser *browse.Browser
+	// Wake is told of the media of each item a client opens, which it may
+	// play next; nil tells no one.
+	Wake func(sources []core.MediaSource)
 }
 
 var _ libraryv1connect.ItemServiceHandler = (*ItemService)(nil)
@@ -119,6 +122,9 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 	sources, err := s.store.MediaSources().ListForItem(ctx, item.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
+	}
+	if s.Wake != nil && len(sources) > 0 {
+		s.Wake(sources)
 	}
 	credits, err := s.store.People().CreditsForItem(ctx, item.ID)
 	if err != nil {
