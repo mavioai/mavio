@@ -465,7 +465,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 
 ### 13.2 数据源与编号
 * **Servarr 的服务**是默认数据源，无需密钥：Radarr 的元数据服务（`api.radarr.video`）提供电影与列表，Sonarr 的 SkyHook（`skyhook.sonarr.tv`）提供剧集与单集，Sonarr 的服务（`services.sonarr.tv`）提供 scene 映射与日播剧，以及 XEM（`thexem.info`）和 Prowlarr 的索引器定义（`indexers.prowlarr.com`）。对 Servarr 服务的请求携带该服务所属应用的 User-Agent，构造方式与该应用相同（`Sonarr/<version> (<os> <os version>)`）。
-* **TMDB**：`scraper-tmdb` 使用 Radarr 的 TMDB 只读访问令牌，管理员设置了自己的 API Key 时改用该密钥。
+* **TMDB**：`scraper-tmdb` 在管理员设置了自己的 API Key 时使用该密钥，否则使用 Radarr 的 TMDB 只读访问令牌；TMDB 拒绝该令牌时，回退到插件内置的 Mavio 自己的 API Key。
 * **磁盘上的编号遵循 TVDB**，与 Sonarr 一致：剧集的单集来自 SkyHook，按 TVDB 顺序，带绝对集数与播出日期；文件按这些编号命名（动漫还带绝对集数）；请求按此顺序列出季。剧集有类型：standard、daily 或 anime，决定如何匹配 release。
 * **TMDB 的元数据**通过剧集的显示顺序挂上：即 Jellyfin 的 `DisplayOrder` 加 TMDB 的 episode groups，以及 TMDB 单集上已有的 TVDB ID。
 * **命名不同的 release** 通过 Sonarr 的 scene 映射与 XEM 匹配；日播剧按播出日期匹配。

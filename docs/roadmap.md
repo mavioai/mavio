@@ -373,9 +373,9 @@ flowchart TD
 **Scope**: the metadata acquisition needs, without keys by default.
 
 - `plugins/scraper-servarr` (WASM): Radarr's movie metadata and lists, Sonarr's SkyHook series and episodes in TVDB order, scene mappings, daily series, XEM
-- `scraper-tmdb`: Radarr's TMDB read access token unless an administrator sets a key; `DISCOVERY_PROVIDER` (trending, popular, upcoming, by genre, studio, network, keyword and watch provider, recommendations and similar titles); episode groups
+- `scraper-tmdb`: Radarr's TMDB read access token unless an administrator sets a key, and Mavio's own key when TMDB rejects the token; `DISCOVERY_PROVIDER` (trending, popular, upcoming, by genre, studio, network, keyword and watch provider, recommendations and similar titles); episode groups
 
-**Done when**: with no key configured, a movie and a series are identified and refreshed, the series' wanted episodes are numbered as TVDB numbers them, and TMDB's episode metadata is attached to them through the series' display order.
+**Done when**: with no key configured, a movie and a series are identified and refreshed, also when TMDB rejects Radarr's token, the series' wanted episodes are numbered as TVDB numbers them, and TMDB's episode metadata is attached to them through the series' display order.
 
 ### P17 Indexers
 **Scope**: `plugins/indexers`, a first-party process plugin porting Prowlarr: Newznab, Torznab, the Cardigann engine with the definitions of `indexers.prowlarr.com`, every site Prowlarr implements in code, categories and capabilities, rate limits and backoff, indexer proxies (HTTP, SOCKS, FlareSolverr). The capability `INDEXER_PROVIDER`; `ReleaseService` searches the configured indexers and parses what they return with `libs/release`.
@@ -438,7 +438,7 @@ flowchart TD
 | Go modules split too finely | Friction in dependency upgrades and tidying | Keep watching; merge modules when needed |
 | Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P21); then serve the stream as `.sup` |
 | Negative audio decode times in fMP4 | HLS outputs keep negative timestamps, so audio that starts before zero (AAC encoder priming) is written with a negative `tfdt`, a field the format defines as unsigned. hls.js and Safari play it, and Jellyfin writes the same for its fMP4 clients; players outside that set are unverified | If a player misplaces or drops the audio: shift only the audio to zero, keeping the video at the source's timestamps |
-| Servarr's services | Acquisition uses the services Radarr, Sonarr and Prowlarr use, and Radarr's TMDB token, without keys of its own; their operators may change or withdraw them | Requests carry the User-Agent of the application whose service it is; an administrator can set their own TMDB key, and `scraper-servarr` follows the services in its releases |
+| Servarr's services | Acquisition uses the services Radarr, Sonarr and Prowlarr use, and Radarr's TMDB token, without keys of its own; their operators may change or withdraw them | Requests carry the User-Agent of the application whose service it is; an administrator can set their own TMDB key, Mavio's own key stands in when Radarr's token is rejected, and `scraper-servarr` follows the services in its releases |
 | Series numbering | Releases and files follow TVDB's numbering, TMDB's metadata may number the same episodes otherwise, anime in particular | Display orders with TMDB episode groups and episode TVDB IDs in P15 and P16; scene mappings and XEM in P19 |
 | Indexer churn | Sites change their pages and APIs | Cardigann definitions are fetched at run time; the indexers plugin is upgraded from the catalog without a server release |
 | Live TV, DVR and channels | Large parts of Jellyfin that Mavio has neither adopted nor ruled out; the plugin platform leaves out their provider types | Decide before P21 |

@@ -465,7 +465,7 @@ Mavio finds, downloads and imports the movies and series its users want, as Seer
 
 ### 13.2 Data Sources and Numbering
 * **Servarr's services**, without keys, are the default sources: Radarr's metadata service (`api.radarr.video`) for movies and lists, Sonarr's SkyHook (`skyhook.sonarr.tv`) for series and episodes, Sonarr's services (`services.sonarr.tv`) for scene mappings and daily series, XEM (`thexem.info`), and Prowlarr's indexer definitions (`indexers.prowlarr.com`). Requests to a Servarr service carry the User-Agent of the application whose service it is, as that application builds it (`Sonarr/<version> (<os> <os version>)`).
-* **TMDB**: `scraper-tmdb` uses Radarr's TMDB read access token unless an administrator sets an API key of their own, which then takes its place.
+* **TMDB**: `scraper-tmdb` uses an administrator's own API key when one is set, else Radarr's TMDB read access token; when TMDB rejects that token, it falls back to Mavio's own API key, which the plugin ships.
 * **Numbering on disk follows TVDB**, as Sonarr's does: a series' episodes come from SkyHook in TVDB order with absolute numbers and air dates, files are named by those numbers (anime also by absolute number), and requests list seasons in that order. A series has a type, standard, daily or anime, which decides how releases are matched.
 * **TMDB's metadata** is attached through the series' display order, Jellyfin's `DisplayOrder` over TMDB's episode groups, and TMDB's episode TVDB IDs where they exist.
 * **Releases named otherwise** are matched through Sonarr's scene mappings and XEM; daily series by air date.
