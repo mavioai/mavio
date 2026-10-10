@@ -416,6 +416,7 @@ flowchart TD
     - [ ] The origin, source, container, codec and resolution of its releases, which Prowlarr's TorrentInfo keeps and releases do not have yet
   - [x] FileList (`internal/sites/filelist`)
   - [x] HDBits (`internal/sites/hdbits`)
+  - [x] PassThePopcorn (`internal/sites/passthepopcorn`)
   - [ ] The API tokens of AvistaZ and SpeedApp sites kept across restarts, as Prowlarr keeps them in the settings; they log in again after each start
   - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
