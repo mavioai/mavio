@@ -10,7 +10,7 @@
 
 * **自底向上**：先实现零业务依赖的底层库，再逐层向上组装；每一层只依赖已完成的下层。
 * **完成标准**：一个阶段的库通过各自的测试即为完成，包括全部移植的测试用例（或有明确标记、写明原因的 skip），见[测试策略 §2](testing.zh-CN.md#2-从-jellyfin-移植测试用例)。
-* **服务端优先**：P7 至 P12 对照 Jellyfin 服务端（其 API 控制器与元数据提供者）补全服务端；P13 与 P14 让插件能力与 Jellyfin 对齐并加入 DLNA；客户端放在最后的 P15，基于完成的 API 构建。
+* **服务端优先**：P7 至 P12 对照 Jellyfin 服务端（其 API 控制器与元数据提供者）补全服务端；P13 与 P14 让插件能力与 Jellyfin 对齐并加入 DLNA；客户端随后在 P15 基于完成的 API 构建；P16 打包并发布版本。
 * **集成冒烟**：从 P1 起，每个阶段结束时在 `apps/server/internal/smoke` 增加一个把已完成的库串起来的集成测试。它不是 MVP，只用来尽早暴露接口漂移，降低自底向上方式"后期集成才发现问题"的风险。
 
 ---
@@ -35,6 +35,7 @@ flowchart TD
     P13["P13 插件平台<br/>宿主 API、事件、HTTP 路由、任务、远程设备、更多提供者类型"]
     P14["P14 DLNA<br/>plugins/dlna：媒体服务器、推送播放、设备 profile"]
     P15["P15 客户端与生态<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim 决定"]
+    P16["P16 打包与发布<br/>libs/proto 与 libs/plugin 标签、服务端二进制与容器镜像"]
 
     P0 --> P1
     P1 --> P2
@@ -55,6 +56,8 @@ flowchart TD
     P12 --> P13
     P13 --> P14
     P13 --> P15
+    P14 --> P16
+    P15 --> P16
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -72,9 +75,10 @@ flowchart TD
 | P10 | 元数据管理 | ✅ 完成 |
 | P11 | 管理与运维 | ✅ 完成 |
 | P12 | 媒体附加功能 | ✅ 完成 |
-| P13 | 插件平台 | 未开始 |
-| P14 | DLNA | 未开始 |
+| P13 | 插件平台 | ✅ 完成 |
+| P14 | DLNA | 进行中 |
 | P15 | 客户端与生态 | 未开始 |
+| P16 | 打包与发布 | 未开始 |
 
 ---
 
@@ -163,7 +167,7 @@ flowchart TD
 - [x] 通过开发用播放器在 Safari 的原生 HLS（即 AVFoundation）上验证播放：直接串流、转码、拖动并重启转码、同步的 HLS 字幕轨。HLS 字幕轨是按视频分片切分、不带 `X-TIMESTAMP-MAP` 的 WebVTT；若有播放器错位，则按视频的时间戳推算并加上该头
 
 ### P6 服务端装配与分发
-**范围**：`apps/server` 装配；`CGO_ENABLED=0` 交叉编译；容器镜像内置 jellyfin-ffmpeg 的便携版，即 `mise.toml` 锁定的那一份。镜像发布以后再做。
+**范围**：`apps/server` 装配；`CGO_ENABLED=0` 交叉编译；容器镜像内置 jellyfin-ffmpeg 的便携版，即 `mise.toml` 锁定的那一份。镜像发布属于 P16。
 
 **完成标准**：端到端冒烟测试：扫描 → 刮削 → 播放决策 → HLS 播放。
 
@@ -307,7 +311,7 @@ flowchart TD
 ### P13 插件平台
 **范围**：让 Mavio 两种运行时的插件都能做到 Jellyfin 插件能做的事（频道与直播电视除外）（[插件平台](plugins.zh-CN.md)）：带作用域、可代表用户的宿主 API；面向消费者的事件，以及发给通知插件的全部活动；HTTP 路由；任务与数据目录；远程设备；图片、歌词、本地元数据、保存器、处理器、解析器、片头、图片生成器、媒体源与密码重置提供者；外部 ID 声明；按媒体库的提供者顺序。
 
-**完成标准**：为两种运行时构建的测试插件在端到端测试中通过装配好的服务端使用每一种能力；契约与 SDK 有文档，并以 `libs/proto` 与 `libs/plugin` 版本发布。
+**完成标准**：为两种运行时构建的测试插件在端到端测试中通过装配好的服务端使用每一种能力；契约与 SDK 有文档。
 
 **进度**：
 - [x] 宿主 API：作用域、代表用户、两种运行时的传输
@@ -319,7 +323,6 @@ flowchart TD
 - [x] 解析器、片头提供者、图片生成器、媒体源提供者、密码重置
 - [x] 按媒体库的提供者顺序
 - [x] 端到端测试（使用真实 ffmpeg 的 `apps/server/internal/server/capabilities_test.go` 与 `plugins_test.go`），覆盖两种运行时
-- [ ] 为 `libs/proto` 与 `libs/plugin` 打发布标签
 
 ### P14 DLNA
 **范围**：`plugins/dlna`，第一方进程插件（[插件平台 §10](plugins.zh-CN.md#10-dlnapluginsdlna)）：媒体服务器（SSDP、ContentDirectory、ConnectionManager、带 DLNA 头的媒体）、推送播放（发现渲染器、AVTransport 与 RenderingControl）、设备 profile；为服务端的每个平台构建，进入官方目录与容器镜像。
@@ -336,6 +339,15 @@ flowchart TD
 
 ### P15 客户端与生态
 **范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。具体完成标准在 P14 完成后制定。
+
+### P16 打包与发布
+**范围**：首批版本发布（[开发指南 §7](development.zh-CN.md#7-发布与版本)）：依次为 `libs/proto` 与 `libs/plugin` 打标签；发布服务端的版本二进制与容器镜像。
+
+**完成标准**：仓库外的插件以 `GOWORK=off`、不用 `replace` 基于打了标签的 `libs/proto` 与 `libs/plugin` 构建成功；某个版本的二进制与镜像已发布，且镜像能启动。
+
+**进度**：
+- [ ] 为 `libs/proto` 与 `libs/plugin` 打发布标签
+- [ ] 发布服务端的版本二进制与容器镜像
 
 ---
 
