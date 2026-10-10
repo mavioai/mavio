@@ -1,0 +1,20 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "mavio/plugin/v1/provider.proto";
+
+// EventConsumerService receives the server's events whose types match the
+// plugin's permissions.events, in order and at most once.
+service EventConsumerService {
+  // Consume delivers a batch of events. An error makes the host retry the
+  // batch a few times before dropping it.
+  rpc Consume(ConsumeRequest) returns (ConsumeResponse);
+}
+
+message ConsumeRequest {
+  // Events in the order they happened, at most 100.
+  repeated Event events = 1;
+}
+
+message ConsumeResponse {}

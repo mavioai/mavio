@@ -29,6 +29,7 @@ type Plugin interface {
 	Subtitles() pluginv1connect.SubtitleProviderServiceClient
 	Segments() pluginv1connect.MediaSegmentProviderServiceClient
 	Tasks() pluginv1connect.TaskRunnerServiceClient
+	Events() pluginv1connect.EventConsumerServiceClient
 	// Close stops the plugin and releases its resources.
 	Close(ctx context.Context) error
 }

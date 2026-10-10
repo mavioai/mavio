@@ -21,6 +21,7 @@ type Set struct {
 	subtitles pluginv1connect.SubtitleProviderServiceClient
 	segments  pluginv1connect.MediaSegmentProviderServiceClient
 	tasks     pluginv1connect.TaskRunnerServiceClient
+	events    pluginv1connect.EventConsumerServiceClient
 }
 
 // New builds the clients for m over c.
@@ -43,6 +44,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_TASK_RUNNER) {
 		s.tasks = pluginv1connect.NewTaskRunnerServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_EVENT_CONSUMER) {
+		s.events = pluginv1connect.NewEventConsumerServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -70,3 +74,6 @@ func (s Set) Segments() pluginv1connect.MediaSegmentProviderServiceClient { retu
 
 // Tasks returns the TaskRunnerService client, or nil.
 func (s Set) Tasks() pluginv1connect.TaskRunnerServiceClient { return s.tasks }
+
+// Events returns the EventConsumerService client, or nil.
+func (s Set) Events() pluginv1connect.EventConsumerServiceClient { return s.events }

@@ -88,6 +88,8 @@ const (
 	Capability_CAPABILITY_SEGMENT_PROVIDER Capability = 5
 	// Implements TaskRunnerService for the manifest's tasks.
 	Capability_CAPABILITY_TASK_RUNNER Capability = 6
+	// Implements EventConsumerService for the events of permissions.events.
+	Capability_CAPABILITY_EVENT_CONSUMER Capability = 7
 )
 
 // Enum value maps for Capability.
@@ -100,6 +102,7 @@ var (
 		4: "CAPABILITY_SUBTITLE_PROVIDER",
 		5: "CAPABILITY_SEGMENT_PROVIDER",
 		6: "CAPABILITY_TASK_RUNNER",
+		7: "CAPABILITY_EVENT_CONSUMER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":       0,
@@ -109,6 +112,7 @@ var (
 		"CAPABILITY_SUBTITLE_PROVIDER": 4,
 		"CAPABILITY_SEGMENT_PROVIDER":  5,
 		"CAPABILITY_TASK_RUNNER":       6,
+		"CAPABILITY_EVENT_CONSUMER":    7,
 	}
 )
 
@@ -579,6 +583,7 @@ type Permissions struct {
 	xxx_hidden_ReadPaths   []string               `protobuf:"bytes,2,rep,name=read_paths,json=readPaths"`
 	xxx_hidden_Api         []string               `protobuf:"bytes,3,rep,name=api"`
 	xxx_hidden_ActAsUsers  bool                   `protobuf:"varint,4,opt,name=act_as_users,json=actAsUsers"`
+	xxx_hidden_Events      []string               `protobuf:"bytes,5,rep,name=events"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -638,6 +643,13 @@ func (x *Permissions) GetActAsUsers() bool {
 	return false
 }
 
+func (x *Permissions) GetEvents() []string {
+	if x != nil {
+		return x.xxx_hidden_Events
+	}
+	return nil
+}
+
 func (x *Permissions) SetHttpHosts(v []string) {
 	x.xxx_hidden_HttpHosts = v
 }
@@ -652,7 +664,11 @@ func (x *Permissions) SetApi(v []string) {
 
 func (x *Permissions) SetActAsUsers(v bool) {
 	x.xxx_hidden_ActAsUsers = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *Permissions) SetEvents(v []string) {
+	x.xxx_hidden_Events = v
 }
 
 func (x *Permissions) HasActAsUsers() bool {
@@ -683,6 +699,10 @@ type Permissions_builder struct {
 	// Whether host API requests may act as a user named in the Mavio-User
 	// header.
 	ActAsUsers *bool
+	// Event types the plugin consumes: a type such as "item.added", a
+	// category such as "item.*", or "*" for every event. Requires
+	// CAPABILITY_EVENT_CONSUMER.
+	Events []string
 }
 
 func (b0 Permissions_builder) Build() *Permissions {
@@ -693,9 +713,10 @@ func (b0 Permissions_builder) Build() *Permissions {
 	x.xxx_hidden_ReadPaths = b.ReadPaths
 	x.xxx_hidden_Api = b.Api
 	if b.ActAsUsers != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
 		x.xxx_hidden_ActAsUsers = *b.ActAsUsers
 	}
+	x.xxx_hidden_Events = b.Events
 	return m0
 }
 
@@ -1190,7 +1211,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\rconfig_schema\x18\v \x01(\tR\fconfigSchema\x12\x1f\n" +
 	"\vapi_version\x18\f \x01(\tR\n" +
 	"apiVersion\x12+\n" +
-	"\x05tasks\x18\r \x03(\v2\x15.mavio.plugin.v1.TaskR\x05tasks\"\x7f\n" +
+	"\x05tasks\x18\r \x03(\v2\x15.mavio.plugin.v1.TaskR\x05tasks\"\x97\x01\n" +
 	"\vPermissions\x12\x1d\n" +
 	"\n" +
 	"http_hosts\x18\x01 \x03(\tR\thttpHosts\x12\x1d\n" +
@@ -1198,7 +1219,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"read_paths\x18\x02 \x03(\tR\treadPaths\x12\x10\n" +
 	"\x03api\x18\x03 \x03(\tR\x03api\x12 \n" +
 	"\fact_as_users\x18\x04 \x01(\bR\n" +
-	"actAsUsers\"\x11\n" +
+	"actAsUsers\x12\x16\n" +
+	"\x06events\x18\x05 \x03(\tR\x06events\"\x11\n" +
 	"\x0fDescribeRequest\"I\n" +
 	"\x10DescribeResponse\x125\n" +
 	"\bmanifest\x18\x01 \x01(\v2\x19.mavio.plugin.v1.ManifestR\bmanifest\"3\n" +
@@ -1215,7 +1237,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\xe0\x01\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\xff\x01\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1224,7 +1246,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x13CAPABILITY_NOTIFIER\x10\x03\x12 \n" +
 	"\x1cCAPABILITY_SUBTITLE_PROVIDER\x10\x04\x12\x1f\n" +
 	"\x1bCAPABILITY_SEGMENT_PROVIDER\x10\x05\x12\x1a\n" +
-	"\x16CAPABILITY_TASK_RUNNER\x10\x062\xda\x02\n" +
+	"\x16CAPABILITY_TASK_RUNNER\x10\x06\x12\x1d\n" +
+	"\x19CAPABILITY_EVENT_CONSUMER\x10\a2\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +

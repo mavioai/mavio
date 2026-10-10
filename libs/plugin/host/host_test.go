@@ -82,9 +82,9 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 		quoted[i] = fmt.Sprintf("%q", h)
 	}
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
-		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER"],"apiVersion":"1.0",
+		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER"],"apiVersion":"1.0",
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
-		"permissions":{"httpHosts":[%s]},"configSchema":%q}`, runtimeName, strings.Join(quoted, ","), configSchema)
+		"permissions":{"httpHosts":[%s],"events":["item.*"]},"configSchema":%q}`, runtimeName, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -249,6 +249,23 @@ func TestTasksAndDataFolder(t *testing.T) {
 		}
 		if msg, err := run(host.WithCallTimeout(ctx, 5*time.Second), "slow"); err != nil || msg != "slept" {
 			t.Errorf("slow task with its timeout = %q, %v", msg, err)
+		}
+	})
+}
+
+func TestEvents(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := openWith(t, rt, func(o *host.Options) { o.DataDir = t.TempDir() })
+		ctx := t.Context()
+		events := []*pluginv1.Event{
+			pluginv1.Event_builder{Id: proto.String("1"), Type: proto.String("item.added")}.Build(),
+			pluginv1.Event_builder{Id: proto.String("2"), Type: proto.String("item.removed")}.Build(),
+		}
+		if _, err := p.Events().Consume(ctx, pluginv1.ConsumeRequest_builder{Events: events}.Build()); err != nil {
+			t.Fatalf("Consume() = %v", err)
+		}
+		if got, err := search(ctx, p, "events"); err != nil || got != "item.added item.removed" {
+			t.Errorf("consumed events = %q, %v, want item.added item.removed", got, err)
 		}
 	})
 }

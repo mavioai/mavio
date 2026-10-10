@@ -38,6 +38,7 @@ var (
 	hostPattern    = regexp.MustCompile(`^(\*\.)?([a-z0-9-]+\.)*[a-z0-9-]+(:\d+)?$`)
 	taskPattern    = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 	scopePattern   = regexp.MustCompile(`^mavio\.[a-z0-9]+\.v[0-9]+\.[A-Z][A-Za-z0-9]*Service(:read)?$`)
+	eventPattern   = regexp.MustCompile(`^(\*|[a-z]+(_[a-z]+)*\.(\*|[a-z]+(_[a-z]+)*))$`)
 )
 
 // Task limits.
@@ -117,6 +118,15 @@ func Validate(m *pluginv1.Manifest) error {
 	for _, scope := range m.GetPermissions().GetApi() {
 		if !scopePattern.MatchString(scope) {
 			add("api scope %q must be <package>.<Service> or <package>.<Service>:read, e.g. mavio.library.v1.ItemService:read", scope)
+		}
+	}
+	consumes := HasCapability(m, pluginv1.Capability_CAPABILITY_EVENT_CONSUMER)
+	if consumes != (len(m.GetPermissions().GetEvents()) > 0) {
+		add("CAPABILITY_EVENT_CONSUMER and permissions.events go together")
+	}
+	for _, e := range m.GetPermissions().GetEvents() {
+		if !eventPattern.MatchString(e) {
+			add("event %q must be a type such as item.added, a category such as item.*, or *", e)
 		}
 	}
 	runsTasks := HasCapability(m, pluginv1.Capability_CAPABILITY_TASK_RUNNER)
@@ -200,6 +210,18 @@ func AllowsProcedure(m *pluginv1.Manifest, procedure string, readOnly bool) bool
 	for _, scope := range m.GetPermissions().GetApi() {
 		name, read := strings.CutSuffix(scope, ":read")
 		if name == service && (!read || readOnly) {
+			return true
+		}
+	}
+	return false
+}
+
+// ConsumesEvent reports whether the manifest's event patterns match an
+// event type.
+func ConsumesEvent(m *pluginv1.Manifest, eventType string) bool {
+	category, _, _ := strings.Cut(eventType, ".")
+	for _, pattern := range m.GetPermissions().GetEvents() {
+		if pattern == "*" || pattern == eventType || pattern == category+".*" {
 			return true
 		}
 	}

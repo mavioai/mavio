@@ -5,6 +5,8 @@
 // Searches act on the lookup name:
 //
 //	"config"        returns the current configuration in the overview
+//	"events"        returns the types of the events consumed so far, which
+//	                the data folder keeps, as WASM instances share no memory
 //	"fetch:<url>"   GETs the URL with guest.HTTPClient and returns the body
 //	"host:<path>"   GETs the path of the host API with guest.HostClient and
 //	                returns the status and body
@@ -45,6 +47,23 @@ func init() {
 	guest.Handle(pluginv1connect.NewPluginServiceHandler(&lifecycle{}))
 	guest.Handle(pluginv1connect.NewMetadataProviderServiceHandler(&provider{}))
 	guest.Handle(pluginv1connect.NewTaskRunnerServiceHandler(tasks{}))
+	guest.Handle(pluginv1connect.NewEventConsumerServiceHandler(consumer{}))
+}
+
+type consumer struct{}
+
+func (consumer) Consume(_ context.Context, req *pluginv1.ConsumeRequest) (*pluginv1.ConsumeResponse, error) {
+	f, err := os.OpenFile(filepath.Join(guest.DataDir(), "events"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	for _, e := range req.GetEvents() {
+		if _, err := fmt.Fprintln(f, e.GetType()); err != nil {
+			return nil, err
+		}
+	}
+	return &pluginv1.ConsumeResponse{}, f.Close()
 }
 
 type tasks struct{}
@@ -108,6 +127,12 @@ func (provider) Search(ctx context.Context, req *pluginv1.SearchRequest) (*plugi
 		mu.Lock()
 		overview = config
 		mu.Unlock()
+	case name == "events":
+		data, err := os.ReadFile(filepath.Join(guest.DataDir(), "events"))
+		if err != nil {
+			return nil, err
+		}
+		overview = strings.Join(strings.Fields(string(data)), " ")
 	case strings.HasPrefix(name, "fetch:"):
 		resp, err := guest.HTTPClient().Get(strings.TrimPrefix(name, "fetch:"))
 		if err != nil {

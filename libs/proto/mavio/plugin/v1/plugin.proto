@@ -50,6 +50,8 @@ enum Capability {
   CAPABILITY_SEGMENT_PROVIDER = 5;
   // Implements TaskRunnerService for the manifest's tasks.
   CAPABILITY_TASK_RUNNER = 6;
+  // Implements EventConsumerService for the events of permissions.events.
+  CAPABILITY_EVENT_CONSUMER = 7;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin
@@ -92,6 +94,10 @@ message Permissions {
   // Whether host API requests may act as a user named in the Mavio-User
   // header.
   bool act_as_users = 4;
+  // Event types the plugin consumes: a type such as "item.added", a
+  // category such as "item.*", or "*" for every event. Requires
+  // CAPABILITY_EVENT_CONSUMER.
+  repeated string events = 5;
 }
 
 message DescribeRequest {}

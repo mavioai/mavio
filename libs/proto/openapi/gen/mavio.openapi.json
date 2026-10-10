@@ -4819,7 +4819,8 @@
           "CAPABILITY_NOTIFIER",
           "CAPABILITY_SUBTITLE_PROVIDER",
           "CAPABILITY_SEGMENT_PROVIDER",
-          "CAPABILITY_TASK_RUNNER"
+          "CAPABILITY_TASK_RUNNER",
+          "CAPABILITY_EVENT_CONSUMER"
         ]
       },
       "mavio.plugin.v1.Manifest": {
@@ -4933,6 +4934,14 @@
             "type": "boolean",
             "title": "act_as_users",
             "description": "Whether host API requests may act as a user named in the Mavio-User\n header."
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "events",
+            "description": "Event types the plugin consumes: a type such as \"item.added\", a\n category such as \"item.*\", or \"*\" for every event. Requires\n CAPABILITY_EVENT_CONSUMER."
           }
         },
         "title": "Permissions",

@@ -81,6 +81,14 @@ func TestValidate(t *testing.T) {
 		{"duplicate task", func(m *pluginv1.Manifest) { withTasks(m, task("a", 0, 0), task("a", 0, 0)) }, "not unique"},
 		{"short interval", func(m *pluginv1.Manifest) { withTasks(m, task("a", time.Second, 0)) }, "interval"},
 		{"long timeout", func(m *pluginv1.Manifest) { withTasks(m, task("a", 0, 7*time.Hour)) }, "timeout"},
+		{"events without capability", func(m *pluginv1.Manifest) { m.GetPermissions().SetEvents([]string{"item.added"}) }, "go together"},
+		{"capability without events", func(m *pluginv1.Manifest) {
+			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_EVENT_CONSUMER))
+		}, "go together"},
+		{"bad event", func(m *pluginv1.Manifest) {
+			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_EVENT_CONSUMER))
+			m.GetPermissions().SetEvents([]string{"item.*.added"})
+		}, "event"},
 		{"bad schema", func(m *pluginv1.Manifest) { m.SetConfigSchema(`{"type":"nope"}`) }, "config_schema"},
 	}
 	for _, tt := range tests {
@@ -150,6 +158,34 @@ func TestAllowsProcedure(t *testing.T) {
 	}
 	if err := Validate(m); err != nil {
 		t.Errorf("Validate() = %v, want nil", err)
+	}
+}
+
+func TestConsumesEvent(t *testing.T) {
+	m := valid()
+	m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_EVENT_CONSUMER))
+	m.GetPermissions().SetEvents([]string{"item.*", "user.login_failed"})
+	if err := Validate(m); err != nil {
+		t.Fatalf("Validate() = %v, want nil", err)
+	}
+	tests := []struct {
+		eventType string
+		want      bool
+	}{
+		{"item.added", true},
+		{"item.removed", true},
+		{"user.login_failed", true},
+		{"user.login", false},
+		{"items.added", false},
+	}
+	for _, tt := range tests {
+		if got := ConsumesEvent(m, tt.eventType); got != tt.want {
+			t.Errorf("ConsumesEvent(%q) = %v, want %v", tt.eventType, got, tt.want)
+		}
+	}
+	m.GetPermissions().SetEvents([]string{"*"})
+	if !ConsumesEvent(m, "playback.started") {
+		t.Error("ConsumesEvent(playback.started) with * = false, want true")
 	}
 }
 
