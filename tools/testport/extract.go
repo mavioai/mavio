@@ -1,8 +1,10 @@
-// Package testport extracts test cases and test assets from Jellyfin's C#
-// test projects into language-neutral JSON for Mavio's Go tests.
+// Package testport extracts test cases and test assets from C# test projects
+// (xUnit in Jellyfin, NUnit in Sonarr, Radarr and Prowlarr) into
+// language-neutral JSON for Mavio's Go tests.
 package testport
 
 import (
+	"cmp"
 	"fmt"
 	"regexp"
 	"slices"
@@ -20,7 +22,8 @@ type TestClass struct {
 	Unsupported []Unsupported `json:"unsupported,omitempty"`
 }
 
-// Theory is a parameterized test method and its cases.
+// Theory is a parameterized test method and its cases: an xUnit [Theory] or
+// an NUnit method with [TestCase] or [TestCaseSource].
 type Theory struct {
 	Method string       `json:"method"`
 	Line   int          `json:"line"`
@@ -35,16 +38,18 @@ type Param struct {
 	Type string `json:"type"`
 }
 
-// TheoryCase is one set of arguments for a theory.
+// TheoryCase is one set of arguments for a theory. The expected value of an
+// NUnit case with ExpectedResult is stored in Args under "$result".
 type TheoryCase struct {
 	ID   string     `json:"id"`
 	Line int        `json:"line"`
 	Args csharp.Map `json:"args"`
 	Skip string     `json:"skip,omitempty"`
-	From string     `json:"from,omitempty"` // MemberData source member
+	From string     `json:"from,omitempty"` // MemberData or TestCaseSource member
 }
 
-// Fact is a non-parameterized test, listed so it can be ported by hand.
+// Fact is a non-parameterized test (xUnit [Fact], NUnit [Test]), listed so it
+// can be ported by hand.
 type Fact struct {
 	Method string `json:"method"`
 	Line   int    `json:"line"`
@@ -59,8 +64,9 @@ type Unsupported struct {
 }
 
 // Extract parses a C# test file and returns its test classes, including
-// nested classes, in source order. Classes without tests are omitted.
-func Extract(src string) ([]TestClass, error) {
+// nested classes, in source order. Classes without tests are omitted. origin
+// names the source project in skip reasons, e.g. "commented out in Sonarr".
+func Extract(src, origin string) ([]TestClass, error) {
 	f, err := csharp.Parse(src)
 	if err != nil {
 		return nil, err
@@ -68,7 +74,7 @@ func Extract(src string) ([]TestClass, error) {
 	var out []TestClass
 	var walk func(cls *csharp.Class, prefix string)
 	walk = func(cls *csharp.Class, prefix string) {
-		tc := extractClass(f, cls)
+		tc := extractClass(f, cls, origin)
 		tc.Class = prefix + cls.Name
 		if len(tc.Theories)+len(tc.Facts)+len(tc.Unsupported) > 0 {
 			out = append(out, tc)
@@ -113,8 +119,9 @@ func ExtractConstants(src string) (csharp.Map, error) {
 	return out, nil
 }
 
-func extractClass(f *csharp.File, cls *csharp.Class) TestClass {
+func extractClass(f *csharp.File, cls *csharp.Class, origin string) TestClass {
 	tc := TestClass{Line: cls.Line}
+	classSkip := ignoreReason(f, cls.Attributes)
 	seen := map[string]int{}
 	prevEnd := cls.BodyStart
 	for _, m := range cls.Members {
@@ -124,14 +131,23 @@ func extractClass(f *csharp.File, cls *csharp.Class) TestClass {
 			continue
 		}
 		var theory, fact *csharp.Attribute
+		nunitCases := false
 		for i := range m.Attributes {
 			switch m.Attributes[i].Name {
 			case "Theory":
 				theory = &m.Attributes[i]
-			case "Fact":
+			case "Fact", "Test":
 				fact = &m.Attributes[i]
+			case "TestCase", "TestCaseSource":
+				nunitCases = true
 			}
 		}
+		// NUnit: [TestCase]/[TestCaseSource] make a parameterized test, with
+		// or without [Test]; [Ignore] and [Explicit] skip it.
+		if nunitCases && theory == nil {
+			theory, fact = &csharp.Attribute{Name: "TestCase"}, nil
+		}
+		skip := cmp.Or(ignoreReason(f, m.Attributes), classSkip)
 		// Overloads get a numeric suffix so case IDs stay unique.
 		method := m.Name
 		if seen[m.Name]++; seen[m.Name] > 1 {
@@ -139,10 +155,10 @@ func extractClass(f *csharp.File, cls *csharp.Class) TestClass {
 		}
 		switch {
 		case fact != nil:
-			tc.Facts = append(tc.Facts, Fact{Method: method, Line: m.Line, Skip: namedString(f, fact.Args, "Skip")})
+			tc.Facts = append(tc.Facts, Fact{Method: method, Line: m.Line, Skip: cmp.Or(namedString(f, fact.Args, "Skip"), skip)})
 		case theory != nil:
-			th, unsupported := extractTheory(f, cls, m, method, leading+f.Src[m.Start:m.Header[0].Pos])
-			th.Skip = namedString(f, theory.Args, "Skip")
+			th, unsupported := extractTheory(f, cls, m, method, leading+f.Src[m.Start:m.Header[0].Pos], origin)
+			th.Skip = cmp.Or(namedString(f, theory.Args, "Skip"), skip)
 			if len(th.Cases) > 0 {
 				tc.Theories = append(tc.Theories, th)
 			}
@@ -152,13 +168,37 @@ func extractClass(f *csharp.File, cls *csharp.Class) TestClass {
 	return tc
 }
 
-// commentedInlineData matches an InlineData attribute that was commented out,
-// optionally with a label: "// TODO: [InlineData(…)]".
-var commentedInlineData = regexp.MustCompile(`(?m)^[ \t]*//[ \t]*(?:([A-Za-z]+)[ \t]*:[ \t]*)?(\[InlineData\b.*)$`)
+// ignoreReason returns the reason of an NUnit [Ignore] or [Explicit]
+// attribute among attrs, or "".
+func ignoreReason(f *csharp.File, attrs []csharp.Attribute) string {
+	for _, a := range attrs {
+		switch a.Name {
+		case "Ignore":
+			if len(a.Args) > 0 {
+				if s, ok := f.Eval(a.Args[0].Expr).(string); ok && s != "" {
+					return s
+				}
+			}
+			return "ignored"
+		case "Explicit":
+			if len(a.Args) > 0 {
+				if s, ok := f.Eval(a.Args[0].Expr).(string); ok && s != "" {
+					return "explicit: " + s
+				}
+			}
+			return "explicit"
+		}
+	}
+	return ""
+}
+
+// commentedCase matches an InlineData or TestCase attribute that was
+// commented out, optionally with a label: "// TODO: [InlineData(…)]".
+var commentedCase = regexp.MustCompile(`(?m)^[ \t]*//[ \t]*(?:([A-Za-z]+)[ \t]*:[ \t]*)?(\[(?:InlineData|TestCase)\b.*)$`)
 
 // extractTheory extracts the cases of theory m. attrText is the source text
 // before the method header, including its attributes and leading comments.
-func extractTheory(f *csharp.File, cls *csharp.Class, m *csharp.Member, method, attrText string) (Theory, []Unsupported) {
+func extractTheory(f *csharp.File, cls *csharp.Class, m *csharp.Member, method, attrText, origin string) (Theory, []Unsupported) {
 	th := Theory{Method: method, Line: m.Line, Cases: []TheoryCase{}}
 	for _, p := range m.Params {
 		th.Params = append(th.Params, Param{Name: p.Name, Type: p.Type})
@@ -169,21 +209,32 @@ func extractTheory(f *csharp.File, cls *csharp.Class, m *csharp.Member, method, 
 	}
 	inline := func(af *csharp.File, a csharp.Attribute, line int, skip string) {
 		var positional []csharp.Arg
+		var result []csharp.Token
 		for _, arg := range a.Args {
-			if arg.Name == "" {
+			switch arg.Name {
+			case "":
 				positional = append(positional, arg)
+			case "ExpectedResult":
+				result = arg.Expr
 			}
 		}
 		if skip == "" {
-			skip = namedString(af, a.Args, "Skip")
+			skip = cmp.Or(namedString(af, a.Args, "Skip"), namedString(af, a.Args, "Ignore"), namedString(af, a.Args, "IgnoreReason"))
 		}
-		add(line, bindArgs(af, m.Params, positional), skip, "")
+		if skip == "" && namedString(af, a.Args, "Explicit") == "true" {
+			skip = "explicit"
+		}
+		args := bindArgs(af, m.Params, positional)
+		if result != nil {
+			args = append(args, csharp.KV{Key: "$result", Value: af.Eval(result)})
+		}
+		add(line, args, skip, "")
 	}
 
-	// InlineData cases that Jellyfin commented out (typically known failures)
-	// are kept as skipped cases.
+	// Cases that were commented out upstream (typically known failures) are
+	// kept as skipped cases.
 	startLine := m.Line - strings.Count(attrText, "\n")
-	for _, loc := range commentedInlineData.FindAllStringSubmatchIndex(attrText, -1) {
+	for _, loc := range commentedCase.FindAllStringSubmatchIndex(attrText, -1) {
 		label, text := "", attrText[loc[4]:loc[5]]
 		if loc[2] >= 0 {
 			label = attrText[loc[2]:loc[3]]
@@ -192,7 +243,7 @@ func extractTheory(f *csharp.File, cls *csharp.Class, m *csharp.Member, method, 
 		if err != nil || len(attrs) != 1 {
 			continue
 		}
-		reason := "commented out in Jellyfin"
+		reason := "commented out in " + origin
 		if label != "" {
 			reason += " (" + label + ")"
 		}
@@ -201,9 +252,9 @@ func extractTheory(f *csharp.File, cls *csharp.Class, m *csharp.Member, method, 
 
 	for _, a := range m.Attributes {
 		switch a.Name {
-		case "InlineData":
+		case "InlineData", "TestCase":
 			inline(f, a, a.Line, "")
-		case "MemberData":
+		case "MemberData", "TestCaseSource":
 			name, rows, reason := memberData(f, cls, a)
 			if reason != "" {
 				unsupported = append(unsupported, Unsupported{Method: method, Line: a.Line, Reason: reason})
@@ -280,16 +331,16 @@ type row struct {
 	args []csharp.Arg
 }
 
-// memberData resolves a [MemberData(nameof(X))] attribute to the rows
-// produced by member X. It returns a reason when the data cannot be
-// extracted statically.
+// memberData resolves a [MemberData(nameof(X))] or [TestCaseSource(nameof(X))]
+// attribute to the rows produced by member X. It returns a reason when the
+// data cannot be extracted statically.
 func memberData(f *csharp.File, cls *csharp.Class, a csharp.Attribute) (string, []row, string) {
 	var nameArg []csharp.Token
 	for _, arg := range a.Args {
 		switch {
 		case arg.Name == "" && nameArg == nil:
 			nameArg = arg.Expr
-		case arg.Name == "MemberType":
+		case arg.Name == "MemberType", arg.Name == "" && nameArg != nil && a.Name == "TestCaseSource" && len(a.Args) == 2 && isTypeof(arg.Expr):
 			return "", nil, "MemberData from another type (" + f.Text(arg.Expr) + ") is not supported; port by hand"
 		case arg.Name == "":
 			return "", nil, "parameterized MemberData is not supported; port by hand"
@@ -344,6 +395,10 @@ func memberData(f *csharp.File, cls *csharp.Class, a csharp.Attribute) (string, 
 	return name, rows, ""
 }
 
+func isTypeof(toks []csharp.Token) bool {
+	return len(toks) > 0 && toks[0].Text == "typeof"
+}
+
 func closing(toks []csharp.Token, open int) int {
 	depth := 0
 	for j := open; j < len(toks); j++ {
@@ -383,6 +438,10 @@ func arrayArgs(toks []csharp.Token) []csharp.Arg {
 }
 
 func collectionRows(body []csharp.Token) []row {
+	// Array initializer without new: object[] X = { new object[] { … }, … }.
+	if len(body) > 0 && body[0].Text == "{" && closing(body, 0) == len(body)-1 {
+		body = append([]csharp.Token{{Text: "new"}, {Text: "object"}, {Text: "["}, {Text: "]"}}, body...)
+	}
 	for i := 0; i < len(body); i++ {
 		if body[i].Text != "new" {
 			continue

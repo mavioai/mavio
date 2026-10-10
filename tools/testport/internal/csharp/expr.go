@@ -20,6 +20,16 @@ type KV struct {
 	Value Value
 }
 
+// Get returns the value of key, or nil.
+func (m Map) Get(key string) Value {
+	for _, kv := range m {
+		if kv.Key == key {
+			return kv.Value
+		}
+	}
+	return nil
+}
+
 // MarshalJSON encodes m as an object with keys in insertion order.
 func (m Map) MarshalJSON() ([]byte, error) {
 	var b bytes.Buffer
