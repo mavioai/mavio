@@ -2,8 +2,9 @@
 // (TMDB): movies, series, seasons and episodes, with their cast, crew and
 // images; it also lists the episodes of series in their display orders.
 // It builds as plugin.wasm (GOOS=wasip1, -buildmode=c-shared) and, for the
-// process runtime, as a native executable. Requests need a TMDB
-// API key, which administrators configure.
+// process runtime, as a native executable. Requests use an
+// administrator's TMDB API key when one is configured, else Radarr's API
+// read access token, and Mavio's own key once TMDB rejects that token.
 package main
 
 import (
@@ -13,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"sync/atomic"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -37,7 +39,7 @@ var shipped = func() *pluginv1.Manifest {
 }()
 
 func init() {
-	p := &plugin{baseURL: defaultBaseURL}
+	p := &plugin{baseURL: defaultBaseURL, radarrToken: radarrToken, mavioKey: mavioKey}
 	guest.Handle(pluginv1connect.NewPluginServiceHandler(p))
 	guest.Handle(pluginv1connect.NewMetadataProviderServiceHandler(p))
 	guest.Handle(pluginv1connect.NewEpisodeListProviderServiceHandler(p))
@@ -55,12 +57,26 @@ type config struct {
 // defaultMaxCast is how many actors are credited unless configured.
 const defaultMaxCast = 15
 
-var errUnconfigured = connect.NewError(connect.CodeFailedPrecondition, errors.New("no TMDB API key is configured"))
+// radarrToken is Radarr's TMDB API read access token, from its
+// RadarrCloudRequestBuilder, used unless an administrator configures a
+// key.
+const radarrToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxYTczNzMzMDE5NjFkMDNmOTdmODUzYTg3NmRkMTIxMiIsInN1YiI6IjU4NjRmNTkyYzNhMzY4MGFiNjAxNzUzNCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.gh1BwogCCKOda6xj9FRMgAAj_RYKMMPC3oNlcBtlmwk"
+
+// mavioKey is Mavio's own TMDB API key, used once TMDB rejects Radarr's
+// token; release builds set it with -ldflags "-X main.mavioKey=…".
+var mavioKey string
+
+var errUnconfigured = connect.NewError(connect.CodeFailedPrecondition,
+	errors.New("TMDB rejected Radarr's token and this build has no key of its own; configure a TMDB API key"))
 
 // plugin implements the lifecycle, metadata provider and episode list
 // provider services.
 type plugin struct {
 	baseURL string
+	// radarrToken and mavioKey are the keys used without a configured
+	// one; rejected records that TMDB rejected radarrToken.
+	radarrToken, mavioKey string
+	rejected              atomic.Bool
 
 	mu  sync.RWMutex
 	cfg config
@@ -83,7 +99,7 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 
 func (p *plugin) Health(context.Context, *pluginv1.HealthRequest) (*pluginv1.HealthResponse, error) {
 	resp := pluginv1.HealthResponse_builder{Healthy: proto.Bool(true)}.Build()
-	if p.config().APIKey == "" {
+	if _, err := p.session(); err != nil {
 		resp.SetHealthy(false)
 		resp.SetMessage(errUnconfigured.Message())
 	}
@@ -109,15 +125,22 @@ type session struct {
 
 func (p *plugin) session() (session, error) {
 	cfg := p.config()
-	if cfg.APIKey == "" {
-		return session{}, errUnconfigured
+	c := &client{http: guest.HTTPClient(), baseURL: p.baseURL, key: cfg.APIKey}
+	if c.key == "" {
+		c.key, c.fallback, c.rejected = p.radarrToken, p.mavioKey, &p.rejected
+		if p.rejected.Load() {
+			c.key, c.fallback = p.mavioKey, ""
+		}
+		if c.key == "" {
+			return session{}, errUnconfigured
+		}
 	}
 	cast := castConfig{maxCast: defaultMaxCast, hideMissing: cfg.HideMissingCastMembers}
 	if cfg.MaxCastMembers != nil {
 		cast.maxCast = *cfg.MaxCastMembers
 	}
 	return session{
-		client: &client{http: guest.HTTPClient(), baseURL: p.baseURL, key: cfg.APIKey},
+		client: c,
 		cast:   cast,
 		adult:  cfg.IncludeAdult,
 	}, nil

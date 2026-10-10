@@ -3,9 +3,10 @@
   "targets": {
     "build": {
       "options": {
-        "command": "go build -buildmode=c-shared -o dist/plugin.wasm .",
+        "command": "go build -buildmode=c-shared -ldflags=\"-X main.mavioKey=$MAVIO_TMDB_KEY\" -o dist/plugin.wasm .",
         "env": { "GOOS": "wasip1", "GOARCH": "wasm", "CGO_ENABLED": "0" }
       },
+      "inputs": ["go", "^go", "{projectRoot}/manifest.json", { "env": "MAVIO_TMDB_KEY" }],
       "outputs": ["{projectRoot}/dist"]
     }
   }
