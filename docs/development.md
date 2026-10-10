@@ -158,7 +158,7 @@ Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`); jobs other 
 
 Other modules are used only inside the repository and promise no stable external API.
 
-The server's release binaries are built with `VERSION=v0.1.0 pnpm nx run server:dist`, and its image with `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` from the repository root. The Dockerfile pins the same jellyfin-ffmpeg version as `mise.toml`, with the SHA-256 digests of its two Linux portable builds; upgrading jellyfin-ffmpeg changes both files.
+The server's release binaries are built with `VERSION=v0.1.0 pnpm nx run server:dist`, and its image with `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` from the repository root. The Dockerfile pins the same jellyfin-ffmpeg version as `mise.toml`, with the SHA-256 digests of its two Linux portable builds; upgrading jellyfin-ffmpeg changes both files, and a test (`apps/server/internal/buildinfo`) fails when the two pins disagree.
 
 ---
 

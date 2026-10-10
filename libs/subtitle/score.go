@@ -119,7 +119,7 @@ func ExtractLanguageFromStem(stem string) string {
 }
 
 // ScoreSubtitle scores a subtitle candidate against a video file stem and
-// user language preferences according to docs/optimization.md §4.1:
+// user language preferences according to docs/architecture.md §9.1:
 //
 //   - Exact stem match: +1000
 //   - Prefix match + boundary delimiter: +500

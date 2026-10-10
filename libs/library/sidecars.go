@@ -29,7 +29,7 @@ var sidecarCodecs = map[string]string{
 const minSidecarScore = 500
 
 // sidecars returns the subtitle files beside a video as external streams,
-// best first: the subtitle scoring of docs/optimization.md §4.1 without a
+// best first: the subtitle scoring of docs/architecture.md §9.1 without a
 // user's languages, so files named exactly like the video, unflagged and
 // in richer formats come first. Languages come from the file names,
 // Chinese variants included. entries are the folder's files.

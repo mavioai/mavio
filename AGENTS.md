@@ -11,7 +11,7 @@ This is the repository working guide for AI coding agents (and new developers). 
 | [docs/development.md](docs/development.md) | Toolchain, Nx, Go module conventions, code generation, code quality, CI, releases |
 | [docs/testing.md](docs/testing.md) | Test layers, porting tests from Jellyfin, test media |
 | [docs/roadmap.md](docs/roadmap.md) | Phases, completion criteria, current status, risks |
-| [docs/optimization.md](docs/optimization.md) | Storage and performance: media drive identification, anti-thrashing queues, quiet gates, prefetching, playback latency |
+| [docs/optimization.md](docs/optimization.md) | Optimization topics, each with an implementation index: storage I/O latency mitigation and speculative warming |
 
 ## Project Overview
 

@@ -4,252 +4,110 @@
 
 > Related: [Architecture](architecture.md) · [Domain Model](domain.md) · [Development](development.md) · [Testing](testing.md) · [Roadmap](roadmap.md) · [AGENTS.md](../AGENTS.md)
 
-> This document defines Mavio's global optimization architecture, covering storage I/O scheduling, speculative prefetching, low-latency playback pipelines, subtitle metadata resolution, and deterministic engineering invariants.
+> This document collects Mavio's optimization topics, one chapter per topic. Each chapter states the problem, the mechanisms adopted and an implementation index mapping every mechanism to the code that implements it, the phase that delivered it and where it departs from Jellyfin, so that later alignment with Jellyfin does not mistake a deliberate difference for a gap.
 
 ---
 
-## 1. Goals and Design Principles
+## 1. Storage I/O Latency Mitigation and Speculative Warming
 
-As a self-hosted media server, Mavio's primary deployment environments are home servers, multi-bay NAS appliances (e.g. Synology, TrueNAS, Unraid), and low-power hardware. These environments feature severe storage heterogeneity:
-1. **Mechanical hard drives (HDD) have fragile throughput**: HDDs incur a 10~15ms physical seek penalty. Concurrent multi-task random reads cause violent head thrashing, causing throughput to plummet from 150MB/s down to single-digit MB/s.
-2. **Network storage and external drives spin down easily**: SMB/NFS mount points and external USB drives automatically enter sleep/spin-down after several minutes of inactivity. Re-spinning the platter takes 5~10 seconds, which frequently causes client playback timeouts.
-3. **Severe foreground vs. background I/O contention**: If background reconciliation scans or trickplay thumbnail generation saturate the disk I/O queue, real-time client playback and HLS segment delivery suffer severe buffering and stuttering.
-4. **Growing and incomplete files produce dirty reads**: Partially downloaded media files from PT/BT, Aria2, or download automation tools cause `ffprobe` failures or register incorrect durations if scanned prematurely.
+### 1.1 Goals and Challenges
 
-To address these challenges, Mavio establishes the following storage and media optimization principles:
-* **Physical volume awareness to eliminate concurrent seeking**: Background I/O must be serialized into single-flight lanes per physical device, preserving peak sequential read throughput on mechanical disks.
-* **Absolute priority for foreground streaming**: Whenever an active client playback session exists, background scans and offline tasks must yield and throttle down.
-* **Targeted prefetching with minimal budget**: Avoid uncontrolled blind buffering; accurately target file heads (metadata) and file tails (indexes) with minimal memory overhead.
-* **Zero-intrusion, cross-platform adaptability**: Seamlessly support Linux, Windows, and macOS using each operating system's most efficient native system calls—transparent and fast on SSDs, protective on HDDs.
+Mavio is deployed on home servers, NAS appliances (Synology, TrueNAS, Unraid) and low-power hardware, whose storage is heterogeneous:
 
----
+1. **Hard disks thrash**: a seek costs 10–15 ms; concurrent random reads of one disk move the heads back and forth and drop its throughput from about 150 MB/s to a few MB/s.
+2. **Disks and shares sleep**: external USB disks and NAS disks spin down after minutes of inactivity, and SMB/NFS shares disconnect; spinning up takes 5–10 seconds, long enough for a client to give up on starting playback.
+3. **Background I/O competes with playback**: scans, probes and thumbnail extraction filling a disk's queue make playback stall.
+4. **Files still being written**: files that download clients or automation tools (qBittorrent, Aria2, Sonarr, Radarr) are still writing make ffprobe fail or record wrong durations when scanned too early.
+5. **Resuming costs seeks**: opening a file, reading its index, seeking to the resume position and then decoding from the previous keyframe takes several round trips on slow storage.
 
-## 2. Storage I/O Latency Mitigation and Speculative Warming System
+The principles adopted:
 
-### 2.1 Multi-Dimensional Storage & Protocol Identification
+* **Know the device**: background reads of one hard disk or remote volume are serialized; solid-state drives keep full concurrency.
+* **Playback first**: while clients stream, background reads wait.
+* **Small, targeted reads ahead**: read the container header and index and the media around the start position, not whole files.
+* **Wake before it is needed, and only while someone is there**: keep the volumes being played awake, and wake the volumes of media a present user is likely to play; let disks sleep otherwise.
+* **Native on every platform**: each operating system's own calls, without CGO.
 
-When scanning and reading media paths, Mavio identifies the underlying storage medium and mounting protocol through a cross-platform abstraction layer:
+### 1.2 Storage Identification
 
-```text
-               ┌───────────────────────────┐
-               │    Storage Path Probe     │
-               └─────────────┬─────────────┘
-                             │
-     ┌───────────────────────┼───────────────────────┐
-     ▼                       ▼                       ▼
-   Linux                  Windows                  macOS
-┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-│ stat.st_dev  │      │ GetDriveType │      │ statfs       │
-│ sysfs /queue │      │ DeviceIo-    │      │ f_fstypename │
-│ statfs.f_type│      │ Control IOCTL│      │ f_fsid / dev │
-└──────┬───────┘      └──────┬───────┘      └──────┬───────┘
-       │                     │                     │
-       └─────────────────────┼─────────────────────┘
-                             ▼
-               ┌───────────────────────────┐
-               │    Storage Device Type    │
-               │  • Local SSD              │
-               │  • Local HDD (Rotational) │
-               │  • Remote NAS (SMB/NFS)   │
-               │  • Cloud Mount (Dataless) │
-               └───────────────────────────┘
-```
+`storage.DetectDevice` classifies the volume holding a path as a local SSD, a local hard disk, a remote share or a cloud mount, and returns a stable volume ID that keys every per-volume mechanism below. `storage.Detector` detects each folder once (at most 4,096 folders are remembered); a path that cannot be detected is unknown and treated as a solid-state drive.
 
-#### Linux
-1. **Mechanical Disk (Rotational) Detection**:
-   * Extract the device identifier `st.st_dev` via `stat(path, &st)`;
-   * Read `/sys/dev/block/<major>:<minor>/queue/rotational`:
-     * `1`: Rotational medium (mechanical HDD); automatically activates per-device single-flight anti-thrashing queues;
-     * `0`: Non-rotational medium (NVMe / SATA SSD); allows regular high-concurrency I/O.
-2. **Network Volumes and Protocol Detection**:
-   * Inspect `buf.Type` via `statfs(path, &buf)`:
-     * `0x517B` (`SMB_SUPER_MAGIC`) / `0xfe534d42` (`SMB2_MAGIC_NUMBER`): SMB share;
-     * `0x6969` (`NFS_SUPER_MAGIC`): NFS mount;
-     * `0x65735546` (`FUSE_SUPER_MAGIC`): FUSE mount (such as Rclone / Alist).
+| Platform | Volume ID | Hard disk | Remote share | Cloud mount |
+| :--- | :--- | :--- | :--- | :--- |
+| Linux | `st_dev` | `/sys/dev/block/<major>:<minor>/queue/rotational` is `1` | `statfs.f_type` SMB (`0x517B`), SMB2 (`0xFE534D42`), CIFS, NFS (`0x6969`) | FUSE (`0x65735546`: rclone, Alist, …) |
+| Windows | volume serial number | `IOCTL_STORAGE_QUERY_PROPERTY` with `StorageDeviceSeekPenaltyProperty` | `GetDriveTypeW` is `DRIVE_REMOTE`, or a UNC path | path under OneDrive or iCloud Drive |
+| macOS | `statfs.f_fsid` | volumes under `/Volumes` (external enclosures) | `f_fstypename` `smbfs`, `nfs`, `afpfs`, `webdav`, or no `MNT_LOCAL` | path under `~/Library/Mobile Documents` or `~/Library/CloudStorage` |
 
-#### Windows
-1. **Mechanical Disk Detection**:
-   * Obtain volume handle via `CreateFileW` and invoke `DeviceIoControl` with `IOCTL_STORAGE_QUERY_PROPERTY` querying `StorageDeviceSeekPenaltyProperty`;
-   * If `DEVICE_SEEK_PENALTY_DESCRIPTOR.IncursSeekPenalty` is `TRUE`, the drive is classified as an HDD.
-2. **Network Volume Detection**:
-   * Check if `GetDriveTypeW(rootPath) == DRIVE_REMOTE` or detect UNC path prefixes (`\\server\share`).
-3. **Cloud Placeholder Interception**:
-   * Check if file attributes include `FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS` (`0x00400000`);
-   * Open background scan files with `FILE_FLAG_OPEN_NO_RECALL` to prevent triggering silent cloud downloads.
+Two properties are derived from a device:
 
-#### macOS
-1. **Network Volume Detection**:
-   * Match `statfs.f_fstypename` against `"smbfs"`, `"nfs"`, `"afpfs"`, `"webdav"`; and ensure `(sfs.f_flags & MNT_LOCAL) == 0`.
-2. **Cloud and Placeholder File Interception**:
-   * Path classification against `~/Library/Mobile Documents` (iCloud) and `~/Library/CloudStorage` (FileProvider cloud storage);
-   * Thread-level system policy `IOPOL_TYPE_VFS_MATERIALIZE_DATALESS_FILES` set to `IOPOL_MATERIALIZE_DATALESS_FILES_OFF`.
+* **Serialized** (`DeviceInfo.Serialized`): hard disks, remote shares and cloud mounts; their background reads run one at a time.
+* **Sleeps** (`DeviceInfo.Sleeps`): hard disks and remote shares; they are kept awake and woken. Cloud mounts are never read speculatively, since reading a placeholder downloads it.
 
----
+### 1.3 Per-volume Serialization
 
-### 2.2 Per-Device Single-Flight Serialization & Anti-Thrashing
+* **`storage.VolumeLedger`**: one slot per volume ID, handed out first come, first served; `Acquire` waits for the slot or for the context to end, and returns its release. A volume's lane is dropped when no one holds or waits for it.
+* **Scans**: the walker reads folders with 4 goroutines (the library's concurrency) on solid-state drives and with one on serialized volumes; each folder listing holds its volume's slot.
+* **Probes**: probing a file on a serialized volume holds the volume's slot; versions of one item on one disk are probed one after another, the probe never waiting for itself.
+* The result is that a hard disk serves one sequential reader at a time across all scans and probes of all libraries.
 
-* **Rationale**: When thousands of files reside on the same mechanical disk, concurrent probe tasks force drive heads to continuously seek back and forth between inner and outer platters, collapsing overall I/O latency.
-* **Scheduling Mechanism**:
-  * Introduce a `DeviceLedger` in `libs/library`.
-  * Extract the physical device identifier (Linux: `st_dev` / major:minor; Windows: Volume Serial Number; macOS: `f_fsid`) as the lock key.
-  * **Single-Device Semaphore**: For devices classified as HDDs or remote mounts, **only 1 background scan/probe worker may hold an active I/O token per physical device** at any given moment.
-  * **Result**: Tasks run sequentially, keeping the drive's actuator arm in continuous sequential-read mode and maintaining hardware peak throughput while eliminating head thrashing and mechanical wear.
+### 1.4 Quiet Gate for Background I/O
 
----
+* **`storage.QuietGate`**: foreground activity extends a quiet deadline to now plus the quiet period (3 seconds by default) and never shortens it, so a burst of requests yields one quiet tail without a timer per request.
+* **Activity**: starting a playback and every media request (HLS playlists and segments, direct-play range reads) note activity. Continuous streaming keeps background reads paused while it reads, and lets them run in its gaps; a playback does not hold the gate for its whole length, which would stop scans for as long as anyone watches.
+* **Waiters**: before each folder a scan walker, and before reading a file a probe, black border detection, trickplay, chapter image and loudness jobs wait out the quiet deadline (`PauseOrCancel`), honoring cancellation.
 
-### 2.3 Active Streaming & Background I/O Quiet Gate
+### 1.5 Targeted Prefetching
 
-* **Rationale**: During full library scans, hashing, or trickplay sprite generation, active client playback can suffer severe buffering if foreground requests contend with background tasks for disk queues.
-* **Scheduling Mechanism** (`storage.QuietGate`, following khuaplayer's foreground storage gate):
-  * Foreground activity extends a quiet deadline (`quietUntil = max(quietUntil, now + quietPeriod)`, default 3 seconds), never shortening it, so that a burst of requests coalesces into one quiet tail without a timer per event.
-  * Starting a playback and every media request — HLS playlists and segments, direct-play range reads, seeks — note activity. Continuous streaming therefore keeps background reads paused while it reads and lets them resume in the gaps; a playback does not hold the gate for its whole duration, which would stop library scans for as long as anyone watches.
-  * Background tasks (scan walkers before each folder, probes, black border detection) wait out the quiet window before issuing physical I/O, sampling cancellation while they wait.
+* **Head and tail**: `storage.PrefetchHeadTail` reads ahead the first 1 MB (MP4 `ftyp`/`moov`, the MKV EBML header, MPEG-TS headers) and the last 256 KB (a trailing MP4 `moov`, MKV `Cues`, AVI `idx1`) of a file. It runs before every probe and before every playback.
+* **Range**: `storage.PrefetchRange` reads ahead an arbitrary range clipped to the file. A playback starting past zero reads ahead the media around its start position, estimated from the source's size and duration: 1 MB before it and 3 seconds after it, at most 64 MB.
+* **Mechanism**: on Linux, `posix_fadvise(POSIX_FADV_WILLNEED)` lets the kernel load the ranges into the page cache asynchronously without application buffers; elsewhere the ranges are read in 128 KB chunks and discarded, warming the system cache.
 
----
+### 1.6 Keeping Volumes Awake and Waking Them
 
-### 2.4 Targeted Metadata Budget Prefetching
+* **Heartbeat read** (`storage.VolumeHeartbeat`): 4 KB at a random 4 KB-aligned offset of a file, bypassing the cache so that the read reaches the disk or share: `O_DIRECT` on Linux (falling back to `POSIX_FADV_DONTNEED` and a normal read on file systems that refuse it), `F_NOCACHE` on macOS, and `FILE_FLAG_NO_BUFFERING | FILE_FLAG_OPEN_NO_RECALL` on Windows.
+* **`storage.Keeper`** reads only volumes that sleep:
+  * `Beat` reads each volume at most once per heartbeat interval (2.5 seconds), however many paths name it; a volume whose last read has not returned (a hung share) is skipped.
+  * `Wake` reads a volume at most once per wake cooldown (30 seconds) and then prefetches the file's head and tail.
+* **Three triggers** in the server:
+  1. **Playback keep-alive** (`playback.Manager`): every heartbeat interval, the volumes of all playbacks in progress are beaten, so a paused playback resumes without waiting for a spin-up.
+  2. **Presence warming** (`apps/server/internal/warming`): every 30 seconds, for each user with a client in use (an event stream open and a request within the last 5 minutes), the media of their 8 most recently played resumable items ("continue watching") is looked up; every heartbeat interval their volumes are beaten. When no user is present, nothing is read and the disks may sleep.
+  3. **Opening an item** (`ItemService.GetItem`): the media sources of the item a client opens are woken, so the volume is spinning by the time the client asks to play.
 
-* **Rationale**: Video container headers and indexes (MP4/MKV) are concentrated at the two ends: the beginning contains file signatures and track descriptors, while the end stores indexes (such as MP4 trailing `moov` boxes, MKV trailing `Cues`, and AVI `idx1`). Blindly buffering entire files wastes memory and bandwidth.
-* **Prefetch Strategy**:
-  * **Head 1 MB**: Read the first 1MB, sufficient for almost all MP4 `ftyp/moov`, MKV EBML headers, and MPEG-TS headers.
-  * **Tail 256 KB**: Seek directly to the end and read the trailing 256KB to cover index data.
-  * **Linux Kernel-Level Asynchronous Prefetch**:
-    On Linux, the server avoids allocating application memory buffers and directly leverages kernel prefetching:
-    ```c
-    posix_fadvise(fd, 0, 1024 * 1024, POSIX_FADV_WILLNEED);
-    posix_fadvise(fd, fileSize - 256 * 1024, 256 * 1024, POSIX_FADV_WILLNEED);
-    ```
-    The kernel asynchronously brings the target sectors into Page Cache, allowing subsequent `ffprobe` calls and playback demuxers to hit memory immediately without waiting.
+### 1.7 Files Still Being Written (Growth Policy)
 
----
+* **`storage.GrowthPolicy`** decides during a scan whether a file is still growing:
+  * its name has a download suffix (`.part`, `.crdownload`, `.download`, `.aria2`, `.tmp`, `.incomplete`, `.!ut`, `.!qb`);
+  * it was modified within the write window (10 seconds);
+  * or it was deferred before and its size and modification time have not been stable for 30 seconds.
+* **Deferral**: a growing file is left out of the scan without errors or probes and is deferred for its library (at most 4,096 files; one that never settles, such as a paused download, is forgotten after a day). Its folder is not marked unchanged, so a later scan lists it again although its modification time did not change.
+* **Reconciliation** (`library.Scanner.RunDeferred`, every 10 seconds): deferred files are stat'ed; once a file went away (a finished download renamed) or stayed unchanged for 30 seconds after its write window, a scan of its library is queued, once per library.
+* Without a policy, the scanner still skips files with download suffixes.
 
-### 2.5 Remote Volume & Spin-Down Prevention Heartbeat
+### 1.8 Resume Seek Folding and Keyframe Snapping
 
-* **Rationale**: External USB mechanical drives and NAS shares commonly spin down after 5~15 minutes of inactivity. When a user browses media in preparation for playback, if the disk is asleep, starting playback requires a 5~10 second platter spin-up delay, giving the illusion of a frozen server.
-* **Heartbeat Mechanism**:
-  * **Controlled Heartbeat Interval**: When an active client browsing session is detected (e.g. via persistent WebSocket/Connect-RPC) and the media resides on a remote or external disk, a lightweight heartbeat is emitted every 2.5 seconds.
-  * **Cache-Bypassing Micro-Reads**:
-    * Linux uses `O_DIRECT`, Windows uses `FILE_FLAG_NO_BUFFERING`, and macOS uses `fcntl(F_NOCACHE, 1)`;
-    * Issues a 4KB `pread` at a random file offset, forcing the drive controller to process a physical read and keeping the motor spinning.
-  * **Presence and Power Preservation**: The moment the client disconnects or becomes idle, heartbeats stop immediately, respecting storage power-saving features.
+* **Keyframe snapping** (`playback.Playback.startPosition`): a playback asked to start at a position begins at a keyframe when one is at most 5 seconds before it, so the decoder shows a picture at once instead of decoding and dropping frames:
+  * for HLS, the start of the segment holding the position, which the encoder or the source begins with a keyframe;
+  * for direct play, the source's keyframe before the position (keyframes stored by the `media.keyframes` job).
 
----
+  The position used is returned in `StartPlaybackResponse.start_position`, so the client seeks there and the player and the server agree.
+* **Seek folding** (`streaming.Stream.Prepare`): starting an HLS playback starts ffmpeg at the segment holding the start position right away, instead of on the first segment request; the first request of that segment finds ffmpeg already reading at the right place and no restart is needed.
+* **Reading ahead** (§1.5): the source's head, tail and the range around the start position are read ahead in the background as the playback starts.
 
-### 2.6 Growing & Incomplete File Lifecycle Management (Growth Policy)
+### 1.9 Implementation Index
 
-* **Rationale**: Media directories often interface directly with download clients (qBittorrent, Aria2, Sonarr, Radarr). Forcing a full probe on an actively downloading file causes crashes, incorrect durations, and corrupt playback state.
-* **Lifecycle State Machine**:
-  * **Temporary Download Suffix Filtering**: The scanner silently ignores temporary extensions such as `.part`, `.crdownload`, `.download`, `.aria2`.
-  * **Active Growth Detection**:
-    * Track file `(size, mtime)` nanosecond stamps;
-    * If `time.Now() - mtime < 10s` or active writer processes hold open locks (on Linux), mark the file as `Growing`.
-  * **Deferred Reconciliation Queue**:
-    * Files in `Growing` state bypass expensive `JobProbe` tasks and raise no errors;
-    * They enter an in-memory deferred queue and undergo full reconciliation only after size and modification timestamps have remained stable beyond a set threshold (e.g. 30 seconds).
-
----
-
-## 3. Media Pipeline & Playback Latency Optimization
-
-### 3.1 Resume Seek Folding & Keyframe Snapping
-
-* **Traditional Resume Latency**: The standard sequence is: Open file $\rightarrow$ Read metadata $\rightarrow$ Seek to timestamp $\rightarrow$ Seek backwards to prior keyframe $\rightarrow$ Decode and discard non-reference frames up to the target timestamp. On slow storage, these multi-step seeks take several seconds.
-* **Optimization Strategy**:
-  * **Fold Seek into Prepare**: Pass the resume timestamp during demuxer initialization, positioning the initial read cursor near the resume target to eliminate secondary random seeking after open.
-  * **Keyframe Snapping**:
-    If the target resume timestamp is within 5 seconds of the preceding keyframe (`diff <= 5.0s`), **snap playback start directly to that keyframe**.
-    * Eliminates CPU overhead from decoding and discarding seconds of lead-in frames;
-    * The first delivered frame is an immediate keyframe, allowing decoders to present picture on screen immediately, reducing first-frame latency by over 70%.
-
----
-
-### 3.2 Dynamic Black Border Auto-Cropping & Failure Circuit Breaker
-
-* **Black Border Auto-Cropping** (`libs/imaging`):
-  * 2.35:1 movies formatted into 16:9 trickplay/BIF preview sprites contain wide letterbox bars, reducing effective picture area and wasting 20%~30% of image size.
-  * Introduce a pure-CPU 1/4 subsampled border detection algorithm (supporting 8-bit YUV420 and 10-bit P010):
-    * Samples along top, bottom, left, and right rows/columns;
-    * Early-exit evaluation across the first 16 samples for instant black-line verification;
-    * Crops borders or attaches crop bounds prior to sprite assembly, boosting thumbnail clarity and saving bandwidth.
-* **Transcode Cropping** (`libs/media/borders`, `libs/media/planner`): a low-priority background job (`media.borders`) samples five frames of each probed video with ffmpeg as 8-bit luma and measures them with the same detector; borders count only where every non-black sample has them, at least 2% of the frame and rounded to even pixels, and are kept on the video stream (`core.MediaStream.Crop`). When a transcode re-encodes the video, unrotated and without burned-in subtitles, the planner crops them before scaling, so letterboxed films spend no bitrate on black bars; copied video is never cropped.
-* **Thumbnail Failure Circuit Breaker**:
-  * Repeatedly retrying broken GOPs during thumbnail generation can hang background queues.
-  * An in-memory cache (`library.FailNotes`) notes each file whose trickplay sheets, chapter images or loudness failed, by job kind, path, size and modification time; for a day the job skips that file, so a broken file is read once and a changed one again. At most 4,096 notes are kept, the oldest forgotten first. Trickplay sheets and chapter images crop the borders border detection found (`core.MediaStream.Crop`) before scaling.
-
----
-
-### 3.3 Dolby Vision Profile 7 Dual-Layer Dependency Handling
-
-* **UHD Blu-ray Challenges**: UHD Blu-ray discs often carry Dolby Vision Profile 7 (FEL / MEL) with a Base Layer (BL) and an Enhancement Layer (EL), on one track or, in transport streams, on two. Treating the EL track as the video to play, or passing both layers to a transcode, breaks playback.
-* **Adopted handling**:
-  * As in khuaplayer, an EL track is recognized only from explicit signaling: its Dolby Vision configuration has an enhancement layer and no base layer (`core.MediaStream.IsDolbyVisionEnhancement`); track order, resolution or names are never used. Stream selection never picks such a track while the file has another video track, so playback, transcodes and copies use the Base Layer.
-  * A single-track Profile 7 stream goes to clients that declare Dolby Vision with an enhancement layer; for clients that take HDR10 only, the planner removes the Dolby Vision metadata and keeps the HDR10-compatible Base Layer, tone mapping it when it re-encodes for SDR clients (`libs/media/planner/hdr.go`, Jellyfin's rules).
-
----
-
-### 3.4 Multichannel Downmixing & Dialogue Normalization
-
-* **Downmixing Issues**: Downmixing 5.1/7.1 audio into stereo often results in faint spoken dialogue and deafening background sound effects.
-* **Planner Optimizations** (`libs/media/planner/audio.go`):
-  * Follow ITU-R BS.775 downmix matrices during audio transcode planning;
-  * Apply center channel dialogue normalization boost (+3dB ~ +4.5dB);
-  * Protect mobile and stereo TV listeners from constant manual volume adjustments.
-
----
-
-## 4. Subtitle & Metadata Resolution
-
-### 4.1 Subtitle Scoring Model & Comprehensive Chinese Alias Normalization
-
-To handle widespread variations in subtitle filenames, `libs/naming` and `libs/library` standardize on a unified alias dictionary and scoring model:
-
-#### Normalized Aliases
-```text
-"zh", "chi", "zho", "chs", "cht", "sc", "tc", "gb", "big5",
-"zh-hans", "zh-hant", "zh-cn", "zh-tw", "zh-hk",
-"简体", "繁體", "繁体", "简中", "繁中", "简", "繁", "中文", "双语" ──▶ "zh"
-```
-
-#### Scoring Rules
-| Match Attribute | Score Adjustment | Rationale |
-| :--- | :--- | :--- |
-| **Exact Stem Match** | `+1000` | E.g. `Movie.mkv` matching `Movie.srt` |
-| **Prefix Match + Boundary Delimiter** | `+500` | E.g. `Movie.1080p.mkv` matching `Movie.zh.srt` |
-| **User Preferred Language Match** | `+200` | Matches user's configured preferred subtitle language |
-| **Other Non-Preferred Language** | `-100` | Penalizes mismatched subtitle languages |
-| **`.forced` Tag** | `-150` | Forced subtitles contain few dialogue lines; deprioritized by default |
-| **`.sdh` / `.cc` / `.hi` Tag** | `-50` | Hearing-impaired commentary; secondary choice |
-| **Format Bonus** | `ASS/SSA: +20` / `SRT: +10` | Favors richer styling formats |
-
-#### Where It Applies
-* **Sidecar discovery** (`libs/library`): scans attach the subtitle files beside a video as its external streams: files whose name is the video's, or starts with it and a delimiter (a stem score of at least 500). Their language, title and default, forced and hearing-impaired flags come from the file name, with Chinese variants recognized (`zh-Hans`, `zh-Hant`, `chi`) and three-letter codes taken only for languages that also have a two-letter one, so that flags such as `sdh` stay flags. They are ordered by the score without a user's languages and numbered after the embedded streams; files added or removed later update the streams without probing the video again, and probing keeps them.
-* **Playback selection** (`libs/media/decision`): a user's preferred subtitle language matches streams by the normalized aliases, so a preference for Chinese finds simplified, traditional and regional variants, and hearing-impaired streams rank lower.
-
----
-
-## 5. Deterministic Engineering & Privacy Invariants
-
-### 5.1 Pinned Dependencies & Zero-Fuzz Patch Discipline
-
-* **Deterministic Dependency Pinning**: `jellyfin-ffmpeg` is pinned by version and by the SHA-256 of each platform's portable build, in `mise.toml` for development and CI (mise refuses a download whose checksum differs) and in `apps/server/Dockerfile` for the container image. A test (`apps/server/internal/buildinfo`) fails when the two pins disagree, so they cannot drift apart.
-* **Zero-Fuzz Patch Rule**: Downstream patches must have pinned checksums in the dependency manifest. Patches are applied with zero fuzz; any upstream line drift fails the build immediately rather than silently shifting code hunks.
-
-### 5.2 Zero-Telemetry & Fail-Closed Privacy Model
-
-* **Zero Telemetry**: Mavio contains no playback analytics, device tracking, or telemetry reporting. All data strictly stays on the user's host.
-* **Fail-Closed Silence**: In the absence of configured external metadata scrapers (such as a TMDB API key), Mavio operates silently using local NFOs and images without making unnecessary outbound network calls.
-
----
-
-## 6. Implementation Index by Module
-
-| Optimization Feature | Target Mavio Module | Target Phase |
-| :--- | :--- | :--- |
-| **Subtitle Scoring & Chinese Alias Normalization** | `libs/naming`, `libs/library` | P2 / P4 |
-| **Growing File Policy & Deferred Reconciliation** | `libs/library/scan.go` | P4 |
-| **Storage Medium Detection & Per-Device Queues** | `libs/library/fs.go`, `libs/library/scan.go` | P4 |
-| **Active Streaming & Background I/O Quiet Gate** | `apps/server`, `libs/library/worker.go` | P5 |
-| **Targeted Prefetching (Head/Tail Prefetch)** | `libs/media/probe`, `libs/library` | P3 / P4 |
-| **Resume Seek Folding & Keyframe Snapping** | `libs/media/planner`, `libs/streaming` | P3 / P5 |
-| **Thumbnail Auto-Cropping & Failure Circuit Breaker** | `libs/imaging`, `libs/media/keyframes` | P2 / P5 |
-| **Dolby Vision Profile 7 Dependency & Downmix Boost** | `libs/media/planner/hdr.go`, `audio.go` | P3 |
+| Mechanism | Implementation | Phase | Relation to Jellyfin |
+| :--- | :--- | :--- | :--- |
+| Device and protocol identification | `libs/library/storage/device.go`, `device_{linux,darwin,windows,other}.go` (`DetectDevice`, `Detector`, `DeviceInfo.Serialized`, `DeviceInfo.Sleeps`) | P9 | Mavio only; Jellyfin does not classify storage |
+| Per-volume serialization | `libs/library/storage/anti_thrashing.go` (`VolumeLedger`); used by `libs/library/scan.go` (`Scanner.walkers`, `scan.folder`) and `libs/library/jobs.go` (`Jobs.probeFile`) | P9 | Mavio only; Jellyfin scans and probes with fixed parallelism whatever the device |
+| Quiet gate | `libs/library/storage/quiet_gate.go` (`QuietGate`); activity from `apps/server/internal/playback/manager.go` (`Manager.Start`) and `playback/http.go`; waited by `libs/library/scan.go`, `jobs.go`, `borders.go`, `mediaextras.go` | P9 | Mavio only; Jellyfin's scheduled tasks do not yield to playback |
+| Head and tail prefetch | `libs/library/storage/prefetch.go`, `prefetch_linux.go`, `prefetch_other.go` (`PrefetchHeadTail`); used by `libs/library/jobs.go` (`Jobs.probeFile`), `storage/keeper.go` (`Keeper.Wake`) and `apps/server/internal/playback/resume.go` (`warmResume`) | P9 | Mavio only |
+| Start-position prefetch | `libs/library/storage/prefetch.go` (`PrefetchRange`); `apps/server/internal/playback/resume.go` (`warmResume`) | P9 | Mavio only |
+| Uncached heartbeat read | `libs/library/storage/heartbeat.go`, `heartbeat_{linux,darwin,windows,other}.go` (`VolumeHeartbeat`, `Heartbeats`) | P9 | Mavio only |
+| Keep-alive and wake | `libs/library/storage/keeper.go` (`Keeper.Beat`, `Keeper.Wake`) | P9 | Mavio only |
+| Playback keep-alive | `apps/server/internal/playback/manager.go` (`Manager.Run`), `playback/resume.go` (`Manager.keepAwake`) | P9 | Mavio only |
+| Presence warming | `apps/server/internal/warming/warming.go` (`Warmer.Run`, `Warmer.Tick`); online sessions from `apps/server/internal/events/hub.go` (`Hub.OnlineSessions`) | P9 | Mavio only; reads disks only while a user is present |
+| Wake on opening an item | `apps/server/internal/rpc/item.go` (`ItemService.Wake` in `GetItem`) → `warming.Warmer.Wake`; wired in `apps/server/internal/server/server.go` | P9 | Mavio only; `GetItem` has the side effect of a background read |
+| Growth policy | `libs/library/storage/growth_policy.go` (`GrowthPolicy`, `HasDownloadSuffix`); used by `libs/library/scan.go` (`scan.list`) | P9 | **Differs**: Jellyfin indexes a file as soon as a scan or its file system monitor sees it (its monitor waits for changes to settle and for the file to be unlocked); Mavio leaves out files modified within 10 seconds and defers them until stable for 30 seconds, so a freshly copied file appears up to about 40 seconds later |
+| Deferred reconciliation | `libs/library/deferred.go` (`Scanner.RunDeferred`, `Scanner.ReconcileDeferred`); run by `apps/server/internal/server/server.go` | P9 | **Differs**: replaces Jellyfin's real-time file system monitor for files still being written; Mavio has no file system monitor (full reconciliation scans, [Architecture §9](architecture.md)) |
+| Keyframe snapping | `apps/server/internal/playback/resume.go` (`Playback.startPosition`); `libs/streaming/layout.go` (`Layout.Index`); `StartPlaybackResponse.start_position` in `libs/proto/mavio/playback/v1/playback.proto` | P9 | **Differs**: Jellyfin starts at the requested position; Mavio may start up to 5 seconds earlier and returns the position it used |
+| Seek folding | `libs/streaming/stream.go` (`Stream.Prepare`); called by `apps/server/internal/playback/resume.go` (`Manager.prepareStart`) | P9 | **Differs**: Jellyfin starts ffmpeg on the first segment request; Mavio starts it when the playback starts |

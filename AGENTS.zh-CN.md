@@ -11,7 +11,7 @@
 | [docs/development.zh-CN.md](docs/development.zh-CN.md) | 工具链、Nx、Go 模块约定、代码生成、代码质量、CI、发布 |
 | [docs/testing.zh-CN.md](docs/testing.zh-CN.md) | 测试分层、从 Jellyfin 移植测试、测试媒体 |
 | [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md) | 阶段划分、完成标准、当前进度、风险 |
-| [docs/optimization.zh-CN.md](docs/optimization.zh-CN.md) | 存储与性能优化：驱动器识别、防抖动排队、I/O 静默门禁、定向预读、起播低延迟 |
+| [docs/optimization.zh-CN.md](docs/optimization.zh-CN.md) | 优化主题，每个附落地对照索引：存储 I/O 延迟缓解与推测式预热 |
 
 ## 项目概览
 

@@ -225,9 +225,9 @@ flowchart TD
 
 **Progress**:
 - [x] Multi-dimensional device and protocol identification: `libs/library/storage` with native Linux (`sysfs`/`st_dev`), macOS (`statfs`/`fsid`), and Windows (`GetDriveType`/`IOCTL_STORAGE_QUERY_PROPERTY`) implementations
-- [x] Anti-thrashing volume serialization: `VolumeLedger` with physical device keying, FIFO fair queuing, and configurable concurrency
-- [x] Foreground streaming quiet gate: `QuietGate` with reader-writer locking, reference counting, scan-interruption checks, and idle spin-down delay
-- [x] In-progress write detection: `GrowthPolicy` with size-stability polling and write-window thresholds
+- [x] Anti-thrashing volume serialization: `VolumeLedger`, one first-come-first-served slot per volume
+- [x] Foreground streaming quiet gate: `QuietGate`, a quiet deadline that foreground activity extends and background reads wait out
+- [x] In-progress write detection: `GrowthPolicy` leaves out files with download suffixes or modified within the write window and defers them; `Scanner.RunDeferred` rescans a library once its deferred files settle or go away
 - [x] Speculative prefetch scheduler: `PrefetchHeadTail` with `posix_fadvise(WILLNEED)` on Linux and sequential chunk warming fallback
 - [x] Integration of `libs/library/storage` into the scanner and probes: devices detected once per folder (`storage.Detector`); only drives with a seek penalty and remote or cloud volumes are serialized, the walker reading one folder at a time on them and each folder listing and probe holding the device; a probe of several versions on one disk no longer waits for itself
 - [x] `QuietGate` and prefetching in playback: starting a playback and every media request extend the quiet window, as khuaplayer's foreground storage gate does, instead of holding background I/O for whole playbacks
@@ -235,6 +235,9 @@ flowchart TD
 - [x] Dolby Vision Profile 7: separate enhancement-layer tracks, recognized only from their configuration, are never chosen as the video; HDR10 clients get the Base Layer without Dolby Vision metadata
 - [x] Black border cropping: borders found by sampling frames (`libs/media/borders`, job `media.borders`), kept on the video stream and cropped by the planner when it re-encodes
 - [x] Pinned dependencies: jellyfin-ffmpeg's SHA-256 per platform in `mise.toml`, checked against the Dockerfile's by a test
+- [x] Keeping volumes awake: uncached heartbeat reads (`VolumeHeartbeat`) by `storage.Keeper` for the volumes of playbacks in progress and of present users' continue-watching media (`internal/warming`), and a wake when a client opens an item
+- [x] Resume latency: playback starts at the keyframe or segment start up to 5 seconds before the requested position (`StartPlaybackResponse.start_position`), HLS starts ffmpeg there when the playback starts, and the media around it is read ahead
+- [x] Implementation index of every storage mechanism, with its departures from Jellyfin ([Optimization §1.9](optimization.md))
 
 ### P10 Metadata Management
 **Scope**: correcting and completing what the library scans find.

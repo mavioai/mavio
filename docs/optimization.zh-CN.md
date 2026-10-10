@@ -4,254 +4,110 @@
 
 > 相关文档：[系统架构](architecture.zh-CN.md) · [领域模型](domain.zh-CN.md) · [开发指南](development.zh-CN.md) · [测试策略](testing.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
-> 本文档规范 Mavio 的全局性能优化体系。包含存储 I/O 调度与预热、媒体转码管线起播延迟、字幕元数据检索以及确定性工程构建规范。
+> 本文档汇集 Mavio 的优化主题，每个主题一章。每章说明问题、采用的机制，以及一张落地对照索引：每个机制对应的实现代码、交付它的阶段、与 Jellyfin 的差异，以免日后与 Jellyfin 对齐时把有意的差异误当作缺漏。
 
 ---
 
-## 1. 目标与设计原则
+## 1. 存储 I/O 延迟缓解与推测式预热（Storage I/O Latency Mitigation and Speculative Warming）
 
-Mavio 作为自托管媒体服务器，核心部署环境通常是家庭服务器、多盘位 NAS（如群晖、TrueNAS、Unraid）或低功耗主机。这些环境具有极强的存储异构性：
-1. **机械硬盘（HDD）吞吐脆弱**：机械盘存在 10~15ms 物理寻道开销，多任务并发随机读会引发磁头剧烈抖动（Head Thrashing），导致吞吐从 150MB/s 断崖式跌落至个位数 MB/s。
-2. **网络存储与外接盘易休眠**：SMB/NFS 挂载点与 USB 外置硬盘在无读写数分钟后会自动休眠停转（Spindle Spin-down），重新起旋需 5~10 秒，极易造成客户端起播超时。
-3. **前后台 I/O 争抢严重**：后台媒体库全量对账扫描（Reconciliation Scan）或雪碧图抽帧若打满磁盘 I/O 队列，前台用户的实时点播与 HLS 切片传输会陷入严重缓冲卡顿。
-4. **下载与写入中文件易脏读**：PT/BT、Aria2 或自动化抓取工具下载中的半截视频如果被提前扫描，会导致 `ffprobe` 探测崩溃或入库错误时长。
+### 1.1 目标与挑战
 
-为此，Mavio 确立以下存储与媒体优化原则：
-* **物理卷感知，杜绝并发寻道**：后台 I/O 必须按物理驱动器（Physical Device）进行单并发单通道排队，永远保持机械盘最佳顺序读性能。
-* **前台点播绝对优先**：当存在活跃的客户端播放流时，后台扫描与离线任务主动退避与降级。
-* **最小预算精准预读**：拒绝无节制盲目缓冲，以极低内存开销精准命中文件头（元数据）与文件尾（索引）。
-* **零侵入与跨平台自适应**：无缝支持 Linux、Windows 与 macOS，针对 OS 特性选用最高效的系统调用，对 SSD 透明高速，对 HDD 关键保护。
+Mavio 部署在家用服务器、NAS（Synology、TrueNAS、Unraid）和低功耗硬件上，存储高度异构：
 
----
+1. **机械硬盘会抖动**：一次寻道 10–15 ms；对同一块盘的并发随机读会让磁头来回移动，吞吐从约 150 MB/s 跌到个位数 MB/s。
+2. **硬盘与共享会休眠**：外置 USB 硬盘和 NAS 硬盘闲置数分钟后停转，SMB/NFS 共享会断开；重新起转需要 5–10 秒，足以让客户端放弃起播。
+3. **后台 I/O 与播放争抢**：扫描、探测和缩略图提取占满磁盘队列时，播放会卡顿。
+4. **仍在写入的文件**：下载客户端或自动化工具（qBittorrent、Aria2、Sonarr、Radarr）仍在写的文件，过早扫描会让 ffprobe 失败或记录错误的时长。
+5. **续播要多次寻道**：打开文件、读索引、跳到续播位置、再从前一个关键帧解码，在慢速存储上要往返好几次。
 
-## 2. 存储 I/O 延迟抑制与推测性预热调度系统 (Storage I/O Latency Mitigation and Speculative Warming)
+采用的原则：
 
-### 2.1 存储介质与挂载协议多维度感知
+* **认识设备**：对同一块机械硬盘或远程卷的后台读取串行化；固态硬盘保持完全并发。
+* **播放优先**：客户端在拉流时，后台读取等待。
+* **小而精准的预读**：预读容器头部与索引、起播位置附近的媒体，而非整个文件。
+* **在需要之前唤醒，且只在有人时**：保持正在播放的卷不休眠，唤醒在场用户可能播放的媒体所在的卷；否则任由磁盘休眠。
+* **各平台原生**：使用各操作系统自己的调用，不用 CGO。
 
-Mavio 服务端在扫描与读取媒体路径时，通过跨平台抽象层识别底层介质类型与挂载协议：
+### 1.2 存储识别
 
-```text
-               ┌───────────────────────────┐
-               │    Storage Path Probe     │
-               └─────────────┬─────────────┘
-                             │
-     ┌───────────────────────┼───────────────────────┐
-     ▼                       ▼                       ▼
-   Linux                  Windows                  macOS
-┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-│ stat.st_dev  │      │ GetDriveType │      │ statfs       │
-│ sysfs /queue │      │ DeviceIo-    │      │ f_fstypename │
-│ statfs.f_type│      │ Control IOCTL│      │ f_fsid / dev │
-└──────┬───────┘      └──────┬───────┘      └──────┬───────┘
-       │                     │                     │
-       └─────────────────────┼─────────────────────┘
-                             ▼
-               ┌───────────────────────────┐
-               │    Storage Device Type    │
-               │  • Local SSD              │
-               │  • Local HDD (Rotational) │
-               │  • Remote NAS (SMB/NFS)   │
-               │  • Cloud Mount (Dataless) │
-               └───────────────────────────┘
-```
+`storage.DetectDevice` 把某路径所在的卷归类为本地 SSD、本地机械硬盘、远程共享或云挂载，并返回一个稳定的卷 ID，作为下文所有按卷机制的键。`storage.Detector` 对每个文件夹只检测一次（最多记住 4,096 个文件夹）；无法检测的路径为未知，按固态硬盘对待。
 
-#### Linux
-1. **机械盘（Rotational）识别**：
-   * 通过 `stat(path, &st)` 提取设备主次设备号 `st.st_dev`；
-   * 读取 `/sys/dev/block/<major>:<minor>/queue/rotational`：
-     * `1`：旋转介质（机械硬盘 HDD），自动启用物理卷防抖动单并发排队；
-     * `0`：非旋转介质（NVMe / SATA SSD），允许常规高并发 I/O。
-2. **网络卷与挂载协议识别**：
-   * 调用 `statfs(path, &buf)` 检查 `buf.Type`：
-     * `0x517B` (`SMB_SUPER_MAGIC`) / `0xfe534d42` (`SMB2_MAGIC_NUMBER`)：SMB 共享；
-     * `0x6969` (`NFS_SUPER_MAGIC`)：NFS 挂载；
-     * `0x65735546` (`FUSE_SUPER_MAGIC`)：FUSE 挂载（如 Rclone / Alist）。
+| 平台 | 卷 ID | 机械硬盘 | 远程共享 | 云挂载 |
+| :--- | :--- | :--- | :--- | :--- |
+| Linux | `st_dev` | `/sys/dev/block/<major>:<minor>/queue/rotational` 为 `1` | `statfs.f_type` 为 SMB（`0x517B`）、SMB2（`0xFE534D42`）、CIFS、NFS（`0x6969`） | FUSE（`0x65735546`：rclone、Alist 等） |
+| Windows | 卷序列号 | `IOCTL_STORAGE_QUERY_PROPERTY` 查询 `StorageDeviceSeekPenaltyProperty` | `GetDriveTypeW` 为 `DRIVE_REMOTE`，或 UNC 路径 | 位于 OneDrive 或 iCloud Drive 下的路径 |
+| macOS | `statfs.f_fsid` | `/Volumes` 下的卷（外置硬盘盒） | `f_fstypename` 为 `smbfs`、`nfs`、`afpfs`、`webdav`，或无 `MNT_LOCAL` | 位于 `~/Library/Mobile Documents` 或 `~/Library/CloudStorage` 下的路径 |
 
-#### Windows
-1. **机械盘识别**：
-   * 通过 `CreateFileW` 获得卷句柄，调用 `DeviceIoControl` 发送 `IOCTL_STORAGE_QUERY_PROPERTY`，查询 `StorageDeviceSeekPenaltyProperty`；
-   * 返回的 `DEVICE_SEEK_PENALTY_DESCRIPTOR.IncursSeekPenalty` 为 `TRUE` 即判定为机械硬盘。
-2. **网络卷识别**：
-   * `GetDriveTypeW(rootPath) == DRIVE_REMOTE`，或检测 UNC 路径（`\\server\share`）。
-3. **云盘占位文件拦截**：
-   * 检查文件属性是否含有 `FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS`（`0x00400000`）；
-   * 后台扫描打开文件时附带 `FILE_FLAG_OPEN_NO_RECALL`，杜绝静默拉取未同步的云端文件。
+由设备派生两个属性：
 
-#### macOS
-1. **网络卷识别**：
-   * `statfs.f_fstypename` 匹配 `"smbfs"`, `"nfs"`, `"afpfs"`, `"webdav"`；且 `(sfs.f_flags & MNT_LOCAL) == 0`。
-2. **云盘与占位文件拦截**：
-   * 路径识别 `~/Library/Mobile Documents`（iCloud）与 `~/Library/CloudStorage`（网盘 FileProvider）；
-   * 线程级系统调用设置 `IOPOL_TYPE_VFS_MATERIALIZE_DATALESS_FILES` 为 `IOPOL_MATERIALIZE_DATALESS_FILES_OFF`。
+* **串行化**（`DeviceInfo.Serialized`）：机械硬盘、远程共享和云挂载；它们的后台读取一次只进行一个。
+* **会休眠**（`DeviceInfo.Sleeps`）：机械硬盘和远程共享；对它们保活和唤醒。云挂载从不做推测式读取，因为读取占位文件会触发下载。
 
----
+### 1.3 按卷串行化
 
-### 2.2 物理驱动器单并发队列与防磁头抖动（Per-Device Serialization）
+* **`storage.VolumeLedger`**：每个卷 ID 一个槽位，按先来先得发放；`Acquire` 等待槽位或上下文结束，返回释放函数。没人持有或等待时，该卷的通道即被丢弃。
+* **扫描**：遍历器在固态硬盘上用 4 个 goroutine（媒体库的并发度）读取文件夹，在串行化的卷上只用 1 个；每次列文件夹都持有该卷的槽位。
+* **探测**：探测串行化卷上的文件时持有该卷的槽位；同一条目在同一块盘上的多个版本依次探测，探测不会等待自己。
+* 结果是：跨所有媒体库的所有扫描和探测，一块机械硬盘同一时刻只服务一个顺序读取者。
 
-* **设计背景**：当媒体库有成千上万个文件分布在同一个机械硬盘上时，如果并发派发探测任务，磁头在盘片内圈与外圈剧烈往返寻道，会导致总 I/O 延迟急剧恶化。
-* **调度机制**：
-  * 在 `libs/library` 中引入物理设备账本（`DeviceLedger`）。
-  * 提取物理设备标识（Linux: `st_dev` / major:minor；Windows: Volume Serial Number；macOS: `f_fsid`）作为锁的 Key。
-  * **单设备信号量**：被识别为机械硬盘（HDD）或远端挂载卷的设备，同一物理设备上在任意时刻**仅允许 1 个后台扫描/探测任务持有 I/O 令牌**。
-  * **效果**：任务顺序执行，机械硬盘磁臂以连续顺序读模式运行，吞吐保持在硬件峰值，杜绝磁头抖动噪声与机械磨损。
+### 1.4 后台 I/O 静默闸门
 
----
+* **`storage.QuietGate`**：前台活动把静默截止时间延长到“当前时间加静默期”（默认 3 秒），且从不缩短，因此一串请求只形成一个静默尾巴，无需每个请求一个计时器。
+* **活动**：开始播放和每个媒体请求（HLS 播放列表与分段、直接播放的范围读取）都记一次活动。持续拉流会在读取时让后台读取暂停，在其间隙让它们运行；播放不会在整个播放期间占住闸门，否则只要有人在看，扫描就会一直停止。
+* **等待者**：扫描遍历器在每个文件夹之前，以及探测、黑边检测、trickplay、章节图片和响度任务在读取文件之前，都会等过静默截止时间（`PauseOrCancel`），并响应取消。
 
-### 2.3 活跃点播与后台扫描 I/O 互锁门禁（Storage Quiet Gate）
+### 1.5 精准预读
 
-* **设计背景**：自建媒体服务器在进行全库扫描、计算哈希或生成雪碧图时，一旦用户开始播放电影，前台与后台争抢磁盘队列，造成前台 HLS 切片或 Direct Play 严重卡顿。
-* **调度机制**（`storage.QuietGate`，沿用 khuaplayer 的前台存储门禁）：
-  * 前台活动延长静默截止时间（`quietUntil = max(quietUntil, now + quietPeriod)`，默认 3 秒），只延长不缩短，使一连串请求合并为一段静默尾巴，而不必为每个事件创建定时器。
-  * 开始播放以及每个媒体请求（HLS 播放列表与分片、直接播放的范围读取、拖动）都记录前台活动。因此连续串流在读取时让后台读取暂停，在间隙中让其恢复；播放不会在整个时长内占住门禁，否则只要有人在看，媒体库扫描就会一直停止。
-  * 后台任务（扫描遍历器在每个文件夹之前、探测、黑边检测）在发起物理 I/O 前等待静默期过去，等待期间检查取消。
+* **头部与尾部**：`storage.PrefetchHeadTail` 预读文件的前 1 MB（MP4 `ftyp`/`moov`、MKV EBML 头、MPEG-TS 头）和最后 256 KB（位于末尾的 MP4 `moov`、MKV `Cues`、AVI `idx1`）。每次探测和每次播放之前都会执行。
+* **范围**：`storage.PrefetchRange` 预读裁剪到文件内的任意范围。从非零位置开始的播放会预读起播位置附近的媒体，按媒体源的大小和时长估算：之前 1 MB、之后 3 秒，最多 64 MB。
+* **机制**：Linux 上用 `posix_fadvise(POSIX_FADV_WILLNEED)` 让内核异步把这些范围载入页缓存，无需应用缓冲区；其他平台按 128 KB 分块读取后丢弃，以预热系统缓存。
 
----
+### 1.6 保活与唤醒卷
 
-### 2.4 定向元数据预算预读（Targeted Head/Tail Prefetching）
+* **心跳读**（`storage.VolumeHeartbeat`）：在文件的一个随机 4 KB 对齐偏移处读 4 KB，并绕过缓存，使读取真正到达磁盘或共享：Linux 用 `O_DIRECT`（文件系统拒绝时退回 `POSIX_FADV_DONTNEED` 加普通读取），macOS 用 `F_NOCACHE`，Windows 用 `FILE_FLAG_NO_BUFFERING | FILE_FLAG_OPEN_NO_RECALL`。
+* **`storage.Keeper`** 只读取会休眠的卷：
+  * `Beat` 每个心跳间隔（2.5 秒）最多读一次每个卷，无论有多少路径指向它；上次读取尚未返回的卷（例如挂起的共享）会被跳过。
+  * `Wake` 每个唤醒冷却期（30 秒）最多读一次每个卷，随后预读该文件的头部和尾部。
+* 服务端的**三个触发点**：
+  1. **播放保活**（`playback.Manager`）：每个心跳间隔，对所有进行中播放所在的卷做心跳，使暂停后的播放恢复时无需等待起转。
+  2. **在场预热**（`apps/server/internal/warming`）：每 30 秒，对每个正在使用客户端的用户（开着事件流、且在最近 5 分钟内有请求），查出其最近播放的 8 个可续播条目（“继续观看”）的媒体；每个心跳间隔对这些卷做心跳。没有用户在场时不读取，磁盘可以休眠。
+  3. **打开条目**（`ItemService.GetItem`）：唤醒客户端打开的条目的媒体源，使客户端请求播放时卷已在转动。
 
-* **设计背景**：视频容器（MP4/MKV）的解码关键信息分布在两端：头部包含文件签名与基础轨信息；尾部经常存放索引（如 MP4 的尾部 `moov` box、MKV 的尾部 `Cues` 索引、AVI 的尾部 `idx1`）。如果盲目全量缓存，会浪费大量内存与带宽。
-* **预算预读策略**：
-  * **Head 1 MB**：读取文件起始 1MB，足以覆盖绝大多数 MP4 `ftyp/moov`、MKV EBML Header 及 MPEG-TS 首部。
-  * **Tail 256 KB**：快速跳转至末尾读取最后 256KB，覆盖尾部索引数据。
-  * **Linux 内核原生预读优化**：
-    在 Linux 上，服务端无需分配应用层缓冲区做无谓的内存拷贝，直接使用系统调用：
-    ```c
-    posix_fadvise(fd, 0, 1024 * 1024, POSIX_FADV_WILLNEED);
-    posix_fadvise(fd, fileSize - 256 * 1024, 256 * 1024, POSIX_FADV_WILLNEED);
-    ```
-    内核异步调度 I/O 线程将目标扇区灌入 Page Cache，后续 `ffprobe` 探测与起播解封装实现零等待直接命中内存。
+### 1.7 仍在写入的文件（增长策略）
 
----
+* **`storage.GrowthPolicy`** 在扫描时判断文件是否仍在增长：
+  * 文件名带下载后缀（`.part`、`.crdownload`、`.download`、`.aria2`、`.tmp`、`.incomplete`、`.!ut`、`.!qb`）；
+  * 在写入窗口（10 秒）内被修改过；
+  * 或此前被推迟过，且其大小和修改时间尚未稳定满 30 秒。
+* **推迟**：增长中的文件被排除在扫描之外，不报错、不探测，并为其媒体库推迟（最多 4,096 个文件；永不稳定的文件，例如暂停的下载，一天后遗忘）。它所在的文件夹不会被标记为未变化，因此即使文件夹修改时间没变，之后的扫描也会重新列出它。
+* **协调**（`library.Scanner.RunDeferred`，每 10 秒）：对被推迟的文件做 stat；一旦文件消失（下载完成后被重命名），或在写入窗口之后保持不变满 30 秒，就为其媒体库排入一次扫描，每个媒体库一次。
+* 没有策略时，扫描器仍会跳过带下载后缀的文件。
 
-### 2.5 远端网络卷与外部驱动器防休眠心跳（Volume Heartbeat）
+### 1.8 续播寻道折叠与关键帧吸附
 
-* **设计背景**：外接 USB 机械移动硬盘或 NAS 共享存储通常配置了 5~15 分钟闲置休眠（Spin-down）以节能。用户在浏览媒体库准备看片时，若磁盘已休眠，点击播放需等待主轴马达加速 5~10 秒，极易产生“服务器卡死”的错觉。
-* **心跳保活机制**：
-  * **受控心跳周期**：当检测到客户端处于活跃浏览状态（如通过 WebSocket/Connect-RPC 保持长连接）且访问的媒体位于网络卷或外置机械盘时，每隔 2.5 秒发送一次微量保活心跳。
-  * **穿透缓存的微量随机读**：
-    * Linux 下使用 `O_DIRECT`，Windows 下使用 `FILE_FLAG_NO_BUFFERING`，macOS 下使用 `fcntl(F_NOCACHE, 1)`；
-    * 在文件随机偏移处读取 4KB 数据（`pread`），强制物理磁盘接收微弱 I/O 命令，维持主轴马达旋转。
-  * **在场检测与节能保护**：一旦客户端断开连接或进入空闲超时，保活心跳立即终止，不破坏存储设备的正常休眠节能逻辑。
+* **关键帧吸附**（`playback.Playback.startPosition`）：请求从某位置开始的播放，若该位置之前 5 秒内有关键帧，就从该关键帧开始，解码器可立即出画，无需解码再丢弃帧：
+  * HLS 取包含该位置的分段起点，编码器或源会以关键帧开始该分段；
+  * 直接播放取源在该位置之前的关键帧（由 `media.keyframes` 任务存储）。
 
----
+  实际采用的位置通过 `StartPlaybackResponse.start_position` 返回，客户端跳到该位置，播放器与服务端保持一致。
+* **寻道折叠**（`streaming.Stream.Prepare`）：开始 HLS 播放时立即让 ffmpeg 从包含起播位置的分段开始，而不是等第一个分段请求；该分段的第一个请求会发现 ffmpeg 已在正确的位置读取，无需重启。
+* **预读**（§1.5）：播放开始时在后台预读源的头部、尾部以及起播位置附近的范围。
 
-### 2.6 “生长中/下载中文件”感知与延迟入库策略（Growth Policy）
+### 1.9 落地对照索引
 
-* **设计背景**：媒体库目录通常直接对接下载工具（qBittorrent、Aria2、Sonarr、Radarr）。未下载完成的文件如果被定时扫描强行处理，会引发探测报错、记录错误时长甚至破坏播放历史。
-* **生命周期状态机**：
-  * **下载临时后缀过滤**：扫描器天然静默忽略 `.part`、`.crdownload`、`.download`、`.aria2` 等临时写入后缀。
-  * **文件活跃增长检测**：
-    * 记录文件的 `(size, mtime)` 纳秒时间戳；
-    * 检查当前 `time.Now() - mtime < 10s`，或在 Linux 下检查文件是否有活跃写入进程（非空锁/写句柄打开）；
-    * 若文件尺寸正在变化或处于上述时间窗内，标记为 `Growing` 状态。
-  * **延迟对账队列（Deferred Reconciliation）**：
-    * 对 `Growing` 状态的文件不执行高开销的 `JobProbe`，不入库不报错；
-    * 将其挂入内存延迟队列，在文件尺寸与修改时间稳定静止超过阈值（如 30 秒）后再发起正式对账与探测。
-
----
-
-## 3. 媒体管道与低延迟起播优化
-
-### 3.1 续播快速定位折叠与关键帧吸附（Resume Seek Folding & Keyframe Snapping）
-
-* **传统续播痛点**：通常流程为：打开文件 $\rightarrow$ 读取头部元数据 $\rightarrow$ 解封装器发起时间戳 Seek 跳转 $\rightarrow$ 寻道回退至前一个关键帧 $\rightarrow$ 解码丢弃数秒内的非参考帧追赶至续播点。在慢速存储上，这一连串二次寻道需要数秒。
-* **优化策略**：
-  * **Seek 折叠（Fold Seek into Prepare）**：在解封装初始化阶段直接将续播时间戳传入，初始读取游标直接在续播位置附近建立，消除打开后的二次随机寻道。
-  * **关键帧吸附（Keyframe Snap）**：
-    如果续播目标点与前序关键帧的时间差在 5 秒以内（`diff <= 5.0s`），**直接将起播时间戳吸附至该关键帧**。
-    * 彻底免除解码丢弃（Drop & Catch up）数秒视频帧的 CPU 开销；
-    * 首帧即为关键帧，客户端或转码器在读取首个视频包后立即可完成解码上屏，首帧画面呈现时间缩短 70% 以上。
-
----
-
-### 3.2 动态黑边自适应剔除与预览抽帧熔断
-
-* **缩略图黑边自适应剔除**（`libs/imaging`）：
-  * 2.35:1 电影在生成 16:9 进度条预览雪碧图（Trickplay / BIF）时往往自带上下大黑边，导致小图有效画面过小且浪费 20%~30% 的体积。
-  * 引入纯 CPU 1/4 降采样黑边检测算法（支持 8-bit YUV420 与 10-bit P010）：
-    * 遍历顶、底、左、右各行/列；
-    * 采用前 16 采样点短路阈值比对，快速识别黑边边界；
-    * 在生成雪碧图前统一执行 Crop 或记录切边坐标，大幅提升移动端和网页端进度条悬浮预览的视觉质量与带宽利用率。
-* **转码黑边裁剪**（`libs/media/borders`、`libs/media/planner`）：低优先级后台任务（`media.borders`）用 ffmpeg 将每个已探测视频的五帧采样为 8-bit 亮度，并用同一检测器测量；只有每个非全黑样本都有的黑边才计入，且至少占画面的 2%，并取偶数像素，记录在视频流上（`core.MediaStream.Crop`）。当转码重新编码视频，且视频未旋转、未烧录字幕时，规划器在缩放之前裁掉黑边，使宽银幕电影不必为黑边耗费码率；直接复制的视频从不裁剪。
-* **抽帧失败熔断（Failure Circuit Breaker）**：
-  * 在批量抽取关键帧或缩略图时，遇到受损 GOP 若无节制重试会导致后台任务死循环。
-  * 内存缓存（`library.FailNotes`）按任务类型、路径、大小与修改时间记录缩略图拼图、章节图片或响度测量失败的文件；一天之内任务跳过该文件，因此受损文件只读一次，文件变化后则重新读取。至多保留 4,096 条记录，最旧的先被遗忘。缩略图拼图与章节图片在缩放前裁去黑边检测找到的黑边（`core.MediaStream.Crop`）。
-
----
-
-### 3.3 杜比视界 Profile 7 双层流感知与降级规划
-
-* **蓝光原盘痛点**：UHD Blu-ray 原盘通常采用双层杜比视界（Profile 7 FEL / MEL），包含基础层（Base Layer）与增强层（Enhancement Layer），可能在同一条轨道中，在传输流中也可能分为两条轨道。把 EL 轨道当作要播放的视频，或把两层都交给转码，都会使播放出错。
-* **采用的处理方式**：
-  * 与 khuaplayer 一样，只根据明确的信令识别 EL 轨道：其杜比视界配置有增强层而没有基础层（`core.MediaStream.IsDolbyVisionEnhancement`）；从不依据轨道顺序、分辨率或名称推断。只要文件还有其他视频轨道，流选择就不会选中这样的轨道，因此播放、转码与复制都使用基础层。
-  * 单轨 Profile 7 流交给声明支持带增强层杜比视界的客户端；对只支持 HDR10 的客户端，规划器去掉杜比视界元数据，保留兼容 HDR10 的基础层，为 SDR 客户端重新编码时进行色调映射（`libs/media/planner/hdr.go`，沿用 Jellyfin 的规则）。
-
----
-
-### 3.4 多声道（5.1 / 7.1）立体声下混对白增强
-
-* **痛点**：将 5.1/7.1 电影下混为双声道立体声时，常出现“人声对白极轻、环境爆炸声震耳欲聋”的声学失衡。
-* **规划器优化**（`libs/media/planner/audio.go`）：
-  * 在音频下混规划中，严格遵循规范的声道衰减矩阵与对白归一化：
-    * 采用 ITU-R BS.775 权重；
-    * 对中置声道（Center Channel，对白专用声道）施加增益补偿（+3dB ~ +4.5dB）；
-    * 避免客户端（手机、平板、立体声电视）用户在观影时频繁手动调节音量。
-
----
-
-## 4. 字幕与元数据检索优化
-
-### 4.1 外部字幕多别名归一化与权重打分模型
-
-针对国内影视字幕命名极其混乱的现状，`libs/naming` 与 `libs/library` 整合完备的别名归一化字典与打分模型：
-
-#### 别名标准化映射
-```text
-"zh", "chi", "zho", "chs", "cht", "sc", "tc", "gb", "big5",
-"zh-hans", "zh-hant", "zh-cn", "zh-tw", "zh-hk",
-"简体", "繁體", "繁体", "简中", "繁中", "简", "繁", "中文", "双语" ──▶ "zh"
-```
-
-#### 智能打分模型
-| 匹配特征 | 得分调整 | 说明 |
-| :--- | :--- | :--- |
-| **基名完全一致** | `+1000` | 如 `Movie.mkv` 对应 `Movie.srt` |
-| **前缀匹配 + 合法边界符** | `+500` | 如 `Movie.1080p.mkv` 对应 `Movie.zh.srt` |
-| **偏好语言匹配** | `+200` | 与用户设置的首选字幕语言一致 |
-| **其他非偏好语言** | `-100` | 降低非目标语言外挂字幕优先级 |
-| **`.forced` 强制字幕** | `-150` | 强制字幕通常仅含极少量对白，默认不优先加载 |
-| **`.sdh` / `.cc` / `.hi` 听障字幕** | `-50` | 包含音效描述，作为次选 |
-| **格式加权** | `ASS/SSA: +20` / `SRT: +10` | 优先选择排版与样式更丰富的字幕格式 |
-
-#### 应用位置
-* **外挂字幕发现**（`libs/library`）：扫描把视频旁的字幕文件作为其外部流附加上去：文件名与视频相同，或以视频名加分隔符开头（基名得分至少 500）。语言、标题以及默认、强制、听障标记取自文件名，可识别中文变体（`zh-Hans`、`zh-Hant`、`chi`）；三字母代码只认同时有两字母代码的语言，使 `sdh` 等标记仍作为标记。它们按不含用户语言的得分排序，编号排在内嵌流之后；之后增删的文件无需重新探测视频即可更新这些流，重新探测时也会保留它们。
-* **播放选择**（`libs/media/decision`）：用户偏好的字幕语言按规范化后的别名匹配，因此偏好中文时可找到简体、繁体与地区变体，听障字幕排名较低。
-
----
-
-## 5. 工程确定性与隐私不变式
-
-### 5.1 Checksum-Pinned 依赖与 Zero-Fuzz 补丁规范
-
-* **依赖确定性封存**：`jellyfin-ffmpeg` 按版本以及每个平台便携版的 SHA-256 锁定：开发与 CI 使用 `mise.toml`（校验和不符的下载会被 mise 拒绝），容器镜像使用 `apps/server/Dockerfile`。一个测试（`apps/server/internal/buildinfo`）在两处锁定不一致时失败，使二者不会逐渐偏离。
-* **Zero-Fuzz 补丁原则**：下游补丁自身必须计算 SHA-256 并锁定在依赖清单中；应用补丁时强制采用零容差（Zero Fuzz），一旦上游代码微调导致补丁行偏移，构建立即报错，严禁静默迁移补丁代码。
-
-### 5.2 零遥测与 Fail-Closed 默认静默原则
-
-* **零数据收集（Zero Telemetry）**：Mavio 不内置任何播放统计上报、设备追踪或用户行为分析埋点，全量数据严格留在用户本地。
-* **默认静默（Fail-Closed）**：当未配置外部刮削源（如 TMDB API Key）时，完全静默使用本地 NFO 与图片，不发起任何无效的外部网络探测请求。
-
----
-
-## 6. 模块落地对照索引
-
-| 优化特性 | 对应 Mavio 模块 | 落地阶段 |
-| :--- | :--- | :--- |
-| **字幕打分模型与中文别名归一化** | `libs/naming`, `libs/library` | P2 / P4 |
-| **生长中文件 Growth Policy 与延迟队列** | `libs/library/scan.go` | P4 |
-| **存储介质识别与物理驱动器单并发队列** | `libs/library/fs.go`, `libs/library/scan.go` | P4 |
-| **活跃点播与后台扫描 I/O 互锁门禁** | `apps/server`, `libs/library/worker.go` | P5 |
-| **定向元数据预读（Head/Tail Prefetch）** | `libs/media/probe`, `libs/library` | P3 / P4 |
-| **续播定位折叠与关键帧吸附** | `libs/media/planner`, `libs/streaming` | P3 / P5 |
-| **缩略图黑边裁剪与抽帧熔断** | `libs/imaging`, `libs/media/keyframes` | P2 / P5 |
-| **杜比视界 Profile 7 依赖规划与多声道下混** | `libs/media/planner/hdr.go`, `audio.go` | P3 |
+| 机制 | 实现 | 阶段 | 与 Jellyfin 的关系 |
+| :--- | :--- | :--- | :--- |
+| 设备与协议识别 | `libs/library/storage/device.go`、`device_{linux,darwin,windows,other}.go`（`DetectDevice`、`Detector`、`DeviceInfo.Serialized`、`DeviceInfo.Sleeps`） | P9 | Mavio 独有；Jellyfin 不区分存储 |
+| 按卷串行化 | `libs/library/storage/anti_thrashing.go`（`VolumeLedger`）；由 `libs/library/scan.go`（`Scanner.walkers`、`scan.folder`）和 `libs/library/jobs.go`（`Jobs.probeFile`）使用 | P9 | Mavio 独有；Jellyfin 无论设备都以固定并行度扫描和探测 |
+| 静默闸门 | `libs/library/storage/quiet_gate.go`（`QuietGate`）；活动来自 `apps/server/internal/playback/manager.go`（`Manager.Start`）和 `playback/http.go`；由 `libs/library/scan.go`、`jobs.go`、`borders.go`、`mediaextras.go` 等待 | P9 | Mavio 独有；Jellyfin 的计划任务不为播放让路 |
+| 头尾预读 | `libs/library/storage/prefetch.go`、`prefetch_linux.go`、`prefetch_other.go`（`PrefetchHeadTail`）；由 `libs/library/jobs.go`（`Jobs.probeFile`）、`storage/keeper.go`（`Keeper.Wake`）和 `apps/server/internal/playback/resume.go`（`warmResume`）使用 | P9 | Mavio 独有 |
+| 起播位置预读 | `libs/library/storage/prefetch.go`（`PrefetchRange`）；`apps/server/internal/playback/resume.go`（`warmResume`） | P9 | Mavio 独有 |
+| 绕过缓存的心跳读 | `libs/library/storage/heartbeat.go`、`heartbeat_{linux,darwin,windows,other}.go`（`VolumeHeartbeat`、`Heartbeats`） | P9 | Mavio 独有 |
+| 保活与唤醒 | `libs/library/storage/keeper.go`（`Keeper.Beat`、`Keeper.Wake`） | P9 | Mavio 独有 |
+| 播放保活 | `apps/server/internal/playback/manager.go`（`Manager.Run`）、`playback/resume.go`（`Manager.keepAwake`） | P9 | Mavio 独有 |
+| 在场预热 | `apps/server/internal/warming/warming.go`（`Warmer.Run`、`Warmer.Tick`）；在线会话来自 `apps/server/internal/events/hub.go`（`Hub.OnlineSessions`） | P9 | Mavio 独有；只在用户在场时读盘 |
+| 打开条目时唤醒 | `apps/server/internal/rpc/item.go`（`GetItem` 中的 `ItemService.Wake`）→ `warming.Warmer.Wake`；在 `apps/server/internal/server/server.go` 中装配 | P9 | Mavio 独有；`GetItem` 带有一次后台读取的副作用 |
+| 增长策略 | `libs/library/storage/growth_policy.go`（`GrowthPolicy`、`HasDownloadSuffix`）；由 `libs/library/scan.go`（`scan.list`）使用 | P9 | **有差异**：Jellyfin 在扫描或其文件系统监视器看到文件时就入库（监视器会等变化平息、文件解锁）；Mavio 排除 10 秒内修改过的文件，并推迟到稳定满 30 秒，因此刚复制的文件最多晚约 40 秒出现 |
+| 推迟协调 | `libs/library/deferred.go`（`Scanner.RunDeferred`、`Scanner.ReconcileDeferred`）；由 `apps/server/internal/server/server.go` 运行 | P9 | **有差异**：对仍在写入的文件，替代了 Jellyfin 的实时文件系统监视器；Mavio 没有文件系统监视器（全量协调扫描，见[架构 §9](architecture.zh-CN.md)） |
+| 关键帧吸附 | `apps/server/internal/playback/resume.go`（`Playback.startPosition`）；`libs/streaming/layout.go`（`Layout.Index`）；`libs/proto/mavio/playback/v1/playback.proto` 中的 `StartPlaybackResponse.start_position` | P9 | **有差异**：Jellyfin 从请求的位置开始；Mavio 可能提前至多 5 秒开始，并返回实际采用的位置 |
+| 寻道折叠 | `libs/streaming/stream.go`（`Stream.Prepare`）；由 `apps/server/internal/playback/resume.go`（`Manager.prepareStart`）调用 | P9 | **有差异**：Jellyfin 在第一个分段请求时启动 ffmpeg；Mavio 在播放开始时启动 |
