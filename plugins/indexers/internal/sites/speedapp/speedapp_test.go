@@ -97,7 +97,7 @@ func TestSearchRequests(t *testing.T) {
 		{
 			"movie by IMDb", "speedapp", testSettings,
 			indexer.Query{Type: indexer.SearchMovie, Term: "ignored", IMDbID: "123", Categories: []int{2040}},
-			"https://speedapp.io/api/torrent?itemsPerPage=100&sort=torrent.createdAt&direction=desc&imdbId=tt0000123&categories%5B%5D=8&categories%5B%5D=29",
+			"https://speedapp.io/api/torrent?itemsPerPage=100&sort=torrent.createdAt&direction=desc&imdbId=tt0000123&categories[]=8&categories[]=29",
 		},
 		{
 			"tv paged", "speedapp", testSettings,
@@ -108,7 +108,7 @@ func TestSearchRequests(t *testing.T) {
 			"legacy link", "retroflix",
 			Settings{BaseSettings: indexer.BaseSettings{BaseURL: "https://retroflix.net/"}, Email: "e", Password: "p"},
 			indexer.Query{Term: "a b", Categories: []int{7000}},
-			"https://retroflix.club/api/torrent?itemsPerPage=100&sort=torrent.createdAt&direction=desc&search=a+b&categories%5B%5D=409",
+			"https://retroflix.club/api/torrent?itemsPerPage=100&sort=torrent.createdAt&direction=desc&search=a+b&categories[]=409",
 		},
 	}
 	for _, tt := range tests {
