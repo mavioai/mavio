@@ -186,6 +186,12 @@ type (
 	tmdbFind struct {
 		MovieResults []tmdbSearchMovie  `json:"movie_results"`
 		TVResults    []tmdbSearchSeries `json:"tv_results"`
+		// Episodes found by another provider's ID, with their series.
+		TVEpisodeResults []struct {
+			ShowID        int `json:"show_id"`
+			SeasonNumber  int `json:"season_number"`
+			EpisodeNumber int `json:"episode_number"`
+		} `json:"tv_episode_results"`
 	}
 
 	tmdbName struct {

@@ -105,6 +105,8 @@ var routes = map[string]string{
 	"/3/tv/episode_group/g-dvd": `{"groups":[
 		{"name":"Disc 2","order":2,"episodes":[{"id":62085,"name":"Pilot","season_number":1,"episode_number":1,"order":0}]},
 		{"name":"Disc 1","order":1,"episodes":[{"id":62086,"name":"Cat's in the Bag...","season_number":1,"episode_number":2,"order":0}]}]}`,
+	"/3/find/349232": `{"movie_results":[],"tv_results":[],"tv_episode_results":[{"id":62086,"show_id":1396,"season_number":1,"episode_number":2}]}`,
+	"/3/find/1":      `{"movie_results":[],"tv_results":[],"tv_episode_results":[{"id":1,"show_id":2,"season_number":1,"episode_number":1}]}`,
 	"/3/tv/1396/season/1/episode/2": `{"id":62086,"name":"Cat's in the Bag...","air_date":"2008-01-27","runtime":48,"vote_average":8.2,
 		"credits":{"cast":[{"id":17419,"name":"Bryan Cranston","character":"Walter White","order":0}],
 			"guest_stars":[{"id":1,"name":"Max Arciniega","character":"Krazy-8","order":0}],
@@ -479,6 +481,42 @@ func TestDisplayOrderMetadata(t *testing.T) {
 	}
 	if paths := fake.paths(); paths[len(paths)-1] != "/3/tv/1396/season/1/episode/2" {
 		t.Errorf("requests = %v, want the aired S1E2 last", paths)
+	}
+}
+
+func TestEpisodeByTVDBID(t *testing.T) {
+	tests := []struct {
+		name      string
+		tvdbID    string
+		wantPaths []string
+	}{
+		// TVDB numbers the episode S2E7 in a series TMDB numbers otherwise:
+		// it is found by its ID, whatever the lookup's numbers.
+		{"by its TVDB ID", "349232", []string{"/3/find/349232", "/3/tv/1396/season/1/episode/2"}},
+		// An ID TMDB has for another series' episode is not this one's.
+		{"another series' episode", "1", []string{"/3/find/1", "/3/tv/1396/season/2/episode/7"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p, fake := newTestPlugin(t, `{"api_key":"key"}`)
+			episode := pluginv1.Lookup_builder{
+				Kind: pluginv1.MediaKind_MEDIA_KIND_EPISODE.Enum(), SeriesExternalIds: map[string]string{"tmdb": "1396"},
+				ExternalIds: map[string]string{"tvdb": tt.tvdbID}, SeasonNumber: proto.Int32(2), EpisodeNumber: proto.Int32(7),
+			}.Build()
+			_, _ = p.GetMetadata(t.Context(), pluginv1.GetMetadataRequest_builder{Lookup: episode}.Build())
+			got := slices.DeleteFunc(fake.paths(), func(p string) bool { return p == "/3/tv/1396" })
+			if !slices.Equal(got, tt.wantPaths) {
+				t.Errorf("requests = %v, want = %v", got, tt.wantPaths)
+			}
+		})
+	}
+	p, _ := newTestPlugin(t, `{"api_key":"key"}`)
+	episode := pluginv1.Lookup_builder{
+		Kind: pluginv1.MediaKind_MEDIA_KIND_EPISODE.Enum(), SeriesExternalIds: map[string]string{"tmdb": "1396"},
+		ExternalIds: map[string]string{"tvdb": "349232"}, SeasonNumber: proto.Int32(2), EpisodeNumber: proto.Int32(7),
+	}.Build()
+	if got := metadataFor(t, p, episode).GetName(); got != "Cat's in the Bag..." {
+		t.Errorf("episode name = %q, want = Cat's in the Bag...", got)
 	}
 }
 
