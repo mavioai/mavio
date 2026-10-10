@@ -374,6 +374,7 @@ flowchart TD
 - [x] 剧集类型、显示顺序与绝对集数；`scraper-tmdb` 按剧集的 TMDB episode group 给季与单集编号
 - [x] `libs/release` 及 Radarr 与 Sonarr 的解析用例
 - [x] `tools/testport` 读取 NUnit 测试用例
+- [x] 监控剧集或更改其显示顺序会立即刷新它；端到端测试（`apps/server/internal/server/episodes_test.go`）
 
 ### P16 资源获取数据源
 **范围**：资源获取所需的元数据，默认无需密钥。
