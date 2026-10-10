@@ -67,6 +67,10 @@ type Refresher struct {
 	// Processors gives the metadata processors, which adjust the merged
 	// metadata of items before it is saved; nil means none.
 	Processors func() []Processor
+	// Generators gives the image generators, which make images of the
+	// kinds an item lacks after a refresh, kept in MetadataDir; nil
+	// gives none.
+	Generators func() []ImageGenerator
 	// Local gives the local metadata readers, whose metadata counts after
 	// the providers' and before the NFO file's; nil means none.
 	Local func() []LocalReader
@@ -207,6 +211,34 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 	if it.Extra == "" && !it.Locked {
 		processedPeople = r.process(ctx, &it, results)
 	}
+	// Each kind of image comes from the most trusted source that has
+	// it, then from the image providers.
+	var images []core.Image
+	for i := len(results) - 1; i >= 0; i-- {
+		for _, img := range imagesOf(it.ID, results[i]) {
+			if !slices.ContainsFunc(images, func(have core.Image) bool { return have.Kind == img.Kind }) ||
+				(img.Kind == core.ImageBackdrop && i == len(results)-1) {
+				images = append(images, img)
+			}
+		}
+	}
+	for _, img := range imagesOf(it.ID, &metadata.Result{RemoteImages: extraImages}) {
+		if !slices.ContainsFunc(images, func(have core.Image) bool { return have.Kind == img.Kind }) {
+			images = append(images, img)
+		}
+	}
+	if it.Extra == "" {
+		have := images
+		if len(have) == 0 {
+			// Without images found, the item keeps those it has.
+			if have, err = r.Store.Images().ListForOwner(ctx, it.ID); err != nil {
+				return it, err
+			}
+		}
+		if generated := r.generate(ctx, it, have, opts.ReplaceMetadata); len(generated) > 0 {
+			images = append(r.withoutGenerated(have, it.ID), generated...)
+		}
+	}
 	it.ParentalRating = ratingScore(&it, lookup.Country)
 	it.MetadataRefreshedAt = r.now()
 	err = r.Store.InTx(ctx, func(tx core.Store) error {
@@ -232,22 +264,6 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 		if opts.ReplaceMetadata && !credited {
 			if err := tx.People().ReplaceCredits(ctx, it.ID, nil); err != nil {
 				return err
-			}
-		}
-		// Each kind of image comes from the most trusted source that has
-		// it, then from the image providers.
-		var images []core.Image
-		for i := len(results) - 1; i >= 0; i-- {
-			for _, img := range imagesOf(it.ID, results[i]) {
-				if !slices.ContainsFunc(images, func(have core.Image) bool { return have.Kind == img.Kind }) ||
-					(img.Kind == core.ImageBackdrop && i == len(results)-1) {
-					images = append(images, img)
-				}
-			}
-		}
-		for _, img := range imagesOf(it.ID, &metadata.Result{RemoteImages: extraImages}) {
-			if !slices.ContainsFunc(images, func(have core.Image) bool { return have.Kind == img.Kind }) {
-				images = append(images, img)
 			}
 		}
 		if len(images) == 0 {

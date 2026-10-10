@@ -133,7 +133,7 @@ A request carries the folder (library kind, library folder, path, what its conta
 `IntroProviderService.GetIntros` (item ID, kind and name, user ID) returns the IDs of items to play before an item for a user, such as its local trailers or a pre-roll, which plugins find through the host API. `PlaybackService.ListIntros` returns them in provider order, each once and at most 20, leaving out the item itself, unknown items, items that do not play and items the user cannot access; a provider failing leaves the others' picks.
 
 ### 8.8 Image Generators
-`ImageGeneratorService.Generate` makes an image of a kind for an item that has none, returned as bytes and stored in the metadata folder as the item's image.
+`ImageGeneratorService.GenerateImages` (item ID, kind and name, the kinds of images it lacks) returns images of some of those kinds, JPEG, PNG or WebP of at most 8 MiB each. At the end of a refresh, the kinds no source gave are asked of the generators in order, each kind once; the images are kept in the metadata folder (`<id[:2]>/<id>/generated/<kind>.<ext>`) and come after every other source. Later refreshes keep them without asking again, a replacing refresh makes them anew, and one is removed once another source gives its kind. Images of kinds not asked for, or that are not images, are refused.
 
 ### 8.9 Media Source Providers
 `MediaSourceProviderService.GetMediaSources` returns extra media sources of an item: an HTTP URL with its probed streams. Playback decisions consider them with the item's files; the server direct plays them by redirect and remuxes or transcodes them with ffmpeg reading the URL.

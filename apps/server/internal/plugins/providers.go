@@ -369,3 +369,14 @@ func (m *Manager) IntroProviders() []library.IntroProvider {
 	}
 	return out
 }
+
+// ImageGenerators returns the image generators among the started plugins.
+func (m *Manager) ImageGenerators() []library.ImageGenerator {
+	var out []library.ImageGenerator
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_IMAGE_GENERATOR) {
+		if pl, ok := m.running(id); ok && pl.ImageGenerator() != nil {
+			out = append(out, &providers.GeneratorPlugin{ID: id, Client: pl.ImageGenerator()})
+		}
+	}
+	return out
+}

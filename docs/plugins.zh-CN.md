@@ -133,7 +133,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 `IntroProviderService.GetIntros`（条目 ID、类型与名称，用户 ID）返回某用户播放某条目之前要播放的条目 ID，例如其本地预告片或片前广告，插件通过宿主 API 查找这些条目。`PlaybackService.ListIntros` 按提供者顺序返回它们，每个条目只出现一次，至多 20 个，并排除条目本身、不存在的条目、不能播放的条目以及用户无权访问的条目；某个提供者失败时保留其他提供者的结果。
 
 ### 8.8 图片生成器
-`ImageGeneratorService.Generate` 为没有某类图片的条目生成该类图片，以字节返回，作为条目的图片存入元数据目录。
+`ImageGeneratorService.GenerateImages`（条目 ID、类型与名称，以及它缺少的图片类型）返回其中部分类型的图片，格式为 JPEG、PNG 或 WebP，每张至多 8 MiB。刷新结束时，按顺序向生成器请求所有来源都未提供的图片类型，每种类型只生成一次；生成的图片保存在元数据目录（`<id[:2]>/<id>/generated/<kind>.<ext>`），排在其他所有来源之后。之后的刷新保留它们而不再请求，替换式刷新会重新生成，一旦其他来源提供了该类型，生成的图片即被删除。未请求类型的图片或不是图片的内容会被拒绝。
 
 ### 8.9 媒体源提供者
 `MediaSourceProviderService.GetMediaSources` 返回条目额外的媒体源：一个 HTTP URL 及其探测出的流。播放决策把它们与条目的文件一并考虑；服务端通过重定向直放它们，或由 ffmpeg 读取该 URL 进行转封装或转码。
