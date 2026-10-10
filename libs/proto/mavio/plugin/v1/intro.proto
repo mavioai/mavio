@@ -1,0 +1,28 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "mavio/plugin/v1/metadata.proto";
+
+// IntroProviderService picks items to play before an item, such as its
+// local trailers or a cinema pre-roll. Plugins find the items through the
+// host API.
+service IntroProviderService {
+  rpc GetIntros(GetIntrosRequest) returns (GetIntrosResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message GetIntrosRequest {
+  // The item about to play.
+  string item_id = 1;
+  MediaKind kind = 2;
+  string name = 3;
+  // The user about to play it.
+  string user_id = 4;
+}
+
+message GetIntrosResponse {
+  // IDs of the items to play first, in order.
+  repeated string item_ids = 1;
+}

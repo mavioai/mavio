@@ -1,0 +1,32 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "mavio/plugin/v1/metadata.proto";
+
+// ImageGeneratorService makes images of items that have none, such as
+// posters of collections or playlists made of their items' posters.
+service ImageGeneratorService {
+  rpc GenerateImages(GenerateImagesRequest) returns (GenerateImagesResponse);
+}
+
+message GenerateImagesRequest {
+  string item_id = 1;
+  MediaKind kind = 2;
+  string name = 3;
+  // The kinds of images the item lacks.
+  repeated ImageKind image_kinds = 4;
+}
+
+// GeneratedImage is an image made for an item.
+message GeneratedImage {
+  // One of the requested kinds.
+  ImageKind kind = 1;
+  // JPEG, PNG or WebP, at most 8 MiB.
+  bytes content = 2;
+}
+
+message GenerateImagesResponse {
+  // At most one image of each kind; none when the plugin makes none.
+  repeated GeneratedImage images = 1;
+}

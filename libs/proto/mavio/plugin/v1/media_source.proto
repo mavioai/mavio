@@ -1,0 +1,36 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "mavio/plugin/v1/metadata.proto";
+
+// MediaSourceProviderService gives items further media sources the server
+// reads over HTTP, such as other versions kept on a remote service. The
+// server probes them and plays them as it plays the items' files.
+service MediaSourceProviderService {
+  rpc GetMediaSources(GetMediaSourcesRequest) returns (GetMediaSourcesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message GetMediaSourcesRequest {
+  string item_id = 1;
+  MediaKind kind = 2;
+  string name = 3;
+  map<string, string> external_ids = 4;
+}
+
+// RemoteMediaSource is media the server reads over HTTP.
+message RemoteMediaSource {
+  // Stable among the item's sources from the plugin.
+  string id = 1;
+  // Distinguishes it from the item's other versions, e.g. "4K HDR".
+  string name = 2;
+  // Absolute http(s) URL the server and clients read the media from,
+  // supporting range requests.
+  string url = 3;
+}
+
+message GetMediaSourcesResponse {
+  repeated RemoteMediaSource sources = 1;
+}

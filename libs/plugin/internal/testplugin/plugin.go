@@ -32,6 +32,17 @@
 // As a lyrics provider it finds synced lyrics "<name>" of every track,
 // whose single line is the track's name.
 //
+// As an intro provider it plays first the items whose IDs the file
+// "intros" of its data folder lists, one per line.
+//
+// As an image generator it makes a 2 × 2 PNG primary image.
+//
+// As a media source provider it gives every item the source "Remote"
+// whose URL the file "source" of its data folder holds, if any.
+//
+// For password resets it appends "<user name> <PIN>" to the file "resets"
+// of its data folder.
+//
 // As a device controller it takes commands to its device "tv" and rejects
 // others, naming the device and the user.
 //
@@ -40,9 +51,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"image"
+	"image/png"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -77,6 +93,10 @@ func init() {
 	guest.Handle(pluginv1connect.NewMetadataProcessorServiceHandler(processor{}))
 	guest.Handle(pluginv1connect.NewLyricsProviderServiceHandler(lyrics{}))
 	guest.Handle(pluginv1connect.NewResolverServiceHandler(resolver{}))
+	guest.Handle(pluginv1connect.NewIntroProviderServiceHandler(intros{}))
+	guest.Handle(pluginv1connect.NewImageGeneratorServiceHandler(generator{}))
+	guest.Handle(pluginv1connect.NewMediaSourceProviderServiceHandler(sources{}))
+	guest.Handle(pluginv1connect.NewPasswordResetServiceHandler(resets{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -178,6 +198,68 @@ func (resolver) Resolve(_ context.Context, req *pluginv1.ResolveRequest) (*plugi
 		}
 	}
 	return pluginv1.ResolveResponse_builder{Claimed: proto.Bool(true), Items: items}.Build(), nil
+}
+
+// dataFile returns the lines of a file of the data folder; none when it
+// does not exist.
+func dataFile(name string) ([]string, error) {
+	data, err := os.ReadFile(filepath.Join(guest.DataDir(), name))
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
+	return strings.Fields(string(data)), err
+}
+
+type intros struct{}
+
+func (intros) GetIntros(context.Context, *pluginv1.GetIntrosRequest) (*pluginv1.GetIntrosResponse, error) {
+	ids, err := dataFile("intros")
+	if err != nil {
+		return nil, err
+	}
+	return pluginv1.GetIntrosResponse_builder{ItemIds: ids}.Build(), nil
+}
+
+type generator struct{}
+
+func (generator) GenerateImages(_ context.Context, req *pluginv1.GenerateImagesRequest) (*pluginv1.GenerateImagesResponse, error) {
+	if !slices.Contains(req.GetImageKinds(), pluginv1.ImageKind_IMAGE_KIND_PRIMARY) {
+		return &pluginv1.GenerateImagesResponse{}, nil
+	}
+	img := image.NewGray(image.Rect(0, 0, 2, 2))
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		return nil, err
+	}
+	return pluginv1.GenerateImagesResponse_builder{Images: []*pluginv1.GeneratedImage{pluginv1.GeneratedImage_builder{
+		Kind: pluginv1.ImageKind_IMAGE_KIND_PRIMARY.Enum(), Content: buf.Bytes(),
+	}.Build()}}.Build(), nil
+}
+
+type sources struct{}
+
+func (sources) GetMediaSources(context.Context, *pluginv1.GetMediaSourcesRequest) (*pluginv1.GetMediaSourcesResponse, error) {
+	urls, err := dataFile("source")
+	if err != nil || len(urls) == 0 {
+		return &pluginv1.GetMediaSourcesResponse{}, err
+	}
+	return pluginv1.GetMediaSourcesResponse_builder{Sources: []*pluginv1.RemoteMediaSource{pluginv1.RemoteMediaSource_builder{
+		Id: proto.String("remote"), Name: proto.String("Remote"), Url: proto.String(urls[0]),
+	}.Build()}}.Build(), nil
+}
+
+type resets struct{}
+
+func (resets) StartReset(_ context.Context, req *pluginv1.StartResetRequest) (*pluginv1.StartResetResponse, error) {
+	f, err := os.OpenFile(filepath.Join(guest.DataDir(), "resets"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	if _, err := fmt.Fprintln(f, req.GetUserName(), req.GetPin()); err != nil {
+		return nil, err
+	}
+	return &pluginv1.StartResetResponse{}, f.Close()
 }
 
 type devices struct{}

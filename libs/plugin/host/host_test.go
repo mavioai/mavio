@@ -89,7 +89,8 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 	}
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
 		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER","CAPABILITY_IMAGE_PROVIDER",
-			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR","CAPABILITY_LYRICS_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
+			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR","CAPABILITY_LYRICS_PROVIDER",
+			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
 		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, resolver, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
@@ -374,6 +375,47 @@ func TestResolver(t *testing.T) {
 	if open(t, "process").Resolver() != nil {
 		t.Error("a process plugin resolves folders")
 	}
+}
+
+func TestDataFileProviders(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		data := t.TempDir()
+		p := openWith(t, rt, func(o *host.Options) { o.DataDir = data })
+		ctx := t.Context()
+		dir := host.DataDir(data, "org.mavio.testplugin")
+
+		sources, err := p.MediaSources().GetMediaSources(ctx, pluginv1.GetMediaSourcesRequest_builder{ItemId: proto.String("a")}.Build())
+		if err != nil || len(sources.GetSources()) != 0 {
+			t.Errorf("GetMediaSources() without a source = %v, %v", sources, err)
+		}
+		for name, content := range map[string]string{"intros": "a\nb\n", "source": "http://media.test/x.mkv\n"} {
+			if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o600); err != nil {
+				t.Fatal(err)
+			}
+		}
+		intros, err := p.Intros().GetIntros(ctx, pluginv1.GetIntrosRequest_builder{ItemId: proto.String("x")}.Build())
+		if err != nil || !slices.Equal(intros.GetItemIds(), []string{"a", "b"}) {
+			t.Errorf("GetIntros() = %v, %v, want [a b]", intros, err)
+		}
+		sources, err = p.MediaSources().GetMediaSources(ctx, pluginv1.GetMediaSourcesRequest_builder{ItemId: proto.String("a")}.Build())
+		if err != nil || len(sources.GetSources()) != 1 || sources.GetSources()[0].GetUrl() != "http://media.test/x.mkv" {
+			t.Errorf("GetMediaSources() = %v, %v", sources, err)
+		}
+
+		images, err := p.ImageGenerator().GenerateImages(ctx, pluginv1.GenerateImagesRequest_builder{
+			ItemId: proto.String("x"), ImageKinds: []pluginv1.ImageKind{pluginv1.ImageKind_IMAGE_KIND_BACKDROP, pluginv1.ImageKind_IMAGE_KIND_PRIMARY},
+		}.Build())
+		if err != nil || len(images.GetImages()) != 1 || !strings.HasPrefix(string(images.GetImages()[0].GetContent()), "\x89PNG") {
+			t.Errorf("GenerateImages() = %v, %v", images, err)
+		}
+
+		if _, err := p.PasswordReset().StartReset(ctx, pluginv1.StartResetRequest_builder{UserName: proto.String("ann"), Pin: proto.String("1234")}.Build()); err != nil {
+			t.Fatalf("StartReset() = %v", err)
+		}
+		if got, err := os.ReadFile(filepath.Join(dir, "resets")); err != nil || string(got) != "ann 1234\n" {
+			t.Errorf("resets = %q, %v", got, err)
+		}
+	})
 }
 
 func TestHTTPRoutes(t *testing.T) {

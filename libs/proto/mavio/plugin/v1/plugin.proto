@@ -72,6 +72,14 @@ enum Capability {
   CAPABILITY_LYRICS_PROVIDER = 14;
   // Implements ResolverService; WASM plugins only.
   CAPABILITY_RESOLVER = 15;
+  // Implements IntroProviderService.
+  CAPABILITY_INTRO_PROVIDER = 16;
+  // Implements ImageGeneratorService.
+  CAPABILITY_IMAGE_GENERATOR = 17;
+  // Implements MediaSourceProviderService.
+  CAPABILITY_MEDIA_SOURCE_PROVIDER = 18;
+  // Implements PasswordResetService.
+  CAPABILITY_PASSWORD_RESET = 19;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin

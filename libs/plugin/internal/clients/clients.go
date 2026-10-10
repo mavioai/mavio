@@ -29,6 +29,10 @@ type Set struct {
 	processor pluginv1connect.MetadataProcessorServiceClient
 	lyrics    pluginv1connect.LyricsProviderServiceClient
 	resolver  pluginv1connect.ResolverServiceClient
+	intros    pluginv1connect.IntroProviderServiceClient
+	generator pluginv1connect.ImageGeneratorServiceClient
+	sources   pluginv1connect.MediaSourceProviderServiceClient
+	reset     pluginv1connect.PasswordResetServiceClient
 }
 
 // New builds the clients for m over c.
@@ -75,6 +79,18 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_RESOLVER) {
 		s.resolver = pluginv1connect.NewResolverServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_INTRO_PROVIDER) {
+		s.intros = pluginv1connect.NewIntroProviderServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_IMAGE_GENERATOR) {
+		s.generator = pluginv1connect.NewImageGeneratorServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_MEDIA_SOURCE_PROVIDER) {
+		s.sources = pluginv1connect.NewMediaSourceProviderServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_PASSWORD_RESET) {
+		s.reset = pluginv1connect.NewPasswordResetServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -126,3 +142,15 @@ func (s Set) Lyrics() pluginv1connect.LyricsProviderServiceClient { return s.lyr
 
 // Resolver returns the ResolverService client, or nil.
 func (s Set) Resolver() pluginv1connect.ResolverServiceClient { return s.resolver }
+
+// Intros returns the IntroProviderService client, or nil.
+func (s Set) Intros() pluginv1connect.IntroProviderServiceClient { return s.intros }
+
+// ImageGenerator returns the ImageGeneratorService client, or nil.
+func (s Set) ImageGenerator() pluginv1connect.ImageGeneratorServiceClient { return s.generator }
+
+// MediaSources returns the MediaSourceProviderService client, or nil.
+func (s Set) MediaSources() pluginv1connect.MediaSourceProviderServiceClient { return s.sources }
+
+// PasswordReset returns the PasswordResetService client, or nil.
+func (s Set) PasswordReset() pluginv1connect.PasswordResetServiceClient { return s.reset }

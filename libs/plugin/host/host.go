@@ -37,6 +37,10 @@ type Plugin interface {
 	Processor() pluginv1connect.MetadataProcessorServiceClient
 	Lyrics() pluginv1connect.LyricsProviderServiceClient
 	Resolver() pluginv1connect.ResolverServiceClient
+	Intros() pluginv1connect.IntroProviderServiceClient
+	ImageGenerator() pluginv1connect.ImageGeneratorServiceClient
+	MediaSources() pluginv1connect.MediaSourceProviderServiceClient
+	PasswordReset() pluginv1connect.PasswordResetServiceClient
 	// HTTP returns the handler of the plugin's HTTP routes, or nil without
 	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
 	HTTP() http.Handler
