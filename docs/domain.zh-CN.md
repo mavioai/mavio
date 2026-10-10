@@ -228,14 +228,14 @@ erDiagram
 ### 9.1 条目查询
 `ItemQuery` 中零值字段表示"不过滤"：
 
-* 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代），或 `MemberOf`（链接进合集或播放列表的条目，每个一次）、`Kinds`、`IncludeExtras`、`IncludeMissing`。
+* 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`MemberOf`（链接进合集或播放列表的条目，每个一次）或 `TopLevel`（没有父级的条目）、`Kinds`、`IncludeExtras`、`IncludeMissing`。
 * 内容：`Search`（见 §9.2）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`，与 `InheritedRating` 比较，nil 表示不限制（未分级的条目默认包含，除非设置 `SkipUnrated`）。
 * 名称按排序名以 Jellyfin 的方式排序：不区分大小写和重音，忽略开头、中间和结尾的冠词（"the"、"a"、"an"），去掉标点 `,&-{}'` 并把 `.+%` 视为空格，数字按数值排序（"Rocky 2" 在 "Rocky 10" 之前），非拉丁文字转写为拉丁字母（中文按拼音排序）。按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
 * 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`，以及 `last_played` / `play_count` 排序。设置了 `UserID` 时，其他用户的播放列表不在结果中。
 * `list_order` 按在 `MemberOf` 所指合集或播放列表中的位置排序，出现两次的条目按其第一个条目项排序。
 * 排序：`SortSpec` 列表；结果总是以 ID 作为最后的排序键，保证分页稳定。
 * 分页：`Limit`（为零表示上限 `MaxPageSize` = 1000）与 `Offset`；`Page.Total` 为所有页的总数。
-* `Validate` 拒绝不一致的查询：超出范围的 limit、负的 offset、没有父级的 `Recursive`、空的年份区间、未知的种类或排序字段，以及没有用户的用户过滤或排序。
+* `Validate` 拒绝不一致的查询：超出范围的 limit、负的 offset、没有父级的 `Recursive`、在父级或合集内的 `TopLevel`、空的年份区间、未知的种类或排序字段，以及没有用户的用户过滤或排序。
 
 ### 9.2 搜索
 条目搜索（`ItemQuery.Search`）、人员搜索（`PersonRepository.Search`，按姓名）和值列表（`ItemRepository.Values` 与 `ValueQuery`）遵循 Jellyfin 内置搜索提供者的规则：

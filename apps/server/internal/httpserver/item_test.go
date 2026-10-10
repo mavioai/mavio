@@ -145,6 +145,7 @@ func TestItemService(t *testing.T) {
 		{"year", libraryv1.ListItemsRequest_builder{YearFrom: new(int32(2000)), Kinds: movie}, []string{"Up"}},
 		{"person", libraryv1.ListItemsRequest_builder{PersonId: new(c.ridley.ID.String())}, []string{"Alien"}},
 		{"descendants", libraryv1.ListItemsRequest_builder{ParentId: new(c.series.ID.String()), Recursive: new(true), Sort: byName}, []string{"Finale", "Pilot", "Season 1"}},
+		{"top level", libraryv1.ListItemsRequest_builder{LibraryIds: []string{c.shows.ID.String()}, TopLevel: new(true)}, []string{"Show"}},
 		{"page", libraryv1.ListItemsRequest_builder{Kinds: movie, Sort: byName, Limit: new(int32(1)), Offset: new(int32(1))}, []string{"Up"}},
 	}
 	for _, tt := range tests {
@@ -157,6 +158,8 @@ func TestItemService(t *testing.T) {
 	}
 	_, err = asAdmin.ListItems(ctx, libraryv1.ListItemsRequest_builder{Recursive: new(true)}.Build())
 	wantCode(t, "recursive without parent", err, connect.CodeInvalidArgument)
+	_, err = asAdmin.ListItems(ctx, libraryv1.ListItemsRequest_builder{ParentId: new(c.series.ID.String()), TopLevel: new(true)}.Build())
+	wantCode(t, "top level within a parent", err, connect.CodeInvalidArgument)
 
 	// Per-user filters.
 	data := userv1connect.NewUserDataServiceClient(http.DefaultClient, url, withToken(token))

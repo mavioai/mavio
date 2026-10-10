@@ -4678,6 +4678,7 @@ type ListItemsRequest struct {
 	xxx_hidden_Sort          *[]*SortSpec           `protobuf:"bytes,16,rep,name=sort"`
 	xxx_hidden_Limit         int32                  `protobuf:"varint,17,opt,name=limit"`
 	xxx_hidden_Offset        int32                  `protobuf:"varint,18,opt,name=offset"`
+	xxx_hidden_TopLevel      bool                   `protobuf:"varint,19,opt,name=top_level,json=topLevel"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -4846,18 +4847,25 @@ func (x *ListItemsRequest) GetOffset() int32 {
 	return 0
 }
 
+func (x *ListItemsRequest) GetTopLevel() bool {
+	if x != nil {
+		return x.xxx_hidden_TopLevel
+	}
+	return false
+}
+
 func (x *ListItemsRequest) SetLibraryIds(v []string) {
 	x.xxx_hidden_LibraryIds = v
 }
 
 func (x *ListItemsRequest) SetParentId(v string) {
 	x.xxx_hidden_ParentId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 19)
 }
 
 func (x *ListItemsRequest) SetRecursive(v bool) {
 	x.xxx_hidden_Recursive = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 19)
 }
 
 func (x *ListItemsRequest) SetKinds(v []ItemKind) {
@@ -4866,12 +4874,12 @@ func (x *ListItemsRequest) SetKinds(v []ItemKind) {
 
 func (x *ListItemsRequest) SetIncludeExtras(v bool) {
 	x.xxx_hidden_IncludeExtras = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 19)
 }
 
 func (x *ListItemsRequest) SetSearch(v string) {
 	x.xxx_hidden_Search = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 19)
 }
 
 func (x *ListItemsRequest) SetGenres(v []string) {
@@ -4888,32 +4896,32 @@ func (x *ListItemsRequest) SetStudios(v []string) {
 
 func (x *ListItemsRequest) SetPersonId(v string) {
 	x.xxx_hidden_PersonId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 19)
 }
 
 func (x *ListItemsRequest) SetYearFrom(v int32) {
 	x.xxx_hidden_YearFrom = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 19)
 }
 
 func (x *ListItemsRequest) SetYearTo(v int32) {
 	x.xxx_hidden_YearTo = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 19)
 }
 
 func (x *ListItemsRequest) SetPlayed(v bool) {
 	x.xxx_hidden_Played = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 19)
 }
 
 func (x *ListItemsRequest) SetFavorite(v bool) {
 	x.xxx_hidden_Favorite = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 19)
 }
 
 func (x *ListItemsRequest) SetResumable(v bool) {
 	x.xxx_hidden_Resumable = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 19)
 }
 
 func (x *ListItemsRequest) SetSort(v []*SortSpec) {
@@ -4922,12 +4930,17 @@ func (x *ListItemsRequest) SetSort(v []*SortSpec) {
 
 func (x *ListItemsRequest) SetLimit(v int32) {
 	x.xxx_hidden_Limit = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 19)
 }
 
 func (x *ListItemsRequest) SetOffset(v int32) {
 	x.xxx_hidden_Offset = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 19)
+}
+
+func (x *ListItemsRequest) SetTopLevel(v bool) {
+	x.xxx_hidden_TopLevel = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 19)
 }
 
 func (x *ListItemsRequest) HasParentId() bool {
@@ -5014,6 +5027,13 @@ func (x *ListItemsRequest) HasOffset() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 17)
 }
 
+func (x *ListItemsRequest) HasTopLevel() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 18)
+}
+
 func (x *ListItemsRequest) ClearParentId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_ParentId = nil
@@ -5074,6 +5094,11 @@ func (x *ListItemsRequest) ClearOffset() {
 	x.xxx_hidden_Offset = 0
 }
 
+func (x *ListItemsRequest) ClearTopLevel() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 18)
+	x.xxx_hidden_TopLevel = false
+}
+
 type ListItemsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -5097,6 +5122,9 @@ type ListItemsRequest_builder struct {
 	// 1–1000; unset means 1000.
 	Limit  *int32
 	Offset *int32
+	// Only items at the top of their libraries' hierarchies, without a
+	// parent; not with parent_id.
+	TopLevel *bool
 }
 
 func (b0 ListItemsRequest_builder) Build() *ListItemsRequest {
@@ -5105,57 +5133,61 @@ func (b0 ListItemsRequest_builder) Build() *ListItemsRequest {
 	_, _ = b, x
 	x.xxx_hidden_LibraryIds = b.LibraryIds
 	if b.ParentId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 19)
 		x.xxx_hidden_ParentId = b.ParentId
 	}
 	if b.Recursive != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 19)
 		x.xxx_hidden_Recursive = *b.Recursive
 	}
 	x.xxx_hidden_Kinds = b.Kinds
 	if b.IncludeExtras != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 19)
 		x.xxx_hidden_IncludeExtras = *b.IncludeExtras
 	}
 	if b.Search != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 19)
 		x.xxx_hidden_Search = b.Search
 	}
 	x.xxx_hidden_Genres = b.Genres
 	x.xxx_hidden_Tags = b.Tags
 	x.xxx_hidden_Studios = b.Studios
 	if b.PersonId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 19)
 		x.xxx_hidden_PersonId = b.PersonId
 	}
 	if b.YearFrom != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 19)
 		x.xxx_hidden_YearFrom = *b.YearFrom
 	}
 	if b.YearTo != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 19)
 		x.xxx_hidden_YearTo = *b.YearTo
 	}
 	if b.Played != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 19)
 		x.xxx_hidden_Played = *b.Played
 	}
 	if b.Favorite != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 19)
 		x.xxx_hidden_Favorite = *b.Favorite
 	}
 	if b.Resumable != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 19)
 		x.xxx_hidden_Resumable = *b.Resumable
 	}
 	x.xxx_hidden_Sort = &b.Sort
 	if b.Limit != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 19)
 		x.xxx_hidden_Limit = *b.Limit
 	}
 	if b.Offset != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 19)
 		x.xxx_hidden_Offset = *b.Offset
+	}
+	if b.TopLevel != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 19)
+		x.xxx_hidden_TopLevel = *b.TopLevel
 	}
 	return m0
 }
@@ -6783,7 +6815,7 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\xc8\x01\x01\x82\x01\x04\x10\x01 \x00R\x05field\x12\x1e\n" +
 	"\n" +
 	"descending\x18\x02 \x01(\bR\n" +
-	"descending\"\xfb\x04\n" +
+	"descending\"\x98\x05\n" +
 	"\x10ListItemsRequest\x12.\n" +
 	"\vlibrary_ids\x18\x01 \x03(\tB\r\xbaH\n" +
 	"\x92\x01\a\"\x05r\x03\xb0\x01\x01R\n" +
@@ -6806,7 +6838,8 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x04sort\x18\x10 \x03(\v2\x1a.mavio.library.v1.SortSpecR\x04sort\x12 \n" +
 	"\x05limit\x18\x11 \x01(\x05B\n" +
 	"\xbaH\a\x1a\x05\x18\xe8\a(\x00R\x05limit\x12\x1f\n" +
-	"\x06offset\x18\x12 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\"W\n" +
+	"\x06offset\x18\x12 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\x12\x1b\n" +
+	"\ttop_level\x18\x13 \x01(\bR\btopLevel\"W\n" +
 	"\x11ListItemsResponse\x12,\n" +
 	"\x05items\x18\x01 \x03(\v2\x16.mavio.library.v1.ItemR\x05items\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\"/\n" +

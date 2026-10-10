@@ -246,6 +246,7 @@ func TestItemQuery(t *testing.T) {
 			{"by kind, case-insensitive name order", core.ItemQuery{Kinds: moviesOnly, Sort: byName}, []string{"amélie", "Brazil", "Ｃａｒｏｌ", "千と千尋の神隠し"}},
 			{"descending", core.ItemQuery{Kinds: moviesOnly, Sort: []core.SortSpec{{Field: core.SortName, Desc: true}}}, []string{"千と千尋の神隠し", "Ｃａｒｏｌ", "Brazil", "amélie"}},
 			{"children", core.ItemQuery{ParentID: series.ID, Sort: byName}, []string{"Season 1", "Season 2"}},
+			{"top level", core.ItemQuery{TopLevel: true, Sort: byName}, []string{"amélie", "Brazil", "Ｃａｒｏｌ", "千と千尋の神隠し", "The Wire"}},
 			{"descendants by index", core.ItemQuery{ParentID: series.ID, Recursive: true, Kinds: []core.ItemKind{core.KindEpisode}, Sort: []core.SortSpec{{Field: core.SortIndex}}}, []string{"S01E01", "S01E02", "S02E01", "S02E02"}},
 			{"search ignores accents", core.ItemQuery{Search: "AMELIE"}, []string{"amélie"}},
 			{"search full-width", core.ItemQuery{Search: "carol"}, []string{"Ｃａｒｏｌ"}},

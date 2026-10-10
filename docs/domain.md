@@ -228,14 +228,14 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 ### 9.1 Item Queries
 `ItemQuery` filters with zero values meaning "no filter":
 
-* Scope: `LibraryIDs` (callers apply the user's library policy here), `ParentID` with optional `Recursive` (all descendants), or `MemberOf` (the items linked into a collection or playlist, each once), `Kinds`, `IncludeExtras`, `IncludeMissing`.
+* Scope: `LibraryIDs` (callers apply the user's library policy here), `ParentID` with optional `Recursive` (all descendants), `MemberOf` (the items linked into a collection or playlist, each once), or `TopLevel` (items without a parent), `Kinds`, `IncludeExtras`, `IncludeMissing`.
 * Content: `Search` (see §9.2); `Genres`, `Tags`, `Studios` (match any, compared in clean form, see §9.2); `PersonID`; `YearFrom`–`YearTo`; `MaxRating`, compared with `InheritedRating`, nil meaning unrestricted (items without a rating are included unless `SkipUnrated`).
 * Names sort by sort name the way Jellyfin sorts them: case- and accent-insensitive, leading, inner and trailing articles ("the", "a", "an") ignored, the punctuation `,&-{}'` removed and `.+%` treated as spaces, numbers in numeric order ("Rocky 2" before "Rocky 10"), and non-Latin text transliterated (Chinese sorts by pinyin). Undated items sort last by premiere date, and items never played sort last by last-played time.
 * Per user (require `UserID`): `Played`, `Favorite`, `Resumable`, and the `last_played` / `play_count` sorts. With a `UserID`, other users' playlists are left out.
 * `list_order` sorts by position in the `MemberOf` collection or playlist, an item listed twice by its first entry.
 * Ordering: a list of `SortSpec`; results are always tie-broken by ID, so paging is stable.
 * Paging: `Limit` (0 means the maximum, `MaxPageSize` = 1000) and `Offset`; `Page.Total` is the count across all pages.
-* `Validate` rejects inconsistent queries: out-of-range limits, negative offsets, `Recursive` without a parent, an empty year range, unknown kinds or sort fields, and user filters or sorts without a user.
+* `Validate` rejects inconsistent queries: out-of-range limits, negative offsets, `Recursive` without a parent, `TopLevel` within a parent or collection, an empty year range, unknown kinds or sort fields, and user filters or sorts without a user.
 
 ### 9.2 Search
 Item search (`ItemQuery.Search`), person search (`PersonRepository.Search`, by name) and value lists (`ItemRepository.Values` with `ValueQuery`) follow Jellyfin's built-in search provider:

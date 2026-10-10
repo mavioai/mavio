@@ -446,6 +446,9 @@ message ListItemsRequest {
     lte: 1000
   }];
   int32 offset = 18 [(buf.validate.field).int32.gte = 0];
+  // Only items at the top of their libraries' hierarchies, without a
+  // parent; not with parent_id.
+  bool top_level = 19;
 }
 
 message ListItemsResponse {

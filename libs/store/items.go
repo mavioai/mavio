@@ -448,6 +448,8 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 		ps = append(ps, item.ParentID(q.ParentID))
 	case !q.MemberOf.IsZero():
 		ps = append(ps, item.HasLinkedInWith(itemlink.ContainerID(q.MemberOf)))
+	case q.TopLevel:
+		ps = append(ps, item.ParentIDIsNil())
 	}
 	if len(q.Kinds) > 0 {
 		kinds := make([]string, len(q.Kinds))

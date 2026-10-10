@@ -20,6 +20,9 @@ type ItemQuery struct {
 	// MemberOf restricts results to the items linked into a collection or
 	// playlist, each once.
 	MemberOf ID
+	// TopLevel restricts results to items without a parent: those at the
+	// top of their libraries' hierarchies.
+	TopLevel bool
 	Kinds    []ItemKind
 	// IncludeExtras includes trailers and other extras, which are excluded by
 	// default.
@@ -98,6 +101,8 @@ func (q *ItemQuery) Validate() error {
 		return fmt.Errorf("%w: recursive query without a parent", ErrInvalid)
 	case !q.MemberOf.IsZero() && !q.ParentID.IsZero():
 		return fmt.Errorf("%w: query for both children and members", ErrInvalid)
+	case q.TopLevel && (!q.ParentID.IsZero() || !q.MemberOf.IsZero()):
+		return fmt.Errorf("%w: top-level query within a parent", ErrInvalid)
 	case q.YearFrom != 0 && q.YearTo != 0 && q.YearFrom > q.YearTo:
 		return fmt.Errorf("%w: year range %d–%d is empty", ErrInvalid, q.YearFrom, q.YearTo)
 	case q.UserID.IsZero() && (q.Played != nil || q.Favorite != nil || q.Resumable):

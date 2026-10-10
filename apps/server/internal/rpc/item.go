@@ -341,6 +341,7 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	policy := &p.User.Policy
 	q := core.ItemQuery{
 		Recursive:     req.GetRecursive(),
+		TopLevel:      req.GetTopLevel(),
 		IncludeExtras: req.GetIncludeExtras(),
 		Search:        req.GetSearch(),
 		Genres:        req.GetGenres(),

@@ -2394,6 +2394,11 @@
             "title": "offset",
             "minimum": 0,
             "format": "int32"
+          },
+          "topLevel": {
+            "type": "boolean",
+            "title": "top_level",
+            "description": "Only items at the top of their libraries' hierarchies, without a\n parent; not with parent_id."
           }
         },
         "title": "ListItemsRequest",
