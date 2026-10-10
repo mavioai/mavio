@@ -33,6 +33,27 @@ var Definitions = []indexer.Definition{
 		ID: "secretcinema", Name: "Secret Cinema",
 		Description: "Secret Cinema is a Private ratioless site for rare MOVIES.",
 	}, secretCinema),
+	apiDefinition(indexer.Definition{
+		ID: "orpheus", Name: "Orpheus",
+		Description: "Orpheus (APOLLO) is a Private Torrent Tracker for MUSIC",
+	}, orpheus),
+	apiDefinition(indexer.Definition{
+		ID: "redacted", Name: "Redacted",
+		Description: "REDActed (Aka.PassTheHeadPhones) is one of the most well-known music trackers.",
+	}, redacted),
+}
+
+var orpheus = apiSite{
+	links:          []string{"https://orpheus.network/"},
+	authorization:  func(key string) string { return "token " + key },
+	fuzzyGroupTime: true,
+}
+
+var redacted = apiSite{
+	links:         []string{"https://redacted.sh/"},
+	legacy:        []string{"https://redacted.ch/"},
+	authorization: func(key string) string { return key },
+	freeload:      true,
 }
 
 var alphaRatio = site{
