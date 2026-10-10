@@ -72,6 +72,13 @@ type SiteTester interface {
 	TestSite(ctx context.Context, ix *Indexer) error
 }
 
+// ReleaseCleaner is a site that cleans up its releases further after a
+// search.
+type ReleaseCleaner interface {
+	Site
+	CleanupReleases(releases []*Release, q *Query) []*Release
+}
+
 // DownloadValidator checks a site's downloads.
 type DownloadValidator interface {
 	ValidateDownload(data []byte) error
@@ -204,7 +211,11 @@ func (ix *Indexer) Search(ctx context.Context, q *Query) ([]*Release, error) {
 		}
 	}
 	ix.Statuses.RecordSuccess(ix.ID)
-	return ix.cleanup(releases), nil
+	releases = ix.cleanup(releases)
+	if rc, ok := ix.Site.(ReleaseCleaner); ok {
+		releases = rc.CleanupReleases(releases, q)
+	}
+	return releases, nil
 }
 
 func (ix *Indexer) checkLimit(limit int, count func(string, time.Duration) (int, time.Time), what string) error {

@@ -404,7 +404,10 @@ flowchart TD
 - [x] Newznab 与 Torznab（`internal/sites/newznab`、`internal/sites/torznab`）
   - [ ] 搜索的时间与大小限制（`minage`、`maxage`、`minsize`、`maxsize`），查询尚未携带
   - [ ] 跨重启保存能力；目前每次启动后重新从 caps 读取
-- [ ] Cardigann 引擎及 `indexers.prowlarr.com` 的定义
+- [x] Cardigann 引擎（`internal/sites/cardigann`）：从目录及其 `Custom` 子目录读取定义，模板、过滤器、HTML、XML 与 JSON 选择器，登录、搜索与下载
+  - [ ] 拉取并更新 `indexers.prowlarr.com` 的定义，由插件的装配完成
+  - [ ] 手动解答验证码：目前没有界面展示图片验证码，自动登录遇到时失败
+  - [ ] 像 Prowlarr 的 GetCookies 那样，以 `cookie` 设置的 cookie 取代响应设置的 cookie；目前只是与之一并发送
 - [ ] Prowlarr 以代码实现的站点
 - [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
 - [ ] `ReleaseService`
