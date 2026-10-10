@@ -58,6 +58,12 @@ message Lookup {
   // library.
   string language = 10;
   string country = 11;
+  // For series, seasons and episodes: the order the series' seasons and
+  // episodes are numbered in, Jellyfin's display orders: empty for the
+  // aired order, or "originalAirDate", "absolute", "dvd", "digital",
+  // "storyArc", "production" or "tv", the types of TMDB's episode groups.
+  // Seasons and episodes are looked up by their numbers in that order.
+  string display_order = 12;
 }
 
 message SearchRequest {

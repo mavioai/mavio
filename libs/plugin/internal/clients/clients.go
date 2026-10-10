@@ -33,6 +33,7 @@ type Set struct {
 	generator pluginv1connect.ImageGeneratorServiceClient
 	sources   pluginv1connect.MediaSourceProviderServiceClient
 	reset     pluginv1connect.PasswordResetServiceClient
+	episodes  pluginv1connect.EpisodeListProviderServiceClient
 }
 
 // New builds the clients for m over c.
@@ -91,6 +92,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_PASSWORD_RESET) {
 		s.reset = pluginv1connect.NewPasswordResetServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_EPISODE_LIST_PROVIDER) {
+		s.episodes = pluginv1connect.NewEpisodeListProviderServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -154,3 +158,6 @@ func (s Set) MediaSources() pluginv1connect.MediaSourceProviderServiceClient { r
 
 // PasswordReset returns the PasswordResetService client, or nil.
 func (s Set) PasswordReset() pluginv1connect.PasswordResetServiceClient { return s.reset }
+
+// Episodes returns the EpisodeListProviderService client, or nil.
+func (s Set) Episodes() pluginv1connect.EpisodeListProviderServiceClient { return s.episodes }

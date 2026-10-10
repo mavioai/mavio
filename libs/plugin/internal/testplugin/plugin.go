@@ -97,6 +97,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewImageGeneratorServiceHandler(generator{}))
 	guest.Handle(pluginv1connect.NewMediaSourceProviderServiceHandler(sources{}))
 	guest.Handle(pluginv1connect.NewPasswordResetServiceHandler(resets{}))
+	guest.Handle(pluginv1connect.NewEpisodeListProviderServiceHandler(episodes{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -169,6 +170,27 @@ func (lyrics) SearchLyrics(_ context.Context, req *pluginv1.SearchLyricsRequest)
 
 func (lyrics) DownloadLyrics(_ context.Context, req *pluginv1.DownloadLyricsRequest) (*pluginv1.DownloadLyricsResponse, error) {
 	return pluginv1.DownloadLyricsResponse_builder{Content: proto.String("[00:01.00]" + req.GetId() + "\n"), Synced: proto.Bool(true)}.Build(), nil
+}
+
+type episodes struct{}
+
+// ListEpisodes lists one season of two episodes, named after the display
+// order.
+func (episodes) ListEpisodes(_ context.Context, req *pluginv1.ListEpisodesRequest) (*pluginv1.ListEpisodesResponse, error) {
+	order := req.GetLookup().GetDisplayOrder()
+	resp := pluginv1.ListEpisodesResponse_builder{
+		Found: proto.Bool(true), Provider: proto.String("test"),
+		Seasons: []*pluginv1.ListedSeason{pluginv1.ListedSeason_builder{
+			SeasonNumber: proto.Int32(1), Metadata: pluginv1.Metadata_builder{Name: proto.String("Season 1")}.Build(),
+		}.Build()},
+	}.Build()
+	for i := range int32(2) {
+		resp.SetEpisodes(append(resp.GetEpisodes(), pluginv1.ListedEpisode_builder{
+			SeasonNumber: proto.Int32(1), EpisodeNumber: proto.Int32(i + 1), AbsoluteNumber: proto.Int32(i + 1),
+			Metadata: pluginv1.Metadata_builder{Name: proto.String(fmt.Sprintf("%s %d", order, i+1))}.Build(),
+		}.Build()))
+	}
+	return resp, nil
 }
 
 type resolver struct{}
