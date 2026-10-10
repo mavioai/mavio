@@ -346,7 +346,12 @@ func (s *Stream) Close() error {
 }
 
 func copyFile(from, to string) error {
-	data, err := os.ReadFile(from)
+	f, err := openShared(from)
+	if err != nil {
+		return fmt.Errorf("initialization segment: %w", err)
+	}
+	data, err := io.ReadAll(f)
+	_ = f.Close()
 	if err != nil {
 		return fmt.Errorf("initialization segment: %w", err)
 	}
@@ -357,6 +362,24 @@ func copyFile(from, to string) error {
 	return os.Rename(tmp, to)
 }
 
+// Opening a file Windows holds is retried every sharingRetry, up to
+// sharingTries times.
+const (
+	sharingRetry = 10 * time.Millisecond
+	sharingTries = 50
+)
+
+// openShared opens a file, waiting out a sharing violation.
+func openShared(path string) (*os.File, error) {
+	for try := 1; ; try++ {
+		f, err := os.Open(path)
+		if err == nil || !sharingViolation(err) || try == sharingTries {
+			return f, err
+		}
+		time.Sleep(sharingRetry)
+	}
+}
+
 // openAll opens files to be read one after another.
 func openAll(paths []string) (io.ReadCloser, int64, error) {
 	var (
@@ -365,7 +388,7 @@ func openAll(paths []string) (io.ReadCloser, int64, error) {
 		size    int64
 	)
 	for _, p := range paths {
-		f, err := os.Open(p)
+		f, err := openShared(p)
 		if err != nil {
 			for _, f := range files {
 				_ = f.Close()
