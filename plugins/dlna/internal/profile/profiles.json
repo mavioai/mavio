@@ -1,0 +1,873 @@
+[
+ {
+  "name": "Samsung TV",
+  "match": [
+   {
+    "manufacturer": "samsung",
+    "model_name": "tv|^UE|^UN|^QE|^QN|^KU|^RU|^TU|^AU|^BU|^CU"
+   },
+   {
+    "headers": {
+     "X-AV-Client-Info": "samsung"
+    }
+   },
+   {
+    "headers": {
+     "User-Agent": "SEC_HHP|SamsungWiselink"
+    }
+   }
+  ],
+  "time_seek": true,
+  "caption_info": true,
+  "mime_types": {
+   "mkv": "video/x-mkv",
+   "ts": "video/mpeg",
+   "avi": "video/x-msvideo"
+  },
+  "capabilities": {
+   "maxStreamingBitrate": "80000000",
+   "musicStreamingTranscodingBitrate": "320000",
+   "directPlay": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "mkv",
+     "videoCodec": "h264,hevc,mpeg4,mpeg2video,vc1,vp9",
+     "audioCodec": "aac,ac3,eac3,mp3,dts,pcm_s16le,flac,opus,vorbis"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "mp4,m4v,mov",
+     "videoCodec": "h264,hevc,mpeg4",
+     "audioCodec": "aac,ac3,eac3,mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "ts,m2ts",
+     "videoCodec": "h264,hevc,mpeg2video,vc1",
+     "audioCodec": "aac,ac3,eac3,mp3,mp2,dts"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "avi",
+     "videoCodec": "mpeg4,h264",
+     "audioCodec": "mp3,ac3,aac"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "asf",
+     "videoCodec": "wmv2,wmv3,vc1",
+     "audioCodec": "wmav2,wmapro"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "mp3",
+     "audioCodec": "mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "mp4,m4a",
+     "audioCodec": "aac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "flac",
+     "audioCodec": "flac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "wav",
+     "audioCodec": "pcm_s16le,pcm_s24le"
+    }
+   ],
+   "transcoding": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "ts",
+     "videoCodec": "h264",
+     "audioCodec": "ac3,aac",
+     "maxAudioChannels": 6,
+     "seekInfo": "SEEK_INFO_AUTO"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "mp3",
+     "audioCodec": "mp3",
+     "maxAudioChannels": 2
+    }
+   ],
+   "codecs": [
+    {
+     "kind": "CODEC_KIND_VIDEO",
+     "codec": "h264",
+     "conditions": [
+      {
+       "property": "PROPERTY_WIDTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "1920"
+      },
+      {
+       "property": "PROPERTY_HEIGHT",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "1080"
+      },
+      {
+       "property": "PROPERTY_VIDEO_BIT_DEPTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "8"
+      },
+      {
+       "property": "PROPERTY_VIDEO_LEVEL",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "51",
+       "optional": true
+      }
+     ]
+    },
+    {
+     "kind": "CODEC_KIND_VIDEO",
+     "codec": "hevc",
+     "conditions": [
+      {
+       "property": "PROPERTY_WIDTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "3840"
+      },
+      {
+       "property": "PROPERTY_HEIGHT",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "2160"
+      },
+      {
+       "property": "PROPERTY_VIDEO_BIT_DEPTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "10"
+      },
+      {
+       "property": "PROPERTY_VIDEO_RANGE_TYPE",
+       "op": "OP_EQUALS_ANY",
+       "value": "sdr|hdr10|hlg|dovi_hdr10|dovi_hlg"
+      }
+     ]
+    }
+   ],
+   "subtitles": [
+    {
+     "format": "srt",
+     "method": "SUBTITLE_METHOD_EXTERNAL"
+    },
+    {
+     "format": "pgssub",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "dvdsub",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    }
+   ]
+  }
+ },
+ {
+  "name": "LG TV",
+  "match": [
+   {
+    "manufacturer": "^LG"
+   },
+   {
+    "headers": {
+     "User-Agent": "webOS|LGE|NetCast"
+    }
+   }
+  ],
+  "time_seek": true,
+  "subtitle_res": true,
+  "capabilities": {
+   "maxStreamingBitrate": "80000000",
+   "musicStreamingTranscodingBitrate": "320000",
+   "directPlay": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "mkv",
+     "videoCodec": "h264,hevc,mpeg4,mpeg2video,vc1,vp9,av1",
+     "audioCodec": "aac,ac3,eac3,mp3,pcm_s16le,flac,opus,vorbis"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "mp4,m4v,mov",
+     "videoCodec": "h264,hevc,mpeg4,av1",
+     "audioCodec": "aac,ac3,eac3,mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "ts,m2ts",
+     "videoCodec": "h264,hevc,mpeg2video,vc1",
+     "audioCodec": "aac,ac3,eac3,mp3,mp2"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "avi",
+     "videoCodec": "mpeg4,h264",
+     "audioCodec": "mp3,ac3,aac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "mp3",
+     "audioCodec": "mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "mp4,m4a",
+     "audioCodec": "aac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "flac",
+     "audioCodec": "flac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "wav",
+     "audioCodec": "pcm_s16le,pcm_s24le"
+    }
+   ],
+   "transcoding": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "ts",
+     "videoCodec": "h264",
+     "audioCodec": "ac3,aac",
+     "maxAudioChannels": 6
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "mp3",
+     "audioCodec": "mp3",
+     "maxAudioChannels": 2
+    }
+   ],
+   "codecs": [
+    {
+     "kind": "CODEC_KIND_VIDEO",
+     "codec": "h264",
+     "conditions": [
+      {
+       "property": "PROPERTY_WIDTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "1920"
+      },
+      {
+       "property": "PROPERTY_HEIGHT",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "1080"
+      },
+      {
+       "property": "PROPERTY_VIDEO_BIT_DEPTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "8"
+      }
+     ]
+    },
+    {
+     "kind": "CODEC_KIND_VIDEO",
+     "codec": "hevc",
+     "conditions": [
+      {
+       "property": "PROPERTY_WIDTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "3840"
+      },
+      {
+       "property": "PROPERTY_HEIGHT",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "2160"
+      },
+      {
+       "property": "PROPERTY_VIDEO_BIT_DEPTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "10"
+      },
+      {
+       "property": "PROPERTY_VIDEO_RANGE_TYPE",
+       "op": "OP_EQUALS_ANY",
+       "value": "sdr|hdr10|hlg|dovi_hdr10|dovi_hlg"
+      }
+     ]
+    }
+   ],
+   "subtitles": [
+    {
+     "format": "srt",
+     "method": "SUBTITLE_METHOD_EXTERNAL"
+    },
+    {
+     "format": "pgssub",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "dvdsub",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    }
+   ]
+  }
+ },
+ {
+  "name": "Sony Bravia",
+  "match": [
+   {
+    "model_name": "BRAVIA|^KDL-|^XBR-|^KD-|^XR-"
+   },
+   {
+    "headers": {
+     "X-AV-Client-Info": "BRAVIA"
+    }
+   }
+  ],
+  "time_seek": true,
+  "capabilities": {
+   "maxStreamingBitrate": "60000000",
+   "musicStreamingTranscodingBitrate": "320000",
+   "directPlay": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "mp4,m4v,mov",
+     "videoCodec": "h264,hevc",
+     "audioCodec": "aac,ac3,eac3,mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "ts,m2ts",
+     "videoCodec": "h264,hevc,mpeg2video",
+     "audioCodec": "aac,ac3,eac3,mp3,mp2"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "mkv",
+     "videoCodec": "h264,hevc,vp9",
+     "audioCodec": "aac,ac3,eac3,mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "mp3",
+     "audioCodec": "mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "mp4,m4a",
+     "audioCodec": "aac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "flac",
+     "audioCodec": "flac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "wav",
+     "audioCodec": "pcm_s16le,pcm_s24le"
+    }
+   ],
+   "transcoding": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "ts",
+     "videoCodec": "h264",
+     "audioCodec": "ac3,aac",
+     "maxAudioChannels": 6
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "mp3",
+     "audioCodec": "mp3",
+     "maxAudioChannels": 2
+    }
+   ],
+   "codecs": [
+    {
+     "kind": "CODEC_KIND_VIDEO",
+     "codec": "h264",
+     "conditions": [
+      {
+       "property": "PROPERTY_WIDTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "1920"
+      },
+      {
+       "property": "PROPERTY_HEIGHT",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "1080"
+      },
+      {
+       "property": "PROPERTY_VIDEO_BIT_DEPTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "8"
+      }
+     ]
+    },
+    {
+     "kind": "CODEC_KIND_VIDEO",
+     "codec": "hevc",
+     "conditions": [
+      {
+       "property": "PROPERTY_WIDTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "3840"
+      },
+      {
+       "property": "PROPERTY_HEIGHT",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "2160"
+      },
+      {
+       "property": "PROPERTY_VIDEO_BIT_DEPTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "10"
+      },
+      {
+       "property": "PROPERTY_VIDEO_RANGE_TYPE",
+       "op": "OP_EQUALS_ANY",
+       "value": "sdr|hdr10|hlg|dovi_hdr10|dovi_hlg"
+      }
+     ]
+    }
+   ],
+   "subtitles": [
+    {
+     "format": "srt",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "subrip",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "ass",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "ssa",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "vtt",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "pgssub",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "dvdsub",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    }
+   ]
+  }
+ },
+ {
+  "name": "Panasonic Viera",
+  "match": [
+   {
+    "manufacturer": "panasonic",
+    "model_name": "viera|^TX-|^TH-|^TC-"
+   },
+   {
+    "headers": {
+     "User-Agent": "Panasonic MIL DLNA|Viera"
+    }
+   }
+  ],
+  "time_seek": true,
+  "capabilities": {
+   "maxStreamingBitrate": "40000000",
+   "musicStreamingTranscodingBitrate": "320000",
+   "directPlay": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "mp4,m4v,mov",
+     "videoCodec": "h264,hevc",
+     "audioCodec": "aac,ac3,mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "ts,m2ts",
+     "videoCodec": "h264,mpeg2video",
+     "audioCodec": "aac,ac3,mp3,mp2"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "mkv",
+     "videoCodec": "h264,hevc",
+     "audioCodec": "aac,ac3,mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "mp3",
+     "audioCodec": "mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "mp4,m4a",
+     "audioCodec": "aac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "flac",
+     "audioCodec": "flac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "wav",
+     "audioCodec": "pcm_s16le,pcm_s24le"
+    }
+   ],
+   "transcoding": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "ts",
+     "videoCodec": "h264",
+     "audioCodec": "ac3,aac",
+     "maxAudioChannels": 6
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "mp3",
+     "audioCodec": "mp3",
+     "maxAudioChannels": 2
+    }
+   ],
+   "codecs": [
+    {
+     "kind": "CODEC_KIND_VIDEO",
+     "codec": "h264",
+     "conditions": [
+      {
+       "property": "PROPERTY_WIDTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "1920"
+      },
+      {
+       "property": "PROPERTY_HEIGHT",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "1080"
+      },
+      {
+       "property": "PROPERTY_VIDEO_BIT_DEPTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "8"
+      }
+     ]
+    },
+    {
+     "kind": "CODEC_KIND_VIDEO",
+     "codec": "hevc",
+     "conditions": [
+      {
+       "property": "PROPERTY_WIDTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "3840"
+      },
+      {
+       "property": "PROPERTY_HEIGHT",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "2160"
+      },
+      {
+       "property": "PROPERTY_VIDEO_BIT_DEPTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "10"
+      },
+      {
+       "property": "PROPERTY_VIDEO_RANGE_TYPE",
+       "op": "OP_EQUALS_ANY",
+       "value": "sdr|hdr10|hlg|dovi_hdr10|dovi_hlg"
+      }
+     ]
+    }
+   ],
+   "subtitles": [
+    {
+     "format": "srt",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "subrip",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "ass",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "ssa",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "vtt",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "pgssub",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "dvdsub",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    }
+   ]
+  }
+ },
+ {
+  "name": "Kodi",
+  "match": [
+   {
+    "model_name": "Kodi|XBMC"
+   },
+   {
+    "friendly_name": "Kodi|XBMC"
+   },
+   {
+    "headers": {
+     "User-Agent": "Kodi|XBMC"
+    }
+   }
+  ],
+  "time_seek": true,
+  "subtitle_res": true,
+  "capabilities": {
+   "maxStreamingBitrate": "0",
+   "musicStreamingTranscodingBitrate": "320000",
+   "directPlay": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": ""
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": ""
+    }
+   ],
+   "transcoding": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "mkv",
+     "videoCodec": "h264",
+     "audioCodec": "aac,ac3",
+     "maxAudioChannels": 8
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "flac",
+     "audioCodec": "flac"
+    }
+   ],
+   "subtitles": [
+    {
+     "format": "srt",
+     "method": "SUBTITLE_METHOD_EXTERNAL"
+    },
+    {
+     "format": "ass",
+     "method": "SUBTITLE_METHOD_EXTERNAL"
+    },
+    {
+     "format": "pgssub",
+     "method": "SUBTITLE_METHOD_EMBED"
+    },
+    {
+     "format": "dvdsub",
+     "method": "SUBTITLE_METHOD_EMBED"
+    }
+   ]
+  }
+ },
+ {
+  "name": "VLC",
+  "match": [
+   {
+    "model_name": "VLC"
+   },
+   {
+    "friendly_name": "VLC"
+   },
+   {
+    "headers": {
+     "User-Agent": "VLC|LibVLC"
+    }
+   }
+  ],
+  "time_seek": false,
+  "subtitle_res": true,
+  "capabilities": {
+   "maxStreamingBitrate": "0",
+   "musicStreamingTranscodingBitrate": "320000",
+   "directPlay": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": ""
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": ""
+    }
+   ],
+   "transcoding": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "mkv",
+     "videoCodec": "h264",
+     "audioCodec": "aac,ac3",
+     "maxAudioChannels": 8
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "flac",
+     "audioCodec": "flac"
+    }
+   ],
+   "subtitles": [
+    {
+     "format": "srt",
+     "method": "SUBTITLE_METHOD_EXTERNAL"
+    },
+    {
+     "format": "ass",
+     "method": "SUBTITLE_METHOD_EXTERNAL"
+    },
+    {
+     "format": "pgssub",
+     "method": "SUBTITLE_METHOD_EMBED"
+    },
+    {
+     "format": "dvdsub",
+     "method": "SUBTITLE_METHOD_EMBED"
+    }
+   ]
+  }
+ },
+ {
+  "name": "Generic",
+  "capabilities": {
+   "maxStreamingBitrate": "20000000",
+   "musicStreamingTranscodingBitrate": "320000",
+   "directPlay": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "mp4,m4v",
+     "videoCodec": "h264",
+     "audioCodec": "aac,mp3,ac3"
+    },
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "container": "ts",
+     "videoCodec": "h264,mpeg2video",
+     "audioCodec": "aac,ac3,mp2,mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "mp3",
+     "audioCodec": "mp3"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "mp4,m4a",
+     "audioCodec": "aac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "flac",
+     "audioCodec": "flac"
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "container": "wav",
+     "audioCodec": "pcm_s16le,pcm_s24le"
+    }
+   ],
+   "transcoding": [
+    {
+     "kind": "MEDIA_KIND_VIDEO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "ts",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "maxAudioChannels": 2
+    },
+    {
+     "kind": "MEDIA_KIND_AUDIO",
+     "protocol": "PROTOCOL_HTTP",
+     "container": "mp3",
+     "audioCodec": "mp3",
+     "maxAudioChannels": 2
+    }
+   ],
+   "codecs": [
+    {
+     "kind": "CODEC_KIND_VIDEO",
+     "codec": "h264",
+     "conditions": [
+      {
+       "property": "PROPERTY_WIDTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "1920"
+      },
+      {
+       "property": "PROPERTY_HEIGHT",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "1080"
+      },
+      {
+       "property": "PROPERTY_VIDEO_BIT_DEPTH",
+       "op": "OP_LESS_THAN_EQUAL",
+       "value": "8"
+      },
+      {
+       "property": "PROPERTY_VIDEO_RANGE_TYPE",
+       "op": "OP_EQUALS_ANY",
+       "value": "sdr"
+      }
+     ]
+    }
+   ],
+   "subtitles": [
+    {
+     "format": "srt",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "subrip",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "ass",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "ssa",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "vtt",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "pgssub",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    },
+    {
+     "format": "dvdsub",
+     "method": "SUBTITLE_METHOD_ENCODE"
+    }
+   ]
+  }
+ }
+]

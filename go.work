@@ -13,6 +13,7 @@ use (
 	./libs/store
 	./libs/streaming
 	./libs/subtitle
+	./plugins/dlna
 	./plugins/scraper-fanart
 	./plugins/scraper-musicbrainz
 	./plugins/scraper-openlibrary

@@ -1,0 +1,11 @@
+{
+  "name": "dlna",
+  "targets": {
+    "dist": {
+      "executor": "nx:run-commands",
+      "options": { "command": "sh scripts/dist.sh", "cwd": "{projectRoot}" },
+      "cache": false,
+      "outputs": ["{projectRoot}/dist"]
+    }
+  }
+}

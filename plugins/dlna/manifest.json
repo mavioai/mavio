@@ -1,0 +1,18 @@
+{
+  "id": "org.mavio.dlna",
+  "name": "DLNA",
+  "version": "0.1.0",
+  "description": "A DLNA media server for televisions and other devices on the local network, and Play To, which plays on DLNA renderers.",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_PROCESS",
+  "capabilities": ["CAPABILITY_HTTP_HANDLER", "CAPABILITY_DEVICE_CONTROLLER", "CAPABILITY_EVENT_CONSUMER"],
+  "permissions": {
+    "api": ["mavio.library.v1.LibraryService:read", "mavio.library.v1.ItemService:read", "mavio.playback.v1.PlaybackService"],
+    "actAsUsers": true,
+    "events": ["item.*"]
+  },
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"string\",\"minLength\":1,\"description\":\"The user whose libraries the media server serves\"},\"server_name\":{\"type\":\"string\",\"description\":\"The name devices show; empty uses the server's\"},\"media_server\":{\"type\":\"boolean\",\"default\":true},\"play_to\":{\"type\":\"boolean\",\"default\":true},\"interfaces\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"description\":\"Network interfaces to use; empty uses every one that takes multicast\"},\"announce_interval_minutes\":{\"type\":\"integer\",\"minimum\":1,\"default\":30},\"ssdp_port\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":65535,\"description\":\"Replaces SSDP's port 1900, for tests\"},\"renderers\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"format\":\"uri\"},\"description\":\"Description URLs of renderers to control besides those found\"},\"profiles\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"required\":[\"name\"]},\"description\":\"Device profiles replacing or added to the built-in ones\"}},\"required\":[\"user\"],\"additionalProperties\":false}",
+  "apiVersion": "1.0"
+}
