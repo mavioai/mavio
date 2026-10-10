@@ -409,6 +409,8 @@ flowchart TD
   - [ ] Captchas solved by hand: an image captcha fails automatic logins, as no UI shows it yet
   - [ ] Cookies of the `cookie` setting replacing those responses set, as Prowlarr's GetCookies does; they are only sent besides them
 - [ ] The sites Prowlarr implements in code
+  - [x] Gazelle (`internal/sites/gazelle`): AlphaRatio, BrokenStones, DesiGaane, DICMusic, GreatPosterWall, Secret Cinema
+  - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
 - [ ] `ReleaseService`
 - [ ] End-to-end test

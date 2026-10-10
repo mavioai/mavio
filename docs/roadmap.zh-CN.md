@@ -409,6 +409,8 @@ flowchart TD
   - [ ] 手动解答验证码：目前没有界面展示图片验证码，自动登录遇到时失败
   - [ ] 像 Prowlarr 的 GetCookies 那样，以 `cookie` 设置的 cookie 取代响应设置的 cookie；目前只是与之一并发送
 - [ ] Prowlarr 以代码实现的站点
+  - [x] Gazelle（`internal/sites/gazelle`）：AlphaRatio、BrokenStones、DesiGaane、DICMusic、GreatPosterWall、Secret Cinema
+  - [ ] torrent 索引器的做种设置（最少做种数、分享率与做种时间），抓取时交给下载客户端
 - [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
 - [ ] `ReleaseService`
 - [ ] 端到端测试
