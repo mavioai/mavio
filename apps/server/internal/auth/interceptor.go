@@ -25,8 +25,8 @@ type Principal struct {
 	// APIKey is the key of a request made with one; Session is zero then.
 	APIKey core.ID
 	// Plugin is the ID of the plugin making a host API request; Session is
-	// zero then. A plugin acting as itself has an administrator User with a
-	// zero ID.
+	// zero then, unless it acts as one of its devices. A plugin acting as
+	// itself has an administrator User with a zero ID.
 	Plugin string
 }
 

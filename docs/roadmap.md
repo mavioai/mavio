@@ -314,7 +314,7 @@ flowchart TD
 - [x] Data folder; tasks
 - [x] Events: the event types of [Plugins §4](plugins.md#4-events), event consumers, notifiers
 - [x] HTTP routes
-- [ ] Remote devices; acting as devices
+- [x] Remote devices; acting as devices
 - [ ] Image, lyrics, local metadata, saver and processor providers; external IDs
 - [ ] Resolvers, intro providers, image generators, media source providers, password reset
 - [ ] Provider order per library

@@ -348,6 +348,7 @@ func (m *Manager) swap(ctx context.Context, id, staged string) (Info, error) {
 		}
 	}
 	m.mu.Unlock()
+	m.dropDevices(ctx, id)
 
 	target := filepath.Join(m.cfg.Dir, folder)
 	backup := ""
@@ -424,6 +425,7 @@ func (m *Manager) Uninstall(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
+	m.dropDevices(ctx, id)
 	var errs []error
 	if e.plugin != nil {
 		errs = append(errs, e.plugin.Close(ctx))

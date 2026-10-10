@@ -77,6 +77,10 @@ type Config struct {
 	OnChange func(userID, sessionID core.ID)
 	// Record logs playbacks starting and stopping; nil logs none.
 	Record func(ctx context.Context, a core.Activity)
+	// Device reports whether a session is a plugin's device, which has no
+	// sign-in: its playbacks end when the plugin no longer lists it. Nil
+	// means no session is.
+	Device func(session core.ID) bool
 	// QuietGate makes background library I/O yield: starting a playback
 	// and every media request, a seek included, extend its quiet window,
 	// as khuaplayer's foreground storage gate does, so that streaming keeps
@@ -774,7 +778,8 @@ func (m *Manager) check(ctx context.Context) {
 			}
 			sessions[p.UserID] = list
 		}
-		signedIn := slices.ContainsFunc(list, func(s core.AuthSession) bool { return s.ID == p.SessionID })
+		signedIn := slices.ContainsFunc(list, func(s core.AuthSession) bool { return s.ID == p.SessionID }) ||
+			m.cfg.Device != nil && m.cfg.Device(p.SessionID)
 		p.mu.Lock()
 		idle, pos := now.Sub(p.lastActive) > m.cfg.IdleTimeout, p.position
 		p.mu.Unlock()

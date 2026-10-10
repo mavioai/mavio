@@ -38,6 +38,9 @@ type Config struct {
 	LibraryDelay time.Duration
 	// Events publishes plugin events; nil publishes none.
 	Events Publisher
+	// Shared reports whether a session is one every signed-in user sees,
+	// such as a plugin's device; nil means none is.
+	Shared func(session core.ID) bool
 	Logger *slog.Logger
 }
 
@@ -210,10 +213,24 @@ func (h *Hub) ToSession(session core.ID, e *sessionv1.Event) bool {
 }
 
 // SessionsChanged tells a user's devices and the administrators that a
-// session came online, went offline or changed its playback.
+// session came online, went offline or changed its playback; a shared
+// session's changes reach every device.
 func (h *Hub) SessionsChanged(userID, session core.ID) {
+	shared := h.cfg.Shared != nil && h.cfg.Shared(session)
+	h.sessionsChanged(session, func(s *Subscriber) bool { return shared || s.User.ID == userID || s.User.Admin })
+}
+
+// SharedSessionsChanged tells every device that shared sessions appeared,
+// changed or are gone.
+func (h *Hub) SharedSessionsChanged(sessions []core.ID) {
+	for _, session := range sessions {
+		h.sessionsChanged(session, func(*Subscriber) bool { return true })
+	}
+}
+
+func (h *Hub) sessionsChanged(session core.ID, want func(*Subscriber) bool) {
 	e := sessionv1.Event_builder{SessionsChanged: sessionv1.SessionsChanged_builder{SessionId: new(session.String())}.Build()}.Build()
-	for _, s := range h.subscribers(func(s *Subscriber) bool { return s.User.ID == userID || s.User.Admin }) {
+	for _, s := range h.subscribers(want) {
 		h.send(s, e)
 	}
 }

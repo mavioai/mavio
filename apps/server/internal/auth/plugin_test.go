@@ -53,27 +53,36 @@ func TestPluginRequests(t *testing.T) {
 		procedure string
 		readOnly  bool
 		user      string
+		device    string
 		want      connect.Code // 0 for success
 		wantUser  string
 	}{
-		{"read in scope", false, "/mavio.library.v1.ItemService/GetItem", true, "", 0, "plugin org.example.p"},
-		{"write beyond read scope", false, "/mavio.library.v1.ItemService/UpdateItem", false, "", connect.CodePermissionDenied, ""},
-		{"service out of scope", false, "/mavio.library.v1.LibraryService/ListLibraries", true, "", connect.CodePermissionDenied, ""},
-		{"public still needs scope", false, "/test.v1.Public/Get", true, "", connect.CodePermissionDenied, ""},
-		{"admin method as itself", false, "/mavio.user.v1.UserService/ListUsers", true, "", 0, "plugin org.example.p"},
-		{"user state as itself", false, "/mavio.user.v1.UserDataService/GetUserData", true, "", connect.CodeFailedPrecondition, ""},
-		{"current user as itself", false, "/mavio.user.v1.UserService/GetCurrentUser", true, "", connect.CodeFailedPrecondition, ""},
-		{"user without act-as", false, "/mavio.user.v1.UserDataService/GetUserData", true, "alice", connect.CodePermissionDenied, ""},
-		{"act as user", true, "/mavio.user.v1.UserDataService/GetUserData", true, "ALICE", 0, "alice"},
-		{"act as disabled user", true, "/mavio.user.v1.UserDataService/GetUserData", true, "bob", connect.CodeUnauthenticated, ""},
-		{"act as unknown user", true, "/mavio.user.v1.UserDataService/GetUserData", true, "carol", connect.CodeUnauthenticated, ""},
-		{"session procedure", true, "/mavio.session.v1.EventService/Subscribe", false, "alice", connect.CodeFailedPrecondition, ""},
+		{"read in scope", false, "/mavio.library.v1.ItemService/GetItem", true, "", "", 0, "plugin org.example.p"},
+		{"write beyond read scope", false, "/mavio.library.v1.ItemService/UpdateItem", false, "", "", connect.CodePermissionDenied, ""},
+		{"service out of scope", false, "/mavio.library.v1.LibraryService/ListLibraries", true, "", "", connect.CodePermissionDenied, ""},
+		{"public still needs scope", false, "/test.v1.Public/Get", true, "", "", connect.CodePermissionDenied, ""},
+		{"admin method as itself", false, "/mavio.user.v1.UserService/ListUsers", true, "", "", 0, "plugin org.example.p"},
+		{"user state as itself", false, "/mavio.user.v1.UserDataService/GetUserData", true, "", "", connect.CodeFailedPrecondition, ""},
+		{"current user as itself", false, "/mavio.user.v1.UserService/GetCurrentUser", true, "", "", connect.CodeFailedPrecondition, ""},
+		{"user without act-as", false, "/mavio.user.v1.UserDataService/GetUserData", true, "alice", "", connect.CodePermissionDenied, ""},
+		{"act as user", true, "/mavio.user.v1.UserDataService/GetUserData", true, "ALICE", "", 0, "alice"},
+		{"act as disabled user", true, "/mavio.user.v1.UserDataService/GetUserData", true, "bob", "", connect.CodeUnauthenticated, ""},
+		{"act as unknown user", true, "/mavio.user.v1.UserDataService/GetUserData", true, "carol", "", connect.CodeUnauthenticated, ""},
+		{"session procedure", true, "/mavio.session.v1.EventService/Subscribe", false, "alice", "", connect.CodeFailedPrecondition, ""},
+		{"act as device", true, "/mavio.user.v1.UserDataService/GetUserData", true, "alice", "tv", 0, "alice"},
+		{"act as unknown device", true, "/mavio.user.v1.UserDataService/GetUserData", true, "alice", "radio", connect.CodeFailedPrecondition, ""},
+		{"device without user", true, "/mavio.library.v1.ItemService/GetItem", true, "", "tv", connect.CodeFailedPrecondition, ""},
 	}
+	tv := core.AuthSession{ID: core.NewID(), DeviceID: "tv"}
+	device := func(id string) (core.AuthSession, bool) { return tv, id == "tv" }
 	for _, tt := range tests {
-		g := Plugin{ID: "org.example.p", Allows: allows, ActAsUsers: tt.actAs}
+		g := Plugin{ID: "org.example.p", Allows: allows, ActAsUsers: tt.actAs, Device: device}
 		h := http.Header{}
 		if tt.user != "" {
 			h.Set(UserHeader, tt.user)
+		}
+		if tt.device != "" {
+			h.Set(DeviceHeader, tt.device)
 		}
 		spec := connect.Spec{Procedure: tt.procedure}
 		if tt.readOnly {
@@ -88,7 +97,7 @@ func TestPluginRequests(t *testing.T) {
 			continue
 		}
 		p, _ := FromContext(got)
-		if p.User.Name != tt.wantUser || p.Plugin != g.ID || !p.Session.ID.IsZero() {
+		if wantSession := tt.device != ""; p.User.Name != tt.wantUser || p.Plugin != g.ID || (p.Session.ID == tv.ID) != wantSession {
 			t.Errorf("%s: principal = %+v, want user %q of plugin %s", tt.name, p, tt.wantUser, g.ID)
 		}
 		if tt.user == "" && (!p.User.Admin || !p.User.ID.IsZero()) {

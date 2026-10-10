@@ -13,7 +13,9 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
+	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/core"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
 )
@@ -74,6 +76,18 @@ type SessionService struct {
 	store     core.Store
 	hub       *events.Hub
 	playbacks *playback.Manager
+	// Devices lists plugins' remote devices and sends them commands; nil
+	// means none.
+	Devices DeviceController
+}
+
+// DeviceController keeps the remote devices of plugins; plugins.Manager is
+// one.
+type DeviceController interface {
+	Devices() []plugins.Device
+	IsDevice(session core.ID) bool
+	SendCommand(ctx context.Context, session core.ID, from core.User, c *pluginv1.Command) error
+	SetDevices(ctx context.Context, plugin string, list []*pluginv1.Device) error
 }
 
 var _ sessionv1connect.SessionServiceHandler = (*SessionService)(nil)
@@ -112,6 +126,15 @@ func (s *SessionService) ListSessions(ctx context.Context, req *sessionv1.ListSe
 			out = append(out, sess)
 		}
 	}
+	if s.Devices != nil {
+		for _, d := range s.Devices.Devices() {
+			sess, err := s.deviceToProto(ctx, &d, p.User.Admin)
+			if err != nil {
+				return nil, connectError(ctx, err)
+			}
+			out = append(out, sess)
+		}
+	}
 	// Online devices first, then the most recently seen.
 	slices.SortStableFunc(out, func(a, b *sessionv1.Session) int {
 		if a.GetOnline() != b.GetOnline() {
@@ -131,18 +154,36 @@ func (s *SessionService) sessionToProto(ctx context.Context, u *core.User, as *c
 		DeviceId: &as.DeviceID, DeviceName: &as.DeviceName, Client: &as.Client, ClientVersion: &as.ClientVersion,
 		LastSeenTime: timestamp(as.LastSeenAt), Online: new(s.hub.Online(as.ID)),
 	}
-	if pb := s.playbacks.NowPlaying(as.ID); pb != nil {
-		items, err := itemsToProto(ctx, s.store, []core.Item{pb.Item}, admin)
-		if err != nil {
-			return nil, err
-		}
-		st := pb.State()
-		b.NowPlaying = sessionv1.NowPlaying_builder{
-			PlaybackId: &pb.ID, Item: items[0], Position: durationpb.New(st.Position), Paused: &st.Paused,
-			Method: new(playMethods[pb.Method]),
-		}.Build()
+	var err error
+	b.NowPlaying, err = s.nowPlaying(ctx, as.ID, admin)
+	return b.Build(), err
+}
+
+func (s *SessionService) deviceToProto(ctx context.Context, d *plugins.Device, admin bool) (*sessionv1.Session, error) {
+	b := sessionv1.Session_builder{
+		Id: new(d.Session.String()), DeviceId: &d.ID, DeviceName: &d.Name, Client: &d.Product,
+		LastSeenTime: timestamp(d.Listed), Online: new(true), PluginId: &d.Plugin,
 	}
-	return b.Build(), nil
+	var err error
+	b.NowPlaying, err = s.nowPlaying(ctx, d.Session, admin)
+	return b.Build(), err
+}
+
+// nowPlaying describes what a session plays, or returns nil.
+func (s *SessionService) nowPlaying(ctx context.Context, session core.ID, admin bool) (*sessionv1.NowPlaying, error) {
+	pb := s.playbacks.NowPlaying(session)
+	if pb == nil {
+		return nil, nil
+	}
+	items, err := itemsToProto(ctx, s.store, []core.Item{pb.Item}, admin)
+	if err != nil {
+		return nil, err
+	}
+	st := pb.State()
+	return sessionv1.NowPlaying_builder{
+		PlaybackId: &pb.ID, Item: items[0], Position: durationpb.New(st.Position), Paused: &st.Paused,
+		Method: new(playMethods[pb.Method]),
+	}.Build(), nil
 }
 
 // SendCommand sends a command to an online device.
@@ -152,6 +193,15 @@ func (s *SessionService) SendCommand(ctx context.Context, req *sessionv1.SendCom
 		return nil, err
 	}
 	target := core.MustParseID(req.GetSessionId())
+	if s.Devices != nil && s.Devices.IsDevice(target) {
+		if err := s.Devices.SendCommand(ctx, target, p.User, commandToPlugin(req.GetCommand())); err != nil {
+			if code := connect.CodeOf(err); code != connect.CodeUnknown {
+				return nil, connect.NewError(code, err)
+			}
+			return nil, connect.NewError(connect.CodeUnavailable, err)
+		}
+		return &sessionv1.SendCommandResponse{}, nil
+	}
 	u, online := s.hub.SessionUser(target)
 	switch {
 	case online && u.ID != p.User.ID && !p.User.Admin:
@@ -166,4 +216,26 @@ func (s *SessionService) SendCommand(ctx context.Context, req *sessionv1.SendCom
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the device is offline"))
 	}
 	return &sessionv1.SendCommandResponse{}, nil
+}
+
+// commandToPlugin describes a command to the plugin controlling a device.
+func commandToPlugin(c *sessionv1.Command) *pluginv1.Command {
+	b := pluginv1.Command_builder{}
+	switch {
+	case c.HasPlay():
+		p := c.GetPlay()
+		b.Play = pluginv1.Play_builder{
+			ItemIds: p.GetItemIds(), StartIndex: new(p.GetStartIndex()), StartPosition: p.GetStartPosition(),
+		}.Build()
+	case c.HasPlayState():
+		b.PlayState = pluginv1.PlayState_builder{
+			Command: new(pluginv1.PlayStateCommand(c.GetPlayState().GetCommand())),
+		}.Build()
+	case c.HasSeek():
+		b.Seek = pluginv1.Seek_builder{Position: c.GetSeek().GetPosition()}.Build()
+	case c.HasMessage():
+		m := c.GetMessage()
+		b.Message = pluginv1.ShowMessage_builder{Text: new(m.GetText()), Timeout: m.GetTimeout()}.Build()
+	}
+	return b.Build()
 }

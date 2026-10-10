@@ -128,7 +128,14 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		},
 	})
 	// What is written reaches the devices' event streams.
-	hub := events.New(events.Config{Store: raw, Events: activityLog, Logger: log})
+	hub := events.New(events.Config{
+		Store: raw, Events: activityLog, Logger: log,
+		// Plugins' devices are every user's.
+		Shared: func(session core.ID) bool {
+			m := started.Load()
+			return m != nil && m.IsDevice(session)
+		},
+	})
 	db := events.Observe(raw, hub)
 	if cfg.DevLibrary != "" {
 		if err := addDevLibraries(ctx, log, db, cfg.DevLibrary); err != nil {
@@ -144,7 +151,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	hostAPI := newLateHandler()
 	plugs, err := plugins.Open(ctx, plugins.Config{
 		Dir: cfg.PluginDir, CacheDir: filepath.Join(cfg.CacheDir, "plugins"), Store: db, Logger: log, HostAPI: hostAPI,
-		DataDir: cfg.PluginDataDir, Activity: activityLog,
+		DataDir: cfg.PluginDataDir, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
 		Catalogs: func() []string { return set.Get().PluginCatalogs },
 	})
 	if err != nil {
@@ -165,7 +172,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	keeper := &storage.Keeper{Devices: devices}
 	warmer := warming.New(warming.Config{Store: db, Keeper: keeper, Online: hub.OnlineSessions, Logger: log})
 
-	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, activityLog, cfg, quietGate, keeper)
+	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, activityLog, plugs, cfg, quietGate, keeper)
 	if err := set.Register(ctx, func(_ context.Context, s core.ServerSettings) error {
 		return playbacks.SetTranscoding(s.Transcoding)
 	}); err != nil {
@@ -186,7 +193,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Refresher: refresher,
+		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher,
 		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Logger: log},
 		Settings:  set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
 		Authenticate: plugs.Authenticate, PluginRoutes: plugs.Routes, Wake: warmer.Wake, Dev: cfg.Dev,
@@ -350,9 +357,10 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 // newPlaybacks sets up playback with the configured ffmpeg, or for direct
 // play only without one. It returns the ffmpeg version, empty without
 // ffmpeg.
-func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, activityLog *activity.Log, cfg Config, quietGate *storage.QuietGate, keeper *storage.Keeper) (*playback.Manager, string) {
+func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, activityLog *activity.Log, plugs *plugins.Manager, cfg Config, quietGate *storage.QuietGate, keeper *storage.Keeper) (*playback.Manager, string) {
 	pc := playback.Config{
-		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, Record: activityLog.Record, QuietGate: quietGate, Keeper: keeper, Logger: log,
+		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, Record: activityLog.Record, Device: plugs.IsDevice,
+		QuietGate: quietGate, Keeper: keeper, Logger: log,
 	}
 	v, err := pc.UseFFmpeg(ctx, cfg.FFmpeg, cfg.FFprobe)
 	if err != nil {

@@ -7,12 +7,19 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
+	"connectrpc.com/connect"
+	"google.golang.org/protobuf/types/known/durationpb"
+
 	"github.com/mavioai/mavio/apps/server/internal/server"
+	"github.com/mavioai/mavio/libs/core"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
+	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
@@ -44,13 +51,14 @@ func installSmoke(t *testing.T, fields string) string {
 }
 
 // TestPluginPlatform runs the assembled server with a plugin using the
-// plugin platform, without ffmpeg: its tasks, data folder, events and HTTP
-// routes.
+// plugin platform, without ffmpeg: its tasks, data folder, events, HTTP
+// routes and remote devices.
 func TestPluginPlatform(t *testing.T) {
 	ctx := t.Context()
-	pluginDir := installSmoke(t, `"capabilities":["CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER"],
+	pluginDir := installSmoke(t, `"capabilities":["CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER",
+			"CAPABILITY_DEVICE_CONTROLLER"],
 		"tasks":[{"id":"count","name":"Count","description":"Counts its runs.","interval":"86400s"}],
-		"permissions":{"events":["task.*","user.created"]}`)
+		"permissions":{"events":["task.*","user.created"],"api":["mavio.playback.v1.PlaybackService"],"actAsUsers":true}`)
 	dataDir := t.TempDir()
 	srv := start(t, server.Config{
 		Database: "sqlite:" + filepath.Join(t.TempDir(), "mavio.db"), FFprobe: "no-ffprobe", FFmpeg: "no-ffmpeg",
@@ -160,5 +168,73 @@ func TestPluginPlatform(t *testing.T) {
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusNotFound {
 		t.Errorf("route of a missing plugin = %d, want 404", resp.StatusCode)
+	}
+
+	// The plugin lists a remote device, which every user sees and may send
+	// commands to; the plugin carries them out as the user and the device.
+	setDevices := func(body string) {
+		t.Helper()
+		resp, err := http.Post(srv.url+"/plugins/org.mavio.smoke/devices", "text/plain", strings.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		msg, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("POST devices = %d %s", resp.StatusCode, msg)
+		}
+	}
+	setDevices("tv")
+	kidToken, err := authv1connect.NewAuthServiceClient(http.DefaultClient, srv.url).Login(ctx, authv1.LoginRequest_builder{
+		Name: new("kid"), Password: new("secret"),
+		Device: authv1.Device_builder{Id: new("kid"), Name: new("Kid"), Client: new("Test"), ClientVersion: new("0")}.Build(),
+	}.Build())
+	if err != nil {
+		t.Fatalf("Login: %v", err)
+	}
+	kidSessions := sessionv1connect.NewSessionServiceClient(http.DefaultClient, srv.url, withToken(kidToken.GetAccessToken()))
+	device := func() *sessionv1.Session {
+		t.Helper()
+		list, err := kidSessions.ListSessions(ctx, &sessionv1.ListSessionsRequest{})
+		if err != nil {
+			t.Fatalf("ListSessions: %v", err)
+		}
+		for _, s := range list.GetSessions() {
+			if s.GetPluginId() != "" {
+				return s
+			}
+		}
+		return nil
+	}
+	tv := device()
+	if tv.GetPluginId() != "org.mavio.smoke" || tv.GetDeviceId() != "tv" || tv.GetDeviceName() != "Device tv" ||
+		tv.GetClient() != "Smoke TV" || !tv.GetOnline() || tv.GetUserId() != "" {
+		t.Fatalf("device session = %v", tv)
+	}
+	send := func(c *sessionv1.Command) error {
+		_, err := kidSessions.SendCommand(ctx, sessionv1.SendCommandRequest_builder{SessionId: new(tv.GetId()), Command: c}.Build())
+		return err
+	}
+	// Playing an item that does not exist gets as far as the playback.
+	err = send(sessionv1.Command_builder{Play: sessionv1.Play_builder{ItemIds: []string{core.NewID().String()}}.Build()}.Build())
+	if connect.CodeOf(err) != connect.CodeNotFound {
+		t.Errorf("SendCommand(play) = %v, want not_found from the playback", err)
+	}
+	if err := send(sessionv1.Command_builder{PlayState: sessionv1.PlayState_builder{
+		Command: sessionv1.PlayStateCommand_PLAY_STATE_COMMAND_PAUSE.Enum(),
+	}.Build()}.Build()); err != nil {
+		t.Errorf("SendCommand(pause) = %v", err)
+	}
+	if err := send(sessionv1.Command_builder{Seek: sessionv1.Seek_builder{Position: durationpb.New(time.Second)}.Build()}.Build()); connect.CodeOf(err) != connect.CodeFailedPrecondition {
+		t.Errorf("SendCommand(seek) = %v, want failed_precondition", err)
+	}
+	// Listed again, it keeps its session; unlisted, it is gone.
+	setDevices("tv")
+	if again := device(); again.GetId() != tv.GetId() {
+		t.Errorf("session listed again = %s, want %s", again.GetId(), tv.GetId())
+	}
+	setDevices("")
+	if gone := device(); gone != nil {
+		t.Errorf("unlisted device = %v", gone)
 	}
 }

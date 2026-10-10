@@ -53,7 +53,7 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 ### 3.2 插件以谁的身份行事
 * 默认情况下插件以自身身份行事：在其作用域内是管理员，但没有自己的用户，因此涉及调用者自身状态的方法（用户数据、播放）返回 `failed_precondition`。
 * 声明 `permissions.act_as_users` 后，请求可以在 `Mavio-User` 头中指定一个用户；此时请求以该用户身份、在该用户的策略下执行，如同该用户亲自发出。被禁用或不存在的用户返回 `unauthenticated`。
-* 设备控制器（§7）还可以在 `Mavio-Device` 中指定自己的某个设备，使其开启的播放归属于该设备的会话。
+* 代表用户行事的设备控制器（§7）还可以在 `Mavio-Device` 中指定自己的某个设备，使其开启的播放归属于该设备的会话。指定它未列出的设备，或指定设备却未指定用户，返回 `failed_precondition`。
 
 ### 3.3 传输
 插件通过 `guest.HostClient()` 返回的客户端，以基础 URL `http://mavio.host` 访问 API；该客户端既承载 Connect 调用，也承载普通 HTTP 媒体路由：
@@ -102,9 +102,9 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 * **数据目录**：每个插件有一个可写目录 `<home>/plugin-data/<id>`（`--plugin-data-dir`），升级时保留，纳入备份，卸载时删除。两种运行时都通过 `MAVIO_PLUGIN_DATA` 告知插件其路径（`guest.DataDir()`）；WASM 插件在 `/data` 看到它。
 
 ## 7. 远程设备
-* `DEVICE_CONTROLLER` 插件通过宿主服务 `HostService.SetDevices` 保持其设备列表为最新：ID、名称、产品、播放决策使用的客户端能力，以及每个设备接受的命令。
-* 服务端把每个设备列为 `SessionService.ListSessions` 中的一个会话：插件列出它期间为在线，并且是共享的——每个已登录用户都能看到并向它发送命令。
-* 向设备 `SendCommand` 时，服务端调用 `DeviceControllerService.SendCommand`，传入命令与发送它的用户。插件以该用户和该设备的身份执行命令（§3.2）：通过 `PlaybackService` 开启并上报播放，于是设备的会话显示它正在播放的内容。
+* `DEVICE_CONTROLLER` 插件（还需要 `permissions.act_as_users`）通过 `HostService.SetDevices` 保持其设备列表为最新：ID、名称、产品，以及每个设备接受的命令种类。任何插件都可以不经作用域调用 `mavio.plugin.v1.HostService`；其他调用者返回 `permission_denied`。
+* 服务端把每个设备列为 `SessionService.ListSessions` 中的一个会话，带插件 ID、没有用户；插件列出它期间为在线，并且是共享的——每个已登录用户都能看到它、向它发送命令，并获知它的变化。再次列出的设备保留原会话；插件不再列出的设备，或已停止插件的设备，连同其播放一并消失。
+* 向设备 `SendCommand` 时，服务端在 30 秒内调用 `DeviceControllerService.SendCommand`，传入命令、设备及其会话，以及发送它的用户；设备不接受的命令返回 `failed_precondition`，插件的错误原样返回给发送者。插件以该用户和该设备的身份执行命令（§3.2）：带着设备的能力通过 `PlaybackService` 开启并上报播放，于是设备的会话显示它正在播放的内容。
 
 ## 8. 提供者能力
 

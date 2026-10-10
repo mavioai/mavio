@@ -113,7 +113,9 @@ func (e *env) start(t *testing.T, r Request) *Playback {
 	if r.Client == nil {
 		r.Client = mp4Client
 	}
-	r.SessionID = e.sess.ID
+	if r.SessionID.IsZero() {
+		r.SessionID = e.sess.ID
+	}
 	p, err := e.m.Start(t.Context(), r)
 	if err != nil {
 		t.Fatalf("Start: %v", err)
@@ -366,6 +368,23 @@ func TestCheck(t *testing.T) {
 	}
 	if want := []string{idle.ID + " 2400000", active.ID + " 0"}; !slices.Equal(stopped, want) {
 		t.Errorf("logged stops = %q, want %q", stopped, want)
+	}
+}
+
+func TestCheckDevice(t *testing.T) {
+	e := newEnv(t)
+	device, listed := core.NewID(), true
+	e.m.cfg.Device = func(session core.ID) bool { return listed && session == device }
+	p := e.start(t, Request{SessionID: device})
+	// A device has no sign-in; its playbacks last while it is listed.
+	e.m.check(t.Context())
+	if e.m.Get(p.ID) == nil {
+		t.Fatal("playback of a listed device ended")
+	}
+	listed = false
+	e.m.check(t.Context())
+	if e.m.Get(p.ID) != nil {
+		t.Error("playback of a device no longer listed kept")
 	}
 }
 

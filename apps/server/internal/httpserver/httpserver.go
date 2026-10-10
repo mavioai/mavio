@@ -29,6 +29,7 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
@@ -51,6 +52,8 @@ type Options struct {
 	Images *images.Server
 	// Plugins runs the server's plugins; nil means none.
 	Plugins rpc.PluginManager
+	// Devices keeps the plugins' remote devices; nil means none.
+	Devices rpc.DeviceController
 	// Refresher carries out metadata changes; nil uses one without
 	// providers.
 	Refresher *library.Refresher
@@ -133,7 +136,12 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(userv1connect.NewDisplayPreferencesServiceHandler(rpc.NewDisplayPreferencesService(opts.Store), interceptors))
 	mux.Handle(playbackv1connect.NewPlaybackServiceHandler(rpc.NewPlaybackService(opts.Playbacks), interceptors))
 	mux.Handle(sessionv1connect.NewEventServiceHandler(rpc.NewEventService(opts.Hub), interceptors))
-	mux.Handle(sessionv1connect.NewSessionServiceHandler(rpc.NewSessionService(opts.Store, opts.Hub, opts.Playbacks), interceptors))
+	sessions := rpc.NewSessionService(opts.Store, opts.Hub, opts.Playbacks)
+	sessions.Devices = opts.Devices
+	mux.Handle(sessionv1connect.NewSessionServiceHandler(sessions, interceptors))
+	// Plugins reach the host service through the host API; others are
+	// turned away.
+	mux.Handle(pluginv1connect.NewHostServiceHandler(rpc.NewHostService(opts.Devices), interceptors))
 	mux.Handle(sessionv1connect.NewSyncPlayServiceHandler(rpc.NewSyncPlayService(opts.Store, opts.Hub), interceptors))
 	mux.Handle("GET /media/", opts.Playbacks.Handler())
 	mux.Handle("GET /images/", opts.Images.Handler())

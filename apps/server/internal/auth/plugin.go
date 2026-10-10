@@ -12,8 +12,14 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 )
 
-// UserHeader names the user a plugin's host API request acts as.
-const UserHeader = "Mavio-User"
+// Headers of a plugin's host API requests.
+const (
+	// UserHeader names the user a request acts as.
+	UserHeader = "Mavio-User"
+	// DeviceHeader names the device of a device controller a request
+	// acting as a user acts as.
+	DeviceHeader = "Mavio-Device"
+)
 
 // Plugin is what a running plugin may do through the host API.
 type Plugin struct {
@@ -23,6 +29,9 @@ type Plugin struct {
 	Allows func(procedure string, readOnly bool) bool
 	// ActAsUsers lets requests act as the user named in UserHeader.
 	ActAsUsers bool
+	// Device returns the session of the plugin's device named in
+	// DeviceHeader; nil means the plugin has none.
+	Device func(id string) (core.AuthSession, bool)
 }
 
 type pluginKey struct{}
@@ -74,6 +83,10 @@ func (i *Interceptor) authenticatePlugin(ctx context.Context, g Plugin, procedur
 		return Principal{}, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("%s needs a signed-in session", procedure))
 	}
 	name := h.Get(UserHeader)
+	if name == "" && h.Get(DeviceHeader) != "" {
+		return Principal{}, connect.NewError(connect.CodeFailedPrecondition,
+			fmt.Errorf("a request acting as a device acts as a user; name the user in %s", UserHeader))
+	}
 	if name == "" {
 		if bound(i.userBound, procedure) {
 			return Principal{}, connect.NewError(connect.CodeFailedPrecondition,
@@ -91,7 +104,17 @@ func (i *Interceptor) authenticatePlugin(ctx context.Context, g Plugin, procedur
 	} else if err != nil {
 		return Principal{}, fmt.Errorf("look up user: %w", err)
 	}
-	return Principal{User: user, Plugin: g.ID}, nil
+	p := Principal{User: user, Plugin: g.ID}
+	if id := h.Get(DeviceHeader); id != "" {
+		var ok bool
+		if g.Device != nil {
+			p.Session, ok = g.Device(id)
+		}
+		if !ok {
+			return Principal{}, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("plugin %s lists no device %q", g.ID, id))
+		}
+	}
+	return p, nil
 }
 
 // ResolveRequest authenticates a plain HTTP request by its bearer token or,

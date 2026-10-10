@@ -24,6 +24,7 @@ import (
 	"github.com/mavioai/mavio/libs/plugin/host/wasm"
 	"github.com/mavioai/mavio/libs/plugin/manifest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
 
 // State is whether a plugin is in use.
@@ -73,6 +74,9 @@ type Config struct {
 	HostAPI http.Handler
 	// Activity records plugin failures and task runs; nil records none.
 	Activity *activity.Log
+	// DevicesChanged is told the sessions of the devices that plugins
+	// listed, changed or no longer list; nil tells nobody.
+	DevicesChanged func(sessions []core.ID)
 	// Now is the clock of task schedules; nil means time.Now.
 	Now    func() time.Time
 	Logger *slog.Logger
@@ -97,6 +101,10 @@ type Manager struct {
 	plugins []*entry // by ID
 	// queues hold the events waiting for each event consumer.
 	queues map[string]*eventQueue
+
+	// devMu guards devices, the devices of each device controller.
+	devMu   sync.Mutex
+	devices map[string][]Device
 }
 
 type entry struct {
@@ -115,7 +123,7 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	if cfg.Client == nil {
 		cfg.Client = &http.Client{Timeout: 5 * time.Minute}
 	}
-	m := &Manager{cfg: cfg, store: cfg.Store, log: cmp.Or(cfg.Logger, slog.New(slog.DiscardHandler)), queues: map[string]*eventQueue{}}
+	m := &Manager{cfg: cfg, store: cfg.Store, log: cmp.Or(cfg.Logger, slog.New(slog.DiscardHandler)), queues: map[string]*eventQueue{}, devices: map[string][]Device{}}
 	// Event delivery outlives the request that installs a plugin.
 	m.ctx, m.cancel = context.WithCancel(context.WithoutCancel(ctx))
 	m.opts = host.Options{
@@ -128,9 +136,14 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 			return auth.PluginHandler(auth.Plugin{
 				ID: man.GetId(),
 				Allows: func(procedure string, readOnly bool) bool {
-					return manifest.AllowsProcedure(man, procedure, readOnly)
+					// Every plugin may call the host service.
+					return strings.HasPrefix(strings.TrimPrefix(procedure, "/"), pluginv1connect.HostServiceName+"/") ||
+						manifest.AllowsProcedure(man, procedure, readOnly)
 				},
 				ActAsUsers: man.GetPermissions().GetActAsUsers(),
+				Device: func(id string) (core.AuthSession, bool) {
+					return m.deviceSession(man.GetId(), id)
+				},
 			}, cfg.HostAPI)
 		}
 	}

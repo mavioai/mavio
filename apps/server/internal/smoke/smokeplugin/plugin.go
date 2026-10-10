@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"maps"
 	"net/http"
 	"os"
@@ -26,6 +27,8 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	"github.com/mavioai/mavio/libs/plugin/guest"
+	playbackv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
@@ -73,6 +76,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewMediaSegmentProviderServiceHandler(segments{}))
 	guest.Handle(pluginv1connect.NewTaskRunnerServiceHandler(tasks{}))
 	guest.Handle(pluginv1connect.NewEventConsumerServiceHandler(consumer{}))
+	guest.Handle(pluginv1connect.NewDeviceControllerServiceHandler(devices{}))
 	routes := http.NewServeMux()
 	// whoami answers with who the host says the caller is, and whether the
 	// caller's Authorization header came through.
@@ -80,7 +84,60 @@ func init() {
 		fmt.Fprintf(w, "user=%q admin=%q authorization=%q", r.Header.Get("Mavio-User-Name"),
 			r.Header.Get("Mavio-User-Admin"), r.Header.Get("Authorization"))
 	})
+	// devices lists a remote device per line of the body, named after it.
+	routes.HandleFunc("POST /devices", func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		var list []*pluginv1.Device
+		for id := range strings.FieldsSeq(string(body)) {
+			list = append(list, pluginv1.Device_builder{
+				Id: proto.String(id), Name: proto.String("Device " + id), Product: proto.String("Smoke TV"),
+				Commands: []pluginv1.CommandKind{pluginv1.CommandKind_COMMAND_KIND_PLAY, pluginv1.CommandKind_COMMAND_KIND_PLAY_STATE},
+			}.Build())
+		}
+		host := pluginv1connect.NewHostServiceClient(guest.HostClient(), guest.HostURL)
+		if _, err := host.SetDevices(r.Context(), pluginv1.SetDevicesRequest_builder{Devices: list}.Build()); err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+		}
+	})
 	guest.HandleHTTP(routes)
+}
+
+// devices plays the first item of a Play command, acting as the user who
+// sent it and the device, and takes play state commands without doing
+// anything.
+type devices struct{}
+
+func (devices) SendCommand(ctx context.Context, req *pluginv1.SendCommandRequest) (*pluginv1.SendCommandResponse, error) {
+	play := req.GetCommand().GetPlay()
+	if play == nil {
+		return &pluginv1.SendCommandResponse{}, nil
+	}
+	client := &http.Client{Transport: headers{
+		guest.UserHeader: req.GetUserName(), guest.DeviceHeader: req.GetDeviceId(),
+	}}
+	playbacks := playbackv1connect.NewPlaybackServiceClient(client, guest.HostURL)
+	_, err := playbacks.StartPlayback(ctx, playbackv1.StartPlaybackRequest_builder{
+		ItemId: proto.String(play.GetItemIds()[0]), Capabilities: &playbackv1.ClientCapabilities{},
+	}.Build())
+	if err != nil {
+		return nil, err
+	}
+	return &pluginv1.SendCommandResponse{}, nil
+}
+
+// headers adds headers to host API requests.
+type headers map[string]string
+
+func (h headers) RoundTrip(r *http.Request) (*http.Response, error) {
+	r = r.Clone(r.Context())
+	for k, v := range h {
+		r.Header.Set(k, v)
+	}
+	return guest.HostClient().Transport.RoundTrip(r)
 }
 
 // consumer appends a line per event to "events" in the data folder: its
