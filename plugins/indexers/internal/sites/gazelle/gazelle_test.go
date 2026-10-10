@@ -44,7 +44,7 @@ func definitionOf(t *testing.T, id string) indexer.Definition {
 	return Definitions[i]
 }
 
-func newIndexer(t *testing.T, id string, settings Settings, h handler) *indexer.Indexer {
+func newIndexer(t *testing.T, id string, settings any, h handler) *indexer.Indexer {
 	t.Helper()
 	data, err := json.Marshal(settings)
 	if err != nil {
@@ -377,4 +377,251 @@ func TestRetryDownload(t *testing.T) {
 			t.Errorf("%s: RetryDownload() = %q, %v, want = %q", tt.name, got, ok, tt.want)
 		}
 	}
+}
+
+func TestRedactedCases(t *testing.T) {
+	ported.Run(t, "redacted_tests/redacted.json", ported.Cases{Facts: map[string]string{
+		"should_parse_recent_feed_from_Redacted": "TestAPIRecentFeeds",
+	}})
+}
+
+func TestOrpheusCases(t *testing.T) {
+	ported.Run(t, "orpheus_tests/orpheus.json", ported.Cases{Facts: map[string]string{
+		"should_parse_recent_feed_from_Orpheus": "TestAPIRecentFeeds",
+	}})
+}
+
+func TestAPIRecentFeeds(t *testing.T) {
+	tests := []struct {
+		id, feed      string
+		count         int
+		title         string
+		download      string
+		info          string
+		date          time.Time
+		size          int64
+		seeders, peer int
+		files         int
+		authorization string
+	}{
+		{
+			id: "redacted", feed: "Redacted/recentfeed.json", count: 39,
+			title:    "Red Hot Chili Peppers - Californication (1999) [Album] [US / Reissue 2020] [FLAC 24bit Lossless / Vinyl]",
+			download: "https://redacted.sh/ajax.php?action=download&id=3892313",
+			info:     "https://redacted.sh/torrents.php?id=16720&torrentid=3892313",
+			date:     time.Date(2022, 12, 17, 8, 2, 35, 0, time.UTC),
+			size:     1247137236, seeders: 4, peer: 4, files: 23,
+			authorization: "somekey",
+		},
+		{
+			id: "orpheus", feed: "Orpheus/recentfeed.json", count: 50,
+			title:    "The Beatles - Abbey Road (1969) [Album] [2.0 Mix 2019] [MP3 V2 (VBR) / BD]",
+			download: "https://orpheus.network/ajax.php?action=download&id=1902448",
+			info:     "https://orpheus.network/torrents.php?id=466&torrentid=1902448",
+			date:     time.Date(2022, 8, 8, 2, 7, 39, 0, time.UTC),
+			size:     68296866, seeders: 0, peer: 0, files: 18,
+			authorization: "token somekey",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.id, func(t *testing.T) {
+			feed := string(ported.Response(t, tt.feed))
+			var auth string
+			ix := newIndexer(t, tt.id, APISettings{APIKey: "somekey"}, func(r *http.Request) *http.Response {
+				auth = r.Header.Get("Authorization")
+				return jsonResponse(feed)
+			})
+			releases, err := ix.Search(context.Background(), &indexer.Query{Categories: []int{3000}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got, want := len(releases), tt.count; got != want {
+				t.Fatalf("len(releases) = %d, want = %d", got, want)
+			}
+			r := releases[0]
+			checks := []struct {
+				name      string
+				got, want any
+			}{
+				{"Authorization", auth, tt.authorization},
+				{"Title", r.Title, tt.title},
+				{"Protocol", r.Protocol, indexer.ProtocolTorrent},
+				{"DownloadURL", r.DownloadURL, tt.download},
+				{"InfoURL", r.InfoURL, tt.info},
+				{"CommentsURL", r.CommentsURL, ""},
+				{"PublishDate", r.PublishDate, tt.date},
+				{"Size", *r.Size, tt.size},
+				{"InfoHash", r.InfoHash, ""},
+				{"MagnetURL", r.MagnetURL, ""},
+				{"Peers", *r.Peers, tt.peer},
+				{"Seeders", *r.Seeders, tt.seeders},
+				{"Files", *r.Files, tt.files},
+				{"IMDbID", r.IMDbID, 0},
+				{"TMDBID", r.TMDBID, 0},
+				{"TVDBID", r.TVDBID, 0},
+				{"Languages", len(r.Languages), 0},
+				{"Subtitles", len(r.Subtitles), 0},
+				{"DownloadVolumeFactor", *r.DownloadVolumeFactor, 1.0},
+				{"UploadVolumeFactor", *r.UploadVolumeFactor, 1.0},
+			}
+			for _, c := range checks {
+				if c.got != c.want {
+					t.Errorf("%s = %v, want = %v", c.name, c.got, c.want)
+				}
+			}
+		})
+	}
+}
+
+func TestAPISearchRequests(t *testing.T) {
+	tests := []struct {
+		name     string
+		id       string
+		settings APISettings
+		q        indexer.Query
+		want     string
+	}{
+		{
+			name: "music", id: "redacted", settings: APISettings{APIKey: "k"},
+			q:    indexer.Query{Type: indexer.SearchMusic, Term: "a.b", Artist: "Artist", Album: "Album", Year: 1999, Categories: []int{3000, 100001}},
+			want: "https://redacted.sh/ajax.php?artistname=Artist&groupname=Album&year=1999&action=browse&order_by=time&order_way=desc&searchstr=a.b&filter_cat[1]=1&filter_cat[4]=1",
+		},
+		{
+			name: "various artists", id: "orpheus", settings: APISettings{APIKey: "k"},
+			q:    indexer.Query{Type: indexer.SearchMusic, Artist: "VA"},
+			want: "https://orpheus.network/ajax.php?action=browse&order_by=time&order_way=desc",
+		},
+		{
+			name: "freeload", id: "redacted", settings: APISettings{APIKey: "k", FreeloadOnly: true},
+			q:    indexer.Query{Term: "x"},
+			want: "https://redacted.sh/ajax.php?action=browse&order_by=time&order_way=desc&searchstr=x&freetorrent=4",
+		},
+		{
+			name: "no freeload on orpheus", id: "orpheus", settings: APISettings{APIKey: "k", FreeloadOnly: true},
+			q:    indexer.Query{Type: indexer.SearchBook, Term: "x"},
+			want: "https://orpheus.network/ajax.php?action=browse&order_by=time&order_way=desc&searchstr=x",
+		},
+		{
+			name: "legacy link", id: "redacted", settings: APISettings{BaseSettings: indexer.BaseSettings{BaseURL: "https://redacted.ch/"}, APIKey: "k"},
+			q:    indexer.Query{},
+			want: "https://redacted.sh/ajax.php?action=browse&order_by=time&order_way=desc",
+		},
+		{name: "movies", id: "redacted", settings: APISettings{APIKey: "k"}, q: indexer.Query{Type: indexer.SearchMovie, Term: "x"}},
+		{name: "tv", id: "orpheus", settings: APISettings{APIKey: "k"}, q: indexer.Query{Type: indexer.SearchTV, Term: "x"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ix := newIndexer(t, tt.id, tt.settings, nil)
+			chain, err := ix.Site.SearchRequests(context.Background(), ix, &tt.q)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got string
+			if r := chain.First(); r != nil {
+				got = r.URL
+			}
+			if got != tt.want {
+				t.Errorf("URL = %q, want = %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAPIValidate(t *testing.T) {
+	if _, err := definitionOf(t, "redacted").New([]byte(`{"api_key":" "}`)); err == nil {
+		t.Errorf("New(blank api_key) = nil error, want = an error")
+	}
+}
+
+func TestAPIParse(t *testing.T) {
+	const feed = `{"status":"success","response":{"results":[
+		{"groupId":1,"groupName":"Album &amp; More","artist":"Artist","groupYear":2000,"releaseType":"Unknown","torrents":[
+			{"torrentId":10,"format":"FLAC","encoding":"Lossless","media":"CD","hasLog":true,"logScore":100,"hasCue":true,"scene":true,"time":"2024-01-02 03:04:05","size":"100","seeders":"2","leechers":"1","fileCount":3,"snatches":4,"canUseToken":true,"category":"Music"},
+			{"torrentId":11,"format":"MP3","encoding":"320","media":"WEB","time":"2024-01-03 03:04:05","size":"100","seeders":"2","leechers":"1","isFreeload":true,"canUseToken":true},
+			{"torrentId":12,"format":"MP3","encoding":"V0","media":"WEB","time":"2024-01-01 03:04:05","size":"100","seeders":"2","leechers":"1","isNeutralLeech":true}
+		]},
+		{"groupId":2,"groupName":"A Book","torrentId":20,"groupTime":"1704078244","size":"5","seeders":"1","leechers":"0","category":"E-Books","canUseToken":true}
+	]}}`
+	type want struct {
+		title, download string
+		down, up        float64
+		cats            []int
+	}
+	tests := []struct {
+		name     string
+		id       string
+		settings APISettings
+		want     []want
+	}{
+		{
+			name: "redacted", id: "redacted", settings: APISettings{APIKey: "k", UseFreeleechToken: TokenPreferred},
+			want: []want{
+				{"Artist - Album & More (2000) [MP3 320 / WEB]", "https://redacted.sh/ajax.php?action=download&id=11", 0, 0, []int{3000, 100001}},
+				{"Artist - Album & More (2000) [FLAC Lossless / CD / Log (100%) / Cue]", "https://redacted.sh/ajax.php?action=download&id=10&usetoken=1", 1, 1, []int{3000, 100001}},
+				{"Artist - Album & More (2000) [MP3 V0 / WEB]", "https://redacted.sh/ajax.php?action=download&id=12", 0, 0, []int{3000, 100001}},
+				{"A Book", "https://redacted.sh/ajax.php?action=download&id=20&usetoken=1", 1, 1, []int{7020, 100003}},
+			},
+		},
+		{
+			name: "freeload only", id: "redacted", settings: APISettings{APIKey: "k", FreeloadOnly: true},
+			want: []want{
+				{"Artist - Album & More (2000) [MP3 320 / WEB]", "https://redacted.sh/ajax.php?action=download&id=11", 0, 0, []int{3000, 100001}},
+			},
+		},
+		{
+			name: "orpheus token required", id: "orpheus", settings: APISettings{APIKey: "k", UseFreeleechToken: TokenRequired},
+			want: []want{
+				{"Artist - Album & More (2000) [MP3 320 / WEB]", "https://orpheus.network/ajax.php?action=download&id=11&usetoken=1", 1, 1, []int{3000, 100001}},
+				{"Artist - Album & More (2000) [FLAC Lossless / CD / Log (100%) / Cue]", "https://orpheus.network/ajax.php?action=download&id=10&usetoken=1", 1, 1, []int{3000, 100001}},
+				{"A Book", "https://orpheus.network/ajax.php?action=download&id=20&usetoken=1", 1, 1, []int{7020, 100003}},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ix := newIndexer(t, tt.id, tt.settings, nil)
+			resp := &indexer.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"application/json"}}, Body: []byte(feed)}
+			releases, err := ix.Site.ParseResponse(context.Background(), ix, resp)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []want
+			for _, r := range releases {
+				got = append(got, want{r.Title, r.DownloadURL, *r.DownloadVolumeFactor, *r.UploadVolumeFactor, r.Categories})
+			}
+			if !slices.EqualFunc(got, tt.want, func(a, b want) bool {
+				return a.title == b.title && a.download == b.download && a.down == b.down && a.up == b.up && slices.Equal(a.cats, b.cats)
+			}) {
+				t.Errorf("releases = %+v, want = %+v", got, tt.want)
+			}
+		})
+	}
+}
+
+// TestAPIDownload runs in a bubble: the retry waits for the rate limit.
+func TestAPIDownload(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		var got []string
+		ix := newIndexer(t, "orpheus", APISettings{APIKey: "k", UseFreeleechToken: TokenPreferred}, func(r *http.Request) *http.Response {
+			got = append(got, r.URL.String()+" "+r.Header.Get("Authorization"))
+			if r.URL.Query().Has("usetoken") {
+				return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"application/x-bittorrent"}}, Body: io.NopCloser(strings.NewReader("You cannot use tokens here"))}
+			}
+			return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"application/x-bittorrent"}}, Body: io.NopCloser(strings.NewReader("d4:infoe"))}
+		})
+		data, err := ix.Download(context.Background(), "https://orpheus.network/ajax.php?action=download&id=1&usetoken=1")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if string(data) != "d4:infoe" {
+			t.Errorf("data = %q, want = %q", data, "d4:infoe")
+		}
+		want := []string{
+			"https://orpheus.network/ajax.php?action=download&id=1&usetoken=1 token k",
+			"https://orpheus.network/ajax.php?action=download&id=1 token k",
+		}
+		if !slices.Equal(got, want) {
+			t.Errorf("requests = %q, want = %q", got, want)
+		}
+	})
 }

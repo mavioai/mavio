@@ -409,7 +409,7 @@ flowchart TD
   - [ ] Captchas solved by hand: an image captcha fails automatic logins, as no UI shows it yet
   - [ ] Cookies of the `cookie` setting replacing those responses set, as Prowlarr's GetCookies does; they are only sent besides them
 - [ ] The sites Prowlarr implements in code
-  - [x] Gazelle (`internal/sites/gazelle`): AlphaRatio, BrokenStones, DesiGaane, DICMusic, GreatPosterWall, Secret Cinema
+  - [x] Gazelle (`internal/sites/gazelle`): AlphaRatio, BrokenStones, DesiGaane, DICMusic, GreatPosterWall, Secret Cinema; with an API key, Orpheus and Redacted
   - [x] AvistaZ (`internal/sites/avistaz`): AnimeZ, AvistaZ, CinemaZ, ExoticaZ, PrivateHD
   - [x] SpeedApp (`internal/sites/speedapp`): RetroFlix, SpeedApp.io
   - [x] BroadcasTheNet (`internal/sites/broadcasthenet`), with the API's 150 calls an hour as its definition's default limits

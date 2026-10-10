@@ -331,7 +331,7 @@ func (s *Site) release(g *group, t *torrentStats, freeleech bool, title string, 
 		Seeders:              &seeders,
 		Peers:                indexer.Ptr(seeders + leechers),
 		PublishDate:          date,
-		Categories:           s.categories(category),
+		Categories:           categories(s.caps, category),
 		DownloadVolumeFactor: indexer.Ptr(volumeFactor(freeleech)),
 		UploadVolumeFactor:   indexer.Ptr(volumeFactor(bool(t.IsNeutralLeech))),
 	}
@@ -343,11 +343,11 @@ func (s *Site) release(g *group, t *torrentStats, freeleech bool, title string, 
 
 // categories maps a torrent's category, by description; the site's
 // category "1" when it has none.
-func (s *Site) categories(category *jsonx.String) []int {
+func categories(caps *indexer.Capabilities, category *jsonx.String) []int {
 	if category == nil || strings.Contains(string(*category), "Select Category") {
-		return indexer.IDs(s.caps.Categories.MapTracker("1"))
+		return indexer.IDs(caps.Categories.MapTracker("1"))
 	}
-	return indexer.IDs(s.caps.Categories.MapTrackerDesc(string(*category)))
+	return indexer.IDs(caps.Categories.MapTrackerDesc(string(*category)))
 }
 
 func volumeFactor(free bool) float64 {
@@ -407,7 +407,13 @@ var tokenErrors = []string{
 // RetryDownload implements indexer.DownloadRetrier: when a token is
 // preferred but cannot be used, the torrent is downloaded without.
 func (s *Site) RetryDownload(link string, data []byte) (string, bool) {
-	if s.settings.UseFreeleechToken != TokenPreferred || len(data) == 0 || data[0] == 'd' || !strings.Contains(link, "usetoken=1") {
+	return retryDownload(s.settings.UseFreeleechToken, link, data)
+}
+
+// retryDownload returns the link downloading a torrent without a token,
+// when a token is preferred but the site answered it cannot be used.
+func retryDownload(use FreeleechToken, link string, data []byte) (string, bool) {
+	if use != TokenPreferred || len(data) == 0 || data[0] == 'd' || !strings.Contains(link, "usetoken=1") {
 		return "", false
 	}
 	page := string(data)

@@ -18,20 +18,25 @@ type errorResponse struct {
 // group is a release group of a browse response, with its torrents or,
 // for sites listing torrents alone, those of its one torrent.
 type group struct {
-	GroupID   jsonx.String  `json:"groupId"`
-	GroupName jsonx.String  `json:"groupName"`
-	Artist    jsonx.String  `json:"artist"`
-	GroupYear jsonx.String  `json:"groupYear"`
-	GroupTime jsonx.String  `json:"groupTime"`
-	Cover     jsonx.String  `json:"cover"`
-	Category  *jsonx.String `json:"category"`
-	Torrents  []torrent     `json:"torrents"`
+	GroupID   jsonx.String `json:"groupId"`
+	GroupName jsonx.String `json:"groupName"`
+	Artist    jsonx.String `json:"artist"`
+	GroupYear jsonx.String `json:"groupYear"`
+	GroupTime jsonx.String `json:"groupTime"`
+	Cover     jsonx.String `json:"cover"`
+	// ReleaseType is the group's kind of release, such as "Album".
+	ReleaseType jsonx.String  `json:"releaseType"`
+	Category    *jsonx.String `json:"category"`
+	Torrents    []torrent     `json:"torrents"`
 	torrentStats
 }
 
 // torrent is a torrent of a release group.
 type torrent struct {
 	RemasterTitle jsonx.String  `json:"remasterTitle"`
+	RemasterYear  jsonx.String  `json:"remasterYear"`
+	HasLog        jsonx.Bool    `json:"hasLog"`
+	LogScore      jsonx.Int     `json:"logScore"`
 	ReleaseName   jsonx.String  `json:"releaseName"`
 	Media         jsonx.String  `json:"media"`
 	Encoding      jsonx.String  `json:"encoding"`
@@ -54,6 +59,7 @@ type torrentStats struct {
 	Leechers            jsonx.String `json:"leechers"`
 	IsFreeLeech         jsonx.Bool   `json:"isFreeLeech"`
 	IsNeutralLeech      jsonx.Bool   `json:"isNeutralLeech"`
+	IsFreeload          jsonx.Bool   `json:"isFreeload"`
 	IsPersonalFreeLeech jsonx.Bool   `json:"isPersonalFreeLeech"`
 	CanUseToken         jsonx.Bool   `json:"canUseToken"`
 }
