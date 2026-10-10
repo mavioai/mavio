@@ -140,7 +140,7 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 	}
 	parts := []string{p.Encode()}
 	for _, c := range s.caps.Categories.MapToTracker(q.Categories, false) {
-		parts = append(parts, indexer.URLEncode("categories[]")+"="+indexer.URLEncode(c))
+		parts = append(parts, "categories[]="+indexer.URLEncode(c))
 	}
 	r := indexer.NewRequest(s.baseURL+"api/torrent?"+strings.Join(parts, "&"), indexer.AcceptJSON)
 	s.ModifyRequest(r)
