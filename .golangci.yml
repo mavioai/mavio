@@ -31,11 +31,11 @@ linters:
         # packages stay allowed. core is strict: standard library only.
         pure:
           list-mode: lax
-          files: ["**/libs/naming/**", "**/libs/subtitle/**"]
+          files: ["**/libs/naming/**", "**/libs/subtitle/**", "**/libs/release/**"]
           deny:
             - pkg: github.com/mavioai/mavio/libs
               desc: "pure libraries may only depend on libs/core"
-          allow: ["$gostd", github.com/mavioai/mavio/libs/core, github.com/mavioai/mavio/libs/naming, github.com/mavioai/mavio/libs/subtitle]
+          allow: ["$gostd", github.com/mavioai/mavio/libs/core, github.com/mavioai/mavio/libs/naming, github.com/mavioai/mavio/libs/subtitle, github.com/mavioai/mavio/libs/release]
         leaf-libs:
           files: ["**/libs/media/**", "**/libs/imaging/**", "**/libs/metadata/**", "**/libs/store/**"]
           deny:
