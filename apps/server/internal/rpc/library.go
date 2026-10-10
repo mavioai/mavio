@@ -133,6 +133,7 @@ func (s *LibraryService) UpdateLibrary(ctx context.Context, req *libraryv1.Updat
 		lib.PreferredLanguage, lib.MetadataCountry = spec.PreferredLanguage, spec.MetadataCountry
 		lib.SaveLocalMetadata, lib.AutoCollections = spec.SaveLocalMetadata, spec.AutoCollections
 		lib.ExtractTrickplay, lib.ExtractChapterImages, lib.AnalyzeLoudness = spec.ExtractTrickplay, spec.ExtractChapterImages, spec.AnalyzeLoudness
+		lib.DownloadLyrics, lib.Providers = spec.DownloadLyrics, spec.Providers
 		if err := tx.Libraries().Update(ctx, &lib); err != nil {
 			return err
 		}
@@ -203,7 +204,8 @@ func libraryFromSpec(spec *libraryv1.LibrarySpec) (core.Library, error) {
 		PreferredLanguage: spec.GetPreferredLanguage(), MetadataCountry: spec.GetMetadataCountry(),
 		SaveLocalMetadata: spec.GetSaveLocalMetadata(), AutoCollections: spec.GetAutoCollections(),
 		ExtractTrickplay: spec.GetExtractTrickplay(), ExtractChapterImages: spec.GetExtractChapterImages(),
-		AnalyzeLoudness: spec.GetAnalyzeLoudness(),
+		AnalyzeLoudness: spec.GetAnalyzeLoudness(), DownloadLyrics: spec.GetDownloadLyrics(),
+		Providers: providerOrderFromProto(spec.GetProviderOrder()),
 	}
 	for k, v := range libraryKinds {
 		if v == spec.GetKind() {
@@ -241,6 +243,8 @@ func libraryToProto(lib *core.Library, admin bool) *libraryv1.Library {
 		ExtractTrickplay:     &lib.ExtractTrickplay,
 		ExtractChapterImages: &lib.ExtractChapterImages,
 		AnalyzeLoudness:      &lib.AnalyzeLoudness,
+		DownloadLyrics:       &lib.DownloadLyrics,
+		ProviderOrder:        providerOrderToProto(&lib.Providers),
 		CreateTime:           timestamppb.New(lib.CreatedAt),
 		UpdateTime:           timestamppb.New(lib.UpdatedAt),
 	}
@@ -251,4 +255,34 @@ func libraryToProto(lib *core.Library, admin bool) *libraryv1.Library {
 		b.ScanInterval = durationpb.New(lib.ScanInterval)
 	}
 	return b.Build()
+}
+
+// providerOrderFromProto converts a library's provider order; unset lists
+// stay nil.
+func providerOrderFromProto(o *libraryv1.ProviderOrder) core.ProviderOrder {
+	list := func(l *libraryv1.ProviderList) []string {
+		if l == nil {
+			return nil
+		}
+		return append([]string{}, l.GetPluginIds()...)
+	}
+	return core.ProviderOrder{
+		Metadata: list(o.GetMetadata()), Images: list(o.GetImages()), Subtitles: list(o.GetSubtitles()),
+		Lyrics: list(o.GetLyrics()), Segments: list(o.GetSegments()),
+	}
+}
+
+// providerOrderToProto converts a library's provider order; nil lists stay
+// unset.
+func providerOrderToProto(o *core.ProviderOrder) *libraryv1.ProviderOrder {
+	list := func(ids []string) *libraryv1.ProviderList {
+		if ids == nil {
+			return nil
+		}
+		return libraryv1.ProviderList_builder{PluginIds: ids}.Build()
+	}
+	return libraryv1.ProviderOrder_builder{
+		Metadata: list(o.Metadata), Images: list(o.Images), Subtitles: list(o.Subtitles),
+		Lyrics: list(o.Lyrics), Segments: list(o.Segments),
+	}.Build()
 }

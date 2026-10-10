@@ -77,6 +77,9 @@ type Refresher struct {
 	// Savers gives the metadata savers, which write metadata beside the
 	// media in libraries saving local metadata; nil means none.
 	Savers func() []Saver
+	// Lyrics downloads lyrics for tracks without any, in libraries that
+	// download lyrics; nil downloads none.
+	Lyrics *Lyrics
 	// MetadataDir holds the artwork chosen for items whose library does
 	// not save local metadata, one folder per item; empty keeps none.
 	MetadataDir string
@@ -104,11 +107,13 @@ func (r *Refresher) logger() *slog.Logger {
 	return slog.New(slog.DiscardHandler)
 }
 
-func (r *Refresher) providers() []Provider {
+// providers returns the metadata providers a library uses, in its order.
+func (r *Refresher) providers(lib core.Library) []Provider {
+	all := r.Providers
 	if r.Source != nil {
-		return r.Source()
+		all = r.Source()
 	}
-	return r.Providers
+	return ordered(all, lib.Providers.Metadata)
 }
 
 func (r *Refresher) now() time.Time {
@@ -176,7 +181,7 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 	}
 	var results []*metadata.Result
 	if it.Extra == "" && !it.Locked {
-		for _, p := range r.providers() {
+		for _, p := range r.providers(lib) {
 			res, err := p.Metadata(ctx, lookup)
 			if err != nil {
 				// One provider failing leaves the others' metadata.
@@ -198,7 +203,7 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 	}
 	var extraImages []metadata.RemoteImage
 	if it.Extra == "" && !it.Locked {
-		extraImages = r.providerImages(ctx, lookup)
+		extraImages = r.providerImages(ctx, lib, lookup)
 	}
 	name := it.Name
 	for _, res := range results {
@@ -280,6 +285,11 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 	if err != nil {
 		return it, err
 	}
+	if r.Lyrics != nil && lib.DownloadLyrics && it.Kind == core.KindTrack {
+		if err := r.Lyrics.Fetch(ctx, lib, it); err != nil {
+			r.logger().WarnContext(ctx, "download lyrics", "item", it.ID, "err", err)
+		}
+	}
 	return it, r.changed(ctx, lib, it)
 }
 
@@ -326,19 +336,20 @@ func (r *Refresher) process(ctx context.Context, it *core.Item, results []*metad
 	return people
 }
 
-// imageProviders returns the image providers.
-func (r *Refresher) imageProviders() []ImageProvider {
+// imageProviders returns the image providers a library uses, in its
+// order.
+func (r *Refresher) imageProviders(lib core.Library) []ImageProvider {
 	if r.Images == nil {
 		return nil
 	}
-	return r.Images()
+	return ordered(r.Images(), lib.Providers.Images)
 }
 
 // providerImages asks the image providers for the best image of each kind
 // they have of an item, in provider order.
-func (r *Refresher) providerImages(ctx context.Context, l Lookup) []metadata.RemoteImage {
+func (r *Refresher) providerImages(ctx context.Context, lib core.Library, l Lookup) []metadata.RemoteImage {
 	var out []metadata.RemoteImage
-	for _, p := range r.imageProviders() {
+	for _, p := range r.imageProviders(lib) {
 		images, err := p.Images(ctx, l)
 		if err != nil {
 			r.logger().WarnContext(ctx, "image provider failed", "provider", p.Name(), "err", err)

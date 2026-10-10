@@ -3,6 +3,7 @@ package httpserver_test
 import (
 	"net/http"
 	"path/filepath"
+	"slices"
 	"testing"
 	"time"
 
@@ -61,11 +62,27 @@ func TestLibraryService(t *testing.T) {
 		Id: new(films.GetId()), Spec: libraryv1.LibrarySpec_builder{
 			Name: new("Movies"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_MOVIES), Paths: []string{movies},
 			ScanInterval: durationpb.New(6 * time.Hour), PreferredLanguage: new("de"), MetadataCountry: new("DE"),
+			DownloadLyrics: new(true), ProviderOrder: libraryv1.ProviderOrder_builder{
+				Metadata: libraryv1.ProviderList_builder{PluginIds: []string{"tmdb", "omdb"}}.Build(),
+				Images:   &libraryv1.ProviderList{},
+			}.Build(),
 		}.Build(),
 	}.Build())
+	order := updated.GetLibrary().GetProviderOrder()
 	if err != nil || updated.GetLibrary().GetName() != "Movies" || updated.GetLibrary().GetScanInterval().AsDuration() != 6*time.Hour ||
-		updated.GetLibrary().GetMetadataCountry() != "DE" {
+		updated.GetLibrary().GetMetadataCountry() != "DE" || !updated.GetLibrary().GetDownloadLyrics() ||
+		!slices.Equal(order.GetMetadata().GetPluginIds(), []string{"tmdb", "omdb"}) || !order.HasImages() || len(order.GetImages().GetPluginIds()) != 0 || order.HasLyrics() {
 		t.Errorf("UpdateLibrary = %v, %v", updated, err)
+	}
+	if _, err := asAdmin.UpdateLibrary(ctx, libraryv1.UpdateLibraryRequest_builder{
+		Id: new(films.GetId()), Spec: libraryv1.LibrarySpec_builder{
+			Name: new("Movies"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_MOVIES), Paths: []string{movies},
+			ProviderOrder: libraryv1.ProviderOrder_builder{
+				Lyrics: libraryv1.ProviderList_builder{PluginIds: []string{"a", "a"}}.Build(),
+			}.Build(),
+		}.Build(),
+	}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+		t.Errorf("UpdateLibrary naming a provider twice = %v, want InvalidArgument", err)
 	}
 
 	// A user limited to the TV library sees it, without paths.

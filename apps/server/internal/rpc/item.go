@@ -252,7 +252,15 @@ func (s *ItemService) SearchRemoteLyrics(ctx context.Context, req *libraryv1.Sea
 	if s.Lyrics == nil {
 		return resp, nil
 	}
-	found, err := s.Lyrics.Search(ctx, core.MustParseID(req.GetItemId()))
+	it, err := s.store.Items().Get(ctx, core.MustParseID(req.GetItemId()))
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	lib, err := s.store.Libraries().Get(ctx, it.LibraryID)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	found, err := s.Lyrics.Search(ctx, lib, it.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}

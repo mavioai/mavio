@@ -37,6 +37,10 @@ const (
 	FieldExtractChapterImages = "extract_chapter_images"
 	// FieldAnalyzeLoudness holds the string denoting the analyze_loudness field in the database.
 	FieldAnalyzeLoudness = "analyze_loudness"
+	// FieldDownloadLyrics holds the string denoting the download_lyrics field in the database.
+	FieldDownloadLyrics = "download_lyrics"
+	// FieldProviderOrder holds the string denoting the provider_order field in the database.
+	FieldProviderOrder = "provider_order"
 	// FieldScanGeneration holds the string denoting the scan_generation field in the database.
 	FieldScanGeneration = "scan_generation"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -79,6 +83,8 @@ var Columns = []string{
 	FieldExtractTrickplay,
 	FieldExtractChapterImages,
 	FieldAnalyzeLoudness,
+	FieldDownloadLyrics,
+	FieldProviderOrder,
 	FieldScanGeneration,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -113,6 +119,8 @@ var (
 	DefaultExtractChapterImages bool
 	// DefaultAnalyzeLoudness holds the default value on creation for the "analyze_loudness" field.
 	DefaultAnalyzeLoudness bool
+	// DefaultDownloadLyrics holds the default value on creation for the "download_lyrics" field.
+	DefaultDownloadLyrics bool
 	// DefaultScanGeneration holds the default value on creation for the "scan_generation" field.
 	DefaultScanGeneration int64
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -181,6 +189,11 @@ func ByExtractChapterImages(opts ...sql.OrderTermOption) OrderOption {
 // ByAnalyzeLoudness orders the results by the analyze_loudness field.
 func ByAnalyzeLoudness(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAnalyzeLoudness, opts...).ToFunc()
+}
+
+// ByDownloadLyrics orders the results by the download_lyrics field.
+func ByDownloadLyrics(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDownloadLyrics, opts...).ToFunc()
 }
 
 // ByScanGeneration orders the results by the scan_generation field.

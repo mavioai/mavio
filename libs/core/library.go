@@ -66,8 +66,38 @@ type Library struct {
 	ExtractChapterImages bool
 	// AnalyzeLoudness measures the loudness of audio, for normalization.
 	AnalyzeLoudness bool
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	// DownloadLyrics has refreshes download lyrics for tracks without any
+	// from the library's lyrics providers.
+	DownloadLyrics bool
+	// Providers names the providers the library uses.
+	Providers ProviderOrder
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+// ProviderOrder names the providers a library uses of each capability, by
+// plugin ID, in the order they are asked. A nil list uses every provider
+// in its default order; an empty one uses none.
+type ProviderOrder struct {
+	Metadata  []string `json:"metadata"`
+	Images    []string `json:"images"`
+	Subtitles []string `json:"subtitles"`
+	Lyrics    []string `json:"lyrics"`
+	Segments  []string `json:"segments"`
+}
+
+// validate checks that the lists name providers once each.
+func (o *ProviderOrder) validate() error {
+	for _, list := range [][]string{o.Metadata, o.Images, o.Subtitles, o.Lyrics, o.Segments} {
+		seen := make(map[string]bool, len(list))
+		for _, id := range list {
+			if id == "" || seen[id] {
+				return fmt.Errorf("%w: provider order names %q twice or empty", ErrInvalid, id)
+			}
+			seen[id] = true
+		}
+	}
+	return nil
 }
 
 // Validate checks the library's invariants.
@@ -84,5 +114,5 @@ func (l *Library) Validate() error {
 	case l.ScanInterval < 0:
 		return fmt.Errorf("%w: negative scan interval", ErrInvalid)
 	}
-	return nil
+	return l.Providers.validate()
 }

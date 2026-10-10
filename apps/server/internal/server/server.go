@@ -181,9 +181,11 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	imageServer := images.New(images.Config{
 		Store: db, Dir: filepath.Join(cfg.CacheDir, "images"), MetadataDir: metadataDir, Logger: log,
 	})
+	lyrics := &library.Lyrics{Store: db, Source: plugs.LyricsProviders, Logger: log}
 	refresher := &library.Refresher{
 		Store: db, Source: plugs.MetadataProviders, Images: plugs.ImageProviders, Local: plugs.LocalReaders, Savers: plugs.Savers,
-		Processors: plugs.Processors, Generators: plugs.ImageGenerators, MetadataDir: filepath.ToSlash(metadataDir), Fetch: imageServer.Fetch, Logger: log,
+		Processors: plugs.Processors, Generators: plugs.ImageGenerators, Lyrics: lyrics,
+		MetadataDir: filepath.ToSlash(metadataDir), Fetch: imageServer.Fetch, Logger: log,
 	}
 	var backups *backup.Manager
 	if cfg.BackupDir != "" {
@@ -196,7 +198,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher,
 		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Logger: log},
-		Lyrics:    &library.Lyrics{Store: db, Source: plugs.LyricsProviders, Logger: log},
+		Lyrics:    lyrics,
 		Intros:    &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
 		Settings:  set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
 		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Dev: cfg.Dev,

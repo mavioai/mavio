@@ -107,6 +107,11 @@ func AnalyzeLoudness(v bool) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldAnalyzeLoudness, v))
 }
 
+// DownloadLyrics applies equality check predicate on the "download_lyrics" field. It's identical to DownloadLyricsEQ.
+func DownloadLyrics(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldDownloadLyrics, v))
+}
+
 // ScanGeneration applies equality check predicate on the "scan_generation" field. It's identical to ScanGenerationEQ.
 func ScanGeneration(v int64) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldScanGeneration, v))
@@ -484,6 +489,26 @@ func AnalyzeLoudnessEQ(v bool) predicate.Library {
 // AnalyzeLoudnessNEQ applies the NEQ predicate on the "analyze_loudness" field.
 func AnalyzeLoudnessNEQ(v bool) predicate.Library {
 	return predicate.Library(sql.FieldNEQ(FieldAnalyzeLoudness, v))
+}
+
+// DownloadLyricsEQ applies the EQ predicate on the "download_lyrics" field.
+func DownloadLyricsEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldEQ(FieldDownloadLyrics, v))
+}
+
+// DownloadLyricsNEQ applies the NEQ predicate on the "download_lyrics" field.
+func DownloadLyricsNEQ(v bool) predicate.Library {
+	return predicate.Library(sql.FieldNEQ(FieldDownloadLyrics, v))
+}
+
+// ProviderOrderIsNil applies the IsNil predicate on the "provider_order" field.
+func ProviderOrderIsNil() predicate.Library {
+	return predicate.Library(sql.FieldIsNull(FieldProviderOrder))
+}
+
+// ProviderOrderNotNil applies the NotNil predicate on the "provider_order" field.
+func ProviderOrderNotNil() predicate.Library {
+	return predicate.Library(sql.FieldNotNull(FieldProviderOrder))
 }
 
 // ScanGenerationEQ applies the EQ predicate on the "scan_generation" field.

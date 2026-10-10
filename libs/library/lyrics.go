@@ -60,11 +60,12 @@ type Lyrics struct {
 	Logger *slog.Logger
 }
 
-func (l *Lyrics) providers() []LyricsProvider {
+// providers returns the lyrics providers a library uses, in its order.
+func (l *Lyrics) providers(lib core.Library) []LyricsProvider {
 	if l.Source == nil {
 		return nil
 	}
-	return l.Source()
+	return ordered(l.Source(), lib.Providers.Lyrics)
 }
 
 func (l *Lyrics) logger() *slog.Logger {
@@ -86,9 +87,10 @@ func (l *Lyrics) track(ctx context.Context, itemID core.ID) (core.Item, error) {
 	return it, nil
 }
 
-// Search asks every provider for lyrics of a track, in their order, each
-// provider's best first. A provider failing leaves the others' results.
-func (l *Lyrics) Search(ctx context.Context, itemID core.ID) ([]RemoteLyrics, error) {
+// Search asks the library's lyrics providers for lyrics of a track, in
+// their order, each provider's best first. A provider failing leaves the
+// others' results.
+func (l *Lyrics) Search(ctx context.Context, lib core.Library, itemID core.ID) ([]RemoteLyrics, error) {
 	it, err := l.track(ctx, itemID)
 	if err != nil {
 		return nil, err
@@ -100,7 +102,7 @@ func (l *Lyrics) Search(ctx context.Context, itemID core.ID) ([]RemoteLyrics, er
 		}
 	}
 	var out []RemoteLyrics
-	for _, p := range l.providers() {
+	for _, p := range l.providers(lib) {
 		found, err := p.SearchLyrics(ctx, q)
 		if err != nil {
 			l.logger().WarnContext(ctx, "lyrics search failed", "provider", p.Name(), "item", it.ID, "err", err)
@@ -118,7 +120,7 @@ func (l *Lyrics) Search(ctx context.Context, itemID core.ID) ([]RemoteLyrics, er
 // when synced and "<track>.txt" otherwise, replacing the track's other
 // lyric files.
 func (l *Lyrics) Download(ctx context.Context, lib core.Library, itemID core.ID, provider, id string) error {
-	providers := l.providers()
+	providers := l.providers(lib)
 	i := slices.IndexFunc(providers, func(p LyricsProvider) bool { return p.Name() == provider })
 	if i < 0 {
 		return fmt.Errorf("lyrics provider %s: %w", provider, core.ErrNotFound)
@@ -127,7 +129,12 @@ func (l *Lyrics) Download(ctx context.Context, lib core.Library, itemID core.ID,
 	if err != nil {
 		return err
 	}
-	content, synced, err := providers[i].DownloadLyrics(ctx, id)
+	return l.save(ctx, lib, it, providers[i], id)
+}
+
+// save downloads a provider's lyrics and saves them beside a track.
+func (l *Lyrics) save(ctx context.Context, lib core.Library, it core.Item, p LyricsProvider, id string) error {
+	content, synced, err := p.DownloadLyrics(ctx, id)
 	if err != nil {
 		return fmt.Errorf("download lyrics: %w", err)
 	}
@@ -163,4 +170,50 @@ func (l *Lyrics) Download(ctx context.Context, lib core.Library, itemID core.ID,
 		}
 	}
 	return nil
+}
+
+// Fetch saves the first lyrics the library's providers find that download
+// beside a track without lyric files; a track with any is left alone.
+func (l *Lyrics) Fetch(ctx context.Context, lib core.Library, it core.Item) error {
+	if hasLyrics(lib, it.Path) {
+		return nil
+	}
+	found, err := l.Search(ctx, lib, it.ID)
+	if err != nil {
+		return err
+	}
+	providers := l.providers(lib)
+	for _, f := range found {
+		i := slices.IndexFunc(providers, func(p LyricsProvider) bool { return p.Name() == f.Provider })
+		if i < 0 {
+			continue
+		}
+		if err := l.save(ctx, lib, it, providers[i], f.ID); err != nil {
+			l.logger().WarnContext(ctx, "lyrics download failed", "provider", f.Provider, "item", it.ID, "err", err)
+			continue
+		}
+		return nil
+	}
+	return nil
+}
+
+// hasLyrics reports whether a lyric file lies beside a media file; when it
+// cannot tell, it says there is one.
+func hasLyrics(lib core.Library, media string) bool {
+	root, rel, ok := libraryRoot(lib, media)
+	if !ok {
+		return true
+	}
+	rt, err := os.OpenRoot(filepath.FromSlash(root))
+	if err != nil {
+		return true
+	}
+	defer rt.Close()
+	stem := strings.TrimSuffix(rel, path.Ext(rel))
+	for _, ext := range metadata.LyricExtensions {
+		if _, err := rt.Stat(stem + ext); !errors.Is(err, fs.ErrNotExist) {
+			return true
+		}
+	}
+	return false
 }

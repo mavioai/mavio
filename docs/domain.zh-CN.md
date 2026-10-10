@@ -85,6 +85,7 @@ erDiagram
 * `ScanInterval` 是定时对账扫描的周期（为零则不定时扫描）；`PreferredLanguage`（ISO 639-1）与 `MetadataCountry`（ISO 3166-1 alpha-2）影响元数据提供者的取数。
 * `SaveLocalMetadata` 把每个条目的 NFO 文件以及为它选择或下载的图片写到媒体旁边，扫描时再读回；`AutoCollections` 把电影放入以提供者的合集（电影系列）命名的合集，先按 `tmdb_collection` ID 查找，否则按名称，首次需要时创建。
 * `ExtractTrickplay` 与 `ExtractChapterImages` 为视频生成缩略图拼图与各章节的图片；`AnalyzeLoudness` 测量音轨的响度。
+* `Providers`（`ProviderOrder`）按能力（元数据、图片、字幕、歌词、片段）以插件 ID 列出媒体库使用的提供者及其顺序：nil 列表按默认顺序使用所有提供者，空列表不使用任何提供者；列表中重复的提供者或空 ID 为 `ErrInvalid`。`DownloadLyrics` 让刷新为没有歌词文件的音轨从媒体库的歌词提供者下载歌词。
 
 ### 4.2 条目
 所有种类共用一个 `Item` 类型，由 `Kind` 决定哪些字段有意义。这直接对应存储层的一张条目表，避免类型继承体系。

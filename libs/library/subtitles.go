@@ -84,11 +84,13 @@ type Subtitles struct {
 	Logger *slog.Logger
 }
 
-func (s *Subtitles) providers() []SubtitleProvider {
+// providers returns the subtitle providers a library uses, in its order.
+func (s *Subtitles) providers(lib core.Library) []SubtitleProvider {
+	all := s.Providers
 	if s.Source != nil {
-		return s.Source()
+		all = s.Source()
 	}
-	return s.Providers
+	return ordered(all, lib.Providers.Subtitles)
 }
 
 func (s *Subtitles) logger() *slog.Logger {
@@ -150,7 +152,7 @@ func (s *Subtitles) Search(ctx context.Context, lib core.Library, itemID, source
 		s.logger().DebugContext(ctx, "no hash for subtitle search", "path", src.Path, "err", err)
 	}
 	var out []RemoteSubtitle
-	for _, p := range s.providers() {
+	for _, p := range s.providers(lib) {
 		found, err := p.SearchSubtitles(ctx, q)
 		if err != nil {
 			s.logger().WarnContext(ctx, "subtitle search failed", "provider", p.Name(), "item", it.ID, "err", err)
@@ -186,7 +188,7 @@ func fileHash(lib core.Library, p string) (string, error) {
 // "<video>.<language>[.sdh][.forced].<format>", and adds it to the video's
 // streams, which it returns.
 func (s *Subtitles) Download(ctx context.Context, lib core.Library, itemID, sourceID core.ID, provider, id string) (core.MediaStream, error) {
-	providers := s.providers()
+	providers := s.providers(lib)
 	i := slices.IndexFunc(providers, func(p SubtitleProvider) bool { return p.Name() == provider })
 	if i < 0 {
 		return core.MediaStream{}, fmt.Errorf("subtitle provider %s: %w", provider, core.ErrNotFound)

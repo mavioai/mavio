@@ -2129,6 +2129,20 @@
             "type": "boolean",
             "title": "analyze_loudness",
             "description": "Measure the loudness of tracks, for normalization."
+          },
+          "downloadLyrics": {
+            "type": "boolean",
+            "title": "download_lyrics",
+            "description": "Download lyrics for tracks without any when refreshing them."
+          },
+          "providerOrder": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ProviderOrder"
+              }
+            ],
+            "title": "provider_order",
+            "description": "The providers the library uses."
           }
         },
         "title": "Library",
@@ -2223,6 +2237,18 @@
           "analyzeLoudness": {
             "type": "boolean",
             "title": "analyze_loudness"
+          },
+          "downloadLyrics": {
+            "type": "boolean",
+            "title": "download_lyrics"
+          },
+          "providerOrder": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ProviderOrder"
+              }
+            ],
+            "title": "provider_order"
           }
         },
         "title": "LibrarySpec",
@@ -3295,6 +3321,73 @@
         "title": "PlaylistEntry",
         "additionalProperties": false,
         "description": "PlaylistEntry is an item at a position of a playlist."
+      },
+      "mavio.library.v1.ProviderList": {
+        "type": "object",
+        "properties": {
+          "pluginIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 128,
+              "minLength": 1
+            },
+            "title": "plugin_ids",
+            "maxItems": 64,
+            "uniqueItems": true
+          }
+        },
+        "title": "ProviderList",
+        "additionalProperties": false,
+        "description": "ProviderList names providers by plugin ID, in the order they are asked."
+      },
+      "mavio.library.v1.ProviderOrder": {
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ProviderList"
+              }
+            ],
+            "title": "metadata"
+          },
+          "images": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ProviderList"
+              }
+            ],
+            "title": "images"
+          },
+          "subtitles": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ProviderList"
+              }
+            ],
+            "title": "subtitles"
+          },
+          "lyrics": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ProviderList"
+              }
+            ],
+            "title": "lyrics"
+          },
+          "segments": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.ProviderList"
+              }
+            ],
+            "title": "segments"
+          }
+        },
+        "title": "ProviderOrder",
+        "additionalProperties": false,
+        "description": "ProviderOrder names the providers a library uses of each capability.\n An unset list uses every provider, in plugin ID order; an empty one\n uses none."
       },
       "mavio.library.v1.Rational": {
         "type": "object",

@@ -142,7 +142,9 @@ A request carries the folder (library kind, library folder, path, what its conta
 `AuthService.ForgotPassword` makes an eight-digit one-time PIN for a user who signs in with a password and passes it, with the user's ID and name and its expiry, to the `PasswordResetService.StartReset` of the plugin chosen in the server settings (`password_reset_plugin`), which delivers it its own way (e-mail, chat). It answers alike whether or not the user exists, delivering in the background. The server keeps only the PIN's hash, in memory, for 30 minutes; a new PIN replaces the user's previous one, and five wrong PINs end it. `AuthService.ResetPassword` with the PIN sets a new password and ends the user's sessions. Without a chosen plugin, `ForgotPassword` fails with `FAILED_PRECONDITION`.
 
 ### 8.11 Provider Order per Library
-A library stores, per capability (metadata, images, subtitles, lyrics, segments), which providers it uses and in which order. Unset means every ready provider in plugin ID order, as today.
+A library stores, per capability (metadata, images, subtitles, lyrics, segments), which providers it uses and in which order, by plugin ID (`LibrarySpec.provider_order`). An unset list means every ready provider in plugin ID order; an empty one means none; IDs of plugins not running are skipped. Refreshes, metadata and image searches, subtitle and lyrics searches and downloads, and media segment jobs ask only the library's providers, in its order.
+
+With `download_lyrics` set, a refresh of a track without a lyric file beside it searches the library's lyrics providers and saves the first lyrics that download, as an administrator's download would.
 
 ## 9. Runtime Differences
 | | WASM | Process |

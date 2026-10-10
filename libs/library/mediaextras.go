@@ -450,10 +450,11 @@ func (j *Jobs) segments(ctx context.Context, job core.Job) ([]core.Job, error) {
 	if j.Segments == nil {
 		return nil, nil
 	}
-	it, _, err := j.itemAndLibrary(ctx, job)
+	it, lib, err := j.itemAndLibrary(ctx, job)
 	if err != nil {
 		return nil, ignoreGone(err)
 	}
+	providers := ordered(j.Segments(), lib.Providers.Segments)
 	sources, err := j.Store.MediaSources().ListForItem(ctx, it.ID)
 	if err != nil || len(sources) == 0 {
 		return nil, ignoreGone(err)
@@ -477,7 +478,7 @@ func (j *Jobs) segments(ctx context.Context, job core.Job) ([]core.Job, error) {
 		}
 	}
 	var all []core.MediaSegment
-	for _, p := range j.Segments() {
+	for _, p := range providers {
 		found, err := p.Segments(ctx, q)
 		if err != nil {
 			j.logger().WarnContext(ctx, "segment provider failed", "provider", p.Name(), "item", it.ID, "err", err)

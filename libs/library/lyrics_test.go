@@ -46,12 +46,12 @@ func TestLyrics(t *testing.T) {
 	site := &lyricsSite{}
 	l := &Lyrics{Store: f.store, Source: func() []LyricsProvider { return []LyricsProvider{&lyricsSite{fail: true}, site} }}
 
-	found, err := l.Search(ctx, track.ID)
+	found, err := l.Search(ctx, f.lib, track.ID)
 	if err != nil || len(found) != 2 || found[0].Provider != "site" || found[0].ID != "1" || site.got.Name != track.Name {
 		t.Fatalf("Search() = %+v, %v; query %+v", found, err, site.got)
 	}
 	album := f.item("Band/Album")
-	if _, err := l.Search(ctx, album.ID); !errors.Is(err, core.ErrInvalid) {
+	if _, err := l.Search(ctx, f.lib, album.ID); !errors.Is(err, core.ErrInvalid) {
 		t.Errorf("Search(album) = %v, want ErrInvalid", err)
 	}
 
@@ -74,6 +74,50 @@ func TestLyrics(t *testing.T) {
 	}
 	if err := l.Download(ctx, f.lib, track.ID, "nobody", "1"); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("Download(unknown provider) = %v, want ErrNotFound", err)
+	}
+}
+
+// namedSite is a lyricsSite with another name.
+type namedSite struct {
+	lyricsSite
+	name string
+}
+
+func (s *namedSite) Name() string { return s.name }
+
+func TestLyricsOrderAndFetch(t *testing.T) {
+	ctx := t.Context()
+	f := newScan(t, core.LibraryMusic)
+	tree(t, f.root, "Band/Album/01 - One.flac", "Band/Album/02 - Two.flac", "Band/Album/02 - Two.txt")
+	f.scan()
+	one, two := f.item("Band/Album/01 - One.flac"), f.item("Band/Album/02 - Two.flac")
+	l := &Lyrics{Store: f.store, Source: func() []LyricsProvider {
+		return []LyricsProvider{&namedSite{name: "a"}, &namedSite{name: "b"}, &namedSite{name: "c"}}
+	}}
+	lib := f.lib
+	lib.Providers.Lyrics = []string{"c", "a", "gone"}
+	found, err := l.Search(ctx, lib, one.ID)
+	if err != nil || len(found) != 4 || found[0].Provider != "c" || found[2].Provider != "a" {
+		t.Errorf("Search() = %+v, %v; want c's then a's", found, err)
+	}
+	if err := l.Download(ctx, lib, one.ID, "b", "1"); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("Download(unused provider) = %v, want ErrNotFound", err)
+	}
+	lib.Providers.Lyrics = []string{}
+	if found, err := l.Search(ctx, lib, one.ID); err != nil || len(found) != 0 {
+		t.Errorf("Search() with no providers = %+v, %v", found, err)
+	}
+
+	// Fetch saves the first lyrics found, and leaves tracks with lyrics be.
+	lib.Providers.Lyrics = nil
+	if err := l.Fetch(ctx, lib, one); err != nil {
+		t.Fatalf("Fetch() = %v", err)
+	}
+	if got := readFile(t, f.root, "Band/Album/01 - One.lrc"); got != "[00:01.00]One\n" {
+		t.Errorf("fetched lyrics = %q", got)
+	}
+	if err := l.Fetch(ctx, lib, two); err != nil || exists(f.root, "Band/Album/02 - Two.lrc") {
+		t.Errorf("Fetch() of a track with lyrics = %v; lrc saved = %v", err, exists(f.root, "Band/Album/02 - Two.lrc"))
 	}
 }
 

@@ -316,8 +316,8 @@ flowchart TD
 - [x] HTTP routes
 - [x] Remote devices; acting as devices
 - [x] Image, lyrics, local metadata, saver and processor providers; external IDs
-- [ ] Resolvers, intro providers, image generators, media source providers, password reset
-- [ ] Provider order per library
+- [x] Resolvers, intro providers, image generators, media source providers, password reset
+- [x] Provider order per library
 - [ ] End-to-end test
 
 ### P14 DLNA

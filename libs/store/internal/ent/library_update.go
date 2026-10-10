@@ -192,6 +192,40 @@ func (_u *LibraryUpdate) SetNillableAnalyzeLoudness(v *bool) *LibraryUpdate {
 	return _u
 }
 
+// SetDownloadLyrics sets the "download_lyrics" field.
+func (_u *LibraryUpdate) SetDownloadLyrics(v bool) *LibraryUpdate {
+	_u.mutation.SetDownloadLyrics(v)
+	return _u
+}
+
+// SetNillableDownloadLyrics sets the "download_lyrics" field if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableDownloadLyrics(v *bool) *LibraryUpdate {
+	if v != nil {
+		_u.SetDownloadLyrics(*v)
+	}
+	return _u
+}
+
+// SetProviderOrder sets the "provider_order" field.
+func (_u *LibraryUpdate) SetProviderOrder(v core.ProviderOrder) *LibraryUpdate {
+	_u.mutation.SetProviderOrder(v)
+	return _u
+}
+
+// SetNillableProviderOrder sets the "provider_order" field if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableProviderOrder(v *core.ProviderOrder) *LibraryUpdate {
+	if v != nil {
+		_u.SetProviderOrder(*v)
+	}
+	return _u
+}
+
+// ClearProviderOrder clears the value of the "provider_order" field.
+func (_u *LibraryUpdate) ClearProviderOrder() *LibraryUpdate {
+	_u.mutation.ClearProviderOrder()
+	return _u
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_u *LibraryUpdate) SetScanGeneration(v int64) *LibraryUpdate {
 	_u.mutation.ResetScanGeneration()
@@ -400,6 +434,15 @@ func (_u *LibraryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AnalyzeLoudness(); ok {
 		_spec.SetField(library.FieldAnalyzeLoudness, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.DownloadLyrics(); ok {
+		_spec.SetField(library.FieldDownloadLyrics, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ProviderOrder(); ok {
+		_spec.SetField(library.FieldProviderOrder, field.TypeJSON, value)
+	}
+	if _u.mutation.ProviderOrderCleared() {
+		_spec.ClearField(library.FieldProviderOrder, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
@@ -681,6 +724,40 @@ func (_u *LibraryUpdateOne) SetNillableAnalyzeLoudness(v *bool) *LibraryUpdateOn
 	return _u
 }
 
+// SetDownloadLyrics sets the "download_lyrics" field.
+func (_u *LibraryUpdateOne) SetDownloadLyrics(v bool) *LibraryUpdateOne {
+	_u.mutation.SetDownloadLyrics(v)
+	return _u
+}
+
+// SetNillableDownloadLyrics sets the "download_lyrics" field if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableDownloadLyrics(v *bool) *LibraryUpdateOne {
+	if v != nil {
+		_u.SetDownloadLyrics(*v)
+	}
+	return _u
+}
+
+// SetProviderOrder sets the "provider_order" field.
+func (_u *LibraryUpdateOne) SetProviderOrder(v core.ProviderOrder) *LibraryUpdateOne {
+	_u.mutation.SetProviderOrder(v)
+	return _u
+}
+
+// SetNillableProviderOrder sets the "provider_order" field if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableProviderOrder(v *core.ProviderOrder) *LibraryUpdateOne {
+	if v != nil {
+		_u.SetProviderOrder(*v)
+	}
+	return _u
+}
+
+// ClearProviderOrder clears the value of the "provider_order" field.
+func (_u *LibraryUpdateOne) ClearProviderOrder() *LibraryUpdateOne {
+	_u.mutation.ClearProviderOrder()
+	return _u
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_u *LibraryUpdateOne) SetScanGeneration(v int64) *LibraryUpdateOne {
 	_u.mutation.ResetScanGeneration()
@@ -919,6 +996,15 @@ func (_u *LibraryUpdateOne) sqlSave(ctx context.Context) (_node *Library, err er
 	}
 	if value, ok := _u.mutation.AnalyzeLoudness(); ok {
 		_spec.SetField(library.FieldAnalyzeLoudness, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.DownloadLyrics(); ok {
+		_spec.SetField(library.FieldDownloadLyrics, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ProviderOrder(); ok {
+		_spec.SetField(library.FieldProviderOrder, field.TypeJSON, value)
+	}
+	if _u.mutation.ProviderOrderCleared() {
+		_spec.ClearField(library.FieldProviderOrder, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)

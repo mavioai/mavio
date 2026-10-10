@@ -2,6 +2,7 @@ package store_test
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 	"time"
 
@@ -75,6 +76,30 @@ func TestTrickplaySegmentsAndLoudness(t *testing.T) {
 		}
 		if l, _ := s.MediaSegments().List(ctx, ep.ID); len(l) != 0 {
 			t.Errorf("segments of a deleted item: %+v", l)
+		}
+	})
+}
+
+func TestProviderOrder(t *testing.T) {
+	eachBackend(t, func(t *testing.T, s *store.Store) {
+		ctx := t.Context()
+		lib := core.Library{
+			Name: "Music", Kind: core.LibraryMusic, Paths: []string{"/media/music"}, DownloadLyrics: true,
+			Providers: core.ProviderOrder{Lyrics: []string{"lrclib", "genius"}, Images: []string{}},
+		}
+		if err := s.Libraries().Create(ctx, &lib); err != nil {
+			t.Fatal(err)
+		}
+		got, err := s.Libraries().Get(ctx, lib.ID)
+		if err != nil || !got.DownloadLyrics || !reflect.DeepEqual(got.Providers, lib.Providers) {
+			t.Errorf("got = %+v, %v; want providers %+v", got.Providers, err, lib.Providers)
+		}
+		lib.Providers = core.ProviderOrder{}
+		if err := s.Libraries().Update(ctx, &lib); err != nil {
+			t.Fatal(err)
+		}
+		if got, _ := s.Libraries().Get(ctx, lib.ID); !reflect.DeepEqual(got.Providers, core.ProviderOrder{}) {
+			t.Errorf("got = %+v, want every provider", got.Providers)
 		}
 	})
 }

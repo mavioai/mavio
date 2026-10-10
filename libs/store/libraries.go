@@ -59,6 +59,8 @@ func (r libraries) Create(ctx context.Context, lib *core.Library) error {
 			SetExtractTrickplay(lib.ExtractTrickplay).
 			SetExtractChapterImages(lib.ExtractChapterImages).
 			SetAnalyzeLoudness(lib.AnalyzeLoudness).
+			SetDownloadLyrics(lib.DownloadLyrics).
+			SetProviderOrder(lib.Providers).
 			SetCreatedAt(now).
 			SetUpdatedAt(now).
 			Save(ctx)
@@ -90,6 +92,8 @@ func (r libraries) Update(ctx context.Context, lib *core.Library) error {
 			SetExtractTrickplay(lib.ExtractTrickplay).
 			SetExtractChapterImages(lib.ExtractChapterImages).
 			SetAnalyzeLoudness(lib.AnalyzeLoudness).
+			SetDownloadLyrics(lib.DownloadLyrics).
+			SetProviderOrder(lib.Providers).
 			SetUpdatedAt(time.Now()).
 			Save(ctx)
 		if err != nil {
@@ -153,6 +157,8 @@ func toLibrary(l *ent.Library) core.Library {
 		ExtractTrickplay:     l.ExtractTrickplay,
 		ExtractChapterImages: l.ExtractChapterImages,
 		AnalyzeLoudness:      l.AnalyzeLoudness,
+		DownloadLyrics:       l.DownloadLyrics,
+		Providers:            l.ProviderOrder,
 		CreatedAt:            l.CreatedAt.UTC(),
 		UpdatedAt:            l.UpdatedAt.UTC(),
 	}

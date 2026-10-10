@@ -41,6 +41,10 @@ type Library struct {
 	ExtractChapterImages bool `json:"extract_chapter_images,omitempty"`
 	// AnalyzeLoudness holds the value of the "analyze_loudness" field.
 	AnalyzeLoudness bool `json:"analyze_loudness,omitempty"`
+	// DownloadLyrics holds the value of the "download_lyrics" field.
+	DownloadLyrics bool `json:"download_lyrics,omitempty"`
+	// ProviderOrder holds the value of the "provider_order" field.
+	ProviderOrder core.ProviderOrder `json:"provider_order,omitempty"`
 	// ScanGeneration holds the value of the "scan_generation" field.
 	ScanGeneration int64 `json:"scan_generation,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -87,11 +91,11 @@ func (*Library) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case library.FieldPaths:
+		case library.FieldPaths, library.FieldProviderOrder:
 			values[i] = new([]byte)
 		case library.FieldID:
 			values[i] = new(core.ID)
-		case library.FieldSaveLocalMetadata, library.FieldAutoCollections, library.FieldExtractTrickplay, library.FieldExtractChapterImages, library.FieldAnalyzeLoudness:
+		case library.FieldSaveLocalMetadata, library.FieldAutoCollections, library.FieldExtractTrickplay, library.FieldExtractChapterImages, library.FieldAnalyzeLoudness, library.FieldDownloadLyrics:
 			values[i] = new(sql.NullBool)
 		case library.FieldScanInterval, library.FieldScanGeneration:
 			values[i] = new(sql.NullInt64)
@@ -187,6 +191,20 @@ func (_m *Library) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field analyze_loudness", values[i])
 			} else if value.Valid {
 				_m.AnalyzeLoudness = value.Bool
+			}
+		case library.FieldDownloadLyrics:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field download_lyrics", values[i])
+			} else if value.Valid {
+				_m.DownloadLyrics = value.Bool
+			}
+		case library.FieldProviderOrder:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_order", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ProviderOrder); err != nil {
+					return fmt.Errorf("unmarshal field provider_order: %w", err)
+				}
 			}
 		case library.FieldScanGeneration:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -284,6 +302,12 @@ func (_m *Library) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("analyze_loudness=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AnalyzeLoudness))
+	builder.WriteString(", ")
+	builder.WriteString("download_lyrics=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DownloadLyrics))
+	builder.WriteString(", ")
+	builder.WriteString("provider_order=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProviderOrder))
 	builder.WriteString(", ")
 	builder.WriteString("scan_generation=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ScanGeneration))

@@ -156,6 +156,34 @@ func (_c *LibraryCreate) SetNillableAnalyzeLoudness(v *bool) *LibraryCreate {
 	return _c
 }
 
+// SetDownloadLyrics sets the "download_lyrics" field.
+func (_c *LibraryCreate) SetDownloadLyrics(v bool) *LibraryCreate {
+	_c.mutation.SetDownloadLyrics(v)
+	return _c
+}
+
+// SetNillableDownloadLyrics sets the "download_lyrics" field if the given value is not nil.
+func (_c *LibraryCreate) SetNillableDownloadLyrics(v *bool) *LibraryCreate {
+	if v != nil {
+		_c.SetDownloadLyrics(*v)
+	}
+	return _c
+}
+
+// SetProviderOrder sets the "provider_order" field.
+func (_c *LibraryCreate) SetProviderOrder(v core.ProviderOrder) *LibraryCreate {
+	_c.mutation.SetProviderOrder(v)
+	return _c
+}
+
+// SetNillableProviderOrder sets the "provider_order" field if the given value is not nil.
+func (_c *LibraryCreate) SetNillableProviderOrder(v *core.ProviderOrder) *LibraryCreate {
+	if v != nil {
+		_c.SetProviderOrder(*v)
+	}
+	return _c
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_c *LibraryCreate) SetScanGeneration(v int64) *LibraryCreate {
 	_c.mutation.SetScanGeneration(v)
@@ -309,6 +337,10 @@ func (_c *LibraryCreate) defaults() {
 		v := library.DefaultAnalyzeLoudness
 		_c.mutation.SetAnalyzeLoudness(v)
 	}
+	if _, ok := _c.mutation.DownloadLyrics(); !ok {
+		v := library.DefaultDownloadLyrics
+		_c.mutation.SetDownloadLyrics(v)
+	}
 	if _, ok := _c.mutation.ScanGeneration(); !ok {
 		v := library.DefaultScanGeneration
 		_c.mutation.SetScanGeneration(v)
@@ -366,6 +398,9 @@ func (_c *LibraryCreate) check() error {
 	}
 	if _, ok := _c.mutation.AnalyzeLoudness(); !ok {
 		return &ValidationError{Name: "analyze_loudness", err: errors.New(`ent: missing required field "Library.analyze_loudness"`)}
+	}
+	if _, ok := _c.mutation.DownloadLyrics(); !ok {
+		return &ValidationError{Name: "download_lyrics", err: errors.New(`ent: missing required field "Library.download_lyrics"`)}
 	}
 	if _, ok := _c.mutation.ScanGeneration(); !ok {
 		return &ValidationError{Name: "scan_generation", err: errors.New(`ent: missing required field "Library.scan_generation"`)}
@@ -455,6 +490,14 @@ func (_c *LibraryCreate) createSpec() (*Library, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AnalyzeLoudness(); ok {
 		_spec.SetField(library.FieldAnalyzeLoudness, field.TypeBool, value)
 		_node.AnalyzeLoudness = value
+	}
+	if value, ok := _c.mutation.DownloadLyrics(); ok {
+		_spec.SetField(library.FieldDownloadLyrics, field.TypeBool, value)
+		_node.DownloadLyrics = value
+	}
+	if value, ok := _c.mutation.ProviderOrder(); ok {
+		_spec.SetField(library.FieldProviderOrder, field.TypeJSON, value)
+		_node.ProviderOrder = value
 	}
 	if value, ok := _c.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
@@ -687,6 +730,36 @@ func (u *LibraryUpsert) SetAnalyzeLoudness(v bool) *LibraryUpsert {
 // UpdateAnalyzeLoudness sets the "analyze_loudness" field to the value that was provided on create.
 func (u *LibraryUpsert) UpdateAnalyzeLoudness() *LibraryUpsert {
 	u.SetExcluded(library.FieldAnalyzeLoudness)
+	return u
+}
+
+// SetDownloadLyrics sets the "download_lyrics" field.
+func (u *LibraryUpsert) SetDownloadLyrics(v bool) *LibraryUpsert {
+	u.Set(library.FieldDownloadLyrics, v)
+	return u
+}
+
+// UpdateDownloadLyrics sets the "download_lyrics" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateDownloadLyrics() *LibraryUpsert {
+	u.SetExcluded(library.FieldDownloadLyrics)
+	return u
+}
+
+// SetProviderOrder sets the "provider_order" field.
+func (u *LibraryUpsert) SetProviderOrder(v core.ProviderOrder) *LibraryUpsert {
+	u.Set(library.FieldProviderOrder, v)
+	return u
+}
+
+// UpdateProviderOrder sets the "provider_order" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateProviderOrder() *LibraryUpsert {
+	u.SetExcluded(library.FieldProviderOrder)
+	return u
+}
+
+// ClearProviderOrder clears the value of the "provider_order" field.
+func (u *LibraryUpsert) ClearProviderOrder() *LibraryUpsert {
+	u.SetNull(library.FieldProviderOrder)
 	return u
 }
 
@@ -929,6 +1002,41 @@ func (u *LibraryUpsertOne) SetAnalyzeLoudness(v bool) *LibraryUpsertOne {
 func (u *LibraryUpsertOne) UpdateAnalyzeLoudness() *LibraryUpsertOne {
 	return u.Update(func(s *LibraryUpsert) {
 		s.UpdateAnalyzeLoudness()
+	})
+}
+
+// SetDownloadLyrics sets the "download_lyrics" field.
+func (u *LibraryUpsertOne) SetDownloadLyrics(v bool) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetDownloadLyrics(v)
+	})
+}
+
+// UpdateDownloadLyrics sets the "download_lyrics" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateDownloadLyrics() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateDownloadLyrics()
+	})
+}
+
+// SetProviderOrder sets the "provider_order" field.
+func (u *LibraryUpsertOne) SetProviderOrder(v core.ProviderOrder) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetProviderOrder(v)
+	})
+}
+
+// UpdateProviderOrder sets the "provider_order" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateProviderOrder() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateProviderOrder()
+	})
+}
+
+// ClearProviderOrder clears the value of the "provider_order" field.
+func (u *LibraryUpsertOne) ClearProviderOrder() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.ClearProviderOrder()
 	})
 }
 
@@ -1343,6 +1451,41 @@ func (u *LibraryUpsertBulk) SetAnalyzeLoudness(v bool) *LibraryUpsertBulk {
 func (u *LibraryUpsertBulk) UpdateAnalyzeLoudness() *LibraryUpsertBulk {
 	return u.Update(func(s *LibraryUpsert) {
 		s.UpdateAnalyzeLoudness()
+	})
+}
+
+// SetDownloadLyrics sets the "download_lyrics" field.
+func (u *LibraryUpsertBulk) SetDownloadLyrics(v bool) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetDownloadLyrics(v)
+	})
+}
+
+// UpdateDownloadLyrics sets the "download_lyrics" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateDownloadLyrics() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateDownloadLyrics()
+	})
+}
+
+// SetProviderOrder sets the "provider_order" field.
+func (u *LibraryUpsertBulk) SetProviderOrder(v core.ProviderOrder) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetProviderOrder(v)
+	})
+}
+
+// UpdateProviderOrder sets the "provider_order" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateProviderOrder() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateProviderOrder()
+	})
+}
+
+// ClearProviderOrder clears the value of the "provider_order" field.
+func (u *LibraryUpsertBulk) ClearProviderOrder() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.ClearProviderOrder()
 	})
 }
 

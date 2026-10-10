@@ -12916,6 +12916,8 @@ type LibraryMutation struct {
 	extract_trickplay      *bool
 	extract_chapter_images *bool
 	analyze_loudness       *bool
+	download_lyrics        *bool
+	provider_order         *core.ProviderOrder
 	scan_generation        *int64
 	addscan_generation     *int64
 	created_at             *time.Time
@@ -13467,6 +13469,91 @@ func (m *LibraryMutation) ResetAnalyzeLoudness() {
 	m.analyze_loudness = nil
 }
 
+// SetDownloadLyrics sets the "download_lyrics" field.
+func (m *LibraryMutation) SetDownloadLyrics(b bool) {
+	m.download_lyrics = &b
+}
+
+// DownloadLyrics returns the value of the "download_lyrics" field in the mutation.
+func (m *LibraryMutation) DownloadLyrics() (r bool, exists bool) {
+	v := m.download_lyrics
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDownloadLyrics returns the old "download_lyrics" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldDownloadLyrics(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDownloadLyrics is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDownloadLyrics requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDownloadLyrics: %w", err)
+	}
+	return oldValue.DownloadLyrics, nil
+}
+
+// ResetDownloadLyrics resets all changes to the "download_lyrics" field.
+func (m *LibraryMutation) ResetDownloadLyrics() {
+	m.download_lyrics = nil
+}
+
+// SetProviderOrder sets the "provider_order" field.
+func (m *LibraryMutation) SetProviderOrder(co core.ProviderOrder) {
+	m.provider_order = &co
+}
+
+// ProviderOrder returns the value of the "provider_order" field in the mutation.
+func (m *LibraryMutation) ProviderOrder() (r core.ProviderOrder, exists bool) {
+	v := m.provider_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProviderOrder returns the old "provider_order" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldProviderOrder(ctx context.Context) (v core.ProviderOrder, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProviderOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProviderOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProviderOrder: %w", err)
+	}
+	return oldValue.ProviderOrder, nil
+}
+
+// ClearProviderOrder clears the value of the "provider_order" field.
+func (m *LibraryMutation) ClearProviderOrder() {
+	m.provider_order = nil
+	m.clearedFields[library.FieldProviderOrder] = struct{}{}
+}
+
+// ProviderOrderCleared returns if the "provider_order" field was cleared in this mutation.
+func (m *LibraryMutation) ProviderOrderCleared() bool {
+	_, ok := m.clearedFields[library.FieldProviderOrder]
+	return ok
+}
+
+// ResetProviderOrder resets all changes to the "provider_order" field.
+func (m *LibraryMutation) ResetProviderOrder() {
+	m.provider_order = nil
+	delete(m.clearedFields, library.FieldProviderOrder)
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (m *LibraryMutation) SetScanGeneration(i int64) {
 	m.scan_generation = &i
@@ -13737,7 +13824,7 @@ func (m *LibraryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LibraryMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 16)
 	if m.name != nil {
 		fields = append(fields, library.FieldName)
 	}
@@ -13770,6 +13857,12 @@ func (m *LibraryMutation) Fields() []string {
 	}
 	if m.analyze_loudness != nil {
 		fields = append(fields, library.FieldAnalyzeLoudness)
+	}
+	if m.download_lyrics != nil {
+		fields = append(fields, library.FieldDownloadLyrics)
+	}
+	if m.provider_order != nil {
+		fields = append(fields, library.FieldProviderOrder)
 	}
 	if m.scan_generation != nil {
 		fields = append(fields, library.FieldScanGeneration)
@@ -13810,6 +13903,10 @@ func (m *LibraryMutation) Field(name string) (ent.Value, bool) {
 		return m.ExtractChapterImages()
 	case library.FieldAnalyzeLoudness:
 		return m.AnalyzeLoudness()
+	case library.FieldDownloadLyrics:
+		return m.DownloadLyrics()
+	case library.FieldProviderOrder:
+		return m.ProviderOrder()
 	case library.FieldScanGeneration:
 		return m.ScanGeneration()
 	case library.FieldCreatedAt:
@@ -13847,6 +13944,10 @@ func (m *LibraryMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldExtractChapterImages(ctx)
 	case library.FieldAnalyzeLoudness:
 		return m.OldAnalyzeLoudness(ctx)
+	case library.FieldDownloadLyrics:
+		return m.OldDownloadLyrics(ctx)
+	case library.FieldProviderOrder:
+		return m.OldProviderOrder(ctx)
 	case library.FieldScanGeneration:
 		return m.OldScanGeneration(ctx)
 	case library.FieldCreatedAt:
@@ -13939,6 +14040,20 @@ func (m *LibraryMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAnalyzeLoudness(v)
 		return nil
+	case library.FieldDownloadLyrics:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDownloadLyrics(v)
+		return nil
+	case library.FieldProviderOrder:
+		v, ok := value.(core.ProviderOrder)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProviderOrder(v)
+		return nil
 	case library.FieldScanGeneration:
 		v, ok := value.(int64)
 		if !ok {
@@ -14016,7 +14131,11 @@ func (m *LibraryMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *LibraryMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(library.FieldProviderOrder) {
+		fields = append(fields, library.FieldProviderOrder)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -14029,6 +14148,11 @@ func (m *LibraryMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *LibraryMutation) ClearField(name string) error {
+	switch name {
+	case library.FieldProviderOrder:
+		m.ClearProviderOrder()
+		return nil
+	}
 	return fmt.Errorf("unknown Library nullable field %s", name)
 }
 
@@ -14068,6 +14192,12 @@ func (m *LibraryMutation) ResetField(name string) error {
 		return nil
 	case library.FieldAnalyzeLoudness:
 		m.ResetAnalyzeLoudness()
+		return nil
+	case library.FieldDownloadLyrics:
+		m.ResetDownloadLyrics()
+		return nil
+	case library.FieldProviderOrder:
+		m.ResetProviderOrder()
 		return nil
 	case library.FieldScanGeneration:
 		m.ResetScanGeneration()

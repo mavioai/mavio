@@ -69,6 +69,35 @@ message Library {
   bool extract_chapter_images = 13;
   // Measure the loudness of tracks, for normalization.
   bool analyze_loudness = 14;
+  // Download lyrics for tracks without any when refreshing them.
+  bool download_lyrics = 15;
+  // The providers the library uses.
+  ProviderOrder provider_order = 16;
+}
+
+// ProviderOrder names the providers a library uses of each capability.
+// An unset list uses every provider, in plugin ID order; an empty one
+// uses none.
+message ProviderOrder {
+  ProviderList metadata = 1;
+  ProviderList images = 2;
+  ProviderList subtitles = 3;
+  ProviderList lyrics = 4;
+  ProviderList segments = 5;
+}
+
+// ProviderList names providers by plugin ID, in the order they are asked.
+message ProviderList {
+  repeated string plugin_ids = 1 [(buf.validate.field).repeated = {
+    max_items: 64
+    unique: true
+    items: {
+      string: {
+        min_len: 1
+        max_len: 128
+      }
+    }
+  }];
 }
 
 // LibrarySpec holds the client-settable fields of a library.
@@ -101,6 +130,8 @@ message LibrarySpec {
   bool extract_trickplay = 9;
   bool extract_chapter_images = 10;
   bool analyze_loudness = 11;
+  bool download_lyrics = 12;
+  ProviderOrder provider_order = 13;
 }
 
 message ListLibrariesRequest {}
