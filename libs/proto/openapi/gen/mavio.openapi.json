@@ -1109,6 +1109,36 @@
         "additionalProperties": false,
         "description": "DolbyVision is a Dolby Vision configuration record."
       },
+      "mavio.library.v1.DownloadRemoteLyricsRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          },
+          "provider": {
+            "type": "string",
+            "title": "provider"
+          },
+          "id": {
+            "type": "string",
+            "title": "id"
+          }
+        },
+        "title": "DownloadRemoteLyricsRequest",
+        "required": [
+          "itemId",
+          "provider",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.library.v1.DownloadRemoteLyricsResponse": {
+        "type": "object",
+        "title": "DownloadRemoteLyricsResponse",
+        "additionalProperties": false
+      },
       "mavio.library.v1.DownloadSubtitleRequest": {
         "type": "object",
         "properties": {
@@ -3301,6 +3331,55 @@
         "additionalProperties": false,
         "description": "RemoteImage is an image a provider has."
       },
+      "mavio.library.v1.RemoteLyrics": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "provider",
+            "description": "The provider and its ID of the lyrics, for DownloadRemoteLyrics."
+          },
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "artists": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "artists"
+          },
+          "album": {
+            "type": "string",
+            "title": "album"
+          },
+          "duration": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Duration"
+              }
+            ],
+            "title": "duration"
+          },
+          "synced": {
+            "type": "boolean",
+            "title": "synced"
+          },
+          "score": {
+            "type": "number",
+            "title": "score",
+            "format": "double"
+          }
+        },
+        "title": "RemoteLyrics",
+        "additionalProperties": false,
+        "description": "RemoteLyrics are lyrics a provider has."
+      },
       "mavio.library.v1.RemoteSearchResult": {
         "type": "object",
         "properties": {
@@ -3482,6 +3561,36 @@
           }
         },
         "title": "ScanLibraryResponse",
+        "additionalProperties": false
+      },
+      "mavio.library.v1.SearchRemoteLyricsRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          }
+        },
+        "title": "SearchRemoteLyricsRequest",
+        "required": [
+          "itemId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.library.v1.SearchRemoteLyricsResponse": {
+        "type": "object",
+        "properties": {
+          "lyrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.library.v1.RemoteLyrics"
+            },
+            "title": "lyrics",
+            "description": "Each provider's lyrics, best first, in provider order."
+          }
+        },
+        "title": "SearchRemoteLyricsResponse",
         "additionalProperties": false
       },
       "mavio.library.v1.SearchRemoteRequest": {
@@ -9006,13 +9115,14 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/UpdatePlaylist": {
+    "/mavio.library.v1.PlaylistService/MovePlaylistEntry": {
       "post": {
         "tags": [
           "PlaylistService"
         ],
-        "summary": "UpdatePlaylist",
-        "operationId": "mavio.library.v1.PlaylistService.UpdatePlaylist",
+        "summary": "MovePlaylistEntry",
+        "description": "MovePlaylistEntry moves an entry to another position.",
+        "operationId": "mavio.library.v1.PlaylistService.MovePlaylistEntry",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -9037,7 +9147,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.MovePlaylistEntryRequest"
               }
             }
           },
@@ -9059,7 +9169,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.MovePlaylistEntryResponse"
                 }
               }
             }
@@ -9067,14 +9177,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListLatestItems": {
+    "/mavio.library.v1.LibraryService/ListLibraries": {
       "post": {
         "tags": [
-          "ItemService"
+          "LibraryService"
         ],
-        "summary": "ListLatestItems",
-        "description": "ListLatestItems lists the items added last to the libraries the caller\n may access, newest first.",
-        "operationId": "mavio.library.v1.ItemService.ListLatestItems",
+        "summary": "ListLibraries",
+        "operationId": "mavio.library.v1.LibraryService.ListLibraries",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -9099,7 +9208,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesRequest"
               }
             }
           },
@@ -9121,7 +9230,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesResponse"
                 }
               }
             }
@@ -9129,68 +9238,7 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/GetAuthInfo": {
-      "post": {
-        "tags": [
-          "AuthService"
-        ],
-        "summary": "GetAuthInfo",
-        "description": "GetAuthInfo tells clients how to sign in.",
-        "operationId": "mavio.auth.v1.AuthService.GetAuthInfo",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.GetAuthInfoRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.GetAuthInfoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
+    "/mavio.session.v1.EventService/Subscribe": {},
     "/mavio.auth.v1.AuthService/GetQuickConnectState": {
       "post": {
         "tags": [
@@ -10055,6 +10103,68 @@
         }
       }
     },
+    "/mavio.library.v1.ItemService/DownloadRemoteLyrics": {
+      "post": {
+        "tags": [
+          "ItemService"
+        ],
+        "summary": "DownloadRemoteLyrics",
+        "description": "DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the\n track, as .lrc when synced and .txt otherwise, replacing its other\n lyric files; administrators only.",
+        "operationId": "mavio.library.v1.ItemService.DownloadRemoteLyrics",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.DownloadRemoteLyricsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.DownloadRemoteLyricsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.library.v1.ItemService/GetItem": {
       "post": {
         "tags": [
@@ -10300,14 +10410,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/StopPlayback": {
+    "/mavio.library.v1.ItemService/ListLatestItems": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "ItemService"
         ],
-        "summary": "StopPlayback",
-        "description": "StopPlayback ends a playback and saves the resume position or marks the\n item played.",
-        "operationId": "mavio.playback.v1.PlaybackService.StopPlayback",
+        "summary": "ListLatestItems",
+        "description": "ListLatestItems lists the items added last to the libraries the caller\n may access, newest first.",
+        "operationId": "mavio.library.v1.ItemService.ListLatestItems",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -10332,7 +10442,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsRequest"
               }
             }
           },
@@ -10354,7 +10464,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsResponse"
                 }
               }
             }
@@ -10548,7 +10658,129 @@
         }
       }
     },
-    "/mavio.session.v1.EventService/Subscribe": {},
+    "/mavio.library.v1.ItemService/SearchRemoteLyrics": {
+      "post": {
+        "tags": [
+          "ItemService"
+        ],
+        "summary": "SearchRemoteLyrics",
+        "description": "SearchRemoteLyrics asks the lyrics providers for lyrics of a track;\n administrators only.",
+        "operationId": "mavio.library.v1.ItemService.SearchRemoteLyrics",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.LibraryService/CreateLibrary": {
+      "post": {
+        "tags": [
+          "LibraryService"
+        ],
+        "summary": "CreateLibrary",
+        "operationId": "mavio.library.v1.LibraryService.CreateLibrary",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.library.v1.LibraryService/DeleteLibrary": {
       "post": {
         "tags": [
@@ -10672,13 +10904,14 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/ListLibraries": {
+    "/mavio.playback.v1.PlaybackService/StopPlayback": {
       "post": {
         "tags": [
-          "LibraryService"
+          "PlaybackService"
         ],
-        "summary": "ListLibraries",
-        "operationId": "mavio.library.v1.LibraryService.ListLibraries",
+        "summary": "StopPlayback",
+        "description": "StopPlayback ends a playback and saves the resume position or marks the\n item played.",
+        "operationId": "mavio.playback.v1.PlaybackService.StopPlayback",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -10703,7 +10936,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackRequest"
               }
             }
           },
@@ -10725,7 +10958,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackResponse"
                 }
               }
             }
@@ -11783,14 +12016,14 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/MovePlaylistEntry": {
+    "/mavio.auth.v1.AuthService/CreateApiKey": {
       "post": {
         "tags": [
-          "PlaylistService"
+          "AuthService"
         ],
-        "summary": "MovePlaylistEntry",
-        "description": "MovePlaylistEntry moves an entry to another position.",
-        "operationId": "mavio.library.v1.PlaylistService.MovePlaylistEntry",
+        "summary": "CreateApiKey",
+        "description": "CreateApiKey makes a token an integration calls the API with, as the\n administrator creating it; the token is returned once. Administrators\n only.",
+        "operationId": "mavio.auth.v1.AuthService.CreateApiKey",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -11815,7 +12048,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.MovePlaylistEntryRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.CreateApiKeyRequest"
               }
             }
           },
@@ -11837,7 +12070,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.MovePlaylistEntryResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.CreateApiKeyResponse"
                 }
               }
             }
@@ -11906,14 +12139,13 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/CreateApiKey": {
+    "/mavio.library.v1.PlaylistService/UpdatePlaylist": {
       "post": {
         "tags": [
-          "AuthService"
+          "PlaylistService"
         ],
-        "summary": "CreateApiKey",
-        "description": "CreateApiKey makes a token an integration calls the API with, as the\n administrator creating it; the token is returned once. Administrators\n only.",
-        "operationId": "mavio.auth.v1.AuthService.CreateApiKey",
+        "summary": "UpdatePlaylist",
+        "operationId": "mavio.library.v1.PlaylistService.UpdatePlaylist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -11938,7 +12170,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.CreateApiKeyRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistRequest"
               }
             }
           },
@@ -11960,7 +12192,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.CreateApiKeyResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistResponse"
                 }
               }
             }
@@ -12154,13 +12386,14 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/CreateLibrary": {
+    "/mavio.auth.v1.AuthService/GetAuthInfo": {
       "post": {
         "tags": [
-          "LibraryService"
+          "AuthService"
         ],
-        "summary": "CreateLibrary",
-        "operationId": "mavio.library.v1.LibraryService.CreateLibrary",
+        "summary": "GetAuthInfo",
+        "description": "GetAuthInfo tells clients how to sign in.",
+        "operationId": "mavio.auth.v1.AuthService.GetAuthInfo",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12185,7 +12418,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.GetAuthInfoRequest"
               }
             }
           },
@@ -12207,7 +12440,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.GetAuthInfoResponse"
                 }
               }
             }

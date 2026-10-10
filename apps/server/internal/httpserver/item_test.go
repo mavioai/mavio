@@ -224,6 +224,17 @@ func TestItemService(t *testing.T) {
 		len(p.GetPerson().GetExternalUrls()) != 1 || p.GetPerson().GetExternalUrls()[0].GetUrl() != "https://www.imdb.com/name/nm0000631" {
 		t.Errorf("GetPerson = %v, %v", p, err)
 	}
+	// Only administrators look for lyrics; without lyrics providers there
+	// are none.
+	_, err = asKid.SearchRemoteLyrics(ctx, libraryv1.SearchRemoteLyricsRequest_builder{ItemId: new(c.pilot.ID.String())}.Build())
+	wantCode(t, "kid searches lyrics", err, connect.CodePermissionDenied)
+	if got, err := asAdmin.SearchRemoteLyrics(ctx, libraryv1.SearchRemoteLyricsRequest_builder{ItemId: new(c.pilot.ID.String())}.Build()); err != nil || len(got.GetLyrics()) != 0 {
+		t.Errorf("SearchRemoteLyrics = %v, %v", got, err)
+	}
+	_, err = asAdmin.DownloadRemoteLyrics(ctx, libraryv1.DownloadRemoteLyricsRequest_builder{
+		ItemId: new(c.pilot.ID.String()), Provider: new("nobody"), Id: new("1"),
+	}.Build())
+	wantCode(t, "download lyrics from nobody", err, connect.CodeNotFound)
 
 	// The kid's latest items: only the pilot, not its rated series.
 	latest, err = asKid.ListLatestItems(ctx, libraryv1.ListLatestItemsRequest_builder{}.Build())

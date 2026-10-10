@@ -315,7 +315,7 @@ flowchart TD
 - [x] Events: the event types of [Plugins §4](plugins.md#4-events), event consumers, notifiers
 - [x] HTTP routes
 - [x] Remote devices; acting as devices
-- [ ] Image, lyrics, local metadata, saver and processor providers; external IDs
+- [x] Image, lyrics, local metadata, saver and processor providers; external IDs
 - [ ] Resolvers, intro providers, image generators, media source providers, password reset
 - [ ] Provider order per library
 - [ ] End-to-end test

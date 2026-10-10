@@ -50,6 +50,12 @@ const (
 	ItemServiceListPeopleProcedure = "/mavio.library.v1.ItemService/ListPeople"
 	// ItemServiceGetLyricsProcedure is the fully-qualified name of the ItemService's GetLyrics RPC.
 	ItemServiceGetLyricsProcedure = "/mavio.library.v1.ItemService/GetLyrics"
+	// ItemServiceSearchRemoteLyricsProcedure is the fully-qualified name of the ItemService's
+	// SearchRemoteLyrics RPC.
+	ItemServiceSearchRemoteLyricsProcedure = "/mavio.library.v1.ItemService/SearchRemoteLyrics"
+	// ItemServiceDownloadRemoteLyricsProcedure is the fully-qualified name of the ItemService's
+	// DownloadRemoteLyrics RPC.
+	ItemServiceDownloadRemoteLyricsProcedure = "/mavio.library.v1.ItemService/DownloadRemoteLyrics"
 )
 
 // ItemServiceClient is a client for the mavio.library.v1.ItemService service.
@@ -75,6 +81,13 @@ type ItemServiceClient interface {
 	// GetLyrics returns the lyrics of a track, read from the lyric file
 	// beside it (.elrc, .lrc or .txt).
 	GetLyrics(context.Context, *v1.GetLyricsRequest) (*v1.GetLyricsResponse, error)
+	// SearchRemoteLyrics asks the lyrics providers for lyrics of a track;
+	// administrators only.
+	SearchRemoteLyrics(context.Context, *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error)
+	// DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
+	// track, as .lrc when synced and .txt otherwise, replacing its other
+	// lyric files; administrators only.
+	DownloadRemoteLyrics(context.Context, *v1.DownloadRemoteLyricsRequest) (*v1.DownloadRemoteLyricsResponse, error)
 }
 
 // NewItemServiceClient constructs a client for the mavio.library.v1.ItemService service. By
@@ -144,19 +157,34 @@ func NewItemServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		searchRemoteLyrics: connect.NewClient[v1.SearchRemoteLyricsRequest, v1.SearchRemoteLyricsResponse](
+			httpClient,
+			baseURL+ItemServiceSearchRemoteLyricsProcedure,
+			connect.WithSchema(itemServiceMethods.ByName("SearchRemoteLyrics")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		downloadRemoteLyrics: connect.NewClient[v1.DownloadRemoteLyricsRequest, v1.DownloadRemoteLyricsResponse](
+			httpClient,
+			baseURL+ItemServiceDownloadRemoteLyricsProcedure,
+			connect.WithSchema(itemServiceMethods.ByName("DownloadRemoteLyrics")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // itemServiceClient implements ItemServiceClient.
 type itemServiceClient struct {
-	getItem         *connect.Client[v1.GetItemRequest, v1.GetItemResponse]
-	listItems       *connect.Client[v1.ListItemsRequest, v1.ListItemsResponse]
-	getPerson       *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
-	listValues      *connect.Client[v1.ListValuesRequest, v1.ListValuesResponse]
-	listLatestItems *connect.Client[v1.ListLatestItemsRequest, v1.ListLatestItemsResponse]
-	listNextUp      *connect.Client[v1.ListNextUpRequest, v1.ListNextUpResponse]
-	listPeople      *connect.Client[v1.ListPeopleRequest, v1.ListPeopleResponse]
-	getLyrics       *connect.Client[v1.GetLyricsRequest, v1.GetLyricsResponse]
+	getItem              *connect.Client[v1.GetItemRequest, v1.GetItemResponse]
+	listItems            *connect.Client[v1.ListItemsRequest, v1.ListItemsResponse]
+	getPerson            *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
+	listValues           *connect.Client[v1.ListValuesRequest, v1.ListValuesResponse]
+	listLatestItems      *connect.Client[v1.ListLatestItemsRequest, v1.ListLatestItemsResponse]
+	listNextUp           *connect.Client[v1.ListNextUpRequest, v1.ListNextUpResponse]
+	listPeople           *connect.Client[v1.ListPeopleRequest, v1.ListPeopleResponse]
+	getLyrics            *connect.Client[v1.GetLyricsRequest, v1.GetLyricsResponse]
+	searchRemoteLyrics   *connect.Client[v1.SearchRemoteLyricsRequest, v1.SearchRemoteLyricsResponse]
+	downloadRemoteLyrics *connect.Client[v1.DownloadRemoteLyricsRequest, v1.DownloadRemoteLyricsResponse]
 }
 
 // GetItem calls mavio.library.v1.ItemService.GetItem.
@@ -231,6 +259,24 @@ func (c *itemServiceClient) GetLyrics(ctx context.Context, req *v1.GetLyricsRequ
 	return nil, err
 }
 
+// SearchRemoteLyrics calls mavio.library.v1.ItemService.SearchRemoteLyrics.
+func (c *itemServiceClient) SearchRemoteLyrics(ctx context.Context, req *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error) {
+	response, err := c.searchRemoteLyrics.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// DownloadRemoteLyrics calls mavio.library.v1.ItemService.DownloadRemoteLyrics.
+func (c *itemServiceClient) DownloadRemoteLyrics(ctx context.Context, req *v1.DownloadRemoteLyricsRequest) (*v1.DownloadRemoteLyricsResponse, error) {
+	response, err := c.downloadRemoteLyrics.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ItemServiceHandler is an implementation of the mavio.library.v1.ItemService service.
 type ItemServiceHandler interface {
 	GetItem(context.Context, *v1.GetItemRequest) (*v1.GetItemResponse, error)
@@ -254,6 +300,13 @@ type ItemServiceHandler interface {
 	// GetLyrics returns the lyrics of a track, read from the lyric file
 	// beside it (.elrc, .lrc or .txt).
 	GetLyrics(context.Context, *v1.GetLyricsRequest) (*v1.GetLyricsResponse, error)
+	// SearchRemoteLyrics asks the lyrics providers for lyrics of a track;
+	// administrators only.
+	SearchRemoteLyrics(context.Context, *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error)
+	// DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
+	// track, as .lrc when synced and .txt otherwise, replacing its other
+	// lyric files; administrators only.
+	DownloadRemoteLyrics(context.Context, *v1.DownloadRemoteLyricsRequest) (*v1.DownloadRemoteLyricsResponse, error)
 }
 
 // NewItemServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -319,6 +372,19 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	itemServiceSearchRemoteLyricsHandler := connect.NewUnaryHandlerSimple(
+		ItemServiceSearchRemoteLyricsProcedure,
+		svc.SearchRemoteLyrics,
+		connect.WithSchema(itemServiceMethods.ByName("SearchRemoteLyrics")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	itemServiceDownloadRemoteLyricsHandler := connect.NewUnaryHandlerSimple(
+		ItemServiceDownloadRemoteLyricsProcedure,
+		svc.DownloadRemoteLyrics,
+		connect.WithSchema(itemServiceMethods.ByName("DownloadRemoteLyrics")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.library.v1.ItemService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ItemServiceGetItemProcedure:
@@ -337,6 +403,10 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 			itemServiceListPeopleHandler.ServeHTTP(w, r)
 		case ItemServiceGetLyricsProcedure:
 			itemServiceGetLyricsHandler.ServeHTTP(w, r)
+		case ItemServiceSearchRemoteLyricsProcedure:
+			itemServiceSearchRemoteLyricsHandler.ServeHTTP(w, r)
+		case ItemServiceDownloadRemoteLyricsProcedure:
+			itemServiceDownloadRemoteLyricsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -376,4 +446,12 @@ func (UnimplementedItemServiceHandler) ListPeople(context.Context, *v1.ListPeopl
 
 func (UnimplementedItemServiceHandler) GetLyrics(context.Context, *v1.GetLyricsRequest) (*v1.GetLyricsResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.GetLyrics is not implemented"))
+}
+
+func (UnimplementedItemServiceHandler) SearchRemoteLyrics(context.Context, *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.SearchRemoteLyrics is not implemented"))
+}
+
+func (UnimplementedItemServiceHandler) DownloadRemoteLyrics(context.Context, *v1.DownloadRemoteLyricsRequest) (*v1.DownloadRemoteLyricsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.DownloadRemoteLyrics is not implemented"))
 }

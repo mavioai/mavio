@@ -166,6 +166,46 @@ func (p *processor) Process(ctx context.Context, res *metadata.Result) (*metadat
 	return (&providers.ProcessorPlugin{ID: p.id, Client: pl.Processor()}).Process(ctx, res)
 }
 
+// LyricsProviders returns the lyrics providers among the started plugins.
+func (m *Manager) LyricsProviders() []library.LyricsProvider {
+	var out []library.LyricsProvider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_LYRICS_PROVIDER) {
+		out = append(out, &lyricsProvider{m: m, id: id})
+	}
+	return out
+}
+
+type lyricsProvider struct {
+	m  *Manager
+	id string
+}
+
+func (p *lyricsProvider) Name() string { return p.id }
+
+func (p *lyricsProvider) plugin() (*providers.LyricsPlugin, bool) {
+	pl, ok := p.m.running(p.id)
+	if !ok || pl.Lyrics() == nil {
+		return nil, false
+	}
+	return &providers.LyricsPlugin{ID: p.id, Client: pl.Lyrics()}, true
+}
+
+func (p *lyricsProvider) SearchLyrics(ctx context.Context, q library.LyricsQuery) ([]library.RemoteLyrics, error) {
+	pl, ok := p.plugin()
+	if !ok {
+		return nil, nil
+	}
+	return pl.SearchLyrics(ctx, q)
+}
+
+func (p *lyricsProvider) DownloadLyrics(ctx context.Context, id string) (string, bool, error) {
+	pl, ok := p.plugin()
+	if !ok {
+		return "", false, fmt.Errorf("plugin %s is not ready", p.id)
+	}
+	return pl.DownloadLyrics(ctx, id)
+}
+
 // ImageProviders returns the image providers among the started plugins.
 func (m *Manager) ImageProviders() []library.ImageProvider {
 	var out []library.ImageProvider

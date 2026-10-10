@@ -46,6 +46,15 @@ service ItemService {
   rpc GetLyrics(GetLyricsRequest) returns (GetLyricsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // SearchRemoteLyrics asks the lyrics providers for lyrics of a track;
+  // administrators only.
+  rpc SearchRemoteLyrics(SearchRemoteLyricsRequest) returns (SearchRemoteLyricsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
+  // track, as .lrc when synced and .txt otherwise, replacing its other
+  // lyric files; administrators only.
+  rpc DownloadRemoteLyrics(DownloadRemoteLyricsRequest) returns (DownloadRemoteLyricsResponse);
 }
 
 enum ItemKind {
@@ -351,6 +360,42 @@ message LyricLine {
   google.protobuf.Duration start = 2;
   repeated LyricCue cues = 3;
 }
+
+message SearchRemoteLyricsRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+// RemoteLyrics are lyrics a provider has.
+message RemoteLyrics {
+  // The provider and its ID of the lyrics, for DownloadRemoteLyrics.
+  string provider = 1;
+  string id = 2;
+  string name = 3;
+  repeated string artists = 4;
+  string album = 5;
+  google.protobuf.Duration duration = 6;
+  bool synced = 7;
+  double score = 8;
+}
+
+message SearchRemoteLyricsResponse {
+  // Each provider's lyrics, best first, in provider order.
+  repeated RemoteLyrics lyrics = 1;
+}
+
+message DownloadRemoteLyricsRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  string provider = 2 [(buf.validate.field).required = true];
+  string id = 3 [(buf.validate.field).required = true];
+}
+
+message DownloadRemoteLyricsResponse {}
 
 message GetLyricsResponse {
   string artist = 1;

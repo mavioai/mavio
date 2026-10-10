@@ -122,7 +122,7 @@ A manifest declares external ID kinds in `external_id_kinds`: key, display name,
 `MetadataProcessorService.ProcessMetadata` receives the merged metadata of an item at the end of a refresh, with the credits of the most trusted source, before it is saved, and returns metadata to apply over it: set fields replace the item's, except locked ones, and people replace its credits unless the cast is locked. Processors run in order, each seeing what the ones before did; one failing changes nothing.
 
 ### 8.5 Lyrics Providers
-`LyricsProviderService.SearchLyrics` (track name, artists, album, duration) and `DownloadLyrics`. `ItemService.SearchRemoteLyrics` and `DownloadRemoteLyrics` save the lyrics beside the track as `.lrc` or `.txt`; refreshes download them for tracks without lyrics in libraries that enable a lyrics provider.
+`LyricsProviderService.SearchLyrics` (track name, artists, album, duration, external IDs) returns lyrics with their IDs, and `DownloadLyrics` returns them as LRC when synced and plain text otherwise, at most 1 MiB. `ItemService.SearchRemoteLyrics` and `DownloadRemoteLyrics`, for administrators, search every lyrics provider and save the chosen lyrics beside the track as `.lrc` or `.txt`, replacing its other lyric files; lyrics that do not parse, or synced lyrics without times, are refused. Refreshes download them for tracks without lyrics in libraries that enable a lyrics provider (§8.11).
 
 ### 8.6 Resolvers
 `ResolverService.Ignore` returns which entries of a folder to leave out; `ResolverService.Resolve` may claim a folder and return the items it holds, as the built-in resolvers do, before them. Resolvers run on every folder of a scan, so they are WASM plugins only.

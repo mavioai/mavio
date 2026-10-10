@@ -78,6 +78,8 @@ type Options struct {
 	// Wake is told of the media of each item a client opens; nil tells no
 	// one.
 	Wake func(sources []core.MediaSource)
+	// Lyrics finds lyrics through the lyrics providers; nil finds none.
+	Lyrics *library.Lyrics
 	// ExternalIDKinds lists the kinds of external IDs; nil lists the
 	// built-in kinds.
 	ExternalIDKinds func() []metadata.ExternalIDKind
@@ -119,7 +121,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle("GET /system/backups/{name}", backupDownload(authn, opts.Backups))
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(rpc.NewLibraryService(opts.Store), interceptors))
 	items := rpc.NewItemService(opts.Store)
-	items.Wake, items.ExternalIDKinds = opts.Wake, opts.ExternalIDKinds
+	items.Wake, items.ExternalIDKinds, items.Lyrics = opts.Wake, opts.ExternalIDKinds, opts.Lyrics
 	mux.Handle(libraryv1connect.NewItemServiceHandler(items, interceptors))
 	mux.Handle(libraryv1connect.NewCollectionServiceHandler(rpc.NewCollectionService(opts.Store), interceptors))
 	refresher, subtitles := opts.Refresher, opts.Subtitles

@@ -122,7 +122,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 `MetadataProcessorService.ProcessMetadata` 在刷新结束、保存之前收到条目合并后的元数据（含最可信来源的演职人员），返回要覆盖其上的元数据：已设置的字段替换条目的字段（已锁定的除外），人员在演员表未锁定时替换其演职人员。处理器依次运行，每个都能看到之前处理器的结果；某个失败时不做任何改动。
 
 ### 8.5 歌词提供者
-`LyricsProviderService.SearchLyrics`（曲目名、艺人、专辑、时长）与 `DownloadLyrics`。`ItemService.SearchRemoteLyrics` 与 `DownloadRemoteLyrics` 把歌词以 `.lrc` 或 `.txt` 保存到曲目旁边；在启用了歌词提供者的媒体库中，刷新时为没有歌词的曲目下载歌词。
+`LyricsProviderService.SearchLyrics`（曲目名、艺人、专辑、时长、外部 ID）返回歌词及其 ID，`DownloadLyrics` 返回歌词：同步歌词为 LRC，否则为纯文本，至多 1 MiB。`ItemService.SearchRemoteLyrics` 与 `DownloadRemoteLyrics` 仅供管理员使用，向每个歌词提供者搜索，并把选中的歌词以 `.lrc` 或 `.txt` 保存到曲目旁边，替换其其他歌词文件；无法解析的歌词或没有时间的同步歌词会被拒绝。在启用了歌词提供者的媒体库中，刷新时为没有歌词的曲目下载歌词（§8.11）。
 
 ### 8.6 解析器
 `ResolverService.Ignore` 返回文件夹中哪些条目应被忽略；`ResolverService.Resolve` 可以认领一个文件夹并返回其中的条目，像内置解析器那样，且先于内置解析器执行。解析器在扫描的每个文件夹上运行，因此只能是 WASM 插件。
