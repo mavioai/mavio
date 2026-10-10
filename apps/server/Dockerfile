@@ -18,7 +18,9 @@ COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
 	cd apps/server && CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath \
 	-ldflags "-s -w ${VERSION:+-X github.com/mavioai/mavio/apps/server/internal/buildinfo.version=$VERSION}" \
-	-o /out/mavio ./cmd/mavio
+	-o /out/mavio ./cmd/mavio \
+	&& cd ../../plugins/dlna && mkdir -p /out/plugins/dlna && cp manifest.json /out/plugins/dlna/ \
+	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/dlna/plugin .
 
 FROM --platform=$BUILDPLATFORM debian:trixie-slim AS ffmpeg
 ARG TARGETARCH JELLYFIN_FFMPEG_VERSION
@@ -47,13 +49,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 	&& mkdir -p /config /cache /media && chown -R mavio:mavio /config /cache
 COPY --from=ffmpeg /out/ /usr/lib/jellyfin-ffmpeg/
 COPY --from=server /out/mavio /usr/local/bin/mavio
+# The plugins the image ships, installed into /config/plugins on the first start.
+COPY --from=server /out/plugins/ /usr/lib/mavio/plugins/
 USER mavio
 # /config is Mavio's home: config.toml, the database, plugins, chosen artwork and backups; /cache
 # holds images, compiled plugins and transcodes. Mount media libraries under /media.
-ENV MAVIO_HOME=/config MAVIO_CACHE_DIR=/cache \
+ENV MAVIO_HOME=/config MAVIO_CACHE_DIR=/cache MAVIO_PLUGIN_SEED_DIR=/usr/lib/mavio/plugins \
 	MAVIO_FFMPEG=/usr/lib/jellyfin-ffmpeg/ffmpeg MAVIO_FFPROBE=/usr/lib/jellyfin-ffmpeg/ffprobe
 VOLUME ["/config", "/cache"]
-EXPOSE 8686 7359/udp
+# 1900/udp is DLNA's SSDP; its multicast reaches devices only with the host's network (--network host).
+EXPOSE 8686 7359/udp 1900/udp
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
 	CMD curl -fsS -H 'Content-Type: application/json' -d '{}' \
 		http://127.0.0.1:8686/mavio.system.v1.SystemService/GetHealth || exit 1

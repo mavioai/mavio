@@ -53,6 +53,9 @@ type Config struct {
 	CacheDir string
 	// PluginDir holds one folder per plugin; empty means no plugins.
 	PluginDir string
+	// PluginSeedDir holds plugin folders installed into PluginDir once,
+	// such as those a container image ships; empty seeds none.
+	PluginSeedDir string
 	// PluginDataDir holds the plugins' data folders; empty gives plugins
 	// none.
 	PluginDataDir string
@@ -150,6 +153,11 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	// Plugins start before the handler tree exists; their host API calls
 	// wait for it.
 	hostAPI := newLateHandler()
+	if cfg.PluginDir != "" && cfg.PluginSeedDir != "" {
+		if err := plugins.Seed(ctx, cfg.PluginSeedDir, cfg.PluginDir, log); err != nil {
+			log.WarnContext(ctx, "seed plugins", "err", err)
+		}
+	}
 	plugs, err := plugins.Open(ctx, plugins.Config{
 		Dir: cfg.PluginDir, CacheDir: filepath.Join(cfg.CacheDir, "plugins"), Store: db, Logger: log, HostAPI: hostAPI,
 		DataDir: cfg.PluginDataDir, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,

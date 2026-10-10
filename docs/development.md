@@ -159,7 +159,9 @@ Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`); jobs other 
 
 Other modules are used only inside the repository and promise no stable external API.
 
-The server's release binaries are built with `VERSION=v0.1.0 pnpm nx run server:dist`, and its image with `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` from the repository root. The Dockerfile pins the same jellyfin-ffmpeg version as `mise.toml`, with the SHA-256 digests of its two Linux portable builds; upgrading jellyfin-ffmpeg changes both files, and a test (`apps/server/internal/buildinfo`) fails when the two pins disagree.
+The server's release binaries are built with `VERSION=v0.1.0 pnpm nx run server:dist`, and its image with `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` from the repository root. The Dockerfile pins the same jellyfin-ffmpeg version as `mise.toml`, with the SHA-256 digests of its two Linux portable builds; upgrading jellyfin-ffmpeg changes both files, and a test (`apps/server/internal/buildinfo`) fails when the two pins disagree. The image also builds the DLNA plugin and ships it in `/usr/lib/mavio/plugins`, the plugin seed folder.
+
+First-party process plugins are packaged with their `dist` target: `pnpm nx run dlna:dist` builds the DLNA plugin, at the version in its manifest, for every server platform into `plugins/dlna/dist/`, as one catalog zip per platform and a `catalog.json` listing them with their SHA-256 digests; the zips' URLs are relative to the catalog.
 
 ---
 

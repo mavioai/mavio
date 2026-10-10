@@ -48,6 +48,7 @@ func TestLoadDefaults(t *testing.T) {
 		{"cache-dir", cfg.CacheDir, filepath.Join(home, "cache")},
 		{"transcode-dir", cfg.TranscodeDir, filepath.Join(home, "cache", "transcodes")},
 		{"plugin-dir", cfg.PluginDir, filepath.Join(home, "plugins")},
+		{"plugin-seed-dir", cfg.PluginSeedDir, ""},
 		{"plugin-data-dir", cfg.PluginDataDir, filepath.Join(home, "plugin-data")},
 		{"metadata-dir", cfg.MetadataDir, filepath.Join(home, "metadata")},
 		{"backup-dir", cfg.BackupDir, filepath.Join(home, "backups")},

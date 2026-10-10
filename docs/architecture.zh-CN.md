@@ -290,7 +290,7 @@ libs/plugin/
 插件在 `init` 中用 `guest.Handle(pluginv1connect.New…ServiceHandler(impl))` 注册 handler；`wasip1` 构建导入 `guest/wasm`，原生构建调用 `process.Serve`。`internal/testplugin` 是同时为两种运行时构建的完整示例。
 
 ### 7.5 服务端中的插件
-* **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`--plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。
+* **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`--plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。在此之前，种子目录（`--plugin-seed-dir`，例如容器镜像附带的插件）中的插件会被复制到插件目录，每个只复制一次：插件目录中的标记文件记录已播种的插件，因此被卸载或升级的插件保持原样，插件目录中已有的插件不会被复制。
 * **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `SystemService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。
 * **状态**：插件以其配置运行、或其 schema 接受空配置时为就绪；在等待其 schema 所要求的配置时为未配置；无法启动或拒绝已保存的配置时为失败。`SystemService.ListPlugins` 连同清单一起报告这些状态。
 * **元数据提供者**：每个已启动的元数据插件都是媒体库刷新的提供者；未就绪时它不提供任何信息，因此之后才配置的插件会参与下一次刷新。只提供图片的提供者（如 fanart.tv）凭靠前的提供者找到的 ID 查找图片，靠后的提供者能看到这些 ID。
@@ -396,7 +396,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 ## 11. API 与认证（apps/server）
 
 * **装配**：`apps/server/internal/server` 把存储、插件、播放、图片、媒体库后台任务与处理器树组装起来并运行到关闭；`cmd/mavio` 只负责解析出它的配置，端到端测试运行的也是同一套装配。
-* **主目录与设置**：服务端保存的一切都在其主目录中，默认为 `~/.mavio`，可由 `--home` 或 `MAVIO_HOME` 另行指定：`config.toml`（可选）、SQLite 数据库 `mavio.db`、`plugins/`、`plugin-data/`（插件的数据目录）、`metadata/`（选定的图片）、`backups/` 与 `cache/`（下载与缩放后的图片、编译后的插件，以及位于 `cache/transcodes/` 的进行中转码），缺失时自动创建。约定无需配置；确实存在的设置（`addr`、`database`、`ffmpeg`、`ffprobe`、`cache-dir`、`transcode-dir`、`plugin-dir`、`plugin-data-dir`、`metadata-dir`、`backup-dir`、`discovery-addr`、`dev`、`dev-library`）由 Viper 依次从命令的参数（`--cache-dir`）、环境变量（`MAVIO_CACHE_DIR`）与 `config.toml`（`cache-dir = "/srv/cache"`）读取，默认取上述布局；转码目录跟随缓存目录。`config.toml` 中的路径必须是绝对路径，填相对路径时服务端拒绝启动；参数与环境变量中的相对路径相对于工作目录；`plugin-dir`、`backup-dir` 或 `discovery-addr` 为空时分别关闭插件、备份或局域网发现。`config.toml` 中有未知的键时服务端拒绝启动。`mavio version` 打印版本，`--restore <备份>` 在提供服务前把备份恢复到空数据库中。
+* **主目录与设置**：服务端保存的一切都在其主目录中，默认为 `~/.mavio`，可由 `--home` 或 `MAVIO_HOME` 另行指定：`config.toml`（可选）、SQLite 数据库 `mavio.db`、`plugins/`、`plugin-data/`（插件的数据目录）、`metadata/`（选定的图片）、`backups/` 与 `cache/`（下载与缩放后的图片、编译后的插件，以及位于 `cache/transcodes/` 的进行中转码），缺失时自动创建。约定无需配置；确实存在的设置（`addr`、`database`、`ffmpeg`、`ffprobe`、`cache-dir`、`transcode-dir`、`plugin-dir`、`plugin-seed-dir`、`plugin-data-dir`、`metadata-dir`、`backup-dir`、`discovery-addr`、`dev`、`dev-library`）由 Viper 依次从命令的参数（`--cache-dir`）、环境变量（`MAVIO_CACHE_DIR`）与 `config.toml`（`cache-dir = "/srv/cache"`）读取，默认取上述布局；转码目录跟随缓存目录。`config.toml` 中的路径必须是绝对路径，填相对路径时服务端拒绝启动；参数与环境变量中的相对路径相对于工作目录；`plugin-dir`、`backup-dir` 或 `discovery-addr` 为空时分别关闭插件、备份或局域网发现。`config.toml` 中有未知的键时服务端拒绝启动。`mavio version` 打印版本，`--restore <备份>` 在提供服务前把备份恢复到空数据库中。
 * **单一处理器树**：`apps/server/internal/httpserver` 把 Connect 服务（实现位于 `internal/rpc`）与普通 HTTP 媒体端点挂载在同一个 `http.ServeMux` 上。每个 Connect 请求在到达服务之前先按其 protovalidate 规则校验，违反规则返回 `invalid_argument`。
 * **账户**：密码以 argon2id（19 MiB、2 轮、1 条并行通道）散列为 PHC 字符串；使用其他参数的散列仍被接受，并在下一次成功登录时替换。以不存在的用户名登录与密码错误的耗时相同。通过插件认证的用户没有密码散列。
 * **Quick Connect**：与 Jellyfin 一样，可以用已登录的设备让新设备登录。新设备无需凭据即可发起请求并显示六位数字代码；已登录用户输入该代码，即以该用户身份为设备登录；设备用请求的密钥（32 个随机字节，从不显示）轮询请求，随后领取一次访问令牌。请求保存在内存中，十分钟后过期，或在获得授权一分钟后过期。代码在待处理的请求中唯一。
@@ -433,4 +433,4 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 
 * **服务端二进制**：`pnpm nx run server:dist` 以 `CGO_ENABLED=0` 和 `-trimpath` 将 `cmd/mavio` 交叉编译为 Linux、macOS、Windows 的 amd64 与 arm64 版本，输出到 `apps/server/dist/`；设置了 `$VERSION` 时将其写入 `internal/buildinfo`。所有二进制均为静态链接。
 * **容器镜像**（`apps/server/Dockerfile`，从仓库根目录构建）：服务端在构建机自身平台上交叉编译，因此构建 linux/amd64 与 linux/arm64 镜像时 Go 部分无需模拟。镜像在 `/usr/lib/jellyfin-ffmpeg` 内置 jellyfin-ffmpeg 便携版，即 `mise.toml` 锁定的版本，并按 GitHub 为该发布文件给出的 SHA-256 摘要校验；基础镜像为 Debian slim，附带 CA 证书与时区数据。
-* **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。健康检查调用 `SystemService.GetHealth`。
+* **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。DLNA 插件随服务端一起构建，并从 `/usr/lib/mavio/plugins` 播种；它在 UDP 1900 端口上的 SSDP 只有在 `--network host` 下才能到达容器。健康检查调用 `SystemService.GetHealth`。
