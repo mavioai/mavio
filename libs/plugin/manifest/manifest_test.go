@@ -56,9 +56,20 @@ func TestTasks(t *testing.T) {
 	}
 }
 
+func idKind(key, template string) *pluginv1.ExternalIdKind {
+	return pluginv1.ExternalIdKind_builder{
+		Key: &key, Name: new("Trakt"), MediaKinds: []pluginv1.MediaKind{pluginv1.MediaKind_MEDIA_KIND_MOVIE}, UrlTemplate: &template,
+	}.Build()
+}
+
 func TestValidate(t *testing.T) {
 	if err := Validate(valid()); err != nil {
 		t.Fatalf("valid manifest: %v", err)
+	}
+	m := valid()
+	m.SetExternalIdKinds([]*pluginv1.ExternalIdKind{idKind("trakt", "https://trakt.tv/movies/{id}"), idKind("simkl", "")})
+	if err := Validate(m); err != nil {
+		t.Fatalf("manifest with external ID kinds: %v", err)
 	}
 	tests := []struct {
 		name string
@@ -101,6 +112,21 @@ func TestValidate(t *testing.T) {
 			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_HTTP_HANDLER))
 			m.SetConfigPage("a/../../x")
 		}, "config_page"},
+		{"bad external ID key", func(m *pluginv1.Manifest) { m.SetExternalIdKinds([]*pluginv1.ExternalIdKind{idKind("Trakt", "")}) }, "external ID key"},
+		{"duplicate external ID key", func(m *pluginv1.Manifest) {
+			m.SetExternalIdKinds([]*pluginv1.ExternalIdKind{idKind("trakt", ""), idKind("trakt", "")})
+		}, "not unique"},
+		{"external ID kind without media", func(m *pluginv1.Manifest) {
+			k := idKind("trakt", "")
+			k.SetMediaKinds(nil)
+			m.SetExternalIdKinds([]*pluginv1.ExternalIdKind{k})
+		}, "needs media kinds"},
+		{"relative URL template", func(m *pluginv1.Manifest) {
+			m.SetExternalIdKinds([]*pluginv1.ExternalIdKind{idKind("trakt", "/movies/{id}")})
+		}, "url_template"},
+		{"URL template without ID", func(m *pluginv1.Manifest) {
+			m.SetExternalIdKinds([]*pluginv1.ExternalIdKind{idKind("trakt", "https://trakt.tv/")})
+		}, "url_template"},
 		{"bad schema", func(m *pluginv1.Manifest) { m.SetConfigSchema(`{"type":"nope"}`) }, "config_schema"},
 	}
 	for _, tt := range tests {

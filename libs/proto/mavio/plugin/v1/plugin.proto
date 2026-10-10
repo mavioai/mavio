@@ -6,6 +6,7 @@ edition = "2023";
 // the capability services it declares in its manifest.
 package mavio.plugin.v1;
 
+import "mavio/plugin/v1/metadata.proto";
 import "mavio/plugin/v1/task.proto";
 
 // PluginService is the lifecycle service every plugin implements.
@@ -87,6 +88,24 @@ message Manifest {
   // Page among the plugin's HTTP routes that configures it, relative to
   // /plugins/{id}/, e.g. "settings"; requires CAPABILITY_HTTP_HANDLER.
   string config_page = 14;
+  // Kinds of external IDs the plugin's providers give, beyond the built-in
+  // ones, so that clients can name them and link to their pages.
+  repeated ExternalIdKind external_id_kinds = 15;
+}
+
+// ExternalIdKind is a kind of external ID, e.g. the ID of a movie on a
+// metadata site.
+message ExternalIdKind {
+  // Key of the IDs in external_ids maps: lowercase letters, digits and
+  // underscores, starting with a letter, e.g. "trakt".
+  string key = 1;
+  // Display name, e.g. "Trakt".
+  string name = 2;
+  // Kinds of media that carry the ID.
+  repeated MediaKind media_kinds = 3;
+  // Absolute http(s) URL of the page of an ID, with "{id}" standing for it,
+  // e.g. "https://trakt.tv/movies/{id}"; empty when there is no page.
+  string url_template = 4;
 }
 
 // Permissions are the host resources a plugin requests. An administrator

@@ -40,6 +40,7 @@ var (
 	taskPattern    = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 	scopePattern   = regexp.MustCompile(`^mavio\.[a-z0-9]+\.v[0-9]+\.[A-Z][A-Za-z0-9]*Service(:read)?$`)
 	eventPattern   = regexp.MustCompile(`^(\*|[a-z]+(_[a-z]+)*\.(\*|[a-z]+(_[a-z]+)*))$`)
+	keyPattern     = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
 )
 
 // Task limits.
@@ -163,6 +164,33 @@ func Validate(m *pluginv1.Manifest) error {
 		}
 		if t.HasTimeout() && (t.GetTimeout().AsDuration() <= 0 || t.GetTimeout().AsDuration() > MaxTaskTimeout) {
 			add("task %q: timeout must be positive and at most %s", t.GetId(), MaxTaskTimeout)
+		}
+	}
+	keys := map[string]bool{}
+	for _, k := range m.GetExternalIdKinds() {
+		switch {
+		case !keyPattern.MatchString(k.GetKey()):
+			add("external ID key %q must be lowercase letters, digits and underscores, starting with a letter", k.GetKey())
+		case keys[k.GetKey()]:
+			add("external ID key %q is not unique", k.GetKey())
+		}
+		keys[k.GetKey()] = true
+		if k.GetName() == "" {
+			add("external ID kind %q needs a name", k.GetKey())
+		}
+		if len(k.GetMediaKinds()) == 0 {
+			add("external ID kind %q needs media kinds", k.GetKey())
+		}
+		for _, mk := range k.GetMediaKinds() {
+			if mk == pluginv1.MediaKind_MEDIA_KIND_UNSPECIFIED || pluginv1.MediaKind_name[int32(mk)] == "" {
+				add("external ID kind %q: unknown media kind %v", k.GetKey(), mk)
+			}
+		}
+		if t := k.GetUrlTemplate(); t != "" {
+			if u, err := url.Parse(strings.ReplaceAll(t, "{id}", "x")); err != nil || (u.Scheme != "http" && u.Scheme != "https") ||
+				u.Host == "" || !strings.Contains(t, "{id}") {
+				add("external ID kind %q: url_template %q must be an absolute http(s) URL containing {id}", k.GetKey(), t)
+			}
 		}
 	}
 	if s := m.GetConfigSchema(); s != "" {
