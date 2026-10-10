@@ -10,7 +10,7 @@
 
 * **Bottom-up**: build the low-level libraries with no business dependencies first, then assemble layer by layer; each layer depends only on completed layers below it.
 * **Definition of done**: a phase is complete when its libraries pass their tests, including all ported test cases (or cases explicitly marked skip with a reason), see [Testing §2](testing.md#2-porting-test-cases-from-jellyfin).
-* **Server first**: P7 to P12 complete the server, by comparing it with Jellyfin's server (its API controllers and providers); P13 and P14 bring plugins level with Jellyfin's and add DLNA; the clients follow in P15, on a finished API; P16 packages and publishes the releases.
+* **Server first**: P7 to P12 complete the server, by comparing it with Jellyfin's server (its API controllers and providers); P13 and P14 bring plugins level with Jellyfin's and add DLNA; the clients follow in P15, on a finished API; P16 verifies playback end to end on real devices; P17 packages and publishes the releases.
 * **Integration smoke tests**: starting from P1, the end of each phase adds an integration test in `apps/server/internal/smoke` that wires the completed libraries together. It is not an MVP; it only exposes interface drift early, reducing the bottom-up approach's risk of "discovering problems only at final integration".
 
 ---
@@ -35,7 +35,8 @@ flowchart TD
     P13["P13 Plugin platform<br/>host API, events, HTTP routes, tasks, remote devices, more provider types"]
     P14["P14 DLNA<br/>plugins/dlna: media server, Play To, device profiles"]
     P15["P15 Clients and ecosystem<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim decision"]
-    P16["P16 Packaging and release<br/>libs/proto and libs/plugin tags, server binaries and container images"]
+    P16["P16 Real-device acceptance<br/>end-to-end playback on real televisions and clients"]
+    P17["P17 Packaging and release<br/>libs/proto and libs/plugin tags, server binaries and container images"]
 
     P0 --> P1
     P1 --> P2
@@ -58,6 +59,7 @@ flowchart TD
     P13 --> P15
     P14 --> P16
     P15 --> P16
+    P16 --> P17
 ```
 
 | Phase | Theme | Status |
@@ -76,9 +78,10 @@ flowchart TD
 | P11 | Administration and operations | ✅ Done |
 | P12 | Media extras | ✅ Done |
 | P13 | Plugin platform | ✅ Done |
-| P14 | DLNA | In progress |
+| P14 | DLNA | ✅ Done |
 | P15 | Clients and ecosystem | Not started |
-| P16 | Packaging and release | Not started |
+| P16 | Real-device acceptance | Not started |
+| P17 | Packaging and release | Not started |
 
 ---
 
@@ -167,7 +170,7 @@ flowchart TD
 - [x] Playback verified with the development player on Safari's native HLS, which is AVFoundation's: direct stream, transcodes, seeking with restarts, an HLS subtitle rendition in sync. HLS subtitle renditions are WebVTT segmented along the video without `X-TIMESTAMP-MAP`; if a player misplaces them, add one derived from the video's timestamps
 
 ### P6 Server Assembly and Distribution
-**Scope**: `apps/server` assembly; `CGO_ENABLED=0` cross-compilation; container images bundling jellyfin-ffmpeg's portable build, the one `mise.toml` pins. Publishing them is part of P16.
+**Scope**: `apps/server` assembly; `CGO_ENABLED=0` cross-compilation; container images bundling jellyfin-ffmpeg's portable build, the one `mise.toml` pins. Publishing them is part of P17.
 
 **Done when**: end-to-end smoke test: scan → scrape → playback decision → HLS playback.
 
@@ -327,7 +330,7 @@ flowchart TD
 ### P14 DLNA
 **Scope**: `plugins/dlna`, a first-party process plugin ([Plugins §10](plugins.md#10-dlna-pluginsdlna)): media server (SSDP, ContentDirectory, ConnectionManager, media with DLNA headers), Play To (renderer discovery, AVTransport and RenderingControl), device profiles; built for every server platform, packaged for a catalog and bundled in the container image.
 
-**Done when**: an end-to-end test with a simulated control point and renderer on the loopback interface discovers the server, browses a library, plays a file with range requests, and drives a renderer through play, pause, seek and stop with progress reported; playback is verified on a real television.
+**Done when**: an end-to-end test with a simulated control point and renderer on the loopback interface discovers the server, browses a library, plays a file with range requests, and drives a renderer through play, pause, seek and stop with progress reported. Playback on a real television is verified in P16.
 
 **Progress**:
 - [x] SSDP and device description
@@ -336,12 +339,19 @@ flowchart TD
 - [x] Play To
 - [x] Builds, catalog packages and container image (seeded plugin folder)
 - [x] End-to-end test (`apps/server/internal/server/dlna_test.go`)
-- [ ] Playback verified on a real television
 
 ### P15 Clients and Ecosystem
 **Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its completion criteria will be defined after P14.
 
-### P16 Packaging and Release
+### P16 Real-Device Acceptance
+**Scope**: end-to-end playback on real devices, after the clients exist: DLNA media server and Play To on real televisions, with the profiles adjusted to what they do.
+
+**Done when**: a real television browses and plays a library through the media server, and is driven through Play To with progress reported.
+
+**Progress**:
+- [ ] DLNA on a real television
+
+### P17 Packaging and Release
 **Scope**: the first releases ([Development §7](development.md#7-releases-and-versioning)): `libs/proto` and `libs/plugin` tagged in that order; the server's release binaries and container images published; the official plugin catalog published with the DLNA plugin.
 
 **Done when**: a plugin outside the repository builds against the tagged `libs/proto` and `libs/plugin` with `GOWORK=off` and no `replace`; the release binaries and images of a version are published and the images start.
