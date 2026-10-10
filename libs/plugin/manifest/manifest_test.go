@@ -89,6 +89,9 @@ func TestValidate(t *testing.T) {
 			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_EVENT_CONSUMER))
 			m.GetPermissions().SetEvents([]string{"item.*.added"})
 		}, "event"},
+		{"device controller not acting as users", func(m *pluginv1.Manifest) {
+			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_DEVICE_CONTROLLER))
+		}, "act_as_users"},
 		{"config page without routes", func(m *pluginv1.Manifest) { m.SetConfigPage("settings") }, "requires CAPABILITY_HTTP_HANDLER"},
 		{"absolute config page", func(m *pluginv1.Manifest) {
 			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_HTTP_HANDLER))

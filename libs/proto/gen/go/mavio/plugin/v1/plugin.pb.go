@@ -93,6 +93,9 @@ const (
 	// Serves HTTP routes under /plugins/{id}/, registered with
 	// guest.HandleHTTP.
 	Capability_CAPABILITY_HTTP_HANDLER Capability = 8
+	// Lists remote devices with HostService.SetDevices and implements
+	// DeviceControllerService for them; requires permissions.act_as_users.
+	Capability_CAPABILITY_DEVICE_CONTROLLER Capability = 9
 )
 
 // Enum value maps for Capability.
@@ -107,6 +110,7 @@ var (
 		6: "CAPABILITY_TASK_RUNNER",
 		7: "CAPABILITY_EVENT_CONSUMER",
 		8: "CAPABILITY_HTTP_HANDLER",
+		9: "CAPABILITY_DEVICE_CONTROLLER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":       0,
@@ -118,6 +122,7 @@ var (
 		"CAPABILITY_TASK_RUNNER":       6,
 		"CAPABILITY_EVENT_CONSUMER":    7,
 		"CAPABILITY_HTTP_HANDLER":      8,
+		"CAPABILITY_DEVICE_CONTROLLER": 9,
 	}
 )
 
@@ -737,7 +742,8 @@ type Permissions_builder struct {
 	// the methods without side effects, e.g. "mavio.library.v1.ItemService:read".
 	Api []string
 	// Whether host API requests may act as a user named in the Mavio-User
-	// header.
+	// header, and a device controller's also as one of its devices named in
+	// the Mavio-Device header.
 	ActAsUsers *bool
 	// Event types the plugin consumes: a type such as "item.added", a
 	// category such as "item.*", or "*" for every event. Requires
@@ -1279,7 +1285,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\x9c\x02\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\xbe\x02\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1290,7 +1296,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x1bCAPABILITY_SEGMENT_PROVIDER\x10\x05\x12\x1a\n" +
 	"\x16CAPABILITY_TASK_RUNNER\x10\x06\x12\x1d\n" +
 	"\x19CAPABILITY_EVENT_CONSUMER\x10\a\x12\x1b\n" +
-	"\x17CAPABILITY_HTTP_HANDLER\x10\b2\xda\x02\n" +
+	"\x17CAPABILITY_HTTP_HANDLER\x10\b\x12 \n" +
+	"\x1cCAPABILITY_DEVICE_CONTROLLER\x10\t2\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +

@@ -130,6 +130,9 @@ func Validate(m *pluginv1.Manifest) error {
 			add("event %q must be a type such as item.added, a category such as item.*, or *", e)
 		}
 	}
+	if HasCapability(m, pluginv1.Capability_CAPABILITY_DEVICE_CONTROLLER) && !m.GetPermissions().GetActAsUsers() {
+		add("CAPABILITY_DEVICE_CONTROLLER requires permissions.act_as_users")
+	}
 	if page := m.GetConfigPage(); page != "" {
 		if !HasCapability(m, pluginv1.Capability_CAPABILITY_HTTP_HANDLER) {
 			add("config_page requires CAPABILITY_HTTP_HANDLER")

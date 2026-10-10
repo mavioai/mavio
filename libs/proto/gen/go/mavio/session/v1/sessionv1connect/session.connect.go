@@ -128,11 +128,14 @@ func (UnimplementedEventServiceHandler) Subscribe(context.Context, *v1.Subscribe
 // SessionServiceClient is a client for the mavio.session.v1.SessionService service.
 type SessionServiceClient interface {
 	// ListSessions lists the calling user's signed-in devices with what they
-	// play, online ones first; administrators may list every user's.
+	// play, online ones first; administrators may list every user's. The
+	// remote devices of plugins, such as DLNA renderers, are listed to
+	// everyone.
 	ListSessions(context.Context, *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error)
 	// SendCommand sends a command to an online device of the calling user,
-	// or of anyone for administrators, through its event stream. The device
-	// carries it out and reports its playback as usual.
+	// or of anyone for administrators, through its event stream, or to a
+	// plugin's remote device through its plugin. The device carries it out
+	// and reports its playback as usual.
 	SendCommand(context.Context, *v1.SendCommandRequest) (*v1.SendCommandResponse, error)
 }
 
@@ -190,11 +193,14 @@ func (c *sessionServiceClient) SendCommand(ctx context.Context, req *v1.SendComm
 // SessionServiceHandler is an implementation of the mavio.session.v1.SessionService service.
 type SessionServiceHandler interface {
 	// ListSessions lists the calling user's signed-in devices with what they
-	// play, online ones first; administrators may list every user's.
+	// play, online ones first; administrators may list every user's. The
+	// remote devices of plugins, such as DLNA renderers, are listed to
+	// everyone.
 	ListSessions(context.Context, *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error)
 	// SendCommand sends a command to an online device of the calling user,
-	// or of anyone for administrators, through its event stream. The device
-	// carries it out and reports its playback as usual.
+	// or of anyone for administrators, through its event stream, or to a
+	// plugin's remote device through its plugin. The device carries it out
+	// and reports its playback as usual.
 	SendCommand(context.Context, *v1.SendCommandRequest) (*v1.SendCommandResponse, error)
 }
 

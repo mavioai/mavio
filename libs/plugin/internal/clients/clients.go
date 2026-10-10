@@ -22,6 +22,7 @@ type Set struct {
 	segments  pluginv1connect.MediaSegmentProviderServiceClient
 	tasks     pluginv1connect.TaskRunnerServiceClient
 	events    pluginv1connect.EventConsumerServiceClient
+	devices   pluginv1connect.DeviceControllerServiceClient
 }
 
 // New builds the clients for m over c.
@@ -47,6 +48,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_EVENT_CONSUMER) {
 		s.events = pluginv1connect.NewEventConsumerServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_DEVICE_CONTROLLER) {
+		s.devices = pluginv1connect.NewDeviceControllerServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -77,3 +81,6 @@ func (s Set) Tasks() pluginv1connect.TaskRunnerServiceClient { return s.tasks }
 
 // Events returns the EventConsumerService client, or nil.
 func (s Set) Events() pluginv1connect.EventConsumerServiceClient { return s.events }
+
+// Devices returns the DeviceControllerService client, or nil.
+func (s Set) Devices() pluginv1connect.DeviceControllerServiceClient { return s.devices }

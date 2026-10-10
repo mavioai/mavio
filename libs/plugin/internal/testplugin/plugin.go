@@ -19,6 +19,9 @@
 // Authorization and Mavio-Plugin-Token headers and the body; "/big" with
 // 17 MiB.
 //
+// As a device controller it takes commands to its device "tv" and rejects
+// others, naming the device and the user.
+//
 // Its tasks: "write" writes a file to its data folder and reads it back;
 // "slow" sleeps for two seconds.
 package main
@@ -53,6 +56,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewMetadataProviderServiceHandler(&provider{}))
 	guest.Handle(pluginv1connect.NewTaskRunnerServiceHandler(tasks{}))
 	guest.Handle(pluginv1connect.NewEventConsumerServiceHandler(consumer{}))
+	guest.Handle(pluginv1connect.NewDeviceControllerServiceHandler(devices{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -80,6 +84,15 @@ func (consumer) Consume(_ context.Context, req *pluginv1.ConsumeRequest) (*plugi
 		}
 	}
 	return &pluginv1.ConsumeResponse{}, f.Close()
+}
+
+type devices struct{}
+
+func (devices) SendCommand(_ context.Context, req *pluginv1.SendCommandRequest) (*pluginv1.SendCommandResponse, error) {
+	if req.GetDeviceId() != "tv" || !req.GetCommand().HasPlay() {
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("%s cannot do that for %s", req.GetDeviceId(), req.GetUserName()))
+	}
+	return &pluginv1.SendCommandResponse{}, nil
 }
 
 type tasks struct{}

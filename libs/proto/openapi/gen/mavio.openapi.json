@@ -4821,7 +4821,8 @@
           "CAPABILITY_SEGMENT_PROVIDER",
           "CAPABILITY_TASK_RUNNER",
           "CAPABILITY_EVENT_CONSUMER",
-          "CAPABILITY_HTTP_HANDLER"
+          "CAPABILITY_HTTP_HANDLER",
+          "CAPABILITY_DEVICE_CONTROLLER"
         ]
       },
       "mavio.plugin.v1.Manifest": {
@@ -4939,7 +4940,7 @@
           "actAsUsers": {
             "type": "boolean",
             "title": "act_as_users",
-            "description": "Whether host API requests may act as a user named in the Mavio-User\n header."
+            "description": "Whether host API requests may act as a user named in the Mavio-User\n header, and a device controller's also as one of its devices named in\n the Mavio-Device header."
           },
           "events": {
             "type": "array",
@@ -6032,6 +6033,11 @@
             ],
             "title": "now_playing",
             "description": "Unset when the device plays nothing."
+          },
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id",
+            "description": "The plugin controlling a remote device, which has no user and whose\n client is its product."
           }
         },
         "title": "Session",
@@ -12106,7 +12112,7 @@
           "SessionService"
         ],
         "summary": "SendCommand",
-        "description": "SendCommand sends a command to an online device of the calling user,\n or of anyone for administrators, through its event stream. The device\n carries it out and reports its playback as usual.",
+        "description": "SendCommand sends a command to an online device of the calling user,\n or of anyone for administrators, through its event stream, or to a\n plugin's remote device through its plugin. The device carries it out\n and reports its playback as usual.",
         "operationId": "mavio.session.v1.SessionService.SendCommand",
         "parameters": [
           {
@@ -14139,7 +14145,7 @@
           "SessionService"
         ],
         "summary": "ListSessions",
-        "description": "ListSessions lists the calling user's signed-in devices with what they\n play, online ones first; administrators may list every user's.",
+        "description": "ListSessions lists the calling user's signed-in devices with what they\n play, online ones first; administrators may list every user's. The\n remote devices of plugins, such as DLNA renderers, are listed to\n everyone.",
         "operationId": "mavio.session.v1.SessionService.ListSessions",
         "parameters": [
           {

@@ -25,6 +25,15 @@ import (
 // its plain HTTP routes, reached with the client HostClient returns.
 const HostURL = "http://" + abi.HostName
 
+// Headers of host API requests; see HostClient.
+const (
+	// UserHeader names the user a request acts as.
+	UserHeader = "Mavio-User"
+	// DeviceHeader names the device, among a device controller's, that a
+	// request acting as a user acts as.
+	DeviceHeader = "Mavio-Device"
+)
+
 var (
 	mu         sync.RWMutex
 	mux        = http.NewServeMux()
@@ -73,8 +82,10 @@ func HTTPClient() *http.Client {
 
 // HostClient returns the client for the host API at HostURL. The host
 // authorizes its requests by the scopes of the manifest's permissions.api;
-// a request acts as the plugin itself unless it names a user in the
-// Mavio-User header and the manifest sets permissions.act_as_users.
+// a request acts as the plugin itself unless it names a user in
+// UserHeader and the manifest sets permissions.act_as_users. A device
+// controller's request acting as a user may also name one of its devices
+// in DeviceHeader, so that the playbacks it starts belong to the device.
 func HostClient() *http.Client {
 	mu.RLock()
 	defer mu.RUnlock()

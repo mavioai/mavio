@@ -1,0 +1,113 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "google/protobuf/duration.proto";
+
+// HostService is what the server offers plugins besides its public API,
+// through the host API. Every plugin may call it.
+service HostService {
+  // SetDevices replaces the remote devices of the calling plugin, which
+  // must declare CAPABILITY_DEVICE_CONTROLLER. The server lists each as a
+  // session every signed-in user sees, until the plugin lists it no
+  // longer or stops.
+  rpc SetDevices(SetDevicesRequest) returns (SetDevicesResponse);
+}
+
+// DeviceControllerService carries out the commands users send to a
+// plugin's devices.
+service DeviceControllerService {
+  // SendCommand carries out a command on a device. The plugin acts as the
+  // user and the device (Mavio-User and Mavio-Device headers) for what
+  // follows from it, such as the playback it starts. An error is returned
+  // to the user who sent the command.
+  rpc SendCommand(SendCommandRequest) returns (SendCommandResponse);
+}
+
+// Device is a remote device a plugin controls, such as a DLNA renderer.
+message Device {
+  // Identifier within the plugin, kept while the device is the same, such
+  // as its UDN; required, at most 256 bytes.
+  string id = 1;
+  // Required, at most 256 bytes.
+  string name = 2;
+  // What the device is, such as its manufacturer and model; at most 256
+  // bytes.
+  string product = 3;
+  // The kinds of commands the device takes.
+  repeated CommandKind commands = 4;
+}
+
+// CommandKind is a kind of Command.
+enum CommandKind {
+  COMMAND_KIND_UNSPECIFIED = 0;
+  COMMAND_KIND_PLAY = 1;
+  COMMAND_KIND_PLAY_STATE = 2;
+  COMMAND_KIND_SEEK = 3;
+  COMMAND_KIND_MESSAGE = 4;
+}
+
+// Command is what a user asks a device to do, as
+// mavio.session.v1.SessionService.SendCommand received it.
+message Command {
+  oneof kind {
+    Play play = 1;
+    PlayState play_state = 2;
+    Seek seek = 3;
+    ShowMessage message = 4;
+  }
+}
+
+// Play starts playing items, as a queue.
+message Play {
+  repeated string item_ids = 1;
+  // The item of the queue to start with.
+  int32 start_index = 2;
+  google.protobuf.Duration start_position = 3;
+}
+
+// PlayState changes the playback.
+message PlayState {
+  PlayStateCommand command = 1;
+}
+
+enum PlayStateCommand {
+  PLAY_STATE_COMMAND_UNSPECIFIED = 0;
+  PLAY_STATE_COMMAND_PAUSE = 1;
+  PLAY_STATE_COMMAND_UNPAUSE = 2;
+  PLAY_STATE_COMMAND_STOP = 3;
+  PLAY_STATE_COMMAND_NEXT = 4;
+  PLAY_STATE_COMMAND_PREVIOUS = 5;
+}
+
+// Seek moves the playback.
+message Seek {
+  google.protobuf.Duration position = 1;
+}
+
+// ShowMessage shows a text.
+message ShowMessage {
+  string text = 1;
+  // How long to show it; unset leaves it to the device.
+  google.protobuf.Duration timeout = 2;
+}
+
+message SetDevicesRequest {
+  // At most 1000, with distinct IDs.
+  repeated Device devices = 1;
+}
+
+message SetDevicesResponse {}
+
+message SendCommandRequest {
+  // The device's ID within the plugin.
+  string device_id = 1;
+  // The device's session, which StartPlayback and the session list use.
+  string session_id = 2;
+  // The user sending the command, to name in Mavio-User.
+  string user_id = 3;
+  string user_name = 4;
+  Command command = 5;
+}
+
+message SendCommandResponse {}

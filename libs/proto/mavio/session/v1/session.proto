@@ -24,13 +24,16 @@ service EventService {
 // SessionService lists the signed-in devices and controls them remotely.
 service SessionService {
   // ListSessions lists the calling user's signed-in devices with what they
-  // play, online ones first; administrators may list every user's.
+  // play, online ones first; administrators may list every user's. The
+  // remote devices of plugins, such as DLNA renderers, are listed to
+  // everyone.
   rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
   // SendCommand sends a command to an online device of the calling user,
-  // or of anyone for administrators, through its event stream. The device
-  // carries it out and reports its playback as usual.
+  // or of anyone for administrators, through its event stream, or to a
+  // plugin's remote device through its plugin. The device carries it out
+  // and reports its playback as usual.
   rpc SendCommand(SendCommandRequest) returns (SendCommandResponse);
 }
 
@@ -133,6 +136,9 @@ message Session {
   bool online = 9;
   // Unset when the device plays nothing.
   NowPlaying now_playing = 10;
+  // The plugin controlling a remote device, which has no user and whose
+  // client is its product.
+  string plugin_id = 11;
 }
 
 // NowPlaying is what a device plays.

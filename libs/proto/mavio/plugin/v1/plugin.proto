@@ -55,6 +55,9 @@ enum Capability {
   // Serves HTTP routes under /plugins/{id}/, registered with
   // guest.HandleHTTP.
   CAPABILITY_HTTP_HANDLER = 8;
+  // Lists remote devices with HostService.SetDevices and implements
+  // DeviceControllerService for them; requires permissions.act_as_users.
+  CAPABILITY_DEVICE_CONTROLLER = 9;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin
@@ -98,7 +101,8 @@ message Permissions {
   // the methods without side effects, e.g. "mavio.library.v1.ItemService:read".
   repeated string api = 3;
   // Whether host API requests may act as a user named in the Mavio-User
-  // header.
+  // header, and a device controller's also as one of its devices named in
+  // the Mavio-Device header.
   bool act_as_users = 4;
   // Event types the plugin consumes: a type such as "item.added", a
   // category such as "item.*", or "*" for every event. Requires

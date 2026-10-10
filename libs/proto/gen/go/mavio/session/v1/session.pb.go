@@ -1498,6 +1498,7 @@ type Session struct {
 	xxx_hidden_LastSeenTime  *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=last_seen_time,json=lastSeenTime"`
 	xxx_hidden_Online        bool                   `protobuf:"varint,9,opt,name=online"`
 	xxx_hidden_NowPlaying    *NowPlaying            `protobuf:"bytes,10,opt,name=now_playing,json=nowPlaying"`
+	xxx_hidden_PluginId      *string                `protobuf:"bytes,11,opt,name=plugin_id,json=pluginId"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -1620,39 +1621,49 @@ func (x *Session) GetNowPlaying() *NowPlaying {
 	return nil
 }
 
+func (x *Session) GetPluginId() string {
+	if x != nil {
+		if x.xxx_hidden_PluginId != nil {
+			return *x.xxx_hidden_PluginId
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Session) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
 }
 
 func (x *Session) SetUserId(v string) {
 	x.xxx_hidden_UserId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
 }
 
 func (x *Session) SetUserName(v string) {
 	x.xxx_hidden_UserName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 11)
 }
 
 func (x *Session) SetDeviceId(v string) {
 	x.xxx_hidden_DeviceId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 11)
 }
 
 func (x *Session) SetDeviceName(v string) {
 	x.xxx_hidden_DeviceName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 11)
 }
 
 func (x *Session) SetClient(v string) {
 	x.xxx_hidden_Client = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
 }
 
 func (x *Session) SetClientVersion(v string) {
 	x.xxx_hidden_ClientVersion = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 11)
 }
 
 func (x *Session) SetLastSeenTime(v *timestamppb.Timestamp) {
@@ -1661,11 +1672,16 @@ func (x *Session) SetLastSeenTime(v *timestamppb.Timestamp) {
 
 func (x *Session) SetOnline(v bool) {
 	x.xxx_hidden_Online = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 11)
 }
 
 func (x *Session) SetNowPlaying(v *NowPlaying) {
 	x.xxx_hidden_NowPlaying = v
+}
+
+func (x *Session) SetPluginId(v string) {
+	x.xxx_hidden_PluginId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
 }
 
 func (x *Session) HasId() bool {
@@ -1738,6 +1754,13 @@ func (x *Session) HasNowPlaying() bool {
 	return x.xxx_hidden_NowPlaying != nil
 }
 
+func (x *Session) HasPluginId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
 func (x *Session) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -1786,6 +1809,11 @@ func (x *Session) ClearNowPlaying() {
 	x.xxx_hidden_NowPlaying = nil
 }
 
+func (x *Session) ClearPluginId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_PluginId = nil
+}
+
 type Session_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1801,6 +1829,9 @@ type Session_builder struct {
 	Online *bool
 	// Unset when the device plays nothing.
 	NowPlaying *NowPlaying
+	// The plugin controlling a remote device, which has no user and whose
+	// client is its product.
+	PluginId *string
 }
 
 func (b0 Session_builder) Build() *Session {
@@ -1808,39 +1839,43 @@ func (b0 Session_builder) Build() *Session {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.UserId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
 		x.xxx_hidden_UserId = b.UserId
 	}
 	if b.UserName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 11)
 		x.xxx_hidden_UserName = b.UserName
 	}
 	if b.DeviceId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 11)
 		x.xxx_hidden_DeviceId = b.DeviceId
 	}
 	if b.DeviceName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 11)
 		x.xxx_hidden_DeviceName = b.DeviceName
 	}
 	if b.Client != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
 		x.xxx_hidden_Client = b.Client
 	}
 	if b.ClientVersion != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 11)
 		x.xxx_hidden_ClientVersion = b.ClientVersion
 	}
 	x.xxx_hidden_LastSeenTime = b.LastSeenTime
 	if b.Online != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 11)
 		x.xxx_hidden_Online = *b.Online
 	}
 	x.xxx_hidden_NowPlaying = b.NowPlaying
+	if b.PluginId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		x.xxx_hidden_PluginId = b.PluginId
+	}
 	return m0
 }
 
@@ -2993,7 +3028,7 @@ const file_mavio_session_v1_session_proto_rawDesc = "" +
 	"library_id\x18\x03 \x01(\tR\tlibraryId\x120\n" +
 	"\x05state\x18\x04 \x01(\x0e2\x1a.mavio.session.v1.JobStateR\x05state\"@\n" +
 	"\rPluginChanged\x12/\n" +
-	"\x06plugin\x18\x01 \x01(\v2\x17.mavio.system.v1.PluginR\x06plugin\"\xe5\x02\n" +
+	"\x06plugin\x18\x01 \x01(\v2\x17.mavio.system.v1.PluginR\x06plugin\"\x82\x03\n" +
 	"\aSession\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1b\n" +
@@ -3007,7 +3042,8 @@ const file_mavio_session_v1_session_proto_rawDesc = "" +
 	"\x06online\x18\t \x01(\bR\x06online\x12=\n" +
 	"\vnow_playing\x18\n" +
 	" \x01(\v2\x1c.mavio.session.v1.NowPlayingR\n" +
-	"nowPlaying\"\xdf\x01\n" +
+	"nowPlaying\x12\x1b\n" +
+	"\tplugin_id\x18\v \x01(\tR\bpluginId\"\xdf\x01\n" +
 	"\n" +
 	"NowPlaying\x12\x1f\n" +
 	"\vplayback_id\x18\x01 \x01(\tR\n" +

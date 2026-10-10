@@ -82,9 +82,9 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 		quoted[i] = fmt.Sprintf("%q", h)
 	}
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
-		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER"],"apiVersion":"1.0","configPage":"echo",
+		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER"],"apiVersion":"1.0","configPage":"echo",
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
-		"permissions":{"httpHosts":[%s],"events":["item.*"]},"configSchema":%q}`, runtimeName, strings.Join(quoted, ","), configSchema)
+		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -266,6 +266,25 @@ func TestEvents(t *testing.T) {
 		}
 		if got, err := search(ctx, p, "events"); err != nil || got != "item.added item.removed" {
 			t.Errorf("consumed events = %q, %v, want item.added item.removed", got, err)
+		}
+	})
+}
+
+func TestDevices(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := open(t, rt)
+		send := func(device string) error {
+			_, err := p.Devices().SendCommand(t.Context(), pluginv1.SendCommandRequest_builder{
+				DeviceId: proto.String(device), UserName: proto.String("ann"),
+				Command: pluginv1.Command_builder{Play: pluginv1.Play_builder{ItemIds: []string{"1"}}.Build()}.Build(),
+			}.Build())
+			return err
+		}
+		if err := send("tv"); err != nil {
+			t.Errorf("SendCommand(tv) = %v", err)
+		}
+		if err := send("radio"); connect.CodeOf(err) != connect.CodeNotFound || !strings.Contains(err.Error(), "radio cannot do that for ann") {
+			t.Errorf("SendCommand(radio) = %v, want not_found naming the device and user", err)
 		}
 	})
 }
