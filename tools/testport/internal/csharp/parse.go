@@ -13,8 +13,9 @@ type File struct {
 
 // Class is a class, struct or record declaration.
 type Class struct {
-	Name string
-	Line int
+	Name       string
+	Line       int
+	Attributes []Attribute
 	// BodyStart is the byte offset just past the opening brace.
 	BodyStart int
 	Members   []*Member
@@ -101,7 +102,20 @@ var typeKeywords = map[string]bool{"class": true, "struct": true, "record": true
 // scope finds the type declarations in toks[start:end].
 func (p *parser) scope(start, end int, outer *Class) ([]*Class, error) {
 	var classes []*Class
+	var pending []Attribute // attributes since the last declaration boundary
 	for i := start; i < end; i++ {
+		switch {
+		case p.is(i, "["):
+			closing, err := p.match(i)
+			if err != nil {
+				return nil, err
+			}
+			pending = append(pending, p.attributes(i+1, closing)...)
+			i = closing
+			continue
+		case p.is(i, ";"), p.is(i, "{"), p.is(i, "}"):
+			pending = nil
+		}
 		if p.toks[i].Kind != Ident || !typeKeywords[p.toks[i].Text] || i > 0 && p.is(i-1, ".") {
 			continue
 		}
@@ -110,8 +124,10 @@ func (p *parser) scope(start, end int, outer *Class) ([]*Class, error) {
 			return nil, err
 		}
 		if cls != nil {
+			cls.Attributes = pending
 			classes = append(classes, cls)
 		}
+		pending = nil
 		i = next
 	}
 	return classes, nil
@@ -198,6 +214,7 @@ func (p *parser) members(cls *Class, start, end int) error {
 				return err
 			}
 			if nested != nil {
+				nested.Attributes = m.Attributes
 				cls.Nested = append(cls.Nested, nested)
 			}
 			i = closing + 1

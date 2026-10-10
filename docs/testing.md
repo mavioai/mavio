@@ -10,7 +10,7 @@
 
 | Layer | Scope | Where | Runs in |
 | :--- | :--- | :--- | :--- |
-| Unit tests | Pure logic; no network, no real ffmpeg, no hardware. Table-driven, many ported from Jellyfin | `*_test.go` next to the code, data in `testdata/` | Every CI run, all platforms |
+| Unit tests | Pure logic; no network, no real ffmpeg, no hardware. Table-driven, many ported from Jellyfin, Sonarr and Radarr | `*_test.go` next to the code, data in `testdata/` | Every CI run, all platforms |
 | Conformance tests | The same repository test suite on SQLite (temporary file) and PostgreSQL (a container started by `libs/store/pgtest`, or the server in `MAVIO_TEST_POSTGRES_DSN`; skipped without Docker or with `-short`); both must pass | `libs/store` | Every CI run (PostgreSQL on Linux) |
 | Integration tests | Real ffmpeg / ffprobe, generated test media, real hardware encoders; call `t.Skip` with a reason when prerequisites are missing | Next to the code, behind prerequisites | CI where prerequisites exist; vendor paths only on the hardware available (maintainers' machines, GitHub-hosted runners) |
 | Smoke tests | Wire the libraries completed so far together inside the server (see [Roadmap §1](roadmap.md#1-principles)) | `apps/server/internal/smoke` | Every CI run |
@@ -19,18 +19,18 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 
 ---
 
-## 2. Porting Test Cases from Jellyfin
+## 2. Porting Test Cases
 
 ### 2.1 Method
-`tools/testport` performs the extraction; `tools/testport/mapping.json` maps Jellyfin test projects and test data directories to Mavio targets (the table in §2.2).
+`tools/testport` performs the extraction; `tools/testport/mapping.json` lists the source repositories (Jellyfin with xUnit tests; Sonarr and Radarr with NUnit tests) and maps their test projects and test data directories to Mavio targets (the table in §2.2).
 
-1. **Parameterized cases**: `[InlineData]` cases, and `[MemberData]` cases backed by `TheoryData.Add(…)`, `yield return` or collection initializers, are written as one JSON file per C# test class under the target's `testdata/cases/`, named in snake_case without the `Tests` suffix (e.g. `TV/EpisodeNumberTests.cs` → `testdata/cases/tv/episode_number.json`). Arguments are keyed by parameter name, with declared defaults filled in. Constants become JSON values; enum members and other symbols become `{"$symbol": …}`, flag combinations `{"$flags": […]}`, constructor calls `{"$new": …}`, and anything that is not a constant keeps its source text as `{"$expr": …}`.
-2. **Provenance**: every case file records the Jellyfin repository, commit and source file; every case records its method, line and stable ID (`Method/n`).
-3. **Jellyfin's own skips**: cases skipped in Jellyfin (`Skip = …`) and `[InlineData]` lines that Jellyfin commented out (typically `// TODO:` / `// FIXME:` known failures) are kept with a `skip` reason.
+1. **Parameterized cases**: xUnit `[InlineData]` cases and NUnit `[TestCase]` cases, and `[MemberData]` / `[TestCaseSource]` cases backed by `TheoryData.Add(…)`, `yield return` or collection initializers, are written as one JSON file per C# test class under the target's `testdata/cases/`, named in snake_case without the `Tests` or `Fixture` suffix (e.g. `TV/EpisodeNumberTests.cs` → `testdata/cases/tv/episode_number.json`). Arguments are keyed by parameter name, with declared defaults filled in; an NUnit `ExpectedResult` is stored under `$result`. Constants become JSON values; enum members and other symbols become `{"$symbol": …}`, flag combinations `{"$flags": […]}`, constructor calls `{"$new": …}`, and anything that is not a constant keeps its source text as `{"$expr": …}`.
+2. **Provenance**: every case file records the source repository, commit and source file; every case records its method, line and stable ID (`Method/n`).
+3. **Upstream skips**: cases skipped upstream (xUnit `Skip = …`; NUnit `Ignore = …`, `[Ignore]`, `[Explicit]`, also on the fixture) and `[InlineData]` / `[TestCase]` lines that were commented out upstream (typically `// TODO:` / `// FIXME:` known failures) are kept with a `skip` reason.
 4. **Generated files are never edited by hand.** Cases that depend on .NET-specific behavior or conflict with Mavio's design are skipped in the Go test by case ID, with a reason; **silently dropping cases is not allowed**.
-5. **Non-parameterized tests** (`[Fact]`) are listed in each case file under `facts` and translated by hand into Go tests; `[MemberData]` that is computed at runtime and `[ClassData]` are listed under `unsupported` with a reason and ported by hand.
-6. **Test assets** (NFO samples, ffprobe JSON, subtitle files, keyframe data, device profiles) are copied into the target's `testdata/`, in subdirectories named by purpose (e.g. `testdata/nfo/`, `testdata/probe/`), with a `SOURCES.json` recording each file's origin. Constants that cases name from another C# file (such as captured ffmpeg outputs) are extracted into a JSON file whose `constants` map is keyed by `Class.Name`, so tests resolve `{"$symbol": …}` arguments against it. No directory in the repository is named after Jellyfin.
-7. Run it per target as each library is implemented: `go run ./cmd/testport -jellyfin <jellyfin checkout> -only libs/naming` (in `tools/testport`). Once a library is ported, new cases are written directly in Mavio.
+5. **Non-parameterized tests** (`[Fact]`, `[Test]`) are listed in each case file under `facts` and translated by hand into Go tests; `[MemberData]` that is computed at runtime and `[ClassData]` are listed under `unsupported` with a reason and ported by hand.
+6. **Test assets** (NFO samples, ffprobe JSON, subtitle files, keyframe data, device profiles) are copied into the target's `testdata/`, in subdirectories named by purpose (e.g. `testdata/nfo/`, `testdata/probe/`), with a `SOURCES.json` recording each file's origin. Constants that cases name from another C# file (such as captured ffmpeg outputs) are extracted into a JSON file whose `constants` map is keyed by `Class.Name`, so tests resolve `{"$symbol": …}` arguments against it. No directory in the repository is named after a source project.
+7. Run it per target as each library is implemented: `go run ./cmd/testport -checkout jellyfin=<checkout> -only libs/naming` (in `tools/testport`); a source's checkout can also be given as `$MAVIO_<NAME>` (e.g. `$MAVIO_SONARR`), and sources without a checkout are skipped. Once a library is ported, new cases are written directly in Mavio.
 
 ### 2.2 Mapping
 | Jellyfin tests | Assets and focus | Mavio target |
@@ -54,6 +54,9 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 | `tests/Jellyfin.Extensions.Tests/StringExtensionsTests.cs` | Diacritics removal used by search keys | `libs/store` |
 | `tests/Jellyfin.Extensions.Tests`, `Jellyfin.Common.Tests` (other classes) | Generic string and path utilities | Merged into the relevant libraries as needed |
 | `Jellyfin.Api.Tests`, `Jellyfin.Server.Integration.Tests` | HTTP API behavior | Not ported for now (to be evaluated together with the shim later) |
+| Sonarr `src/NzbDrone.Core.Test/ParserTests` (~1,460 cases) | Release and file name parsing for series: standard, multi-episode, absolute (anime), daily, mini-series and season packs; quality, language, release group, edition, hashes | `libs/release` (`testdata/cases/series`) |
+| Radarr `src/NzbDrone.Core.Test/ParserTests` (~1,060 cases) | Release and file name parsing for movies: title, year, edition, quality, language, release group, slugs, Roman numerals | `libs/release` (`testdata/cases/movie`) |
+| Sonarr / Radarr `ParserTests/ParsingServiceTests` | Matching parsed releases to library series, episodes and movies | `libs/acquire` (from P18) |
 
 ---
 

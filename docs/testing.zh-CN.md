@@ -10,7 +10,7 @@
 
 | 层次 | 范围 | 位置 | 运行时机 |
 | :--- | :--- | :--- | :--- |
-| 单元测试 | 纯逻辑；不访问网络、不依赖真实 ffmpeg 或硬件。表驱动，很多用例移植自 Jellyfin | 代码旁的 `*_test.go`，数据放在 `testdata/` | 每次 CI，全部平台 |
+| 单元测试 | 纯逻辑；不访问网络、不依赖真实 ffmpeg 或硬件。表驱动，很多用例移植自 Jellyfin、Sonarr 与 Radarr | 代码旁的 `*_test.go`，数据放在 `testdata/` | 每次 CI，全部平台 |
 | 一致性测试 | 同一套仓储测试分别跑在 SQLite（临时文件）与 PostgreSQL（由 `libs/store/pgtest` 启动的容器，或 `MAVIO_TEST_POSTGRES_DSN` 指定的服务器；没有 Docker 或使用 `-short` 时跳过）上，两者都必须通过 | `libs/store` | 每次 CI（PostgreSQL 在 Linux 上运行） |
 | 集成测试 | 真实 ffmpeg / ffprobe、生成的测试媒体、真实硬件编码器；条件不满足时 `t.Skip` 并写明原因 | 代码旁，依赖前置条件 | 具备条件的 CI；厂商路径只在现有硬件（维护者的机器、GitHub 托管 runner）上运行 |
 | 冒烟测试 | 在服务端内把已完成的库串起来（见[路线图 §1](roadmap.zh-CN.md#1-推进原则)） | `apps/server/internal/smoke` | 每次 CI |
@@ -19,18 +19,18 @@
 
 ---
 
-## 2. 从 Jellyfin 移植测试用例
+## 2. 移植测试用例
 
 ### 2.1 方法
-提取由 `tools/testport` 完成；`tools/testport/mapping.json` 把 Jellyfin 的测试工程与测试数据目录映射到 Mavio 的目标位置（即 §2.2 的映射表）。
+提取由 `tools/testport` 完成；`tools/testport/mapping.json` 列出来源仓库（使用 xUnit 测试的 Jellyfin；使用 NUnit 测试的 Sonarr 与 Radarr），并把它们的测试工程与测试数据目录映射到 Mavio 的目标位置（即 §2.2 的映射表）。
 
-1. **参数化用例**：`[InlineData]` 用例，以及由 `TheoryData.Add(…)`、`yield return` 或集合初始化器提供数据的 `[MemberData]` 用例，按 C# 测试类各输出一个 JSON 文件，放在目标的 `testdata/cases/` 下，文件名为去掉 `Tests` 后缀的 snake_case（如 `TV/EpisodeNumberTests.cs` → `testdata/cases/tv/episode_number.json`）。参数按形参名记录，并补全声明的默认值。常量转为 JSON 值；枚举成员等符号转为 `{"$symbol": …}`，标志组合转为 `{"$flags": […]}`，构造调用转为 `{"$new": …}`，其余非常量表达式以源码原文保留为 `{"$expr": …}`。
-2. **来源记录**：每个用例文件记录 Jellyfin 仓库、提交与源文件；每条用例记录方法、行号与稳定 ID（`Method/n`）。
-3. **Jellyfin 自身的跳过**：Jellyfin 中标记跳过的用例（`Skip = …`），以及被 Jellyfin 注释掉的 `[InlineData]` 行（通常是 `// TODO:` / `// FIXME:` 标注的已知失败），保留并带上 `skip` 原因。
+1. **参数化用例**：xUnit 的 `[InlineData]` 与 NUnit 的 `[TestCase]` 用例，以及由 `TheoryData.Add(…)`、`yield return` 或集合初始化器提供数据的 `[MemberData]` / `[TestCaseSource]` 用例，按 C# 测试类各输出一个 JSON 文件，放在目标的 `testdata/cases/` 下，文件名为去掉 `Tests` 或 `Fixture` 后缀的 snake_case（如 `TV/EpisodeNumberTests.cs` → `testdata/cases/tv/episode_number.json`）。参数按形参名记录，并补全声明的默认值；NUnit 的 `ExpectedResult` 记录在 `$result` 下。常量转为 JSON 值；枚举成员等符号转为 `{"$symbol": …}`，标志组合转为 `{"$flags": […]}`，构造调用转为 `{"$new": …}`，其余非常量表达式以源码原文保留为 `{"$expr": …}`。
+2. **来源记录**：每个用例文件记录来源仓库、提交与源文件；每条用例记录方法、行号与稳定 ID（`Method/n`）。
+3. **上游自身的跳过**：上游标记跳过的用例（xUnit 的 `Skip = …`；NUnit 的 `Ignore = …`、`[Ignore]`、`[Explicit]`，包括标在测试类上的），以及被上游注释掉的 `[InlineData]` / `[TestCase]` 行（通常是 `// TODO:` / `// FIXME:` 标注的已知失败），保留并带上 `skip` 原因。
 4. **生成的文件不得手工修改。** 依赖 .NET 特有行为、或与 Mavio 设计取舍不同的用例，在 Go 测试中按用例 ID 跳过并写明原因；**不允许静默丢弃**。
-5. **非参数化测试**（`[Fact]`）列在每个用例文件的 `facts` 中，人工翻译成 Go 测试；运行时计算的 `[MemberData]` 与 `[ClassData]` 列在 `unsupported` 中并写明原因，人工移植。
-6. **测试资产**（NFO 样例、ffprobe JSON、字幕文件、关键帧数据、设备配置）复制到目标的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），并附带 `SOURCES.json` 记录每个文件的来源。用例引用的、定义在其他 C# 文件中的常量（如捕获的 ffmpeg 输出）提取为一个 JSON 文件，其 `constants` 映射以 `Class.Name` 为键，测试据此解析 `{"$symbol": …}` 参数。仓库中不出现以 Jellyfin 命名的目录。
-7. 每实现一个库时按目标运行：在 `tools/testport` 下执行 `go run ./cmd/testport -jellyfin <Jellyfin 仓库路径> -only libs/naming`。一个库移植完成后，新增用例直接写在 Mavio 中。
+5. **非参数化测试**（`[Fact]`、`[Test]`）列在每个用例文件的 `facts` 中，人工翻译成 Go 测试；运行时计算的 `[MemberData]` 与 `[ClassData]` 列在 `unsupported` 中并写明原因，人工移植。
+6. **测试资产**（NFO 样例、ffprobe JSON、字幕文件、关键帧数据、设备配置）复制到目标的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），并附带 `SOURCES.json` 记录每个文件的来源。用例引用的、定义在其他 C# 文件中的常量（如捕获的 ffmpeg 输出）提取为一个 JSON 文件，其 `constants` 映射以 `Class.Name` 为键，测试据此解析 `{"$symbol": …}` 参数。仓库中不出现以来源项目命名的目录。
+7. 每实现一个库时按目标运行：在 `tools/testport` 下执行 `go run ./cmd/testport -checkout jellyfin=<仓库路径> -only libs/naming`；来源仓库路径也可以用 `$MAVIO_<NAME>` 给出（如 `$MAVIO_SONARR`），没有给出路径的来源会被跳过。一个库移植完成后，新增用例直接写在 Mavio 中。
 
 ### 2.2 映射表
 | Jellyfin 测试 | 资产与要点 | Mavio 目标 |
@@ -54,6 +54,9 @@
 | `tests/Jellyfin.Extensions.Tests/StringExtensionsTests.cs` | 搜索键使用的去变音符号 | `libs/store` |
 | `tests/Jellyfin.Extensions.Tests`、`Jellyfin.Common.Tests`（其他测试类） | 字符串、路径等通用工具函数 | 按需并入对应库 |
 | `Jellyfin.Api.Tests`、`Jellyfin.Server.Integration.Tests` | HTTP API 行为 | 暂不移植（与后续 shim 一起评估） |
+| Sonarr `src/NzbDrone.Core.Test/ParserTests`（约 1460 条用例） | 剧集的发布名与文件名解析：标准、多集、绝对集数（动画）、日期型、迷你剧与整季包；质量、语言、发布组、版本、哈希名 | `libs/release`（`testdata/cases/series`） |
+| Radarr `src/NzbDrone.Core.Test/ParserTests`（约 1060 条用例） | 电影的发布名与文件名解析：标题、年份、版本（edition）、质量、语言、发布组、slug、罗马数字 | `libs/release`（`testdata/cases/movie`） |
+| Sonarr / Radarr `ParserTests/ParsingServiceTests` | 把解析出的发布与媒体库中的剧集、单集、电影匹配 | `libs/acquire`（P18 起） |
 
 ---
 

@@ -2,6 +2,7 @@ package testport
 
 import (
 	"encoding/json"
+	"fmt"
 	"maps"
 	"os"
 	"path/filepath"
@@ -70,7 +71,7 @@ public class ParserTests
 `
 
 func TestExtract(t *testing.T) {
-	classes, err := Extract(sampleTests)
+	classes, err := Extract(sampleTests, "Jellyfin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -189,12 +190,13 @@ line 2";
 }`)
 
 	m := Mapping{
+		Name:       "Jellyfin",
 		Repository: "https://example.com/jellyfin",
 		Cases:      []CaseMapping{{Source: "tests/Lib.Tests", Target: "libs/x/testdata/cases"}},
 		Assets:     []AssetMapping{{Source: "tests/Lib.Tests/Test Data", Target: "libs/x/testdata/nfo", Include: "*.nfo", Recursive: true}},
 		Constants:  []ConstMapping{{Source: "tests/Lib.Tests/OutputData.cs", Target: "libs/x/testdata/outputs.json"}},
 	}
-	sum, err := Port(t.Context(), Options{Jellyfin: jellyfin, Mavio: mavio, Mapping: m})
+	sum, err := Port(t.Context(), Options{Checkout: jellyfin, Mavio: mavio, Mapping: m})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -234,5 +236,96 @@ line 2";
 	}
 	if _, err := os.Stat(filepath.Join(mavio, "libs/x/testdata/nfo/c.json")); err == nil {
 		t.Error("c.json copied despite the include pattern")
+	}
+}
+
+const sampleNUnit = `using NUnit.Framework;
+
+namespace Lib.Test
+{
+    [TestFixture]
+    public class QualityFixture : CoreTest
+    {
+        public static object[] SourceCases =
+        {
+            new object[] { "a.mkv", Quality.HDTV720p },
+            new object[] { "b.mkv", Quality.WEBDL1080p },
+        };
+
+        [TestCase("Title.S01E01", "Title", 1)]
+        // [TestCase("broken", "", 0)]
+        [TestCase("Other.S01E02", "Other", 2, Ignore = "flaky")]
+        public void should_parse(string postTitle, string title, int episode)
+        {
+        }
+
+        [TestCase("x", ExpectedResult = true)]
+        public bool should_detect(string input)
+        {
+            return true;
+        }
+
+        [Test]
+        [TestCaseSource(nameof(SourceCases))]
+        public void should_parse_source(string path, Quality quality)
+        {
+        }
+
+        [Test]
+        [Ignore("not ready")]
+        public void plain()
+        {
+        }
+    }
+
+    [Ignore("whole fixture")]
+    public class SkippedFixture
+    {
+        [TestCase("y")]
+        public void skipped(string s)
+        {
+        }
+    }
+}
+`
+
+func TestExtractNUnit(t *testing.T) {
+	classes, err := Extract(sampleNUnit, "Sonarr")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(classes) != 2 {
+		t.Fatalf("got %d classes, want 2", len(classes))
+	}
+	byMethod := map[string]Theory{}
+	for _, th := range classes[0].Theories {
+		byMethod[th.Method] = th
+	}
+
+	parse := byMethod["should_parse"]
+	var got []string
+	for _, c := range parse.Cases {
+		got = append(got, fmt.Sprintf("%s:%v:%s", c.ID, c.Args.Get("postTitle"), c.Skip))
+	}
+	want := "should_parse/1:Title.S01E01:,should_parse/2:broken:commented out in Sonarr,should_parse/3:Other.S01E02:flaky"
+	if strings.Join(got, ",") != want {
+		t.Errorf("should_parse cases: got = %s, want = %s", strings.Join(got, ","), want)
+	}
+
+	detect := byMethod["should_detect"].Cases
+	if len(detect) != 1 || detect[0].Args.Get("$result") != true {
+		t.Errorf("should_detect cases: got = %+v, want one case with $result true", detect)
+	}
+
+	source := byMethod["should_parse_source"].Cases
+	if len(source) != 2 || source[1].From != "SourceCases" || source[1].Args.Get("path") != "b.mkv" {
+		t.Errorf("should_parse_source cases: got = %+v, want 2 from SourceCases", source)
+	}
+
+	if facts := classes[0].Facts; len(facts) != 1 || facts[0].Method != "plain" || facts[0].Skip != "not ready" {
+		t.Errorf("facts: got = %+v, want plain skipped as not ready", facts)
+	}
+	if th := classes[1].Theories; len(th) != 1 || th[0].Skip != "whole fixture" {
+		t.Errorf("skipped fixture: got = %+v, want theory skipped as whole fixture", th)
 	}
 }
