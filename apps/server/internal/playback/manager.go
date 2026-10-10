@@ -374,10 +374,13 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	}
 	if d != nil && d.Method == decision.DirectStream && d.Protocol != decision.HLS && !r.Download {
 		// A progressive remux is the last resort of streaming clients:
-		// remux into the client's HLS profile instead when it has one.
+		// remux into the client's HLS profile instead when it has one, and
+		// into its progressive profile when it does not take the source's
+		// container, as DLNA renderers do not.
 		req.EnableDirectStream = false
-		if hls, err := m.decide(video, req); err == nil && hls != nil && hls.Protocol == decision.HLS {
-			d = hls
+		other, err := m.decide(video, req)
+		if err == nil && other != nil && (other.Protocol == decision.HLS || d.Reasons&decision.ContainerNotSupported != 0) {
+			d = other
 		}
 	}
 	if d == nil {

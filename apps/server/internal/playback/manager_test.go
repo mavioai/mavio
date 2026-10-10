@@ -300,6 +300,18 @@ func TestStartErrors(t *testing.T) {
 		t.Errorf("progressive transcode: Start = %+v, %v", p, err)
 	}
 	_ = e.m.Stop(ctx, e.user.ID, p.ID, nil)
+	// A client without HLS that does not take the source's container gets
+	// a remux into its progressive profile's, not into the source's.
+	tsOnly := &decision.ClientCapabilities{
+		Name:        "ts",
+		DirectPlay:  []decision.DirectPlayProfile{{Kind: decision.Video, Container: "ts", VideoCodec: "h264", AudioCodec: "aac"}},
+		Transcoding: []decision.TranscodingProfile{{Kind: decision.Video, Context: decision.Streaming, Protocol: decision.HTTP, Container: "ts", VideoCodec: "h264", AudioCodec: "aac"}},
+	}
+	p, err = e.m.Start(ctx, Request{User: e.user, ItemID: e.movie.ID, SourceID: e.source, SubtitleStream: new(-1), Client: tsOnly})
+	if err != nil || p.Method != decision.DirectStream || p.progExt != "ts" || p.URL() != "media/"+p.ID+"/stream.ts" {
+		t.Errorf("remux for a client without HLS: Start = %+v, %v; want a direct stream to stream.ts", p, err)
+	}
+	_ = e.m.Stop(ctx, e.user.ID, p.ID, nil)
 	noDownloads := e.user
 	noDownloads.Policy.AllowDownload = false
 	if _, err := e.m.Start(ctx, Request{User: noDownloads, ItemID: e.movie.ID, Client: mp4Client, Download: true}); !errors.Is(err, ErrNotAllowed) {
