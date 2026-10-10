@@ -17,6 +17,13 @@ func (ix *Indexer) Download(ctx context.Context, link string) ([]byte, error) {
 		return nil, err
 	}
 	data, err := ix.download(ctx, link)
+	var he *HTTPError
+	if dl, ok := ix.Site.(DownloadRelogger); ok && errors.As(err, &he) && he.Response.StatusCode == http.StatusUnauthorized {
+		if err := dl.Login(ctx, ix); err != nil {
+			return nil, err
+		}
+		data, err = ix.download(ctx, link)
+	}
 	if err != nil {
 		return nil, err
 	}
