@@ -18,3 +18,23 @@ plugins:
     opt:
       - paths=source_relative
       - simple
+  # One OpenAPI document of the Connect services the server serves, without
+  # the plugin contracts, embedded by package openapi and served at
+  # /spec.json. It runs by version rather than as a tool of this module, so
+  # that its dependencies stay out of the module plugins import.
+  - local: ["go", "run", "github.com/sudorandom/protoc-gen-connect-openapi@v0.27.3"]
+    out: openapi/gen
+    strategy: all
+    opt:
+      - base=openapi/base.yaml
+      - path=mavio.openapi.json
+      - format=json
+      - content-types=json
+      - short-service-tags
+      - trim-unused-types
+      - services=mavio.auth.v1.*
+      - services=mavio.library.v1.*
+      - services=mavio.playback.v1.*
+      - services=mavio.session.v1.*
+      - services=mavio.system.v1.*
+      - services=mavio.user.v1.*

@@ -1,0 +1,178 @@
+# The parts of Mavio's OpenAPI document that the protobuf contracts do not
+# describe: its introduction, authentication and the plain HTTP routes for
+# media bytes. protoc-gen-connect-openapi merges the Connect services into
+# it (pnpm nx run proto:generate).
+openapi: 3.1.0
+info:
+  title: Mavio API
+  description: |
+    Mavio's API is a set of [Connect](https://connectrpc.com) services: each
+    method is a `POST` to `/<package>.<Service>/<Method>` with a JSON (or
+    binary protobuf) body, and answers with JSON or a Connect error. The
+    contracts are the `.proto` files in `libs/proto`; gRPC and gRPC-Web
+    clients can use the same paths, and the server answers gRPC reflection.
+
+    Sign in with `AuthService/Login` and send the access token it returns as
+    `Authorization: Bearer <token>`. Methods marked as needing no
+    authentication, such as signing in and the health check, take none.
+
+    Media bytes are served over plain HTTP: the files of a playback under
+    `/media/`, where the playback ID is the credential, and images under
+    `/images/`, where the image or item ID is. Streaming methods, such as
+    `EventService/Subscribe`, are not listed here.
+  license:
+    name: GPL-3.0-only
+    url: https://www.gnu.org/licenses/gpl-3.0.html
+components:
+  parameters:
+    width: {name: width, in: query, description: Width in pixels., schema: {type: integer, minimum: 1}}
+    height: {name: height, in: query, description: Height in pixels., schema: {type: integer, minimum: 1}}
+    maxWidth: {name: maxWidth, in: query, description: Largest width in pixels, keeping the aspect ratio., schema: {type: integer, minimum: 1}}
+    maxHeight: {name: maxHeight, in: query, description: Largest height in pixels, keeping the aspect ratio., schema: {type: integer, minimum: 1}}
+    fillWidth: {name: fillWidth, in: query, description: Width to fill, cropping to keep the aspect ratio., schema: {type: integer, minimum: 1}}
+    fillHeight: {name: fillHeight, in: query, description: Height to fill, cropping to keep the aspect ratio., schema: {type: integer, minimum: 1}}
+    quality: {name: quality, in: query, description: Encoding quality., schema: {type: integer, minimum: 1, maximum: 100}}
+    format: {name: format, in: query, description: Format of the rendering., schema: {type: string, enum: [jpg, jpeg, png, webp]}}
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: The access token from `AuthService/Login`.
+security:
+  - bearer: []
+tags:
+  - name: Media
+    description: Media bytes over plain HTTP.
+paths:
+  /media/{playback}/{file}:
+    get:
+      tags: [Media]
+      operationId: getPlaybackMedia
+      summary: Media of a playback
+      description: |
+        The file `StartPlayback` returned: the source file for direct play,
+        else the HLS master playlist `master.m3u8`, its media playlist
+        `main.m3u8` and their segments. Range requests are honored. The
+        playback ID is the credential.
+      security: []
+      parameters:
+        - {name: playback, in: path, required: true, schema: {type: string}}
+        - {name: file, in: path, required: true, schema: {type: string}}
+      responses:
+        "200": {description: The file.}
+        "206": {description: The requested range of the file.}
+        "404": {description: No such playback or file.}
+  /media/{playback}/subtitles/{file}:
+    get:
+      tags: [Media]
+      operationId: getPlaybackSubtitle
+      summary: Subtitles of a playback
+      description: A subtitle stream delivered as a file, or the segments of an HLS subtitle rendition.
+      security: []
+      parameters:
+        - {name: playback, in: path, required: true, schema: {type: string}}
+        - {name: file, in: path, required: true, schema: {type: string}}
+      responses:
+        "200": {description: The subtitles.}
+        "404": {description: No such playback or subtitles.}
+  /media/{playback}/attachments/{index}:
+    get:
+      tags: [Media]
+      operationId: getPlaybackAttachment
+      summary: Attachment of a playback's source
+      description: An attachment of the media source, such as a font that styled subtitles need.
+      security: []
+      parameters:
+        - {name: playback, in: path, required: true, schema: {type: string}}
+        - {name: index, in: path, required: true, schema: {type: integer}}
+      responses:
+        "200": {description: The attachment.}
+        "404": {description: No such playback or attachment.}
+  /images/{id}:
+    get:
+      tags: [Media]
+      operationId: getImage
+      summary: An image
+      description: |
+        An image, optionally rendered with the given size, quality and format.
+        Renderings without a format are WebP for clients that accept it, else
+        JPEG or PNG. The image ID is the credential.
+      security: []
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+        - $ref: "#/components/parameters/width"
+        - $ref: "#/components/parameters/height"
+        - $ref: "#/components/parameters/maxWidth"
+        - $ref: "#/components/parameters/maxHeight"
+        - $ref: "#/components/parameters/fillWidth"
+        - $ref: "#/components/parameters/fillHeight"
+        - $ref: "#/components/parameters/quality"
+        - $ref: "#/components/parameters/format"
+      responses:
+        "200": {description: The image.}
+        "404": {description: No such image.}
+  /images/collages/{id}:
+    get:
+      tags: [Media]
+      operationId: getCollage
+      summary: Collage of a library, collection or playlist
+      security: []
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+        - $ref: "#/components/parameters/width"
+        - $ref: "#/components/parameters/height"
+        - $ref: "#/components/parameters/maxWidth"
+        - $ref: "#/components/parameters/maxHeight"
+        - $ref: "#/components/parameters/fillWidth"
+        - $ref: "#/components/parameters/fillHeight"
+        - $ref: "#/components/parameters/quality"
+        - $ref: "#/components/parameters/format"
+      responses:
+        "200": {description: The collage.}
+        "404": {description: Nothing to show.}
+  /images/trickplay/{item}/{width}/{sheet}:
+    get:
+      tags: [Media]
+      operationId: getTrickplaySheet
+      summary: Trickplay sheet of an item
+      description: A JPEG sheet of thumbnails, such as `0.jpg`, of the item's trickplay at a width.
+      security: []
+      parameters:
+        - {name: item, in: path, required: true, schema: {type: string}}
+        - {name: width, in: path, required: true, schema: {type: integer}}
+        - {name: sheet, in: path, required: true, schema: {type: string}}
+      responses:
+        "200": {description: The sheet.}
+        "404": {description: No such sheet.}
+  /images/chapters/{item}/{source}/{index}:
+    get:
+      tags: [Media]
+      operationId: getChapterImage
+      summary: Chapter image of an item
+      security: []
+      parameters:
+        - {name: item, in: path, required: true, schema: {type: string}}
+        - {name: source, in: path, required: true, schema: {type: string}}
+        - {name: index, in: path, required: true, schema: {type: integer}}
+        - $ref: "#/components/parameters/width"
+        - $ref: "#/components/parameters/height"
+        - $ref: "#/components/parameters/maxWidth"
+        - $ref: "#/components/parameters/maxHeight"
+        - $ref: "#/components/parameters/quality"
+        - $ref: "#/components/parameters/format"
+      responses:
+        "200": {description: The image.}
+        "404": {description: No such chapter image.}
+  /system/backups/{name}:
+    get:
+      tags: [Media]
+      operationId: downloadBackup
+      summary: Download a backup
+      description: A backup's zip file, for administrators.
+      parameters:
+        - {name: name, in: path, required: true, schema: {type: string}}
+      responses:
+        "200": {description: The backup.}
+        "401": {description: Missing, invalid or revoked token.}
+        "403": {description: Not an administrator.}
+        "404": {description: No such backup.}
