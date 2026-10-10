@@ -1,0 +1,14 @@
+{
+  "id": "org.mavio.scraper-servarr",
+  "name": "Servarr",
+  "version": "0.1.0",
+  "description": "Metadata for movies from Radarr's metadata service and for series and their episodes, in TheTVDB's order, from Sonarr's SkyHook; Radarr's lists of movies; the titles, air-dated series and numbering releases use, from Sonarr's services and XEM. Needs no keys.",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_WASM",
+  "capabilities": ["CAPABILITY_METADATA_PROVIDER", "CAPABILITY_EPISODE_LIST_PROVIDER", "CAPABILITY_DISCOVERY_PROVIDER", "CAPABILITY_SCENE_MAPPING_PROVIDER"],
+  "permissions": { "httpHosts": ["api.radarr.video", "skyhook.sonarr.tv", "services.sonarr.tv", "thexem.info"] },
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",
+  "apiVersion": "1.0"
+}
