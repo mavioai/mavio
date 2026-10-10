@@ -358,3 +358,14 @@ func (m *Manager) Resolvers() []library.FolderResolver {
 	}
 	return out
 }
+
+// IntroProviders returns the intro providers among the started plugins.
+func (m *Manager) IntroProviders() []library.IntroProvider {
+	var out []library.IntroProvider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_INTRO_PROVIDER) {
+		if pl, ok := m.running(id); ok && pl.Intros() != nil {
+			out = append(out, &providers.IntroPlugin{ID: id, Client: pl.Intros()})
+		}
+	}
+	return out
+}

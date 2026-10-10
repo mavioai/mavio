@@ -4,6 +4,7 @@ package mavio.playback.v1;
 
 import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
+import "mavio/library/v1/item.proto";
 
 // PlaybackService decides how a client plays an item and tracks the
 // playback. All methods act for the calling user.
@@ -19,6 +20,12 @@ service PlaybackService {
   // StopPlayback ends a playback and saves the resume position or marks the
   // item played.
   rpc StopPlayback(StopPlaybackRequest) returns (StopPlaybackResponse);
+  // ListIntros returns the items to play before an item, such as its
+  // trailers, as the intro provider plugins pick them; only items the user
+  // can play.
+  rpc ListIntros(ListIntrosRequest) returns (ListIntrosResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 // ClientCapabilities describes what a client can play: which containers and
@@ -407,3 +414,15 @@ message StopPlaybackRequest {
 }
 
 message StopPlaybackResponse {}
+
+message ListIntrosRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message ListIntrosResponse {
+  // In the order to play them.
+  repeated mavio.library.v1.Item items = 1;
+}

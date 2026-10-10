@@ -42,6 +42,9 @@ const (
 	// PlaybackServiceStopPlaybackProcedure is the fully-qualified name of the PlaybackService's
 	// StopPlayback RPC.
 	PlaybackServiceStopPlaybackProcedure = "/mavio.playback.v1.PlaybackService/StopPlayback"
+	// PlaybackServiceListIntrosProcedure is the fully-qualified name of the PlaybackService's
+	// ListIntros RPC.
+	PlaybackServiceListIntrosProcedure = "/mavio.playback.v1.PlaybackService/ListIntros"
 )
 
 // PlaybackServiceClient is a client for the mavio.playback.v1.PlaybackService service.
@@ -57,6 +60,10 @@ type PlaybackServiceClient interface {
 	// StopPlayback ends a playback and saves the resume position or marks the
 	// item played.
 	StopPlayback(context.Context, *v1.StopPlaybackRequest) (*v1.StopPlaybackResponse, error)
+	// ListIntros returns the items to play before an item, such as its
+	// trailers, as the intro provider plugins pick them; only items the user
+	// can play.
+	ListIntros(context.Context, *v1.ListIntrosRequest) (*v1.ListIntrosResponse, error)
 }
 
 // NewPlaybackServiceClient constructs a client for the mavio.playback.v1.PlaybackService service.
@@ -88,6 +95,13 @@ func NewPlaybackServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(playbackServiceMethods.ByName("StopPlayback")),
 			connect.WithClientOptions(opts...),
 		),
+		listIntros: connect.NewClient[v1.ListIntrosRequest, v1.ListIntrosResponse](
+			httpClient,
+			baseURL+PlaybackServiceListIntrosProcedure,
+			connect.WithSchema(playbackServiceMethods.ByName("ListIntros")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -96,6 +110,7 @@ type playbackServiceClient struct {
 	startPlayback  *connect.Client[v1.StartPlaybackRequest, v1.StartPlaybackResponse]
 	reportProgress *connect.Client[v1.ReportProgressRequest, v1.ReportProgressResponse]
 	stopPlayback   *connect.Client[v1.StopPlaybackRequest, v1.StopPlaybackResponse]
+	listIntros     *connect.Client[v1.ListIntrosRequest, v1.ListIntrosResponse]
 }
 
 // StartPlayback calls mavio.playback.v1.PlaybackService.StartPlayback.
@@ -125,6 +140,15 @@ func (c *playbackServiceClient) StopPlayback(ctx context.Context, req *v1.StopPl
 	return nil, err
 }
 
+// ListIntros calls mavio.playback.v1.PlaybackService.ListIntros.
+func (c *playbackServiceClient) ListIntros(ctx context.Context, req *v1.ListIntrosRequest) (*v1.ListIntrosResponse, error) {
+	response, err := c.listIntros.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // PlaybackServiceHandler is an implementation of the mavio.playback.v1.PlaybackService service.
 type PlaybackServiceHandler interface {
 	// StartPlayback picks a media source and streams, decides whether the
@@ -138,6 +162,10 @@ type PlaybackServiceHandler interface {
 	// StopPlayback ends a playback and saves the resume position or marks the
 	// item played.
 	StopPlayback(context.Context, *v1.StopPlaybackRequest) (*v1.StopPlaybackResponse, error)
+	// ListIntros returns the items to play before an item, such as its
+	// trailers, as the intro provider plugins pick them; only items the user
+	// can play.
+	ListIntros(context.Context, *v1.ListIntrosRequest) (*v1.ListIntrosResponse, error)
 }
 
 // NewPlaybackServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -165,6 +193,13 @@ func NewPlaybackServiceHandler(svc PlaybackServiceHandler, opts ...connect.Handl
 		connect.WithSchema(playbackServiceMethods.ByName("StopPlayback")),
 		connect.WithHandlerOptions(opts...),
 	)
+	playbackServiceListIntrosHandler := connect.NewUnaryHandlerSimple(
+		PlaybackServiceListIntrosProcedure,
+		svc.ListIntros,
+		connect.WithSchema(playbackServiceMethods.ByName("ListIntros")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.playback.v1.PlaybackService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PlaybackServiceStartPlaybackProcedure:
@@ -173,6 +208,8 @@ func NewPlaybackServiceHandler(svc PlaybackServiceHandler, opts ...connect.Handl
 			playbackServiceReportProgressHandler.ServeHTTP(w, r)
 		case PlaybackServiceStopPlaybackProcedure:
 			playbackServiceStopPlaybackHandler.ServeHTTP(w, r)
+		case PlaybackServiceListIntrosProcedure:
+			playbackServiceListIntrosHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -192,4 +229,8 @@ func (UnimplementedPlaybackServiceHandler) ReportProgress(context.Context, *v1.R
 
 func (UnimplementedPlaybackServiceHandler) StopPlayback(context.Context, *v1.StopPlaybackRequest) (*v1.StopPlaybackResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.playback.v1.PlaybackService.StopPlayback is not implemented"))
+}
+
+func (UnimplementedPlaybackServiceHandler) ListIntros(context.Context, *v1.ListIntrosRequest) (*v1.ListIntrosResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.playback.v1.PlaybackService.ListIntros is not implemented"))
 }

@@ -11,6 +11,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/media/decision"
 	playbackv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
@@ -34,13 +35,38 @@ var (
 // PlaybackService implements mavio.playback.v1.PlaybackService.
 type PlaybackService struct {
 	playbacks *playback.Manager
+	store     core.Store
+	// Intros finds the items played before items; nil finds none.
+	Intros *library.Intros
 }
 
 var _ playbackv1connect.PlaybackServiceHandler = (*PlaybackService)(nil)
 
-// NewPlaybackService returns a PlaybackService running playbacks with m.
-func NewPlaybackService(m *playback.Manager) *PlaybackService {
-	return &PlaybackService{playbacks: m}
+// NewPlaybackService returns a PlaybackService running playbacks with m
+// on the items of store.
+func NewPlaybackService(m *playback.Manager, store core.Store) *PlaybackService {
+	return &PlaybackService{playbacks: m, store: store}
+}
+
+// ListIntros returns the items to play before an item.
+func (s *PlaybackService) ListIntros(ctx context.Context, req *playbackv1.ListIntrosRequest) (*playbackv1.ListIntrosResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	in := s.Intros
+	if in == nil {
+		in = &library.Intros{Store: s.store}
+	}
+	items, err := in.List(ctx, &p.User, core.MustParseID(req.GetItemId()))
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out, err := itemsToProto(ctx, s.store, items, p.User.Admin)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return playbackv1.ListIntrosResponse_builder{Items: out}.Build(), nil
 }
 
 // StartPlayback decides how the client plays the item and starts the

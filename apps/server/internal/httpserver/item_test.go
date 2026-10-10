@@ -12,6 +12,8 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
+	playbackv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 	"github.com/mavioai/mavio/libs/store"
@@ -235,6 +237,16 @@ func TestItemService(t *testing.T) {
 		ItemId: new(c.pilot.ID.String()), Provider: new("nobody"), Id: new("1"),
 	}.Build())
 	wantCode(t, "download lyrics from nobody", err, connect.CodeNotFound)
+
+	// Without intro providers nothing plays first; items the kid may not
+	// see have no intros either.
+	playbacks := playbackv1connect.NewPlaybackServiceClient(http.DefaultClient, url, withToken(token))
+	if got, err := playbacks.ListIntros(ctx, playbackv1.ListIntrosRequest_builder{ItemId: new(c.alien.ID.String())}.Build()); err != nil || len(got.GetItems()) != 0 {
+		t.Errorf("ListIntros = %v, %v", got, err)
+	}
+	kidPlaybacks := playbackv1connect.NewPlaybackServiceClient(http.DefaultClient, url, withToken(login(t, url, "kid", "pw", "phone")))
+	_, err = kidPlaybacks.ListIntros(ctx, playbackv1.ListIntrosRequest_builder{ItemId: new(c.alien.ID.String())}.Build())
+	wantCode(t, "kid lists intros of a film", err, connect.CodeNotFound)
 
 	// The kid's latest items: only the pilot, not its rated series.
 	latest, err = asKid.ListLatestItems(ctx, libraryv1.ListLatestItemsRequest_builder{}.Build())

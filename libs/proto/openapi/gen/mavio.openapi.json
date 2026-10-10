@@ -4474,6 +4474,36 @@
         "additionalProperties": false,
         "description": "DirectPlayProfile is a combination of container and codecs the client\n plays as is."
       },
+      "mavio.playback.v1.ListIntrosRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          }
+        },
+        "title": "ListIntrosRequest",
+        "required": [
+          "itemId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.playback.v1.ListIntrosResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.library.v1.Item"
+            },
+            "title": "items",
+            "description": "In the order to play them."
+          }
+        },
+        "title": "ListIntrosResponse",
+        "additionalProperties": false
+      },
       "mavio.playback.v1.MediaKind": {
         "type": "string",
         "title": "MediaKind",
@@ -9182,13 +9212,13 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/ListLibraries": {
+    "/mavio.user.v1.UserDataService/GetUserData": {
       "post": {
         "tags": [
-          "LibraryService"
+          "UserDataService"
         ],
-        "summary": "ListLibraries",
-        "operationId": "mavio.library.v1.LibraryService.ListLibraries",
+        "summary": "GetUserData",
+        "operationId": "mavio.user.v1.UserDataService.GetUserData",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -9213,7 +9243,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesRequest"
+                "$ref": "#/components/schemas/mavio.user.v1.GetUserDataRequest"
               }
             }
           },
@@ -9235,7 +9265,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesResponse"
+                  "$ref": "#/components/schemas/mavio.user.v1.GetUserDataResponse"
                 }
               }
             }
@@ -9243,7 +9273,68 @@
         }
       }
     },
-    "/mavio.session.v1.EventService/Subscribe": {},
+    "/mavio.auth.v1.AuthService/GetAuthInfo": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "GetAuthInfo",
+        "description": "GetAuthInfo tells clients how to sign in.",
+        "operationId": "mavio.auth.v1.AuthService.GetAuthInfo",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.GetAuthInfoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.GetAuthInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.auth.v1.AuthService/GetQuickConnectState": {
       "post": {
         "tags": [
@@ -10909,14 +11000,13 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/StopPlayback": {
+    "/mavio.library.v1.LibraryService/ListLibraries": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "LibraryService"
         ],
-        "summary": "StopPlayback",
-        "description": "StopPlayback ends a playback and saves the resume position or marks the\n item played.",
-        "operationId": "mavio.playback.v1.PlaybackService.StopPlayback",
+        "summary": "ListLibraries",
+        "operationId": "mavio.library.v1.LibraryService.ListLibraries",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -10941,7 +11031,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesRequest"
               }
             }
           },
@@ -10963,7 +11053,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesResponse"
                 }
               }
             }
@@ -11652,14 +11742,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/StartPlayback": {
+    "/mavio.library.v1.MetadataService/UpdateItem": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "MetadataService"
         ],
-        "summary": "StartPlayback",
-        "description": "StartPlayback picks a media source and streams, decides whether the\n client plays it directly, remuxed or transcoded, and returns the URLs to\n play it from. The URLs need no token and work until the playback stops,\n expires or its sign-in session ends.",
-        "operationId": "mavio.playback.v1.PlaybackService.StartPlayback",
+        "summary": "UpdateItem",
+        "description": "UpdateItem changes the fields of an item named by the update mask.",
+        "operationId": "mavio.library.v1.MetadataService.UpdateItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -11684,7 +11774,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateItemRequest"
               }
             }
           },
@@ -11706,7 +11796,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateItemResponse"
                 }
               }
             }
@@ -12205,14 +12295,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/ReportProgress": {
+    "/mavio.playback.v1.PlaybackService/ListIntros": {
       "post": {
         "tags": [
           "PlaybackService"
         ],
-        "summary": "ReportProgress",
-        "description": "ReportProgress records the position of a playback. Playbacks without\n reports or media requests for a while expire.",
-        "operationId": "mavio.playback.v1.PlaybackService.ReportProgress",
+        "summary": "ListIntros",
+        "description": "ListIntros returns the items to play before an item, such as its\n trailers, as the intro provider plugins pick them; only items the user\n can play.",
+        "operationId": "mavio.playback.v1.PlaybackService.ListIntros",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12237,7 +12327,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.ListIntrosRequest"
               }
             }
           },
@@ -12259,69 +12349,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.MetadataService/UpdateItem": {
-      "post": {
-        "tags": [
-          "MetadataService"
-        ],
-        "summary": "UpdateItem",
-        "description": "UpdateItem changes the fields of an item named by the update mask.",
-        "operationId": "mavio.library.v1.MetadataService.UpdateItem",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateItemRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateItemResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.ListIntrosResponse"
                 }
               }
             }
@@ -12391,14 +12419,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/GetAuthInfo": {
+    "/mavio.playback.v1.PlaybackService/ReportProgress": {
       "post": {
         "tags": [
-          "AuthService"
+          "PlaybackService"
         ],
-        "summary": "GetAuthInfo",
-        "description": "GetAuthInfo tells clients how to sign in.",
-        "operationId": "mavio.auth.v1.AuthService.GetAuthInfo",
+        "summary": "ReportProgress",
+        "description": "ReportProgress records the position of a playback. Playbacks without\n reports or media requests for a while expire.",
+        "operationId": "mavio.playback.v1.PlaybackService.ReportProgress",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12423,7 +12451,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.GetAuthInfoRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressRequest"
               }
             }
           },
@@ -12445,7 +12473,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.GetAuthInfoResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressResponse"
                 }
               }
             }
@@ -12453,6 +12481,69 @@
         }
       }
     },
+    "/mavio.session.v1.SyncPlayService/GetTime": {
+      "post": {
+        "tags": [
+          "SyncPlayService"
+        ],
+        "summary": "GetTime",
+        "description": "GetTime returns the server's time when it received and when it\n answered the request, for clients to estimate their clock's offset\n and the round trip, as in NTP.",
+        "operationId": "mavio.session.v1.SyncPlayService.GetTime",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.session.v1.GetTimeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.session.v1.GetTimeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.session.v1.EventService/Subscribe": {},
     "/mavio.session.v1.SessionService/ListSessions": {
       "post": {
         "tags": [
@@ -12639,14 +12730,14 @@
         }
       }
     },
-    "/mavio.session.v1.SyncPlayService/GetTime": {
+    "/mavio.playback.v1.PlaybackService/StopPlayback": {
       "post": {
         "tags": [
-          "SyncPlayService"
+          "PlaybackService"
         ],
-        "summary": "GetTime",
-        "description": "GetTime returns the server's time when it received and when it\n answered the request, for clients to estimate their clock's offset\n and the round trip, as in NTP.",
-        "operationId": "mavio.session.v1.SyncPlayService.GetTime",
+        "summary": "StopPlayback",
+        "description": "StopPlayback ends a playback and saves the resume position or marks the\n item played.",
+        "operationId": "mavio.playback.v1.PlaybackService.StopPlayback",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12671,7 +12762,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.GetTimeRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackRequest"
               }
             }
           },
@@ -12693,7 +12784,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.GetTimeResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.StopPlaybackResponse"
                 }
               }
             }
@@ -14919,13 +15010,14 @@
         }
       }
     },
-    "/mavio.user.v1.UserDataService/GetUserData": {
+    "/mavio.playback.v1.PlaybackService/StartPlayback": {
       "post": {
         "tags": [
-          "UserDataService"
+          "PlaybackService"
         ],
-        "summary": "GetUserData",
-        "operationId": "mavio.user.v1.UserDataService.GetUserData",
+        "summary": "StartPlayback",
+        "description": "StartPlayback picks a media source and streams, decides whether the\n client plays it directly, remuxed or transcoded, and returns the URLs to\n play it from. The URLs need no token and work until the playback stops,\n expires or its sign-in session ends.",
+        "operationId": "mavio.playback.v1.PlaybackService.StartPlayback",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -14950,7 +15042,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.user.v1.GetUserDataRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackRequest"
               }
             }
           },
@@ -14972,7 +15064,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.user.v1.GetUserDataResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackResponse"
                 }
               }
             }

@@ -80,6 +80,9 @@ type Options struct {
 	Wake func(sources []core.MediaSource)
 	// Lyrics finds lyrics through the lyrics providers; nil finds none.
 	Lyrics *library.Lyrics
+	// Intros finds the items played before items through the intro
+	// providers; nil finds none.
+	Intros *library.Intros
 	// ExternalIDKinds lists the kinds of external IDs; nil lists the
 	// built-in kinds.
 	ExternalIDKinds func() []metadata.ExternalIDKind
@@ -140,7 +143,9 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(userv1connect.NewUserServiceHandler(users, interceptors))
 	mux.Handle(userv1connect.NewUserDataServiceHandler(rpc.NewUserDataService(opts.Store), interceptors))
 	mux.Handle(userv1connect.NewDisplayPreferencesServiceHandler(rpc.NewDisplayPreferencesService(opts.Store), interceptors))
-	mux.Handle(playbackv1connect.NewPlaybackServiceHandler(rpc.NewPlaybackService(opts.Playbacks), interceptors))
+	playbackService := rpc.NewPlaybackService(opts.Playbacks, opts.Store)
+	playbackService.Intros = opts.Intros
+	mux.Handle(playbackv1connect.NewPlaybackServiceHandler(playbackService, interceptors))
 	mux.Handle(sessionv1connect.NewEventServiceHandler(rpc.NewEventService(opts.Hub), interceptors))
 	sessions := rpc.NewSessionService(opts.Store, opts.Hub, opts.Playbacks)
 	sessions.Devices = opts.Devices
