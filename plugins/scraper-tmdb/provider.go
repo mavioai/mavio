@@ -365,11 +365,10 @@ func (s session) episodeMetadata(ctx context.Context, l *pluginv1.Lookup) (*plug
 	if err != nil || seriesID == 0 {
 		return nil, err
 	}
-	g, err := s.group(ctx, seriesID, l.GetDisplayOrder(), r.language)
+	season, episode, err := s.episodeNumbers(ctx, seriesID, l)
 	if err != nil {
 		return nil, err
 	}
-	season, episode := g.airedNumbers(int(l.GetSeasonNumber()), int(l.GetEpisodeNumber()))
 	e, err := s.episode(ctx, seriesID, season, episode, r.language, r.country)
 	if err != nil {
 		return nil, err
@@ -388,6 +387,30 @@ func (s session) episodeMetadata(ctx context.Context, l *pluginv1.Lookup) (*plug
 	md.SetPeople(people)
 	md.SetImages(images(r, []imageSet{{pluginv1.ImageKind_IMAGE_KIND_PRIMARY, e.Images.Stills}}))
 	return md, nil
+}
+
+// episodeNumbers returns the aired numbers of an episode of a series: those
+// of the episode with its TVDB ID, which numbers it as TVDB does whatever
+// the series' display order, such as an episode Servarr's episode list
+// listed; else those its numbers have in the display order.
+func (s session) episodeNumbers(ctx context.Context, seriesID int, l *pluginv1.Lookup) (int, int, error) {
+	if id := l.GetExternalIds()[keyTVDB]; id != "" {
+		f, err := s.find(ctx, id, "tvdb_id")
+		if err != nil && !errors.Is(err, errNotFound) {
+			return 0, 0, err
+		}
+		for _, e := range f.TVEpisodeResults {
+			if e.ShowID == seriesID {
+				return e.SeasonNumber, e.EpisodeNumber, nil
+			}
+		}
+	}
+	g, err := s.group(ctx, seriesID, l.GetDisplayOrder(), requestOf(l).language)
+	if err != nil {
+		return 0, 0, err
+	}
+	season, episode := g.airedNumbers(int(l.GetSeasonNumber()), int(l.GetEpisodeNumber()))
+	return season, episode, nil
 }
 
 func names(ns []tmdbName) []string {
