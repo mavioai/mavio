@@ -405,3 +405,37 @@ func TestQuietWindow(t *testing.T) {
 		}
 	})
 }
+
+func TestRemoteSource(t *testing.T) {
+	e := newEnv(t)
+	remote := core.MediaSource{
+		ID: core.NewID(), ItemID: e.movie.ID, Path: "https://media.example/films/Film.MP4?token=1", Name: "Remote",
+		Container: "mov,mp4,m4a,3gp,3g2,mj2", Duration: 100 * time.Minute, Bitrate: 4_000_000,
+		Streams: []core.MediaStream{
+			{Index: 0, Kind: core.StreamVideo, Codec: "h264", Width: 1920, Height: 1080, BitDepth: 8, PixelFormat: "yuv420p"},
+			{Index: 1, Kind: core.StreamAudio, Codec: "aac", Channels: 2, SampleRate: 48000},
+		},
+	}
+	e.m = NewManager(Config{Store: e.store, Dir: t.TempDir(), RemoteSources: func(context.Context, core.Item) []core.MediaSource {
+		return []core.MediaSource{remote}
+	}})
+	// Local sources come first.
+	if p := e.start(t, Request{}); p.Remote() || p.Source().ID != e.source {
+		t.Errorf("got = %s (remote %v), want the local source %s", p.Source().ID, p.Remote(), e.source)
+	}
+	p := e.start(t, Request{SourceID: remote.ID})
+	if !p.Remote() || p.Method != decision.DirectPlay || p.URL() != "media/"+p.ID+"/stream.mp4" {
+		t.Fatalf("got = %s %s (remote %v), want direct play of the remote source as stream.mp4", p.Method, p.URL(), p.Remote())
+	}
+	srv := httptest.NewServer(e.m.Handler())
+	t.Cleanup(srv.Close)
+	client := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	resp, err := client.Get(srv.URL + "/" + p.URL())
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusFound || resp.Header.Get("Location") != remote.Path {
+		t.Errorf("GET = %d %q, want a redirect to %q", resp.StatusCode, resp.Header.Get("Location"), remote.Path)
+	}
+}

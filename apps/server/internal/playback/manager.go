@@ -89,7 +89,10 @@ type Config struct {
 	// Keeper keeps the volumes of the playbacks in progress awake; nil
 	// leaves them be.
 	Keeper *storage.Keeper
-	Logger *slog.Logger
+	// RemoteSources gives an item's media sources read over HTTP, which
+	// playbacks consider after its files; nil gives none.
+	RemoteSources func(ctx context.Context, it core.Item) []core.MediaSource
+	Logger        *slog.Logger
 }
 
 // Manager runs the playbacks in progress.
@@ -263,6 +266,9 @@ type Subtitle struct {
 // Source is the media source played.
 func (p *Playback) Source() *core.MediaSource { return p.Decision.Source.MediaSource }
 
+// Remote reports whether the source is read over HTTP: its Path is a URL.
+func (p *Playback) Remote() bool { return p.Decision.Source.Remote }
+
 // HLS reports whether the playback is delivered as HLS.
 func (p *Playback) HLS() bool { return p.stream != nil }
 
@@ -304,6 +310,10 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	if err != nil {
 		return nil, err
 	}
+	local := len(mediaSources)
+	if m.cfg.RemoteSources != nil {
+		mediaSources = append(mediaSources, m.cfg.RemoteSources(ctx, item)...)
+	}
 	if len(mediaSources) == 0 {
 		return nil, fmt.Errorf("%w: %s has no media", ErrNotPlayable, item.ID)
 	}
@@ -315,6 +325,7 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	sources := make([]*decision.Source, len(mediaSources))
 	for i := range mediaSources {
 		s := sourceFor(&mediaSources[i], &r.User.Preferences, &data)
+		s.Remote = i >= local
 		s.NoTranscoding = !r.User.Policy.AllowTranscoding || m.cfg.FFmpeg == nil
 		s.NoDirectStream = m.cfg.FFmpeg == nil
 		sources[i] = s
@@ -362,7 +373,7 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 		p.SubtitleStream = *i
 	}
 	p.Subtitles = m.subtitles(d, r.Client)
-	if p.root = libraryRoot(&lib, ms.Path); p.root == "" {
+	if p.root = libraryRoot(&lib, ms.Path); p.root == "" && !d.Source.Remote {
 		return nil, fmt.Errorf("%w: %s lies outside its library", ErrNotPlayable, ms.Path)
 	}
 	switch {
@@ -538,9 +549,11 @@ func (m *Manager) prepareHLS(ctx context.Context, p *Playback) error {
 			job.VideoCodec = d.VideoCodecs[0]
 		}
 		out = pl.Output(job)
-		kf := library.KeyframesJob(p.Item.ID, time.Now(), library.KeyframesUrgent)
-		if _, err := m.cfg.Store.Jobs().Enqueue(context.WithoutCancel(ctx), &kf); err != nil {
-			m.log.WarnContext(ctx, "queue keyframe extraction", "item", p.Item.ID, "err", err)
+		if !d.Source.Remote {
+			kf := library.KeyframesJob(p.Item.ID, time.Now(), library.KeyframesUrgent)
+			if _, err := m.cfg.Store.Jobs().Enqueue(context.WithoutCancel(ctx), &kf); err != nil {
+				m.log.WarnContext(ctx, "queue keyframe extraction", "item", p.Item.ID, "err", err)
+			}
 		}
 	}
 	p.Method = decision.Transcode

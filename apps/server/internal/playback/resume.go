@@ -65,7 +65,7 @@ func (m *Manager) prepareStart(ctx context.Context, p *Playback) {
 		}
 	}
 	ms := p.Source()
-	if ms.Path == "" || ms.Disc != "" {
+	if ms.Path == "" || ms.Disc != "" || p.Remote() {
 		return
 	}
 	go warmResume(*ms, p.StartPosition)
@@ -91,7 +91,7 @@ func (m *Manager) keepAwake() {
 	m.mu.Lock()
 	paths := make([]string, 0, len(m.playbacks))
 	for _, p := range m.playbacks {
-		if ms := p.Source(); ms.Path != "" && ms.Disc == "" {
+		if ms := p.Source(); ms.Path != "" && ms.Disc == "" && !p.Remote() {
 			paths = append(paths, ms.Path)
 		}
 	}

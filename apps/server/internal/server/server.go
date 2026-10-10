@@ -367,6 +367,12 @@ func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *eve
 		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, Record: activityLog.Record, Device: plugs.IsDevice,
 		QuietGate: quietGate, Keeper: keeper, Logger: log,
 	}
+	if path, err := exec.LookPath(cfg.FFprobe); err == nil {
+		remote := &library.RemoteSources{
+			Source: plugs.MediaSourceProviders, Prober: providers.FFprobe{Prober: &probe.Prober{FFprobe: path}}, Logger: log,
+		}
+		pc.RemoteSources = remote.For
+	}
 	v, err := pc.UseFFmpeg(ctx, cfg.FFmpeg, cfg.FFprobe)
 	if err != nil {
 		log.WarnContext(ctx, "ffmpeg unavailable; media plays directly only", "ffmpeg", cfg.FFmpeg, "err", err)

@@ -385,6 +385,18 @@ func (m *Manager) ImageGenerators() []library.ImageGenerator {
 	return out
 }
 
+// MediaSourceProviders returns the media source providers among the
+// started plugins.
+func (m *Manager) MediaSourceProviders() []library.MediaSourceProvider {
+	var out []library.MediaSourceProvider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_MEDIA_SOURCE_PROVIDER) {
+		if pl, ok := m.running(id); ok && pl.MediaSources() != nil {
+			out = append(out, &providers.MediaSourcePlugin{ID: id, Client: pl.MediaSources()})
+		}
+	}
+	return out
+}
+
 // StartPasswordReset has a password reset plugin deliver a PIN to a user.
 func (m *Manager) StartPasswordReset(ctx context.Context, pluginID string, user core.User, pin string, expires time.Time) error {
 	pl, ok := m.running(pluginID)

@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -42,7 +43,21 @@ func directName(p *Playback) string {
 	if p.progressive != nil {
 		return "stream." + p.progExt
 	}
-	return "stream" + strings.ToLower(filepath.Ext(p.Source().Path))
+	return "stream" + sourceExt(p)
+}
+
+// sourceExt returns the lowercase extension of the source's file, or of
+// its URL's path.
+func sourceExt(p *Playback) string {
+	name := p.Source().Path
+	if p.Remote() {
+		u, err := url.Parse(name)
+		if err != nil {
+			return ""
+		}
+		return strings.ToLower(path.Ext(u.Path))
+	}
+	return strings.ToLower(filepath.Ext(name))
 }
 
 // Handler serves the media of playbacks at /media/{playback}/{file}. The
@@ -88,7 +103,7 @@ func (m *Manager) serveMedia(w http.ResponseWriter, r *http.Request) {
 		m.serveProgressive(w, r, p)
 	case !p.HLS() && file == directName(p):
 		if p.Download {
-			w.Header().Set("Content-Disposition", attachment(p, filepath.Ext(p.Source().Path)))
+			w.Header().Set("Content-Disposition", attachment(p, sourceExt(p)))
 		}
 		m.serveFile(w, r, p)
 	case p.HLS() && file == "master.m3u8":
@@ -168,6 +183,11 @@ func (m *Manager) serveSegment(w http.ResponseWriter, r *http.Request, p *Playba
 // serveFile serves the source file as is, with range requests, opened
 // within its library folder.
 func (m *Manager) serveFile(w http.ResponseWriter, r *http.Request, p *Playback) {
+	if p.Remote() {
+		// Clients read remote sources from where they are.
+		http.Redirect(w, r, p.Source().Path, http.StatusFound)
+		return
+	}
 	f, info, err := openInRoot(p.root, p.Source().Path)
 	if err != nil {
 		m.log.ErrorContext(r.Context(), "open media", "playback", p.ID, "err", err)

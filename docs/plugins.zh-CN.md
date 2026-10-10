@@ -136,7 +136,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 `ImageGeneratorService.GenerateImages`（条目 ID、类型与名称，以及它缺少的图片类型）返回其中部分类型的图片，格式为 JPEG、PNG 或 WebP，每张至多 8 MiB。刷新结束时，按顺序向生成器请求所有来源都未提供的图片类型，每种类型只生成一次；生成的图片保存在元数据目录（`<id[:2]>/<id>/generated/<kind>.<ext>`），排在其他所有来源之后。之后的刷新保留它们而不再请求，替换式刷新会重新生成，一旦其他来源提供了该类型，生成的图片即被删除。未请求类型的图片或不是图片的内容会被拒绝。
 
 ### 8.9 媒体源提供者
-`MediaSourceProviderService.GetMediaSources` 返回条目额外的媒体源：一个 HTTP URL 及其探测出的流。播放决策把它们与条目的文件一并考虑；服务端通过重定向直放它们，或由 ffmpeg 读取该 URL 进行转封装或转码。
+`MediaSourceProviderService.GetMediaSources` 返回条目额外的媒体源，每个包含 ID、名称和一个 http(s) URL。播放开始时，服务端询问每个媒体源提供者，用 ffprobe 探测每个 URL（探测结果复用一小时，失败结果复用五分钟），并由插件、条目和插件给出的 ID 派生出稳定的媒体源 ID。播放决策在条目的文件之后考虑它们：服务端通过重定向到该 URL 直放它们，或由 ffmpeg 读取该 URL 进行转封装或转码；它们的码率不像本地文件那样受限。条目详情只列出条目的文件。
 
 ### 8.10 密码重置
 `AuthService.ForgotPassword` 为使用密码登录的用户生成一个八位一次性 PIN，连同用户 ID、用户名与过期时间交给服务端设置中选定插件（`password_reset_plugin`）的 `PasswordResetService.StartReset`，由插件以自己的方式（邮件、聊天）投递。无论用户是否存在，它的应答都相同，投递在后台进行。服务端只在内存中保存 PIN 的哈希 30 分钟；新的 PIN 替换该用户之前的 PIN，输错五次即作废。`AuthService.ResetPassword` 凭 PIN 设置新密码，并结束该用户的所有会话。未选定插件时，`ForgotPassword` 以 `FAILED_PRECONDITION` 失败。

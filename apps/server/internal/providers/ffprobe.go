@@ -19,6 +19,20 @@ func (f FFprobe) Probe(ctx context.Context, path string, audio bool) (library.Pr
 	if err != nil {
 		return library.ProbeResult{}, err
 	}
+	return library.ProbeResult{Source: withAttachments(r), Tags: r.Metadata}, nil
+}
+
+// ProbeURL probes the media at an http(s) URL, with its chapters.
+func (f FFprobe) ProbeURL(ctx context.Context, url string, audio bool) (core.MediaSource, error) {
+	r, err := f.Prober.Probe(ctx, probe.Request{Path: url, Audio: audio, Remote: true, Chapters: true})
+	if err != nil {
+		return core.MediaSource{}, err
+	}
+	return withAttachments(r), nil
+}
+
+// withAttachments returns the probed source with its attached files.
+func withAttachments(r probe.Result) core.MediaSource {
 	// Attached files, such as the fonts of ASS subtitles, are streams too;
 	// attached pictures are cover art, not files.
 	for _, a := range r.Attachments {
@@ -29,5 +43,7 @@ func (f FFprobe) Probe(ctx context.Context, path string, audio bool) (library.Pr
 			Index: a.Index, Kind: core.StreamAttachment, Codec: a.Codec, Title: a.FileName, MimeType: a.MimeType,
 		})
 	}
-	return library.ProbeResult{Source: r.Source, Tags: r.Metadata}, nil
+	return r.Source
 }
+
+var _ library.URLProber = FFprobe{}
