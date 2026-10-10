@@ -10,7 +10,7 @@
 
 * **Bottom-up**: build the low-level libraries with no business dependencies first, then assemble layer by layer; each layer depends only on completed layers below it.
 * **Definition of done**: a phase is complete when its libraries pass their tests, including all ported test cases (or cases explicitly marked skip with a reason), see [Testing §2](testing.md#2-porting-test-cases-from-jellyfin).
-* **Server first**: P7 to P12 complete the server, by comparing it with Jellyfin's server (its API controllers and providers); the clients come last, in P13, on a finished API.
+* **Server first**: P7 to P12 complete the server, by comparing it with Jellyfin's server (its API controllers and providers); P13 and P14 bring plugins level with Jellyfin's and add DLNA; the clients come last, in P15, on a finished API.
 * **Integration smoke tests**: starting from P1, the end of each phase adds an integration test in `apps/server/internal/smoke` that wires the completed libraries together. It is not an MVP; it only exposes interface drift early, reducing the bottom-up approach's risk of "discovering problems only at final integration".
 
 ---
@@ -32,7 +32,9 @@ flowchart TD
     P10["P10 Metadata management<br/>editing, identification, images, NFO writing, more providers"]
     P11["P11 Administration and operations<br/>server settings, jobs, plugin hot plugging and catalog, backup, networking"]
     P12["P12 Media extras<br/>trickplay, chapter images, media segments, lyrics, fonts, normalization, offline downloads"]
-    P13["P13 Clients and ecosystem<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim evaluation"]
+    P13["P13 Plugin platform<br/>host API, events, HTTP routes, tasks, remote devices, more provider types"]
+    P14["P14 DLNA<br/>plugins/dlna: media server, Play To, device profiles"]
+    P15["P15 Clients and ecosystem<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim decision"]
 
     P0 --> P1
     P1 --> P2
@@ -51,6 +53,8 @@ flowchart TD
     P10 --> P13
     P11 --> P13
     P12 --> P13
+    P13 --> P14
+    P13 --> P15
 ```
 
 | Phase | Theme | Status |
@@ -68,7 +72,9 @@ flowchart TD
 | P10 | Metadata management | ✅ Done |
 | P11 | Administration and operations | ✅ Done |
 | P12 | Media extras | ✅ Done |
-| P13 | Clients and ecosystem | Not started |
+| P13 | Plugin platform | Not started |
+| P14 | DLNA | Not started |
+| P15 | Clients and ecosystem | Not started |
 
 ---
 
@@ -143,7 +149,7 @@ flowchart TD
 ### P5 Streaming and API
 **Scope**: `streaming` (CMAF HLS, on-demand segmenting, seeking, segment cache); Connect services (library, playback, user, system).
 
-**Done when**: ported HLS cases pass; playback verified on real hls.js and AVFoundation clients. Media3 is verified in P13, with the Android client.
+**Done when**: ported HLS cases pass; playback verified on real hls.js and AVFoundation clients. Media3 is verified in P15, with the Android client.
 
 **Progress**:
 - [x] `libs/streaming`: playlists of the whole media source, RFC 6381 codec strings, segments generated on demand with restarts on seek, segments of copied video joined from one file per group of pictures; ported HLS cases pass
@@ -298,8 +304,37 @@ flowchart TD
 - [x] Progressive remuxes and transcodes; downloads, the file itself or a progressive transcode
 - [x] End-to-end test with real ffmpeg (`apps/server/internal/server/extras_test.go`)
 
-### P13 Clients and Ecosystem
-**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its completion criteria will be defined after P12.
+### P13 Plugin Platform
+**Scope**: what Jellyfin's plugins can do, apart from channels and live TV, for Mavio's plugins in both runtimes ([Plugins](plugins.md)): the host API with scopes and acting as users; events to consumers and every activity to notifiers; HTTP routes; tasks and a data folder; remote devices; image, lyrics, local metadata, saver, processor, resolver, intro, image generator, media source and password reset providers; external ID declarations; provider order per library.
+
+**Done when**: the test plugin, built for both runtimes, exercises every capability through an assembled server in an end-to-end test; the contracts and SDK are documented and tagged as `libs/proto` and `libs/plugin` releases.
+
+**Progress**:
+- [ ] Host API: scopes, acting as users and devices, transport for both runtimes
+- [ ] Data folder; tasks
+- [ ] Events: the event types of [Plugins §4](plugins.md#4-events), event consumers, notifiers
+- [ ] HTTP routes
+- [ ] Remote devices
+- [ ] Image, lyrics, local metadata, saver and processor providers; external IDs
+- [ ] Resolvers, intro providers, image generators, media source providers, password reset
+- [ ] Provider order per library
+- [ ] End-to-end test
+
+### P14 DLNA
+**Scope**: `plugins/dlna`, a first-party process plugin ([Plugins §10](plugins.md#10-dlna-pluginsdlna)): media server (SSDP, ContentDirectory, ConnectionManager, media with DLNA headers), Play To (renderer discovery, AVTransport and RenderingControl), device profiles; built for every server platform, in the official catalog and the container image.
+
+**Done when**: an end-to-end test with a simulated control point and renderer on the loopback interface discovers the server, browses a library, plays a file with range requests, and drives a renderer through play, pause, seek and stop with progress reported; playback is verified on a real television.
+
+**Progress**:
+- [ ] SSDP and device description
+- [ ] ContentDirectory and ConnectionManager
+- [ ] Media with DLNA headers and device profiles
+- [ ] Play To
+- [ ] Builds, catalog and container image
+- [ ] End-to-end test
+
+### P15 Clients and Ecosystem
+**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its completion criteria will be defined after P14.
 
 ---
 
@@ -313,6 +348,6 @@ flowchart TD
 | SVG rasterization | Pure-Go options are incomplete | Decided in P2: SVGs are checked and served as-is, not rasterized |
 | Hardware test coverage | Only the maintainers' machines and GitHub-hosted runners are available; other vendors' encoders are untested on real hardware | Real transcode tests run where the hardware exists and skip elsewhere; other vendor paths rely on the ported EncodingHelper cases |
 | Go modules split too finely | Friction in dependency upgrades and tidying | Keep watching; merge modules when needed |
-| Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P13); then serve the stream as `.sup` |
+| Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P15); then serve the stream as `.sup` |
 | Negative audio decode times in fMP4 | HLS outputs keep negative timestamps, so audio that starts before zero (AAC encoder priming) is written with a negative `tfdt`, a field the format defines as unsigned. hls.js and Safari play it, and Jellyfin writes the same for its fMP4 clients; players outside that set are unverified | If a player misplaces or drops the audio: shift only the audio to zero, keeping the video at the source's timestamps |
-| Live TV, DVR, channels and DLNA | Large parts of Jellyfin (DLNA as a plugin there) that Mavio has neither adopted nor ruled out | Decide before P13; DLNA would be a plugin |
+| Live TV, DVR and channels | Large parts of Jellyfin that Mavio has neither adopted nor ruled out; the plugin platform leaves out their provider types | Decide before P15 |

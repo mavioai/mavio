@@ -19,7 +19,7 @@
 * **默认隐私**：没有遥测、播放统计或设备追踪，所有数据都留在主机上。未配置元数据提供者（如 TMDB API Key）时，服务端只使用本地 NFO 文件与图片，不发出元数据的外部请求。
 
 ### 1.2 非目标（当前阶段）
-* 不兼容 Jellyfin 客户端生态、不提供 Jellyfin 数据迁移。Jellyfin API 兼容垫片（shim）的评估见 [Jellyfin 兼容性](jellyfin-compat.zh-CN.md)，在 P13 决定。
+* 不兼容 Jellyfin 客户端生态、不提供 Jellyfin 数据迁移。Jellyfin API 兼容垫片（shim）的评估见 [Jellyfin 兼容性](jellyfin-compat.zh-CN.md)，在 P15 决定。
 * 暂不实现任何 UI（Web / Mobile / Desktop），但目录与契约提前为其预留。
 
 ### 1.3 工程原则
@@ -239,6 +239,8 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
 ---
 
 ## 7. 插件系统（libs/plugin）
+
+本章介绍运行时以及服务端调用的插件；插件反过来能接触什么——宿主 API、事件、HTTP 路由、任务、远程设备与更多提供者类型——以及 DLNA 插件，见[插件平台](plugins.zh-CN.md)。
 
 ### 7.1 两种运行时，一套契约
 | | WASM 插件（wazero） | 子进程插件（UDS） |

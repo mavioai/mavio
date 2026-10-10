@@ -10,7 +10,7 @@
 
 * **自底向上**：先实现零业务依赖的底层库，再逐层向上组装；每一层只依赖已完成的下层。
 * **完成标准**：一个阶段的库通过各自的测试即为完成，包括全部移植的测试用例（或有明确标记、写明原因的 skip），见[测试策略 §2](testing.zh-CN.md#2-从-jellyfin-移植测试用例)。
-* **服务端优先**：P7 至 P12 对照 Jellyfin 服务端（其 API 控制器与元数据提供者）补全服务端；客户端放在最后的 P13，基于完成的 API 构建。
+* **服务端优先**：P7 至 P12 对照 Jellyfin 服务端（其 API 控制器与元数据提供者）补全服务端；P13 与 P14 让插件能力与 Jellyfin 对齐并加入 DLNA；客户端放在最后的 P15，基于完成的 API 构建。
 * **集成冒烟**：从 P1 起，每个阶段结束时在 `apps/server/internal/smoke` 增加一个把已完成的库串起来的集成测试。它不是 MVP，只用来尽早暴露接口漂移，降低自底向上方式"后期集成才发现问题"的风险。
 
 ---
@@ -32,7 +32,9 @@ flowchart TD
     P10["P10 元数据管理<br/>编辑、重新识别、图片、写回 NFO、更多元数据来源"]
     P11["P11 管理与运维<br/>服务端设置、任务、插件热插拔与插件目录、备份、网络"]
     P12["P12 媒体附加功能<br/>trickplay、章节图片、媒体片段、歌词、字体、音量标准化、离线下载"]
-    P13["P13 客户端与生态<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim 评估"]
+    P13["P13 插件平台<br/>宿主 API、事件、HTTP 路由、任务、远程设备、更多提供者类型"]
+    P14["P14 DLNA<br/>plugins/dlna：媒体服务器、推送播放、设备 profile"]
+    P15["P15 客户端与生态<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim 决定"]
 
     P0 --> P1
     P1 --> P2
@@ -51,6 +53,8 @@ flowchart TD
     P10 --> P13
     P11 --> P13
     P12 --> P13
+    P13 --> P14
+    P13 --> P15
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -68,7 +72,9 @@ flowchart TD
 | P10 | 元数据管理 | ✅ 完成 |
 | P11 | 管理与运维 | ✅ 完成 |
 | P12 | 媒体附加功能 | ✅ 完成 |
-| P13 | 客户端与生态 | 未开始 |
+| P13 | 插件平台 | 未开始 |
+| P14 | DLNA | 未开始 |
+| P15 | 客户端与生态 | 未开始 |
 
 ---
 
@@ -143,7 +149,7 @@ flowchart TD
 ### P5 流媒体与 API
 **范围**：`streaming`（CMAF HLS、按需分片、seek、分片缓存）；Connect 服务（库、播放、用户、系统）。
 
-**完成标准**：HLS 移植用例通过；hls.js 与 AVFoundation 实机播放验证。Media3 在 P13 中随 Android 客户端验证。
+**完成标准**：HLS 移植用例通过；hls.js 与 AVFoundation 实机播放验证。Media3 在 P15 中随 Android 客户端验证。
 
 **进度**：
 - [x] `libs/streaming`：覆盖整个媒体源的播放列表、RFC 6381 编解码器字符串、按需生成分片并在拖动时重启、直接复制视频的分片由每个图像组一个文件拼接而成；HLS 移植用例通过
@@ -298,8 +304,37 @@ flowchart TD
 - [x] 渐进式转封装与转码；下载文件本身或渐进式转码结果
 - [x] 使用真实 ffmpeg 的端到端测试（`apps/server/internal/server/extras_test.go`）
 
-### P13 客户端与生态
-**范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。具体完成标准在 P12 完成后制定。
+### P13 插件平台
+**范围**：让 Mavio 两种运行时的插件都能做到 Jellyfin 插件能做的事（频道与直播电视除外）（[插件平台](plugins.zh-CN.md)）：带作用域、可代表用户的宿主 API；面向消费者的事件，以及发给通知插件的全部活动；HTTP 路由；任务与数据目录；远程设备；图片、歌词、本地元数据、保存器、处理器、解析器、片头、图片生成器、媒体源与密码重置提供者；外部 ID 声明；按媒体库的提供者顺序。
+
+**完成标准**：为两种运行时构建的测试插件在端到端测试中通过装配好的服务端使用每一种能力；契约与 SDK 有文档，并以 `libs/proto` 与 `libs/plugin` 版本发布。
+
+**进度**：
+- [ ] 宿主 API：作用域、代表用户与设备、两种运行时的传输
+- [ ] 数据目录；任务
+- [ ] 事件：[插件平台 §4](plugins.zh-CN.md#4-事件) 的事件类型、事件消费者、通知插件
+- [ ] HTTP 路由
+- [ ] 远程设备
+- [ ] 图片、歌词、本地元数据、保存器与处理器提供者；外部 ID
+- [ ] 解析器、片头提供者、图片生成器、媒体源提供者、密码重置
+- [ ] 按媒体库的提供者顺序
+- [ ] 端到端测试
+
+### P14 DLNA
+**范围**：`plugins/dlna`，第一方进程插件（[插件平台 §10](plugins.zh-CN.md#10-dlnapluginsdlna)）：媒体服务器（SSDP、ContentDirectory、ConnectionManager、带 DLNA 头的媒体）、推送播放（发现渲染器、AVTransport 与 RenderingControl）、设备 profile；为服务端的每个平台构建，进入官方目录与容器镜像。
+
+**完成标准**：端到端测试在回环接口上用模拟的控制点与渲染器发现服务端、浏览媒体库、以 Range 请求播放文件，并驱动渲染器完成播放、暂停、跳转与停止且上报进度；在真实电视上验证播放。
+
+**进度**：
+- [ ] SSDP 与设备描述
+- [ ] ContentDirectory 与 ConnectionManager
+- [ ] 带 DLNA 头的媒体与设备 profile
+- [ ] 推送播放
+- [ ] 构建、目录与容器镜像
+- [ ] 端到端测试
+
+### P15 客户端与生态
+**范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。具体完成标准在 P14 完成后制定。
 
 ---
 
@@ -313,6 +348,6 @@ flowchart TD
 | SVG 栅格化 | 纯 Go 方案不完善 | P2 已决定：检查后原样下发，不做栅格化 |
 | 硬件测试覆盖 | 只有维护者自己的机器与 GitHub 托管 runner，其他厂商的编码器无法在实机上测试 | 真实转码测试在有硬件处运行、其余处跳过；其他厂商路径依赖移植的 EncodingHelper 用例 |
 | Go 模块拆分过细 | 依赖升级与 tidy 的摩擦 | 持续观察，必要时合并模块 |
-| 图形字幕 | PGS 与 VobSub 只能烧录，因而强制视频转码 | 有客户端能自行渲染 PGS 时（P13），改为以 `.sup` 交付该流 |
+| 图形字幕 | PGS 与 VobSub 只能烧录，因而强制视频转码 | 有客户端能自行渲染 PGS 时（P15），改为以 `.sup` 交付该流 |
 | fMP4 中为负的音频解码时间 | HLS 输出保留负时间戳，因此早于零点开始的音频（AAC 编码器的预填充）会以负的 `tfdt` 写出，而格式规定该字段为无符号数。hls.js 与 Safari 能正常播放，Jellyfin 对其 fMP4 客户端也写出同样的值；此外的播放器未经验证 | 若有播放器放错或丢弃音频：只把音频平移到零点，视频保持源文件的时间戳 |
-| 电视直播、录像、频道与 DLNA | Jellyfin 中体量很大的部分（DLNA 在 Jellyfin 中是插件），Mavio 既未采纳也未排除 | P13 之前决定；若做 DLNA，则以插件实现 |
+| 电视直播、录像与频道 | Jellyfin 中体量很大的部分，Mavio 既未采纳也未排除；插件平台不包含它们的提供者类型 | P15 之前决定 |

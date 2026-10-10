@@ -19,7 +19,7 @@
 * **Private by default**: no telemetry, playback analytics or device tracking; all data stays on the host. Without configured metadata providers (such as a TMDB API key) the server works from local NFO files and images and makes no outbound metadata requests.
 
 ### 1.2 Non-goals (current phase)
-* No compatibility with the Jellyfin client ecosystem and no Jellyfin data migration. A Jellyfin API compatibility shim is evaluated in [Jellyfin Compatibility](jellyfin-compat.md) and decided in P13.
+* No compatibility with the Jellyfin client ecosystem and no Jellyfin data migration. A Jellyfin API compatibility shim is evaluated in [Jellyfin Compatibility](jellyfin-compat.md) and decided in P15.
 * No UI yet (Web / Mobile / Desktop), but the directory layout and contracts already reserve room for it.
 
 ### 1.3 Engineering Principles
@@ -239,6 +239,8 @@ A media server's image workload is "poster-scale": individual images are small, 
 ---
 
 ## 7. Plugin System (libs/plugin)
+
+This chapter covers the runtimes and the plugins the server calls; [Plugins](plugins.md) covers what plugins reach in turn — the host API, events, HTTP routes, tasks, remote devices and the further provider types — and the DLNA plugin.
 
 ### 7.1 Two Runtimes, One Contract
 | | WASM plugins (wazero) | Child-process plugins (UDS) |

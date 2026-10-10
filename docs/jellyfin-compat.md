@@ -4,7 +4,7 @@
 
 > Related: [Architecture](architecture.md) · [Domain Model](domain.md) · [Roadmap](roadmap.md) · [AGENTS.md](../AGENTS.md)
 
-> Mavio is not compatible with the Jellyfin client ecosystem ([Architecture §1.2](architecture.md)). This document evaluates a shim that would let existing Jellyfin clients use a Mavio server: what it would take, where it conflicts with Mavio's design, and the form it would take if adopted. **Status: not adopted.** The decision belongs to P13 ([Roadmap](roadmap.md)), once Mavio's own clients are under way. The figures were taken from Jellyfin 12.2 (October 2026).
+> Mavio is not compatible with the Jellyfin client ecosystem ([Architecture §1.2](architecture.md)). This document evaluates a shim that would let existing Jellyfin clients use a Mavio server: what it would take, where it conflicts with Mavio's design, and the form it would take if adopted. **Status: not adopted.** The decision belongs to P15 ([Roadmap](roadmap.md)), once Mavio's own clients are under way. The figures were taken from Jellyfin 12.2 (October 2026).
 
 ---
 
@@ -38,7 +38,7 @@ A shim is feasible: Mavio's identifiers, client capabilities and playback, SyncP
 5. **Jellyfin Web.** It expects the server to host it at `/web`. The shim would target native clients — Swiftfin, Findroid, Jellyfin for Android TV, Infuse, Finamp, Streamyfin — and not bundle it.
 
 ## 4. Benefits and Costs
-* **Benefits**: mature clients on every platform before Mavio's own exist (P13), and playback tested on real devices through them.
+* **Benefits**: mature clients on every platform before Mavio's own exist (P15), and playback tested on real devices through them.
 * **Costs**: an untyped REST surface to maintain alongside Jellyfin's evolution; a second authorization path for media; and the positioning in Architecture §1.2 would change.
 
 ## 5. Form if Adopted

@@ -12,6 +12,7 @@
 | [docs/testing.zh-CN.md](docs/testing.zh-CN.md) | 测试分层、从 Jellyfin 移植测试、测试媒体 |
 | [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md) | 阶段划分、完成标准、当前进度、风险 |
 | [docs/optimization.zh-CN.md](docs/optimization.zh-CN.md) | 优化主题，每个附落地对照索引：存储 I/O 延迟缓解与推测式预热 |
+| [docs/plugins.zh-CN.md](docs/plugins.zh-CN.md) | 插件平台：宿主 API、事件、HTTP 路由、任务、远程设备、提供者类型；DLNA 插件 |
 | [docs/jellyfin-compat.zh-CN.md](docs/jellyfin-compat.zh-CN.md) | Jellyfin API 兼容垫片评估（未采用） |
 
 ## 项目概览

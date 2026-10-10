@@ -4,7 +4,7 @@
 
 > 相关文档：[系统架构](architecture.zh-CN.md) · [领域模型](domain.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
-> Mavio 不兼容 Jellyfin 客户端生态（[架构 §1.2](architecture.zh-CN.md)）。本文档评估一个让现有 Jellyfin 客户端使用 Mavio 服务端的兼容垫片（shim）：需要做什么、与 Mavio 的设计在哪里冲突，以及若采用时的形态。**状态：未采用。** 是否采用在 P13 决定（[路线图](roadmap.zh-CN.md)），届时 Mavio 自有客户端已经起步。文中数据取自 Jellyfin 12.2（2026 年 10 月）。
+> Mavio 不兼容 Jellyfin 客户端生态（[架构 §1.2](architecture.zh-CN.md)）。本文档评估一个让现有 Jellyfin 客户端使用 Mavio 服务端的兼容垫片（shim）：需要做什么、与 Mavio 的设计在哪里冲突，以及若采用时的形态。**状态：未采用。** 是否采用在 P15 决定（[路线图](roadmap.zh-CN.md)），届时 Mavio 自有客户端已经起步。文中数据取自 Jellyfin 12.2（2026 年 10 月）。
 
 ---
 
@@ -38,7 +38,7 @@
 5. **Jellyfin Web。** 它要求由服务端托管在 `/web`。垫片面向原生客户端（Swiftfin、Findroid、Jellyfin Android TV、Infuse、Finamp、Streamyfin），不打包它。
 
 ## 4. 收益与代价
-* **收益**：在 Mavio 自有客户端（P13）之前就有覆盖各平台的成熟客户端，并能借助它们在真实设备上测试播放。
+* **收益**：在 Mavio 自有客户端（P15）之前就有覆盖各平台的成熟客户端，并能借助它们在真实设备上测试播放。
 * **代价**：一个要随 Jellyfin 演进维护的非强类型 REST 外壳；媒体的第二条授权路径；架构 §1.2 中的定位也要随之改变。
 
 ## 5. 若采用时的形态
