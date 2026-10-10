@@ -325,29 +325,31 @@ flowchart TD
 - [x] 端到端测试（使用真实 ffmpeg 的 `apps/server/internal/server/capabilities_test.go` 与 `plugins_test.go`），覆盖两种运行时
 
 ### P14 DLNA
-**范围**：`plugins/dlna`，第一方进程插件（[插件平台 §10](plugins.zh-CN.md#10-dlnapluginsdlna)）：媒体服务器（SSDP、ContentDirectory、ConnectionManager、带 DLNA 头的媒体）、推送播放（发现渲染器、AVTransport 与 RenderingControl）、设备 profile；为服务端的每个平台构建，进入官方目录与容器镜像。
+**范围**：`plugins/dlna`，第一方进程插件（[插件平台 §10](plugins.zh-CN.md#10-dlnapluginsdlna)）：媒体服务器（SSDP、ContentDirectory、ConnectionManager、带 DLNA 头的媒体）、推送播放（发现渲染器、AVTransport 与 RenderingControl）、设备 profile；为服务端的每个平台构建，打包为目录插件包并内置于容器镜像。
 
 **完成标准**：端到端测试在回环接口上用模拟的控制点与渲染器发现服务端、浏览媒体库、以 Range 请求播放文件，并驱动渲染器完成播放、暂停、跳转与停止且上报进度；在真实电视上验证播放。
 
 **进度**：
-- [ ] SSDP 与设备描述
-- [ ] ContentDirectory 与 ConnectionManager
-- [ ] 带 DLNA 头的媒体与设备 profile
-- [ ] 推送播放
-- [ ] 构建、目录与容器镜像
-- [ ] 端到端测试
+- [x] SSDP 与设备描述
+- [x] ContentDirectory 与 ConnectionManager
+- [x] 带 DLNA 头的媒体与设备 profile
+- [x] 推送播放
+- [x] 构建、目录插件包与容器镜像（插件种子目录）
+- [x] 端到端测试（`apps/server/internal/server/dlna_test.go`）
+- [ ] 在真实电视上验证播放
 
 ### P15 客户端与生态
 **范围**：`libs/client`、`libs/ui`；基于完成的服务端 API 构建 `apps/web`、`apps/desktop`、`apps/mobile`；随 Android 客户端在 Media3 上验证播放；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。具体完成标准在 P14 完成后制定。
 
 ### P16 打包与发布
-**范围**：首批版本发布（[开发指南 §7](development.zh-CN.md#7-发布与版本)）：依次为 `libs/proto` 与 `libs/plugin` 打标签；发布服务端的版本二进制与容器镜像。
+**范围**：首批版本发布（[开发指南 §7](development.zh-CN.md#7-发布与版本)）：依次为 `libs/proto` 与 `libs/plugin` 打标签；发布服务端的版本二进制与容器镜像；发布包含 DLNA 插件的官方插件目录。
 
 **完成标准**：仓库外的插件以 `GOWORK=off`、不用 `replace` 基于打了标签的 `libs/proto` 与 `libs/plugin` 构建成功；某个版本的二进制与镜像已发布，且镜像能启动。
 
 **进度**：
 - [ ] 为 `libs/proto` 与 `libs/plugin` 打发布标签
 - [ ] 发布服务端的版本二进制与容器镜像
+- [ ] 发布官方插件目录
 
 ---
 

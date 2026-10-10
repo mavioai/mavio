@@ -325,29 +325,31 @@ flowchart TD
 - [x] End-to-end test (`apps/server/internal/server/capabilities_test.go` with real ffmpeg, `plugins_test.go`), in both runtimes
 
 ### P14 DLNA
-**Scope**: `plugins/dlna`, a first-party process plugin ([Plugins §10](plugins.md#10-dlna-pluginsdlna)): media server (SSDP, ContentDirectory, ConnectionManager, media with DLNA headers), Play To (renderer discovery, AVTransport and RenderingControl), device profiles; built for every server platform, in the official catalog and the container image.
+**Scope**: `plugins/dlna`, a first-party process plugin ([Plugins §10](plugins.md#10-dlna-pluginsdlna)): media server (SSDP, ContentDirectory, ConnectionManager, media with DLNA headers), Play To (renderer discovery, AVTransport and RenderingControl), device profiles; built for every server platform, packaged for a catalog and bundled in the container image.
 
 **Done when**: an end-to-end test with a simulated control point and renderer on the loopback interface discovers the server, browses a library, plays a file with range requests, and drives a renderer through play, pause, seek and stop with progress reported; playback is verified on a real television.
 
 **Progress**:
-- [ ] SSDP and device description
-- [ ] ContentDirectory and ConnectionManager
-- [ ] Media with DLNA headers and device profiles
-- [ ] Play To
-- [ ] Builds, catalog and container image
-- [ ] End-to-end test
+- [x] SSDP and device description
+- [x] ContentDirectory and ConnectionManager
+- [x] Media with DLNA headers and device profiles
+- [x] Play To
+- [x] Builds, catalog packages and container image (seeded plugin folder)
+- [x] End-to-end test (`apps/server/internal/server/dlna_test.go`)
+- [ ] Playback verified on a real television
 
 ### P15 Clients and Ecosystem
 **Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its completion criteria will be defined after P14.
 
 ### P16 Packaging and Release
-**Scope**: the first releases ([Development §7](development.md#7-releases-and-versioning)): `libs/proto` and `libs/plugin` tagged in that order; the server's release binaries and container images published.
+**Scope**: the first releases ([Development §7](development.md#7-releases-and-versioning)): `libs/proto` and `libs/plugin` tagged in that order; the server's release binaries and container images published; the official plugin catalog published with the DLNA plugin.
 
 **Done when**: a plugin outside the repository builds against the tagged `libs/proto` and `libs/plugin` with `GOWORK=off` and no `replace`; the release binaries and images of a version are published and the images start.
 
 **Progress**:
 - [ ] Tag `libs/proto` and `libs/plugin` releases
 - [ ] Publish the server's release binaries and container images
+- [ ] Publish the official plugin catalog
 
 ---
 

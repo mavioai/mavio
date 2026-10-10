@@ -156,22 +156,25 @@ With `download_lyrics` set, a refresh of a track without a lyric file beside it 
 | Long tasks | Up to the task timeout | Unlimited |
 
 ## 10. DLNA (`plugins/dlna`)
-DLNA is a first-party process plugin: it needs UDP multicast, which WASM has no sockets for, and long-lived listeners. It is built for every platform the server is, published in the official catalog and bundled in the container image.
+DLNA is a first-party process plugin: it needs UDP multicast, which WASM has no sockets for, and long-lived listeners. It is built for every platform the server is and bundled in the container image (§10.6).
 
 ### 10.1 Capabilities
-`HTTP_HANDLER` (descriptions, control and event URLs, media), `DEVICE_CONTROLLER` (Play To), `EVENT_CONSUMER` (`item.*`, for content updates), and the host API with `act_as_users` and scopes on the library, item, playback, user and system services.
+`HTTP_HANDLER` (descriptions, control and event URLs, media), `DEVICE_CONTROLLER` (Play To), `EVENT_CONSUMER` (`item.*`, for content updates), and the host API with `act_as_users` and the scopes `LibraryService:read`, `ItemService:read` and `PlaybackService`.
 
 ### 10.2 Media Server
 * **Discovery**: SSDP on 239.255.255.250:1900 on every interface: `NOTIFY` alive and byebye, answers to `M-SEARCH` for the root device, `MediaServer:1`, `ContentDirectory:1`, `ConnectionManager:1` and `X_MS_MediaReceiverRegistrar:1`. The description URL is the server's address on the interface the request came in on, with its HTTP port and base URL from `HostService.GetServerInfo`.
 * **Content**: `ContentDirectory` `Browse` and `Search` as the configured user, over the user's libraries, folders, series, seasons, albums, artists, playlists and collections, as DIDL-Lite; `SystemUpdateID` follows library events, announced by GENA.
-* **Media**: each `res` URL is a plugin route for the item; a request to it starts a playback for the renderer's profile through `PlaybackService` (direct play, or a progressive remux or transcode, since most renderers take no HLS) and is proxied with ranges, with the DLNA headers renderers expect (`contentFeatures.dlna.org`, `transferMode.dlna.org`). Subtitles go as `res` or `CaptionInfo.sec` when the profile takes them, else are burned in.
+* **Media**: each `res` URL is the plugin route `media/{item}/{file}`, with the profile in `?profile=` or matched by request headers. A request starts a playback for the renderer's profile through `PlaybackService` (direct play, or a progressive remux or transcode, since most renderers take no HLS); requests for the same user, item, profile and start share a playback, dropped after four idle minutes. The host's media route is proxied with ranges and the DLNA headers renderers expect (`contentFeatures.dlna.org`, whose `DLNA.ORG_OP` is 01 for direct play and 10 for time seek, and `transferMode.dlna.org`); `TimeSeekRange.dlna.org` restarts a transcode at the time given. Subtitles go as a `res` or `CaptionInfo.sec` pointing at `subtitles/{item}/{file}` (SRT) when the profile takes them, else are burned in. Images go through `images/{id}?size=`, as JPEG thumbnails or large images.
 
 ### 10.3 Play To
-* The plugin searches for `MediaRenderer:1` devices, reads their descriptions and registers each as a device (§7) with the profile matching it.
-* Commands map to `AVTransport` and `RenderingControl`: play (`SetAVTransportURI` with the playback's URL, `Play`), pause, resume, stop, seek, next and previous within the queue it keeps, volume and mute. The plugin polls the transport every second and reports progress; a renderer gone for three polls stops its playback.
+* The plugin searches for `MediaRenderer:1` devices every five minutes and follows their announcements, reads their descriptions and registers each as a device (§7) with the profile matching it. Renderers listed in the configuration, such as those on other subnets, are read from their description URLs.
+* Commands map to `AVTransport` and `RenderingControl`: play (`SetAVTransportURI` with the route `play/{playback}/stream.{ext}` and its DIDL-Lite, then `Play`), pause, resume, stop, seek (`REL_TIME` for direct play; a transcode restarts at the position), next and previous within the queue it keeps, volume and mute. The plugin polls the transport every second and reports progress at most every five seconds; a renderer stopping within ten seconds of the end has played the item, and the next one starts. A renderer playing another URI, or failing three polls, stops its playback.
 
 ### 10.4 Device Profiles
-Renderers are matched by their description (manufacturer, model, friendly name) and request headers (`User-Agent`, `X-AV-Client-Info`) to profiles holding the containers, codecs and subtitle formats they take, as `ClientCapabilities`, and their quirks (time-seek support, DLNA flags). A generic profile applies to the rest; administrators add or override profiles in the plugin's configuration.
+Built-in profiles cover Samsung, LG, Sony and Panasonic televisions, Kodi and VLC, with a generic profile for the rest. A profile has a `name`; `match` rules, regular expressions on `friendly_name`, `manufacturer`, `model_name`, `model_number` and request `headers`, every field set matching; the `capabilities` it takes, as a `ClientCapabilities` in JSON; and its quirks: `time_seek`, `caption_info`, `subtitle_res`, and `mime_types` replacing the MIME types of containers. Profiles in the configuration replace the built-in one of their name and are tried before the others.
 
 ### 10.5 Configuration
-The user whose libraries are served, the server name shown, enabling the media server and Play To, the interfaces to use, the announcement interval (default 30 minutes) and profile overrides.
+The `user` whose libraries are served (required), the `server_name` shown, `media_server` and `play_to` (default on), the `interfaces` to use (default every interface up with multicast and IPv4), `announce_interval_minutes` (default 30), `ssdp_port` (for tests), `renderers` (extra description URLs) and `profiles`.
+
+### 10.6 Packaging
+`pnpm nx run dlna:dist` builds the plugin for Linux, macOS and Windows on amd64 and arm64, packs each as a catalog zip of `manifest.json` and the executable, and writes their catalog to `plugins/dlna/dist/catalog.json`. The container image ships the plugin in its plugin seed folder (architecture document §12); SSDP multicast reaches a container only on the host network.

@@ -156,22 +156,25 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 | 长任务 | 至多任务超时 | 不限 |
 
 ## 10. DLNA（`plugins/dlna`）
-DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和长期运行的监听。它为服务端支持的每个平台构建，发布在官方目录中，并打包进容器镜像。
+DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和长期运行的监听。它为服务端支持的每个平台构建，并打包进容器镜像（§10.6）。
 
 ### 10.1 能力
-`HTTP_HANDLER`（设备描述、控制与事件 URL、媒体）、`DEVICE_CONTROLLER`（推送播放）、`EVENT_CONSUMER`（`item.*`，用于内容更新），以及带 `act_as_users` 和媒体库、条目、播放、用户、系统服务作用域的宿主 API。
+`HTTP_HANDLER`（设备描述、控制与事件 URL、媒体）、`DEVICE_CONTROLLER`（推送播放）、`EVENT_CONSUMER`（`item.*`，用于内容更新），以及带 `act_as_users` 和 `LibraryService:read`、`ItemService:read`、`PlaybackService` 作用域的宿主 API。
 
 ### 10.2 媒体服务器
 * **发现**：在每个网络接口的 239.255.255.250:1900 上运行 SSDP：发送 `NOTIFY` alive 与 byebye，并应答针对根设备、`MediaServer:1`、`ContentDirectory:1`、`ConnectionManager:1` 与 `X_MS_MediaReceiverRegistrar:1` 的 `M-SEARCH`。描述 URL 使用请求到达的网络接口上的服务端地址，以及 `HostService.GetServerInfo` 给出的 HTTP 端口与基础 URL。
 * **内容**：以配置的用户身份执行 `ContentDirectory` 的 `Browse` 与 `Search`，覆盖该用户的媒体库、文件夹、剧集、季、专辑、艺人、播放列表与合集，以 DIDL-Lite 输出；`SystemUpdateID` 随媒体库事件变化，并通过 GENA 通告。
-* **媒体**：每个 `res` URL 都是指向该条目的插件路由；对它的请求会通过 `PlaybackService` 按渲染器的 profile 开启一次播放（直放，或渐进式转封装、转码，因为多数渲染器不支持 HLS），并以支持 Range 的方式代理，带上渲染器期望的 DLNA 头（`contentFeatures.dlna.org`、`transferMode.dlna.org`）。profile 接受时，字幕以 `res` 或 `CaptionInfo.sec` 提供，否则烧录。
+* **媒体**：每个 `res` URL 都是插件路由 `media/{item}/{file}`，profile 由 `?profile=` 指定或按请求头匹配。请求会通过 `PlaybackService` 按渲染器的 profile 开启一次播放（直放，或渐进式转封装、转码，因为多数渲染器不支持 HLS）；同一用户、条目、profile 与起点的请求共用一次播放，空闲四分钟后释放。宿主的媒体路由以支持 Range 的方式代理，并带上渲染器期望的 DLNA 头（`contentFeatures.dlna.org`，其 `DLNA.ORG_OP` 在直放时为 01、按时间跳转时为 10；以及 `transferMode.dlna.org`）；`TimeSeekRange.dlna.org` 让转码从给定时间重新开始。profile 接受时，字幕以指向 `subtitles/{item}/{file}`（SRT）的 `res` 或 `CaptionInfo.sec` 提供，否则烧录。图片经由 `images/{id}?size=` 以 JPEG 缩略图或大图提供。
 
 ### 10.3 推送播放（Play To）
-* 插件搜索 `MediaRenderer:1` 设备，读取其描述，并以匹配的 profile 把每个设备注册为设备（§7）。
-* 命令映射到 `AVTransport` 与 `RenderingControl`：播放（以播放的 URL 调用 `SetAVTransportURI`，再 `Play`）、暂停、继续、停止、跳转、在插件维护的队列中切换下一项和上一项、音量与静音。插件每秒轮询一次传输状态并上报进度；连续三次轮询都不在的渲染器，其播放被停止。
+* 插件每五分钟搜索一次 `MediaRenderer:1` 设备并跟随其通告，读取其描述，并以匹配的 profile 把每个设备注册为设备（§7）。配置中列出的渲染器（例如位于其他子网的渲染器）从其描述 URL 读取。
+* 命令映射到 `AVTransport` 与 `RenderingControl`：播放（以路由 `play/{playback}/stream.{ext}` 及其 DIDL-Lite 调用 `SetAVTransportURI`，再 `Play`）、暂停、继续、停止、跳转（直放用 `REL_TIME`；转码从该位置重新开始）、在插件维护的队列中切换下一项和上一项、音量与静音。插件每秒轮询一次传输状态，至多每五秒上报一次进度；渲染器在结束前十秒内停止即视为播完，并开始下一项。渲染器改放其他 URI，或连续三次轮询失败，其播放被停止。
 
 ### 10.4 设备 profile
-根据渲染器的描述（制造商、型号、友好名称）与请求头（`User-Agent`、`X-AV-Client-Info`）把渲染器匹配到 profile；profile 以 `ClientCapabilities` 描述其接受的容器、编解码器与字幕格式，并记录其特殊行为（是否支持按时间跳转、DLNA 标志）。其余设备使用通用 profile；管理员可以在插件配置中添加或覆盖 profile。
+内置 profile 覆盖三星、LG、索尼与松下电视以及 Kodi、VLC，其余设备使用通用 profile。profile 包含 `name`；`match` 规则，即对 `friendly_name`、`manufacturer`、`model_name`、`model_number` 与请求 `headers` 的正则表达式，所设字段须全部匹配；以 JSON 形式的 `ClientCapabilities` 描述其接受内容的 `capabilities`；以及其特殊行为：`time_seek`、`caption_info`、`subtitle_res`，和替换容器 MIME 类型的 `mime_types`。配置中的 profile 替换同名的内置 profile，并先于其他 profile 尝试。
 
 ### 10.5 配置
-提供哪个用户的媒体库、显示的服务器名称、是否启用媒体服务器与推送播放、使用的网络接口、通告间隔（默认 30 分钟），以及 profile 覆盖。
+提供其媒体库的 `user`（必填）、显示的 `server_name`、`media_server` 与 `play_to`（默认开启）、使用的 `interfaces`（默认为所有已启用、支持组播且有 IPv4 地址的接口）、`announce_interval_minutes`（默认 30）、`ssdp_port`（供测试）、`renderers`（额外的描述 URL）与 `profiles`。
+
+### 10.6 打包
+`pnpm nx run dlna:dist` 为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建插件，把每个平台打成包含 `manifest.json` 与可执行文件的目录 zip 包，并把其目录写入 `plugins/dlna/dist/catalog.json`。容器镜像在其插件种子目录中附带该插件（架构文档 §12）；SSDP 组播只能到达使用宿主网络的容器。
