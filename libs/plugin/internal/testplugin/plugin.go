@@ -26,6 +26,9 @@
 //
 // As a metadata processor it adds the tag "processed".
 //
+// As a lyrics provider it finds synced lyrics "<name>" of every track,
+// whose single line is the track's name.
+//
 // As a device controller it takes commands to its device "tv" and rejects
 // others, naming the device and the user.
 //
@@ -68,6 +71,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewLocalMetadataServiceHandler(local{}))
 	guest.Handle(pluginv1connect.NewMetadataSaverServiceHandler(local{}))
 	guest.Handle(pluginv1connect.NewMetadataProcessorServiceHandler(processor{}))
+	guest.Handle(pluginv1connect.NewLyricsProviderServiceHandler(lyrics{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -128,6 +132,18 @@ type processor struct{}
 func (processor) ProcessMetadata(_ context.Context, req *pluginv1.ProcessMetadataRequest) (*pluginv1.ProcessMetadataResponse, error) {
 	md := pluginv1.Metadata_builder{Tags: append(req.GetMetadata().GetTags(), "processed")}.Build()
 	return pluginv1.ProcessMetadataResponse_builder{Changed: proto.Bool(true), Metadata: md}.Build(), nil
+}
+
+type lyrics struct{}
+
+func (lyrics) SearchLyrics(_ context.Context, req *pluginv1.SearchLyricsRequest) (*pluginv1.SearchLyricsResponse, error) {
+	return pluginv1.SearchLyricsResponse_builder{Lyrics: []*pluginv1.RemoteLyrics{pluginv1.RemoteLyrics_builder{
+		Id: proto.String(req.GetName()), Name: proto.String(req.GetName()), Synced: proto.Bool(true),
+	}.Build()}}.Build(), nil
+}
+
+func (lyrics) DownloadLyrics(_ context.Context, req *pluginv1.DownloadLyricsRequest) (*pluginv1.DownloadLyricsResponse, error) {
+	return pluginv1.DownloadLyricsResponse_builder{Content: proto.String("[00:01.00]" + req.GetId() + "\n"), Synced: proto.Bool(true)}.Build(), nil
 }
 
 type devices struct{}

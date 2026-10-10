@@ -68,6 +68,8 @@ enum Capability {
   CAPABILITY_METADATA_SAVER = 12;
   // Implements MetadataProcessorService.
   CAPABILITY_METADATA_PROCESSOR = 13;
+  // Implements LyricsProviderService.
+  CAPABILITY_LYRICS_PROVIDER = 14;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin

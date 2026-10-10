@@ -4925,7 +4925,8 @@
           "CAPABILITY_IMAGE_PROVIDER",
           "CAPABILITY_LOCAL_METADATA",
           "CAPABILITY_METADATA_SAVER",
-          "CAPABILITY_METADATA_PROCESSOR"
+          "CAPABILITY_METADATA_PROCESSOR",
+          "CAPABILITY_LYRICS_PROVIDER"
         ]
       },
       "mavio.plugin.v1.ExternalIdKind": {

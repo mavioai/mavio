@@ -27,6 +27,7 @@ type Set struct {
 	local     pluginv1connect.LocalMetadataServiceClient
 	saver     pluginv1connect.MetadataSaverServiceClient
 	processor pluginv1connect.MetadataProcessorServiceClient
+	lyrics    pluginv1connect.LyricsProviderServiceClient
 }
 
 // New builds the clients for m over c.
@@ -67,6 +68,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_METADATA_PROCESSOR) {
 		s.processor = pluginv1connect.NewMetadataProcessorServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_LYRICS_PROVIDER) {
+		s.lyrics = pluginv1connect.NewLyricsProviderServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -112,3 +116,6 @@ func (s Set) Saver() pluginv1connect.MetadataSaverServiceClient { return s.saver
 
 // Processor returns the MetadataProcessorService client, or nil.
 func (s Set) Processor() pluginv1connect.MetadataProcessorServiceClient { return s.processor }
+
+// Lyrics returns the LyricsProviderService client, or nil.
+func (s Set) Lyrics() pluginv1connect.LyricsProviderServiceClient { return s.lyrics }

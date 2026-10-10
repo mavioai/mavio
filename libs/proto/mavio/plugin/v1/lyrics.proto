@@ -1,0 +1,57 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "google/protobuf/duration.proto";
+
+// LyricsProviderService finds lyrics of tracks in an external source.
+service LyricsProviderService {
+  // SearchLyrics returns the lyrics the provider has of a track, best
+  // first.
+  rpc SearchLyrics(SearchLyricsRequest) returns (SearchLyricsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // DownloadLyrics returns lyrics SearchLyrics found.
+  rpc DownloadLyrics(DownloadLyricsRequest) returns (DownloadLyricsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message SearchLyricsRequest {
+  // The track's name.
+  string name = 1;
+  repeated string artists = 2;
+  string album = 3;
+  google.protobuf.Duration duration = 4;
+  // Known IDs keyed by provider, as Lookup.external_ids.
+  map<string, string> external_ids = 5;
+}
+
+// RemoteLyrics are lyrics a provider has.
+message RemoteLyrics {
+  // The provider's ID of the lyrics, passed to DownloadLyrics.
+  string id = 1;
+  string name = 2;
+  repeated string artists = 3;
+  string album = 4;
+  google.protobuf.Duration duration = 5;
+  // The lines have start times.
+  bool synced = 6;
+  // Provider-assigned match quality in [0, 1].
+  double score = 7;
+}
+
+message SearchLyricsResponse {
+  repeated RemoteLyrics lyrics = 1;
+}
+
+message DownloadLyricsRequest {
+  string id = 1;
+}
+
+message DownloadLyricsResponse {
+  // The lyrics as LRC (enhanced LRC included) when synced, else as plain
+  // text, one line per line; at most 1 MiB.
+  string content = 1;
+  bool synced = 2;
+}

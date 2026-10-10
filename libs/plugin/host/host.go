@@ -35,6 +35,7 @@ type Plugin interface {
 	LocalMetadata() pluginv1connect.LocalMetadataServiceClient
 	Saver() pluginv1connect.MetadataSaverServiceClient
 	Processor() pluginv1connect.MetadataProcessorServiceClient
+	Lyrics() pluginv1connect.LyricsProviderServiceClient
 	// HTTP returns the handler of the plugin's HTTP routes, or nil without
 	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
 	HTTP() http.Handler
