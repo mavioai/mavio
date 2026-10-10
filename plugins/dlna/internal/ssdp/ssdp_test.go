@@ -108,6 +108,9 @@ func loopback(t *testing.T) []net.Interface {
 	}
 	for _, ifi := range all {
 		if ifi.Flags&net.FlagLoopback != 0 && ifi.Flags&net.FlagUp != 0 {
+			if ifi.Flags&net.FlagMulticast == 0 {
+				t.Skipf("loopback interface %s takes no multicast", ifi.Name)
+			}
 			ifaces, err := Interfaces([]string{ifi.Name})
 			if err != nil {
 				t.Skipf("loopback: %v", err)
