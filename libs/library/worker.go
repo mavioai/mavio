@@ -14,7 +14,9 @@ import (
 
 // Handler runs one kind of job. Jobs it returns are enqueued once the job
 // has completed, such as the next scheduled run, which could not be
-// enqueued while the job itself still holds its unique key.
+// enqueued while the job itself still holds its unique key. They are
+// enqueued after a failure too, unless the failed job is to be retried
+// under the same key.
 type Handler func(ctx context.Context, job core.Job) ([]core.Job, error)
 
 // Worker leases jobs from the queue and runs their handlers, extending the
@@ -115,9 +117,10 @@ func (w *Worker) RunOne(ctx context.Context) (bool, error) {
 	}
 	if runErr != nil {
 		log.WarnContext(ctx, "job failed", "err", runErr)
-		return true, w.Queue.Fail(ctx, job.ID, w.Owner, runErr)
-	}
-	if err := w.Queue.Complete(ctx, job.ID, w.Owner); err != nil {
+		if err := w.Queue.Fail(ctx, job.ID, w.Owner, runErr); err != nil {
+			return true, err
+		}
+	} else if err := w.Queue.Complete(ctx, job.ID, w.Owner); err != nil {
 		return true, err
 	}
 	for i := range next {
@@ -125,7 +128,9 @@ func (w *Worker) RunOne(ctx context.Context) (bool, error) {
 			return true, err
 		}
 	}
-	log.DebugContext(ctx, "job done")
+	if runErr == nil {
+		log.DebugContext(ctx, "job done")
+	}
 	return true, nil
 }
 

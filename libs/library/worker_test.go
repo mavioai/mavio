@@ -40,7 +40,10 @@ func TestWorker(t *testing.T) {
 			// enqueued once the job completed.
 			return []core.Job{{ID: core.NewID(), Kind: "later", UniqueKey: "ok", MaxAttempts: 1, RunAt: m.clock().Add(time.Hour)}}, nil
 		},
-		"bad":   func(context.Context, core.Job) ([]core.Job, error) { return nil, errors.New("boom") },
+		"bad": func(context.Context, core.Job) ([]core.Job, error) {
+			// Follow-ups of failed jobs are enqueued too.
+			return []core.Job{{ID: core.NewID(), Kind: "after-bad", MaxAttempts: 1, RunAt: m.clock().Add(time.Hour)}}, errors.New("boom")
+		},
 		"panic": func(context.Context, core.Job) ([]core.Job, error) { panic("oops") },
 	}}
 	ok := enqueue(t, m, "ok", "ok")
@@ -57,8 +60,12 @@ func TestWorker(t *testing.T) {
 	if got := m.job(ok.ID); got.State != core.JobSucceeded || ran != 1 {
 		t.Errorf("ok = %+v", got)
 	}
-	if len(m.jobs) != 4 || m.jobs[3].Kind != "later" {
-		t.Errorf("follow-up = %+v", m.jobs)
+	kinds := map[string]bool{}
+	for _, j := range m.jobs {
+		kinds[j.Kind] = true
+	}
+	if len(m.jobs) != 5 || !kinds["later"] || !kinds["after-bad"] {
+		t.Errorf("follow-ups = %+v", m.jobs)
 	}
 	if got := m.job(bad.ID); got.State != core.JobPending || got.LastError != "boom" {
 		t.Errorf("bad = %+v", got)
