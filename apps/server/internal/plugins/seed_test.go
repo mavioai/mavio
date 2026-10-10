@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
@@ -39,7 +40,8 @@ func TestSeed(t *testing.T) {
 		t.Fatalf("Seed: %v", err)
 	}
 	info, err := os.Stat(filepath.Join(dir, "dlna", "plugin"))
-	if err != nil || info.Mode()&0o100 == 0 {
+	// Windows keeps no execute bits.
+	if err != nil || runtime.GOOS != "windows" && info.Mode()&0o100 == 0 {
 		t.Errorf("seeded executable = %v, %v; want an executable file", info, err)
 	}
 	if _, err := os.Stat(filepath.Join(dir, "other")); !os.IsNotExist(err) {
