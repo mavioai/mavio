@@ -1,7 +1,7 @@
 // Command scraper-tmdb is the metadata provider for The Movie Database
 // (TMDB): movies, series, seasons and episodes, with their cast, crew and
-// images; it also lists the episodes of series in their display orders.
-// It builds as plugin.wasm (GOOS=wasip1, -buildmode=c-shared) and, for the
+// images; it also lists the episodes of series in their display orders,
+// and movies and series to discover. It builds as plugin.wasm (GOOS=wasip1, -buildmode=c-shared) and, for the
 // process runtime, as a native executable. Requests use an
 // administrator's TMDB API key when one is configured, else Radarr's API
 // read access token, and Mavio's own key once TMDB rejects that token.
@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -43,6 +44,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewPluginServiceHandler(p))
 	guest.Handle(pluginv1connect.NewMetadataProviderServiceHandler(p))
 	guest.Handle(pluginv1connect.NewEpisodeListProviderServiceHandler(p))
+	guest.Handle(pluginv1connect.NewDiscoveryProviderServiceHandler(p))
 }
 
 // config is the plugin's configuration, as described by the manifest's
@@ -69,14 +71,16 @@ var mavioKey string
 var errUnconfigured = connect.NewError(connect.CodeFailedPrecondition,
 	errors.New("TMDB rejected Radarr's token and this build has no key of its own; configure a TMDB API key"))
 
-// plugin implements the lifecycle, metadata provider and episode list
-// provider services.
+// plugin implements the lifecycle, metadata provider, episode list
+// provider and discovery provider services.
 type plugin struct {
 	baseURL string
 	// radarrToken and mavioKey are the keys used without a configured
 	// one; rejected records that TMDB rejected radarrToken.
 	radarrToken, mavioKey string
 	rejected              atomic.Bool
+	// now is the clock; nil for time.Now.
+	now func() time.Time
 
 	mu  sync.RWMutex
 	cfg config
@@ -108,6 +112,13 @@ func (p *plugin) Health(context.Context, *pluginv1.HealthRequest) (*pluginv1.Hea
 
 func (p *plugin) Shutdown(context.Context, *pluginv1.ShutdownRequest) (*pluginv1.ShutdownResponse, error) {
 	return &pluginv1.ShutdownResponse{}, nil
+}
+
+func (p *plugin) clock() time.Time {
+	if p.now != nil {
+		return p.now()
+	}
+	return time.Now()
 }
 
 func (p *plugin) config() config {
