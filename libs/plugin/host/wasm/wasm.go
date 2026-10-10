@@ -30,6 +30,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/plugin/internal/abi"
 	"github.com/mavioai/mavio/libs/plugin/internal/clients"
+	"github.com/mavioai/mavio/libs/plugin/internal/proc"
 	"github.com/mavioai/mavio/libs/plugin/manifest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
@@ -55,7 +56,20 @@ type Options struct {
 	// HostAPI serves the plugin's requests to the host API (abi.HostName);
 	// nil denies them.
 	HostAPI http.Handler
+	// DataDir is mounted writable at /data; empty mounts nothing.
+	DataDir string
 	Logger  *slog.Logger
+}
+
+// DataMount is where WASM plugins see their data folder.
+const DataMount = "/data"
+
+type callTimeoutKey struct{}
+
+// WithCallTimeout returns ctx bounding the WASM calls made with it by d
+// instead of Options.CallTimeout.
+func WithCallTimeout(ctx context.Context, d time.Duration) context.Context {
+	return context.WithValue(ctx, callTimeoutKey{}, d)
 }
 
 // Plugin is a running WASM plugin. It implements host.Plugin.
@@ -167,8 +181,13 @@ func (p *Plugin) newInstance(ctx context.Context) (*instance, error) {
 	for _, dir := range p.manifest.GetPermissions().GetReadPaths() {
 		fsConfig = fsConfig.WithReadOnlyDirMount(dir, dir)
 	}
+	cfg := wazero.NewModuleConfig()
+	if p.opts.DataDir != "" {
+		fsConfig = fsConfig.WithDirMount(p.opts.DataDir, DataMount)
+		cfg = cfg.WithEnv(proc.EnvData, DataMount)
+	}
 	name := fmt.Sprintf("%s#%d", p.manifest.GetId(), p.nextModule.Add(1))
-	mod, err := p.runtime.InstantiateModule(ctx, p.compiled, wazero.NewModuleConfig().
+	mod, err := p.runtime.InstantiateModule(ctx, p.compiled, cfg.
 		WithName(name).
 		WithStartFunctions(abi.ExportInit).
 		WithStdout(logWriter{p.log, slog.LevelDebug}).
@@ -264,7 +283,11 @@ func (p *Plugin) callConfigured(ctx context.Context, inst *instance, req abi.Req
 }
 
 func (p *Plugin) call(ctx context.Context, inst *instance, req abi.Request) (abi.Response, error) {
-	ctx, cancel := context.WithTimeout(ctx, p.opts.CallTimeout)
+	timeout := p.opts.CallTimeout
+	if d, ok := ctx.Value(callTimeoutKey{}).(time.Duration); ok {
+		timeout = d
+	}
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	mod := inst.mod
 	in := abi.EncodeRequest(req)

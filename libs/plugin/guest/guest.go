@@ -13,9 +13,11 @@ package guest
 import (
 	"errors"
 	"net/http"
+	"os"
 	"sync"
 
 	"github.com/mavioai/mavio/libs/plugin/internal/abi"
+	"github.com/mavioai/mavio/libs/plugin/internal/proc"
 )
 
 // HostURL is the base URL of the host API: the server's Connect services and
@@ -76,6 +78,11 @@ func SetHostClient(c *http.Client) {
 	defer mu.Unlock()
 	hostClient = c
 }
+
+// DataDir returns the plugin's writable data folder, which the host keeps
+// across restarts and upgrades, includes in backups and deletes when the
+// plugin is uninstalled; it is empty when the host gives none.
+func DataDir() string { return os.Getenv(proc.EnvData) }
 
 // SetHTTPClient replaces the client returned by HTTPClient. Runtime entry
 // points call it; plugins normally do not.

@@ -50,7 +50,8 @@ message Job {
 
 // Task is a recurring piece of work.
 message Task {
-  // Such as "library.scan:<library ID>" or "jobs.cleanup".
+  // Such as "library.scan:<library ID>", "jobs.cleanup" or
+  // "plugin:<plugin ID>:<task ID>".
   string id = 1;
   string name = 2;
   string description = 3;
@@ -63,6 +64,8 @@ message Task {
   // When it runs next; unset when not scheduled.
   google.protobuf.Timestamp next_run_time = 7;
   bool running = 8;
+  // The plugin whose task it is; empty for the server's own.
+  string plugin_id = 9;
 }
 
 message ListTasksRequest {}

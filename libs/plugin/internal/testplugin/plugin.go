@@ -12,6 +12,9 @@
 //	"panic"         panics in the handler
 //	"slow"          sleeps for two seconds
 //	anything else   echoes the name
+//
+// Its tasks: "write" writes a file to its data folder and reads it back;
+// "slow" sleeps for two seconds.
 package main
 
 import (
@@ -19,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -40,6 +44,28 @@ const (
 func init() {
 	guest.Handle(pluginv1connect.NewPluginServiceHandler(&lifecycle{}))
 	guest.Handle(pluginv1connect.NewMetadataProviderServiceHandler(&provider{}))
+	guest.Handle(pluginv1connect.NewTaskRunnerServiceHandler(tasks{}))
+}
+
+type tasks struct{}
+
+func (tasks) RunTask(_ context.Context, req *pluginv1.RunTaskRequest) (*pluginv1.RunTaskResponse, error) {
+	switch req.GetTaskId() {
+	case "write":
+		file := filepath.Join(guest.DataDir(), "note.txt")
+		if err := os.WriteFile(file, []byte("kept"), 0o600); err != nil {
+			return nil, err
+		}
+		data, err := os.ReadFile(file)
+		if err != nil {
+			return nil, err
+		}
+		return pluginv1.RunTaskResponse_builder{Message: proto.String(file + ": " + string(data))}.Build(), nil
+	case "slow":
+		time.Sleep(2 * time.Second)
+		return pluginv1.RunTaskResponse_builder{Message: proto.String("slept")}.Build(), nil
+	}
+	return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("no task %s", req.GetTaskId()))
 }
 
 var (

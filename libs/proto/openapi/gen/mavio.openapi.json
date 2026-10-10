@@ -4818,7 +4818,8 @@
           "CAPABILITY_AUTH_PROVIDER",
           "CAPABILITY_NOTIFIER",
           "CAPABILITY_SUBTITLE_PROVIDER",
-          "CAPABILITY_SEGMENT_PROVIDER"
+          "CAPABILITY_SEGMENT_PROVIDER",
+          "CAPABILITY_TASK_RUNNER"
         ]
       },
       "mavio.plugin.v1.Manifest": {
@@ -4887,6 +4888,14 @@
             "type": "string",
             "title": "api_version",
             "description": "Version of this contract the plugin was built against, e.g. \"1.0\"."
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.Task"
+            },
+            "title": "tasks",
+            "description": "Tasks the plugin runs; requires CAPABILITY_TASK_RUNNER."
           }
         },
         "title": "Manifest",
@@ -4938,6 +4947,45 @@
           "RUNTIME_WASM",
           "RUNTIME_PROCESS"
         ]
+      },
+      "mavio.plugin.v1.Task": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "Identifier within the plugin: lowercase letters, digits and dashes."
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "description": {
+            "type": "string",
+            "title": "description"
+          },
+          "interval": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Duration"
+              }
+            ],
+            "title": "interval",
+            "description": "Period of scheduled runs; unset runs the task only on demand."
+          },
+          "timeout": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Duration"
+              }
+            ],
+            "title": "timeout",
+            "description": "Bound of a run, at most six hours; unset means one hour."
+          }
+        },
+        "title": "Task",
+        "additionalProperties": false,
+        "description": "Task is a task a plugin declares."
       },
       "mavio.session.v1.Command": {
         "type": "object",
@@ -7417,7 +7465,7 @@
           "id": {
             "type": "string",
             "title": "id",
-            "description": "Such as \"library.scan:\u003clibrary ID\u003e\" or \"jobs.cleanup\"."
+            "description": "Such as \"library.scan:\u003clibrary ID\u003e\", \"jobs.cleanup\" or\n \"plugin:\u003cplugin ID\u003e:\u003ctask ID\u003e\"."
           },
           "name": {
             "type": "string",
@@ -7462,6 +7510,11 @@
           "running": {
             "type": "boolean",
             "title": "running"
+          },
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id",
+            "description": "The plugin whose task it is; empty for the server's own."
           }
         },
         "title": "Task",

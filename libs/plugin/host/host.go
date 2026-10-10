@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/mavioai/mavio/libs/plugin/host/process"
 	"github.com/mavioai/mavio/libs/plugin/host/wasm"
@@ -26,6 +28,7 @@ type Plugin interface {
 	Notifier() pluginv1connect.NotifierServiceClient
 	Subtitles() pluginv1connect.SubtitleProviderServiceClient
 	Segments() pluginv1connect.MediaSegmentProviderServiceClient
+	Tasks() pluginv1connect.TaskRunnerServiceClient
 	// Close stops the plugin and releases its resources.
 	Close(ctx context.Context) error
 }
@@ -42,7 +45,20 @@ type Options struct {
 	// HostAPI returns the handler serving a plugin's host API requests; it
 	// is called once per plugin, and nil serves none.
 	HostAPI func(m *pluginv1.Manifest) http.Handler
+	// DataDir holds a writable data folder per plugin, named by its ID and
+	// created when the plugin starts; empty gives plugins none.
+	DataDir string
 }
+
+// WithCallTimeout returns ctx bounding the calls made with it by d instead
+// of the WASM runtime's call timeout; process plugins have no call timeout
+// besides ctx's.
+func WithCallTimeout(ctx context.Context, d time.Duration) context.Context {
+	return wasm.WithCallTimeout(ctx, d)
+}
+
+// DataDir returns the data folder of plugin id in base.
+func DataDir(base, id string) string { return filepath.Join(base, id) }
 
 // Open starts the plugin in dir and checks that it describes itself as its
 // manifest says.
@@ -59,6 +75,13 @@ func Open(ctx context.Context, dir string, opts Options) (Plugin, error) {
 	if opts.HostAPI != nil {
 		h := opts.HostAPI(m)
 		opts.WASM.HostAPI, opts.Process.HostAPI = h, h
+	}
+	if opts.DataDir != "" {
+		dir := DataDir(opts.DataDir, m.GetId())
+		if err := os.MkdirAll(dir, 0o700); err != nil {
+			return nil, fmt.Errorf("plugin %s: data folder: %w", m.GetId(), err)
+		}
+		opts.WASM.DataDir, opts.Process.DataDir = dir, dir
 	}
 	var p Plugin
 	switch m.GetRuntime() {

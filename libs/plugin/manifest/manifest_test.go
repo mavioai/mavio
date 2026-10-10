@@ -5,8 +5,10 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
@@ -22,6 +24,36 @@ func valid() *pluginv1.Manifest {
 		Permissions:  pluginv1.Permissions_builder{HttpHosts: []string{"api.themoviedb.org", "*.tmdb.org"}}.Build(),
 		ConfigSchema: proto.String(`{"type":"object","properties":{"api_key":{"type":"string"}},"required":["api_key"]}`),
 	}.Build()
+}
+
+func task(id string, interval, timeout time.Duration) *pluginv1.Task {
+	t := pluginv1.Task_builder{Id: proto.String(id), Name: proto.String("Task " + id)}.Build()
+	if interval != 0 {
+		t.SetInterval(durationpb.New(interval))
+	}
+	if timeout != 0 {
+		t.SetTimeout(durationpb.New(timeout))
+	}
+	return t
+}
+
+func withTasks(m *pluginv1.Manifest, tasks ...*pluginv1.Task) {
+	m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_TASK_RUNNER))
+	m.SetTasks(tasks)
+}
+
+func TestTasks(t *testing.T) {
+	m := valid()
+	withTasks(m, task("sync", time.Hour, 0), task("rebuild", 0, 2*time.Hour))
+	if err := Validate(m); err != nil {
+		t.Fatalf("Validate() = %v", err)
+	}
+	if got := TaskTimeout(m.GetTasks()[0]); got != DefaultTaskTimeout {
+		t.Errorf("TaskTimeout(sync) = %v, want %v", got, DefaultTaskTimeout)
+	}
+	if got := TaskTimeout(m.GetTasks()[1]); got != 2*time.Hour {
+		t.Errorf("TaskTimeout(rebuild) = %v, want 2h", got)
+	}
 }
 
 func TestValidate(t *testing.T) {
@@ -41,6 +73,14 @@ func TestValidate(t *testing.T) {
 		{"bad host", func(m *pluginv1.Manifest) { m.GetPermissions().SetHttpHosts([]string{"https://x.org/"}) }, "http host"},
 		{"relative path", func(m *pluginv1.Manifest) { m.GetPermissions().SetReadPaths([]string{"media"}) }, "absolute"},
 		{"bad scope", func(m *pluginv1.Manifest) { m.GetPermissions().SetApi([]string{"mavio.library.v1.ItemService:write"}) }, "api scope"},
+		{"tasks without capability", func(m *pluginv1.Manifest) { m.SetTasks([]*pluginv1.Task{task("a", 0, 0)}) }, "go together"},
+		{"capability without tasks", func(m *pluginv1.Manifest) {
+			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_TASK_RUNNER))
+		}, "go together"},
+		{"bad task id", func(m *pluginv1.Manifest) { withTasks(m, task("Sync", 0, 0)) }, "task id"},
+		{"duplicate task", func(m *pluginv1.Manifest) { withTasks(m, task("a", 0, 0), task("a", 0, 0)) }, "not unique"},
+		{"short interval", func(m *pluginv1.Manifest) { withTasks(m, task("a", time.Second, 0)) }, "interval"},
+		{"long timeout", func(m *pluginv1.Manifest) { withTasks(m, task("a", 0, 7*time.Hour)) }, "timeout"},
 		{"bad schema", func(m *pluginv1.Manifest) { m.SetConfigSchema(`{"type":"nope"}`) }, "config_schema"},
 	}
 	for _, tt := range tests {

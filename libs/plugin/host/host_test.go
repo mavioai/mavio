@@ -82,7 +82,8 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 		quoted[i] = fmt.Sprintf("%q", h)
 	}
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
-		"capabilities":["CAPABILITY_METADATA_PROVIDER"],"apiVersion":"1.0",
+		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER"],"apiVersion":"1.0",
+		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
 		"permissions":{"httpHosts":[%s]},"configSchema":%q}`, runtimeName, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatal(err)
@@ -102,16 +103,18 @@ func open(t *testing.T, rt string, hosts ...string) host.Plugin {
 
 func openWithTimeout(t *testing.T, rt string, callTimeout time.Duration, hosts ...string) host.Plugin {
 	t.Helper()
-	return openWith(t, rt, callTimeout, nil, hosts...)
+	return openWith(t, rt, func(o *host.Options) { o.WASM.CallTimeout = callTimeout }, hosts...)
 }
 
-func openWith(t *testing.T, rt string, callTimeout time.Duration, hostAPI func(*pluginv1.Manifest) http.Handler, hosts ...string) host.Plugin {
+func openWith(t *testing.T, rt string, configure func(*host.Options), hosts ...string) host.Plugin {
 	t.Helper()
 	cacheOnce.Do(func() { cacheDir, _ = os.MkdirTemp("", "mavio-wasm-cache-") })
 	opts := host.Options{
-		WASM:    wasm.Options{CacheDir: cacheDir, CallTimeout: callTimeout, Instances: 3, Logger: slog.New(slog.DiscardHandler)},
+		WASM:    wasm.Options{CacheDir: cacheDir, CallTimeout: 10 * time.Second, Instances: 3, Logger: slog.New(slog.DiscardHandler)},
 		Process: process.Options{HealthInterval: -1, Logger: slog.New(slog.DiscardHandler)},
-		HostAPI: hostAPI,
+	}
+	if configure != nil {
+		configure(&opts)
 	}
 	p, err := host.Open(t.Context(), pluginDir(t, rt, hosts...), opts)
 	if err != nil {
@@ -206,7 +209,7 @@ func TestHostAPI(t *testing.T) {
 				fmt.Fprintf(w, "%s %s %s auth=%q", m.GetId(), r.Method, r.URL.RequestURI(), r.Header.Get("Authorization"))
 			})
 		}
-		p = openWith(t, rt, 10*time.Second, hostAPI)
+		p = openWith(t, rt, func(o *host.Options) { o.HostAPI = hostAPI })
 		ctx := t.Context()
 		want := `418 org.mavio.testplugin GET /a/b?c=d auth=""`
 		if got, err := search(ctx, p, "host:/a/b?c=d"); err != nil || got != want {
@@ -214,6 +217,38 @@ func TestHostAPI(t *testing.T) {
 		}
 		if got, err := search(ctx, p, "host:/reenter"); err != nil || got != "200 inner <nil>" {
 			t.Errorf("reentrant host call = %q, %v", got, err)
+		}
+	})
+}
+
+func TestTasksAndDataFolder(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		data := t.TempDir()
+		p := openWith(t, rt, func(o *host.Options) { o.DataDir, o.WASM.CallTimeout = data, time.Second })
+		ctx := t.Context()
+		run := func(ctx context.Context, id string) (string, error) {
+			resp, err := p.Tasks().RunTask(ctx, pluginv1.RunTaskRequest_builder{TaskId: proto.String(id)}.Build())
+			return resp.GetMessage(), err
+		}
+		msg, err := run(ctx, "write")
+		if err != nil {
+			t.Fatalf("write task: %v", err)
+		}
+		if !strings.HasSuffix(msg, ": kept") {
+			t.Errorf("write task = %q", msg)
+		}
+		if got, err := os.ReadFile(filepath.Join(host.DataDir(data, "org.mavio.testplugin"), "note.txt")); err != nil || string(got) != "kept" {
+			t.Errorf("file in the data folder = %q, %v", got, err)
+		}
+
+		// A task's timeout replaces the WASM call timeout.
+		if rt == "wasm" {
+			if _, err := run(ctx, "slow"); err == nil {
+				t.Error("slow task within the call timeout succeeded")
+			}
+		}
+		if msg, err := run(host.WithCallTimeout(ctx, 5*time.Second), "slow"); err != nil || msg != "slept" {
+			t.Errorf("slow task with its timeout = %q, %v", msg, err)
 		}
 	})
 }

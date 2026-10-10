@@ -6,6 +6,8 @@ edition = "2023";
 // the capability services it declares in its manifest.
 package mavio.plugin.v1;
 
+import "mavio/plugin/v1/task.proto";
+
 // PluginService is the lifecycle service every plugin implements.
 service PluginService {
   // Describe returns the plugin's manifest. The host calls it once after
@@ -46,6 +48,8 @@ enum Capability {
   CAPABILITY_SUBTITLE_PROVIDER = 4;
   // Implements MediaSegmentProviderService.
   CAPABILITY_SEGMENT_PROVIDER = 5;
+  // Implements TaskRunnerService for the manifest's tasks.
+  CAPABILITY_TASK_RUNNER = 6;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin
@@ -68,6 +72,8 @@ message Manifest {
   string config_schema = 11;
   // Version of this contract the plugin was built against, e.g. "1.0".
   string api_version = 12;
+  // Tasks the plugin runs; requires CAPABILITY_TASK_RUNNER.
+  repeated Task tasks = 13;
 }
 
 // Permissions are the host resources a plugin requests. An administrator

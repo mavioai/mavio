@@ -17,6 +17,7 @@ import (
 	"runtime"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -35,8 +36,27 @@ var (
 	idPattern      = regexp.MustCompile(`^[a-z0-9]+(\.[a-z0-9]+(-[a-z0-9]+)*)+$`)
 	versionPattern = regexp.MustCompile(`^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$`)
 	hostPattern    = regexp.MustCompile(`^(\*\.)?([a-z0-9-]+\.)*[a-z0-9-]+(:\d+)?$`)
+	taskPattern    = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 	scopePattern   = regexp.MustCompile(`^mavio\.[a-z0-9]+\.v[0-9]+\.[A-Z][A-Za-z0-9]*Service(:read)?$`)
 )
+
+// Task limits.
+const (
+	// MaxTaskTimeout bounds a task's run.
+	MaxTaskTimeout = 6 * time.Hour
+	// DefaultTaskTimeout bounds runs of tasks that declare no timeout.
+	DefaultTaskTimeout = time.Hour
+	// MinTaskInterval is the shortest interval of scheduled runs.
+	MinTaskInterval = time.Minute
+)
+
+// TaskTimeout returns the bound of a run of t.
+func TaskTimeout(t *pluginv1.Task) time.Duration {
+	if !t.HasTimeout() {
+		return DefaultTaskTimeout
+	}
+	return t.GetTimeout().AsDuration()
+}
 
 // Load reads and validates the manifest of the plugin in dir.
 func Load(dir string) (*pluginv1.Manifest, error) {
@@ -97,6 +117,29 @@ func Validate(m *pluginv1.Manifest) error {
 	for _, scope := range m.GetPermissions().GetApi() {
 		if !scopePattern.MatchString(scope) {
 			add("api scope %q must be <package>.<Service> or <package>.<Service>:read, e.g. mavio.library.v1.ItemService:read", scope)
+		}
+	}
+	runsTasks := HasCapability(m, pluginv1.Capability_CAPABILITY_TASK_RUNNER)
+	if runsTasks != (len(m.GetTasks()) > 0) {
+		add("CAPABILITY_TASK_RUNNER and tasks go together")
+	}
+	taskIDs := map[string]bool{}
+	for _, t := range m.GetTasks() {
+		switch {
+		case !taskPattern.MatchString(t.GetId()):
+			add("task id %q must be lowercase letters, digits and dashes", t.GetId())
+		case taskIDs[t.GetId()]:
+			add("task id %q is not unique", t.GetId())
+		}
+		taskIDs[t.GetId()] = true
+		if t.GetName() == "" {
+			add("task %q needs a name", t.GetId())
+		}
+		if t.HasInterval() && t.GetInterval().AsDuration() < MinTaskInterval {
+			add("task %q: interval must be at least %s", t.GetId(), MinTaskInterval)
+		}
+		if t.HasTimeout() && (t.GetTimeout().AsDuration() <= 0 || t.GetTimeout().AsDuration() > MaxTaskTimeout) {
+			add("task %q: timeout must be positive and at most %s", t.GetId(), MaxTaskTimeout)
 		}
 	}
 	if s := m.GetConfigSchema(); s != "" {

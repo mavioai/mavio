@@ -51,6 +51,9 @@ type Options struct {
 	// HostAPI serves the plugin's requests to the host API on a socket next
 	// to the plugin's; nil serves none.
 	HostAPI http.Handler
+	// DataDir is the plugin's writable data folder, passed in
+	// MAVIO_PLUGIN_DATA; empty passes none.
+	DataDir string
 	Logger  *slog.Logger
 }
 
@@ -229,6 +232,9 @@ func (p *Plugin) launch(ctx context.Context) error {
 	cmd.Env = append(cmd.Env, proc.EnvSocket+"="+p.socket, proc.EnvToken+"="+p.token)
 	if p.host != nil {
 		cmd.Env = append(cmd.Env, proc.EnvHostSocket+"="+filepath.Join(p.dir, "host.sock"))
+	}
+	if p.opts.DataDir != "" {
+		cmd.Env = append(cmd.Env, proc.EnvData+"="+p.opts.DataDir)
 	}
 	cmd.Dir = filepath.Dir(p.path)
 	configure(cmd)

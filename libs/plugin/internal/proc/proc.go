@@ -10,6 +10,8 @@ const (
 	// EnvHostSocket names the socket serving the host API. Requests on it
 	// present the plugin's token, as the host's requests do.
 	EnvHostSocket = "MAVIO_HOST_SOCKET"
+	// EnvData names the plugin's writable data folder, in both runtimes.
+	EnvData = "MAVIO_PLUGIN_DATA"
 )
 
 // ProtocolVersion is the handshake protocol version.
