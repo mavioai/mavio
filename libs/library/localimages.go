@@ -107,13 +107,15 @@ func (a *localArt) addNamed(f artFolder, kind core.ImageKind, prefix, name strin
 // localImages finds the artwork of an item in its library root: rel is
 // the item's path relative to the root, isFolder whether the item is its
 // folder, and mixed whether the folder holds other items. Episodes take
-// "<file>" and "<file>-thumb" images; tracks and photos take none. Paths
-// are relative to the root.
+// "<file>" and "<file>-thumb" images; tracks take none, and a photo is
+// its own primary image, as in Jellyfin. Paths are relative to the root.
 func localImages(fsys fs.FS, it *core.Item, rel string, isFolder, mixed bool) []metadata.LocalImage {
 	var a localArt
 	switch it.Kind {
-	case core.KindTrack, core.KindPhoto:
+	case core.KindTrack:
 		return nil
+	case core.KindPhoto:
+		return []metadata.LocalImage{{Kind: core.ImagePrimary, Path: rel}}
 	case core.KindEpisode:
 		dir, base := path.Dir(rel), strings.TrimSuffix(path.Base(rel), path.Ext(rel))
 		for _, d := range []string{dir, path.Join(dir, "metadata")} {

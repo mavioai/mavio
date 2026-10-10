@@ -132,7 +132,7 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 	trip := filepath.Join(photos, "Trip")
 	photo := filepath.Join(trip, "beach.png")
 	var pic bytes.Buffer
-	if err := png.Encode(&pic, image.NewRGBA(image.Rect(0, 0, 4, 3))); err != nil {
+	if err := png.Encode(&pic, image.NewGray(image.Rect(0, 0, 4, 3))); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.MkdirAll(trip, 0o755); err != nil {
@@ -297,10 +297,22 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 		t.Errorf("GetLyrics = %v, %v", lyrics, err)
 	}
 
-	// Photos reach plugins too.
-	item(libraryv1.ItemKind_ITEM_KIND_PHOTO, photo, "the processed photo", func(r *libraryv1.GetItemResponse) bool {
+	// Photos reach plugins too. A photo is its own primary image.
+	photoItem := item(libraryv1.ItemKind_ITEM_KIND_PHOTO, photo, "the processed photo", func(r *libraryv1.GetItemResponse) bool {
 		return slices.Contains(r.GetItem().GetTags(), "processed")
 	})
+	imgs := photoItem.GetItem().GetImages()
+	i := slices.IndexFunc(imgs, func(img *libraryv1.Image) bool { return img.GetKind() == libraryv1.ImageKind_IMAGE_KIND_PRIMARY })
+	if i < 0 || imgs[i].GetWidth() != 4 {
+		t.Errorf("photo images = %v, want = the photo as primary", imgs)
+	} else if resp, err := http.Get(srv.url + "/images/" + imgs[i].GetId() + "?format=jpg"); err != nil {
+		t.Error(err)
+	} else {
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusOK || resp.Header.Get("Content-Type") != "image/jpeg" {
+			t.Errorf("photo image: %s %s", resp.Status, resp.Header.Get("Content-Type"))
+		}
+	}
 
 	// The resolver claims folders and leaves out what it ignores.
 	if rt == "wasm" {

@@ -88,6 +88,9 @@ func TestLocalImages(t *testing.T) {
 			{Kind: core.ImagePrimary, Path: "Show/Season 1/metadata/Show S01E02.jpg"},
 		}},
 		{"track", core.Item{Kind: core.KindTrack}, "Music/Album/01 Song.flac", false, false, nil},
+		{"photo", core.Item{Kind: core.KindPhoto}, "Trip/beach.png", false, false, []img{
+			{Kind: core.ImagePrimary, Path: "Trip/beach.png"},
+		}},
 	}
 	for _, tt := range tests {
 		got := localImages(fsys, &tt.item, tt.rel, tt.folder, tt.mixed)
