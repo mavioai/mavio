@@ -1,0 +1,24 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "mavio/plugin/v1/metadata.proto";
+
+// ImageProviderService finds images of items in an external source, such
+// as fanart.tv. Refreshes take the kinds of images an item lacks from it.
+service ImageProviderService {
+  // GetImages returns the images the provider has of an item, best first
+  // within each kind.
+  rpc GetImages(GetImagesRequest) returns (GetImagesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message GetImagesRequest {
+  // The item, with the external IDs the metadata providers found.
+  Lookup lookup = 1;
+}
+
+message GetImagesResponse {
+  repeated RemoteImage images = 1;
+}

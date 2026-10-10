@@ -23,6 +23,7 @@ type Set struct {
 	tasks     pluginv1connect.TaskRunnerServiceClient
 	events    pluginv1connect.EventConsumerServiceClient
 	devices   pluginv1connect.DeviceControllerServiceClient
+	images    pluginv1connect.ImageProviderServiceClient
 }
 
 // New builds the clients for m over c.
@@ -51,6 +52,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_DEVICE_CONTROLLER) {
 		s.devices = pluginv1connect.NewDeviceControllerServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_IMAGE_PROVIDER) {
+		s.images = pluginv1connect.NewImageProviderServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -84,3 +88,6 @@ func (s Set) Events() pluginv1connect.EventConsumerServiceClient { return s.even
 
 // Devices returns the DeviceControllerService client, or nil.
 func (s Set) Devices() pluginv1connect.DeviceControllerServiceClient { return s.devices }
+
+// Images returns the ImageProviderService client, or nil.
+func (s Set) Images() pluginv1connect.ImageProviderServiceClient { return s.images }

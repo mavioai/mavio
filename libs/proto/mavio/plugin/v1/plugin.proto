@@ -58,6 +58,8 @@ enum Capability {
   // Lists remote devices with HostService.SetDevices and implements
   // DeviceControllerService for them; requires permissions.act_as_users.
   CAPABILITY_DEVICE_CONTROLLER = 9;
+  // Implements ImageProviderService.
+  CAPABILITY_IMAGE_PROVIDER = 10;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin

@@ -31,6 +31,7 @@ type Plugin interface {
 	Tasks() pluginv1connect.TaskRunnerServiceClient
 	Events() pluginv1connect.EventConsumerServiceClient
 	Devices() pluginv1connect.DeviceControllerServiceClient
+	Images() pluginv1connect.ImageProviderServiceClient
 	// HTTP returns the handler of the plugin's HTTP routes, or nil without
 	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
 	HTTP() http.Handler

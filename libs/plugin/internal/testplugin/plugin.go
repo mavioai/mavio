@@ -19,6 +19,8 @@
 // Authorization and Mavio-Plugin-Token headers and the body; "/big" with
 // 17 MiB.
 //
+// As an image provider it offers a poster named after the lookup.
+//
 // As a device controller it takes commands to its device "tv" and rejects
 // others, naming the device and the user.
 //
@@ -57,6 +59,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewTaskRunnerServiceHandler(tasks{}))
 	guest.Handle(pluginv1connect.NewEventConsumerServiceHandler(consumer{}))
 	guest.Handle(pluginv1connect.NewDeviceControllerServiceHandler(devices{}))
+	guest.Handle(pluginv1connect.NewImageProviderServiceHandler(images{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -84,6 +87,14 @@ func (consumer) Consume(_ context.Context, req *pluginv1.ConsumeRequest) (*plugi
 		}
 	}
 	return &pluginv1.ConsumeResponse{}, f.Close()
+}
+
+type images struct{}
+
+func (images) GetImages(_ context.Context, req *pluginv1.GetImagesRequest) (*pluginv1.GetImagesResponse, error) {
+	return pluginv1.GetImagesResponse_builder{Images: []*pluginv1.RemoteImage{pluginv1.RemoteImage_builder{
+		Kind: pluginv1.ImageKind_IMAGE_KIND_PRIMARY.Enum(), Url: proto.String("https://images.test/" + req.GetLookup().GetName() + ".jpg"),
+	}.Build()}}.Build(), nil
 }
 
 type devices struct{}

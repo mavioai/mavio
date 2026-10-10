@@ -82,7 +82,7 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 		quoted[i] = fmt.Sprintf("%q", h)
 	}
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
-		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER"],"apiVersion":"1.0","configPage":"echo",
+		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER","CAPABILITY_IMAGE_PROVIDER"],"apiVersion":"1.0","configPage":"echo",
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
 		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
@@ -285,6 +285,18 @@ func TestDevices(t *testing.T) {
 		}
 		if err := send("radio"); connect.CodeOf(err) != connect.CodeNotFound || !strings.Contains(err.Error(), "radio cannot do that for ann") {
 			t.Errorf("SendCommand(radio) = %v, want not_found naming the device and user", err)
+		}
+	})
+}
+
+func TestImages(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := open(t, rt)
+		resp, err := p.Images().GetImages(t.Context(), pluginv1.GetImagesRequest_builder{
+			Lookup: pluginv1.Lookup_builder{Name: proto.String("Alien")}.Build(),
+		}.Build())
+		if err != nil || len(resp.GetImages()) != 1 || resp.GetImages()[0].GetUrl() != "https://images.test/Alien.jpg" {
+			t.Errorf("GetImages() = %v, %v, want the Alien poster", resp, err)
 		}
 	})
 }

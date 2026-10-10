@@ -96,21 +96,24 @@ const (
 	// Lists remote devices with HostService.SetDevices and implements
 	// DeviceControllerService for them; requires permissions.act_as_users.
 	Capability_CAPABILITY_DEVICE_CONTROLLER Capability = 9
+	// Implements ImageProviderService.
+	Capability_CAPABILITY_IMAGE_PROVIDER Capability = 10
 )
 
 // Enum value maps for Capability.
 var (
 	Capability_name = map[int32]string{
-		0: "CAPABILITY_UNSPECIFIED",
-		1: "CAPABILITY_METADATA_PROVIDER",
-		2: "CAPABILITY_AUTH_PROVIDER",
-		3: "CAPABILITY_NOTIFIER",
-		4: "CAPABILITY_SUBTITLE_PROVIDER",
-		5: "CAPABILITY_SEGMENT_PROVIDER",
-		6: "CAPABILITY_TASK_RUNNER",
-		7: "CAPABILITY_EVENT_CONSUMER",
-		8: "CAPABILITY_HTTP_HANDLER",
-		9: "CAPABILITY_DEVICE_CONTROLLER",
+		0:  "CAPABILITY_UNSPECIFIED",
+		1:  "CAPABILITY_METADATA_PROVIDER",
+		2:  "CAPABILITY_AUTH_PROVIDER",
+		3:  "CAPABILITY_NOTIFIER",
+		4:  "CAPABILITY_SUBTITLE_PROVIDER",
+		5:  "CAPABILITY_SEGMENT_PROVIDER",
+		6:  "CAPABILITY_TASK_RUNNER",
+		7:  "CAPABILITY_EVENT_CONSUMER",
+		8:  "CAPABILITY_HTTP_HANDLER",
+		9:  "CAPABILITY_DEVICE_CONTROLLER",
+		10: "CAPABILITY_IMAGE_PROVIDER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":       0,
@@ -123,6 +126,7 @@ var (
 		"CAPABILITY_EVENT_CONSUMER":    7,
 		"CAPABILITY_HTTP_HANDLER":      8,
 		"CAPABILITY_DEVICE_CONTROLLER": 9,
+		"CAPABILITY_IMAGE_PROVIDER":    10,
 	}
 )
 
@@ -1285,7 +1289,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\xbe\x02\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\xdd\x02\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1297,7 +1301,9 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x16CAPABILITY_TASK_RUNNER\x10\x06\x12\x1d\n" +
 	"\x19CAPABILITY_EVENT_CONSUMER\x10\a\x12\x1b\n" +
 	"\x17CAPABILITY_HTTP_HANDLER\x10\b\x12 \n" +
-	"\x1cCAPABILITY_DEVICE_CONTROLLER\x10\t2\xda\x02\n" +
+	"\x1cCAPABILITY_DEVICE_CONTROLLER\x10\t\x12\x1d\n" +
+	"\x19CAPABILITY_IMAGE_PROVIDER\x10\n" +
+	"2\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +
