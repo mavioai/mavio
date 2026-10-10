@@ -113,7 +113,8 @@ func (x *LocalFile) ClearContent() {
 type LocalFile_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Name relative to the item's folder, with "/" separators.
+	// Name relative to the item's folder, with "/" separators. At most 16
+	// files of 1 MiB each.
 	Name    *string
 	Content []byte
 }
@@ -235,7 +236,8 @@ type ReadMetadataRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Lookup *Lookup
-	// Name of the item's media file or folder within its folder.
+	// Name of the item's media file, or of its folder for items that are
+	// folders, such as series; their files are inside it.
 	MediaName *string
 	// The files beside the item matching local_metadata_files.
 	Files []*LocalFile
@@ -470,7 +472,8 @@ type SaveMetadataRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Kind *MediaKind
-	// Name of the item's media file or folder within its folder.
+	// Name of the item's media file, or of its folder for items that are
+	// folders, such as series; their files are inside it.
 	MediaName *string
 	// The item's metadata as saved, with its credits and remote images.
 	Metadata *Metadata

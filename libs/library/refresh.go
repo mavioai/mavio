@@ -64,6 +64,12 @@ type Refresher struct {
 	// Images gives the image providers, which fill in the kinds of images
 	// the metadata providers and local files lack; nil means none.
 	Images func() []ImageProvider
+	// Local gives the local metadata readers, whose metadata counts after
+	// the providers' and before the NFO file's; nil means none.
+	Local func() []LocalReader
+	// Savers gives the metadata savers, which write metadata beside the
+	// media in libraries saving local metadata; nil means none.
+	Savers func() []Saver
 	// MetadataDir holds the artwork chosen for items whose library does
 	// not save local metadata, one folder per item; empty keeps none.
 	MetadataDir string
@@ -176,6 +182,9 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 				lookup.ExternalIDs = mergeIDs(lookup.ExternalIDs, res.Item.ExternalIDs)
 			}
 		}
+	}
+	if !opts.ReplaceMetadata && it.Extra == "" && !it.Locked {
+		results = append(results, r.readLocal(ctx, lib, it, lookup)...)
 	}
 	if local != nil {
 		results = append(results, local)

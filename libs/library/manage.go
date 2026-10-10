@@ -229,8 +229,8 @@ func clearMetadata(it *core.Item) {
 	it.SeriesStatus, it.AirDays, it.RemoteTrailers = "", nil, nil
 }
 
-// saveLocal writes an item's NFO file next to its media and saves its
-// provider images there.
+// saveLocal writes an item's NFO file and the savers' files next to its
+// media and saves its provider images there.
 func (r *Refresher) saveLocal(ctx context.Context, lib core.Library, it core.Item) error {
 	root, rel, ok := libraryRoot(lib, it.Path)
 	if !ok || it.Extra != "" {
@@ -272,9 +272,6 @@ func (r *Refresher) saveLocal(ctx context.Context, lib core.Library, it core.Ite
 			return err
 		}
 	}
-	if !metadata.CanWriteNFO(it.Kind) {
-		return nil
-	}
 	res := &metadata.Result{Item: it}
 	for _, img := range images {
 		if img.RemoteURL != "" {
@@ -286,6 +283,12 @@ func (r *Refresher) saveLocal(ctx context.Context, lib core.Library, it core.Ite
 	}
 	if it.Kind == core.KindEpisode {
 		res.SeriesName = r.seriesName(ctx, it)
+	}
+	if err := r.save(ctx, lib, it, res); err != nil {
+		return err
+	}
+	if !metadata.CanWriteNFO(it.Kind) {
+		return nil
 	}
 	data, err := metadata.WriteNFO(res)
 	if err != nil {

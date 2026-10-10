@@ -115,8 +115,8 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称、携带它的媒体类型（包括人物），以及可选的 URL 模板，例如 `https://trakt.tv/movies/{id}`。内置类型涵盖 TMDB、IMDb、TheTVDB、TVmaze、AniDB、AniList、aniSearch 与 MusicBrainz；已启动插件的类型排在其后，已列出的键不会被重新定义。`MetadataService.ListExternalIdKinds` 列出它们，可只列某一条目类型的；`ItemService.GetItem` 与 `GetPerson` 返回 `external_urls`，即条目或人物各 ID 的页面，ID 按路径段转义。
 
 ### 8.3 本地元数据与保存器
-* `LOCAL_METADATA` 插件在 manifest 中声明文件名模式。刷新条目时，宿主读取条目旁边匹配的文件（每个至多 1 MiB），把文件名与内容传给 `LocalMetadataService.Read`，后者像提供者一样返回元数据；本地元数据的优先级仅次于 NFO，高于提供者。
-* `METADATA_SAVER` 插件在 `MetadataSaverService.Save` 中收到条目保存后的元数据，返回文件（相对条目文件夹的名称与内容）；在保存本地元数据的媒体库中，宿主把它们写到媒体旁边。
+* `LOCAL_METADATA` 插件在 manifest 的 `local_metadata_files` 中声明文件名模式，例如 `*.yaml`。刷新条目时，宿主读取条目文件夹（剧集等文件夹类条目即其自身）中匹配的文件，至多 16 个、每个至多 1 MiB，把文件名与内容连同条目媒体的名称传给 `LocalMetadataService.ReadMetadata`，后者像提供者一样返回元数据。本地元数据的优先级仅次于 NFO，高于提供者；替换元数据的刷新与忽略 NFO 一样忽略它。
+* `METADATA_SAVER` 插件在 `MetadataSaverService.SaveMetadata` 中收到条目保存后的元数据（含演职人员与远程图片），返回文件（相对条目文件夹的名称与内容）；在保存本地元数据的媒体库中，宿主把它们与 NFO 文件一起写到该文件夹，除非其中有文件超出该文件夹、会替换媒体本身或超出上述限制。
 
 ### 8.4 元数据处理器
 `MetadataProcessorService.Process` 在刷新结束、保存之前收到条目合并后的元数据，返回要覆盖其上的元数据；锁定字段保持不变。

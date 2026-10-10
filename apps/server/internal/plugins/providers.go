@@ -9,6 +9,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
+	"github.com/mavioai/mavio/libs/plugin/manifest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
@@ -83,6 +84,62 @@ func (m *Manager) ExternalIDKinds() []metadata.ExternalIDKind {
 	}
 	m.mu.Unlock()
 	return metadata.MergeExternalIDKinds(metadata.BuiltinExternalIDKinds(), declared...)
+}
+
+// LocalReaders returns the local metadata readers among the started
+// plugins.
+func (m *Manager) LocalReaders() []library.LocalReader {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []library.LocalReader
+	for _, e := range m.plugins {
+		if e.plugin != nil && manifest.HasCapability(e.manifest, pluginv1.Capability_CAPABILITY_LOCAL_METADATA) {
+			out = append(out, &localReader{m: m, id: e.manifest.GetId(), files: e.manifest.GetLocalMetadataFiles()})
+		}
+	}
+	return out
+}
+
+type localReader struct {
+	m     *Manager
+	id    string
+	files []string
+}
+
+func (p *localReader) Name() string { return p.id }
+
+func (p *localReader) Patterns() []string { return p.files }
+
+func (p *localReader) ReadLocal(ctx context.Context, l library.Lookup, media string, files []library.LocalFile) (*metadata.Result, error) {
+	pl, ok := p.m.running(p.id)
+	if !ok || pl.LocalMetadata() == nil {
+		return nil, nil
+	}
+	return (&providers.LocalPlugin{ID: p.id, Files: p.files, Client: pl.LocalMetadata()}).ReadLocal(ctx, l, media, files)
+}
+
+// Savers returns the metadata savers among the started plugins.
+func (m *Manager) Savers() []library.Saver {
+	var out []library.Saver
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_METADATA_SAVER) {
+		out = append(out, &saver{m: m, id: id})
+	}
+	return out
+}
+
+type saver struct {
+	m  *Manager
+	id string
+}
+
+func (p *saver) Name() string { return p.id }
+
+func (p *saver) Save(ctx context.Context, media string, res *metadata.Result) ([]library.LocalFile, error) {
+	pl, ok := p.m.running(p.id)
+	if !ok || pl.Saver() == nil {
+		return nil, nil
+	}
+	return (&providers.SaverPlugin{ID: p.id, Client: pl.Saver()}).Save(ctx, media, res)
 }
 
 // ImageProviders returns the image providers among the started plugins.
