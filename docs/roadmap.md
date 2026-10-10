@@ -410,6 +410,8 @@ flowchart TD
   - [ ] Cookies of the `cookie` setting replacing those responses set, as Prowlarr's GetCookies does; they are only sent besides them
 - [ ] The sites Prowlarr implements in code
   - [x] Gazelle (`internal/sites/gazelle`): AlphaRatio, BrokenStones, DesiGaane, DICMusic, GreatPosterWall, Secret Cinema
+  - [x] AvistaZ (`internal/sites/avistaz`): AnimeZ, AvistaZ, CinemaZ, ExoticaZ, PrivateHD
+    - [ ] Their API tokens kept across restarts, as Prowlarr keeps them in the settings; they log in again after each start
   - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
 - [ ] `ReleaseService`

@@ -58,6 +58,20 @@ type LoginSite interface {
 	Login(ctx context.Context, ix *Indexer) error
 }
 
+// RequestModifier is a site that changes its requests before they are
+// sent again after logging in, such as with a new token.
+type RequestModifier interface {
+	LoginSite
+	ModifyRequest(r *Request)
+}
+
+// DownloadRelogger is a site that logs in again when a download is
+// unauthorized, then downloads again.
+type DownloadRelogger interface {
+	LoginSite
+	ReloginOnUnauthorizedDownload()
+}
+
 // DownloadSite is a site whose releases are downloaded by other requests
 // than GETs of their download URLs.
 type DownloadSite interface {
@@ -309,6 +323,10 @@ func (ix *Indexer) fetch(ctx context.Context, r *Request) (*Response, error) {
 			req.Cookies = map[string]string{}
 		}
 		maps.Copy(req.Cookies, ix.Cookies())
+		if rm, ok := ix.Site.(RequestModifier); ok {
+			req.Header = req.Header.Clone()
+			rm.ModifyRequest(&req)
+		}
 		if resp, err = s.Do(ctx, &req); err != nil {
 			return nil, err
 		}

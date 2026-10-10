@@ -410,6 +410,8 @@ flowchart TD
   - [ ] 像 Prowlarr 的 GetCookies 那样，以 `cookie` 设置的 cookie 取代响应设置的 cookie；目前只是与之一并发送
 - [ ] Prowlarr 以代码实现的站点
   - [x] Gazelle（`internal/sites/gazelle`）：AlphaRatio、BrokenStones、DesiGaane、DICMusic、GreatPosterWall、Secret Cinema
+  - [x] AvistaZ（`internal/sites/avistaz`）：AnimeZ、AvistaZ、CinemaZ、ExoticaZ、PrivateHD
+    - [ ] 像 Prowlarr 存入设置那样跨重启保存其 API 令牌；目前每次启动后重新登录
   - [ ] torrent 索引器的做种设置（最少做种数、分享率与做种时间），抓取时交给下载客户端
 - [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
 - [ ] `ReleaseService`
