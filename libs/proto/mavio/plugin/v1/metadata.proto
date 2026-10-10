@@ -32,6 +32,9 @@ enum MediaKind {
   MEDIA_KIND_BOOK = 9;
   MEDIA_KIND_AUDIOBOOK = 10;
   MEDIA_KIND_PERSON = 11;
+  // A video that is none of the above, such as one of a home videos
+  // library.
+  MEDIA_KIND_VIDEO = 12;
 }
 
 // Lookup is what the host knows about an item.

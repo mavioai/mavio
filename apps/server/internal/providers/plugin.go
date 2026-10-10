@@ -123,6 +123,7 @@ var mediaKinds = map[core.ItemKind]pluginv1.MediaKind{
 	core.KindMusicAlbum:  pluginv1.MediaKind_MEDIA_KIND_MUSIC_ALBUM,
 	core.KindTrack:       pluginv1.MediaKind_MEDIA_KIND_TRACK,
 	core.KindMusicVideo:  pluginv1.MediaKind_MEDIA_KIND_MUSIC_VIDEO,
+	core.KindVideo:       pluginv1.MediaKind_MEDIA_KIND_VIDEO,
 	core.KindBook:        pluginv1.MediaKind_MEDIA_KIND_BOOK,
 	core.KindAudioBook:   pluginv1.MediaKind_MEDIA_KIND_AUDIOBOOK,
 }

@@ -5375,7 +5375,8 @@
           "MEDIA_KIND_MUSIC_VIDEO",
           "MEDIA_KIND_BOOK",
           "MEDIA_KIND_AUDIOBOOK",
-          "MEDIA_KIND_PERSON"
+          "MEDIA_KIND_PERSON",
+          "MEDIA_KIND_VIDEO"
         ],
         "description": "MediaKind is the kind of item metadata is requested for."
       },
