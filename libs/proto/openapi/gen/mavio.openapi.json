@@ -5422,7 +5422,8 @@
           "CAPABILITY_IMAGE_GENERATOR",
           "CAPABILITY_MEDIA_SOURCE_PROVIDER",
           "CAPABILITY_PASSWORD_RESET",
-          "CAPABILITY_EPISODE_LIST_PROVIDER"
+          "CAPABILITY_EPISODE_LIST_PROVIDER",
+          "CAPABILITY_DISCOVERY_PROVIDER"
         ]
       },
       "mavio.plugin.v1.ExternalIdKind": {

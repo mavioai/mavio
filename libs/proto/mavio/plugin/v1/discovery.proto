@@ -1,0 +1,215 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "buf/validate/validate.proto";
+import "mavio/plugin/v1/metadata.proto";
+
+// DiscoveryProviderService lists movies and series to discover from an
+// external source, such as trending or popular titles, in catalogs the
+// provider declares.
+service DiscoveryProviderService {
+  // ListCatalogs lists the catalogs the provider offers.
+  rpc ListCatalogs(ListCatalogsRequest) returns (ListCatalogsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // Discover lists a page of a catalog's titles.
+  rpc Discover(DiscoverRequest) returns (DiscoverResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListFilterValues lists the values a filter takes, such as genres, or
+  // the keywords and studios matching a query.
+  rpc ListFilterValues(ListFilterValuesRequest) returns (ListFilterValuesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message ListCatalogsRequest {
+  // ISO 639-1 language for the catalogs' names; empty for English.
+  string language = 1;
+}
+
+message ListCatalogsResponse {
+  repeated Catalog catalogs = 1;
+}
+
+// Catalog is a list of titles a provider offers, such as trending titles,
+// popular movies or a chart.
+message Catalog {
+  // Stable within the plugin, e.g. "trending" or "imdb_top250".
+  string id = 1;
+  string name = 2;
+  // What it lists: movies, series or both.
+  CatalogKind kind = 3;
+  // MEDIA_KIND_MOVIE and/or MEDIA_KIND_SERIES; a request names one when
+  // there are two, unless the catalog mixes them (MEDIA_KIND_UNSPECIFIED
+  // listed too).
+  repeated MediaKind media_kinds = 4;
+  // The filters it takes; others in a request are ignored.
+  repeated DiscoverFilter filters = 5;
+  // The orders it lists in; empty for its own order only.
+  repeated DiscoverSort sorts = 6;
+}
+
+// CatalogKind is what a catalog lists.
+enum CatalogKind {
+  CATALOG_KIND_UNSPECIFIED = 0;
+  // Titles of current interest.
+  CATALOG_KIND_TRENDING = 1;
+  // Popular titles, filtered and ordered as requested.
+  CATALOG_KIND_POPULAR = 2;
+  // Titles to be released.
+  CATALOG_KIND_UPCOMING = 3;
+  // The best rated titles.
+  CATALOG_KIND_TOP_RATED = 4;
+  // Titles recommended to those who liked a title.
+  CATALOG_KIND_RECOMMENDATIONS = 5;
+  // Titles similar to a title.
+  CATALOG_KIND_SIMILAR = 6;
+  // A list curated elsewhere, such as a chart.
+  CATALOG_KIND_LIST = 7;
+}
+
+// DiscoverFilter is a filter of discovery requests.
+enum DiscoverFilter {
+  DISCOVER_FILTER_UNSPECIFIED = 0;
+  DISCOVER_FILTER_GENRE = 1;
+  // Production companies; movies only.
+  DISCOVER_FILTER_STUDIO = 2;
+  // Television networks; series only.
+  DISCOVER_FILTER_NETWORK = 3;
+  DISCOVER_FILTER_KEYWORD = 4;
+  // Streaming services in the request's watch region.
+  DISCOVER_FILTER_WATCH_PROVIDER = 5;
+  DISCOVER_FILTER_ORIGINAL_LANGUAGE = 6;
+  DISCOVER_FILTER_RELEASE_DATE = 7;
+  DISCOVER_FILTER_RUNTIME = 8;
+  DISCOVER_FILTER_RATING = 9;
+  DISCOVER_FILTER_VOTE_COUNT = 10;
+  // Content ratings in a country.
+  DISCOVER_FILTER_CERTIFICATION = 11;
+}
+
+// DiscoverSort is an order of discovered titles.
+enum DiscoverSort {
+  // The catalog's own order.
+  DISCOVER_SORT_UNSPECIFIED = 0;
+  DISCOVER_SORT_POPULARITY = 1;
+  DISCOVER_SORT_RELEASE_DATE = 2;
+  DISCOVER_SORT_RATING = 3;
+  DISCOVER_SORT_VOTE_COUNT = 4;
+  DISCOVER_SORT_TITLE = 5;
+}
+
+message DiscoverRequest {
+  // A catalog of ListCatalogs.
+  string catalog = 1 [(buf.validate.field).required = true];
+  // Movies or series, for catalogs listing both.
+  MediaKind media_kind = 2;
+  // The title of recommendations and similar titles, by its external IDs
+  // such as "tmdb".
+  map<string, string> external_ids = 3;
+
+  // Filters by the provider's IDs of ListFilterValues; a title matches
+  // any of a filter's values.
+  repeated string genres = 4;
+  repeated string studios = 5;
+  repeated string networks = 6;
+  repeated string keywords = 7;
+  repeated string excluded_keywords = 8;
+  repeated string watch_providers = 9;
+  // ISO 3166-1 country of watch providers.
+  string watch_region = 10;
+  // ISO 639-1.
+  string original_language = 11;
+  // ISO 8601 calendar dates, inclusive.
+  string released_from = 12;
+  string released_to = 13;
+  // Minutes.
+  int32 runtime_min = 14 [(buf.validate.field).int32.gte = 0];
+  int32 runtime_max = 15 [(buf.validate.field).int32.gte = 0];
+  // 0–10.
+  double rating_min = 16 [(buf.validate.field).double = {
+    gte: 0
+    lte: 10
+  }];
+  double rating_max = 17 [(buf.validate.field).double = {
+    gte: 0
+    lte: 10
+  }];
+  int32 votes_min = 18 [(buf.validate.field).int32.gte = 0];
+  // Content ratings of certification_country (ISO 3166-1), any of them.
+  string certification_country = 19;
+  repeated string certifications = 20;
+
+  DiscoverSort sort = 21;
+  bool ascending = 22;
+  // ISO 639-1 language of names and overviews, ISO 3166-1 region of
+  // release dates.
+  string language = 23;
+  string region = 24;
+  bool include_adult = 25;
+  // From 1; unset for the first page.
+  int32 page = 26 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 500
+  }];
+}
+
+message DiscoverResponse {
+  repeated DiscoveredTitle titles = 1;
+  int32 page = 2;
+  int32 total_pages = 3;
+  int32 total_results = 4;
+}
+
+// DiscoveredTitle is a movie or series a catalog lists.
+message DiscoveredTitle {
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+  MediaKind media_kind = 1;
+  string name = 2;
+  string original_title = 3;
+  // ISO 639-1.
+  string original_language = 4;
+  string overview = 5;
+  // ISO 8601 calendar date: a movie's release, a series' first air date.
+  string premiere_date = 6;
+  int32 year = 7;
+  // Such as "tmdb" and "imdb"; at least one.
+  map<string, string> external_ids = 8;
+  // The provider's genre IDs.
+  repeated string genres = 9;
+  string poster_url = 10;
+  string backdrop_url = 11;
+  // 0–10.
+  double community_rating = 12;
+  int32 vote_count = 13;
+  double popularity = 14;
+  bool adult = 15;
+}
+
+message ListFilterValuesRequest {
+  // GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+  DiscoverFilter filter = 1 [(buf.validate.field).required = true];
+  // Movies or series.
+  MediaKind media_kind = 2;
+  // Matched against names; studios and keywords need one.
+  string query = 3;
+  // The values' IDs, for their names; with a query, matched too.
+  repeated string ids = 4;
+  string language = 5;
+  // ISO 3166-1 region of watch providers.
+  string region = 6;
+}
+
+message ListFilterValuesResponse {
+  repeated FilterValue values = 1;
+}
+
+// FilterValue is a value of a discovery filter.
+message FilterValue {
+  string id = 1;
+  string name = 2;
+  // A logo or an illustrative backdrop.
+  string image_url = 3;
+}

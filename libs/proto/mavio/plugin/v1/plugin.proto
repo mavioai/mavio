@@ -82,6 +82,8 @@ enum Capability {
   CAPABILITY_PASSWORD_RESET = 19;
   // Implements EpisodeListProviderService.
   CAPABILITY_EPISODE_LIST_PROVIDER = 20;
+  // Implements DiscoveryProviderService.
+  CAPABILITY_DISCOVERY_PROVIDER = 21;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin
