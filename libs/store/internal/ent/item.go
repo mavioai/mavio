@@ -125,6 +125,14 @@ type Item struct {
 	ScanGeneration int64 `json:"scan_generation,omitempty"`
 	// MissingSince holds the value of the "missing_since" field.
 	MissingSince *time.Time `json:"missing_since,omitempty"`
+	// Virtual holds the value of the "virtual" field.
+	Virtual bool `json:"virtual,omitempty"`
+	// Monitored holds the value of the "monitored" field.
+	Monitored bool `json:"monitored,omitempty"`
+	// SeriesType holds the value of the "series_type" field.
+	SeriesType string `json:"series_type,omitempty"`
+	// AbsoluteNumber holds the value of the "absolute_number" field.
+	AbsoluteNumber *int `json:"absolute_number,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ItemQuery when eager-loading is set.
 	Edges        ItemEdges `json:"edges"`
@@ -322,13 +330,13 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case item.FieldID, item.FieldLibraryID:
 			values[i] = new(core.ID)
-		case item.FieldLocked:
+		case item.FieldLocked, item.FieldVirtual, item.FieldMonitored:
 			values[i] = new(sql.NullBool)
 		case item.FieldCommunityRating, item.FieldCriticRating, item.FieldLoudness:
 			values[i] = new(sql.NullFloat64)
-		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldInheritedRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber, item.FieldScanGeneration:
+		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldInheritedRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber, item.FieldScanGeneration, item.FieldAbsoluteNumber:
 			values[i] = new(sql.NullInt64)
-		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldCustomRating, item.FieldCollectionName, item.FieldAspectRatio, item.FieldVideo3dFormat, item.FieldAlbum, item.FieldSeriesStatus, item.FieldAirTime, item.FieldDisplayOrder, item.FieldMetadataLanguage, item.FieldMetadataCountry, item.FieldExtra:
+		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldCustomRating, item.FieldCollectionName, item.FieldAspectRatio, item.FieldVideo3dFormat, item.FieldAlbum, item.FieldSeriesStatus, item.FieldAirTime, item.FieldDisplayOrder, item.FieldMetadataLanguage, item.FieldMetadataCountry, item.FieldExtra, item.FieldSeriesType:
 			values[i] = new(sql.NullString)
 		case item.FieldPremiereDate, item.FieldEndDate, item.FieldDateAdded, item.FieldFileModified, item.FieldMetadataRefreshedAt, item.FieldMissingSince:
 			values[i] = new(sql.NullTime)
@@ -692,6 +700,31 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 				_m.MissingSince = new(time.Time)
 				*_m.MissingSince = value.Time
 			}
+		case item.FieldVirtual:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field virtual", values[i])
+			} else if value.Valid {
+				_m.Virtual = value.Bool
+			}
+		case item.FieldMonitored:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field monitored", values[i])
+			} else if value.Valid {
+				_m.Monitored = value.Bool
+			}
+		case item.FieldSeriesType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field series_type", values[i])
+			} else if value.Valid {
+				_m.SeriesType = value.String
+			}
+		case item.FieldAbsoluteNumber:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field absolute_number", values[i])
+			} else if value.Valid {
+				_m.AbsoluteNumber = new(int)
+				*_m.AbsoluteNumber = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -991,6 +1024,20 @@ func (_m *Item) String() string {
 	if v := _m.MissingSince; v != nil {
 		builder.WriteString("missing_since=")
 		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("virtual=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Virtual))
+	builder.WriteString(", ")
+	builder.WriteString("monitored=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Monitored))
+	builder.WriteString(", ")
+	builder.WriteString("series_type=")
+	builder.WriteString(_m.SeriesType)
+	builder.WriteString(", ")
+	if v := _m.AbsoluteNumber; v != nil {
+		builder.WriteString("absolute_number=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')
 	return builder.String()

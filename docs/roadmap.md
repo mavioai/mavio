@@ -92,7 +92,7 @@ flowchart TD
 | P12 | Media extras | ✅ Done |
 | P13 | Plugin platform | ✅ Done |
 | P14 | DLNA | ✅ Done |
-| P15 | Acquisition foundation | Not started |
+| P15 | Acquisition foundation | ✅ Done |
 | P16 | Acquisition data sources | Not started |
 | P17 | Indexers | Not started |
 | P18 | Movie acquisition | Not started |
@@ -362,12 +362,18 @@ flowchart TD
 ### P15 Acquisition Foundation
 **Scope**: what the server needs before it can want media it does not have ([Architecture §13](architecture.md#13-acquisition-libsacquire)).
 
-- Wanted items: movies and episodes known from metadata but without files, kept apart from the missing items of §4.7 of the [Domain Model](domain.md); monitored state and quality profile per movie, series and season
+- Wanted items: movies and episodes known from metadata but without files, kept apart from the missing items of §4.7 of the [Domain Model](domain.md); monitored state per movie, series, season and episode
 - Series: TVDB ID, series type (standard, daily, anime) and display order, Jellyfin's `DisplayOrder` with TMDB episode groups
 - `libs/release`: release title parsing (title, year, season and episode, absolute and daily numbers, quality, source, resolution, codecs, languages, edition, release group), with Radarr's and Sonarr's parser rules in their .NET syntax on `regexp2`
 - `tools/testport` reads NUnit test cases, so that Radarr's and Sonarr's parser cases are ported as Jellyfin's are
 
 **Done when**: the ported parser cases pass or are skipped with a reason; the missing-episode cases of `scraper-tmdb` skipped in P4 pass; a series' episodes are listed in its display order.
+
+**Progress**:
+- [x] Virtual and monitored items ([Domain Model §4.8](domain.md#48-virtual-items)); episode list providers (`EPISODE_LIST_PROVIDER`, [Plugins §8.12](plugins.md#812-acquisition-providers)); the missing-episode cases pass in `libs/library`
+- [x] Series types, display orders and absolute numbers; `scraper-tmdb` numbers seasons and episodes by the series' TMDB episode group
+- [x] `libs/release` with Radarr's and Sonarr's parser cases
+- [x] `tools/testport` reads NUnit test cases
 
 ### P16 Acquisition Data Sources
 **Scope**: the metadata acquisition needs, without keys by default.
@@ -385,7 +391,7 @@ flowchart TD
 ### P18 Movie Acquisition
 **Scope**: `libs/acquire` with its `movie` package, porting Radarr; `plugins/download-clients`, a first-party process plugin with every download client Radarr and Sonarr support.
 
-- Quality definitions and profiles, custom formats, delay and release profiles
+- Quality definitions and profiles, a profile per monitored movie, series and season; custom formats, delay and release profiles
 - Decisions: the specifications of Radarr's decision engine; ranking
 - RSS sync and searches as jobs; the queue of tracked downloads; remote path mappings
 - Import: completed downloads verified with ffprobe, hard linked or moved into the library under a naming template, a scan of their folder; upgrades until the cutoff, replaced files to a recycle folder, blocklist and a new search when a download fails

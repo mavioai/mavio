@@ -133,7 +133,7 @@ func (s *LibraryService) UpdateLibrary(ctx context.Context, req *libraryv1.Updat
 		lib.PreferredLanguage, lib.MetadataCountry = spec.PreferredLanguage, spec.MetadataCountry
 		lib.SaveLocalMetadata, lib.AutoCollections = spec.SaveLocalMetadata, spec.AutoCollections
 		lib.ExtractTrickplay, lib.ExtractChapterImages, lib.AnalyzeLoudness = spec.ExtractTrickplay, spec.ExtractChapterImages, spec.AnalyzeLoudness
-		lib.DownloadLyrics, lib.Providers = spec.DownloadLyrics, spec.Providers
+		lib.DownloadLyrics, lib.Providers, lib.VirtualEpisodes = spec.DownloadLyrics, spec.Providers, spec.VirtualEpisodes
 		if err := tx.Libraries().Update(ctx, &lib); err != nil {
 			return err
 		}
@@ -207,6 +207,11 @@ func libraryFromSpec(spec *libraryv1.LibrarySpec) (core.Library, error) {
 		AnalyzeLoudness: spec.GetAnalyzeLoudness(), DownloadLyrics: spec.GetDownloadLyrics(),
 		Providers: providerOrderFromProto(spec.GetProviderOrder()),
 	}
+	if v := spec.GetVirtualEpisodes(); v != nil {
+		lib.VirtualEpisodes = core.VirtualEpisodes{
+			Missing: v.GetMissing(), Unaired: v.GetUnaired(), Specials: v.GetSpecials(), GraceDays: int(v.GetGraceDays()),
+		}
+	}
 	for k, v := range libraryKinds {
 		if v == spec.GetKind() {
 			lib.Kind = k
@@ -245,8 +250,12 @@ func libraryToProto(lib *core.Library, admin bool) *libraryv1.Library {
 		AnalyzeLoudness:      &lib.AnalyzeLoudness,
 		DownloadLyrics:       &lib.DownloadLyrics,
 		ProviderOrder:        providerOrderToProto(&lib.Providers),
-		CreateTime:           timestamppb.New(lib.CreatedAt),
-		UpdateTime:           timestamppb.New(lib.UpdatedAt),
+		VirtualEpisodes: libraryv1.VirtualEpisodes_builder{
+			Missing: &lib.VirtualEpisodes.Missing, Unaired: &lib.VirtualEpisodes.Unaired, Specials: &lib.VirtualEpisodes.Specials,
+			GraceDays: new(int32(lib.VirtualEpisodes.GraceDays)),
+		}.Build(),
+		CreateTime: timestamppb.New(lib.CreatedAt),
+		UpdateTime: timestamppb.New(lib.UpdatedAt),
 	}
 	if admin {
 		b.Paths = lib.Paths
@@ -268,7 +277,7 @@ func providerOrderFromProto(o *libraryv1.ProviderOrder) core.ProviderOrder {
 	}
 	return core.ProviderOrder{
 		Metadata: list(o.GetMetadata()), Images: list(o.GetImages()), Subtitles: list(o.GetSubtitles()),
-		Lyrics: list(o.GetLyrics()), Segments: list(o.GetSegments()),
+		Lyrics: list(o.GetLyrics()), Segments: list(o.GetSegments()), Episodes: list(o.GetEpisodes()),
 	}
 }
 
@@ -283,6 +292,6 @@ func providerOrderToProto(o *core.ProviderOrder) *libraryv1.ProviderOrder {
 	}
 	return libraryv1.ProviderOrder_builder{
 		Metadata: list(o.Metadata), Images: list(o.Images), Subtitles: list(o.Subtitles),
-		Lyrics: list(o.Lyrics), Segments: list(o.Segments),
+		Lyrics: list(o.Lyrics), Segments: list(o.Segments), Episodes: list(o.Episodes),
 	}.Build()
 }

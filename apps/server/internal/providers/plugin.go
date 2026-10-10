@@ -152,6 +152,7 @@ func toLookup(kind pluginv1.MediaKind, l library.Lookup) *pluginv1.Lookup {
 		Artists:           l.Artists,
 		Language:          proto.String(l.Language),
 		Country:           proto.String(l.Country),
+		DisplayOrder:      proto.String(string(l.DisplayOrder)),
 	}.Build()
 	if l.SeasonNumber != nil {
 		lookup.SetSeasonNumber(int32(*l.SeasonNumber))

@@ -261,23 +261,3 @@ func TestMapCast(t *testing.T) {
 		t.Errorf("mapCast() = %+v, want = %+v", got, want)
 	}
 }
-
-func TestMissingEpisodeProviderCases(t *testing.T) {
-	const reason = "virtual episodes for missing and unaired episodes are not part of the domain model yet"
-	skip := map[string]string{"ShouldImportEpisode_RespectsAirDateAndOptions": reason}
-	for _, fact := range []string{
-		"ShouldPrune_AgedOutVirtualTmdbEpisode_ReturnsTrue", "ShouldPrune_NotInPruningMode_ReturnsFalse",
-		"ShouldPrune_StillUpcoming_ReturnsFalse", "ShouldPrune_VirtualEpisodeFromAnotherProvider_ReturnsFalse",
-		"ShouldPrune_PhysicalEpisode_ReturnsFalse", "ShouldPrune_AiredWithinGracePeriod_ReturnsFalse",
-		"ShouldPrune_AiredBeyondGracePeriod_ReturnsTrue", "ShouldPrune_SpecialWithSpecialsDisabled_ReturnsTrue",
-		"ShouldPrune_SpecialWithSpecialsEnabled_FollowsNormalRules", "GetPremiereDate_NullAirDate_ReturnsNull",
-		"GetPremiereDate_AirDate_ReturnsUtc", "UpdateVirtualEpisode_PlaceholderTitleReplaced_UpdatesAndReturnsTrue",
-		"UpdateVirtualEpisode_NoChanges_ReturnsFalse", "UpdateVirtualEpisode_EmptyTmdbValues_DoNotOverwrite",
-		"UpdateVirtualEpisode_RescheduledAirDate_UpdatesPremiereAndYear", "BuildSeasonSortNameTemplate_NoNameSortedPhysicalSeason_ReturnsNull",
-		"BuildSeasonSortNameTemplate_MirrorsSiblingConventionAndSwapsNumber", "BuildSeasonSortNameTemplate_PreservesNonEnglishToken",
-		"BuildSeasonSortNameTemplate_SiblingWithoutDigits_ReturnsNull", "BuildSeasonSortNameTemplate_IgnoresVirtualSeasonsAsReference",
-	} {
-		skip[fact] = reason
-	}
-	portedCases(t, "tmdb_missing_episode_provider.json", ported{skip: skip})
-}

@@ -89,6 +89,11 @@ func (Item) Fields() []ent.Field {
 		field.Time("metadata_refreshed_at").Optional().Nillable(),
 		field.Int64("scan_generation").Default(0),
 		field.Time("missing_since").Optional().Nillable(),
+		// virtual items are known from metadata without a file.
+		field.Bool("virtual").Default(false),
+		field.Bool("monitored").Default(false),
+		field.String("series_type").Default(""),
+		field.Int("absolute_number").Optional().Nillable(),
 	}
 }
 

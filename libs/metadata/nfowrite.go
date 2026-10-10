@@ -242,7 +242,7 @@ func (w *nfoWriter) kind(r *Result) {
 			w.text("airs_dayofweek", "Daily")
 		}
 		w.text("airs_time", it.AirTime)
-		w.text("displayorder", it.DisplayOrder)
+		w.text("displayorder", string(it.DisplayOrder))
 	case core.KindSeason:
 		w.number("seasonnumber", it.IndexNumber)
 	case core.KindEpisode:

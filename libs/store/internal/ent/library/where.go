@@ -511,6 +511,16 @@ func ProviderOrderNotNil() predicate.Library {
 	return predicate.Library(sql.FieldNotNull(FieldProviderOrder))
 }
 
+// VirtualEpisodesIsNil applies the IsNil predicate on the "virtual_episodes" field.
+func VirtualEpisodesIsNil() predicate.Library {
+	return predicate.Library(sql.FieldIsNull(FieldVirtualEpisodes))
+}
+
+// VirtualEpisodesNotNil applies the NotNil predicate on the "virtual_episodes" field.
+func VirtualEpisodesNotNil() predicate.Library {
+	return predicate.Library(sql.FieldNotNull(FieldVirtualEpisodes))
+}
+
 // ScanGenerationEQ applies the EQ predicate on the "scan_generation" field.
 func ScanGenerationEQ(v int64) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldScanGeneration, v))

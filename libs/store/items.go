@@ -126,6 +126,7 @@ var optionalColumns = []struct {
 	{func(it *core.Item) bool { return it.IndexNumber == nil }, item.IndexNumberNotNil(), (*ent.ItemUpdate).ClearIndexNumber},
 	{func(it *core.Item) bool { return it.ParentIndexNumber == nil }, item.ParentIndexNumberNotNil(), (*ent.ItemUpdate).ClearParentIndexNumber},
 	{func(it *core.Item) bool { return it.IndexNumberEnd == nil }, item.IndexNumberEndNotNil(), (*ent.ItemUpdate).ClearIndexNumberEnd},
+	{func(it *core.Item) bool { return it.AbsoluteNumber == nil }, item.AbsoluteNumberNotNil(), (*ent.ItemUpdate).ClearAbsoluteNumber},
 	{func(it *core.Item) bool { return it.PremiereDate == nil }, item.PremiereDateNotNil(), (*ent.ItemUpdate).ClearPremiereDate},
 	{func(it *core.Item) bool { return it.EndDate == nil }, item.EndDateNotNil(), (*ent.ItemUpdate).ClearEndDate},
 	{func(it *core.Item) bool { return it.ParentalRating == nil }, item.ParentalRatingNotNil(), (*ent.ItemUpdate).ClearParentalRating},
@@ -464,6 +465,21 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 	if !q.IncludeMissing {
 		ps = append(ps, item.MissingSinceIsNil())
 	}
+	switch {
+	case q.OnlyVirtual:
+		ps = append(ps, item.Virtual(true))
+	case !q.IncludeVirtual:
+		ps = append(ps, item.Virtual(false))
+	}
+	if q.Monitored != nil {
+		ps = append(ps, item.Monitored(*q.Monitored))
+	}
+	if q.IndexNumber != nil {
+		ps = append(ps, item.IndexNumber(*q.IndexNumber))
+	}
+	if q.ParentIndexNumber != nil {
+		ps = append(ps, item.ParentIndexNumber(*q.ParentIndexNumber))
+	}
 	if srch, ok := parseSearch(q.Search); ok {
 		ps = append(ps, predicate.Item(func(s *entsql.Selector) {
 			s.Where(srch.match(s.C(item.FieldSearchKey), s.C(item.FieldOriginalKey), s.C(item.FieldSortKey)))
@@ -616,9 +632,12 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 		SetOverview(it.Overview).
 		SetTagline(it.Tagline).
 		SetPath(it.Path).
+		SetVirtual(it.Virtual).
+		SetMonitored(it.Monitored).
 		SetNillableIndexNumber(it.IndexNumber).
 		SetNillableParentIndexNumber(it.ParentIndexNumber).
 		SetNillableIndexNumberEnd(it.IndexNumberEnd).
+		SetNillableAbsoluteNumber(it.AbsoluteNumber).
 		SetProductionYear(it.ProductionYear).
 		SetNillablePremiereDate(it.PremiereDate).
 		SetNillableEndDate(it.EndDate).
@@ -640,7 +659,8 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 		SetSeriesStatus(string(it.SeriesStatus)).
 		SetAirDays(fromWeekdays(it.AirDays)).
 		SetAirTime(it.AirTime).
-		SetDisplayOrder(it.DisplayOrder).
+		SetDisplayOrder(string(it.DisplayOrder)).
+		SetSeriesType(string(it.SeriesType)).
 		SetNillableAirsBeforeSeasonNumber(it.AirsBeforeSeasonNumber).
 		SetNillableAirsAfterSeasonNumber(it.AirsAfterSeasonNumber).
 		SetNillableAirsBeforeEpisodeNumber(it.AirsBeforeEpisodeNumber).
@@ -694,9 +714,12 @@ func toItem(e *ent.Item) core.Item {
 		Overview:                e.Overview,
 		Tagline:                 e.Tagline,
 		Path:                    e.Path,
+		Virtual:                 e.Virtual,
+		Monitored:               e.Monitored,
 		IndexNumber:             e.IndexNumber,
 		ParentIndexNumber:       e.ParentIndexNumber,
 		IndexNumberEnd:          e.IndexNumberEnd,
+		AbsoluteNumber:          e.AbsoluteNumber,
 		ProductionYear:          e.ProductionYear,
 		PremiereDate:            utcPtr(e.PremiereDate),
 		EndDate:                 utcPtr(e.EndDate),
@@ -717,7 +740,8 @@ func toItem(e *ent.Item) core.Item {
 		SeriesStatus:            core.SeriesStatus(e.SeriesStatus),
 		AirDays:                 toWeekdays(e.AirDays),
 		AirTime:                 e.AirTime,
-		DisplayOrder:            e.DisplayOrder,
+		DisplayOrder:            core.DisplayOrder(e.DisplayOrder),
+		SeriesType:              core.SeriesType(e.SeriesType),
 		AirsBeforeSeasonNumber:  e.AirsBeforeSeasonNumber,
 		AirsAfterSeasonNumber:   e.AirsAfterSeasonNumber,
 		AirsBeforeEpisodeNumber: e.AirsBeforeEpisodeNumber,

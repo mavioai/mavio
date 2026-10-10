@@ -45,6 +45,8 @@ type Library struct {
 	DownloadLyrics bool `json:"download_lyrics,omitempty"`
 	// ProviderOrder holds the value of the "provider_order" field.
 	ProviderOrder core.ProviderOrder `json:"provider_order,omitempty"`
+	// VirtualEpisodes holds the value of the "virtual_episodes" field.
+	VirtualEpisodes core.VirtualEpisodes `json:"virtual_episodes,omitempty"`
 	// ScanGeneration holds the value of the "scan_generation" field.
 	ScanGeneration int64 `json:"scan_generation,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -91,7 +93,7 @@ func (*Library) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case library.FieldPaths, library.FieldProviderOrder:
+		case library.FieldPaths, library.FieldProviderOrder, library.FieldVirtualEpisodes:
 			values[i] = new([]byte)
 		case library.FieldID:
 			values[i] = new(core.ID)
@@ -206,6 +208,14 @@ func (_m *Library) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field provider_order: %w", err)
 				}
 			}
+		case library.FieldVirtualEpisodes:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field virtual_episodes", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.VirtualEpisodes); err != nil {
+					return fmt.Errorf("unmarshal field virtual_episodes: %w", err)
+				}
+			}
 		case library.FieldScanGeneration:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field scan_generation", values[i])
@@ -308,6 +318,9 @@ func (_m *Library) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("provider_order=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ProviderOrder))
+	builder.WriteString(", ")
+	builder.WriteString("virtual_episodes=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VirtualEpisodes))
 	builder.WriteString(", ")
 	builder.WriteString("scan_generation=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ScanGeneration))

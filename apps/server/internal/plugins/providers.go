@@ -62,6 +62,31 @@ func (p *provider) Search(ctx context.Context, l library.Lookup, limit int) ([]l
 	return pl.Search(ctx, l, limit)
 }
 
+// EpisodeListers returns the episode list providers among the started
+// plugins.
+func (m *Manager) EpisodeListers() []library.EpisodeLister {
+	var out []library.EpisodeLister
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_EPISODE_LIST_PROVIDER) {
+		out = append(out, &episodeLister{m: m, id: id})
+	}
+	return out
+}
+
+type episodeLister struct {
+	m  *Manager
+	id string
+}
+
+func (p *episodeLister) Name() string { return p.id }
+
+func (p *episodeLister) Episodes(ctx context.Context, l library.Lookup) (*library.EpisodeList, error) {
+	pl, ok := p.m.running(p.id)
+	if !ok || pl.Episodes() == nil {
+		return nil, nil
+	}
+	return (&providers.EpisodeListPlugin{ID: p.id, Client: pl.Episodes()}).Episodes(ctx, l)
+}
+
 // ExternalIDKinds returns the built-in kinds of external IDs followed by
 // those the started plugins declare.
 func (m *Manager) ExternalIDKinds() []metadata.ExternalIDKind {

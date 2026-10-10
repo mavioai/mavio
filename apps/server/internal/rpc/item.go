@@ -48,6 +48,17 @@ var (
 		core.SeriesEnded:      libraryv1.SeriesStatus_SERIES_STATUS_ENDED,
 		core.SeriesUnreleased: libraryv1.SeriesStatus_SERIES_STATUS_UNRELEASED,
 	}
+	seriesTypes = map[core.SeriesType]libraryv1.SeriesType{
+		core.SeriesStandard: libraryv1.SeriesType_SERIES_TYPE_STANDARD,
+		core.SeriesDaily:    libraryv1.SeriesType_SERIES_TYPE_DAILY,
+		core.SeriesAnime:    libraryv1.SeriesType_SERIES_TYPE_ANIME,
+	}
+	displayOrders = map[core.DisplayOrder]libraryv1.DisplayOrder{
+		core.OrderAired: libraryv1.DisplayOrder_DISPLAY_ORDER_AIRED, core.OrderOriginalAirDate: libraryv1.DisplayOrder_DISPLAY_ORDER_ORIGINAL_AIR_DATE,
+		core.OrderAbsolute: libraryv1.DisplayOrder_DISPLAY_ORDER_ABSOLUTE, core.OrderDVD: libraryv1.DisplayOrder_DISPLAY_ORDER_DVD,
+		core.OrderDigital: libraryv1.DisplayOrder_DISPLAY_ORDER_DIGITAL, core.OrderStoryArc: libraryv1.DisplayOrder_DISPLAY_ORDER_STORY_ARC,
+		core.OrderProduction: libraryv1.DisplayOrder_DISPLAY_ORDER_PRODUCTION, core.OrderTV: libraryv1.DisplayOrder_DISPLAY_ORDER_TV,
+	}
 	imageKinds = map[core.ImageKind]libraryv1.ImageKind{
 		core.ImagePrimary: libraryv1.ImageKind_IMAGE_KIND_PRIMARY, core.ImageBackdrop: libraryv1.ImageKind_IMAGE_KIND_BACKDROP,
 		core.ImageLogo: libraryv1.ImageKind_IMAGE_KIND_LOGO, core.ImageThumb: libraryv1.ImageKind_IMAGE_KIND_THUMB,
@@ -386,6 +397,10 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	if req.HasFavorite() {
 		q.Favorite = new(req.GetFavorite())
 	}
+	q.IncludeVirtual = req.GetIncludeVirtual()
+	if req.HasMonitored() {
+		q.Monitored = new(req.GetMonitored())
+	}
 	q.Kinds = itemKindsFromProto(req.GetKinds())
 	for _, sort := range req.GetSort() {
 		q.Sort = append(q.Sort, core.SortSpec{Field: sortFields[sort.GetField()], Desc: sort.GetDescending()})
@@ -716,6 +731,9 @@ func itemToProto(it *core.Item, images []core.Image, admin bool) *libraryv1.Item
 		CustomRating:      &it.CustomRating,
 		CollectionName:    &it.CollectionName,
 		NormalizationGain: it.NormalizationGain(),
+		Virtual:           &it.Virtual,
+		Monitored:         &it.Monitored,
+		AbsoluteNumber:    int32Ptr(it.AbsoluteNumber),
 
 		ProductionLocations: it.ProductionLocations,
 	}
@@ -750,6 +768,9 @@ func itemToProto(it *core.Item, images []core.Image, admin bool) *libraryv1.Item
 	}
 	if st, ok := seriesStatuses[it.SeriesStatus]; ok {
 		b.SeriesStatus = &st
+	}
+	if it.Kind == core.KindSeries {
+		b.SeriesType, b.DisplayOrder = new(seriesTypes[it.SeriesType]), new(displayOrders[it.DisplayOrder])
 	}
 	if it.Extra != "" {
 		b.Extra = new(extraKinds[it.Extra])

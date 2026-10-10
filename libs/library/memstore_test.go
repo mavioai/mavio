@@ -106,17 +106,39 @@ func (r memItems) GetByPath(_ context.Context, lib core.ID, path string) (core.I
 	return core.Item{}, core.ErrNotFound
 }
 
-func (r memItems) Query(context.Context, core.ItemQuery) (core.Page[core.Item], error) {
-	panic("unused")
+// Query filters as Walk does, ordered by ID.
+func (r memItems) Query(ctx context.Context, q core.ItemQuery) (core.Page[core.Item], error) {
+	var page core.Page[core.Item]
+	for it := range r.Walk(ctx, q) {
+		page.Items = append(page.Items, it)
+	}
+	slices.SortFunc(page.Items, func(a, b core.Item) int { return strings.Compare(a.ID.String(), b.ID.String()) })
+	page.Total = len(page.Items)
+	return page, nil
 }
 
-// Walk filters by library and kind only.
+// Walk filters by library, kind, parent (recursively), virtual and
+// monitored state and numbers; missing items and extras are not left
+// out.
 func (r memItems) Walk(_ context.Context, q core.ItemQuery) iter.Seq2[core.Item, error] {
 	r.m.mu.Lock()
+	under := func(it core.Item) bool {
+		for p := it.ParentID; !p.IsZero(); p = r.m.items[p].ParentID {
+			if p == q.ParentID {
+				return true
+			}
+			if !q.Recursive {
+				return false
+			}
+		}
+		return false
+	}
+	eq := func(want, got *int) bool { return want == nil || (got != nil && *got == *want) }
 	var found []core.Item
 	for _, it := range r.m.items {
 		if (len(q.LibraryIDs) == 0 || slices.Contains(q.LibraryIDs, it.LibraryID)) && (len(q.Kinds) == 0 || slices.Contains(q.Kinds, it.Kind)) &&
-			(q.ParentID.IsZero() || it.ParentID == q.ParentID) {
+			(q.ParentID.IsZero() || under(it)) && (it.Virtual == q.OnlyVirtual || (q.IncludeVirtual && !q.OnlyVirtual)) &&
+			(q.Monitored == nil || it.Monitored == *q.Monitored) && eq(q.IndexNumber, it.IndexNumber) && eq(q.ParentIndexNumber, it.ParentIndexNumber) {
 			found = append(found, it)
 		}
 	}

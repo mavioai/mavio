@@ -1,7 +1,8 @@
 // Command scraper-tmdb is the metadata provider for The Movie Database
 // (TMDB): movies, series, seasons and episodes, with their cast, crew and
-// images. It builds as plugin.wasm (GOOS=wasip1, -buildmode=c-shared) and,
-// for the process runtime, as a native executable. Requests need a TMDB
+// images; it also lists the episodes of series in their display orders.
+// It builds as plugin.wasm (GOOS=wasip1, -buildmode=c-shared) and, for the
+// process runtime, as a native executable. Requests need a TMDB
 // API key, which administrators configure.
 package main
 
@@ -39,6 +40,7 @@ func init() {
 	p := &plugin{baseURL: defaultBaseURL}
 	guest.Handle(pluginv1connect.NewPluginServiceHandler(p))
 	guest.Handle(pluginv1connect.NewMetadataProviderServiceHandler(p))
+	guest.Handle(pluginv1connect.NewEpisodeListProviderServiceHandler(p))
 }
 
 // config is the plugin's configuration, as described by the manifest's
@@ -55,7 +57,8 @@ const defaultMaxCast = 15
 
 var errUnconfigured = connect.NewError(connect.CodeFailedPrecondition, errors.New("no TMDB API key is configured"))
 
-// plugin implements the lifecycle and metadata provider services.
+// plugin implements the lifecycle, metadata provider and episode list
+// provider services.
 type plugin struct {
 	baseURL string
 

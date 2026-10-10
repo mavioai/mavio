@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"maps"
 	"net/http"
 	"net/http/httptest"
@@ -93,9 +94,17 @@ var routes = map[string]string{
 		"aggregate_credits":{"cast":[{"id":17419,"name":"Bryan Cranston","order":0,"roles":[{"character":"Walter White","episode_count":62}]}]},
 		"external_ids":{"imdb_id":"tt0903747","tvdb_id":81189},
 		"keywords":{"results":[{"name":"drug dealer"}]},
-		"content_ratings":{"results":[{"iso_3166_1":"US","rating":"TV-MA"}]}}`,
+		"content_ratings":{"results":[{"iso_3166_1":"US","rating":"TV-MA"}]},
+		"seasons":[{"id":3572,"name":"Season 1","air_date":"2008-01-20","season_number":1,"poster_path":"/s1.jpg"}],
+		"episode_groups":{"results":[{"id":"g-dvd","type":3}]}}`,
 	"/3/tv/1396/season/1": `{"id":3572,"name":"Season 1","air_date":"2008-01-20","season_number":1,
-		"images":{"posters":[{"file_path":"/s1.jpg","iso_639_1":"en"}]},"external_ids":{"tvdb_id":30272}}`,
+		"images":{"posters":[{"file_path":"/s1.jpg","iso_639_1":"en"}]},"external_ids":{"tvdb_id":30272},
+		"episodes":[
+			{"id":62085,"name":"Pilot","air_date":"2008-01-20","runtime":58,"season_number":1,"episode_number":1,"still_path":"/pilot.jpg"},
+			{"id":62086,"name":"Cat's in the Bag...","air_date":"2008-01-27","season_number":1,"episode_number":2}]}`,
+	"/3/tv/episode_group/g-dvd": `{"groups":[
+		{"name":"Disc 2","order":2,"episodes":[{"id":62085,"name":"Pilot","season_number":1,"episode_number":1,"order":0}]},
+		{"name":"Disc 1","order":1,"episodes":[{"id":62086,"name":"Cat's in the Bag...","season_number":1,"episode_number":2,"order":0}]}]}`,
 	"/3/tv/1396/season/1/episode/2": `{"id":62086,"name":"Cat's in the Bag...","air_date":"2008-01-27","runtime":48,"vote_average":8.2,
 		"credits":{"cast":[{"id":17419,"name":"Bryan Cranston","character":"Walter White","order":0}],
 			"guest_stars":[{"id":1,"name":"Max Arciniega","character":"Krazy-8","order":0}],
@@ -376,5 +385,97 @@ func TestSearch(t *testing.T) {
 	}
 	if r := resp.GetResults()[0]; r.GetScore() != 1 || r.GetYear() != 2020 || r.GetImageUrl() != "https://image.tmdb.org/t/p/original/mulan.jpg" {
 		t.Errorf("best result = %v, want = score 1, year 2020 and a poster", r)
+	}
+}
+
+func listEpisodes(t *testing.T, p *plugin, order string) (*pluginv1.ListEpisodesResponse, []string) {
+	t.Helper()
+	l := lookup(pluginv1.MediaKind_MEDIA_KIND_SERIES, "", 0, map[string]string{"tmdb": "1396"})
+	l.SetDisplayOrder(order)
+	resp, err := p.ListEpisodes(t.Context(), pluginv1.ListEpisodesRequest_builder{Lookup: l}.Build())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, s := range resp.GetSeasons() {
+		got = append(got, fmt.Sprintf("S%d %s", s.GetSeasonNumber(), s.GetMetadata().GetName()))
+	}
+	for _, e := range resp.GetEpisodes() {
+		got = append(got, fmt.Sprintf("S%dE%d/%d %s %s", e.GetSeasonNumber(), e.GetEpisodeNumber(), e.GetAbsoluteNumber(),
+			e.GetMetadata().GetName(), e.GetMetadata().GetExternalIds()["tmdb"]))
+	}
+	return resp, got
+}
+
+func TestListEpisodes(t *testing.T) {
+	p, _ := newTestPlugin(t, `{"api_key":"key"}`)
+
+	// The aired order, also for orders the series has no group of.
+	for _, order := range []string{"", "absolute"} {
+		resp, got := listEpisodes(t, p, order)
+		if !resp.GetFound() || resp.GetProvider() != "tmdb" {
+			t.Errorf("%q: found = %v, provider = %q, want = found, tmdb", order, resp.GetFound(), resp.GetProvider())
+		}
+		want := []string{"S1 Season 1", "S1E1/0 Pilot 62085", "S1E2/0 Cat's in the Bag... 62086"}
+		if !slices.Equal(got, want) {
+			t.Errorf("%q: listed = %v, want = %v", order, got, want)
+		}
+	}
+	resp, _ := listEpisodes(t, p, "")
+	pilot := resp.GetEpisodes()[0].GetMetadata()
+	if pilot.GetPremiereDate() != "2008-01-20" || pilot.GetRuntime().AsDuration() != 58*time.Minute ||
+		len(pilot.GetImages()) != 1 || pilot.GetImages()[0].GetUrl() != "https://image.tmdb.org/t/p/original/pilot.jpg" {
+		t.Errorf("pilot = %v, want its air date, runtime and still", pilot)
+	}
+
+	// The DVD order of the series' episode group, by the groups' orders.
+	_, got := listEpisodes(t, p, "dvd")
+	want := []string{"S1 Disc 1", "S2 Disc 2", "S1E1/0 Cat's in the Bag... 62086", "S2E1/0 Pilot 62085"}
+	if !slices.Equal(got, want) {
+		t.Errorf("dvd: listed = %v, want = %v", got, want)
+	}
+
+	// Unknown series are not found.
+	l := lookup(pluginv1.MediaKind_MEDIA_KIND_SERIES, "", 0, map[string]string{"tmdb": "999"})
+	if resp, err := p.ListEpisodes(t.Context(), pluginv1.ListEpisodesRequest_builder{Lookup: l}.Build()); err != nil || resp.GetFound() {
+		t.Errorf("ListEpisodes(999) = %v, %v, want = not found", resp, err)
+	}
+}
+
+func TestGroupEpisodesAbsolute(t *testing.T) {
+	_, episodes := groupEpisodes(tmdbEpisodeGroup{Groups: []tmdbGroupSeason{
+		{Order: 1, Episodes: []tmdbListedEpisode{{ID: 2, Order: 1}, {ID: 1, Order: 0}}},
+		{Order: 0, Episodes: []tmdbListedEpisode{{ID: 9, Order: 0}}},
+		{Order: 2, Episodes: []tmdbListedEpisode{{ID: 3, Order: 0}}},
+	}}, true)
+	var got []string
+	for _, e := range episodes {
+		got = append(got, fmt.Sprintf("S%dE%d/%d", e.GetSeasonNumber(), e.GetEpisodeNumber(), e.GetAbsoluteNumber()))
+	}
+	if want := []string{"S0E1/0", "S1E1/1", "S1E2/2", "S2E1/3"}; !slices.Equal(got, want) {
+		t.Errorf("episodes = %v, want = %v", got, want)
+	}
+}
+
+func TestDisplayOrderMetadata(t *testing.T) {
+	p, fake := newTestPlugin(t, `{"api_key":"key"}`)
+	series := map[string]string{"tmdb": "1396"}
+	season := pluginv1.Lookup_builder{
+		Kind: pluginv1.MediaKind_MEDIA_KIND_SEASON.Enum(), SeriesExternalIds: series,
+		SeasonNumber: proto.Int32(2), DisplayOrder: proto.String("dvd"),
+	}.Build()
+	if got := metadataFor(t, p, season).GetName(); got != "Disc 2" {
+		t.Errorf("season name = %q, want = Disc 2", got)
+	}
+	// The DVD order's S1E1 is the aired S1E2.
+	episode := pluginv1.Lookup_builder{
+		Kind: pluginv1.MediaKind_MEDIA_KIND_EPISODE.Enum(), SeriesExternalIds: series,
+		SeasonNumber: proto.Int32(1), EpisodeNumber: proto.Int32(1), DisplayOrder: proto.String("dvd"),
+	}.Build()
+	if got := metadataFor(t, p, episode).GetName(); got != "Cat's in the Bag..." {
+		t.Errorf("episode name = %q, want = Cat's in the Bag...", got)
+	}
+	if paths := fake.paths(); paths[len(paths)-1] != "/3/tv/1396/season/1/episode/2" {
+		t.Errorf("requests = %v, want the aired S1E2 last", paths)
 	}
 }

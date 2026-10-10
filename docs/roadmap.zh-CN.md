@@ -92,7 +92,7 @@ flowchart TD
 | P12 | 媒体附加功能 | ✅ 完成 |
 | P13 | 插件平台 | ✅ 完成 |
 | P14 | DLNA | ✅ 完成 |
-| P15 | 资源获取基础 | 未开始 |
+| P15 | 资源获取基础 | ✅ 完成 |
 | P16 | 资源获取数据源 | 未开始 |
 | P17 | 索引器 | 未开始 |
 | P18 | 电影资源获取 | 未开始 |
@@ -362,12 +362,18 @@ flowchart TD
 ### P15 资源获取基础
 **范围**：服务端在能"想要"自己没有的媒体之前所需的东西（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）。
 
-- 想要的条目：元数据中已知、但还没有文件的电影与剧集，与[领域模型](domain.zh-CN.md) §4.7 的缺失条目分开；电影、剧集与季的监控状态和质量档案
+- 想要的条目：元数据中已知、但还没有文件的电影与剧集，与[领域模型](domain.zh-CN.md) §4.7 的缺失条目分开；电影、剧集、季与单集的监控状态
 - 剧集：TVDB ID、剧集类型（standard、daily、anime）与显示顺序，即 Jellyfin 的 `DisplayOrder` 加 TMDB episode groups
 - `libs/release`：release 标题解析（标题、年份、季与集、绝对集数与日播日期、质量、来源、分辨率、编码、语言、版本、发布组），沿用 Radarr 与 Sonarr 解析规则的 .NET 语法，在 `regexp2` 上运行
 - `tools/testport` 读取 NUnit 测试用例，使 Radarr 与 Sonarr 的解析用例能像 Jellyfin 的一样移植
 
 **完成标准**：移植的解析用例通过或带原因跳过；P4 跳过的 `scraper-tmdb` 缺失剧集用例通过；剧集的单集按其显示顺序列出。
+
+**进度**：
+- [x] 虚拟条目与被监控条目（[领域模型 §4.8](domain.zh-CN.md#48-虚拟条目)）；集列表提供者（`EPISODE_LIST_PROVIDER`，[插件 §8.12](plugins.zh-CN.md#812-资源获取提供者)）；缺失剧集用例在 `libs/library` 中通过
+- [x] 剧集类型、显示顺序与绝对集数；`scraper-tmdb` 按剧集的 TMDB episode group 给季与单集编号
+- [x] `libs/release` 及 Radarr 与 Sonarr 的解析用例
+- [x] `tools/testport` 读取 NUnit 测试用例
 
 ### P16 资源获取数据源
 **范围**：资源获取所需的元数据，默认无需密钥。
@@ -385,7 +391,7 @@ flowchart TD
 ### P18 电影资源获取
 **范围**：`libs/acquire` 及其 `movie` 包，移植 Radarr；`plugins/download-clients`，包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件。
 
-- 质量定义与质量档案、custom formats、delay profile 与 release profile
+- 质量定义与质量档案，每部被监控的电影、剧集与季一个档案；custom formats、delay profile 与 release profile
 - 决策：Radarr 决策引擎的各项规格；排序
 - 以作业执行的 RSS 同步与搜索；被跟踪下载的队列；远程路径映射
 - 入库：完成的下载经 ffprobe 校验，按命名模板硬链接或移动进媒体库，并扫描其所在目录；升级到截止质量为止，被替换的文件移入回收目录；下载失败时加入黑名单并重新搜索

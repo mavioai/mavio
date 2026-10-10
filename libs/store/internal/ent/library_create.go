@@ -184,6 +184,20 @@ func (_c *LibraryCreate) SetNillableProviderOrder(v *core.ProviderOrder) *Librar
 	return _c
 }
 
+// SetVirtualEpisodes sets the "virtual_episodes" field.
+func (_c *LibraryCreate) SetVirtualEpisodes(v core.VirtualEpisodes) *LibraryCreate {
+	_c.mutation.SetVirtualEpisodes(v)
+	return _c
+}
+
+// SetNillableVirtualEpisodes sets the "virtual_episodes" field if the given value is not nil.
+func (_c *LibraryCreate) SetNillableVirtualEpisodes(v *core.VirtualEpisodes) *LibraryCreate {
+	if v != nil {
+		_c.SetVirtualEpisodes(*v)
+	}
+	return _c
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_c *LibraryCreate) SetScanGeneration(v int64) *LibraryCreate {
 	_c.mutation.SetScanGeneration(v)
@@ -499,6 +513,10 @@ func (_c *LibraryCreate) createSpec() (*Library, *sqlgraph.CreateSpec) {
 		_spec.SetField(library.FieldProviderOrder, field.TypeJSON, value)
 		_node.ProviderOrder = value
 	}
+	if value, ok := _c.mutation.VirtualEpisodes(); ok {
+		_spec.SetField(library.FieldVirtualEpisodes, field.TypeJSON, value)
+		_node.VirtualEpisodes = value
+	}
 	if value, ok := _c.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
 		_node.ScanGeneration = value
@@ -760,6 +778,24 @@ func (u *LibraryUpsert) UpdateProviderOrder() *LibraryUpsert {
 // ClearProviderOrder clears the value of the "provider_order" field.
 func (u *LibraryUpsert) ClearProviderOrder() *LibraryUpsert {
 	u.SetNull(library.FieldProviderOrder)
+	return u
+}
+
+// SetVirtualEpisodes sets the "virtual_episodes" field.
+func (u *LibraryUpsert) SetVirtualEpisodes(v core.VirtualEpisodes) *LibraryUpsert {
+	u.Set(library.FieldVirtualEpisodes, v)
+	return u
+}
+
+// UpdateVirtualEpisodes sets the "virtual_episodes" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateVirtualEpisodes() *LibraryUpsert {
+	u.SetExcluded(library.FieldVirtualEpisodes)
+	return u
+}
+
+// ClearVirtualEpisodes clears the value of the "virtual_episodes" field.
+func (u *LibraryUpsert) ClearVirtualEpisodes() *LibraryUpsert {
+	u.SetNull(library.FieldVirtualEpisodes)
 	return u
 }
 
@@ -1037,6 +1073,27 @@ func (u *LibraryUpsertOne) UpdateProviderOrder() *LibraryUpsertOne {
 func (u *LibraryUpsertOne) ClearProviderOrder() *LibraryUpsertOne {
 	return u.Update(func(s *LibraryUpsert) {
 		s.ClearProviderOrder()
+	})
+}
+
+// SetVirtualEpisodes sets the "virtual_episodes" field.
+func (u *LibraryUpsertOne) SetVirtualEpisodes(v core.VirtualEpisodes) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetVirtualEpisodes(v)
+	})
+}
+
+// UpdateVirtualEpisodes sets the "virtual_episodes" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateVirtualEpisodes() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateVirtualEpisodes()
+	})
+}
+
+// ClearVirtualEpisodes clears the value of the "virtual_episodes" field.
+func (u *LibraryUpsertOne) ClearVirtualEpisodes() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.ClearVirtualEpisodes()
 	})
 }
 
@@ -1486,6 +1543,27 @@ func (u *LibraryUpsertBulk) UpdateProviderOrder() *LibraryUpsertBulk {
 func (u *LibraryUpsertBulk) ClearProviderOrder() *LibraryUpsertBulk {
 	return u.Update(func(s *LibraryUpsert) {
 		s.ClearProviderOrder()
+	})
+}
+
+// SetVirtualEpisodes sets the "virtual_episodes" field.
+func (u *LibraryUpsertBulk) SetVirtualEpisodes(v core.VirtualEpisodes) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetVirtualEpisodes(v)
+	})
+}
+
+// UpdateVirtualEpisodes sets the "virtual_episodes" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateVirtualEpisodes() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateVirtualEpisodes()
+	})
+}
+
+// ClearVirtualEpisodes clears the value of the "virtual_episodes" field.
+func (u *LibraryUpsertBulk) ClearVirtualEpisodes() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.ClearVirtualEpisodes()
 	})
 }
 

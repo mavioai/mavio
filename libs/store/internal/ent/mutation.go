@@ -5409,6 +5409,11 @@ type ItemMutation struct {
 	scan_generation               *int64
 	addscan_generation            *int64
 	missing_since                 *time.Time
+	virtual                       *bool
+	monitored                     *bool
+	series_type                   *string
+	absolute_number               *int
+	addabsolute_number            *int
 	clearedFields                 map[string]struct{}
 	library                       *core.ID
 	clearedlibrary                bool
@@ -8071,6 +8076,184 @@ func (m *ItemMutation) ResetMissingSince() {
 	delete(m.clearedFields, item.FieldMissingSince)
 }
 
+// SetVirtual sets the "virtual" field.
+func (m *ItemMutation) SetVirtual(b bool) {
+	m.virtual = &b
+}
+
+// Virtual returns the value of the "virtual" field in the mutation.
+func (m *ItemMutation) Virtual() (r bool, exists bool) {
+	v := m.virtual
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVirtual returns the old "virtual" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldVirtual(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVirtual is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVirtual requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVirtual: %w", err)
+	}
+	return oldValue.Virtual, nil
+}
+
+// ResetVirtual resets all changes to the "virtual" field.
+func (m *ItemMutation) ResetVirtual() {
+	m.virtual = nil
+}
+
+// SetMonitored sets the "monitored" field.
+func (m *ItemMutation) SetMonitored(b bool) {
+	m.monitored = &b
+}
+
+// Monitored returns the value of the "monitored" field in the mutation.
+func (m *ItemMutation) Monitored() (r bool, exists bool) {
+	v := m.monitored
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMonitored returns the old "monitored" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldMonitored(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMonitored is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMonitored requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMonitored: %w", err)
+	}
+	return oldValue.Monitored, nil
+}
+
+// ResetMonitored resets all changes to the "monitored" field.
+func (m *ItemMutation) ResetMonitored() {
+	m.monitored = nil
+}
+
+// SetSeriesType sets the "series_type" field.
+func (m *ItemMutation) SetSeriesType(s string) {
+	m.series_type = &s
+}
+
+// SeriesType returns the value of the "series_type" field in the mutation.
+func (m *ItemMutation) SeriesType() (r string, exists bool) {
+	v := m.series_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSeriesType returns the old "series_type" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldSeriesType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSeriesType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSeriesType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSeriesType: %w", err)
+	}
+	return oldValue.SeriesType, nil
+}
+
+// ResetSeriesType resets all changes to the "series_type" field.
+func (m *ItemMutation) ResetSeriesType() {
+	m.series_type = nil
+}
+
+// SetAbsoluteNumber sets the "absolute_number" field.
+func (m *ItemMutation) SetAbsoluteNumber(i int) {
+	m.absolute_number = &i
+	m.addabsolute_number = nil
+}
+
+// AbsoluteNumber returns the value of the "absolute_number" field in the mutation.
+func (m *ItemMutation) AbsoluteNumber() (r int, exists bool) {
+	v := m.absolute_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAbsoluteNumber returns the old "absolute_number" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldAbsoluteNumber(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAbsoluteNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAbsoluteNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAbsoluteNumber: %w", err)
+	}
+	return oldValue.AbsoluteNumber, nil
+}
+
+// AddAbsoluteNumber adds i to the "absolute_number" field.
+func (m *ItemMutation) AddAbsoluteNumber(i int) {
+	if m.addabsolute_number != nil {
+		*m.addabsolute_number += i
+	} else {
+		m.addabsolute_number = &i
+	}
+}
+
+// AddedAbsoluteNumber returns the value that was added to the "absolute_number" field in this mutation.
+func (m *ItemMutation) AddedAbsoluteNumber() (r int, exists bool) {
+	v := m.addabsolute_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAbsoluteNumber clears the value of the "absolute_number" field.
+func (m *ItemMutation) ClearAbsoluteNumber() {
+	m.absolute_number = nil
+	m.addabsolute_number = nil
+	m.clearedFields[item.FieldAbsoluteNumber] = struct{}{}
+}
+
+// AbsoluteNumberCleared returns if the "absolute_number" field was cleared in this mutation.
+func (m *ItemMutation) AbsoluteNumberCleared() bool {
+	_, ok := m.clearedFields[item.FieldAbsoluteNumber]
+	return ok
+}
+
+// ResetAbsoluteNumber resets all changes to the "absolute_number" field.
+func (m *ItemMutation) ResetAbsoluteNumber() {
+	m.absolute_number = nil
+	m.addabsolute_number = nil
+	delete(m.clearedFields, item.FieldAbsoluteNumber)
+}
+
 // ClearLibrary clears the "library" edge to the Library entity.
 func (m *ItemMutation) ClearLibrary() {
 	m.clearedlibrary = true
@@ -8807,7 +8990,7 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 52)
+	fields := make([]string, 0, 56)
 	if m.library != nil {
 		fields = append(fields, item.FieldLibraryID)
 	}
@@ -8964,6 +9147,18 @@ func (m *ItemMutation) Fields() []string {
 	if m.missing_since != nil {
 		fields = append(fields, item.FieldMissingSince)
 	}
+	if m.virtual != nil {
+		fields = append(fields, item.FieldVirtual)
+	}
+	if m.monitored != nil {
+		fields = append(fields, item.FieldMonitored)
+	}
+	if m.series_type != nil {
+		fields = append(fields, item.FieldSeriesType)
+	}
+	if m.absolute_number != nil {
+		fields = append(fields, item.FieldAbsoluteNumber)
+	}
 	return fields
 }
 
@@ -9076,6 +9271,14 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 		return m.ScanGeneration()
 	case item.FieldMissingSince:
 		return m.MissingSince()
+	case item.FieldVirtual:
+		return m.Virtual()
+	case item.FieldMonitored:
+		return m.Monitored()
+	case item.FieldSeriesType:
+		return m.SeriesType()
+	case item.FieldAbsoluteNumber:
+		return m.AbsoluteNumber()
 	}
 	return nil, false
 }
@@ -9189,6 +9392,14 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldScanGeneration(ctx)
 	case item.FieldMissingSince:
 		return m.OldMissingSince(ctx)
+	case item.FieldVirtual:
+		return m.OldVirtual(ctx)
+	case item.FieldMonitored:
+		return m.OldMonitored(ctx)
+	case item.FieldSeriesType:
+		return m.OldSeriesType(ctx)
+	case item.FieldAbsoluteNumber:
+		return m.OldAbsoluteNumber(ctx)
 	}
 	return nil, fmt.Errorf("unknown Item field %s", name)
 }
@@ -9562,6 +9773,34 @@ func (m *ItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMissingSince(v)
 		return nil
+	case item.FieldVirtual:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVirtual(v)
+		return nil
+	case item.FieldMonitored:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMonitored(v)
+		return nil
+	case item.FieldSeriesType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSeriesType(v)
+		return nil
+	case item.FieldAbsoluteNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAbsoluteNumber(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Item field %s", name)
 }
@@ -9612,6 +9851,9 @@ func (m *ItemMutation) AddedFields() []string {
 	if m.addscan_generation != nil {
 		fields = append(fields, item.FieldScanGeneration)
 	}
+	if m.addabsolute_number != nil {
+		fields = append(fields, item.FieldAbsoluteNumber)
+	}
 	return fields
 }
 
@@ -9648,6 +9890,8 @@ func (m *ItemMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedLoudness()
 	case item.FieldScanGeneration:
 		return m.AddedScanGeneration()
+	case item.FieldAbsoluteNumber:
+		return m.AddedAbsoluteNumber()
 	}
 	return nil, false
 }
@@ -9755,6 +9999,13 @@ func (m *ItemMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddScanGeneration(v)
 		return nil
+	case item.FieldAbsoluteNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAbsoluteNumber(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Item numeric field %s", name)
 }
@@ -9828,6 +10079,9 @@ func (m *ItemMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(item.FieldMissingSince) {
 		fields = append(fields, item.FieldMissingSince)
+	}
+	if m.FieldCleared(item.FieldAbsoluteNumber) {
+		fields = append(fields, item.FieldAbsoluteNumber)
 	}
 	return fields
 }
@@ -9908,6 +10162,9 @@ func (m *ItemMutation) ClearField(name string) error {
 		return nil
 	case item.FieldMissingSince:
 		m.ClearMissingSince()
+		return nil
+	case item.FieldAbsoluteNumber:
+		m.ClearAbsoluteNumber()
 		return nil
 	}
 	return fmt.Errorf("unknown Item nullable field %s", name)
@@ -10072,6 +10329,18 @@ func (m *ItemMutation) ResetField(name string) error {
 		return nil
 	case item.FieldMissingSince:
 		m.ResetMissingSince()
+		return nil
+	case item.FieldVirtual:
+		m.ResetVirtual()
+		return nil
+	case item.FieldMonitored:
+		m.ResetMonitored()
+		return nil
+	case item.FieldSeriesType:
+		m.ResetSeriesType()
+		return nil
+	case item.FieldAbsoluteNumber:
+		m.ResetAbsoluteNumber()
 		return nil
 	}
 	return fmt.Errorf("unknown Item field %s", name)
@@ -12918,6 +13187,7 @@ type LibraryMutation struct {
 	analyze_loudness       *bool
 	download_lyrics        *bool
 	provider_order         *core.ProviderOrder
+	virtual_episodes       *core.VirtualEpisodes
 	scan_generation        *int64
 	addscan_generation     *int64
 	created_at             *time.Time
@@ -13554,6 +13824,55 @@ func (m *LibraryMutation) ResetProviderOrder() {
 	delete(m.clearedFields, library.FieldProviderOrder)
 }
 
+// SetVirtualEpisodes sets the "virtual_episodes" field.
+func (m *LibraryMutation) SetVirtualEpisodes(ce core.VirtualEpisodes) {
+	m.virtual_episodes = &ce
+}
+
+// VirtualEpisodes returns the value of the "virtual_episodes" field in the mutation.
+func (m *LibraryMutation) VirtualEpisodes() (r core.VirtualEpisodes, exists bool) {
+	v := m.virtual_episodes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVirtualEpisodes returns the old "virtual_episodes" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldVirtualEpisodes(ctx context.Context) (v core.VirtualEpisodes, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVirtualEpisodes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVirtualEpisodes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVirtualEpisodes: %w", err)
+	}
+	return oldValue.VirtualEpisodes, nil
+}
+
+// ClearVirtualEpisodes clears the value of the "virtual_episodes" field.
+func (m *LibraryMutation) ClearVirtualEpisodes() {
+	m.virtual_episodes = nil
+	m.clearedFields[library.FieldVirtualEpisodes] = struct{}{}
+}
+
+// VirtualEpisodesCleared returns if the "virtual_episodes" field was cleared in this mutation.
+func (m *LibraryMutation) VirtualEpisodesCleared() bool {
+	_, ok := m.clearedFields[library.FieldVirtualEpisodes]
+	return ok
+}
+
+// ResetVirtualEpisodes resets all changes to the "virtual_episodes" field.
+func (m *LibraryMutation) ResetVirtualEpisodes() {
+	m.virtual_episodes = nil
+	delete(m.clearedFields, library.FieldVirtualEpisodes)
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (m *LibraryMutation) SetScanGeneration(i int64) {
 	m.scan_generation = &i
@@ -13824,7 +14143,7 @@ func (m *LibraryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LibraryMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 17)
 	if m.name != nil {
 		fields = append(fields, library.FieldName)
 	}
@@ -13863,6 +14182,9 @@ func (m *LibraryMutation) Fields() []string {
 	}
 	if m.provider_order != nil {
 		fields = append(fields, library.FieldProviderOrder)
+	}
+	if m.virtual_episodes != nil {
+		fields = append(fields, library.FieldVirtualEpisodes)
 	}
 	if m.scan_generation != nil {
 		fields = append(fields, library.FieldScanGeneration)
@@ -13907,6 +14229,8 @@ func (m *LibraryMutation) Field(name string) (ent.Value, bool) {
 		return m.DownloadLyrics()
 	case library.FieldProviderOrder:
 		return m.ProviderOrder()
+	case library.FieldVirtualEpisodes:
+		return m.VirtualEpisodes()
 	case library.FieldScanGeneration:
 		return m.ScanGeneration()
 	case library.FieldCreatedAt:
@@ -13948,6 +14272,8 @@ func (m *LibraryMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldDownloadLyrics(ctx)
 	case library.FieldProviderOrder:
 		return m.OldProviderOrder(ctx)
+	case library.FieldVirtualEpisodes:
+		return m.OldVirtualEpisodes(ctx)
 	case library.FieldScanGeneration:
 		return m.OldScanGeneration(ctx)
 	case library.FieldCreatedAt:
@@ -14054,6 +14380,13 @@ func (m *LibraryMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetProviderOrder(v)
 		return nil
+	case library.FieldVirtualEpisodes:
+		v, ok := value.(core.VirtualEpisodes)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVirtualEpisodes(v)
+		return nil
 	case library.FieldScanGeneration:
 		v, ok := value.(int64)
 		if !ok {
@@ -14135,6 +14468,9 @@ func (m *LibraryMutation) ClearedFields() []string {
 	if m.FieldCleared(library.FieldProviderOrder) {
 		fields = append(fields, library.FieldProviderOrder)
 	}
+	if m.FieldCleared(library.FieldVirtualEpisodes) {
+		fields = append(fields, library.FieldVirtualEpisodes)
+	}
 	return fields
 }
 
@@ -14151,6 +14487,9 @@ func (m *LibraryMutation) ClearField(name string) error {
 	switch name {
 	case library.FieldProviderOrder:
 		m.ClearProviderOrder()
+		return nil
+	case library.FieldVirtualEpisodes:
+		m.ClearVirtualEpisodes()
 		return nil
 	}
 	return fmt.Errorf("unknown Library nullable field %s", name)
@@ -14198,6 +14537,9 @@ func (m *LibraryMutation) ResetField(name string) error {
 		return nil
 	case library.FieldProviderOrder:
 		m.ResetProviderOrder()
+		return nil
+	case library.FieldVirtualEpisodes:
+		m.ResetVirtualEpisodes()
 		return nil
 	case library.FieldScanGeneration:
 		m.ResetScanGeneration()

@@ -674,6 +674,62 @@ func (_c *ItemCreate) SetNillableMissingSince(v *time.Time) *ItemCreate {
 	return _c
 }
 
+// SetVirtual sets the "virtual" field.
+func (_c *ItemCreate) SetVirtual(v bool) *ItemCreate {
+	_c.mutation.SetVirtual(v)
+	return _c
+}
+
+// SetNillableVirtual sets the "virtual" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableVirtual(v *bool) *ItemCreate {
+	if v != nil {
+		_c.SetVirtual(*v)
+	}
+	return _c
+}
+
+// SetMonitored sets the "monitored" field.
+func (_c *ItemCreate) SetMonitored(v bool) *ItemCreate {
+	_c.mutation.SetMonitored(v)
+	return _c
+}
+
+// SetNillableMonitored sets the "monitored" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableMonitored(v *bool) *ItemCreate {
+	if v != nil {
+		_c.SetMonitored(*v)
+	}
+	return _c
+}
+
+// SetSeriesType sets the "series_type" field.
+func (_c *ItemCreate) SetSeriesType(v string) *ItemCreate {
+	_c.mutation.SetSeriesType(v)
+	return _c
+}
+
+// SetNillableSeriesType sets the "series_type" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableSeriesType(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetSeriesType(*v)
+	}
+	return _c
+}
+
+// SetAbsoluteNumber sets the "absolute_number" field.
+func (_c *ItemCreate) SetAbsoluteNumber(v int) *ItemCreate {
+	_c.mutation.SetAbsoluteNumber(v)
+	return _c
+}
+
+// SetNillableAbsoluteNumber sets the "absolute_number" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableAbsoluteNumber(v *int) *ItemCreate {
+	if v != nil {
+		_c.SetAbsoluteNumber(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *ItemCreate) SetID(v core.ID) *ItemCreate {
 	_c.mutation.SetID(v)
@@ -1004,6 +1060,18 @@ func (_c *ItemCreate) defaults() {
 		v := item.DefaultScanGeneration
 		_c.mutation.SetScanGeneration(v)
 	}
+	if _, ok := _c.mutation.Virtual(); !ok {
+		v := item.DefaultVirtual
+		_c.mutation.SetVirtual(v)
+	}
+	if _, ok := _c.mutation.Monitored(); !ok {
+		v := item.DefaultMonitored
+		_c.mutation.SetMonitored(v)
+	}
+	if _, ok := _c.mutation.SeriesType(); !ok {
+		v := item.DefaultSeriesType
+		_c.mutation.SetSeriesType(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := item.DefaultID()
 		_c.mutation.SetID(v)
@@ -1101,6 +1169,15 @@ func (_c *ItemCreate) check() error {
 	}
 	if _, ok := _c.mutation.ScanGeneration(); !ok {
 		return &ValidationError{Name: "scan_generation", err: errors.New(`ent: missing required field "Item.scan_generation"`)}
+	}
+	if _, ok := _c.mutation.Virtual(); !ok {
+		return &ValidationError{Name: "virtual", err: errors.New(`ent: missing required field "Item.virtual"`)}
+	}
+	if _, ok := _c.mutation.Monitored(); !ok {
+		return &ValidationError{Name: "monitored", err: errors.New(`ent: missing required field "Item.monitored"`)}
+	}
+	if _, ok := _c.mutation.SeriesType(); !ok {
+		return &ValidationError{Name: "series_type", err: errors.New(`ent: missing required field "Item.series_type"`)}
 	}
 	if len(_c.mutation.LibraryIDs()) == 0 {
 		return &ValidationError{Name: "library", err: errors.New(`ent: missing required edge "Item.library"`)}
@@ -1332,6 +1409,22 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.MissingSince(); ok {
 		_spec.SetField(item.FieldMissingSince, field.TypeTime, value)
 		_node.MissingSince = &value
+	}
+	if value, ok := _c.mutation.Virtual(); ok {
+		_spec.SetField(item.FieldVirtual, field.TypeBool, value)
+		_node.Virtual = value
+	}
+	if value, ok := _c.mutation.Monitored(); ok {
+		_spec.SetField(item.FieldMonitored, field.TypeBool, value)
+		_node.Monitored = value
+	}
+	if value, ok := _c.mutation.SeriesType(); ok {
+		_spec.SetField(item.FieldSeriesType, field.TypeString, value)
+		_node.SeriesType = value
+	}
+	if value, ok := _c.mutation.AbsoluteNumber(); ok {
+		_spec.SetField(item.FieldAbsoluteNumber, field.TypeInt, value)
+		_node.AbsoluteNumber = &value
 	}
 	if nodes := _c.mutation.LibraryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -2469,6 +2562,66 @@ func (u *ItemUpsert) ClearMissingSince() *ItemUpsert {
 	return u
 }
 
+// SetVirtual sets the "virtual" field.
+func (u *ItemUpsert) SetVirtual(v bool) *ItemUpsert {
+	u.Set(item.FieldVirtual, v)
+	return u
+}
+
+// UpdateVirtual sets the "virtual" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateVirtual() *ItemUpsert {
+	u.SetExcluded(item.FieldVirtual)
+	return u
+}
+
+// SetMonitored sets the "monitored" field.
+func (u *ItemUpsert) SetMonitored(v bool) *ItemUpsert {
+	u.Set(item.FieldMonitored, v)
+	return u
+}
+
+// UpdateMonitored sets the "monitored" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateMonitored() *ItemUpsert {
+	u.SetExcluded(item.FieldMonitored)
+	return u
+}
+
+// SetSeriesType sets the "series_type" field.
+func (u *ItemUpsert) SetSeriesType(v string) *ItemUpsert {
+	u.Set(item.FieldSeriesType, v)
+	return u
+}
+
+// UpdateSeriesType sets the "series_type" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateSeriesType() *ItemUpsert {
+	u.SetExcluded(item.FieldSeriesType)
+	return u
+}
+
+// SetAbsoluteNumber sets the "absolute_number" field.
+func (u *ItemUpsert) SetAbsoluteNumber(v int) *ItemUpsert {
+	u.Set(item.FieldAbsoluteNumber, v)
+	return u
+}
+
+// UpdateAbsoluteNumber sets the "absolute_number" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateAbsoluteNumber() *ItemUpsert {
+	u.SetExcluded(item.FieldAbsoluteNumber)
+	return u
+}
+
+// AddAbsoluteNumber adds v to the "absolute_number" field.
+func (u *ItemUpsert) AddAbsoluteNumber(v int) *ItemUpsert {
+	u.Add(item.FieldAbsoluteNumber, v)
+	return u
+}
+
+// ClearAbsoluteNumber clears the value of the "absolute_number" field.
+func (u *ItemUpsert) ClearAbsoluteNumber() *ItemUpsert {
+	u.SetNull(item.FieldAbsoluteNumber)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -3494,6 +3647,76 @@ func (u *ItemUpsertOne) UpdateMissingSince() *ItemUpsertOne {
 func (u *ItemUpsertOne) ClearMissingSince() *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearMissingSince()
+	})
+}
+
+// SetVirtual sets the "virtual" field.
+func (u *ItemUpsertOne) SetVirtual(v bool) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetVirtual(v)
+	})
+}
+
+// UpdateVirtual sets the "virtual" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateVirtual() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateVirtual()
+	})
+}
+
+// SetMonitored sets the "monitored" field.
+func (u *ItemUpsertOne) SetMonitored(v bool) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetMonitored(v)
+	})
+}
+
+// UpdateMonitored sets the "monitored" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateMonitored() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateMonitored()
+	})
+}
+
+// SetSeriesType sets the "series_type" field.
+func (u *ItemUpsertOne) SetSeriesType(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetSeriesType(v)
+	})
+}
+
+// UpdateSeriesType sets the "series_type" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateSeriesType() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateSeriesType()
+	})
+}
+
+// SetAbsoluteNumber sets the "absolute_number" field.
+func (u *ItemUpsertOne) SetAbsoluteNumber(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAbsoluteNumber(v)
+	})
+}
+
+// AddAbsoluteNumber adds v to the "absolute_number" field.
+func (u *ItemUpsertOne) AddAbsoluteNumber(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddAbsoluteNumber(v)
+	})
+}
+
+// UpdateAbsoluteNumber sets the "absolute_number" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateAbsoluteNumber() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAbsoluteNumber()
+	})
+}
+
+// ClearAbsoluteNumber clears the value of the "absolute_number" field.
+func (u *ItemUpsertOne) ClearAbsoluteNumber() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAbsoluteNumber()
 	})
 }
 
@@ -4689,6 +4912,76 @@ func (u *ItemUpsertBulk) UpdateMissingSince() *ItemUpsertBulk {
 func (u *ItemUpsertBulk) ClearMissingSince() *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearMissingSince()
+	})
+}
+
+// SetVirtual sets the "virtual" field.
+func (u *ItemUpsertBulk) SetVirtual(v bool) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetVirtual(v)
+	})
+}
+
+// UpdateVirtual sets the "virtual" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateVirtual() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateVirtual()
+	})
+}
+
+// SetMonitored sets the "monitored" field.
+func (u *ItemUpsertBulk) SetMonitored(v bool) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetMonitored(v)
+	})
+}
+
+// UpdateMonitored sets the "monitored" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateMonitored() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateMonitored()
+	})
+}
+
+// SetSeriesType sets the "series_type" field.
+func (u *ItemUpsertBulk) SetSeriesType(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetSeriesType(v)
+	})
+}
+
+// UpdateSeriesType sets the "series_type" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateSeriesType() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateSeriesType()
+	})
+}
+
+// SetAbsoluteNumber sets the "absolute_number" field.
+func (u *ItemUpsertBulk) SetAbsoluteNumber(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAbsoluteNumber(v)
+	})
+}
+
+// AddAbsoluteNumber adds v to the "absolute_number" field.
+func (u *ItemUpsertBulk) AddAbsoluteNumber(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddAbsoluteNumber(v)
+	})
+}
+
+// UpdateAbsoluteNumber sets the "absolute_number" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateAbsoluteNumber() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAbsoluteNumber()
+	})
+}
+
+// ClearAbsoluteNumber clears the value of the "absolute_number" field.
+func (u *ItemUpsertBulk) ClearAbsoluteNumber() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAbsoluteNumber()
 	})
 }
 
