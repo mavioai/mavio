@@ -44,20 +44,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 	&& rm -rf /var/lib/apt/lists/* \
 	&& groupadd --system --gid 1000 mavio \
 	&& useradd --system --uid 1000 --gid mavio --home-dir /config mavio \
-	&& mkdir -p /config/plugins /cache /media && chown -R mavio:mavio /config /cache
+	&& mkdir -p /config /cache /media && chown -R mavio:mavio /config /cache
 COPY --from=ffmpeg /out/ /usr/lib/jellyfin-ffmpeg/
 COPY --from=server /out/mavio /usr/local/bin/mavio
 USER mavio
-# /config holds the database, plugins, chosen artwork and backups, /cache images, compiled plugins
-# and transcodes; mount media libraries under /media.
+# /config is Mavio's home: config.toml, the database, plugins, chosen artwork and backups; /cache
+# holds images, compiled plugins and transcodes. Mount media libraries under /media.
+ENV MAVIO_HOME=/config MAVIO_CACHE_DIR=/cache \
+	MAVIO_FFMPEG=/usr/lib/jellyfin-ffmpeg/ffmpeg MAVIO_FFPROBE=/usr/lib/jellyfin-ffmpeg/ffprobe
 VOLUME ["/config", "/cache"]
 EXPOSE 8686 7359/udp
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
 	CMD curl -fsS -H 'Content-Type: application/json' -d '{}' \
 		http://127.0.0.1:8686/mavio.system.v1.SystemService/GetHealth || exit 1
-# Arguments after the image name are appended, and later flags override
-# these, e.g. `docker run … mavio:dev -database postgres://…`.
-ENTRYPOINT ["mavio", "-addr", ":8686", "-database", "sqlite:/config/mavio.db", "-plugin-dir", "/config/plugins", \
-	"-metadata-dir", "/config/metadata", "-backup-dir", "/config/backups", \
-	"-cache-dir", "/cache", "-transcode-dir", "/cache/transcodes", \
-	"-ffmpeg", "/usr/lib/jellyfin-ffmpeg/ffmpeg", "-ffprobe", "/usr/lib/jellyfin-ffmpeg/ffprobe"]
+# Arguments after the image name are flags, e.g. `docker run … mavio:dev --database postgres://…`;
+# they and `-e MAVIO_…` variables override the settings above and those of /config/config.toml.
+ENTRYPOINT ["mavio"]

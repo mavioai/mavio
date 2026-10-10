@@ -51,6 +51,7 @@ Mavio 采用 **GPL-3.0**（`GPL-3.0-only`）。GPL-3.0 与 Apache-2.0 兼容，�
 | 变更检测 | **全量对账扫描**（定时、启动时、手动 / API 触发），以目录 mtime 剪枝 | 见 §9 |
 | 后台任务 | 自建数据库任务队列（租约 + 重试） | 同时支持 SQLite / PostgreSQL |
 | 可观测性 | `log/slog` + OpenTelemetry（trace / metrics） | |
+| 命令行与设置 | **Cobra + Viper** | 命令行参数、`MAVIO_*` 环境变量与 Mavio 主目录中的 `config.toml`；见 §11 |
 
 工程工具（Nx、mise、buf、golangci-lint、CI）见[开发指南](development.zh-CN.md)。
 
@@ -286,7 +287,7 @@ libs/plugin/
 插件在 `init` 中用 `guest.Handle(pluginv1connect.New…ServiceHandler(impl))` 注册 handler；`wasip1` 构建导入 `guest/wasm`，原生构建调用 `process.Serve`。`internal/testplugin` 是同时为两种运行时构建的完整示例。
 
 ### 7.5 服务端中的插件
-* **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`-plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。
+* **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`--plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。
 * **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `SystemService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。
 * **状态**：插件以其配置运行、或其 schema 接受空配置时为就绪；在等待其 schema 所要求的配置时为未配置；无法启动或拒绝已保存的配置时为失败。`SystemService.ListPlugins` 连同清单一起报告这些状态。
 * **元数据提供者**：每个已启动的元数据插件都是媒体库刷新的提供者；未就绪时它不提供任何信息，因此之后才配置的插件会参与下一次刷新。只提供图片的提供者（如 fanart.tv）凭靠前的提供者找到的 ID 查找图片，靠后的提供者能看到这些 ID。
@@ -344,7 +345,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **逐个文件夹解析**：解析器根据文件夹在媒体库中的位置（媒体库类型，以及它是否位于剧集、季或艺术家之下），把文件夹及其条目映射为：文件夹本身所代表的条目（自成文件夹的电影、光盘镜像、剧集、季、专辑、有声书）、由其中文件构成的条目，以及接下来要解析的子文件夹及其位置。规则遵循 Jellyfin 的命名与解析规则；附加内容从所属条目的文件夹及其附加内容文件夹中查找。由于文件夹的结果只取决于其列表与位置，未变化的文件夹无需重新解析。
 * **对账只读元数据**：对账遍历目录、比对文件 stat，只把新增或变化的文件送去 ffprobe 和刮削。
 * **并发**：按媒体库根目录和目录子树并发遍历（`errgroup.SetLimit`），网络文件系统上使用较低的并发度。
-* **任务**：扫描、探测与元数据刷新都是持久化任务，由租用它们的 worker 执行（`library.scan`、`media.probe`、`media.keyframes`、`item.refresh`、`image.placeholders`）。扫描为每个新增或变化的媒体文件排入一次探测，并为每个新增的无媒体条目（如剧集、季或专辑）排入一次元数据刷新；扫描还把每个视频旁的字幕文件作为其外部流附加上去（§9.1）。对视频的探测还会排入一次低优先级的黑边检测（`media.borders`），转码时据此裁剪。随后按媒体库的设置排入媒体附加内容（`libs/media/thumbnails`，在黑边检测之后）：缩略图拼图（`media.trickplay`：ffmpeg 以 fps、crop、scale 与 tile 滤镜一次完成，宽 320 像素，每 10 秒一张，每张拼图 10 × 10，先写在元数据目录的旁边再换入）、章节图片（`media.chapters`：每个章节一帧，宽 640 像素，第一个章节取开头稍后处）、由片段提供者插件给出的电影与剧集的媒体片段（`media.segments`；两个提供者的同类片段重叠时取前者），以及音轨的响度（`media.loudness`：ffmpeg `ebur128` 的积分响度；专辑在其所有音轨都测得后随之计算）。附加内容会等待静默闸门；某文件的图片或测量失败后，一天内不再读取（`FailNotes`，在内存中，至多 4,096 条）。`library.extras` 为某媒体库的每个条目排入这些任务。探测排入一次元数据刷新，对视频还排入一次低优先级的关键帧提取（HLS 切分直接复制的视频需要关键帧）。刷新先应用提供者的元数据，再应用本地 NFO 文件，不改动已锁定的字段，并为得到的分级计算分数（`metadata.RatingScore`）。媒体旁的图片按 Jellyfin 的本地图片命名查找（`poster`、`folder`、`<文件名>-poster`、`fanart-1`、`season01-poster`、`<单集>-thumb` 等；多个视频共用的文件夹中只认以文件名为前缀的名称），优先于 NFO 文件指定的图片；每种图片取自拥有它的最可信来源。再次找到的图片保留其 ID、尺寸与占位图，随后由占位图任务测量新图片并计算其 blurhash 与 thumbhash。对于不保存本地元数据的媒体库，管理员为条目选择的图片保存在元数据目录（`-metadata-dir`，`<id[:2]>/<id>/<种类>.<扩展名>`），优先于其他所有图片。在保存本地元数据的媒体库中，刷新会写出条目的 NFO 文件（`metadata.WriteNFO`，Kodi 格式加 Jellyfin 的锁定元素；覆盖已找到的 NFO 文件，否则电影与视频写为旁边的 `<文件名>.nfo`，其他按 Jellyfin 的命名），并把提供者的图片按本地图片命名保存，替换同名但格式不同的文件；季、音轨与照片的图片仍留在远程。定时扫描在媒体库的扫描间隔后排入下一次；按需扫描与之并行排队，同一媒体库的扫描不会重叠。
+* **任务**：扫描、探测与元数据刷新都是持久化任务，由租用它们的 worker 执行（`library.scan`、`media.probe`、`media.keyframes`、`item.refresh`、`image.placeholders`）。扫描为每个新增或变化的媒体文件排入一次探测，并为每个新增的无媒体条目（如剧集、季或专辑）排入一次元数据刷新；扫描还把每个视频旁的字幕文件作为其外部流附加上去（§9.1）。对视频的探测还会排入一次低优先级的黑边检测（`media.borders`），转码时据此裁剪。随后按媒体库的设置排入媒体附加内容（`libs/media/thumbnails`，在黑边检测之后）：缩略图拼图（`media.trickplay`：ffmpeg 以 fps、crop、scale 与 tile 滤镜一次完成，宽 320 像素，每 10 秒一张，每张拼图 10 × 10，先写在元数据目录的旁边再换入）、章节图片（`media.chapters`：每个章节一帧，宽 640 像素，第一个章节取开头稍后处）、由片段提供者插件给出的电影与剧集的媒体片段（`media.segments`；两个提供者的同类片段重叠时取前者），以及音轨的响度（`media.loudness`：ffmpeg `ebur128` 的积分响度；专辑在其所有音轨都测得后随之计算）。附加内容会等待静默闸门；某文件的图片或测量失败后，一天内不再读取（`FailNotes`，在内存中，至多 4,096 条）。`library.extras` 为某媒体库的每个条目排入这些任务。探测排入一次元数据刷新，对视频还排入一次低优先级的关键帧提取（HLS 切分直接复制的视频需要关键帧）。刷新先应用提供者的元数据，再应用本地 NFO 文件，不改动已锁定的字段，并为得到的分级计算分数（`metadata.RatingScore`）。媒体旁的图片按 Jellyfin 的本地图片命名查找（`poster`、`folder`、`<文件名>-poster`、`fanart-1`、`season01-poster`、`<单集>-thumb` 等；多个视频共用的文件夹中只认以文件名为前缀的名称），优先于 NFO 文件指定的图片；每种图片取自拥有它的最可信来源。再次找到的图片保留其 ID、尺寸与占位图，随后由占位图任务测量新图片并计算其 blurhash 与 thumbhash。对于不保存本地元数据的媒体库，管理员为条目选择的图片保存在元数据目录（`--metadata-dir`，`<id[:2]>/<id>/<种类>.<扩展名>`），优先于其他所有图片。在保存本地元数据的媒体库中，刷新会写出条目的 NFO 文件（`metadata.WriteNFO`，Kodi 格式加 Jellyfin 的锁定元素；覆盖已找到的 NFO 文件，否则电影与视频写为旁边的 `<文件名>.nfo`，其他按 Jellyfin 的命名），并把提供者的图片按本地图片命名保存，替换同名但格式不同的文件；季、音轨与照片的图片仍留在远程。定时扫描在媒体库的扫描间隔后排入下一次；按需扫描与之并行排队，同一媒体库的扫描不会重叠。
 * **存储感知**：扫描与探测对机械硬盘和远程卷的读取串行化，在客户端拉流时等待，并把仍在写入的文件留到稳定后再处理（[优化 §1](optimization.zh-CN.md)）。
 * **一致性**：每次扫描在数据库中记一个"扫描代次"；扫描完成后，未被本代次看到的条目标记为缺失（先软删除，宽限期后再清理），避免挂载点暂时不可用导致整库被删。
 
@@ -389,7 +390,8 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 
 ## 11. API 与认证（apps/server）
 
-* **装配**：`apps/server/internal/server` 把存储、插件、播放、图片、媒体库后台任务与处理器树组装起来并运行到关闭；`cmd/mavio` 只把命令行参数解析为它的配置，端到端测试运行的也是同一套装配。
+* **装配**：`apps/server/internal/server` 把存储、插件、播放、图片、媒体库后台任务与处理器树组装起来并运行到关闭；`cmd/mavio` 只负责解析出它的配置，端到端测试运行的也是同一套装配。
+* **主目录与设置**：服务端保存的一切都在其主目录中，默认为 `~/.mavio`，可由 `--home` 或 `MAVIO_HOME` 另行指定：`config.toml`（可选）、SQLite 数据库 `mavio.db`、`plugins/`、`metadata/`（选定的图片）、`backups/` 与 `cache/`（下载与缩放后的图片、编译后的插件，以及位于 `cache/transcodes/` 的进行中转码），缺失时自动创建。约定无需配置；确实存在的设置（`addr`、`database`、`ffmpeg`、`ffprobe`、`cache-dir`、`transcode-dir`、`plugin-dir`、`metadata-dir`、`backup-dir`、`discovery-addr`、`dev`、`dev-library`）由 Viper 依次从命令的参数（`--cache-dir`）、环境变量（`MAVIO_CACHE_DIR`）与 `config.toml`（`cache-dir = "/srv/cache"`）读取，默认取上述布局；转码目录跟随缓存目录。`config.toml` 中的相对路径相对于主目录，参数与环境变量中的相对路径相对于工作目录；`plugin-dir`、`backup-dir` 或 `discovery-addr` 为空时分别关闭插件、备份或局域网发现。`config.toml` 中有未知的键时服务端拒绝启动。`mavio version` 打印版本，`--restore <备份>` 在提供服务前把备份恢复到空数据库中。
 * **单一处理器树**：`apps/server/internal/httpserver` 把 Connect 服务（实现位于 `internal/rpc`）与普通 HTTP 媒体端点挂载在同一个 `http.ServeMux` 上。每个 Connect 请求在到达服务之前先按其 protovalidate 规则校验，违反规则返回 `invalid_argument`。
 * **账户**：密码以 argon2id（19 MiB、2 轮、1 条并行通道）散列为 PHC 字符串；使用其他参数的散列仍被接受，并在下一次成功登录时替换。以不存在的用户名登录与密码错误的耗时相同。通过插件认证的用户没有密码散列。
 * **Quick Connect**：与 Jellyfin 一样，可以用已登录的设备让新设备登录。新设备无需凭据即可发起请求并显示六位数字代码；已登录用户输入该代码，即以该用户身份为设备登录；设备用请求的密钥（32 个随机字节，从不显示）轮询请求，随后领取一次访问令牌。请求保存在内存中，十分钟后过期，或在获得授权一分钟后过期。代码在待处理的请求中唯一。
@@ -405,18 +407,18 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **合集与播放列表**（`CollectionService`、`PlaylistService`）：管理员整理合集，用户整理自己的播放列表，它们位于服务端在首次需要时创建的整理类媒体库中。每个用户都能看到播放列表媒体库，其中只有自己的播放列表；合集媒体库遵循媒体库权限。以合集或播放列表为 parent 调用 `ItemService.ListItems` 会按用户权限列出其中的条目，每个一次，未指定排序时按其顺序；`ListPlaylistEntries` 列出播放列表的条目项及其 ID。把剧集、季、专辑或合集加入播放列表时，按顺序加入其中可播放的条目。`LibraryService` 不能创建、修改或扫描整理类媒体库，启动时的扫描也跳过它们。
 * **元数据管理**（`MetadataService`，仅限管理员）：`UpdateItem` 设置更新掩码指定的字段（包括锁定），通过 `library.Refresher.Update` 保存条目；`RefreshItem` 立即刷新条目，带 `replace_metadata` 时丢弃提供者此前给出的内容（外部 ID 与锁定字段除外），并忽略条目的 NFO 文件（在保存本地元数据的媒体库中也忽略其旁边的图片，由提供者的图片替换）。`SearchRemote` 按条目的名称与年份或给定的名称与年份，询问能搜索的元数据插件该条目可能是什么；`IdentifyItem` 用某个结果的外部 ID 替换条目的外部 ID，并以此刷新条目。`ListRemoteImages` 列出提供者拥有的条目图片；`SetItemImage` 下载其中一张或接收上传的图片，设为该种类的第一张，保存在媒体旁或元数据目录中；`DeleteItemImage` 删除图片及其文件。`SearchSubtitles` 与 `DownloadSubtitle` 通过字幕插件查找字幕，转换为 UTF-8 后保存在视频旁，命名为 `<文件名>.<语言>[.sdh][.forced].<格式>`，立即成为视频的字幕流。保存本地元数据的媒体库中，条目的修改会重写其 NFO 文件；启用自动合集的媒体库中，电影会加入其合集。
 * **设置**（`internal/settings`，`SystemService.GetServerSettings` 与 `UpdateServerSettings`）：服务端设置（[领域模型](domain.zh-CN.md) §12）保存在数据库中，无需重启即可生效。服务端各部分注册自己应用设置的方式；一次修改依次交给各部分，若有一部分拒绝（例如证书无法读取），已接受的部分恢复之前的设置，且不保存任何内容。转码设置作用于此后开始的播放：`playback.Manager` 换用新的规划器与转码目录；`GetServerSettings` 还列出服务端 ffmpeg 支持的硬件加速。
-* **网络**（`internal/network`）：处理器树既在根路径、也在基础 URL 下提供服务，访问不带斜杠的基础路径会重定向到带斜杠的路径。HTTPS 以配置的证书在单独端口运行，随设置变化而启动、重启或停止。局域网发现在 `-discovery-addr`（默认 7359）上应答 UDP 请求 `who is MavioServer?`，返回服务端名称、版本，以及请求到达的网卡上的地址。
+* **网络**（`internal/network`）：处理器树既在根路径、也在基础 URL 下提供服务，访问不带斜杠的基础路径会重定向到带斜杠的路径。HTTPS 以配置的证书在单独端口运行，随设置变化而启动、重启或停止。局域网发现在 `--discovery-addr`（默认 7359）上应答 UDP 请求 `who is MavioServer?`，返回服务端名称、版本，以及请求到达的网卡上的地址。
 * **任务与作业**（`TaskService`）：周期性任务为每个媒体库的扫描与每日的作业清理；`ListTasks` 给出每个任务的间隔、上次完成的运行、下次运行以及是否正在运行，`RunTask` 立即排入一次运行，`ListJobs` 分页列出作业队列。
 * **API 密钥**（`AuthService.CreateApiKey`、`ListApiKeys`、`RevokeApiKey`）：拦截器在需要会话令牌之处也接受 API 密钥的令牌（[领域模型](domain.zh-CN.md) §12.2）；这类请求没有会话。
 * **活动与日志**（`internal/activity`、`ActivityService`；`internal/logs`、`SystemService.ListLogs`）：活动被保存并排队发送给通知插件，90 天后清除。服务端在内存中保留最近 2,000 条 info 及以上级别的日志供 `ListLogs` 使用，日志照常输出。
 * **文件夹**（`SystemService.ListDirectory`）：管理员浏览服务端的文件夹或根目录（Windows 上为各驱动器）以选择媒体库文件夹；隐藏条目不列出。
 * **本地化数据**（`LocalizationService`）：国家、具有 ISO 639-1 代码的语言，以及某个国家分级体系中的分级，来自 `libs/metadata` 中 Jellyfin 的数据（`Countries`、`Languages`、`ParentalRatings`）。
-* **备份**（`internal/backup`、`BackupService`）：备份是 `-backup-dir` 中的一个 zip 文件，包含 `manifest.json`、数据库的行（`store.Dump`：每张表为一份由带类型值组成的 JSON 行文件，取自同一快照）、元数据目录与插件目录。管理员带着自己的 bearer 令牌在 `/system/backups/{name}` 下载。`-restore <文件>` 在新服务端启动前把备份恢复到其空数据库中（`store.Restore`：数据库类型相同，且架构包含备份所含的每个迁移；按外键顺序插入行，条目排在其父条目之后，派生键重新计算），并放回各文件夹。
+* **备份**（`internal/backup`、`BackupService`）：备份是 `--backup-dir` 中的一个 zip 文件，包含 `manifest.json`、数据库的行（`store.Dump`：每张表为一份由带类型值组成的 JSON 行文件，取自同一快照）、元数据目录与插件目录。管理员带着自己的 bearer 令牌在 `/system/backups/{name}` 下载。`-restore <文件>` 在新服务端启动前把备份恢复到其空数据库中（`store.Restore`：数据库类型相同，且架构包含备份所含的每个迁移；按外键顺序插入行，条目排在其父条目之后，派生键重新计算），并放回各文件夹。
 * **下载与渐进式流**：请求 `download` 的播放需要用户的下载权限，并以静态场景决策：客户端能播放文件本身时，以附件形式提供文件；否则按客户端的静态配置文件做渐进式转封装或转码，从不使用 HLS。没有 HLS 配置文件的流式客户端也得到渐进式流。ffmpeg 为每个请求把渐进式流（分片 MP4、Matroska 或 MPEG-TS）直接写入响应，因此不能跳转。
 * **媒体附加内容**：`ItemService.GetItem` 列出条目的缩略图拼图与媒体片段；拼图在 `/images/trickplay/{item}/{width}/{sheet}.jpg`、章节图片在 `/images/chapters/{item}/{source}/{index}` 提供（接受图片参数），文件取自元数据目录，ID 即凭证。条目带有由其测得响度计算出的归一化增益。`ItemService.GetLyrics` 读取音轨旁的歌词文件（`.elrc`、`.lrc` 或 `.txt`，必要时从旧字符集转换），由 `metadata.ParseLyrics` 解析：LRC 的行及其时间与 ID 标签，增强 LRC 的逐字时间作为以 UTF-16 码元计的提示，与 Jellyfin 的解析器一致。播放会列出其片源附带的文件，例如供客户端渲染 ASS 字幕的字体；ffmpeg 在 `/media/{playback}/attachments/{index}` 处各提取一次。
 * **图片**：图片在 `/images/{id}` 提供，接受 Jellyfin 的尺寸参数（`width`、`height`、`maxWidth`、`maxHeight`、`fillWidth`、`fillHeight`、`quality`）；与媒体 URL 一样，客户端从按访问权限过滤的 API 响应中得到的 ID 是唯一的凭证。本地图片在其条目所属媒体库文件夹或元数据目录内读取；提供者的图片只下载一次，存入缓存目录。不带尺寸参数时提供原图；`imaging.Process` 生成的图片采用请求的 `format`（`jpg`、`png`、`webp`），未指定时对 `Accept` 头接受 WebP 的客户端生成 WebP，否则为 JPEG（含透明时为 PNG）。生成的图片按源内容哈希与参数缓存，对同一结果的并发请求共享一次生成。SVG 通过 `CheckSVG` 后原样提供。
 * **拼贴图**：`/images/collages/{id}` 以相同参数合成媒体库的图片（其最近添加条目的海报并排，16:9）、合集的图片（其条目的海报，2 × 2 网格，2:3）或播放列表的图片（其条目所属剧集与专辑的海报，或条目自身的海报，正方形网格），与 Jellyfin 的动态图片一样；所有者的 ID 即凭证。拼贴图按所用图片缓存，因此会随之更新；没有可用的图片时返回未找到。
-* **开发用播放器**：带 `-dev` 启动时，服务端还提供 `/dev/player`：一个单页面，可登录、列出视频并通过 `PlaybackService` 播放，使用 hls.js 或 Safari 自带的 HLS 播放器（`?engine=native|hlsjs`），可选的串流码率上限会使视频转码（`?bitrate=<每秒比特数>`），用于在客户端完成之前于真实浏览器上检查播放。`-dev-library <dir>` 把 `pnpm nx run fixtures:dev-library` 生成的示例媒体库中的 `Movies` 与 `Shows` 文件夹添加为媒体库。
+* **开发用播放器**：带 `--dev` 启动时，服务端还提供 `/dev/player`：一个单页面，可登录、列出视频并通过 `PlaybackService` 播放，使用 hls.js 或 Safari 自带的 HLS 播放器（`?engine=native|hlsjs`），可选的串流码率上限会使视频转码（`?bitrate=<每秒比特数>`），用于在客户端完成之前于真实浏览器上检查播放。`-dev-library <dir>` 把 `pnpm nx run fixtures:dev-library` 生成的示例媒体库中的 `Movies` 与 `Shows` 文件夹添加为媒体库。
 * **字幕**：以文件交付的文本字幕在 `/media/{playback}/subtitles/{index}.{format}` 提供，由 `libs/subtitle` 从媒体库中的外挂文件或内嵌流转换而来；内嵌流由 ffmpeg 在每次播放中提取一次（ASS 保留样式，其他文本转为 SRT）。对接受清单内字幕的 HLS 客户端，每条文本字幕是主播放列表的一个字幕轨：一个 WebVTT 播放列表，语言以 BCP 47 标签表示，按视频分片切分：每个分片 `subtitles/{index}-{segment}.vtt` 包含在其期间显示的字幕，与视频一样以源文件的时间轴计时，最后一个分片还包含超出媒体结尾的字幕。图形字幕（PGS、VobSub）只能烧录；服务端无法写出的外挂文件，或没有 ffmpeg 时无法提取的内嵌字幕，将被丢弃。
 
 ---
@@ -425,4 +427,4 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 
 * **服务端二进制**：`pnpm nx run server:dist` 以 `CGO_ENABLED=0` 和 `-trimpath` 将 `cmd/mavio` 交叉编译为 Linux、macOS、Windows 的 amd64 与 arm64 版本，输出到 `apps/server/dist/`；设置了 `$VERSION` 时将其写入 `internal/buildinfo`。所有二进制均为静态链接。
 * **容器镜像**（`apps/server/Dockerfile`，从仓库根目录构建）：服务端在构建机自身平台上交叉编译，因此构建 linux/amd64 与 linux/arm64 镜像时 Go 部分无需模拟。镜像在 `/usr/lib/jellyfin-ffmpeg` 内置 jellyfin-ffmpeg 便携版，即 `mise.toml` 锁定的版本，并按 GitHub 为该发布文件给出的 SHA-256 摘要校验；基础镜像为 Debian slim，附带 CA 证书与时区数据。
-* **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；SQLite 数据库、插件目录、选定的图片与备份位于 `/config`，图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。入口点以命令行参数传入这些路径，镜像名之后的参数可覆盖它们。健康检查调用 `SystemService.GetHealth`。
+* **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。健康检查调用 `SystemService.GetHealth`。

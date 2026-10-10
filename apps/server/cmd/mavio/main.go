@@ -3,14 +3,14 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log/slog"
 	"net"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
+
+	"github.com/spf13/cobra"
 
 	"github.com/mavioai/mavio/apps/server/internal/buildinfo"
 	"github.com/mavioai/mavio/apps/server/internal/server"
@@ -20,50 +20,57 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	if err := run(ctx, os.Args[1:]); err != nil {
+	if err := newCommand().ExecuteContext(ctx); err != nil {
 		slog.Error("mavio exited", "err", err)
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context, args []string) error {
-	fs := flag.NewFlagSet("mavio", flag.ContinueOnError)
-	addr := fs.String("addr", ":8686", "HTTP listen address")
-	cfg := server.Config{Version: buildinfo.Version(), Logger: slog.Default()}
-	fs.StringVar(&cfg.Database, "database", "sqlite:mavio.db", "database: sqlite:<path> or postgres://…")
-	fs.StringVar(&cfg.FFmpeg, "ffmpeg", "ffmpeg", "ffmpeg binary; without it media is only played directly")
-	fs.StringVar(&cfg.FFprobe, "ffprobe", "ffprobe", "ffprobe binary")
-	fs.StringVar(&cfg.TranscodeDir, "transcode-dir", filepath.Join(os.TempDir(), "mavio-transcodes"), "directory for transcodes")
-	fs.StringVar(&cfg.CacheDir, "cache-dir", defaultCacheDir(), "directory for downloaded and resized images and compiled plugins")
-	fs.StringVar(&cfg.PluginDir, "plugin-dir", "", "directory holding one folder per plugin, each with its manifest.json")
-	fs.StringVar(&cfg.BackupDir, "backup-dir", "backups", "directory for backups")
-	fs.StringVar(&cfg.Restore, "restore", "", "restore this backup into the empty database before starting")
-	fs.StringVar(&cfg.DiscoveryAddr, "discovery-addr", ":7359", "UDP address answering discovery requests from clients on the local network; empty answers none")
-	fs.StringVar(&cfg.MetadataDir, "metadata-dir", "metadata", "directory for the artwork chosen for items of libraries not saving metadata next to their media")
-	fs.BoolVar(&cfg.Dev, "dev", false, "serve the development player at /dev/player")
-	fs.StringVar(&cfg.DevLibrary, "dev-library", "", "add the Movies and Shows folders of this directory as libraries, e.g. .fixtures/dev-library")
-	showVersion := fs.Bool("version", false, "print version and exit")
-	if err := fs.Parse(args); err != nil {
-		return err
-	}
-	if *showVersion {
-		fmt.Println(cfg.Version)
-		return nil
-	}
+// newCommand returns the mavio command: it serves, and its version
+// subcommand prints the version.
+func newCommand() *cobra.Command {
+	var restore string
+	cmd := &cobra.Command{
+		Use:   "mavio",
+		Short: "Mavio media server",
+		Long: `Mavio serves media libraries.
 
-	var lc net.ListenConfig
-	ln, err := lc.Listen(ctx, "tcp", *addr)
-	if err != nil {
-		return fmt.Errorf("listen: %w", err)
+Everything it keeps lives in its home, ~/.mavio unless --home or
+MAVIO_HOME says otherwise: config.toml, the SQLite database mavio.db, and
+the plugins, metadata, backups and cache folders. Each setting below may
+also be given in config.toml under its flag's name, or as a MAVIO_*
+environment variable (MAVIO_CACHE_DIR for --cache-dir); flags come first,
+then variables, then config.toml. Relative paths in config.toml are
+relative to the home.`,
+		Version:       buildinfo.Version(),
+		Args:          cobra.NoArgs,
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			o, err := load(cmd.Flags())
+			if err != nil {
+				return err
+			}
+			cfg := o.Server
+			cfg.Version, cfg.Logger, cfg.Restore = buildinfo.Version(), slog.Default(), restore
+			var lc net.ListenConfig
+			ln, err := lc.Listen(cmd.Context(), "tcp", o.Addr)
+			if err != nil {
+				return fmt.Errorf("listen: %w", err)
+			}
+			slog.InfoContext(cmd.Context(), "mavio home", "path", o.Home)
+			return server.Run(cmd.Context(), cfg, ln)
+		},
 	}
-	return server.Run(ctx, cfg, ln)
-}
-
-// defaultCacheDir is the user's cache directory for Mavio, or one in the
-// temporary directory.
-func defaultCacheDir() string {
-	if dir, err := os.UserCacheDir(); err == nil {
-		return filepath.Join(dir, "mavio")
-	}
-	return filepath.Join(os.TempDir(), "mavio-cache")
+	defineFlags(cmd.Flags())
+	cmd.Flags().StringVar(&restore, "restore", "", "restore this backup into the empty database before starting")
+	cmd.AddCommand(&cobra.Command{
+		Use:   "version",
+		Short: "Print the version",
+		Args:  cobra.NoArgs,
+		Run: func(cmd *cobra.Command, _ []string) {
+			cmd.Println(buildinfo.Version())
+		},
+	})
+	return cmd
 }

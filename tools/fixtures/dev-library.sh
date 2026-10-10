@@ -3,7 +3,7 @@
 # player: movies that a browser plays directly, remuxed, with subtitles,
 # several audio tracks or transcoded, and a series, with posters named in
 # NFO files. Usage: dev-library.sh [dir], default .fixtures/dev-library.
-# Serve it with: mavio -dev -dev-library <dir>
+# Serve it with: mavio --dev --dev-library <dir>
 set -eu
 L=${1:-$(cd "$(dirname "$0")/../.." && pwd)/.fixtures/dev-library}; M="$L/Movies"; T="$L/Shows"
 rm -rf "$L"; mkdir -p "$M" "$T/Test Show/Season 01"

@@ -29,7 +29,7 @@ Run the server with the sample library and the development player at http://loca
 
 ```bash
 pnpm nx run fixtures:dev-library
-cd apps/server && go run ./cmd/mavio -dev -dev-library ../../.fixtures/dev-library
+cd apps/server && go run ./cmd/mavio --dev --dev-library ../../.fixtures/dev-library
 ```
 
 Or as a container, with media mounted under `/media`:

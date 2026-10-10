@@ -29,7 +29,7 @@ pnpm nx run-many -t build test
 
 ```bash
 pnpm nx run fixtures:dev-library
-cd apps/server && go run ./cmd/mavio -dev -dev-library ../../.fixtures/dev-library
+cd apps/server && go run ./cmd/mavio --dev --dev-library ../../.fixtures/dev-library
 ```
 
 或以容器运行，把媒体挂载在 `/media` 下：
