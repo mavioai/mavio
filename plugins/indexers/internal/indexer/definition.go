@@ -56,6 +56,8 @@ type Definition struct {
 	// LegacyLinks are former addresses, replaced by the first link.
 	LegacyLinks []string
 	Fields      []Field
+	// Limits are the indexer's limits unless its settings give others.
+	Limits Limits
 	// New returns an indexer site of the definition from its settings'
 	// JSON.
 	New func(settings []byte) (Site, error)
