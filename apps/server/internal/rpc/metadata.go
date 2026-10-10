@@ -9,6 +9,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
@@ -51,6 +52,8 @@ type MetadataService struct {
 	// fetch downloads images.
 	fetch func(ctx context.Context, url string) ([]byte, error)
 	now   func() time.Time
+	// Activity records subtitle downloads; nil records none.
+	Activity *activity.Log
 }
 
 var _ libraryv1connect.MetadataServiceHandler = (*MetadataService)(nil)
@@ -386,6 +389,17 @@ func (s *MetadataService) DownloadSubtitle(ctx context.Context, req *libraryv1.D
 		return nil, err
 	}
 	st, err := s.subtitles.Download(ctx, lib, it.ID, sourceID(req.GetMediaSourceId()), req.GetProvider(), req.GetSubtitleId())
+	a := core.Activity{
+		Type: "subtitle.downloaded", ItemID: it.ID, Title: "Downloaded a subtitle of " + it.Name,
+		Attributes: map[string]string{"provider": req.GetProvider(), "subtitle": req.GetSubtitleId()},
+	}
+	if err != nil {
+		a.Type, a.Severity, a.Title, a.Message = "subtitle.download_failed", core.SeverityError, "Failed to download a subtitle of "+it.Name, err.Error()
+		s.Activity.Record(ctx, a)
+	} else {
+		a.Attributes["language"] = st.Language
+		s.Activity.Publish(a)
+	}
 	if errors.Is(err, core.ErrNotFound) {
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	} else if err != nil {

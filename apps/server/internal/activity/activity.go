@@ -1,5 +1,7 @@
 // Package activity records what happens on the server in the activity log
-// and sends each activity to the notification plugins.
+// and sends each activity to the notification plugins. It also publishes
+// the events left out of the log, which with the logged ones reach the
+// event consumers.
 package activity
 
 import (
@@ -21,7 +23,13 @@ type Config struct {
 	Store core.Store
 	// Notifiers returns the notifiers to send to now; nil sends to none.
 	Notifiers func() []Notifier
-	Logger    *slog.Logger
+	// Events receives every event, logged or published, and must not
+	// block; nil sends none.
+	Events func(a core.Activity)
+	// Wants reports whether any consumer takes events of a type, for
+	// publishers to skip events no one takes; nil takes none.
+	Wants  func(eventType string) bool
+	Logger *slog.Logger
 	// Retention is how long activities are kept; zero keeps them for 90
 	// days.
 	Retention time.Duration
@@ -67,6 +75,32 @@ func (l *Log) Record(ctx context.Context, a core.Activity) {
 	default:
 		l.log.WarnContext(ctx, "notifiers behind; activity not sent", "type", a.Type)
 	}
+	if l.cfg.Events != nil {
+		l.cfg.Events(a)
+	}
+}
+
+// Publish sends an event the activity log leaves out to the event
+// consumers.
+func (l *Log) Publish(a core.Activity) {
+	if l == nil || l.cfg.Events == nil {
+		return
+	}
+	if a.ID.IsZero() {
+		a.ID = core.NewID()
+	}
+	if a.Time.IsZero() {
+		a.Time = time.Now().UTC()
+	}
+	if a.Severity == "" {
+		a.Severity = core.SeverityInfo
+	}
+	l.cfg.Events(a)
+}
+
+// Wants reports whether any consumer takes events of a type.
+func (l *Log) Wants(eventType string) bool {
+	return l != nil && l.cfg.Wants != nil && l.cfg.Wants(eventType)
 }
 
 // Run sends queued activities to the notifiers and purges old ones daily,

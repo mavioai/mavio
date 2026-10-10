@@ -418,6 +418,7 @@ func (m *Manager) Uninstall(ctx context.Context, id string) error {
 	e, err := m.find(id)
 	if err == nil {
 		m.plugins = slices.DeleteFunc(m.plugins, func(o *entry) bool { return o == e })
+		m.dropQueue(id)
 	}
 	m.mu.Unlock()
 	if err != nil {

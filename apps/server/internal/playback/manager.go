@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -74,6 +75,8 @@ type Config struct {
 	// OnChange is told when a session starts or ends a playback, or
 	// pauses or resumes it; nil tells no one.
 	OnChange func(userID, sessionID core.ID)
+	// Record logs playbacks starting and stopping; nil logs none.
+	Record func(ctx context.Context, a core.Activity)
 	// QuietGate makes background library I/O yield: starting a playback
 	// and every media request, a seek included, extend its quiet window,
 	// as khuaplayer's foreground storage gate does, so that streaming keeps
@@ -192,8 +195,10 @@ type Playback struct {
 	ID        string
 	UserID    core.ID
 	SessionID core.ID
-	Item      core.Item
-	Decision  *decision.Decision
+	// UserName names the user in the activity log.
+	UserName string
+	Item     core.Item
+	Decision *decision.Decision
 	// Method is how the source plays: direct play, a direct stream when
 	// the video (or the audio of audio items) is copied, else a
 	// transcode.
@@ -342,7 +347,7 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	}
 
 	p := &Playback{
-		ID: newID(), UserID: r.User.ID, SessionID: r.SessionID, Item: item, Decision: d, Method: d.Method, Download: r.Download,
+		ID: newID(), UserID: r.User.ID, SessionID: r.SessionID, UserName: r.User.Name, Item: item, Decision: d, Method: d.Method, Download: r.Download,
 		AudioStream: -1, SubtitleStream: -1, lastActive: time.Now(), position: r.Start,
 	}
 	ms := d.Source.MediaSource
@@ -396,7 +401,38 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	m.log.InfoContext(ctx, "playback started", "playback", p.ID, "user", r.User.Name, "item", item.Name,
 		"method", p.Method, "reasons", d.Reasons.String(), "client", r.Client.Name)
 	m.changed(p)
+	m.report(ctx, p, "playback.started", p.StartPosition, map[string]string{
+		"method": string(p.Method), "client": r.Client.Name,
+	})
 	return p, nil
+}
+
+// report logs a playback starting or stopping at pos.
+func (m *Manager) report(ctx context.Context, p *Playback, eventType string, pos time.Duration, attrs map[string]string) {
+	if m.cfg.Record == nil {
+		return
+	}
+	verb := "started"
+	if eventType == "playback.stopped" {
+		verb = "stopped"
+	}
+	if attrs == nil {
+		attrs = map[string]string{}
+	}
+	attrs["playback"], attrs["session"] = p.ID, p.SessionID.String()
+	attrs["position"] = strconv.FormatInt(pos.Milliseconds(), 10)
+	m.cfg.Record(ctx, core.Activity{
+		Type: eventType, UserID: p.UserID, ItemID: p.Item.ID,
+		Title: fmt.Sprintf("%s %s playing %s", p.UserName, verb, p.Item.Name), Attributes: attrs,
+	})
+}
+
+// stopped logs a playback stopping at pos.
+func (m *Manager) stopped(ctx context.Context, p *Playback, pos time.Duration) {
+	p.mu.Lock()
+	played := p.counted
+	p.mu.Unlock()
+	m.report(ctx, p, "playback.stopped", pos, map[string]string{"played": strconv.FormatBool(played)})
 }
 
 // changed tells OnChange about a playback's session.
@@ -627,7 +663,9 @@ func (m *Manager) Stop(ctx context.Context, userID core.ID, id string, pos *time
 		end = *pos
 	}
 	m.log.InfoContext(ctx, "playback stopped", "playback", p.ID, "position", end)
-	return m.record(ctx, p, end)
+	err = m.record(ctx, p, end)
+	m.stopped(ctx, p, end)
+	return err
 }
 
 // record applies a position to the user's state of the item, counting a
@@ -744,6 +782,7 @@ func (m *Manager) check(ctx context.Context) {
 		case !signedIn:
 			m.log.InfoContext(ctx, "playback ended with its sign-in", "playback", p.ID)
 			m.remove(p)
+			m.stopped(ctx, p, pos)
 		case idle:
 			m.log.InfoContext(ctx, "playback expired", "playback", p.ID, "position", pos)
 			m.remove(p)
@@ -752,6 +791,7 @@ func (m *Manager) check(ctx context.Context) {
 					m.log.WarnContext(ctx, "record expired playback", "playback", p.ID, "err", err)
 				}
 			}
+			m.stopped(ctx, p, pos)
 		}
 	}
 }

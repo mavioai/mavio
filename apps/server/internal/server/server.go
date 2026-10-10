@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync/atomic"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -105,8 +106,29 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		}
 		log.InfoContext(ctx, "restored backup", "backup", cfg.Restore)
 	}
+	// The activity log comes first: the hub and the plugins record and
+	// publish events, which reach the plugins once they started.
+	var started atomic.Pointer[plugins.Manager]
+	activityLog := activity.New(activity.Config{
+		Store: raw, Logger: log,
+		Notifiers: func() []activity.Notifier {
+			if m := started.Load(); m != nil {
+				return m.Notifiers()
+			}
+			return nil
+		},
+		Events: func(a core.Activity) {
+			if m := started.Load(); m != nil {
+				m.Publish(a)
+			}
+		},
+		Wants: func(eventType string) bool {
+			m := started.Load()
+			return m != nil && m.Wants(eventType)
+		},
+	})
 	// What is written reaches the devices' event streams.
-	hub := events.New(events.Config{Store: raw, Logger: log})
+	hub := events.New(events.Config{Store: raw, Events: activityLog, Logger: log})
 	db := events.Observe(raw, hub)
 	if cfg.DevLibrary != "" {
 		if err := addDevLibraries(ctx, log, db, cfg.DevLibrary); err != nil {
@@ -122,12 +144,13 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	hostAPI := newLateHandler()
 	plugs, err := plugins.Open(ctx, plugins.Config{
 		Dir: cfg.PluginDir, CacheDir: filepath.Join(cfg.CacheDir, "plugins"), Store: db, Logger: log, HostAPI: hostAPI,
-		DataDir:  cfg.PluginDataDir,
+		DataDir: cfg.PluginDataDir, Activity: activityLog,
 		Catalogs: func() []string { return set.Get().PluginCatalogs },
 	})
 	if err != nil {
 		return err
 	}
+	started.Store(plugs)
 	defer func() {
 		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
@@ -135,10 +158,6 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			log.ErrorContext(ctx, "stop plugins", "err", err)
 		}
 	}()
-	activityLog := activity.New(activity.Config{
-		Store: db, Logger: log,
-		Notifiers: func() []activity.Notifier { return plugs.Notifiers() },
-	})
 	quietGate := storage.NewQuietGate(0)
 	volumeLedger := storage.NewVolumeLedger()
 	devices := &storage.Detector{}
@@ -146,7 +165,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	keeper := &storage.Keeper{Devices: devices}
 	warmer := warming.New(warming.Config{Store: db, Keeper: keeper, Online: hub.OnlineSessions, Logger: log})
 
-	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, cfg, quietGate, keeper)
+	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, activityLog, cfg, quietGate, keeper)
 	if err := set.Register(ctx, func(_ context.Context, s core.ServerSettings) error {
 		return playbacks.SetTranscoding(s.Transcoding)
 	}); err != nil {
@@ -331,9 +350,9 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 // newPlaybacks sets up playback with the configured ffmpeg, or for direct
 // play only without one. It returns the ffmpeg version, empty without
 // ffmpeg.
-func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, cfg Config, quietGate *storage.QuietGate, keeper *storage.Keeper) (*playback.Manager, string) {
+func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, activityLog *activity.Log, cfg Config, quietGate *storage.QuietGate, keeper *storage.Keeper) (*playback.Manager, string) {
 	pc := playback.Config{
-		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, QuietGate: quietGate, Keeper: keeper, Logger: log,
+		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, Record: activityLog.Record, QuietGate: quietGate, Keeper: keeper, Logger: log,
 	}
 	v, err := pc.UseFFmpeg(ctx, cfg.FFmpeg, cfg.FFprobe)
 	if err != nil {

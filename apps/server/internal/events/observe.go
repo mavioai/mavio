@@ -103,30 +103,72 @@ func (r observedItems) changed(ids ...core.ID) {
 }
 
 func (r observedItems) Upsert(ctx context.Context, items ...core.Item) error {
-	err := r.ItemRepository.Upsert(ctx, items...)
-	if err == nil {
-		ids := make([]core.ID, len(items))
+	// Plugins learn whether items were added or updated, which only the
+	// rows before the write tell.
+	hub := r.o.hub
+	var existed []bool
+	if hub.wants("item.added") || hub.wants("item.updated") {
+		existed = make([]bool, len(items))
 		for i := range items {
-			ids[i] = items[i].ID
+			_, err := r.Get(ctx, items[i].ID)
+			if err != nil && !errors.Is(err, core.ErrNotFound) {
+				return err
+			}
+			existed[i] = err == nil
 		}
-		r.changed(ids...)
 	}
-	return err
+	err := r.ItemRepository.Upsert(ctx, items...)
+	if err != nil {
+		return err
+	}
+	ids := make([]core.ID, len(items))
+	for i := range items {
+		ids[i] = items[i].ID
+	}
+	r.changed(ids...)
+	if existed != nil {
+		var events []core.Activity
+		for i := range items {
+			t := "item.added"
+			if existed[i] {
+				t = "item.updated"
+			}
+			if hub.wants(t) {
+				events = append(events, itemEvent(t, items[i].ID, items[i].LibraryID, items[i].Name))
+			}
+		}
+		r.o.report(func() {
+			for _, e := range events {
+				hub.publish(e)
+			}
+		})
+	}
+	return nil
 }
 
 func (r observedItems) Delete(ctx context.Context, ids ...core.ID) error {
 	// The libraries of deleted items tell who may learn of them.
 	removed := map[core.ID]core.ID{}
+	var events []core.Activity
+	wants := r.o.hub.wants("item.removed")
 	for _, id := range ids {
 		if it, err := r.Get(ctx, id); err == nil {
 			removed[id] = it.LibraryID
+			if wants {
+				events = append(events, itemEvent("item.removed", id, it.LibraryID, it.Name))
+			}
 		} else if !errors.Is(err, core.ErrNotFound) {
 			return err
 		}
 	}
 	err := r.ItemRepository.Delete(ctx, ids...)
 	if err == nil {
-		r.o.report(func() { r.o.hub.ItemsChanged(nil, nil, removed) })
+		r.o.report(func() {
+			r.o.hub.ItemsChanged(nil, nil, removed)
+			for _, e := range events {
+				r.o.hub.publish(e)
+			}
+		})
 	}
 	return err
 }
@@ -146,7 +188,14 @@ func (r observedItems) PurgeMissing(ctx context.Context, libraryID core.ID, befo
 		for _, id := range ids {
 			removed[id] = libraryID
 		}
-		r.o.report(func() { r.o.hub.ItemsChanged(nil, nil, removed) })
+		r.o.report(func() {
+			r.o.hub.ItemsChanged(nil, nil, removed)
+			if r.o.hub.wants("item.removed") {
+				for _, id := range ids {
+					r.o.hub.publish(itemEvent("item.removed", id, libraryID, ""))
+				}
+			}
+		})
 	}
 	return ids, err
 }
@@ -182,7 +231,12 @@ func (r observedUserData) Put(ctx context.Context, d *core.UserData) error {
 	err := r.UserDataRepository.Put(ctx, d)
 	if err == nil {
 		saved := *d
-		r.o.report(func() { r.o.hub.UserDataChanged(saved) })
+		r.o.report(func() {
+			r.o.hub.UserDataChanged(saved)
+			if r.o.hub.wants("userdata.changed") {
+				r.o.hub.publish(userDataEvent(&saved))
+			}
+		})
 	}
 	return err
 }
@@ -203,7 +257,7 @@ func (q observedJobs) Lease(ctx context.Context, owner string, kinds []string, t
 func (q observedJobs) Complete(ctx context.Context, id core.ID, owner string) error {
 	err := q.JobQueue.Complete(ctx, id, owner)
 	if err == nil {
-		q.o.report(func() { q.o.hub.JobEnded(id, false) })
+		q.o.report(func() { q.o.hub.JobEnded(id, nil) })
 	}
 	return err
 }
@@ -211,7 +265,7 @@ func (q observedJobs) Complete(ctx context.Context, id core.ID, owner string) er
 func (q observedJobs) Fail(ctx context.Context, id core.ID, owner string, cause error) error {
 	err := q.JobQueue.Fail(ctx, id, owner, cause)
 	if err == nil {
-		q.o.report(func() { q.o.hub.JobEnded(id, true) })
+		q.o.report(func() { q.o.hub.JobEnded(id, cause) })
 	}
 	return err
 }

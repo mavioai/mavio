@@ -1,7 +1,8 @@
 // Package events delivers what changes to the event streams of signed-in
 // devices: library changes, users' item states, sessions, remote commands,
 // scans and plugins. A Hub keeps the streams; Observe wraps the store so
-// that what is written reaches the hub once committed.
+// that what is written reaches the hub once committed. The hub also
+// publishes item, user data, task and scan events to plugins.
 package events
 
 import (
@@ -19,6 +20,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 )
@@ -34,7 +36,19 @@ type Config struct {
 	// LibraryDelay gathers library changes for this long before sending
 	// them; default five seconds.
 	LibraryDelay time.Duration
-	Logger       *slog.Logger
+	// Events publishes plugin events; nil publishes none.
+	Events Publisher
+	Logger *slog.Logger
+}
+
+// Publisher sends events to plugins; activity.Log is one.
+type Publisher interface {
+	// Record logs an event and publishes it.
+	Record(ctx context.Context, a core.Activity)
+	// Publish publishes an event left out of the log.
+	Publish(a core.Activity)
+	// Wants reports whether any plugin takes events of a type.
+	Wants(eventType string) bool
 }
 
 // Hub keeps the event streams of the signed-in devices.
@@ -49,8 +63,8 @@ type Hub struct {
 	libs    map[core.ID]bool
 	changed map[core.ID]bool
 	removed map[core.ID]core.ID // item → library
-	// scans are the running scan jobs, by job ID.
-	scans map[core.ID]core.Job
+	// tasks are the running jobs of tasks, by job ID.
+	tasks map[core.ID]core.Job
 	// offline are told of sessions going offline.
 	offline []func(session core.ID)
 }
@@ -71,7 +85,7 @@ func New(cfg Config) *Hub {
 	if log == nil {
 		log = slog.New(slog.DiscardHandler)
 	}
-	h := &Hub{cfg: cfg, log: log, subs: map[core.ID]*Subscriber{}, scans: map[core.ID]core.Job{}}
+	h := &Hub{cfg: cfg, log: log, subs: map[core.ID]*Subscriber{}, tasks: map[core.ID]core.Job{}}
 	h.resetPending()
 	return h
 }
@@ -221,34 +235,41 @@ func (h *Hub) ToAdmins(e *sessionv1.Event) {
 	}
 }
 
-// scanJob is the kind of jobs whose states administrators follow.
-const scanJob = "library.scan"
+// taskJobs are the kinds of the jobs of tasks, which administrators follow
+// and plugins learn of. Plugin tasks report their own runs.
+var taskJobs = map[string]bool{library.JobScan: true, library.JobExtras: true, library.JobCleanup: true}
 
-// JobLeased tells administrators that a scan started.
+// JobLeased tells administrators that a task's run started.
 func (h *Hub) JobLeased(job core.Job) {
-	if job.Kind != scanJob {
+	if !taskJobs[job.Kind] {
 		return
 	}
 	h.mu.Lock()
-	h.scans[job.ID] = job
+	h.tasks[job.ID] = job
 	h.mu.Unlock()
-	h.jobChanged(job, sessionv1.JobState_JOB_STATE_RUNNING)
+	if job.Kind == library.JobScan {
+		h.jobChanged(job, sessionv1.JobState_JOB_STATE_RUNNING)
+	}
 }
 
-// JobEnded tells administrators that a scan succeeded or failed.
-func (h *Hub) JobEnded(id core.ID, failed bool) {
+// JobEnded tells administrators that a scan succeeded or failed, and
+// plugins that a task's run ended; cause is why it failed.
+func (h *Hub) JobEnded(id core.ID, cause error) {
 	h.mu.Lock()
-	job, ok := h.scans[id]
-	delete(h.scans, id)
+	job, ok := h.tasks[id]
+	delete(h.tasks, id)
 	h.mu.Unlock()
 	if !ok {
 		return
 	}
-	state := sessionv1.JobState_JOB_STATE_SUCCEEDED
-	if failed {
-		state = sessionv1.JobState_JOB_STATE_FAILED
+	if job.Kind == library.JobScan {
+		state := sessionv1.JobState_JOB_STATE_SUCCEEDED
+		if cause != nil {
+			state = sessionv1.JobState_JOB_STATE_FAILED
+		}
+		h.jobChanged(job, state)
 	}
-	h.jobChanged(job, state)
+	h.taskEnded(job, cause)
 }
 
 func (h *Hub) jobChanged(job core.Job, state sessionv1.JobState) {

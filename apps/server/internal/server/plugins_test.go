@@ -14,6 +14,8 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
+	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
 
 // installSmoke builds the smoke plugin for WASM into a plugin folder, with
@@ -41,11 +43,12 @@ func installSmoke(t *testing.T, fields string) string {
 }
 
 // TestPluginPlatform runs the assembled server with a plugin using the
-// plugin platform, without ffmpeg: its tasks and data folder.
+// plugin platform, without ffmpeg: its tasks, data folder and events.
 func TestPluginPlatform(t *testing.T) {
 	ctx := t.Context()
-	pluginDir := installSmoke(t, `"capabilities":["CAPABILITY_TASK_RUNNER"],
-		"tasks":[{"id":"count","name":"Count","description":"Counts its runs.","interval":"86400s"}]`)
+	pluginDir := installSmoke(t, `"capabilities":["CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER"],
+		"tasks":[{"id":"count","name":"Count","description":"Counts its runs.","interval":"86400s"}],
+		"permissions":{"events":["task.*","user.created"]}`)
 	dataDir := t.TempDir()
 	srv := start(t, server.Config{
 		Database: "sqlite:" + filepath.Join(t.TempDir(), "mavio.db"), FFprobe: "no-ffprobe", FFmpeg: "no-ffmpeg",
@@ -93,5 +96,25 @@ func TestPluginPlatform(t *testing.T) {
 	}
 	if got, err := os.ReadFile(filepath.Join(dataDir, "org.mavio.smoke", "runs")); err != nil || string(got) != "1" {
 		t.Errorf("runs in the plugin's data folder = %q, %v", got, err)
+	}
+
+	// The plugin consumes the events it asked for: the task's run and the
+	// new account, but not sign-ins.
+	users := userv1connect.NewUserServiceClient(http.DefaultClient, srv.url, withToken(first.GetAccessToken()))
+	kid, err := users.CreateUser(ctx, userv1.CreateUserRequest_builder{Name: new("kid"), Password: new("secret")}.Build())
+	if err != nil {
+		t.Fatalf("CreateUser: %v", err)
+	}
+	want := "task.completed plugin=org.mavio.smoke task=plugin:org.mavio.smoke:count\n" +
+		"user.created by=" + first.GetUser().GetId() + "\n"
+	events := filepath.Join(dataDir, "org.mavio.smoke", "events")
+	for deadline := time.Now().Add(30 * time.Second); ; time.Sleep(100 * time.Millisecond) {
+		got, _ := os.ReadFile(events)
+		if string(got) == want {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("consumed events = %q, want %q (kid %s)", got, want, kid.GetUser().GetId())
+		}
 	}
 }

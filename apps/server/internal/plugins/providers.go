@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/libs/core"
@@ -148,17 +146,7 @@ func (n *notifier) Notify(ctx context.Context, a core.Activity) error {
 	if !ok || pl.Notifier() == nil {
 		return nil
 	}
-	ev := pluginv1.Event_builder{
-		Id: new(a.ID.String()), Type: &a.Type, Time: timestamppb.New(a.Time), Title: &a.Title, Message: &a.Message,
-		Attributes: a.Attributes,
-	}.Build()
-	if !a.UserID.IsZero() {
-		ev.SetUserId(a.UserID.String())
-	}
-	if !a.ItemID.IsZero() {
-		ev.SetItemId(a.ItemID.String())
-	}
-	_, err := pl.Notifier().Notify(ctx, pluginv1.NotifyRequest_builder{Event: ev}.Build())
+	_, err := pl.Notifier().Notify(ctx, pluginv1.NotifyRequest_builder{Event: eventToProto(&a)}.Build())
 	return err
 }
 

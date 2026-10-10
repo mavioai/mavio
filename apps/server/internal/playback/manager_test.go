@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"testing/synctest"
@@ -186,6 +187,8 @@ func TestDirectPlay(t *testing.T) {
 func TestProgressAndStop(t *testing.T) {
 	ctx := t.Context()
 	e := newEnv(t)
+	var logged []core.Activity
+	e.m.cfg.Record = func(_ context.Context, a core.Activity) { logged = append(logged, a) }
 	changes := 0
 	e.m.cfg.OnChange = func(user, session core.ID) {
 		if user != e.user.ID || session != e.sess.ID {
@@ -232,6 +235,14 @@ func TestProgressAndStop(t *testing.T) {
 	}
 	if err := e.m.Stop(ctx, e.user.ID, p.ID, nil); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("second Stop: %v, want ErrNotFound", err)
+	}
+	// The log keeps the start and the stop, which played the item.
+	if len(logged) != 2 || logged[0].Type != "playback.started" || logged[1].Type != "playback.stopped" {
+		t.Fatalf("logged = %+v, want a start and a stop", logged)
+	}
+	if a := logged[1]; a.UserID != e.user.ID || a.ItemID != e.movie.ID || a.Title != "alice stopped playing Film" ||
+		a.Attributes["position"] != "5880000" || a.Attributes["played"] != "true" || a.Attributes["playback"] != p.ID {
+		t.Errorf("stop = %+v", a)
 	}
 
 	// The next playback starts with the remembered streams.
@@ -327,6 +338,12 @@ func TestNoKeyframes(t *testing.T) {
 func TestCheck(t *testing.T) {
 	ctx := t.Context()
 	e := newEnv(t)
+	var stopped []string
+	e.m.cfg.Record = func(_ context.Context, a core.Activity) {
+		if a.Type == "playback.stopped" {
+			stopped = append(stopped, a.Attributes["playback"]+" "+a.Attributes["position"])
+		}
+	}
 	idle := e.start(t, Request{Start: 40 * time.Minute})
 	active := e.start(t, Request{})
 	idle.lastActive = time.Now().Add(-2 * e.m.cfg.IdleTimeout)
@@ -346,6 +363,9 @@ func TestCheck(t *testing.T) {
 	e.m.check(ctx)
 	if e.m.Get(active.ID) != nil {
 		t.Error("playback of a signed-out session kept")
+	}
+	if want := []string{idle.ID + " 2400000", active.ID + " 0"}; !slices.Equal(stopped, want) {
+		t.Errorf("logged stops = %q, want %q", stopped, want)
 	}
 }
 

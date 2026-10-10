@@ -69,20 +69,20 @@ The channel a request arrives on identifies the plugin: the host drops any crede
 ## 4. Events
 
 ### 4.1 Event Types
-Events are `mavio.plugin.v1.Event`: ID, type, time, title, message, item, user and attributes.
+Events are `mavio.plugin.v1.Event`: ID, type, time, title, message, item, user and attributes. Positions are in milliseconds.
 
 | Type | When | Activity log |
 | :--- | :--- | :--- |
 | `user.login`, `user.login_failed` | Sign-in | Yes |
-| `user.created`, `user.updated`, `user.deleted`, `user.password_changed` | Account changes | Yes |
+| `user.created`, `user.updated`, `user.deleted`, `user.password_changed` | Account changes; the event's user is the account, the `by` attribute the user who changed it | Yes |
 | `apikey.created`, `apikey.revoked` | API keys | Yes |
 | `settings.updated`, `backup.created` | Administration | Yes |
-| `plugin.installed`, `plugin.updated`, `plugin.uninstalled`, `plugin.failed` | Plugins | Yes |
-| `task.completed`, `task.failed` | A task's run ends | Failures only |
-| `playback.started`, `playback.stopped` | A playback starts or stops; `position` and `played` attributes | Yes |
-| `subtitle.downloaded`, `subtitle.download_failed` | Subtitle downloads | Failures only |
-| `item.added`, `item.updated`, `item.removed` | Library changes, after their transaction commits; `library` attribute | No |
-| `library.scanned` | A library scan ends | No |
+| `plugin.installed`, `plugin.updated`, `plugin.configured`, `plugin.uninstalled`, `plugin.failed` | Plugins; `plugin.failed` when a plugin fails to start | Yes |
+| `task.completed`, `task.failed` | A task's run ends; `task` attribute (the task's ID in `TaskService`), and `plugin` for plugin tasks, whose message is the run's | Failures only |
+| `playback.started`, `playback.stopped` | A playback starts or stops, also when it expires or its sign-in ends; `playback`, `session` and `position` attributes, and `played` when it stops | Yes |
+| `subtitle.downloaded`, `subtitle.download_failed` | Subtitle downloads; `provider` and `subtitle` attributes | Failures only |
+| `item.added`, `item.updated`, `item.removed` | Library changes, after their transaction commits; `library` attribute. They are worked out only while a plugin consumes them | No |
+| `library.scanned` | A library scan ends; `library` and `succeeded` attributes | No |
 | `userdata.changed` | A user's item state changes: `played`, `favorite`, `position` | No |
 
 ### 4.2 Delivery

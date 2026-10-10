@@ -69,20 +69,20 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 ## 4. 事件
 
 ### 4.1 事件类型
-事件是 `mavio.plugin.v1.Event`：ID、类型、时间、标题、消息、条目、用户与附加属性。
+事件是 `mavio.plugin.v1.Event`：ID、类型、时间、标题、消息、条目、用户与附加属性。位置以毫秒计。
 
 | 类型 | 时机 | 活动日志 |
 | :--- | :--- | :--- |
 | `user.login`、`user.login_failed` | 登录 | 是 |
-| `user.created`、`user.updated`、`user.deleted`、`user.password_changed` | 账户变更 | 是 |
+| `user.created`、`user.updated`、`user.deleted`、`user.password_changed` | 账户变更；事件的用户是该账户，附加属性 `by` 是做出变更的用户 | 是 |
 | `apikey.created`、`apikey.revoked` | API 密钥 | 是 |
 | `settings.updated`、`backup.created` | 管理操作 | 是 |
-| `plugin.installed`、`plugin.updated`、`plugin.uninstalled`、`plugin.failed` | 插件 | 是 |
-| `task.completed`、`task.failed` | 任务的一次运行结束 | 仅失败 |
-| `playback.started`、`playback.stopped` | 播放开始或停止；附加属性 `position` 与 `played` | 是 |
-| `subtitle.downloaded`、`subtitle.download_failed` | 字幕下载 | 仅失败 |
-| `item.added`、`item.updated`、`item.removed` | 媒体库变更，在其事务提交后；附加属性 `library` | 否 |
-| `library.scanned` | 一次媒体库扫描结束 | 否 |
+| `plugin.installed`、`plugin.updated`、`plugin.configured`、`plugin.uninstalled`、`plugin.failed` | 插件；插件启动失败时为 `plugin.failed` | 是 |
+| `task.completed`、`task.failed` | 任务的一次运行结束；附加属性 `task`（任务在 `TaskService` 中的 ID），插件任务另有 `plugin`，其消息即该次运行的消息 | 仅失败 |
+| `playback.started`、`playback.stopped` | 播放开始或停止，包括过期或登录结束时；附加属性 `playback`、`session` 与 `position`，停止时另有 `played` | 是 |
+| `subtitle.downloaded`、`subtitle.download_failed` | 字幕下载；附加属性 `provider` 与 `subtitle` | 仅失败 |
+| `item.added`、`item.updated`、`item.removed` | 媒体库变更，在其事务提交后；附加属性 `library`。仅在有插件消费时才计算 | 否 |
+| `library.scanned` | 一次媒体库扫描结束；附加属性 `library` 与 `succeeded` | 否 |
 | `userdata.changed` | 用户的条目状态变化：`played`、`favorite`、`position` | 否 |
 
 ### 4.2 投递

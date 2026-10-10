@@ -16,6 +16,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/plugin/host"
@@ -70,6 +71,8 @@ type Config struct {
 	// HostAPI serves the plugins' host API requests, which it sees with the
 	// plugin's grant (auth.PluginHandler); nil serves none.
 	HostAPI http.Handler
+	// Activity records plugin failures and task runs; nil records none.
+	Activity *activity.Log
 	// Now is the clock of task schedules; nil means time.Now.
 	Now    func() time.Time
 	Logger *slog.Logger
@@ -86,8 +89,14 @@ type Manager struct {
 	// install serializes installations, which take long, apart from mu.
 	install sync.Mutex
 
+	// ctx ends with Close, stopping event delivery.
+	ctx    context.Context
+	cancel context.CancelFunc
+
 	mu      sync.Mutex
 	plugins []*entry // by ID
+	// queues hold the events waiting for each event consumer.
+	queues map[string]*eventQueue
 }
 
 type entry struct {
@@ -106,7 +115,9 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	if cfg.Client == nil {
 		cfg.Client = &http.Client{Timeout: 5 * time.Minute}
 	}
-	m := &Manager{cfg: cfg, store: cfg.Store, log: cmp.Or(cfg.Logger, slog.New(slog.DiscardHandler))}
+	m := &Manager{cfg: cfg, store: cfg.Store, log: cmp.Or(cfg.Logger, slog.New(slog.DiscardHandler)), queues: map[string]*eventQueue{}}
+	// Event delivery outlives the request that installs a plugin.
+	m.ctx, m.cancel = context.WithCancel(context.WithoutCancel(ctx))
 	m.opts = host.Options{
 		WASM:    wasm.Options{CacheDir: cfg.CacheDir, Logger: m.log},
 		Process: process.Options{Logger: m.log},
@@ -178,6 +189,10 @@ func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool
 	if e.err != nil {
 		e.state = Failed
 		m.log.ErrorContext(ctx, "plugin failed", "plugin", e.manifest.GetId(), "err", e.err)
+		m.cfg.Activity.Record(ctx, core.Activity{
+			Type: "plugin.failed", Severity: core.SeverityError, Title: "Plugin " + e.manifest.GetId() + " failed to start",
+			Message: e.err.Error(), Attributes: map[string]string{"plugin": e.manifest.GetId()},
+		})
 	} else {
 		m.scheduleTasks(ctx, e.manifest)
 		m.log.InfoContext(ctx, "plugin started", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion(),
@@ -297,8 +312,9 @@ func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, e
 	return e.info(), nil
 }
 
-// Close stops the plugins.
+// Close stops the plugins, dropping the events they wait for.
 func (m *Manager) Close(ctx context.Context) error {
+	m.cancel()
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	var errs []error

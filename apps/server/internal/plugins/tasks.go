@@ -120,9 +120,15 @@ func (m *Manager) RunTask(ctx context.Context, job core.Job) ([]core.Job, error)
 	req := &pluginv1.RunTaskRequest{}
 	req.SetTaskId(p.Task)
 	resp, err := plugin.Tasks().RunTask(ctx, req)
+	attrs := map[string]string{"task": TaskID(p.Plugin, p.Task), "plugin": p.Plugin}
 	if err != nil {
-		return next, fmt.Errorf("plugin %s task %s: %w", p.Plugin, p.Task, err)
+		err = fmt.Errorf("plugin %s task %s: %w", p.Plugin, p.Task, err)
+		m.cfg.Activity.Record(ctx, core.Activity{
+			Type: "task.failed", Severity: core.SeverityError, Title: t.GetName() + " failed", Message: err.Error(), Attributes: attrs,
+		})
+		return next, err
 	}
 	m.log.InfoContext(ctx, "plugin task done", "plugin", p.Plugin, "task", p.Task, "message", resp.GetMessage())
+	m.cfg.Activity.Publish(core.Activity{Type: "task.completed", Title: t.GetName() + " completed", Message: resp.GetMessage(), Attributes: attrs})
 	return next, nil
 }

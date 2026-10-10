@@ -74,11 +74,16 @@ func (s *SystemService) InstallPlugin(ctx context.Context, req *systemv1.Install
 	if s.Plugins == nil {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the server runs no plugins"))
 	}
+	installed := slices.ContainsFunc(s.Plugins.Plugins(), func(i plugins.Info) bool { return i.Manifest.GetId() == req.GetPluginId() })
 	info, err := s.Plugins.Install(ctx, req.GetPluginId(), req.GetVersion())
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	plugin := s.pluginChanged(ctx, info, "plugin.installed", "installed")
+	kind, verb := "plugin.installed", "installed"
+	if installed {
+		kind, verb = "plugin.updated", "updated"
+	}
+	plugin := s.pluginChanged(ctx, info, kind, verb)
 	return systemv1.InstallPluginResponse_builder{Plugin: plugin}.Build(), nil
 }
 

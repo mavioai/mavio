@@ -3,11 +3,13 @@ package rpc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"time"
 
 	"connectrpc.com/connect"
 
+	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/libs/core"
@@ -18,6 +20,8 @@ import (
 // UserService implements mavio.user.v1.UserService.
 type UserService struct {
 	store core.Store
+	// Activity records account changes; nil records none.
+	Activity *activity.Log
 }
 
 var _ userv1connect.UserServiceHandler = (*UserService)(nil)
@@ -76,7 +80,8 @@ func (s *UserService) GetCurrentUser(ctx context.Context, _ *userv1.GetCurrentUs
 
 // CreateUser creates an account.
 func (s *UserService) CreateUser(ctx context.Context, req *userv1.CreateUserRequest) (*userv1.CreateUserResponse, error) {
-	if _, err := admin(ctx); err != nil {
+	p, err := admin(ctx)
+	if err != nil {
 		return nil, err
 	}
 	u := core.User{
@@ -100,16 +105,18 @@ func (s *UserService) CreateUser(ctx context.Context, req *userv1.CreateUserRequ
 	if err := s.store.Users().Create(ctx, &u); err != nil {
 		return nil, connectError(ctx, err)
 	}
+	s.accountChanged(ctx, p, "user.created", "created", u)
 	return userv1.CreateUserResponse_builder{User: userToProto(&u)}.Build(), nil
 }
 
 // UpdateUser changes a user's name, rights, state and policy.
 func (s *UserService) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequest) (*userv1.UpdateUserResponse, error) {
-	if _, err := admin(ctx); err != nil {
+	p, err := admin(ctx)
+	if err != nil {
 		return nil, err
 	}
 	var u core.User
-	err := s.store.InTx(ctx, func(tx core.Store) error {
+	err = s.store.InTx(ctx, func(tx core.Store) error {
 		var err error
 		if u, err = tx.Users().Get(ctx, core.MustParseID(req.GetId())); err != nil {
 			return err
@@ -126,16 +133,23 @@ func (s *UserService) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequ
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
+	s.accountChanged(ctx, p, "user.updated", "changed", u)
 	return userv1.UpdateUserResponse_builder{User: userToProto(&u)}.Build(), nil
 }
 
 // DeleteUser removes an account with its state and sessions.
 func (s *UserService) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequest) (*userv1.DeleteUserResponse, error) {
-	if _, err := admin(ctx); err != nil {
+	p, err := admin(ctx)
+	if err != nil {
 		return nil, err
 	}
-	err := s.store.InTx(ctx, func(tx core.Store) error {
-		if err := tx.Users().Delete(ctx, core.MustParseID(req.GetId())); err != nil {
+	var u core.User
+	err = s.store.InTx(ctx, func(tx core.Store) error {
+		var err error
+		if u, err = tx.Users().Get(ctx, core.MustParseID(req.GetId())); err != nil {
+			return err
+		}
+		if err := tx.Users().Delete(ctx, u.ID); err != nil {
 			return err
 		}
 		return adminRemains(ctx, tx)
@@ -143,6 +157,7 @@ func (s *UserService) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
+	s.accountChanged(ctx, p, "user.deleted", "deleted", u)
 	return &userv1.DeleteUserResponse{}, nil
 }
 
@@ -170,9 +185,10 @@ func (s *UserService) SetPassword(ctx context.Context, req *userv1.SetPasswordRe
 	if !self && !p.User.Admin {
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("administrator required"))
 	}
+	var u core.User
 	err = s.store.InTx(ctx, func(tx core.Store) error {
-		u, err := tx.Users().Get(ctx, id)
-		if err != nil {
+		var err error
+		if u, err = tx.Users().Get(ctx, id); err != nil {
 			return err
 		}
 		if u.AuthProvider != "" {
@@ -203,7 +219,18 @@ func (s *UserService) SetPassword(ctx context.Context, req *userv1.SetPasswordRe
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
+	s.accountChanged(ctx, p, "user.password_changed", "changed the password of", u)
 	return &userv1.SetPasswordResponse{}, nil
+}
+
+// accountChanged records a change of u's account by p; the activity
+// concerns u, and its "by" attribute names p.
+func (s *UserService) accountChanged(ctx context.Context, p auth.Principal, eventType, verb string, u core.User) {
+	a := core.Activity{Type: eventType, UserID: u.ID, Title: fmt.Sprintf("%s %s user %s", p.User.Name, verb, u.Name)}
+	if !p.User.ID.IsZero() {
+		a.Attributes = map[string]string{"by": p.User.ID.String()}
+	}
+	s.Activity.Record(ctx, a)
 }
 
 // UpdatePreferences changes the caller's playback preferences.

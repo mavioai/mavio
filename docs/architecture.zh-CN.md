@@ -297,7 +297,7 @@ libs/plugin/
 * **热插拔**：`SystemService.InstallPlugin` 从插件目录安装插件，或将其升级、降级；`UninstallPlugin` 卸载插件；期间服务端照常服务。安装时下载该版本的 zip 包，按插件目录核对其 SHA-256，解压到插件文件夹中的隐藏文件夹并检查清单；随后停止正在运行的版本，将其文件夹移到一旁，移入新版本并以已保存的配置启动；若新版本无法启动，则恢复之前的版本。卸载会停止插件并删除其文件夹与配置。各项能力在使用时查找，因此插件一旦就绪，刷新、搜索与通知即会用到它。
 * **插件目录**：插件目录是服务端设置中某个 http 或 https URL 上的 JSON 文档，列出插件及其版本：版本号、API 版本、运行时（进程插件还有 os 与 arch）、相对于目录的包 URL、SHA-256、更新说明与发布时间。`ListCatalogPlugins` 给出服务端能运行的版本（最新的在前）以及已安装的版本；同一插件以最先列出它的目录为准，无法访问的目录被跳过。
 * **宿主 API**：每个插件的宿主 API 请求带着该插件的授权（`auth.PluginHandler`）进入处理器树；认证拦截器按清单的 `permissions.api` 检查请求，并解析 `Mavio-User`（[插件平台 §3](plugins.zh-CN.md#3-宿主-api)）。
-* **认证与通知**：`AuthProvider` 指向某个插件的用户，在该插件的 `Authenticate` 接受其用户名与密码时登录。活动日志中的每项活动都作为 `Event` 发送给通知插件。
+* **认证与通知**：`AuthProvider` 指向某个插件的用户，在该插件的 `Authenticate` 接受其用户名与密码时登录。活动日志中的每项活动都作为 `Event` 发送给通知插件。消费事件的插件通过各自的队列，分批收到其清单列出的事件，无论是否进入日志（[插件平台 §4](plugins.zh-CN.md#4-事件)）。
 * **任务与数据目录**：插件的任务作为 `plugin.task` 作业在单独的 worker 上运行，并出现在 `TaskService` 中；每个插件在 `--plugin-data-dir` 中有一个数据目录（[插件平台 §6](plugins.zh-CN.md#6-任务与数据目录)）。
 * **片段提供者**：对每个已探测的电影与剧集，以其 ID、时长与章节询问每个已启动的片段插件。
 * **字幕提供者**：`MetadataService.SearchSubtitles` 以视频的 OpenSubtitles 哈希（`subtitle.FileHash`）、名称与 ID 搜索每个已启动的字幕插件；未就绪的插件什么也找不到。
@@ -415,7 +415,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **网络**（`internal/network`）：处理器树既在根路径、也在基础 URL 下提供服务，访问不带斜杠的基础路径会重定向到带斜杠的路径。HTTPS 以配置的证书在单独端口运行，随设置变化而启动、重启或停止。局域网发现在 `--discovery-addr`（默认 7359）上应答 UDP 请求 `who is MavioServer?`，返回服务端名称、版本，以及请求到达的网卡上的地址。
 * **任务与作业**（`TaskService`）：周期性任务为每个媒体库的扫描与每日的作业清理；`ListTasks` 给出每个任务的间隔、上次完成的运行、下次运行以及是否正在运行，`RunTask` 立即排入一次运行，`ListJobs` 分页列出作业队列。
 * **API 密钥**（`AuthService.CreateApiKey`、`ListApiKeys`、`RevokeApiKey`）：拦截器在需要会话令牌之处也接受 API 密钥的令牌（[领域模型](domain.zh-CN.md) §12.2）；这类请求没有会话。
-* **活动与日志**（`internal/activity`、`ActivityService`；`internal/logs`、`SystemService.ListLogs`）：活动被保存并排队发送给通知插件，90 天后清除。服务端在内存中保留最近 2,000 条 info 及以上级别的日志供 `ListLogs` 使用，日志照常输出。
+* **活动与日志**（`internal/activity`、`ActivityService`；`internal/logs`、`SystemService.ListLogs`）：活动被保存并排队发送给通知插件，90 天后清除。日志还把它不保存的事件（来自 `events.Observe` 与 hub 的条目、用户数据、任务与扫描事件）发布给事件消费者；插件管理器为每个消费者维护一个队列。活动日志先于 hub 与插件创建，插件启动后事件才到达插件。服务端在内存中保留最近 2,000 条 info 及以上级别的日志供 `ListLogs` 使用，日志照常输出。
 * **文件夹**（`SystemService.ListDirectory`）：管理员浏览服务端的文件夹或根目录（Windows 上为各驱动器）以选择媒体库文件夹；隐藏条目不列出。
 * **本地化数据**（`LocalizationService`）：国家、具有 ISO 639-1 代码的语言，以及某个国家分级体系中的分级，来自 `libs/metadata` 中 Jellyfin 的数据（`Countries`、`Languages`、`ParentalRatings`）。
 * **备份**（`internal/backup`、`BackupService`）：备份是 `--backup-dir` 中的一个 zip 文件，包含 `manifest.json`、数据库的行（`store.Dump`：每张表为一份由带类型值组成的 JSON 行文件，取自同一快照）、元数据目录、插件目录与插件的数据目录。管理员带着自己的 bearer 令牌在 `/system/backups/{name}` 下载。`-restore <文件>` 在新服务端启动前把备份恢复到其空数据库中（`store.Restore`：数据库类型相同，且架构包含备份所含的每个迁移；按外键顺序插入行，条目排在其父条目之后，派生键重新计算），并放回各文件夹。

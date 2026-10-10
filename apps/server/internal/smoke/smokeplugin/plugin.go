@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -70,6 +71,29 @@ func init() {
 	guest.Handle(pluginv1connect.NewNotifierServiceHandler(notifier{}))
 	guest.Handle(pluginv1connect.NewMediaSegmentProviderServiceHandler(segments{}))
 	guest.Handle(pluginv1connect.NewTaskRunnerServiceHandler(tasks{}))
+	guest.Handle(pluginv1connect.NewEventConsumerServiceHandler(consumer{}))
+}
+
+// consumer appends a line per event to "events" in the data folder: its
+// type, then its attributes as key=value in key order.
+type consumer struct{}
+
+func (consumer) Consume(_ context.Context, req *pluginv1.ConsumeRequest) (*pluginv1.ConsumeResponse, error) {
+	f, err := os.OpenFile(filepath.Join(guest.DataDir(), "events"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	for _, e := range req.GetEvents() {
+		line := []string{e.GetType()}
+		for _, k := range slices.Sorted(maps.Keys(e.GetAttributes())) {
+			line = append(line, k+"="+e.GetAttributes()[k])
+		}
+		if _, err := fmt.Fprintln(f, strings.Join(line, " ")); err != nil {
+			return nil, err
+		}
+	}
+	return &pluginv1.ConsumeResponse{}, f.Close()
 }
 
 // tasks runs "count", which counts its runs in the data folder, and

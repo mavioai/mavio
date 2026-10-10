@@ -119,9 +119,13 @@ func Handler(opts Options) (http.Handler, error) {
 	if subtitles == nil {
 		subtitles = &library.Subtitles{Store: opts.Store}
 	}
-	mux.Handle(libraryv1connect.NewMetadataServiceHandler(rpc.NewMetadataService(opts.Store, refresher, subtitles, opts.Images.Fetch), interceptors))
+	metadataService := rpc.NewMetadataService(opts.Store, refresher, subtitles, opts.Images.Fetch)
+	metadataService.Activity = opts.Activity
+	mux.Handle(libraryv1connect.NewMetadataServiceHandler(metadataService, interceptors))
 	mux.Handle(libraryv1connect.NewPlaylistServiceHandler(rpc.NewPlaylistService(opts.Store), interceptors))
-	mux.Handle(userv1connect.NewUserServiceHandler(rpc.NewUserService(opts.Store), interceptors))
+	users := rpc.NewUserService(opts.Store)
+	users.Activity = opts.Activity
+	mux.Handle(userv1connect.NewUserServiceHandler(users, interceptors))
 	mux.Handle(userv1connect.NewUserDataServiceHandler(rpc.NewUserDataService(opts.Store), interceptors))
 	mux.Handle(userv1connect.NewDisplayPreferencesServiceHandler(rpc.NewDisplayPreferencesService(opts.Store), interceptors))
 	mux.Handle(playbackv1connect.NewPlaybackServiceHandler(rpc.NewPlaybackService(opts.Playbacks), interceptors))
