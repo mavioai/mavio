@@ -190,6 +190,8 @@ func commandKind(c *pluginv1.Command) pluginv1.CommandKind {
 		return pluginv1.CommandKind_COMMAND_KIND_SEEK
 	case c.HasMessage():
 		return pluginv1.CommandKind_COMMAND_KIND_MESSAGE
+	case c.HasVolume():
+		return pluginv1.CommandKind_COMMAND_KIND_VOLUME
 	}
 	return pluginv1.CommandKind_COMMAND_KIND_UNSPECIFIED
 }

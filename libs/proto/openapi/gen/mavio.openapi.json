@@ -5533,6 +5533,11 @@
                 "required": [
                   "message"
                 ]
+              },
+              {
+                "required": [
+                  "volume"
+                ]
               }
             ]
           }
@@ -5593,6 +5598,20 @@
               }
             },
             "title": "seek"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "volume": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.session.v1.Volume"
+                  }
+                ],
+                "title": "volume"
+              }
+            },
+            "title": "volume"
           }
         ],
         "unevaluatedProperties": false,
@@ -5619,6 +5638,11 @@
                   "required": [
                     "seek"
                   ]
+                },
+                {
+                  "required": [
+                    "volume"
+                  ]
                 }
               ]
             },
@@ -5643,6 +5667,11 @@
                   {
                     "required": [
                       "seek"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "volume"
                     ]
                   }
                 ]
@@ -6838,6 +6867,26 @@
         "title": "UserDataChanged",
         "additionalProperties": false,
         "description": "UserDataChanged carries the user's new state of items, from any of\n their devices."
+      },
+      "mavio.session.v1.Volume": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "integer",
+            "title": "level",
+            "maximum": 100,
+            "minimum": 0,
+            "format": "int32",
+            "description": "0–100."
+          },
+          "muted": {
+            "type": "boolean",
+            "title": "muted"
+          }
+        },
+        "title": "Volume",
+        "additionalProperties": false,
+        "description": "Volume sets the volume, mutes or unmutes; it sets one of them at least.\nvolume.set // set level or muted\n"
       },
       "mavio.system.v1.Activity": {
         "type": "object",

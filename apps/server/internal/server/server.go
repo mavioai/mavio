@@ -25,6 +25,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
+	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/apps/server/internal/warming"
 	"github.com/mavioai/mavio/libs/core"
@@ -194,6 +195,17 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			Folders: backup.Folders{Metadata: metadataDir, Plugins: cfg.PluginDir, PluginData: cfg.PluginDataDir},
 		})
 	}
+	port := 0
+	if a, ok := ln.Addr().(*net.TCPAddr); ok {
+		port = a.Port
+	}
+	serverName := func() string {
+		if name := set.Get().Network.ServerName; name != "" {
+			return name
+		}
+		name, _ := os.Hostname()
+		return name
+	}
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher,
@@ -201,6 +213,10 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Lyrics:    lyrics,
 		Intros:    &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
 		Settings:  set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
+		ServerInfo: func() rpc.ServerInfo {
+			n := set.Get().Network
+			return rpc.ServerInfo{Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: n.HTTPSPort}
+		},
 		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Dev: cfg.Dev,
 	})
 	if err != nil {
@@ -211,16 +227,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	// The network settings decide the base URL, HTTPS and discovery.
 	prefix := network.NewPrefix(h)
 	https := &network.HTTPS{Handler: prefix, Host: cfg.HTTPSHost, Logger: log}
-	port := 0
-	if a, ok := ln.Addr().(*net.TCPAddr); ok {
-		port = a.Port
-	}
 	discovery := &network.Discovery{Addr: cfg.DiscoveryAddr, Port: port, Logger: log, Reply: func() network.DiscoveryReply {
-		name := set.Get().Network.ServerName
-		if name == "" {
-			name, _ = os.Hostname()
-		}
-		return network.DiscoveryReply{Name: name, Version: cfg.Version}
+		return network.DiscoveryReply{Name: serverName(), Version: cfg.Version}
 	}}
 	defer func() {
 		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)

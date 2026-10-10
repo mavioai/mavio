@@ -55,6 +55,8 @@ type Options struct {
 	Plugins rpc.PluginManager
 	// Devices keeps the plugins' remote devices; nil means none.
 	Devices rpc.DeviceController
+	// ServerInfo tells plugins how the server is reached.
+	ServerInfo func() rpc.ServerInfo
 	// Refresher carries out metadata changes; nil uses one without
 	// providers.
 	Refresher *library.Refresher
@@ -157,7 +159,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(sessionv1connect.NewSessionServiceHandler(sessions, interceptors))
 	// Plugins reach the host service through the host API; others are
 	// turned away.
-	mux.Handle(pluginv1connect.NewHostServiceHandler(rpc.NewHostService(opts.Devices), interceptors))
+	mux.Handle(pluginv1connect.NewHostServiceHandler(rpc.NewHostService(opts.Devices, opts.ServerInfo), interceptors))
 	mux.Handle(sessionv1connect.NewSyncPlayServiceHandler(rpc.NewSyncPlayService(opts.Store, opts.Hub), interceptors))
 	mux.Handle("GET /media/", opts.Playbacks.Handler())
 	mux.Handle("GET /images/", opts.Images.Handler())

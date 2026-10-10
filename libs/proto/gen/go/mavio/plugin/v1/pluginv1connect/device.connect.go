@@ -37,6 +37,9 @@ const (
 const (
 	// HostServiceSetDevicesProcedure is the fully-qualified name of the HostService's SetDevices RPC.
 	HostServiceSetDevicesProcedure = "/mavio.plugin.v1.HostService/SetDevices"
+	// HostServiceGetServerInfoProcedure is the fully-qualified name of the HostService's GetServerInfo
+	// RPC.
+	HostServiceGetServerInfoProcedure = "/mavio.plugin.v1.HostService/GetServerInfo"
 	// DeviceControllerServiceSendCommandProcedure is the fully-qualified name of the
 	// DeviceControllerService's SendCommand RPC.
 	DeviceControllerServiceSendCommandProcedure = "/mavio.plugin.v1.DeviceControllerService/SendCommand"
@@ -49,6 +52,9 @@ type HostServiceClient interface {
 	// session every signed-in user sees, until the plugin lists it no
 	// longer or stops.
 	SetDevices(context.Context, *v1.SetDevicesRequest) (*v1.SetDevicesResponse, error)
+	// GetServerInfo tells how the server is reached, such as for URLs given
+	// to devices on the local network.
+	GetServerInfo(context.Context, *v1.GetServerInfoRequest) (*v1.GetServerInfoResponse, error)
 }
 
 // NewHostServiceClient constructs a client for the mavio.plugin.v1.HostService service. By default,
@@ -68,17 +74,34 @@ func NewHostServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(hostServiceMethods.ByName("SetDevices")),
 			connect.WithClientOptions(opts...),
 		),
+		getServerInfo: connect.NewClient[v1.GetServerInfoRequest, v1.GetServerInfoResponse](
+			httpClient,
+			baseURL+HostServiceGetServerInfoProcedure,
+			connect.WithSchema(hostServiceMethods.ByName("GetServerInfo")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // hostServiceClient implements HostServiceClient.
 type hostServiceClient struct {
-	setDevices *connect.Client[v1.SetDevicesRequest, v1.SetDevicesResponse]
+	setDevices    *connect.Client[v1.SetDevicesRequest, v1.SetDevicesResponse]
+	getServerInfo *connect.Client[v1.GetServerInfoRequest, v1.GetServerInfoResponse]
 }
 
 // SetDevices calls mavio.plugin.v1.HostService.SetDevices.
 func (c *hostServiceClient) SetDevices(ctx context.Context, req *v1.SetDevicesRequest) (*v1.SetDevicesResponse, error) {
 	response, err := c.setDevices.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// GetServerInfo calls mavio.plugin.v1.HostService.GetServerInfo.
+func (c *hostServiceClient) GetServerInfo(ctx context.Context, req *v1.GetServerInfoRequest) (*v1.GetServerInfoResponse, error) {
+	response, err := c.getServerInfo.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -92,6 +115,9 @@ type HostServiceHandler interface {
 	// session every signed-in user sees, until the plugin lists it no
 	// longer or stops.
 	SetDevices(context.Context, *v1.SetDevicesRequest) (*v1.SetDevicesResponse, error)
+	// GetServerInfo tells how the server is reached, such as for URLs given
+	// to devices on the local network.
+	GetServerInfo(context.Context, *v1.GetServerInfoRequest) (*v1.GetServerInfoResponse, error)
 }
 
 // NewHostServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -107,10 +133,19 @@ func NewHostServiceHandler(svc HostServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(hostServiceMethods.ByName("SetDevices")),
 		connect.WithHandlerOptions(opts...),
 	)
+	hostServiceGetServerInfoHandler := connect.NewUnaryHandlerSimple(
+		HostServiceGetServerInfoProcedure,
+		svc.GetServerInfo,
+		connect.WithSchema(hostServiceMethods.ByName("GetServerInfo")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.plugin.v1.HostService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case HostServiceSetDevicesProcedure:
 			hostServiceSetDevicesHandler.ServeHTTP(w, r)
+		case HostServiceGetServerInfoProcedure:
+			hostServiceGetServerInfoHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -122,6 +157,10 @@ type UnimplementedHostServiceHandler struct{}
 
 func (UnimplementedHostServiceHandler) SetDevices(context.Context, *v1.SetDevicesRequest) (*v1.SetDevicesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.SetDevices is not implemented"))
+}
+
+func (UnimplementedHostServiceHandler) GetServerInfo(context.Context, *v1.GetServerInfoRequest) (*v1.GetServerInfoResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.HostService.GetServerInfo is not implemented"))
 }
 
 // DeviceControllerServiceClient is a client for the mavio.plugin.v1.DeviceControllerService

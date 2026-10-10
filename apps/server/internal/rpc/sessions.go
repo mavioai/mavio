@@ -236,6 +236,16 @@ func commandToPlugin(c *sessionv1.Command) *pluginv1.Command {
 	case c.HasMessage():
 		m := c.GetMessage()
 		b.Message = pluginv1.ShowMessage_builder{Text: new(m.GetText()), Timeout: m.GetTimeout()}.Build()
+	case c.HasVolume():
+		v := c.GetVolume()
+		vb := pluginv1.Volume_builder{}
+		if v.HasLevel() {
+			vb.Level = new(v.GetLevel())
+		}
+		if v.HasMuted() {
+			vb.Muted = new(v.GetMuted())
+		}
+		b.Volume = vb.Build()
 	}
 	return b.Build()
 }

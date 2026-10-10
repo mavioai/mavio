@@ -222,7 +222,18 @@ func testPluginPlatform(t *testing.T, rt string) {
 	if body, _ := whoami("Authorization", "Basic eDp5"); body != `user="" admin="" authorization="Basic eDp5"` {
 		t.Errorf("whoami with the plugin's own credentials = %s", body)
 	}
-	resp, err := http.Get(srv.url + "/plugins/org.mavio.missing/whoami")
+	// The plugin learns how the server is reached.
+	resp, err := http.Get(srv.url + "/plugins/org.mavio.smoke/server")
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	host, _ := os.Hostname()
+	if want := fmt.Sprintf(`name=%q version="v-test" http=%s https=0 base=""`, host, srv.url[strings.LastIndex(srv.url, ":")+1:]); string(info) != want {
+		t.Errorf("GET server = %s, want %s", info, want)
+	}
+	resp, err = http.Get(srv.url + "/plugins/org.mavio.missing/whoami")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -288,6 +299,15 @@ func testPluginPlatform(t *testing.T, rt string) {
 	}
 	if err := send(sessionv1.Command_builder{Seek: sessionv1.Seek_builder{Position: durationpb.New(time.Second)}.Build()}.Build()); connect.CodeOf(err) != connect.CodeFailedPrecondition {
 		t.Errorf("SendCommand(seek) = %v, want failed_precondition", err)
+	}
+	if err := send(sessionv1.Command_builder{Volume: sessionv1.Volume_builder{Level: new(int32(30))}.Build()}.Build()); err != nil {
+		t.Errorf("SendCommand(volume) = %v", err)
+	}
+	if err := send(sessionv1.Command_builder{Volume: &sessionv1.Volume{}}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+		t.Errorf("SendCommand(empty volume) = %v, want invalid_argument", err)
+	}
+	if got, _ := os.ReadFile(filepath.Join(dataDir, "org.mavio.smoke", "volume")); string(got) != "true 30 false false\n" {
+		t.Errorf("volume commands = %q", got)
 	}
 	// Listed again, it keeps its session; unlisted, it is gone.
 	setDevices("tv")

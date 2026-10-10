@@ -97,7 +97,9 @@ func init() {
 		for id := range strings.FieldsSeq(string(body)) {
 			list = append(list, pluginv1.Device_builder{
 				Id: proto.String(id), Name: proto.String("Device " + id), Product: proto.String("Smoke TV"),
-				Commands: []pluginv1.CommandKind{pluginv1.CommandKind_COMMAND_KIND_PLAY, pluginv1.CommandKind_COMMAND_KIND_PLAY_STATE},
+				Commands: []pluginv1.CommandKind{
+					pluginv1.CommandKind_COMMAND_KIND_PLAY, pluginv1.CommandKind_COMMAND_KIND_PLAY_STATE, pluginv1.CommandKind_COMMAND_KIND_VOLUME,
+				},
 			}.Build())
 		}
 		host := pluginv1connect.NewHostServiceClient(guest.HostClient(), guest.HostURL)
@@ -105,15 +107,29 @@ func init() {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 		}
 	})
+	// server answers with how the host says the server is reached.
+	routes.HandleFunc("GET /server", func(w http.ResponseWriter, r *http.Request) {
+		host := pluginv1connect.NewHostServiceClient(guest.HostClient(), guest.HostURL)
+		info, err := host.GetServerInfo(r.Context(), &pluginv1.GetServerInfoRequest{})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		fmt.Fprintf(w, "name=%q version=%q http=%d https=%d base=%q", info.GetServerName(), info.GetVersion(),
+			info.GetHttpPort(), info.GetHttpsPort(), info.GetBaseUrl())
+	})
 	guest.HandleHTTP(routes)
 }
 
 // devices plays the first item of a Play command, acting as the user who
-// sent it and the device, and takes play state commands without doing
-// anything.
+// sent it and the device, takes play state commands without doing
+// anything and appends volume commands to "volume" in the data folder.
 type devices struct{}
 
 func (devices) SendCommand(ctx context.Context, req *pluginv1.SendCommandRequest) (*pluginv1.SendCommandResponse, error) {
+	if v := req.GetCommand().GetVolume(); v != nil {
+		return &pluginv1.SendCommandResponse{}, appendData("volume", v.HasLevel(), v.GetLevel(), v.HasMuted(), v.GetMuted())
+	}
 	play := req.GetCommand().GetPlay()
 	if play == nil {
 		return &pluginv1.SendCommandResponse{}, nil

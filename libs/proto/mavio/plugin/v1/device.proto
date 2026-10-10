@@ -12,6 +12,11 @@ service HostService {
   // session every signed-in user sees, until the plugin lists it no
   // longer or stops.
   rpc SetDevices(SetDevicesRequest) returns (SetDevicesResponse);
+  // GetServerInfo tells how the server is reached, such as for URLs given
+  // to devices on the local network.
+  rpc GetServerInfo(GetServerInfoRequest) returns (GetServerInfoResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 // DeviceControllerService carries out the commands users send to a
@@ -45,6 +50,7 @@ enum CommandKind {
   COMMAND_KIND_PLAY_STATE = 2;
   COMMAND_KIND_SEEK = 3;
   COMMAND_KIND_MESSAGE = 4;
+  COMMAND_KIND_VOLUME = 5;
 }
 
 // Command is what a user asks a device to do, as
@@ -55,6 +61,7 @@ message Command {
     PlayState play_state = 2;
     Seek seek = 3;
     ShowMessage message = 4;
+    Volume volume = 5;
   }
 }
 
@@ -92,6 +99,13 @@ message ShowMessage {
   google.protobuf.Duration timeout = 2;
 }
 
+// Volume sets the volume, mutes or unmutes, as far as its fields are set.
+message Volume {
+  // 0–100.
+  int32 level = 1;
+  bool muted = 2;
+}
+
 message SetDevicesRequest {
   // At most 1000, with distinct IDs.
   repeated Device devices = 1;
@@ -111,3 +125,18 @@ message SendCommandRequest {
 }
 
 message SendCommandResponse {}
+
+message GetServerInfoRequest {}
+
+message GetServerInfoResponse {
+  // The name the server shows, its host name unless administrators set one.
+  string server_name = 1;
+  string version = 2;
+  // The port the server serves HTTP on, on every address it listens on.
+  int32 http_port = 3;
+  // The port it serves HTTPS on; 0 when it serves none.
+  int32 https_port = 4;
+  // The path the server is served under, such as "/mavio"; empty for the
+  // root.
+  string base_url = 5;
+}

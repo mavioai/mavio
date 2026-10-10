@@ -159,6 +159,7 @@ message Command {
     PlayState play_state = 2;
     Seek seek = 3;
     Message message = 4;
+    Volume volume = 5;
   }
 }
 
@@ -215,6 +216,21 @@ message Message {
   ];
   // How long to show it; unset leaves it to the user.
   google.protobuf.Duration timeout = 2 [(buf.validate.field).duration.gt = {}];
+}
+
+// Volume sets the volume, mutes or unmutes; it sets one of them at least.
+message Volume {
+  option (buf.validate.message).cel = {
+    id: "volume.set"
+    message: "set level or muted"
+    expression: "has(this.level) || has(this.muted)"
+  };
+  // 0–100.
+  int32 level = 1 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 100
+  }];
+  bool muted = 2;
 }
 
 message ListSessionsRequest {
