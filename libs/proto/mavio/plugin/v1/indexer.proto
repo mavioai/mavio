@@ -1,0 +1,283 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// IndexerProviderService searches indexers, the sites that list releases
+// as torrents or NZBs. The provider implements kinds of indexers, its
+// definitions, and the plugin's configuration lists the indexers
+// configured from them.
+service IndexerProviderService {
+  // ListDefinitions lists the kinds of indexers the provider implements,
+  // with the settings each takes.
+  rpc ListDefinitions(ListDefinitionsRequest) returns (ListDefinitionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListIndexers lists the configured indexers with their capabilities.
+  rpc ListIndexers(ListIndexersRequest) returns (ListIndexersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // TestIndexer checks that an indexer, configured or not, answers a
+  // search with the settings given, signing in when it needs to.
+  rpc TestIndexer(TestIndexerRequest) returns (TestIndexerResponse);
+  // SearchReleases searches indexers, or reads their recent releases when the
+  // request has no query, IDs, season or episode.
+  rpc SearchReleases(SearchReleasesRequest) returns (SearchReleasesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetReleaseFile fetches a release's torrent file or NZB from its
+  // indexer, or the magnet link its download link leads to.
+  rpc GetReleaseFile(GetReleaseFileRequest) returns (GetReleaseFileResponse);
+}
+
+message ListDefinitionsRequest {}
+
+message ListDefinitionsResponse {
+  repeated IndexerDefinition definitions = 1;
+}
+
+// IndexerDefinition is a kind of indexer the provider implements: a site,
+// or a protocol such as Newznab that many sites speak.
+message IndexerDefinition {
+  // Stable within the plugin, e.g. "newznab" or "1337x".
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  DownloadProtocol protocol = 4;
+  IndexerPrivacy privacy = 5;
+  // The site's language, e.g. "en-US".
+  string language = 6;
+  // The site's addresses, the first by default.
+  repeated string links = 7;
+  // The settings an indexer of the definition takes.
+  repeated IndexerField fields = 8;
+}
+
+// DownloadProtocol is how a release is downloaded.
+enum DownloadProtocol {
+  DOWNLOAD_PROTOCOL_UNSPECIFIED = 0;
+  DOWNLOAD_PROTOCOL_TORRENT = 1;
+  DOWNLOAD_PROTOCOL_USENET = 2;
+}
+
+// IndexerPrivacy is who may use an indexer.
+enum IndexerPrivacy {
+  INDEXER_PRIVACY_UNSPECIFIED = 0;
+  // Anyone.
+  INDEXER_PRIVACY_PUBLIC = 1;
+  // Anyone who signs up.
+  INDEXER_PRIVACY_SEMI_PRIVATE = 2;
+  // Members only, by invitation.
+  INDEXER_PRIVACY_PRIVATE = 3;
+}
+
+// IndexerField is a setting of an indexer.
+message IndexerField {
+  // The setting's key in the indexer's settings.
+  string name = 1;
+  string label = 2;
+  string help_text = 3;
+  IndexerFieldType type = 4;
+  // The default value as JSON; empty for none.
+  string default_json = 5;
+  // The choices of a select.
+  repeated IndexerFieldOption options = 6;
+  bool advanced = 7;
+  // A secret, such as a password, an API key or a cookie, which is never
+  // shown back.
+  bool secret = 8;
+}
+
+// IndexerFieldType is how a setting is entered.
+enum IndexerFieldType {
+  INDEXER_FIELD_TYPE_UNSPECIFIED = 0;
+  // A string.
+  INDEXER_FIELD_TYPE_TEXT = 1;
+  // A number.
+  INDEXER_FIELD_TYPE_NUMBER = 2;
+  // A boolean.
+  INDEXER_FIELD_TYPE_CHECKBOX = 3;
+  // One of the options' values.
+  INDEXER_FIELD_TYPE_SELECT = 4;
+  // Any of the options' values, as a list.
+  INDEXER_FIELD_TYPE_MULTI_SELECT = 5;
+  // Text shown to administrators, not a setting.
+  INDEXER_FIELD_TYPE_INFO = 6;
+}
+
+// IndexerFieldOption is a choice of a select.
+message IndexerFieldOption {
+  // As JSON.
+  string value_json = 1;
+  string label = 2;
+}
+
+message ListIndexersRequest {}
+
+message ListIndexersResponse {
+  repeated Indexer indexers = 1;
+}
+
+// Indexer is a configured indexer.
+message Indexer {
+  // Stable within the plugin's configuration.
+  string id = 1;
+  string name = 2;
+  string definition_id = 3;
+  DownloadProtocol protocol = 4;
+  IndexerPrivacy privacy = 5;
+  bool enabled = 6;
+  // Lower first when releases are otherwise equal; 25 by default.
+  int32 priority = 7;
+  IndexerCapabilities capabilities = 8;
+  // Set while the indexer is left out after failing, until this time.
+  google.protobuf.Timestamp disabled_until = 9;
+  // The failure that left it out.
+  string failure = 10;
+}
+
+// IndexerCapabilities is what an indexer can be searched by, as Newznab's
+// caps tell.
+message IndexerCapabilities {
+  // The parameters of each search type, in Newznab's names: "q" for
+  // basic searches; "q", "season", "ep", "imdbid", "tvdbid", "rid",
+  // "tvmazeid", "traktid", "tmdbid", "doubanid", "year" and "genre" for
+  // series; "q", "imdbid", "tmdbid", "traktid", "doubanid", "year" and
+  // "genre" for movies. An empty list means the type is not searchable.
+  repeated string search_params = 1;
+  repeated string tv_search_params = 2;
+  repeated string movie_search_params = 3;
+  // The Newznab categories the indexer lists releases in.
+  repeated IndexerCategory categories = 4;
+  // The number of results a search returns by default and at most.
+  int32 limit_default = 5;
+  int32 limit_max = 6;
+  // The indexer takes the query as given, without simplifying it.
+  bool raw_search = 7;
+}
+
+// IndexerCategory is a Newznab category, such as 2000 for movies.
+message IndexerCategory {
+  int32 id = 1;
+  string name = 2;
+  repeated IndexerCategory subcategories = 3;
+}
+
+message TestIndexerRequest {
+  // A configured indexer, or one described by the remaining fields.
+  string indexer_id = 1;
+  string definition_id = 2;
+  // The indexer's settings as a JSON object.
+  string settings_json = 3;
+}
+
+message TestIndexerResponse {
+  // Empty when the test passed.
+  string failure = 1;
+}
+
+message SearchReleasesRequest {
+  // The indexers to search; empty for every enabled indexer.
+  repeated string indexer_ids = 1;
+  IndexerSearchType type = 2;
+  // Free text, apart from the IDs, season and episode.
+  string query = 3 [(buf.validate.field).string.max_len = 1000];
+  // Newznab categories; empty for those of the search type.
+  repeated int32 categories = 4;
+  // IDs of the movie or series: "imdb", "tmdb", "tvdb", "tvrage",
+  // "tvmaze", "trakt", "douban".
+  map<string, string> external_ids = 5;
+  int32 season = 6;
+  // An episode number, or a date such as "2024-03-01" or "03/01" for daily
+  // series.
+  string episode = 7 [(buf.validate.field).string.max_len = 64];
+  int32 year = 8;
+  string genre = 9 [(buf.validate.field).string.max_len = 100];
+  // Results per indexer; zero for its default.
+  int32 limit = 10 [(buf.validate.field).int32.gte = 0];
+  int32 offset = 11 [(buf.validate.field).int32.gte = 0];
+}
+
+// IndexerSearchType is what a search looks for, as Newznab's t parameter
+// tells.
+enum IndexerSearchType {
+  // A basic search.
+  INDEXER_SEARCH_TYPE_UNSPECIFIED = 0;
+  INDEXER_SEARCH_TYPE_MOVIE = 1;
+  INDEXER_SEARCH_TYPE_TV = 2;
+}
+
+message SearchReleasesResponse {
+  repeated Release releases = 1;
+  // The indexers that failed, which the releases leave out.
+  repeated IndexerFailure failures = 2;
+}
+
+// IndexerFailure is an indexer that failed a search.
+message IndexerFailure {
+  string indexer_id = 1;
+  string message = 2;
+  // Set when the indexer is left out until then.
+  google.protobuf.Timestamp disabled_until = 3;
+}
+
+// Release is a release an indexer lists.
+message Release {
+  string indexer_id = 1;
+  // Unique within the indexer.
+  string guid = 2;
+  string title = 3;
+  string description = 4;
+  // In bytes; unset when unknown.
+  int64 size = 5;
+  // Where the torrent file or NZB is fetched, through GetReleaseFile.
+  string download_url = 6;
+  string magnet_url = 7;
+  string info_hash = 8;
+  // The release's page on the indexer.
+  string info_url = 9;
+  string comments_url = 10;
+  DownloadProtocol protocol = 11;
+  google.protobuf.Timestamp publish_date = 12;
+  // Newznab categories.
+  repeated int32 categories = 13;
+  // IDs of the movie or series the indexer gives, keyed as in searches.
+  map<string, string> external_ids = 14;
+  int32 year = 15;
+  int32 grabs = 16;
+  int32 files = 17;
+  int32 seeders = 18;
+  // Seeders and leechers.
+  int32 peers = 19;
+  // How much of the download counts against the account's ratio, and of
+  // the upload for it; 1 for normal releases, 0 for freeleech.
+  double download_volume_factor = 20;
+  double upload_volume_factor = 21;
+  double minimum_ratio = 22;
+  // In seconds.
+  int64 minimum_seed_time = 23;
+  // Prowlarr's indexer flags: "internal", "exclusive", "freeleech",
+  // "neutralleech", "halfleech", "scene", "doubleupload", "nuked".
+  repeated string flags = 24;
+  repeated string languages = 25;
+  repeated string subtitles = 26;
+  repeated string genres = 27;
+  string poster_url = 28;
+}
+
+message GetReleaseFileRequest {
+  string indexer_id = 1 [(buf.validate.field).required = true];
+  // The release's download URL.
+  string download_url = 2 [(buf.validate.field).required = true];
+}
+
+message GetReleaseFileResponse {
+  // The torrent file or NZB; empty when the download led to a magnet link.
+  bytes data = 1;
+  string content_type = 2;
+  // The file name the indexer gave, if any.
+  string file_name = 3;
+  string magnet_url = 4;
+}

@@ -91,7 +91,7 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
 		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER","CAPABILITY_IMAGE_PROVIDER",
 			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR","CAPABILITY_LYRICS_PROVIDER",
-			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET","CAPABILITY_EPISODE_LIST_PROVIDER","CAPABILITY_DISCOVERY_PROVIDER","CAPABILITY_SCENE_MAPPING_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
+			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET","CAPABILITY_EPISODE_LIST_PROVIDER","CAPABILITY_DISCOVERY_PROVIDER","CAPABILITY_SCENE_MAPPING_PROVIDER","CAPABILITY_INDEXER_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
 		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, resolver, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
@@ -403,6 +403,34 @@ func TestSceneMappings(t *testing.T) {
 		}.Build())
 		if err != nil || !numbering.GetFound() || numbering.GetEpisodes()[0].GetSceneSeasonNumber() != 2 {
 			t.Errorf("GetSceneNumbering() = %v, %v", numbering, err)
+		}
+	})
+}
+
+func TestIndexers(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := open(t, rt)
+		defs, err := p.Indexers().ListDefinitions(t.Context(), &pluginv1.ListDefinitionsRequest{})
+		if err != nil || len(defs.GetDefinitions()) != 1 || !defs.GetDefinitions()[0].GetFields()[0].GetSecret() {
+			t.Errorf("ListDefinitions() = %v, %v", defs, err)
+		}
+		list, err := p.Indexers().ListIndexers(t.Context(), &pluginv1.ListIndexersRequest{})
+		if err != nil || len(list.GetIndexers()) != 1 || list.GetIndexers()[0].GetCapabilities().GetTvSearchParams()[1] != "season" {
+			t.Errorf("ListIndexers() = %v, %v", list, err)
+		}
+		test, err := p.Indexers().TestIndexer(t.Context(), pluginv1.TestIndexerRequest_builder{DefinitionId: proto.String("other")}.Build())
+		if err != nil || test.GetFailure() == "" {
+			t.Errorf("TestIndexer(other) = %v, %v, want a failure", test, err)
+		}
+		found, err := p.Indexers().SearchReleases(t.Context(), pluginv1.SearchReleasesRequest_builder{Query: proto.String("Show")}.Build())
+		if err != nil || len(found.GetReleases()) != 1 || found.GetReleases()[0].GetTitle() != "Show.S01E01" {
+			t.Errorf("SearchReleases() = %v, %v", found, err)
+		}
+		file, err := p.Indexers().GetReleaseFile(t.Context(), pluginv1.GetReleaseFileRequest_builder{
+			IndexerId: proto.String("test"), DownloadUrl: proto.String("https://indexer.test/1.torrent"),
+		}.Build())
+		if err != nil || string(file.GetData()) != "torrent" {
+			t.Errorf("GetReleaseFile() = %v, %v", file, err)
 		}
 	})
 }
