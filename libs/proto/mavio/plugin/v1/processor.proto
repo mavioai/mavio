@@ -1,0 +1,27 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "mavio/plugin/v1/metadata.proto";
+
+// MetadataProcessorService adjusts the metadata of items at the end of
+// refreshes, such as translating genres or cleaning up titles.
+service MetadataProcessorService {
+  // ProcessMetadata receives the merged metadata of an item before it is
+  // saved and returns metadata to apply over it. Set fields replace the
+  // item's, except locked ones; people, when given, replace its credits
+  // unless the cast is locked.
+  rpc ProcessMetadata(ProcessMetadataRequest) returns (ProcessMetadataResponse);
+}
+
+message ProcessMetadataRequest {
+  MediaKind kind = 1;
+  // The item's metadata, with the credits of the most trusted source.
+  Metadata metadata = 2;
+}
+
+message ProcessMetadataResponse {
+  // False leaves the item as it is.
+  bool changed = 1;
+  Metadata metadata = 2;
+}

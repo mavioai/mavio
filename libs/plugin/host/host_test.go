@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -83,7 +84,7 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 	}
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
 		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER","CAPABILITY_IMAGE_PROVIDER",
-			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER"],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
+			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR"],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
 		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
@@ -317,6 +318,18 @@ func TestLocalMetadata(t *testing.T) {
 		}.Build())
 		if err != nil || len(saved.GetFiles()) != 1 || saved.GetFiles()[0].GetName() != "Alien.mkv.title" || string(saved.GetFiles()[0].GetContent()) != "Alien\n" {
 			t.Errorf("SaveMetadata() = %v, %v, want Alien.mkv.title", saved, err)
+		}
+	})
+}
+
+func TestProcessor(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := open(t, rt)
+		resp, err := p.Processor().ProcessMetadata(t.Context(), pluginv1.ProcessMetadataRequest_builder{
+			Metadata: pluginv1.Metadata_builder{Tags: []string{"heist"}}.Build(),
+		}.Build())
+		if got := resp.GetMetadata().GetTags(); err != nil || !resp.GetChanged() || !slices.Equal(got, []string{"heist", "processed"}) {
+			t.Errorf("ProcessMetadata() = %v, %v, want the tags heist and processed", resp, err)
 		}
 	})
 }

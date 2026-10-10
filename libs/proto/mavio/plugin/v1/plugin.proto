@@ -66,6 +66,8 @@ enum Capability {
   CAPABILITY_LOCAL_METADATA = 11;
   // Implements MetadataSaverService.
   CAPABILITY_METADATA_SAVER = 12;
+  // Implements MetadataProcessorService.
+  CAPABILITY_METADATA_PROCESSOR = 13;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin

@@ -103,6 +103,8 @@ const (
 	Capability_CAPABILITY_LOCAL_METADATA Capability = 11
 	// Implements MetadataSaverService.
 	Capability_CAPABILITY_METADATA_SAVER Capability = 12
+	// Implements MetadataProcessorService.
+	Capability_CAPABILITY_METADATA_PROCESSOR Capability = 13
 )
 
 // Enum value maps for Capability.
@@ -121,21 +123,23 @@ var (
 		10: "CAPABILITY_IMAGE_PROVIDER",
 		11: "CAPABILITY_LOCAL_METADATA",
 		12: "CAPABILITY_METADATA_SAVER",
+		13: "CAPABILITY_METADATA_PROCESSOR",
 	}
 	Capability_value = map[string]int32{
-		"CAPABILITY_UNSPECIFIED":       0,
-		"CAPABILITY_METADATA_PROVIDER": 1,
-		"CAPABILITY_AUTH_PROVIDER":     2,
-		"CAPABILITY_NOTIFIER":          3,
-		"CAPABILITY_SUBTITLE_PROVIDER": 4,
-		"CAPABILITY_SEGMENT_PROVIDER":  5,
-		"CAPABILITY_TASK_RUNNER":       6,
-		"CAPABILITY_EVENT_CONSUMER":    7,
-		"CAPABILITY_HTTP_HANDLER":      8,
-		"CAPABILITY_DEVICE_CONTROLLER": 9,
-		"CAPABILITY_IMAGE_PROVIDER":    10,
-		"CAPABILITY_LOCAL_METADATA":    11,
-		"CAPABILITY_METADATA_SAVER":    12,
+		"CAPABILITY_UNSPECIFIED":        0,
+		"CAPABILITY_METADATA_PROVIDER":  1,
+		"CAPABILITY_AUTH_PROVIDER":      2,
+		"CAPABILITY_NOTIFIER":           3,
+		"CAPABILITY_SUBTITLE_PROVIDER":  4,
+		"CAPABILITY_SEGMENT_PROVIDER":   5,
+		"CAPABILITY_TASK_RUNNER":        6,
+		"CAPABILITY_EVENT_CONSUMER":     7,
+		"CAPABILITY_HTTP_HANDLER":       8,
+		"CAPABILITY_DEVICE_CONTROLLER":  9,
+		"CAPABILITY_IMAGE_PROVIDER":     10,
+		"CAPABILITY_LOCAL_METADATA":     11,
+		"CAPABILITY_METADATA_SAVER":     12,
+		"CAPABILITY_METADATA_PROCESSOR": 13,
 	}
 )
 
@@ -1507,7 +1511,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\x9b\x03\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\xbe\x03\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1523,7 +1527,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x19CAPABILITY_IMAGE_PROVIDER\x10\n" +
 	"\x12\x1d\n" +
 	"\x19CAPABILITY_LOCAL_METADATA\x10\v\x12\x1d\n" +
-	"\x19CAPABILITY_METADATA_SAVER\x10\f2\xda\x02\n" +
+	"\x19CAPABILITY_METADATA_SAVER\x10\f\x12!\n" +
+	"\x1dCAPABILITY_METADATA_PROCESSOR\x10\r2\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +

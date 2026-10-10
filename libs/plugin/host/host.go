@@ -34,6 +34,7 @@ type Plugin interface {
 	Images() pluginv1connect.ImageProviderServiceClient
 	LocalMetadata() pluginv1connect.LocalMetadataServiceClient
 	Saver() pluginv1connect.MetadataSaverServiceClient
+	Processor() pluginv1connect.MetadataProcessorServiceClient
 	// HTTP returns the handler of the plugin's HTTP routes, or nil without
 	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
 	HTTP() http.Handler

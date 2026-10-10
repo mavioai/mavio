@@ -26,6 +26,7 @@ type Set struct {
 	images    pluginv1connect.ImageProviderServiceClient
 	local     pluginv1connect.LocalMetadataServiceClient
 	saver     pluginv1connect.MetadataSaverServiceClient
+	processor pluginv1connect.MetadataProcessorServiceClient
 }
 
 // New builds the clients for m over c.
@@ -63,6 +64,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_METADATA_SAVER) {
 		s.saver = pluginv1connect.NewMetadataSaverServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_METADATA_PROCESSOR) {
+		s.processor = pluginv1connect.NewMetadataProcessorServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -105,3 +109,6 @@ func (s Set) LocalMetadata() pluginv1connect.LocalMetadataServiceClient { return
 
 // Saver returns the MetadataSaverService client, or nil.
 func (s Set) Saver() pluginv1connect.MetadataSaverServiceClient { return s.saver }
+
+// Processor returns the MetadataProcessorService client, or nil.
+func (s Set) Processor() pluginv1connect.MetadataProcessorServiceClient { return s.processor }

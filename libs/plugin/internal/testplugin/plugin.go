@@ -24,6 +24,8 @@
 // As a local metadata reader it takes the name from the first line of the
 // first file; as a saver it writes the name to "<media name>.title".
 //
+// As a metadata processor it adds the tag "processed".
+//
 // As a device controller it takes commands to its device "tv" and rejects
 // others, naming the device and the user.
 //
@@ -65,6 +67,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewImageProviderServiceHandler(images{}))
 	guest.Handle(pluginv1connect.NewLocalMetadataServiceHandler(local{}))
 	guest.Handle(pluginv1connect.NewMetadataSaverServiceHandler(local{}))
+	guest.Handle(pluginv1connect.NewMetadataProcessorServiceHandler(processor{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -118,6 +121,13 @@ func (local) SaveMetadata(_ context.Context, req *pluginv1.SaveMetadataRequest) 
 	return pluginv1.SaveMetadataResponse_builder{Files: []*pluginv1.LocalFile{pluginv1.LocalFile_builder{
 		Name: proto.String(req.GetMediaName() + ".title"), Content: []byte(req.GetMetadata().GetName() + "\n"),
 	}.Build()}}.Build(), nil
+}
+
+type processor struct{}
+
+func (processor) ProcessMetadata(_ context.Context, req *pluginv1.ProcessMetadataRequest) (*pluginv1.ProcessMetadataResponse, error) {
+	md := pluginv1.Metadata_builder{Tags: append(req.GetMetadata().GetTags(), "processed")}.Build()
+	return pluginv1.ProcessMetadataResponse_builder{Changed: proto.Bool(true), Metadata: md}.Build(), nil
 }
 
 type devices struct{}
