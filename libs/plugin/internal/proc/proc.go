@@ -27,5 +27,9 @@ type Handshake struct {
 // AuthScheme prefixes the token in the Authorization header.
 const AuthScheme = "Bearer "
 
+// TokenHeader carries the token of requests to HTTP routes instead, which
+// keep their own Authorization header.
+const TokenHeader = "Mavio-Plugin-Token"
+
 // ShutdownPath is the RPC after which a process plugin exits.
 const ShutdownPath = "/mavio.plugin.v1.PluginService/Shutdown"

@@ -34,6 +34,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/plugin/internal/clients"
 	"github.com/mavioai/mavio/libs/plugin/internal/proc"
+	"github.com/mavioai/mavio/libs/plugin/manifest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
@@ -68,6 +69,7 @@ type Plugin struct {
 	socket   string
 	token    string
 	host     *http.Server
+	routes   http.Handler
 
 	mu     sync.Mutex
 	cmd    *exec.Cmd
@@ -122,8 +124,18 @@ func Start(ctx context.Context, path string, m *pluginv1.Manifest, opts Options)
 			return nil, err
 		}
 	}
-	transport := p.transport()
-	p.Set = clients.New(&http.Client{Transport: transport}, "http://plugin", m, connect.WithInterceptors(p.waitReady()))
+	h2 := p.dialer()
+	p.Set = clients.New(&http.Client{Transport: roundTripper(func(req *http.Request) (*http.Response, error) {
+		req = req.Clone(req.Context())
+		req.Header.Set("Authorization", proc.AuthScheme+p.token)
+		return h2.RoundTrip(req)
+	})}, "http://plugin", m, connect.WithInterceptors(p.waitReady()))
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_HTTP_HANDLER) {
+		p.routes = clients.Routes(roundTripper(func(req *http.Request) (*http.Response, error) {
+			req.Header.Set(proc.TokenHeader, p.token)
+			return h2.RoundTrip(req)
+		}), 0, p.log)
+	}
 
 	if err := p.launch(ctx); err != nil {
 		p.closeHost()
@@ -181,24 +193,22 @@ func socketBase() string {
 	return os.TempDir()
 }
 
-// transport is an HTTP/2 cleartext transport dialing the plugin's socket and
-// presenting the token.
-func (p *Plugin) transport() http.RoundTripper {
+// dialer is an HTTP/2 cleartext transport dialing the plugin's socket.
+func (p *Plugin) dialer() *http.Transport {
 	var protocols http.Protocols
 	protocols.SetUnencryptedHTTP2(true)
-	t := &http.Transport{
+	return &http.Transport{
 		Protocols: &protocols,
 		DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
 			var d net.Dialer
 			return d.DialContext(ctx, "unix", p.socket)
 		},
 	}
-	return roundTripper(func(req *http.Request) (*http.Response, error) {
-		req = req.Clone(req.Context())
-		req.Header.Set("Authorization", proc.AuthScheme+p.token)
-		return t.RoundTrip(req)
-	})
 }
+
+// HTTP returns the handler of the plugin's HTTP routes, or nil; it
+// streams both ways.
+func (p *Plugin) HTTP() http.Handler { return p.routes }
 
 type roundTripper func(*http.Request) (*http.Response, error)
 

@@ -5,8 +5,12 @@
 // Envelopes are sequences of fields; strings and byte slices are prefixed
 // with their length as a little-endian uint32.
 //
-//	request:  path, header count, (name, value)…, body
+//	request:  path, header count, (name, value)…, body, method, query
 //	response: status (uint32), header count, (name, value)…, body
+//
+// The method and query of requests came later; guests that predate them
+// ignore them, and hosts that predate them leave them out, which means a
+// POST without a query.
 package abi
 
 import (
@@ -32,14 +36,25 @@ const (
 // server instead of the network.
 const HostName = "mavio.host"
 
+// HTTPPrefix prefixes the paths of the requests to a plugin's HTTP routes
+// in both runtimes, apart from its Connect services.
+const HTTPPrefix = "/_mavio/http"
+
+// MaxHTTPBody bounds the request and response bodies of WASM plugins' HTTP
+// routes, which are buffered.
+const MaxHTTPBody = 16 << 20
+
 // ErrMalformed reports an envelope that cannot be decoded.
 var ErrMalformed = errors.New("abi: malformed envelope")
 
-// Request is a Connect call routed to a guest handler.
+// Request is a Connect call or a request to an HTTP route, routed to a
+// guest handler.
 type Request struct {
 	Path   string
 	Header http.Header
 	Body   []byte
+	// Method is empty for POST; Query is the raw query.
+	Method, Query string
 }
 
 // Response is the guest handler's reply.
@@ -54,7 +69,12 @@ func EncodeRequest(r Request) []byte {
 	var b []byte
 	b = appendBytes(b, []byte(r.Path))
 	b = appendHeader(b, r.Header)
-	return appendBytes(b, r.Body)
+	b = appendBytes(b, r.Body)
+	if r.Method == "" && r.Query == "" {
+		return b
+	}
+	b = appendBytes(b, []byte(r.Method))
+	return appendBytes(b, []byte(r.Query))
 }
 
 // DecodeRequest parses an encoded request.
@@ -68,7 +88,15 @@ func DecodeRequest(b []byte) (Request, error) {
 	if r.Header, b, err = readHeader(b); err != nil {
 		return r, err
 	}
-	r.Body, _, err = readBytes(b)
+	if r.Body, b, err = readBytes(b); err != nil || len(b) == 0 {
+		return r, err
+	}
+	method, b, err := readBytes(b)
+	if err != nil {
+		return r, err
+	}
+	query, _, err := readBytes(b)
+	r.Method, r.Query = string(method), string(query)
 	return r, err
 }
 

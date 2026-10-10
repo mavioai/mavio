@@ -7,7 +7,8 @@
 //		guest.Handle(pluginv1connect.NewMetadataProviderServiceHandler(&provider{}))
 //	}
 //
-// The same handler code builds for both runtimes.
+// The same handler code builds for both runtimes. A plugin declaring
+// CAPABILITY_HTTP_HANDLER also registers its HTTP routes with HandleHTTP.
 package guest
 
 import (
@@ -43,6 +44,15 @@ func Handle(path string, h http.Handler) {
 	mu.Lock()
 	defer mu.Unlock()
 	mux.Handle(path, h)
+}
+
+// HandleHTTP registers the handler of the plugin's HTTP routes, which the
+// server serves under /plugins/{id}/. It sees request paths without that
+// prefix, starting with "/". Requests made with a valid access token
+// carry the user in the Mavio-User-Id, Mavio-User-Name and
+// Mavio-User-Admin headers instead of the token.
+func HandleHTTP(h http.Handler) {
+	Handle(abi.HTTPPrefix+"/", http.StripPrefix(abi.HTTPPrefix, h))
 }
 
 // Handler returns the handler serving all registered services.

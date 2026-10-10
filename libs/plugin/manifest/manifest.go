@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -127,6 +128,15 @@ func Validate(m *pluginv1.Manifest) error {
 	for _, e := range m.GetPermissions().GetEvents() {
 		if !eventPattern.MatchString(e) {
 			add("event %q must be a type such as item.added, a category such as item.*, or *", e)
+		}
+	}
+	if page := m.GetConfigPage(); page != "" {
+		if !HasCapability(m, pluginv1.Capability_CAPABILITY_HTTP_HANDLER) {
+			add("config_page requires CAPABILITY_HTTP_HANDLER")
+		}
+		if u, err := url.Parse(page); err != nil || u.IsAbs() || u.Host != "" || strings.HasPrefix(page, "/") ||
+			slices.Contains(strings.Split(u.Path, "/"), "..") {
+			add("config_page %q must be a path relative to the plugin's routes", page)
 		}
 	}
 	runsTasks := HasCapability(m, pluginv1.Capability_CAPABILITY_TASK_RUNNER)

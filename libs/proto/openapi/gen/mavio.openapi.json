@@ -4820,7 +4820,8 @@
           "CAPABILITY_SUBTITLE_PROVIDER",
           "CAPABILITY_SEGMENT_PROVIDER",
           "CAPABILITY_TASK_RUNNER",
-          "CAPABILITY_EVENT_CONSUMER"
+          "CAPABILITY_EVENT_CONSUMER",
+          "CAPABILITY_HTTP_HANDLER"
         ]
       },
       "mavio.plugin.v1.Manifest": {
@@ -4897,6 +4898,11 @@
             },
             "title": "tasks",
             "description": "Tasks the plugin runs; requires CAPABILITY_TASK_RUNNER."
+          },
+          "configPage": {
+            "type": "string",
+            "title": "config_page",
+            "description": "Page among the plugin's HTTP routes that configures it, relative to\n /plugins/{id}/, e.g. \"settings\"; requires CAPABILITY_HTTP_HANDLER."
           }
         },
         "title": "Manifest",

@@ -81,6 +81,7 @@ type Plugin struct {
 	runtime  wazero.Runtime
 	compiled wazero.CompiledModule
 	pool     chan *instance
+	routes   http.Handler
 
 	cfgMu      sync.Mutex
 	config     []byte // encoded Configure request body
@@ -144,8 +145,15 @@ func Open(ctx context.Context, path string, m *pluginv1.Manifest, opts Options) 
 		return nil, err
 	}
 	p.Set = clients.New(&http.Client{Transport: p}, "http://plugin", m)
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_HTTP_HANDLER) {
+		p.routes = clients.Routes(p, abi.MaxHTTPBody, p.log)
+	}
 	return p, nil
 }
+
+// HTTP returns the handler of the plugin's HTTP routes, or nil. Bodies
+// are buffered, up to abi.MaxHTTPBody each way.
+func (p *Plugin) HTTP() http.Handler { return p.routes }
 
 func (p *Plugin) setup(ctx context.Context, bin []byte) error {
 	if _, err := wasi_snapshot_preview1.Instantiate(ctx, p.runtime); err != nil {
@@ -207,10 +215,14 @@ func (p *Plugin) RoundTrip(req *http.Request) (*http.Response, error) {
 	if p.closed.Load() {
 		return nil, errors.New("plugin closed")
 	}
-	body, err := io.ReadAll(req.Body)
-	req.Body.Close()
-	if err != nil {
-		return nil, err
+	var body []byte
+	if req.Body != nil {
+		var err error
+		body, err = io.ReadAll(req.Body)
+		req.Body.Close()
+		if err != nil {
+			return nil, err
+		}
 	}
 	ctx := req.Context()
 	if req.URL.Path == configurePath {
@@ -223,13 +235,20 @@ func (p *Plugin) RoundTrip(req *http.Request) (*http.Response, error) {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
-	resp, err := p.callConfigured(ctx, inst, abi.Request{Path: req.URL.Path, Header: req.Header, Body: body})
+	call := abi.Request{Path: req.URL.Path, Header: req.Header, Body: body}
+	if req.Method != http.MethodPost || req.URL.RawQuery != "" {
+		call.Method, call.Query = req.Method, req.URL.RawQuery
+	}
+	resp, err := p.callConfigured(ctx, inst, call)
 	if err != nil {
 		p.log.WarnContext(ctx, "plugin call failed; replacing instance", "path", req.URL.Path, "err", err)
 		p.replace(inst)
 		return nil, err
 	}
 	p.pool <- inst
+	if strings.HasPrefix(req.URL.Path, abi.HTTPPrefix+"/") && len(resp.Body) > abi.MaxHTTPBody {
+		return nil, fmt.Errorf("response of %d bytes exceeds the limit of %d", len(resp.Body), abi.MaxHTTPBody)
+	}
 	return httpResponse(req, resp), nil
 }
 

@@ -90,6 +90,9 @@ const (
 	Capability_CAPABILITY_TASK_RUNNER Capability = 6
 	// Implements EventConsumerService for the events of permissions.events.
 	Capability_CAPABILITY_EVENT_CONSUMER Capability = 7
+	// Serves HTTP routes under /plugins/{id}/, registered with
+	// guest.HandleHTTP.
+	Capability_CAPABILITY_HTTP_HANDLER Capability = 8
 )
 
 // Enum value maps for Capability.
@@ -103,6 +106,7 @@ var (
 		5: "CAPABILITY_SEGMENT_PROVIDER",
 		6: "CAPABILITY_TASK_RUNNER",
 		7: "CAPABILITY_EVENT_CONSUMER",
+		8: "CAPABILITY_HTTP_HANDLER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":       0,
@@ -113,6 +117,7 @@ var (
 		"CAPABILITY_SEGMENT_PROVIDER":  5,
 		"CAPABILITY_TASK_RUNNER":       6,
 		"CAPABILITY_EVENT_CONSUMER":    7,
+		"CAPABILITY_HTTP_HANDLER":      8,
 	}
 )
 
@@ -155,6 +160,7 @@ type Manifest struct {
 	xxx_hidden_ConfigSchema *string                `protobuf:"bytes,11,opt,name=config_schema,json=configSchema"`
 	xxx_hidden_ApiVersion   *string                `protobuf:"bytes,12,opt,name=api_version,json=apiVersion"`
 	xxx_hidden_Tasks        *[]*Task               `protobuf:"bytes,13,rep,name=tasks"`
+	xxx_hidden_ConfigPage   *string                `protobuf:"bytes,14,opt,name=config_page,json=configPage"`
 	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
 	XXX_presence            [1]uint32
 	unknownFields           protoimpl.UnknownFields
@@ -308,44 +314,54 @@ func (x *Manifest) GetTasks() []*Task {
 	return nil
 }
 
+func (x *Manifest) GetConfigPage() string {
+	if x != nil {
+		if x.xxx_hidden_ConfigPage != nil {
+			return *x.xxx_hidden_ConfigPage
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Manifest) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 14)
 }
 
 func (x *Manifest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 14)
 }
 
 func (x *Manifest) SetVersion(v string) {
 	x.xxx_hidden_Version = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 14)
 }
 
 func (x *Manifest) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 14)
 }
 
 func (x *Manifest) SetAuthor(v string) {
 	x.xxx_hidden_Author = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 14)
 }
 
 func (x *Manifest) SetHomepage(v string) {
 	x.xxx_hidden_Homepage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 14)
 }
 
 func (x *Manifest) SetLicense(v string) {
 	x.xxx_hidden_License = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 14)
 }
 
 func (x *Manifest) SetRuntime(v Runtime) {
 	x.xxx_hidden_Runtime = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 14)
 }
 
 func (x *Manifest) SetCapabilities(v []Capability) {
@@ -358,16 +374,21 @@ func (x *Manifest) SetPermissions(v *Permissions) {
 
 func (x *Manifest) SetConfigSchema(v string) {
 	x.xxx_hidden_ConfigSchema = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 14)
 }
 
 func (x *Manifest) SetApiVersion(v string) {
 	x.xxx_hidden_ApiVersion = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 14)
 }
 
 func (x *Manifest) SetTasks(v []*Task) {
 	x.xxx_hidden_Tasks = &v
+}
+
+func (x *Manifest) SetConfigPage(v string) {
+	x.xxx_hidden_ConfigPage = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 14)
 }
 
 func (x *Manifest) HasId() bool {
@@ -447,6 +468,13 @@ func (x *Manifest) HasApiVersion() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
 }
 
+func (x *Manifest) HasConfigPage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
+}
+
 func (x *Manifest) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -501,6 +529,11 @@ func (x *Manifest) ClearApiVersion() {
 	x.xxx_hidden_ApiVersion = nil
 }
 
+func (x *Manifest) ClearConfigPage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 13)
+	x.xxx_hidden_ConfigPage = nil
+}
+
 type Manifest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -523,6 +556,9 @@ type Manifest_builder struct {
 	ApiVersion *string
 	// Tasks the plugin runs; requires CAPABILITY_TASK_RUNNER.
 	Tasks []*Task
+	// Page among the plugin's HTTP routes that configures it, relative to
+	// /plugins/{id}/, e.g. "settings"; requires CAPABILITY_HTTP_HANDLER.
+	ConfigPage *string
 }
 
 func (b0 Manifest_builder) Build() *Manifest {
@@ -530,48 +566,52 @@ func (b0 Manifest_builder) Build() *Manifest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 14)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 14)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Version != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 14)
 		x.xxx_hidden_Version = b.Version
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 14)
 		x.xxx_hidden_Description = b.Description
 	}
 	if b.Author != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 14)
 		x.xxx_hidden_Author = b.Author
 	}
 	if b.Homepage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 14)
 		x.xxx_hidden_Homepage = b.Homepage
 	}
 	if b.License != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 14)
 		x.xxx_hidden_License = b.License
 	}
 	if b.Runtime != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 14)
 		x.xxx_hidden_Runtime = *b.Runtime
 	}
 	x.xxx_hidden_Capabilities = b.Capabilities
 	x.xxx_hidden_Permissions = b.Permissions
 	if b.ConfigSchema != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 14)
 		x.xxx_hidden_ConfigSchema = b.ConfigSchema
 	}
 	if b.ApiVersion != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 14)
 		x.xxx_hidden_ApiVersion = b.ApiVersion
 	}
 	x.xxx_hidden_Tasks = &b.Tasks
+	if b.ConfigPage != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 14)
+		x.xxx_hidden_ConfigPage = b.ConfigPage
+	}
 	return m0
 }
 
@@ -1195,7 +1235,7 @@ var File_mavio_plugin_v1_plugin_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\n" +
-	"\x1cmavio/plugin/v1/plugin.proto\x12\x0fmavio.plugin.v1\x1a\x1amavio/plugin/v1/task.proto\"\xe0\x03\n" +
+	"\x1cmavio/plugin/v1/plugin.proto\x12\x0fmavio.plugin.v1\x1a\x1amavio/plugin/v1/task.proto\"\x81\x04\n" +
 	"\bManifest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
@@ -1211,7 +1251,9 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\rconfig_schema\x18\v \x01(\tR\fconfigSchema\x12\x1f\n" +
 	"\vapi_version\x18\f \x01(\tR\n" +
 	"apiVersion\x12+\n" +
-	"\x05tasks\x18\r \x03(\v2\x15.mavio.plugin.v1.TaskR\x05tasks\"\x97\x01\n" +
+	"\x05tasks\x18\r \x03(\v2\x15.mavio.plugin.v1.TaskR\x05tasks\x12\x1f\n" +
+	"\vconfig_page\x18\x0e \x01(\tR\n" +
+	"configPage\"\x97\x01\n" +
 	"\vPermissions\x12\x1d\n" +
 	"\n" +
 	"http_hosts\x18\x01 \x03(\tR\thttpHosts\x12\x1d\n" +
@@ -1237,7 +1279,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\xff\x01\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\x9c\x02\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1247,7 +1289,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x1cCAPABILITY_SUBTITLE_PROVIDER\x10\x04\x12\x1f\n" +
 	"\x1bCAPABILITY_SEGMENT_PROVIDER\x10\x05\x12\x1a\n" +
 	"\x16CAPABILITY_TASK_RUNNER\x10\x06\x12\x1d\n" +
-	"\x19CAPABILITY_EVENT_CONSUMER\x10\a2\xda\x02\n" +
+	"\x19CAPABILITY_EVENT_CONSUMER\x10\a\x12\x1b\n" +
+	"\x17CAPABILITY_HTTP_HANDLER\x10\b2\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +

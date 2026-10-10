@@ -82,7 +82,7 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 		quoted[i] = fmt.Sprintf("%q", h)
 	}
 	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
-		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER"],"apiVersion":"1.0",
+		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER"],"apiVersion":"1.0","configPage":"echo",
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
 		"permissions":{"httpHosts":[%s],"events":["item.*"]},"configSchema":%q}`, runtimeName, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
@@ -266,6 +266,42 @@ func TestEvents(t *testing.T) {
 		}
 		if got, err := search(ctx, p, "events"); err != nil || got != "item.added item.removed" {
 			t.Errorf("consumed events = %q, %v, want item.added item.removed", got, err)
+		}
+	})
+}
+
+func TestHTTPRoutes(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := open(t, rt)
+		do := func(method, target, auth, body string) *httptest.ResponseRecorder {
+			req := httptest.NewRequestWithContext(t.Context(), method, target, strings.NewReader(body))
+			if auth != "" {
+				req.Header.Set("Authorization", auth)
+			}
+			w := httptest.NewRecorder()
+			p.HTTP().ServeHTTP(w, req)
+			return w
+		}
+		// Routes see the method, path, query, the client's Authorization
+		// and body, never the host's token.
+		w := do(http.MethodPut, "/echo?a=1", "Basic eDp5", "hello")
+		want := `PUT /echo a=1 auth="Basic eDp5" token="" body=hello`
+		if w.Code != http.StatusOK || w.Body.String() != want {
+			t.Errorf("PUT /echo = %d %q, want %q", w.Code, w.Body, want)
+		}
+		if w := do(http.MethodGet, "/missing", "", ""); w.Code != http.StatusNotFound {
+			t.Errorf("GET /missing = %d, want 404", w.Code)
+		}
+		// WASM bodies are bounded.
+		if rt == "wasm" {
+			if w := do(http.MethodGet, "/big", "", ""); w.Code != http.StatusBadGateway {
+				t.Errorf("GET /big = %d, want 502", w.Code)
+			}
+			if w := do(http.MethodPost, "/echo", "", strings.Repeat("x", 17<<20)); w.Code != http.StatusRequestEntityTooLarge {
+				t.Errorf("POST of 17 MiB = %d, want 413", w.Code)
+			}
+		} else if w := do(http.MethodGet, "/big", "", ""); w.Code != http.StatusOK || w.Body.Len() != 17<<20 {
+			t.Errorf("GET /big = %d with %d bytes, want 17 MiB", w.Code, w.Body.Len())
 		}
 	})
 }

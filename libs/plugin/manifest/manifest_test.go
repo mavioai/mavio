@@ -89,6 +89,15 @@ func TestValidate(t *testing.T) {
 			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_EVENT_CONSUMER))
 			m.GetPermissions().SetEvents([]string{"item.*.added"})
 		}, "event"},
+		{"config page without routes", func(m *pluginv1.Manifest) { m.SetConfigPage("settings") }, "requires CAPABILITY_HTTP_HANDLER"},
+		{"absolute config page", func(m *pluginv1.Manifest) {
+			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_HTTP_HANDLER))
+			m.SetConfigPage("/settings")
+		}, "config_page"},
+		{"config page outside the routes", func(m *pluginv1.Manifest) {
+			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_HTTP_HANDLER))
+			m.SetConfigPage("a/../../x")
+		}, "config_page"},
 		{"bad schema", func(m *pluginv1.Manifest) { m.SetConfigSchema(`{"type":"nope"}`) }, "config_schema"},
 	}
 	for _, tt := range tests {

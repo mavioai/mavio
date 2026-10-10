@@ -9,6 +9,7 @@ package wasm
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -73,7 +74,11 @@ func serve(in []byte) abi.Response {
 	if err != nil {
 		return abi.Response{Status: http.StatusBadRequest, Body: []byte(err.Error())}
 	}
-	hreq, err := http.NewRequestWithContext(context.Background(), http.MethodPost, "http://plugin"+req.Path, bytes.NewReader(req.Body))
+	method, target := cmp.Or(req.Method, http.MethodPost), "http://plugin"+req.Path
+	if req.Query != "" {
+		target += "?" + req.Query
+	}
+	hreq, err := http.NewRequestWithContext(context.Background(), method, target, bytes.NewReader(req.Body))
 	if err != nil {
 		return abi.Response{Status: http.StatusBadRequest, Body: []byte(err.Error())}
 	}

@@ -25,6 +25,15 @@ func TestRoundTrip(t *testing.T) {
 		t.Errorf("response round trip = %+v, %v", gotResp, err)
 	}
 
+	route := Request{Path: HTTPPrefix + "/page", Method: http.MethodGet, Query: "a=1&b=2"}
+	if got, err := DecodeRequest(EncodeRequest(route)); err != nil || got.Method != http.MethodGet || got.Query != "a=1&b=2" || got.Path != route.Path {
+		t.Errorf("route request round trip = %+v, %v", got, err)
+	}
+	// Requests without method and query read as before, as POSTs.
+	if got, err := DecodeRequest(EncodeRequest(req)); err != nil || got.Method != "" || got.Query != "" {
+		t.Errorf("request without method = %+v, %v", got, err)
+	}
+
 	empty, err := DecodeRequest(EncodeRequest(Request{}))
 	if err != nil || empty.Path != "" || len(empty.Body) != 0 {
 		t.Errorf("empty request = %+v, %v", empty, err)

@@ -30,6 +30,9 @@ type Plugin interface {
 	Segments() pluginv1connect.MediaSegmentProviderServiceClient
 	Tasks() pluginv1connect.TaskRunnerServiceClient
 	Events() pluginv1connect.EventConsumerServiceClient
+	// HTTP returns the handler of the plugin's HTTP routes, or nil without
+	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
+	HTTP() http.Handler
 	// Close stops the plugin and releases its resources.
 	Close(ctx context.Context) error
 }

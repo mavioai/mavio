@@ -20,10 +20,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/mavioai/mavio/libs/plugin/guest"
+	"github.com/mavioai/mavio/libs/plugin/internal/abi"
 	"github.com/mavioai/mavio/libs/plugin/internal/proc"
 )
 
@@ -102,10 +104,20 @@ func Serve(ctx context.Context, pluginID string) error {
 	return nil
 }
 
+// authenticate requires the host's token: in the Authorization header of
+// Connect calls, or in proc.TokenHeader of requests to HTTP routes, whose
+// handler sees no token.
 func authenticate(token string, next http.Handler) http.Handler {
 	want := []byte(proc.AuthScheme + token)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if subtle.ConstantTimeCompare([]byte(r.Header.Get("Authorization")), want) != 1 {
+		switch {
+		case strings.HasPrefix(r.URL.Path, abi.HTTPPrefix+"/"):
+			if subtle.ConstantTimeCompare([]byte(r.Header.Get(proc.TokenHeader)), []byte(token)) != 1 {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+			r.Header.Del(proc.TokenHeader)
+		case subtle.ConstantTimeCompare([]byte(r.Header.Get("Authorization")), want) != 1:
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}

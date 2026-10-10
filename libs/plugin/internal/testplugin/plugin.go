@@ -15,6 +15,10 @@
 //	"slow"          sleeps for two seconds
 //	anything else   echoes the name
 //
+// Its HTTP routes: "/echo" answers with the method, path, query, the
+// Authorization and Mavio-Plugin-Token headers and the body; "/big" with
+// 17 MiB.
+//
 // Its tasks: "write" writes a file to its data folder and reads it back;
 // "slow" sleeps for two seconds.
 package main
@@ -23,6 +27,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -48,6 +53,17 @@ func init() {
 	guest.Handle(pluginv1connect.NewMetadataProviderServiceHandler(&provider{}))
 	guest.Handle(pluginv1connect.NewTaskRunnerServiceHandler(tasks{}))
 	guest.Handle(pluginv1connect.NewEventConsumerServiceHandler(consumer{}))
+	routes := http.NewServeMux()
+	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		w.Header().Set("Content-Type", "text/plain")
+		fmt.Fprintf(w, "%s %s %s auth=%q token=%q body=%s", r.Method, r.URL.Path, r.URL.RawQuery,
+			r.Header.Get("Authorization"), r.Header.Get("Mavio-Plugin-Token"), body)
+	})
+	routes.HandleFunc("/big", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write(make([]byte, 17<<20))
+	})
+	guest.HandleHTTP(routes)
 }
 
 type consumer struct{}

@@ -52,6 +52,9 @@ enum Capability {
   CAPABILITY_TASK_RUNNER = 6;
   // Implements EventConsumerService for the events of permissions.events.
   CAPABILITY_EVENT_CONSUMER = 7;
+  // Serves HTTP routes under /plugins/{id}/, registered with
+  // guest.HandleHTTP.
+  CAPABILITY_HTTP_HANDLER = 8;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin
@@ -76,6 +79,9 @@ message Manifest {
   string api_version = 12;
   // Tasks the plugin runs; requires CAPABILITY_TASK_RUNNER.
   repeated Task tasks = 13;
+  // Page among the plugin's HTTP routes that configures it, relative to
+  // /plugins/{id}/, e.g. "settings"; requires CAPABILITY_HTTP_HANDLER.
+  string config_page = 14;
 }
 
 // Permissions are the host resources a plugin requests. An administrator
