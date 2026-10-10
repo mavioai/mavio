@@ -79,6 +79,16 @@ type ReleaseCleaner interface {
 	CleanupReleases(releases []*Release, q *Query) []*Release
 }
 
+// DownloadRetrier is a site that downloads a release again by another
+// link when a download is not what was wanted, such as a page saying a
+// freeleech token cannot be used.
+type DownloadRetrier interface {
+	Site
+	// RetryDownload returns the link to download again; ok false to keep
+	// the download.
+	RetryDownload(link string, data []byte) (retry string, ok bool)
+}
+
 // DownloadValidator checks a site's downloads.
 type DownloadValidator interface {
 	ValidateDownload(data []byte) error

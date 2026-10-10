@@ -156,6 +156,15 @@ func (cs *Categories) mapBy(v string, key func(categoryMapping) string) []*Categ
 	return out
 }
 
+// IDs returns the IDs of categories.
+func IDs(categories []*Category) []int {
+	ids := make([]int, len(categories))
+	for i, c := range categories {
+		ids[i] = c.ID
+	}
+	return ids
+}
+
 // Supported returns those of the Newznab categories the indexer has.
 func (cs *Categories) Supported(categories []int) []int {
 	var out []int

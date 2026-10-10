@@ -20,6 +20,13 @@ func (ix *Indexer) Download(ctx context.Context, link string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	if dr, ok := ix.Site.(DownloadRetrier); ok {
+		if retry, ok := dr.RetryDownload(link, data); ok {
+			if data, err = ix.download(ctx, retry); err != nil {
+				return nil, err
+			}
+		}
+	}
 	ix.Statuses.RecordGrab(ix.ID)
 	return data, nil
 }

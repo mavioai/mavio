@@ -5,6 +5,8 @@ import (
 	"iter"
 	"net/http"
 	"net/url"
+	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -213,4 +215,24 @@ func (r *Request) bodyReader() *bytes.Reader {
 		return nil
 	}
 	return bytes.NewReader(r.Body)
+}
+
+var (
+	cookiePair = regexp.MustCompile(`([^()<>@,;:\\"/\[\]?={}\s]+)=([^,;\\"\s]+)`)
+	// cookieAttributes are the attributes of Set-Cookie headers, not
+	// cookies.
+	cookieAttributes = []string{"COMMENT", "COMMENTURL", "DISCORD", "DOMAIN", "EXPIRES", "MAX-AGE", "PATH", "PORT", "SECURE", "VERSION", "HTTPONLY", "SAMESITE"}
+)
+
+// ParseCookieHeader reads the cookies of a Cookie header, as Prowlarr's
+// CookieUtil.CookieHeaderToDictionary does: malformed ones are skipped,
+// and the last of the same name wins.
+func ParseCookieHeader(header string) map[string]string {
+	cookies := map[string]string{}
+	for _, m := range cookiePair.FindAllStringSubmatch(header, -1) {
+		if !slices.Contains(cookieAttributes, strings.ToUpper(m[1])) {
+			cookies[m[1]] = m[2]
+		}
+	}
+	return cookies
 }
