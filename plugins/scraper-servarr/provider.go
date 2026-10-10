@@ -63,12 +63,18 @@ func (p *plugin) metadata(ctx context.Context, l *pluginv1.Lookup) (*pluginv1.Me
 	switch l.GetKind() {
 	case pluginv1.MediaKind_MEDIA_KIND_MOVIE:
 		m, err := p.findMovie(ctx, l.GetExternalIds())
+		if errors.Is(err, errNotFound) {
+			m, err = p.identifyMovie(ctx, l)
+		}
 		if err != nil {
 			return nil, err
 		}
 		return m.metadata(l.GetLanguage(), l.GetCountry()), nil
 	case pluginv1.MediaKind_MEDIA_KIND_SERIES:
 		s, err := p.findShow(ctx, l.GetExternalIds())
+		if errors.Is(err, errNotFound) {
+			s, err = p.identifyShow(ctx, l)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -96,6 +102,54 @@ func (p *plugin) metadata(ctx context.Context, l *pluginv1.Lookup) (*pluginv1.Me
 		return e.metadata(), nil
 	}
 	return nil, errNotFound
+}
+
+// identifyMovie finds a movie without known IDs by its name and year: the
+// search result whose title matches best, if any title matches.
+func (p *plugin) identifyMovie(ctx context.Context, l *pluginv1.Lookup) (radarrMovie, error) {
+	movies, err := p.searchMovies(ctx, l)
+	if err != nil {
+		return radarrMovie{}, err
+	}
+	i := bestMatch(l.GetName(), int(l.GetYear()), len(movies), func(i int) ([]string, int) { return movies[i].titles(), movies[i].Year })
+	if i < 0 {
+		return radarrMovie{}, errNotFound
+	}
+	return movies[i], nil
+}
+
+// identifyShow finds a series without known IDs like identifyMovie.
+func (p *plugin) identifyShow(ctx context.Context, l *pluginv1.Lookup) (skyShow, error) {
+	if l.GetName() == "" {
+		return skyShow{}, errNotFound
+	}
+	shows, err := p.searchShows(ctx, l.GetName())
+	if err != nil {
+		return skyShow{}, err
+	}
+	i := bestMatch(l.GetName(), int(l.GetYear()), len(shows), func(i int) ([]string, int) { return shows[i].titles(), shows[i].year() })
+	if i < 0 {
+		return skyShow{}, errNotFound
+	}
+	// Search results lack the series' episodes.
+	return p.show(ctx, shows[i].TvdbID)
+}
+
+// bestMatch returns the index of the one of n candidates, given by their
+// titles and year, that matches name and year best, the first on ties;
+// -1 when no title matches name.
+func bestMatch(name string, year, n int, candidate func(i int) ([]string, int)) int {
+	best, bestScore := -1, 0.0
+	for i := range n {
+		titles, y := candidate(i)
+		if !slices.ContainsFunc(titles, func(t string) bool { return t != "" && normalizeTitle(t) == normalizeTitle(name) }) {
+			continue
+		}
+		if s := matchScore(name, year, titles, y); best < 0 || s > bestScore {
+			best, bestScore = i, s
+		}
+	}
+	return best
 }
 
 // ListEpisodes lists a series' seasons and episodes as SkyHook numbers

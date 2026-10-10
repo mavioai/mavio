@@ -1,6 +1,7 @@
 package main
 
 import (
+	"maps"
 	"net/url"
 	"slices"
 	"testing"
@@ -225,5 +226,44 @@ func TestMovieNotFound(t *testing.T) {
 		if err != nil || resp.GetFound() {
 			t.Errorf("GetMetadata(%v) = %v, %v, want not found", ids, resp, err)
 		}
+	}
+}
+
+func TestIdentify(t *testing.T) {
+	routes := map[string]string{
+		"GET /radarr/search": `[
+			{"TmdbId": 1, "Title": "The Matrix Resurrections", "Year": 2021},
+			{"TmdbId": 604, "Title": "The Matrix", "Year": 2003},
+			{"TmdbId": 603, "Title": "The Matrix", "Year": 1999}]`,
+	}
+	maps.Copy(routes, seriesRoutes)
+	tests := []struct {
+		name   string
+		lookup *pluginv1.Lookup
+		want   string // the TMDB ID of a movie, the TVDB ID of a series
+	}{
+		{"movie by title and year", lookup(pluginv1.MediaKind_MEDIA_KIND_MOVIE, "The Matrix", 1999, nil), "603"},
+		{"movie by title", lookup(pluginv1.MediaKind_MEDIA_KIND_MOVIE, "The Matrix", 0, nil), "604"},
+		// A year without a matching title identifies nothing.
+		{"movie whose title matches none", lookup(pluginv1.MediaKind_MEDIA_KIND_MOVIE, "Matrix Reloaded", 2021, nil), ""},
+		{"series by title", lookup(pluginv1.MediaKind_MEDIA_KIND_SERIES, "Breaking Bad", 0, nil), "81189"},
+		{"series whose title matches none", lookup(pluginv1.MediaKind_MEDIA_KIND_SERIES, "Breaking", 2008, nil), ""},
+		{"series without a name", lookup(pluginv1.MediaKind_MEDIA_KIND_SERIES, "", 0, nil), ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p, _ := newTestPlugin(t, routes)
+			resp, err := p.GetMetadata(t.Context(), pluginv1.GetMetadataRequest_builder{Lookup: tt.lookup}.Build())
+			if err != nil {
+				t.Fatal(err)
+			}
+			key := "tmdb"
+			if tt.lookup.GetKind() == pluginv1.MediaKind_MEDIA_KIND_SERIES {
+				key = "tvdb"
+			}
+			if got := resp.GetMetadata().GetExternalIds()[key]; got != tt.want || resp.GetFound() != (tt.want != "") {
+				t.Errorf("identified = %v %q, want = %q", resp.GetFound(), got, tt.want)
+			}
+		})
 	}
 }
