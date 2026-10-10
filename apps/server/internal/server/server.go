@@ -183,7 +183,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	})
 	refresher := &library.Refresher{
 		Store: db, Source: plugs.MetadataProviders, Images: plugs.ImageProviders, Local: plugs.LocalReaders, Savers: plugs.Savers,
-		MetadataDir: filepath.ToSlash(metadataDir), Fetch: imageServer.Fetch, Logger: log,
+		Processors: plugs.Processors, MetadataDir: filepath.ToSlash(metadataDir), Fetch: imageServer.Fetch, Logger: log,
 	}
 	var backups *backup.Manager
 	if cfg.BackupDir != "" {

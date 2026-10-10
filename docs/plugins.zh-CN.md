@@ -119,7 +119,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 * `METADATA_SAVER` 插件在 `MetadataSaverService.SaveMetadata` 中收到条目保存后的元数据（含演职人员与远程图片），返回文件（相对条目文件夹的名称与内容）；在保存本地元数据的媒体库中，宿主把它们与 NFO 文件一起写到该文件夹，除非其中有文件超出该文件夹、会替换媒体本身或超出上述限制。
 
 ### 8.4 元数据处理器
-`MetadataProcessorService.Process` 在刷新结束、保存之前收到条目合并后的元数据，返回要覆盖其上的元数据；锁定字段保持不变。
+`MetadataProcessorService.ProcessMetadata` 在刷新结束、保存之前收到条目合并后的元数据（含最可信来源的演职人员），返回要覆盖其上的元数据：已设置的字段替换条目的字段（已锁定的除外），人员在演员表未锁定时替换其演职人员。处理器依次运行，每个都能看到之前处理器的结果；某个失败时不做任何改动。
 
 ### 8.5 歌词提供者
 `LyricsProviderService.SearchLyrics`（曲目名、艺人、专辑、时长）与 `DownloadLyrics`。`ItemService.SearchRemoteLyrics` 与 `DownloadRemoteLyrics` 把歌词以 `.lrc` 或 `.txt` 保存到曲目旁边；在启用了歌词提供者的媒体库中，刷新时为没有歌词的曲目下载歌词。

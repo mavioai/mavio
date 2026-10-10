@@ -119,7 +119,7 @@ A manifest declares external ID kinds in `external_id_kinds`: key, display name,
 * `METADATA_SAVER` plugins receive an item's saved metadata, with its credits and remote images, in `MetadataSaverService.SaveMetadata` and return files (name relative to the item's folder, contents); in libraries saving local metadata the host writes them there with the NFO file, unless one of them leaves the folder, replaces the media or exceeds the limits above.
 
 ### 8.4 Metadata Processors
-`MetadataProcessorService.Process` receives the merged metadata of an item at the end of a refresh, before it is saved, and returns metadata to apply over it; locked fields are kept.
+`MetadataProcessorService.ProcessMetadata` receives the merged metadata of an item at the end of a refresh, with the credits of the most trusted source, before it is saved, and returns metadata to apply over it: set fields replace the item's, except locked ones, and people replace its credits unless the cast is locked. Processors run in order, each seeing what the ones before did; one failing changes nothing.
 
 ### 8.5 Lyrics Providers
 `LyricsProviderService.SearchLyrics` (track name, artists, album, duration) and `DownloadLyrics`. `ItemService.SearchRemoteLyrics` and `DownloadRemoteLyrics` save the lyrics beside the track as `.lrc` or `.txt`; refreshes download them for tracks without lyrics in libraries that enable a lyrics provider.

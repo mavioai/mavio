@@ -2,6 +2,7 @@ package providers
 
 import (
 	"context"
+	"slices"
 	"testing"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
+	"github.com/mavioai/mavio/libs/metadata"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
@@ -30,6 +32,27 @@ func (f *fakeLocal) SaveMetadata(_ context.Context, req *pluginv1.SaveMetadataRe
 	return pluginv1.SaveMetadataResponse_builder{Files: []*pluginv1.LocalFile{
 		pluginv1.LocalFile_builder{Name: proto.String("movie.json"), Content: []byte("{}")}.Build(),
 	}}.Build(), nil
+}
+
+func (f *fakeLocal) ProcessMetadata(_ context.Context, req *pluginv1.ProcessMetadataRequest) (*pluginv1.ProcessMetadataResponse, error) {
+	if req.GetMetadata().GetName() == "unchanged" {
+		return &pluginv1.ProcessMetadataResponse{}, nil
+	}
+	return pluginv1.ProcessMetadataResponse_builder{
+		Changed: proto.Bool(true), Metadata: pluginv1.Metadata_builder{Tags: []string{"processed"}}.Build(),
+	}.Build(), nil
+}
+
+func TestProcessorPlugin(t *testing.T) {
+	p := &ProcessorPlugin{ID: "tags", Client: &fakeLocal{}}
+	in := &metadata.Result{Item: core.Item{Kind: core.KindMovie, Name: "Heat"}}
+	if res, err := p.Process(t.Context(), in); err != nil || res == nil || !slices.Equal(res.Item.Tags, []string{"processed"}) {
+		t.Errorf("Process() = %+v, %v", res, err)
+	}
+	in.Item.Name = "unchanged"
+	if res, err := p.Process(t.Context(), in); err != nil || res != nil {
+		t.Errorf("Process(unchanged) = %+v, %v, want nil", res, err)
+	}
 }
 
 func TestLocalPlugins(t *testing.T) {

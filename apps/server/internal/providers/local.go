@@ -74,6 +74,31 @@ func (p *SaverPlugin) Save(ctx context.Context, media string, res *metadata.Resu
 	return out, nil
 }
 
+// ProcessorPlugin is a metadata processor plugin as a library.Processor.
+type ProcessorPlugin struct {
+	ID     string
+	Client pluginv1connect.MetadataProcessorServiceClient
+}
+
+// Name returns the plugin's ID.
+func (p *ProcessorPlugin) Name() string { return p.ID }
+
+// Process has the plugin adjust an item's merged metadata.
+func (p *ProcessorPlugin) Process(ctx context.Context, res *metadata.Result) (*metadata.Result, error) {
+	kind, ok := mediaKinds[res.Item.Kind]
+	if !ok {
+		return nil, nil
+	}
+	resp, err := p.Client.ProcessMetadata(ctx, pluginv1.ProcessMetadataRequest_builder{Kind: kind.Enum(), Metadata: toMetadata(res)}.Build())
+	if err != nil {
+		return nil, fmt.Errorf("process metadata: %w", err)
+	}
+	if !resp.GetChanged() {
+		return nil, nil
+	}
+	return toResult(resp.GetMetadata()), nil
+}
+
 func toLocalFiles(files []library.LocalFile) []*pluginv1.LocalFile {
 	out := make([]*pluginv1.LocalFile, len(files))
 	for i, f := range files {
@@ -168,4 +193,5 @@ var (
 var (
 	_ library.LocalReader = (*LocalPlugin)(nil)
 	_ library.Saver       = (*SaverPlugin)(nil)
+	_ library.Processor   = (*ProcessorPlugin)(nil)
 )

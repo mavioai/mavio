@@ -142,6 +142,30 @@ func (p *saver) Save(ctx context.Context, media string, res *metadata.Result) ([
 	return (&providers.SaverPlugin{ID: p.id, Client: pl.Saver()}).Save(ctx, media, res)
 }
 
+// Processors returns the metadata processors among the started plugins.
+func (m *Manager) Processors() []library.Processor {
+	var out []library.Processor
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_METADATA_PROCESSOR) {
+		out = append(out, &processor{m: m, id: id})
+	}
+	return out
+}
+
+type processor struct {
+	m  *Manager
+	id string
+}
+
+func (p *processor) Name() string { return p.id }
+
+func (p *processor) Process(ctx context.Context, res *metadata.Result) (*metadata.Result, error) {
+	pl, ok := p.m.running(p.id)
+	if !ok || pl.Processor() == nil {
+		return nil, nil
+	}
+	return (&providers.ProcessorPlugin{ID: p.id, Client: pl.Processor()}).Process(ctx, res)
+}
+
 // ImageProviders returns the image providers among the started plugins.
 func (m *Manager) ImageProviders() []library.ImageProvider {
 	var out []library.ImageProvider

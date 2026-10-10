@@ -64,6 +64,9 @@ type Refresher struct {
 	// Images gives the image providers, which fill in the kinds of images
 	// the metadata providers and local files lack; nil means none.
 	Images func() []ImageProvider
+	// Processors gives the metadata processors, which adjust the merged
+	// metadata of items before it is saved; nil means none.
+	Processors func() []Processor
 	// Local gives the local metadata readers, whose metadata counts after
 	// the providers' and before the NFO file's; nil means none.
 	Local func() []LocalReader
@@ -200,6 +203,10 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 	if it.Name == "" {
 		it.Name = name
 	}
+	var processedPeople []metadata.Person
+	if it.Extra == "" && !it.Locked {
+		processedPeople = r.process(ctx, &it, results)
+	}
 	it.ParentalRating = ratingScore(&it, lookup.Country)
 	it.MetadataRefreshedAt = r.now()
 	err = r.Store.InTx(ctx, func(tx core.Store) error {
@@ -208,6 +215,12 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 		}
 		// The most trusted source with people and images provides them.
 		credited := slices.Contains(it.LockedFields, core.FieldCast)
+		if !credited && processedPeople != nil {
+			if err := replaceCredits(ctx, tx, it.ID, processedPeople); err != nil {
+				return err
+			}
+			credited = true
+		}
 		for i := len(results) - 1; i >= 0 && !credited; i-- {
 			if len(results[i].People) > 0 {
 				if err := replaceCredits(ctx, tx, it.ID, results[i].People); err != nil {
@@ -252,6 +265,49 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 		return it, err
 	}
 	return it, r.changed(ctx, lib, it)
+}
+
+// Processor adjusts the merged metadata of items at the end of refreshes,
+// such as a metadata processor plugin.
+type Processor interface {
+	Name() string
+	// Process returns metadata to apply over an item's, or nil to leave it
+	// as it is. Its people, when given, replace the item's credits.
+	Process(ctx context.Context, res *metadata.Result) (*metadata.Result, error)
+}
+
+// process has the processors adjust an item's merged metadata, in order,
+// each seeing what the ones before did; locked fields are kept. It
+// returns the people the last processor that gave any gave.
+func (r *Refresher) process(ctx context.Context, it *core.Item, results []*metadata.Result) []metadata.Person {
+	if r.Processors == nil {
+		return nil
+	}
+	merged := &metadata.Result{}
+	for i := len(results) - 1; i >= 0; i-- {
+		if len(results[i].People) > 0 {
+			merged.People = results[i].People
+			break
+		}
+	}
+	var people []metadata.Person
+	for _, p := range r.Processors() {
+		merged.Item = *it
+		res, err := p.Process(ctx, merged)
+		if err != nil {
+			r.logger().WarnContext(ctx, "metadata processor failed", "processor", p.Name(), "item", it.ID, "err", err)
+			continue
+		}
+		if res == nil {
+			continue
+		}
+		res.Item.LockedFields, res.Item.Locked = nil, false
+		applyMetadata(it, res.Item, false)
+		if len(res.People) > 0 {
+			merged.People, people = res.People, res.People
+		}
+	}
+	return people
 }
 
 // imageProviders returns the image providers.
