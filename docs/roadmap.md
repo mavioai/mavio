@@ -401,7 +401,9 @@ flowchart TD
 - [x] Prowlarr's cases and recorded responses ported into `plugins/indexers/testdata`
 - [x] Number, size and date parsing (`internal/parse`)
 - [x] Categories, capabilities and search criteria (`internal/indexer`)
-- [ ] Newznab and Torznab
+- [x] Newznab and Torznab (`internal/sites/newznab`, `internal/sites/torznab`)
+  - [ ] The age and size limits of searches (`minage`, `maxage`, `minsize`, `maxsize`), which queries do not carry yet
+  - [ ] Capabilities kept across restarts; they are read again from the caps after each start
 - [ ] The Cardigann engine and the definitions of `indexers.prowlarr.com`
 - [ ] The sites Prowlarr implements in code
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)

@@ -125,5 +125,8 @@ func (ix *Indexer) Test(ctx context.Context) error {
 	if len(releases) == 0 {
 		return errors.New("query successful, but the indexer returned no results; check its categories and settings")
 	}
+	if st, ok := ix.Site.(SiteTester); ok {
+		return st.TestSite(ctx, ix)
+	}
 	return nil
 }

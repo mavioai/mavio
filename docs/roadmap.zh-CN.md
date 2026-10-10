@@ -401,7 +401,9 @@ flowchart TD
 - [x] Prowlarr 的用例与录制响应移植到 `plugins/indexers/testdata`
 - [x] 数字、大小与日期解析（`internal/parse`）
 - [x] 分类、能力与搜索条件（`internal/indexer`）
-- [ ] Newznab 与 Torznab
+- [x] Newznab 与 Torznab（`internal/sites/newznab`、`internal/sites/torznab`）
+  - [ ] 搜索的时间与大小限制（`minage`、`maxage`、`minsize`、`maxsize`），查询尚未携带
+  - [ ] 跨重启保存能力；目前每次启动后重新从 caps 读取
 - [ ] Cardigann 引擎及 `indexers.prowlarr.com` 的定义
 - [ ] Prowlarr 以代码实现的站点
 - [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）

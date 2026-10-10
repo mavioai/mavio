@@ -65,6 +65,13 @@ type DownloadSite interface {
 	DownloadRequest(ctx context.Context, ix *Indexer, link string) (*Request, error)
 }
 
+// SiteTester is a site with more to check when the indexer is tested.
+type SiteTester interface {
+	Site
+	// TestSite checks the site after its first page was fetched.
+	TestSite(ctx context.Context, ix *Indexer) error
+}
+
 // DownloadValidator checks a site's downloads.
 type DownloadValidator interface {
 	ValidateDownload(data []byte) error

@@ -1,5 +1,7 @@
 package indexer
 
+import "slices"
+
 // The categories are those of Prowlarr's NewznabStandardCategory; they are
 // read only.
 
@@ -186,4 +188,14 @@ func init() {
 	XXX.Sub = []*Category{XXXDVD, XXXWMV, XXXXviD, XXXx264, XXXUHD, XXXPack, XXXImageSet, XXXOther, XXXSD, XXXWEBDL}
 	Books.Sub = []*Category{BooksMags, BooksEBook, BooksComics, BooksTechnical, BooksOther, BooksForeign}
 	Other.Sub = []*Category{OtherMisc, OtherHashed}
+}
+
+// ParentCategories returns the standard categories with subcategories.
+func ParentCategories() []*Category {
+	return slices.Clone(parentCategories)
+}
+
+// StandardCategories returns all the standard categories.
+func StandardCategories() []*Category {
+	return slices.Clone(standardCategories)
 }
