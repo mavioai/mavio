@@ -48,6 +48,10 @@
 // series it is asked to number, numbers its episode 1x1 as 2x1, and lists
 // the series with TVDB ID 1 as daily.
 //
+// As an indexer provider it implements the definition "test" and has its
+// indexer "test", which finds the release "<query>.S01E01" and serves the
+// file "torrent" for it.
+//
 // As a device controller it takes commands to its device "tv" and rejects
 // others, naming the device and the user.
 //
@@ -105,6 +109,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewEpisodeListProviderServiceHandler(episodes{}))
 	guest.Handle(pluginv1connect.NewDiscoveryProviderServiceHandler(discovery{}))
 	guest.Handle(pluginv1connect.NewSceneMappingProviderServiceHandler(scene{}))
+	guest.Handle(pluginv1connect.NewIndexerProviderServiceHandler(indexers{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -226,6 +231,51 @@ func (discovery) ListFilterValues(_ context.Context, req *pluginv1.ListFilterVal
 	return pluginv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{pluginv1.FilterValue_builder{
 		Id: proto.String("1"), Name: proto.String(req.GetQuery()),
 	}.Build()}}.Build(), nil
+}
+
+type indexers struct{}
+
+// ListDefinitions lists the definition "test".
+func (indexers) ListDefinitions(context.Context, *pluginv1.ListDefinitionsRequest) (*pluginv1.ListDefinitionsResponse, error) {
+	return pluginv1.ListDefinitionsResponse_builder{Definitions: []*pluginv1.IndexerDefinition{pluginv1.IndexerDefinition_builder{
+		Id: proto.String("test"), Name: proto.String("Test"), Protocol: pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT.Enum(),
+		Fields: []*pluginv1.IndexerField{pluginv1.IndexerField_builder{
+			Name: proto.String("apikey"), Type: pluginv1.IndexerFieldType_INDEXER_FIELD_TYPE_TEXT.Enum(), Secret: proto.Bool(true),
+		}.Build()},
+	}.Build()}}.Build(), nil
+}
+
+// ListIndexers lists the indexer "test".
+func (indexers) ListIndexers(context.Context, *pluginv1.ListIndexersRequest) (*pluginv1.ListIndexersResponse, error) {
+	return pluginv1.ListIndexersResponse_builder{Indexers: []*pluginv1.Indexer{pluginv1.Indexer_builder{
+		Id: proto.String("test"), Name: proto.String("Test"), DefinitionId: proto.String("test"), Enabled: proto.Bool(true),
+		Protocol:     pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT.Enum(),
+		Capabilities: pluginv1.IndexerCapabilities_builder{SearchParams: []string{"q"}, TvSearchParams: []string{"q", "season", "ep"}}.Build(),
+	}.Build()}}.Build(), nil
+}
+
+// TestIndexer passes for the definition "test".
+func (indexers) TestIndexer(_ context.Context, req *pluginv1.TestIndexerRequest) (*pluginv1.TestIndexerResponse, error) {
+	if req.GetIndexerId() == "test" || req.GetDefinitionId() == "test" {
+		return &pluginv1.TestIndexerResponse{}, nil
+	}
+	return pluginv1.TestIndexerResponse_builder{Failure: proto.String("unknown definition")}.Build(), nil
+}
+
+// SearchReleases finds "<query>.S01E01".
+func (indexers) SearchReleases(_ context.Context, req *pluginv1.SearchReleasesRequest) (*pluginv1.SearchReleasesResponse, error) {
+	return pluginv1.SearchReleasesResponse_builder{Releases: []*pluginv1.Release{pluginv1.Release_builder{
+		IndexerId: proto.String("test"), Guid: proto.String("1"), Title: proto.String(req.GetQuery() + ".S01E01"),
+		DownloadUrl: proto.String("https://indexer.test/1.torrent"), Protocol: pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT.Enum(),
+	}.Build()}}.Build(), nil
+}
+
+// GetReleaseFile serves "torrent".
+func (indexers) GetReleaseFile(_ context.Context, req *pluginv1.GetReleaseFileRequest) (*pluginv1.GetReleaseFileResponse, error) {
+	if req.GetIndexerId() != "test" {
+		return nil, connect.NewError(connect.CodeNotFound, errors.New("no such indexer"))
+	}
+	return pluginv1.GetReleaseFileResponse_builder{Data: []byte("torrent"), ContentType: proto.String("application/x-bittorrent")}.Build(), nil
 }
 
 type scene struct{}

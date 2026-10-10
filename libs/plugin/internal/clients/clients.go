@@ -36,6 +36,7 @@ type Set struct {
 	episodes  pluginv1connect.EpisodeListProviderServiceClient
 	discovery pluginv1connect.DiscoveryProviderServiceClient
 	scene     pluginv1connect.SceneMappingProviderServiceClient
+	indexers  pluginv1connect.IndexerProviderServiceClient
 }
 
 // New builds the clients for m over c.
@@ -103,6 +104,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_SCENE_MAPPING_PROVIDER) {
 		s.scene = pluginv1connect.NewSceneMappingProviderServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_INDEXER_PROVIDER) {
+		s.indexers = pluginv1connect.NewIndexerProviderServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -175,3 +179,6 @@ func (s Set) Discovery() pluginv1connect.DiscoveryProviderServiceClient { return
 
 // SceneMappings returns the SceneMappingProviderService client, or nil.
 func (s Set) SceneMappings() pluginv1connect.SceneMappingProviderServiceClient { return s.scene }
+
+// Indexers returns the IndexerProviderService client, or nil.
+func (s Set) Indexers() pluginv1connect.IndexerProviderServiceClient { return s.indexers }

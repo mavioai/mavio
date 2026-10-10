@@ -123,6 +123,8 @@ const (
 	Capability_CAPABILITY_DISCOVERY_PROVIDER Capability = 21
 	// Implements SceneMappingProviderService.
 	Capability_CAPABILITY_SCENE_MAPPING_PROVIDER Capability = 22
+	// Implements IndexerProviderService.
+	Capability_CAPABILITY_INDEXER_PROVIDER Capability = 23
 )
 
 // Enum value maps for Capability.
@@ -151,6 +153,7 @@ var (
 		20: "CAPABILITY_EPISODE_LIST_PROVIDER",
 		21: "CAPABILITY_DISCOVERY_PROVIDER",
 		22: "CAPABILITY_SCENE_MAPPING_PROVIDER",
+		23: "CAPABILITY_INDEXER_PROVIDER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":            0,
@@ -176,6 +179,7 @@ var (
 		"CAPABILITY_EPISODE_LIST_PROVIDER":  20,
 		"CAPABILITY_DISCOVERY_PROVIDER":     21,
 		"CAPABILITY_SCENE_MAPPING_PROVIDER": 22,
+		"CAPABILITY_INDEXER_PROVIDER":       23,
 	}
 )
 
@@ -1547,7 +1551,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\xeb\x05\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\x8c\x06\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1573,7 +1577,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x19CAPABILITY_PASSWORD_RESET\x10\x13\x12$\n" +
 	" CAPABILITY_EPISODE_LIST_PROVIDER\x10\x14\x12!\n" +
 	"\x1dCAPABILITY_DISCOVERY_PROVIDER\x10\x15\x12%\n" +
-	"!CAPABILITY_SCENE_MAPPING_PROVIDER\x10\x162\xda\x02\n" +
+	"!CAPABILITY_SCENE_MAPPING_PROVIDER\x10\x16\x12\x1f\n" +
+	"\x1bCAPABILITY_INDEXER_PROVIDER\x10\x172\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +
