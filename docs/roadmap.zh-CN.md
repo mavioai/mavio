@@ -94,7 +94,7 @@ flowchart TD
 | P14 | DLNA | ✅ 完成 |
 | P15 | 资源获取基础 | ✅ 完成 |
 | P16 | 资源获取数据源 | 进行中 |
-| P17 | 索引器 | 未开始 |
+| P17 | 索引器 | 进行中 |
 | P18 | 电影资源获取 | 未开始 |
 | P19 | 剧集资源获取 | 未开始 |
 | P20 | 发现与请求 | 未开始 |
@@ -395,6 +395,18 @@ flowchart TD
 **范围**：`plugins/indexers`，移植 Prowlarr 的第一方进程插件：Newznab、Torznab、Cardigann 引擎及 `indexers.prowlarr.com` 的定义、Prowlarr 以代码实现的全部站点、分类与能力、限速与退避、索引器代理（HTTP、SOCKS、FlareSolverr）。能力类型 `INDEXER_PROVIDER`；`ReleaseService` 搜索已配置的索引器，并用 `libs/release` 解析其结果。
 
 **完成标准**：移植的 Prowlarr 用例通过；通过装配好的服务端，对 Newznab、Torznab、Cardigann 定义与代码实现站点的录制响应进行搜索，并解析为 release。
+
+**进展**：
+- [x] `INDEXER_PROVIDER` 契约（`mavio/plugin/v1/indexer.proto`）及其宿主客户端
+- [x] Prowlarr 的用例与录制响应移植到 `plugins/indexers/testdata`
+- [x] 数字、大小与日期解析（`internal/parse`）
+- [ ] 分类、能力与搜索条件
+- [ ] Newznab 与 Torznab
+- [ ] Cardigann 引擎及 `indexers.prowlarr.com` 的定义
+- [ ] Prowlarr 以代码实现的站点
+- [ ] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
+- [ ] `ReleaseService`
+- [ ] 端到端测试
 
 ### P18 电影资源获取
 **范围**：`libs/acquire` 及其 `movie` 包，移植 Radarr；`plugins/download-clients`，包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件。

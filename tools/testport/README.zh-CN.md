@@ -2,7 +2,7 @@
 
 > [English](README.md) | 简体中文
 
-从 Jellyfin、Sonarr 与 Radarr 的仓库中提取参数化测试用例与测试资产，写入 Mavio 各库的 `testdata/` 目录。格式与规则见 `docs/testing.zh-CN.md` §2。
+从 Jellyfin、Sonarr、Radarr 与 Prowlarr 的仓库中提取参数化测试用例与测试资产，写入 Mavio 各库的 `testdata/` 目录。格式与规则见 `docs/testing.zh-CN.md` §2。
 
 ```bash
 # 在 tools/testport 下

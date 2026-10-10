@@ -2,7 +2,7 @@
 
 > English | [简体中文](README.zh-CN.md)
 
-Extracts parameterized test cases and test assets from checkouts of Jellyfin, Sonarr and Radarr into Mavio's `testdata/` directories. See `docs/testing.md` §2 for the format and rules.
+Extracts parameterized test cases and test assets from checkouts of Jellyfin, Sonarr, Radarr and Prowlarr into Mavio's `testdata/` directories. See `docs/testing.md` §2 for the format and rules.
 
 ```bash
 # in tools/testport
