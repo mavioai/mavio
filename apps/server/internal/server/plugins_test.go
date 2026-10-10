@@ -2,6 +2,7 @@ package server_test
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -43,10 +44,11 @@ func installSmoke(t *testing.T, fields string) string {
 }
 
 // TestPluginPlatform runs the assembled server with a plugin using the
-// plugin platform, without ffmpeg: its tasks, data folder and events.
+// plugin platform, without ffmpeg: its tasks, data folder, events and HTTP
+// routes.
 func TestPluginPlatform(t *testing.T) {
 	ctx := t.Context()
-	pluginDir := installSmoke(t, `"capabilities":["CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER"],
+	pluginDir := installSmoke(t, `"capabilities":["CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER"],
 		"tasks":[{"id":"count","name":"Count","description":"Counts its runs.","interval":"86400s"}],
 		"permissions":{"events":["task.*","user.created"]}`)
 	dataDir := t.TempDir()
@@ -116,5 +118,47 @@ func TestPluginPlatform(t *testing.T) {
 		if time.Now().After(deadline) {
 			t.Fatalf("consumed events = %q, want %q (kid %s)", got, want, kid.GetUser().GetId())
 		}
+	}
+
+	// The plugin's routes see the caller a valid token names, never the
+	// token, and serve sandboxed pages; forged user headers are dropped.
+	whoami := func(header, value string) (string, string) {
+		t.Helper()
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.url+"/plugins/org.mavio.smoke/whoami", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set(header, value)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err != nil || resp.StatusCode != http.StatusOK {
+			t.Fatalf("GET whoami = %d %s, %v", resp.StatusCode, body, err)
+		}
+		return string(body), resp.Header.Get("Content-Security-Policy")
+	}
+	body, csp := whoami("Authorization", "Bearer "+first.GetAccessToken())
+	if want := `user="admin" admin="true" authorization=""`; body != want {
+		t.Errorf("whoami with a token = %s, want %s", body, want)
+	}
+	if csp != "sandbox allow-scripts allow-forms allow-popups" {
+		t.Errorf("Content-Security-Policy = %q", csp)
+	}
+	if body, _ := whoami("Mavio-User-Name", "admin"); body != `user="" admin="" authorization=""` {
+		t.Errorf("whoami with a forged user = %s", body)
+	}
+	if body, _ := whoami("Authorization", "Basic eDp5"); body != `user="" admin="" authorization="Basic eDp5"` {
+		t.Errorf("whoami with the plugin's own credentials = %s", body)
+	}
+	resp, err := http.Get(srv.url + "/plugins/org.mavio.missing/whoami")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Errorf("route of a missing plugin = %d, want 404", resp.StatusCode)
 	}
 }

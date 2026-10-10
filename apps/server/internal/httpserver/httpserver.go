@@ -62,6 +62,9 @@ type Options struct {
 	Accelerations func() []core.HardwareAcceleration
 	// Logs keeps the recent log records.
 	Logs *logs.Ring
+	// PluginRoutes returns the handler of a started plugin's HTTP routes, or
+	// nil; nil serves none.
+	PluginRoutes func(id string) http.Handler
 	// Activity records what happens; nil records nothing.
 	Activity *activity.Log
 	// Backups makes backups; nil makes none.
@@ -134,6 +137,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(sessionv1connect.NewSyncPlayServiceHandler(rpc.NewSyncPlayService(opts.Store, opts.Hub), interceptors))
 	mux.Handle("GET /media/", opts.Playbacks.Handler())
 	mux.Handle("GET /images/", opts.Images.Handler())
+	mux.Handle("/plugins/{id}/", pluginRoutes(authn, opts.PluginRoutes))
 	if opts.Dev {
 		mux.Handle("GET /dev/", devplayer.Handler())
 	}

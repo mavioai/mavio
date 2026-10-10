@@ -91,11 +91,11 @@ manifest 在 `permissions.api` 中列出插件可以调用的服务：`<package>
 * 每个插件有自己的队列，最多 10,000 个事件；失败的批次以退避方式重试三次，超出队列容量或用尽重试的事件被丢弃并记录警告。对每个插件按顺序投递，至多一次。
 
 ## 5. HTTP 路由
-* 声明 `HTTP_HANDLER` 的插件在 `/plugins/{id}/` 下处理所有方法，在根路径与基础 URL 下均可访问。宿主去掉前缀，把请求交给插件以 `guest.HandleHTTP` 注册的处理器。
-* 认证由插件负责：路由无需令牌即可访问，因为 DLNA 渲染器与 OAuth 回调需要如此。请求携带有效的 Bearer 令牌时，宿主去掉令牌并添加 `Mavio-User-Id`、`Mavio-User-Name` 与 `Mavio-User-Admin`；不带令牌的请求中的这些头会被去掉。
+* 声明 `HTTP_HANDLER` 的插件在 `/plugins/{id}/` 下处理所有方法，在根路径与基础 URL 下均可访问，等待配置期间也是如此。宿主去掉前缀，把请求交给插件以 `guest.HandleHTTP` 注册的处理器，并以 `X-Forwarded-For`、`X-Forwarded-Host` 与 `X-Forwarded-Proto` 描述客户端的请求。在插件内部，路由位于一个保留路径下，与其 Connect 服务分开。
+* 认证由插件负责：路由无需令牌即可访问，因为 DLNA 渲染器与 OAuth 回调需要如此。请求携带有效的 Bearer 令牌时，宿主去掉令牌并添加 `Mavio-User-Id`、`Mavio-User-Name` 与 `Mavio-User-Admin`；不带令牌的请求中的这些头会被去掉。其他 `Authorization` 头原样到达插件。
 * 每个响应都带有 `Content-Security-Policy: sandbox allow-scripts allow-forms allow-popups`，使插件提供的页面运行在不透明源中，无法读取服务端源的存储。
-* manifest 可以把其路由中的一个页面指定为 `config_page`，客户端把它与配置 schema 描述的表单并列打开。
-* **运行时**：进程插件通过其 socket 上的流式反向代理访问。WASM 请求会被缓冲，每个方向至多 16 MiB；ABI 请求信封在请求体之后携带方法与查询字符串，旧的 guest 会忽略它们。
+* manifest 可以把其路由中的一个页面指定为 `config_page`，即相对于 `/plugins/{id}/` 的路径，例如 `settings`，客户端把它与配置 schema 描述的表单并列打开。
+* **运行时**：进程插件通过其 socket 上的流式反向代理访问，代理在 `Mavio-Plugin-Token` 中出示插件的令牌，使请求保留自己的 `Authorization`。WASM 请求会被缓冲并受调用超时限制，每个方向至多 16 MiB；ABI 请求信封在请求体之后携带方法与查询字符串，旧的 guest 会忽略它们。
 
 ## 6. 任务与数据目录
 * **任务**：`TASK_RUNNER` 插件的 manifest 列出任务（ID、名称、说明、至少一分钟的间隔、超时）。它们以 `plugin:{plugin}:{task}` 出现在 `TaskService` 中，并带有插件 ID；它们作为 `plugin.task` 作业在单独的 worker 上运行，调用 `TaskRunnerService.RunTask`：自插件启动起按间隔运行，每次运行排入下一次；也可按需运行。任务的超时（至多六小时，未设置时为一小时）在该次调用中取代 WASM 的调用超时。插件未就绪时跳过定时运行；已不存在的任务的运行被丢弃。

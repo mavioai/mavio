@@ -253,6 +253,18 @@ func (m *Manager) running(id string) (host.Plugin, bool) {
 	return e.plugin, true
 }
 
+// Routes returns the handler of a started plugin's HTTP routes, or nil.
+// Unconfigured plugins serve them too, for their configuration pages.
+func (m *Manager) Routes(id string) http.Handler {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	e, err := m.find(id)
+	if err != nil || e.plugin == nil || e.state == Failed {
+		return nil
+	}
+	return e.plugin.HTTP()
+}
+
 // withCapability lists the IDs of the started plugins declaring c.
 func (m *Manager) withCapability(c pluginv1.Capability) []string {
 	m.mu.Lock()

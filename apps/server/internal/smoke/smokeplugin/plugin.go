@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"net/http"
 	"os"
 	"path/filepath"
 	"slices"
@@ -72,6 +73,14 @@ func init() {
 	guest.Handle(pluginv1connect.NewMediaSegmentProviderServiceHandler(segments{}))
 	guest.Handle(pluginv1connect.NewTaskRunnerServiceHandler(tasks{}))
 	guest.Handle(pluginv1connect.NewEventConsumerServiceHandler(consumer{}))
+	routes := http.NewServeMux()
+	// whoami answers with who the host says the caller is, and whether the
+	// caller's Authorization header came through.
+	routes.HandleFunc("GET /whoami", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "user=%q admin=%q authorization=%q", r.Header.Get("Mavio-User-Name"),
+			r.Header.Get("Mavio-User-Admin"), r.Header.Get("Authorization"))
+	})
+	guest.HandleHTTP(routes)
 }
 
 // consumer appends a line per event to "events" in the data folder: its

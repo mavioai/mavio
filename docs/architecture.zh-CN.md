@@ -254,7 +254,7 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
 两种运行时都实现 `libs/proto/mavio/plugin/v1` 中定义的同一组服务（`MetadataProvider`、`AuthProvider`、`Notifier`……）。宿主侧通过统一的 `plugin.Host` 接口调用，不感知插件具体跑在哪种运行时。
 
 ### 7.2 WASM 运行时
-* **调用即 Connect 请求**：宿主的 Connect 客户端使用一个特殊的 HTTP transport：它不走网络连接，而是把请求（路径、头、body）编码成信封写入插件内存，再调用模块导出的 `mavio_call(ptr, len) -> (ptr << 32 | len)`；`mavio_alloc` / `mavio_free` 管理共享缓冲区。插件内部由 `guest/wasm` 把请求交给插件注册的标准 Connect handler，并返回响应信封（状态码、头、body）。因此两种运行时的插件代码完全相同。
+* **调用即 Connect 请求**：宿主的 Connect 客户端使用一个特殊的 HTTP transport：它不走网络连接，而是把请求（路径、头、body，HTTP 路由还有方法与查询字符串）编码成信封写入插件内存，再调用模块导出的 `mavio_call(ptr, len) -> (ptr << 32 | len)`；`mavio_alloc` / `mavio_free` 管理共享缓冲区。插件内部由 `guest/wasm` 把请求交给插件注册的标准 Connect handler，并返回响应信封（状态码、头、body）。因此两种运行时的插件代码完全相同。
 * **构建模式**：插件是 WASI reactor（`GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared`）；宿主为每个实例执行一次 `_initialize`。
 * **宿主函数**（模块 `mavio`）：
   * `http_fetch(ptr, len) -> (handle << 32 | len)`：若 manifest 的 `http_hosts` 允许目标主机，由宿主代为执行 HTTP 请求；`http_read(handle, ptr)` 把结果拷贝进插件内存。分两步是为了避免在宿主函数中回调插件，Go 的 wasip1 运行时不支持这种重入。插件侧 SDK 把它们封装成普通的 `*http.Client`（`guest.HTTPClient()`）。发往宿主 API（[插件平台 §3](plugins.zh-CN.md#3-宿主-api)）所在的 `mavio.host` 的请求则在进程内由服务端的处理器树处理（`guest.HostClient()`）。
