@@ -150,7 +150,7 @@ A virtual item is a movie, season or episode known from metadata whose file the 
 
 * Refreshing a series asks the library's episode listers (`ProviderOrder.Episodes`) in order; the first that knows the series lists its seasons and episodes, numbered in the series' `DisplayOrder`. As Jellyfin's TMDB missing episode provider, the refresh then creates a virtual episode for each listed episode that no episode of the series holds and the library's `VirtualEpisodes` wants, in its season, creating a virtual season when the series has no season of that number; it updates the virtual episodes it made before, moves them into the season of their number, and deletes them once an episode file holds them, they age out of `GraceDays`, or they are no longer wanted. Virtual seasons left empty are deleted.
 * A virtual item belongs to the lister whose provider has an external ID on it; virtual items of other listers are left alone.
-* A monitored series lists every episode, aired or not, and keeps them; its specials follow `Specials`.
+* A monitored series lists every episode, aired or not, and keeps them; its specials follow `Specials`. Monitoring a series, or changing its display order, queues its refresh at once.
 * A scan that finds the file of a virtual season or episode, by its numbers, turns that item into a physical one, keeping its ID, metadata and user data; a multi-episode file deletes the other virtual episodes it holds.
 
 ## 5. Media Sources, Streams and Chapters

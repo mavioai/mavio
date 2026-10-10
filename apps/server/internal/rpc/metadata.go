@@ -141,6 +141,7 @@ func (s *MetadataService) UpdateItem(ctx context.Context, req *libraryv1.UpdateI
 			return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("unknown field %q in the update mask", p))
 		}
 	}
+	before := it
 	it, err = s.refresher.Update(ctx, lib, it.ID, func(it *core.Item) error {
 		for _, p := range paths {
 			itemSetters[p](it, md)
@@ -149,6 +150,14 @@ func (s *MetadataService) UpdateItem(ctx context.Context, req *libraryv1.UpdateI
 	})
 	if err != nil {
 		return nil, connectError(ctx, err)
+	}
+	// A series monitored or numbered anew lists its episodes again now
+	// rather than at its next refresh.
+	if it.Kind == core.KindSeries && (it.Monitored != before.Monitored || it.DisplayOrder != before.DisplayOrder) {
+		job := library.RefreshJob(it.ID, s.now())
+		if _, err := s.store.Jobs().Enqueue(ctx, &job); err != nil {
+			return nil, connectError(ctx, err)
+		}
 	}
 	out, err := s.item(ctx, it)
 	if err != nil {

@@ -46,6 +46,9 @@ import (
 //     "resets" of its data folder.
 //   - As a notifier it appends the type of every event to the file
 //     "notified" of its data folder.
+//   - As an episode list provider it knows the series "Smoke Show": two
+//     seasons of two episodes each, aired in 2000, identified by "smoke"
+//     IDs.
 func init() {
 	guest.Handle(pluginv1connect.NewImageProviderServiceHandler(images{}))
 	guest.Handle(pluginv1connect.NewLocalMetadataServiceHandler(local{}))
@@ -58,6 +61,38 @@ func init() {
 	guest.Handle(pluginv1connect.NewImageGeneratorServiceHandler(generator{}))
 	guest.Handle(pluginv1connect.NewMediaSourceProviderServiceHandler(sources{}))
 	guest.Handle(pluginv1connect.NewPasswordResetServiceHandler(resets{}))
+	guest.Handle(pluginv1connect.NewEpisodeListProviderServiceHandler(episodes{}))
+}
+
+// episodes lists the episodes of "Smoke Show".
+type episodes struct{}
+
+func (episodes) ListEpisodes(_ context.Context, req *pluginv1.ListEpisodesRequest) (*pluginv1.ListEpisodesResponse, error) {
+	if req.GetLookup().GetName() != "Smoke Show" {
+		return &pluginv1.ListEpisodesResponse{}, nil
+	}
+	resp := pluginv1.ListEpisodesResponse_builder{Found: proto.Bool(true), Provider: proto.String("smoke")}.Build()
+	for season := range int32(2) {
+		season++
+		resp.SetSeasons(append(resp.GetSeasons(), pluginv1.ListedSeason_builder{
+			SeasonNumber: proto.Int32(season),
+			Metadata: pluginv1.Metadata_builder{
+				Name: proto.String(fmt.Sprintf("Season %d", season)), ExternalIds: map[string]string{"smoke": fmt.Sprintf("s%d", season)},
+			}.Build(),
+		}.Build()))
+		for episode := range int32(2) {
+			episode++
+			resp.SetEpisodes(append(resp.GetEpisodes(), pluginv1.ListedEpisode_builder{
+				SeasonNumber: proto.Int32(season), EpisodeNumber: proto.Int32(episode),
+				Metadata: pluginv1.Metadata_builder{
+					Name:         proto.String(fmt.Sprintf("Episode %d.%d", season, episode)),
+					PremiereDate: proto.String(fmt.Sprintf("2000-0%d-0%d", season, episode)),
+					ExternalIds:  map[string]string{"smoke": fmt.Sprintf("e%d.%d", season, episode)},
+				}.Build(),
+			}.Build()))
+		}
+	}
+	return resp, nil
 }
 
 // readData returns the words of a file of the data folder; none when it

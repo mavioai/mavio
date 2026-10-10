@@ -374,6 +374,7 @@ flowchart TD
 - [x] Series types, display orders and absolute numbers; `scraper-tmdb` numbers seasons and episodes by the series' TMDB episode group
 - [x] `libs/release` with Radarr's and Sonarr's parser cases
 - [x] `tools/testport` reads NUnit test cases
+- [x] Monitoring a series or changing its display order refreshes it at once; end-to-end test (`apps/server/internal/server/episodes_test.go`)
 
 ### P16 Acquisition Data Sources
 **Scope**: the metadata acquisition needs, without keys by default.
