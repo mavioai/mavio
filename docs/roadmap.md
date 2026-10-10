@@ -10,7 +10,7 @@
 
 * **Bottom-up**: build the low-level libraries with no business dependencies first, then assemble layer by layer; each layer depends only on completed layers below it.
 * **Definition of done**: a phase is complete when its libraries pass their tests, including all ported test cases (or cases explicitly marked skip with a reason), see [Testing §2](testing.md#2-porting-test-cases-from-jellyfin).
-* **Server first**: P7 to P12 complete the server, by comparing it with Jellyfin's server (its API controllers and providers); P13 and P14 bring plugins level with Jellyfin's and add DLNA; the clients follow in P15, on a finished API; P16 verifies playback end to end on real devices; P17 packages and publishes the releases.
+* **Server first**: P7 to P12 complete the server, by comparing it with Jellyfin's server (its API controllers and providers); P13 and P14 bring plugins level with Jellyfin's and add DLNA; P15 to P20 add acquisition, what Seerr, Radarr, Sonarr and Prowlarr do beside Jellyfin ([Architecture §13](architecture.md#13-acquisition-libsacquire)); the clients follow in P21, on a finished API; P22 verifies playback end to end on real devices; P23 packages and publishes the releases.
 * **Integration smoke tests**: starting from P1, the end of each phase adds an integration test in `apps/server/internal/smoke` that wires the completed libraries together. It is not an MVP; it only exposes interface drift early, reducing the bottom-up approach's risk of "discovering problems only at final integration".
 
 ---
@@ -34,9 +34,15 @@ flowchart TD
     P12["P12 Media extras<br/>trickplay, chapter images, media segments, lyrics, fonts, normalization, offline downloads"]
     P13["P13 Plugin platform<br/>host API, events, HTTP routes, tasks, remote devices, more provider types"]
     P14["P14 DLNA<br/>plugins/dlna: media server, Play To, device profiles"]
-    P15["P15 Clients and ecosystem<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim decision"]
-    P16["P16 Real-device acceptance<br/>end-to-end playback on real televisions and clients"]
-    P17["P17 Packaging and release<br/>libs/proto and libs/plugin tags, server binaries and container images"]
+    P15["P15 Acquisition foundation<br/>wanted items, display orders, series types, libs/release"]
+    P16["P16 Acquisition data sources<br/>plugins/scraper-servarr, discovery in scraper-tmdb"]
+    P17["P17 Indexers<br/>plugins/indexers, ReleaseService"]
+    P18["P18 Movie acquisition<br/>libs/acquire, plugins/download-clients"]
+    P19["P19 Series acquisition<br/>season packs, anime, daily series, scene mappings"]
+    P20["P20 Discovery and requests<br/>DiscoverService, RequestService"]
+    P21["P21 Clients and ecosystem<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim decision"]
+    P22["P22 Real-device acceptance<br/>end-to-end playback on real televisions and clients"]
+    P23["P23 Packaging and release<br/>libs/proto and libs/plugin tags, server binaries and container images"]
 
     P0 --> P1
     P1 --> P2
@@ -56,10 +62,17 @@ flowchart TD
     P11 --> P13
     P12 --> P13
     P13 --> P14
-    P13 --> P15
-    P14 --> P16
+    P14 --> P15
     P15 --> P16
-    P16 --> P17
+    P15 --> P17
+    P16 --> P18
+    P17 --> P18
+    P18 --> P19
+    P19 --> P20
+    P20 --> P21
+    P14 --> P22
+    P21 --> P22
+    P22 --> P23
 ```
 
 | Phase | Theme | Status |
@@ -79,9 +92,15 @@ flowchart TD
 | P12 | Media extras | ✅ Done |
 | P13 | Plugin platform | ✅ Done |
 | P14 | DLNA | ✅ Done |
-| P15 | Clients and ecosystem | Not started |
-| P16 | Real-device acceptance | Not started |
-| P17 | Packaging and release | Not started |
+| P15 | Acquisition foundation | Not started |
+| P16 | Acquisition data sources | Not started |
+| P17 | Indexers | Not started |
+| P18 | Movie acquisition | Not started |
+| P19 | Series acquisition | Not started |
+| P20 | Discovery and requests | Not started |
+| P21 | Clients and ecosystem | Not started |
+| P22 | Real-device acceptance | Not started |
+| P23 | Packaging and release | Not started |
 
 ---
 
@@ -156,7 +175,7 @@ flowchart TD
 ### P5 Streaming and API
 **Scope**: `streaming` (CMAF HLS, on-demand segmenting, seeking, segment cache); Connect services (library, playback, user, system).
 
-**Done when**: ported HLS cases pass; playback verified on real hls.js and AVFoundation clients. Media3 is verified in P15, with the Android client.
+**Done when**: ported HLS cases pass; playback verified on real hls.js and AVFoundation clients. Media3 is verified in P21, with the Android client.
 
 **Progress**:
 - [x] `libs/streaming`: playlists of the whole media source, RFC 6381 codec strings, segments generated on demand with restarts on seek, segments of copied video joined from one file per group of pictures; ported HLS cases pass
@@ -170,7 +189,7 @@ flowchart TD
 - [x] Playback verified with the development player on Safari's native HLS, which is AVFoundation's: direct stream, transcodes, seeking with restarts, an HLS subtitle rendition in sync. HLS subtitle renditions are WebVTT segmented along the video without `X-TIMESTAMP-MAP`; if a player misplaces them, add one derived from the video's timestamps
 
 ### P6 Server Assembly and Distribution
-**Scope**: `apps/server` assembly; `CGO_ENABLED=0` cross-compilation; container images bundling jellyfin-ffmpeg's portable build, the one `mise.toml` pins. Publishing them is part of P17.
+**Scope**: `apps/server` assembly; `CGO_ENABLED=0` cross-compilation; container images bundling jellyfin-ffmpeg's portable build, the one `mise.toml` pins. Publishing them is part of P23.
 
 **Done when**: end-to-end smoke test: scan → scrape → playback decision → HLS playback.
 
@@ -330,7 +349,7 @@ flowchart TD
 ### P14 DLNA
 **Scope**: `plugins/dlna`, a first-party process plugin ([Plugins §10](plugins.md#10-dlna-pluginsdlna)): media server (SSDP, ContentDirectory, ConnectionManager, media with DLNA headers), Play To (renderer discovery, AVTransport and RenderingControl), device profiles; built for every server platform, packaged for a catalog and bundled in the container image.
 
-**Done when**: an end-to-end test with a simulated control point and renderer on the loopback interface discovers the server, browses a library, plays a file with range requests, and drives a renderer through play, pause, seek and stop with progress reported. Playback on a real television is verified in P16.
+**Done when**: an end-to-end test with a simulated control point and renderer on the loopback interface discovers the server, browses a library, plays a file with range requests, and drives a renderer through play, pause, seek and stop with progress reported. Playback on a real television is verified in P22.
 
 **Progress**:
 - [x] SSDP and device description
@@ -340,10 +359,54 @@ flowchart TD
 - [x] Builds, catalog packages and container image (seeded plugin folder)
 - [x] End-to-end test (`apps/server/internal/server/dlna_test.go`)
 
-### P15 Clients and Ecosystem
-**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its completion criteria will be defined after P14.
+### P15 Acquisition Foundation
+**Scope**: what the server needs before it can want media it does not have ([Architecture §13](architecture.md#13-acquisition-libsacquire)).
 
-### P16 Real-Device Acceptance
+- Wanted items: movies and episodes known from metadata but without files, kept apart from the missing items of §4.7 of the [Domain Model](domain.md); monitored state and quality profile per movie, series and season
+- Series: TVDB ID, series type (standard, daily, anime) and display order, Jellyfin's `DisplayOrder` with TMDB episode groups
+- `libs/release`: release title parsing (title, year, season and episode, absolute and daily numbers, quality, source, resolution, codecs, languages, edition, release group), with Radarr's and Sonarr's parser rules in their .NET syntax on `regexp2`
+- `tools/testport` reads NUnit test cases, so that Radarr's and Sonarr's parser cases are ported as Jellyfin's are
+
+**Done when**: the ported parser cases pass or are skipped with a reason; the missing-episode cases of `scraper-tmdb` skipped in P4 pass; a series' episodes are listed in its display order.
+
+### P16 Acquisition Data Sources
+**Scope**: the metadata acquisition needs, without keys by default.
+
+- `plugins/scraper-servarr` (WASM): Radarr's movie metadata and lists, Sonarr's SkyHook series and episodes in TVDB order, scene mappings, daily series, XEM
+- `scraper-tmdb`: Radarr's TMDB read access token unless an administrator sets a key; `DISCOVERY_PROVIDER` (trending, popular, upcoming, by genre, studio, network, keyword and watch provider, recommendations and similar titles); episode groups
+
+**Done when**: with no key configured, a movie and a series are identified and refreshed, the series' wanted episodes are numbered as TVDB numbers them, and TMDB's episode metadata is attached to them through the series' display order.
+
+### P17 Indexers
+**Scope**: `plugins/indexers`, a first-party process plugin porting Prowlarr: Newznab, Torznab, the Cardigann engine with the definitions of `indexers.prowlarr.com`, every site Prowlarr implements in code, categories and capabilities, rate limits and backoff, indexer proxies (HTTP, SOCKS, FlareSolverr). The capability `INDEXER_PROVIDER`; `ReleaseService` searches the configured indexers and parses what they return with `libs/release`.
+
+**Done when**: Prowlarr's ported cases pass; recorded responses of Newznab, Torznab, Cardigann definitions and the sites implemented in code are searched and parsed into releases through the assembled server.
+
+### P18 Movie Acquisition
+**Scope**: `libs/acquire` with its `movie` package, porting Radarr; `plugins/download-clients`, a first-party process plugin with every download client Radarr and Sonarr support.
+
+- Quality definitions and profiles, custom formats, delay and release profiles
+- Decisions: the specifications of Radarr's decision engine; ranking
+- RSS sync and searches as jobs; the queue of tracked downloads; remote path mappings
+- Import: completed downloads verified with ffprobe, hard linked or moved into the library under a naming template, a scan of their folder; upgrades until the cutoff, replaced files to a recycle folder, blocklist and a new search when a download fails
+- History
+
+**Done when**: an end-to-end test with a simulated indexer and download client on the loopback interface: a wanted movie is found, sent, tracked, imported and played, then upgraded by a better release; a failed download is blocklisted and replaced.
+
+### P19 Series Acquisition
+**Scope**: `libs/acquire/series`, porting Sonarr: episode, season and series searches, season packs, multi-episode files, anime with absolute numbers, daily series by air date, scene mappings and XEM, monitoring of new seasons and episodes.
+
+**Done when**: the end-to-end test of P18 for a series: wanted episodes are found singly and as a season pack, an anime and a daily series are matched through their numbering, and each episode becomes playable once imported.
+
+### P20 Discovery and Requests
+**Scope**: porting Seerr. `DiscoverService` lists what the discovery providers offer, marked as available, wanted or requested; `RequestService`: requests of movies and seasons, approval by administrators or automatic, quotas per user, users' limits on ratings applied to what they may request, notifications of the requester; reporting problems with an item.
+
+**Done when**: an end-to-end test: a user limited to PG finds a film and a series through discovery, cannot request one rated above the limit, requests the others; an administrator approves; they are acquired and the user is notified that they are available.
+
+### P21 Clients and Ecosystem
+**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its completion criteria will be defined after P20.
+
+### P22 Real-Device Acceptance
 **Scope**: end-to-end playback on real devices, after the clients exist: DLNA media server and Play To on real televisions, with the profiles adjusted to what they do.
 
 **Done when**: a real television browses and plays a library through the media server, and is driven through Play To with progress reported.
@@ -351,7 +414,7 @@ flowchart TD
 **Progress**:
 - [ ] DLNA on a real television
 
-### P17 Packaging and Release
+### P23 Packaging and Release
 **Scope**: the first releases ([Development §7](development.md#7-releases-and-versioning)): `libs/proto` and `libs/plugin` tagged in that order; the server's release binaries and container images published; the official plugin catalog published with the DLNA plugin.
 
 **Done when**: a plugin outside the repository builds against the tagged `libs/proto` and `libs/plugin` with `GOWORK=off` and no `replace`; the release binaries and images of a version are published and the images start.
@@ -373,6 +436,9 @@ flowchart TD
 | SVG rasterization | Pure-Go options are incomplete | Decided in P2: SVGs are checked and served as-is, not rasterized |
 | Hardware test coverage | Only the maintainers' machines and GitHub-hosted runners are available; other vendors' encoders are untested on real hardware | Real transcode tests run where the hardware exists and skip elsewhere; other vendor paths rely on the ported EncodingHelper cases |
 | Go modules split too finely | Friction in dependency upgrades and tidying | Keep watching; merge modules when needed |
-| Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P15); then serve the stream as `.sup` |
+| Image subtitles | PGS and VobSub are only burned in, which forces a video transcode | When a client renders PGS itself (P21); then serve the stream as `.sup` |
 | Negative audio decode times in fMP4 | HLS outputs keep negative timestamps, so audio that starts before zero (AAC encoder priming) is written with a negative `tfdt`, a field the format defines as unsigned. hls.js and Safari play it, and Jellyfin writes the same for its fMP4 clients; players outside that set are unverified | If a player misplaces or drops the audio: shift only the audio to zero, keeping the video at the source's timestamps |
-| Live TV, DVR and channels | Large parts of Jellyfin that Mavio has neither adopted nor ruled out; the plugin platform leaves out their provider types | Decide before P15 |
+| Servarr's services | Acquisition uses the services Radarr, Sonarr and Prowlarr use, and Radarr's TMDB token, without keys of its own; their operators may change or withdraw them | Requests carry the User-Agent of the application whose service it is; an administrator can set their own TMDB key, and `scraper-servarr` follows the services in its releases |
+| Series numbering | Releases and files follow TVDB's numbering, TMDB's metadata may number the same episodes otherwise, anime in particular | Display orders with TMDB episode groups and episode TVDB IDs in P15 and P16; scene mappings and XEM in P19 |
+| Indexer churn | Sites change their pages and APIs | Cardigann definitions are fetched at run time; the indexers plugin is upgraded from the catalog without a server release |
+| Live TV, DVR and channels | Large parts of Jellyfin that Mavio has neither adopted nor ruled out; the plugin platform leaves out their provider types | Decide before P21 |

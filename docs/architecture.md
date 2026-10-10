@@ -16,10 +16,10 @@
 * **Strongly typed contracts**: Protobuf + Connect-RPC is used for all internal and external APIs; future Web / Expo / Desktop clients generate their SDKs directly from the contracts.
 * **Plugin isolation**: plugins never enter the host's address space. Two runtimes — a WASM (wazero) sandbox and a child process (UDS) — share one set of contracts.
 * **Multiple databases**: SQLite and PostgreSQL are both first-class.
-* **Private by default**: no telemetry, playback analytics or device tracking; all data stays on the host. Without configured metadata providers (such as a TMDB API key) the server works from local NFO files and images and makes no outbound metadata requests.
+* **Private by default**: no telemetry, playback analytics or device tracking; all data stays on the host. Without metadata plugins the server works from local NFO files and images and makes no outbound metadata requests; the plugins that reach the services acquisition uses need no keys of the administrator (§13.2).
 
 ### 1.2 Non-goals (current phase)
-* No compatibility with the Jellyfin client ecosystem and no Jellyfin data migration. A Jellyfin API compatibility shim is evaluated in [Jellyfin Compatibility](jellyfin-compat.md) and decided in P15.
+* No compatibility with the Jellyfin client ecosystem and no Jellyfin data migration. A Jellyfin API compatibility shim is evaluated in [Jellyfin Compatibility](jellyfin-compat.md) and decided in P21.
 * No UI yet (Web / Mobile / Desktop), but the directory layout and contracts already reserve room for it.
 
 ### 1.3 Engineering Principles
@@ -96,6 +96,8 @@ mavio/
 │   ├── media/                   # [Go] Probing, keyframes, hardware acceleration, playback decisions, transcode planning, ffmpeg supervision
 │   ├── library/                 # [Go] Scanner, resolver chain, job scheduling
 │   ├── streaming/               # [Go] HLS (CMAF) playlists, on-demand segmenting, segment cache
+│   ├── release/                 # [Go] Release title parsing: numbering, quality, languages, edition, group
+│   ├── acquire/                 # [Go] Acquisition engine: profiles, decisions, searches, queue, import (movie, series)
 │   ├── client/                  # (later) [TS] connect-es client wrapper and Query hooks
 │   └── ui/                      # (later) [TS] Cross-platform components and design tokens
 │
@@ -106,6 +108,9 @@ mavio/
 │   ├── scraper-fanart/          # [Go → wasm] fanart.tv artwork
 │   ├── scraper-openlibrary/     # [Go → wasm] Open Library book metadata
 │   ├── subtitles-opensubtitles/ # [Go → wasm] OpenSubtitles.com subtitle downloads
+│   ├── scraper-servarr/         # [Go → wasm] Servarr's metadata services: SkyHook, Radarr metadata, scene mappings, XEM
+│   ├── indexers/                # [Go → child process] Indexers: Newznab, Torznab, Cardigann, Prowlarr's sites
+│   ├── download-clients/        # [Go → child process] Download clients: qBittorrent, Transmission, SABnzbd, NZBGet, …
 │   ├── notifier-webhook/        # [Go → wasm] Webhook notifications
 │   └── auth-ldap/               # [Go → child process] LDAP authentication (needs native long-lived TCP connections)
 │
@@ -124,12 +129,14 @@ apps/server ──▶ streaming ──▶ media ──▶ core
      │             ▼            │
      ├──────▶ library ──▶ naming / metadata / subtitle / imaging ──▶ core
      │             │
+     ├──────▶ acquire ──▶ release / naming ──▶ core
      ├──────▶ store ──▶ core
      └──────▶ plugin ──▶ proto
 
 plugins/* ──▶ plugin ──▶ proto
 ```
-* `core` depends on no other library; `naming` and `subtitle` are pure-function libraries.
+* `core` depends on no other library; `naming`, `subtitle` and `release` are pure-function libraries.
+* `acquire`, like `library`, reaches storage, scans and plugins only through ports in `core`, which `apps/server` implements.
 * `media` depends only on `core` and knows nothing about databases or plugins.
 * Only `apps/server` does wiring. The dependency direction is enforced in CI by depguard rules.
 
@@ -434,3 +441,50 @@ Scoring:
 * **Server binaries**: `pnpm nx run server:dist` cross-compiles `cmd/mavio` with `CGO_ENABLED=0` and `-trimpath` for Linux, macOS and Windows on amd64 and arm64 into `apps/server/dist/`, stamping `$VERSION` into `internal/buildinfo` when set; every binary is static.
 * **Container image** (`apps/server/Dockerfile`, built from the repository root): the server is cross-compiled on the build machine's platform, so linux/amd64 and linux/arm64 images build without emulation of Go. The image bundles jellyfin-ffmpeg's portable build in `/usr/lib/jellyfin-ffmpeg`, the version `mise.toml` pins, checked against GitHub's SHA-256 digest of the release asset, on Debian slim with CA certificates and time zone data.
 * **Image layout**: the server runs as `mavio` (uid and gid 1000) on port 8686, answering discovery on UDP port 7359, with its home in `/config` (`config.toml`, the SQLite database, plugin folder, chosen artwork and backups), images, compiled plugins and transcodes in `/cache`, and media libraries mounted under `/media`. The image sets these and the jellyfin-ffmpeg binaries through `MAVIO_*` environment variables, which flags after the image name and `-e` variables override. The DLNA plugin is built with the server and seeded from `/usr/lib/mavio/plugins`; its SSDP on UDP port 1900 reaches the container only with `--network host`. A health check calls `SystemService.GetHealth`.
+
+---
+
+## 13. Acquisition (libs/acquire)
+
+Mavio finds, downloads and imports the movies and series its users want, as Seerr, Radarr, Sonarr and Prowlarr do beside Jellyfin, in one server: one catalog of items, one set of users, one configuration. The work is phases P15 to P20 of the [Roadmap](roadmap.md).
+
+### 13.1 Parts
+| Part | Where | Counterpart |
+| :--- | :--- | :--- |
+| Discovery | `DiscoverService`; lists from `DISCOVERY_PROVIDER` plugins (`scraper-tmdb`) | Seerr's discovery |
+| Requests | `RequestService` | Seerr's requests |
+| Acquisition engine | `libs/acquire`, packages `movie` and `series`; services in `apps/server` | Radarr, Sonarr |
+| Release parsing | `libs/release` | Radarr's and Sonarr's parsers |
+| Servarr's metadata | `plugins/scraper-servarr` (WASM) | Radarr's and Sonarr's metadata sources, scene mappings |
+| Indexers | `plugins/indexers` (process), `INDEXER_PROVIDER`; searched through `ReleaseService` | Prowlarr |
+| Download clients | `plugins/download-clients` (process), `DOWNLOAD_CLIENT`; reached through `DownloadService` | Radarr's and Sonarr's download clients |
+
+* **State in the server, networks in plugins.** Wanted items, profiles, decisions, the queue, history, imports and requests are the server's, next to the items and users they concern. What talks to indexers and download clients, and changes with them, is in plugins, upgraded from catalogs without a server release.
+* **One engine.** Movies and series share quality profiles, custom formats, decisions, the queue and imports; the `movie` and `series` packages differ in how they search, monitor and match releases to items.
+* **Plugins do not call each other.** The server gathers what the provider plugins give, as it does with subtitle providers, and calls the indexers and download clients itself.
+
+### 13.2 Data Sources and Numbering
+* **Servarr's services**, without keys, are the default sources: Radarr's metadata service (`api.radarr.video`) for movies and lists, Sonarr's SkyHook (`skyhook.sonarr.tv`) for series and episodes, Sonarr's services (`services.sonarr.tv`) for scene mappings and daily series, XEM (`thexem.info`), and Prowlarr's indexer definitions (`indexers.prowlarr.com`). Requests to a Servarr service carry the User-Agent of the application whose service it is, as that application builds it (`Sonarr/<version> (<os> <os version>)`).
+* **TMDB**: `scraper-tmdb` uses Radarr's TMDB read access token unless an administrator sets an API key of their own, which then takes its place.
+* **Numbering on disk follows TVDB**, as Sonarr's does: a series' episodes come from SkyHook in TVDB order with absolute numbers and air dates, files are named by those numbers (anime also by absolute number), and requests list seasons in that order. A series has a type, standard, daily or anime, which decides how releases are matched.
+* **TMDB's metadata** is attached through the series' display order, Jellyfin's `DisplayOrder` over TMDB's episode groups, and TMDB's episode TVDB IDs where they exist.
+* **Releases named otherwise** are matched through Sonarr's scene mappings and XEM; daily series by air date.
+
+### 13.3 Flow
+1. **Request**: a user requests a movie or seasons; approved by an administrator or automatically within the user's quota, and only within the user's rating limit. The request makes the movie or episodes wanted, monitored with a quality profile.
+2. **Search**: a wanted item is searched at once; RSS sync and searches for wanted items and upgrades run as jobs on their intervals.
+3. **Releases**: `ReleaseService` asks the indexers for a movie or episodes by their IDs, numbers and categories; `libs/release` parses each release, which is matched to items by IDs, titles and scene mappings.
+4. **Decision**: each release goes through the specifications of Radarr's and Sonarr's decision engines (quality allowed, size, custom format score, language, already queued, upgrade allowed, delay, blocklist, age, seeders) and the accepted ones are ranked.
+5. **Download**: the best release goes to a download client through `DownloadService`, with the category of its kind; the queue tracks it by polling the clients.
+6. **Import**: a completed download, with remote path mappings applied, is matched to its items again and verified with ffprobe; its files are hard linked into the library when they share a volume, else copied or moved, under the library's naming template, holding the volume's slot of `VolumeLedger` and yielding to playback through `QuietGate`. The folder is scanned and the wanted items become items with media.
+7. **Upgrades and failures**: a better release replaces a file until the profile's cutoff, the replaced file going to a recycle folder; a failed or mismatched download is blocklisted and searched again.
+8. **Notification**: the request becomes available and its requester is notified through the activity log.
+
+### 13.4 Indexers (`plugins/indexers`)
+A first-party process plugin porting Prowlarr: Newznab and Torznab, the Cardigann engine with definitions fetched from `indexers.prowlarr.com` at run time, and every site Prowlarr implements in code; capabilities and categories, rate limits and backoff after failures, indexer proxies (HTTP, SOCKS, FlareSolverr). Its configuration lists the configured indexers; the definitions and the fields each takes come from the plugin. `IndexerProviderService` lists the indexers with their capabilities, searches them (movie, series or text, with IDs, season and episode, categories), reads their RSS feeds and fetches a release's torrent file, magnet link or NZB.
+
+### 13.5 Download Clients (`plugins/download-clients`)
+A first-party process plugin with every download client Radarr and Sonarr support, such as qBittorrent, Transmission, Deluge, rTorrent, Aria2, SABnzbd, NZBGet and a watch folder. Its configuration lists the configured clients. `DownloadClientService` adds a release (torrent file, magnet link or NZB, with category, tags and seeding limits), lists downloads with their state, progress and output path, and removes them. Remote path mappings are the server's.
+
+### 13.6 Storage
+Wanted state, quality definitions and profiles, custom formats, delay and release profiles, the queue, history, the blocklist and requests are in `libs/store`, on both databases, behind ports in `core`.

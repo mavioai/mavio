@@ -4,7 +4,7 @@
 
 > 相关文档：[系统架构](architecture.zh-CN.md) · [领域模型](domain.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
-> [架构 §7](architecture.zh-CN.md#7-插件系统libsplugin) 描述两种插件运行时，以及服务端如何调用插件。本文档描述插件如何获得 Jellyfin 插件所能获得的能力（频道与直播电视除外）：服务端 API、事件、HTTP 路由、任务、数据目录、远程设备以及其余提供者类型。本文档还描述 DLNA：Mavio 把它作为基于这些能力构建的第一方插件发布。相应工作是[路线图](roadmap.zh-CN.md)的 P13（平台）与 P14（DLNA）阶段。
+> [架构 §7](architecture.zh-CN.md#7-插件系统libsplugin) 描述两种插件运行时，以及服务端如何调用插件。本文档描述插件如何获得 Jellyfin 插件所能获得的能力（频道与直播电视除外）：服务端 API、事件、HTTP 路由、任务、数据目录、远程设备以及其余提供者类型。本文档还描述 DLNA：Mavio 把它作为基于这些能力构建的第一方插件发布；以及资源获取新增的提供者类型。相应工作是[路线图](roadmap.zh-CN.md)的 P13（平台）与 P14（DLNA）阶段，资源获取提供者在 P16 至 P18。
 
 ---
 
@@ -145,6 +145,14 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 媒体库按能力（元数据、图片、字幕、歌词、片段）以插件 ID 保存使用哪些提供者以及顺序（`LibrarySpec.provider_order`）。未设置的列表表示按插件 ID 顺序使用所有就绪的提供者；空列表表示不使用任何提供者；未运行插件的 ID 被跳过。刷新、元数据与图片搜索、字幕与歌词的搜索和下载，以及媒体片段作业，都只按媒体库的顺序询问它的提供者。
 
 设置 `download_lyrics` 后，刷新一个旁边没有歌词文件的音轨时，会搜索媒体库的歌词提供者，并保存第一个能下载的歌词，与管理员手动下载相同。
+
+### 8.12 资源获取提供者
+资源获取（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）新增三种提供者类型，都由服务端汇集，彼此之间从不互相调用：
+* `DISCOVERY_PROVIDER`：`DiscoveryProviderService` 列出可供发现的电影与剧集（趋势、热门、即将上映，按类型、制片公司、电视网、关键词或观看平台，推荐与相似作品）及其外部 ID；`DiscoverService` 标明服务端已有、想要或已被请求的作品。由 `scraper-tmdb` 提供。
+* `INDEXER_PROVIDER`：`IndexerProviderService` 列出索引器及其能力，搜索它们，读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB；`ReleaseService` 搜索每个就绪的索引器提供者。由 `plugins/indexers` 提供。
+* `DOWNLOAD_CLIENT`：`DownloadClientService` 向下载客户端添加 release、列出其下载并删除下载；`DownloadService` 按 release 的类型与协议把它发送给相应的客户端。由 `plugins/download-clients` 提供。
+
+两个面向网络的提供者都是进程插件：索引器与下载客户端的地址由管理员配置，WASM 清单的 `http_hosts` 无法列出它们，而且索引器需要代理与长期会话。
 
 ## 9. 运行时差异
 | | WASM | 进程 |
