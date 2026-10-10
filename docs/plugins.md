@@ -127,6 +127,8 @@ A manifest declares external ID kinds in `external_id_kinds`: key, display name,
 ### 8.6 Resolvers
 `ResolverService.Ignore` returns which entries of a folder to leave out; `ResolverService.Resolve` may claim a folder and return the items it holds, as the built-in resolvers do, before them. Resolvers run on every folder of a scan, so they are WASM plugins only.
 
+A request carries the folder (library kind, library folder, path, what its containing folder resolved to, the containing season's number) and the names of its entries. Every resolver's `Ignore` runs first, in plugin order; then the first resolver that claims the folder resolves it, and folders no resolver claims go to the built-in resolvers. A claimed folder may be an item itself (`folder_item`: a series, a season, an album) and holds items made of its files, each with its name, year, indexes, external IDs and the further files of a stacked video, and the subfolders to scan next with what the folder is to them. Items must be of kinds scans find and name existing entries; extras and versions stay with the built-in resolvers. A resolver that fails or returns an invalid result makes the folder count as unreadable: the scan keeps the items already stored under it.
+
 ### 8.7 Intro Providers
 `IntroProviderService.GetIntros` returns the IDs of items to play before an item for a user, such as local trailers. `PlaybackService.ListIntros` returns them, filtered by the user's access.
 

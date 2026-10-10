@@ -34,7 +34,10 @@ type ProbePayload struct {
 type Scanner struct {
 	Store    core.Store
 	Resolver *Resolver
-	Logger   *slog.Logger
+	// Resolvers gives the folder resolvers, which leave entries out and
+	// may claim folders before Resolver; nil means none.
+	Resolvers func() []FolderResolver
+	Logger    *slog.Logger
 	// Concurrency bounds the folders scanned at once; default 4.
 	Concurrency int
 	// NoPruning lists every folder, also those whose modification time and
@@ -235,7 +238,13 @@ func (sc *scan) folder(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, t 
 		entries[i] = Entry{Path: p, IsDir: e.IsDir}
 		stats[p] = e
 	}
-	res, err := sc.Resolver.Resolve(t.scope, t.dir, entries, filtered{rfs, ignores})
+	res, err := sc.resolve(ctx, t, entries, filtered{rfs, ignores})
+	if rerr := (*resolverError)(nil); errors.As(err, &rerr) {
+		// A folder a resolver failed on keeps its items.
+		sc.logger().WarnContext(ctx, "folder resolver failed", "path", t.dir, "err", err)
+		sc.count(func(s *ScanStats) { s.Unreadable++ })
+		return nil, sc.Store.Items().MarkSeen(ctx, sc.lib.ID, t.dir, sc.gen)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("resolve %s: %w", t.dir, err)
 	}

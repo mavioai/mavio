@@ -347,3 +347,14 @@ func (m *Manager) Authenticate(ctx context.Context, pluginID, username, password
 		Authenticated: resp.GetAuthenticated(), DisplayName: resp.GetDisplayName(), Admin: resp.GetAdmin(), Message: resp.GetMessage(),
 	}, nil
 }
+
+// Resolvers returns the resolvers among the started plugins.
+func (m *Manager) Resolvers() []library.FolderResolver {
+	var out []library.FolderResolver
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_RESOLVER) {
+		if pl, ok := m.running(id); ok && pl.Resolver() != nil {
+			out = append(out, &providers.ResolverPlugin{ID: id, Client: pl.Resolver()})
+		}
+	}
+	return out
+}

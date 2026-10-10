@@ -264,7 +264,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		}
 		return nil
 	})
-	if worker, scanner := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, plugs.SegmentProviders, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
+	if worker, scanner := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, plugs.SegmentProviders, plugs.Resolvers, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err
@@ -313,7 +313,8 @@ func addDevLibraries(ctx context.Context, log *slog.Logger, db core.Store, dir s
 // every library queued, and its scanner, or nil when there is no ffprobe
 // to probe media with.
 func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffprobe, ffmpeg string, analyzer library.ImageAnalyzer,
-	refresher *library.Refresher, segments func() []library.SegmentProvider, quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
+	refresher *library.Refresher, segments func() []library.SegmentProvider, resolvers func() []library.FolderResolver,
+	quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
 	growthPolicy *storage.GrowthPolicy,
 ) (*library.Worker, *library.Scanner) {
 	path, err := exec.LookPath(ffprobe)
@@ -325,6 +326,7 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 		Store: db,
 		Scanner: &library.Scanner{
 			Store: db, Resolver: library.NewResolver(), Logger: log,
+			Resolvers:    resolvers,
 			QuietGate:    quietGate,
 			VolumeLedger: volumeLedger,
 			Devices:      devices,
