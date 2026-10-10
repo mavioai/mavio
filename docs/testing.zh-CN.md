@@ -10,7 +10,7 @@
 
 | 层次 | 范围 | 位置 | 运行时机 |
 | :--- | :--- | :--- | :--- |
-| 单元测试 | 纯逻辑；不访问网络、不依赖真实 ffmpeg 或硬件。表驱动，很多用例移植自 Jellyfin、Sonarr 与 Radarr | 代码旁的 `*_test.go`，数据放在 `testdata/` | 每次 CI，全部平台 |
+| 单元测试 | 纯逻辑；不访问网络、不依赖真实 ffmpeg 或硬件。表驱动，很多用例移植自 Jellyfin、Sonarr、Radarr 与 Prowlarr | 代码旁的 `*_test.go`，数据放在 `testdata/` | 每次 CI，全部平台 |
 | 一致性测试 | 同一套仓储测试分别跑在 SQLite（临时文件）与 PostgreSQL（由 `libs/store/pgtest` 启动的容器，或 `MAVIO_TEST_POSTGRES_DSN` 指定的服务器；没有 Docker 或使用 `-short` 时跳过）上，两者都必须通过 | `libs/store` | 每次 CI（PostgreSQL 在 Linux 上运行） |
 | 集成测试 | 真实 ffmpeg / ffprobe、生成的测试媒体、真实硬件编码器；条件不满足时 `t.Skip` 并写明原因 | 代码旁，依赖前置条件 | 具备条件的 CI；厂商路径只在现有硬件（维护者的机器、GitHub 托管 runner）上运行 |
 | 冒烟测试 | 在服务端内把已完成的库串起来（见[路线图 §1](roadmap.zh-CN.md#1-推进原则)） | `apps/server/internal/smoke` | 每次 CI |
@@ -22,7 +22,7 @@
 ## 2. 移植测试用例
 
 ### 2.1 方法
-提取由 `tools/testport` 完成；`tools/testport/mapping.json` 列出来源仓库（使用 xUnit 测试的 Jellyfin；使用 NUnit 测试的 Sonarr 与 Radarr），并把它们的测试工程与测试数据目录映射到 Mavio 的目标位置（即 §2.2 的映射表）。
+提取由 `tools/testport` 完成；`tools/testport/mapping.json` 列出来源仓库（使用 xUnit 测试的 Jellyfin；使用 NUnit 测试的 Sonarr、Radarr 与 Prowlarr），并把它们的测试工程与测试数据目录映射到 Mavio 的目标位置（即 §2.2 的映射表）。
 
 1. **参数化用例**：xUnit 的 `[InlineData]` 与 NUnit 的 `[TestCase]` 用例，以及由 `TheoryData.Add(…)`、`yield return` 或集合初始化器提供数据的 `[MemberData]` / `[TestCaseSource]` 用例，按 C# 测试类各输出一个 JSON 文件，放在目标的 `testdata/cases/` 下，文件名为去掉 `Tests` 或 `Fixture` 后缀的 snake_case（如 `TV/EpisodeNumberTests.cs` → `testdata/cases/tv/episode_number.json`）。参数按形参名记录，并补全声明的默认值；NUnit 的 `ExpectedResult` 记录在 `$result` 下。常量转为 JSON 值；枚举成员等符号转为 `{"$symbol": …}`，标志组合转为 `{"$flags": […]}`，构造调用转为 `{"$new": …}`，其余非常量表达式以源码原文保留为 `{"$expr": …}`。
 2. **来源记录**：每个用例文件记录来源仓库、提交与源文件；每条用例记录方法、行号与稳定 ID（`Method/n`）。
@@ -57,6 +57,7 @@
 | Sonarr `src/NzbDrone.Core.Test/ParserTests`（约 1460 条用例） | 剧集的发布名与文件名解析：标准、多集、绝对集数（动画）、日期型、迷你剧与整季包；质量、语言、发布组、版本、哈希名 | `libs/release`（`testdata/cases/series`） |
 | Radarr `src/NzbDrone.Core.Test/ParserTests`（约 1060 条用例） | 电影的发布名与文件名解析：标题、年份、版本（edition）、质量、语言、发布组、slug、罗马数字 | `libs/release`（`testdata/cases/movie`） |
 | Sonarr / Radarr `ParserTests/ParsingServiceTests` | 把解析出的发布与媒体库中的剧集、单集、电影匹配 | `libs/acquire`（P18 起） |
+| Prowlarr `src/NzbDrone.Core.Test/IndexerTests`、`ParserTests` 与 `Files/Indexers`（录制的响应） | 索引器响应解析（Newznab、Torznab、RSS、Cardigann 与代码实现的站点）、分类映射、退避；数字、大小与日期解析 | `plugins/indexers`（`testdata/cases`、`testdata/responses`） |
 
 ---
 

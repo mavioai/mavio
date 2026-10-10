@@ -10,7 +10,7 @@
 
 | Layer | Scope | Where | Runs in |
 | :--- | :--- | :--- | :--- |
-| Unit tests | Pure logic; no network, no real ffmpeg, no hardware. Table-driven, many ported from Jellyfin, Sonarr and Radarr | `*_test.go` next to the code, data in `testdata/` | Every CI run, all platforms |
+| Unit tests | Pure logic; no network, no real ffmpeg, no hardware. Table-driven, many ported from Jellyfin, Sonarr, Radarr and Prowlarr | `*_test.go` next to the code, data in `testdata/` | Every CI run, all platforms |
 | Conformance tests | The same repository test suite on SQLite (temporary file) and PostgreSQL (a container started by `libs/store/pgtest`, or the server in `MAVIO_TEST_POSTGRES_DSN`; skipped without Docker or with `-short`); both must pass | `libs/store` | Every CI run (PostgreSQL on Linux) |
 | Integration tests | Real ffmpeg / ffprobe, generated test media, real hardware encoders; call `t.Skip` with a reason when prerequisites are missing | Next to the code, behind prerequisites | CI where prerequisites exist; vendor paths only on the hardware available (maintainers' machines, GitHub-hosted runners) |
 | Smoke tests | Wire the libraries completed so far together inside the server (see [Roadmap §1](roadmap.md#1-principles)) | `apps/server/internal/smoke` | Every CI run |
@@ -22,7 +22,7 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 ## 2. Porting Test Cases
 
 ### 2.1 Method
-`tools/testport` performs the extraction; `tools/testport/mapping.json` lists the source repositories (Jellyfin with xUnit tests; Sonarr and Radarr with NUnit tests) and maps their test projects and test data directories to Mavio targets (the table in §2.2).
+`tools/testport` performs the extraction; `tools/testport/mapping.json` lists the source repositories (Jellyfin with xUnit tests; Sonarr, Radarr and Prowlarr with NUnit tests) and maps their test projects and test data directories to Mavio targets (the table in §2.2).
 
 1. **Parameterized cases**: xUnit `[InlineData]` cases and NUnit `[TestCase]` cases, and `[MemberData]` / `[TestCaseSource]` cases backed by `TheoryData.Add(…)`, `yield return` or collection initializers, are written as one JSON file per C# test class under the target's `testdata/cases/`, named in snake_case without the `Tests` or `Fixture` suffix (e.g. `TV/EpisodeNumberTests.cs` → `testdata/cases/tv/episode_number.json`). Arguments are keyed by parameter name, with declared defaults filled in; an NUnit `ExpectedResult` is stored under `$result`. Constants become JSON values; enum members and other symbols become `{"$symbol": …}`, flag combinations `{"$flags": […]}`, constructor calls `{"$new": …}`, and anything that is not a constant keeps its source text as `{"$expr": …}`.
 2. **Provenance**: every case file records the source repository, commit and source file; every case records its method, line and stable ID (`Method/n`).
@@ -57,6 +57,7 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 | Sonarr `src/NzbDrone.Core.Test/ParserTests` (~1,460 cases) | Release and file name parsing for series: standard, multi-episode, absolute (anime), daily, mini-series and season packs; quality, language, release group, edition, hashes | `libs/release` (`testdata/cases/series`) |
 | Radarr `src/NzbDrone.Core.Test/ParserTests` (~1,060 cases) | Release and file name parsing for movies: title, year, edition, quality, language, release group, slugs, Roman numerals | `libs/release` (`testdata/cases/movie`) |
 | Sonarr / Radarr `ParserTests/ParsingServiceTests` | Matching parsed releases to library series, episodes and movies | `libs/acquire` (from P18) |
+| Prowlarr `src/NzbDrone.Core.Test/IndexerTests`, `ParserTests` and `Files/Indexers` (recorded responses) | Indexer response parsing (Newznab, Torznab, RSS, Cardigann and code-implemented sites), category mapping, backoff; number, size and date parsing | `plugins/indexers` (`testdata/cases`, `testdata/responses`) |
 
 ---
 

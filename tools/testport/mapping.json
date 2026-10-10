@@ -59,6 +59,17 @@
         { "source": "src/NzbDrone.Core.Test/ParserTests", "target": "libs/release/testdata/cases/movie" },
         { "source": "src/NzbDrone.Core.Test/ParserTests/ParsingServiceTests", "target": "libs/acquire/testdata/cases/movie/parsing_service" }
       ]
+    },
+    {
+      "name": "Prowlarr",
+      "repository": "https://github.com/Prowlarr/Prowlarr",
+      "cases": [
+        { "source": "src/NzbDrone.Core.Test/IndexerTests", "target": "plugins/indexers/testdata/cases" },
+        { "source": "src/NzbDrone.Core.Test/ParserTests", "target": "plugins/indexers/testdata/cases/parser" }
+      ],
+      "assets": [
+        { "source": "src/NzbDrone.Core.Test/Files/Indexers", "target": "plugins/indexers/testdata/responses", "recursive": true }
+      ]
     }
   ]
 }

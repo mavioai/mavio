@@ -94,7 +94,7 @@ flowchart TD
 | P14 | DLNA | ✅ Done |
 | P15 | Acquisition foundation | ✅ Done |
 | P16 | Acquisition data sources | In progress |
-| P17 | Indexers | Not started |
+| P17 | Indexers | In progress |
 | P18 | Movie acquisition | Not started |
 | P19 | Series acquisition | Not started |
 | P20 | Discovery and requests | Not started |
@@ -395,6 +395,18 @@ flowchart TD
 **Scope**: `plugins/indexers`, a first-party process plugin porting Prowlarr: Newznab, Torznab, the Cardigann engine with the definitions of `indexers.prowlarr.com`, every site Prowlarr implements in code, categories and capabilities, rate limits and backoff, indexer proxies (HTTP, SOCKS, FlareSolverr). The capability `INDEXER_PROVIDER`; `ReleaseService` searches the configured indexers and parses what they return with `libs/release`.
 
 **Done when**: Prowlarr's ported cases pass; recorded responses of Newznab, Torznab, Cardigann definitions and the sites implemented in code are searched and parsed into releases through the assembled server.
+
+**Progress**:
+- [x] The `INDEXER_PROVIDER` contract (`mavio/plugin/v1/indexer.proto`) and its host client
+- [x] Prowlarr's cases and recorded responses ported into `plugins/indexers/testdata`
+- [x] Number, size and date parsing (`internal/parse`)
+- [ ] Categories, capabilities and search criteria
+- [ ] Newznab and Torznab
+- [ ] The Cardigann engine and the definitions of `indexers.prowlarr.com`
+- [ ] The sites Prowlarr implements in code
+- [ ] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
+- [ ] `ReleaseService`
+- [ ] End-to-end test
 
 ### P18 Movie Acquisition
 **Scope**: `libs/acquire` with its `movie` package, porting Radarr; `plugins/download-clients`, a first-party process plugin with every download client Radarr and Sonarr support.
