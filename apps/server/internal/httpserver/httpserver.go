@@ -84,7 +84,9 @@ func Handler(opts Options) (http.Handler, error) {
 	public := append([]string{systemv1connect.SystemServiceGetHealthProcedure}, rpc.AuthPublicProcedures...)
 	// Authentication runs first, so that invalid requests from strangers
 	// learn nothing about the rules.
-	authn := auth.NewInterceptor(opts.Store, public...)
+	authn := auth.NewInterceptor(opts.Store, public...).
+		RequireUser(rpc.UserBoundProcedures...).
+		RequireSession(rpc.SessionBoundProcedures...)
 	interceptors := connect.WithInterceptors(authn, validate)
 
 	mux := http.NewServeMux()
@@ -142,6 +144,20 @@ func Handler(opts Options) (http.Handler, error) {
 	return mux, nil
 }
 
+// connectHTTPStatus maps an authentication error to its HTTP status.
+func connectHTTPStatus(err error) int {
+	switch connect.CodeOf(err) {
+	case connect.CodeUnauthenticated:
+		return http.StatusUnauthorized
+	case connect.CodePermissionDenied:
+		return http.StatusForbidden
+	case connect.CodeFailedPrecondition:
+		return http.StatusPreconditionFailed
+	default:
+		return http.StatusInternalServerError
+	}
+}
+
 // services are the Connect services the server serves.
 var services = []string{
 	authv1connect.AuthServiceName,
@@ -189,17 +205,13 @@ func Serve(ctx context.Context, ln net.Listener, h http.Handler) error {
 }
 
 // backupDownload serves a backup file to administrators, who send their
-// bearer token as for the API.
+// bearer token as for the API, and to plugins with BackupService in their
+// scopes.
 func backupDownload(authn *auth.Interceptor, backups *backup.Manager) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, ok := auth.Bearer(r)
-		if !ok {
-			http.Error(w, "missing bearer token", http.StatusUnauthorized)
-			return
-		}
-		p, err := authn.Resolve(r.Context(), token)
+		p, err := authn.ResolveRequest(r, "/"+systemv1connect.BackupServiceName+"/Download")
 		if err != nil {
-			http.Error(w, "invalid or revoked token", http.StatusUnauthorized)
+			http.Error(w, err.Error(), connectHTTPStatus(err))
 			return
 		}
 		if !p.User.Admin {

@@ -17,13 +17,17 @@ import (
 // touchInterval is how often a session's last activity is recorded.
 const touchInterval = time.Minute
 
-// Principal is the signed-in user making a request, through a session or
-// an API key.
+// Principal is the signed-in user making a request, through a session, an
+// API key or a plugin's host API.
 type Principal struct {
 	User    core.User
 	Session core.AuthSession
 	// APIKey is the key of a request made with one; Session is zero then.
 	APIKey core.ID
+	// Plugin is the ID of the plugin making a host API request; Session is
+	// zero then. A plugin acting as itself has an administrator User with a
+	// zero ID.
+	Plugin string
 }
 
 type principalKey struct{}
@@ -41,9 +45,11 @@ func FromContext(ctx context.Context) (Principal, bool) {
 
 // Interceptor authenticates Connect requests by their bearer token.
 type Interceptor struct {
-	store  core.Store
-	public map[string]bool
-	now    func() time.Time
+	store        core.Store
+	public       map[string]bool
+	userBound    map[string]bool
+	sessionBound map[string]bool
+	now          func() time.Time
 }
 
 var _ connect.Interceptor = (*Interceptor)(nil)
@@ -52,7 +58,10 @@ var _ connect.Interceptor = (*Interceptor)(nil)
 // every procedure except the public ones, given as Connect procedure names
 // such as "/mavio.auth.v1.AuthService/Login".
 func NewInterceptor(store core.Store, public ...string) *Interceptor {
-	i := &Interceptor{store: store, public: make(map[string]bool, len(public)), now: time.Now}
+	i := &Interceptor{
+		store: store, public: make(map[string]bool, len(public)),
+		userBound: map[string]bool{}, sessionBound: map[string]bool{}, now: time.Now,
+	}
 	for _, p := range public {
 		i.public[p] = true
 	}
@@ -65,7 +74,7 @@ func (i *Interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 		if req.Spec().IsClient {
 			return next(ctx, req)
 		}
-		ctx, err := i.authenticate(ctx, req.Spec().Procedure, req.Header())
+		ctx, err := i.authenticate(ctx, req.Spec(), req.Header())
 		if err != nil {
 			return nil, err
 		}
@@ -81,7 +90,7 @@ func (i *Interceptor) WrapStreamingClient(next connect.StreamingClientFunc) conn
 // WrapStreamingHandler implements connect.Interceptor.
 func (i *Interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) connect.StreamingHandlerFunc {
 	return func(ctx context.Context, conn connect.StreamingHandlerConn) error {
-		ctx, err := i.authenticate(ctx, conn.Spec().Procedure, conn.RequestHeader())
+		ctx, err := i.authenticate(ctx, conn.Spec(), conn.RequestHeader())
 		if err != nil {
 			return err
 		}
@@ -89,7 +98,15 @@ func (i *Interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 	}
 }
 
-func (i *Interceptor) authenticate(ctx context.Context, procedure string, h http.Header) (context.Context, error) {
+func (i *Interceptor) authenticate(ctx context.Context, spec connect.Spec, h http.Header) (context.Context, error) {
+	procedure := spec.Procedure
+	if g, ok := ctx.Value(pluginKey{}).(Plugin); ok {
+		p, err := i.authenticatePlugin(ctx, g, procedure, spec.IdempotencyLevel == connect.IdempotencyNoSideEffects, h)
+		if err != nil {
+			return ctx, err
+		}
+		return WithPrincipal(ctx, p), nil
+	}
 	if i.public[procedure] {
 		return ctx, nil
 	}
@@ -164,6 +181,3 @@ func (i *Interceptor) resolveKey(ctx context.Context, token string, invalid erro
 	}
 	return Principal{User: user, APIKey: key.ID}, nil
 }
-
-// Bearer returns the token of a request's "Authorization: Bearer" header.
-func Bearer(r *http.Request) (string, bool) { return bearer(r.Header) }

@@ -60,10 +60,11 @@ Plugins reach the API at the base URL `http://mavio.host` with the client `guest
 * **WASM**: a request to `mavio.host` through `http_fetch` is served in process by the server's handler tree instead of the network.
 * **Process**: the host serves its handler tree on a second socket in the plugin's private socket folder, named by `MAVIO_HOST_SOCKET`.
 
-The host authenticates these requests itself with a token it generates for each plugin at start and keeps in memory; plugins never see it. The token ends when the plugin stops.
+The channel a request arrives on identifies the plugin: the host drops any credentials it carries (`Authorization`, cookies), so a plugin cannot borrow a user's session. The host API socket of a process plugin requires the same per-start token as the plugin's own socket.
 
 ### 3.4 Limits
-A WASM plugin's call into the host API runs while its own call holds one of its instances; a host call that needs the same plugin waits for another instance and fails at the call timeout when none comes free.
+* A WASM plugin's call into the host API runs while its own call holds one of its instances; a host call that needs the same plugin waits for another instance and fails at the call timeout when none comes free.
+* WASM plugins receive host API responses whole, up to 64 MiB, so server streams such as `EventService.Subscribe` are for process plugins only.
 
 ## 4. Events
 

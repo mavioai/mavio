@@ -44,7 +44,7 @@ func TestInterceptor(t *testing.T) {
 		if header != "" {
 			h.Set("Authorization", header)
 		}
-		ctx, err := i.authenticate(ctx, procedure, h)
+		ctx, err := i.authenticate(ctx, connect.Spec{Procedure: procedure}, h)
 		p, ok := FromContext(ctx)
 		return p, ok, err
 	}

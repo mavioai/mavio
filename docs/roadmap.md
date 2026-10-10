@@ -310,11 +310,11 @@ flowchart TD
 **Done when**: the test plugin, built for both runtimes, exercises every capability through an assembled server in an end-to-end test; the contracts and SDK are documented and tagged as `libs/proto` and `libs/plugin` releases.
 
 **Progress**:
-- [ ] Host API: scopes, acting as users and devices, transport for both runtimes
+- [x] Host API: scopes, acting as users, transport for both runtimes
 - [ ] Data folder; tasks
 - [ ] Events: the event types of [Plugins §4](plugins.md#4-events), event consumers, notifiers
 - [ ] HTTP routes
-- [ ] Remote devices
+- [ ] Remote devices; acting as devices
 - [ ] Image, lyrics, local metadata, saver and processor providers; external IDs
 - [ ] Resolvers, intro providers, image generators, media source providers, password reset
 - [ ] Provider order per library

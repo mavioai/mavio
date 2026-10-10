@@ -18,6 +18,10 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
 
 // AuthPublicProcedures are the AuthService methods callable without a token.
@@ -28,6 +32,29 @@ var AuthPublicProcedures = []string{
 	authv1connect.AuthServiceStartQuickConnectProcedure,
 	authv1connect.AuthServiceGetQuickConnectStateProcedure,
 	authv1connect.AuthServiceLoginWithQuickConnectProcedure,
+}
+
+// UserBoundProcedures act on the caller's own state, so a plugin calls them
+// only while acting as a user (auth.Interceptor.RequireUser).
+var UserBoundProcedures = []string{
+	authv1connect.AuthServiceListSessionsProcedure,
+	authv1connect.AuthServiceRevokeSessionProcedure,
+	authv1connect.AuthServiceAuthorizeQuickConnectProcedure,
+	authv1connect.AuthServiceCreateApiKeyProcedure,
+	userv1connect.UserServiceGetCurrentUserProcedure,
+	userv1connect.UserServiceUpdatePreferencesProcedure,
+	userv1connect.UserDataServiceName,
+	userv1connect.DisplayPreferencesServiceName,
+	playbackv1connect.PlaybackServiceName,
+	libraryv1connect.PlaylistServiceName,
+}
+
+// SessionBoundProcedures need the caller's signed-in session, which plugins
+// do not have (auth.Interceptor.RequireSession).
+var SessionBoundProcedures = []string{
+	authv1connect.AuthServiceLogoutProcedure,
+	sessionv1connect.EventServiceName,
+	sessionv1connect.SyncPlayServiceName,
 }
 
 // AuthService implements mavio.auth.v1.AuthService.

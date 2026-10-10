@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -111,8 +112,11 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	if err != nil {
 		return err
 	}
+	// Plugins start before the handler tree exists; their host API calls
+	// wait for it.
+	hostAPI := newLateHandler()
 	plugs, err := plugins.Open(ctx, plugins.Config{
-		Dir: cfg.PluginDir, CacheDir: filepath.Join(cfg.CacheDir, "plugins"), Store: db, Logger: log,
+		Dir: cfg.PluginDir, CacheDir: filepath.Join(cfg.CacheDir, "plugins"), Store: db, Logger: log, HostAPI: hostAPI,
 		Catalogs: func() []string { return set.Get().PluginCatalogs },
 	})
 	if err != nil {
@@ -164,6 +168,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	if err != nil {
 		return err
 	}
+	hostAPI.set(h)
 
 	// The network settings decide the base URL, HTTPS and discovery.
 	prefix := network.NewPrefix(h)
@@ -327,4 +332,27 @@ func bordersOf(ffmpeg string) library.BorderDetector {
 		return nil
 	}
 	return providers.Borders{Detector: &borders.Detector{FFmpeg: path}}
+}
+
+// lateHandler serves a handler set after it is created; requests wait for
+// it.
+type lateHandler struct {
+	ready chan struct{}
+	h     http.Handler
+}
+
+func newLateHandler() *lateHandler { return &lateHandler{ready: make(chan struct{})} }
+
+func (l *lateHandler) set(h http.Handler) {
+	l.h = h
+	close(l.ready)
+}
+
+func (l *lateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	select {
+	case <-l.ready:
+		l.h.ServeHTTP(w, r)
+	case <-r.Context().Done():
+		http.Error(w, "server starting", http.StatusServiceUnavailable)
+	}
 }

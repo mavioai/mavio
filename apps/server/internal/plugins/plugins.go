@@ -16,6 +16,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/plugin/host"
 	"github.com/mavioai/mavio/libs/plugin/host/process"
@@ -63,7 +64,10 @@ type Config struct {
 	// Client downloads catalogs and plugin packages; nil uses one with a
 	// five-minute timeout.
 	Client *http.Client
-	Logger *slog.Logger
+	// HostAPI serves the plugins' host API requests, which it sees with the
+	// plugin's grant (auth.PluginHandler); nil serves none.
+	HostAPI http.Handler
+	Logger  *slog.Logger
 }
 
 // Manager runs the plugins of a plugin folder, and installs, upgrades and
@@ -101,6 +105,17 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	m.opts = host.Options{
 		WASM:    wasm.Options{CacheDir: cfg.CacheDir, Logger: m.log},
 		Process: process.Options{Logger: m.log},
+	}
+	if cfg.HostAPI != nil {
+		m.opts.HostAPI = func(man *pluginv1.Manifest) http.Handler {
+			return auth.PluginHandler(auth.Plugin{
+				ID: man.GetId(),
+				Allows: func(procedure string, readOnly bool) bool {
+					return manifest.AllowsProcedure(man, procedure, readOnly)
+				},
+				ActAsUsers: man.GetPermissions().GetActAsUsers(),
+			}, cfg.HostAPI)
+		}
 	}
 	if cfg.Dir == "" {
 		return m, nil
