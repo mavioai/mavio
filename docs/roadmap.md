@@ -400,11 +400,11 @@ flowchart TD
 - [x] The `INDEXER_PROVIDER` contract (`mavio/plugin/v1/indexer.proto`) and its host client
 - [x] Prowlarr's cases and recorded responses ported into `plugins/indexers/testdata`
 - [x] Number, size and date parsing (`internal/parse`)
-- [ ] Categories, capabilities and search criteria
+- [x] Categories, capabilities and search criteria (`internal/indexer`)
 - [ ] Newznab and Torznab
 - [ ] The Cardigann engine and the definitions of `indexers.prowlarr.com`
 - [ ] The sites Prowlarr implements in code
-- [ ] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
+- [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
 - [ ] `ReleaseService`
 - [ ] End-to-end test
 

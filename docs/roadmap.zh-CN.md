@@ -400,11 +400,11 @@ flowchart TD
 - [x] `INDEXER_PROVIDER` 契约（`mavio/plugin/v1/indexer.proto`）及其宿主客户端
 - [x] Prowlarr 的用例与录制响应移植到 `plugins/indexers/testdata`
 - [x] 数字、大小与日期解析（`internal/parse`）
-- [ ] 分类、能力与搜索条件
+- [x] 分类、能力与搜索条件（`internal/indexer`）
 - [ ] Newznab 与 Torznab
 - [ ] Cardigann 引擎及 `indexers.prowlarr.com` 的定义
 - [ ] Prowlarr 以代码实现的站点
-- [ ] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
+- [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
 - [ ] `ReleaseService`
 - [ ] 端到端测试
 
