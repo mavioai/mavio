@@ -24,6 +24,8 @@ type Set struct {
 	events    pluginv1connect.EventConsumerServiceClient
 	devices   pluginv1connect.DeviceControllerServiceClient
 	images    pluginv1connect.ImageProviderServiceClient
+	local     pluginv1connect.LocalMetadataServiceClient
+	saver     pluginv1connect.MetadataSaverServiceClient
 }
 
 // New builds the clients for m over c.
@@ -55,6 +57,12 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_IMAGE_PROVIDER) {
 		s.images = pluginv1connect.NewImageProviderServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_LOCAL_METADATA) {
+		s.local = pluginv1connect.NewLocalMetadataServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_METADATA_SAVER) {
+		s.saver = pluginv1connect.NewMetadataSaverServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -91,3 +99,9 @@ func (s Set) Devices() pluginv1connect.DeviceControllerServiceClient { return s.
 
 // Images returns the ImageProviderService client, or nil.
 func (s Set) Images() pluginv1connect.ImageProviderServiceClient { return s.images }
+
+// LocalMetadata returns the LocalMetadataService client, or nil.
+func (s Set) LocalMetadata() pluginv1connect.LocalMetadataServiceClient { return s.local }
+
+// Saver returns the MetadataSaverService client, or nil.
+func (s Set) Saver() pluginv1connect.MetadataSaverServiceClient { return s.saver }

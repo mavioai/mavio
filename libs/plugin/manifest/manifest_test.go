@@ -127,6 +127,18 @@ func TestValidate(t *testing.T) {
 		{"URL template without ID", func(m *pluginv1.Manifest) {
 			m.SetExternalIdKinds([]*pluginv1.ExternalIdKind{idKind("trakt", "https://trakt.tv/")})
 		}, "url_template"},
+		{"local metadata files without capability", func(m *pluginv1.Manifest) { m.SetLocalMetadataFiles([]string{"*.yaml"}) }, "go together"},
+		{"capability without local metadata files", func(m *pluginv1.Manifest) {
+			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_LOCAL_METADATA))
+		}, "go together"},
+		{"local metadata file in a folder", func(m *pluginv1.Manifest) {
+			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_LOCAL_METADATA))
+			m.SetLocalMetadataFiles([]string{"meta/*.yaml"})
+		}, "without /"},
+		{"bad local metadata pattern", func(m *pluginv1.Manifest) {
+			m.SetCapabilities(append(m.GetCapabilities(), pluginv1.Capability_CAPABILITY_LOCAL_METADATA))
+			m.SetLocalMetadataFiles([]string{"[a"})
+		}, "pattern"},
 		{"bad schema", func(m *pluginv1.Manifest) { m.SetConfigSchema(`{"type":"nope"}`) }, "config_schema"},
 	}
 	for _, tt := range tests {

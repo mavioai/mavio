@@ -1,0 +1,56 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "mavio/plugin/v1/metadata.proto";
+
+// LocalMetadataService reads metadata from files beside the media, in
+// formats the host does not know. The manifest's local_metadata_files name
+// the files it reads.
+service LocalMetadataService {
+  // ReadMetadata returns the metadata of an item from its local files.
+  rpc ReadMetadata(ReadMetadataRequest) returns (ReadMetadataResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+// LocalFile is a file beside the media.
+message LocalFile {
+  // Name relative to the item's folder, with "/" separators.
+  string name = 1;
+  bytes content = 2;
+}
+
+message ReadMetadataRequest {
+  Lookup lookup = 1;
+  // Name of the item's media file or folder within its folder.
+  string media_name = 2;
+  // The files beside the item matching local_metadata_files.
+  repeated LocalFile files = 3;
+}
+
+message ReadMetadataResponse {
+  // False when the files hold no metadata of the item.
+  bool found = 1;
+  Metadata metadata = 2;
+}
+
+// MetadataSaverService writes metadata beside the media, in libraries
+// saving local metadata.
+service MetadataSaverService {
+  // SaveMetadata returns the files to write for an item's metadata.
+  rpc SaveMetadata(SaveMetadataRequest) returns (SaveMetadataResponse);
+}
+
+message SaveMetadataRequest {
+  MediaKind kind = 1;
+  // Name of the item's media file or folder within its folder.
+  string media_name = 2;
+  // The item's metadata as saved, with its credits and remote images.
+  Metadata metadata = 3;
+}
+
+message SaveMetadataResponse {
+  // Files to write in the item's folder, replacing files of the same name.
+  repeated LocalFile files = 1;
+}

@@ -61,6 +61,11 @@ enum Capability {
   CAPABILITY_DEVICE_CONTROLLER = 9;
   // Implements ImageProviderService.
   CAPABILITY_IMAGE_PROVIDER = 10;
+  // Implements LocalMetadataService for the files named by
+  // local_metadata_files.
+  CAPABILITY_LOCAL_METADATA = 11;
+  // Implements MetadataSaverService.
+  CAPABILITY_METADATA_SAVER = 12;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin
@@ -91,6 +96,10 @@ message Manifest {
   // Kinds of external IDs the plugin's providers give, beyond the built-in
   // ones, so that clients can name them and link to their pages.
   repeated ExternalIdKind external_id_kinds = 15;
+  // Names of the files beside the media a local metadata reader reads, as
+  // patterns such as "*.yaml" or "movie.json" (path.Match syntax, without
+  // "/"); requires CAPABILITY_LOCAL_METADATA.
+  repeated string local_metadata_files = 16;
 }
 
 // ExternalIdKind is a kind of external ID, e.g. the ID of a movie on a

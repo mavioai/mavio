@@ -21,6 +21,9 @@
 //
 // As an image provider it offers a poster named after the lookup.
 //
+// As a local metadata reader it takes the name from the first line of the
+// first file; as a saver it writes the name to "<media name>.title".
+//
 // As a device controller it takes commands to its device "tv" and rejects
 // others, naming the device and the user.
 //
@@ -60,6 +63,8 @@ func init() {
 	guest.Handle(pluginv1connect.NewEventConsumerServiceHandler(consumer{}))
 	guest.Handle(pluginv1connect.NewDeviceControllerServiceHandler(devices{}))
 	guest.Handle(pluginv1connect.NewImageProviderServiceHandler(images{}))
+	guest.Handle(pluginv1connect.NewLocalMetadataServiceHandler(local{}))
+	guest.Handle(pluginv1connect.NewMetadataSaverServiceHandler(local{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -94,6 +99,24 @@ type images struct{}
 func (images) GetImages(_ context.Context, req *pluginv1.GetImagesRequest) (*pluginv1.GetImagesResponse, error) {
 	return pluginv1.GetImagesResponse_builder{Images: []*pluginv1.RemoteImage{pluginv1.RemoteImage_builder{
 		Kind: pluginv1.ImageKind_IMAGE_KIND_PRIMARY.Enum(), Url: proto.String("https://images.test/" + req.GetLookup().GetName() + ".jpg"),
+	}.Build()}}.Build(), nil
+}
+
+type local struct{}
+
+func (local) ReadMetadata(_ context.Context, req *pluginv1.ReadMetadataRequest) (*pluginv1.ReadMetadataResponse, error) {
+	if len(req.GetFiles()) == 0 {
+		return &pluginv1.ReadMetadataResponse{}, nil
+	}
+	name, _, _ := strings.Cut(string(req.GetFiles()[0].GetContent()), "\n")
+	return pluginv1.ReadMetadataResponse_builder{
+		Found: proto.Bool(true), Metadata: pluginv1.Metadata_builder{Name: &name}.Build(),
+	}.Build(), nil
+}
+
+func (local) SaveMetadata(_ context.Context, req *pluginv1.SaveMetadataRequest) (*pluginv1.SaveMetadataResponse, error) {
+	return pluginv1.SaveMetadataResponse_builder{Files: []*pluginv1.LocalFile{pluginv1.LocalFile_builder{
+		Name: proto.String(req.GetMediaName() + ".title"), Content: []byte(req.GetMetadata().GetName() + "\n"),
 	}.Build()}}.Build(), nil
 }
 

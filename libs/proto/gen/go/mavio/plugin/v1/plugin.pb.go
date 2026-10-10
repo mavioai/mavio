@@ -98,6 +98,11 @@ const (
 	Capability_CAPABILITY_DEVICE_CONTROLLER Capability = 9
 	// Implements ImageProviderService.
 	Capability_CAPABILITY_IMAGE_PROVIDER Capability = 10
+	// Implements LocalMetadataService for the files named by
+	// local_metadata_files.
+	Capability_CAPABILITY_LOCAL_METADATA Capability = 11
+	// Implements MetadataSaverService.
+	Capability_CAPABILITY_METADATA_SAVER Capability = 12
 )
 
 // Enum value maps for Capability.
@@ -114,6 +119,8 @@ var (
 		8:  "CAPABILITY_HTTP_HANDLER",
 		9:  "CAPABILITY_DEVICE_CONTROLLER",
 		10: "CAPABILITY_IMAGE_PROVIDER",
+		11: "CAPABILITY_LOCAL_METADATA",
+		12: "CAPABILITY_METADATA_SAVER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":       0,
@@ -127,6 +134,8 @@ var (
 		"CAPABILITY_HTTP_HANDLER":      8,
 		"CAPABILITY_DEVICE_CONTROLLER": 9,
 		"CAPABILITY_IMAGE_PROVIDER":    10,
+		"CAPABILITY_LOCAL_METADATA":    11,
+		"CAPABILITY_METADATA_SAVER":    12,
 	}
 )
 
@@ -155,26 +164,27 @@ func (x Capability) Number() protoreflect.EnumNumber {
 // Manifest describes a plugin. It is shipped alongside the plugin
 // (manifest.json) and returned by Describe.
 type Manifest struct {
-	state                      protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id              *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Name            *string                `protobuf:"bytes,2,opt,name=name"`
-	xxx_hidden_Version         *string                `protobuf:"bytes,3,opt,name=version"`
-	xxx_hidden_Description     *string                `protobuf:"bytes,4,opt,name=description"`
-	xxx_hidden_Author          *string                `protobuf:"bytes,5,opt,name=author"`
-	xxx_hidden_Homepage        *string                `protobuf:"bytes,6,opt,name=homepage"`
-	xxx_hidden_License         *string                `protobuf:"bytes,7,opt,name=license"`
-	xxx_hidden_Runtime         Runtime                `protobuf:"varint,8,opt,name=runtime,enum=mavio.plugin.v1.Runtime"`
-	xxx_hidden_Capabilities    []Capability           `protobuf:"varint,9,rep,packed,name=capabilities,enum=mavio.plugin.v1.Capability"`
-	xxx_hidden_Permissions     *Permissions           `protobuf:"bytes,10,opt,name=permissions"`
-	xxx_hidden_ConfigSchema    *string                `protobuf:"bytes,11,opt,name=config_schema,json=configSchema"`
-	xxx_hidden_ApiVersion      *string                `protobuf:"bytes,12,opt,name=api_version,json=apiVersion"`
-	xxx_hidden_Tasks           *[]*Task               `protobuf:"bytes,13,rep,name=tasks"`
-	xxx_hidden_ConfigPage      *string                `protobuf:"bytes,14,opt,name=config_page,json=configPage"`
-	xxx_hidden_ExternalIdKinds *[]*ExternalIdKind     `protobuf:"bytes,15,rep,name=external_id_kinds,json=externalIdKinds"`
-	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
-	XXX_presence               [1]uint32
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+	state                         protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id                 *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Name               *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_Version            *string                `protobuf:"bytes,3,opt,name=version"`
+	xxx_hidden_Description        *string                `protobuf:"bytes,4,opt,name=description"`
+	xxx_hidden_Author             *string                `protobuf:"bytes,5,opt,name=author"`
+	xxx_hidden_Homepage           *string                `protobuf:"bytes,6,opt,name=homepage"`
+	xxx_hidden_License            *string                `protobuf:"bytes,7,opt,name=license"`
+	xxx_hidden_Runtime            Runtime                `protobuf:"varint,8,opt,name=runtime,enum=mavio.plugin.v1.Runtime"`
+	xxx_hidden_Capabilities       []Capability           `protobuf:"varint,9,rep,packed,name=capabilities,enum=mavio.plugin.v1.Capability"`
+	xxx_hidden_Permissions        *Permissions           `protobuf:"bytes,10,opt,name=permissions"`
+	xxx_hidden_ConfigSchema       *string                `protobuf:"bytes,11,opt,name=config_schema,json=configSchema"`
+	xxx_hidden_ApiVersion         *string                `protobuf:"bytes,12,opt,name=api_version,json=apiVersion"`
+	xxx_hidden_Tasks              *[]*Task               `protobuf:"bytes,13,rep,name=tasks"`
+	xxx_hidden_ConfigPage         *string                `protobuf:"bytes,14,opt,name=config_page,json=configPage"`
+	xxx_hidden_ExternalIdKinds    *[]*ExternalIdKind     `protobuf:"bytes,15,rep,name=external_id_kinds,json=externalIdKinds"`
+	xxx_hidden_LocalMetadataFiles []string               `protobuf:"bytes,16,rep,name=local_metadata_files,json=localMetadataFiles"`
+	XXX_raceDetectHookData        protoimpl.RaceDetectHookData
+	XXX_presence                  [1]uint32
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
 }
 
 func (x *Manifest) Reset() {
@@ -343,44 +353,51 @@ func (x *Manifest) GetExternalIdKinds() []*ExternalIdKind {
 	return nil
 }
 
+func (x *Manifest) GetLocalMetadataFiles() []string {
+	if x != nil {
+		return x.xxx_hidden_LocalMetadataFiles
+	}
+	return nil
+}
+
 func (x *Manifest) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 16)
 }
 
 func (x *Manifest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 16)
 }
 
 func (x *Manifest) SetVersion(v string) {
 	x.xxx_hidden_Version = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 16)
 }
 
 func (x *Manifest) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 16)
 }
 
 func (x *Manifest) SetAuthor(v string) {
 	x.xxx_hidden_Author = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 16)
 }
 
 func (x *Manifest) SetHomepage(v string) {
 	x.xxx_hidden_Homepage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 16)
 }
 
 func (x *Manifest) SetLicense(v string) {
 	x.xxx_hidden_License = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 16)
 }
 
 func (x *Manifest) SetRuntime(v Runtime) {
 	x.xxx_hidden_Runtime = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 16)
 }
 
 func (x *Manifest) SetCapabilities(v []Capability) {
@@ -393,12 +410,12 @@ func (x *Manifest) SetPermissions(v *Permissions) {
 
 func (x *Manifest) SetConfigSchema(v string) {
 	x.xxx_hidden_ConfigSchema = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 16)
 }
 
 func (x *Manifest) SetApiVersion(v string) {
 	x.xxx_hidden_ApiVersion = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 16)
 }
 
 func (x *Manifest) SetTasks(v []*Task) {
@@ -407,11 +424,15 @@ func (x *Manifest) SetTasks(v []*Task) {
 
 func (x *Manifest) SetConfigPage(v string) {
 	x.xxx_hidden_ConfigPage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 16)
 }
 
 func (x *Manifest) SetExternalIdKinds(v []*ExternalIdKind) {
 	x.xxx_hidden_ExternalIdKinds = &v
+}
+
+func (x *Manifest) SetLocalMetadataFiles(v []string) {
+	x.xxx_hidden_LocalMetadataFiles = v
 }
 
 func (x *Manifest) HasId() bool {
@@ -585,6 +606,10 @@ type Manifest_builder struct {
 	// Kinds of external IDs the plugin's providers give, beyond the built-in
 	// ones, so that clients can name them and link to their pages.
 	ExternalIdKinds []*ExternalIdKind
+	// Names of the files beside the media a local metadata reader reads, as
+	// patterns such as "*.yaml" or "movie.json" (path.Match syntax, without
+	// "/"); requires CAPABILITY_LOCAL_METADATA.
+	LocalMetadataFiles []string
 }
 
 func (b0 Manifest_builder) Build() *Manifest {
@@ -592,53 +617,54 @@ func (b0 Manifest_builder) Build() *Manifest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 16)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 16)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Version != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 16)
 		x.xxx_hidden_Version = b.Version
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 16)
 		x.xxx_hidden_Description = b.Description
 	}
 	if b.Author != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 16)
 		x.xxx_hidden_Author = b.Author
 	}
 	if b.Homepage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 16)
 		x.xxx_hidden_Homepage = b.Homepage
 	}
 	if b.License != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 16)
 		x.xxx_hidden_License = b.License
 	}
 	if b.Runtime != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 16)
 		x.xxx_hidden_Runtime = *b.Runtime
 	}
 	x.xxx_hidden_Capabilities = b.Capabilities
 	x.xxx_hidden_Permissions = b.Permissions
 	if b.ConfigSchema != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 16)
 		x.xxx_hidden_ConfigSchema = b.ConfigSchema
 	}
 	if b.ApiVersion != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 16)
 		x.xxx_hidden_ApiVersion = b.ApiVersion
 	}
 	x.xxx_hidden_Tasks = &b.Tasks
 	if b.ConfigPage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 16)
 		x.xxx_hidden_ConfigPage = b.ConfigPage
 	}
 	x.xxx_hidden_ExternalIdKinds = &b.ExternalIdKinds
+	x.xxx_hidden_LocalMetadataFiles = b.LocalMetadataFiles
 	return m0
 }
 
@@ -1429,7 +1455,7 @@ var File_mavio_plugin_v1_plugin_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\n" +
-	"\x1cmavio/plugin/v1/plugin.proto\x12\x0fmavio.plugin.v1\x1a\x1emavio/plugin/v1/metadata.proto\x1a\x1amavio/plugin/v1/task.proto\"\xce\x04\n" +
+	"\x1cmavio/plugin/v1/plugin.proto\x12\x0fmavio.plugin.v1\x1a\x1emavio/plugin/v1/metadata.proto\x1a\x1amavio/plugin/v1/task.proto\"\x80\x05\n" +
 	"\bManifest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
@@ -1448,7 +1474,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x05tasks\x18\r \x03(\v2\x15.mavio.plugin.v1.TaskR\x05tasks\x12\x1f\n" +
 	"\vconfig_page\x18\x0e \x01(\tR\n" +
 	"configPage\x12K\n" +
-	"\x11external_id_kinds\x18\x0f \x03(\v2\x1f.mavio.plugin.v1.ExternalIdKindR\x0fexternalIdKinds\"\x96\x01\n" +
+	"\x11external_id_kinds\x18\x0f \x03(\v2\x1f.mavio.plugin.v1.ExternalIdKindR\x0fexternalIdKinds\x120\n" +
+	"\x14local_metadata_files\x18\x10 \x03(\tR\x12localMetadataFiles\"\x96\x01\n" +
 	"\x0eExternalIdKind\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12;\n" +
@@ -1480,7 +1507,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\xdd\x02\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\x9b\x03\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1494,7 +1521,9 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x17CAPABILITY_HTTP_HANDLER\x10\b\x12 \n" +
 	"\x1cCAPABILITY_DEVICE_CONTROLLER\x10\t\x12\x1d\n" +
 	"\x19CAPABILITY_IMAGE_PROVIDER\x10\n" +
-	"2\xda\x02\n" +
+	"\x12\x1d\n" +
+	"\x19CAPABILITY_LOCAL_METADATA\x10\v\x12\x1d\n" +
+	"\x19CAPABILITY_METADATA_SAVER\x10\f2\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +

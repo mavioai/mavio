@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -191,6 +192,15 @@ func Validate(m *pluginv1.Manifest) error {
 				u.Host == "" || !strings.Contains(t, "{id}") {
 				add("external ID kind %q: url_template %q must be an absolute http(s) URL containing {id}", k.GetKey(), t)
 			}
+		}
+	}
+	reads := HasCapability(m, pluginv1.Capability_CAPABILITY_LOCAL_METADATA)
+	if reads != (len(m.GetLocalMetadataFiles()) > 0) {
+		add("CAPABILITY_LOCAL_METADATA and local_metadata_files go together")
+	}
+	for _, f := range m.GetLocalMetadataFiles() {
+		if _, err := path.Match(f, ""); err != nil || f == "" || strings.Contains(f, "/") {
+			add("local metadata file %q must be a file name pattern without /", f)
 		}
 	}
 	if s := m.GetConfigSchema(); s != "" {

@@ -4922,7 +4922,9 @@
           "CAPABILITY_EVENT_CONSUMER",
           "CAPABILITY_HTTP_HANDLER",
           "CAPABILITY_DEVICE_CONTROLLER",
-          "CAPABILITY_IMAGE_PROVIDER"
+          "CAPABILITY_IMAGE_PROVIDER",
+          "CAPABILITY_LOCAL_METADATA",
+          "CAPABILITY_METADATA_SAVER"
         ]
       },
       "mavio.plugin.v1.ExternalIdKind": {
@@ -5043,6 +5045,14 @@
             },
             "title": "external_id_kinds",
             "description": "Kinds of external IDs the plugin's providers give, beyond the built-in\n ones, so that clients can name them and link to their pages."
+          },
+          "localMetadataFiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "local_metadata_files",
+            "description": "Names of the files beside the media a local metadata reader reads, as\n patterns such as \"*.yaml\" or \"movie.json\" (path.Match syntax, without\n \"/\"); requires CAPABILITY_LOCAL_METADATA."
           }
         },
         "title": "Manifest",
