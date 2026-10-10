@@ -58,6 +58,7 @@
 | Radarr `src/NzbDrone.Core.Test/ParserTests`（约 1060 条用例） | 电影的发布名与文件名解析：标题、年份、版本（edition）、质量、语言、发布组、slug、罗马数字 | `libs/release`（`testdata/cases/movie`） |
 | Sonarr / Radarr `ParserTests/ParsingServiceTests` | 把解析出的发布与媒体库中的剧集、单集、电影匹配 | `libs/acquire`（P18 起） |
 | Prowlarr `src/NzbDrone.Core.Test/IndexerTests`、`ParserTests` 与 `Files/Indexers`（录制的响应） | 索引器响应解析（Newznab、Torznab、RSS、Cardigann 与代码实现的站点）、分类映射、退避；数字、大小与日期解析 | `plugins/indexers`（`testdata/cases`、`testdata/responses`） |
+| Sonarr `src/NzbDrone.Core.Test/IndexerTests/TorrentRssIndexerTests`（Prowlarr 保留了这些订阅源，但没有保留测试） | 通用的种子 RSS 订阅源：检测订阅源的读取方式、EZRSS | `plugins/indexers`（`testdata/cases/torrent_rss_tests`） |
 
 ---
 
