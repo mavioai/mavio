@@ -404,7 +404,10 @@ flowchart TD
 - [x] Newznab and Torznab (`internal/sites/newznab`, `internal/sites/torznab`)
   - [ ] The age and size limits of searches (`minage`, `maxage`, `minsize`, `maxsize`), which queries do not carry yet
   - [ ] Capabilities kept across restarts; they are read again from the caps after each start
-- [ ] The Cardigann engine and the definitions of `indexers.prowlarr.com`
+- [x] The Cardigann engine (`internal/sites/cardigann`): definitions read from a directory and its `Custom` directory, templates, filters, HTML, XML and JSON selectors, logins, searches and downloads
+  - [ ] Fetching and updating the definitions of `indexers.prowlarr.com`, which the plugin's wiring does
+  - [ ] Captchas solved by hand: an image captcha fails automatic logins, as no UI shows it yet
+  - [ ] Cookies of the `cookie` setting replacing those responses set, as Prowlarr's GetCookies does; they are only sent besides them
 - [ ] The sites Prowlarr implements in code
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
 - [ ] `ReleaseService`

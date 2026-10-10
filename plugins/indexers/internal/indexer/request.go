@@ -38,6 +38,9 @@ type Request struct {
 	Timeout time.Duration
 	// Encoding decodes the response's text, replacing the indexer's.
 	Encoding encoding.Encoding
+	// State is the site's own data about the request, for reading its
+	// response.
+	State any
 }
 
 // NewRequest returns a GET request accepting the content type.
