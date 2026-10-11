@@ -225,7 +225,7 @@ func Handler(opts Options) (http.Handler, error) {
 	}
 	mux.Handle("GET /api", docs)
 	mux.Handle("GET /api/", docs)
-	return mux, nil
+	return cors(mux), nil
 }
 
 // connectHTTPStatus maps an authentication error to its HTTP status.

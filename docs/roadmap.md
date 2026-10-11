@@ -557,7 +557,7 @@ flowchart TD
 - [x] `libs/design`: tokens, icons, strings, component specifications and the feature parity table, compiled for every client
 - [ ] Server: `HomeService` with the hubs of Home and of the library tabs, and their settings
 - [ ] Server: `ItemService.ListSimilarItems`
-- [ ] Server: cross-origin requests on the API and the media and image routes
+- [x] Server: cross-origin requests on every route (`apps/server/internal/httpserver/cors.go`)
 - [ ] Prototypes: Rust on tvOS, connect-rust streams with `EventService`, libmpv with EDR and Picture in Picture on Apple platforms, MyGo's video element
 - [ ] Skeletons of the apps and libraries
 - [ ] `libs/client-rust`: servers and sign-in, the event stream, the offline store, playback reporting, downloads, screen state, the merging of several servers; the Swift, Kotlin and Go bindings

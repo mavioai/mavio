@@ -557,7 +557,7 @@ flowchart TD
 - [x] `libs/design`：tokens、图标、字符串、组件规范与功能对齐表，为每个客户端编译
 - [ ] 服务端：`HomeService`，提供首页与媒体库标签页的推荐行及其设置
 - [ ] 服务端：`ItemService.ListSimilarItems`
-- [ ] 服务端：API 以及媒体与图片路由的跨域请求
+- [x] 服务端：所有路由的跨域请求（`apps/server/internal/httpserver/cors.go`）
 - [ ] 原型：tvOS 上的 Rust、connect-rust 与 `EventService` 的流、Apple 平台上 libmpv 的 EDR 与画中画、MyGo 的视频元素
 - [ ] 各应用与库的骨架
 - [ ] `libs/client-rust`：服务器与登录、事件流、离线存储、播放上报、下载、页面状态、多台服务器的合并；Swift、Kotlin 与 Go 绑定
