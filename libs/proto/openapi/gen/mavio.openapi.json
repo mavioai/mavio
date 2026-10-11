@@ -13776,7 +13776,8 @@
         "properties": {
           "jobId": {
             "type": "string",
-            "title": "job_id"
+            "title": "job_id",
+            "description": "The queued job, or the run already queued or running."
           },
           "enqueued": {
             "type": "boolean",

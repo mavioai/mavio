@@ -1043,6 +1043,7 @@ func (x *RunTaskResponse) ClearEnqueued() {
 type RunTaskResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
+	// The queued job, or the run already queued or running.
 	JobId *string
 	// False when a run was already queued or running.
 	Enqueued *bool

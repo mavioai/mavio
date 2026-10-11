@@ -1171,6 +1171,8 @@ impl ::buffa::ExtensionSet for RunTaskRequest {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct RunTaskResponse {
+    /// The queued job, or the run already queued or running.
+    ///
     /// Field 1: `job_id`
     pub job_id: ::core::option::Option<::buffa::alloc::string::String>,
     /// False when a run was already queued or running.

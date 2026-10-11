@@ -1714,6 +1714,8 @@ impl ::buffa::HasMessageView for super::super::RunTaskRequest {
 }
 #[derive(Clone, Debug, Default)]
 pub struct RunTaskResponseView<'a> {
+    /// The queued job, or the run already queued or running.
+    ///
     /// Field 1: `job_id`
     pub job_id: ::core::option::Option<&'a str>,
     /// False when a run was already queued or running.
@@ -1917,6 +1919,8 @@ impl RunTaskResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
+    /// The queued job, or the run already queued or running.
+    ///
     /// Field 1: `job_id`
     #[must_use]
     pub fn job_id(&self) -> ::core::option::Option<&'_ str> {
