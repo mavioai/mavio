@@ -31,15 +31,18 @@ func TestAggregateSeriesQuality(t *testing.T) {
 		{"v0 in the name", []QualityAugment{withRevision(name, 0, ConfidenceTag), releaseName}, WEBDL480p, DetectedName, DetectedName, DetectedName, 0},
 		{
 			"v0 in the name, v2 in the release name",
-			[]QualityAugment{withRevision(name, 0, ConfidenceTag), withRevision(name, 2, ConfidenceTag)}, SDTV, DetectedName, DetectedName, DetectedName, 2,
+			[]QualityAugment{withRevision(name, 0, ConfidenceTag), withRevision(name, 2, ConfidenceTag)},
+			SDTV, DetectedName, DetectedName, DetectedName, 2,
 		},
 		{
 			"Bluray-576p from the name and media info",
-			[]QualityAugment{{SeriesSourceBluray, ConfidenceDefault, 480, ConfidenceDefault, rev(0), ConfidenceTag}, mediaInfo(576)}, Bluray576p, DetectedName, DetectedMediaInfo, DetectedName, 0,
+			[]QualityAugment{{SeriesSourceBluray, ConfidenceDefault, 480, ConfidenceDefault, rev(0), ConfidenceTag}, mediaInfo(576)},
+			Bluray576p, DetectedName, DetectedMediaInfo, DetectedName, 0,
 		},
 		{
 			"SDTV from HDTV in the name and 576p media info",
-			[]QualityAugment{{SeriesSourceTelevision, ConfidenceDefault, 480, ConfidenceDefault, rev(0), ConfidenceTag}, mediaInfo(576)}, SDTV, DetectedName, DetectedMediaInfo, DetectedName, 0,
+			[]QualityAugment{{SeriesSourceTelevision, ConfidenceDefault, 480, ConfidenceDefault, rev(0), ConfidenceTag}, mediaInfo(576)},
+			SDTV, DetectedName, DetectedMediaInfo, DetectedName, 0,
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
@@ -59,11 +62,28 @@ func TestAugmentFromVideo(t *testing.T) {
 	for _, tt := range []struct {
 		width, height, want int
 	}{
-		{4096, 1, 2160}, {4000, 1, 2160}, {3840, 1, 2160}, {3200, 1, 2160},
-		{2000, 1, 1080}, {1920, 1, 1080}, {1440, 1080, 1080}, {1800, 1, 1080},
-		{1490, 1, 720}, {1280, 1, 720}, {1200, 1, 720},
-		{1000, 1, 576}, {720, 576, 576}, {800, 1, 480}, {720, 1, 480}, {600, 1, 480}, {100, 1, 480},
-		{1, 2160, 2160}, {1, 1080, 1080}, {1, 720, 720}, {1, 576, 576}, {1, 480, 480},
+		{4096, 1, 2160},
+		{4000, 1, 2160},
+		{3840, 1, 2160},
+		{3200, 1, 2160},
+		{2000, 1, 1080},
+		{1920, 1, 1080},
+		{1440, 1080, 1080},
+		{1800, 1, 1080},
+		{1490, 1, 720},
+		{1280, 1, 720},
+		{1200, 1, 720},
+		{1000, 1, 576},
+		{720, 576, 576},
+		{800, 1, 480},
+		{720, 1, 480},
+		{600, 1, 480},
+		{100, 1, 480},
+		{1, 2160, 2160},
+		{1, 1080, 1080},
+		{1, 720, 720},
+		{1, 576, 576},
+		{1, 480, 480},
 	} {
 		got, ok := AugmentFromVideo(tt.width, tt.height)
 		if !ok || got.Resolution != tt.want || got.ResolutionConfidence != ConfidenceMediaInfo {
