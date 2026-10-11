@@ -103,6 +103,7 @@ func (p *plugin) ListIndexers(ctx context.Context, _ *pluginv1.ListIndexersReque
 				if c.cfg.SeasonPackSeedTime > 0 {
 					b.SeasonPackSeedTime = durationpb.New(time.Duration(c.cfg.SeasonPackSeedTime) * time.Minute)
 				}
+				b.RejectBlocklistedTorrentHashes = proto.Bool(c.cfg.RejectBlocklistedTorrentHashes)
 			}
 			b.Tags, b.MultiLanguages = c.cfg.Tags, c.cfg.MultiLanguages
 			if until, failure, ok := p.statuses.Disabled(c.cfg.ID); ok {

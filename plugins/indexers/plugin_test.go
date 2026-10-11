@@ -201,7 +201,7 @@ func TestTorznabIndexer(t *testing.T) {
 			map[string]any{
 				"id": "tosho", "definition": "torznab", "settings": map[string]any{"base_url": srv.URL},
 				"tags": []any{"anime"}, "required_flags": []any{"freeleech"}, "minimum_seeders": 3, "multi_languages": []any{"French", "Original"},
-				"seed_ratio": 1.5, "seed_time": 60, "season_pack_seed_time": 120,
+				"seed_ratio": 1.5, "seed_time": 60, "season_pack_seed_time": 120, "reject_blocklisted_torrent_hashes": true,
 			},
 			map[string]any{"id": "off", "definition": "torznab", "enabled": false, "settings": map[string]any{"base_url": srv.URL}},
 			map[string]any{"id": "broken", "definition": "nosuchdefinition"},
@@ -240,6 +240,8 @@ func TestTorznabIndexer(t *testing.T) {
 		{"off MinimumSeeders", list.GetIndexers()[1].GetMinimumSeeders(), int32(1)},
 		{"off HasSeedRatio", list.GetIndexers()[1].HasSeedRatio(), false},
 		{"off HasSeedTime", list.GetIndexers()[1].HasSeedTime(), false},
+		{"RejectBlocklistedTorrentHashes", tosho.GetRejectBlocklistedTorrentHashes(), true},
+		{"off RejectBlocklistedTorrentHashes", list.GetIndexers()[1].GetRejectBlocklistedTorrentHashes(), false},
 	} {
 		if !equal(c.got, c.want) {
 			t.Errorf("%s = %v, want = %v", c.name, c.got, c.want)
