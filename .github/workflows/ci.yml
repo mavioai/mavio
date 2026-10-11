@@ -20,6 +20,8 @@ jobs:
   check:
     name: Lint, test, build (affected)
     runs-on: ubuntu-latest
+    outputs:
+      apple: ${{ steps.apple.outputs.projects }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,8 +33,11 @@ jobs:
           workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
       - uses: nrwl/nx-set-shas@v4
-      # The Apple projects build only on macOS, in the apple job.
+      # The Apple projects build only on macOS, in the apple job, which runs
+      # when they are affected.
       - run: pnpm nx affected -t buf-lint lint tidy-check typecheck build test --exclude 'tag:platform:apple' --output-style=static
+      - id: apple
+        run: echo "projects=$(pnpm exec nx show projects --affected --projects 'tag:platform:apple' --json)" >> "$GITHUB_OUTPUT"
       - name: Generated code is up to date
         run: |
           pnpm nx run-many -t generate --exclude 'tag:platform:apple' --output-style=static
@@ -62,6 +67,7 @@ jobs:
   apple:
     name: Apple
     needs: check
+    if: needs.check.outputs.apple != '[]'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,10 +76,10 @@ jobs:
         with:
           workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx run-many -t lint build test --projects 'tag:platform:apple' --output-style=static
+      - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.check.outputs.apple), ',') }}' --output-style=static
       - name: Generated projects are up to date
         run: |
-          pnpm nx run-many -t generate --projects 'tag:platform:apple' --output-style=static
+          pnpm nx run-many -t generate --projects '${{ join(fromJSON(needs.check.outputs.apple), ',') }}' --output-style=static
           git diff --exit-code
 
   media:

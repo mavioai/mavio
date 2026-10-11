@@ -177,7 +177,7 @@ A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.
 `.github/workflows/ci.yml` runs on pushes to `main` and on pull requests:
 * **check** (Linux): `nx affected -t buf-lint lint tidy-check typecheck build test`; regenerates code and fails on any diff; runs `buf breaking` against the base branch on pull requests.
 * **test**: `nx run-many -t test build` on linux arm64, macOS and Windows.
-* **apple** (macOS): `nx run-many -t lint build test` over the Apple projects, and fails when their generated Xcode projects differ from what `generate` writes.
+* **apple** (macOS), when **check** finds Apple projects affected: `nx run-many -t lint build test` over them, and fails when their generated Xcode projects differ from what `generate` writes.
 * **media** (Linux, macOS): installs jellyfin-ffmpeg, generates the fixtures and runs the `media`, `streaming` and `server` tests without the Nx cache, so the ffmpeg integration and smoke tests run on the runners' hardware.
 
 * **dist** (Linux): `nx run server:dist`, so the server cross-compiles for every supported platform.
