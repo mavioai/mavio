@@ -1428,6 +1428,13 @@ pub struct IndexerView<'a> {
     ///
     /// Field 19: `anime_standard_format_search`
     pub anime_standard_format_search: ::core::option::Option<bool>,
+    /// The download client the indexer's releases are always sent to, as
+    /// Radarr's and Sonarr's indexer DownloadClientId: "\<plugin\>/\<client\>",
+    /// or a client's ID alone for the client of that ID of any download
+    /// client provider; empty for the client chosen as for every indexer.
+    ///
+    /// Field 20: `download_client_id`
+    pub download_client_id: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for IndexerView<'a> {
@@ -1636,6 +1643,13 @@ impl<'a> ::buffa::MessageView<'a> for IndexerView<'a> {
                     ::buffa::types::decode_bool(&mut cur)?,
                 );
             }
+            20u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.download_client_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             11u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -1746,6 +1760,7 @@ impl<'a> ::buffa::MessageView<'a> for IndexerView<'a> {
             },
             reject_blocklisted_torrent_hashes: self.reject_blocklisted_torrent_hashes,
             anime_standard_format_search: self.anime_standard_format_search,
+            download_client_id: self.download_client_id.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1834,6 +1849,9 @@ impl<'a> ::buffa::ViewEncode<'a> for IndexerView<'a> {
         if self.anime_standard_format_search.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.download_client_id {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1921,6 +1939,9 @@ impl<'a> ::buffa::ViewEncode<'a> for IndexerView<'a> {
         }
         if let Some(v) = self.anime_standard_format_search {
             ::buffa::types::put_bool_field(19u32, v, buf);
+        }
+        if let Some(ref v) = self.download_client_id {
+            ::buffa::types::put_string_field(20u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2154,6 +2175,16 @@ impl IndexerOwnedView {
     #[must_use]
     pub fn anime_standard_format_search(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().anime_standard_format_search
+    }
+    /// The download client the indexer's releases are always sent to, as
+    /// Radarr's and Sonarr's indexer DownloadClientId: "\<plugin\>/\<client\>",
+    /// or a client's ID alone for the client of that ID of any download
+    /// client provider; empty for the client chosen as for every indexer.
+    ///
+    /// Field 20: `download_client_id`
+    #[must_use]
+    pub fn download_client_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().download_client_id
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<IndexerView<'static>>>

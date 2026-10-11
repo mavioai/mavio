@@ -120,6 +120,11 @@ message Indexer {
   // Anime is searched for by season and episode too, and season packs of
   // anime by season, as Sonarr's AnimeStandardFormatSearch.
   bool anime_standard_format_search = 19;
+  // The download client the indexer's releases are always sent to, as
+  // Radarr's and Sonarr's indexer DownloadClientId: "<plugin>/<client>",
+  // or a client's ID alone for the client of that ID of any download
+  // client provider; empty for the client chosen as for every indexer.
+  string download_client_id = 20;
 }
 
 // IndexerCapabilities is what an indexer can be searched by, as Newznab's
