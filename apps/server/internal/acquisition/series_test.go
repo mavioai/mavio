@@ -747,6 +747,19 @@ func TestDecideEpisodes(t *testing.T) {
 	if len(decided) != 2 || len(decided[0].Rejections) != 0 || !slices.Equal(decided[0].EpisodeIDs, []core.ID{ep1.ID}) || len(decided[1].Rejections) == 0 {
 		t.Errorf("decided = %+v, want S01E01 approved first, S01E02 rejected", decided)
 	}
+
+	// A whole series' search takes releases of any of its episodes, as
+	// by RSS.
+	ep2 := e.episode(s.ID, 2, 1)
+	season2 := releasesRelease(torrent("c", "Breaking.Bad.S02E01.720p.HDTV.x264-GRP", gb, hashOf("c"), e.clock.Add(-time.Hour)))
+	decided, err = e.rt.Decide(e.ctx, s.ID, []releases.Release{rels[1], season2, rels[0]})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(decided) != 3 || !slices.ContainsFunc(decided, func(d Decided) bool { return slices.Contains(d.EpisodeIDs, ep2.ID) }) ||
+		slices.ContainsFunc(decided, func(d Decided) bool { return len(d.Rejections) > 0 }) {
+		t.Errorf("series decided = %+v, want the episodes of both seasons approved", decided)
+	}
 }
 
 // releasesRelease returns a release as the indexer's search found it.

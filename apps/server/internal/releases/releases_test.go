@@ -299,7 +299,7 @@ func TestCriteriaErrors(t *testing.T) {
 	}{
 		{"unknown item", core.NewID(), core.ErrNotFound},
 		{"music", artistID, core.ErrInvalid},
-		{"series", seriesID, core.ErrInvalid},
+		{"series without seasons", dailySeriesID, core.ErrInvalid},
 	} {
 		if _, err := s.criteria(t.Context(), Search{ItemID: tt.id}); !errors.Is(err, tt.want) {
 			t.Errorf("%s: err = %v, want = %v", tt.name, err, tt.want)
@@ -418,6 +418,42 @@ func TestAnimeSeasonSearch(t *testing.T) {
 	}
 	if !slices.Equal(guids, []string{"a", "b"}) {
 		t.Errorf("releases = %q, want = a and b once each", guids)
+	}
+}
+
+// TestSeriesSearch checks that a whole series is searched season by
+// season, but the specials, as Sonarr's SeriesSearchService does, and
+// anime episode by episode.
+func TestSeriesSearch(t *testing.T) {
+	now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	lib := library()
+	season1, specials := core.NewID(), core.NewID()
+	lib.byID[season1] = core.Item{ID: season1, ParentID: seriesID, Kind: core.KindSeason, IndexNumber: new(1)}
+	lib.byID[specials] = core.Item{ID: specials, ParentID: seriesID, Kind: core.KindSeason, IndexNumber: new(0)}
+	for _, tt := range []struct {
+		name string
+		id   core.ID
+		want []string
+	}{
+		{"series", seriesID, []string{
+			`ix TV q="" ids=tvdb:263365 s=1 cat=[5000]`, `ix TV q="Marvels Agents of SHIELD" ids= s=1 cat=[5000]`,
+			`ix TV q="" ids=tvdb:263365 s=2 cat=[5000]`, `ix TV q="Marvels Agents of SHIELD" ids= s=2 cat=[5000]`,
+		}},
+		{"anime", animeSeriesID, []string{
+			`ix TV q="03" ids=tvdb:400001 cat=[5070]`, `ix UNSPECIFIED q="Cafe Enchante 03" ids= cat=[5070]`,
+			`ix TV q="04" ids=tvdb:400001 cat=[5070]`, `ix UNSPECIFIED q="Cafe Enchante 04" ids= cat=[5070]`,
+		}},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &fakeProvider{indexers: []*pluginv1.Indexer{newIndexer("ix", 1, caps([]string{"q"}, []string{"q", "season", "ep", "tvdbid"}, nil))}}
+			s := &Searcher{Items: lib, Now: func() time.Time { return now }, Providers: func() []Provider { return []Provider{{ID: "p", Client: p}} }}
+			if _, err := s.Search(t.Context(), Search{ItemID: tt.id}); err != nil {
+				t.Fatal(err)
+			}
+			if !slices.Equal(p.requests, tt.want) {
+				t.Errorf("requests = %q, want = %q", p.requests, tt.want)
+			}
+		})
 	}
 }
 

@@ -31,8 +31,8 @@ type criteria struct {
 	text       *Search
 	movie      *movieCriteria
 	episode    *episodeCriteria
-	// seasonEpisodes are the episodes of a season of anime, searched
-	// one by one in place of episode.
+	// seasonEpisodes are the episodes of a season of anime, or the
+	// seasons of a whole series, searched one by one in place of episode.
 	seasonEpisodes []*episodeCriteria
 	// limits holds the age and size limits of the requests; nil for none.
 	limits *Search
@@ -111,9 +111,11 @@ func (s *Searcher) criteria(ctx context.Context, q Search) (*criteria, error) {
 			kind: release.Movie, categories: or(q.Categories, moviesCategory),
 			movie: &movieCriteria{titles: titles(item), year: item.ProductionYear, ids: externalIDs(item, movieIDParams)},
 		}, nil
+	case core.KindSeries:
+		return s.seriesCriteria(ctx, item, q)
 	case core.KindSeason, core.KindEpisode:
 	default:
-		return nil, fmt.Errorf("%s %s is not searched for releases, only movies, seasons and episodes: %w", item.Kind, item.ID, core.ErrInvalid)
+		return nil, fmt.Errorf("%s %s is not searched for releases, only movies, series, seasons and episodes: %w", item.Kind, item.ID, core.ErrInvalid)
 	}
 	series, err := s.series(ctx, item)
 	if err != nil {
@@ -155,6 +157,48 @@ func (s *Searcher) criteria(ctx context.Context, q Search) (*criteria, error) {
 		category = animeCategory
 	}
 	return &criteria{kind: release.Series, categories: or(q.Categories, category), episode: e}, nil
+}
+
+// seriesCriteria returns the criteria of an interactive search of a whole
+// series: each of its seasons but the specials, searched as Sonarr's
+// SeriesSearchService searches a series season by season, and the
+// seasons of anime episode by episode as its SearchAnimeSeason.
+func (s *Searcher) seriesCriteria(ctx context.Context, series core.Item, q Search) (*criteria, error) {
+	base := episodeCriteria{titles: titles(series), ids: externalIDs(series, tvIDParams), seriesType: series.SeriesType}
+	var seasons []core.Item
+	for it, err := range s.Items.Walk(ctx, core.ItemQuery{
+		ParentID: series.ID, Kinds: []core.ItemKind{core.KindSeason}, IncludeVirtual: true, IncludeMissing: true,
+	}) {
+		if err != nil {
+			return nil, err
+		}
+		if it.IndexNumber != nil && *it.IndexNumber > 0 {
+			seasons = append(seasons, it)
+		}
+	}
+	slices.SortFunc(seasons, func(a, b core.Item) int { return *a.IndexNumber - *b.IndexNumber })
+	var searches []*episodeCriteria
+	for _, season := range seasons {
+		e := base
+		e.season = *season.IndexNumber
+		if series.SeriesType != core.SeriesAnime {
+			searches = append(searches, &e)
+			continue
+		}
+		episodes, err := s.animeSeasonEpisodes(ctx, season, series, &e)
+		if err != nil {
+			return nil, err
+		}
+		searches = append(searches, episodes...)
+	}
+	if len(searches) == 0 {
+		return nil, fmt.Errorf("series %s has no seasons to search: %w", series.ID, core.ErrInvalid)
+	}
+	category := tvCategory
+	if series.SeriesType == core.SeriesAnime {
+		category = animeCategory
+	}
+	return &criteria{kind: release.Series, categories: or(q.Categories, category), seasonEpisodes: searches}, nil
 }
 
 // animeSeasonEpisodes returns the criteria of the episodes of a season of
@@ -228,7 +272,8 @@ func externalIDs(item core.Item, params []idParam) map[string]string {
 }
 
 // searches returns the searches of an indexer with caps, each tiers of
-// requests: one search, or one by episode of a season of anime.
+// requests: one search, or one by episode of a season of anime, or by
+// season of a whole series.
 func (c *criteria) searches(caps *pluginv1.IndexerCapabilities) [][][]*pluginv1.SearchReleasesRequest {
 	if c.seasonEpisodes == nil {
 		return [][][]*pluginv1.SearchReleasesRequest{c.tiers(caps)}
