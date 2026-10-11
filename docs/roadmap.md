@@ -462,7 +462,10 @@ flowchart TD
   - [ ] Hashes of blocklisted torrents checked when grabbing, as Radarr refuses a torrent whose hash is blocklisted
   - [ ] Helpers the clients share instead of each keeping its own: remote path joining, .NET version parsing, JSON-RPC and XML-RPC, URL base validation, a free-form tag field, a "release rejected" error, warnings from tests, NZB validity checks, a configurable history limit, IDs kept in the case clients give them, and `::1` counted as localhost
 - [x] `libs/acquire`: qualities and their definitions, quality profiles, custom formats, delay profiles, release profiles
-- [ ] Decisions: the specifications of Radarr's decision engine and its ranking
+- [x] Decisions: the specifications of Radarr's decision engine and its ranking, with its cases ported (`libs/acquire`)
+  - [ ] Indexers found by name, for the cases of Radarr's tests that give releases only an indexer name
+  - [ ] Languages kept apart as unknown and any; an unknown language counts as any
+  - [ ] Tags of indexers, which the indexer tag specification needs before it rejects anything
 - [x] Domain and storage: profiles, custom formats, the queue of tracked downloads, history, the blocklist, remote path mappings, naming (`libs/core/acquisition.go`, `libs/store`)
   - [ ] The format scores of quality profiles checked against the custom formats that exist
 - [ ] Adding a wanted movie to a library by its TMDB ID, with a quality profile and minimum availability

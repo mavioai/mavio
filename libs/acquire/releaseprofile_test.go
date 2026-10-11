@@ -59,7 +59,7 @@ func TestCheckTerms(t *testing.T) {
 }
 
 func TestReleaseProfile(t *testing.T) {
-	p := ReleaseProfile{Enabled: true, IndexerID: 2, Tags: []int{1}, Required: []string{"/x/q"}}
+	p := ReleaseProfile{Enabled: true, IndexerID: ixID(2), Tags: []string{"1"}, Required: []string{"/x/q"}}
 	if err := p.Validate(); err == nil {
 		t.Error("Validate() with modifier q = nil, want = an error")
 	}
@@ -68,21 +68,21 @@ func TestReleaseProfile(t *testing.T) {
 		t.Errorf("Validate() = %v, want = nil", err)
 	}
 	tests := []struct {
-		tags    []int
+		tags    []string
 		indexer int
 		want    bool
 	}{
-		{[]int{1}, 2, true},
-		{[]int{1}, 3, false},
-		{[]int{4}, 2, false},
+		{[]string{"1"}, 2, true},
+		{[]string{"1"}, 3, false},
+		{[]string{"4"}, 2, false},
 	}
 	for _, tt := range tests {
-		if got := p.AppliesTo(tt.tags, tt.indexer); got != tt.want {
+		if got := p.AppliesTo(tt.tags, ixID(tt.indexer)); got != tt.want {
 			t.Errorf("AppliesTo(%v, %d) = %v, want = %v", tt.tags, tt.indexer, got, tt.want)
 		}
 	}
 	p.Enabled = false
-	if p.AppliesTo([]int{1}, 2) {
+	if p.AppliesTo([]string{"1"}, ixID(2)) {
 		t.Error("AppliesTo() of a disabled profile = true, want = false")
 	}
 }

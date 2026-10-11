@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/release"
 )
 
@@ -30,7 +31,7 @@ func (it ProfileItem) IsGroup() bool { return it.ID != 0 || len(it.Items) > 0 }
 
 // FormatScore scores a custom format in a profile.
 type FormatScore struct {
-	FormatID int
+	FormatID core.ID
 	Score    int
 }
 
@@ -38,7 +39,7 @@ type FormatScore struct {
 // to get of a movie or series and when to stop upgrading it, as Radarr's
 // and Sonarr's QualityProfile.
 type QualityProfile struct {
-	ID   int
+	ID   core.ID
 	Name string
 	// UpgradeAllowed lets a release replace a file until the cutoff.
 	UpgradeAllowed bool
@@ -362,4 +363,12 @@ func cmpInt(a, b int) int {
 		return 1
 	}
 	return 0
+}
+
+// String returns the group's name or the quality's.
+func (it ProfileItem) String() string {
+	if it.IsGroup() {
+		return it.Name
+	}
+	return it.Quality.String()
 }
