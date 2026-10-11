@@ -10,14 +10,16 @@ The state of every feature on each client ([Clients §6.8](../../docs/clients.md
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Servers and sign-in** | | | | | | | |
 | Server discovery on the local network | — | ○ | ○ | ○ | ○ | ○ | ○ |
-| Several servers | — | ○ | ○ | ○ | ○ | ○ | ○ |
+| Several servers signed in at once | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Sign-in with a password | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Quick Connect | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | **Browsing** | | | | | | | |
-| Home: continue watching, next up, latest | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| Home: hubs merged across servers | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| Library Recommended tab | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Libraries with sort and filters | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Search | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Details: movie, series, season, person, collection | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| More like this | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Favorites, played and unplayed | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Live updates from the event stream | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | **Playback** | | | | | | | |
@@ -48,7 +50,7 @@ The state of every feature on each client ([Clients §6.8](../../docs/clients.md
 
 ## Not Applicable
 
-* **Server discovery, several servers, starting on cached content on the web**: the web UI is served by the server it talks to.
+* **Server discovery and starting on cached content on the web**: browsers cannot discover servers on the local network, and the web UI is loaded from a server, which it reaches before anything else.
 * **Second engine on the web and on Windows and Linux**: the web plays with the browser's player; Windows and Linux play with libmpv alone.
 * **Picture in Picture on Android TV and on Windows and Linux**: Android TV and Google TV devices do not offer it; the desktop app has windows of its own instead.
 * **AirPlay on Apple TV, Android and Windows and Linux**: Apple TV receives AirPlay rather than sending it; the others lack it.

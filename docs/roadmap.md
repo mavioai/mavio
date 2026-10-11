@@ -547,7 +547,27 @@ flowchart TD
   - [ ] Unrated titles hidden from users whose policy blocks them in the end-to-end test
 
 ### P21 Clients and Ecosystem
-**Scope**: the [clients](clients.md), built on the finished server API: the web UI embedded in the server (`apps/web`, served at `/`), the Apple apps for iPhone and iPad, Apple TV and the Mac (`apps/ios`, `apps/tvos`, `apps/macos`), the Android apps for phones and tablets and for Android TV (`apps/android`, `apps/android-tv`), the Windows and Linux app on MyGo (`apps/windows-linux`), and the libraries they share (`libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`); the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its foundation does not wait for P20: the toolchains and build targets, the TypeScript and Rust code generated from `libs/proto`, `libs/design`, the prototypes the open items of §4 name for clients, and the skeletons of the apps and libraries. Only the discovery and request screens wait for P20. The clients then come in this order, each proving the shared core and the design system before the next platform builds on them: the web UI with `libs/client-ts` and `libs/design`; the iPhone and iPad app with `libs/client-rust` and `libs/apple`; the Android phone and tablet app with `libs/android`; the Apple TV and Android TV apps; the Mac app; the Windows and Linux app. Its completion criteria will be defined after P20.
+**Scope**: the [clients](clients.md), built on the finished server API: the web UI embedded in the server (`apps/web`, served at `/`), the Apple apps for iPhone and iPad, Apple TV and the Mac (`apps/ios`, `apps/tvos`, `apps/macos`), the Android apps for phones and tablets and for Android TV (`apps/android`, `apps/android-tv`), the Windows and Linux app on MyGo (`apps/windows-linux`), and the libraries they share (`libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`); the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its foundation does not wait for P20: the toolchains and build targets, the TypeScript and Rust code generated from `libs/proto`, `libs/design`, the prototypes the open items of §4 name for clients, and the skeletons of the apps and libraries. Only the discovery and request screens wait for P20. The clients then come in this order, each proving the shared core and the design system before the next platform builds on them: the web UI with `libs/client-ts` and `libs/design`; the iPhone and iPad app with `libs/client-rust` and `libs/apple`; the Android phone and tablet app with `libs/android`; the Apple TV and Android TV apps; the Mac app; the Windows and Linux app.
+
+**Done when**: every client signs in to two servers at once and shows one Home merging their hubs, with a title both servers have shown once; browses a library, searches both servers, opens an item and plays it — direct play, and a transcode where the client needs one — with audio and subtitle selection, its progress reported and resumed on another client; requests a title from Trending, which is approved, acquired and then shown as available; the native apps start offline on cached content, and those with downloads play a downloaded item offline. Each client's screens pass their snapshot tests, and `libs/design/parity.md` has no feature left planned.
+
+**Progress**:
+- [x] Toolchains and build targets: Rust in `libs/client-rust` with `tools/nx-cargo`; Go, Node.js and pnpm updated
+- [x] TypeScript and Rust generated from `libs/proto` (`@mavio/proto`, `mavio-api`)
+- [x] `libs/design`: tokens, icons, strings, component specifications and the feature parity table, compiled for every client
+- [ ] Server: `HomeService` with the hubs of Home and of the library tabs, and their settings
+- [ ] Server: `ItemService.ListSimilarItems`
+- [ ] Server: cross-origin requests on the API and the media and image routes
+- [ ] Prototypes: Rust on tvOS, connect-rust streams with `EventService`, libmpv with EDR and Picture in Picture on Apple platforms, MyGo's video element
+- [ ] Skeletons of the apps and libraries
+- [ ] `libs/client-rust`: servers and sign-in, the event stream, the offline store, playback reporting, downloads, screen state, the merging of several servers; the Swift, Kotlin and Go bindings
+- [ ] Web UI (`apps/web`, `libs/client-ts`)
+- [ ] iPhone and iPad app (`apps/ios`, `libs/apple`)
+- [ ] Android phone and tablet app (`apps/android`, `libs/android`)
+- [ ] Apple TV and Android TV apps
+- [ ] Mac app
+- [ ] Windows and Linux app
+- [ ] The decision on a Jellyfin API compatibility shim
 
 ### P22 Real-Device Acceptance
 **Scope**: end-to-end playback on real devices, after the clients exist: DLNA media server and Play To on real televisions, with the profiles adjusted to what they do.

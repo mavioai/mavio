@@ -82,6 +82,7 @@ The server owns every decision that depends on the library, the user or other de
 | Live updates | Server pushes | One `EventService` stream per device: item and library changes, user data, sessions, remote-control commands and SyncPlay. Clients reconnect with backoff and do not poll |
 | Media and images | Plain HTTP | `/media/{playback}/…` and `/images/…`; the IDs are the credentials, so players need no headers |
 | Sign-in | Server | Bearer tokens; television apps sign in with Quick Connect |
+| Home | Server builds, client merges | Each server builds its hubs for the user with `HomeService` ([Architecture §11](architecture.md#11-api-and-authentication-appsserver)); the client merges the hubs of every server it is signed in to (§5.4) |
 | Finding servers | Client | UDP discovery on port 7359 on the local network, or an address typed in |
 | Acquisition, discovery and requests | Server | The server's own services; clients call nothing else |
 
@@ -92,6 +93,7 @@ The server owns every decision that depends on the library, the user or other de
 ### 4.1 Web (`apps/web`)
 * **Role**: every feature — browsing, playback, requests, administration and the first-run setup — with no installation.
 * **Serving**: Vite builds into `apps/server/internal/webui/dist`, which the server embeds with `//go:embed` and serves at `/`, with the SPA's routes falling back to `index.html`. The directory holds only a `.gitkeep` in the repository; a server built without the web UI serves a page saying so. Nx makes the server's `build` depend on the web's. The API reference stays at `/api`.
+* **Servers**: signed in to the server serving it, the web UI adds others as the apps do (§5.4) and calls them cross-origin; servers allow any origin on their API and media routes, which take bearer tokens and ID credentials and never cookies. The list of servers, their tokens excepted, is kept in the user's display preferences on the serving server, so that it follows the user across browsers.
 * **API**: `libs/client-ts`, on `connect-es` v2 and `protobuf-es` v2 with the code generated from `libs/proto`, and TanStack Query for caching and invalidation, driven by the event stream.
 * **Playback**: hls.js on browsers with Media Source Extensions, the native HLS player on Safari; capabilities from `MediaCapabilities.decodingInfo`. ASS subtitles keep their styling with JASSUB (libass in WebAssembly). For what a browser cannot play without a transcode, the player offers to open the playback URL in an external player (mpv, VLC, IINA).
 
@@ -137,7 +139,7 @@ The server owns every decision that depends on the library, the user or other de
 ## 5. Shared Core (`libs/client-rust`)
 
 ### 5.1 Responsibilities
-* **Servers and sign-in**: several servers per app, discovery, sign-in with a password or Quick Connect, and the access token, kept by the app in the platform's secure storage (Keychain, Android Keystore, Windows Credential Manager, the Secret Service) through an interface the app implements.
+* **Servers and sign-in**: several servers signed in at once (§5.4), discovery, sign-in with a password or Quick Connect, and the access token, kept by the app in the platform's secure storage (Keychain, Android Keystore, Windows Credential Manager, the Secret Service) through an interface the app implements.
 * **Connect client**: [connect-rust](https://github.com/connectrpc/connect-rust) over HTTP/1.1 and HTTP/2, with the messages and clients generated from `libs/proto` into `libs/proto/gen/rust` and included by the crate `mavio-api`.
 * **Event stream**: one `EventService` stream per server, reconnected with backoff, its events dispatched to the app.
 * **Offline store**: SQLite (`rusqlite`, bundled SQLite) with the items last browsed, so that the app starts on cached content, the downloaded items, and the progress reports made offline, sent once the server is reachable.
@@ -154,6 +156,18 @@ The server owns every decision that depends on the library, the user or other de
 * **Swift**: UniFFI generates the Swift API, packaged with the static libraries as an XCFramework that `MavioKit` depends on.
 * **Kotlin**: UniFFI generates the Kotlin API, packaged with the shared libraries in the `core` module of `libs/android`.
 * **Go**: a C ABI of a few functions taking and returning byte buffers, which hold protobuf messages of the core's API, defined in `libs/client-rust/proto`; results and events come back through one callback, so that purego creates a single callback for the process. The Go API is generated from those messages.
+
+### 5.4 Several Servers
+A client is signed in at once to every server the user added — their own and those of friends and family — each with its own user and access token. The servers do not know each other; the client alone puts them together, in the user's order of servers.
+* **What spans servers**: Home, Search and Downloads. A library, an item's details and the player belong to one server, whose name the item shows when more than one server is signed in.
+* **Home**, as Plex builds it: the hubs of every server (§6.3), merged:
+  * **Continue Watching** is one hub across servers: the items being watched and the next episodes, by last activity;
+  * **the same title on several servers**, matched by TMDB, TVDB or IMDb IDs, appears once: from the server where the user played it last, else the first in the user's order; its details offer the other servers' versions;
+  * **the other hubs** follow server by server in the user's order, each server's in the order of its pinned libraries;
+  * **Trending** from discovery appears once, from the first server that discovers, its titles marked available when any server has them; requests go to that server.
+* **Search** asks every server at once and lists the results by server.
+* **Progressive and offline**: each server's hubs are drawn as they arrive, in their fixed places, so that a slow server holds back no other; an unreachable server's hubs come from the offline store, marked offline.
+* **Played state** stays on each server: the same title played on one server is not marked played on another.
 
 ---
 
@@ -178,9 +192,16 @@ Content and brand icons are [Phosphor](https://phosphoricons.com/) (MIT), pinned
 
 ### 6.3 Information Architecture
 Every client has the same screens with the same names, reached the same way:
-* **Top-level destinations**: Home (continue watching, next up, latest per library), the libraries, Search, Downloads (the apps), and the profile with settings.
+* **Top-level destinations**: Home (§6.3.1), the libraries, Search, Downloads (the apps), and the profile with settings.
 * **Screens below them**: a library (grid with sort and filters), an item's details (movie, series, season, person, collection), the player, and settings.
 * **Navigation container**, mapped per platform: a tab bar on iPhone, a sidebar on iPad, Mac, Windows, Linux and wide web windows, a navigation bar or rail on Android by window size class, a top tab bar on Apple TV, and a side menu on Android TV.
+
+#### 6.3.1 Home
+Home is a column of hubs, after Plex's: rows of items, each a reason to watch something.
+* **Hubs**: Continue Watching first, then for each pinned library its hubs — Recently Added, Recently Released, Recently Aired (episodes), Top Rated, Top Unplayed, Start Watching (series not begun), Rediscover (played long ago, or series left with episodes unplayed), Because You Watched, More in a genre, Starring, Directed by, the collections an administrator promoted, and the requests that became available — and Trending, the titles discovery offers that no server has, to request.
+* **Who chooses**: administrators choose for each library which hubs appear on its Recommended tab and which on Home; each user pins and orders libraries, which orders their hubs, and hides hubs. Continue Watching cannot be hidden.
+* **Rotation**: the hubs seeded by an item, a genre or a person (Because You Watched, More in, Starring, Directed by) draw their seeds from what the user played recently, chosen anew each day, so that Home changes from day to day and stays put during a day.
+* **Library tabs**: a library opens on its Recommended tab, its hubs, beside the grid of all its items.
 
 ### 6.4 Components
 The core components are specified once in `libs/design/components.md` — their anatomy, their states (default, focused, pressed, loading, watched progress, played), their sizes per form factor and their tokens — and implemented natively on each platform; the specification is shared, not the code. They are the poster and thumbnail cards, the shelf row, the details header, the episode row, the person card, the track and subtitle pickers, and the empty, error and offline states. Television adds the focused state (scale and shadow) to every card.
