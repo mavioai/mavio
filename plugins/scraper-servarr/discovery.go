@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -149,6 +150,12 @@ func (m radarrMovie) discovered() *pluginv1.DiscoveredTitle {
 		t.SetVoteCount(int32(r.Count))
 	}
 	return t
+}
+
+// SearchTitles is not offered: searches go to providers searching TMDB,
+// as Seerr's do.
+func (p *plugin) SearchTitles(context.Context, *pluginv1.SearchTitlesRequest) (*pluginv1.SearchTitlesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scraper-servarr does not search titles"))
 }
 
 // ListFilterValues lists no values: the catalogs take no filters with
