@@ -400,13 +400,15 @@ pub(crate) mod tests {
     }
 
     pub(crate) fn servers() -> (Servers, Arc<MemoryTokens>) {
-        let tokens = Arc::new(MemoryTokens::default());
-        let s = Servers::new(
-            Arc::new(Store::open_in_memory().unwrap()),
-            tokens.clone(),
-            device(),
-        );
+        let (s, tokens, _) = servers_with_store();
         (s, tokens)
+    }
+
+    pub(crate) fn servers_with_store() -> (Servers, Arc<MemoryTokens>, Arc<Store>) {
+        let tokens = Arc::new(MemoryTokens::default());
+        let store = Arc::new(Store::open_in_memory().unwrap());
+        let s = Servers::new(store.clone(), tokens.clone(), device());
+        (s, tokens, store)
     }
 
     /// A fake server named name, with ID id, that signs in "me" with
