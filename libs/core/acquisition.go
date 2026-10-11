@@ -787,6 +787,57 @@ var ColonReplacements = []ColonReplacement{ColonDelete, ColonDash, ColonSpaceDas
 // Valid reports whether c is a known replacement.
 func (c ColonReplacement) Valid() bool { return slices.Contains(ColonReplacements, c) }
 
+// MultiEpisodeStyle is how the name of a file holding several episodes
+// writes their numbers, as Sonarr's MultiEpisodeStyle.
+type MultiEpisodeStyle string
+
+// The multi-episode styles, shown for episodes 6 to 8 of season 15 in
+// the format "S{season:00}E{episode:00}".
+const (
+	// MultiEpisodeExtend writes S15E06-07-08.
+	MultiEpisodeExtend MultiEpisodeStyle = "extend"
+	// MultiEpisodeDuplicate writes S15E06 - S15E07 - S15E08.
+	MultiEpisodeDuplicate MultiEpisodeStyle = "duplicate"
+	// MultiEpisodeRepeat writes S15E06E07E08.
+	MultiEpisodeRepeat MultiEpisodeStyle = "repeat"
+	// MultiEpisodeScene writes S15E06-E07-E08.
+	MultiEpisodeScene MultiEpisodeStyle = "scene"
+	// MultiEpisodeRange writes S15E06-08.
+	MultiEpisodeRange MultiEpisodeStyle = "range"
+	// MultiEpisodePrefixedRange writes S15E06-E08, Sonarr's default.
+	MultiEpisodePrefixedRange MultiEpisodeStyle = "prefixed_range"
+)
+
+// MultiEpisodeStyles lists the multi-episode styles.
+var MultiEpisodeStyles = []MultiEpisodeStyle{
+	MultiEpisodeExtend, MultiEpisodeDuplicate, MultiEpisodeRepeat, MultiEpisodeScene, MultiEpisodeRange, MultiEpisodePrefixedRange,
+}
+
+// Valid reports whether s is a known style.
+func (s MultiEpisodeStyle) Valid() bool { return slices.Contains(MultiEpisodeStyles, s) }
+
+// EpisodeTitleRequired is when an episode imported under a name that
+// shows its title must have one, as Sonarr's EpisodeTitleRequiredType.
+type EpisodeTitleRequired string
+
+// The episode title requirements.
+const (
+	// EpisodeTitleAlways requires the title of episodes aired within
+	// the last two days.
+	EpisodeTitleAlways EpisodeTitleRequired = "always"
+	// EpisodeTitleBulkSeasonReleases requires it but of the episodes of
+	// a season released at once.
+	EpisodeTitleBulkSeasonReleases EpisodeTitleRequired = "bulk_season_releases"
+	// EpisodeTitleNever requires no title.
+	EpisodeTitleNever EpisodeTitleRequired = "never"
+)
+
+// EpisodeTitleRequirements lists the episode title requirements.
+var EpisodeTitleRequirements = []EpisodeTitleRequired{EpisodeTitleAlways, EpisodeTitleBulkSeasonReleases, EpisodeTitleNever}
+
+// Valid reports whether r is a known requirement.
+func (r EpisodeTitleRequired) Valid() bool { return slices.Contains(EpisodeTitleRequirements, r) }
+
 // AcquisitionSettings are how releases are chosen, downloaded and
 // imported, as Radarr's and Sonarr's settings.
 type AcquisitionSettings struct {
@@ -799,6 +850,12 @@ type AcquisitionSettings struct {
 	// AutoRedownloadFailedFromInteractiveSearch also searches again when
 	// the failed release was grabbed from an interactive search.
 	AutoRedownloadFailedFromInteractiveSearch bool
+	// AutoUnmonitorPreviouslyDownloadedEpisodes unmonitors the episodes
+	// of wanted series whose files go missing, as Sonarr's setting.
+	AutoUnmonitorPreviouslyDownloadedEpisodes bool
+	// EpisodeTitleRequired is when episodes imported under names showing
+	// their titles must have one; empty is EpisodeTitleAlways.
+	EpisodeTitleRequired EpisodeTitleRequired
 	// MaximumSize is in megabytes; 0 for none.
 	MaximumSize int
 	// MinimumAge is how old usenet releases must be, in minutes.
@@ -843,26 +900,50 @@ type NamingSettings struct {
 	// The templates, such as "{Movie Title} ({Release Year})".
 	MovieFolderFormat   string
 	StandardMovieFormat string
+	// RenameEpisodes names episode files by the episode formats;
+	// otherwise they keep their names.
+	RenameEpisodes bool
+	// The templates of episode files of standard, daily and anime series,
+	// such as "{Series Title} - S{season:00}E{episode:00}", and of the
+	// folders of series, seasons and specials; empty for Sonarr's
+	// defaults.
+	StandardEpisodeFormat string
+	DailyEpisodeFormat    string
+	AnimeEpisodeFormat    string
+	SeriesFolderFormat    string
+	SeasonFolderFormat    string
+	SpecialsFolderFormat  string
+	// MultiEpisodeStyle is how files of several episodes are named; empty
+	// for MultiEpisodePrefixedRange.
+	MultiEpisodeStyle MultiEpisodeStyle
 }
 
-// DefaultAcquisitionSettings are Radarr's defaults.
+// DefaultAcquisitionSettings are Radarr's and Sonarr's defaults.
 func DefaultAcquisitionSettings() AcquisitionSettings {
 	return AcquisitionSettings{
 		Propers:                   PropersPreferAndUpgrade,
 		CompletedDownloadHandling: true,
 		AutoRedownloadFailed:      true,
 		AutoRedownloadFailedFromInteractiveSearch: true,
-		MinimumFreeSpace:      100,
-		RSSSyncInterval:       30,
-		CheckFinishedInterval: 1,
-		RecycleBinCleanupDays: 7,
-		CopyUsingHardlinks:    true,
-		ExtraFileExtensions:   []string{"srt"},
+		EpisodeTitleRequired:                      EpisodeTitleAlways,
+		MinimumFreeSpace:                          100,
+		RSSSyncInterval:                           30,
+		CheckFinishedInterval:                     1,
+		RecycleBinCleanupDays:                     7,
+		CopyUsingHardlinks:                        true,
+		ExtraFileExtensions:                       []string{"srt"},
 		Naming: NamingSettings{
 			ReplaceIllegalCharacters: true,
 			ColonReplacement:         ColonSmart,
 			MovieFolderFormat:        "{Movie Title} ({Release Year})",
 			StandardMovieFormat:      "{Movie Title} ({Release Year}) {Quality Full}",
+			StandardEpisodeFormat:    "{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}",
+			DailyEpisodeFormat:       "{Series Title} - {Air-Date} - {Episode Title} {Quality Full}",
+			AnimeEpisodeFormat:       "{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}",
+			SeriesFolderFormat:       "{Series Title}",
+			SeasonFolderFormat:       "Season {season}",
+			SpecialsFolderFormat:     "Specials",
+			MultiEpisodeStyle:        MultiEpisodePrefixedRange,
 		},
 	}
 }
@@ -885,6 +966,10 @@ func (a *AcquisitionSettings) Validate() error {
 		return fmt.Errorf("%w: unknown colon replacement %q", ErrInvalid, a.Naming.ColonReplacement)
 	case strings.TrimSpace(a.Naming.MovieFolderFormat) == "" || strings.TrimSpace(a.Naming.StandardMovieFormat) == "":
 		return fmt.Errorf("%w: movie naming requires folder and file formats", ErrInvalid)
+	case a.Naming.MultiEpisodeStyle != "" && !a.Naming.MultiEpisodeStyle.Valid():
+		return fmt.Errorf("%w: unknown multi-episode style %q", ErrInvalid, a.Naming.MultiEpisodeStyle)
+	case a.EpisodeTitleRequired != "" && !a.EpisodeTitleRequired.Valid():
+		return fmt.Errorf("%w: unknown episode title requirement %q", ErrInvalid, a.EpisodeTitleRequired)
 	}
 	return nil
 }

@@ -91,6 +91,8 @@ erDiagram
 | `PendingReason` | `delay`、`client_unavailable`、`fallback` |
 | `ProperDownload` | `prefer_and_upgrade`、`do_not_upgrade`、`do_not_prefer` |
 | `ColonReplacement` | `delete`、`dash`、`space_dash`、`space_dash_space`、`smart` |
+| `MultiEpisodeStyle` | `extend`、`duplicate`、`repeat`、`scene`、`range`、`prefixed_range` |
+| `EpisodeTitleRequired` | `always`、`bulk_season_releases`、`never` |
 | `Provider` | `tmdb`、`tmdb_collection`、`imdb`、`tvdb`、`tvmaze`、`anidb`、`anilist`、`anisearch`（动画数据库，每季一个条目）、`musicbrainz_artist`、`musicbrainz_album_artist`、`musicbrainz_album`、`musicbrainz_release_group`、`musicbrainz_track`（常用取值；插件可使用其他名称） |
 
 ---
@@ -356,7 +358,7 @@ erDiagram
 * 删除条目时一并删除其想要状态、单集状态、下载、历史、黑名单条目与待定发布。
 
 ### 13.4 设置
-`AcquisitionSettings` 属于服务器设置，沿用 Radarr 的设置：如何对待 proper 与 repack（`prefer_and_upgrade`、`do_not_upgrade`、`do_not_prefer`）、是否偏好索引器标志、已完成下载的处理与失败后重新搜索（交互式搜索抓取的发布须另行允许）、发布的最大大小、Usenet 发布的最小时长与保留期、允许或白名单中的硬字幕、入库后须保留的空闲空间、电影视为可用的延迟、RSS 同步间隔（10–120 分钟，0 表示停用）与下载检查间隔、回收目录及其清理、硬链接、附加文件与空目录，以及 `Naming`：是否重命名电影文件、替换非法字符、替换冒号（`delete`、`dash`、`space_dash`、`space_dash_space`、`smart`），以及电影目录与文件的模板。
+`AcquisitionSettings` 属于服务器设置，沿用 Radarr 的设置：如何对待 proper 与 repack（`prefer_and_upgrade`、`do_not_upgrade`、`do_not_prefer`）、是否偏好索引器标志、已完成下载的处理与失败后重新搜索（交互式搜索抓取的发布须另行允许）、发布的最大大小、Usenet 发布的最小时长与保留期、允许或白名单中的硬字幕、入库后须保留的空闲空间、电影视为可用的延迟、RSS 同步间隔（10–120 分钟，0 表示停用）与下载检查间隔、回收目录及其清理、硬链接、附加文件与空目录，以及 `Naming`：是否重命名电影文件、替换非法字符、替换冒号（`delete`、`dash`、`space_dash`、`space_dash_space`、`smart`），以及电影目录与文件的模板。此外还有 Sonarr 的设置：是否取消监控文件丢失的想要剧集的单集、以显示标题的名称入库的单集何时必须有标题（`EpisodeTitleRequired`），以及 `Naming` 中是否重命名单集文件、标准、日更与动画单集文件以及剧集、季与特别篇目录的模板，和 `MultiEpisodeStyle`；模板或样式为空时使用 Sonarr 的默认值。
 
 ### 13.5 远程路径映射
 `RemotePathMapping` 把 `Host` 上的下载客户端报告的目录（`RemotePath`）映射到服务端看到的绝对目录（`LocalPath`）。同一主机的同一远程路径只映射一次。
