@@ -95,8 +95,8 @@ flowchart TD
 | P15 | Acquisition foundation | ✅ Done |
 | P16 | Acquisition data sources | In progress |
 | P17 | Indexers | ✅ Done |
-| P18 | Movie acquisition | In progress |
-| P19 | Series acquisition | Not started |
+| P18 | Movie acquisition | ✅ Done |
+| P19 | Series acquisition | In progress |
 | P20 | Discovery and requests | Not started |
 | P21 | Clients and ecosystem | Not started |
 | P22 | Real-device acceptance | Not started |
@@ -487,12 +487,25 @@ flowchart TD
   - [ ] Download folders left empty by imports deleted
   - [ ] A scan of the imported file only, rather than of its library
 - [x] Failed downloads: the blocklist and a new search
-- [ ] End-to-end test
+- [x] The acquisition jobs (RSS sync, the queue check, the recycle bin cleanup) listed and run on demand among the tasks of `TaskService`
+- [x] End-to-end test (`apps/server/internal/server/acquisition_test.go`): a Newznab indexer and SABnzbd simulated on the loopback interface, through the indexer and download client plugins; a wanted movie is searched, grabbed, tracked, imported under Radarr's naming and played, upgraded by a release found by RSS sync with the old file in the recycle bin, and a failed download is blocklisted and replaced by a new search
+  - [ ] A torrent client, and imports by hard link or copy rather than the moves SABnzbd's downloads get
+  - [ ] Remote path mappings in the end-to-end test; unit tests cover them
+- [ ] A hang of `apps/server`'s tests, seen once while every package ran in parallel: the job worker's lease renewal waited on SQLite's only write connection; not reproduced since
 
 ### P19 Series Acquisition
 **Scope**: `libs/acquire/series`, porting Sonarr: episode, season and series searches, season packs, multi-episode files, anime with absolute numbers, daily series by air date, scene mappings and XEM, monitoring of new seasons and episodes.
 
 **Done when**: the end-to-end test of P18 for a series: wanted episodes are found singly and as a season pack, an anime and a daily series are matched through their numbering, and each episode becomes playable once imported.
+
+**Progress**:
+- [x] Decisions: the specifications of Sonarr's decision engine and its ranking, with its cases ported (`libs/acquire/series`)
+  - [ ] Indexers found by name, for the cases of Sonarr's tests that give releases only an indexer name
+- [x] Episode file names, series and season folders named as Sonarr names them (`libs/acquire/organize`)
+- [ ] Wanted series and episodes: series added by TVDB ID, with a quality profile, monitoring of new seasons and episodes
+- [ ] Episode, season and series searches and RSS sync as jobs; releases matched to episodes through scene mappings, XEM, absolute numbers and air dates
+- [ ] Import of episodes, season packs and multi-episode files; upgrades
+- [ ] End-to-end test
 
 ### P20 Discovery and Requests
 **Scope**: porting Seerr. `DiscoverService` lists what the discovery providers offer, marked as available, wanted or requested; `RequestService`: requests of movies and seasons, approval by administrators or automatic, quotas per user, users' limits on ratings applied to what they may request, notifications of the requester; reporting problems with an item.

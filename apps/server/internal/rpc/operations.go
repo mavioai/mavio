@@ -13,6 +13,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
@@ -46,6 +47,8 @@ type TaskService struct {
 	now   func() time.Time
 	// Plugins lists the plugins' tasks; nil lists none.
 	Plugins func() []plugins.Task
+	// Acquisition lists the acquisition tasks; nil lists none.
+	Acquisition *acquisition.Runtime
 }
 
 var _ systemv1connect.TaskServiceHandler = (*TaskService)(nil)
@@ -122,6 +125,19 @@ func (s *TaskService) tasks(ctx context.Context) ([]task, error) {
 			})
 		}
 	}
+	if s.Acquisition != nil {
+		for _, at := range s.Acquisition.Tasks() {
+			t := systemv1.Task_builder{Id: new(at.Kind), Name: new(at.Name), Kind: new(at.Kind), Description: new(at.Description)}.Build()
+			if at.Interval > 0 {
+				t.SetInterval(durationpb.New(at.Interval))
+			}
+			out = append(out, task{
+				proto:   t,
+				matches: func(j *core.Job) bool { return j.Kind == at.Kind },
+				run:     func(now time.Time) core.Job { return acquisition.RunJob(at.Kind, now) },
+			})
+		}
+	}
 	out = append(out, task{
 		proto: systemv1.Task_builder{
 			Id: new(library.JobCleanup), Name: new("Clean up jobs"), Kind: new(library.JobCleanup),
@@ -142,7 +158,7 @@ func (s *TaskService) ListTasks(ctx context.Context, _ *systemv1.ListTasksReques
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask}
+	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask, acquisition.JobRSS, acquisition.JobQueue, acquisition.JobRecycleBin}
 	active, err := s.store.Jobs().List(ctx, core.JobQuery{Kinds: kinds, States: []core.JobState{core.JobPending, core.JobRunning}})
 	if err != nil {
 		return nil, connectError(ctx, err)
