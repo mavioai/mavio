@@ -196,6 +196,12 @@ type importPlan struct {
 	langs           []release.Language
 	formats         []acquire.CustomFormat
 	libPath, folder string
+	// edition and releaseGroup are read from the download's title, else
+	// from the file's path.
+	edition, releaseGroup string
+	// mode, when set, is how the file is transferred rather than as its
+	// download's client allows.
+	mode *transferMode
 }
 
 // importOne imports a file of a download for a movie unless an import
@@ -227,7 +233,24 @@ func (r *Runtime) planImport(ctx context.Context, rn *run, m *movie, d *core.Dow
 	if quality != nil {
 		plan.q = *quality
 	}
+	parsed := release.ParseMovieTitle(d.Title, false)
+	if parsed == nil {
+		parsed = release.ParseMoviePath(f.path)
+	}
+	if parsed != nil {
+		plan.edition, plan.releaseGroup = parsed.Edition, parsed.ReleaseGroup
+	}
 	plan.langs = languagesOf(d.Languages)
+	if d.ID.IsZero() {
+		// A folder that is not a tracked download: the languages its
+		// file's name, else the folder's, says, as Radarr's
+		// AggregateLanguage.
+		if fp := release.ParseMoviePath(f.path); fp != nil && knownLanguages(fp.Languages) {
+			plan.langs = fp.Languages
+		} else if parsed != nil {
+			plan.langs = parsed.Languages
+		}
+	}
 	plan.formats = rn.formats(d.Title, plan.q, plan.langs, f.size, nil)
 	upgrades := acquire.Upgrades{Propers: rn.env.Config.Propers}
 	if reason, msg := upgrades.ImportUpgrade(m.target.Profile, m.acq.File, plan.q, plan.formats); reason != "" {
@@ -260,17 +283,11 @@ func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.
 	libPath, folder := plan.libPath, plan.folder
 	s := r.settings()
 
-	parsed := release.ParseMovieTitle(d.Title, false)
-	if parsed == nil {
-		parsed = release.ParseMoviePath(f.path)
-	}
 	file := organize.File{
 		Quality: rn.qualityTitle(q.Quality), Revision: organize.Revision{Version: q.Revision.Version, Real: q.Revision.Real},
 		SceneName: d.Title, RelativePath: filepath.ToSlash(f.rel), Path: filepath.ToSlash(f.path),
 	}
-	if parsed != nil {
-		file.Edition, file.ReleaseGroup = parsed.Edition, parsed.ReleaseGroup
-	}
+	file.Edition, file.ReleaseGroup = plan.edition, plan.releaseGroup
 	file.MediaInfo = mediaInfoOf(probed, d.Title)
 	for _, cf := range formats {
 		file.CustomFormats = append(file.CustomFormats, organize.CustomFormat{Name: cf.Name, IncludeWhenRenaming: cf.IncludeWhenRenaming})
@@ -298,6 +315,9 @@ func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.
 		mode = transferMove
 	case s.CopyUsingHardlinks:
 		mode = transferHardLinkOrCopy
+	}
+	if plan.mode != nil {
+		mode = *plan.mode
 	}
 	dest := filepath.Join(libPath, rel)
 	done, err := r.pace(ctx, dest)
@@ -342,9 +362,12 @@ func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.
 	}
 	data := map[string]string{
 		dataImportedPath: imported, dataDroppedPath: filepath.ToSlash(f.path),
-		dataDownloadClient: p.client.Ref(), dataDownloadClientName: p.client.GetName(),
 		dataSceneName: d.Title, dataSize: strconv.FormatInt(f.size, 10), dataIndexer: d.Indexer,
 		dataCustomFormatScore: strconv.Itoa(m.target.Profile.FormatScore(formats)),
+	}
+	if p.client.DownloadClient != nil {
+		// Files of folders that are not tracked downloads have no client.
+		data[dataDownloadClient], data[dataDownloadClientName] = p.client.Ref(), p.client.GetName()
 	}
 	if file.ReleaseGroup != "" {
 		data[dataReleaseGroup] = file.ReleaseGroup
@@ -431,4 +454,9 @@ func (rn *run) qualityTitle(q release.Quality) string {
 		}
 	}
 	return q.String()
+}
+
+// knownLanguages reports whether languages names one other than unknown.
+func knownLanguages(langs []release.Language) bool {
+	return slices.ContainsFunc(langs, func(l release.Language) bool { return l != release.LanguageUnknown })
 }

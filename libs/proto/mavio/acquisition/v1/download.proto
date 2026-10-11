@@ -39,15 +39,16 @@ service DownloadService {
   rpc DeleteBlocklist(DeleteBlocklistRequest) returns (DeleteBlocklistResponse) {
     option idempotency_level = IDEMPOTENT;
   }
-  // ListManualImport lists the video files of a tracked movie download
-  // with the quality an import would give them and why the import
-  // specifications reject them, as Radarr's manual import.
+  // ListManualImport lists the video files of a tracked movie download,
+  // or of a folder that is not one, with the movie each is for, the
+  // quality, languages and release group an import would give them and
+  // why the import specifications reject them, as Radarr's manual import.
   rpc ListManualImport(ListManualImportRequest) returns (ListManualImportResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // ManualImport imports a video file of a tracked movie download for its
-  // movie whatever the import specifications reject, and completes the
-  // download.
+  // ManualImport imports a video file of a tracked movie download, or of
+  // a folder that is not one, for the movie chosen whatever the import
+  // specifications reject, and completes a tracked download.
   rpc ManualImport(ManualImportRequest) returns (ManualImportResponse);
 }
 
@@ -273,11 +274,11 @@ message DeleteBlocklistRequest {
 
 message DeleteBlocklistResponse {}
 
-// ManualImportFile is a video file of a tracked download.
+// ManualImportFile is a video file of a tracked download or a folder.
 message ManualImportFile {
   // The server's path.
   string path = 1;
-  // The path below the download's.
+  // The path below the download's or the folder's.
   string relative_path = 2;
   // In bytes.
   int64 size = 3;
@@ -286,16 +287,35 @@ message ManualImportFile {
   string quality = 4;
   // The quality's revision.
   int32 revision = 5;
-  // Why the import specifications reject the file.
+  // Why the import specifications reject the file; "Unknown Movie" when
+  // no movie matches it.
   repeated string rejections = 6;
+  // The movie the file is for; unset when no movie matches it.
+  string movie_id = 7;
+  // The names of the languages and the release group an import would
+  // give the file.
+  repeated string languages = 8;
+  string release_group = 9;
+}
+
+// ImportMode is how a manual import transfers a file, as Radarr's.
+enum ImportMode {
+  // Moves the files of downloads whose client lets them be moved and of
+  // folders, and copies the others.
+  IMPORT_MODE_UNSPECIFIED = 0;
+  IMPORT_MODE_MOVE = 1;
+  // Copies, or hard links with copy_using_hardlinks.
+  IMPORT_MODE_COPY = 2;
 }
 
 message ListManualImportRequest {
-  // The tracked download, a queue item.
-  string id = 1 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.uuid = true
-  ];
+  // The tracked download, a queue item; unset for folder.
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  // The absolute path of a folder or file that is not a tracked download.
+  string folder = 2;
+  // The movie the files are for; unset for the download's movie, or for
+  // the wanted movie each file's name matches.
+  string movie_id = 3 [(buf.validate.field).string.uuid = true];
 }
 
 message ListManualImportResponse {
@@ -304,16 +324,25 @@ message ListManualImportResponse {
 }
 
 message ManualImportRequest {
-  // The tracked download, a queue item.
-  string id = 1 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.uuid = true
-  ];
+  // The tracked download, a queue item; unset for folder.
+  string id = 1 [(buf.validate.field).string.uuid = true];
   // The path of the file, as ListManualImport lists it.
   string path = 2 [(buf.validate.field).required = true];
   // Radarr's name of the file's quality; unset for that ListManualImport
   // lists.
   string quality = 3;
+  // The absolute path of a folder or file that is not a tracked download.
+  string folder = 4;
+  // The movie to import the file for; unset for that ListManualImport
+  // lists.
+  string movie_id = 5 [(buf.validate.field).string.uuid = true];
+  // The names of the file's languages; empty for those ListManualImport
+  // lists.
+  repeated string languages = 6;
+  // The file's release group, which may be empty; unset for that
+  // ListManualImport lists.
+  string release_group = 7;
+  ImportMode mode = 8;
 }
 
 message ManualImportResponse {}

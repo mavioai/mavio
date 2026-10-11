@@ -2047,6 +2047,16 @@
         ],
         "description": "HistoryEventType is what happened."
       },
+      "mavio.acquisition.v1.ImportMode": {
+        "type": "string",
+        "title": "ImportMode",
+        "enum": [
+          "IMPORT_MODE_UNSPECIFIED",
+          "IMPORT_MODE_MOVE",
+          "IMPORT_MODE_COPY"
+        ],
+        "description": "ImportMode is how a manual import transfers a file, as Radarr's."
+      },
       "mavio.acquisition.v1.Indexer": {
         "type": "object",
         "properties": {
@@ -2761,13 +2771,21 @@
             "type": "string",
             "title": "id",
             "format": "uuid",
-            "description": "The tracked download, a queue item."
+            "description": "The tracked download, a queue item; unset for folder."
+          },
+          "folder": {
+            "type": "string",
+            "title": "folder",
+            "description": "The absolute path of a folder or file that is not a tracked download."
+          },
+          "movieId": {
+            "type": "string",
+            "title": "movie_id",
+            "format": "uuid",
+            "description": "The movie the files are for; unset for the download's movie, or for\n the wanted movie each file's name matches."
           }
         },
         "title": "ListManualImportRequest",
-        "required": [
-          "id"
-        ],
         "additionalProperties": false
       },
       "mavio.acquisition.v1.ListManualImportResponse": {
@@ -3112,7 +3130,7 @@
           "relativePath": {
             "type": "string",
             "title": "relative_path",
-            "description": "The path below the download's."
+            "description": "The path below the download's or the folder's."
           },
           "size": {
             "type": "string",
@@ -3137,12 +3155,29 @@
               "type": "string"
             },
             "title": "rejections",
-            "description": "Why the import specifications reject the file."
+            "description": "Why the import specifications reject the file; \"Unknown Movie\" when\n no movie matches it."
+          },
+          "movieId": {
+            "type": "string",
+            "title": "movie_id",
+            "description": "The movie the file is for; unset when no movie matches it."
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "languages",
+            "description": "The names of the languages and the release group an import would\n give the file."
+          },
+          "releaseGroup": {
+            "type": "string",
+            "title": "release_group"
           }
         },
         "title": "ManualImportFile",
         "additionalProperties": false,
-        "description": "ManualImportFile is a video file of a tracked download."
+        "description": "ManualImportFile is a video file of a tracked download or a folder."
       },
       "mavio.acquisition.v1.ManualImportRequest": {
         "type": "object",
@@ -3151,7 +3186,7 @@
             "type": "string",
             "title": "id",
             "format": "uuid",
-            "description": "The tracked download, a queue item."
+            "description": "The tracked download, a queue item; unset for folder."
           },
           "path": {
             "type": "string",
@@ -3162,11 +3197,42 @@
             "type": "string",
             "title": "quality",
             "description": "Radarr's name of the file's quality; unset for that ListManualImport\n lists."
+          },
+          "folder": {
+            "type": "string",
+            "title": "folder",
+            "description": "The absolute path of a folder or file that is not a tracked download."
+          },
+          "movieId": {
+            "type": "string",
+            "title": "movie_id",
+            "format": "uuid",
+            "description": "The movie to import the file for; unset for that ListManualImport\n lists."
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "languages",
+            "description": "The names of the file's languages; empty for those ListManualImport\n lists."
+          },
+          "releaseGroup": {
+            "type": "string",
+            "title": "release_group",
+            "description": "The file's release group, which may be empty; unset for that\n ListManualImport lists."
+          },
+          "mode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ImportMode"
+              }
+            ],
+            "title": "mode"
           }
         },
         "title": "ManualImportRequest",
         "required": [
-          "id",
           "path"
         ],
         "additionalProperties": false
@@ -16201,7 +16267,7 @@
           "DownloadService"
         ],
         "summary": "ListManualImport",
-        "description": "ListManualImport lists the video files of a tracked movie download\n with the quality an import would give them and why the import\n specifications reject them, as Radarr's manual import.",
+        "description": "ListManualImport lists the video files of a tracked movie download,\n or of a folder that is not one, with the movie each is for, the\n quality, languages and release group an import would give them and\n why the import specifications reject them, as Radarr's manual import.",
         "operationId": "mavio.acquisition.v1.DownloadService.ListManualImport",
         "parameters": [
           {
@@ -16325,7 +16391,7 @@
           "DownloadService"
         ],
         "summary": "ManualImport",
-        "description": "ManualImport imports a video file of a tracked movie download for its\n movie whatever the import specifications reject, and completes the\n download.",
+        "description": "ManualImport imports a video file of a tracked movie download, or of\n a folder that is not one, for the movie chosen whatever the import\n specifications reject, and completes a tracked download.",
         "operationId": "mavio.acquisition.v1.DownloadService.ManualImport",
         "parameters": [
           {
