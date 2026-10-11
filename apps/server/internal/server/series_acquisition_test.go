@@ -189,6 +189,7 @@ func TestSeriesAcquisition(t *testing.T) {
 	acq.SetRssSyncInterval(0)
 	acq.SetSkipFreeSpaceCheck(true)
 	acq.SetRenameMovies(true)
+	acq.SetRenameEpisodes(true)
 	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: settings}.Build()); err != nil {
 		t.Fatalf("UpdateServerSettings: %v", err)
 	}

@@ -511,12 +511,19 @@ func TestAcquisitionSettings(t *testing.T) {
 	a.SetRecycleBin("/trash")
 	a.SetWhitelistedHardcodedSubs([]string{"kor"})
 	a.SetRenameMovies(true)
+	a.SetRenameEpisodes(true)
+	a.SetMultiEpisodeStyle(systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_SCENE)
+	a.SetSeasonFolderFormat("S{season:00}")
+	a.SetAutoUnmonitorPreviouslyDownloadedEpisodes(true)
+	a.SetEpisodeTitleRequired(systemv1.EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_NEVER)
 	if err := update(set); err != nil {
 		t.Fatalf("UpdateServerSettings: %v", err)
 	}
 	stored := m.Get().Acquisition
 	if stored.Propers != core.PropersDoNotPrefer || stored.Naming.ColonReplacement != core.ColonSpaceDash || stored.MinimumAge != 15 ||
-		stored.RecycleBin != "/trash" || !slices.Equal(stored.WhitelistedHardcodedSubs, []string{"kor"}) || !stored.Naming.RenameMovies {
+		stored.RecycleBin != "/trash" || !slices.Equal(stored.WhitelistedHardcodedSubs, []string{"kor"}) || !stored.Naming.RenameMovies ||
+		!stored.Naming.RenameEpisodes || stored.Naming.MultiEpisodeStyle != core.MultiEpisodeScene || stored.Naming.SeasonFolderFormat != "S{season:00}" ||
+		!stored.AutoUnmonitorPreviouslyDownloadedEpisodes || stored.EpisodeTitleRequired != core.EpisodeTitleNever {
 		t.Errorf("stored acquisition settings = %+v", stored)
 	}
 
