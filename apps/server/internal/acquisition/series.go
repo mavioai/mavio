@@ -36,6 +36,9 @@ type show struct {
 	items map[core.ID]core.Item
 	// seasons are the season items by number.
 	seasons map[int]core.Item
+	// searchedAt are when episodes were last searched for, by ID; none
+	// for episodes never searched for.
+	searchedAt map[core.ID]time.Time
 }
 
 // coveredID returns the ID of an episode a multi-episode file holds
@@ -83,7 +86,7 @@ func (rn *run) show(ctx context.Context, seriesID core.ID) (*show, error) {
 	if err != nil {
 		return nil, err
 	}
-	sh := &show{item: it, wanted: w, lib: lib, byID: map[core.ID]*series.Episode{}, items: map[core.ID]core.Item{}, seasons: map[int]core.Item{}}
+	sh := &show{item: it, wanted: w, lib: lib, byID: map[core.ID]*series.Episode{}, items: map[core.ID]core.Item{}, seasons: map[int]core.Item{}, searchedAt: map[core.ID]time.Time{}}
 	s := &series.Series{
 		Target: acquire.Target{
 			ID: it.ID, Kind: release.Series, Title: it.Name, Year: it.ProductionYear,
@@ -105,8 +108,17 @@ func (rn *run) show(ctx context.Context, seriesID core.ID) (*show, error) {
 		}
 		tree = append(tree, child)
 	}
-	numbers := rn.rt.sceneNumbers(ctx, s.TvdbID)
-	s.UseSceneNumbering = len(numbers) > 0
+	stored, err := st.EpisodeStates().List(ctx, seriesID)
+	if err != nil {
+		return nil, err
+	}
+	states := make(map[core.EpisodeNumber]core.EpisodeState, len(stored))
+	for _, es := range stored {
+		states[es.EpisodeNumber] = es
+		if es.HasSceneNumbering() {
+			s.UseSceneNumbering = true
+		}
+	}
 	for _, c := range tree {
 		switch {
 		case c.Kind == core.KindSeason && c.IndexNumber != nil:
@@ -158,11 +170,11 @@ func (rn *run) show(ctx context.Context, seriesID core.ID) (*show, error) {
 				ep.AirDateUTC = c.PremiereDate.UTC()
 				ep.AirDate = c.PremiereDate.UTC().Format(time.DateOnly)
 			}
-			if sn, ok := numbers[[2]int{ep.SeasonNumber, ep.EpisodeNumber}]; ok {
-				ep.SceneSeasonNumber, ep.SceneEpisodeNumber = new(sn.season), new(sn.episode)
-				if sn.hasAbsolute {
-					ep.SceneAbsoluteEpisodeNumber = new(sn.absolute)
-				}
+			es := states[core.EpisodeNumber{Season: ep.SeasonNumber, Episode: ep.EpisodeNumber}]
+			ep.SceneSeasonNumber, ep.SceneEpisodeNumber, ep.SceneAbsoluteEpisodeNumber = es.SceneSeason, es.SceneEpisode, es.SceneAbsolute
+			ep.UnverifiedSceneNumbering = es.UnverifiedSceneNumbering
+			if !es.LastSearchedAt.IsZero() {
+				sh.searchedAt[id] = es.LastSearchedAt
 			}
 			sh.episodes = append(sh.episodes, ep)
 			sh.byID[id] = ep

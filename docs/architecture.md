@@ -477,7 +477,7 @@ Mavio finds, downloads and imports the movies and series its users want, as Seer
 * **TMDB**: `scraper-tmdb` uses an administrator's own API key when one is set, else Radarr's TMDB read access token; when TMDB rejects that token, it falls back to Mavio's own API key, which the plugin ships.
 * **Numbering on disk follows TVDB**, as Sonarr's does: a series' episodes come from SkyHook in TVDB order with absolute numbers and air dates, files are named by those numbers (anime also by absolute number), and requests list seasons in that order. A series has a type, standard, daily or anime, which decides how releases are matched.
 * **TMDB's metadata** is attached through the series' display order, Jellyfin's `DisplayOrder` over TMDB's episode groups, and TMDB's episode TVDB IDs where they exist.
-* **Releases named otherwise** are matched through Sonarr's scene mappings and XEM; daily series by air date.
+* **Releases named otherwise** are matched through Sonarr's scene mappings and XEM; daily series by air date. The scene numbering XEM gives a wanted series is kept on its episodes (`EpisodeState`), extrapolated to the episodes it leaves out as Sonarr's `XemService` extrapolates it, when the series is added and with the scene mappings every 3 hours.
 
 ### 13.3 Flow
 1. **Request**: a user requests a movie or seasons; approved by an administrator or automatically within the user's quota, and only within the user's rating limit. The request makes the movie or episodes wanted, monitored with a quality profile.

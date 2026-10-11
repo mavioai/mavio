@@ -97,10 +97,13 @@ func identifySeries(ctx context.Context, st core.Store, it core.Item) (core.Item
 	return it, nil
 }
 
-// fakeScene is a scene mapping provider listing mappings.
+// fakeScene is a scene mapping provider listing mappings, and the scene
+// numbering of series by TVDB ID.
 type fakeScene struct {
 	pluginv1connect.SceneMappingProviderServiceClient
-	mappings []*pluginv1.SceneMapping
+	mappings     []*pluginv1.SceneMapping
+	numbering    map[string][]*pluginv1.SceneNumbering
+	numberingErr error
 }
 
 func (f *fakeScene) ListSceneMappings(context.Context, *pluginv1.ListSceneMappingsRequest) (*pluginv1.ListSceneMappingsResponse, error) {
@@ -111,8 +114,15 @@ func (f *fakeScene) ListDailySeries(context.Context, *pluginv1.ListDailySeriesRe
 	return &pluginv1.ListDailySeriesResponse{}, nil
 }
 
-func (f *fakeScene) GetSceneNumbering(context.Context, *pluginv1.GetSceneNumberingRequest) (*pluginv1.GetSceneNumberingResponse, error) {
-	return &pluginv1.GetSceneNumberingResponse{}, nil
+func (f *fakeScene) GetSceneNumbering(_ context.Context, req *pluginv1.GetSceneNumberingRequest) (*pluginv1.GetSceneNumberingResponse, error) {
+	if f.numberingErr != nil {
+		return nil, f.numberingErr
+	}
+	episodes, ok := f.numbering[req.GetSeriesExternalIds()["tvdb"]]
+	if !ok {
+		return &pluginv1.GetSceneNumberingResponse{}, nil
+	}
+	return pluginv1.GetSceneNumberingResponse_builder{Found: new(true), Provider: new("tvdb"), Episodes: episodes}.Build(), nil
 }
 
 // seriesEnv is an env with a show library and a series quality profile:

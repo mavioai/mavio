@@ -157,6 +157,8 @@ type Result struct {
 	Releases []Release
 	// Failures are the indexers that failed, which Releases leave out.
 	Failures []Failure
+	// Searched is how many indexers were searched, failed or not.
+	Searched int
 }
 
 // Search searches the indexers. An unknown item fails with
@@ -199,7 +201,7 @@ func (s *Searcher) Search(ctx context.Context, q Search) (*Result, error) {
 		wg.Go(func() { found[i], failed[i] = search(ctx, clients[ix.Provider], ix, c) })
 	}
 	wg.Wait()
-	res := &Result{Failures: failures}
+	res := &Result{Failures: failures, Searched: len(targets)}
 	for i := range targets {
 		res.Releases = append(res.Releases, found[i]...)
 		res.Failures = append(res.Failures, failed[i]...)
@@ -217,7 +219,9 @@ func (s *Searcher) Search(ctx context.Context, q Search) (*Result, error) {
 func search(ctx context.Context, client pluginv1connect.IndexerProviderServiceClient, ix Indexer, c *criteria) ([]Release, []Failure) {
 	var out []Release
 	seen := map[string]bool{}
-	for _, tiers := range c.searches(ix.GetCapabilities()) {
+	ic := *c
+	ic.animeStandardFormat = ix.GetAnimeStandardFormatSearch()
+	for _, tiers := range ic.searches(ix.GetCapabilities()) {
 		found, failures := searchTiers(ctx, client, ix, c, tiers)
 		for _, r := range found {
 			if !seen[r.GetGuid()] {

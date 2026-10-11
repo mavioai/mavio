@@ -70,6 +70,9 @@ type Episode struct {
 	SceneSeasonNumber          *int
 	SceneEpisodeNumber         *int
 	SceneAbsoluteEpisodeNumber *int
+	// UnverifiedSceneNumbering is set when the scene numbering of the
+	// episode is extrapolated from that of others, not confirmed.
+	UnverifiedSceneNumbering bool
 }
 
 // SceneMapping is a title the scene gives a series, as Sonarr's
@@ -100,7 +103,7 @@ type SceneMapping struct {
 }
 
 // SearchMode is how indexers are searched for a series by a scene
-// title, as Sonarr's SearchMode.
+// title, as Sonarr's SearchMode flags.
 type SearchMode int
 
 // The search modes.
@@ -111,6 +114,8 @@ const (
 	SearchModeSearchID
 	// SearchModeSearchTitle searches by title only.
 	SearchModeSearchTitle
+	// SearchModeSearchIDAndTitle searches by IDs and title at once.
+	SearchModeSearchIDAndTitle = SearchModeSearchID | SearchModeSearchTitle
 )
 
 // Candidate is an episode release mapped to its series and episodes, as

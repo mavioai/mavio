@@ -47,6 +47,8 @@ const (
 	SearchByID SearchMode = 1
 	// SearchByTitle searches by titles.
 	SearchByTitle SearchMode = 2
+	// SearchByIDAndTitle searches by IDs and titles at once.
+	SearchByIDAndTitle = SearchByID | SearchByTitle
 )
 
 // EpisodeQuery is a search for episodes of a series, as Sonarr's search
@@ -97,7 +99,9 @@ func (s *Searcher) episodeQueryCriteria(series core.Item, q Search) (*criteria, 
 // queryTiers are the requests of an episode query, as Sonarr's
 // NewznabRequestGenerator.GetSearchRequests of its criteria: by the IDs
 // the indexer takes, and by titles as the search mode says; anime by
-// absolute number; specials by their titles.
+// absolute number, and by season and episode, or season, for indexers set
+// to search anime in the standard format (Sonarr's
+// AnimeStandardFormatSearch); specials by their titles.
 func (c *criteria) queryTiers(caps *pluginv1.IndexerCapabilities) [][]*pluginv1.SearchReleasesRequest {
 	e := c.episode
 	q := e.query
@@ -112,19 +116,47 @@ func (c *criteria) queryTiers(caps *pluginv1.IndexerCapabilities) [][]*pluginv1.
 			return nil
 		}
 		number := fmt.Sprintf("%02d", q.Absolute)
+		// Indexers set to search anime in the standard format are also
+		// searched by season and episode.
+		standard := c.animeStandardFormat && q.Season > 0 && q.Episode > 0 &&
+			slices.Contains(params, "season") && slices.Contains(params, "ep")
+		numbered := func(req *pluginv1.SearchReleasesRequest) *pluginv1.SearchReleasesRequest {
+			req.SetSeason(int32(q.Season))
+			req.SetEpisode(fmt.Sprint(q.Episode))
+			return req
+		}
 		var tier []*pluginv1.SearchReleasesRequest
 		if len(ids) > 0 {
 			tier = append(tier, c.request(tv, number, ids))
+			if standard {
+				tier = append(tier, numbered(c.request(tv, "", ids)))
+			}
 		}
 		for _, t := range cleanTitles(e.titles) {
 			tier = append(tier, c.request(basic, t+" "+number, nil))
+			if standard {
+				tier = append(tier, numbered(c.request(tv, t, nil)))
+			}
 		}
 		return [][]*pluginv1.SearchReleasesRequest{tier}
 	case QueryAnimeSeason:
-		// Sonarr searches season packs of anime only for indexers set to
-		// search anime in the standard format, which the plugins do not
-		// tell.
-		return nil
+		// Season packs of anime are searched for only of indexers set to
+		// search anime in the standard format.
+		if !searchable || !c.animeStandardFormat || q.Season <= 0 {
+			return nil
+		}
+		var tier []*pluginv1.SearchReleasesRequest
+		if len(ids) > 0 {
+			req := c.request(tv, "", ids)
+			req.SetSeason(int32(q.Season))
+			tier = append(tier, req)
+		}
+		for _, t := range cleanTitles(e.titles) {
+			req := c.request(tv, t, nil)
+			req.SetSeason(int32(q.Season))
+			tier = append(tier, req)
+		}
+		return [][]*pluginv1.SearchReleasesRequest{tier}
 	case QuerySpecial:
 		if !searchable {
 			return nil

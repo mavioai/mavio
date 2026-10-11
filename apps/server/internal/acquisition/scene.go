@@ -1,6 +1,7 @@
 package acquisition
 
 import (
+	"cmp"
 	"context"
 	"maps"
 	"slices"
@@ -9,22 +10,20 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/libs/acquire/series"
+	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
 
 // JobSceneMappings refreshes the scene mappings and daily series of the
 // scene mapping providers, every SceneMappingInterval, as Sonarr's
-// UpdateSceneMappingCommand.
+// UpdateSceneMappingCommand, then the scene numbering of wanted series,
+// which Sonarr refreshes with its series.
 const JobSceneMappings = "acquisition.scene_mappings"
 
 // SceneMappingInterval is how often the scene mappings are refreshed, as
 // Sonarr's.
 const SceneMappingInterval = 3 * time.Hour
-
-// sceneNumberingTTL is how long the scene numbering of a series is kept
-// before it is asked for again.
-const sceneNumberingTTL = 12 * time.Hour
 
 // SceneProvider is a scene mapping provider plugin.
 type SceneProvider struct {
@@ -32,30 +31,15 @@ type SceneProvider struct {
 	Client pluginv1connect.SceneMappingProviderServiceClient
 }
 
-// sceneNumber is how releases number an episode.
-type sceneNumber struct {
-	season, episode, absolute int
-	hasAbsolute               bool
-}
-
-// sceneNumbering is the scene numbering of a series as a provider told,
-// by TVDB season and episode.
-type sceneNumbering struct {
-	at       time.Time
-	episodes map[[2]int]sceneNumber
-}
-
 // sceneCache keeps what the scene mapping providers list, as Sonarr's
-// SceneMappingService and DailySeriesService cache it, and the scene
-// numbering of series, which Sonarr stores on episodes.
+// SceneMappingService and DailySeriesService cache it.
 type sceneCache struct {
 	mu sync.Mutex
 	// mappings and daily are by provider: a provider that fails keeps
 	// what it listed before.
-	mappings  map[string][]series.SceneMapping
-	daily     map[string][]int
-	index     *series.SceneMappings
-	numbering map[int]*sceneNumbering
+	mappings map[string][]series.SceneMapping
+	daily    map[string][]int
+	index    *series.SceneMappings
 }
 
 func (r *Runtime) sceneProviders() []SceneProvider {
@@ -154,6 +138,8 @@ func sceneMappingFromPlugin(m *pluginv1.SceneMapping) (series.SceneMapping, bool
 		sm.SearchMode = series.SearchModeSearchID
 	case pluginv1.SceneSearchMode_SCENE_SEARCH_MODE_TITLE:
 		sm.SearchMode = series.SearchModeSearchTitle
+	case pluginv1.SceneSearchMode_SCENE_SEARCH_MODE_ID_AND_TITLE:
+		sm.SearchMode = series.SearchModeSearchIDAndTitle
 	}
 	return sm, true
 }
@@ -192,49 +178,123 @@ func (r *Runtime) isDaily(ctx context.Context, tvdbID int) bool {
 	return false
 }
 
-// sceneNumbers returns how releases number a series' episodes, by TVDB
-// season and episode, as the first provider that knows the series tells
-// (Sonarr's XemService); nil when none does. Numberings are kept for
-// sceneNumberingTTL.
-func (r *Runtime) sceneNumbers(ctx context.Context, tvdbID int) map[[2]int]sceneNumber {
-	if tvdbID <= 0 {
+// UpdateScenes refreshes the scene mappings and daily series, then the
+// scene numbering of every wanted series, as the job JobSceneMappings
+// does.
+func (r *Runtime) UpdateScenes(ctx context.Context) error {
+	if err := r.UpdateSceneMappings(ctx); err != nil {
+		return err
+	}
+	wanted, err := r.Store.Wanted().List(ctx)
+	if err != nil {
+		return err
+	}
+	for _, w := range wanted {
+		it, err := r.Store.Items().Get(ctx, w.ItemID)
+		if err != nil {
+			return err
+		}
+		if it.Kind != core.KindSeries {
+			continue
+		}
+		if err := r.updateSceneNumbering(ctx, it); err != nil {
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			r.logger().ErrorContext(ctx, "couldn't update scene numbering", "series", it.Name, "err", err)
+		}
+	}
+	return nil
+}
+
+// updateSceneNumbering keeps on a series' episodes how releases number
+// them, as the first scene mapping provider that knows the series tells,
+// extrapolated to the episodes it leaves out, as Sonarr's
+// XemService.PerformUpdate. A series no provider knows loses its scene
+// numbering; without providers, or when one fails and none knows the
+// series, it is kept.
+func (r *Runtime) updateSceneNumbering(ctx context.Context, it core.Item) error {
+	tvdbID, _ := strconv.Atoi(it.ExternalIDs[core.ProviderTVDB])
+	providers := r.sceneProviders()
+	if tvdbID <= 0 || len(providers) == 0 {
 		return nil
 	}
-	now := r.now()
-	r.scene.mu.Lock()
-	cached := r.scene.numbering[tvdbID]
-	r.scene.mu.Unlock()
-	if cached != nil && now.Sub(cached.at) < sceneNumberingTTL {
-		return cached.episodes
-	}
-	n := &sceneNumbering{at: now}
+	var mappings []series.XemMapping
+	found, failed := false, false
 	req := pluginv1.GetSceneNumberingRequest_builder{SeriesExternalIds: map[string]string{"tvdb": strconv.Itoa(tvdbID)}}.Build()
-	for _, p := range r.sceneProviders() {
+	for _, p := range providers {
 		resp, err := p.Client.GetSceneNumbering(ctx, req)
 		if err != nil {
 			if ctx.Err() != nil {
-				return nil
+				return ctx.Err()
 			}
 			r.logger().WarnContext(ctx, "couldn't get scene numbering", "plugin", p.ID, "tvdb", tvdbID, "err", err)
+			failed = true
 			continue
 		}
 		if !resp.GetFound() || (resp.GetProvider() != "" && resp.GetProvider() != "tvdb") {
 			continue
 		}
-		n.episodes = map[[2]int]sceneNumber{}
+		found = true
 		for _, e := range resp.GetEpisodes() {
-			n.episodes[[2]int{int(e.GetSeasonNumber()), int(e.GetEpisodeNumber())}] = sceneNumber{
-				season: int(e.GetSceneSeasonNumber()), episode: int(e.GetSceneEpisodeNumber()),
-				absolute: int(e.GetSceneAbsoluteNumber()), hasAbsolute: e.GetSceneAbsoluteNumber() > 0,
-			}
+			mappings = append(mappings, series.XemMapping{
+				Tvdb: series.XemNumber{Season: int(e.GetSeasonNumber()), Episode: int(e.GetEpisodeNumber())},
+				Scene: series.XemNumber{
+					Season: int(e.GetSceneSeasonNumber()), Episode: int(e.GetSceneEpisodeNumber()), Absolute: int(e.GetSceneAbsoluteNumber()),
+				},
+			})
 		}
 		break
 	}
-	r.scene.mu.Lock()
-	if r.scene.numbering == nil {
-		r.scene.numbering = map[int]*sceneNumbering{}
+	if !found && failed {
+		return nil
 	}
-	r.scene.numbering[tvdbID] = n
-	r.scene.mu.Unlock()
-	return n.episodes
+	var states []core.EpisodeState
+	if found {
+		episodes, err := r.episodeNumbers(ctx, it.ID)
+		if err != nil {
+			return err
+		}
+		for _, n := range series.NumberScenes(episodes, mappings) {
+			st := core.EpisodeState{
+				EpisodeNumber: core.EpisodeNumber{Season: n.Season, Episode: n.Episode},
+				SceneSeason:   n.SceneSeason, SceneEpisode: n.SceneEpisode, SceneAbsolute: n.SceneAbsolute,
+				UnverifiedSceneNumbering: n.Unverified,
+			}
+			if st.HasSceneNumbering() {
+				states = append(states, st)
+			}
+		}
+	}
+	return r.Store.EpisodeStates().PutSceneNumbering(ctx, it.ID, states)
+}
+
+// episodeNumbers returns the seasons and numbers of a series' episodes,
+// with those multi-episode files cover.
+func (r *Runtime) episodeNumbers(ctx context.Context, seriesID core.ID) ([][2]int, error) {
+	seen := map[[2]int]bool{}
+	var out [][2]int
+	for c, err := range r.Store.Items().Walk(ctx, core.ItemQuery{
+		ParentID: seriesID, Recursive: true, Kinds: []core.ItemKind{core.KindEpisode}, IncludeVirtual: true, IncludeMissing: true,
+	}) {
+		if err != nil {
+			return nil, err
+		}
+		if c.ParentIndexNumber == nil || c.IndexNumber == nil {
+			continue
+		}
+		last := *c.IndexNumber
+		if c.IndexNumberEnd != nil && *c.IndexNumberEnd > last {
+			last = *c.IndexNumberEnd
+		}
+		for n := *c.IndexNumber; n <= last; n++ {
+			k := [2]int{*c.ParentIndexNumber, n}
+			if !seen[k] {
+				seen[k] = true
+				out = append(out, k)
+			}
+		}
+	}
+	slices.SortFunc(out, func(a, b [2]int) int { return cmp.Or(cmp.Compare(a[0], b[0]), cmp.Compare(a[1], b[1])) })
+	return out, nil
 }
