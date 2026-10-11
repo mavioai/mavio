@@ -10,7 +10,7 @@
 
 * **Bottom-up**: build the low-level libraries with no business dependencies first, then assemble layer by layer; each layer depends only on completed layers below it.
 * **Definition of done**: a phase is complete when its libraries pass their tests, including all ported test cases (or cases explicitly marked skip with a reason), see [Testing §2](testing.md#2-porting-test-cases).
-* **Server first**: P7 to P12 complete the server, by comparing it with Jellyfin's server (its API controllers and providers); P13 and P14 bring plugins level with Jellyfin's and add DLNA; P15 to P20 add acquisition, what Seerr, Radarr, Sonarr and Prowlarr do beside Jellyfin ([Architecture §13](architecture.md#13-acquisition-libsacquire)); the clients follow in P21, on a finished API; P22 verifies playback end to end on real devices; P23 packages and publishes the releases.
+* **Server first**: P7 to P12 complete the server, by comparing it with Jellyfin's server (its API controllers and providers); P13 and P14 bring plugins level with Jellyfin's and add DLNA; P15 to P20 add acquisition, what Seerr, Radarr, Sonarr and Prowlarr do beside Jellyfin ([Architecture §13](architecture.md#13-acquisition-libsacquire)); the clients follow in P21, whose foundation is built alongside P19 and P20 on the browsing and playback API already finished; P22 verifies playback end to end on real devices; P23 packages and publishes the releases.
 * **Integration smoke tests**: starting from P1, the end of each phase adds an integration test in `apps/server/internal/smoke` that wires the completed libraries together. It is not an MVP; it only exposes interface drift early, reducing the bottom-up approach's risk of "discovering problems only at final integration".
 
 ---
@@ -98,7 +98,7 @@ flowchart TD
 | P18 | Movie acquisition | ✅ Done |
 | P19 | Series acquisition | In progress |
 | P20 | Discovery and requests | Not started |
-| P21 | Clients and ecosystem | Not started |
+| P21 | Clients and ecosystem | In progress |
 | P22 | Real-device acceptance | Not started |
 | P23 | Packaging and release | Not started |
 
@@ -523,7 +523,7 @@ flowchart TD
 **Done when**: an end-to-end test: a user limited to PG finds a film and a series through discovery, cannot request one rated above the limit, requests the others; an administrator approves; they are acquired and the user is notified that they are available.
 
 ### P21 Clients and Ecosystem
-**Scope**: the [clients](clients.md), built on the finished server API: the web UI embedded in the server (`apps/web`, served at `/`), the Apple apps for iPhone and iPad, Apple TV and the Mac (`apps/ios`, `apps/tvos`, `apps/macos`), the Android apps for phones and tablets and for Android TV (`apps/android`, `apps/android-tv`), the Windows and Linux app on MyGo (`apps/windows-linux`), and the libraries they share (`libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`); the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). It starts with the prototypes the open items of §4 name for clients. The clients then come in this order, each proving the shared core and the design system before the next platform builds on them: the web UI with `libs/client-ts` and `libs/design`; the iPhone and iPad app with `libs/client-rust` and `libs/apple`; the Android phone and tablet app with `libs/android`; the Apple TV and Android TV apps; the Mac app; the Windows and Linux app. Its completion criteria will be defined after P20.
+**Scope**: the [clients](clients.md), built on the finished server API: the web UI embedded in the server (`apps/web`, served at `/`), the Apple apps for iPhone and iPad, Apple TV and the Mac (`apps/ios`, `apps/tvos`, `apps/macos`), the Android apps for phones and tablets and for Android TV (`apps/android`, `apps/android-tv`), the Windows and Linux app on MyGo (`apps/windows-linux`), and the libraries they share (`libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`); the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its foundation does not wait for P20: the toolchains and build targets, the TypeScript and Rust code generated from `libs/proto`, `libs/design`, the prototypes the open items of §4 name for clients, and the skeletons of the apps and libraries. Only the discovery and request screens wait for P20. The clients then come in this order, each proving the shared core and the design system before the next platform builds on them: the web UI with `libs/client-ts` and `libs/design`; the iPhone and iPad app with `libs/client-rust` and `libs/apple`; the Android phone and tablet app with `libs/android`; the Apple TV and Android TV apps; the Mac app; the Windows and Linux app. Its completion criteria will be defined after P20.
 
 ### P22 Real-Device Acceptance
 **Scope**: end-to-end playback on real devices, after the clients exist: DLNA media server and Play To on real televisions, with the profiles adjusted to what they do.
