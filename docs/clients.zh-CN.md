@@ -168,13 +168,13 @@ flowchart LR
 | 平台层 | 遵循平台本身 | 窗口边框、菜单栏、材质、系统字体、返回手势、电视焦点、无障碍、系统图标 |
 
 ### 6.1 设计 tokens
-颜色、字体、间距、圆角、层级与动效在 `libs/design/tokens` 中以 W3C Design Tokens（DTCG）格式一次定义。Style Dictionary 将其编译到 `libs/design/gen/{ts,swift,kotlin,go}`。生成的代码提交入库，CI 检查其是否最新，与 `libs/proto/gen` 相同。
-* **颜色**：深色主题优先，适合海报图与暗光环境，另有浅色主题；两者对比度均达到 WCAG AA。
+颜色、字体、间距、圆角、层级与动效在 `libs/design/tokens` 中以 W3C Design Tokens（DTCG）格式一次定义。由 Style Dictionary 解析，`pnpm nx run design:generate` 将其与图标、字符串一起编译到 `libs/design/gen/{ts,swift,kotlin,go}`。生成的代码提交入库，CI 检查其是否最新，与 `libs/proto/gen` 相同。
+* **颜色**：深色主题优先，适合海报图与暗光环境，另有浅色主题；两者对比度均达到 WCAG AA，由生成器检查每一组文字与背景。
 * **字体**：字号层级（字号、字重、行高）共享；字体族用平台的系统字体——Apple 平台用 SF Pro，Android 用 Roboto，Windows 用 Segoe UI Variable，Linux 与 Web 用随应用附带的 Inter——以便 Dynamic Type 与字体缩放生效。品牌字体只用于标志与展示性标题。
 * **按设备形态取值**：tokens 有手机、平板、桌面与电视四档取值（电视按 3 米观看距离设计，并留出防过扫描边距）。
 
 ### 6.2 图标
-内容与品牌图标使用 [Phosphor](https://phosphoricons.com/)（MIT），以固定版本的 SVG 源保存在 `libs/design/icons`，与 tokens 一起编译为 React 组件、资源目录中的符号图像与 Android 矢量图；MyGo 直接绘制这些 SVG。Regular 与 Fill 两种字重标示未激活与激活状态（收藏、静音、循环、字幕），不引起布局偏移。用户期待系统图标之处，系统控件使用平台图标——Apple 平台用 SF Symbols（分享、AirPlay、画中画、菜单），Android 用 Material Symbols。
+内容与品牌图标使用 [Phosphor](https://phosphoricons.com/)（MIT），固定版本，`libs/design/icons/icons.json` 将语义名称映射到 Phosphor 名称；生成器把其 SVG 源复制到 `libs/design/icons/svg`，并编译为供 Web UI 与 MyGo（自行绘制）使用的路径数据、资源目录图像与 Android 矢量图。Regular 与 Fill 两种字重标示未激活与激活状态（收藏、静音、循环、字幕），不引起布局偏移。用户期待系统图标之处，系统控件使用平台图标——Apple 平台用 SF Symbols（分享、AirPlay、画中画、菜单），Android 用 Material Symbols。
 
 ### 6.3 信息架构
 所有客户端拥有相同的页面、相同的名称与相同的到达路径：
@@ -183,7 +183,7 @@ flowchart LR
 * **导航容器**，按平台映射：iPhone 用标签栏；iPad、Mac、Windows、Linux 与宽 Web 窗口用侧边栏；Android 按窗口尺寸类别用导航栏或导航侧栏；Apple TV 用顶部标签栏；Android TV 用侧边菜单。
 
 ### 6.4 组件
-核心组件在 `libs/design/components` 中一次规定——结构、状态（默认、获得焦点、按下、加载、观看进度、已看完）、各设备形态的尺寸与所用 tokens——再在各平台原生实现；共享的是规范，不是代码。它们包括海报与缩略图卡片、横向列表、详情页头部、剧集行、人物卡片、音轨与字幕选择器，以及空、错误与离线状态。电视为每张卡片增加获得焦点状态（放大与阴影）。
+核心组件在 `libs/design/components.md` 中一次规定——结构、状态（默认、获得焦点、按下、加载、观看进度、已看完）、各设备形态的尺寸与所用 tokens——再在各平台原生实现；共享的是规范，不是代码。它们包括海报与缩略图卡片、横向列表、详情页头部、剧集行、人物卡片、音轨与字幕选择器，以及空、错误与离线状态。电视为每张卡片增加获得焦点状态（放大与阴影）。
 
 ### 6.5 屏幕控制器（OSC）
 所有播放器遵循同一布局与状态机：

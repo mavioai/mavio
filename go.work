@@ -2,7 +2,9 @@ go 1.27.0
 
 use (
 	./apps/server
+	./libs/acquire
 	./libs/core
+	./libs/design
 	./libs/imaging
 	./libs/library
 	./libs/media
@@ -10,7 +12,6 @@ use (
 	./libs/naming
 	./libs/plugin
 	./libs/proto
-	./libs/acquire
 	./libs/release
 	./libs/store
 	./libs/streaming

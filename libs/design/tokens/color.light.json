@@ -1,0 +1,69 @@
+{
+  "color": {
+    "$description": "The semantic colors of the light theme.",
+    "$type": "color",
+    "background": {
+      "$value": "{palette.neutral.50}"
+    },
+    "surface": {
+      "$value": "{palette.neutral.0}"
+    },
+    "surfaceRaised": {
+      "$value": "{palette.neutral.0}"
+    },
+    "surfaceOverlay": {
+      "$value": "{palette.neutral.0}"
+    },
+    "border": {
+      "$value": "{palette.neutral.200}"
+    },
+    "textPrimary": {
+      "$value": "{palette.neutral.950}"
+    },
+    "textSecondary": {
+      "$value": "{palette.neutral.700}"
+    },
+    "textTertiary": {
+      "$value": "{palette.neutral.600}"
+    },
+    "textDisabled": {
+      "$value": "{palette.neutral.400}"
+    },
+    "accent": {
+      "$value": "{palette.accent.600}"
+    },
+    "accentPressed": {
+      "$value": "{palette.accent.700}"
+    },
+    "onAccent": {
+      "$value": "{palette.neutral.0}"
+    },
+    "focus": {
+      "$value": "{palette.accent.500}"
+    },
+    "progress": {
+      "$value": "{palette.accent.600}"
+    },
+    "danger": {
+      "$value": "{palette.red.600}"
+    },
+    "success": {
+      "$value": "{palette.green.600}"
+    },
+    "warning": {
+      "$value": "{palette.amber.600}"
+    },
+    "scrim": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0,
+          0,
+          0
+        ],
+        "alpha": 0.4,
+        "hex": "#000000"
+      }
+    }
+  }
+}

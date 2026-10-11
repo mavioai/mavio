@@ -61,6 +61,8 @@ A project overrides a default target with a `project.json` next to its `go.mod`;
 
 `tools/nx-cargo` gives every Cargo workspace `build` (`cargo build --locked --all-targets`), `test` (`cargo test --locked`), `bench` (`cargo bench --locked`, not cached) and `lint` (`cargo fmt --check` and `cargo clippy --locked --all-targets -- -D warnings`).
 
+The scripts of a `package.json` are targets too: `libs/proto` and `libs/design` have `typecheck` (`tsc -p tsconfig.json`, TypeScript 7), and `libs/design` has `generate` (§4.4). A directory with both a `go.mod` and a `package.json`, such as `libs/design`, is one project with the targets of both.
+
 ### 2.3 Common Commands
 ```bash
 pnpm nx run-many -t build test lint tidy-check     # Check everything
@@ -135,6 +137,26 @@ go build -o plugin .                                                     # proce
 
 A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.exe` on Windows).
 
+### 4.4 Design System
+`pnpm nx run design:generate` runs `libs/design/build/build.js`, which compiles the sources of the design system ([Clients §6](clients.md#6-design-system)) into `libs/design/gen`:
+
+| Source | Contents |
+| :--- | :--- |
+| `tokens/*.json` | Design tokens in the DTCG format, resolved by Style Dictionary; one file per theme (`color.dark`, `color.light`), type scale (`typography.default`, `typography.tv`) and form factor (`layout.*`) |
+| `icons/icons.json` | Semantic icon names mapped to Phosphor names; the SVGs, Regular and Fill, come from `@phosphor-icons/core` at its pinned version and are copied into `icons/svg` |
+| `strings/<locale>.json` | Strings in ICU MessageFormat with a description, and the platforms a string is limited to; English (`en.json`) is the source |
+
+| Output | For |
+| :--- | :--- |
+| `gen/ts` | The web UI: `tokens.ts`, `tokens.css` (custom properties, the light theme under `prefers-color-scheme`), `icons.ts` (path data), `strings.ts`; the npm package `@mavio/design` exports them |
+| `gen/swift` | Apple platforms: `MavioTokens.swift` (SwiftUI), `Icons.xcassets`, `Localizable.xcstrings` |
+| `gen/kotlin` | Android: `ai/mavio/design/MavioTokens.kt` (Compose), `res/drawable` (vector drawables), `res/values*/strings.xml` |
+| `gen/go` | The Windows and Linux app: the Go package `design` (module `github.com/mavioai/mavio/libs/design`) with the tokens, icon path data, the strings and their formatter |
+
+* The generator fails on a text and background pair below WCAG AA contrast (4.5:1) in either theme, on a message whose plural lacks a CLDR category of its locale, and on a translation whose arguments differ from the source's.
+* Messages are limited to the ICU subset every platform's format expresses: text, `{arg}`, and one plural over the whole message whose forms hold the count (`#`) and text.
+* Commit `gen/` with its sources; never edit it by hand.
+
 ---
 
 ## 5. Code Quality
@@ -149,7 +171,7 @@ A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.
 ## 6. Continuous Integration
 
 `.github/workflows/ci.yml` runs on pushes to `main` and on pull requests:
-* **check** (Linux): `nx affected -t buf-lint lint tidy-check build test`; regenerates code and fails on any diff; runs `buf breaking` against the base branch on pull requests.
+* **check** (Linux): `nx affected -t buf-lint lint tidy-check typecheck build test`; regenerates code and fails on any diff; runs `buf breaking` against the base branch on pull requests.
 * **test**: `nx run-many -t test build` on linux arm64, macOS and Windows.
 * **media** (Linux, macOS): installs jellyfin-ffmpeg, generates the fixtures and runs the `media`, `streaming` and `server` tests without the Nx cache, so the ffmpeg integration and smoke tests run on the runners' hardware.
 

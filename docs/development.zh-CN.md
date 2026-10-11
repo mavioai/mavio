@@ -59,6 +59,8 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 
 `tools/nx-cargo` 为每个 Cargo workspace 生成 `build`（`cargo build --locked --all-targets`）、`test`（`cargo test --locked`）、`bench`（`cargo bench --locked`，不缓存）与 `lint`（`cargo fmt --check` 与 `cargo clippy --locked --all-targets -- -D warnings`）。
 
+`package.json` 的脚本同样是目标：`libs/proto` 与 `libs/design` 有 `typecheck`（`tsc -p tsconfig.json`，TypeScript 7），`libs/design` 还有 `generate`（§4.4）。同时含 `go.mod` 与 `package.json` 的目录（如 `libs/design`）是一个项目，具有两者的目标。
+
 ### 2.3 常用命令
 ```bash
 pnpm nx run-many -t build test lint tidy-check     # 全量检查
@@ -133,6 +135,26 @@ go build -o plugin .                                                     # 子�
 
 插件目录包含 `manifest.json`，以及 `plugin.wasm` 或 `plugin`（Windows 上为 `plugin.exe`）。
 
+### 4.4 设计系统
+`pnpm nx run design:generate` 运行 `libs/design/build/build.js`，把设计系统（[客户端 §6](clients.zh-CN.md#6-设计系统)）的源文件编译到 `libs/design/gen`：
+
+| 源文件 | 内容 |
+| :--- | :--- |
+| `tokens/*.json` | DTCG 格式的设计 tokens，由 Style Dictionary 解析；每个主题（`color.dark`、`color.light`）、字号体系（`typography.default`、`typography.tv`）与设备形态（`layout.*`）各一个文件 |
+| `icons/icons.json` | 语义图标名到 Phosphor 名称的映射；Regular 与 Fill 两种 SVG 取自固定版本的 `@phosphor-icons/core`，复制到 `icons/svg` |
+| `strings/<locale>.json` | ICU MessageFormat 字符串，带说明及其限定的平台；英文（`en.json`）为源语言 |
+
+| 输出 | 用于 |
+| :--- | :--- |
+| `gen/ts` | Web UI：`tokens.ts`、`tokens.css`（CSS 自定义属性，浅色主题位于 `prefers-color-scheme` 下）、`icons.ts`（路径数据）、`strings.ts`；由 npm 包 `@mavio/design` 导出 |
+| `gen/swift` | Apple 平台：`MavioTokens.swift`（SwiftUI）、`Icons.xcassets`、`Localizable.xcstrings` |
+| `gen/kotlin` | Android：`ai/mavio/design/MavioTokens.kt`（Compose）、`res/drawable`（矢量图）、`res/values*/strings.xml` |
+| `gen/go` | Windows 与 Linux 应用：Go 包 `design`（模块 `github.com/mavioai/mavio/libs/design`），含 tokens、图标路径数据、字符串及其格式化函数 |
+
+* 任一主题中有文字与背景组合低于 WCAG AA 对比度（4.5:1）、某条消息的复数缺少其语言的 CLDR 类别、或某条译文的参数与源语言不同时，生成器报错。
+* 消息限于每个平台的格式都能表达的 ICU 子集：文本、`{arg}`，以及覆盖整条消息、各形式只含计数（`#`）与文本的一个复数。
+* `gen/` 与其源文件一起提交，不得手工修改。
+
 ---
 
 ## 5. 代码质量
@@ -147,7 +169,7 @@ go build -o plugin .                                                     # 子�
 ## 6. 持续集成
 
 `.github/workflows/ci.yml` 在推送到 `main` 和提交 PR 时运行：
-* **check**（Linux）：`nx affected -t buf-lint lint tidy-check build test`；重新生成代码，有任何差异即失败；PR 上对照目标分支运行 `buf breaking`。
+* **check**（Linux）：`nx affected -t buf-lint lint tidy-check typecheck build test`；重新生成代码，有任何差异即失败；PR 上对照目标分支运行 `buf breaking`。
 * **test**：在 linux arm64、macOS、Windows 上运行 `nx run-many -t test build`。
 * **media**（Linux、macOS）：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
 

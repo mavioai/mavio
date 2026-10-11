@@ -31,7 +31,7 @@ jobs:
           workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
       - uses: nrwl/nx-set-shas@v4
-      - run: pnpm nx affected -t buf-lint lint tidy-check build test --output-style=static
+      - run: pnpm nx affected -t buf-lint lint tidy-check typecheck build test --output-style=static
       - name: Generated code is up to date
         run: |
           pnpm nx run-many -t generate --output-style=static
@@ -56,7 +56,7 @@ jobs:
         with:
           workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx run-many -t test build --output-style=static
+      - run: pnpm nx run-many -t typecheck test build --output-style=static
 
   media:
     name: Media integration (${{ matrix.os }})

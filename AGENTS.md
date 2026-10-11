@@ -41,6 +41,7 @@ libs/release/         Release title parsing (from P15, pure functions)
 libs/acquire/         Acquisition engine: profiles, decisions, searches, queue, import (from P18)
 plugins/<name>/       Plugins (built as wasip1 WASM by default)
 libs/client-rust/     Shared Rust core of the clients (Cargo workspace; api = generated messages and clients)
+libs/design/          Design system of the clients: tokens, icons, strings, component specifications; gen/ for every client
 tools/nx-go/          Local Nx plugin: infers an Nx project from every go.mod and builds the dependency graph
 tools/nx-cargo/       Local Nx plugin: infers an Nx project from every Cargo workspace
 tools/{fixtures,testport}/  Test media generation, test case porting
@@ -68,7 +69,7 @@ pnpm nx show projects                              # List projects (name = direc
 
 Every Go module also works without Nx: `cd libs/naming && go test ./...`.
 
-Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test`, `bench`, `lint`, `tidy-check` (`GOWORK=off go mod tidy -diff`). `libs/proto` additionally has `generate` and `buf-lint`; it generates Go, TypeScript (`gen/ts`, the npm package `@mavio/proto`) and Rust (`gen/rust`, included by `libs/client-rust/api`). Every Cargo workspace has `build`, `test`, `bench` and `lint` (`cargo fmt --check` + clippy with `-D warnings`). See [docs/development.md](docs/development.md) §2.
+Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test`, `bench`, `lint`, `tidy-check` (`GOWORK=off go mod tidy -diff`). `libs/proto` additionally has `generate` and `buf-lint`; it generates Go, TypeScript (`gen/ts`, the npm package `@mavio/proto`) and Rust (`gen/rust`, included by `libs/client-rust/api`). Every Cargo workspace has `build`, `test`, `bench` and `lint` (`cargo fmt --check` + clippy with `-D warnings`). `libs/proto` and `libs/design` have `typecheck` (TypeScript), and `libs/design` has `generate` (`pnpm nx run design:generate`, whose `gen/` is committed). See [docs/development.md](docs/development.md) §2.
 
 ## Go Conventions
 

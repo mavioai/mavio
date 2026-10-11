@@ -168,13 +168,13 @@ The clients share one identity and one structure, and each looks native on its p
 | Platform | The platform's own | Window chrome, the menu bar, materials, system fonts, the back gesture, television focus, accessibility, system icons |
 
 ### 6.1 Design Tokens
-Colors, typography, spacing, radii, elevation and motion are defined once in `libs/design/tokens` in the W3C Design Tokens (DTCG) format. Style Dictionary compiles them into `libs/design/gen/{ts,swift,kotlin,go}`. The generated code is committed and CI checks that it is current, as with `libs/proto/gen`.
-* **Color**: a dark theme first, which suits artwork and dim rooms, and a light theme; both meet WCAG AA contrast.
+Colors, typography, spacing, radii, elevation and motion are defined once in `libs/design/tokens` in the W3C Design Tokens (DTCG) format. Style Dictionary resolves them and `pnpm nx run design:generate` compiles them, with the icons and strings, into `libs/design/gen/{ts,swift,kotlin,go}`. The generated code is committed and CI checks that it is current, as with `libs/proto/gen`.
+* **Color**: a dark theme first, which suits artwork and dim rooms, and a light theme; both meet WCAG AA contrast, which the generator checks for every pair of text and background.
 * **Typography**: the type scale (sizes, weights, line heights) is shared; the family is the platform's system font — SF Pro on Apple platforms, Roboto on Android, Segoe UI Variable on Windows, and Inter, shipped with the app, on Linux and the web — so that Dynamic Type and font scaling apply. The brand typeface appears only in the logo and display titles.
 * **Sizes per form factor**: the tokens have phone, tablet, desktop and television values (television sized for 10-foot viewing and overscan-safe margins).
 
 ### 6.2 Icons
-Content and brand icons are [Phosphor](https://phosphoricons.com/) (MIT), kept as SVG sources at a pinned version in `libs/design/icons` and compiled with the tokens into React components, asset catalog symbol images and Android vector drawables; MyGo draws the SVGs themselves. Regular and Fill weights mark inactive and active states (favorite, mute, loop, subtitles) without shifting the layout. System controls use the platform's icons — SF Symbols on Apple platforms (share, AirPlay, Picture in Picture, menus) and Material Symbols on Android — where users expect them.
+Content and brand icons are [Phosphor](https://phosphoricons.com/) (MIT), pinned in `libs/design/icons/icons.json`, which maps semantic names to Phosphor names; the generator copies their SVG sources into `libs/design/icons/svg` and compiles them into path data for the web UI and for MyGo, which draws them itself, asset catalog images and Android vector drawables. Regular and Fill weights mark inactive and active states (favorite, mute, loop, subtitles) without shifting the layout. System controls use the platform's icons — SF Symbols on Apple platforms (share, AirPlay, Picture in Picture, menus) and Material Symbols on Android — where users expect them.
 
 ### 6.3 Information Architecture
 Every client has the same screens with the same names, reached the same way:
@@ -183,7 +183,7 @@ Every client has the same screens with the same names, reached the same way:
 * **Navigation container**, mapped per platform: a tab bar on iPhone, a sidebar on iPad, Mac, Windows, Linux and wide web windows, a navigation bar or rail on Android by window size class, a top tab bar on Apple TV, and a side menu on Android TV.
 
 ### 6.4 Components
-The core components are specified once in `libs/design/components` — their anatomy, their states (default, focused, pressed, loading, watched progress, played), their sizes per form factor and their tokens — and implemented natively on each platform; the specification is shared, not the code. They are the poster and thumbnail cards, the shelf row, the details header, the episode row, the person card, the track and subtitle pickers, and the empty, error and offline states. Television adds the focused state (scale and shadow) to every card.
+The core components are specified once in `libs/design/components.md` — their anatomy, their states (default, focused, pressed, loading, watched progress, played), their sizes per form factor and their tokens — and implemented natively on each platform; the specification is shared, not the code. They are the poster and thumbnail cards, the shelf row, the details header, the episode row, the person card, the track and subtitle pickers, and the empty, error and offline states. Television adds the focused state (scale and shadow) to every card.
 
 ### 6.5 On-Screen Controller
 Every player follows one layout and state machine:

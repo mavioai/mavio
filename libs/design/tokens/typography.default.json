@@ -1,0 +1,141 @@
+{
+  "typography": {
+    "$description": "The type scale of phones, tablets and desktops; the family is the platform's system font.",
+    "$type": "typography",
+    "display": {
+      "$value": {
+        "fontFamily": "system",
+        "fontSize": {
+          "value": 34,
+          "unit": "px"
+        },
+        "fontWeight": 700,
+        "lineHeight": 1.1765,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    },
+    "title1": {
+      "$value": {
+        "fontFamily": "system",
+        "fontSize": {
+          "value": 28,
+          "unit": "px"
+        },
+        "fontWeight": 700,
+        "lineHeight": 1.2143,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    },
+    "title2": {
+      "$value": {
+        "fontFamily": "system",
+        "fontSize": {
+          "value": 22,
+          "unit": "px"
+        },
+        "fontWeight": 600,
+        "lineHeight": 1.2727,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    },
+    "title3": {
+      "$value": {
+        "fontFamily": "system",
+        "fontSize": {
+          "value": 20,
+          "unit": "px"
+        },
+        "fontWeight": 600,
+        "lineHeight": 1.3,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    },
+    "headline": {
+      "$value": {
+        "fontFamily": "system",
+        "fontSize": {
+          "value": 17,
+          "unit": "px"
+        },
+        "fontWeight": 600,
+        "lineHeight": 1.2941,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    },
+    "body": {
+      "$value": {
+        "fontFamily": "system",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": 400,
+        "lineHeight": 1.375,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    },
+    "callout": {
+      "$value": {
+        "fontFamily": "system",
+        "fontSize": {
+          "value": 15,
+          "unit": "px"
+        },
+        "fontWeight": 400,
+        "lineHeight": 1.3333,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    },
+    "footnote": {
+      "$value": {
+        "fontFamily": "system",
+        "fontSize": {
+          "value": 13,
+          "unit": "px"
+        },
+        "fontWeight": 400,
+        "lineHeight": 1.3846,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    },
+    "caption": {
+      "$value": {
+        "fontFamily": "system",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": 500,
+        "lineHeight": 1.3333,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    }
+  }
+}

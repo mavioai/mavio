@@ -1,0 +1,73 @@
+{
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "instant": {
+        "$value": {
+          "value": 100,
+          "unit": "ms"
+        }
+      },
+      "fast": {
+        "$value": {
+          "value": 150,
+          "unit": "ms"
+        }
+      },
+      "normal": {
+        "$value": {
+          "value": 250,
+          "unit": "ms"
+        }
+      },
+      "slow": {
+        "$value": {
+          "value": 400,
+          "unit": "ms"
+        }
+      },
+      "controlsHide": {
+        "$value": {
+          "value": 3000,
+          "unit": "ms"
+        },
+        "$description": "Time without input after which the on-screen controller fades out during playback."
+      }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "standard": {
+        "$value": [
+          0.2,
+          0,
+          0,
+          1
+        ]
+      },
+      "emphasized": {
+        "$value": [
+          0.3,
+          0,
+          0,
+          1
+        ]
+      },
+      "decelerate": {
+        "$value": [
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "accelerate": {
+        "$value": [
+          0.3,
+          0,
+          1,
+          1
+        ]
+      }
+    }
+  }
+}

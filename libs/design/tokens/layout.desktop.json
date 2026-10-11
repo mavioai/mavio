@@ -1,0 +1,50 @@
+{
+  "layout": {
+    "$description": "Layout values of the desktop form factor.",
+    "margin": {
+      "$type": "dimension",
+      "$value": {
+        "value": 32,
+        "unit": "px"
+      },
+      "$description": "Horizontal margin of the screen's content; on television it keeps content inside the overscan-safe area."
+    },
+    "gutter": {
+      "$type": "dimension",
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$description": "Space between cards in a shelf or grid."
+    },
+    "poster": {
+      "$type": "dimension",
+      "$value": {
+        "value": 160,
+        "unit": "px"
+      },
+      "$description": "Width of a 2:3 poster card."
+    },
+    "thumbnail": {
+      "$type": "dimension",
+      "$value": {
+        "value": 320,
+        "unit": "px"
+      },
+      "$description": "Width of a 16:9 thumbnail card."
+    },
+    "touchTarget": {
+      "$type": "dimension",
+      "$value": {
+        "value": 28,
+        "unit": "px"
+      },
+      "$description": "Smallest size of a pointer or touch target (0 on television, which has none)."
+    },
+    "focusScale": {
+      "$type": "number",
+      "$value": 1,
+      "$description": "Scale of a card that has focus."
+    }
+  }
+}

@@ -41,6 +41,7 @@ libs/release/         release 标题解析（P15 起，纯函数）
 libs/acquire/         资源获取引擎：档案、决策、搜索、队列、入库（P18 起）
 plugins/<name>/       插件（默认编译为 wasip1 WASM）
 libs/client-rust/     客户端的 Rust 共享核心（Cargo workspace；api 为生成的消息与客户端）
+libs/design/          客户端的设计系统：tokens、图标、字符串、组件规范；gen/ 为每个客户端生成
 tools/nx-go/          本地 Nx 插件：把每个 go.mod 推断为 Nx 项目并生成依赖图
 tools/nx-cargo/       本地 Nx 插件：把每个 Cargo workspace 推断为 Nx 项目
 tools/{fixtures,testport}/  测试媒体生成、测试用例移植
@@ -68,7 +69,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 
 每个 Go 模块也能脱离 Nx 直接使用：`cd libs/naming && go test ./...`。
 
-每个 Go 项目都有这些推断出来的 Nx 目标：`build`（`CGO_ENABLED=0`）、`test`、`bench`、`lint`、`tidy-check`（`GOWORK=off go mod tidy -diff`）。`libs/proto` 另有 `generate` 和 `buf-lint`；它生成 Go、TypeScript（`gen/ts`，即 npm 包 `@mavio/proto`）与 Rust（`gen/rust`，由 `libs/client-rust/api` 包含）。每个 Cargo workspace 有 `build`、`test`、`bench` 与 `lint`（`cargo fmt --check` 加上 `-D warnings` 的 clippy）。详见 [docs/development.zh-CN.md](docs/development.zh-CN.md) §2。
+每个 Go 项目都有这些推断出来的 Nx 目标：`build`（`CGO_ENABLED=0`）、`test`、`bench`、`lint`、`tidy-check`（`GOWORK=off go mod tidy -diff`）。`libs/proto` 另有 `generate` 和 `buf-lint`；它生成 Go、TypeScript（`gen/ts`，即 npm 包 `@mavio/proto`）与 Rust（`gen/rust`，由 `libs/client-rust/api` 包含）。每个 Cargo workspace 有 `build`、`test`、`bench` 与 `lint`（`cargo fmt --check` 加上 `-D warnings` 的 clippy）。`libs/proto` 与 `libs/design` 有 `typecheck`（TypeScript），`libs/design` 还有 `generate`（`pnpm nx run design:generate`，其 `gen/` 提交入库）。详见 [docs/development.zh-CN.md](docs/development.zh-CN.md) §2。
 
 ## Go 约定
 

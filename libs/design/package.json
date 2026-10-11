@@ -1,0 +1,26 @@
+{
+  "name": "@mavio/design",
+  "version": "0.0.0",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "exports": {
+    "./tokens": "./gen/ts/tokens.ts",
+    "./tokens.css": "./gen/ts/tokens.css",
+    "./icons": "./gen/ts/icons.ts",
+    "./strings": "./gen/ts/strings.ts"
+  },
+  "scripts": {
+    "generate": "node build/build.js",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@formatjs/icu-messageformat-parser": "3.5.21",
+    "@phosphor-icons/core": "2.1.1",
+    "style-dictionary": "5.6.1",
+    "typescript": "7.0.2"
+  },
+  "nx": {
+    "name": "design"
+  }
+}
