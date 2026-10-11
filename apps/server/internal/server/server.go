@@ -221,6 +221,10 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	if a, ok := ln.Addr().(*net.TCPAddr); ok {
 		port = a.Port
 	}
+	serverID, err := db.Settings().ServerID(ctx)
+	if err != nil {
+		return err
+	}
 	serverName := func() string {
 		if name := set.Get().Network.ServerName; name != "" {
 			return name
@@ -252,7 +256,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Settings:  set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
 		ServerInfo: func() rpc.ServerInfo {
 			n := set.Get().Network
-			return rpc.ServerInfo{Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: n.HTTPSPort}
+			return rpc.ServerInfo{ID: serverID.String(), Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: n.HTTPSPort}
 		},
 		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Indexers: plugs.IndexerProviders,
 		Downloads: plugs.DownloadClientProviders, Acquisition: acq, Requests: reqs, Dev: cfg.Dev,
@@ -266,7 +270,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	prefix := network.NewPrefix(h)
 	https := &network.HTTPS{Handler: prefix, Host: cfg.HTTPSHost, Logger: log}
 	discovery := &network.Discovery{Addr: cfg.DiscoveryAddr, Port: port, Logger: log, Reply: func() network.DiscoveryReply {
-		return network.DiscoveryReply{Name: serverName(), Version: cfg.Version}
+		return network.DiscoveryReply{ID: serverID.String(), Name: serverName(), Version: cfg.Version}
 	}}
 	defer func() {
 		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)

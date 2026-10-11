@@ -239,6 +239,10 @@ type SettingsRepository interface {
 	Get(ctx context.Context) (ServerSettings, error)
 	// Put validates and stores the settings, setting UpdatedAt.
 	Put(ctx context.Context, s *ServerSettings) error
+	// ServerID returns the ID that tells the server apart from others to
+	// clients, created on the first call; backups carry it with the
+	// database.
+	ServerID(ctx context.Context) (ID, error)
 }
 
 // APIKeyRepository stores API keys.

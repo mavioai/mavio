@@ -63,7 +63,8 @@ type Options struct {
 	Plugins rpc.PluginManager
 	// Devices keeps the plugins' remote devices; nil means none.
 	Devices rpc.DeviceController
-	// ServerInfo tells plugins how the server is reached.
+	// ServerInfo names the server to clients and tells plugins how it is
+	// reached.
 	ServerInfo func() rpc.ServerInfo
 	// Refresher carries out metadata changes; nil uses one without
 	// providers.
@@ -142,6 +143,7 @@ func Handler(opts Options) (http.Handler, error) {
 	authService := rpc.NewAuthService(opts.Store)
 	authService.Activity, authService.Authenticate = opts.Activity, opts.Authenticate
 	authService.ResetPlugin, authService.StartReset = opts.ResetPlugin, opts.StartReset
+	authService.Info = opts.ServerInfo
 	mux.Handle(authv1connect.NewAuthServiceHandler(authService, interceptors))
 	tasks := rpc.NewTaskService(opts.Store)
 	if opts.Plugins != nil {

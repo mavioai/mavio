@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -15,8 +17,12 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 )
 
-// serverSettingsKey keys the server settings among the settings rows.
-const serverSettingsKey = "server"
+// serverSettingsKey keys the server settings among the settings rows, and
+// serverIDKey the server's ID.
+const (
+	serverSettingsKey = "server"
+	serverIDKey       = "server-id"
+)
 
 type settings struct{ s *Store }
 
@@ -59,6 +65,29 @@ func (r settings) Put(ctx context.Context, s *core.ServerSettings) error {
 		UpdateNewValues().
 		Exec(ctx)
 	return mapErr(err, "put settings")
+}
+
+func (r settings) ServerID(ctx context.Context) (core.ID, error) {
+	// The first caller's ID wins; later ones read it back.
+	err := r.s.write.Setting.Create().
+		SetKey(serverIDKey).
+		SetValue(core.NewID().String()).
+		SetUpdatedAt(time.Now().UTC()).
+		OnConflictColumns(setting.FieldKey).
+		DoNothing().
+		Exec(ctx)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return core.ID{}, mapErr(err, "create server ID")
+	}
+	row, err := r.s.write.Setting.Query().Where(setting.Key(serverIDKey)).Only(ctx)
+	if err != nil {
+		return core.ID{}, mapErr(err, "get server ID")
+	}
+	id, err := core.ParseID(row.Value)
+	if err != nil {
+		return core.ID{}, fmt.Errorf("get server ID: %w", err)
+	}
+	return id, nil
 }
 
 type apiKeys struct{ s *Store }

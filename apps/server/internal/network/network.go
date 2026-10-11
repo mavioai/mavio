@@ -149,6 +149,7 @@ const DiscoveryRequest = "who is MavioServer?"
 
 // DiscoveryReply is what a server answers.
 type DiscoveryReply struct {
+	ID      string `json:"id"`
 	Name    string `json:"name"`
 	Address string `json:"address"`
 	Version string `json:"version"`

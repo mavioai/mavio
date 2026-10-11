@@ -5606,6 +5606,20 @@
             "type": "boolean",
             "title": "setup_required",
             "description": "True until the first user is created."
+          },
+          "serverId": {
+            "type": "string",
+            "title": "server_id",
+            "description": "Tells the server apart from others whatever address reaches it; stable\n for the server's database."
+          },
+          "serverName": {
+            "type": "string",
+            "title": "server_name",
+            "description": "The name the server shows, its host name unless administrators set one."
+          },
+          "version": {
+            "type": "string",
+            "title": "version"
           }
         },
         "title": "GetAuthInfoResponse",

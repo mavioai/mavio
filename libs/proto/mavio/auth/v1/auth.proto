@@ -95,6 +95,12 @@ message GetAuthInfoRequest {}
 message GetAuthInfoResponse {
   // True until the first user is created.
   bool setup_required = 1;
+  // Tells the server apart from others whatever address reaches it; stable
+  // for the server's database.
+  string server_id = 2;
+  // The name the server shows, its host name unless administrators set one.
+  string server_name = 3;
+  string version = 4;
 }
 
 message CreateFirstUserRequest {

@@ -570,6 +570,7 @@ flowchart TD
 - [x] 服务端：`ItemService.ListSimilarItems`，由 `ItemQuery.SimilarTo` 评分（`libs/store/items.go`）
   - [ ] 在本地结果之后，加入发现提供者给出、媒体库拥有的相似作品，如 Jellyfin 的远程相似条目提供者所做
 - [x] 服务端：所有路由的跨域请求（`apps/server/internal/httpserver/cors.go`）
+- [x] 服务端：`AuthService.GetAuthInfo` 与发现应答中带上服务端的 ID、名称和版本，客户端据此在任意地址上认出同一服务端
 - [x] 服务端：为调用者列出的条目带上其用户数据（`Item.user_data`），即客户端绘制条目、跨服务器合并“继续观看”所依据的进度、已播放标记和最近活动
 - [ ] 原型：
   - [x] tvOS 上的 Rust：在 `nightly-2026-10-10` 上以 `-Zbuild-std` 构建，`mavio-api` 及其 `events` 示例可为 `aarch64-apple-tvos` 与 `aarch64-apple-tvos-sim` 构建，示例在 tvOS 模拟器中运行，TLS（rustls 与 aws-lc-rs）可构建
