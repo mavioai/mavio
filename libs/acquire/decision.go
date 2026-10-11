@@ -217,6 +217,10 @@ type IndexerInfo struct {
 	MultiLanguages []release.Language
 	// DisabledUntil is set while the indexer is left out after failing.
 	DisabledUntil time.Time
+	// SeasonSearchMaximumSingleEpisodeAge is in days; season searches
+	// want season packs of seasons whose last episode aired longer ago.
+	// 0 for no limit.
+	SeasonSearchMaximumSingleEpisodeAge int
 }
 
 // Ports are what the decisions read from the rest of the server.
