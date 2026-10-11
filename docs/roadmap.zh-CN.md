@@ -97,7 +97,7 @@ flowchart TD
 | P17 | 索引器 | ✅ 完成 |
 | P18 | 电影资源获取 | ✅ 完成 |
 | P19 | 剧集资源获取 | ✅ 完成 |
-| P20 | 发现与请求 | 进行中 |
+| P20 | 发现与请求 | ✅ 完成 |
 | P21 | 客户端与生态 | 进行中 |
 | P22 | 真实设备验收 | 未开始 |
 | P23 | 打包与发布 | 未开始 |
@@ -541,7 +541,10 @@ flowchart TD
 - [x] `IssueService`：报告条目的问题，评论、解决与重新打开
 - [x] 通知：所涉用户的活动，经 `ActivityService.ListMyActivities` 读取，由通知插件投递
   - [ ] 向用户的会话推送事件
-- [ ] 端到端测试
+- [x] 端到端测试（`apps/server/internal/server/requests_test.go`）：限制为 PG 的用户经 scraper-tmdb 发现一部电影与一部剧集，请求 R 级电影被拒，请求其余作品；管理员审批；作品被抓取、入库并播放，用户收到可播放的通知；用户报告的问题被解决
+  - [ ] 端到端测试中被拒绝的请求、耗尽的配额与重试的失败请求
+  - [ ] 端到端测试中修改待审批请求的季，以及请求全部季
+  - [ ] 端到端测试中对策略屏蔽未分级内容的用户隐藏未分级作品
 
 ### P21 客户端与生态
 **范围**：基于完成的服务端 API 构建[客户端](clients.zh-CN.md)：内嵌于服务端的 Web UI（`apps/web`，在 `/` 提供）、面向 iPhone 与 iPad、Apple TV 与 Mac 的 Apple 应用（`apps/ios`、`apps/tvos`、`apps/macos`）、面向手机与平板及 Android TV 的 Android 应用（`apps/android`、`apps/android-tv`）、基于 MyGo 的 Windows 与 Linux 应用（`apps/windows-linux`），以及它们共享的库（`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。其基础部分不等待 P20：工具链与构建目标、从 `libs/proto` 生成的 TypeScript 与 Rust 代码、`libs/design`、§4 中客户端待决事项所列的原型，以及各应用与库的骨架。只有发现与请求页面等待 P20。之后按以下顺序构建客户端，每一个都先验证共享核心与设计系统，下一个平台再在其上构建：Web UI，连同 `libs/client-ts` 与 `libs/design`；iPhone 与 iPad 应用，连同 `libs/client-rust` 与 `libs/apple`；Android 手机与平板应用，连同 `libs/android`；Apple TV 与 Android TV 应用；Mac 应用；Windows 与 Linux 应用。具体完成标准在 P20 完成后制定。
