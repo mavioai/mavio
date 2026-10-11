@@ -191,6 +191,7 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 	// The download's title stands for a lone file whose name does not
 	// parse, as Sonarr's download client info does.
 	downloadInfo := release.ParseSeriesTitle(d.Title)
+	grabbedQuality := release.ParseQuality(d.Title, release.Series)
 	// The name of the download's folder, Sonarr's folder info.
 	var folderInfo *release.ParsedEpisodeInfo
 	if len(files) > 0 && files[0].path != local {
@@ -198,7 +199,6 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 	}
 	now := r.now()
 	naming, oseries := rn.seriesNaming(), organizeSeries(sh)
-	grabbed := qualityModel(d.Quality)
 	langs := languagesOf(d.Languages)
 	upgrades := acquire.Upgrades{Propers: rn.env.Config.Propers}
 	s := r.settings()
@@ -218,6 +218,7 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 		le := &localEpisode{file: f, langs: langs}
 		out = append(out, le)
 		le.parsed = release.ParseSeriesPath(f.path)
+		fileInfo := le.parsed
 		single := len(files) == 1
 		if le.parsed == nil && single {
 			le.parsed = downloadInfo
@@ -242,12 +243,11 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 			continue
 		}
 		le.episodes = m.Episodes
-		// A lone file is the release grabbed; others have their own
-		// quality, the grabbed one standing for what their names lack.
-		le.quality = acquire.ModelOf(le.parsed.Quality)
-		if (single || le.quality.Quality == release.Unknown) && grabbed.Quality != release.Unknown {
-			le.quality = grabbed
+		probe, unreadable, err := r.probeFile(ctx, f)
+		if err != nil {
+			return nil, err
 		}
+		le.quality = acquire.ModelOf(aggregateQuality(fileInfo, folderInfo, downloadInfo, probe, grabbedQuality))
 		if len(le.langs) == 0 {
 			le.langs = le.parsed.Languages
 		}
@@ -302,7 +302,8 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 		if missingAbsoluteNumber(naming, oseries, le.episodes, now) {
 			le.reasons = append(le.reasons, msgNoAbsoluteNumber)
 		}
-		if len(le.reasons) > 0 {
+		if probe == nil {
+			le.reasons = append(le.reasons, unreadable...)
 			continue
 		}
 		runtime := 0
@@ -311,13 +312,35 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 			runtime += cmp.Or(ep.Runtime, sh.series.Runtime)
 			special = special || ep.SeasonNumber == 0
 		}
-		reasons, err := r.verifyFile(ctx, f, cmp.Or(runtime, 45), special)
-		if err != nil {
-			return nil, err
-		}
-		le.reasons = append(le.reasons, reasons...)
+		le.reasons = append(le.reasons, checkProbe(f, probe, cmp.Or(runtime, 45), special)...)
 	}
 	return out, nil
+}
+
+// aggregateQuality returns the quality of an episode file, as Sonarr's
+// AggregateQuality with its augmenters in order: the names of the file,
+// of the download's folder and of the download, the frame size of the
+// file's video, and the name of the release grabbed.
+func aggregateQuality(fileInfo, folderInfo, downloadInfo *release.ParsedEpisodeInfo, probe *library.ProbeResult, grabbed release.ParsedQuality) release.ParsedQuality {
+	var augments []release.QualityAugment
+	for _, info := range []*release.ParsedEpisodeInfo{fileInfo, folderInfo, downloadInfo} {
+		if info != nil {
+			augments = append(augments, release.AugmentFromName(info.Quality))
+		}
+	}
+	if probe != nil {
+		for _, s := range probe.Source.Streams {
+			if s.Kind != core.StreamVideo {
+				continue
+			}
+			if a, ok := release.AugmentFromVideo(s.Width, s.Height); ok {
+				augments = append(augments, a)
+			}
+			break
+		}
+	}
+	augments = append(augments, release.AugmentFromName(grabbed))
+	return release.AggregateSeriesQuality(augments...)
 }
 
 // seriesLibraryFolder returns the library folder a series' folder is in

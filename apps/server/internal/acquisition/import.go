@@ -326,21 +326,36 @@ func (r *Runtime) verify(ctx context.Context, m *movie, f importFile) ([]string,
 // and files without audio; specials are not checked for samples, as
 // Sonarr's DetectSample.
 func (r *Runtime) verifyFile(ctx context.Context, f importFile, runtime int, special bool) ([]string, error) {
+	res, reasons, err := r.probeFile(ctx, f)
+	if res == nil {
+		return reasons, err
+	}
+	return checkProbe(f, res, runtime, special), nil
+}
+
+// probeFile reads a file; nil with why when it cannot be read.
+func (r *Runtime) probeFile(ctx context.Context, f importFile) (*library.ProbeResult, []string, error) {
 	if r.Prober == nil {
-		return []string{fmt.Sprintf(msgUnreadable, "no prober")}, nil
+		return nil, []string{fmt.Sprintf(msgUnreadable, "no prober")}, nil
 	}
 	done, err := r.pace(ctx, f.path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	res, err := r.Prober.Probe(ctx, f.path, false)
 	done()
 	if err != nil {
 		if ctx.Err() != nil {
-			return nil, ctx.Err()
+			return nil, nil, ctx.Err()
 		}
-		return []string{fmt.Sprintf(msgUnreadable, err)}, nil
+		return nil, []string{fmt.Sprintf(msgUnreadable, err)}, nil
 	}
+	return &res, nil, nil
+}
+
+// checkProbe rejects samples of a runtime in minutes and files without
+// audio among files read; specials are not checked for samples.
+func checkProbe(f importFile, res *library.ProbeResult, runtime int, special bool) []string {
 	var reasons []string
 	if !special {
 		switch acquire.IsSample(f.path, &res.Source.Duration, runtime) {
@@ -353,7 +368,7 @@ func (r *Runtime) verifyFile(ctx context.Context, f importFile, runtime int, spe
 	if !slices.ContainsFunc(res.Source.Streams, func(s core.MediaStream) bool { return s.Kind == core.StreamAudio }) {
 		reasons = append(reasons, msgNoAudio)
 	}
-	return reasons, nil
+	return reasons
 }
 
 // libraryFolder returns the library folder a movie's folder is in and the
