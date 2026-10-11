@@ -1,4 +1,59 @@
 // The web UI's client of the Mavio API (docs/clients.md §4.1): Connect
 // clients over connect-es, one per server the user is signed in to, and
 // the TanStack Query hooks the screens use.
-export { type Server, transport } from "./server.ts";
+export { backoff, follow, refreshes, useEvents } from "./events.ts";
+export {
+  type Content,
+  type Entry,
+  type Hubs,
+  merge,
+  type Section,
+  type ServerHubs,
+  type Trending,
+  type Version,
+} from "./home.ts";
+export {
+  type Copy,
+  errorMessage,
+  type Filter,
+  libraryItemsRequest,
+  type SearchResults,
+  type ServerLibraries,
+  ServersProvider,
+  type Sort,
+  serverKey,
+  useChildren,
+  useHome,
+  useHubItems,
+  useItem,
+  useLibraries,
+  useLibrary,
+  useLibraryItems,
+  useOtherCopies,
+  useRecommended,
+  useSearch,
+  useServer,
+  useServers,
+  useServersStore,
+  useSignedIn,
+  useSimilar,
+  useUserData,
+} from "./hooks.ts";
+export { type Artwork, artwork, imageOf, imageUrl, libraryImageUrl, thumbOf } from "./images.ts";
+export {
+  browserDecoders,
+  capabilities,
+  type Decoders,
+  nativeHls,
+  Playback,
+  type PlayOptions,
+} from "./playback.ts";
+export { type Server, transport, urlOf } from "./server.ts";
+export {
+  normalizeUrl,
+  type QuickConnect,
+  type ServerEntry,
+  type ServerInfo,
+  Servers,
+  type Storage,
+} from "./servers.ts";

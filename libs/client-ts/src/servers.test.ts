@@ -1,0 +1,134 @@
+import { SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
+import { afterEach, expect, test, vi } from "vitest";
+
+import { normalizeUrl, type ServerEntry, Servers, type Storage } from "./servers.ts";
+
+afterEach(() => vi.unstubAllGlobals());
+
+function memory(): Storage & { data: Map<string, string> } {
+  const data = new Map<string, string>();
+  return { data, getItem: (k) => data.get(k) ?? null, setItem: (k, v) => void data.set(k, v) };
+}
+
+/** The JSON body of a Connect call. */
+function body(init: RequestInit): unknown {
+  const b = init.body;
+  if (!b) return {};
+  return JSON.parse(typeof b === "string" ? b : new TextDecoder().decode(b as Uint8Array));
+}
+
+/** Answers Connect calls by method name. */
+function serve(answers: Record<string, (body: unknown, init: RequestInit) => unknown>) {
+  const fetch = vi.fn(async (url: string, init: RequestInit) => {
+    const method = url.slice(url.lastIndexOf("/") + 1);
+    const answer = answers[method];
+    if (!answer) return Response.json({ code: "unimplemented", message: method }, { status: 404 });
+    const out = answer(body(init), init);
+    return out instanceof Response ? out : Response.json(out);
+  });
+  vi.stubGlobal("fetch", fetch);
+  return fetch;
+}
+
+test("normalizes typed addresses", () => {
+  const cases: [string, string][] = [
+    ["192.168.1.2", "http://192.168.1.2:8686"],
+    ["media.example.com/", "http://media.example.com:8686"],
+    ["https://media.example.com/mavio/", "https://media.example.com/mavio"],
+    ["http://den:9000", "http://den:9000"],
+  ];
+  for (const [input, want] of cases) expect(normalizeUrl(input), input).toBe(want);
+  expect(() => normalizeUrl("ftp://den")).toThrow();
+  expect(() => normalizeUrl("  ")).toThrow();
+});
+
+test("signs in to several servers, each with its own token", async () => {
+  const fetch = serve({});
+  fetch.mockImplementation(async (url: string, init: RequestInit) => {
+    const method = url.slice(url.lastIndexOf("/") + 1);
+    const server = url.startsWith("http://den") ? "den" : "attic";
+    if (method === "GetAuthInfo") return Response.json({ serverId: server, serverName: server, version: "1.0" });
+    if (method === "Login") {
+      return Response.json({ accessToken: `${server}-token`, user: { id: "u", name: (body(init) as { name: string }).name } });
+    }
+    return Response.json({});
+  });
+  const servers = new Servers(memory(), "http://den:8686");
+  await servers.signIn("den", "ann", "pw");
+  await servers.signIn("https://attic.example.com", "bob", "pw");
+  expect(servers.snapshot().map((s) => [s.id, s.url, s.userName, s.token])).toEqual([
+    ["den", "http://den:8686", "ann", "den-token"],
+    ["attic", "https://attic.example.com", "bob", "attic-token"],
+  ]);
+  // The list, without tokens, follows the user in the serving server's preferences.
+  const saved = fetch.mock.calls.filter(([url]) => url.endsWith("/SetDisplayPreferences")).at(-1)!;
+  expect(saved[0]).toBe("http://den:8686/mavio.user.v1.DisplayPreferencesService/SetDisplayPreferences");
+  const list = JSON.parse((body(saved[1]) as { values: { list: string } }).values.list) as ServerEntry[];
+  expect(list.map((s) => [s.id, s.token])).toEqual([
+    ["den", undefined],
+    ["attic", undefined],
+  ]);
+});
+
+test("rejects an address that is not a Mavio server", async () => {
+  serve({ GetAuthInfo: () => ({}) });
+  await expect(new Servers(memory(), "").probe("example.com")).rejects.toThrow(/not a Mavio server/);
+});
+
+test("a rejected token signs the user out of that server alone", async () => {
+  const storage = memory();
+  const entry = (id: string): ServerEntry => ({
+    id,
+    name: id,
+    version: "1",
+    url: `https://${id}.example.com`,
+    userId: "u",
+    userName: "ann",
+    token: `${id}-token`,
+  });
+  storage.setItem("mavio.servers", JSON.stringify([entry("a"), entry("b")]));
+  const servers = new Servers(storage, "https://a.example.com");
+  let changes = 0;
+  servers.subscribe(() => changes++);
+  serve({
+    GetHealth: (_, init) =>
+      new Headers(init.headers).get("authorization") === "Bearer b-token"
+        ? Response.json({ code: "unauthenticated", message: "expired" }, { status: 401 })
+        : {},
+  });
+  await servers.client(SystemService, servers.get("a")!).getHealth({});
+  await expect(servers.client(SystemService, servers.get("b")!).getHealth({})).rejects.toThrow(/expired/);
+  expect(servers.signedIn().map((s) => s.id)).toEqual(["a"]);
+  expect(servers.get("b")?.userName).toBe("ann");
+  expect(changes).toBe(1);
+  expect(JSON.parse(storage.data.get("mavio.servers")!)[1].token).toBeUndefined();
+});
+
+test("orders servers and adds those of other browsers signed out", async () => {
+  const storage = memory();
+  const mk = (id: string, token?: string): ServerEntry => ({
+    id,
+    name: id,
+    version: "1",
+    url: `http://${id}:8686`,
+    userId: "u",
+    userName: "ann",
+    token,
+  });
+  storage.setItem("mavio.servers", JSON.stringify([mk("home", "t"), mk("b", "tb")]));
+  const servers = new Servers(storage, "http://home:8686");
+  serve({
+    GetDisplayPreferences: () => ({
+      preferences: { values: { list: JSON.stringify([mk("c"), mk("home"), mk("b")]) } },
+    }),
+    SetDisplayPreferences: () => ({}),
+  });
+  await servers.load();
+  expect(servers.snapshot().map((s) => [s.id, !!s.token])).toEqual([
+    ["c", false],
+    ["home", true],
+    ["b", true],
+  ]);
+  servers.order(["b", "home"]);
+  expect(servers.snapshot().map((s) => s.id)).toEqual(["b", "home", "c"]);
+});
