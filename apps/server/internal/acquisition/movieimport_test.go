@@ -1,6 +1,7 @@
 package acquisition
 
 import (
+	"context"
 	"errors"
 	"io/fs"
 	"os"
@@ -10,8 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mavioai/mavio/libs/acquire"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
+	"github.com/mavioai/mavio/libs/release"
 )
 
 // grabAndComplete grabs the 1080p release of the movie and lists its
@@ -103,5 +107,41 @@ func TestImportDeletesEmptiedDownloadFolder(t *testing.T) {
 				t.Errorf("downloads folder: %v, want = kept", err)
 			}
 		})
+	}
+}
+
+// sizedProber reads every file as a 2160p HEVC video with 5.1 E-AC-3
+// audio.
+type sizedProber struct{}
+
+func (sizedProber) Probe(_ context.Context, _ string, _ bool) (library.ProbeResult, error) {
+	return library.ProbeResult{Source: core.MediaSource{Duration: 2 * time.Hour, Streams: []core.MediaStream{
+		{Kind: core.StreamVideo, Codec: "hevc", Width: 3840, Height: 1600, BitDepth: 10},
+		{Kind: core.StreamAudio, Codec: "eac3", Channels: 6, ChannelLayout: "5.1(side)", Language: "eng"},
+	}}}, nil
+}
+
+// TestImportQualityFromMediaInfo checks imports take the resolution of a
+// file's video over that of the names, as Radarr's AggregateQuality, and
+// write its media info in the file's name.
+func TestImportQualityFromMediaInfo(t *testing.T) {
+	e := newEnv(t)
+	e.rt.Prober = sizedProber{}
+	e.settings.Naming.StandardMovieFormat = "{Movie Title} ({Release Year}) {Quality Full} {MediaInfo VideoCodec} {MediaInfo AudioCodec} {MediaInfo AudioChannels}"
+	it := e.addMovie()
+	e.grabAndComplete(it, title1080+".mkv")
+	if err := e.rt.CheckQueue(e.ctx); err != nil {
+		t.Fatal(err)
+	}
+	if d := e.download(hash1080); d.State != core.DownloadImported {
+		t.Fatalf("download = %s %v, want = imported", d.State, d.Messages)
+	}
+	want := "The Matrix (1999) Bluray-2160p h265 EAC3 5.1.mkv"
+	if got := filepath.Base(e.item(it.ID).Path); got != want {
+		t.Errorf("imported file = %q, want = %q", got, want)
+	}
+	imported := e.history(core.HistoryImported)
+	if len(imported) != 1 || imported[0].Quality.Quality != acquire.QualityID(release.Bluray2160p) {
+		t.Errorf("imported events = %+v, want = one of Bluray-2160p", imported)
 	}
 }

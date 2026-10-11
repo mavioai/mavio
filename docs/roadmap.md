@@ -482,7 +482,7 @@ flowchart TD
 - [x] The queue: tracked downloads polled from the clients
   - [x] The downloads of a client that fails to answer, or is left out after failing, keep their last state rather than being flagged
 - [x] Import, upgrades and the recycle folder
-  - [ ] Qualities aggregated from the media info of files, and the media info tokens of file names
+  - [x] Qualities of imported files aggregated from their names, their download folder's, the release's and their media info, whose video size decides the resolution, as Radarr's AggregateQuality; the MediaInfo tokens of file names written from the file read at import
   - [x] Subtitles imported with a movie named by their language, tags and copy number, matched by the video's name, the movie's title and year, or taken when the video is the download's only one, as Radarr's SubtitleService; the extras of a file an upgrade replaces recycled with it
     - [ ] Extra files tracked in the database, as Radarr's extra file tables, rather than found by name beside the movie file
   - [ ] Manual import of a download's files
