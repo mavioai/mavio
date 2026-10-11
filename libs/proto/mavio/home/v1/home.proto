@@ -1,0 +1,90 @@
+edition = "2023";
+
+package mavio.home.v1;
+
+import "buf/validate/validate.proto";
+import "mavio/acquisition/v1/discover.proto";
+import "mavio/library/v1/item.proto";
+import "mavio/library/v1/library.proto";
+
+// HomeService lists the hubs of Home and of the libraries' Recommended
+// tabs: rows of items, each a reason to watch something, chosen per
+// library by administrators. Home starts with continue watching across
+// the libraries and the requests that became available, follows with the
+// Home hubs of each library the user pinned, in their order, and ends with
+// trending titles. Hubs the user hid and hubs without items are left out.
+// The user's choices are display preferences of client "mavio", view
+// "home": "libraries" lists the pinned library IDs in order, comma
+// separated, all libraries in name order when unset; "hidden" lists the
+// IDs of hidden hubs, which cannot hide continue watching. Items are those
+// the caller may access. Signed-in users.
+service HomeService {
+  // ListHubs lists the hubs of Home, or of a library's Recommended tab,
+  // with their first items.
+  rpc ListHubs(ListHubsRequest) returns (ListHubsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetHub lists a page of a hub's items.
+  rpc GetHub(GetHubRequest) returns (GetHubResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message ListHubsRequest {
+  // The library whose Recommended tab to list; unset for Home.
+  string library_id = 1 [(buf.validate.field).string.uuid = true];
+  // The items listed of each hub; unset for 20.
+  int32 item_limit = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 50
+  }];
+}
+
+message ListHubsResponse {
+  repeated Hub hubs = 1;
+}
+
+message GetHubRequest {
+  // A hub's ID from ListHubs.
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 128
+    }
+  ];
+  // Unset for 20.
+  int32 limit = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 100
+  }];
+  int32 offset = 3 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 10000
+  }];
+}
+
+message GetHubResponse {
+  Hub hub = 1;
+}
+
+// Hub is a row of items.
+message Hub {
+  // Stable: the kind of a hub spanning the libraries, such as "trending",
+  // or "<kind>/<library ID>". It names the hub to GetHub and to hide it.
+  string id = 1;
+  mavio.library.v1.HubKind kind = 2;
+  // The library of the hub, unset for those spanning the libraries.
+  string library_id = 3;
+  string library_name = 4;
+  // What a seeded hub is drawn from, which changes daily: the item of
+  // because you watched and because you like, the person of starring and
+  // directed by (seed_id), or the genre of more in genre (seed_name only).
+  string seed_id = 5;
+  string seed_name = 6;
+  // The items of the libraries; trending lists titles instead.
+  repeated mavio.library.v1.Item items = 7;
+  repeated mavio.acquisition.v1.DiscoveredTitle titles = 8;
+  // Whether the hub has items after these.
+  bool more = 9;
+}

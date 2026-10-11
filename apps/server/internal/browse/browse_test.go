@@ -211,3 +211,30 @@ func TestNextUp(t *testing.T) {
 		t.Errorf("rating limit: got = %q", got)
 	}
 }
+
+func TestContinueWatching(t *testing.T) {
+	e := newEnv(t)
+	ctx := t.Context()
+	e.play(t, "Lost E1", 1, true, 0)
+	e.play(t, "Fargo E1", 2, true, 0)
+	e.play(t, "Fargo E2", 3, false, 10*time.Minute)
+	e.play(t, "Alien", 4, false, 20*time.Minute)
+	tests := []struct {
+		name string
+		q    ContinueQuery
+		want []string
+	}{
+		{"by activity, each series once", ContinueQuery{Limit: 10}, []string{"Alien", "Fargo E2", "Lost E2"}},
+		{"page", ContinueQuery{Limit: 1, Offset: 1}, []string{"Fargo E2"}},
+		{"since", ContinueQuery{Limit: 10, Since: time.Date(2026, 2, 1, 2, 30, 0, 0, time.UTC)}, []string{"Alien", "Fargo E2"}},
+	}
+	for _, tt := range tests {
+		list, err := e.b.ContinueWatching(ctx, e.scope, tt.q)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := names(list); !slices.Equal(got, tt.want) {
+			t.Errorf("%s: got = %q, want = %q", tt.name, got, tt.want)
+		}
+	}
+}

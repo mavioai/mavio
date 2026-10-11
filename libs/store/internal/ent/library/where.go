@@ -521,6 +521,16 @@ func VirtualEpisodesNotNil() predicate.Library {
 	return predicate.Library(sql.FieldNotNull(FieldVirtualEpisodes))
 }
 
+// HubsIsNil applies the IsNil predicate on the "hubs" field.
+func HubsIsNil() predicate.Library {
+	return predicate.Library(sql.FieldIsNull(FieldHubs))
+}
+
+// HubsNotNil applies the NotNil predicate on the "hubs" field.
+func HubsNotNil() predicate.Library {
+	return predicate.Library(sql.FieldNotNull(FieldHubs))
+}
+
 // ScanGenerationEQ applies the EQ predicate on the "scan_generation" field.
 func ScanGenerationEQ(v int64) predicate.Library {
 	return predicate.Library(sql.FieldEQ(FieldScanGeneration, v))

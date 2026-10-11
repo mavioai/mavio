@@ -5194,6 +5194,147 @@
         "title": "StartQuickConnectResponse",
         "additionalProperties": false
       },
+      "mavio.home.v1.GetHubRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "maxLength": 128,
+            "minLength": 1,
+            "description": "A hub's ID from ListHubs."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "limit",
+            "maximum": 100,
+            "minimum": 0,
+            "format": "int32",
+            "description": "Unset for 20."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "offset",
+            "maximum": 10000,
+            "minimum": 0,
+            "format": "int32"
+          }
+        },
+        "title": "GetHubRequest",
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.home.v1.GetHubResponse": {
+        "type": "object",
+        "properties": {
+          "hub": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.home.v1.Hub"
+              }
+            ],
+            "title": "hub"
+          }
+        },
+        "title": "GetHubResponse",
+        "additionalProperties": false
+      },
+      "mavio.home.v1.Hub": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "Stable: the kind of a hub spanning the libraries, such as \"trending\",\n or \"\u003ckind\u003e/\u003clibrary ID\u003e\". It names the hub to GetHub and to hide it."
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.HubKind"
+              }
+            ],
+            "title": "kind"
+          },
+          "libraryId": {
+            "type": "string",
+            "title": "library_id",
+            "description": "The library of the hub, unset for those spanning the libraries."
+          },
+          "libraryName": {
+            "type": "string",
+            "title": "library_name"
+          },
+          "seedId": {
+            "type": "string",
+            "title": "seed_id",
+            "description": "What a seeded hub is drawn from, which changes daily: the item of\n because you watched and because you like, the person of starring and\n directed by (seed_id), or the genre of more in genre (seed_name only)."
+          },
+          "seedName": {
+            "type": "string",
+            "title": "seed_name"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.library.v1.Item"
+            },
+            "title": "items",
+            "description": "The items of the libraries; trending lists titles instead."
+          },
+          "titles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.DiscoveredTitle"
+            },
+            "title": "titles"
+          },
+          "more": {
+            "type": "boolean",
+            "title": "more",
+            "description": "Whether the hub has items after these."
+          }
+        },
+        "title": "Hub",
+        "additionalProperties": false,
+        "description": "Hub is a row of items."
+      },
+      "mavio.home.v1.ListHubsRequest": {
+        "type": "object",
+        "properties": {
+          "libraryId": {
+            "type": "string",
+            "title": "library_id",
+            "format": "uuid",
+            "description": "The library whose Recommended tab to list; unset for Home."
+          },
+          "itemLimit": {
+            "type": "integer",
+            "title": "item_limit",
+            "maximum": 50,
+            "minimum": 0,
+            "format": "int32",
+            "description": "The items listed of each hub; unset for 20."
+          }
+        },
+        "title": "ListHubsRequest",
+        "additionalProperties": false
+      },
+      "mavio.home.v1.ListHubsResponse": {
+        "type": "object",
+        "properties": {
+          "hubs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.home.v1.Hub"
+            },
+            "title": "hubs"
+          }
+        },
+        "title": "ListHubsResponse",
+        "additionalProperties": false
+      },
       "mavio.library.v1.AddToCollectionRequest": {
         "type": "object",
         "properties": {
@@ -5912,6 +6053,46 @@
         },
         "title": "GetPersonResponse",
         "additionalProperties": false
+      },
+      "mavio.library.v1.HubKind": {
+        "type": "string",
+        "title": "HubKind",
+        "enum": [
+          "HUB_KIND_UNSPECIFIED",
+          "HUB_KIND_CONTINUE_WATCHING",
+          "HUB_KIND_RECENTLY_ADDED",
+          "HUB_KIND_RECENTLY_RELEASED",
+          "HUB_KIND_RECENTLY_AIRED",
+          "HUB_KIND_TOP_RATED",
+          "HUB_KIND_TOP_UNPLAYED",
+          "HUB_KIND_START_WATCHING",
+          "HUB_KIND_REDISCOVER",
+          "HUB_KIND_BECAUSE_YOU_WATCHED",
+          "HUB_KIND_BECAUSE_YOU_LIKE",
+          "HUB_KIND_MORE_IN_GENRE",
+          "HUB_KIND_STARRING",
+          "HUB_KIND_DIRECTED_BY",
+          "HUB_KIND_AVAILABLE_REQUESTS",
+          "HUB_KIND_TRENDING"
+        ],
+        "description": "HubKind is a kind of hub: a row of items on Home or on a library's\n Recommended tab, each a reason to watch something."
+      },
+      "mavio.library.v1.HubList": {
+        "type": "object",
+        "properties": {
+          "kinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.library.v1.HubKind"
+            },
+            "title": "kinds",
+            "maxItems": 32,
+            "uniqueItems": true
+          }
+        },
+        "title": "HubList",
+        "additionalProperties": false,
+        "description": "HubList lists hub kinds in order."
       },
       "mavio.library.v1.IdentifyItemRequest": {
         "type": "object",
@@ -6643,11 +6824,44 @@
             ],
             "title": "virtual_episodes",
             "description": "The episodes a series lacks that refreshes add to it as virtual items."
+          },
+          "hubs": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.LibraryHubs"
+              }
+            ],
+            "title": "hubs",
+            "description": "The hubs of the library on Home and on its Recommended tab."
           }
         },
         "title": "Library",
         "additionalProperties": false,
         "description": "Library is a named set of root folders scanned as one collection."
+      },
+      "mavio.library.v1.LibraryHubs": {
+        "type": "object",
+        "properties": {
+          "home": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.HubList"
+              }
+            ],
+            "title": "home"
+          },
+          "recommended": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.HubList"
+              }
+            ],
+            "title": "recommended"
+          }
+        },
+        "title": "LibraryHubs",
+        "additionalProperties": false,
+        "description": "LibraryHubs are the hubs an administrator chose for a library, in\n order. An unset list keeps the defaults of the library's kind; an empty\n one shows none. Continue watching on Home spans the libraries and is not\n among a library's Home hubs."
       },
       "mavio.library.v1.LibraryKind": {
         "type": "string",
@@ -6757,6 +6971,14 @@
               }
             ],
             "title": "virtual_episodes"
+          },
+          "hubs": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.LibraryHubs"
+              }
+            ],
+            "title": "hubs"
           }
         },
         "title": "LibrarySpec",
@@ -14124,12 +14346,16 @@
       "description": "AuthService signs clients in and out. GetAuthInfo, CreateFirstUser and\n Login are public; the other methods act on the calling user."
     },
     {
-      "name": "CollectionService",
-      "description": "CollectionService lets administrators curate collections: named sets of\n items across libraries, such as a film series. Collections are items of\n the collections library; users with access to it list them with\n ItemService.ListItems and their members with its parent_id, seeing the\n members their policy allows."
-    },
-    {
       "name": "LibraryService",
       "description": "LibraryService manages libraries and their scans."
+    },
+    {
+      "name": "HomeService",
+      "description": "HomeService lists the hubs of Home and of the libraries' Recommended\n tabs: rows of items, each a reason to watch something, chosen per\n library by administrators. Home starts with continue watching across\n the libraries and the requests that became available, follows with the\n Home hubs of each library the user pinned, in their order, and ends with\n trending titles. Hubs the user hid and hubs without items are left out.\n The user's choices are display preferences of client \"mavio\", view\n \"home\": \"libraries\" lists the pinned library IDs in order, comma\n separated, all libraries in name order when unset; \"hidden\" lists the\n IDs of hidden hubs, which cannot hide continue watching. Items are those\n the caller may access. Signed-in users."
+    },
+    {
+      "name": "CollectionService",
+      "description": "CollectionService lets administrators curate collections: named sets of\n items across libraries, such as a film series. Collections are items of\n the collections library; users with access to it list them with\n ItemService.ListItems and their members with its parent_id, seeing the\n members their policy allows."
     },
     {
       "name": "MetadataService",
@@ -14541,13 +14767,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetPerson": {
+    "/mavio.library.v1.ItemService/GetItem": {
       "post": {
         "tags": [
           "ItemService"
         ],
-        "summary": "GetPerson",
-        "operationId": "mavio.library.v1.ItemService.GetPerson",
+        "summary": "GetItem",
+        "operationId": "mavio.library.v1.ItemService.GetItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -14572,7 +14798,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetPersonRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
               }
             }
           },
@@ -14594,7 +14820,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetPersonResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
                 }
               }
             }
@@ -14602,13 +14828,13 @@
         }
       }
     },
-    "/mavio.session.v1.SyncPlayService/NextItem": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
-          "SyncPlayService"
+          "CollectionService"
         ],
-        "summary": "NextItem",
-        "operationId": "mavio.session.v1.SyncPlayService.NextItem",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -14633,7 +14859,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.NextItemRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -14655,7 +14881,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.NextItemResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -17498,14 +17724,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListPeople": {
+    "/mavio.acquisition.v1.RequestService/RetryRequest": {
       "post": {
         "tags": [
-          "ItemService"
+          "RequestService"
         ],
-        "summary": "ListPeople",
-        "description": "ListPeople lists the people credited on the items the caller may\n access, with the number of items crediting each.",
-        "operationId": "mavio.library.v1.ItemService.ListPeople",
+        "summary": "RetryRequest",
+        "description": "RetryRequest approves a failed request again. Administrators only.",
+        "operationId": "mavio.acquisition.v1.RequestService.RetryRequest",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -17530,7 +17756,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListPeopleRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.RetryRequestRequest"
               }
             }
           },
@@ -17552,7 +17778,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListPeopleResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.RetryRequestResponse"
                 }
               }
             }
@@ -18490,14 +18716,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/GetQuickConnectState": {
+    "/mavio.library.v1.ItemService/ListPeople": {
       "post": {
         "tags": [
-          "AuthService"
+          "ItemService"
         ],
-        "summary": "GetQuickConnectState",
-        "description": "GetQuickConnectState tells whether a request was authorized; unknown\n and expired requests are NOT_FOUND.",
-        "operationId": "mavio.auth.v1.AuthService.GetQuickConnectState",
+        "summary": "ListPeople",
+        "description": "ListPeople lists the people credited on the items the caller may\n access, with the number of items crediting each.",
+        "operationId": "mavio.library.v1.ItemService.ListPeople",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -18522,7 +18748,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListPeopleRequest"
               }
             }
           },
@@ -18544,7 +18770,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListPeopleResponse"
                 }
               }
             }
@@ -19110,6 +19336,130 @@
         }
       }
     },
+    "/mavio.home.v1.HomeService/GetHub": {
+      "post": {
+        "tags": [
+          "HomeService"
+        ],
+        "summary": "GetHub",
+        "description": "GetHub lists a page of a hub's items.",
+        "operationId": "mavio.home.v1.HomeService.GetHub",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.home.v1.GetHubRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.home.v1.GetHubResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.home.v1.HomeService/ListHubs": {
+      "post": {
+        "tags": [
+          "HomeService"
+        ],
+        "summary": "ListHubs",
+        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
+        "operationId": "mavio.home.v1.HomeService.ListHubs",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.home.v1.ListHubsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.home.v1.ListHubsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
@@ -19294,13 +19644,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.library.v1.ItemService/ListNextUp": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ItemService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "ListNextUp",
+        "description": "ListNextUp lists the next episode to watch of each series the caller\n has played, the series played most recently first. Episodes being\n watched are left to continue watching: ListItems with resumable set,\n sorted by last played.",
+        "operationId": "mavio.library.v1.ItemService.ListNextUp",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -19325,7 +19676,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListNextUpRequest"
               }
             }
           },
@@ -19347,7 +19698,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListNextUpResponse"
                 }
               }
             }
@@ -19478,13 +19829,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetItem": {
+    "/mavio.acquisition.v1.DiscoverService/ListCatalogs": {
       "post": {
         "tags": [
-          "ItemService"
+          "DiscoverService"
         ],
-        "summary": "GetItem",
-        "operationId": "mavio.library.v1.ItemService.GetItem",
+        "summary": "ListCatalogs",
+        "description": "ListCatalogs lists the catalogs of every discovery provider.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.ListCatalogs",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -19509,7 +19861,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListCatalogsRequest"
               }
             }
           },
@@ -19531,7 +19883,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListCatalogsResponse"
                 }
               }
             }
@@ -19601,14 +19953,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/ListCatalogs": {
+    "/mavio.library.v1.ItemService/GetPerson": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "ItemService"
         ],
-        "summary": "ListCatalogs",
-        "description": "ListCatalogs lists the catalogs of every discovery provider.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.ListCatalogs",
+        "summary": "GetPerson",
+        "operationId": "mavio.library.v1.ItemService.GetPerson",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -19633,7 +19984,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListCatalogsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetPersonRequest"
               }
             }
           },
@@ -19655,7 +20006,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListCatalogsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetPersonResponse"
                 }
               }
             }
@@ -19724,13 +20075,14 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/CreatePlaylist": {
+    "/mavio.auth.v1.AuthService/GetQuickConnectState": {
       "post": {
         "tags": [
-          "PlaylistService"
+          "AuthService"
         ],
-        "summary": "CreatePlaylist",
-        "operationId": "mavio.library.v1.PlaylistService.CreatePlaylist",
+        "summary": "GetQuickConnectState",
+        "description": "GetQuickConnectState tells whether a request was authorized; unknown\n and expired requests are NOT_FOUND.",
+        "operationId": "mavio.auth.v1.AuthService.GetQuickConnectState",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -19755,7 +20107,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateRequest"
               }
             }
           },
@@ -19777,7 +20129,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateResponse"
                 }
               }
             }
@@ -19847,14 +20199,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.RequestService/RetryRequest": {
+    "/mavio.library.v1.ItemService/ListLatestItems": {
       "post": {
         "tags": [
-          "RequestService"
+          "ItemService"
         ],
-        "summary": "RetryRequest",
-        "description": "RetryRequest approves a failed request again. Administrators only.",
-        "operationId": "mavio.acquisition.v1.RequestService.RetryRequest",
+        "summary": "ListLatestItems",
+        "description": "ListLatestItems lists the items added last to the libraries the caller\n may access, newest first.",
+        "operationId": "mavio.library.v1.ItemService.ListLatestItems",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -19879,7 +20231,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.RetryRequestRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsRequest"
               }
             }
           },
@@ -19901,7 +20253,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.RetryRequestResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsResponse"
                 }
               }
             }
@@ -21145,14 +21497,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListLatestItems": {
+    "/mavio.library.v1.PlaylistService/CreatePlaylist": {
       "post": {
         "tags": [
-          "ItemService"
+          "PlaylistService"
         ],
-        "summary": "ListLatestItems",
-        "description": "ListLatestItems lists the items added last to the libraries the caller\n may access, newest first.",
-        "operationId": "mavio.library.v1.ItemService.ListLatestItems",
+        "summary": "CreatePlaylist",
+        "operationId": "mavio.library.v1.PlaylistService.CreatePlaylist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21177,7 +21528,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistRequest"
               }
             }
           },
@@ -21199,7 +21550,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreatePlaylistResponse"
                 }
               }
             }
@@ -22319,14 +22670,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListNextUp": {
+    "/mavio.session.v1.SyncPlayService/NextItem": {
       "post": {
         "tags": [
-          "ItemService"
+          "SyncPlayService"
         ],
-        "summary": "ListNextUp",
-        "description": "ListNextUp lists the next episode to watch of each series the caller\n has played, the series played most recently first. Episodes being\n watched are left to continue watching: ListItems with resumable set,\n sorted by last played.",
-        "operationId": "mavio.library.v1.ItemService.ListNextUp",
+        "summary": "NextItem",
+        "operationId": "mavio.session.v1.SyncPlayService.NextItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22351,7 +22701,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListNextUpRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.NextItemRequest"
               }
             }
           },
@@ -22373,7 +22723,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListNextUpResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.NextItemResponse"
                 }
               }
             }

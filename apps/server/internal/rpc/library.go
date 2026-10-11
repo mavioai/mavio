@@ -206,6 +206,7 @@ func libraryFromSpec(spec *libraryv1.LibrarySpec) (core.Library, error) {
 		ExtractTrickplay: spec.GetExtractTrickplay(), ExtractChapterImages: spec.GetExtractChapterImages(),
 		AnalyzeLoudness: spec.GetAnalyzeLoudness(), DownloadLyrics: spec.GetDownloadLyrics(),
 		Providers: providerOrderFromProto(spec.GetProviderOrder()),
+		Hubs:      libraryHubsFromProto(spec.GetHubs()),
 	}
 	if v := spec.GetVirtualEpisodes(); v != nil {
 		lib.VirtualEpisodes = core.VirtualEpisodes{
@@ -250,6 +251,7 @@ func libraryToProto(lib *core.Library, admin bool) *libraryv1.Library {
 		AnalyzeLoudness:      &lib.AnalyzeLoudness,
 		DownloadLyrics:       &lib.DownloadLyrics,
 		ProviderOrder:        providerOrderToProto(&lib.Providers),
+		Hubs:                 libraryHubsToProto(&lib.Hubs),
 		VirtualEpisodes: libraryv1.VirtualEpisodes_builder{
 			Missing: &lib.VirtualEpisodes.Missing, Unaired: &lib.VirtualEpisodes.Unaired, Specials: &lib.VirtualEpisodes.Specials,
 			GraceDays: new(int32(lib.VirtualEpisodes.GraceDays)),
@@ -294,4 +296,53 @@ func providerOrderToProto(o *core.ProviderOrder) *libraryv1.ProviderOrder {
 		Metadata: list(o.Metadata), Images: list(o.Images), Subtitles: list(o.Subtitles),
 		Lyrics: list(o.Lyrics), Segments: list(o.Segments), Episodes: list(o.Episodes),
 	}.Build()
+}
+
+// hubKinds maps the hub kinds to their protobuf values.
+var hubKinds = map[core.HubKind]libraryv1.HubKind{
+	core.HubContinueWatching:  libraryv1.HubKind_HUB_KIND_CONTINUE_WATCHING,
+	core.HubRecentlyAdded:     libraryv1.HubKind_HUB_KIND_RECENTLY_ADDED,
+	core.HubRecentlyReleased:  libraryv1.HubKind_HUB_KIND_RECENTLY_RELEASED,
+	core.HubRecentlyAired:     libraryv1.HubKind_HUB_KIND_RECENTLY_AIRED,
+	core.HubTopRated:          libraryv1.HubKind_HUB_KIND_TOP_RATED,
+	core.HubTopUnplayed:       libraryv1.HubKind_HUB_KIND_TOP_UNPLAYED,
+	core.HubStartWatching:     libraryv1.HubKind_HUB_KIND_START_WATCHING,
+	core.HubRediscover:        libraryv1.HubKind_HUB_KIND_REDISCOVER,
+	core.HubBecauseYouWatched: libraryv1.HubKind_HUB_KIND_BECAUSE_YOU_WATCHED,
+	core.HubBecauseYouLike:    libraryv1.HubKind_HUB_KIND_BECAUSE_YOU_LIKE,
+	core.HubMoreInGenre:       libraryv1.HubKind_HUB_KIND_MORE_IN_GENRE,
+	core.HubStarring:          libraryv1.HubKind_HUB_KIND_STARRING,
+	core.HubDirectedBy:        libraryv1.HubKind_HUB_KIND_DIRECTED_BY,
+	core.HubAvailableRequests: libraryv1.HubKind_HUB_KIND_AVAILABLE_REQUESTS,
+	core.HubTrending:          libraryv1.HubKind_HUB_KIND_TRENDING,
+}
+
+// libraryHubsFromProto converts a library's hubs; unset lists stay nil.
+func libraryHubsFromProto(h *libraryv1.LibraryHubs) core.LibraryHubs {
+	list := func(l *libraryv1.HubList) []core.HubKind {
+		if l == nil {
+			return nil
+		}
+		out := make([]core.HubKind, len(l.GetKinds()))
+		for i, k := range l.GetKinds() {
+			out[i] = keyOf(hubKinds, k)
+		}
+		return out
+	}
+	return core.LibraryHubs{Home: list(h.GetHome()), Recommended: list(h.GetRecommended())}
+}
+
+// libraryHubsToProto converts a library's hubs; nil lists stay unset.
+func libraryHubsToProto(h *core.LibraryHubs) *libraryv1.LibraryHubs {
+	list := func(kinds []core.HubKind) *libraryv1.HubList {
+		if kinds == nil {
+			return nil
+		}
+		out := make([]libraryv1.HubKind, len(kinds))
+		for i, k := range kinds {
+			out[i] = hubKinds[k]
+		}
+		return libraryv1.HubList_builder{Kinds: out}.Build()
+	}
+	return libraryv1.LibraryHubs_builder{Home: list(h.Home), Recommended: list(h.Recommended)}.Build()
 }

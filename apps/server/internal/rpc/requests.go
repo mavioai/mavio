@@ -490,25 +490,29 @@ func (s *DiscoverService) Discover(ctx context.Context, req *acquisitionv1.Disco
 	}
 	out := make([]*acquisitionv1.DiscoveredTitle, len(page.Titles))
 	for i, d := range page.Titles {
-		t := d.Title
-		b := acquisitionv1.DiscoveredTitle_builder{
-			MediaKind: new(keyOf(acquisitionKinds, d.Kind)), Name: new(t.GetName()), OriginalTitle: new(t.GetOriginalTitle()),
-			OriginalLanguage: new(t.GetOriginalLanguage()), Overview: new(t.GetOverview()),
-			PremiereDate: new(t.GetPremiereDate()), Year: new(t.GetYear()), ExternalIds: t.GetExternalIds(),
-			Genres: t.GetGenres(), PosterUrl: new(t.GetPosterUrl()), BackdropUrl: new(t.GetBackdropUrl()),
-			CommunityRating: new(t.GetCommunityRating()), VoteCount: new(t.GetVoteCount()), Popularity: new(t.GetPopularity()),
-			Status: new(mediaStatuses[d.Status]), ItemId: optionalID(d.ItemID), RequestId: optionalID(d.RequestID),
-			Requestable: new(d.Requestable),
-		}
-		if d.RequestStatus != "" {
-			b.RequestStatus = new(requestStatuses[d.RequestStatus])
-		}
-		out[i] = b.Build()
+		out[i] = discoveredTitleToProto(&d)
 	}
 	return acquisitionv1.DiscoverResponse_builder{
 		Titles: out, Page: new(int32(page.Page)), TotalPages: new(int32(page.TotalPages)),
 		TotalResults: new(int32(page.TotalResults)),
 	}.Build(), nil
+}
+
+func discoveredTitleToProto(d *requests.DiscoveredTitle) *acquisitionv1.DiscoveredTitle {
+	t := d.Title
+	b := acquisitionv1.DiscoveredTitle_builder{
+		MediaKind: new(keyOf(acquisitionKinds, d.Kind)), Name: new(t.GetName()), OriginalTitle: new(t.GetOriginalTitle()),
+		OriginalLanguage: new(t.GetOriginalLanguage()), Overview: new(t.GetOverview()),
+		PremiereDate: new(t.GetPremiereDate()), Year: new(t.GetYear()), ExternalIds: t.GetExternalIds(),
+		Genres: t.GetGenres(), PosterUrl: new(t.GetPosterUrl()), BackdropUrl: new(t.GetBackdropUrl()),
+		CommunityRating: new(t.GetCommunityRating()), VoteCount: new(t.GetVoteCount()), Popularity: new(t.GetPopularity()),
+		Status: new(mediaStatuses[d.Status]), ItemId: optionalID(d.ItemID), RequestId: optionalID(d.RequestID),
+		Requestable: new(d.Requestable),
+	}
+	if d.RequestStatus != "" {
+		b.RequestStatus = new(requestStatuses[d.RequestStatus])
+	}
+	return b.Build()
 }
 
 // ListFilterValues lists the values a filter of a catalog takes.

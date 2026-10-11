@@ -43,6 +43,8 @@ const (
 	FieldProviderOrder = "provider_order"
 	// FieldVirtualEpisodes holds the string denoting the virtual_episodes field in the database.
 	FieldVirtualEpisodes = "virtual_episodes"
+	// FieldHubs holds the string denoting the hubs field in the database.
+	FieldHubs = "hubs"
 	// FieldScanGeneration holds the string denoting the scan_generation field in the database.
 	FieldScanGeneration = "scan_generation"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -88,6 +90,7 @@ var Columns = []string{
 	FieldDownloadLyrics,
 	FieldProviderOrder,
 	FieldVirtualEpisodes,
+	FieldHubs,
 	FieldScanGeneration,
 	FieldCreatedAt,
 	FieldUpdatedAt,

@@ -198,7 +198,7 @@ Every client has the same screens with the same names, reached the same way:
 
 #### 6.3.1 Home
 Home is a column of hubs, after Plex's: rows of items, each a reason to watch something.
-* **Hubs**: Continue Watching first, then for each pinned library its hubs — Recently Added, Recently Released, Recently Aired (episodes), Top Rated, Top Unplayed, Start Watching (series not begun), Rediscover (played long ago, or series left with episodes unplayed), Because You Watched, More in a genre, Starring, Directed by, the collections an administrator promoted, and the requests that became available — and Trending, the titles discovery offers that no server has, to request.
+* **Hubs**: Continue Watching and the requests that became available first, then for each pinned library its hubs — Recently Added, Recently Released, Recently Aired (episodes), Top Rated, Top Unplayed, Start Watching (series not begun), Rediscover (played long ago), Because You Watched, Because You Like, More in a genre, Starring, Directed by, and the collections an administrator promoted — and Trending, the titles discovery offers that no server has, to request.
 * **Who chooses**: administrators choose for each library which hubs appear on its Recommended tab and which on Home; each user pins and orders libraries, which orders their hubs, and hides hubs. Continue Watching cannot be hidden.
 * **Rotation**: the hubs seeded by an item, a genre or a person (Because You Watched, More in, Starring, Directed by) draw their seeds from what the user played recently, chosen anew each day, so that Home changes from day to day and stays put during a day.
 * **Library tabs**: a library opens on its Recommended tab, its hubs, beside the grid of all its items.

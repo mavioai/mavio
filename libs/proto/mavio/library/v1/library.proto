@@ -75,6 +75,8 @@ message Library {
   ProviderOrder provider_order = 16;
   // The episodes a series lacks that refreshes add to it as virtual items.
   VirtualEpisodes virtual_episodes = 17;
+  // The hubs of the library on Home and on its Recommended tab.
+  LibraryHubs hubs = 18;
 }
 
 // VirtualEpisodes configures which episodes refreshes list as virtual
@@ -92,6 +94,62 @@ message VirtualEpisodes {
   int32 grace_days = 4 [(buf.validate.field).int32 = {
     gte: 0
     lte: 3650
+  }];
+}
+
+// HubKind is a kind of hub: a row of items on Home or on a library's
+// Recommended tab, each a reason to watch something.
+enum HubKind {
+  HUB_KIND_UNSPECIFIED = 0;
+  // The items being watched and the next episodes, by last activity.
+  // On Home it spans the libraries.
+  HUB_KIND_CONTINUE_WATCHING = 1;
+  HUB_KIND_RECENTLY_ADDED = 2;
+  // Items by release date.
+  HUB_KIND_RECENTLY_RELEASED = 3;
+  // Episodes by air date.
+  HUB_KIND_RECENTLY_AIRED = 4;
+  HUB_KIND_TOP_RATED = 5;
+  // The best rated items the user has not played.
+  HUB_KIND_TOP_UNPLAYED = 6;
+  // The series the user has not begun.
+  HUB_KIND_START_WATCHING = 7;
+  // What the user played long ago: items last played over a year ago,
+  // series last watched over half a year ago.
+  HUB_KIND_REDISCOVER = 8;
+  // The seeded hubs: items like one the user played lately or likes, and
+  // items of a genre, actor or director of what they played lately.
+  HUB_KIND_BECAUSE_YOU_WATCHED = 9;
+  HUB_KIND_BECAUSE_YOU_LIKE = 10;
+  HUB_KIND_MORE_IN_GENRE = 11;
+  HUB_KIND_STARRING = 12;
+  HUB_KIND_DIRECTED_BY = 13;
+  // The items the user requested that became available; Home only.
+  HUB_KIND_AVAILABLE_REQUESTS = 14;
+  // The trending titles of discovery the server lacks; Home only.
+  HUB_KIND_TRENDING = 15;
+}
+
+// LibraryHubs are the hubs an administrator chose for a library, in
+// order. An unset list keeps the defaults of the library's kind; an empty
+// one shows none. Continue watching on Home spans the libraries and is not
+// among a library's Home hubs.
+message LibraryHubs {
+  HubList home = 1;
+  HubList recommended = 2;
+}
+
+// HubList lists hub kinds in order.
+message HubList {
+  repeated HubKind kinds = 1 [(buf.validate.field).repeated = {
+    max_items: 32
+    unique: true
+    items: {
+      enum: {
+        defined_only: true
+        not_in: [0]
+      }
+    }
   }];
 }
 
@@ -155,6 +213,7 @@ message LibrarySpec {
   bool download_lyrics = 12;
   ProviderOrder provider_order = 13;
   VirtualEpisodes virtual_episodes = 14;
+  LibraryHubs hubs = 15;
 }
 
 message ListLibrariesRequest {}

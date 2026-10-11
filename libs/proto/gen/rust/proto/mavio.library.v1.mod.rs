@@ -2,8 +2,8 @@
 
 include!("mavio.library.v1.media.rs");
 include!("mavio.library.v1.item.rs");
-include!("mavio.library.v1.collection.rs");
 include!("mavio.library.v1.library.rs");
+include!("mavio.library.v1.collection.rs");
 include!("mavio.library.v1.metadata.rs");
 include!("mavio.library.v1.playlist.rs");
 #[allow(
@@ -25,8 +25,8 @@ pub mod __buffa {
         use super::*;
         include!("mavio.library.v1.media.__view.rs");
         include!("mavio.library.v1.item.__view.rs");
-        include!("mavio.library.v1.collection.__view.rs");
         include!("mavio.library.v1.library.__view.rs");
+        include!("mavio.library.v1.collection.__view.rs");
         include!("mavio.library.v1.metadata.__view.rs");
         include!("mavio.library.v1.playlist.__view.rs");
         pub mod oneof {
@@ -202,46 +202,6 @@ pub use self::__buffa::view::ListNextUpResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListNextUpResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::CreateCollectionRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::CreateCollectionRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::CreateCollectionResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::CreateCollectionResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::UpdateCollectionRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::UpdateCollectionRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::UpdateCollectionResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::UpdateCollectionResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::DeleteCollectionRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::DeleteCollectionRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::DeleteCollectionResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::DeleteCollectionResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::AddToCollectionRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::AddToCollectionRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::AddToCollectionResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::AddToCollectionResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::RemoveFromCollectionRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::RemoveFromCollectionRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::RemoveFromCollectionResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::RemoveFromCollectionResponseOwnedView;
-#[doc(inline)]
 pub use self::__buffa::view::LibraryView;
 #[doc(inline)]
 pub use self::__buffa::view::LibraryOwnedView;
@@ -249,6 +209,14 @@ pub use self::__buffa::view::LibraryOwnedView;
 pub use self::__buffa::view::VirtualEpisodesView;
 #[doc(inline)]
 pub use self::__buffa::view::VirtualEpisodesOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LibraryHubsView;
+#[doc(inline)]
+pub use self::__buffa::view::LibraryHubsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::HubListView;
+#[doc(inline)]
+pub use self::__buffa::view::HubListOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ProviderOrderView;
 #[doc(inline)]
@@ -309,6 +277,46 @@ pub use self::__buffa::view::ScanLibraryRequestOwnedView;
 pub use self::__buffa::view::ScanLibraryResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ScanLibraryResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateCollectionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateCollectionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateCollectionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateCollectionResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateCollectionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateCollectionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateCollectionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateCollectionResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteCollectionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteCollectionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteCollectionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteCollectionResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AddToCollectionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AddToCollectionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AddToCollectionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AddToCollectionResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFromCollectionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFromCollectionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFromCollectionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFromCollectionResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ItemMetadataView;
 #[doc(inline)]

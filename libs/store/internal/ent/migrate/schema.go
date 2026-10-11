@@ -784,6 +784,7 @@ var (
 		{Name: "download_lyrics", Type: field.TypeBool, Default: false},
 		{Name: "provider_order", Type: field.TypeJSON, Nullable: true},
 		{Name: "virtual_episodes", Type: field.TypeJSON, Nullable: true},
+		{Name: "hubs", Type: field.TypeJSON, Nullable: true},
 		{Name: "scan_generation", Type: field.TypeInt64, Default: 0},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},

@@ -536,8 +536,42 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 		if q.Resumable {
 			ps = append(ps, item.HasUserDataWith(mine, userdata.PositionGT(0)))
 		}
+		if q.Started != nil {
+			started := lastPlayed(q.UserID, " IS NOT NULL")
+			if !*q.Started {
+				started = item.Not(started)
+			}
+			ps = append(ps, started)
+		}
+		if !q.PlayedAfter.IsZero() {
+			ps = append(ps, lastPlayed(q.UserID, " > ", q.PlayedAfter))
+		}
+		if !q.PlayedBefore.IsZero() {
+			ps = append(ps, lastPlayed(q.UserID, " < ", q.PlayedBefore))
+		}
 	}
 	return ps
+}
+
+// lastPlayed compares the user's last play of an item, or of the episodes
+// of a series or season, with cond and its argument, if any.
+func lastPlayed(user core.ID, cond string, arg ...any) predicate.Item {
+	return predicate.Item(func(s *entsql.Selector) {
+		id, kind := s.C(item.FieldID), s.C(item.FieldKind)
+		s.Where(entsql.P(func(b *entsql.Builder) {
+			b.WriteString("(CASE WHEN " + kind + " IN ('" + string(core.KindSeries) + "', '" + string(core.KindSeason) + "')" +
+				" THEN (SELECT MAX(ud.last_played_at) FROM user_data ud JOIN items e ON e.id = ud.item_id WHERE ud.user_id = ").
+				Arg(user).
+				WriteString(" AND e.kind = '" + string(core.KindEpisode) + "' AND (e.parent_id = " + id +
+					" OR e.parent_id IN (SELECT p.id FROM items p WHERE p.parent_id = " + id + ")))" +
+					" ELSE (SELECT ud.last_played_at FROM user_data ud WHERE ud.user_id = ").
+				Arg(user).
+				WriteString(" AND ud.item_id = " + id + ") END)" + cond)
+			for _, a := range arg {
+				b.Arg(a)
+			}
+		}))
+	})
 }
 
 // descendantsOf matches all items below parent, using a recursive CTE that

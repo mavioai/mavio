@@ -246,6 +246,26 @@ func (_u *LibraryUpdate) ClearVirtualEpisodes() *LibraryUpdate {
 	return _u
 }
 
+// SetHubs sets the "hubs" field.
+func (_u *LibraryUpdate) SetHubs(v core.LibraryHubs) *LibraryUpdate {
+	_u.mutation.SetHubs(v)
+	return _u
+}
+
+// SetNillableHubs sets the "hubs" field if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableHubs(v *core.LibraryHubs) *LibraryUpdate {
+	if v != nil {
+		_u.SetHubs(*v)
+	}
+	return _u
+}
+
+// ClearHubs clears the value of the "hubs" field.
+func (_u *LibraryUpdate) ClearHubs() *LibraryUpdate {
+	_u.mutation.ClearHubs()
+	return _u
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_u *LibraryUpdate) SetScanGeneration(v int64) *LibraryUpdate {
 	_u.mutation.ResetScanGeneration()
@@ -469,6 +489,12 @@ func (_u *LibraryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.VirtualEpisodesCleared() {
 		_spec.ClearField(library.FieldVirtualEpisodes, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Hubs(); ok {
+		_spec.SetField(library.FieldHubs, field.TypeJSON, value)
+	}
+	if _u.mutation.HubsCleared() {
+		_spec.ClearField(library.FieldHubs, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
@@ -804,6 +830,26 @@ func (_u *LibraryUpdateOne) ClearVirtualEpisodes() *LibraryUpdateOne {
 	return _u
 }
 
+// SetHubs sets the "hubs" field.
+func (_u *LibraryUpdateOne) SetHubs(v core.LibraryHubs) *LibraryUpdateOne {
+	_u.mutation.SetHubs(v)
+	return _u
+}
+
+// SetNillableHubs sets the "hubs" field if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableHubs(v *core.LibraryHubs) *LibraryUpdateOne {
+	if v != nil {
+		_u.SetHubs(*v)
+	}
+	return _u
+}
+
+// ClearHubs clears the value of the "hubs" field.
+func (_u *LibraryUpdateOne) ClearHubs() *LibraryUpdateOne {
+	_u.mutation.ClearHubs()
+	return _u
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_u *LibraryUpdateOne) SetScanGeneration(v int64) *LibraryUpdateOne {
 	_u.mutation.ResetScanGeneration()
@@ -1057,6 +1103,12 @@ func (_u *LibraryUpdateOne) sqlSave(ctx context.Context) (_node *Library, err er
 	}
 	if _u.mutation.VirtualEpisodesCleared() {
 		_spec.ClearField(library.FieldVirtualEpisodes, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Hubs(); ok {
+		_spec.SetField(library.FieldHubs, field.TypeJSON, value)
+	}
+	if _u.mutation.HubsCleared() {
+		_spec.ClearField(library.FieldHubs, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)

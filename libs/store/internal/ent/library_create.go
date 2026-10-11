@@ -198,6 +198,20 @@ func (_c *LibraryCreate) SetNillableVirtualEpisodes(v *core.VirtualEpisodes) *Li
 	return _c
 }
 
+// SetHubs sets the "hubs" field.
+func (_c *LibraryCreate) SetHubs(v core.LibraryHubs) *LibraryCreate {
+	_c.mutation.SetHubs(v)
+	return _c
+}
+
+// SetNillableHubs sets the "hubs" field if the given value is not nil.
+func (_c *LibraryCreate) SetNillableHubs(v *core.LibraryHubs) *LibraryCreate {
+	if v != nil {
+		_c.SetHubs(*v)
+	}
+	return _c
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (_c *LibraryCreate) SetScanGeneration(v int64) *LibraryCreate {
 	_c.mutation.SetScanGeneration(v)
@@ -517,6 +531,10 @@ func (_c *LibraryCreate) createSpec() (*Library, *sqlgraph.CreateSpec) {
 		_spec.SetField(library.FieldVirtualEpisodes, field.TypeJSON, value)
 		_node.VirtualEpisodes = value
 	}
+	if value, ok := _c.mutation.Hubs(); ok {
+		_spec.SetField(library.FieldHubs, field.TypeJSON, value)
+		_node.Hubs = value
+	}
 	if value, ok := _c.mutation.ScanGeneration(); ok {
 		_spec.SetField(library.FieldScanGeneration, field.TypeInt64, value)
 		_node.ScanGeneration = value
@@ -796,6 +814,24 @@ func (u *LibraryUpsert) UpdateVirtualEpisodes() *LibraryUpsert {
 // ClearVirtualEpisodes clears the value of the "virtual_episodes" field.
 func (u *LibraryUpsert) ClearVirtualEpisodes() *LibraryUpsert {
 	u.SetNull(library.FieldVirtualEpisodes)
+	return u
+}
+
+// SetHubs sets the "hubs" field.
+func (u *LibraryUpsert) SetHubs(v core.LibraryHubs) *LibraryUpsert {
+	u.Set(library.FieldHubs, v)
+	return u
+}
+
+// UpdateHubs sets the "hubs" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateHubs() *LibraryUpsert {
+	u.SetExcluded(library.FieldHubs)
+	return u
+}
+
+// ClearHubs clears the value of the "hubs" field.
+func (u *LibraryUpsert) ClearHubs() *LibraryUpsert {
+	u.SetNull(library.FieldHubs)
 	return u
 }
 
@@ -1094,6 +1130,27 @@ func (u *LibraryUpsertOne) UpdateVirtualEpisodes() *LibraryUpsertOne {
 func (u *LibraryUpsertOne) ClearVirtualEpisodes() *LibraryUpsertOne {
 	return u.Update(func(s *LibraryUpsert) {
 		s.ClearVirtualEpisodes()
+	})
+}
+
+// SetHubs sets the "hubs" field.
+func (u *LibraryUpsertOne) SetHubs(v core.LibraryHubs) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetHubs(v)
+	})
+}
+
+// UpdateHubs sets the "hubs" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateHubs() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateHubs()
+	})
+}
+
+// ClearHubs clears the value of the "hubs" field.
+func (u *LibraryUpsertOne) ClearHubs() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.ClearHubs()
 	})
 }
 
@@ -1564,6 +1621,27 @@ func (u *LibraryUpsertBulk) UpdateVirtualEpisodes() *LibraryUpsertBulk {
 func (u *LibraryUpsertBulk) ClearVirtualEpisodes() *LibraryUpsertBulk {
 	return u.Update(func(s *LibraryUpsert) {
 		s.ClearVirtualEpisodes()
+	})
+}
+
+// SetHubs sets the "hubs" field.
+func (u *LibraryUpsertBulk) SetHubs(v core.LibraryHubs) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetHubs(v)
+	})
+}
+
+// UpdateHubs sets the "hubs" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateHubs() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateHubs()
+	})
+}
+
+// ClearHubs clears the value of the "hubs" field.
+func (u *LibraryUpsertBulk) ClearHubs() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.ClearHubs()
 	})
 }
 

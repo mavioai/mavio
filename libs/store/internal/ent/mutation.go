@@ -20408,6 +20408,7 @@ type LibraryMutation struct {
 	download_lyrics        *bool
 	provider_order         *core.ProviderOrder
 	virtual_episodes       *core.VirtualEpisodes
+	hubs                   *core.LibraryHubs
 	scan_generation        *int64
 	addscan_generation     *int64
 	created_at             *time.Time
@@ -21093,6 +21094,55 @@ func (m *LibraryMutation) ResetVirtualEpisodes() {
 	delete(m.clearedFields, library.FieldVirtualEpisodes)
 }
 
+// SetHubs sets the "hubs" field.
+func (m *LibraryMutation) SetHubs(ch core.LibraryHubs) {
+	m.hubs = &ch
+}
+
+// Hubs returns the value of the "hubs" field in the mutation.
+func (m *LibraryMutation) Hubs() (r core.LibraryHubs, exists bool) {
+	v := m.hubs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHubs returns the old "hubs" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldHubs(ctx context.Context) (v core.LibraryHubs, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHubs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHubs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHubs: %w", err)
+	}
+	return oldValue.Hubs, nil
+}
+
+// ClearHubs clears the value of the "hubs" field.
+func (m *LibraryMutation) ClearHubs() {
+	m.hubs = nil
+	m.clearedFields[library.FieldHubs] = struct{}{}
+}
+
+// HubsCleared returns if the "hubs" field was cleared in this mutation.
+func (m *LibraryMutation) HubsCleared() bool {
+	_, ok := m.clearedFields[library.FieldHubs]
+	return ok
+}
+
+// ResetHubs resets all changes to the "hubs" field.
+func (m *LibraryMutation) ResetHubs() {
+	m.hubs = nil
+	delete(m.clearedFields, library.FieldHubs)
+}
+
 // SetScanGeneration sets the "scan_generation" field.
 func (m *LibraryMutation) SetScanGeneration(i int64) {
 	m.scan_generation = &i
@@ -21363,7 +21413,7 @@ func (m *LibraryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LibraryMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 18)
 	if m.name != nil {
 		fields = append(fields, library.FieldName)
 	}
@@ -21405,6 +21455,9 @@ func (m *LibraryMutation) Fields() []string {
 	}
 	if m.virtual_episodes != nil {
 		fields = append(fields, library.FieldVirtualEpisodes)
+	}
+	if m.hubs != nil {
+		fields = append(fields, library.FieldHubs)
 	}
 	if m.scan_generation != nil {
 		fields = append(fields, library.FieldScanGeneration)
@@ -21451,6 +21504,8 @@ func (m *LibraryMutation) Field(name string) (ent.Value, bool) {
 		return m.ProviderOrder()
 	case library.FieldVirtualEpisodes:
 		return m.VirtualEpisodes()
+	case library.FieldHubs:
+		return m.Hubs()
 	case library.FieldScanGeneration:
 		return m.ScanGeneration()
 	case library.FieldCreatedAt:
@@ -21494,6 +21549,8 @@ func (m *LibraryMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldProviderOrder(ctx)
 	case library.FieldVirtualEpisodes:
 		return m.OldVirtualEpisodes(ctx)
+	case library.FieldHubs:
+		return m.OldHubs(ctx)
 	case library.FieldScanGeneration:
 		return m.OldScanGeneration(ctx)
 	case library.FieldCreatedAt:
@@ -21607,6 +21664,13 @@ func (m *LibraryMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetVirtualEpisodes(v)
 		return nil
+	case library.FieldHubs:
+		v, ok := value.(core.LibraryHubs)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHubs(v)
+		return nil
 	case library.FieldScanGeneration:
 		v, ok := value.(int64)
 		if !ok {
@@ -21691,6 +21755,9 @@ func (m *LibraryMutation) ClearedFields() []string {
 	if m.FieldCleared(library.FieldVirtualEpisodes) {
 		fields = append(fields, library.FieldVirtualEpisodes)
 	}
+	if m.FieldCleared(library.FieldHubs) {
+		fields = append(fields, library.FieldHubs)
+	}
 	return fields
 }
 
@@ -21710,6 +21777,9 @@ func (m *LibraryMutation) ClearField(name string) error {
 		return nil
 	case library.FieldVirtualEpisodes:
 		m.ClearVirtualEpisodes()
+		return nil
+	case library.FieldHubs:
+		m.ClearHubs()
 		return nil
 	}
 	return fmt.Errorf("unknown Library nullable field %s", name)
@@ -21760,6 +21830,9 @@ func (m *LibraryMutation) ResetField(name string) error {
 		return nil
 	case library.FieldVirtualEpisodes:
 		m.ResetVirtualEpisodes()
+		return nil
+	case library.FieldHubs:
+		m.ResetHubs()
 		return nil
 	case library.FieldScanGeneration:
 		m.ResetScanGeneration()

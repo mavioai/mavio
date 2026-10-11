@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/library/v1/library.proto.
  */
 export const file_mavio_library_v1_library: GenFile = /*@__PURE__*/
-  fileDesc("Ch5tYXZpby9saWJyYXJ5L3YxL2xpYnJhcnkucHJvdG8SEG1hdmlvLmxpYnJhcnkudjEixAQKB0xpYnJhcnkSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIrCgRraW5kGAMgASgOMh0ubWF2aW8ubGlicmFyeS52MS5MaWJyYXJ5S2luZBINCgVwYXRocxgEIAMoCRIwCg1zY2FuX2ludGVydmFsGAUgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEhoKEnByZWZlcnJlZF9sYW5ndWFnZRgGIAEoCRIYChBtZXRhZGF0YV9jb3VudHJ5GAcgASgJEi8KC2NyZWF0ZV90aW1lGAggASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIvCgt1cGRhdGVfdGltZRgJIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASGwoTc2F2ZV9sb2NhbF9tZXRhZGF0YRgKIAEoCBIYChBhdXRvX2NvbGxlY3Rpb25zGAsgASgIEhkKEWV4dHJhY3RfdHJpY2twbGF5GAwgASgIEh4KFmV4dHJhY3RfY2hhcHRlcl9pbWFnZXMYDSABKAgSGAoQYW5hbHl6ZV9sb3VkbmVzcxgOIAEoCBIXCg9kb3dubG9hZF9seXJpY3MYDyABKAgSNwoOcHJvdmlkZXJfb3JkZXIYECABKAsyHy5tYXZpby5saWJyYXJ5LnYxLlByb3ZpZGVyT3JkZXISOwoQdmlydHVhbF9lcGlzb2RlcxgRIAEoCzIhLm1hdmlvLmxpYnJhcnkudjEuVmlydHVhbEVwaXNvZGVzImUKD1ZpcnR1YWxFcGlzb2RlcxIPCgdtaXNzaW5nGAEgASgIEg8KB3VuYWlyZWQYAiABKAgSEAoIc3BlY2lhbHMYAyABKAgSHgoKZ3JhY2VfZGF5cxgEIAEoBUIKukgHGgUYwhwoACK4AgoNUHJvdmlkZXJPcmRlchIwCghtZXRhZGF0YRgBIAEoCzIeLm1hdmlvLmxpYnJhcnkudjEuUHJvdmlkZXJMaXN0Ei4KBmltYWdlcxgCIAEoCzIeLm1hdmlvLmxpYnJhcnkudjEuUHJvdmlkZXJMaXN0EjEKCXN1YnRpdGxlcxgDIAEoCzIeLm1hdmlvLmxpYnJhcnkudjEuUHJvdmlkZXJMaXN0Ei4KBmx5cmljcxgEIAEoCzIeLm1hdmlvLmxpYnJhcnkudjEuUHJvdmlkZXJMaXN0EjAKCHNlZ21lbnRzGAUgASgLMh4ubWF2aW8ubGlicmFyeS52MS5Qcm92aWRlckxpc3QSMAoIZXBpc29kZXMYBiABKAsyHi5tYXZpby5saWJyYXJ5LnYxLlByb3ZpZGVyTGlzdCI3CgxQcm92aWRlckxpc3QSJwoKcGx1Z2luX2lkcxgBIAMoCUITukgQkgENEEAYASIHcgUQARiAASK+BAoLTGlicmFyeVNwZWMSGwoEbmFtZRgBIAEoCUINukgKyAEBcgUQARjIARI6CgRraW5kGAIgASgOMh0ubWF2aW8ubGlicmFyeS52MS5MaWJyYXJ5S2luZEINukgKyAEBggEEEAEgABIdCgVwYXRocxgDIAMoCUIOukgLkgEICAEiBHICEAESOgoNc2Nhbl9pbnRlcnZhbBgEIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIIukgFqgECMgASMAoScHJlZmVycmVkX2xhbmd1YWdlGAUgASgJQhS6SBFyDzINXihbYS16XXsyfSk/JBIuChBtZXRhZGF0YV9jb3VudHJ5GAYgASgJQhS6SBFyDzINXihbQS1aXXsyfSk/JBIbChNzYXZlX2xvY2FsX21ldGFkYXRhGAcgASgIEhgKEGF1dG9fY29sbGVjdGlvbnMYCCABKAgSGQoRZXh0cmFjdF90cmlja3BsYXkYCSABKAgSHgoWZXh0cmFjdF9jaGFwdGVyX2ltYWdlcxgKIAEoCBIYChBhbmFseXplX2xvdWRuZXNzGAsgASgIEhcKD2Rvd25sb2FkX2x5cmljcxgMIAEoCBI3Cg5wcm92aWRlcl9vcmRlchgNIAEoCzIfLm1hdmlvLmxpYnJhcnkudjEuUHJvdmlkZXJPcmRlchI7ChB2aXJ0dWFsX2VwaXNvZGVzGA4gASgLMiEubWF2aW8ubGlicmFyeS52MS5WaXJ0dWFsRXBpc29kZXMiFgoUTGlzdExpYnJhcmllc1JlcXVlc3QiRQoVTGlzdExpYnJhcmllc1Jlc3BvbnNlEiwKCWxpYnJhcmllcxgBIAMoCzIZLm1hdmlvLmxpYnJhcnkudjEuTGlicmFyeSIsChFHZXRMaWJyYXJ5UmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQEiQAoSR2V0TGlicmFyeVJlc3BvbnNlEioKB2xpYnJhcnkYASABKAsyGS5tYXZpby5saWJyYXJ5LnYxLkxpYnJhcnkiSwoUQ3JlYXRlTGlicmFyeVJlcXVlc3QSMwoEc3BlYxgBIAEoCzIdLm1hdmlvLmxpYnJhcnkudjEuTGlicmFyeVNwZWNCBrpIA8gBASJDChVDcmVhdGVMaWJyYXJ5UmVzcG9uc2USKgoHbGlicmFyeRgBIAEoCzIZLm1hdmlvLmxpYnJhcnkudjEuTGlicmFyeSJkChRVcGRhdGVMaWJyYXJ5UmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQESMwoEc3BlYxgCIAEoCzIdLm1hdmlvLmxpYnJhcnkudjEuTGlicmFyeVNwZWNCBrpIA8gBASJDChVVcGRhdGVMaWJyYXJ5UmVzcG9uc2USKgoHbGlicmFyeRgBIAEoCzIZLm1hdmlvLmxpYnJhcnkudjEuTGlicmFyeSIvChREZWxldGVMaWJyYXJ5UmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQEiFwoVRGVsZXRlTGlicmFyeVJlc3BvbnNlIi0KElNjYW5MaWJyYXJ5UmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQEiNwoTU2NhbkxpYnJhcnlSZXNwb25zZRIOCgZqb2JfaWQYASABKAkSEAoIZW5xdWV1ZWQYAiABKAgqtAIKC0xpYnJhcnlLaW5kEhwKGExJQlJBUllfS0lORF9VTlNQRUNJRklFRBAAEhcKE0xJQlJBUllfS0lORF9NT1ZJRVMQARIWChJMSUJSQVJZX0tJTkRfU0hPV1MQAhIWChJMSUJSQVJZX0tJTkRfTVVTSUMQAxIdChlMSUJSQVJZX0tJTkRfTVVTSUNfVklERU9TEAQSHAoYTElCUkFSWV9LSU5EX0hPTUVfVklERU9TEAUSFgoSTElCUkFSWV9LSU5EX0JPT0tTEAYSFwoTTElCUkFSWV9LSU5EX1BIT1RPUxAHEhYKEkxJQlJBUllfS0lORF9NSVhFRBAIEhwKGExJQlJBUllfS0lORF9DT0xMRUNUSU9OUxAJEhoKFkxJQlJBUllfS0lORF9QTEFZTElTVFMQCjLXBAoOTGlicmFyeVNlcnZpY2USZQoNTGlzdExpYnJhcmllcxImLm1hdmlvLmxpYnJhcnkudjEuTGlzdExpYnJhcmllc1JlcXVlc3QaJy5tYXZpby5saWJyYXJ5LnYxLkxpc3RMaWJyYXJpZXNSZXNwb25zZSIDkAIBElwKCkdldExpYnJhcnkSIy5tYXZpby5saWJyYXJ5LnYxLkdldExpYnJhcnlSZXF1ZXN0GiQubWF2aW8ubGlicmFyeS52MS5HZXRMaWJyYXJ5UmVzcG9uc2UiA5ACARJgCg1DcmVhdGVMaWJyYXJ5EiYubWF2aW8ubGlicmFyeS52MS5DcmVhdGVMaWJyYXJ5UmVxdWVzdBonLm1hdmlvLmxpYnJhcnkudjEuQ3JlYXRlTGlicmFyeVJlc3BvbnNlEmAKDVVwZGF0ZUxpYnJhcnkSJi5tYXZpby5saWJyYXJ5LnYxLlVwZGF0ZUxpYnJhcnlSZXF1ZXN0GicubWF2aW8ubGlicmFyeS52MS5VcGRhdGVMaWJyYXJ5UmVzcG9uc2USYAoNRGVsZXRlTGlicmFyeRImLm1hdmlvLmxpYnJhcnkudjEuRGVsZXRlTGlicmFyeVJlcXVlc3QaJy5tYXZpby5saWJyYXJ5LnYxLkRlbGV0ZUxpYnJhcnlSZXNwb25zZRJaCgtTY2FuTGlicmFyeRIkLm1hdmlvLmxpYnJhcnkudjEuU2NhbkxpYnJhcnlSZXF1ZXN0GiUubWF2aW8ubGlicmFyeS52MS5TY2FuTGlicmFyeVJlc3BvbnNlQs0BChRjb20ubWF2aW8ubGlicmFyeS52MUIMTGlicmFyeVByb3RvUAFaRWdpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9saWJyYXJ5L3YxO2xpYnJhcnl2MaICA01MWKoCEE1hdmlvLkxpYnJhcnkuVjHKAhBNYXZpb1xMaWJyYXJ5XFYx4gIcTWF2aW9cTGlicmFyeVxWMVxHUEJNZXRhZGF0YeoCEk1hdmlvOjpMaWJyYXJ5OjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp]);
+  fileDesc("Ch5tYXZpby9saWJyYXJ5L3YxL2xpYnJhcnkucHJvdG8SEG1hdmlvLmxpYnJhcnkudjEi8QQKB0xpYnJhcnkSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIrCgRraW5kGAMgASgOMh0ubWF2aW8ubGlicmFyeS52MS5MaWJyYXJ5S2luZBINCgVwYXRocxgEIAMoCRIwCg1zY2FuX2ludGVydmFsGAUgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEhoKEnByZWZlcnJlZF9sYW5ndWFnZRgGIAEoCRIYChBtZXRhZGF0YV9jb3VudHJ5GAcgASgJEi8KC2NyZWF0ZV90aW1lGAggASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIvCgt1cGRhdGVfdGltZRgJIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASGwoTc2F2ZV9sb2NhbF9tZXRhZGF0YRgKIAEoCBIYChBhdXRvX2NvbGxlY3Rpb25zGAsgASgIEhkKEWV4dHJhY3RfdHJpY2twbGF5GAwgASgIEh4KFmV4dHJhY3RfY2hhcHRlcl9pbWFnZXMYDSABKAgSGAoQYW5hbHl6ZV9sb3VkbmVzcxgOIAEoCBIXCg9kb3dubG9hZF9seXJpY3MYDyABKAgSNwoOcHJvdmlkZXJfb3JkZXIYECABKAsyHy5tYXZpby5saWJyYXJ5LnYxLlByb3ZpZGVyT3JkZXISOwoQdmlydHVhbF9lcGlzb2RlcxgRIAEoCzIhLm1hdmlvLmxpYnJhcnkudjEuVmlydHVhbEVwaXNvZGVzEisKBGh1YnMYEiABKAsyHS5tYXZpby5saWJyYXJ5LnYxLkxpYnJhcnlIdWJzImUKD1ZpcnR1YWxFcGlzb2RlcxIPCgdtaXNzaW5nGAEgASgIEg8KB3VuYWlyZWQYAiABKAgSEAoIc3BlY2lhbHMYAyABKAgSHgoKZ3JhY2VfZGF5cxgEIAEoBUIKukgHGgUYwhwoACJmCgtMaWJyYXJ5SHVicxInCgRob21lGAEgASgLMhkubWF2aW8ubGlicmFyeS52MS5IdWJMaXN0Ei4KC3JlY29tbWVuZGVkGAIgASgLMhkubWF2aW8ubGlicmFyeS52MS5IdWJMaXN0IkgKB0h1Ykxpc3QSPQoFa2luZHMYASADKA4yGS5tYXZpby5saWJyYXJ5LnYxLkh1YktpbmRCE7pIEJIBDRAgGAEiB4IBBBABIAAiuAIKDVByb3ZpZGVyT3JkZXISMAoIbWV0YWRhdGEYASABKAsyHi5tYXZpby5saWJyYXJ5LnYxLlByb3ZpZGVyTGlzdBIuCgZpbWFnZXMYAiABKAsyHi5tYXZpby5saWJyYXJ5LnYxLlByb3ZpZGVyTGlzdBIxCglzdWJ0aXRsZXMYAyABKAsyHi5tYXZpby5saWJyYXJ5LnYxLlByb3ZpZGVyTGlzdBIuCgZseXJpY3MYBCABKAsyHi5tYXZpby5saWJyYXJ5LnYxLlByb3ZpZGVyTGlzdBIwCghzZWdtZW50cxgFIAEoCzIeLm1hdmlvLmxpYnJhcnkudjEuUHJvdmlkZXJMaXN0EjAKCGVwaXNvZGVzGAYgASgLMh4ubWF2aW8ubGlicmFyeS52MS5Qcm92aWRlckxpc3QiNwoMUHJvdmlkZXJMaXN0EicKCnBsdWdpbl9pZHMYASADKAlCE7pIEJIBDRBAGAEiB3IFEAEYgAEi6wQKC0xpYnJhcnlTcGVjEhsKBG5hbWUYASABKAlCDbpICsgBAXIFEAEYyAESOgoEa2luZBgCIAEoDjIdLm1hdmlvLmxpYnJhcnkudjEuTGlicmFyeUtpbmRCDbpICsgBAYIBBBABIAASHQoFcGF0aHMYAyADKAlCDrpIC5IBCAgBIgRyAhABEjoKDXNjYW5faW50ZXJ2YWwYBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CCLpIBaoBAjIAEjAKEnByZWZlcnJlZF9sYW5ndWFnZRgFIAEoCUIUukgRcg8yDV4oW2Etel17Mn0pPyQSLgoQbWV0YWRhdGFfY291bnRyeRgGIAEoCUIUukgRcg8yDV4oW0EtWl17Mn0pPyQSGwoTc2F2ZV9sb2NhbF9tZXRhZGF0YRgHIAEoCBIYChBhdXRvX2NvbGxlY3Rpb25zGAggASgIEhkKEWV4dHJhY3RfdHJpY2twbGF5GAkgASgIEh4KFmV4dHJhY3RfY2hhcHRlcl9pbWFnZXMYCiABKAgSGAoQYW5hbHl6ZV9sb3VkbmVzcxgLIAEoCBIXCg9kb3dubG9hZF9seXJpY3MYDCABKAgSNwoOcHJvdmlkZXJfb3JkZXIYDSABKAsyHy5tYXZpby5saWJyYXJ5LnYxLlByb3ZpZGVyT3JkZXISOwoQdmlydHVhbF9lcGlzb2RlcxgOIAEoCzIhLm1hdmlvLmxpYnJhcnkudjEuVmlydHVhbEVwaXNvZGVzEisKBGh1YnMYDyABKAsyHS5tYXZpby5saWJyYXJ5LnYxLkxpYnJhcnlIdWJzIhYKFExpc3RMaWJyYXJpZXNSZXF1ZXN0IkUKFUxpc3RMaWJyYXJpZXNSZXNwb25zZRIsCglsaWJyYXJpZXMYASADKAsyGS5tYXZpby5saWJyYXJ5LnYxLkxpYnJhcnkiLAoRR2V0TGlicmFyeVJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBIkAKEkdldExpYnJhcnlSZXNwb25zZRIqCgdsaWJyYXJ5GAEgASgLMhkubWF2aW8ubGlicmFyeS52MS5MaWJyYXJ5IksKFENyZWF0ZUxpYnJhcnlSZXF1ZXN0EjMKBHNwZWMYASABKAsyHS5tYXZpby5saWJyYXJ5LnYxLkxpYnJhcnlTcGVjQga6SAPIAQEiQwoVQ3JlYXRlTGlicmFyeVJlc3BvbnNlEioKB2xpYnJhcnkYASABKAsyGS5tYXZpby5saWJyYXJ5LnYxLkxpYnJhcnkiZAoUVXBkYXRlTGlicmFyeVJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBEjMKBHNwZWMYAiABKAsyHS5tYXZpby5saWJyYXJ5LnYxLkxpYnJhcnlTcGVjQga6SAPIAQEiQwoVVXBkYXRlTGlicmFyeVJlc3BvbnNlEioKB2xpYnJhcnkYASABKAsyGS5tYXZpby5saWJyYXJ5LnYxLkxpYnJhcnkiLwoURGVsZXRlTGlicmFyeVJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBIhcKFURlbGV0ZUxpYnJhcnlSZXNwb25zZSItChJTY2FuTGlicmFyeVJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBIjcKE1NjYW5MaWJyYXJ5UmVzcG9uc2USDgoGam9iX2lkGAEgASgJEhAKCGVucXVldWVkGAIgASgIKrQCCgtMaWJyYXJ5S2luZBIcChhMSUJSQVJZX0tJTkRfVU5TUEVDSUZJRUQQABIXChNMSUJSQVJZX0tJTkRfTU9WSUVTEAESFgoSTElCUkFSWV9LSU5EX1NIT1dTEAISFgoSTElCUkFSWV9LSU5EX01VU0lDEAMSHQoZTElCUkFSWV9LSU5EX01VU0lDX1ZJREVPUxAEEhwKGExJQlJBUllfS0lORF9IT01FX1ZJREVPUxAFEhYKEkxJQlJBUllfS0lORF9CT09LUxAGEhcKE0xJQlJBUllfS0lORF9QSE9UT1MQBxIWChJMSUJSQVJZX0tJTkRfTUlYRUQQCBIcChhMSUJSQVJZX0tJTkRfQ09MTEVDVElPTlMQCRIaChZMSUJSQVJZX0tJTkRfUExBWUxJU1RTEAoqzAMKB0h1YktpbmQSGAoUSFVCX0tJTkRfVU5TUEVDSUZJRUQQABIeChpIVUJfS0lORF9DT05USU5VRV9XQVRDSElORxABEhsKF0hVQl9LSU5EX1JFQ0VOVExZX0FEREVEEAISHgoaSFVCX0tJTkRfUkVDRU5UTFlfUkVMRUFTRUQQAxIbChdIVUJfS0lORF9SRUNFTlRMWV9BSVJFRBAEEhYKEkhVQl9LSU5EX1RPUF9SQVRFRBAFEhkKFUhVQl9LSU5EX1RPUF9VTlBMQVlFRBAGEhsKF0hVQl9LSU5EX1NUQVJUX1dBVENISU5HEAcSFwoTSFVCX0tJTkRfUkVESVNDT1ZFUhAIEiAKHEhVQl9LSU5EX0JFQ0FVU0VfWU9VX1dBVENIRUQQCRIdChlIVUJfS0lORF9CRUNBVVNFX1lPVV9MSUtFEAoSGgoWSFVCX0tJTkRfTU9SRV9JTl9HRU5SRRALEhUKEUhVQl9LSU5EX1NUQVJSSU5HEAwSGAoUSFVCX0tJTkRfRElSRUNURURfQlkQDRIfChtIVUJfS0lORF9BVkFJTEFCTEVfUkVRVUVTVFMQDhIVChFIVUJfS0lORF9UUkVORElORxAPMtcECg5MaWJyYXJ5U2VydmljZRJlCg1MaXN0TGlicmFyaWVzEiYubWF2aW8ubGlicmFyeS52MS5MaXN0TGlicmFyaWVzUmVxdWVzdBonLm1hdmlvLmxpYnJhcnkudjEuTGlzdExpYnJhcmllc1Jlc3BvbnNlIgOQAgESXAoKR2V0TGlicmFyeRIjLm1hdmlvLmxpYnJhcnkudjEuR2V0TGlicmFyeVJlcXVlc3QaJC5tYXZpby5saWJyYXJ5LnYxLkdldExpYnJhcnlSZXNwb25zZSIDkAIBEmAKDUNyZWF0ZUxpYnJhcnkSJi5tYXZpby5saWJyYXJ5LnYxLkNyZWF0ZUxpYnJhcnlSZXF1ZXN0GicubWF2aW8ubGlicmFyeS52MS5DcmVhdGVMaWJyYXJ5UmVzcG9uc2USYAoNVXBkYXRlTGlicmFyeRImLm1hdmlvLmxpYnJhcnkudjEuVXBkYXRlTGlicmFyeVJlcXVlc3QaJy5tYXZpby5saWJyYXJ5LnYxLlVwZGF0ZUxpYnJhcnlSZXNwb25zZRJgCg1EZWxldGVMaWJyYXJ5EiYubWF2aW8ubGlicmFyeS52MS5EZWxldGVMaWJyYXJ5UmVxdWVzdBonLm1hdmlvLmxpYnJhcnkudjEuRGVsZXRlTGlicmFyeVJlc3BvbnNlEloKC1NjYW5MaWJyYXJ5EiQubWF2aW8ubGlicmFyeS52MS5TY2FuTGlicmFyeVJlcXVlc3QaJS5tYXZpby5saWJyYXJ5LnYxLlNjYW5MaWJyYXJ5UmVzcG9uc2VCzQEKFGNvbS5tYXZpby5saWJyYXJ5LnYxQgxMaWJyYXJ5UHJvdG9QAVpFZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL2xpYnJhcnkvdjE7bGlicmFyeXYxogIDTUxYqgIQTWF2aW8uTGlicmFyeS5WMcoCEE1hdmlvXExpYnJhcnlcVjHiAhxNYXZpb1xMaWJyYXJ5XFYxXEdQQk1ldGFkYXRh6gISTWF2aW86OkxpYnJhcnk6OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp]);
 
 /**
  * Library is a named set of root folders scanned as one collection.
@@ -128,6 +128,13 @@ export type Library = Message<"mavio.library.v1.Library"> & {
    * @generated from field: mavio.library.v1.VirtualEpisodes virtual_episodes = 17;
    */
   virtualEpisodes?: VirtualEpisodes | undefined;
+
+  /**
+   * The hubs of the library on Home and on its Recommended tab.
+   *
+   * @generated from field: mavio.library.v1.LibraryHubs hubs = 18;
+   */
+  hubs?: LibraryHubs | undefined;
 };
 
 /**
@@ -183,6 +190,52 @@ export const VirtualEpisodesSchema: GenMessage<VirtualEpisodes> = /*@__PURE__*/
   messageDesc(file_mavio_library_v1_library, 1);
 
 /**
+ * LibraryHubs are the hubs an administrator chose for a library, in
+ * order. An unset list keeps the defaults of the library's kind; an empty
+ * one shows none. Continue watching on Home spans the libraries and is not
+ * among a library's Home hubs.
+ *
+ * @generated from message mavio.library.v1.LibraryHubs
+ */
+export type LibraryHubs = Message<"mavio.library.v1.LibraryHubs"> & {
+  /**
+   * @generated from field: mavio.library.v1.HubList home = 1;
+   */
+  home?: HubList | undefined;
+
+  /**
+   * @generated from field: mavio.library.v1.HubList recommended = 2;
+   */
+  recommended?: HubList | undefined;
+};
+
+/**
+ * Describes the message mavio.library.v1.LibraryHubs.
+ * Use `create(LibraryHubsSchema)` to create a new message.
+ */
+export const LibraryHubsSchema: GenMessage<LibraryHubs> = /*@__PURE__*/
+  messageDesc(file_mavio_library_v1_library, 2);
+
+/**
+ * HubList lists hub kinds in order.
+ *
+ * @generated from message mavio.library.v1.HubList
+ */
+export type HubList = Message<"mavio.library.v1.HubList"> & {
+  /**
+   * @generated from field: repeated mavio.library.v1.HubKind kinds = 1;
+   */
+  kinds: HubKind[];
+};
+
+/**
+ * Describes the message mavio.library.v1.HubList.
+ * Use `create(HubListSchema)` to create a new message.
+ */
+export const HubListSchema: GenMessage<HubList> = /*@__PURE__*/
+  messageDesc(file_mavio_library_v1_library, 3);
+
+/**
  * ProviderOrder names the providers a library uses of each capability.
  * An unset list uses every provider, in plugin ID order; an empty one
  * uses none.
@@ -228,7 +281,7 @@ export type ProviderOrder = Message<"mavio.library.v1.ProviderOrder"> & {
  * Use `create(ProviderOrderSchema)` to create a new message.
  */
 export const ProviderOrderSchema: GenMessage<ProviderOrder> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 2);
+  messageDesc(file_mavio_library_v1_library, 4);
 
 /**
  * ProviderList names providers by plugin ID, in the order they are asked.
@@ -247,7 +300,7 @@ export type ProviderList = Message<"mavio.library.v1.ProviderList"> & {
  * Use `create(ProviderListSchema)` to create a new message.
  */
 export const ProviderListSchema: GenMessage<ProviderList> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 3);
+  messageDesc(file_mavio_library_v1_library, 5);
 
 /**
  * LibrarySpec holds the client-settable fields of a library.
@@ -324,6 +377,11 @@ export type LibrarySpec = Message<"mavio.library.v1.LibrarySpec"> & {
    * @generated from field: mavio.library.v1.VirtualEpisodes virtual_episodes = 14;
    */
   virtualEpisodes?: VirtualEpisodes | undefined;
+
+  /**
+   * @generated from field: mavio.library.v1.LibraryHubs hubs = 15;
+   */
+  hubs?: LibraryHubs | undefined;
 };
 
 /**
@@ -331,7 +389,7 @@ export type LibrarySpec = Message<"mavio.library.v1.LibrarySpec"> & {
  * Use `create(LibrarySpecSchema)` to create a new message.
  */
 export const LibrarySpecSchema: GenMessage<LibrarySpec> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 4);
+  messageDesc(file_mavio_library_v1_library, 6);
 
 /**
  * @generated from message mavio.library.v1.ListLibrariesRequest
@@ -344,7 +402,7 @@ export type ListLibrariesRequest = Message<"mavio.library.v1.ListLibrariesReques
  * Use `create(ListLibrariesRequestSchema)` to create a new message.
  */
 export const ListLibrariesRequestSchema: GenMessage<ListLibrariesRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 5);
+  messageDesc(file_mavio_library_v1_library, 7);
 
 /**
  * @generated from message mavio.library.v1.ListLibrariesResponse
@@ -361,7 +419,7 @@ export type ListLibrariesResponse = Message<"mavio.library.v1.ListLibrariesRespo
  * Use `create(ListLibrariesResponseSchema)` to create a new message.
  */
 export const ListLibrariesResponseSchema: GenMessage<ListLibrariesResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 6);
+  messageDesc(file_mavio_library_v1_library, 8);
 
 /**
  * @generated from message mavio.library.v1.GetLibraryRequest
@@ -378,7 +436,7 @@ export type GetLibraryRequest = Message<"mavio.library.v1.GetLibraryRequest"> & 
  * Use `create(GetLibraryRequestSchema)` to create a new message.
  */
 export const GetLibraryRequestSchema: GenMessage<GetLibraryRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 7);
+  messageDesc(file_mavio_library_v1_library, 9);
 
 /**
  * @generated from message mavio.library.v1.GetLibraryResponse
@@ -395,7 +453,7 @@ export type GetLibraryResponse = Message<"mavio.library.v1.GetLibraryResponse"> 
  * Use `create(GetLibraryResponseSchema)` to create a new message.
  */
 export const GetLibraryResponseSchema: GenMessage<GetLibraryResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 8);
+  messageDesc(file_mavio_library_v1_library, 10);
 
 /**
  * @generated from message mavio.library.v1.CreateLibraryRequest
@@ -412,7 +470,7 @@ export type CreateLibraryRequest = Message<"mavio.library.v1.CreateLibraryReques
  * Use `create(CreateLibraryRequestSchema)` to create a new message.
  */
 export const CreateLibraryRequestSchema: GenMessage<CreateLibraryRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 9);
+  messageDesc(file_mavio_library_v1_library, 11);
 
 /**
  * @generated from message mavio.library.v1.CreateLibraryResponse
@@ -429,7 +487,7 @@ export type CreateLibraryResponse = Message<"mavio.library.v1.CreateLibraryRespo
  * Use `create(CreateLibraryResponseSchema)` to create a new message.
  */
 export const CreateLibraryResponseSchema: GenMessage<CreateLibraryResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 10);
+  messageDesc(file_mavio_library_v1_library, 12);
 
 /**
  * @generated from message mavio.library.v1.UpdateLibraryRequest
@@ -451,7 +509,7 @@ export type UpdateLibraryRequest = Message<"mavio.library.v1.UpdateLibraryReques
  * Use `create(UpdateLibraryRequestSchema)` to create a new message.
  */
 export const UpdateLibraryRequestSchema: GenMessage<UpdateLibraryRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 11);
+  messageDesc(file_mavio_library_v1_library, 13);
 
 /**
  * @generated from message mavio.library.v1.UpdateLibraryResponse
@@ -468,7 +526,7 @@ export type UpdateLibraryResponse = Message<"mavio.library.v1.UpdateLibraryRespo
  * Use `create(UpdateLibraryResponseSchema)` to create a new message.
  */
 export const UpdateLibraryResponseSchema: GenMessage<UpdateLibraryResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 12);
+  messageDesc(file_mavio_library_v1_library, 14);
 
 /**
  * @generated from message mavio.library.v1.DeleteLibraryRequest
@@ -485,7 +543,7 @@ export type DeleteLibraryRequest = Message<"mavio.library.v1.DeleteLibraryReques
  * Use `create(DeleteLibraryRequestSchema)` to create a new message.
  */
 export const DeleteLibraryRequestSchema: GenMessage<DeleteLibraryRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 13);
+  messageDesc(file_mavio_library_v1_library, 15);
 
 /**
  * @generated from message mavio.library.v1.DeleteLibraryResponse
@@ -498,7 +556,7 @@ export type DeleteLibraryResponse = Message<"mavio.library.v1.DeleteLibraryRespo
  * Use `create(DeleteLibraryResponseSchema)` to create a new message.
  */
 export const DeleteLibraryResponseSchema: GenMessage<DeleteLibraryResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 14);
+  messageDesc(file_mavio_library_v1_library, 16);
 
 /**
  * @generated from message mavio.library.v1.ScanLibraryRequest
@@ -515,7 +573,7 @@ export type ScanLibraryRequest = Message<"mavio.library.v1.ScanLibraryRequest"> 
  * Use `create(ScanLibraryRequestSchema)` to create a new message.
  */
 export const ScanLibraryRequestSchema: GenMessage<ScanLibraryRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 15);
+  messageDesc(file_mavio_library_v1_library, 17);
 
 /**
  * @generated from message mavio.library.v1.ScanLibraryResponse
@@ -539,7 +597,7 @@ export type ScanLibraryResponse = Message<"mavio.library.v1.ScanLibraryResponse"
  * Use `create(ScanLibraryResponseSchema)` to create a new message.
  */
 export const ScanLibraryResponseSchema: GenMessage<ScanLibraryResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_library_v1_library, 16);
+  messageDesc(file_mavio_library_v1_library, 18);
 
 /**
  * LibraryKind decides how a library's folders are interpreted.
@@ -613,6 +671,121 @@ export enum LibraryKind {
  */
 export const LibraryKindSchema: GenEnum<LibraryKind> = /*@__PURE__*/
   enumDesc(file_mavio_library_v1_library, 0);
+
+/**
+ * HubKind is a kind of hub: a row of items on Home or on a library's
+ * Recommended tab, each a reason to watch something.
+ *
+ * @generated from enum mavio.library.v1.HubKind
+ */
+export enum HubKind {
+  /**
+   * @generated from enum value: HUB_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * The items being watched and the next episodes, by last activity.
+   * On Home it spans the libraries.
+   *
+   * @generated from enum value: HUB_KIND_CONTINUE_WATCHING = 1;
+   */
+  CONTINUE_WATCHING = 1,
+
+  /**
+   * @generated from enum value: HUB_KIND_RECENTLY_ADDED = 2;
+   */
+  RECENTLY_ADDED = 2,
+
+  /**
+   * Items by release date.
+   *
+   * @generated from enum value: HUB_KIND_RECENTLY_RELEASED = 3;
+   */
+  RECENTLY_RELEASED = 3,
+
+  /**
+   * Episodes by air date.
+   *
+   * @generated from enum value: HUB_KIND_RECENTLY_AIRED = 4;
+   */
+  RECENTLY_AIRED = 4,
+
+  /**
+   * @generated from enum value: HUB_KIND_TOP_RATED = 5;
+   */
+  TOP_RATED = 5,
+
+  /**
+   * The best rated items the user has not played.
+   *
+   * @generated from enum value: HUB_KIND_TOP_UNPLAYED = 6;
+   */
+  TOP_UNPLAYED = 6,
+
+  /**
+   * The series the user has not begun.
+   *
+   * @generated from enum value: HUB_KIND_START_WATCHING = 7;
+   */
+  START_WATCHING = 7,
+
+  /**
+   * What the user played long ago: items last played over a year ago,
+   * series last watched over half a year ago.
+   *
+   * @generated from enum value: HUB_KIND_REDISCOVER = 8;
+   */
+  REDISCOVER = 8,
+
+  /**
+   * The seeded hubs: items like one the user played lately or likes, and
+   * items of a genre, actor or director of what they played lately.
+   *
+   * @generated from enum value: HUB_KIND_BECAUSE_YOU_WATCHED = 9;
+   */
+  BECAUSE_YOU_WATCHED = 9,
+
+  /**
+   * @generated from enum value: HUB_KIND_BECAUSE_YOU_LIKE = 10;
+   */
+  BECAUSE_YOU_LIKE = 10,
+
+  /**
+   * @generated from enum value: HUB_KIND_MORE_IN_GENRE = 11;
+   */
+  MORE_IN_GENRE = 11,
+
+  /**
+   * @generated from enum value: HUB_KIND_STARRING = 12;
+   */
+  STARRING = 12,
+
+  /**
+   * @generated from enum value: HUB_KIND_DIRECTED_BY = 13;
+   */
+  DIRECTED_BY = 13,
+
+  /**
+   * The items the user requested that became available; Home only.
+   *
+   * @generated from enum value: HUB_KIND_AVAILABLE_REQUESTS = 14;
+   */
+  AVAILABLE_REQUESTS = 14,
+
+  /**
+   * The trending titles of discovery the server lacks; Home only.
+   *
+   * @generated from enum value: HUB_KIND_TRENDING = 15;
+   */
+  TRENDING = 15,
+}
+
+/**
+ * Describes the enum mavio.library.v1.HubKind.
+ */
+export const HubKindSchema: GenEnum<HubKind> = /*@__PURE__*/
+  enumDesc(file_mavio_library_v1_library, 1);
 
 /**
  * LibraryService manages libraries and their scans.

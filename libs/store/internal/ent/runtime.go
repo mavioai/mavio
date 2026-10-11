@@ -502,15 +502,15 @@ func init() {
 	// library.DefaultDownloadLyrics holds the default value on creation for the download_lyrics field.
 	library.DefaultDownloadLyrics = libraryDescDownloadLyrics.Default.(bool)
 	// libraryDescScanGeneration is the schema descriptor for scan_generation field.
-	libraryDescScanGeneration := libraryFields[15].Descriptor()
+	libraryDescScanGeneration := libraryFields[16].Descriptor()
 	// library.DefaultScanGeneration holds the default value on creation for the scan_generation field.
 	library.DefaultScanGeneration = libraryDescScanGeneration.Default.(int64)
 	// libraryDescCreatedAt is the schema descriptor for created_at field.
-	libraryDescCreatedAt := libraryFields[16].Descriptor()
+	libraryDescCreatedAt := libraryFields[17].Descriptor()
 	// library.DefaultCreatedAt holds the default value on creation for the created_at field.
 	library.DefaultCreatedAt = libraryDescCreatedAt.Default.(func() time.Time)
 	// libraryDescUpdatedAt is the schema descriptor for updated_at field.
-	libraryDescUpdatedAt := libraryFields[17].Descriptor()
+	libraryDescUpdatedAt := libraryFields[18].Descriptor()
 	// library.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	library.DefaultUpdatedAt = libraryDescUpdatedAt.Default.(func() time.Time)
 	// library.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

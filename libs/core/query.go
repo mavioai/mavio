@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"slices"
+	"time"
 )
 
 // MaxPageSize is the largest Limit a query may request.
@@ -66,6 +67,12 @@ type ItemQuery struct {
 	Played    *bool
 	Favorite  *bool
 	Resumable bool // has a resume position
+	// PlayedAfter and PlayedBefore restrict results to the items the user
+	// last played within the range, both exclusive; Started to those the
+	// user has, or has not, played at all. A series or season counts the
+	// plays of its episodes.
+	PlayedAfter, PlayedBefore time.Time
+	Started                   *bool
 
 	Sort   []SortSpec
 	Limit  int // zero means MaxPageSize
@@ -119,7 +126,8 @@ func (q *ItemQuery) Validate() error {
 		return fmt.Errorf("%w: top-level query within a parent", ErrInvalid)
 	case q.YearFrom != 0 && q.YearTo != 0 && q.YearFrom > q.YearTo:
 		return fmt.Errorf("%w: year range %d–%d is empty", ErrInvalid, q.YearFrom, q.YearTo)
-	case q.UserID.IsZero() && (q.Played != nil || q.Favorite != nil || q.Resumable):
+	case q.UserID.IsZero() && (q.Played != nil || q.Favorite != nil || q.Resumable || q.Started != nil ||
+		!q.PlayedAfter.IsZero() || !q.PlayedBefore.IsZero()):
 		return fmt.Errorf("%w: user filters require a user", ErrInvalid)
 	}
 	for _, k := range q.Kinds {

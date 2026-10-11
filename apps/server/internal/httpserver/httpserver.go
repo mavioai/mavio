@@ -20,6 +20,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/devplayer"
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
+	"github.com/mavioai/mavio/apps/server/internal/home"
 	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/logs"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
@@ -33,6 +34,7 @@ import (
 	"github.com/mavioai/mavio/libs/metadata"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/home/v1/homev1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
@@ -207,6 +209,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(acquisitionv1connect.NewDiscoverServiceHandler(rpc.NewDiscoverService(reqs), interceptors))
 	mux.Handle(acquisitionv1connect.NewRequestServiceHandler(rpc.NewRequestService(reqs), interceptors))
 	mux.Handle(acquisitionv1connect.NewIssueServiceHandler(rpc.NewIssueService(reqs), interceptors))
+	mux.Handle(homev1connect.NewHomeServiceHandler(rpc.NewHomeService(opts.Store, home.New(opts.Store, reqs)), interceptors))
 	mux.Handle("GET /media/", opts.Playbacks.Handler())
 	mux.Handle("GET /images/", opts.Images.Handler())
 	mux.Handle("/plugins/{id}/", pluginRoutes(authn, opts.PluginRoutes))
@@ -248,6 +251,7 @@ var services = []string{
 	acquisitionv1connect.WantedServiceName, acquisitionv1connect.DiscoverServiceName, acquisitionv1connect.RequestServiceName,
 	acquisitionv1connect.IssueServiceName,
 	authv1connect.AuthServiceName,
+	homev1connect.HomeServiceName,
 	libraryv1connect.LibraryServiceName, libraryv1connect.ItemServiceName, libraryv1connect.CollectionServiceName,
 	libraryv1connect.MetadataServiceName, libraryv1connect.PlaylistServiceName,
 	playbackv1connect.PlaybackServiceName,

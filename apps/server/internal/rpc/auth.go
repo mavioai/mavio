@@ -19,6 +19,7 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/home/v1/homev1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
@@ -56,6 +57,7 @@ var UserBoundProcedures = []string{
 	acquisitionv1connect.IssueServiceCreateIssueProcedure,
 	acquisitionv1connect.IssueServiceAddCommentProcedure,
 	systemv1connect.ActivityServiceListMyActivitiesProcedure,
+	homev1connect.HomeServiceName,
 }
 
 // SessionBoundProcedures need the caller's signed-in session, which plugins

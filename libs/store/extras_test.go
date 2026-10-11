@@ -88,6 +88,7 @@ func TestProviderOrder(t *testing.T) {
 			Name: "Music", Kind: core.LibraryMusic, Paths: []string{"/media/music"}, DownloadLyrics: true,
 			Providers:       core.ProviderOrder{Lyrics: []string{"lrclib", "genius"}, Images: []string{}, Episodes: []string{"scraper-tmdb"}},
 			VirtualEpisodes: core.VirtualEpisodes{Unaired: true, GraceDays: 7},
+			Hubs:            core.LibraryHubs{Home: []core.HubKind{}, Recommended: []core.HubKind{core.HubRecentlyReleased}},
 		}
 		if err := s.Libraries().Create(ctx, &lib); err != nil {
 			t.Fatal(err)
@@ -96,12 +97,19 @@ func TestProviderOrder(t *testing.T) {
 		if err != nil || !got.DownloadLyrics || !reflect.DeepEqual(got.Providers, lib.Providers) || got.VirtualEpisodes != lib.VirtualEpisodes {
 			t.Errorf("got = %+v, %v; want providers %+v", got.Providers, err, lib.Providers)
 		}
-		lib.Providers = core.ProviderOrder{}
+		if !reflect.DeepEqual(got.Hubs, lib.Hubs) {
+			t.Errorf("got = %+v, want hubs %+v", got.Hubs, lib.Hubs)
+		}
+		lib.Providers, lib.Hubs = core.ProviderOrder{}, core.LibraryHubs{}
 		if err := s.Libraries().Update(ctx, &lib); err != nil {
 			t.Fatal(err)
 		}
-		if got, _ := s.Libraries().Get(ctx, lib.ID); !reflect.DeepEqual(got.Providers, core.ProviderOrder{}) {
+		got, _ = s.Libraries().Get(ctx, lib.ID)
+		if !reflect.DeepEqual(got.Providers, core.ProviderOrder{}) {
 			t.Errorf("got = %+v, want every provider", got.Providers)
+		}
+		if got.Hubs.Home != nil || got.Hubs.Recommended != nil {
+			t.Errorf("got = %+v, want the default hubs", got.Hubs)
 		}
 	})
 }

@@ -151,6 +151,211 @@ impl ::buffa::Enumeration for LibraryKind {
         ]
     }
 }
+/// HubKind is a kind of hub: a row of items on Home or on a library's
+/// Recommended tab, each a reason to watch something.
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[repr(i32)]
+pub enum HubKind {
+    HUB_KIND_UNSPECIFIED = 0i32,
+    /// The items being watched and the next episodes, by last activity.
+    /// On Home it spans the libraries.
+    HUB_KIND_CONTINUE_WATCHING = 1i32,
+    HUB_KIND_RECENTLY_ADDED = 2i32,
+    /// Items by release date.
+    HUB_KIND_RECENTLY_RELEASED = 3i32,
+    /// Episodes by air date.
+    HUB_KIND_RECENTLY_AIRED = 4i32,
+    HUB_KIND_TOP_RATED = 5i32,
+    /// The best rated items the user has not played.
+    HUB_KIND_TOP_UNPLAYED = 6i32,
+    /// The series the user has not begun.
+    HUB_KIND_START_WATCHING = 7i32,
+    /// What the user played long ago: items last played over a year ago,
+    /// series last watched over half a year ago.
+    HUB_KIND_REDISCOVER = 8i32,
+    /// The seeded hubs: items like one the user played lately or likes, and
+    /// items of a genre, actor or director of what they played lately.
+    HUB_KIND_BECAUSE_YOU_WATCHED = 9i32,
+    HUB_KIND_BECAUSE_YOU_LIKE = 10i32,
+    HUB_KIND_MORE_IN_GENRE = 11i32,
+    HUB_KIND_STARRING = 12i32,
+    HUB_KIND_DIRECTED_BY = 13i32,
+    /// The items the user requested that became available; Home only.
+    HUB_KIND_AVAILABLE_REQUESTS = 14i32,
+    /// The trending titles of discovery the server lacks; Home only.
+    HUB_KIND_TRENDING = 15i32,
+}
+impl HubKind {
+    ///Idiomatic alias for [`Self::HUB_KIND_UNSPECIFIED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Unspecified: Self = Self::HUB_KIND_UNSPECIFIED;
+    ///Idiomatic alias for [`Self::HUB_KIND_CONTINUE_WATCHING`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const ContinueWatching: Self = Self::HUB_KIND_CONTINUE_WATCHING;
+    ///Idiomatic alias for [`Self::HUB_KIND_RECENTLY_ADDED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const RecentlyAdded: Self = Self::HUB_KIND_RECENTLY_ADDED;
+    ///Idiomatic alias for [`Self::HUB_KIND_RECENTLY_RELEASED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const RecentlyReleased: Self = Self::HUB_KIND_RECENTLY_RELEASED;
+    ///Idiomatic alias for [`Self::HUB_KIND_RECENTLY_AIRED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const RecentlyAired: Self = Self::HUB_KIND_RECENTLY_AIRED;
+    ///Idiomatic alias for [`Self::HUB_KIND_TOP_RATED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const TopRated: Self = Self::HUB_KIND_TOP_RATED;
+    ///Idiomatic alias for [`Self::HUB_KIND_TOP_UNPLAYED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const TopUnplayed: Self = Self::HUB_KIND_TOP_UNPLAYED;
+    ///Idiomatic alias for [`Self::HUB_KIND_START_WATCHING`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const StartWatching: Self = Self::HUB_KIND_START_WATCHING;
+    ///Idiomatic alias for [`Self::HUB_KIND_REDISCOVER`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Rediscover: Self = Self::HUB_KIND_REDISCOVER;
+    ///Idiomatic alias for [`Self::HUB_KIND_BECAUSE_YOU_WATCHED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const BecauseYouWatched: Self = Self::HUB_KIND_BECAUSE_YOU_WATCHED;
+    ///Idiomatic alias for [`Self::HUB_KIND_BECAUSE_YOU_LIKE`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const BecauseYouLike: Self = Self::HUB_KIND_BECAUSE_YOU_LIKE;
+    ///Idiomatic alias for [`Self::HUB_KIND_MORE_IN_GENRE`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const MoreInGenre: Self = Self::HUB_KIND_MORE_IN_GENRE;
+    ///Idiomatic alias for [`Self::HUB_KIND_STARRING`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Starring: Self = Self::HUB_KIND_STARRING;
+    ///Idiomatic alias for [`Self::HUB_KIND_DIRECTED_BY`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const DirectedBy: Self = Self::HUB_KIND_DIRECTED_BY;
+    ///Idiomatic alias for [`Self::HUB_KIND_AVAILABLE_REQUESTS`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const AvailableRequests: Self = Self::HUB_KIND_AVAILABLE_REQUESTS;
+    ///Idiomatic alias for [`Self::HUB_KIND_TRENDING`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Trending: Self = Self::HUB_KIND_TRENDING;
+}
+impl ::core::default::Default for HubKind {
+    fn default() -> Self {
+        Self::HUB_KIND_UNSPECIFIED
+    }
+}
+impl ::buffa::Enumeration for HubKind {
+    fn from_i32(value: i32) -> ::core::option::Option<Self> {
+        match value {
+            0i32 => ::core::option::Option::Some(Self::HUB_KIND_UNSPECIFIED),
+            1i32 => ::core::option::Option::Some(Self::HUB_KIND_CONTINUE_WATCHING),
+            2i32 => ::core::option::Option::Some(Self::HUB_KIND_RECENTLY_ADDED),
+            3i32 => ::core::option::Option::Some(Self::HUB_KIND_RECENTLY_RELEASED),
+            4i32 => ::core::option::Option::Some(Self::HUB_KIND_RECENTLY_AIRED),
+            5i32 => ::core::option::Option::Some(Self::HUB_KIND_TOP_RATED),
+            6i32 => ::core::option::Option::Some(Self::HUB_KIND_TOP_UNPLAYED),
+            7i32 => ::core::option::Option::Some(Self::HUB_KIND_START_WATCHING),
+            8i32 => ::core::option::Option::Some(Self::HUB_KIND_REDISCOVER),
+            9i32 => ::core::option::Option::Some(Self::HUB_KIND_BECAUSE_YOU_WATCHED),
+            10i32 => ::core::option::Option::Some(Self::HUB_KIND_BECAUSE_YOU_LIKE),
+            11i32 => ::core::option::Option::Some(Self::HUB_KIND_MORE_IN_GENRE),
+            12i32 => ::core::option::Option::Some(Self::HUB_KIND_STARRING),
+            13i32 => ::core::option::Option::Some(Self::HUB_KIND_DIRECTED_BY),
+            14i32 => ::core::option::Option::Some(Self::HUB_KIND_AVAILABLE_REQUESTS),
+            15i32 => ::core::option::Option::Some(Self::HUB_KIND_TRENDING),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn to_i32(&self) -> i32 {
+        *self as i32
+    }
+    fn proto_name(&self) -> &'static str {
+        match self {
+            Self::HUB_KIND_UNSPECIFIED => "HUB_KIND_UNSPECIFIED",
+            Self::HUB_KIND_CONTINUE_WATCHING => "HUB_KIND_CONTINUE_WATCHING",
+            Self::HUB_KIND_RECENTLY_ADDED => "HUB_KIND_RECENTLY_ADDED",
+            Self::HUB_KIND_RECENTLY_RELEASED => "HUB_KIND_RECENTLY_RELEASED",
+            Self::HUB_KIND_RECENTLY_AIRED => "HUB_KIND_RECENTLY_AIRED",
+            Self::HUB_KIND_TOP_RATED => "HUB_KIND_TOP_RATED",
+            Self::HUB_KIND_TOP_UNPLAYED => "HUB_KIND_TOP_UNPLAYED",
+            Self::HUB_KIND_START_WATCHING => "HUB_KIND_START_WATCHING",
+            Self::HUB_KIND_REDISCOVER => "HUB_KIND_REDISCOVER",
+            Self::HUB_KIND_BECAUSE_YOU_WATCHED => "HUB_KIND_BECAUSE_YOU_WATCHED",
+            Self::HUB_KIND_BECAUSE_YOU_LIKE => "HUB_KIND_BECAUSE_YOU_LIKE",
+            Self::HUB_KIND_MORE_IN_GENRE => "HUB_KIND_MORE_IN_GENRE",
+            Self::HUB_KIND_STARRING => "HUB_KIND_STARRING",
+            Self::HUB_KIND_DIRECTED_BY => "HUB_KIND_DIRECTED_BY",
+            Self::HUB_KIND_AVAILABLE_REQUESTS => "HUB_KIND_AVAILABLE_REQUESTS",
+            Self::HUB_KIND_TRENDING => "HUB_KIND_TRENDING",
+        }
+    }
+    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
+        match name {
+            "HUB_KIND_UNSPECIFIED" => {
+                ::core::option::Option::Some(Self::HUB_KIND_UNSPECIFIED)
+            }
+            "HUB_KIND_CONTINUE_WATCHING" => {
+                ::core::option::Option::Some(Self::HUB_KIND_CONTINUE_WATCHING)
+            }
+            "HUB_KIND_RECENTLY_ADDED" => {
+                ::core::option::Option::Some(Self::HUB_KIND_RECENTLY_ADDED)
+            }
+            "HUB_KIND_RECENTLY_RELEASED" => {
+                ::core::option::Option::Some(Self::HUB_KIND_RECENTLY_RELEASED)
+            }
+            "HUB_KIND_RECENTLY_AIRED" => {
+                ::core::option::Option::Some(Self::HUB_KIND_RECENTLY_AIRED)
+            }
+            "HUB_KIND_TOP_RATED" => {
+                ::core::option::Option::Some(Self::HUB_KIND_TOP_RATED)
+            }
+            "HUB_KIND_TOP_UNPLAYED" => {
+                ::core::option::Option::Some(Self::HUB_KIND_TOP_UNPLAYED)
+            }
+            "HUB_KIND_START_WATCHING" => {
+                ::core::option::Option::Some(Self::HUB_KIND_START_WATCHING)
+            }
+            "HUB_KIND_REDISCOVER" => {
+                ::core::option::Option::Some(Self::HUB_KIND_REDISCOVER)
+            }
+            "HUB_KIND_BECAUSE_YOU_WATCHED" => {
+                ::core::option::Option::Some(Self::HUB_KIND_BECAUSE_YOU_WATCHED)
+            }
+            "HUB_KIND_BECAUSE_YOU_LIKE" => {
+                ::core::option::Option::Some(Self::HUB_KIND_BECAUSE_YOU_LIKE)
+            }
+            "HUB_KIND_MORE_IN_GENRE" => {
+                ::core::option::Option::Some(Self::HUB_KIND_MORE_IN_GENRE)
+            }
+            "HUB_KIND_STARRING" => ::core::option::Option::Some(Self::HUB_KIND_STARRING),
+            "HUB_KIND_DIRECTED_BY" => {
+                ::core::option::Option::Some(Self::HUB_KIND_DIRECTED_BY)
+            }
+            "HUB_KIND_AVAILABLE_REQUESTS" => {
+                ::core::option::Option::Some(Self::HUB_KIND_AVAILABLE_REQUESTS)
+            }
+            "HUB_KIND_TRENDING" => ::core::option::Option::Some(Self::HUB_KIND_TRENDING),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn values() -> &'static [Self] {
+        &[
+            Self::HUB_KIND_UNSPECIFIED,
+            Self::HUB_KIND_CONTINUE_WATCHING,
+            Self::HUB_KIND_RECENTLY_ADDED,
+            Self::HUB_KIND_RECENTLY_RELEASED,
+            Self::HUB_KIND_RECENTLY_AIRED,
+            Self::HUB_KIND_TOP_RATED,
+            Self::HUB_KIND_TOP_UNPLAYED,
+            Self::HUB_KIND_START_WATCHING,
+            Self::HUB_KIND_REDISCOVER,
+            Self::HUB_KIND_BECAUSE_YOU_WATCHED,
+            Self::HUB_KIND_BECAUSE_YOU_LIKE,
+            Self::HUB_KIND_MORE_IN_GENRE,
+            Self::HUB_KIND_STARRING,
+            Self::HUB_KIND_DIRECTED_BY,
+            Self::HUB_KIND_AVAILABLE_REQUESTS,
+            Self::HUB_KIND_TRENDING,
+        ]
+    }
+}
 /// Library is a named set of root folders scanned as one collection.
 #[derive(Clone, PartialEq, Default)]
 pub struct Library {
@@ -226,6 +431,10 @@ pub struct Library {
         VirtualEpisodes,
         ::buffa::Inline<VirtualEpisodes>,
     >,
+    /// The hubs of the library on Home and on its Recommended tab.
+    ///
+    /// Field 18: `hubs`
+    pub hubs: ::buffa::MessageField<LibraryHubs, ::buffa::Inline<LibraryHubs>>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -249,6 +458,7 @@ impl ::core::fmt::Debug for Library {
             .field("download_lyrics", &self.download_lyrics)
             .field("provider_order", &self.provider_order)
             .field("virtual_episodes", &self.virtual_episodes)
+            .field("hubs", &self.hubs)
             .finish()
     }
 }
@@ -446,6 +656,14 @@ impl ::buffa::Message for Library {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.hubs.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.hubs.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -531,6 +749,14 @@ impl ::buffa::Message for Library {
                 buf,
             );
             self.virtual_episodes.write_to(__cache, buf);
+        }
+        if self.hubs.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                18u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.hubs.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -718,6 +944,17 @@ impl ::buffa::Message for Library {
                     ctx,
                 )?;
             }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.hubs.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -743,6 +980,7 @@ impl ::buffa::Message for Library {
         self.download_lyrics = ::core::option::Option::None;
         self.provider_order = ::buffa::MessageField::none();
         self.virtual_episodes = ::buffa::MessageField::none();
+        self.hubs = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -947,6 +1185,294 @@ impl ::buffa::Message for VirtualEpisodes {
 }
 impl ::buffa::ExtensionSet for VirtualEpisodes {
     const PROTO_FQN: &'static str = "mavio.library.v1.VirtualEpisodes";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// LibraryHubs are the hubs an administrator chose for a library, in
+/// order. An unset list keeps the defaults of the library's kind; an empty
+/// one shows none. Continue watching on Home spans the libraries and is not
+/// among a library's Home hubs.
+#[derive(Clone, PartialEq, Default)]
+pub struct LibraryHubs {
+    /// Field 1: `home`
+    pub home: ::buffa::MessageField<HubList, ::buffa::Inline<HubList>>,
+    /// Field 2: `recommended`
+    pub recommended: ::buffa::MessageField<HubList, ::buffa::Inline<HubList>>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for LibraryHubs {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("LibraryHubs")
+            .field("home", &self.home)
+            .field("recommended", &self.recommended)
+            .finish()
+    }
+}
+impl LibraryHubs {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.LibraryHubs";
+}
+::buffa::impl_default_instance!(LibraryHubs);
+impl ::buffa::MessageName for LibraryHubs {
+    const PACKAGE: &'static str = "mavio.library.v1";
+    const NAME: &'static str = "LibraryHubs";
+    const FULL_NAME: &'static str = "mavio.library.v1.LibraryHubs";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.LibraryHubs";
+}
+impl ::buffa::Message for LibraryHubs {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.home.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.home.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.recommended.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.recommended.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.home.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.home.write_to(__cache, buf);
+        }
+        if self.recommended.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.recommended.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.home.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.recommended.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.home = ::buffa::MessageField::none();
+        self.recommended = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for LibraryHubs {
+    const PROTO_FQN: &'static str = "mavio.library.v1.LibraryHubs";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// HubList lists hub kinds in order.
+#[derive(Clone, PartialEq, Default)]
+pub struct HubList {
+    /// Field 1: `kinds`
+    pub kinds: ::buffa::alloc::vec::Vec<::buffa::EnumValue<HubKind>>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for HubList {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("HubList").field("kinds", &self.kinds).finish()
+    }
+}
+impl HubList {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.HubList";
+}
+::buffa::impl_default_instance!(HubList);
+impl ::buffa::MessageName for HubList {
+    const PACKAGE: &'static str = "mavio.library.v1";
+    const NAME: &'static str = "HubList";
+    const FULL_NAME: &'static str = "mavio.library.v1.HubList";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.HubList";
+}
+impl ::buffa::Message for HubList {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if !self.kinds.is_empty() {
+            let payload: u64 = self
+                .kinds
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if !self.kinds.is_empty() {
+            let payload: u64 = self
+                .kinds
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            ::buffa::types::put_len_delimited_header(1u32, payload, buf);
+            for v in &self.kinds {
+                ::buffa::types::encode_int32(v.to_i32(), buf);
+            }
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                    let len = ::buffa::encoding::decode_varint(buf)?;
+                    let len = usize::try_from(len)
+                        .map_err(|_| ::buffa::DecodeError::MessageTooLarge)?;
+                    if buf.remaining() < len {
+                        return ::core::result::Result::Err(
+                            ::buffa::DecodeError::UnexpectedEof,
+                        );
+                    }
+                    self.kinds.reserve(len);
+                    let mut limited = buf.take(len);
+                    while limited.has_remaining() {
+                        self.kinds
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32_packed(&mut limited)?,
+                                ),
+                            );
+                    }
+                    let leftover = limited.remaining();
+                    if leftover > 0 {
+                        limited.advance(leftover);
+                    }
+                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                    self.kinds
+                        .push(
+                            ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                        );
+                } else {
+                    return ::core::result::Result::Err(
+                        ::buffa::encoding::wire_type_mismatch(
+                            tag,
+                            ::buffa::encoding::WireType::LengthDelimited,
+                        ),
+                    );
+                }
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.kinds.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for HubList {
+    const PROTO_FQN: &'static str = "mavio.library.v1.HubList";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -1367,6 +1893,8 @@ pub struct LibrarySpec {
         VirtualEpisodes,
         ::buffa::Inline<VirtualEpisodes>,
     >,
+    /// Field 15: `hubs`
+    pub hubs: ::buffa::MessageField<LibraryHubs, ::buffa::Inline<LibraryHubs>>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1387,6 +1915,7 @@ impl ::core::fmt::Debug for LibrarySpec {
             .field("download_lyrics", &self.download_lyrics)
             .field("provider_order", &self.provider_order)
             .field("virtual_episodes", &self.virtual_episodes)
+            .field("hubs", &self.hubs)
             .finish()
     }
 }
@@ -1558,6 +2087,14 @@ impl ::buffa::Message for LibrarySpec {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.hubs.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.hubs.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1624,6 +2161,14 @@ impl ::buffa::Message for LibrarySpec {
                 buf,
             );
             self.virtual_episodes.write_to(__cache, buf);
+        }
+        if self.hubs.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                15u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.hubs.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1779,6 +2324,17 @@ impl ::buffa::Message for LibrarySpec {
                     ctx,
                 )?;
             }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.hubs.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1801,6 +2357,7 @@ impl ::buffa::Message for LibrarySpec {
         self.download_lyrics = ::core::option::Option::None;
         self.provider_order = ::buffa::MessageField::none();
         self.virtual_episodes = ::buffa::MessageField::none();
+        self.hubs = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }

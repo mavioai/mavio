@@ -103,6 +103,7 @@ erDiagram
 * `ExtractTrickplay` 与 `ExtractChapterImages` 为视频生成缩略图拼图与各章节的图片；`AnalyzeLoudness` 测量音轨的响度。
 * `Providers`（`ProviderOrder`）按能力（元数据、图片、字幕、歌词、片段、集列表）以插件 ID 列出媒体库使用的提供者及其顺序：nil 列表按默认顺序使用所有提供者，空列表不使用任何提供者；列表中重复的提供者或空 ID 为 `ErrInvalid`。`DownloadLyrics` 让刷新为没有歌词文件的音轨从媒体库的歌词提供者下载歌词。
 * `VirtualEpisodes` 选择刷新以虚拟条目加入剧集的集（§4.8）：`Missing` 为已播出的集，`Unaired` 为今天及以后播出的集，`Specials` 还包括第 0 季的集；`Missing` 关闭时，`GraceDays`（不能为负）让虚拟集在播出后保留这么多天，等待文件到来。
+* `Hubs`（`LibraryHubs`）是媒体库在首页与其"推荐"标签页显示的推荐行（每行是一排条目，各是一个观看的理由），以 `HubKind` 列表按顺序给出；nil 列表沿用媒体库种类的默认值，空列表不显示任何推荐行。`LibraryKind.HubKinds` 列出媒体库提供的种类，即其标签页的默认顺序：电影提供继续观看、最近添加、最近上映、评分最高、未看的高分作品、因为你看过、因为你喜欢、同类型更多、主演、导演与重温；剧集相同，但以最近播出与开始观看代替最近上映与未看的高分作品，且没有导演；音乐视频、家庭视频与混合媒体库提供继续观看、最近添加、最近上映与评分最高；音乐、图书与照片提供最近添加与最近上映。首页默认显示电影的最近添加、因为你看过与未看的高分作品，剧集的最近添加与开始观看，以及其他媒体库的最近添加。媒体库不提供的种类、重复的种类，或首页推荐行中的继续观看（首页上它跨越所有媒体库），为 `ErrInvalid`。已可观看的请求与热门跨越所有媒体库（`HubKind.Global`），不属于任何媒体库。
 
 ### 4.2 条目
 所有种类共用一个 `Item` 类型，由 `Kind` 决定哪些字段有意义。这直接对应存储层的一张条目表，避免类型继承体系。
@@ -269,7 +270,7 @@ erDiagram
 * 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`MemberOf`（链接进合集或播放列表的条目，每个一次）或 `TopLevel`（没有父级的条目）、`Kinds`、`IncludeExtras`、`IncludeMissing`、`IncludeVirtual` 或 `OnlyVirtual`（§4.8）。
 * 内容：`Search`（见 §9.2）；`Monitored`（nil 表示不限）；`IndexNumber` 与 `ParentIndexNumber`（如某季的某一集）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`，与 `InheritedRating` 比较，nil 表示不限制（未分级的条目默认包含，除非设置 `SkipUnrated`）。
 * 名称按排序名以 Jellyfin 的方式排序：不区分大小写和重音，忽略开头、中间和结尾的冠词（"the"、"a"、"an"），去掉标点 `,&-{}'` 并把 `.+%` 视为空格，数字按数值排序（"Rocky 2" 在 "Rocky 10" 之前），非拉丁文字转写为拉丁字母（中文按拼音排序）。按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
-* 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`，以及 `last_played` / `play_count` 排序。设置了 `UserID` 时，其他用户的播放列表不在结果中。
+* 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`、`Started`（用户是否播放过该条目）、`PlayedAfter` 与 `PlayedBefore`（最后播放时间在该范围内，两端均不含），以及 `last_played` / `play_count` 排序。对于 `Started`、`PlayedAfter` 与 `PlayedBefore`，剧集与季按其各集的播放计算。设置了 `UserID` 时，其他用户的播放列表不在结果中。
 * 相似度：`SimilarTo` 保留与某条目共有类型、标签、工作室或人物的条目（该条目本身除外），并在排序规格之前按相似度排序，评分方式同 Jellyfin 的相似电影：每个共有类型计 10 分，每个标签与每个工作室计 5 分，两者共同署名的每个人物，若该条目将其列为导演计 50 分、列为演员或客串演员计 15 分。
 * `list_order` 按在 `MemberOf` 所指合集或播放列表中的位置排序，出现两次的条目按其第一个条目项排序。
 * 排序：`SortSpec` 列表；结果总是以 ID 作为最后的排序键，保证分页稳定。

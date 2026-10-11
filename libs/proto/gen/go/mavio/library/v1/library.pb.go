@@ -96,6 +96,103 @@ func (x LibraryKind) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// HubKind is a kind of hub: a row of items on Home or on a library's
+// Recommended tab, each a reason to watch something.
+type HubKind int32
+
+const (
+	HubKind_HUB_KIND_UNSPECIFIED HubKind = 0
+	// The items being watched and the next episodes, by last activity.
+	// On Home it spans the libraries.
+	HubKind_HUB_KIND_CONTINUE_WATCHING HubKind = 1
+	HubKind_HUB_KIND_RECENTLY_ADDED    HubKind = 2
+	// Items by release date.
+	HubKind_HUB_KIND_RECENTLY_RELEASED HubKind = 3
+	// Episodes by air date.
+	HubKind_HUB_KIND_RECENTLY_AIRED HubKind = 4
+	HubKind_HUB_KIND_TOP_RATED      HubKind = 5
+	// The best rated items the user has not played.
+	HubKind_HUB_KIND_TOP_UNPLAYED HubKind = 6
+	// The series the user has not begun.
+	HubKind_HUB_KIND_START_WATCHING HubKind = 7
+	// What the user played long ago: items last played over a year ago,
+	// series last watched over half a year ago.
+	HubKind_HUB_KIND_REDISCOVER HubKind = 8
+	// The seeded hubs: items like one the user played lately or likes, and
+	// items of a genre, actor or director of what they played lately.
+	HubKind_HUB_KIND_BECAUSE_YOU_WATCHED HubKind = 9
+	HubKind_HUB_KIND_BECAUSE_YOU_LIKE    HubKind = 10
+	HubKind_HUB_KIND_MORE_IN_GENRE       HubKind = 11
+	HubKind_HUB_KIND_STARRING            HubKind = 12
+	HubKind_HUB_KIND_DIRECTED_BY         HubKind = 13
+	// The items the user requested that became available; Home only.
+	HubKind_HUB_KIND_AVAILABLE_REQUESTS HubKind = 14
+	// The trending titles of discovery the server lacks; Home only.
+	HubKind_HUB_KIND_TRENDING HubKind = 15
+)
+
+// Enum value maps for HubKind.
+var (
+	HubKind_name = map[int32]string{
+		0:  "HUB_KIND_UNSPECIFIED",
+		1:  "HUB_KIND_CONTINUE_WATCHING",
+		2:  "HUB_KIND_RECENTLY_ADDED",
+		3:  "HUB_KIND_RECENTLY_RELEASED",
+		4:  "HUB_KIND_RECENTLY_AIRED",
+		5:  "HUB_KIND_TOP_RATED",
+		6:  "HUB_KIND_TOP_UNPLAYED",
+		7:  "HUB_KIND_START_WATCHING",
+		8:  "HUB_KIND_REDISCOVER",
+		9:  "HUB_KIND_BECAUSE_YOU_WATCHED",
+		10: "HUB_KIND_BECAUSE_YOU_LIKE",
+		11: "HUB_KIND_MORE_IN_GENRE",
+		12: "HUB_KIND_STARRING",
+		13: "HUB_KIND_DIRECTED_BY",
+		14: "HUB_KIND_AVAILABLE_REQUESTS",
+		15: "HUB_KIND_TRENDING",
+	}
+	HubKind_value = map[string]int32{
+		"HUB_KIND_UNSPECIFIED":         0,
+		"HUB_KIND_CONTINUE_WATCHING":   1,
+		"HUB_KIND_RECENTLY_ADDED":      2,
+		"HUB_KIND_RECENTLY_RELEASED":   3,
+		"HUB_KIND_RECENTLY_AIRED":      4,
+		"HUB_KIND_TOP_RATED":           5,
+		"HUB_KIND_TOP_UNPLAYED":        6,
+		"HUB_KIND_START_WATCHING":      7,
+		"HUB_KIND_REDISCOVER":          8,
+		"HUB_KIND_BECAUSE_YOU_WATCHED": 9,
+		"HUB_KIND_BECAUSE_YOU_LIKE":    10,
+		"HUB_KIND_MORE_IN_GENRE":       11,
+		"HUB_KIND_STARRING":            12,
+		"HUB_KIND_DIRECTED_BY":         13,
+		"HUB_KIND_AVAILABLE_REQUESTS":  14,
+		"HUB_KIND_TRENDING":            15,
+	}
+)
+
+func (x HubKind) Enum() *HubKind {
+	p := new(HubKind)
+	*p = x
+	return p
+}
+
+func (x HubKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (HubKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_library_v1_library_proto_enumTypes[1].Descriptor()
+}
+
+func (HubKind) Type() protoreflect.EnumType {
+	return &file_mavio_library_v1_library_proto_enumTypes[1]
+}
+
+func (x HubKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // Library is a named set of root folders scanned as one collection.
 type Library struct {
 	state                           protoimpl.MessageState `protogen:"opaque.v1"`
@@ -116,6 +213,7 @@ type Library struct {
 	xxx_hidden_DownloadLyrics       bool                   `protobuf:"varint,15,opt,name=download_lyrics,json=downloadLyrics"`
 	xxx_hidden_ProviderOrder        *ProviderOrder         `protobuf:"bytes,16,opt,name=provider_order,json=providerOrder"`
 	xxx_hidden_VirtualEpisodes      *VirtualEpisodes       `protobuf:"bytes,17,opt,name=virtual_episodes,json=virtualEpisodes"`
+	xxx_hidden_Hubs                 *LibraryHubs           `protobuf:"bytes,18,opt,name=hubs"`
 	XXX_raceDetectHookData          protoimpl.RaceDetectHookData
 	XXX_presence                    [1]uint32
 	unknownFields                   protoimpl.UnknownFields
@@ -280,19 +378,26 @@ func (x *Library) GetVirtualEpisodes() *VirtualEpisodes {
 	return nil
 }
 
+func (x *Library) GetHubs() *LibraryHubs {
+	if x != nil {
+		return x.xxx_hidden_Hubs
+	}
+	return nil
+}
+
 func (x *Library) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 18)
 }
 
 func (x *Library) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 18)
 }
 
 func (x *Library) SetKind(v LibraryKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 18)
 }
 
 func (x *Library) SetPaths(v []string) {
@@ -305,12 +410,12 @@ func (x *Library) SetScanInterval(v *durationpb.Duration) {
 
 func (x *Library) SetPreferredLanguage(v string) {
 	x.xxx_hidden_PreferredLanguage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 18)
 }
 
 func (x *Library) SetMetadataCountry(v string) {
 	x.xxx_hidden_MetadataCountry = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 18)
 }
 
 func (x *Library) SetCreateTime(v *timestamppb.Timestamp) {
@@ -323,32 +428,32 @@ func (x *Library) SetUpdateTime(v *timestamppb.Timestamp) {
 
 func (x *Library) SetSaveLocalMetadata(v bool) {
 	x.xxx_hidden_SaveLocalMetadata = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 18)
 }
 
 func (x *Library) SetAutoCollections(v bool) {
 	x.xxx_hidden_AutoCollections = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 18)
 }
 
 func (x *Library) SetExtractTrickplay(v bool) {
 	x.xxx_hidden_ExtractTrickplay = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 18)
 }
 
 func (x *Library) SetExtractChapterImages(v bool) {
 	x.xxx_hidden_ExtractChapterImages = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 18)
 }
 
 func (x *Library) SetAnalyzeLoudness(v bool) {
 	x.xxx_hidden_AnalyzeLoudness = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 18)
 }
 
 func (x *Library) SetDownloadLyrics(v bool) {
 	x.xxx_hidden_DownloadLyrics = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 17)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 18)
 }
 
 func (x *Library) SetProviderOrder(v *ProviderOrder) {
@@ -357,6 +462,10 @@ func (x *Library) SetProviderOrder(v *ProviderOrder) {
 
 func (x *Library) SetVirtualEpisodes(v *VirtualEpisodes) {
 	x.xxx_hidden_VirtualEpisodes = v
+}
+
+func (x *Library) SetHubs(v *LibraryHubs) {
+	x.xxx_hidden_Hubs = v
 }
 
 func (x *Library) HasId() bool {
@@ -471,6 +580,13 @@ func (x *Library) HasVirtualEpisodes() bool {
 	return x.xxx_hidden_VirtualEpisodes != nil
 }
 
+func (x *Library) HasHubs() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Hubs != nil
+}
+
 func (x *Library) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -546,6 +662,10 @@ func (x *Library) ClearVirtualEpisodes() {
 	x.xxx_hidden_VirtualEpisodes = nil
 }
 
+func (x *Library) ClearHubs() {
+	x.xxx_hidden_Hubs = nil
+}
+
 type Library_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -579,6 +699,8 @@ type Library_builder struct {
 	ProviderOrder *ProviderOrder
 	// The episodes a series lacks that refreshes add to it as virtual items.
 	VirtualEpisodes *VirtualEpisodes
+	// The hubs of the library on Home and on its Recommended tab.
+	Hubs *LibraryHubs
 }
 
 func (b0 Library_builder) Build() *Library {
@@ -586,55 +708,56 @@ func (b0 Library_builder) Build() *Library {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 18)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 18)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 18)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	x.xxx_hidden_Paths = b.Paths
 	x.xxx_hidden_ScanInterval = b.ScanInterval
 	if b.PreferredLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 18)
 		x.xxx_hidden_PreferredLanguage = b.PreferredLanguage
 	}
 	if b.MetadataCountry != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 18)
 		x.xxx_hidden_MetadataCountry = b.MetadataCountry
 	}
 	x.xxx_hidden_CreateTime = b.CreateTime
 	x.xxx_hidden_UpdateTime = b.UpdateTime
 	if b.SaveLocalMetadata != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 18)
 		x.xxx_hidden_SaveLocalMetadata = *b.SaveLocalMetadata
 	}
 	if b.AutoCollections != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 18)
 		x.xxx_hidden_AutoCollections = *b.AutoCollections
 	}
 	if b.ExtractTrickplay != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 18)
 		x.xxx_hidden_ExtractTrickplay = *b.ExtractTrickplay
 	}
 	if b.ExtractChapterImages != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 18)
 		x.xxx_hidden_ExtractChapterImages = *b.ExtractChapterImages
 	}
 	if b.AnalyzeLoudness != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 18)
 		x.xxx_hidden_AnalyzeLoudness = *b.AnalyzeLoudness
 	}
 	if b.DownloadLyrics != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 17)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 18)
 		x.xxx_hidden_DownloadLyrics = *b.DownloadLyrics
 	}
 	x.xxx_hidden_ProviderOrder = b.ProviderOrder
 	x.xxx_hidden_VirtualEpisodes = b.VirtualEpisodes
+	x.xxx_hidden_Hubs = b.Hubs
 	return m0
 }
 
@@ -811,6 +934,161 @@ func (b0 VirtualEpisodes_builder) Build() *VirtualEpisodes {
 	return m0
 }
 
+// LibraryHubs are the hubs an administrator chose for a library, in
+// order. An unset list keeps the defaults of the library's kind; an empty
+// one shows none. Continue watching on Home spans the libraries and is not
+// among a library's Home hubs.
+type LibraryHubs struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Home        *HubList               `protobuf:"bytes,1,opt,name=home"`
+	xxx_hidden_Recommended *HubList               `protobuf:"bytes,2,opt,name=recommended"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *LibraryHubs) Reset() {
+	*x = LibraryHubs{}
+	mi := &file_mavio_library_v1_library_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LibraryHubs) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LibraryHubs) ProtoMessage() {}
+
+func (x *LibraryHubs) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_library_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *LibraryHubs) GetHome() *HubList {
+	if x != nil {
+		return x.xxx_hidden_Home
+	}
+	return nil
+}
+
+func (x *LibraryHubs) GetRecommended() *HubList {
+	if x != nil {
+		return x.xxx_hidden_Recommended
+	}
+	return nil
+}
+
+func (x *LibraryHubs) SetHome(v *HubList) {
+	x.xxx_hidden_Home = v
+}
+
+func (x *LibraryHubs) SetRecommended(v *HubList) {
+	x.xxx_hidden_Recommended = v
+}
+
+func (x *LibraryHubs) HasHome() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Home != nil
+}
+
+func (x *LibraryHubs) HasRecommended() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Recommended != nil
+}
+
+func (x *LibraryHubs) ClearHome() {
+	x.xxx_hidden_Home = nil
+}
+
+func (x *LibraryHubs) ClearRecommended() {
+	x.xxx_hidden_Recommended = nil
+}
+
+type LibraryHubs_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Home        *HubList
+	Recommended *HubList
+}
+
+func (b0 LibraryHubs_builder) Build() *LibraryHubs {
+	m0 := &LibraryHubs{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Home = b.Home
+	x.xxx_hidden_Recommended = b.Recommended
+	return m0
+}
+
+// HubList lists hub kinds in order.
+type HubList struct {
+	state            protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Kinds []HubKind              `protobuf:"varint,1,rep,packed,name=kinds,enum=mavio.library.v1.HubKind"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *HubList) Reset() {
+	*x = HubList{}
+	mi := &file_mavio_library_v1_library_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HubList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HubList) ProtoMessage() {}
+
+func (x *HubList) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_library_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *HubList) GetKinds() []HubKind {
+	if x != nil {
+		return x.xxx_hidden_Kinds
+	}
+	return nil
+}
+
+func (x *HubList) SetKinds(v []HubKind) {
+	x.xxx_hidden_Kinds = v
+}
+
+type HubList_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Kinds []HubKind
+}
+
+func (b0 HubList_builder) Build() *HubList {
+	m0 := &HubList{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Kinds = b.Kinds
+	return m0
+}
+
 // ProviderOrder names the providers a library uses of each capability.
 // An unset list uses every provider, in plugin ID order; an empty one
 // uses none.
@@ -828,7 +1106,7 @@ type ProviderOrder struct {
 
 func (x *ProviderOrder) Reset() {
 	*x = ProviderOrder{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[2]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -840,7 +1118,7 @@ func (x *ProviderOrder) String() string {
 func (*ProviderOrder) ProtoMessage() {}
 
 func (x *ProviderOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[2]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1018,7 +1296,7 @@ type ProviderList struct {
 
 func (x *ProviderList) Reset() {
 	*x = ProviderList{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[3]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1030,7 +1308,7 @@ func (x *ProviderList) String() string {
 func (*ProviderList) ProtoMessage() {}
 
 func (x *ProviderList) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[3]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1083,6 +1361,7 @@ type LibrarySpec struct {
 	xxx_hidden_DownloadLyrics       bool                   `protobuf:"varint,12,opt,name=download_lyrics,json=downloadLyrics"`
 	xxx_hidden_ProviderOrder        *ProviderOrder         `protobuf:"bytes,13,opt,name=provider_order,json=providerOrder"`
 	xxx_hidden_VirtualEpisodes      *VirtualEpisodes       `protobuf:"bytes,14,opt,name=virtual_episodes,json=virtualEpisodes"`
+	xxx_hidden_Hubs                 *LibraryHubs           `protobuf:"bytes,15,opt,name=hubs"`
 	XXX_raceDetectHookData          protoimpl.RaceDetectHookData
 	XXX_presence                    [1]uint32
 	unknownFields                   protoimpl.UnknownFields
@@ -1091,7 +1370,7 @@ type LibrarySpec struct {
 
 func (x *LibrarySpec) Reset() {
 	*x = LibrarySpec{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[4]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1103,7 +1382,7 @@ func (x *LibrarySpec) String() string {
 func (*LibrarySpec) ProtoMessage() {}
 
 func (x *LibrarySpec) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[4]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1223,14 +1502,21 @@ func (x *LibrarySpec) GetVirtualEpisodes() *VirtualEpisodes {
 	return nil
 }
 
+func (x *LibrarySpec) GetHubs() *LibraryHubs {
+	if x != nil {
+		return x.xxx_hidden_Hubs
+	}
+	return nil
+}
+
 func (x *LibrarySpec) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 14)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 15)
 }
 
 func (x *LibrarySpec) SetKind(v LibraryKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 14)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 15)
 }
 
 func (x *LibrarySpec) SetPaths(v []string) {
@@ -1243,42 +1529,42 @@ func (x *LibrarySpec) SetScanInterval(v *durationpb.Duration) {
 
 func (x *LibrarySpec) SetPreferredLanguage(v string) {
 	x.xxx_hidden_PreferredLanguage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 14)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 15)
 }
 
 func (x *LibrarySpec) SetMetadataCountry(v string) {
 	x.xxx_hidden_MetadataCountry = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 14)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 15)
 }
 
 func (x *LibrarySpec) SetSaveLocalMetadata(v bool) {
 	x.xxx_hidden_SaveLocalMetadata = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 14)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 15)
 }
 
 func (x *LibrarySpec) SetAutoCollections(v bool) {
 	x.xxx_hidden_AutoCollections = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 14)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 15)
 }
 
 func (x *LibrarySpec) SetExtractTrickplay(v bool) {
 	x.xxx_hidden_ExtractTrickplay = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 14)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 15)
 }
 
 func (x *LibrarySpec) SetExtractChapterImages(v bool) {
 	x.xxx_hidden_ExtractChapterImages = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 14)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 15)
 }
 
 func (x *LibrarySpec) SetAnalyzeLoudness(v bool) {
 	x.xxx_hidden_AnalyzeLoudness = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 14)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 15)
 }
 
 func (x *LibrarySpec) SetDownloadLyrics(v bool) {
 	x.xxx_hidden_DownloadLyrics = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 14)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 15)
 }
 
 func (x *LibrarySpec) SetProviderOrder(v *ProviderOrder) {
@@ -1287,6 +1573,10 @@ func (x *LibrarySpec) SetProviderOrder(v *ProviderOrder) {
 
 func (x *LibrarySpec) SetVirtualEpisodes(v *VirtualEpisodes) {
 	x.xxx_hidden_VirtualEpisodes = v
+}
+
+func (x *LibrarySpec) SetHubs(v *LibraryHubs) {
+	x.xxx_hidden_Hubs = v
 }
 
 func (x *LibrarySpec) HasName() bool {
@@ -1380,6 +1670,13 @@ func (x *LibrarySpec) HasVirtualEpisodes() bool {
 	return x.xxx_hidden_VirtualEpisodes != nil
 }
 
+func (x *LibrarySpec) HasHubs() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Hubs != nil
+}
+
 func (x *LibrarySpec) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -1442,6 +1739,10 @@ func (x *LibrarySpec) ClearVirtualEpisodes() {
 	x.xxx_hidden_VirtualEpisodes = nil
 }
 
+func (x *LibrarySpec) ClearHubs() {
+	x.xxx_hidden_Hubs = nil
+}
+
 type LibrarySpec_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1459,6 +1760,7 @@ type LibrarySpec_builder struct {
 	DownloadLyrics       *bool
 	ProviderOrder        *ProviderOrder
 	VirtualEpisodes      *VirtualEpisodes
+	Hubs                 *LibraryHubs
 }
 
 func (b0 LibrarySpec_builder) Build() *LibrarySpec {
@@ -1466,49 +1768,50 @@ func (b0 LibrarySpec_builder) Build() *LibrarySpec {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 14)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 15)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 14)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 15)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	x.xxx_hidden_Paths = b.Paths
 	x.xxx_hidden_ScanInterval = b.ScanInterval
 	if b.PreferredLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 14)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 15)
 		x.xxx_hidden_PreferredLanguage = b.PreferredLanguage
 	}
 	if b.MetadataCountry != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 14)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 15)
 		x.xxx_hidden_MetadataCountry = b.MetadataCountry
 	}
 	if b.SaveLocalMetadata != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 14)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 15)
 		x.xxx_hidden_SaveLocalMetadata = *b.SaveLocalMetadata
 	}
 	if b.AutoCollections != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 14)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 15)
 		x.xxx_hidden_AutoCollections = *b.AutoCollections
 	}
 	if b.ExtractTrickplay != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 14)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 15)
 		x.xxx_hidden_ExtractTrickplay = *b.ExtractTrickplay
 	}
 	if b.ExtractChapterImages != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 14)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 15)
 		x.xxx_hidden_ExtractChapterImages = *b.ExtractChapterImages
 	}
 	if b.AnalyzeLoudness != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 14)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 15)
 		x.xxx_hidden_AnalyzeLoudness = *b.AnalyzeLoudness
 	}
 	if b.DownloadLyrics != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 14)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 15)
 		x.xxx_hidden_DownloadLyrics = *b.DownloadLyrics
 	}
 	x.xxx_hidden_ProviderOrder = b.ProviderOrder
 	x.xxx_hidden_VirtualEpisodes = b.VirtualEpisodes
+	x.xxx_hidden_Hubs = b.Hubs
 	return m0
 }
 
@@ -1520,7 +1823,7 @@ type ListLibrariesRequest struct {
 
 func (x *ListLibrariesRequest) Reset() {
 	*x = ListLibrariesRequest{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[5]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1532,7 +1835,7 @@ func (x *ListLibrariesRequest) String() string {
 func (*ListLibrariesRequest) ProtoMessage() {}
 
 func (x *ListLibrariesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[5]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1564,7 +1867,7 @@ type ListLibrariesResponse struct {
 
 func (x *ListLibrariesResponse) Reset() {
 	*x = ListLibrariesResponse{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[6]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1576,7 +1879,7 @@ func (x *ListLibrariesResponse) String() string {
 func (*ListLibrariesResponse) ProtoMessage() {}
 
 func (x *ListLibrariesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[6]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1625,7 +1928,7 @@ type GetLibraryRequest struct {
 
 func (x *GetLibraryRequest) Reset() {
 	*x = GetLibraryRequest{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[7]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1637,7 +1940,7 @@ func (x *GetLibraryRequest) String() string {
 func (*GetLibraryRequest) ProtoMessage() {}
 
 func (x *GetLibraryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[7]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1701,7 +2004,7 @@ type GetLibraryResponse struct {
 
 func (x *GetLibraryResponse) Reset() {
 	*x = GetLibraryResponse{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[8]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1713,7 +2016,7 @@ func (x *GetLibraryResponse) String() string {
 func (*GetLibraryResponse) ProtoMessage() {}
 
 func (x *GetLibraryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[8]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1769,7 +2072,7 @@ type CreateLibraryRequest struct {
 
 func (x *CreateLibraryRequest) Reset() {
 	*x = CreateLibraryRequest{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[9]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1781,7 +2084,7 @@ func (x *CreateLibraryRequest) String() string {
 func (*CreateLibraryRequest) ProtoMessage() {}
 
 func (x *CreateLibraryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[9]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1837,7 +2140,7 @@ type CreateLibraryResponse struct {
 
 func (x *CreateLibraryResponse) Reset() {
 	*x = CreateLibraryResponse{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[10]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1849,7 +2152,7 @@ func (x *CreateLibraryResponse) String() string {
 func (*CreateLibraryResponse) ProtoMessage() {}
 
 func (x *CreateLibraryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[10]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1908,7 +2211,7 @@ type UpdateLibraryRequest struct {
 
 func (x *UpdateLibraryRequest) Reset() {
 	*x = UpdateLibraryRequest{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[11]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1920,7 +2223,7 @@ func (x *UpdateLibraryRequest) String() string {
 func (*UpdateLibraryRequest) ProtoMessage() {}
 
 func (x *UpdateLibraryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[11]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2008,7 +2311,7 @@ type UpdateLibraryResponse struct {
 
 func (x *UpdateLibraryResponse) Reset() {
 	*x = UpdateLibraryResponse{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[12]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2020,7 +2323,7 @@ func (x *UpdateLibraryResponse) String() string {
 func (*UpdateLibraryResponse) ProtoMessage() {}
 
 func (x *UpdateLibraryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[12]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2078,7 +2381,7 @@ type DeleteLibraryRequest struct {
 
 func (x *DeleteLibraryRequest) Reset() {
 	*x = DeleteLibraryRequest{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[13]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2090,7 +2393,7 @@ func (x *DeleteLibraryRequest) String() string {
 func (*DeleteLibraryRequest) ProtoMessage() {}
 
 func (x *DeleteLibraryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[13]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2153,7 +2456,7 @@ type DeleteLibraryResponse struct {
 
 func (x *DeleteLibraryResponse) Reset() {
 	*x = DeleteLibraryResponse{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[14]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2165,7 +2468,7 @@ func (x *DeleteLibraryResponse) String() string {
 func (*DeleteLibraryResponse) ProtoMessage() {}
 
 func (x *DeleteLibraryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[14]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2199,7 +2502,7 @@ type ScanLibraryRequest struct {
 
 func (x *ScanLibraryRequest) Reset() {
 	*x = ScanLibraryRequest{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[15]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2211,7 +2514,7 @@ func (x *ScanLibraryRequest) String() string {
 func (*ScanLibraryRequest) ProtoMessage() {}
 
 func (x *ScanLibraryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[15]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2278,7 +2581,7 @@ type ScanLibraryResponse struct {
 
 func (x *ScanLibraryResponse) Reset() {
 	*x = ScanLibraryResponse{}
-	mi := &file_mavio_library_v1_library_proto_msgTypes[16]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2290,7 +2593,7 @@ func (x *ScanLibraryResponse) String() string {
 func (*ScanLibraryResponse) ProtoMessage() {}
 
 func (x *ScanLibraryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_library_proto_msgTypes[16]
+	mi := &file_mavio_library_v1_library_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2379,7 +2682,7 @@ var File_mavio_library_v1_library_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\n" +
-	"\x1emavio/library/v1/library.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb2\x06\n" +
+	"\x1emavio/library/v1/library.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe5\x06\n" +
 	"\aLibrary\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x121\n" +
@@ -2400,14 +2703,20 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\x10analyze_loudness\x18\x0e \x01(\bR\x0fanalyzeLoudness\x12'\n" +
 	"\x0fdownload_lyrics\x18\x0f \x01(\bR\x0edownloadLyrics\x12F\n" +
 	"\x0eprovider_order\x18\x10 \x01(\v2\x1f.mavio.library.v1.ProviderOrderR\rproviderOrder\x12L\n" +
-	"\x10virtual_episodes\x18\x11 \x01(\v2!.mavio.library.v1.VirtualEpisodesR\x0fvirtualEpisodes\"\x8c\x01\n" +
+	"\x10virtual_episodes\x18\x11 \x01(\v2!.mavio.library.v1.VirtualEpisodesR\x0fvirtualEpisodes\x121\n" +
+	"\x04hubs\x18\x12 \x01(\v2\x1d.mavio.library.v1.LibraryHubsR\x04hubs\"\x8c\x01\n" +
 	"\x0fVirtualEpisodes\x12\x18\n" +
 	"\amissing\x18\x01 \x01(\bR\amissing\x12\x18\n" +
 	"\aunaired\x18\x02 \x01(\bR\aunaired\x12\x1a\n" +
 	"\bspecials\x18\x03 \x01(\bR\bspecials\x12)\n" +
 	"\n" +
 	"grace_days\x18\x04 \x01(\x05B\n" +
-	"\xbaH\a\x1a\x05\x18\xc2\x1c(\x00R\tgraceDays\"\xf1\x02\n" +
+	"\xbaH\a\x1a\x05\x18\xc2\x1c(\x00R\tgraceDays\"y\n" +
+	"\vLibraryHubs\x12-\n" +
+	"\x04home\x18\x01 \x01(\v2\x19.mavio.library.v1.HubListR\x04home\x12;\n" +
+	"\vrecommended\x18\x02 \x01(\v2\x19.mavio.library.v1.HubListR\vrecommended\"O\n" +
+	"\aHubList\x12D\n" +
+	"\x05kinds\x18\x01 \x03(\x0e2\x19.mavio.library.v1.HubKindB\x13\xbaH\x10\x92\x01\r\x10 \x18\x01\"\a\x82\x01\x04\x10\x01 \x00R\x05kinds\"\xf1\x02\n" +
 	"\rProviderOrder\x12:\n" +
 	"\bmetadata\x18\x01 \x01(\v2\x1e.mavio.library.v1.ProviderListR\bmetadata\x126\n" +
 	"\x06images\x18\x02 \x01(\v2\x1e.mavio.library.v1.ProviderListR\x06images\x12<\n" +
@@ -2417,7 +2726,7 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\bepisodes\x18\x06 \x01(\v2\x1e.mavio.library.v1.ProviderListR\bepisodes\"B\n" +
 	"\fProviderList\x122\n" +
 	"\n" +
-	"plugin_ids\x18\x01 \x03(\tB\x13\xbaH\x10\x92\x01\r\x10@\x18\x01\"\ar\x05\x10\x01\x18\x80\x01R\tpluginIds\"\x90\x06\n" +
+	"plugin_ids\x18\x01 \x03(\tB\x13\xbaH\x10\x92\x01\r\x10@\x18\x01\"\ar\x05\x10\x01\x18\x80\x01R\tpluginIds\"\xc3\x06\n" +
 	"\vLibrarySpec\x12!\n" +
 	"\x04name\x18\x01 \x01(\tB\r\xbaH\n" +
 	"\xc8\x01\x01r\x05\x10\x01\x18\xc8\x01R\x04name\x12@\n" +
@@ -2435,7 +2744,8 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\x10analyze_loudness\x18\v \x01(\bR\x0fanalyzeLoudness\x12'\n" +
 	"\x0fdownload_lyrics\x18\f \x01(\bR\x0edownloadLyrics\x12F\n" +
 	"\x0eprovider_order\x18\r \x01(\v2\x1f.mavio.library.v1.ProviderOrderR\rproviderOrder\x12L\n" +
-	"\x10virtual_episodes\x18\x0e \x01(\v2!.mavio.library.v1.VirtualEpisodesR\x0fvirtualEpisodes\"\x16\n" +
+	"\x10virtual_episodes\x18\x0e \x01(\v2!.mavio.library.v1.VirtualEpisodesR\x0fvirtualEpisodes\x121\n" +
+	"\x04hubs\x18\x0f \x01(\v2\x1d.mavio.library.v1.LibraryHubsR\x04hubs\"\x16\n" +
 	"\x14ListLibrariesRequest\"P\n" +
 	"\x15ListLibrariesResponse\x127\n" +
 	"\tlibraries\x18\x01 \x03(\v2\x19.mavio.library.v1.LibraryR\tlibraries\"0\n" +
@@ -2472,7 +2782,25 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\x12LIBRARY_KIND_MIXED\x10\b\x12\x1c\n" +
 	"\x18LIBRARY_KIND_COLLECTIONS\x10\t\x12\x1a\n" +
 	"\x16LIBRARY_KIND_PLAYLISTS\x10\n" +
-	"2\xd7\x04\n" +
+	"*\xcc\x03\n" +
+	"\aHubKind\x12\x18\n" +
+	"\x14HUB_KIND_UNSPECIFIED\x10\x00\x12\x1e\n" +
+	"\x1aHUB_KIND_CONTINUE_WATCHING\x10\x01\x12\x1b\n" +
+	"\x17HUB_KIND_RECENTLY_ADDED\x10\x02\x12\x1e\n" +
+	"\x1aHUB_KIND_RECENTLY_RELEASED\x10\x03\x12\x1b\n" +
+	"\x17HUB_KIND_RECENTLY_AIRED\x10\x04\x12\x16\n" +
+	"\x12HUB_KIND_TOP_RATED\x10\x05\x12\x19\n" +
+	"\x15HUB_KIND_TOP_UNPLAYED\x10\x06\x12\x1b\n" +
+	"\x17HUB_KIND_START_WATCHING\x10\a\x12\x17\n" +
+	"\x13HUB_KIND_REDISCOVER\x10\b\x12 \n" +
+	"\x1cHUB_KIND_BECAUSE_YOU_WATCHED\x10\t\x12\x1d\n" +
+	"\x19HUB_KIND_BECAUSE_YOU_LIKE\x10\n" +
+	"\x12\x1a\n" +
+	"\x16HUB_KIND_MORE_IN_GENRE\x10\v\x12\x15\n" +
+	"\x11HUB_KIND_STARRING\x10\f\x12\x18\n" +
+	"\x14HUB_KIND_DIRECTED_BY\x10\r\x12\x1f\n" +
+	"\x1bHUB_KIND_AVAILABLE_REQUESTS\x10\x0e\x12\x15\n" +
+	"\x11HUB_KIND_TRENDING\x10\x0f2\xd7\x04\n" +
 	"\x0eLibraryService\x12e\n" +
 	"\rListLibraries\x12&.mavio.library.v1.ListLibrariesRequest\x1a'.mavio.library.v1.ListLibrariesResponse\"\x03\x90\x02\x01\x12\\\n" +
 	"\n" +
@@ -2483,70 +2811,78 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\vScanLibrary\x12$.mavio.library.v1.ScanLibraryRequest\x1a%.mavio.library.v1.ScanLibraryResponseB\xcd\x01\n" +
 	"\x14com.mavio.library.v1B\fLibraryProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1;libraryv1\xa2\x02\x03MLX\xaa\x02\x10Mavio.Library.V1\xca\x02\x10Mavio\\Library\\V1\xe2\x02\x1cMavio\\Library\\V1\\GPBMetadata\xea\x02\x12Mavio::Library::V1b\beditionsp\xe8\a"
 
-var file_mavio_library_v1_library_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mavio_library_v1_library_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_mavio_library_v1_library_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_mavio_library_v1_library_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_mavio_library_v1_library_proto_goTypes = []any{
 	(LibraryKind)(0),              // 0: mavio.library.v1.LibraryKind
-	(*Library)(nil),               // 1: mavio.library.v1.Library
-	(*VirtualEpisodes)(nil),       // 2: mavio.library.v1.VirtualEpisodes
-	(*ProviderOrder)(nil),         // 3: mavio.library.v1.ProviderOrder
-	(*ProviderList)(nil),          // 4: mavio.library.v1.ProviderList
-	(*LibrarySpec)(nil),           // 5: mavio.library.v1.LibrarySpec
-	(*ListLibrariesRequest)(nil),  // 6: mavio.library.v1.ListLibrariesRequest
-	(*ListLibrariesResponse)(nil), // 7: mavio.library.v1.ListLibrariesResponse
-	(*GetLibraryRequest)(nil),     // 8: mavio.library.v1.GetLibraryRequest
-	(*GetLibraryResponse)(nil),    // 9: mavio.library.v1.GetLibraryResponse
-	(*CreateLibraryRequest)(nil),  // 10: mavio.library.v1.CreateLibraryRequest
-	(*CreateLibraryResponse)(nil), // 11: mavio.library.v1.CreateLibraryResponse
-	(*UpdateLibraryRequest)(nil),  // 12: mavio.library.v1.UpdateLibraryRequest
-	(*UpdateLibraryResponse)(nil), // 13: mavio.library.v1.UpdateLibraryResponse
-	(*DeleteLibraryRequest)(nil),  // 14: mavio.library.v1.DeleteLibraryRequest
-	(*DeleteLibraryResponse)(nil), // 15: mavio.library.v1.DeleteLibraryResponse
-	(*ScanLibraryRequest)(nil),    // 16: mavio.library.v1.ScanLibraryRequest
-	(*ScanLibraryResponse)(nil),   // 17: mavio.library.v1.ScanLibraryResponse
-	(*durationpb.Duration)(nil),   // 18: google.protobuf.Duration
-	(*timestamppb.Timestamp)(nil), // 19: google.protobuf.Timestamp
+	(HubKind)(0),                  // 1: mavio.library.v1.HubKind
+	(*Library)(nil),               // 2: mavio.library.v1.Library
+	(*VirtualEpisodes)(nil),       // 3: mavio.library.v1.VirtualEpisodes
+	(*LibraryHubs)(nil),           // 4: mavio.library.v1.LibraryHubs
+	(*HubList)(nil),               // 5: mavio.library.v1.HubList
+	(*ProviderOrder)(nil),         // 6: mavio.library.v1.ProviderOrder
+	(*ProviderList)(nil),          // 7: mavio.library.v1.ProviderList
+	(*LibrarySpec)(nil),           // 8: mavio.library.v1.LibrarySpec
+	(*ListLibrariesRequest)(nil),  // 9: mavio.library.v1.ListLibrariesRequest
+	(*ListLibrariesResponse)(nil), // 10: mavio.library.v1.ListLibrariesResponse
+	(*GetLibraryRequest)(nil),     // 11: mavio.library.v1.GetLibraryRequest
+	(*GetLibraryResponse)(nil),    // 12: mavio.library.v1.GetLibraryResponse
+	(*CreateLibraryRequest)(nil),  // 13: mavio.library.v1.CreateLibraryRequest
+	(*CreateLibraryResponse)(nil), // 14: mavio.library.v1.CreateLibraryResponse
+	(*UpdateLibraryRequest)(nil),  // 15: mavio.library.v1.UpdateLibraryRequest
+	(*UpdateLibraryResponse)(nil), // 16: mavio.library.v1.UpdateLibraryResponse
+	(*DeleteLibraryRequest)(nil),  // 17: mavio.library.v1.DeleteLibraryRequest
+	(*DeleteLibraryResponse)(nil), // 18: mavio.library.v1.DeleteLibraryResponse
+	(*ScanLibraryRequest)(nil),    // 19: mavio.library.v1.ScanLibraryRequest
+	(*ScanLibraryResponse)(nil),   // 20: mavio.library.v1.ScanLibraryResponse
+	(*durationpb.Duration)(nil),   // 21: google.protobuf.Duration
+	(*timestamppb.Timestamp)(nil), // 22: google.protobuf.Timestamp
 }
 var file_mavio_library_v1_library_proto_depIdxs = []int32{
 	0,  // 0: mavio.library.v1.Library.kind:type_name -> mavio.library.v1.LibraryKind
-	18, // 1: mavio.library.v1.Library.scan_interval:type_name -> google.protobuf.Duration
-	19, // 2: mavio.library.v1.Library.create_time:type_name -> google.protobuf.Timestamp
-	19, // 3: mavio.library.v1.Library.update_time:type_name -> google.protobuf.Timestamp
-	3,  // 4: mavio.library.v1.Library.provider_order:type_name -> mavio.library.v1.ProviderOrder
-	2,  // 5: mavio.library.v1.Library.virtual_episodes:type_name -> mavio.library.v1.VirtualEpisodes
-	4,  // 6: mavio.library.v1.ProviderOrder.metadata:type_name -> mavio.library.v1.ProviderList
-	4,  // 7: mavio.library.v1.ProviderOrder.images:type_name -> mavio.library.v1.ProviderList
-	4,  // 8: mavio.library.v1.ProviderOrder.subtitles:type_name -> mavio.library.v1.ProviderList
-	4,  // 9: mavio.library.v1.ProviderOrder.lyrics:type_name -> mavio.library.v1.ProviderList
-	4,  // 10: mavio.library.v1.ProviderOrder.segments:type_name -> mavio.library.v1.ProviderList
-	4,  // 11: mavio.library.v1.ProviderOrder.episodes:type_name -> mavio.library.v1.ProviderList
-	0,  // 12: mavio.library.v1.LibrarySpec.kind:type_name -> mavio.library.v1.LibraryKind
-	18, // 13: mavio.library.v1.LibrarySpec.scan_interval:type_name -> google.protobuf.Duration
-	3,  // 14: mavio.library.v1.LibrarySpec.provider_order:type_name -> mavio.library.v1.ProviderOrder
-	2,  // 15: mavio.library.v1.LibrarySpec.virtual_episodes:type_name -> mavio.library.v1.VirtualEpisodes
-	1,  // 16: mavio.library.v1.ListLibrariesResponse.libraries:type_name -> mavio.library.v1.Library
-	1,  // 17: mavio.library.v1.GetLibraryResponse.library:type_name -> mavio.library.v1.Library
-	5,  // 18: mavio.library.v1.CreateLibraryRequest.spec:type_name -> mavio.library.v1.LibrarySpec
-	1,  // 19: mavio.library.v1.CreateLibraryResponse.library:type_name -> mavio.library.v1.Library
-	5,  // 20: mavio.library.v1.UpdateLibraryRequest.spec:type_name -> mavio.library.v1.LibrarySpec
-	1,  // 21: mavio.library.v1.UpdateLibraryResponse.library:type_name -> mavio.library.v1.Library
-	6,  // 22: mavio.library.v1.LibraryService.ListLibraries:input_type -> mavio.library.v1.ListLibrariesRequest
-	8,  // 23: mavio.library.v1.LibraryService.GetLibrary:input_type -> mavio.library.v1.GetLibraryRequest
-	10, // 24: mavio.library.v1.LibraryService.CreateLibrary:input_type -> mavio.library.v1.CreateLibraryRequest
-	12, // 25: mavio.library.v1.LibraryService.UpdateLibrary:input_type -> mavio.library.v1.UpdateLibraryRequest
-	14, // 26: mavio.library.v1.LibraryService.DeleteLibrary:input_type -> mavio.library.v1.DeleteLibraryRequest
-	16, // 27: mavio.library.v1.LibraryService.ScanLibrary:input_type -> mavio.library.v1.ScanLibraryRequest
-	7,  // 28: mavio.library.v1.LibraryService.ListLibraries:output_type -> mavio.library.v1.ListLibrariesResponse
-	9,  // 29: mavio.library.v1.LibraryService.GetLibrary:output_type -> mavio.library.v1.GetLibraryResponse
-	11, // 30: mavio.library.v1.LibraryService.CreateLibrary:output_type -> mavio.library.v1.CreateLibraryResponse
-	13, // 31: mavio.library.v1.LibraryService.UpdateLibrary:output_type -> mavio.library.v1.UpdateLibraryResponse
-	15, // 32: mavio.library.v1.LibraryService.DeleteLibrary:output_type -> mavio.library.v1.DeleteLibraryResponse
-	17, // 33: mavio.library.v1.LibraryService.ScanLibrary:output_type -> mavio.library.v1.ScanLibraryResponse
-	28, // [28:34] is the sub-list for method output_type
-	22, // [22:28] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	21, // 1: mavio.library.v1.Library.scan_interval:type_name -> google.protobuf.Duration
+	22, // 2: mavio.library.v1.Library.create_time:type_name -> google.protobuf.Timestamp
+	22, // 3: mavio.library.v1.Library.update_time:type_name -> google.protobuf.Timestamp
+	6,  // 4: mavio.library.v1.Library.provider_order:type_name -> mavio.library.v1.ProviderOrder
+	3,  // 5: mavio.library.v1.Library.virtual_episodes:type_name -> mavio.library.v1.VirtualEpisodes
+	4,  // 6: mavio.library.v1.Library.hubs:type_name -> mavio.library.v1.LibraryHubs
+	5,  // 7: mavio.library.v1.LibraryHubs.home:type_name -> mavio.library.v1.HubList
+	5,  // 8: mavio.library.v1.LibraryHubs.recommended:type_name -> mavio.library.v1.HubList
+	1,  // 9: mavio.library.v1.HubList.kinds:type_name -> mavio.library.v1.HubKind
+	7,  // 10: mavio.library.v1.ProviderOrder.metadata:type_name -> mavio.library.v1.ProviderList
+	7,  // 11: mavio.library.v1.ProviderOrder.images:type_name -> mavio.library.v1.ProviderList
+	7,  // 12: mavio.library.v1.ProviderOrder.subtitles:type_name -> mavio.library.v1.ProviderList
+	7,  // 13: mavio.library.v1.ProviderOrder.lyrics:type_name -> mavio.library.v1.ProviderList
+	7,  // 14: mavio.library.v1.ProviderOrder.segments:type_name -> mavio.library.v1.ProviderList
+	7,  // 15: mavio.library.v1.ProviderOrder.episodes:type_name -> mavio.library.v1.ProviderList
+	0,  // 16: mavio.library.v1.LibrarySpec.kind:type_name -> mavio.library.v1.LibraryKind
+	21, // 17: mavio.library.v1.LibrarySpec.scan_interval:type_name -> google.protobuf.Duration
+	6,  // 18: mavio.library.v1.LibrarySpec.provider_order:type_name -> mavio.library.v1.ProviderOrder
+	3,  // 19: mavio.library.v1.LibrarySpec.virtual_episodes:type_name -> mavio.library.v1.VirtualEpisodes
+	4,  // 20: mavio.library.v1.LibrarySpec.hubs:type_name -> mavio.library.v1.LibraryHubs
+	2,  // 21: mavio.library.v1.ListLibrariesResponse.libraries:type_name -> mavio.library.v1.Library
+	2,  // 22: mavio.library.v1.GetLibraryResponse.library:type_name -> mavio.library.v1.Library
+	8,  // 23: mavio.library.v1.CreateLibraryRequest.spec:type_name -> mavio.library.v1.LibrarySpec
+	2,  // 24: mavio.library.v1.CreateLibraryResponse.library:type_name -> mavio.library.v1.Library
+	8,  // 25: mavio.library.v1.UpdateLibraryRequest.spec:type_name -> mavio.library.v1.LibrarySpec
+	2,  // 26: mavio.library.v1.UpdateLibraryResponse.library:type_name -> mavio.library.v1.Library
+	9,  // 27: mavio.library.v1.LibraryService.ListLibraries:input_type -> mavio.library.v1.ListLibrariesRequest
+	11, // 28: mavio.library.v1.LibraryService.GetLibrary:input_type -> mavio.library.v1.GetLibraryRequest
+	13, // 29: mavio.library.v1.LibraryService.CreateLibrary:input_type -> mavio.library.v1.CreateLibraryRequest
+	15, // 30: mavio.library.v1.LibraryService.UpdateLibrary:input_type -> mavio.library.v1.UpdateLibraryRequest
+	17, // 31: mavio.library.v1.LibraryService.DeleteLibrary:input_type -> mavio.library.v1.DeleteLibraryRequest
+	19, // 32: mavio.library.v1.LibraryService.ScanLibrary:input_type -> mavio.library.v1.ScanLibraryRequest
+	10, // 33: mavio.library.v1.LibraryService.ListLibraries:output_type -> mavio.library.v1.ListLibrariesResponse
+	12, // 34: mavio.library.v1.LibraryService.GetLibrary:output_type -> mavio.library.v1.GetLibraryResponse
+	14, // 35: mavio.library.v1.LibraryService.CreateLibrary:output_type -> mavio.library.v1.CreateLibraryResponse
+	16, // 36: mavio.library.v1.LibraryService.UpdateLibrary:output_type -> mavio.library.v1.UpdateLibraryResponse
+	18, // 37: mavio.library.v1.LibraryService.DeleteLibrary:output_type -> mavio.library.v1.DeleteLibraryResponse
+	20, // 38: mavio.library.v1.LibraryService.ScanLibrary:output_type -> mavio.library.v1.ScanLibraryResponse
+	33, // [33:39] is the sub-list for method output_type
+	27, // [27:33] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_mavio_library_v1_library_proto_init() }
@@ -2559,8 +2895,8 @@ func file_mavio_library_v1_library_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_library_v1_library_proto_rawDesc), len(file_mavio_library_v1_library_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   17,
+			NumEnums:      2,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

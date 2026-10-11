@@ -555,7 +555,9 @@ flowchart TD
 - [x] 工具链与构建目标：`libs/client-rust` 中的 Rust 与 `tools/nx-cargo`；更新 Go、Node.js 与 pnpm
 - [x] 从 `libs/proto` 生成 TypeScript 与 Rust（`@mavio/proto`、`mavio-api`）
 - [x] `libs/design`：tokens、图标、字符串、组件规范与功能对齐表，为每个客户端编译
-- [ ] 服务端：`HomeService`，提供首页与媒体库标签页的推荐行及其设置
+- [x] 服务端：`HomeService`，提供首页与媒体库标签页的推荐行（`apps/server/internal/home`），由 `Library.Hubs` 按媒体库选择
+  - [ ] 管理员推荐到首页的合集推荐行
+  - [ ] 每种以种子生成的推荐行使用多个种子，如 Plex 显示多行"因为你看过"
 - [x] 服务端：`ItemService.ListSimilarItems`，由 `ItemQuery.SimilarTo` 评分（`libs/store/items.go`）
   - [ ] 在本地结果之后，加入发现提供者给出、媒体库拥有的相似作品，如 Jellyfin 的远程相似条目提供者所做
 - [x] 服务端：所有路由的跨域请求（`apps/server/internal/httpserver/cors.go`）

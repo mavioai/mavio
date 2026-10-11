@@ -1,5 +1,6 @@
 // Package browse builds the lists of a client's home screen from the
-// store: the latest items of the libraries and the next episodes to watch.
+// store: the latest items of the libraries, the next episodes to watch and
+// what the user is in the middle of.
 package browse
 
 import (
@@ -218,17 +219,36 @@ type NextUpQuery struct {
 // NextUp lists the next episode to watch of each series the user has
 // played, the series played most recently first (core.NextEpisode).
 func (b *Browser) NextUp(ctx context.Context, scope Scope, q NextUpQuery) ([]core.Item, error) {
+	list, err := b.nextUp(ctx, scope, q)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]core.Item, len(list))
+	for i, n := range list {
+		out[i] = n.item
+	}
+	return out, nil
+}
+
+// upNext is a series' next episode and when the series was last played,
+// unknown for a requested series.
+type upNext struct {
+	item core.Item
+	last time.Time
+}
+
+func (b *Browser) nextUp(ctx context.Context, scope Scope, q NextUpQuery) ([]upNext, error) {
 	want := q.Offset + q.Limit
-	var out []core.Item
-	add := func(series core.ID) error {
+	var out []upNext
+	add := func(series core.ID, last time.Time) error {
 		next, err := b.nextEpisode(ctx, scope, series, q.IncludeResumable)
 		if next != nil {
-			out = append(out, *next)
+			out = append(out, upNext{*next, last})
 		}
 		return err
 	}
 	if !q.SeriesID.IsZero() {
-		if err := add(q.SeriesID); err != nil {
+		if err := add(q.SeriesID, time.Time{}); err != nil {
 			return nil, err
 		}
 		return window(out, q.Offset, q.Limit), nil
@@ -263,7 +283,7 @@ func (b *Browser) NextUp(ctx context.Context, scope Scope, q NextUpQuery) ([]cor
 				continue
 			}
 			seen[series.ID] = true
-			if err := add(series.ID); err != nil {
+			if err := add(series.ID, *last); err != nil {
 				return nil, err
 			}
 			if len(out) >= want {
@@ -275,6 +295,70 @@ func (b *Browser) NextUp(ctx context.Context, scope Scope, q NextUpQuery) ([]cor
 		}
 	}
 	return window(out, q.Offset, q.Limit), nil
+}
+
+// ContinueQuery selects what the user is in the middle of.
+type ContinueQuery struct {
+	// Since leaves out what was last played before it.
+	Since         time.Time
+	Limit, Offset int
+}
+
+// ContinueWatching lists what the user is in the middle of, most recent
+// activity first, as Plex's Continue Watching: the items with a resume
+// position and the next episodes of the series played, each series once.
+func (b *Browser) ContinueWatching(ctx context.Context, scope Scope, q ContinueQuery) ([]core.Item, error) {
+	want := q.Offset + q.Limit
+	iq := scope.query()
+	iq.Kinds, iq.Resumable = LatestKinds, true
+	iq.Sort = []core.SortSpec{{Field: core.SortLastPlayed, Desc: true}}
+	iq.Limit = min(want, core.MaxPageSize)
+	page, err := b.store.Items().Query(ctx, iq)
+	if err != nil {
+		return nil, fmt.Errorf("query resumable items: %w", err)
+	}
+	data, err := b.store.UserData().GetMany(ctx, scope.UserID, ids(page.Items))
+	if err != nil {
+		return nil, fmt.Errorf("get user data: %w", err)
+	}
+	items := newCache(b.store)
+	var list []upNext
+	watching := map[core.ID]bool{}
+	for _, it := range page.Items {
+		last := data[it.ID].LastPlayedAt
+		if last == nil || last.Before(q.Since) {
+			continue
+		}
+		if it.Kind == core.KindEpisode {
+			series, err := items.series(ctx, &it)
+			if err != nil {
+				return nil, err
+			}
+			if series != nil {
+				watching[series.ID] = true
+			}
+		}
+		list = append(list, upNext{it, *last})
+	}
+	next, err := b.nextUp(ctx, scope, NextUpQuery{Since: q.Since, Limit: want})
+	if err != nil {
+		return nil, err
+	}
+	for _, n := range next {
+		series, err := items.series(ctx, &n.item)
+		if err != nil {
+			return nil, err
+		}
+		if series == nil || !watching[series.ID] {
+			list = append(list, n)
+		}
+	}
+	slices.SortStableFunc(list, func(a, b upNext) int { return b.last.Compare(a.last) })
+	out := make([]core.Item, 0, len(list))
+	for _, n := range window(list, q.Offset, q.Limit) {
+		out = append(out, n.item)
+	}
+	return out, nil
 }
 
 // nextEpisode returns the next episode of a series in the scope, or nil.

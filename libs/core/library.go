@@ -74,6 +74,8 @@ type Library struct {
 	VirtualEpisodes VirtualEpisodes
 	// Providers names the providers the library uses.
 	Providers ProviderOrder
+	// Hubs are the hubs of the library on Home and on its Recommended tab.
+	Hubs      LibraryHubs
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -137,6 +139,9 @@ func (l *Library) Validate() error {
 		return fmt.Errorf("%w: negative scan interval", ErrInvalid)
 	case l.VirtualEpisodes.GraceDays < 0:
 		return fmt.Errorf("%w: negative grace period of virtual episodes", ErrInvalid)
+	}
+	if err := l.Hubs.validate(l.Kind); err != nil {
+		return err
 	}
 	return l.Providers.validate()
 }
