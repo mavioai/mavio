@@ -57,6 +57,12 @@ const (
 	// DownloadServiceDeleteBlocklistProcedure is the fully-qualified name of the DownloadService's
 	// DeleteBlocklist RPC.
 	DownloadServiceDeleteBlocklistProcedure = "/mavio.acquisition.v1.DownloadService/DeleteBlocklist"
+	// DownloadServiceListManualImportProcedure is the fully-qualified name of the DownloadService's
+	// ListManualImport RPC.
+	DownloadServiceListManualImportProcedure = "/mavio.acquisition.v1.DownloadService/ListManualImport"
+	// DownloadServiceManualImportProcedure is the fully-qualified name of the DownloadService's
+	// ManualImport RPC.
+	DownloadServiceManualImportProcedure = "/mavio.acquisition.v1.DownloadService/ManualImport"
 )
 
 // DownloadServiceClient is a client for the mavio.acquisition.v1.DownloadService service.
@@ -79,6 +85,14 @@ type DownloadServiceClient interface {
 	MarkFailed(context.Context, *v1.MarkFailedRequest) (*v1.MarkFailedResponse, error)
 	ListBlocklist(context.Context, *v1.ListBlocklistRequest) (*v1.ListBlocklistResponse, error)
 	DeleteBlocklist(context.Context, *v1.DeleteBlocklistRequest) (*v1.DeleteBlocklistResponse, error)
+	// ListManualImport lists the video files of a tracked movie download
+	// with the quality an import would give them and why the import
+	// specifications reject them, as Radarr's manual import.
+	ListManualImport(context.Context, *v1.ListManualImportRequest) (*v1.ListManualImportResponse, error)
+	// ManualImport imports a video file of a tracked movie download for its
+	// movie whatever the import specifications reject, and completes the
+	// download.
+	ManualImport(context.Context, *v1.ManualImportRequest) (*v1.ManualImportResponse, error)
 }
 
 // NewDownloadServiceClient constructs a client for the mavio.acquisition.v1.DownloadService
@@ -145,6 +159,19 @@ func NewDownloadServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithIdempotency(connect.IdempotencyIdempotent),
 			connect.WithClientOptions(opts...),
 		),
+		listManualImport: connect.NewClient[v1.ListManualImportRequest, v1.ListManualImportResponse](
+			httpClient,
+			baseURL+DownloadServiceListManualImportProcedure,
+			connect.WithSchema(downloadServiceMethods.ByName("ListManualImport")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		manualImport: connect.NewClient[v1.ManualImportRequest, v1.ManualImportResponse](
+			httpClient,
+			baseURL+DownloadServiceManualImportProcedure,
+			connect.WithSchema(downloadServiceMethods.ByName("ManualImport")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -158,6 +185,8 @@ type downloadServiceClient struct {
 	markFailed          *connect.Client[v1.MarkFailedRequest, v1.MarkFailedResponse]
 	listBlocklist       *connect.Client[v1.ListBlocklistRequest, v1.ListBlocklistResponse]
 	deleteBlocklist     *connect.Client[v1.DeleteBlocklistRequest, v1.DeleteBlocklistResponse]
+	listManualImport    *connect.Client[v1.ListManualImportRequest, v1.ListManualImportResponse]
+	manualImport        *connect.Client[v1.ManualImportRequest, v1.ManualImportResponse]
 }
 
 // ListDownloadClients calls mavio.acquisition.v1.DownloadService.ListDownloadClients.
@@ -232,6 +261,24 @@ func (c *downloadServiceClient) DeleteBlocklist(ctx context.Context, req *v1.Del
 	return nil, err
 }
 
+// ListManualImport calls mavio.acquisition.v1.DownloadService.ListManualImport.
+func (c *downloadServiceClient) ListManualImport(ctx context.Context, req *v1.ListManualImportRequest) (*v1.ListManualImportResponse, error) {
+	response, err := c.listManualImport.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ManualImport calls mavio.acquisition.v1.DownloadService.ManualImport.
+func (c *downloadServiceClient) ManualImport(ctx context.Context, req *v1.ManualImportRequest) (*v1.ManualImportResponse, error) {
+	response, err := c.manualImport.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // DownloadServiceHandler is an implementation of the mavio.acquisition.v1.DownloadService service.
 type DownloadServiceHandler interface {
 	// ListDownloadClients lists the clients every ready download client
@@ -252,6 +299,14 @@ type DownloadServiceHandler interface {
 	MarkFailed(context.Context, *v1.MarkFailedRequest) (*v1.MarkFailedResponse, error)
 	ListBlocklist(context.Context, *v1.ListBlocklistRequest) (*v1.ListBlocklistResponse, error)
 	DeleteBlocklist(context.Context, *v1.DeleteBlocklistRequest) (*v1.DeleteBlocklistResponse, error)
+	// ListManualImport lists the video files of a tracked movie download
+	// with the quality an import would give them and why the import
+	// specifications reject them, as Radarr's manual import.
+	ListManualImport(context.Context, *v1.ListManualImportRequest) (*v1.ListManualImportResponse, error)
+	// ManualImport imports a video file of a tracked movie download for its
+	// movie whatever the import specifications reject, and completes the
+	// download.
+	ManualImport(context.Context, *v1.ManualImportRequest) (*v1.ManualImportResponse, error)
 }
 
 // NewDownloadServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -314,6 +369,19 @@ func NewDownloadServiceHandler(svc DownloadServiceHandler, opts ...connect.Handl
 		connect.WithIdempotency(connect.IdempotencyIdempotent),
 		connect.WithHandlerOptions(opts...),
 	)
+	downloadServiceListManualImportHandler := connect.NewUnaryHandlerSimple(
+		DownloadServiceListManualImportProcedure,
+		svc.ListManualImport,
+		connect.WithSchema(downloadServiceMethods.ByName("ListManualImport")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	downloadServiceManualImportHandler := connect.NewUnaryHandlerSimple(
+		DownloadServiceManualImportProcedure,
+		svc.ManualImport,
+		connect.WithSchema(downloadServiceMethods.ByName("ManualImport")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.acquisition.v1.DownloadService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DownloadServiceListDownloadClientsProcedure:
@@ -332,6 +400,10 @@ func NewDownloadServiceHandler(svc DownloadServiceHandler, opts ...connect.Handl
 			downloadServiceListBlocklistHandler.ServeHTTP(w, r)
 		case DownloadServiceDeleteBlocklistProcedure:
 			downloadServiceDeleteBlocklistHandler.ServeHTTP(w, r)
+		case DownloadServiceListManualImportProcedure:
+			downloadServiceListManualImportHandler.ServeHTTP(w, r)
+		case DownloadServiceManualImportProcedure:
+			downloadServiceManualImportHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -371,4 +443,12 @@ func (UnimplementedDownloadServiceHandler) ListBlocklist(context.Context, *v1.Li
 
 func (UnimplementedDownloadServiceHandler) DeleteBlocklist(context.Context, *v1.DeleteBlocklistRequest) (*v1.DeleteBlocklistResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DownloadService.DeleteBlocklist is not implemented"))
+}
+
+func (UnimplementedDownloadServiceHandler) ListManualImport(context.Context, *v1.ListManualImportRequest) (*v1.ListManualImportResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DownloadService.ListManualImport is not implemented"))
+}
+
+func (UnimplementedDownloadServiceHandler) ManualImport(context.Context, *v1.ManualImportRequest) (*v1.ManualImportResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DownloadService.ManualImport is not implemented"))
 }

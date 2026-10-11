@@ -79,6 +79,8 @@ type polled struct {
 // lists that are not tracked are left alone; tracked downloads gone from
 // a client that answered are warned of.
 func (r *Runtime) CheckQueue(ctx context.Context) error {
+	r.importing.Lock()
+	defer r.importing.Unlock()
 	tracked, err := r.unfinished(ctx, core.NilID)
 	if err != nil {
 		return err

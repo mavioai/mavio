@@ -189,28 +189,58 @@ func importFiles(ctx context.Context, local string) ([]importFile, error) {
 	return out, nil
 }
 
+// importPlan is what an import of a file was decided with.
+type importPlan struct {
+	probed          library.ProbeResult
+	q               acquire.QualityModel
+	langs           []release.Language
+	formats         []acquire.CustomFormat
+	libPath, folder string
+}
+
 // importOne imports a file of a download for a movie unless an import
 // specification rejects it, returning why; errors are of the transfer.
 func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Download, p polled, f importFile) ([]string, error) {
+	plan, reasons, err := r.planImport(ctx, rn, m, d, f, nil, false)
+	if err != nil || len(reasons) > 0 {
+		return reasons, err
+	}
+	return nil, r.importPlanned(ctx, rn, m, d, p, f, plan)
+}
+
+// planImport decides the import of a file of a download for a movie,
+// returning why the import specifications reject it: the first reasons
+// found, or every reason when all is set. quality, when set, is the
+// file's quality rather than that read from it and its names. The plan
+// has no library folder when the movie has none.
+func (r *Runtime) planImport(ctx context.Context, rn *run, m *movie, d *core.Download, f importFile, quality *acquire.QualityModel, all bool) (importPlan, []string, error) {
+	var plan importPlan
 	probed, reasons, err := r.verify(ctx, m, f)
 	if err != nil {
-		return nil, err
+		return plan, nil, err
 	}
-	if len(reasons) > 0 {
-		return reasons, nil
+	if len(reasons) > 0 && !all {
+		return plan, reasons, nil
 	}
-	q := importQuality(d, f, probed)
-	langs := languagesOf(d.Languages)
-	formats := rn.formats(d.Title, q, langs, f.size, nil)
+	plan.probed = probed
+	plan.q = importQuality(d, f, probed)
+	if quality != nil {
+		plan.q = *quality
+	}
+	plan.langs = languagesOf(d.Languages)
+	plan.formats = rn.formats(d.Title, plan.q, plan.langs, f.size, nil)
 	upgrades := acquire.Upgrades{Propers: rn.env.Config.Propers}
-	if reason, msg := upgrades.ImportUpgrade(m.target.Profile, m.acq.File, q, formats); reason != "" {
-		return []string{msg}, nil
+	if reason, msg := upgrades.ImportUpgrade(m.target.Profile, m.acq.File, plan.q, plan.formats); reason != "" {
+		if reasons = append(reasons, msg); !all {
+			return plan, reasons, nil
+		}
 	}
 
 	libPath, folder, ok := libraryFolder(m)
 	if !ok {
-		return []string{msgNoLibraryFolder}, nil
+		return plan, append(reasons, msgNoLibraryFolder), nil
 	}
+	plan.libPath, plan.folder = libPath, folder
 	s := r.settings()
 	if !s.SkipFreeSpaceCheck {
 		// The volume of the movie's folder, which may be another than the
@@ -218,9 +248,17 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 		// Radarr's FreeSpaceSpecification.
 		dir := filepath.Join(libPath, filepath.FromSlash(folder))
 		if free, known := r.freeSpace(dir); known && free < f.size+int64(s.MinimumFreeSpace)*1024*1024 {
-			return []string{msgNoFreeSpace}, nil
+			reasons = append(reasons, msgNoFreeSpace)
 		}
 	}
+	return plan, reasons, nil
+}
+
+// importPlanned imports a file of a download for a movie as planned.
+func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.Download, p polled, f importFile, plan importPlan) error {
+	probed, q, langs, formats := plan.probed, plan.q, plan.langs, plan.formats
+	libPath, folder := plan.libPath, plan.folder
+	s := r.settings()
 
 	parsed := release.ParseMovieTitle(d.Title, false)
 	if parsed == nil {
@@ -239,19 +277,19 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 	}
 	name, err := organize.BuildFileName(rn.naming(), organizeMovie(m.item), file)
 	if err != nil {
-		return nil, fmt.Errorf("name file: %w", err)
+		return fmt.Errorf("name file: %w", err)
 	}
 	rel := filepath.FromSlash(path.Join(folder, name)) + filepath.Ext(f.path)
 	if !filepath.IsLocal(rel) {
-		return nil, fmt.Errorf("file name %q leaves the library folder", rel)
+		return fmt.Errorf("file name %q leaves the library folder", rel)
 	}
 	root, err := os.OpenRoot(libPath)
 	if err != nil {
-		return nil, fmt.Errorf("library folder: %w", err)
+		return fmt.Errorf("library folder: %w", err)
 	}
 	defer func() { _ = root.Close() }()
 	if err := root.MkdirAll(filepath.Dir(rel), 0o755); err != nil {
-		return nil, fmt.Errorf("movie folder: %w", err)
+		return fmt.Errorf("movie folder: %w", err)
 	}
 
 	mode := transferCopy
@@ -264,24 +302,24 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 	dest := filepath.Join(libPath, rel)
 	done, err := r.pace(ctx, dest)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer done()
 	if m.file != "" {
 		old := filepath.FromSlash(m.file)
 		if err := r.recycle(ctx, old, path.Base(path.Dir(m.file))); err != nil {
-			return nil, err
+			return err
 		}
 		r.recycleExtras(ctx, old, path.Base(path.Dir(m.file)), s.ExtraFileExtensions)
 		if err := r.Store.History().Add(ctx, core.HistoryEvent{
 			ID: core.NewID(), Type: core.HistoryFileDeleted, ItemID: m.item.ID, Date: r.now(), SourceTitle: m.file,
 			Quality: qualityRef(m.acq.File.Quality), Languages: languageNames(m.acq.File.Languages), Data: map[string]string{dataReason: "Upgrade"},
 		}); err != nil {
-			return nil, err
+			return err
 		}
 	}
 	if err := transfer(root, f.path, rel, mode); err != nil {
-		return nil, fmt.Errorf("%s file: %w", mode, err)
+		return fmt.Errorf("%s file: %w", mode, err)
 	}
 	r.logger().InfoContext(ctx, "imported movie file", "item", m.item.ID, "from", f.path, "to", dest, "mode", mode.String())
 	if s.ImportExtraFiles {
@@ -291,16 +329,16 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 	imported := filepath.ToSlash(dest)
 	it, err := r.Store.Items().Get(ctx, m.item.ID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	it.Path, it.Virtual = imported, false
 	if err := r.Store.Items().Upsert(ctx, it); err != nil {
-		return nil, err
+		return err
 	}
 	// A scan of the movie's folder alone, rather than of its library.
 	job := library.ScanFolderJob(m.lib, filepath.Dir(dest), r.now())
 	if _, err := r.Store.Jobs().Enqueue(ctx, &job); err != nil {
-		return nil, fmt.Errorf("queue scan: %w", err)
+		return fmt.Errorf("queue scan: %w", err)
 	}
 	data := map[string]string{
 		dataImportedPath: imported, dataDroppedPath: filepath.ToSlash(f.path),
@@ -315,12 +353,12 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 		ID: core.NewID(), Type: core.HistoryImported, ItemID: m.item.ID, Date: r.now(), SourceTitle: d.Title,
 		Quality: qualityRef(q), Languages: languageNames(langs), DownloadID: d.DownloadID, Data: data,
 	}); err != nil {
-		return nil, err
+		return err
 	}
 	// The movie has its file now: later decisions in this run see it.
 	delete(rn.movies, m.item.ID)
 	r.imported(ctx, m.item.ID)
-	return nil, nil
+	return nil
 }
 
 // verify reads a file and rejects samples and files without audio, as
