@@ -16,6 +16,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
@@ -954,6 +955,21 @@ func (_c *ItemCreate) SetWanted(v *Wanted) *ItemCreate {
 	return _c.SetWantedID(v.ID)
 }
 
+// AddEpisodeStateIDs adds the "episode_states" edge to the EpisodeState entity by IDs.
+func (_c *ItemCreate) AddEpisodeStateIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddEpisodeStateIDs(ids...)
+	return _c
+}
+
+// AddEpisodeStates adds the "episode_states" edges to the EpisodeState entity.
+func (_c *ItemCreate) AddEpisodeStates(v ...*EpisodeState) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddEpisodeStateIDs(ids...)
+}
+
 // AddDownloadIDs adds the "downloads" edge to the Download entity by IDs.
 func (_c *ItemCreate) AddDownloadIDs(ids ...core.ID) *ItemCreate {
 	_c.mutation.AddDownloadIDs(ids...)
@@ -1779,6 +1795,22 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(wanted.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.EpisodeStatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.EpisodeStatesTable,
+			Columns: []string{item.EpisodeStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(episodestate.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

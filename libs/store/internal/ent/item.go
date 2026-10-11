@@ -174,6 +174,8 @@ type ItemEdges struct {
 	LinkedIn []*ItemLink `json:"linked_in,omitempty"`
 	// Wanted holds the value of the wanted edge.
 	Wanted *Wanted `json:"wanted,omitempty"`
+	// EpisodeStates holds the value of the episode_states edge.
+	EpisodeStates []*EpisodeState `json:"episode_states,omitempty"`
 	// Downloads holds the value of the downloads edge.
 	Downloads []*Download `json:"downloads,omitempty"`
 	// History holds the value of the history edge.
@@ -186,7 +188,7 @@ type ItemEdges struct {
 	Issues []*Issue `json:"issues,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [21]bool
+	loadedTypes [22]bool
 }
 
 // LibraryOrErr returns the Library value or an error if the edge
@@ -343,10 +345,19 @@ func (e ItemEdges) WantedOrErr() (*Wanted, error) {
 	return nil, &NotLoadedError{edge: "wanted"}
 }
 
+// EpisodeStatesOrErr returns the EpisodeStates value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) EpisodeStatesOrErr() ([]*EpisodeState, error) {
+	if e.loadedTypes[16] {
+		return e.EpisodeStates, nil
+	}
+	return nil, &NotLoadedError{edge: "episode_states"}
+}
+
 // DownloadsOrErr returns the Downloads value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) DownloadsOrErr() ([]*Download, error) {
-	if e.loadedTypes[16] {
+	if e.loadedTypes[17] {
 		return e.Downloads, nil
 	}
 	return nil, &NotLoadedError{edge: "downloads"}
@@ -355,7 +366,7 @@ func (e ItemEdges) DownloadsOrErr() ([]*Download, error) {
 // HistoryOrErr returns the History value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) HistoryOrErr() ([]*HistoryEvent, error) {
-	if e.loadedTypes[17] {
+	if e.loadedTypes[18] {
 		return e.History, nil
 	}
 	return nil, &NotLoadedError{edge: "history"}
@@ -364,7 +375,7 @@ func (e ItemEdges) HistoryOrErr() ([]*HistoryEvent, error) {
 // BlocklistOrErr returns the Blocklist value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) BlocklistOrErr() ([]*BlocklistEntry, error) {
-	if e.loadedTypes[18] {
+	if e.loadedTypes[19] {
 		return e.Blocklist, nil
 	}
 	return nil, &NotLoadedError{edge: "blocklist"}
@@ -373,7 +384,7 @@ func (e ItemEdges) BlocklistOrErr() ([]*BlocklistEntry, error) {
 // PendingReleasesOrErr returns the PendingReleases value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) PendingReleasesOrErr() ([]*PendingRelease, error) {
-	if e.loadedTypes[19] {
+	if e.loadedTypes[20] {
 		return e.PendingReleases, nil
 	}
 	return nil, &NotLoadedError{edge: "pending_releases"}
@@ -382,7 +393,7 @@ func (e ItemEdges) PendingReleasesOrErr() ([]*PendingRelease, error) {
 // IssuesOrErr returns the Issues value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) IssuesOrErr() ([]*Issue, error) {
-	if e.loadedTypes[20] {
+	if e.loadedTypes[21] {
 		return e.Issues, nil
 	}
 	return nil, &NotLoadedError{edge: "issues"}
@@ -885,6 +896,11 @@ func (_m *Item) QueryLinkedIn() *ItemLinkQuery {
 // QueryWanted queries the "wanted" edge of the Item entity.
 func (_m *Item) QueryWanted() *WantedQuery {
 	return NewItemClient(_m.config).QueryWanted(_m)
+}
+
+// QueryEpisodeStates queries the "episode_states" edge of the Item entity.
+func (_m *Item) QueryEpisodeStates() *EpisodeStateQuery {
+	return NewItemClient(_m.config).QueryEpisodeStates(_m)
 }
 
 // QueryDownloads queries the "downloads" edge of the Item entity.

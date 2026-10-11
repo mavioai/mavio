@@ -3369,6 +3369,29 @@ func HasWantedWith(preds ...predicate.Wanted) predicate.Item {
 	})
 }
 
+// HasEpisodeStates applies the HasEdge predicate on the "episode_states" edge.
+func HasEpisodeStates() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, EpisodeStatesTable, EpisodeStatesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasEpisodeStatesWith applies the HasEdge predicate on the "episode_states" edge with a given conditions (other predicates).
+func HasEpisodeStatesWith(preds ...predicate.EpisodeState) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newEpisodeStatesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasDownloads applies the HasEdge predicate on the "downloads" edge.
 func HasDownloads() predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {

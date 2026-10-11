@@ -159,6 +159,8 @@ const (
 	EdgeLinkedIn = "linked_in"
 	// EdgeWanted holds the string denoting the wanted edge name in mutations.
 	EdgeWanted = "wanted"
+	// EdgeEpisodeStates holds the string denoting the episode_states edge name in mutations.
+	EdgeEpisodeStates = "episode_states"
 	// EdgeDownloads holds the string denoting the downloads edge name in mutations.
 	EdgeDownloads = "downloads"
 	// EdgeHistory holds the string denoting the history edge name in mutations.
@@ -271,6 +273,13 @@ const (
 	WantedInverseTable = "wanted"
 	// WantedColumn is the table column denoting the wanted relation/edge.
 	WantedColumn = "item_id"
+	// EpisodeStatesTable is the table that holds the episode_states relation/edge.
+	EpisodeStatesTable = "episode_states"
+	// EpisodeStatesInverseTable is the table name for the EpisodeState entity.
+	// It exists in this package in order to avoid circular dependency with the "episodestate" package.
+	EpisodeStatesInverseTable = "episode_states"
+	// EpisodeStatesColumn is the table column denoting the episode_states relation/edge.
+	EpisodeStatesColumn = "series_id"
 	// DownloadsTable is the table that holds the downloads relation/edge.
 	DownloadsTable = "downloads"
 	// DownloadsInverseTable is the table name for the Download entity.
@@ -890,6 +899,20 @@ func ByWantedField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
+// ByEpisodeStatesCount orders the results by episode_states count.
+func ByEpisodeStatesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newEpisodeStatesStep(), opts...)
+	}
+}
+
+// ByEpisodeStates orders the results by episode_states terms.
+func ByEpisodeStates(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newEpisodeStatesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByDownloadsCount orders the results by downloads count.
 func ByDownloadsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -1069,6 +1092,13 @@ func newWantedStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(WantedInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, false, WantedTable, WantedColumn),
+	)
+}
+func newEpisodeStatesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(EpisodeStatesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, EpisodeStatesTable, EpisodeStatesColumn),
 	)
 }
 func newDownloadsStep() *sqlgraph.Step {

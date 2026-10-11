@@ -16,6 +16,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
@@ -56,6 +57,7 @@ type ItemQuery struct {
 	withLinks           *ItemLinkQuery
 	withLinkedIn        *ItemLinkQuery
 	withWanted          *WantedQuery
+	withEpisodeStates   *EpisodeStateQuery
 	withDownloads       *DownloadQuery
 	withHistory         *HistoryEventQuery
 	withBlocklist       *BlocklistEntryQuery
@@ -450,6 +452,28 @@ func (_q *ItemQuery) QueryWanted() *WantedQuery {
 	return query
 }
 
+// QueryEpisodeStates chains the current query on the "episode_states" edge.
+func (_q *ItemQuery) QueryEpisodeStates() *EpisodeStateQuery {
+	query := (&EpisodeStateClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(episodestate.Table, episodestate.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.EpisodeStatesTable, item.EpisodeStatesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryDownloads chains the current query on the "downloads" edge.
 func (_q *ItemQuery) QueryDownloads() *DownloadQuery {
 	query := (&DownloadClient{config: _q.config}).Query()
@@ -768,6 +792,7 @@ func (_q *ItemQuery) Clone() *ItemQuery {
 		withLinks:           _q.withLinks.Clone(),
 		withLinkedIn:        _q.withLinkedIn.Clone(),
 		withWanted:          _q.withWanted.Clone(),
+		withEpisodeStates:   _q.withEpisodeStates.Clone(),
 		withDownloads:       _q.withDownloads.Clone(),
 		withHistory:         _q.withHistory.Clone(),
 		withBlocklist:       _q.withBlocklist.Clone(),
@@ -956,6 +981,17 @@ func (_q *ItemQuery) WithWanted(opts ...func(*WantedQuery)) *ItemQuery {
 	return _q
 }
 
+// WithEpisodeStates tells the query-builder to eager-load the nodes that are connected to
+// the "episode_states" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithEpisodeStates(opts ...func(*EpisodeStateQuery)) *ItemQuery {
+	query := (&EpisodeStateClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withEpisodeStates = query
+	return _q
+}
+
 // WithDownloads tells the query-builder to eager-load the nodes that are connected to
 // the "downloads" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *ItemQuery) WithDownloads(opts ...func(*DownloadQuery)) *ItemQuery {
@@ -1089,7 +1125,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	var (
 		nodes       = []*Item{}
 		_spec       = _q.querySpec()
-		loadedTypes = [21]bool{
+		loadedTypes = [22]bool{
 			_q.withLibrary != nil,
 			_q.withParent != nil,
 			_q.withChildren != nil,
@@ -1106,6 +1142,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 			_q.withLinks != nil,
 			_q.withLinkedIn != nil,
 			_q.withWanted != nil,
+			_q.withEpisodeStates != nil,
 			_q.withDownloads != nil,
 			_q.withHistory != nil,
 			_q.withBlocklist != nil,
@@ -1238,6 +1275,13 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	if query := _q.withWanted; query != nil {
 		if err := _q.loadWanted(ctx, query, nodes, nil,
 			func(n *Item, e *Wanted) { n.Edges.Wanted = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withEpisodeStates; query != nil {
+		if err := _q.loadEpisodeStates(ctx, query, nodes,
+			func(n *Item) { n.Edges.EpisodeStates = []*EpisodeState{} },
+			func(n *Item, e *EpisodeState) { n.Edges.EpisodeStates = append(n.Edges.EpisodeStates, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1765,6 +1809,36 @@ func (_q *ItemQuery) loadWanted(ctx context.Context, query *WantedQuery, nodes [
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadEpisodeStates(ctx context.Context, query *EpisodeStateQuery, nodes []*Item, init func(*Item), assign func(*Item, *EpisodeState)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(episodestate.FieldSeriesID)
+	}
+	query.Where(predicate.EpisodeState(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.EpisodeStatesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.SeriesID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "series_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

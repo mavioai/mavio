@@ -340,6 +340,39 @@ var (
 			},
 		},
 	}
+	// EpisodeStatesColumns holds the columns for the "episode_states" table.
+	EpisodeStatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "season", Type: field.TypeInt},
+		{Name: "episode", Type: field.TypeInt},
+		{Name: "scene_season", Type: field.TypeInt, Nullable: true},
+		{Name: "scene_episode", Type: field.TypeInt, Nullable: true},
+		{Name: "scene_absolute", Type: field.TypeInt, Nullable: true},
+		{Name: "unverified_scene_numbering", Type: field.TypeBool, Default: false},
+		{Name: "last_searched_at", Type: field.TypeTime, Nullable: true},
+		{Name: "series_id", Type: field.TypeUUID},
+	}
+	// EpisodeStatesTable holds the schema information for the "episode_states" table.
+	EpisodeStatesTable = &schema.Table{
+		Name:       "episode_states",
+		Columns:    EpisodeStatesColumns,
+		PrimaryKey: []*schema.Column{EpisodeStatesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "episode_states_items_episode_states",
+				Columns:    []*schema.Column{EpisodeStatesColumns[8]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "episodestate_series_id_season_episode",
+				Unique:  true,
+				Columns: []*schema.Column{EpisodeStatesColumns[8], EpisodeStatesColumns[1], EpisodeStatesColumns[2]},
+			},
+		},
+	}
 	// FolderStatesColumns holds the columns for the "folder_states" table.
 	FolderStatesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1279,6 +1312,7 @@ var (
 		DelayProfilesTable,
 		DisplayPreferencesTable,
 		DownloadsTable,
+		EpisodeStatesTable,
 		FolderStatesTable,
 		HistoryEventsTable,
 		ImagesTable,
@@ -1345,6 +1379,10 @@ func init() {
 	DownloadsTable.ForeignKeys[0].RefTable = ItemsTable
 	DownloadsTable.Annotation = &entsql.Annotation{
 		Table: "downloads",
+	}
+	EpisodeStatesTable.ForeignKeys[0].RefTable = ItemsTable
+	EpisodeStatesTable.Annotation = &entsql.Annotation{
+		Table: "episode_states",
 	}
 	FolderStatesTable.ForeignKeys[0].RefTable = LibrariesTable
 	FolderStatesTable.Annotation = &entsql.Annotation{

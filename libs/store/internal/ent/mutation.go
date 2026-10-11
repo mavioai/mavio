@@ -22,6 +22,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
@@ -69,6 +70,7 @@ const (
 	TypeDelayProfile       = "DelayProfile"
 	TypeDisplayPreferences = "DisplayPreferences"
 	TypeDownload           = "Download"
+	TypeEpisodeState       = "EpisodeState"
 	TypeFolderState        = "FolderState"
 	TypeHistoryEvent       = "HistoryEvent"
 	TypeImage              = "Image"
@@ -8338,6 +8340,1020 @@ func (m *DownloadMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Download edge %s", name)
 }
 
+// EpisodeStateMutation represents an operation that mutates the EpisodeState nodes in the graph.
+type EpisodeStateMutation struct {
+	config
+	op                         Op
+	typ                        string
+	id                         *core.ID
+	season                     *int
+	addseason                  *int
+	episode                    *int
+	addepisode                 *int
+	scene_season               *int
+	addscene_season            *int
+	scene_episode              *int
+	addscene_episode           *int
+	scene_absolute             *int
+	addscene_absolute          *int
+	unverified_scene_numbering *bool
+	last_searched_at           *time.Time
+	clearedFields              map[string]struct{}
+	series                     *core.ID
+	clearedseries              bool
+	done                       bool
+	oldValue                   func(context.Context) (*EpisodeState, error)
+	predicates                 []predicate.EpisodeState
+}
+
+var _ ent.Mutation = (*EpisodeStateMutation)(nil)
+
+// episodestateOption allows management of the mutation configuration using functional options.
+type episodestateOption func(*EpisodeStateMutation)
+
+// newEpisodeStateMutation creates new mutation for the EpisodeState entity.
+func newEpisodeStateMutation(c config, op Op, opts ...episodestateOption) *EpisodeStateMutation {
+	m := &EpisodeStateMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEpisodeState,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEpisodeStateID sets the ID field of the mutation.
+func withEpisodeStateID(id core.ID) episodestateOption {
+	return func(m *EpisodeStateMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EpisodeState
+		)
+		m.oldValue = func(ctx context.Context) (*EpisodeState, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EpisodeState.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEpisodeState sets the old EpisodeState of the mutation.
+func withEpisodeState(node *EpisodeState) episodestateOption {
+	return func(m *EpisodeStateMutation) {
+		m.oldValue = func(context.Context) (*EpisodeState, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EpisodeStateMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EpisodeStateMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of EpisodeState entities.
+func (m *EpisodeStateMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EpisodeStateMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EpisodeStateMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EpisodeState.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetSeriesID sets the "series_id" field.
+func (m *EpisodeStateMutation) SetSeriesID(c core.ID) {
+	m.series = &c
+}
+
+// SeriesID returns the value of the "series_id" field in the mutation.
+func (m *EpisodeStateMutation) SeriesID() (r core.ID, exists bool) {
+	v := m.series
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSeriesID returns the old "series_id" field's value of the EpisodeState entity.
+// If the EpisodeState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeStateMutation) OldSeriesID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSeriesID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSeriesID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSeriesID: %w", err)
+	}
+	return oldValue.SeriesID, nil
+}
+
+// ResetSeriesID resets all changes to the "series_id" field.
+func (m *EpisodeStateMutation) ResetSeriesID() {
+	m.series = nil
+}
+
+// SetSeason sets the "season" field.
+func (m *EpisodeStateMutation) SetSeason(i int) {
+	m.season = &i
+	m.addseason = nil
+}
+
+// Season returns the value of the "season" field in the mutation.
+func (m *EpisodeStateMutation) Season() (r int, exists bool) {
+	v := m.season
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSeason returns the old "season" field's value of the EpisodeState entity.
+// If the EpisodeState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeStateMutation) OldSeason(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSeason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSeason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSeason: %w", err)
+	}
+	return oldValue.Season, nil
+}
+
+// AddSeason adds i to the "season" field.
+func (m *EpisodeStateMutation) AddSeason(i int) {
+	if m.addseason != nil {
+		*m.addseason += i
+	} else {
+		m.addseason = &i
+	}
+}
+
+// AddedSeason returns the value that was added to the "season" field in this mutation.
+func (m *EpisodeStateMutation) AddedSeason() (r int, exists bool) {
+	v := m.addseason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSeason resets all changes to the "season" field.
+func (m *EpisodeStateMutation) ResetSeason() {
+	m.season = nil
+	m.addseason = nil
+}
+
+// SetEpisode sets the "episode" field.
+func (m *EpisodeStateMutation) SetEpisode(i int) {
+	m.episode = &i
+	m.addepisode = nil
+}
+
+// Episode returns the value of the "episode" field in the mutation.
+func (m *EpisodeStateMutation) Episode() (r int, exists bool) {
+	v := m.episode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEpisode returns the old "episode" field's value of the EpisodeState entity.
+// If the EpisodeState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeStateMutation) OldEpisode(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEpisode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEpisode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEpisode: %w", err)
+	}
+	return oldValue.Episode, nil
+}
+
+// AddEpisode adds i to the "episode" field.
+func (m *EpisodeStateMutation) AddEpisode(i int) {
+	if m.addepisode != nil {
+		*m.addepisode += i
+	} else {
+		m.addepisode = &i
+	}
+}
+
+// AddedEpisode returns the value that was added to the "episode" field in this mutation.
+func (m *EpisodeStateMutation) AddedEpisode() (r int, exists bool) {
+	v := m.addepisode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetEpisode resets all changes to the "episode" field.
+func (m *EpisodeStateMutation) ResetEpisode() {
+	m.episode = nil
+	m.addepisode = nil
+}
+
+// SetSceneSeason sets the "scene_season" field.
+func (m *EpisodeStateMutation) SetSceneSeason(i int) {
+	m.scene_season = &i
+	m.addscene_season = nil
+}
+
+// SceneSeason returns the value of the "scene_season" field in the mutation.
+func (m *EpisodeStateMutation) SceneSeason() (r int, exists bool) {
+	v := m.scene_season
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSceneSeason returns the old "scene_season" field's value of the EpisodeState entity.
+// If the EpisodeState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeStateMutation) OldSceneSeason(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSceneSeason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSceneSeason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSceneSeason: %w", err)
+	}
+	return oldValue.SceneSeason, nil
+}
+
+// AddSceneSeason adds i to the "scene_season" field.
+func (m *EpisodeStateMutation) AddSceneSeason(i int) {
+	if m.addscene_season != nil {
+		*m.addscene_season += i
+	} else {
+		m.addscene_season = &i
+	}
+}
+
+// AddedSceneSeason returns the value that was added to the "scene_season" field in this mutation.
+func (m *EpisodeStateMutation) AddedSceneSeason() (r int, exists bool) {
+	v := m.addscene_season
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSceneSeason clears the value of the "scene_season" field.
+func (m *EpisodeStateMutation) ClearSceneSeason() {
+	m.scene_season = nil
+	m.addscene_season = nil
+	m.clearedFields[episodestate.FieldSceneSeason] = struct{}{}
+}
+
+// SceneSeasonCleared returns if the "scene_season" field was cleared in this mutation.
+func (m *EpisodeStateMutation) SceneSeasonCleared() bool {
+	_, ok := m.clearedFields[episodestate.FieldSceneSeason]
+	return ok
+}
+
+// ResetSceneSeason resets all changes to the "scene_season" field.
+func (m *EpisodeStateMutation) ResetSceneSeason() {
+	m.scene_season = nil
+	m.addscene_season = nil
+	delete(m.clearedFields, episodestate.FieldSceneSeason)
+}
+
+// SetSceneEpisode sets the "scene_episode" field.
+func (m *EpisodeStateMutation) SetSceneEpisode(i int) {
+	m.scene_episode = &i
+	m.addscene_episode = nil
+}
+
+// SceneEpisode returns the value of the "scene_episode" field in the mutation.
+func (m *EpisodeStateMutation) SceneEpisode() (r int, exists bool) {
+	v := m.scene_episode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSceneEpisode returns the old "scene_episode" field's value of the EpisodeState entity.
+// If the EpisodeState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeStateMutation) OldSceneEpisode(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSceneEpisode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSceneEpisode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSceneEpisode: %w", err)
+	}
+	return oldValue.SceneEpisode, nil
+}
+
+// AddSceneEpisode adds i to the "scene_episode" field.
+func (m *EpisodeStateMutation) AddSceneEpisode(i int) {
+	if m.addscene_episode != nil {
+		*m.addscene_episode += i
+	} else {
+		m.addscene_episode = &i
+	}
+}
+
+// AddedSceneEpisode returns the value that was added to the "scene_episode" field in this mutation.
+func (m *EpisodeStateMutation) AddedSceneEpisode() (r int, exists bool) {
+	v := m.addscene_episode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSceneEpisode clears the value of the "scene_episode" field.
+func (m *EpisodeStateMutation) ClearSceneEpisode() {
+	m.scene_episode = nil
+	m.addscene_episode = nil
+	m.clearedFields[episodestate.FieldSceneEpisode] = struct{}{}
+}
+
+// SceneEpisodeCleared returns if the "scene_episode" field was cleared in this mutation.
+func (m *EpisodeStateMutation) SceneEpisodeCleared() bool {
+	_, ok := m.clearedFields[episodestate.FieldSceneEpisode]
+	return ok
+}
+
+// ResetSceneEpisode resets all changes to the "scene_episode" field.
+func (m *EpisodeStateMutation) ResetSceneEpisode() {
+	m.scene_episode = nil
+	m.addscene_episode = nil
+	delete(m.clearedFields, episodestate.FieldSceneEpisode)
+}
+
+// SetSceneAbsolute sets the "scene_absolute" field.
+func (m *EpisodeStateMutation) SetSceneAbsolute(i int) {
+	m.scene_absolute = &i
+	m.addscene_absolute = nil
+}
+
+// SceneAbsolute returns the value of the "scene_absolute" field in the mutation.
+func (m *EpisodeStateMutation) SceneAbsolute() (r int, exists bool) {
+	v := m.scene_absolute
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSceneAbsolute returns the old "scene_absolute" field's value of the EpisodeState entity.
+// If the EpisodeState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeStateMutation) OldSceneAbsolute(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSceneAbsolute is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSceneAbsolute requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSceneAbsolute: %w", err)
+	}
+	return oldValue.SceneAbsolute, nil
+}
+
+// AddSceneAbsolute adds i to the "scene_absolute" field.
+func (m *EpisodeStateMutation) AddSceneAbsolute(i int) {
+	if m.addscene_absolute != nil {
+		*m.addscene_absolute += i
+	} else {
+		m.addscene_absolute = &i
+	}
+}
+
+// AddedSceneAbsolute returns the value that was added to the "scene_absolute" field in this mutation.
+func (m *EpisodeStateMutation) AddedSceneAbsolute() (r int, exists bool) {
+	v := m.addscene_absolute
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSceneAbsolute clears the value of the "scene_absolute" field.
+func (m *EpisodeStateMutation) ClearSceneAbsolute() {
+	m.scene_absolute = nil
+	m.addscene_absolute = nil
+	m.clearedFields[episodestate.FieldSceneAbsolute] = struct{}{}
+}
+
+// SceneAbsoluteCleared returns if the "scene_absolute" field was cleared in this mutation.
+func (m *EpisodeStateMutation) SceneAbsoluteCleared() bool {
+	_, ok := m.clearedFields[episodestate.FieldSceneAbsolute]
+	return ok
+}
+
+// ResetSceneAbsolute resets all changes to the "scene_absolute" field.
+func (m *EpisodeStateMutation) ResetSceneAbsolute() {
+	m.scene_absolute = nil
+	m.addscene_absolute = nil
+	delete(m.clearedFields, episodestate.FieldSceneAbsolute)
+}
+
+// SetUnverifiedSceneNumbering sets the "unverified_scene_numbering" field.
+func (m *EpisodeStateMutation) SetUnverifiedSceneNumbering(b bool) {
+	m.unverified_scene_numbering = &b
+}
+
+// UnverifiedSceneNumbering returns the value of the "unverified_scene_numbering" field in the mutation.
+func (m *EpisodeStateMutation) UnverifiedSceneNumbering() (r bool, exists bool) {
+	v := m.unverified_scene_numbering
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnverifiedSceneNumbering returns the old "unverified_scene_numbering" field's value of the EpisodeState entity.
+// If the EpisodeState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeStateMutation) OldUnverifiedSceneNumbering(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnverifiedSceneNumbering is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnverifiedSceneNumbering requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnverifiedSceneNumbering: %w", err)
+	}
+	return oldValue.UnverifiedSceneNumbering, nil
+}
+
+// ResetUnverifiedSceneNumbering resets all changes to the "unverified_scene_numbering" field.
+func (m *EpisodeStateMutation) ResetUnverifiedSceneNumbering() {
+	m.unverified_scene_numbering = nil
+}
+
+// SetLastSearchedAt sets the "last_searched_at" field.
+func (m *EpisodeStateMutation) SetLastSearchedAt(t time.Time) {
+	m.last_searched_at = &t
+}
+
+// LastSearchedAt returns the value of the "last_searched_at" field in the mutation.
+func (m *EpisodeStateMutation) LastSearchedAt() (r time.Time, exists bool) {
+	v := m.last_searched_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastSearchedAt returns the old "last_searched_at" field's value of the EpisodeState entity.
+// If the EpisodeState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeStateMutation) OldLastSearchedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastSearchedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastSearchedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastSearchedAt: %w", err)
+	}
+	return oldValue.LastSearchedAt, nil
+}
+
+// ClearLastSearchedAt clears the value of the "last_searched_at" field.
+func (m *EpisodeStateMutation) ClearLastSearchedAt() {
+	m.last_searched_at = nil
+	m.clearedFields[episodestate.FieldLastSearchedAt] = struct{}{}
+}
+
+// LastSearchedAtCleared returns if the "last_searched_at" field was cleared in this mutation.
+func (m *EpisodeStateMutation) LastSearchedAtCleared() bool {
+	_, ok := m.clearedFields[episodestate.FieldLastSearchedAt]
+	return ok
+}
+
+// ResetLastSearchedAt resets all changes to the "last_searched_at" field.
+func (m *EpisodeStateMutation) ResetLastSearchedAt() {
+	m.last_searched_at = nil
+	delete(m.clearedFields, episodestate.FieldLastSearchedAt)
+}
+
+// ClearSeries clears the "series" edge to the Item entity.
+func (m *EpisodeStateMutation) ClearSeries() {
+	m.clearedseries = true
+	m.clearedFields[episodestate.FieldSeriesID] = struct{}{}
+}
+
+// SeriesCleared reports if the "series" edge to the Item entity was cleared.
+func (m *EpisodeStateMutation) SeriesCleared() bool {
+	return m.clearedseries
+}
+
+// SeriesIDs returns the "series" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SeriesID instead. It exists only for internal usage by the builders.
+func (m *EpisodeStateMutation) SeriesIDs() (ids []core.ID) {
+	if id := m.series; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSeries resets all changes to the "series" edge.
+func (m *EpisodeStateMutation) ResetSeries() {
+	m.series = nil
+	m.clearedseries = false
+}
+
+// Where appends a list predicates to the EpisodeStateMutation builder.
+func (m *EpisodeStateMutation) Where(ps ...predicate.EpisodeState) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EpisodeStateMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EpisodeStateMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EpisodeState, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EpisodeStateMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EpisodeStateMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EpisodeState).
+func (m *EpisodeStateMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EpisodeStateMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.series != nil {
+		fields = append(fields, episodestate.FieldSeriesID)
+	}
+	if m.season != nil {
+		fields = append(fields, episodestate.FieldSeason)
+	}
+	if m.episode != nil {
+		fields = append(fields, episodestate.FieldEpisode)
+	}
+	if m.scene_season != nil {
+		fields = append(fields, episodestate.FieldSceneSeason)
+	}
+	if m.scene_episode != nil {
+		fields = append(fields, episodestate.FieldSceneEpisode)
+	}
+	if m.scene_absolute != nil {
+		fields = append(fields, episodestate.FieldSceneAbsolute)
+	}
+	if m.unverified_scene_numbering != nil {
+		fields = append(fields, episodestate.FieldUnverifiedSceneNumbering)
+	}
+	if m.last_searched_at != nil {
+		fields = append(fields, episodestate.FieldLastSearchedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EpisodeStateMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case episodestate.FieldSeriesID:
+		return m.SeriesID()
+	case episodestate.FieldSeason:
+		return m.Season()
+	case episodestate.FieldEpisode:
+		return m.Episode()
+	case episodestate.FieldSceneSeason:
+		return m.SceneSeason()
+	case episodestate.FieldSceneEpisode:
+		return m.SceneEpisode()
+	case episodestate.FieldSceneAbsolute:
+		return m.SceneAbsolute()
+	case episodestate.FieldUnverifiedSceneNumbering:
+		return m.UnverifiedSceneNumbering()
+	case episodestate.FieldLastSearchedAt:
+		return m.LastSearchedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EpisodeStateMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case episodestate.FieldSeriesID:
+		return m.OldSeriesID(ctx)
+	case episodestate.FieldSeason:
+		return m.OldSeason(ctx)
+	case episodestate.FieldEpisode:
+		return m.OldEpisode(ctx)
+	case episodestate.FieldSceneSeason:
+		return m.OldSceneSeason(ctx)
+	case episodestate.FieldSceneEpisode:
+		return m.OldSceneEpisode(ctx)
+	case episodestate.FieldSceneAbsolute:
+		return m.OldSceneAbsolute(ctx)
+	case episodestate.FieldUnverifiedSceneNumbering:
+		return m.OldUnverifiedSceneNumbering(ctx)
+	case episodestate.FieldLastSearchedAt:
+		return m.OldLastSearchedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown EpisodeState field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EpisodeStateMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case episodestate.FieldSeriesID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSeriesID(v)
+		return nil
+	case episodestate.FieldSeason:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSeason(v)
+		return nil
+	case episodestate.FieldEpisode:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEpisode(v)
+		return nil
+	case episodestate.FieldSceneSeason:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSceneSeason(v)
+		return nil
+	case episodestate.FieldSceneEpisode:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSceneEpisode(v)
+		return nil
+	case episodestate.FieldSceneAbsolute:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSceneAbsolute(v)
+		return nil
+	case episodestate.FieldUnverifiedSceneNumbering:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnverifiedSceneNumbering(v)
+		return nil
+	case episodestate.FieldLastSearchedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastSearchedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EpisodeState field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EpisodeStateMutation) AddedFields() []string {
+	var fields []string
+	if m.addseason != nil {
+		fields = append(fields, episodestate.FieldSeason)
+	}
+	if m.addepisode != nil {
+		fields = append(fields, episodestate.FieldEpisode)
+	}
+	if m.addscene_season != nil {
+		fields = append(fields, episodestate.FieldSceneSeason)
+	}
+	if m.addscene_episode != nil {
+		fields = append(fields, episodestate.FieldSceneEpisode)
+	}
+	if m.addscene_absolute != nil {
+		fields = append(fields, episodestate.FieldSceneAbsolute)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EpisodeStateMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case episodestate.FieldSeason:
+		return m.AddedSeason()
+	case episodestate.FieldEpisode:
+		return m.AddedEpisode()
+	case episodestate.FieldSceneSeason:
+		return m.AddedSceneSeason()
+	case episodestate.FieldSceneEpisode:
+		return m.AddedSceneEpisode()
+	case episodestate.FieldSceneAbsolute:
+		return m.AddedSceneAbsolute()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EpisodeStateMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case episodestate.FieldSeason:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSeason(v)
+		return nil
+	case episodestate.FieldEpisode:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEpisode(v)
+		return nil
+	case episodestate.FieldSceneSeason:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSceneSeason(v)
+		return nil
+	case episodestate.FieldSceneEpisode:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSceneEpisode(v)
+		return nil
+	case episodestate.FieldSceneAbsolute:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSceneAbsolute(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EpisodeState numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EpisodeStateMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(episodestate.FieldSceneSeason) {
+		fields = append(fields, episodestate.FieldSceneSeason)
+	}
+	if m.FieldCleared(episodestate.FieldSceneEpisode) {
+		fields = append(fields, episodestate.FieldSceneEpisode)
+	}
+	if m.FieldCleared(episodestate.FieldSceneAbsolute) {
+		fields = append(fields, episodestate.FieldSceneAbsolute)
+	}
+	if m.FieldCleared(episodestate.FieldLastSearchedAt) {
+		fields = append(fields, episodestate.FieldLastSearchedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EpisodeStateMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EpisodeStateMutation) ClearField(name string) error {
+	switch name {
+	case episodestate.FieldSceneSeason:
+		m.ClearSceneSeason()
+		return nil
+	case episodestate.FieldSceneEpisode:
+		m.ClearSceneEpisode()
+		return nil
+	case episodestate.FieldSceneAbsolute:
+		m.ClearSceneAbsolute()
+		return nil
+	case episodestate.FieldLastSearchedAt:
+		m.ClearLastSearchedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown EpisodeState nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EpisodeStateMutation) ResetField(name string) error {
+	switch name {
+	case episodestate.FieldSeriesID:
+		m.ResetSeriesID()
+		return nil
+	case episodestate.FieldSeason:
+		m.ResetSeason()
+		return nil
+	case episodestate.FieldEpisode:
+		m.ResetEpisode()
+		return nil
+	case episodestate.FieldSceneSeason:
+		m.ResetSceneSeason()
+		return nil
+	case episodestate.FieldSceneEpisode:
+		m.ResetSceneEpisode()
+		return nil
+	case episodestate.FieldSceneAbsolute:
+		m.ResetSceneAbsolute()
+		return nil
+	case episodestate.FieldUnverifiedSceneNumbering:
+		m.ResetUnverifiedSceneNumbering()
+		return nil
+	case episodestate.FieldLastSearchedAt:
+		m.ResetLastSearchedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown EpisodeState field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EpisodeStateMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.series != nil {
+		edges = append(edges, episodestate.EdgeSeries)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EpisodeStateMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case episodestate.EdgeSeries:
+		if id := m.series; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EpisodeStateMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EpisodeStateMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EpisodeStateMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedseries {
+		edges = append(edges, episodestate.EdgeSeries)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EpisodeStateMutation) EdgeCleared(name string) bool {
+	switch name {
+	case episodestate.EdgeSeries:
+		return m.clearedseries
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EpisodeStateMutation) ClearEdge(name string) error {
+	switch name {
+	case episodestate.EdgeSeries:
+		m.ClearSeries()
+		return nil
+	}
+	return fmt.Errorf("unknown EpisodeState unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EpisodeStateMutation) ResetEdge(name string) error {
+	switch name {
+	case episodestate.EdgeSeries:
+		m.ResetSeries()
+		return nil
+	}
+	return fmt.Errorf("unknown EpisodeState edge %s", name)
+}
+
 // FolderStateMutation represents an operation that mutates the FolderState nodes in the graph.
 type FolderStateMutation struct {
 	config
@@ -12866,6 +13882,9 @@ type ItemMutation struct {
 	clearedlinked_in              bool
 	wanted                        *core.ID
 	clearedwanted                 bool
+	episode_states                map[core.ID]struct{}
+	removedepisode_states         map[core.ID]struct{}
+	clearedepisode_states         bool
 	downloads                     map[core.ID]struct{}
 	removeddownloads              map[core.ID]struct{}
 	cleareddownloads              bool
@@ -16420,6 +17439,60 @@ func (m *ItemMutation) ResetWanted() {
 	m.clearedwanted = false
 }
 
+// AddEpisodeStateIDs adds the "episode_states" edge to the EpisodeState entity by ids.
+func (m *ItemMutation) AddEpisodeStateIDs(ids ...core.ID) {
+	if m.episode_states == nil {
+		m.episode_states = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.episode_states[ids[i]] = struct{}{}
+	}
+}
+
+// ClearEpisodeStates clears the "episode_states" edge to the EpisodeState entity.
+func (m *ItemMutation) ClearEpisodeStates() {
+	m.clearedepisode_states = true
+}
+
+// EpisodeStatesCleared reports if the "episode_states" edge to the EpisodeState entity was cleared.
+func (m *ItemMutation) EpisodeStatesCleared() bool {
+	return m.clearedepisode_states
+}
+
+// RemoveEpisodeStateIDs removes the "episode_states" edge to the EpisodeState entity by IDs.
+func (m *ItemMutation) RemoveEpisodeStateIDs(ids ...core.ID) {
+	if m.removedepisode_states == nil {
+		m.removedepisode_states = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.episode_states, ids[i])
+		m.removedepisode_states[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedEpisodeStates returns the removed IDs of the "episode_states" edge to the EpisodeState entity.
+func (m *ItemMutation) RemovedEpisodeStatesIDs() (ids []core.ID) {
+	for id := range m.removedepisode_states {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// EpisodeStatesIDs returns the "episode_states" edge IDs in the mutation.
+func (m *ItemMutation) EpisodeStatesIDs() (ids []core.ID) {
+	for id := range m.episode_states {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetEpisodeStates resets all changes to the "episode_states" edge.
+func (m *ItemMutation) ResetEpisodeStates() {
+	m.episode_states = nil
+	m.clearedepisode_states = false
+	m.removedepisode_states = nil
+}
+
 // AddDownloadIDs adds the "downloads" edge to the Download entity by ids.
 func (m *ItemMutation) AddDownloadIDs(ids ...core.ID) {
 	if m.downloads == nil {
@@ -18082,7 +19155,7 @@ func (m *ItemMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ItemMutation) AddedEdges() []string {
-	edges := make([]string, 0, 21)
+	edges := make([]string, 0, 22)
 	if m.library != nil {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -18130,6 +19203,9 @@ func (m *ItemMutation) AddedEdges() []string {
 	}
 	if m.wanted != nil {
 		edges = append(edges, item.EdgeWanted)
+	}
+	if m.episode_states != nil {
+		edges = append(edges, item.EdgeEpisodeStates)
 	}
 	if m.downloads != nil {
 		edges = append(edges, item.EdgeDownloads)
@@ -18239,6 +19315,12 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 		if id := m.wanted; id != nil {
 			return []ent.Value{*id}
 		}
+	case item.EdgeEpisodeStates:
+		ids := make([]ent.Value, 0, len(m.episode_states))
+		for id := range m.episode_states {
+			ids = append(ids, id)
+		}
+		return ids
 	case item.EdgeDownloads:
 		ids := make([]ent.Value, 0, len(m.downloads))
 		for id := range m.downloads {
@@ -18275,7 +19357,7 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ItemMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 21)
+	edges := make([]string, 0, 22)
 	if m.removedchildren != nil {
 		edges = append(edges, item.EdgeChildren)
 	}
@@ -18308,6 +19390,9 @@ func (m *ItemMutation) RemovedEdges() []string {
 	}
 	if m.removedlinked_in != nil {
 		edges = append(edges, item.EdgeLinkedIn)
+	}
+	if m.removedepisode_states != nil {
+		edges = append(edges, item.EdgeEpisodeStates)
 	}
 	if m.removeddownloads != nil {
 		edges = append(edges, item.EdgeDownloads)
@@ -18397,6 +19482,12 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeEpisodeStates:
+		ids := make([]ent.Value, 0, len(m.removedepisode_states))
+		for id := range m.removedepisode_states {
+			ids = append(ids, id)
+		}
+		return ids
 	case item.EdgeDownloads:
 		ids := make([]ent.Value, 0, len(m.removeddownloads))
 		for id := range m.removeddownloads {
@@ -18433,7 +19524,7 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ItemMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 21)
+	edges := make([]string, 0, 22)
 	if m.clearedlibrary {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -18481,6 +19572,9 @@ func (m *ItemMutation) ClearedEdges() []string {
 	}
 	if m.clearedwanted {
 		edges = append(edges, item.EdgeWanted)
+	}
+	if m.clearedepisode_states {
+		edges = append(edges, item.EdgeEpisodeStates)
 	}
 	if m.cleareddownloads {
 		edges = append(edges, item.EdgeDownloads)
@@ -18536,6 +19630,8 @@ func (m *ItemMutation) EdgeCleared(name string) bool {
 		return m.clearedlinked_in
 	case item.EdgeWanted:
 		return m.clearedwanted
+	case item.EdgeEpisodeStates:
+		return m.clearedepisode_states
 	case item.EdgeDownloads:
 		return m.cleareddownloads
 	case item.EdgeHistory:
@@ -18624,6 +19720,9 @@ func (m *ItemMutation) ResetEdge(name string) error {
 		return nil
 	case item.EdgeWanted:
 		m.ResetWanted()
+		return nil
+	case item.EdgeEpisodeStates:
+		m.ResetEpisodeStates()
 		return nil
 	case item.EdgeDownloads:
 		m.ResetDownloads()

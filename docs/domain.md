@@ -44,6 +44,7 @@ erDiagram
 | `Activity` | Something that happened on the server, kept in the activity log |
 | `QualityDefinition`, `QualityProfile`, `CustomFormat`, `DelayProfile`, `ReleaseProfile` | What releases are wanted and how they rank (§13) |
 | `Wanted` | How a monitored movie or series is acquired: its quality profile, minimum availability, new item monitoring, season folder flag and tags |
+| `EpisodeState` | What acquisition keeps of an episode of a series by its season and number: its scene numbering and last search time |
 | `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | A tracked download, an acquisition event, a release not to grab again, a release kept to grab later |
 | `RemotePathMapping` | How a download client's paths map to the server's |
 | `Request` / `SeasonRequest` | A user's request of a movie or of seasons of a series (§13.6) |
@@ -252,6 +253,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `QualityDefinitionRepository` | `List` a kind's definitions (none until stored), `Replace` them |
 | `QualityProfileRepository`, `CustomFormatRepository`, `DelayProfileRepository`, `ReleaseProfileRepository` | `Get`, `List`, `Put` (insert or replace by ID), `Delete`; see §13 for their constraints |
 | `WantedRepository` | `Get` (`ErrNotFound` when never wanted), `List` some items' or all, `Put`, `Delete`; deleting the item deletes it |
+| `EpisodeStateRepository` | `List` a series' states by season and episode, `PutSceneNumbering` (replacing the scene numbering of a series' episodes, keeping their search times), `Searched` (recording when episodes were searched for); deleting the series deletes them |
 | `DownloadRepository` | `Get`, `GetByDownloadID` (by plugin, client and the client's ID), `List` (paged, by item and state, most recently grabbed first), `Put`, `Delete` |
 | `HistoryRepository` | `Add`, `List` (paged, newest first, by items or their series, types, download ID and time), `Purge` of events before a time |
 | `BlocklistRepository` | `Add`, `List` (paged, newest first, an item's or all), `Delete` |
@@ -344,12 +346,14 @@ The server keeps what `libs/acquire` decides with and what happens to the releas
 ### 13.2 Wanted Items
 A monitored movie or series (`Item.Monitored`) is acquired as its `Wanted` says: its `QualityProfileID`, a movie's `MinimumAvailability` (`announced`, `in_cinemas`, `released`), a series' `MonitorNewItems` (`all`, the default when empty, or `none`: whether seasons and episodes a refresh adds are monitored, as Sonarr's `NewItemMonitorTypes`) and `SeasonFolder` (whether its episodes are imported into season folders), its `Tags`, `AddedAt` and `LastSearchedAt`. A wanted movie without a file, or a wanted series without a folder, is a virtual item (§4.8).
 
+An `EpisodeState` keeps, apart from the episode's item, which a scan may replace, what Sonarr keeps on its `Episode` for an episode of a series, by its TVDB season and number (`EpisodeNumber`): how the scene numbers it (`SceneSeason`, `SceneEpisode`, `SceneAbsolute`, nil when as TVDB does, and `UnverifiedSceneNumbering` when the numbering is extrapolated from that of other episodes rather than confirmed) and when it was last searched for (`LastSearchedAt`). Episodes without either have no state.
+
 ### 13.3 Downloads, History and the Blocklist
 * A `Download` is a grabbed release, tracked from the grab until it is imported, fails or is ignored: its download client (`PluginID`, `ClientID`) and the client's `DownloadID`, its item and episodes, title, indexer, protocol, quality, languages and size, and its `State` (`downloading`, `import_blocked`, `import_pending`, `importing`, `imported`, `failed_pending`, `failed`, `ignored`) with `Messages`. A client's download is tracked once.
 * A `HistoryEvent` records a grab, an import from a download folder, a failed or ignored download, or a file deleted or renamed, for a movie or an episode (with its series as `ParentID`): the release's `SourceTitle`, quality and languages, the `DownloadID` and type-specific `Data`.
 * A `BlocklistEntry` is a release not to grab again for an item: its title, quality, languages, size, protocol, indexer and flags, publish date, torrent hash and why it was blocklisted.
 * A `PendingRelease` is a release kept to grab later: held by a delay profile, waiting for a download client, or kept as a fallback should better releases fail. `Release` is the release as `libs/acquire` encodes it.
-* Deleting an item deletes its wanted state, downloads, history, blocklist entries and pending releases.
+* Deleting an item deletes its wanted state, episode states, downloads, history, blocklist entries and pending releases.
 
 ### 13.4 Settings
 `AcquisitionSettings`, part of the server settings, are Radarr's: how propers and repacks are treated (`prefer_and_upgrade`, `do_not_upgrade`, `do_not_prefer`), whether indexer flags are preferred, completed download handling and new searches after failures (for releases grabbed from an interactive search only when also allowed), the maximum release size, the minimum age and retention of usenet releases, hardcoded subtitles allowed or whitelisted, the free space an import must leave, the delay after which movies count as available, the RSS sync interval (10–120 minutes, 0 disabling it) and the download check interval, the recycle bin and its cleanup, hard links, extra files and empty folders, and `Naming`: whether movie files are renamed, illegal characters replaced, colons replaced (`delete`, `dash`, `space_dash`, `space_dash_space`, `smart`), and the movie folder and file templates.

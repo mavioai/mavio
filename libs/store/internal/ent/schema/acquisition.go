@@ -183,6 +183,42 @@ func (Wanted) Edges() []ent.Edge {
 	}
 }
 
+// EpisodeState holds the schema of core.EpisodeState: one row per
+// episode of a series, by season and episode.
+type EpisodeState struct{ ent.Schema }
+
+// Annotations of EpisodeState.
+func (EpisodeState) Annotations() []schema.Annotation {
+	return []schema.Annotation{entsql.Annotation{Table: "episode_states"}}
+}
+
+// Fields of EpisodeState.
+func (EpisodeState) Fields() []ent.Field {
+	return []ent.Field{
+		idField(),
+		field.UUID("series_id", core.ID{}),
+		field.Int("season"),
+		field.Int("episode"),
+		field.Int("scene_season").Optional().Nillable(),
+		field.Int("scene_episode").Optional().Nillable(),
+		field.Int("scene_absolute").Optional().Nillable(),
+		field.Bool("unverified_scene_numbering").Default(false),
+		field.Time("last_searched_at").Optional().Nillable(),
+	}
+}
+
+// Edges of EpisodeState.
+func (EpisodeState) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("series", Item.Type).Ref("episode_states").Field("series_id").Unique().Required(),
+	}
+}
+
+// Indexes of EpisodeState.
+func (EpisodeState) Indexes() []ent.Index {
+	return []ent.Index{index.Fields("series_id", "season", "episode").Unique()}
+}
+
 // Download holds the schema of core.Download.
 type Download struct{ ent.Schema }
 

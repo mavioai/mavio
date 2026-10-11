@@ -43,6 +43,7 @@ erDiagram
 | `Activity` | 服务端上发生的事情，记录在活动日志中 |
 | `QualityDefinition`、`QualityProfile`、`CustomFormat`、`DelayProfile`、`ReleaseProfile` | 想要哪些发布及其排序（§13） |
 | `Wanted` | 被监控的电影或剧集如何获取：其质量档案、最低可用状态、新条目监控、季文件夹标志与标签 |
+| `EpisodeState` | 获取按季号与集号为剧集的单集保存的内容：其 scene 编号与上次搜索时间 |
 | `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | 被跟踪的下载、获取事件、不再抓取的发布、留待以后抓取的发布 |
 | `RemotePathMapping` | 下载客户端的路径如何映射到服务端的路径 |
 | `Request` / `SeasonRequest` | 用户对一部电影或一部剧集若干季的请求（§13.6） |
@@ -252,6 +253,7 @@ erDiagram
 | `QualityDefinitionRepository` | `List` 某类型的定义（保存之前为空）、`Replace` 替换 |
 | `QualityProfileRepository`、`CustomFormatRepository`、`DelayProfileRepository`、`ReleaseProfileRepository` | `Get`、`List`、`Put`（按 ID 插入或替换）、`Delete`；约束见 §13 |
 | `WantedRepository` | `Get`（从未想要时为 `ErrNotFound`）、`List` 某些条目或全部、`Put`、`Delete`；删除条目时一并删除 |
+| `EpisodeStateRepository` | `List` 某剧集按季与集排序的状态、`PutSceneNumbering`（替换某剧集各集的 scene 编号，保留其搜索时间）、`Searched`（记录单集被搜索的时间）；删除剧集时一并删除 |
 | `DownloadRepository` | `Get`、`GetByDownloadID`（按插件、客户端与客户端的 ID）、`List`（分页，按条目与状态，最近抓取的在前）、`Put`、`Delete` |
 | `HistoryRepository` | `Add`、`List`（分页，最新的在前，按条目或其剧集、类型、下载 ID 与时间）、`Purge` 清除某时间之前的事件 |
 | `BlocklistRepository` | `Add`、`List`（分页，最新的在前，某条目的或全部）、`Delete` |
@@ -344,12 +346,14 @@ erDiagram
 ### 13.2 想要的条目
 被监控的电影或剧集（`Item.Monitored`）按其 `Wanted` 获取：`QualityProfileID`、电影的 `MinimumAvailability`（`announced`、`in_cinemas`、`released`）、剧集的 `MonitorNewItems`（`all`，为空时的默认值，或 `none`：刷新新增的季和集是否被监控，与 Sonarr 的 `NewItemMonitorTypes` 相同）与 `SeasonFolder`（其单集是否导入到季文件夹中）、`Tags`、`AddedAt` 与 `LastSearchedAt`。没有文件的想要的电影、或没有文件夹的想要的剧集是虚拟条目（§4.8）。
 
+`EpisodeState` 在单集条目（扫描可能替换它）之外，按 TVDB 季号与集号（`EpisodeNumber`）保存 Sonarr 保存在其 `Episode` 上的内容：scene 如何为该集编号（`SceneSeason`、`SceneEpisode`、`SceneAbsolute`，与 TVDB 相同时为 nil；编号由其他单集的编号推算而非确认时设置 `UnverifiedSceneNumbering`），以及上次搜索它的时间（`LastSearchedAt`）。两者皆无的单集没有状态。
+
 ### 13.3 下载、历史与黑名单
 * `Download` 是被抓取的发布，从抓取起被跟踪，直到入库、失败或被忽略：其下载客户端（`PluginID`、`ClientID`）与客户端的 `DownloadID`、其条目与剧集、标题、索引器、协议、质量、语言与大小，以及 `State`（`downloading`、`import_blocked`、`import_pending`、`importing`、`imported`、`failed_pending`、`failed`、`ignored`）与 `Messages`。客户端的同一个下载只跟踪一次。
 * `HistoryEvent` 记录电影或单集（其剧集为 `ParentID`）的一次抓取、从下载目录入库、下载失败或被忽略、文件被删除或改名：发布的 `SourceTitle`、质量与语言、`DownloadID` 以及与类型相关的 `Data`。
 * `BlocklistEntry` 是某条目不再抓取的发布：其标题、质量、语言、大小、协议、索引器与标志、发布日期、种子哈希以及被拉黑的原因。
 * `PendingRelease` 是留待以后抓取的发布：被 delay profile 延迟、等待下载客户端，或作为更好的发布失败时的后备。`Release` 是 `libs/acquire` 编码后的发布。
-* 删除条目时一并删除其想要状态、下载、历史、黑名单条目与待定发布。
+* 删除条目时一并删除其想要状态、单集状态、下载、历史、黑名单条目与待定发布。
 
 ### 13.4 设置
 `AcquisitionSettings` 属于服务器设置，沿用 Radarr 的设置：如何对待 proper 与 repack（`prefer_and_upgrade`、`do_not_upgrade`、`do_not_prefer`）、是否偏好索引器标志、已完成下载的处理与失败后重新搜索（交互式搜索抓取的发布须另行允许）、发布的最大大小、Usenet 发布的最小时长与保留期、允许或白名单中的硬字幕、入库后须保留的空闲空间、电影视为可用的延迟、RSS 同步间隔（10–120 分钟，0 表示停用）与下载检查间隔、回收目录及其清理、硬链接、附加文件与空目录，以及 `Naming`：是否重命名电影文件、替换非法字符、替换冒号（`delete`、`dash`、`space_dash`、`space_dash_space`、`smart`），以及电影目录与文件的模板。
