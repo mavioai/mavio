@@ -2,7 +2,7 @@
 
 > [English](architecture.md) | 简体中文
 
-> 相关文档：[领域模型](domain.zh-CN.md) · [开发指南](development.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [测试策略](testing.zh-CN.md) · [性能与优化](optimization.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
+> 相关文档：[客户端](clients.zh-CN.md) · [领域模型](domain.zh-CN.md) · [开发指南](development.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [测试策略](testing.zh-CN.md) · [性能与优化](optimization.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
 > Mavio 是一个以 Go 为服务端核心的新一代自托管媒体服务器。它借鉴 Jellyfin 多年沉淀的领域知识、FFmpeg 管线与测试资产，但不以兼容 Jellyfin 生态为目标，选型一律取当下最现代、最合适的方案。
 
@@ -13,7 +13,7 @@
 ### 1.1 目标
 * **轻量高效**：低常驻内存、快速冷启动、高扫描吞吐与低首分片延迟来自现代技术栈本身——无运行时虚拟机的原生 Go 单二进制、以 WASM 沙箱代替重量级隔离、ffmpeg 硬件管线。
 * **单二进制交付**：服务端为 `CGO_ENABLED=0` 的单一 Go 二进制；唯一外部运行时依赖是 `jellyfin-ffmpeg`。
-* **强类型契约**：对内对外统一使用 Protobuf + Connect-RPC，未来的 Web / Expo / Desktop 客户端直接从契约生成 SDK。
+* **强类型契约**：对内对外统一使用 Protobuf + Connect-RPC，未来的客户端（[客户端](clients.zh-CN.md)）直接从契约生成 SDK。
 * **插件隔离**：插件不进入宿主地址空间，WASM（wazero）沙箱与独立子进程（UDS）两种运行时共享同一套契约。
 * **多数据库**：SQLite 与 PostgreSQL 均为一等公民。
 * **默认隐私**：没有遥测、播放统计或设备追踪，所有数据都留在主机上。没有元数据插件时，服务端只使用本地 NFO 文件与图片，不发出元数据的外部请求；访问资源获取所用服务的插件无需管理员提供密钥（§13.2）。
@@ -80,9 +80,10 @@ mavio/
 │
 ├── apps/
 │   ├── server/                  # [Go] 服务端：cmd/mavio、依赖装配、配置、Connect 服务实现
-│   ├── web/                     # (后期) React + Vite + TanStack Router / Query
-│   ├── mobile/                  # (后期) Expo
-│   └── desktop/                 # (后期) Tauri 2，复用 web；可将 server 作为 sidecar 内嵌
+│   ├── web/                     # (后期) [TS] Web UI，内嵌于服务端（见 clients.zh-CN.md）
+│   ├── ios/ tvos/ macos/        # (后期) [Swift] iPhone 与 iPad、Apple TV、Mac（见 clients.zh-CN.md）
+│   ├── android/ android-tv/     # (后期) [Kotlin] 手机与平板、Android TV（见 clients.zh-CN.md）
+│   └── windows-linux/           # (后期) [Go] Windows 与 Linux：MyGo、libmpv（见 clients.zh-CN.md）
 │
 ├── libs/
 │   ├── proto/                   # [Go + TS] 契约：*.proto 源文件、buf 配置、生成的 Go/TS 代码
@@ -98,8 +99,10 @@ mavio/
 │   ├── streaming/               # [Go] HLS (CMAF) 播放列表、按需分片、分片缓存
 │   ├── release/                 # [Go] release 标题解析：编号、质量、语言、版本、发布组
 │   ├── acquire/                 # [Go] 资源获取引擎：档案、决策、搜索、队列、入库（movie、series）
-│   ├── client/                  # (后期) [TS] 基于 connect-es 的客户端封装与 Query hooks
-│   └── ui/                      # (后期) [TS] 跨端组件与设计 tokens
+│   ├── client-ts/               # (后期) [TS] Web UI 的 connect-es 客户端与 Query hooks（见 clients.zh-CN.md）
+│   ├── client-rust/             # (后期) [Rust] 原生客户端的共享核心（见 clients.zh-CN.md）
+│   ├── apple/ android/          # (后期) [Swift] [Kotlin] Apple 各应用与 Android 各应用的共享代码（见 clients.zh-CN.md）
+│   └── design/                  # (后期) 所有客户端的设计 tokens 与图标（见 clients.zh-CN.md）
 │
 ├── plugins/
 │   ├── scraper-tmdb/            # [Go → wasm] TMDB 元数据刮削

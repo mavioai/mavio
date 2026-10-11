@@ -13,13 +13,14 @@ This is the repository working guide for AI coding agents (and new developers). 
 | [docs/roadmap.md](docs/roadmap.md) | Phases, completion criteria, current status, risks |
 | [docs/optimization.md](docs/optimization.md) | Optimization topics, each with an implementation index: storage I/O latency mitigation and speculative warming |
 | [docs/plugins.md](docs/plugins.md) | Plugin platform: host API, events, HTTP routes, tasks, remote devices, provider types; the DLNA plugin |
+| [docs/clients.md](docs/clients.md) | Clients: the embedded web UI, the Apple, Android, Windows and Linux apps, the shared Rust core, the design system |
 | [docs/jellyfin-compat.md](docs/jellyfin-compat.md) | Evaluation of a Jellyfin API compatibility shim (not adopted) |
 
 ## Project Overview
 
 Mavio is a self-hosted media server with a Go server at its core. It draws on Jellyfin's domain knowledge and test assets but is not compatible with the Jellyfin ecosystem. It is licensed under **GPL-3.0**.
 
-Current phase: **P6 server assembly and distribution** (see [docs/roadmap.md](docs/roadmap.md)). No UI is being built yet; `apps/web`, `apps/mobile`, `apps/desktop`, `libs/client` and `libs/ui` do not exist yet — do not create them ahead of time.
+Current phase: **P6 server assembly and distribution** (see [docs/roadmap.md](docs/roadmap.md)). No UI is being built yet; the clients of [docs/clients.md](docs/clients.md) (`apps/web`, `apps/ios`, `apps/tvos`, `apps/macos`, `apps/android`, `apps/android-tv`, `apps/windows-linux`, `libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`) do not exist yet — do not create them ahead of time.
 
 ## Directory Structure
 
@@ -70,7 +71,7 @@ Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test
 ## Go Conventions
 
 ### Modules and Dependencies
-- Every `apps/*`, `libs/*` and `plugins/*` directory is an independent Go module with module path `github.com/mavioai/mavio/<dir>`; the `go` directive is `1.27.0` everywhere.
+- Every Go project in `apps/*`, `libs/*` and `plugins/*` is an independent Go module with module path `github.com/mavioai/mavio/<dir>`; the `go` directive is `1.27.0` everywhere.
 - Dependencies between in-repo modules are declared **both** in `go.work` and in each `go.mod` as `require` + relative-path `replace` (see `apps/server/go.mod`). This keeps `go mod tidy` and builds working with `GOWORK=off`. To add an internal dependency:
   ```bash
   go mod edit -require=github.com/mavioai/mavio/libs/core@v0.0.0 -replace=github.com/mavioai/mavio/libs/core=../core

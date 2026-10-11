@@ -31,10 +31,10 @@ pnpm install            # 安装 Nx
 ## 2. Monorepo 与 Nx
 
 ### 2.1 为什么用 Nx
-Go 是服务端主语言；未来还会有 Web（React + Vite）、Mobile（Expo）、Desktop（Tauri 2）三类 TS 应用，并共享由 `libs/proto` 生成的客户端代码。这是一个跨语言的 monorepo，需要统一的依赖图、受影响分析与任务缓存：
-* Nx 对 Expo（`@nx/expo`）、Vite / React 有官方插件；
+Go 是服务端主语言；未来还会加入以 TypeScript（Web UI）、Swift、Kotlin、Go（Windows 与 Linux 应用）与 Rust（它们的共享核心）编写的[客户端](clients.zh-CN.md)，并使用由 `libs/proto` 生成的客户端代码。这是一个跨语言的 monorepo，需要统一的依赖图、受影响分析与任务缓存：
+* Nx 对 Vite / React 与 Gradle（`@nx/gradle`）有官方插件；Cargo 与 `xcodebuild` 通过各自的目标运行；
 * Go 项目由仓库内的本地 Nx 插件 `tools/nx-go` 推断：每个 `go.mod` 自动成为一个项目，并根据 `go.mod` 中的仓库内 `require` 生成依赖图；
-* 用 tags 表达边界：`type:app|lib|plugin`、`lang:go|ts`、`scope:server|client|shared`。TS 侧由 `@nx/enforce-module-boundaries` 约束，Go 侧由 depguard 约束（§5）。
+* 用 tags 表达边界：`type:app|lib|plugin`、`lang:go|ts|rust|swift|kotlin`、`scope:server|client|shared`。TS 侧由 `@nx/enforce-module-boundaries` 约束，Go 侧由 depguard 约束（§5）。
 
 Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `go test`。
 

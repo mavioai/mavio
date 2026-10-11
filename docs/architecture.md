@@ -2,7 +2,7 @@
 
 > English | [简体中文](architecture.zh-CN.md)
 
-> Related: [Domain Model](domain.md) · [Development](development.md) · [Roadmap](roadmap.md) · [Testing](testing.md) · [Optimization](optimization.md) · [AGENTS.md](../AGENTS.md)
+> Related: [Clients](clients.md) · [Domain Model](domain.md) · [Development](development.md) · [Roadmap](roadmap.md) · [Testing](testing.md) · [Optimization](optimization.md) · [AGENTS.md](../AGENTS.md)
 
 > Mavio is a next-generation self-hosted media server with a Go server at its core. It draws on the domain knowledge, FFmpeg pipeline and test assets that Jellyfin has accumulated over many years, but it does not aim to be compatible with the Jellyfin ecosystem; every technology choice is the most modern and best-suited option available today.
 
@@ -13,7 +13,7 @@
 ### 1.1 Goals
 * **Lightweight and efficient**: low resident memory, fast cold starts, high scan throughput and low first-segment latency follow from the modern stack — a single native Go binary with no runtime VM, WASM sandboxing instead of heavyweight isolation, and ffmpeg hardware pipelines.
 * **Single-binary delivery**: the server is a single `CGO_ENABLED=0` Go binary; its only external runtime dependency is `jellyfin-ffmpeg`.
-* **Strongly typed contracts**: Protobuf + Connect-RPC is used for all internal and external APIs; future Web / Expo / Desktop clients generate their SDKs directly from the contracts.
+* **Strongly typed contracts**: Protobuf + Connect-RPC is used for all internal and external APIs; the future clients ([Clients](clients.md)) generate their SDKs directly from the contracts.
 * **Plugin isolation**: plugins never enter the host's address space. Two runtimes — a WASM (wazero) sandbox and a child process (UDS) — share one set of contracts.
 * **Multiple databases**: SQLite and PostgreSQL are both first-class.
 * **Private by default**: no telemetry, playback analytics or device tracking; all data stays on the host. Without metadata plugins the server works from local NFO files and images and makes no outbound metadata requests; the plugins that reach the services acquisition uses need no keys of the administrator (§13.2).
@@ -80,9 +80,10 @@ mavio/
 │
 ├── apps/
 │   ├── server/                  # [Go] Server: cmd/mavio, dependency wiring, config, Connect service implementations
-│   ├── web/                     # (later) React + Vite + TanStack Router / Query
-│   ├── mobile/                  # (later) Expo
-│   └── desktop/                 # (later) Tauri 2, reusing web; can embed the server as a sidecar
+│   ├── web/                     # (later) [TS] Web UI, embedded in the server (see clients.md)
+│   ├── ios/ tvos/ macos/        # (later) [Swift] iPhone and iPad, Apple TV, Mac (see clients.md)
+│   ├── android/ android-tv/     # (later) [Kotlin] Phones and tablets, Android TV (see clients.md)
+│   └── windows-linux/           # (later) [Go] Windows and Linux: MyGo, libmpv (see clients.md)
 │
 ├── libs/
 │   ├── proto/                   # [Go + TS] Contracts: *.proto sources, buf config, generated Go/TS code
@@ -98,8 +99,10 @@ mavio/
 │   ├── streaming/               # [Go] HLS (CMAF) playlists, on-demand segmenting, segment cache
 │   ├── release/                 # [Go] Release title parsing: numbering, quality, languages, edition, group
 │   ├── acquire/                 # [Go] Acquisition engine: profiles, decisions, searches, queue, import (movie, series)
-│   ├── client/                  # (later) [TS] connect-es client wrapper and Query hooks
-│   └── ui/                      # (later) [TS] Cross-platform components and design tokens
+│   ├── client-ts/               # (later) [TS] connect-es client and Query hooks of the web UI (see clients.md)
+│   ├── client-rust/             # (later) [Rust] Shared core of the native clients (see clients.md)
+│   ├── apple/ android/          # (later) [Swift] [Kotlin] Code shared by the Apple apps and by the Android apps (see clients.md)
+│   └── design/                  # (later) Design tokens and icons for every client (see clients.md)
 │
 ├── plugins/
 │   ├── scraper-tmdb/            # [Go → wasm] TMDB metadata scraper

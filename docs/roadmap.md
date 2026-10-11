@@ -40,7 +40,7 @@ flowchart TD
     P18["P18 Movie acquisition<br/>libs/acquire, plugins/download-clients"]
     P19["P19 Series acquisition<br/>season packs, anime, daily series, scene mappings"]
     P20["P20 Discovery and requests<br/>DiscoverService, RequestService"]
-    P21["P21 Clients and ecosystem<br/>libs/client, libs/ui, apps/web, apps/desktop, apps/mobile, Jellyfin shim decision"]
+    P21["P21 Clients and ecosystem<br/>apps/web, Apple, Android, Windows and Linux apps, libs/client-rust, Jellyfin shim decision"]
     P22["P22 Real-device acceptance<br/>end-to-end playback on real televisions and clients"]
     P23["P23 Packaging and release<br/>libs/proto and libs/plugin tags, server binaries and container images"]
 
@@ -523,7 +523,7 @@ flowchart TD
 **Done when**: an end-to-end test: a user limited to PG finds a film and a series through discovery, cannot request one rated above the limit, requests the others; an administrator approves; they are acquired and the user is notified that they are available.
 
 ### P21 Clients and Ecosystem
-**Scope**: `libs/client`, `libs/ui`; `apps/web`, `apps/desktop`, `apps/mobile`, built on the finished server API; playback verified on Media3 with the Android client; the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its completion criteria will be defined after P20.
+**Scope**: the [clients](clients.md), built on the finished server API: the web UI embedded in the server (`apps/web`, served at `/`), the Apple apps for iPhone and iPad, Apple TV and the Mac (`apps/ios`, `apps/tvos`, `apps/macos`), the Android apps for phones and tablets and for Android TV (`apps/android`, `apps/android-tv`), the Windows and Linux app on MyGo (`apps/windows-linux`), and the libraries they share (`libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`); the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). It starts with the prototypes the open items of §4 name for clients. The clients then come in this order, each proving the shared core and the design system before the next platform builds on them: the web UI with `libs/client-ts` and `libs/design`; the iPhone and iPad app with `libs/client-rust` and `libs/apple`; the Android phone and tablet app with `libs/android`; the Apple TV and Android TV apps; the Mac app; the Windows and Linux app. Its completion criteria will be defined after P20.
 
 ### P22 Real-Device Acceptance
 **Scope**: end-to-end playback on real devices, after the clients exist: DLNA media server and Play To on real televisions, with the profiles adjusted to what they do.
@@ -561,3 +561,10 @@ flowchart TD
 | Series numbering | Releases and files follow TVDB's numbering, TMDB's metadata may number the same episodes otherwise, anime in particular | Display orders with TMDB episode groups and episode TVDB IDs in P15 and P16; scene mappings and XEM in P19 |
 | Indexer churn | Sites change their pages and APIs | Cardigann definitions are fetched at run time; the indexers plugin is upgraded from the catalog without a server release |
 | Live TV, DVR and channels | Large parts of Jellyfin that Mavio has neither adopted nor ruled out; the plugin platform leaves out their provider types | Decide before P21 |
+| Client licensing and app stores | The clients would be GPL-3.0 like the rest of the repository, whose terms conflict with the App Store's; LGPL builds of libmpv and FFmpeg also oblige letting users relink them | Decide before the first App Store release: a separate license for the clients, a contributor agreement, or no App Store distribution |
+| libmpv on Apple platforms | mpv's render API has only OpenGL and software back ends, and OpenGL is deprecated on Apple platforms; IINA's Picture in Picture uses the private `PIP.framework`, which the App Store rejects, so libmpv playback reaching `AVPictureInPictureController` through `AVSampleBufferDisplayLayer` is unproven | Prototype first in P21: EDR output and Picture in Picture of libmpv playback on macOS, iOS and tvOS. If Picture in Picture cannot be fed, entering it during libmpv playback starts the playback again on AVPlayer, the server processing the source. Also verify that the server's remux of a Dolby Vision source keeps its Dolby Vision metadata |
+| libmpv on Android | libmpv is the second engine of the Android apps; its OpenGL ES rendering may be slow on the weak GPUs of Android TV devices, many of them 32-bit, and it outputs no HDR | Measure on low-end Android TV devices in P21; where libmpv cannot keep up, the app leaves it out of its capabilities and the server processes the source |
+| Rust on tvOS | `aarch64-apple-tvos` is a tier 3 Rust target: no prebuilt standard library, built with `-Zbuild-std` on nightly | Prototype first in P21; pin the nightly the tvOS build uses |
+| connect-rust before 1.0 | `libs/client-rust` uses connect-rust, which is still in 0.x and may change its API | Pin the version; follow its releases |
+| HDR on Linux | The Linux app draws video with OpenGL in a GTK 3 `GtkGLArea`, which presents SDR only, so HDR is tone mapped | Revisit when MyGo's Linux backend can present HDR surfaces |
+| MyGo | `apps/windows-linux` builds on MyGo, started in September 2026 and still in 0.x, mostly by one maintainer. It has no element yet that places a native surface drawn by another renderer under its native UI, which the player needs for mpv's video (a child window on Windows, a `GtkGLArea` on Linux); the way it places its own web views is the model | Prototype first in P21: the video element, contributed to MyGo, with HDR10 on Windows; pin the MyGo version |
