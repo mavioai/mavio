@@ -227,6 +227,17 @@ func (discovery) Discover(_ context.Context, req *pluginv1.DiscoverRequest) (*pl
 	}.Build(), nil
 }
 
+// SearchTitles lists a movie named after the query.
+func (discovery) SearchTitles(_ context.Context, req *pluginv1.SearchTitlesRequest) (*pluginv1.SearchTitlesResponse, error) {
+	return pluginv1.SearchTitlesResponse_builder{
+		Titles: []*pluginv1.DiscoveredTitle{pluginv1.DiscoveredTitle_builder{
+			MediaKind: pluginv1.MediaKind_MEDIA_KIND_MOVIE.Enum(), Name: proto.String(req.GetQuery()),
+			ExternalIds: map[string]string{"tmdb": "1"},
+		}.Build()},
+		Page: proto.Int32(1), TotalPages: proto.Int32(1), TotalResults: proto.Int32(1),
+	}.Build(), nil
+}
+
 // ListFilterValues lists the query as the filter's only value.
 func (discovery) ListFilterValues(_ context.Context, req *pluginv1.ListFilterValuesRequest) (*pluginv1.ListFilterValuesResponse, error) {
 	return pluginv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{pluginv1.FilterValue_builder{
