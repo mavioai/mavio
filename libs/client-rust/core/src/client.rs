@@ -8,8 +8,9 @@ use std::time::{Duration, SystemTime};
 
 use mavio_api::proto::mavio::home::v1::{GetHubRequest, ListHubsRequest, ListHubsResponse};
 use mavio_api::proto::mavio::library::v1::{
-    CreditKind, GetItemRequest, GetItemResponse, ImageKind, Item, LibraryKind, ListItemsRequest,
-    ListLibrariesRequest, ListLibrariesResponse, ListSimilarItemsRequest, SortField, SortSpec,
+    CreditKind, GetItemRequest, GetItemResponse, ImageKind, Item, ItemKind, LibraryKind,
+    ListItemsRequest, ListLibrariesRequest, ListLibrariesResponse, ListSimilarItemsRequest,
+    SortField, SortSpec,
 };
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
@@ -28,6 +29,22 @@ use crate::view::{self, Artwork, Card, Row};
 
 /// The items of a search asked of each server.
 const SEARCH_LIMIT: i32 = 30;
+/// The kinds search finds: titles, not the seasons and folders inside them.
+const SEARCH_KINDS: [ItemKind; 13] = [
+    ItemKind::ITEM_KIND_MOVIE,
+    ItemKind::ITEM_KIND_SERIES,
+    ItemKind::ITEM_KIND_EPISODE,
+    ItemKind::ITEM_KIND_VIDEO,
+    ItemKind::ITEM_KIND_MUSIC_ARTIST,
+    ItemKind::ITEM_KIND_MUSIC_ALBUM,
+    ItemKind::ITEM_KIND_TRACK,
+    ItemKind::ITEM_KIND_MUSIC_VIDEO,
+    ItemKind::ITEM_KIND_AUDIOBOOK,
+    ItemKind::ITEM_KIND_BOOK,
+    ItemKind::ITEM_KIND_PHOTO_ALBUM,
+    ItemKind::ITEM_KIND_COLLECTION,
+    ItemKind::ITEM_KIND_PLAYLIST,
+];
 
 /// Receives what the servers push.
 pub trait Listener: Send + Sync {
@@ -606,7 +623,7 @@ impl Core {
                 Ok(conn) => {
                     let req = ListItemsRequest {
                         search: Some(query.to_owned()),
-                        recursive: Some(true),
+                        kinds: SEARCH_KINDS.iter().map(|&k| k.into()).collect(),
                         limit: Some(SEARCH_LIMIT),
                         ..Default::default()
                     };
@@ -1122,6 +1139,9 @@ mod tests {
             "/mavio.library.v1.ItemService/ListItems",
             |_, req: ListItemsRequest| {
                 assert_eq!(req.search.as_deref(), Some("brazil"));
+                // A search spans the whole server, which takes no recursive flag.
+                assert_eq!(req.recursive, None);
+                assert!(!req.kinds.is_empty());
                 Ok(ListItemsResponse {
                     items: vec![movie("a1", "68")],
                     ..Default::default()
