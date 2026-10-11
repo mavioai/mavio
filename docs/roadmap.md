@@ -529,18 +529,19 @@ flowchart TD
 **Progress**:
 - [x] Domain and storage: requests with their seasons, issues and their comments, users' request permissions and quotas, the server's request settings (`libs/core/request.go`, `libs/store`)
 - [x] `DiscoverService`: the catalogs of the discovery providers, their titles marked as available, wanted or requested, and the user's rating limit applied (`apps/server/internal/requests`)
-  - [ ] Text search in discovery, once a discovery provider searches
-  - [ ] Totals of pages that leave out titles above the user's rating limit; the provider's totals are given
-  - [ ] Unrated titles kept by certification filters when the user's policy allows them
-  - [ ] Details of a title with the status of each of its seasons
+  - [x] Text search in discovery (`DiscoverService.SearchTitles`), through the `SearchTitles` of discovery providers; scraper-tmdb searches as Seerr does, with its `tmdb:`, `imdb:`, `tvdb:` and `year:` prefixes
+  - [x] Totals of pages that leave titles out: `hidden_results` counts the titles left out of a page, `total_results` is the provider's total less them, exact on a single page and otherwise an upper bound
+  - [x] Unrated titles kept by certification filters unless the user's policy blocks them: certifications go to the provider only when the caller asks for some or blocks unrated titles; otherwise the server rates the titles itself
+  - [x] Details of a title with the status of each of its seasons (`DiscoverService.GetTitle`), as Seerr's movie and series details
 - [x] `RequestService`: requests of movies and seasons checked as Seerr checks them (permissions, rating limit, quotas, duplicates), approved automatically or by an administrator, acquired through `WantedService`, completed when their items become available (`requests.availability`)
-  - [ ] A quality profile of its own for anime requested
-  - [ ] Seerr's blocklisted and deleted statuses of titles
-  - [ ] The country and language of a server-wide metadata setting for ratings, rather than the destination library's
-  - [ ] The availability job listed among the tasks
+  - [x] A quality profile and library of their own for anime requested (`RequestSettings.AnimeQualityProfileID`, `AnimeLibraryID`), added as anime series, as Seerr's anime settings
+  - [x] Seerr's blocklisted and deleted statuses of titles: the blocklist (`BlockTitle`, `UnblockTitle`, `ListBlockedTitles`, `core.BlockedTitle`) refuses requests of its titles; a title whose completed request's files are gone is deleted and may be requested again
+    - [ ] Seerr's blocklisted tags, blocklisting the titles of keywords automatically, and blocklisting a collection
+  - [x] The country and language of a server-wide metadata setting (`ServerSettings.Metadata`) for ratings and names, rather than the destination library's
+  - [x] The availability job listed among the tasks (`TaskService`, "Sync request availability")
 - [x] `IssueService`: problems with an item reported, commented on, resolved and reopened
 - [x] Notifications: activities of the user concerned, read through `ActivityService.ListMyActivities` and delivered by notifier plugins
-  - [ ] An event pushed to the user's sessions
+  - [x] An event pushed to the sessions of the user concerned, and of administrators for the requests and issues awaiting them (`NotificationReceived`)
 - [x] End-to-end test (`apps/server/internal/server/requests_test.go`): a user limited to PG discovers a film and a series through scraper-tmdb, is refused an R-rated film, requests the others; an administrator approves; they are grabbed, imported and played, and the user is notified that they are available; an issue the user reports is resolved
   - [ ] Declined requests, exhausted quotas and retried failed requests in the end-to-end test
   - [ ] Changed seasons of pending requests and requests of every season in the end-to-end test
