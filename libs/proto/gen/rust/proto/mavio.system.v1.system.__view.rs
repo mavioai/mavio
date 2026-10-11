@@ -7325,7 +7325,7 @@ impl ::buffa::HasMessageView for super::super::MetadataSettings {
     type ViewHandle = MetadataSettingsOwnedView;
 }
 /// AcquisitionSettings are how releases are chosen, downloaded and
-/// imported, as Radarr's settings.
+/// imported, as Radarr's and Sonarr's settings.
 #[derive(Clone, Debug, Default)]
 pub struct AcquisitionSettingsView<'a> {
     /// Field 1: `propers`
@@ -7422,6 +7422,42 @@ pub struct AcquisitionSettingsView<'a> {
     ///
     /// Field 26: `auto_redownload_failed_from_interactive_search`
     pub auto_redownload_failed_from_interactive_search: ::core::option::Option<bool>,
+    /// Whether episode files are named by the episode formats.
+    ///
+    /// Field 40: `rename_episodes`
+    pub rename_episodes: ::core::option::Option<bool>,
+    /// Templates of episode files of standard, daily and anime series and of
+    /// the folders of series, seasons and specials, such as
+    /// "{Series Title} - S{season:00}E{episode:00}"; empty for the defaults.
+    ///
+    /// Field 41: `standard_episode_format`
+    pub standard_episode_format: ::core::option::Option<&'a str>,
+    /// Field 42: `daily_episode_format`
+    pub daily_episode_format: ::core::option::Option<&'a str>,
+    /// Field 43: `anime_episode_format`
+    pub anime_episode_format: ::core::option::Option<&'a str>,
+    /// Field 44: `series_folder_format`
+    pub series_folder_format: ::core::option::Option<&'a str>,
+    /// Field 45: `season_folder_format`
+    pub season_folder_format: ::core::option::Option<&'a str>,
+    /// Field 46: `specials_folder_format`
+    pub specials_folder_format: ::core::option::Option<&'a str>,
+    /// Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.
+    ///
+    /// Field 47: `multi_episode_style`
+    pub multi_episode_style: ::core::option::Option<
+        ::buffa::EnumValue<super::super::MultiEpisodeStyle>,
+    >,
+    /// Unmonitors the episodes of wanted series whose files go missing.
+    ///
+    /// Field 48: `auto_unmonitor_previously_downloaded_episodes`
+    pub auto_unmonitor_previously_downloaded_episodes: ::core::option::Option<bool>,
+    /// Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
+    ///
+    /// Field 49: `episode_title_required`
+    pub episode_title_required: ::core::option::Option<
+        ::buffa::EnumValue<super::super::EpisodeTitleRequired>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
@@ -7640,6 +7676,86 @@ impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
                     ::buffa::types::decode_bool(&mut cur)?,
                 );
             }
+            40u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.rename_episodes = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            41u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.standard_episode_format = Some(
+                    ::buffa::types::borrow_str(&mut cur)?,
+                );
+            }
+            42u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.daily_episode_format = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            43u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.anime_episode_format = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            44u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.series_folder_format = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            45u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.season_folder_format = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            46u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.specials_folder_format = Some(
+                    ::buffa::types::borrow_str(&mut cur)?,
+                );
+            }
+            47u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.multi_episode_style = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
+            48u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.auto_unmonitor_previously_downloaded_episodes = Some(
+                    ::buffa::types::decode_bool(&mut cur)?,
+                );
+            }
+            49u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.episode_title_required = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
             9u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -7725,6 +7841,17 @@ impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
             standard_movie_format: self.standard_movie_format.map(|s| s.to_string()),
             auto_redownload_failed_from_interactive_search: self
                 .auto_redownload_failed_from_interactive_search,
+            rename_episodes: self.rename_episodes,
+            standard_episode_format: self.standard_episode_format.map(|s| s.to_string()),
+            daily_episode_format: self.daily_episode_format.map(|s| s.to_string()),
+            anime_episode_format: self.anime_episode_format.map(|s| s.to_string()),
+            series_folder_format: self.series_folder_format.map(|s| s.to_string()),
+            season_folder_format: self.season_folder_format.map(|s| s.to_string()),
+            specials_folder_format: self.specials_folder_format.map(|s| s.to_string()),
+            multi_episode_style: self.multi_episode_style,
+            auto_unmonitor_previously_downloaded_episodes: self
+                .auto_unmonitor_previously_downloaded_episodes,
+            episode_title_required: self.episode_title_required,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -7814,6 +7941,36 @@ impl<'a> ::buffa::ViewEncode<'a> for AcquisitionSettingsView<'a> {
         if self.auto_redownload_failed_from_interactive_search.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.rename_episodes.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.standard_episode_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.daily_episode_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.anime_episode_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.series_folder_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.season_folder_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.specials_folder_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.multi_episode_style {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if self.auto_unmonitor_previously_downloaded_episodes.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.episode_title_required {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -7902,6 +8059,36 @@ impl<'a> ::buffa::ViewEncode<'a> for AcquisitionSettingsView<'a> {
         }
         if let Some(v) = self.auto_redownload_failed_from_interactive_search {
             ::buffa::types::put_bool_field(26u32, v, buf);
+        }
+        if let Some(v) = self.rename_episodes {
+            ::buffa::types::put_bool_field(40u32, v, buf);
+        }
+        if let Some(ref v) = self.standard_episode_format {
+            ::buffa::types::put_string_field(41u32, v, buf);
+        }
+        if let Some(ref v) = self.daily_episode_format {
+            ::buffa::types::put_string_field(42u32, v, buf);
+        }
+        if let Some(ref v) = self.anime_episode_format {
+            ::buffa::types::put_string_field(43u32, v, buf);
+        }
+        if let Some(ref v) = self.series_folder_format {
+            ::buffa::types::put_string_field(44u32, v, buf);
+        }
+        if let Some(ref v) = self.season_folder_format {
+            ::buffa::types::put_string_field(45u32, v, buf);
+        }
+        if let Some(ref v) = self.specials_folder_format {
+            ::buffa::types::put_string_field(46u32, v, buf);
+        }
+        if let Some(ref v) = self.multi_episode_style {
+            ::buffa::types::put_int32_field(47u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.auto_unmonitor_previously_downloaded_episodes {
+            ::buffa::types::put_bool_field(48u32, v, buf);
+        }
+        if let Some(ref v) = self.episode_title_required {
+            ::buffa::types::put_int32_field(49u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8171,6 +8358,74 @@ impl AcquisitionSettingsOwnedView {
         &self,
     ) -> ::core::option::Option<bool> {
         self.0.reborrow().auto_redownload_failed_from_interactive_search
+    }
+    /// Whether episode files are named by the episode formats.
+    ///
+    /// Field 40: `rename_episodes`
+    #[must_use]
+    pub fn rename_episodes(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().rename_episodes
+    }
+    /// Templates of episode files of standard, daily and anime series and of
+    /// the folders of series, seasons and specials, such as
+    /// "{Series Title} - S{season:00}E{episode:00}"; empty for the defaults.
+    ///
+    /// Field 41: `standard_episode_format`
+    #[must_use]
+    pub fn standard_episode_format(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().standard_episode_format
+    }
+    /// Field 42: `daily_episode_format`
+    #[must_use]
+    pub fn daily_episode_format(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().daily_episode_format
+    }
+    /// Field 43: `anime_episode_format`
+    #[must_use]
+    pub fn anime_episode_format(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().anime_episode_format
+    }
+    /// Field 44: `series_folder_format`
+    #[must_use]
+    pub fn series_folder_format(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().series_folder_format
+    }
+    /// Field 45: `season_folder_format`
+    #[must_use]
+    pub fn season_folder_format(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().season_folder_format
+    }
+    /// Field 46: `specials_folder_format`
+    #[must_use]
+    pub fn specials_folder_format(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().specials_folder_format
+    }
+    /// Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.
+    ///
+    /// Field 47: `multi_episode_style`
+    #[must_use]
+    pub fn multi_episode_style(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<super::super::MultiEpisodeStyle>> {
+        self.0.reborrow().multi_episode_style
+    }
+    /// Unmonitors the episodes of wanted series whose files go missing.
+    ///
+    /// Field 48: `auto_unmonitor_previously_downloaded_episodes`
+    #[must_use]
+    pub fn auto_unmonitor_previously_downloaded_episodes(
+        &self,
+    ) -> ::core::option::Option<bool> {
+        self.0.reborrow().auto_unmonitor_previously_downloaded_episodes
+    }
+    /// Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
+    ///
+    /// Field 49: `episode_title_required`
+    #[must_use]
+    pub fn episode_title_required(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<super::super::EpisodeTitleRequired>> {
+        self.0.reborrow().episode_title_required
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<AcquisitionSettingsView<'static>>>

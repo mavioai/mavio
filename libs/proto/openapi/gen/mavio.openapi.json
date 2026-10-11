@@ -12514,11 +12514,64 @@
             "type": "boolean",
             "title": "auto_redownload_failed_from_interactive_search",
             "description": "Search again when a download grabbed from an interactive search\n fails, when auto_redownload_failed is set."
+          },
+          "renameEpisodes": {
+            "type": "boolean",
+            "title": "rename_episodes",
+            "description": "Whether episode files are named by the episode formats."
+          },
+          "standardEpisodeFormat": {
+            "type": "string",
+            "title": "standard_episode_format",
+            "description": "Templates of episode files of standard, daily and anime series and of\n the folders of series, seasons and specials, such as\n \"{Series Title} - S{season:00}E{episode:00}\"; empty for the defaults."
+          },
+          "dailyEpisodeFormat": {
+            "type": "string",
+            "title": "daily_episode_format"
+          },
+          "animeEpisodeFormat": {
+            "type": "string",
+            "title": "anime_episode_format"
+          },
+          "seriesFolderFormat": {
+            "type": "string",
+            "title": "series_folder_format"
+          },
+          "seasonFolderFormat": {
+            "type": "string",
+            "title": "season_folder_format"
+          },
+          "specialsFolderFormat": {
+            "type": "string",
+            "title": "specials_folder_format"
+          },
+          "multiEpisodeStyle": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.MultiEpisodeStyle"
+              }
+            ],
+            "title": "multi_episode_style",
+            "description": "Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.\nenum.defined_only = true\n"
+          },
+          "autoUnmonitorPreviouslyDownloadedEpisodes": {
+            "type": "boolean",
+            "title": "auto_unmonitor_previously_downloaded_episodes",
+            "description": "Unmonitors the episodes of wanted series whose files go missing."
+          },
+          "episodeTitleRequired": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.EpisodeTitleRequired"
+              }
+            ],
+            "title": "episode_title_required",
+            "description": "Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.\nenum.defined_only = true\n"
           }
         },
         "title": "AcquisitionSettings",
         "additionalProperties": false,
-        "description": "AcquisitionSettings are how releases are chosen, downloaded and\n imported, as Radarr's settings."
+        "description": "AcquisitionSettings are how releases are chosen, downloaded and\n imported, as Radarr's and Sonarr's settings."
       },
       "mavio.system.v1.Activity": {
         "type": "object",
@@ -12772,6 +12825,17 @@
         "title": "DirectoryEntry",
         "additionalProperties": false,
         "description": "DirectoryEntry is a file or folder."
+      },
+      "mavio.system.v1.EpisodeTitleRequired": {
+        "type": "string",
+        "title": "EpisodeTitleRequired",
+        "enum": [
+          "EPISODE_TITLE_REQUIRED_UNSPECIFIED",
+          "EPISODE_TITLE_REQUIRED_ALWAYS",
+          "EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES",
+          "EPISODE_TITLE_REQUIRED_NEVER"
+        ],
+        "description": "EpisodeTitleRequired is when an episode imported under a name showing\n its title must have one."
       },
       "mavio.system.v1.GetHealthRequest": {
         "type": "object",
@@ -13538,6 +13602,20 @@
         "title": "MetadataSettings",
         "additionalProperties": false,
         "description": "MetadataSettings are the server's language and country of metadata\n beside libraries', as Jellyfin's: requests and discovery name titles in\n them and rate titles in the country."
+      },
+      "mavio.system.v1.MultiEpisodeStyle": {
+        "type": "string",
+        "title": "MultiEpisodeStyle",
+        "enum": [
+          "MULTI_EPISODE_STYLE_UNSPECIFIED",
+          "MULTI_EPISODE_STYLE_EXTEND",
+          "MULTI_EPISODE_STYLE_DUPLICATE",
+          "MULTI_EPISODE_STYLE_REPEAT",
+          "MULTI_EPISODE_STYLE_SCENE",
+          "MULTI_EPISODE_STYLE_RANGE",
+          "MULTI_EPISODE_STYLE_PREFIXED_RANGE"
+        ],
+        "description": "MultiEpisodeStyle is how the name of a file of several episodes writes\n their numbers, shown for episodes 6 to 8 of season 15."
       },
       "mavio.system.v1.NetworkSettings": {
         "type": "object",
