@@ -173,12 +173,12 @@ func (r observedItems) Delete(ctx context.Context, ids ...core.ID) error {
 	return err
 }
 
-func (r observedItems) MarkMissing(ctx context.Context, libraryID core.ID, generation int64, now time.Time) (int, error) {
-	n, err := r.ItemRepository.MarkMissing(ctx, libraryID, generation, now)
-	if err == nil && n > 0 {
+func (r observedItems) MarkMissing(ctx context.Context, libraryID core.ID, generation int64, now time.Time) ([]core.ID, error) {
+	ids, err := r.ItemRepository.MarkMissing(ctx, libraryID, generation, now)
+	if err == nil && len(ids) > 0 {
 		r.o.report(func() { r.o.hub.ItemsChanged([]core.ID{libraryID}, nil, nil) })
 	}
-	return n, err
+	return ids, err
 }
 
 func (r observedItems) PurgeMissing(ctx context.Context, libraryID core.ID, before time.Time) ([]core.ID, error) {
