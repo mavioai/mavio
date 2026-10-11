@@ -91,6 +91,8 @@ All enumerations are string types with stable lowercase values (`DisplayOrder` k
 | `PendingReason` | `delay`, `client_unavailable`, `fallback` |
 | `ProperDownload` | `prefer_and_upgrade`, `do_not_upgrade`, `do_not_prefer` |
 | `ColonReplacement` | `delete`, `dash`, `space_dash`, `space_dash_space`, `smart` |
+| `MultiEpisodeStyle` | `extend`, `duplicate`, `repeat`, `scene`, `range`, `prefixed_range` |
+| `EpisodeTitleRequired` | `always`, `bulk_season_releases`, `never` |
 | `Provider` | `tmdb`, `tmdb_collection`, `imdb`, `tvdb`, `tvmaze`, `anidb`, `anilist`, `anisearch` (anime databases, one entry per season), `musicbrainz_artist`, `musicbrainz_album_artist`, `musicbrainz_album`, `musicbrainz_release_group`, `musicbrainz_track` (well-known; plugins may add others) |
 
 ---
@@ -356,7 +358,7 @@ An `EpisodeState` keeps, apart from the episode's item, which a scan may replace
 * Deleting an item deletes its wanted state, episode states, downloads, history, blocklist entries and pending releases.
 
 ### 13.4 Settings
-`AcquisitionSettings`, part of the server settings, are Radarr's: how propers and repacks are treated (`prefer_and_upgrade`, `do_not_upgrade`, `do_not_prefer`), whether indexer flags are preferred, completed download handling and new searches after failures (for releases grabbed from an interactive search only when also allowed), the maximum release size, the minimum age and retention of usenet releases, hardcoded subtitles allowed or whitelisted, the free space an import must leave, the delay after which movies count as available, the RSS sync interval (10–120 minutes, 0 disabling it) and the download check interval, the recycle bin and its cleanup, hard links, extra files and empty folders, and `Naming`: whether movie files are renamed, illegal characters replaced, colons replaced (`delete`, `dash`, `space_dash`, `space_dash_space`, `smart`), and the movie folder and file templates.
+`AcquisitionSettings`, part of the server settings, are Radarr's: how propers and repacks are treated (`prefer_and_upgrade`, `do_not_upgrade`, `do_not_prefer`), whether indexer flags are preferred, completed download handling and new searches after failures (for releases grabbed from an interactive search only when also allowed), the maximum release size, the minimum age and retention of usenet releases, hardcoded subtitles allowed or whitelisted, the free space an import must leave, the delay after which movies count as available, the RSS sync interval (10–120 minutes, 0 disabling it) and the download check interval, the recycle bin and its cleanup, hard links, extra files and empty folders, and `Naming`: whether movie files are renamed, illegal characters replaced, colons replaced (`delete`, `dash`, `space_dash`, `space_dash_space`, `smart`), and the movie folder and file templates. Sonarr's settings join them: whether the episodes of wanted series whose files go missing are unmonitored, when an episode imported under a name showing its title must have one (`EpisodeTitleRequired`), and in `Naming` whether episode files are renamed, the templates of standard, daily and anime episode files and of series, season and specials folders, and the `MultiEpisodeStyle`; an empty template or style means Sonarr's default.
 
 ### 13.5 Remote Path Mappings
 A `RemotePathMapping` maps a folder a download client on `Host` reports (`RemotePath`) to the absolute folder the server sees (`LocalPath`). A host's remote path is mapped once.

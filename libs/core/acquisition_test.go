@@ -72,6 +72,9 @@ func TestAcquisitionValidate(t *testing.T) {
 		{"relative recycle bin", settings(func(s *AcquisitionSettings) { s.RecycleBin = "trash" }), false},
 		{"unknown propers setting", settings(func(s *AcquisitionSettings) { s.Propers = "always" }), false},
 		{"no movie file format", settings(func(s *AcquisitionSettings) { s.Naming.StandardMovieFormat = "" }), false},
+		{"default episode formats", settings(func(s *AcquisitionSettings) { s.Naming.StandardEpisodeFormat, s.Naming.MultiEpisodeStyle = "", "" }), true},
+		{"unknown multi-episode style", settings(func(s *AcquisitionSettings) { s.Naming.MultiEpisodeStyle = "triple" }), false},
+		{"unknown episode title requirement", settings(func(s *AcquisitionSettings) { s.EpisodeTitleRequired = "sometimes" }), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
