@@ -85,13 +85,35 @@ func TestAugmentFromVideo(t *testing.T) {
 		{1, 576, 576},
 		{1, 480, 480},
 	} {
-		got, ok := AugmentFromVideo(tt.width, tt.height)
-		if !ok || got.Resolution != tt.want || got.ResolutionConfidence != ConfidenceMediaInfo {
+		got, ok := AugmentFromVideo(tt.width, tt.height, "")
+		if !ok || got.Resolution != tt.want || got.ResolutionConfidence != ConfidenceMediaInfo || got.Source != SeriesSourceUnknown {
 			t.Errorf("AugmentFromVideo(%d, %d) = %d, %v, want = %d", tt.width, tt.height, got.Resolution, ok, tt.want)
 		}
 	}
-	if _, ok := AugmentFromVideo(0, 0); ok {
+	if _, ok := AugmentFromVideo(0, 0, "Series.Title.S01E05.WEB.x264-Sonarr"); ok {
 		t.Error("AugmentFromVideo(0, 0) told a resolution")
+	}
+	// Sonarr's should_include_source_if_extracted_from_title and the cases
+	// after it: the source the container's title names.
+	for _, tt := range []struct {
+		width, height int
+		title         string
+		resolution    int
+		source        SeriesSource
+	}{
+		{1920, 1080, "Series.Title.S01E05.WEB.x264-Sonarr", 1080, SeriesSourceWeb},
+		{1920, 1080, "Series.Title.S01E05.x264-Sonarr", 1080, SeriesSourceUnknown},
+		{1024, 576, "Series.Title.S01E05.Bluray.x264-Sonarr", 576, SeriesSourceBluray},
+	} {
+		got, ok := AugmentFromVideo(tt.width, tt.height, tt.title)
+		wantConfidence := ConfidenceDefault
+		if tt.source != SeriesSourceUnknown {
+			wantConfidence = ConfidenceMediaInfo
+		}
+		if !ok || got.Resolution != tt.resolution || got.Source != tt.source || got.SourceConfidence != wantConfidence {
+			t.Errorf("AugmentFromVideo(%d, %d, %q) = %d %v (%v), want = %d %v (%v)",
+				tt.width, tt.height, tt.title, got.Resolution, got.Source, got.SourceConfidence, tt.resolution, tt.source, wantConfidence)
+		}
 	}
 }
 

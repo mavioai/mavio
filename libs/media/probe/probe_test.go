@@ -340,3 +340,24 @@ func TestNormalize(t *testing.T) {
 		t.Run(name, check)
 	}
 }
+
+// TestContainerTitle checks the title tag of the container is kept apart
+// from those of its streams, as Radarr's and Sonarr's MediaInfo.Title.
+func TestContainerTitle(t *testing.T) {
+	tests := []struct {
+		name   string
+		stream Tags
+		format Tags
+		want   string
+	}{
+		{"container", Tags{"title": "Stream"}, Tags{"title": "Series.Title.S01E05.WEB.x264-Sonarr"}, "Series.Title.S01E05.WEB.x264-Sonarr"},
+		{"stream only", Tags{"title": "Stream"}, Tags{}, ""},
+		{"none", nil, nil, ""},
+	}
+	for _, tt := range tests {
+		out := &Output{Streams: []Stream{{CodecType: "video", Tags: tt.stream}}, Format: &Format{FormatName: "matroska,webm", Tags: tt.format}}
+		if got := Normalize(out, "/media/file.mkv", false).ContainerTitle; got != tt.want {
+			t.Errorf("%s: ContainerTitle = %q, want = %q", tt.name, got, tt.want)
+		}
+	}
+}

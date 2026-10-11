@@ -26,6 +26,9 @@ type Result struct {
 	People []Person
 	// SeriesName is the show an episode file names in its tags.
 	SeriesName string
+	// ContainerTitle is the title tag of the container alone, without
+	// those of its streams, as Radarr's and Sonarr's MediaInfo.Title.
+	ContainerTitle string
 }
 
 // Attachment is a file embedded in the container, or attached cover art.
@@ -115,6 +118,9 @@ func Normalize(out *Output, path string, isAudio bool) Result {
 	if out.Format != nil {
 		for k, v := range out.Format.Tags {
 			tags[k] = v
+			if strings.EqualFold(k, "title") {
+				r.ContainerTitle = v
+			}
 		}
 	}
 

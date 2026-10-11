@@ -19,7 +19,7 @@ func (f FFprobe) Probe(ctx context.Context, path string, audio bool) (library.Pr
 	if err != nil {
 		return library.ProbeResult{}, err
 	}
-	return library.ProbeResult{Source: withAttachments(r), Tags: r.Metadata}, nil
+	return library.ProbeResult{Source: withAttachments(r), Tags: r.Metadata, ContainerTitle: r.ContainerTitle}, nil
 }
 
 // ProbeURL probes the media at an http(s) URL, with its chapters.

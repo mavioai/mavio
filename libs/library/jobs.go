@@ -60,6 +60,10 @@ type ProbeResult struct {
 	// Tags are the metadata embedded in audio files, such as title,
 	// artists and track number.
 	Tags core.Item
+	// ContainerTitle is the title tag of the container itself, which
+	// often holds a video's release name and which Radarr's and Sonarr's
+	// AugmentQualityFromMediaInfo read its source from; "" for none.
+	ContainerTitle string
 }
 
 // Prober reads the facts of a media file, such as with ffprobe.

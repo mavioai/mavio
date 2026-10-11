@@ -325,7 +325,8 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 // aggregateQuality returns the quality of an episode file, as Sonarr's
 // AggregateQuality with its augmenters in order: the names of the file,
 // of the download's folder and of the download, the frame size of the
-// file's video, and the name of the release grabbed.
+// file's video and the title tag of its container, and the name of the
+// release grabbed.
 func aggregateQuality(fileInfo, folderInfo, downloadInfo *release.ParsedEpisodeInfo, probe *library.ProbeResult, grabbed release.ParsedQuality) release.ParsedQuality {
 	var augments []release.QualityAugment
 	for _, info := range []*release.ParsedEpisodeInfo{fileInfo, folderInfo, downloadInfo} {
@@ -338,7 +339,7 @@ func aggregateQuality(fileInfo, folderInfo, downloadInfo *release.ParsedEpisodeI
 			if s.Kind != core.StreamVideo {
 				continue
 			}
-			if a, ok := release.AugmentFromVideo(s.Width, s.Height); ok {
+			if a, ok := release.AugmentFromVideo(s.Width, s.Height, probe.ContainerTitle); ok {
 				augments = append(augments, a)
 			}
 			break
