@@ -417,6 +417,8 @@ flowchart TD
   - [x] FileList (`internal/sites/filelist`)
   - [x] HDBits (`internal/sites/hdbits`)
   - [x] PassThePopcorn (`internal/sites/passthepopcorn`)
+  - [x] GazelleGames (`internal/sites/gazellegames`), asking for the passkey on testing or on the first download
+    - [ ] Its size limits (`sizesmall`, `sizeslarge`), sent once queries carry `minsize` and `maxsize`
   - [ ] The API tokens of AvistaZ and SpeedApp sites kept across restarts, as Prowlarr keeps them in the settings; they log in again after each start
   - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
