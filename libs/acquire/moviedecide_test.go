@@ -363,11 +363,12 @@ func TestMovieLanguages(t *testing.T) {
 func TestDecideMoviesIndexerLanguages(t *testing.T) {
 	const multiTitle = "Some.Movie.2024.MULTi.1080p.WEB.H265-RlsGroup"
 	tests := []struct {
-		name      string
-		indexerID int
-		indexers  map[string]*IndexerInfo
-		want      []release.Language
-		skip      string
+		name        string
+		indexerID   int
+		indexerName string
+		indexers    map[string]*IndexerInfo
+		want        []release.Language
+		skip        string
 	}{
 		{
 			name:      "should_return_multi_languages_when_indexer_id_has_multi_languages_configuration",
@@ -395,16 +396,28 @@ func TestDecideMoviesIndexerLanguages(t *testing.T) {
 			want: []release.Language{release.English},
 		},
 		{
-			name: "should_return_multi_languages_when_indexer_name_has_multi_languages_configuration",
-			skip: "Ports cannot find an indexer by name; Radarr falls back to the indexer's name when its ID finds none",
+			name:        "should_return_multi_languages_when_indexer_name_has_multi_languages_configuration",
+			indexerName: "MyIndexer (Prowlarr)",
+			indexers:    map[string]*IndexerInfo{ixID(1): {ID: ixID(1), Name: "MyIndexer (Prowlarr)", MultiLanguages: []release.Language{release.Original, release.French}}},
+			want:        []release.Language{release.English, release.French},
 		},
 		{
-			name: "should_return_multi_languages_from_indexer_with_name_when_indexer_id_does_not_exist",
-			skip: "Ports cannot find an indexer by name; Radarr falls back to the indexer's name when its ID finds none",
+			name:      "should_return_multi_languages_from_indexer_with_name_when_indexer_id_does_not_exist",
+			indexerID: 10, indexerName: "MyIndexer1",
+			indexers: map[string]*IndexerInfo{
+				ixID(1): {ID: ixID(1), Name: "MyIndexer1", MultiLanguages: []release.Language{release.Original, release.French}},
+				ixID(2): {ID: ixID(2), Name: "MyIndexer2", MultiLanguages: []release.Language{release.Original, release.German}},
+			},
+			want: []release.Language{release.English, release.French},
 		},
 		{
-			name: "should_return_multi_languages_from_indexer_with_name_when_indexer_id_not_available",
-			skip: "Ports cannot find an indexer by name; Radarr falls back to the indexer's name when its ID finds none",
+			name:        "should_return_multi_languages_from_indexer_with_name_when_indexer_id_not_available",
+			indexerName: "MyIndexer1",
+			indexers: map[string]*IndexerInfo{
+				ixID(1): {ID: ixID(1), Name: "MyIndexer1", MultiLanguages: []release.Language{release.Original, release.French}},
+				ixID(2): {ID: ixID(2), Name: "MyIndexer2", MultiLanguages: []release.Language{release.Original, release.German}},
+			},
+			want: []release.Language{release.English, release.French},
 		},
 	}
 	for _, tt := range tests {
@@ -416,7 +429,11 @@ func TestDecideMoviesIndexerLanguages(t *testing.T) {
 			ports.indexers = tt.indexers
 			engine := &Engine{Env: e}
 			finder := &rkFinder{target: &Target{ID: tid(1), Kind: release.Movie, Title: "Some Movie", OriginalLanguage: release.English}}
-			got := engine.DecideMovies(context.Background(), []*Release{{Title: multiTitle, IndexerID: ixID(tt.indexerID)}}, nil, false, finder.find)
+			r := &Release{Title: multiTitle, Indexer: tt.indexerName}
+			if tt.indexerID > 0 {
+				r.IndexerID = ixID(tt.indexerID)
+			}
+			got := engine.DecideMovies(context.Background(), []*Release{r}, nil, false, finder.find)
 			if len(got) != 1 {
 				t.Fatalf("len(decisions) = %d, want = 1", len(got))
 			}

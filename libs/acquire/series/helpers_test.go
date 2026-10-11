@@ -2,6 +2,7 @@ package series
 
 import (
 	"context"
+	"maps"
 	"slices"
 	"strconv"
 	"testing"
@@ -76,6 +77,15 @@ func (f *fakePorts) Blocklisted(_ context.Context, id core.ID, r *acquire.Releas
 
 func (f *fakePorts) Indexer(_ context.Context, id string) (*acquire.IndexerInfo, error) {
 	return f.indexers[id], f.err
+}
+
+func (f *fakePorts) IndexerByName(_ context.Context, name string) (*acquire.IndexerInfo, error) {
+	for _, id := range slices.Sorted(maps.Keys(f.indexers)) {
+		if f.indexers[id].Name == name {
+			return f.indexers[id], f.err
+		}
+	}
+	return nil, f.err
 }
 
 func (f *fakePorts) FreeSpace(context.Context, string) (int64, bool, error) {

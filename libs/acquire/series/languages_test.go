@@ -11,7 +11,8 @@ import (
 
 // TestAggregateLanguages ports Sonarr's
 // Download/Aggregation/Aggregators/AggregateLanguagesFixture through
-// augment, which looks the indexer up by ID and works out the languages.
+// augment, which looks the indexer up by ID, else by name, and works out
+// the languages.
 // The series' original language is English; the episode is titled
 // "Title1" unless the case names it. Cases Sonarr compares with
 // BeEquivalentTo ignore order; those with Equal do not.
@@ -20,6 +21,10 @@ func TestAggregateLanguages(t *testing.T) {
 	const simple = "Series.Title.S01E01.xyz-RlsGroup"
 	langs := func(l ...release.Language) []release.Language { return l }
 	originalFrench := langs(release.Original, release.French)
+	named := map[string]*acquire.IndexerInfo{
+		ixID(1): {ID: ixID(1), Name: "MyIndexer1", MultiLanguages: originalFrench},
+		ixID(2): {ID: ixID(2), Name: "MyIndexer2", MultiLanguages: langs(release.Original, release.German)},
+	}
 	tests := []struct {
 		name          string
 		skip          string
@@ -28,6 +33,9 @@ func TestAggregateLanguages(t *testing.T) {
 		releaseTokens string
 		title         string // the release's title as the indexer gave it
 		indexer       int    // the release's indexer, 0 for none
+		indexerName   string // the release's indexer's name
+		indexers      map[string]*acquire.IndexerInfo
+		nameLookups   int
 		multiLangs    []release.Language
 		episodeTitle  string
 		want          []release.Language
@@ -39,7 +47,11 @@ func TestAggregateLanguages(t *testing.T) {
 		{name: "should_return_parsed_language", parsed: langs(release.French), releaseTitle: simple, want: langs(release.French), ordered: true},
 		{name: "should_return_multi_languages_when_indexer_id_has_multi_languages_configuration", parsed: langs(), releaseTitle: multi, title: multi, indexer: 1, multiLangs: originalFrench, want: langs(release.English, release.French), lookups: 1},
 		{name: "should_return_multi_languages_from_indexer_with_id_when_indexer_id_and_name_are_set", parsed: langs(), releaseTitle: multi, title: multi, indexer: 1, multiLangs: originalFrench, want: langs(release.English, release.French), lookups: 1},
-		{name: "should_return_multi_languages_when_indexer_name_has_multi_languages_configuration", skip: "Ports.Indexer finds indexers by ID only; Mavio has no lookup by name"},
+		{
+			name: "should_return_multi_languages_when_indexer_name_has_multi_languages_configuration", parsed: langs(), releaseTitle: multi, title: multi,
+			indexerName: "MyIndexer (Prowlarr)", indexers: map[string]*acquire.IndexerInfo{ixID(1): {ID: ixID(1), Name: "MyIndexer (Prowlarr)", MultiLanguages: originalFrench}},
+			want: langs(release.English, release.French), nameLookups: 1,
+		},
 		{
 			name: "should_return_multi_languages_when_release_as_unknown_as_default_language_and_indexer_has_multi_languages_configuration", parsed: langs(release.LanguageUnknown),
 			releaseTitle: multi, title: multi, indexer: 1, multiLangs: originalFrench, want: langs(release.English, release.French), lookups: 1,
@@ -75,8 +87,14 @@ func TestAggregateLanguages(t *testing.T) {
 			releaseTitle: "Series.Title.S01E01.Jimmy.The.Greek.Greek.xyz-RlsGroup", releaseTokens: ".Jimmy.The.Greek.Greek.xyz-RlsGroup", episodeTitle: "Jimmy The Greek",
 			want: langs(release.Greek), ordered: true,
 		},
-		{name: "should_return_multi_languages_from_indexer_with_name_when_indexer_id_does_not_exist", skip: "Ports.Indexer finds indexers by ID only; Mavio has no fallback to the name"},
-		{name: "should_return_multi_languages_from_indexer_with_name_when_indexer_id_not_available", skip: "Ports.Indexer finds indexers by ID only; Mavio has no lookup by name"},
+		{
+			name: "should_return_multi_languages_from_indexer_with_name_when_indexer_id_does_not_exist", parsed: langs(), releaseTitle: multi, title: multi,
+			indexer: 10, indexerName: "MyIndexer1", indexers: named, want: langs(release.English, release.French), lookups: 1, nameLookups: 1,
+		},
+		{
+			name: "should_return_multi_languages_from_indexer_with_name_when_indexer_id_not_available", parsed: langs(), releaseTitle: multi, title: multi,
+			indexerName: "MyIndexer1", indexers: named, want: langs(release.English, release.French), nameLookups: 1,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -85,8 +103,11 @@ func TestAggregateLanguages(t *testing.T) {
 			}
 			env, ports, _ := newTestEnv()
 			ports.indexers = map[string]*acquire.IndexerInfo{ixID(1): {ID: ixID(1), MultiLanguages: tt.multiLangs}}
-			lookups := 0
-			counting := &countingPorts{fakePorts: ports, lookups: &lookups}
+			if tt.indexers != nil {
+				ports.indexers = tt.indexers
+			}
+			lookups, nameLookups := 0, 0
+			counting := &countingPorts{fakePorts: ports, lookups: &lookups, nameLookups: &nameLookups}
 			env.Ports = counting
 			s := testSeries(testProfile(release.HDTV720p, release.HDTV720p))
 			episode := ep(1, 1, 1)
@@ -95,7 +116,7 @@ func TestAggregateLanguages(t *testing.T) {
 				episode.Title = tt.episodeTitle
 			}
 			parsed := &release.ParsedEpisodeInfo{Languages: tt.parsed, ReleaseTitle: tt.releaseTitle, ReleaseTokens: tt.releaseTokens}
-			c := NewCandidate(&acquire.Release{Title: tt.title, IndexerID: ixID(tt.indexer)}, parsed, s, []*Episode{episode})
+			c := NewCandidate(&acquire.Release{Title: tt.title, IndexerID: ixID(tt.indexer), Indexer: tt.indexerName}, parsed, s, []*Episode{episode})
 			e := &Engine{Env: env}
 			if err := e.augment(context.Background(), c); err != nil {
 				t.Fatalf("augment() error = %v", err)
@@ -117,17 +138,22 @@ func TestAggregateLanguages(t *testing.T) {
 					t.Errorf("Languages = %v, want = %v in any order", got, tt.want)
 				}
 			}
-			if lookups != tt.lookups {
-				t.Errorf("indexer lookups = %d, want = %d", lookups, tt.lookups)
+			if lookups != tt.lookups || nameLookups != tt.nameLookups {
+				t.Errorf("indexer lookups by ID, by name = %d, %d, want = %d, %d", lookups, nameLookups, tt.lookups, tt.nameLookups)
 			}
 		})
 	}
 }
 
-// countingPorts counts indexer lookups.
+// countingPorts counts indexer lookups, by ID and by name.
 type countingPorts struct {
 	*fakePorts
-	lookups *int
+	lookups, nameLookups *int
+}
+
+func (c *countingPorts) IndexerByName(ctx context.Context, name string) (*acquire.IndexerInfo, error) {
+	*c.nameLookups++
+	return c.fakePorts.IndexerByName(ctx, name)
 }
 
 func (c *countingPorts) Indexer(ctx context.Context, id string) (*acquire.IndexerInfo, error) {
