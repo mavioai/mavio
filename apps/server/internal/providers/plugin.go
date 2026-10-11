@@ -160,6 +160,9 @@ func toLookup(kind pluginv1.MediaKind, l library.Lookup) *pluginv1.Lookup {
 	if l.EpisodeNumber != nil {
 		lookup.SetEpisodeNumber(int32(*l.EpisodeNumber))
 	}
+	if l.EpisodeNumberEnd != nil {
+		lookup.SetEpisodeNumberEnd(int32(*l.EpisodeNumberEnd))
+	}
 	return lookup
 }
 

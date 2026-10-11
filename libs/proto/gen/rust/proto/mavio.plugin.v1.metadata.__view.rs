@@ -45,6 +45,13 @@ pub struct LookupView<'a> {
     ///
     /// Field 12: `display_order`
     pub display_order: ::core::option::Option<&'a str>,
+    /// For an episode whose file holds several: the number of the last, of
+    /// the same season. A provider then returns the episodes from
+    /// episode_number to it as one, their names and overviews joined by
+    /// " / ", as Jellyfin's TmdbEpisodeProvider does.
+    ///
+    /// Field 13: `episode_number_end`
+    pub episode_number_end: ::core::option::Option<i32>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for LookupView<'a> {
@@ -141,6 +148,13 @@ impl<'a> ::buffa::MessageView<'a> for LookupView<'a> {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 view.display_order = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.episode_number_end = Some(::buffa::types::decode_int32(&mut cur)?);
             }
             9u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -277,6 +291,7 @@ impl<'a> ::buffa::MessageView<'a> for LookupView<'a> {
             language: self.language.map(|s| s.to_string()),
             country: self.country.map(|s| s.to_string()),
             display_order: self.display_order.map(|s| s.to_string()),
+            episode_number_end: self.episode_number_end,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -329,6 +344,9 @@ impl<'a> ::buffa::ViewEncode<'a> for LookupView<'a> {
         }
         if let Some(ref v) = self.display_order {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.episode_number_end {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -414,6 +432,9 @@ impl<'a> ::buffa::ViewEncode<'a> for LookupView<'a> {
         }
         if let Some(ref v) = self.display_order {
             ::buffa::types::put_string_field(12u32, v, buf);
+        }
+        if let Some(v) = self.episode_number_end {
+            ::buffa::types::put_int32_field(13u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -580,6 +601,16 @@ impl LookupOwnedView {
     #[must_use]
     pub fn display_order(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().display_order
+    }
+    /// For an episode whose file holds several: the number of the last, of
+    /// the same season. A provider then returns the episodes from
+    /// episode_number to it as one, their names and overviews joined by
+    /// " / ", as Jellyfin's TmdbEpisodeProvider does.
+    ///
+    /// Field 13: `episode_number_end`
+    #[must_use]
+    pub fn episode_number_end(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().episode_number_end
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<LookupView<'static>>> for LookupOwnedView {

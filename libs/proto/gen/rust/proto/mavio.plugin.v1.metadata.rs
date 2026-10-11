@@ -584,6 +584,13 @@ pub struct Lookup {
     ///
     /// Field 12: `display_order`
     pub display_order: ::core::option::Option<::buffa::alloc::string::String>,
+    /// For an episode whose file holds several: the number of the last, of
+    /// the same season. A provider then returns the episodes from
+    /// episode_number to it as one, their names and overviews joined by
+    /// " / ", as Jellyfin's TmdbEpisodeProvider does.
+    ///
+    /// Field 13: `episode_number_end`
+    pub episode_number_end: ::core::option::Option<i32>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -602,6 +609,7 @@ impl ::core::fmt::Debug for Lookup {
             .field("language", &self.language)
             .field("country", &self.country)
             .field("display_order", &self.display_order)
+            .field("episode_number_end", &self.episode_number_end)
             .finish()
     }
 }
@@ -691,6 +699,13 @@ impl Lookup {
         self.display_order = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::episode_number_end`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_episode_number_end(mut self, value: i32) -> Self {
+        self.episode_number_end = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Lookup);
 impl ::buffa::MessageName for Lookup {
@@ -754,6 +769,9 @@ impl ::buffa::Message for Lookup {
         if let Some(ref v) = self.display_order {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(v) = self.episode_number_end {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -803,6 +821,9 @@ impl ::buffa::Message for Lookup {
         }
         if let Some(ref v) = self.display_order {
             ::buffa::types::put_string_field(12u32, v, buf);
+        }
+        if let Some(v) = self.episode_number_end {
+            ::buffa::types::put_int32_field(13u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -940,6 +961,15 @@ impl ::buffa::Message for Lookup {
                     buf,
                 )?;
             }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.episode_number_end = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -960,6 +990,7 @@ impl ::buffa::Message for Lookup {
         self.language = ::core::option::Option::None;
         self.country = ::core::option::Option::None;
         self.display_order = ::core::option::Option::None;
+        self.episode_number_end = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

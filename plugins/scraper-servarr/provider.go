@@ -99,7 +99,15 @@ func (p *plugin) metadata(ctx context.Context, l *pluginv1.Lookup) (*pluginv1.Me
 		if !ok {
 			return nil, errNotFound
 		}
-		return e.metadata(), nil
+		md := e.metadata()
+		// The other episodes a file holds, as Jellyfin's
+		// TmdbEpisodeProvider.
+		for n := e.EpisodeNumber + 1; n <= e.EpisodeNumber+int(l.GetEpisodeNumberEnd()-l.GetEpisodeNumber()); n++ {
+			if o, ok := s.episode(0, e.SeasonNumber, n); ok {
+				joinEpisode(md, o.Title, o.Overview)
+			}
+		}
+		return md, nil
 	}
 	return nil, errNotFound
 }

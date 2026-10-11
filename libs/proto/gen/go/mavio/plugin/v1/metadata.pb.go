@@ -305,6 +305,7 @@ type Lookup struct {
 	xxx_hidden_Language          *string                `protobuf:"bytes,10,opt,name=language"`
 	xxx_hidden_Country           *string                `protobuf:"bytes,11,opt,name=country"`
 	xxx_hidden_DisplayOrder      *string                `protobuf:"bytes,12,opt,name=display_order,json=displayOrder"`
+	xxx_hidden_EpisodeNumberEnd  int32                  `protobuf:"varint,13,opt,name=episode_number_end,json=episodeNumberEnd"`
 	XXX_raceDetectHookData       protoimpl.RaceDetectHookData
 	XXX_presence                 [1]uint32
 	unknownFields                protoimpl.UnknownFields
@@ -437,19 +438,26 @@ func (x *Lookup) GetDisplayOrder() string {
 	return ""
 }
 
+func (x *Lookup) GetEpisodeNumberEnd() int32 {
+	if x != nil {
+		return x.xxx_hidden_EpisodeNumberEnd
+	}
+	return 0
+}
+
 func (x *Lookup) SetKind(v MediaKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 13)
 }
 
 func (x *Lookup) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 13)
 }
 
 func (x *Lookup) SetYear(v int32) {
 	x.xxx_hidden_Year = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 13)
 }
 
 func (x *Lookup) SetExternalIds(v map[string]string) {
@@ -462,17 +470,17 @@ func (x *Lookup) SetSeriesExternalIds(v map[string]string) {
 
 func (x *Lookup) SetSeasonNumber(v int32) {
 	x.xxx_hidden_SeasonNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 13)
 }
 
 func (x *Lookup) SetEpisodeNumber(v int32) {
 	x.xxx_hidden_EpisodeNumber = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 13)
 }
 
 func (x *Lookup) SetAlbum(v string) {
 	x.xxx_hidden_Album = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 13)
 }
 
 func (x *Lookup) SetArtists(v []string) {
@@ -481,17 +489,22 @@ func (x *Lookup) SetArtists(v []string) {
 
 func (x *Lookup) SetLanguage(v string) {
 	x.xxx_hidden_Language = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 13)
 }
 
 func (x *Lookup) SetCountry(v string) {
 	x.xxx_hidden_Country = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 13)
 }
 
 func (x *Lookup) SetDisplayOrder(v string) {
 	x.xxx_hidden_DisplayOrder = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 13)
+}
+
+func (x *Lookup) SetEpisodeNumberEnd(v int32) {
+	x.xxx_hidden_EpisodeNumberEnd = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 13)
 }
 
 func (x *Lookup) HasKind() bool {
@@ -557,6 +570,13 @@ func (x *Lookup) HasDisplayOrder() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
 }
 
+func (x *Lookup) HasEpisodeNumberEnd() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
 func (x *Lookup) ClearKind() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Kind = MediaKind_MEDIA_KIND_UNSPECIFIED
@@ -602,6 +622,11 @@ func (x *Lookup) ClearDisplayOrder() {
 	x.xxx_hidden_DisplayOrder = nil
 }
 
+func (x *Lookup) ClearEpisodeNumberEnd() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_EpisodeNumberEnd = 0
+}
+
 type Lookup_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -628,6 +653,11 @@ type Lookup_builder struct {
 	// "storyArc", "production" or "tv", the types of TMDB's episode groups.
 	// Seasons and episodes are looked up by their numbers in that order.
 	DisplayOrder *string
+	// For an episode whose file holds several: the number of the last, of
+	// the same season. A provider then returns the episodes from
+	// episode_number to it as one, their names and overviews joined by
+	// " / ", as Jellyfin's TmdbEpisodeProvider does.
+	EpisodeNumberEnd *int32
 }
 
 func (b0 Lookup_builder) Build() *Lookup {
@@ -635,43 +665,47 @@ func (b0 Lookup_builder) Build() *Lookup {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 13)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 13)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Year != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 13)
 		x.xxx_hidden_Year = *b.Year
 	}
 	x.xxx_hidden_ExternalIds = b.ExternalIds
 	x.xxx_hidden_SeriesExternalIds = b.SeriesExternalIds
 	if b.SeasonNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 13)
 		x.xxx_hidden_SeasonNumber = *b.SeasonNumber
 	}
 	if b.EpisodeNumber != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 13)
 		x.xxx_hidden_EpisodeNumber = *b.EpisodeNumber
 	}
 	if b.Album != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 13)
 		x.xxx_hidden_Album = b.Album
 	}
 	x.xxx_hidden_Artists = b.Artists
 	if b.Language != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 13)
 		x.xxx_hidden_Language = b.Language
 	}
 	if b.Country != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 13)
 		x.xxx_hidden_Country = b.Country
 	}
 	if b.DisplayOrder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 13)
 		x.xxx_hidden_DisplayOrder = b.DisplayOrder
+	}
+	if b.EpisodeNumberEnd != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 13)
+		x.xxx_hidden_EpisodeNumberEnd = *b.EpisodeNumberEnd
 	}
 	return m0
 }
@@ -2562,7 +2596,7 @@ var File_mavio_plugin_v1_metadata_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"\n" +
-	"\x1emavio/plugin/v1/metadata.proto\x12\x0fmavio.plugin.v1\x1a\x1egoogle/protobuf/duration.proto\"\xea\x04\n" +
+	"\x1emavio/plugin/v1/metadata.proto\x12\x0fmavio.plugin.v1\x1a\x1egoogle/protobuf/duration.proto\"\x98\x05\n" +
 	"\x06Lookup\x12.\n" +
 	"\x04kind\x18\x01 \x01(\x0e2\x1a.mavio.plugin.v1.MediaKindR\x04kind\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -2576,7 +2610,8 @@ const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"\blanguage\x18\n" +
 	" \x01(\tR\blanguage\x12\x18\n" +
 	"\acountry\x18\v \x01(\tR\acountry\x12#\n" +
-	"\rdisplay_order\x18\f \x01(\tR\fdisplayOrder\x1a>\n" +
+	"\rdisplay_order\x18\f \x01(\tR\fdisplayOrder\x12,\n" +
+	"\x12episode_number_end\x18\r \x01(\x05R\x10episodeNumberEnd\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aD\n" +

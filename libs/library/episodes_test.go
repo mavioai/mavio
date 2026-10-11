@@ -153,6 +153,31 @@ func TestSeasonSortNameTemplate(t *testing.T) {
 	}
 }
 
+// TestLookupEpisodeRange checks the lookup of an episode whose file holds
+// several gives providers the last, so that they describe them all, as
+// Jellyfin's EpisodeInfo.IndexNumberEnd.
+func TestLookupEpisodeRange(t *testing.T) {
+	f := newScan(t, core.LibraryShows)
+	tree(t, f.root, "Show/Season 01/Show S01E01-E02.mkv", "Show/Season 01/Show S01E03.mkv")
+	f.scan()
+	r := &Refresher{Store: f.store}
+	for _, tt := range []struct {
+		path string
+		end  *int
+	}{
+		{"Show/Season 01/Show S01E01-E02.mkv", new(2)},
+		{"Show/Season 01/Show S01E03.mkv", nil},
+	} {
+		l, err := r.lookup(t.Context(), f.lib, f.item(tt.path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := l.EpisodeNumberEnd; (got == nil) != (tt.end == nil) || got != nil && *got != *tt.end {
+			t.Errorf("%s: EpisodeNumberEnd = %v, want = %v", tt.path, got, tt.end)
+		}
+	}
+}
+
 // fakeLister lists a fixed set of episodes and records lookups.
 type fakeLister struct {
 	list    EpisodeList
