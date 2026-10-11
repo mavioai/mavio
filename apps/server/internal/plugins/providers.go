@@ -10,6 +10,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
+	"github.com/mavioai/mavio/apps/server/internal/releases"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
@@ -435,4 +436,15 @@ func (m *Manager) StartPasswordReset(ctx context.Context, pluginID string, user 
 		return fmt.Errorf("password reset plugin %s: %w", pluginID, err)
 	}
 	return nil
+}
+
+// IndexerProviders returns the indexer providers among the ready plugins.
+func (m *Manager) IndexerProviders() []releases.Provider {
+	var out []releases.Provider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_INDEXER_PROVIDER) {
+		if pl, ok := m.running(id); ok && pl.Indexers() != nil {
+			out = append(out, releases.Provider{ID: id, Client: pl.Indexers()})
+		}
+	}
+	return out
 }

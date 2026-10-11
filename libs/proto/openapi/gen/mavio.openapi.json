@@ -199,6 +199,558 @@
         "format": "date-time",
         "description": "A point in time in RFC 3339 format, with up to nanosecond precision. Output uses UTC (`Z`); input may use an offset from UTC."
       },
+      "mavio.acquisition.v1.DownloadProtocol": {
+        "type": "string",
+        "title": "DownloadProtocol",
+        "enum": [
+          "DOWNLOAD_PROTOCOL_UNSPECIFIED",
+          "DOWNLOAD_PROTOCOL_TORRENT",
+          "DOWNLOAD_PROTOCOL_USENET"
+        ],
+        "description": "DownloadProtocol is how a release is downloaded."
+      },
+      "mavio.acquisition.v1.Indexer": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          },
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "definitionId": {
+            "type": "string",
+            "title": "definition_id",
+            "description": "The kind of indexer within the plugin, e.g. \"newznab\"."
+          },
+          "protocol": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DownloadProtocol"
+              }
+            ],
+            "title": "protocol"
+          },
+          "privacy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.IndexerPrivacy"
+              }
+            ],
+            "title": "privacy"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "enabled"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "priority",
+            "format": "int32",
+            "description": "Lower first when releases are otherwise equal."
+          },
+          "searchParams": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "search_params",
+            "description": "What it can be searched by, in Newznab's parameter names, for basic,\n series and movie searches; empty when it cannot be searched so."
+          },
+          "tvSearchParams": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "tv_search_params"
+          },
+          "movieSearchParams": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "movie_search_params"
+          },
+          "disabledUntil": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "disabled_until",
+            "description": "Set while the indexer is left out after failing, until this time."
+          },
+          "failure": {
+            "type": "string",
+            "title": "failure",
+            "description": "The failure that left it out."
+          }
+        },
+        "title": "Indexer",
+        "additionalProperties": false,
+        "description": "Indexer is an indexer a plugin has configured."
+      },
+      "mavio.acquisition.v1.IndexerFailure": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          },
+          "indexerId": {
+            "type": "string",
+            "title": "indexer_id"
+          },
+          "message": {
+            "type": "string",
+            "title": "message"
+          },
+          "disabledUntil": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "disabled_until",
+            "description": "Set when the indexer is left out until then."
+          }
+        },
+        "title": "IndexerFailure",
+        "additionalProperties": false,
+        "description": "IndexerFailure is an indexer, or with no indexer ID a plugin, that\n failed."
+      },
+      "mavio.acquisition.v1.IndexerPrivacy": {
+        "type": "string",
+        "title": "IndexerPrivacy",
+        "enum": [
+          "INDEXER_PRIVACY_UNSPECIFIED",
+          "INDEXER_PRIVACY_PUBLIC",
+          "INDEXER_PRIVACY_SEMI_PRIVATE",
+          "INDEXER_PRIVACY_PRIVATE"
+        ],
+        "description": "IndexerPrivacy is who may use an indexer."
+      },
+      "mavio.acquisition.v1.IndexerRef": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          },
+          "indexerId": {
+            "type": "string",
+            "title": "indexer_id"
+          }
+        },
+        "title": "IndexerRef",
+        "required": [
+          "pluginId",
+          "indexerId"
+        ],
+        "additionalProperties": false,
+        "description": "IndexerRef names an indexer: its plugin and its ID within the plugin's\n configuration."
+      },
+      "mavio.acquisition.v1.ListIndexersRequest": {
+        "type": "object",
+        "title": "ListIndexersRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListIndexersResponse": {
+        "type": "object",
+        "properties": {
+          "indexers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.Indexer"
+            },
+            "title": "indexers",
+            "description": "By plugin, then by priority and name."
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.IndexerFailure"
+            },
+            "title": "failures",
+            "description": "The plugins that failed to list theirs."
+          }
+        },
+        "title": "ListIndexersResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ParsedRelease": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ReleaseKind"
+              }
+            ],
+            "title": "kind"
+          },
+          "titles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "titles",
+            "description": "The movie's title and its alternatives, or the series' title."
+          },
+          "year": {
+            "type": "integer",
+            "title": "year",
+            "format": "int32"
+          },
+          "edition": {
+            "type": "string",
+            "title": "edition",
+            "description": "Of movies."
+          },
+          "imdbId": {
+            "type": "string",
+            "title": "imdb_id"
+          },
+          "tmdbId": {
+            "type": "integer",
+            "title": "tmdb_id",
+            "format": "int32"
+          },
+          "season": {
+            "type": "integer",
+            "title": "season",
+            "format": "int32",
+            "description": "Of episodes: the season, the episode numbers within it or across\n seasons, the air date of a daily series' episode (\"2006-01-02\"), and\n whether the release is a whole season."
+          },
+          "episodes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "title": "episodes"
+          },
+          "absoluteEpisodes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "title": "absolute_episodes"
+          },
+          "airDate": {
+            "type": "string",
+            "title": "air_date"
+          },
+          "fullSeason": {
+            "type": "boolean",
+            "title": "full_season"
+          },
+          "quality": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ReleaseQuality"
+              }
+            ],
+            "title": "quality"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "languages",
+            "description": "English names, e.g. \"French\"."
+          },
+          "releaseGroup": {
+            "type": "string",
+            "title": "release_group"
+          }
+        },
+        "title": "ParsedRelease",
+        "additionalProperties": false,
+        "description": "ParsedRelease is a release title parsed with Radarr's rules for movies\n and Sonarr's for episodes."
+      },
+      "mavio.acquisition.v1.Release": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          },
+          "indexerId": {
+            "type": "string",
+            "title": "indexer_id"
+          },
+          "indexerName": {
+            "type": "string",
+            "title": "indexer_name"
+          },
+          "guid": {
+            "type": "string",
+            "title": "guid",
+            "description": "Unique within the indexer."
+          },
+          "title": {
+            "type": "string",
+            "title": "title"
+          },
+          "size": {
+            "type": "string",
+            "title": "size",
+            "format": "int64",
+            "description": "In bytes; unset when unknown."
+          },
+          "downloadUrl": {
+            "type": "string",
+            "title": "download_url"
+          },
+          "magnetUrl": {
+            "type": "string",
+            "title": "magnet_url"
+          },
+          "infoHash": {
+            "type": "string",
+            "title": "info_hash"
+          },
+          "infoUrl": {
+            "type": "string",
+            "title": "info_url",
+            "description": "The release's page on the indexer."
+          },
+          "protocol": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DownloadProtocol"
+              }
+            ],
+            "title": "protocol"
+          },
+          "publishDate": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "publish_date"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "title": "categories",
+            "description": "Newznab categories."
+          },
+          "externalIds": {
+            "type": "object",
+            "title": "external_ids",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            },
+            "description": "IDs of the movie or series the indexer gives: \"imdb\", \"tmdb\", \"tvdb\",\n \"tvrage\", \"tvmaze\", \"trakt\", \"douban\"."
+          },
+          "grabs": {
+            "type": "integer",
+            "title": "grabs",
+            "format": "int32"
+          },
+          "seeders": {
+            "type": "integer",
+            "title": "seeders",
+            "format": "int32"
+          },
+          "peers": {
+            "type": "integer",
+            "title": "peers",
+            "format": "int32",
+            "description": "Seeders and leechers."
+          },
+          "downloadVolumeFactor": {
+            "type": "number",
+            "title": "download_volume_factor",
+            "format": "double",
+            "description": "How much of the download counts against the account's ratio, and of\n the upload for it; 1 for normal releases, 0 for freeleech."
+          },
+          "uploadVolumeFactor": {
+            "type": "number",
+            "title": "upload_volume_factor",
+            "format": "double"
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "flags",
+            "description": "Prowlarr's indexer flags: \"internal\", \"exclusive\", \"freeleech\",\n \"neutralleech\", \"halfleech\", \"scene\", \"doubleupload\", \"nuked\"."
+          },
+          "parsed": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ParsedRelease"
+              }
+            ],
+            "title": "parsed",
+            "description": "What the title tells; unset when it cannot be parsed."
+          }
+        },
+        "title": "Release",
+        "additionalProperties": false,
+        "description": "Release is a release an indexer lists."
+      },
+      "mavio.acquisition.v1.ReleaseKind": {
+        "type": "string",
+        "title": "ReleaseKind",
+        "enum": [
+          "RELEASE_KIND_UNSPECIFIED",
+          "RELEASE_KIND_MOVIE",
+          "RELEASE_KIND_EPISODE"
+        ],
+        "description": "ReleaseKind is what a parsed release holds."
+      },
+      "mavio.acquisition.v1.ReleaseQuality": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name",
+            "description": "Radarr's name, e.g. \"Bluray-1080p\"."
+          },
+          "source": {
+            "type": "string",
+            "title": "source",
+            "description": "\"cam\", \"telesync\", \"telecine\", \"workprint\", \"dvd\", \"tv\", \"webdl\",\n \"webrip\" or \"bluray\"; empty when unknown."
+          },
+          "resolution": {
+            "type": "integer",
+            "title": "resolution",
+            "format": "int32",
+            "description": "In lines, e.g. 1080; zero when unknown."
+          },
+          "modifier": {
+            "type": "string",
+            "title": "modifier",
+            "description": "\"regional\", \"screener\", \"rawhd\", \"brdisk\" or \"remux\"; empty for none."
+          },
+          "version": {
+            "type": "integer",
+            "title": "version",
+            "format": "int32",
+            "description": "Re-releases: PROPER and REPACK raise the version, REAL the real\n count."
+          },
+          "real": {
+            "type": "integer",
+            "title": "real",
+            "format": "int32"
+          },
+          "repack": {
+            "type": "boolean",
+            "title": "repack"
+          }
+        },
+        "title": "ReleaseQuality",
+        "additionalProperties": false,
+        "description": "ReleaseQuality is a release's quality."
+      },
+      "mavio.acquisition.v1.ReleaseSearchType": {
+        "type": "string",
+        "title": "ReleaseSearchType",
+        "enum": [
+          "RELEASE_SEARCH_TYPE_UNSPECIFIED",
+          "RELEASE_SEARCH_TYPE_MOVIE",
+          "RELEASE_SEARCH_TYPE_TV"
+        ],
+        "description": "ReleaseSearchType is what a text search looks for."
+      },
+      "mavio.acquisition.v1.SearchReleasesRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid",
+            "description": "A movie, season or episode of the library, wanted or not; searches by\n its own or its series' IDs, title, year and numbers."
+          },
+          "query": {
+            "type": "string",
+            "title": "query",
+            "maxLength": 1000,
+            "description": "A text search when item_id is unset; nothing reads recent releases."
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ReleaseSearchType"
+              }
+            ],
+            "title": "type",
+            "description": "enum.defined_only = true\n"
+          },
+          "season": {
+            "type": "integer",
+            "title": "season",
+            "minimum": 0,
+            "format": "int32",
+            "description": "The season and episode of a text search of type TV; zero for none. The\n episode may be a date such as \"2024-03-01\" for daily series."
+          },
+          "episode": {
+            "type": "string",
+            "title": "episode",
+            "maxLength": 64
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "title": "categories",
+            "description": "Newznab categories; empty for those of the movie, series or type."
+          },
+          "indexers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.IndexerRef"
+            },
+            "title": "indexers",
+            "description": "The indexers to search; empty for every enabled indexer."
+          }
+        },
+        "title": "SearchReleasesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.SearchReleasesResponse": {
+        "type": "object",
+        "properties": {
+          "releases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.Release"
+            },
+            "title": "releases",
+            "description": "By indexer priority, then newest first."
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.IndexerFailure"
+            },
+            "title": "failures",
+            "description": "The indexers that failed, which the releases leave out."
+          }
+        },
+        "title": "SearchReleasesResponse",
+        "additionalProperties": false
+      },
       "mavio.auth.v1.ApiKey": {
         "type": "object",
         "properties": {
@@ -9129,6 +9681,10 @@
       "description": "Media bytes over plain HTTP."
     },
     {
+      "name": "ReleaseService",
+      "description": "ReleaseService searches the indexers of the indexer provider plugins for\n releases, the torrents and NZBs of movies and episodes, and parses their\n titles as Radarr and Sonarr do. Administrators only."
+    },
+    {
       "name": "UserService",
       "description": "UserService manages accounts. All methods except GetCurrentUser and\n UpdatePreferences require an administrator."
     },
@@ -9624,14 +10180,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/SearchRemoteLyrics": {
+    "/mavio.library.v1.ItemService/ListItems": {
       "post": {
         "tags": [
           "ItemService"
         ],
-        "summary": "SearchRemoteLyrics",
-        "description": "SearchRemoteLyrics asks the lyrics providers for lyrics of a track;\n administrators only.",
-        "operationId": "mavio.library.v1.ItemService.SearchRemoteLyrics",
+        "summary": "ListItems",
+        "operationId": "mavio.library.v1.ItemService.ListItems",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -9656,7 +10211,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListItemsRequest"
               }
             }
           },
@@ -9678,7 +10233,131 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListItemsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.auth.v1.AuthService/CreateApiKey": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "CreateApiKey",
+        "description": "CreateApiKey makes a token an integration calls the API with, as the\n administrator creating it; the token is returned once. Administrators\n only.",
+        "operationId": "mavio.auth.v1.AuthService.CreateApiKey",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.CreateApiKeyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.CreateApiKeyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.auth.v1.AuthService/CreateFirstUser": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "CreateFirstUser",
+        "description": "CreateFirstUser creates an administrator and signs it in. It fails with\n FAILED_PRECONDITION once any user exists.",
+        "operationId": "mavio.auth.v1.AuthService.CreateFirstUser",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.CreateFirstUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.CreateFirstUserResponse"
                 }
               }
             }
@@ -10982,13 +11661,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListItems": {
+    "/mavio.playback.v1.PlaybackService/ListIntros": {
       "post": {
         "tags": [
-          "ItemService"
+          "PlaybackService"
         ],
-        "summary": "ListItems",
-        "operationId": "mavio.library.v1.ItemService.ListItems",
+        "summary": "ListIntros",
+        "description": "ListIntros returns the items to play before an item, such as its\n trailers, as the intro provider plugins pick them; only items the user\n can play.",
+        "operationId": "mavio.playback.v1.PlaybackService.ListIntros",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -11013,7 +11693,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListItemsRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.ListIntrosRequest"
               }
             }
           },
@@ -11035,7 +11715,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListItemsResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.ListIntrosResponse"
                 }
               }
             }
@@ -11291,14 +11971,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/ReportProgress": {
+    "/mavio.library.v1.ItemService/SearchRemoteLyrics": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "ItemService"
         ],
-        "summary": "ReportProgress",
-        "description": "ReportProgress records the position of a playback. Playbacks without\n reports or media requests for a while expire.",
-        "operationId": "mavio.playback.v1.PlaybackService.ReportProgress",
+        "summary": "SearchRemoteLyrics",
+        "description": "SearchRemoteLyrics asks the lyrics providers for lyrics of a track;\n administrators only.",
+        "operationId": "mavio.library.v1.ItemService.SearchRemoteLyrics",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -11323,7 +12003,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsRequest"
               }
             }
           },
@@ -11345,7 +12025,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsResponse"
                 }
               }
             }
@@ -11907,14 +12587,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/StartPlayback": {
+    "/mavio.library.v1.MetadataService/ListExternalIdKinds": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "MetadataService"
         ],
-        "summary": "StartPlayback",
-        "description": "StartPlayback picks a media source and streams, decides whether the\n client plays it directly, remuxed or transcoded, and returns the URLs to\n play it from. The URLs need no token and work until the playback stops,\n expires or its sign-in session ends.",
-        "operationId": "mavio.playback.v1.PlaybackService.StartPlayback",
+        "summary": "ListExternalIdKinds",
+        "description": "ListExternalIdKinds lists the kinds of external IDs items and persons\n carry: the built-in ones and those plugins declare.",
+        "operationId": "mavio.library.v1.MetadataService.ListExternalIdKinds",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -11939,7 +12619,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListExternalIdKindsRequest"
               }
             }
           },
@@ -11961,7 +12641,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListExternalIdKindsResponse"
                 }
               }
             }
@@ -12403,14 +13083,13 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/ListMediaSources": {
+    "/mavio.library.v1.PlaylistService/UpdatePlaylist": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "PlaylistService"
         ],
-        "summary": "ListMediaSources",
-        "description": "ListMediaSources returns the media sources an item plays from: its\n files, as GetItem lists them, then those the media source provider\n plugins give, probed. StartPlayback plays one by its ID.",
-        "operationId": "mavio.playback.v1.PlaybackService.ListMediaSources",
+        "summary": "UpdatePlaylist",
+        "operationId": "mavio.library.v1.PlaylistService.UpdatePlaylist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12435,7 +13114,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.ListMediaSourcesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistRequest"
               }
             }
           },
@@ -12457,7 +13136,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.ListMediaSourcesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistResponse"
                 }
               }
             }
@@ -12649,14 +13328,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/CreateApiKey": {
+    "/mavio.acquisition.v1.ReleaseService/SearchReleases": {
       "post": {
         "tags": [
-          "AuthService"
+          "ReleaseService"
         ],
-        "summary": "CreateApiKey",
-        "description": "CreateApiKey makes a token an integration calls the API with, as the\n administrator creating it; the token is returned once. Administrators\n only.",
-        "operationId": "mavio.auth.v1.AuthService.CreateApiKey",
+        "summary": "SearchReleases",
+        "description": "SearchReleases searches indexers for a movie, season or episode of the\n library, by the IDs and numbers each indexer can search by and else by\n title, as Radarr and Sonarr do; or for text; or reads their recent\n releases when given neither.",
+        "operationId": "mavio.acquisition.v1.ReleaseService.SearchReleases",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12681,7 +13360,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.CreateApiKeyRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchReleasesRequest"
               }
             }
           },
@@ -12703,7 +13382,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.CreateApiKeyResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchReleasesResponse"
                 }
               }
             }
@@ -12772,129 +13451,6 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/UpdatePlaylist": {
-      "post": {
-        "tags": [
-          "PlaylistService"
-        ],
-        "summary": "UpdatePlaylist",
-        "operationId": "mavio.library.v1.PlaylistService.UpdatePlaylist",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdatePlaylistResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.playback.v1.PlaybackService/ListIntros": {
-      "post": {
-        "tags": [
-          "PlaybackService"
-        ],
-        "summary": "ListIntros",
-        "description": "ListIntros returns the items to play before an item, such as its\n trailers, as the intro provider plugins pick them; only items the user\n can play.",
-        "operationId": "mavio.playback.v1.PlaybackService.ListIntros",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.ListIntrosRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.ListIntrosResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/mavio.library.v1.PlaylistService/CreatePlaylist": {
       "post": {
         "tags": [
@@ -12956,14 +13512,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/CreateFirstUser": {
+    "/mavio.auth.v1.AuthService/AuthorizeQuickConnect": {
       "post": {
         "tags": [
           "AuthService"
         ],
-        "summary": "CreateFirstUser",
-        "description": "CreateFirstUser creates an administrator and signs it in. It fails with\n FAILED_PRECONDITION once any user exists.",
-        "operationId": "mavio.auth.v1.AuthService.CreateFirstUser",
+        "summary": "AuthorizeQuickConnect",
+        "description": "AuthorizeQuickConnect signs the device waiting with the code in as the\n calling user.",
+        "operationId": "mavio.auth.v1.AuthService.AuthorizeQuickConnect",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12988,7 +13544,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.CreateFirstUserRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.AuthorizeQuickConnectRequest"
               }
             }
           },
@@ -13010,7 +13566,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.CreateFirstUserResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.AuthorizeQuickConnectResponse"
                 }
               }
             }
@@ -13018,14 +13574,14 @@
         }
       }
     },
-    "/mavio.library.v1.MetadataService/ListExternalIdKinds": {
+    "/mavio.playback.v1.PlaybackService/ListMediaSources": {
       "post": {
         "tags": [
-          "MetadataService"
+          "PlaybackService"
         ],
-        "summary": "ListExternalIdKinds",
-        "description": "ListExternalIdKinds lists the kinds of external IDs items and persons\n carry: the built-in ones and those plugins declare.",
-        "operationId": "mavio.library.v1.MetadataService.ListExternalIdKinds",
+        "summary": "ListMediaSources",
+        "description": "ListMediaSources returns the media sources an item plays from: its\n files, as GetItem lists them, then those the media source provider\n plugins give, probed. StartPlayback plays one by its ID.",
+        "operationId": "mavio.playback.v1.PlaybackService.ListMediaSources",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -13050,7 +13606,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListExternalIdKindsRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.ListMediaSourcesRequest"
               }
             }
           },
@@ -13072,7 +13628,131 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListExternalIdKindsResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.ListMediaSourcesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.playback.v1.PlaybackService/ReportProgress": {
+      "post": {
+        "tags": [
+          "PlaybackService"
+        ],
+        "summary": "ReportProgress",
+        "description": "ReportProgress records the position of a playback. Playbacks without\n reports or media requests for a while expire.",
+        "operationId": "mavio.playback.v1.PlaybackService.ReportProgress",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.playback.v1.ReportProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.playback.v1.PlaybackService/StartPlayback": {
+      "post": {
+        "tags": [
+          "PlaybackService"
+        ],
+        "summary": "StartPlayback",
+        "description": "StartPlayback picks a media source and streams, decides whether the\n client plays it directly, remuxed or transcoded, and returns the URLs to\n play it from. The URLs need no token and work until the playback stops,\n expires or its sign-in session ends.",
+        "operationId": "mavio.playback.v1.PlaybackService.StartPlayback",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.playback.v1.StartPlaybackResponse"
                 }
               }
             }
@@ -16036,14 +16716,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/AuthorizeQuickConnect": {
+    "/mavio.acquisition.v1.ReleaseService/ListIndexers": {
       "post": {
         "tags": [
-          "AuthService"
+          "ReleaseService"
         ],
-        "summary": "AuthorizeQuickConnect",
-        "description": "AuthorizeQuickConnect signs the device waiting with the code in as the\n calling user.",
-        "operationId": "mavio.auth.v1.AuthService.AuthorizeQuickConnect",
+        "summary": "ListIndexers",
+        "description": "ListIndexers lists the indexers every ready indexer provider has\n configured.",
+        "operationId": "mavio.acquisition.v1.ReleaseService.ListIndexers",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16068,7 +16748,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.AuthorizeQuickConnectRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListIndexersRequest"
               }
             }
           },
@@ -16090,7 +16770,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.AuthorizeQuickConnectResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListIndexersResponse"
                 }
               }
             }

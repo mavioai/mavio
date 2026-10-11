@@ -73,6 +73,7 @@ require (
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lufia/plan9stats v0.0.0-20260330125221-c963978e514e // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
+	github.com/mavioai/mavio/libs/release v0.0.0
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.2.0 // indirect
@@ -146,3 +147,5 @@ replace github.com/mavioai/mavio/libs/media => ../../libs/media
 replace github.com/mavioai/mavio/tools/fixtures => ../../tools/fixtures
 
 replace github.com/mavioai/mavio/libs/library => ../../libs/library
+
+replace github.com/mavioai/mavio/libs/release => ../../libs/release
