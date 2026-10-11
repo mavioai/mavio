@@ -613,10 +613,10 @@ func TestImportBlocked(t *testing.T) {
 	}
 	// A path the client's host gives that is not one of the server's
 	// needs a remote path mapping: a Windows path on other systems, a Unix
-	// one on Windows.
+	// one on Windows, neither of them mapped.
 	remote := `D:\Downloads\` + title1080
 	if runtime.GOOS == "windows" {
-		remote = "/downloads/" + title1080
+		remote = "/elsewhere/" + title1080
 	}
 	e.client.setDownloads(pluginv1.Download_builder{
 		ClientId: new("qb"), Id: new(hash1080), Title: new(title1080), Status: new(pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED),
