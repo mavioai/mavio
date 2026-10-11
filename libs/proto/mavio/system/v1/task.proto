@@ -79,6 +79,7 @@ message RunTaskRequest {
 }
 
 message RunTaskResponse {
+  // The queued job, or the run already queued or running.
   string job_id = 1;
   // False when a run was already queued or running.
   bool enqueued = 2;

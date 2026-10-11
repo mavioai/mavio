@@ -521,7 +521,7 @@ flowchart TD
   - [ ] RSS syncs of series, multi-episode files and upgrades of episodes in the end-to-end test
   - [ ] XEM's scene numbering in the end-to-end test
   - [ ] Failed episode downloads, the blocklist and the searches replacing them in the end-to-end test
-  - [ ] `RunTask` answering with the queued or running job when it does not queue another
+  - [x] `RunTask` answers with the queued or running job when it does not queue another
 
 ### P20 Discovery and Requests
 **Scope**: porting Seerr. `DiscoverService` lists what the discovery providers offer, marked as available, wanted or requested; `RequestService`: requests of movies and seasons, approval by administrators or automatic, quotas per user, users' limits on ratings applied to what they may request, notifications of the requester; reporting problems with an item.

@@ -55,7 +55,9 @@ func TestTaskServiceAcquisition(t *testing.T) {
 		}
 	}
 
-	// Running a task queues its job now, once.
+	// Running a task queues its job now, once; running it again answers
+	// with the queued job.
+	var queued string
 	for i, want := range []bool{true, false} {
 		run, err := admin.RunTask(ctx, systemv1.RunTaskRequest_builder{Id: new(acquisition.JobQueue)}.Build())
 		if err != nil {
@@ -63,6 +65,11 @@ func TestTaskServiceAcquisition(t *testing.T) {
 		}
 		if run.GetEnqueued() != want {
 			t.Errorf("RunTask %d enqueued = %t, want = %t", i, run.GetEnqueued(), want)
+		}
+		if i == 0 {
+			queued = run.GetJobId()
+		} else if run.GetJobId() != queued {
+			t.Errorf("RunTask %d job = %s, want = %s", i, run.GetJobId(), queued)
 		}
 	}
 	jobs, err := db.Jobs().List(ctx, core.JobQuery{Kinds: []string{acquisition.JobQueue}})
