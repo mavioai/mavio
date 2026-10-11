@@ -34,6 +34,10 @@ func availabilityJob(at time.Time, scheduled bool) core.Job {
 	return core.Job{ID: core.NewID(), Kind: JobAvailability, Payload: payload, UniqueKey: key, MaxAttempts: 1, RunAt: at}
 }
 
+// RunJob returns the availability job running it now, on demand: the
+// TaskService's task. It does not schedule another run.
+func RunJob(at time.Time) core.Job { return availabilityJob(at, false) }
+
 // Handlers returns the handler of the availability job, which schedules
 // its next run.
 func (s *Service) Handlers() map[string]library.Handler {

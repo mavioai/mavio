@@ -129,6 +129,9 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 		PluginCatalogs: s.PluginCatalogs, PasswordResetPlugin: &s.PasswordResetPlugin,
 		Acquisition: acquisitionSettingsToProto(&s.Acquisition),
 		Requests:    requestSettingsToProto(&s.Requests),
+		Metadata: systemv1.MetadataSettings_builder{
+			PreferredLanguage: &s.Metadata.PreferredLanguage, Country: &s.Metadata.Country,
+		}.Build(),
 	}.Build()
 	if !s.UpdatedAt.IsZero() {
 		out.SetUpdateTime(timestamppb.New(s.UpdatedAt))
@@ -137,7 +140,7 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 }
 
 // settingsFromProto returns the settings of p, keeping the current
-// acquisition and request settings when p has none.
+// acquisition, request and metadata settings when p has none.
 func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings) (core.ServerSettings, error) {
 	t, n := p.GetTranscoding(), p.GetNetwork()
 	acquisition := current.Acquisition
@@ -150,6 +153,10 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 		if requests, err = requestSettingsFromProto(p.GetRequests()); err != nil {
 			return core.ServerSettings{}, err
 		}
+	}
+	meta := current.Metadata
+	if p.HasMetadata() {
+		meta = core.MetadataSettings{PreferredLanguage: p.GetMetadata().GetPreferredLanguage(), Country: p.GetMetadata().GetCountry()}
 	}
 	var hw core.HardwareAcceleration
 	for k, v := range hardwareAccelerations {
@@ -172,6 +179,7 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 		PluginCatalogs: p.GetPluginCatalogs(), PasswordResetPlugin: p.GetPasswordResetPlugin(),
 		Acquisition: acquisition,
 		Requests:    requests,
+		Metadata:    meta,
 	}, nil
 }
 
@@ -195,6 +203,8 @@ func requestSettingsToProto(r *core.RequestSettings) *systemv1.RequestSettings {
 		{r.MovieQualityProfileID, &b.MovieQualityProfileId},
 		{r.SeriesLibraryID, &b.SeriesLibraryId},
 		{r.SeriesQualityProfileID, &b.SeriesQualityProfileId},
+		{r.AnimeLibraryID, &b.AnimeLibraryId},
+		{r.AnimeQualityProfileID, &b.AnimeQualityProfileId},
 	} {
 		if !f.id.IsZero() {
 			*f.to = new(f.id.String())
@@ -232,6 +242,8 @@ func requestSettingsFromProto(p *systemv1.RequestSettings) (core.RequestSettings
 		{p.GetMovieQualityProfileId(), &out.MovieQualityProfileID},
 		{p.GetSeriesLibraryId(), &out.SeriesLibraryID},
 		{p.GetSeriesQualityProfileId(), &out.SeriesQualityProfileID},
+		{p.GetAnimeLibraryId(), &out.AnimeLibraryID},
+		{p.GetAnimeQualityProfileId(), &out.AnimeQualityProfileID},
 	} {
 		if f.s == "" {
 			continue

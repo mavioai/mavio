@@ -25,6 +25,15 @@ const (
 	// StatusAvailable is a movie with a file, or a series whose wanted
 	// aired episodes all have files.
 	StatusAvailable
+	// StatusBlocklisted is a title administrators blocked from being
+	// requested, whatever the libraries have of it, as Seerr's
+	// MediaStatus.BLOCKLISTED.
+	StatusBlocklisted
+	// StatusDeleted is a title, or season, a completed request made
+	// available whose files the libraries no longer have, as Seerr's
+	// MediaStatus.DELETED, which its availability sync sets; it may be
+	// requested again.
+	StatusDeleted
 )
 
 // hasFile reports whether an item has its file, as the acquisition

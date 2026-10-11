@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
+	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/libs/core"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
@@ -84,4 +85,45 @@ func TestTaskServiceAcquisition(t *testing.T) {
 	svc.Acquisition = nil
 	_, err = admin.RunTask(ctx, systemv1.RunTaskRequest_builder{Id: new(acquisition.JobRSS)}.Build())
 	wantCode(t, "RunTask without acquisition", err, connect.CodeNotFound)
+}
+
+func TestTaskServiceRequests(t *testing.T) {
+	ctx := t.Context()
+	db := openStore(t)
+	svc := NewTaskService(db)
+	url := testHandlers(t, func(opts connect.HandlerOption) (string, http.Handler) {
+		return systemv1connect.NewTaskServiceHandler(svc, opts)
+	})
+	admin := systemv1connect.NewTaskServiceClient(http.DefaultClient, url, as("admin"))
+	run := systemv1.RunTaskRequest_builder{Id: new(requests.JobAvailability)}.Build()
+
+	// Without requests, the task is not listed.
+	_, err := admin.RunTask(ctx, run)
+	wantCode(t, "RunTask without requests", err, connect.CodeNotFound)
+
+	svc.Requests = true
+	resp, err := admin.ListTasks(ctx, &systemv1.ListTasksRequest{})
+	if err != nil {
+		t.Fatalf("ListTasks: %v", err)
+	}
+	listed := false
+	for _, task := range resp.GetTasks() {
+		if task.GetId() == requests.JobAvailability {
+			listed = true
+			if got := task.GetInterval().AsDuration(); got != requests.AvailabilityInterval {
+				t.Errorf("availability interval = %v, want = %v", got, requests.AvailabilityInterval)
+			}
+		}
+	}
+	if !listed {
+		t.Fatalf("tasks = %v, want = %s listed", resp.GetTasks(), requests.JobAvailability)
+	}
+	got, err := admin.RunTask(ctx, run)
+	if err != nil || !got.GetEnqueued() {
+		t.Fatalf("RunTask = %v, %v, want = enqueued", got, err)
+	}
+	jobs, err := db.Jobs().List(ctx, core.JobQuery{Kinds: []string{requests.JobAvailability}})
+	if err != nil || len(jobs.Items) != 1 || jobs.Items[0].State != core.JobPending {
+		t.Errorf("availability jobs = %+v, %v, want = 1 pending", jobs, err)
+	}
 }

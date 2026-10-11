@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"time"
 
 	"connectrpc.com/connect"
 
@@ -256,6 +257,65 @@ func (s *RequestService) GetQuota(ctx context.Context, req *acquisitionv1.GetQuo
 	return out.Build(), nil
 }
 
+func blockedTitleToProto(b *core.BlockedTitle) *acquisitionv1.BlockedTitle {
+	return acquisitionv1.BlockedTitle_builder{
+		MediaKind: new(keyOf(acquisitionKinds, b.Kind)), TmdbId: new(int32(b.TmdbID)), Title: new(b.Title),
+		UserId: optionalID(b.UserID), CreateTime: timestamp(b.CreatedAt),
+	}.Build()
+}
+
+// BlockTitle puts a title on the blocklist; administrators.
+func (s *RequestService) BlockTitle(ctx context.Context, req *acquisitionv1.BlockTitleRequest) (*acquisitionv1.BlockTitleResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	kind, err := mediaKind(req.GetMediaKind())
+	if err != nil {
+		return nil, err
+	}
+	b, err := s.requests.Block(ctx, p.User, kind, int(req.GetTmdbId()))
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	return acquisitionv1.BlockTitleResponse_builder{BlockedTitle: blockedTitleToProto(&b)}.Build(), nil
+}
+
+// UnblockTitle takes a title off the blocklist; administrators.
+func (s *RequestService) UnblockTitle(ctx context.Context, req *acquisitionv1.UnblockTitleRequest) (*acquisitionv1.UnblockTitleResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	kind, err := mediaKind(req.GetMediaKind())
+	if err != nil {
+		return nil, err
+	}
+	if err := s.requests.Unblock(ctx, p.User, kind, int(req.GetTmdbId())); err != nil {
+		return nil, requestError(ctx, err)
+	}
+	return &acquisitionv1.UnblockTitleResponse{}, nil
+}
+
+// ListBlockedTitles lists the blocklist; administrators.
+func (s *RequestService) ListBlockedTitles(ctx context.Context, req *acquisitionv1.ListBlockedTitlesRequest) (*acquisitionv1.ListBlockedTitlesResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	page, err := s.requests.ListBlocked(ctx, p.User, core.BlockedTitleQuery{
+		Search: req.GetSearch(), Limit: int(req.GetLimit()), Offset: int(req.GetOffset()),
+	})
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	out := make([]*acquisitionv1.BlockedTitle, len(page.Items))
+	for i := range page.Items {
+		out[i] = blockedTitleToProto(&page.Items[i])
+	}
+	return acquisitionv1.ListBlockedTitlesResponse_builder{BlockedTitles: out, Total: new(int32(page.Total))}.Build(), nil
+}
+
 var issueTypes = map[core.IssueType]acquisitionv1.IssueType{
 	core.IssueVideo:     acquisitionv1.IssueType_ISSUE_TYPE_VIDEO,
 	core.IssueAudio:     acquisitionv1.IssueType_ISSUE_TYPE_AUDIO,
@@ -454,11 +514,13 @@ func (s *DiscoverService) ListCatalogs(ctx context.Context, req *acquisitionv1.L
 }
 
 var mediaStatuses = map[requests.MediaStatus]acquisitionv1.MediaStatus{
-	requests.StatusNone:      acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED,
-	requests.StatusRequested: acquisitionv1.MediaStatus_MEDIA_STATUS_REQUESTED,
-	requests.StatusWanted:    acquisitionv1.MediaStatus_MEDIA_STATUS_WANTED,
-	requests.StatusPartial:   acquisitionv1.MediaStatus_MEDIA_STATUS_PARTIALLY_AVAILABLE,
-	requests.StatusAvailable: acquisitionv1.MediaStatus_MEDIA_STATUS_AVAILABLE,
+	requests.StatusNone:        acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED,
+	requests.StatusRequested:   acquisitionv1.MediaStatus_MEDIA_STATUS_REQUESTED,
+	requests.StatusWanted:      acquisitionv1.MediaStatus_MEDIA_STATUS_WANTED,
+	requests.StatusPartial:     acquisitionv1.MediaStatus_MEDIA_STATUS_PARTIALLY_AVAILABLE,
+	requests.StatusAvailable:   acquisitionv1.MediaStatus_MEDIA_STATUS_AVAILABLE,
+	requests.StatusBlocklisted: acquisitionv1.MediaStatus_MEDIA_STATUS_BLOCKLISTED,
+	requests.StatusDeleted:     acquisitionv1.MediaStatus_MEDIA_STATUS_DELETED,
 }
 
 // Discover lists a page of a catalog, marked with what the server has of
@@ -488,13 +550,43 @@ func (s *DiscoverService) Discover(ctx context.Context, req *acquisitionv1.Disco
 	if err != nil {
 		return nil, requestError(ctx, err)
 	}
-	out := make([]*acquisitionv1.DiscoveredTitle, len(page.Titles))
-	for i, d := range page.Titles {
-		out[i] = discoveredTitleToProto(&d)
-	}
 	return acquisitionv1.DiscoverResponse_builder{
-		Titles: out, Page: new(int32(page.Page)), TotalPages: new(int32(page.TotalPages)),
-		TotalResults: new(int32(page.TotalResults)),
+		Titles: discoveredToProto(page.Titles), Page: new(int32(page.Page)), TotalPages: new(int32(page.TotalPages)),
+		TotalResults: new(int32(page.TotalResults)), HiddenResults: new(int32(page.Hidden)),
+	}.Build(), nil
+}
+
+// discoveredToProto converts discovered titles.
+func discoveredToProto(titles []requests.DiscoveredTitle) []*acquisitionv1.DiscoveredTitle {
+	out := make([]*acquisitionv1.DiscoveredTitle, len(titles))
+	for i := range titles {
+		out[i] = discoveredTitleToProto(&titles[i])
+	}
+	return out
+}
+
+// SearchTitles finds titles by name through a discovery provider.
+func (s *DiscoverService) SearchTitles(ctx context.Context, req *acquisitionv1.SearchTitlesRequest) (*acquisitionv1.SearchTitlesResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	pr := pluginv1.SearchTitlesRequest_builder{
+		Query: new(req.GetQuery()), MediaKind: new(pluginKinds[req.GetMediaKind()]), Language: new(req.GetLanguage()),
+	}
+	if req.GetYear() > 0 {
+		pr.Year = new(req.GetYear())
+	}
+	if req.GetPage() > 0 {
+		pr.Page = new(req.GetPage())
+	}
+	page, err := s.requests.Search(ctx, p.User, req.GetPluginId(), pr.Build())
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	return acquisitionv1.SearchTitlesResponse_builder{
+		Titles: discoveredToProto(page.Titles), Page: new(int32(page.Page)), TotalPages: new(int32(page.TotalPages)),
+		TotalResults: new(int32(page.TotalResults)), HiddenResults: new(int32(page.Hidden)), PluginId: new(page.PluginID),
 	}.Build(), nil
 }
 
@@ -513,6 +605,58 @@ func discoveredTitleToProto(d *requests.DiscoveredTitle) *acquisitionv1.Discover
 		b.RequestStatus = new(requestStatuses[d.RequestStatus])
 	}
 	return b.Build()
+}
+
+// isoDate formats a date as an ISO 8601 calendar date, empty when nil.
+func isoDate(t *time.Time) *string {
+	if t == nil {
+		return new("")
+	}
+	return new(t.Format(time.DateOnly))
+}
+
+// GetTitle returns a title's page with the status of each season.
+func (s *DiscoverService) GetTitle(ctx context.Context, req *acquisitionv1.GetTitleRequest) (*acquisitionv1.GetTitleResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	kind, err := mediaKind(req.GetMediaKind())
+	if err != nil {
+		return nil, err
+	}
+	d, err := s.requests.GetTitle(ctx, p.User, kind, int(req.GetTmdbId()))
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	ids := make(map[string]string, len(d.ExternalIDs))
+	for k, v := range d.ExternalIDs {
+		ids[string(k)] = v
+	}
+	reqs := make([]*acquisitionv1.Request, len(d.Requests))
+	for i := range d.Requests {
+		reqs[i] = requestToProto(&d.Requests[i])
+	}
+	seasons := make([]*acquisitionv1.SeasonStatus, len(d.Seasons))
+	for i, ss := range d.Seasons {
+		b := acquisitionv1.SeasonStatus_builder{
+			SeasonNumber: new(int32(ss.Number)), EpisodeCount: new(int32(ss.Episodes)), PremiereDate: isoDate(ss.PremiereDate),
+			Status: new(mediaStatuses[ss.Status]), RequestId: optionalID(ss.RequestID), Requestable: new(ss.Requestable),
+		}
+		if ss.RequestStatus != "" {
+			b.RequestStatus = new(requestStatuses[ss.RequestStatus])
+		}
+		seasons[i] = b.Build()
+	}
+	t := acquisitionv1.Title_builder{
+		MediaKind: new(keyOf(acquisitionKinds, d.Kind)), TmdbId: new(int32(d.TmdbID)), TvdbId: new(int32(d.TvdbID)),
+		Name: new(d.Name), OriginalTitle: new(d.OriginalTitle), Overview: new(d.Overview), PremiereDate: isoDate(d.PremiereDate),
+		Year: new(int32(d.Year)), OfficialRating: new(d.Rating), RatingCountry: new(d.Country), Genres: d.Genres,
+		CommunityRating: new(d.CommunityRating), ExternalIds: ids, PosterUrl: new(d.PosterURL), BackdropUrl: new(d.BackdropURL),
+		Anime: new(d.Anime()), Status: new(mediaStatuses[d.Status]), ItemId: optionalID(d.ItemID), Requests: reqs,
+		Requestable: new(d.Requestable), Seasons: seasons,
+	}.Build()
+	return acquisitionv1.GetTitleResponse_builder{Title: t}.Build(), nil
 }
 
 // ListFilterValues lists the values a filter of a catalog takes.

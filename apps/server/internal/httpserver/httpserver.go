@@ -149,6 +149,7 @@ func Handler(opts Options) (http.Handler, error) {
 	}
 	// Acquisition jobs run only where the server runs their worker.
 	tasks.Acquisition = opts.Acquisition
+	tasks.Requests = opts.Requests != nil
 	mux.Handle(systemv1connect.NewTaskServiceHandler(tasks, interceptors))
 	mux.Handle(systemv1connect.NewActivityServiceHandler(rpc.NewActivityService(opts.Store), interceptors))
 	mux.Handle(systemv1connect.NewBackupServiceHandler(rpc.NewBackupService(opts.Backups, opts.Activity), interceptors))
@@ -203,6 +204,9 @@ func Handler(opts Options) (http.Handler, error) {
 	reqs := opts.Requests
 	if reqs == nil {
 		reqs = &requests.Service{Store: opts.Store, Acquisition: acq, Settings: requestSettings}
+		if opts.Settings != nil {
+			reqs.MetadataSettings = func() core.MetadataSettings { return opts.Settings.Get().Metadata }
+		}
 		if opts.Activity != nil {
 			reqs.Activity = opts.Activity
 		}

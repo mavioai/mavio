@@ -57,8 +57,16 @@ type Service struct {
 	Discovery func() []DiscoveryProvider
 	// Activity records notifications; nil records none.
 	Activity Recorder
-	Now      func() time.Time
-	Logger   *slog.Logger
+	// Events pushes a notification recorded to the devices of the user it
+	// concerns, when user, and of the administrators, when admins: the
+	// events hub. Nil pushes none.
+	Events func(a core.Activity, user, admins bool)
+	// MetadataSettings returns the server's metadata language and
+	// country, which titles are looked up and rated in; nil uses English
+	// and the US.
+	MetadataSettings func() core.MetadataSettings
+	Now              func() time.Time
+	Logger           *slog.Logger
 
 	// users serializes each user's requests, for quotas; titles each
 	// title's requests and approvals, for duplicates. A user's lock is
@@ -88,9 +96,18 @@ func (s *Service) settings() core.RequestSettings {
 	return s.Settings()
 }
 
-func (s *Service) record(ctx context.Context, a core.Activity) {
+// record records a notification and pushes it to the devices of the user
+// it concerns, when user, and of the administrators, when admins.
+func (s *Service) record(ctx context.Context, a core.Activity, user, admins bool) {
+	a.ID, a.Time = core.NewID(), s.now().UTC()
+	if a.Severity == "" {
+		a.Severity = core.SeverityInfo
+	}
 	if s.Activity != nil {
 		s.Activity.Record(ctx, a)
+	}
+	if s.Events != nil {
+		s.Events(a, user, admins)
 	}
 }
 
