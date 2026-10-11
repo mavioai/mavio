@@ -1028,6 +1028,10 @@ type SearchReleasesRequest struct {
 	xxx_hidden_Episode     *string                `protobuf:"bytes,5,opt,name=episode"`
 	xxx_hidden_Categories  []int32                `protobuf:"varint,6,rep,packed,name=categories"`
 	xxx_hidden_Indexers    *[]*IndexerRef         `protobuf:"bytes,7,rep,name=indexers"`
+	xxx_hidden_MinAge      int32                  `protobuf:"varint,8,opt,name=min_age,json=minAge"`
+	xxx_hidden_MaxAge      int32                  `protobuf:"varint,9,opt,name=max_age,json=maxAge"`
+	xxx_hidden_MinSize     int64                  `protobuf:"varint,10,opt,name=min_size,json=minSize"`
+	xxx_hidden_MaxSize     int64                  `protobuf:"varint,11,opt,name=max_size,json=maxSize"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -1121,29 +1125,57 @@ func (x *SearchReleasesRequest) GetIndexers() []*IndexerRef {
 	return nil
 }
 
+func (x *SearchReleasesRequest) GetMinAge() int32 {
+	if x != nil {
+		return x.xxx_hidden_MinAge
+	}
+	return 0
+}
+
+func (x *SearchReleasesRequest) GetMaxAge() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaxAge
+	}
+	return 0
+}
+
+func (x *SearchReleasesRequest) GetMinSize() int64 {
+	if x != nil {
+		return x.xxx_hidden_MinSize
+	}
+	return 0
+}
+
+func (x *SearchReleasesRequest) GetMaxSize() int64 {
+	if x != nil {
+		return x.xxx_hidden_MaxSize
+	}
+	return 0
+}
+
 func (x *SearchReleasesRequest) SetItemId(v string) {
 	x.xxx_hidden_ItemId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
 }
 
 func (x *SearchReleasesRequest) SetQuery(v string) {
 	x.xxx_hidden_Query = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
 }
 
 func (x *SearchReleasesRequest) SetType(v ReleaseSearchType) {
 	x.xxx_hidden_Type = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 11)
 }
 
 func (x *SearchReleasesRequest) SetSeason(v int32) {
 	x.xxx_hidden_Season = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 11)
 }
 
 func (x *SearchReleasesRequest) SetEpisode(v string) {
 	x.xxx_hidden_Episode = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 11)
 }
 
 func (x *SearchReleasesRequest) SetCategories(v []int32) {
@@ -1152,6 +1184,26 @@ func (x *SearchReleasesRequest) SetCategories(v []int32) {
 
 func (x *SearchReleasesRequest) SetIndexers(v []*IndexerRef) {
 	x.xxx_hidden_Indexers = &v
+}
+
+func (x *SearchReleasesRequest) SetMinAge(v int32) {
+	x.xxx_hidden_MinAge = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 11)
+}
+
+func (x *SearchReleasesRequest) SetMaxAge(v int32) {
+	x.xxx_hidden_MaxAge = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 11)
+}
+
+func (x *SearchReleasesRequest) SetMinSize(v int64) {
+	x.xxx_hidden_MinSize = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 11)
+}
+
+func (x *SearchReleasesRequest) SetMaxSize(v int64) {
+	x.xxx_hidden_MaxSize = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
 }
 
 func (x *SearchReleasesRequest) HasItemId() bool {
@@ -1189,6 +1241,34 @@ func (x *SearchReleasesRequest) HasEpisode() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
 }
 
+func (x *SearchReleasesRequest) HasMinAge() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *SearchReleasesRequest) HasMaxAge() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
+func (x *SearchReleasesRequest) HasMinSize() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
+func (x *SearchReleasesRequest) HasMaxSize() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
 func (x *SearchReleasesRequest) ClearItemId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_ItemId = nil
@@ -1214,6 +1294,26 @@ func (x *SearchReleasesRequest) ClearEpisode() {
 	x.xxx_hidden_Episode = nil
 }
 
+func (x *SearchReleasesRequest) ClearMinAge() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_MinAge = 0
+}
+
+func (x *SearchReleasesRequest) ClearMaxAge() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_MaxAge = 0
+}
+
+func (x *SearchReleasesRequest) ClearMinSize() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_MinSize = 0
+}
+
+func (x *SearchReleasesRequest) ClearMaxSize() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_MaxSize = 0
+}
+
 type SearchReleasesRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1231,6 +1331,12 @@ type SearchReleasesRequest_builder struct {
 	Categories []int32
 	// The indexers to search; empty for every enabled indexer.
 	Indexers []*IndexerRef
+	// The age of releases, in days, and their size, in bytes, to search
+	// within, as Prowlarr's searches take them; unset for no limit.
+	MinAge  *int32
+	MaxAge  *int32
+	MinSize *int64
+	MaxSize *int64
 }
 
 func (b0 SearchReleasesRequest_builder) Build() *SearchReleasesRequest {
@@ -1238,27 +1344,43 @@ func (b0 SearchReleasesRequest_builder) Build() *SearchReleasesRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.ItemId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
 		x.xxx_hidden_ItemId = b.ItemId
 	}
 	if b.Query != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
 		x.xxx_hidden_Query = b.Query
 	}
 	if b.Type != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 11)
 		x.xxx_hidden_Type = *b.Type
 	}
 	if b.Season != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 11)
 		x.xxx_hidden_Season = *b.Season
 	}
 	if b.Episode != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 11)
 		x.xxx_hidden_Episode = b.Episode
 	}
 	x.xxx_hidden_Categories = b.Categories
 	x.xxx_hidden_Indexers = &b.Indexers
+	if b.MinAge != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 11)
+		x.xxx_hidden_MinAge = *b.MinAge
+	}
+	if b.MaxAge != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 11)
+		x.xxx_hidden_MaxAge = *b.MaxAge
+	}
+	if b.MinSize != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 11)
+		x.xxx_hidden_MinSize = *b.MinSize
+	}
+	if b.MaxSize != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		x.xxx_hidden_MaxSize = *b.MaxSize
+	}
 	return m0
 }
 
@@ -2978,7 +3100,7 @@ const file_mavio_acquisition_v1_release_proto_rawDesc = "" +
 	"\n" +
 	"indexer_id\x18\x02 \x01(\tR\tindexerId\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12A\n" +
-	"\x0edisabled_until\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\rdisabledUntil\"\xc3\x02\n" +
+	"\x0edisabled_until\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\rdisabledUntil\"\xcf\x03\n" +
 	"\x15SearchReleasesRequest\x12!\n" +
 	"\aitem_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06itemId\x12\x1e\n" +
 	"\x05query\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\xe8\aR\x05query\x12E\n" +
@@ -2988,7 +3110,12 @@ const file_mavio_acquisition_v1_release_proto_rawDesc = "" +
 	"\n" +
 	"categories\x18\x06 \x03(\x05R\n" +
 	"categories\x12<\n" +
-	"\bindexers\x18\a \x03(\v2 .mavio.acquisition.v1.IndexerRefR\bindexers\"\x95\x01\n" +
+	"\bindexers\x18\a \x03(\v2 .mavio.acquisition.v1.IndexerRefR\bindexers\x12 \n" +
+	"\amin_age\x18\b \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06minAge\x12 \n" +
+	"\amax_age\x18\t \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06maxAge\x12\"\n" +
+	"\bmin_size\x18\n" +
+	" \x01(\x03B\a\xbaH\x04\"\x02(\x00R\aminSize\x12\"\n" +
+	"\bmax_size\x18\v \x01(\x03B\a\xbaH\x04\"\x02(\x00R\amaxSize\"\x95\x01\n" +
 	"\x16SearchReleasesResponse\x129\n" +
 	"\breleases\x18\x01 \x03(\v2\x1d.mavio.acquisition.v1.ReleaseR\breleases\x12@\n" +
 	"\bfailures\x18\x02 \x03(\v2$.mavio.acquisition.v1.IndexerFailureR\bfailures\"\xae\b\n" +

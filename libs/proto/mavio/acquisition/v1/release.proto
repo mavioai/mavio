@@ -110,6 +110,12 @@ message SearchReleasesRequest {
   repeated int32 categories = 6;
   // The indexers to search; empty for every enabled indexer.
   repeated IndexerRef indexers = 7;
+  // The age of releases, in days, and their size, in bytes, to search
+  // within, as Prowlarr's searches take them; unset for no limit.
+  int32 min_age = 8 [(buf.validate.field).int32.gte = 0];
+  int32 max_age = 9 [(buf.validate.field).int32.gte = 0];
+  int64 min_size = 10 [(buf.validate.field).int64.gte = 0];
+  int64 max_size = 11 [(buf.validate.field).int64.gte = 0];
 }
 
 message SearchReleasesResponse {

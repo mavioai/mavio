@@ -1350,6 +1350,17 @@ pub struct SearchReleasesRequest {
     ///
     /// Field 7: `indexers`
     pub indexers: ::buffa::alloc::vec::Vec<IndexerRef>,
+    /// The age of releases, in days, and their size, in bytes, to search
+    /// within, as Prowlarr's searches take them; unset for no limit.
+    ///
+    /// Field 8: `min_age`
+    pub min_age: ::core::option::Option<i32>,
+    /// Field 9: `max_age`
+    pub max_age: ::core::option::Option<i32>,
+    /// Field 10: `min_size`
+    pub min_size: ::core::option::Option<i64>,
+    /// Field 11: `max_size`
+    pub max_size: ::core::option::Option<i64>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1363,6 +1374,10 @@ impl ::core::fmt::Debug for SearchReleasesRequest {
             .field("episode", &self.episode)
             .field("categories", &self.categories)
             .field("indexers", &self.indexers)
+            .field("min_age", &self.min_age)
+            .field("max_age", &self.max_age)
+            .field("min_size", &self.min_size)
+            .field("max_size", &self.max_size)
             .finish()
     }
 }
@@ -1421,6 +1436,34 @@ impl SearchReleasesRequest {
         self.episode = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::min_age`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_min_age(mut self, value: i32) -> Self {
+        self.min_age = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::max_age`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_max_age(mut self, value: i32) -> Self {
+        self.max_age = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::min_size`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_min_size(mut self, value: i64) -> Self {
+        self.min_size = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::max_size`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_max_size(mut self, value: i64) -> Self {
+        self.max_size = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(SearchReleasesRequest);
 impl ::buffa::MessageName for SearchReleasesRequest {
@@ -1473,6 +1516,18 @@ impl ::buffa::Message for SearchReleasesRequest {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(v) = self.min_age {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_age {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.min_size {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_size {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1516,6 +1571,18 @@ impl ::buffa::Message for SearchReleasesRequest {
                 buf,
             );
             v.write_to(__cache, buf);
+        }
+        if let Some(v) = self.min_age {
+            ::buffa::types::put_int32_field(8u32, v, buf);
+        }
+        if let Some(v) = self.max_age {
+            ::buffa::types::put_int32_field(9u32, v, buf);
+        }
+        if let Some(v) = self.min_size {
+            ::buffa::types::put_int64_field(10u32, v, buf);
+        }
+        if let Some(v) = self.max_size {
+            ::buffa::types::put_int64_field(11u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1630,6 +1697,42 @@ impl ::buffa::Message for SearchReleasesRequest {
                 ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
                 self.indexers.push(elem);
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.min_age = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.max_age = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.min_size = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.max_size = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1645,6 +1748,10 @@ impl ::buffa::Message for SearchReleasesRequest {
         self.episode = ::core::option::Option::None;
         self.categories.clear();
         self.indexers.clear();
+        self.min_age = ::core::option::Option::None;
+        self.max_age = ::core::option::Option::None;
+        self.min_size = ::core::option::Option::None;
+        self.max_size = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

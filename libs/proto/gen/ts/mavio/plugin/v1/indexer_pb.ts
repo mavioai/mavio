@@ -5,8 +5,8 @@
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
-import type { Timestamp } from "@bufbuild/protobuf/wkt";
-import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
+import type { Duration, Timestamp } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_duration, file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { SettingField } from "./settings_pb";
 import { file_mavio_plugin_v1_settings } from "./settings_pb";
 import type { Message } from "@bufbuild/protobuf";
@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/indexer.proto.
  */
 export const file_mavio_plugin_v1_indexer: GenFile = /*@__PURE__*/
-  fileDesc("Ch1tYXZpby9wbHVnaW4vdjEvaW5kZXhlci5wcm90bxIPbWF2aW8ucGx1Z2luLnYxIhgKFkxpc3REZWZpbml0aW9uc1JlcXVlc3QiUgoXTGlzdERlZmluaXRpb25zUmVzcG9uc2USNwoLZGVmaW5pdGlvbnMYASADKAsyIi5tYXZpby5wbHVnaW4udjEuSW5kZXhlckRlZmluaXRpb24i+QEKEUluZGV4ZXJEZWZpbml0aW9uEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSMwoIcHJvdG9jb2wYBCABKA4yIS5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRQcm90b2NvbBIwCgdwcml2YWN5GAUgASgOMh8ubWF2aW8ucGx1Z2luLnYxLkluZGV4ZXJQcml2YWN5EhAKCGxhbmd1YWdlGAYgASgJEg0KBWxpbmtzGAcgAygJEi0KBmZpZWxkcxgIIAMoCzIdLm1hdmlvLnBsdWdpbi52MS5TZXR0aW5nRmllbGQiFQoTTGlzdEluZGV4ZXJzUmVxdWVzdCJCChRMaXN0SW5kZXhlcnNSZXNwb25zZRIqCghpbmRleGVycxgBIAMoCzIYLm1hdmlvLnBsdWdpbi52MS5JbmRleGVyIsUCCgdJbmRleGVyEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSFQoNZGVmaW5pdGlvbl9pZBgDIAEoCRIzCghwcm90b2NvbBgEIAEoDjIhLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFByb3RvY29sEjAKB3ByaXZhY3kYBSABKA4yHy5tYXZpby5wbHVnaW4udjEuSW5kZXhlclByaXZhY3kSDwoHZW5hYmxlZBgGIAEoCBIQCghwcmlvcml0eRgHIAEoBRI6CgxjYXBhYmlsaXRpZXMYCCABKAsyJC5tYXZpby5wbHVnaW4udjEuSW5kZXhlckNhcGFiaWxpdGllcxIyCg5kaXNhYmxlZF91bnRpbBgJIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDwoHZmFpbHVyZRgKIAEoCSLXAQoTSW5kZXhlckNhcGFiaWxpdGllcxIVCg1zZWFyY2hfcGFyYW1zGAEgAygJEhgKEHR2X3NlYXJjaF9wYXJhbXMYAiADKAkSGwoTbW92aWVfc2VhcmNoX3BhcmFtcxgDIAMoCRI0CgpjYXRlZ29yaWVzGAQgAygLMiAubWF2aW8ucGx1Z2luLnYxLkluZGV4ZXJDYXRlZ29yeRIVCg1saW1pdF9kZWZhdWx0GAUgASgFEhEKCWxpbWl0X21heBgGIAEoBRISCgpyYXdfc2VhcmNoGAcgASgIImQKD0luZGV4ZXJDYXRlZ29yeRIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEjcKDXN1YmNhdGVnb3JpZXMYAyADKAsyIC5tYXZpby5wbHVnaW4udjEuSW5kZXhlckNhdGVnb3J5IlYKElRlc3RJbmRleGVyUmVxdWVzdBISCgppbmRleGVyX2lkGAEgASgJEhUKDWRlZmluaXRpb25faWQYAiABKAkSFQoNc2V0dGluZ3NfanNvbhgDIAEoCSImChNUZXN0SW5kZXhlclJlc3BvbnNlEg8KB2ZhaWx1cmUYASABKAkijwMKFVNlYXJjaFJlbGVhc2VzUmVxdWVzdBITCgtpbmRleGVyX2lkcxgBIAMoCRIwCgR0eXBlGAIgASgOMiIubWF2aW8ucGx1Z2luLnYxLkluZGV4ZXJTZWFyY2hUeXBlEhcKBXF1ZXJ5GAMgASgJQgi6SAVyAxjoBxISCgpjYXRlZ29yaWVzGAQgAygFEk0KDGV4dGVybmFsX2lkcxgFIAMoCzI3Lm1hdmlvLnBsdWdpbi52MS5TZWFyY2hSZWxlYXNlc1JlcXVlc3QuRXh0ZXJuYWxJZHNFbnRyeRIOCgZzZWFzb24YBiABKAUSGAoHZXBpc29kZRgHIAEoCUIHukgEcgIYQBIMCgR5ZWFyGAggASgFEhYKBWdlbnJlGAkgASgJQge6SARyAhhkEhYKBWxpbWl0GAogASgFQge6SAQaAigAEhcKBm9mZnNldBgLIAEoBUIHukgEGgIoABoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEidwoWU2VhcmNoUmVsZWFzZXNSZXNwb25zZRIqCghyZWxlYXNlcxgBIAMoCzIYLm1hdmlvLnBsdWdpbi52MS5SZWxlYXNlEjEKCGZhaWx1cmVzGAIgAygLMh8ubWF2aW8ucGx1Z2luLnYxLkluZGV4ZXJGYWlsdXJlImkKDkluZGV4ZXJGYWlsdXJlEhIKCmluZGV4ZXJfaWQYASABKAkSDwoHbWVzc2FnZRgCIAEoCRIyCg5kaXNhYmxlZF91bnRpbBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAixwUKB1JlbGVhc2USEgoKaW5kZXhlcl9pZBgBIAEoCRIMCgRndWlkGAIgASgJEg0KBXRpdGxlGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQgASgJEgwKBHNpemUYBSABKAMSFAoMZG93bmxvYWRfdXJsGAYgASgJEhIKCm1hZ25ldF91cmwYByABKAkSEQoJaW5mb19oYXNoGAggASgJEhAKCGluZm9fdXJsGAkgASgJEhQKDGNvbW1lbnRzX3VybBgKIAEoCRIzCghwcm90b2NvbBgLIAEoDjIhLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFByb3RvY29sEjAKDHB1Ymxpc2hfZGF0ZRgMIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASEgoKY2F0ZWdvcmllcxgNIAMoBRI/CgxleHRlcm5hbF9pZHMYDiADKAsyKS5tYXZpby5wbHVnaW4udjEuUmVsZWFzZS5FeHRlcm5hbElkc0VudHJ5EgwKBHllYXIYDyABKAUSDQoFZ3JhYnMYECABKAUSDQoFZmlsZXMYESABKAUSDwoHc2VlZGVycxgSIAEoBRINCgVwZWVycxgTIAEoBRIeChZkb3dubG9hZF92b2x1bWVfZmFjdG9yGBQgASgBEhwKFHVwbG9hZF92b2x1bWVfZmFjdG9yGBUgASgBEhUKDW1pbmltdW1fcmF0aW8YFiABKAESGQoRbWluaW11bV9zZWVkX3RpbWUYFyABKAMSDQoFZmxhZ3MYGCADKAkSEQoJbGFuZ3VhZ2VzGBkgAygJEhEKCXN1YnRpdGxlcxgaIAMoCRIOCgZnZW5yZXMYGyADKAkSEgoKcG9zdGVyX3VybBgcIAEoCRoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiUQoVR2V0UmVsZWFzZUZpbGVSZXF1ZXN0EhoKCmluZGV4ZXJfaWQYASABKAlCBrpIA8gBARIcCgxkb3dubG9hZF91cmwYAiABKAlCBrpIA8gBASJjChZHZXRSZWxlYXNlRmlsZVJlc3BvbnNlEgwKBGRhdGEYASABKAwSFAoMY29udGVudF90eXBlGAIgASgJEhEKCWZpbGVfbmFtZRgDIAEoCRISCgptYWduZXRfdXJsGAQgASgJKnIKEERvd25sb2FkUHJvdG9jb2wSIQodRE9XTkxPQURfUFJPVE9DT0xfVU5TUEVDSUZJRUQQABIdChlET1dOTE9BRF9QUk9UT0NPTF9UT1JSRU5UEAESHAoYRE9XTkxPQURfUFJPVE9DT0xfVVNFTkVUEAIqjAEKDkluZGV4ZXJQcml2YWN5Eh8KG0lOREVYRVJfUFJJVkFDWV9VTlNQRUNJRklFRBAAEhoKFklOREVYRVJfUFJJVkFDWV9QVUJMSUMQARIgChxJTkRFWEVSX1BSSVZBQ1lfU0VNSV9QUklWQVRFEAISGwoXSU5ERVhFUl9QUklWQUNZX1BSSVZBVEUQAypzChFJbmRleGVyU2VhcmNoVHlwZRIjCh9JTkRFWEVSX1NFQVJDSF9UWVBFX1VOU1BFQ0lGSUVEEAASHQoZSU5ERVhFUl9TRUFSQ0hfVFlQRV9NT1ZJRRABEhoKFklOREVYRVJfU0VBUkNIX1RZUEVfVFYQAjKKBAoWSW5kZXhlclByb3ZpZGVyU2VydmljZRJpCg9MaXN0RGVmaW5pdGlvbnMSJy5tYXZpby5wbHVnaW4udjEuTGlzdERlZmluaXRpb25zUmVxdWVzdBooLm1hdmlvLnBsdWdpbi52MS5MaXN0RGVmaW5pdGlvbnNSZXNwb25zZSIDkAIBEmAKDExpc3RJbmRleGVycxIkLm1hdmlvLnBsdWdpbi52MS5MaXN0SW5kZXhlcnNSZXF1ZXN0GiUubWF2aW8ucGx1Z2luLnYxLkxpc3RJbmRleGVyc1Jlc3BvbnNlIgOQAgESWAoLVGVzdEluZGV4ZXISIy5tYXZpby5wbHVnaW4udjEuVGVzdEluZGV4ZXJSZXF1ZXN0GiQubWF2aW8ucGx1Z2luLnYxLlRlc3RJbmRleGVyUmVzcG9uc2USZgoOU2VhcmNoUmVsZWFzZXMSJi5tYXZpby5wbHVnaW4udjEuU2VhcmNoUmVsZWFzZXNSZXF1ZXN0GicubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFJlbGVhc2VzUmVzcG9uc2UiA5ACARJhCg5HZXRSZWxlYXNlRmlsZRImLm1hdmlvLnBsdWdpbi52MS5HZXRSZWxlYXNlRmlsZVJlcXVlc3QaJy5tYXZpby5wbHVnaW4udjEuR2V0UmVsZWFzZUZpbGVSZXNwb25zZULGAQoTY29tLm1hdmlvLnBsdWdpbi52MUIMSW5kZXhlclByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9wbHVnaW4vdjE7cGx1Z2ludjGiAgNNUFiqAg9NYXZpby5QbHVnaW4uVjHKAg9NYXZpb1xQbHVnaW5cVjHiAhtNYXZpb1xQbHVnaW5cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6UGx1Z2luOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_plugin_v1_settings]);
+  fileDesc("Ch1tYXZpby9wbHVnaW4vdjEvaW5kZXhlci5wcm90bxIPbWF2aW8ucGx1Z2luLnYxIhgKFkxpc3REZWZpbml0aW9uc1JlcXVlc3QiUgoXTGlzdERlZmluaXRpb25zUmVzcG9uc2USNwoLZGVmaW5pdGlvbnMYASADKAsyIi5tYXZpby5wbHVnaW4udjEuSW5kZXhlckRlZmluaXRpb24i+QEKEUluZGV4ZXJEZWZpbml0aW9uEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSMwoIcHJvdG9jb2wYBCABKA4yIS5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRQcm90b2NvbBIwCgdwcml2YWN5GAUgASgOMh8ubWF2aW8ucGx1Z2luLnYxLkluZGV4ZXJQcml2YWN5EhAKCGxhbmd1YWdlGAYgASgJEg0KBWxpbmtzGAcgAygJEi0KBmZpZWxkcxgIIAMoCzIdLm1hdmlvLnBsdWdpbi52MS5TZXR0aW5nRmllbGQiFQoTTGlzdEluZGV4ZXJzUmVxdWVzdCJCChRMaXN0SW5kZXhlcnNSZXNwb25zZRIqCghpbmRleGVycxgBIAMoCzIYLm1hdmlvLnBsdWdpbi52MS5JbmRleGVyIpkECgdJbmRleGVyEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSFQoNZGVmaW5pdGlvbl9pZBgDIAEoCRIzCghwcm90b2NvbBgEIAEoDjIhLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFByb3RvY29sEjAKB3ByaXZhY3kYBSABKA4yHy5tYXZpby5wbHVnaW4udjEuSW5kZXhlclByaXZhY3kSDwoHZW5hYmxlZBgGIAEoCBIQCghwcmlvcml0eRgHIAEoBRI6CgxjYXBhYmlsaXRpZXMYCCABKAsyJC5tYXZpby5wbHVnaW4udjEuSW5kZXhlckNhcGFiaWxpdGllcxIyCg5kaXNhYmxlZF91bnRpbBgJIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDwoHZmFpbHVyZRgKIAEoCRIMCgR0YWdzGAsgAygJEhYKDnJlcXVpcmVkX2ZsYWdzGAwgAygJEhcKD21pbmltdW1fc2VlZGVycxgNIAEoBRIXCg9tdWx0aV9sYW5ndWFnZXMYDiADKAkSEgoKc2VlZF9yYXRpbxgPIAEoARIsCglzZWVkX3RpbWUYECABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SOAoVc2Vhc29uX3BhY2tfc2VlZF90aW1lGBEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uItcBChNJbmRleGVyQ2FwYWJpbGl0aWVzEhUKDXNlYXJjaF9wYXJhbXMYASADKAkSGAoQdHZfc2VhcmNoX3BhcmFtcxgCIAMoCRIbChNtb3ZpZV9zZWFyY2hfcGFyYW1zGAMgAygJEjQKCmNhdGVnb3JpZXMYBCADKAsyIC5tYXZpby5wbHVnaW4udjEuSW5kZXhlckNhdGVnb3J5EhUKDWxpbWl0X2RlZmF1bHQYBSABKAUSEQoJbGltaXRfbWF4GAYgASgFEhIKCnJhd19zZWFyY2gYByABKAgiZAoPSW5kZXhlckNhdGVnb3J5EgoKAmlkGAEgASgFEgwKBG5hbWUYAiABKAkSNwoNc3ViY2F0ZWdvcmllcxgDIAMoCzIgLm1hdmlvLnBsdWdpbi52MS5JbmRleGVyQ2F0ZWdvcnkiVgoSVGVzdEluZGV4ZXJSZXF1ZXN0EhIKCmluZGV4ZXJfaWQYASABKAkSFQoNZGVmaW5pdGlvbl9pZBgCIAEoCRIVCg1zZXR0aW5nc19qc29uGAMgASgJIiYKE1Rlc3RJbmRleGVyUmVzcG9uc2USDwoHZmFpbHVyZRgBIAEoCSKSBAoVU2VhcmNoUmVsZWFzZXNSZXF1ZXN0EhMKC2luZGV4ZXJfaWRzGAEgAygJEjAKBHR5cGUYAiABKA4yIi5tYXZpby5wbHVnaW4udjEuSW5kZXhlclNlYXJjaFR5cGUSFwoFcXVlcnkYAyABKAlCCLpIBXIDGOgHEhIKCmNhdGVnb3JpZXMYBCADKAUSTQoMZXh0ZXJuYWxfaWRzGAUgAygLMjcubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFJlbGVhc2VzUmVxdWVzdC5FeHRlcm5hbElkc0VudHJ5Eg4KBnNlYXNvbhgGIAEoBRIYCgdlcGlzb2RlGAcgASgJQge6SARyAhhAEgwKBHllYXIYCCABKAUSFgoFZ2VucmUYCSABKAlCB7pIBHICGGQSFgoFbGltaXQYCiABKAVCB7pIBBoCKAASFwoGb2Zmc2V0GAsgASgFQge6SAQaAigAEhcKBXRpdGxlGAwgASgJQgi6SAVyAxjoBxIYCgdtaW5fYWdlGA0gASgFQge6SAQaAigAEhgKB21heF9hZ2UYDiABKAVCB7pIBBoCKAASGQoIbWluX3NpemUYDyABKANCB7pIBCICKAASGQoIbWF4X3NpemUYECABKANCB7pIBCICKAAaMgoQRXh0ZXJuYWxJZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIncKFlNlYXJjaFJlbGVhc2VzUmVzcG9uc2USKgoIcmVsZWFzZXMYASADKAsyGC5tYXZpby5wbHVnaW4udjEuUmVsZWFzZRIxCghmYWlsdXJlcxgCIAMoCzIfLm1hdmlvLnBsdWdpbi52MS5JbmRleGVyRmFpbHVyZSJpCg5JbmRleGVyRmFpbHVyZRISCgppbmRleGVyX2lkGAEgASgJEg8KB21lc3NhZ2UYAiABKAkSMgoOZGlzYWJsZWRfdW50aWwYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIp0GCgdSZWxlYXNlEhIKCmluZGV4ZXJfaWQYASABKAkSDAoEZ3VpZBgCIAEoCRINCgV0aXRsZRgDIAEoCRITCgtkZXNjcmlwdGlvbhgEIAEoCRIMCgRzaXplGAUgASgDEhQKDGRvd25sb2FkX3VybBgGIAEoCRISCgptYWduZXRfdXJsGAcgASgJEhEKCWluZm9faGFzaBgIIAEoCRIQCghpbmZvX3VybBgJIAEoCRIUCgxjb21tZW50c191cmwYCiABKAkSMwoIcHJvdG9jb2wYCyABKA4yIS5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRQcm90b2NvbBIwCgxwdWJsaXNoX2RhdGUYDCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhIKCmNhdGVnb3JpZXMYDSADKAUSPwoMZXh0ZXJuYWxfaWRzGA4gAygLMikubWF2aW8ucGx1Z2luLnYxLlJlbGVhc2UuRXh0ZXJuYWxJZHNFbnRyeRIMCgR5ZWFyGA8gASgFEg0KBWdyYWJzGBAgASgFEg0KBWZpbGVzGBEgASgFEg8KB3NlZWRlcnMYEiABKAUSDQoFcGVlcnMYEyABKAUSHgoWZG93bmxvYWRfdm9sdW1lX2ZhY3RvchgUIAEoARIcChR1cGxvYWRfdm9sdW1lX2ZhY3RvchgVIAEoARIVCg1taW5pbXVtX3JhdGlvGBYgASgBEhkKEW1pbmltdW1fc2VlZF90aW1lGBcgASgDEg0KBWZsYWdzGBggAygJEhEKCWxhbmd1YWdlcxgZIAMoCRIRCglzdWJ0aXRsZXMYGiADKAkSDgoGZ2VucmVzGBsgAygJEhIKCnBvc3Rlcl91cmwYHCABKAkSDgoGb3JpZ2luGB0gASgJEg4KBnNvdXJjZRgeIAEoCRIRCgljb250YWluZXIYHyABKAkSDQoFY29kZWMYICABKAkSEgoKcmVzb2x1dGlvbhghIAEoCRoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiUQoVR2V0UmVsZWFzZUZpbGVSZXF1ZXN0EhoKCmluZGV4ZXJfaWQYASABKAlCBrpIA8gBARIcCgxkb3dubG9hZF91cmwYAiABKAlCBrpIA8gBASJjChZHZXRSZWxlYXNlRmlsZVJlc3BvbnNlEgwKBGRhdGEYASABKAwSFAoMY29udGVudF90eXBlGAIgASgJEhEKCWZpbGVfbmFtZRgDIAEoCRISCgptYWduZXRfdXJsGAQgASgJKnIKEERvd25sb2FkUHJvdG9jb2wSIQodRE9XTkxPQURfUFJPVE9DT0xfVU5TUEVDSUZJRUQQABIdChlET1dOTE9BRF9QUk9UT0NPTF9UT1JSRU5UEAESHAoYRE9XTkxPQURfUFJPVE9DT0xfVVNFTkVUEAIqjAEKDkluZGV4ZXJQcml2YWN5Eh8KG0lOREVYRVJfUFJJVkFDWV9VTlNQRUNJRklFRBAAEhoKFklOREVYRVJfUFJJVkFDWV9QVUJMSUMQARIgChxJTkRFWEVSX1BSSVZBQ1lfU0VNSV9QUklWQVRFEAISGwoXSU5ERVhFUl9QUklWQUNZX1BSSVZBVEUQAypzChFJbmRleGVyU2VhcmNoVHlwZRIjCh9JTkRFWEVSX1NFQVJDSF9UWVBFX1VOU1BFQ0lGSUVEEAASHQoZSU5ERVhFUl9TRUFSQ0hfVFlQRV9NT1ZJRRABEhoKFklOREVYRVJfU0VBUkNIX1RZUEVfVFYQAjKKBAoWSW5kZXhlclByb3ZpZGVyU2VydmljZRJpCg9MaXN0RGVmaW5pdGlvbnMSJy5tYXZpby5wbHVnaW4udjEuTGlzdERlZmluaXRpb25zUmVxdWVzdBooLm1hdmlvLnBsdWdpbi52MS5MaXN0RGVmaW5pdGlvbnNSZXNwb25zZSIDkAIBEmAKDExpc3RJbmRleGVycxIkLm1hdmlvLnBsdWdpbi52MS5MaXN0SW5kZXhlcnNSZXF1ZXN0GiUubWF2aW8ucGx1Z2luLnYxLkxpc3RJbmRleGVyc1Jlc3BvbnNlIgOQAgESWAoLVGVzdEluZGV4ZXISIy5tYXZpby5wbHVnaW4udjEuVGVzdEluZGV4ZXJSZXF1ZXN0GiQubWF2aW8ucGx1Z2luLnYxLlRlc3RJbmRleGVyUmVzcG9uc2USZgoOU2VhcmNoUmVsZWFzZXMSJi5tYXZpby5wbHVnaW4udjEuU2VhcmNoUmVsZWFzZXNSZXF1ZXN0GicubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFJlbGVhc2VzUmVzcG9uc2UiA5ACARJhCg5HZXRSZWxlYXNlRmlsZRImLm1hdmlvLnBsdWdpbi52MS5HZXRSZWxlYXNlRmlsZVJlcXVlc3QaJy5tYXZpby5wbHVnaW4udjEuR2V0UmVsZWFzZUZpbGVSZXNwb25zZULGAQoTY29tLm1hdmlvLnBsdWdpbi52MUIMSW5kZXhlclByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9wbHVnaW4vdjE7cGx1Z2ludjGiAgNNUFiqAg9NYXZpby5QbHVnaW4uVjHKAg9NYXZpb1xQbHVnaW5cVjHiAhtNYXZpb1xQbHVnaW5cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6UGx1Z2luOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_mavio_plugin_v1_settings]);
 
 /**
  * @generated from message mavio.plugin.v1.ListDefinitionsRequest
@@ -203,6 +203,56 @@ export type Indexer = Message<"mavio.plugin.v1.Indexer"> & {
    * @generated from field: string failure = 10;
    */
   failure: string;
+
+  /**
+   * The indexer's tags: items with tags only take releases of indexers
+   * sharing one of them, and proxies sharing one are used for it.
+   *
+   * @generated from field: repeated string tags = 11;
+   */
+  tags: string[];
+
+  /**
+   * Flags a torrent release must carry one of, in the names of releases'
+   * flags; empty for none.
+   *
+   * @generated from field: repeated string required_flags = 12;
+   */
+  requiredFlags: string[];
+
+  /**
+   * The fewest seeders a torrent release may have; 0 for none.
+   *
+   * @generated from field: int32 minimum_seeders = 13;
+   */
+  minimumSeeders: number;
+
+  /**
+   * The languages of the indexer's MULTi releases, by English name, e.g.
+   * "French"; "Original" for the original language of the movie or series.
+   *
+   * @generated from field: repeated string multi_languages = 14;
+   */
+  multiLanguages: string[];
+
+  /**
+   * How long torrents of the indexer seed: the ratio, the time for single
+   * releases and for season packs; unset for the download client's
+   * defaults.
+   *
+   * @generated from field: double seed_ratio = 15;
+   */
+  seedRatio: number;
+
+  /**
+   * @generated from field: google.protobuf.Duration seed_time = 16;
+   */
+  seedTime?: Duration | undefined;
+
+  /**
+   * @generated from field: google.protobuf.Duration season_pack_seed_time = 17;
+   */
+  seasonPackSeedTime?: Duration | undefined;
 };
 
 /**
@@ -224,7 +274,9 @@ export type IndexerCapabilities = Message<"mavio.plugin.v1.IndexerCapabilities">
    * basic searches; "q", "season", "ep", "imdbid", "tvdbid", "rid",
    * "tvmazeid", "traktid", "tmdbid", "doubanid", "year" and "genre" for
    * series; "q", "imdbid", "tmdbid", "traktid", "doubanid", "year" and
-   * "genre" for movies. An empty list means the type is not searchable.
+   * "genre" for movies; "title" for series too when the indexer takes a
+   * series' title apart from the query. An empty list means the type is
+   * not searchable.
    *
    * @generated from field: repeated string search_params = 1;
    */
@@ -425,6 +477,38 @@ export type SearchReleasesRequest = Message<"mavio.plugin.v1.SearchReleasesReque
    * @generated from field: int32 offset = 11;
    */
   offset: number;
+
+  /**
+   * A series' title, for TV searches of indexers taking Newznab's title
+   * parameter.
+   *
+   * @generated from field: string title = 12;
+   */
+  title: string;
+
+  /**
+   * The age of releases, in days, and their size, in bytes, that indexers
+   * taking them search within and the results are kept within; unset for
+   * no limit.
+   *
+   * @generated from field: int32 min_age = 13;
+   */
+  minAge: number;
+
+  /**
+   * @generated from field: int32 max_age = 14;
+   */
+  maxAge: number;
+
+  /**
+   * @generated from field: int64 min_size = 15;
+   */
+  minSize: bigint;
+
+  /**
+   * @generated from field: int64 max_size = 16;
+   */
+  maxSize: bigint;
 };
 
 /**
@@ -656,6 +740,35 @@ export type Release = Message<"mavio.plugin.v1.Release"> & {
    * @generated from field: string poster_url = 28;
    */
   posterUrl: string;
+
+  /**
+   * What some sites tell of a release's media, in their words: its origin
+   * (e.g. "Scene", "P2P", "Internal"), source (e.g. "WEB-DL"), container
+   * (e.g. "MKV"), codec (e.g. "H.264") and resolution (e.g. "1080p").
+   *
+   * @generated from field: string origin = 29;
+   */
+  origin: string;
+
+  /**
+   * @generated from field: string source = 30;
+   */
+  source: string;
+
+  /**
+   * @generated from field: string container = 31;
+   */
+  container: string;
+
+  /**
+   * @generated from field: string codec = 32;
+   */
+  codec: string;
+
+  /**
+   * @generated from field: string resolution = 33;
+   */
+  resolution: string;
 };
 
 /**

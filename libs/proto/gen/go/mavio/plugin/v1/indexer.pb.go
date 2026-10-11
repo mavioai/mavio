@@ -10,6 +10,7 @@ import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	durationpb "google.golang.org/protobuf/types/known/durationpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	unsafe "unsafe"
@@ -648,21 +649,28 @@ func (b0 ListIndexersResponse_builder) Build() *ListIndexersResponse {
 
 // Indexer is a configured indexer.
 type Indexer struct {
-	state                    protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id            *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Name          *string                `protobuf:"bytes,2,opt,name=name"`
-	xxx_hidden_DefinitionId  *string                `protobuf:"bytes,3,opt,name=definition_id,json=definitionId"`
-	xxx_hidden_Protocol      DownloadProtocol       `protobuf:"varint,4,opt,name=protocol,enum=mavio.plugin.v1.DownloadProtocol"`
-	xxx_hidden_Privacy       IndexerPrivacy         `protobuf:"varint,5,opt,name=privacy,enum=mavio.plugin.v1.IndexerPrivacy"`
-	xxx_hidden_Enabled       bool                   `protobuf:"varint,6,opt,name=enabled"`
-	xxx_hidden_Priority      int32                  `protobuf:"varint,7,opt,name=priority"`
-	xxx_hidden_Capabilities  *IndexerCapabilities   `protobuf:"bytes,8,opt,name=capabilities"`
-	xxx_hidden_DisabledUntil *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=disabled_until,json=disabledUntil"`
-	xxx_hidden_Failure       *string                `protobuf:"bytes,10,opt,name=failure"`
-	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
-	XXX_presence             [1]uint32
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
+	state                         protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id                 *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Name               *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_DefinitionId       *string                `protobuf:"bytes,3,opt,name=definition_id,json=definitionId"`
+	xxx_hidden_Protocol           DownloadProtocol       `protobuf:"varint,4,opt,name=protocol,enum=mavio.plugin.v1.DownloadProtocol"`
+	xxx_hidden_Privacy            IndexerPrivacy         `protobuf:"varint,5,opt,name=privacy,enum=mavio.plugin.v1.IndexerPrivacy"`
+	xxx_hidden_Enabled            bool                   `protobuf:"varint,6,opt,name=enabled"`
+	xxx_hidden_Priority           int32                  `protobuf:"varint,7,opt,name=priority"`
+	xxx_hidden_Capabilities       *IndexerCapabilities   `protobuf:"bytes,8,opt,name=capabilities"`
+	xxx_hidden_DisabledUntil      *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=disabled_until,json=disabledUntil"`
+	xxx_hidden_Failure            *string                `protobuf:"bytes,10,opt,name=failure"`
+	xxx_hidden_Tags               []string               `protobuf:"bytes,11,rep,name=tags"`
+	xxx_hidden_RequiredFlags      []string               `protobuf:"bytes,12,rep,name=required_flags,json=requiredFlags"`
+	xxx_hidden_MinimumSeeders     int32                  `protobuf:"varint,13,opt,name=minimum_seeders,json=minimumSeeders"`
+	xxx_hidden_MultiLanguages     []string               `protobuf:"bytes,14,rep,name=multi_languages,json=multiLanguages"`
+	xxx_hidden_SeedRatio          float64                `protobuf:"fixed64,15,opt,name=seed_ratio,json=seedRatio"`
+	xxx_hidden_SeedTime           *durationpb.Duration   `protobuf:"bytes,16,opt,name=seed_time,json=seedTime"`
+	xxx_hidden_SeasonPackSeedTime *durationpb.Duration   `protobuf:"bytes,17,opt,name=season_pack_seed_time,json=seasonPackSeedTime"`
+	XXX_raceDetectHookData        protoimpl.RaceDetectHookData
+	XXX_presence                  [1]uint32
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
 }
 
 func (x *Indexer) Reset() {
@@ -776,39 +784,88 @@ func (x *Indexer) GetFailure() string {
 	return ""
 }
 
+func (x *Indexer) GetTags() []string {
+	if x != nil {
+		return x.xxx_hidden_Tags
+	}
+	return nil
+}
+
+func (x *Indexer) GetRequiredFlags() []string {
+	if x != nil {
+		return x.xxx_hidden_RequiredFlags
+	}
+	return nil
+}
+
+func (x *Indexer) GetMinimumSeeders() int32 {
+	if x != nil {
+		return x.xxx_hidden_MinimumSeeders
+	}
+	return 0
+}
+
+func (x *Indexer) GetMultiLanguages() []string {
+	if x != nil {
+		return x.xxx_hidden_MultiLanguages
+	}
+	return nil
+}
+
+func (x *Indexer) GetSeedRatio() float64 {
+	if x != nil {
+		return x.xxx_hidden_SeedRatio
+	}
+	return 0
+}
+
+func (x *Indexer) GetSeedTime() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_SeedTime
+	}
+	return nil
+}
+
+func (x *Indexer) GetSeasonPackSeedTime() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_SeasonPackSeedTime
+	}
+	return nil
+}
+
 func (x *Indexer) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 17)
 }
 
 func (x *Indexer) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 17)
 }
 
 func (x *Indexer) SetDefinitionId(v string) {
 	x.xxx_hidden_DefinitionId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 17)
 }
 
 func (x *Indexer) SetProtocol(v DownloadProtocol) {
 	x.xxx_hidden_Protocol = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 17)
 }
 
 func (x *Indexer) SetPrivacy(v IndexerPrivacy) {
 	x.xxx_hidden_Privacy = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 17)
 }
 
 func (x *Indexer) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 17)
 }
 
 func (x *Indexer) SetPriority(v int32) {
 	x.xxx_hidden_Priority = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 17)
 }
 
 func (x *Indexer) SetCapabilities(v *IndexerCapabilities) {
@@ -821,7 +878,37 @@ func (x *Indexer) SetDisabledUntil(v *timestamppb.Timestamp) {
 
 func (x *Indexer) SetFailure(v string) {
 	x.xxx_hidden_Failure = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 17)
+}
+
+func (x *Indexer) SetTags(v []string) {
+	x.xxx_hidden_Tags = v
+}
+
+func (x *Indexer) SetRequiredFlags(v []string) {
+	x.xxx_hidden_RequiredFlags = v
+}
+
+func (x *Indexer) SetMinimumSeeders(v int32) {
+	x.xxx_hidden_MinimumSeeders = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 17)
+}
+
+func (x *Indexer) SetMultiLanguages(v []string) {
+	x.xxx_hidden_MultiLanguages = v
+}
+
+func (x *Indexer) SetSeedRatio(v float64) {
+	x.xxx_hidden_SeedRatio = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 17)
+}
+
+func (x *Indexer) SetSeedTime(v *durationpb.Duration) {
+	x.xxx_hidden_SeedTime = v
+}
+
+func (x *Indexer) SetSeasonPackSeedTime(v *durationpb.Duration) {
+	x.xxx_hidden_SeasonPackSeedTime = v
 }
 
 func (x *Indexer) HasId() bool {
@@ -894,6 +981,34 @@ func (x *Indexer) HasFailure() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
 }
 
+func (x *Indexer) HasMinimumSeeders() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
+func (x *Indexer) HasSeedRatio() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 14)
+}
+
+func (x *Indexer) HasSeedTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_SeedTime != nil
+}
+
+func (x *Indexer) HasSeasonPackSeedTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_SeasonPackSeedTime != nil
+}
+
 func (x *Indexer) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -942,6 +1057,24 @@ func (x *Indexer) ClearFailure() {
 	x.xxx_hidden_Failure = nil
 }
 
+func (x *Indexer) ClearMinimumSeeders() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_MinimumSeeders = 0
+}
+
+func (x *Indexer) ClearSeedRatio() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 14)
+	x.xxx_hidden_SeedRatio = 0
+}
+
+func (x *Indexer) ClearSeedTime() {
+	x.xxx_hidden_SeedTime = nil
+}
+
+func (x *Indexer) ClearSeasonPackSeedTime() {
+	x.xxx_hidden_SeasonPackSeedTime = nil
+}
+
 type Indexer_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -959,6 +1092,23 @@ type Indexer_builder struct {
 	DisabledUntil *timestamppb.Timestamp
 	// The failure that left it out.
 	Failure *string
+	// The indexer's tags: items with tags only take releases of indexers
+	// sharing one of them, and proxies sharing one are used for it.
+	Tags []string
+	// Flags a torrent release must carry one of, in the names of releases'
+	// flags; empty for none.
+	RequiredFlags []string
+	// The fewest seeders a torrent release may have; 0 for none.
+	MinimumSeeders *int32
+	// The languages of the indexer's MULTi releases, by English name, e.g.
+	// "French"; "Original" for the original language of the movie or series.
+	MultiLanguages []string
+	// How long torrents of the indexer seed: the ratio, the time for single
+	// releases and for season packs; unset for the download client's
+	// defaults.
+	SeedRatio          *float64
+	SeedTime           *durationpb.Duration
+	SeasonPackSeedTime *durationpb.Duration
 }
 
 func (b0 Indexer_builder) Build() *Indexer {
@@ -966,39 +1116,52 @@ func (b0 Indexer_builder) Build() *Indexer {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 17)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 17)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.DefinitionId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 17)
 		x.xxx_hidden_DefinitionId = b.DefinitionId
 	}
 	if b.Protocol != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 17)
 		x.xxx_hidden_Protocol = *b.Protocol
 	}
 	if b.Privacy != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 17)
 		x.xxx_hidden_Privacy = *b.Privacy
 	}
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 17)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.Priority != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 17)
 		x.xxx_hidden_Priority = *b.Priority
 	}
 	x.xxx_hidden_Capabilities = b.Capabilities
 	x.xxx_hidden_DisabledUntil = b.DisabledUntil
 	if b.Failure != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 17)
 		x.xxx_hidden_Failure = b.Failure
 	}
+	x.xxx_hidden_Tags = b.Tags
+	x.xxx_hidden_RequiredFlags = b.RequiredFlags
+	if b.MinimumSeeders != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 17)
+		x.xxx_hidden_MinimumSeeders = *b.MinimumSeeders
+	}
+	x.xxx_hidden_MultiLanguages = b.MultiLanguages
+	if b.SeedRatio != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 17)
+		x.xxx_hidden_SeedRatio = *b.SeedRatio
+	}
+	x.xxx_hidden_SeedTime = b.SeedTime
+	x.xxx_hidden_SeasonPackSeedTime = b.SeasonPackSeedTime
 	return m0
 }
 
@@ -1169,7 +1332,9 @@ type IndexerCapabilities_builder struct {
 	// basic searches; "q", "season", "ep", "imdbid", "tvdbid", "rid",
 	// "tvmazeid", "traktid", "tmdbid", "doubanid", "year" and "genre" for
 	// series; "q", "imdbid", "tmdbid", "traktid", "doubanid", "year" and
-	// "genre" for movies. An empty list means the type is not searchable.
+	// "genre" for movies; "title" for series too when the indexer takes a
+	// series' title apart from the query. An empty list means the type is
+	// not searchable.
 	SearchParams      []string
 	TvSearchParams    []string
 	MovieSearchParams []string
@@ -1568,6 +1733,11 @@ type SearchReleasesRequest struct {
 	xxx_hidden_Genre       *string                `protobuf:"bytes,9,opt,name=genre"`
 	xxx_hidden_Limit       int32                  `protobuf:"varint,10,opt,name=limit"`
 	xxx_hidden_Offset      int32                  `protobuf:"varint,11,opt,name=offset"`
+	xxx_hidden_Title       *string                `protobuf:"bytes,12,opt,name=title"`
+	xxx_hidden_MinAge      int32                  `protobuf:"varint,13,opt,name=min_age,json=minAge"`
+	xxx_hidden_MaxAge      int32                  `protobuf:"varint,14,opt,name=max_age,json=maxAge"`
+	xxx_hidden_MinSize     int64                  `protobuf:"varint,15,opt,name=min_size,json=minSize"`
+	xxx_hidden_MaxSize     int64                  `protobuf:"varint,16,opt,name=max_size,json=maxSize"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -1687,18 +1857,56 @@ func (x *SearchReleasesRequest) GetOffset() int32 {
 	return 0
 }
 
+func (x *SearchReleasesRequest) GetTitle() string {
+	if x != nil {
+		if x.xxx_hidden_Title != nil {
+			return *x.xxx_hidden_Title
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SearchReleasesRequest) GetMinAge() int32 {
+	if x != nil {
+		return x.xxx_hidden_MinAge
+	}
+	return 0
+}
+
+func (x *SearchReleasesRequest) GetMaxAge() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaxAge
+	}
+	return 0
+}
+
+func (x *SearchReleasesRequest) GetMinSize() int64 {
+	if x != nil {
+		return x.xxx_hidden_MinSize
+	}
+	return 0
+}
+
+func (x *SearchReleasesRequest) GetMaxSize() int64 {
+	if x != nil {
+		return x.xxx_hidden_MaxSize
+	}
+	return 0
+}
+
 func (x *SearchReleasesRequest) SetIndexerIds(v []string) {
 	x.xxx_hidden_IndexerIds = v
 }
 
 func (x *SearchReleasesRequest) SetType(v IndexerSearchType) {
 	x.xxx_hidden_Type = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 16)
 }
 
 func (x *SearchReleasesRequest) SetQuery(v string) {
 	x.xxx_hidden_Query = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 16)
 }
 
 func (x *SearchReleasesRequest) SetCategories(v []int32) {
@@ -1711,32 +1919,57 @@ func (x *SearchReleasesRequest) SetExternalIds(v map[string]string) {
 
 func (x *SearchReleasesRequest) SetSeason(v int32) {
 	x.xxx_hidden_Season = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 16)
 }
 
 func (x *SearchReleasesRequest) SetEpisode(v string) {
 	x.xxx_hidden_Episode = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 16)
 }
 
 func (x *SearchReleasesRequest) SetYear(v int32) {
 	x.xxx_hidden_Year = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 16)
 }
 
 func (x *SearchReleasesRequest) SetGenre(v string) {
 	x.xxx_hidden_Genre = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 16)
 }
 
 func (x *SearchReleasesRequest) SetLimit(v int32) {
 	x.xxx_hidden_Limit = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 16)
 }
 
 func (x *SearchReleasesRequest) SetOffset(v int32) {
 	x.xxx_hidden_Offset = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 16)
+}
+
+func (x *SearchReleasesRequest) SetTitle(v string) {
+	x.xxx_hidden_Title = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 16)
+}
+
+func (x *SearchReleasesRequest) SetMinAge(v int32) {
+	x.xxx_hidden_MinAge = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 16)
+}
+
+func (x *SearchReleasesRequest) SetMaxAge(v int32) {
+	x.xxx_hidden_MaxAge = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 16)
+}
+
+func (x *SearchReleasesRequest) SetMinSize(v int64) {
+	x.xxx_hidden_MinSize = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 16)
+}
+
+func (x *SearchReleasesRequest) SetMaxSize(v int64) {
+	x.xxx_hidden_MaxSize = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 16)
 }
 
 func (x *SearchReleasesRequest) HasType() bool {
@@ -1795,6 +2028,41 @@ func (x *SearchReleasesRequest) HasOffset() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
 }
 
+func (x *SearchReleasesRequest) HasTitle() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
+func (x *SearchReleasesRequest) HasMinAge() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
+func (x *SearchReleasesRequest) HasMaxAge() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
+}
+
+func (x *SearchReleasesRequest) HasMinSize() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 14)
+}
+
+func (x *SearchReleasesRequest) HasMaxSize() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 15)
+}
+
 func (x *SearchReleasesRequest) ClearType() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_Type = IndexerSearchType_INDEXER_SEARCH_TYPE_UNSPECIFIED
@@ -1835,6 +2103,31 @@ func (x *SearchReleasesRequest) ClearOffset() {
 	x.xxx_hidden_Offset = 0
 }
 
+func (x *SearchReleasesRequest) ClearTitle() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_Title = nil
+}
+
+func (x *SearchReleasesRequest) ClearMinAge() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_MinAge = 0
+}
+
+func (x *SearchReleasesRequest) ClearMaxAge() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 13)
+	x.xxx_hidden_MaxAge = 0
+}
+
+func (x *SearchReleasesRequest) ClearMinSize() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 14)
+	x.xxx_hidden_MinSize = 0
+}
+
+func (x *SearchReleasesRequest) ClearMaxSize() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 15)
+	x.xxx_hidden_MaxSize = 0
+}
+
 type SearchReleasesRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1857,6 +2150,16 @@ type SearchReleasesRequest_builder struct {
 	// Results per indexer; zero for its default.
 	Limit  *int32
 	Offset *int32
+	// A series' title, for TV searches of indexers taking Newznab's title
+	// parameter.
+	Title *string
+	// The age of releases, in days, and their size, in bytes, that indexers
+	// taking them search within and the results are kept within; unset for
+	// no limit.
+	MinAge  *int32
+	MaxAge  *int32
+	MinSize *int64
+	MaxSize *int64
 }
 
 func (b0 SearchReleasesRequest_builder) Build() *SearchReleasesRequest {
@@ -1865,38 +2168,58 @@ func (b0 SearchReleasesRequest_builder) Build() *SearchReleasesRequest {
 	_, _ = b, x
 	x.xxx_hidden_IndexerIds = b.IndexerIds
 	if b.Type != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 16)
 		x.xxx_hidden_Type = *b.Type
 	}
 	if b.Query != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 16)
 		x.xxx_hidden_Query = b.Query
 	}
 	x.xxx_hidden_Categories = b.Categories
 	x.xxx_hidden_ExternalIds = b.ExternalIds
 	if b.Season != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 16)
 		x.xxx_hidden_Season = *b.Season
 	}
 	if b.Episode != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 16)
 		x.xxx_hidden_Episode = b.Episode
 	}
 	if b.Year != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 16)
 		x.xxx_hidden_Year = *b.Year
 	}
 	if b.Genre != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 16)
 		x.xxx_hidden_Genre = b.Genre
 	}
 	if b.Limit != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 16)
 		x.xxx_hidden_Limit = *b.Limit
 	}
 	if b.Offset != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 16)
 		x.xxx_hidden_Offset = *b.Offset
+	}
+	if b.Title != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 16)
+		x.xxx_hidden_Title = b.Title
+	}
+	if b.MinAge != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 16)
+		x.xxx_hidden_MinAge = *b.MinAge
+	}
+	if b.MaxAge != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 16)
+		x.xxx_hidden_MaxAge = *b.MaxAge
+	}
+	if b.MinSize != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 16)
+		x.xxx_hidden_MinSize = *b.MinSize
+	}
+	if b.MaxSize != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 16)
+		x.xxx_hidden_MaxSize = *b.MaxSize
 	}
 	return m0
 }
@@ -2146,8 +2469,13 @@ type Release struct {
 	xxx_hidden_Subtitles            []string               `protobuf:"bytes,26,rep,name=subtitles"`
 	xxx_hidden_Genres               []string               `protobuf:"bytes,27,rep,name=genres"`
 	xxx_hidden_PosterUrl            *string                `protobuf:"bytes,28,opt,name=poster_url,json=posterUrl"`
+	xxx_hidden_Origin               *string                `protobuf:"bytes,29,opt,name=origin"`
+	xxx_hidden_Source               *string                `protobuf:"bytes,30,opt,name=source"`
+	xxx_hidden_Container            *string                `protobuf:"bytes,31,opt,name=container"`
+	xxx_hidden_Codec                *string                `protobuf:"bytes,32,opt,name=codec"`
+	xxx_hidden_Resolution           *string                `protobuf:"bytes,33,opt,name=resolution"`
 	XXX_raceDetectHookData          protoimpl.RaceDetectHookData
-	XXX_presence                    [1]uint32
+	XXX_presence                    [2]uint32
 	unknownFields                   protoimpl.UnknownFields
 	sizeCache                       protoimpl.SizeCache
 }
@@ -2405,59 +2733,109 @@ func (x *Release) GetPosterUrl() string {
 	return ""
 }
 
+func (x *Release) GetOrigin() string {
+	if x != nil {
+		if x.xxx_hidden_Origin != nil {
+			return *x.xxx_hidden_Origin
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Release) GetSource() string {
+	if x != nil {
+		if x.xxx_hidden_Source != nil {
+			return *x.xxx_hidden_Source
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Release) GetContainer() string {
+	if x != nil {
+		if x.xxx_hidden_Container != nil {
+			return *x.xxx_hidden_Container
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Release) GetCodec() string {
+	if x != nil {
+		if x.xxx_hidden_Codec != nil {
+			return *x.xxx_hidden_Codec
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Release) GetResolution() string {
+	if x != nil {
+		if x.xxx_hidden_Resolution != nil {
+			return *x.xxx_hidden_Resolution
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Release) SetIndexerId(v string) {
 	x.xxx_hidden_IndexerId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 33)
 }
 
 func (x *Release) SetGuid(v string) {
 	x.xxx_hidden_Guid = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 33)
 }
 
 func (x *Release) SetTitle(v string) {
 	x.xxx_hidden_Title = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 33)
 }
 
 func (x *Release) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 33)
 }
 
 func (x *Release) SetSize(v int64) {
 	x.xxx_hidden_Size = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 33)
 }
 
 func (x *Release) SetDownloadUrl(v string) {
 	x.xxx_hidden_DownloadUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 33)
 }
 
 func (x *Release) SetMagnetUrl(v string) {
 	x.xxx_hidden_MagnetUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 33)
 }
 
 func (x *Release) SetInfoHash(v string) {
 	x.xxx_hidden_InfoHash = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 33)
 }
 
 func (x *Release) SetInfoUrl(v string) {
 	x.xxx_hidden_InfoUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 33)
 }
 
 func (x *Release) SetCommentsUrl(v string) {
 	x.xxx_hidden_CommentsUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 33)
 }
 
 func (x *Release) SetProtocol(v DownloadProtocol) {
 	x.xxx_hidden_Protocol = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 33)
 }
 
 func (x *Release) SetPublishDate(v *timestamppb.Timestamp) {
@@ -2474,47 +2852,47 @@ func (x *Release) SetExternalIds(v map[string]string) {
 
 func (x *Release) SetYear(v int32) {
 	x.xxx_hidden_Year = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 33)
 }
 
 func (x *Release) SetGrabs(v int32) {
 	x.xxx_hidden_Grabs = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 33)
 }
 
 func (x *Release) SetFiles(v int32) {
 	x.xxx_hidden_Files = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 33)
 }
 
 func (x *Release) SetSeeders(v int32) {
 	x.xxx_hidden_Seeders = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 33)
 }
 
 func (x *Release) SetPeers(v int32) {
 	x.xxx_hidden_Peers = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 33)
 }
 
 func (x *Release) SetDownloadVolumeFactor(v float64) {
 	x.xxx_hidden_DownloadVolumeFactor = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 33)
 }
 
 func (x *Release) SetUploadVolumeFactor(v float64) {
 	x.xxx_hidden_UploadVolumeFactor = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 33)
 }
 
 func (x *Release) SetMinimumRatio(v float64) {
 	x.xxx_hidden_MinimumRatio = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 33)
 }
 
 func (x *Release) SetMinimumSeedTime(v int64) {
 	x.xxx_hidden_MinimumSeedTime = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 33)
 }
 
 func (x *Release) SetFlags(v []string) {
@@ -2535,7 +2913,32 @@ func (x *Release) SetGenres(v []string) {
 
 func (x *Release) SetPosterUrl(v string) {
 	x.xxx_hidden_PosterUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 28)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 33)
+}
+
+func (x *Release) SetOrigin(v string) {
+	x.xxx_hidden_Origin = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 33)
+}
+
+func (x *Release) SetSource(v string) {
+	x.xxx_hidden_Source = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 29, 33)
+}
+
+func (x *Release) SetContainer(v string) {
+	x.xxx_hidden_Container = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 30, 33)
+}
+
+func (x *Release) SetCodec(v string) {
+	x.xxx_hidden_Codec = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 31, 33)
+}
+
+func (x *Release) SetResolution(v string) {
+	x.xxx_hidden_Resolution = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 33)
 }
 
 func (x *Release) HasIndexerId() bool {
@@ -2692,6 +3095,41 @@ func (x *Release) HasPosterUrl() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 27)
 }
 
+func (x *Release) HasOrigin() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 28)
+}
+
+func (x *Release) HasSource() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 29)
+}
+
+func (x *Release) HasContainer() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 30)
+}
+
+func (x *Release) HasCodec() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 31)
+}
+
+func (x *Release) HasResolution() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 32)
+}
+
 func (x *Release) ClearIndexerId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_IndexerId = nil
@@ -2801,6 +3239,31 @@ func (x *Release) ClearPosterUrl() {
 	x.xxx_hidden_PosterUrl = nil
 }
 
+func (x *Release) ClearOrigin() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 28)
+	x.xxx_hidden_Origin = nil
+}
+
+func (x *Release) ClearSource() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 29)
+	x.xxx_hidden_Source = nil
+}
+
+func (x *Release) ClearContainer() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 30)
+	x.xxx_hidden_Container = nil
+}
+
+func (x *Release) ClearCodec() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 31)
+	x.xxx_hidden_Codec = nil
+}
+
+func (x *Release) ClearResolution() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 32)
+	x.xxx_hidden_Resolution = nil
+}
+
 type Release_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -2844,6 +3307,14 @@ type Release_builder struct {
 	Subtitles []string
 	Genres    []string
 	PosterUrl *string
+	// What some sites tell of a release's media, in their words: its origin
+	// (e.g. "Scene", "P2P", "Internal"), source (e.g. "WEB-DL"), container
+	// (e.g. "MKV"), codec (e.g. "H.264") and resolution (e.g. "1080p").
+	Origin     *string
+	Source     *string
+	Container  *string
+	Codec      *string
+	Resolution *string
 }
 
 func (b0 Release_builder) Build() *Release {
@@ -2851,86 +3322,86 @@ func (b0 Release_builder) Build() *Release {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.IndexerId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 33)
 		x.xxx_hidden_IndexerId = b.IndexerId
 	}
 	if b.Guid != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 33)
 		x.xxx_hidden_Guid = b.Guid
 	}
 	if b.Title != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 33)
 		x.xxx_hidden_Title = b.Title
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 33)
 		x.xxx_hidden_Description = b.Description
 	}
 	if b.Size != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 33)
 		x.xxx_hidden_Size = *b.Size
 	}
 	if b.DownloadUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 33)
 		x.xxx_hidden_DownloadUrl = b.DownloadUrl
 	}
 	if b.MagnetUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 33)
 		x.xxx_hidden_MagnetUrl = b.MagnetUrl
 	}
 	if b.InfoHash != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 33)
 		x.xxx_hidden_InfoHash = b.InfoHash
 	}
 	if b.InfoUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 33)
 		x.xxx_hidden_InfoUrl = b.InfoUrl
 	}
 	if b.CommentsUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 33)
 		x.xxx_hidden_CommentsUrl = b.CommentsUrl
 	}
 	if b.Protocol != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 33)
 		x.xxx_hidden_Protocol = *b.Protocol
 	}
 	x.xxx_hidden_PublishDate = b.PublishDate
 	x.xxx_hidden_Categories = b.Categories
 	x.xxx_hidden_ExternalIds = b.ExternalIds
 	if b.Year != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 33)
 		x.xxx_hidden_Year = *b.Year
 	}
 	if b.Grabs != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 33)
 		x.xxx_hidden_Grabs = *b.Grabs
 	}
 	if b.Files != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 33)
 		x.xxx_hidden_Files = *b.Files
 	}
 	if b.Seeders != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 33)
 		x.xxx_hidden_Seeders = *b.Seeders
 	}
 	if b.Peers != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 33)
 		x.xxx_hidden_Peers = *b.Peers
 	}
 	if b.DownloadVolumeFactor != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 33)
 		x.xxx_hidden_DownloadVolumeFactor = *b.DownloadVolumeFactor
 	}
 	if b.UploadVolumeFactor != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 33)
 		x.xxx_hidden_UploadVolumeFactor = *b.UploadVolumeFactor
 	}
 	if b.MinimumRatio != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 33)
 		x.xxx_hidden_MinimumRatio = *b.MinimumRatio
 	}
 	if b.MinimumSeedTime != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 33)
 		x.xxx_hidden_MinimumSeedTime = *b.MinimumSeedTime
 	}
 	x.xxx_hidden_Flags = b.Flags
@@ -2938,8 +3409,28 @@ func (b0 Release_builder) Build() *Release {
 	x.xxx_hidden_Subtitles = b.Subtitles
 	x.xxx_hidden_Genres = b.Genres
 	if b.PosterUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 28)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 33)
 		x.xxx_hidden_PosterUrl = b.PosterUrl
+	}
+	if b.Origin != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 33)
+		x.xxx_hidden_Origin = b.Origin
+	}
+	if b.Source != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 29, 33)
+		x.xxx_hidden_Source = b.Source
+	}
+	if b.Container != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 30, 33)
+		x.xxx_hidden_Container = b.Container
+	}
+	if b.Codec != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 31, 33)
+		x.xxx_hidden_Codec = b.Codec
+	}
+	if b.Resolution != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 33)
+		x.xxx_hidden_Resolution = b.Resolution
 	}
 	return m0
 }
@@ -3239,7 +3730,7 @@ var File_mavio_plugin_v1_indexer_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\n" +
-	"\x1dmavio/plugin/v1/indexer.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1emavio/plugin/v1/settings.proto\"\x18\n" +
+	"\x1dmavio/plugin/v1/indexer.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1emavio/plugin/v1/settings.proto\"\x18\n" +
 	"\x16ListDefinitionsRequest\"_\n" +
 	"\x17ListDefinitionsResponse\x12D\n" +
 	"\vdefinitions\x18\x01 \x03(\v2\".mavio.plugin.v1.IndexerDefinitionR\vdefinitions\"\xbc\x02\n" +
@@ -3254,7 +3745,7 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\x06fields\x18\b \x03(\v2\x1d.mavio.plugin.v1.SettingFieldR\x06fields\"\x15\n" +
 	"\x13ListIndexersRequest\"L\n" +
 	"\x14ListIndexersResponse\x124\n" +
-	"\bindexers\x18\x01 \x03(\v2\x18.mavio.plugin.v1.IndexerR\bindexers\"\xa9\x03\n" +
+	"\bindexers\x18\x01 \x03(\v2\x18.mavio.plugin.v1.IndexerR\bindexers\"\xdb\x05\n" +
 	"\aIndexer\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
@@ -3266,7 +3757,15 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\fcapabilities\x18\b \x01(\v2$.mavio.plugin.v1.IndexerCapabilitiesR\fcapabilities\x12A\n" +
 	"\x0edisabled_until\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\rdisabledUntil\x12\x18\n" +
 	"\afailure\x18\n" +
-	" \x01(\tR\afailure\"\xb7\x02\n" +
+	" \x01(\tR\afailure\x12\x12\n" +
+	"\x04tags\x18\v \x03(\tR\x04tags\x12%\n" +
+	"\x0erequired_flags\x18\f \x03(\tR\rrequiredFlags\x12'\n" +
+	"\x0fminimum_seeders\x18\r \x01(\x05R\x0eminimumSeeders\x12'\n" +
+	"\x0fmulti_languages\x18\x0e \x03(\tR\x0emultiLanguages\x12\x1d\n" +
+	"\n" +
+	"seed_ratio\x18\x0f \x01(\x01R\tseedRatio\x126\n" +
+	"\tseed_time\x18\x10 \x01(\v2\x19.google.protobuf.DurationR\bseedTime\x12L\n" +
+	"\x15season_pack_seed_time\x18\x11 \x01(\v2\x19.google.protobuf.DurationR\x12seasonPackSeedTime\"\xb7\x02\n" +
 	"\x13IndexerCapabilities\x12#\n" +
 	"\rsearch_params\x18\x01 \x03(\tR\fsearchParams\x12(\n" +
 	"\x10tv_search_params\x18\x02 \x03(\tR\x0etvSearchParams\x12.\n" +
@@ -3288,7 +3787,7 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\rdefinition_id\x18\x02 \x01(\tR\fdefinitionId\x12#\n" +
 	"\rsettings_json\x18\x03 \x01(\tR\fsettingsJson\"/\n" +
 	"\x13TestIndexerResponse\x12\x18\n" +
-	"\afailure\x18\x01 \x01(\tR\afailure\"\xfa\x03\n" +
+	"\afailure\x18\x01 \x01(\tR\afailure\"\xa6\x05\n" +
 	"\x15SearchReleasesRequest\x12\x1f\n" +
 	"\vindexer_ids\x18\x01 \x03(\tR\n" +
 	"indexerIds\x126\n" +
@@ -3304,7 +3803,12 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\x05genre\x18\t \x01(\tB\a\xbaH\x04r\x02\x18dR\x05genre\x12\x1d\n" +
 	"\x05limit\x18\n" +
 	" \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x05limit\x12\x1f\n" +
-	"\x06offset\x18\v \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\x1a>\n" +
+	"\x06offset\x18\v \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\x12\x1e\n" +
+	"\x05title\x18\f \x01(\tB\b\xbaH\x05r\x03\x18\xe8\aR\x05title\x12 \n" +
+	"\amin_age\x18\r \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06minAge\x12 \n" +
+	"\amax_age\x18\x0e \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06maxAge\x12\"\n" +
+	"\bmin_size\x18\x0f \x01(\x03B\a\xbaH\x04\"\x02(\x00R\aminSize\x12\"\n" +
+	"\bmax_size\x18\x10 \x01(\x03B\a\xbaH\x04\"\x02(\x00R\amaxSize\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x8b\x01\n" +
@@ -3315,7 +3819,7 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\n" +
 	"indexer_id\x18\x01 \x01(\tR\tindexerId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12A\n" +
-	"\x0edisabled_until\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\rdisabledUntil\"\x83\b\n" +
+	"\x0edisabled_until\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\rdisabledUntil\"\x87\t\n" +
 	"\aRelease\x12\x1d\n" +
 	"\n" +
 	"indexer_id\x18\x01 \x01(\tR\tindexerId\x12\x12\n" +
@@ -3350,7 +3854,14 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\tsubtitles\x18\x1a \x03(\tR\tsubtitles\x12\x16\n" +
 	"\x06genres\x18\x1b \x03(\tR\x06genres\x12\x1d\n" +
 	"\n" +
-	"poster_url\x18\x1c \x01(\tR\tposterUrl\x1a>\n" +
+	"poster_url\x18\x1c \x01(\tR\tposterUrl\x12\x16\n" +
+	"\x06origin\x18\x1d \x01(\tR\x06origin\x12\x16\n" +
+	"\x06source\x18\x1e \x01(\tR\x06source\x12\x1c\n" +
+	"\tcontainer\x18\x1f \x01(\tR\tcontainer\x12\x14\n" +
+	"\x05codec\x18  \x01(\tR\x05codec\x12\x1e\n" +
+	"\n" +
+	"resolution\x18! \x01(\tR\n" +
+	"resolution\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"i\n" +
@@ -3411,6 +3922,7 @@ var file_mavio_plugin_v1_indexer_proto_goTypes = []any{
 	nil,                             // 20: mavio.plugin.v1.Release.ExternalIdsEntry
 	(*SettingField)(nil),            // 21: mavio.plugin.v1.SettingField
 	(*timestamppb.Timestamp)(nil),   // 22: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),     // 23: google.protobuf.Duration
 }
 var file_mavio_plugin_v1_indexer_proto_depIdxs = []int32{
 	5,  // 0: mavio.plugin.v1.ListDefinitionsResponse.definitions:type_name -> mavio.plugin.v1.IndexerDefinition
@@ -3422,31 +3934,33 @@ var file_mavio_plugin_v1_indexer_proto_depIdxs = []int32{
 	1,  // 6: mavio.plugin.v1.Indexer.privacy:type_name -> mavio.plugin.v1.IndexerPrivacy
 	9,  // 7: mavio.plugin.v1.Indexer.capabilities:type_name -> mavio.plugin.v1.IndexerCapabilities
 	22, // 8: mavio.plugin.v1.Indexer.disabled_until:type_name -> google.protobuf.Timestamp
-	10, // 9: mavio.plugin.v1.IndexerCapabilities.categories:type_name -> mavio.plugin.v1.IndexerCategory
-	10, // 10: mavio.plugin.v1.IndexerCategory.subcategories:type_name -> mavio.plugin.v1.IndexerCategory
-	2,  // 11: mavio.plugin.v1.SearchReleasesRequest.type:type_name -> mavio.plugin.v1.IndexerSearchType
-	19, // 12: mavio.plugin.v1.SearchReleasesRequest.external_ids:type_name -> mavio.plugin.v1.SearchReleasesRequest.ExternalIdsEntry
-	16, // 13: mavio.plugin.v1.SearchReleasesResponse.releases:type_name -> mavio.plugin.v1.Release
-	15, // 14: mavio.plugin.v1.SearchReleasesResponse.failures:type_name -> mavio.plugin.v1.IndexerFailure
-	22, // 15: mavio.plugin.v1.IndexerFailure.disabled_until:type_name -> google.protobuf.Timestamp
-	0,  // 16: mavio.plugin.v1.Release.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
-	22, // 17: mavio.plugin.v1.Release.publish_date:type_name -> google.protobuf.Timestamp
-	20, // 18: mavio.plugin.v1.Release.external_ids:type_name -> mavio.plugin.v1.Release.ExternalIdsEntry
-	3,  // 19: mavio.plugin.v1.IndexerProviderService.ListDefinitions:input_type -> mavio.plugin.v1.ListDefinitionsRequest
-	6,  // 20: mavio.plugin.v1.IndexerProviderService.ListIndexers:input_type -> mavio.plugin.v1.ListIndexersRequest
-	11, // 21: mavio.plugin.v1.IndexerProviderService.TestIndexer:input_type -> mavio.plugin.v1.TestIndexerRequest
-	13, // 22: mavio.plugin.v1.IndexerProviderService.SearchReleases:input_type -> mavio.plugin.v1.SearchReleasesRequest
-	17, // 23: mavio.plugin.v1.IndexerProviderService.GetReleaseFile:input_type -> mavio.plugin.v1.GetReleaseFileRequest
-	4,  // 24: mavio.plugin.v1.IndexerProviderService.ListDefinitions:output_type -> mavio.plugin.v1.ListDefinitionsResponse
-	7,  // 25: mavio.plugin.v1.IndexerProviderService.ListIndexers:output_type -> mavio.plugin.v1.ListIndexersResponse
-	12, // 26: mavio.plugin.v1.IndexerProviderService.TestIndexer:output_type -> mavio.plugin.v1.TestIndexerResponse
-	14, // 27: mavio.plugin.v1.IndexerProviderService.SearchReleases:output_type -> mavio.plugin.v1.SearchReleasesResponse
-	18, // 28: mavio.plugin.v1.IndexerProviderService.GetReleaseFile:output_type -> mavio.plugin.v1.GetReleaseFileResponse
-	24, // [24:29] is the sub-list for method output_type
-	19, // [19:24] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	23, // 9: mavio.plugin.v1.Indexer.seed_time:type_name -> google.protobuf.Duration
+	23, // 10: mavio.plugin.v1.Indexer.season_pack_seed_time:type_name -> google.protobuf.Duration
+	10, // 11: mavio.plugin.v1.IndexerCapabilities.categories:type_name -> mavio.plugin.v1.IndexerCategory
+	10, // 12: mavio.plugin.v1.IndexerCategory.subcategories:type_name -> mavio.plugin.v1.IndexerCategory
+	2,  // 13: mavio.plugin.v1.SearchReleasesRequest.type:type_name -> mavio.plugin.v1.IndexerSearchType
+	19, // 14: mavio.plugin.v1.SearchReleasesRequest.external_ids:type_name -> mavio.plugin.v1.SearchReleasesRequest.ExternalIdsEntry
+	16, // 15: mavio.plugin.v1.SearchReleasesResponse.releases:type_name -> mavio.plugin.v1.Release
+	15, // 16: mavio.plugin.v1.SearchReleasesResponse.failures:type_name -> mavio.plugin.v1.IndexerFailure
+	22, // 17: mavio.plugin.v1.IndexerFailure.disabled_until:type_name -> google.protobuf.Timestamp
+	0,  // 18: mavio.plugin.v1.Release.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
+	22, // 19: mavio.plugin.v1.Release.publish_date:type_name -> google.protobuf.Timestamp
+	20, // 20: mavio.plugin.v1.Release.external_ids:type_name -> mavio.plugin.v1.Release.ExternalIdsEntry
+	3,  // 21: mavio.plugin.v1.IndexerProviderService.ListDefinitions:input_type -> mavio.plugin.v1.ListDefinitionsRequest
+	6,  // 22: mavio.plugin.v1.IndexerProviderService.ListIndexers:input_type -> mavio.plugin.v1.ListIndexersRequest
+	11, // 23: mavio.plugin.v1.IndexerProviderService.TestIndexer:input_type -> mavio.plugin.v1.TestIndexerRequest
+	13, // 24: mavio.plugin.v1.IndexerProviderService.SearchReleases:input_type -> mavio.plugin.v1.SearchReleasesRequest
+	17, // 25: mavio.plugin.v1.IndexerProviderService.GetReleaseFile:input_type -> mavio.plugin.v1.GetReleaseFileRequest
+	4,  // 26: mavio.plugin.v1.IndexerProviderService.ListDefinitions:output_type -> mavio.plugin.v1.ListDefinitionsResponse
+	7,  // 27: mavio.plugin.v1.IndexerProviderService.ListIndexers:output_type -> mavio.plugin.v1.ListIndexersResponse
+	12, // 28: mavio.plugin.v1.IndexerProviderService.TestIndexer:output_type -> mavio.plugin.v1.TestIndexerResponse
+	14, // 29: mavio.plugin.v1.IndexerProviderService.SearchReleases:output_type -> mavio.plugin.v1.SearchReleasesResponse
+	18, // 30: mavio.plugin.v1.IndexerProviderService.GetReleaseFile:output_type -> mavio.plugin.v1.GetReleaseFileResponse
+	26, // [26:31] is the sub-list for method output_type
+	21, // [21:26] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_indexer_proto_init() }

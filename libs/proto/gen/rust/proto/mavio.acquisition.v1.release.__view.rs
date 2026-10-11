@@ -1667,6 +1667,17 @@ pub struct SearchReleasesRequestView<'a> {
         'a,
         super::super::__buffa::view::IndexerRefView<'a>,
     >,
+    /// The age of releases, in days, and their size, in bytes, to search
+    /// within, as Prowlarr's searches take them; unset for no limit.
+    ///
+    /// Field 8: `min_age`
+    pub min_age: ::core::option::Option<i32>,
+    /// Field 9: `max_age`
+    pub max_age: ::core::option::Option<i32>,
+    /// Field 10: `min_size`
+    pub min_size: ::core::option::Option<i64>,
+    /// Field 11: `max_size`
+    pub max_size: ::core::option::Option<i64>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for SearchReleasesRequestView<'a> {
@@ -1735,6 +1746,34 @@ impl<'a> ::buffa::MessageView<'a> for SearchReleasesRequestView<'a> {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 view.episode = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.min_age = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.max_age = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.min_size = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.max_size = Some(::buffa::types::decode_int64(&mut cur)?);
             }
             6u32 => {
                 if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
@@ -1812,6 +1851,10 @@ impl<'a> ::buffa::MessageView<'a> for SearchReleasesRequestView<'a> {
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            min_age: self.min_age,
+            max_age: self.max_age,
+            min_size: self.min_size,
+            max_size: self.max_size,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1853,6 +1896,18 @@ impl<'a> ::buffa::ViewEncode<'a> for SearchReleasesRequestView<'a> {
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
+        }
+        if let Some(v) = self.min_age {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_age {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.min_size {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_size {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -1898,6 +1953,18 @@ impl<'a> ::buffa::ViewEncode<'a> for SearchReleasesRequestView<'a> {
                 buf,
             );
             v.write_to(__cache, buf);
+        }
+        if let Some(v) = self.min_age {
+            ::buffa::types::put_int32_field(8u32, v, buf);
+        }
+        if let Some(v) = self.max_age {
+            ::buffa::types::put_int32_field(9u32, v, buf);
+        }
+        if let Some(v) = self.min_size {
+            ::buffa::types::put_int64_field(10u32, v, buf);
+        }
+        if let Some(v) = self.max_size {
+            ::buffa::types::put_int64_field(11u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2044,6 +2111,29 @@ impl SearchReleasesRequestOwnedView {
         &self,
     ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::IndexerRefView<'_>> {
         &self.0.reborrow().indexers
+    }
+    /// The age of releases, in days, and their size, in bytes, to search
+    /// within, as Prowlarr's searches take them; unset for no limit.
+    ///
+    /// Field 8: `min_age`
+    #[must_use]
+    pub fn min_age(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().min_age
+    }
+    /// Field 9: `max_age`
+    #[must_use]
+    pub fn max_age(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().max_age
+    }
+    /// Field 10: `min_size`
+    #[must_use]
+    pub fn min_size(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().min_size
+    }
+    /// Field 11: `max_size`
+    #[must_use]
+    pub fn max_size(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().max_size
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<SearchReleasesRequestView<'static>>>
