@@ -31,6 +31,11 @@ type criteria struct {
 	text       *Search
 	movie      *movieCriteria
 	episode    *episodeCriteria
+	// seasonEpisodes are the episodes of a season of anime, searched
+	// one by one in place of episode.
+	seasonEpisodes []*episodeCriteria
+	// limits holds the age and size limits of the requests; nil for none.
+	limits *Search
 }
 
 // movieCriteria are those of Radarr's MovieSearchCriteria.
@@ -118,7 +123,11 @@ func (s *Searcher) criteria(ctx context.Context, q Search) (*criteria, error) {
 		}
 		e.season = *item.IndexNumber
 		if series.SeriesType == core.SeriesAnime {
-			return nil, fmt.Errorf("seasons of anime are searched by episode: %w", core.ErrInvalid)
+			episodes, err := s.animeSeasonEpisodes(ctx, item, series, e)
+			if err != nil {
+				return nil, err
+			}
+			return &criteria{kind: release.Series, categories: or(q.Categories, animeCategory), seasonEpisodes: episodes}, nil
 		}
 	} else {
 		if item.IndexNumber == nil || item.ParentIndexNumber == nil {
@@ -143,6 +152,30 @@ func (s *Searcher) criteria(ctx context.Context, q Search) (*criteria, error) {
 		category = animeCategory
 	}
 	return &criteria{kind: release.Series, categories: or(q.Categories, category), episode: e}, nil
+}
+
+// animeSeasonEpisodes returns the criteria of the episodes of a season of
+// anime that have aired and have absolute numbers, as Sonarr's
+// SearchAnimeSeason searches them one by one, each as an anime episode;
+// season is the season's criteria.
+func (s *Searcher) animeSeasonEpisodes(ctx context.Context, item, series core.Item, season *episodeCriteria) ([]*episodeCriteria, error) {
+	now := s.now()
+	var out []*episodeCriteria
+	for ep, err := range s.Items.Walk(ctx, core.ItemQuery{
+		ParentID: item.ID, Kinds: []core.ItemKind{core.KindEpisode}, IncludeVirtual: true, IncludeMissing: true,
+	}) {
+		if err != nil {
+			return nil, err
+		}
+		if ep.PremiereDate == nil || !ep.PremiereDate.Before(now) || ep.AbsoluteNumber == nil || *ep.AbsoluteNumber <= 0 || ep.IndexNumber == nil {
+			continue
+		}
+		e := *season
+		e.episode, e.absolute, e.airDate = *ep.IndexNumber, *ep.AbsoluteNumber, *ep.PremiereDate
+		out = append(out, &e)
+	}
+	slices.SortFunc(out, func(a, b *episodeCriteria) int { return a.absolute - b.absolute })
+	return out, nil
 }
 
 // series returns the series of a season or episode.
@@ -189,6 +222,23 @@ func externalIDs(item core.Item, params []idParam) map[string]string {
 		}
 	}
 	return ids
+}
+
+// searches returns the searches of an indexer with caps, each tiers of
+// requests: one search, or one by episode of a season of anime.
+func (c *criteria) searches(caps *pluginv1.IndexerCapabilities) [][][]*pluginv1.SearchReleasesRequest {
+	if c.seasonEpisodes == nil {
+		return [][][]*pluginv1.SearchReleasesRequest{c.tiers(caps)}
+	}
+	var out [][][]*pluginv1.SearchReleasesRequest
+	for _, e := range c.seasonEpisodes {
+		ec := *c
+		ec.seasonEpisodes, ec.episode = nil, e
+		if tiers := ec.tiers(caps); len(tiers) > 0 {
+			out = append(out, tiers)
+		}
+	}
+	return out
 }
 
 // tiers returns the requests an indexer with caps is sent, tier by tier;
@@ -253,8 +303,7 @@ func (c *criteria) episodeTiers(caps *pluginv1.IndexerCapabilities) [][]*pluginv
 	if !slices.Contains(params, "season") || e.episode > 0 && !slices.Contains(params, "ep") {
 		return nil
 	}
-	query := slices.Contains(params, "q")
-	if !query && len(ids) == 0 {
+	if !textSearch(params) && len(ids) == 0 {
 		return nil
 	}
 	numbered := func(req *pluginv1.SearchReleasesRequest) *pluginv1.SearchReleasesRequest {
@@ -274,18 +323,51 @@ func (c *criteria) episodeTiers(caps *pluginv1.IndexerCapabilities) [][]*pluginv
 	if len(ids) > 0 {
 		byID = append(byID, numbered(c.request(tv, "", ids)))
 	}
-	if query {
-		for _, t := range cleanTitles(e.titles) {
-			byTitle = append(byTitle, numbered(c.request(tv, t, nil)))
-		}
-	}
+	byTitle = c.titleRequests(params, e.titles, numbered)
 	return [][]*pluginv1.SearchReleasesRequest{byID, byTitle}
 }
 
+// textSearch reports whether an indexer taking the TV search parameters
+// searches series by text, as Sonarr's SupportsTvTextSearches.
+func textSearch(params []string) bool {
+	return slices.Contains(params, "q") || slices.Contains(params, "title")
+}
+
+// titleRequests are the TV searches of a series by its titles, as
+// Sonarr's AddTitlePageableRequests makes them: by Newznab's title, of
+// the titles as they are, for indexers taking it, else by query, of the
+// clean titles.
+func (c *criteria) titleRequests(params, titles []string, numbered func(*pluginv1.SearchReleasesRequest) *pluginv1.SearchReleasesRequest) []*pluginv1.SearchReleasesRequest {
+	tv := pluginv1.IndexerSearchType_INDEXER_SEARCH_TYPE_TV
+	var out []*pluginv1.SearchReleasesRequest
+	switch {
+	case slices.Contains(params, "title"):
+		var seen []string
+		for _, t := range titles {
+			if t = strings.TrimSpace(t); t == "" || slices.Contains(seen, t) {
+				continue
+			}
+			seen = append(seen, t)
+			req := c.request(tv, "", nil)
+			req.SetTitle(t)
+			out = append(out, numbered(req))
+		}
+	case slices.Contains(params, "q"):
+		for _, t := range cleanTitles(titles) {
+			out = append(out, numbered(c.request(tv, t, nil)))
+		}
+	}
+	return out
+}
+
 func (c *criteria) request(t pluginv1.IndexerSearchType, query string, ids map[string]string) *pluginv1.SearchReleasesRequest {
-	return pluginv1.SearchReleasesRequest_builder{
+	b := pluginv1.SearchReleasesRequest_builder{
 		Type: &t, Query: &query, Categories: c.categories, ExternalIds: ids,
-	}.Build()
+	}
+	if l := c.limits; l != nil {
+		b.MinAge, b.MaxAge, b.MinSize, b.MaxSize = l.MinAge, l.MaxAge, l.MinSize, l.MaxSize
+	}
+	return b.Build()
 }
 
 // supported returns the IDs whose Newznab parameters an indexer takes.

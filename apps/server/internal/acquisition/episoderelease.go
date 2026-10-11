@@ -216,5 +216,8 @@ func (r *Runtime) grabEpisodeRelease(ctx context.Context, rn *run, it core.Item,
 		c.Languages = langs
 	}
 	c.Source = acquire.SourceInteractiveSearch
-	return r.grab(ctx, rn, grabRequest{show: sh, episodes: c.Episodes, rel: rel, candidate: c.Candidate, pluginID: pluginID, clientID: clientID})
+	return r.grab(ctx, rn, grabRequest{
+		show: sh, episodes: c.Episodes, rel: rel, candidate: c.Candidate, pluginID: pluginID, clientID: clientID,
+		fullSeason: c.Parsed != nil && c.Parsed.FullSeason,
+	})
 }

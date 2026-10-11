@@ -75,6 +75,33 @@ type grabRequest struct {
 	// pluginID and clientID name the client; empty for the first of the
 	// release's protocol.
 	pluginID, clientID string
+	// fullSeason is set for releases of full seasons, which seed for the
+	// indexer's season pack seed time.
+	fullSeason bool
+}
+
+// seedSettings returns how long a torrent release seeds, as Radarr's and
+// Sonarr's SeedConfigProvider: the indexer's seed ratio and seed time, the
+// season pack seed time for full seasons; else what the release asks.
+func (rn *run) seedSettings(ctx context.Context, rel *Release, fullSeason bool) (ratio float64, seedTime time.Duration) {
+	ratio, seedTime = rel.MinimumRatio, rel.MinimumSeedTime
+	if rn == nil {
+		return ratio, seedTime
+	}
+	ix, ok := rn.indexer(ctx, rel.IndexerRef())
+	if !ok {
+		return ratio, seedTime
+	}
+	if ix.HasSeedRatio() {
+		ratio = ix.GetSeedRatio()
+	}
+	switch {
+	case fullSeason && ix.HasSeasonPackSeedTime():
+		seedTime = ix.GetSeasonPackSeedTime().AsDuration()
+	case !fullSeason && ix.HasSeedTime():
+		seedTime = ix.GetSeedTime().AsDuration()
+	}
+	return ratio, seedTime
 }
 
 // recentEpisodes reports whether any of episodes aired in the last two
@@ -122,11 +149,12 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 		if rel.InfoHash != "" {
 			req.SetInfoHash(rel.InfoHash)
 		}
-		if rel.MinimumRatio > 0 {
-			req.SetSeedRatio(rel.MinimumRatio)
+		ratio, seedTime := rn.seedSettings(ctx, rel, g.fullSeason)
+		if ratio > 0 {
+			req.SetSeedRatio(ratio)
 		}
-		if rel.MinimumSeedTime > 0 {
-			req.SetSeedTime(durationpb.New(rel.MinimumSeedTime))
+		if seedTime > 0 {
+			req.SetSeedTime(durationpb.New(seedTime))
 		}
 	}
 	var resp *pluginv1.AddDownloadResponse

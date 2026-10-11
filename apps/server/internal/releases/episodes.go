@@ -139,8 +139,7 @@ func (c *criteria) queryTiers(caps *pluginv1.IndexerCapabilities) [][]*pluginv1.
 	if !slices.Contains(params, "season") || needsEpisode && !slices.Contains(params, "ep") {
 		return nil
 	}
-	text := slices.Contains(params, "q")
-	if !text && len(ids) == 0 {
+	if !textSearch(params) && len(ids) == 0 {
 		return nil
 	}
 	numbered := func(req *pluginv1.SearchReleasesRequest) *pluginv1.SearchReleasesRequest {
@@ -159,14 +158,7 @@ func (c *criteria) queryTiers(caps *pluginv1.IndexerCapabilities) [][]*pluginv1.
 		return req
 	}
 	byTitles := func() []*pluginv1.SearchReleasesRequest {
-		if !text {
-			return nil
-		}
-		var out []*pluginv1.SearchReleasesRequest
-		for _, t := range cleanTitles(e.titles) {
-			out = append(out, numbered(c.request(tv, t, nil)))
-		}
-		return out
+		return c.titleRequests(params, e.titles, numbered)
 	}
 	var first, second []*pluginv1.SearchReleasesRequest
 	if (q.Mode&SearchByID != 0 || q.Mode == SearchDefault) && len(ids) > 0 {

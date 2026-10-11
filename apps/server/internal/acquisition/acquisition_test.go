@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
@@ -46,6 +47,8 @@ type fakeIndexer struct {
 	// tv answers TV searches when set; requests are those it was asked.
 	tv       func(req *pluginv1.SearchReleasesRequest) []*pluginv1.Release
 	requests []*pluginv1.SearchReleasesRequest
+	// settings, when set, changes the indexer's settings.
+	settings func(b *pluginv1.Indexer_builder)
 }
 
 func (f *fakeIndexer) set(search, rss []*pluginv1.Release) {
@@ -58,7 +61,11 @@ func (f *fakeIndexer) ListIndexers(context.Context, *pluginv1.ListIndexersReques
 	caps := pluginv1.IndexerCapabilities_builder{
 		SearchParams: []string{"q"}, MovieSearchParams: []string{"q", "imdbid", "tmdbid"}, TvSearchParams: []string{"q", "season", "ep", "tvdbid"},
 	}.Build()
-	ix := pluginv1.Indexer_builder{Id: new("ix"), Name: new("Indexer"), Enabled: new(true), Priority: new(int32(25)), Capabilities: caps}.Build()
+	b := pluginv1.Indexer_builder{Id: new("ix"), Name: new("Indexer"), Enabled: new(true), Priority: new(int32(25)), Capabilities: caps}
+	if f.settings != nil {
+		f.settings(&b)
+	}
+	ix := b.Build()
 	return pluginv1.ListIndexersResponse_builder{Indexers: []*pluginv1.Indexer{ix}}.Build(), nil
 }
 
@@ -454,6 +461,75 @@ func TestSearchGrabsBest(t *testing.T) {
 	}
 	if _, err := e.rt.Decide(e.ctx, core.NewID(), found.Releases); !errors.Is(err, ErrNotWanted) {
 		t.Errorf("Decide(unknown) err = %v, want = ErrNotWanted", err)
+	}
+}
+
+// TestGrabSeedSettings checks grabs seed as the indexer's settings say,
+// as Radarr's and Sonarr's SeedConfigProvider, and the decisions read the
+// indexer's settings.
+func TestGrabSeedSettings(t *testing.T) {
+	e := newEnv(t)
+	it := e.addMovie()
+	e.indexer.settings = func(b *pluginv1.Indexer_builder) {
+		b.SeedRatio = new(2.5)
+		b.SeedTime = durationpb.New(90 * time.Minute)
+		b.SeasonPackSeedTime = durationpb.New(3 * time.Hour)
+	}
+	e.indexer.set(e.both(), nil)
+	if err := e.rt.SearchMovie(e.ctx, it.ID, false); err != nil {
+		t.Fatal(err)
+	}
+	if len(e.client.added) != 1 {
+		t.Fatalf("grabs = %d, want = 1", len(e.client.added))
+	}
+	if add := e.client.added[0]; add.GetSeedRatio() != 2.5 || add.GetSeedTime().AsDuration() != 90*time.Minute {
+		t.Errorf("seed ratio, time = %v, %v, want = 2.5, 1h30m0s", add.GetSeedRatio(), add.GetSeedTime().AsDuration())
+	}
+
+	rn := &run{rt: e.rt}
+	ratio, seedTime := rn.seedSettings(e.ctx, &Release{PluginID: "idx", IndexerID: "ix", MinimumRatio: 1}, true)
+	if ratio != 2.5 || seedTime != 3*time.Hour {
+		t.Errorf("seedSettings(full season) = %v, %v, want = 2.5, 3h0m0s", ratio, seedTime)
+	}
+	ratio, seedTime = rn.seedSettings(e.ctx, &Release{PluginID: "idx", IndexerID: "gone", MinimumRatio: 1, MinimumSeedTime: time.Hour}, false)
+	if ratio != 1 || seedTime != time.Hour {
+		t.Errorf("seedSettings(unknown indexer) = %v, %v, want = the release's 1, 1h0m0s", ratio, seedTime)
+	}
+}
+
+// TestIndexerSettings checks the decisions read the indexer's settings:
+// releases without its required flags or minimum seeders are not grabbed.
+func TestIndexerSettings(t *testing.T) {
+	e := newEnv(t)
+	it := e.addMovie()
+	e.indexer.settings = func(b *pluginv1.Indexer_builder) {
+		b.Tags = []string{"hd"}
+		b.RequiredFlags = []string{"freeleech"}
+		b.MinimumSeeders = new(int32(3))
+		b.MultiLanguages = []string{"French", "Klingon"}
+	}
+	e.indexer.set(e.both(), nil)
+	if err := e.rt.SearchMovie(e.ctx, it.ID, false); err != nil {
+		t.Fatal(err)
+	}
+	if got := e.client.titles(); len(got) != 0 {
+		t.Errorf("grabbed = %v, want = none without the required flags", got)
+	}
+
+	p := ports{rn: &run{rt: e.rt}}
+	info, err := p.Indexer(e.ctx, "idx/ix")
+	if err != nil || info == nil {
+		t.Fatalf("Indexer() = %v, %v, want = the indexer", info, err)
+	}
+	if info.Name != "Indexer" || !slices.Equal(info.Tags, []string{"hd"}) || !slices.Equal(info.RequiredFlags, []string{"freeleech"}) ||
+		info.MinimumSeeders != 3 || !slices.Equal(info.MultiLanguages, []release.Language{release.French}) {
+		t.Errorf("Indexer() = %+v, want = the indexer's settings, without unknown languages", info)
+	}
+	if byName, err := p.IndexerByName(e.ctx, "Indexer"); err != nil || byName == nil || byName.ID != "idx/ix" {
+		t.Errorf("IndexerByName(Indexer) = %+v, %v, want = idx/ix", byName, err)
+	}
+	if none, err := p.IndexerByName(e.ctx, "Other"); err != nil || none != nil {
+		t.Errorf("IndexerByName(Other) = %+v, %v, want = nil", none, err)
 	}
 }
 
