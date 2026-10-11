@@ -18,15 +18,21 @@ import (
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/gazellegames"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/hdbits"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/hdtorrents"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/headphones"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/immortalseed"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/iptorrents"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/knaben"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/libble"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/newznab"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/norbits"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/nzbindex"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/passthepopcorn"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/pixelhd"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/rutracker"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/speedapp"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentpotato"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentrss"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentscsv"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torznab"
 )
 
@@ -45,12 +51,18 @@ func codeDefinitions() []indexer.Definition {
 		gazellegames.Definition,
 		hdbits.Definition,
 		hdtorrents.Definition,
+		headphones.Definition,
 		immortalseed.Definition,
 		iptorrents.Definition,
+		knaben.Definition,
 		libble.Definition,
 		norbits.Definition,
+		nzbindex.Definition,
 		passthepopcorn.Definition,
 		pixelhd.Definition,
+		rutracker.Definition,
+		torrentpotato.Definition,
+		torrentscsv.Definition,
 	)
 	return defs
 }

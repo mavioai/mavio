@@ -421,6 +421,9 @@ flowchart TD
     - [ ] 其大小限制（`sizesmall`、`sizeslarge`），待查询携带 `minsize` 与 `maxsize` 后发送
   - [x] IPTorrents（`internal/sites/iptorrents`），使用浏览器的 Cookie 和 User-Agent 抓取其页面
   - [x] BitHDTV、HD-Torrents、ImmortalSeed、Libble、NorBits 和 PiXELHD（`internal/sites/<name>`），抓取其页面
+  - [x] Headphones、Knaben、NzbIndex、RuTracker、TorrentPotato 和 TorrentsCSV（`internal/sites/<name>`）
+    - [ ] 像 Prowlarr 的 NZB 校验那样，在转交前检查 NzbIndex、Headphones 和 Newznab 下载的 NZB
+    - [ ] RuTracker 的登录验证码：尚无界面显示它，自动登录会失败
   - [ ] 像 Prowlarr 存入设置那样跨重启保存 AvistaZ 与 SpeedApp 站点的 API 令牌；目前每次启动后重新登录
   - [ ] torrent 索引器的做种设置（最少做种数、分享率与做种时间），抓取时交给下载客户端
 - [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
