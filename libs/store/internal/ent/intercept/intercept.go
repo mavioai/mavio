@@ -11,6 +11,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/activity"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
@@ -180,6 +181,33 @@ func (f TraverseAuthSession) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.AuthSessionQuery", q)
+}
+
+// The BlockedTitleFunc type is an adapter to allow the use of ordinary function as a Querier.
+type BlockedTitleFunc func(context.Context, *ent.BlockedTitleQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f BlockedTitleFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.BlockedTitleQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.BlockedTitleQuery", q)
+}
+
+// The TraverseBlockedTitle type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseBlockedTitle func(context.Context, *ent.BlockedTitleQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseBlockedTitle) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseBlockedTitle) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.BlockedTitleQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.BlockedTitleQuery", q)
 }
 
 // The BlocklistEntryFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -1028,6 +1056,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.ActivityQuery, predicate.Activity, activity.OrderOption]{typ: ent.TypeActivity, tq: q}, nil
 	case *ent.AuthSessionQuery:
 		return &query[*ent.AuthSessionQuery, predicate.AuthSession, authsession.OrderOption]{typ: ent.TypeAuthSession, tq: q}, nil
+	case *ent.BlockedTitleQuery:
+		return &query[*ent.BlockedTitleQuery, predicate.BlockedTitle, blockedtitle.OrderOption]{typ: ent.TypeBlockedTitle, tq: q}, nil
 	case *ent.BlocklistEntryQuery:
 		return &query[*ent.BlocklistEntryQuery, predicate.BlocklistEntry, blocklistentry.OrderOption]{typ: ent.TypeBlocklistEntry, tq: q}, nil
 	case *ent.CreditQuery:

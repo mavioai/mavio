@@ -15,6 +15,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
@@ -40,6 +41,7 @@ type UserQuery struct {
 	withRequests           *RequestQuery
 	withIssues             *IssueQuery
 	withIssueComments      *IssueCommentQuery
+	withBlockedTitles      *BlockedTitleQuery
 	modifiers              []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -253,6 +255,28 @@ func (_q *UserQuery) QueryIssueComments() *IssueCommentQuery {
 	return query
 }
 
+// QueryBlockedTitles chains the current query on the "blocked_titles" edge.
+func (_q *UserQuery) QueryBlockedTitles() *BlockedTitleQuery {
+	query := (&BlockedTitleClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(blockedtitle.Table, blockedtitle.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.BlockedTitlesTable, user.BlockedTitlesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (_q *UserQuery) First(ctx context.Context) (*User, error) {
@@ -453,6 +477,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withRequests:           _q.withRequests.Clone(),
 		withIssues:             _q.withIssues.Clone(),
 		withIssueComments:      _q.withIssueComments.Clone(),
+		withBlockedTitles:      _q.withBlockedTitles.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -548,6 +573,17 @@ func (_q *UserQuery) WithIssueComments(opts ...func(*IssueCommentQuery)) *UserQu
 	return _q
 }
 
+// WithBlockedTitles tells the query-builder to eager-load the nodes that are connected to
+// the "blocked_titles" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithBlockedTitles(opts ...func(*BlockedTitleQuery)) *UserQuery {
+	query := (&BlockedTitleClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withBlockedTitles = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -626,7 +662,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [9]bool{
 			_q.withUserData != nil,
 			_q.withAuthSessions != nil,
 			_q.withPlaylists != nil,
@@ -635,6 +671,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withRequests != nil,
 			_q.withIssues != nil,
 			_q.withIssueComments != nil,
+			_q.withBlockedTitles != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -713,6 +750,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadIssueComments(ctx, query, nodes,
 			func(n *User) { n.Edges.IssueComments = []*IssueComment{} },
 			func(n *User, e *IssueComment) { n.Edges.IssueComments = append(n.Edges.IssueComments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withBlockedTitles; query != nil {
+		if err := _q.loadBlockedTitles(ctx, query, nodes,
+			func(n *User) { n.Edges.BlockedTitles = []*BlockedTitle{} },
+			func(n *User, e *BlockedTitle) { n.Edges.BlockedTitles = append(n.Edges.BlockedTitles, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -957,6 +1001,39 @@ func (_q *UserQuery) loadIssueComments(ctx context.Context, query *IssueCommentQ
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadBlockedTitles(ctx context.Context, query *BlockedTitleQuery, nodes []*User, init func(*User), assign func(*User, *BlockedTitle)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(blockedtitle.FieldUserID)
+	}
+	query.Where(predicate.BlockedTitle(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.BlockedTitlesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

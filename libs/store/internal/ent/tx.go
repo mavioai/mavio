@@ -18,6 +18,8 @@ type Tx struct {
 	Activity *ActivityClient
 	// AuthSession is the client for interacting with the AuthSession builders.
 	AuthSession *AuthSessionClient
+	// BlockedTitle is the client for interacting with the BlockedTitle builders.
+	BlockedTitle *BlockedTitleClient
 	// BlocklistEntry is the client for interacting with the BlocklistEntry builders.
 	BlocklistEntry *BlocklistEntryClient
 	// Credit is the client for interacting with the Credit builders.
@@ -214,6 +216,7 @@ func (tx *Tx) init() {
 	tx.APIKey = NewAPIKeyClient(tx.config)
 	tx.Activity = NewActivityClient(tx.config)
 	tx.AuthSession = NewAuthSessionClient(tx.config)
+	tx.BlockedTitle = NewBlockedTitleClient(tx.config)
 	tx.BlocklistEntry = NewBlocklistEntryClient(tx.config)
 	tx.Credit = NewCreditClient(tx.config)
 	tx.CustomFormat = NewCustomFormatClient(tx.config)

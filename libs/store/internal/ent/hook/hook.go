@@ -45,6 +45,18 @@ func (f AuthSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuthSessionMutation", m)
 }
 
+// The BlockedTitleFunc type is an adapter to allow the use of ordinary
+// function as BlockedTitle mutator.
+type BlockedTitleFunc func(context.Context, *ent.BlockedTitleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BlockedTitleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BlockedTitleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BlockedTitleMutation", m)
+}
+
 // The BlocklistEntryFunc type is an adapter to allow the use of ordinary
 // function as BlocklistEntry mutator.
 type BlocklistEntryFunc func(context.Context, *ent.BlocklistEntryMutation) (ent.Value, error)

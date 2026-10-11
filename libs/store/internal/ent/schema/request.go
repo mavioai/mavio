@@ -105,6 +105,42 @@ func (Issue) Indexes() []ent.Index {
 	}
 }
 
+// BlockedTitle holds the schema of core.BlockedTitle: one row per kind
+// and TMDB ID; deleting its administrator keeps it, without them.
+type BlockedTitle struct{ ent.Schema }
+
+// Annotations of BlockedTitle.
+func (BlockedTitle) Annotations() []schema.Annotation {
+	return []schema.Annotation{entsql.Annotation{Table: "blocked_titles"}}
+}
+
+// Fields of BlockedTitle.
+func (BlockedTitle) Fields() []ent.Field {
+	return []ent.Field{
+		idField(),
+		field.String("kind"),
+		field.Int("tmdb_id"),
+		field.String("title").Default(""),
+		field.UUID("user_id", core.ID{}).Optional().Nillable(),
+		field.Time("created_at"),
+	}
+}
+
+// Edges of BlockedTitle.
+func (BlockedTitle) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("user", User.Type).Ref("blocked_titles").Field("user_id").Unique(),
+	}
+}
+
+// Indexes of BlockedTitle.
+func (BlockedTitle) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("kind", "tmdb_id").Unique(),
+		index.Fields("created_at"),
+	}
+}
+
 // IssueComment holds the schema of core.IssueComment.
 type IssueComment struct{ ent.Schema }
 

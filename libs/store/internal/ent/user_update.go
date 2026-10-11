@@ -14,6 +14,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
@@ -290,6 +291,21 @@ func (_u *UserUpdate) AddIssueComments(v ...*IssueComment) *UserUpdate {
 	return _u.AddIssueCommentIDs(ids...)
 }
 
+// AddBlockedTitleIDs adds the "blocked_titles" edge to the BlockedTitle entity by IDs.
+func (_u *UserUpdate) AddBlockedTitleIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.AddBlockedTitleIDs(ids...)
+	return _u
+}
+
+// AddBlockedTitles adds the "blocked_titles" edges to the BlockedTitle entity.
+func (_u *UserUpdate) AddBlockedTitles(v ...*BlockedTitle) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddBlockedTitleIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -461,6 +477,27 @@ func (_u *UserUpdate) RemoveIssueComments(v ...*IssueComment) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveIssueCommentIDs(ids...)
+}
+
+// ClearBlockedTitles clears all "blocked_titles" edges to the BlockedTitle entity.
+func (_u *UserUpdate) ClearBlockedTitles() *UserUpdate {
+	_u.mutation.ClearBlockedTitles()
+	return _u
+}
+
+// RemoveBlockedTitleIDs removes the "blocked_titles" edge to BlockedTitle entities by IDs.
+func (_u *UserUpdate) RemoveBlockedTitleIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.RemoveBlockedTitleIDs(ids...)
+	return _u
+}
+
+// RemoveBlockedTitles removes "blocked_titles" edges to BlockedTitle entities.
+func (_u *UserUpdate) RemoveBlockedTitles(v ...*BlockedTitle) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveBlockedTitleIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -908,6 +945,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.BlockedTitlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedTitlesTable,
+			Columns: []string{user.BlockedTitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockedtitle.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedBlockedTitlesIDs(); len(nodes) > 0 && !_u.mutation.BlockedTitlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedTitlesTable,
+			Columns: []string{user.BlockedTitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockedtitle.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.BlockedTitlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedTitlesTable,
+			Columns: []string{user.BlockedTitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockedtitle.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -1182,6 +1264,21 @@ func (_u *UserUpdateOne) AddIssueComments(v ...*IssueComment) *UserUpdateOne {
 	return _u.AddIssueCommentIDs(ids...)
 }
 
+// AddBlockedTitleIDs adds the "blocked_titles" edge to the BlockedTitle entity by IDs.
+func (_u *UserUpdateOne) AddBlockedTitleIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.AddBlockedTitleIDs(ids...)
+	return _u
+}
+
+// AddBlockedTitles adds the "blocked_titles" edges to the BlockedTitle entity.
+func (_u *UserUpdateOne) AddBlockedTitles(v ...*BlockedTitle) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddBlockedTitleIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -1353,6 +1450,27 @@ func (_u *UserUpdateOne) RemoveIssueComments(v ...*IssueComment) *UserUpdateOne 
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveIssueCommentIDs(ids...)
+}
+
+// ClearBlockedTitles clears all "blocked_titles" edges to the BlockedTitle entity.
+func (_u *UserUpdateOne) ClearBlockedTitles() *UserUpdateOne {
+	_u.mutation.ClearBlockedTitles()
+	return _u
+}
+
+// RemoveBlockedTitleIDs removes the "blocked_titles" edge to BlockedTitle entities by IDs.
+func (_u *UserUpdateOne) RemoveBlockedTitleIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.RemoveBlockedTitleIDs(ids...)
+	return _u
+}
+
+// RemoveBlockedTitles removes "blocked_titles" edges to BlockedTitle entities.
+func (_u *UserUpdateOne) RemoveBlockedTitles(v ...*BlockedTitle) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveBlockedTitleIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1823,6 +1941,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(issuecomment.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.BlockedTitlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedTitlesTable,
+			Columns: []string{user.BlockedTitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockedtitle.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedBlockedTitlesIDs(); len(nodes) > 0 && !_u.mutation.BlockedTitlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedTitlesTable,
+			Columns: []string{user.BlockedTitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockedtitle.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.BlockedTitlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedTitlesTable,
+			Columns: []string{user.BlockedTitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockedtitle.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

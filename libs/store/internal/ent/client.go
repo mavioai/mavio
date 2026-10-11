@@ -19,6 +19,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/activity"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
@@ -63,6 +64,8 @@ type Client struct {
 	Activity *ActivityClient
 	// AuthSession is the client for interacting with the AuthSession builders.
 	AuthSession *AuthSessionClient
+	// BlockedTitle is the client for interacting with the BlockedTitle builders.
+	BlockedTitle *BlockedTitleClient
 	// BlocklistEntry is the client for interacting with the BlocklistEntry builders.
 	BlocklistEntry *BlocklistEntryClient
 	// Credit is the client for interacting with the Credit builders.
@@ -139,6 +142,7 @@ func (c *Client) init() {
 	c.APIKey = NewAPIKeyClient(c.config)
 	c.Activity = NewActivityClient(c.config)
 	c.AuthSession = NewAuthSessionClient(c.config)
+	c.BlockedTitle = NewBlockedTitleClient(c.config)
 	c.BlocklistEntry = NewBlocklistEntryClient(c.config)
 	c.Credit = NewCreditClient(c.config)
 	c.CustomFormat = NewCustomFormatClient(c.config)
@@ -265,6 +269,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		APIKey:             NewAPIKeyClient(cfg),
 		Activity:           NewActivityClient(cfg),
 		AuthSession:        NewAuthSessionClient(cfg),
+		BlockedTitle:       NewBlockedTitleClient(cfg),
 		BlocklistEntry:     NewBlocklistEntryClient(cfg),
 		Credit:             NewCreditClient(cfg),
 		CustomFormat:       NewCustomFormatClient(cfg),
@@ -318,6 +323,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		APIKey:             NewAPIKeyClient(cfg),
 		Activity:           NewActivityClient(cfg),
 		AuthSession:        NewAuthSessionClient(cfg),
+		BlockedTitle:       NewBlockedTitleClient(cfg),
 		BlocklistEntry:     NewBlocklistEntryClient(cfg),
 		Credit:             NewCreditClient(cfg),
 		CustomFormat:       NewCustomFormatClient(cfg),
@@ -378,13 +384,13 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.APIKey, c.Activity, c.AuthSession, c.BlocklistEntry, c.Credit, c.CustomFormat,
-		c.DelayProfile, c.DisplayPreferences, c.Download, c.FolderState,
-		c.HistoryEvent, c.Image, c.Issue, c.IssueComment, c.Item, c.ItemLink,
-		c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease,
-		c.Person, c.PluginConfig, c.QualityDefinition, c.QualityProfile,
-		c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting, c.Trickplay,
-		c.User, c.UserData, c.Wanted,
+		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry, c.Credit,
+		c.CustomFormat, c.DelayProfile, c.DisplayPreferences, c.Download,
+		c.FolderState, c.HistoryEvent, c.Image, c.Issue, c.IssueComment, c.Item,
+		c.ItemLink, c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource,
+		c.PendingRelease, c.Person, c.PluginConfig, c.QualityDefinition,
+		c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting,
+		c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Use(hooks...)
 	}
@@ -394,13 +400,13 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.APIKey, c.Activity, c.AuthSession, c.BlocklistEntry, c.Credit, c.CustomFormat,
-		c.DelayProfile, c.DisplayPreferences, c.Download, c.FolderState,
-		c.HistoryEvent, c.Image, c.Issue, c.IssueComment, c.Item, c.ItemLink,
-		c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease,
-		c.Person, c.PluginConfig, c.QualityDefinition, c.QualityProfile,
-		c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting, c.Trickplay,
-		c.User, c.UserData, c.Wanted,
+		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry, c.Credit,
+		c.CustomFormat, c.DelayProfile, c.DisplayPreferences, c.Download,
+		c.FolderState, c.HistoryEvent, c.Image, c.Issue, c.IssueComment, c.Item,
+		c.ItemLink, c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource,
+		c.PendingRelease, c.Person, c.PluginConfig, c.QualityDefinition,
+		c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting,
+		c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -415,6 +421,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Activity.mutate(ctx, m)
 	case *AuthSessionMutation:
 		return c.AuthSession.mutate(ctx, m)
+	case *BlockedTitleMutation:
+		return c.BlockedTitle.mutate(ctx, m)
 	case *BlocklistEntryMutation:
 		return c.BlocklistEntry.mutate(ctx, m)
 	case *CreditMutation:
@@ -910,6 +918,155 @@ func (c *AuthSessionClient) mutate(ctx context.Context, m *AuthSessionMutation) 
 		return (&AuthSessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AuthSession mutation op: %q", m.Op())
+	}
+}
+
+// BlockedTitleClient is a client for the BlockedTitle schema.
+type BlockedTitleClient struct {
+	config
+}
+
+// NewBlockedTitleClient returns a client for the BlockedTitle from the given config.
+func NewBlockedTitleClient(c config) *BlockedTitleClient {
+	return &BlockedTitleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `blockedtitle.Hooks(f(g(h())))`.
+func (c *BlockedTitleClient) Use(hooks ...Hook) {
+	c.hooks.BlockedTitle = append(c.hooks.BlockedTitle, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `blockedtitle.Intercept(f(g(h())))`.
+func (c *BlockedTitleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BlockedTitle = append(c.inters.BlockedTitle, interceptors...)
+}
+
+// Create returns a builder for creating a BlockedTitle entity.
+func (c *BlockedTitleClient) Create() *BlockedTitleCreate {
+	mutation := newBlockedTitleMutation(c.config, OpCreate)
+	return &BlockedTitleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BlockedTitle entities.
+func (c *BlockedTitleClient) CreateBulk(builders ...*BlockedTitleCreate) *BlockedTitleCreateBulk {
+	return &BlockedTitleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BlockedTitleClient) MapCreateBulk(slice any, setFunc func(*BlockedTitleCreate, int)) *BlockedTitleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BlockedTitleCreateBulk{err: fmt.Errorf("calling to BlockedTitleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BlockedTitleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BlockedTitleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BlockedTitle.
+func (c *BlockedTitleClient) Update() *BlockedTitleUpdate {
+	mutation := newBlockedTitleMutation(c.config, OpUpdate)
+	return &BlockedTitleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BlockedTitleClient) UpdateOne(_m *BlockedTitle) *BlockedTitleUpdateOne {
+	mutation := newBlockedTitleMutation(c.config, OpUpdateOne, withBlockedTitle(_m))
+	return &BlockedTitleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BlockedTitleClient) UpdateOneID(id core.ID) *BlockedTitleUpdateOne {
+	mutation := newBlockedTitleMutation(c.config, OpUpdateOne, withBlockedTitleID(id))
+	return &BlockedTitleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BlockedTitle.
+func (c *BlockedTitleClient) Delete() *BlockedTitleDelete {
+	mutation := newBlockedTitleMutation(c.config, OpDelete)
+	return &BlockedTitleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BlockedTitleClient) DeleteOne(_m *BlockedTitle) *BlockedTitleDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BlockedTitleClient) DeleteOneID(id core.ID) *BlockedTitleDeleteOne {
+	builder := c.Delete().Where(blockedtitle.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BlockedTitleDeleteOne{builder}
+}
+
+// Query returns a query builder for BlockedTitle.
+func (c *BlockedTitleClient) Query() *BlockedTitleQuery {
+	return &BlockedTitleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBlockedTitle},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BlockedTitle entity by its id.
+func (c *BlockedTitleClient) Get(ctx context.Context, id core.ID) (*BlockedTitle, error) {
+	return c.Query().Where(blockedtitle.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BlockedTitleClient) GetX(ctx context.Context, id core.ID) *BlockedTitle {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a BlockedTitle.
+func (c *BlockedTitleClient) QueryUser(_m *BlockedTitle) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blockedtitle.Table, blockedtitle.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, blockedtitle.UserTable, blockedtitle.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BlockedTitleClient) Hooks() []Hook {
+	return c.hooks.BlockedTitle
+}
+
+// Interceptors returns the client interceptors.
+func (c *BlockedTitleClient) Interceptors() []Interceptor {
+	return c.inters.BlockedTitle
+}
+
+func (c *BlockedTitleClient) mutate(ctx context.Context, m *BlockedTitleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BlockedTitleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BlockedTitleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BlockedTitleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BlockedTitleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown BlockedTitle mutation op: %q", m.Op())
 	}
 }
 
@@ -5641,6 +5798,22 @@ func (c *UserClient) QueryIssueComments(_m *User) *IssueCommentQuery {
 	return query
 }
 
+// QueryBlockedTitles queries the blocked_titles edge of a User.
+func (c *UserClient) QueryBlockedTitles(_m *User) *BlockedTitleQuery {
+	query := (&BlockedTitleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(blockedtitle.Table, blockedtitle.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.BlockedTitlesTable, user.BlockedTitlesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -5999,19 +6172,19 @@ func (c *WantedClient) mutate(ctx context.Context, m *WantedMutation) (Value, er
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		APIKey, Activity, AuthSession, BlocklistEntry, Credit, CustomFormat,
-		DelayProfile, DisplayPreferences, Download, FolderState, HistoryEvent, Image,
-		Issue, IssueComment, Item, ItemLink, ItemValue, Job, Library, MediaSegment,
-		MediaSource, PendingRelease, Person, PluginConfig, QualityDefinition,
-		QualityProfile, ReleaseProfile, RemotePathMapping, Request, Setting, Trickplay,
-		User, UserData, Wanted []ent.Hook
+		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credit,
+		CustomFormat, DelayProfile, DisplayPreferences, Download, FolderState,
+		HistoryEvent, Image, Issue, IssueComment, Item, ItemLink, ItemValue, Job,
+		Library, MediaSegment, MediaSource, PendingRelease, Person, PluginConfig,
+		QualityDefinition, QualityProfile, ReleaseProfile, RemotePathMapping, Request,
+		Setting, Trickplay, User, UserData, Wanted []ent.Hook
 	}
 	inters struct {
-		APIKey, Activity, AuthSession, BlocklistEntry, Credit, CustomFormat,
-		DelayProfile, DisplayPreferences, Download, FolderState, HistoryEvent, Image,
-		Issue, IssueComment, Item, ItemLink, ItemValue, Job, Library, MediaSegment,
-		MediaSource, PendingRelease, Person, PluginConfig, QualityDefinition,
-		QualityProfile, ReleaseProfile, RemotePathMapping, Request, Setting, Trickplay,
-		User, UserData, Wanted []ent.Interceptor
+		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credit,
+		CustomFormat, DelayProfile, DisplayPreferences, Download, FolderState,
+		HistoryEvent, Image, Issue, IssueComment, Item, ItemLink, ItemValue, Job,
+		Library, MediaSegment, MediaSource, PendingRelease, Person, PluginConfig,
+		QualityDefinition, QualityProfile, ReleaseProfile, RemotePathMapping, Request,
+		Setting, Trickplay, User, UserData, Wanted []ent.Interceptor
 	}
 )

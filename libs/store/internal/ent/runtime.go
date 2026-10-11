@@ -9,6 +9,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/activity"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
@@ -97,6 +98,16 @@ func init() {
 	authsessionDescID := authsessionFields[0].Descriptor()
 	// authsession.DefaultID holds the default value on creation for the id field.
 	authsession.DefaultID = authsessionDescID.Default.(func() core.ID)
+	blockedtitleFields := schema.BlockedTitle{}.Fields()
+	_ = blockedtitleFields
+	// blockedtitleDescTitle is the schema descriptor for title field.
+	blockedtitleDescTitle := blockedtitleFields[3].Descriptor()
+	// blockedtitle.DefaultTitle holds the default value on creation for the title field.
+	blockedtitle.DefaultTitle = blockedtitleDescTitle.Default.(string)
+	// blockedtitleDescID is the schema descriptor for id field.
+	blockedtitleDescID := blockedtitleFields[0].Descriptor()
+	// blockedtitle.DefaultID holds the default value on creation for the id field.
+	blockedtitle.DefaultID = blockedtitleDescID.Default.(func() core.ID)
 	blocklistentryFields := schema.BlocklistEntry{}.Fields()
 	_ = blocklistentryFields
 	// blocklistentryDescSize is the schema descriptor for size field.

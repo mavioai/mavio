@@ -650,6 +650,29 @@ func HasIssueCommentsWith(preds ...predicate.IssueComment) predicate.User {
 	})
 }
 
+// HasBlockedTitles applies the HasEdge predicate on the "blocked_titles" edge.
+func HasBlockedTitles() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, BlockedTitlesTable, BlockedTitlesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBlockedTitlesWith applies the HasEdge predicate on the "blocked_titles" edge with a given conditions (other predicates).
+func HasBlockedTitlesWith(preds ...predicate.BlockedTitle) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newBlockedTitlesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(sql.AndPredicates(predicates...))

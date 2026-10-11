@@ -63,9 +63,11 @@ type UserEdges struct {
 	Issues []*Issue `json:"issues,omitempty"`
 	// IssueComments holds the value of the issue_comments edge.
 	IssueComments []*IssueComment `json:"issue_comments,omitempty"`
+	// BlockedTitles holds the value of the blocked_titles edge.
+	BlockedTitles []*BlockedTitle `json:"blocked_titles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [9]bool
 }
 
 // UserDataOrErr returns the UserData value or an error if the edge
@@ -138,6 +140,15 @@ func (e UserEdges) IssueCommentsOrErr() ([]*IssueComment, error) {
 		return e.IssueComments, nil
 	}
 	return nil, &NotLoadedError{edge: "issue_comments"}
+}
+
+// BlockedTitlesOrErr returns the BlockedTitles value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) BlockedTitlesOrErr() ([]*BlockedTitle, error) {
+	if e.loadedTypes[8] {
+		return e.BlockedTitles, nil
+	}
+	return nil, &NotLoadedError{edge: "blocked_titles"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -292,6 +303,11 @@ func (_m *User) QueryIssues() *IssueQuery {
 // QueryIssueComments queries the "issue_comments" edge of the User entity.
 func (_m *User) QueryIssueComments() *IssueCommentQuery {
 	return NewUserClient(_m.config).QueryIssueComments(_m)
+}
+
+// QueryBlockedTitles queries the "blocked_titles" edge of the User entity.
+func (_m *User) QueryBlockedTitles() *BlockedTitleQuery {
+	return NewUserClient(_m.config).QueryBlockedTitles(_m)
 }
 
 // Update returns a builder for updating this User.

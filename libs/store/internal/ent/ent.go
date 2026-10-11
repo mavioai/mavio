@@ -15,6 +15,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/activity"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
@@ -109,6 +110,7 @@ func checkColumn(t, c string) error {
 			apikey.Table:             apikey.ValidColumn,
 			activity.Table:           activity.ValidColumn,
 			authsession.Table:        authsession.ValidColumn,
+			blockedtitle.Table:       blockedtitle.ValidColumn,
 			blocklistentry.Table:     blocklistentry.ValidColumn,
 			credit.Table:             credit.ValidColumn,
 			customformat.Table:       customformat.ValidColumn,

@@ -90,6 +90,41 @@ var (
 			},
 		},
 	}
+	// BlockedTitlesColumns holds the columns for the "blocked_titles" table.
+	BlockedTitlesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "tmdb_id", Type: field.TypeInt},
+		{Name: "title", Type: field.TypeString, Default: ""},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// BlockedTitlesTable holds the schema information for the "blocked_titles" table.
+	BlockedTitlesTable = &schema.Table{
+		Name:       "blocked_titles",
+		Columns:    BlockedTitlesColumns,
+		PrimaryKey: []*schema.Column{BlockedTitlesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "blocked_titles_users_blocked_titles",
+				Columns:    []*schema.Column{BlockedTitlesColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "blockedtitle_kind_tmdb_id",
+				Unique:  true,
+				Columns: []*schema.Column{BlockedTitlesColumns[1], BlockedTitlesColumns[2]},
+			},
+			{
+				Name:    "blockedtitle_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{BlockedTitlesColumns[4]},
+			},
+		},
+	}
 	// BlocklistColumns holds the columns for the "blocklist" table.
 	BlocklistColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1237,6 +1272,7 @@ var (
 		APIKeysTable,
 		ActivitiesTable,
 		AuthSessionsTable,
+		BlockedTitlesTable,
 		BlocklistTable,
 		CreditsTable,
 		CustomFormatsTable,
@@ -1282,6 +1318,10 @@ func init() {
 	AuthSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	AuthSessionsTable.Annotation = &entsql.Annotation{
 		Table: "auth_sessions",
+	}
+	BlockedTitlesTable.ForeignKeys[0].RefTable = UsersTable
+	BlockedTitlesTable.Annotation = &entsql.Annotation{
+		Table: "blocked_titles",
 	}
 	BlocklistTable.ForeignKeys[0].RefTable = ItemsTable
 	BlocklistTable.Annotation = &entsql.Annotation{
