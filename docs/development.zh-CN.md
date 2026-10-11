@@ -65,6 +65,8 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 
 `libs/client-ts` 与 `apps/web` 同样有 `typecheck`，`libs/client-ts` 有 `test`（Vitest），`apps/web` 有 `build`（Vite），它把 Web UI 写入 `apps/server/internal/webui/dist`。服务端的 `build` 与 `dist` 依赖它（`apps/server/project.json`），使二进制内嵌该 UI；直接 `go build` 则内嵌该目录现有的内容，目录中只有 `.gitkeep` 时，服务端提供一个说明未随 UI 构建的页面。`pnpm --filter @mavio/web dev` 用 Vite 提供 UI，并把其 API 调用发往 8686 端口上的服务端。
 
+Apple 各项目需要 Xcode，只在 macOS 上构建；它们带有标签 `platform:apple`，Linux 与 Windows 的 CI 任务将其排除。`libs/apple` 有 `core`，运行 `scripts/build-core.sh`：为每个 Apple 目标构建 `mavio-uniffi`，把每个共享库包装为动态 framework，写出 `build/MavioCoreFFI.xcframework`，以及 UniFFI 生成的 Swift API（`build/MavioCore`）；采用 framework 而非静态库，是因为应用中其他 Rust 代码的静态库（AetherEngine 的 LibDovi）各自带有 Rust 标准库，其符号会冲突。其 `build` 与 `test` 在 `core` 之后运行 `swift build` 与 `swift test`，`lint` 以仓库的 `.swift-format` 运行 `swift format lint --strict`。`apps/ios`、`apps/tvos` 与 `apps/macos` 有 `build`（不签名的 `xcodebuild`，iPhone 与 Apple TV 面向模拟器；只构建 arm64，与 AetherEngine 的模拟器库一致）、`lint`，以及 `generate`：它用 `libs/apple/scripts/gen-project.py` 写出应用的 `Mavio.xcodeproj`，该工程提交入库、不手工编辑，其源码是同步文件夹 `Mavio/`，添加文件无须改动工程。
+
 ### 2.3 常用命令
 ```bash
 pnpm nx run-many -t build test lint tidy-check     # 全量检查
@@ -175,12 +177,13 @@ go build -o plugin .                                                     # 子�
 `.github/workflows/ci.yml` 在推送到 `main` 和提交 PR 时运行：
 * **check**（Linux）：`nx affected -t buf-lint lint tidy-check typecheck build test`；重新生成代码，有任何差异即失败；PR 上对照目标分支运行 `buf breaking`。
 * **test**：在 linux arm64、macOS、Windows 上运行 `nx run-many -t test build`。
+* **apple**（macOS）：对 Apple 各项目运行 `nx run-many -t lint build test`，生成的 Xcode 工程与 `generate` 写出的不一致时失败。
 * **media**（Linux、macOS）：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
 
 * **dist**（Linux）：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台。
 * **image**（Linux）：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
 
-CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check** 与 **test** 缓存 Cargo 的构建（`Swatinem/rust-cache`）。
+CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check**、**test** 与 **apple** 缓存 Cargo 的构建（`Swatinem/rust-cache`）。
 
 ---
 

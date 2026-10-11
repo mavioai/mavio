@@ -149,10 +149,10 @@ flowchart LR
 ### 5.2 边界
 * 不含 GUI、图形与解码：视图模型只含状态，不含布局；核心从不接触视频表面或解码器，也不探测能力；应用把自己的 `ClientCapabilities` 传入。
 * 基于 Tokio 的异步 API；每个调用都可取消。
-* 目标平台：`aarch64-apple-ios`、`aarch64-apple-ios-sim`、`aarch64-apple-tvos`、`aarch64-apple-darwin`、`x86_64-apple-darwin`、`aarch64-linux-android`、`armv7-linux-androideabi`（许多 Android TV 设备运行 32 位系统）、`x86_64-linux-android`、`x86_64-pc-windows-msvc`、`aarch64-pc-windows-msvc`、`x86_64-unknown-linux-gnu`、`aarch64-unknown-linux-gnu`。
+* 目标平台：`aarch64-apple-ios`、`aarch64-apple-ios-sim`、`aarch64-apple-tvos`、`aarch64-apple-tvos-sim`、`aarch64-apple-darwin`、`x86_64-apple-darwin`、`aarch64-linux-android`、`armv7-linux-androideabi`（许多 Android TV 设备运行 32 位系统）、`x86_64-linux-android`、`x86_64-pc-windows-msvc`、`aarch64-pc-windows-msvc`、`x86_64-unknown-linux-gnu`、`aarch64-unknown-linux-gnu`。
 
 ### 5.3 绑定
-* **Swift**：UniFFI 生成 Swift API，与静态库一起打包为 `MavioKit` 所依赖的 XCFramework。
+* **Swift**：UniFFI 生成 Swift API，与共享库一起打包为 `MavioKit` 所依赖的、由动态 framework 组成的 XCFramework。
 * **Kotlin**：UniFFI 生成 Kotlin API，与共享库一起打包在 `libs/android` 的 `core` 模块中。
 * **Go**：一个由少量函数组成的 C ABI，参数与返回值是字节缓冲区，其中是核心 API 的 protobuf 消息，定义在 `libs/client-rust/proto`；结果与事件通过同一个回调返回，因此 purego 在整个进程中只需创建一个回调。Go API 由这些消息生成。
 

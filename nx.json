@@ -34,6 +34,12 @@
       "{projectRoot}/Cargo.lock",
       "{projectRoot}/rust-toolchain.toml"
     ],
+    "swift": [
+      "{projectRoot}/**/*.swift",
+      "{projectRoot}/**/*.xcassets/**/*",
+      "{projectRoot}/**/*.xcstrings",
+      "{projectRoot}/Package.resolved"
+    ],
     "rustGen": [
       "{projectRoot}/gen/rust/**/*"
     ]

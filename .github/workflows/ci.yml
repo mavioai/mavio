@@ -31,10 +31,11 @@ jobs:
           workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
       - uses: nrwl/nx-set-shas@v4
-      - run: pnpm nx affected -t buf-lint lint tidy-check typecheck build test --output-style=static
+      # The Apple projects build only on macOS, in the apple job.
+      - run: pnpm nx affected -t buf-lint lint tidy-check typecheck build test --exclude 'tag:platform:apple' --output-style=static
       - name: Generated code is up to date
         run: |
-          pnpm nx run-many -t generate --output-style=static
+          pnpm nx run-many -t generate --exclude 'tag:platform:apple' --output-style=static
           git diff --exit-code
       - name: Protobuf breaking changes
         if: github.event_name == 'pull_request'
@@ -56,7 +57,24 @@ jobs:
         with:
           workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx run-many -t typecheck test build --output-style=static
+      - run: pnpm nx run-many -t typecheck test build --exclude 'tag:platform:apple' --output-style=static
+
+  apple:
+    name: Apple
+    needs: check
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: libs/client-rust
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm nx run-many -t lint build test --projects 'tag:platform:apple' --output-style=static
+      - name: Generated projects are up to date
+        run: |
+          pnpm nx run-many -t generate --projects 'tag:platform:apple' --output-style=static
+          git diff --exit-code
 
   media:
     name: Media integration (${{ matrix.os }})

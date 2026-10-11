@@ -65,6 +65,8 @@ The scripts of a `package.json` are targets too: `libs/proto` and `libs/design` 
 
 `libs/client-ts` and `apps/web` have `typecheck` as well, `libs/client-ts` has `test` (Vitest) and `apps/web` has `build` (Vite), which writes the web UI into `apps/server/internal/webui/dist`. The server's `build` and `dist` depend on it (`apps/server/project.json`), so that the binaries embed the UI; a plain `go build` embeds whatever the directory holds, and with only its `.gitkeep` the server serves a page saying it was built without the UI. `pnpm --filter @mavio/web dev` serves the UI with Vite, sending its API calls to a server on port 8686.
 
+The Apple projects need Xcode and build only on macOS; they carry the tag `platform:apple`, which the Linux and Windows CI jobs exclude. `libs/apple` has `core`, which runs `scripts/build-core.sh`: it builds `mavio-uniffi` for every Apple target, wraps each shared library in a dynamic framework, and writes `build/MavioCoreFFI.xcframework` with the Swift API UniFFI generates (`build/MavioCore`); a framework rather than a static library, because static libraries of other Rust code in an app (AetherEngine's LibDovi) carry their own Rust standard library, whose symbols would clash. Its `build` and `test` run `swift build` and `swift test` after `core`, and `lint` runs `swift format lint --strict` with the repository's `.swift-format`. `apps/ios`, `apps/tvos` and `apps/macos` have `build` (`xcodebuild` without signing, for the simulator on iPhone and Apple TV; arm64 only, as AetherEngine's simulator libraries are), `lint`, and `generate`, which writes the app's `Mavio.xcodeproj` with `libs/apple/scripts/gen-project.py`: the project is committed and never edited by hand, and its sources are the synchronized folder `Mavio/`, so adding a file needs no change to it.
+
 ### 2.3 Common Commands
 ```bash
 pnpm nx run-many -t build test lint tidy-check     # Check everything
@@ -175,12 +177,13 @@ A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.
 `.github/workflows/ci.yml` runs on pushes to `main` and on pull requests:
 * **check** (Linux): `nx affected -t buf-lint lint tidy-check typecheck build test`; regenerates code and fails on any diff; runs `buf breaking` against the base branch on pull requests.
 * **test**: `nx run-many -t test build` on linux arm64, macOS and Windows.
+* **apple** (macOS): `nx run-many -t lint build test` over the Apple projects, and fails when their generated Xcode projects differ from what `generate` writes.
 * **media** (Linux, macOS): installs jellyfin-ffmpeg, generates the fixtures and runs the `media`, `streaming` and `server` tests without the Nx cache, so the ffmpeg integration and smoke tests run on the runners' hardware.
 
 * **dist** (Linux): `nx run server:dist`, so the server cross-compiles for every supported platform.
 * **image** (Linux): builds the container image for linux/amd64 and linux/arm64 without pushing it, then runs the amd64 image until its health check passes.
 
-Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`); jobs other than **media** leave jellyfin-ffmpeg out (`MISE_DISABLE_TOOLS`). Rust comes from `rust-toolchain.toml` through the runners' rustup, and **check** and **test** cache Cargo's builds (`Swatinem/rust-cache`).
+Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`); jobs other than **media** leave jellyfin-ffmpeg out (`MISE_DISABLE_TOOLS`). Rust comes from `rust-toolchain.toml` through the runners' rustup, and **check**, **test** and **apple** cache Cargo's builds (`Swatinem/rust-cache`).
 
 ---
 

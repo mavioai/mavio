@@ -1,0 +1,62 @@
+{
+  "name": "macos",
+  "tags": [
+    "platform:apple"
+  ],
+  "implicitDependencies": [
+    "apple"
+  ],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "xcodebuild -project Mavio.xcodeproj -scheme Mavio -destination 'generic/platform=macOS' -derivedDataPath ../../dist/xcode/macos CODE_SIGNING_ALLOWED=NO -quiet build",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "apple"
+          ],
+          "target": "core"
+        }
+      ],
+      "inputs": [
+        "swift",
+        "^swift",
+        "{projectRoot}/Mavio.xcodeproj/**/*",
+        {
+          "dependentTasksOutputFiles": "**/*",
+          "transitive": true
+        }
+      ],
+      "cache": true
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "swift format lint --strict --recursive Mavio",
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "swift",
+        "{workspaceRoot}/.swift-format"
+      ],
+      "cache": true
+    },
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "python3 ../../libs/apple/scripts/gen-project.py macos",
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "{workspaceRoot}/libs/apple/scripts/gen-project.py"
+      ],
+      "outputs": [
+        "{projectRoot}/Mavio.xcodeproj"
+      ],
+      "cache": true
+    }
+  }
+}

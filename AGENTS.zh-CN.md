@@ -42,6 +42,8 @@ libs/acquire/         资源获取引擎：档案、决策、搜索、队列、�
 plugins/<name>/       插件（默认编译为 wasip1 WASM）
 apps/web/             Web UI（React + Vite），构建到 apps/server/internal/webui/dist，由服务端内嵌
 libs/client-ts/       Web UI 的 Connect 客户端与 TanStack Query hooks
+apps/{ios,tvos,macos}/  Apple 各应用（SwiftUI）；其 Xcode 工程由 libs/apple/scripts/gen-project.py 生成
+libs/apple/           Apple 各应用共享的 Swift 包：MavioKit、MavioPlayer、MavioUI，以及核心的 XCFramework
 libs/client-rust/     客户端的 Rust 共享核心（Cargo workspace；api 为生成的消息与客户端）
 libs/design/          客户端的设计系统：tokens、图标、字符串、组件规范；gen/ 为每个客户端生成
 tools/nx-go/          本地 Nx 插件：把每个 go.mod 推断为 Nx 项目并生成依赖图
@@ -71,7 +73,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 
 每个 Go 模块也能脱离 Nx 直接使用：`cd libs/naming && go test ./...`。
 
-每个 Go 项目都有这些推断出来的 Nx 目标：`build`（`CGO_ENABLED=0`）、`test`、`bench`、`lint`、`tidy-check`（`GOWORK=off go mod tidy -diff`）。`libs/proto` 另有 `generate` 和 `buf-lint`；它生成 Go、TypeScript（`gen/ts`，即 npm 包 `@mavio/proto`）与 Rust（`gen/rust`，由 `libs/client-rust/api` 包含）。每个 Cargo workspace 有 `build`、`test`、`bench` 与 `lint`（`cargo fmt --check` 加上 `-D warnings` 的 clippy）。`libs/proto`、`libs/design`、`libs/client-ts` 与 `apps/web` 有 `typecheck`（TypeScript），`libs/client-ts` 有 `test`（Vitest），`apps/web` 有 `build`（Vite），服务端的 `build` 与 `dist` 依赖它，`libs/design` 还有 `generate`（`pnpm nx run design:generate`，其 `gen/` 提交入库）。详见 [docs/development.zh-CN.md](docs/development.zh-CN.md) §2。
+每个 Go 项目都有这些推断出来的 Nx 目标：`build`（`CGO_ENABLED=0`）、`test`、`bench`、`lint`、`tidy-check`（`GOWORK=off go mod tidy -diff`）。`libs/proto` 另有 `generate` 和 `buf-lint`；它生成 Go、TypeScript（`gen/ts`，即 npm 包 `@mavio/proto`）与 Rust（`gen/rust`，由 `libs/client-rust/api` 包含）。每个 Cargo workspace 有 `build`、`test`、`bench` 与 `lint`（`cargo fmt --check` 加上 `-D warnings` 的 clippy）。`libs/proto`、`libs/design`、`libs/client-ts` 与 `apps/web` 有 `typecheck`（TypeScript），`libs/client-ts` 有 `test`（Vitest），`apps/web` 有 `build`（Vite），服务端的 `build` 与 `dist` 依赖它，`libs/design` 还有 `generate`（`pnpm nx run design:generate`，其 `gen/` 提交入库）。Apple 各项目（标签 `platform:apple`）只在 macOS 上构建：`libs/apple` 有 `core`（把共享核心构建为 `build/MavioCoreFFI.xcframework`）、`build` 与 `test`（SwiftPM）以及 `lint`（`swift format`）；`apps/ios`、`apps/tvos` 与 `apps/macos` 有 `build`（不签名的 `xcodebuild`）、`lint` 与 `generate`（其提交入库的 Xcode 工程）。详见 [docs/development.zh-CN.md](docs/development.zh-CN.md) §2。
 
 ## Go 约定
 

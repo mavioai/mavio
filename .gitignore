@@ -24,3 +24,6 @@ apps/server/internal/webui/dist/*
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Xcode
+xcuserdata/

@@ -1,0 +1,76 @@
+{
+  "name": "apple",
+  "tags": [
+    "platform:apple"
+  ],
+  "implicitDependencies": [
+    "client-rust",
+    "design"
+  ],
+  "targets": {
+    "core": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "sh scripts/build-core.sh",
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "{projectRoot}/scripts/build-core.sh",
+        "^rust"
+      ],
+      "outputs": [
+        "{projectRoot}/build"
+      ],
+      "cache": true
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "swift build",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        "core"
+      ],
+      "inputs": [
+        "swift",
+        "^swift",
+        {
+          "dependentTasksOutputFiles": "**/*"
+        }
+      ],
+      "cache": true
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "swift test",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        "core"
+      ],
+      "inputs": [
+        "swift",
+        "^swift",
+        {
+          "dependentTasksOutputFiles": "**/*"
+        }
+      ],
+      "cache": true
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "swift format lint --strict --recursive Package.swift Sources Tests ../design/Package.swift",
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "swift",
+        "{workspaceRoot}/.swift-format",
+        "{workspaceRoot}/libs/design/Package.swift"
+      ],
+      "cache": true
+    }
+  }
+}
