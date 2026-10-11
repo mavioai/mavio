@@ -10,8 +10,44 @@ import (
 	"github.com/mavioai/mavio/libs/acquire/organize"
 	"github.com/mavioai/mavio/libs/acquire/series"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/release"
 )
+
+func TestAggregateEpisodeQuality(t *testing.T) {
+	video := func(w, h int) *library.ProbeResult {
+		return &library.ProbeResult{Source: core.MediaSource{Streams: []core.MediaStream{{Kind: core.StreamAudio}, {Kind: core.StreamVideo, Width: w, Height: h}}}}
+	}
+	parse := release.ParseSeriesTitle
+	for _, tt := range []struct {
+		name                   string
+		file, folder, download string
+		probe                  *library.ProbeResult
+		want                   release.Quality
+	}{
+		{name: "file name", file: "Show.S01E01.720p.HDTV.x264-GRP", download: "Show.S01.1080p.WEB-DL-GRP", want: release.HDTV720p},
+		{name: "resolution from the video", file: "Show.S01E01.HDTV.x264-GRP", probe: video(1280, 720), want: release.HDTV720p},
+		{name: "video over the name", file: "Show.S01E01.720p.WEB-DL-GRP", probe: video(1920, 1080), want: release.WEBDL1080p},
+		{name: "source from the folder", file: "Show.S01E01.1080p", folder: "Show.S01E01.1080p.WEB-DL-GRP", want: release.WEBDL1080p},
+		{name: "grabbed release only", download: "Show.S01E01.720p.WEB-DL-GRP", want: release.WEBDL720p},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			var file, folder, download *release.ParsedEpisodeInfo
+			if tt.file != "" {
+				file = parse(tt.file)
+			}
+			if tt.folder != "" {
+				folder = parse(tt.folder)
+			}
+			if tt.download != "" {
+				download = parse(tt.download)
+			}
+			if got := aggregateQuality(file, folder, download, tt.probe, release.ParseQuality(tt.download, release.Series)); got.Quality != tt.want {
+				t.Errorf("aggregateQuality() = %v, want = %v", got.Quality, tt.want)
+			}
+		})
+	}
+}
 
 // Ports Sonarr's EpisodeTitleSpecificationFixture.
 func TestMissingEpisodeTitle(t *testing.T) {
