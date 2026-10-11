@@ -16,7 +16,10 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
+	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -224,6 +227,51 @@ func (_c *UserCreate) AddAPIKeys(v ...*APIKey) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddAPIKeyIDs(ids...)
+}
+
+// AddRequestIDs adds the "requests" edge to the Request entity by IDs.
+func (_c *UserCreate) AddRequestIDs(ids ...core.ID) *UserCreate {
+	_c.mutation.AddRequestIDs(ids...)
+	return _c
+}
+
+// AddRequests adds the "requests" edges to the Request entity.
+func (_c *UserCreate) AddRequests(v ...*Request) *UserCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddRequestIDs(ids...)
+}
+
+// AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
+func (_c *UserCreate) AddIssueIDs(ids ...core.ID) *UserCreate {
+	_c.mutation.AddIssueIDs(ids...)
+	return _c
+}
+
+// AddIssues adds the "issues" edges to the Issue entity.
+func (_c *UserCreate) AddIssues(v ...*Issue) *UserCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddIssueIDs(ids...)
+}
+
+// AddIssueCommentIDs adds the "issue_comments" edge to the IssueComment entity by IDs.
+func (_c *UserCreate) AddIssueCommentIDs(ids ...core.ID) *UserCreate {
+	_c.mutation.AddIssueCommentIDs(ids...)
+	return _c
+}
+
+// AddIssueComments adds the "issue_comments" edges to the IssueComment entity.
+func (_c *UserCreate) AddIssueComments(v ...*IssueComment) *UserCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddIssueCommentIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -470,6 +518,54 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(apikey.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.RequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestsTable,
+			Columns: []string{user.RequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.IssuesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.IssueCommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssueCommentsTable,
+			Columns: []string{user.IssueCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issuecomment.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

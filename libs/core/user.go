@@ -33,6 +33,9 @@ func (u *User) Validate() error {
 		return fmt.Errorf("%w: user %q has neither a password nor an auth provider", ErrInvalid, u.Name)
 	case !u.Preferences.SubtitleMode.Valid():
 		return fmt.Errorf("%w: user %q has unknown subtitle mode %q", ErrInvalid, u.Name, u.Preferences.SubtitleMode)
+	case u.Policy.MovieQuota != nil && u.Policy.MovieQuota.Validate() != nil,
+		u.Policy.SeriesQuota != nil && u.Policy.SeriesQuota.Validate() != nil:
+		return fmt.Errorf("%w: user %q has a negative request quota", ErrInvalid, u.Name)
 	}
 	return nil
 }
@@ -55,6 +58,12 @@ type UserPolicy struct {
 	MaxStreamingBitrate int64
 	// MaxSessions limits concurrent playback sessions; zero means unlimited.
 	MaxSessions int
+	// Requests are what the user may request and report; administrators
+	// may do all.
+	Requests RequestPermissions
+	// MovieQuota and SeriesQuota bound the user's requests; nil uses the
+	// server's RequestSettings.
+	MovieQuota, SeriesQuota *Quota
 }
 
 // CanAccessLibrary reports whether the policy allows the library.

@@ -36,6 +36,10 @@ type Tx struct {
 	HistoryEvent *HistoryEventClient
 	// Image is the client for interacting with the Image builders.
 	Image *ImageClient
+	// Issue is the client for interacting with the Issue builders.
+	Issue *IssueClient
+	// IssueComment is the client for interacting with the IssueComment builders.
+	IssueComment *IssueCommentClient
 	// Item is the client for interacting with the Item builders.
 	Item *ItemClient
 	// ItemLink is the client for interacting with the ItemLink builders.
@@ -64,6 +68,8 @@ type Tx struct {
 	ReleaseProfile *ReleaseProfileClient
 	// RemotePathMapping is the client for interacting with the RemotePathMapping builders.
 	RemotePathMapping *RemotePathMappingClient
+	// Request is the client for interacting with the Request builders.
+	Request *RequestClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
 	// Trickplay is the client for interacting with the Trickplay builders.
@@ -217,6 +223,8 @@ func (tx *Tx) init() {
 	tx.FolderState = NewFolderStateClient(tx.config)
 	tx.HistoryEvent = NewHistoryEventClient(tx.config)
 	tx.Image = NewImageClient(tx.config)
+	tx.Issue = NewIssueClient(tx.config)
+	tx.IssueComment = NewIssueCommentClient(tx.config)
 	tx.Item = NewItemClient(tx.config)
 	tx.ItemLink = NewItemLinkClient(tx.config)
 	tx.ItemValue = NewItemValueClient(tx.config)
@@ -231,6 +239,7 @@ func (tx *Tx) init() {
 	tx.QualityProfile = NewQualityProfileClient(tx.config)
 	tx.ReleaseProfile = NewReleaseProfileClient(tx.config)
 	tx.RemotePathMapping = NewRemotePathMappingClient(tx.config)
+	tx.Request = NewRequestClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
 	tx.Trickplay = NewTrickplayClient(tx.config)
 	tx.User = NewUserClient(tx.config)

@@ -167,6 +167,8 @@ const (
 	EdgeBlocklist = "blocklist"
 	// EdgePendingReleases holds the string denoting the pending_releases edge name in mutations.
 	EdgePendingReleases = "pending_releases"
+	// EdgeIssues holds the string denoting the issues edge name in mutations.
+	EdgeIssues = "issues"
 	// Table holds the table name of the item in the database.
 	Table = "items"
 	// LibraryTable is the table that holds the library relation/edge.
@@ -297,6 +299,13 @@ const (
 	PendingReleasesInverseTable = "pending_releases"
 	// PendingReleasesColumn is the table column denoting the pending_releases relation/edge.
 	PendingReleasesColumn = "item_id"
+	// IssuesTable is the table that holds the issues relation/edge.
+	IssuesTable = "issues"
+	// IssuesInverseTable is the table name for the Issue entity.
+	// It exists in this package in order to avoid circular dependency with the "issue" package.
+	IssuesInverseTable = "issues"
+	// IssuesColumn is the table column denoting the issues relation/edge.
+	IssuesColumn = "item_id"
 )
 
 // Columns holds all SQL columns for item fields.
@@ -936,6 +945,20 @@ func ByPendingReleases(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newPendingReleasesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByIssuesCount orders the results by issues count.
+func ByIssuesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIssuesStep(), opts...)
+	}
+}
+
+// ByIssues orders the results by issues terms.
+func ByIssues(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIssuesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newLibraryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -1074,5 +1097,12 @@ func newPendingReleasesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PendingReleasesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, PendingReleasesTable, PendingReleasesColumn),
+	)
+}
+func newIssuesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IssuesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, IssuesTable, IssuesColumn),
 	)
 }

@@ -48,6 +48,9 @@ func (User) Edges() []ent.Edge {
 		edge.To("playlists", Item.Type).Annotations(cascade()),
 		edge.To("display_preferences", DisplayPreferences.Type).Annotations(cascade()),
 		edge.To("api_keys", APIKey.Type).Annotations(cascade()),
+		edge.To("requests", Request.Type).Annotations(cascade()),
+		edge.To("issues", Issue.Type).Annotations(cascade()),
+		edge.To("issue_comments", IssueComment.Type).Annotations(cascade()),
 	}
 }
 

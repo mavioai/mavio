@@ -181,6 +181,9 @@ func (r activities) List(ctx context.Context, q core.ActivityQuery) (core.Page[c
 	if q.MinSeverity != "" {
 		where = append(where, activity.SeverityIn(severitiesFrom(q.MinSeverity)...))
 	}
+	if len(q.Types) > 0 {
+		where = append(where, activity.TypeIn(q.Types...))
+	}
 	query := r.s.read.Activity.Query().Where(where...)
 	total, err := query.Clone().Count(ctx)
 	if err != nil {

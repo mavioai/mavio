@@ -18,6 +18,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -1321,6 +1322,21 @@ func (_u *ItemUpdate) AddPendingReleases(v ...*PendingRelease) *ItemUpdate {
 	return _u.AddPendingReleaseIDs(ids...)
 }
 
+// AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
+func (_u *ItemUpdate) AddIssueIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddIssueIDs(ids...)
+	return _u
+}
+
+// AddIssues adds the "issues" edges to the Issue entity.
+func (_u *ItemUpdate) AddIssues(v ...*Issue) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueIDs(ids...)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_u *ItemUpdate) Mutation() *ItemMutation {
 	return _u.mutation
@@ -1669,6 +1685,27 @@ func (_u *ItemUpdate) RemovePendingReleases(v ...*PendingRelease) *ItemUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemovePendingReleaseIDs(ids...)
+}
+
+// ClearIssues clears all "issues" edges to the Issue entity.
+func (_u *ItemUpdate) ClearIssues() *ItemUpdate {
+	_u.mutation.ClearIssues()
+	return _u
+}
+
+// RemoveIssueIDs removes the "issues" edge to Issue entities by IDs.
+func (_u *ItemUpdate) RemoveIssueIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveIssueIDs(ids...)
+	return _u
+}
+
+// RemoveIssues removes "issues" edges to Issue entities.
+func (_u *ItemUpdate) RemoveIssues(v ...*Issue) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -2818,6 +2855,51 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.IssuesTable,
+			Columns: []string{item.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssuesIDs(); len(nodes) > 0 && !_u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.IssuesTable,
+			Columns: []string{item.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssuesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.IssuesTable,
+			Columns: []string{item.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -4122,6 +4204,21 @@ func (_u *ItemUpdateOne) AddPendingReleases(v ...*PendingRelease) *ItemUpdateOne
 	return _u.AddPendingReleaseIDs(ids...)
 }
 
+// AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
+func (_u *ItemUpdateOne) AddIssueIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddIssueIDs(ids...)
+	return _u
+}
+
+// AddIssues adds the "issues" edges to the Issue entity.
+func (_u *ItemUpdateOne) AddIssues(v ...*Issue) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueIDs(ids...)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_u *ItemUpdateOne) Mutation() *ItemMutation {
 	return _u.mutation
@@ -4470,6 +4567,27 @@ func (_u *ItemUpdateOne) RemovePendingReleases(v ...*PendingRelease) *ItemUpdate
 		ids[i] = v[i].ID
 	}
 	return _u.RemovePendingReleaseIDs(ids...)
+}
+
+// ClearIssues clears all "issues" edges to the Issue entity.
+func (_u *ItemUpdateOne) ClearIssues() *ItemUpdateOne {
+	_u.mutation.ClearIssues()
+	return _u
+}
+
+// RemoveIssueIDs removes the "issues" edge to Issue entities by IDs.
+func (_u *ItemUpdateOne) RemoveIssueIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveIssueIDs(ids...)
+	return _u
+}
+
+// RemoveIssues removes "issues" edges to Issue entities.
+func (_u *ItemUpdateOne) RemoveIssues(v ...*Issue) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueIDs(ids...)
 }
 
 // Where appends a list predicates to the ItemUpdate builder.
@@ -5649,6 +5767,51 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.IssuesTable,
+			Columns: []string{item.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssuesIDs(); len(nodes) > 0 && !_u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.IssuesTable,
+			Columns: []string{item.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssuesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.IssuesTable,
+			Columns: []string{item.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

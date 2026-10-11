@@ -18,6 +18,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -59,6 +60,7 @@ type ItemQuery struct {
 	withHistory         *HistoryEventQuery
 	withBlocklist       *BlocklistEntryQuery
 	withPendingReleases *PendingReleaseQuery
+	withIssues          *IssueQuery
 	modifiers           []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -536,6 +538,28 @@ func (_q *ItemQuery) QueryPendingReleases() *PendingReleaseQuery {
 	return query
 }
 
+// QueryIssues chains the current query on the "issues" edge.
+func (_q *ItemQuery) QueryIssues() *IssueQuery {
+	query := (&IssueClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(issue.Table, issue.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.IssuesTable, item.IssuesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Item entity from the query.
 // Returns a *NotFoundError when no Item was found.
 func (_q *ItemQuery) First(ctx context.Context) (*Item, error) {
@@ -748,6 +772,7 @@ func (_q *ItemQuery) Clone() *ItemQuery {
 		withHistory:         _q.withHistory.Clone(),
 		withBlocklist:       _q.withBlocklist.Clone(),
 		withPendingReleases: _q.withPendingReleases.Clone(),
+		withIssues:          _q.withIssues.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -975,6 +1000,17 @@ func (_q *ItemQuery) WithPendingReleases(opts ...func(*PendingReleaseQuery)) *It
 	return _q
 }
 
+// WithIssues tells the query-builder to eager-load the nodes that are connected to
+// the "issues" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithIssues(opts ...func(*IssueQuery)) *ItemQuery {
+	query := (&IssueClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withIssues = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -1053,7 +1089,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	var (
 		nodes       = []*Item{}
 		_spec       = _q.querySpec()
-		loadedTypes = [20]bool{
+		loadedTypes = [21]bool{
 			_q.withLibrary != nil,
 			_q.withParent != nil,
 			_q.withChildren != nil,
@@ -1074,6 +1110,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 			_q.withHistory != nil,
 			_q.withBlocklist != nil,
 			_q.withPendingReleases != nil,
+			_q.withIssues != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -1229,6 +1266,13 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 		if err := _q.loadPendingReleases(ctx, query, nodes,
 			func(n *Item) { n.Edges.PendingReleases = []*PendingRelease{} },
 			func(n *Item, e *PendingRelease) { n.Edges.PendingReleases = append(n.Edges.PendingReleases, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withIssues; query != nil {
+		if err := _q.loadIssues(ctx, query, nodes,
+			func(n *Item) { n.Edges.Issues = []*Issue{} },
+			func(n *Item, e *Issue) { n.Edges.Issues = append(n.Edges.Issues, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1831,6 +1875,36 @@ func (_q *ItemQuery) loadPendingReleases(ctx context.Context, query *PendingRele
 	}
 	query.Where(predicate.PendingRelease(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(item.PendingReleasesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadIssues(ctx context.Context, query *IssueQuery, nodes []*Item, init func(*Item), assign func(*Item, *Issue)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(issue.FieldItemID)
+	}
+	query.Where(predicate.Issue(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.IssuesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

@@ -46,6 +46,8 @@ erDiagram
 | `Wanted` | How a monitored movie or series is acquired: its quality profile, minimum availability, new item monitoring, season folder flag and tags |
 | `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | A tracked download, an acquisition event, a release not to grab again, a release kept to grab later |
 | `RemotePathMapping` | How a download client's paths map to the server's |
+| `Request` / `SeasonRequest` | A user's request of a movie or of seasons of a series (§13.6) |
+| `Issue` / `IssueComment` | A problem a user reports with an item, and its thread (§13.7) |
 
 ---
 
@@ -197,6 +199,7 @@ A virtual item is a movie, series, season or episode known from metadata whose f
   * `Libraries` limits access to listed libraries (nil means all); `CanAccessLibrary` applies it.
   * `MaxParentalRating` is the highest allowed rating score (content ratings such as "PG-13" map to scores per country rating system; nil means unrestricted, zero allows only content for all ages); `BlockUnrated` hides unrated items when a maximum is set.
   * `AllowTranscoding`, `AllowDownload`, `MaxStreamingBitrate` (bits per second, zero means unlimited) and `MaxSessions` (zero means unlimited).
+  * `Requests` (`RequestPermissions`): whether the user may request movies and series, whether their requests of each are approved automatically, and whether they may report issues; `MovieQuota` and `SeriesQuota` are their own quotas (§13.6), nil for the server's. Administrators may do all of it, without quotas.
 * `UserPolicy.CanAccess` allows an item when its library is allowed and, under a maximum rating, its rating score (`ParentalRating`, else `InheritedRating`) is within it; unrated items pass unless `BlockUnrated` is set, as rating filters on item queries do. `User.CanAccess` allows a user their own playlists and nobody else's, whatever the library policy, and applies the policy to other items.
 * `UserPreferences`: preferred audio and subtitle languages (ISO 639-2/B, in order), `SubtitleMode`, and whether to prefer the default audio track over the preferred language.
 * `UserData` is one user's state for one item: `Played`, `PlayCount`, resume `Position`, the last selected audio/subtitle streams (subtitle `-1` means off), `Favorite`, an optional 0–10 `Rating`, and timestamps. Missing state means "never interacted".
@@ -242,7 +245,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `DisplayPreferencesRepository` | `Get` a user's preferences for a client's view (`ErrNotFound` when never set), `Put` them, replacing the earlier ones |
 | `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate` |
 | `APIKeyRepository` | `Create`, `GetByTokenHash`, `List` (newest first), `Touch`, `Delete`; deleting the user deletes their keys |
-| `ActivityRepository` | `Add`, `List` (paged, newest first, by time, user and least severity), `Purge` of activities before a time |
+| `ActivityRepository` | `Add`, `List` (paged, newest first, by time, user, types and least severity), `Purge` of activities before a time |
 | `TrickplayRepository` | `Put` an item's sheets at a width (replacing the earlier), `List` an item's (narrowest first), `Delete` them |
 | `MediaSegmentRepository` | `List` an item's segments by start, `Replace` them |
 | `QualityDefinitionRepository` | `List` a kind's definitions (none until stored), `Replace` them |
@@ -253,6 +256,8 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `BlocklistRepository` | `Add`, `List` (paged, newest first, an item's or all), `Delete` |
 | `PendingReleaseRepository` | `List` an item's or all (oldest first), `Add`, `Delete` |
 | `RemotePathMappingRepository` | `List`, `Put`, `Delete` |
+| `RequestRepository` | `Get`, `List` (paged, by user, statuses, kind, TMDB ID and item, newest or most recently modified first), `Put` (insert or replace by ID), `Delete`, `QuotaUsed` (see §13.6); deleting the user deletes their requests |
+| `IssueRepository` | `Get` and `List` (paged, with their comments), `Put`, `AddComment`, `Delete`; deleting the item or the user deletes their issues |
 
 * **Transactions**: `Store.InTx` runs a function with a `Store` bound to one transaction; returning an error rolls it back.
 * **Replace semantics**: `Replace*` methods set the complete set for an owner, removing anything not in the new set — scans and metadata refreshes always write whole sets.
@@ -310,13 +315,14 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 * `PluginCatalogs`: the http or https URLs of the catalogs plugins are installed from.
 * `PasswordResetPlugin`: the ID of the plugin that delivers the PINs resetting forgotten passwords; empty when users cannot reset them.
 * `Acquisition`: how releases are chosen, downloaded and imported (§13.4).
+* `Requests`: the permissions new users get, the default quotas, and where approved requests go (§13.6).
 * `Validate` checks the known values and ranges.
 
 ### 12.2 API Keys
 An `APIKey` lets an integration call the API without signing in: its token, shown once, acts as the administrator who created it, while that user stays an enabled administrator. Only its SHA-256 hash (`TokenHash`) is stored, with a `Name`, `CreatedAt` and `LastUsedAt`, recorded at most once a minute.
 
 ### 12.3 Activity Log
-An `Activity` is something that happened: a dotted `Type`, a `Severity` (`info`, `warning`, `error`), a `Title` and `Message`, the `UserID` and `ItemID` it concerns and type-specific `Attributes`. The log keeps sign-ins (`user.login`) and failed ones (`user.login_failed`, a warning), API keys created and revoked (`apikey.created`, `apikey.revoked`), account changes (`user.created`, `user.updated`, `user.deleted`, `user.password_changed`), plugins installed, updated, configured, uninstalled and failing to start (`plugin.installed`, `plugin.updated`, `plugin.configured`, `plugin.uninstalled`, `plugin.failed`), settings changes (`settings.updated`), backups (`backup.created`), playbacks starting and stopping (`playback.started`, `playback.stopped`), and failed task runs and subtitle downloads (`task.failed`, `subtitle.download_failed`). It keeps them for 90 days, and they are sent to notification plugins as events; event-consuming plugins also get the events left out of the log (see [Plugins §4](plugins.md#4-events)).
+An `Activity` is something that happened: a dotted `Type`, a `Severity` (`info`, `warning`, `error`), a `Title` and `Message`, the `UserID` and `ItemID` it concerns and type-specific `Attributes`. The log keeps sign-ins (`user.login`) and failed ones (`user.login_failed`, a warning), API keys created and revoked (`apikey.created`, `apikey.revoked`), requests and issues (§13.6, §13.7), account changes (`user.created`, `user.updated`, `user.deleted`, `user.password_changed`), plugins installed, updated, configured, uninstalled and failing to start (`plugin.installed`, `plugin.updated`, `plugin.configured`, `plugin.uninstalled`, `plugin.failed`), settings changes (`settings.updated`), backups (`backup.created`), playbacks starting and stopping (`playback.started`, `playback.stopped`), and failed task runs and subtitle downloads (`task.failed`, `subtitle.download_failed`). It keeps them for 90 days; users list those concerning them, their notifications; and they are sent to notification plugins as events; event-consuming plugins also get the events left out of the log (see [Plugins §4](plugins.md#4-events)).
 
 ---
 
@@ -347,3 +353,11 @@ A monitored movie or series (`Item.Monitored`) is acquired as its `Wanted` says:
 ### 13.5 Remote Path Mappings
 A `RemotePathMapping` maps a folder a download client on `Host` reports (`RemotePath`) to the absolute folder the server sees (`LocalPath`). A host's remote path is mapped once.
 
+### 13.6 Requests
+* A `Request` is a user's request of a movie or a series by TMDB ID (`Kind`, `TmdbID`, and a series' `TvdbID` once known), with its `Title` and `Year`, the `ItemID` of the item it made wanted, the `RequestedBy` and `ModifiedBy` users, `IgnoreQuota`, a `Message` (why it failed) and its times. A series request lists its `Seasons` (`SeasonRequest`: a number, at least one, each once, and a status); a movie request has none.
+* `RequestStatus`: `pending` (waiting for an administrator), `approved` (its title made wanted), `declined`, `failed` (making it wanted failed; it may be retried) and `completed` (available). Pending, approved and failed requests are active: they stand in the way of other requests of their title or seasons. A season completes when its aired episodes all have files; a series request when all its seasons have.
+* A `Quota` allows `Limit` requests of movies, or seasons of series, in the last `Days` days (all time when 0); a limit of 0 is unlimited. `QuotaUsed` counts a user's requests of a kind since a time, seasons for series, leaving out declined requests and those ignoring quotas, as Seerr's `User.getQuota`.
+* `RequestSettings`, part of the server settings: the `DefaultPermissions` new users get, the default `MovieQuota` and `SeriesQuota`, the movie library, quality profile and minimum availability approved movies are added with, the show library, quality profile, season folder flag and new item monitoring of approved series, and whether specials (season 0) may be requested.
+
+### 13.7 Issues
+An `Issue` is a problem a user reports with an item: its `Type` (`video`, `audio`, `subtitles`, `other`), `Status` (`open`, `resolved`), an optional `SeasonNumber` and `EpisodeNumber`, `CreatedBy`, `ModifiedBy` and its times. Its `Comments` (`IssueComment`: a user, a message and times) are its thread, oldest first; the first is the report's message.

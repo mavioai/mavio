@@ -28,6 +28,8 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -42,6 +44,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
+	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
@@ -78,6 +81,10 @@ type Client struct {
 	HistoryEvent *HistoryEventClient
 	// Image is the client for interacting with the Image builders.
 	Image *ImageClient
+	// Issue is the client for interacting with the Issue builders.
+	Issue *IssueClient
+	// IssueComment is the client for interacting with the IssueComment builders.
+	IssueComment *IssueCommentClient
 	// Item is the client for interacting with the Item builders.
 	Item *ItemClient
 	// ItemLink is the client for interacting with the ItemLink builders.
@@ -106,6 +113,8 @@ type Client struct {
 	ReleaseProfile *ReleaseProfileClient
 	// RemotePathMapping is the client for interacting with the RemotePathMapping builders.
 	RemotePathMapping *RemotePathMappingClient
+	// Request is the client for interacting with the Request builders.
+	Request *RequestClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
 	// Trickplay is the client for interacting with the Trickplay builders.
@@ -139,6 +148,8 @@ func (c *Client) init() {
 	c.FolderState = NewFolderStateClient(c.config)
 	c.HistoryEvent = NewHistoryEventClient(c.config)
 	c.Image = NewImageClient(c.config)
+	c.Issue = NewIssueClient(c.config)
+	c.IssueComment = NewIssueCommentClient(c.config)
 	c.Item = NewItemClient(c.config)
 	c.ItemLink = NewItemLinkClient(c.config)
 	c.ItemValue = NewItemValueClient(c.config)
@@ -153,6 +164,7 @@ func (c *Client) init() {
 	c.QualityProfile = NewQualityProfileClient(c.config)
 	c.ReleaseProfile = NewReleaseProfileClient(c.config)
 	c.RemotePathMapping = NewRemotePathMappingClient(c.config)
+	c.Request = NewRequestClient(c.config)
 	c.Setting = NewSettingClient(c.config)
 	c.Trickplay = NewTrickplayClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -262,6 +274,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		FolderState:        NewFolderStateClient(cfg),
 		HistoryEvent:       NewHistoryEventClient(cfg),
 		Image:              NewImageClient(cfg),
+		Issue:              NewIssueClient(cfg),
+		IssueComment:       NewIssueCommentClient(cfg),
 		Item:               NewItemClient(cfg),
 		ItemLink:           NewItemLinkClient(cfg),
 		ItemValue:          NewItemValueClient(cfg),
@@ -276,6 +290,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		QualityProfile:     NewQualityProfileClient(cfg),
 		ReleaseProfile:     NewReleaseProfileClient(cfg),
 		RemotePathMapping:  NewRemotePathMappingClient(cfg),
+		Request:            NewRequestClient(cfg),
 		Setting:            NewSettingClient(cfg),
 		Trickplay:          NewTrickplayClient(cfg),
 		User:               NewUserClient(cfg),
@@ -312,6 +327,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		FolderState:        NewFolderStateClient(cfg),
 		HistoryEvent:       NewHistoryEventClient(cfg),
 		Image:              NewImageClient(cfg),
+		Issue:              NewIssueClient(cfg),
+		IssueComment:       NewIssueCommentClient(cfg),
 		Item:               NewItemClient(cfg),
 		ItemLink:           NewItemLinkClient(cfg),
 		ItemValue:          NewItemValueClient(cfg),
@@ -326,6 +343,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		QualityProfile:     NewQualityProfileClient(cfg),
 		ReleaseProfile:     NewReleaseProfileClient(cfg),
 		RemotePathMapping:  NewRemotePathMappingClient(cfg),
+		Request:            NewRequestClient(cfg),
 		Setting:            NewSettingClient(cfg),
 		Trickplay:          NewTrickplayClient(cfg),
 		User:               NewUserClient(cfg),
@@ -362,10 +380,11 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.APIKey, c.Activity, c.AuthSession, c.BlocklistEntry, c.Credit, c.CustomFormat,
 		c.DelayProfile, c.DisplayPreferences, c.Download, c.FolderState,
-		c.HistoryEvent, c.Image, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
-		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
-		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
-		c.Setting, c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.HistoryEvent, c.Image, c.Issue, c.IssueComment, c.Item, c.ItemLink,
+		c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease,
+		c.Person, c.PluginConfig, c.QualityDefinition, c.QualityProfile,
+		c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting, c.Trickplay,
+		c.User, c.UserData, c.Wanted,
 	} {
 		n.Use(hooks...)
 	}
@@ -377,10 +396,11 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.APIKey, c.Activity, c.AuthSession, c.BlocklistEntry, c.Credit, c.CustomFormat,
 		c.DelayProfile, c.DisplayPreferences, c.Download, c.FolderState,
-		c.HistoryEvent, c.Image, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
-		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
-		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
-		c.Setting, c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.HistoryEvent, c.Image, c.Issue, c.IssueComment, c.Item, c.ItemLink,
+		c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease,
+		c.Person, c.PluginConfig, c.QualityDefinition, c.QualityProfile,
+		c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting, c.Trickplay,
+		c.User, c.UserData, c.Wanted,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -413,6 +433,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.HistoryEvent.mutate(ctx, m)
 	case *ImageMutation:
 		return c.Image.mutate(ctx, m)
+	case *IssueMutation:
+		return c.Issue.mutate(ctx, m)
+	case *IssueCommentMutation:
+		return c.IssueComment.mutate(ctx, m)
 	case *ItemMutation:
 		return c.Item.mutate(ctx, m)
 	case *ItemLinkMutation:
@@ -441,6 +465,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ReleaseProfile.mutate(ctx, m)
 	case *RemotePathMappingMutation:
 		return c.RemotePathMapping.mutate(ctx, m)
+	case *RequestMutation:
+		return c.Request.mutate(ctx, m)
 	case *SettingMutation:
 		return c.Setting.mutate(ctx, m)
 	case *TrickplayMutation:
@@ -2228,6 +2254,352 @@ func (c *ImageClient) mutate(ctx context.Context, m *ImageMutation) (Value, erro
 	}
 }
 
+// IssueClient is a client for the Issue schema.
+type IssueClient struct {
+	config
+}
+
+// NewIssueClient returns a client for the Issue from the given config.
+func NewIssueClient(c config) *IssueClient {
+	return &IssueClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `issue.Hooks(f(g(h())))`.
+func (c *IssueClient) Use(hooks ...Hook) {
+	c.hooks.Issue = append(c.hooks.Issue, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `issue.Intercept(f(g(h())))`.
+func (c *IssueClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Issue = append(c.inters.Issue, interceptors...)
+}
+
+// Create returns a builder for creating a Issue entity.
+func (c *IssueClient) Create() *IssueCreate {
+	mutation := newIssueMutation(c.config, OpCreate)
+	return &IssueCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Issue entities.
+func (c *IssueClient) CreateBulk(builders ...*IssueCreate) *IssueCreateBulk {
+	return &IssueCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *IssueClient) MapCreateBulk(slice any, setFunc func(*IssueCreate, int)) *IssueCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &IssueCreateBulk{err: fmt.Errorf("calling to IssueClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*IssueCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &IssueCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Issue.
+func (c *IssueClient) Update() *IssueUpdate {
+	mutation := newIssueMutation(c.config, OpUpdate)
+	return &IssueUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *IssueClient) UpdateOne(_m *Issue) *IssueUpdateOne {
+	mutation := newIssueMutation(c.config, OpUpdateOne, withIssue(_m))
+	return &IssueUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *IssueClient) UpdateOneID(id core.ID) *IssueUpdateOne {
+	mutation := newIssueMutation(c.config, OpUpdateOne, withIssueID(id))
+	return &IssueUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Issue.
+func (c *IssueClient) Delete() *IssueDelete {
+	mutation := newIssueMutation(c.config, OpDelete)
+	return &IssueDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *IssueClient) DeleteOne(_m *Issue) *IssueDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *IssueClient) DeleteOneID(id core.ID) *IssueDeleteOne {
+	builder := c.Delete().Where(issue.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &IssueDeleteOne{builder}
+}
+
+// Query returns a query builder for Issue.
+func (c *IssueClient) Query() *IssueQuery {
+	return &IssueQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeIssue},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Issue entity by its id.
+func (c *IssueClient) Get(ctx context.Context, id core.ID) (*Issue, error) {
+	return c.Query().Where(issue.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *IssueClient) GetX(ctx context.Context, id core.ID) *Issue {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryItem queries the item edge of a Issue.
+func (c *IssueClient) QueryItem(_m *Issue) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(issue.Table, issue.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, issue.ItemTable, issue.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Issue.
+func (c *IssueClient) QueryUser(_m *Issue) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(issue.Table, issue.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, issue.UserTable, issue.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryComments queries the comments edge of a Issue.
+func (c *IssueClient) QueryComments(_m *Issue) *IssueCommentQuery {
+	query := (&IssueCommentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(issue.Table, issue.FieldID, id),
+			sqlgraph.To(issuecomment.Table, issuecomment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, issue.CommentsTable, issue.CommentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *IssueClient) Hooks() []Hook {
+	return c.hooks.Issue
+}
+
+// Interceptors returns the client interceptors.
+func (c *IssueClient) Interceptors() []Interceptor {
+	return c.inters.Issue
+}
+
+func (c *IssueClient) mutate(ctx context.Context, m *IssueMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&IssueCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&IssueUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&IssueUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&IssueDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Issue mutation op: %q", m.Op())
+	}
+}
+
+// IssueCommentClient is a client for the IssueComment schema.
+type IssueCommentClient struct {
+	config
+}
+
+// NewIssueCommentClient returns a client for the IssueComment from the given config.
+func NewIssueCommentClient(c config) *IssueCommentClient {
+	return &IssueCommentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `issuecomment.Hooks(f(g(h())))`.
+func (c *IssueCommentClient) Use(hooks ...Hook) {
+	c.hooks.IssueComment = append(c.hooks.IssueComment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `issuecomment.Intercept(f(g(h())))`.
+func (c *IssueCommentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.IssueComment = append(c.inters.IssueComment, interceptors...)
+}
+
+// Create returns a builder for creating a IssueComment entity.
+func (c *IssueCommentClient) Create() *IssueCommentCreate {
+	mutation := newIssueCommentMutation(c.config, OpCreate)
+	return &IssueCommentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of IssueComment entities.
+func (c *IssueCommentClient) CreateBulk(builders ...*IssueCommentCreate) *IssueCommentCreateBulk {
+	return &IssueCommentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *IssueCommentClient) MapCreateBulk(slice any, setFunc func(*IssueCommentCreate, int)) *IssueCommentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &IssueCommentCreateBulk{err: fmt.Errorf("calling to IssueCommentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*IssueCommentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &IssueCommentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for IssueComment.
+func (c *IssueCommentClient) Update() *IssueCommentUpdate {
+	mutation := newIssueCommentMutation(c.config, OpUpdate)
+	return &IssueCommentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *IssueCommentClient) UpdateOne(_m *IssueComment) *IssueCommentUpdateOne {
+	mutation := newIssueCommentMutation(c.config, OpUpdateOne, withIssueComment(_m))
+	return &IssueCommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *IssueCommentClient) UpdateOneID(id core.ID) *IssueCommentUpdateOne {
+	mutation := newIssueCommentMutation(c.config, OpUpdateOne, withIssueCommentID(id))
+	return &IssueCommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for IssueComment.
+func (c *IssueCommentClient) Delete() *IssueCommentDelete {
+	mutation := newIssueCommentMutation(c.config, OpDelete)
+	return &IssueCommentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *IssueCommentClient) DeleteOne(_m *IssueComment) *IssueCommentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *IssueCommentClient) DeleteOneID(id core.ID) *IssueCommentDeleteOne {
+	builder := c.Delete().Where(issuecomment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &IssueCommentDeleteOne{builder}
+}
+
+// Query returns a query builder for IssueComment.
+func (c *IssueCommentClient) Query() *IssueCommentQuery {
+	return &IssueCommentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeIssueComment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a IssueComment entity by its id.
+func (c *IssueCommentClient) Get(ctx context.Context, id core.ID) (*IssueComment, error) {
+	return c.Query().Where(issuecomment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *IssueCommentClient) GetX(ctx context.Context, id core.ID) *IssueComment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryIssue queries the issue edge of a IssueComment.
+func (c *IssueCommentClient) QueryIssue(_m *IssueComment) *IssueQuery {
+	query := (&IssueClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(issuecomment.Table, issuecomment.FieldID, id),
+			sqlgraph.To(issue.Table, issue.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, issuecomment.IssueTable, issuecomment.IssueColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a IssueComment.
+func (c *IssueCommentClient) QueryUser(_m *IssueComment) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(issuecomment.Table, issuecomment.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, issuecomment.UserTable, issuecomment.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *IssueCommentClient) Hooks() []Hook {
+	return c.hooks.IssueComment
+}
+
+// Interceptors returns the client interceptors.
+func (c *IssueCommentClient) Interceptors() []Interceptor {
+	return c.inters.IssueComment
+}
+
+func (c *IssueCommentClient) mutate(ctx context.Context, m *IssueCommentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&IssueCommentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&IssueCommentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&IssueCommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&IssueCommentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown IssueComment mutation op: %q", m.Op())
+	}
+}
+
 // ItemClient is a client for the Item schema.
 type ItemClient struct {
 	config
@@ -2649,6 +3021,22 @@ func (c *ItemClient) QueryPendingReleases(_m *Item) *PendingReleaseQuery {
 			sqlgraph.From(item.Table, item.FieldID, id),
 			sqlgraph.To(pendingrelease.Table, pendingrelease.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, item.PendingReleasesTable, item.PendingReleasesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIssues queries the issues edge of a Item.
+func (c *ItemClient) QueryIssues(_m *Item) *IssueQuery {
+	query := (&IssueClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(issue.Table, issue.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.IssuesTable, item.IssuesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -4586,6 +4974,155 @@ func (c *RemotePathMappingClient) mutate(ctx context.Context, m *RemotePathMappi
 	}
 }
 
+// RequestClient is a client for the Request schema.
+type RequestClient struct {
+	config
+}
+
+// NewRequestClient returns a client for the Request from the given config.
+func NewRequestClient(c config) *RequestClient {
+	return &RequestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `request.Hooks(f(g(h())))`.
+func (c *RequestClient) Use(hooks ...Hook) {
+	c.hooks.Request = append(c.hooks.Request, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `request.Intercept(f(g(h())))`.
+func (c *RequestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Request = append(c.inters.Request, interceptors...)
+}
+
+// Create returns a builder for creating a Request entity.
+func (c *RequestClient) Create() *RequestCreate {
+	mutation := newRequestMutation(c.config, OpCreate)
+	return &RequestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Request entities.
+func (c *RequestClient) CreateBulk(builders ...*RequestCreate) *RequestCreateBulk {
+	return &RequestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RequestClient) MapCreateBulk(slice any, setFunc func(*RequestCreate, int)) *RequestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RequestCreateBulk{err: fmt.Errorf("calling to RequestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RequestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RequestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Request.
+func (c *RequestClient) Update() *RequestUpdate {
+	mutation := newRequestMutation(c.config, OpUpdate)
+	return &RequestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RequestClient) UpdateOne(_m *Request) *RequestUpdateOne {
+	mutation := newRequestMutation(c.config, OpUpdateOne, withRequest(_m))
+	return &RequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RequestClient) UpdateOneID(id core.ID) *RequestUpdateOne {
+	mutation := newRequestMutation(c.config, OpUpdateOne, withRequestID(id))
+	return &RequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Request.
+func (c *RequestClient) Delete() *RequestDelete {
+	mutation := newRequestMutation(c.config, OpDelete)
+	return &RequestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RequestClient) DeleteOne(_m *Request) *RequestDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RequestClient) DeleteOneID(id core.ID) *RequestDeleteOne {
+	builder := c.Delete().Where(request.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RequestDeleteOne{builder}
+}
+
+// Query returns a query builder for Request.
+func (c *RequestClient) Query() *RequestQuery {
+	return &RequestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRequest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Request entity by its id.
+func (c *RequestClient) Get(ctx context.Context, id core.ID) (*Request, error) {
+	return c.Query().Where(request.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RequestClient) GetX(ctx context.Context, id core.ID) *Request {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Request.
+func (c *RequestClient) QueryUser(_m *Request) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(request.Table, request.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, request.UserTable, request.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RequestClient) Hooks() []Hook {
+	return c.hooks.Request
+}
+
+// Interceptors returns the client interceptors.
+func (c *RequestClient) Interceptors() []Interceptor {
+	return c.inters.Request
+}
+
+func (c *RequestClient) mutate(ctx context.Context, m *RequestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RequestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RequestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RequestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Request mutation op: %q", m.Op())
+	}
+}
+
 // SettingClient is a client for the Setting schema.
 type SettingClient struct {
 	config
@@ -5056,6 +5593,54 @@ func (c *UserClient) QueryAPIKeys(_m *User) *APIKeyQuery {
 	return query
 }
 
+// QueryRequests queries the requests edge of a User.
+func (c *UserClient) QueryRequests(_m *User) *RequestQuery {
+	query := (&RequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(request.Table, request.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RequestsTable, user.RequestsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIssues queries the issues edge of a User.
+func (c *UserClient) QueryIssues(_m *User) *IssueQuery {
+	query := (&IssueClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(issue.Table, issue.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.IssuesTable, user.IssuesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIssueComments queries the issue_comments edge of a User.
+func (c *UserClient) QueryIssueComments(_m *User) *IssueCommentQuery {
+	query := (&IssueCommentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(issuecomment.Table, issuecomment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.IssueCommentsTable, user.IssueCommentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -5416,17 +6001,17 @@ type (
 	hooks struct {
 		APIKey, Activity, AuthSession, BlocklistEntry, Credit, CustomFormat,
 		DelayProfile, DisplayPreferences, Download, FolderState, HistoryEvent, Image,
-		Item, ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource,
-		PendingRelease, Person, PluginConfig, QualityDefinition, QualityProfile,
-		ReleaseProfile, RemotePathMapping, Setting, Trickplay, User, UserData,
-		Wanted []ent.Hook
+		Issue, IssueComment, Item, ItemLink, ItemValue, Job, Library, MediaSegment,
+		MediaSource, PendingRelease, Person, PluginConfig, QualityDefinition,
+		QualityProfile, ReleaseProfile, RemotePathMapping, Request, Setting, Trickplay,
+		User, UserData, Wanted []ent.Hook
 	}
 	inters struct {
 		APIKey, Activity, AuthSession, BlocklistEntry, Credit, CustomFormat,
 		DelayProfile, DisplayPreferences, Download, FolderState, HistoryEvent, Image,
-		Item, ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource,
-		PendingRelease, Person, PluginConfig, QualityDefinition, QualityProfile,
-		ReleaseProfile, RemotePathMapping, Setting, Trickplay, User, UserData,
-		Wanted []ent.Interceptor
+		Issue, IssueComment, Item, ItemLink, ItemValue, Job, Library, MediaSegment,
+		MediaSource, PendingRelease, Person, PluginConfig, QualityDefinition,
+		QualityProfile, ReleaseProfile, RemotePathMapping, Request, Setting, Trickplay,
+		User, UserData, Wanted []ent.Interceptor
 	}
 )

@@ -45,6 +45,12 @@ const (
 	EdgeDisplayPreferences = "display_preferences"
 	// EdgeAPIKeys holds the string denoting the api_keys edge name in mutations.
 	EdgeAPIKeys = "api_keys"
+	// EdgeRequests holds the string denoting the requests edge name in mutations.
+	EdgeRequests = "requests"
+	// EdgeIssues holds the string denoting the issues edge name in mutations.
+	EdgeIssues = "issues"
+	// EdgeIssueComments holds the string denoting the issue_comments edge name in mutations.
+	EdgeIssueComments = "issue_comments"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// UserDataTable is the table that holds the user_data relation/edge.
@@ -82,6 +88,27 @@ const (
 	APIKeysInverseTable = "api_keys"
 	// APIKeysColumn is the table column denoting the api_keys relation/edge.
 	APIKeysColumn = "user_id"
+	// RequestsTable is the table that holds the requests relation/edge.
+	RequestsTable = "requests"
+	// RequestsInverseTable is the table name for the Request entity.
+	// It exists in this package in order to avoid circular dependency with the "request" package.
+	RequestsInverseTable = "requests"
+	// RequestsColumn is the table column denoting the requests relation/edge.
+	RequestsColumn = "requested_by"
+	// IssuesTable is the table that holds the issues relation/edge.
+	IssuesTable = "issues"
+	// IssuesInverseTable is the table name for the Issue entity.
+	// It exists in this package in order to avoid circular dependency with the "issue" package.
+	IssuesInverseTable = "issues"
+	// IssuesColumn is the table column denoting the issues relation/edge.
+	IssuesColumn = "created_by"
+	// IssueCommentsTable is the table that holds the issue_comments relation/edge.
+	IssueCommentsTable = "issue_comments"
+	// IssueCommentsInverseTable is the table name for the IssueComment entity.
+	// It exists in this package in order to avoid circular dependency with the "issuecomment" package.
+	IssueCommentsInverseTable = "issue_comments"
+	// IssueCommentsColumn is the table column denoting the issue_comments relation/edge.
+	IssueCommentsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -243,6 +270,48 @@ func ByAPIKeys(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAPIKeysStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByRequestsCount orders the results by requests count.
+func ByRequestsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRequestsStep(), opts...)
+	}
+}
+
+// ByRequests orders the results by requests terms.
+func ByRequests(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRequestsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByIssuesCount orders the results by issues count.
+func ByIssuesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIssuesStep(), opts...)
+	}
+}
+
+// ByIssues orders the results by issues terms.
+func ByIssues(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIssuesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByIssueCommentsCount orders the results by issue_comments count.
+func ByIssueCommentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIssueCommentsStep(), opts...)
+	}
+}
+
+// ByIssueComments orders the results by issue_comments terms.
+func ByIssueComments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIssueCommentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserDataStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -276,5 +345,26 @@ func newAPIKeysStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(APIKeysInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, APIKeysTable, APIKeysColumn),
+	)
+}
+func newRequestsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RequestsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RequestsTable, RequestsColumn),
+	)
+}
+func newIssuesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IssuesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, IssuesTable, IssuesColumn),
+	)
+}
+func newIssueCommentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IssueCommentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, IssueCommentsTable, IssueCommentsColumn),
 	)
 }

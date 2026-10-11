@@ -1,6 +1,10 @@
 package store
 
-import "time"
+import (
+	"time"
+
+	"github.com/mavioai/mavio/libs/core"
+)
 
 // Times are stored with microsecond precision and returned in UTC.
 
@@ -31,4 +35,12 @@ func utcPtr(t *time.Time) *time.Time {
 	}
 	u := t.UTC()
 	return &u
+}
+
+// nonZeroID returns a pointer to id, nil when it is zero.
+func nonZeroID(id core.ID) *core.ID {
+	if id.IsZero() {
+		return nil
+	}
+	return &id
 }

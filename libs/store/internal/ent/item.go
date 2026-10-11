@@ -182,9 +182,11 @@ type ItemEdges struct {
 	Blocklist []*BlocklistEntry `json:"blocklist,omitempty"`
 	// PendingReleases holds the value of the pending_releases edge.
 	PendingReleases []*PendingRelease `json:"pending_releases,omitempty"`
+	// Issues holds the value of the issues edge.
+	Issues []*Issue `json:"issues,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [20]bool
+	loadedTypes [21]bool
 }
 
 // LibraryOrErr returns the Library value or an error if the edge
@@ -375,6 +377,15 @@ func (e ItemEdges) PendingReleasesOrErr() ([]*PendingRelease, error) {
 		return e.PendingReleases, nil
 	}
 	return nil, &NotLoadedError{edge: "pending_releases"}
+}
+
+// IssuesOrErr returns the Issues value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) IssuesOrErr() ([]*Issue, error) {
+	if e.loadedTypes[20] {
+		return e.Issues, nil
+	}
+	return nil, &NotLoadedError{edge: "issues"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -894,6 +905,11 @@ func (_m *Item) QueryBlocklist() *BlocklistEntryQuery {
 // QueryPendingReleases queries the "pending_releases" edge of the Item entity.
 func (_m *Item) QueryPendingReleases() *PendingReleaseQuery {
 	return NewItemClient(_m.config).QueryPendingReleases(_m)
+}
+
+// QueryIssues queries the "issues" edge of the Item entity.
+func (_m *Item) QueryIssues() *IssueQuery {
+	return NewItemClient(_m.config).QueryIssues(_m)
 }
 
 // Update returns a builder for updating this Item.

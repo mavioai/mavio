@@ -24,6 +24,8 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -38,6 +40,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
+	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
@@ -115,6 +118,8 @@ func checkColumn(t, c string) error {
 			folderstate.Table:        folderstate.ValidColumn,
 			historyevent.Table:       historyevent.ValidColumn,
 			image.Table:              image.ValidColumn,
+			issue.Table:              issue.ValidColumn,
+			issuecomment.Table:       issuecomment.ValidColumn,
 			item.Table:               item.ValidColumn,
 			itemlink.Table:           itemlink.ValidColumn,
 			itemvalue.Table:          itemvalue.ValidColumn,
@@ -129,6 +134,7 @@ func checkColumn(t, c string) error {
 			qualityprofile.Table:     qualityprofile.ValidColumn,
 			releaseprofile.Table:     releaseprofile.ValidColumn,
 			remotepathmapping.Table:  remotepathmapping.ValidColumn,
+			request.Table:            request.ValidColumn,
 			setting.Table:            setting.ValidColumn,
 			trickplay.Table:          trickplay.ValidColumn,
 			user.Table:               user.ValidColumn,

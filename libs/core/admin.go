@@ -21,7 +21,9 @@ type ServerSettings struct {
 	// resetting forgotten passwords; empty when users cannot reset them.
 	PasswordResetPlugin string
 	Acquisition         AcquisitionSettings
-	UpdatedAt           time.Time
+	// Requests are the defaults and destinations of users' requests.
+	Requests  RequestSettings
+	UpdatedAt time.Time
 }
 
 // HardwareAcceleration chooses how video is decoded and encoded.
@@ -112,6 +114,7 @@ func DefaultServerSettings() ServerSettings {
 		},
 		Network:     NetworkSettings{LocalDiscovery: true},
 		Acquisition: DefaultAcquisitionSettings(),
+		Requests:    DefaultRequestSettings(),
 	}
 }
 
@@ -147,6 +150,9 @@ func (s *ServerSettings) Validate() error {
 		return fmt.Errorf("%w: HTTPS needs a certificate and a key", ErrInvalid)
 	}
 	if err := s.Acquisition.Validate(); err != nil {
+		return err
+	}
+	if err := s.Requests.Validate(); err != nil {
 		return err
 	}
 	for _, c := range s.PluginCatalogs {
@@ -249,8 +255,10 @@ type ActivityQuery struct {
 	UserID ID
 	// MinSeverity leaves out less severe activities.
 	MinSeverity Severity
-	Limit       int // zero means MaxPageSize
-	Offset      int
+	// Types keeps activities of these types only.
+	Types  []string
+	Limit  int // zero means MaxPageSize
+	Offset int
 }
 
 // JobQuery selects jobs, most recently created first; unset fields do

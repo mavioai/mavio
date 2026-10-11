@@ -18,6 +18,8 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -32,6 +34,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
+	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/schema"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
@@ -276,6 +279,26 @@ func init() {
 	imageDescID := imageFields[0].Descriptor()
 	// image.DefaultID holds the default value on creation for the id field.
 	image.DefaultID = imageDescID.Default.(func() core.ID)
+	issueFields := schema.Issue{}.Fields()
+	_ = issueFields
+	// issueDescSeasonNumber is the schema descriptor for season_number field.
+	issueDescSeasonNumber := issueFields[4].Descriptor()
+	// issue.DefaultSeasonNumber holds the default value on creation for the season_number field.
+	issue.DefaultSeasonNumber = issueDescSeasonNumber.Default.(int)
+	// issueDescEpisodeNumber is the schema descriptor for episode_number field.
+	issueDescEpisodeNumber := issueFields[5].Descriptor()
+	// issue.DefaultEpisodeNumber holds the default value on creation for the episode_number field.
+	issue.DefaultEpisodeNumber = issueDescEpisodeNumber.Default.(int)
+	// issueDescID is the schema descriptor for id field.
+	issueDescID := issueFields[0].Descriptor()
+	// issue.DefaultID holds the default value on creation for the id field.
+	issue.DefaultID = issueDescID.Default.(func() core.ID)
+	issuecommentFields := schema.IssueComment{}.Fields()
+	_ = issuecommentFields
+	// issuecommentDescID is the schema descriptor for id field.
+	issuecommentDescID := issuecommentFields[0].Descriptor()
+	// issuecomment.DefaultID holds the default value on creation for the id field.
+	issuecomment.DefaultID = issuecommentDescID.Default.(func() core.ID)
 	itemFields := schema.Item{}.Fields()
 	_ = itemFields
 	// itemDescOriginalTitle is the schema descriptor for original_title field.
@@ -658,6 +681,36 @@ func init() {
 	remotepathmappingDescID := remotepathmappingFields[0].Descriptor()
 	// remotepathmapping.DefaultID holds the default value on creation for the id field.
 	remotepathmapping.DefaultID = remotepathmappingDescID.Default.(func() core.ID)
+	requestFields := schema.Request{}.Fields()
+	_ = requestFields
+	// requestDescTvdbID is the schema descriptor for tvdb_id field.
+	requestDescTvdbID := requestFields[3].Descriptor()
+	// request.DefaultTvdbID holds the default value on creation for the tvdb_id field.
+	request.DefaultTvdbID = requestDescTvdbID.Default.(int)
+	// requestDescTitle is the schema descriptor for title field.
+	requestDescTitle := requestFields[4].Descriptor()
+	// request.DefaultTitle holds the default value on creation for the title field.
+	request.DefaultTitle = requestDescTitle.Default.(string)
+	// requestDescYear is the schema descriptor for year field.
+	requestDescYear := requestFields[5].Descriptor()
+	// request.DefaultYear holds the default value on creation for the year field.
+	request.DefaultYear = requestDescYear.Default.(int)
+	// requestDescSeasonCount is the schema descriptor for season_count field.
+	requestDescSeasonCount := requestFields[8].Descriptor()
+	// request.DefaultSeasonCount holds the default value on creation for the season_count field.
+	request.DefaultSeasonCount = requestDescSeasonCount.Default.(int)
+	// requestDescIgnoreQuota is the schema descriptor for ignore_quota field.
+	requestDescIgnoreQuota := requestFields[12].Descriptor()
+	// request.DefaultIgnoreQuota holds the default value on creation for the ignore_quota field.
+	request.DefaultIgnoreQuota = requestDescIgnoreQuota.Default.(bool)
+	// requestDescMessage is the schema descriptor for message field.
+	requestDescMessage := requestFields[13].Descriptor()
+	// request.DefaultMessage holds the default value on creation for the message field.
+	request.DefaultMessage = requestDescMessage.Default.(string)
+	// requestDescID is the schema descriptor for id field.
+	requestDescID := requestFields[0].Descriptor()
+	// request.DefaultID holds the default value on creation for the id field.
+	request.DefaultID = requestDescID.Default.(func() core.ID)
 	settingFields := schema.Setting{}.Fields()
 	_ = settingFields
 	// settingDescUpdatedAt is the schema descriptor for updated_at field.

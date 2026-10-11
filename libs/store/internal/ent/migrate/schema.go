@@ -436,6 +436,97 @@ var (
 			},
 		},
 	}
+	// IssuesColumns holds the columns for the "issues" table.
+	IssuesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "type", Type: field.TypeString},
+		{Name: "status", Type: field.TypeString},
+		{Name: "season_number", Type: field.TypeInt, Default: 0},
+		{Name: "episode_number", Type: field.TypeInt, Default: 0},
+		{Name: "modified_by", Type: field.TypeUUID, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "item_id", Type: field.TypeUUID},
+		{Name: "created_by", Type: field.TypeUUID},
+	}
+	// IssuesTable holds the schema information for the "issues" table.
+	IssuesTable = &schema.Table{
+		Name:       "issues",
+		Columns:    IssuesColumns,
+		PrimaryKey: []*schema.Column{IssuesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "issues_items_issues",
+				Columns:    []*schema.Column{IssuesColumns[8]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "issues_users_issues",
+				Columns:    []*schema.Column{IssuesColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "issue_created_by_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{IssuesColumns[9], IssuesColumns[6]},
+			},
+			{
+				Name:    "issue_item_id",
+				Unique:  false,
+				Columns: []*schema.Column{IssuesColumns[8]},
+			},
+			{
+				Name:    "issue_status",
+				Unique:  false,
+				Columns: []*schema.Column{IssuesColumns[2]},
+			},
+			{
+				Name:    "issue_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{IssuesColumns[6]},
+			},
+		},
+	}
+	// IssueCommentsColumns holds the columns for the "issue_comments" table.
+	IssueCommentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "message", Type: field.TypeString, Size: 2147483647},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "issue_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// IssueCommentsTable holds the schema information for the "issue_comments" table.
+	IssueCommentsTable = &schema.Table{
+		Name:       "issue_comments",
+		Columns:    IssueCommentsColumns,
+		PrimaryKey: []*schema.Column{IssueCommentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "issue_comments_issues_comments",
+				Columns:    []*schema.Column{IssueCommentsColumns[4]},
+				RefColumns: []*schema.Column{IssuesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "issue_comments_users_issue_comments",
+				Columns:    []*schema.Column{IssueCommentsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "issuecomment_issue_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{IssueCommentsColumns[4], IssueCommentsColumns[2]},
+			},
+		},
+	}
 	// ItemsColumns holds the columns for the "items" table.
 	ItemsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -940,6 +1031,66 @@ var (
 			},
 		},
 	}
+	// RequestsColumns holds the columns for the "requests" table.
+	RequestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "tmdb_id", Type: field.TypeInt},
+		{Name: "tvdb_id", Type: field.TypeInt, Default: 0},
+		{Name: "title", Type: field.TypeString, Default: ""},
+		{Name: "year", Type: field.TypeInt, Default: 0},
+		{Name: "item_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "seasons", Type: field.TypeJSON, Nullable: true},
+		{Name: "season_count", Type: field.TypeInt, Default: 0},
+		{Name: "status", Type: field.TypeString},
+		{Name: "modified_by", Type: field.TypeUUID, Nullable: true},
+		{Name: "ignore_quota", Type: field.TypeBool, Default: false},
+		{Name: "message", Type: field.TypeString, Default: ""},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "requested_by", Type: field.TypeUUID},
+	}
+	// RequestsTable holds the schema information for the "requests" table.
+	RequestsTable = &schema.Table{
+		Name:       "requests",
+		Columns:    RequestsColumns,
+		PrimaryKey: []*schema.Column{RequestsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "requests_users_requests",
+				Columns:    []*schema.Column{RequestsColumns[15]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "request_requested_by_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{RequestsColumns[15], RequestsColumns[13]},
+			},
+			{
+				Name:    "request_kind_tmdb_id",
+				Unique:  false,
+				Columns: []*schema.Column{RequestsColumns[1], RequestsColumns[2]},
+			},
+			{
+				Name:    "request_item_id",
+				Unique:  false,
+				Columns: []*schema.Column{RequestsColumns[6]},
+			},
+			{
+				Name:    "request_status",
+				Unique:  false,
+				Columns: []*schema.Column{RequestsColumns[9]},
+			},
+			{
+				Name:    "request_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{RequestsColumns[13]},
+			},
+		},
+	}
 	// SettingsColumns holds the columns for the "settings" table.
 	SettingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1094,6 +1245,8 @@ var (
 		FolderStatesTable,
 		HistoryEventsTable,
 		ImagesTable,
+		IssuesTable,
+		IssueCommentsTable,
 		ItemsTable,
 		ItemLinksTable,
 		ItemValuesTable,
@@ -1108,6 +1261,7 @@ var (
 		QualityProfilesTable,
 		ReleaseProfilesTable,
 		RemotePathMappingsTable,
+		RequestsTable,
 		SettingsTable,
 		TrickplayTable,
 		UsersTable,
@@ -1164,6 +1318,16 @@ func init() {
 	ImagesTable.Annotation = &entsql.Annotation{
 		Table: "images",
 	}
+	IssuesTable.ForeignKeys[0].RefTable = ItemsTable
+	IssuesTable.ForeignKeys[1].RefTable = UsersTable
+	IssuesTable.Annotation = &entsql.Annotation{
+		Table: "issues",
+	}
+	IssueCommentsTable.ForeignKeys[0].RefTable = IssuesTable
+	IssueCommentsTable.ForeignKeys[1].RefTable = UsersTable
+	IssueCommentsTable.Annotation = &entsql.Annotation{
+		Table: "issue_comments",
+	}
 	ItemsTable.ForeignKeys[0].RefTable = ItemsTable
 	ItemsTable.ForeignKeys[1].RefTable = ItemsTable
 	ItemsTable.ForeignKeys[2].RefTable = LibrariesTable
@@ -1215,6 +1379,10 @@ func init() {
 	}
 	RemotePathMappingsTable.Annotation = &entsql.Annotation{
 		Table: "remote_path_mappings",
+	}
+	RequestsTable.ForeignKeys[0].RefTable = UsersTable
+	RequestsTable.Annotation = &entsql.Annotation{
+		Table: "requests",
 	}
 	SettingsTable.Annotation = &entsql.Annotation{
 		Table: "settings",

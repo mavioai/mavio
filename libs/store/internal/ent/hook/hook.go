@@ -153,6 +153,30 @@ func (f ImageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ImageMutation", m)
 }
 
+// The IssueFunc type is an adapter to allow the use of ordinary
+// function as Issue mutator.
+type IssueFunc func(context.Context, *ent.IssueMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f IssueFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.IssueMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IssueMutation", m)
+}
+
+// The IssueCommentFunc type is an adapter to allow the use of ordinary
+// function as IssueComment mutator.
+type IssueCommentFunc func(context.Context, *ent.IssueCommentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f IssueCommentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.IssueCommentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IssueCommentMutation", m)
+}
+
 // The ItemFunc type is an adapter to allow the use of ordinary
 // function as Item mutator.
 type ItemFunc func(context.Context, *ent.ItemMutation) (ent.Value, error)
@@ -319,6 +343,18 @@ func (f RemotePathMappingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RemotePathMappingMutation", m)
+}
+
+// The RequestFunc type is an adapter to allow the use of ordinary
+// function as Request mutator.
+type RequestFunc func(context.Context, *ent.RequestMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RequestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RequestMutation", m)
 }
 
 // The SettingFunc type is an adapter to allow the use of ordinary
