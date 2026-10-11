@@ -23,6 +23,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
@@ -71,6 +72,7 @@ const (
 	TypeDisplayPreferences = "DisplayPreferences"
 	TypeDownload           = "Download"
 	TypeEpisodeState       = "EpisodeState"
+	TypeExtraFile          = "ExtraFile"
 	TypeFolderState        = "FolderState"
 	TypeHistoryEvent       = "HistoryEvent"
 	TypeImage              = "Image"
@@ -9444,6 +9446,809 @@ func (m *EpisodeStateMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown EpisodeState edge %s", name)
 }
 
+// ExtraFileMutation represents an operation that mutates the ExtraFile nodes in the graph.
+type ExtraFileMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *core.ID
+	kind                *string
+	_path               *string
+	extension           *string
+	language            *string
+	language_tags       *[]string
+	appendlanguage_tags []string
+	added               *time.Time
+	last_updated        *time.Time
+	clearedFields       map[string]struct{}
+	item                *core.ID
+	cleareditem         bool
+	done                bool
+	oldValue            func(context.Context) (*ExtraFile, error)
+	predicates          []predicate.ExtraFile
+}
+
+var _ ent.Mutation = (*ExtraFileMutation)(nil)
+
+// extrafileOption allows management of the mutation configuration using functional options.
+type extrafileOption func(*ExtraFileMutation)
+
+// newExtraFileMutation creates new mutation for the ExtraFile entity.
+func newExtraFileMutation(c config, op Op, opts ...extrafileOption) *ExtraFileMutation {
+	m := &ExtraFileMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeExtraFile,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withExtraFileID sets the ID field of the mutation.
+func withExtraFileID(id core.ID) extrafileOption {
+	return func(m *ExtraFileMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ExtraFile
+		)
+		m.oldValue = func(ctx context.Context) (*ExtraFile, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ExtraFile.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withExtraFile sets the old ExtraFile of the mutation.
+func withExtraFile(node *ExtraFile) extrafileOption {
+	return func(m *ExtraFileMutation) {
+		m.oldValue = func(context.Context) (*ExtraFile, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ExtraFileMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ExtraFileMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ExtraFile entities.
+func (m *ExtraFileMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ExtraFileMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ExtraFileMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ExtraFile.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetItemID sets the "item_id" field.
+func (m *ExtraFileMutation) SetItemID(c core.ID) {
+	m.item = &c
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *ExtraFileMutation) ItemID() (r core.ID, exists bool) {
+	v := m.item
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the ExtraFile entity.
+// If the ExtraFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExtraFileMutation) OldItemID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *ExtraFileMutation) ResetItemID() {
+	m.item = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *ExtraFileMutation) SetKind(s string) {
+	m.kind = &s
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *ExtraFileMutation) Kind() (r string, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the ExtraFile entity.
+// If the ExtraFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExtraFileMutation) OldKind(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *ExtraFileMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetPath sets the "path" field.
+func (m *ExtraFileMutation) SetPath(s string) {
+	m._path = &s
+}
+
+// Path returns the value of the "path" field in the mutation.
+func (m *ExtraFileMutation) Path() (r string, exists bool) {
+	v := m._path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPath returns the old "path" field's value of the ExtraFile entity.
+// If the ExtraFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExtraFileMutation) OldPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPath: %w", err)
+	}
+	return oldValue.Path, nil
+}
+
+// ResetPath resets all changes to the "path" field.
+func (m *ExtraFileMutation) ResetPath() {
+	m._path = nil
+}
+
+// SetExtension sets the "extension" field.
+func (m *ExtraFileMutation) SetExtension(s string) {
+	m.extension = &s
+}
+
+// Extension returns the value of the "extension" field in the mutation.
+func (m *ExtraFileMutation) Extension() (r string, exists bool) {
+	v := m.extension
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExtension returns the old "extension" field's value of the ExtraFile entity.
+// If the ExtraFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExtraFileMutation) OldExtension(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExtension is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExtension requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExtension: %w", err)
+	}
+	return oldValue.Extension, nil
+}
+
+// ResetExtension resets all changes to the "extension" field.
+func (m *ExtraFileMutation) ResetExtension() {
+	m.extension = nil
+}
+
+// SetLanguage sets the "language" field.
+func (m *ExtraFileMutation) SetLanguage(s string) {
+	m.language = &s
+}
+
+// Language returns the value of the "language" field in the mutation.
+func (m *ExtraFileMutation) Language() (r string, exists bool) {
+	v := m.language
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLanguage returns the old "language" field's value of the ExtraFile entity.
+// If the ExtraFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExtraFileMutation) OldLanguage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLanguage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLanguage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLanguage: %w", err)
+	}
+	return oldValue.Language, nil
+}
+
+// ResetLanguage resets all changes to the "language" field.
+func (m *ExtraFileMutation) ResetLanguage() {
+	m.language = nil
+}
+
+// SetLanguageTags sets the "language_tags" field.
+func (m *ExtraFileMutation) SetLanguageTags(s []string) {
+	m.language_tags = &s
+	m.appendlanguage_tags = nil
+}
+
+// LanguageTags returns the value of the "language_tags" field in the mutation.
+func (m *ExtraFileMutation) LanguageTags() (r []string, exists bool) {
+	v := m.language_tags
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLanguageTags returns the old "language_tags" field's value of the ExtraFile entity.
+// If the ExtraFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExtraFileMutation) OldLanguageTags(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLanguageTags is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLanguageTags requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLanguageTags: %w", err)
+	}
+	return oldValue.LanguageTags, nil
+}
+
+// AppendLanguageTags adds s to the "language_tags" field.
+func (m *ExtraFileMutation) AppendLanguageTags(s []string) {
+	m.appendlanguage_tags = append(m.appendlanguage_tags, s...)
+}
+
+// AppendedLanguageTags returns the list of values that were appended to the "language_tags" field in this mutation.
+func (m *ExtraFileMutation) AppendedLanguageTags() ([]string, bool) {
+	if len(m.appendlanguage_tags) == 0 {
+		return nil, false
+	}
+	return m.appendlanguage_tags, true
+}
+
+// ClearLanguageTags clears the value of the "language_tags" field.
+func (m *ExtraFileMutation) ClearLanguageTags() {
+	m.language_tags = nil
+	m.appendlanguage_tags = nil
+	m.clearedFields[extrafile.FieldLanguageTags] = struct{}{}
+}
+
+// LanguageTagsCleared returns if the "language_tags" field was cleared in this mutation.
+func (m *ExtraFileMutation) LanguageTagsCleared() bool {
+	_, ok := m.clearedFields[extrafile.FieldLanguageTags]
+	return ok
+}
+
+// ResetLanguageTags resets all changes to the "language_tags" field.
+func (m *ExtraFileMutation) ResetLanguageTags() {
+	m.language_tags = nil
+	m.appendlanguage_tags = nil
+	delete(m.clearedFields, extrafile.FieldLanguageTags)
+}
+
+// SetAdded sets the "added" field.
+func (m *ExtraFileMutation) SetAdded(t time.Time) {
+	m.added = &t
+}
+
+// Added returns the value of the "added" field in the mutation.
+func (m *ExtraFileMutation) Added() (r time.Time, exists bool) {
+	v := m.added
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAdded returns the old "added" field's value of the ExtraFile entity.
+// If the ExtraFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExtraFileMutation) OldAdded(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAdded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAdded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAdded: %w", err)
+	}
+	return oldValue.Added, nil
+}
+
+// ResetAdded resets all changes to the "added" field.
+func (m *ExtraFileMutation) ResetAdded() {
+	m.added = nil
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (m *ExtraFileMutation) SetLastUpdated(t time.Time) {
+	m.last_updated = &t
+}
+
+// LastUpdated returns the value of the "last_updated" field in the mutation.
+func (m *ExtraFileMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.last_updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "last_updated" field's value of the ExtraFile entity.
+// If the ExtraFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExtraFileMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ResetLastUpdated resets all changes to the "last_updated" field.
+func (m *ExtraFileMutation) ResetLastUpdated() {
+	m.last_updated = nil
+}
+
+// ClearItem clears the "item" edge to the Item entity.
+func (m *ExtraFileMutation) ClearItem() {
+	m.cleareditem = true
+	m.clearedFields[extrafile.FieldItemID] = struct{}{}
+}
+
+// ItemCleared reports if the "item" edge to the Item entity was cleared.
+func (m *ExtraFileMutation) ItemCleared() bool {
+	return m.cleareditem
+}
+
+// ItemIDs returns the "item" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemID instead. It exists only for internal usage by the builders.
+func (m *ExtraFileMutation) ItemIDs() (ids []core.ID) {
+	if id := m.item; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItem resets all changes to the "item" edge.
+func (m *ExtraFileMutation) ResetItem() {
+	m.item = nil
+	m.cleareditem = false
+}
+
+// Where appends a list predicates to the ExtraFileMutation builder.
+func (m *ExtraFileMutation) Where(ps ...predicate.ExtraFile) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ExtraFileMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ExtraFileMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ExtraFile, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ExtraFileMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ExtraFileMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ExtraFile).
+func (m *ExtraFileMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ExtraFileMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.item != nil {
+		fields = append(fields, extrafile.FieldItemID)
+	}
+	if m.kind != nil {
+		fields = append(fields, extrafile.FieldKind)
+	}
+	if m._path != nil {
+		fields = append(fields, extrafile.FieldPath)
+	}
+	if m.extension != nil {
+		fields = append(fields, extrafile.FieldExtension)
+	}
+	if m.language != nil {
+		fields = append(fields, extrafile.FieldLanguage)
+	}
+	if m.language_tags != nil {
+		fields = append(fields, extrafile.FieldLanguageTags)
+	}
+	if m.added != nil {
+		fields = append(fields, extrafile.FieldAdded)
+	}
+	if m.last_updated != nil {
+		fields = append(fields, extrafile.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ExtraFileMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case extrafile.FieldItemID:
+		return m.ItemID()
+	case extrafile.FieldKind:
+		return m.Kind()
+	case extrafile.FieldPath:
+		return m.Path()
+	case extrafile.FieldExtension:
+		return m.Extension()
+	case extrafile.FieldLanguage:
+		return m.Language()
+	case extrafile.FieldLanguageTags:
+		return m.LanguageTags()
+	case extrafile.FieldAdded:
+		return m.Added()
+	case extrafile.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ExtraFileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case extrafile.FieldItemID:
+		return m.OldItemID(ctx)
+	case extrafile.FieldKind:
+		return m.OldKind(ctx)
+	case extrafile.FieldPath:
+		return m.OldPath(ctx)
+	case extrafile.FieldExtension:
+		return m.OldExtension(ctx)
+	case extrafile.FieldLanguage:
+		return m.OldLanguage(ctx)
+	case extrafile.FieldLanguageTags:
+		return m.OldLanguageTags(ctx)
+	case extrafile.FieldAdded:
+		return m.OldAdded(ctx)
+	case extrafile.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown ExtraFile field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ExtraFileMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case extrafile.FieldItemID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case extrafile.FieldKind:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case extrafile.FieldPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPath(v)
+		return nil
+	case extrafile.FieldExtension:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExtension(v)
+		return nil
+	case extrafile.FieldLanguage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLanguage(v)
+		return nil
+	case extrafile.FieldLanguageTags:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLanguageTags(v)
+		return nil
+	case extrafile.FieldAdded:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAdded(v)
+		return nil
+	case extrafile.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ExtraFile field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ExtraFileMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ExtraFileMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ExtraFileMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown ExtraFile numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ExtraFileMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(extrafile.FieldLanguageTags) {
+		fields = append(fields, extrafile.FieldLanguageTags)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ExtraFileMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ExtraFileMutation) ClearField(name string) error {
+	switch name {
+	case extrafile.FieldLanguageTags:
+		m.ClearLanguageTags()
+		return nil
+	}
+	return fmt.Errorf("unknown ExtraFile nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ExtraFileMutation) ResetField(name string) error {
+	switch name {
+	case extrafile.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case extrafile.FieldKind:
+		m.ResetKind()
+		return nil
+	case extrafile.FieldPath:
+		m.ResetPath()
+		return nil
+	case extrafile.FieldExtension:
+		m.ResetExtension()
+		return nil
+	case extrafile.FieldLanguage:
+		m.ResetLanguage()
+		return nil
+	case extrafile.FieldLanguageTags:
+		m.ResetLanguageTags()
+		return nil
+	case extrafile.FieldAdded:
+		m.ResetAdded()
+		return nil
+	case extrafile.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown ExtraFile field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ExtraFileMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.item != nil {
+		edges = append(edges, extrafile.EdgeItem)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ExtraFileMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case extrafile.EdgeItem:
+		if id := m.item; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ExtraFileMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ExtraFileMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ExtraFileMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareditem {
+		edges = append(edges, extrafile.EdgeItem)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ExtraFileMutation) EdgeCleared(name string) bool {
+	switch name {
+	case extrafile.EdgeItem:
+		return m.cleareditem
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ExtraFileMutation) ClearEdge(name string) error {
+	switch name {
+	case extrafile.EdgeItem:
+		m.ClearItem()
+		return nil
+	}
+	return fmt.Errorf("unknown ExtraFile unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ExtraFileMutation) ResetEdge(name string) error {
+	switch name {
+	case extrafile.EdgeItem:
+		m.ResetItem()
+		return nil
+	}
+	return fmt.Errorf("unknown ExtraFile edge %s", name)
+}
+
 // FolderStateMutation represents an operation that mutates the FolderState nodes in the graph.
 type FolderStateMutation struct {
 	config
@@ -13996,6 +14801,9 @@ type ItemMutation struct {
 	pending_releases              map[core.ID]struct{}
 	removedpending_releases       map[core.ID]struct{}
 	clearedpending_releases       bool
+	extra_files                   map[core.ID]struct{}
+	removedextra_files            map[core.ID]struct{}
+	clearedextra_files            bool
 	issues                        map[core.ID]struct{}
 	removedissues                 map[core.ID]struct{}
 	clearedissues                 bool
@@ -18128,6 +18936,60 @@ func (m *ItemMutation) ResetPendingReleases() {
 	m.removedpending_releases = nil
 }
 
+// AddExtraFileIDs adds the "extra_files" edge to the ExtraFile entity by ids.
+func (m *ItemMutation) AddExtraFileIDs(ids ...core.ID) {
+	if m.extra_files == nil {
+		m.extra_files = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.extra_files[ids[i]] = struct{}{}
+	}
+}
+
+// ClearExtraFiles clears the "extra_files" edge to the ExtraFile entity.
+func (m *ItemMutation) ClearExtraFiles() {
+	m.clearedextra_files = true
+}
+
+// ExtraFilesCleared reports if the "extra_files" edge to the ExtraFile entity was cleared.
+func (m *ItemMutation) ExtraFilesCleared() bool {
+	return m.clearedextra_files
+}
+
+// RemoveExtraFileIDs removes the "extra_files" edge to the ExtraFile entity by IDs.
+func (m *ItemMutation) RemoveExtraFileIDs(ids ...core.ID) {
+	if m.removedextra_files == nil {
+		m.removedextra_files = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.extra_files, ids[i])
+		m.removedextra_files[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedExtraFiles returns the removed IDs of the "extra_files" edge to the ExtraFile entity.
+func (m *ItemMutation) RemovedExtraFilesIDs() (ids []core.ID) {
+	for id := range m.removedextra_files {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ExtraFilesIDs returns the "extra_files" edge IDs in the mutation.
+func (m *ItemMutation) ExtraFilesIDs() (ids []core.ID) {
+	for id := range m.extra_files {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetExtraFiles resets all changes to the "extra_files" edge.
+func (m *ItemMutation) ResetExtraFiles() {
+	m.extra_files = nil
+	m.clearedextra_files = false
+	m.removedextra_files = nil
+}
+
 // AddIssueIDs adds the "issues" edge to the Issue entity by ids.
 func (m *ItemMutation) AddIssueIDs(ids ...core.ID) {
 	if m.issues == nil {
@@ -19712,7 +20574,7 @@ func (m *ItemMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ItemMutation) AddedEdges() []string {
-	edges := make([]string, 0, 22)
+	edges := make([]string, 0, 23)
 	if m.library != nil {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -19775,6 +20637,9 @@ func (m *ItemMutation) AddedEdges() []string {
 	}
 	if m.pending_releases != nil {
 		edges = append(edges, item.EdgePendingReleases)
+	}
+	if m.extra_files != nil {
+		edges = append(edges, item.EdgeExtraFiles)
 	}
 	if m.issues != nil {
 		edges = append(edges, item.EdgeIssues)
@@ -19902,6 +20767,12 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeExtraFiles:
+		ids := make([]ent.Value, 0, len(m.extra_files))
+		for id := range m.extra_files {
+			ids = append(ids, id)
+		}
+		return ids
 	case item.EdgeIssues:
 		ids := make([]ent.Value, 0, len(m.issues))
 		for id := range m.issues {
@@ -19914,7 +20785,7 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ItemMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 22)
+	edges := make([]string, 0, 23)
 	if m.removedchildren != nil {
 		edges = append(edges, item.EdgeChildren)
 	}
@@ -19962,6 +20833,9 @@ func (m *ItemMutation) RemovedEdges() []string {
 	}
 	if m.removedpending_releases != nil {
 		edges = append(edges, item.EdgePendingReleases)
+	}
+	if m.removedextra_files != nil {
+		edges = append(edges, item.EdgeExtraFiles)
 	}
 	if m.removedissues != nil {
 		edges = append(edges, item.EdgeIssues)
@@ -20069,6 +20943,12 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeExtraFiles:
+		ids := make([]ent.Value, 0, len(m.removedextra_files))
+		for id := range m.removedextra_files {
+			ids = append(ids, id)
+		}
+		return ids
 	case item.EdgeIssues:
 		ids := make([]ent.Value, 0, len(m.removedissues))
 		for id := range m.removedissues {
@@ -20081,7 +20961,7 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ItemMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 22)
+	edges := make([]string, 0, 23)
 	if m.clearedlibrary {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -20145,6 +21025,9 @@ func (m *ItemMutation) ClearedEdges() []string {
 	if m.clearedpending_releases {
 		edges = append(edges, item.EdgePendingReleases)
 	}
+	if m.clearedextra_files {
+		edges = append(edges, item.EdgeExtraFiles)
+	}
 	if m.clearedissues {
 		edges = append(edges, item.EdgeIssues)
 	}
@@ -20197,6 +21080,8 @@ func (m *ItemMutation) EdgeCleared(name string) bool {
 		return m.clearedblocklist
 	case item.EdgePendingReleases:
 		return m.clearedpending_releases
+	case item.EdgeExtraFiles:
+		return m.clearedextra_files
 	case item.EdgeIssues:
 		return m.clearedissues
 	}
@@ -20292,6 +21177,9 @@ func (m *ItemMutation) ResetEdge(name string) error {
 		return nil
 	case item.EdgePendingReleases:
 		m.ResetPendingReleases()
+		return nil
+	case item.EdgeExtraFiles:
+		m.ResetExtraFiles()
 		return nil
 	case item.EdgeIssues:
 		m.ResetIssues()

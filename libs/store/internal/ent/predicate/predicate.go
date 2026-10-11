@@ -39,6 +39,9 @@ type Download func(*sql.Selector)
 // EpisodeState is the predicate function for episodestate builders.
 type EpisodeState func(*sql.Selector)
 
+// ExtraFile is the predicate function for extrafile builders.
+type ExtraFile func(*sql.Selector)
+
 // FolderState is the predicate function for folderstate builders.
 type FolderState func(*sql.Selector)
 

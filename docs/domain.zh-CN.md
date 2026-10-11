@@ -45,6 +45,7 @@ erDiagram
 | `Wanted` | 被监控的电影或剧集如何获取：其质量档案、最低可用状态、新条目监控、季文件夹标志与标签 |
 | `EpisodeState` | 获取按季号与集号为剧集的单集保存的内容：其 scene 编号与上次搜索时间 |
 | `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | 被跟踪的下载、获取事件、不再抓取的发布、留待以后抓取的发布 |
+| `ExtraFile` | 与电影或单集文件一同入库的字幕或其他附加文件 |
 | `RemotePathMapping` | 下载客户端的路径如何映射到服务端的路径 |
 | `Request` / `SeasonRequest` | 用户对一部电影或一部剧集若干季的请求（§13.6） |
 | `Issue` / `IssueComment` | 用户就某个条目报告的问题及其讨论（§13.7） |
@@ -260,6 +261,7 @@ erDiagram
 | `HistoryRepository` | `Add`、`List`（分页，最新的在前，按条目或其剧集、类型、下载 ID 与时间）、`Purge` 清除某时间之前的事件、`MoveItems`（把条目的事件交给取代它们的条目） |
 | `BlocklistRepository` | `Add`、`List`（分页，最新的在前，某条目的或全部）、`Delete` |
 | `PendingReleaseRepository` | `List` 某条目的或全部（最早的在前）、`Add`、`Delete` |
+| `ExtraFileRepository` | `List` 某条目的（按路径）、`Put`（插入或替换）、`Delete` |
 | `RemotePathMappingRepository` | `List`、`Put`、`Delete` |
 | `RequestRepository` | `Get`、`List`（分页，可按用户、状态、类型、TMDB ID 与条目筛选，最新创建或最近修改的在前）、`Put`（按 ID 插入或替换）、`Delete`、`QuotaUsed`（见 §13.6）；删除用户会删除其请求 |
 | `IssueRepository` | `Get` 与 `List`（分页，带评论）、`Put`、`AddComment`、`Delete`；删除条目或用户会删除其问题 |
@@ -355,7 +357,8 @@ erDiagram
 * `HistoryEvent` 记录电影或单集（其剧集为 `ParentID`）的一次抓取、从下载目录入库、下载失败或被忽略、文件被删除或改名：发布的 `SourceTitle`、质量与语言、`DownloadID` 以及与类型相关的 `Data`。多集文件的条目（入库或扫描发现时）取代其涵盖的各集的条目时，也接管它们的事件。
 * `BlocklistEntry` 是某条目不再抓取的发布：其标题、质量、语言、大小、协议、索引器与标志、发布日期、种子哈希以及被拉黑的原因。
 * `PendingRelease` 是留待以后抓取的发布：被 delay profile 延迟、等待下载客户端，或作为更好的发布失败时的后备。`Release` 是 `libs/acquire` 编码后的发布。
-* 删除条目时一并删除其想要状态、单集状态、下载、历史、黑名单条目与待定发布。
+* `ExtraFile` 是与电影或单集文件一同入库的文件，如 Radarr 与 Sonarr 的附加文件表：电影，或持有单集文件的单集（`ItemID`）、其 `Kind`（`subtitle`，如 Radarr 的 SubtitleFile，或 `other`，如其 OtherExtraFile）、绝对路径 `Path`、`Extension`、字幕的 `Language` 与 `LanguageTags`，以及 `Added` 与 `LastUpdated` 时间。升级回收被替换文件所记录的附加文件；未记录的文件保留。
+* 删除条目时一并删除其想要状态、单集状态、下载、历史、黑名单条目、待定发布与附加文件。
 
 ### 13.4 设置
 `AcquisitionSettings` 属于服务器设置，沿用 Radarr 的设置：如何对待 proper 与 repack（`prefer_and_upgrade`、`do_not_upgrade`、`do_not_prefer`）、是否偏好索引器标志、已完成下载的处理与失败后重新搜索（交互式搜索抓取的发布须另行允许）、发布的最大大小、Usenet 发布的最小时长与保留期、允许或白名单中的硬字幕、入库后须保留的空闲空间、电影视为可用的延迟、RSS 同步间隔（10–120 分钟，0 表示停用）与下载检查间隔、回收目录及其清理、硬链接、附加文件与空目录，以及 `Naming`：是否重命名电影文件、替换非法字符、替换冒号（`delete`、`dash`、`space_dash`、`space_dash_space`、`smart`），以及电影目录与文件的模板。此外还有 Sonarr 的设置：是否取消监控文件丢失的想要剧集的单集、以显示标题的名称入库的单集何时必须有标题（`EpisodeTitleRequired`）、其中文件不予入库的下载客户端工作目录（`DownloadClientWorkingFolders`，以 `|` 分隔的前缀，为空时为 `_UNPACK_|_FAILED_`），以及 `Naming` 中是否重命名单集文件、标准、日更与动画单集文件以及剧集、季与特别篇目录的模板，和 `MultiEpisodeStyle`；模板或样式为空时使用 Sonarr 的默认值。

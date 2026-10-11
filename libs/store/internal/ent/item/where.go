@@ -3729,6 +3729,29 @@ func HasPendingReleasesWith(preds ...predicate.PendingRelease) predicate.Item {
 	})
 }
 
+// HasExtraFiles applies the HasEdge predicate on the "extra_files" edge.
+func HasExtraFiles() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ExtraFilesTable, ExtraFilesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasExtraFilesWith applies the HasEdge predicate on the "extra_files" edge with a given conditions (other predicates).
+func HasExtraFilesWith(preds ...predicate.ExtraFile) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newExtraFilesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasIssues applies the HasEdge predicate on the "issues" edge.
 func HasIssues() predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {

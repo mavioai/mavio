@@ -19,6 +19,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
@@ -398,6 +399,33 @@ func (f TraverseEpisodeState) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.EpisodeStateQuery", q)
+}
+
+// The ExtraFileFunc type is an adapter to allow the use of ordinary function as a Querier.
+type ExtraFileFunc func(context.Context, *ent.ExtraFileQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f ExtraFileFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.ExtraFileQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.ExtraFileQuery", q)
+}
+
+// The TraverseExtraFile type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseExtraFile func(context.Context, *ent.ExtraFileQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseExtraFile) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseExtraFile) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ExtraFileQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.ExtraFileQuery", q)
 }
 
 // The FolderStateFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -1100,6 +1128,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.DownloadQuery, predicate.Download, download.OrderOption]{typ: ent.TypeDownload, tq: q}, nil
 	case *ent.EpisodeStateQuery:
 		return &query[*ent.EpisodeStateQuery, predicate.EpisodeState, episodestate.OrderOption]{typ: ent.TypeEpisodeState, tq: q}, nil
+	case *ent.ExtraFileQuery:
+		return &query[*ent.ExtraFileQuery, predicate.ExtraFile, extrafile.OrderOption]{typ: ent.TypeExtraFile, tq: q}, nil
 	case *ent.FolderStateQuery:
 		return &query[*ent.FolderStateQuery, predicate.FolderState, folderstate.OrderOption]{typ: ent.TypeFolderState, tq: q}, nil
 	case *ent.HistoryEventQuery:

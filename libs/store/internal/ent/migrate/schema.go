@@ -374,6 +374,39 @@ var (
 			},
 		},
 	}
+	// ExtraFilesColumns holds the columns for the "extra_files" table.
+	ExtraFilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "path", Type: field.TypeString, Size: 2147483647},
+		{Name: "extension", Type: field.TypeString, Default: ""},
+		{Name: "language", Type: field.TypeString, Default: ""},
+		{Name: "language_tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "added", Type: field.TypeTime},
+		{Name: "last_updated", Type: field.TypeTime},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// ExtraFilesTable holds the schema information for the "extra_files" table.
+	ExtraFilesTable = &schema.Table{
+		Name:       "extra_files",
+		Columns:    ExtraFilesColumns,
+		PrimaryKey: []*schema.Column{ExtraFilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "extra_files_items_extra_files",
+				Columns:    []*schema.Column{ExtraFilesColumns[8]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "extrafile_item_id",
+				Unique:  false,
+				Columns: []*schema.Column{ExtraFilesColumns[8]},
+			},
+		},
+	}
 	// FolderStatesColumns holds the columns for the "folder_states" table.
 	FolderStatesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1320,6 +1353,7 @@ var (
 		DisplayPreferencesTable,
 		DownloadsTable,
 		EpisodeStatesTable,
+		ExtraFilesTable,
 		FolderStatesTable,
 		HistoryEventsTable,
 		ImagesTable,
@@ -1390,6 +1424,10 @@ func init() {
 	EpisodeStatesTable.ForeignKeys[0].RefTable = ItemsTable
 	EpisodeStatesTable.Annotation = &entsql.Annotation{
 		Table: "episode_states",
+	}
+	ExtraFilesTable.ForeignKeys[0].RefTable = ItemsTable
+	ExtraFilesTable.Annotation = &entsql.Annotation{
+		Table: "extra_files",
 	}
 	FolderStatesTable.ForeignKeys[0].RefTable = LibrariesTable
 	FolderStatesTable.Annotation = &entsql.Annotation{

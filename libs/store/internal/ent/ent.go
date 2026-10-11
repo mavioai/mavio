@@ -23,6 +23,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
@@ -119,6 +120,7 @@ func checkColumn(t, c string) error {
 			displaypreferences.Table: displaypreferences.ValidColumn,
 			download.Table:           download.ValidColumn,
 			episodestate.Table:       episodestate.ValidColumn,
+			extrafile.Table:          extrafile.ValidColumn,
 			folderstate.Table:        folderstate.ValidColumn,
 			historyevent.Table:       historyevent.ValidColumn,
 			image.Table:              image.ValidColumn,

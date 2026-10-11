@@ -545,6 +545,59 @@ func (b *BlocklistEntry) Validate() error {
 	return nil
 }
 
+// ExtraFileKind is what an extra file is, as the tables of Radarr's and
+// Sonarr's extra files.
+type ExtraFileKind string
+
+// The kinds of extra files.
+const (
+	// ExtraFileSubtitle is a subtitle file, as Radarr's SubtitleFile.
+	ExtraFileSubtitle ExtraFileKind = "subtitle"
+	// ExtraFileOther is any other extra file, as Radarr's OtherExtraFile.
+	ExtraFileOther ExtraFileKind = "other"
+)
+
+// Valid reports whether k is a known kind.
+func (k ExtraFileKind) Valid() bool { return k == ExtraFileSubtitle || k == ExtraFileOther }
+
+// ExtraFile is a file imported with a movie or episode file, as Radarr's
+// and Sonarr's ExtraFile with SubtitleFile and OtherExtraFile: the
+// imports record them, and an upgrade recycles those of the file it
+// replaces.
+type ExtraFile struct {
+	ID ID
+	// ItemID is the movie, or the episode holding the episode file, whose
+	// file it goes with.
+	ItemID ID
+	Kind   ExtraFileKind
+	// Path is the file's absolute path, with slashes, as items' paths;
+	// Radarr's RelativePath is relative to the movie's folder.
+	Path string
+	// Extension is the file's extension with its dot, such as ".srt".
+	Extension string
+	// Language is the name of a subtitle's language, LanguageTags its
+	// tags such as "forced", as Radarr's SubtitleFile; empty for other
+	// extras and unknown languages.
+	Language     string
+	LanguageTags []string
+	// Added is when it was imported, LastUpdated when it was recorded
+	// last.
+	Added, LastUpdated time.Time
+}
+
+// Validate checks the extra file's invariants.
+func (e *ExtraFile) Validate() error {
+	switch {
+	case e.ID.IsZero() || e.ItemID.IsZero():
+		return fmt.Errorf("%w: extra file requires an ID and an item", ErrInvalid)
+	case !e.Kind.Valid():
+		return fmt.Errorf("%w: extra file %s has kind %q", ErrInvalid, e.ID, e.Kind)
+	case !isAbs(e.Path):
+		return fmt.Errorf("%w: extra file %s path %q is not absolute", ErrInvalid, e.ID, e.Path)
+	}
+	return nil
+}
+
 // PendingReason is why a release is kept pending.
 type PendingReason string
 
@@ -738,6 +791,16 @@ type (
 		// is zero, oldest first.
 		List(ctx context.Context, itemID ID) ([]PendingRelease, error)
 		Add(ctx context.Context, p *PendingRelease) error
+		Delete(ctx context.Context, ids ...ID) error
+	}
+
+	// ExtraFileRepository stores the extra files imported with movie and
+	// episode files; deleting the item deletes them.
+	ExtraFileRepository interface {
+		// List returns the extra files of an item, by path.
+		List(ctx context.Context, itemID ID) ([]ExtraFile, error)
+		// Put inserts or replaces an extra file; zero times are now.
+		Put(ctx context.Context, e *ExtraFile) error
 		Delete(ctx context.Context, ids ...ID) error
 	}
 

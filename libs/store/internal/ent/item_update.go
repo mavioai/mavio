@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
@@ -1449,6 +1450,21 @@ func (_u *ItemUpdate) AddPendingReleases(v ...*PendingRelease) *ItemUpdate {
 	return _u.AddPendingReleaseIDs(ids...)
 }
 
+// AddExtraFileIDs adds the "extra_files" edge to the ExtraFile entity by IDs.
+func (_u *ItemUpdate) AddExtraFileIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddExtraFileIDs(ids...)
+	return _u
+}
+
+// AddExtraFiles adds the "extra_files" edges to the ExtraFile entity.
+func (_u *ItemUpdate) AddExtraFiles(v ...*ExtraFile) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddExtraFileIDs(ids...)
+}
+
 // AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
 func (_u *ItemUpdate) AddIssueIDs(ids ...core.ID) *ItemUpdate {
 	_u.mutation.AddIssueIDs(ids...)
@@ -1833,6 +1849,27 @@ func (_u *ItemUpdate) RemovePendingReleases(v ...*PendingRelease) *ItemUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemovePendingReleaseIDs(ids...)
+}
+
+// ClearExtraFiles clears all "extra_files" edges to the ExtraFile entity.
+func (_u *ItemUpdate) ClearExtraFiles() *ItemUpdate {
+	_u.mutation.ClearExtraFiles()
+	return _u
+}
+
+// RemoveExtraFileIDs removes the "extra_files" edge to ExtraFile entities by IDs.
+func (_u *ItemUpdate) RemoveExtraFileIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveExtraFileIDs(ids...)
+	return _u
+}
+
+// RemoveExtraFiles removes "extra_files" edges to ExtraFile entities.
+func (_u *ItemUpdate) RemoveExtraFiles(v ...*ExtraFile) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveExtraFileIDs(ids...)
 }
 
 // ClearIssues clears all "issues" edges to the Issue entity.
@@ -3091,6 +3128,51 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ExtraFilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.ExtraFilesTable,
+			Columns: []string{item.ExtraFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(extrafile.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedExtraFilesIDs(); len(nodes) > 0 && !_u.mutation.ExtraFilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.ExtraFilesTable,
+			Columns: []string{item.ExtraFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(extrafile.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ExtraFilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.ExtraFilesTable,
+			Columns: []string{item.ExtraFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(extrafile.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -4566,6 +4648,21 @@ func (_u *ItemUpdateOne) AddPendingReleases(v ...*PendingRelease) *ItemUpdateOne
 	return _u.AddPendingReleaseIDs(ids...)
 }
 
+// AddExtraFileIDs adds the "extra_files" edge to the ExtraFile entity by IDs.
+func (_u *ItemUpdateOne) AddExtraFileIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddExtraFileIDs(ids...)
+	return _u
+}
+
+// AddExtraFiles adds the "extra_files" edges to the ExtraFile entity.
+func (_u *ItemUpdateOne) AddExtraFiles(v ...*ExtraFile) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddExtraFileIDs(ids...)
+}
+
 // AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
 func (_u *ItemUpdateOne) AddIssueIDs(ids ...core.ID) *ItemUpdateOne {
 	_u.mutation.AddIssueIDs(ids...)
@@ -4950,6 +5047,27 @@ func (_u *ItemUpdateOne) RemovePendingReleases(v ...*PendingRelease) *ItemUpdate
 		ids[i] = v[i].ID
 	}
 	return _u.RemovePendingReleaseIDs(ids...)
+}
+
+// ClearExtraFiles clears all "extra_files" edges to the ExtraFile entity.
+func (_u *ItemUpdateOne) ClearExtraFiles() *ItemUpdateOne {
+	_u.mutation.ClearExtraFiles()
+	return _u
+}
+
+// RemoveExtraFileIDs removes the "extra_files" edge to ExtraFile entities by IDs.
+func (_u *ItemUpdateOne) RemoveExtraFileIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveExtraFileIDs(ids...)
+	return _u
+}
+
+// RemoveExtraFiles removes "extra_files" edges to ExtraFile entities.
+func (_u *ItemUpdateOne) RemoveExtraFiles(v ...*ExtraFile) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveExtraFileIDs(ids...)
 }
 
 // ClearIssues clears all "issues" edges to the Issue entity.
@@ -6238,6 +6356,51 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ExtraFilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.ExtraFilesTable,
+			Columns: []string{item.ExtraFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(extrafile.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedExtraFilesIDs(); len(nodes) > 0 && !_u.mutation.ExtraFilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.ExtraFilesTable,
+			Columns: []string{item.ExtraFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(extrafile.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ExtraFilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.ExtraFilesTable,
+			Columns: []string{item.ExtraFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(extrafile.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

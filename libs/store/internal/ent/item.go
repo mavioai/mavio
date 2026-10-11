@@ -196,11 +196,13 @@ type ItemEdges struct {
 	Blocklist []*BlocklistEntry `json:"blocklist,omitempty"`
 	// PendingReleases holds the value of the pending_releases edge.
 	PendingReleases []*PendingRelease `json:"pending_releases,omitempty"`
+	// ExtraFiles holds the value of the extra_files edge.
+	ExtraFiles []*ExtraFile `json:"extra_files,omitempty"`
 	// Issues holds the value of the issues edge.
 	Issues []*Issue `json:"issues,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [22]bool
+	loadedTypes [23]bool
 }
 
 // LibraryOrErr returns the Library value or an error if the edge
@@ -402,10 +404,19 @@ func (e ItemEdges) PendingReleasesOrErr() ([]*PendingRelease, error) {
 	return nil, &NotLoadedError{edge: "pending_releases"}
 }
 
+// ExtraFilesOrErr returns the ExtraFiles value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) ExtraFilesOrErr() ([]*ExtraFile, error) {
+	if e.loadedTypes[21] {
+		return e.ExtraFiles, nil
+	}
+	return nil, &NotLoadedError{edge: "extra_files"}
+}
+
 // IssuesOrErr returns the Issues value or an error if the edge
 // was not loaded in eager-loading.
 func (e ItemEdges) IssuesOrErr() ([]*Issue, error) {
-	if e.loadedTypes[21] {
+	if e.loadedTypes[22] {
 		return e.Issues, nil
 	}
 	return nil, &NotLoadedError{edge: "issues"}
@@ -975,6 +986,11 @@ func (_m *Item) QueryBlocklist() *BlocklistEntryQuery {
 // QueryPendingReleases queries the "pending_releases" edge of the Item entity.
 func (_m *Item) QueryPendingReleases() *PendingReleaseQuery {
 	return NewItemClient(_m.config).QueryPendingReleases(_m)
+}
+
+// QueryExtraFiles queries the "extra_files" edge of the Item entity.
+func (_m *Item) QueryExtraFiles() *ExtraFileQuery {
+	return NewItemClient(_m.config).QueryExtraFiles(_m)
 }
 
 // QueryIssues queries the "issues" edge of the Item entity.

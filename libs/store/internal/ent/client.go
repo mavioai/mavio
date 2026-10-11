@@ -27,6 +27,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
@@ -81,6 +82,8 @@ type Client struct {
 	Download *DownloadClient
 	// EpisodeState is the client for interacting with the EpisodeState builders.
 	EpisodeState *EpisodeStateClient
+	// ExtraFile is the client for interacting with the ExtraFile builders.
+	ExtraFile *ExtraFileClient
 	// FolderState is the client for interacting with the FolderState builders.
 	FolderState *FolderStateClient
 	// HistoryEvent is the client for interacting with the HistoryEvent builders.
@@ -153,6 +156,7 @@ func (c *Client) init() {
 	c.DisplayPreferences = NewDisplayPreferencesClient(c.config)
 	c.Download = NewDownloadClient(c.config)
 	c.EpisodeState = NewEpisodeStateClient(c.config)
+	c.ExtraFile = NewExtraFileClient(c.config)
 	c.FolderState = NewFolderStateClient(c.config)
 	c.HistoryEvent = NewHistoryEventClient(c.config)
 	c.Image = NewImageClient(c.config)
@@ -281,6 +285,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		DisplayPreferences: NewDisplayPreferencesClient(cfg),
 		Download:           NewDownloadClient(cfg),
 		EpisodeState:       NewEpisodeStateClient(cfg),
+		ExtraFile:          NewExtraFileClient(cfg),
 		FolderState:        NewFolderStateClient(cfg),
 		HistoryEvent:       NewHistoryEventClient(cfg),
 		Image:              NewImageClient(cfg),
@@ -336,6 +341,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		DisplayPreferences: NewDisplayPreferencesClient(cfg),
 		Download:           NewDownloadClient(cfg),
 		EpisodeState:       NewEpisodeStateClient(cfg),
+		ExtraFile:          NewExtraFileClient(cfg),
 		FolderState:        NewFolderStateClient(cfg),
 		HistoryEvent:       NewHistoryEventClient(cfg),
 		Image:              NewImageClient(cfg),
@@ -392,7 +398,7 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry, c.Credit,
 		c.CustomFormat, c.DelayProfile, c.DisplayPreferences, c.Download,
-		c.EpisodeState, c.FolderState, c.HistoryEvent, c.Image, c.Issue,
+		c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent, c.Image, c.Issue,
 		c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
 		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
 		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
@@ -408,7 +414,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry, c.Credit,
 		c.CustomFormat, c.DelayProfile, c.DisplayPreferences, c.Download,
-		c.EpisodeState, c.FolderState, c.HistoryEvent, c.Image, c.Issue,
+		c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent, c.Image, c.Issue,
 		c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
 		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
 		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
@@ -443,6 +449,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Download.mutate(ctx, m)
 	case *EpisodeStateMutation:
 		return c.EpisodeState.mutate(ctx, m)
+	case *ExtraFileMutation:
+		return c.ExtraFile.mutate(ctx, m)
 	case *FolderStateMutation:
 		return c.FolderState.mutate(ctx, m)
 	case *HistoryEventMutation:
@@ -2105,6 +2113,155 @@ func (c *EpisodeStateClient) mutate(ctx context.Context, m *EpisodeStateMutation
 	}
 }
 
+// ExtraFileClient is a client for the ExtraFile schema.
+type ExtraFileClient struct {
+	config
+}
+
+// NewExtraFileClient returns a client for the ExtraFile from the given config.
+func NewExtraFileClient(c config) *ExtraFileClient {
+	return &ExtraFileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `extrafile.Hooks(f(g(h())))`.
+func (c *ExtraFileClient) Use(hooks ...Hook) {
+	c.hooks.ExtraFile = append(c.hooks.ExtraFile, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `extrafile.Intercept(f(g(h())))`.
+func (c *ExtraFileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ExtraFile = append(c.inters.ExtraFile, interceptors...)
+}
+
+// Create returns a builder for creating a ExtraFile entity.
+func (c *ExtraFileClient) Create() *ExtraFileCreate {
+	mutation := newExtraFileMutation(c.config, OpCreate)
+	return &ExtraFileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ExtraFile entities.
+func (c *ExtraFileClient) CreateBulk(builders ...*ExtraFileCreate) *ExtraFileCreateBulk {
+	return &ExtraFileCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ExtraFileClient) MapCreateBulk(slice any, setFunc func(*ExtraFileCreate, int)) *ExtraFileCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ExtraFileCreateBulk{err: fmt.Errorf("calling to ExtraFileClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ExtraFileCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ExtraFileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ExtraFile.
+func (c *ExtraFileClient) Update() *ExtraFileUpdate {
+	mutation := newExtraFileMutation(c.config, OpUpdate)
+	return &ExtraFileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ExtraFileClient) UpdateOne(_m *ExtraFile) *ExtraFileUpdateOne {
+	mutation := newExtraFileMutation(c.config, OpUpdateOne, withExtraFile(_m))
+	return &ExtraFileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ExtraFileClient) UpdateOneID(id core.ID) *ExtraFileUpdateOne {
+	mutation := newExtraFileMutation(c.config, OpUpdateOne, withExtraFileID(id))
+	return &ExtraFileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ExtraFile.
+func (c *ExtraFileClient) Delete() *ExtraFileDelete {
+	mutation := newExtraFileMutation(c.config, OpDelete)
+	return &ExtraFileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ExtraFileClient) DeleteOne(_m *ExtraFile) *ExtraFileDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ExtraFileClient) DeleteOneID(id core.ID) *ExtraFileDeleteOne {
+	builder := c.Delete().Where(extrafile.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ExtraFileDeleteOne{builder}
+}
+
+// Query returns a query builder for ExtraFile.
+func (c *ExtraFileClient) Query() *ExtraFileQuery {
+	return &ExtraFileQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeExtraFile},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ExtraFile entity by its id.
+func (c *ExtraFileClient) Get(ctx context.Context, id core.ID) (*ExtraFile, error) {
+	return c.Query().Where(extrafile.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ExtraFileClient) GetX(ctx context.Context, id core.ID) *ExtraFile {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryItem queries the item edge of a ExtraFile.
+func (c *ExtraFileClient) QueryItem(_m *ExtraFile) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(extrafile.Table, extrafile.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, extrafile.ItemTable, extrafile.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ExtraFileClient) Hooks() []Hook {
+	return c.hooks.ExtraFile
+}
+
+// Interceptors returns the client interceptors.
+func (c *ExtraFileClient) Interceptors() []Interceptor {
+	return c.inters.ExtraFile
+}
+
+func (c *ExtraFileClient) mutate(ctx context.Context, m *ExtraFileMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ExtraFileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ExtraFileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ExtraFileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ExtraFileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ExtraFile mutation op: %q", m.Op())
+	}
+}
+
 // FolderStateClient is a client for the FolderState schema.
 type FolderStateClient struct {
 	config
@@ -3351,6 +3508,22 @@ func (c *ItemClient) QueryPendingReleases(_m *Item) *PendingReleaseQuery {
 			sqlgraph.From(item.Table, item.FieldID, id),
 			sqlgraph.To(pendingrelease.Table, pendingrelease.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, item.PendingReleasesTable, item.PendingReleasesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryExtraFiles queries the extra_files edge of a Item.
+func (c *ItemClient) QueryExtraFiles(_m *Item) *ExtraFileQuery {
+	query := (&ExtraFileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(extrafile.Table, extrafile.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.ExtraFilesTable, item.ExtraFilesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -6347,18 +6520,18 @@ type (
 	hooks struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credit,
 		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
-		FolderState, HistoryEvent, Image, Issue, IssueComment, Item, ItemLink,
-		ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease, Person,
-		PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
+		ExtraFile, FolderState, HistoryEvent, Image, Issue, IssueComment, Item,
+		ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease,
+		Person, PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
 		RemotePathMapping, Request, Setting, Trickplay, User, UserData,
 		Wanted []ent.Hook
 	}
 	inters struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credit,
 		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
-		FolderState, HistoryEvent, Image, Issue, IssueComment, Item, ItemLink,
-		ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease, Person,
-		PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
+		ExtraFile, FolderState, HistoryEvent, Image, Issue, IssueComment, Item,
+		ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease,
+		Person, PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
 		RemotePathMapping, Request, Setting, Trickplay, User, UserData,
 		Wanted []ent.Interceptor
 	}

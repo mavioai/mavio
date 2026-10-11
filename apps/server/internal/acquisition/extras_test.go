@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"testing"
 
@@ -112,8 +113,9 @@ func TestImportMatchesExtras(t *testing.T) {
 	}
 }
 
-// TestUpgradeRecyclesOldExtras checks an upgrade recycles the extras of
-// the file it replaces, as Radarr's ExtraService on MovieFileDeletedEvent.
+// TestUpgradeRecyclesOldExtras checks an upgrade recycles the extras
+// recorded with the file it replaces, as Radarr's ExtraFileService on
+// MovieFileDeletedEvent, and records those of the new file.
 func TestUpgradeRecyclesOldExtras(t *testing.T) {
 	e := newEnv(t)
 	it := e.addMovie()
@@ -122,8 +124,15 @@ func TestUpgradeRecyclesOldExtras(t *testing.T) {
 		t.Fatal(err)
 	}
 	old := "The Matrix (1999) Bluray-720p"
-	for _, f := range []string{old + ".mkv", old + ".en.srt", old + ".1.fr.forced.ass", "folder.jpg", "The Matrix (1999) Other.en.srt"} {
+	for _, f := range []string{old + ".mkv", old + ".en.srt", old + ".1.fr.forced.ass", old + ".de.srt", "folder.jpg", "The Matrix (1999) Other.en.srt"} {
 		if err := os.WriteFile(filepath.Join(folder, f), []byte(f), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// The German subtitle is not recorded: it stays.
+	for _, f := range []string{old + ".en.srt", old + ".1.fr.forced.ass"} {
+		x := core.ExtraFile{ItemID: it.ID, Kind: core.ExtraFileSubtitle, Path: filepath.ToSlash(filepath.Join(folder, f)), Extension: filepath.Ext(f)}
+		if err := e.db.ExtraFiles().Put(e.ctx, &x); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -145,6 +154,7 @@ func TestUpgradeRecyclesOldExtras(t *testing.T) {
 	}{
 		{old + ".en.srt", false},
 		{old + ".1.fr.forced.ass", false},
+		{old + ".de.srt", true},
 		{"folder.jpg", true},
 		{"The Matrix (1999) Other.en.srt", true},
 		{"The Matrix (1999) Bluray-1080p.en.srt", true},
@@ -158,5 +168,17 @@ func TestUpgradeRecyclesOldExtras(t *testing.T) {
 				t.Errorf("%s not in the recycle bin", tc.name)
 			}
 		}
+	}
+	extras, err := e.db.ExtraFiles().List(e.ctx, it.ID)
+	want := core.ExtraFile{
+		ItemID: it.ID, Kind: core.ExtraFileSubtitle, Path: filepath.ToSlash(filepath.Join(folder, "The Matrix (1999) Bluray-1080p.en.srt")),
+		Extension: ".srt", Language: "English", Added: e.clock, LastUpdated: e.clock,
+	}
+	if err != nil || len(extras) != 1 {
+		t.Fatalf("extra files = %+v, %v, want = %+v", extras, err, want)
+	}
+	want.ID = extras[0].ID
+	if !reflect.DeepEqual(extras[0], want) {
+		t.Errorf("extra file = %+v, want = %+v", extras[0], want)
 	}
 }

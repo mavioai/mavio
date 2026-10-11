@@ -484,7 +484,7 @@ flowchart TD
 - [x] Import, upgrades and the recycle folder
   - [x] Qualities of imported files aggregated from their names, their download folder's, the release's and their media info, whose video size decides the resolution, as Radarr's AggregateQuality; the MediaInfo tokens of file names written from the file read at import
   - [x] Subtitles imported with a movie named by their language, tags and copy number, matched by the video's name, the movie's title and year, or taken when the video is the download's only one, as Radarr's SubtitleService; the extras of a file an upgrade replaces recycled with it
-    - [ ] Extra files tracked in the database, as Radarr's extra file tables, rather than found by name beside the movie file
+    - [x] Extra files tracked in the database (`core.ExtraFile`, `extra_files`), as Radarr's and Sonarr's SubtitleFile and OtherExtraFile tables, for movies and episodes: imports record them with their language and tags, and upgrades recycle those recorded rather than those found by name beside the old file
   - [x] Manual import of the files of a tracked movie download (`ListManualImport`, `ManualImport` of `DownloadService`): its video files listed with the quality an import gives them and the rejections, and the chosen one imported with the chosen quality whatever they are, as Radarr's ManualImportService
     - [ ] Manual import of folders that are not tracked downloads, of files for another movie than the download's, and with chosen languages and release groups
   - [x] Free space checked on the volume of the movie folder an import writes to, or of its nearest existing parent, rather than the library folder, as Radarr's FreeSpaceSpecification

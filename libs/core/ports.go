@@ -40,6 +40,7 @@ type Store interface {
 	History() HistoryRepository
 	Blocklist() BlocklistRepository
 	PendingReleases() PendingReleaseRepository
+	ExtraFiles() ExtraFileRepository
 	RemotePathMappings() RemotePathMappingRepository
 	Requests() RequestRepository
 	Issues() IssueRepository
