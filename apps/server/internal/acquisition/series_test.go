@@ -15,6 +15,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/releases"
 	"github.com/mavioai/mavio/libs/acquire"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	"github.com/mavioai/mavio/libs/release"
@@ -429,8 +430,8 @@ func TestEpisodeSearchGrabsAndImports(t *testing.T) {
 	if len(imports) != 1 || imports[0].ItemID != ep1.ID || imports[0].ParentID != s.ID || imports[0].Data[dataImportedPath] != want {
 		t.Errorf("import history = %+v", imports)
 	}
-	if len(e.jobs("library.scan")) == 0 {
-		t.Error("no library scan queued")
+	if scans := e.jobs(library.JobScanFolder); len(scans) != 1 || !strings.Contains(string(scans[0].Payload), "Breaking Bad") || len(e.jobs(library.JobScan)) != 0 {
+		t.Errorf("scans = %+v, want one of the series folder alone", scans)
 	}
 
 	// A better release upgrades the file, the old one recycled.

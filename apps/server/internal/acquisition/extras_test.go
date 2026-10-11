@@ -9,12 +9,13 @@ import (
 	"testing"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/release"
 )
 
 // TestNameExtras ports Radarr's SubtitleServiceFixture naming cases.
 func TestNameExtras(t *testing.T) {
-	release := filepath.Join("downloads", "Movie.Title.2022")
-	video := filepath.Join(release, "Movie.Title.2022.mkv")
+	folder := filepath.Join("downloads", "Movie.Title.2022")
+	video := filepath.Join(folder, "Movie.Title.2022.mkv")
 	for _, tc := range []struct {
 		name  string
 		files []string
@@ -42,10 +43,10 @@ func TestNameExtras(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var files []string
 			for _, f := range tc.files {
-				files = append(files, filepath.Join(release, f))
+				files = append(files, filepath.Join(folder, f))
 			}
 			var got []string
-			for _, e := range nameExtras(video, files) {
+			for _, e := range nameExtras(video, files, release.Movie) {
 				got = append(got, e.suffix)
 			}
 			if !slices.Equal(got, tc.want) {

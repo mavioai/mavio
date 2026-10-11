@@ -520,6 +520,7 @@ flowchart TD
     - [ ] The download client working folders as a setting; Sonarr's default `_UNPACK_|_FAILED_` applies
   - [x] The qualities of episode files aggregated as Sonarr's AggregateQuality: from the names of the file, the download's folder, the download and the grabbed release, and the frame size of the file's video
     - [ ] The source the title tag of a file's container tells, as Sonarr's AugmentQualityFromMediaInfo reads it; probes do not keep that tag
+  - [x] Episode imports as movie imports where Sonarr behaves as Radarr: free space checked for each file on the volume of the series folder, as Sonarr's FreeSpaceSpecification; subtitles named by their language, tags and copy number and matched by the video's name or the season and episodes theirs hold, as Sonarr's SubtitleService; the extras of replaced files recycled; download folders emptied by moves deleted, as Sonarr's ShouldDeleteFolder; a scan of the series folder only
   - [x] The history of the episodes a multi-episode file covers kept by the file's item, on import and on scans
 - [x] End-to-end test (`apps/server/internal/server/series_acquisition_test.go`): a season pack and a single episode of a standard series, an anime release named by a scene mapping title and an absolute number, and a daily series' release named by air date are found, imported under Sonarr's naming and played
   - [ ] RSS syncs of series, multi-episode files and upgrades of episodes in the end-to-end test

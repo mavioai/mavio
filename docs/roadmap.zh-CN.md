@@ -520,6 +520,7 @@ flowchart TD
     - [ ] 下载客户端工作文件夹作为设置；目前使用 Sonarr 的默认值 `_UNPACK_|_FAILED_`
   - [x] 按 Sonarr 的 AggregateQuality 汇总单集文件的质量：来自文件、下载文件夹、下载与抓取的发布的名称，以及文件视频的画面尺寸
     - [ ] 文件容器标题标签所示的来源，如 Sonarr 的 AugmentQualityFromMediaInfo 所读；探测目前不保留该标签
+  - [x] 在 Sonarr 与 Radarr 行为相同之处，单集入库与电影入库一致：按 Sonarr 的 FreeSpaceSpecification 对每个文件检查剧集文件夹所在卷的剩余空间；按 Sonarr 的 SubtitleService，字幕按语言、标签与副本序号命名，并按视频文件名或其名称所含的季与集匹配；被替换文件的附加文件一并回收；按 Sonarr 的 ShouldDeleteFolder，删除因移动而清空的下载文件夹；只扫描剧集文件夹
   - [x] 多集文件所涵盖的各集的历史记录在入库与扫描时由该文件的条目保留
 - [x] 端到端测试（`apps/server/internal/server/series_acquisition_test.go`）：普通剧集的整季包与单集、以 scene 映射标题和绝对集数命名的动漫 release、以播出日期命名的日播剧 release 被找到，按 Sonarr 的命名入库并播放
   - [ ] 端到端测试中的剧集 RSS 同步、多集文件与单集升级
