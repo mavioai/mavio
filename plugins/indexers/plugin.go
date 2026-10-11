@@ -77,6 +77,9 @@ type indexerConfig struct {
 	// blocklisted, as Radarr's and Sonarr's
 	// RejectBlocklistedTorrentHashesWhileGrabbing.
 	RejectBlocklistedTorrentHashes bool `json:"reject_blocklisted_torrent_hashes"`
+	// AnimeStandardFormatSearch searches anime by season and episode too,
+	// as Sonarr's AnimeStandardFormatSearch indexer setting.
+	AnimeStandardFormatSearch bool `json:"anime_standard_format_search"`
 }
 
 // minimumSeeders returns the fewest seeders a torrent release may have.

@@ -106,6 +106,7 @@ func (p *plugin) ListIndexers(ctx context.Context, _ *pluginv1.ListIndexersReque
 				b.RejectBlocklistedTorrentHashes = proto.Bool(c.cfg.RejectBlocklistedTorrentHashes)
 			}
 			b.Tags, b.MultiLanguages = c.cfg.Tags, c.cfg.MultiLanguages
+			b.AnimeStandardFormatSearch = proto.Bool(c.cfg.AnimeStandardFormatSearch)
 			if until, failure, ok := p.statuses.Disabled(c.cfg.ID); ok {
 				b.DisabledUntil, b.Failure = timestamppb.New(until), proto.String(failure)
 			}

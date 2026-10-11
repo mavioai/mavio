@@ -668,6 +668,7 @@ type Indexer struct {
 	xxx_hidden_SeedTime                       *durationpb.Duration   `protobuf:"bytes,16,opt,name=seed_time,json=seedTime"`
 	xxx_hidden_SeasonPackSeedTime             *durationpb.Duration   `protobuf:"bytes,17,opt,name=season_pack_seed_time,json=seasonPackSeedTime"`
 	xxx_hidden_RejectBlocklistedTorrentHashes bool                   `protobuf:"varint,18,opt,name=reject_blocklisted_torrent_hashes,json=rejectBlocklistedTorrentHashes"`
+	xxx_hidden_AnimeStandardFormatSearch      bool                   `protobuf:"varint,19,opt,name=anime_standard_format_search,json=animeStandardFormatSearch"`
 	XXX_raceDetectHookData                    protoimpl.RaceDetectHookData
 	XXX_presence                              [1]uint32
 	unknownFields                             protoimpl.UnknownFields
@@ -841,39 +842,46 @@ func (x *Indexer) GetRejectBlocklistedTorrentHashes() bool {
 	return false
 }
 
+func (x *Indexer) GetAnimeStandardFormatSearch() bool {
+	if x != nil {
+		return x.xxx_hidden_AnimeStandardFormatSearch
+	}
+	return false
+}
+
 func (x *Indexer) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 19)
 }
 
 func (x *Indexer) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 19)
 }
 
 func (x *Indexer) SetDefinitionId(v string) {
 	x.xxx_hidden_DefinitionId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 19)
 }
 
 func (x *Indexer) SetProtocol(v DownloadProtocol) {
 	x.xxx_hidden_Protocol = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 19)
 }
 
 func (x *Indexer) SetPrivacy(v IndexerPrivacy) {
 	x.xxx_hidden_Privacy = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 19)
 }
 
 func (x *Indexer) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 19)
 }
 
 func (x *Indexer) SetPriority(v int32) {
 	x.xxx_hidden_Priority = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 19)
 }
 
 func (x *Indexer) SetCapabilities(v *IndexerCapabilities) {
@@ -886,7 +894,7 @@ func (x *Indexer) SetDisabledUntil(v *timestamppb.Timestamp) {
 
 func (x *Indexer) SetFailure(v string) {
 	x.xxx_hidden_Failure = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 19)
 }
 
 func (x *Indexer) SetTags(v []string) {
@@ -899,7 +907,7 @@ func (x *Indexer) SetRequiredFlags(v []string) {
 
 func (x *Indexer) SetMinimumSeeders(v int32) {
 	x.xxx_hidden_MinimumSeeders = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 19)
 }
 
 func (x *Indexer) SetMultiLanguages(v []string) {
@@ -908,7 +916,7 @@ func (x *Indexer) SetMultiLanguages(v []string) {
 
 func (x *Indexer) SetSeedRatio(v float64) {
 	x.xxx_hidden_SeedRatio = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 19)
 }
 
 func (x *Indexer) SetSeedTime(v *durationpb.Duration) {
@@ -921,7 +929,12 @@ func (x *Indexer) SetSeasonPackSeedTime(v *durationpb.Duration) {
 
 func (x *Indexer) SetRejectBlocklistedTorrentHashes(v bool) {
 	x.xxx_hidden_RejectBlocklistedTorrentHashes = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 18)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 19)
+}
+
+func (x *Indexer) SetAnimeStandardFormatSearch(v bool) {
+	x.xxx_hidden_AnimeStandardFormatSearch = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 19)
 }
 
 func (x *Indexer) HasId() bool {
@@ -1029,6 +1042,13 @@ func (x *Indexer) HasRejectBlocklistedTorrentHashes() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 17)
 }
 
+func (x *Indexer) HasAnimeStandardFormatSearch() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 18)
+}
+
 func (x *Indexer) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -1100,6 +1120,11 @@ func (x *Indexer) ClearRejectBlocklistedTorrentHashes() {
 	x.xxx_hidden_RejectBlocklistedTorrentHashes = false
 }
 
+func (x *Indexer) ClearAnimeStandardFormatSearch() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 18)
+	x.xxx_hidden_AnimeStandardFormatSearch = false
+}
+
 type Indexer_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1137,6 +1162,9 @@ type Indexer_builder struct {
 	// Torrents of the indexer whose hash is blocklisted are refused when
 	// grabbed, even though their hash was not known when they were chosen.
 	RejectBlocklistedTorrentHashes *bool
+	// Anime is searched for by season and episode too, and season packs of
+	// anime by season, as Sonarr's AnimeStandardFormatSearch.
+	AnimeStandardFormatSearch *bool
 }
 
 func (b0 Indexer_builder) Build() *Indexer {
@@ -1144,55 +1172,59 @@ func (b0 Indexer_builder) Build() *Indexer {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 19)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 19)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.DefinitionId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 19)
 		x.xxx_hidden_DefinitionId = b.DefinitionId
 	}
 	if b.Protocol != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 19)
 		x.xxx_hidden_Protocol = *b.Protocol
 	}
 	if b.Privacy != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 19)
 		x.xxx_hidden_Privacy = *b.Privacy
 	}
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 19)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.Priority != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 19)
 		x.xxx_hidden_Priority = *b.Priority
 	}
 	x.xxx_hidden_Capabilities = b.Capabilities
 	x.xxx_hidden_DisabledUntil = b.DisabledUntil
 	if b.Failure != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 19)
 		x.xxx_hidden_Failure = b.Failure
 	}
 	x.xxx_hidden_Tags = b.Tags
 	x.xxx_hidden_RequiredFlags = b.RequiredFlags
 	if b.MinimumSeeders != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 19)
 		x.xxx_hidden_MinimumSeeders = *b.MinimumSeeders
 	}
 	x.xxx_hidden_MultiLanguages = b.MultiLanguages
 	if b.SeedRatio != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 19)
 		x.xxx_hidden_SeedRatio = *b.SeedRatio
 	}
 	x.xxx_hidden_SeedTime = b.SeedTime
 	x.xxx_hidden_SeasonPackSeedTime = b.SeasonPackSeedTime
 	if b.RejectBlocklistedTorrentHashes != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 18)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 19)
 		x.xxx_hidden_RejectBlocklistedTorrentHashes = *b.RejectBlocklistedTorrentHashes
+	}
+	if b.AnimeStandardFormatSearch != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 19)
+		x.xxx_hidden_AnimeStandardFormatSearch = *b.AnimeStandardFormatSearch
 	}
 	return m0
 }
@@ -3777,7 +3809,7 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\x06fields\x18\b \x03(\v2\x1d.mavio.plugin.v1.SettingFieldR\x06fields\"\x15\n" +
 	"\x13ListIndexersRequest\"L\n" +
 	"\x14ListIndexersResponse\x124\n" +
-	"\bindexers\x18\x01 \x03(\v2\x18.mavio.plugin.v1.IndexerR\bindexers\"\xa6\x06\n" +
+	"\bindexers\x18\x01 \x03(\v2\x18.mavio.plugin.v1.IndexerR\bindexers\"\xe7\x06\n" +
 	"\aIndexer\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
@@ -3798,7 +3830,8 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"seed_ratio\x18\x0f \x01(\x01R\tseedRatio\x126\n" +
 	"\tseed_time\x18\x10 \x01(\v2\x19.google.protobuf.DurationR\bseedTime\x12L\n" +
 	"\x15season_pack_seed_time\x18\x11 \x01(\v2\x19.google.protobuf.DurationR\x12seasonPackSeedTime\x12I\n" +
-	"!reject_blocklisted_torrent_hashes\x18\x12 \x01(\bR\x1erejectBlocklistedTorrentHashes\"\xb7\x02\n" +
+	"!reject_blocklisted_torrent_hashes\x18\x12 \x01(\bR\x1erejectBlocklistedTorrentHashes\x12?\n" +
+	"\x1canime_standard_format_search\x18\x13 \x01(\bR\x19animeStandardFormatSearch\"\xb7\x02\n" +
 	"\x13IndexerCapabilities\x12#\n" +
 	"\rsearch_params\x18\x01 \x03(\tR\fsearchParams\x12(\n" +
 	"\x10tv_search_params\x18\x02 \x03(\tR\x0etvSearchParams\x12.\n" +
