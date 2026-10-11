@@ -172,7 +172,8 @@ func (r *Runtime) Handlers() map[string]library.Handler {
 		JobQueue: r.recurring(JobQueue, func(s core.AcquisitionSettings) time.Duration {
 			return time.Duration(max(s.CheckFinishedInterval, 1)) * time.Minute
 		}, r.CheckQueue),
-		JobRecycleBin: r.recurring(JobRecycleBin, func(core.AcquisitionSettings) time.Duration { return 24 * time.Hour }, r.CleanRecycleBin),
+		JobRecycleBin:    r.recurring(JobRecycleBin, func(core.AcquisitionSettings) time.Duration { return 24 * time.Hour }, r.CleanRecycleBin),
+		JobRefreshMovies: r.recurring(JobRefreshMovies, func(core.AcquisitionSettings) time.Duration { return 24 * time.Hour }, r.RefreshMovies),
 		JobEpisodeSearch: func(ctx context.Context, job core.Job) ([]core.Job, error) {
 			var p EpisodeSearchPayload
 			if err := json.Unmarshal(job.Payload, &p); err != nil {
@@ -225,14 +226,15 @@ func SearchJob(itemID core.ID, userInvoked bool, at time.Time) core.Job {
 }
 
 // Schedule enqueues the recurring jobs that are not pending: the queue
-// check, the recycle bin cleanup and the scene mappings update, and the
-// RSS sync unless s disables
-// it. It is called at startup and whenever the settings change, with the
-// settings applied: settings appliers run under the settings lock, so it
-// must not read the settings through Settings.
+// check, the recycle bin cleanup, the scene mappings update and the movie
+// refresh, and the RSS sync unless s disables it. It is called at startup
+// and whenever the settings change, with the settings applied: settings
+// appliers run under the settings lock, so it must not read the settings
+// through Settings.
 func (r *Runtime) Schedule(ctx context.Context, s core.AcquisitionSettings) error {
 	now := r.now()
 	jobs := []core.Job{scheduledJob(JobQueue, now, true), scheduledJob(JobRecycleBin, now, true), scheduledJob(JobSceneMappings, now, true)}
+	jobs = append(jobs, scheduledJob(JobRefreshMovies, now, true))
 	if s.RSSSyncInterval > 0 {
 		jobs = append(jobs, scheduledJob(JobRSS, now, true))
 	}
@@ -267,8 +269,8 @@ type Task struct {
 }
 
 // Tasks returns the recurring jobs with the intervals the settings give:
-// RSS syncs, queue checks, recycle bin cleanups and scene mapping
-// updates, as Radarr's and Sonarr's tasks.
+// RSS syncs, queue checks, recycle bin cleanups, movie refreshes and
+// scene mapping updates, as Radarr's and Sonarr's tasks.
 func (r *Runtime) Tasks() []Task {
 	s := r.settings()
 	return []Task{
@@ -283,6 +285,10 @@ func (r *Runtime) Tasks() []Task {
 		{
 			Kind: JobRecycleBin, Name: "Clean up recycle bin", Interval: 24 * time.Hour,
 			Description: "Deletes what has been in the recycle bin longer than the settings keep it.",
+		},
+		{
+			Kind: JobRefreshMovies, Name: "Refresh movie", Interval: 24 * time.Hour,
+			Description: "Refreshes the metadata of the wanted movies not yet released, released lately or not refreshed for long.",
 		},
 		{
 			Kind: JobSceneMappings, Name: "Update scene mapping", Interval: SceneMappingInterval,

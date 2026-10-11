@@ -2,11 +2,13 @@ package acquisition
 
 import (
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/mavioai/mavio/apps/server/internal/releases"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
@@ -105,5 +107,52 @@ func TestRSSMatchesOtherTitles(t *testing.T) {
 				t.Errorf("grabbed = %v, want = [%s]", got, tc.title)
 			}
 		})
+	}
+}
+
+// TestRefreshMovies checks the daily refresh queues refreshes of the
+// wanted movies due for one, such as those never identified.
+func TestRefreshMovies(t *testing.T) {
+	e := newEnv(t)
+	day := func(n int) *time.Time {
+		d := e.clock.AddDate(0, 0, n)
+		return &d
+	}
+	add := func(name string, refreshed time.Time, premiere, physical *time.Time) core.ID {
+		it := core.Item{
+			ID: core.NewID(), LibraryID: e.lib.ID, Kind: core.KindMovie, Name: name, Virtual: true, Monitored: true, DateAdded: e.clock,
+			MetadataRefreshedAt: refreshed, PremiereDate: premiere, PhysicalReleaseDate: physical,
+		}
+		if err := e.db.Items().Upsert(e.ctx, it); err != nil {
+			t.Fatal(err)
+		}
+		w := core.Wanted{ItemID: it.ID, QualityProfileID: e.profile, MinimumAvailability: core.AvailabilityReleased, AddedAt: e.clock}
+		if err := e.db.Wanted().Put(e.ctx, &w); err != nil {
+			t.Fatal(err)
+		}
+		return it.ID
+	}
+	placeholder := add("TMDB 1", time.Time{}, nil, nil)
+	upcoming := add("Upcoming", *day(-1), day(20), nil)
+	add("Released long ago", *day(-1), day(-400), day(-300))
+	add("Refreshed lately", e.clock.Add(-time.Hour), day(20), nil)
+	stale := add("Stale", *day(-200), day(-400), day(-300))
+
+	if err := e.rt.RefreshMovies(e.ctx); err != nil {
+		t.Fatal(err)
+	}
+	var got []core.ID
+	for _, j := range e.jobs(library.JobRefresh) {
+		for _, id := range []core.ID{placeholder, upcoming, stale} {
+			if strings.Contains(string(j.Payload), id.String()) {
+				got = append(got, id)
+			}
+		}
+	}
+	if n := len(e.jobs(library.JobRefresh)); n != 3 || len(got) != 3 {
+		t.Errorf("refresh jobs = %d (%d of the movies due), want = 3: the placeholder, the upcoming and the stale movie", n, len(got))
+	}
+	if !slices.ContainsFunc(e.rt.Tasks(), func(task Task) bool { return task.Kind == JobRefreshMovies && task.Interval == 24*time.Hour }) {
+		t.Errorf("tasks lack the daily movie refresh")
 	}
 }
