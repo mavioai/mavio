@@ -192,20 +192,16 @@ func importFiles(ctx context.Context, local string) ([]importFile, error) {
 // importOne imports a file of a download for a movie unless an import
 // specification rejects it, returning why; errors are of the transfer.
 func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Download, p polled, f importFile) ([]string, error) {
-	q := qualityModel(d.Quality)
-	if q.Quality == release.Unknown {
-		q = acquire.ModelOf(release.ParseQuality(filepath.Base(f.path), release.Movie))
-	}
-	langs := languagesOf(d.Languages)
-	formats := rn.formats(d.Title, q, langs, f.size, nil)
-
-	reasons, err := r.verify(ctx, m, f)
+	probed, reasons, err := r.verify(ctx, m, f)
 	if err != nil {
 		return nil, err
 	}
 	if len(reasons) > 0 {
 		return reasons, nil
 	}
+	q := importQuality(d, f, probed)
+	langs := languagesOf(d.Languages)
+	formats := rn.formats(d.Title, q, langs, f.size, nil)
 	upgrades := acquire.Upgrades{Propers: rn.env.Config.Propers}
 	if reason, msg := upgrades.ImportUpgrade(m.target.Profile, m.acq.File, q, formats); reason != "" {
 		return []string{msg}, nil
@@ -237,6 +233,7 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 	if parsed != nil {
 		file.Edition, file.ReleaseGroup = parsed.Edition, parsed.ReleaseGroup
 	}
+	file.MediaInfo = mediaInfoOf(probed, d.Title)
 	for _, cf := range formats {
 		file.CustomFormats = append(file.CustomFormats, organize.CustomFormat{Name: cf.Name, IncludeWhenRenaming: cf.IncludeWhenRenaming})
 	}
@@ -329,19 +326,12 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 // verify reads a file and rejects samples and files without audio, as
 // Radarr's NotSampleSpecification and HasAudioTrackSpecification; a file
 // that cannot be read is rejected too.
-func (r *Runtime) verify(ctx context.Context, m *movie, f importFile) ([]string, error) {
-	return r.verifyFile(ctx, f, m.acq.Runtime, false)
-}
-
-// verifyFile reads a file and rejects samples of a runtime in minutes
-// and files without audio; specials are not checked for samples, as
-// Sonarr's DetectSample.
-func (r *Runtime) verifyFile(ctx context.Context, f importFile, runtime int, special bool) ([]string, error) {
+func (r *Runtime) verify(ctx context.Context, m *movie, f importFile) (library.ProbeResult, []string, error) {
 	res, reasons, err := r.probeFile(ctx, f)
 	if res == nil {
-		return reasons, err
+		return library.ProbeResult{}, reasons, err
 	}
-	return checkProbe(f, res, runtime, special), nil
+	return *res, checkProbe(f, res, m.acq.Runtime, false), nil
 }
 
 // probeFile reads a file; nil with why when it cannot be read.
