@@ -181,6 +181,8 @@ const (
 	EdgeBlocklist = "blocklist"
 	// EdgePendingReleases holds the string denoting the pending_releases edge name in mutations.
 	EdgePendingReleases = "pending_releases"
+	// EdgeExtraFiles holds the string denoting the extra_files edge name in mutations.
+	EdgeExtraFiles = "extra_files"
 	// EdgeIssues holds the string denoting the issues edge name in mutations.
 	EdgeIssues = "issues"
 	// Table holds the table name of the item in the database.
@@ -320,6 +322,13 @@ const (
 	PendingReleasesInverseTable = "pending_releases"
 	// PendingReleasesColumn is the table column denoting the pending_releases relation/edge.
 	PendingReleasesColumn = "item_id"
+	// ExtraFilesTable is the table that holds the extra_files relation/edge.
+	ExtraFilesTable = "extra_files"
+	// ExtraFilesInverseTable is the table name for the ExtraFile entity.
+	// It exists in this package in order to avoid circular dependency with the "extrafile" package.
+	ExtraFilesInverseTable = "extra_files"
+	// ExtraFilesColumn is the table column denoting the extra_files relation/edge.
+	ExtraFilesColumn = "item_id"
 	// IssuesTable is the table that holds the issues relation/edge.
 	IssuesTable = "issues"
 	// IssuesInverseTable is the table name for the Issue entity.
@@ -1011,6 +1020,20 @@ func ByPendingReleases(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByExtraFilesCount orders the results by extra_files count.
+func ByExtraFilesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newExtraFilesStep(), opts...)
+	}
+}
+
+// ByExtraFiles orders the results by extra_files terms.
+func ByExtraFiles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newExtraFilesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByIssuesCount orders the results by issues count.
 func ByIssuesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -1169,6 +1192,13 @@ func newPendingReleasesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PendingReleasesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, PendingReleasesTable, PendingReleasesColumn),
+	)
+}
+func newExtraFilesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ExtraFilesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ExtraFilesTable, ExtraFilesColumn),
 	)
 }
 func newIssuesStep() *sqlgraph.Step {

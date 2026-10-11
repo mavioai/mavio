@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
@@ -1098,6 +1099,21 @@ func (_c *ItemCreate) AddPendingReleases(v ...*PendingRelease) *ItemCreate {
 	return _c.AddPendingReleaseIDs(ids...)
 }
 
+// AddExtraFileIDs adds the "extra_files" edge to the ExtraFile entity by IDs.
+func (_c *ItemCreate) AddExtraFileIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddExtraFileIDs(ids...)
+	return _c
+}
+
+// AddExtraFiles adds the "extra_files" edges to the ExtraFile entity.
+func (_c *ItemCreate) AddExtraFiles(v ...*ExtraFile) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddExtraFileIDs(ids...)
+}
+
 // AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
 func (_c *ItemCreate) AddIssueIDs(ids ...core.ID) *ItemCreate {
 	_c.mutation.AddIssueIDs(ids...)
@@ -1981,6 +1997,22 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ExtraFilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.ExtraFilesTable,
+			Columns: []string{item.ExtraFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(extrafile.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

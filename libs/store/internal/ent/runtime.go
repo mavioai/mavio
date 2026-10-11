@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/extrafile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
@@ -239,6 +240,20 @@ func init() {
 	episodestateDescID := episodestateFields[0].Descriptor()
 	// episodestate.DefaultID holds the default value on creation for the id field.
 	episodestate.DefaultID = episodestateDescID.Default.(func() core.ID)
+	extrafileFields := schema.ExtraFile{}.Fields()
+	_ = extrafileFields
+	// extrafileDescExtension is the schema descriptor for extension field.
+	extrafileDescExtension := extrafileFields[4].Descriptor()
+	// extrafile.DefaultExtension holds the default value on creation for the extension field.
+	extrafile.DefaultExtension = extrafileDescExtension.Default.(string)
+	// extrafileDescLanguage is the schema descriptor for language field.
+	extrafileDescLanguage := extrafileFields[5].Descriptor()
+	// extrafile.DefaultLanguage holds the default value on creation for the language field.
+	extrafile.DefaultLanguage = extrafileDescLanguage.Default.(string)
+	// extrafileDescID is the schema descriptor for id field.
+	extrafileDescID := extrafileFields[0].Descriptor()
+	// extrafile.DefaultID holds the default value on creation for the id field.
+	extrafile.DefaultID = extrafileDescID.Default.(func() core.ID)
 	folderstateFields := schema.FolderState{}.Fields()
 	_ = folderstateFields
 	// folderstateDescModTime is the schema descriptor for mod_time field.

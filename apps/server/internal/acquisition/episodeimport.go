@@ -447,7 +447,7 @@ func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *co
 		if err := r.recycle(ctx, oldPath, path.Base(sh.series.Path)); err != nil {
 			return "", nil, err
 		}
-		r.recycleExtras(ctx, oldPath, path.Base(sh.series.Path), s.ExtraFileExtensions)
+		r.recycleExtras(ctx, it.ID, path.Base(sh.series.Path))
 		if err := r.Store.History().Add(ctx, core.HistoryEvent{
 			ID: core.NewID(), Type: core.HistoryFileDeleted, ItemID: it.ID, ParentID: sh.item.ID, Date: r.now(), SourceTitle: it.Path,
 			Quality: qualityRef(f.Quality), Languages: languageNames(f.Languages), Data: map[string]string{dataReason: "Upgrade"},
@@ -459,14 +459,16 @@ func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *co
 		return "", nil, fmt.Errorf("%s file: %w", mode, err)
 	}
 	r.logger().InfoContext(ctx, "imported episode file", "series", sh.item.Name, "from", le.file.path, "to", dest, "mode", mode.String())
+	var extras []core.ExtraFile
 	if s.ImportExtraFiles {
-		r.importEpisodeExtras(ctx, root, sh, le, le.folderInfo != nil, rel, mode, s.ExtraFileExtensions)
+		extras = r.importEpisodeExtras(ctx, root, sh, le, le.folderInfo != nil, rel, mode, s.ExtraFileExtensions)
 	}
 	imported := filepath.ToSlash(dest)
 	holder, err := r.recordEpisodeItems(ctx, sh, episodes, imported)
 	if err != nil {
 		return "", nil, err
 	}
+	r.recordExtras(ctx, holder, extras)
 	// A scan of the series' folder alone, rather than of its library.
 	seriesDir := libPath
 	if _, seriesRel, ok := seriesLibraryFolder(sh); ok {

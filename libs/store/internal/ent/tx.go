@@ -34,6 +34,8 @@ type Tx struct {
 	Download *DownloadClient
 	// EpisodeState is the client for interacting with the EpisodeState builders.
 	EpisodeState *EpisodeStateClient
+	// ExtraFile is the client for interacting with the ExtraFile builders.
+	ExtraFile *ExtraFileClient
 	// FolderState is the client for interacting with the FolderState builders.
 	FolderState *FolderStateClient
 	// HistoryEvent is the client for interacting with the HistoryEvent builders.
@@ -226,6 +228,7 @@ func (tx *Tx) init() {
 	tx.DisplayPreferences = NewDisplayPreferencesClient(tx.config)
 	tx.Download = NewDownloadClient(tx.config)
 	tx.EpisodeState = NewEpisodeStateClient(tx.config)
+	tx.ExtraFile = NewExtraFileClient(tx.config)
 	tx.FolderState = NewFolderStateClient(tx.config)
 	tx.HistoryEvent = NewHistoryEventClient(tx.config)
 	tx.Image = NewImageClient(tx.config)

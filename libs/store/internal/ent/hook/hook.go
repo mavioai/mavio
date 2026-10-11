@@ -141,6 +141,18 @@ func (f EpisodeStateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EpisodeStateMutation", m)
 }
 
+// The ExtraFileFunc type is an adapter to allow the use of ordinary
+// function as ExtraFile mutator.
+type ExtraFileFunc func(context.Context, *ent.ExtraFileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ExtraFileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ExtraFileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ExtraFileMutation", m)
+}
+
 // The FolderStateFunc type is an adapter to allow the use of ordinary
 // function as FolderState mutator.
 type FolderStateFunc func(context.Context, *ent.FolderStateMutation) (ent.Value, error)

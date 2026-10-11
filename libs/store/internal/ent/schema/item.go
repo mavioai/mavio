@@ -133,6 +133,7 @@ func (Item) Edges() []ent.Edge {
 		edge.To("history", HistoryEvent.Type).Annotations(cascade()),
 		edge.To("blocklist", BlocklistEntry.Type).Annotations(cascade()),
 		edge.To("pending_releases", PendingRelease.Type).Annotations(cascade()),
+		edge.To("extra_files", ExtraFile.Type).Annotations(cascade()),
 		edge.To("issues", Issue.Type).Annotations(cascade()),
 	}
 }

@@ -386,6 +386,41 @@ func (PendingRelease) Indexes() []ent.Index {
 	return []ent.Index{index.Fields("item_id", "added")}
 }
 
+// ExtraFile holds the schema of core.ExtraFile.
+type ExtraFile struct{ ent.Schema }
+
+// Annotations of ExtraFile.
+func (ExtraFile) Annotations() []schema.Annotation {
+	return []schema.Annotation{entsql.Annotation{Table: "extra_files"}}
+}
+
+// Fields of ExtraFile.
+func (ExtraFile) Fields() []ent.Field {
+	return []ent.Field{
+		idField(),
+		field.UUID("item_id", core.ID{}),
+		field.String("kind"),
+		field.Text("path"),
+		field.String("extension").Default(""),
+		field.String("language").Default(""),
+		field.Strings("language_tags").Optional(),
+		field.Time("added"),
+		field.Time("last_updated"),
+	}
+}
+
+// Edges of ExtraFile.
+func (ExtraFile) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("item", Item.Type).Ref("extra_files").Field("item_id").Unique().Required(),
+	}
+}
+
+// Indexes of ExtraFile.
+func (ExtraFile) Indexes() []ent.Index {
+	return []ent.Index{index.Fields("item_id")}
+}
+
 // RemotePathMapping holds the schema of core.RemotePathMapping.
 type RemotePathMapping struct{ ent.Schema }
 

@@ -310,7 +310,7 @@ func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.
 		if err := r.recycle(ctx, old, path.Base(path.Dir(m.file))); err != nil {
 			return err
 		}
-		r.recycleExtras(ctx, old, path.Base(path.Dir(m.file)), s.ExtraFileExtensions)
+		r.recycleExtras(ctx, m.item.ID, path.Base(path.Dir(m.file)))
 		if err := r.Store.History().Add(ctx, core.HistoryEvent{
 			ID: core.NewID(), Type: core.HistoryFileDeleted, ItemID: m.item.ID, Date: r.now(), SourceTitle: m.file,
 			Quality: qualityRef(m.acq.File.Quality), Languages: languageNames(m.acq.File.Languages), Data: map[string]string{dataReason: "Upgrade"},
@@ -323,7 +323,7 @@ func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.
 	}
 	r.logger().InfoContext(ctx, "imported movie file", "item", m.item.ID, "from", f.path, "to", dest, "mode", mode.String())
 	if s.ImportExtraFiles {
-		r.importMovieExtras(ctx, root, m, f, rel, mode, s.ExtraFileExtensions)
+		r.recordExtras(ctx, m.item.ID, r.importMovieExtras(ctx, root, m, f, rel, mode, s.ExtraFileExtensions))
 	}
 
 	imported := filepath.ToSlash(dest)

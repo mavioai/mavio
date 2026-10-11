@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/naming"
 	"github.com/mavioai/mavio/libs/release"
 )
@@ -43,9 +44,9 @@ func wantedExtensions(extensions []string) map[string]bool {
 // or as its movie, or any when the video is the folder's only one besides
 // a sample. Subtitles are named as the imported video with their language,
 // tags and, among those alike, a copy number, such as ".1.en.forced.srt";
-// other extras keep what follows the video's name in theirs. Failures are
-// logged.
-func (r *Runtime) importMovieExtras(ctx context.Context, root *os.Root, m *movie, f importFile, rel string, mode transferMode, extensions []string) {
+// other extras keep what follows the video's name in theirs. It returns
+// the extras imported, for recordExtras. Failures are logged.
+func (r *Runtime) importMovieExtras(ctx context.Context, root *os.Root, m *movie, f importFile, rel string, mode transferMode, extensions []string) []core.ExtraFile {
 	parsed := release.ParseMoviePath(f.path)
 	sameMovie := func(p string) bool {
 		if parsed == nil || parsed.PrimaryMovieTitle() == "" {
@@ -55,7 +56,7 @@ func (r *Runtime) importMovieExtras(ctx context.Context, root *os.Root, m *movie
 		return info != nil && info.Year == parsed.Year && strings.EqualFold(info.PrimaryMovieTitle(), parsed.PrimaryMovieTitle())
 	}
 	isSample := func(p string) bool { return r.isSample(ctx, p, m.acq.Runtime) }
-	r.importExtras(ctx, root, f.path, f.inFolder, rel, mode, extensions, release.Movie, sameMovie, isSample)
+	return r.importExtras(ctx, root, f.path, f.inFolder, rel, mode, extensions, release.Movie, sameMovie, isSample)
 }
 
 // importEpisodeExtras imports the extra files of an imported episode
@@ -63,7 +64,7 @@ func (r *Runtime) importMovieExtras(ctx context.Context, root *os.Root, m *movie
 // and OtherExtraService: as importMovieExtras, but the files below the
 // video's folder are looked at when the download's folder name parsed,
 // and extras match by the season and episodes their names hold.
-func (r *Runtime) importEpisodeExtras(ctx context.Context, root *os.Root, sh *show, le *localEpisode, recurse bool, rel string, mode transferMode, extensions []string) {
+func (r *Runtime) importEpisodeExtras(ctx context.Context, root *os.Root, sh *show, le *localEpisode, recurse bool, rel string, mode transferMode, extensions []string) []core.ExtraFile {
 	fileInfo := release.ParseSeriesPath(le.file.path)
 	sameEpisodes := func(p string) bool {
 		if fileInfo == nil {
@@ -74,25 +75,48 @@ func (r *Runtime) importEpisodeExtras(ctx context.Context, root *os.Root, sh *sh
 			info.SeasonNumber == fileInfo.SeasonNumber && slices.Equal(info.EpisodeNumbers, fileInfo.EpisodeNumbers)
 	}
 	isSample := func(p string) bool { return r.isSample(ctx, p, cmp.Or(sh.series.Runtime, 45)) }
-	r.importExtras(ctx, root, le.file.path, recurse, rel, mode, extensions, release.Series, sameEpisodes, isSample)
+	return r.importExtras(ctx, root, le.file.path, recurse, rel, mode, extensions, release.Series, sameEpisodes, isSample)
 }
 
 // importExtras imports the extras of an imported video to beside rel:
 // those named as the video or that matches accepts, or any when the
 // video is its folder's only one besides a sample; recurse looks below
-// the video's folder too.
+// the video's folder too. It returns the extras imported, without their
+// item.
 func (r *Runtime) importExtras(ctx context.Context, root *os.Root, video string, recurse bool, rel string, mode transferMode, extensions []string,
 	kind release.Kind, matches, isSample func(path string) bool,
-) {
+) []core.ExtraFile {
 	wanted := wantedExtensions(extensions)
 	if len(wanted) == 0 {
-		return
+		return nil
 	}
 	files := r.extraFiles(ctx, video, recurse, wanted, matches, isSample)
 	destBase := strings.TrimSuffix(rel, filepath.Ext(rel))
+	var out []core.ExtraFile
 	for _, e := range nameExtras(video, files, kind) {
-		if err := transfer(root, e.src, destBase+e.suffix, mode); err != nil {
+		dest := destBase + e.suffix
+		if err := transfer(root, e.src, dest, mode); err != nil {
 			r.logger().WarnContext(ctx, "couldn't import extra file", "path", e.src, "err", err)
+			continue
+		}
+		out = append(out, core.ExtraFile{
+			Kind: e.kind, Path: filepath.ToSlash(filepath.Join(root.Name(), dest)), Extension: strings.ToLower(filepath.Ext(dest)),
+			Language: e.language, LanguageTags: e.tags,
+		})
+	}
+	return out
+}
+
+// recordExtras records the extras imported with the file of a movie or
+// episode item, as Radarr's and Sonarr's ExtraFileManager.ImportFiles
+// add their SubtitleFile and OtherExtraFile rows. Failures are logged.
+func (r *Runtime) recordExtras(ctx context.Context, itemID core.ID, extras []core.ExtraFile) {
+	now := r.now()
+	for i := range extras {
+		e := &extras[i]
+		e.ItemID, e.Added, e.LastUpdated = itemID, now, now
+		if err := r.Store.ExtraFiles().Put(ctx, e); err != nil {
+			r.logger().WarnContext(ctx, "couldn't record extra file", "path", e.Path, "err", err)
 		}
 	}
 }
@@ -158,9 +182,13 @@ func hasPrefixFold(s, prefix string) bool {
 }
 
 // extraName is an extra file to import and what follows the imported
-// video's name, without its extension, in its name.
+// video's name, without its extension, in its name; a subtitle's language
+// name, unless unknown, and tags.
 type extraName struct {
 	src, suffix string
+	kind        core.ExtraFileKind
+	language    string
+	tags        []string
 }
 
 // nameExtras names the extra files of a video. Subtitles alike in
@@ -187,7 +215,7 @@ func nameExtras(video string, files []string, kind release.Kind) []extraName {
 			if len(stem) > len(videoBase) && hasPrefixFold(stem, videoBase) {
 				suffix = stem[len(videoBase):]
 			}
-			out = append(out, extraName{src: p, suffix: suffix + ext})
+			out = append(out, extraName{src: p, suffix: suffix + ext, kind: core.ExtraFileOther})
 			continue
 		}
 		s := subtitle{src: p, ext: ext, language: release.ParseSubtitleLanguage(p, kind), tags: release.ParseLanguageTags(p)}
@@ -200,7 +228,14 @@ func nameExtras(video string, files []string, kind release.Kind) []extraName {
 	for _, key := range keys {
 		group := groups[key]
 		for i, s := range group {
-			out = append(out, extraName{src: s.src, suffix: subtitleSuffix(s.language, kind, i+1, s.tags, len(group) > 1) + s.ext})
+			e := extraName{
+				src: s.src, suffix: subtitleSuffix(s.language, kind, i+1, s.tags, len(group) > 1) + s.ext,
+				kind: core.ExtraFileSubtitle, tags: s.tags,
+			}
+			if s.language != release.LanguageUnknown {
+				e.language = s.language.String()
+			}
+			out = append(out, e)
 		}
 	}
 	return out
@@ -226,34 +261,26 @@ func subtitleSuffix(language release.Language, kind release.Kind, copyNumber int
 	return b.String()
 }
 
-// recycleExtras recycles the extra files of a movie or episode file an
-// upgrade replaces, as Radarr's and Sonarr's extra file services do on
-// MovieFileDeletedEvent and EpisodeFileDeletedEvent: the
-// subtitles and the files with wanted extensions of its folder named as it
-// with a suffix. Failures are logged.
-func (r *Runtime) recycleExtras(ctx context.Context, old, sub string, extensions []string) {
-	wanted := wantedExtensions(extensions)
-	dir := filepath.Dir(old)
-	entries, err := os.ReadDir(dir)
+// recycleExtras recycles the extra files recorded with the file of a
+// movie or episode item an upgrade replaces, and deletes their records,
+// as Radarr's and Sonarr's ExtraFileService do on MovieFileDeletedEvent
+// and EpisodeFileDeletedEvent; extras not recorded stay. Failures are
+// logged.
+func (r *Runtime) recycleExtras(ctx context.Context, itemID core.ID, sub string) {
+	extras, err := r.Store.ExtraFiles().List(ctx, itemID)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			r.logger().WarnContext(ctx, "couldn't list extra files of replaced file", "path", dir, "err", err)
-		}
+		r.logger().WarnContext(ctx, "couldn't list extra files of replaced file", "item", itemID, "err", err)
 		return
 	}
-	oldBase := strings.TrimSuffix(filepath.Base(old), filepath.Ext(old))
-	parser := naming.Default()
-	for _, e := range entries {
-		name := e.Name()
-		ext := filepath.Ext(name)
-		if e.IsDir() || name == filepath.Base(old) || parser.IsVideoFile(name) ||
-			(!isSubtitleExtension(ext) && !wanted[strings.ToLower(ext)]) ||
-			!hasPrefixFold(name, oldBase+".") {
+	var gone []core.ID
+	for _, e := range extras {
+		if err := r.recycle(ctx, filepath.FromSlash(e.Path), sub); err != nil {
+			r.logger().WarnContext(ctx, "couldn't recycle extra file of replaced file", "path", e.Path, "err", err)
 			continue
 		}
-		p := filepath.Join(dir, name)
-		if err := r.recycle(ctx, p, sub); err != nil {
-			r.logger().WarnContext(ctx, "couldn't recycle extra file of replaced file", "path", p, "err", err)
-		}
+		gone = append(gone, e.ID)
+	}
+	if err := r.Store.ExtraFiles().Delete(ctx, gone...); err != nil {
+		r.logger().WarnContext(ctx, "couldn't delete records of recycled extra files", "item", itemID, "err", err)
 	}
 }

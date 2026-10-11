@@ -93,6 +93,7 @@ func (m *memStore) RemotePathMappings() core.RemotePathMappingRepository    { pa
 func (m *memStore) Requests() core.RequestRepository                        { panic("unused") }
 func (m *memStore) Issues() core.IssueRepository                            { panic("unused") }
 func (m *memStore) BlockedTitles() core.BlockedTitleRepository              { panic("unused") }
+func (m *memStore) ExtraFiles() core.ExtraFileRepository                    { panic("unused") }
 func (m *memStore) InTx(_ context.Context, fn func(core.Store) error) error { return fn(m) }
 
 // present returns the items not missing, by path.

@@ -46,6 +46,7 @@ erDiagram
 | `Wanted` | How a monitored movie or series is acquired: its quality profile, minimum availability, new item monitoring, season folder flag and tags |
 | `EpisodeState` | What acquisition keeps of an episode of a series by its season and number: its scene numbering and last search time |
 | `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | A tracked download, an acquisition event, a release not to grab again, a release kept to grab later |
+| `ExtraFile` | A subtitle or other extra file imported with a movie or episode file |
 | `RemotePathMapping` | How a download client's paths map to the server's |
 | `Request` / `SeasonRequest` | A user's request of a movie or of seasons of a series (§13.6) |
 | `Issue` / `IssueComment` | A problem a user reports with an item, and its thread (§13.7) |
@@ -260,6 +261,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `HistoryRepository` | `Add`, `List` (paged, newest first, by items or their series, types, download ID and time), `Purge` of events before a time, `MoveItems` (giving the events of items to the item taking their place) |
 | `BlocklistRepository` | `Add`, `List` (paged, newest first, an item's or all), `Delete` |
 | `PendingReleaseRepository` | `List` an item's or all (oldest first), `Add`, `Delete` |
+| `ExtraFileRepository` | `List` an item's (by path), `Put` (insert or replace), `Delete` |
 | `RemotePathMappingRepository` | `List`, `Put`, `Delete` |
 | `RequestRepository` | `Get`, `List` (paged, by user, statuses, kind, TMDB ID and item, newest or most recently modified first), `Put` (insert or replace by ID), `Delete`, `QuotaUsed` (see §13.6); deleting the user deletes their requests |
 | `IssueRepository` | `Get` and `List` (paged, with their comments), `Put`, `AddComment`, `Delete`; deleting the item or the user deletes their issues |
@@ -355,7 +357,8 @@ An `EpisodeState` keeps, apart from the episode's item, which a scan may replace
 * A `HistoryEvent` records a grab, an import from a download folder, a failed or ignored download, or a file deleted or renamed, for a movie or an episode (with its series as `ParentID`): the release's `SourceTitle`, quality and languages, the `DownloadID` and type-specific `Data`. When the item of a multi-episode file takes the place of the items of the episodes it covers, imported or found by a scan, it takes their events too.
 * A `BlocklistEntry` is a release not to grab again for an item: its title, quality, languages, size, protocol, indexer and flags, publish date, torrent hash and why it was blocklisted.
 * A `PendingRelease` is a release kept to grab later: held by a delay profile, waiting for a download client, or kept as a fallback should better releases fail. `Release` is the release as `libs/acquire` encodes it.
-* Deleting an item deletes its wanted state, episode states, downloads, history, blocklist entries and pending releases.
+* An `ExtraFile` is a file imported with a movie or episode file, as Radarr's and Sonarr's extra file tables: the movie, or the episode holding the episode file (`ItemID`), its `Kind` (`subtitle`, as Radarr's SubtitleFile, or `other`, as its OtherExtraFile), its absolute `Path`, `Extension`, a subtitle's `Language` and `LanguageTags`, and when it was `Added` and `LastUpdated`. An upgrade recycles the extra files recorded with the file it replaces; files not recorded stay.
+* Deleting an item deletes its wanted state, episode states, downloads, history, blocklist entries, pending releases and extra files.
 
 ### 13.4 Settings
 `AcquisitionSettings`, part of the server settings, are Radarr's: how propers and repacks are treated (`prefer_and_upgrade`, `do_not_upgrade`, `do_not_prefer`), whether indexer flags are preferred, completed download handling and new searches after failures (for releases grabbed from an interactive search only when also allowed), the maximum release size, the minimum age and retention of usenet releases, hardcoded subtitles allowed or whitelisted, the free space an import must leave, the delay after which movies count as available, the RSS sync interval (10–120 minutes, 0 disabling it) and the download check interval, the recycle bin and its cleanup, hard links, extra files and empty folders, and `Naming`: whether movie files are renamed, illegal characters replaced, colons replaced (`delete`, `dash`, `space_dash`, `space_dash_space`, `smart`), and the movie folder and file templates. Sonarr's settings join them: whether the episodes of wanted series whose files go missing are unmonitored, when an episode imported under a name showing its title must have one (`EpisodeTitleRequired`), the download client working folders whose files are not imported (`DownloadClientWorkingFolders`, prefixes separated by `|`, `_UNPACK_|_FAILED_` when empty), and in `Naming` whether episode files are renamed, the templates of standard, daily and anime episode files and of series, season and specials folders, and the `MultiEpisodeStyle`; an empty template or style means Sonarr's default.
