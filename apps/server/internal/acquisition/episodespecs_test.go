@@ -178,15 +178,25 @@ func TestUnpacking(t *testing.T) {
 		}
 		return p
 	}
-	if unpacking(file("Unsorted TV/30.rock/30.rock.s01e01.avi", now), now) {
+	working := (&core.AcquisitionSettings{}).WorkingFolders()
+	if unpacking(file("Unsorted TV/30.rock/30.rock.s01e01.avi", now), working, now) {
 		t.Error("file outside a working folder is being unpacked")
 	}
-	if !unpacking(file("Unsorted TV/_UNPACK_30.rock/someSubFolder/30.rock.s01e01.avi", now), now) {
+	unpack := file("Unsorted TV/_UNPACK_30.rock/someSubFolder/30.rock.s01e01.avi", now)
+	if !unpacking(unpack, working, now) {
 		t.Error("file written just now in a working folder is not being unpacked")
 	}
 	old := file("Unsorted TV/_FAILED_30.rock/30.rock.s01e02.avi", now.Add(-time.Hour))
-	if got, want := unpacking(old, now), runtime.GOOS != "windows"; got != want {
+	if got, want := unpacking(old, working, now), runtime.GOOS != "windows"; got != want {
 		t.Errorf("old file in a working folder being unpacked = %v, want = %v", got, want)
+	}
+	// Working folders of the setting replace the default ones.
+	custom := (&core.AcquisitionSettings{DownloadClientWorkingFolders: "_TMP_ | .partial"}).WorkingFolders()
+	if unpacking(unpack, custom, now) {
+		t.Error("file in _UNPACK_ is being unpacked with working folders _TMP_ and .partial")
+	}
+	if !unpacking(file("Unsorted TV/.partial.30.rock/30.rock.s01e03.avi", now), custom, now) {
+		t.Error("file written just now in .partial is not being unpacked")
 	}
 }
 

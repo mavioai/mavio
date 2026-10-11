@@ -288,7 +288,7 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 		// NotUnpackingSpecification, MatchesFolderSpecification,
 		// EpisodeTitleSpecification, UnverifiedSceneNumberingSpecification
 		// and AbsoluteEpisodeNumberSpecification.
-		if unpacking(f.path, now) {
+		if unpacking(f.path, s.WorkingFolders(), now) {
 			le.reasons = append(le.reasons, msgUnpacking)
 		}
 		msg, err := unexpectedEpisodes(ctx, ps, sh.series, le.parsed, folderInfo)

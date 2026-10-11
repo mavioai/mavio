@@ -1,6 +1,7 @@
 package core
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -859,6 +860,11 @@ type AcquisitionSettings struct {
 	// EpisodeTitleRequired is when episodes imported under names showing
 	// their titles must have one; empty is EpisodeTitleAlways.
 	EpisodeTitleRequired EpisodeTitleRequired
+	// DownloadClientWorkingFolders are the prefixes, separated by "|", of
+	// the folders download clients unpack into or leave failed downloads
+	// in, whose files are not imported, as Sonarr's setting; empty for
+	// DefaultDownloadClientWorkingFolders.
+	DownloadClientWorkingFolders string
 	// MaximumSize is in megabytes; 0 for none.
 	MaximumSize int
 	// MinimumAge is how old usenet releases must be, in minutes.
@@ -921,6 +927,22 @@ type NamingSettings struct {
 	MultiEpisodeStyle MultiEpisodeStyle
 }
 
+// DefaultDownloadClientWorkingFolders are Sonarr's default download
+// client working folders.
+const DefaultDownloadClientWorkingFolders = "_UNPACK_|_FAILED_"
+
+// WorkingFolders returns the prefixes of the download client working
+// folders, the default ones when none are set.
+func (a *AcquisitionSettings) WorkingFolders() []string {
+	var out []string
+	for f := range strings.SplitSeq(cmp.Or(strings.TrimSpace(a.DownloadClientWorkingFolders), DefaultDownloadClientWorkingFolders), "|") {
+		if f = strings.TrimSpace(f); f != "" {
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
 // DefaultAcquisitionSettings are Radarr's and Sonarr's defaults.
 func DefaultAcquisitionSettings() AcquisitionSettings {
 	return AcquisitionSettings{
@@ -929,6 +951,7 @@ func DefaultAcquisitionSettings() AcquisitionSettings {
 		AutoRedownloadFailed:      true,
 		AutoRedownloadFailedFromInteractiveSearch: true,
 		EpisodeTitleRequired:                      EpisodeTitleAlways,
+		DownloadClientWorkingFolders:              DefaultDownloadClientWorkingFolders,
 		MinimumFreeSpace:                          100,
 		RSSSyncInterval:                           30,
 		CheckFinishedInterval:                     1,

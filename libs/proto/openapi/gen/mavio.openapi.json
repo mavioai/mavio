@@ -12673,6 +12673,11 @@
             ],
             "title": "episode_title_required",
             "description": "Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.\nenum.defined_only = true\n"
+          },
+          "downloadClientWorkingFolders": {
+            "type": "string",
+            "title": "download_client_working_folders",
+            "description": "The prefixes, separated by \"|\", of the folders download clients\n unpack into or leave failed downloads in, whose files are not\n imported; empty for \"_UNPACK_|_FAILED_\"."
           }
         },
         "title": "AcquisitionSettings",

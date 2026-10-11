@@ -7458,6 +7458,12 @@ pub struct AcquisitionSettingsView<'a> {
     pub episode_title_required: ::core::option::Option<
         ::buffa::EnumValue<super::super::EpisodeTitleRequired>,
     >,
+    /// The prefixes, separated by "|", of the folders download clients
+    /// unpack into or leave failed downloads in, whose files are not
+    /// imported; empty for "_UNPACK_|_FAILED_".
+    ///
+    /// Field 50: `download_client_working_folders`
+    pub download_client_working_folders: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
@@ -7756,6 +7762,15 @@ impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
                     ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
                 );
             }
+            50u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.download_client_working_folders = Some(
+                    ::buffa::types::borrow_str(&mut cur)?,
+                );
+            }
             9u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -7852,6 +7867,9 @@ impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
             auto_unmonitor_previously_downloaded_episodes: self
                 .auto_unmonitor_previously_downloaded_episodes,
             episode_title_required: self.episode_title_required,
+            download_client_working_folders: self
+                .download_client_working_folders
+                .map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -7971,6 +7989,9 @@ impl<'a> ::buffa::ViewEncode<'a> for AcquisitionSettingsView<'a> {
         if let Some(ref v) = self.episode_title_required {
             size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
         }
+        if let Some(ref v) = self.download_client_working_folders {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -8089,6 +8110,9 @@ impl<'a> ::buffa::ViewEncode<'a> for AcquisitionSettingsView<'a> {
         }
         if let Some(ref v) = self.episode_title_required {
             ::buffa::types::put_int32_field(49u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.download_client_working_folders {
+            ::buffa::types::put_string_field(50u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8426,6 +8450,15 @@ impl AcquisitionSettingsOwnedView {
         &self,
     ) -> ::core::option::Option<::buffa::EnumValue<super::super::EpisodeTitleRequired>> {
         self.0.reborrow().episode_title_required
+    }
+    /// The prefixes, separated by "|", of the folders download clients
+    /// unpack into or leave failed downloads in, whose files are not
+    /// imported; empty for "_UNPACK_|_FAILED_".
+    ///
+    /// Field 50: `download_client_working_folders`
+    #[must_use]
+    pub fn download_client_working_folders(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().download_client_working_folders
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<AcquisitionSettingsView<'static>>>

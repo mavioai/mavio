@@ -517,7 +517,7 @@ flowchart TD
 - [x] 单集、整季包与多集文件的入库；升级
   - [x] 剧集命名设置：是否重命名单集、单集文件格式、剧集、季与特别篇目录格式与多集样式，为空时使用 Sonarr 的默认值
   - [x] Sonarr 关于单集标题（含 `EpisodeTitleRequired` 设置）、解压中、未验证的 scene 编号、绝对集数与文件夹匹配的入库规格，以及其 scene 名称计算
-    - [ ] 下载客户端工作文件夹作为设置；目前使用 Sonarr 的默认值 `_UNPACK_|_FAILED_`
+    - [x] 下载客户端工作文件夹作为设置（`DownloadClientWorkingFolders`），默认为 Sonarr 的 `_UNPACK_|_FAILED_`
   - [x] 按 Sonarr 的 AggregateQuality 汇总单集文件的质量：来自文件、下载文件夹、下载与抓取的发布的名称，以及文件视频的画面尺寸
     - [ ] 文件容器标题标签所示的来源，如 Sonarr 的 AugmentQualityFromMediaInfo 所读；探测目前不保留该标签
   - [x] 在 Sonarr 与 Radarr 行为相同之处，单集入库与电影入库一致：按 Sonarr 的 FreeSpaceSpecification 对每个文件检查剧集文件夹所在卷的剩余空间；按 Sonarr 的 SubtitleService，字幕按语言、标签与副本序号命名，并按视频文件名或其名称所含的季与集匹配；被替换文件的附加文件一并回收；按 Sonarr 的 ShouldDeleteFolder，删除因移动而清空的下载文件夹；只扫描剧集文件夹

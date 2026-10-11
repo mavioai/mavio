@@ -26,19 +26,14 @@ const (
 	msgNoAbsoluteNumber   = "Episode does not have an absolute episode number and recently aired"
 )
 
-// downloadWorkingFolders are the prefixes of the folders download clients
-// unpack into or leave failed downloads in, Sonarr's default
-// DownloadClientWorkingFolders.
-const downloadWorkingFolders = "_UNPACK_|_FAILED_"
-
 // unpacking reports whether a file is still being unpacked, as Sonarr's
-// NotUnpackingSpecification: a folder it is in starts with a working
-// folder's name; on Windows, only while it was written within the last
-// five minutes.
-func unpacking(path string, now time.Time) bool {
+// NotUnpackingSpecification: a folder it is in starts with one of the
+// working folders' prefixes (DownloadClientWorkingFolders); on Windows,
+// only while it was written within the last five minutes.
+func unpacking(path string, workingFolders []string, now time.Time) bool {
 	for dir := filepath.Dir(path); ; dir = filepath.Dir(dir) {
 		name := filepath.Base(dir)
-		for _, working := range strings.Split(downloadWorkingFolders, "|") {
+		for _, working := range workingFolders {
 			if !strings.HasPrefix(name, working) {
 				continue
 			}
