@@ -1,0 +1,207 @@
+edition = "2023";
+
+package mavio.acquisition.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ReleaseService searches the indexers of the indexer provider plugins for
+// releases, the torrents and NZBs of movies and episodes, and parses their
+// titles as Radarr and Sonarr do. Administrators only.
+service ReleaseService {
+  // ListIndexers lists the indexers every ready indexer provider has
+  // configured.
+  rpc ListIndexers(ListIndexersRequest) returns (ListIndexersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SearchReleases searches indexers for a movie, season or episode of the
+  // library, by the IDs and numbers each indexer can search by and else by
+  // title, as Radarr and Sonarr do; or for text; or reads their recent
+  // releases when given neither.
+  rpc SearchReleases(SearchReleasesRequest) returns (SearchReleasesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+// DownloadProtocol is how a release is downloaded.
+enum DownloadProtocol {
+  DOWNLOAD_PROTOCOL_UNSPECIFIED = 0;
+  DOWNLOAD_PROTOCOL_TORRENT = 1;
+  DOWNLOAD_PROTOCOL_USENET = 2;
+}
+
+// IndexerPrivacy is who may use an indexer.
+enum IndexerPrivacy {
+  INDEXER_PRIVACY_UNSPECIFIED = 0;
+  INDEXER_PRIVACY_PUBLIC = 1;
+  INDEXER_PRIVACY_SEMI_PRIVATE = 2;
+  INDEXER_PRIVACY_PRIVATE = 3;
+}
+
+// IndexerRef names an indexer: its plugin and its ID within the plugin's
+// configuration.
+message IndexerRef {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+  string indexer_id = 2 [(buf.validate.field).required = true];
+}
+
+// Indexer is an indexer a plugin has configured.
+message Indexer {
+  string plugin_id = 1;
+  string id = 2;
+  string name = 3;
+  // The kind of indexer within the plugin, e.g. "newznab".
+  string definition_id = 4;
+  DownloadProtocol protocol = 5;
+  IndexerPrivacy privacy = 6;
+  bool enabled = 7;
+  // Lower first when releases are otherwise equal.
+  int32 priority = 8;
+  // What it can be searched by, in Newznab's parameter names, for basic,
+  // series and movie searches; empty when it cannot be searched so.
+  repeated string search_params = 9;
+  repeated string tv_search_params = 10;
+  repeated string movie_search_params = 11;
+  // Set while the indexer is left out after failing, until this time.
+  google.protobuf.Timestamp disabled_until = 12;
+  // The failure that left it out.
+  string failure = 13;
+}
+
+message ListIndexersRequest {}
+
+message ListIndexersResponse {
+  // By plugin, then by priority and name.
+  repeated Indexer indexers = 1;
+  // The plugins that failed to list theirs.
+  repeated IndexerFailure failures = 2;
+}
+
+// IndexerFailure is an indexer, or with no indexer ID a plugin, that
+// failed.
+message IndexerFailure {
+  string plugin_id = 1;
+  string indexer_id = 2;
+  string message = 3;
+  // Set when the indexer is left out until then.
+  google.protobuf.Timestamp disabled_until = 4;
+}
+
+// ReleaseSearchType is what a text search looks for.
+enum ReleaseSearchType {
+  // Anything.
+  RELEASE_SEARCH_TYPE_UNSPECIFIED = 0;
+  RELEASE_SEARCH_TYPE_MOVIE = 1;
+  RELEASE_SEARCH_TYPE_TV = 2;
+}
+
+message SearchReleasesRequest {
+  // A movie, season or episode of the library, wanted or not; searches by
+  // its own or its series' IDs, title, year and numbers.
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  // A text search when item_id is unset; nothing reads recent releases.
+  string query = 2 [(buf.validate.field).string.max_len = 1000];
+  ReleaseSearchType type = 3 [(buf.validate.field).enum.defined_only = true];
+  // The season and episode of a text search of type TV; zero for none. The
+  // episode may be a date such as "2024-03-01" for daily series.
+  int32 season = 4 [(buf.validate.field).int32.gte = 0];
+  string episode = 5 [(buf.validate.field).string.max_len = 64];
+  // Newznab categories; empty for those of the movie, series or type.
+  repeated int32 categories = 6;
+  // The indexers to search; empty for every enabled indexer.
+  repeated IndexerRef indexers = 7;
+}
+
+message SearchReleasesResponse {
+  // By indexer priority, then newest first.
+  repeated Release releases = 1;
+  // The indexers that failed, which the releases leave out.
+  repeated IndexerFailure failures = 2;
+}
+
+// Release is a release an indexer lists.
+message Release {
+  string plugin_id = 1;
+  string indexer_id = 2;
+  string indexer_name = 3;
+  // Unique within the indexer.
+  string guid = 4;
+  string title = 5;
+  // In bytes; unset when unknown.
+  int64 size = 6;
+  string download_url = 7;
+  string magnet_url = 8;
+  string info_hash = 9;
+  // The release's page on the indexer.
+  string info_url = 10;
+  DownloadProtocol protocol = 11;
+  google.protobuf.Timestamp publish_date = 12;
+  // Newznab categories.
+  repeated int32 categories = 13;
+  // IDs of the movie or series the indexer gives: "imdb", "tmdb", "tvdb",
+  // "tvrage", "tvmaze", "trakt", "douban".
+  map<string, string> external_ids = 14;
+  int32 grabs = 15;
+  int32 seeders = 16;
+  // Seeders and leechers.
+  int32 peers = 17;
+  // How much of the download counts against the account's ratio, and of
+  // the upload for it; 1 for normal releases, 0 for freeleech.
+  double download_volume_factor = 18;
+  double upload_volume_factor = 19;
+  // Prowlarr's indexer flags: "internal", "exclusive", "freeleech",
+  // "neutralleech", "halfleech", "scene", "doubleupload", "nuked".
+  repeated string flags = 20;
+  // What the title tells; unset when it cannot be parsed.
+  ParsedRelease parsed = 21;
+}
+
+// ReleaseKind is what a parsed release holds.
+enum ReleaseKind {
+  RELEASE_KIND_UNSPECIFIED = 0;
+  RELEASE_KIND_MOVIE = 1;
+  RELEASE_KIND_EPISODE = 2;
+}
+
+// ParsedRelease is a release title parsed with Radarr's rules for movies
+// and Sonarr's for episodes.
+message ParsedRelease {
+  ReleaseKind kind = 1;
+  // The movie's title and its alternatives, or the series' title.
+  repeated string titles = 2;
+  int32 year = 3;
+  // Of movies.
+  string edition = 4;
+  string imdb_id = 5;
+  int32 tmdb_id = 6;
+  // Of episodes: the season, the episode numbers within it or across
+  // seasons, the air date of a daily series' episode ("2006-01-02"), and
+  // whether the release is a whole season.
+  int32 season = 7;
+  repeated int32 episodes = 8;
+  repeated int32 absolute_episodes = 9;
+  string air_date = 10;
+  bool full_season = 11;
+  ReleaseQuality quality = 12;
+  // English names, e.g. "French".
+  repeated string languages = 13;
+  string release_group = 14;
+}
+
+// ReleaseQuality is a release's quality.
+message ReleaseQuality {
+  // Radarr's name, e.g. "Bluray-1080p".
+  string name = 1;
+  // "cam", "telesync", "telecine", "workprint", "dvd", "tv", "webdl",
+  // "webrip" or "bluray"; empty when unknown.
+  string source = 2;
+  // In lines, e.g. 1080; zero when unknown.
+  int32 resolution = 3;
+  // "regional", "screener", "rawhd", "brdisk" or "remux"; empty for none.
+  string modifier = 4;
+  // Re-releases: PROPER and REPACK raise the version, REAL the real
+  // count.
+  int32 version = 5;
+  int32 real = 6;
+  bool repack = 7;
+}

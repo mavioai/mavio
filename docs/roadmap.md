@@ -94,7 +94,7 @@ flowchart TD
 | P14 | DLNA | ✅ Done |
 | P15 | Acquisition foundation | ✅ Done |
 | P16 | Acquisition data sources | In progress |
-| P17 | Indexers | In progress |
+| P17 | Indexers | ✅ Done |
 | P18 | Movie acquisition | Not started |
 | P19 | Series acquisition | Not started |
 | P20 | Discovery and requests | Not started |
@@ -405,7 +405,7 @@ flowchart TD
   - [ ] The age and size limits of searches (`minage`, `maxage`, `minsize`, `maxsize`), which queries do not carry yet
   - [ ] Capabilities kept across restarts; they are read again from the caps after each start
 - [x] The Cardigann engine (`internal/sites/cardigann`): definitions read from a directory and its `Custom` directory, templates, filters, HTML, XML and JSON selectors, logins, searches and downloads
-  - [ ] Fetching and updating the definitions of `indexers.prowlarr.com`, which the plugin's wiring does
+  - [x] Fetching and updating the definitions of `indexers.prowlarr.com`, which the plugin's wiring does
   - [ ] Captchas solved by hand: an image captcha fails automatic logins, as no UI shows it yet
   - [ ] Cookies of the `cookie` setting replacing those responses set, as Prowlarr's GetCookies does; they are only sent besides them
 - [x] The sites Prowlarr implements in code, but those it marks obsolete
@@ -434,8 +434,12 @@ flowchart TD
   - [ ] The API tokens of AvistaZ and SpeedApp sites kept across restarts, as Prowlarr keeps them in the settings; they log in again after each start
   - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
-- [ ] `ReleaseService`
-- [ ] End-to-end test
+- [x] `ReleaseService` (`mavio/acquisition/v1/release.proto`, `apps/server/internal/releases`): lists the indexers of every ready provider; searches them for a movie, season or episode of the library tier by tier as Radarr's and Sonarr's FetchReleases do (the IDs each indexer takes, then its titles), or for text; parses the releases with `libs/release`
+  - [ ] Seasons of anime searched episode by episode, as Sonarr does; they are refused for now
+  - [ ] Newznab's `title` parameter, which Sonarr sends to indexers taking it
+  - [ ] Scene titles and mappings (XEM) of series searched besides their titles, with P19
+  - [ ] Indexer capabilities kept with the server, so that searches need not list the indexers first
+- [x] End-to-end test (`apps/server/internal/server/releases_test.go`): Newznab, Torznab, a Cardigann definition fetched as `indexers.prowlarr.com` serves them and NzbIndex, searched through the assembled server
 
 ### P18 Movie Acquisition
 **Scope**: `libs/acquire` with its `movie` package, porting Radarr; `plugins/download-clients`, a first-party process plugin with every download client Radarr and Sonarr support.

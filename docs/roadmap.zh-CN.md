@@ -94,7 +94,7 @@ flowchart TD
 | P14 | DLNA | ✅ 完成 |
 | P15 | 资源获取基础 | ✅ 完成 |
 | P16 | 资源获取数据源 | 进行中 |
-| P17 | 索引器 | 进行中 |
+| P17 | 索引器 | ✅ 完成 |
 | P18 | 电影资源获取 | 未开始 |
 | P19 | 剧集资源获取 | 未开始 |
 | P20 | 发现与请求 | 未开始 |
@@ -405,7 +405,7 @@ flowchart TD
   - [ ] 搜索的时间与大小限制（`minage`、`maxage`、`minsize`、`maxsize`），查询尚未携带
   - [ ] 跨重启保存能力；目前每次启动后重新从 caps 读取
 - [x] Cardigann 引擎（`internal/sites/cardigann`）：从目录及其 `Custom` 子目录读取定义，模板、过滤器、HTML、XML 与 JSON 选择器，登录、搜索与下载
-  - [ ] 拉取并更新 `indexers.prowlarr.com` 的定义，由插件的装配完成
+  - [x] 拉取并更新 `indexers.prowlarr.com` 的定义，由插件的装配完成
   - [ ] 手动解答验证码：目前没有界面展示图片验证码，自动登录遇到时失败
   - [ ] 像 Prowlarr 的 GetCookies 那样，以 `cookie` 设置的 cookie 取代响应设置的 cookie；目前只是与之一并发送
 - [x] Prowlarr 以代码实现的站点，其标记为过时者除外
@@ -434,8 +434,12 @@ flowchart TD
   - [ ] 像 Prowlarr 存入设置那样跨重启保存 AvistaZ 与 SpeedApp 站点的 API 令牌；目前每次启动后重新登录
   - [ ] torrent 索引器的做种设置（最少做种数、分享率与做种时间），抓取时交给下载客户端
 - [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
-- [ ] `ReleaseService`
-- [ ] 端到端测试
+- [x] `ReleaseService`（`mavio/acquisition/v1/release.proto`、`apps/server/internal/releases`）：列出各就绪提供方的索引器；如 Radarr 与 Sonarr 的 FetchReleases 那样逐级为媒体库中的电影、季或单集搜索（先按各索引器支持的 ID，再按标题），或按文本搜索；用 `libs/release` 解析 release
+  - [ ] 如 Sonarr 那样逐集搜索动漫的季；目前拒绝此类搜索
+  - [ ] Newznab 的 `title` 参数，Sonarr 会发给支持它的索引器
+  - [ ] 剧集除标题外也按 scene 标题与映射（XEM）搜索，随 P19 完成
+  - [ ] 索引器能力由服务器保存，搜索无需先列出索引器
+- [x] 端到端测试（`apps/server/internal/server/releases_test.go`）：经装配好的服务器搜索 Newznab、Torznab、以 `indexers.prowlarr.com` 的方式提供的 Cardigann 定义以及 NzbIndex
 
 ### P18 电影资源获取
 **范围**：`libs/acquire` 及其 `movie` 包，移植 Radarr；`plugins/download-clients`，包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件。

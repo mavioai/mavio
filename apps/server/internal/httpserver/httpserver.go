@@ -22,11 +22,13 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/logs"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
+	"github.com/mavioai/mavio/apps/server/internal/releases"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
@@ -92,6 +94,9 @@ type Options struct {
 	// ExternalIDKinds lists the kinds of external IDs; nil lists the
 	// built-in kinds.
 	ExternalIDKinds func() []metadata.ExternalIDKind
+	// Indexers returns the ready indexer providers, which ReleaseService
+	// searches; nil searches none.
+	Indexers func() []releases.Provider
 	// Dev serves the development player at /dev/player.
 	Dev bool
 }
@@ -161,6 +166,7 @@ func Handler(opts Options) (http.Handler, error) {
 	// turned away.
 	mux.Handle(pluginv1connect.NewHostServiceHandler(rpc.NewHostService(opts.Devices, opts.ServerInfo), interceptors))
 	mux.Handle(sessionv1connect.NewSyncPlayServiceHandler(rpc.NewSyncPlayService(opts.Store, opts.Hub), interceptors))
+	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(rpc.NewReleaseService(opts.Store, opts.Indexers), interceptors))
 	mux.Handle("GET /media/", opts.Playbacks.Handler())
 	mux.Handle("GET /images/", opts.Images.Handler())
 	mux.Handle("/plugins/{id}/", pluginRoutes(authn, opts.PluginRoutes))
@@ -198,6 +204,7 @@ func connectHTTPStatus(err error) int {
 
 // services are the Connect services the server serves.
 var services = []string{
+	acquisitionv1connect.ReleaseServiceName,
 	authv1connect.AuthServiceName,
 	libraryv1connect.LibraryServiceName, libraryv1connect.ItemServiceName, libraryv1connect.CollectionServiceName,
 	libraryv1connect.MetadataServiceName, libraryv1connect.PlaylistServiceName,
