@@ -100,6 +100,9 @@ func (r *Runtime) importDownload(ctx context.Context, rn *run, d *core.Download,
 			reasons = append(reasons, err.Error())
 		}
 		if len(reasons) == 0 {
+			if p.item.GetCanMoveFiles() {
+				r.cleanDownloadFolder(ctx, m, local, mappings)
+			}
 			return r.completeImport(ctx, d, p)
 		}
 		msgs = append(msgs, filepath.Base(f.path)+": "+strings.Join(reasons, "; "))

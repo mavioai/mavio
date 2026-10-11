@@ -486,7 +486,7 @@ flowchart TD
   - [ ] 按语言命名的附加文件，以及升级时删除旧的附加文件
   - [ ] 手动导入下载中的文件
   - [x] 在入库写入的电影文件夹（或其最近的已存在上层文件夹）所在的卷上检查剩余空间，而非媒体库文件夹，如同 Radarr 的 FreeSpaceSpecification
-  - [ ] 删除入库后留空的下载文件夹
+  - [x] 入库把电影移出下载文件夹后，若其中只剩样片与小 RAR 文件，则删除该文件夹，如同 Radarr 的 DownloadedMovieImportService.ShouldDeleteFolder；媒体库与远程路径映射的文件夹保留
   - [x] 只扫描电影入库写入的文件夹（`library.scan_folder`），而非其所在的整个媒体库
 - [x] 失败的下载：黑名单与重新搜索
 - [x] 获取作业（RSS 同步、队列检查、回收目录清理）列于 `TaskService` 的任务中，并可按需运行

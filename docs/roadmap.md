@@ -486,7 +486,7 @@ flowchart TD
   - [ ] Extra files named by their language, and the old extras deleted on upgrades
   - [ ] Manual import of a download's files
   - [x] Free space checked on the volume of the movie folder an import writes to, or of its nearest existing parent, rather than the library folder, as Radarr's FreeSpaceSpecification
-  - [ ] Download folders left empty by imports deleted
+  - [x] Download folders an import moved the movie out of deleted when only samples and small RAR files are left, as Radarr's DownloadedMovieImportService.ShouldDeleteFolder; folders of libraries and remote path mappings are kept
   - [x] A scan of the folder a movie was imported to only (`library.scan_folder`), rather than of its library
 - [x] Failed downloads: the blocklist and a new search
 - [x] The acquisition jobs (RSS sync, the queue check, the recycle bin cleanup) listed and run on demand among the tasks of `TaskService`
