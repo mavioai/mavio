@@ -476,7 +476,7 @@ flowchart TD
   - [ ] Releases matched to movies by their alternative titles, translations and secondary years
   - [x] Tags, required flags, minimum seeders and MULTi languages of indexers, which the indexer plugin reports from its configuration
   - [ ] Download client tags and round robin among clients of one priority; the first client by priority is used
-  - [ ] `AutoRedownloadFailedFromInteractiveSearch` kept apart from searching again after failures
+  - [x] Failed releases grabbed from an interactive search searched for again only with `AutoRedownloadFailedFromInteractiveSearch`, as Radarr's RedownloadFailedDownloadService
 - [x] The queue: tracked downloads polled from the clients
   - [ ] The downloads of a client that fails to answer keep their last state rather than being flagged
 - [x] Import, upgrades and the recycle folder

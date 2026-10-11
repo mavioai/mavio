@@ -749,6 +749,9 @@ type AcquisitionSettings struct {
 	CompletedDownloadHandling bool
 	// AutoRedownloadFailed searches again when a download fails.
 	AutoRedownloadFailed bool
+	// AutoRedownloadFailedFromInteractiveSearch also searches again when
+	// the failed release was grabbed from an interactive search.
+	AutoRedownloadFailedFromInteractiveSearch bool
 	// MaximumSize is in megabytes; 0 for none.
 	MaximumSize int
 	// MinimumAge is how old usenet releases must be, in minutes.
@@ -801,12 +804,13 @@ func DefaultAcquisitionSettings() AcquisitionSettings {
 		Propers:                   PropersPreferAndUpgrade,
 		CompletedDownloadHandling: true,
 		AutoRedownloadFailed:      true,
-		MinimumFreeSpace:          100,
-		RSSSyncInterval:           30,
-		CheckFinishedInterval:     1,
-		RecycleBinCleanupDays:     7,
-		CopyUsingHardlinks:        true,
-		ExtraFileExtensions:       []string{"srt"},
+		AutoRedownloadFailedFromInteractiveSearch: true,
+		MinimumFreeSpace:      100,
+		RSSSyncInterval:       30,
+		CheckFinishedInterval: 1,
+		RecycleBinCleanupDays: 7,
+		CopyUsingHardlinks:    true,
+		ExtraFileExtensions:   []string{"srt"},
 		Naming: NamingSettings{
 			ReplaceIllegalCharacters: true,
 			ColonReplacement:         ColonSmart,
