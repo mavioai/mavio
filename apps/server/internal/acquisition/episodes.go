@@ -223,6 +223,21 @@ func (r *Runtime) searched(ctx context.Context, rn *run, sh *show) error {
 	return nil
 }
 
+// searchedEpisodes records that episodes of a series were searched for
+// now, as Sonarr's EpisodeService.UpdateLastSearchTime.
+func (rn *run) searchedEpisodes(ctx context.Context, sh *show, episodes []*series.Episode) error {
+	if len(episodes) == 0 {
+		return nil
+	}
+	now := rn.rt.now()
+	numbers := make([]core.EpisodeNumber, len(episodes))
+	for i, ep := range episodes {
+		numbers[i] = core.EpisodeNumber{Season: ep.SeasonNumber, Episode: ep.EpisodeNumber}
+		sh.searchedAt[ep.ID] = now
+	}
+	return rn.rt.Store.EpisodeStates().Searched(ctx, sh.item.ID, now, numbers...)
+}
+
 // seasonEpisodes returns the episodes of a season of a series.
 func seasonEpisodes(sh *show, season int) []*series.Episode {
 	var out []*series.Episode
@@ -270,11 +285,18 @@ func (r *Runtime) searchBulk(ctx context.Context, rn *run, episodes []wantedEpis
 		}
 		groups[i].episodes = append(groups[i].episodes, we.episode)
 	}
-	// Episodes keep no search times of their own: their series' stand
-	// for them.
-	slices.SortStableFunc(groups, func(a, b *group) int {
-		return a.sh.wanted.LastSearchedAt.Compare(b.sh.wanted.LastSearchedAt)
-	})
+	// By the episode searched for longest ago, those never searched for
+	// first.
+	searchedAt := func(g *group) time.Time {
+		var first time.Time
+		for i, ep := range g.episodes {
+			if at := g.sh.searchedAt[ep.ID]; i == 0 || at.Before(first) {
+				first = at
+			}
+		}
+		return first
+	}
+	slices.SortStableFunc(groups, func(a, b *group) int { return searchedAt(a).Compare(searchedAt(b)) })
 	grabbed := 0
 	for _, g := range groups {
 		var decisions []series.Decision
@@ -379,6 +401,8 @@ func queryMode(m series.SearchMode) releases.SearchMode {
 		return releases.SearchByID
 	case series.SearchModeSearchTitle:
 		return releases.SearchByTitle
+	case series.SearchModeSearchIDAndTitle:
+		return releases.SearchByIDAndTitle
 	}
 	return releases.SearchDefault
 }
@@ -715,6 +739,12 @@ func (rn *run) dispatch(ctx context.Context, b *batch, q releases.EpisodeQuery, 
 	}
 	for _, f := range res.Failures {
 		rn.rt.logger().WarnContext(ctx, "indexer failed", "plugin", f.Provider, "indexer", f.Indexer, "err", f.Message)
+	}
+	// The episodes were searched for if an indexer was.
+	if sh := rn.shows[q.SeriesID]; sh != nil && res.Searched > 0 {
+		if err := rn.searchedEpisodes(ctx, sh, s.Episodes); err != nil {
+			return nil, err
+		}
 	}
 	rels := make([]*acquire.Release, 0, len(res.Releases))
 	for _, rel := range res.Releases {

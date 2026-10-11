@@ -477,7 +477,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 * **TMDB**：`scraper-tmdb` 在管理员设置了自己的 API Key 时使用该密钥，否则使用 Radarr 的 TMDB 只读访问令牌；TMDB 拒绝该令牌时，回退到插件内置的 Mavio 自己的 API Key。
 * **磁盘上的编号遵循 TVDB**，与 Sonarr 一致：剧集的单集来自 SkyHook，按 TVDB 顺序，带绝对集数与播出日期；文件按这些编号命名（动漫还带绝对集数）；请求按此顺序列出季。剧集有类型：standard、daily 或 anime，决定如何匹配 release。
 * **TMDB 的元数据**通过剧集的显示顺序挂上：即 Jellyfin 的 `DisplayOrder` 加 TMDB 的 episode groups，以及 TMDB 单集上已有的 TVDB ID。
-* **命名不同的 release** 通过 Sonarr 的 scene 映射与 XEM 匹配；日播剧按播出日期匹配。
+* **命名不同的 release** 通过 Sonarr 的 scene 映射与 XEM 匹配；日播剧按播出日期匹配。XEM 给出的想要的剧集的 scene 编号保存在其单集上（`EpisodeState`），并像 Sonarr 的 `XemService` 那样推算到它未覆盖的单集；在剧集加入时以及每 3 小时随 scene 映射一同更新。
 
 ### 13.3 流程
 1. **请求**：用户请求一部电影或若干季；由管理员审批，或在用户配额内自动通过，且只能在用户的分级限制之内。请求使电影或单集成为想要的条目，按某个质量档案受监控。

@@ -506,10 +506,10 @@ flowchart TD
 - [x] 想要的剧集与单集：按 TVDB ID 加入剧集，带质量档案，监控新季与新集（`WantedService.AddSeries`、`apps/server/internal/acquisition`）
   - [ ] 想要的剧集被扫描找到的磁盘上的单集，按 Sonarr 的方式监控
   - [ ] Sonarr 的 `AutoUnmonitorPreviouslyDownloadedEpisodes`
-  - [ ] 每一集自己的上次搜索时间；目前单集使用其剧集的
+  - [x] 每一集自己的上次搜索时间（`EpisodeState.LastSearchedAt`），在为其搜索了索引器时设置，并决定缺失单集批量搜索的顺序
 - [x] 以作业执行的单集、整季与整剧搜索及 RSS 同步；通过 scene 映射、XEM、绝对集数与播出日期把发布匹配到单集（`libs/acquire/series`、作业 `acquisition.episode_search`，scene 映射由 `acquisition.scene_mappings` 刷新）
-  - [ ] 像 Sonarr 一样把 scene 编号保存在单集上，而不是在内存中缓存 12 小时
-  - [ ] 按 `AnimeStandardFormatSearch` 的动漫整季搜索，以及同时按 ID 与标题搜索的 scene 映射搜索模式
+  - [x] 像 Sonarr 一样把 scene 编号保存在单集上（`EpisodeState`），并像 Sonarr 的 `XemService` 那样推算并标记为未验证；在剧集加入时以及随 scene 映射一同刷新
+  - [x] 对设置了 `anime_standard_format_search`（Sonarr 的 `AnimeStandardFormatSearch`）的索引器，按季与集搜索动漫，按季搜索动漫整季包；同时按 ID 与标题搜索的 scene 映射
   - [ ] 整部剧集的交互式搜索
   - [x] 剧集与电影引擎使用服务器的日志记录器，而不是默认的
 - [x] 单集、整季包与多集文件的入库；升级

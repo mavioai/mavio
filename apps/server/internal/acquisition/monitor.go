@@ -145,6 +145,12 @@ func (r *Runtime) AddSeries(ctx context.Context, n NewSeries) (core.Item, core.W
 	if err := r.monitorEpisodes(ctx, it, cmpMonitor(n.Monitor)); err != nil {
 		return core.Item{}, core.Wanted{}, err
 	}
+	if err := r.updateSceneNumbering(ctx, it); err != nil {
+		if ctx.Err() != nil {
+			return core.Item{}, core.Wanted{}, ctx.Err()
+		}
+		r.logger().WarnContext(ctx, "couldn't update scene numbering", "item", it.ID, "err", err)
+	}
 	r.logger().InfoContext(ctx, "added series", "item", it.ID, "name", it.Name, "tvdb", tvdb)
 	if n.Search {
 		if _, err := r.QueueEpisodeSearch(ctx, EpisodeSearchPayload{Scope: ScopeMissing, SeriesID: it.ID}); err != nil {

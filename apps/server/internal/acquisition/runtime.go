@@ -180,7 +180,7 @@ func (r *Runtime) Handlers() map[string]library.Handler {
 			}
 			return nil, r.SearchEpisodes(ctx, p)
 		},
-		JobSceneMappings: r.recurring(JobSceneMappings, func(core.AcquisitionSettings) time.Duration { return SceneMappingInterval }, r.UpdateSceneMappings),
+		JobSceneMappings: r.recurring(JobSceneMappings, func(core.AcquisitionSettings) time.Duration { return SceneMappingInterval }, r.UpdateScenes),
 	}
 }
 

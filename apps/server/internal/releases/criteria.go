@@ -36,6 +36,9 @@ type criteria struct {
 	seasonEpisodes []*episodeCriteria
 	// limits holds the age and size limits of the requests; nil for none.
 	limits *Search
+	// animeStandardFormat is set for indexers that search anime by season
+	// and episode too.
+	animeStandardFormat bool
 }
 
 // movieCriteria are those of Radarr's MovieSearchCriteria.

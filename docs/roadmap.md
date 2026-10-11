@@ -506,10 +506,10 @@ flowchart TD
 - [x] Wanted series and episodes: series added by TVDB ID, with a quality profile, monitoring of new seasons and episodes (`WantedService.AddSeries`, `apps/server/internal/acquisition`)
   - [ ] Episodes found on disk by scans of a wanted series monitored as Sonarr monitors them
   - [ ] Sonarr's `AutoUnmonitorPreviouslyDownloadedEpisodes`
-  - [ ] Each episode's own last search time; episodes use their series'
+  - [x] Each episode's own last search time (`EpisodeState.LastSearchedAt`), set when an indexer was searched for it and ordering the bulk searches of missing episodes
 - [x] Episode, season and series searches and RSS sync as jobs; releases matched to episodes through scene mappings, XEM, absolute numbers and air dates (`libs/acquire/series`, job `acquisition.episode_search`, scene mappings refreshed by `acquisition.scene_mappings`)
-  - [ ] Scene numbering kept on episodes, as Sonarr keeps it, rather than cached in memory for 12 hours
-  - [ ] Anime season searches by `AnimeStandardFormatSearch`, and the search mode of scene mappings searched by both IDs and title
+  - [x] Scene numbering kept on episodes (`EpisodeState`), extrapolated and marked unverified as Sonarr's `XemService` does, refreshed when a series is added and with the scene mappings
+  - [x] Anime searched by season and episode, and anime season packs by season, of indexers set to (`anime_standard_format_search`, Sonarr's `AnimeStandardFormatSearch`); scene mappings searched by both IDs and title
   - [ ] Interactive searches of a whole series
   - [x] The series and movie engines log with the server's logger rather than the default one
 - [x] Import of episodes, season packs and multi-episode files; upgrades

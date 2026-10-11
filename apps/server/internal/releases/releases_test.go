@@ -239,6 +239,22 @@ func TestEpisodeQueryTiers(t *testing.T) {
 			` TV q="13" ids=tvdb:400001 cat=[5070]`,
 			` UNSPECIFIED q="Cafe Enchante 13" ids= cat=[5070]`,
 		}}},
+		{"ID and title", EpisodeQuery{SeriesID: seriesID, Season: 3, Episode: 1, Mode: SearchByIDAndTitle, Titles: []string{"Agents of SHIELD"}}, [][]string{
+			{` TV q="" ids=imdb:tt2364582,tvdb:263365 s=3 e=1 cat=[5000]`, ` TV q="Agents of SHIELD" ids= s=3 e=1 cat=[5000]`}, nil,
+		}},
+		// Sonarr's AnimeStandardFormatSearch indexer setting.
+		{"standard format anime episode", EpisodeQuery{Kind: QueryAnimeEpisode, SeriesID: animeSeriesID, Season: 1, Episode: 13, Absolute: 13}, [][]string{{
+			` TV q="13" ids=tvdb:400001 cat=[5070]`,
+			` TV q="" ids=tvdb:400001 s=1 e=13 cat=[5070]`,
+			` UNSPECIFIED q="Cafe Enchante 13" ids= cat=[5070]`,
+			` TV q="Cafe Enchante" ids= s=1 e=13 cat=[5070]`,
+		}}},
+		{"standard format anime season", EpisodeQuery{Kind: QueryAnimeSeason, SeriesID: animeSeriesID, Season: 1}, [][]string{{
+			` TV q="" ids=tvdb:400001 s=1 cat=[5070]`,
+			` TV q="Cafe Enchante" ids= s=1 cat=[5070]`,
+		}}},
+		{"standard format anime season 0", EpisodeQuery{Kind: QueryAnimeSeason, SeriesID: animeSeriesID}, nil},
+		{"anime season", EpisodeQuery{Kind: QueryAnimeSeason, SeriesID: animeSeriesID, Season: 1}, nil},
 		{"special", EpisodeQuery{Kind: QuerySpecial, SeriesID: seriesID, SpecialTitles: []string{"Agents of SHIELD Slingshot"}}, [][]string{{
 			` UNSPECIFIED q="Agents of SHIELD Slingshot" ids= cat=[5000 5070]`,
 		}}},
@@ -258,6 +274,7 @@ func TestEpisodeQueryTiers(t *testing.T) {
 			if strings.HasPrefix(tt.name, "title taken") {
 				tvCaps = caps([]string{"q"}, []string{"q", "title", "season", "ep"}, nil)
 			}
+			c.animeStandardFormat = strings.HasPrefix(tt.name, "standard format")
 			var got [][]string
 			for _, tier := range c.tiers(tvCaps) {
 				var reqs []string
