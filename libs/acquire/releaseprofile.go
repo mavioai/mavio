@@ -7,23 +7,26 @@ import (
 	"strings"
 
 	"github.com/dlclark/regexp2"
+
+	"github.com/mavioai/mavio/libs/core"
 )
 
 // ReleaseProfile requires or forbids terms in release titles, as Sonarr's
 // ReleaseProfile.
 type ReleaseProfile struct {
-	ID      int
+	ID      core.ID
 	Name    string
 	Enabled bool
 	// Required are terms of which a release title must contain one.
 	Required []string
 	// Ignored are terms a release title must contain none of.
 	Ignored []string
-	// IndexerID limits the profile to an indexer's releases; 0 for all.
-	IndexerID int
+	// IndexerID limits the profile to an indexer's releases, named as
+	// "<plugin ID>/<indexer ID>"; empty for all.
+	IndexerID string
 	// Tags are the tags of the movies and series the profile applies to,
 	// all when none.
-	Tags []int
+	Tags []string
 }
 
 // perlRegex is Sonarr's form of a term that is a regular expression.
@@ -106,10 +109,10 @@ func (m *TermMatcher) Match(term, title string) bool {
 
 // AppliesTo reports whether the enabled profile applies to a release of an
 // indexer for an item of tags, as Sonarr's EnabledForTags.
-func (p *ReleaseProfile) AppliesTo(tags []int, indexerID int) bool {
+func (p *ReleaseProfile) AppliesTo(tags []string, indexerID string) bool {
 	return p.Enabled &&
-		(p.IndexerID == 0 || p.IndexerID == indexerID) &&
-		(len(p.Tags) == 0 || slices.ContainsFunc(p.Tags, func(t int) bool { return slices.Contains(tags, t) }))
+		(p.IndexerID == "" || p.IndexerID == indexerID) &&
+		(len(p.Tags) == 0 || slices.ContainsFunc(p.Tags, func(t string) bool { return slices.Contains(tags, t) }))
 }
 
 // CheckTerms returns why a title fails the profiles, Sonarr's

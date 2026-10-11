@@ -10,6 +10,7 @@ import (
 
 	"github.com/dlclark/regexp2"
 
+	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/release"
 )
 
@@ -76,7 +77,7 @@ type Specification struct {
 // CustomFormat is a named set of conditions on releases and files, which
 // quality profiles score, as Radarr's and Sonarr's CustomFormat.
 type CustomFormat struct {
-	ID   int
+	ID   core.ID
 	Name string
 	// IncludeWhenRenaming puts the format's name in file names.
 	IncludeWhenRenaming bool

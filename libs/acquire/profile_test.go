@@ -155,7 +155,7 @@ func TestAllowedQualities(t *testing.T) {
 }
 
 func TestDefaultProfiles(t *testing.T) {
-	formats := []CustomFormat{{ID: 3, Name: "x"}}
+	formats := []CustomFormat{{ID: tid(3), Name: "x"}}
 	for _, kind := range []release.Kind{release.Movie, release.Series} {
 		profiles := DefaultProfiles(kind, formats)
 		if len(profiles) != 6 {
@@ -165,7 +165,7 @@ func TestDefaultProfiles(t *testing.T) {
 			if err := p.Validate(kind); err != nil {
 				t.Errorf("kind %d: profile %q: Validate() = %v", kind, p.Name, err)
 			}
-			if len(p.FormatItems) != 1 || p.FormatItems[0] != (FormatScore{FormatID: 3}) {
+			if len(p.FormatItems) != 1 || p.FormatItems[0] != (FormatScore{FormatID: tid(3)}) {
 				t.Errorf("kind %d: profile %q: FormatItems = %v, want = [{3 0}]", kind, p.Name, p.FormatItems)
 			}
 			if p.MinUpgradeFormatScore != 1 {
@@ -256,8 +256,8 @@ func TestQualityIDs(t *testing.T) {
 }
 
 func TestFormatScore(t *testing.T) {
-	p := QualityProfile{FormatItems: []FormatScore{{1, 10}, {2, -5}, {3, 100}}}
-	if got := p.FormatScore([]CustomFormat{{ID: 1}, {ID: 2}}); got != 5 {
+	p := QualityProfile{FormatItems: []FormatScore{{tid(1), 10}, {tid(2), -5}, {tid(3), 100}}}
+	if got := p.FormatScore([]CustomFormat{{ID: tid(1)}, {ID: tid(2)}}); got != 5 {
 		t.Errorf("FormatScore() = %d, want = 5", got)
 	}
 }

@@ -89,6 +89,18 @@ func (l Language) String() string {
 	return languageNames[l]
 }
 
+// LanguageByName returns the language String names, ignoring case, such
+// as "English", "Portuguese (Brazil)", "Unknown" or "Original"; ok is
+// false for an unknown name.
+func LanguageByName(name string) (l Language, ok bool) {
+	for i, n := range languageNames {
+		if strings.EqualFold(n, name) {
+			return Language(i), true
+		}
+	}
+	return LanguageUnknown, false
+}
+
 // kindLanguages lists each app's languages in its declaration order.
 var kindLanguages = map[Kind][]Language{
 	Series: {

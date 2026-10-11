@@ -107,13 +107,13 @@ func TestMatchFormats(t *testing.T) {
 	}
 	res := func(v int) Specification { return Specification{Kind: SpecResolution, Value: v} }
 	formats := []CustomFormat{
-		{ID: 1, Name: "x265", Specifications: []Specification{title(`x265|hevc`, false, false)}},
-		{ID: 2, Name: "any of", Specifications: []Specification{title(`nope`, false, false), title(`grp`, false, false)}},
-		{ID: 3, Name: "required fails", Specifications: []Specification{title(`grp`, false, false), title(`nope`, true, false)}},
-		{ID: 4, Name: "Both kinds", Specifications: []Specification{title(`grp`, false, false), res(2160)}},
-		{ID: 5, Name: "both kinds hold", Specifications: []Specification{title(`grp`, false, false), res(1080), res(720)}},
-		{ID: 6, Name: "empty"},
-		{ID: 7, Name: "Required negated", Specifications: []Specification{title(`x264`, true, true)}},
+		{ID: tid(1), Name: "x265", Specifications: []Specification{title(`x265|hevc`, false, false)}},
+		{ID: tid(2), Name: "any of", Specifications: []Specification{title(`nope`, false, false), title(`grp`, false, false)}},
+		{ID: tid(3), Name: "required fails", Specifications: []Specification{title(`grp`, false, false), title(`nope`, true, false)}},
+		{ID: tid(4), Name: "Both kinds", Specifications: []Specification{title(`grp`, false, false), res(2160)}},
+		{ID: tid(5), Name: "both kinds hold", Specifications: []Specification{title(`grp`, false, false), res(1080), res(720)}},
+		{ID: tid(6), Name: "empty"},
+		{ID: tid(7), Name: "Required negated", Specifications: []Specification{title(`x264`, true, true)}},
 	}
 	for i := range formats {
 		if err := formats[i].Validate(); err != nil {
