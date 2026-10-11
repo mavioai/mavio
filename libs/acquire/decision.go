@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -223,6 +224,23 @@ type IndexerInfo struct {
 	SeasonSearchMaximumSingleEpisodeAge int
 }
 
+// IndexerOf returns the indexer of a release, or nil, as Radarr's and
+// Sonarr's AggregateLanguages find it: by the release's indexer ID, else
+// by its indexer's name.
+func IndexerOf(ctx context.Context, p Ports, r *Release) (*IndexerInfo, error) {
+	var ix *IndexerInfo
+	if r.IndexerID != "" {
+		var err error
+		if ix, err = p.Indexer(ctx, r.IndexerID); err != nil {
+			return nil, err
+		}
+	}
+	if ix == nil && strings.TrimSpace(r.Indexer) != "" {
+		return p.IndexerByName(ctx, r.Indexer)
+	}
+	return ix, nil
+}
+
 // Ports are what the decisions read from the rest of the server.
 type Ports interface {
 	// History returns the history of the items, newest first.
@@ -236,6 +254,9 @@ type Ports interface {
 	Blocklisted(ctx context.Context, targetID core.ID, r *Release) (bool, error)
 	// Indexer returns an indexer, or nil when there is none by the ID.
 	Indexer(ctx context.Context, id string) (*IndexerInfo, error)
+	// IndexerByName returns an indexer by its name, or nil when there is
+	// none, as Radarr's and Sonarr's IndexerFactory.FindByName.
+	IndexerByName(ctx context.Context, name string) (*IndexerInfo, error)
 	// FreeSpace returns the free space of the volume holding path; ok
 	// is false when it is unknown.
 	FreeSpace(ctx context.Context, path string) (free int64, ok bool, err error)

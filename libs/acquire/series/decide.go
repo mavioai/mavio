@@ -143,12 +143,9 @@ func (e *Engine) decideEpisode(ctx context.Context, r *acquire.Release, s *Searc
 // of a candidate mapped to its series and episodes.
 func (e *Engine) augment(ctx context.Context, c *Candidate) error {
 	r := c.Release
-	var ix *acquire.IndexerInfo
-	if r.IndexerID != "" {
-		var err error
-		if ix, err = e.Env.Ports.Indexer(ctx, r.IndexerID); err != nil {
-			return err
-		}
+	ix, err := acquire.IndexerOf(ctx, e.Env.Ports, r)
+	if err != nil {
+		return err
 	}
 	var multi []release.Language
 	if ix != nil {

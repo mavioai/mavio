@@ -72,15 +72,13 @@ func (e *Engine) decideMovie(ctx context.Context, r *Release, s *Search, pushed 
 		c.Items = []*Item{item}
 	}
 	var multi []release.Language
-	if r.IndexerID != "" {
-		ix, err := e.Env.Ports.Indexer(ctx, r.IndexerID)
-		if err != nil {
-			slog.ErrorContext(ctx, "couldn't process release", "release", r.Title, "error", err)
-			return Decision{Candidate: c, Rejections: []Rejection{{Reason: ReasonError, Message: "Unexpected error processing release"}}}, true
-		}
-		if ix != nil {
-			multi = ix.MultiLanguages
-		}
+	ix, err := IndexerOf(ctx, e.Env.Ports, r)
+	if err != nil {
+		slog.ErrorContext(ctx, "couldn't process release", "release", r.Title, "error", err)
+		return Decision{Candidate: c, Rejections: []Rejection{{Reason: ReasonError, Message: "Unexpected error processing release"}}}, true
+	}
+	if ix != nil {
+		multi = ix.MultiLanguages
 	}
 	c.Languages = movieLanguages(parsed, r, target, multi)
 	c.Formats = MatchFormats(e.Env.Formats, c.formatInput(parsed.SimpleReleaseTitle))

@@ -20,11 +20,13 @@ type run struct {
 	engine   *acquire.Engine
 
 	indexers map[string]releases.Indexer
-	profiles map[core.ID]*acquire.QualityProfile
-	libs     map[core.ID]core.Library
-	movies   map[core.ID]*movie
-	refs     []acquire.MovieRef
-	refsRead bool
+	// indexerList holds the indexers in the order ListIndexers gives.
+	indexerList []releases.Indexer
+	profiles    map[core.ID]*acquire.QualityProfile
+	libs        map[core.ID]core.Library
+	movies      map[core.ID]*movie
+	refs        []acquire.MovieRef
+	refsRead    bool
 
 	// senv and sengine decide on episode releases.
 	senv    *series.Env
@@ -112,15 +114,33 @@ func (r *Runtime) newRun(ctx context.Context) (*run, error) {
 // indexer returns an indexer by its decisions' ID, listing the indexers
 // on first use.
 func (rn *run) indexer(ctx context.Context, id string) (releases.Indexer, bool) {
-	if rn.indexers == nil {
-		rn.indexers = map[string]releases.Indexer{}
-		list, _ := rn.rt.searcher().ListIndexers(ctx)
-		for _, ix := range list {
-			rn.indexers[ix.Provider+"/"+ix.GetId()] = ix
-		}
-	}
+	rn.listIndexers(ctx)
 	ix, ok := rn.indexers[id]
 	return ix, ok
+}
+
+// indexerByName returns the first indexer, by provider, priority and
+// name, of a name, listing the indexers on first use.
+func (rn *run) indexerByName(ctx context.Context, name string) (releases.Indexer, bool) {
+	rn.listIndexers(ctx)
+	for _, ix := range rn.indexerList {
+		if ix.GetName() == name {
+			return ix, true
+		}
+	}
+	return releases.Indexer{}, false
+}
+
+// listIndexers lists the indexers unless they were.
+func (rn *run) listIndexers(ctx context.Context) {
+	if rn.indexers != nil {
+		return
+	}
+	rn.indexers = map[string]releases.Indexer{}
+	rn.indexerList, _ = rn.rt.searcher().ListIndexers(ctx)
+	for _, ix := range rn.indexerList {
+		rn.indexers[ix.Provider+"/"+ix.GetId()] = ix
+	}
 }
 
 // seriesFormats returns the custom formats a title matches, parsed as an
@@ -285,18 +305,41 @@ func (p ports) Blocklisted(ctx context.Context, targetID core.ID, r *acquire.Rel
 	return acquire.Blocklisted(entries, r), nil
 }
 
-// Indexer implements acquire.Ports. The plugins tell neither tags,
-// required flags, minimum seeders nor the languages of MULTi releases.
+// Indexer implements acquire.Ports: the indexer's settings as its plugin
+// tells them.
 func (p ports) Indexer(ctx context.Context, id string) (*acquire.IndexerInfo, error) {
 	ix, ok := p.rn.indexer(ctx, id)
 	if !ok {
 		return nil, nil
 	}
-	info := &acquire.IndexerInfo{ID: id, Name: ix.GetName()}
+	return indexerInfo(ix), nil
+}
+
+// IndexerByName implements acquire.Ports.
+func (p ports) IndexerByName(ctx context.Context, name string) (*acquire.IndexerInfo, error) {
+	ix, ok := p.rn.indexerByName(ctx, name)
+	if !ok {
+		return nil, nil
+	}
+	return indexerInfo(ix), nil
+}
+
+// indexerInfo returns what the decisions need of an indexer. Languages
+// of MULTi releases the server does not know are left out.
+func indexerInfo(ix releases.Indexer) *acquire.IndexerInfo {
+	info := &acquire.IndexerInfo{
+		ID: ix.Provider + "/" + ix.GetId(), Name: ix.GetName(), Tags: ix.GetTags(),
+		RequiredFlags: ix.GetRequiredFlags(), MinimumSeeders: int(ix.GetMinimumSeeders()),
+	}
+	for _, name := range ix.GetMultiLanguages() {
+		if l, ok := release.LanguageByName(name); ok {
+			info.MultiLanguages = append(info.MultiLanguages, l)
+		}
+	}
 	if ix.HasDisabledUntil() {
 		info.DisabledUntil = ix.GetDisabledUntil().AsTime()
 	}
-	return info, nil
+	return info
 }
 
 // FreeSpace implements acquire.Ports.
