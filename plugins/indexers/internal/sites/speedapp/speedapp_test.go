@@ -215,6 +215,39 @@ func equal(a, b any) bool {
 	return a == b
 }
 
+// TestTokenKept checks that the token outlives the site, as Prowlarr keeps
+// it with the indexer's settings.
+func TestTokenKept(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		var logins int
+		h := func(r *http.Request) *http.Response {
+			switch r.URL.Path {
+			case "/api/login":
+				logins++
+				return jsonResponse(http.StatusOK, `{"token":"tok"}`)
+			case "/api/torrent":
+				if r.Header.Get("Authorization") != "Bearer tok" {
+					return jsonResponse(http.StatusUnauthorized, `{}`)
+				}
+				return jsonResponse(http.StatusOK, torrents)
+			}
+			return jsonResponse(http.StatusNotFound, "")
+		}
+		ix := newIndexer(t, "speedapp", testSettings, h)
+		if _, err := ix.Search(context.Background(), &indexer.Query{Type: indexer.SearchMovie}); err != nil {
+			t.Fatal(err)
+		}
+		restarted := newIndexer(t, "speedapp", testSettings, h)
+		restarted.Statuses = ix.Statuses
+		if _, err := restarted.Search(context.Background(), &indexer.Query{Type: indexer.SearchMovie}); err != nil {
+			t.Fatal(err)
+		}
+		if logins != 1 {
+			t.Errorf("logins = %d, want = 1", logins)
+		}
+	})
+}
+
 func TestFilterByQuery(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		ix := newIndexer(t, "speedapp", testSettings, func(r *http.Request) *http.Response {
@@ -317,7 +350,7 @@ func TestLoginFollowsRedirects(t *testing.T) {
 		if err := ix.Site.(indexer.LoginSite).Login(context.Background(), ix); err != nil {
 			t.Fatal(err)
 		}
-		if got := ix.Site.(*Site).getToken(); got != "tok" {
+		if got := ix.Site.(*Site).getToken(nil); got != "tok" {
 			t.Errorf("token = %q, want = tok", got)
 		}
 	})

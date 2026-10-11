@@ -211,7 +211,9 @@ type torrent struct {
 	Snatched    *jsonx.Int   `json:"Snatched"`
 	Seeders     *jsonx.Int   `json:"Seeders"`
 	Leechers    *jsonx.Int   `json:"Leechers"`
+	Source      jsonx.String `json:"Source"`
 	Container   jsonx.String `json:"Container"`
+	Codec       jsonx.String `json:"Codec"`
 	Resolution  jsonx.String `json:"Resolution"`
 	Origin      jsonx.String `json:"Origin"`
 	ReleaseName jsonx.String `json:"ReleaseName"`
@@ -315,16 +317,22 @@ func (s *Site) release(t torrent, protocol string) *indexer.Release {
 		seedTime = 432000 // 120 hours for seasons
 	}
 	rel := &indexer.Release{
-		GUID:                 fmt.Sprintf("BTN-%d", t.TorrentID),
-		InfoURL:              fmt.Sprintf("%s//broadcasthe.net/torrents.php?id=%d&torrentid=%d", protocol, t.GroupID, t.TorrentID),
-		DownloadURL:          protocolPrefix.ReplaceAllLiteralString(string(t.DownloadURL), protocol),
-		Title:                title(t),
-		Protocol:             indexer.ProtocolTorrent,
-		Categories:           indexer.IDs(s.caps.Categories.MapTracker(string(t.Resolution))),
-		InfoHash:             string(t.InfoHash),
-		Size:                 indexer.Ptr(int64(t.Size)),
-		PublishDate:          time.Unix(int64(t.Time), 0).UTC(),
-		Scene:                origin == "SCENE",
+		GUID:        fmt.Sprintf("BTN-%d", t.TorrentID),
+		InfoURL:     fmt.Sprintf("%s//broadcasthe.net/torrents.php?id=%d&torrentid=%d", protocol, t.GroupID, t.TorrentID),
+		DownloadURL: protocolPrefix.ReplaceAllLiteralString(string(t.DownloadURL), protocol),
+		Title:       title(t),
+		Protocol:    indexer.ProtocolTorrent,
+		Categories:  indexer.IDs(s.caps.Categories.MapTracker(string(t.Resolution))),
+		InfoHash:    string(t.InfoHash),
+		Size:        indexer.Ptr(int64(t.Size)),
+		PublishDate: time.Unix(int64(t.Time), 0).UTC(),
+		Scene:       origin == "SCENE",
+		// Prowlarr's TorrentInfo carries the torrent's media details.
+		Origin:               string(t.Origin),
+		Source:               string(t.Source),
+		Container:            string(t.Container),
+		Codec:                string(t.Codec),
+		Resolution:           string(t.Resolution),
 		DownloadVolumeFactor: indexer.Ptr(0.0),
 		UploadVolumeFactor:   indexer.Ptr(1.0),
 		MinimumRatio:         indexer.Ptr(1.0),

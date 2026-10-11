@@ -109,7 +109,7 @@ func (s *Site) Capabilities(context.Context, *indexer.Indexer) (*indexer.Capabil
 
 // SearchRequests implements indexer.Site, as Prowlarr's
 // SpeedAppRequestGenerator does.
-func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.Query) (*indexer.Chain, error) {
+func (s *Site) SearchRequests(_ context.Context, ix *indexer.Indexer, q *indexer.Query) (*indexer.Chain, error) {
 	var p indexer.Params
 	l := pageSize
 	if q.Limit > 0 {
@@ -145,26 +145,35 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 	r := indexer.NewRequest(s.baseURL+"api/torrent?"+strings.Join(parts, "&"), indexer.AcceptJSON)
 	// Prowlarr's IndexerRequest of a URL follows redirects.
 	r.FollowRedirects = true
-	s.ModifyRequest(r)
+	r.Header.Set("Authorization", "Bearer "+s.getToken(ix))
 	var c indexer.Chain
 	c.AddRequests(r)
 	return &c, nil
 }
 
-func (s *Site) getToken() string {
+// tokenState is the key of the token kept with the indexer's state.
+const tokenState = "token"
+
+// getToken returns the API token: the one got last, else the one kept
+// with the indexer's state when ix is given, as Prowlarr keeps the token
+// with the indexer's settings.
+func (s *Site) getToken(ix *indexer.Indexer) string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.token == "" && ix != nil && ix.Statuses != nil {
+		s.token = ix.State(tokenState)
+	}
 	return s.token
 }
 
 // LoginNeeded implements indexer.LoginSite: without a token, or on HTTP
 // 401.
 func (s *Site) LoginNeeded(r *indexer.Response) bool {
-	return s.getToken() == "" || r.StatusCode == http.StatusUnauthorized
+	return s.getToken(nil) == "" || r.StatusCode == http.StatusUnauthorized
 }
 
 // Login implements indexer.LoginSite: it gets a new token for the API.
-// The token is kept until the site rejects it, but not across restarts.
+// The token is kept with the indexer's state until the site rejects it.
 func (s *Site) Login(ctx context.Context, ix *indexer.Indexer) error {
 	token, err := s.newToken(ctx, ix)
 	if err != nil {
@@ -173,6 +182,9 @@ func (s *Site) Login(ctx context.Context, ix *indexer.Indexer) error {
 	s.mu.Lock()
 	s.token = token
 	s.mu.Unlock()
+	if ix.Statuses != nil {
+		ix.SetState(tokenState, token)
+	}
 	return nil
 }
 
@@ -209,13 +221,13 @@ func (s *Site) newToken(ctx context.Context, ix *indexer.Indexer) (string, error
 // ModifyRequest implements indexer.RequestModifier: requests carry the
 // token.
 func (s *Site) ModifyRequest(r *indexer.Request) {
-	r.Header.Set("Authorization", "Bearer "+s.getToken())
+	r.Header.Set("Authorization", "Bearer "+s.getToken(nil))
 }
 
 // DownloadRequest implements indexer.DownloadSite: downloads carry the
 // token, logging in first when there is none yet.
 func (s *Site) DownloadRequest(ctx context.Context, ix *indexer.Indexer, link string) (*indexer.Request, error) {
-	if s.getToken() == "" {
+	if s.getToken(ix) == "" {
 		if err := s.Login(ctx, ix); err != nil {
 			return nil, err
 		}

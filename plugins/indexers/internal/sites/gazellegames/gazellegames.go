@@ -137,6 +137,13 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 	if s.settings.FreeleechOnly {
 		parts = append(parts, "freetorrent=1")
 	}
+	// Sizes go in whole MiB.
+	if q.MinSize != nil && *q.MinSize/1024/1024 > 0 {
+		parts = append(parts, "sizesmall="+strconv.FormatInt(*q.MinSize/1024/1024, 10))
+	}
+	if q.MaxSize != nil && *q.MaxSize/1024/1024 > 0 {
+		parts = append(parts, "sizeslarge="+strconv.FormatInt(*q.MaxSize/1024/1024, 10))
+	}
 	var c indexer.Chain
 	c.AddRequests(s.apiRequest(strings.Join(parts, "&")))
 	return &c, nil

@@ -320,6 +320,15 @@ func (s *Site) cookies(ix *indexer.Indexer) map[string]string {
 	return indexer.ParseCookieHeader("mam_id=" + s.settings.MamID)
 }
 
+// PrepareTest implements indexer.TestPreparer: the cookies kept are
+// forgotten before a test, so that the settings' mam_id is tried, as
+// Prowlarr's MyAnonamouse.Test does.
+func (s *Site) PrepareTest(ctx context.Context, ix *indexer.Indexer) error {
+	ix.ClearCookies()
+	slog.DebugContext(ctx, "cookies cleared", "indexer", ix.Name)
+	return nil
+}
+
 // sanitizeRe matches what .NET's [^\w]+ does.
 var sanitizeRe = regexp.MustCompile(`[^\p{L}\p{Mn}\p{Nd}\p{Pc}]+`)
 
@@ -373,6 +382,16 @@ func (s *Site) SearchRequests(ctx context.Context, ix *indexer.Indexer, q *index
 		}
 	} else {
 		p.Set("tor[cat][]", "0")
+	}
+	// Sizes go in bytes, the unit being 1.
+	if q.MinSize != nil && *q.MinSize > 0 {
+		p.Set("tor[minSize]", strconv.FormatInt(*q.MinSize, 10))
+	}
+	if q.MaxSize != nil && *q.MaxSize > 0 {
+		p.Set("tor[maxSize]", strconv.FormatInt(*q.MaxSize, 10))
+	}
+	if (q.MinSize != nil && *q.MinSize > 0) || (q.MaxSize != nil && *q.MaxSize > 0) {
+		p.Set("tor[unit]", "1")
 	}
 	r := indexer.NewRequest(s.baseURL+"tor/js/loadSearchJSONbasic.php?"+p.Encode(), indexer.AcceptJSON)
 	// Prowlarr's IndexerRequest of a URL follows redirects.

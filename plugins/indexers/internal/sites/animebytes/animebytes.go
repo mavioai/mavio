@@ -158,6 +158,10 @@ func (s *Site) Info() indexer.Info {
 	}
 }
 
+// PageCacheLife implements indexer.PageCacher: results are kept for three
+// minutes, as Prowlarr's AnimeBytes.FetchPage keeps them.
+func (s *Site) PageCacheLife() time.Duration { return 3 * time.Minute }
+
 // Capabilities implements indexer.Site.
 func (s *Site) Capabilities(context.Context, *indexer.Indexer) (*indexer.Capabilities, error) {
 	return s.caps, nil

@@ -191,7 +191,7 @@ func basicParams(s *Site, q *indexer.Query, genre string) *query {
 }
 
 // SearchRequests implements indexer.Site.
-func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.Query) (*indexer.Chain, error) {
+func (s *Site) SearchRequests(_ context.Context, ix *indexer.Indexer, q *indexer.Query) (*indexer.Chain, error) {
 	params := s.params
 	if params == nil {
 		params = basicParams
@@ -210,7 +210,7 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		default:
 			p.add("search", strings.TrimSpace(q.SanitizedTerm()))
 		}
-		c.AddRequests(s.request(p))
+		c.AddRequests(s.request(ix, p))
 	case indexer.SearchTV:
 		p := params(s, q, q.Genre)
 		episode := q.EpisodeString()
@@ -227,16 +227,16 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		default:
 			p.add("search", strings.TrimSpace(q.SanitizedTerm()+" "+episode))
 		}
-		c.AddRequests(s.request(p))
+		c.AddRequests(s.request(ix, p))
 	default:
 		p := params(s, q, "")
 		p.add("search", strings.TrimSpace(q.SanitizedTerm()))
-		c.AddRequests(s.request(p))
+		c.AddRequests(s.request(ix, p))
 	}
 	return &c, nil
 }
 
-func (s *Site) request(p *query) *indexer.Request {
+func (s *Site) request(ix *indexer.Indexer, p *query) *indexer.Request {
 	parts := make([]string, len(*p))
 	for i, e := range *p {
 		parts[i] = e.key + "=" + indexer.URLEncode(e.value)
@@ -244,14 +244,23 @@ func (s *Site) request(p *query) *indexer.Request {
 	r := indexer.NewRequest(s.baseURL+"api/v1/jackett/torrents?"+strings.Join(parts, "&"), indexer.AcceptJSON)
 	// Prowlarr's IndexerRequest of a URL follows redirects.
 	r.FollowRedirects = true
-	r.Header.Set("Authorization", "Bearer "+s.getToken())
+	r.Header.Set("Authorization", "Bearer "+s.getToken(ix))
 	r.AllowedStatus = []int{http.StatusNotFound}
 	return r
 }
 
-func (s *Site) getToken() string {
+// tokenState is the key of the token kept with the indexer's state.
+const tokenState = "token"
+
+// getToken returns the API token: the one got last, else the one kept
+// with the indexer's state when ix is given, as Prowlarr keeps the token
+// with the indexer's settings.
+func (s *Site) getToken(ix *indexer.Indexer) string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.token == "" && ix != nil && ix.Statuses != nil {
+		s.token = ix.State(tokenState)
+	}
 	return s.token
 }
 
@@ -261,7 +270,7 @@ func (s *Site) LoginNeeded(r *indexer.Response) bool {
 }
 
 // Login implements indexer.LoginSite: it gets a new token for the API.
-// The token is kept until the site rejects it, but not across restarts.
+// The token is kept with the indexer's state until the site rejects it.
 func (s *Site) Login(ctx context.Context, ix *indexer.Indexer) error {
 	token, err := s.newToken(ctx, ix)
 	if err != nil {
@@ -270,6 +279,9 @@ func (s *Site) Login(ctx context.Context, ix *indexer.Indexer) error {
 	s.mu.Lock()
 	s.token = token
 	s.mu.Unlock()
+	if ix.Statuses != nil {
+		ix.SetState(tokenState, token)
+	}
 	return nil
 }
 
@@ -315,7 +327,7 @@ func errorMessage(r *indexer.Response, def string) string {
 // ModifyRequest implements indexer.RequestModifier: requests sent again
 // after logging in carry the new token.
 func (s *Site) ModifyRequest(r *indexer.Request) {
-	r.Header.Set("Authorization", "Bearer "+s.getToken())
+	r.Header.Set("Authorization", "Bearer "+s.getToken(nil))
 }
 
 // TestSite implements indexer.SiteTester: the credentials get a token.

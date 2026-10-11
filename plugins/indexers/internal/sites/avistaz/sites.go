@@ -150,9 +150,9 @@ func animeZDefinition() indexer.Definition {
 }
 
 // DownloadRequest implements indexer.DownloadSite.
-func (s animeZSite) DownloadRequest(_ context.Context, _ *indexer.Indexer, link string) (*indexer.Request, error) {
+func (s animeZSite) DownloadRequest(_ context.Context, ix *indexer.Indexer, link string) (*indexer.Request, error) {
 	r := indexer.NewRequest(link, indexer.AcceptJSON)
-	r.Header.Set("Authorization", "Bearer "+s.getToken())
+	r.Header.Set("Authorization", "Bearer "+s.getToken(ix))
 	r.Cookies = map[string]string{}
 	return r, nil
 }

@@ -44,6 +44,9 @@ type Status struct {
 	CookiesExpire time.Time         `json:"cookies_expire,omitzero"`
 	QueryTimes    []time.Time       `json:"queries,omitempty"`
 	GrabTimes     []time.Time       `json:"grabs,omitempty"`
+	// Values are what the indexer's site keeps across restarts, such as
+	// API tokens and capabilities, by key.
+	Values map[string]string `json:"values,omitempty"`
 }
 
 // Statuses keeps the statuses of indexers by ID: their backoff after
@@ -94,7 +97,40 @@ func (s *Statuses) Get(id string) Status {
 	}
 	c := *st
 	c.Cookies = maps.Clone(st.Cookies)
+	c.Values = maps.Clone(st.Values)
 	return c
+}
+
+// Value returns a value the indexer's site keeps; "" when there is none.
+func (s *Statuses) Value(id, key string) string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if st := s.m[id]; st != nil {
+		return st.Values[key]
+	}
+	return ""
+}
+
+// SetValue keeps a value of the indexer's site; "" forgets it.
+func (s *Statuses) SetValue(id, key, value string) {
+	if id == "" {
+		return
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	st := s.status(id)
+	if st.Values[key] == value {
+		return
+	}
+	if value == "" {
+		delete(st.Values, key)
+	} else {
+		if st.Values == nil {
+			st.Values = map[string]string{}
+		}
+		st.Values[key] = value
+	}
+	s.save()
 }
 
 // Disabled returns until when the indexer is left out, if it is.

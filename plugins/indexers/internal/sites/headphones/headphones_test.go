@@ -198,11 +198,11 @@ func TestDownload(t *testing.T) {
 		if got := r.Header.Get("Authorization"); got != auth {
 			t.Errorf("Authorization = %q, want = %q", got, auth)
 		}
-		return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"application/x-nzb"}}, Body: io.NopCloser(strings.NewReader("<nzb/>"))}
+		return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"application/x-nzb"}}, Body: io.NopCloser(strings.NewReader("<nzb><file/></nzb>"))}
 	})
 	data, err := ix.Download(context.Background(), "https://indexer.codeshy.com/getnzb/abc.nzb")
-	if err != nil || string(data) != "<nzb/>" {
-		t.Errorf("Download() = %q, %v, want = %q, nil", data, err, "<nzb/>")
+	if err != nil || string(data) != "<nzb><file/></nzb>" {
+		t.Errorf("Download() = %q, %v, want = %q, nil", data, err, "<nzb><file/></nzb>")
 	}
 }
 

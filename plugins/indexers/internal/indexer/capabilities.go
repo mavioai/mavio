@@ -38,7 +38,9 @@ const (
 // list them.
 var searchTypeParams = map[SearchType][]Param{
 	SearchBasic: {ParamQ},
-	SearchTV:    {ParamQ, ParamSeason, ParamEp, ParamIMDbID, ParamTVDBID, ParamRID, ParamTVMazeID, ParamTraktID, ParamTMDBID, ParamDoubanID, ParamGenre, ParamYear},
+	// Prowlarr's series searches do not take the title; Sonarr sends it
+	// to Newznab indexers whose caps list it.
+	SearchTV:    {ParamQ, ParamSeason, ParamEp, ParamIMDbID, ParamTVDBID, ParamRID, ParamTVMazeID, ParamTraktID, ParamTMDBID, ParamDoubanID, ParamGenre, ParamYear, ParamTitle},
 	SearchMovie: {ParamQ, ParamIMDbID, ParamTMDBID, ParamIMDbTitle, ParamIMDbYear, ParamTraktID, ParamGenre, ParamDoubanID, ParamYear},
 	SearchMusic: {ParamQ, ParamAlbum, ParamArtist, ParamLabel, ParamYear, ParamGenre, ParamTrack},
 	SearchBook:  {ParamQ, ParamTitle, ParamAuthor, ParamPublisher, ParamGenre, ParamYear},

@@ -109,14 +109,16 @@ func (s *Site) SearchRequests(_ context.Context, ix *indexer.Indexer, q *indexer
 	if err != nil {
 		return nil, err
 	}
-	if c := s.e.settingsCookie(); c != nil {
-		for _, r := range requests {
-			r.Cookies = c
-		}
-	}
 	var chain indexer.Chain
 	chain.AddRequests(requests...)
 	return &chain, nil
+}
+
+// RequestCookies implements indexer.CookieSource: the cookie setting
+// replaces the cookies responses set, as Prowlarr's Cardigann.GetCookies
+// does.
+func (s *Site) RequestCookies(*indexer.Indexer) map[string]string {
+	return s.e.settingsCookie()
 }
 
 // ParseResponse implements indexer.Site.

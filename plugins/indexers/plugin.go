@@ -45,8 +45,11 @@ type indexerConfig struct {
 	// Enabled is true when unset.
 	Enabled *bool `json:"enabled"`
 	// Priority orders indexers, lower first; 25 when 0.
-	Priority int      `json:"priority"`
-	Tags     []string `json:"tags"`
+	Priority int `json:"priority"`
+	// Tags limit the indexer to items sharing one of them, as the
+	// IndexerTag specifications of Radarr and Sonarr do, and pick the
+	// proxies sharing one.
+	Tags []string `json:"tags"`
 	// QueryLimit and GrabLimit are the most queries and grabs per
 	// LimitsUnit, "day" (the default) or "hour"; the definition's when 0.
 	QueryLimit int    `json:"query_limit"`
@@ -54,6 +57,39 @@ type indexerConfig struct {
 	LimitsUnit string `json:"limits_unit"`
 	// Settings are the definition's settings.
 	Settings json.RawMessage `json:"settings"`
+	// RequiredFlags are the flags a torrent release must carry one of, as
+	// Radarr's and Sonarr's RequiredFlags indexer setting.
+	RequiredFlags []string `json:"required_flags"`
+	// MinimumSeeders is the fewest seeders a torrent release may have; 1
+	// when unset, as Radarr's and Sonarr's IndexerDefaults.MINIMUM_SEEDERS.
+	MinimumSeeders *int `json:"minimum_seeders"`
+	// MultiLanguages are the languages of the indexer's MULTi releases, by
+	// English name, as Radarr's and Sonarr's MultiLanguages setting.
+	MultiLanguages []string `json:"multi_languages"`
+	// SeedRatio, SeedTime and SeasonPackSeedTime are how long torrents
+	// seed, the times in minutes, as Sonarr's SeedCriteriaSettings; 0
+	// for the download client's defaults.
+	SeedRatio          float64 `json:"seed_ratio"`
+	SeedTime           int     `json:"seed_time"`
+	SeasonPackSeedTime int     `json:"season_pack_seed_time"`
+}
+
+// minimumSeeders returns the fewest seeders a torrent release may have.
+func (c *indexerConfig) minimumSeeders() int {
+	if c.MinimumSeeders == nil {
+		return 1
+	}
+	return *c.MinimumSeeders
+}
+
+// knownFlag reports whether indexers' required flags may name f.
+func knownFlag(f string) bool {
+	switch indexer.Flag(f) {
+	case indexer.FlagInternal, indexer.FlagExclusive, indexer.FlagFreeleech, indexer.FlagNeutralLeech,
+		indexer.FlagHalfLeech, indexer.FlagScene, indexer.FlagDoubleUpload:
+		return true
+	}
+	return false
 }
 
 func (c *indexerConfig) enabled() bool { return c.Enabled == nil || *c.Enabled }
@@ -186,6 +222,15 @@ func (c *config) validate() error {
 			return fmt.Errorf("indexer %s: definition is required", ic.ID)
 		case ic.LimitsUnit != "" && ic.LimitsUnit != "day" && ic.LimitsUnit != "hour":
 			return fmt.Errorf("indexer %s: limits_unit must be day or hour", ic.ID)
+		case ic.MinimumSeeders != nil && *ic.MinimumSeeders < 0:
+			return fmt.Errorf("indexer %s: minimum_seeders must not be negative", ic.ID)
+		case ic.SeedRatio < 0 || ic.SeedTime < 0 || ic.SeasonPackSeedTime < 0:
+			return fmt.Errorf("indexer %s: seed_ratio, seed_time and season_pack_seed_time must not be negative", ic.ID)
+		}
+		for _, f := range ic.RequiredFlags {
+			if !knownFlag(f) {
+				return fmt.Errorf("indexer %s: unknown required flag %q", ic.ID, f)
+			}
 		}
 		seen[ic.ID] = true
 	}

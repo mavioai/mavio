@@ -104,6 +104,8 @@ func TestQuery(t *testing.T) {
 		Type: pluginv1.IndexerSearchType_INDEXER_SEARCH_TYPE_TV.Enum(), Query: proto.String("Show"),
 		ExternalIds: map[string]string{"imdb": "tt0944947", "tvdb": "121361"},
 		Season:      proto.Int32(0), Episode: proto.String("3"),
+		Title: proto.String("The Show"), MinAge: proto.Int32(0), MaxAge: proto.Int32(30),
+		MaxSize: proto.Int64(5000),
 	}.Build()
 	q, err := query(req)
 	if err != nil {
@@ -119,6 +121,11 @@ func TestQuery(t *testing.T) {
 		{"Season", q.Season != nil && *q.Season == 0, true},
 		{"Episode", q.Episode, "3"},
 		{"Categories", q.Categories, []int{5000}},
+		{"Title", q.Title, "The Show"},
+		{"MinAge", q.MinAge, indexer.Ptr(0)},
+		{"MaxAge", q.MaxAge, indexer.Ptr(30)},
+		{"MinSize", q.MinSize, (*int64)(nil)},
+		{"MaxSize", q.MaxSize, indexer.Ptr[int64](5000)},
 	} {
 		if !equal(c.got, c.want) {
 			t.Errorf("%s = %v, want = %v", c.name, c.got, c.want)
@@ -129,6 +136,23 @@ func TestQuery(t *testing.T) {
 	}
 	if q, _ := query(&pluginv1.SearchReleasesRequest{}); q.Season != nil || q.Categories != nil {
 		t.Errorf("query({}) = %+v, want = no season and no categories", q)
+	}
+}
+
+func TestReleaseProtoMediaDetails(t *testing.T) {
+	r := releaseProto("btn", &indexer.Release{
+		Title: "Show.S01.1080p.BluRay", Origin: "Internal", Source: "Bluray", Container: "M2TS", Codec: "H.264", Resolution: "1080p",
+	})
+	for _, c := range []struct{ name, got, want string }{
+		{"Origin", r.GetOrigin(), "Internal"},
+		{"Source", r.GetSource(), "Bluray"},
+		{"Container", r.GetContainer(), "M2TS"},
+		{"Codec", r.GetCodec(), "H.264"},
+		{"Resolution", r.GetResolution(), "1080p"},
+	} {
+		if c.got != c.want {
+			t.Errorf("%s = %q, want = %q", c.name, c.got, c.want)
+		}
 	}
 }
 
@@ -174,7 +198,11 @@ func TestTorznabIndexer(t *testing.T) {
 	p := newTestPlugin(t)
 	configure(t, p, map[string]any{
 		"indexers": []any{
-			map[string]any{"id": "tosho", "definition": "torznab", "settings": map[string]any{"base_url": srv.URL}},
+			map[string]any{
+				"id": "tosho", "definition": "torznab", "settings": map[string]any{"base_url": srv.URL},
+				"tags": []any{"anime"}, "required_flags": []any{"freeleech"}, "minimum_seeders": 3, "multi_languages": []any{"French", "Original"},
+				"seed_ratio": 1.5, "seed_time": 60, "season_pack_seed_time": 120,
+			},
 			map[string]any{"id": "off", "definition": "torznab", "enabled": false, "settings": map[string]any{"base_url": srv.URL}},
 			map[string]any{"id": "broken", "definition": "nosuchdefinition"},
 		},
@@ -202,6 +230,16 @@ func TestTorznabIndexer(t *testing.T) {
 		{"Failure", tosho.GetFailure(), ""},
 		{"has categories", len(tosho.GetCapabilities().GetCategories()) > 0, true},
 		{"off Enabled", list.GetIndexers()[1].GetEnabled(), false},
+		{"Tags", tosho.GetTags(), []string{"anime"}},
+		{"RequiredFlags", tosho.GetRequiredFlags(), []string{"freeleech"}},
+		{"MinimumSeeders", tosho.GetMinimumSeeders(), int32(3)},
+		{"MultiLanguages", tosho.GetMultiLanguages(), []string{"French", "Original"}},
+		{"SeedRatio", tosho.GetSeedRatio(), 1.5},
+		{"SeedTime", tosho.GetSeedTime().AsDuration(), time.Hour},
+		{"SeasonPackSeedTime", tosho.GetSeasonPackSeedTime().AsDuration(), 2 * time.Hour},
+		{"off MinimumSeeders", list.GetIndexers()[1].GetMinimumSeeders(), int32(1)},
+		{"off HasSeedRatio", list.GetIndexers()[1].HasSeedRatio(), false},
+		{"off HasSeedTime", list.GetIndexers()[1].HasSeedTime(), false},
 	} {
 		if !equal(c.got, c.want) {
 			t.Errorf("%s = %v, want = %v", c.name, c.got, c.want)
@@ -257,6 +295,9 @@ func TestConfigureInvalid(t *testing.T) {
 		`{"indexers":[{"definition":"torznab"}]}`,
 		`{"indexers":[{"id":"a","definition":"torznab"},{"id":"a","definition":"torznab"}]}`,
 		`{"indexers":[{"id":"a","definition":"torznab","limits_unit":"week"}]}`,
+		`{"indexers":[{"id":"a","definition":"torznab","required_flags":["shiny"]}]}`,
+		`{"indexers":[{"id":"a","definition":"torznab","minimum_seeders":-1}]}`,
+		`{"indexers":[{"id":"a","definition":"torznab","seed_time":-1}]}`,
 		`{"proxies":[{"kind":"gopher","host":"x"}]}`,
 	} {
 		if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(c)}.Build()); err == nil {

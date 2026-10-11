@@ -88,6 +88,11 @@ func SearchRequests(s Settings, caps *indexer.Capabilities, q *indexer.Query) *i
 		if strings.TrimSpace(q.Episode) != "" && has(indexer.ParamEp) {
 			p.set("ep", q.Episode)
 		}
+		// Sonarr's AddTitlePageableRequests sends a series' title to the
+		// indexers taking it.
+		if q.Title != "" && has(indexer.ParamTitle) {
+			p.set("title", q.Title)
+		}
 	case indexer.SearchBook:
 		t = "book"
 		if q.Author != "" && has(indexer.ParamAuthor) {
@@ -123,6 +128,18 @@ func SearchRequests(s Settings, caps *indexer.Capabilities, q *indexer.Query) *i
 	// Prowlarr sends the offset when the search has one; queries always
 	// do.
 	p.set("offset", strconv.Itoa(q.Offset))
+	if q.MinAge != nil {
+		p.set("minage", strconv.Itoa(*q.MinAge))
+	}
+	if q.MaxAge != nil {
+		p.set("maxage", strconv.Itoa(*q.MaxAge))
+	}
+	if q.MinSize != nil {
+		p.set("minsize", strconv.FormatInt(*q.MinSize, 10))
+	}
+	if q.MaxSize != nil {
+		p.set("maxsize", strconv.FormatInt(*q.MaxSize, 10))
+	}
 	u += "&" + p.encode()
 
 	r := indexer.NewRequest(u, indexer.AcceptRSS)

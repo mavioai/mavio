@@ -2,6 +2,9 @@ package newznab
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -17,7 +20,9 @@ import (
 const capsLife = 7 * 24 * time.Hour
 
 // CapsProvider reads an indexer's capabilities from its caps and keeps
-// them for a week, as Prowlarr's NewznabCapabilitiesProvider does.
+// them for a week, as Prowlarr's NewznabCapabilitiesProvider does; the
+// caps are kept with the indexer's state too, so that they are not read
+// again after a restart.
 type CapsProvider struct {
 	// fetching serializes reads of the caps; mu guards what is kept.
 	fetching sync.Mutex
@@ -40,14 +45,67 @@ func (p *CapsProvider) Get(ctx context.Context, ix *indexer.Indexer, s Settings)
 	if caps != nil && now().Sub(fetched) < capsLife {
 		return caps, nil
 	}
-	caps, err := fetchCapabilities(ctx, ix, s)
+	if caps, fetched, ok := loadCapabilities(ix, s); ok && now().Sub(fetched) < capsLife {
+		p.Set(caps, fetched)
+		return caps, nil
+	}
+	caps, raw, err := fetchCapabilities(ctx, ix, s)
 	if err != nil {
 		return nil, err
 	}
-	p.mu.Lock()
-	p.caps, p.fetched = caps, now()
-	p.mu.Unlock()
+	p.Set(caps, now())
+	if raw != "" {
+		storeCapabilities(ix, s, raw, now())
+	}
 	return caps, nil
+}
+
+// capsState is the key of the caps kept with the indexer's state.
+const capsState = "newznab_caps"
+
+// storedCaps are the caps kept with the indexer's state: the response
+// read, for the settings it was read with.
+type storedCaps struct {
+	// Key names the API URL and key the caps were read with.
+	Key     string    `json:"key"`
+	Fetched time.Time `json:"fetched"`
+	Caps    string    `json:"caps"`
+}
+
+// capsKey names the settings caps are read with, as Prowlarr's cache of
+// capabilities keys them by the settings.
+func capsKey(s Settings) string {
+	sum := sha256.Sum256([]byte(s.apiURL() + "\x00" + s.APIKey))
+	return hex.EncodeToString(sum[:])
+}
+
+// loadCapabilities reads the caps kept with the indexer's state; ok is
+// false when there are none for the settings or they do not parse.
+func loadCapabilities(ix *indexer.Indexer, s Settings) (*indexer.Capabilities, time.Time, bool) {
+	if ix.Statuses == nil {
+		return nil, time.Time{}, false
+	}
+	var st storedCaps
+	if v := ix.State(capsState); v == "" || json.Unmarshal([]byte(v), &st) != nil || st.Key != capsKey(s) {
+		return nil, time.Time{}, false
+	}
+	caps, err := ParseCapabilities(&indexer.Response{Request: indexer.NewRequest(s.apiURL()+"?t=caps", indexer.AcceptRSS), Body: []byte(st.Caps)})
+	if err != nil {
+		return nil, time.Time{}, false
+	}
+	return caps, st.Fetched, true
+}
+
+// storeCapabilities keeps the caps read with the indexer's state.
+func storeCapabilities(ix *indexer.Indexer, s Settings, raw string, fetched time.Time) {
+	if ix.Statuses == nil {
+		return
+	}
+	data, err := json.Marshal(storedCaps{Key: capsKey(s), Fetched: fetched, Caps: raw})
+	if err != nil {
+		return
+	}
+	ix.SetState(capsState, string(data))
 }
 
 // Set keeps capabilities read at a time, as stored capabilities are.
@@ -64,7 +122,9 @@ func (p *CapsProvider) Cached() *indexer.Capabilities {
 	return p.caps
 }
 
-func fetchCapabilities(ctx context.Context, ix *indexer.Indexer, s Settings) (*indexer.Capabilities, error) {
+// fetchCapabilities reads the indexer's caps, returning what they say and
+// the response when it parsed.
+func fetchCapabilities(ctx context.Context, ix *indexer.Indexer, s Settings) (*indexer.Capabilities, string, error) {
 	u := s.apiURL() + "?t=caps"
 	if strings.TrimSpace(s.APIKey) != "" {
 		u += "&apikey=" + s.APIKey
@@ -73,19 +133,22 @@ func fetchCapabilities(ctx context.Context, ix *indexer.Indexer, s Settings) (*i
 	r.FollowRedirects = true
 	resp, err := ix.Do(ctx, r)
 	if err != nil {
-		return nil, fmt.Errorf("get capabilities of %s: %w", s.BaseURL, err)
+		return nil, "", fmt.Errorf("get capabilities of %s: %w", s.BaseURL, err)
 	}
 	if resp.HasError() && !resp.HasContentType("xml") {
-		return nil, &indexer.HTTPError{Response: resp}
+		return nil, "", &indexer.HTTPError{Response: resp}
 	}
 	caps, err := ParseCapabilities(resp)
 	if errors.Is(err, errUnexpectedData) {
 		// Prowlarr keeps the defaults when the caps hold what it cannot
 		// read.
 		slog.DebugContext(ctx, "unexpected Newznab capabilities", "indexer", ix.Name, "error", err)
-		return indexer.NewCapabilities(), nil
+		return indexer.NewCapabilities(), "", nil
 	}
-	return caps, err
+	if err != nil {
+		return nil, "", err
+	}
+	return caps, resp.Content(), nil
 }
 
 // errUnexpectedData is returned for caps whose values do not parse.

@@ -130,6 +130,16 @@ func TestSearchRequests(t *testing.T) {
 			q:    indexer.Query{Type: indexer.SearchMovie, Term: "Game"},
 			want: "https://gazellegames.net/api.php?request=search&search_type=torrents&empty_groups=filled&order_by=time&order_way=desc&groupname=Game&freetorrent=1",
 		},
+		{
+			name: "sizes in MiB", settings: Settings{APIKey: "k"},
+			q:    indexer.Query{MinSize: indexer.Ptr[int64](3 << 20), MaxSize: indexer.Ptr[int64](10<<20 + 5)},
+			want: "https://gazellegames.net/api.php?request=search&search_type=torrents&empty_groups=filled&order_by=time&order_way=desc&sizesmall=3&sizeslarge=10",
+		},
+		{
+			name: "sizes under a MiB", settings: Settings{APIKey: "k"},
+			q:    indexer.Query{MinSize: indexer.Ptr[int64](1000), MaxSize: indexer.Ptr[int64](0)},
+			want: "https://gazellegames.net/api.php?request=search&search_type=torrents&empty_groups=filled&order_by=time&order_way=desc",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
