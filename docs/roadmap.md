@@ -454,7 +454,13 @@ flowchart TD
 
 **Progress**:
 - [x] The `DOWNLOAD_CLIENT_PROVIDER` contract (`mavio/plugin/v1/download_client.proto`) and its host client
-- [ ] `plugins/download-clients`: the download clients of Radarr and Sonarr, with their cases ported
+- [x] `plugins/download-clients`: the download clients of Radarr and Sonarr, with their cases ported (`internal/clients/<name>`: Aria2, Torrent and Usenet Blackhole, Deluge, Download Station, Flood, Freebox, Hadouken, NZBGet, NzbVortex, Pneumatic, qBittorrent, rqbit, rTorrent, SABnzbd, Transmission, uTorrent, Vuze)
+  - [ ] Seed limits given with grabs kept across restarts, as Radarr keeps its seed configuration; they apply only until the plugin restarts
+  - [ ] Download client tags, so that a movie or series only uses the clients that share one of its tags
+  - [ ] Flood's additional tags (quality, languages, release group and the like), once grabs carry them
+  - [ ] Sonarr's refusal of full seasons by Pneumatic, once grabs say whether they are a full season
+  - [ ] Hashes of blocklisted torrents checked when grabbing, as Radarr refuses a torrent whose hash is blocklisted
+  - [ ] Helpers the clients share instead of each keeping its own: remote path joining, .NET version parsing, JSON-RPC and XML-RPC, URL base validation, a free-form tag field, a "release rejected" error, warnings from tests, NZB validity checks, a configurable history limit, IDs kept in the case clients give them, and `::1` counted as localhost
 - [x] `libs/acquire`: qualities and their definitions, quality profiles, custom formats, delay profiles, release profiles
 - [ ] Decisions: the specifications of Radarr's decision engine and its ranking
 - [ ] Domain and storage: profiles, custom formats, the queue of tracked downloads, history, the blocklist, remote path mappings, naming

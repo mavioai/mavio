@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -125,7 +126,20 @@ func TestDefinitions(t *testing.T) {
 			}
 			names[f.Name] = true
 		}
-		if _, err := d.New([]byte(`{}`), client.Env{HTTP: http.DefaultClient, Now: time.Now, Log: slog.New(slog.DiscardHandler)}); err != nil {
+		// The defaults name settings the client knows; clients whose
+		// required settings have no default refuse them, but not as
+		// unknown.
+		defaults := map[string]any{}
+		for _, f := range d.Fields {
+			if f.Default != nil {
+				defaults[f.Name] = f.Default
+			}
+		}
+		data, err := json.Marshal(defaults)
+		if err != nil {
+			t.Fatalf("definition %q: defaults: %v", d.ID, err)
+		}
+		if _, err := d.New(data, client.Env{HTTP: http.DefaultClient, Now: time.Now, Log: slog.New(slog.DiscardHandler)}); err != nil && strings.Contains(err.Error(), "unknown field") {
 			t.Errorf("definition %q: New() with the defaults error = %v", d.ID, err)
 		}
 	}
