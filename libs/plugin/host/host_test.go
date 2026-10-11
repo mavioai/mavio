@@ -384,6 +384,10 @@ func TestDiscovery(t *testing.T) {
 		if err != nil || len(values.GetValues()) != 1 || values.GetValues()[0].GetName() != "heist" {
 			t.Errorf("ListFilterValues() = %v, %v", values, err)
 		}
+		found, err := p.Discovery().SearchTitles(t.Context(), pluginv1.SearchTitlesRequest_builder{Query: proto.String("heat")}.Build())
+		if err != nil || len(found.GetTitles()) != 1 || found.GetTitles()[0].GetName() != "heat" {
+			t.Errorf("SearchTitles() = %v, %v", found, err)
+		}
 	})
 }
 
