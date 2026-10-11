@@ -55,6 +55,9 @@ type Release struct {
 	Flags     []Flag
 	PosterURL string
 
+	// What some sites tell of the release's media, in their words.
+	Origin, Source, Container, Codec, Resolution string
+
 	// Torrents only.
 	MagnetURL            string
 	InfoHash             string

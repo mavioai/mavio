@@ -13,6 +13,7 @@ import (
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
@@ -90,6 +91,20 @@ func (p *plugin) ListIndexers(ctx context.Context, _ *pluginv1.ListIndexersReque
 				Protocol: protocols[c.ix.Site.Info().Protocol].Enum(), Privacy: privacies[c.def.Privacy].Enum(),
 				Enabled: proto.Bool(c.cfg.enabled()), Priority: proto.Int32(int32(c.ix.Priority)),
 			}
+			if c.ix.Site.Info().Protocol == indexer.ProtocolTorrent {
+				b.RequiredFlags = c.cfg.RequiredFlags
+				b.MinimumSeeders = proto.Int32(int32(c.cfg.minimumSeeders()))
+				if c.cfg.SeedRatio > 0 {
+					b.SeedRatio = proto.Float64(c.cfg.SeedRatio)
+				}
+				if c.cfg.SeedTime > 0 {
+					b.SeedTime = durationpb.New(time.Duration(c.cfg.SeedTime) * time.Minute)
+				}
+				if c.cfg.SeasonPackSeedTime > 0 {
+					b.SeasonPackSeedTime = durationpb.New(time.Duration(c.cfg.SeasonPackSeedTime) * time.Minute)
+				}
+			}
+			b.Tags, b.MultiLanguages = c.cfg.Tags, c.cfg.MultiLanguages
 			if until, failure, ok := p.statuses.Disabled(c.cfg.ID); ok {
 				b.DisabledUntil, b.Failure = timestamppb.New(until), proto.String(failure)
 			}
@@ -237,7 +252,19 @@ func (p *plugin) SearchReleases(ctx context.Context, req *pluginv1.SearchRelease
 func query(req *pluginv1.SearchReleasesRequest) (*indexer.Query, error) {
 	q := &indexer.Query{
 		Term: req.GetQuery(), Episode: req.GetEpisode(), Year: int(req.GetYear()), Genre: req.GetGenre(),
-		Limit: int(req.GetLimit()), Offset: int(req.GetOffset()),
+		Limit: int(req.GetLimit()), Offset: int(req.GetOffset()), Title: req.GetTitle(),
+	}
+	if req.HasMinAge() {
+		q.MinAge = indexer.Ptr(int(req.GetMinAge()))
+	}
+	if req.HasMaxAge() {
+		q.MaxAge = indexer.Ptr(int(req.GetMaxAge()))
+	}
+	if req.HasMinSize() {
+		q.MinSize = indexer.Ptr(req.GetMinSize())
+	}
+	if req.HasMaxSize() {
+		q.MaxSize = indexer.Ptr(req.GetMaxSize())
 	}
 	switch req.GetType() {
 	case pluginv1.IndexerSearchType_INDEXER_SEARCH_TYPE_MOVIE:
@@ -314,6 +341,8 @@ func releaseProto(indexerID string, r *indexer.Release) *pluginv1.Release {
 		Protocol: protocols[r.Protocol].Enum(), Categories: cats, ExternalIds: ids,
 		Year: proto.Int32(int32(r.Year)), Flags: flags, Languages: r.Languages, Subtitles: r.Subtitles,
 		Genres: r.Genres, PosterUrl: proto.String(r.PosterURL),
+		Origin: proto.String(r.Origin), Source: proto.String(r.Source), Container: proto.String(r.Container),
+		Codec: proto.String(r.Codec), Resolution: proto.String(r.Resolution),
 	}
 	if !r.PublishDate.IsZero() {
 		b.PublishDate = timestamppb.New(r.PublishDate)

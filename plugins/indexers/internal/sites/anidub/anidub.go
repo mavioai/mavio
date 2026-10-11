@@ -297,6 +297,10 @@ func (s *Site) parseRelease(ctx context.Context, ix *indexer.Indexer, r *indexer
 			PublishDate:          pageDate(ctx, doc, now().UTC()),
 			DownloadURL:          s.baseURL + "engine/download.php?id=" + id,
 			Size:                 &size,
+			// Prowlarr's Resolution reads the ID of the torrent's own
+			// block, which names no quality; the quality block the
+			// title reads is meant.
+			Resolution: quality(t.Parent),
 		})
 	}
 	return releases, nil

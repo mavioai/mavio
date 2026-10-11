@@ -59,7 +59,15 @@ type Query struct {
 	Genre   string
 
 	Artist, Album, Label, Track string
-	Author, Title, Publisher    string
+	// Title is a book's title, or a series' for indexers taking Newznab's
+	// title parameter in TV searches.
+	Author, Title, Publisher string
+
+	// MinAge and MaxAge limit the age of releases in days, MinSize and
+	// MaxSize their size in bytes, as Prowlarr's search criteria do; nil
+	// for no limit.
+	MinAge, MaxAge   *int
+	MinSize, MaxSize *int64
 }
 
 // IsIDSearch reports whether the query names what it looks for by more
@@ -70,7 +78,7 @@ func (q *Query) IsIDSearch() bool {
 	case SearchMovie:
 		return q.IMDbID != "" || q.Genre != "" || q.TMDBID != 0 || q.TraktID != 0 || q.DoubanID != 0 || q.Year != 0
 	case SearchTV:
-		return q.IMDbID != "" || q.TVDBID != 0 || q.RID != 0 || q.TraktID != 0 || q.TVMazeID != 0 || q.TMDBID != 0 || q.DoubanID != 0
+		return q.IMDbID != "" || q.TVDBID != 0 || q.RID != 0 || q.TraktID != 0 || q.TVMazeID != 0 || q.TMDBID != 0 || q.DoubanID != 0 || q.Title != ""
 	case SearchMusic:
 		return q.Album != "" || q.Artist != "" || q.Label != "" || q.Genre != "" || q.Track != "" || q.Year != 0
 	case SearchBook:

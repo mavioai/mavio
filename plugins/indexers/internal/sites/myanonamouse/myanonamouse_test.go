@@ -75,6 +75,18 @@ func TestSearchRequests(t *testing.T) {
 				"&tor[srchIn][description]=true&tor[srchIn][series]=true&tor[srchIn][filenames]=true&tor[browse_lang][0]=1&tor[browse_lang][1]=36" +
 				"&tor[cat][0]=14&tor[cat][1]=60&tor[cat][2]=71&tor[cat][3]=72",
 		},
+		{
+			"sizes", testSettings,
+			indexer.Query{MinSize: indexer.Ptr[int64](1000), MaxSize: indexer.Ptr[int64](5000)},
+			base + "tor[text]=&tor[searchType]=all" + fixed + "&tor[startNumber]=0&perpage=100&thumbnails=1&description=1&tor[cat][]=0" +
+				"&tor[minSize]=1000&tor[maxSize]=5000&tor[unit]=1",
+		},
+		{
+			"minimum size only", testSettings,
+			indexer.Query{MinSize: indexer.Ptr[int64](1000), MaxSize: indexer.Ptr[int64](0)},
+			base + "tor[text]=&tor[searchType]=all" + fixed + "&tor[startNumber]=0&perpage=100&thumbnails=1&description=1&tor[cat][]=0" +
+				"&tor[minSize]=1000&tor[unit]=1",
+		},
 		{"term empty once sanitized", testSettings, indexer.Query{Term: "!!!"}, ""},
 		{"TV", testSettings, indexer.Query{Type: indexer.SearchTV, Term: "Show"}, ""},
 		{"movie", testSettings, indexer.Query{Type: indexer.SearchMovie, Term: "Film"}, ""},
@@ -122,6 +134,17 @@ func TestCookies(t *testing.T) {
 	ix.SetCookies(map[string]string{"mam_id": "renewed", "other": "x"}, time.Time{})
 	if got := site.cookies(ix); got["mam_id"] != "renewed" || got["other"] != "x" {
 		t.Errorf("cookies() = %v, want = the stored ones", got)
+	}
+}
+
+func TestPrepareTest(t *testing.T) {
+	ix := newIndexer(t, testSettings, nil)
+	ix.SetCookies(map[string]string{"mam_id": "renewed"}, time.Time{})
+	if err := ix.Site.(indexer.TestPreparer).PrepareTest(context.Background(), ix); err != nil {
+		t.Fatal(err)
+	}
+	if got := ix.Site.(*Site).cookies(ix); got["mam_id"] != "settings-id" {
+		t.Errorf("cookies() after PrepareTest = %v, want = the settings' mam_id", got)
 	}
 }
 

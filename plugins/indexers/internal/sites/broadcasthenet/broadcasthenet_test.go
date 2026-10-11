@@ -192,7 +192,7 @@ func TestSearchRequests(t *testing.T) {
 
 const results = `{"id":"x","result":{"results":"2","torrents":{
 "20":{"GroupID":"5","TorrentID":"20","Category":"Season","Snatched":"3","Seeders":"10","Leechers":"2",
- "Container":"M2TS","Resolution":"1080p","Origin":"Internal","ReleaseName":"Show.S01.1080p.BluRay.H.264-GRP\\\\",
+ "Source":"Bluray","Codec":"H.264","Container":"M2TS","Resolution":"1080p","Origin":"Internal","ReleaseName":"Show.S01.1080p.BluRay.H.264-GRP\\\\",
  "Size":"1000","Time":"1600000000","TvdbID":"71","TvrageID":"0","ImdbID":"0123","InfoHash":"ABC",
  "DownloadURL":"https://broadcasthe.net/torrents.php?action=download&id=20"},
 "10":{"GroupID":"4","TorrentID":"10","Category":"Episode","Container":"MKV","Resolution":"Unknown",
@@ -228,6 +228,12 @@ func TestParseResponse(t *testing.T) {
 		{"PublishDate", a.PublishDate, time.Unix(1600000000, 0).UTC()},
 		{"Flags", a.HasFlag(indexer.FlagInternal), true},
 		{"Scene", a.Scene, false},
+		{"Origin", a.Origin, "Internal"},
+		{"Source", a.Source, "Bluray"},
+		{"Container", a.Container, "M2TS"},
+		{"Codec", a.Codec, "H.264"},
+		{"Resolution", a.Resolution, "1080p"},
+		{"second Source", b.Source, ""},
 		{"MinimumSeedTime", *a.MinimumSeedTime, int64(432000)},
 		{"DownloadVolumeFactor", *a.DownloadVolumeFactor, 0.0},
 		{"TVDBID", a.TVDBID, 71},

@@ -9,7 +9,9 @@ import (
 	"net"
 	"net/http"
 	"regexp"
+	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/text/encoding"
@@ -103,9 +105,35 @@ type DownloadRetrier interface {
 	RetryDownload(link string, data []byte) (retry string, ok bool)
 }
 
-// DownloadValidator checks a site's downloads.
+// DownloadValidator checks a site's downloads. The downloads of Usenet
+// sites are checked as NZBs besides.
 type DownloadValidator interface {
 	ValidateDownload(data []byte) error
+}
+
+// CookieSource is a site whose requests carry cookies of its own in place
+// of those the indexer kept, as Prowlarr's GetCookies overrides do.
+type CookieSource interface {
+	Site
+	// RequestCookies returns the cookies of the site's requests; nil
+	// for those the indexer kept.
+	RequestCookies(ix *Indexer) map[string]string
+}
+
+// PageCacher is a site whose search results are kept for a while, as
+// Prowlarr's AnimeBytes keeps them, so that the same page is not fetched
+// again meanwhile.
+type PageCacher interface {
+	Site
+	// PageCacheLife is how long a page's releases are kept.
+	PageCacheLife() time.Duration
+}
+
+// TestPreparer is a site with something to do before the indexer is
+// tested, such as forgetting its cookies.
+type TestPreparer interface {
+	Site
+	PrepareTest(ctx context.Context, ix *Indexer) error
 }
 
 // Limits are the most queries and grabs an indexer is used for, per hour
@@ -131,6 +159,15 @@ type Indexer struct {
 	Limits   Limits
 	// Now is the clock; time.Now when nil.
 	Now func() time.Time
+
+	pagesMu sync.Mutex
+	pages   map[string]cachedPage
+}
+
+// cachedPage is a page of releases a PageCacher's search fetched.
+type cachedPage struct {
+	releases []*Release
+	expires  time.Time
 }
 
 func (ix *Indexer) now() time.Time {
@@ -159,6 +196,33 @@ func (ix *Indexer) SetCookies(cookies map[string]string, expire time.Time) {
 		expire = ix.now().Add(cookieLife)
 	}
 	ix.Statuses.SetCookies(ix.ID, cookies, expire)
+}
+
+// ClearCookies forgets the indexer's cookies.
+func (ix *Indexer) ClearCookies() {
+	ix.Statuses.SetCookies(ix.ID, nil, time.Time{})
+}
+
+// requestCookies returns the cookies of the site's requests: the site's
+// own when it has them, else those the indexer kept.
+func (ix *Indexer) requestCookies() map[string]string {
+	if cs, ok := ix.Site.(CookieSource); ok {
+		if c := cs.RequestCookies(ix); c != nil {
+			return c
+		}
+	}
+	return ix.Cookies()
+}
+
+// State returns a value the site keeps across restarts, such as an API
+// token; "" when there is none.
+func (ix *Indexer) State(key string) string {
+	return ix.Statuses.Value(ix.ID, key)
+}
+
+// SetState keeps a value of the site's across restarts; "" forgets it.
+func (ix *Indexer) SetState(key, value string) {
+	ix.Statuses.SetValue(ix.ID, key, value)
 }
 
 // Do sends a request of the site's, such as logging in, as is: with the
@@ -239,7 +303,32 @@ func (ix *Indexer) Search(ctx context.Context, q *Query) ([]*Release, error) {
 	if rc, ok := ix.Site.(ReleaseCleaner); ok {
 		releases = rc.CleanupReleases(releases, q)
 	}
-	return releases, nil
+	return filterLimits(releases, q, ix.now()), nil
+}
+
+// filterLimits keeps the releases within the query's age and size
+// limits, as Prowlarr's DispatchIndexer filters them; releases without a
+// size count as empty.
+func filterLimits(releases []*Release, q *Query, now time.Time) []*Release {
+	positive := func(v *int) bool { return v != nil && *v > 0 }
+	positive64 := func(v *int64) bool { return v != nil && *v > 0 }
+	if !positive(q.MinAge) && !positive(q.MaxAge) && !positive64(q.MinSize) && !positive64(q.MaxSize) {
+		return releases
+	}
+	return slices.DeleteFunc(releases, func(r *Release) bool {
+		var size int64
+		if r.Size != nil {
+			size = *r.Size
+		}
+		switch {
+		case positive(q.MinAge) && r.PublishDate.After(now.AddDate(0, 0, -*q.MinAge)),
+			positive(q.MaxAge) && r.PublishDate.Before(now.AddDate(0, 0, -*q.MaxAge)),
+			positive64(q.MinSize) && size < *q.MinSize,
+			positive64(q.MaxSize) && size > *q.MaxSize:
+			return true
+		}
+		return false
+	})
 }
 
 func (ix *Indexer) checkLimit(limit int, count func(string, time.Duration) (int, time.Time), what string) error {
@@ -288,13 +377,60 @@ func supports(c *Capabilities, q *Query) bool {
 	return true
 }
 
-// fetchPage fetches a page of a search and parses it.
+// fetchPage fetches a page of a search and parses it; a PageCacher's
+// page is read from the cache while it is kept.
 func (ix *Indexer) fetchPage(ctx context.Context, r *Request) ([]*Release, error) {
+	pc, cached := ix.Site.(PageCacher)
+	if cached {
+		if releases, ok := ix.cachedPage(r.URL); ok {
+			return releases, nil
+		}
+	}
 	resp, err := ix.fetch(ctx, r)
 	if err != nil {
 		return nil, err
 	}
-	return ix.Site.ParseResponse(ctx, ix, resp)
+	releases, err := ix.Site.ParseResponse(ctx, ix, resp)
+	if err == nil && cached {
+		ix.cachePage(r.URL, releases, pc.PageCacheLife())
+	}
+	return releases, err
+}
+
+// cachedPage returns copies of the releases of a page kept, dropping the
+// pages expired.
+func (ix *Indexer) cachedPage(url string) ([]*Release, bool) {
+	ix.pagesMu.Lock()
+	defer ix.pagesMu.Unlock()
+	now := ix.now()
+	maps.DeleteFunc(ix.pages, func(_ string, p cachedPage) bool { return !p.expires.After(now) })
+	p, ok := ix.pages[url]
+	if !ok {
+		return nil, false
+	}
+	return copyReleases(p.releases), true
+}
+
+// cachePage keeps copies of a page's releases for life.
+func (ix *Indexer) cachePage(url string, releases []*Release, life time.Duration) {
+	ix.pagesMu.Lock()
+	defer ix.pagesMu.Unlock()
+	if ix.pages == nil {
+		ix.pages = map[string]cachedPage{}
+	}
+	ix.pages[url] = cachedPage{releases: copyReleases(releases), expires: ix.now().Add(life)}
+}
+
+// copyReleases copies releases, as searches change them.
+func copyReleases(releases []*Release) []*Release {
+	out := make([]*Release, len(releases))
+	for i, r := range releases {
+		c := *r
+		c.Flags = slices.Clone(r.Flags)
+		c.Categories = slices.Clone(r.Categories)
+		out[i] = &c
+	}
+	return out
 }
 
 // fetch sends a search's request with the indexer's cookies, retrying
@@ -306,7 +442,7 @@ func (ix *Indexer) fetch(ctx context.Context, r *Request) (*Response, error) {
 	if req.Cookies == nil {
 		req.Cookies = map[string]string{}
 	}
-	maps.Copy(req.Cookies, ix.Cookies())
+	maps.Copy(req.Cookies, ix.requestCookies())
 
 	resp, err := ix.retry(ctx, s, &req)
 	if err != nil {
@@ -322,7 +458,7 @@ func (ix *Indexer) fetch(ctx context.Context, r *Request) (*Response, error) {
 		if req.Cookies == nil {
 			req.Cookies = map[string]string{}
 		}
-		maps.Copy(req.Cookies, ix.Cookies())
+		maps.Copy(req.Cookies, ix.requestCookies())
 		if rm, ok := ix.Site.(RequestModifier); ok {
 			req.Header = req.Header.Clone()
 			rm.ModifyRequest(&req)

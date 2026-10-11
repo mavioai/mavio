@@ -248,6 +248,39 @@ func TestLogin(t *testing.T) {
 	})
 }
 
+// TestTokenKept checks that the token outlives the site, as Prowlarr keeps
+// it with the indexer's settings.
+func TestTokenKept(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		var logins int
+		h := func(r *http.Request) *http.Response {
+			switch r.URL.Path {
+			case "/api/v1/jackett/auth":
+				logins++
+				return jsonResponse(http.StatusOK, `{"token":"tok"}`)
+			case "/api/v1/jackett/torrents":
+				if r.Header.Get("Authorization") != "Bearer tok" {
+					return jsonResponse(http.StatusUnauthorized, `{"message":"no"}`)
+				}
+				return jsonResponse(http.StatusOK, `{"data":[]}`)
+			}
+			return jsonResponse(http.StatusNotFound, "")
+		}
+		ix := newIndexer(t, "privatehd", testSettings, h)
+		if _, err := ix.Search(context.Background(), &indexer.Query{}); err != nil {
+			t.Fatal(err)
+		}
+		restarted := newIndexer(t, "privatehd", testSettings, h)
+		restarted.Statuses = ix.Statuses
+		if _, err := restarted.Search(context.Background(), &indexer.Query{}); err != nil {
+			t.Fatal(err)
+		}
+		if logins != 1 {
+			t.Errorf("logins = %d, want = 1", logins)
+		}
+	})
+}
+
 func TestResponses(t *testing.T) {
 	tests := []struct {
 		name    string

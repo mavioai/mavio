@@ -527,6 +527,33 @@ func TestSearchJSON(t *testing.T) {
 	})
 }
 
+// The cookie setting replaces the cookies responses set, as Prowlarr's
+// Cardigann.GetCookies does.
+func TestCookieSettingReplacesKept(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		var sent []string
+		ix, _ := newTestIndexer(t, mustParse(t, jsonDefinition), Settings{Fields: map[string]any{"cookie": "uid=1; pass=x"}}, func(w http.ResponseWriter, r *http.Request) {
+			var cs []string
+			for _, c := range r.Cookies() {
+				cs = append(cs, c.Name+"="+c.Value)
+			}
+			slices.Sort(cs)
+			sent = append(sent, strings.Join(cs, "; "))
+			http.SetCookie(w, &http.Cookie{Name: "session", Value: "fromresponse"})
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"total": 0, "results": []}`))
+		})
+		for range 2 {
+			if _, err := ix.Search(context.Background(), &indexer.Query{Term: "movie"}); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if want := []string{"pass=x; uid=1", "pass=x; uid=1"}; !slices.Equal(sent, want) {
+			t.Errorf("cookies sent = %q, want = %q", sent, want)
+		}
+	})
+}
+
 func TestDownloadSelectors(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		ix, _ := newTestIndexer(t, mustParse(t, htmlDefinition), Settings{}, func(w http.ResponseWriter, r *http.Request) {

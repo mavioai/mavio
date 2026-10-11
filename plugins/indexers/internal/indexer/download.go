@@ -91,6 +91,11 @@ func (ix *Indexer) download(ctx context.Context, link string) ([]byte, error) {
 	if resp.HasContentType("text/html") {
 		return nil, fmt.Errorf("download %s: the site answered with a page", link)
 	}
+	if ix.Site.Info().Protocol == ProtocolUsenet {
+		if err := ValidateNZB(resp.Body); err != nil {
+			return nil, fmt.Errorf("download %s: %w", link, err)
+		}
+	}
 	if v, ok := ix.Site.(DownloadValidator); ok {
 		if err := v.ValidateDownload(resp.Body); err != nil {
 			return nil, fmt.Errorf("download %s: %w", link, err)
@@ -116,6 +121,11 @@ func ValidateMagnet(link string) error {
 // Test checks that the indexer answers: it fetches the first page of a
 // search for recent releases, or for "test" when the site lists none.
 func (ix *Indexer) Test(ctx context.Context) error {
+	if tp, ok := ix.Site.(TestPreparer); ok {
+		if err := tp.PrepareTest(ctx, ix); err != nil {
+			return err
+		}
+	}
 	q := &Query{Type: SearchBasic}
 	if !ix.Site.Info().SupportsRSS {
 		q.Term = "test"

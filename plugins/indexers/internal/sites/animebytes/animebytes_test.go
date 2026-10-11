@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/indexers/internal/indexer"
@@ -149,6 +150,36 @@ func TestRecentFeed(t *testing.T) {
 			}
 		}
 	}
+}
+
+// Results are kept for three minutes, as Prowlarr's AnimeBytes.FetchPage
+// keeps them.
+func TestResultsCached(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		body := string(ported.Response(t, "AnimeBytes/recentfeed.json"))
+		requests := 0
+		ix := newIndexer(t, testSettings, func(r *http.Request) *http.Response {
+			requests++
+			return respond("application/json", body)(r)
+		})
+		search := func() {
+			t.Helper()
+			if _, err := ix.Search(context.Background(), &indexer.Query{Term: "test"}); err != nil {
+				t.Fatal(err)
+			}
+		}
+		search()
+		time.Sleep(2 * time.Minute)
+		search()
+		if requests != 1 {
+			t.Errorf("requests within three minutes = %d, want = 1", requests)
+		}
+		time.Sleep(time.Minute)
+		search()
+		if requests != 2 {
+			t.Errorf("requests after three minutes = %d, want = 2", requests)
+		}
+	})
 }
 
 func TestSearchRequests(t *testing.T) {

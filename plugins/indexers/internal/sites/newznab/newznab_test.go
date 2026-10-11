@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -200,6 +201,45 @@ func TestCapsRequestedOnce(t *testing.T) {
 	}
 }
 
+func TestCapsKeptAcrossRestarts(t *testing.T) {
+	file := filepath.Join(t.TempDir(), "status.json")
+	var calls atomic.Int32
+	tr := transport{caps: ported.Response(t, "Newznab/newznab_caps.xml"), capsCalls: &calls}
+	start := func(s Settings) (*Site, *indexer.Indexer) {
+		t.Helper()
+		st, err := indexer.NewStatuses(file, time.Now)
+		if err != nil {
+			t.Fatal(err)
+		}
+		site := newSite(t, s)
+		ix := newIndexer(t, site, tr)
+		ix.Statuses = st
+		return site, ix
+	}
+	settings := Settings{BaseURL: "http://indxer.local", APIKey: "abc"}
+	for i, tt := range []struct {
+		name     string
+		settings Settings
+		calls    int32
+	}{
+		{name: "first start", settings: settings, calls: 1},
+		{name: "restart", settings: settings, calls: 1},
+		{name: "other API key", settings: Settings{BaseURL: "http://indxer.local", APIKey: "def"}, calls: 2},
+	} {
+		site, ix := start(tt.settings)
+		caps, err := site.Capabilities(context.Background(), ix)
+		if err != nil {
+			t.Fatalf("%d %s: %v", i, tt.name, err)
+		}
+		if caps.LimitsMax != 60 || len(caps.Params[indexer.SearchTV]) == 0 {
+			t.Errorf("%s: caps = %+v, want = those of newznab_caps.xml", tt.name, caps)
+		}
+		if got := calls.Load(); got != tt.calls {
+			t.Errorf("%s: caps requests = %d, want = %d", tt.name, got, tt.calls)
+		}
+	}
+}
+
 func TestCaps(t *testing.T) {
 	xml := string(ported.Response(t, "Newznab/newznab_caps.xml"))
 	caps := mustCaps(t, xml)
@@ -341,6 +381,25 @@ func TestRequestGenerator(t *testing.T) {
 		{name: "fallback to q", typ: indexer.SearchMovie, params: []indexer.Param{q, imdb, tmdb}, has: []string{"q=", "t=search"}, hasNot: []string{"tmdbid=11", "imdbid=0076759"}},
 		{name: "season padded", typ: indexer.SearchTV, params: []indexer.Param{q, indexer.ParamSeason, indexer.ParamEp}, set: func(q *indexer.Query) { q.Season = indexer.Ptr(0) }, has: []string{"t=tvsearch", "season=00", "cat=5000"}},
 		{name: "plus", typ: indexer.SearchBasic, set: func(q *indexer.Query) { q.Term = "C++" }, has: []string{"q=C%2520%2520"}},
+		{
+			name: "limits", typ: indexer.SearchBasic,
+			set: func(q *indexer.Query) {
+				q.MinAge, q.MaxAge, q.MinSize, q.MaxSize = indexer.Ptr(1), indexer.Ptr(30), indexer.Ptr[int64](1000), indexer.Ptr[int64](5000)
+			},
+			has: []string{"minage=1", "maxage=30", "minsize=1000", "maxsize=5000"},
+		},
+		{name: "no limits", typ: indexer.SearchBasic, hasNot: []string{"minage=", "maxage=", "minsize=", "maxsize="}},
+		{
+			name: "title", typ: indexer.SearchTV, params: []indexer.Param{q, indexer.ParamSeason, indexer.ParamEp, indexer.ParamTitle},
+			set: func(q *indexer.Query) {
+				q.Term, q.Title, q.Season, q.Episode = "", "Marvel's Agents", indexer.Ptr(1), "2"
+			},
+			has: []string{"t=tvsearch", "title=Marvel%27s+Agents", "season=1", "ep=2"}, hasNot: []string{"q="},
+		},
+		{
+			name: "title not taken", typ: indexer.SearchTV, params: []indexer.Param{q, indexer.ParamSeason, indexer.ParamEp},
+			set: func(q *indexer.Query) { q.Title, q.Season = "Marvel's Agents", indexer.Ptr(1) }, hasNot: []string{"title="},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
