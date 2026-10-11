@@ -454,6 +454,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 | 发现 | `DiscoverService`；列表来自 `DISCOVERY_PROVIDER` 插件（`scraper-tmdb`） | Seerr 的发现 |
 | 请求 | `RequestService` | Seerr 的请求 |
 | 资源获取引擎 | `libs/acquire`，含 `movie` 与 `series` 包，以及为文件命名的 `organize` 包；服务在 `apps/server` 中 | Radarr、Sonarr |
+| 想要的条目 | `WantedService`：按 TMDB ID 加入的电影，作为 `apps/server/internal/acquisition` 作业执行的搜索与 RSS 同步 | Radarr 的电影与搜索 |
 | 档案 | `ProfileService`：质量定义与质量档案、custom formats、延迟档案与发布档案、远程路径映射 | Radarr 与 Sonarr 的设置 |
 | release 解析 | `libs/release` | Radarr 与 Sonarr 的解析器 |
 | Servarr 的元数据 | `plugins/scraper-servarr`（WASM） | Radarr 与 Sonarr 的元数据源、scene 映射 |

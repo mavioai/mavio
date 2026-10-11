@@ -12,11 +12,13 @@ import (
 	"connectrpc.com/connect"
 	"connectrpc.com/grpcreflect"
 
+	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/apidocs"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
 	"github.com/mavioai/mavio/apps/server/internal/devplayer"
+	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/logs"
@@ -97,6 +99,14 @@ type Options struct {
 	// Indexers returns the ready indexer providers, which ReleaseService
 	// searches; nil searches none.
 	Indexers func() []releases.Provider
+	// Downloads returns the ready download client providers; nil has
+	// none.
+	Downloads func() []downloads.Provider
+	// Acquisition acquires the wanted movies for WantedService,
+	// DownloadService and the decisions of ReleaseService; nil uses one
+	// with the default acquisition settings over Store, Indexers and
+	// Downloads.
+	Acquisition *acquisition.Runtime
 	// Dev serves the development player at /dev/player.
 	Dev bool
 }
@@ -166,7 +176,13 @@ func Handler(opts Options) (http.Handler, error) {
 	// turned away.
 	mux.Handle(pluginv1connect.NewHostServiceHandler(rpc.NewHostService(opts.Devices, opts.ServerInfo), interceptors))
 	mux.Handle(sessionv1connect.NewSyncPlayServiceHandler(rpc.NewSyncPlayService(opts.Store, opts.Hub), interceptors))
-	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(rpc.NewReleaseService(opts.Store, opts.Indexers), interceptors))
+	acq := opts.Acquisition
+	if acq == nil {
+		acq = &acquisition.Runtime{Store: opts.Store, Indexers: opts.Indexers, Clients: opts.Downloads}
+	}
+	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(rpc.NewReleaseService(opts.Store, opts.Indexers, acq), interceptors))
+	mux.Handle(acquisitionv1connect.NewWantedServiceHandler(rpc.NewWantedService(acq), interceptors))
+	mux.Handle(acquisitionv1connect.NewDownloadServiceHandler(rpc.NewDownloadService(opts.Store, acq), interceptors))
 	mux.Handle(acquisitionv1connect.NewProfileServiceHandler(rpc.NewProfileService(opts.Store), interceptors))
 	mux.Handle("GET /media/", opts.Playbacks.Handler())
 	mux.Handle("GET /images/", opts.Images.Handler())
@@ -205,7 +221,8 @@ func connectHTTPStatus(err error) int {
 
 // services are the Connect services the server serves.
 var services = []string{
-	acquisitionv1connect.ProfileServiceName, acquisitionv1connect.ReleaseServiceName,
+	acquisitionv1connect.DownloadServiceName, acquisitionv1connect.ProfileServiceName, acquisitionv1connect.ReleaseServiceName,
+	acquisitionv1connect.WantedServiceName,
 	authv1connect.AuthServiceName,
 	libraryv1connect.LibraryServiceName, libraryv1connect.ItemServiceName, libraryv1connect.CollectionServiceName,
 	libraryv1connect.MetadataServiceName, libraryv1connect.PlaylistServiceName,

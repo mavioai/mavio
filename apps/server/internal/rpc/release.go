@@ -2,7 +2,11 @@ package rpc
 
 import (
 	"context"
+	"errors"
+	"strings"
+	"unicode"
 
+	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/releases"
 	"github.com/mavioai/mavio/libs/core"
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
@@ -14,15 +18,24 @@ import (
 // ReleaseService implements mavio.acquisition.v1.ReleaseService.
 type ReleaseService struct {
 	searcher *releases.Searcher
+	decider  Decider
 }
 
 var _ acquisitionv1connect.ReleaseServiceHandler = (*ReleaseService)(nil)
 
+// Decider decides on the releases a search found for a monitored movie,
+// failing with acquisition.ErrNotWanted for other items, as
+// acquisition.Runtime does.
+type Decider interface {
+	Decide(ctx context.Context, itemID core.ID, found []releases.Release) ([]acquisition.Decided, error)
+}
+
 // NewReleaseService returns a ReleaseService searching the indexers of
 // the providers that providers returns, which may be nil, for the items of
-// store.
-func NewReleaseService(store core.Store, providers func() []releases.Provider) *ReleaseService {
-	return &ReleaseService{searcher: &releases.Searcher{Providers: providers, Items: store.Items()}}
+// store; searches of monitored movies are decided on by decider, unless
+// nil.
+func NewReleaseService(store core.Store, providers func() []releases.Provider, decider Decider) *ReleaseService {
+	return &ReleaseService{searcher: &releases.Searcher{Providers: providers, Items: store.Items()}, decider: decider}
 }
 
 // ListIndexers lists the indexers of every ready indexer provider.
@@ -73,11 +86,61 @@ func (s *ReleaseService) SearchReleases(ctx context.Context, req *acquisitionv1.
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out := make([]*acquisitionv1.Release, len(res.Releases))
-	for i, r := range res.Releases {
-		out[i] = releaseToProto(r)
+	out, err := s.decide(ctx, q.ItemID, res.Releases)
+	if err != nil {
+		return nil, connectError(ctx, err)
 	}
 	return acquisitionv1.SearchReleasesResponse_builder{Releases: out, Failures: failuresToProto(res.Failures)}.Build(), nil
+}
+
+// decide returns the releases of a search, decided on and best first for
+// a monitored movie, else as found.
+func (s *ReleaseService) decide(ctx context.Context, itemID core.ID, found []releases.Release) ([]*acquisitionv1.Release, error) {
+	if s.decider != nil && !itemID.IsZero() {
+		decided, err := s.decider.Decide(ctx, itemID, found)
+		switch {
+		case err == nil:
+			out := make([]*acquisitionv1.Release, len(decided))
+			for i, d := range decided {
+				r := releaseToProto(d.Release)
+				rejections := make([]*acquisitionv1.Rejection, len(d.Rejections))
+				for j, rj := range d.Rejections {
+					rejections[j] = acquisitionv1.Rejection_builder{
+						Reason: new(snakeCase(string(rj.Reason))), Message: new(rj.Message), Temporary: new(rj.Temporary),
+					}.Build()
+				}
+				r.SetRejections(rejections)
+				r.SetEvaluated(true)
+				r.SetCustomFormats(d.Formats)
+				r.SetCustomFormatScore(int32(d.Score))
+				out[i] = r
+			}
+			return out, nil
+		case !errors.Is(err, acquisition.ErrNotWanted):
+			return nil, err
+		}
+	}
+	out := make([]*acquisitionv1.Release, len(found))
+	for i, r := range found {
+		out[i] = releaseToProto(r)
+	}
+	return out, nil
+}
+
+// snakeCase returns a camel case code in snake case, as
+// "qualityNotWanted" becomes "quality_not_wanted".
+func snakeCase(s string) string {
+	var b strings.Builder
+	for i, r := range s {
+		if unicode.IsUpper(r) {
+			if i > 0 {
+				b.WriteByte('_')
+			}
+			r = unicode.ToLower(r)
+		}
+		b.WriteRune(r)
+	}
+	return b.String()
 }
 
 func failuresToProto(failures []releases.Failure) []*acquisitionv1.IndexerFailure {

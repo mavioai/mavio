@@ -1,0 +1,263 @@
+edition = "2023";
+
+package mavio.acquisition.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "mavio/acquisition/v1/release.proto";
+
+// DownloadService sends releases to the download clients of the download
+// client provider plugins and tracks them until they are imported: the
+// queue, the history and the blocklist. Administrators only.
+service DownloadService {
+  // ListDownloadClients lists the clients every ready download client
+  // provider has configured.
+  rpc ListDownloadClients(ListDownloadClientsRequest) returns (ListDownloadClientsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GrabRelease sends a release SearchReleases found for a movie to a
+  // download client, whatever its decision rejected, and tracks it.
+  rpc GrabRelease(GrabReleaseRequest) returns (GrabReleaseResponse);
+  // ListQueue lists the tracked downloads, with what their clients last
+  // told of them.
+  rpc ListQueue(ListQueueRequest) returns (ListQueueResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // RemoveFromQueue stops tracking a download, optionally removing it
+  // from its client, blocklisting its release and searching again.
+  rpc RemoveFromQueue(RemoveFromQueueRequest) returns (RemoveFromQueueResponse);
+  rpc ListHistory(ListHistoryRequest) returns (ListHistoryResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // MarkFailed marks the download of a grab as failed: its release is
+  // blocklisted and, as the settings say, searched for again.
+  rpc MarkFailed(MarkFailedRequest) returns (MarkFailedResponse);
+  rpc ListBlocklist(ListBlocklistRequest) returns (ListBlocklistResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc DeleteBlocklist(DeleteBlocklistRequest) returns (DeleteBlocklistResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+}
+
+// DownloadClient is a download client a plugin has configured.
+message DownloadClient {
+  string plugin_id = 1;
+  string id = 2;
+  string name = 3;
+  // The kind of client within the plugin, e.g. "qbittorrent".
+  string definition_id = 4;
+  DownloadProtocol protocol = 5;
+  bool enabled = 6;
+  // Lower first.
+  int32 priority = 7;
+  // Set while the client is left out after failing, until this time.
+  google.protobuf.Timestamp disabled_until = 8;
+  string failure = 9;
+}
+
+message ListDownloadClientsRequest {}
+
+message ListDownloadClientsResponse {
+  // By plugin, then by priority and name.
+  repeated DownloadClient clients = 1;
+  // Plugins that failed to list theirs, by plugin ID.
+  map<string, string> failures = 2;
+}
+
+message GrabReleaseRequest {
+  // The movie the release is for.
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  // A release as SearchReleases returned it.
+  Release release = 2 [(buf.validate.field).required = true];
+  // The client to send it to, by plugin and ID; unset for the first
+  // enabled client of the release's protocol.
+  string client_plugin_id = 3;
+  string client_id = 4;
+}
+
+message GrabReleaseResponse {
+  QueueItem item = 1;
+}
+
+// DownloadState is where a tracked download is.
+enum DownloadState {
+  DOWNLOAD_STATE_UNSPECIFIED = 0;
+  DOWNLOAD_STATE_DOWNLOADING = 1;
+  // Done downloading, but it cannot be imported; messages say why.
+  DOWNLOAD_STATE_IMPORT_BLOCKED = 2;
+  // Done downloading, waiting to be imported.
+  DOWNLOAD_STATE_IMPORT_PENDING = 3;
+  DOWNLOAD_STATE_IMPORTING = 4;
+  DOWNLOAD_STATE_IMPORTED = 5;
+  // Failed, waiting to be handled.
+  DOWNLOAD_STATE_FAILED_PENDING = 6;
+  DOWNLOAD_STATE_FAILED = 7;
+  DOWNLOAD_STATE_IGNORED = 8;
+}
+
+// QueueItem is a tracked download.
+message QueueItem {
+  string id = 1;
+  string item_id = 2;
+  // The movie's name.
+  string item_name = 3;
+  string title = 4;
+  string client_plugin_id = 5;
+  string client_id = 6;
+  // The client's ID of the download.
+  string download_id = 7;
+  IndexerRef indexer = 8;
+  string indexer_name = 9;
+  DownloadProtocol protocol = 10;
+  // Radarr's name, e.g. "Bluray-1080p".
+  string quality = 11;
+  repeated string languages = 12;
+  // In bytes.
+  int64 size = 13;
+  DownloadState state = 14;
+  repeated string messages = 15;
+  google.protobuf.Timestamp grab_time = 16;
+  // What the client last told; unset until it was polled.
+  DownloadStatus status = 17;
+  int64 remaining_size = 18;
+  google.protobuf.Duration remaining_time = 19;
+}
+
+// DownloadStatus is what a client tells of a download.
+enum DownloadStatus {
+  DOWNLOAD_STATUS_UNSPECIFIED = 0;
+  DOWNLOAD_STATUS_QUEUED = 1;
+  DOWNLOAD_STATUS_PAUSED = 2;
+  DOWNLOAD_STATUS_DOWNLOADING = 3;
+  DOWNLOAD_STATUS_COMPLETED = 4;
+  DOWNLOAD_STATUS_FAILED = 5;
+  DOWNLOAD_STATUS_WARNING = 6;
+}
+
+message ListQueueRequest {
+  // The downloads of a movie; unset for all.
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  // Also list the finished downloads.
+  bool include_finished = 2;
+  int32 limit = 3 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 4 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListQueueResponse {
+  // Most recently grabbed first.
+  repeated QueueItem items = 1;
+  int32 total = 2;
+}
+
+message RemoveFromQueueRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  // Remove the download and its files from the client.
+  bool remove_from_client = 2;
+  // Blocklist the release.
+  bool blocklist = 3;
+  // With blocklist: search for the movie again.
+  bool search = 4;
+}
+
+message RemoveFromQueueResponse {}
+
+// HistoryEventType is what happened.
+enum HistoryEventType {
+  HISTORY_EVENT_TYPE_UNSPECIFIED = 0;
+  HISTORY_EVENT_TYPE_GRABBED = 1;
+  HISTORY_EVENT_TYPE_IMPORTED = 2;
+  HISTORY_EVENT_TYPE_DOWNLOAD_FAILED = 3;
+  HISTORY_EVENT_TYPE_FILE_DELETED = 4;
+  HISTORY_EVENT_TYPE_FILE_RENAMED = 5;
+  HISTORY_EVENT_TYPE_IGNORED = 6;
+}
+
+// HistoryEvent is something that happened in acquiring an item.
+message HistoryEvent {
+  string id = 1;
+  HistoryEventType type = 2;
+  string item_id = 3;
+  google.protobuf.Timestamp time = 4;
+  string source_title = 5;
+  string quality = 6;
+  repeated string languages = 7;
+  string download_id = 8;
+  // Type-specific details, such as the indexer of a grab or the reason of
+  // a failure.
+  map<string, string> data = 9;
+}
+
+message ListHistoryRequest {
+  // The events of a movie; unset for all.
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated HistoryEventType types = 2 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  int32 limit = 3 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 4 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListHistoryResponse {
+  // Newest first.
+  repeated HistoryEvent events = 1;
+  int32 total = 2;
+}
+
+message MarkFailedRequest {
+  // A grabbed event.
+  string history_event_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message MarkFailedResponse {}
+
+// BlocklistEntry is a release not to grab again for an item.
+message BlocklistEntry {
+  string id = 1;
+  string item_id = 2;
+  string source_title = 3;
+  string quality = 4;
+  repeated string languages = 5;
+  google.protobuf.Timestamp time = 6;
+  google.protobuf.Timestamp publish_time = 7;
+  int64 size = 8;
+  DownloadProtocol protocol = 9;
+  IndexerRef indexer = 10;
+  string indexer_name = 11;
+  string message = 12;
+}
+
+message ListBlocklistRequest {
+  // The entries of a movie; unset for all.
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  int32 limit = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 3 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListBlocklistResponse {
+  // Newest first.
+  repeated BlocklistEntry entries = 1;
+  int32 total = 2;
+}
+
+message DeleteBlocklistRequest {
+  repeated string ids = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    items: {
+      string: {uuid: true}
+    }
+  }];
+}
+
+message DeleteBlocklistResponse {}

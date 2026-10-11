@@ -454,6 +454,7 @@ Mavio finds, downloads and imports the movies and series its users want, as Seer
 | Discovery | `DiscoverService`; lists from `DISCOVERY_PROVIDER` plugins (`scraper-tmdb`) | Seerr's discovery |
 | Requests | `RequestService` | Seerr's requests |
 | Acquisition engine | `libs/acquire`, packages `movie` and `series`, `organize` naming files; services in `apps/server` | Radarr, Sonarr |
+| Wanted items | `WantedService`: movies added by TMDB ID, searches and RSS sync as jobs of `apps/server/internal/acquisition` | Radarr's movies and searches |
 | Profiles | `ProfileService`: quality definitions and profiles, custom formats, delay and release profiles, remote path mappings | Radarr's and Sonarr's settings |
 | Release parsing | `libs/release` | Radarr's and Sonarr's parsers |
 | Servarr's metadata | `plugins/scraper-servarr` (WASM) | Radarr's and Sonarr's metadata sources, scene mappings |

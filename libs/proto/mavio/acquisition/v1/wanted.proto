@@ -1,0 +1,152 @@
+edition = "2023";
+
+package mavio.acquisition.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// WantedService adds the movies and series to acquire, and searches for
+// them. Administrators only.
+service WantedService {
+  // AddMovie adds a movie to a movie library by its TMDB ID, as a virtual
+  // item identified by the library's metadata providers, monitored with
+  // a quality profile; it fails with ALREADY_EXISTS when the library has
+  // the movie.
+  rpc AddMovie(AddMovieRequest) returns (AddMovieResponse);
+  // GetWanted returns how a movie or series is acquired.
+  rpc GetWanted(GetWantedRequest) returns (GetWantedResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateWanted changes how a movie or series is acquired.
+  rpc UpdateWanted(UpdateWantedRequest) returns (UpdateWantedResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // ListWanted lists the monitored movies that lack a file, or whose file
+  // has not met their profile's cutoff.
+  rpc ListWanted(ListWantedRequest) returns (ListWantedResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SearchWanted queues searches for monitored movies, which grab the
+  // best release each finds.
+  rpc SearchWanted(SearchWantedRequest) returns (SearchWantedResponse);
+  // SyncRSS queues an RSS sync: the indexers' recent releases are checked
+  // against every monitored movie.
+  rpc SyncRSS(SyncRSSRequest) returns (SyncRSSResponse);
+}
+
+// MinimumAvailability is when a movie starts to be searched for.
+enum MinimumAvailability {
+  MINIMUM_AVAILABILITY_UNSPECIFIED = 0;
+  MINIMUM_AVAILABILITY_ANNOUNCED = 1;
+  MINIMUM_AVAILABILITY_IN_CINEMAS = 2;
+  MINIMUM_AVAILABILITY_RELEASED = 3;
+}
+
+// Wanted is how a monitored movie or series is acquired.
+message Wanted {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  // Whether the item is monitored: searched for and upgraded.
+  bool monitored = 2;
+  string quality_profile_id = 3 [(buf.validate.field).string.uuid = true];
+  // Of movies; unspecified for released.
+  MinimumAvailability minimum_availability = 4 [(buf.validate.field).enum.defined_only = true];
+  // Choose the delay and release profiles, and download clients.
+  repeated string tags = 5 [(buf.validate.field).repeated.items.string = {
+    min_len: 1
+    max_len: 100
+  }];
+  // Set by the server.
+  google.protobuf.Timestamp add_time = 6;
+  google.protobuf.Timestamp last_search_time = 7;
+}
+
+message AddMovieRequest {
+  string library_id = 1 [(buf.validate.field).string.uuid = true];
+  int32 tmdb_id = 2 [(buf.validate.field).int32.gt = 0];
+  string quality_profile_id = 3 [(buf.validate.field).string.uuid = true];
+  MinimumAvailability minimum_availability = 4 [(buf.validate.field).enum.defined_only = true];
+  repeated string tags = 5 [(buf.validate.field).repeated.items.string = {
+    min_len: 1
+    max_len: 100
+  }];
+  // Search for the movie at once.
+  bool search = 6;
+}
+
+message AddMovieResponse {
+  // The movie's item.
+  string item_id = 1;
+  Wanted wanted = 2;
+}
+
+message GetWantedRequest {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetWantedResponse {
+  Wanted wanted = 1;
+}
+
+message UpdateWantedRequest {
+  Wanted wanted = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateWantedResponse {
+  Wanted wanted = 1;
+}
+
+// WantedFilter is which monitored movies ListWanted lists.
+enum WantedFilter {
+  WANTED_FILTER_UNSPECIFIED = 0;
+  // Those without a file.
+  WANTED_FILTER_MISSING = 1;
+  // Those whose file has not met their profile's cutoff.
+  WANTED_FILTER_CUTOFF_UNMET = 2;
+}
+
+message ListWantedRequest {
+  WantedFilter filter = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  int32 limit = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 3 [(buf.validate.field).int32.gte = 0];
+}
+
+// WantedMovie is a monitored movie ListWanted lists.
+message WantedMovie {
+  string item_id = 1;
+  string name = 2;
+  int32 year = 3;
+  Wanted wanted = 4;
+  // The quality of its file, by Radarr's name; empty without a file.
+  string quality = 5;
+  // Whether the movie is available by its minimum availability.
+  bool available = 6;
+}
+
+message ListWantedResponse {
+  // By name.
+  repeated WantedMovie movies = 1;
+  int32 total = 2;
+}
+
+message SearchWantedRequest {
+  // The movies to search for; empty for every monitored movie the filter
+  // selects.
+  repeated string item_ids = 1 [(buf.validate.field).repeated.items.string.uuid = true];
+  // With no items: the movies to search for; unspecified for missing.
+  WantedFilter filter = 2 [(buf.validate.field).enum.defined_only = true];
+}
+
+message SearchWantedResponse {
+  // The number of movies queued.
+  int32 queued = 1;
+}
+
+message SyncRSSRequest {}
+
+message SyncRSSResponse {}

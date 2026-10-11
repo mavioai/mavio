@@ -15,6 +15,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
 	"github.com/mavioai/mavio/apps/server/internal/events"
@@ -217,6 +218,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		name, _ := os.Hostname()
 		return name
 	}
+	acq := newAcquisition(log, db, set, plugs, refresher, cfg.FFprobe, quietGate, volumeLedger, devices)
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher,
@@ -228,7 +230,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			n := set.Get().Network
 			return rpc.ServerInfo{Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: n.HTTPSPort}
 		},
-		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Indexers: plugs.IndexerProviders, Dev: cfg.Dev,
+		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Indexers: plugs.IndexerProviders,
+		Downloads: plugs.DownloadClientProviders, Acquisition: acq, Dev: cfg.Dev,
 	})
 	if err != nil {
 		return err
@@ -286,6 +289,24 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		}
 		return nil
 	})
+	// Acquisition has a worker of its own too, so that searches and
+	// imports neither wait for scans nor hold them up.
+	acqWorker := &library.Worker{
+		Queue: db.Jobs(), Owner: fmt.Sprintf("%s:%d:acquisition", hostname, os.Getpid()), Handlers: acq.Handlers(), Logger: log,
+	}
+	// The recurring jobs are scheduled now and whenever the settings
+	// change, as when RSS sync is turned on.
+	if err := set.Register(ctx, func(ctx context.Context, s core.ServerSettings) error {
+		return acq.Schedule(ctx, s.Acquisition)
+	}); err != nil {
+		log.ErrorContext(ctx, "schedule acquisition jobs", "err", err)
+	}
+	g.Go(func() error {
+		if err := acqWorker.Run(ctx); !errors.Is(err, context.Canceled) {
+			return err
+		}
+		return nil
+	})
 	if worker, scanner := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, plugs.SegmentProviders, plugs.Resolvers, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
@@ -328,6 +349,23 @@ func addDevLibraries(ctx context.Context, log *slog.Logger, db core.Store, dir s
 		}
 	}
 	return nil
+}
+
+// newAcquisition returns the movie acquisition runtime: the settings'
+// acquisition settings, the plugins' indexers and download clients, and
+// ffprobe to verify imports with when there is one.
+func newAcquisition(log *slog.Logger, db core.Store, set *settings.Manager, plugs *plugins.Manager, refresher *library.Refresher, ffprobe string,
+	quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
+) *acquisition.Runtime {
+	rt := &acquisition.Runtime{
+		Store: db, Settings: func() core.AcquisitionSettings { return set.Get().Acquisition },
+		Indexers: plugs.IndexerProviders, Clients: plugs.DownloadClientProviders, Identifier: refresher,
+		VolumeLedger: volumeLedger, QuietGate: quietGate, Devices: devices, Logger: log,
+	}
+	if path, err := exec.LookPath(ffprobe); err == nil {
+		rt.Prober = providers.FFprobe{Prober: &probe.Prober{FFprobe: path}}
+	}
+	return rt
 }
 
 // newLibraryWorker returns the worker running scans, probes, keyframe

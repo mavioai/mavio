@@ -468,11 +468,25 @@ flowchart TD
   - [ ] Tags of indexers, which the indexer tag specification needs before it rejects anything
 - [x] Domain and storage: profiles, custom formats, the queue of tracked downloads, history, the blocklist, remote path mappings, naming (`libs/core/acquisition.go`, `libs/store`)
   - [ ] The format scores of quality profiles checked against the custom formats that exist
-- [ ] Adding a wanted movie to a library by its TMDB ID, with a quality profile and minimum availability
-- [ ] Movie searches and RSS sync as jobs; grabs through `DownloadService`
-- [ ] The queue: tracked downloads polled from the clients
-- [ ] Import, upgrades and the recycle folder
-- [ ] Failed downloads: the blocklist and a new search
+- [x] Adding a wanted movie to a library by its TMDB ID, with a quality profile and minimum availability (`WantedService`, `apps/server/internal/acquisition`)
+  - [ ] Digital and physical release dates of movies, which availability needs; until then a movie is released 90 days after its premiere, as Radarr assumes without them
+  - [ ] The original language of movies, which profiles wanting "Original" need; until then they accept any language
+  - [ ] A movie whose identification fails is kept under its placeholder name ("TMDB <id>")
+- [x] Movie searches and RSS sync as jobs; grabs through `DownloadService`; decisions in `SearchReleases`
+  - [ ] Releases matched to movies by their alternative titles, translations and secondary years
+  - [ ] Tags, required flags, minimum seeders and MULTi languages of indexers, which the indexer plugin does not report yet
+  - [ ] Download client tags and round robin among clients of one priority; the first client by priority is used
+  - [ ] `AutoRedownloadFailedFromInteractiveSearch` kept apart from searching again after failures
+- [x] The queue: tracked downloads polled from the clients
+  - [ ] The downloads of a client that fails to answer keep their last state rather than being flagged
+- [x] Import, upgrades and the recycle folder
+  - [ ] Qualities aggregated from the media info of files, and the media info tokens of file names
+  - [ ] Extra files named by their language, and the old extras deleted on upgrades
+  - [ ] Manual import of a download's files
+  - [ ] Free space checked on the volume an import writes to rather than the library folder
+  - [ ] Download folders left empty by imports deleted
+  - [ ] A scan of the imported file only, rather than of its library
+- [x] Failed downloads: the blocklist and a new search
 - [ ] End-to-end test
 
 ### P19 Series Acquisition
