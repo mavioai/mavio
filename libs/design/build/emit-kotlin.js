@@ -4,7 +4,7 @@ import { HEADER, hex, num, pascal, snake, write } from './util.js';
 import { argsOf, entriesFor, formParts, SOURCE_LOCALE } from './strings.js';
 import { VIEWBOX } from './icons.js';
 
-export const KOTLIN_PACKAGE = 'ai.mavio.design';
+export const KOTLIN_PACKAGE = 'dev.mavio.design';
 
 function color({ r, g, b, a }) {
   const argb = hex({ r, g, b, a: 1 }).slice(1);

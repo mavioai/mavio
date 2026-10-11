@@ -150,7 +150,7 @@ A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.
 | :--- | :--- |
 | `gen/ts` | The web UI: `tokens.ts`, `tokens.css` (custom properties, the light theme under `prefers-color-scheme`), `icons.ts` (path data), `strings.ts`; the npm package `@mavio/design` exports them |
 | `gen/swift` | Apple platforms: `MavioTokens.swift` (SwiftUI), `Icons.xcassets`, `Localizable.xcstrings` |
-| `gen/kotlin` | Android: `ai/mavio/design/MavioTokens.kt` (Compose), `res/drawable` (vector drawables), `res/values*/strings.xml` |
+| `gen/kotlin` | Android: `dev/mavio/design/MavioTokens.kt` (Compose), `res/drawable` (vector drawables), `res/values*/strings.xml` |
 | `gen/go` | The Windows and Linux app: the Go package `design` (module `github.com/mavioai/mavio/libs/design`) with the tokens, icon path data, the strings and their formatter |
 
 * The generator fails on a text and background pair below WCAG AA contrast (4.5:1) in either theme, on a message whose plural lacks a CLDR category of its locale, and on a translation whose arguments differ from the source's.

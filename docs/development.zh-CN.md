@@ -148,7 +148,7 @@ go build -o plugin .                                                     # 子�
 | :--- | :--- |
 | `gen/ts` | Web UI：`tokens.ts`、`tokens.css`（CSS 自定义属性，浅色主题位于 `prefers-color-scheme` 下）、`icons.ts`（路径数据）、`strings.ts`；由 npm 包 `@mavio/design` 导出 |
 | `gen/swift` | Apple 平台：`MavioTokens.swift`（SwiftUI）、`Icons.xcassets`、`Localizable.xcstrings` |
-| `gen/kotlin` | Android：`ai/mavio/design/MavioTokens.kt`（Compose）、`res/drawable`（矢量图）、`res/values*/strings.xml` |
+| `gen/kotlin` | Android：`dev/mavio/design/MavioTokens.kt`（Compose）、`res/drawable`（矢量图）、`res/values*/strings.xml` |
 | `gen/go` | Windows 与 Linux 应用：Go 包 `design`（模块 `github.com/mavioai/mavio/libs/design`），含 tokens、图标路径数据、字符串及其格式化函数 |
 
 * 任一主题中有文字与背景组合低于 WCAG AA 对比度（4.5:1）、某条消息的复数缺少其语言的 CLDR 类别、或某条译文的参数与源语言不同时，生成器报错。
