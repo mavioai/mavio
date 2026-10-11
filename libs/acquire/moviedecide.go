@@ -2,7 +2,6 @@ package acquire
 
 import (
 	"context"
-	"log/slog"
 	"slices"
 	"strings"
 
@@ -57,7 +56,7 @@ func (e *Engine) decideMovie(ctx context.Context, r *Release, s *Search, pushed 
 	}
 	target, item, err := find(ctx, parsed, r, s)
 	if err != nil {
-		slog.ErrorContext(ctx, "couldn't process release", "release", r.Title, "error", err)
+		e.logger().ErrorContext(ctx, "couldn't process release", "release", r.Title, "error", err)
 		return Decision{Candidate: c, Rejections: []Rejection{{Reason: ReasonError, Message: "Unexpected error processing release"}}}, true
 	}
 	if target == nil {
@@ -74,7 +73,7 @@ func (e *Engine) decideMovie(ctx context.Context, r *Release, s *Search, pushed 
 	var multi []release.Language
 	ix, err := IndexerOf(ctx, e.Env.Ports, r)
 	if err != nil {
-		slog.ErrorContext(ctx, "couldn't process release", "release", r.Title, "error", err)
+		e.logger().ErrorContext(ctx, "couldn't process release", "release", r.Title, "error", err)
 		return Decision{Candidate: c, Rejections: []Rejection{{Reason: ReasonError, Message: "Unexpected error processing release"}}}, true
 	}
 	if ix != nil {

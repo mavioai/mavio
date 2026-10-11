@@ -511,7 +511,7 @@ flowchart TD
   - [ ] Scene numbering kept on episodes, as Sonarr keeps it, rather than cached in memory for 12 hours
   - [ ] Anime season searches by `AnimeStandardFormatSearch`, and the search mode of scene mappings searched by both IDs and title
   - [ ] Interactive searches of a whole series
-  - [ ] A logger given to the series engine rather than the default one
+  - [x] The series and movie engines log with the server's logger rather than the default one
 - [x] Import of episodes, season packs and multi-episode files; upgrades
   - [ ] Series naming settings: episode formats, the season folder format, the multi-episode style; Sonarr's defaults apply
   - [ ] Sonarr's import specifications for episode titles, unpacking, unverified scene numbering, absolute numbers and matching folders, and its scene name check
