@@ -8,7 +8,7 @@
 # The server is cross-compiled on the build machine's own platform, so
 # multi-platform builds need no emulation.
 
-ARG GO_VERSION=1.27.1
+ARG GO_VERSION=1.27.2
 ARG JELLYFIN_FFMPEG_VERSION=8.1.3-1
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-trixie AS server
