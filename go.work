@@ -15,6 +15,7 @@ use (
 	./libs/streaming
 	./libs/subtitle
 	./plugins/dlna
+	./plugins/download-clients
 	./plugins/indexers
 	./plugins/scraper-fanart
 	./plugins/scraper-musicbrainz

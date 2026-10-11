@@ -22,7 +22,9 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 	&& cd ../../plugins/dlna && mkdir -p /out/plugins/dlna && cp manifest.json /out/plugins/dlna/ \
 	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/dlna/plugin . \
 	&& cd ../indexers && mkdir -p /out/plugins/indexers && cp manifest.json /out/plugins/indexers/ \
-	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/indexers/plugin .
+	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/indexers/plugin . \
+	&& cd ../download-clients && mkdir -p /out/plugins/download-clients && cp manifest.json /out/plugins/download-clients/ \
+	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/download-clients/plugin .
 
 FROM --platform=$BUILDPLATFORM debian:trixie-slim AS ffmpeg
 ARG TARGETARCH JELLYFIN_FFMPEG_VERSION

@@ -71,7 +71,9 @@ type DownloadClientProviderServiceClient interface {
 	// TestDownloadClient checks that a download client, configured or not,
 	// answers with the settings given.
 	TestDownloadClient(context.Context, *v1.TestDownloadClientRequest) (*v1.TestDownloadClientResponse, error)
-	// AddDownload sends a release to a download client.
+	// AddDownload sends a release to a download client. It fails with
+	// CodeUnimplemented when the client cannot take a magnet link, which is
+	// then sent as a torrent file where the release has one.
 	AddDownload(context.Context, *v1.AddDownloadRequest) (*v1.AddDownloadResponse, error)
 	// ListDownloads lists the downloads of download clients in their
 	// categories for movies and series, with what each client tells of
@@ -252,7 +254,9 @@ type DownloadClientProviderServiceHandler interface {
 	// TestDownloadClient checks that a download client, configured or not,
 	// answers with the settings given.
 	TestDownloadClient(context.Context, *v1.TestDownloadClientRequest) (*v1.TestDownloadClientResponse, error)
-	// AddDownload sends a release to a download client.
+	// AddDownload sends a release to a download client. It fails with
+	// CodeUnimplemented when the client cannot take a magnet link, which is
+	// then sent as a torrent file where the release has one.
 	AddDownload(context.Context, *v1.AddDownloadRequest) (*v1.AddDownloadResponse, error)
 	// ListDownloads lists the downloads of download clients in their
 	// categories for movies and series, with what each client tells of
