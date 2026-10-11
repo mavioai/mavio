@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mavioai/mavio/libs/acquire"
 	"github.com/mavioai/mavio/libs/acquire/series"
 	"github.com/mavioai/mavio/libs/core"
 )
@@ -83,8 +84,10 @@ func (r *Runtime) grabEvents(ctx context.Context, downloadID string, itemID core
 // of Radarr's and Sonarr's DownloadFailedEvent: the tracked download, if
 // any, fails; the release is blocklisted; the failure goes in the
 // history, once per grabbed item; and the movie or episodes are searched
-// for again when the settings say so and redownload is not skipped, or
-// when search is set. grabs are the download's grab events, the first
+// for again when search is set, or when redownload is not skipped and the
+// settings say so, as Radarr's RedownloadFailedDownloadService: releases
+// grabbed from an interactive search only with
+// AutoRedownloadFailedFromInteractiveSearch. grabs are the download's grab events, the first
 // standing for them; episode grabs have their series as parent.
 func (r *Runtime) markFailed(ctx context.Context, d *core.Download, grabs []core.HistoryEvent, message string, skipRedownload, search bool) error {
 	now := r.now()
@@ -127,7 +130,7 @@ func (r *Runtime) markFailed(ctx context.Context, d *core.Download, grabs []core
 		return err
 	}
 	r.logger().InfoContext(ctx, "download failed", "release", grab.SourceTitle, "item", grab.ItemID, "message", message)
-	if search || (!skipRedownload && r.settings().AutoRedownloadFailed) {
+	if search || (!skipRedownload && r.redownloads(ctx, grab)) {
 		if grab.ParentID.IsZero() {
 			_, err := r.QueueSearch(ctx, []core.ID{grab.ItemID}, false)
 			return err
@@ -135,6 +138,21 @@ func (r *Runtime) markFailed(ctx context.Context, d *core.Download, grabs []core
 		return r.redownloadEpisodes(ctx, grab.ParentID, episodeIDs)
 	}
 	return nil
+}
+
+// redownloads reports whether the settings search again for the items
+// of a failed grab.
+func (r *Runtime) redownloads(ctx context.Context, grab core.HistoryEvent) bool {
+	s := r.settings()
+	switch {
+	case !s.AutoRedownloadFailed:
+		r.logger().DebugContext(ctx, "auto redownloading failed releases is disabled")
+		return false
+	case grab.Data[dataReleaseSource] == releaseSources[acquire.SourceInteractiveSearch] && !s.AutoRedownloadFailedFromInteractiveSearch:
+		r.logger().DebugContext(ctx, "auto redownloading failed releases from interactive search is disabled")
+		return false
+	}
+	return true
 }
 
 // redownloadEpisodes searches again for the episodes of a failed

@@ -476,7 +476,7 @@ flowchart TD
   - [ ] 按电影的别名、译名与次要年份匹配发布
   - [x] 索引器的标签、必需标志、最少做种数与 MULTi 语言，由索引器插件按其配置提供
   - [ ] 下载客户端的标签，以及同一优先级的客户端之间轮流使用；目前使用优先级最高的第一个客户端
-  - [ ] 区分 `AutoRedownloadFailedFromInteractiveSearch` 与失败后重新搜索
+  - [x] 交互式搜索抓取的失败发布仅在开启 `AutoRedownloadFailedFromInteractiveSearch` 时重新搜索，如同 Radarr 的 RedownloadFailedDownloadService
 - [x] 队列：从客户端轮询的被跟踪下载
   - [ ] 无法应答的客户端的下载保留最后状态，而非被标记
 - [x] 入库、升级与回收目录

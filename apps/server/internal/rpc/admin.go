@@ -285,6 +285,7 @@ func acquisitionSettingsToProto(a *core.AcquisitionSettings) *systemv1.Acquisiti
 	return systemv1.AcquisitionSettings_builder{
 		Propers: new(properDownloads[a.Propers]), PreferIndexerFlags: &a.PreferIndexerFlags,
 		CompletedDownloadHandling: &a.CompletedDownloadHandling, AutoRedownloadFailed: &a.AutoRedownloadFailed,
+		AutoRedownloadFailedFromInteractiveSearch: &a.AutoRedownloadFailedFromInteractiveSearch,
 		MaximumSize: new(int32(a.MaximumSize)), MinimumAge: new(int32(a.MinimumAge)), Retention: new(int32(a.Retention)),
 		AllowHardcodedSubs: &a.AllowHardcodedSubs, WhitelistedHardcodedSubs: a.WhitelistedHardcodedSubs,
 		SkipFreeSpaceCheck: &a.SkipFreeSpaceCheck, MinimumFreeSpace: new(int32(a.MinimumFreeSpace)),
@@ -299,9 +300,12 @@ func acquisitionSettingsToProto(a *core.AcquisitionSettings) *systemv1.Acquisiti
 }
 
 func acquisitionSettingsFromProto(p *systemv1.AcquisitionSettings) core.AcquisitionSettings {
+	// Unset by clients that predate it, it keeps its default.
+	fromInteractive := !p.HasAutoRedownloadFailedFromInteractiveSearch() || p.GetAutoRedownloadFailedFromInteractiveSearch()
 	return core.AcquisitionSettings{
 		Propers: keyOf(properDownloads, p.GetPropers()), PreferIndexerFlags: p.GetPreferIndexerFlags(),
 		CompletedDownloadHandling: p.GetCompletedDownloadHandling(), AutoRedownloadFailed: p.GetAutoRedownloadFailed(),
+		AutoRedownloadFailedFromInteractiveSearch: fromInteractive,
 		MaximumSize: int(p.GetMaximumSize()), MinimumAge: int(p.GetMinimumAge()), Retention: int(p.GetRetention()),
 		AllowHardcodedSubs: p.GetAllowHardcodedSubs(), WhitelistedHardcodedSubs: p.GetWhitelistedHardcodedSubs(),
 		SkipFreeSpaceCheck: p.GetSkipFreeSpaceCheck(), MinimumFreeSpace: int(p.GetMinimumFreeSpace()),

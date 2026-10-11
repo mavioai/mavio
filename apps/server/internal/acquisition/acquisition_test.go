@@ -848,6 +848,41 @@ func TestFailedBlocklistsAndSearchesAgain(t *testing.T) {
 	}
 }
 
+// Radarr's RedownloadFailedDownloadService: releases grabbed from an
+// interactive search are searched for again only with
+// AutoRedownloadFailedFromInteractiveSearch.
+func TestFailedFromInteractiveSearch(t *testing.T) {
+	for _, fromInteractive := range []bool{false, true} {
+		e := newEnv(t)
+		e.settings.AutoRedownloadFailedFromInteractiveSearch = fromInteractive
+		it := e.addMovie()
+		rel := &Release{
+			PluginID: "idx", IndexerID: "ix", IndexerName: "Indexer", GUID: "g720", Title: title720, Size: 4 * gb,
+			DownloadURL: "https://indexer.test/g720", Protocol: core.ProtocolTorrent, InfoHash: hash720, PublishDate: e.clock,
+		}
+		if _, err := e.rt.GrabRelease(e.ctx, it.ID, rel, "", ""); err != nil {
+			t.Fatal(err)
+		}
+		e.client.setDownloads(pluginv1.Download_builder{
+			ClientId: new("qb"), Id: new(hash720), Title: new(title720), Status: new(pluginv1.DownloadStatus_DOWNLOAD_STATUS_FAILED),
+			Message: new("Unpack failed"),
+		}.Build())
+		if err := e.rt.CheckQueue(e.ctx); err != nil {
+			t.Fatal(err)
+		}
+		if n := len(e.blocklist(it.ID)); n != 1 {
+			t.Errorf("from interactive %v: blocklist = %d entries, want = 1", fromInteractive, n)
+		}
+		want := 0
+		if fromInteractive {
+			want = 1
+		}
+		if n := len(e.jobs(JobSearch)); n != want {
+			t.Errorf("from interactive %v: search jobs = %d, want = %d", fromInteractive, n, want)
+		}
+	}
+}
+
 func TestMarkFailed(t *testing.T) {
 	e := newEnv(t)
 	e.settings.AutoRedownloadFailed = false

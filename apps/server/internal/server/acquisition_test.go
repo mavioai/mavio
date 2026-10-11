@@ -425,7 +425,7 @@ func TestAcquisition(t *testing.T) {
 	acq.SetRssSyncInterval(0)
 	acq.SetSkipFreeSpaceCheck(true)
 	acq.SetRenameMovies(true)
-	if !acq.GetCompletedDownloadHandling() || !acq.GetAutoRedownloadFailed() {
+	if !acq.GetCompletedDownloadHandling() || !acq.GetAutoRedownloadFailed() || !acq.GetAutoRedownloadFailedFromInteractiveSearch() {
 		t.Errorf("default acquisition settings = %v, want = completed download handling and redownloading failed", acq)
 	}
 	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: settings}.Build()); err != nil {
