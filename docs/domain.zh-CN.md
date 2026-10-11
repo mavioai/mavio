@@ -45,6 +45,8 @@ erDiagram
 | `Wanted` | 被监控的电影或剧集如何获取：其质量档案、最低可用状态、新条目监控、季文件夹标志与标签 |
 | `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | 被跟踪的下载、获取事件、不再抓取的发布、留待以后抓取的发布 |
 | `RemotePathMapping` | 下载客户端的路径如何映射到服务端的路径 |
+| `Request` / `SeasonRequest` | 用户对一部电影或一部剧集若干季的请求（§13.6） |
+| `Issue` / `IssueComment` | 用户就某个条目报告的问题及其讨论（§13.7） |
 | `DisplayPreferences` | 用户对某个客户端如何显示某个视图的设置 |
 
 ---
@@ -197,6 +199,7 @@ erDiagram
   * `Libraries` 把访问限制在列出的媒体库内（nil 表示全部）；由 `CanAccessLibrary` 判断。
   * `MaxParentalRating` 是允许的最高分级分数（"PG-13" 这类内容分级按国家分级体系映射为分数；nil 表示不限制，为零表示只允许适合所有年龄的内容）；设置了上限时，`BlockUnrated` 会隐藏没有分级的条目。
   * `AllowTranscoding`、`AllowDownload`、`MaxStreamingBitrate`（比特每秒，为零表示不限）与 `MaxSessions`（为零表示不限）。
+  * `Requests`（`RequestPermissions`）：用户能否请求电影与剧集、其各类请求是否自动通过，以及能否报告问题；`MovieQuota` 与 `SeriesQuota` 是用户自己的配额（§13.6），nil 表示使用服务端的配额。管理员可以做所有这些事，且不受配额限制。
 * `UserPolicy.CanAccess` 在条目所属媒体库被允许、且设置了最高分级时其分级分数（`ParentalRating`，没有时取 `InheritedRating`）不超过该值时允许访问；未分级条目除非设置了 `BlockUnrated` 否则放行，与条目查询的分级过滤一致。`User.CanAccess` 允许用户访问自己的播放列表、不允许访问他人的播放列表，与媒体库权限无关；对其他条目则应用权限策略。
 * `UserPreferences`：按偏好顺序排列的音频与字幕语言（ISO 639-2/B）、`SubtitleMode`，以及是否优先选择默认音轨而非偏好语言。
 * `UserData` 是某个用户对某个条目的状态：`Played`、`PlayCount`、续播位置 `Position`、上次选择的音频/字幕流（字幕为 `-1` 表示关闭）、`Favorite`、可选的 0–10 分 `Rating` 以及时间戳。没有记录表示"从未交互"。
@@ -242,7 +245,7 @@ erDiagram
 | `DisplayPreferencesRepository` | `Get` 用户对某个客户端视图的偏好（从未设置时返回 `ErrNotFound`），`Put` 写入并替换之前的偏好 |
 | `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入 |
 | `APIKeyRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Touch`、`Delete`；删除用户时一并删除其密钥 |
-| `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
+| `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户、类型与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
 | `TrickplayRepository` | `Put` 某条目在某宽度下的拼图（替换之前的）、`List` 某条目的拼图（最窄的在前）、`Delete` 删除 |
 | `MediaSegmentRepository` | `List` 某条目的片段（按开始时间）、`Replace` 替换 |
 | `QualityDefinitionRepository` | `List` 某类型的定义（保存之前为空）、`Replace` 替换 |
@@ -253,6 +256,8 @@ erDiagram
 | `BlocklistRepository` | `Add`、`List`（分页，最新的在前，某条目的或全部）、`Delete` |
 | `PendingReleaseRepository` | `List` 某条目的或全部（最早的在前）、`Add`、`Delete` |
 | `RemotePathMappingRepository` | `List`、`Put`、`Delete` |
+| `RequestRepository` | `Get`、`List`（分页，可按用户、状态、类型、TMDB ID 与条目筛选，最新创建或最近修改的在前）、`Put`（按 ID 插入或替换）、`Delete`、`QuotaUsed`（见 §13.6）；删除用户会删除其请求 |
+| `IssueRepository` | `Get` 与 `List`（分页，带评论）、`Put`、`AddComment`、`Delete`；删除条目或用户会删除其问题 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
 * **Replace 语义**：`Replace*` 方法设置某个所有者的完整集合，删除不在新集合中的内容——扫描与元数据刷新总是整组写入。
@@ -310,13 +315,14 @@ erDiagram
 * `PluginCatalogs`：安装插件所用插件目录的 http 或 https URL。
 * `PasswordResetPlugin`：投递用于重置遗忘密码的 PIN 的插件 ID；为空时用户无法重置密码。
 * `Acquisition`：如何选择、下载与入库发布（§13.4）。
+* `Requests`：新用户获得的权限、默认配额，以及通过的请求去向（§13.6）。
 * `Validate` 检查已知取值与范围。
 
 ### 12.2 API 密钥
 `APIKey` 让集成无需登录即可调用 API：它的令牌只显示一次，以创建它的管理员身份行事，前提是该用户仍是已启用的管理员。只保存令牌的 SHA-256 哈希（`TokenHash`），以及 `Name`、`CreatedAt` 与至多每分钟记录一次的 `LastUsedAt`。
 
 ### 12.3 活动日志
-`Activity` 是发生过的一件事：点分的 `Type`、`Severity`（`info`、`warning`、`error`）、`Title` 与 `Message`、相关的 `UserID` 与 `ItemID`，以及因类型而异的 `Attributes`。日志记录登录（`user.login`）与失败的登录（`user.login_failed`，警告）、API 密钥的创建与吊销（`apikey.created`、`apikey.revoked`）、账户变更（`user.created`、`user.updated`、`user.deleted`、`user.password_changed`）、插件的安装、更新、配置、卸载与启动失败（`plugin.installed`、`plugin.updated`、`plugin.configured`、`plugin.uninstalled`、`plugin.failed`）、设置的修改（`settings.updated`）、备份（`backup.created`）、播放的开始与停止（`playback.started`、`playback.stopped`），以及失败的任务运行与字幕下载（`task.failed`、`subtitle.download_failed`）。活动保留 90 天，并作为事件发送给通知插件；消费事件的插件还会收到不进入日志的事件（见[插件平台 §4](plugins.zh-CN.md#4-事件)）。
+`Activity` 是发生过的一件事：点分的 `Type`、`Severity`（`info`、`warning`、`error`）、`Title` 与 `Message`、相关的 `UserID` 与 `ItemID`，以及因类型而异的 `Attributes`。日志记录登录（`user.login`）与失败的登录（`user.login_failed`，警告）、API 密钥的创建与吊销（`apikey.created`、`apikey.revoked`）、请求与问题（§13.6、§13.7）、账户变更（`user.created`、`user.updated`、`user.deleted`、`user.password_changed`）、插件的安装、更新、配置、卸载与启动失败（`plugin.installed`、`plugin.updated`、`plugin.configured`、`plugin.uninstalled`、`plugin.failed`）、设置的修改（`settings.updated`）、备份（`backup.created`）、播放的开始与停止（`playback.started`、`playback.stopped`），以及失败的任务运行与字幕下载（`task.failed`、`subtitle.download_failed`）。活动保留 90 天，用户可列出与自己相关的活动，即其通知；活动并作为事件发送给通知插件；消费事件的插件还会收到不进入日志的事件（见[插件平台 §4](plugins.zh-CN.md#4-事件)）。
 
 ---
 
@@ -347,3 +353,11 @@ erDiagram
 ### 13.5 远程路径映射
 `RemotePathMapping` 把 `Host` 上的下载客户端报告的目录（`RemotePath`）映射到服务端看到的绝对目录（`LocalPath`）。同一主机的同一远程路径只映射一次。
 
+### 13.6 请求
+* `Request` 是用户按 TMDB ID 对一部电影或一部剧集的请求（`Kind`、`TmdbID`，剧集在得知后还有 `TvdbID`），带有 `Title` 与 `Year`、它使之成为想要的条目的 `ItemID`、`RequestedBy` 与 `ModifiedBy` 用户、`IgnoreQuota`、`Message`（失败的原因）及其时间。剧集请求列出其 `Seasons`（`SeasonRequest`：季号，至少一个，各不重复，以及状态）；电影请求没有季。
+* `RequestStatus`：`pending`（等待管理员）、`approved`（其标题已成为想要的条目）、`declined`、`failed`（设为想要失败；可以重试）与 `completed`（已可用）。待审批、已通过与失败的请求是活动的：它们会阻止对同一标题或同一季的其他请求。一季在其已播出的单集全部有文件时完成；剧集请求在其所有季都完成时完成。
+* `Quota` 允许在最近 `Days` 天内（为 0 时不限时间）请求 `Limit` 部电影或剧集的 `Limit` 季；限额为 0 表示不限。`QuotaUsed` 统计用户自某时间起某类型的请求数，剧集按季计，不计被拒绝的请求与忽略配额的请求，与 Seerr 的 `User.getQuota` 一致。
+* `RequestSettings` 是服务端设置的一部分：新用户获得的 `DefaultPermissions`、默认的 `MovieQuota` 与 `SeriesQuota`、通过的电影请求加入的电影媒体库、质量档案与最低可用性、通过的剧集请求的剧集媒体库、质量档案、是否按季分目录与新条目的监控方式，以及能否请求特别篇（第 0 季）。
+
+### 13.7 问题
+`Issue` 是用户就某个条目报告的问题：`Type`（`video`、`audio`、`subtitles`、`other`）、`Status`（`open`、`resolved`）、可选的 `SeasonNumber` 与 `EpisodeNumber`、`CreatedBy`、`ModifiedBy` 及其时间。其 `Comments`（`IssueComment`：用户、消息与时间）是讨论串，最早的在前；第一条即报告的内容。

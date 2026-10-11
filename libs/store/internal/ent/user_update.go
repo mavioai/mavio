@@ -15,8 +15,11 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -242,6 +245,51 @@ func (_u *UserUpdate) AddAPIKeys(v ...*APIKey) *UserUpdate {
 	return _u.AddAPIKeyIDs(ids...)
 }
 
+// AddRequestIDs adds the "requests" edge to the Request entity by IDs.
+func (_u *UserUpdate) AddRequestIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.AddRequestIDs(ids...)
+	return _u
+}
+
+// AddRequests adds the "requests" edges to the Request entity.
+func (_u *UserUpdate) AddRequests(v ...*Request) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddRequestIDs(ids...)
+}
+
+// AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
+func (_u *UserUpdate) AddIssueIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.AddIssueIDs(ids...)
+	return _u
+}
+
+// AddIssues adds the "issues" edges to the Issue entity.
+func (_u *UserUpdate) AddIssues(v ...*Issue) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueIDs(ids...)
+}
+
+// AddIssueCommentIDs adds the "issue_comments" edge to the IssueComment entity by IDs.
+func (_u *UserUpdate) AddIssueCommentIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.AddIssueCommentIDs(ids...)
+	return _u
+}
+
+// AddIssueComments adds the "issue_comments" edges to the IssueComment entity.
+func (_u *UserUpdate) AddIssueComments(v ...*IssueComment) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueCommentIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -350,6 +398,69 @@ func (_u *UserUpdate) RemoveAPIKeys(v ...*APIKey) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAPIKeyIDs(ids...)
+}
+
+// ClearRequests clears all "requests" edges to the Request entity.
+func (_u *UserUpdate) ClearRequests() *UserUpdate {
+	_u.mutation.ClearRequests()
+	return _u
+}
+
+// RemoveRequestIDs removes the "requests" edge to Request entities by IDs.
+func (_u *UserUpdate) RemoveRequestIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.RemoveRequestIDs(ids...)
+	return _u
+}
+
+// RemoveRequests removes "requests" edges to Request entities.
+func (_u *UserUpdate) RemoveRequests(v ...*Request) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveRequestIDs(ids...)
+}
+
+// ClearIssues clears all "issues" edges to the Issue entity.
+func (_u *UserUpdate) ClearIssues() *UserUpdate {
+	_u.mutation.ClearIssues()
+	return _u
+}
+
+// RemoveIssueIDs removes the "issues" edge to Issue entities by IDs.
+func (_u *UserUpdate) RemoveIssueIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.RemoveIssueIDs(ids...)
+	return _u
+}
+
+// RemoveIssues removes "issues" edges to Issue entities.
+func (_u *UserUpdate) RemoveIssues(v ...*Issue) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueIDs(ids...)
+}
+
+// ClearIssueComments clears all "issue_comments" edges to the IssueComment entity.
+func (_u *UserUpdate) ClearIssueComments() *UserUpdate {
+	_u.mutation.ClearIssueComments()
+	return _u
+}
+
+// RemoveIssueCommentIDs removes the "issue_comments" edge to IssueComment entities by IDs.
+func (_u *UserUpdate) RemoveIssueCommentIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.RemoveIssueCommentIDs(ids...)
+	return _u
+}
+
+// RemoveIssueComments removes "issue_comments" edges to IssueComment entities.
+func (_u *UserUpdate) RemoveIssueComments(v ...*IssueComment) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueCommentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -662,6 +773,141 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.RequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestsTable,
+			Columns: []string{user.RequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedRequestsIDs(); len(nodes) > 0 && !_u.mutation.RequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestsTable,
+			Columns: []string{user.RequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestsTable,
+			Columns: []string{user.RequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssuesIDs(); len(nodes) > 0 && !_u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssuesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IssueCommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssueCommentsTable,
+			Columns: []string{user.IssueCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issuecomment.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssueCommentsIDs(); len(nodes) > 0 && !_u.mutation.IssueCommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssueCommentsTable,
+			Columns: []string{user.IssueCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issuecomment.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssueCommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssueCommentsTable,
+			Columns: []string{user.IssueCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issuecomment.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -891,6 +1137,51 @@ func (_u *UserUpdateOne) AddAPIKeys(v ...*APIKey) *UserUpdateOne {
 	return _u.AddAPIKeyIDs(ids...)
 }
 
+// AddRequestIDs adds the "requests" edge to the Request entity by IDs.
+func (_u *UserUpdateOne) AddRequestIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.AddRequestIDs(ids...)
+	return _u
+}
+
+// AddRequests adds the "requests" edges to the Request entity.
+func (_u *UserUpdateOne) AddRequests(v ...*Request) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddRequestIDs(ids...)
+}
+
+// AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
+func (_u *UserUpdateOne) AddIssueIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.AddIssueIDs(ids...)
+	return _u
+}
+
+// AddIssues adds the "issues" edges to the Issue entity.
+func (_u *UserUpdateOne) AddIssues(v ...*Issue) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueIDs(ids...)
+}
+
+// AddIssueCommentIDs adds the "issue_comments" edge to the IssueComment entity by IDs.
+func (_u *UserUpdateOne) AddIssueCommentIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.AddIssueCommentIDs(ids...)
+	return _u
+}
+
+// AddIssueComments adds the "issue_comments" edges to the IssueComment entity.
+func (_u *UserUpdateOne) AddIssueComments(v ...*IssueComment) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueCommentIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -999,6 +1290,69 @@ func (_u *UserUpdateOne) RemoveAPIKeys(v ...*APIKey) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAPIKeyIDs(ids...)
+}
+
+// ClearRequests clears all "requests" edges to the Request entity.
+func (_u *UserUpdateOne) ClearRequests() *UserUpdateOne {
+	_u.mutation.ClearRequests()
+	return _u
+}
+
+// RemoveRequestIDs removes the "requests" edge to Request entities by IDs.
+func (_u *UserUpdateOne) RemoveRequestIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.RemoveRequestIDs(ids...)
+	return _u
+}
+
+// RemoveRequests removes "requests" edges to Request entities.
+func (_u *UserUpdateOne) RemoveRequests(v ...*Request) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveRequestIDs(ids...)
+}
+
+// ClearIssues clears all "issues" edges to the Issue entity.
+func (_u *UserUpdateOne) ClearIssues() *UserUpdateOne {
+	_u.mutation.ClearIssues()
+	return _u
+}
+
+// RemoveIssueIDs removes the "issues" edge to Issue entities by IDs.
+func (_u *UserUpdateOne) RemoveIssueIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.RemoveIssueIDs(ids...)
+	return _u
+}
+
+// RemoveIssues removes "issues" edges to Issue entities.
+func (_u *UserUpdateOne) RemoveIssues(v ...*Issue) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueIDs(ids...)
+}
+
+// ClearIssueComments clears all "issue_comments" edges to the IssueComment entity.
+func (_u *UserUpdateOne) ClearIssueComments() *UserUpdateOne {
+	_u.mutation.ClearIssueComments()
+	return _u
+}
+
+// RemoveIssueCommentIDs removes the "issue_comments" edge to IssueComment entities by IDs.
+func (_u *UserUpdateOne) RemoveIssueCommentIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.RemoveIssueCommentIDs(ids...)
+	return _u
+}
+
+// RemoveIssueComments removes "issue_comments" edges to IssueComment entities.
+func (_u *UserUpdateOne) RemoveIssueComments(v ...*IssueComment) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueCommentIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1334,6 +1688,141 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(apikey.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.RequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestsTable,
+			Columns: []string{user.RequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedRequestsIDs(); len(nodes) > 0 && !_u.mutation.RequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestsTable,
+			Columns: []string{user.RequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestsTable,
+			Columns: []string{user.RequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssuesIDs(); len(nodes) > 0 && !_u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssuesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IssueCommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssueCommentsTable,
+			Columns: []string{user.IssueCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issuecomment.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssueCommentsIDs(); len(nodes) > 0 && !_u.mutation.IssueCommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssueCommentsTable,
+			Columns: []string{user.IssueCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issuecomment.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssueCommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssueCommentsTable,
+			Columns: []string{user.IssueCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issuecomment.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

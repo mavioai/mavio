@@ -18,6 +18,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -1013,6 +1014,21 @@ func (_c *ItemCreate) AddPendingReleases(v ...*PendingRelease) *ItemCreate {
 	return _c.AddPendingReleaseIDs(ids...)
 }
 
+// AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
+func (_c *ItemCreate) AddIssueIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddIssueIDs(ids...)
+	return _c
+}
+
+// AddIssues adds the "issues" edges to the Issue entity.
+func (_c *ItemCreate) AddIssues(v ...*Issue) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddIssueIDs(ids...)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_c *ItemCreate) Mutation() *ItemMutation {
 	return _c.mutation
@@ -1827,6 +1843,22 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.IssuesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.IssuesTable,
+			Columns: []string{item.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

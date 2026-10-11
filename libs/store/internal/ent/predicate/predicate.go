@@ -42,6 +42,12 @@ type HistoryEvent func(*sql.Selector)
 // Image is the predicate function for image builders.
 type Image func(*sql.Selector)
 
+// Issue is the predicate function for issue builders.
+type Issue func(*sql.Selector)
+
+// IssueComment is the predicate function for issuecomment builders.
+type IssueComment func(*sql.Selector)
+
 // Item is the predicate function for item builders.
 type Item func(*sql.Selector)
 
@@ -83,6 +89,9 @@ type ReleaseProfile func(*sql.Selector)
 
 // RemotePathMapping is the predicate function for remotepathmapping builders.
 type RemotePathMapping func(*sql.Selector)
+
+// Request is the predicate function for request builders.
+type Request func(*sql.Selector)
 
 // Setting is the predicate function for setting builders.
 type Setting func(*sql.Selector)

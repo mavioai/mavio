@@ -97,6 +97,10 @@ func TestActivities(t *testing.T) {
 		if err != nil || page.Total != 1 || page.Items[0].UserID != user || !page.Items[0].Time.Equal(base) {
 			t.Errorf("List(user) = %+v, %v", page, err)
 		}
+		page, err = s.Activities().List(ctx, core.ActivityQuery{Types: []string{"user.login", "plugin.failed"}})
+		if err != nil || page.Total != 2 || page.Items[0].Type != "plugin.failed" {
+			t.Errorf("List(types) = %+v, %v", page, err)
+		}
 		if n, err := s.Activities().Purge(ctx, base.Add(90*time.Minute)); err != nil || n != 2 {
 			t.Errorf("Purge = %d, %v; want 2", n, err)
 		}

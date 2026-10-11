@@ -581,6 +581,75 @@ func HasAPIKeysWith(preds ...predicate.APIKey) predicate.User {
 	})
 }
 
+// HasRequests applies the HasEdge predicate on the "requests" edge.
+func HasRequests() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RequestsTable, RequestsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRequestsWith applies the HasEdge predicate on the "requests" edge with a given conditions (other predicates).
+func HasRequestsWith(preds ...predicate.Request) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newRequestsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasIssues applies the HasEdge predicate on the "issues" edge.
+func HasIssues() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, IssuesTable, IssuesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasIssuesWith applies the HasEdge predicate on the "issues" edge with a given conditions (other predicates).
+func HasIssuesWith(preds ...predicate.Issue) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newIssuesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasIssueComments applies the HasEdge predicate on the "issue_comments" edge.
+func HasIssueComments() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, IssueCommentsTable, IssueCommentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasIssueCommentsWith applies the HasEdge predicate on the "issue_comments" edge with a given conditions (other predicates).
+func HasIssueCommentsWith(preds ...predicate.IssueComment) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newIssueCommentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(sql.AndPredicates(predicates...))

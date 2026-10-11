@@ -16,8 +16,11 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -34,6 +37,9 @@ type UserQuery struct {
 	withPlaylists          *ItemQuery
 	withDisplayPreferences *DisplayPreferencesQuery
 	withAPIKeys            *APIKeyQuery
+	withRequests           *RequestQuery
+	withIssues             *IssueQuery
+	withIssueComments      *IssueCommentQuery
 	modifiers              []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -174,6 +180,72 @@ func (_q *UserQuery) QueryAPIKeys() *APIKeyQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(apikey.Table, apikey.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.APIKeysTable, user.APIKeysColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRequests chains the current query on the "requests" edge.
+func (_q *UserQuery) QueryRequests() *RequestQuery {
+	query := (&RequestClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(request.Table, request.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RequestsTable, user.RequestsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryIssues chains the current query on the "issues" edge.
+func (_q *UserQuery) QueryIssues() *IssueQuery {
+	query := (&IssueClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(issue.Table, issue.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.IssuesTable, user.IssuesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryIssueComments chains the current query on the "issue_comments" edge.
+func (_q *UserQuery) QueryIssueComments() *IssueCommentQuery {
+	query := (&IssueCommentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(issuecomment.Table, issuecomment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.IssueCommentsTable, user.IssueCommentsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -378,6 +450,9 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withPlaylists:          _q.withPlaylists.Clone(),
 		withDisplayPreferences: _q.withDisplayPreferences.Clone(),
 		withAPIKeys:            _q.withAPIKeys.Clone(),
+		withRequests:           _q.withRequests.Clone(),
+		withIssues:             _q.withIssues.Clone(),
+		withIssueComments:      _q.withIssueComments.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -437,6 +512,39 @@ func (_q *UserQuery) WithAPIKeys(opts ...func(*APIKeyQuery)) *UserQuery {
 		opt(query)
 	}
 	_q.withAPIKeys = query
+	return _q
+}
+
+// WithRequests tells the query-builder to eager-load the nodes that are connected to
+// the "requests" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithRequests(opts ...func(*RequestQuery)) *UserQuery {
+	query := (&RequestClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withRequests = query
+	return _q
+}
+
+// WithIssues tells the query-builder to eager-load the nodes that are connected to
+// the "issues" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithIssues(opts ...func(*IssueQuery)) *UserQuery {
+	query := (&IssueClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withIssues = query
+	return _q
+}
+
+// WithIssueComments tells the query-builder to eager-load the nodes that are connected to
+// the "issue_comments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithIssueComments(opts ...func(*IssueCommentQuery)) *UserQuery {
+	query := (&IssueCommentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withIssueComments = query
 	return _q
 }
 
@@ -518,12 +626,15 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [8]bool{
 			_q.withUserData != nil,
 			_q.withAuthSessions != nil,
 			_q.withPlaylists != nil,
 			_q.withDisplayPreferences != nil,
 			_q.withAPIKeys != nil,
+			_q.withRequests != nil,
+			_q.withIssues != nil,
+			_q.withIssueComments != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -581,6 +692,27 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadAPIKeys(ctx, query, nodes,
 			func(n *User) { n.Edges.APIKeys = []*APIKey{} },
 			func(n *User, e *APIKey) { n.Edges.APIKeys = append(n.Edges.APIKeys, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withRequests; query != nil {
+		if err := _q.loadRequests(ctx, query, nodes,
+			func(n *User) { n.Edges.Requests = []*Request{} },
+			func(n *User, e *Request) { n.Edges.Requests = append(n.Edges.Requests, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withIssues; query != nil {
+		if err := _q.loadIssues(ctx, query, nodes,
+			func(n *User) { n.Edges.Issues = []*Issue{} },
+			func(n *User, e *Issue) { n.Edges.Issues = append(n.Edges.Issues, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withIssueComments; query != nil {
+		if err := _q.loadIssueComments(ctx, query, nodes,
+			func(n *User) { n.Edges.IssueComments = []*IssueComment{} },
+			func(n *User, e *IssueComment) { n.Edges.IssueComments = append(n.Edges.IssueComments, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -725,6 +857,96 @@ func (_q *UserQuery) loadAPIKeys(ctx context.Context, query *APIKeyQuery, nodes 
 	}
 	query.Where(predicate.APIKey(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.APIKeysColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadRequests(ctx context.Context, query *RequestQuery, nodes []*User, init func(*User), assign func(*User, *Request)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(request.FieldRequestedBy)
+	}
+	query.Where(predicate.Request(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.RequestsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.RequestedBy
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "requested_by" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadIssues(ctx context.Context, query *IssueQuery, nodes []*User, init func(*User), assign func(*User, *Issue)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(issue.FieldCreatedBy)
+	}
+	query.Where(predicate.Issue(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.IssuesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CreatedBy
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "created_by" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadIssueComments(ctx context.Context, query *IssueCommentQuery, nodes []*User, init func(*User), assign func(*User, *IssueComment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(issuecomment.FieldUserID)
+	}
+	query.Where(predicate.IssueComment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.IssueCommentsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

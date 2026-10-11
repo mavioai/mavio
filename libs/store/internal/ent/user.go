@@ -57,9 +57,15 @@ type UserEdges struct {
 	DisplayPreferences []*DisplayPreferences `json:"display_preferences,omitempty"`
 	// APIKeys holds the value of the api_keys edge.
 	APIKeys []*APIKey `json:"api_keys,omitempty"`
+	// Requests holds the value of the requests edge.
+	Requests []*Request `json:"requests,omitempty"`
+	// Issues holds the value of the issues edge.
+	Issues []*Issue `json:"issues,omitempty"`
+	// IssueComments holds the value of the issue_comments edge.
+	IssueComments []*IssueComment `json:"issue_comments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [8]bool
 }
 
 // UserDataOrErr returns the UserData value or an error if the edge
@@ -105,6 +111,33 @@ func (e UserEdges) APIKeysOrErr() ([]*APIKey, error) {
 		return e.APIKeys, nil
 	}
 	return nil, &NotLoadedError{edge: "api_keys"}
+}
+
+// RequestsOrErr returns the Requests value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RequestsOrErr() ([]*Request, error) {
+	if e.loadedTypes[5] {
+		return e.Requests, nil
+	}
+	return nil, &NotLoadedError{edge: "requests"}
+}
+
+// IssuesOrErr returns the Issues value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) IssuesOrErr() ([]*Issue, error) {
+	if e.loadedTypes[6] {
+		return e.Issues, nil
+	}
+	return nil, &NotLoadedError{edge: "issues"}
+}
+
+// IssueCommentsOrErr returns the IssueComments value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) IssueCommentsOrErr() ([]*IssueComment, error) {
+	if e.loadedTypes[7] {
+		return e.IssueComments, nil
+	}
+	return nil, &NotLoadedError{edge: "issue_comments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -244,6 +277,21 @@ func (_m *User) QueryDisplayPreferences() *DisplayPreferencesQuery {
 // QueryAPIKeys queries the "api_keys" edge of the User entity.
 func (_m *User) QueryAPIKeys() *APIKeyQuery {
 	return NewUserClient(_m.config).QueryAPIKeys(_m)
+}
+
+// QueryRequests queries the "requests" edge of the User entity.
+func (_m *User) QueryRequests() *RequestQuery {
+	return NewUserClient(_m.config).QueryRequests(_m)
+}
+
+// QueryIssues queries the "issues" edge of the User entity.
+func (_m *User) QueryIssues() *IssueQuery {
+	return NewUserClient(_m.config).QueryIssues(_m)
+}
+
+// QueryIssueComments queries the "issue_comments" edge of the User entity.
+func (_m *User) QueryIssueComments() *IssueCommentQuery {
+	return NewUserClient(_m.config).QueryIssueComments(_m)
 }
 
 // Update returns a builder for updating this User.

@@ -20,6 +20,8 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
+	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemvalue"
@@ -35,6 +37,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
+	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
@@ -422,6 +425,60 @@ func (f TraverseImage) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.ImageQuery", q)
 }
 
+// The IssueFunc type is an adapter to allow the use of ordinary function as a Querier.
+type IssueFunc func(context.Context, *ent.IssueQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f IssueFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.IssueQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.IssueQuery", q)
+}
+
+// The TraverseIssue type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseIssue func(context.Context, *ent.IssueQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseIssue) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseIssue) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.IssueQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.IssueQuery", q)
+}
+
+// The IssueCommentFunc type is an adapter to allow the use of ordinary function as a Querier.
+type IssueCommentFunc func(context.Context, *ent.IssueCommentQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f IssueCommentFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.IssueCommentQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.IssueCommentQuery", q)
+}
+
+// The TraverseIssueComment type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseIssueComment func(context.Context, *ent.IssueCommentQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseIssueComment) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseIssueComment) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.IssueCommentQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.IssueCommentQuery", q)
+}
+
 // The ItemFunc type is an adapter to allow the use of ordinary function as a Querier.
 type ItemFunc func(context.Context, *ent.ItemQuery) (ent.Value, error)
 
@@ -800,6 +857,33 @@ func (f TraverseRemotePathMapping) Traverse(ctx context.Context, q ent.Query) er
 	return fmt.Errorf("unexpected query type %T. expect *ent.RemotePathMappingQuery", q)
 }
 
+// The RequestFunc type is an adapter to allow the use of ordinary function as a Querier.
+type RequestFunc func(context.Context, *ent.RequestQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f RequestFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.RequestQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.RequestQuery", q)
+}
+
+// The TraverseRequest type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseRequest func(context.Context, *ent.RequestQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseRequest) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseRequest) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.RequestQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.RequestQuery", q)
+}
+
 // The SettingFunc type is an adapter to allow the use of ordinary function as a Querier.
 type SettingFunc func(context.Context, *ent.SettingQuery) (ent.Value, error)
 
@@ -962,6 +1046,10 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.HistoryEventQuery, predicate.HistoryEvent, historyevent.OrderOption]{typ: ent.TypeHistoryEvent, tq: q}, nil
 	case *ent.ImageQuery:
 		return &query[*ent.ImageQuery, predicate.Image, image.OrderOption]{typ: ent.TypeImage, tq: q}, nil
+	case *ent.IssueQuery:
+		return &query[*ent.IssueQuery, predicate.Issue, issue.OrderOption]{typ: ent.TypeIssue, tq: q}, nil
+	case *ent.IssueCommentQuery:
+		return &query[*ent.IssueCommentQuery, predicate.IssueComment, issuecomment.OrderOption]{typ: ent.TypeIssueComment, tq: q}, nil
 	case *ent.ItemQuery:
 		return &query[*ent.ItemQuery, predicate.Item, item.OrderOption]{typ: ent.TypeItem, tq: q}, nil
 	case *ent.ItemLinkQuery:
@@ -990,6 +1078,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.ReleaseProfileQuery, predicate.ReleaseProfile, releaseprofile.OrderOption]{typ: ent.TypeReleaseProfile, tq: q}, nil
 	case *ent.RemotePathMappingQuery:
 		return &query[*ent.RemotePathMappingQuery, predicate.RemotePathMapping, remotepathmapping.OrderOption]{typ: ent.TypeRemotePathMapping, tq: q}, nil
+	case *ent.RequestQuery:
+		return &query[*ent.RequestQuery, predicate.Request, request.OrderOption]{typ: ent.TypeRequest, tq: q}, nil
 	case *ent.SettingQuery:
 		return &query[*ent.SettingQuery, predicate.Setting, setting.OrderOption]{typ: ent.TypeSetting, tq: q}, nil
 	case *ent.TrickplayQuery:
