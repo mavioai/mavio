@@ -417,6 +417,8 @@ flowchart TD
   - [x] FileList（`internal/sites/filelist`）
   - [x] HDBits（`internal/sites/hdbits`）
   - [x] PassThePopcorn（`internal/sites/passthepopcorn`）
+  - [x] GazelleGames（`internal/sites/gazellegames`），在测试或首次下载时获取 passkey
+    - [ ] 其大小限制（`sizesmall`、`sizeslarge`），待查询携带 `minsize` 与 `maxsize` 后发送
   - [ ] 像 Prowlarr 存入设置那样跨重启保存 AvistaZ 与 SpeedApp 站点的 API 令牌；目前每次启动后重新登录
   - [ ] torrent 索引器的做种设置（最少做种数、分享率与做种时间），抓取时交给下载客户端
 - [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
