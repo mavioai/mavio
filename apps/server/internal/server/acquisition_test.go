@@ -375,13 +375,17 @@ func TestAcquisition(t *testing.T) {
 	}
 	ctx := t.Context()
 
-	// The film the downloads hold: longer than ten minutes, so that it is
-	// no sample of a movie of The Matrix's runtime, with audio.
-	film := filepath.Join(t.TempDir(), "film.mkv")
-	run(t, ffmpeg, "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=160x120:rate=1",
-		"-f", "lavfi", "-i", "sine=frequency=440:sample_rate=8000", "-t", "610",
-		"-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-b:a", "16k", film)
-	settled(t, film)
+	// The films the downloads hold: longer than ten minutes, so that they
+	// are no samples of a movie of The Matrix's runtime, with audio, and
+	// of the resolutions of the releases, which imports read the quality
+	// from.
+	film, film1080 := filepath.Join(t.TempDir(), "film.mkv"), filepath.Join(t.TempDir(), "film1080.mkv")
+	for path, size := range map[string]string{film: "1280x720", film1080: "1920x1080"} {
+		run(t, ffmpeg, "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size="+size+":rate=1",
+			"-f", "lavfi", "-i", "sine=frequency=440:sample_rate=8000", "-t", "610",
+			"-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-b:a", "16k", path)
+		settled(t, path)
+	}
 
 	movies, recycle := t.TempDir(), t.TempDir()
 	indexer := newFakeNewznab(t)
@@ -566,7 +570,11 @@ func TestAcquisition(t *testing.T) {
 			q := download(rel.title)
 			return q.GetStatus() == acquisitionv1.DownloadStatus_DOWNLOAD_STATUS_DOWNLOADING && q.GetRemainingSize() == 1500<<20
 		}, describeQueue)
-		sab.finish(t, j, film, "")
+		video := film
+		if strings.Contains(rel.title, "1080p") {
+			video = film1080
+		}
+		sab.finish(t, j, video, "")
 		waitFor(t, rel.title+" imported", func() bool {
 			runQueueCheck()
 			return download(rel.title).GetState() == acquisitionv1.DownloadState_DOWNLOAD_STATE_IMPORTED
