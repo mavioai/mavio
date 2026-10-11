@@ -340,8 +340,8 @@ erDiagram
 
 ### 13.1 档案与格式
 * `QualityDefinition` 限定某个质量的大小，分电影与剧集，以每分钟时长的兆字节计（`MinSize`、`MaxSize`、`PreferredSize`，0 表示不限）。在服务端保存 `libs/acquire` 的默认值之前不存在任何定义。
-* `QualityProfile` 分电影与剧集，对其 `Items`（质量以及质量组，组 ID 从 1000 起）从低到高排序，并允许其中一部分；`Cutoff` 指出升级停止的质量或组，`UpgradeAllowed` 决定是否升级。`FormatScores` 为 custom format 打分；发布须达到 `MinFormatScore`，升级在 `CutoffFormatScore` 处停止，且每次至少提高 `MinUpgradeFormatScore`。`Language` 是电影发布须具备的语言：语言名称、`Original`，或为空表示任意。名称在同一类型内唯一；被想要的条目使用中的档案不能删除。
-* `CustomFormat` 是一组具名的 `Specifications`，每项匹配一类事实（发布标题、版本、语言、索引器标志、来源、分辨率、质量修饰、大小、发布组、年份、发布类型），可取反或设为必需。名称唯一；删除格式时从各档案中移除其分数。
+* `QualityProfile` 分电影与剧集，对其 `Items`（质量以及质量组，组 ID 从 1000 起）从低到高排序，并允许其中一部分；`Cutoff` 指出升级停止的质量或组，`UpgradeAllowed` 决定是否升级。`FormatScores` 为 custom format 打分；发布须达到 `MinFormatScore`，升级在 `CutoffFormatScore` 处停止，且每次至少提高 `MinUpgradeFormatScore`。分数所属的格式必须存在，每个格式至多一个分数；没有分数的格式计 0 分，且 `MinFormatScore` 必须可以达到。`Language` 是电影发布须具备的语言：语言名称、`Original`、`Unknown`（语言未知的发布），或为空（`Any`）表示任意。名称在同一类型内唯一；被想要的条目使用中的档案不能删除。
+* `CustomFormat` 是一组具名的 `Specifications`，每项匹配一类事实（发布标题、版本、语言、索引器标志、来源、分辨率、质量修饰、大小、发布组、年份、发布类型），可取反或设为必需。名称唯一；删除格式时从各档案中移除其分数，删除最后一个格式时重置各档案的格式分数（最低分与 cutoff 为 0，最低升级分为 1）。
 * `DelayProfile` 为与其某个 `Tags` 相同的条目启用协议、指定偏好的协议，并按协议延迟发布，除非发布已是档案中的最佳质量或分数足够高；`Default` 档案没有标签，排在最后且不能删除。
 * `ReleaseProfile` 要求或忽略发布标题中的词（普通词或 `/regex/flags`），适用于与其某个标签相同的条目（无标签时为全部），以及某个索引器的发布（未指定时为全部）。
 

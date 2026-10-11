@@ -14,6 +14,7 @@ func TestLanguageByName(t *testing.T) {
 		{"Spanish (Latino)", SpanishLatino, true},
 		{"Unknown", LanguageUnknown, true},
 		{"Original", Original, true},
+		{"Any", Any, true},
 		{"Georgian", Georgian, true},
 		{"", LanguageUnknown, false},
 		{"Klingon", LanguageUnknown, false},
@@ -24,7 +25,7 @@ func TestLanguageByName(t *testing.T) {
 			t.Errorf("LanguageByName(%q) got = %v, %v, want = %v, %v", tt.name, got, ok, tt.want, tt.wantOK)
 		}
 	}
-	for l := LanguageUnknown; l <= Original; l++ {
+	for l := LanguageUnknown; l <= Any; l++ {
 		if got, ok := LanguageByName(l.String()); !ok || got != l {
 			t.Errorf("LanguageByName(%q) got = %v, %v, want = %v, true", l.String(), got, ok, l)
 		}

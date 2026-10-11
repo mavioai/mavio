@@ -318,7 +318,7 @@ func (LanguageWanted) Name() string { return "Language" }
 func (LanguageWanted) Check(_ context.Context, _ *Env, c *Candidate, _ *Search) (*Rejection, error) {
 	wanted := c.Target.Profile.Language
 	switch wanted {
-	case release.LanguageUnknown:
+	case release.Any:
 		return nil, nil
 	case release.Original:
 		if original := c.Target.OriginalLanguage; !slices.Contains(c.Languages, original) {

@@ -123,9 +123,11 @@ func TestLanguageWantedSpec(t *testing.T) {
 		{"should_return_false_if_language_is_german", release.English, []release.Language{release.German}, false},
 		{"should_return_false_if_release_is_german_and_profile_original", release.Original, []release.Language{release.German}, false},
 		{"should_return_true_if_release_is_french_and_profile_original", release.Original, []release.Language{release.French}, true},
-		// Radarr's Language.Any is release.LanguageUnknown in a profile.
-		{"should_return_true_if_allowed_language_any (German)", release.LanguageUnknown, []release.Language{release.German}, true},
-		{"should_return_true_if_allowed_language_any (English)", release.LanguageUnknown, []release.Language{release.English}, true},
+		{"should_return_true_if_allowed_language_any (German)", release.Any, []release.Language{release.German}, true},
+		{"should_return_true_if_allowed_language_any (English)", release.Any, []release.Language{release.English}, true},
+		// Unknown is a language of its own, not any.
+		{"unknown wanted, german found", release.LanguageUnknown, []release.Language{release.German}, false},
+		{"unknown wanted, unknown found", release.LanguageUnknown, []release.Language{release.LanguageUnknown}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

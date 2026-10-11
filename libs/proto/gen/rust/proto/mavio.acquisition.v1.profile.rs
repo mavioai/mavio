@@ -1355,7 +1355,8 @@ pub struct QualityProfile {
     /// Field 10: `format_scores`
     pub format_scores: ::buffa::alloc::vec::Vec<FormatScore>,
     /// The language movie releases must have: an English language name,
-    /// "Original" for the movie's own, empty for any.
+    /// "Original" for the movie's own, "Unknown" for releases whose language
+    /// is not known, empty or "Any" for any.
     ///
     /// Field 11: `language`
     pub language: ::core::option::Option<::buffa::alloc::string::String>,

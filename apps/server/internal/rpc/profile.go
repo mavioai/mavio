@@ -229,7 +229,7 @@ func (s *ProfileService) UpdateQualityProfile(ctx context.Context, req *acquisit
 }
 
 // putQualityProfile checks a profile against its kind's qualities and the
-// custom formats, then stores it.
+// custom formats that exist, then stores it.
 func (s *ProfileService) putQualityProfile(ctx context.Context, p *core.QualityProfile) error {
 	ap, err := acquire.QualityProfileFromCore(*p)
 	if err != nil {
@@ -242,16 +242,16 @@ func (s *ProfileService) putQualityProfile(ctx context.Context, p *core.QualityP
 	if err := ap.Validate(kind); err != nil {
 		return invalid(fmt.Errorf("quality profile %q: %w", p.Name, err))
 	}
-	if len(p.FormatScores) > 0 {
-		formats, err := s.store.CustomFormats().List(ctx)
-		if err != nil {
-			return connectError(ctx, err)
-		}
-		for _, sc := range p.FormatScores {
-			if !slices.ContainsFunc(formats, func(f core.CustomFormat) bool { return f.ID == sc.FormatID }) {
-				return invalid(fmt.Errorf("quality profile %q scores unknown custom format %s", p.Name, sc.FormatID))
-			}
-		}
+	formats, err := s.store.CustomFormats().List(ctx)
+	if err != nil {
+		return connectError(ctx, err)
+	}
+	ids := make([]core.ID, len(formats))
+	for i, f := range formats {
+		ids[i] = f.ID
+	}
+	if err := ap.ValidateFormatScores(ids); err != nil {
+		return invalid(fmt.Errorf("quality profile %q: %w", p.Name, err))
 	}
 	if err := s.store.QualityProfiles().Put(ctx, p); err != nil {
 		return connectError(ctx, err)

@@ -1245,7 +1245,8 @@ type QualityProfile_builder struct {
 	MinUpgradeFormatScore *int32
 	FormatScores          []*FormatScore
 	// The language movie releases must have: an English language name,
-	// "Original" for the movie's own, empty for any.
+	// "Original" for the movie's own, "Unknown" for releases whose language
+	// is not known, empty or "Any" for any.
 	Language *string
 }
 

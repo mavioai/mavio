@@ -114,7 +114,7 @@ func (s *Specification) compile() error {
 		re.MatchTimeout = regexTimeout
 		s.re = re
 	case SpecLanguage:
-		if s.Value < 0 || s.Value > int(release.Original) {
+		if s.Value < 0 || s.Value > int(release.Any) {
 			return fmt.Errorf("unknown language %d", s.Value)
 		}
 	case SpecIndexerFlag:

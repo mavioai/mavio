@@ -69,6 +69,10 @@ const (
 	Georgian
 	// Original is the original language of the movie or series.
 	Original
+	// Any is any language, which profiles and custom formats may want, as
+	// Radarr's Language.Any; it is not Unknown, the language of releases
+	// whose language is not known. No release is in Any.
+	Any
 )
 
 var languageNames = [...]string{
@@ -78,7 +82,7 @@ var languageNames = [...]string{
 	"Malayalam", "Ukrainian", "Slovak", "Thai", "Portuguese (Brazil)", "Spanish (Latino)", "Romanian", "Latvian",
 	"Persian", "Catalan", "Croatian", "Serbian", "Bosnian", "Estonian", "Tamil", "Indonesian", "Macedonian",
 	"Slovenian", "Bengali", "Telugu", "Kannada", "Albanian", "Afrikaans", "Marathi", "Tagalog", "Urdu", "Romansh",
-	"Mongolian", "Georgian", "Original",
+	"Mongolian", "Georgian", "Original", "Any",
 }
 
 // String returns the English name of the language.
@@ -90,7 +94,7 @@ func (l Language) String() string {
 }
 
 // LanguageByName returns the language String names, ignoring case, such
-// as "English", "Portuguese (Brazil)", "Unknown" or "Original"; ok is
+// as "English", "Portuguese (Brazil)", "Unknown", "Original" or "Any"; ok is
 // false for an unknown name.
 func LanguageByName(name string) (l Language, ok bool) {
 	for i, n := range languageNames {

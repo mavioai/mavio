@@ -3328,7 +3328,7 @@
             "type": "string",
             "title": "language",
             "maxLength": 100,
-            "description": "The language movie releases must have: an English language name,\n \"Original\" for the movie's own, empty for any."
+            "description": "The language movie releases must have: an English language name,\n \"Original\" for the movie's own, \"Unknown\" for releases whose language\n is not known, empty or \"Any\" for any."
           }
         },
         "title": "QualityProfile",

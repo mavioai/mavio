@@ -3,6 +3,7 @@ package acquire
 import (
 	"testing"
 
+	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/release"
 )
 
@@ -252,6 +253,39 @@ func TestQualityIDs(t *testing.T) {
 	}
 	if got := QualityID(release.Remux2160p); got != 31 {
 		t.Errorf("QualityID(Remux-2160p) = %d, want = 31", got)
+	}
+}
+
+// TestValidateFormatScores ports the format item rules of Radarr's
+// QualityProfileController.
+func TestValidateFormatScores(t *testing.T) {
+	formats := []core.ID{tid(1), tid(2), tid(3)}
+	tests := []struct {
+		name    string
+		items   []FormatScore
+		min     int
+		formats []core.ID
+		wantErr bool
+	}{
+		{"no scores", nil, 0, formats, false},
+		{"unknown format", []FormatScore{{tid(4), 10}}, 0, formats, true},
+		{"format scored twice", []FormatScore{{tid(1), 10}, {tid(1), 5}}, 0, formats, true},
+		{"minimum reached by the sum", []FormatScore{{tid(1), 10}, {tid(2), 20}, {tid(3), -5}}, 30, formats, false},
+		{"minimum above the sum", []FormatScore{{tid(1), 10}, {tid(2), 20}, {tid(3), -5}}, 31, formats, true},
+		{"negative minimum reached by an unscored format", []FormatScore{{tid(1), -10}}, -5, formats, false},
+		{"negative minimum reached by a release matching none", []FormatScore{{tid(1), -10}, {tid(2), -20}, {tid(3), -30}}, -5, formats, false},
+		{"negative minimum reached by the best", []FormatScore{{tid(1), -10}, {tid(2), -20}, {tid(3), -30}}, -10, formats, false},
+		{"no formats, minimum 0", nil, 0, nil, false},
+		{"no formats, positive minimum", nil, 1, nil, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := QualityProfile{FormatItems: tt.items, MinFormatScore: tt.min}
+			err := p.ValidateFormatScores(tt.formats)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ValidateFormatScores() error = %v, want error = %v", err, tt.wantErr)
+			}
+		})
 	}
 }
 

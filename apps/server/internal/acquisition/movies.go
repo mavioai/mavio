@@ -100,7 +100,7 @@ func (rn *run) profile(ctx context.Context, id core.ID) (*acquire.QualityProfile
 		return nil, err
 	}
 	if p.Language == release.Original {
-		p.Language = release.LanguageUnknown
+		p.Language = release.Any
 	}
 	rn.profiles[id] = &p
 	return &p, nil

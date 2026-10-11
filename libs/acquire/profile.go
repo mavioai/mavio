@@ -55,7 +55,8 @@ type QualityProfile struct {
 	MinUpgradeFormatScore int
 	FormatItems           []FormatScore
 	// Language is the language of movie releases, release.Original for the
-	// movie's own; release.LanguageUnknown for any. Series ignore it.
+	// movie's own, release.Any for any; release.LanguageUnknown wants
+	// releases whose language is unknown. Series ignore it.
 	Language release.Language
 }
 
@@ -238,6 +239,45 @@ func (p *QualityProfile) FormatScore(formats []CustomFormat) int {
 		}
 	}
 	return score
+}
+
+// ErrUnsatisfiableFormatScore is returned for a profile whose minimum
+// custom format score no release can reach.
+var ErrUnsatisfiableFormatScore = errors.New("minimum custom format score can never be satisfied")
+
+// ValidateFormatScores checks a profile's custom format scores against
+// the formats that exist, as Radarr's QualityProfileController: each
+// score is of a format that exists, and no format is scored twice. A
+// format the profile does not score scores 0, as Radarr scores the
+// formats it adds to every profile; so the minimum score must be reached
+// by the positive scores together or by the best one, else the profile
+// fails with ErrUnsatisfiableFormatScore.
+func (p *QualityProfile) ValidateFormatScores(formats []core.ID) error {
+	seen := map[core.ID]bool{}
+	best, sum := 0, 0
+	for _, fi := range p.FormatItems {
+		if !slices.Contains(formats, fi.FormatID) {
+			return fmt.Errorf("custom format %s does not exist", fi.FormatID)
+		}
+		if seen[fi.FormatID] {
+			return fmt.Errorf("custom format %s is scored twice", fi.FormatID)
+		}
+		seen[fi.FormatID] = true
+		if fi.Score > 0 {
+			sum += fi.Score
+		}
+		if len(seen) == 1 || fi.Score > best {
+			best = fi.Score
+		}
+	}
+	if len(seen) < len(formats) || len(seen) == 0 {
+		// The formats without a score score 0.
+		best = max(best, 0)
+	}
+	if sum < p.MinFormatScore && best < p.MinFormatScore {
+		return ErrUnsatisfiableFormatScore
+	}
+	return nil
 }
 
 // NewProfile returns a profile of a kind's default definitions, grouped

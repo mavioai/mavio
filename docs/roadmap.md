@@ -464,10 +464,10 @@ flowchart TD
 - [x] `libs/acquire`: qualities and their definitions, quality profiles, custom formats, delay profiles, release profiles
 - [x] Decisions: the specifications of Radarr's decision engine and its ranking, with its cases ported (`libs/acquire`)
   - [x] Indexers found by name when their ID finds none, as Radarr's AggregateLanguages
-  - [ ] Languages kept apart as unknown and any; an unknown language counts as any
+  - [x] Unknown and any languages kept apart (`release.Any`), as Radarr's Language.Unknown and Language.Any: profiles wanting any language accept every release, those wanting Unknown only releases of an unknown language
   - [x] Tags of indexers, which the indexer tag specification checks
 - [x] Domain and storage: profiles, custom formats, the queue of tracked downloads, history, the blocklist, remote path mappings, naming (`libs/core/acquisition.go`, `libs/store`)
-  - [ ] The format scores of quality profiles checked against the custom formats that exist
+  - [x] The format scores of quality profiles checked against the custom formats that exist, as Radarr's QualityProfileController: no score of a missing format or two of one, a minimum score that can be reached; deleting the last format resets the profiles' format scores, as Radarr's QualityProfileService
 - [x] Adding a wanted movie to a library by its TMDB ID, with a quality profile and minimum availability (`WantedService`, `apps/server/internal/acquisition`)
   - [ ] Digital and physical release dates of movies, which availability needs; until then a movie is released 90 days after its premiere, as Radarr assumes without them
   - [ ] The original language of movies, which profiles wanting "Original" need; until then they accept any language
