@@ -15,6 +15,9 @@ type Activity func(*sql.Selector)
 // AuthSession is the predicate function for authsession builders.
 type AuthSession func(*sql.Selector)
 
+// BlockedTitle is the predicate function for blockedtitle builders.
+type BlockedTitle func(*sql.Selector)
+
 // BlocklistEntry is the predicate function for blocklistentry builders.
 type BlocklistEntry func(*sql.Selector)
 

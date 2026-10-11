@@ -15,6 +15,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/activity"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
@@ -61,6 +62,7 @@ const (
 	TypeAPIKey             = "APIKey"
 	TypeActivity           = "Activity"
 	TypeAuthSession        = "AuthSession"
+	TypeBlockedTitle       = "BlockedTitle"
 	TypeBlocklistEntry     = "BlocklistEntry"
 	TypeCredit             = "Credit"
 	TypeCustomFormat       = "CustomFormat"
@@ -2250,6 +2252,666 @@ func (m *AuthSessionMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown AuthSession edge %s", name)
+}
+
+// BlockedTitleMutation represents an operation that mutates the BlockedTitle nodes in the graph.
+type BlockedTitleMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *core.ID
+	kind          *string
+	tmdb_id       *int
+	addtmdb_id    *int
+	title         *string
+	created_at    *time.Time
+	clearedFields map[string]struct{}
+	user          *core.ID
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*BlockedTitle, error)
+	predicates    []predicate.BlockedTitle
+}
+
+var _ ent.Mutation = (*BlockedTitleMutation)(nil)
+
+// blockedtitleOption allows management of the mutation configuration using functional options.
+type blockedtitleOption func(*BlockedTitleMutation)
+
+// newBlockedTitleMutation creates new mutation for the BlockedTitle entity.
+func newBlockedTitleMutation(c config, op Op, opts ...blockedtitleOption) *BlockedTitleMutation {
+	m := &BlockedTitleMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBlockedTitle,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBlockedTitleID sets the ID field of the mutation.
+func withBlockedTitleID(id core.ID) blockedtitleOption {
+	return func(m *BlockedTitleMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *BlockedTitle
+		)
+		m.oldValue = func(ctx context.Context) (*BlockedTitle, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().BlockedTitle.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBlockedTitle sets the old BlockedTitle of the mutation.
+func withBlockedTitle(node *BlockedTitle) blockedtitleOption {
+	return func(m *BlockedTitleMutation) {
+		m.oldValue = func(context.Context) (*BlockedTitle, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BlockedTitleMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BlockedTitleMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of BlockedTitle entities.
+func (m *BlockedTitleMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BlockedTitleMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BlockedTitleMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().BlockedTitle.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetKind sets the "kind" field.
+func (m *BlockedTitleMutation) SetKind(s string) {
+	m.kind = &s
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *BlockedTitleMutation) Kind() (r string, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the BlockedTitle entity.
+// If the BlockedTitle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BlockedTitleMutation) OldKind(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *BlockedTitleMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetTmdbID sets the "tmdb_id" field.
+func (m *BlockedTitleMutation) SetTmdbID(i int) {
+	m.tmdb_id = &i
+	m.addtmdb_id = nil
+}
+
+// TmdbID returns the value of the "tmdb_id" field in the mutation.
+func (m *BlockedTitleMutation) TmdbID() (r int, exists bool) {
+	v := m.tmdb_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTmdbID returns the old "tmdb_id" field's value of the BlockedTitle entity.
+// If the BlockedTitle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BlockedTitleMutation) OldTmdbID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTmdbID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTmdbID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTmdbID: %w", err)
+	}
+	return oldValue.TmdbID, nil
+}
+
+// AddTmdbID adds i to the "tmdb_id" field.
+func (m *BlockedTitleMutation) AddTmdbID(i int) {
+	if m.addtmdb_id != nil {
+		*m.addtmdb_id += i
+	} else {
+		m.addtmdb_id = &i
+	}
+}
+
+// AddedTmdbID returns the value that was added to the "tmdb_id" field in this mutation.
+func (m *BlockedTitleMutation) AddedTmdbID() (r int, exists bool) {
+	v := m.addtmdb_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTmdbID resets all changes to the "tmdb_id" field.
+func (m *BlockedTitleMutation) ResetTmdbID() {
+	m.tmdb_id = nil
+	m.addtmdb_id = nil
+}
+
+// SetTitle sets the "title" field.
+func (m *BlockedTitleMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *BlockedTitleMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the BlockedTitle entity.
+// If the BlockedTitle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BlockedTitleMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *BlockedTitleMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *BlockedTitleMutation) SetUserID(c core.ID) {
+	m.user = &c
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *BlockedTitleMutation) UserID() (r core.ID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the BlockedTitle entity.
+// If the BlockedTitle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BlockedTitleMutation) OldUserID(ctx context.Context) (v *core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (m *BlockedTitleMutation) ClearUserID() {
+	m.user = nil
+	m.clearedFields[blockedtitle.FieldUserID] = struct{}{}
+}
+
+// UserIDCleared returns if the "user_id" field was cleared in this mutation.
+func (m *BlockedTitleMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[blockedtitle.FieldUserID]
+	return ok
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *BlockedTitleMutation) ResetUserID() {
+	m.user = nil
+	delete(m.clearedFields, blockedtitle.FieldUserID)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *BlockedTitleMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *BlockedTitleMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the BlockedTitle entity.
+// If the BlockedTitle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BlockedTitleMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *BlockedTitleMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *BlockedTitleMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[blockedtitle.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *BlockedTitleMutation) UserCleared() bool {
+	return m.UserIDCleared() || m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *BlockedTitleMutation) UserIDs() (ids []core.ID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *BlockedTitleMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the BlockedTitleMutation builder.
+func (m *BlockedTitleMutation) Where(ps ...predicate.BlockedTitle) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the BlockedTitleMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BlockedTitleMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.BlockedTitle, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *BlockedTitleMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BlockedTitleMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (BlockedTitle).
+func (m *BlockedTitleMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BlockedTitleMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.kind != nil {
+		fields = append(fields, blockedtitle.FieldKind)
+	}
+	if m.tmdb_id != nil {
+		fields = append(fields, blockedtitle.FieldTmdbID)
+	}
+	if m.title != nil {
+		fields = append(fields, blockedtitle.FieldTitle)
+	}
+	if m.user != nil {
+		fields = append(fields, blockedtitle.FieldUserID)
+	}
+	if m.created_at != nil {
+		fields = append(fields, blockedtitle.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BlockedTitleMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case blockedtitle.FieldKind:
+		return m.Kind()
+	case blockedtitle.FieldTmdbID:
+		return m.TmdbID()
+	case blockedtitle.FieldTitle:
+		return m.Title()
+	case blockedtitle.FieldUserID:
+		return m.UserID()
+	case blockedtitle.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BlockedTitleMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case blockedtitle.FieldKind:
+		return m.OldKind(ctx)
+	case blockedtitle.FieldTmdbID:
+		return m.OldTmdbID(ctx)
+	case blockedtitle.FieldTitle:
+		return m.OldTitle(ctx)
+	case blockedtitle.FieldUserID:
+		return m.OldUserID(ctx)
+	case blockedtitle.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown BlockedTitle field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BlockedTitleMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case blockedtitle.FieldKind:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case blockedtitle.FieldTmdbID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTmdbID(v)
+		return nil
+	case blockedtitle.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case blockedtitle.FieldUserID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case blockedtitle.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BlockedTitle field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BlockedTitleMutation) AddedFields() []string {
+	var fields []string
+	if m.addtmdb_id != nil {
+		fields = append(fields, blockedtitle.FieldTmdbID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BlockedTitleMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case blockedtitle.FieldTmdbID:
+		return m.AddedTmdbID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BlockedTitleMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case blockedtitle.FieldTmdbID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTmdbID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BlockedTitle numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BlockedTitleMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(blockedtitle.FieldUserID) {
+		fields = append(fields, blockedtitle.FieldUserID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BlockedTitleMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BlockedTitleMutation) ClearField(name string) error {
+	switch name {
+	case blockedtitle.FieldUserID:
+		m.ClearUserID()
+		return nil
+	}
+	return fmt.Errorf("unknown BlockedTitle nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BlockedTitleMutation) ResetField(name string) error {
+	switch name {
+	case blockedtitle.FieldKind:
+		m.ResetKind()
+		return nil
+	case blockedtitle.FieldTmdbID:
+		m.ResetTmdbID()
+		return nil
+	case blockedtitle.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case blockedtitle.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case blockedtitle.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown BlockedTitle field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BlockedTitleMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, blockedtitle.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BlockedTitleMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case blockedtitle.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BlockedTitleMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BlockedTitleMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BlockedTitleMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, blockedtitle.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BlockedTitleMutation) EdgeCleared(name string) bool {
+	switch name {
+	case blockedtitle.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BlockedTitleMutation) ClearEdge(name string) error {
+	switch name {
+	case blockedtitle.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown BlockedTitle unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BlockedTitleMutation) ResetEdge(name string) error {
+	switch name {
+	case blockedtitle.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown BlockedTitle edge %s", name)
 }
 
 // BlocklistEntryMutation represents an operation that mutates the BlocklistEntry nodes in the graph.
@@ -32116,6 +32778,9 @@ type UserMutation struct {
 	issue_comments             map[core.ID]struct{}
 	removedissue_comments      map[core.ID]struct{}
 	clearedissue_comments      bool
+	blocked_titles             map[core.ID]struct{}
+	removedblocked_titles      map[core.ID]struct{}
+	clearedblocked_titles      bool
 	done                       bool
 	oldValue                   func(context.Context) (*User, error)
 	predicates                 []predicate.User
@@ -33030,6 +33695,60 @@ func (m *UserMutation) ResetIssueComments() {
 	m.removedissue_comments = nil
 }
 
+// AddBlockedTitleIDs adds the "blocked_titles" edge to the BlockedTitle entity by ids.
+func (m *UserMutation) AddBlockedTitleIDs(ids ...core.ID) {
+	if m.blocked_titles == nil {
+		m.blocked_titles = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.blocked_titles[ids[i]] = struct{}{}
+	}
+}
+
+// ClearBlockedTitles clears the "blocked_titles" edge to the BlockedTitle entity.
+func (m *UserMutation) ClearBlockedTitles() {
+	m.clearedblocked_titles = true
+}
+
+// BlockedTitlesCleared reports if the "blocked_titles" edge to the BlockedTitle entity was cleared.
+func (m *UserMutation) BlockedTitlesCleared() bool {
+	return m.clearedblocked_titles
+}
+
+// RemoveBlockedTitleIDs removes the "blocked_titles" edge to the BlockedTitle entity by IDs.
+func (m *UserMutation) RemoveBlockedTitleIDs(ids ...core.ID) {
+	if m.removedblocked_titles == nil {
+		m.removedblocked_titles = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.blocked_titles, ids[i])
+		m.removedblocked_titles[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedBlockedTitles returns the removed IDs of the "blocked_titles" edge to the BlockedTitle entity.
+func (m *UserMutation) RemovedBlockedTitlesIDs() (ids []core.ID) {
+	for id := range m.removedblocked_titles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// BlockedTitlesIDs returns the "blocked_titles" edge IDs in the mutation.
+func (m *UserMutation) BlockedTitlesIDs() (ids []core.ID) {
+	for id := range m.blocked_titles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetBlockedTitles resets all changes to the "blocked_titles" edge.
+func (m *UserMutation) ResetBlockedTitles() {
+	m.blocked_titles = nil
+	m.clearedblocked_titles = false
+	m.removedblocked_titles = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -33325,7 +34044,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.user_data != nil {
 		edges = append(edges, user.EdgeUserData)
 	}
@@ -33349,6 +34068,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.issue_comments != nil {
 		edges = append(edges, user.EdgeIssueComments)
+	}
+	if m.blocked_titles != nil {
+		edges = append(edges, user.EdgeBlockedTitles)
 	}
 	return edges
 }
@@ -33405,13 +34127,19 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeBlockedTitles:
+		ids := make([]ent.Value, 0, len(m.blocked_titles))
+		for id := range m.blocked_titles {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.removeduser_data != nil {
 		edges = append(edges, user.EdgeUserData)
 	}
@@ -33435,6 +34163,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedissue_comments != nil {
 		edges = append(edges, user.EdgeIssueComments)
+	}
+	if m.removedblocked_titles != nil {
+		edges = append(edges, user.EdgeBlockedTitles)
 	}
 	return edges
 }
@@ -33491,13 +34222,19 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeBlockedTitles:
+		ids := make([]ent.Value, 0, len(m.removedblocked_titles))
+		for id := range m.removedblocked_titles {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.cleareduser_data {
 		edges = append(edges, user.EdgeUserData)
 	}
@@ -33522,6 +34259,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedissue_comments {
 		edges = append(edges, user.EdgeIssueComments)
 	}
+	if m.clearedblocked_titles {
+		edges = append(edges, user.EdgeBlockedTitles)
+	}
 	return edges
 }
 
@@ -33545,6 +34285,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedissues
 	case user.EdgeIssueComments:
 		return m.clearedissue_comments
+	case user.EdgeBlockedTitles:
+		return m.clearedblocked_titles
 	}
 	return false
 }
@@ -33584,6 +34326,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeIssueComments:
 		m.ResetIssueComments()
+		return nil
+	case user.EdgeBlockedTitles:
+		m.ResetBlockedTitles()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

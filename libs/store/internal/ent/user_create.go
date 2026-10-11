@@ -15,6 +15,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
@@ -272,6 +273,21 @@ func (_c *UserCreate) AddIssueComments(v ...*IssueComment) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddIssueCommentIDs(ids...)
+}
+
+// AddBlockedTitleIDs adds the "blocked_titles" edge to the BlockedTitle entity by IDs.
+func (_c *UserCreate) AddBlockedTitleIDs(ids ...core.ID) *UserCreate {
+	_c.mutation.AddBlockedTitleIDs(ids...)
+	return _c
+}
+
+// AddBlockedTitles adds the "blocked_titles" edges to the BlockedTitle entity.
+func (_c *UserCreate) AddBlockedTitles(v ...*BlockedTitle) *UserCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddBlockedTitleIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -566,6 +582,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(issuecomment.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.BlockedTitlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedTitlesTable,
+			Columns: []string{user.BlockedTitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockedtitle.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

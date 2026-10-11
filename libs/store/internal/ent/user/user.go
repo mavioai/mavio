@@ -51,6 +51,8 @@ const (
 	EdgeIssues = "issues"
 	// EdgeIssueComments holds the string denoting the issue_comments edge name in mutations.
 	EdgeIssueComments = "issue_comments"
+	// EdgeBlockedTitles holds the string denoting the blocked_titles edge name in mutations.
+	EdgeBlockedTitles = "blocked_titles"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// UserDataTable is the table that holds the user_data relation/edge.
@@ -109,6 +111,13 @@ const (
 	IssueCommentsInverseTable = "issue_comments"
 	// IssueCommentsColumn is the table column denoting the issue_comments relation/edge.
 	IssueCommentsColumn = "user_id"
+	// BlockedTitlesTable is the table that holds the blocked_titles relation/edge.
+	BlockedTitlesTable = "blocked_titles"
+	// BlockedTitlesInverseTable is the table name for the BlockedTitle entity.
+	// It exists in this package in order to avoid circular dependency with the "blockedtitle" package.
+	BlockedTitlesInverseTable = "blocked_titles"
+	// BlockedTitlesColumn is the table column denoting the blocked_titles relation/edge.
+	BlockedTitlesColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -312,6 +321,20 @@ func ByIssueComments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newIssueCommentsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByBlockedTitlesCount orders the results by blocked_titles count.
+func ByBlockedTitlesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBlockedTitlesStep(), opts...)
+	}
+}
+
+// ByBlockedTitles orders the results by blocked_titles terms.
+func ByBlockedTitles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBlockedTitlesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserDataStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -366,5 +389,12 @@ func newIssueCommentsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(IssueCommentsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, IssueCommentsTable, IssueCommentsColumn),
+	)
+}
+func newBlockedTitlesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BlockedTitlesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, BlockedTitlesTable, BlockedTitlesColumn),
 	)
 }

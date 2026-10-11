@@ -51,6 +51,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("requests", Request.Type).Annotations(cascade()),
 		edge.To("issues", Issue.Type).Annotations(cascade()),
 		edge.To("issue_comments", IssueComment.Type).Annotations(cascade()),
+		edge.To("blocked_titles", BlockedTitle.Type).Annotations(entsql.Annotation{OnDelete: entsql.SetNull}),
 	}
 }
 
