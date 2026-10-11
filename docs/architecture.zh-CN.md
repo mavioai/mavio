@@ -460,7 +460,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 | 下载客户端 | `plugins/download-clients`（进程），`DOWNLOAD_CLIENT_PROVIDER`；通过 `DownloadService` 调用 | Radarr 与 Sonarr 的下载客户端 |
 
 * **状态在服务端，网络在插件。** 想要的条目、档案、决策、队列、历史、入库与请求都属于服务端，与它们所涉及的条目和用户放在一起。与索引器和下载客户端打交道、并随它们变化的部分放在插件中，从插件目录升级，无需发布服务端。
-* **一个引擎。** 电影与剧集共用质量档案、custom formats、决策、队列与入库；`movie` 与 `series` 包的区别在于如何搜索、监控以及把 release 匹配到条目。
+* **一个引擎。** 电影与剧集共用质量档案、custom formats、决策、队列与入库；`movie` 与 `series` 包的区别在于如何搜索、监控以及把 release 匹配到条目。共用的模型在根包 `acquire` 中：Radarr 的质量 ID 与各质量的定义（电影用 Radarr 的默认值，剧集用 Sonarr 的）、带分组、截止质量与格式分数的质量档案、包含 Radarr 全部规格及 Sonarr 的 release 类型的 custom formats、delay profile 以及 Sonarr 的 release profile。对来源的条件在剧集上也使用 Radarr 的来源与修饰符，Sonarr 的 raw 来源即 Radarr 的 Raw-HD 与 remux 修饰符。
 * **插件之间不互相调用。** 服务端汇集各提供者插件给出的结果（与字幕提供者相同），并由自己调用索引器与下载客户端。
 
 ### 13.2 数据源与编号

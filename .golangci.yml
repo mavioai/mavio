@@ -59,6 +59,13 @@ linters:
               desc: "use repository ports from libs/core"
             - pkg: github.com/mavioai/mavio/libs/library
               desc: "streaming must not depend on library"
+        acquire:
+          list-mode: lax
+          files: ["**/libs/acquire/**"]
+          deny:
+            - pkg: github.com/mavioai/mavio/libs
+              desc: "acquire depends on release, naming and core; apps/server wires the rest through ports in core"
+          allow: ["$gostd", github.com/mavioai/mavio/libs/acquire, github.com/mavioai/mavio/libs/release, github.com/mavioai/mavio/libs/naming, github.com/mavioai/mavio/libs/core]
         plugin-sdk:
           list-mode: lax
           files: ["**/libs/plugin/**"]

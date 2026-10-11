@@ -455,7 +455,7 @@ flowchart TD
 **进度**：
 - [x] `DOWNLOAD_CLIENT_PROVIDER` 契约（`mavio/plugin/v1/download_client.proto`）及其宿主客户端
 - [ ] `plugins/download-clients`：Radarr 与 Sonarr 的下载客户端，并移植其用例
-- [ ] `libs/acquire`：质量及其定义、质量档案、custom formats、delay profile
+- [x] `libs/acquire`：质量及其定义、质量档案、custom formats、delay profile、release profile
 - [ ] 决策：Radarr 决策引擎的各项规格及其排序
 - [ ] 领域与存储：档案、custom formats、被跟踪下载的队列、历史、黑名单、远程路径映射、命名
 - [ ] 按 TMDB ID 把想要的电影加入媒体库，带质量档案与最低可用状态

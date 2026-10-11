@@ -460,7 +460,7 @@ Mavio finds, downloads and imports the movies and series its users want, as Seer
 | Download clients | `plugins/download-clients` (process), `DOWNLOAD_CLIENT_PROVIDER`; reached through `DownloadService` | Radarr's and Sonarr's download clients |
 
 * **State in the server, networks in plugins.** Wanted items, profiles, decisions, the queue, history, imports and requests are the server's, next to the items and users they concern. What talks to indexers and download clients, and changes with them, is in plugins, upgraded from catalogs without a server release.
-* **One engine.** Movies and series share quality profiles, custom formats, decisions, the queue and imports; the `movie` and `series` packages differ in how they search, monitor and match releases to items.
+* **One engine.** Movies and series share quality profiles, custom formats, decisions, the queue and imports; the `movie` and `series` packages differ in how they search, monitor and match releases to items. The shared model is the root package `acquire`: Radarr's quality IDs and the qualities' definitions (Radarr's defaults for movies, Sonarr's for series), quality profiles with their groups, cutoffs and format scores, custom formats with every specification of Radarr and Sonarr's release type, delay profiles and Sonarr's release profiles. Conditions on sources use Radarr's sources and modifiers for series too, Sonarr's raw sources being Radarr's Raw-HD and remux modifiers.
 * **Plugins do not call each other.** The server gathers what the provider plugins give, as it does with subtitle providers, and calls the indexers and download clients itself.
 
 ### 13.2 Data Sources and Numbering
