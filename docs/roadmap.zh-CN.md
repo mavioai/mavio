@@ -493,8 +493,8 @@ flowchart TD
 - [x] 失败的下载：黑名单与重新搜索
 - [x] 获取作业（RSS 同步、队列检查、回收目录清理）列于 `TaskService` 的任务中，并可按需运行
 - [x] 端到端测试（`apps/server/internal/server/acquisition_test.go`）：在回环接口上模拟 Newznab 索引器与 SABnzbd，经由索引器与下载客户端插件；一部想要的电影被搜索、抓取、跟踪、按 Radarr 的命名入库并播放，随后被 RSS 同步找到的发布升级，旧文件移入回收目录；失败的下载被加入黑名单，并由新的搜索替换
-  - [ ] 种子客户端，以及以硬链接或复制入库，而非 SABnzbd 的下载所用的移动
-  - [ ] 端到端测试中的远程路径映射；单元测试已覆盖
+  - [x] 种子客户端（`torrent_acquisition_test.go`）：在回环接口上模拟 Torznab 索引器与 qBittorrent；磁力链接连同索引器的做种限制一起发送，仍在做种的下载以硬链接入库，关闭硬链接后的升级以复制入库，种子在达到限制暂停后连同文件一起移除
+  - [x] 端到端测试中的远程路径映射：qBittorrent 所在另一台机器的目录映射为服务端的目录
 
 ### P19 剧集资源获取
 **范围**：`libs/acquire/series`，移植 Sonarr：单集、整季与整剧搜索，整季包，多集文件，按绝对集数的动漫，按播出日期的日播剧，scene 映射与 XEM，新季与新集的监控。
@@ -523,9 +523,9 @@ flowchart TD
   - [x] 在 Sonarr 与 Radarr 行为相同之处，单集入库与电影入库一致：按 Sonarr 的 FreeSpaceSpecification 对每个文件检查剧集文件夹所在卷的剩余空间；按 Sonarr 的 SubtitleService，字幕按语言、标签与副本序号命名，并按视频文件名或其名称所含的季与集匹配；被替换文件的附加文件一并回收；按 Sonarr 的 ShouldDeleteFolder，删除因移动而清空的下载文件夹；只扫描剧集文件夹
   - [x] 多集文件所涵盖的各集的历史记录在入库与扫描时由该文件的条目保留
 - [x] 端到端测试（`apps/server/internal/server/series_acquisition_test.go`）：普通剧集的整季包与单集、以 scene 映射标题和绝对集数命名的动漫 release、以播出日期命名的日播剧 release 被找到，按 Sonarr 的命名入库并播放
-  - [ ] 端到端测试中的剧集 RSS 同步、多集文件与单集升级
-  - [ ] 端到端测试中 XEM 的 scene 编号
-  - [ ] 端到端测试中失败的单集下载、阻止列表以及替代它们的搜索
+  - [x] 端到端测试中的剧集 RSS 同步、多集文件与单集升级（`series_flows_test.go`）：RSS 同步抓取包含两集的 release 并作为一个文件入库，随后被另一个 release 升级
+  - [x] 端到端测试中 XEM 的 scene 编号（`series_flows_test.go`）：按 scene 编号搜索索引器，以其命名的 release 按 TVDB 的编号入库
+  - [x] 端到端测试中失败的单集下载、阻止列表以及替代它们的搜索（`series_flows_test.go`）
   - [x] `RunTask` 在未排入新作业时返回已排队或运行中的作业
 
 ### P20 发现与请求
@@ -550,9 +550,9 @@ flowchart TD
 - [x] 通知：所涉用户的活动，经 `ActivityService.ListMyActivities` 读取，由通知插件投递
   - [x] 向所涉用户的会话推送事件，待管理员处理的请求与问题也推送给管理员的会话（`NotificationReceived`）
 - [x] 端到端测试（`apps/server/internal/server/requests_test.go`）：限制为 PG 的用户经 scraper-tmdb 发现一部电影与一部剧集，请求 R 级电影被拒，请求其余作品；管理员审批；作品被抓取、入库并播放，用户收到可播放的通知；用户报告的问题被解决
-  - [ ] 端到端测试中被拒绝的请求、耗尽的配额与重试的失败请求
-  - [ ] 端到端测试中修改待审批请求的季，以及请求全部季
-  - [ ] 端到端测试中对策略屏蔽未分级内容的用户隐藏未分级作品
+  - [x] 端到端测试中被拒绝的请求、耗尽的配额与重试的失败请求（`request_flows_test.go`）
+  - [x] 端到端测试中修改待审批请求的季，以及请求全部季（`request_flows_test.go`）
+  - [x] 端到端测试中对策略屏蔽未分级内容的用户隐藏未分级作品（`request_flows_test.go`）：从目录中略去，`GetTitle` 与请求被拒绝，并按分级向 TMDB 查询
 
 ### P21 客户端与生态
 **范围**：基于完成的服务端 API 构建[客户端](clients.zh-CN.md)：内嵌于服务端的 Web UI（`apps/web`，在 `/` 提供）、面向 iPhone 与 iPad、Apple TV 与 Mac 的 Apple 应用（`apps/ios`、`apps/tvos`、`apps/macos`）、面向手机与平板及 Android TV 的 Android 应用（`apps/android`、`apps/android-tv`）、基于 MyGo 的 Windows 与 Linux 应用（`apps/windows-linux`），以及它们共享的库（`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。其基础部分不等待 P20：工具链与构建目标、从 `libs/proto` 生成的 TypeScript 与 Rust 代码、`libs/design`、§4 中客户端待决事项所列的原型，以及各应用与库的骨架。只有发现与请求页面等待 P20。之后按以下顺序构建客户端，每一个都先验证共享核心与设计系统，下一个平台再在其上构建：Web UI，连同 `libs/client-ts` 与 `libs/design`；iPhone 与 iPad 应用，连同 `libs/client-rust` 与 `libs/apple`；Android 手机与平板应用，连同 `libs/android`；Apple TV 与 Android TV 应用；Mac 应用；Windows 与 Linux 应用。

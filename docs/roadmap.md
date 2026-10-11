@@ -493,8 +493,8 @@ flowchart TD
 - [x] Failed downloads: the blocklist and a new search
 - [x] The acquisition jobs (RSS sync, the queue check, the recycle bin cleanup) listed and run on demand among the tasks of `TaskService`
 - [x] End-to-end test (`apps/server/internal/server/acquisition_test.go`): a Newznab indexer and SABnzbd simulated on the loopback interface, through the indexer and download client plugins; a wanted movie is searched, grabbed, tracked, imported under Radarr's naming and played, upgraded by a release found by RSS sync with the old file in the recycle bin, and a failed download is blocklisted and replaced by a new search
-  - [ ] A torrent client, and imports by hard link or copy rather than the moves SABnzbd's downloads get
-  - [ ] Remote path mappings in the end-to-end test; unit tests cover them
+  - [x] A torrent client (`torrent_acquisition_test.go`): a Torznab indexer and qBittorrent simulated on the loopback interface; the magnet link sent with the indexer's seeding limits, the seeding download imported by a hard link and an upgrade, with hard links off, by a copy, and a torrent removed with its files once paused at its limits
+  - [x] Remote path mappings in the end-to-end test: qBittorrent's folders of another machine mapped to the server's
 
 ### P19 Series Acquisition
 **Scope**: `libs/acquire/series`, porting Sonarr: episode, season and series searches, season packs, multi-episode files, anime with absolute numbers, daily series by air date, scene mappings and XEM, monitoring of new seasons and episodes.
@@ -523,9 +523,9 @@ flowchart TD
   - [x] Episode imports as movie imports where Sonarr behaves as Radarr: free space checked for each file on the volume of the series folder, as Sonarr's FreeSpaceSpecification; subtitles named by their language, tags and copy number and matched by the video's name or the season and episodes theirs hold, as Sonarr's SubtitleService; the extras of replaced files recycled; download folders emptied by moves deleted, as Sonarr's ShouldDeleteFolder; a scan of the series folder only
   - [x] The history of the episodes a multi-episode file covers kept by the file's item, on import and on scans
 - [x] End-to-end test (`apps/server/internal/server/series_acquisition_test.go`): a season pack and a single episode of a standard series, an anime release named by a scene mapping title and an absolute number, and a daily series' release named by air date are found, imported under Sonarr's naming and played
-  - [ ] RSS syncs of series, multi-episode files and upgrades of episodes in the end-to-end test
-  - [ ] XEM's scene numbering in the end-to-end test
-  - [ ] Failed episode downloads, the blocklist and the searches replacing them in the end-to-end test
+  - [x] RSS syncs of series, multi-episode files and upgrades of episodes in the end-to-end test (`series_flows_test.go`): a release of two episodes grabbed by an RSS sync and imported as one file, upgraded by another
+  - [x] XEM's scene numbering in the end-to-end test (`series_flows_test.go`): the indexer searched by the scene's numbers, and the release named by them imported as TVDB numbers the episode
+  - [x] Failed episode downloads, the blocklist and the searches replacing them in the end-to-end test (`series_flows_test.go`)
   - [x] `RunTask` answers with the queued or running job when it does not queue another
 
 ### P20 Discovery and Requests
@@ -550,9 +550,9 @@ flowchart TD
 - [x] Notifications: activities of the user concerned, read through `ActivityService.ListMyActivities` and delivered by notifier plugins
   - [x] An event pushed to the sessions of the user concerned, and of administrators for the requests and issues awaiting them (`NotificationReceived`)
 - [x] End-to-end test (`apps/server/internal/server/requests_test.go`): a user limited to PG discovers a film and a series through scraper-tmdb, is refused an R-rated film, requests the others; an administrator approves; they are grabbed, imported and played, and the user is notified that they are available; an issue the user reports is resolved
-  - [ ] Declined requests, exhausted quotas and retried failed requests in the end-to-end test
-  - [ ] Changed seasons of pending requests and requests of every season in the end-to-end test
-  - [ ] Unrated titles hidden from users whose policy blocks them in the end-to-end test
+  - [x] Declined requests, exhausted quotas and retried failed requests in the end-to-end test (`request_flows_test.go`)
+  - [x] Changed seasons of pending requests and requests of every season in the end-to-end test (`request_flows_test.go`)
+  - [x] Unrated titles hidden from users whose policy blocks them in the end-to-end test (`request_flows_test.go`): left out of catalogs, refused by `GetTitle` and requests, and asked of TMDB by certification
 
 ### P21 Clients and Ecosystem
 **Scope**: the [clients](clients.md), built on the finished server API: the web UI embedded in the server (`apps/web`, served at `/`), the Apple apps for iPhone and iPad, Apple TV and the Mac (`apps/ios`, `apps/tvos`, `apps/macos`), the Android apps for phones and tablets and for Android TV (`apps/android`, `apps/android-tv`), the Windows and Linux app on MyGo (`apps/windows-linux`), and the libraries they share (`libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`); the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its foundation does not wait for P20: the toolchains and build targets, the TypeScript and Rust code generated from `libs/proto`, `libs/design`, the prototypes the open items of §4 name for clients, and the skeletons of the apps and libraries. Only the discovery and request screens wait for P20. The clients then come in this order, each proving the shared core and the design system before the next platform builds on them: the web UI with `libs/client-ts` and `libs/design`; the iPhone and iPad app with `libs/client-rust` and `libs/apple`; the Android phone and tablet app with `libs/android`; the Apple TV and Android TV apps; the Mac app; the Windows and Linux app.
