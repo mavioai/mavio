@@ -565,7 +565,7 @@ flowchart TD
   - [x] Rust on tvOS: on `nightly-2026-10-10` with `-Zbuild-std`, `mavio-api` and its `events` example build for `aarch64-apple-tvos` and `aarch64-apple-tvos-sim`, the example runs in the tvOS simulator, and TLS (rustls with aws-lc-rs) builds
   - [x] connect-rust streams with `EventService`: `libs/client-rust/api/examples/events.rs` signs in and prints the device's events, on macOS and in the tvOS simulator
   - [ ] libmpv with EDR and Picture in Picture on macOS, iOS and tvOS
-  - [ ] MyGo's video element, with HDR10 on Windows
+  - [ ] MyGo's video element, with HDR10 on Windows: deferred until a Windows machine is available, before the Windows and Linux app starts
 - [ ] Skeletons of the apps and libraries
 - [ ] `libs/client-rust`: servers and sign-in, the event stream, the offline store, playback reporting, downloads, screen state, the merging of several servers; the Swift, Kotlin and Go bindings
 - [ ] Web UI (`apps/web`, `libs/client-ts`)

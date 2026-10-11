@@ -565,7 +565,7 @@ flowchart TD
   - [x] tvOS 上的 Rust：在 `nightly-2026-10-10` 上以 `-Zbuild-std` 构建，`mavio-api` 及其 `events` 示例可为 `aarch64-apple-tvos` 与 `aarch64-apple-tvos-sim` 构建，示例在 tvOS 模拟器中运行，TLS（rustls 与 aws-lc-rs）可构建
   - [x] connect-rust 与 `EventService` 的流：`libs/client-rust/api/examples/events.rs` 登录并打印设备的事件，在 macOS 与 tvOS 模拟器上均可运行
   - [ ] macOS、iOS 与 tvOS 上 libmpv 的 EDR 与画中画
-  - [ ] MyGo 的视频元素，含 Windows 上的 HDR10
+  - [ ] MyGo 的视频元素，含 Windows 上的 HDR10：延后到有 Windows 机器时，在 Windows 与 Linux 应用开始之前完成
 - [ ] 各应用与库的骨架
 - [ ] `libs/client-rust`：服务器与登录、事件流、离线存储、播放上报、下载、页面状态、多台服务器的合并；Swift、Kotlin 与 Go 绑定
 - [ ] Web UI（`apps/web`、`libs/client-ts`）
