@@ -215,9 +215,42 @@ func (r *Runtime) QueueSearch(ctx context.Context, itemIDs []core.ID, userInvoke
 	return len(itemIDs), nil
 }
 
+// Task is a recurring acquisition job, as administrators see and run it
+// among the server's tasks.
+type Task struct {
+	// Kind is the job kind it runs, which is also its task ID.
+	Kind, Name, Description string
+	// Interval is how often it runs; 0 when it runs on demand only.
+	Interval time.Duration
+}
+
+// Tasks returns the recurring jobs with the intervals the settings give:
+// RSS syncs, queue checks and recycle bin cleanups, as Radarr's tasks.
+func (r *Runtime) Tasks() []Task {
+	s := r.settings()
+	return []Task{
+		{
+			Kind: JobRSS, Name: "RSS sync", Interval: time.Duration(s.RSSSyncInterval) * time.Minute,
+			Description: "Reads the indexers' recent releases and grabs those of wanted movies.",
+		},
+		{
+			Kind: JobQueue, Name: "Refresh monitored downloads", Interval: time.Duration(max(s.CheckFinishedInterval, 1)) * time.Minute,
+			Description: "Checks the tracked downloads in their clients, imports the completed ones and handles the failed ones.",
+		},
+		{
+			Kind: JobRecycleBin, Name: "Clean up recycle bin", Interval: 24 * time.Hour,
+			Description: "Deletes what has been in the recycle bin longer than the settings keep it.",
+		},
+	}
+}
+
+// RunJob returns a job running a recurring job now, apart from its
+// scheduled runs.
+func RunJob(kind string, at time.Time) core.Job { return scheduledJob(kind, at, false) }
+
 // QueueRSS enqueues an RSS sync.
 func (r *Runtime) QueueRSS(ctx context.Context) error {
-	job := scheduledJob(JobRSS, r.now(), false)
+	job := RunJob(JobRSS, r.now())
 	if _, err := r.Store.Jobs().Enqueue(ctx, &job); err != nil {
 		return fmt.Errorf("queue RSS sync: %w", err)
 	}

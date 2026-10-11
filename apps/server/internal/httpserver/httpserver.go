@@ -139,6 +139,8 @@ func Handler(opts Options) (http.Handler, error) {
 	if opts.Plugins != nil {
 		tasks.Plugins = opts.Plugins.Tasks
 	}
+	// Acquisition jobs run only where the server runs their worker.
+	tasks.Acquisition = opts.Acquisition
 	mux.Handle(systemv1connect.NewTaskServiceHandler(tasks, interceptors))
 	mux.Handle(systemv1connect.NewActivityServiceHandler(rpc.NewActivityService(opts.Store), interceptors))
 	mux.Handle(systemv1connect.NewBackupServiceHandler(rpc.NewBackupService(opts.Backups, opts.Activity), interceptors))
