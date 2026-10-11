@@ -59,6 +59,10 @@ func TestRequestValidate(t *testing.T) {
 		{"negative quota", settings(func(s *RequestSettings) { s.SeriesQuota.Days = -1 }), false},
 		{"unknown availability", settings(func(s *RequestSettings) { s.MinimumAvailability = "tba" }), false},
 		{"unknown new item monitoring", settings(func(s *RequestSettings) { s.MonitorNewItems = "future" }), false},
+		{"blocked movie", &BlockedTitle{Kind: KindMovie, TmdbID: 603}, true},
+		{"blocked episode", &BlockedTitle{Kind: KindEpisode, TmdbID: 603}, false},
+		{"blocked title without a TMDB ID", &BlockedTitle{Kind: KindSeries}, false},
+		{"blocked title query past a page", &BlockedTitleQuery{Limit: MaxPageSize + 1}, false},
 		{"user with a negative quota", &User{ID: id, Name: "u", PasswordHash: "x", Policy: UserPolicy{MovieQuota: &Quota{Limit: -1}}}, false},
 	}
 	for _, tt := range tests {

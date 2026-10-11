@@ -266,8 +266,65 @@ func (q *IssueQuery) Validate() error {
 	return nil
 }
 
+// BlockedTitle is a movie or series administrators blocked from being
+// requested, as Seerr's Blocklist.
+type BlockedTitle struct {
+	// Kind is KindMovie or KindSeries.
+	Kind   ItemKind
+	TmdbID int
+	// Title names it as it was blocklisted; empty when unknown.
+	Title string
+	// UserID is the administrator who blocklisted it; zero once they are
+	// deleted.
+	UserID ID
+	// CreatedAt is set by the repository when zero.
+	CreatedAt time.Time
+}
+
+// Validate checks the blocked title's invariants.
+func (b *BlockedTitle) Validate() error {
+	switch {
+	case b.Kind != KindMovie && b.Kind != KindSeries:
+		return fmt.Errorf("%w: blocked title of kind %q", ErrInvalid, b.Kind)
+	case b.TmdbID <= 0:
+		return fmt.Errorf("%w: blocked title requires a TMDB ID", ErrInvalid)
+	}
+	return nil
+}
+
+// BlockedTitleQuery selects blocked titles, newest first.
+type BlockedTitleQuery struct {
+	// Search matches titles containing it, ignoring case; empty matches
+	// all.
+	Search string
+	Limit  int // zero means MaxPageSize
+	Offset int
+}
+
+// Validate checks the query's bounds.
+func (q *BlockedTitleQuery) Validate() error {
+	if q.Limit < 0 || q.Limit > MaxPageSize || q.Offset < 0 {
+		return fmt.Errorf("%w: page outside 0–%d", ErrInvalid, MaxPageSize)
+	}
+	return nil
+}
+
 // Repositories of requests and issues.
 type (
+	// BlockedTitleRepository stores the blocklist of titles, one entry
+	// per kind and TMDB ID.
+	BlockedTitleRepository interface {
+		// Get returns ErrNotFound for a title not blocklisted.
+		Get(ctx context.Context, kind ItemKind, tmdbID int) (BlockedTitle, error)
+		// List returns the blocked titles q selects.
+		List(ctx context.Context, q BlockedTitleQuery) (Page[BlockedTitle], error)
+		// Add blocklists a title; ErrConflict when it is already.
+		Add(ctx context.Context, b *BlockedTitle) error
+		// Delete takes a title off the blocklist; ErrNotFound when it is
+		// not on it.
+		Delete(ctx context.Context, kind ItemKind, tmdbID int) error
+	}
+
 	// RequestRepository stores requests; deleting the user deletes their
 	// requests.
 	RequestRepository interface {
@@ -356,6 +413,12 @@ type RequestSettings struct {
 	SeriesQualityProfileID ID
 	SeasonFolder           bool
 	MonitorNewItems        NewItemMonitor
+	// AnimeLibraryID and AnimeQualityProfileID are where approved anime
+	// series are added instead, as Seerr's activeAnimeDirectory and
+	// activeAnimeProfileId; unset, those of series apply. Anime series
+	// are added as SeriesAnime either way, as Seerr's animeSeriesType.
+	AnimeLibraryID        ID
+	AnimeQualityProfileID ID
 	// Specials allows requesting season 0 (Seerr's
 	// enableSpecialEpisodes).
 	Specials bool

@@ -69,6 +69,7 @@ func (m *memStore) PendingReleases() core.PendingReleaseRepository          { pa
 func (m *memStore) RemotePathMappings() core.RemotePathMappingRepository    { panic("unused") }
 func (m *memStore) Requests() core.RequestRepository                        { panic("unused") }
 func (m *memStore) Issues() core.IssueRepository                            { panic("unused") }
+func (m *memStore) BlockedTitles() core.BlockedTitleRepository              { panic("unused") }
 func (m *memStore) InTx(_ context.Context, fn func(core.Store) error) error { return fn(m) }
 
 // present returns the items not missing, by path.

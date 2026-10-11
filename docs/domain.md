@@ -259,6 +259,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `RemotePathMappingRepository` | `List`, `Put`, `Delete` |
 | `RequestRepository` | `Get`, `List` (paged, by user, statuses, kind, TMDB ID and item, newest or most recently modified first), `Put` (insert or replace by ID), `Delete`, `QuotaUsed` (see §13.6); deleting the user deletes their requests |
 | `IssueRepository` | `Get` and `List` (paged, with their comments), `Put`, `AddComment`, `Delete`; deleting the item or the user deletes their issues |
+| `BlockedTitleRepository` | `Get` by kind and TMDB ID, `List` (paged, newest first, searched by title), `Add` (`ErrConflict` when blocklisted already), `Delete`; deleting the user who blocklisted a title keeps it |
 
 * **Transactions**: `Store.InTx` runs a function with a `Store` bound to one transaction; returning an error rolls it back.
 * **Replace semantics**: `Replace*` methods set the complete set for an owner, removing anything not in the new set — scans and metadata refreshes always write whole sets.
@@ -318,6 +319,7 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 * `PasswordResetPlugin`: the ID of the plugin that delivers the PINs resetting forgotten passwords; empty when users cannot reset them.
 * `Acquisition`: how releases are chosen, downloaded and imported (§13.4).
 * `Requests`: the permissions new users get, the default quotas, and where approved requests go (§13.6).
+* `Metadata` (`MetadataSettings`): the server's `PreferredLanguage` (ISO 639-1) and `Country` (ISO 3166-1) of metadata, as Jellyfin's `PreferredMetadataLanguage` and `MetadataCountryCode`; requests and discovery name titles in the language and rate them in the country. The defaults are `en` and `US`.
 * `Validate` checks the known values and ranges.
 
 ### 12.2 API Keys
@@ -359,7 +361,8 @@ A `RemotePathMapping` maps a folder a download client on `Host` reports (`Remote
 * A `Request` is a user's request of a movie or a series by TMDB ID (`Kind`, `TmdbID`, and a series' `TvdbID` once known), with its `Title` and `Year`, the `ItemID` of the item it made wanted, the `RequestedBy` and `ModifiedBy` users, `IgnoreQuota`, a `Message` (why it failed) and its times. A series request lists its `Seasons` (`SeasonRequest`: a number, at least one, each once, and a status); a movie request has none.
 * `RequestStatus`: `pending` (waiting for an administrator), `approved` (its title made wanted), `declined`, `failed` (making it wanted failed; it may be retried) and `completed` (available). Pending, approved and failed requests are active: they stand in the way of other requests of their title or seasons. A season completes when its aired episodes all have files; a series request when all its seasons have.
 * A `Quota` allows `Limit` requests of movies, or seasons of series, in the last `Days` days (all time when 0); a limit of 0 is unlimited. `QuotaUsed` counts a user's requests of a kind since a time, seasons for series, leaving out declined requests and those ignoring quotas, as Seerr's `User.getQuota`.
-* `RequestSettings`, part of the server settings: the `DefaultPermissions` new users get, the default `MovieQuota` and `SeriesQuota`, the movie library, quality profile and minimum availability approved movies are added with, the show library, quality profile, season folder flag and new item monitoring of approved series, and whether specials (season 0) may be requested.
+* `RequestSettings`, part of the server settings: the `DefaultPermissions` new users get, the default `MovieQuota` and `SeriesQuota`, the movie library, quality profile and minimum availability approved movies are added with, the show library, quality profile, season folder flag and new item monitoring of approved series, the `AnimeLibraryID` and `AnimeQualityProfileID` approved anime series are added with instead (unset, those of series apply; anime series are added as `anime` either way), and whether specials (season 0) may be requested.
+* A `BlockedTitle` is a movie or series administrators blocked from being requested, as Seerr's blocklist: its `Kind` (movie or series) and `TmdbID`, once each, its `Title` when it was blocklisted, the `UserID` of the administrator, and its `CreatedAt`.
 
 ### 13.7 Issues
 An `Issue` is a problem a user reports with an item: its `Type` (`video`, `audio`, `subtitles`, `other`), `Status` (`open`, `resolved`), an optional `SeasonNumber` and `EpisodeNumber`, `CreatedBy`, `ModifiedBy` and its times. Its `Comments` (`IssueComment`: a user, a message and times) are its thread, oldest first; the first is the report's message.
