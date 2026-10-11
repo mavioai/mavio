@@ -480,6 +480,53 @@ func (s *ItemService) ListNextUp(ctx context.Context, req *libraryv1.ListNextUpR
 	return libraryv1.ListNextUpResponse_builder{Items: out}.Build(), nil
 }
 
+// ListSimilarItems lists the items most like an item, of its kind.
+func (s *ItemService) ListSimilarItems(ctx context.Context, req *libraryv1.ListSimilarItemsRequest) (*libraryv1.ListSimilarItemsResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	it, err := s.store.Items().Get(ctx, core.MustParseID(req.GetId()))
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	if !p.User.CanAccess(&it) {
+		return nil, connect.NewError(connect.CodeNotFound, errors.New("no such item"))
+	}
+	// Episodes and seasons stand for their series.
+	for (it.Kind == core.KindEpisode || it.Kind == core.KindSeason) && !it.ParentID.IsZero() {
+		if it, err = s.store.Items().Get(ctx, it.ParentID); err != nil {
+			return nil, connectError(ctx, err)
+		}
+	}
+	policy := &p.User.Policy
+	ids, ok := libraryScope(policy, nil)
+	if !ok {
+		return &libraryv1.ListSimilarItemsResponse{}, nil
+	}
+	q := core.ItemQuery{
+		LibraryIDs:  ids,
+		Kinds:       []core.ItemKind{it.Kind},
+		SimilarTo:   it.ID,
+		MaxRating:   policy.MaxParentalRating,
+		SkipUnrated: policy.BlockUnrated,
+		UserID:      p.User.ID,
+		Limit:       cmp.Or(int(req.GetLimit()), defaultListLimit),
+	}
+	if req.HasPlayed() {
+		q.Played = new(req.GetPlayed())
+	}
+	page, err := s.store.Items().Query(ctx, q)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out, err := itemsToProto(ctx, s.store, page.Items, p.User.Admin)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return libraryv1.ListSimilarItemsResponse_builder{Items: out}.Build(), nil
+}
+
 // browseScope limits browsing to the requested libraries and the rating
 // the user may see; it reports false when no library remains.
 func browseScope(u *core.User, libraries []string) (browse.Scope, bool) {

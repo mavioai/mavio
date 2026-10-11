@@ -46,6 +46,9 @@ const (
 	ItemServiceListLatestItemsProcedure = "/mavio.library.v1.ItemService/ListLatestItems"
 	// ItemServiceListNextUpProcedure is the fully-qualified name of the ItemService's ListNextUp RPC.
 	ItemServiceListNextUpProcedure = "/mavio.library.v1.ItemService/ListNextUp"
+	// ItemServiceListSimilarItemsProcedure is the fully-qualified name of the ItemService's
+	// ListSimilarItems RPC.
+	ItemServiceListSimilarItemsProcedure = "/mavio.library.v1.ItemService/ListSimilarItems"
 	// ItemServiceListPeopleProcedure is the fully-qualified name of the ItemService's ListPeople RPC.
 	ItemServiceListPeopleProcedure = "/mavio.library.v1.ItemService/ListPeople"
 	// ItemServiceGetLyricsProcedure is the fully-qualified name of the ItemService's GetLyrics RPC.
@@ -75,6 +78,11 @@ type ItemServiceClient interface {
 	// watched are left to continue watching: ListItems with resumable set,
 	// sorted by last played.
 	ListNextUp(context.Context, *v1.ListNextUpRequest) (*v1.ListNextUpResponse, error)
+	// ListSimilarItems lists the items most like an item, of its kind, in the
+	// libraries and rating the caller may access: those sharing the most
+	// genres, tags, studios, directors and actors with it. Episodes and
+	// seasons stand for their series.
+	ListSimilarItems(context.Context, *v1.ListSimilarItemsRequest) (*v1.ListSimilarItemsResponse, error)
 	// ListPeople lists the people credited on the items the caller may
 	// access, with the number of items crediting each.
 	ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error)
@@ -143,6 +151,13 @@ func NewItemServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		listSimilarItems: connect.NewClient[v1.ListSimilarItemsRequest, v1.ListSimilarItemsResponse](
+			httpClient,
+			baseURL+ItemServiceListSimilarItemsProcedure,
+			connect.WithSchema(itemServiceMethods.ByName("ListSimilarItems")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		listPeople: connect.NewClient[v1.ListPeopleRequest, v1.ListPeopleResponse](
 			httpClient,
 			baseURL+ItemServiceListPeopleProcedure,
@@ -181,6 +196,7 @@ type itemServiceClient struct {
 	listValues           *connect.Client[v1.ListValuesRequest, v1.ListValuesResponse]
 	listLatestItems      *connect.Client[v1.ListLatestItemsRequest, v1.ListLatestItemsResponse]
 	listNextUp           *connect.Client[v1.ListNextUpRequest, v1.ListNextUpResponse]
+	listSimilarItems     *connect.Client[v1.ListSimilarItemsRequest, v1.ListSimilarItemsResponse]
 	listPeople           *connect.Client[v1.ListPeopleRequest, v1.ListPeopleResponse]
 	getLyrics            *connect.Client[v1.GetLyricsRequest, v1.GetLyricsResponse]
 	searchRemoteLyrics   *connect.Client[v1.SearchRemoteLyricsRequest, v1.SearchRemoteLyricsResponse]
@@ -241,6 +257,15 @@ func (c *itemServiceClient) ListNextUp(ctx context.Context, req *v1.ListNextUpRe
 	return nil, err
 }
 
+// ListSimilarItems calls mavio.library.v1.ItemService.ListSimilarItems.
+func (c *itemServiceClient) ListSimilarItems(ctx context.Context, req *v1.ListSimilarItemsRequest) (*v1.ListSimilarItemsResponse, error) {
+	response, err := c.listSimilarItems.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ListPeople calls mavio.library.v1.ItemService.ListPeople.
 func (c *itemServiceClient) ListPeople(ctx context.Context, req *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error) {
 	response, err := c.listPeople.CallUnary(ctx, connect.NewRequest(req))
@@ -294,6 +319,11 @@ type ItemServiceHandler interface {
 	// watched are left to continue watching: ListItems with resumable set,
 	// sorted by last played.
 	ListNextUp(context.Context, *v1.ListNextUpRequest) (*v1.ListNextUpResponse, error)
+	// ListSimilarItems lists the items most like an item, of its kind, in the
+	// libraries and rating the caller may access: those sharing the most
+	// genres, tags, studios, directors and actors with it. Episodes and
+	// seasons stand for their series.
+	ListSimilarItems(context.Context, *v1.ListSimilarItemsRequest) (*v1.ListSimilarItemsResponse, error)
 	// ListPeople lists the people credited on the items the caller may
 	// access, with the number of items crediting each.
 	ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error)
@@ -358,6 +388,13 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	itemServiceListSimilarItemsHandler := connect.NewUnaryHandlerSimple(
+		ItemServiceListSimilarItemsProcedure,
+		svc.ListSimilarItems,
+		connect.WithSchema(itemServiceMethods.ByName("ListSimilarItems")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	itemServiceListPeopleHandler := connect.NewUnaryHandlerSimple(
 		ItemServiceListPeopleProcedure,
 		svc.ListPeople,
@@ -399,6 +436,8 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 			itemServiceListLatestItemsHandler.ServeHTTP(w, r)
 		case ItemServiceListNextUpProcedure:
 			itemServiceListNextUpHandler.ServeHTTP(w, r)
+		case ItemServiceListSimilarItemsProcedure:
+			itemServiceListSimilarItemsHandler.ServeHTTP(w, r)
 		case ItemServiceListPeopleProcedure:
 			itemServiceListPeopleHandler.ServeHTTP(w, r)
 		case ItemServiceGetLyricsProcedure:
@@ -438,6 +477,10 @@ func (UnimplementedItemServiceHandler) ListLatestItems(context.Context, *v1.List
 
 func (UnimplementedItemServiceHandler) ListNextUp(context.Context, *v1.ListNextUpRequest) (*v1.ListNextUpResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.ListNextUp is not implemented"))
+}
+
+func (UnimplementedItemServiceHandler) ListSimilarItems(context.Context, *v1.ListSimilarItemsRequest) (*v1.ListSimilarItemsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.ListSimilarItems is not implemented"))
 }
 
 func (UnimplementedItemServiceHandler) ListPeople(context.Context, *v1.ListPeopleRequest) (*v1.ListPeopleResponse, error) {

@@ -55,6 +55,10 @@ type ItemQuery struct {
 	// also excludes items without a rating.
 	MaxRating   *int
 	SkipUnrated bool
+	// SimilarTo restricts results to the items sharing genres, tags,
+	// studios or people with an item, the item excepted, ordered by
+	// similarity before Sort; see docs/domain.md.
+	SimilarTo ID
 
 	// UserID enables the per-user filters and sorts below, and leaves out
 	// other users' playlists.

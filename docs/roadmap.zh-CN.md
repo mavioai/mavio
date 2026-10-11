@@ -556,7 +556,8 @@ flowchart TD
 - [x] 从 `libs/proto` 生成 TypeScript 与 Rust（`@mavio/proto`、`mavio-api`）
 - [x] `libs/design`：tokens、图标、字符串、组件规范与功能对齐表，为每个客户端编译
 - [ ] 服务端：`HomeService`，提供首页与媒体库标签页的推荐行及其设置
-- [ ] 服务端：`ItemService.ListSimilarItems`
+- [x] 服务端：`ItemService.ListSimilarItems`，由 `ItemQuery.SimilarTo` 评分（`libs/store/items.go`）
+  - [ ] 在本地结果之后，加入发现提供者给出、媒体库拥有的相似作品，如 Jellyfin 的远程相似条目提供者所做
 - [x] 服务端：所有路由的跨域请求（`apps/server/internal/httpserver/cors.go`）
 - [ ] 原型：tvOS 上的 Rust、connect-rust 与 `EventService` 的流、Apple 平台上 libmpv 的 EDR 与画中画、MyGo 的视频元素
 - [ ] 各应用与库的骨架

@@ -556,7 +556,8 @@ flowchart TD
 - [x] TypeScript and Rust generated from `libs/proto` (`@mavio/proto`, `mavio-api`)
 - [x] `libs/design`: tokens, icons, strings, component specifications and the feature parity table, compiled for every client
 - [ ] Server: `HomeService` with the hubs of Home and of the library tabs, and their settings
-- [ ] Server: `ItemService.ListSimilarItems`
+- [x] Server: `ItemService.ListSimilarItems`, scored by `ItemQuery.SimilarTo` (`libs/store/items.go`)
+  - [ ] The discovery providers' similar titles that the libraries have, after the local ones, as Jellyfin's remote similar items providers add them
 - [x] Server: cross-origin requests on every route (`apps/server/internal/httpserver/cors.go`)
 - [ ] Prototypes: Rust on tvOS, connect-rust streams with `EventService`, libmpv with EDR and Picture in Picture on Apple platforms, MyGo's video element
 - [ ] Skeletons of the apps and libraries

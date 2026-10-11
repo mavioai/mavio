@@ -36,6 +36,13 @@ service ItemService {
   rpc ListNextUp(ListNextUpRequest) returns (ListNextUpResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // ListSimilarItems lists the items most like an item, of its kind, in the
+  // libraries and rating the caller may access: those sharing the most
+  // genres, tags, studios, directors and actors with it. Episodes and
+  // seasons stand for their series.
+  rpc ListSimilarItems(ListSimilarItemsRequest) returns (ListSimilarItemsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   // ListPeople lists the people credited on the items the caller may
   // access, with the number of items crediting each.
   rpc ListPeople(ListPeopleRequest) returns (ListPeopleResponse) {
@@ -609,6 +616,24 @@ message ListLatestItemsRequest {
 }
 
 message ListLatestItemsResponse {
+  repeated Item items = 1;
+}
+
+message ListSimilarItemsRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // Filters by the caller's played state.
+  bool played = 2;
+  // 1–100; unset means 20.
+  int32 limit = 3 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 100
+  }];
+}
+
+message ListSimilarItemsResponse {
   repeated Item items = 1;
 }
 

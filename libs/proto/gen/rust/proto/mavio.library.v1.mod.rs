@@ -186,6 +186,14 @@ pub use self::__buffa::view::ListLatestItemsResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListLatestItemsResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ListSimilarItemsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSimilarItemsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSimilarItemsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSimilarItemsResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ListNextUpRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ListNextUpRequestOwnedView;

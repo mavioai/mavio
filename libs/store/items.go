@@ -503,6 +503,11 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 	if q.YearTo != 0 {
 		ps = append(ps, item.ProductionYearLTE(q.YearTo))
 	}
+	if !q.SimilarTo.IsZero() {
+		ps = append(ps, item.IDNEQ(q.SimilarTo), predicate.Item(func(s *entsql.Selector) {
+			s.Where(entsql.ExprP(similarity(s.C(item.FieldID), q.SimilarTo) + " > 0"))
+		}))
+	}
 	if q.MaxRating != nil {
 		within := item.InheritedRatingLTE(*q.MaxRating)
 		if !q.SkipUnrated {
@@ -547,6 +552,24 @@ func descendantsOf(parent core.ID) predicate.Item {
 	})
 }
 
+// similarity is the SQL score of the item in column id against the item
+// like, as Jellyfin scores similar movies: 10 for each genre shared, 5 for
+// each tag and studio, and for each person credited on both, 50 when like
+// credits them as director and 15 as actor or guest star. The ID is written
+// as a literal: ent drops the arguments of ORDER BY expressions, and its
+// canonical form needs no escaping.
+func similarity(id string, like core.ID) string {
+	l := "'" + like.String() + "'"
+	return "((SELECT COALESCE(SUM(CASE v.kind WHEN '" + valueGenre + "' THEN 10 ELSE 5 END), 0) FROM item_values v" +
+		" JOIN item_values lv ON lv.kind = v.kind AND lv.value_key = v.value_key" +
+		" WHERE lv.item_id = " + l + " AND v.item_id = " + id +
+		" AND v.kind IN ('" + valueGenre + "', '" + valueTag + "', '" + valueStudio + "'))" +
+		" + (SELECT COALESCE(SUM(CASE lc.kind WHEN '" + string(core.CreditDirector) + "' THEN 50 ELSE 15 END), 0) FROM credits c" +
+		" JOIN credits lc ON lc.person_id = c.person_id" +
+		" WHERE lc.item_id = " + l + " AND c.item_id = " + id +
+		" AND lc.kind IN ('" + string(core.CreditDirector) + "', '" + string(core.CreditActor) + "', '" + string(core.CreditGuestStar) + "')))"
+}
+
 // orderItems applies q.Sort, always tie-breaking by ID for stable paging.
 // Search results are ordered by relevance first and by sort name after
 // q.Sort.
@@ -554,6 +577,9 @@ func orderItems(s *entsql.Selector, q core.ItemQuery) {
 	srch, searching := parseSearch(q.Search)
 	if searching {
 		s.OrderExpr(srch.rank(s.C(item.FieldSearchKey)))
+	}
+	if !q.SimilarTo.IsZero() {
+		s.OrderExpr(entsql.Expr(similarity(s.C(item.FieldID), q.SimilarTo) + " DESC"))
 	}
 	var ud *entsql.SelectTable
 	joinUserData := func() *entsql.SelectTable {
