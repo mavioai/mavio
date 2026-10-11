@@ -269,6 +269,21 @@ var colonReplacements = map[core.ColonReplacement]systemv1.ColonReplacement{
 	core.ColonSmart:          systemv1.ColonReplacement_COLON_REPLACEMENT_SMART,
 }
 
+var multiEpisodeStyles = map[core.MultiEpisodeStyle]systemv1.MultiEpisodeStyle{
+	core.MultiEpisodeExtend:        systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_EXTEND,
+	core.MultiEpisodeDuplicate:     systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_DUPLICATE,
+	core.MultiEpisodeRepeat:        systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_REPEAT,
+	core.MultiEpisodeScene:         systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_SCENE,
+	core.MultiEpisodeRange:         systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_RANGE,
+	core.MultiEpisodePrefixedRange: systemv1.MultiEpisodeStyle_MULTI_EPISODE_STYLE_PREFIXED_RANGE,
+}
+
+var episodeTitleRequirements = map[core.EpisodeTitleRequired]systemv1.EpisodeTitleRequired{
+	core.EpisodeTitleAlways:             systemv1.EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_ALWAYS,
+	core.EpisodeTitleBulkSeasonReleases: systemv1.EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES,
+	core.EpisodeTitleNever:              systemv1.EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_NEVER,
+}
+
 // keyOf returns the key of v in m, the zero key when there is none.
 func keyOf[K, V comparable](m map[K]V, v V) K {
 	for k, mv := range m {
@@ -296,6 +311,12 @@ func acquisitionSettingsToProto(a *core.AcquisitionSettings) *systemv1.Acquisiti
 		RenameMovies: &n.RenameMovies, ReplaceIllegalCharacters: &n.ReplaceIllegalCharacters,
 		ColonReplacement:  new(colonReplacements[n.ColonReplacement]),
 		MovieFolderFormat: &n.MovieFolderFormat, StandardMovieFormat: &n.StandardMovieFormat,
+		RenameEpisodes: &n.RenameEpisodes, StandardEpisodeFormat: &n.StandardEpisodeFormat,
+		DailyEpisodeFormat: &n.DailyEpisodeFormat, AnimeEpisodeFormat: &n.AnimeEpisodeFormat,
+		SeriesFolderFormat: &n.SeriesFolderFormat, SeasonFolderFormat: &n.SeasonFolderFormat,
+		SpecialsFolderFormat: &n.SpecialsFolderFormat, MultiEpisodeStyle: new(multiEpisodeStyles[n.MultiEpisodeStyle]),
+		AutoUnmonitorPreviouslyDownloadedEpisodes: &a.AutoUnmonitorPreviouslyDownloadedEpisodes,
+		EpisodeTitleRequired:                      new(episodeTitleRequirements[a.EpisodeTitleRequired]),
 	}.Build()
 }
 
@@ -313,11 +334,17 @@ func acquisitionSettingsFromProto(p *systemv1.AcquisitionSettings) core.Acquisit
 		CheckFinishedInterval: int(p.GetCheckFinishedInterval()), RecycleBin: p.GetRecycleBin(),
 		RecycleBinCleanupDays: int(p.GetRecycleBinCleanupDays()), CopyUsingHardlinks: p.GetCopyUsingHardlinks(),
 		ImportExtraFiles: p.GetImportExtraFiles(), ExtraFileExtensions: p.GetExtraFileExtensions(),
-		DeleteEmptyFolders: p.GetDeleteEmptyFolders(),
+		DeleteEmptyFolders:                        p.GetDeleteEmptyFolders(),
+		AutoUnmonitorPreviouslyDownloadedEpisodes: p.GetAutoUnmonitorPreviouslyDownloadedEpisodes(),
+		EpisodeTitleRequired:                      keyOf(episodeTitleRequirements, p.GetEpisodeTitleRequired()),
 		Naming: core.NamingSettings{
 			RenameMovies: p.GetRenameMovies(), ReplaceIllegalCharacters: p.GetReplaceIllegalCharacters(),
 			ColonReplacement:  keyOf(colonReplacements, p.GetColonReplacement()),
 			MovieFolderFormat: p.GetMovieFolderFormat(), StandardMovieFormat: p.GetStandardMovieFormat(),
+			RenameEpisodes: p.GetRenameEpisodes(), StandardEpisodeFormat: p.GetStandardEpisodeFormat(),
+			DailyEpisodeFormat: p.GetDailyEpisodeFormat(), AnimeEpisodeFormat: p.GetAnimeEpisodeFormat(),
+			SeriesFolderFormat: p.GetSeriesFolderFormat(), SeasonFolderFormat: p.GetSeasonFolderFormat(),
+			SpecialsFolderFormat: p.GetSpecialsFolderFormat(), MultiEpisodeStyle: keyOf(multiEpisodeStyles, p.GetMultiEpisodeStyle()),
 		},
 	}
 }

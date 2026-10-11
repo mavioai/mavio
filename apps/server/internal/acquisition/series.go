@@ -262,14 +262,30 @@ func organizeSeries(sh *show) organize.Series {
 	return s
 }
 
-// seriesNaming returns the series naming settings: Sonarr's defaults,
-// renaming and replacing characters as the movie settings say.
+// seriesNaming returns the series naming settings, Sonarr's defaults
+// where a format or the multi-episode style is not set; characters are
+// replaced as for movies.
 func (rn *run) seriesNaming() organize.SeriesNaming {
 	n := organize.DefaultSeriesNaming()
 	s := rn.settings.Naming
-	n.RenameEpisodes, n.ReplaceIllegalCharacters = s.RenameMovies, s.ReplaceIllegalCharacters
+	n.RenameEpisodes, n.ReplaceIllegalCharacters = s.RenameEpisodes, s.ReplaceIllegalCharacters
 	if s.ColonReplacement != "" {
 		n.ColonReplacement = organize.ColonReplacement(s.ColonReplacement)
+	}
+	if s.MultiEpisodeStyle != "" {
+		n.MultiEpisodeStyle = organize.MultiEpisodeStyle(s.MultiEpisodeStyle)
+	}
+	for _, f := range []struct {
+		to   *string
+		from string
+	}{
+		{&n.StandardEpisodeFormat, s.StandardEpisodeFormat}, {&n.DailyEpisodeFormat, s.DailyEpisodeFormat},
+		{&n.AnimeEpisodeFormat, s.AnimeEpisodeFormat}, {&n.SeriesFolderFormat, s.SeriesFolderFormat},
+		{&n.SeasonFolderFormat, s.SeasonFolderFormat}, {&n.SpecialsFolderFormat, s.SpecialsFolderFormat},
+	} {
+		if strings.TrimSpace(f.from) != "" {
+			*f.to = f.from
+		}
 	}
 	return n
 }

@@ -214,6 +214,7 @@ func TestRequests(t *testing.T) {
 	acq.SetRssSyncInterval(0)
 	acq.SetSkipFreeSpaceCheck(true)
 	acq.SetRenameMovies(true)
+	acq.SetRenameEpisodes(true)
 	settings.SetRequests(systemv1.RequestSettings_builder{
 		MovieQuotaLimit: new(int32(5)), SeriesQuotaLimit: new(int32(10)),
 		MovieLibraryId: new(movieLib), MovieQualityProfileId: new(movieProfile),

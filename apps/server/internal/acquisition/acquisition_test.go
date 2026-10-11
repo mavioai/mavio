@@ -242,6 +242,7 @@ func newEnv(t *testing.T) *env {
 	e.settings = core.DefaultAcquisitionSettings()
 	e.settings.RecycleBin = e.binDir
 	e.settings.Naming.RenameMovies = true
+	e.settings.Naming.RenameEpisodes = true
 	e.settings.ImportExtraFiles = true
 	e.rt = &Runtime{
 		Store:      db,

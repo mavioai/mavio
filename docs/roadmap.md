@@ -513,7 +513,7 @@ flowchart TD
   - [ ] Interactive searches of a whole series
   - [x] The series and movie engines log with the server's logger rather than the default one
 - [x] Import of episodes, season packs and multi-episode files; upgrades
-  - [ ] Series naming settings: episode formats, the season folder format, the multi-episode style; Sonarr's defaults apply
+  - [x] Series naming settings: whether episodes are renamed, the episode file formats, the series, season and specials folder formats and the multi-episode style, with Sonarr's defaults when empty
   - [ ] Sonarr's import specifications for episode titles, unpacking, unverified scene numbering, absolute numbers and matching folders, and its scene name check
   - [ ] The qualities of episode files aggregated as Sonarr aggregates them
   - [x] The history of the episodes a multi-episode file covers kept by the file's item, on import and on scans
