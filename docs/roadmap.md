@@ -427,6 +427,7 @@ flowchart TD
   - [x] BeyondHD, M-Team TP, MyAnonamouse, Nebulance, Shazbat and TorrentDay (`internal/sites/<name>`)
     - [ ] MyAnonamouse's size limits (`tor[minSize]`, `tor[maxSize]`), sent once queries carry `minsize` and `maxsize`
     - [ ] MyAnonamouse's cookies cleared before a test, as Prowlarr does
+  - [x] PreToMe, RevolutionTT, SceneHD, SpeedCD, TorrentBytes, TorrentSyndikat, Uniotaku and XSpeeds (`internal/sites/<name>`)
   - [ ] The API tokens of AvistaZ and SpeedApp sites kept across restarts, as Prowlarr keeps them in the settings; they log in again after each start
   - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)

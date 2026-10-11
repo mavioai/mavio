@@ -32,14 +32,22 @@ import (
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/nzbindex"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/passthepopcorn"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/pixelhd"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/pretome"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/revolutiontt"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/rutracker"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/scenehd"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/shazbat"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/speedapp"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/speedcd"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentbytes"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentday"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentpotato"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentrss"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentscsv"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentsyndikat"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torznab"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/uniotaku"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/xspeeds"
 )
 
 // codeDefinitions are the definitions implemented in code: the generic
@@ -70,11 +78,19 @@ func codeDefinitions() []indexer.Definition {
 		nzbindex.Definition,
 		passthepopcorn.Definition,
 		pixelhd.Definition,
+		pretome.Definition,
+		revolutiontt.Definition,
 		rutracker.Definition,
+		scenehd.Definition,
 		shazbat.Definition,
+		speedcd.Definition,
+		torrentbytes.Definition,
 		torrentday.Definition,
 		torrentpotato.Definition,
 		torrentscsv.Definition,
+		torrentsyndikat.Definition,
+		uniotaku.Definition,
+		xspeeds.Definition,
 	)
 	return defs
 }
