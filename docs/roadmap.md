@@ -455,7 +455,7 @@ flowchart TD
 **Progress**:
 - [x] The `DOWNLOAD_CLIENT_PROVIDER` contract (`mavio/plugin/v1/download_client.proto`) and its host client
 - [ ] `plugins/download-clients`: the download clients of Radarr and Sonarr, with their cases ported
-- [ ] `libs/acquire`: qualities and their definitions, quality profiles, custom formats, delay profiles
+- [x] `libs/acquire`: qualities and their definitions, quality profiles, custom formats, delay profiles, release profiles
 - [ ] Decisions: the specifications of Radarr's decision engine and its ranking
 - [ ] Domain and storage: profiles, custom formats, the queue of tracked downloads, history, the blocklist, remote path mappings, naming
 - [ ] Adding a wanted movie to a library by its TMDB ID, with a quality profile and minimum availability
