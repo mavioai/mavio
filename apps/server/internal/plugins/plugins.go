@@ -12,6 +12,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"connectrpc.com/connect"
@@ -111,6 +112,9 @@ type Manager struct {
 	// devMu guards devices, the devices of each device controller.
 	devMu   sync.Mutex
 	devices map[string][]Device
+
+	// revisions numbers the plugins' starts and configurations.
+	revisions atomic.Uint64
 }
 
 type entry struct {
@@ -120,6 +124,9 @@ type entry struct {
 	plugin   host.Plugin // nil when it failed to start
 	state    State
 	err      error
+	// revision changes when the plugin starts and is configured, for
+	// those keeping what it provides.
+	revision uint64
 }
 
 // Open starts the plugins of cfg.Dir and delivers their stored
@@ -192,7 +199,7 @@ func (m *Manager) sort() {
 // its configuration; seen are the IDs other folders hold.
 func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool) *entry {
 	dir := filepath.Join(m.cfg.Dir, folder)
-	e := &entry{folder: folder}
+	e := &entry{folder: folder, revision: m.revisions.Add(1)}
 	e.manifest, e.err = manifest.Load(dir)
 	switch {
 	case e.err != nil:
@@ -363,6 +370,7 @@ func (m *Manager) deliverConfig(ctx context.Context, id, configJSON string) (*en
 		}
 		return nil, fmt.Errorf("configure plugin %s: %w", id, err)
 	}
+	e.revision = m.revisions.Add(1)
 	return e, nil
 }
 

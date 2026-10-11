@@ -17,6 +17,9 @@ import (
 type Provider struct {
 	ID     string
 	Client pluginv1connect.IndexerProviderServiceClient
+	// Revision changes whenever the provider's indexers may have: when
+	// the plugin starts and when it is configured.
+	Revision uint64
 }
 
 // Indexer is an indexer a provider has configured.
@@ -41,11 +44,30 @@ type Searcher struct {
 	Providers func() []Provider
 	// Items finds the items searched for.
 	Items core.ItemRepository
+	// Cache keeps the providers' indexers for searches; nil lists them
+	// for every search.
+	Cache *IndexerCache
+	// Now is the clock; time.Now when nil.
+	Now func() time.Time
+}
+
+func (s *Searcher) now() time.Time {
+	if s.Now != nil {
+		return s.Now()
+	}
+	return time.Now()
 }
 
 // ListIndexers lists the indexers of every provider, by provider, then by
-// priority and name, and the providers that failed to list theirs.
+// priority and name, and the providers that failed to list theirs. The
+// indexers are listed anew, and kept in the cache.
 func (s *Searcher) ListIndexers(ctx context.Context) ([]Indexer, []Failure) {
+	return s.indexers(ctx, false)
+}
+
+// indexers lists the indexers of every provider as ListIndexers does;
+// cached takes those the cache keeps.
+func (s *Searcher) indexers(ctx context.Context, cached bool) ([]Indexer, []Failure) {
 	var providers []Provider
 	if s.Providers != nil {
 		providers = s.Providers()
@@ -55,12 +77,22 @@ func (s *Searcher) ListIndexers(ctx context.Context) ([]Indexer, []Failure) {
 	var wg sync.WaitGroup
 	for i, p := range providers {
 		wg.Go(func() {
-			resp, err := p.Client.ListIndexers(ctx, &pluginv1.ListIndexersRequest{})
-			if err != nil {
-				failures[i] = &Failure{Provider: p.ID, Message: err.Error()}
-				return
+			list, ok := []*pluginv1.Indexer(nil), false
+			if cached && s.Cache != nil {
+				list, ok = s.Cache.get(p)
 			}
-			for _, ix := range resp.GetIndexers() {
+			if !ok {
+				resp, err := p.Client.ListIndexers(ctx, &pluginv1.ListIndexersRequest{})
+				if err != nil {
+					failures[i] = &Failure{Provider: p.ID, Message: err.Error()}
+					return
+				}
+				list = resp.GetIndexers()
+				if s.Cache != nil {
+					s.Cache.put(p, list)
+				}
+			}
+			for _, ix := range list {
 				lists[i] = append(lists[i], Indexer{Provider: p.ID, Indexer: ix})
 			}
 		})
@@ -100,6 +132,11 @@ type Search struct {
 	// Episodes, when set, searches for episodes of a series as the
 	// acquisition of series asks, in place of ItemID.
 	Episodes *EpisodeQuery
+	// MinAge and MaxAge, in days, and MinSize and MaxSize, in bytes, are
+	// the limits releases are searched within, as Prowlarr's searches
+	// take them; nil for none.
+	MinAge, MaxAge   *int32
+	MinSize, MaxSize *int64
 }
 
 // Release is a release an indexer found, with its title parsed: Movie for
@@ -130,7 +167,8 @@ func (s *Searcher) Search(ctx context.Context, q Search) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	indexers, failures := s.ListIndexers(ctx)
+	c.limits = &q
+	indexers, failures := s.indexers(ctx, true)
 	clients := map[string]pluginv1connect.IndexerProviderServiceClient{}
 	if s.Providers != nil {
 		for _, p := range s.Providers() {
@@ -173,12 +211,32 @@ func (s *Searcher) Search(ctx context.Context, q Search) (*Result, error) {
 	return res, nil
 }
 
-// search runs the tiers of requests the criteria make for an indexer,
-// stopping at the first that finds releases, as Radarr's and Sonarr's
-// FetchReleases do.
+// search runs the searches the criteria make for an indexer, one after
+// the other, as Sonarr dispatches the episodes of an anime season, until
+// one fails.
 func search(ctx context.Context, client pluginv1connect.IndexerProviderServiceClient, ix Indexer, c *criteria) ([]Release, []Failure) {
+	var out []Release
+	seen := map[string]bool{}
+	for _, tiers := range c.searches(ix.GetCapabilities()) {
+		found, failures := searchTiers(ctx, client, ix, c, tiers)
+		for _, r := range found {
+			if !seen[r.GetGuid()] {
+				seen[r.GetGuid()] = true
+				out = append(out, r)
+			}
+		}
+		if len(failures) > 0 {
+			return out, failures
+		}
+	}
+	return out, nil
+}
+
+// searchTiers runs tiers of requests for an indexer, stopping at the
+// first that finds releases, as Radarr's and Sonarr's FetchReleases do.
+func searchTiers(ctx context.Context, client pluginv1connect.IndexerProviderServiceClient, ix Indexer, c *criteria, tiers [][]*pluginv1.SearchReleasesRequest) ([]Release, []Failure) {
 	var failures []Failure
-	for _, tier := range c.tiers(ix.GetCapabilities()) {
+	for _, tier := range tiers {
 		seen := map[string]bool{}
 		var out []Release
 		for _, req := range tier {

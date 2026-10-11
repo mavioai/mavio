@@ -460,11 +460,14 @@ func (m *Manager) SceneMappingProviders() []SceneMappingProvider {
 }
 
 // IndexerProviders returns the indexer providers among the ready plugins.
+// Their revisions change when they start and are configured.
 func (m *Manager) IndexerProviders() []releases.Provider {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	var out []releases.Provider
-	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_INDEXER_PROVIDER) {
-		if pl, ok := m.running(id); ok && pl.Indexers() != nil {
-			out = append(out, releases.Provider{ID: id, Client: pl.Indexers()})
+	for _, e := range m.plugins {
+		if e.plugin != nil && e.state == Ready && manifest.HasCapability(e.manifest, pluginv1.Capability_CAPABILITY_INDEXER_PROVIDER) && e.plugin.Indexers() != nil {
+			out = append(out, releases.Provider{ID: e.manifest.GetId(), Client: e.plugin.Indexers(), Revision: e.revision})
 		}
 	}
 	return out

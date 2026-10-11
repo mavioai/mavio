@@ -196,7 +196,7 @@ func Handler(opts Options) (http.Handler, error) {
 	if acq == nil {
 		acq = &acquisition.Runtime{Store: opts.Store, Indexers: opts.Indexers, Clients: opts.Downloads}
 	}
-	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(rpc.NewReleaseService(opts.Store, opts.Indexers, acq), interceptors))
+	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(rpc.NewReleaseService(opts.Store, opts.Indexers, acq.IndexerCache(), acq), interceptors))
 	mux.Handle(acquisitionv1connect.NewWantedServiceHandler(rpc.NewWantedService(acq), interceptors))
 	mux.Handle(acquisitionv1connect.NewDownloadServiceHandler(rpc.NewDownloadService(opts.Store, acq), interceptors))
 	mux.Handle(acquisitionv1connect.NewProfileServiceHandler(rpc.NewProfileService(opts.Store), interceptors))

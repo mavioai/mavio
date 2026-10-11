@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"iter"
 	"slices"
 	"strings"
 	"sync"
@@ -31,6 +32,17 @@ func (r items) Get(_ context.Context, id core.ID) (core.Item, error) {
 	return core.Item{}, fmt.Errorf("item %s: %w", id, core.ErrNotFound)
 }
 
+// Walk returns the children of q's parent of q's kinds.
+func (r items) Walk(_ context.Context, q core.ItemQuery) iter.Seq2[core.Item, error] {
+	return func(yield func(core.Item, error) bool) {
+		for _, it := range r.byID {
+			if it.ParentID == q.ParentID && slices.Contains(q.Kinds, it.Kind) && !yield(it, nil) {
+				return
+			}
+		}
+	}
+}
+
 // fakeProvider answers searches with the releases found for each request,
 // keyed by describe, and records the requests.
 type fakeProvider struct {
@@ -41,9 +53,13 @@ type fakeProvider struct {
 
 	mu       sync.Mutex
 	requests []string
+	listed   int
 }
 
 func (p *fakeProvider) ListIndexers(context.Context, *pluginv1.ListIndexersRequest) (*pluginv1.ListIndexersResponse, error) {
+	p.mu.Lock()
+	p.listed++
+	p.mu.Unlock()
 	return pluginv1.ListIndexersResponse_builder{Indexers: p.indexers}.Build(), nil
 }
 
@@ -75,6 +91,12 @@ func describe(req *pluginv1.SearchReleasesRequest) string {
 	if req.GetEpisode() != "" {
 		s += " e=" + req.GetEpisode()
 	}
+	if req.GetTitle() != "" {
+		s += fmt.Sprintf(" title=%q", req.GetTitle())
+	}
+	if req.HasMinAge() || req.HasMaxAge() || req.HasMinSize() || req.HasMaxSize() {
+		s += fmt.Sprintf(" age=%d-%d size=%d-%d", req.GetMinAge(), req.GetMaxAge(), req.GetMinSize(), req.GetMaxSize())
+	}
 	return s + fmt.Sprint(" cat=", req.GetCategories())
 }
 
@@ -95,6 +117,7 @@ var (
 	seriesID                                                                           = core.NewID()
 	seasonID                                                                           = core.NewID()
 	episodeID, dailyID, animeID, dailySeriesID, animeSeriesID, animeSeasonID, artistID = core.NewID(), core.NewID(), core.NewID(), core.NewID(), core.NewID(), core.NewID(), core.NewID()
+	animeNextID, animeUnairedID, animeUnnumberedID                                     = core.NewID(), core.NewID(), core.NewID()
 )
 
 func library() items {
@@ -120,8 +143,14 @@ func library() items {
 			ExternalIDs: map[core.Provider]string{core.ProviderTVDB: "400001"},
 		},
 		animeSeasonID: {ID: animeSeasonID, ParentID: animeSeriesID, Kind: core.KindSeason, IndexNumber: new(1)},
-		animeID:       {ID: animeID, ParentID: animeSeasonID, Kind: core.KindEpisode, IndexNumber: new(3), ParentIndexNumber: new(1), AbsoluteNumber: new(3)},
-		artistID:      {ID: artistID, Kind: core.KindMusicArtist, Name: "Artist"},
+		animeID:       {ID: animeID, ParentID: animeSeasonID, Kind: core.KindEpisode, IndexNumber: new(3), ParentIndexNumber: new(1), AbsoluteNumber: new(3), PremiereDate: new(airDate.AddDate(0, 0, 14))},
+		animeNextID:   {ID: animeNextID, ParentID: animeSeasonID, Kind: core.KindEpisode, IndexNumber: new(4), ParentIndexNumber: new(1), AbsoluteNumber: new(4), PremiereDate: new(airDate.AddDate(0, 0, 21))},
+		animeUnairedID: {
+			ID: animeUnairedID, ParentID: animeSeasonID, Kind: core.KindEpisode, IndexNumber: new(5), ParentIndexNumber: new(1), AbsoluteNumber: new(5),
+			PremiereDate: new(time.Date(2100, 1, 1, 0, 0, 0, 0, time.UTC)),
+		},
+		animeUnnumberedID: {ID: animeUnnumberedID, ParentID: animeSeasonID, Kind: core.KindEpisode, IndexNumber: new(6), ParentIndexNumber: new(1), PremiereDate: new(airDate)},
+		artistID:          {ID: artistID, Kind: core.KindMusicArtist, Name: "Artist"},
 	}}
 }
 
@@ -155,6 +184,12 @@ func TestTiers(t *testing.T) {
 			` UNSPECIFIED q="Cafe Enchante 03" ids= cat=[5070]`,
 		}}},
 		{"episode without season and ep", episodeID, caps([]string{"q"}, []string{"q", "tvdbid"}, nil), nil},
+		{"episode by Newznab's title", episodeID, caps([]string{"q"}, []string{"q", "title", "season", "ep"}, nil), [][]string{
+			nil, {` TV q="" ids= s=2 e=5 title="Marvel's Agents of S.H.I.E.L.D." cat=[5000]`},
+		}},
+		{"season by Newznab's title alone", seasonID, caps(nil, []string{"title", "season"}, nil), [][]string{
+			nil, {` TV q="" ids= s=2 title="Marvel's Agents of S.H.I.E.L.D." cat=[5000]`},
+		}},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Searcher{Items: library()}
@@ -207,6 +242,11 @@ func TestEpisodeQueryTiers(t *testing.T) {
 		{"special", EpisodeQuery{Kind: QuerySpecial, SeriesID: seriesID, SpecialTitles: []string{"Agents of SHIELD Slingshot"}}, [][]string{{
 			` UNSPECIFIED q="Agents of SHIELD Slingshot" ids= cat=[5000 5070]`,
 		}}},
+		// Sonarr's should_search_by_title_if_supported: scene titles as
+		// they are.
+		{"title taken", EpisodeQuery{SeriesID: seriesID, Season: 3, Episode: 1, Mode: SearchByTitle, Titles: []string{"Agents of S.H.I.E.L.D.", "Agents of S.H.I.E.L.D."}}, [][]string{
+			{` TV q="" ids= s=3 e=1 title="Agents of S.H.I.E.L.D." cat=[5000]`}, nil,
+		}},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Searcher{Items: library()}
@@ -214,8 +254,12 @@ func TestEpisodeQueryTiers(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			tvCaps := all
+			if strings.HasPrefix(tt.name, "title taken") {
+				tvCaps = caps([]string{"q"}, []string{"q", "title", "season", "ep"}, nil)
+			}
 			var got [][]string
-			for _, tier := range c.tiers(all) {
+			for _, tier := range c.tiers(tvCaps) {
 				var reqs []string
 				for _, r := range tier {
 					reqs = append(reqs, describe(r))
@@ -239,7 +283,6 @@ func TestCriteriaErrors(t *testing.T) {
 		{"unknown item", core.NewID(), core.ErrNotFound},
 		{"music", artistID, core.ErrInvalid},
 		{"series", seriesID, core.ErrInvalid},
-		{"anime season", animeSeasonID, core.ErrInvalid},
 	} {
 		if _, err := s.criteria(t.Context(), Search{ItemID: tt.id}); !errors.Is(err, tt.want) {
 			t.Errorf("%s: err = %v, want = %v", tt.name, err, tt.want)
@@ -325,6 +368,94 @@ func TestSearch(t *testing.T) {
 	}
 	if len(res.Failures) != 1 || res.Failures[0].Indexer != "gone" {
 		t.Errorf("failures = %+v, want = gone unknown", res.Failures)
+	}
+}
+
+// TestAnimeSeasonSearch checks that a season of anime is searched episode
+// by episode, as Sonarr's SearchAnimeSeason does: those aired with
+// absolute numbers, each until a tier finds releases.
+func TestAnimeSeasonSearch(t *testing.T) {
+	now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	p := &fakeProvider{
+		indexers: []*pluginv1.Indexer{newIndexer("ix", 1, caps([]string{"q"}, []string{"q", "tvdbid"}, nil))},
+		found: map[string][]*pluginv1.Release{
+			`ix TV q="03" ids=tvdb:400001 cat=[5070]`:             {rel("a", "[Group] Cafe Enchante - 03 [1080p]", now)},
+			`ix UNSPECIFIED q="Cafe Enchante 04" ids= cat=[5070]`: {rel("a", "[Group] Cafe Enchante - 03 [1080p]", now), rel("b", "[Group] Cafe Enchante - 04 [1080p]", now)},
+		},
+	}
+	s := &Searcher{Items: library(), Now: func() time.Time { return now }, Providers: func() []Provider { return []Provider{{ID: "p", Client: p}} }}
+	res, err := s.Search(t.Context(), Search{ItemID: animeSeasonID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{
+		`ix TV q="03" ids=tvdb:400001 cat=[5070]`, `ix UNSPECIFIED q="Cafe Enchante 03" ids= cat=[5070]`,
+		`ix TV q="04" ids=tvdb:400001 cat=[5070]`, `ix UNSPECIFIED q="Cafe Enchante 04" ids= cat=[5070]`,
+	}
+	if !slices.Equal(p.requests, want) {
+		t.Errorf("requests = %q, want = %q", p.requests, want)
+	}
+	var guids []string
+	for _, r := range res.Releases {
+		guids = append(guids, r.GetGuid())
+	}
+	if !slices.Equal(guids, []string{"a", "b"}) {
+		t.Errorf("releases = %q, want = a and b once each", guids)
+	}
+}
+
+// TestSearchLimits checks that a search's age and size limits go with its
+// requests.
+func TestSearchLimits(t *testing.T) {
+	p := &fakeProvider{indexers: []*pluginv1.Indexer{newIndexer("ix", 1, caps([]string{"q"}, nil, []string{"q", "imdbid"}))}}
+	s := &Searcher{Items: library(), Providers: func() []Provider { return []Provider{{ID: "p", Client: p}} }}
+	if _, err := s.Search(t.Context(), Search{ItemID: movieID, MinAge: new(int32(1)), MaxSize: new(int64(5000))}); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{
+		`ix MOVIE q="" ids=imdb:tt0133093 age=1-0 size=0-5000 cat=[2000]`,
+		`ix UNSPECIFIED q="Matrix 1999" ids= age=1-0 size=0-5000 cat=[2000]`,
+	}
+	if !slices.Equal(p.requests, want) {
+		t.Errorf("requests = %q, want = %q", p.requests, want)
+	}
+}
+
+// TestIndexerCache checks that searches take the indexers the cache keeps
+// while the provider keeps its revision, for an hour.
+func TestIndexerCache(t *testing.T) {
+	now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	p := &fakeProvider{indexers: []*pluginv1.Indexer{newIndexer("ix", 1, caps([]string{"q"}, nil, nil))}}
+	revision := uint64(1)
+	s := &Searcher{
+		Items: library(), Cache: &IndexerCache{Now: func() time.Time { return now }},
+		Providers: func() []Provider { return []Provider{{ID: "p", Client: p, Revision: revision}} },
+	}
+	search := func() {
+		t.Helper()
+		if _, err := s.Search(t.Context(), Search{Query: "x"}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, step := range []struct {
+		name   string
+		do     func()
+		listed int
+	}{
+		{"first search", search, 1},
+		{"second search", search, 1},
+		{"listing", func() { s.ListIndexers(t.Context()) }, 2},
+		{"search after listing", search, 2},
+		{"new revision", func() { revision++; search() }, 3},
+		{"an hour later", func() { now = now.Add(time.Hour); search() }, 4},
+	} {
+		step.do()
+		if p.listed != step.listed {
+			t.Errorf("%s: listed = %d, want = %d", step.name, p.listed, step.listed)
+		}
+	}
+	if len(p.requests) != 5 {
+		t.Errorf("searches = %d, want = 5", len(p.requests))
 	}
 }
 

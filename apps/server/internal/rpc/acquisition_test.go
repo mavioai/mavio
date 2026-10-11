@@ -270,7 +270,7 @@ func TestDownloadService(t *testing.T) {
 	url := testHandlers(t, func(opts connect.HandlerOption) (string, http.Handler) {
 		mux := http.NewServeMux()
 		mux.Handle(acquisitionv1connect.NewDownloadServiceHandler(NewDownloadService(f.db, f.rt), opts))
-		mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(NewReleaseService(f.db, f.rt.Indexers, f.rt), opts))
+		mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(NewReleaseService(f.db, f.rt.Indexers, f.rt.IndexerCache(), f.rt), opts))
 		mux.Handle(acquisitionv1connect.NewWantedServiceHandler(NewWantedService(f.rt), opts))
 		return "/", mux
 	})

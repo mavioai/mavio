@@ -90,6 +90,20 @@ type Runtime struct {
 	devices *storage.Detector
 	// scene caches the scene mapping providers' mappings.
 	scene sceneCache
+	// indexerCache keeps the indexer providers' indexers for searches.
+	indexerCache *releases.IndexerCache
+}
+
+// IndexerCache returns the cache of the indexer providers' indexers the
+// runtime's searches use, for other searchers of the same providers to
+// share.
+func (r *Runtime) IndexerCache() *releases.IndexerCache {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.indexerCache == nil {
+		r.indexerCache = &releases.IndexerCache{Now: r.Now}
+	}
+	return r.indexerCache
 }
 
 func (r *Runtime) now() time.Time {
@@ -135,7 +149,7 @@ func (r *Runtime) clients() []downloads.Provider {
 }
 
 func (r *Runtime) searcher() *releases.Searcher {
-	return &releases.Searcher{Providers: r.Indexers, Items: r.Store.Items()}
+	return &releases.Searcher{Providers: r.Indexers, Items: r.Store.Items(), Cache: r.IndexerCache(), Now: r.Now}
 }
 
 // Handlers returns the handlers of the acquisition jobs for a

@@ -831,7 +831,10 @@ func (r *Runtime) grabEpisodeDecision(ctx context.Context, rn *run, b *batch, d 
 		r.logger().WarnContext(ctx, "couldn't grab release", "release", c.Release.Title, "err", err)
 		return grabSkipped
 	}
-	_, err = r.grab(ctx, rn, grabRequest{show: sh, episodes: c.Episodes, rel: b.of[c.Release], candidate: c.Candidate})
+	_, err = r.grab(ctx, rn, grabRequest{
+		show: sh, episodes: c.Episodes, rel: b.of[c.Release], candidate: c.Candidate,
+		fullSeason: c.Parsed != nil && c.Parsed.FullSeason,
+	})
 	switch {
 	case err == nil:
 		return grabGrabbed

@@ -32,10 +32,10 @@ type Decider interface {
 
 // NewReleaseService returns a ReleaseService searching the indexers of
 // the providers that providers returns, which may be nil, for the items of
-// store; searches of monitored movies are decided on by decider, unless
-// nil.
-func NewReleaseService(store core.Store, providers func() []releases.Provider, decider Decider) *ReleaseService {
-	return &ReleaseService{searcher: &releases.Searcher{Providers: providers, Items: store.Items()}, decider: decider}
+// store, keeping them in cache unless nil; searches of monitored movies
+// are decided on by decider, unless nil.
+func NewReleaseService(store core.Store, providers func() []releases.Provider, cache *releases.IndexerCache, decider Decider) *ReleaseService {
+	return &ReleaseService{searcher: &releases.Searcher{Providers: providers, Items: store.Items(), Cache: cache}, decider: decider}
 }
 
 // ListIndexers lists the indexers of every ready indexer provider.
@@ -81,6 +81,20 @@ func (s *ReleaseService) SearchReleases(ctx context.Context, req *acquisitionv1.
 	}
 	for _, r := range req.GetIndexers() {
 		q.Indexers = append(q.Indexers, releases.Ref{Provider: r.GetPluginId(), Indexer: r.GetIndexerId()})
+	}
+	// Prowlarr's searches take the age and size limits; Radarr's and
+	// Sonarr's do not.
+	if req.HasMinAge() {
+		q.MinAge = new(req.GetMinAge())
+	}
+	if req.HasMaxAge() {
+		q.MaxAge = new(req.GetMaxAge())
+	}
+	if req.HasMinSize() {
+		q.MinSize = new(req.GetMinSize())
+	}
+	if req.HasMaxSize() {
+		q.MaxSize = new(req.GetMaxSize())
 	}
 	res, err := s.searcher.Search(ctx, q)
 	if err != nil {
