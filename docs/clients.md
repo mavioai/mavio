@@ -47,7 +47,7 @@ flowchart LR
         Report["Playback reporting<br/>downloads"]
     end
 
-    AppleLib["libs/apple<br/>AVPlayer + libmpv"]
+    AppleLib["libs/apple<br/>AVPlayer + AetherEngine"]
     AndroidLib["libs/android<br/>Media3 + libmpv"]
     iOS["apps/ios"]
     tvOS["apps/tvos"]
@@ -77,7 +77,7 @@ The server owns every decision that depends on the library, the user or other de
 | Concern | Where | How |
 | :--- | :--- | :--- |
 | Playback decision | Server | `PlaybackService` decides direct play, remux or transcode from the client's `ClientCapabilities` with `libs/media/decision`, together with the user's stream preferences, bitrate cap, transcoding permission and playback limits ([Architecture §11](architecture.md#11-api-and-authentication-appsserver)) |
-| Capabilities | Client | Probed with the platform's own APIs: AVFoundation and VideoToolbox, `MediaCodecList` and `Display.HdrCapabilities`, the browser's `MediaCapabilities` and `MediaSource.isTypeSupported`, and the decoders of the bundled libmpv. A client playing with two engines declares what either plays, so that the server processes media only when neither can (§4.2) |
+| Capabilities | Client | Probed with the platform's own APIs: AVFoundation and VideoToolbox, `MediaCodecList` and `Display.HdrCapabilities`, the browser's `MediaCapabilities` and `MediaSource.isTypeSupported`, and the decoders of the bundled second engines (AetherEngine, libmpv). A client playing with two engines declares what either plays, so that the server processes media only when neither can (§4.2) |
 | Progress | Client reports, server records | Reported through `PlaybackService` every 10 seconds while playing and on pause, seek and stop; the server ends a playback five minutes after its last report |
 | Live updates | Server pushes | One `EventService` stream per device: item and library changes, user data, sessions, remote-control commands and SyncPlay. Clients reconnect with backoff and do not poll |
 | Media and images | Plain HTTP | `/media/{playback}/…` and `/images/…`; the IDs are the credentials, so players need no headers |
@@ -103,14 +103,13 @@ The server owns every decision that depends on the library, the user or other de
   * `MavioKit`: the core's Swift API with the app services above it — accounts, capability probing, downloads with a background `URLSession`, Now Playing (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`);
   * `MavioPlayer`: one player interface with two engines, and Picture in Picture;
   * `MavioUI`: SwiftUI components each app composes in its own way (artwork, posters, rows), and the design tokens.
-* **Player engines**, in order of preference: AVPlayer, then libmpv, then the server's processing.
-  * **Capabilities**: the app declares in `direct_play` the profiles AVPlayer plays and those libmpv plays. The server therefore plays a source directly whenever either engine can, and remuxes or transcodes it only when neither can.
-  * **Choice**: a source played directly goes to AVPlayer when AVPlayer plays it as it is, else to libmpv; what the server remuxes or transcodes is HLS, which goes to AVPlayer.
-  * **Dolby Vision**: the libmpv profiles exclude Dolby Vision video, which libmpv shows only as HDR10, so the server remuxes such a source in Matroska into HLS, copying the video, and AVPlayer plays it in Dolby Vision.
-  * **AirPlay**: while AirPlay is in use, the app declares AVPlayer's profiles alone, libmpv having no AirPlay.
+* **Player engines**, in order of preference: AVPlayer, then AetherEngine, then the server's processing.
+  * **Capabilities**: the app declares in `direct_play` the profiles AVPlayer plays and those AetherEngine plays. The server therefore plays a source directly whenever either engine can, and remuxes or transcodes it only when neither can.
+  * **Choice**: a source played directly goes to AVPlayer when AVPlayer plays it as it is, else to AetherEngine; what the server remuxes or transcodes is HLS, which goes to AVPlayer.
+  * **AirPlay**: while AirPlay is in use, the app declares AVPlayer's profiles alone.
   * **AVPlayer**, the first engine, plays what AVFoundation plays — MP4 and MOV with H.264, HEVC, AV1 where the hardware decodes it, Dolby Vision and HDR10, AAC, AC-3 and E-AC-3 with Atmos — and every HLS stream the server makes. It brings system Picture in Picture, AirPlay, `AVPlayerViewController` on iOS and tvOS, and frame rate and dynamic range matching on tvOS (`AVDisplayCriteria`).
-  * **libmpv**, the second, direct plays what AVFoundation does not, such as Matroska with styled ASS subtitles, DTS and TrueHD, sparing the server a transcode. It renders as IINA does: mpv's render API (whose back ends are OpenGL and software) into a `CAOpenGLLayer`, and for HDR the layer is switched to EDR (`wantsExtendedDynamicRangeContent`, `RGBA16Float` contents, a PQ color space) with mpv's `target-trc=pq` and `target-peak` taken from the screen; on iOS and tvOS the OpenGL ES back end is used.
-* **Picture in Picture**: `AVPictureInPictureController` only, which is public and allowed in the App Store. AVPlayer gives it directly; libmpv playback feeds it through its `AVSampleBufferDisplayLayer` content source, with frames rendered into IOSurface-backed pixel buffers.
+  * **[AetherEngine](https://github.com/superuser404notfound/AetherEngine)**, the second, a Swift package pinned to an exact version, direct plays what AVFoundation does not, such as Matroska with styled ASS and PGS subtitles, VP9, DTS and TrueHD, sparing the server a transcode. FFmpeg demuxes and VideoToolbox decodes (dav1d and libavcodec where the hardware cannot), and frames reach Apple's own display stack — an `AVPlayerLayer` on its native path, an `AVSampleBufferDisplayLayer` on its software path — with no renderer of its own: HDR10, HDR10+, HLG and Dolby Vision (profiles 5, 7 as 8.1, and 8) go to the display as they are, through EDR on the Mac and iPad and with display criteria on tvOS. DTS and TrueHD are converted to E-AC-3 5.1 and E-AC-3 with Atmos is passed through. Its FFmpeg is embedded as dynamic LGPL frameworks, the only FFmpeg in the app.
+* **Picture in Picture**: `AVPictureInPictureController` only, which is public and allowed in the App Store. AVPlayer gives it directly, and AetherEngine through its `AVPlayerLayer` or its `AVSampleBufferDisplayLayer` content source. tvOS shows no Picture in Picture of a sample buffer display layer, so entering it while AetherEngine plays on its software path starts the playback again on AVPlayer, the server processing the source.
 
 ### 4.3 Android (`apps/android`, `apps/android-tv`, `libs/android`)
 * **One app per interaction model.** Phones, tablets and foldables share an app in Compose with adaptive layouts; Android TV and Google TV have their own in Compose for TV, built around D-pad focus, with Watch Next and channels on the home screen. They are published as one Play listing, the TV app for the TV form factor.

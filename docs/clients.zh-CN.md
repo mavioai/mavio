@@ -47,7 +47,7 @@ flowchart LR
         Report["播放上报<br/>下载"]
     end
 
-    AppleLib["libs/apple<br/>AVPlayer + libmpv"]
+    AppleLib["libs/apple<br/>AVPlayer + AetherEngine"]
     AndroidLib["libs/android<br/>Media3 + libmpv"]
     iOS["apps/ios"]
     tvOS["apps/tvos"]
@@ -77,7 +77,7 @@ flowchart LR
 | 关注点 | 归属 | 方式 |
 | :--- | :--- | :--- |
 | 播放决策 | 服务端 | `PlaybackService` 依据客户端的 `ClientCapabilities`，以 `libs/media/decision` 决定直接播放、重封装或转码，并结合用户的流偏好、码率上限、转码权限与播放数限制（[架构 §11](architecture.zh-CN.md#11-api-与认证appsserver)） |
-| 能力 | 客户端 | 用平台自身的 API 探测：AVFoundation 与 VideoToolbox、`MediaCodecList` 与 `Display.HdrCapabilities`、浏览器的 `MediaCapabilities` 与 `MediaSource.isTypeSupported`，以及随附 libmpv 的解码器。以两个引擎播放的客户端，声明两者任一能播放的内容，使服务端只在两者都不能播放时才处理媒体（§4.2） |
+| 能力 | 客户端 | 用平台自身的 API 探测：AVFoundation 与 VideoToolbox、`MediaCodecList` 与 `Display.HdrCapabilities`、浏览器的 `MediaCapabilities` 与 `MediaSource.isTypeSupported`，以及随附的第二引擎（AetherEngine、libmpv）的解码器。以两个引擎播放的客户端，声明两者任一能播放的内容，使服务端只在两者都不能播放时才处理媒体（§4.2） |
 | 进度 | 客户端上报，服务端记录 | 通过 `PlaybackService` 在播放时每 10 秒上报一次，并在暂停、跳转与停止时上报；服务端在最后一次上报五分钟后结束该播放 |
 | 实时更新 | 服务端推送 | 每台设备一条 `EventService` 流：条目与媒体库变更、用户数据、会话、远程控制命令与 SyncPlay。客户端以退避重连，不轮询 |
 | 媒体与图片 | 普通 HTTP | `/media/{playback}/…` 与 `/images/…`；ID 即凭据，播放器无需附加请求头 |
@@ -103,14 +103,13 @@ flowchart LR
   * `MavioKit`：核心的 Swift API 及其上的应用服务——账户、能力探测、以后台 `URLSession` 下载、正在播放（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）；
   * `MavioPlayer`：一个播放器接口、两个引擎，以及画中画；
   * `MavioUI`：各应用以各自方式组合的 SwiftUI 组件（图片、海报、行），以及设计 tokens。
-* **播放引擎**，优先顺序为：AVPlayer，其次 libmpv，最后由服务端处理。
-  * **能力**：应用在 `direct_play` 中声明 AVPlayer 能播放的配置与 libmpv 能播放的配置。因此只要任一引擎能播放，服务端就直接播放该源；两者都不能播放时才重封装或转码。
-  * **选择**：直接播放的源，AVPlayer 能原样播放时交给 AVPlayer，否则交给 libmpv；服务端重封装或转码的结果是 HLS，交给 AVPlayer。
-  * **杜比视界**：libmpv 的配置排除杜比视界视频（libmpv 只能将其显示为 HDR10），因此 Matroska 中的此类源由服务端拷贝视频重封装为 HLS，由 AVPlayer 以杜比视界播放。
-  * **AirPlay**：使用 AirPlay 时，应用只声明 AVPlayer 的配置，因为 libmpv 不支持 AirPlay。
+* **播放引擎**，优先顺序为：AVPlayer，其次 AetherEngine，最后由服务端处理。
+  * **能力**：应用在 `direct_play` 中声明 AVPlayer 能播放的配置与 AetherEngine 能播放的配置。因此只要任一引擎能播放，服务端就直接播放该源；两者都不能播放时才重封装或转码。
+  * **选择**：直接播放的源，AVPlayer 能原样播放时交给 AVPlayer，否则交给 AetherEngine；服务端重封装或转码的结果是 HLS，交给 AVPlayer。
+  * **AirPlay**：使用 AirPlay 时，应用只声明 AVPlayer 的配置。
   * **AVPlayer** 是首选引擎，播放 AVFoundation 能播放的内容——H.264、HEVC、硬件可解码时的 AV1、杜比视界与 HDR10 的 MP4 与 MOV，AAC、AC-3 及带 Atmos 的 E-AC-3——以及服务端产生的所有 HLS 流。它带来系统画中画、AirPlay、iOS 与 tvOS 上的 `AVPlayerViewController`，以及 tvOS 上的帧率与动态范围匹配（`AVDisplayCriteria`）。
-  * **libmpv** 是第二引擎，直接播放 AVFoundation 不能播放的内容，如带样式 ASS 字幕的 Matroska、DTS 与 TrueHD，免去服务端转码。其渲染方式与 IINA 相同：mpv 的 render API（后端为 OpenGL 与软件渲染）渲染到 `CAOpenGLLayer`；HDR 时把该层切换为 EDR（`wantsExtendedDynamicRangeContent`、`RGBA16Float` 内容、PQ 色彩空间），mpv 设置 `target-trc=pq`，`target-peak` 取自屏幕；iOS 与 tvOS 上使用 OpenGL ES 后端。
-* **画中画**：只用公开且被 App Store 允许的 `AVPictureInPictureController`。AVPlayer 直接支持；libmpv 播放通过其 `AVSampleBufferDisplayLayer` 内容源接入，帧渲染到以 IOSurface 为后备的像素缓冲区。
+  * **[AetherEngine](https://github.com/superuser404notfound/AetherEngine)** 是第二引擎，以 Swift 包引入并固定到确切版本，直接播放 AVFoundation 不能播放的内容，如带样式 ASS 与 PGS 字幕的 Matroska、VP9、DTS 与 TrueHD，免去服务端转码。FFmpeg 解封装，VideoToolbox 解码（硬件不支持时用 dav1d 与 libavcodec），帧交给 Apple 自身的显示栈——原生路径上是 `AVPlayerLayer`，软件路径上是 `AVSampleBufferDisplayLayer`——没有自己的渲染器：HDR10、HDR10+、HLG 与杜比视界（配置 5、作为 8.1 的 7，以及 8）原样输出到显示器，在 Mac 与 iPad 上经由 EDR，在 tvOS 上配合显示条件。DTS 与 TrueHD 转换为 E-AC-3 5.1，带 Atmos 的 E-AC-3 直通。其 FFmpeg 以 LGPL 动态框架嵌入，是应用中唯一的 FFmpeg。
+* **画中画**：只用公开且被 App Store 允许的 `AVPictureInPictureController`。AVPlayer 直接支持，AetherEngine 经由其 `AVPlayerLayer` 或 `AVSampleBufferDisplayLayer` 内容源接入。tvOS 不显示样本缓冲显示层的画中画，因此 AetherEngine 在软件路径上播放时进入画中画，改由 AVPlayer 重新开始播放，由服务端处理该源。
 
 ### 4.3 Android（`apps/android`、`apps/android-tv`、`libs/android`）
 * **每种交互模型一个应用。** 手机、平板与折叠屏共用一个以 Compose 编写、采用自适应布局的应用；Android TV 与 Google TV 有自己的 Compose for TV 应用，围绕方向键焦点构建，并提供主屏上的 Watch Next 与频道。两者作为同一个 Play 商店条目发布，TV 应用面向 TV 设备类型。

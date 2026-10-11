@@ -564,7 +564,7 @@ flowchart TD
 - [ ] 原型：
   - [x] tvOS 上的 Rust：在 `nightly-2026-10-10` 上以 `-Zbuild-std` 构建，`mavio-api` 及其 `events` 示例可为 `aarch64-apple-tvos` 与 `aarch64-apple-tvos-sim` 构建，示例在 tvOS 模拟器中运行，TLS（rustls 与 aws-lc-rs）可构建
   - [x] connect-rust 与 `EventService` 的流：`libs/client-rust/api/examples/events.rs` 登录并打印设备的事件，在 macOS 与 tvOS 模拟器上均可运行
-  - [ ] macOS、iOS 与 tvOS 上 libmpv 的 EDR 与画中画
+  - [ ] macOS、iOS 与 tvOS 上 AetherEngine 的 EDR 与画中画
   - [ ] MyGo 的视频元素，含 Windows 上的 HDR10：延后到有 Windows 机器时，在 Windows 与 Linux 应用开始之前完成
 - [ ] 各应用与库的骨架
 - [ ] `libs/client-rust`：服务器与登录、事件流、离线存储、播放上报、下载、页面状态、多台服务器的合并；Swift、Kotlin 与 Go 绑定
@@ -612,8 +612,8 @@ flowchart TD
 | 剧集编号 | release 与文件按 TVDB 编号，TMDB 的元数据可能对同样的单集另行编号，动漫尤甚 | P15 与 P16 的显示顺序（TMDB episode groups）与单集 TVDB ID；P19 的 scene 映射与 XEM |
 | 索引器变动 | 站点会改变页面与 API | Cardigann 定义在运行时拉取；索引器插件从插件目录升级，无需发布服务端 |
 | 电视直播、录像与频道 | Jellyfin 中体量很大的部分，Mavio 既未采纳也未排除；插件平台不包含它们的提供者类型 | P21 之前决定 |
-| 客户端许可证与应用商店 | 客户端将与仓库其余部分一样采用 GPL-3.0，其条款与 App Store 的条款冲突；以 LGPL 构建的 libmpv 与 FFmpeg 还要求允许用户重新链接 | 首次在 App Store 发布前决定：为客户端另定许可证、要求贡献者协议，或不通过 App Store 分发 |
-| Apple 平台上的 libmpv | mpv 的 render API 只有 OpenGL 与软件渲染后端，而 OpenGL 在 Apple 平台上已弃用；IINA 的画中画使用 App Store 不接受的私有 `PIP.framework`，因此 libmpv 播放经 `AVSampleBufferDisplayLayer` 接入 `AVPictureInPictureController` 尚未得到验证 | P21 先做原型：macOS、iOS 与 tvOS 上 libmpv 播放的 EDR 输出与画中画。若无法接入画中画，则 libmpv 播放中进入画中画时改由 AVPlayer 重新开始播放，由服务端处理该源。另需验证服务端重封装杜比视界源时保留其杜比视界元数据 |
+| 客户端许可证与应用商店 | 客户端将与仓库其余部分一样采用 GPL-3.0，其条款与 App Store 的条款冲突；以 LGPL 构建的 FFmpeg（Apple 平台上为 AetherEngine 的框架）与 libmpv 还要求允许用户重新链接 | 首次在 App Store 发布前决定：为客户端另定许可证、要求贡献者协议，或不通过 App Store 分发 |
+| AetherEngine | Apple 应用的第二引擎是一个年轻的包，主要由一位维护者开发，7.x 版本发布频繁 | P21 先做原型：macOS、iOS 与 tvOS 上 HDR10 Matroska 源的 EDR 输出、杜比视界、带样式的 ASS 字幕与画中画；固定版本并跟进其发布 |
 | Android 上的 libmpv | libmpv 是 Android 应用的第二引擎；在 Android TV 设备（其中许多为 32 位）孱弱的 GPU 上，其 OpenGL ES 渲染可能过慢，且不能输出 HDR | P21 在低端 Android TV 设备上实测；libmpv 跟不上的设备，应用不在能力中声明它，由服务端处理该源 |
 | tvOS 上的 Rust | `aarch64-apple-tvos` 是 Rust 的 tier 3 目标：没有预编译的标准库，需在 nightly 上以 `-Zbuild-std` 构建 | P21 已做原型：核心的依赖在 `nightly-2026-10-10` 上可构建并运行（[开发 §1](development.zh-CN.md#1-工具链与环境)）；有意识地推进该固定版本 |
 | 1.0 之前的 connect-rust | `libs/client-rust` 使用的 connect-rust 仍处于 0.x，API 可能变化 | 固定版本；跟进其发布 |
