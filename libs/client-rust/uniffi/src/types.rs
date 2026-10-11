@@ -4,10 +4,10 @@ use std::collections::HashMap;
 use std::time::{Duration, SystemTime};
 
 use mavio_core::{
-    Artwork, Card, CardKind, CreditEntry, Details, DeviceInfo, DownloadEntry, DownloadState,
-    Filter, FoundServer, Libraries, LibraryEntry, LibraryType, Page, PlaybackOptions, Row,
-    RowContent, RowKind, SearchResults, ServerInfo, ServerRecord, Sort, Source, StreamState,
-    TitleCard, Transfer, Version,
+    Artwork, AudioStream, Card, CardKind, CreditEntry, Details, DeviceInfo, DownloadEntry,
+    DownloadState, Filter, FoundServer, Libraries, LibraryEntry, LibraryType, Page,
+    PlaybackOptions, Row, RowContent, RowKind, SearchResults, ServerInfo, ServerRecord, Sort,
+    Source, StreamState, TitleCard, Transfer, Version,
 };
 
 #[uniffi::remote(Record)]
@@ -229,6 +229,18 @@ pub struct Source {
     pub media_source_id: Option<String>,
     pub name: Option<String>,
     pub size: Option<u64>,
+    pub container: Option<String>,
+    pub audio: Vec<AudioStream>,
+}
+
+#[uniffi::remote(Record)]
+pub struct AudioStream {
+    pub index: i32,
+    pub language: Option<String>,
+    pub title: Option<String>,
+    pub codec: String,
+    pub channels: i32,
+    pub default: bool,
 }
 
 #[uniffi::remote(Record)]

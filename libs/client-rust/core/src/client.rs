@@ -10,7 +10,7 @@ use mavio_api::proto::mavio::home::v1::{GetHubRequest, ListHubsRequest, ListHubs
 use mavio_api::proto::mavio::library::v1::{
     CreditKind, GetItemRequest, GetItemResponse, ImageKind, Item, ItemKind, LibraryKind,
     ListItemsRequest, ListLibrariesRequest, ListLibrariesResponse, ListSimilarItemsRequest,
-    SortField, SortSpec,
+    SortField, SortSpec, StreamKind,
 };
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::Event;
@@ -198,6 +198,27 @@ pub struct Source {
     pub name: Option<String>,
     /// The file's size.
     pub size: Option<u64>,
+    /// The file's container, such as "mkv", for a file of this server.
+    pub container: Option<String>,
+    /// The file's audio streams, for a file of this server.
+    pub audio: Vec<AudioStream>,
+}
+
+/// An audio stream of a file, to choose it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct AudioStream {
+    /// The stream's index in the file.
+    pub index: i32,
+    /// Its language.
+    pub language: Option<String>,
+    /// Its title.
+    pub title: Option<String>,
+    /// Its codec, such as "aac".
+    pub codec: String,
+    /// Its channels.
+    pub channels: i32,
+    /// Whether it is the default.
+    pub default: bool,
 }
 
 /// An item's details.
@@ -826,6 +847,23 @@ impl Core {
                 media_source_id: m.id.clone(),
                 name: m.name.clone().filter(|n| !n.is_empty()),
                 size: m.size_bytes.filter(|s| *s > 0).map(|s| s as u64),
+                container: m.container.clone().filter(|c| !c.is_empty()),
+                audio: m
+                    .streams
+                    .iter()
+                    .filter(|s| {
+                        s.kind.as_ref().and_then(|k| k.as_known())
+                            == Some(StreamKind::STREAM_KIND_AUDIO)
+                    })
+                    .map(|s| AudioStream {
+                        index: s.index.unwrap_or_default(),
+                        language: s.language.clone().filter(|l| !l.is_empty()),
+                        title: s.title.clone().filter(|t| !t.is_empty()),
+                        codec: s.codec.clone().unwrap_or_default(),
+                        channels: s.channels.unwrap_or_default(),
+                        default: s.default.unwrap_or_default(),
+                    })
+                    .collect(),
             })
             .collect();
         sources.extend(others);
@@ -966,6 +1004,8 @@ impl Core {
                         media_source_id: None,
                         name: None,
                         size: None,
+                        container: None,
+                        audio: Vec::new(),
                     },
                 ))
             });
@@ -1013,7 +1053,7 @@ impl Core {
 mod tests {
     use mavio_api::proto::mavio::home::v1::Hub;
     use mavio_api::proto::mavio::library::v1::{
-        HubKind, ItemKind, ListItemsResponse, ListSimilarItemsResponse,
+        HubKind, ItemKind, ListItemsResponse, ListSimilarItemsResponse, MediaSource, MediaStream,
     };
 
     use super::*;
@@ -1170,8 +1210,27 @@ mod tests {
         a.unary(
             "/mavio.library.v1.ItemService/GetItem",
             |_, req: GetItemRequest| {
+                let stream = |index, kind: StreamKind, codec: &str| MediaStream {
+                    index: Some(index),
+                    kind: Some(kind.into()),
+                    codec: Some(codec.into()),
+                    ..Default::default()
+                };
                 Ok(GetItemResponse {
                     item: movie(req.id.as_deref().unwrap(), "68").into(),
+                    media_sources: vec![MediaSource {
+                        id: Some("ms1".into()),
+                        container: Some("mkv".into()),
+                        streams: vec![
+                            stream(0, StreamKind::STREAM_KIND_VIDEO, "hevc"),
+                            MediaStream {
+                                language: Some("jpn".into()),
+                                channels: Some(6),
+                                ..stream(1, StreamKind::STREAM_KIND_AUDIO, "ac3")
+                            },
+                        ],
+                        ..Default::default()
+                    }],
                     ..Default::default()
                 })
             },
@@ -1211,6 +1270,18 @@ mod tests {
             }]
         );
         assert_eq!(d.sources.last().unwrap().server_name, "Friend");
+        assert_eq!(d.sources[0].container.as_deref(), Some("mkv"));
+        assert_eq!(
+            d.sources[0].audio,
+            [AudioStream {
+                index: 1,
+                language: Some("jpn".into()),
+                title: None,
+                codec: "ac3".into(),
+                channels: 6,
+                default: false,
+            }]
+        );
 
         // a goes away: its details come from the offline store.
         a.unary(
