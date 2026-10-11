@@ -564,7 +564,8 @@ flowchart TD
 - [ ] Prototypes:
   - [x] Rust on tvOS: on `nightly-2026-10-10` with `-Zbuild-std`, `mavio-api` and its `events` example build for `aarch64-apple-tvos` and `aarch64-apple-tvos-sim`, the example runs in the tvOS simulator, and TLS (rustls with aws-lc-rs) builds
   - [x] connect-rust streams with `EventService`: `libs/client-rust/api/examples/events.rs` signs in and prints the device's events, on macOS and in the tvOS simulator
-  - [ ] AetherEngine with EDR and Picture in Picture on macOS, iOS and tvOS
+  - [x] AetherEngine 7.34.0 on macOS, iOS and tvOS: on the Mac an HDR10 Matroska source plays on AVPlayer through the engine's remux, decoded by VideoToolbox, and raises the display's EDR headroom; Picture in Picture starts on its `AVPlayerLayer` and, for VP9, AV1 and MPEG-2 on its software path, on its `AVSampleBufferDisplayLayer`; an ASS track arrives as raw event lines with its script header. The iPad and Apple TV simulators play the same sources on the software path, and the iPad one enters Picture in Picture on the sample buffer display layer when the app goes to the background
+    - [ ] On the user's devices: the picture inside Picture in Picture on an iPhone or iPad, HDR10 and display criteria on an Apple TV, and a Dolby Vision source
   - [ ] MyGo's video element, with HDR10 on Windows: deferred until a Windows machine is available, before the Windows and Linux app starts
 - [ ] Skeletons of the apps and libraries
 - [ ] `libs/client-rust`: servers and sign-in, the event stream, the offline store, playback reporting, downloads, screen state, the merging of several servers; the Swift, Kotlin and Go bindings
