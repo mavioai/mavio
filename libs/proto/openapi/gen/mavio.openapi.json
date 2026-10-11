@@ -7234,6 +7234,15 @@
             "title": "absolute_number",
             "format": "int32",
             "description": "An episode's number counted across seasons; unset when unknown."
+          },
+          "userData": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.user.v1.UserData"
+              }
+            ],
+            "title": "user_data",
+            "description": "The caller's state of the item, unset when it has none; set where the\n item is listed for the caller."
           }
         },
         "title": "Item",
@@ -15266,20 +15275,20 @@
       "description": "IssueService takes the problems users report with items, as Seerr's\n issues: users who may report issues report them and comment on their\n own; administrators see, comment on, resolve and delete all."
     },
     {
-      "name": "ItemService",
-      "description": "ItemService browses and searches library items."
-    },
-    {
-      "name": "WantedService",
-      "description": "WantedService adds the movies and series to acquire, and searches for\n them. Administrators only."
-    },
-    {
       "name": "UserService",
       "description": "UserService manages accounts. All methods except GetCurrentUser and\n UpdatePreferences require an administrator."
     },
     {
       "name": "UserDataService",
       "description": "UserDataService reads and updates the calling user's per-item state."
+    },
+    {
+      "name": "ItemService",
+      "description": "ItemService browses and searches library items."
+    },
+    {
+      "name": "WantedService",
+      "description": "WantedService adds the movies and series to acquire, and searches for\n them. Administrators only."
     },
     {
       "name": "AuthService",

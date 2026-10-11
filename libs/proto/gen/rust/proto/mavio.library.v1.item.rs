@@ -1526,6 +1526,14 @@ pub struct Item {
     ///
     /// Field 49: `absolute_number`
     pub absolute_number: ::core::option::Option<i32>,
+    /// The caller's state of the item, unset when it has none; set where the
+    /// item is listed for the caller.
+    ///
+    /// Field 50: `user_data`
+    pub user_data: ::buffa::MessageField<
+        super::super::user::v1::UserData,
+        ::buffa::Inline<super::super::user::v1::UserData>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1581,6 +1589,7 @@ impl ::core::fmt::Debug for Item {
             .field("series_type", &self.series_type)
             .field("display_order", &self.display_order)
             .field("absolute_number", &self.absolute_number)
+            .field("user_data", &self.user_data)
             .finish()
     }
 }
@@ -2109,6 +2118,14 @@ impl ::buffa::Message for Item {
         if let Some(v) = self.absolute_number {
             size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if self.user_data.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.user_data.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2305,6 +2322,14 @@ impl ::buffa::Message for Item {
         }
         if let Some(v) = self.absolute_number {
             ::buffa::types::put_int32_field(49u32, v, buf);
+        }
+        if self.user_data.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                50u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.user_data.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2866,6 +2891,17 @@ impl ::buffa::Message for Item {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            50u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.user_data.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2923,6 +2959,7 @@ impl ::buffa::Message for Item {
         self.series_type = ::core::option::Option::None;
         self.display_order = ::core::option::Option::None;
         self.absolute_number = ::core::option::Option::None;
+        self.user_data = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }

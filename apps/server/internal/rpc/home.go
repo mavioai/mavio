@@ -39,7 +39,7 @@ func (s *HomeService) ListHubs(ctx context.Context, req *homev1.ListHubsRequest)
 	}
 	out := make([]*homev1.Hub, len(hubs))
 	for i := range hubs {
-		if out[i], err = s.hubToProto(ctx, &hubs[i], p.User.Admin); err != nil {
+		if out[i], err = s.hubToProto(ctx, &hubs[i], p.User.Admin, p.User.ID); err != nil {
 			return nil, connectError(ctx, err)
 		}
 	}
@@ -56,15 +56,15 @@ func (s *HomeService) GetHub(ctx context.Context, req *homev1.GetHubRequest) (*h
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := s.hubToProto(ctx, &h, p.User.Admin)
+	out, err := s.hubToProto(ctx, &h, p.User.Admin, p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
 	return homev1.GetHubResponse_builder{Hub: out}.Build(), nil
 }
 
-func (s *HomeService) hubToProto(ctx context.Context, h *home.Hub, admin bool) (*homev1.Hub, error) {
-	items, err := itemsToProto(ctx, s.store, h.Items, admin)
+func (s *HomeService) hubToProto(ctx context.Context, h *home.Hub, admin bool, viewer core.ID) (*homev1.Hub, error) {
+	items, err := itemsToProto(ctx, s.store, h.Items, admin, viewer)
 	if err != nil {
 		return nil, err
 	}

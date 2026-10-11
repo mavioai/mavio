@@ -6,6 +6,7 @@ import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "mavio/library/v1/media.proto";
+import "mavio/user/v1/user.proto";
 
 // ItemService browses and searches library items.
 service ItemService {
@@ -285,6 +286,9 @@ message Item {
   DisplayOrder display_order = 48;
   // An episode's number counted across seasons; unset when unknown.
   int32 absolute_number = 49;
+  // The caller's state of the item, unset when it has none; set where the
+  // item is listed for the caller.
+  mavio.user.v1.UserData user_data = 50;
 }
 
 // ExternalUrl is the page of an item or person on an external site.
