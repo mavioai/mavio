@@ -143,8 +143,8 @@ The server owns every decision that depends on the library, the user or other de
 * **Event stream**: one `EventService` stream per server, reconnected with backoff, its events dispatched to the app.
 * **Offline store**: SQLite (`rusqlite`, bundled SQLite) with the items last browsed, so that the app starts on cached content, the downloaded items, and the progress reports made offline, sent once the server is reachable.
 * **Playback reporting**: starting playbacks, the periodic and final progress reports, and the replay of offline ones.
-* **Downloads**: the queue, its state, and the items downloaded; the apps move the bytes with the platform's background transfer.
-* **Screen state**: a view model for every screen of §6.3 — the data it shows, its loading, empty and error states, and the actions it offers — observed by the apps, which only draw it; the screens therefore behave alike on every platform. `libs/client-ts` gives the web UI the same view models as hooks.
+* **Downloads**: the queue, its state, and the items downloaded; the core asks the server for the file to keep, and the apps move its bytes with the platform's background transfer and report how far they got.
+* **Screen state**: for every screen of §6.3 the data it shows — cards, rows, details, libraries and their grids, search results and downloads, as plain records with image URLs resolved — whether it came from the offline store, its errors, and the actions it offers. Home arrives through a listener as each server answers (§5.4). The apps keep each screen's loading state in their own observable model and only draw; the screens therefore behave alike on every platform. `libs/client-ts` gives the web UI the same data as hooks.
 
 ### 5.2 Boundaries
 * No GUI, graphics or decoding: the view models hold state, not layout; the core never touches a video surface or a decoder, and never probes capabilities; the apps pass their `ClientCapabilities` in.
@@ -152,6 +152,7 @@ The server owns every decision that depends on the library, the user or other de
 * Targets: `aarch64-apple-ios`, `aarch64-apple-ios-sim`, `aarch64-apple-tvos`, `aarch64-apple-tvos-sim`, `aarch64-apple-darwin`, `x86_64-apple-darwin`, `aarch64-linux-android`, `armv7-linux-androideabi` (many Android TV devices run 32-bit), `x86_64-linux-android`, `x86_64-pc-windows-msvc`, `aarch64-pc-windows-msvc`, `x86_64-unknown-linux-gnu`, `aarch64-unknown-linux-gnu`.
 
 ### 5.3 Bindings
+* **The UniFFI API** (`mavio-uniffi`): the object `Client`, whose async functions run on one Tokio runtime of the process and are cancelled when the app drops their future; the interfaces the app implements: `SecureTokens` for the tokens, `CoreListener` for the streams' states and events, `HomeListener` for Home; and the client's capabilities as typed records, converted to `ClientCapabilities`.
 * **Swift**: UniFFI generates the Swift API, packaged with the shared libraries as an XCFramework of dynamic frameworks that `MavioKit` depends on.
 * **Kotlin**: UniFFI generates the Kotlin API, packaged with the shared libraries in the `core` module of `libs/android`.
 * **Go**: a C ABI of a few functions taking and returning byte buffers, which hold protobuf messages of the core's API, defined in `libs/client-rust/proto`; results and events come back through one callback, so that purego creates a single callback for the process. The Go API is generated from those messages.

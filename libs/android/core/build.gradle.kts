@@ -25,6 +25,9 @@ androidComponents {
 
 dependencies {
     implementation("${libs.jna.get()}@aar")
+    implementation(libs.androidx.annotation)
+    // The API's async functions are suspend functions.
+    api(libs.kotlinx.coroutines.core)
     testImplementation(libs.jna)
     testImplementation(libs.junit)
 }

@@ -143,8 +143,8 @@ flowchart LR
 * **事件流**：每台服务器一条 `EventService` 流，以退避重连，事件分发给应用。
 * **离线存储**：SQLite（`rusqlite`，内置 SQLite），保存最近浏览的条目以便应用以缓存内容启动、已下载的条目，以及离线时产生的进度上报，待服务器可达后发送。
 * **播放上报**：开始播放、周期与最终进度上报，以及离线上报的补发。
-* **下载**：队列、其状态与已下载的条目；字节由应用借助平台的后台传输搬运。
-* **页面状态**：§6.3 中每个页面的视图模型——它显示的数据、加载、空与错误状态，以及它提供的操作——由应用观察，应用只负责绘制；因此各页面在所有平台上行为一致。`libs/client-ts` 以 hooks 形式为 Web UI 提供相同的视图模型。
+* **下载**：队列、其状态与已下载的条目；核心向服务器请求要保存的文件，应用借助平台的后台传输搬运其字节并上报进度。
+* **页面状态**：§6.3 中每个页面显示的数据——卡片、行、详情、媒体库及其网格、搜索结果与下载，均为图片 URL 已解析的普通记录——它是否来自离线存储、它的错误，以及它提供的操作。首页在每台服务器应答时经由监听器到达（§5.4）。应用把每个页面的加载状态保存在自己的可观察模型中，只负责绘制；因此各页面在所有平台上行为一致。`libs/client-ts` 以 hooks 形式为 Web UI 提供相同的数据。
 
 ### 5.2 边界
 * 不含 GUI、图形与解码：视图模型只含状态，不含布局；核心从不接触视频表面或解码器，也不探测能力；应用把自己的 `ClientCapabilities` 传入。
@@ -152,6 +152,7 @@ flowchart LR
 * 目标平台：`aarch64-apple-ios`、`aarch64-apple-ios-sim`、`aarch64-apple-tvos`、`aarch64-apple-tvos-sim`、`aarch64-apple-darwin`、`x86_64-apple-darwin`、`aarch64-linux-android`、`armv7-linux-androideabi`（许多 Android TV 设备运行 32 位系统）、`x86_64-linux-android`、`x86_64-pc-windows-msvc`、`aarch64-pc-windows-msvc`、`x86_64-unknown-linux-gnu`、`aarch64-unknown-linux-gnu`。
 
 ### 5.3 绑定
+* **UniFFI API**（`mavio-uniffi`）：对象 `Client`，其异步函数运行在进程唯一的 Tokio 运行时上，应用丢弃其 future 时即被取消；应用实现的接口：保存令牌的 `SecureTokens`、接收流状态与事件的 `CoreListener`、接收首页的 `HomeListener`；客户端能力以类型化记录表示，转换为 `ClientCapabilities`。
 * **Swift**：UniFFI 生成 Swift API，与共享库一起打包为 `MavioKit` 所依赖的、由动态 framework 组成的 XCFramework。
 * **Kotlin**：UniFFI 生成 Kotlin API，与共享库一起打包在 `libs/android` 的 `core` 模块中。
 * **Go**：一个由少量函数组成的 C ABI，参数与返回值是字节缓冲区，其中是核心 API 的 protobuf 消息，定义在 `libs/client-rust/proto`；结果与事件通过同一个回调返回，因此 purego 在整个进程中只需创建一个回调。Go API 由这些消息生成。

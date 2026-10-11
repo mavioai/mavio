@@ -585,7 +585,9 @@ flowchart TD
   - [x] Apple: `libs/apple` (`MavioKit` over the core's XCFramework, `MavioPlayer` with AetherEngine, `MavioUI` over `MavioDesign`, the Swift package of `libs/design`) and the apps `apps/ios`, `apps/tvos` and `apps/macos`, each showing the core's version on the simulator and the Mac
   - [x] Android: `libs/android` (`core` with the core's Kotlin API and libraries, `player` with Media3, `ui` with the design tokens, icons and strings) and the apps `apps/android` and `apps/android-tv`, which build and pass Android lint
   - [ ] Windows and Linux: `apps/windows-linux` with the core's C ABI (`capi`, `proto`); deferred with MyGo's video element until a Windows machine is available
-- [ ] `libs/client-rust`: servers and sign-in, the event stream, the offline store, playback reporting, downloads, screen state, the merging of several servers; the Swift, Kotlin and Go bindings
+- [x] `libs/client-rust`: servers, their discovery and sign-in (password, first user, Quick Connect), the event streams with backoff, the offline store, playback reporting with offline replay, downloads, screen state, the merging of several servers (Home, Search, items' copies on other servers); the Swift and Kotlin bindings
+  - [ ] The Go binding (`capi`, `proto`), with the Windows and Linux app
+  - [ ] Remote control commands and SyncPlay over the event stream, with the players of the apps that take them
 - [ ] Web UI (`apps/web`, `libs/client-ts`)
 - [ ] iPhone and iPad app (`apps/ios`, `libs/apple`)
 - [ ] Android phone and tablet app (`apps/android`, `libs/android`)

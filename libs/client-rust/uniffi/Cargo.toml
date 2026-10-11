@@ -15,7 +15,9 @@ name = "mavio"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
+mavio-api = { path = "../api" }
 mavio-core = { path = "../core" }
+tokio = { version = "1", features = ["rt-multi-thread"] }
 uniffi.workspace = true
 
 [lints]
