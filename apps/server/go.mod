@@ -14,6 +14,7 @@ require (
 	github.com/mavioai/mavio/libs/naming v0.0.0
 	github.com/mavioai/mavio/libs/plugin v0.0.0
 	github.com/mavioai/mavio/libs/proto v0.0.0
+	github.com/mavioai/mavio/libs/release v0.0.0
 	github.com/mavioai/mavio/libs/store v0.0.0
 	github.com/mavioai/mavio/libs/streaming v0.0.0-20261009053433-ba7d51fbd256
 	github.com/mavioai/mavio/libs/subtitle v0.0.0
@@ -22,8 +23,8 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	golang.org/x/crypto v0.57.0
-	golang.org/x/sync v0.23.0
-	golang.org/x/text v0.42.0
+	golang.org/x/sync v0.24.0
+	golang.org/x/text v0.43.0
 	google.golang.org/protobuf v1.36.12
 )
 
@@ -73,7 +74,6 @@ require (
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lufia/plan9stats v0.0.0-20260330125221-c963978e514e // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
-	github.com/mavioai/mavio/libs/release v0.0.0
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.2.0 // indirect
