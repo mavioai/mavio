@@ -1350,6 +1350,11 @@ pub struct DownloadClientView<'a> {
     ///
     /// Field 12: `host`
     pub host: ::core::option::Option<&'a str>,
+    /// The client's tags: a movie or series with tags only uses the clients
+    /// sharing one of them, else those without tags, as Radarr's.
+    ///
+    /// Field 13: `tags`
+    pub tags: ::buffa::RepeatedView<'a, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for DownloadClientView<'a> {
@@ -1486,6 +1491,17 @@ impl<'a> ::buffa::MessageView<'a> for DownloadClientView<'a> {
                 )?;
                 view.host = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.tags.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -1528,6 +1544,7 @@ impl<'a> ::buffa::MessageView<'a> for DownloadClientView<'a> {
             failure: self.failure.map(|s| s.to_string()),
             prefers_torrent_file: self.prefers_torrent_file,
             host: self.host.map(|s| s.to_string()),
+            tags: self.tags.iter().map(|s| s.to_string()).collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1578,6 +1595,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DownloadClientView<'a> {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         if let Some(ref v) = self.host {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.tags {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -1631,6 +1651,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DownloadClientView<'a> {
         }
         if let Some(ref v) = self.host {
             ::buffa::types::put_string_field(12u32, v, buf);
+        }
+        for v in &self.tags {
+            ::buffa::types::put_string_field(13u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1807,6 +1830,14 @@ impl DownloadClientOwnedView {
     #[must_use]
     pub fn host(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().host
+    }
+    /// The client's tags: a movie or series with tags only uses the clients
+    /// sharing one of them, else those without tags, as Radarr's.
+    ///
+    /// Field 13: `tags`
+    #[must_use]
+    pub fn tags(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().tags
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<DownloadClientView<'static>>>
@@ -2110,6 +2141,11 @@ pub struct TestDownloadClientResponseView<'a> {
     ///
     /// Field 1: `failure`
     pub failure: ::core::option::Option<&'a str>,
+    /// What the test warns of, though it passed, such as a category
+    /// recommended.
+    ///
+    /// Field 2: `warnings`
+    pub warnings: ::buffa::RepeatedView<'a, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for TestDownloadClientResponseView<'a> {
@@ -2149,6 +2185,17 @@ impl<'a> ::buffa::MessageView<'a> for TestDownloadClientResponseView<'a> {
                 )?;
                 view.failure = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.warnings.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -2178,6 +2225,7 @@ impl<'a> ::buffa::MessageView<'a> for TestDownloadClientResponseView<'a> {
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::TestDownloadClientResponse {
             failure: self.failure.map(|s| s.to_string()),
+            warnings: self.warnings.iter().map(|s| s.to_string()).collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2190,6 +2238,9 @@ impl<'a> ::buffa::ViewEncode<'a> for TestDownloadClientResponseView<'a> {
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
         if let Some(ref v) = self.failure {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.warnings {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -2205,6 +2256,9 @@ impl<'a> ::buffa::ViewEncode<'a> for TestDownloadClientResponseView<'a> {
         use ::buffa::Enumeration as _;
         if let Some(ref v) = self.failure {
             ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        for v in &self.warnings {
+            ::buffa::types::put_string_field(2u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2308,6 +2362,14 @@ impl TestDownloadClientResponseOwnedView {
     pub fn failure(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().failure
     }
+    /// What the test warns of, though it passed, such as a category
+    /// recommended.
+    ///
+    /// Field 2: `warnings`
+    #[must_use]
+    pub fn warnings(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().warnings
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<TestDownloadClientResponseView<'static>>>
 for TestDownloadClientResponseOwnedView {
@@ -2372,6 +2434,23 @@ pub struct AddDownloadRequestView<'a> {
     pub seed_time: ::buffa::MessageFieldView<
         ::buffa_types::google::protobuf::__buffa::view::DurationView<'a>,
     >,
+    /// The release is of a full season, which some clients cannot take.
+    ///
+    /// Field 11: `full_season`
+    pub full_season: ::core::option::Option<bool>,
+    /// What the release and its movie or series are, which clients such as
+    /// Flood tag downloads with.
+    ///
+    /// Field 12: `details`
+    pub details: ::buffa::MessageFieldView<
+        super::super::__buffa::view::DownloadDetailsView<'a>,
+    >,
+    /// The info hashes of torrents blocklisted for the movie or series, in
+    /// hex: a torrent whose hash is among them is refused, as Radarr refuses
+    /// blocklisted torrents whose hash was not known before grabbing.
+    ///
+    /// Field 13: `blocklisted_info_hashes`
+    pub blocklisted_info_hashes: ::buffa::RepeatedView<'a, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for AddDownloadRequestView<'a> {
@@ -2490,6 +2569,45 @@ impl<'a> ::buffa::MessageView<'a> for AddDownloadRequestView<'a> {
                     }
                 }
             }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.full_season = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.details.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.details = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::DownloadDetailsView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.blocklisted_info_hashes.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -2530,6 +2648,21 @@ impl<'a> ::buffa::MessageView<'a> for AddDownloadRequestView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            full_season: self.full_season,
+            details: match self.details.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::DownloadDetails,
+                        ::buffa::Inline<super::super::DownloadDetails>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            blocklisted_info_hashes: self
+                .blocklisted_info_hashes
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2576,6 +2709,20 @@ impl<'a> ::buffa::ViewEncode<'a> for AddDownloadRequestView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.full_season.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.details.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.details.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.blocklisted_info_hashes {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2621,6 +2768,20 @@ impl<'a> ::buffa::ViewEncode<'a> for AddDownloadRequestView<'a> {
                 buf,
             );
             self.seed_time.write_to(__cache, buf);
+        }
+        if let Some(v) = self.full_season {
+            ::buffa::types::put_bool_field(11u32, v, buf);
+        }
+        if self.details.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                12u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.details.write_to(__cache, buf);
+        }
+        for v in &self.blocklisted_info_hashes {
+            ::buffa::types::put_string_field(13u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2790,6 +2951,34 @@ impl AddDownloadRequestOwnedView {
     > {
         &self.0.reborrow().seed_time
     }
+    /// The release is of a full season, which some clients cannot take.
+    ///
+    /// Field 11: `full_season`
+    #[must_use]
+    pub fn full_season(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().full_season
+    }
+    /// What the release and its movie or series are, which clients such as
+    /// Flood tag downloads with.
+    ///
+    /// Field 12: `details`
+    #[must_use]
+    pub fn details(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::DownloadDetailsView<'_>,
+    > {
+        &self.0.reborrow().details
+    }
+    /// The info hashes of torrents blocklisted for the movie or series, in
+    /// hex: a torrent whose hash is among them is refused, as Radarr refuses
+    /// blocklisted torrents whose hash was not known before grabbing.
+    ///
+    /// Field 13: `blocklisted_info_hashes`
+    #[must_use]
+    pub fn blocklisted_info_hashes(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().blocklisted_info_hashes
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<AddDownloadRequestView<'static>>>
 for AddDownloadRequestOwnedView {
@@ -2812,6 +3001,402 @@ for AddDownloadRequestOwnedView {
 impl ::buffa::HasMessageView for super::super::AddDownloadRequest {
     type View<'a> = AddDownloadRequestView<'a>;
     type ViewHandle = AddDownloadRequestOwnedView;
+}
+/// DownloadDetails are what a release and its movie or series are, as
+/// Radarr's and Sonarr's Flood tags them.
+#[derive(Clone, Debug, Default)]
+pub struct DownloadDetailsView<'a> {
+    /// The release's quality, e.g. "Bluray-2160p".
+    ///
+    /// Field 1: `quality`
+    pub quality: ::core::option::Option<&'a str>,
+    /// The release's languages, by English name.
+    ///
+    /// Field 2: `languages`
+    pub languages: ::buffa::RepeatedView<'a, &'a str>,
+    /// Field 3: `release_group`
+    pub release_group: ::core::option::Option<&'a str>,
+    /// The name of the release's indexer.
+    ///
+    /// Field 4: `indexer`
+    pub indexer: ::core::option::Option<&'a str>,
+    /// The movie's or series' year; 0 when unknown.
+    ///
+    /// Field 5: `year`
+    pub year: ::core::option::Option<i32>,
+    /// The movie's collection.
+    ///
+    /// Field 6: `collection`
+    pub collection: ::core::option::Option<&'a str>,
+    /// The movie's studio, or the series' network.
+    ///
+    /// Field 7: `studio`
+    pub studio: ::core::option::Option<&'a str>,
+    /// The series' title as a URL slug, e.g. "big-buck-bunny".
+    ///
+    /// Field 8: `title_slug`
+    pub title_slug: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for DownloadDetailsView<'a> {
+    type Owned = super::super::DownloadDetails;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.quality = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.release_group = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.indexer = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.year = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.collection = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.studio = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.title_slug = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.languages.push(__elem);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::DownloadDetails, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::DownloadDetails, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::DownloadDetails {
+            quality: self.quality.map(|s| s.to_string()),
+            languages: self.languages.iter().map(|s| s.to_string()).collect(),
+            release_group: self.release_group.map(|s| s.to_string()),
+            indexer: self.indexer.map(|s| s.to_string()),
+            year: self.year,
+            collection: self.collection.map(|s| s.to_string()),
+            studio: self.studio.map(|s| s.to_string()),
+            title_slug: self.title_slug.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for DownloadDetailsView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.quality {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.release_group {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.indexer {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.year {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.collection {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.studio {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.title_slug {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.quality {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        for v in &self.languages {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.release_group {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.indexer {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(v) = self.year {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(ref v) = self.collection {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        if let Some(ref v) = self.studio {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.title_slug {
+            ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for DownloadDetailsView<'a> {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "DownloadDetails";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.DownloadDetails";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.DownloadDetails";
+}
+::buffa::impl_default_view_instance!(DownloadDetailsView);
+::buffa::impl_view_reborrow!(DownloadDetailsView);
+/** Self-contained, `'static` owned view of a `DownloadDetails` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`DownloadDetailsView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`DownloadDetailsView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct DownloadDetailsOwnedView(::buffa::OwnedView<DownloadDetailsView<'static>>);
+impl DownloadDetailsOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            DownloadDetailsOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            DownloadDetailsOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::DownloadDetails,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            DownloadDetailsOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`DownloadDetailsView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &DownloadDetailsView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::DownloadDetails {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// The release's quality, e.g. "Bluray-2160p".
+    ///
+    /// Field 1: `quality`
+    #[must_use]
+    pub fn quality(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().quality
+    }
+    /// The release's languages, by English name.
+    ///
+    /// Field 2: `languages`
+    #[must_use]
+    pub fn languages(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().languages
+    }
+    /// Field 3: `release_group`
+    #[must_use]
+    pub fn release_group(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().release_group
+    }
+    /// The name of the release's indexer.
+    ///
+    /// Field 4: `indexer`
+    #[must_use]
+    pub fn indexer(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().indexer
+    }
+    /// The movie's or series' year; 0 when unknown.
+    ///
+    /// Field 5: `year`
+    #[must_use]
+    pub fn year(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().year
+    }
+    /// The movie's collection.
+    ///
+    /// Field 6: `collection`
+    #[must_use]
+    pub fn collection(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().collection
+    }
+    /// The movie's studio, or the series' network.
+    ///
+    /// Field 7: `studio`
+    #[must_use]
+    pub fn studio(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().studio
+    }
+    /// The series' title as a URL slug, e.g. "big-buck-bunny".
+    ///
+    /// Field 8: `title_slug`
+    #[must_use]
+    pub fn title_slug(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().title_slug
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<DownloadDetailsView<'static>>>
+for DownloadDetailsOwnedView {
+    fn from(inner: ::buffa::OwnedView<DownloadDetailsView<'static>>) -> Self {
+        DownloadDetailsOwnedView(inner)
+    }
+}
+impl ::core::convert::From<DownloadDetailsOwnedView>
+for ::buffa::OwnedView<DownloadDetailsView<'static>> {
+    fn from(wrapper: DownloadDetailsOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<DownloadDetailsView<'static>>>
+for DownloadDetailsOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<DownloadDetailsView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::DownloadDetails {
+    type View<'a> = DownloadDetailsView<'a>;
+    type ViewHandle = DownloadDetailsOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct AddDownloadResponseView<'a> {

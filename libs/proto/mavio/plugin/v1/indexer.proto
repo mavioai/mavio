@@ -114,6 +114,9 @@ message Indexer {
   double seed_ratio = 15;
   google.protobuf.Duration seed_time = 16;
   google.protobuf.Duration season_pack_seed_time = 17;
+  // Torrents of the indexer whose hash is blocklisted are refused when
+  // grabbed, even though their hash was not known when they were chosen.
+  bool reject_blocklisted_torrent_hashes = 18;
 }
 
 // IndexerCapabilities is what an indexer can be searched by, as Newznab's

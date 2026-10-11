@@ -5171,6 +5171,11 @@ pub struct AcquisitionSettings {
     pub movie_folder_format: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 25: `standard_movie_format`
     pub standard_movie_format: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Search again when a download grabbed from an interactive search
+    /// fails, when auto_redownload_failed is set.
+    ///
+    /// Field 26: `auto_redownload_failed_from_interactive_search`
+    pub auto_redownload_failed_from_interactive_search: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -5202,6 +5207,10 @@ impl ::core::fmt::Debug for AcquisitionSettings {
             .field("colon_replacement", &self.colon_replacement)
             .field("movie_folder_format", &self.movie_folder_format)
             .field("standard_movie_format", &self.standard_movie_format)
+            .field(
+                "auto_redownload_failed_from_interactive_search",
+                &self.auto_redownload_failed_from_interactive_search,
+            )
             .finish()
     }
 }
@@ -5389,6 +5398,16 @@ impl AcquisitionSettings {
         self.standard_movie_format = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::auto_redownload_failed_from_interactive_search`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_auto_redownload_failed_from_interactive_search(
+        mut self,
+        value: bool,
+    ) -> Self {
+        self.auto_redownload_failed_from_interactive_search = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(AcquisitionSettings);
 impl ::buffa::MessageName for AcquisitionSettings {
@@ -5485,6 +5504,9 @@ impl ::buffa::Message for AcquisitionSettings {
         if let Some(ref v) = self.standard_movie_format {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.auto_redownload_failed_from_interactive_search.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -5569,6 +5591,9 @@ impl ::buffa::Message for AcquisitionSettings {
         }
         if let Some(ref v) = self.standard_movie_format {
             ::buffa::types::put_string_field(25u32, v, buf);
+        }
+        if let Some(v) = self.auto_redownload_failed_from_interactive_search {
+            ::buffa::types::put_bool_field(26u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5821,6 +5846,15 @@ impl ::buffa::Message for AcquisitionSettings {
                     buf,
                 )?;
             }
+            26u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.auto_redownload_failed_from_interactive_search = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5854,6 +5888,7 @@ impl ::buffa::Message for AcquisitionSettings {
         self.colon_replacement = ::core::option::Option::None;
         self.movie_folder_format = ::core::option::Option::None;
         self.standard_movie_format = ::core::option::Option::None;
+        self.auto_redownload_failed_from_interactive_search = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

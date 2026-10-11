@@ -1418,6 +1418,11 @@ pub struct IndexerView<'a> {
     pub season_pack_seed_time: ::buffa::MessageFieldView<
         ::buffa_types::google::protobuf::__buffa::view::DurationView<'a>,
     >,
+    /// Torrents of the indexer whose hash is blocklisted are refused when
+    /// grabbed, even though their hash was not known when they were chosen.
+    ///
+    /// Field 18: `reject_blocklisted_torrent_hashes`
+    pub reject_blocklisted_torrent_hashes: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for IndexerView<'a> {
@@ -1608,6 +1613,15 @@ impl<'a> ::buffa::MessageView<'a> for IndexerView<'a> {
                     }
                 }
             }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.reject_blocklisted_torrent_hashes = Some(
+                    ::buffa::types::decode_bool(&mut cur)?,
+                );
+            }
             11u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -1716,6 +1730,7 @@ impl<'a> ::buffa::MessageView<'a> for IndexerView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            reject_blocklisted_torrent_hashes: self.reject_blocklisted_torrent_hashes,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1798,6 +1813,9 @@ impl<'a> ::buffa::ViewEncode<'a> for IndexerView<'a> {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.reject_blocklisted_torrent_hashes.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1879,6 +1897,9 @@ impl<'a> ::buffa::ViewEncode<'a> for IndexerView<'a> {
                 buf,
             );
             self.season_pack_seed_time.write_to(__cache, buf);
+        }
+        if let Some(v) = self.reject_blocklisted_torrent_hashes {
+            ::buffa::types::put_bool_field(18u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2096,6 +2117,14 @@ impl IndexerOwnedView {
         ::buffa_types::google::protobuf::__buffa::view::DurationView<'_>,
     > {
         &self.0.reborrow().season_pack_seed_time
+    }
+    /// Torrents of the indexer whose hash is blocklisted are refused when
+    /// grabbed, even though their hash was not known when they were chosen.
+    ///
+    /// Field 18: `reject_blocklisted_torrent_hashes`
+    #[must_use]
+    pub fn reject_blocklisted_torrent_hashes(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().reject_blocklisted_torrent_hashes
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<IndexerView<'static>>>

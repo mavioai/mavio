@@ -28,7 +28,11 @@ service DownloadClientProviderService {
   rpc TestDownloadClient(TestDownloadClientRequest) returns (TestDownloadClientResponse);
   // AddDownload sends a release to a download client. It fails with
   // CodeUnimplemented when the client cannot take a magnet link, which is
-  // then sent as a torrent file where the release has one.
+  // then sent as a torrent file where the release has one, or a release of
+  // a full season it cannot take; with CodeFailedPrecondition when the
+  // client rejects the release, as a duplicate, or the torrent's hash is
+  // among the blocklisted hashes; with CodeInvalidArgument for an NZB that
+  // is not valid.
   rpc AddDownload(AddDownloadRequest) returns (AddDownloadResponse);
   // ListDownloads lists the downloads of download clients in their
   // categories for movies and series, with what each client tells of
@@ -98,6 +102,9 @@ message DownloadClient {
   // The host the client runs on, which remote path mappings are kept by;
   // empty for clients that are folders.
   string host = 12;
+  // The client's tags: a movie or series with tags only uses the clients
+  // sharing one of them, else those without tags, as Radarr's.
+  repeated string tags = 13;
 }
 
 message TestDownloadClientRequest {
@@ -111,6 +118,9 @@ message TestDownloadClientRequest {
 message TestDownloadClientResponse {
   // Empty when the test passed.
   string failure = 1;
+  // What the test warns of, though it passed, such as a category
+  // recommended.
+  repeated string warnings = 2;
 }
 
 // DownloadKind is what a download is of, which chooses its category and
@@ -143,6 +153,35 @@ message AddDownloadRequest {
   // for; unset for the client's own limits.
   double seed_ratio = 9 [(buf.validate.field).double.gte = 0];
   google.protobuf.Duration seed_time = 10;
+  // The release is of a full season, which some clients cannot take.
+  bool full_season = 11;
+  // What the release and its movie or series are, which clients such as
+  // Flood tag downloads with.
+  DownloadDetails details = 12;
+  // The info hashes of torrents blocklisted for the movie or series, in
+  // hex: a torrent whose hash is among them is refused, as Radarr refuses
+  // blocklisted torrents whose hash was not known before grabbing.
+  repeated string blocklisted_info_hashes = 13 [(buf.validate.field).repeated.items.string.max_len = 64];
+}
+
+// DownloadDetails are what a release and its movie or series are, as
+// Radarr's and Sonarr's Flood tags them.
+message DownloadDetails {
+  // The release's quality, e.g. "Bluray-2160p".
+  string quality = 1;
+  // The release's languages, by English name.
+  repeated string languages = 2;
+  string release_group = 3;
+  // The name of the release's indexer.
+  string indexer = 4;
+  // The movie's or series' year; 0 when unknown.
+  int32 year = 5;
+  // The movie's collection.
+  string collection = 6;
+  // The movie's studio, or the series' network.
+  string studio = 7;
+  // The series' title as a URL slug, e.g. "big-buck-bunny".
+  string title_slug = 8;
 }
 
 message AddDownloadResponse {

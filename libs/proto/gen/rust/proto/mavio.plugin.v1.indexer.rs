@@ -995,6 +995,11 @@ pub struct Indexer {
         ::buffa_types::google::protobuf::Duration,
         ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
     >,
+    /// Torrents of the indexer whose hash is blocklisted are refused when
+    /// grabbed, even though their hash was not known when they were chosen.
+    ///
+    /// Field 18: `reject_blocklisted_torrent_hashes`
+    pub reject_blocklisted_torrent_hashes: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1018,6 +1023,10 @@ impl ::core::fmt::Debug for Indexer {
             .field("seed_ratio", &self.seed_ratio)
             .field("seed_time", &self.seed_time)
             .field("season_pack_seed_time", &self.season_pack_seed_time)
+            .field(
+                "reject_blocklisted_torrent_hashes",
+                &self.reject_blocklisted_torrent_hashes,
+            )
             .finish()
     }
 }
@@ -1114,6 +1123,13 @@ impl Indexer {
         self.seed_ratio = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::reject_blocklisted_torrent_hashes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_reject_blocklisted_torrent_hashes(mut self, value: bool) -> Self {
+        self.reject_blocklisted_torrent_hashes = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Indexer);
 impl ::buffa::MessageName for Indexer {
@@ -1206,6 +1222,9 @@ impl ::buffa::Message for Indexer {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.reject_blocklisted_torrent_hashes.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1286,6 +1305,9 @@ impl ::buffa::Message for Indexer {
                 buf,
             );
             self.season_pack_seed_time.write_to(__cache, buf);
+        }
+        if let Some(v) = self.reject_blocklisted_torrent_hashes {
+            ::buffa::types::put_bool_field(18u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1473,6 +1495,15 @@ impl ::buffa::Message for Indexer {
                     ctx,
                 )?;
             }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.reject_blocklisted_torrent_hashes = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1498,6 +1529,7 @@ impl ::buffa::Message for Indexer {
         self.seed_ratio = ::core::option::Option::None;
         self.seed_time = ::buffa::MessageField::none();
         self.season_pack_seed_time = ::buffa::MessageField::none();
+        self.reject_blocklisted_torrent_hashes = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

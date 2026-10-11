@@ -544,6 +544,7 @@ type DownloadClient struct {
 	xxx_hidden_Failure                  *string                `protobuf:"bytes,10,opt,name=failure"`
 	xxx_hidden_PrefersTorrentFile       bool                   `protobuf:"varint,11,opt,name=prefers_torrent_file,json=prefersTorrentFile"`
 	xxx_hidden_Host                     *string                `protobuf:"bytes,12,opt,name=host"`
+	xxx_hidden_Tags                     []string               `protobuf:"bytes,13,rep,name=tags"`
 	XXX_raceDetectHookData              protoimpl.RaceDetectHookData
 	XXX_presence                        [1]uint32
 	unknownFields                       protoimpl.UnknownFields
@@ -676,44 +677,51 @@ func (x *DownloadClient) GetHost() string {
 	return ""
 }
 
+func (x *DownloadClient) GetTags() []string {
+	if x != nil {
+		return x.xxx_hidden_Tags
+	}
+	return nil
+}
+
 func (x *DownloadClient) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 13)
 }
 
 func (x *DownloadClient) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 13)
 }
 
 func (x *DownloadClient) SetDefinitionId(v string) {
 	x.xxx_hidden_DefinitionId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 13)
 }
 
 func (x *DownloadClient) SetProtocol(v DownloadProtocol) {
 	x.xxx_hidden_Protocol = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 13)
 }
 
 func (x *DownloadClient) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 13)
 }
 
 func (x *DownloadClient) SetPriority(v int32) {
 	x.xxx_hidden_Priority = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 13)
 }
 
 func (x *DownloadClient) SetRemoveCompletedDownloads(v bool) {
 	x.xxx_hidden_RemoveCompletedDownloads = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 13)
 }
 
 func (x *DownloadClient) SetRemoveFailedDownloads(v bool) {
 	x.xxx_hidden_RemoveFailedDownloads = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 13)
 }
 
 func (x *DownloadClient) SetDisabledUntil(v *timestamppb.Timestamp) {
@@ -722,17 +730,21 @@ func (x *DownloadClient) SetDisabledUntil(v *timestamppb.Timestamp) {
 
 func (x *DownloadClient) SetFailure(v string) {
 	x.xxx_hidden_Failure = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 13)
 }
 
 func (x *DownloadClient) SetPrefersTorrentFile(v bool) {
 	x.xxx_hidden_PrefersTorrentFile = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 13)
 }
 
 func (x *DownloadClient) SetHost(v string) {
 	x.xxx_hidden_Host = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 13)
+}
+
+func (x *DownloadClient) SetTags(v []string) {
+	x.xxx_hidden_Tags = v
 }
 
 func (x *DownloadClient) HasId() bool {
@@ -903,6 +915,9 @@ type DownloadClient_builder struct {
 	// The host the client runs on, which remote path mappings are kept by;
 	// empty for clients that are folders.
 	Host *string
+	// The client's tags: a movie or series with tags only uses the clients
+	// sharing one of them, else those without tags, as Radarr's.
+	Tags []string
 }
 
 func (b0 DownloadClient_builder) Build() *DownloadClient {
@@ -910,50 +925,51 @@ func (b0 DownloadClient_builder) Build() *DownloadClient {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 13)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 13)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.DefinitionId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 13)
 		x.xxx_hidden_DefinitionId = b.DefinitionId
 	}
 	if b.Protocol != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 13)
 		x.xxx_hidden_Protocol = *b.Protocol
 	}
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 13)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.Priority != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 13)
 		x.xxx_hidden_Priority = *b.Priority
 	}
 	if b.RemoveCompletedDownloads != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 13)
 		x.xxx_hidden_RemoveCompletedDownloads = *b.RemoveCompletedDownloads
 	}
 	if b.RemoveFailedDownloads != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 13)
 		x.xxx_hidden_RemoveFailedDownloads = *b.RemoveFailedDownloads
 	}
 	x.xxx_hidden_DisabledUntil = b.DisabledUntil
 	if b.Failure != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 13)
 		x.xxx_hidden_Failure = b.Failure
 	}
 	if b.PrefersTorrentFile != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 13)
 		x.xxx_hidden_PrefersTorrentFile = *b.PrefersTorrentFile
 	}
 	if b.Host != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 13)
 		x.xxx_hidden_Host = b.Host
 	}
+	x.xxx_hidden_Tags = b.Tags
 	return m0
 }
 
@@ -1106,6 +1122,7 @@ func (b0 TestDownloadClientRequest_builder) Build() *TestDownloadClientRequest {
 type TestDownloadClientResponse struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Failure     *string                `protobuf:"bytes,1,opt,name=failure"`
+	xxx_hidden_Warnings    []string               `protobuf:"bytes,2,rep,name=warnings"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -1147,9 +1164,20 @@ func (x *TestDownloadClientResponse) GetFailure() string {
 	return ""
 }
 
+func (x *TestDownloadClientResponse) GetWarnings() []string {
+	if x != nil {
+		return x.xxx_hidden_Warnings
+	}
+	return nil
+}
+
 func (x *TestDownloadClientResponse) SetFailure(v string) {
 	x.xxx_hidden_Failure = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *TestDownloadClientResponse) SetWarnings(v []string) {
+	x.xxx_hidden_Warnings = v
 }
 
 func (x *TestDownloadClientResponse) HasFailure() bool {
@@ -1169,6 +1197,9 @@ type TestDownloadClientResponse_builder struct {
 
 	// Empty when the test passed.
 	Failure *string
+	// What the test warns of, though it passed, such as a category
+	// recommended.
+	Warnings []string
 }
 
 func (b0 TestDownloadClientResponse_builder) Build() *TestDownloadClientResponse {
@@ -1176,28 +1207,32 @@ func (b0 TestDownloadClientResponse_builder) Build() *TestDownloadClientResponse
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Failure != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
 		x.xxx_hidden_Failure = b.Failure
 	}
+	x.xxx_hidden_Warnings = b.Warnings
 	return m0
 }
 
 type AddDownloadRequest struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ClientId    *string                `protobuf:"bytes,1,opt,name=client_id,json=clientId"`
-	xxx_hidden_Title       *string                `protobuf:"bytes,2,opt,name=title"`
-	xxx_hidden_Kind        DownloadKind           `protobuf:"varint,3,opt,name=kind,enum=mavio.plugin.v1.DownloadKind"`
-	xxx_hidden_Recent      bool                   `protobuf:"varint,4,opt,name=recent"`
-	xxx_hidden_Data        []byte                 `protobuf:"bytes,5,opt,name=data"`
-	xxx_hidden_FileName    *string                `protobuf:"bytes,6,opt,name=file_name,json=fileName"`
-	xxx_hidden_MagnetUrl   *string                `protobuf:"bytes,7,opt,name=magnet_url,json=magnetUrl"`
-	xxx_hidden_InfoHash    *string                `protobuf:"bytes,8,opt,name=info_hash,json=infoHash"`
-	xxx_hidden_SeedRatio   float64                `protobuf:"fixed64,9,opt,name=seed_ratio,json=seedRatio"`
-	xxx_hidden_SeedTime    *durationpb.Duration   `protobuf:"bytes,10,opt,name=seed_time,json=seedTime"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                            protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ClientId              *string                `protobuf:"bytes,1,opt,name=client_id,json=clientId"`
+	xxx_hidden_Title                 *string                `protobuf:"bytes,2,opt,name=title"`
+	xxx_hidden_Kind                  DownloadKind           `protobuf:"varint,3,opt,name=kind,enum=mavio.plugin.v1.DownloadKind"`
+	xxx_hidden_Recent                bool                   `protobuf:"varint,4,opt,name=recent"`
+	xxx_hidden_Data                  []byte                 `protobuf:"bytes,5,opt,name=data"`
+	xxx_hidden_FileName              *string                `protobuf:"bytes,6,opt,name=file_name,json=fileName"`
+	xxx_hidden_MagnetUrl             *string                `protobuf:"bytes,7,opt,name=magnet_url,json=magnetUrl"`
+	xxx_hidden_InfoHash              *string                `protobuf:"bytes,8,opt,name=info_hash,json=infoHash"`
+	xxx_hidden_SeedRatio             float64                `protobuf:"fixed64,9,opt,name=seed_ratio,json=seedRatio"`
+	xxx_hidden_SeedTime              *durationpb.Duration   `protobuf:"bytes,10,opt,name=seed_time,json=seedTime"`
+	xxx_hidden_FullSeason            bool                   `protobuf:"varint,11,opt,name=full_season,json=fullSeason"`
+	xxx_hidden_Details               *DownloadDetails       `protobuf:"bytes,12,opt,name=details"`
+	xxx_hidden_BlocklistedInfoHashes []string               `protobuf:"bytes,13,rep,name=blocklisted_info_hashes,json=blocklistedInfoHashes"`
+	XXX_raceDetectHookData           protoimpl.RaceDetectHookData
+	XXX_presence                     [1]uint32
+	unknownFields                    protoimpl.UnknownFields
+	sizeCache                        protoimpl.SizeCache
 }
 
 func (x *AddDownloadRequest) Reset() {
@@ -1312,24 +1347,45 @@ func (x *AddDownloadRequest) GetSeedTime() *durationpb.Duration {
 	return nil
 }
 
+func (x *AddDownloadRequest) GetFullSeason() bool {
+	if x != nil {
+		return x.xxx_hidden_FullSeason
+	}
+	return false
+}
+
+func (x *AddDownloadRequest) GetDetails() *DownloadDetails {
+	if x != nil {
+		return x.xxx_hidden_Details
+	}
+	return nil
+}
+
+func (x *AddDownloadRequest) GetBlocklistedInfoHashes() []string {
+	if x != nil {
+		return x.xxx_hidden_BlocklistedInfoHashes
+	}
+	return nil
+}
+
 func (x *AddDownloadRequest) SetClientId(v string) {
 	x.xxx_hidden_ClientId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 13)
 }
 
 func (x *AddDownloadRequest) SetTitle(v string) {
 	x.xxx_hidden_Title = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 13)
 }
 
 func (x *AddDownloadRequest) SetKind(v DownloadKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 13)
 }
 
 func (x *AddDownloadRequest) SetRecent(v bool) {
 	x.xxx_hidden_Recent = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 13)
 }
 
 func (x *AddDownloadRequest) SetData(v []byte) {
@@ -1337,31 +1393,44 @@ func (x *AddDownloadRequest) SetData(v []byte) {
 		v = []byte{}
 	}
 	x.xxx_hidden_Data = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 13)
 }
 
 func (x *AddDownloadRequest) SetFileName(v string) {
 	x.xxx_hidden_FileName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 13)
 }
 
 func (x *AddDownloadRequest) SetMagnetUrl(v string) {
 	x.xxx_hidden_MagnetUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 13)
 }
 
 func (x *AddDownloadRequest) SetInfoHash(v string) {
 	x.xxx_hidden_InfoHash = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 13)
 }
 
 func (x *AddDownloadRequest) SetSeedRatio(v float64) {
 	x.xxx_hidden_SeedRatio = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 13)
 }
 
 func (x *AddDownloadRequest) SetSeedTime(v *durationpb.Duration) {
 	x.xxx_hidden_SeedTime = v
+}
+
+func (x *AddDownloadRequest) SetFullSeason(v bool) {
+	x.xxx_hidden_FullSeason = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 13)
+}
+
+func (x *AddDownloadRequest) SetDetails(v *DownloadDetails) {
+	x.xxx_hidden_Details = v
+}
+
+func (x *AddDownloadRequest) SetBlocklistedInfoHashes(v []string) {
+	x.xxx_hidden_BlocklistedInfoHashes = v
 }
 
 func (x *AddDownloadRequest) HasClientId() bool {
@@ -1434,6 +1503,20 @@ func (x *AddDownloadRequest) HasSeedTime() bool {
 	return x.xxx_hidden_SeedTime != nil
 }
 
+func (x *AddDownloadRequest) HasFullSeason() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
+func (x *AddDownloadRequest) HasDetails() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Details != nil
+}
+
 func (x *AddDownloadRequest) ClearClientId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_ClientId = nil
@@ -1483,6 +1566,15 @@ func (x *AddDownloadRequest) ClearSeedTime() {
 	x.xxx_hidden_SeedTime = nil
 }
 
+func (x *AddDownloadRequest) ClearFullSeason() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_FullSeason = false
+}
+
+func (x *AddDownloadRequest) ClearDetails() {
+	x.xxx_hidden_Details = nil
+}
+
 type AddDownloadRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1507,6 +1599,15 @@ type AddDownloadRequest_builder struct {
 	// for; unset for the client's own limits.
 	SeedRatio *float64
 	SeedTime  *durationpb.Duration
+	// The release is of a full season, which some clients cannot take.
+	FullSeason *bool
+	// What the release and its movie or series are, which clients such as
+	// Flood tag downloads with.
+	Details *DownloadDetails
+	// The info hashes of torrents blocklisted for the movie or series, in
+	// hex: a torrent whose hash is among them is refused, as Radarr refuses
+	// blocklisted torrents whose hash was not known before grabbing.
+	BlocklistedInfoHashes []string
 }
 
 func (b0 AddDownloadRequest_builder) Build() *AddDownloadRequest {
@@ -1514,42 +1615,344 @@ func (b0 AddDownloadRequest_builder) Build() *AddDownloadRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.ClientId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 13)
 		x.xxx_hidden_ClientId = b.ClientId
 	}
 	if b.Title != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 13)
 		x.xxx_hidden_Title = b.Title
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 13)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	if b.Recent != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 13)
 		x.xxx_hidden_Recent = *b.Recent
 	}
 	if b.Data != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 13)
 		x.xxx_hidden_Data = b.Data
 	}
 	if b.FileName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 13)
 		x.xxx_hidden_FileName = b.FileName
 	}
 	if b.MagnetUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 13)
 		x.xxx_hidden_MagnetUrl = b.MagnetUrl
 	}
 	if b.InfoHash != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 13)
 		x.xxx_hidden_InfoHash = b.InfoHash
 	}
 	if b.SeedRatio != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 13)
 		x.xxx_hidden_SeedRatio = *b.SeedRatio
 	}
 	x.xxx_hidden_SeedTime = b.SeedTime
+	if b.FullSeason != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 13)
+		x.xxx_hidden_FullSeason = *b.FullSeason
+	}
+	x.xxx_hidden_Details = b.Details
+	x.xxx_hidden_BlocklistedInfoHashes = b.BlocklistedInfoHashes
+	return m0
+}
+
+// DownloadDetails are what a release and its movie or series are, as
+// Radarr's and Sonarr's Flood tags them.
+type DownloadDetails struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Quality      *string                `protobuf:"bytes,1,opt,name=quality"`
+	xxx_hidden_Languages    []string               `protobuf:"bytes,2,rep,name=languages"`
+	xxx_hidden_ReleaseGroup *string                `protobuf:"bytes,3,opt,name=release_group,json=releaseGroup"`
+	xxx_hidden_Indexer      *string                `protobuf:"bytes,4,opt,name=indexer"`
+	xxx_hidden_Year         int32                  `protobuf:"varint,5,opt,name=year"`
+	xxx_hidden_Collection   *string                `protobuf:"bytes,6,opt,name=collection"`
+	xxx_hidden_Studio       *string                `protobuf:"bytes,7,opt,name=studio"`
+	xxx_hidden_TitleSlug    *string                `protobuf:"bytes,8,opt,name=title_slug,json=titleSlug"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *DownloadDetails) Reset() {
+	*x = DownloadDetails{}
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DownloadDetails) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DownloadDetails) ProtoMessage() {}
+
+func (x *DownloadDetails) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DownloadDetails) GetQuality() string {
+	if x != nil {
+		if x.xxx_hidden_Quality != nil {
+			return *x.xxx_hidden_Quality
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DownloadDetails) GetLanguages() []string {
+	if x != nil {
+		return x.xxx_hidden_Languages
+	}
+	return nil
+}
+
+func (x *DownloadDetails) GetReleaseGroup() string {
+	if x != nil {
+		if x.xxx_hidden_ReleaseGroup != nil {
+			return *x.xxx_hidden_ReleaseGroup
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DownloadDetails) GetIndexer() string {
+	if x != nil {
+		if x.xxx_hidden_Indexer != nil {
+			return *x.xxx_hidden_Indexer
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DownloadDetails) GetYear() int32 {
+	if x != nil {
+		return x.xxx_hidden_Year
+	}
+	return 0
+}
+
+func (x *DownloadDetails) GetCollection() string {
+	if x != nil {
+		if x.xxx_hidden_Collection != nil {
+			return *x.xxx_hidden_Collection
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DownloadDetails) GetStudio() string {
+	if x != nil {
+		if x.xxx_hidden_Studio != nil {
+			return *x.xxx_hidden_Studio
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DownloadDetails) GetTitleSlug() string {
+	if x != nil {
+		if x.xxx_hidden_TitleSlug != nil {
+			return *x.xxx_hidden_TitleSlug
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DownloadDetails) SetQuality(v string) {
+	x.xxx_hidden_Quality = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+}
+
+func (x *DownloadDetails) SetLanguages(v []string) {
+	x.xxx_hidden_Languages = v
+}
+
+func (x *DownloadDetails) SetReleaseGroup(v string) {
+	x.xxx_hidden_ReleaseGroup = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
+}
+
+func (x *DownloadDetails) SetIndexer(v string) {
+	x.xxx_hidden_Indexer = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
+}
+
+func (x *DownloadDetails) SetYear(v int32) {
+	x.xxx_hidden_Year = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+}
+
+func (x *DownloadDetails) SetCollection(v string) {
+	x.xxx_hidden_Collection = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
+}
+
+func (x *DownloadDetails) SetStudio(v string) {
+	x.xxx_hidden_Studio = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+}
+
+func (x *DownloadDetails) SetTitleSlug(v string) {
+	x.xxx_hidden_TitleSlug = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
+}
+
+func (x *DownloadDetails) HasQuality() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *DownloadDetails) HasReleaseGroup() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *DownloadDetails) HasIndexer() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *DownloadDetails) HasYear() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *DownloadDetails) HasCollection() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *DownloadDetails) HasStudio() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *DownloadDetails) HasTitleSlug() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *DownloadDetails) ClearQuality() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Quality = nil
+}
+
+func (x *DownloadDetails) ClearReleaseGroup() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_ReleaseGroup = nil
+}
+
+func (x *DownloadDetails) ClearIndexer() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Indexer = nil
+}
+
+func (x *DownloadDetails) ClearYear() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Year = 0
+}
+
+func (x *DownloadDetails) ClearCollection() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_Collection = nil
+}
+
+func (x *DownloadDetails) ClearStudio() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_Studio = nil
+}
+
+func (x *DownloadDetails) ClearTitleSlug() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_TitleSlug = nil
+}
+
+type DownloadDetails_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The release's quality, e.g. "Bluray-2160p".
+	Quality *string
+	// The release's languages, by English name.
+	Languages    []string
+	ReleaseGroup *string
+	// The name of the release's indexer.
+	Indexer *string
+	// The movie's or series' year; 0 when unknown.
+	Year *int32
+	// The movie's collection.
+	Collection *string
+	// The movie's studio, or the series' network.
+	Studio *string
+	// The series' title as a URL slug, e.g. "big-buck-bunny".
+	TitleSlug *string
+}
+
+func (b0 DownloadDetails_builder) Build() *DownloadDetails {
+	m0 := &DownloadDetails{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Quality != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		x.xxx_hidden_Quality = b.Quality
+	}
+	x.xxx_hidden_Languages = b.Languages
+	if b.ReleaseGroup != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
+		x.xxx_hidden_ReleaseGroup = b.ReleaseGroup
+	}
+	if b.Indexer != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
+		x.xxx_hidden_Indexer = b.Indexer
+	}
+	if b.Year != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		x.xxx_hidden_Year = *b.Year
+	}
+	if b.Collection != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
+		x.xxx_hidden_Collection = b.Collection
+	}
+	if b.Studio != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		x.xxx_hidden_Studio = b.Studio
+	}
+	if b.TitleSlug != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		x.xxx_hidden_TitleSlug = b.TitleSlug
+	}
 	return m0
 }
 
@@ -1564,7 +1967,7 @@ type AddDownloadResponse struct {
 
 func (x *AddDownloadResponse) Reset() {
 	*x = AddDownloadResponse{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[9]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1576,7 +1979,7 @@ func (x *AddDownloadResponse) String() string {
 func (*AddDownloadResponse) ProtoMessage() {}
 
 func (x *AddDownloadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[9]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1645,7 +2048,7 @@ type ListDownloadsRequest struct {
 
 func (x *ListDownloadsRequest) Reset() {
 	*x = ListDownloadsRequest{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[10]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1657,7 +2060,7 @@ func (x *ListDownloadsRequest) String() string {
 func (*ListDownloadsRequest) ProtoMessage() {}
 
 func (x *ListDownloadsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[10]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1736,7 +2139,7 @@ type ListDownloadsResponse struct {
 
 func (x *ListDownloadsResponse) Reset() {
 	*x = ListDownloadsResponse{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[11]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1748,7 +2151,7 @@ func (x *ListDownloadsResponse) String() string {
 func (*ListDownloadsResponse) ProtoMessage() {}
 
 func (x *ListDownloadsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[11]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1845,7 +2248,7 @@ type Download struct {
 
 func (x *Download) Reset() {
 	*x = Download{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[12]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1857,7 +2260,7 @@ func (x *Download) String() string {
 func (*Download) ProtoMessage() {}
 
 func (x *Download) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[12]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2392,7 +2795,7 @@ type DownloadClientStatus struct {
 
 func (x *DownloadClientStatus) Reset() {
 	*x = DownloadClientStatus{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[13]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2404,7 +2807,7 @@ func (x *DownloadClientStatus) String() string {
 func (*DownloadClientStatus) ProtoMessage() {}
 
 func (x *DownloadClientStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[13]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2581,7 +2984,7 @@ type DownloadClientFailure struct {
 
 func (x *DownloadClientFailure) Reset() {
 	*x = DownloadClientFailure{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[14]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2593,7 +2996,7 @@ func (x *DownloadClientFailure) String() string {
 func (*DownloadClientFailure) ProtoMessage() {}
 
 func (x *DownloadClientFailure) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[14]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2717,7 +3120,7 @@ type GetDownloadRequest struct {
 
 func (x *GetDownloadRequest) Reset() {
 	*x = GetDownloadRequest{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[15]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2729,7 +3132,7 @@ func (x *GetDownloadRequest) String() string {
 func (*GetDownloadRequest) ProtoMessage() {}
 
 func (x *GetDownloadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[15]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2825,7 +3228,7 @@ type GetDownloadResponse struct {
 
 func (x *GetDownloadResponse) Reset() {
 	*x = GetDownloadResponse{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[16]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2837,7 +3240,7 @@ func (x *GetDownloadResponse) String() string {
 func (*GetDownloadResponse) ProtoMessage() {}
 
 func (x *GetDownloadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[16]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2897,7 +3300,7 @@ type RemoveDownloadRequest struct {
 
 func (x *RemoveDownloadRequest) Reset() {
 	*x = RemoveDownloadRequest{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[17]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2909,7 +3312,7 @@ func (x *RemoveDownloadRequest) String() string {
 func (*RemoveDownloadRequest) ProtoMessage() {}
 
 func (x *RemoveDownloadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[17]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3034,7 +3437,7 @@ type RemoveDownloadResponse struct {
 
 func (x *RemoveDownloadResponse) Reset() {
 	*x = RemoveDownloadResponse{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[18]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3046,7 +3449,7 @@ func (x *RemoveDownloadResponse) String() string {
 func (*RemoveDownloadResponse) ProtoMessage() {}
 
 func (x *RemoveDownloadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[18]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3081,7 +3484,7 @@ type MarkDownloadImportedRequest struct {
 
 func (x *MarkDownloadImportedRequest) Reset() {
 	*x = MarkDownloadImportedRequest{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[19]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3093,7 +3496,7 @@ func (x *MarkDownloadImportedRequest) String() string {
 func (*MarkDownloadImportedRequest) ProtoMessage() {}
 
 func (x *MarkDownloadImportedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[19]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3188,7 +3591,7 @@ type MarkDownloadImportedResponse struct {
 
 func (x *MarkDownloadImportedResponse) Reset() {
 	*x = MarkDownloadImportedResponse{}
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[20]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3200,7 +3603,7 @@ func (x *MarkDownloadImportedResponse) String() string {
 func (*MarkDownloadImportedResponse) ProtoMessage() {}
 
 func (x *MarkDownloadImportedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[20]
+	mi := &file_mavio_plugin_v1_download_client_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3239,7 +3642,7 @@ const file_mavio_plugin_v1_download_client_proto_rawDesc = "" +
 	"\x06fields\x18\x05 \x03(\v2\x1d.mavio.plugin.v1.SettingFieldR\x06fields\"\x1c\n" +
 	"\x1aListDownloadClientsRequest\"X\n" +
 	"\x1bListDownloadClientsResponse\x129\n" +
-	"\aclients\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.DownloadClientR\aclients\"\xe7\x03\n" +
+	"\aclients\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.DownloadClientR\aclients\"\xfb\x03\n" +
 	"\x0eDownloadClient\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
@@ -3253,13 +3656,15 @@ const file_mavio_plugin_v1_download_client_proto_rawDesc = "" +
 	"\afailure\x18\n" +
 	" \x01(\tR\afailure\x120\n" +
 	"\x14prefers_torrent_file\x18\v \x01(\bR\x12prefersTorrentFile\x12\x12\n" +
-	"\x04host\x18\f \x01(\tR\x04host\"\x82\x01\n" +
+	"\x04host\x18\f \x01(\tR\x04host\x12\x12\n" +
+	"\x04tags\x18\r \x03(\tR\x04tags\"\x82\x01\n" +
 	"\x19TestDownloadClientRequest\x12\x1b\n" +
 	"\tclient_id\x18\x01 \x01(\tR\bclientId\x12#\n" +
 	"\rdefinition_id\x18\x02 \x01(\tR\fdefinitionId\x12#\n" +
-	"\rsettings_json\x18\x03 \x01(\tR\fsettingsJson\"6\n" +
+	"\rsettings_json\x18\x03 \x01(\tR\fsettingsJson\"R\n" +
 	"\x1aTestDownloadClientResponse\x12\x18\n" +
-	"\afailure\x18\x01 \x01(\tR\afailure\"\x95\x03\n" +
+	"\afailure\x18\x01 \x01(\tR\afailure\x12\x1a\n" +
+	"\bwarnings\x18\x02 \x03(\tR\bwarnings\"\xb8\x04\n" +
 	"\x12AddDownloadRequest\x12#\n" +
 	"\tclient_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bclientId\x12\x1e\n" +
 	"\x05title\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\xe8\aR\x05title\x12;\n" +
@@ -3273,7 +3678,23 @@ const file_mavio_plugin_v1_download_client_proto_rawDesc = "" +
 	"\n" +
 	"seed_ratio\x18\t \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\tseedRatio\x126\n" +
 	"\tseed_time\x18\n" +
-	" \x01(\v2\x19.google.protobuf.DurationR\bseedTime\"6\n" +
+	" \x01(\v2\x19.google.protobuf.DurationR\bseedTime\x12\x1f\n" +
+	"\vfull_season\x18\v \x01(\bR\n" +
+	"fullSeason\x12:\n" +
+	"\adetails\x18\f \x01(\v2 .mavio.plugin.v1.DownloadDetailsR\adetails\x12D\n" +
+	"\x17blocklisted_info_hashes\x18\r \x03(\tB\f\xbaH\t\x92\x01\x06\"\x04r\x02\x18@R\x15blocklistedInfoHashes\"\xf3\x01\n" +
+	"\x0fDownloadDetails\x12\x18\n" +
+	"\aquality\x18\x01 \x01(\tR\aquality\x12\x1c\n" +
+	"\tlanguages\x18\x02 \x03(\tR\tlanguages\x12#\n" +
+	"\rrelease_group\x18\x03 \x01(\tR\freleaseGroup\x12\x18\n" +
+	"\aindexer\x18\x04 \x01(\tR\aindexer\x12\x12\n" +
+	"\x04year\x18\x05 \x01(\x05R\x04year\x12\x1e\n" +
+	"\n" +
+	"collection\x18\x06 \x01(\tR\n" +
+	"collection\x12\x16\n" +
+	"\x06studio\x18\a \x01(\tR\x06studio\x12\x1d\n" +
+	"\n" +
+	"title_slug\x18\b \x01(\tR\ttitleSlug\"6\n" +
 	"\x13AddDownloadResponse\x12\x1f\n" +
 	"\vdownload_id\x18\x01 \x01(\tR\n" +
 	"downloadId\"`\n" +
@@ -3358,7 +3779,7 @@ const file_mavio_plugin_v1_download_client_proto_rawDesc = "" +
 	"\x13com.mavio.plugin.v1B\x13DownloadClientProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
 var file_mavio_plugin_v1_download_client_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_mavio_plugin_v1_download_client_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_mavio_plugin_v1_download_client_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_mavio_plugin_v1_download_client_proto_goTypes = []any{
 	(DownloadKind)(0),                             // 0: mavio.plugin.v1.DownloadKind
 	(DownloadStatus)(0),                           // 1: mavio.plugin.v1.DownloadStatus
@@ -3371,61 +3792,63 @@ var file_mavio_plugin_v1_download_client_proto_goTypes = []any{
 	(*TestDownloadClientRequest)(nil),             // 8: mavio.plugin.v1.TestDownloadClientRequest
 	(*TestDownloadClientResponse)(nil),            // 9: mavio.plugin.v1.TestDownloadClientResponse
 	(*AddDownloadRequest)(nil),                    // 10: mavio.plugin.v1.AddDownloadRequest
-	(*AddDownloadResponse)(nil),                   // 11: mavio.plugin.v1.AddDownloadResponse
-	(*ListDownloadsRequest)(nil),                  // 12: mavio.plugin.v1.ListDownloadsRequest
-	(*ListDownloadsResponse)(nil),                 // 13: mavio.plugin.v1.ListDownloadsResponse
-	(*Download)(nil),                              // 14: mavio.plugin.v1.Download
-	(*DownloadClientStatus)(nil),                  // 15: mavio.plugin.v1.DownloadClientStatus
-	(*DownloadClientFailure)(nil),                 // 16: mavio.plugin.v1.DownloadClientFailure
-	(*GetDownloadRequest)(nil),                    // 17: mavio.plugin.v1.GetDownloadRequest
-	(*GetDownloadResponse)(nil),                   // 18: mavio.plugin.v1.GetDownloadResponse
-	(*RemoveDownloadRequest)(nil),                 // 19: mavio.plugin.v1.RemoveDownloadRequest
-	(*RemoveDownloadResponse)(nil),                // 20: mavio.plugin.v1.RemoveDownloadResponse
-	(*MarkDownloadImportedRequest)(nil),           // 21: mavio.plugin.v1.MarkDownloadImportedRequest
-	(*MarkDownloadImportedResponse)(nil),          // 22: mavio.plugin.v1.MarkDownloadImportedResponse
-	(DownloadProtocol)(0),                         // 23: mavio.plugin.v1.DownloadProtocol
-	(*SettingField)(nil),                          // 24: mavio.plugin.v1.SettingField
-	(*timestamppb.Timestamp)(nil),                 // 25: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),                   // 26: google.protobuf.Duration
+	(*DownloadDetails)(nil),                       // 11: mavio.plugin.v1.DownloadDetails
+	(*AddDownloadResponse)(nil),                   // 12: mavio.plugin.v1.AddDownloadResponse
+	(*ListDownloadsRequest)(nil),                  // 13: mavio.plugin.v1.ListDownloadsRequest
+	(*ListDownloadsResponse)(nil),                 // 14: mavio.plugin.v1.ListDownloadsResponse
+	(*Download)(nil),                              // 15: mavio.plugin.v1.Download
+	(*DownloadClientStatus)(nil),                  // 16: mavio.plugin.v1.DownloadClientStatus
+	(*DownloadClientFailure)(nil),                 // 17: mavio.plugin.v1.DownloadClientFailure
+	(*GetDownloadRequest)(nil),                    // 18: mavio.plugin.v1.GetDownloadRequest
+	(*GetDownloadResponse)(nil),                   // 19: mavio.plugin.v1.GetDownloadResponse
+	(*RemoveDownloadRequest)(nil),                 // 20: mavio.plugin.v1.RemoveDownloadRequest
+	(*RemoveDownloadResponse)(nil),                // 21: mavio.plugin.v1.RemoveDownloadResponse
+	(*MarkDownloadImportedRequest)(nil),           // 22: mavio.plugin.v1.MarkDownloadImportedRequest
+	(*MarkDownloadImportedResponse)(nil),          // 23: mavio.plugin.v1.MarkDownloadImportedResponse
+	(DownloadProtocol)(0),                         // 24: mavio.plugin.v1.DownloadProtocol
+	(*SettingField)(nil),                          // 25: mavio.plugin.v1.SettingField
+	(*timestamppb.Timestamp)(nil),                 // 26: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),                   // 27: google.protobuf.Duration
 }
 var file_mavio_plugin_v1_download_client_proto_depIdxs = []int32{
 	4,  // 0: mavio.plugin.v1.ListDownloadClientDefinitionsResponse.definitions:type_name -> mavio.plugin.v1.DownloadClientDefinition
-	23, // 1: mavio.plugin.v1.DownloadClientDefinition.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
-	24, // 2: mavio.plugin.v1.DownloadClientDefinition.fields:type_name -> mavio.plugin.v1.SettingField
+	24, // 1: mavio.plugin.v1.DownloadClientDefinition.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
+	25, // 2: mavio.plugin.v1.DownloadClientDefinition.fields:type_name -> mavio.plugin.v1.SettingField
 	7,  // 3: mavio.plugin.v1.ListDownloadClientsResponse.clients:type_name -> mavio.plugin.v1.DownloadClient
-	23, // 4: mavio.plugin.v1.DownloadClient.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
-	25, // 5: mavio.plugin.v1.DownloadClient.disabled_until:type_name -> google.protobuf.Timestamp
+	24, // 4: mavio.plugin.v1.DownloadClient.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
+	26, // 5: mavio.plugin.v1.DownloadClient.disabled_until:type_name -> google.protobuf.Timestamp
 	0,  // 6: mavio.plugin.v1.AddDownloadRequest.kind:type_name -> mavio.plugin.v1.DownloadKind
-	26, // 7: mavio.plugin.v1.AddDownloadRequest.seed_time:type_name -> google.protobuf.Duration
-	14, // 8: mavio.plugin.v1.ListDownloadsResponse.downloads:type_name -> mavio.plugin.v1.Download
-	15, // 9: mavio.plugin.v1.ListDownloadsResponse.statuses:type_name -> mavio.plugin.v1.DownloadClientStatus
-	16, // 10: mavio.plugin.v1.ListDownloadsResponse.failures:type_name -> mavio.plugin.v1.DownloadClientFailure
-	0,  // 11: mavio.plugin.v1.Download.kind:type_name -> mavio.plugin.v1.DownloadKind
-	26, // 12: mavio.plugin.v1.Download.remaining_time:type_name -> google.protobuf.Duration
-	1,  // 13: mavio.plugin.v1.Download.status:type_name -> mavio.plugin.v1.DownloadStatus
-	25, // 14: mavio.plugin.v1.DownloadClientFailure.disabled_until:type_name -> google.protobuf.Timestamp
-	14, // 15: mavio.plugin.v1.GetDownloadResponse.download:type_name -> mavio.plugin.v1.Download
-	2,  // 16: mavio.plugin.v1.DownloadClientProviderService.ListDownloadClientDefinitions:input_type -> mavio.plugin.v1.ListDownloadClientDefinitionsRequest
-	5,  // 17: mavio.plugin.v1.DownloadClientProviderService.ListDownloadClients:input_type -> mavio.plugin.v1.ListDownloadClientsRequest
-	8,  // 18: mavio.plugin.v1.DownloadClientProviderService.TestDownloadClient:input_type -> mavio.plugin.v1.TestDownloadClientRequest
-	10, // 19: mavio.plugin.v1.DownloadClientProviderService.AddDownload:input_type -> mavio.plugin.v1.AddDownloadRequest
-	12, // 20: mavio.plugin.v1.DownloadClientProviderService.ListDownloads:input_type -> mavio.plugin.v1.ListDownloadsRequest
-	17, // 21: mavio.plugin.v1.DownloadClientProviderService.GetDownload:input_type -> mavio.plugin.v1.GetDownloadRequest
-	19, // 22: mavio.plugin.v1.DownloadClientProviderService.RemoveDownload:input_type -> mavio.plugin.v1.RemoveDownloadRequest
-	21, // 23: mavio.plugin.v1.DownloadClientProviderService.MarkDownloadImported:input_type -> mavio.plugin.v1.MarkDownloadImportedRequest
-	3,  // 24: mavio.plugin.v1.DownloadClientProviderService.ListDownloadClientDefinitions:output_type -> mavio.plugin.v1.ListDownloadClientDefinitionsResponse
-	6,  // 25: mavio.plugin.v1.DownloadClientProviderService.ListDownloadClients:output_type -> mavio.plugin.v1.ListDownloadClientsResponse
-	9,  // 26: mavio.plugin.v1.DownloadClientProviderService.TestDownloadClient:output_type -> mavio.plugin.v1.TestDownloadClientResponse
-	11, // 27: mavio.plugin.v1.DownloadClientProviderService.AddDownload:output_type -> mavio.plugin.v1.AddDownloadResponse
-	13, // 28: mavio.plugin.v1.DownloadClientProviderService.ListDownloads:output_type -> mavio.plugin.v1.ListDownloadsResponse
-	18, // 29: mavio.plugin.v1.DownloadClientProviderService.GetDownload:output_type -> mavio.plugin.v1.GetDownloadResponse
-	20, // 30: mavio.plugin.v1.DownloadClientProviderService.RemoveDownload:output_type -> mavio.plugin.v1.RemoveDownloadResponse
-	22, // 31: mavio.plugin.v1.DownloadClientProviderService.MarkDownloadImported:output_type -> mavio.plugin.v1.MarkDownloadImportedResponse
-	24, // [24:32] is the sub-list for method output_type
-	16, // [16:24] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	27, // 7: mavio.plugin.v1.AddDownloadRequest.seed_time:type_name -> google.protobuf.Duration
+	11, // 8: mavio.plugin.v1.AddDownloadRequest.details:type_name -> mavio.plugin.v1.DownloadDetails
+	15, // 9: mavio.plugin.v1.ListDownloadsResponse.downloads:type_name -> mavio.plugin.v1.Download
+	16, // 10: mavio.plugin.v1.ListDownloadsResponse.statuses:type_name -> mavio.plugin.v1.DownloadClientStatus
+	17, // 11: mavio.plugin.v1.ListDownloadsResponse.failures:type_name -> mavio.plugin.v1.DownloadClientFailure
+	0,  // 12: mavio.plugin.v1.Download.kind:type_name -> mavio.plugin.v1.DownloadKind
+	27, // 13: mavio.plugin.v1.Download.remaining_time:type_name -> google.protobuf.Duration
+	1,  // 14: mavio.plugin.v1.Download.status:type_name -> mavio.plugin.v1.DownloadStatus
+	26, // 15: mavio.plugin.v1.DownloadClientFailure.disabled_until:type_name -> google.protobuf.Timestamp
+	15, // 16: mavio.plugin.v1.GetDownloadResponse.download:type_name -> mavio.plugin.v1.Download
+	2,  // 17: mavio.plugin.v1.DownloadClientProviderService.ListDownloadClientDefinitions:input_type -> mavio.plugin.v1.ListDownloadClientDefinitionsRequest
+	5,  // 18: mavio.plugin.v1.DownloadClientProviderService.ListDownloadClients:input_type -> mavio.plugin.v1.ListDownloadClientsRequest
+	8,  // 19: mavio.plugin.v1.DownloadClientProviderService.TestDownloadClient:input_type -> mavio.plugin.v1.TestDownloadClientRequest
+	10, // 20: mavio.plugin.v1.DownloadClientProviderService.AddDownload:input_type -> mavio.plugin.v1.AddDownloadRequest
+	13, // 21: mavio.plugin.v1.DownloadClientProviderService.ListDownloads:input_type -> mavio.plugin.v1.ListDownloadsRequest
+	18, // 22: mavio.plugin.v1.DownloadClientProviderService.GetDownload:input_type -> mavio.plugin.v1.GetDownloadRequest
+	20, // 23: mavio.plugin.v1.DownloadClientProviderService.RemoveDownload:input_type -> mavio.plugin.v1.RemoveDownloadRequest
+	22, // 24: mavio.plugin.v1.DownloadClientProviderService.MarkDownloadImported:input_type -> mavio.plugin.v1.MarkDownloadImportedRequest
+	3,  // 25: mavio.plugin.v1.DownloadClientProviderService.ListDownloadClientDefinitions:output_type -> mavio.plugin.v1.ListDownloadClientDefinitionsResponse
+	6,  // 26: mavio.plugin.v1.DownloadClientProviderService.ListDownloadClients:output_type -> mavio.plugin.v1.ListDownloadClientsResponse
+	9,  // 27: mavio.plugin.v1.DownloadClientProviderService.TestDownloadClient:output_type -> mavio.plugin.v1.TestDownloadClientResponse
+	12, // 28: mavio.plugin.v1.DownloadClientProviderService.AddDownload:output_type -> mavio.plugin.v1.AddDownloadResponse
+	14, // 29: mavio.plugin.v1.DownloadClientProviderService.ListDownloads:output_type -> mavio.plugin.v1.ListDownloadsResponse
+	19, // 30: mavio.plugin.v1.DownloadClientProviderService.GetDownload:output_type -> mavio.plugin.v1.GetDownloadResponse
+	21, // 31: mavio.plugin.v1.DownloadClientProviderService.RemoveDownload:output_type -> mavio.plugin.v1.RemoveDownloadResponse
+	23, // 32: mavio.plugin.v1.DownloadClientProviderService.MarkDownloadImported:output_type -> mavio.plugin.v1.MarkDownloadImportedResponse
+	25, // [25:33] is the sub-list for method output_type
+	17, // [17:25] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_download_client_proto_init() }
@@ -3441,7 +3864,7 @@ func file_mavio_plugin_v1_download_client_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_download_client_proto_rawDesc), len(file_mavio_plugin_v1_download_client_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   21,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

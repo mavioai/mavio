@@ -19,6 +19,8 @@ pub enum SettingFieldType {
     SETTING_FIELD_TYPE_MULTI_SELECT = 5i32,
     /// Text shown to administrators, not a setting.
     SETTING_FIELD_TYPE_INFO = 6i32,
+    /// Strings entered freely, such as tags, as a list.
+    SETTING_FIELD_TYPE_TAG = 7i32,
 }
 impl SettingFieldType {
     ///Idiomatic alias for [`Self::SETTING_FIELD_TYPE_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -42,6 +44,9 @@ impl SettingFieldType {
     ///Idiomatic alias for [`Self::SETTING_FIELD_TYPE_INFO`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const Info: Self = Self::SETTING_FIELD_TYPE_INFO;
+    ///Idiomatic alias for [`Self::SETTING_FIELD_TYPE_TAG`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Tag: Self = Self::SETTING_FIELD_TYPE_TAG;
 }
 impl ::core::default::Default for SettingFieldType {
     fn default() -> Self {
@@ -58,6 +63,7 @@ impl ::buffa::Enumeration for SettingFieldType {
             4i32 => ::core::option::Option::Some(Self::SETTING_FIELD_TYPE_SELECT),
             5i32 => ::core::option::Option::Some(Self::SETTING_FIELD_TYPE_MULTI_SELECT),
             6i32 => ::core::option::Option::Some(Self::SETTING_FIELD_TYPE_INFO),
+            7i32 => ::core::option::Option::Some(Self::SETTING_FIELD_TYPE_TAG),
             _ => ::core::option::Option::None,
         }
     }
@@ -73,6 +79,7 @@ impl ::buffa::Enumeration for SettingFieldType {
             Self::SETTING_FIELD_TYPE_SELECT => "SETTING_FIELD_TYPE_SELECT",
             Self::SETTING_FIELD_TYPE_MULTI_SELECT => "SETTING_FIELD_TYPE_MULTI_SELECT",
             Self::SETTING_FIELD_TYPE_INFO => "SETTING_FIELD_TYPE_INFO",
+            Self::SETTING_FIELD_TYPE_TAG => "SETTING_FIELD_TYPE_TAG",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -98,6 +105,9 @@ impl ::buffa::Enumeration for SettingFieldType {
             "SETTING_FIELD_TYPE_INFO" => {
                 ::core::option::Option::Some(Self::SETTING_FIELD_TYPE_INFO)
             }
+            "SETTING_FIELD_TYPE_TAG" => {
+                ::core::option::Option::Some(Self::SETTING_FIELD_TYPE_TAG)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -110,6 +120,7 @@ impl ::buffa::Enumeration for SettingFieldType {
             Self::SETTING_FIELD_TYPE_SELECT,
             Self::SETTING_FIELD_TYPE_MULTI_SELECT,
             Self::SETTING_FIELD_TYPE_INFO,
+            Self::SETTING_FIELD_TYPE_TAG,
         ]
     }
 }
