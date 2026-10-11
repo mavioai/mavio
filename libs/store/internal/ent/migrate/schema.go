@@ -1052,6 +1052,8 @@ var (
 	WantedColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "minimum_availability", Type: field.TypeString, Default: ""},
+		{Name: "monitor_new_items", Type: field.TypeString, Default: ""},
+		{Name: "season_folder", Type: field.TypeBool, Default: false},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
 		{Name: "added_at", Type: field.TypeTime},
 		{Name: "last_searched_at", Type: field.TypeTime, Nullable: true},
@@ -1066,13 +1068,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "wanted_items_wanted",
-				Columns:    []*schema.Column{WantedColumns[5]},
+				Columns:    []*schema.Column{WantedColumns[7]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "wanted_quality_profiles_wanted",
-				Columns:    []*schema.Column{WantedColumns[6]},
+				Columns:    []*schema.Column{WantedColumns[8]},
 				RefColumns: []*schema.Column{QualityProfilesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

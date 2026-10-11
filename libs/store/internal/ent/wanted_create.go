@@ -52,6 +52,34 @@ func (_c *WantedCreate) SetNillableMinimumAvailability(v *string) *WantedCreate 
 	return _c
 }
 
+// SetMonitorNewItems sets the "monitor_new_items" field.
+func (_c *WantedCreate) SetMonitorNewItems(v string) *WantedCreate {
+	_c.mutation.SetMonitorNewItems(v)
+	return _c
+}
+
+// SetNillableMonitorNewItems sets the "monitor_new_items" field if the given value is not nil.
+func (_c *WantedCreate) SetNillableMonitorNewItems(v *string) *WantedCreate {
+	if v != nil {
+		_c.SetMonitorNewItems(*v)
+	}
+	return _c
+}
+
+// SetSeasonFolder sets the "season_folder" field.
+func (_c *WantedCreate) SetSeasonFolder(v bool) *WantedCreate {
+	_c.mutation.SetSeasonFolder(v)
+	return _c
+}
+
+// SetNillableSeasonFolder sets the "season_folder" field if the given value is not nil.
+func (_c *WantedCreate) SetNillableSeasonFolder(v *bool) *WantedCreate {
+	if v != nil {
+		_c.SetSeasonFolder(*v)
+	}
+	return _c
+}
+
 // SetTags sets the "tags" field.
 func (_c *WantedCreate) SetTags(v []string) *WantedCreate {
 	_c.mutation.SetTags(v)
@@ -141,6 +169,14 @@ func (_c *WantedCreate) defaults() {
 		v := wanted.DefaultMinimumAvailability
 		_c.mutation.SetMinimumAvailability(v)
 	}
+	if _, ok := _c.mutation.MonitorNewItems(); !ok {
+		v := wanted.DefaultMonitorNewItems
+		_c.mutation.SetMonitorNewItems(v)
+	}
+	if _, ok := _c.mutation.SeasonFolder(); !ok {
+		v := wanted.DefaultSeasonFolder
+		_c.mutation.SetSeasonFolder(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := wanted.DefaultID()
 		_c.mutation.SetID(v)
@@ -157,6 +193,12 @@ func (_c *WantedCreate) check() error {
 	}
 	if _, ok := _c.mutation.MinimumAvailability(); !ok {
 		return &ValidationError{Name: "minimum_availability", err: errors.New(`ent: missing required field "Wanted.minimum_availability"`)}
+	}
+	if _, ok := _c.mutation.MonitorNewItems(); !ok {
+		return &ValidationError{Name: "monitor_new_items", err: errors.New(`ent: missing required field "Wanted.monitor_new_items"`)}
+	}
+	if _, ok := _c.mutation.SeasonFolder(); !ok {
+		return &ValidationError{Name: "season_folder", err: errors.New(`ent: missing required field "Wanted.season_folder"`)}
 	}
 	if _, ok := _c.mutation.AddedAt(); !ok {
 		return &ValidationError{Name: "added_at", err: errors.New(`ent: missing required field "Wanted.added_at"`)}
@@ -206,6 +248,14 @@ func (_c *WantedCreate) createSpec() (*Wanted, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.MinimumAvailability(); ok {
 		_spec.SetField(wanted.FieldMinimumAvailability, field.TypeString, value)
 		_node.MinimumAvailability = value
+	}
+	if value, ok := _c.mutation.MonitorNewItems(); ok {
+		_spec.SetField(wanted.FieldMonitorNewItems, field.TypeString, value)
+		_node.MonitorNewItems = value
+	}
+	if value, ok := _c.mutation.SeasonFolder(); ok {
+		_spec.SetField(wanted.FieldSeasonFolder, field.TypeBool, value)
+		_node.SeasonFolder = value
 	}
 	if value, ok := _c.mutation.Tags(); ok {
 		_spec.SetField(wanted.FieldTags, field.TypeJSON, value)
@@ -338,6 +388,30 @@ func (u *WantedUpsert) SetMinimumAvailability(v string) *WantedUpsert {
 // UpdateMinimumAvailability sets the "minimum_availability" field to the value that was provided on create.
 func (u *WantedUpsert) UpdateMinimumAvailability() *WantedUpsert {
 	u.SetExcluded(wanted.FieldMinimumAvailability)
+	return u
+}
+
+// SetMonitorNewItems sets the "monitor_new_items" field.
+func (u *WantedUpsert) SetMonitorNewItems(v string) *WantedUpsert {
+	u.Set(wanted.FieldMonitorNewItems, v)
+	return u
+}
+
+// UpdateMonitorNewItems sets the "monitor_new_items" field to the value that was provided on create.
+func (u *WantedUpsert) UpdateMonitorNewItems() *WantedUpsert {
+	u.SetExcluded(wanted.FieldMonitorNewItems)
+	return u
+}
+
+// SetSeasonFolder sets the "season_folder" field.
+func (u *WantedUpsert) SetSeasonFolder(v bool) *WantedUpsert {
+	u.Set(wanted.FieldSeasonFolder, v)
+	return u
+}
+
+// UpdateSeasonFolder sets the "season_folder" field to the value that was provided on create.
+func (u *WantedUpsert) UpdateSeasonFolder() *WantedUpsert {
+	u.SetExcluded(wanted.FieldSeasonFolder)
 	return u
 }
 
@@ -476,6 +550,34 @@ func (u *WantedUpsertOne) SetMinimumAvailability(v string) *WantedUpsertOne {
 func (u *WantedUpsertOne) UpdateMinimumAvailability() *WantedUpsertOne {
 	return u.Update(func(s *WantedUpsert) {
 		s.UpdateMinimumAvailability()
+	})
+}
+
+// SetMonitorNewItems sets the "monitor_new_items" field.
+func (u *WantedUpsertOne) SetMonitorNewItems(v string) *WantedUpsertOne {
+	return u.Update(func(s *WantedUpsert) {
+		s.SetMonitorNewItems(v)
+	})
+}
+
+// UpdateMonitorNewItems sets the "monitor_new_items" field to the value that was provided on create.
+func (u *WantedUpsertOne) UpdateMonitorNewItems() *WantedUpsertOne {
+	return u.Update(func(s *WantedUpsert) {
+		s.UpdateMonitorNewItems()
+	})
+}
+
+// SetSeasonFolder sets the "season_folder" field.
+func (u *WantedUpsertOne) SetSeasonFolder(v bool) *WantedUpsertOne {
+	return u.Update(func(s *WantedUpsert) {
+		s.SetSeasonFolder(v)
+	})
+}
+
+// UpdateSeasonFolder sets the "season_folder" field to the value that was provided on create.
+func (u *WantedUpsertOne) UpdateSeasonFolder() *WantedUpsertOne {
+	return u.Update(func(s *WantedUpsert) {
+		s.UpdateSeasonFolder()
 	})
 }
 
@@ -789,6 +891,34 @@ func (u *WantedUpsertBulk) SetMinimumAvailability(v string) *WantedUpsertBulk {
 func (u *WantedUpsertBulk) UpdateMinimumAvailability() *WantedUpsertBulk {
 	return u.Update(func(s *WantedUpsert) {
 		s.UpdateMinimumAvailability()
+	})
+}
+
+// SetMonitorNewItems sets the "monitor_new_items" field.
+func (u *WantedUpsertBulk) SetMonitorNewItems(v string) *WantedUpsertBulk {
+	return u.Update(func(s *WantedUpsert) {
+		s.SetMonitorNewItems(v)
+	})
+}
+
+// UpdateMonitorNewItems sets the "monitor_new_items" field to the value that was provided on create.
+func (u *WantedUpsertBulk) UpdateMonitorNewItems() *WantedUpsertBulk {
+	return u.Update(func(s *WantedUpsert) {
+		s.UpdateMonitorNewItems()
+	})
+}
+
+// SetSeasonFolder sets the "season_folder" field.
+func (u *WantedUpsertBulk) SetSeasonFolder(v bool) *WantedUpsertBulk {
+	return u.Update(func(s *WantedUpsert) {
+		s.SetSeasonFolder(v)
+	})
+}
+
+// UpdateSeasonFolder sets the "season_folder" field to the value that was provided on create.
+func (u *WantedUpsertBulk) UpdateSeasonFolder() *WantedUpsertBulk {
+	return u.Update(func(s *WantedUpsert) {
+		s.UpdateSeasonFolder()
 	})
 }
 

@@ -71,6 +71,16 @@ func MinimumAvailability(v string) predicate.Wanted {
 	return predicate.Wanted(sql.FieldEQ(FieldMinimumAvailability, v))
 }
 
+// MonitorNewItems applies equality check predicate on the "monitor_new_items" field. It's identical to MonitorNewItemsEQ.
+func MonitorNewItems(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldEQ(FieldMonitorNewItems, v))
+}
+
+// SeasonFolder applies equality check predicate on the "season_folder" field. It's identical to SeasonFolderEQ.
+func SeasonFolder(v bool) predicate.Wanted {
+	return predicate.Wanted(sql.FieldEQ(FieldSeasonFolder, v))
+}
+
 // AddedAt applies equality check predicate on the "added_at" field. It's identical to AddedAtEQ.
 func AddedAt(v time.Time) predicate.Wanted {
 	return predicate.Wanted(sql.FieldEQ(FieldAddedAt, v))
@@ -184,6 +194,81 @@ func MinimumAvailabilityEqualFold(v string) predicate.Wanted {
 // MinimumAvailabilityContainsFold applies the ContainsFold predicate on the "minimum_availability" field.
 func MinimumAvailabilityContainsFold(v string) predicate.Wanted {
 	return predicate.Wanted(sql.FieldContainsFold(FieldMinimumAvailability, v))
+}
+
+// MonitorNewItemsEQ applies the EQ predicate on the "monitor_new_items" field.
+func MonitorNewItemsEQ(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldEQ(FieldMonitorNewItems, v))
+}
+
+// MonitorNewItemsNEQ applies the NEQ predicate on the "monitor_new_items" field.
+func MonitorNewItemsNEQ(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldNEQ(FieldMonitorNewItems, v))
+}
+
+// MonitorNewItemsIn applies the In predicate on the "monitor_new_items" field.
+func MonitorNewItemsIn(vs ...string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldIn(FieldMonitorNewItems, vs...))
+}
+
+// MonitorNewItemsNotIn applies the NotIn predicate on the "monitor_new_items" field.
+func MonitorNewItemsNotIn(vs ...string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldNotIn(FieldMonitorNewItems, vs...))
+}
+
+// MonitorNewItemsGT applies the GT predicate on the "monitor_new_items" field.
+func MonitorNewItemsGT(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldGT(FieldMonitorNewItems, v))
+}
+
+// MonitorNewItemsGTE applies the GTE predicate on the "monitor_new_items" field.
+func MonitorNewItemsGTE(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldGTE(FieldMonitorNewItems, v))
+}
+
+// MonitorNewItemsLT applies the LT predicate on the "monitor_new_items" field.
+func MonitorNewItemsLT(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldLT(FieldMonitorNewItems, v))
+}
+
+// MonitorNewItemsLTE applies the LTE predicate on the "monitor_new_items" field.
+func MonitorNewItemsLTE(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldLTE(FieldMonitorNewItems, v))
+}
+
+// MonitorNewItemsContains applies the Contains predicate on the "monitor_new_items" field.
+func MonitorNewItemsContains(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldContains(FieldMonitorNewItems, v))
+}
+
+// MonitorNewItemsHasPrefix applies the HasPrefix predicate on the "monitor_new_items" field.
+func MonitorNewItemsHasPrefix(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldHasPrefix(FieldMonitorNewItems, v))
+}
+
+// MonitorNewItemsHasSuffix applies the HasSuffix predicate on the "monitor_new_items" field.
+func MonitorNewItemsHasSuffix(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldHasSuffix(FieldMonitorNewItems, v))
+}
+
+// MonitorNewItemsEqualFold applies the EqualFold predicate on the "monitor_new_items" field.
+func MonitorNewItemsEqualFold(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldEqualFold(FieldMonitorNewItems, v))
+}
+
+// MonitorNewItemsContainsFold applies the ContainsFold predicate on the "monitor_new_items" field.
+func MonitorNewItemsContainsFold(v string) predicate.Wanted {
+	return predicate.Wanted(sql.FieldContainsFold(FieldMonitorNewItems, v))
+}
+
+// SeasonFolderEQ applies the EQ predicate on the "season_folder" field.
+func SeasonFolderEQ(v bool) predicate.Wanted {
+	return predicate.Wanted(sql.FieldEQ(FieldSeasonFolder, v))
+}
+
+// SeasonFolderNEQ applies the NEQ predicate on the "season_folder" field.
+func SeasonFolderNEQ(v bool) predicate.Wanted {
+	return predicate.Wanted(sql.FieldNEQ(FieldSeasonFolder, v))
 }
 
 // TagsIsNil applies the IsNil predicate on the "tags" field.

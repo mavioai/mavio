@@ -393,6 +393,8 @@ func (r wantedItems) Put(ctx context.Context, w *core.Wanted) error {
 				SetItemID(w.ItemID).
 				SetQualityProfileID(w.QualityProfileID).
 				SetMinimumAvailability(string(w.MinimumAvailability)).
+				SetMonitorNewItems(string(w.MonitorNewItems)).
+				SetSeasonFolder(w.SeasonFolder).
 				SetTags(w.Tags).
 				SetAddedAt(w.AddedAt).
 				SetNillableLastSearchedAt(nonZero(w.LastSearchedAt))
@@ -406,6 +408,8 @@ func (r wantedItems) Put(ctx context.Context, w *core.Wanted) error {
 		u := tx.write.Wanted.UpdateOne(old).
 			SetQualityProfileID(w.QualityProfileID).
 			SetMinimumAvailability(string(w.MinimumAvailability)).
+			SetMonitorNewItems(string(w.MonitorNewItems)).
+			SetSeasonFolder(w.SeasonFolder).
 			SetTags(w.Tags).
 			SetAddedAt(w.AddedAt)
 		if w.LastSearchedAt.IsZero() {
@@ -431,6 +435,7 @@ func (r wantedItems) Delete(ctx context.Context, itemID core.ID) error {
 func toWanted(w *ent.Wanted) core.Wanted {
 	return core.Wanted{
 		ItemID: w.ItemID, QualityProfileID: w.QualityProfileID, MinimumAvailability: core.MovieAvailability(w.MinimumAvailability),
+		MonitorNewItems: core.NewItemMonitor(w.MonitorNewItems), SeasonFolder: w.SeasonFolder,
 		Tags: w.Tags, AddedAt: w.AddedAt.UTC(), LastSearchedAt: zeroIfNil(w.LastSearchedAt),
 	}
 }

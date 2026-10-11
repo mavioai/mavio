@@ -99,6 +99,7 @@ func TestValidate(t *testing.T) {
 	}{
 		{"valid item", ptr(validItem()).Validate()},
 		{"virtual episode", (&Item{ID: NewID(), LibraryID: NewID(), Kind: KindEpisode, Name: "Pilot", Virtual: true}).Validate()},
+		{"virtual series", (&Item{ID: NewID(), LibraryID: NewID(), Kind: KindSeries, Name: "Show", Virtual: true}).Validate()},
 		{"valid library", (&Library{Name: "Movies", Kind: LibraryMovies, Paths: []string{"/media"}}).Validate()},
 		{"valid user", (&User{ID: NewID(), Name: "alice", PasswordHash: "$argon2id$x"}).Validate()},
 		{"valid job", (&Job{ID: NewID(), Kind: "library.scan", MaxAttempts: 3}).Validate()},
@@ -124,7 +125,7 @@ func TestValidate(t *testing.T) {
 		{"item air day", func() error { it := validItem(); it.AirDays = []time.Weekday{7}; return it.Validate() }()},
 		{"item display order", func() error { it := validItem(); it.DisplayOrder = "aired"; return it.Validate() }()},
 		{"item series type", func() error { it := validItem(); it.SeriesType = "standard"; return it.Validate() }()},
-		{"virtual series", func() error { it := validItem(); it.Kind, it.Virtual = KindSeries, true; return it.Validate() }()},
+		{"virtual collection", func() error { it := validItem(); it.Kind, it.Virtual = KindCollection, true; return it.Validate() }()},
 		{"virtual with path", func() error { it := validItem(); it.Path, it.Virtual = "/a.mkv", true; return it.Validate() }()},
 		{"library without paths", (&Library{Name: "x", Kind: LibraryMovies}).Validate()},
 		{"library unknown kind", (&Library{Name: "x", Kind: "tv", Paths: []string{"/"}}).Validate()},

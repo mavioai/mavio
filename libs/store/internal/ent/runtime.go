@@ -738,6 +738,14 @@ func init() {
 	wantedDescMinimumAvailability := wantedFields[3].Descriptor()
 	// wanted.DefaultMinimumAvailability holds the default value on creation for the minimum_availability field.
 	wanted.DefaultMinimumAvailability = wantedDescMinimumAvailability.Default.(string)
+	// wantedDescMonitorNewItems is the schema descriptor for monitor_new_items field.
+	wantedDescMonitorNewItems := wantedFields[4].Descriptor()
+	// wanted.DefaultMonitorNewItems holds the default value on creation for the monitor_new_items field.
+	wanted.DefaultMonitorNewItems = wantedDescMonitorNewItems.Default.(string)
+	// wantedDescSeasonFolder is the schema descriptor for season_folder field.
+	wantedDescSeasonFolder := wantedFields[5].Descriptor()
+	// wanted.DefaultSeasonFolder holds the default value on creation for the season_folder field.
+	wanted.DefaultSeasonFolder = wantedDescSeasonFolder.Default.(bool)
 	// wantedDescID is the schema descriptor for id field.
 	wantedDescID := wantedFields[0].Descriptor()
 	// wanted.DefaultID holds the default value on creation for the id field.

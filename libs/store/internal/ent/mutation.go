@@ -31333,6 +31333,8 @@ type WantedMutation struct {
 	typ                    string
 	id                     *core.ID
 	minimum_availability   *string
+	monitor_new_items      *string
+	season_folder          *bool
 	tags                   *[]string
 	appendtags             []string
 	added_at               *time.Time
@@ -31557,6 +31559,78 @@ func (m *WantedMutation) OldMinimumAvailability(ctx context.Context) (v string, 
 // ResetMinimumAvailability resets all changes to the "minimum_availability" field.
 func (m *WantedMutation) ResetMinimumAvailability() {
 	m.minimum_availability = nil
+}
+
+// SetMonitorNewItems sets the "monitor_new_items" field.
+func (m *WantedMutation) SetMonitorNewItems(s string) {
+	m.monitor_new_items = &s
+}
+
+// MonitorNewItems returns the value of the "monitor_new_items" field in the mutation.
+func (m *WantedMutation) MonitorNewItems() (r string, exists bool) {
+	v := m.monitor_new_items
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMonitorNewItems returns the old "monitor_new_items" field's value of the Wanted entity.
+// If the Wanted object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WantedMutation) OldMonitorNewItems(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMonitorNewItems is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMonitorNewItems requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMonitorNewItems: %w", err)
+	}
+	return oldValue.MonitorNewItems, nil
+}
+
+// ResetMonitorNewItems resets all changes to the "monitor_new_items" field.
+func (m *WantedMutation) ResetMonitorNewItems() {
+	m.monitor_new_items = nil
+}
+
+// SetSeasonFolder sets the "season_folder" field.
+func (m *WantedMutation) SetSeasonFolder(b bool) {
+	m.season_folder = &b
+}
+
+// SeasonFolder returns the value of the "season_folder" field in the mutation.
+func (m *WantedMutation) SeasonFolder() (r bool, exists bool) {
+	v := m.season_folder
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSeasonFolder returns the old "season_folder" field's value of the Wanted entity.
+// If the Wanted object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WantedMutation) OldSeasonFolder(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSeasonFolder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSeasonFolder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSeasonFolder: %w", err)
+	}
+	return oldValue.SeasonFolder, nil
+}
+
+// ResetSeasonFolder resets all changes to the "season_folder" field.
+func (m *WantedMutation) ResetSeasonFolder() {
+	m.season_folder = nil
 }
 
 // SetTags sets the "tags" field.
@@ -31797,7 +31871,7 @@ func (m *WantedMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *WantedMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 8)
 	if m.item != nil {
 		fields = append(fields, wanted.FieldItemID)
 	}
@@ -31806,6 +31880,12 @@ func (m *WantedMutation) Fields() []string {
 	}
 	if m.minimum_availability != nil {
 		fields = append(fields, wanted.FieldMinimumAvailability)
+	}
+	if m.monitor_new_items != nil {
+		fields = append(fields, wanted.FieldMonitorNewItems)
+	}
+	if m.season_folder != nil {
+		fields = append(fields, wanted.FieldSeasonFolder)
 	}
 	if m.tags != nil {
 		fields = append(fields, wanted.FieldTags)
@@ -31830,6 +31910,10 @@ func (m *WantedMutation) Field(name string) (ent.Value, bool) {
 		return m.QualityProfileID()
 	case wanted.FieldMinimumAvailability:
 		return m.MinimumAvailability()
+	case wanted.FieldMonitorNewItems:
+		return m.MonitorNewItems()
+	case wanted.FieldSeasonFolder:
+		return m.SeasonFolder()
 	case wanted.FieldTags:
 		return m.Tags()
 	case wanted.FieldAddedAt:
@@ -31851,6 +31935,10 @@ func (m *WantedMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldQualityProfileID(ctx)
 	case wanted.FieldMinimumAvailability:
 		return m.OldMinimumAvailability(ctx)
+	case wanted.FieldMonitorNewItems:
+		return m.OldMonitorNewItems(ctx)
+	case wanted.FieldSeasonFolder:
+		return m.OldSeasonFolder(ctx)
 	case wanted.FieldTags:
 		return m.OldTags(ctx)
 	case wanted.FieldAddedAt:
@@ -31886,6 +31974,20 @@ func (m *WantedMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMinimumAvailability(v)
+		return nil
+	case wanted.FieldMonitorNewItems:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMonitorNewItems(v)
+		return nil
+	case wanted.FieldSeasonFolder:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSeasonFolder(v)
 		return nil
 	case wanted.FieldTags:
 		v, ok := value.([]string)
@@ -31980,6 +32082,12 @@ func (m *WantedMutation) ResetField(name string) error {
 		return nil
 	case wanted.FieldMinimumAvailability:
 		m.ResetMinimumAvailability()
+		return nil
+	case wanted.FieldMonitorNewItems:
+		m.ResetMonitorNewItems()
+		return nil
+	case wanted.FieldSeasonFolder:
+		m.ResetSeasonFolder()
 		return nil
 	case wanted.FieldTags:
 		m.ResetTags()

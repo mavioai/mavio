@@ -19,6 +19,10 @@ const (
 	FieldQualityProfileID = "quality_profile_id"
 	// FieldMinimumAvailability holds the string denoting the minimum_availability field in the database.
 	FieldMinimumAvailability = "minimum_availability"
+	// FieldMonitorNewItems holds the string denoting the monitor_new_items field in the database.
+	FieldMonitorNewItems = "monitor_new_items"
+	// FieldSeasonFolder holds the string denoting the season_folder field in the database.
+	FieldSeasonFolder = "season_folder"
 	// FieldTags holds the string denoting the tags field in the database.
 	FieldTags = "tags"
 	// FieldAddedAt holds the string denoting the added_at field in the database.
@@ -53,6 +57,8 @@ var Columns = []string{
 	FieldItemID,
 	FieldQualityProfileID,
 	FieldMinimumAvailability,
+	FieldMonitorNewItems,
+	FieldSeasonFolder,
 	FieldTags,
 	FieldAddedAt,
 	FieldLastSearchedAt,
@@ -71,6 +77,10 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultMinimumAvailability holds the default value on creation for the "minimum_availability" field.
 	DefaultMinimumAvailability string
+	// DefaultMonitorNewItems holds the default value on creation for the "monitor_new_items" field.
+	DefaultMonitorNewItems string
+	// DefaultSeasonFolder holds the default value on creation for the "season_folder" field.
+	DefaultSeasonFolder bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() core.ID
 )
@@ -96,6 +106,16 @@ func ByQualityProfileID(opts ...sql.OrderTermOption) OrderOption {
 // ByMinimumAvailability orders the results by the minimum_availability field.
 func ByMinimumAvailability(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMinimumAvailability, opts...).ToFunc()
+}
+
+// ByMonitorNewItems orders the results by the monitor_new_items field.
+func ByMonitorNewItems(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMonitorNewItems, opts...).ToFunc()
+}
+
+// BySeasonFolder orders the results by the season_folder field.
+func BySeasonFolder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSeasonFolder, opts...).ToFunc()
 }
 
 // ByAddedAt orders the results by the added_at field.

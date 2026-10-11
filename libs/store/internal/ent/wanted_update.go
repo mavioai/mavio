@@ -75,6 +75,34 @@ func (_u *WantedUpdate) SetNillableMinimumAvailability(v *string) *WantedUpdate 
 	return _u
 }
 
+// SetMonitorNewItems sets the "monitor_new_items" field.
+func (_u *WantedUpdate) SetMonitorNewItems(v string) *WantedUpdate {
+	_u.mutation.SetMonitorNewItems(v)
+	return _u
+}
+
+// SetNillableMonitorNewItems sets the "monitor_new_items" field if the given value is not nil.
+func (_u *WantedUpdate) SetNillableMonitorNewItems(v *string) *WantedUpdate {
+	if v != nil {
+		_u.SetMonitorNewItems(*v)
+	}
+	return _u
+}
+
+// SetSeasonFolder sets the "season_folder" field.
+func (_u *WantedUpdate) SetSeasonFolder(v bool) *WantedUpdate {
+	_u.mutation.SetSeasonFolder(v)
+	return _u
+}
+
+// SetNillableSeasonFolder sets the "season_folder" field if the given value is not nil.
+func (_u *WantedUpdate) SetNillableSeasonFolder(v *bool) *WantedUpdate {
+	if v != nil {
+		_u.SetSeasonFolder(*v)
+	}
+	return _u
+}
+
 // SetTags sets the "tags" field.
 func (_u *WantedUpdate) SetTags(v []string) *WantedUpdate {
 	_u.mutation.SetTags(v)
@@ -212,6 +240,12 @@ func (_u *WantedUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.MinimumAvailability(); ok {
 		_spec.SetField(wanted.FieldMinimumAvailability, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.MonitorNewItems(); ok {
+		_spec.SetField(wanted.FieldMonitorNewItems, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SeasonFolder(); ok {
+		_spec.SetField(wanted.FieldSeasonFolder, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Tags(); ok {
 		_spec.SetField(wanted.FieldTags, field.TypeJSON, value)
@@ -351,6 +385,34 @@ func (_u *WantedUpdateOne) SetMinimumAvailability(v string) *WantedUpdateOne {
 func (_u *WantedUpdateOne) SetNillableMinimumAvailability(v *string) *WantedUpdateOne {
 	if v != nil {
 		_u.SetMinimumAvailability(*v)
+	}
+	return _u
+}
+
+// SetMonitorNewItems sets the "monitor_new_items" field.
+func (_u *WantedUpdateOne) SetMonitorNewItems(v string) *WantedUpdateOne {
+	_u.mutation.SetMonitorNewItems(v)
+	return _u
+}
+
+// SetNillableMonitorNewItems sets the "monitor_new_items" field if the given value is not nil.
+func (_u *WantedUpdateOne) SetNillableMonitorNewItems(v *string) *WantedUpdateOne {
+	if v != nil {
+		_u.SetMonitorNewItems(*v)
+	}
+	return _u
+}
+
+// SetSeasonFolder sets the "season_folder" field.
+func (_u *WantedUpdateOne) SetSeasonFolder(v bool) *WantedUpdateOne {
+	_u.mutation.SetSeasonFolder(v)
+	return _u
+}
+
+// SetNillableSeasonFolder sets the "season_folder" field if the given value is not nil.
+func (_u *WantedUpdateOne) SetNillableSeasonFolder(v *bool) *WantedUpdateOne {
+	if v != nil {
+		_u.SetSeasonFolder(*v)
 	}
 	return _u
 }
@@ -522,6 +584,12 @@ func (_u *WantedUpdateOne) sqlSave(ctx context.Context) (_node *Wanted, err erro
 	}
 	if value, ok := _u.mutation.MinimumAvailability(); ok {
 		_spec.SetField(wanted.FieldMinimumAvailability, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.MonitorNewItems(); ok {
+		_spec.SetField(wanted.FieldMonitorNewItems, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SeasonFolder(); ok {
+		_spec.SetField(wanted.FieldSeasonFolder, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Tags(); ok {
 		_spec.SetField(wanted.FieldTags, field.TypeJSON, value)

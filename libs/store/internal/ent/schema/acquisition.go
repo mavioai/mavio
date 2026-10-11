@@ -167,6 +167,8 @@ func (Wanted) Fields() []ent.Field {
 		field.UUID("item_id", core.ID{}).Unique(),
 		field.UUID("quality_profile_id", core.ID{}),
 		field.String("minimum_availability").Default(""),
+		field.String("monitor_new_items").Default(""),
+		field.Bool("season_folder").Default(false),
 		field.JSON("tags", []string{}).Optional(),
 		field.Time("added_at"),
 		field.Time("last_searched_at").Optional().Nillable(),

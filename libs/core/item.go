@@ -251,8 +251,8 @@ type Item struct {
 	// Path is the file or folder the item was resolved from; empty for
 	// items without one, such as collections and virtual items.
 	Path string
-	// Virtual marks a movie, season or episode known from metadata whose
-	// file the library does not have. Virtual items are hidden from queries
+	// Virtual marks a movie, series, season or episode known from metadata
+	// whose file or folder the library does not have. Virtual items are hidden from queries
 	// unless requested; a scan that finds the file turns the item into a
 	// physical one.
 	Virtual bool
@@ -412,7 +412,7 @@ func (it *Item) Validate() error {
 }
 
 // virtualKinds are the kinds of items that can be virtual.
-var virtualKinds = map[ItemKind]bool{KindMovie: true, KindSeason: true, KindEpisode: true}
+var virtualKinds = map[ItemKind]bool{KindMovie: true, KindSeries: true, KindSeason: true, KindEpisode: true}
 
 // Link is an entry of a collection or playlist: an item at a position.
 // A playlist may hold an item several times, each entry with its own ID.

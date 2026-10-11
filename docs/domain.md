@@ -43,7 +43,7 @@ erDiagram
 | `APIKey` | A token an integration calls the API with, as the administrator who created it |
 | `Activity` | Something that happened on the server, kept in the activity log |
 | `QualityDefinition`, `QualityProfile`, `CustomFormat`, `DelayProfile`, `ReleaseProfile` | What releases are wanted and how they rank (§13) |
-| `Wanted` | How a monitored movie or series is acquired: its quality profile, minimum availability and tags |
+| `Wanted` | How a monitored movie or series is acquired: its quality profile, minimum availability, new item monitoring, season folder flag and tags |
 | `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | A tracked download, an acquisition event, a release not to grab again, a release kept to grab later |
 | `RemotePathMapping` | How a download client's paths map to the server's |
 
@@ -158,7 +158,7 @@ Trailers, featurettes, theme songs and other extras are ordinary items with `Ext
 Every library scan has a generation, one more than the last. A scan stamps the items it sees with its generation; items with a path that a complete scan did not see are marked missing (`MissingSince`) rather than deleted, so a temporarily unavailable mount point loses nothing. Folders a scan could not read keep their items as they were: present items stay present, missing ones missing. Missing items are hidden from queries unless `ItemQuery.IncludeMissing` is set, come back when their file reappears, and are purged after a grace period.
 
 ### 4.8 Virtual Items
-A virtual item is a movie, season or episode known from metadata whose file the library does not have, as Jellyfin's virtual items; unlike a missing item (§4.7), the library never had it. Virtual items are hidden from queries unless `ItemQuery.IncludeVirtual` or `OnlyVirtual` is set.
+A virtual item is a movie, series, season or episode known from metadata whose file or folder the library does not have, as Jellyfin's virtual items (a virtual series is one added to be acquired, §13.2); unlike a missing item (§4.7), the library never had it. Virtual items are hidden from queries unless `ItemQuery.IncludeVirtual` or `OnlyVirtual` is set.
 
 * Refreshing a series asks the library's episode listers (`ProviderOrder.Episodes`) in order; the first that knows the series lists its seasons and episodes, numbered in the series' `DisplayOrder`. As Jellyfin's TMDB missing episode provider, the refresh then creates a virtual episode for each listed episode that no episode of the series holds and the library's `VirtualEpisodes` wants, in its season, creating a virtual season when the series has no season of that number; it updates the virtual episodes it made before, moves them into the season of their number, and deletes them once an episode file holds them, they age out of `GraceDays`, or they are no longer wanted. Virtual seasons left empty are deleted.
 * A virtual item belongs to the lister whose provider has an external ID on it; virtual items of other listers are left alone.
@@ -332,7 +332,7 @@ The server keeps what `libs/acquire` decides with and what happens to the releas
 * A `ReleaseProfile` requires or ignores terms (plain or `/regex/flags`) in release titles, for the items sharing one of its tags (all when none) and the releases of one indexer (all when none).
 
 ### 13.2 Wanted Items
-A monitored movie or series (`Item.Monitored`) is acquired as its `Wanted` says: its `QualityProfileID`, a movie's `MinimumAvailability` (`announced`, `in_cinemas`, `released`), its `Tags`, `AddedAt` and `LastSearchedAt`. A wanted movie without a file is a virtual item (§4.8).
+A monitored movie or series (`Item.Monitored`) is acquired as its `Wanted` says: its `QualityProfileID`, a movie's `MinimumAvailability` (`announced`, `in_cinemas`, `released`), a series' `MonitorNewItems` (`all`, the default when empty, or `none`: whether seasons and episodes a refresh adds are monitored, as Sonarr's `NewItemMonitorTypes`) and `SeasonFolder` (whether its episodes are imported into season folders), its `Tags`, `AddedAt` and `LastSearchedAt`. A wanted movie without a file, or a wanted series without a folder, is a virtual item (§4.8).
 
 ### 13.3 Downloads, History and the Blocklist
 * A `Download` is a grabbed release, tracked from the grab until it is imported, fails or is ignored: its download client (`PluginID`, `ClientID`) and the client's `DownloadID`, its item and episodes, title, indexer, protocol, quality, languages and size, and its `State` (`downloading`, `import_blocked`, `import_pending`, `importing`, `imported`, `failed_pending`, `failed`, `ignored`) with `Messages`. A client's download is tracked once.

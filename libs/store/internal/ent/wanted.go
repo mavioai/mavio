@@ -27,6 +27,10 @@ type Wanted struct {
 	QualityProfileID core.ID `json:"quality_profile_id,omitempty"`
 	// MinimumAvailability holds the value of the "minimum_availability" field.
 	MinimumAvailability string `json:"minimum_availability,omitempty"`
+	// MonitorNewItems holds the value of the "monitor_new_items" field.
+	MonitorNewItems string `json:"monitor_new_items,omitempty"`
+	// SeasonFolder holds the value of the "season_folder" field.
+	SeasonFolder bool `json:"season_folder,omitempty"`
 	// Tags holds the value of the "tags" field.
 	Tags []string `json:"tags,omitempty"`
 	// AddedAt holds the value of the "added_at" field.
@@ -81,7 +85,9 @@ func (*Wanted) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case wanted.FieldID, wanted.FieldItemID, wanted.FieldQualityProfileID:
 			values[i] = new(core.ID)
-		case wanted.FieldMinimumAvailability:
+		case wanted.FieldSeasonFolder:
+			values[i] = new(sql.NullBool)
+		case wanted.FieldMinimumAvailability, wanted.FieldMonitorNewItems:
 			values[i] = new(sql.NullString)
 		case wanted.FieldAddedAt, wanted.FieldLastSearchedAt:
 			values[i] = new(sql.NullTime)
@@ -123,6 +129,18 @@ func (_m *Wanted) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field minimum_availability", values[i])
 			} else if value.Valid {
 				_m.MinimumAvailability = value.String
+			}
+		case wanted.FieldMonitorNewItems:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field monitor_new_items", values[i])
+			} else if value.Valid {
+				_m.MonitorNewItems = value.String
+			}
+		case wanted.FieldSeasonFolder:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field season_folder", values[i])
+			} else if value.Valid {
+				_m.SeasonFolder = value.Bool
 			}
 		case wanted.FieldTags:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -199,6 +217,12 @@ func (_m *Wanted) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("minimum_availability=")
 	builder.WriteString(_m.MinimumAvailability)
+	builder.WriteString(", ")
+	builder.WriteString("monitor_new_items=")
+	builder.WriteString(_m.MonitorNewItems)
+	builder.WriteString(", ")
+	builder.WriteString("season_folder=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SeasonFolder))
 	builder.WriteString(", ")
 	builder.WriteString("tags=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Tags))

@@ -42,7 +42,7 @@ erDiagram
 | `APIKey` | 集成调用 API 所用的令牌，以创建它的管理员身份行事 |
 | `Activity` | 服务端上发生的事情，记录在活动日志中 |
 | `QualityDefinition`、`QualityProfile`、`CustomFormat`、`DelayProfile`、`ReleaseProfile` | 想要哪些发布及其排序（§13） |
-| `Wanted` | 被监控的电影或剧集如何获取：其质量档案、最低可用状态与标签 |
+| `Wanted` | 被监控的电影或剧集如何获取：其质量档案、最低可用状态、新条目监控、季文件夹标志与标签 |
 | `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | 被跟踪的下载、获取事件、不再抓取的发布、留待以后抓取的发布 |
 | `RemotePathMapping` | 下载客户端的路径如何映射到服务端的路径 |
 | `DisplayPreferences` | 用户对某个客户端如何显示某个视图的设置 |
@@ -158,7 +158,7 @@ erDiagram
 每次媒体库扫描都有一个世代，比上一次多一。扫描为看到的条目记下自己的世代；完整扫描没有看到的、有路径的条目被标记为缺失（`MissingSince`）而不是删除，因此暂时不可用的挂载点不会丢失任何东西。扫描无法读取的文件夹，其条目保持原状：存在的仍存在，缺失的仍缺失。缺失条目在查询中隐藏（除非设置 `ItemQuery.IncludeMissing`），文件重新出现时恢复，超过宽限期后被清除。
 
 ### 4.8 虚拟条目
-虚拟条目是从元数据得知、但媒体库没有其文件的电影、季或单集，与 Jellyfin 的虚拟条目相同；与缺失条目（§4.7）不同，媒体库从未有过它。虚拟条目在查询中隐藏，除非设置 `ItemQuery.IncludeVirtual` 或 `OnlyVirtual`。
+虚拟条目是从元数据得知、但媒体库没有其文件或文件夹的电影、剧集、季或单集，与 Jellyfin 的虚拟条目相同（虚拟剧集是为获取而添加的剧集，§13.2）；与缺失条目（§4.7）不同，媒体库从未有过它。虚拟条目在查询中隐藏，除非设置 `ItemQuery.IncludeVirtual` 或 `OnlyVirtual`。
 
 * 刷新剧集时按顺序询问媒体库的集列表提供者（`ProviderOrder.Episodes`），第一个认识该剧集的提供者按剧集的 `DisplayOrder` 编号列出它的季和集。随后刷新像 Jellyfin 的 TMDB 缺失集提供者那样：为每个列出的、剧集中没有单集占据且媒体库的 `VirtualEpisodes` 想要的集，在其季中创建虚拟集，剧集没有该编号的季时创建虚拟季；更新之前创建的虚拟集，把它们移到编号所在的季，并在单集文件占据它们、超过 `GraceDays`、或不再想要时删除它们。变空的虚拟季被删除。
 * 虚拟条目属于其外部 ID 中有该提供者 ID 的集列表提供者；其他提供者的虚拟条目不受影响。
@@ -332,7 +332,7 @@ erDiagram
 * `ReleaseProfile` 要求或忽略发布标题中的词（普通词或 `/regex/flags`），适用于与其某个标签相同的条目（无标签时为全部），以及某个索引器的发布（未指定时为全部）。
 
 ### 13.2 想要的条目
-被监控的电影或剧集（`Item.Monitored`）按其 `Wanted` 获取：`QualityProfileID`、电影的 `MinimumAvailability`（`announced`、`in_cinemas`、`released`）、`Tags`、`AddedAt` 与 `LastSearchedAt`。没有文件的想要的电影是虚拟条目（§4.8）。
+被监控的电影或剧集（`Item.Monitored`）按其 `Wanted` 获取：`QualityProfileID`、电影的 `MinimumAvailability`（`announced`、`in_cinemas`、`released`）、剧集的 `MonitorNewItems`（`all`，为空时的默认值，或 `none`：刷新新增的季和集是否被监控，与 Sonarr 的 `NewItemMonitorTypes` 相同）与 `SeasonFolder`（其单集是否导入到季文件夹中）、`Tags`、`AddedAt` 与 `LastSearchedAt`。没有文件的想要的电影、或没有文件夹的想要的剧集是虚拟条目（§4.8）。
 
 ### 13.3 下载、历史与黑名单
 * `Download` 是被抓取的发布，从抓取起被跟踪，直到入库、失败或被忽略：其下载客户端（`PluginID`、`ClientID`）与客户端的 `DownloadID`、其条目与剧集、标题、索引器、协议、质量、语言与大小，以及 `State`（`downloading`、`import_blocked`、`import_pending`、`importing`、`imported`、`failed_pending`、`failed`、`ignored`）与 `Messages`。客户端的同一个下载只跟踪一次。

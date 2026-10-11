@@ -284,6 +284,19 @@ var MovieAvailabilities = []MovieAvailability{AvailabilityAnnounced, Availabilit
 // Valid reports whether a is a known availability.
 func (a MovieAvailability) Valid() bool { return slices.Contains(MovieAvailabilities, a) }
 
+// NewItemMonitor is whether a wanted series monitors the seasons and
+// episodes a refresh adds, as Sonarr's NewItemMonitorTypes.
+type NewItemMonitor string
+
+// The new item monitoring options.
+const (
+	NewItemsAll  NewItemMonitor = "all"
+	NewItemsNone NewItemMonitor = "none"
+)
+
+// Valid reports whether m is a known option.
+func (m NewItemMonitor) Valid() bool { return m == NewItemsAll || m == NewItemsNone }
+
 // Wanted is how a monitored movie or series is acquired.
 type Wanted struct {
 	// ItemID is the movie or series.
@@ -291,8 +304,13 @@ type Wanted struct {
 	QualityProfileID ID
 	// MinimumAvailability is for movies.
 	MinimumAvailability MovieAvailability
-	Tags                []string
-	AddedAt             time.Time
+	// MonitorNewItems is for series; empty is NewItemsAll.
+	MonitorNewItems NewItemMonitor
+	// SeasonFolder is for series: whether episodes are imported into
+	// season folders.
+	SeasonFolder bool
+	Tags         []string
+	AddedAt      time.Time
 	// LastSearchedAt is when the item was last searched for, if ever.
 	LastSearchedAt time.Time
 }
@@ -304,6 +322,8 @@ func (w *Wanted) Validate() error {
 		return fmt.Errorf("%w: wanted requires an item and a quality profile", ErrInvalid)
 	case w.MinimumAvailability != "" && !w.MinimumAvailability.Valid():
 		return fmt.Errorf("%w: unknown minimum availability %q", ErrInvalid, w.MinimumAvailability)
+	case w.MonitorNewItems != "" && !w.MonitorNewItems.Valid():
+		return fmt.Errorf("%w: unknown new item monitoring %q", ErrInvalid, w.MonitorNewItems)
 	}
 	return nil
 }

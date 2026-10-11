@@ -331,6 +331,23 @@ func TestWanted(t *testing.T) {
 		if err := repo.Put(ctx, &core.Wanted{ItemID: heat.ID}); !errors.Is(err, core.ErrInvalid) {
 			t.Errorf("Put without a profile: %v, want ErrInvalid", err)
 		}
+		if err := repo.Put(ctx, &core.Wanted{ItemID: heat.ID, QualityProfileID: p.ID, MonitorNewItems: "some"}); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("Put with unknown new item monitoring: %v, want ErrInvalid", err)
+		}
+		// A series keeps its new item monitoring and season folder flag.
+		shows := newLibrary(t, s, "/shows")
+		show := newItem(shows, core.KindSeries, "Show")
+		upsert(t, s, show)
+		ws := core.Wanted{ItemID: show.ID, QualityProfileID: p.ID, MonitorNewItems: core.NewItemsNone, SeasonFolder: true, AddedAt: added}
+		if err := repo.Put(ctx, &ws); err != nil {
+			t.Fatal(err)
+		}
+		if got, err := repo.Get(ctx, show.ID); err != nil || !reflect.DeepEqual(got, ws) {
+			t.Errorf("Get(series) = %+v, %v; want = %+v", got, err, ws)
+		}
+		if err := repo.Delete(ctx, show.ID); err != nil {
+			t.Fatal(err)
+		}
 		if err := repo.Put(ctx, &core.Wanted{ItemID: heat.ID, QualityProfileID: core.NewID()}); err == nil {
 			t.Error("Put with an unknown profile succeeded")
 		}
