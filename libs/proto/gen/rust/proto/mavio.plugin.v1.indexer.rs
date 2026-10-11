@@ -1005,6 +1005,13 @@ pub struct Indexer {
     ///
     /// Field 19: `anime_standard_format_search`
     pub anime_standard_format_search: ::core::option::Option<bool>,
+    /// The download client the indexer's releases are always sent to, as
+    /// Radarr's and Sonarr's indexer DownloadClientId: "\<plugin\>/\<client\>",
+    /// or a client's ID alone for the client of that ID of any download
+    /// client provider; empty for the client chosen as for every indexer.
+    ///
+    /// Field 20: `download_client_id`
+    pub download_client_id: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1033,6 +1040,7 @@ impl ::core::fmt::Debug for Indexer {
                 &self.reject_blocklisted_torrent_hashes,
             )
             .field("anime_standard_format_search", &self.anime_standard_format_search)
+            .field("download_client_id", &self.download_client_id)
             .finish()
     }
 }
@@ -1143,6 +1151,16 @@ impl Indexer {
         self.anime_standard_format_search = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::download_client_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_download_client_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.download_client_id = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Indexer);
 impl ::buffa::MessageName for Indexer {
@@ -1241,6 +1259,9 @@ impl ::buffa::Message for Indexer {
         if self.anime_standard_format_search.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.download_client_id {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1327,6 +1348,9 @@ impl ::buffa::Message for Indexer {
         }
         if let Some(v) = self.anime_standard_format_search {
             ::buffa::types::put_bool_field(19u32, v, buf);
+        }
+        if let Some(ref v) = self.download_client_id {
+            ::buffa::types::put_string_field(20u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1532,6 +1556,18 @@ impl ::buffa::Message for Indexer {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            20u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .download_client_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1559,6 +1595,7 @@ impl ::buffa::Message for Indexer {
         self.season_pack_seed_time = ::buffa::MessageField::none();
         self.reject_blocklisted_torrent_hashes = ::core::option::Option::None;
         self.anime_standard_format_search = ::core::option::Option::None;
+        self.download_client_id = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

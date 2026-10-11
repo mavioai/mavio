@@ -80,6 +80,11 @@ type indexerConfig struct {
 	// AnimeStandardFormatSearch searches anime by season and episode too,
 	// as Sonarr's AnimeStandardFormatSearch indexer setting.
 	AnimeStandardFormatSearch bool `json:"anime_standard_format_search"`
+	// DownloadClientID is the download client the indexer's releases are
+	// always sent to, "<plugin>/<client>" or a client's ID alone, as
+	// Radarr's and Sonarr's IndexerDefinition.DownloadClientId; empty for
+	// none.
+	DownloadClientID string `json:"download_client_id"`
 }
 
 // minimumSeeders returns the fewest seeders a torrent release may have.
