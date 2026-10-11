@@ -95,6 +95,9 @@ type Manager struct {
 
 	// install serializes installations, which take long, apart from mu.
 	install sync.Mutex
+	// setConfig serializes SetConfig, so that the stored configuration is
+	// the one delivered last; unlike mu, it is held while storing.
+	setConfig sync.Mutex
 
 	// ctx ends with Close, stopping event delivery.
 	ctx    context.Context
@@ -313,31 +316,54 @@ func (m *Manager) Config(ctx context.Context, id string) (core.PluginConfig, err
 // SetConfig validates configJSON against the plugin's schema, delivers it
 // to the running plugin and stores it once the plugin accepts it. The
 // plugin is ready afterwards, even if its stored configuration had failed.
+//
+// m.mu is not held while the configuration is stored: a store transaction
+// holding SQLite's one write connection may wait on m.mu (publishing an
+// event asks Wants), and waiting on that connection under m.mu would
+// deadlock with it.
 func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	e, err := m.find(id)
+	m.setConfig.Lock()
+	defer m.setConfig.Unlock()
+	e, err := m.deliverConfig(ctx, id, configJSON)
 	if err != nil {
 		return Info{}, err
-	}
-	if e.plugin == nil {
-		return Info{}, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("plugin %s is not running: %w", id, e.err))
-	}
-	if err := manifest.ValidateConfig(e.manifest, configJSON); err != nil {
-		return Info{}, fmt.Errorf("%w: plugin %s: %w", core.ErrInvalid, id, err)
-	}
-	if err := host.Configure(ctx, e.plugin, configJSON); err != nil {
-		if connect.CodeOf(err) == connect.CodeInvalidArgument {
-			return Info{}, fmt.Errorf("%w: plugin %s rejected the configuration: %w", core.ErrInvalid, id, err)
-		}
-		return Info{}, fmt.Errorf("configure plugin %s: %w", id, err)
 	}
 	if err := m.store.PluginConfigs().Put(ctx, &core.PluginConfig{PluginID: id, JSON: configJSON}); err != nil {
 		return Info{}, err
 	}
-	e.state, e.err = Ready, nil
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	// The plugin may have been replaced or stopped meanwhile; its
+	// successor reads the stored configuration when it starts.
+	if cur, err := m.find(id); err == nil && cur == e && e.plugin != nil {
+		e.state, e.err = Ready, nil
+	}
 	m.log.InfoContext(ctx, "plugin configured", "plugin", id)
 	return e.info(), nil
+}
+
+// deliverConfig validates configJSON against a running plugin's schema and
+// delivers it to the plugin, returning the plugin's entry.
+func (m *Manager) deliverConfig(ctx context.Context, id, configJSON string) (*entry, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	e, err := m.find(id)
+	if err != nil {
+		return nil, err
+	}
+	if e.plugin == nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("plugin %s is not running: %w", id, e.err))
+	}
+	if err := manifest.ValidateConfig(e.manifest, configJSON); err != nil {
+		return nil, fmt.Errorf("%w: plugin %s: %w", core.ErrInvalid, id, err)
+	}
+	if err := host.Configure(ctx, e.plugin, configJSON); err != nil {
+		if connect.CodeOf(err) == connect.CodeInvalidArgument {
+			return nil, fmt.Errorf("%w: plugin %s rejected the configuration: %w", core.ErrInvalid, id, err)
+		}
+		return nil, fmt.Errorf("configure plugin %s: %w", id, err)
+	}
+	return e, nil
 }
 
 // Close stops the plugins, dropping the events they wait for.

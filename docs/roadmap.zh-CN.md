@@ -549,5 +549,4 @@ flowchart TD
 | Servarr 的服务 | 资源获取使用 Radarr、Sonarr 与 Prowlarr 所用的服务及 Radarr 的 TMDB 令牌，自身不持有密钥；服务的运营方可能变更或撤回它们 | 请求携带该服务所属应用的 User-Agent；管理员可设置自己的 TMDB 密钥；Radarr 的令牌被拒绝时由 Mavio 自己的密钥接替；`scraper-servarr` 随版本跟进这些服务 |
 | 剧集编号 | release 与文件按 TVDB 编号，TMDB 的元数据可能对同样的单集另行编号，动漫尤甚 | P15 与 P16 的显示顺序（TMDB episode groups）与单集 TVDB ID；P19 的 scene 映射与 XEM |
 | 索引器变动 | 站点会改变页面与 API | Cardigann 定义在运行时拉取；索引器插件从插件目录升级，无需发布服务端 |
-| `apps/server` 测试一次未解释的超时 | 2026-10-11 在 P18 期间（获取运行时接入之前），`apps/server` 的 `go test ./...` 在所有包并行运行时失败：`internal/server` 超过了 Go 默认的 10 分钟超时。goroutine 转储的末尾显示作业 worker 的续租（`library.(*Worker).RunOne` → `store.jobs.Extend` → `sqlcsqlite.(*Queries).ExtendJob`）在等待 SQLite，而其写连接池只有一个连接（`libs/store/store.go`，`SetMaxOpenConns(1)`）；转储的其余部分未保留，因此占用该连接的是什么无从得知。随后单独运行该包通过，用时 192 秒，此后每次运行均通过。尚有两种解释：一是死锁，即某个 goroutine 占着写连接（未结束的 `Store.InTx` 或未关闭的 rows）同时等待一次写入；二是并未卡死，该包在与其他所有包分享 CPU 时耗时超过 10 分钟，续租只是转储恰好捕获到的 goroutine | 再次出现时：以 `GOTRACEBACK=all` 重新运行并保留完整输出；死锁表现为测试进程 CPU 为 0% 且有 goroutine 停在写事务中，变慢则表现为测试仍在推进。之后 `internal/server` 的另一次卡死（`TestAdministration`）原因不同，是设置管理器锁上的死锁，已查明并修复 |
 | 电视直播、录像与频道 | Jellyfin 中体量很大的部分，Mavio 既未采纳也未排除；插件平台不包含它们的提供者类型 | P21 之前决定 |
