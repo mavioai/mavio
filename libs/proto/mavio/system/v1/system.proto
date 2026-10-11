@@ -5,6 +5,7 @@ package mavio.system.v1;
 import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
+import "mavio/acquisition/v1/wanted.proto";
 import "mavio/plugin/v1/plugin.proto";
 
 // SystemService exposes server-level information and health, and the
@@ -264,6 +265,40 @@ message ServerSettings {
   // How releases are chosen, downloaded and imported; unset in an update
   // keeps the current ones.
   AcquisitionSettings acquisition = 6;
+  // What users may request by default and where approved requests go;
+  // unset in an update keeps the current ones.
+  RequestSettings requests = 7;
+}
+
+// RequestSettings are the defaults of users' requests and where approved
+// requests are acquired.
+message RequestSettings {
+  // The request permissions new users get.
+  bool default_request_movies = 1;
+  bool default_request_series = 2;
+  bool default_auto_approve_movies = 3;
+  bool default_auto_approve_series = 4;
+  bool default_report_issues = 5;
+  // The quotas of users without their own: requests of movies, or seasons
+  // of series, in the last days; a limit of 0 is unlimited, 0 days all
+  // time.
+  int32 movie_quota_limit = 6 [(buf.validate.field).int32.gte = 0];
+  int32 movie_quota_days = 7 [(buf.validate.field).int32.gte = 0];
+  int32 series_quota_limit = 8 [(buf.validate.field).int32.gte = 0];
+  int32 series_quota_days = 9 [(buf.validate.field).int32.gte = 0];
+  // The movie library and quality profile approved movies are added to;
+  // empty, approvals fail.
+  string movie_library_id = 10;
+  string movie_quality_profile_id = 11;
+  mavio.acquisition.v1.MinimumAvailability minimum_availability = 12 [(buf.validate.field).enum.defined_only = true];
+  // The show library and quality profile approved series are added to;
+  // empty, approvals fail.
+  string series_library_id = 13;
+  string series_quality_profile_id = 14;
+  bool season_folder = 15;
+  mavio.acquisition.v1.NewItemMonitor monitor_new_items = 16 [(buf.validate.field).enum.defined_only = true];
+  // Allow requesting specials, season 0.
+  bool specials = 17;
 }
 
 // ProperDownload is what to do with propers and repacks.

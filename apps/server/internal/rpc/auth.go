@@ -16,11 +16,13 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
 
@@ -49,6 +51,11 @@ var UserBoundProcedures = []string{
 	userv1connect.DisplayPreferencesServiceName,
 	playbackv1connect.PlaybackServiceName,
 	libraryv1connect.PlaylistServiceName,
+	acquisitionv1connect.RequestServiceCreateRequestProcedure,
+	acquisitionv1connect.RequestServiceGetQuotaProcedure,
+	acquisitionv1connect.IssueServiceCreateIssueProcedure,
+	acquisitionv1connect.IssueServiceAddCommentProcedure,
+	systemv1connect.ActivityServiceListMyActivitiesProcedure,
 }
 
 // SessionBoundProcedures need the caller's signed-in session, which plugins

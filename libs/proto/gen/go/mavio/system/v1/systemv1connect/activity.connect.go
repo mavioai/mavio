@@ -36,11 +36,19 @@ const (
 	// ActivityServiceListActivitiesProcedure is the fully-qualified name of the ActivityService's
 	// ListActivities RPC.
 	ActivityServiceListActivitiesProcedure = "/mavio.system.v1.ActivityService/ListActivities"
+	// ActivityServiceListMyActivitiesProcedure is the fully-qualified name of the ActivityService's
+	// ListMyActivities RPC.
+	ActivityServiceListMyActivitiesProcedure = "/mavio.system.v1.ActivityService/ListMyActivities"
 )
 
 // ActivityServiceClient is a client for the mavio.system.v1.ActivityService service.
 type ActivityServiceClient interface {
+	// ListActivities lists everyone's activities. Administrators only.
 	ListActivities(context.Context, *v1.ListActivitiesRequest) (*v1.ListActivitiesResponse, error)
+	// ListMyActivities lists the caller's own activities, their
+	// notifications: such as their requests approved, declined or
+	// available, and comments on their issues. Signed-in users.
+	ListMyActivities(context.Context, *v1.ListMyActivitiesRequest) (*v1.ListMyActivitiesResponse, error)
 }
 
 // NewActivityServiceClient constructs a client for the mavio.system.v1.ActivityService service. By
@@ -61,12 +69,20 @@ func NewActivityServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		listMyActivities: connect.NewClient[v1.ListMyActivitiesRequest, v1.ListMyActivitiesResponse](
+			httpClient,
+			baseURL+ActivityServiceListMyActivitiesProcedure,
+			connect.WithSchema(activityServiceMethods.ByName("ListMyActivities")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // activityServiceClient implements ActivityServiceClient.
 type activityServiceClient struct {
-	listActivities *connect.Client[v1.ListActivitiesRequest, v1.ListActivitiesResponse]
+	listActivities   *connect.Client[v1.ListActivitiesRequest, v1.ListActivitiesResponse]
+	listMyActivities *connect.Client[v1.ListMyActivitiesRequest, v1.ListMyActivitiesResponse]
 }
 
 // ListActivities calls mavio.system.v1.ActivityService.ListActivities.
@@ -78,9 +94,23 @@ func (c *activityServiceClient) ListActivities(ctx context.Context, req *v1.List
 	return nil, err
 }
 
+// ListMyActivities calls mavio.system.v1.ActivityService.ListMyActivities.
+func (c *activityServiceClient) ListMyActivities(ctx context.Context, req *v1.ListMyActivitiesRequest) (*v1.ListMyActivitiesResponse, error) {
+	response, err := c.listMyActivities.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ActivityServiceHandler is an implementation of the mavio.system.v1.ActivityService service.
 type ActivityServiceHandler interface {
+	// ListActivities lists everyone's activities. Administrators only.
 	ListActivities(context.Context, *v1.ListActivitiesRequest) (*v1.ListActivitiesResponse, error)
+	// ListMyActivities lists the caller's own activities, their
+	// notifications: such as their requests approved, declined or
+	// available, and comments on their issues. Signed-in users.
+	ListMyActivities(context.Context, *v1.ListMyActivitiesRequest) (*v1.ListMyActivitiesResponse, error)
 }
 
 // NewActivityServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -97,10 +127,19 @@ func NewActivityServiceHandler(svc ActivityServiceHandler, opts ...connect.Handl
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	activityServiceListMyActivitiesHandler := connect.NewUnaryHandlerSimple(
+		ActivityServiceListMyActivitiesProcedure,
+		svc.ListMyActivities,
+		connect.WithSchema(activityServiceMethods.ByName("ListMyActivities")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.system.v1.ActivityService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ActivityServiceListActivitiesProcedure:
 			activityServiceListActivitiesHandler.ServeHTTP(w, r)
+		case ActivityServiceListMyActivitiesProcedure:
+			activityServiceListMyActivitiesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -112,4 +151,8 @@ type UnimplementedActivityServiceHandler struct{}
 
 func (UnimplementedActivityServiceHandler) ListActivities(context.Context, *v1.ListActivitiesRequest) (*v1.ListActivitiesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.ActivityService.ListActivities is not implemented"))
+}
+
+func (UnimplementedActivityServiceHandler) ListMyActivities(context.Context, *v1.ListMyActivitiesRequest) (*v1.ListMyActivitiesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.ActivityService.ListMyActivities is not implemented"))
 }

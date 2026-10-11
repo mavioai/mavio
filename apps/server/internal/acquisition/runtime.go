@@ -75,8 +75,12 @@ type Runtime struct {
 	VolumeLedger *storage.VolumeLedger
 	QuietGate    *storage.QuietGate
 	Devices      *storage.Detector
-	Now          func() time.Time
-	Logger       *slog.Logger
+	// Imported is told, after an import is stored, of the movie or series
+	// a file was imported for; nil tells none. It runs without the
+	// runtime's locks held.
+	Imported func(ctx context.Context, itemID core.ID)
+	Now      func() time.Time
+	Logger   *slog.Logger
 
 	mu sync.Mutex
 	// statuses are what the clients last told of the tracked downloads,
@@ -93,6 +97,13 @@ func (r *Runtime) now() time.Time {
 		return r.Now()
 	}
 	return time.Now()
+}
+
+// imported tells Imported of an import.
+func (r *Runtime) imported(ctx context.Context, itemID core.ID) {
+	if r.Imported != nil {
+		r.Imported(ctx, itemID)
+	}
 }
 
 func (r *Runtime) logger() *slog.Logger {

@@ -311,6 +311,7 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 	}
 	// The movie has its file now: later decisions in this run see it.
 	delete(rn.movies, m.item.ID)
+	r.imported(ctx, m.item.ID)
 	return nil, nil
 }
 

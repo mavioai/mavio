@@ -560,6 +560,32 @@ pub struct UserPolicyView<'a> {
     ///
     /// Field 8: `max_sessions`
     pub max_sessions: ::core::option::Option<i32>,
+    /// What the user may request and report; administrators may do all.
+    /// Unset in CreateUser takes the server's default permissions, in
+    /// UpdateUser keeps the current ones.
+    ///
+    /// Field 9: `request_movies`
+    pub request_movies: ::core::option::Option<bool>,
+    /// Field 10: `request_series`
+    pub request_series: ::core::option::Option<bool>,
+    /// Approve the user's requests at once.
+    ///
+    /// Field 11: `auto_approve_movies`
+    pub auto_approve_movies: ::core::option::Option<bool>,
+    /// Field 12: `auto_approve_series`
+    pub auto_approve_series: ::core::option::Option<bool>,
+    /// Field 13: `report_issues`
+    pub report_issues: ::core::option::Option<bool>,
+    /// The user's quotas; unset uses the server's.
+    ///
+    /// Field 14: `movie_quota`
+    pub movie_quota: ::buffa::MessageFieldView<
+        super::super::__buffa::view::RequestQuotaView<'a>,
+    >,
+    /// Field 15: `series_quota`
+    pub series_quota: ::buffa::MessageFieldView<
+        super::super::__buffa::view::RequestQuotaView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for UserPolicyView<'a> {
@@ -643,6 +669,83 @@ impl<'a> ::buffa::MessageView<'a> for UserPolicyView<'a> {
                 )?;
                 view.max_sessions = Some(::buffa::types::decode_int32(&mut cur)?);
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.request_movies = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.request_series = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.auto_approve_movies = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.auto_approve_series = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.report_issues = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.movie_quota.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.movie_quota = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::RequestQuotaView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.series_quota.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.series_quota = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::RequestQuotaView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
             2u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -684,6 +787,29 @@ impl<'a> ::buffa::MessageView<'a> for UserPolicyView<'a> {
             allow_download: self.allow_download,
             max_streaming_bitrate: self.max_streaming_bitrate,
             max_sessions: self.max_sessions,
+            request_movies: self.request_movies,
+            request_series: self.request_series,
+            auto_approve_movies: self.auto_approve_movies,
+            auto_approve_series: self.auto_approve_series,
+            report_issues: self.report_issues,
+            movie_quota: match self.movie_quota.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::RequestQuota,
+                        ::buffa::Inline<super::super::RequestQuota>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            series_quota: match self.series_quota.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::RequestQuota,
+                        ::buffa::Inline<super::super::RequestQuota>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -691,7 +817,7 @@ impl<'a> ::buffa::MessageView<'a> for UserPolicyView<'a> {
 }
 impl<'a> ::buffa::ViewEncode<'a> for UserPolicyView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -719,13 +845,44 @@ impl<'a> ::buffa::ViewEncode<'a> for UserPolicyView<'a> {
         if let Some(v) = self.max_sessions {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if self.request_movies.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.request_series.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.auto_approve_movies.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.auto_approve_series.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.report_issues.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.movie_quota.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.movie_quota.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.series_quota.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.series_quota.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -753,6 +910,37 @@ impl<'a> ::buffa::ViewEncode<'a> for UserPolicyView<'a> {
         }
         if let Some(v) = self.max_sessions {
             ::buffa::types::put_int32_field(8u32, v, buf);
+        }
+        if let Some(v) = self.request_movies {
+            ::buffa::types::put_bool_field(9u32, v, buf);
+        }
+        if let Some(v) = self.request_series {
+            ::buffa::types::put_bool_field(10u32, v, buf);
+        }
+        if let Some(v) = self.auto_approve_movies {
+            ::buffa::types::put_bool_field(11u32, v, buf);
+        }
+        if let Some(v) = self.auto_approve_series {
+            ::buffa::types::put_bool_field(12u32, v, buf);
+        }
+        if let Some(v) = self.report_issues {
+            ::buffa::types::put_bool_field(13u32, v, buf);
+        }
+        if self.movie_quota.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                14u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.movie_quota.write_to(__cache, buf);
+        }
+        if self.series_quota.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                15u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.series_quota.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -895,6 +1083,53 @@ impl UserPolicyOwnedView {
     pub fn max_sessions(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().max_sessions
     }
+    /// What the user may request and report; administrators may do all.
+    /// Unset in CreateUser takes the server's default permissions, in
+    /// UpdateUser keeps the current ones.
+    ///
+    /// Field 9: `request_movies`
+    #[must_use]
+    pub fn request_movies(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().request_movies
+    }
+    /// Field 10: `request_series`
+    #[must_use]
+    pub fn request_series(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().request_series
+    }
+    /// Approve the user's requests at once.
+    ///
+    /// Field 11: `auto_approve_movies`
+    #[must_use]
+    pub fn auto_approve_movies(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().auto_approve_movies
+    }
+    /// Field 12: `auto_approve_series`
+    #[must_use]
+    pub fn auto_approve_series(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().auto_approve_series
+    }
+    /// Field 13: `report_issues`
+    #[must_use]
+    pub fn report_issues(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().report_issues
+    }
+    /// The user's quotas; unset uses the server's.
+    ///
+    /// Field 14: `movie_quota`
+    #[must_use]
+    pub fn movie_quota(
+        &self,
+    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::RequestQuotaView<'_>> {
+        &self.0.reborrow().movie_quota
+    }
+    /// Field 15: `series_quota`
+    #[must_use]
+    pub fn series_quota(
+        &self,
+    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::RequestQuotaView<'_>> {
+        &self.0.reborrow().series_quota
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<UserPolicyView<'static>>>
 for UserPolicyOwnedView {
@@ -917,6 +1152,250 @@ for UserPolicyOwnedView {
 impl ::buffa::HasMessageView for super::super::UserPolicy {
     type View<'a> = UserPolicyView<'a>;
     type ViewHandle = UserPolicyOwnedView;
+}
+/// RequestQuota bounds a user's requests: limit requests of movies, or
+/// seasons of series, in the last days.
+#[derive(Clone, Debug, Default)]
+pub struct RequestQuotaView<'a> {
+    /// 0 for unlimited.
+    ///
+    /// Field 1: `limit`
+    pub limit: ::core::option::Option<i32>,
+    /// 0 for all time.
+    ///
+    /// Field 2: `days`
+    pub days: ::core::option::Option<i32>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for RequestQuotaView<'a> {
+    type Owned = super::super::RequestQuota;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.limit = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.days = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::RequestQuota, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::RequestQuota, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::RequestQuota {
+            limit: self.limit,
+            days: self.days,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for RequestQuotaView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.limit {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.days {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.limit {
+            ::buffa::types::put_int32_field(1u32, v, buf);
+        }
+        if let Some(v) = self.days {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for RequestQuotaView<'a> {
+    const PACKAGE: &'static str = "mavio.user.v1";
+    const NAME: &'static str = "RequestQuota";
+    const FULL_NAME: &'static str = "mavio.user.v1.RequestQuota";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.RequestQuota";
+}
+::buffa::impl_default_view_instance!(RequestQuotaView);
+::buffa::impl_view_reborrow!(RequestQuotaView);
+/** Self-contained, `'static` owned view of a `RequestQuota` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`RequestQuotaView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RequestQuotaView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct RequestQuotaOwnedView(::buffa::OwnedView<RequestQuotaView<'static>>);
+impl RequestQuotaOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RequestQuotaOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RequestQuotaOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::RequestQuota,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RequestQuotaOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`RequestQuotaView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &RequestQuotaView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::RequestQuota {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// 0 for unlimited.
+    ///
+    /// Field 1: `limit`
+    #[must_use]
+    pub fn limit(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().limit
+    }
+    /// 0 for all time.
+    ///
+    /// Field 2: `days`
+    #[must_use]
+    pub fn days(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().days
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<RequestQuotaView<'static>>>
+for RequestQuotaOwnedView {
+    fn from(inner: ::buffa::OwnedView<RequestQuotaView<'static>>) -> Self {
+        RequestQuotaOwnedView(inner)
+    }
+}
+impl ::core::convert::From<RequestQuotaOwnedView>
+for ::buffa::OwnedView<RequestQuotaView<'static>> {
+    fn from(wrapper: RequestQuotaOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<RequestQuotaView<'static>>>
+for RequestQuotaOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<RequestQuotaView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::RequestQuota {
+    type View<'a> = RequestQuotaView<'a>;
+    type ViewHandle = RequestQuotaOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct UserPreferencesView<'a> {

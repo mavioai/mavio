@@ -394,6 +394,13 @@ type UserPolicy struct {
 	xxx_hidden_AllowDownload       bool                   `protobuf:"varint,6,opt,name=allow_download,json=allowDownload"`
 	xxx_hidden_MaxStreamingBitrate int64                  `protobuf:"varint,7,opt,name=max_streaming_bitrate,json=maxStreamingBitrate"`
 	xxx_hidden_MaxSessions         int32                  `protobuf:"varint,8,opt,name=max_sessions,json=maxSessions"`
+	xxx_hidden_RequestMovies       bool                   `protobuf:"varint,9,opt,name=request_movies,json=requestMovies"`
+	xxx_hidden_RequestSeries       bool                   `protobuf:"varint,10,opt,name=request_series,json=requestSeries"`
+	xxx_hidden_AutoApproveMovies   bool                   `protobuf:"varint,11,opt,name=auto_approve_movies,json=autoApproveMovies"`
+	xxx_hidden_AutoApproveSeries   bool                   `protobuf:"varint,12,opt,name=auto_approve_series,json=autoApproveSeries"`
+	xxx_hidden_ReportIssues        bool                   `protobuf:"varint,13,opt,name=report_issues,json=reportIssues"`
+	xxx_hidden_MovieQuota          *RequestQuota          `protobuf:"bytes,14,opt,name=movie_quota,json=movieQuota"`
+	xxx_hidden_SeriesQuota         *RequestQuota          `protobuf:"bytes,15,opt,name=series_quota,json=seriesQuota"`
 	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
 	XXX_presence                   [1]uint32
 	unknownFields                  protoimpl.UnknownFields
@@ -481,9 +488,58 @@ func (x *UserPolicy) GetMaxSessions() int32 {
 	return 0
 }
 
+func (x *UserPolicy) GetRequestMovies() bool {
+	if x != nil {
+		return x.xxx_hidden_RequestMovies
+	}
+	return false
+}
+
+func (x *UserPolicy) GetRequestSeries() bool {
+	if x != nil {
+		return x.xxx_hidden_RequestSeries
+	}
+	return false
+}
+
+func (x *UserPolicy) GetAutoApproveMovies() bool {
+	if x != nil {
+		return x.xxx_hidden_AutoApproveMovies
+	}
+	return false
+}
+
+func (x *UserPolicy) GetAutoApproveSeries() bool {
+	if x != nil {
+		return x.xxx_hidden_AutoApproveSeries
+	}
+	return false
+}
+
+func (x *UserPolicy) GetReportIssues() bool {
+	if x != nil {
+		return x.xxx_hidden_ReportIssues
+	}
+	return false
+}
+
+func (x *UserPolicy) GetMovieQuota() *RequestQuota {
+	if x != nil {
+		return x.xxx_hidden_MovieQuota
+	}
+	return nil
+}
+
+func (x *UserPolicy) GetSeriesQuota() *RequestQuota {
+	if x != nil {
+		return x.xxx_hidden_SeriesQuota
+	}
+	return nil
+}
+
 func (x *UserPolicy) SetAllLibraries(v bool) {
 	x.xxx_hidden_AllLibraries = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 15)
 }
 
 func (x *UserPolicy) SetLibraryIds(v []string) {
@@ -492,32 +548,65 @@ func (x *UserPolicy) SetLibraryIds(v []string) {
 
 func (x *UserPolicy) SetMaxParentalRating(v int32) {
 	x.xxx_hidden_MaxParentalRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 15)
 }
 
 func (x *UserPolicy) SetBlockUnrated(v bool) {
 	x.xxx_hidden_BlockUnrated = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 15)
 }
 
 func (x *UserPolicy) SetAllowTranscoding(v bool) {
 	x.xxx_hidden_AllowTranscoding = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 15)
 }
 
 func (x *UserPolicy) SetAllowDownload(v bool) {
 	x.xxx_hidden_AllowDownload = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 15)
 }
 
 func (x *UserPolicy) SetMaxStreamingBitrate(v int64) {
 	x.xxx_hidden_MaxStreamingBitrate = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 15)
 }
 
 func (x *UserPolicy) SetMaxSessions(v int32) {
 	x.xxx_hidden_MaxSessions = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 15)
+}
+
+func (x *UserPolicy) SetRequestMovies(v bool) {
+	x.xxx_hidden_RequestMovies = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 15)
+}
+
+func (x *UserPolicy) SetRequestSeries(v bool) {
+	x.xxx_hidden_RequestSeries = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 15)
+}
+
+func (x *UserPolicy) SetAutoApproveMovies(v bool) {
+	x.xxx_hidden_AutoApproveMovies = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 15)
+}
+
+func (x *UserPolicy) SetAutoApproveSeries(v bool) {
+	x.xxx_hidden_AutoApproveSeries = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 15)
+}
+
+func (x *UserPolicy) SetReportIssues(v bool) {
+	x.xxx_hidden_ReportIssues = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 15)
+}
+
+func (x *UserPolicy) SetMovieQuota(v *RequestQuota) {
+	x.xxx_hidden_MovieQuota = v
+}
+
+func (x *UserPolicy) SetSeriesQuota(v *RequestQuota) {
+	x.xxx_hidden_SeriesQuota = v
 }
 
 func (x *UserPolicy) HasAllLibraries() bool {
@@ -569,6 +658,55 @@ func (x *UserPolicy) HasMaxSessions() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
 }
 
+func (x *UserPolicy) HasRequestMovies() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
+func (x *UserPolicy) HasRequestSeries() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
+func (x *UserPolicy) HasAutoApproveMovies() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
+func (x *UserPolicy) HasAutoApproveSeries() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
+func (x *UserPolicy) HasReportIssues() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
+func (x *UserPolicy) HasMovieQuota() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_MovieQuota != nil
+}
+
+func (x *UserPolicy) HasSeriesQuota() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_SeriesQuota != nil
+}
+
 func (x *UserPolicy) ClearAllLibraries() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_AllLibraries = false
@@ -604,6 +742,39 @@ func (x *UserPolicy) ClearMaxSessions() {
 	x.xxx_hidden_MaxSessions = 0
 }
 
+func (x *UserPolicy) ClearRequestMovies() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_RequestMovies = false
+}
+
+func (x *UserPolicy) ClearRequestSeries() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_RequestSeries = false
+}
+
+func (x *UserPolicy) ClearAutoApproveMovies() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_AutoApproveMovies = false
+}
+
+func (x *UserPolicy) ClearAutoApproveSeries() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_AutoApproveSeries = false
+}
+
+func (x *UserPolicy) ClearReportIssues() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_ReportIssues = false
+}
+
+func (x *UserPolicy) ClearMovieQuota() {
+	x.xxx_hidden_MovieQuota = nil
+}
+
+func (x *UserPolicy) ClearSeriesQuota() {
+	x.xxx_hidden_SeriesQuota = nil
+}
+
 type UserPolicy_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -621,6 +792,18 @@ type UserPolicy_builder struct {
 	MaxStreamingBitrate *int64
 	// 0 means unlimited.
 	MaxSessions *int32
+	// What the user may request and report; administrators may do all.
+	// Unset in CreateUser takes the server's default permissions, in
+	// UpdateUser keeps the current ones.
+	RequestMovies *bool
+	RequestSeries *bool
+	// Approve the user's requests at once.
+	AutoApproveMovies *bool
+	AutoApproveSeries *bool
+	ReportIssues      *bool
+	// The user's quotas; unset uses the server's.
+	MovieQuota  *RequestQuota
+	SeriesQuota *RequestQuota
 }
 
 func (b0 UserPolicy_builder) Build() *UserPolicy {
@@ -628,33 +811,164 @@ func (b0 UserPolicy_builder) Build() *UserPolicy {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.AllLibraries != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 15)
 		x.xxx_hidden_AllLibraries = *b.AllLibraries
 	}
 	x.xxx_hidden_LibraryIds = b.LibraryIds
 	if b.MaxParentalRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 15)
 		x.xxx_hidden_MaxParentalRating = *b.MaxParentalRating
 	}
 	if b.BlockUnrated != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 15)
 		x.xxx_hidden_BlockUnrated = *b.BlockUnrated
 	}
 	if b.AllowTranscoding != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 15)
 		x.xxx_hidden_AllowTranscoding = *b.AllowTranscoding
 	}
 	if b.AllowDownload != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 15)
 		x.xxx_hidden_AllowDownload = *b.AllowDownload
 	}
 	if b.MaxStreamingBitrate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 15)
 		x.xxx_hidden_MaxStreamingBitrate = *b.MaxStreamingBitrate
 	}
 	if b.MaxSessions != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 15)
 		x.xxx_hidden_MaxSessions = *b.MaxSessions
+	}
+	if b.RequestMovies != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 15)
+		x.xxx_hidden_RequestMovies = *b.RequestMovies
+	}
+	if b.RequestSeries != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 15)
+		x.xxx_hidden_RequestSeries = *b.RequestSeries
+	}
+	if b.AutoApproveMovies != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 15)
+		x.xxx_hidden_AutoApproveMovies = *b.AutoApproveMovies
+	}
+	if b.AutoApproveSeries != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 15)
+		x.xxx_hidden_AutoApproveSeries = *b.AutoApproveSeries
+	}
+	if b.ReportIssues != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 15)
+		x.xxx_hidden_ReportIssues = *b.ReportIssues
+	}
+	x.xxx_hidden_MovieQuota = b.MovieQuota
+	x.xxx_hidden_SeriesQuota = b.SeriesQuota
+	return m0
+}
+
+// RequestQuota bounds a user's requests: limit requests of movies, or
+// seasons of series, in the last days.
+type RequestQuota struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Limit       int32                  `protobuf:"varint,1,opt,name=limit"`
+	xxx_hidden_Days        int32                  `protobuf:"varint,2,opt,name=days"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *RequestQuota) Reset() {
+	*x = RequestQuota{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestQuota) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestQuota) ProtoMessage() {}
+
+func (x *RequestQuota) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *RequestQuota) GetLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_Limit
+	}
+	return 0
+}
+
+func (x *RequestQuota) GetDays() int32 {
+	if x != nil {
+		return x.xxx_hidden_Days
+	}
+	return 0
+}
+
+func (x *RequestQuota) SetLimit(v int32) {
+	x.xxx_hidden_Limit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *RequestQuota) SetDays(v int32) {
+	x.xxx_hidden_Days = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *RequestQuota) HasLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *RequestQuota) HasDays() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *RequestQuota) ClearLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Limit = 0
+}
+
+func (x *RequestQuota) ClearDays() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Days = 0
+}
+
+type RequestQuota_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// 0 for unlimited.
+	Limit *int32
+	// 0 for all time.
+	Days *int32
+}
+
+func (b0 RequestQuota_builder) Build() *RequestQuota {
+	m0 := &RequestQuota{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Limit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Limit = *b.Limit
+	}
+	if b.Days != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Days = *b.Days
 	}
 	return m0
 }
@@ -673,7 +987,7 @@ type UserPreferences struct {
 
 func (x *UserPreferences) Reset() {
 	*x = UserPreferences{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[2]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -685,7 +999,7 @@ func (x *UserPreferences) String() string {
 func (*UserPreferences) ProtoMessage() {}
 
 func (x *UserPreferences) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[2]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -815,7 +1129,7 @@ type UserData struct {
 
 func (x *UserData) Reset() {
 	*x = UserData{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[3]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -827,7 +1141,7 @@ func (x *UserData) String() string {
 func (*UserData) ProtoMessage() {}
 
 func (x *UserData) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[3]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1115,7 +1429,7 @@ type ListUsersRequest struct {
 
 func (x *ListUsersRequest) Reset() {
 	*x = ListUsersRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[4]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1127,7 +1441,7 @@ func (x *ListUsersRequest) String() string {
 func (*ListUsersRequest) ProtoMessage() {}
 
 func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[4]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1159,7 +1473,7 @@ type ListUsersResponse struct {
 
 func (x *ListUsersResponse) Reset() {
 	*x = ListUsersResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[5]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1171,7 +1485,7 @@ func (x *ListUsersResponse) String() string {
 func (*ListUsersResponse) ProtoMessage() {}
 
 func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[5]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1220,7 +1534,7 @@ type GetUserRequest struct {
 
 func (x *GetUserRequest) Reset() {
 	*x = GetUserRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[6]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1232,7 +1546,7 @@ func (x *GetUserRequest) String() string {
 func (*GetUserRequest) ProtoMessage() {}
 
 func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[6]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1296,7 +1610,7 @@ type GetUserResponse struct {
 
 func (x *GetUserResponse) Reset() {
 	*x = GetUserResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[7]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1308,7 +1622,7 @@ func (x *GetUserResponse) String() string {
 func (*GetUserResponse) ProtoMessage() {}
 
 func (x *GetUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[7]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1363,7 +1677,7 @@ type GetCurrentUserRequest struct {
 
 func (x *GetCurrentUserRequest) Reset() {
 	*x = GetCurrentUserRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[8]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1375,7 +1689,7 @@ func (x *GetCurrentUserRequest) String() string {
 func (*GetCurrentUserRequest) ProtoMessage() {}
 
 func (x *GetCurrentUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[8]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1407,7 +1721,7 @@ type GetCurrentUserResponse struct {
 
 func (x *GetCurrentUserResponse) Reset() {
 	*x = GetCurrentUserResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[9]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1419,7 +1733,7 @@ func (x *GetCurrentUserResponse) String() string {
 func (*GetCurrentUserResponse) ProtoMessage() {}
 
 func (x *GetCurrentUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[9]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1482,7 +1796,7 @@ type CreateUserRequest struct {
 
 func (x *CreateUserRequest) Reset() {
 	*x = CreateUserRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[10]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1494,7 +1808,7 @@ func (x *CreateUserRequest) String() string {
 func (*CreateUserRequest) ProtoMessage() {}
 
 func (x *CreateUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[10]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1700,7 +2014,7 @@ type CreateUserResponse struct {
 
 func (x *CreateUserResponse) Reset() {
 	*x = CreateUserResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[11]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1712,7 +2026,7 @@ func (x *CreateUserResponse) String() string {
 func (*CreateUserResponse) ProtoMessage() {}
 
 func (x *CreateUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[11]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1774,7 +2088,7 @@ type UpdateUserRequest struct {
 
 func (x *UpdateUserRequest) Reset() {
 	*x = UpdateUserRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[12]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1786,7 +2100,7 @@ func (x *UpdateUserRequest) String() string {
 func (*UpdateUserRequest) ProtoMessage() {}
 
 func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[12]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1964,7 +2278,7 @@ type UpdateUserResponse struct {
 
 func (x *UpdateUserResponse) Reset() {
 	*x = UpdateUserResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[13]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1976,7 +2290,7 @@ func (x *UpdateUserResponse) String() string {
 func (*UpdateUserResponse) ProtoMessage() {}
 
 func (x *UpdateUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[13]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2034,7 +2348,7 @@ type DeleteUserRequest struct {
 
 func (x *DeleteUserRequest) Reset() {
 	*x = DeleteUserRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[14]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2046,7 +2360,7 @@ func (x *DeleteUserRequest) String() string {
 func (*DeleteUserRequest) ProtoMessage() {}
 
 func (x *DeleteUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[14]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2109,7 +2423,7 @@ type DeleteUserResponse struct {
 
 func (x *DeleteUserResponse) Reset() {
 	*x = DeleteUserResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[15]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2121,7 +2435,7 @@ func (x *DeleteUserResponse) String() string {
 func (*DeleteUserResponse) ProtoMessage() {}
 
 func (x *DeleteUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[15]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2157,7 +2471,7 @@ type SetPasswordRequest struct {
 
 func (x *SetPasswordRequest) Reset() {
 	*x = SetPasswordRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[16]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2169,7 +2483,7 @@ func (x *SetPasswordRequest) String() string {
 func (*SetPasswordRequest) ProtoMessage() {}
 
 func (x *SetPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[16]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2297,7 +2611,7 @@ type SetPasswordResponse struct {
 
 func (x *SetPasswordResponse) Reset() {
 	*x = SetPasswordResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[17]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2309,7 +2623,7 @@ func (x *SetPasswordResponse) String() string {
 func (*SetPasswordResponse) ProtoMessage() {}
 
 func (x *SetPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[17]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2341,7 +2655,7 @@ type UpdatePreferencesRequest struct {
 
 func (x *UpdatePreferencesRequest) Reset() {
 	*x = UpdatePreferencesRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[18]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2353,7 +2667,7 @@ func (x *UpdatePreferencesRequest) String() string {
 func (*UpdatePreferencesRequest) ProtoMessage() {}
 
 func (x *UpdatePreferencesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[18]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2409,7 +2723,7 @@ type UpdatePreferencesResponse struct {
 
 func (x *UpdatePreferencesResponse) Reset() {
 	*x = UpdatePreferencesResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2421,7 +2735,7 @@ func (x *UpdatePreferencesResponse) String() string {
 func (*UpdatePreferencesResponse) ProtoMessage() {}
 
 func (x *UpdatePreferencesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2477,7 +2791,7 @@ type GetUserDataRequest struct {
 
 func (x *GetUserDataRequest) Reset() {
 	*x = GetUserDataRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2489,7 +2803,7 @@ func (x *GetUserDataRequest) String() string {
 func (*GetUserDataRequest) ProtoMessage() {}
 
 func (x *GetUserDataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2534,7 +2848,7 @@ type GetUserDataResponse struct {
 
 func (x *GetUserDataResponse) Reset() {
 	*x = GetUserDataResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2546,7 +2860,7 @@ func (x *GetUserDataResponse) String() string {
 func (*GetUserDataResponse) ProtoMessage() {}
 
 func (x *GetUserDataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2601,7 +2915,7 @@ type UpdateUserDataRequest struct {
 
 func (x *UpdateUserDataRequest) Reset() {
 	*x = UpdateUserDataRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2613,7 +2927,7 @@ func (x *UpdateUserDataRequest) String() string {
 func (*UpdateUserDataRequest) ProtoMessage() {}
 
 func (x *UpdateUserDataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2788,7 +3102,7 @@ type UpdateUserDataResponse struct {
 
 func (x *UpdateUserDataResponse) Reset() {
 	*x = UpdateUserDataResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2800,7 +3114,7 @@ func (x *UpdateUserDataResponse) String() string {
 func (*UpdateUserDataResponse) ProtoMessage() {}
 
 func (x *UpdateUserDataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2862,7 +3176,7 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\vpreferences\x18\a \x01(\v2\x1e.mavio.user.v1.UserPreferencesR\vpreferences\x12;\n" +
 	"\vcreate_time\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"createTime\x12B\n" +
-	"\x0flast_login_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\rlastLoginTime\"\xfc\x02\n" +
+	"\x0flast_login_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\rlastLoginTime\"\xcd\x05\n" +
 	"\n" +
 	"UserPolicy\x12#\n" +
 	"\rall_libraries\x18\x01 \x01(\bR\fallLibraries\x12.\n" +
@@ -2874,7 +3188,19 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x11allow_transcoding\x18\x05 \x01(\bR\x10allowTranscoding\x12%\n" +
 	"\x0eallow_download\x18\x06 \x01(\bR\rallowDownload\x12;\n" +
 	"\x15max_streaming_bitrate\x18\a \x01(\x03B\a\xbaH\x04\"\x02(\x00R\x13maxStreamingBitrate\x12*\n" +
-	"\fmax_sessions\x18\b \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\vmaxSessions\"\x9e\x02\n" +
+	"\fmax_sessions\x18\b \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\vmaxSessions\x12%\n" +
+	"\x0erequest_movies\x18\t \x01(\bR\rrequestMovies\x12%\n" +
+	"\x0erequest_series\x18\n" +
+	" \x01(\bR\rrequestSeries\x12.\n" +
+	"\x13auto_approve_movies\x18\v \x01(\bR\x11autoApproveMovies\x12.\n" +
+	"\x13auto_approve_series\x18\f \x01(\bR\x11autoApproveSeries\x12#\n" +
+	"\rreport_issues\x18\r \x01(\bR\freportIssues\x12<\n" +
+	"\vmovie_quota\x18\x0e \x01(\v2\x1b.mavio.user.v1.RequestQuotaR\n" +
+	"movieQuota\x12>\n" +
+	"\fseries_quota\x18\x0f \x01(\v2\x1b.mavio.user.v1.RequestQuotaR\vseriesQuota\"J\n" +
+	"\fRequestQuota\x12\x1d\n" +
+	"\x05limit\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x05limit\x12\x1b\n" +
+	"\x04days\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x04days\"\x9e\x02\n" +
 	"\x0fUserPreferences\x12?\n" +
 	"\x0faudio_languages\x18\x01 \x03(\tB\x16\xbaH\x13\x92\x01\x10\"\x0er\f2\n" +
 	"^[a-z]{3}$R\x0eaudioLanguages\x12E\n" +
@@ -2970,82 +3296,85 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x11com.mavio.user.v1B\tUserProtoP\x01Z?github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1;userv1\xa2\x02\x03MUX\xaa\x02\rMavio.User.V1\xca\x02\rMavio\\User\\V1\xe2\x02\x19Mavio\\User\\V1\\GPBMetadata\xea\x02\x0fMavio::User::V1b\beditionsp\xe8\a"
 
 var file_mavio_user_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mavio_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_mavio_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_mavio_user_v1_user_proto_goTypes = []any{
 	(SubtitleMode)(0),                 // 0: mavio.user.v1.SubtitleMode
 	(*User)(nil),                      // 1: mavio.user.v1.User
 	(*UserPolicy)(nil),                // 2: mavio.user.v1.UserPolicy
-	(*UserPreferences)(nil),           // 3: mavio.user.v1.UserPreferences
-	(*UserData)(nil),                  // 4: mavio.user.v1.UserData
-	(*ListUsersRequest)(nil),          // 5: mavio.user.v1.ListUsersRequest
-	(*ListUsersResponse)(nil),         // 6: mavio.user.v1.ListUsersResponse
-	(*GetUserRequest)(nil),            // 7: mavio.user.v1.GetUserRequest
-	(*GetUserResponse)(nil),           // 8: mavio.user.v1.GetUserResponse
-	(*GetCurrentUserRequest)(nil),     // 9: mavio.user.v1.GetCurrentUserRequest
-	(*GetCurrentUserResponse)(nil),    // 10: mavio.user.v1.GetCurrentUserResponse
-	(*CreateUserRequest)(nil),         // 11: mavio.user.v1.CreateUserRequest
-	(*CreateUserResponse)(nil),        // 12: mavio.user.v1.CreateUserResponse
-	(*UpdateUserRequest)(nil),         // 13: mavio.user.v1.UpdateUserRequest
-	(*UpdateUserResponse)(nil),        // 14: mavio.user.v1.UpdateUserResponse
-	(*DeleteUserRequest)(nil),         // 15: mavio.user.v1.DeleteUserRequest
-	(*DeleteUserResponse)(nil),        // 16: mavio.user.v1.DeleteUserResponse
-	(*SetPasswordRequest)(nil),        // 17: mavio.user.v1.SetPasswordRequest
-	(*SetPasswordResponse)(nil),       // 18: mavio.user.v1.SetPasswordResponse
-	(*UpdatePreferencesRequest)(nil),  // 19: mavio.user.v1.UpdatePreferencesRequest
-	(*UpdatePreferencesResponse)(nil), // 20: mavio.user.v1.UpdatePreferencesResponse
-	(*GetUserDataRequest)(nil),        // 21: mavio.user.v1.GetUserDataRequest
-	(*GetUserDataResponse)(nil),       // 22: mavio.user.v1.GetUserDataResponse
-	(*UpdateUserDataRequest)(nil),     // 23: mavio.user.v1.UpdateUserDataRequest
-	(*UpdateUserDataResponse)(nil),    // 24: mavio.user.v1.UpdateUserDataResponse
-	(*timestamppb.Timestamp)(nil),     // 25: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),       // 26: google.protobuf.Duration
+	(*RequestQuota)(nil),              // 3: mavio.user.v1.RequestQuota
+	(*UserPreferences)(nil),           // 4: mavio.user.v1.UserPreferences
+	(*UserData)(nil),                  // 5: mavio.user.v1.UserData
+	(*ListUsersRequest)(nil),          // 6: mavio.user.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),         // 7: mavio.user.v1.ListUsersResponse
+	(*GetUserRequest)(nil),            // 8: mavio.user.v1.GetUserRequest
+	(*GetUserResponse)(nil),           // 9: mavio.user.v1.GetUserResponse
+	(*GetCurrentUserRequest)(nil),     // 10: mavio.user.v1.GetCurrentUserRequest
+	(*GetCurrentUserResponse)(nil),    // 11: mavio.user.v1.GetCurrentUserResponse
+	(*CreateUserRequest)(nil),         // 12: mavio.user.v1.CreateUserRequest
+	(*CreateUserResponse)(nil),        // 13: mavio.user.v1.CreateUserResponse
+	(*UpdateUserRequest)(nil),         // 14: mavio.user.v1.UpdateUserRequest
+	(*UpdateUserResponse)(nil),        // 15: mavio.user.v1.UpdateUserResponse
+	(*DeleteUserRequest)(nil),         // 16: mavio.user.v1.DeleteUserRequest
+	(*DeleteUserResponse)(nil),        // 17: mavio.user.v1.DeleteUserResponse
+	(*SetPasswordRequest)(nil),        // 18: mavio.user.v1.SetPasswordRequest
+	(*SetPasswordResponse)(nil),       // 19: mavio.user.v1.SetPasswordResponse
+	(*UpdatePreferencesRequest)(nil),  // 20: mavio.user.v1.UpdatePreferencesRequest
+	(*UpdatePreferencesResponse)(nil), // 21: mavio.user.v1.UpdatePreferencesResponse
+	(*GetUserDataRequest)(nil),        // 22: mavio.user.v1.GetUserDataRequest
+	(*GetUserDataResponse)(nil),       // 23: mavio.user.v1.GetUserDataResponse
+	(*UpdateUserDataRequest)(nil),     // 24: mavio.user.v1.UpdateUserDataRequest
+	(*UpdateUserDataResponse)(nil),    // 25: mavio.user.v1.UpdateUserDataResponse
+	(*timestamppb.Timestamp)(nil),     // 26: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),       // 27: google.protobuf.Duration
 }
 var file_mavio_user_v1_user_proto_depIdxs = []int32{
 	2,  // 0: mavio.user.v1.User.policy:type_name -> mavio.user.v1.UserPolicy
-	3,  // 1: mavio.user.v1.User.preferences:type_name -> mavio.user.v1.UserPreferences
-	25, // 2: mavio.user.v1.User.create_time:type_name -> google.protobuf.Timestamp
-	25, // 3: mavio.user.v1.User.last_login_time:type_name -> google.protobuf.Timestamp
-	0,  // 4: mavio.user.v1.UserPreferences.subtitle_mode:type_name -> mavio.user.v1.SubtitleMode
-	26, // 5: mavio.user.v1.UserData.position:type_name -> google.protobuf.Duration
-	25, // 6: mavio.user.v1.UserData.last_played_time:type_name -> google.protobuf.Timestamp
-	1,  // 7: mavio.user.v1.ListUsersResponse.users:type_name -> mavio.user.v1.User
-	1,  // 8: mavio.user.v1.GetUserResponse.user:type_name -> mavio.user.v1.User
-	1,  // 9: mavio.user.v1.GetCurrentUserResponse.user:type_name -> mavio.user.v1.User
-	2,  // 10: mavio.user.v1.CreateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
-	3,  // 11: mavio.user.v1.CreateUserRequest.preferences:type_name -> mavio.user.v1.UserPreferences
-	1,  // 12: mavio.user.v1.CreateUserResponse.user:type_name -> mavio.user.v1.User
-	2,  // 13: mavio.user.v1.UpdateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
-	1,  // 14: mavio.user.v1.UpdateUserResponse.user:type_name -> mavio.user.v1.User
-	3,  // 15: mavio.user.v1.UpdatePreferencesRequest.preferences:type_name -> mavio.user.v1.UserPreferences
-	3,  // 16: mavio.user.v1.UpdatePreferencesResponse.preferences:type_name -> mavio.user.v1.UserPreferences
-	4,  // 17: mavio.user.v1.GetUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
-	26, // 18: mavio.user.v1.UpdateUserDataRequest.position:type_name -> google.protobuf.Duration
-	4,  // 19: mavio.user.v1.UpdateUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
-	5,  // 20: mavio.user.v1.UserService.ListUsers:input_type -> mavio.user.v1.ListUsersRequest
-	7,  // 21: mavio.user.v1.UserService.GetUser:input_type -> mavio.user.v1.GetUserRequest
-	9,  // 22: mavio.user.v1.UserService.GetCurrentUser:input_type -> mavio.user.v1.GetCurrentUserRequest
-	11, // 23: mavio.user.v1.UserService.CreateUser:input_type -> mavio.user.v1.CreateUserRequest
-	13, // 24: mavio.user.v1.UserService.UpdateUser:input_type -> mavio.user.v1.UpdateUserRequest
-	15, // 25: mavio.user.v1.UserService.DeleteUser:input_type -> mavio.user.v1.DeleteUserRequest
-	17, // 26: mavio.user.v1.UserService.SetPassword:input_type -> mavio.user.v1.SetPasswordRequest
-	19, // 27: mavio.user.v1.UserService.UpdatePreferences:input_type -> mavio.user.v1.UpdatePreferencesRequest
-	21, // 28: mavio.user.v1.UserDataService.GetUserData:input_type -> mavio.user.v1.GetUserDataRequest
-	23, // 29: mavio.user.v1.UserDataService.UpdateUserData:input_type -> mavio.user.v1.UpdateUserDataRequest
-	6,  // 30: mavio.user.v1.UserService.ListUsers:output_type -> mavio.user.v1.ListUsersResponse
-	8,  // 31: mavio.user.v1.UserService.GetUser:output_type -> mavio.user.v1.GetUserResponse
-	10, // 32: mavio.user.v1.UserService.GetCurrentUser:output_type -> mavio.user.v1.GetCurrentUserResponse
-	12, // 33: mavio.user.v1.UserService.CreateUser:output_type -> mavio.user.v1.CreateUserResponse
-	14, // 34: mavio.user.v1.UserService.UpdateUser:output_type -> mavio.user.v1.UpdateUserResponse
-	16, // 35: mavio.user.v1.UserService.DeleteUser:output_type -> mavio.user.v1.DeleteUserResponse
-	18, // 36: mavio.user.v1.UserService.SetPassword:output_type -> mavio.user.v1.SetPasswordResponse
-	20, // 37: mavio.user.v1.UserService.UpdatePreferences:output_type -> mavio.user.v1.UpdatePreferencesResponse
-	22, // 38: mavio.user.v1.UserDataService.GetUserData:output_type -> mavio.user.v1.GetUserDataResponse
-	24, // 39: mavio.user.v1.UserDataService.UpdateUserData:output_type -> mavio.user.v1.UpdateUserDataResponse
-	30, // [30:40] is the sub-list for method output_type
-	20, // [20:30] is the sub-list for method input_type
-	20, // [20:20] is the sub-list for extension type_name
-	20, // [20:20] is the sub-list for extension extendee
-	0,  // [0:20] is the sub-list for field type_name
+	4,  // 1: mavio.user.v1.User.preferences:type_name -> mavio.user.v1.UserPreferences
+	26, // 2: mavio.user.v1.User.create_time:type_name -> google.protobuf.Timestamp
+	26, // 3: mavio.user.v1.User.last_login_time:type_name -> google.protobuf.Timestamp
+	3,  // 4: mavio.user.v1.UserPolicy.movie_quota:type_name -> mavio.user.v1.RequestQuota
+	3,  // 5: mavio.user.v1.UserPolicy.series_quota:type_name -> mavio.user.v1.RequestQuota
+	0,  // 6: mavio.user.v1.UserPreferences.subtitle_mode:type_name -> mavio.user.v1.SubtitleMode
+	27, // 7: mavio.user.v1.UserData.position:type_name -> google.protobuf.Duration
+	26, // 8: mavio.user.v1.UserData.last_played_time:type_name -> google.protobuf.Timestamp
+	1,  // 9: mavio.user.v1.ListUsersResponse.users:type_name -> mavio.user.v1.User
+	1,  // 10: mavio.user.v1.GetUserResponse.user:type_name -> mavio.user.v1.User
+	1,  // 11: mavio.user.v1.GetCurrentUserResponse.user:type_name -> mavio.user.v1.User
+	2,  // 12: mavio.user.v1.CreateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
+	4,  // 13: mavio.user.v1.CreateUserRequest.preferences:type_name -> mavio.user.v1.UserPreferences
+	1,  // 14: mavio.user.v1.CreateUserResponse.user:type_name -> mavio.user.v1.User
+	2,  // 15: mavio.user.v1.UpdateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
+	1,  // 16: mavio.user.v1.UpdateUserResponse.user:type_name -> mavio.user.v1.User
+	4,  // 17: mavio.user.v1.UpdatePreferencesRequest.preferences:type_name -> mavio.user.v1.UserPreferences
+	4,  // 18: mavio.user.v1.UpdatePreferencesResponse.preferences:type_name -> mavio.user.v1.UserPreferences
+	5,  // 19: mavio.user.v1.GetUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
+	27, // 20: mavio.user.v1.UpdateUserDataRequest.position:type_name -> google.protobuf.Duration
+	5,  // 21: mavio.user.v1.UpdateUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
+	6,  // 22: mavio.user.v1.UserService.ListUsers:input_type -> mavio.user.v1.ListUsersRequest
+	8,  // 23: mavio.user.v1.UserService.GetUser:input_type -> mavio.user.v1.GetUserRequest
+	10, // 24: mavio.user.v1.UserService.GetCurrentUser:input_type -> mavio.user.v1.GetCurrentUserRequest
+	12, // 25: mavio.user.v1.UserService.CreateUser:input_type -> mavio.user.v1.CreateUserRequest
+	14, // 26: mavio.user.v1.UserService.UpdateUser:input_type -> mavio.user.v1.UpdateUserRequest
+	16, // 27: mavio.user.v1.UserService.DeleteUser:input_type -> mavio.user.v1.DeleteUserRequest
+	18, // 28: mavio.user.v1.UserService.SetPassword:input_type -> mavio.user.v1.SetPasswordRequest
+	20, // 29: mavio.user.v1.UserService.UpdatePreferences:input_type -> mavio.user.v1.UpdatePreferencesRequest
+	22, // 30: mavio.user.v1.UserDataService.GetUserData:input_type -> mavio.user.v1.GetUserDataRequest
+	24, // 31: mavio.user.v1.UserDataService.UpdateUserData:input_type -> mavio.user.v1.UpdateUserDataRequest
+	7,  // 32: mavio.user.v1.UserService.ListUsers:output_type -> mavio.user.v1.ListUsersResponse
+	9,  // 33: mavio.user.v1.UserService.GetUser:output_type -> mavio.user.v1.GetUserResponse
+	11, // 34: mavio.user.v1.UserService.GetCurrentUser:output_type -> mavio.user.v1.GetCurrentUserResponse
+	13, // 35: mavio.user.v1.UserService.CreateUser:output_type -> mavio.user.v1.CreateUserResponse
+	15, // 36: mavio.user.v1.UserService.UpdateUser:output_type -> mavio.user.v1.UpdateUserResponse
+	17, // 37: mavio.user.v1.UserService.DeleteUser:output_type -> mavio.user.v1.DeleteUserResponse
+	19, // 38: mavio.user.v1.UserService.SetPassword:output_type -> mavio.user.v1.SetPasswordResponse
+	21, // 39: mavio.user.v1.UserService.UpdatePreferences:output_type -> mavio.user.v1.UpdatePreferencesResponse
+	23, // 40: mavio.user.v1.UserDataService.GetUserData:output_type -> mavio.user.v1.GetUserDataResponse
+	25, // 41: mavio.user.v1.UserDataService.UpdateUserData:output_type -> mavio.user.v1.UpdateUserDataResponse
+	32, // [32:42] is the sub-list for method output_type
+	22, // [22:32] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_mavio_user_v1_user_proto_init() }
@@ -3059,7 +3388,7 @@ func file_mavio_user_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_user_v1_user_proto_rawDesc), len(file_mavio_user_v1_user_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   24,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

@@ -76,6 +76,27 @@ message UserPolicy {
   int64 max_streaming_bitrate = 7 [(buf.validate.field).int64.gte = 0];
   // 0 means unlimited.
   int32 max_sessions = 8 [(buf.validate.field).int32.gte = 0];
+  // What the user may request and report; administrators may do all.
+  // Unset in CreateUser takes the server's default permissions, in
+  // UpdateUser keeps the current ones.
+  bool request_movies = 9;
+  bool request_series = 10;
+  // Approve the user's requests at once.
+  bool auto_approve_movies = 11;
+  bool auto_approve_series = 12;
+  bool report_issues = 13;
+  // The user's quotas; unset uses the server's.
+  RequestQuota movie_quota = 14;
+  RequestQuota series_quota = 15;
+}
+
+// RequestQuota bounds a user's requests: limit requests of movies, or
+// seasons of series, in the last days.
+message RequestQuota {
+  // 0 for unlimited.
+  int32 limit = 1 [(buf.validate.field).int32.gte = 0];
+  // 0 for all time.
+  int32 days = 2 [(buf.validate.field).int32.gte = 0];
 }
 
 message UserPreferences {

@@ -41,6 +41,13 @@ func userToProto(u *core.User) *userv1.User {
 			AllowDownload:       &u.Policy.AllowDownload,
 			MaxStreamingBitrate: &u.Policy.MaxStreamingBitrate,
 			MaxSessions:         new(int32(u.Policy.MaxSessions)),
+			RequestMovies:       &u.Policy.Requests.Movies,
+			RequestSeries:       &u.Policy.Requests.Series,
+			AutoApproveMovies:   &u.Policy.Requests.AutoApproveMovies,
+			AutoApproveSeries:   &u.Policy.Requests.AutoApproveSeries,
+			ReportIssues:        &u.Policy.Requests.ReportIssues,
+			MovieQuota:          quotaToProto(u.Policy.MovieQuota),
+			SeriesQuota:         quotaToProto(u.Policy.SeriesQuota),
 		}.Build(),
 		Preferences: userv1.UserPreferences_builder{
 			AudioLanguages:        u.Preferences.AudioLanguages,
@@ -51,4 +58,12 @@ func userToProto(u *core.User) *userv1.User {
 		CreateTime:    timestamppb.New(u.CreatedAt),
 		LastLoginTime: lastLogin,
 	}.Build()
+}
+
+// quotaToProto converts a user's quota; nil for the server's.
+func quotaToProto(q *core.Quota) *userv1.RequestQuota {
+	if q == nil {
+		return nil
+	}
+	return userv1.RequestQuota_builder{Limit: new(int32(q.Limit)), Days: new(int32(q.Days))}.Build()
 }

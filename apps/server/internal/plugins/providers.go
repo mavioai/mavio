@@ -12,6 +12,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/apps/server/internal/releases"
+	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
@@ -464,6 +465,18 @@ func (m *Manager) IndexerProviders() []releases.Provider {
 	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_INDEXER_PROVIDER) {
 		if pl, ok := m.running(id); ok && pl.Indexers() != nil {
 			out = append(out, releases.Provider{ID: id, Client: pl.Indexers()})
+		}
+	}
+	return out
+}
+
+// DiscoveryProviders returns the discovery providers among the ready
+// plugins.
+func (m *Manager) DiscoveryProviders() []requests.DiscoveryProvider {
+	var out []requests.DiscoveryProvider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_DISCOVERY_PROVIDER) {
+		if pl, ok := m.running(id); ok && pl.Discovery() != nil {
+			out = append(out, requests.DiscoveryProvider{ID: id, Client: pl.Discovery()})
 		}
 	}
 	return out

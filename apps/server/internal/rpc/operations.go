@@ -278,8 +278,31 @@ func (s *ActivityService) ListActivities(ctx context.Context, req *systemv1.List
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out := make([]*systemv1.Activity, len(page.Items))
-	for i, a := range page.Items {
+	return systemv1.ListActivitiesResponse_builder{Activities: activitiesToProto(page.Items), Total: new(int32(page.Total))}.Build(), nil
+}
+
+// ListMyActivities lists the caller's own activities.
+func (s *ActivityService) ListMyActivities(ctx context.Context, req *systemv1.ListMyActivitiesRequest) (*systemv1.ListMyActivitiesResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	q := core.ActivityQuery{
+		UserID: p.User.ID, Types: req.GetTypes(), Limit: cmp.Or(int(req.GetLimit()), 100), Offset: int(req.GetOffset()),
+	}
+	if req.HasSince() {
+		q.Since = req.GetSince().AsTime()
+	}
+	page, err := s.store.Activities().List(ctx, q)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return systemv1.ListMyActivitiesResponse_builder{Activities: activitiesToProto(page.Items), Total: new(int32(page.Total))}.Build(), nil
+}
+
+func activitiesToProto(items []core.Activity) []*systemv1.Activity {
+	out := make([]*systemv1.Activity, len(items))
+	for i, a := range items {
 		out[i] = systemv1.Activity_builder{
 			Id: new(a.ID.String()), Time: timestamppb.New(a.Time), Type: &a.Type, Severity: new(severities[a.Severity]),
 			Title: &a.Title, Message: &a.Message, Attributes: a.Attributes,
@@ -291,7 +314,7 @@ func (s *ActivityService) ListActivities(ctx context.Context, req *systemv1.List
 			out[i].SetItemId(a.ItemID.String())
 		}
 	}
-	return systemv1.ListActivitiesResponse_builder{Activities: out, Total: new(int32(page.Total))}.Build(), nil
+	return out
 }
 
 // BackupService implements mavio.system.v1.BackupService.

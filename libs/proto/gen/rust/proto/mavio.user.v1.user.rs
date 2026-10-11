@@ -486,6 +486,28 @@ pub struct UserPolicy {
     ///
     /// Field 8: `max_sessions`
     pub max_sessions: ::core::option::Option<i32>,
+    /// What the user may request and report; administrators may do all.
+    /// Unset in CreateUser takes the server's default permissions, in
+    /// UpdateUser keeps the current ones.
+    ///
+    /// Field 9: `request_movies`
+    pub request_movies: ::core::option::Option<bool>,
+    /// Field 10: `request_series`
+    pub request_series: ::core::option::Option<bool>,
+    /// Approve the user's requests at once.
+    ///
+    /// Field 11: `auto_approve_movies`
+    pub auto_approve_movies: ::core::option::Option<bool>,
+    /// Field 12: `auto_approve_series`
+    pub auto_approve_series: ::core::option::Option<bool>,
+    /// Field 13: `report_issues`
+    pub report_issues: ::core::option::Option<bool>,
+    /// The user's quotas; unset uses the server's.
+    ///
+    /// Field 14: `movie_quota`
+    pub movie_quota: ::buffa::MessageField<RequestQuota, ::buffa::Inline<RequestQuota>>,
+    /// Field 15: `series_quota`
+    pub series_quota: ::buffa::MessageField<RequestQuota, ::buffa::Inline<RequestQuota>>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -500,6 +522,13 @@ impl ::core::fmt::Debug for UserPolicy {
             .field("allow_download", &self.allow_download)
             .field("max_streaming_bitrate", &self.max_streaming_bitrate)
             .field("max_sessions", &self.max_sessions)
+            .field("request_movies", &self.request_movies)
+            .field("request_series", &self.request_series)
+            .field("auto_approve_movies", &self.auto_approve_movies)
+            .field("auto_approve_series", &self.auto_approve_series)
+            .field("report_issues", &self.report_issues)
+            .field("movie_quota", &self.movie_quota)
+            .field("series_quota", &self.series_quota)
             .finish()
     }
 }
@@ -560,6 +589,41 @@ impl UserPolicy {
         self.max_sessions = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::request_movies`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_request_movies(mut self, value: bool) -> Self {
+        self.request_movies = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::request_series`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_request_series(mut self, value: bool) -> Self {
+        self.request_series = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::auto_approve_movies`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_auto_approve_movies(mut self, value: bool) -> Self {
+        self.auto_approve_movies = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::auto_approve_series`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_auto_approve_series(mut self, value: bool) -> Self {
+        self.auto_approve_series = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::report_issues`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_report_issues(mut self, value: bool) -> Self {
+        self.report_issues = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(UserPolicy);
 impl ::buffa::MessageName for UserPolicy {
@@ -577,7 +641,7 @@ impl ::buffa::Message for UserPolicy {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -605,12 +669,43 @@ impl ::buffa::Message for UserPolicy {
         if let Some(v) = self.max_sessions {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if self.request_movies.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.request_series.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.auto_approve_movies.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.auto_approve_series.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.report_issues.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.movie_quota.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.movie_quota.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.series_quota.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.series_quota.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -638,6 +733,37 @@ impl ::buffa::Message for UserPolicy {
         }
         if let Some(v) = self.max_sessions {
             ::buffa::types::put_int32_field(8u32, v, buf);
+        }
+        if let Some(v) = self.request_movies {
+            ::buffa::types::put_bool_field(9u32, v, buf);
+        }
+        if let Some(v) = self.request_series {
+            ::buffa::types::put_bool_field(10u32, v, buf);
+        }
+        if let Some(v) = self.auto_approve_movies {
+            ::buffa::types::put_bool_field(11u32, v, buf);
+        }
+        if let Some(v) = self.auto_approve_series {
+            ::buffa::types::put_bool_field(12u32, v, buf);
+        }
+        if let Some(v) = self.report_issues {
+            ::buffa::types::put_bool_field(13u32, v, buf);
+        }
+        if self.movie_quota.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                14u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.movie_quota.write_to(__cache, buf);
+        }
+        if self.series_quota.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                15u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.series_quota.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -726,6 +852,73 @@ impl ::buffa::Message for UserPolicy {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.request_movies = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.request_series = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.auto_approve_movies = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.auto_approve_series = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.report_issues = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.movie_quota.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.series_quota.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -742,11 +935,159 @@ impl ::buffa::Message for UserPolicy {
         self.allow_download = ::core::option::Option::None;
         self.max_streaming_bitrate = ::core::option::Option::None;
         self.max_sessions = ::core::option::Option::None;
+        self.request_movies = ::core::option::Option::None;
+        self.request_series = ::core::option::Option::None;
+        self.auto_approve_movies = ::core::option::Option::None;
+        self.auto_approve_series = ::core::option::Option::None;
+        self.report_issues = ::core::option::Option::None;
+        self.movie_quota = ::buffa::MessageField::none();
+        self.series_quota = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for UserPolicy {
     const PROTO_FQN: &'static str = "mavio.user.v1.UserPolicy";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// RequestQuota bounds a user's requests: limit requests of movies, or
+/// seasons of series, in the last days.
+#[derive(Clone, PartialEq, Default)]
+pub struct RequestQuota {
+    /// 0 for unlimited.
+    ///
+    /// Field 1: `limit`
+    pub limit: ::core::option::Option<i32>,
+    /// 0 for all time.
+    ///
+    /// Field 2: `days`
+    pub days: ::core::option::Option<i32>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for RequestQuota {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("RequestQuota")
+            .field("limit", &self.limit)
+            .field("days", &self.days)
+            .finish()
+    }
+}
+impl RequestQuota {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.RequestQuota";
+}
+impl RequestQuota {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::limit`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_limit(mut self, value: i32) -> Self {
+        self.limit = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::days`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_days(mut self, value: i32) -> Self {
+        self.days = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(RequestQuota);
+impl ::buffa::MessageName for RequestQuota {
+    const PACKAGE: &'static str = "mavio.user.v1";
+    const NAME: &'static str = "RequestQuota";
+    const FULL_NAME: &'static str = "mavio.user.v1.RequestQuota";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.RequestQuota";
+}
+impl ::buffa::Message for RequestQuota {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.limit {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.days {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.limit {
+            ::buffa::types::put_int32_field(1u32, v, buf);
+        }
+        if let Some(v) = self.days {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.limit = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.days = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.limit = ::core::option::Option::None;
+        self.days = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for RequestQuota {
+    const PROTO_FQN: &'static str = "mavio.user.v1.RequestQuota";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

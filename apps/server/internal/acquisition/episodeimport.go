@@ -438,6 +438,7 @@ func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *co
 	}); err != nil {
 		return "", nil, err
 	}
+	r.imported(ctx, sh.item.ID)
 	return imported, nil, nil
 }
 

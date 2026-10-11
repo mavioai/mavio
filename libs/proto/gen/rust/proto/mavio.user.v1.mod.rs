@@ -32,6 +32,10 @@ pub use self::__buffa::view::UserPolicyView;
 #[doc(inline)]
 pub use self::__buffa::view::UserPolicyOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::RequestQuotaView;
+#[doc(inline)]
+pub use self::__buffa::view::RequestQuotaOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::UserPreferencesView;
 #[doc(inline)]
 pub use self::__buffa::view::UserPreferencesOwnedView;

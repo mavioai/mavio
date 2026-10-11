@@ -97,7 +97,7 @@ flowchart TD
 | P17 | 索引器 | ✅ 完成 |
 | P18 | 电影资源获取 | ✅ 完成 |
 | P19 | 剧集资源获取 | ✅ 完成 |
-| P20 | 发现与请求 | 未开始 |
+| P20 | 发现与请求 | 进行中 |
 | P21 | 客户端与生态 | 进行中 |
 | P22 | 真实设备验收 | 未开始 |
 | P23 | 打包与发布 | 未开始 |
@@ -525,6 +525,23 @@ flowchart TD
 **范围**：移植 Seerr。`DiscoverService` 列出发现提供者给出的内容，并标明已入库、想要或已请求；`RequestService`：电影与季的请求，由管理员审批或自动通过，按用户的配额，用户的分级限制同样作用于其可请求的内容，通知请求者；报告条目的问题。
 
 **完成标准**：端到端测试：限制为 PG 的用户通过发现找到一部电影与一部剧集，无法请求分级超出限制的作品，请求其余作品；管理员审批；作品被获取，用户收到可播放的通知。
+
+**进展**：
+- [x] 领域与存储：请求及其季、问题及其评论、用户的请求权限与配额、服务器的请求设置（`libs/core/request.go`、`libs/store`）
+- [x] `DiscoverService`：发现提供者的目录，其中的作品标明已入库、想要或已请求，并应用用户的分级限制（`apps/server/internal/requests`）
+  - [ ] 发现中的文本搜索，待有发现提供者支持搜索
+  - [ ] 剔除超出用户分级限制的作品后的页数与总数；目前给出提供者的总数
+  - [ ] 用户策略允许未分级作品时，分级筛选保留未分级作品
+  - [ ] 作品详情，含其各季的状态
+- [x] `RequestService`：按 Seerr 的方式检查电影与季的请求（权限、分级限制、配额、重复），自动或由管理员审批，经 `WantedService` 获取，其条目可用时完成（`requests.availability`）
+  - [ ] 为请求的动漫使用单独的质量档案
+  - [ ] Seerr 中作品的已阻止与已删除状态
+  - [ ] 分级使用服务器级元数据设置的国家与语言，而非目标媒体库的
+  - [ ] 可用性作业列入任务列表
+- [x] `IssueService`：报告条目的问题，评论、解决与重新打开
+- [x] 通知：所涉用户的活动，经 `ActivityService.ListMyActivities` 读取，由通知插件投递
+  - [ ] 向用户的会话推送事件
+- [ ] 端到端测试
 
 ### P21 客户端与生态
 **范围**：基于完成的服务端 API 构建[客户端](clients.zh-CN.md)：内嵌于服务端的 Web UI（`apps/web`，在 `/` 提供）、面向 iPhone 与 iPad、Apple TV 与 Mac 的 Apple 应用（`apps/ios`、`apps/tvos`、`apps/macos`）、面向手机与平板及 Android TV 的 Android 应用（`apps/android`、`apps/android-tv`）、基于 MyGo 的 Windows 与 Linux 应用（`apps/windows-linux`），以及它们共享的库（`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。其基础部分不等待 P20：工具链与构建目标、从 `libs/proto` 生成的 TypeScript 与 Rust 代码、`libs/design`、§4 中客户端待决事项所列的原型，以及各应用与库的骨架。只有发现与请求页面等待 P20。之后按以下顺序构建客户端，每一个都先验证共享核心与设计系统，下一个平台再在其上构建：Web UI，连同 `libs/client-ts` 与 `libs/design`；iPhone 与 iPad 应用，连同 `libs/client-rust` 与 `libs/apple`；Android 手机与平板应用，连同 `libs/android`；Apple TV 与 Android TV 应用；Mac 应用；Windows 与 Linux 应用。具体完成标准在 P20 完成后制定。

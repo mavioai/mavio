@@ -118,6 +118,10 @@ pub use self::__buffa::view::ServerSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::ServerSettingsOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::RequestSettingsView;
+#[doc(inline)]
+pub use self::__buffa::view::RequestSettingsOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::AcquisitionSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::AcquisitionSettingsOwnedView;
@@ -173,6 +177,14 @@ pub use self::__buffa::view::ListActivitiesRequestOwnedView;
 pub use self::__buffa::view::ListActivitiesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListActivitiesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListMyActivitiesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListMyActivitiesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListMyActivitiesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListMyActivitiesResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::BackupView;
 #[doc(inline)]

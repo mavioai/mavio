@@ -22,6 +22,18 @@ type UserService struct {
 	store core.Store
 	// Activity records account changes; nil records none.
 	Activity *activity.Log
+	// Requests returns the request settings, whose default permissions new
+	// users get; nil uses the defaults.
+	Requests func() core.RequestSettings
+}
+
+// defaultRequestPermissions returns the request permissions new users
+// get.
+func (s *UserService) defaultRequestPermissions() core.RequestPermissions {
+	if s.Requests == nil {
+		return core.DefaultRequestSettings().DefaultPermissions
+	}
+	return s.Requests().DefaultPermissions
 }
 
 var _ userv1connect.UserServiceHandler = (*UserService)(nil)
@@ -88,7 +100,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *userv1.CreateUserRequ
 		Name:         req.GetName(),
 		AuthProvider: req.GetAuthProvider(),
 		Admin:        req.GetAdmin(),
-		Policy:       core.UserPolicy{AllowTranscoding: true, AllowDownload: true},
+		Policy:       core.UserPolicy{AllowTranscoding: true, AllowDownload: true, Requests: s.defaultRequestPermissions()},
 	}
 	switch {
 	case u.AuthProvider == "" && req.GetPassword() == "":
@@ -97,7 +109,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *userv1.CreateUserRequ
 		u.PasswordHash = auth.HashPassword(req.GetPassword())
 	}
 	if req.HasPolicy() {
-		u.Policy = policyFromProto(req.GetPolicy())
+		u.Policy = policyFromProto(req.GetPolicy(), u.Policy.Requests)
 	}
 	if req.HasPreferences() {
 		u.Preferences = preferencesFromProto(req.GetPreferences())
@@ -123,7 +135,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequ
 		}
 		u.Name, u.Admin, u.Disabled = req.GetName(), req.GetAdmin(), req.GetDisabled()
 		if req.HasPolicy() {
-			u.Policy = policyFromProto(req.GetPolicy())
+			u.Policy = policyFromProto(req.GetPolicy(), u.Policy.Requests)
 		}
 		if err := tx.Users().Update(ctx, &u); err != nil {
 			return err
@@ -372,13 +384,38 @@ func (s *UserDataService) setPlayed(d *core.UserData, played bool) {
 	d.Played, d.Position, d.PlayCount, d.LastPlayedAt = false, 0, 0, nil
 }
 
-func policyFromProto(p *userv1.UserPolicy) core.UserPolicy {
+// policyFromProto converts a policy; request permissions it leaves unset
+// are those of requests.
+func policyFromProto(p *userv1.UserPolicy, requests core.RequestPermissions) core.UserPolicy {
 	out := core.UserPolicy{
 		BlockUnrated:        p.GetBlockUnrated(),
 		AllowTranscoding:    p.GetAllowTranscoding(),
 		AllowDownload:       p.GetAllowDownload(),
 		MaxStreamingBitrate: p.GetMaxStreamingBitrate(),
 		MaxSessions:         int(p.GetMaxSessions()),
+		Requests:            requests,
+	}
+	r := &out.Requests
+	for _, f := range []struct {
+		has bool
+		v   bool
+		to  *bool
+	}{
+		{p.HasRequestMovies(), p.GetRequestMovies(), &r.Movies},
+		{p.HasRequestSeries(), p.GetRequestSeries(), &r.Series},
+		{p.HasAutoApproveMovies(), p.GetAutoApproveMovies(), &r.AutoApproveMovies},
+		{p.HasAutoApproveSeries(), p.GetAutoApproveSeries(), &r.AutoApproveSeries},
+		{p.HasReportIssues(), p.GetReportIssues(), &r.ReportIssues},
+	} {
+		if f.has {
+			*f.to = f.v
+		}
+	}
+	if p.HasMovieQuota() {
+		out.MovieQuota = &core.Quota{Limit: int(p.GetMovieQuota().GetLimit()), Days: int(p.GetMovieQuota().GetDays())}
+	}
+	if p.HasSeriesQuota() {
+		out.SeriesQuota = &core.Quota{Limit: int(p.GetSeriesQuota().GetLimit()), Days: int(p.GetSeriesQuota().GetDays())}
 	}
 	if p.HasMaxParentalRating() {
 		out.MaxParentalRating = new(int(p.GetMaxParentalRating()))

@@ -97,7 +97,7 @@ flowchart TD
 | P17 | Indexers | ✅ Done |
 | P18 | Movie acquisition | ✅ Done |
 | P19 | Series acquisition | ✅ Done |
-| P20 | Discovery and requests | Not started |
+| P20 | Discovery and requests | In progress |
 | P21 | Clients and ecosystem | In progress |
 | P22 | Real-device acceptance | Not started |
 | P23 | Packaging and release | Not started |
@@ -525,6 +525,23 @@ flowchart TD
 **Scope**: porting Seerr. `DiscoverService` lists what the discovery providers offer, marked as available, wanted or requested; `RequestService`: requests of movies and seasons, approval by administrators or automatic, quotas per user, users' limits on ratings applied to what they may request, notifications of the requester; reporting problems with an item.
 
 **Done when**: an end-to-end test: a user limited to PG finds a film and a series through discovery, cannot request one rated above the limit, requests the others; an administrator approves; they are acquired and the user is notified that they are available.
+
+**Progress**:
+- [x] Domain and storage: requests with their seasons, issues and their comments, users' request permissions and quotas, the server's request settings (`libs/core/request.go`, `libs/store`)
+- [x] `DiscoverService`: the catalogs of the discovery providers, their titles marked as available, wanted or requested, and the user's rating limit applied (`apps/server/internal/requests`)
+  - [ ] Text search in discovery, once a discovery provider searches
+  - [ ] Totals of pages that leave out titles above the user's rating limit; the provider's totals are given
+  - [ ] Unrated titles kept by certification filters when the user's policy allows them
+  - [ ] Details of a title with the status of each of its seasons
+- [x] `RequestService`: requests of movies and seasons checked as Seerr checks them (permissions, rating limit, quotas, duplicates), approved automatically or by an administrator, acquired through `WantedService`, completed when their items become available (`requests.availability`)
+  - [ ] A quality profile of its own for anime requested
+  - [ ] Seerr's blocklisted and deleted statuses of titles
+  - [ ] The country and language of a server-wide metadata setting for ratings, rather than the destination library's
+  - [ ] The availability job listed among the tasks
+- [x] `IssueService`: problems with an item reported, commented on, resolved and reopened
+- [x] Notifications: activities of the user concerned, read through `ActivityService.ListMyActivities` and delivered by notifier plugins
+  - [ ] An event pushed to the user's sessions
+- [ ] End-to-end test
 
 ### P21 Clients and Ecosystem
 **Scope**: the [clients](clients.md), built on the finished server API: the web UI embedded in the server (`apps/web`, served at `/`), the Apple apps for iPhone and iPad, Apple TV and the Mac (`apps/ios`, `apps/tvos`, `apps/macos`), the Android apps for phones and tablets and for Android TV (`apps/android`, `apps/android-tv`), the Windows and Linux app on MyGo (`apps/windows-linux`), and the libraries they share (`libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`); the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its foundation does not wait for P20: the toolchains and build targets, the TypeScript and Rust code generated from `libs/proto`, `libs/design`, the prototypes the open items of §4 name for clients, and the skeletons of the apps and libraries. Only the discovery and request screens wait for P20. The clients then come in this order, each proving the shared core and the design system before the next platform builds on them: the web UI with `libs/client-ts` and `libs/design`; the iPhone and iPad app with `libs/client-rust` and `libs/apple`; the Android phone and tablet app with `libs/android`; the Apple TV and Android TV apps; the Mac app; the Windows and Linux app. Its completion criteria will be defined after P20.
