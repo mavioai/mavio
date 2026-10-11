@@ -14,8 +14,10 @@ func TestMatchMovie(t *testing.T) {
 		{ID: tid(3), Title: "Amélie", OriginalTitle: "Le Fabuleux Destin d'Amélie Poulain", Year: 2001},
 		{ID: tid(4), Title: "Twin", Year: 2010},
 		{ID: tid(5), Title: "Twin", Year: 2010},
-		{ID: tid(6), Title: "Crouching Tiger, Hidden Dragon", Year: 2000, SecondaryYear: 2001, TmdbID: 146,
-			AlternativeTitles: []string{"Wo Hu Cang Long"}, TranslatedTitles: []string{"Tiger and Dragon"}},
+		{
+			ID: tid(6), Title: "Crouching Tiger, Hidden Dragon", Year: 2000, SecondaryYear: 2001, TmdbID: 146,
+			AlternativeTitles: []string{"Wo Hu Cang Long"}, TranslatedTitles: []string{"Tiger and Dragon"},
+		},
 		{ID: tid(7), Title: "Spirited Away", Year: 2001, TranslatedTitles: []string{"Chihiros Reise ins Zauberland"}},
 	}
 	tests := []struct {
