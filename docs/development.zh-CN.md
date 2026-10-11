@@ -27,6 +27,8 @@ pnpm install            # 安装 Nx
 
 Rust 由 `libs/client-rust/rust-toolchain.toml` 固定，rustup 在该目录首次运行 `cargo` 时安装它；只需安装 rustup 本身。
 
+tvOS 目标 `aarch64-apple-tvos` 与 `aarch64-apple-tvos-sim` 属于 tier 3，没有预编译的标准库：它们在固定的 nightly `nightly-2026-10-10` 上构建，由其 `rust-src` 组件构建标准库（`rustup toolchain install nightly-2026-10-10 --component rust-src`，然后 `cargo +nightly-2026-10-10 build -Zbuild-std=std,panic_abort --target aarch64-apple-tvos`）。
+
 迁移由 `libs/store/internal/cmd/migrategen` 生成，它以库的形式使用 Atlas，不需要 Atlas CLI。生成 PostgreSQL 迁移和运行 PostgreSQL 一致性测试需要 Docker。`libs/store/pgtest` 依次在 `DOCKER_HOST`、Docker CLI 当前上下文（`docker context use`）的引擎、Docker Desktop / OrbStack / Colima / Rancher Desktop / Podman 的常见 socket 中找到的第一个引擎上启动容器，无需额外配置。
 
 ---

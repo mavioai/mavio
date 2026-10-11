@@ -16,5 +16,9 @@ buffa.workspace = true
 buffa-types.workspace = true
 connectrpc = { workspace = true, features = ["client"] }
 
+[dev-dependencies]
+http = "1"
+tokio = { version = "1", features = ["macros", "rt"] }
+
 [lints]
 workspace = true

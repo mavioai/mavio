@@ -561,7 +561,11 @@ flowchart TD
 - [x] 服务端：`ItemService.ListSimilarItems`，由 `ItemQuery.SimilarTo` 评分（`libs/store/items.go`）
   - [ ] 在本地结果之后，加入发现提供者给出、媒体库拥有的相似作品，如 Jellyfin 的远程相似条目提供者所做
 - [x] 服务端：所有路由的跨域请求（`apps/server/internal/httpserver/cors.go`）
-- [ ] 原型：tvOS 上的 Rust、connect-rust 与 `EventService` 的流、Apple 平台上 libmpv 的 EDR 与画中画、MyGo 的视频元素
+- [ ] 原型：
+  - [x] tvOS 上的 Rust：在 `nightly-2026-10-10` 上以 `-Zbuild-std` 构建，`mavio-api` 及其 `events` 示例可为 `aarch64-apple-tvos` 与 `aarch64-apple-tvos-sim` 构建，示例在 tvOS 模拟器中运行，TLS（rustls 与 aws-lc-rs）可构建
+  - [x] connect-rust 与 `EventService` 的流：`libs/client-rust/api/examples/events.rs` 登录并打印设备的事件，在 macOS 与 tvOS 模拟器上均可运行
+  - [ ] macOS、iOS 与 tvOS 上 libmpv 的 EDR 与画中画
+  - [ ] MyGo 的视频元素，含 Windows 上的 HDR10
 - [ ] 各应用与库的骨架
 - [ ] `libs/client-rust`：服务器与登录、事件流、离线存储、播放上报、下载、页面状态、多台服务器的合并；Swift、Kotlin 与 Go 绑定
 - [ ] Web UI（`apps/web`、`libs/client-ts`）
@@ -611,7 +615,7 @@ flowchart TD
 | 客户端许可证与应用商店 | 客户端将与仓库其余部分一样采用 GPL-3.0，其条款与 App Store 的条款冲突；以 LGPL 构建的 libmpv 与 FFmpeg 还要求允许用户重新链接 | 首次在 App Store 发布前决定：为客户端另定许可证、要求贡献者协议，或不通过 App Store 分发 |
 | Apple 平台上的 libmpv | mpv 的 render API 只有 OpenGL 与软件渲染后端，而 OpenGL 在 Apple 平台上已弃用；IINA 的画中画使用 App Store 不接受的私有 `PIP.framework`，因此 libmpv 播放经 `AVSampleBufferDisplayLayer` 接入 `AVPictureInPictureController` 尚未得到验证 | P21 先做原型：macOS、iOS 与 tvOS 上 libmpv 播放的 EDR 输出与画中画。若无法接入画中画，则 libmpv 播放中进入画中画时改由 AVPlayer 重新开始播放，由服务端处理该源。另需验证服务端重封装杜比视界源时保留其杜比视界元数据 |
 | Android 上的 libmpv | libmpv 是 Android 应用的第二引擎；在 Android TV 设备（其中许多为 32 位）孱弱的 GPU 上，其 OpenGL ES 渲染可能过慢，且不能输出 HDR | P21 在低端 Android TV 设备上实测；libmpv 跟不上的设备，应用不在能力中声明它，由服务端处理该源 |
-| tvOS 上的 Rust | `aarch64-apple-tvos` 是 Rust 的 tier 3 目标：没有预编译的标准库，需在 nightly 上以 `-Zbuild-std` 构建 | P21 先做原型；固定 tvOS 构建所用的 nightly 版本 |
+| tvOS 上的 Rust | `aarch64-apple-tvos` 是 Rust 的 tier 3 目标：没有预编译的标准库，需在 nightly 上以 `-Zbuild-std` 构建 | P21 已做原型：核心的依赖在 `nightly-2026-10-10` 上可构建并运行（[开发 §1](development.zh-CN.md#1-工具链与环境)）；有意识地推进该固定版本 |
 | 1.0 之前的 connect-rust | `libs/client-rust` 使用的 connect-rust 仍处于 0.x，API 可能变化 | 固定版本；跟进其发布 |
 | Linux 上的 HDR | Linux 应用以 OpenGL 在 GTK 3 的 `GtkGLArea` 中绘制视频，后者只能呈现 SDR，因此 HDR 经色调映射输出 | MyGo 的 Linux 后端能呈现 HDR 表面时再评估 |
 | MyGo | `apps/windows-linux` 基于 MyGo 构建，该框架始于 2026 年 9 月，仍处于 0.x，主要由一位维护者开发。它还没有能把由其他渲染器绘制的原生表面放在其原生 UI 之下的元素，而播放器显示 mpv 的视频需要它（Windows 上的子窗口、Linux 上的 `GtkGLArea`）；可参照它放置自身 Web 视图的方式实现 | P21 先做原型：视频元素（贡献给 MyGo），以及 Windows 上的 HDR10；固定 MyGo 版本 |

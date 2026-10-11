@@ -447,6 +447,8 @@ dependencies = [
  "buffa",
  "buffa-types",
  "connectrpc",
+ "http",
+ "tokio",
 ]
 
 [[package]]

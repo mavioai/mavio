@@ -561,7 +561,11 @@ flowchart TD
 - [x] Server: `ItemService.ListSimilarItems`, scored by `ItemQuery.SimilarTo` (`libs/store/items.go`)
   - [ ] The discovery providers' similar titles that the libraries have, after the local ones, as Jellyfin's remote similar items providers add them
 - [x] Server: cross-origin requests on every route (`apps/server/internal/httpserver/cors.go`)
-- [ ] Prototypes: Rust on tvOS, connect-rust streams with `EventService`, libmpv with EDR and Picture in Picture on Apple platforms, MyGo's video element
+- [ ] Prototypes:
+  - [x] Rust on tvOS: on `nightly-2026-10-10` with `-Zbuild-std`, `mavio-api` and its `events` example build for `aarch64-apple-tvos` and `aarch64-apple-tvos-sim`, the example runs in the tvOS simulator, and TLS (rustls with aws-lc-rs) builds
+  - [x] connect-rust streams with `EventService`: `libs/client-rust/api/examples/events.rs` signs in and prints the device's events, on macOS and in the tvOS simulator
+  - [ ] libmpv with EDR and Picture in Picture on macOS, iOS and tvOS
+  - [ ] MyGo's video element, with HDR10 on Windows
 - [ ] Skeletons of the apps and libraries
 - [ ] `libs/client-rust`: servers and sign-in, the event stream, the offline store, playback reporting, downloads, screen state, the merging of several servers; the Swift, Kotlin and Go bindings
 - [ ] Web UI (`apps/web`, `libs/client-ts`)
@@ -611,7 +615,7 @@ flowchart TD
 | Client licensing and app stores | The clients would be GPL-3.0 like the rest of the repository, whose terms conflict with the App Store's; LGPL builds of libmpv and FFmpeg also oblige letting users relink them | Decide before the first App Store release: a separate license for the clients, a contributor agreement, or no App Store distribution |
 | libmpv on Apple platforms | mpv's render API has only OpenGL and software back ends, and OpenGL is deprecated on Apple platforms; IINA's Picture in Picture uses the private `PIP.framework`, which the App Store rejects, so libmpv playback reaching `AVPictureInPictureController` through `AVSampleBufferDisplayLayer` is unproven | Prototype first in P21: EDR output and Picture in Picture of libmpv playback on macOS, iOS and tvOS. If Picture in Picture cannot be fed, entering it during libmpv playback starts the playback again on AVPlayer, the server processing the source. Also verify that the server's remux of a Dolby Vision source keeps its Dolby Vision metadata |
 | libmpv on Android | libmpv is the second engine of the Android apps; its OpenGL ES rendering may be slow on the weak GPUs of Android TV devices, many of them 32-bit, and it outputs no HDR | Measure on low-end Android TV devices in P21; where libmpv cannot keep up, the app leaves it out of its capabilities and the server processes the source |
-| Rust on tvOS | `aarch64-apple-tvos` is a tier 3 Rust target: no prebuilt standard library, built with `-Zbuild-std` on nightly | Prototype first in P21; pin the nightly the tvOS build uses |
+| Rust on tvOS | `aarch64-apple-tvos` is a tier 3 Rust target: no prebuilt standard library, built with `-Zbuild-std` on nightly | Prototyped in P21: the core's dependencies build and run on `nightly-2026-10-10` ([Development §1](development.md#1-toolchain-and-setup)); move the pin forward deliberately |
 | connect-rust before 1.0 | `libs/client-rust` uses connect-rust, which is still in 0.x and may change its API | Pin the version; follow its releases |
 | HDR on Linux | The Linux app draws video with OpenGL in a GTK 3 `GtkGLArea`, which presents SDR only, so HDR is tone mapped | Revisit when MyGo's Linux backend can present HDR surfaces |
 | MyGo | `apps/windows-linux` builds on MyGo, started in September 2026 and still in 0.x, mostly by one maintainer. It has no element yet that places a native surface drawn by another renderer under its native UI, which the player needs for mpv's video (a child window on Windows, a `GtkGLArea` on Linux); the way it places its own web views is the model | Prototype first in P21: the video element, contributed to MyGo, with HDR10 on Windows; pin the MyGo version |
