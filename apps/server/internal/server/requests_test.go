@@ -113,9 +113,10 @@ func TestRequests(t *testing.T) {
 	ctx := t.Context()
 
 	// What the downloads hold: longer than ten minutes, no sample of The
-	// Matrix nor of an episode, with audio.
+	// Matrix nor of an episode, with audio, and of the resolution of the
+	// releases, which imports read the quality from.
 	film := filepath.Join(t.TempDir(), "film.mkv")
-	run(t, ffmpeg, "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=160x120:rate=1",
+	run(t, ffmpeg, "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=1920x1080:rate=1",
 		"-f", "lavfi", "-i", "sine=frequency=440:sample_rate=8000", "-t", "610",
 		"-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-b:a", "16k", film)
 	settled(t, film)
