@@ -402,43 +402,43 @@ flowchart TD
 - [x] 数字、大小与日期解析（`internal/parse`）
 - [x] 分类、能力与搜索条件（`internal/indexer`）
 - [x] Newznab 与 Torznab（`internal/sites/newznab`、`internal/sites/torznab`）
-  - [ ] 搜索的时间与大小限制（`minage`、`maxage`、`minsize`、`maxsize`），查询尚未携带
-  - [ ] 跨重启保存能力；目前每次启动后重新从 caps 读取
+  - [x] 搜索的时间与大小限制（`minage`、`maxage`、`minsize`、`maxsize`）：查询携带它们，Newznab 与 Torznab 发送它们，插件丢弃超出限制的发布；交互式的 `SearchReleases` 如 Prowlarr 的搜索那样接受它们
+  - [x] 能力跨重启保存在插件的数据目录中，只在索引器的 URL 或 API 密钥改变或满一周后重新读取
 - [x] Cardigann 引擎（`internal/sites/cardigann`）：从目录及其 `Custom` 子目录读取定义，模板、过滤器、HTML、XML 与 JSON 选择器，登录、搜索与下载
   - [x] 拉取并更新 `indexers.prowlarr.com` 的定义，由插件的装配完成
   - [ ] 手动解答验证码：目前没有界面展示图片验证码，自动登录遇到时失败
-  - [ ] 像 Prowlarr 的 GetCookies 那样，以 `cookie` 设置的 cookie 取代响应设置的 cookie；目前只是与之一并发送
+  - [x] 像 Prowlarr 的 GetCookies 那样，以 `cookie` 设置的 cookie 取代响应设置的 cookie
 - [x] Prowlarr 以代码实现的站点，其标记为过时者除外
   - [x] Gazelle（`internal/sites/gazelle`）：AlphaRatio、BrokenStones、DesiGaane、DICMusic、GreatPosterWall、Secret Cinema；使用 API 密钥的 Orpheus、Redacted
   - [x] AvistaZ（`internal/sites/avistaz`）：AnimeZ、AvistaZ、CinemaZ、ExoticaZ、PrivateHD
   - [x] SpeedApp（`internal/sites/speedapp`）：RetroFlix、SpeedApp.io
   - [x] BroadcasTheNet（`internal/sites/broadcasthenet`），以 API 每小时 150 次调用作为其定义的默认限额
-    - [ ] 其发布的来源组、片源、容器、编码与分辨率：Prowlarr 的 TorrentInfo 保留了这些信息，发布尚无对应字段
+    - [x] 其发布的来源组、片源、容器、编码与分辨率，如同 Prowlarr 的 TorrentInfo 所保留
   - [x] FileList（`internal/sites/filelist`）
   - [x] HDBits（`internal/sites/hdbits`）
   - [x] PassThePopcorn（`internal/sites/passthepopcorn`）
   - [x] GazelleGames（`internal/sites/gazellegames`），在测试或首次下载时获取 passkey
-    - [ ] 其大小限制（`sizesmall`、`sizeslarge`），待查询携带 `minsize` 与 `maxsize` 后发送
+    - [x] 其大小限制（`sizesmall`、`sizeslarge`），由查询的 `minsize` 与 `maxsize` 发送
   - [x] IPTorrents（`internal/sites/iptorrents`），使用浏览器的 Cookie 和 User-Agent 抓取其页面
   - [x] BitHDTV、HD-Torrents、ImmortalSeed、Libble、NorBits 和 PiXELHD（`internal/sites/<name>`），抓取其页面
   - [x] Headphones、Knaben、NzbIndex、RuTracker、TorrentPotato 和 TorrentsCSV（`internal/sites/<name>`）
-    - [ ] 像 Prowlarr 的 NZB 校验那样，在转交前检查 NzbIndex、Headphones 和 Newznab 下载的 NZB
+    - [x] 像 Prowlarr 的 NzbValidationService 那样，在转交前检查每个 Usenet 索引器下载的 NZB
     - [ ] RuTracker 的登录验证码：尚无界面显示它，自动登录会失败
   - [x] BeyondHD、M-Team TP、MyAnonamouse、Nebulance、Shazbat 和 TorrentDay（`internal/sites/<name>`）
-    - [ ] MyAnonamouse 的大小限制（`tor[minSize]`、`tor[maxSize]`），待查询带上 `minsize` 和 `maxsize` 后发送
-    - [ ] 像 Prowlarr 那样在测试 MyAnonamouse 前清除其 Cookie
+    - [x] MyAnonamouse 的大小限制（`tor[minSize]`、`tor[maxSize]`），由查询的 `minsize` 和 `maxsize` 发送
+    - [x] 像 Prowlarr 那样在测试 MyAnonamouse 前清除其 Cookie
   - [x] PreToMe、RevolutionTT、SceneHD、SpeedCD、TorrentBytes、TorrentSyndikat、Uniotaku 和 XSpeeds（`internal/sites/<name>`）
   - [x] AnimeBytes、Anidex、Anidub、BakaBT、SubsPlease 和 Toloka.to（`internal/sites/<name>`）
-    - [ ] 像 Prowlarr 那样将 AnimeBytes 的结果缓存三分钟
-    - [ ] Anidub 的分辨率：Prowlarr 的发布保留它，Mavio 的发布尚无此字段
-  - [ ] 像 Prowlarr 存入设置那样跨重启保存 AvistaZ 与 SpeedApp 站点的 API 令牌；目前每次启动后重新登录
-  - [ ] torrent 索引器的做种设置（最少做种数、分享率与做种时间），抓取时交给下载客户端
+    - [x] 像 Prowlarr 那样将 AnimeBytes 的结果缓存三分钟
+    - [x] Anidub 的分辨率，从每个种子的质量块读取（Prowlarr 从错误的元素读取，因而读不到）
+  - [x] AvistaZ 与 SpeedApp 站点的 API 令牌跨重启保存在插件的数据目录中，如同 Prowlarr 将其存入设置
+  - [x] torrent 索引器的做种设置：决策检查最少做种数，分享率、做种时间与整季包做种时间在抓取时交给下载客户端，如同 Radarr 与 Sonarr 的 SeedConfigProvider
 - [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
 - [x] `ReleaseService`（`mavio/acquisition/v1/release.proto`、`apps/server/internal/releases`）：列出各就绪提供方的索引器；如 Radarr 与 Sonarr 的 FetchReleases 那样逐级为媒体库中的电影、季或单集搜索（先按各索引器支持的 ID，再按标题），或按文本搜索；用 `libs/release` 解析 release
-  - [ ] 如 Sonarr 那样逐集搜索动漫的季；目前拒绝此类搜索
-  - [ ] Newznab 的 `title` 参数，Sonarr 会发给支持它的索引器
+  - [x] 如 Sonarr 的 SearchAnimeSeason 那样逐集搜索动漫的季，每个已播出的单集按其绝对集数搜索
+  - [x] Newznab 的 `title` 参数：如 Sonarr 那样，以原始标题发给支持它的索引器
   - [x] 剧集除标题外也按 scene 标题与映射（XEM）搜索，随 P19 完成
-  - [ ] 索引器能力由服务器保存，搜索无需先列出索引器
+  - [x] 服务器保存索引器及其能力一小时，直到其插件重启或重新配置，搜索无需先列出索引器
 - [x] 端到端测试（`apps/server/internal/server/releases_test.go`）：经装配好的服务器搜索 Newznab、Torznab、以 `indexers.prowlarr.com` 的方式提供的 Cardigann 定义以及 NzbIndex
 
 ### P18 电影资源获取
@@ -463,9 +463,9 @@ flowchart TD
   - [ ] 各客户端共用的辅助代码，取代各自的副本：远程路径拼接、.NET 版本解析、JSON-RPC 与 XML-RPC、URL base 校验、自由格式的标签字段、“发布被拒”错误、测试的警告、NZB 有效性检查、可配置的历史条数上限、保留客户端给出的 ID 大小写，以及把 `::1` 视为本机
 - [x] `libs/acquire`：质量及其定义、质量档案、custom formats、delay profile、release profile
 - [x] 决策：Radarr 决策引擎的各项规格及其排序，并移植其用例（`libs/acquire`）
-  - [ ] 按名称查找索引器，用于 Radarr 测试中只给出索引器名称的发布
+  - [x] 按 ID 找不到索引器时按名称查找，如同 Radarr 的 AggregateLanguages
   - [ ] 区分未知语言与任意语言；目前未知语言视为任意语言
-  - [ ] 索引器的标签，索引器标签规格需要它才会拒绝发布
+  - [x] 索引器的标签，由索引器标签规格检查
 - [x] 领域与存储：档案、custom formats、被跟踪下载的队列、历史、黑名单、远程路径映射、命名（`libs/core/acquisition.go`、`libs/store`）
   - [ ] 质量档案的格式评分对照已有的 custom formats 进行检查
 - [x] 按 TMDB ID 把想要的电影加入媒体库，带质量档案与最低可用状态（`WantedService`、`apps/server/internal/acquisition`）
@@ -474,7 +474,7 @@ flowchart TD
   - [ ] 识别失败的电影保留其占位名称（"TMDB <id>"）
 - [x] 以作业执行的电影搜索与 RSS 同步；通过 `DownloadService` 抓取；`SearchReleases` 给出决策
   - [ ] 按电影的别名、译名与次要年份匹配发布
-  - [ ] 索引器的标签、必需标志、最少做种数与 MULTi 语言，索引器插件尚未提供
+  - [x] 索引器的标签、必需标志、最少做种数与 MULTi 语言，由索引器插件按其配置提供
   - [ ] 下载客户端的标签，以及同一优先级的客户端之间轮流使用；目前使用优先级最高的第一个客户端
   - [ ] 区分 `AutoRedownloadFailedFromInteractiveSearch` 与失败后重新搜索
 - [x] 队列：从客户端轮询的被跟踪下载
@@ -499,7 +499,7 @@ flowchart TD
 
 **进展**：
 - [x] 决策：Sonarr 决策引擎的各项规格及其排序，并移植其用例（`libs/acquire/series`）
-  - [ ] 按名称查找索引器，用于 Sonarr 测试中只给出索引器名称的发布
+  - [x] 按 ID 找不到索引器时按名称查找，如同 Sonarr 的 AggregateLanguages
 - [x] 按 Sonarr 的方式命名剧集文件、剧集与季文件夹（`libs/acquire/organize`）
 - [x] 想要的剧集与单集：按 TVDB ID 加入剧集，带质量档案，监控新季与新集（`WantedService.AddSeries`、`apps/server/internal/acquisition`）
   - [ ] 想要的剧集被扫描找到的磁盘上的单集，按 Sonarr 的方式监控

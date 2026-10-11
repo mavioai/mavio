@@ -402,43 +402,43 @@ flowchart TD
 - [x] Number, size and date parsing (`internal/parse`)
 - [x] Categories, capabilities and search criteria (`internal/indexer`)
 - [x] Newznab and Torznab (`internal/sites/newznab`, `internal/sites/torznab`)
-  - [ ] The age and size limits of searches (`minage`, `maxage`, `minsize`, `maxsize`), which queries do not carry yet
-  - [ ] Capabilities kept across restarts; they are read again from the caps after each start
+  - [x] The age and size limits of searches (`minage`, `maxage`, `minsize`, `maxsize`): queries carry them, Newznab and Torznab send them, and the plugin drops releases outside them; the interactive `SearchReleases` takes them, as Prowlarr's searches do
+  - [x] Capabilities kept across restarts in the plugin's data folder, read again only when the indexer's URL or API key changes or after a week
 - [x] The Cardigann engine (`internal/sites/cardigann`): definitions read from a directory and its `Custom` directory, templates, filters, HTML, XML and JSON selectors, logins, searches and downloads
   - [x] Fetching and updating the definitions of `indexers.prowlarr.com`, which the plugin's wiring does
   - [ ] Captchas solved by hand: an image captcha fails automatic logins, as no UI shows it yet
-  - [ ] Cookies of the `cookie` setting replacing those responses set, as Prowlarr's GetCookies does; they are only sent besides them
+  - [x] Cookies of the `cookie` setting replace those responses set, as Prowlarr's GetCookies does
 - [x] The sites Prowlarr implements in code, but those it marks obsolete
   - [x] Gazelle (`internal/sites/gazelle`): AlphaRatio, BrokenStones, DesiGaane, DICMusic, GreatPosterWall, Secret Cinema; with an API key, Orpheus and Redacted
   - [x] AvistaZ (`internal/sites/avistaz`): AnimeZ, AvistaZ, CinemaZ, ExoticaZ, PrivateHD
   - [x] SpeedApp (`internal/sites/speedapp`): RetroFlix, SpeedApp.io
   - [x] BroadcasTheNet (`internal/sites/broadcasthenet`), with the API's 150 calls an hour as its definition's default limits
-    - [ ] The origin, source, container, codec and resolution of its releases, which Prowlarr's TorrentInfo keeps and releases do not have yet
+    - [x] The origin, source, container, codec and resolution of its releases, as Prowlarr's TorrentInfo keeps them
   - [x] FileList (`internal/sites/filelist`)
   - [x] HDBits (`internal/sites/hdbits`)
   - [x] PassThePopcorn (`internal/sites/passthepopcorn`)
   - [x] GazelleGames (`internal/sites/gazellegames`), asking for the passkey on testing or on the first download
-    - [ ] Its size limits (`sizesmall`, `sizeslarge`), sent once queries carry `minsize` and `maxsize`
+    - [x] Its size limits (`sizesmall`, `sizeslarge`), sent from the queries' `minsize` and `maxsize`
   - [x] IPTorrents (`internal/sites/iptorrents`), scraping its pages with the cookie and User-Agent of a browser
   - [x] BitHDTV, HD-Torrents, ImmortalSeed, Libble, NorBits and PiXELHD (`internal/sites/<name>`), scraping their pages
   - [x] Headphones, Knaben, NzbIndex, RuTracker, TorrentPotato and TorrentsCSV (`internal/sites/<name>`)
-    - [ ] Downloaded NZBs checked before they are sent on, as Prowlarr's NZB validation does, for NzbIndex, Headphones and Newznab
+    - [x] Downloaded NZBs checked before they are sent on, as Prowlarr's NzbValidationService does, for every Usenet indexer
     - [ ] RuTracker's login captcha, which fails automatic logins as no UI shows it yet
   - [x] BeyondHD, M-Team TP, MyAnonamouse, Nebulance, Shazbat and TorrentDay (`internal/sites/<name>`)
-    - [ ] MyAnonamouse's size limits (`tor[minSize]`, `tor[maxSize]`), sent once queries carry `minsize` and `maxsize`
-    - [ ] MyAnonamouse's cookies cleared before a test, as Prowlarr does
+    - [x] MyAnonamouse's size limits (`tor[minSize]`, `tor[maxSize]`), sent from the queries' `minsize` and `maxsize`
+    - [x] MyAnonamouse's cookies cleared before a test, as Prowlarr does
   - [x] PreToMe, RevolutionTT, SceneHD, SpeedCD, TorrentBytes, TorrentSyndikat, Uniotaku and XSpeeds (`internal/sites/<name>`)
   - [x] AnimeBytes, Anidex, Anidub, BakaBT, SubsPlease and Toloka.to (`internal/sites/<name>`)
-    - [ ] AnimeBytes' results kept for three minutes, as Prowlarr caches them
-    - [ ] Anidub's resolution, which Prowlarr's releases keep and Mavio's do not have yet
-  - [ ] The API tokens of AvistaZ and SpeedApp sites kept across restarts, as Prowlarr keeps them in the settings; they log in again after each start
-  - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
+    - [x] AnimeBytes' results kept for three minutes, as Prowlarr caches them
+    - [x] Anidub's resolution, read from each torrent's quality block (Prowlarr reads it from the wrong element and finds none)
+  - [x] The API tokens of AvistaZ and SpeedApp sites kept across restarts in the plugin's data folder, as Prowlarr keeps them in the settings
+  - [x] The seeding settings of torrent indexers: the minimum seeders the decisions check, and the seed ratio, seed time and season pack seed time download clients are given with grabs, as Radarr's and Sonarr's SeedConfigProvider
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
 - [x] `ReleaseService` (`mavio/acquisition/v1/release.proto`, `apps/server/internal/releases`): lists the indexers of every ready provider; searches them for a movie, season or episode of the library tier by tier as Radarr's and Sonarr's FetchReleases do (the IDs each indexer takes, then its titles), or for text; parses the releases with `libs/release`
-  - [ ] Seasons of anime searched episode by episode, as Sonarr does; they are refused for now
-  - [ ] Newznab's `title` parameter, which Sonarr sends to indexers taking it
+  - [x] Seasons of anime searched episode by episode, each aired episode by its absolute number, as Sonarr's SearchAnimeSeason
+  - [x] Newznab's `title` parameter, sent with the raw titles to indexers taking it, as Sonarr does
   - [x] Scene titles and mappings (XEM) of series searched besides their titles, with P19
-  - [ ] Indexer capabilities kept with the server, so that searches need not list the indexers first
+  - [x] Indexers and their capabilities kept by the server for an hour, until their plugin restarts or is configured again, so that searches need not list the indexers first
 - [x] End-to-end test (`apps/server/internal/server/releases_test.go`): Newznab, Torznab, a Cardigann definition fetched as `indexers.prowlarr.com` serves them and NzbIndex, searched through the assembled server
 
 ### P18 Movie Acquisition
@@ -463,9 +463,9 @@ flowchart TD
   - [ ] Helpers the clients share instead of each keeping its own: remote path joining, .NET version parsing, JSON-RPC and XML-RPC, URL base validation, a free-form tag field, a "release rejected" error, warnings from tests, NZB validity checks, a configurable history limit, IDs kept in the case clients give them, and `::1` counted as localhost
 - [x] `libs/acquire`: qualities and their definitions, quality profiles, custom formats, delay profiles, release profiles
 - [x] Decisions: the specifications of Radarr's decision engine and its ranking, with its cases ported (`libs/acquire`)
-  - [ ] Indexers found by name, for the cases of Radarr's tests that give releases only an indexer name
+  - [x] Indexers found by name when their ID finds none, as Radarr's AggregateLanguages
   - [ ] Languages kept apart as unknown and any; an unknown language counts as any
-  - [ ] Tags of indexers, which the indexer tag specification needs before it rejects anything
+  - [x] Tags of indexers, which the indexer tag specification checks
 - [x] Domain and storage: profiles, custom formats, the queue of tracked downloads, history, the blocklist, remote path mappings, naming (`libs/core/acquisition.go`, `libs/store`)
   - [ ] The format scores of quality profiles checked against the custom formats that exist
 - [x] Adding a wanted movie to a library by its TMDB ID, with a quality profile and minimum availability (`WantedService`, `apps/server/internal/acquisition`)
@@ -474,7 +474,7 @@ flowchart TD
   - [ ] A movie whose identification fails is kept under its placeholder name ("TMDB <id>")
 - [x] Movie searches and RSS sync as jobs; grabs through `DownloadService`; decisions in `SearchReleases`
   - [ ] Releases matched to movies by their alternative titles, translations and secondary years
-  - [ ] Tags, required flags, minimum seeders and MULTi languages of indexers, which the indexer plugin does not report yet
+  - [x] Tags, required flags, minimum seeders and MULTi languages of indexers, which the indexer plugin reports from its configuration
   - [ ] Download client tags and round robin among clients of one priority; the first client by priority is used
   - [ ] `AutoRedownloadFailedFromInteractiveSearch` kept apart from searching again after failures
 - [x] The queue: tracked downloads polled from the clients
@@ -499,7 +499,7 @@ flowchart TD
 
 **Progress**:
 - [x] Decisions: the specifications of Sonarr's decision engine and its ranking, with its cases ported (`libs/acquire/series`)
-  - [ ] Indexers found by name, for the cases of Sonarr's tests that give releases only an indexer name
+  - [x] Indexers found by name when their ID finds none, as Sonarr's AggregateLanguages
 - [x] Episode file names, series and season folders named as Sonarr names them (`libs/acquire/organize`)
 - [x] Wanted series and episodes: series added by TVDB ID, with a quality profile, monitoring of new seasons and episodes (`WantedService.AddSeries`, `apps/server/internal/acquisition`)
   - [ ] Episodes found on disk by scans of a wanted series monitored as Sonarr monitors them
