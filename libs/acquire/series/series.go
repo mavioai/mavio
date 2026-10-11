@@ -32,6 +32,25 @@ type Series struct {
 	Runtime int
 	// Seasons are the numbers of the series' seasons, 0 for specials.
 	Seasons []int
+	// TvdbID, TvRageID and ImdbID are the series' external IDs; zero or
+	// empty when unknown.
+	TvdbID   int
+	TvRageID int
+	ImdbID   string
+	// CleanTitle is release.CleanSeriesTitle of the title; empty to work
+	// it out from Title.
+	CleanTitle string
+	// UseSceneNumbering is set when the scene numbers the series' episodes
+	// apart from TVDB, as XEM tells.
+	UseSceneNumbering bool
+}
+
+// cleanTitle returns the series' clean title.
+func (s *Series) cleanTitle() string {
+	if s.CleanTitle != "" {
+		return s.CleanTitle
+	}
+	return release.CleanSeriesTitle(s.Title)
 }
 
 // Episode is an episode of a series. Its Item's Runtime is the episode's
@@ -44,19 +63,55 @@ type Episode struct {
 	Title                 string
 	// AirDateUTC is zero when the air date is unknown.
 	AirDateUTC time.Time
+	// AirDate is the local air date as "2006-01-02"; empty when unknown.
+	AirDate string
+	// SceneSeasonNumber, SceneEpisodeNumber and SceneAbsoluteEpisodeNumber
+	// are how the scene numbers the episode, nil when as TVDB does.
+	SceneSeasonNumber          *int
+	SceneEpisodeNumber         *int
+	SceneAbsoluteEpisodeNumber *int
 }
 
-// SceneMapping is the scene mapping a release's series title was found
-// by, as Sonarr's SceneMapping.
+// SceneMapping is a title the scene gives a series, as Sonarr's
+// SceneMapping.
 type SceneMapping struct {
 	Title  string
 	TvdbID int
-	// SceneOrigin says how the scene numbers the series: "mixed" when
-	// its numbering is ambiguous, "unknown" or "unknown:<type>" when it
-	// is not known, empty when the mapping says nothing.
+	// SearchTerm is the title to search by; ParseTerm is
+	// release.CleanSeriesTitle of Title, worked out when empty.
+	SearchTerm, ParseTerm string
+	// SeasonNumber is the TVDB season the title is of, and
+	// SceneSeasonNumber the scene's; nil (or -1) for any.
+	SeasonNumber, SceneSeasonNumber *int
+	// SceneOrigin says how the scene numbers the series: "tvdb" as TVDB
+	// does, "mixed" when its numbering is ambiguous, "unknown" or
+	// "unknown:<type>" when it is not known, empty when the mapping says
+	// nothing.
 	SceneOrigin string
-	Comment     string
+	// SearchMode is how indexers are searched with the title.
+	SearchMode SearchMode
+	Comment    string
+	// FilterRegex, a .NET regular expression, limits the mapping to
+	// release titles it matches.
+	FilterRegex string
+	// Type is the provider the mapping came from: "XemService" for XEM,
+	// as Sonarr names its providers.
+	Type string
 }
+
+// SearchMode is how indexers are searched for a series by a scene
+// title, as Sonarr's SearchMode.
+type SearchMode int
+
+// The search modes.
+const (
+	// SearchModeDefault searches by the series' IDs, then by title.
+	SearchModeDefault SearchMode = iota
+	// SearchModeSearchID searches by IDs only.
+	SearchModeSearchID
+	// SearchModeSearchTitle searches by title only.
+	SearchModeSearchTitle
+)
 
 // Candidate is an episode release mapped to its series and episodes, as
 // Sonarr's RemoteEpisode. The embedded Candidate's Target is the

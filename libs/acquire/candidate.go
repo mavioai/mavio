@@ -36,6 +36,7 @@ type Release struct {
 	ImdbID    string
 	TmdbID    int
 	TvdbID    int
+	TvRageID  int
 }
 
 // Age returns how old the release is at now.
