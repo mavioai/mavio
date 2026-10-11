@@ -362,8 +362,8 @@ func (r *Runtime) SetMonitored(ctx context.Context, itemIDs []core.ID, monitored
 	return nil
 }
 
-// NewSeasonMonitored tells whether the seasons a refresh adds to a series
-// are monitored, for library.Refresher: as a wanted series' monitoring of
+// NewSeasonMonitored tells whether the seasons a refresh or a scan adds
+// to a series are monitored, for library.Refresher and library.Scanner: as a wanted series' monitoring of
 // new items says, as Sonarr's RefreshSeriesService; for other series,
 // when the series is monitored.
 func (r *Runtime) NewSeasonMonitored(ctx context.Context, s core.Item) bool {
@@ -375,6 +375,69 @@ func (r *Runtime) NewSeasonMonitored(ctx context.Context, s core.Item) bool {
 		return s.Monitored
 	}
 	return w.MonitorNewItems != core.NewItemsNone
+}
+
+// UnmonitorMissing unmonitors the episodes of wanted series among the
+// items a scan of lib marked missing, when the settings say to, as
+// Sonarr's EpisodeService does with AutoUnmonitorPreviouslyDownloadedEpisodes
+// for episode files missing from disk; for library.Scanner.OnMissing.
+func (r *Runtime) UnmonitorMissing(ctx context.Context, lib core.Library, ids []core.ID) {
+	if lib.Kind != core.LibraryShows || !r.settings().AutoUnmonitorPreviouslyDownloadedEpisodes {
+		return
+	}
+	if err := r.unmonitorMissing(ctx, ids); err != nil {
+		r.logger().WarnContext(ctx, "couldn't unmonitor missing episodes", "library", lib.Name, "err", err)
+	}
+}
+
+func (r *Runtime) unmonitorMissing(ctx context.Context, ids []core.ID) error {
+	wanted := map[core.ID]bool{}
+	isWanted := func(id core.ID) (bool, error) {
+		if w, ok := wanted[id]; ok {
+			return w, nil
+		}
+		_, err := r.Store.Wanted().Get(ctx, id)
+		switch {
+		case errors.Is(err, core.ErrNotFound):
+			wanted[id] = false
+		case err != nil:
+			return false, err
+		default:
+			wanted[id] = true
+		}
+		return wanted[id], nil
+	}
+	for _, id := range ids {
+		it, err := r.Store.Items().Get(ctx, id)
+		if errors.Is(err, core.ErrNotFound) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if it.Kind != core.KindEpisode || !it.Monitored {
+			continue
+		}
+		seriesID := it.ParentID
+		if parent, err := r.Store.Items().Get(ctx, seriesID); err != nil && !errors.Is(err, core.ErrNotFound) {
+			return err
+		} else if err == nil && parent.Kind == core.KindSeason {
+			seriesID = parent.ParentID
+		}
+		ok, err := isWanted(seriesID)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			continue
+		}
+		it.Monitored = false
+		if err := r.Store.Items().Upsert(ctx, it); err != nil {
+			return err
+		}
+		r.logger().InfoContext(ctx, "unmonitored episode whose file went missing", "item", it.ID, "path", it.Path)
+	}
+	return nil
 }
 
 // seasonsOf returns the distinct season numbers of episodes.

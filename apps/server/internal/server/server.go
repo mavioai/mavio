@@ -324,6 +324,10 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		return nil
 	})
 	if worker, scanner := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, plugs.SegmentProviders, plugs.Resolvers, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
+		// Seasons and episodes scans find in wanted series are monitored
+		// as the series says, and episodes whose files go missing are
+		// unmonitored when the settings say to.
+		scanner.NewSeasonMonitored, scanner.OnMissing = acq.NewSeasonMonitored, acq.UnmonitorMissing
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err
