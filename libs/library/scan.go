@@ -510,6 +510,7 @@ func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.I
 		return core.NilID, err
 	}
 	before := it
+	var covered []core.ID
 	if isNew {
 		it = core.Item{ID: core.NewID(), LibraryID: sc.lib.ID, DateAdded: sc.now(), Name: n.Name, Path: n.Path}
 		if n.Year != nil {
@@ -518,7 +519,8 @@ func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.I
 		it.IndexNumber, it.ParentIndexNumber, it.IndexNumberEnd = n.Index, n.ParentIndex, n.IndexEnd
 		it.PremiereDate = n.Aired
 		it.Video3DFormat = n.Format3D
-		v, ok, err := p.adopt(ctx, n, parent)
+		v, ok, cov, err := p.adopt(ctx, n, parent)
+		covered = cov
 		if err != nil {
 			return core.NilID, err
 		}
@@ -563,6 +565,16 @@ func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.I
 	} else if err := p.tx.Items().Touch(ctx, sc.lib.ID, sc.gen, n.Path); err != nil {
 		return core.NilID, err
 	}
+	if len(covered) > 0 {
+		// The virtual episodes a multi-episode file covers go, their
+		// history kept by the file's item.
+		if err := p.tx.History().MoveItems(ctx, it.ID, covered...); err != nil {
+			return core.NilID, err
+		}
+		if err := p.tx.Items().Delete(ctx, covered...); err != nil {
+			return core.NilID, err
+		}
+	}
 	if sources != nil {
 		if err := p.tx.MediaSources().Replace(ctx, it.ID, sources); err != nil {
 			return core.NilID, err
@@ -579,15 +591,16 @@ func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.I
 
 // adopt finds the virtual season or episode a new season folder or
 // episode file is: one of the same series with the same numbers. It
-// deletes the other virtual episodes a multi-episode file holds.
-func (p *saver) adopt(ctx context.Context, n Node, parent core.ID) (core.Item, bool, error) {
+// returns the other virtual episodes a multi-episode file holds too,
+// which go.
+func (p *saver) adopt(ctx context.Context, n Node, parent core.ID) (core.Item, bool, []core.ID, error) {
 	if n.Extra != "" || n.Index == nil || (n.Kind == core.KindEpisode && n.ParentIndex == nil) ||
 		(n.Kind != core.KindEpisode && n.Kind != core.KindSeason) {
-		return core.Item{}, false, nil
+		return core.Item{}, false, nil, nil
 	}
 	series, err := p.seriesOf(ctx, parent)
 	if err != nil || series.IsZero() {
-		return core.Item{}, false, err
+		return core.Item{}, false, nil, err
 	}
 	q := core.ItemQuery{ParentID: series, Kinds: []core.ItemKind{n.Kind}, OnlyVirtual: true, IncludeMissing: true}
 	last := *n.Index
@@ -601,7 +614,7 @@ func (p *saver) adopt(ctx context.Context, n Node, parent core.ID) (core.Item, b
 	}
 	page, err := p.tx.Items().Query(ctx, q)
 	if err != nil {
-		return core.Item{}, false, err
+		return core.Item{}, false, nil, err
 	}
 	var adopted core.Item
 	var found bool
@@ -615,12 +628,7 @@ func (p *saver) adopt(ctx context.Context, n Node, parent core.ID) (core.Item, b
 			covered = append(covered, v.ID)
 		}
 	}
-	if len(covered) > 0 {
-		if err := p.tx.Items().Delete(ctx, covered...); err != nil {
-			return core.Item{}, false, err
-		}
-	}
-	return adopted, found, nil
+	return adopted, found, covered, nil
 }
 
 // seriesOf returns the series a season or episode under parent belongs

@@ -468,6 +468,11 @@ func (r *Runtime) recordEpisodeItems(ctx context.Context, sh *show, episodes []*
 		}
 	}
 	if len(gone) > 0 {
+		// The items of the other episodes go, their history kept by the
+		// file's.
+		if err := r.Store.History().MoveItems(ctx, it.ID, gone...); err != nil {
+			return core.NilID, err
+		}
 		if err := st.Delete(ctx, gone...); err != nil {
 			return core.NilID, err
 		}

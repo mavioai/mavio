@@ -711,6 +711,10 @@ type (
 		List(ctx context.Context, q HistoryQuery) (Page[HistoryEvent], error)
 		// Purge deletes the events before a time and reports how many.
 		Purge(ctx context.Context, before time.Time) (int, error)
+		// MoveItems gives the events of items to another item, which
+		// takes their place, as the item of a multi-episode file takes
+		// that of the episodes it covers.
+		MoveItems(ctx context.Context, to ID, from ...ID) error
 	}
 
 	// BlocklistRepository stores blocklisted releases; deleting the item

@@ -516,7 +516,7 @@ flowchart TD
   - [ ] Series naming settings: episode formats, the season folder format, the multi-episode style; Sonarr's defaults apply
   - [ ] Sonarr's import specifications for episode titles, unpacking, unverified scene numbering, absolute numbers and matching folders, and its scene name check
   - [ ] The qualities of episode files aggregated as Sonarr aggregates them
-  - [ ] The history of the episodes a multi-episode file covers, which goes with their items
+  - [x] The history of the episodes a multi-episode file covers kept by the file's item, on import and on scans
 - [x] End-to-end test (`apps/server/internal/server/series_acquisition_test.go`): a season pack and a single episode of a standard series, an anime release named by a scene mapping title and an absolute number, and a daily series' release named by air date are found, imported under Sonarr's naming and played
   - [ ] RSS syncs of series, multi-episode files and upgrades of episodes in the end-to-end test
   - [ ] XEM's scene numbering in the end-to-end test

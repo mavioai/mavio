@@ -560,6 +560,11 @@ func TestMultiEpisodeFile(t *testing.T) {
 	if left := e.episode(s.ID, 1, 3); !left.ID.IsZero() {
 		t.Errorf("S01E03 still has its own item %+v", left)
 	}
+	// S01E03's history goes to the file's item rather than with its own.
+	grabs := e.history(core.HistoryGrabbed)
+	if len(grabs) != 2 || grabs[0].ItemID != ep2.ID || grabs[1].ItemID != ep2.ID {
+		t.Errorf("grab history = %+v, want = both episodes' grabs on the file's item", grabs)
+	}
 	// The file holds both episodes: S01E03 is no longer missing.
 	missing, _, err := e.rt.ListWantedEpisodes(e.ctx, WantedMissing, 0, 0)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -218,6 +219,15 @@ func (r history) List(ctx context.Context, q core.HistoryQuery) (core.Page[core.
 		}
 	}
 	return out, nil
+}
+
+func (r history) MoveItems(ctx context.Context, to core.ID, from ...core.ID) error {
+	from = slices.DeleteFunc(slices.Clone(from), func(id core.ID) bool { return id == to })
+	if len(from) == 0 {
+		return nil
+	}
+	err := r.s.write.HistoryEvent.Update().Where(historyevent.ItemIDIn(from...)).SetItemID(to).Exec(ctx)
+	return mapErr(err, "move history")
 }
 
 func (r history) Purge(ctx context.Context, before time.Time) (int, error) {

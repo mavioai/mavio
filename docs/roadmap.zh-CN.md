@@ -516,7 +516,7 @@ flowchart TD
   - [ ] 剧集命名设置：单集格式、季文件夹格式、多集样式；目前使用 Sonarr 的默认值
   - [ ] Sonarr 关于单集标题、解压中、未验证的 scene 编号、绝对集数与文件夹匹配的入库规格，以及其 scene 名称检查
   - [ ] 按 Sonarr 的方式汇总单集文件的质量
-  - [ ] 多集文件所涵盖的各集的历史记录，目前随其条目一并删除
+  - [x] 多集文件所涵盖的各集的历史记录在入库与扫描时由该文件的条目保留
 - [x] 端到端测试（`apps/server/internal/server/series_acquisition_test.go`）：普通剧集的整季包与单集、以 scene 映射标题和绝对集数命名的动漫 release、以播出日期命名的日播剧 release 被找到，按 Sonarr 的命名入库并播放
   - [ ] 端到端测试中的剧集 RSS 同步、多集文件与单集升级
   - [ ] 端到端测试中 XEM 的 scene 编号

@@ -3,7 +3,9 @@ package library
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"slices"
+	"strconv"
 	"testing"
 	"time"
 
@@ -306,5 +308,38 @@ func TestListEpisodes(t *testing.T) {
 	}
 	if !slices.Equal(asked, []core.ID{series.ID}) || len(monitored) != 0 || len(f.virtuals(series.ID)) == 0 {
 		t.Errorf("not monitoring new items: asked %v, monitored %v, virtuals %v; want the series asked, none monitored", asked, monitored, f.virtuals(series.ID))
+	}
+}
+
+func TestMultiEpisodeFileKeepsHistory(t *testing.T) {
+	f := newScan(t, core.LibraryShows)
+	tree(t, f.root, "Show/Season 01/Show S01E01.mkv")
+	f.scan()
+	season := f.item("Show/Season 01")
+	virtual := func(n int) core.Item {
+		it := core.Item{
+			ID: core.NewID(), LibraryID: f.lib.ID, ParentID: season.ID, Kind: core.KindEpisode, Name: "Episode " + strconv.Itoa(n),
+			IndexNumber: new(n), ParentIndexNumber: new(1), Virtual: true, Monitored: true, DateAdded: f.clock,
+		}
+		if err := f.store.Items().Upsert(t.Context(), it); err != nil {
+			t.Fatal(err)
+		}
+		return it
+	}
+	second, third := virtual(2), virtual(3)
+
+	// The file of both takes the second's place, and the history of the
+	// third, which goes.
+	f.clock = f.clock.Add(time.Hour)
+	tree(t, f.root, "Show/Season 01/Show S01E02-E03.mkv")
+	f.scan()
+	if got := f.item("Show/Season 01/Show S01E02-E03.mkv"); got.ID != second.ID || got.IndexNumberEnd == nil || *got.IndexNumberEnd != 3 {
+		t.Errorf("multi-episode file = %+v, want the second episode's item through episode 3", got)
+	}
+	if _, err := f.store.Items().Get(t.Context(), third.ID); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("third episode = %v, want it gone", err)
+	}
+	if got := f.store.moved[third.ID]; got != second.ID {
+		t.Errorf("third episode's history went to %s, want = %s", got, second.ID)
 	}
 }
