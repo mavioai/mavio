@@ -514,7 +514,8 @@ flowchart TD
   - [x] The series and movie engines log with the server's logger rather than the default one
 - [x] Import of episodes, season packs and multi-episode files; upgrades
   - [x] Series naming settings: whether episodes are renamed, the episode file formats, the series, season and specials folder formats and the multi-episode style, with Sonarr's defaults when empty
-  - [ ] Sonarr's import specifications for episode titles, unpacking, unverified scene numbering, absolute numbers and matching folders, and its scene name check
+  - [x] Sonarr's import specifications for episode titles (with the `EpisodeTitleRequired` setting), unpacking, unverified scene numbering, absolute numbers and matching folders, and its scene name calculation
+    - [ ] The download client working folders as a setting; Sonarr's default `_UNPACK_|_FAILED_` applies
   - [ ] The qualities of episode files aggregated as Sonarr aggregates them
   - [x] The history of the episodes a multi-episode file covers kept by the file's item, on import and on scans
 - [x] End-to-end test (`apps/server/internal/server/series_acquisition_test.go`): a season pack and a single episode of a standard series, an anime release named by a scene mapping title and an absolute number, and a daily series' release named by air date are found, imported under Sonarr's naming and played

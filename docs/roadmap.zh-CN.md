@@ -514,7 +514,8 @@ flowchart TD
   - [x] 剧集与电影引擎使用服务器的日志记录器，而不是默认的
 - [x] 单集、整季包与多集文件的入库；升级
   - [x] 剧集命名设置：是否重命名单集、单集文件格式、剧集、季与特别篇目录格式与多集样式，为空时使用 Sonarr 的默认值
-  - [ ] Sonarr 关于单集标题、解压中、未验证的 scene 编号、绝对集数与文件夹匹配的入库规格，以及其 scene 名称检查
+  - [x] Sonarr 关于单集标题（含 `EpisodeTitleRequired` 设置）、解压中、未验证的 scene 编号、绝对集数与文件夹匹配的入库规格，以及其 scene 名称计算
+    - [ ] 下载客户端工作文件夹作为设置；目前使用 Sonarr 的默认值 `_UNPACK_|_FAILED_`
   - [ ] 按 Sonarr 的方式汇总单集文件的质量
   - [x] 多集文件所涵盖的各集的历史记录在入库与扫描时由该文件的条目保留
 - [x] 端到端测试（`apps/server/internal/server/series_acquisition_test.go`）：普通剧集的整季包与单集、以 scene 映射标题和绝对集数命名的动漫 release、以播出日期命名的日播剧 release 被找到，按 Sonarr 的命名入库并播放
