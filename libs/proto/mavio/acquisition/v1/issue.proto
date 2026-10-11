@@ -1,0 +1,176 @@
+edition = "2023";
+
+package mavio.acquisition.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// IssueService takes the problems users report with items, as Seerr's
+// issues: users who may report issues report them and comment on their
+// own; administrators see, comment on, resolve and delete all.
+service IssueService {
+  // CreateIssue reports a problem with an item the caller can access;
+  // its message is the first comment.
+  rpc CreateIssue(CreateIssueRequest) returns (CreateIssueResponse);
+  // ListIssues lists the caller's issues, or anyone's for administrators.
+  rpc ListIssues(ListIssuesRequest) returns (ListIssuesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetIssue returns an issue of the caller's, or anyone's for
+  // administrators.
+  rpc GetIssue(GetIssueRequest) returns (GetIssueResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // AddComment comments on an issue: its reporter or an administrator.
+  rpc AddComment(AddCommentRequest) returns (AddCommentResponse);
+  // ResolveIssue resolves an issue: its reporter or an administrator.
+  rpc ResolveIssue(ResolveIssueRequest) returns (ResolveIssueResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // ReopenIssue reopens an issue: its reporter or an administrator.
+  rpc ReopenIssue(ReopenIssueRequest) returns (ReopenIssueResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // DeleteIssue deletes an issue: administrators any, its reporter while
+  // nobody else commented on it.
+  rpc DeleteIssue(DeleteIssueRequest) returns (DeleteIssueResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+}
+
+// IssueType is what kind of problem an issue reports.
+enum IssueType {
+  ISSUE_TYPE_UNSPECIFIED = 0;
+  ISSUE_TYPE_VIDEO = 1;
+  ISSUE_TYPE_AUDIO = 2;
+  ISSUE_TYPE_SUBTITLES = 3;
+  ISSUE_TYPE_OTHER = 4;
+}
+
+// IssueStatus is whether an issue is open.
+enum IssueStatus {
+  ISSUE_STATUS_UNSPECIFIED = 0;
+  ISSUE_STATUS_OPEN = 1;
+  ISSUE_STATUS_RESOLVED = 2;
+}
+
+// Issue is a problem a user reports with an item.
+message Issue {
+  string id = 1;
+  string item_id = 2;
+  IssueType type = 3;
+  IssueStatus status = 4;
+  // Of series; 0 for none.
+  int32 season_number = 5;
+  int32 episode_number = 6;
+  string created_by = 7;
+  // Who last resolved or reopened it.
+  string modified_by = 8;
+  // Oldest first; the first says what the problem is.
+  repeated IssueComment comments = 9;
+  google.protobuf.Timestamp create_time = 10;
+  google.protobuf.Timestamp update_time = 11;
+}
+
+// IssueComment is a comment on an issue.
+message IssueComment {
+  string id = 1;
+  string user_id = 2;
+  string message = 3;
+  google.protobuf.Timestamp create_time = 4;
+  google.protobuf.Timestamp update_time = 5;
+}
+
+message CreateIssueRequest {
+  // The movie, series, season or episode.
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  IssueType type = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // Of series; 0 for all.
+  int32 season_number = 3 [(buf.validate.field).int32.gte = 0];
+  int32 episode_number = 4 [(buf.validate.field).int32.gte = 0];
+  string message = 5 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 10000
+  }];
+}
+
+message CreateIssueResponse {
+  Issue issue = 1;
+}
+
+// IssueSort is the order of listed issues.
+enum IssueSort {
+  // Newest first.
+  ISSUE_SORT_UNSPECIFIED = 0;
+  // Last changed first.
+  ISSUE_SORT_MODIFIED = 1;
+}
+
+message ListIssuesRequest {
+  // Any of them; unset for all.
+  repeated IssueStatus statuses = 1 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // The issues of an item.
+  string item_id = 2 [(buf.validate.field).string.uuid = true];
+  // Administrators: a user's issues; others list their own.
+  string user_id = 3 [(buf.validate.field).string.uuid = true];
+  IssueSort sort = 4 [(buf.validate.field).enum.defined_only = true];
+  // 1–1000; unset means 100.
+  int32 limit = 5 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 6 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListIssuesResponse {
+  repeated Issue issues = 1;
+  int32 total = 2;
+}
+
+message GetIssueRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetIssueResponse {
+  Issue issue = 1;
+}
+
+message AddCommentRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string message = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 10000
+  }];
+}
+
+message AddCommentResponse {
+  Issue issue = 1;
+}
+
+message ResolveIssueRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message ResolveIssueResponse {
+  Issue issue = 1;
+}
+
+message ReopenIssueRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message ReopenIssueResponse {
+  Issue issue = 1;
+}
+
+message DeleteIssueRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteIssueResponse {}

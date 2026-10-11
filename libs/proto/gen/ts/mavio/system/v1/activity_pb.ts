@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/system/v1/activity.proto.
  */
 export const file_mavio_system_v1_activity: GenFile = /*@__PURE__*/
-  fileDesc("Ch5tYXZpby9zeXN0ZW0vdjEvYWN0aXZpdHkucHJvdG8SD21hdmlvLnN5c3RlbS52MSKvAgoIQWN0aXZpdHkSCgoCaWQYASABKAkSKAoEdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDAoEdHlwZRgDIAEoCRIrCghzZXZlcml0eRgEIAEoDjIZLm1hdmlvLnN5c3RlbS52MS5TZXZlcml0eRINCgV0aXRsZRgFIAEoCRIPCgdtZXNzYWdlGAYgASgJEg8KB3VzZXJfaWQYByABKAkSDwoHaXRlbV9pZBgIIAEoCRI9CgphdHRyaWJ1dGVzGAkgAygLMikubWF2aW8uc3lzdGVtLnYxLkFjdGl2aXR5LkF0dHJpYnV0ZXNFbnRyeRoxCg9BdHRyaWJ1dGVzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASLMAQoVTGlzdEFjdGl2aXRpZXNSZXF1ZXN0EikKBXNpbmNlGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIZCgd1c2VyX2lkGAIgASgJQgi6SAVyA7ABARI5CgxtaW5fc2V2ZXJpdHkYAyABKA4yGS5tYXZpby5zeXN0ZW0udjEuU2V2ZXJpdHlCCLpIBYIBAhABEhkKBWxpbWl0GAQgASgFQgq6SAcaBRjoBygAEhcKBm9mZnNldBgFIAEoBUIHukgEGgIoACJWChZMaXN0QWN0aXZpdGllc1Jlc3BvbnNlEi0KCmFjdGl2aXRpZXMYASADKAsyGS5tYXZpby5zeXN0ZW0udjEuQWN0aXZpdHkSDQoFdG90YWwYAiABKAUqYQoIU2V2ZXJpdHkSGAoUU0VWRVJJVFlfVU5TUEVDSUZJRUQQABIRCg1TRVZFUklUWV9JTkZPEAESFAoQU0VWRVJJVFlfV0FSTklORxACEhIKDlNFVkVSSVRZX0VSUk9SEAMyeQoPQWN0aXZpdHlTZXJ2aWNlEmYKDkxpc3RBY3Rpdml0aWVzEiYubWF2aW8uc3lzdGVtLnYxLkxpc3RBY3Rpdml0aWVzUmVxdWVzdBonLm1hdmlvLnN5c3RlbS52MS5MaXN0QWN0aXZpdGllc1Jlc3BvbnNlIgOQAgFCxwEKE2NvbS5tYXZpby5zeXN0ZW0udjFCDUFjdGl2aXR5UHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3N5c3RlbS92MTtzeXN0ZW12MaICA01TWKoCD01hdmlvLlN5c3RlbS5WMcoCD01hdmlvXFN5c3RlbVxWMeICG01hdmlvXFN5c3RlbVxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpTeXN0ZW06OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp]);
+  fileDesc("Ch5tYXZpby9zeXN0ZW0vdjEvYWN0aXZpdHkucHJvdG8SD21hdmlvLnN5c3RlbS52MSKvAgoIQWN0aXZpdHkSCgoCaWQYASABKAkSKAoEdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDAoEdHlwZRgDIAEoCRIrCghzZXZlcml0eRgEIAEoDjIZLm1hdmlvLnN5c3RlbS52MS5TZXZlcml0eRINCgV0aXRsZRgFIAEoCRIPCgdtZXNzYWdlGAYgASgJEg8KB3VzZXJfaWQYByABKAkSDwoHaXRlbV9pZBgIIAEoCRI9CgphdHRyaWJ1dGVzGAkgAygLMikubWF2aW8uc3lzdGVtLnYxLkFjdGl2aXR5LkF0dHJpYnV0ZXNFbnRyeRoxCg9BdHRyaWJ1dGVzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASLMAQoVTGlzdEFjdGl2aXRpZXNSZXF1ZXN0EikKBXNpbmNlGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIZCgd1c2VyX2lkGAIgASgJQgi6SAVyA7ABARI5CgxtaW5fc2V2ZXJpdHkYAyABKA4yGS5tYXZpby5zeXN0ZW0udjEuU2V2ZXJpdHlCCLpIBYIBAhABEhkKBWxpbWl0GAQgASgFQgq6SAcaBRjoBygAEhcKBm9mZnNldBgFIAEoBUIHukgEGgIoACJWChZMaXN0QWN0aXZpdGllc1Jlc3BvbnNlEi0KCmFjdGl2aXRpZXMYASADKAsyGS5tYXZpby5zeXN0ZW0udjEuQWN0aXZpdHkSDQoFdG90YWwYAiABKAUikQEKF0xpc3RNeUFjdGl2aXRpZXNSZXF1ZXN0EikKBXNpbmNlGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIXCgV0eXBlcxgCIAMoCUIIukgFkgECEGQSGQoFbGltaXQYAyABKAVCCrpIBxoFGOgHKAASFwoGb2Zmc2V0GAQgASgFQge6SAQaAigAIlgKGExpc3RNeUFjdGl2aXRpZXNSZXNwb25zZRItCgphY3Rpdml0aWVzGAEgAygLMhkubWF2aW8uc3lzdGVtLnYxLkFjdGl2aXR5Eg0KBXRvdGFsGAIgASgFKmEKCFNldmVyaXR5EhgKFFNFVkVSSVRZX1VOU1BFQ0lGSUVEEAASEQoNU0VWRVJJVFlfSU5GTxABEhQKEFNFVkVSSVRZX1dBUk5JTkcQAhISCg5TRVZFUklUWV9FUlJPUhADMucBCg9BY3Rpdml0eVNlcnZpY2USZgoOTGlzdEFjdGl2aXRpZXMSJi5tYXZpby5zeXN0ZW0udjEuTGlzdEFjdGl2aXRpZXNSZXF1ZXN0GicubWF2aW8uc3lzdGVtLnYxLkxpc3RBY3Rpdml0aWVzUmVzcG9uc2UiA5ACARJsChBMaXN0TXlBY3Rpdml0aWVzEigubWF2aW8uc3lzdGVtLnYxLkxpc3RNeUFjdGl2aXRpZXNSZXF1ZXN0GikubWF2aW8uc3lzdGVtLnYxLkxpc3RNeUFjdGl2aXRpZXNSZXNwb25zZSIDkAIBQscBChNjb20ubWF2aW8uc3lzdGVtLnYxQg1BY3Rpdml0eVByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9zeXN0ZW0vdjE7c3lzdGVtdjGiAgNNU1iqAg9NYXZpby5TeXN0ZW0uVjHKAg9NYXZpb1xTeXN0ZW1cVjHiAhtNYXZpb1xTeXN0ZW1cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6U3lzdGVtOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_timestamp]);
 
 /**
  * Activity is something that happened on the server.
@@ -142,6 +142,67 @@ export const ListActivitiesResponseSchema: GenMessage<ListActivitiesResponse> = 
   messageDesc(file_mavio_system_v1_activity, 2);
 
 /**
+ * @generated from message mavio.system.v1.ListMyActivitiesRequest
+ */
+export type ListMyActivitiesRequest = Message<"mavio.system.v1.ListMyActivitiesRequest"> & {
+  /**
+   * @generated from field: google.protobuf.Timestamp since = 1;
+   */
+  since?: Timestamp | undefined;
+
+  /**
+   * Activities of these types, such as "request.available"; unset for
+   * all.
+   *
+   * @generated from field: repeated string types = 2;
+   */
+  types: string[];
+
+  /**
+   * 1–1000; unset means 100.
+   *
+   * @generated from field: int32 limit = 3;
+   */
+  limit: number;
+
+  /**
+   * @generated from field: int32 offset = 4;
+   */
+  offset: number;
+};
+
+/**
+ * Describes the message mavio.system.v1.ListMyActivitiesRequest.
+ * Use `create(ListMyActivitiesRequestSchema)` to create a new message.
+ */
+export const ListMyActivitiesRequestSchema: GenMessage<ListMyActivitiesRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_activity, 3);
+
+/**
+ * @generated from message mavio.system.v1.ListMyActivitiesResponse
+ */
+export type ListMyActivitiesResponse = Message<"mavio.system.v1.ListMyActivitiesResponse"> & {
+  /**
+   * Newest first.
+   *
+   * @generated from field: repeated mavio.system.v1.Activity activities = 1;
+   */
+  activities: Activity[];
+
+  /**
+   * @generated from field: int32 total = 2;
+   */
+  total: number;
+};
+
+/**
+ * Describes the message mavio.system.v1.ListMyActivitiesResponse.
+ * Use `create(ListMyActivitiesResponseSchema)` to create a new message.
+ */
+export const ListMyActivitiesResponseSchema: GenMessage<ListMyActivitiesResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_activity, 4);
+
+/**
  * @generated from enum mavio.system.v1.Severity
  */
 export enum Severity {
@@ -174,18 +235,32 @@ export const SeveritySchema: GenEnum<Severity> = /*@__PURE__*/
 
 /**
  * ActivityService lists the activity log: sign-ins, playbacks, changes to
- * users, plugins and settings, and failures. Administrators only.
+ * users, plugins and settings, requests and issues, and failures.
  *
  * @generated from service mavio.system.v1.ActivityService
  */
 export const ActivityService: GenService<{
   /**
+   * ListActivities lists everyone's activities. Administrators only.
+   *
    * @generated from rpc mavio.system.v1.ActivityService.ListActivities
    */
   listActivities: {
     methodKind: "unary";
     input: typeof ListActivitiesRequestSchema;
     output: typeof ListActivitiesResponseSchema;
+  },
+  /**
+   * ListMyActivities lists the caller's own activities, their
+   * notifications: such as their requests approved, declined or
+   * available, and comments on their issues. Signed-in users.
+   *
+   * @generated from rpc mavio.system.v1.ActivityService.ListMyActivities
+   */
+  listMyActivities: {
+    methodKind: "unary";
+    input: typeof ListMyActivitiesRequestSchema;
+    output: typeof ListMyActivitiesResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_system_v1_activity, 0);

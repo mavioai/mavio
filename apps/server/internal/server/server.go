@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"maps"
 	"net"
 	"net/http"
 	"os"
@@ -26,6 +27,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
+	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/apps/server/internal/warming"
@@ -219,6 +221,13 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		return name
 	}
 	acq := newAcquisition(log, db, set, plugs, refresher, cfg.FFprobe, quietGate, volumeLedger, devices)
+	reqs := &requests.Service{
+		Store: db, Acquisition: acq, Settings: func() core.RequestSettings { return set.Get().Requests },
+		Metadata: plugs.MetadataProviders, Episodes: plugs.EpisodeListers, Discovery: plugs.DiscoveryProviders,
+		Activity: activityLog, Logger: log,
+	}
+	// Imports complete the requests of what they import.
+	acq.Imported = reqs.Imported
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher,
@@ -231,7 +240,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			return rpc.ServerInfo{Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: n.HTTPSPort}
 		},
 		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Indexers: plugs.IndexerProviders,
-		Downloads: plugs.DownloadClientProviders, Acquisition: acq, Dev: cfg.Dev,
+		Downloads: plugs.DownloadClientProviders, Acquisition: acq, Requests: reqs, Dev: cfg.Dev,
 	})
 	if err != nil {
 		return err
@@ -291,8 +300,11 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	})
 	// Acquisition has a worker of its own too, so that searches and
 	// imports neither wait for scans nor hold them up.
+	// It also completes the requests whose titles became available.
+	acqHandlers := acq.Handlers()
+	maps.Copy(acqHandlers, reqs.Handlers())
 	acqWorker := &library.Worker{
-		Queue: db.Jobs(), Owner: fmt.Sprintf("%s:%d:acquisition", hostname, os.Getpid()), Handlers: acq.Handlers(), Logger: log,
+		Queue: db.Jobs(), Owner: fmt.Sprintf("%s:%d:acquisition", hostname, os.Getpid()), Handlers: acqHandlers, Logger: log,
 	}
 	// The recurring jobs are scheduled now and whenever the settings
 	// change, as when RSS sync is turned on.
@@ -300,6 +312,9 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		return acq.Schedule(ctx, s.Acquisition)
 	}); err != nil {
 		log.ErrorContext(ctx, "schedule acquisition jobs", "err", err)
+	}
+	if err := reqs.Schedule(ctx); err != nil {
+		log.ErrorContext(ctx, "schedule request availability job", "err", err)
 	}
 	g.Go(func() error {
 		if err := acqWorker.Run(ctx); !errors.Is(err, context.Canceled) {

@@ -199,6 +199,39 @@
         "format": "date-time",
         "description": "A point in time in RFC 3339 format, with up to nanosecond precision. Output uses UTC (`Z`); input may use an offset from UTC."
       },
+      "mavio.acquisition.v1.AddCommentRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          },
+          "message": {
+            "type": "string",
+            "title": "message",
+            "maxLength": 10000,
+            "minLength": 1
+          }
+        },
+        "title": "AddCommentRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.AddCommentResponse": {
+        "type": "object",
+        "properties": {
+          "issue": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Issue"
+              }
+            ],
+            "title": "issue"
+          }
+        },
+        "title": "AddCommentResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.AddMovieRequest": {
         "type": "object",
         "properties": {
@@ -353,6 +386,33 @@
         "title": "AddSeriesResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.ApproveRequestRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "ApproveRequestRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ApproveRequestResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Request"
+              }
+            ],
+            "title": "request"
+          }
+        },
+        "title": "ApproveRequestResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.BlocklistEntry": {
         "type": "object",
         "properties": {
@@ -429,6 +489,65 @@
         "additionalProperties": false,
         "description": "BlocklistEntry is a release not to grab again for an item."
       },
+      "mavio.acquisition.v1.Catalog": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "\"\u003cplugin\u003e/\u003ccatalog\u003e\", such as \"scraper-tmdb/trending\"."
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.CatalogKind"
+              }
+            ],
+            "title": "kind"
+          },
+          "mediaKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.MediaKind"
+            },
+            "title": "media_kinds",
+            "description": "MEDIA_KIND_MOVIE and/or MEDIA_KIND_SERIES; a request names one when\n there are two, unless mixed is set."
+          },
+          "mixed": {
+            "type": "boolean",
+            "title": "mixed",
+            "description": "Whether it lists movies and series together."
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.DiscoverFilter"
+            },
+            "title": "filters",
+            "description": "The filters it takes; others in a request are ignored."
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.DiscoverSort"
+            },
+            "title": "sorts",
+            "description": "The orders it lists in; empty for its own order only."
+          },
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id",
+            "description": "The plugin offering it."
+          }
+        },
+        "title": "Catalog",
+        "additionalProperties": false,
+        "description": "Catalog is a list of titles a discovery provider offers."
+      },
       "mavio.acquisition.v1.CreateCustomFormatRequest": {
         "type": "object",
         "properties": {
@@ -493,6 +612,67 @@
           }
         },
         "title": "CreateDelayProfileResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.CreateIssueRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid",
+            "description": "The movie, series, season or episode."
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.IssueType"
+              }
+            ],
+            "not": {
+              "enum": [
+                "ISSUE_TYPE_UNSPECIFIED"
+              ]
+            },
+            "title": "type",
+            "description": "enum.defined_only = true\n"
+          },
+          "seasonNumber": {
+            "type": "integer",
+            "title": "season_number",
+            "minimum": 0,
+            "format": "int32",
+            "description": "Of series; 0 for all."
+          },
+          "episodeNumber": {
+            "type": "integer",
+            "title": "episode_number",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "title": "message",
+            "maxLength": 10000,
+            "minLength": 1
+          }
+        },
+        "title": "CreateIssueRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.CreateIssueResponse": {
+        "type": "object",
+        "properties": {
+          "issue": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Issue"
+              }
+            ],
+            "title": "issue"
+          }
+        },
+        "title": "CreateIssueResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.CreateQualityProfileRequest": {
@@ -592,6 +772,76 @@
           }
         },
         "title": "CreateRemotePathMappingResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.CreateRequestRequest": {
+        "type": "object",
+        "properties": {
+          "mediaKind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.MediaKind"
+              }
+            ],
+            "not": {
+              "enum": [
+                "MEDIA_KIND_UNSPECIFIED"
+              ]
+            },
+            "title": "media_kind",
+            "description": "enum.defined_only = true\n"
+          },
+          "tmdbId": {
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "title": "tmdb_id",
+            "format": "int32"
+          },
+          "seasons": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "format": "int32"
+            },
+            "title": "seasons",
+            "maxItems": 1000,
+            "uniqueItems": true,
+            "description": "Of series: the seasons requested, unless all_seasons."
+          },
+          "allSeasons": {
+            "type": "boolean",
+            "title": "all_seasons",
+            "description": "Of series: every season not requested yet, specials only when the\n server allows them."
+          },
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "format": "uuid",
+            "description": "Administrators: the user requesting; unset for the caller."
+          },
+          "ignoreQuota": {
+            "type": "boolean",
+            "title": "ignore_quota",
+            "description": "Administrators: leave the request out of the user's quota."
+          }
+        },
+        "title": "CreateRequestRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.CreateRequestResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Request"
+              }
+            ],
+            "title": "request"
+          }
+        },
+        "title": "CreateRequestResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.CustomFormat": {
@@ -703,6 +953,33 @@
           "CUSTOM_FORMAT_SPEC_KIND_RELEASE_TYPE"
         ],
         "description": "CustomFormatSpecKind is what a custom format's condition looks at."
+      },
+      "mavio.acquisition.v1.DeclineRequestRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "DeclineRequestRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DeclineRequestResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Request"
+              }
+            ],
+            "title": "request"
+          }
+        },
+        "title": "DeclineRequestResponse",
+        "additionalProperties": false
       },
       "mavio.acquisition.v1.DelayProfile": {
         "type": "object",
@@ -847,6 +1124,23 @@
         "title": "DeleteDelayProfileResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.DeleteIssueRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "DeleteIssueRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DeleteIssueResponse": {
+        "type": "object",
+        "title": "DeleteIssueResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.DeleteQualityProfileRequest": {
         "type": "object",
         "properties": {
@@ -897,6 +1191,327 @@
         "type": "object",
         "title": "DeleteRemotePathMappingResponse",
         "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DeleteRequestRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "DeleteRequestRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DeleteRequestResponse": {
+        "type": "object",
+        "title": "DeleteRequestResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DiscoverRequest": {
+        "type": "object",
+        "properties": {
+          "catalog": {
+            "type": "string",
+            "title": "catalog",
+            "minLength": 1,
+            "description": "A catalog of ListCatalogs."
+          },
+          "mediaKind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.MediaKind"
+              }
+            ],
+            "title": "media_kind",
+            "description": "Movies or series, for catalogs listing both.\nenum.defined_only = true\n"
+          },
+          "tmdbId": {
+            "type": "integer",
+            "title": "tmdb_id",
+            "minimum": 0,
+            "format": "int32",
+            "description": "The title of recommendations and similar titles, by its TMDB ID."
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "genres",
+            "description": "Filters by the provider's IDs of ListFilterValues; a title matches\n any of a filter's values."
+          },
+          "studios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "studios"
+          },
+          "networks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "networks"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "keywords"
+          },
+          "excludedKeywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "excluded_keywords"
+          },
+          "watchProviders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "watch_providers"
+          },
+          "watchRegion": {
+            "type": "string",
+            "title": "watch_region",
+            "description": "ISO 3166-1 country of watch providers."
+          },
+          "originalLanguage": {
+            "type": "string",
+            "title": "original_language",
+            "description": "ISO 639-1."
+          },
+          "releasedFrom": {
+            "type": "string",
+            "title": "released_from",
+            "description": "ISO 8601 calendar dates, inclusive."
+          },
+          "releasedTo": {
+            "type": "string",
+            "title": "released_to"
+          },
+          "runtimeMin": {
+            "type": "integer",
+            "title": "runtime_min",
+            "minimum": 0,
+            "format": "int32",
+            "description": "Minutes."
+          },
+          "runtimeMax": {
+            "type": "integer",
+            "title": "runtime_max",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "ratingMin": {
+            "type": "number",
+            "title": "rating_min",
+            "maximum": 10,
+            "minimum": 0,
+            "format": "double",
+            "description": "0–10."
+          },
+          "ratingMax": {
+            "type": "number",
+            "title": "rating_max",
+            "maximum": 10,
+            "minimum": 0,
+            "format": "double"
+          },
+          "votesMin": {
+            "type": "integer",
+            "title": "votes_min",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "certifications": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "certifications",
+            "description": "Content ratings of the server's metadata country, any of them; those\n above the caller's rating limit are dropped."
+          },
+          "sort": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.DiscoverSort"
+              }
+            ],
+            "title": "sort",
+            "description": "enum.defined_only = true\n"
+          },
+          "ascending": {
+            "type": "boolean",
+            "title": "ascending"
+          },
+          "language": {
+            "type": "string",
+            "title": "language",
+            "description": "ISO 639-1 language of names and overviews."
+          },
+          "page": {
+            "type": "integer",
+            "title": "page",
+            "maximum": 500,
+            "minimum": 0,
+            "format": "int32",
+            "description": "From 1; unset for the first page."
+          }
+        },
+        "title": "DiscoverRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DiscoverResponse": {
+        "type": "object",
+        "properties": {
+          "titles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.DiscoveredTitle"
+            },
+            "title": "titles"
+          },
+          "page": {
+            "type": "integer",
+            "title": "page",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "title": "total_pages",
+            "format": "int32"
+          },
+          "totalResults": {
+            "type": "integer",
+            "title": "total_results",
+            "format": "int32"
+          }
+        },
+        "title": "DiscoverResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DiscoveredTitle": {
+        "type": "object",
+        "properties": {
+          "mediaKind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.MediaKind"
+              }
+            ],
+            "title": "media_kind",
+            "description": "MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES."
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "originalTitle": {
+            "type": "string",
+            "title": "original_title"
+          },
+          "originalLanguage": {
+            "type": "string",
+            "title": "original_language",
+            "description": "ISO 639-1."
+          },
+          "overview": {
+            "type": "string",
+            "title": "overview"
+          },
+          "premiereDate": {
+            "type": "string",
+            "title": "premiere_date",
+            "description": "ISO 8601 calendar date: a movie's release, a series' first air date."
+          },
+          "year": {
+            "type": "integer",
+            "title": "year",
+            "format": "int32"
+          },
+          "externalIds": {
+            "type": "object",
+            "title": "external_ids",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            },
+            "description": "Such as \"tmdb\" and \"imdb\"."
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "genres",
+            "description": "The provider's genre IDs."
+          },
+          "posterUrl": {
+            "type": "string",
+            "title": "poster_url"
+          },
+          "backdropUrl": {
+            "type": "string",
+            "title": "backdrop_url"
+          },
+          "communityRating": {
+            "type": "number",
+            "title": "community_rating",
+            "format": "double",
+            "description": "0–10."
+          },
+          "voteCount": {
+            "type": "integer",
+            "title": "vote_count",
+            "format": "int32"
+          },
+          "popularity": {
+            "type": "number",
+            "title": "popularity",
+            "format": "double"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.MediaStatus"
+              }
+            ],
+            "title": "status"
+          },
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "description": "The movie or series in a library, if any."
+          },
+          "requestId": {
+            "type": "string",
+            "title": "request_id",
+            "description": "The latest active request of it, if any, and its status."
+          },
+          "requestStatus": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.RequestStatus"
+              }
+            ],
+            "title": "request_status"
+          },
+          "requestable": {
+            "type": "boolean",
+            "title": "requestable",
+            "description": "Whether the caller may request it now: their policy allows its\n kind, and it is neither available nor wholly requested or wanted."
+          }
+        },
+        "title": "DiscoveredTitle",
+        "additionalProperties": false,
+        "description": "DiscoveredTitle is a movie or series a catalog lists."
       },
       "mavio.acquisition.v1.DownloadClient": {
         "type": "object",
@@ -1011,6 +1626,96 @@
         "title": "FormatScore",
         "additionalProperties": false,
         "description": "FormatScore is a custom format's score in a profile."
+      },
+      "mavio.acquisition.v1.GetIssueRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "GetIssueRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetIssueResponse": {
+        "type": "object",
+        "properties": {
+          "issue": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Issue"
+              }
+            ],
+            "title": "issue"
+          }
+        },
+        "title": "GetIssueResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetQuotaRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "format": "uuid",
+            "description": "Administrators: a user's quotas; unset for the caller's."
+          }
+        },
+        "title": "GetQuotaRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetQuotaResponse": {
+        "type": "object",
+        "properties": {
+          "movie": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Quota"
+              }
+            ],
+            "title": "movie"
+          },
+          "series": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Quota"
+              }
+            ],
+            "title": "series"
+          }
+        },
+        "title": "GetQuotaResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetRequestRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "GetRequestRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetRequestResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Request"
+              }
+            ],
+            "title": "request"
+          }
+        },
+        "title": "GetRequestResponse",
+        "additionalProperties": false
       },
       "mavio.acquisition.v1.GetWantedRequest": {
         "type": "object",
@@ -1309,6 +2014,149 @@
         "additionalProperties": false,
         "description": "IndexerRef names an indexer: its plugin and its ID within the plugin's\n configuration."
       },
+      "mavio.acquisition.v1.Issue": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "itemId": {
+            "type": "string",
+            "title": "item_id"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.IssueType"
+              }
+            ],
+            "title": "type"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.IssueStatus"
+              }
+            ],
+            "title": "status"
+          },
+          "seasonNumber": {
+            "type": "integer",
+            "title": "season_number",
+            "format": "int32",
+            "description": "Of series; 0 for none."
+          },
+          "episodeNumber": {
+            "type": "integer",
+            "title": "episode_number",
+            "format": "int32"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "created_by"
+          },
+          "modifiedBy": {
+            "type": "string",
+            "title": "modified_by",
+            "description": "Who last resolved or reopened it."
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.IssueComment"
+            },
+            "title": "comments",
+            "description": "Oldest first; the first says what the problem is."
+          },
+          "createTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "create_time"
+          },
+          "updateTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "update_time"
+          }
+        },
+        "title": "Issue",
+        "additionalProperties": false,
+        "description": "Issue is a problem a user reports with an item."
+      },
+      "mavio.acquisition.v1.IssueComment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "userId": {
+            "type": "string",
+            "title": "user_id"
+          },
+          "message": {
+            "type": "string",
+            "title": "message"
+          },
+          "createTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "create_time"
+          },
+          "updateTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "update_time"
+          }
+        },
+        "title": "IssueComment",
+        "additionalProperties": false,
+        "description": "IssueComment is a comment on an issue."
+      },
+      "mavio.acquisition.v1.IssueSort": {
+        "type": "string",
+        "title": "IssueSort",
+        "enum": [
+          "ISSUE_SORT_UNSPECIFIED",
+          "ISSUE_SORT_MODIFIED"
+        ],
+        "description": "IssueSort is the order of listed issues."
+      },
+      "mavio.acquisition.v1.IssueStatus": {
+        "type": "string",
+        "title": "IssueStatus",
+        "enum": [
+          "ISSUE_STATUS_UNSPECIFIED",
+          "ISSUE_STATUS_OPEN",
+          "ISSUE_STATUS_RESOLVED"
+        ],
+        "description": "IssueStatus is whether an issue is open."
+      },
+      "mavio.acquisition.v1.IssueType": {
+        "type": "string",
+        "title": "IssueType",
+        "enum": [
+          "ISSUE_TYPE_UNSPECIFIED",
+          "ISSUE_TYPE_VIDEO",
+          "ISSUE_TYPE_AUDIO",
+          "ISSUE_TYPE_SUBTITLES",
+          "ISSUE_TYPE_OTHER"
+        ],
+        "description": "IssueType is what kind of problem an issue reports."
+      },
       "mavio.acquisition.v1.ListBlocklistRequest": {
         "type": "object",
         "properties": {
@@ -1353,6 +2201,32 @@
           }
         },
         "title": "ListBlocklistResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListCatalogsRequest": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "title": "language",
+            "description": "ISO 639-1 language of the catalogs' names; unset for English."
+          }
+        },
+        "title": "ListCatalogsRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListCatalogsResponse": {
+        "type": "object",
+        "properties": {
+          "catalogs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.Catalog"
+            },
+            "title": "catalogs"
+          }
+        },
+        "title": "ListCatalogsResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.ListCustomFormatsRequest": {
@@ -1421,6 +2295,78 @@
           }
         },
         "title": "ListDownloadClientsResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListFilterValuesRequest": {
+        "type": "object",
+        "properties": {
+          "catalog": {
+            "type": "string",
+            "title": "catalog",
+            "minLength": 1,
+            "description": "The catalog whose provider lists the values."
+          },
+          "filter": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.DiscoverFilter"
+              }
+            ],
+            "not": {
+              "enum": [
+                "DISCOVER_FILTER_UNSPECIFIED"
+              ]
+            },
+            "title": "filter",
+            "description": "GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.\nenum.defined_only = true\n"
+          },
+          "mediaKind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.MediaKind"
+              }
+            ],
+            "title": "media_kind",
+            "description": "Movies or series.\nenum.defined_only = true\n"
+          },
+          "query": {
+            "type": "string",
+            "title": "query",
+            "description": "Matched against names; studios and keywords need one."
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "ids",
+            "description": "The values' IDs, for their names."
+          },
+          "language": {
+            "type": "string",
+            "title": "language"
+          },
+          "region": {
+            "type": "string",
+            "title": "region",
+            "description": "ISO 3166-1 region of watch providers."
+          }
+        },
+        "title": "ListFilterValuesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListFilterValuesResponse": {
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.FilterValue"
+            },
+            "title": "values"
+          }
+        },
+        "title": "ListFilterValuesResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.ListHistoryRequest": {
@@ -1502,6 +2448,75 @@
           }
         },
         "title": "ListIndexersResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListIssuesRequest": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.IssueStatus"
+            },
+            "title": "statuses",
+            "description": "Any of them; unset for all."
+          },
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid",
+            "description": "The issues of an item."
+          },
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "format": "uuid",
+            "description": "Administrators: a user's issues; others list their own."
+          },
+          "sort": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.IssueSort"
+              }
+            ],
+            "title": "sort",
+            "description": "enum.defined_only = true\n"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "limit",
+            "maximum": 1000,
+            "minimum": 0,
+            "format": "int32",
+            "description": "1–1000; unset means 100."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "offset",
+            "minimum": 0,
+            "format": "int32"
+          }
+        },
+        "title": "ListIssuesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListIssuesResponse": {
+        "type": "object",
+        "properties": {
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.Issue"
+            },
+            "title": "issues"
+          },
+          "total": {
+            "type": "integer",
+            "title": "total",
+            "format": "int32"
+          }
+        },
+        "title": "ListIssuesResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.ListQualityDefinitionsRequest": {
@@ -1665,6 +2680,90 @@
         "title": "ListRemotePathMappingsResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.ListRequestsRequest": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.RequestStatus"
+            },
+            "title": "statuses",
+            "description": "Any of them; unset for all."
+          },
+          "mediaKind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.MediaKind"
+              }
+            ],
+            "title": "media_kind",
+            "description": "enum.defined_only = true\n"
+          },
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "format": "uuid",
+            "description": "Administrators: a user's requests; others list their own."
+          },
+          "tmdbId": {
+            "type": "integer",
+            "title": "tmdb_id",
+            "minimum": 0,
+            "format": "int32",
+            "description": "The requests of a title, by its TMDB ID."
+          },
+          "sort": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.RequestSort"
+              }
+            ],
+            "title": "sort",
+            "description": "enum.defined_only = true\n"
+          },
+          "ascending": {
+            "type": "boolean",
+            "title": "ascending",
+            "description": "Oldest first."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "limit",
+            "maximum": 1000,
+            "minimum": 0,
+            "format": "int32",
+            "description": "1–1000; unset means 100."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "offset",
+            "minimum": 0,
+            "format": "int32"
+          }
+        },
+        "title": "ListRequestsRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "requests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.Request"
+            },
+            "title": "requests"
+          },
+          "total": {
+            "type": "integer",
+            "title": "total",
+            "format": "int32"
+          }
+        },
+        "title": "ListRequestsResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.ListWantedRequest": {
         "type": "object",
         "properties": {
@@ -1763,6 +2862,18 @@
           "MEDIA_KIND_SERIES"
         ],
         "description": "MediaKind is what a profile or definition is for."
+      },
+      "mavio.acquisition.v1.MediaStatus": {
+        "type": "string",
+        "title": "MediaStatus",
+        "enum": [
+          "MEDIA_STATUS_UNSPECIFIED",
+          "MEDIA_STATUS_REQUESTED",
+          "MEDIA_STATUS_WANTED",
+          "MEDIA_STATUS_PARTIALLY_AVAILABLE",
+          "MEDIA_STATUS_AVAILABLE"
+        ],
+        "description": "MediaStatus is what the server has of a discovered title, as Seerr's\n media statuses."
       },
       "mavio.acquisition.v1.MinimumAvailability": {
         "type": "string",
@@ -2204,6 +3315,42 @@
         "additionalProperties": false,
         "description": "QueueItem is a tracked download."
       },
+      "mavio.acquisition.v1.Quota": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "limit",
+            "format": "int32",
+            "description": "Requests of movies, or seasons of series, in the last days; 0 for\n unlimited."
+          },
+          "days": {
+            "type": "integer",
+            "title": "days",
+            "format": "int32",
+            "description": "0 for all time."
+          },
+          "used": {
+            "type": "integer",
+            "title": "used",
+            "format": "int32"
+          },
+          "remaining": {
+            "type": "integer",
+            "title": "remaining",
+            "format": "int32",
+            "description": "Unset when unlimited."
+          },
+          "restricted": {
+            "type": "boolean",
+            "title": "restricted",
+            "description": "Whether the user may request no more."
+          }
+        },
+        "title": "Quota",
+        "additionalProperties": false,
+        "description": "Quota is how much of a quota a user has used."
+      },
       "mavio.acquisition.v1.Rejection": {
         "type": "object",
         "properties": {
@@ -2578,6 +3725,33 @@
         "title": "RemoveFromQueueResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.ReopenIssueRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "ReopenIssueRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ReopenIssueResponse": {
+        "type": "object",
+        "properties": {
+          "issue": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Issue"
+              }
+            ],
+            "title": "issue"
+          }
+        },
+        "title": "ReopenIssueResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.ReorderDelayProfilesRequest": {
         "type": "object",
         "properties": {
@@ -2606,6 +3780,179 @@
           }
         },
         "title": "ReorderDelayProfilesResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.Request": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "mediaKind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.MediaKind"
+              }
+            ],
+            "title": "media_kind",
+            "description": "MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES."
+          },
+          "tmdbId": {
+            "type": "integer",
+            "title": "tmdb_id",
+            "format": "int32"
+          },
+          "tvdbId": {
+            "type": "integer",
+            "title": "tvdb_id",
+            "format": "int32",
+            "description": "For series, once known."
+          },
+          "title": {
+            "type": "string",
+            "title": "title"
+          },
+          "year": {
+            "type": "integer",
+            "title": "year",
+            "format": "int32"
+          },
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "description": "The movie or series wanted for it, once approved."
+          },
+          "seasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SeasonRequest"
+            },
+            "title": "seasons",
+            "description": "The seasons of a series request."
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.RequestStatus"
+              }
+            ],
+            "title": "status"
+          },
+          "requestedBy": {
+            "type": "string",
+            "title": "requested_by",
+            "description": "The user who asked, and the administrator who last approved,\n declined or retried it."
+          },
+          "modifiedBy": {
+            "type": "string",
+            "title": "modified_by"
+          },
+          "ignoreQuota": {
+            "type": "boolean",
+            "title": "ignore_quota",
+            "description": "Left out of its user's quota."
+          },
+          "message": {
+            "type": "string",
+            "title": "message",
+            "description": "Why it failed."
+          },
+          "createTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "create_time"
+          },
+          "updateTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "update_time"
+          }
+        },
+        "title": "Request",
+        "additionalProperties": false,
+        "description": "Request is a user's request of a movie or of seasons of a series."
+      },
+      "mavio.acquisition.v1.RequestSort": {
+        "type": "string",
+        "title": "RequestSort",
+        "enum": [
+          "REQUEST_SORT_UNSPECIFIED",
+          "REQUEST_SORT_MODIFIED"
+        ],
+        "description": "RequestSort is the order of listed requests."
+      },
+      "mavio.acquisition.v1.RequestStatus": {
+        "type": "string",
+        "title": "RequestStatus",
+        "enum": [
+          "REQUEST_STATUS_UNSPECIFIED",
+          "REQUEST_STATUS_PENDING",
+          "REQUEST_STATUS_APPROVED",
+          "REQUEST_STATUS_DECLINED",
+          "REQUEST_STATUS_FAILED",
+          "REQUEST_STATUS_COMPLETED"
+        ],
+        "description": "RequestStatus is where a request is."
+      },
+      "mavio.acquisition.v1.ResolveIssueRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "ResolveIssueRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ResolveIssueResponse": {
+        "type": "object",
+        "properties": {
+          "issue": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Issue"
+              }
+            ],
+            "title": "issue"
+          }
+        },
+        "title": "ResolveIssueResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.RetryRequestRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "RetryRequestRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.RetryRequestResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Request"
+              }
+            ],
+            "title": "request"
+          }
+        },
+        "title": "RetryRequestResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.SearchReleasesRequest": {
@@ -2734,6 +4081,27 @@
         },
         "title": "SearchWantedResponse",
         "additionalProperties": false
+      },
+      "mavio.acquisition.v1.SeasonRequest": {
+        "type": "object",
+        "properties": {
+          "seasonNumber": {
+            "type": "integer",
+            "title": "season_number",
+            "format": "int32"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.RequestStatus"
+              }
+            ],
+            "title": "status"
+          }
+        },
+        "title": "SeasonRequest",
+        "additionalProperties": false,
+        "description": "SeasonRequest is a season a series request asks for."
       },
       "mavio.acquisition.v1.SeriesMonitor": {
         "type": "string",
@@ -2973,6 +4341,46 @@
           }
         },
         "title": "UpdateReleaseProfileResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UpdateRequestRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          },
+          "seasons": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "format": "int32"
+            },
+            "title": "seasons",
+            "maxItems": 1000,
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "The seasons requested."
+          }
+        },
+        "title": "UpdateRequestRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UpdateRequestResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Request"
+              }
+            ],
+            "title": "request"
+          }
+        },
+        "title": "UpdateRequestResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.UpdateWantedRequest": {
@@ -8433,6 +9841,53 @@
           "CAPABILITY_DOWNLOAD_CLIENT_PROVIDER"
         ]
       },
+      "mavio.plugin.v1.CatalogKind": {
+        "type": "string",
+        "title": "CatalogKind",
+        "enum": [
+          "CATALOG_KIND_UNSPECIFIED",
+          "CATALOG_KIND_TRENDING",
+          "CATALOG_KIND_POPULAR",
+          "CATALOG_KIND_UPCOMING",
+          "CATALOG_KIND_TOP_RATED",
+          "CATALOG_KIND_RECOMMENDATIONS",
+          "CATALOG_KIND_SIMILAR",
+          "CATALOG_KIND_LIST"
+        ],
+        "description": "CatalogKind is what a catalog lists."
+      },
+      "mavio.plugin.v1.DiscoverFilter": {
+        "type": "string",
+        "title": "DiscoverFilter",
+        "enum": [
+          "DISCOVER_FILTER_UNSPECIFIED",
+          "DISCOVER_FILTER_GENRE",
+          "DISCOVER_FILTER_STUDIO",
+          "DISCOVER_FILTER_NETWORK",
+          "DISCOVER_FILTER_KEYWORD",
+          "DISCOVER_FILTER_WATCH_PROVIDER",
+          "DISCOVER_FILTER_ORIGINAL_LANGUAGE",
+          "DISCOVER_FILTER_RELEASE_DATE",
+          "DISCOVER_FILTER_RUNTIME",
+          "DISCOVER_FILTER_RATING",
+          "DISCOVER_FILTER_VOTE_COUNT",
+          "DISCOVER_FILTER_CERTIFICATION"
+        ],
+        "description": "DiscoverFilter is a filter of discovery requests."
+      },
+      "mavio.plugin.v1.DiscoverSort": {
+        "type": "string",
+        "title": "DiscoverSort",
+        "enum": [
+          "DISCOVER_SORT_UNSPECIFIED",
+          "DISCOVER_SORT_POPULARITY",
+          "DISCOVER_SORT_RELEASE_DATE",
+          "DISCOVER_SORT_RATING",
+          "DISCOVER_SORT_VOTE_COUNT",
+          "DISCOVER_SORT_TITLE"
+        ],
+        "description": "DiscoverSort is an order of discovered titles."
+      },
       "mavio.plugin.v1.ExternalIdKind": {
         "type": "object",
         "properties": {
@@ -8463,6 +9918,27 @@
         "title": "ExternalIdKind",
         "additionalProperties": false,
         "description": "ExternalIdKind is a kind of external ID, e.g. the ID of a movie on a\n metadata site."
+      },
+      "mavio.plugin.v1.FilterValue": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "imageUrl": {
+            "type": "string",
+            "title": "image_url",
+            "description": "A logo or an illustrative backdrop."
+          }
+        },
+        "title": "FilterValue",
+        "additionalProperties": false,
+        "description": "FilterValue is a value of a discovery filter."
       },
       "mavio.plugin.v1.Manifest": {
         "type": "object",
@@ -11055,6 +12531,64 @@
         "title": "ListLogsResponse",
         "additionalProperties": false
       },
+      "mavio.system.v1.ListMyActivitiesRequest": {
+        "type": "object",
+        "properties": {
+          "since": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "since"
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "types",
+            "maxItems": 100,
+            "description": "Activities of these types, such as \"request.available\"; unset for\n all."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "limit",
+            "maximum": 1000,
+            "minimum": 0,
+            "format": "int32",
+            "description": "1–1000; unset means 100."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "offset",
+            "minimum": 0,
+            "format": "int32"
+          }
+        },
+        "title": "ListMyActivitiesRequest",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.ListMyActivitiesResponse": {
+        "type": "object",
+        "properties": {
+          "activities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.system.v1.Activity"
+            },
+            "title": "activities",
+            "description": "Newest first."
+          },
+          "total": {
+            "type": "integer",
+            "title": "total",
+            "format": "int32"
+          }
+        },
+        "title": "ListMyActivitiesResponse",
+        "additionalProperties": false
+      },
       "mavio.system.v1.ListPluginsRequest": {
         "type": "object",
         "title": "ListPluginsRequest",
@@ -11278,6 +12812,105 @@
         "additionalProperties": false,
         "description": "Rating is a content rating of a country's rating system."
       },
+      "mavio.system.v1.RequestSettings": {
+        "type": "object",
+        "properties": {
+          "defaultRequestMovies": {
+            "type": "boolean",
+            "title": "default_request_movies",
+            "description": "The request permissions new users get."
+          },
+          "defaultRequestSeries": {
+            "type": "boolean",
+            "title": "default_request_series"
+          },
+          "defaultAutoApproveMovies": {
+            "type": "boolean",
+            "title": "default_auto_approve_movies"
+          },
+          "defaultAutoApproveSeries": {
+            "type": "boolean",
+            "title": "default_auto_approve_series"
+          },
+          "defaultReportIssues": {
+            "type": "boolean",
+            "title": "default_report_issues"
+          },
+          "movieQuotaLimit": {
+            "type": "integer",
+            "title": "movie_quota_limit",
+            "minimum": 0,
+            "format": "int32",
+            "description": "The quotas of users without their own: requests of movies, or seasons\n of series, in the last days; a limit of 0 is unlimited, 0 days all\n time."
+          },
+          "movieQuotaDays": {
+            "type": "integer",
+            "title": "movie_quota_days",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "seriesQuotaLimit": {
+            "type": "integer",
+            "title": "series_quota_limit",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "seriesQuotaDays": {
+            "type": "integer",
+            "title": "series_quota_days",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "movieLibraryId": {
+            "type": "string",
+            "title": "movie_library_id",
+            "description": "The movie library and quality profile approved movies are added to;\n empty, approvals fail."
+          },
+          "movieQualityProfileId": {
+            "type": "string",
+            "title": "movie_quality_profile_id"
+          },
+          "minimumAvailability": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.MinimumAvailability"
+              }
+            ],
+            "title": "minimum_availability",
+            "description": "enum.defined_only = true\n"
+          },
+          "seriesLibraryId": {
+            "type": "string",
+            "title": "series_library_id",
+            "description": "The show library and quality profile approved series are added to;\n empty, approvals fail."
+          },
+          "seriesQualityProfileId": {
+            "type": "string",
+            "title": "series_quality_profile_id"
+          },
+          "seasonFolder": {
+            "type": "boolean",
+            "title": "season_folder"
+          },
+          "monitorNewItems": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.NewItemMonitor"
+              }
+            ],
+            "title": "monitor_new_items",
+            "description": "enum.defined_only = true\n"
+          },
+          "specials": {
+            "type": "boolean",
+            "title": "specials",
+            "description": "Allow requesting specials, season 0."
+          }
+        },
+        "title": "RequestSettings",
+        "additionalProperties": false,
+        "description": "RequestSettings are the defaults of users' requests and where approved\n requests are acquired."
+      },
       "mavio.system.v1.RunTaskRequest": {
         "type": "object",
         "properties": {
@@ -11357,6 +12990,15 @@
             ],
             "title": "acquisition",
             "description": "How releases are chosen, downloaded and imported; unset in an update\n keeps the current ones."
+          },
+          "requests": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.RequestSettings"
+              }
+            ],
+            "title": "requests",
+            "description": "What users may request by default and where approved requests go;\n unset in an update keeps the current ones."
           }
         },
         "title": "ServerSettings",
@@ -11879,6 +13521,28 @@
         "title": "ListUsersResponse",
         "additionalProperties": false
       },
+      "mavio.user.v1.RequestQuota": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "limit",
+            "minimum": 0,
+            "format": "int32",
+            "description": "0 for unlimited."
+          },
+          "days": {
+            "type": "integer",
+            "title": "days",
+            "minimum": 0,
+            "format": "int32",
+            "description": "0 for all time."
+          }
+        },
+        "title": "RequestQuota",
+        "additionalProperties": false,
+        "description": "RequestQuota bounds a user's requests: limit requests of movies, or\n seasons of series, in the last days."
+      },
       "mavio.user.v1.SetDisplayPreferencesRequest": {
         "type": "object",
         "properties": {
@@ -12280,6 +13944,45 @@
             "minimum": 0,
             "format": "int32",
             "description": "0 means unlimited."
+          },
+          "requestMovies": {
+            "type": "boolean",
+            "title": "request_movies",
+            "description": "What the user may request and report; administrators may do all.\n Unset in CreateUser takes the server's default permissions, in\n UpdateUser keeps the current ones."
+          },
+          "requestSeries": {
+            "type": "boolean",
+            "title": "request_series"
+          },
+          "autoApproveMovies": {
+            "type": "boolean",
+            "title": "auto_approve_movies",
+            "description": "Approve the user's requests at once."
+          },
+          "autoApproveSeries": {
+            "type": "boolean",
+            "title": "auto_approve_series"
+          },
+          "reportIssues": {
+            "type": "boolean",
+            "title": "report_issues"
+          },
+          "movieQuota": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.user.v1.RequestQuota"
+              }
+            ],
+            "title": "movie_quota",
+            "description": "The user's quotas; unset uses the server's."
+          },
+          "seriesQuota": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.user.v1.RequestQuota"
+              }
+            ],
+            "title": "series_quota"
           }
         },
         "title": "UserPolicy",
@@ -12339,12 +14042,24 @@
       "description": "ReleaseService searches the indexers of the indexer provider plugins for\n releases, the torrents and NZBs of movies and episodes, and parses their\n titles as Radarr and Sonarr do. Administrators only."
     },
     {
+      "name": "ProfileService",
+      "description": "ProfileService keeps what decides which releases are grabbed: quality\n definitions, quality profiles, custom formats, delay and release\n profiles; and the remote path mappings of download clients.\n Administrators only, but for listing quality profiles, which users who\n may request media read too."
+    },
+    {
+      "name": "RequestService",
+      "description": "RequestService takes users' requests of movies and seasons of series,\n as Seerr's: administrators approve or decline them, unless the user's\n requests are approved at once, and approved requests are acquired.\n Signed-in users request what their policy allows, within their quotas\n and their rating limit, and see their own requests; administrators\n manage all."
+    },
+    {
+      "name": "DiscoverService",
+      "description": "DiscoverService lists the movies and series the discovery providers\n offer, such as trending or popular titles, marked with what the server\n has of them: available, wanted or requested. Titles rated above the\n caller's rating limit are left out. Signed-in users."
+    },
+    {
       "name": "DownloadService",
       "description": "DownloadService sends releases to the download clients of the download\n client provider plugins and tracks them until they are imported: the\n queue, the history and the blocklist. Administrators only."
     },
     {
-      "name": "ProfileService",
-      "description": "ProfileService keeps what decides which releases are grabbed: quality\n definitions, quality profiles, custom formats, delay and release\n profiles; and the remote path mappings of download clients.\n Administrators only, but for listing quality profiles, which users who\n may request media read too."
+      "name": "IssueService",
+      "description": "IssueService takes the problems users report with items, as Seerr's\n issues: users who may report issues report them and comment on their\n own; administrators see, comment on, resolve and delete all."
     },
     {
       "name": "ItemService",
@@ -12404,7 +14119,7 @@
     },
     {
       "name": "ActivityService",
-      "description": "ActivityService lists the activity log: sign-ins, playbacks, changes to\n users, plugins and settings, and failures. Administrators only."
+      "description": "ActivityService lists the activity log: sign-ins, playbacks, changes to\n users, plugins and settings, requests and issues, and failures."
     },
     {
       "name": "BackupService",
@@ -12784,13 +14499,13 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/CreateLibrary": {
+    "/mavio.library.v1.ItemService/GetItem": {
       "post": {
         "tags": [
-          "LibraryService"
+          "ItemService"
         ],
-        "summary": "CreateLibrary",
-        "operationId": "mavio.library.v1.LibraryService.CreateLibrary",
+        "summary": "GetItem",
+        "operationId": "mavio.library.v1.ItemService.GetItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12815,7 +14530,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
               }
             }
           },
@@ -12837,7 +14552,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
                 }
               }
             }
@@ -12845,14 +14560,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ReleaseService/SearchReleases": {
+    "/mavio.auth.v1.AuthService/GetQuickConnectState": {
       "post": {
         "tags": [
-          "ReleaseService"
+          "AuthService"
         ],
-        "summary": "SearchReleases",
-        "description": "SearchReleases searches indexers for a movie, season or episode of the\n library, by the IDs and numbers each indexer can search by and else by\n title, as Radarr and Sonarr do; or for text; or reads their recent\n releases when given neither.",
-        "operationId": "mavio.acquisition.v1.ReleaseService.SearchReleases",
+        "summary": "GetQuickConnectState",
+        "description": "GetQuickConnectState tells whether a request was authorized; unknown\n and expired requests are NOT_FOUND.",
+        "operationId": "mavio.auth.v1.AuthService.GetQuickConnectState",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12877,7 +14592,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchReleasesRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateRequest"
               }
             }
           },
@@ -12899,7 +14614,191 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchReleasesResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.DownloadService/DeleteBlocklist": {
+      "post": {
+        "tags": [
+          "DownloadService"
+        ],
+        "summary": "DeleteBlocklist",
+        "operationId": "mavio.acquisition.v1.DownloadService.DeleteBlocklist",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteBlocklistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteBlocklistResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.DownloadService/GrabRelease": {
+      "post": {
+        "tags": [
+          "DownloadService"
+        ],
+        "summary": "GrabRelease",
+        "description": "GrabRelease sends a release SearchReleases found for a movie to a\n download client, whatever its decision rejected, and tracks it.",
+        "operationId": "mavio.acquisition.v1.DownloadService.GrabRelease",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GrabReleaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GrabReleaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.DownloadService/ListBlocklist": {
+      "post": {
+        "tags": [
+          "DownloadService"
+        ],
+        "summary": "ListBlocklist",
+        "operationId": "mavio.acquisition.v1.DownloadService.ListBlocklist",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListBlocklistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListBlocklistResponse"
                 }
               }
             }
@@ -13209,6 +15108,440 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.acquisition.v1.RemoveFromQueueResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.IssueService/AddComment": {
+      "post": {
+        "tags": [
+          "IssueService"
+        ],
+        "summary": "AddComment",
+        "description": "AddComment comments on an issue: its reporter or an administrator.",
+        "operationId": "mavio.acquisition.v1.IssueService.AddComment",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.AddCommentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.AddCommentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.IssueService/CreateIssue": {
+      "post": {
+        "tags": [
+          "IssueService"
+        ],
+        "summary": "CreateIssue",
+        "description": "CreateIssue reports a problem with an item the caller can access;\n its message is the first comment.",
+        "operationId": "mavio.acquisition.v1.IssueService.CreateIssue",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateIssueResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.IssueService/DeleteIssue": {
+      "post": {
+        "tags": [
+          "IssueService"
+        ],
+        "summary": "DeleteIssue",
+        "description": "DeleteIssue deletes an issue: administrators any, its reporter while\n nobody else commented on it.",
+        "operationId": "mavio.acquisition.v1.IssueService.DeleteIssue",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteIssueResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.IssueService/GetIssue": {
+      "post": {
+        "tags": [
+          "IssueService"
+        ],
+        "summary": "GetIssue",
+        "description": "GetIssue returns an issue of the caller's, or anyone's for\n administrators.",
+        "operationId": "mavio.acquisition.v1.IssueService.GetIssue",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetIssueResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.IssueService/ListIssues": {
+      "post": {
+        "tags": [
+          "IssueService"
+        ],
+        "summary": "ListIssues",
+        "description": "ListIssues lists the caller's issues, or anyone's for administrators.",
+        "operationId": "mavio.acquisition.v1.IssueService.ListIssues",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListIssuesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListIssuesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.IssueService/ReopenIssue": {
+      "post": {
+        "tags": [
+          "IssueService"
+        ],
+        "summary": "ReopenIssue",
+        "description": "ReopenIssue reopens an issue: its reporter or an administrator.",
+        "operationId": "mavio.acquisition.v1.IssueService.ReopenIssue",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.IssueService/ResolveIssue": {
+      "post": {
+        "tags": [
+          "IssueService"
+        ],
+        "summary": "ResolveIssue",
+        "description": "ResolveIssue resolves an issue: its reporter or an administrator.",
+        "operationId": "mavio.acquisition.v1.IssueService.ResolveIssue",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ResolveIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ResolveIssueResponse"
                 }
               }
             }
@@ -14260,14 +16593,13 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/ScanLibrary": {
+    "/mavio.acquisition.v1.ProfileService/UpdateCustomFormat": {
       "post": {
         "tags": [
-          "LibraryService"
+          "ProfileService"
         ],
-        "summary": "ScanLibrary",
-        "description": "ScanLibrary enqueues a reconciliation scan. A scan that is already\n pending or running is not enqueued again.",
-        "operationId": "mavio.library.v1.LibraryService.ScanLibrary",
+        "summary": "UpdateCustomFormat",
+        "operationId": "mavio.acquisition.v1.ProfileService.UpdateCustomFormat",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -14292,7 +16624,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ScanLibraryRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateCustomFormatRequest"
               }
             }
           },
@@ -14314,7 +16646,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ScanLibraryResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateCustomFormatResponse"
                 }
               }
             }
@@ -14629,13 +16961,14 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/UpdateLibrary": {
+    "/mavio.acquisition.v1.ReleaseService/SearchReleases": {
       "post": {
         "tags": [
-          "LibraryService"
+          "ReleaseService"
         ],
-        "summary": "UpdateLibrary",
-        "operationId": "mavio.library.v1.LibraryService.UpdateLibrary",
+        "summary": "SearchReleases",
+        "description": "SearchReleases searches indexers for a movie, season or episode of the\n library, by the IDs and numbers each indexer can search by and else by\n title, as Radarr and Sonarr do; or for text; or reads their recent\n releases when given neither.",
+        "operationId": "mavio.acquisition.v1.ReleaseService.SearchReleases",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -14660,7 +16993,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateLibraryRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchReleasesRequest"
               }
             }
           },
@@ -14682,7 +17015,565 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateLibraryResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchReleasesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.RequestService/ApproveRequest": {
+      "post": {
+        "tags": [
+          "RequestService"
+        ],
+        "summary": "ApproveRequest",
+        "description": "ApproveRequest approves a pending request, which adds its movie or\n seasons to acquisition. Administrators only.",
+        "operationId": "mavio.acquisition.v1.RequestService.ApproveRequest",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ApproveRequestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ApproveRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.RequestService/CreateRequest": {
+      "post": {
+        "tags": [
+          "RequestService"
+        ],
+        "summary": "CreateRequest",
+        "description": "CreateRequest requests a movie, or seasons of a series, by its TMDB\n ID. It fails with PERMISSION_DENIED when the user may not request it\n (its kind, or its rating above the user's limit), RESOURCE_EXHAUSTED\n past the user's quota, and ALREADY_EXISTS when it is requested,\n wanted or available already.",
+        "operationId": "mavio.acquisition.v1.RequestService.CreateRequest",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRequestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.RequestService/DeclineRequest": {
+      "post": {
+        "tags": [
+          "RequestService"
+        ],
+        "summary": "DeclineRequest",
+        "description": "DeclineRequest declines a pending request, which frees the quota it\n used. Administrators only.",
+        "operationId": "mavio.acquisition.v1.RequestService.DeclineRequest",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeclineRequestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeclineRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.ItemService/ListLatestItems": {
+      "post": {
+        "tags": [
+          "ItemService"
+        ],
+        "summary": "ListLatestItems",
+        "description": "ListLatestItems lists the items added last to the libraries the caller\n may access, newest first.",
+        "operationId": "mavio.library.v1.ItemService.ListLatestItems",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.RequestService/GetQuota": {
+      "post": {
+        "tags": [
+          "RequestService"
+        ],
+        "summary": "GetQuota",
+        "description": "GetQuota returns how much of their quotas a user has used: the\n caller's own, or anyone's for administrators.",
+        "operationId": "mavio.acquisition.v1.RequestService.GetQuota",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetQuotaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetQuotaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.RequestService/GetRequest": {
+      "post": {
+        "tags": [
+          "RequestService"
+        ],
+        "summary": "GetRequest",
+        "description": "GetRequest returns a request of the caller's, or anyone's for\n administrators.",
+        "operationId": "mavio.acquisition.v1.RequestService.GetRequest",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetRequestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.RequestService/ListRequests": {
+      "post": {
+        "tags": [
+          "RequestService"
+        ],
+        "summary": "ListRequests",
+        "description": "ListRequests lists the caller's requests, or anyone's for\n administrators.",
+        "operationId": "mavio.acquisition.v1.RequestService.ListRequests",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListRequestsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListRequestsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.RequestService/RetryRequest": {
+      "post": {
+        "tags": [
+          "RequestService"
+        ],
+        "summary": "RetryRequest",
+        "description": "RetryRequest approves a failed request again. Administrators only.",
+        "operationId": "mavio.acquisition.v1.RequestService.RetryRequest",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.RetryRequestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.RetryRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.RequestService/UpdateRequest": {
+      "post": {
+        "tags": [
+          "RequestService"
+        ],
+        "summary": "UpdateRequest",
+        "description": "UpdateRequest changes the seasons of a pending series request; its\n user or an administrator.",
+        "operationId": "mavio.acquisition.v1.RequestService.UpdateRequest",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateRequestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateRequestResponse"
                 }
               }
             }
@@ -15558,14 +18449,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/GetQuickConnectState": {
+    "/mavio.library.v1.ItemService/ListNextUp": {
       "post": {
         "tags": [
-          "AuthService"
+          "ItemService"
         ],
-        "summary": "GetQuickConnectState",
-        "description": "GetQuickConnectState tells whether a request was authorized; unknown\n and expired requests are NOT_FOUND.",
-        "operationId": "mavio.auth.v1.AuthService.GetQuickConnectState",
+        "summary": "ListNextUp",
+        "description": "ListNextUp lists the next episode to watch of each series the caller\n has played, the series played most recently first. Episodes being\n watched are left to continue watching: ListItems with resumable set,\n sorted by last played.",
+        "operationId": "mavio.library.v1.ItemService.ListNextUp",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -15590,7 +18481,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListNextUpRequest"
               }
             }
           },
@@ -15612,7 +18503,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListNextUpResponse"
                 }
               }
             }
@@ -15744,14 +18635,14 @@
         }
       }
     },
-    "/mavio.library.v1.MetadataService/DeleteItemImage": {
+    "/mavio.auth.v1.AuthService/Login": {
       "post": {
         "tags": [
-          "MetadataService"
+          "AuthService"
         ],
-        "summary": "DeleteItemImage",
-        "description": "DeleteItemImage removes an image of an item, and its file when it lies\n in the library's folders.",
-        "operationId": "mavio.library.v1.MetadataService.DeleteItemImage",
+        "summary": "Login",
+        "description": "Login signs a device in, replacing its previous session. Wrong\n credentials and disabled users fail with UNAUTHENTICATED.",
+        "operationId": "mavio.auth.v1.AuthService.Login",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -15776,7 +18667,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteItemImageRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.LoginRequest"
               }
             }
           },
@@ -15798,7 +18689,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteItemImageResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.LoginResponse"
                 }
               }
             }
@@ -16178,14 +19069,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.library.v1.ItemService/ListPeople": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ItemService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "ListPeople",
+        "description": "ListPeople lists the people credited on the items the caller may\n access, with the number of items crediting each.",
+        "operationId": "mavio.library.v1.ItemService.ListPeople",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16210,7 +19101,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListPeopleRequest"
               }
             }
           },
@@ -16232,7 +19123,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListPeopleResponse"
                 }
               }
             }
@@ -16546,13 +19437,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetItem": {
+    "/mavio.acquisition.v1.DiscoverService/ListCatalogs": {
       "post": {
         "tags": [
-          "ItemService"
+          "DiscoverService"
         ],
-        "summary": "GetItem",
-        "operationId": "mavio.library.v1.ItemService.GetItem",
+        "summary": "ListCatalogs",
+        "description": "ListCatalogs lists the catalogs of every discovery provider.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.ListCatalogs",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16577,7 +19469,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListCatalogsRequest"
               }
             }
           },
@@ -16599,7 +19491,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListCatalogsResponse"
                 }
               }
             }
@@ -16791,14 +19683,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListLatestItems": {
+    "/mavio.acquisition.v1.RequestService/DeleteRequest": {
       "post": {
         "tags": [
-          "ItemService"
+          "RequestService"
         ],
-        "summary": "ListLatestItems",
-        "description": "ListLatestItems lists the items added last to the libraries the caller\n may access, newest first.",
-        "operationId": "mavio.library.v1.ItemService.ListLatestItems",
+        "summary": "DeleteRequest",
+        "description": "DeleteRequest deletes a request: administrators any, users their\n pending ones.",
+        "operationId": "mavio.acquisition.v1.RequestService.DeleteRequest",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16823,7 +19715,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteRequestRequest"
               }
             }
           },
@@ -16845,7 +19737,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteRequestResponse"
                 }
               }
             }
@@ -16853,14 +19745,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListNextUp": {
+    "/mavio.acquisition.v1.DiscoverService/ListFilterValues": {
       "post": {
         "tags": [
-          "ItemService"
+          "DiscoverService"
         ],
-        "summary": "ListNextUp",
-        "description": "ListNextUp lists the next episode to watch of each series the caller\n has played, the series played most recently first. Episodes being\n watched are left to continue watching: ListItems with resumable set,\n sorted by last played.",
-        "operationId": "mavio.library.v1.ItemService.ListNextUp",
+        "summary": "ListFilterValues",
+        "description": "ListFilterValues lists the values a catalog's filter takes, such as\n genres, or the keywords and studios matching a query.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.ListFilterValues",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16885,7 +19777,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListNextUpRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListFilterValuesRequest"
               }
             }
           },
@@ -16907,7 +19799,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListNextUpResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListFilterValuesResponse"
                 }
               }
             }
@@ -16915,14 +19807,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListPeople": {
+    "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
-          "ItemService"
+          "CollectionService"
         ],
-        "summary": "ListPeople",
-        "description": "ListPeople lists the people credited on the items the caller may\n access, with the number of items crediting each.",
-        "operationId": "mavio.library.v1.ItemService.ListPeople",
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16947,7 +19839,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListPeopleRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
               }
             }
           },
@@ -16969,7 +19861,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListPeopleResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
                 }
               }
             }
@@ -17101,14 +19993,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DownloadService/GrabRelease": {
+    "/mavio.library.v1.LibraryService/CreateLibrary": {
       "post": {
         "tags": [
-          "DownloadService"
+          "LibraryService"
         ],
-        "summary": "GrabRelease",
-        "description": "GrabRelease sends a release SearchReleases found for a movie to a\n download client, whatever its decision rejected, and tracks it.",
-        "operationId": "mavio.acquisition.v1.DownloadService.GrabRelease",
+        "summary": "CreateLibrary",
+        "operationId": "mavio.library.v1.LibraryService.CreateLibrary",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -17133,7 +20024,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GrabReleaseRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryRequest"
               }
             }
           },
@@ -17155,7 +20046,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GrabReleaseResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryResponse"
                 }
               }
             }
@@ -17347,13 +20238,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/UpdateCustomFormat": {
+    "/mavio.library.v1.LibraryService/ScanLibrary": {
       "post": {
         "tags": [
-          "ProfileService"
+          "LibraryService"
         ],
-        "summary": "UpdateCustomFormat",
-        "operationId": "mavio.acquisition.v1.ProfileService.UpdateCustomFormat",
+        "summary": "ScanLibrary",
+        "description": "ScanLibrary enqueues a reconciliation scan. A scan that is already\n pending or running is not enqueued again.",
+        "operationId": "mavio.library.v1.LibraryService.ScanLibrary",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -17378,7 +20270,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateCustomFormatRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ScanLibraryRequest"
               }
             }
           },
@@ -17400,7 +20292,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateCustomFormatResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ScanLibraryResponse"
                 }
               }
             }
@@ -17408,13 +20300,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DownloadService/ListBlocklist": {
+    "/mavio.library.v1.LibraryService/UpdateLibrary": {
       "post": {
         "tags": [
-          "DownloadService"
+          "LibraryService"
         ],
-        "summary": "ListBlocklist",
-        "operationId": "mavio.acquisition.v1.DownloadService.ListBlocklist",
+        "summary": "UpdateLibrary",
+        "operationId": "mavio.library.v1.LibraryService.UpdateLibrary",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -17439,7 +20331,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListBlocklistRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateLibraryRequest"
               }
             }
           },
@@ -17461,7 +20353,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListBlocklistResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateLibraryResponse"
                 }
               }
             }
@@ -17469,14 +20361,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/Login": {
+    "/mavio.library.v1.MetadataService/DeleteItemImage": {
       "post": {
         "tags": [
-          "AuthService"
+          "MetadataService"
         ],
-        "summary": "Login",
-        "description": "Login signs a device in, replacing its previous session. Wrong\n credentials and disabled users fail with UNAUTHENTICATED.",
-        "operationId": "mavio.auth.v1.AuthService.Login",
+        "summary": "DeleteItemImage",
+        "description": "DeleteItemImage removes an image of an item, and its file when it lies\n in the library's folders.",
+        "operationId": "mavio.library.v1.MetadataService.DeleteItemImage",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -17501,7 +20393,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.LoginRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteItemImageRequest"
               }
             }
           },
@@ -17523,7 +20415,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.LoginResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteItemImageResponse"
                 }
               }
             }
@@ -19882,6 +22774,7 @@
           "ActivityService"
         ],
         "summary": "ListActivities",
+        "description": "ListActivities lists everyone's activities. Administrators only.",
         "operationId": "mavio.system.v1.ActivityService.ListActivities",
         "parameters": [
           {
@@ -19930,6 +22823,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.system.v1.ListActivitiesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.ActivityService/ListMyActivities": {
+      "post": {
+        "tags": [
+          "ActivityService"
+        ],
+        "summary": "ListMyActivities",
+        "description": "ListMyActivities lists the caller's own activities, their\n notifications: such as their requests approved, declined or\n available, and comments on their issues. Signed-in users.",
+        "operationId": "mavio.system.v1.ActivityService.ListMyActivities",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.ListMyActivitiesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.ListMyActivitiesResponse"
                 }
               }
             }
@@ -21784,13 +24739,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DownloadService/DeleteBlocklist": {
+    "/mavio.acquisition.v1.DiscoverService/Discover": {
       "post": {
         "tags": [
-          "DownloadService"
+          "DiscoverService"
         ],
-        "summary": "DeleteBlocklist",
-        "operationId": "mavio.acquisition.v1.DownloadService.DeleteBlocklist",
+        "summary": "Discover",
+        "description": "Discover lists a page of a catalog's titles.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.Discover",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21815,7 +24771,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteBlocklistRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DiscoverRequest"
               }
             }
           },
@@ -21837,7 +24793,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteBlocklistResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DiscoverResponse"
                 }
               }
             }

@@ -5808,6 +5808,13 @@ pub struct ServerSettingsView<'a> {
     pub acquisition: ::buffa::MessageFieldView<
         super::super::__buffa::view::AcquisitionSettingsView<'a>,
     >,
+    /// What users may request by default and where approved requests go;
+    /// unset in an update keeps the current ones.
+    ///
+    /// Field 7: `requests`
+    pub requests: ::buffa::MessageFieldView<
+        super::super::__buffa::view::RequestSettingsView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ServerSettingsView<'a> {
@@ -5931,6 +5938,27 @@ impl<'a> ::buffa::MessageView<'a> for ServerSettingsView<'a> {
                     }
                 }
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.requests.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.requests = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::RequestSettingsView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -6006,6 +6034,15 @@ impl<'a> ::buffa::MessageView<'a> for ServerSettingsView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            requests: match self.requests.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::RequestSettings,
+                        ::buffa::Inline<super::super::RequestSettings>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -6050,6 +6087,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ServerSettingsView<'a> {
         if self.acquisition.is_set() {
             let __slot = __cache.reserve();
             let inner_size = self.acquisition.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.requests.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.requests.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -6103,6 +6148,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ServerSettingsView<'a> {
                 buf,
             );
             self.acquisition.write_to(__cache, buf);
+        }
+        if self.requests.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                7u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.requests.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -6251,6 +6304,18 @@ impl ServerSettingsOwnedView {
     > {
         &self.0.reborrow().acquisition
     }
+    /// What users may request by default and where approved requests go;
+    /// unset in an update keeps the current ones.
+    ///
+    /// Field 7: `requests`
+    #[must_use]
+    pub fn requests(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::RequestSettingsView<'_>,
+    > {
+        &self.0.reborrow().requests
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<ServerSettingsView<'static>>>
 for ServerSettingsOwnedView {
@@ -6273,6 +6338,625 @@ for ServerSettingsOwnedView {
 impl ::buffa::HasMessageView for super::super::ServerSettings {
     type View<'a> = ServerSettingsView<'a>;
     type ViewHandle = ServerSettingsOwnedView;
+}
+/// RequestSettings are the defaults of users' requests and where approved
+/// requests are acquired.
+#[derive(Clone, Debug, Default)]
+pub struct RequestSettingsView<'a> {
+    /// The request permissions new users get.
+    ///
+    /// Field 1: `default_request_movies`
+    pub default_request_movies: ::core::option::Option<bool>,
+    /// Field 2: `default_request_series`
+    pub default_request_series: ::core::option::Option<bool>,
+    /// Field 3: `default_auto_approve_movies`
+    pub default_auto_approve_movies: ::core::option::Option<bool>,
+    /// Field 4: `default_auto_approve_series`
+    pub default_auto_approve_series: ::core::option::Option<bool>,
+    /// Field 5: `default_report_issues`
+    pub default_report_issues: ::core::option::Option<bool>,
+    /// The quotas of users without their own: requests of movies, or seasons
+    /// of series, in the last days; a limit of 0 is unlimited, 0 days all
+    /// time.
+    ///
+    /// Field 6: `movie_quota_limit`
+    pub movie_quota_limit: ::core::option::Option<i32>,
+    /// Field 7: `movie_quota_days`
+    pub movie_quota_days: ::core::option::Option<i32>,
+    /// Field 8: `series_quota_limit`
+    pub series_quota_limit: ::core::option::Option<i32>,
+    /// Field 9: `series_quota_days`
+    pub series_quota_days: ::core::option::Option<i32>,
+    /// The movie library and quality profile approved movies are added to;
+    /// empty, approvals fail.
+    ///
+    /// Field 10: `movie_library_id`
+    pub movie_library_id: ::core::option::Option<&'a str>,
+    /// Field 11: `movie_quality_profile_id`
+    pub movie_quality_profile_id: ::core::option::Option<&'a str>,
+    /// Field 12: `minimum_availability`
+    pub minimum_availability: ::core::option::Option<
+        ::buffa::EnumValue<
+            super::super::super::super::acquisition::v1::MinimumAvailability,
+        >,
+    >,
+    /// The show library and quality profile approved series are added to;
+    /// empty, approvals fail.
+    ///
+    /// Field 13: `series_library_id`
+    pub series_library_id: ::core::option::Option<&'a str>,
+    /// Field 14: `series_quality_profile_id`
+    pub series_quality_profile_id: ::core::option::Option<&'a str>,
+    /// Field 15: `season_folder`
+    pub season_folder: ::core::option::Option<bool>,
+    /// Field 16: `monitor_new_items`
+    pub monitor_new_items: ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::acquisition::v1::NewItemMonitor>,
+    >,
+    /// Allow requesting specials, season 0.
+    ///
+    /// Field 17: `specials`
+    pub specials: ::core::option::Option<bool>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for RequestSettingsView<'a> {
+    type Owned = super::super::RequestSettings;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.default_request_movies = Some(
+                    ::buffa::types::decode_bool(&mut cur)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.default_request_series = Some(
+                    ::buffa::types::decode_bool(&mut cur)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.default_auto_approve_movies = Some(
+                    ::buffa::types::decode_bool(&mut cur)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.default_auto_approve_series = Some(
+                    ::buffa::types::decode_bool(&mut cur)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.default_report_issues = Some(
+                    ::buffa::types::decode_bool(&mut cur)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.movie_quota_limit = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.movie_quota_days = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.series_quota_limit = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.series_quota_days = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.movie_library_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.movie_quality_profile_id = Some(
+                    ::buffa::types::borrow_str(&mut cur)?,
+                );
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.minimum_availability = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.series_library_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.series_quality_profile_id = Some(
+                    ::buffa::types::borrow_str(&mut cur)?,
+                );
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.season_folder = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.monitor_new_items = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.specials = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::RequestSettings, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::RequestSettings, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::RequestSettings {
+            default_request_movies: self.default_request_movies,
+            default_request_series: self.default_request_series,
+            default_auto_approve_movies: self.default_auto_approve_movies,
+            default_auto_approve_series: self.default_auto_approve_series,
+            default_report_issues: self.default_report_issues,
+            movie_quota_limit: self.movie_quota_limit,
+            movie_quota_days: self.movie_quota_days,
+            series_quota_limit: self.series_quota_limit,
+            series_quota_days: self.series_quota_days,
+            movie_library_id: self.movie_library_id.map(|s| s.to_string()),
+            movie_quality_profile_id: self
+                .movie_quality_profile_id
+                .map(|s| s.to_string()),
+            minimum_availability: self.minimum_availability,
+            series_library_id: self.series_library_id.map(|s| s.to_string()),
+            series_quality_profile_id: self
+                .series_quality_profile_id
+                .map(|s| s.to_string()),
+            season_folder: self.season_folder,
+            monitor_new_items: self.monitor_new_items,
+            specials: self.specials,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for RequestSettingsView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.default_request_movies.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.default_request_series.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.default_auto_approve_movies.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.default_auto_approve_series.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.default_report_issues.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.movie_quota_limit {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.movie_quota_days {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.series_quota_limit {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.series_quota_days {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.movie_library_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.movie_quality_profile_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.minimum_availability {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.series_library_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.series_quality_profile_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.season_folder.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.monitor_new_items {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if self.specials.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.default_request_movies {
+            ::buffa::types::put_bool_field(1u32, v, buf);
+        }
+        if let Some(v) = self.default_request_series {
+            ::buffa::types::put_bool_field(2u32, v, buf);
+        }
+        if let Some(v) = self.default_auto_approve_movies {
+            ::buffa::types::put_bool_field(3u32, v, buf);
+        }
+        if let Some(v) = self.default_auto_approve_series {
+            ::buffa::types::put_bool_field(4u32, v, buf);
+        }
+        if let Some(v) = self.default_report_issues {
+            ::buffa::types::put_bool_field(5u32, v, buf);
+        }
+        if let Some(v) = self.movie_quota_limit {
+            ::buffa::types::put_int32_field(6u32, v, buf);
+        }
+        if let Some(v) = self.movie_quota_days {
+            ::buffa::types::put_int32_field(7u32, v, buf);
+        }
+        if let Some(v) = self.series_quota_limit {
+            ::buffa::types::put_int32_field(8u32, v, buf);
+        }
+        if let Some(v) = self.series_quota_days {
+            ::buffa::types::put_int32_field(9u32, v, buf);
+        }
+        if let Some(ref v) = self.movie_library_id {
+            ::buffa::types::put_string_field(10u32, v, buf);
+        }
+        if let Some(ref v) = self.movie_quality_profile_id {
+            ::buffa::types::put_string_field(11u32, v, buf);
+        }
+        if let Some(ref v) = self.minimum_availability {
+            ::buffa::types::put_int32_field(12u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.series_library_id {
+            ::buffa::types::put_string_field(13u32, v, buf);
+        }
+        if let Some(ref v) = self.series_quality_profile_id {
+            ::buffa::types::put_string_field(14u32, v, buf);
+        }
+        if let Some(v) = self.season_folder {
+            ::buffa::types::put_bool_field(15u32, v, buf);
+        }
+        if let Some(ref v) = self.monitor_new_items {
+            ::buffa::types::put_int32_field(16u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.specials {
+            ::buffa::types::put_bool_field(17u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for RequestSettingsView<'a> {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "RequestSettings";
+    const FULL_NAME: &'static str = "mavio.system.v1.RequestSettings";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.RequestSettings";
+}
+::buffa::impl_default_view_instance!(RequestSettingsView);
+::buffa::impl_view_reborrow!(RequestSettingsView);
+/** Self-contained, `'static` owned view of a `RequestSettings` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`RequestSettingsView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RequestSettingsView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct RequestSettingsOwnedView(::buffa::OwnedView<RequestSettingsView<'static>>);
+impl RequestSettingsOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RequestSettingsOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RequestSettingsOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::RequestSettings,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RequestSettingsOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`RequestSettingsView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &RequestSettingsView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::RequestSettings {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// The request permissions new users get.
+    ///
+    /// Field 1: `default_request_movies`
+    #[must_use]
+    pub fn default_request_movies(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().default_request_movies
+    }
+    /// Field 2: `default_request_series`
+    #[must_use]
+    pub fn default_request_series(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().default_request_series
+    }
+    /// Field 3: `default_auto_approve_movies`
+    #[must_use]
+    pub fn default_auto_approve_movies(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().default_auto_approve_movies
+    }
+    /// Field 4: `default_auto_approve_series`
+    #[must_use]
+    pub fn default_auto_approve_series(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().default_auto_approve_series
+    }
+    /// Field 5: `default_report_issues`
+    #[must_use]
+    pub fn default_report_issues(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().default_report_issues
+    }
+    /// The quotas of users without their own: requests of movies, or seasons
+    /// of series, in the last days; a limit of 0 is unlimited, 0 days all
+    /// time.
+    ///
+    /// Field 6: `movie_quota_limit`
+    #[must_use]
+    pub fn movie_quota_limit(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().movie_quota_limit
+    }
+    /// Field 7: `movie_quota_days`
+    #[must_use]
+    pub fn movie_quota_days(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().movie_quota_days
+    }
+    /// Field 8: `series_quota_limit`
+    #[must_use]
+    pub fn series_quota_limit(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().series_quota_limit
+    }
+    /// Field 9: `series_quota_days`
+    #[must_use]
+    pub fn series_quota_days(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().series_quota_days
+    }
+    /// The movie library and quality profile approved movies are added to;
+    /// empty, approvals fail.
+    ///
+    /// Field 10: `movie_library_id`
+    #[must_use]
+    pub fn movie_library_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().movie_library_id
+    }
+    /// Field 11: `movie_quality_profile_id`
+    #[must_use]
+    pub fn movie_quality_profile_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().movie_quality_profile_id
+    }
+    /// Field 12: `minimum_availability`
+    #[must_use]
+    pub fn minimum_availability(
+        &self,
+    ) -> ::core::option::Option<
+        ::buffa::EnumValue<
+            super::super::super::super::acquisition::v1::MinimumAvailability,
+        >,
+    > {
+        self.0.reborrow().minimum_availability
+    }
+    /// The show library and quality profile approved series are added to;
+    /// empty, approvals fail.
+    ///
+    /// Field 13: `series_library_id`
+    #[must_use]
+    pub fn series_library_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().series_library_id
+    }
+    /// Field 14: `series_quality_profile_id`
+    #[must_use]
+    pub fn series_quality_profile_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().series_quality_profile_id
+    }
+    /// Field 15: `season_folder`
+    #[must_use]
+    pub fn season_folder(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().season_folder
+    }
+    /// Field 16: `monitor_new_items`
+    #[must_use]
+    pub fn monitor_new_items(
+        &self,
+    ) -> ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::acquisition::v1::NewItemMonitor>,
+    > {
+        self.0.reborrow().monitor_new_items
+    }
+    /// Allow requesting specials, season 0.
+    ///
+    /// Field 17: `specials`
+    #[must_use]
+    pub fn specials(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().specials
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<RequestSettingsView<'static>>>
+for RequestSettingsOwnedView {
+    fn from(inner: ::buffa::OwnedView<RequestSettingsView<'static>>) -> Self {
+        RequestSettingsOwnedView(inner)
+    }
+}
+impl ::core::convert::From<RequestSettingsOwnedView>
+for ::buffa::OwnedView<RequestSettingsView<'static>> {
+    fn from(wrapper: RequestSettingsOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<RequestSettingsView<'static>>>
+for RequestSettingsOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<RequestSettingsView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::RequestSettings {
+    type View<'a> = RequestSettingsView<'a>;
+    type ViewHandle = RequestSettingsOwnedView;
 }
 /// AcquisitionSettings are how releases are chosen, downloaded and
 /// imported, as Radarr's settings.

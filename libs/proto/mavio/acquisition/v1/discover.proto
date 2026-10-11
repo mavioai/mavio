@@ -1,0 +1,185 @@
+edition = "2023";
+
+package mavio.acquisition.v1;
+
+import "buf/validate/validate.proto";
+import "mavio/acquisition/v1/profile.proto";
+import "mavio/acquisition/v1/request.proto";
+import "mavio/plugin/v1/discovery.proto";
+
+// DiscoverService lists the movies and series the discovery providers
+// offer, such as trending or popular titles, marked with what the server
+// has of them: available, wanted or requested. Titles rated above the
+// caller's rating limit are left out. Signed-in users.
+service DiscoverService {
+  // ListCatalogs lists the catalogs of every discovery provider.
+  rpc ListCatalogs(ListCatalogsRequest) returns (ListCatalogsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // Discover lists a page of a catalog's titles.
+  rpc Discover(DiscoverRequest) returns (DiscoverResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListFilterValues lists the values a catalog's filter takes, such as
+  // genres, or the keywords and studios matching a query.
+  rpc ListFilterValues(ListFilterValuesRequest) returns (ListFilterValuesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message ListCatalogsRequest {
+  // ISO 639-1 language of the catalogs' names; unset for English.
+  string language = 1;
+}
+
+message ListCatalogsResponse {
+  repeated Catalog catalogs = 1;
+}
+
+// Catalog is a list of titles a discovery provider offers.
+message Catalog {
+  // "<plugin>/<catalog>", such as "scraper-tmdb/trending".
+  string id = 1;
+  string name = 2;
+  mavio.plugin.v1.CatalogKind kind = 3;
+  // MEDIA_KIND_MOVIE and/or MEDIA_KIND_SERIES; a request names one when
+  // there are two, unless mixed is set.
+  repeated MediaKind media_kinds = 4;
+  // Whether it lists movies and series together.
+  bool mixed = 5;
+  // The filters it takes; others in a request are ignored.
+  repeated mavio.plugin.v1.DiscoverFilter filters = 6;
+  // The orders it lists in; empty for its own order only.
+  repeated mavio.plugin.v1.DiscoverSort sorts = 7;
+  // The plugin offering it.
+  string plugin_id = 8;
+}
+
+message DiscoverRequest {
+  // A catalog of ListCatalogs.
+  string catalog = 1 [(buf.validate.field).string.min_len = 1];
+  // Movies or series, for catalogs listing both.
+  MediaKind media_kind = 2 [(buf.validate.field).enum.defined_only = true];
+  // The title of recommendations and similar titles, by its TMDB ID.
+  int32 tmdb_id = 3 [(buf.validate.field).int32.gte = 0];
+
+  // Filters by the provider's IDs of ListFilterValues; a title matches
+  // any of a filter's values.
+  repeated string genres = 4;
+  repeated string studios = 5;
+  repeated string networks = 6;
+  repeated string keywords = 7;
+  repeated string excluded_keywords = 8;
+  repeated string watch_providers = 9;
+  // ISO 3166-1 country of watch providers.
+  string watch_region = 10;
+  // ISO 639-1.
+  string original_language = 11;
+  // ISO 8601 calendar dates, inclusive.
+  string released_from = 12;
+  string released_to = 13;
+  // Minutes.
+  int32 runtime_min = 14 [(buf.validate.field).int32.gte = 0];
+  int32 runtime_max = 15 [(buf.validate.field).int32.gte = 0];
+  // 0–10.
+  double rating_min = 16 [(buf.validate.field).double = {
+    gte: 0
+    lte: 10
+  }];
+  double rating_max = 17 [(buf.validate.field).double = {
+    gte: 0
+    lte: 10
+  }];
+  int32 votes_min = 18 [(buf.validate.field).int32.gte = 0];
+  // Content ratings of the server's metadata country, any of them; those
+  // above the caller's rating limit are dropped.
+  repeated string certifications = 19;
+  mavio.plugin.v1.DiscoverSort sort = 20 [(buf.validate.field).enum.defined_only = true];
+  bool ascending = 21;
+  // ISO 639-1 language of names and overviews.
+  string language = 22;
+  // From 1; unset for the first page.
+  int32 page = 23 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 500
+  }];
+}
+
+message DiscoverResponse {
+  repeated DiscoveredTitle titles = 1;
+  int32 page = 2;
+  int32 total_pages = 3;
+  int32 total_results = 4;
+}
+
+// MediaStatus is what the server has of a discovered title, as Seerr's
+// media statuses.
+enum MediaStatus {
+  // Nothing.
+  MEDIA_STATUS_UNSPECIFIED = 0;
+  // A request of it waits for approval.
+  MEDIA_STATUS_REQUESTED = 1;
+  // It is wanted: monitored by acquisition, without files yet.
+  MEDIA_STATUS_WANTED = 2;
+  // A series some of whose monitored episodes have files.
+  MEDIA_STATUS_PARTIALLY_AVAILABLE = 3;
+  // A movie with a file, or a series whose monitored aired episodes all
+  // have files.
+  MEDIA_STATUS_AVAILABLE = 4;
+}
+
+// DiscoveredTitle is a movie or series a catalog lists.
+message DiscoveredTitle {
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+  MediaKind media_kind = 1;
+  string name = 2;
+  string original_title = 3;
+  // ISO 639-1.
+  string original_language = 4;
+  string overview = 5;
+  // ISO 8601 calendar date: a movie's release, a series' first air date.
+  string premiere_date = 6;
+  int32 year = 7;
+  // Such as "tmdb" and "imdb".
+  map<string, string> external_ids = 8;
+  // The provider's genre IDs.
+  repeated string genres = 9;
+  string poster_url = 10;
+  string backdrop_url = 11;
+  // 0–10.
+  double community_rating = 12;
+  int32 vote_count = 13;
+  double popularity = 14;
+  MediaStatus status = 15;
+  // The movie or series in a library, if any.
+  string item_id = 16;
+  // The latest active request of it, if any, and its status.
+  string request_id = 17;
+  RequestStatus request_status = 18;
+  // Whether the caller may request it now: their policy allows its
+  // kind, and it is neither available nor wholly requested or wanted.
+  bool requestable = 19;
+}
+
+message ListFilterValuesRequest {
+  // The catalog whose provider lists the values.
+  string catalog = 1 [(buf.validate.field).string.min_len = 1];
+  // GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+  mavio.plugin.v1.DiscoverFilter filter = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // Movies or series.
+  MediaKind media_kind = 3 [(buf.validate.field).enum.defined_only = true];
+  // Matched against names; studios and keywords need one.
+  string query = 4;
+  // The values' IDs, for their names.
+  repeated string ids = 5;
+  string language = 6;
+  // ISO 3166-1 region of watch providers.
+  string region = 7;
+}
+
+message ListFilterValuesResponse {
+  repeated mavio.plugin.v1.FilterValue values = 1;
+}

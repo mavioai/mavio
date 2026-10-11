@@ -6,9 +6,16 @@ import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
 // ActivityService lists the activity log: sign-ins, playbacks, changes to
-// users, plugins and settings, and failures. Administrators only.
+// users, plugins and settings, requests and issues, and failures.
 service ActivityService {
+  // ListActivities lists everyone's activities. Administrators only.
   rpc ListActivities(ListActivitiesRequest) returns (ListActivitiesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListMyActivities lists the caller's own activities, their
+  // notifications: such as their requests approved, declined or
+  // available, and comments on their issues. Signed-in users.
+  rpc ListMyActivities(ListMyActivitiesRequest) returns (ListMyActivitiesResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
 }
@@ -48,6 +55,25 @@ message ListActivitiesRequest {
 }
 
 message ListActivitiesResponse {
+  // Newest first.
+  repeated Activity activities = 1;
+  int32 total = 2;
+}
+
+message ListMyActivitiesRequest {
+  google.protobuf.Timestamp since = 1;
+  // Activities of these types, such as "request.available"; unset for
+  // all.
+  repeated string types = 2 [(buf.validate.field).repeated.max_items = 100];
+  // 1–1000; unset means 100.
+  int32 limit = 3 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 4 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListMyActivitiesResponse {
   // Newest first.
   repeated Activity activities = 1;
   int32 total = 2;

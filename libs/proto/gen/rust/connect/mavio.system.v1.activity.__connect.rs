@@ -6,6 +6,14 @@ pub type OwnedListActivitiesRequestView = ::buffa::view::OwnedView<
 pub type OwnedListActivitiesResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::ListActivitiesResponseView<'static>,
 >;
+///Shorthand for `OwnedView<ListMyActivitiesRequestView<'static>>`.
+pub type OwnedListMyActivitiesRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListMyActivitiesRequestView<'static>,
+>;
+///Shorthand for `OwnedView<ListMyActivitiesResponseView<'static>>`.
+pub type OwnedListMyActivitiesResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListMyActivitiesResponseView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::ListActivitiesResponse>
 for crate::proto::mavio::system::v1::__buffa::view::ListActivitiesResponseView<'_> {
     fn encode(
@@ -40,6 +48,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::ListMyActivitiesResponse>
+for crate::proto::mavio::system::v1::__buffa::view::ListMyActivitiesResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::ListMyActivitiesResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListMyActivitiesResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const ACTIVITY_SERVICE_SERVICE_NAME: &str = "mavio.system.v1.ActivityService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ListActivities` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -48,8 +90,14 @@ pub const ACTIVITY_SERVICE_LIST_ACTIVITIES_SPEC: ::connectrpc::Spec = ::connectr
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListMyActivities` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ACTIVITY_SERVICE_LIST_MY_ACTIVITIES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.ActivityService/ListMyActivities",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// ActivityService lists the activity log: sign-ins, playbacks, changes to
-/// users, plugins and settings, and failures. Administrators only.
+/// users, plugins and settings, requests and issues, and failures.
 ///
 /// # Implementing handlers
 ///
@@ -100,7 +148,7 @@ pub const ACTIVITY_SERVICE_LIST_ACTIVITIES_SPEC: ::connectrpc::Spec = ::connectr
 /// example` doc.
 #[allow(clippy::type_complexity)]
 pub trait ActivityService: Send + Sync + 'static {
-    /// Handle the ListActivities RPC.
+    /// ListActivities lists everyone's activities. Administrators only.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -120,6 +168,31 @@ pub trait ActivityService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::system::v1::ListActivitiesResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListMyActivities lists the caller's own activities, their
+    /// notifications: such as their requests approved, declined or
+    /// available, and comments on their issues. Signed-in users.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_my_activities<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::ListMyActivitiesRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::ListMyActivitiesResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -184,6 +257,35 @@ impl<S: ActivityService> ActivityServiceExt for S {
                 },
             )
             .with_spec(ACTIVITY_SERVICE_LIST_ACTIVITIES_SPEC)
+            .route_view_idempotent(
+                ACTIVITY_SERVICE_SERVICE_NAME,
+                "ListMyActivities",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::ListMyActivitiesRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::ListMyActivitiesRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_my_activities(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::ListMyActivitiesResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(ACTIVITY_SERVICE_LIST_MY_ACTIVITIES_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -244,6 +346,12 @@ impl<T: ActivityService> ::connectrpc::Dispatcher for ActivityServiceServer<T> {
                         .with_spec(ACTIVITY_SERVICE_LIST_ACTIVITIES_SPEC),
                 )
             }
+            "ListMyActivities" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(ACTIVITY_SERVICE_LIST_MY_ACTIVITIES_SPEC),
+                )
+            }
             _ => None,
         }
     }
@@ -278,6 +386,28 @@ impl<T: ActivityService> ::connectrpc::Dispatcher for ActivityServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::system::v1::ListActivitiesResponse,
+                        >(format)
+                })
+            }
+            "ListMyActivities" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::ListMyActivitiesRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::ListMyActivitiesRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::ListMyActivitiesRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_my_activities(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::ListMyActivitiesResponse,
                         >(format)
                 })
             }
@@ -448,6 +578,51 @@ where
                 &self.transport,
                 &self.config,
                 ACTIVITY_SERVICE_LIST_ACTIVITIES_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListMyActivities RPC. Sends a request to /mavio.system.v1.ActivityService/ListMyActivities.
+    pub async fn list_my_activities(
+        &self,
+        request: crate::proto::mavio::system::v1::ListMyActivitiesRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::ListMyActivitiesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_my_activities_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListMyActivities RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_my_activities_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::ListMyActivitiesRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::ListMyActivitiesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                ACTIVITY_SERVICE_LIST_MY_ACTIVITIES_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

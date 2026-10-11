@@ -674,6 +674,245 @@ func (b0 ListActivitiesResponse_builder) Build() *ListActivitiesResponse {
 	return m0
 }
 
+type ListMyActivitiesRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Since       *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=since"`
+	xxx_hidden_Types       []string               `protobuf:"bytes,2,rep,name=types"`
+	xxx_hidden_Limit       int32                  `protobuf:"varint,3,opt,name=limit"`
+	xxx_hidden_Offset      int32                  `protobuf:"varint,4,opt,name=offset"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ListMyActivitiesRequest) Reset() {
+	*x = ListMyActivitiesRequest{}
+	mi := &file_mavio_system_v1_activity_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMyActivitiesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMyActivitiesRequest) ProtoMessage() {}
+
+func (x *ListMyActivitiesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_activity_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListMyActivitiesRequest) GetSince() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_Since
+	}
+	return nil
+}
+
+func (x *ListMyActivitiesRequest) GetTypes() []string {
+	if x != nil {
+		return x.xxx_hidden_Types
+	}
+	return nil
+}
+
+func (x *ListMyActivitiesRequest) GetLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_Limit
+	}
+	return 0
+}
+
+func (x *ListMyActivitiesRequest) GetOffset() int32 {
+	if x != nil {
+		return x.xxx_hidden_Offset
+	}
+	return 0
+}
+
+func (x *ListMyActivitiesRequest) SetSince(v *timestamppb.Timestamp) {
+	x.xxx_hidden_Since = v
+}
+
+func (x *ListMyActivitiesRequest) SetTypes(v []string) {
+	x.xxx_hidden_Types = v
+}
+
+func (x *ListMyActivitiesRequest) SetLimit(v int32) {
+	x.xxx_hidden_Limit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *ListMyActivitiesRequest) SetOffset(v int32) {
+	x.xxx_hidden_Offset = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+}
+
+func (x *ListMyActivitiesRequest) HasSince() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Since != nil
+}
+
+func (x *ListMyActivitiesRequest) HasLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *ListMyActivitiesRequest) HasOffset() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *ListMyActivitiesRequest) ClearSince() {
+	x.xxx_hidden_Since = nil
+}
+
+func (x *ListMyActivitiesRequest) ClearLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Limit = 0
+}
+
+func (x *ListMyActivitiesRequest) ClearOffset() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Offset = 0
+}
+
+type ListMyActivitiesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Since *timestamppb.Timestamp
+	// Activities of these types, such as "request.available"; unset for
+	// all.
+	Types []string
+	// 1–1000; unset means 100.
+	Limit  *int32
+	Offset *int32
+}
+
+func (b0 ListMyActivitiesRequest_builder) Build() *ListMyActivitiesRequest {
+	m0 := &ListMyActivitiesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Since = b.Since
+	x.xxx_hidden_Types = b.Types
+	if b.Limit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		x.xxx_hidden_Limit = *b.Limit
+	}
+	if b.Offset != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_Offset = *b.Offset
+	}
+	return m0
+}
+
+type ListMyActivitiesResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Activities  *[]*Activity           `protobuf:"bytes,1,rep,name=activities"`
+	xxx_hidden_Total       int32                  `protobuf:"varint,2,opt,name=total"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ListMyActivitiesResponse) Reset() {
+	*x = ListMyActivitiesResponse{}
+	mi := &file_mavio_system_v1_activity_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMyActivitiesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMyActivitiesResponse) ProtoMessage() {}
+
+func (x *ListMyActivitiesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_activity_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListMyActivitiesResponse) GetActivities() []*Activity {
+	if x != nil {
+		if x.xxx_hidden_Activities != nil {
+			return *x.xxx_hidden_Activities
+		}
+	}
+	return nil
+}
+
+func (x *ListMyActivitiesResponse) GetTotal() int32 {
+	if x != nil {
+		return x.xxx_hidden_Total
+	}
+	return 0
+}
+
+func (x *ListMyActivitiesResponse) SetActivities(v []*Activity) {
+	x.xxx_hidden_Activities = &v
+}
+
+func (x *ListMyActivitiesResponse) SetTotal(v int32) {
+	x.xxx_hidden_Total = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *ListMyActivitiesResponse) HasTotal() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ListMyActivitiesResponse) ClearTotal() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Total = 0
+}
+
+type ListMyActivitiesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Newest first.
+	Activities []*Activity
+	Total      *int32
+}
+
+func (b0 ListMyActivitiesResponse_builder) Build() *ListMyActivitiesResponse {
+	m0 := &ListMyActivitiesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Activities = &b.Activities
+	if b.Total != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Total = *b.Total
+	}
+	return m0
+}
+
 var File_mavio_system_v1_activity_proto protoreflect.FileDescriptor
 
 const file_mavio_system_v1_activity_proto_rawDesc = "" +
@@ -705,40 +944,58 @@ const file_mavio_system_v1_activity_proto_rawDesc = "" +
 	"\n" +
 	"activities\x18\x01 \x03(\v2\x19.mavio.system.v1.ActivityR\n" +
 	"activities\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"\xae\x01\n" +
+	"\x17ListMyActivitiesRequest\x120\n" +
+	"\x05since\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x05since\x12\x1e\n" +
+	"\x05types\x18\x02 \x03(\tB\b\xbaH\x05\x92\x01\x02\x10dR\x05types\x12 \n" +
+	"\x05limit\x18\x03 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xe8\a(\x00R\x05limit\x12\x1f\n" +
+	"\x06offset\x18\x04 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\"k\n" +
+	"\x18ListMyActivitiesResponse\x129\n" +
+	"\n" +
+	"activities\x18\x01 \x03(\v2\x19.mavio.system.v1.ActivityR\n" +
+	"activities\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total*a\n" +
 	"\bSeverity\x12\x18\n" +
 	"\x14SEVERITY_UNSPECIFIED\x10\x00\x12\x11\n" +
 	"\rSEVERITY_INFO\x10\x01\x12\x14\n" +
 	"\x10SEVERITY_WARNING\x10\x02\x12\x12\n" +
-	"\x0eSEVERITY_ERROR\x10\x032y\n" +
+	"\x0eSEVERITY_ERROR\x10\x032\xe7\x01\n" +
 	"\x0fActivityService\x12f\n" +
-	"\x0eListActivities\x12&.mavio.system.v1.ListActivitiesRequest\x1a'.mavio.system.v1.ListActivitiesResponse\"\x03\x90\x02\x01B\xc7\x01\n" +
+	"\x0eListActivities\x12&.mavio.system.v1.ListActivitiesRequest\x1a'.mavio.system.v1.ListActivitiesResponse\"\x03\x90\x02\x01\x12l\n" +
+	"\x10ListMyActivities\x12(.mavio.system.v1.ListMyActivitiesRequest\x1a).mavio.system.v1.ListMyActivitiesResponse\"\x03\x90\x02\x01B\xc7\x01\n" +
 	"\x13com.mavio.system.v1B\rActivityProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1;systemv1\xa2\x02\x03MSX\xaa\x02\x0fMavio.System.V1\xca\x02\x0fMavio\\System\\V1\xe2\x02\x1bMavio\\System\\V1\\GPBMetadata\xea\x02\x11Mavio::System::V1b\beditionsp\xe8\a"
 
 var file_mavio_system_v1_activity_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mavio_system_v1_activity_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_mavio_system_v1_activity_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_mavio_system_v1_activity_proto_goTypes = []any{
-	(Severity)(0),                  // 0: mavio.system.v1.Severity
-	(*Activity)(nil),               // 1: mavio.system.v1.Activity
-	(*ListActivitiesRequest)(nil),  // 2: mavio.system.v1.ListActivitiesRequest
-	(*ListActivitiesResponse)(nil), // 3: mavio.system.v1.ListActivitiesResponse
-	nil,                            // 4: mavio.system.v1.Activity.AttributesEntry
-	(*timestamppb.Timestamp)(nil),  // 5: google.protobuf.Timestamp
+	(Severity)(0),                    // 0: mavio.system.v1.Severity
+	(*Activity)(nil),                 // 1: mavio.system.v1.Activity
+	(*ListActivitiesRequest)(nil),    // 2: mavio.system.v1.ListActivitiesRequest
+	(*ListActivitiesResponse)(nil),   // 3: mavio.system.v1.ListActivitiesResponse
+	(*ListMyActivitiesRequest)(nil),  // 4: mavio.system.v1.ListMyActivitiesRequest
+	(*ListMyActivitiesResponse)(nil), // 5: mavio.system.v1.ListMyActivitiesResponse
+	nil,                              // 6: mavio.system.v1.Activity.AttributesEntry
+	(*timestamppb.Timestamp)(nil),    // 7: google.protobuf.Timestamp
 }
 var file_mavio_system_v1_activity_proto_depIdxs = []int32{
-	5, // 0: mavio.system.v1.Activity.time:type_name -> google.protobuf.Timestamp
-	0, // 1: mavio.system.v1.Activity.severity:type_name -> mavio.system.v1.Severity
-	4, // 2: mavio.system.v1.Activity.attributes:type_name -> mavio.system.v1.Activity.AttributesEntry
-	5, // 3: mavio.system.v1.ListActivitiesRequest.since:type_name -> google.protobuf.Timestamp
-	0, // 4: mavio.system.v1.ListActivitiesRequest.min_severity:type_name -> mavio.system.v1.Severity
-	1, // 5: mavio.system.v1.ListActivitiesResponse.activities:type_name -> mavio.system.v1.Activity
-	2, // 6: mavio.system.v1.ActivityService.ListActivities:input_type -> mavio.system.v1.ListActivitiesRequest
-	3, // 7: mavio.system.v1.ActivityService.ListActivities:output_type -> mavio.system.v1.ListActivitiesResponse
-	7, // [7:8] is the sub-list for method output_type
-	6, // [6:7] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	7,  // 0: mavio.system.v1.Activity.time:type_name -> google.protobuf.Timestamp
+	0,  // 1: mavio.system.v1.Activity.severity:type_name -> mavio.system.v1.Severity
+	6,  // 2: mavio.system.v1.Activity.attributes:type_name -> mavio.system.v1.Activity.AttributesEntry
+	7,  // 3: mavio.system.v1.ListActivitiesRequest.since:type_name -> google.protobuf.Timestamp
+	0,  // 4: mavio.system.v1.ListActivitiesRequest.min_severity:type_name -> mavio.system.v1.Severity
+	1,  // 5: mavio.system.v1.ListActivitiesResponse.activities:type_name -> mavio.system.v1.Activity
+	7,  // 6: mavio.system.v1.ListMyActivitiesRequest.since:type_name -> google.protobuf.Timestamp
+	1,  // 7: mavio.system.v1.ListMyActivitiesResponse.activities:type_name -> mavio.system.v1.Activity
+	2,  // 8: mavio.system.v1.ActivityService.ListActivities:input_type -> mavio.system.v1.ListActivitiesRequest
+	4,  // 9: mavio.system.v1.ActivityService.ListMyActivities:input_type -> mavio.system.v1.ListMyActivitiesRequest
+	3,  // 10: mavio.system.v1.ActivityService.ListActivities:output_type -> mavio.system.v1.ListActivitiesResponse
+	5,  // 11: mavio.system.v1.ActivityService.ListMyActivities:output_type -> mavio.system.v1.ListMyActivitiesResponse
+	10, // [10:12] is the sub-list for method output_type
+	8,  // [8:10] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_mavio_system_v1_activity_proto_init() }
@@ -752,7 +1009,7 @@ func file_mavio_system_v1_activity_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_system_v1_activity_proto_rawDesc), len(file_mavio_system_v1_activity_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

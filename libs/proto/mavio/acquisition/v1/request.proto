@@ -1,0 +1,245 @@
+edition = "2023";
+
+package mavio.acquisition.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "mavio/acquisition/v1/profile.proto";
+
+// RequestService takes users' requests of movies and seasons of series,
+// as Seerr's: administrators approve or decline them, unless the user's
+// requests are approved at once, and approved requests are acquired.
+// Signed-in users request what their policy allows, within their quotas
+// and their rating limit, and see their own requests; administrators
+// manage all.
+service RequestService {
+  // CreateRequest requests a movie, or seasons of a series, by its TMDB
+  // ID. It fails with PERMISSION_DENIED when the user may not request it
+  // (its kind, or its rating above the user's limit), RESOURCE_EXHAUSTED
+  // past the user's quota, and ALREADY_EXISTS when it is requested,
+  // wanted or available already.
+  rpc CreateRequest(CreateRequestRequest) returns (CreateRequestResponse);
+  // ListRequests lists the caller's requests, or anyone's for
+  // administrators.
+  rpc ListRequests(ListRequestsRequest) returns (ListRequestsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetRequest returns a request of the caller's, or anyone's for
+  // administrators.
+  rpc GetRequest(GetRequestRequest) returns (GetRequestResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateRequest changes the seasons of a pending series request; its
+  // user or an administrator.
+  rpc UpdateRequest(UpdateRequestRequest) returns (UpdateRequestResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // DeleteRequest deletes a request: administrators any, users their
+  // pending ones.
+  rpc DeleteRequest(DeleteRequestRequest) returns (DeleteRequestResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // ApproveRequest approves a pending request, which adds its movie or
+  // seasons to acquisition. Administrators only.
+  rpc ApproveRequest(ApproveRequestRequest) returns (ApproveRequestResponse);
+  // DeclineRequest declines a pending request, which frees the quota it
+  // used. Administrators only.
+  rpc DeclineRequest(DeclineRequestRequest) returns (DeclineRequestResponse);
+  // RetryRequest approves a failed request again. Administrators only.
+  rpc RetryRequest(RetryRequestRequest) returns (RetryRequestResponse);
+  // GetQuota returns how much of their quotas a user has used: the
+  // caller's own, or anyone's for administrators.
+  rpc GetQuota(GetQuotaRequest) returns (GetQuotaResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+// RequestStatus is where a request is.
+enum RequestStatus {
+  REQUEST_STATUS_UNSPECIFIED = 0;
+  // Waits for an administrator.
+  REQUEST_STATUS_PENDING = 1;
+  // Approved: its movie or seasons are wanted.
+  REQUEST_STATUS_APPROVED = 2;
+  // Declined; it uses no quota.
+  REQUEST_STATUS_DECLINED = 3;
+  // Approved, but its movie or seasons could not be made wanted; see its
+  // message.
+  REQUEST_STATUS_FAILED = 4;
+  // Its movie or seasons are available.
+  REQUEST_STATUS_COMPLETED = 5;
+}
+
+// SeasonRequest is a season a series request asks for.
+message SeasonRequest {
+  int32 season_number = 1;
+  RequestStatus status = 2;
+}
+
+// Request is a user's request of a movie or of seasons of a series.
+message Request {
+  string id = 1;
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+  MediaKind media_kind = 2;
+  int32 tmdb_id = 3;
+  // For series, once known.
+  int32 tvdb_id = 4;
+  string title = 5;
+  int32 year = 6;
+  // The movie or series wanted for it, once approved.
+  string item_id = 7;
+  // The seasons of a series request.
+  repeated SeasonRequest seasons = 8;
+  RequestStatus status = 9;
+  // The user who asked, and the administrator who last approved,
+  // declined or retried it.
+  string requested_by = 10;
+  string modified_by = 11;
+  // Left out of its user's quota.
+  bool ignore_quota = 12;
+  // Why it failed.
+  string message = 13;
+  google.protobuf.Timestamp create_time = 14;
+  google.protobuf.Timestamp update_time = 15;
+}
+
+message CreateRequestRequest {
+  MediaKind media_kind = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  int32 tmdb_id = 2 [(buf.validate.field).int32.gt = 0];
+  // Of series: the seasons requested, unless all_seasons.
+  repeated int32 seasons = 3 [(buf.validate.field).repeated = {
+    max_items: 1000
+    unique: true
+    items: {
+      int32: {gte: 0}
+    }
+  }];
+  // Of series: every season not requested yet, specials only when the
+  // server allows them.
+  bool all_seasons = 4;
+  // Administrators: the user requesting; unset for the caller.
+  string user_id = 5 [(buf.validate.field).string.uuid = true];
+  // Administrators: leave the request out of the user's quota.
+  bool ignore_quota = 6;
+}
+
+message CreateRequestResponse {
+  Request request = 1;
+}
+
+// RequestSort is the order of listed requests.
+enum RequestSort {
+  // Newest first.
+  REQUEST_SORT_UNSPECIFIED = 0;
+  // Last changed first.
+  REQUEST_SORT_MODIFIED = 1;
+}
+
+message ListRequestsRequest {
+  // Any of them; unset for all.
+  repeated RequestStatus statuses = 1 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  MediaKind media_kind = 2 [(buf.validate.field).enum.defined_only = true];
+  // Administrators: a user's requests; others list their own.
+  string user_id = 3 [(buf.validate.field).string.uuid = true];
+  // The requests of a title, by its TMDB ID.
+  int32 tmdb_id = 4 [(buf.validate.field).int32.gte = 0];
+  RequestSort sort = 5 [(buf.validate.field).enum.defined_only = true];
+  // Oldest first.
+  bool ascending = 6;
+  // 1–1000; unset means 100.
+  int32 limit = 7 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 8 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListRequestsResponse {
+  repeated Request requests = 1;
+  int32 total = 2;
+}
+
+message GetRequestRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetRequestResponse {
+  Request request = 1;
+}
+
+message UpdateRequestRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  // The seasons requested.
+  repeated int32 seasons = 2 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 1000
+    unique: true
+    items: {
+      int32: {gte: 0}
+    }
+  }];
+}
+
+message UpdateRequestResponse {
+  Request request = 1;
+}
+
+message DeleteRequestRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteRequestResponse {}
+
+message ApproveRequestRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message ApproveRequestResponse {
+  Request request = 1;
+}
+
+message DeclineRequestRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeclineRequestResponse {
+  Request request = 1;
+}
+
+message RetryRequestRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message RetryRequestResponse {
+  Request request = 1;
+}
+
+message GetQuotaRequest {
+  // Administrators: a user's quotas; unset for the caller's.
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+// Quota is how much of a quota a user has used.
+message Quota {
+  // Requests of movies, or seasons of series, in the last days; 0 for
+  // unlimited.
+  int32 limit = 1;
+  // 0 for all time.
+  int32 days = 2;
+  int32 used = 3;
+  // Unset when unlimited.
+  int32 remaining = 4;
+  // Whether the user may request no more.
+  bool restricted = 5;
+}
+
+message GetQuotaResponse {
+  Quota movie = 1;
+  Quota series = 2;
+}

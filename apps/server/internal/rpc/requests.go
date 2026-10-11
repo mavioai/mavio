@@ -1,0 +1,528 @@
+package rpc
+
+import (
+	"context"
+	"errors"
+	"strconv"
+
+	"connectrpc.com/connect"
+
+	"github.com/mavioai/mavio/apps/server/internal/requests"
+	"github.com/mavioai/mavio/libs/core"
+	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
+)
+
+// requestError maps the errors of the requests service to Connect codes.
+func requestError(ctx context.Context, err error) error {
+	switch {
+	case errors.Is(err, requests.ErrPermission), errors.Is(err, requests.ErrRating):
+		return connect.NewError(connect.CodePermissionDenied, err)
+	case errors.Is(err, requests.ErrQuota):
+		return connect.NewError(connect.CodeResourceExhausted, err)
+	case errors.Is(err, requests.ErrState):
+		return connect.NewError(connect.CodeFailedPrecondition, err)
+	}
+	return connectError(ctx, err)
+}
+
+// parseOptionalID parses an ID that may be empty.
+func parseOptionalID(s string) (core.ID, error) {
+	if s == "" {
+		return core.NilID, nil
+	}
+	id, err := core.ParseID(s)
+	if err != nil {
+		return core.NilID, invalid(err)
+	}
+	return id, nil
+}
+
+// optionalID returns the string of an ID, nil when it is zero.
+func optionalID(id core.ID) *string {
+	if id.IsZero() {
+		return nil
+	}
+	return new(id.String())
+}
+
+var requestStatuses = map[core.RequestStatus]acquisitionv1.RequestStatus{
+	core.RequestPending:   acquisitionv1.RequestStatus_REQUEST_STATUS_PENDING,
+	core.RequestApproved:  acquisitionv1.RequestStatus_REQUEST_STATUS_APPROVED,
+	core.RequestDeclined:  acquisitionv1.RequestStatus_REQUEST_STATUS_DECLINED,
+	core.RequestFailed:    acquisitionv1.RequestStatus_REQUEST_STATUS_FAILED,
+	core.RequestCompleted: acquisitionv1.RequestStatus_REQUEST_STATUS_COMPLETED,
+}
+
+func requestToProto(r *core.Request) *acquisitionv1.Request {
+	seasons := make([]*acquisitionv1.SeasonRequest, len(r.Seasons))
+	for i, s := range r.Seasons {
+		seasons[i] = acquisitionv1.SeasonRequest_builder{
+			SeasonNumber: new(int32(s.Number)), Status: new(requestStatuses[s.Status]),
+		}.Build()
+	}
+	return acquisitionv1.Request_builder{
+		Id: new(r.ID.String()), MediaKind: new(keyOf(acquisitionKinds, r.Kind)), TmdbId: new(int32(r.TmdbID)),
+		TvdbId: new(int32(r.TvdbID)), Title: &r.Title, Year: new(int32(r.Year)), ItemId: optionalID(r.ItemID),
+		Seasons: seasons, Status: new(requestStatuses[r.Status]), RequestedBy: new(r.RequestedBy.String()),
+		ModifiedBy: optionalID(r.ModifiedBy), IgnoreQuota: &r.IgnoreQuota, Message: &r.Message,
+		CreateTime: timestamp(r.CreatedAt), UpdateTime: timestamp(r.UpdatedAt),
+	}.Build()
+}
+
+// RequestService implements mavio.acquisition.v1.RequestService.
+type RequestService struct{ requests *requests.Service }
+
+var _ acquisitionv1connect.RequestServiceHandler = (*RequestService)(nil)
+
+// NewRequestService returns a RequestService backed by the requests
+// service.
+func NewRequestService(svc *requests.Service) *RequestService { return &RequestService{requests: svc} }
+
+// CreateRequest requests a movie or seasons of a series.
+func (s *RequestService) CreateRequest(ctx context.Context, req *acquisitionv1.CreateRequestRequest) (*acquisitionv1.CreateRequestResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	kind, err := mediaKind(req.GetMediaKind())
+	if err != nil {
+		return nil, err
+	}
+	forID, err := parseOptionalID(req.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+	n := requests.NewRequest{
+		Kind: kind, TmdbID: int(req.GetTmdbId()), AllSeasons: req.GetAllSeasons(), For: forID, IgnoreQuota: req.GetIgnoreQuota(),
+	}
+	for _, sn := range req.GetSeasons() {
+		n.Seasons = append(n.Seasons, int(sn))
+	}
+	r, err := s.requests.Create(ctx, p.User, n)
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	return acquisitionv1.CreateRequestResponse_builder{Request: requestToProto(&r)}.Build(), nil
+}
+
+// ListRequests lists the caller's requests, or anyone's for
+// administrators.
+func (s *RequestService) ListRequests(ctx context.Context, req *acquisitionv1.ListRequestsRequest) (*acquisitionv1.ListRequestsResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	q := core.RequestQuery{
+		TmdbID: int(req.GetTmdbId()), SortByModified: req.GetSort() == acquisitionv1.RequestSort_REQUEST_SORT_MODIFIED,
+		Ascending: req.GetAscending(), Limit: int(req.GetLimit()), Offset: int(req.GetOffset()),
+	}
+	if q.RequestedBy, err = parseOptionalID(req.GetUserId()); err != nil {
+		return nil, err
+	}
+	if k := req.GetMediaKind(); k != acquisitionv1.MediaKind_MEDIA_KIND_UNSPECIFIED {
+		if q.Kind, err = mediaKind(k); err != nil {
+			return nil, err
+		}
+	}
+	for _, st := range req.GetStatuses() {
+		q.Statuses = append(q.Statuses, keyOf(requestStatuses, st))
+	}
+	page, err := s.requests.List(ctx, p.User, q)
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	out := make([]*acquisitionv1.Request, len(page.Items))
+	for i := range page.Items {
+		out[i] = requestToProto(&page.Items[i])
+	}
+	return acquisitionv1.ListRequestsResponse_builder{Requests: out, Total: new(int32(page.Total))}.Build(), nil
+}
+
+// requestCall runs a call on a request by its ID with the caller.
+func requestCall(ctx context.Context, id string, call func(core.User, core.ID) (core.Request, error)) (*acquisitionv1.Request, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	rid, err := core.ParseID(id)
+	if err != nil {
+		return nil, invalid(err)
+	}
+	r, err := call(p.User, rid)
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	return requestToProto(&r), nil
+}
+
+// GetRequest returns a request of the caller's, or anyone's for
+// administrators.
+func (s *RequestService) GetRequest(ctx context.Context, req *acquisitionv1.GetRequestRequest) (*acquisitionv1.GetRequestResponse, error) {
+	r, err := requestCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Request, error) { return s.requests.Get(ctx, u, id) })
+	if err != nil {
+		return nil, err
+	}
+	return acquisitionv1.GetRequestResponse_builder{Request: r}.Build(), nil
+}
+
+// UpdateRequest changes the seasons of a pending series request.
+func (s *RequestService) UpdateRequest(ctx context.Context, req *acquisitionv1.UpdateRequestRequest) (*acquisitionv1.UpdateRequestResponse, error) {
+	seasons := make([]int, len(req.GetSeasons()))
+	for i, sn := range req.GetSeasons() {
+		seasons[i] = int(sn)
+	}
+	r, err := requestCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Request, error) {
+		return s.requests.Update(ctx, u, id, seasons)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return acquisitionv1.UpdateRequestResponse_builder{Request: r}.Build(), nil
+}
+
+// DeleteRequest deletes a request.
+func (s *RequestService) DeleteRequest(ctx context.Context, req *acquisitionv1.DeleteRequestRequest) (*acquisitionv1.DeleteRequestResponse, error) {
+	_, err := requestCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Request, error) {
+		return core.Request{}, s.requests.Delete(ctx, u, id)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &acquisitionv1.DeleteRequestResponse{}, nil
+}
+
+// ApproveRequest approves a pending request; administrators.
+func (s *RequestService) ApproveRequest(ctx context.Context, req *acquisitionv1.ApproveRequestRequest) (*acquisitionv1.ApproveRequestResponse, error) {
+	r, err := requestCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Request, error) { return s.requests.Approve(ctx, u, id) })
+	if err != nil {
+		return nil, err
+	}
+	return acquisitionv1.ApproveRequestResponse_builder{Request: r}.Build(), nil
+}
+
+// DeclineRequest declines a pending request; administrators.
+func (s *RequestService) DeclineRequest(ctx context.Context, req *acquisitionv1.DeclineRequestRequest) (*acquisitionv1.DeclineRequestResponse, error) {
+	r, err := requestCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Request, error) { return s.requests.Decline(ctx, u, id) })
+	if err != nil {
+		return nil, err
+	}
+	return acquisitionv1.DeclineRequestResponse_builder{Request: r}.Build(), nil
+}
+
+// RetryRequest approves a failed request again; administrators.
+func (s *RequestService) RetryRequest(ctx context.Context, req *acquisitionv1.RetryRequestRequest) (*acquisitionv1.RetryRequestResponse, error) {
+	r, err := requestCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Request, error) { return s.requests.Retry(ctx, u, id) })
+	if err != nil {
+		return nil, err
+	}
+	return acquisitionv1.RetryRequestResponse_builder{Request: r}.Build(), nil
+}
+
+// GetQuota returns the caller's quotas, or any user's for administrators.
+func (s *RequestService) GetQuota(ctx context.Context, req *acquisitionv1.GetQuotaRequest) (*acquisitionv1.GetQuotaResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	u := p.User
+	if req.GetUserId() != "" && req.GetUserId() != u.ID.String() {
+		if !u.Admin {
+			return nil, connect.NewError(connect.CodePermissionDenied, errors.New("quotas of another user"))
+		}
+		id, err := core.ParseID(req.GetUserId())
+		if err != nil {
+			return nil, invalid(err)
+		}
+		if u, err = s.requests.Store.Users().Get(ctx, id); err != nil {
+			return nil, connectError(ctx, err)
+		}
+	}
+	out := acquisitionv1.GetQuotaResponse_builder{}
+	for _, k := range []struct {
+		kind core.ItemKind
+		to   **acquisitionv1.Quota
+	}{{core.KindMovie, &out.Movie}, {core.KindSeries, &out.Series}} {
+		q, err := s.requests.Quota(ctx, u, k.kind)
+		if err != nil {
+			return nil, requestError(ctx, err)
+		}
+		*k.to = acquisitionv1.Quota_builder{
+			Limit: new(int32(q.Limit)), Days: new(int32(q.Days)), Used: new(int32(q.Used)),
+			Remaining: new(int32(q.Remaining)), Restricted: new(q.Restricted),
+		}.Build()
+	}
+	return out.Build(), nil
+}
+
+var issueTypes = map[core.IssueType]acquisitionv1.IssueType{
+	core.IssueVideo:     acquisitionv1.IssueType_ISSUE_TYPE_VIDEO,
+	core.IssueAudio:     acquisitionv1.IssueType_ISSUE_TYPE_AUDIO,
+	core.IssueSubtitles: acquisitionv1.IssueType_ISSUE_TYPE_SUBTITLES,
+	core.IssueOther:     acquisitionv1.IssueType_ISSUE_TYPE_OTHER,
+}
+
+var issueStatuses = map[core.IssueStatus]acquisitionv1.IssueStatus{
+	core.IssueOpen:     acquisitionv1.IssueStatus_ISSUE_STATUS_OPEN,
+	core.IssueResolved: acquisitionv1.IssueStatus_ISSUE_STATUS_RESOLVED,
+}
+
+func issueToProto(i *core.Issue) *acquisitionv1.Issue {
+	comments := make([]*acquisitionv1.IssueComment, len(i.Comments))
+	for j, c := range i.Comments {
+		comments[j] = acquisitionv1.IssueComment_builder{
+			Id: new(c.ID.String()), UserId: new(c.UserID.String()), Message: new(c.Message),
+			CreateTime: timestamp(c.CreatedAt), UpdateTime: timestamp(c.UpdatedAt),
+		}.Build()
+	}
+	return acquisitionv1.Issue_builder{
+		Id: new(i.ID.String()), ItemId: new(i.ItemID.String()), Type: new(issueTypes[i.Type]), Status: new(issueStatuses[i.Status]),
+		SeasonNumber: new(int32(i.SeasonNumber)), EpisodeNumber: new(int32(i.EpisodeNumber)),
+		CreatedBy: new(i.CreatedBy.String()), ModifiedBy: optionalID(i.ModifiedBy), Comments: comments,
+		CreateTime: timestamp(i.CreatedAt), UpdateTime: timestamp(i.UpdatedAt),
+	}.Build()
+}
+
+// IssueService implements mavio.acquisition.v1.IssueService.
+type IssueService struct{ requests *requests.Service }
+
+var _ acquisitionv1connect.IssueServiceHandler = (*IssueService)(nil)
+
+// NewIssueService returns an IssueService backed by the requests
+// service.
+func NewIssueService(svc *requests.Service) *IssueService { return &IssueService{requests: svc} }
+
+// issueCall runs a call on an issue by its ID with the caller.
+func issueCall(ctx context.Context, id string, call func(core.User, core.ID) (core.Issue, error)) (*acquisitionv1.Issue, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	iid, err := core.ParseID(id)
+	if err != nil {
+		return nil, invalid(err)
+	}
+	i, err := call(p.User, iid)
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	return issueToProto(&i), nil
+}
+
+// CreateIssue reports a problem with an item.
+func (s *IssueService) CreateIssue(ctx context.Context, req *acquisitionv1.CreateIssueRequest) (*acquisitionv1.CreateIssueResponse, error) {
+	n := requests.NewIssue{
+		Type: keyOf(issueTypes, req.GetType()), SeasonNumber: int(req.GetSeasonNumber()),
+		EpisodeNumber: int(req.GetEpisodeNumber()), Message: req.GetMessage(),
+	}
+	i, err := issueCall(ctx, req.GetItemId(), func(u core.User, id core.ID) (core.Issue, error) {
+		n.ItemID = id
+		return s.requests.CreateIssue(ctx, u, n)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return acquisitionv1.CreateIssueResponse_builder{Issue: i}.Build(), nil
+}
+
+// ListIssues lists the caller's issues, or anyone's for administrators.
+func (s *IssueService) ListIssues(ctx context.Context, req *acquisitionv1.ListIssuesRequest) (*acquisitionv1.ListIssuesResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	q := core.IssueQuery{
+		SortByModified: req.GetSort() == acquisitionv1.IssueSort_ISSUE_SORT_MODIFIED,
+		Limit:          int(req.GetLimit()), Offset: int(req.GetOffset()),
+	}
+	if q.CreatedBy, err = parseOptionalID(req.GetUserId()); err != nil {
+		return nil, err
+	}
+	if q.ItemID, err = parseOptionalID(req.GetItemId()); err != nil {
+		return nil, err
+	}
+	for _, st := range req.GetStatuses() {
+		q.Statuses = append(q.Statuses, keyOf(issueStatuses, st))
+	}
+	page, err := s.requests.ListIssues(ctx, p.User, q)
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	out := make([]*acquisitionv1.Issue, len(page.Items))
+	for i := range page.Items {
+		out[i] = issueToProto(&page.Items[i])
+	}
+	return acquisitionv1.ListIssuesResponse_builder{Issues: out, Total: new(int32(page.Total))}.Build(), nil
+}
+
+// GetIssue returns an issue with its comments.
+func (s *IssueService) GetIssue(ctx context.Context, req *acquisitionv1.GetIssueRequest) (*acquisitionv1.GetIssueResponse, error) {
+	i, err := issueCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Issue, error) { return s.requests.GetIssue(ctx, u, id) })
+	if err != nil {
+		return nil, err
+	}
+	return acquisitionv1.GetIssueResponse_builder{Issue: i}.Build(), nil
+}
+
+// AddComment comments on an issue.
+func (s *IssueService) AddComment(ctx context.Context, req *acquisitionv1.AddCommentRequest) (*acquisitionv1.AddCommentResponse, error) {
+	i, err := issueCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Issue, error) {
+		return s.requests.Comment(ctx, u, id, req.GetMessage())
+	})
+	if err != nil {
+		return nil, err
+	}
+	return acquisitionv1.AddCommentResponse_builder{Issue: i}.Build(), nil
+}
+
+// ResolveIssue resolves an issue.
+func (s *IssueService) ResolveIssue(ctx context.Context, req *acquisitionv1.ResolveIssueRequest) (*acquisitionv1.ResolveIssueResponse, error) {
+	i, err := issueCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Issue, error) { return s.requests.Resolve(ctx, u, id) })
+	if err != nil {
+		return nil, err
+	}
+	return acquisitionv1.ResolveIssueResponse_builder{Issue: i}.Build(), nil
+}
+
+// ReopenIssue opens a resolved issue again.
+func (s *IssueService) ReopenIssue(ctx context.Context, req *acquisitionv1.ReopenIssueRequest) (*acquisitionv1.ReopenIssueResponse, error) {
+	i, err := issueCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Issue, error) { return s.requests.Reopen(ctx, u, id) })
+	if err != nil {
+		return nil, err
+	}
+	return acquisitionv1.ReopenIssueResponse_builder{Issue: i}.Build(), nil
+}
+
+// DeleteIssue deletes an issue.
+func (s *IssueService) DeleteIssue(ctx context.Context, req *acquisitionv1.DeleteIssueRequest) (*acquisitionv1.DeleteIssueResponse, error) {
+	_, err := issueCall(ctx, req.GetId(), func(u core.User, id core.ID) (core.Issue, error) {
+		return core.Issue{}, s.requests.DeleteIssue(ctx, u, id)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &acquisitionv1.DeleteIssueResponse{}, nil
+}
+
+// DiscoverService implements mavio.acquisition.v1.DiscoverService.
+type DiscoverService struct{ requests *requests.Service }
+
+var _ acquisitionv1connect.DiscoverServiceHandler = (*DiscoverService)(nil)
+
+// NewDiscoverService returns a DiscoverService backed by the requests
+// service.
+func NewDiscoverService(svc *requests.Service) *DiscoverService {
+	return &DiscoverService{requests: svc}
+}
+
+// pluginKinds maps the media kinds of requests to those of plugins.
+var pluginKinds = map[acquisitionv1.MediaKind]pluginv1.MediaKind{
+	acquisitionv1.MediaKind_MEDIA_KIND_UNSPECIFIED: pluginv1.MediaKind_MEDIA_KIND_UNSPECIFIED,
+	acquisitionv1.MediaKind_MEDIA_KIND_MOVIE:       pluginv1.MediaKind_MEDIA_KIND_MOVIE,
+	acquisitionv1.MediaKind_MEDIA_KIND_SERIES:      pluginv1.MediaKind_MEDIA_KIND_SERIES,
+}
+
+// ListCatalogs lists the catalogs of the discovery providers.
+func (s *DiscoverService) ListCatalogs(ctx context.Context, req *acquisitionv1.ListCatalogsRequest) (*acquisitionv1.ListCatalogsResponse, error) {
+	if _, err := principal(ctx); err != nil {
+		return nil, err
+	}
+	cs, err := s.requests.Catalogs(ctx, req.GetLanguage())
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	out := make([]*acquisitionv1.Catalog, len(cs))
+	for i, c := range cs {
+		b := acquisitionv1.Catalog_builder{
+			Id: new(c.ID), Name: new(c.Catalog.GetName()), Kind: new(c.Catalog.GetKind()), Filters: c.Catalog.GetFilters(),
+			Sorts: c.Catalog.GetSorts(), PluginId: new(c.PluginID), Mixed: new(false),
+		}
+		for _, k := range c.Catalog.GetMediaKinds() {
+			switch k {
+			case pluginv1.MediaKind_MEDIA_KIND_UNSPECIFIED:
+				b.Mixed = new(true)
+			case pluginv1.MediaKind_MEDIA_KIND_MOVIE:
+				b.MediaKinds = append(b.MediaKinds, acquisitionv1.MediaKind_MEDIA_KIND_MOVIE)
+			case pluginv1.MediaKind_MEDIA_KIND_SERIES:
+				b.MediaKinds = append(b.MediaKinds, acquisitionv1.MediaKind_MEDIA_KIND_SERIES)
+			}
+		}
+		out[i] = b.Build()
+	}
+	return acquisitionv1.ListCatalogsResponse_builder{Catalogs: out}.Build(), nil
+}
+
+var mediaStatuses = map[requests.MediaStatus]acquisitionv1.MediaStatus{
+	requests.StatusNone:      acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED,
+	requests.StatusRequested: acquisitionv1.MediaStatus_MEDIA_STATUS_REQUESTED,
+	requests.StatusWanted:    acquisitionv1.MediaStatus_MEDIA_STATUS_WANTED,
+	requests.StatusPartial:   acquisitionv1.MediaStatus_MEDIA_STATUS_PARTIALLY_AVAILABLE,
+	requests.StatusAvailable: acquisitionv1.MediaStatus_MEDIA_STATUS_AVAILABLE,
+}
+
+// Discover lists a page of a catalog, marked with what the server has of
+// each title.
+func (s *DiscoverService) Discover(ctx context.Context, req *acquisitionv1.DiscoverRequest) (*acquisitionv1.DiscoverResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	pr := pluginv1.DiscoverRequest_builder{
+		MediaKind: new(pluginKinds[req.GetMediaKind()]), Genres: req.GetGenres(), Studios: req.GetStudios(),
+		Networks: req.GetNetworks(), Keywords: req.GetKeywords(), ExcludedKeywords: req.GetExcludedKeywords(),
+		WatchProviders: req.GetWatchProviders(), WatchRegion: new(req.GetWatchRegion()),
+		OriginalLanguage: new(req.GetOriginalLanguage()), ReleasedFrom: new(req.GetReleasedFrom()),
+		ReleasedTo: new(req.GetReleasedTo()), RuntimeMin: new(req.GetRuntimeMin()), RuntimeMax: new(req.GetRuntimeMax()),
+		RatingMin: new(req.GetRatingMin()), RatingMax: new(req.GetRatingMax()), VotesMin: new(req.GetVotesMin()),
+		Certifications: req.GetCertifications(), Sort: new(req.GetSort()), Ascending: new(req.GetAscending()),
+		Language: new(req.GetLanguage()),
+	}
+	if req.GetTmdbId() > 0 {
+		pr.ExternalIds = map[string]string{string(core.ProviderTMDB): strconv.Itoa(int(req.GetTmdbId()))}
+	}
+	if req.GetPage() > 0 {
+		pr.Page = new(req.GetPage())
+	}
+	page, err := s.requests.Discover(ctx, p.User, req.GetCatalog(), pr.Build())
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	out := make([]*acquisitionv1.DiscoveredTitle, len(page.Titles))
+	for i, d := range page.Titles {
+		t := d.Title
+		b := acquisitionv1.DiscoveredTitle_builder{
+			MediaKind: new(keyOf(acquisitionKinds, d.Kind)), Name: new(t.GetName()), OriginalTitle: new(t.GetOriginalTitle()),
+			OriginalLanguage: new(t.GetOriginalLanguage()), Overview: new(t.GetOverview()),
+			PremiereDate: new(t.GetPremiereDate()), Year: new(t.GetYear()), ExternalIds: t.GetExternalIds(),
+			Genres: t.GetGenres(), PosterUrl: new(t.GetPosterUrl()), BackdropUrl: new(t.GetBackdropUrl()),
+			CommunityRating: new(t.GetCommunityRating()), VoteCount: new(t.GetVoteCount()), Popularity: new(t.GetPopularity()),
+			Status: new(mediaStatuses[d.Status]), ItemId: optionalID(d.ItemID), RequestId: optionalID(d.RequestID),
+			Requestable: new(d.Requestable),
+		}
+		if d.RequestStatus != "" {
+			b.RequestStatus = new(requestStatuses[d.RequestStatus])
+		}
+		out[i] = b.Build()
+	}
+	return acquisitionv1.DiscoverResponse_builder{
+		Titles: out, Page: new(int32(page.Page)), TotalPages: new(int32(page.TotalPages)),
+		TotalResults: new(int32(page.TotalResults)),
+	}.Build(), nil
+}
+
+// ListFilterValues lists the values a filter of a catalog takes.
+func (s *DiscoverService) ListFilterValues(ctx context.Context, req *acquisitionv1.ListFilterValuesRequest) (*acquisitionv1.ListFilterValuesResponse, error) {
+	if _, err := principal(ctx); err != nil {
+		return nil, err
+	}
+	pr := pluginv1.ListFilterValuesRequest_builder{
+		Filter: new(req.GetFilter()), MediaKind: new(pluginKinds[req.GetMediaKind()]), Query: new(req.GetQuery()),
+		Ids: req.GetIds(), Language: new(req.GetLanguage()), Region: new(req.GetRegion()),
+	}.Build()
+	values, err := s.requests.FilterValues(ctx, req.GetCatalog(), pr)
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	return acquisitionv1.ListFilterValuesResponse_builder{Values: values}.Build(), nil
+}

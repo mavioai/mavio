@@ -128,6 +128,7 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 		}.Build(),
 		PluginCatalogs: s.PluginCatalogs, PasswordResetPlugin: &s.PasswordResetPlugin,
 		Acquisition: acquisitionSettingsToProto(&s.Acquisition),
+		Requests:    requestSettingsToProto(&s.Requests),
 	}.Build()
 	if !s.UpdatedAt.IsZero() {
 		out.SetUpdateTime(timestamppb.New(s.UpdatedAt))
@@ -136,12 +137,19 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 }
 
 // settingsFromProto returns the settings of p, keeping the current
-// acquisition settings when p has none.
-func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings) core.ServerSettings {
+// acquisition and request settings when p has none.
+func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings) (core.ServerSettings, error) {
 	t, n := p.GetTranscoding(), p.GetNetwork()
 	acquisition := current.Acquisition
 	if p.HasAcquisition() {
 		acquisition = acquisitionSettingsFromProto(p.GetAcquisition())
+	}
+	requests := current.Requests
+	if p.HasRequests() {
+		var err error
+		if requests, err = requestSettingsFromProto(p.GetRequests()); err != nil {
+			return core.ServerSettings{}, err
+		}
 	}
 	var hw core.HardwareAcceleration
 	for k, v := range hardwareAccelerations {
@@ -163,7 +171,76 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 		},
 		PluginCatalogs: p.GetPluginCatalogs(), PasswordResetPlugin: p.GetPasswordResetPlugin(),
 		Acquisition: acquisition,
+		Requests:    requests,
+	}, nil
+}
+
+func requestSettingsToProto(r *core.RequestSettings) *systemv1.RequestSettings {
+	d := &r.DefaultPermissions
+	b := systemv1.RequestSettings_builder{
+		DefaultRequestMovies: &d.Movies, DefaultRequestSeries: &d.Series,
+		DefaultAutoApproveMovies: &d.AutoApproveMovies, DefaultAutoApproveSeries: &d.AutoApproveSeries,
+		DefaultReportIssues: &d.ReportIssues,
+		MovieQuotaLimit:     new(int32(r.MovieQuota.Limit)), MovieQuotaDays: new(int32(r.MovieQuota.Days)),
+		SeriesQuotaLimit: new(int32(r.SeriesQuota.Limit)), SeriesQuotaDays: new(int32(r.SeriesQuota.Days)),
+		MinimumAvailability: new(minimumAvailabilityToProto(r.MinimumAvailability)),
+		SeasonFolder:        &r.SeasonFolder, MonitorNewItems: new(newItemMonitorToProto(r.MonitorNewItems)),
+		Specials: &r.Specials,
 	}
+	for _, f := range []struct {
+		id core.ID
+		to **string
+	}{
+		{r.MovieLibraryID, &b.MovieLibraryId},
+		{r.MovieQualityProfileID, &b.MovieQualityProfileId},
+		{r.SeriesLibraryID, &b.SeriesLibraryId},
+		{r.SeriesQualityProfileID, &b.SeriesQualityProfileId},
+	} {
+		if !f.id.IsZero() {
+			*f.to = new(f.id.String())
+		}
+	}
+	return b.Build()
+}
+
+func requestSettingsFromProto(p *systemv1.RequestSettings) (core.RequestSettings, error) {
+	out := core.RequestSettings{
+		DefaultPermissions: core.RequestPermissions{
+			Movies: p.GetDefaultRequestMovies(), Series: p.GetDefaultRequestSeries(),
+			AutoApproveMovies: p.GetDefaultAutoApproveMovies(), AutoApproveSeries: p.GetDefaultAutoApproveSeries(),
+			ReportIssues: p.GetDefaultReportIssues(),
+		},
+		MovieQuota:   core.Quota{Limit: int(p.GetMovieQuotaLimit()), Days: int(p.GetMovieQuotaDays())},
+		SeriesQuota:  core.Quota{Limit: int(p.GetSeriesQuotaLimit()), Days: int(p.GetSeriesQuotaDays())},
+		SeasonFolder: p.GetSeasonFolder(), Specials: p.GetSpecials(),
+	}
+	var err error
+	if out.MinimumAvailability, err = minimumAvailability(p.GetMinimumAvailability()); err != nil {
+		return out, err
+	}
+	out.MonitorNewItems = core.NewItemsNone
+	if p.HasMonitorNewItems() {
+		if out.MonitorNewItems, err = newItemMonitor(p.GetMonitorNewItems()); err != nil {
+			return out, err
+		}
+	}
+	for _, f := range []struct {
+		s  string
+		to *core.ID
+	}{
+		{p.GetMovieLibraryId(), &out.MovieLibraryID},
+		{p.GetMovieQualityProfileId(), &out.MovieQualityProfileID},
+		{p.GetSeriesLibraryId(), &out.SeriesLibraryID},
+		{p.GetSeriesQualityProfileId(), &out.SeriesQualityProfileID},
+	} {
+		if f.s == "" {
+			continue
+		}
+		if *f.to, err = core.ParseID(f.s); err != nil {
+			return out, invalid(err)
+		}
+	}
+	return out, nil
 }
 
 var properDownloads = map[core.ProperDownload]systemv1.ProperDownload{
@@ -263,7 +340,11 @@ func (s *SystemService) UpdateServerSettings(ctx context.Context, req *systemv1.
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("settings cannot be changed"))
 	}
 	current := s.currentSettings()
-	set, err := s.Settings.Update(ctx, settingsFromProto(req.GetSettings(), &current))
+	next, err := settingsFromProto(req.GetSettings(), &current)
+	if err != nil {
+		return nil, err
+	}
+	set, err := s.Settings.Update(ctx, next)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}

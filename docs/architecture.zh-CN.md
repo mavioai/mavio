@@ -454,8 +454,8 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 ### 13.1 组成
 | 部分 | 位置 | 对应 |
 | :--- | :--- | :--- |
-| 发现 | `DiscoverService`；列表来自 `DISCOVERY_PROVIDER` 插件（`scraper-tmdb`） | Seerr 的发现 |
-| 请求 | `RequestService` | Seerr 的请求 |
+| 发现 | `DiscoverService`；列表来自 `DISCOVERY_PROVIDER` 插件（`scraper-tmdb`、`scraper-servarr`） | Seerr 的发现 |
+| 请求与问题 | `RequestService`、`IssueService`；规则在 `apps/server/internal/requests` 中 | Seerr 的请求与问题 |
 | 资源获取引擎 | `libs/acquire`，含 `movie` 与 `series` 包，以及为文件命名的 `organize` 包；服务在 `apps/server` 中 | Radarr、Sonarr |
 | 想要的条目 | `WantedService`：按 TMDB ID 加入的电影与按 TVDB ID 加入的剧集，作为 `apps/server/internal/acquisition` 作业执行的搜索、RSS 同步与 scene 映射更新 | Radarr 的电影、Sonarr 的剧集及其搜索 |
 | 档案 | `ProfileService`：质量定义与质量档案、custom formats、延迟档案与发布档案、远程路径映射 | Radarr 与 Sonarr 的设置 |
@@ -493,3 +493,14 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 
 ### 13.6 存储
 想要的状态、质量定义与质量档案、custom formats、delay profile 与 release profile、队列、历史、黑名单与请求都存放在 `libs/store` 中，支持两种数据库，并通过 `core` 中的端口访问。
+
+### 13.7 发现、请求与问题
+`apps/server/internal/requests` 包实现 Seerr 的规则；`DiscoverService`、`RequestService` 与 `IssueService` 封装它，`server.go` 把它连接到资源获取运行时、元数据提供者、单集列表提供者、发现提供者与活动日志。
+* **权限**是用户策略中的布尔值：可请求电影、可请求剧集、各自自动通过、可报告问题；以及配额：若干天内电影的数量或剧集的季数，用户自己的或服务端的。管理员即 Seerr 的请求、问题与用户管理者：审批、拒绝与重试请求，为他人请求，忽略配额，且不受限制。服务端的请求设置给出新用户的权限，并规定通过的请求去向：电影媒体库与质量档案及最低可用性，剧集媒体库与质量档案及是否按季分目录、如何监控新季，以及能否请求特别篇。
+* **标题**通过元数据提供者按 TMDB ID 查询，使用目标媒体库的国家与语言（否则为美国与英语），并缓存数小时：名称、年份、分级，剧集还有 TVDB ID。单集列表提供者给出剧集的季。
+* **创建请求**按 Seerr 的顺序检查：权限、分级限制（标题的分级按该国体系打分；未分级的通过，除非策略屏蔽未分级条目）、配额（被拒绝的请求与忽略配额的请求不计入），然后是重复：已请求、已想要或已可用的电影被拒绝；剧集中其他活动请求所请求的季、已想要或已有文件的季被剔除，剩余季数须在配额之内。请求随后处于待审批状态，或在用户该类型的请求自动通过时立即通过。用户锁与标题锁串行化检查与写入，因此并发请求既不会超出配额，也不会重复请求同一标题。
+* **审批**使标题成为想要的条目：电影通过 `AddMovie` 并搜索；剧集通过不监控任何内容的 `AddSeries`，再监控并搜索所请求的季。媒体库中已有的标题被设为想要，并加入其季。失败时请求被标记为失败并记录错误，由管理员重试。
+* **可用性**：资源获取运行时的入库钩子，以及为扫描发现的文件每十分钟运行一次的周期作业，会完成那些电影已有文件、或各季已播出单集全部有文件的已通过和失败的请求，按季逐一完成。
+* **发现**把各提供者的目录合并为 `<plugin>/<catalog>`，并把一页中的每个标题标记为可用、部分可用、想要、已请求或无，附带其条目、其活动请求以及用户能否请求它。用户的分级限制同样适用：按认证分级过滤的目录只被请求限制之内的分级；其他目录的标题逐个查询，超出限制的被剔除。成人标题从不列出。
+* **问题**报告用户可访问的条目在视频、音频、字幕或其他方面的问题，可指明季与集，并带有评论串。创建者与管理员可评论、解决与重新打开；管理员，或尚无回复的问题的创建者，可删除问题。
+* **通知**是以相关用户为用户的活动：`request.pending`（面向管理员的通知器）、`request.approved`、`request.auto_approved`、`request.declined`、`request.failed`、`request.available`、`issue.created`、`issue.commented`、`issue.resolved` 与 `issue.reopened`，属性中带有请求或问题。通知器插件投递它们，`ActivityService.ListMyActivities` 列出用户自己的活动。
