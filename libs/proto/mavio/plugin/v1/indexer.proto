@@ -3,6 +3,7 @@ edition = "2023";
 package mavio.plugin.v1;
 
 import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "mavio/plugin/v1/settings.proto";
 
@@ -96,6 +97,23 @@ message Indexer {
   google.protobuf.Timestamp disabled_until = 9;
   // The failure that left it out.
   string failure = 10;
+  // The indexer's tags: items with tags only take releases of indexers
+  // sharing one of them, and proxies sharing one are used for it.
+  repeated string tags = 11;
+  // Flags a torrent release must carry one of, in the names of releases'
+  // flags; empty for none.
+  repeated string required_flags = 12;
+  // The fewest seeders a torrent release may have; 0 for none.
+  int32 minimum_seeders = 13;
+  // The languages of the indexer's MULTi releases, by English name, e.g.
+  // "French"; "Original" for the original language of the movie or series.
+  repeated string multi_languages = 14;
+  // How long torrents of the indexer seed: the ratio, the time for single
+  // releases and for season packs; unset for the download client's
+  // defaults.
+  double seed_ratio = 15;
+  google.protobuf.Duration seed_time = 16;
+  google.protobuf.Duration season_pack_seed_time = 17;
 }
 
 // IndexerCapabilities is what an indexer can be searched by, as Newznab's
@@ -105,7 +123,9 @@ message IndexerCapabilities {
   // basic searches; "q", "season", "ep", "imdbid", "tvdbid", "rid",
   // "tvmazeid", "traktid", "tmdbid", "doubanid", "year" and "genre" for
   // series; "q", "imdbid", "tmdbid", "traktid", "doubanid", "year" and
-  // "genre" for movies. An empty list means the type is not searchable.
+  // "genre" for movies; "title" for series too when the indexer takes a
+  // series' title apart from the query. An empty list means the type is
+  // not searchable.
   repeated string search_params = 1;
   repeated string tv_search_params = 2;
   repeated string movie_search_params = 3;
@@ -158,6 +178,16 @@ message SearchReleasesRequest {
   // Results per indexer; zero for its default.
   int32 limit = 10 [(buf.validate.field).int32.gte = 0];
   int32 offset = 11 [(buf.validate.field).int32.gte = 0];
+  // A series' title, for TV searches of indexers taking Newznab's title
+  // parameter.
+  string title = 12 [(buf.validate.field).string.max_len = 1000];
+  // The age of releases, in days, and their size, in bytes, that indexers
+  // taking them search within and the results are kept within; unset for
+  // no limit.
+  int32 min_age = 13 [(buf.validate.field).int32.gte = 0];
+  int32 max_age = 14 [(buf.validate.field).int32.gte = 0];
+  int64 min_size = 15 [(buf.validate.field).int64.gte = 0];
+  int64 max_size = 16 [(buf.validate.field).int64.gte = 0];
 }
 
 // IndexerSearchType is what a search looks for, as Newznab's t parameter
@@ -225,6 +255,14 @@ message Release {
   repeated string subtitles = 26;
   repeated string genres = 27;
   string poster_url = 28;
+  // What some sites tell of a release's media, in their words: its origin
+  // (e.g. "Scene", "P2P", "Internal"), source (e.g. "WEB-DL"), container
+  // (e.g. "MKV"), codec (e.g. "H.264") and resolution (e.g. "1080p").
+  string origin = 29;
+  string source = 30;
+  string container = 31;
+  string codec = 32;
+  string resolution = 33;
 }
 
 message GetReleaseFileRequest {

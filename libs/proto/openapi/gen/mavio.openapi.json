@@ -4007,6 +4007,31 @@
             },
             "title": "indexers",
             "description": "The indexers to search; empty for every enabled indexer."
+          },
+          "minAge": {
+            "type": "integer",
+            "title": "min_age",
+            "minimum": 0,
+            "format": "int32",
+            "description": "The age of releases, in days, and their size, in bytes, to search\n within, as Prowlarr's searches take them; unset for no limit."
+          },
+          "maxAge": {
+            "type": "integer",
+            "title": "max_age",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "minSize": {
+            "type": "string",
+            "title": "min_size",
+            "minimum": 0,
+            "format": "int64"
+          },
+          "maxSize": {
+            "type": "string",
+            "title": "max_size",
+            "minimum": 0,
+            "format": "int64"
           }
         },
         "title": "SearchReleasesRequest",

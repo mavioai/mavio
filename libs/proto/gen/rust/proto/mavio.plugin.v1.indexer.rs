@@ -960,6 +960,41 @@ pub struct Indexer {
     ///
     /// Field 10: `failure`
     pub failure: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The indexer's tags: items with tags only take releases of indexers
+    /// sharing one of them, and proxies sharing one are used for it.
+    ///
+    /// Field 11: `tags`
+    pub tags: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Flags a torrent release must carry one of, in the names of releases'
+    /// flags; empty for none.
+    ///
+    /// Field 12: `required_flags`
+    pub required_flags: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// The fewest seeders a torrent release may have; 0 for none.
+    ///
+    /// Field 13: `minimum_seeders`
+    pub minimum_seeders: ::core::option::Option<i32>,
+    /// The languages of the indexer's MULTi releases, by English name, e.g.
+    /// "French"; "Original" for the original language of the movie or series.
+    ///
+    /// Field 14: `multi_languages`
+    pub multi_languages: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// How long torrents of the indexer seed: the ratio, the time for single
+    /// releases and for season packs; unset for the download client's
+    /// defaults.
+    ///
+    /// Field 15: `seed_ratio`
+    pub seed_ratio: ::core::option::Option<f64>,
+    /// Field 16: `seed_time`
+    pub seed_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Duration,
+        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
+    >,
+    /// Field 17: `season_pack_seed_time`
+    pub season_pack_seed_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Duration,
+        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -976,6 +1011,13 @@ impl ::core::fmt::Debug for Indexer {
             .field("capabilities", &self.capabilities)
             .field("disabled_until", &self.disabled_until)
             .field("failure", &self.failure)
+            .field("tags", &self.tags)
+            .field("required_flags", &self.required_flags)
+            .field("minimum_seeders", &self.minimum_seeders)
+            .field("multi_languages", &self.multi_languages)
+            .field("seed_ratio", &self.seed_ratio)
+            .field("seed_time", &self.seed_time)
+            .field("season_pack_seed_time", &self.season_pack_seed_time)
             .finish()
     }
 }
@@ -1058,6 +1100,20 @@ impl Indexer {
         self.failure = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::minimum_seeders`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_minimum_seeders(mut self, value: i32) -> Self {
+        self.minimum_seeders = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::seed_ratio`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_seed_ratio(mut self, value: f64) -> Self {
+        self.seed_ratio = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Indexer);
 impl ::buffa::MessageName for Indexer {
@@ -1119,6 +1175,37 @@ impl ::buffa::Message for Indexer {
         if let Some(ref v) = self.failure {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.tags {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.required_flags {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.minimum_seeders {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        for v in &self.multi_languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.seed_ratio.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.seed_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.seed_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.season_pack_seed_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.season_pack_seed_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1168,6 +1255,37 @@ impl ::buffa::Message for Indexer {
         }
         if let Some(ref v) = self.failure {
             ::buffa::types::put_string_field(10u32, v, buf);
+        }
+        for v in &self.tags {
+            ::buffa::types::put_string_field(11u32, v, buf);
+        }
+        for v in &self.required_flags {
+            ::buffa::types::put_string_field(12u32, v, buf);
+        }
+        if let Some(v) = self.minimum_seeders {
+            ::buffa::types::put_int32_field(13u32, v, buf);
+        }
+        for v in &self.multi_languages {
+            ::buffa::types::put_string_field(14u32, v, buf);
+        }
+        if let Some(v) = self.seed_ratio {
+            ::buffa::types::put_double_field(15u32, v, buf);
+        }
+        if self.seed_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                16u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.seed_time.write_to(__cache, buf);
+        }
+        if self.season_pack_seed_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                17u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.season_pack_seed_time.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1282,6 +1400,79 @@ impl ::buffa::Message for Indexer {
                     buf,
                 )?;
             }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.tags.push(__elem);
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.required_flags.push(__elem);
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.minimum_seeders = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.multi_languages.push(__elem);
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.seed_ratio = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.seed_time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.season_pack_seed_time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1300,6 +1491,13 @@ impl ::buffa::Message for Indexer {
         self.capabilities = ::buffa::MessageField::none();
         self.disabled_until = ::buffa::MessageField::none();
         self.failure = ::core::option::Option::None;
+        self.tags.clear();
+        self.required_flags.clear();
+        self.minimum_seeders = ::core::option::Option::None;
+        self.multi_languages.clear();
+        self.seed_ratio = ::core::option::Option::None;
+        self.seed_time = ::buffa::MessageField::none();
+        self.season_pack_seed_time = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1320,7 +1518,9 @@ pub struct IndexerCapabilities {
     /// basic searches; "q", "season", "ep", "imdbid", "tvdbid", "rid",
     /// "tvmazeid", "traktid", "tmdbid", "doubanid", "year" and "genre" for
     /// series; "q", "imdbid", "tmdbid", "traktid", "doubanid", "year" and
-    /// "genre" for movies. An empty list means the type is not searchable.
+    /// "genre" for movies; "title" for series too when the indexer takes a
+    /// series' title apart from the query. An empty list means the type is
+    /// not searchable.
     ///
     /// Field 1: `search_params`
     pub search_params: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
@@ -2091,6 +2291,23 @@ pub struct SearchReleasesRequest {
     pub limit: ::core::option::Option<i32>,
     /// Field 11: `offset`
     pub offset: ::core::option::Option<i32>,
+    /// A series' title, for TV searches of indexers taking Newznab's title
+    /// parameter.
+    ///
+    /// Field 12: `title`
+    pub title: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The age of releases, in days, and their size, in bytes, that indexers
+    /// taking them search within and the results are kept within; unset for
+    /// no limit.
+    ///
+    /// Field 13: `min_age`
+    pub min_age: ::core::option::Option<i32>,
+    /// Field 14: `max_age`
+    pub max_age: ::core::option::Option<i32>,
+    /// Field 15: `min_size`
+    pub min_size: ::core::option::Option<i64>,
+    /// Field 16: `max_size`
+    pub max_size: ::core::option::Option<i64>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -2108,6 +2325,11 @@ impl ::core::fmt::Debug for SearchReleasesRequest {
             .field("genre", &self.genre)
             .field("limit", &self.limit)
             .field("offset", &self.offset)
+            .field("title", &self.title)
+            .field("min_age", &self.min_age)
+            .field("max_age", &self.max_age)
+            .field("min_size", &self.min_size)
+            .field("max_size", &self.max_size)
             .finish()
     }
 }
@@ -2187,6 +2409,44 @@ impl SearchReleasesRequest {
         self.offset = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::title`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_title(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.title = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::min_age`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_min_age(mut self, value: i32) -> Self {
+        self.min_age = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::max_age`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_max_age(mut self, value: i32) -> Self {
+        self.max_age = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::min_size`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_min_size(mut self, value: i64) -> Self {
+        self.min_size = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::max_size`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_max_size(mut self, value: i64) -> Self {
+        self.max_size = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(SearchReleasesRequest);
 impl ::buffa::MessageName for SearchReleasesRequest {
@@ -2249,6 +2509,21 @@ impl ::buffa::Message for SearchReleasesRequest {
         if let Some(v) = self.offset {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.title {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.min_age {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_age {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.min_size {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_size {
+            size += 2u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2301,6 +2576,21 @@ impl ::buffa::Message for SearchReleasesRequest {
         }
         if let Some(v) = self.offset {
             ::buffa::types::put_int32_field(11u32, v, buf);
+        }
+        if let Some(ref v) = self.title {
+            ::buffa::types::put_string_field(12u32, v, buf);
+        }
+        if let Some(v) = self.min_age {
+            ::buffa::types::put_int32_field(13u32, v, buf);
+        }
+        if let Some(v) = self.max_age {
+            ::buffa::types::put_int32_field(14u32, v, buf);
+        }
+        if let Some(v) = self.min_size {
+            ::buffa::types::put_int64_field(15u32, v, buf);
+        }
+        if let Some(v) = self.max_size {
+            ::buffa::types::put_int64_field(16u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2452,6 +2742,52 @@ impl ::buffa::Message for SearchReleasesRequest {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.title.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.min_age = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.max_age = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.min_size = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.max_size = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2471,6 +2807,11 @@ impl ::buffa::Message for SearchReleasesRequest {
         self.genre = ::core::option::Option::None;
         self.limit = ::core::option::Option::None;
         self.offset = ::core::option::Option::None;
+        self.title = ::core::option::Option::None;
+        self.min_age = ::core::option::Option::None;
+        self.max_age = ::core::option::Option::None;
+        self.min_size = ::core::option::Option::None;
+        self.max_size = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -2899,6 +3240,20 @@ pub struct Release {
     pub genres: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     /// Field 28: `poster_url`
     pub poster_url: ::core::option::Option<::buffa::alloc::string::String>,
+    /// What some sites tell of a release's media, in their words: its origin
+    /// (e.g. "Scene", "P2P", "Internal"), source (e.g. "WEB-DL"), container
+    /// (e.g. "MKV"), codec (e.g. "H.264") and resolution (e.g. "1080p").
+    ///
+    /// Field 29: `origin`
+    pub origin: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 30: `source`
+    pub source: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 31: `container`
+    pub container: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 32: `codec`
+    pub codec: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 33: `resolution`
+    pub resolution: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -2933,6 +3288,11 @@ impl ::core::fmt::Debug for Release {
             .field("subtitles", &self.subtitles)
             .field("genres", &self.genres)
             .field("poster_url", &self.poster_url)
+            .field("origin", &self.origin)
+            .field("source", &self.source)
+            .field("container", &self.container)
+            .field("codec", &self.codec)
+            .field("resolution", &self.resolution)
             .finish()
     }
 }
@@ -3124,6 +3484,56 @@ impl Release {
         self.poster_url = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::origin`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_origin(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.origin = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::source`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_source(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.source = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::container`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_container(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.container = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::codec`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_codec(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.codec = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::resolution`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_resolution(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.resolution = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Release);
 impl ::buffa::MessageName for Release {
@@ -3242,6 +3652,21 @@ impl ::buffa::Message for Release {
         if let Some(ref v) = self.poster_url {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.origin {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.source {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.container {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.codec {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.resolution {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3350,6 +3775,21 @@ impl ::buffa::Message for Release {
         }
         if let Some(ref v) = self.poster_url {
             ::buffa::types::put_string_field(28u32, v, buf);
+        }
+        if let Some(ref v) = self.origin {
+            ::buffa::types::put_string_field(29u32, v, buf);
+        }
+        if let Some(ref v) = self.source {
+            ::buffa::types::put_string_field(30u32, v, buf);
+        }
+        if let Some(ref v) = self.container {
+            ::buffa::types::put_string_field(31u32, v, buf);
+        }
+        if let Some(ref v) = self.codec {
+            ::buffa::types::put_string_field(32u32, v, buf);
+        }
+        if let Some(ref v) = self.resolution {
+            ::buffa::types::put_string_field(33u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3685,6 +4125,60 @@ impl ::buffa::Message for Release {
                     buf,
                 )?;
             }
+            29u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.origin.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            30u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.source.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            31u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .container
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            32u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.codec.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            33u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .resolution
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3721,6 +4215,11 @@ impl ::buffa::Message for Release {
         self.subtitles.clear();
         self.genres.clear();
         self.poster_url = ::core::option::Option::None;
+        self.origin = ::core::option::Option::None;
+        self.source = ::core::option::Option::None;
+        self.container = ::core::option::Option::None;
+        self.codec = ::core::option::Option::None;
+        self.resolution = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
