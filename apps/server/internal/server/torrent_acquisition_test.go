@@ -249,7 +249,7 @@ func TestTorrentAcquisition(t *testing.T) {
 		waitFor(t, rel.title+" grabbed", func() bool {
 			q = s.download(rel.title)
 			return q != nil && qb.torrent(hash) != nil
-		}, s.describeQueue)
+		}, s.describeWanted(movieID))
 		if q.GetQuality() != quality || q.GetClientId() != "qb" || q.GetDownloadId() != strings.ToUpper(hash) ||
 			q.GetProtocol() != acquisitionv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT || q.GetIndexer().GetIndexerId() != "tz" {
 			t.Errorf("queued %s = %v, want = %s in qBittorrent, from the Torznab indexer", rel.title, q, quality)

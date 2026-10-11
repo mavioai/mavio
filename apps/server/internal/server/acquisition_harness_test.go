@@ -266,6 +266,40 @@ func (s *acquisitionServer) describeQueue() any {
 	return out
 }
 
+// describeWanted describes, for failures, the downloads and what decides
+// on a wanted item's releases: its runtime, which bounds their sizes, its
+// history, and the releases a search finds for it with their rejections
+// as they stand now.
+func (s *acquisitionServer) describeWanted(itemID string) func() any {
+	return func() any {
+		ctx := s.t.Context()
+		out := []any{"queue", s.describeQueue()}
+		if it, err := s.items.GetItem(ctx, libraryv1.GetItemRequest_builder{Id: new(itemID)}.Build()); err == nil {
+			out = append(out, "runtime", it.GetItem().GetRuntime().AsDuration())
+		}
+		if resp, err := s.downloads.ListHistory(ctx, acquisitionv1.ListHistoryRequest_builder{ItemId: new(itemID)}.Build()); err == nil {
+			var history []string
+			for _, h := range resp.GetEvents() {
+				history = append(history, fmt.Sprintf("%s %s %s", h.GetType(), h.GetSourceTitle(), h.GetQuality()))
+			}
+			out = append(out, "history", history)
+		}
+		resp, err := s.releases.SearchReleases(ctx, acquisitionv1.SearchReleasesRequest_builder{ItemId: new(itemID)}.Build())
+		if err != nil {
+			return append(out, "search", err)
+		}
+		var found []string
+		for _, r := range resp.GetReleases() {
+			var rejections []string
+			for _, rj := range r.GetRejections() {
+				rejections = append(rejections, rj.GetMessage())
+			}
+			found = append(found, fmt.Sprintf("%s %q", r.GetTitle(), rejections))
+		}
+		return append(out, "search", found, resp.GetFailures())
+	}
+}
+
 // download returns the download of a release, or nil.
 func (s *acquisitionServer) download(title string) *acquisitionv1.QueueItem {
 	for _, q := range s.queue() {
