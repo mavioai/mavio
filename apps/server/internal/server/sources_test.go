@@ -77,9 +77,14 @@ const (
 // service and Sonarr's SkyHook as the hosts they name.
 type fakeServices struct {
 	mode tmdbMode
+	// routes are answers of a test's own, by host and path, before
+	// serviceRoutes.
+	routes map[string]string
 
 	mu      sync.Mutex
 	unknown []string
+	// served counts the requests answered, by host and path.
+	served map[string]int
 	// keyed counts TMDB's answers to Mavio's key.
 	keyed int
 }
@@ -140,7 +145,17 @@ func (f *fakeServices) serve(w http.ResponseWriter, r *http.Request) {
 			f.mu.Unlock()
 		}
 	}
-	if body, ok := serviceRoutes[r.URL.Host+r.URL.Path]; ok {
+	body, ok := f.routes[r.URL.Host+r.URL.Path]
+	if !ok {
+		body, ok = serviceRoutes[r.URL.Host+r.URL.Path]
+	}
+	if ok {
+		f.mu.Lock()
+		if f.served == nil {
+			f.served = map[string]int{}
+		}
+		f.served[r.URL.Host+r.URL.Path]++
+		f.mu.Unlock()
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(body))
 		return

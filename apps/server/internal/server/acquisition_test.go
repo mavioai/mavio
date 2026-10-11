@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html"
 	"io"
 	"net"
 	"net/http"
@@ -73,7 +74,17 @@ type offered struct {
 	id, title string
 	size      int64
 	published time.Time
+	// categories are the release's Newznab categories, Movies > HD when
+	// empty.
+	categories []int
+	// attrs are the release's further Newznab attributes, such as tvdbid,
+	// season and episode; The Matrix's IMDb ID when nil.
+	attrs [][2]string
 }
+
+// newznabCategoryNames are the names of the Newznab categories releases
+// are offered in.
+var newznabCategoryNames = map[int]string{2000: "Movies", 2040: "Movies &gt; HD", 5000: "TV", 5040: "TV &gt; HD", 5070: "TV &gt; Anime"}
 
 // fakeNewznab is a Newznab indexer listing the releases offered, for
 // every search and its RSS feed alike, and serving their NZBs.
@@ -134,12 +145,25 @@ func (f *fakeNewznab) serve(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(&b, `<newznab:response offset="0" total="%d"/>`, len(f.releases))
 	for _, rel := range f.releases {
 		link := f.URL + "/getnzb/" + rel.id + ".nzb"
+		categories, attrs := rel.categories, rel.attrs
+		if len(categories) == 0 {
+			categories = []int{2000, 2040}
+		}
+		if attrs == nil {
+			attrs = [][2]string{{"imdb", "0133093"}}
+		}
 		fmt.Fprintf(&b, `<item><title>%s</title><guid isPermaLink="true">%s/details/%s</guid><link>%s</link>
-<pubDate>%s</pubDate><category>Movies &gt; HD</category>
+<pubDate>%s</pubDate><category>%s</category>
 <enclosure url="%s" length="%d" type="application/x-nzb"/>
-<newznab:attr name="category" value="2000"/><newznab:attr name="category" value="2040"/>
-<newznab:attr name="size" value="%d"/><newznab:attr name="guid" value="%s"/><newznab:attr name="imdb" value="0133093"/>
-</item>`, rel.title, f.URL, rel.id, link, rel.published.Format(time.RFC1123Z), link, rel.size, rel.size, rel.id)
+`, html.EscapeString(rel.title), f.URL, rel.id, link, rel.published.Format(time.RFC1123Z), newznabCategoryNames[categories[len(categories)-1]], link, rel.size)
+		for _, c := range categories {
+			fmt.Fprintf(&b, `<newznab:attr name="category" value="%d"/>`, c)
+		}
+		fmt.Fprintf(&b, `<newznab:attr name="size" value="%d"/><newznab:attr name="guid" value="%s"/>`, rel.size, rel.id)
+		for _, a := range attrs {
+			fmt.Fprintf(&b, `<newznab:attr name="%s" value="%s"/>`, a[0], html.EscapeString(a[1]))
+		}
+		b.WriteString("\n</item>")
 	}
 	b.WriteString(`</channel></rss>`)
 	_, _ = w.Write([]byte(b.String()))
@@ -292,7 +316,24 @@ func (f *fakeSABnzbd) finish(t *testing.T, j *sabJob, video, failure string) {
 		j.state, j.failMessage = "Failed", failure
 		return
 	}
-	copyFile(t, video, filepath.Join(f.complete, j.category, j.name, j.name+".mkv"))
+	f.completeLocked(t, j, video, j.name+".mkv")
+}
+
+// completeWith completes a job with a copy of a video file under each
+// name in its job folder, as SABnzbd leaves a season pack it unpacked.
+func (f *fakeSABnzbd) completeWith(t *testing.T, j *sabJob, video string, names ...string) {
+	t.Helper()
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.completeLocked(t, j, video, names...)
+}
+
+// completeLocked completes a job with its files; f.mu is held.
+func (f *fakeSABnzbd) completeLocked(t *testing.T, j *sabJob, video string, names ...string) {
+	t.Helper()
+	for _, name := range names {
+		copyFile(t, video, filepath.Join(f.complete, j.category, j.name, name))
+	}
 	j.state = "Completed"
 }
 
@@ -556,10 +597,10 @@ func TestAcquisition(t *testing.T) {
 
 	folder := filepath.Join(movies, "The Matrix (1999)")
 	day := time.Now().Add(-48 * time.Hour)
-	hdtv := offered{"aaa1", "The.Matrix.1999.720p.HDTV.x264-GRPA", 4 << 30, day}
-	webdl := offered{"bbb2", "The.Matrix.1999.1080p.WEB-DL.DD5.1.H.264-GRPB", 6 << 30, day}
-	blurayFailing := offered{"ccc3", "The.Matrix.1999.1080p.BluRay.x264-GRPC", 9 << 30, day}
-	blurayReplacement := offered{"ddd4", "The.Matrix.1999.1080p.BluRay.x264-GRPD", 9 << 30, day.Add(-time.Hour)}
+	hdtv := offered{id: "aaa1", title: "The.Matrix.1999.720p.HDTV.x264-GRPA", size: 4 << 30, published: day}
+	webdl := offered{id: "bbb2", title: "The.Matrix.1999.1080p.WEB-DL.DD5.1.H.264-GRPB", size: 6 << 30, published: day}
+	blurayFailing := offered{id: "ccc3", title: "The.Matrix.1999.1080p.BluRay.x264-GRPC", size: 9 << 30, published: day}
+	blurayReplacement := offered{id: "ddd4", title: "The.Matrix.1999.1080p.BluRay.x264-GRPD", size: 9 << 30, published: day.Add(-time.Hour)}
 
 	// 1. A search finds the HDTV release, which is grabbed, tracked and
 	// imported under Radarr's naming, and played.
