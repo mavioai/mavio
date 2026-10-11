@@ -239,6 +239,8 @@ func TestItemQuery(t *testing.T) {
 		movies[1].Genres, movies[1].ProductionYear, movies[1].ParentalRating = []string{"Drama"}, 1985, ptr(15)
 		movies[2].Genres, movies[2].ProductionYear, movies[2].OriginalTitle = []string{"Animation"}, 2001, "Spirited Away"
 		movies[3].ProductionYear, movies[3].ParentalRating = 2015, ptr(15)
+		movies[0].ExternalIDs = map[core.Provider]string{core.ProviderTMDB: "194", core.ProviderIMDb: "tt0211915"}
+		movies[1].ExternalIDs = map[core.Provider]string{core.ProviderTMDB: "68"}
 		trailer := newItem(lib, core.KindVideo, "Brazil Trailer")
 		trailer.Extra, trailer.OwnerID = core.ExtraTrailer, movies[1].ID
 		upsert(t, s, append(movies, trailer)...)
@@ -262,6 +264,8 @@ func TestItemQuery(t *testing.T) {
 			{"extras excluded", core.ItemQuery{Search: "brazil"}, []string{"Brazil"}},
 			{"extras included", core.ItemQuery{Search: "brazil", IncludeExtras: true, Sort: byName}, []string{"Brazil", "Brazil Trailer"}},
 			{"genres any of", core.ItemQuery{Genres: []string{"Drama", "Animation"}, Sort: byName}, []string{"Brazil", "千と千尋の神隠し"}},
+			{"external IDs any of", core.ItemQuery{ExternalIDs: map[core.Provider]string{core.ProviderTMDB: "68", core.ProviderIMDb: "tt0211915"}, Sort: byName}, []string{"amélie", "Brazil"}},
+			{"external ID of another provider", core.ItemQuery{ExternalIDs: map[core.Provider]string{core.ProviderTVDB: "194"}}, nil},
 			{"year range", core.ItemQuery{Kinds: moviesOnly, YearFrom: 2000, YearTo: 2010, Sort: byName}, []string{"amélie", "千と千尋の神隠し"}},
 			{"max rating includes unrated", core.ItemQuery{Kinds: moviesOnly, MaxRating: ptr(12), Sort: byName}, []string{"amélie", "千と千尋の神隠し"}},
 			{"max rating skips unrated", core.ItemQuery{Kinds: moviesOnly, MaxRating: ptr(12), SkipUnrated: true}, []string{"amélie"}},

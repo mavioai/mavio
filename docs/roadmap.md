@@ -571,6 +571,7 @@ flowchart TD
   - [ ] The discovery providers' similar titles that the libraries have, after the local ones, as Jellyfin's remote similar items providers add them
 - [x] Server: cross-origin requests on every route (`apps/server/internal/httpserver/cors.go`)
 - [x] Server: the server's ID, name and version in `AuthService.GetAuthInfo` and the discovery reply, by which clients recognize a server at any address
+- [x] Server: `ListItems` by external IDs (`ItemQuery.ExternalIDs`), by which clients find a title's versions on their other servers
 - [x] Server: the caller's user data on the items listed for them (`Item.user_data`), the progress, played marks and last activity by which clients draw items and merge Continue Watching across servers
 - [ ] Prototypes:
   - [x] Rust on tvOS: on `nightly-2026-10-10` with `-Zbuild-std`, `mavio-api` and its `events` example build for `aarch64-apple-tvos` and `aarch64-apple-tvos-sim`, the example runs in the tvOS simulator, and TLS (rustls with aws-lc-rs) builds

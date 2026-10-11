@@ -6579,6 +6579,14 @@ pub struct ListItemsRequest {
     ///
     /// Field 21: `monitored`
     pub monitored: ::core::option::Option<bool>,
+    /// Only items with any of these IDs, keyed by provider as Item's: the same
+    /// title as another server's.
+    ///
+    /// Field 22: `external_ids`
+    pub external_ids: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        ::buffa::alloc::string::String,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -6606,6 +6614,7 @@ impl ::core::fmt::Debug for ListItemsRequest {
             .field("top_level", &self.top_level)
             .field("include_virtual", &self.include_virtual)
             .field("monitored", &self.monitored)
+            .field("external_ids", &self.external_ids)
             .finish()
     }
 }
@@ -6825,6 +6834,12 @@ impl ::buffa::Message for ListItemsRequest {
         if self.monitored.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::Str,
+                _,
+            >(&self.external_ids, 2u64);
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -6911,6 +6926,11 @@ impl ::buffa::Message for ListItemsRequest {
         if let Some(v) = self.monitored {
             ::buffa::types::put_bool_field(21u32, v, buf);
         }
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::Str,
+            _,
+        >(&self.external_ids, 22u32, buf);
         self.__buffa_unknown_fields.write_to(buf);
     }
     fn merge_field(
@@ -7160,6 +7180,17 @@ impl ::buffa::Message for ListItemsRequest {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            22u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::Str,
+                    _,
+                >(&mut self.external_ids, buf, ctx)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -7189,6 +7220,7 @@ impl ::buffa::Message for ListItemsRequest {
         self.top_level = ::core::option::Option::None;
         self.include_virtual = ::core::option::Option::None;
         self.monitored = ::core::option::Option::None;
+        self.external_ids.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

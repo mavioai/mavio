@@ -398,6 +398,12 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	if req.HasPersonId() {
 		q.PersonID = core.MustParseID(req.GetPersonId())
 	}
+	for p, id := range req.GetExternalIds() {
+		if q.ExternalIDs == nil {
+			q.ExternalIDs = map[core.Provider]string{}
+		}
+		q.ExternalIDs[core.Provider(p)] = id
+	}
 	if req.HasPlayed() {
 		q.Played = new(req.GetPlayed())
 	}

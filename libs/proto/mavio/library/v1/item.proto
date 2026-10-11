@@ -501,6 +501,9 @@ message ListItemsRequest {
   bool include_virtual = 20;
   // Only monitored or only unmonitored items.
   bool monitored = 21;
+  // Only items with any of these IDs, keyed by provider as Item's: the same
+  // title as another server's.
+  map<string, string> external_ids = 22 [(buf.validate.field).map.max_pairs = 10];
 }
 
 message ListItemsResponse {
