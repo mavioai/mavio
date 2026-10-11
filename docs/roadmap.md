@@ -471,7 +471,7 @@ flowchart TD
 - [x] Adding a wanted movie to a library by its TMDB ID, with a quality profile and minimum availability (`WantedService`, `apps/server/internal/acquisition`)
   - [x] Digital and physical release dates of movies (from TMDB's release dates, or Radarr's metadata), which minimum availability uses as Radarr's Movie.IsAvailable; a movie without them is released 90 days after its premiere
   - [x] The original language of movies, which profiles wanting "Original" take and releases without languages are in; profiles accept any language for movies whose original language is unknown
-  - [ ] A movie whose identification fails is kept under its placeholder name ("TMDB <id>")
+  - [x] A movie whose identification fails is kept under its placeholder name ("TMDB <id>") and refreshed by the daily refresh of wanted movies, which refreshes those due for it as Radarr's RefreshMovieService and ShouldRefreshMovie: never refreshed, refreshed more than 180 days ago, or at least 12 hours ago and not yet released or physically released in the last 30 days
 - [x] Movie searches and RSS sync as jobs; grabs through `DownloadService`; decisions in `SearchReleases`
   - [x] Releases matched to movies by their alternative titles, translations and secondary years, as Radarr's MovieService.FindByTitle and TryGetMovieBySearchCriteria
   - [x] Tags, required flags, minimum seeders and MULTi languages of indexers, which the indexer plugin reports from its configuration

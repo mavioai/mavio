@@ -471,7 +471,7 @@ flowchart TD
 - [x] 按 TMDB ID 把想要的电影加入媒体库，带质量档案与最低可用状态（`WantedService`、`apps/server/internal/acquisition`）
   - [x] 电影的数字版与实体版发行日期（来自 TMDB 的发行日期或 Radarr 的元数据），最低可用性如同 Radarr 的 Movie.IsAvailable 使用它们；没有这些日期的电影在首映 90 天后视为已发行
   - [x] 电影的原始语言，要求"Original"的档案取它，没有语言标记的发布即为该语言；原始语言未知的电影，档案接受任何语言
-  - [ ] 识别失败的电影保留其占位名称（"TMDB <id>"）
+  - [x] 识别失败的电影保留其占位名称（"TMDB <id>"），由每日刷新想要的电影的作业再次刷新；该作业如同 Radarr 的 RefreshMovieService 与 ShouldRefreshMovie，刷新到期的电影：从未刷新、超过 180 天未刷新，或至少 12 小时未刷新且尚未发行或在最近 30 天内发行实体版
 - [x] 以作业执行的电影搜索与 RSS 同步；通过 `DownloadService` 抓取；`SearchReleases` 给出决策
   - [x] 按电影的别名、译名与次要年份匹配发布，如同 Radarr 的 MovieService.FindByTitle 与 TryGetMovieBySearchCriteria
   - [x] 索引器的标签、必需标志、最少做种数与 MULTi 语言，由索引器插件按其配置提供
