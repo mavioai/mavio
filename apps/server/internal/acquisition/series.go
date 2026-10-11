@@ -53,6 +53,37 @@ func coveredID(holder core.ID, episode int) core.ID {
 	return id
 }
 
+// titleSeparator joins the titles of the episodes a multi-episode item
+// holds into its name, as Jellyfin's EpisodeNfoParser does.
+const titleSeparator = " / "
+
+// coveredName returns the name of an item holding a file of several
+// episodes: their titles joined as Jellyfin's EpisodeNfoParser joins the
+// names of a multi-episode NFO, so that the titles of the episodes beyond
+// the first, which have no items of their own, stay known for naming the
+// file as Sonarr's FileNameBuilder does. It is empty when an episode has
+// no title, or a title holds the separator.
+func coveredName(episodes []*series.Episode) string {
+	titles := make([]string, 0, len(episodes))
+	for _, ep := range episodes {
+		if ep.Title == "" || strings.Contains(ep.Title, titleSeparator) {
+			return ""
+		}
+		titles = append(titles, ep.Title)
+	}
+	return strings.Join(titles, titleSeparator)
+}
+
+// coveredTitles returns the titles of the episodes from first to last a
+// multi-episode item holds, split from its name; only the first has the
+// whole name when the name does not split into one title per episode.
+func coveredTitles(name string, first, last int) []string {
+	if parts := strings.Split(name, titleSeparator); last > first && len(parts) == last-first+1 {
+		return parts
+	}
+	return []string{name}
+}
+
 // hasFile reports whether an episode item has its file.
 func hasFile(it core.Item) bool { return !it.Virtual && it.Path != "" && it.MissingSince == nil }
 
@@ -145,6 +176,7 @@ func (rn *run) show(ctx context.Context, seriesID core.ID) (*show, error) {
 		if c.IndexNumberEnd != nil && *c.IndexNumberEnd > last && hasFile(c) {
 			last = *c.IndexNumberEnd
 		}
+		titles := coveredTitles(c.Name, *c.IndexNumber, last)
 		for n := *c.IndexNumber; n <= last; n++ {
 			id := c.ID
 			if n != *c.IndexNumber {
@@ -158,8 +190,10 @@ func (rn *run) show(ctx context.Context, seriesID core.ID) (*show, error) {
 				SeasonNumber:  *c.ParentIndexNumber,
 				EpisodeNumber: n,
 			}
+			if i := n - *c.IndexNumber; i < len(titles) {
+				ep.Title = titles[i]
+			}
 			if n == *c.IndexNumber {
-				ep.Title = c.Name
 				if c.AbsoluteNumber != nil {
 					ep.AbsoluteEpisodeNumber = *c.AbsoluteNumber
 				}

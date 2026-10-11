@@ -514,6 +514,9 @@ func (r *Runtime) recordEpisodeItems(ctx context.Context, sh *show, episodes []*
 	it.Path, it.Virtual, it.MissingSince, it.IndexNumberEnd = imported, false, nil, nil
 	if last := episodes[len(episodes)-1]; len(episodes) > 1 && last.SeasonNumber == episodes[0].SeasonNumber && last.EpisodeNumber > *it.IndexNumber {
 		it.IndexNumberEnd = new(last.EpisodeNumber)
+		if name := coveredName(episodes); name != "" {
+			it.Name = name
+		}
 	}
 	if err := st.Upsert(ctx, it); err != nil {
 		return core.NilID, err
