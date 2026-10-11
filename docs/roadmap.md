@@ -96,7 +96,7 @@ flowchart TD
 | P16 | Acquisition data sources | In progress |
 | P17 | Indexers | ✅ Done |
 | P18 | Movie acquisition | ✅ Done |
-| P19 | Series acquisition | In progress |
+| P19 | Series acquisition | ✅ Done |
 | P20 | Discovery and requests | Not started |
 | P21 | Clients and ecosystem | In progress |
 | P22 | Real-device acceptance | Not started |
@@ -437,7 +437,7 @@ flowchart TD
 - [x] `ReleaseService` (`mavio/acquisition/v1/release.proto`, `apps/server/internal/releases`): lists the indexers of every ready provider; searches them for a movie, season or episode of the library tier by tier as Radarr's and Sonarr's FetchReleases do (the IDs each indexer takes, then its titles), or for text; parses the releases with `libs/release`
   - [ ] Seasons of anime searched episode by episode, as Sonarr does; they are refused for now
   - [ ] Newznab's `title` parameter, which Sonarr sends to indexers taking it
-  - [ ] Scene titles and mappings (XEM) of series searched besides their titles, with P19
+  - [x] Scene titles and mappings (XEM) of series searched besides their titles, with P19
   - [ ] Indexer capabilities kept with the server, so that searches need not list the indexers first
 - [x] End-to-end test (`apps/server/internal/server/releases_test.go`): Newznab, Torznab, a Cardigann definition fetched as `indexers.prowlarr.com` serves them and NzbIndex, searched through the assembled server
 
@@ -515,7 +515,11 @@ flowchart TD
   - [ ] Sonarr's import specifications for episode titles, unpacking, unverified scene numbering, absolute numbers and matching folders, and its scene name check
   - [ ] The qualities of episode files aggregated as Sonarr aggregates them
   - [ ] The history of the episodes a multi-episode file covers, which goes with their items
-- [ ] End-to-end test
+- [x] End-to-end test (`apps/server/internal/server/series_acquisition_test.go`): a season pack and a single episode of a standard series, an anime release named by a scene mapping title and an absolute number, and a daily series' release named by air date are found, imported under Sonarr's naming and played
+  - [ ] RSS syncs of series, multi-episode files and upgrades of episodes in the end-to-end test
+  - [ ] XEM's scene numbering in the end-to-end test
+  - [ ] Failed episode downloads, the blocklist and the searches replacing them in the end-to-end test
+  - [ ] `RunTask` answering with the queued or running job when it does not queue another
 
 ### P20 Discovery and Requests
 **Scope**: porting Seerr. `DiscoverService` lists what the discovery providers offer, marked as available, wanted or requested; `RequestService`: requests of movies and seasons, approval by administrators or automatic, quotas per user, users' limits on ratings applied to what they may request, notifications of the requester; reporting problems with an item.

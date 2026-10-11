@@ -96,7 +96,7 @@ flowchart TD
 | P16 | 资源获取数据源 | 进行中 |
 | P17 | 索引器 | ✅ 完成 |
 | P18 | 电影资源获取 | ✅ 完成 |
-| P19 | 剧集资源获取 | 进行中 |
+| P19 | 剧集资源获取 | ✅ 完成 |
 | P20 | 发现与请求 | 未开始 |
 | P21 | 客户端与生态 | 进行中 |
 | P22 | 真实设备验收 | 未开始 |
@@ -437,7 +437,7 @@ flowchart TD
 - [x] `ReleaseService`（`mavio/acquisition/v1/release.proto`、`apps/server/internal/releases`）：列出各就绪提供方的索引器；如 Radarr 与 Sonarr 的 FetchReleases 那样逐级为媒体库中的电影、季或单集搜索（先按各索引器支持的 ID，再按标题），或按文本搜索；用 `libs/release` 解析 release
   - [ ] 如 Sonarr 那样逐集搜索动漫的季；目前拒绝此类搜索
   - [ ] Newznab 的 `title` 参数，Sonarr 会发给支持它的索引器
-  - [ ] 剧集除标题外也按 scene 标题与映射（XEM）搜索，随 P19 完成
+  - [x] 剧集除标题外也按 scene 标题与映射（XEM）搜索，随 P19 完成
   - [ ] 索引器能力由服务器保存，搜索无需先列出索引器
 - [x] 端到端测试（`apps/server/internal/server/releases_test.go`）：经装配好的服务器搜索 Newznab、Torznab、以 `indexers.prowlarr.com` 的方式提供的 Cardigann 定义以及 NzbIndex
 
@@ -515,7 +515,11 @@ flowchart TD
   - [ ] Sonarr 关于单集标题、解压中、未验证的 scene 编号、绝对集数与文件夹匹配的入库规格，以及其 scene 名称检查
   - [ ] 按 Sonarr 的方式汇总单集文件的质量
   - [ ] 多集文件所涵盖的各集的历史记录，目前随其条目一并删除
-- [ ] 端到端测试
+- [x] 端到端测试（`apps/server/internal/server/series_acquisition_test.go`）：普通剧集的整季包与单集、以 scene 映射标题和绝对集数命名的动漫 release、以播出日期命名的日播剧 release 被找到，按 Sonarr 的命名入库并播放
+  - [ ] 端到端测试中的剧集 RSS 同步、多集文件与单集升级
+  - [ ] 端到端测试中 XEM 的 scene 编号
+  - [ ] 端到端测试中失败的单集下载、阻止列表以及替代它们的搜索
+  - [ ] `RunTask` 在未排入新作业时返回已排队或运行中的作业
 
 ### P20 发现与请求
 **范围**：移植 Seerr。`DiscoverService` 列出发现提供者给出的内容，并标明已入库、想要或已请求；`RequestService`：电影与季的请求，由管理员审批或自动通过，按用户的配额，用户的分级限制同样作用于其可请求的内容，通知请求者；报告条目的问题。
