@@ -61,6 +61,9 @@ func (r *Runtime) importDownload(ctx context.Context, rn *run, d *core.Download,
 		return r.warn(ctx, d, fmt.Sprintf(msgNotLocalPath, local))
 	}
 	local = filepath.Clean(local)
+	if isSeriesDownload(*d) {
+		return r.importEpisodeDownload(ctx, rn, d, p, local)
+	}
 	if done, err := r.alreadyImported(ctx, d); err != nil || done {
 		if done {
 			return r.completeImport(ctx, d, p)
@@ -315,6 +318,13 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 // Radarr's NotSampleSpecification and HasAudioTrackSpecification; a file
 // that cannot be read is rejected too.
 func (r *Runtime) verify(ctx context.Context, m *movie, f importFile) ([]string, error) {
+	return r.verifyFile(ctx, f, m.acq.Runtime, false)
+}
+
+// verifyFile reads a file and rejects samples of a runtime in minutes
+// and files without audio; specials are not checked for samples, as
+// Sonarr's DetectSample.
+func (r *Runtime) verifyFile(ctx context.Context, f importFile, runtime int, special bool) ([]string, error) {
 	if r.Prober == nil {
 		return []string{fmt.Sprintf(msgUnreadable, "no prober")}, nil
 	}
@@ -331,11 +341,13 @@ func (r *Runtime) verify(ctx context.Context, m *movie, f importFile) ([]string,
 		return []string{fmt.Sprintf(msgUnreadable, err)}, nil
 	}
 	var reasons []string
-	switch acquire.IsSample(f.path, &res.Source.Duration, m.acq.Runtime) {
-	case acquire.SampleYes:
-		reasons = append(reasons, msgSample)
-	case acquire.SampleIndeterminate:
-		reasons = append(reasons, msgSampleUnknown)
+	if !special {
+		switch acquire.IsSample(f.path, &res.Source.Duration, runtime) {
+		case acquire.SampleYes:
+			reasons = append(reasons, msgSample)
+		case acquire.SampleIndeterminate:
+			reasons = append(reasons, msgSampleUnknown)
+		}
 	}
 	if !slices.ContainsFunc(res.Source.Streams, func(s core.MediaStream) bool { return s.Kind == core.StreamAudio }) {
 		reasons = append(reasons, msgNoAudio)

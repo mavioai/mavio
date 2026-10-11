@@ -4,6 +4,7 @@ package mavio.acquisition.v1;
 
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+import "mavio/library/v1/item.proto";
 
 // WantedService adds the movies and series to acquire, and searches for
 // them. Administrators only.
@@ -13,6 +14,21 @@ service WantedService {
   // a quality profile; it fails with ALREADY_EXISTS when the library has
   // the movie.
   rpc AddMovie(AddMovieRequest) returns (AddMovieResponse);
+  // AddSeries adds a series to a show library by its TVDB ID, as a
+  // virtual item identified by the library's metadata providers, which
+  // list its episodes, monitored with a quality profile; it fails with
+  // ALREADY_EXISTS when the library has the series.
+  rpc AddSeries(AddSeriesRequest) returns (AddSeriesResponse);
+  // MonitorSeries applies a monitoring option to the seasons and episodes
+  // of wanted series, as Sonarr's season pass.
+  rpc MonitorSeries(MonitorSeriesRequest) returns (MonitorSeriesResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // SetMonitored monitors or unmonitors seasons and episodes; a season
+  // takes its episodes along.
+  rpc SetMonitored(SetMonitoredRequest) returns (SetMonitoredResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
   // GetWanted returns how a movie or series is acquired.
   rpc GetWanted(GetWantedRequest) returns (GetWantedResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
@@ -21,16 +37,16 @@ service WantedService {
   rpc UpdateWanted(UpdateWantedRequest) returns (UpdateWantedResponse) {
     option idempotency_level = IDEMPOTENT;
   }
-  // ListWanted lists the monitored movies that lack a file, or whose file
-  // has not met their profile's cutoff.
+  // ListWanted lists the monitored movies or episodes that lack a file,
+  // or whose file has not met their profile's cutoff.
   rpc ListWanted(ListWantedRequest) returns (ListWantedResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // SearchWanted queues searches for monitored movies, which grab the
-  // best release each finds.
+  // SearchWanted queues searches for monitored movies or episodes, which
+  // grab the best releases they find.
   rpc SearchWanted(SearchWantedRequest) returns (SearchWantedResponse);
   // SyncRSS queues an RSS sync: the indexers' recent releases are checked
-  // against every monitored movie.
+  // against every monitored movie and episode.
   rpc SyncRSS(SyncRSSRequest) returns (SyncRSSResponse);
 }
 
@@ -40,6 +56,42 @@ enum MinimumAvailability {
   MINIMUM_AVAILABILITY_ANNOUNCED = 1;
   MINIMUM_AVAILABILITY_IN_CINEMAS = 2;
   MINIMUM_AVAILABILITY_RELEASED = 3;
+}
+
+// NewItemMonitor is whether a series monitors the seasons and episodes
+// refreshes add, as Sonarr's NewItemMonitorTypes.
+enum NewItemMonitor {
+  // All, for series.
+  NEW_ITEM_MONITOR_UNSPECIFIED = 0;
+  NEW_ITEM_MONITOR_ALL = 1;
+  NEW_ITEM_MONITOR_NONE = 2;
+}
+
+// SeriesMonitor is which episodes of a series to monitor, as Sonarr's
+// MonitorTypes.
+enum SeriesMonitor {
+  SERIES_MONITOR_UNSPECIFIED = 0;
+  // Every episode but specials.
+  SERIES_MONITOR_ALL = 1;
+  // Episodes not aired yet.
+  SERIES_MONITOR_FUTURE = 2;
+  // Episodes without a file.
+  SERIES_MONITOR_MISSING = 3;
+  // Episodes with a file.
+  SERIES_MONITOR_EXISTING = 4;
+  SERIES_MONITOR_FIRST_SEASON = 5;
+  SERIES_MONITOR_LAST_SEASON = 6;
+  // The first episode of the first season.
+  SERIES_MONITOR_PILOT = 7;
+  // Episodes aired in the last 90 days, and future ones.
+  SERIES_MONITOR_RECENT = 8;
+  // Monitors the specials, leaving the other episodes as they are.
+  SERIES_MONITOR_MONITOR_SPECIALS = 9;
+  // Unmonitors the specials, leaving the other episodes as they are.
+  SERIES_MONITOR_UNMONITOR_SPECIALS = 10;
+  SERIES_MONITOR_NONE = 11;
+  // Leaves the episodes as the seasons' monitoring makes them.
+  SERIES_MONITOR_SKIP = 12;
 }
 
 // Wanted is how a monitored movie or series is acquired.
@@ -58,6 +110,10 @@ message Wanted {
   // Set by the server.
   google.protobuf.Timestamp add_time = 6;
   google.protobuf.Timestamp last_search_time = 7;
+  // Of series: whether seasons and episodes refreshes add are monitored.
+  NewItemMonitor monitor_new_items = 8 [(buf.validate.field).enum.defined_only = true];
+  // Of series: whether episodes are imported into season folders.
+  bool season_folder = 9;
 }
 
 message AddMovieRequest {
@@ -79,6 +135,64 @@ message AddMovieResponse {
   Wanted wanted = 2;
 }
 
+message AddSeriesRequest {
+  string library_id = 1 [(buf.validate.field).string.uuid = true];
+  int32 tvdb_id = 2 [(buf.validate.field).int32.gt = 0];
+  string quality_profile_id = 3 [(buf.validate.field).string.uuid = true];
+  // Unspecified for daily when the scene mapping providers list the
+  // series as daily, else standard.
+  mavio.library.v1.SeriesType series_type = 4 [(buf.validate.field).enum.defined_only = true];
+  bool season_folder = 5;
+  // Unspecified for all.
+  SeriesMonitor monitor = 6 [(buf.validate.field).enum.defined_only = true];
+  NewItemMonitor monitor_new_items = 7 [(buf.validate.field).enum.defined_only = true];
+  repeated string tags = 8 [(buf.validate.field).repeated.items.string = {
+    min_len: 1
+    max_len: 100
+  }];
+  // Search for the monitored episodes without a file at once.
+  bool search = 9;
+}
+
+message AddSeriesResponse {
+  // The series' item.
+  string item_id = 1;
+  Wanted wanted = 2;
+}
+
+message MonitorSeriesRequest {
+  // Wanted series.
+  repeated string item_ids = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 1000
+    items: {
+      string: {uuid: true}
+    }
+  }];
+  SeriesMonitor monitor = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // Unspecified to leave as it is.
+  NewItemMonitor monitor_new_items = 3 [(buf.validate.field).enum.defined_only = true];
+}
+
+message MonitorSeriesResponse {}
+
+message SetMonitoredRequest {
+  // Seasons and episodes.
+  repeated string item_ids = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 10000
+    items: {
+      string: {uuid: true}
+    }
+  }];
+  bool monitored = 2;
+}
+
+message SetMonitoredResponse {}
+
 message GetWantedRequest {
   string item_id = 1 [(buf.validate.field).string.uuid = true];
 }
@@ -95,7 +209,7 @@ message UpdateWantedResponse {
   Wanted wanted = 1;
 }
 
-// WantedFilter is which monitored movies ListWanted lists.
+// WantedFilter is which monitored movies or episodes ListWanted lists.
 enum WantedFilter {
   WANTED_FILTER_UNSPECIFIED = 0;
   // Those without a file.
@@ -114,6 +228,35 @@ message ListWantedRequest {
     lte: 1000
   }];
   int32 offset = 3 [(buf.validate.field).int32.gte = 0];
+  WantedKind kind = 4 [(buf.validate.field).enum.defined_only = true];
+}
+
+// WantedKind is whether ListWanted and SearchWanted are about movies or
+// episodes.
+enum WantedKind {
+  // Movies.
+  WANTED_KIND_UNSPECIFIED = 0;
+  WANTED_KIND_MOVIE = 1;
+  WANTED_KIND_EPISODE = 2;
+}
+
+// WantedEpisode is a monitored episode of a wanted series ListWanted
+// lists.
+message WantedEpisode {
+  string item_id = 1;
+  string series_id = 2;
+  string series_name = 3;
+  int32 season_number = 4;
+  int32 episode_number = 5;
+  // Zero when unknown.
+  int32 absolute_number = 6;
+  string name = 7;
+  // Unset when unknown.
+  google.protobuf.Timestamp air_time = 8;
+  // The quality of its file, by Sonarr's name; empty without a file.
+  string quality = 9;
+  // The series' wanted state.
+  Wanted wanted = 10;
 }
 
 // WantedMovie is a monitored movie ListWanted lists.
@@ -132,18 +275,21 @@ message ListWantedResponse {
   // By name.
   repeated WantedMovie movies = 1;
   int32 total = 2;
+  // Of kind episode, most recently aired first.
+  repeated WantedEpisode episodes = 3;
 }
 
 message SearchWantedRequest {
-  // The movies to search for; empty for every monitored movie the filter
-  // selects.
+  // The movies to search for, or the series, seasons and episodes; empty
+  // for every monitored movie or episode the filter selects.
   repeated string item_ids = 1 [(buf.validate.field).repeated.items.string.uuid = true];
   // With no items: the movies to search for; unspecified for missing.
   WantedFilter filter = 2 [(buf.validate.field).enum.defined_only = true];
+  WantedKind kind = 3 [(buf.validate.field).enum.defined_only = true];
 }
 
 message SearchWantedResponse {
-  // The number of movies queued.
+  // The number of searches queued.
   int32 queued = 1;
 }
 

@@ -501,9 +501,20 @@ flowchart TD
 - [x] Decisions: the specifications of Sonarr's decision engine and its ranking, with its cases ported (`libs/acquire/series`)
   - [ ] Indexers found by name, for the cases of Sonarr's tests that give releases only an indexer name
 - [x] Episode file names, series and season folders named as Sonarr names them (`libs/acquire/organize`)
-- [ ] Wanted series and episodes: series added by TVDB ID, with a quality profile, monitoring of new seasons and episodes
-- [ ] Episode, season and series searches and RSS sync as jobs; releases matched to episodes through scene mappings, XEM, absolute numbers and air dates
-- [ ] Import of episodes, season packs and multi-episode files; upgrades
+- [x] Wanted series and episodes: series added by TVDB ID, with a quality profile, monitoring of new seasons and episodes (`WantedService.AddSeries`, `apps/server/internal/acquisition`)
+  - [ ] Episodes found on disk by scans of a wanted series monitored as Sonarr monitors them
+  - [ ] Sonarr's `AutoUnmonitorPreviouslyDownloadedEpisodes`
+  - [ ] Each episode's own last search time; episodes use their series'
+- [x] Episode, season and series searches and RSS sync as jobs; releases matched to episodes through scene mappings, XEM, absolute numbers and air dates (`libs/acquire/series`, job `acquisition.episode_search`, scene mappings refreshed by `acquisition.scene_mappings`)
+  - [ ] Scene numbering kept on episodes, as Sonarr keeps it, rather than cached in memory for 12 hours
+  - [ ] Anime season searches by `AnimeStandardFormatSearch`, and the search mode of scene mappings searched by both IDs and title
+  - [ ] Interactive searches of a whole series
+  - [ ] A logger given to the series engine rather than the default one
+- [x] Import of episodes, season packs and multi-episode files; upgrades
+  - [ ] Series naming settings: episode formats, the season folder format, the multi-episode style; Sonarr's defaults apply
+  - [ ] Sonarr's import specifications for episode titles, unpacking, unverified scene numbering, absolute numbers and matching folders, and its scene name check
+  - [ ] The qualities of episode files aggregated as Sonarr aggregates them
+  - [ ] The history of the episodes a multi-episode file covers, which goes with their items
 - [ ] End-to-end test
 
 ### P20 Discovery and Requests

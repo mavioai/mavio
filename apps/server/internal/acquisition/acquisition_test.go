@@ -43,6 +43,9 @@ type fakeIndexer struct {
 
 	mu          sync.Mutex
 	search, rss []*pluginv1.Release
+	// tv answers TV searches when set; requests are those it was asked.
+	tv       func(req *pluginv1.SearchReleasesRequest) []*pluginv1.Release
+	requests []*pluginv1.SearchReleasesRequest
 }
 
 func (f *fakeIndexer) set(search, rss []*pluginv1.Release) {
@@ -52,7 +55,9 @@ func (f *fakeIndexer) set(search, rss []*pluginv1.Release) {
 }
 
 func (f *fakeIndexer) ListIndexers(context.Context, *pluginv1.ListIndexersRequest) (*pluginv1.ListIndexersResponse, error) {
-	caps := pluginv1.IndexerCapabilities_builder{SearchParams: []string{"q"}, MovieSearchParams: []string{"q", "imdbid", "tmdbid"}}.Build()
+	caps := pluginv1.IndexerCapabilities_builder{
+		SearchParams: []string{"q"}, MovieSearchParams: []string{"q", "imdbid", "tmdbid"}, TvSearchParams: []string{"q", "season", "ep", "tvdbid"},
+	}.Build()
 	ix := pluginv1.Indexer_builder{Id: new("ix"), Name: new("Indexer"), Enabled: new(true), Priority: new(int32(25)), Capabilities: caps}.Build()
 	return pluginv1.ListIndexersResponse_builder{Indexers: []*pluginv1.Indexer{ix}}.Build(), nil
 }
@@ -60,8 +65,12 @@ func (f *fakeIndexer) ListIndexers(context.Context, *pluginv1.ListIndexersReques
 func (f *fakeIndexer) SearchReleases(_ context.Context, req *pluginv1.SearchReleasesRequest) (*pluginv1.SearchReleasesResponse, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	f.requests = append(f.requests, req)
 	found := f.rss
-	if len(req.GetExternalIds()) > 0 || req.GetQuery() != "" {
+	switch {
+	case f.tv != nil && (len(req.GetExternalIds()) > 0 || req.GetQuery() != ""):
+		found = f.tv(req)
+	case len(req.GetExternalIds()) > 0 || req.GetQuery() != "":
 		found = f.search
 	}
 	return pluginv1.SearchReleasesResponse_builder{Releases: found}.Build(), nil
@@ -160,6 +169,9 @@ func (f fakeIdentifier) Identify(ctx context.Context, _ core.Library, id core.ID
 	it, err := f.st.Items().Get(ctx, id)
 	if err != nil {
 		return core.Item{}, err
+	}
+	if it.Kind == core.KindSeries {
+		return identifySeries(ctx, f.st, it)
 	}
 	matrix(&it)
 	return it, f.st.Items().Upsert(ctx, it)
@@ -378,7 +390,7 @@ func TestAddMovie(t *testing.T) {
 	if err != nil || u.Monitored || !slices.Equal(u.Tags, []string{"4k"}) || e.item(it.ID).Monitored {
 		t.Errorf("UpdateWanted(unmonitored) = %+v, %v, want = unmonitored with tags", u, err)
 	}
-	if n, err := e.rt.SearchWanted(e.ctx, nil, WantedMissing); err != nil || n != 0 {
+	if n, err := e.rt.SearchWanted(e.ctx, WantedKindMovie, nil, WantedMissing); err != nil || n != 0 {
 		t.Errorf("SearchWanted(unmonitored) = %d, %v, want = 0", n, err)
 	}
 }

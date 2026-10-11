@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 
+	"github.com/mavioai/mavio/libs/acquire"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/release"
 )
 
 // pendingRelease is a stored pending release with its release.
@@ -36,11 +39,14 @@ func (r *Runtime) pending(ctx context.Context, itemID core.ID) ([]pendingRelease
 	return out, nil
 }
 
-// pendingAdd is a release to keep pending for a movie.
+// pendingAdd is a release to keep pending for a movie, or for episodes of
+// a series.
 type pendingAdd struct {
 	itemID core.ID
-	rel    *Release
-	reason core.PendingReason
+	// itemIDs are the episodes; empty for a movie.
+	itemIDs []core.ID
+	rel     *Release
+	reason  core.PendingReason
 }
 
 // sameRelease reports whether two releases are the same, as Radarr's
@@ -75,8 +81,12 @@ func (r *Runtime) addPending(ctx context.Context, adds []pendingAdd) error {
 			if err != nil {
 				return fmt.Errorf("pending release: %w", err)
 			}
+			ids := a.itemIDs
+			if len(ids) == 0 {
+				ids = []core.ID{a.itemID}
+			}
 			p := pendingRelease{
-				PendingRelease: core.PendingRelease{ID: core.NewID(), ItemID: a.itemID, ItemIDs: []core.ID{a.itemID}, Title: a.rel.Title, Added: r.now(), Reason: a.reason, Release: data},
+				PendingRelease: core.PendingRelease{ID: core.NewID(), ItemID: a.itemID, ItemIDs: ids, Title: a.rel.Title, Added: r.now(), Reason: a.reason, Release: data},
 				release:        a.rel,
 			}
 			if err := r.Store.PendingReleases().Add(ctx, &p.PendingRelease); err != nil {
@@ -124,6 +134,34 @@ func (r *Runtime) removePending(ctx context.Context, itemID core.ID, match func(
 	var ids []core.ID
 	for _, p := range pending {
 		if match == nil || match(p.release) {
+			ids = append(ids, p.ID)
+		}
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	return r.Store.PendingReleases().Delete(ctx, ids...)
+}
+
+// removeGrabbedPending deletes the pending releases of a series that hold
+// any of the grabbed episodes and are of a quality no better than the
+// grabbed release's, as Sonarr's PendingReleaseService.RemoveGrabbed:
+// better ones stay to be tried again.
+func (r *Runtime) removeGrabbedPending(ctx context.Context, sh *show, episodeIDs []core.ID, q acquire.QualityModel) error {
+	pending, err := r.pending(ctx, sh.item.ID)
+	if err != nil {
+		return err
+	}
+	var ids []core.ID
+	for _, p := range pending {
+		if !slices.ContainsFunc(p.ItemIDs, func(id core.ID) bool { return slices.Contains(episodeIDs, id) }) {
+			continue
+		}
+		pq := acquire.ModelOf(release.ParseQuality(p.release.Title, release.Series))
+		if parsed := release.ParseSeriesTitle(p.release.Title); parsed != nil {
+			pq = acquire.ModelOf(parsed.Quality)
+		}
+		if sh.series.Profile == nil || sh.series.Profile.Compare(q, pq, false) >= 0 {
 			ids = append(ids, p.ID)
 		}
 	}

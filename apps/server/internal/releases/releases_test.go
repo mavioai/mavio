@@ -177,6 +177,58 @@ func TestTiers(t *testing.T) {
 	}
 }
 
+// TestEpisodeQueryTiers covers the requests of episode queries, as
+// Sonarr's NewznabRequestGeneratorFixture expects them by search mode.
+func TestEpisodeQueryTiers(t *testing.T) {
+	all := caps([]string{"q"}, []string{"q", "season", "ep", "tvdbid", "imdbid"}, nil)
+	for _, tt := range []struct {
+		name string
+		q    EpisodeQuery
+		want [][]string
+	}{
+		{"single episode by scene numbers and titles", EpisodeQuery{SeriesID: seriesID, Season: 3, Episode: 1, Titles: []string{"Agents of SHIELD"}}, [][]string{
+			{` TV q="" ids=imdb:tt2364582,tvdb:263365 s=3 e=1 cat=[5000]`},
+			{` TV q="Agents of SHIELD" ids= s=3 e=1 cat=[5000]`},
+		}},
+		{"title only", EpisodeQuery{SeriesID: seriesID, Season: 3, Episode: 1, Mode: SearchByTitle, Titles: []string{"Scene Title"}}, [][]string{
+			{` TV q="Scene Title" ids= s=3 e=1 cat=[5000]`}, nil,
+		}},
+		{"ID only", EpisodeQuery{Kind: QuerySeason, SeriesID: seriesID, Season: 2, Mode: SearchByID}, [][]string{
+			{` TV q="" ids=imdb:tt2364582,tvdb:263365 s=2 cat=[5000]`}, nil,
+		}},
+		{"daily season", EpisodeQuery{Kind: QueryDailySeason, SeriesID: dailySeriesID, Year: 2024}, [][]string{
+			{` TV q="" ids=tvdb:71256 s=2024 cat=[5000]`},
+			{` TV q="Daily Show" ids= s=2024 cat=[5000]`},
+		}},
+		{"anime episode", EpisodeQuery{Kind: QueryAnimeEpisode, SeriesID: animeSeriesID, Absolute: 13}, [][]string{{
+			` TV q="13" ids=tvdb:400001 cat=[5070]`,
+			` UNSPECIFIED q="Cafe Enchante 13" ids= cat=[5070]`,
+		}}},
+		{"special", EpisodeQuery{Kind: QuerySpecial, SeriesID: seriesID, SpecialTitles: []string{"Agents of SHIELD Slingshot"}}, [][]string{{
+			` UNSPECIFIED q="Agents of SHIELD Slingshot" ids= cat=[5000 5070]`,
+		}}},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &Searcher{Items: library()}
+			c, err := s.criteria(t.Context(), Search{Episodes: &tt.q})
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got [][]string
+			for _, tier := range c.tiers(all) {
+				var reqs []string
+				for _, r := range tier {
+					reqs = append(reqs, describe(r))
+				}
+				got = append(got, reqs)
+			}
+			if fmt.Sprint(got) != fmt.Sprint(tt.want) {
+				t.Errorf("tiers = %q, want = %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestCriteriaErrors(t *testing.T) {
 	s := &Searcher{Items: library()}
 	for _, tt := range []struct {

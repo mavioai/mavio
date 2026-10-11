@@ -94,7 +94,7 @@ func (s *ReleaseService) SearchReleases(ctx context.Context, req *acquisitionv1.
 }
 
 // decide returns the releases of a search, decided on and best first for
-// a monitored movie, else as found.
+// a monitored movie or a wanted series, season or episode, else as found.
 func (s *ReleaseService) decide(ctx context.Context, itemID core.ID, found []releases.Release) ([]*acquisitionv1.Release, error) {
 	if s.decider != nil && !itemID.IsZero() {
 		decided, err := s.decider.Decide(ctx, itemID, found)
@@ -113,6 +113,13 @@ func (s *ReleaseService) decide(ctx context.Context, itemID core.ID, found []rel
 				r.SetEvaluated(true)
 				r.SetCustomFormats(d.Formats)
 				r.SetCustomFormatScore(int32(d.Score))
+				if len(d.EpisodeIDs) > 0 {
+					ids := make([]string, len(d.EpisodeIDs))
+					for j, id := range d.EpisodeIDs {
+						ids[j] = id.String()
+					}
+					r.SetEpisodeIds(ids)
+				}
 				out[i] = r
 			}
 			return out, nil

@@ -67,7 +67,8 @@ message ListDownloadClientsResponse {
 }
 
 message GrabReleaseRequest {
-  // The movie the release is for.
+  // The movie the release is for, or the wanted series, season or episode
+  // whose episodes it holds.
   string item_id = 1 [(buf.validate.field).string.uuid = true];
   // A release as SearchReleases returned it.
   Release release = 2 [(buf.validate.field).required = true];

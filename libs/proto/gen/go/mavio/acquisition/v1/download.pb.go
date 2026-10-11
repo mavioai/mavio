@@ -795,7 +795,8 @@ func (x *GrabReleaseRequest) ClearClientId() {
 type GrabReleaseRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// The movie the release is for.
+	// The movie the release is for, or the wanted series, season or episode
+	// whose episodes it holds.
 	ItemId *string
 	// A release as SearchReleases returned it.
 	Release *Release

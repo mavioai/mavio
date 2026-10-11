@@ -55,7 +55,8 @@ func (r *Runtime) SearchMovie(ctx context.Context, itemID core.ID, userInvoked b
 
 // SyncRSS reads the indexers' recent releases and decides on them with
 // the pending releases, for every wanted movie, as Radarr's
-// RssSyncService; pending releases rejected for good are dropped.
+// RssSyncService, and for the episodes of every wanted series, as
+// Sonarr's; pending releases rejected for good are dropped.
 func (r *Runtime) SyncRSS(ctx context.Context) error {
 	rn, err := r.newRun(ctx)
 	if err != nil {
@@ -68,9 +69,12 @@ func (r *Runtime) SyncRSS(ctx context.Context) error {
 	for _, f := range res.Failures {
 		r.logger().WarnContext(ctx, "indexer failed", "plugin", f.Provider, "indexer", f.Indexer, "err", f.Message)
 	}
-	b := newBatch()
+	// Movies and episodes are decided on apart, each with its pending
+	// releases.
+	b, eb := newBatch(), newBatch()
 	for _, rel := range res.Releases {
 		b.add(FromSearch(rel))
+		eb.add(FromSearch(rel))
 	}
 	pending, err := r.pending(ctx, core.NilID)
 	if err != nil {
@@ -82,7 +86,11 @@ func (r *Runtime) SyncRSS(ctx context.Context) error {
 		if ix, ok := rn.indexer(ctx, p.release.IndexerRef()); ok && ix.HasDisabledUntil() && ix.GetDisabledUntil().AsTime().After(r.now()) {
 			continue
 		}
-		b.targets[b.add(p.release)] = p.ItemID
+		if isSeriesPending(p.PendingRelease) {
+			eb.targets[eb.add(p.release)] = p.ItemID
+		} else {
+			b.targets[b.add(p.release)] = p.ItemID
+		}
 	}
 	decisions := rn.engine.DecideMovies(ctx, b.releases, nil, false, rn.findMovie(b))
 	processed, err := r.process(ctx, rn, b, decisions)
@@ -98,8 +106,32 @@ func (r *Runtime) SyncRSS(ctx context.Context) error {
 			return err
 		}
 	}
-	r.logger().InfoContext(ctx, "RSS sync completed", "releases", len(b.releases), "grabbed", len(processed.grabbed), "pending", len(processed.pending))
+	find, special, err := rn.findEpisodes(ctx, eb)
+	if err != nil {
+		return err
+	}
+	edecisions := rn.sengine.DecideEpisodes(ctx, eb.releases, nil, false, find, special)
+	eprocessed, err := r.processEpisodes(ctx, rn, eb, edecisions)
+	if err != nil {
+		return err
+	}
+	for _, d := range eprocessed.rejected {
+		if d.Candidate == nil || d.Candidate.Series == nil {
+			continue
+		}
+		rel := eb.of[d.Candidate.Release]
+		if err := r.removePending(ctx, d.Candidate.Series.ID, func(p *Release) bool { return sameRelease(p, rel) }); err != nil {
+			return err
+		}
+	}
+	r.logger().InfoContext(ctx, "RSS sync completed", "releases", len(b.releases),
+		"grabbed", len(processed.grabbed)+len(eprocessed.grabbed), "pending", len(processed.pending)+len(eprocessed.pending))
 	return nil
+}
+
+// isSeriesPending reports whether a pending release is of episodes.
+func isSeriesPending(p core.PendingRelease) bool {
+	return len(p.ItemIDs) > 1 || (len(p.ItemIDs) == 1 && p.ItemIDs[0] != p.ItemID)
 }
 
 // processed is what processing decisions did.
@@ -204,16 +236,29 @@ type Decided struct {
 	Rejections []acquire.Rejection
 	Formats    []string
 	Score      int
+	// EpisodeIDs are the episodes an episode release maps to.
+	EpisodeIDs []core.ID
 }
 
-// Decide decides on the releases a search found for a wanted movie, as
-// for an interactive search, and returns them best first, the rejected
-// last. An item that is not a monitored wanted movie fails with
+// Decide decides on the releases a search found for a wanted movie, or
+// for a wanted series, a season or an episode of it, as for an
+// interactive search, and returns them best first, the rejected last.
+// An item that is not of a monitored wanted movie or series fails with
 // ErrNotWanted.
 func (r *Runtime) Decide(ctx context.Context, itemID core.ID, found []releases.Release) ([]Decided, error) {
 	rn, err := r.newRun(ctx)
 	if err != nil {
 		return nil, err
+	}
+	it, err := r.Store.Items().Get(ctx, itemID)
+	if errors.Is(err, core.ErrNotFound) {
+		return nil, ErrNotWanted
+	}
+	if err != nil {
+		return nil, err
+	}
+	if isEpisodeKind(it.Kind) {
+		return r.decideEpisodes(ctx, rn, it, found)
 	}
 	m, err := rn.movie(ctx, itemID)
 	if errors.Is(err, core.ErrNotFound) || errors.Is(err, core.ErrInvalid) {
@@ -263,5 +308,6 @@ func (r *Runtime) Decide(ctx context.Context, itemID core.ID, found []releases.R
 	return out, nil
 }
 
-// ErrNotWanted is returned for items that are not wanted movies.
-var ErrNotWanted = fmt.Errorf("%w: not a wanted movie", core.ErrNotFound)
+// ErrNotWanted is returned for items that are not of wanted movies or
+// series.
+var ErrNotWanted = fmt.Errorf("%w: not wanted", core.ErrNotFound)

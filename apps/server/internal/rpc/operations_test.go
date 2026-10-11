@@ -47,6 +47,7 @@ func TestTaskServiceAcquisition(t *testing.T) {
 		{acquisition.JobRSS, -1}, // RSS sync on demand only
 		{acquisition.JobQueue, time.Minute},
 		{acquisition.JobRecycleBin, 24 * time.Hour},
+		{acquisition.JobSceneMappings, 3 * time.Hour},
 	} {
 		if got, ok := intervals[tt.id]; !ok || got != tt.want {
 			t.Errorf("task %s interval = %v (listed %t), want = %v", tt.id, got, ok, tt.want)

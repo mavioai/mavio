@@ -36,6 +36,8 @@ type Release struct {
 	Peers     *int     `json:"peers,omitempty"`
 	ImdbID    string   `json:"imdb_id,omitempty"`
 	TmdbID    int      `json:"tmdb_id,omitempty"`
+	TvdbID    int      `json:"tvdb_id,omitempty"`
+	TvRageID  int      `json:"tvrage_id,omitempty"`
 	// MinimumRatio and MinimumSeedTime are what the indexer asks torrents
 	// to seed; zero for none.
 	MinimumRatio    float64       `json:"minimum_ratio,omitempty"`
@@ -58,9 +60,7 @@ func FromSearch(r releases.Release) *Release {
 	if r.HasPublishDate() {
 		out.PublishDate = r.GetPublishDate().AsTime()
 	}
-	if id, err := strconv.Atoi(r.GetExternalIds()["tmdb"]); err == nil {
-		out.TmdbID = id
-	}
+	out.TmdbID, out.TvdbID, out.TvRageID = externalID(r.GetExternalIds(), "tmdb"), externalID(r.GetExternalIds(), "tvdb"), externalID(r.GetExternalIds(), "tvrage")
 	if r.HasSeeders() {
 		out.Seeders = new(int(r.GetSeeders()))
 	}
@@ -68,6 +68,15 @@ func FromSearch(r releases.Release) *Release {
 		out.Peers = new(int(r.GetPeers()))
 	}
 	return out
+}
+
+// externalID returns a numeric external ID, 0 when there is none.
+func externalID(ids map[string]string, key string) int {
+	id, err := strconv.Atoi(ids[key])
+	if err != nil || id < 0 {
+		return 0
+	}
+	return id
 }
 
 // ProtocolFromPlugin returns the stored protocol of a plugin's; unknown
@@ -88,7 +97,7 @@ func (r *Release) decisionRelease() *acquire.Release {
 		GUID: r.GUID, Title: r.Title, Size: r.Size, PublishDate: r.PublishDate,
 		IndexerID: r.IndexerRef(), Indexer: r.IndexerName, IndexerPriority: r.Priority,
 		Flags: r.Flags, Seeders: r.Seeders, Peers: r.Peers, InfoHash: r.InfoHash,
-		ImdbID: r.ImdbID, TmdbID: r.TmdbID,
+		ImdbID: r.ImdbID, TmdbID: r.TmdbID, TvdbID: r.TvdbID, TvRageID: r.TvRageID,
 	}
 	if p, err := acquire.ProtocolFromCore(r.Protocol); err == nil {
 		out.Protocol = p
@@ -105,7 +114,8 @@ func (r *Release) decisionRelease() *acquire.Release {
 type batch struct {
 	releases []*acquire.Release
 	of       map[*acquire.Release]*Release
-	// targets are the movies of pending releases, which are known.
+	// targets are the movies or series of pending releases, which are
+	// known.
 	targets map[*acquire.Release]core.ID
 }
 

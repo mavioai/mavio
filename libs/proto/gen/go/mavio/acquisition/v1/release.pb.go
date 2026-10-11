@@ -1369,6 +1369,7 @@ type Release struct {
 	xxx_hidden_Evaluated            bool                   `protobuf:"varint,23,opt,name=evaluated"`
 	xxx_hidden_CustomFormats        []string               `protobuf:"bytes,24,rep,name=custom_formats,json=customFormats"`
 	xxx_hidden_CustomFormatScore    int32                  `protobuf:"varint,25,opt,name=custom_format_score,json=customFormatScore"`
+	xxx_hidden_EpisodeIds           []string               `protobuf:"bytes,26,rep,name=episode_ids,json=episodeIds"`
 	XXX_raceDetectHookData          protoimpl.RaceDetectHookData
 	XXX_presence                    [1]uint32
 	unknownFields                   protoimpl.UnknownFields
@@ -1606,59 +1607,66 @@ func (x *Release) GetCustomFormatScore() int32 {
 	return 0
 }
 
+func (x *Release) GetEpisodeIds() []string {
+	if x != nil {
+		return x.xxx_hidden_EpisodeIds
+	}
+	return nil
+}
+
 func (x *Release) SetPluginId(v string) {
 	x.xxx_hidden_PluginId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 26)
 }
 
 func (x *Release) SetIndexerId(v string) {
 	x.xxx_hidden_IndexerId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 26)
 }
 
 func (x *Release) SetIndexerName(v string) {
 	x.xxx_hidden_IndexerName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 26)
 }
 
 func (x *Release) SetGuid(v string) {
 	x.xxx_hidden_Guid = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 26)
 }
 
 func (x *Release) SetTitle(v string) {
 	x.xxx_hidden_Title = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 26)
 }
 
 func (x *Release) SetSize(v int64) {
 	x.xxx_hidden_Size = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 26)
 }
 
 func (x *Release) SetDownloadUrl(v string) {
 	x.xxx_hidden_DownloadUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 26)
 }
 
 func (x *Release) SetMagnetUrl(v string) {
 	x.xxx_hidden_MagnetUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 26)
 }
 
 func (x *Release) SetInfoHash(v string) {
 	x.xxx_hidden_InfoHash = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 26)
 }
 
 func (x *Release) SetInfoUrl(v string) {
 	x.xxx_hidden_InfoUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 26)
 }
 
 func (x *Release) SetProtocol(v DownloadProtocol) {
 	x.xxx_hidden_Protocol = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 26)
 }
 
 func (x *Release) SetPublishDate(v *timestamppb.Timestamp) {
@@ -1675,27 +1683,27 @@ func (x *Release) SetExternalIds(v map[string]string) {
 
 func (x *Release) SetGrabs(v int32) {
 	x.xxx_hidden_Grabs = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 26)
 }
 
 func (x *Release) SetSeeders(v int32) {
 	x.xxx_hidden_Seeders = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 26)
 }
 
 func (x *Release) SetPeers(v int32) {
 	x.xxx_hidden_Peers = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 26)
 }
 
 func (x *Release) SetDownloadVolumeFactor(v float64) {
 	x.xxx_hidden_DownloadVolumeFactor = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 26)
 }
 
 func (x *Release) SetUploadVolumeFactor(v float64) {
 	x.xxx_hidden_UploadVolumeFactor = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 26)
 }
 
 func (x *Release) SetFlags(v []string) {
@@ -1712,7 +1720,7 @@ func (x *Release) SetRejections(v []*Rejection) {
 
 func (x *Release) SetEvaluated(v bool) {
 	x.xxx_hidden_Evaluated = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 26)
 }
 
 func (x *Release) SetCustomFormats(v []string) {
@@ -1721,7 +1729,11 @@ func (x *Release) SetCustomFormats(v []string) {
 
 func (x *Release) SetCustomFormatScore(v int32) {
 	x.xxx_hidden_CustomFormatScore = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 26)
+}
+
+func (x *Release) SetEpisodeIds(v []string) {
+	x.xxx_hidden_EpisodeIds = v
 }
 
 func (x *Release) HasPluginId() bool {
@@ -1998,7 +2010,7 @@ type Release_builder struct {
 	Flags []string
 	// What the title tells; unset when it cannot be parsed.
 	Parsed *ParsedRelease
-	// For a search of a monitored movie: why the release would not be
+	// For a search of a monitored movie or episode: why the release would not be
 	// grabbed, as the decision engine says; empty when it would be.
 	Rejections []*Rejection
 	// For a search of a monitored movie: whether the decision engine
@@ -2006,6 +2018,9 @@ type Release_builder struct {
 	Evaluated         *bool
 	CustomFormats     []string
 	CustomFormatScore *int32
+	// For a search of a wanted series' season or episode: the episodes the
+	// release was matched to.
+	EpisodeIds []string
 }
 
 func (b0 Release_builder) Build() *Release {
@@ -2013,84 +2028,85 @@ func (b0 Release_builder) Build() *Release {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.PluginId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 26)
 		x.xxx_hidden_PluginId = b.PluginId
 	}
 	if b.IndexerId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 26)
 		x.xxx_hidden_IndexerId = b.IndexerId
 	}
 	if b.IndexerName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 26)
 		x.xxx_hidden_IndexerName = b.IndexerName
 	}
 	if b.Guid != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 26)
 		x.xxx_hidden_Guid = b.Guid
 	}
 	if b.Title != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 26)
 		x.xxx_hidden_Title = b.Title
 	}
 	if b.Size != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 26)
 		x.xxx_hidden_Size = *b.Size
 	}
 	if b.DownloadUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 26)
 		x.xxx_hidden_DownloadUrl = b.DownloadUrl
 	}
 	if b.MagnetUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 26)
 		x.xxx_hidden_MagnetUrl = b.MagnetUrl
 	}
 	if b.InfoHash != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 26)
 		x.xxx_hidden_InfoHash = b.InfoHash
 	}
 	if b.InfoUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 26)
 		x.xxx_hidden_InfoUrl = b.InfoUrl
 	}
 	if b.Protocol != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 26)
 		x.xxx_hidden_Protocol = *b.Protocol
 	}
 	x.xxx_hidden_PublishDate = b.PublishDate
 	x.xxx_hidden_Categories = b.Categories
 	x.xxx_hidden_ExternalIds = b.ExternalIds
 	if b.Grabs != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 26)
 		x.xxx_hidden_Grabs = *b.Grabs
 	}
 	if b.Seeders != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 26)
 		x.xxx_hidden_Seeders = *b.Seeders
 	}
 	if b.Peers != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 26)
 		x.xxx_hidden_Peers = *b.Peers
 	}
 	if b.DownloadVolumeFactor != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 26)
 		x.xxx_hidden_DownloadVolumeFactor = *b.DownloadVolumeFactor
 	}
 	if b.UploadVolumeFactor != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 26)
 		x.xxx_hidden_UploadVolumeFactor = *b.UploadVolumeFactor
 	}
 	x.xxx_hidden_Flags = b.Flags
 	x.xxx_hidden_Parsed = b.Parsed
 	x.xxx_hidden_Rejections = &b.Rejections
 	if b.Evaluated != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 26)
 		x.xxx_hidden_Evaluated = *b.Evaluated
 	}
 	x.xxx_hidden_CustomFormats = b.CustomFormats
 	if b.CustomFormatScore != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 26)
 		x.xxx_hidden_CustomFormatScore = *b.CustomFormatScore
 	}
+	x.xxx_hidden_EpisodeIds = b.EpisodeIds
 	return m0
 }
 
@@ -2975,7 +2991,7 @@ const file_mavio_acquisition_v1_release_proto_rawDesc = "" +
 	"\bindexers\x18\a \x03(\v2 .mavio.acquisition.v1.IndexerRefR\bindexers\"\x95\x01\n" +
 	"\x16SearchReleasesResponse\x129\n" +
 	"\breleases\x18\x01 \x03(\v2\x1d.mavio.acquisition.v1.ReleaseR\breleases\x12@\n" +
-	"\bfailures\x18\x02 \x03(\v2$.mavio.acquisition.v1.IndexerFailureR\bfailures\"\x8d\b\n" +
+	"\bfailures\x18\x02 \x03(\v2$.mavio.acquisition.v1.IndexerFailureR\bfailures\"\xae\b\n" +
 	"\aRelease\x12\x1b\n" +
 	"\tplugin_id\x18\x01 \x01(\tR\bpluginId\x12\x1d\n" +
 	"\n" +
@@ -3008,7 +3024,9 @@ const file_mavio_acquisition_v1_release_proto_rawDesc = "" +
 	"rejections\x12\x1c\n" +
 	"\tevaluated\x18\x17 \x01(\bR\tevaluated\x12%\n" +
 	"\x0ecustom_formats\x18\x18 \x03(\tR\rcustomFormats\x12.\n" +
-	"\x13custom_format_score\x18\x19 \x01(\x05R\x11customFormatScore\x1a>\n" +
+	"\x13custom_format_score\x18\x19 \x01(\x05R\x11customFormatScore\x12\x1f\n" +
+	"\vepisode_ids\x18\x1a \x03(\tR\n" +
+	"episodeIds\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"[\n" +

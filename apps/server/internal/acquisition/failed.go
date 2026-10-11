@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/mavioai/mavio/libs/acquire/series"
 	"github.com/mavioai/mavio/libs/core"
 )
 
@@ -18,14 +20,14 @@ const msgManuallyFailed = "Manually marked as failed"
 // Radarr's FailedDownloadService.ProcessFailed: without a grab in the
 // history it is only warned of.
 func (r *Runtime) failTracked(ctx context.Context, d *core.Download, p polled, message string) error {
-	grab, err := r.grabEvent(ctx, d.DownloadID, d.ItemID)
+	grabs, err := r.grabEvents(ctx, d.DownloadID, d.ItemID)
 	if errors.Is(err, core.ErrNotFound) {
 		return r.warn(ctx, d, "Download has failed wasn't grabbed by Mavio, skipping automatic download handling")
 	}
 	if err != nil {
 		return err
 	}
-	if err := r.markFailed(ctx, d, grab, message, false, false); err != nil {
+	if err := r.markFailed(ctx, d, grabs, message, false, false); err != nil {
 		return err
 	}
 	if p.client.GetRemoveFailedDownloads() && p.item.GetCanBeRemoved() {
@@ -51,13 +53,42 @@ func (r *Runtime) grabEvent(ctx context.Context, downloadID string, itemID core.
 	return page.Items[0], nil
 }
 
+// grabEvents returns the latest grab of a download, of an item unless
+// itemID is NilID, and for episode releases the grabs of the download's
+// other episodes after it.
+func (r *Runtime) grabEvents(ctx context.Context, downloadID string, itemID core.ID) ([]core.HistoryEvent, error) {
+	grab, err := r.grabEvent(ctx, downloadID, itemID)
+	if err != nil {
+		return nil, err
+	}
+	if grab.ParentID.IsZero() || downloadID == "" {
+		return []core.HistoryEvent{grab}, nil
+	}
+	page, err := r.Store.History().List(ctx, core.HistoryQuery{
+		Types: []core.HistoryEventType{core.HistoryGrabbed}, DownloadID: downloadID, ItemIDs: []core.ID{grab.ParentID}, Limit: core.MaxPageSize,
+	})
+	if err != nil {
+		return nil, err
+	}
+	grabs := []core.HistoryEvent{grab}
+	for _, h := range page.Items {
+		if h.ID != grab.ID && h.ParentID == grab.ParentID && !slices.ContainsFunc(grabs, func(o core.HistoryEvent) bool { return o.ItemID == h.ItemID }) {
+			grabs = append(grabs, h)
+		}
+	}
+	return grabs, nil
+}
+
 // markFailed records that the download of a grab failed, as the handlers
-// of Radarr's DownloadFailedEvent: the tracked download, if any, fails;
-// the release is blocklisted; the failure goes in the history; and the
-// movie is searched for again when the settings say so and redownload is
-// not skipped, or when search is set.
-func (r *Runtime) markFailed(ctx context.Context, d *core.Download, grab core.HistoryEvent, message string, skipRedownload, search bool) error {
+// of Radarr's and Sonarr's DownloadFailedEvent: the tracked download, if
+// any, fails; the release is blocklisted; the failure goes in the
+// history, once per grabbed item; and the movie or episodes are searched
+// for again when the settings say so and redownload is not skipped, or
+// when search is set. grabs are the download's grab events, the first
+// standing for them; episode grabs have their series as parent.
+func (r *Runtime) markFailed(ctx context.Context, d *core.Download, grabs []core.HistoryEvent, message string, skipRedownload, search bool) error {
 	now := r.now()
+	grab := grabs[0]
 	if d != nil {
 		d.State, d.Messages = core.DownloadFailed, []string{message}
 		if err := r.putDownload(ctx, d); err != nil {
@@ -65,6 +96,17 @@ func (r *Runtime) markFailed(ctx context.Context, d *core.Download, grab core.Hi
 		}
 	}
 	entry := blocklistEntry(grab, message, now)
+	var episodeIDs []core.ID
+	if !grab.ParentID.IsZero() {
+		if d != nil && d.ItemID == grab.ParentID && len(d.ItemIDs) > 0 {
+			episodeIDs = slices.Clone(d.ItemIDs)
+		} else {
+			for _, g := range grabs {
+				episodeIDs = append(episodeIDs, g.ItemID)
+			}
+		}
+		entry.ItemID, entry.ItemIDs = grab.ParentID, episodeIDs
+	}
 	if err := r.Store.Blocklist().Add(ctx, &entry); err != nil {
 		return fmt.Errorf("blocklist %s: %w", grab.SourceTitle, err)
 	}
@@ -74,19 +116,56 @@ func (r *Runtime) markFailed(ctx context.Context, d *core.Download, grab core.Hi
 			data[k] = v
 		}
 	}
-	if err := r.Store.History().Add(ctx, core.HistoryEvent{
-		ID: core.NewID(), Type: core.HistoryDownloadFailed, ItemID: grab.ItemID, ParentID: grab.ParentID, Date: now,
-		SourceTitle: grab.SourceTitle, Quality: grab.Quality, Languages: grab.Languages, DownloadID: grab.DownloadID, Data: data,
-	}); err != nil {
+	events := make([]core.HistoryEvent, 0, len(grabs))
+	for _, g := range grabs {
+		events = append(events, core.HistoryEvent{
+			ID: core.NewID(), Type: core.HistoryDownloadFailed, ItemID: g.ItemID, ParentID: g.ParentID, Date: now,
+			SourceTitle: g.SourceTitle, Quality: g.Quality, Languages: g.Languages, DownloadID: g.DownloadID, Data: data,
+		})
+	}
+	if err := r.Store.History().Add(ctx, events...); err != nil {
 		return err
 	}
 	r.logger().InfoContext(ctx, "download failed", "release", grab.SourceTitle, "item", grab.ItemID, "message", message)
 	if search || (!skipRedownload && r.settings().AutoRedownloadFailed) {
-		if _, err := r.QueueSearch(ctx, []core.ID{grab.ItemID}, false); err != nil {
+		if grab.ParentID.IsZero() {
+			_, err := r.QueueSearch(ctx, []core.ID{grab.ItemID}, false)
 			return err
 		}
+		return r.redownloadEpisodes(ctx, grab.ParentID, episodeIDs)
 	}
 	return nil
+}
+
+// redownloadEpisodes searches again for the episodes of a failed
+// download, as Sonarr's RedownloadFailedDownloadService: one episode by
+// itself, a whole season as a season, others one by one.
+func (r *Runtime) redownloadEpisodes(ctx context.Context, seriesID core.ID, episodeIDs []core.ID) error {
+	if len(episodeIDs) == 0 {
+		return nil
+	}
+	p := EpisodeSearchPayload{Scope: ScopeEpisodes, SeriesID: seriesID, EpisodeIDs: episodeIDs}
+	if len(episodeIDs) > 1 {
+		rn, err := r.newRun(ctx)
+		if err != nil {
+			return err
+		}
+		sh, err := rn.show(ctx, seriesID)
+		if errors.Is(err, core.ErrNotFound) || errors.Is(err, core.ErrInvalid) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if ep, ok := sh.byID[episodeIDs[0]]; ok {
+			season := seasonEpisodes(sh, ep.SeasonNumber)
+			if len(season) == len(episodeIDs) && !slices.ContainsFunc(season, func(e *series.Episode) bool { return !slices.Contains(episodeIDs, e.ID) }) {
+				p = EpisodeSearchPayload{Scope: ScopeSeason, SeriesID: seriesID, SeasonNumber: ep.SeasonNumber}
+			}
+		}
+	}
+	_, err := r.QueueEpisodeSearch(ctx, p)
+	return err
 }
 
 // blocklistEntry returns the blocklist entry of a failed grab, as
@@ -137,6 +216,12 @@ func (r *Runtime) MarkFailed(ctx context.Context, historyID core.ID) error {
 			return err
 		}
 	}
+	grabs := []core.HistoryEvent{grab}
+	if !grab.ParentID.IsZero() {
+		if grabs, err = r.grabEvents(ctx, grab.DownloadID, grab.ItemID); err != nil {
+			return err
+		}
+	}
 	var d *core.Download
 	if plugin, client, ok := strings.Cut(grab.Data[dataDownloadClient], "/"); ok && grab.DownloadID != "" {
 		tracked, err := r.Store.Downloads().GetByDownloadID(ctx, plugin, client, grab.DownloadID)
@@ -147,7 +232,7 @@ func (r *Runtime) MarkFailed(ctx context.Context, historyID core.ID) error {
 			return err
 		}
 	}
-	return r.markFailed(ctx, d, grab, msgManuallyFailed, false, false)
+	return r.markFailed(ctx, d, grabs, msgManuallyFailed, false, false)
 }
 
 // historyEvent returns a history event by ID; the store lists events
@@ -183,10 +268,10 @@ func (r *Runtime) RemoveFromQueue(ctx context.Context, id core.ID, removeFromCli
 		r.removeFromClient(ctx, &d, true)
 	}
 	if blocklist {
-		grab, err := r.grabEvent(ctx, d.DownloadID, d.ItemID)
+		grabs, err := r.grabEvents(ctx, d.DownloadID, d.ItemID)
 		switch {
 		case err == nil:
-			return r.markFailed(ctx, &d, grab, msgManuallyFailed, true, search)
+			return r.markFailed(ctx, &d, grabs, msgManuallyFailed, true, search)
 		case !errors.Is(err, core.ErrNotFound):
 			return err
 		}
@@ -195,19 +280,37 @@ func (r *Runtime) RemoveFromQueue(ctx context.Context, id core.ID, removeFromCli
 		if err := r.putDownload(ctx, &d); err != nil {
 			return err
 		}
-		if search {
-			_, err := r.QueueSearch(ctx, []core.ID{d.ItemID}, false)
-			return err
+		switch {
+		case !search:
+			return nil
+		case isSeriesDownload(d):
+			return r.redownloadEpisodes(ctx, d.ItemID, d.ItemIDs)
 		}
-		return nil
+		_, err = r.QueueSearch(ctx, []core.ID{d.ItemID}, false)
+		return err
 	}
 	d.State = core.DownloadIgnored
 	if err := r.putDownload(ctx, &d); err != nil {
 		return err
 	}
-	return r.Store.History().Add(ctx, core.HistoryEvent{
-		ID: core.NewID(), Type: core.HistoryIgnored, ItemID: d.ItemID, Date: r.now(), SourceTitle: d.Title,
-		Quality: d.Quality, Languages: d.Languages, DownloadID: d.DownloadID,
-		Data: map[string]string{dataMessage: "Manually ignored", dataDownloadClient: d.PluginID + "/" + d.ClientID},
-	})
+	// Episode downloads are ignored for each item grabbed.
+	items := []core.HistoryEvent{{ItemID: d.ItemID}}
+	if isSeriesDownload(d) {
+		grabs, err := r.grabEvents(ctx, d.DownloadID, d.ItemID)
+		switch {
+		case err == nil:
+			items = grabs
+		case !errors.Is(err, core.ErrNotFound):
+			return err
+		}
+	}
+	events := make([]core.HistoryEvent, 0, len(items))
+	for _, it := range items {
+		events = append(events, core.HistoryEvent{
+			ID: core.NewID(), Type: core.HistoryIgnored, ItemID: it.ItemID, ParentID: it.ParentID, Date: r.now(), SourceTitle: d.Title,
+			Quality: d.Quality, Languages: d.Languages, DownloadID: d.DownloadID,
+			Data: map[string]string{dataMessage: "Manually ignored", dataDownloadClient: d.PluginID + "/" + d.ClientID},
+		})
+	}
+	return r.Store.History().Add(ctx, events...)
 }

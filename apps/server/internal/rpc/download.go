@@ -47,7 +47,8 @@ func (s *DownloadService) ListDownloadClients(ctx context.Context, _ *acquisitio
 	return acquisitionv1.ListDownloadClientsResponse_builder{Clients: out, Failures: failures}.Build(), nil
 }
 
-// GrabRelease sends a release to a download client for a movie.
+// GrabRelease sends a release to a download client for a movie or
+// episodes.
 func (s *DownloadService) GrabRelease(ctx context.Context, req *acquisitionv1.GrabReleaseRequest) (*acquisitionv1.GrabReleaseResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err
@@ -81,6 +82,12 @@ func releaseFromProto(r *acquisitionv1.Release) *acquisition.Release {
 	}
 	if id, err := strconv.Atoi(r.GetExternalIds()["tmdb"]); err == nil {
 		out.TmdbID = id
+	}
+	if id, err := strconv.Atoi(r.GetExternalIds()["tvdb"]); err == nil {
+		out.TvdbID = id
+	}
+	if id, err := strconv.Atoi(r.GetExternalIds()["tvrage"]); err == nil {
+		out.TvRageID = id
 	}
 	if r.HasSeeders() {
 		out.Seeders = new(int(r.GetSeeders()))

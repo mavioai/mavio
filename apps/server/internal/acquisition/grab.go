@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	"github.com/mavioai/mavio/libs/acquire"
+	"github.com/mavioai/mavio/libs/acquire/series"
 	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/release"
@@ -45,6 +47,7 @@ const (
 	dataReleaseSource      = "releaseSource"
 	dataTmdbID             = "tmdbId"
 	dataImdbID             = "imdbId"
+	dataTvdbID             = "tvdbId"
 	dataMessage            = "message"
 	dataReason             = "reason"
 	dataImportedPath       = "importedPath"
@@ -60,9 +63,13 @@ var releaseSources = map[acquire.Source]string{
 	acquire.SourceReleasePush:       "ReleasePush",
 }
 
-// grabRequest is a release to send to a download client for a movie.
+// grabRequest is a release to send to a download client for a movie, or
+// for episodes of a series.
 type grabRequest struct {
-	movie     *movie
+	movie *movie
+	// show and episodes are set for episode releases, in place of movie.
+	show      *show
+	episodes  []*series.Episode
 	rel       *Release
 	candidate *acquire.Candidate
 	// pluginID and clientID name the client; empty for the first of the
@@ -70,12 +77,22 @@ type grabRequest struct {
 	pluginID, clientID string
 }
 
+// recentEpisodes reports whether any of episodes aired in the last two
+// weeks or is to air, as Sonarr's RemoteEpisode.IsRecentEpisode.
+func recentEpisodes(episodes []*series.Episode, now time.Time) bool {
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	return slices.ContainsFunc(episodes, func(e *series.Episode) bool {
+		return !e.AirDateUTC.IsZero() && !e.AirDateUTC.Before(today.AddDate(0, 0, -14))
+	})
+}
+
 // grab sends a release to a download client and tracks the download, as
-// Radarr's DownloadService.DownloadReport: it records the grab in the
-// history and drops the movie's pending releases.
+// Radarr's and Sonarr's DownloadService.DownloadReport: it records the
+// grab in the history, once per episode for episode releases, and drops
+// the pending releases it stands for.
 func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Download, error) {
 	rel, c := g.rel, g.candidate
-	if rel == nil || c == nil {
+	if rel == nil || c == nil || (g.movie == nil && (g.show == nil || len(g.episodes) == 0)) {
 		return core.Download{}, fmt.Errorf("%w: nothing to grab", core.ErrInvalid)
 	}
 	client, err := r.chooseClient(ctx, rel.Protocol, g.pluginID, g.clientID)
@@ -87,9 +104,19 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 		return core.Download{}, fmt.Errorf("%w: plugin %s is not ready", errClientUnavailable, client.PluginID)
 	}
 	now := r.now()
+	kind, recent := pluginv1.DownloadKind_DOWNLOAD_KIND_MOVIE, false
+	var itemID core.ID
+	var itemIDs []core.ID
+	if g.show != nil {
+		kind, recent, itemID = pluginv1.DownloadKind_DOWNLOAD_KIND_SERIES, recentEpisodes(g.episodes, now), g.show.item.ID
+		for _, ep := range g.episodes {
+			itemIDs = append(itemIDs, ep.ID)
+		}
+	} else {
+		recent, itemID, itemIDs = g.movie.acq.Availability.Recent(now), g.movie.item.ID, []core.ID{g.movie.item.ID}
+	}
 	req := pluginv1.AddDownloadRequest_builder{
-		ClientId: new(client.GetId()), Title: new(rel.Title), Kind: new(pluginv1.DownloadKind_DOWNLOAD_KIND_MOVIE),
-		Recent: new(g.movie.acq.Availability.Recent(now)),
+		ClientId: new(client.GetId()), Title: new(rel.Title), Kind: new(kind), Recent: new(recent),
 	}.Build()
 	if rel.Protocol == core.ProtocolTorrent {
 		if rel.InfoHash != "" {
@@ -133,7 +160,7 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 
 	d := core.Download{
 		ID: core.NewID(), PluginID: client.PluginID, ClientID: client.GetId(), DownloadID: resp.GetDownloadId(),
-		ItemID: g.movie.item.ID, ItemIDs: []core.ID{g.movie.item.ID}, Title: rel.Title,
+		ItemID: itemID, ItemIDs: itemIDs, Title: rel.Title,
 		IndexerID: rel.IndexerRef(), Indexer: rel.IndexerName, Protocol: rel.Protocol,
 		Quality: qualityRef(c.Quality), Languages: languageNames(c.Languages), Size: rel.Size,
 		State: core.DownloadDownloading, GrabbedAt: now, UpdatedAt: now,
@@ -154,7 +181,11 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 		dataDownloadURL: rel.DownloadURL, dataInfoURL: rel.InfoURL, dataReleaseGroup: c.ReleaseGroup,
 		dataIndexerFlags: strings.Join(rel.Flags, ","), dataCustomFormatScore: strconv.Itoa(c.FormatScore),
 		dataReleaseSource: releaseSources[c.Source],
-		dataTmdbID:        g.movie.item.ExternalIDs[core.ProviderTMDB], dataImdbID: g.movie.item.ExternalIDs[core.ProviderIMDb],
+	}
+	if g.show != nil {
+		data[dataTvdbID], data[dataImdbID] = g.show.item.ExternalIDs[core.ProviderTVDB], g.show.item.ExternalIDs[core.ProviderIMDb]
+	} else {
+		data[dataTmdbID], data[dataImdbID] = g.movie.item.ExternalIDs[core.ProviderTMDB], g.movie.item.ExternalIDs[core.ProviderIMDb]
 	}
 	if !rel.PublishDate.IsZero() {
 		data[dataPublishedDate] = rel.PublishDate.UTC().Format(time.RFC3339)
@@ -167,13 +198,34 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 			delete(data, k)
 		}
 	}
-	if err := r.Store.History().Add(ctx, core.HistoryEvent{
-		ID: core.NewID(), Type: core.HistoryGrabbed, ItemID: d.ItemID, Date: now, SourceTitle: rel.Title,
-		Quality: d.Quality, Languages: d.Languages, DownloadID: d.DownloadID, Data: data,
-	}); err != nil {
+	var events []core.HistoryEvent
+	if g.show != nil {
+		// History events are of items: the episodes a multi-episode file
+		// covers are recorded as the file's item.
+		seen := map[core.ID]bool{}
+		for _, ep := range g.episodes {
+			if h := rn.holderOf(ep.ID); !seen[h] {
+				seen[h] = true
+				events = append(events, core.HistoryEvent{
+					ID: core.NewID(), Type: core.HistoryGrabbed, ItemID: h, ParentID: itemID, Date: now, SourceTitle: rel.Title,
+					Quality: d.Quality, Languages: d.Languages, DownloadID: d.DownloadID, Data: data,
+				})
+			}
+		}
+	} else {
+		events = []core.HistoryEvent{{
+			ID: core.NewID(), Type: core.HistoryGrabbed, ItemID: d.ItemID, Date: now, SourceTitle: rel.Title,
+			Quality: d.Quality, Languages: d.Languages, DownloadID: d.DownloadID, Data: data,
+		}}
+	}
+	if err := r.Store.History().Add(ctx, events...); err != nil {
 		return d, err
 	}
-	if err := r.removePending(ctx, d.ItemID, nil); err != nil {
+	if g.show != nil {
+		if err := r.removeGrabbedPending(ctx, g.show, itemIDs, c.Quality); err != nil {
+			return d, err
+		}
+	} else if err := r.removePending(ctx, d.ItemID, nil); err != nil {
 		return d, err
 	}
 	r.logger().InfoContext(ctx, "grabbed release", "release", rel.Title, "item", d.ItemID, "client", client.GetName(), "indexer", rel.IndexerName)
@@ -213,20 +265,32 @@ func (r *Runtime) releaseFile(ctx context.Context, rel *Release, req *pluginv1.A
 }
 
 // GrabRelease sends a release a search found to a download client for a
-// wanted movie, whatever the decisions on it, and tracks it, as Radarr's
-// ReleaseController does. pluginID and clientID name the client; empty
-// for the first of the release's protocol.
+// wanted movie, or for episodes of a wanted series given it, a season or
+// an episode, whatever the decisions on it, and tracks it, as Radarr's
+// and Sonarr's ReleaseController do. pluginID and clientID name the
+// client; empty for the first of the release's protocol.
 func (r *Runtime) GrabRelease(ctx context.Context, itemID core.ID, rel *Release, pluginID, clientID string) (core.Download, error) {
 	rn, err := r.newRun(ctx)
 	if err != nil {
 		return core.Download{}, err
 	}
-	m, err := rn.movie(ctx, itemID)
+	if !rel.Protocol.Valid() {
+		return core.Download{}, fmt.Errorf("%w: release has no protocol", core.ErrInvalid)
+	}
+	it, err := r.Store.Items().Get(ctx, itemID)
 	if err != nil {
 		return core.Download{}, err
 	}
-	if !rel.Protocol.Valid() {
-		return core.Download{}, fmt.Errorf("%w: release has no protocol", core.ErrInvalid)
+	if isEpisodeKind(it.Kind) {
+		d, err := r.grabEpisodeRelease(ctx, rn, it, rel, pluginID, clientID)
+		if errors.Is(err, errReleaseUnavailable) || errors.Is(err, errClientUnavailable) {
+			return d, fmt.Errorf("%w: %w", core.ErrConflict, err)
+		}
+		return d, err
+	}
+	m, err := rn.movie(ctx, itemID)
+	if err != nil {
+		return core.Download{}, err
 	}
 	c := &acquire.Candidate{Release: rel.decisionRelease(), Source: acquire.SourceInteractiveSearch, Target: m.target, Items: []*acquire.Item{m.acq}}
 	if parsed := release.ParseMovieTitle(rel.Title, false); parsed != nil {

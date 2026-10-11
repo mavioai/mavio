@@ -265,6 +265,94 @@
         "title": "AddMovieResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.AddSeriesRequest": {
+        "type": "object",
+        "properties": {
+          "libraryId": {
+            "type": "string",
+            "title": "library_id",
+            "format": "uuid"
+          },
+          "tvdbId": {
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "title": "tvdb_id",
+            "format": "int32"
+          },
+          "qualityProfileId": {
+            "type": "string",
+            "title": "quality_profile_id",
+            "format": "uuid"
+          },
+          "seriesType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.SeriesType"
+              }
+            ],
+            "title": "series_type",
+            "description": "Unspecified for daily when the scene mapping providers list the\n series as daily, else standard.\nenum.defined_only = true\n"
+          },
+          "seasonFolder": {
+            "type": "boolean",
+            "title": "season_folder"
+          },
+          "monitor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SeriesMonitor"
+              }
+            ],
+            "title": "monitor",
+            "description": "Unspecified for all.\nenum.defined_only = true\n"
+          },
+          "monitorNewItems": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.NewItemMonitor"
+              }
+            ],
+            "title": "monitor_new_items",
+            "description": "enum.defined_only = true\n"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            },
+            "title": "tags"
+          },
+          "search": {
+            "type": "boolean",
+            "title": "search",
+            "description": "Search for the monitored episodes without a file at once."
+          }
+        },
+        "title": "AddSeriesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.AddSeriesResponse": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "description": "The series' item."
+          },
+          "wanted": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Wanted"
+              }
+            ],
+            "title": "wanted"
+          }
+        },
+        "title": "AddSeriesResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.BlocklistEntry": {
         "type": "object",
         "properties": {
@@ -958,7 +1046,7 @@
             "type": "string",
             "title": "item_id",
             "format": "uuid",
-            "description": "The movie the release is for."
+            "description": "The movie the release is for, or the wanted series, season or episode\n whose episodes it holds."
           },
           "release": {
             "allOf": [
@@ -1606,6 +1694,15 @@
             "title": "offset",
             "minimum": 0,
             "format": "int32"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.WantedKind"
+              }
+            ],
+            "title": "kind",
+            "description": "enum.defined_only = true\n"
           }
         },
         "title": "ListWantedRequest",
@@ -1626,6 +1723,14 @@
             "type": "integer",
             "title": "total",
             "format": "int32"
+          },
+          "episodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.WantedEpisode"
+            },
+            "title": "episodes",
+            "description": "Of kind episode, most recently aired first."
           }
         },
         "title": "ListWantedResponse",
@@ -1669,6 +1774,62 @@
           "MINIMUM_AVAILABILITY_RELEASED"
         ],
         "description": "MinimumAvailability is when a movie starts to be searched for."
+      },
+      "mavio.acquisition.v1.MonitorSeriesRequest": {
+        "type": "object",
+        "properties": {
+          "itemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "item_ids",
+            "maxItems": 1000,
+            "minItems": 1,
+            "description": "Wanted series."
+          },
+          "monitor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SeriesMonitor"
+              }
+            ],
+            "not": {
+              "enum": [
+                "SERIES_MONITOR_UNSPECIFIED"
+              ]
+            },
+            "title": "monitor",
+            "description": "enum.defined_only = true\n"
+          },
+          "monitorNewItems": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.NewItemMonitor"
+              }
+            ],
+            "title": "monitor_new_items",
+            "description": "Unspecified to leave as it is.\nenum.defined_only = true\n"
+          }
+        },
+        "title": "MonitorSeriesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.MonitorSeriesResponse": {
+        "type": "object",
+        "title": "MonitorSeriesResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.NewItemMonitor": {
+        "type": "string",
+        "title": "NewItemMonitor",
+        "enum": [
+          "NEW_ITEM_MONITOR_UNSPECIFIED",
+          "NEW_ITEM_MONITOR_ALL",
+          "NEW_ITEM_MONITOR_NONE"
+        ],
+        "description": "NewItemMonitor is whether a series monitors the seasons and episodes\n refreshes add, as Sonarr's NewItemMonitorTypes."
       },
       "mavio.acquisition.v1.ParsedRelease": {
         "type": "object",
@@ -2196,7 +2357,7 @@
               "$ref": "#/components/schemas/mavio.acquisition.v1.Rejection"
             },
             "title": "rejections",
-            "description": "For a search of a monitored movie: why the release would not be\n grabbed, as the decision engine says; empty when it would be."
+            "description": "For a search of a monitored movie or episode: why the release would not be\n grabbed, as the decision engine says; empty when it would be."
           },
           "evaluated": {
             "type": "boolean",
@@ -2214,6 +2375,14 @@
             "type": "integer",
             "title": "custom_format_score",
             "format": "int32"
+          },
+          "episodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "episode_ids",
+            "description": "For a search of a wanted series' season or episode: the episodes the\n release was matched to."
           }
         },
         "title": "Release",
@@ -2529,7 +2698,7 @@
               "format": "uuid"
             },
             "title": "item_ids",
-            "description": "The movies to search for; empty for every monitored movie the filter\n selects."
+            "description": "The movies to search for, or the series, seasons and episodes; empty\n for every monitored movie or episode the filter selects."
           },
           "filter": {
             "allOf": [
@@ -2539,6 +2708,15 @@
             ],
             "title": "filter",
             "description": "With no items: the movies to search for; unspecified for missing.\nenum.defined_only = true\n"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.WantedKind"
+              }
+            ],
+            "title": "kind",
+            "description": "enum.defined_only = true\n"
           }
         },
         "title": "SearchWantedRequest",
@@ -2551,10 +2729,57 @@
             "type": "integer",
             "title": "queued",
             "format": "int32",
-            "description": "The number of movies queued."
+            "description": "The number of searches queued."
           }
         },
         "title": "SearchWantedResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.SeriesMonitor": {
+        "type": "string",
+        "title": "SeriesMonitor",
+        "enum": [
+          "SERIES_MONITOR_UNSPECIFIED",
+          "SERIES_MONITOR_ALL",
+          "SERIES_MONITOR_FUTURE",
+          "SERIES_MONITOR_MISSING",
+          "SERIES_MONITOR_EXISTING",
+          "SERIES_MONITOR_FIRST_SEASON",
+          "SERIES_MONITOR_LAST_SEASON",
+          "SERIES_MONITOR_PILOT",
+          "SERIES_MONITOR_RECENT",
+          "SERIES_MONITOR_MONITOR_SPECIALS",
+          "SERIES_MONITOR_UNMONITOR_SPECIALS",
+          "SERIES_MONITOR_NONE",
+          "SERIES_MONITOR_SKIP"
+        ],
+        "description": "SeriesMonitor is which episodes of a series to monitor, as Sonarr's\n MonitorTypes."
+      },
+      "mavio.acquisition.v1.SetMonitoredRequest": {
+        "type": "object",
+        "properties": {
+          "itemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "item_ids",
+            "maxItems": 10000,
+            "minItems": 1,
+            "description": "Seasons and episodes."
+          },
+          "monitored": {
+            "type": "boolean",
+            "title": "monitored"
+          }
+        },
+        "title": "SetMonitoredRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.SetMonitoredResponse": {
+        "type": "object",
+        "title": "SetMonitoredResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.SyncRSSRequest": {
@@ -2836,11 +3061,88 @@
               }
             ],
             "title": "last_search_time"
+          },
+          "monitorNewItems": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.NewItemMonitor"
+              }
+            ],
+            "title": "monitor_new_items",
+            "description": "Of series: whether seasons and episodes refreshes add are monitored.\nenum.defined_only = true\n"
+          },
+          "seasonFolder": {
+            "type": "boolean",
+            "title": "season_folder",
+            "description": "Of series: whether episodes are imported into season folders."
           }
         },
         "title": "Wanted",
         "additionalProperties": false,
         "description": "Wanted is how a monitored movie or series is acquired."
+      },
+      "mavio.acquisition.v1.WantedEpisode": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id"
+          },
+          "seriesId": {
+            "type": "string",
+            "title": "series_id"
+          },
+          "seriesName": {
+            "type": "string",
+            "title": "series_name"
+          },
+          "seasonNumber": {
+            "type": "integer",
+            "title": "season_number",
+            "format": "int32"
+          },
+          "episodeNumber": {
+            "type": "integer",
+            "title": "episode_number",
+            "format": "int32"
+          },
+          "absoluteNumber": {
+            "type": "integer",
+            "title": "absolute_number",
+            "format": "int32",
+            "description": "Zero when unknown."
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "airTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "air_time",
+            "description": "Unset when unknown."
+          },
+          "quality": {
+            "type": "string",
+            "title": "quality",
+            "description": "The quality of its file, by Sonarr's name; empty without a file."
+          },
+          "wanted": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.Wanted"
+              }
+            ],
+            "title": "wanted",
+            "description": "The series' wanted state."
+          }
+        },
+        "title": "WantedEpisode",
+        "additionalProperties": false,
+        "description": "WantedEpisode is a monitored episode of a wanted series ListWanted\n lists."
       },
       "mavio.acquisition.v1.WantedFilter": {
         "type": "string",
@@ -2850,7 +3152,17 @@
           "WANTED_FILTER_MISSING",
           "WANTED_FILTER_CUTOFF_UNMET"
         ],
-        "description": "WantedFilter is which monitored movies ListWanted lists."
+        "description": "WantedFilter is which monitored movies or episodes ListWanted lists."
+      },
+      "mavio.acquisition.v1.WantedKind": {
+        "type": "string",
+        "title": "WantedKind",
+        "enum": [
+          "WANTED_KIND_UNSPECIFIED",
+          "WANTED_KIND_MOVIE",
+          "WANTED_KIND_EPISODE"
+        ],
+        "description": "WantedKind is whether ListWanted and SearchWanted are about movies or\n episodes."
       },
       "mavio.acquisition.v1.WantedMovie": {
         "type": "object",
@@ -12035,6 +12347,10 @@
       "description": "ProfileService keeps what decides which releases are grabbed: quality\n definitions, quality profiles, custom formats, delay and release\n profiles; and the remote path mappings of download clients.\n Administrators only, but for listing quality profiles, which users who\n may request media read too."
     },
     {
+      "name": "ItemService",
+      "description": "ItemService browses and searches library items."
+    },
+    {
       "name": "WantedService",
       "description": "WantedService adds the movies and series to acquire, and searches for\n them. Administrators only."
     },
@@ -12049,10 +12365,6 @@
     {
       "name": "AuthService",
       "description": "AuthService signs clients in and out. GetAuthInfo, CreateFirstUser and\n Login are public; the other methods act on the calling user."
-    },
-    {
-      "name": "ItemService",
-      "description": "ItemService browses and searches library items."
     },
     {
       "name": "CollectionService",
@@ -12472,13 +12784,13 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/ListLibraries": {
+    "/mavio.library.v1.LibraryService/CreateLibrary": {
       "post": {
         "tags": [
           "LibraryService"
         ],
-        "summary": "ListLibraries",
-        "operationId": "mavio.library.v1.LibraryService.ListLibraries",
+        "summary": "CreateLibrary",
+        "operationId": "mavio.library.v1.LibraryService.CreateLibrary",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12503,7 +12815,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryRequest"
               }
             }
           },
@@ -12525,7 +12837,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryResponse"
                 }
               }
             }
@@ -12533,14 +12845,14 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/ListIntros": {
+    "/mavio.acquisition.v1.ReleaseService/SearchReleases": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "ReleaseService"
         ],
-        "summary": "ListIntros",
-        "description": "ListIntros returns the items to play before an item, such as its\n trailers, as the intro provider plugins pick them; only items the user\n can play.",
-        "operationId": "mavio.playback.v1.PlaybackService.ListIntros",
+        "summary": "SearchReleases",
+        "description": "SearchReleases searches indexers for a movie, season or episode of the\n library, by the IDs and numbers each indexer can search by and else by\n title, as Radarr and Sonarr do; or for text; or reads their recent\n releases when given neither.",
+        "operationId": "mavio.acquisition.v1.ReleaseService.SearchReleases",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -12565,7 +12877,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.ListIntrosRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchReleasesRequest"
               }
             }
           },
@@ -12587,7 +12899,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.ListIntrosResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchReleasesResponse"
                 }
               }
             }
@@ -13948,13 +14260,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/UpdateCustomFormat": {
+    "/mavio.library.v1.LibraryService/ScanLibrary": {
       "post": {
         "tags": [
-          "ProfileService"
+          "LibraryService"
         ],
-        "summary": "UpdateCustomFormat",
-        "operationId": "mavio.acquisition.v1.ProfileService.UpdateCustomFormat",
+        "summary": "ScanLibrary",
+        "description": "ScanLibrary enqueues a reconciliation scan. A scan that is already\n pending or running is not enqueued again.",
+        "operationId": "mavio.library.v1.LibraryService.ScanLibrary",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -13979,7 +14292,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateCustomFormatRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ScanLibraryRequest"
               }
             }
           },
@@ -14001,7 +14314,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateCustomFormatResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ScanLibraryResponse"
                 }
               }
             }
@@ -14316,14 +14629,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ReleaseService/SearchReleases": {
+    "/mavio.library.v1.LibraryService/UpdateLibrary": {
       "post": {
         "tags": [
-          "ReleaseService"
+          "LibraryService"
         ],
-        "summary": "SearchReleases",
-        "description": "SearchReleases searches indexers for a movie, season or episode of the\n library, by the IDs and numbers each indexer can search by and else by\n title, as Radarr and Sonarr do; or for text; or reads their recent\n releases when given neither.",
-        "operationId": "mavio.acquisition.v1.ReleaseService.SearchReleases",
+        "summary": "UpdateLibrary",
+        "operationId": "mavio.library.v1.LibraryService.UpdateLibrary",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -14348,7 +14660,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchReleasesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateLibraryRequest"
               }
             }
           },
@@ -14370,7 +14682,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchReleasesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateLibraryResponse"
                 }
               }
             }
@@ -14433,6 +14745,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.acquisition.v1.AddMovieResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.WantedService/AddSeries": {
+      "post": {
+        "tags": [
+          "WantedService"
+        ],
+        "summary": "AddSeries",
+        "description": "AddSeries adds a series to a show library by its TVDB ID, as a\n virtual item identified by the library's metadata providers, which\n list its episodes, monitored with a quality profile; it fails with\n ALREADY_EXISTS when the library has the series.",
+        "operationId": "mavio.acquisition.v1.WantedService.AddSeries",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.AddSeriesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.AddSeriesResponse"
                 }
               }
             }
@@ -14508,7 +14882,7 @@
           "WantedService"
         ],
         "summary": "ListWanted",
-        "description": "ListWanted lists the monitored movies that lack a file, or whose file\n has not met their profile's cutoff.",
+        "description": "ListWanted lists the monitored movies or episodes that lack a file,\n or whose file has not met their profile's cutoff.",
         "operationId": "mavio.acquisition.v1.WantedService.ListWanted",
         "parameters": [
           {
@@ -14564,13 +14938,75 @@
         }
       }
     },
+    "/mavio.acquisition.v1.WantedService/MonitorSeries": {
+      "post": {
+        "tags": [
+          "WantedService"
+        ],
+        "summary": "MonitorSeries",
+        "description": "MonitorSeries applies a monitoring option to the seasons and episodes\n of wanted series, as Sonarr's season pass.",
+        "operationId": "mavio.acquisition.v1.WantedService.MonitorSeries",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.MonitorSeriesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.MonitorSeriesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.acquisition.v1.WantedService/SearchWanted": {
       "post": {
         "tags": [
           "WantedService"
         ],
         "summary": "SearchWanted",
-        "description": "SearchWanted queues searches for monitored movies, which grab the\n best release each finds.",
+        "description": "SearchWanted queues searches for monitored movies or episodes, which\n grab the best releases they find.",
         "operationId": "mavio.acquisition.v1.WantedService.SearchWanted",
         "parameters": [
           {
@@ -14626,14 +15062,14 @@
         }
       }
     },
-    "/mavio.library.v1.MetadataService/DownloadSubtitle": {
+    "/mavio.acquisition.v1.WantedService/SetMonitored": {
       "post": {
         "tags": [
-          "MetadataService"
+          "WantedService"
         ],
-        "summary": "DownloadSubtitle",
-        "description": "DownloadSubtitle saves a subtitle found by SearchSubtitles next to the\n video, where it becomes one of the video's subtitle streams.",
-        "operationId": "mavio.library.v1.MetadataService.DownloadSubtitle",
+        "summary": "SetMonitored",
+        "description": "SetMonitored monitors or unmonitors seasons and episodes; a season\n takes its episodes along.",
+        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -14658,7 +15094,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DownloadSubtitleRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
               }
             }
           },
@@ -14680,7 +15116,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DownloadSubtitleResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.WantedService/SyncRSS": {
+      "post": {
+        "tags": [
+          "WantedService"
+        ],
+        "summary": "SyncRSS",
+        "description": "SyncRSS queues an RSS sync: the indexers' recent releases are checked\n against every monitored movie and episode.",
+        "operationId": "mavio.acquisition.v1.WantedService.SyncRSS",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SyncRSSRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SyncRSSResponse"
                 }
               }
             }
@@ -15246,14 +15744,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/Login": {
+    "/mavio.library.v1.MetadataService/DeleteItemImage": {
       "post": {
         "tags": [
-          "AuthService"
+          "MetadataService"
         ],
-        "summary": "Login",
-        "description": "Login signs a device in, replacing its previous session. Wrong\n credentials and disabled users fail with UNAUTHENTICATED.",
-        "operationId": "mavio.auth.v1.AuthService.Login",
+        "summary": "DeleteItemImage",
+        "description": "DeleteItemImage removes an image of an item, and its file when it lies\n in the library's folders.",
+        "operationId": "mavio.library.v1.MetadataService.DeleteItemImage",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -15278,7 +15776,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.LoginRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteItemImageRequest"
               }
             }
           },
@@ -15300,7 +15798,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.LoginResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteItemImageResponse"
                 }
               }
             }
@@ -16603,13 +17101,14 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/CreateLibrary": {
+    "/mavio.acquisition.v1.DownloadService/GrabRelease": {
       "post": {
         "tags": [
-          "LibraryService"
+          "DownloadService"
         ],
-        "summary": "CreateLibrary",
-        "operationId": "mavio.library.v1.LibraryService.CreateLibrary",
+        "summary": "GrabRelease",
+        "description": "GrabRelease sends a release SearchReleases found for a movie to a\n download client, whatever its decision rejected, and tracks it.",
+        "operationId": "mavio.acquisition.v1.DownloadService.GrabRelease",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16634,7 +17133,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GrabReleaseRequest"
               }
             }
           },
@@ -16656,7 +17155,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateLibraryResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GrabReleaseResponse"
                 }
               }
             }
@@ -16787,76 +17286,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DownloadService/GrabRelease": {
-      "post": {
-        "tags": [
-          "DownloadService"
-        ],
-        "summary": "GrabRelease",
-        "description": "GrabRelease sends a release SearchReleases found for a movie to a\n download client, whatever its decision rejected, and tracks it.",
-        "operationId": "mavio.acquisition.v1.DownloadService.GrabRelease",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GrabReleaseRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GrabReleaseResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.LibraryService/ScanLibrary": {
+    "/mavio.library.v1.LibraryService/ListLibraries": {
       "post": {
         "tags": [
           "LibraryService"
         ],
-        "summary": "ScanLibrary",
-        "description": "ScanLibrary enqueues a reconciliation scan. A scan that is already\n pending or running is not enqueued again.",
-        "operationId": "mavio.library.v1.LibraryService.ScanLibrary",
+        "summary": "ListLibraries",
+        "operationId": "mavio.library.v1.LibraryService.ListLibraries",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16881,7 +17317,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ScanLibraryRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesRequest"
               }
             }
           },
@@ -16903,7 +17339,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ScanLibraryResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesResponse"
                 }
               }
             }
@@ -16911,14 +17347,13 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/AddToPlaylist": {
+    "/mavio.acquisition.v1.ProfileService/UpdateCustomFormat": {
       "post": {
         "tags": [
-          "PlaylistService"
+          "ProfileService"
         ],
-        "summary": "AddToPlaylist",
-        "description": "AddToPlaylist inserts entries for items; a series, season, album or\n other container adds its playable items in order.",
-        "operationId": "mavio.library.v1.PlaylistService.AddToPlaylist",
+        "summary": "UpdateCustomFormat",
+        "operationId": "mavio.acquisition.v1.ProfileService.UpdateCustomFormat",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16943,7 +17378,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToPlaylistRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateCustomFormatRequest"
               }
             }
           },
@@ -16965,7 +17400,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToPlaylistResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateCustomFormatResponse"
                 }
               }
             }
@@ -17034,14 +17469,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.WantedService/SyncRSS": {
+    "/mavio.auth.v1.AuthService/Login": {
       "post": {
         "tags": [
-          "WantedService"
+          "AuthService"
         ],
-        "summary": "SyncRSS",
-        "description": "SyncRSS queues an RSS sync: the indexers' recent releases are checked\n against every monitored movie.",
-        "operationId": "mavio.acquisition.v1.WantedService.SyncRSS",
+        "summary": "Login",
+        "description": "Login signs a device in, replacing its previous session. Wrong\n credentials and disabled users fail with UNAUTHENTICATED.",
+        "operationId": "mavio.auth.v1.AuthService.Login",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -17066,7 +17501,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SyncRSSRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.LoginRequest"
               }
             }
           },
@@ -17088,7 +17523,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SyncRSSResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.MetadataService/DownloadSubtitle": {
+      "post": {
+        "tags": [
+          "MetadataService"
+        ],
+        "summary": "DownloadSubtitle",
+        "description": "DownloadSubtitle saves a subtitle found by SearchSubtitles next to the\n video, where it becomes one of the video's subtitle streams.",
+        "operationId": "mavio.library.v1.MetadataService.DownloadSubtitle",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.DownloadSubtitleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.DownloadSubtitleResponse"
                 }
               }
             }
@@ -17592,13 +18089,14 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/UpdateLibrary": {
+    "/mavio.library.v1.PlaylistService/AddToPlaylist": {
       "post": {
         "tags": [
-          "LibraryService"
+          "PlaylistService"
         ],
-        "summary": "UpdateLibrary",
-        "operationId": "mavio.library.v1.LibraryService.UpdateLibrary",
+        "summary": "AddToPlaylist",
+        "description": "AddToPlaylist inserts entries for items; a series, season, album or\n other container adds its playable items in order.",
+        "operationId": "mavio.library.v1.PlaylistService.AddToPlaylist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -17623,7 +18121,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateLibraryRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToPlaylistRequest"
               }
             }
           },
@@ -17645,7 +18143,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateLibraryResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToPlaylistResponse"
                 }
               }
             }
@@ -18082,14 +18580,14 @@
         }
       }
     },
-    "/mavio.library.v1.MetadataService/DeleteItemImage": {
+    "/mavio.playback.v1.PlaybackService/ListIntros": {
       "post": {
         "tags": [
-          "MetadataService"
+          "PlaybackService"
         ],
-        "summary": "DeleteItemImage",
-        "description": "DeleteItemImage removes an image of an item, and its file when it lies\n in the library's folders.",
-        "operationId": "mavio.library.v1.MetadataService.DeleteItemImage",
+        "summary": "ListIntros",
+        "description": "ListIntros returns the items to play before an item, such as its\n trailers, as the intro provider plugins pick them; only items the user\n can play.",
+        "operationId": "mavio.playback.v1.PlaybackService.ListIntros",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -18114,7 +18612,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteItemImageRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.ListIntrosRequest"
               }
             }
           },
@@ -18136,7 +18634,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteItemImageResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.ListIntrosResponse"
                 }
               }
             }

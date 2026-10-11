@@ -97,6 +97,9 @@ type Search struct {
 	Categories []int32
 	// Indexers are those to search; empty for every enabled indexer.
 	Indexers []Ref
+	// Episodes, when set, searches for episodes of a series as the
+	// acquisition of series asks, in place of ItemID.
+	Episodes *EpisodeQuery
 }
 
 // Release is a release an indexer found, with its title parsed: Movie for

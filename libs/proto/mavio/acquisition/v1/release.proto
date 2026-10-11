@@ -156,7 +156,7 @@ message Release {
   repeated string flags = 20;
   // What the title tells; unset when it cannot be parsed.
   ParsedRelease parsed = 21;
-  // For a search of a monitored movie: why the release would not be
+  // For a search of a monitored movie or episode: why the release would not be
   // grabbed, as the decision engine says; empty when it would be.
   repeated Rejection rejections = 22;
   // For a search of a monitored movie: whether the decision engine
@@ -164,6 +164,9 @@ message Release {
   bool evaluated = 23;
   repeated string custom_formats = 24;
   int32 custom_format_score = 25;
+  // For a search of a wanted series' season or episode: the episodes the
+  // release was matched to.
+  repeated string episode_ids = 26;
 }
 
 // Rejection is why the decision engine rejects a release.

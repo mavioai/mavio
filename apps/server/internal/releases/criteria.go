@@ -51,6 +51,9 @@ type episodeCriteria struct {
 	episode  int
 	absolute int
 	airDate  time.Time
+	// query is the episode query the criteria were made of, or nil for
+	// those of an item.
+	query *EpisodeQuery
 }
 
 // The IDs Newznab searches take for movies and for series, in Radarr's
@@ -64,6 +67,19 @@ type idParam struct{ key, param string }
 
 // criteria returns the criteria of a search, reading its item.
 func (s *Searcher) criteria(ctx context.Context, q Search) (*criteria, error) {
+	if q.Episodes != nil {
+		if s.Items == nil {
+			return nil, fmt.Errorf("series %s: %w", q.Episodes.SeriesID, core.ErrNotFound)
+		}
+		series, err := s.Items.Get(ctx, q.Episodes.SeriesID)
+		if err != nil {
+			return nil, err
+		}
+		if series.Kind != core.KindSeries {
+			return nil, fmt.Errorf("%s %s is not a series: %w", series.Kind, series.ID, core.ErrInvalid)
+		}
+		return s.episodeQueryCriteria(series, q)
+	}
 	if q.ItemID == core.NilID {
 		c := &criteria{text: &q, categories: q.Categories}
 		switch q.Type {
@@ -147,11 +163,11 @@ func (s *Searcher) series(ctx context.Context, item core.Item) (core.Item, error
 	return core.Item{}, fmt.Errorf("%s %s has no series: %w", item.Kind, item.ID, core.ErrInvalid)
 }
 
-func or(categories []int32, category int32) []int32 {
+func or(categories []int32, category ...int32) []int32 {
 	if len(categories) > 0 {
 		return categories
 	}
-	return []int32{category}
+	return category
 }
 
 // titles returns an item's titles, the original after the name.
@@ -181,6 +197,8 @@ func (c *criteria) tiers(caps *pluginv1.IndexerCapabilities) [][]*pluginv1.Searc
 	switch {
 	case c.movie != nil:
 		return c.movieTiers(caps)
+	case c.episode != nil && c.episode.query != nil:
+		return c.queryTiers(caps)
 	case c.episode != nil:
 		return c.episodeTiers(caps)
 	}
@@ -295,6 +313,11 @@ func cleanTitles(titles []string) []string {
 	}
 	return out
 }
+
+// CleanSceneTitle returns a title as indexers are searched by it, as
+// Sonarr's SearchCriteriaBase.GetCleanSceneTitle and NewsnabifyTitle make
+// it.
+func CleanSceneTitle(title string) string { return cleanTitle(title) }
 
 // cleanTitle is GetCleanSceneTitle followed by NewsnabifyTitle: a leading
 // "The" dropped, "&" spelled out, apostrophes and periods dropped and other

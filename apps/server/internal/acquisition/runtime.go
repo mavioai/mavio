@@ -21,7 +21,7 @@ const (
 	// payload is a SearchPayload.
 	JobSearch = "acquisition.search"
 	// JobRSS reads the indexers' recent releases and grabs those of
-	// wanted movies, every RSSSyncInterval minutes.
+	// wanted movies and episodes, every RSSSyncInterval minutes.
 	JobRSS = "acquisition.rss"
 	// JobQueue checks the tracked downloads in their clients, imports the
 	// completed and handles the failed, every CheckFinishedInterval
@@ -52,7 +52,7 @@ type Identifier interface {
 	Identify(ctx context.Context, lib core.Library, itemID core.ID, ids map[core.Provider]string) (core.Item, error)
 }
 
-// Runtime acquires movies. Its zero value is not usable; Store and
+// Runtime acquires movies and episodes. Its zero value is not usable; Store and
 // Settings are required.
 type Runtime struct {
 	Store core.Store
@@ -62,6 +62,9 @@ type Runtime struct {
 	// provider plugins; nil returns none.
 	Indexers func() []releases.Provider
 	Clients  func() []downloads.Provider
+	// SceneProviders returns the ready scene mapping provider plugins;
+	// nil returns none.
+	SceneProviders func() []SceneProvider
 	// Identifier identifies added movies; nil leaves them as added.
 	Identifier Identifier
 	// Prober reads imported files; without it no file is imported, as
@@ -81,6 +84,8 @@ type Runtime struct {
 	statuses map[core.ID]ClientStatus
 	// devices detects volumes when Devices is nil.
 	devices *storage.Detector
+	// scene caches the scene mapping providers' mappings.
+	scene sceneCache
 }
 
 func (r *Runtime) now() time.Time {
@@ -140,6 +145,14 @@ func (r *Runtime) Handlers() map[string]library.Handler {
 			return time.Duration(max(s.CheckFinishedInterval, 1)) * time.Minute
 		}, r.CheckQueue),
 		JobRecycleBin: r.recurring(JobRecycleBin, func(core.AcquisitionSettings) time.Duration { return 24 * time.Hour }, r.CleanRecycleBin),
+		JobEpisodeSearch: func(ctx context.Context, job core.Job) ([]core.Job, error) {
+			var p EpisodeSearchPayload
+			if err := json.Unmarshal(job.Payload, &p); err != nil {
+				return nil, fmt.Errorf("episode search payload: %w", err)
+			}
+			return nil, r.SearchEpisodes(ctx, p)
+		},
+		JobSceneMappings: r.recurring(JobSceneMappings, func(core.AcquisitionSettings) time.Duration { return SceneMappingInterval }, r.UpdateSceneMappings),
 	}
 }
 
@@ -184,13 +197,14 @@ func SearchJob(itemID core.ID, userInvoked bool, at time.Time) core.Job {
 }
 
 // Schedule enqueues the recurring jobs that are not pending: the queue
-// check and the recycle bin cleanup, and the RSS sync unless s disables
+// check, the recycle bin cleanup and the scene mappings update, and the
+// RSS sync unless s disables
 // it. It is called at startup and whenever the settings change, with the
 // settings applied: settings appliers run under the settings lock, so it
 // must not read the settings through Settings.
 func (r *Runtime) Schedule(ctx context.Context, s core.AcquisitionSettings) error {
 	now := r.now()
-	jobs := []core.Job{scheduledJob(JobQueue, now, true), scheduledJob(JobRecycleBin, now, true)}
+	jobs := []core.Job{scheduledJob(JobQueue, now, true), scheduledJob(JobRecycleBin, now, true), scheduledJob(JobSceneMappings, now, true)}
 	if s.RSSSyncInterval > 0 {
 		jobs = append(jobs, scheduledJob(JobRSS, now, true))
 	}
@@ -225,13 +239,14 @@ type Task struct {
 }
 
 // Tasks returns the recurring jobs with the intervals the settings give:
-// RSS syncs, queue checks and recycle bin cleanups, as Radarr's tasks.
+// RSS syncs, queue checks, recycle bin cleanups and scene mapping
+// updates, as Radarr's and Sonarr's tasks.
 func (r *Runtime) Tasks() []Task {
 	s := r.settings()
 	return []Task{
 		{
 			Kind: JobRSS, Name: "RSS sync", Interval: time.Duration(s.RSSSyncInterval) * time.Minute,
-			Description: "Reads the indexers' recent releases and grabs those of wanted movies.",
+			Description: "Reads the indexers' recent releases and grabs those of wanted movies and episodes.",
 		},
 		{
 			Kind: JobQueue, Name: "Refresh monitored downloads", Interval: time.Duration(max(s.CheckFinishedInterval, 1)) * time.Minute,
@@ -240,6 +255,10 @@ func (r *Runtime) Tasks() []Task {
 		{
 			Kind: JobRecycleBin, Name: "Clean up recycle bin", Interval: 24 * time.Hour,
 			Description: "Deletes what has been in the recycle bin longer than the settings keep it.",
+		},
+		{
+			Kind: JobSceneMappings, Name: "Update scene mapping", Interval: SceneMappingInterval,
+			Description: "Reads the scene mappings and daily series of the scene mapping providers.",
 		},
 	}
 }

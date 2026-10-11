@@ -351,9 +351,10 @@ func addDevLibraries(ctx context.Context, log *slog.Logger, db core.Store, dir s
 	return nil
 }
 
-// newAcquisition returns the movie acquisition runtime: the settings'
-// acquisition settings, the plugins' indexers and download clients, and
-// ffprobe to verify imports with when there is one.
+// newAcquisition returns the movie and series acquisition runtime: the
+// settings' acquisition settings, the plugins' indexers, download clients
+// and scene mapping providers, and ffprobe to verify imports with when
+// there is one.
 func newAcquisition(log *slog.Logger, db core.Store, set *settings.Manager, plugs *plugins.Manager, refresher *library.Refresher, ffprobe string,
 	quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
 ) *acquisition.Runtime {
@@ -361,7 +362,17 @@ func newAcquisition(log *slog.Logger, db core.Store, set *settings.Manager, plug
 		Store: db, Settings: func() core.AcquisitionSettings { return set.Get().Acquisition },
 		Indexers: plugs.IndexerProviders, Clients: plugs.DownloadClientProviders, Identifier: refresher,
 		VolumeLedger: volumeLedger, QuietGate: quietGate, Devices: devices, Logger: log,
+		SceneProviders: func() []acquisition.SceneProvider {
+			var out []acquisition.SceneProvider
+			for _, p := range plugs.SceneMappingProviders() {
+				out = append(out, acquisition.SceneProvider{ID: p.ID, Client: p.Client})
+			}
+			return out
+		},
 	}
+	// Seasons and episodes refreshes add to wanted series are monitored as
+	// the series says.
+	refresher.NewSeasonMonitored = rt.NewSeasonMonitored
 	if path, err := exec.LookPath(ffprobe); err == nil {
 		rt.Prober = providers.FFprobe{Prober: &probe.Prober{FFprobe: path}}
 	}

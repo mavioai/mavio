@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/libs/metadata"
 	"github.com/mavioai/mavio/libs/plugin/manifest"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 )
 
 // The capabilities of plugins are looked up when they are used, so that a
@@ -437,6 +438,24 @@ func (m *Manager) StartPasswordReset(ctx context.Context, pluginID string, user 
 		return fmt.Errorf("password reset plugin %s: %w", pluginID, err)
 	}
 	return nil
+}
+
+// SceneMappingProvider is a ready scene mapping provider plugin.
+type SceneMappingProvider struct {
+	ID     string
+	Client pluginv1connect.SceneMappingProviderServiceClient
+}
+
+// SceneMappingProviders returns the scene mapping providers among the
+// ready plugins.
+func (m *Manager) SceneMappingProviders() []SceneMappingProvider {
+	var out []SceneMappingProvider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_SCENE_MAPPING_PROVIDER) {
+		if pl, ok := m.running(id); ok && pl.SceneMappings() != nil {
+			out = append(out, SceneMappingProvider{ID: id, Client: pl.SceneMappings()})
+		}
+	}
+	return out
 }
 
 // IndexerProviders returns the indexer providers among the ready plugins.

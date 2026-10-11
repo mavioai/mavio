@@ -501,9 +501,20 @@ flowchart TD
 - [x] 决策：Sonarr 决策引擎的各项规格及其排序，并移植其用例（`libs/acquire/series`）
   - [ ] 按名称查找索引器，用于 Sonarr 测试中只给出索引器名称的发布
 - [x] 按 Sonarr 的方式命名剧集文件、剧集与季文件夹（`libs/acquire/organize`）
-- [ ] 想要的剧集与单集：按 TVDB ID 加入剧集，带质量档案，监控新季与新集
-- [ ] 以作业执行的单集、整季与整剧搜索及 RSS 同步；通过 scene 映射、XEM、绝对集数与播出日期把发布匹配到单集
-- [ ] 单集、整季包与多集文件的入库；升级
+- [x] 想要的剧集与单集：按 TVDB ID 加入剧集，带质量档案，监控新季与新集（`WantedService.AddSeries`、`apps/server/internal/acquisition`）
+  - [ ] 想要的剧集被扫描找到的磁盘上的单集，按 Sonarr 的方式监控
+  - [ ] Sonarr 的 `AutoUnmonitorPreviouslyDownloadedEpisodes`
+  - [ ] 每一集自己的上次搜索时间；目前单集使用其剧集的
+- [x] 以作业执行的单集、整季与整剧搜索及 RSS 同步；通过 scene 映射、XEM、绝对集数与播出日期把发布匹配到单集（`libs/acquire/series`、作业 `acquisition.episode_search`，scene 映射由 `acquisition.scene_mappings` 刷新）
+  - [ ] 像 Sonarr 一样把 scene 编号保存在单集上，而不是在内存中缓存 12 小时
+  - [ ] 按 `AnimeStandardFormatSearch` 的动漫整季搜索，以及同时按 ID 与标题搜索的 scene 映射搜索模式
+  - [ ] 整部剧集的交互式搜索
+  - [ ] 为剧集引擎提供日志记录器，而不是使用默认的
+- [x] 单集、整季包与多集文件的入库；升级
+  - [ ] 剧集命名设置：单集格式、季文件夹格式、多集样式；目前使用 Sonarr 的默认值
+  - [ ] Sonarr 关于单集标题、解压中、未验证的 scene 编号、绝对集数与文件夹匹配的入库规格，以及其 scene 名称检查
+  - [ ] 按 Sonarr 的方式汇总单集文件的质量
+  - [ ] 多集文件所涵盖的各集的历史记录，目前随其条目一并删除
 - [ ] 端到端测试
 
 ### P20 发现与请求
