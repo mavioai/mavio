@@ -129,6 +129,18 @@ func (f DownloadFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DownloadMutation", m)
 }
 
+// The EpisodeStateFunc type is an adapter to allow the use of ordinary
+// function as EpisodeState mutator.
+type EpisodeStateFunc func(context.Context, *ent.EpisodeStateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EpisodeStateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EpisodeStateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EpisodeStateMutation", m)
+}
+
 // The FolderStateFunc type is an adapter to allow the use of ordinary
 // function as FolderState mutator.
 type FolderStateFunc func(context.Context, *ent.FolderStateMutation) (ent.Value, error)

@@ -35,6 +35,7 @@ type Store interface {
 	DelayProfiles() DelayProfileRepository
 	ReleaseProfiles() ReleaseProfileRepository
 	Wanted() WantedRepository
+	EpisodeStates() EpisodeStateRepository
 	Downloads() DownloadRepository
 	History() HistoryRepository
 	Blocklist() BlocklistRepository

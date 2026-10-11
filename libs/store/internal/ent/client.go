@@ -26,6 +26,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
@@ -78,6 +79,8 @@ type Client struct {
 	DisplayPreferences *DisplayPreferencesClient
 	// Download is the client for interacting with the Download builders.
 	Download *DownloadClient
+	// EpisodeState is the client for interacting with the EpisodeState builders.
+	EpisodeState *EpisodeStateClient
 	// FolderState is the client for interacting with the FolderState builders.
 	FolderState *FolderStateClient
 	// HistoryEvent is the client for interacting with the HistoryEvent builders.
@@ -149,6 +152,7 @@ func (c *Client) init() {
 	c.DelayProfile = NewDelayProfileClient(c.config)
 	c.DisplayPreferences = NewDisplayPreferencesClient(c.config)
 	c.Download = NewDownloadClient(c.config)
+	c.EpisodeState = NewEpisodeStateClient(c.config)
 	c.FolderState = NewFolderStateClient(c.config)
 	c.HistoryEvent = NewHistoryEventClient(c.config)
 	c.Image = NewImageClient(c.config)
@@ -276,6 +280,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		DelayProfile:       NewDelayProfileClient(cfg),
 		DisplayPreferences: NewDisplayPreferencesClient(cfg),
 		Download:           NewDownloadClient(cfg),
+		EpisodeState:       NewEpisodeStateClient(cfg),
 		FolderState:        NewFolderStateClient(cfg),
 		HistoryEvent:       NewHistoryEventClient(cfg),
 		Image:              NewImageClient(cfg),
@@ -330,6 +335,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		DelayProfile:       NewDelayProfileClient(cfg),
 		DisplayPreferences: NewDisplayPreferencesClient(cfg),
 		Download:           NewDownloadClient(cfg),
+		EpisodeState:       NewEpisodeStateClient(cfg),
 		FolderState:        NewFolderStateClient(cfg),
 		HistoryEvent:       NewHistoryEventClient(cfg),
 		Image:              NewImageClient(cfg),
@@ -386,11 +392,11 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry, c.Credit,
 		c.CustomFormat, c.DelayProfile, c.DisplayPreferences, c.Download,
-		c.FolderState, c.HistoryEvent, c.Image, c.Issue, c.IssueComment, c.Item,
-		c.ItemLink, c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource,
-		c.PendingRelease, c.Person, c.PluginConfig, c.QualityDefinition,
-		c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting,
-		c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.EpisodeState, c.FolderState, c.HistoryEvent, c.Image, c.Issue,
+		c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
+		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
+		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
+		c.Request, c.Setting, c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Use(hooks...)
 	}
@@ -402,11 +408,11 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry, c.Credit,
 		c.CustomFormat, c.DelayProfile, c.DisplayPreferences, c.Download,
-		c.FolderState, c.HistoryEvent, c.Image, c.Issue, c.IssueComment, c.Item,
-		c.ItemLink, c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource,
-		c.PendingRelease, c.Person, c.PluginConfig, c.QualityDefinition,
-		c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting,
-		c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.EpisodeState, c.FolderState, c.HistoryEvent, c.Image, c.Issue,
+		c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
+		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
+		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
+		c.Request, c.Setting, c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -435,6 +441,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.DisplayPreferences.mutate(ctx, m)
 	case *DownloadMutation:
 		return c.Download.mutate(ctx, m)
+	case *EpisodeStateMutation:
+		return c.EpisodeState.mutate(ctx, m)
 	case *FolderStateMutation:
 		return c.FolderState.mutate(ctx, m)
 	case *HistoryEventMutation:
@@ -1948,6 +1956,155 @@ func (c *DownloadClient) mutate(ctx context.Context, m *DownloadMutation) (Value
 	}
 }
 
+// EpisodeStateClient is a client for the EpisodeState schema.
+type EpisodeStateClient struct {
+	config
+}
+
+// NewEpisodeStateClient returns a client for the EpisodeState from the given config.
+func NewEpisodeStateClient(c config) *EpisodeStateClient {
+	return &EpisodeStateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `episodestate.Hooks(f(g(h())))`.
+func (c *EpisodeStateClient) Use(hooks ...Hook) {
+	c.hooks.EpisodeState = append(c.hooks.EpisodeState, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `episodestate.Intercept(f(g(h())))`.
+func (c *EpisodeStateClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EpisodeState = append(c.inters.EpisodeState, interceptors...)
+}
+
+// Create returns a builder for creating a EpisodeState entity.
+func (c *EpisodeStateClient) Create() *EpisodeStateCreate {
+	mutation := newEpisodeStateMutation(c.config, OpCreate)
+	return &EpisodeStateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EpisodeState entities.
+func (c *EpisodeStateClient) CreateBulk(builders ...*EpisodeStateCreate) *EpisodeStateCreateBulk {
+	return &EpisodeStateCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EpisodeStateClient) MapCreateBulk(slice any, setFunc func(*EpisodeStateCreate, int)) *EpisodeStateCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EpisodeStateCreateBulk{err: fmt.Errorf("calling to EpisodeStateClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EpisodeStateCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EpisodeStateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EpisodeState.
+func (c *EpisodeStateClient) Update() *EpisodeStateUpdate {
+	mutation := newEpisodeStateMutation(c.config, OpUpdate)
+	return &EpisodeStateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EpisodeStateClient) UpdateOne(_m *EpisodeState) *EpisodeStateUpdateOne {
+	mutation := newEpisodeStateMutation(c.config, OpUpdateOne, withEpisodeState(_m))
+	return &EpisodeStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EpisodeStateClient) UpdateOneID(id core.ID) *EpisodeStateUpdateOne {
+	mutation := newEpisodeStateMutation(c.config, OpUpdateOne, withEpisodeStateID(id))
+	return &EpisodeStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EpisodeState.
+func (c *EpisodeStateClient) Delete() *EpisodeStateDelete {
+	mutation := newEpisodeStateMutation(c.config, OpDelete)
+	return &EpisodeStateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EpisodeStateClient) DeleteOne(_m *EpisodeState) *EpisodeStateDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EpisodeStateClient) DeleteOneID(id core.ID) *EpisodeStateDeleteOne {
+	builder := c.Delete().Where(episodestate.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EpisodeStateDeleteOne{builder}
+}
+
+// Query returns a query builder for EpisodeState.
+func (c *EpisodeStateClient) Query() *EpisodeStateQuery {
+	return &EpisodeStateQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEpisodeState},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EpisodeState entity by its id.
+func (c *EpisodeStateClient) Get(ctx context.Context, id core.ID) (*EpisodeState, error) {
+	return c.Query().Where(episodestate.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EpisodeStateClient) GetX(ctx context.Context, id core.ID) *EpisodeState {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySeries queries the series edge of a EpisodeState.
+func (c *EpisodeStateClient) QuerySeries(_m *EpisodeState) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(episodestate.Table, episodestate.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, episodestate.SeriesTable, episodestate.SeriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EpisodeStateClient) Hooks() []Hook {
+	return c.hooks.EpisodeState
+}
+
+// Interceptors returns the client interceptors.
+func (c *EpisodeStateClient) Interceptors() []Interceptor {
+	return c.inters.EpisodeState
+}
+
+func (c *EpisodeStateClient) mutate(ctx context.Context, m *EpisodeStateMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EpisodeStateCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EpisodeStateUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EpisodeStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EpisodeStateDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EpisodeState mutation op: %q", m.Op())
+	}
+}
+
 // FolderStateClient is a client for the FolderState schema.
 type FolderStateClient struct {
 	config
@@ -3114,6 +3271,22 @@ func (c *ItemClient) QueryWanted(_m *Item) *WantedQuery {
 			sqlgraph.From(item.Table, item.FieldID, id),
 			sqlgraph.To(wanted.Table, wanted.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, item.WantedTable, item.WantedColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEpisodeStates queries the episode_states edge of a Item.
+func (c *ItemClient) QueryEpisodeStates(_m *Item) *EpisodeStateQuery {
+	query := (&EpisodeStateClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(episodestate.Table, episodestate.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.EpisodeStatesTable, item.EpisodeStatesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -6173,18 +6346,20 @@ func (c *WantedClient) mutate(ctx context.Context, m *WantedMutation) (Value, er
 type (
 	hooks struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credit,
-		CustomFormat, DelayProfile, DisplayPreferences, Download, FolderState,
-		HistoryEvent, Image, Issue, IssueComment, Item, ItemLink, ItemValue, Job,
-		Library, MediaSegment, MediaSource, PendingRelease, Person, PluginConfig,
-		QualityDefinition, QualityProfile, ReleaseProfile, RemotePathMapping, Request,
-		Setting, Trickplay, User, UserData, Wanted []ent.Hook
+		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
+		FolderState, HistoryEvent, Image, Issue, IssueComment, Item, ItemLink,
+		ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease, Person,
+		PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
+		RemotePathMapping, Request, Setting, Trickplay, User, UserData,
+		Wanted []ent.Hook
 	}
 	inters struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credit,
-		CustomFormat, DelayProfile, DisplayPreferences, Download, FolderState,
-		HistoryEvent, Image, Issue, IssueComment, Item, ItemLink, ItemValue, Job,
-		Library, MediaSegment, MediaSource, PendingRelease, Person, PluginConfig,
-		QualityDefinition, QualityProfile, ReleaseProfile, RemotePathMapping, Request,
-		Setting, Trickplay, User, UserData, Wanted []ent.Interceptor
+		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
+		FolderState, HistoryEvent, Image, Issue, IssueComment, Item, ItemLink,
+		ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease, Person,
+		PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
+		RemotePathMapping, Request, Setting, Trickplay, User, UserData,
+		Wanted []ent.Interceptor
 	}
 )

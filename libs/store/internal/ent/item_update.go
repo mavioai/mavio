@@ -16,6 +16,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
@@ -1262,6 +1263,21 @@ func (_u *ItemUpdate) SetWanted(v *Wanted) *ItemUpdate {
 	return _u.SetWantedID(v.ID)
 }
 
+// AddEpisodeStateIDs adds the "episode_states" edge to the EpisodeState entity by IDs.
+func (_u *ItemUpdate) AddEpisodeStateIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddEpisodeStateIDs(ids...)
+	return _u
+}
+
+// AddEpisodeStates adds the "episode_states" edges to the EpisodeState entity.
+func (_u *ItemUpdate) AddEpisodeStates(v ...*EpisodeState) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddEpisodeStateIDs(ids...)
+}
+
 // AddDownloadIDs adds the "downloads" edge to the Download entity by IDs.
 func (_u *ItemUpdate) AddDownloadIDs(ids ...core.ID) *ItemUpdate {
 	_u.mutation.AddDownloadIDs(ids...)
@@ -1601,6 +1617,27 @@ func (_u *ItemUpdate) RemoveLinkedIn(v ...*ItemLink) *ItemUpdate {
 func (_u *ItemUpdate) ClearWanted() *ItemUpdate {
 	_u.mutation.ClearWanted()
 	return _u
+}
+
+// ClearEpisodeStates clears all "episode_states" edges to the EpisodeState entity.
+func (_u *ItemUpdate) ClearEpisodeStates() *ItemUpdate {
+	_u.mutation.ClearEpisodeStates()
+	return _u
+}
+
+// RemoveEpisodeStateIDs removes the "episode_states" edge to EpisodeState entities by IDs.
+func (_u *ItemUpdate) RemoveEpisodeStateIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveEpisodeStateIDs(ids...)
+	return _u
+}
+
+// RemoveEpisodeStates removes "episode_states" edges to EpisodeState entities.
+func (_u *ItemUpdate) RemoveEpisodeStates(v ...*EpisodeState) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveEpisodeStateIDs(ids...)
 }
 
 // ClearDownloads clears all "downloads" edges to the Download entity.
@@ -2675,6 +2712,51 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(wanted.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.EpisodeStatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.EpisodeStatesTable,
+			Columns: []string{item.EpisodeStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(episodestate.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedEpisodeStatesIDs(); len(nodes) > 0 && !_u.mutation.EpisodeStatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.EpisodeStatesTable,
+			Columns: []string{item.EpisodeStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(episodestate.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EpisodeStatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.EpisodeStatesTable,
+			Columns: []string{item.EpisodeStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(episodestate.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -4144,6 +4226,21 @@ func (_u *ItemUpdateOne) SetWanted(v *Wanted) *ItemUpdateOne {
 	return _u.SetWantedID(v.ID)
 }
 
+// AddEpisodeStateIDs adds the "episode_states" edge to the EpisodeState entity by IDs.
+func (_u *ItemUpdateOne) AddEpisodeStateIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddEpisodeStateIDs(ids...)
+	return _u
+}
+
+// AddEpisodeStates adds the "episode_states" edges to the EpisodeState entity.
+func (_u *ItemUpdateOne) AddEpisodeStates(v ...*EpisodeState) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddEpisodeStateIDs(ids...)
+}
+
 // AddDownloadIDs adds the "downloads" edge to the Download entity by IDs.
 func (_u *ItemUpdateOne) AddDownloadIDs(ids ...core.ID) *ItemUpdateOne {
 	_u.mutation.AddDownloadIDs(ids...)
@@ -4483,6 +4580,27 @@ func (_u *ItemUpdateOne) RemoveLinkedIn(v ...*ItemLink) *ItemUpdateOne {
 func (_u *ItemUpdateOne) ClearWanted() *ItemUpdateOne {
 	_u.mutation.ClearWanted()
 	return _u
+}
+
+// ClearEpisodeStates clears all "episode_states" edges to the EpisodeState entity.
+func (_u *ItemUpdateOne) ClearEpisodeStates() *ItemUpdateOne {
+	_u.mutation.ClearEpisodeStates()
+	return _u
+}
+
+// RemoveEpisodeStateIDs removes the "episode_states" edge to EpisodeState entities by IDs.
+func (_u *ItemUpdateOne) RemoveEpisodeStateIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveEpisodeStateIDs(ids...)
+	return _u
+}
+
+// RemoveEpisodeStates removes "episode_states" edges to EpisodeState entities.
+func (_u *ItemUpdateOne) RemoveEpisodeStates(v ...*EpisodeState) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveEpisodeStateIDs(ids...)
 }
 
 // ClearDownloads clears all "downloads" edges to the Download entity.
@@ -5587,6 +5705,51 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(wanted.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.EpisodeStatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.EpisodeStatesTable,
+			Columns: []string{item.EpisodeStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(episodestate.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedEpisodeStatesIDs(); len(nodes) > 0 && !_u.mutation.EpisodeStatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.EpisodeStatesTable,
+			Columns: []string{item.EpisodeStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(episodestate.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EpisodeStatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.EpisodeStatesTable,
+			Columns: []string{item.EpisodeStatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(episodestate.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

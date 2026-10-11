@@ -119,6 +119,7 @@ func (Item) Edges() []ent.Edge {
 		edge.To("linked_in", ItemLink.Type).Annotations(cascade()),
 		// Acquisition state goes with its movie, series or episode.
 		edge.To("wanted", Wanted.Type).Annotations(cascade()).Unique(),
+		edge.To("episode_states", EpisodeState.Type).Annotations(cascade()),
 		edge.To("downloads", Download.Type).Annotations(cascade()),
 		edge.To("history", HistoryEvent.Type).Annotations(cascade()),
 		edge.To("blocklist", BlocklistEntry.Type).Annotations(cascade()),

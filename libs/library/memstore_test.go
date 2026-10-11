@@ -62,6 +62,7 @@ func (m *memStore) CustomFormats() core.CustomFormatRepository              { pa
 func (m *memStore) DelayProfiles() core.DelayProfileRepository              { panic("unused") }
 func (m *memStore) ReleaseProfiles() core.ReleaseProfileRepository          { panic("unused") }
 func (m *memStore) Wanted() core.WantedRepository                           { panic("unused") }
+func (m *memStore) EpisodeStates() core.EpisodeStateRepository              { panic("unused") }
 func (m *memStore) Downloads() core.DownloadRepository                      { panic("unused") }
 func (m *memStore) History() core.HistoryRepository                         { panic("unused") }
 func (m *memStore) Blocklist() core.BlocklistRepository                     { panic("unused") }

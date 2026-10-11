@@ -16,6 +16,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/episodestate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
@@ -228,6 +229,16 @@ func init() {
 	downloadDescID := downloadFields[0].Descriptor()
 	// download.DefaultID holds the default value on creation for the id field.
 	download.DefaultID = downloadDescID.Default.(func() core.ID)
+	episodestateFields := schema.EpisodeState{}.Fields()
+	_ = episodestateFields
+	// episodestateDescUnverifiedSceneNumbering is the schema descriptor for unverified_scene_numbering field.
+	episodestateDescUnverifiedSceneNumbering := episodestateFields[7].Descriptor()
+	// episodestate.DefaultUnverifiedSceneNumbering holds the default value on creation for the unverified_scene_numbering field.
+	episodestate.DefaultUnverifiedSceneNumbering = episodestateDescUnverifiedSceneNumbering.Default.(bool)
+	// episodestateDescID is the schema descriptor for id field.
+	episodestateDescID := episodestateFields[0].Descriptor()
+	// episodestate.DefaultID holds the default value on creation for the id field.
+	episodestate.DefaultID = episodestateDescID.Default.(func() core.ID)
 	folderstateFields := schema.FolderState{}.Fields()
 	_ = folderstateFields
 	// folderstateDescModTime is the schema descriptor for mod_time field.

@@ -328,6 +328,34 @@ func (w *Wanted) Validate() error {
 	return nil
 }
 
+// EpisodeNumber is an episode of a series by its TVDB season and number.
+type EpisodeNumber struct {
+	Season, Episode int
+}
+
+// EpisodeState is what acquisition keeps of an episode of a wanted series
+// apart from its item, which a scan may replace, by its TVDB season and
+// number, as Sonarr keeps it on its Episode: how the scene numbers it and
+// when it was last searched for.
+type EpisodeState struct {
+	SeriesID ID
+	EpisodeNumber
+	// SceneSeason, SceneEpisode and SceneAbsolute are how the scene
+	// numbers the episode; nil when as TVDB does.
+	SceneSeason, SceneEpisode, SceneAbsolute *int
+	// UnverifiedSceneNumbering is set when the scene numbering of the
+	// episode is extrapolated from that of others, not yet confirmed.
+	UnverifiedSceneNumbering bool
+	// LastSearchedAt is when the episode was last searched for, if ever.
+	LastSearchedAt time.Time
+}
+
+// HasSceneNumbering reports whether the scene numbers the episode apart
+// from TVDB.
+func (s *EpisodeState) HasSceneNumbering() bool {
+	return s.SceneSeason != nil || s.SceneEpisode != nil || s.SceneAbsolute != nil || s.UnverifiedSceneNumbering
+}
+
 // QualityRef is a quality with its revision.
 type QualityRef struct {
 	// Quality is Radarr's quality ID.
@@ -645,6 +673,21 @@ type (
 		List(ctx context.Context, itemIDs ...ID) ([]Wanted, error)
 		Put(ctx context.Context, w *Wanted) error
 		Delete(ctx context.Context, itemID ID) error
+	}
+
+	// EpisodeStateRepository stores the states of episodes of series;
+	// deleting the series deletes them.
+	EpisodeStateRepository interface {
+		// List returns the states of a series' episodes by season and
+		// episode.
+		List(ctx context.Context, seriesID ID) ([]EpisodeState, error)
+		// PutSceneNumbering replaces the scene numbering of a series'
+		// episodes: those of states take theirs, the others none. Last
+		// search times are kept.
+		PutSceneNumbering(ctx context.Context, seriesID ID, states []EpisodeState) error
+		// Searched records that episodes of a series were searched for at
+		// a time.
+		Searched(ctx context.Context, seriesID ID, at time.Time, episodes ...EpisodeNumber) error
 	}
 
 	// DownloadRepository stores tracked downloads. A client's download is

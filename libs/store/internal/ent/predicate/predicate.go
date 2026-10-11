@@ -36,6 +36,9 @@ type DisplayPreferences func(*sql.Selector)
 // Download is the predicate function for download builders.
 type Download func(*sql.Selector)
 
+// EpisodeState is the predicate function for episodestate builders.
+type EpisodeState func(*sql.Selector)
+
 // FolderState is the predicate function for folderstate builders.
 type FolderState func(*sql.Selector)
 
