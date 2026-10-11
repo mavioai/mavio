@@ -64,7 +64,8 @@ type QualityProfile struct {
 	MinUpgradeFormatScore int
 	FormatScores          []FormatScore
 	// Language is the language movie releases must have: a language
-	// name, "Original" for the movie's own, or empty for any.
+	// name, "Original" for the movie's own, "Unknown" for releases whose
+	// language is not known, or empty or "Any" for any.
 	Language string
 }
 
@@ -635,7 +636,9 @@ type (
 	}
 
 	// CustomFormatRepository stores custom formats. Names are unique
-	// (ErrConflict); deleting a format removes its scores from profiles.
+	// (ErrConflict); deleting a format removes its scores from profiles,
+	// and deleting the last resets their format scores: the minimum and
+	// cutoff to 0, the minimum upgrade to 1.
 	CustomFormatRepository interface {
 		Get(ctx context.Context, id ID) (CustomFormat, error)
 		// List returns the formats by name.

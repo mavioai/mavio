@@ -183,7 +183,8 @@ message QualityProfile {
   int32 min_upgrade_format_score = 9;
   repeated FormatScore format_scores = 10;
   // The language movie releases must have: an English language name,
-  // "Original" for the movie's own, empty for any.
+  // "Original" for the movie's own, "Unknown" for releases whose language
+  // is not known, empty or "Any" for any.
   string language = 11 [(buf.validate.field).string.max_len = 100];
 }
 

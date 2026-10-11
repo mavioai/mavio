@@ -123,7 +123,7 @@ func languageFromCore(name string) (release.Language, error) {
 
 // languageToCore returns the name of a language.
 func languageToCore(l release.Language) (string, error) {
-	if l < release.LanguageUnknown || l > release.Original {
+	if l < release.LanguageUnknown || l > release.Any {
 		return "", unknown("language", int(l))
 	}
 	return l.String(), nil
@@ -148,6 +148,7 @@ func QualityProfileFromCore(p core.QualityProfile) (QualityProfile, error) {
 	for _, s := range p.FormatScores {
 		out.FormatItems = append(out.FormatItems, FormatScore{FormatID: s.FormatID, Score: s.Score})
 	}
+	out.Language = release.Any
 	if p.Language != "" {
 		if out.Language, err = languageFromCore(p.Language); err != nil {
 			return QualityProfile{}, fmt.Errorf("quality profile %q: %w", p.Name, err)
@@ -178,7 +179,7 @@ func profileItemsFromCore(items []core.QualityProfileItem) ([]ProfileItem, error
 }
 
 // QualityProfileToCore returns the stored form of a profile of a kind;
-// release.LanguageUnknown is stored as any language.
+// release.Any is stored as empty.
 func QualityProfileToCore(p QualityProfile, kind core.ItemKind) (core.QualityProfile, error) {
 	out := core.QualityProfile{
 		ID:                    p.ID,
@@ -197,7 +198,7 @@ func QualityProfileToCore(p QualityProfile, kind core.ItemKind) (core.QualityPro
 	for _, s := range p.FormatItems {
 		out.FormatScores = append(out.FormatScores, core.FormatScore{FormatID: s.FormatID, Score: s.Score})
 	}
-	if p.Language != release.LanguageUnknown {
+	if p.Language != release.Any {
 		if out.Language, err = languageToCore(p.Language); err != nil {
 			return core.QualityProfile{}, fmt.Errorf("quality profile %q: %w", p.Name, err)
 		}

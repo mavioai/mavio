@@ -69,7 +69,9 @@ func TestQualityProfileFromCoreLanguage(t *testing.T) {
 		language string
 		want     release.Language
 	}{
-		{"", release.LanguageUnknown},
+		{"", release.Any},
+		{"Any", release.Any},
+		{"Unknown", release.LanguageUnknown},
 		{"Original", release.Original},
 		{"French", release.French},
 	}
@@ -77,6 +79,25 @@ func TestQualityProfileFromCoreLanguage(t *testing.T) {
 		p, err := QualityProfileFromCore(core.QualityProfile{Language: tt.language})
 		if err != nil || p.Language != tt.want {
 			t.Errorf("QualityProfileFromCore(%q).Language got = %v, %v, want = %v, nil", tt.language, p.Language, err, tt.want)
+		}
+	}
+}
+
+// TestQualityProfileToCoreLanguage checks that any language is stored as
+// empty and the unknown language apart from it.
+func TestQualityProfileToCoreLanguage(t *testing.T) {
+	tests := []struct {
+		language release.Language
+		want     string
+	}{
+		{release.Any, ""},
+		{release.LanguageUnknown, "Unknown"},
+		{release.Original, "Original"},
+	}
+	for _, tt := range tests {
+		p, err := QualityProfileToCore(QualityProfile{Language: tt.language}, core.KindMovie)
+		if err != nil || p.Language != tt.want {
+			t.Errorf("QualityProfileToCore(%v).Language got = %q, %v, want = %q, nil", tt.language, p.Language, err, tt.want)
 		}
 	}
 }
@@ -97,7 +118,7 @@ func TestQualityProfileConversionErrors(t *testing.T) {
 			t.Errorf("QualityProfileFromCore(%s) error got = %v, want = %v", tt.name, err, ErrUnknownValue)
 		}
 	}
-	if _, err := QualityProfileToCore(QualityProfile{Language: release.Original + 1}, core.KindMovie); !errors.Is(err, ErrUnknownValue) {
+	if _, err := QualityProfileToCore(QualityProfile{Language: release.Any + 1}, core.KindMovie); !errors.Is(err, ErrUnknownValue) {
 		t.Errorf("QualityProfileToCore(unknown language) error got = %v, want = %v", err, ErrUnknownValue)
 	}
 }

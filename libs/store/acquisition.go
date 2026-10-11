@@ -201,12 +201,22 @@ func (r customFormats) Delete(ctx context.Context, id core.ID) error {
 		if err != nil {
 			return mapErr(err, "delete custom format")
 		}
+		left, err := tx.write.CustomFormat.Query().Exist(ctx)
+		if err != nil {
+			return mapErr(err, "delete custom format")
+		}
 		for _, p := range profiles {
 			scores := slices.DeleteFunc(slices.Clone(p.FormatScores), func(s core.FormatScore) bool { return s.FormatID == id })
-			if len(scores) == len(p.FormatScores) {
+			if len(scores) == len(p.FormatScores) && left {
 				continue
 			}
-			if err := tx.write.QualityProfile.UpdateOneID(p.ID).SetFormatScores(scores).Exec(ctx); err != nil {
+			u := tx.write.QualityProfile.UpdateOneID(p.ID).SetFormatScores(scores)
+			if !left {
+				// Without formats, the format scores are reset, as
+				// Radarr's QualityProfileService on CustomFormatDeletedEvent.
+				u.SetMinFormatScore(0).SetCutoffFormatScore(0).SetMinUpgradeFormatScore(1)
+			}
+			if err := u.Exec(ctx); err != nil {
 				return mapErr(err, "delete custom format")
 			}
 		}

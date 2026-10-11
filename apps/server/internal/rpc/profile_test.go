@@ -210,6 +210,14 @@ func TestProfileService(t *testing.T) {
 		"unknown format": func(p *acquisitionv1.QualityProfile) {
 			p.SetFormatScores([]*acquisitionv1.FormatScore{acquisitionv1.FormatScore_builder{FormatId: new(core.NewID().String())}.Build()})
 		},
+		"format scored twice": func(p *acquisitionv1.QualityProfile) {
+			score := acquisitionv1.FormatScore_builder{FormatId: new(x265.GetId()), Score: new(int32(10))}.Build()
+			p.SetFormatScores([]*acquisitionv1.FormatScore{score, score})
+		},
+		"unsatisfiable minimum score": func(p *acquisitionv1.QualityProfile) {
+			p.SetFormatScores([]*acquisitionv1.FormatScore{acquisitionv1.FormatScore_builder{FormatId: new(x265.GetId()), Score: new(int32(10))}.Build()})
+			p.SetMinFormatScore(11)
+		},
 		"unknown language": func(p *acquisitionv1.QualityProfile) { p.SetLanguage("Klingon") },
 		"no kind":          func(p *acquisitionv1.QualityProfile) { p.ClearKind() },
 	}

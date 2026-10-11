@@ -162,6 +162,21 @@ func TestQualityProfilesAndCustomFormats(t *testing.T) {
 			t.Errorf("second Delete: %v, want ErrNotFound", err)
 		}
 
+		// Deleting the last format resets the format scores of profiles.
+		hd, _ = profiles.Get(ctx, hd.ID)
+		hd.MinFormatScore, hd.CutoffFormatScore, hd.MinUpgradeFormatScore = 10, 100, 5
+		if err := profiles.Put(ctx, &hd); err != nil {
+			t.Fatal(err)
+		}
+		if err := formats.Delete(ctx, hdr.ID); err != nil {
+			t.Fatal(err)
+		}
+		gotP, _ = profiles.Get(ctx, hd.ID)
+		if len(gotP.FormatScores) != 0 || gotP.MinFormatScore != 0 || gotP.CutoffFormatScore != 0 || gotP.MinUpgradeFormatScore != 1 {
+			t.Errorf("HD without formats = scores %+v, min %d, cutoff %d, min upgrade %d; want none, 0, 0, 1",
+				gotP.FormatScores, gotP.MinFormatScore, gotP.CutoffFormatScore, gotP.MinUpgradeFormatScore)
+		}
+
 		// A profile wanted items use cannot be deleted.
 		lib := newLibrary(t, s, "/movies")
 		movie := newItem(lib, core.KindMovie, "Heat")

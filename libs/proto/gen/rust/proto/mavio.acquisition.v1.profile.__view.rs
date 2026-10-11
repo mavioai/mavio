@@ -1994,7 +1994,8 @@ pub struct QualityProfileView<'a> {
         super::super::__buffa::view::FormatScoreView<'a>,
     >,
     /// The language movie releases must have: an English language name,
-    /// "Original" for the movie's own, empty for any.
+    /// "Original" for the movie's own, "Unknown" for releases whose language
+    /// is not known, empty or "Any" for any.
     ///
     /// Field 11: `language`
     pub language: ::core::option::Option<&'a str>,
@@ -2445,7 +2446,8 @@ impl QualityProfileOwnedView {
         &self.0.reborrow().format_scores
     }
     /// The language movie releases must have: an English language name,
-    /// "Original" for the movie's own, empty for any.
+    /// "Original" for the movie's own, "Unknown" for releases whose language
+    /// is not known, empty or "Any" for any.
     ///
     /// Field 11: `language`
     #[must_use]

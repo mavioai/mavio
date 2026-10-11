@@ -464,10 +464,10 @@ flowchart TD
 - [x] `libs/acquire`：质量及其定义、质量档案、custom formats、delay profile、release profile
 - [x] 决策：Radarr 决策引擎的各项规格及其排序，并移植其用例（`libs/acquire`）
   - [x] 按 ID 找不到索引器时按名称查找，如同 Radarr 的 AggregateLanguages
-  - [ ] 区分未知语言与任意语言；目前未知语言视为任意语言
+  - [x] 区分未知语言与任意语言（`release.Any`），如同 Radarr 的 Language.Unknown 与 Language.Any：要求任意语言的档案接受所有发布，要求 Unknown 的档案只接受语言未知的发布
   - [x] 索引器的标签，由索引器标签规格检查
 - [x] 领域与存储：档案、custom formats、被跟踪下载的队列、历史、黑名单、远程路径映射、命名（`libs/core/acquisition.go`、`libs/store`）
-  - [ ] 质量档案的格式评分对照已有的 custom formats 进行检查
+  - [x] 质量档案的格式评分对照已有的 custom formats 进行检查，如同 Radarr 的 QualityProfileController：不得为不存在的格式打分或为同一格式打两次分，最低分必须可以达到；删除最后一个格式时重置各档案的格式分数，如同 Radarr 的 QualityProfileService
 - [x] 按 TMDB ID 把想要的电影加入媒体库，带质量档案与最低可用状态（`WantedService`、`apps/server/internal/acquisition`）
   - [ ] 电影的数字版与实体版发行日期，可用状态需要它们；在此之前，电影在首映 90 天后视为已发行，与 Radarr 缺少这些日期时的假定相同
   - [ ] 电影的原始语言，要求"Original"的档案需要它；在此之前这些档案接受任何语言

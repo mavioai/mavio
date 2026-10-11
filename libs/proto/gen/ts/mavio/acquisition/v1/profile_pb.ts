@@ -274,7 +274,8 @@ export type QualityProfile = Message<"mavio.acquisition.v1.QualityProfile"> & {
 
   /**
    * The language movie releases must have: an English language name,
-   * "Original" for the movie's own, empty for any.
+   * "Original" for the movie's own, "Unknown" for releases whose language
+   * is not known, empty or "Any" for any.
    *
    * @generated from field: string language = 11;
    */

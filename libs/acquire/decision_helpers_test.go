@@ -113,7 +113,7 @@ func newTestEnv() (*Env, *fakePorts) {
 // testProfile returns a profile of the given qualities, lowest first,
 // all allowed, with the cutoff given and upgrades allowed.
 func testProfile(cutoff release.Quality, qualities ...release.Quality) *QualityProfile {
-	p := &QualityProfile{ID: tid(1), Name: "Test", UpgradeAllowed: true, Cutoff: QualityID(cutoff)}
+	p := &QualityProfile{ID: tid(1), Name: "Test", UpgradeAllowed: true, Cutoff: QualityID(cutoff), Language: release.Any}
 	for _, q := range qualities {
 		p.Items = append(p.Items, ProfileItem{Quality: q, Allowed: true})
 	}
