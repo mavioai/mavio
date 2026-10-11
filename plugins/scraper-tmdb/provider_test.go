@@ -118,6 +118,7 @@ var routes = map[string]string{
 			"crew":[{"id":2,"name":"Adam Bernstein","department":"Directing","job":"Director"}]},
 		"images":{"stills":[{"file_path":"/still.jpg"}]},
 		"external_ids":{"imdb_id":"tt1054724","tvdb_id":349232}}`,
+	"/3/tv/1396/season/1/episode/3": `{"id":62087,"name":"...And the Bag's in the River","overview":"Walt cleans up.","air_date":"2008-02-10"}`,
 }
 
 func newTestPlugin(t *testing.T, cfg string) (*plugin, *fakeTMDB) {
@@ -345,6 +346,15 @@ func TestSeasonAndEpisode(t *testing.T) {
 	}
 	if imgs := md.GetImages(); len(imgs) != 1 || imgs[0].GetKind() != pluginv1.ImageKind_IMAGE_KIND_PRIMARY {
 		t.Errorf("images = %v, want = the still as primary image", imgs)
+	}
+
+	// A file of several episodes has their names and overviews joined, as
+	// Jellyfin's TmdbEpisodeProvider; an episode TMDB lacks is left out.
+	several := proto.CloneOf(episode)
+	several.SetEpisodeNumberEnd(4)
+	md = metadataFor(t, p, several)
+	if md.GetName() != "Cat's in the Bag... / ...And the Bag's in the River" || md.GetOverview() != "Walt cleans up." || md.GetPremiereDate() != "2008-01-27" {
+		t.Errorf("episodes 1x2-1x4 = %q, %q, %s; want = both names, the third's overview, the first's date", md.GetName(), md.GetOverview(), md.GetPremiereDate())
 	}
 
 	// Without the series' IDs an episode cannot be found.

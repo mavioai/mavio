@@ -64,6 +64,11 @@ message Lookup {
   // "storyArc", "production" or "tv", the types of TMDB's episode groups.
   // Seasons and episodes are looked up by their numbers in that order.
   string display_order = 12;
+  // For an episode whose file holds several: the number of the last, of
+  // the same season. A provider then returns the episodes from
+  // episode_number to it as one, their names and overviews joined by
+  // " / ", as Jellyfin's TmdbEpisodeProvider does.
+  int32 episode_number_end = 13;
 }
 
 message SearchRequest {

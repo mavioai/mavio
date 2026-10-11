@@ -130,6 +130,13 @@ func TestSeriesMetadata(t *testing.T) {
 		md.GetCommunityRating() != 8.2 || md.GetExternalIds()["tvdb"] != "349232" || len(md.GetImages()) != 1 {
 		t.Errorf("episode 1x1 = %v", md)
 	}
+	// A file of two episodes has their names joined, as Jellyfin's
+	// TmdbEpisodeProvider; the second has no overview to join.
+	both := episode(1, 1, nil)
+	both.SetEpisodeNumberEnd(2)
+	if md := get(both); md.GetName() != "Pilot / Cat's in the Bag..." || md.GetOverview() != "Walter is diagnosed." || md.GetExternalIds()["tvdb"] != "349232" {
+		t.Errorf("episodes 1x1-1x2 = %q, %q, %v; want = \"Pilot / Cat's in the Bag...\", the first's overview and ID", md.GetName(), md.GetOverview(), md.GetExternalIds())
+	}
 	// An episode's TVDB ID comes before its numbers.
 	if md := get(episode(9, 9, map[string]string{"tvdb": "349236"})); md.GetName() != "Seven Thirty-Seven" {
 		t.Errorf("episode by TVDB ID = %v", md)

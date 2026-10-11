@@ -29,8 +29,11 @@ type Lookup struct {
 	// episodes.
 	SeriesExternalIDs           map[core.Provider]string
 	SeasonNumber, EpisodeNumber *int
-	Album                       string
-	Artists                     []string
+	// EpisodeNumberEnd is the last episode of the season an episode's
+	// file holds, when it holds several; providers return them as one.
+	EpisodeNumberEnd *int
+	Album            string
+	Artists          []string
 	// Language (ISO 639-1) and Country (ISO 3166-1 alpha-2) are the
 	// library's or the item's preferences.
 	Language, Country string
@@ -414,6 +417,9 @@ func (r *Refresher) lookup(ctx context.Context, lib core.Library, it core.Item) 
 		l.SeasonNumber = it.IndexNumber
 	case core.KindEpisode:
 		l.SeasonNumber, l.EpisodeNumber = it.ParentIndexNumber, it.IndexNumber
+		if it.IndexNumber != nil && it.IndexNumberEnd != nil && *it.IndexNumberEnd > *it.IndexNumber {
+			l.EpisodeNumberEnd = it.IndexNumberEnd
+		}
 	default:
 		return l, nil
 	}

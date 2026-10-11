@@ -287,6 +287,16 @@ func (s skyShow) episode(tvdbID, season, number int) (skyEpisode, bool) {
 	return s.Episodes[i], true
 }
 
+// joinEpisode adds another episode a file holds to the metadata of its
+// first: its name and overview joined by " / ", as Jellyfin's
+// TmdbEpisodeProvider joins those of a multi-episode file.
+func joinEpisode(md *pluginv1.Metadata, name, overview string) {
+	md.SetName(md.GetName() + " / " + name)
+	if overview != "" {
+		md.SetOverview(strings.TrimPrefix(md.GetOverview()+" / "+overview, " / "))
+	}
+}
+
 func (e skyEpisode) metadata() *pluginv1.Metadata {
 	md := pluginv1.Metadata_builder{
 		Name:     proto.String(e.Title),

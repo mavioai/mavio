@@ -382,6 +382,28 @@ func (s session) episodeMetadata(ctx context.Context, l *pluginv1.Lookup) (*plug
 	}.Build()
 	setDate(md, e.AirDate)
 	setRuntime(md, e.Runtime)
+	// The other episodes a file holds, their names and overviews joined
+	// as Jellyfin's TmdbEpisodeProvider.
+	for n := l.GetEpisodeNumber() + 1; n <= l.GetEpisodeNumberEnd(); n++ {
+		next := proto.CloneOf(l)
+		next.SetEpisodeNumber(n)
+		next.SetExternalIds(nil)
+		season, episode, err := s.episodeNumbers(ctx, seriesID, next)
+		if err != nil {
+			return nil, err
+		}
+		o, err := s.episode(ctx, seriesID, season, episode, r.language, r.country)
+		if errors.Is(err, errNotFound) {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		md.SetName(md.GetName() + " / " + o.Name)
+		if o.Overview != "" {
+			md.SetOverview(strings.TrimPrefix(md.GetOverview()+" / "+o.Overview, " / "))
+		}
+	}
 	people := castCredits(mapCast(e.Credits.Cast, s.cast), pluginv1.CreditKind_CREDIT_KIND_ACTOR)
 	people = append(people, castCredits(mapCast(e.Credits.GuestStars, s.cast), pluginv1.CreditKind_CREDIT_KIND_GUEST_STAR)...)
 	people = append(people, crewCredits(e.Credits.Crew)...)
