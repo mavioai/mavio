@@ -503,20 +503,7 @@ func findBySourceAndResolution(kind Kind, hint Quality, resolution int, remux bo
 		if remux {
 			source = sonarrBlurayRaw
 		}
-		if i := slices.IndexFunc(catalog, func(e catalogEntry) bool { return e.source == source && e.resolution == resolution }); i >= 0 {
-			return catalog[i].q
-		}
-		if resolution < 720 {
-			switch source {
-			case sonarrTelevision:
-				return SDTV
-			case sonarrWeb:
-				return WEBDL480p
-			case sonarrWebRip:
-				return WEBRip480p
-			}
-		}
-		return nearest(catalog, source, func(e catalogEntry) bool { return e.resolution == resolution })
+		return findSeriesQuality(source, resolution)
 	}
 
 	modifier := ModifierNone
@@ -543,6 +530,26 @@ func findBySourceAndResolution(kind Kind, hint Quality, resolution int, remux bo
 		}
 	}
 	return nearest(catalog, source, func(e catalogEntry) bool { return e.modifier == modifier && e.resolution == resolution })
+}
+
+// findSeriesQuality ports Sonarr's QualityFinder.FindBySourceAndResolution:
+// the series quality of a source and resolution, or the nearest one.
+func findSeriesQuality(source, resolution int) Quality {
+	catalog := catalogs[Series]
+	if i := slices.IndexFunc(catalog, func(e catalogEntry) bool { return e.source == source && e.resolution == resolution }); i >= 0 {
+		return catalog[i].q
+	}
+	if resolution < 720 {
+		switch source {
+		case sonarrTelevision:
+			return SDTV
+		case sonarrWeb:
+			return WEBDL480p
+		case sonarrWebRip:
+			return WEBRip480p
+		}
+	}
+	return nearest(catalog, source, func(e catalogEntry) bool { return e.resolution == resolution })
 }
 
 // nearest returns the first quality matching keep, in order of source, whose
