@@ -138,7 +138,7 @@ The server owns every decision that depends on the library, the user or other de
 
 ### 5.1 Responsibilities
 * **Servers and sign-in**: several servers per app, discovery, sign-in with a password or Quick Connect, and the access token, kept by the app in the platform's secure storage (Keychain, Android Keystore, Windows Credential Manager, the Secret Service) through an interface the app implements.
-* **Connect client**: [connect-rust](https://github.com/connectrpc/connect-rust) over HTTP/1.1 and HTTP/2, with the messages generated from `libs/proto` into `libs/proto/gen/rust`.
+* **Connect client**: [connect-rust](https://github.com/connectrpc/connect-rust) over HTTP/1.1 and HTTP/2, with the messages and clients generated from `libs/proto` into `libs/proto/gen/rust` and included by the crate `mavio-api`.
 * **Event stream**: one `EventService` stream per server, reconnected with backoff, its events dispatched to the app.
 * **Offline store**: SQLite (`rusqlite`, bundled SQLite) with the items last browsed, so that the app starts on cached content, the downloaded items, and the progress reports made offline, sent once the server is reachable.
 * **Playback reporting**: starting playbacks, the periodic and final progress reports, and the replay of offline ones.
@@ -242,6 +242,7 @@ mavio/
 │   ├── proto/                   # Contracts; gen/go, gen/ts, gen/rust
 │   ├── client-ts/               # [TS] connect-es client and Query hooks
 │   ├── client-rust/             # [Rust] Cargo workspace of the shared core
+│   │   ├── api/                 # Generated messages and Connect clients (mavio-api)
 │   │   ├── core/                # Servers, events, offline store, reporting, downloads
 │   │   ├── uniffi/              # UniFFI exports for Swift and Kotlin
 │   │   ├── capi/                # C ABI for Go

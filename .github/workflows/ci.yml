@@ -25,6 +25,10 @@ jobs:
         with:
           fetch-depth: 0
       - uses: jdx/mise-action@v2
+      # Rust comes from libs/client-rust/rust-toolchain.toml through rustup.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
       - uses: nrwl/nx-set-shas@v4
       - run: pnpm nx affected -t buf-lint lint tidy-check build test --output-style=static
@@ -48,6 +52,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
       - run: pnpm nx run-many -t test build --output-style=static
 

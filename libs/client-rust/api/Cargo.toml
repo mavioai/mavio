@@ -1,0 +1,20 @@
+[package]
+name = "mavio-api"
+description = "Messages and Connect clients of the Mavio API, generated from libs/proto"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+# The generated code's doc comments quote the .proto files, not Rust.
+doctest = false
+
+[dependencies]
+buffa.workspace = true
+buffa-types.workspace = true
+connectrpc = { workspace = true, features = ["client"] }
+
+[lints]
+workspace = true

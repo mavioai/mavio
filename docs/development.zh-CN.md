@@ -13,16 +13,19 @@
 | 工具 | 用途 |
 | :--- | :--- |
 | go | 服务端、库、插件 |
-| node + pnpm | Nx，以及后续的 TS 应用 |
+| node + pnpm | Nx、`protoc-gen-es`，以及后续的 TS 应用 |
 | buf | Protobuf 的 lint、格式化、破坏性变更检查与代码生成 |
 | golangci-lint | Go 代码检查与格式检查 |
 | sqlc | 生成 `libs/store` 中的方言专属查询代码 |
+| protoc-gen-buffa、protoc-gen-buffa-packaging、protoc-gen-connect-rust | `libs/proto` 的 Rust 代码生成，取自其发布构建 |
 | jellyfin-ffmpeg | 媒体管线、测试媒体生成与集成测试（`PATH` 上的 `ffmpeg` / `ffprobe`） |
 
 ```bash
 mise install            # 安装锁定版本的工具链
 pnpm install            # 安装 Nx
 ```
+
+Rust 由 `libs/client-rust/rust-toolchain.toml` 固定，rustup 在该目录首次运行 `cargo` 时安装它；只需安装 rustup 本身。
 
 迁移由 `libs/store/internal/cmd/migrategen` 生成，它以库的形式使用 Atlas，不需要 Atlas CLI。生成 PostgreSQL 迁移和运行 PostgreSQL 一致性测试需要 Docker。`libs/store/pgtest` 依次在 `DOCKER_HOST`、Docker CLI 当前上下文（`docker context use`）的引擎、Docker Desktop / OrbStack / Colima / Rancher Desktop / Podman 的常见 socket 中找到的第一个引擎上启动容器，无需额外配置。
 
@@ -34,6 +37,7 @@ pnpm install            # 安装 Nx
 Go 是服务端主语言；未来还会加入以 TypeScript（Web UI）、Swift、Kotlin、Go（Windows 与 Linux 应用）与 Rust（它们的共享核心）编写的[客户端](clients.zh-CN.md)，并使用由 `libs/proto` 生成的客户端代码。这是一个跨语言的 monorepo，需要统一的依赖图、受影响分析与任务缓存：
 * Nx 对 Vite / React 与 Gradle（`@nx/gradle`）有官方插件；Cargo 与 `xcodebuild` 通过各自的目标运行；
 * Go 项目由仓库内的本地 Nx 插件 `tools/nx-go` 推断：每个 `go.mod` 自动成为一个项目，并根据 `go.mod` 中的仓库内 `require` 生成依赖图；
+* Cargo workspace 由本地 Nx 插件 `tools/nx-cargo` 推断：每个含 `[workspace]` 表的 `Cargo.toml` 成为一个项目，依赖其 `[workspace.metadata.nx]` 的 `implicitDependencies` 所列的项目（`libs/client-rust` 列出 `proto`，它包含后者生成的 Rust 代码）；
 * 用 tags 表达边界：`type:app|lib|plugin`、`lang:go|ts|rust|swift|kotlin`、`scope:server|client|shared`。TS 侧由 `@nx/enforce-module-boundaries` 约束，Go 侧由 depguard 约束（§5）。
 
 Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `go test`。
@@ -52,6 +56,8 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 | `buf-lint` | `buf lint && buf format --diff --exit-code`（仅限含 `buf.yaml` 的项目） | 是 |
 
 需要覆盖默认目标时，在 `go.mod` 旁放一个 `project.json`；例如 `plugins/scraper-tmdb/project.json` 把构建改为 `wasip1` WASM 模块。
+
+`tools/nx-cargo` 为每个 Cargo workspace 生成 `build`（`cargo build --locked --all-targets`）、`test`（`cargo test --locked`）、`bench`（`cargo bench --locked`，不缓存）与 `lint`（`cargo fmt --check` 与 `cargo clippy --locked --all-targets -- -D warnings`）。
 
 ### 2.3 常用命令
 ```bash
@@ -99,6 +105,7 @@ GOWORK=off go mod tidy
 * 契约源文件在 `libs/proto/mavio/<domain>/v1/`，使用 `edition = "2023"`；包名为 `mavio.<domain>.v1`。
 * `buf generate`（配置见 `libs/proto/buf.gen.yaml`）以 `default_api_level=API_OPAQUE` 运行 `protoc-gen-go`（通过 Getter/Setter 访问字段），以 `simple` 运行 `protoc-gen-connect-go`（handler 直接收发消息）。managed 模式把 `go_package` 设置在 `github.com/mavioai/mavio/libs/proto/gen/go` 之下。
 * 同一次运行还生成 `libs/proto/openapi/gen/mavio.openapi.json`，即服务端所提供服务的 OpenAPI 文档，由 `protoc-gen-connect-openapi` 合并 `openapi/base.yaml`（说明、Bearer 认证、普通 HTTP 媒体路由）。它通过 `go run` 以 `buf.gen.yaml` 中固定的版本运行，使其依赖不进入第三方插件所导入的 go.mod；`openapi` 包嵌入该文档，文档与 `gen/` 一样提交。
+* 同一次运行还用 `protoc-gen-es` 把 TypeScript 生成到 `gen/ts`（protobuf-es 消息，以及 connect-es 使用的服务描述；`libs/proto` 同时是导出它们的 npm 包 `@mavio/proto`），用 `protoc-gen-buffa`（消息，在 `gen/rust/proto`）与 `protoc-gen-connect-rust`（客户端，在 `gen/rust/connect`）把 Rust 生成到 `gen/rust`，每棵树的 `mod.rs` 由 `protoc-gen-buffa-packaging` 生成。`libs/client-rust` 的 crate `mavio-api` 包含这两棵 Rust 树。
 * 修改 `.proto` 后运行 `pnpm nx run proto:generate`，并**提交生成的 `gen/` 代码**。不要手动编辑 `gen/` 下的文件。
 * `buf lint` 使用 STANDARD 规则，`buf breaking` 使用 FILE 规则。已发布的字段编号不得复用；破坏性变更放入新的 `v2` 包。
 * 只读 RPC 标注 `option idempotency_level = NO_SIDE_EFFECTS;`。
@@ -147,7 +154,7 @@ go build -o plugin .                                                     # 子�
 * **dist**（Linux）：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台。
 * **image**（Linux）：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
 
-CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg（`MISE_DISABLE_TOOLS`）。
+CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check** 与 **test** 缓存 Cargo 的构建（`Swatinem/rust-cache`）。
 
 ---
 

@@ -18,6 +18,32 @@ plugins:
     opt:
       - paths=source_relative
       - simple
+  # TypeScript for the web UI (libs/client-ts): messages and service
+  # descriptors of protobuf-es, which connect-es uses directly; the imported
+  # protovalidate options are generated too, as the descriptors import them.
+  - local: node_modules/.bin/protoc-gen-es
+    out: gen/ts
+    include_imports: true
+    opt:
+      - target=ts
+  # Rust for the shared core (libs/client-rust/api): buffa messages and
+  # connect-rust clients, each tree with the mod.rs files of the packaging
+  # plugin. The clients find the messages at crate::proto.
+  - local: protoc-gen-buffa
+    out: gen/rust/proto
+    strategy: all
+  - local: protoc-gen-buffa-packaging
+    out: gen/rust/proto
+    strategy: all
+  - local: protoc-gen-connect-rust
+    out: gen/rust/connect
+    opt:
+      - buffa_module=crate::proto
+  - local: protoc-gen-buffa-packaging
+    out: gen/rust/connect
+    strategy: all
+    opt:
+      - filter=services
   # One OpenAPI document of the Connect services the server serves, without
   # the plugin contracts, embedded by package openapi and served at
   # /api/spec.json. It runs by version rather than as a tool of this module, so

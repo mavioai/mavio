@@ -138,7 +138,7 @@ flowchart LR
 
 ### 5.1 职责
 * **服务器与登录**：每个应用可连接多台服务器，支持发现、以密码或 Quick Connect 登录；访问令牌由应用通过它实现的接口保存在平台的安全存储中（Keychain、Android Keystore、Windows 凭据管理器、Secret Service）。
-* **Connect 客户端**：[connect-rust](https://github.com/connectrpc/connect-rust)，基于 HTTP/1.1 与 HTTP/2，消息从 `libs/proto` 生成到 `libs/proto/gen/rust`。
+* **Connect 客户端**：[connect-rust](https://github.com/connectrpc/connect-rust)，基于 HTTP/1.1 与 HTTP/2，消息与客户端从 `libs/proto` 生成到 `libs/proto/gen/rust`，由 crate `mavio-api` 包含。
 * **事件流**：每台服务器一条 `EventService` 流，以退避重连，事件分发给应用。
 * **离线存储**：SQLite（`rusqlite`，内置 SQLite），保存最近浏览的条目以便应用以缓存内容启动、已下载的条目，以及离线时产生的进度上报，待服务器可达后发送。
 * **播放上报**：开始播放、周期与最终进度上报，以及离线上报的补发。
@@ -242,6 +242,7 @@ mavio/
 │   ├── proto/                   # 契约；gen/go、gen/ts、gen/rust
 │   ├── client-ts/               # [TS] connect-es 客户端与 Query hooks
 │   ├── client-rust/             # [Rust] 共享核心的 Cargo workspace
+│   │   ├── api/                 # 生成的消息与 Connect 客户端（mavio-api）
 │   │   ├── core/                # 服务器、事件、离线存储、上报、下载
 │   │   ├── uniffi/              # 面向 Swift 与 Kotlin 的 UniFFI 导出
 │   │   ├── capi/                # 面向 Go 的 C ABI
