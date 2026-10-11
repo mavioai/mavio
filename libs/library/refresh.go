@@ -83,6 +83,11 @@ type Refresher struct {
 	// Episodes gives the episode listers, which list the episodes series
 	// lack as virtual episodes; nil means none.
 	Episodes func() []EpisodeLister
+	// NewSeasonMonitored tells whether a season listing episodes adds to
+	// a series is monitored, as a series' monitoring of new items does in
+	// Sonarr's RefreshSeriesService; nil monitors those of monitored
+	// series. Specials added are never monitored.
+	NewSeasonMonitored func(ctx context.Context, series core.Item) bool
 	// Lyrics downloads lyrics for tracks without any, in libraries that
 	// download lyrics; nil downloads none.
 	Lyrics *Lyrics

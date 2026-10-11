@@ -290,4 +290,21 @@ func TestListEpisodes(t *testing.T) {
 	if want := []string{"Premiere", "The Second"}; !slices.Equal(monitored, want) {
 		t.Errorf("monitored series = %v, want = %v", monitored, want)
 	}
+
+	// A series not monitoring new items lists new seasons unmonitored.
+	for it := range f.store.Items().Walk(t.Context(), core.ItemQuery{ParentID: series.ID, Kinds: []core.ItemKind{core.KindSeason}, OnlyVirtual: true}) {
+		if err := f.store.Items().Delete(t.Context(), it.ID); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var asked []core.ID
+	r.NewSeasonMonitored = func(_ context.Context, s core.Item) bool { asked = append(asked, s.ID); return false }
+	refresh()
+	monitored = nil
+	for it := range f.store.Items().Walk(t.Context(), core.ItemQuery{ParentID: series.ID, Recursive: true, OnlyVirtual: true, Monitored: new(true)}) {
+		monitored = append(monitored, it.Name)
+	}
+	if !slices.Equal(asked, []core.ID{series.ID}) || len(monitored) != 0 || len(f.virtuals(series.ID)) == 0 {
+		t.Errorf("not monitoring new items: asked %v, monitored %v, virtuals %v; want the series asked, none monitored", asked, monitored, f.virtuals(series.ID))
+	}
 }

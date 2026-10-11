@@ -86,7 +86,10 @@ func (r *Refresher) listEpisodes(ctx context.Context, lib core.Library, series c
 
 	now := r.now()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-	rec := reconciler{r: r, lib: lib, series: series, provider: list.Provider, now: now, seasons: map[int]core.Item{}}
+	rec := reconciler{r: r, lib: lib, series: series, provider: list.Provider, now: now, seasons: map[int]core.Item{}, monitorNew: series.Monitored}
+	if r.NewSeasonMonitored != nil {
+		rec.monitorNew = r.NewSeasonMonitored(ctx, series)
+	}
 	// Every slot that has an episode, physical or virtual, so that none is
 	// listed twice; the provider's IDs of the physical episodes, which
 	// are the episodes whatever numbers their files have; and the virtual
@@ -283,9 +286,11 @@ type reconciler struct {
 	now      time.Time
 	// seasons are the series' seasons by number, physical before virtual.
 	seasons map[int]core.Item
-	pending []core.Item
-	stills  []pendingStill
-	saved   int
+	// monitorNew is whether new seasons but the specials are monitored.
+	monitorNew bool
+	pending    []core.Item
+	stills     []pendingStill
+	saved      int
 }
 
 type pendingStill struct {
@@ -311,7 +316,7 @@ func (rc *reconciler) season(ctx context.Context, number int, listed metadata.Re
 		ID: core.NewID(), LibraryID: rc.series.LibraryID, ParentID: rc.series.ID, Kind: core.KindSeason,
 		Name: listed.Item.Name, Overview: listed.Item.Overview, PremiereDate: listed.Item.PremiereDate,
 		ProductionYear: listed.Item.ProductionYear, ExternalIDs: listed.Item.ExternalIDs,
-		IndexNumber: &number, Virtual: true, Monitored: rc.series.Monitored && number != 0, DateAdded: rc.now,
+		IndexNumber: &number, Virtual: true, Monitored: rc.monitorNew && number != 0, DateAdded: rc.now,
 	}
 	if s.Name == "" {
 		s.Name = seasonName(number)
@@ -333,14 +338,18 @@ func seasonName(number int) string {
 	return "Season " + strconv.Itoa(number)
 }
 
-// virtualEpisode makes a virtual episode of what a lister knows of it.
+// virtualEpisode makes a virtual episode of what a lister knows of it,
+// monitored with its season, as Sonarr's
+// RefreshEpisodeService.GetMonitoredStatus: an episode 0 outside season 1
+// is not.
 func (rc *reconciler) virtualEpisode(ctx context.Context, season core.Item, ep core.Item) core.Item {
+	monitored := season.Monitored && (*ep.IndexNumber != 0 || *ep.ParentIndexNumber == 1)
 	it := core.Item{
 		ID: core.NewID(), LibraryID: rc.series.LibraryID, ParentID: season.ID, Kind: core.KindEpisode,
 		Name: ep.Name, Overview: ep.Overview, PremiereDate: ep.PremiereDate, ProductionYear: ep.ProductionYear,
 		Runtime: ep.Runtime, ExternalIDs: ep.ExternalIDs,
 		ParentIndexNumber: ep.ParentIndexNumber, IndexNumber: ep.IndexNumber, AbsoluteNumber: ep.AbsoluteNumber,
-		Virtual: true, Monitored: season.Monitored, DateAdded: rc.now,
+		Virtual: true, Monitored: monitored, DateAdded: rc.now,
 	}
 	if it.Name == "" {
 		it.Name = "Episode " + strconv.Itoa(*ep.IndexNumber)
