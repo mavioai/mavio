@@ -529,18 +529,19 @@ flowchart TD
 **进展**：
 - [x] 领域与存储：请求及其季、问题及其评论、用户的请求权限与配额、服务器的请求设置（`libs/core/request.go`、`libs/store`）
 - [x] `DiscoverService`：发现提供者的目录，其中的作品标明已入库、想要或已请求，并应用用户的分级限制（`apps/server/internal/requests`）
-  - [ ] 发现中的文本搜索，待有发现提供者支持搜索
-  - [ ] 剔除超出用户分级限制的作品后的页数与总数；目前给出提供者的总数
-  - [ ] 用户策略允许未分级作品时，分级筛选保留未分级作品
-  - [ ] 作品详情，含其各季的状态
+  - [x] 发现中的文本搜索（`DiscoverService.SearchTitles`），经发现提供者的 `SearchTitles`；scraper-tmdb 按 Seerr 的方式搜索，支持 `tmdb:`、`imdb:`、`tvdb:` 与 `year:` 前缀
+  - [x] 剔除作品后的页数与总数：`hidden_results` 统计本页剔除的作品，`total_results` 为提供者的总数减去它们，仅一页时精确，否则为上限
+  - [x] 除非用户策略屏蔽未分级作品，分级筛选保留未分级作品：仅当调用者指定分级或屏蔽未分级作品时才把分级交给提供者，否则由服务器自行分级筛选
+  - [x] 作品详情，含其各季的状态（`DiscoverService.GetTitle`），如 Seerr 的电影与剧集详情
 - [x] `RequestService`：按 Seerr 的方式检查电影与季的请求（权限、分级限制、配额、重复），自动或由管理员审批，经 `WantedService` 获取，其条目可用时完成（`requests.availability`）
-  - [ ] 为请求的动漫使用单独的质量档案
-  - [ ] Seerr 中作品的已阻止与已删除状态
-  - [ ] 分级使用服务器级元数据设置的国家与语言，而非目标媒体库的
-  - [ ] 可用性作业列入任务列表
+  - [x] 为请求的动漫使用单独的质量档案与媒体库（`RequestSettings.AnimeQualityProfileID`、`AnimeLibraryID`），并作为动漫剧集添加，如 Seerr 的动漫设置
+  - [x] Seerr 中作品的已阻止与已删除状态：阻止列表（`BlockTitle`、`UnblockTitle`、`ListBlockedTitles`、`core.BlockedTitle`）拒绝其中作品的请求；已完成请求的文件已不存在的作品为已删除，可再次请求
+    - [ ] Seerr 的阻止标签（按关键词自动阻止作品）与阻止整个合集
+  - [x] 分级与名称使用服务器级元数据设置（`ServerSettings.Metadata`）的国家与语言，而非目标媒体库的
+  - [x] 可用性作业列入任务列表（`TaskService`，“Sync request availability”）
 - [x] `IssueService`：报告条目的问题，评论、解决与重新打开
 - [x] 通知：所涉用户的活动，经 `ActivityService.ListMyActivities` 读取，由通知插件投递
-  - [ ] 向用户的会话推送事件
+  - [x] 向所涉用户的会话推送事件，待管理员处理的请求与问题也推送给管理员的会话（`NotificationReceived`）
 - [x] 端到端测试（`apps/server/internal/server/requests_test.go`）：限制为 PG 的用户经 scraper-tmdb 发现一部电影与一部剧集，请求 R 级电影被拒，请求其余作品；管理员审批；作品被抓取、入库并播放，用户收到可播放的通知；用户报告的问题被解决
   - [ ] 端到端测试中被拒绝的请求、耗尽的配额与重试的失败请求
   - [ ] 端到端测试中修改待审批请求的季，以及请求全部季
