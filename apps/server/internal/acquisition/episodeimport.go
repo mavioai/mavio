@@ -92,7 +92,7 @@ func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Do
 		d.State = core.DownloadImportPending
 		return r.warn(ctx, d, fmt.Sprintf(msgNoFiles, local))
 	}
-	locals, err := r.episodeDecisions(ctx, rn, sh, d, files, expected)
+	locals, err := r.episodeDecisions(ctx, rn, sh, d, local, files, expected)
 	if err != nil {
 		return err
 	}
@@ -176,12 +176,14 @@ func (r *Runtime) importedSlots(ctx context.Context, sh *show, d *core.Download)
 	return out, nil
 }
 
-// episodeDecisions maps the files of a download to their episodes and
-// runs the import specifications Sonarr applies by default on each: the
-// episodes must be known and grabbed, the file no sample, with audio,
-// fitting the free space, no full season nor split episode, and an
-// upgrade of the files it replaces, none holding more episodes.
-func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *core.Download, files []importFile, expected []slot) ([]*localEpisode, error) {
+// episodeDecisions maps the files of a download, at local, to their
+// episodes and runs Sonarr's import specifications on each: the episodes
+// must be known, grabbed, expected by the name of the download's folder,
+// with titles and absolute numbers when the file names need them, and of
+// confirmed scene numbering; the file no sample, with audio, not being
+// unpacked, fitting the free space, no full season nor split episode,
+// and an upgrade of the files it replaces, none holding more episodes.
+func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *core.Download, local string, files []importFile, expected []slot) ([]*localEpisode, error) {
 	ps, err := rn.parsing(ctx)
 	if err != nil {
 		return nil, err
@@ -189,6 +191,13 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 	// The download's title stands for a lone file whose name does not
 	// parse, as Sonarr's download client info does.
 	downloadInfo := release.ParseSeriesTitle(d.Title)
+	// The name of the download's folder, Sonarr's folder info.
+	var folderInfo *release.ParsedEpisodeInfo
+	if len(files) > 0 && files[0].path != local {
+		folderInfo = release.ParseSeriesTitle(filepath.Base(local))
+	}
+	now := r.now()
+	naming, oseries := rn.seriesNaming(), organizeSeries(sh)
 	grabbed := qualityModel(d.Quality)
 	langs := languagesOf(d.Languages)
 	upgrades := acquire.Upgrades{Propers: rn.env.Config.Propers}
@@ -242,9 +251,7 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 		if len(le.langs) == 0 {
 			le.langs = le.parsed.Languages
 		}
-		if single && downloadInfo != nil && !downloadInfo.FullSeason {
-			le.sceneName = d.Title
-		}
+		le.sceneName = sceneNameOf(f.path, single, downloadInfo, folderInfo)
 		le.formats = rn.seriesFormats(cmp.Or(le.sceneName, strings.TrimSuffix(filepath.Base(f.path), filepath.Ext(f.path))), le.quality, le.langs, f.size, nil)
 
 		// MatchesGrabSpecification.
@@ -272,6 +279,28 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 		}
 		if lowSpace {
 			le.reasons = append(le.reasons, msgNoFreeSpace)
+		}
+		// NotUnpackingSpecification, MatchesFolderSpecification,
+		// EpisodeTitleSpecification, UnverifiedSceneNumberingSpecification
+		// and AbsoluteEpisodeNumberSpecification.
+		if unpacking(f.path, now) {
+			le.reasons = append(le.reasons, msgUnpacking)
+		}
+		msg, err := unexpectedEpisodes(ctx, ps, sh.series, le.parsed, folderInfo)
+		if err != nil {
+			return nil, err
+		}
+		if msg != "" {
+			le.reasons = append(le.reasons, msg)
+		}
+		if msg := missingEpisodeTitle(s.EpisodeTitleRequired, naming, oseries, le.episodes, sh.episodes, now); msg != "" {
+			le.reasons = append(le.reasons, msg)
+		}
+		if unverifiedSceneNumbering(le.episodes) {
+			le.reasons = append(le.reasons, msgUnverifiedScene)
+		}
+		if missingAbsoluteNumber(naming, oseries, le.episodes, now) {
+			le.reasons = append(le.reasons, msgNoAbsoluteNumber)
 		}
 		if len(le.reasons) > 0 {
 			continue
@@ -331,14 +360,7 @@ func (r *Runtime) importEpisodeFile(ctx context.Context, rn *run, sh *show, d *c
 	for _, cf := range le.formats {
 		file.CustomFormats = append(file.CustomFormats, organize.CustomFormat{Name: cf.Name, IncludeWhenRenaming: cf.IncludeWhenRenaming})
 	}
-	oe := make([]organize.Episode, len(episodes))
-	for i, ep := range episodes {
-		oe[i] = organize.Episode{
-			SeasonNumber: ep.SeasonNumber, EpisodeNumber: ep.EpisodeNumber, AbsoluteEpisodeNumber: ep.AbsoluteEpisodeNumber,
-			AirDate: ep.AirDate, Title: ep.Title,
-		}
-	}
-	dest, err := organize.BuildEpisodeFilePath(rn.seriesNaming(), organizeSeries(sh), oe, file, filepath.Ext(le.file.path))
+	dest, err := organize.BuildEpisodeFilePath(rn.seriesNaming(), organizeSeries(sh), organizeEpisodes(episodes), file, filepath.Ext(le.file.path))
 	if err != nil {
 		return "", nil, fmt.Errorf("name file: %w", err)
 	}
