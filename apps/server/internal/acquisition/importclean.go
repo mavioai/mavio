@@ -1,6 +1,7 @@
 package acquisition
 
 import (
+	"cmp"
 	"context"
 	"io/fs"
 	"os"
@@ -19,10 +20,33 @@ const rarLeftOver = 10 << 20
 // cleanDownloadFolder deletes a download's folder that an import moved
 // its movie out of, when nothing but samples and small RAR files are
 // left, as Radarr's DownloadedMovieImportService.ProcessFolder and
-// ShouldDeleteFolder. Folders of libraries and of remote path mappings,
-// and those holding them, and folders in libraries are never deleted.
-// Failures are logged.
+// ShouldDeleteFolder.
 func (r *Runtime) cleanDownloadFolder(ctx context.Context, m *movie, folder string, mappings []acquire.RemotePathMapping) {
+	r.deleteDownloadFolder(ctx, folder, mappings, func(p string) bool {
+		return release.ParseMovieTitle(filepath.Base(p), false) != nil && r.isSample(ctx, p, m.acq.Runtime)
+	})
+}
+
+// cleanEpisodeDownloadFolder deletes a download's folder that an import
+// moved episodes of a series out of, when nothing but samples and small
+// RAR files are left, as Sonarr's
+// DownloadedEpisodesImportService.ProcessFolder and ShouldDeleteFolder:
+// a video whose name does not parse, or that may be a special, keeps it.
+func (r *Runtime) cleanEpisodeDownloadFolder(ctx context.Context, sh *show, folder string, mappings []acquire.RemotePathMapping) {
+	r.deleteDownloadFolder(ctx, folder, mappings, func(p string) bool {
+		info := release.ParseSeriesTitle(filepath.Base(p))
+		if info == nil || info.IsPossibleSpecialEpisode() {
+			return false
+		}
+		return r.isSample(ctx, p, cmp.Or(sh.series.Runtime, 45))
+	})
+}
+
+// deleteDownloadFolder deletes a download's folder when every video file
+// left in it is a sample and no RAR file of 10 MiB or more is. Folders of
+// libraries and of remote path mappings, and those holding them, and
+// folders in libraries are never deleted. Failures are logged.
+func (r *Runtime) deleteDownloadFolder(ctx context.Context, folder string, mappings []acquire.RemotePathMapping, sample func(path string) bool) {
 	if fi, err := os.Stat(folder); err != nil || !fi.IsDir() {
 		return
 	}
@@ -43,7 +67,7 @@ func (r *Runtime) cleanDownloadFolder(ctx context.Context, m *movie, folder stri
 			}
 		}
 	}
-	if !r.onlySamplesLeft(ctx, m, folder) {
+	if !onlySamplesLeft(ctx, folder, sample) {
 		return
 	}
 	if err := os.RemoveAll(folder); err != nil {
@@ -60,8 +84,8 @@ func within(path, dir string) bool {
 }
 
 // onlySamplesLeft reports whether every video file left in a folder is a
-// sample of the movie, and no RAR file of 10 MiB or more is left.
-func (r *Runtime) onlySamplesLeft(ctx context.Context, m *movie, folder string) bool {
+// sample, and no RAR file of 10 MiB or more is left.
+func onlySamplesLeft(ctx context.Context, folder string, sample func(path string) bool) bool {
 	parser := naming.Default()
 	ok := true
 	err := filepath.WalkDir(folder, func(p string, d fs.DirEntry, err error) error {
@@ -84,7 +108,7 @@ func (r *Runtime) onlySamplesLeft(ctx context.Context, m *movie, folder string) 
 		if !parser.IsVideoFile(p) {
 			return nil
 		}
-		if release.ParseMovieTitle(filepath.Base(p), false) == nil || !r.isSample(ctx, m, p) {
+		if !sample(p) {
 			ok = false
 			return fs.SkipAll
 		}
@@ -93,9 +117,9 @@ func (r *Runtime) onlySamplesLeft(ctx context.Context, m *movie, folder string) 
 	return err == nil && ok
 }
 
-// isSample reports whether a video file is a sample of the movie by its
-// runtime, as Radarr's DetectSample.
-func (r *Runtime) isSample(ctx context.Context, m *movie, path string) bool {
+// isSample reports whether a video file is a sample of a title of a
+// runtime in minutes, as Radarr's and Sonarr's DetectSample.
+func (r *Runtime) isSample(ctx context.Context, path string, runtime int) bool {
 	if r.Prober == nil {
 		return false
 	}
@@ -108,5 +132,5 @@ func (r *Runtime) isSample(ctx context.Context, m *movie, path string) bool {
 	if err != nil {
 		return false
 	}
-	return acquire.IsSample(path, &res.Source.Duration, m.acq.Runtime) == acquire.SampleYes
+	return acquire.IsSample(path, &res.Source.Duration, runtime) == acquire.SampleYes
 }

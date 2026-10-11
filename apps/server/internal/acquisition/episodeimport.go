@@ -52,7 +52,10 @@ type localEpisode struct {
 	// sceneName is the release name of the file, as Sonarr's
 	// SceneNameCalculator; empty for its file name.
 	sceneName string
-	reasons   []string
+	// folderInfo is what the name of the download's folder holds, as
+	// Sonarr's FolderEpisodeInfo; nil for a lone file.
+	folderInfo *release.ParsedEpisodeInfo
+	reasons    []string
 }
 
 // importEpisodeDownload imports the video files of a completed episode
@@ -62,8 +65,9 @@ type localEpisode struct {
 // the files holding the most episodes, then the largest, first; a file
 // whose episodes another one brought is skipped. The download is
 // imported once every episode it was grabbed for is; else it is blocked
-// with why.
-func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Download, p polled, local string) error {
+// with why. A folder the files were moved out of is deleted once only
+// samples are left in it.
+func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Download, p polled, local string, mappings []acquire.RemotePathMapping) error {
 	sh, err := rn.show(ctx, d.ItemID)
 	if errors.Is(err, core.ErrNotFound) || errors.Is(err, core.ErrInvalid) {
 		d.State = core.DownloadImportBlocked
@@ -101,6 +105,7 @@ func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Do
 		return cmp.Or(cmp.Compare(len(b.episodes), len(a.episodes)), cmp.Compare(b.file.size, a.file.size))
 	})
 	var msgs []string
+	moved := false
 	for _, le := range locals {
 		if len(le.reasons) == 0 {
 			if i := slices.IndexFunc(le.episodes, func(ep *series.Episode) bool { return imported[slotOf(ep)] != "" }); i >= 0 {
@@ -117,6 +122,7 @@ func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Do
 			}
 			le.reasons = reasons
 			if len(reasons) == 0 {
+				moved = moved || p.item.GetCanMoveFiles()
 				for _, ep := range le.episodes {
 					imported[slotOf(ep)] = dest
 				}
@@ -128,6 +134,9 @@ func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Do
 			}
 		}
 		msgs = append(msgs, filepath.Base(le.file.path)+": "+strings.Join(le.reasons, "; "))
+	}
+	if moved {
+		r.cleanEpisodeDownloadFolder(ctx, sh, local, mappings)
 	}
 	if len(imported) > 0 && allImported(expected, imported) {
 		return r.completeImport(ctx, d, p)
@@ -202,20 +211,16 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 	langs := languagesOf(d.Languages)
 	upgrades := acquire.Upgrades{Propers: rn.env.Config.Propers}
 	s := r.settings()
-	var total int64
-	for _, f := range files {
-		total += f.size
-	}
-	libPath, _, haveFolder := seriesLibraryFolder(sh)
-	lowSpace := false
-	if haveFolder && !s.SkipFreeSpaceCheck {
-		if free, known := freeSpace(libPath); known && free < total+int64(s.MinimumFreeSpace)*1024*1024 {
-			lowSpace = true
-		}
+	// The free space of the series folder's volume, which may be another
+	// than the library folder's, or of its nearest parent until it exists,
+	// as Sonarr's FreeSpaceSpecification.
+	free, freeKnown := int64(0), false
+	if libPath, seriesRel, ok := seriesLibraryFolder(sh); ok && !s.SkipFreeSpaceCheck {
+		free, freeKnown = r.freeSpace(filepath.Join(libPath, filepath.FromSlash(seriesRel)))
 	}
 	out := make([]*localEpisode, 0, len(files))
 	for _, f := range files {
-		le := &localEpisode{file: f, langs: langs}
+		le := &localEpisode{file: f, langs: langs, folderInfo: folderInfo}
 		out = append(out, le)
 		le.parsed = release.ParseSeriesPath(f.path)
 		fileInfo := le.parsed
@@ -277,7 +282,7 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 				le.reasons = append(le.reasons, msg)
 			}
 		}
-		if lowSpace {
+		if freeKnown && free < f.size+int64(s.MinimumFreeSpace)*1024*1024 {
 			le.reasons = append(le.reasons, msgNoFreeSpace)
 		}
 		// NotUnpackingSpecification, MatchesFolderSpecification,
@@ -437,9 +442,11 @@ func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *co
 	}
 	for _, it := range old {
 		f := sh.byID[it.ID].File
-		if err := r.recycle(ctx, filepath.FromSlash(it.Path), path.Base(sh.series.Path)); err != nil {
+		oldPath := filepath.FromSlash(it.Path)
+		if err := r.recycle(ctx, oldPath, path.Base(sh.series.Path)); err != nil {
 			return "", nil, err
 		}
+		r.recycleExtras(ctx, oldPath, path.Base(sh.series.Path), s.ExtraFileExtensions)
 		if err := r.Store.History().Add(ctx, core.HistoryEvent{
 			ID: core.NewID(), Type: core.HistoryFileDeleted, ItemID: it.ID, ParentID: sh.item.ID, Date: r.now(), SourceTitle: it.Path,
 			Quality: qualityRef(f.Quality), Languages: languageNames(f.Languages), Data: map[string]string{dataReason: "Upgrade"},
@@ -452,14 +459,19 @@ func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *co
 	}
 	r.logger().InfoContext(ctx, "imported episode file", "series", sh.item.Name, "from", le.file.path, "to", dest, "mode", mode.String())
 	if s.ImportExtraFiles {
-		r.importExtras(ctx, root, le.file.path, rel, mode, s.ExtraFileExtensions)
+		r.importEpisodeExtras(ctx, root, sh, le, le.folderInfo != nil, rel, mode, s.ExtraFileExtensions)
 	}
 	imported := filepath.ToSlash(dest)
 	holder, err := r.recordEpisodeItems(ctx, sh, episodes, imported)
 	if err != nil {
 		return "", nil, err
 	}
-	job := library.ScanJob(sh.lib, r.now(), false)
+	// A scan of the series' folder alone, rather than of its library.
+	seriesDir := libPath
+	if _, seriesRel, ok := seriesLibraryFolder(sh); ok {
+		seriesDir = filepath.Join(libPath, filepath.FromSlash(seriesRel))
+	}
+	job := library.ScanFolderJob(sh.lib, seriesDir, r.now())
 	if _, err := r.Store.Jobs().Enqueue(ctx, &job); err != nil {
 		return "", nil, fmt.Errorf("queue scan: %w", err)
 	}

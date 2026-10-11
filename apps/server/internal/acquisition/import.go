@@ -64,7 +64,7 @@ func (r *Runtime) importDownload(ctx context.Context, rn *run, d *core.Download,
 	}
 	local = filepath.Clean(local)
 	if isSeriesDownload(*d) {
-		return r.importEpisodeDownload(ctx, rn, d, p, local)
+		return r.importEpisodeDownload(ctx, rn, d, p, local, mappings)
 	}
 	if done, err := r.alreadyImported(ctx, d); err != nil || done {
 		if done {
@@ -431,44 +431,4 @@ func (rn *run) qualityTitle(q release.Quality) string {
 		}
 	}
 	return q.String()
-}
-
-// importExtras imports the files beside a video whose extensions are
-// wanted, named as the imported video with what follows the video's
-// name in theirs, such as ".en" of "Movie.en.srt", as Radarr's extra file
-// services. Failures are logged.
-func (r *Runtime) importExtras(ctx context.Context, root *os.Root, video, rel string, mode transferMode, extensions []string) {
-	wanted := map[string]bool{}
-	for _, e := range extensions {
-		if e = strings.ToLower(strings.Trim(strings.TrimSpace(e), ".")); e != "" {
-			wanted["."+e] = true
-		}
-	}
-	if len(wanted) == 0 {
-		return
-	}
-	dir := filepath.Dir(video)
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		r.logger().WarnContext(ctx, "couldn't list extra files", "path", dir, "err", err)
-		return
-	}
-	videoBase := strings.TrimSuffix(filepath.Base(video), filepath.Ext(video))
-	destBase := strings.TrimSuffix(rel, filepath.Ext(rel))
-	for _, e := range entries {
-		name := e.Name()
-		ext := filepath.Ext(name)
-		if e.IsDir() || strings.HasPrefix(name, ".") || !wanted[strings.ToLower(ext)] {
-			continue
-		}
-		stem := strings.TrimSuffix(name, ext)
-		suffix := ""
-		if len(stem) > len(videoBase) && strings.EqualFold(stem[:len(videoBase)], videoBase) {
-			suffix = stem[len(videoBase):]
-		}
-		dest := destBase + suffix + ext
-		if err := transfer(root, filepath.Join(dir, name), dest, mode); err != nil {
-			r.logger().WarnContext(ctx, "couldn't import extra file", "path", name, "err", err)
-		}
-	}
 }
