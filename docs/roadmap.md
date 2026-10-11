@@ -588,7 +588,14 @@ flowchart TD
 - [x] `libs/client-rust`: servers, their discovery and sign-in (password, first user, Quick Connect), the event streams with backoff, the offline store, playback reporting with offline replay, downloads, screen state, the merging of several servers (Home, Search, items' copies on other servers); the Swift and Kotlin bindings
   - [ ] The Go binding (`capi`, `proto`), with the Windows and Linux app
   - [ ] Remote control commands and SyncPlay over the event stream, with the players of the apps that take them
-- [ ] Web UI (`apps/web`, `libs/client-ts`)
+- [x] Web UI (`apps/web`, `libs/client-ts`): sign-in (password, first user, Quick Connect), several servers and their order, the merged Home, libraries with their Recommended and All tabs, hubs, search across servers, details with versions and copies on other servers, the player (direct play and HLS, audio and subtitle tracks, external players), authorizing devices; refreshed by the event streams
+  - [ ] Discovery and request screens, with P20
+  - [ ] Administration screens: libraries, users, devices, plugins, tasks, settings
+  - [ ] Person pages, collections and playlists
+  - [ ] Playing the next episode at the end of one
+  - [ ] Styled ASS subtitles with JASSUB
+  - [ ] The query cache kept offline
+  - [ ] Storybook of the components and Playwright screenshots of the screens
 - [ ] iPhone and iPad app (`apps/ios`, `libs/apple`)
 - [ ] Android phone and tablet app (`apps/android`, `libs/android`)
 - [ ] Apple TV and Android TV apps

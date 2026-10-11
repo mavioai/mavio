@@ -95,7 +95,7 @@ flowchart LR
 * **提供方式**：Vite 构建到 `apps/server/internal/webui/dist`，服务端以 `//go:embed` 内嵌并在 `/` 提供，SPA 的路由回退到 `index.html`。仓库中该目录只有一个 `.gitkeep`；未带 Web UI 构建的服务端会提供一个说明此情况的页面。Nx 让服务端的 `build` 依赖 Web 的 `build`。API 参考保留在 `/api`。
 * **服务器**：Web UI 登录到提供它的服务器，并像各应用一样添加其他服务器（§5.4），以跨域方式调用它们；服务器的所有路由允许任何来源，它们接受 Bearer 令牌与 ID 凭据，从不使用 Cookie。服务器列表（令牌除外）保存在提供它的服务器上用户的显示偏好中，从而跟随用户跨浏览器。
 * **API**：`libs/client-ts`，基于 `connect-es` v2 与 `protobuf-es` v2 以及从 `libs/proto` 生成的代码，用 TanStack Query 做缓存与失效，由事件流驱动。
-* **播放**：支持 Media Source Extensions 的浏览器用 hls.js，Safari 用原生 HLS 播放器；能力来自 `MediaCapabilities.decodingInfo`。ASS 字幕借助 JASSUB（WebAssembly 版 libass）保留样式。对浏览器不转码就无法播放的内容，播放器提供在外部播放器（mpv、VLC、IINA）中打开播放 URL。
+* **播放**：支持 Media Source Extensions 的浏览器用 hls.js，Safari 用原生 HLS 播放器；能力来自 `MediaSource.isTypeSupported` 与 `canPlayType`。ASS 字幕借助 JASSUB（WebAssembly 版 libass）保留样式。对浏览器不转码就无法播放的内容，播放器提供在外部播放器（mpv、VLC、IINA）中打开播放 URL。
 
 ### 4.2 Apple（`apps/ios`、`apps/tvos`、`apps/macos`、`libs/apple`）
 * **每种交互模型一个应用。** iPhone 与 iPad 按 App Store 的惯例是一个通用应用，iPad 上有自己的布局：侧边栏与多栏、多窗口、台前调度、指针与硬件键盘。Apple TV 是独立应用，围绕焦点引擎与十英尺距离的遥控器构建，并提供 Top Shelf。Mac 是以 AppKit 编写的独立应用，AppKit 让播放器能完全掌控窗口、菜单栏、全屏、触控板以及同时打开多个播放器。

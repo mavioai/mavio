@@ -8,9 +8,15 @@ export default defineConfig({
   build: {
     outDir: "../server/internal/webui/dist",
     emptyOutDir: true,
+    // The API's generated descriptors and hls.js are large by themselves.
+    chunkSizeWarningLimit: 1024,
   },
   server: {
     // During development the UI calls the server running on its default port.
-    proxy: { "/mavio.": "http://localhost:8686" },
+    proxy: {
+      "/mavio.": "http://localhost:8686",
+      "/images/": "http://localhost:8686",
+      "/media/": "http://localhost:8686",
+    },
   },
 });
