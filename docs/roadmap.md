@@ -424,6 +424,9 @@ flowchart TD
   - [x] Headphones, Knaben, NzbIndex, RuTracker, TorrentPotato and TorrentsCSV (`internal/sites/<name>`)
     - [ ] Downloaded NZBs checked before they are sent on, as Prowlarr's NZB validation does, for NzbIndex, Headphones and Newznab
     - [ ] RuTracker's login captcha, which fails automatic logins as no UI shows it yet
+  - [x] BeyondHD, M-Team TP, MyAnonamouse, Nebulance, Shazbat and TorrentDay (`internal/sites/<name>`)
+    - [ ] MyAnonamouse's size limits (`tor[minSize]`, `tor[maxSize]`), sent once queries carry `minsize` and `maxsize`
+    - [ ] MyAnonamouse's cookies cleared before a test, as Prowlarr does
   - [ ] The API tokens of AvistaZ and SpeedApp sites kept across restarts, as Prowlarr keeps them in the settings; they log in again after each start
   - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)

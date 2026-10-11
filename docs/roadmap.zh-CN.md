@@ -424,6 +424,9 @@ flowchart TD
   - [x] Headphones、Knaben、NzbIndex、RuTracker、TorrentPotato 和 TorrentsCSV（`internal/sites/<name>`）
     - [ ] 像 Prowlarr 的 NZB 校验那样，在转交前检查 NzbIndex、Headphones 和 Newznab 下载的 NZB
     - [ ] RuTracker 的登录验证码：尚无界面显示它，自动登录会失败
+  - [x] BeyondHD、M-Team TP、MyAnonamouse、Nebulance、Shazbat 和 TorrentDay（`internal/sites/<name>`）
+    - [ ] MyAnonamouse 的大小限制（`tor[minSize]`、`tor[maxSize]`），待查询带上 `minsize` 和 `maxsize` 后发送
+    - [ ] 像 Prowlarr 那样在测试 MyAnonamouse 前清除其 Cookie
   - [ ] 像 Prowlarr 存入设置那样跨重启保存 AvistaZ 与 SpeedApp 站点的 API 令牌；目前每次启动后重新登录
   - [ ] torrent 索引器的做种设置（最少做种数、分享率与做种时间），抓取时交给下载客户端
 - [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）

@@ -10,6 +10,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/indexers/internal/indexer"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/avistaz"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/beyondhd"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/bithdtv"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/broadcasthenet"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/cardigann"
@@ -23,13 +24,18 @@ import (
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/iptorrents"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/knaben"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/libble"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/mteamtp"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/myanonamouse"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/nebulance"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/newznab"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/norbits"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/nzbindex"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/passthepopcorn"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/pixelhd"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/rutracker"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/shazbat"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/speedapp"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentday"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentpotato"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentrss"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentscsv"
@@ -45,6 +51,7 @@ func codeDefinitions() []indexer.Definition {
 	defs = append(defs, gazelle.Definitions...)
 	defs = append(defs, speedapp.Definitions...)
 	defs = append(defs,
+		beyondhd.Definition,
 		bithdtv.Definition,
 		broadcasthenet.Definition,
 		filelist.Definition,
@@ -56,11 +63,16 @@ func codeDefinitions() []indexer.Definition {
 		iptorrents.Definition,
 		knaben.Definition,
 		libble.Definition,
+		mteamtp.Definition,
+		myanonamouse.Definition,
+		nebulance.Definition,
 		norbits.Definition,
 		nzbindex.Definition,
 		passthepopcorn.Definition,
 		pixelhd.Definition,
 		rutracker.Definition,
+		shazbat.Definition,
+		torrentday.Definition,
 		torrentpotato.Definition,
 		torrentscsv.Definition,
 	)
