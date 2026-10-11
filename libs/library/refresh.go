@@ -226,6 +226,11 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 	if it.Name == "" {
 		it.Name = name
 	}
+	if !slices.ContainsFunc(results, func(res *metadata.Result) bool { return res.Item.Runtime != 0 }) {
+		if err := r.fileRuntime(ctx, &it); err != nil {
+			return it, err
+		}
+	}
 	var processedPeople []metadata.Person
 	if it.Extra == "" && !it.Locked {
 		processedPeople = r.process(ctx, &it, results)
@@ -311,6 +316,23 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 		}
 	}
 	return it, r.changed(ctx, lib, it)
+}
+
+// fileRuntime gives an item whose metadata gives no runtime that of its
+// file when it was probed since the item's last refresh: a probe leaves
+// the runtime an item has to the refresh it queues.
+func (r *Refresher) fileRuntime(ctx context.Context, it *core.Item) error {
+	if slices.Contains(it.LockedFields, core.FieldRuntime) {
+		return nil
+	}
+	sources, err := r.Store.MediaSources().ListForItem(ctx, it.ID)
+	if err != nil {
+		return fmt.Errorf("media sources of %s: %w", it.ID, err)
+	}
+	if len(sources) > 0 && sources[0].Duration > 0 && sources[0].ProbedAt.After(it.MetadataRefreshedAt) {
+		it.Runtime = sources[0].Duration
+	}
+	return nil
 }
 
 // Processor adjusts the merged metadata of items at the end of refreshes,
