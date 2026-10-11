@@ -20,7 +20,7 @@
 
 Mavio 是以 Go 为服务端核心的自托管媒体服务器，借鉴 Jellyfin 的领域知识与测试资产，但不兼容 Jellyfin 生态。许可证为 **GPL-3.0**。
 
-当前阶段：**P6 服务端装配与分发**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。[docs/clients.zh-CN.md](docs/clients.zh-CN.md) 中客户端的基础部分（P21）与 P19、P20 并行构建，顺序见路线图；客户端的目录（`apps/web`、`apps/ios`、`apps/tvos`、`apps/macos`、`apps/android`、`apps/android-tv`、`apps/windows-linux`、`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）在其步骤开始时才创建。
+当前阶段：**P6 服务端装配与分发**、**P16 资源获取数据源**（只差 Mavio 自己的 TMDB key）和 **P21 客户端与生态**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。[docs/clients.zh-CN.md](docs/clients.zh-CN.md) 中的客户端按路线图给出的顺序构建；客户端的目录（`apps/web`、`apps/ios`、`apps/tvos`、`apps/macos`、`apps/android`、`apps/android-tv`、`apps/windows-linux`、`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）在其步骤开始时才创建。
 
 ## 目录结构
 
