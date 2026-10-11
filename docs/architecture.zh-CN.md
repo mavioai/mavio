@@ -457,7 +457,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 | release 解析 | `libs/release` | Radarr 与 Sonarr 的解析器 |
 | Servarr 的元数据 | `plugins/scraper-servarr`（WASM） | Radarr 与 Sonarr 的元数据源、scene 映射 |
 | 索引器 | `plugins/indexers`（进程），`INDEXER_PROVIDER`；通过 `ReleaseService` 搜索 | Prowlarr |
-| 下载客户端 | `plugins/download-clients`（进程），`DOWNLOAD_CLIENT`；通过 `DownloadService` 调用 | Radarr 与 Sonarr 的下载客户端 |
+| 下载客户端 | `plugins/download-clients`（进程），`DOWNLOAD_CLIENT_PROVIDER`；通过 `DownloadService` 调用 | Radarr 与 Sonarr 的下载客户端 |
 
 * **状态在服务端，网络在插件。** 想要的条目、档案、决策、队列、历史、入库与请求都属于服务端，与它们所涉及的条目和用户放在一起。与索引器和下载客户端打交道、并随它们变化的部分放在插件中，从插件目录升级，无需发布服务端。
 * **一个引擎。** 电影与剧集共用质量档案、custom formats、决策、队列与入库；`movie` 与 `series` 包的区别在于如何搜索、监控以及把 release 匹配到条目。
@@ -484,7 +484,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 移植 Prowlarr 的第一方进程插件：Newznab 与 Torznab、在运行时从 `indexers.prowlarr.com` 拉取定义的 Cardigann 引擎，以及 Prowlarr 以代码实现的全部站点；能力与分类、限速与失败后的退避、索引器代理（HTTP、SOCKS、FlareSolverr）。其配置列出已配置的索引器；定义以及每个定义所需的字段由插件给出。`IndexerProviderService` 列出索引器及其能力，搜索它们（电影、剧集或文本，带 ID、季与集、分类），读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB。
 
 ### 13.5 下载客户端（`plugins/download-clients`）
-包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件，如 qBittorrent、Transmission、Deluge、rTorrent、Aria2、SABnzbd、NZBGet 与监视目录。其配置列出已配置的客户端。`DownloadClientService` 添加 release（种子文件、磁力链接或 NZB，带分类、标签与做种限制），列出下载及其状态、进度与输出路径，并删除下载。远程路径映射属于服务端。
+包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件，如 qBittorrent、Transmission、Deluge、rTorrent、Aria2、SABnzbd、NZBGet 与监视目录。其配置列出已配置的客户端，每个客户端有电影与剧集各自的分类。`DownloadClientProviderService` 添加 release（种子文件、磁力链接或 NZB，使用其类型的分类与优先级，以及其索引器的做种限制），列出下载及其状态、进度与输出路径，将下载标记为已入库，并删除下载。远程路径映射属于服务端。
 
 ### 13.6 存储
 想要的状态、质量定义与质量档案、custom formats、delay profile 与 release profile、队列、历史、黑名单与请求都存放在 `libs/store` 中，支持两种数据库，并通过 `core` 中的端口访问。

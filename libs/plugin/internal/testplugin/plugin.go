@@ -110,6 +110,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewDiscoveryProviderServiceHandler(discovery{}))
 	guest.Handle(pluginv1connect.NewSceneMappingProviderServiceHandler(scene{}))
 	guest.Handle(pluginv1connect.NewIndexerProviderServiceHandler(indexers{}))
+	guest.Handle(pluginv1connect.NewDownloadClientProviderServiceHandler(downloads{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -239,8 +240,8 @@ type indexers struct{}
 func (indexers) ListDefinitions(context.Context, *pluginv1.ListDefinitionsRequest) (*pluginv1.ListDefinitionsResponse, error) {
 	return pluginv1.ListDefinitionsResponse_builder{Definitions: []*pluginv1.IndexerDefinition{pluginv1.IndexerDefinition_builder{
 		Id: proto.String("test"), Name: proto.String("Test"), Protocol: pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT.Enum(),
-		Fields: []*pluginv1.IndexerField{pluginv1.IndexerField_builder{
-			Name: proto.String("apikey"), Type: pluginv1.IndexerFieldType_INDEXER_FIELD_TYPE_TEXT.Enum(), Secret: proto.Bool(true),
+		Fields: []*pluginv1.SettingField{pluginv1.SettingField_builder{
+			Name: proto.String("apikey"), Type: pluginv1.SettingFieldType_SETTING_FIELD_TYPE_TEXT.Enum(), Secret: proto.Bool(true),
 		}.Build()},
 	}.Build()}}.Build(), nil
 }
@@ -503,4 +504,28 @@ func (provider) Search(ctx context.Context, req *pluginv1.SearchRequest) (*plugi
 
 func (provider) GetMetadata(context.Context, *pluginv1.GetMetadataRequest) (*pluginv1.GetMetadataResponse, error) {
 	return pluginv1.GetMetadataResponse_builder{Found: proto.Bool(false)}.Build(), nil
+}
+
+type downloads struct {
+	pluginv1connect.UnimplementedDownloadClientProviderServiceHandler
+}
+
+// ListDownloadClientDefinitions lists the torrent client "test".
+func (downloads) ListDownloadClientDefinitions(context.Context, *pluginv1.ListDownloadClientDefinitionsRequest) (*pluginv1.ListDownloadClientDefinitionsResponse, error) {
+	return pluginv1.ListDownloadClientDefinitionsResponse_builder{Definitions: []*pluginv1.DownloadClientDefinition{pluginv1.DownloadClientDefinition_builder{
+		Id: proto.String("test"), Name: proto.String("Test"), Protocol: pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT.Enum(),
+	}.Build()}}.Build(), nil
+}
+
+// AddDownload returns the magnet link's hash as the download's ID.
+func (downloads) AddDownload(_ context.Context, req *pluginv1.AddDownloadRequest) (*pluginv1.AddDownloadResponse, error) {
+	_, hash, _ := strings.Cut(req.GetMagnetUrl(), "btih:")
+	return pluginv1.AddDownloadResponse_builder{DownloadId: proto.String(hash)}.Build(), nil
+}
+
+// ListDownloads lists a completed download.
+func (downloads) ListDownloads(context.Context, *pluginv1.ListDownloadsRequest) (*pluginv1.ListDownloadsResponse, error) {
+	return pluginv1.ListDownloadsResponse_builder{Downloads: []*pluginv1.Download{pluginv1.Download_builder{
+		ClientId: proto.String("test"), Id: proto.String("ABC"), Status: pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED.Enum(),
+	}.Build()}}.Build(), nil
 }

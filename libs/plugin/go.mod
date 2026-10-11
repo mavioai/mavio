@@ -11,6 +11,7 @@ require (
 )
 
 require (
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.12-20260825204119-511051f7f437.2 // indirect
 	golang.org/x/sys v0.44.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
 )

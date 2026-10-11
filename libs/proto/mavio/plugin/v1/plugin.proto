@@ -88,6 +88,8 @@ enum Capability {
   CAPABILITY_SCENE_MAPPING_PROVIDER = 22;
   // Implements IndexerProviderService.
   CAPABILITY_INDEXER_PROVIDER = 23;
+  // Implements DownloadClientProviderService.
+  CAPABILITY_DOWNLOAD_CLIENT_PROVIDER = 24;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin

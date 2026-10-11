@@ -1,0 +1,251 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "mavio/plugin/v1/indexer.proto";
+import "mavio/plugin/v1/settings.proto";
+
+// DownloadClientProviderService sends releases to download clients, such
+// as qBittorrent or SABnzbd, and follows their downloads. The provider
+// implements kinds of download clients, its definitions, and the plugin's
+// configuration lists the clients configured from them, each with a
+// category for movies and one for series.
+service DownloadClientProviderService {
+  // ListDownloadClientDefinitions lists the kinds of download clients the
+  // provider implements, with the settings each takes.
+  rpc ListDownloadClientDefinitions(ListDownloadClientDefinitionsRequest) returns (ListDownloadClientDefinitionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListDownloadClients lists the configured download clients.
+  rpc ListDownloadClients(ListDownloadClientsRequest) returns (ListDownloadClientsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // TestDownloadClient checks that a download client, configured or not,
+  // answers with the settings given.
+  rpc TestDownloadClient(TestDownloadClientRequest) returns (TestDownloadClientResponse);
+  // AddDownload sends a release to a download client.
+  rpc AddDownload(AddDownloadRequest) returns (AddDownloadResponse);
+  // ListDownloads lists the downloads of download clients in their
+  // categories for movies and series, with what each client tells of
+  // itself.
+  rpc ListDownloads(ListDownloadsRequest) returns (ListDownloadsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetDownload reads a download again before it is imported, for the
+  // clients that move a download's files once it completes.
+  rpc GetDownload(GetDownloadRequest) returns (GetDownloadResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // RemoveDownload removes a download from its client, with its files
+  // when asked.
+  rpc RemoveDownload(RemoveDownloadRequest) returns (RemoveDownloadResponse);
+  // MarkDownloadImported tells a client that a download was imported,
+  // which moves it to the client's category for imported downloads where
+  // one is set.
+  rpc MarkDownloadImported(MarkDownloadImportedRequest) returns (MarkDownloadImportedResponse);
+}
+
+message ListDownloadClientDefinitionsRequest {}
+
+message ListDownloadClientDefinitionsResponse {
+  repeated DownloadClientDefinition definitions = 1;
+}
+
+// DownloadClientDefinition is a kind of download client the provider
+// implements.
+message DownloadClientDefinition {
+  // Stable within the plugin, e.g. "qbittorrent".
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  DownloadProtocol protocol = 4;
+  // The settings a client of the definition takes.
+  repeated SettingField fields = 5;
+}
+
+message ListDownloadClientsRequest {}
+
+message ListDownloadClientsResponse {
+  repeated DownloadClient clients = 1;
+}
+
+// DownloadClient is a configured download client.
+message DownloadClient {
+  // Stable within the plugin's configuration.
+  string id = 1;
+  string name = 2;
+  string definition_id = 3;
+  DownloadProtocol protocol = 4;
+  bool enabled = 5;
+  // Lower first among the clients of a protocol; 1 by default.
+  int32 priority = 6;
+  // Whether imported downloads are removed from the client, and failed
+  // ones.
+  bool remove_completed_downloads = 7;
+  bool remove_failed_downloads = 8;
+  // Set while the client is left out after failing, until this time.
+  google.protobuf.Timestamp disabled_until = 9;
+  // The failure that left it out.
+  string failure = 10;
+}
+
+message TestDownloadClientRequest {
+  // A configured client, or one described by the remaining fields.
+  string client_id = 1;
+  string definition_id = 2;
+  // The client's settings as a JSON object.
+  string settings_json = 3;
+}
+
+message TestDownloadClientResponse {
+  // Empty when the test passed.
+  string failure = 1;
+}
+
+// DownloadKind is what a download is of, which chooses its category and
+// priority in the client.
+enum DownloadKind {
+  DOWNLOAD_KIND_UNSPECIFIED = 0;
+  DOWNLOAD_KIND_MOVIE = 1;
+  DOWNLOAD_KIND_SERIES = 2;
+}
+
+message AddDownloadRequest {
+  string client_id = 1 [(buf.validate.field).required = true];
+  // The release's title, which names the download where the client takes
+  // a name.
+  string title = 2 [(buf.validate.field).string.max_len = 1000];
+  DownloadKind kind = 3 [(buf.validate.field).enum.defined_only = true];
+  // The movie was released, or the episode aired, lately: the download
+  // takes the client's priority for recent releases.
+  bool recent = 4;
+  // The torrent file or NZB, as GetReleaseFile fetched it; empty for a
+  // magnet link.
+  bytes data = 5;
+  // The file's name, for the clients that keep it.
+  string file_name = 6 [(buf.validate.field).string.max_len = 1000];
+  string magnet_url = 7;
+  // The torrent's info hash in hex, when the indexer gave it.
+  string info_hash = 8 [(buf.validate.field).string.max_len = 64];
+  // How long a torrent seeds: the ratio and the time its indexer asks
+  // for; unset for the client's own limits.
+  double seed_ratio = 9 [(buf.validate.field).double.gte = 0];
+  google.protobuf.Duration seed_time = 10;
+}
+
+message AddDownloadResponse {
+  // The download's ID in the client: a torrent's info hash in upper case,
+  // or the client's ID of an NZB.
+  string download_id = 1;
+}
+
+message ListDownloadsRequest {
+  // The clients to list; empty for every enabled client.
+  repeated string client_ids = 1;
+}
+
+message ListDownloadsResponse {
+  repeated Download downloads = 1;
+  // What each listed client tells of itself.
+  repeated DownloadClientStatus statuses = 2;
+  // The clients that failed, which the downloads leave out.
+  repeated DownloadClientFailure failures = 3;
+}
+
+// Download is a download in a client.
+message Download {
+  string client_id = 1;
+  // The ID AddDownload returned.
+  string id = 2;
+  string title = 3;
+  // The client's category, label or folder the download is in.
+  string category = 4;
+  // The kind whose category the download is in; unspecified when the
+  // categories of movies and series are one.
+  DownloadKind kind = 5;
+  // In bytes.
+  int64 total_size = 6;
+  int64 remaining_size = 7;
+  // Unset when unknown.
+  google.protobuf.Duration remaining_time = 8;
+  // A torrent's ratio of upload to download; unset when unknown.
+  double seed_ratio = 9;
+  // Where the download's files are, as the client sees them.
+  string output_path = 10;
+  // What the client says of the download, such as why it failed.
+  string message = 11;
+  DownloadStatus status = 12;
+  // The client cannot read the download, as for encrypted archives.
+  bool encrypted = 13;
+  // The download's files may be moved, not only copied, once imported.
+  bool can_move_files = 14;
+  // The download may be removed from the client, once it is done seeding.
+  bool can_be_removed = 15;
+  // The client has a category for imported downloads.
+  bool has_post_import_category = 16;
+}
+
+// DownloadStatus is the state of a download, as Radarr's
+// DownloadItemStatus.
+enum DownloadStatus {
+  DOWNLOAD_STATUS_UNSPECIFIED = 0;
+  DOWNLOAD_STATUS_QUEUED = 1;
+  DOWNLOAD_STATUS_PAUSED = 2;
+  DOWNLOAD_STATUS_DOWNLOADING = 3;
+  DOWNLOAD_STATUS_COMPLETED = 4;
+  DOWNLOAD_STATUS_FAILED = 5;
+  // Downloading, but the client warns of something, such as a stalled
+  // torrent.
+  DOWNLOAD_STATUS_WARNING = 6;
+}
+
+// DownloadClientStatus is what a client tells of itself, as Radarr's
+// DownloadClientInfo.
+message DownloadClientStatus {
+  string client_id = 1;
+  // The client runs on the server's machine.
+  bool is_localhost = 2;
+  // How the client sorts completed downloads into folders, as SABnzbd's
+  // and NZBGet's sorting do, which imports cannot follow; empty for none.
+  string sorting_mode = 3;
+  // The client removes completed downloads itself.
+  bool removes_completed_downloads = 4;
+  // The folders completed downloads end up in, as the client sees them.
+  repeated string output_root_folders = 5;
+}
+
+// DownloadClientFailure is a client that failed.
+message DownloadClientFailure {
+  string client_id = 1;
+  string message = 2;
+  // Set when the client is left out until then.
+  google.protobuf.Timestamp disabled_until = 3;
+}
+
+message GetDownloadRequest {
+  string client_id = 1 [(buf.validate.field).required = true];
+  string download_id = 2 [(buf.validate.field).required = true];
+}
+
+message GetDownloadResponse {
+  Download download = 1;
+}
+
+message RemoveDownloadRequest {
+  string client_id = 1 [(buf.validate.field).required = true];
+  string download_id = 2 [(buf.validate.field).required = true];
+  // Delete the download's files too.
+  bool delete_data = 3;
+}
+
+message RemoveDownloadResponse {}
+
+message MarkDownloadImportedRequest {
+  string client_id = 1 [(buf.validate.field).required = true];
+  string download_id = 2 [(buf.validate.field).required = true];
+}
+
+message MarkDownloadImportedResponse {}

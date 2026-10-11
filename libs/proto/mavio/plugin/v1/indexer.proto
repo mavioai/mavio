@@ -4,6 +4,7 @@ package mavio.plugin.v1;
 
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+import "mavio/plugin/v1/settings.proto";
 
 // IndexerProviderService searches indexers, the sites that list releases
 // as torrents or NZBs. The provider implements kinds of indexers, its
@@ -52,7 +53,7 @@ message IndexerDefinition {
   // The site's addresses, the first by default.
   repeated string links = 7;
   // The settings an indexer of the definition takes.
-  repeated IndexerField fields = 8;
+  repeated SettingField fields = 8;
 }
 
 // DownloadProtocol is how a release is downloaded.
@@ -71,47 +72,6 @@ enum IndexerPrivacy {
   INDEXER_PRIVACY_SEMI_PRIVATE = 2;
   // Members only, by invitation.
   INDEXER_PRIVACY_PRIVATE = 3;
-}
-
-// IndexerField is a setting of an indexer.
-message IndexerField {
-  // The setting's key in the indexer's settings.
-  string name = 1;
-  string label = 2;
-  string help_text = 3;
-  IndexerFieldType type = 4;
-  // The default value as JSON; empty for none.
-  string default_json = 5;
-  // The choices of a select.
-  repeated IndexerFieldOption options = 6;
-  bool advanced = 7;
-  // A secret, such as a password, an API key or a cookie, which is never
-  // shown back.
-  bool secret = 8;
-}
-
-// IndexerFieldType is how a setting is entered.
-enum IndexerFieldType {
-  INDEXER_FIELD_TYPE_UNSPECIFIED = 0;
-  // A string.
-  INDEXER_FIELD_TYPE_TEXT = 1;
-  // A number.
-  INDEXER_FIELD_TYPE_NUMBER = 2;
-  // A boolean.
-  INDEXER_FIELD_TYPE_CHECKBOX = 3;
-  // One of the options' values.
-  INDEXER_FIELD_TYPE_SELECT = 4;
-  // Any of the options' values, as a list.
-  INDEXER_FIELD_TYPE_MULTI_SELECT = 5;
-  // Text shown to administrators, not a setting.
-  INDEXER_FIELD_TYPE_INFO = 6;
-}
-
-// IndexerFieldOption is a choice of a select.
-message IndexerFieldOption {
-  // As JSON.
-  string value_json = 1;
-  string label = 2;
 }
 
 message ListIndexersRequest {}

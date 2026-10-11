@@ -389,10 +389,10 @@ func TestCardigannDefinitions(t *testing.T) {
 	}{
 		{"Privacy", def.GetPrivacy(), pluginv1.IndexerPrivacy_INDEXER_PRIVACY_PUBLIC},
 		{"fields", names, []string{"base_url", "sort", "info_cookie"}},
-		{"sort type", def.GetFields()[1].GetType(), pluginv1.IndexerFieldType_INDEXER_FIELD_TYPE_SELECT},
+		{"sort type", def.GetFields()[1].GetType(), pluginv1.SettingFieldType_SETTING_FIELD_TYPE_SELECT},
 		{"sort default", def.GetFields()[1].GetDefaultJson(), `"seeders"`},
 		{"sort options", len(def.GetFields()[1].GetOptions()), 2},
-		{"info type", def.GetFields()[2].GetType(), pluginv1.IndexerFieldType_INDEXER_FIELD_TYPE_INFO},
+		{"info type", def.GetFields()[2].GetType(), pluginv1.SettingFieldType_SETTING_FIELD_TYPE_INFO},
 	} {
 		if !equal(c.got, c.want) {
 			t.Errorf("%s = %v, want = %v", c.name, c.got, c.want)
