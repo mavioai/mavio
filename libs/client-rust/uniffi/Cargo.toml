@@ -9,17 +9,14 @@ publish.workspace = true
 
 [lib]
 name = "mavio"
-# A static library for the Apple XCFramework, a shared one for Android.
-crate-type = ["lib", "staticlib", "cdylib"]
-
-[[bin]]
-# Generates the Swift and Kotlin sources from the built library.
-name = "uniffi-bindgen"
-path = "src/bin/uniffi-bindgen.rs"
+# A shared library, for the Apple frameworks and for Android: it keeps its
+# Rust standard library to itself, which a static library would clash with
+# the other Rust static libraries of an app (AetherEngine's LibDovi).
+crate-type = ["lib", "cdylib"]
 
 [dependencies]
 mavio-core = { path = "../core" }
-uniffi = { workspace = true, features = ["cli"] }
+uniffi.workspace = true
 
 [lints]
 workspace = true
