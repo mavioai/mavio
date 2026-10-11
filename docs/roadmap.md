@@ -568,6 +568,7 @@ flowchart TD
     - [ ] On the user's devices: the picture inside Picture in Picture on an iPhone or iPad, HDR10 and display criteria on an Apple TV, and a Dolby Vision source
   - [ ] MyGo's video element, with HDR10 on Windows: deferred until a Windows machine is available, before the Windows and Linux app starts
 - [ ] Skeletons of the apps and libraries
+  - [x] `libs/client-rust`: `mavio-core`, and `mavio-uniffi`, whose `uniffi-bindgen` generates the Swift module `MavioCore` and the Kotlin package `dev.mavio.core`; the C ABI and its messages (`capi`, `proto`) come with the Windows and Linux app, their only user
 - [ ] `libs/client-rust`: servers and sign-in, the event stream, the offline store, playback reporting, downloads, screen state, the merging of several servers; the Swift, Kotlin and Go bindings
 - [ ] Web UI (`apps/web`, `libs/client-ts`)
 - [ ] iPhone and iPad app (`apps/ios`, `libs/apple`)

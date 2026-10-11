@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["api"]
+members = ["api", "core", "uniffi"]
 
 [workspace.package]
 version = "0.0.0"
@@ -13,6 +13,7 @@ publish = false
 buffa = "0.9.2"
 buffa-types = "0.9.2"
 connectrpc = { version = "0.9.1", default-features = false }
+uniffi = "0.32.2"
 
 [workspace.lints.rust]
 unsafe_code = "deny"

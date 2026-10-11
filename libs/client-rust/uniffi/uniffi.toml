@@ -1,0 +1,7 @@
+# Names of the generated Swift and Kotlin APIs.
+[bindings.swift]
+module_name = "MavioCore"
+ffi_module_name = "MavioCoreFFI"
+
+[bindings.kotlin]
+package_name = "dev.mavio.core"
