@@ -20,9 +20,37 @@ export type MessageKey =
   | 'home.continueWatching'
   | 'home.nextUp'
   | 'home.latest'
+  | 'home.recentlyReleased'
+  | 'home.recentlyAired'
+  | 'home.topRated'
+  | 'home.topUnplayed'
+  | 'home.startWatching'
+  | 'home.rediscover'
+  | 'home.becauseYouWatched'
+  | 'home.becauseYouLike'
+  | 'home.moreInGenre'
+  | 'home.starring'
+  | 'home.directedBy'
+  | 'home.availableRequests'
+  | 'home.trending'
+  | 'home.offline'
+  | 'home.serverUnreachable'
+  | 'home.more'
   | 'library.sort'
   | 'library.filter'
   | 'library.itemCount'
+  | 'library.recommended'
+  | 'library.all'
+  | 'library.sortName'
+  | 'library.sortDateAdded'
+  | 'library.sortReleased'
+  | 'library.sortRating'
+  | 'library.sortLastPlayed'
+  | 'library.sortRandom'
+  | 'library.filterAll'
+  | 'library.filterUnplayed'
+  | 'library.filterPlayed'
+  | 'library.filterFavorites'
   | 'item.play'
   | 'item.resume'
   | 'item.favorite'
@@ -33,6 +61,13 @@ export type MessageKey =
   | 'item.episodeNumber'
   | 'item.minutesLeft'
   | 'item.cast'
+  | 'item.seasons'
+  | 'item.episodes'
+  | 'item.tracks'
+  | 'item.similar'
+  | 'item.versions'
+  | 'item.onServer'
+  | 'item.unplayedCount'
   | 'player.play'
   | 'player.pause'
   | 'player.seekBack'
@@ -46,6 +81,11 @@ export type MessageKey =
   | 'player.pictureInPicture'
   | 'player.chapters'
   | 'player.nextEpisode'
+  | 'player.back'
+  | 'player.openExternal'
+  | 'player.copyLink'
+  | 'player.mute'
+  | 'player.unmute'
   | 'state.loading'
   | 'state.empty'
   | 'state.error'
@@ -58,7 +98,25 @@ export type MessageKey =
   | 'auth.username'
   | 'auth.password'
   | 'auth.quickConnect'
-  | 'auth.quickConnectCode';
+  | 'auth.quickConnectCode'
+  | 'auth.welcome'
+  | 'auth.setUp'
+  | 'auth.setUpMessage'
+  | 'auth.createAccount'
+  | 'auth.addServer'
+  | 'auth.signOut'
+  | 'auth.signedOut'
+  | 'auth.signedInAs'
+  | 'auth.servers'
+  | 'auth.authorizeDevice'
+  | 'auth.authorize'
+  | 'auth.authorized'
+  | 'auth.notMavio'
+  | 'auth.wrongPassword'
+  | 'auth.moveUp'
+  | 'auth.moveDown'
+  | 'search.placeholder'
+  | 'search.noResults';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -71,9 +129,37 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "home.continueWatching": "Continue Watching",
     "home.nextUp": "Next Up",
     "home.latest": "Latest in {library}",
+    "home.recentlyReleased": "Recently Released in {library}",
+    "home.recentlyAired": "Recently Aired in {library}",
+    "home.topRated": "Top Rated in {library}",
+    "home.topUnplayed": "Top Unplayed in {library}",
+    "home.startWatching": "Start Watching in {library}",
+    "home.rediscover": "Rediscover in {library}",
+    "home.becauseYouWatched": "Because You Watched {title}",
+    "home.becauseYouLike": "Because You Like {title}",
+    "home.moreInGenre": "More in {genre}",
+    "home.starring": "Starring {name}",
+    "home.directedBy": "Directed by {name}",
+    "home.availableRequests": "Now Available",
+    "home.trending": "Trending",
+    "home.offline": "Offline",
+    "home.serverUnreachable": "{server} is unreachable",
+    "home.more": "See All",
     "library.sort": "Sort",
     "library.filter": "Filter",
     "library.itemCount": "{count, plural, one {# item} other {# items}}",
+    "library.recommended": "Recommended",
+    "library.all": "Library",
+    "library.sortName": "Name",
+    "library.sortDateAdded": "Date Added",
+    "library.sortReleased": "Release Date",
+    "library.sortRating": "Rating",
+    "library.sortLastPlayed": "Last Played",
+    "library.sortRandom": "Random",
+    "library.filterAll": "All",
+    "library.filterUnplayed": "Unplayed",
+    "library.filterPlayed": "Played",
+    "library.filterFavorites": "Favorites",
     "item.play": "Play",
     "item.resume": "Resume",
     "item.favorite": "Favorite",
@@ -84,6 +170,13 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "item.episodeNumber": "Season {season}, Episode {episode}",
     "item.minutesLeft": "{count, plural, one {# minute left} other {# minutes left}}",
     "item.cast": "Cast & Crew",
+    "item.seasons": "Seasons",
+    "item.episodes": "Episodes",
+    "item.tracks": "Tracks",
+    "item.similar": "More Like This",
+    "item.versions": "Versions",
+    "item.onServer": "On {server}",
+    "item.unplayedCount": "{count, plural, one {# unplayed} other {# unplayed}}",
     "player.play": "Play",
     "player.pause": "Pause",
     "player.seekBack": "Back {count, plural, one {# second} other {# seconds}}",
@@ -97,6 +190,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.pictureInPicture": "Picture in Picture",
     "player.chapters": "Chapters",
     "player.nextEpisode": "Next Episode",
+    "player.back": "Back",
+    "player.openExternal": "Open in External Player",
+    "player.copyLink": "Copy Stream Link",
+    "player.mute": "Mute",
+    "player.unmute": "Unmute",
     "state.loading": "Loading…",
     "state.empty": "Nothing here yet",
     "state.error": "Something went wrong",
@@ -109,7 +207,25 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.username": "Username",
     "auth.password": "Password",
     "auth.quickConnect": "Use Quick Connect",
-    "auth.quickConnectCode": "Enter {code} on a device that is signed in"
+    "auth.quickConnectCode": "Enter {code} on a device that is signed in",
+    "auth.welcome": "Welcome to Mavio",
+    "auth.setUp": "Set Up {server}",
+    "auth.setUpMessage": "Create the administrator account of this server.",
+    "auth.createAccount": "Create Account",
+    "auth.addServer": "Add Server",
+    "auth.signOut": "Sign Out",
+    "auth.signedOut": "Signed out",
+    "auth.signedInAs": "Signed in as {name}",
+    "auth.servers": "Servers",
+    "auth.authorizeDevice": "Authorize a Device",
+    "auth.authorize": "Authorize",
+    "auth.authorized": "The device is signed in.",
+    "auth.notMavio": "This address is not a Mavio server.",
+    "auth.wrongPassword": "The username or password is incorrect.",
+    "auth.moveUp": "Move Up",
+    "auth.moveDown": "Move Down",
+    "search.placeholder": "Search movies, shows and more",
+    "search.noResults": "No results"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -120,9 +236,37 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "home.continueWatching": "继续观看",
     "home.nextUp": "下一集",
     "home.latest": "{library}最新内容",
+    "home.recentlyReleased": "{library}最近发行",
+    "home.recentlyAired": "{library}最近播出",
+    "home.topRated": "{library}高分内容",
+    "home.topUnplayed": "{library}未看高分",
+    "home.startWatching": "{library}开始追剧",
+    "home.rediscover": "{library}重温",
+    "home.becauseYouWatched": "因为你看过{title}",
+    "home.becauseYouLike": "因为你喜欢{title}",
+    "home.moreInGenre": "更多{genre}",
+    "home.starring": "{name}主演",
+    "home.directedBy": "{name}执导",
+    "home.availableRequests": "你请求的内容已上线",
+    "home.trending": "热门",
+    "home.offline": "离线",
+    "home.serverUnreachable": "无法连接{server}",
+    "home.more": "查看全部",
     "library.sort": "排序",
     "library.filter": "筛选",
     "library.itemCount": "{count, plural, other {# 个项目}}",
+    "library.recommended": "推荐",
+    "library.all": "全部",
+    "library.sortName": "名称",
+    "library.sortDateAdded": "添加日期",
+    "library.sortReleased": "发行日期",
+    "library.sortRating": "评分",
+    "library.sortLastPlayed": "最近播放",
+    "library.sortRandom": "随机",
+    "library.filterAll": "全部",
+    "library.filterUnplayed": "未看",
+    "library.filterPlayed": "已看",
+    "library.filterFavorites": "收藏",
     "item.play": "播放",
     "item.resume": "继续播放",
     "item.favorite": "收藏",
@@ -133,6 +277,13 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "item.episodeNumber": "第 {season} 季第 {episode} 集",
     "item.minutesLeft": "{count, plural, other {剩余 # 分钟}}",
     "item.cast": "演职人员",
+    "item.seasons": "季",
+    "item.episodes": "集",
+    "item.tracks": "曲目",
+    "item.similar": "相似内容",
+    "item.versions": "版本",
+    "item.onServer": "位于{server}",
+    "item.unplayedCount": "{count, plural, other {# 集未看}}",
     "player.play": "播放",
     "player.pause": "暂停",
     "player.seekBack": "{count, plural, other {后退 # 秒}}",
@@ -146,6 +297,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.pictureInPicture": "画中画",
     "player.chapters": "章节",
     "player.nextEpisode": "下一集",
+    "player.back": "返回",
+    "player.openExternal": "在外部播放器中打开",
+    "player.copyLink": "复制串流链接",
+    "player.mute": "静音",
+    "player.unmute": "取消静音",
     "state.loading": "正在载入…",
     "state.empty": "这里还没有内容",
     "state.error": "出了点问题",
@@ -158,6 +314,24 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.username": "用户名",
     "auth.password": "密码",
     "auth.quickConnect": "使用 Quick Connect",
-    "auth.quickConnectCode": "在已登录的设备上输入 {code}"
+    "auth.quickConnectCode": "在已登录的设备上输入 {code}",
+    "auth.welcome": "欢迎使用 Mavio",
+    "auth.setUp": "设置{server}",
+    "auth.setUpMessage": "创建此服务器的管理员账户。",
+    "auth.createAccount": "创建账户",
+    "auth.addServer": "添加服务器",
+    "auth.signOut": "退出登录",
+    "auth.signedOut": "已退出登录",
+    "auth.signedInAs": "已登录为 {name}",
+    "auth.servers": "服务器",
+    "auth.authorizeDevice": "授权设备",
+    "auth.authorize": "授权",
+    "auth.authorized": "设备已登录。",
+    "auth.notMavio": "此地址不是 Mavio 服务器。",
+    "auth.wrongPassword": "用户名或密码不正确。",
+    "auth.moveUp": "上移",
+    "auth.moveDown": "下移",
+    "search.placeholder": "搜索电影、剧集等",
+    "search.noResults": "没有结果"
   }
 };
