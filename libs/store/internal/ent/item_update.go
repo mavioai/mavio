@@ -13,7 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
@@ -21,10 +24,12 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
+	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
+	"github.com/mavioai/mavio/libs/store/internal/ent/wanted"
 )
 
 // ItemUpdate is the builder for updating Item entities.
@@ -1237,6 +1242,85 @@ func (_u *ItemUpdate) AddLinkedIn(v ...*ItemLink) *ItemUpdate {
 	return _u.AddLinkedInIDs(ids...)
 }
 
+// SetWantedID sets the "wanted" edge to the Wanted entity by ID.
+func (_u *ItemUpdate) SetWantedID(id core.ID) *ItemUpdate {
+	_u.mutation.SetWantedID(id)
+	return _u
+}
+
+// SetNillableWantedID sets the "wanted" edge to the Wanted entity by ID if the given value is not nil.
+func (_u *ItemUpdate) SetNillableWantedID(id *core.ID) *ItemUpdate {
+	if id != nil {
+		_u = _u.SetWantedID(*id)
+	}
+	return _u
+}
+
+// SetWanted sets the "wanted" edge to the Wanted entity.
+func (_u *ItemUpdate) SetWanted(v *Wanted) *ItemUpdate {
+	return _u.SetWantedID(v.ID)
+}
+
+// AddDownloadIDs adds the "downloads" edge to the Download entity by IDs.
+func (_u *ItemUpdate) AddDownloadIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddDownloadIDs(ids...)
+	return _u
+}
+
+// AddDownloads adds the "downloads" edges to the Download entity.
+func (_u *ItemUpdate) AddDownloads(v ...*Download) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDownloadIDs(ids...)
+}
+
+// AddHistoryIDs adds the "history" edge to the HistoryEvent entity by IDs.
+func (_u *ItemUpdate) AddHistoryIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddHistoryIDs(ids...)
+	return _u
+}
+
+// AddHistory adds the "history" edges to the HistoryEvent entity.
+func (_u *ItemUpdate) AddHistory(v ...*HistoryEvent) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddHistoryIDs(ids...)
+}
+
+// AddBlocklistIDs adds the "blocklist" edge to the BlocklistEntry entity by IDs.
+func (_u *ItemUpdate) AddBlocklistIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddBlocklistIDs(ids...)
+	return _u
+}
+
+// AddBlocklist adds the "blocklist" edges to the BlocklistEntry entity.
+func (_u *ItemUpdate) AddBlocklist(v ...*BlocklistEntry) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddBlocklistIDs(ids...)
+}
+
+// AddPendingReleaseIDs adds the "pending_releases" edge to the PendingRelease entity by IDs.
+func (_u *ItemUpdate) AddPendingReleaseIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddPendingReleaseIDs(ids...)
+	return _u
+}
+
+// AddPendingReleases adds the "pending_releases" edges to the PendingRelease entity.
+func (_u *ItemUpdate) AddPendingReleases(v ...*PendingRelease) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPendingReleaseIDs(ids...)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_u *ItemUpdate) Mutation() *ItemMutation {
 	return _u.mutation
@@ -1495,6 +1579,96 @@ func (_u *ItemUpdate) RemoveLinkedIn(v ...*ItemLink) *ItemUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLinkedInIDs(ids...)
+}
+
+// ClearWanted clears the "wanted" edge to the Wanted entity.
+func (_u *ItemUpdate) ClearWanted() *ItemUpdate {
+	_u.mutation.ClearWanted()
+	return _u
+}
+
+// ClearDownloads clears all "downloads" edges to the Download entity.
+func (_u *ItemUpdate) ClearDownloads() *ItemUpdate {
+	_u.mutation.ClearDownloads()
+	return _u
+}
+
+// RemoveDownloadIDs removes the "downloads" edge to Download entities by IDs.
+func (_u *ItemUpdate) RemoveDownloadIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveDownloadIDs(ids...)
+	return _u
+}
+
+// RemoveDownloads removes "downloads" edges to Download entities.
+func (_u *ItemUpdate) RemoveDownloads(v ...*Download) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDownloadIDs(ids...)
+}
+
+// ClearHistory clears all "history" edges to the HistoryEvent entity.
+func (_u *ItemUpdate) ClearHistory() *ItemUpdate {
+	_u.mutation.ClearHistory()
+	return _u
+}
+
+// RemoveHistoryIDs removes the "history" edge to HistoryEvent entities by IDs.
+func (_u *ItemUpdate) RemoveHistoryIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveHistoryIDs(ids...)
+	return _u
+}
+
+// RemoveHistory removes "history" edges to HistoryEvent entities.
+func (_u *ItemUpdate) RemoveHistory(v ...*HistoryEvent) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveHistoryIDs(ids...)
+}
+
+// ClearBlocklist clears all "blocklist" edges to the BlocklistEntry entity.
+func (_u *ItemUpdate) ClearBlocklist() *ItemUpdate {
+	_u.mutation.ClearBlocklist()
+	return _u
+}
+
+// RemoveBlocklistIDs removes the "blocklist" edge to BlocklistEntry entities by IDs.
+func (_u *ItemUpdate) RemoveBlocklistIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveBlocklistIDs(ids...)
+	return _u
+}
+
+// RemoveBlocklist removes "blocklist" edges to BlocklistEntry entities.
+func (_u *ItemUpdate) RemoveBlocklist(v ...*BlocklistEntry) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveBlocklistIDs(ids...)
+}
+
+// ClearPendingReleases clears all "pending_releases" edges to the PendingRelease entity.
+func (_u *ItemUpdate) ClearPendingReleases() *ItemUpdate {
+	_u.mutation.ClearPendingReleases()
+	return _u
+}
+
+// RemovePendingReleaseIDs removes the "pending_releases" edge to PendingRelease entities by IDs.
+func (_u *ItemUpdate) RemovePendingReleaseIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemovePendingReleaseIDs(ids...)
+	return _u
+}
+
+// RemovePendingReleases removes "pending_releases" edges to PendingRelease entities.
+func (_u *ItemUpdate) RemovePendingReleases(v ...*PendingRelease) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePendingReleaseIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -2435,6 +2609,215 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.WantedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.WantedTable,
+			Columns: []string{item.WantedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wanted.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.WantedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.WantedTable,
+			Columns: []string{item.WantedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wanted.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DownloadsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.DownloadsTable,
+			Columns: []string{item.DownloadsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(download.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDownloadsIDs(); len(nodes) > 0 && !_u.mutation.DownloadsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.DownloadsTable,
+			Columns: []string{item.DownloadsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(download.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DownloadsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.DownloadsTable,
+			Columns: []string{item.DownloadsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(download.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.HistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.HistoryTable,
+			Columns: []string{item.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(historyevent.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedHistoryIDs(); len(nodes) > 0 && !_u.mutation.HistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.HistoryTable,
+			Columns: []string{item.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(historyevent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.HistoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.HistoryTable,
+			Columns: []string{item.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(historyevent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.BlocklistCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.BlocklistTable,
+			Columns: []string{item.BlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedBlocklistIDs(); len(nodes) > 0 && !_u.mutation.BlocklistCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.BlocklistTable,
+			Columns: []string{item.BlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.BlocklistIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.BlocklistTable,
+			Columns: []string{item.BlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PendingReleasesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.PendingReleasesTable,
+			Columns: []string{item.PendingReleasesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPendingReleasesIDs(); len(nodes) > 0 && !_u.mutation.PendingReleasesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.PendingReleasesTable,
+			Columns: []string{item.PendingReleasesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PendingReleasesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.PendingReleasesTable,
+			Columns: []string{item.PendingReleasesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -3660,6 +4043,85 @@ func (_u *ItemUpdateOne) AddLinkedIn(v ...*ItemLink) *ItemUpdateOne {
 	return _u.AddLinkedInIDs(ids...)
 }
 
+// SetWantedID sets the "wanted" edge to the Wanted entity by ID.
+func (_u *ItemUpdateOne) SetWantedID(id core.ID) *ItemUpdateOne {
+	_u.mutation.SetWantedID(id)
+	return _u
+}
+
+// SetNillableWantedID sets the "wanted" edge to the Wanted entity by ID if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableWantedID(id *core.ID) *ItemUpdateOne {
+	if id != nil {
+		_u = _u.SetWantedID(*id)
+	}
+	return _u
+}
+
+// SetWanted sets the "wanted" edge to the Wanted entity.
+func (_u *ItemUpdateOne) SetWanted(v *Wanted) *ItemUpdateOne {
+	return _u.SetWantedID(v.ID)
+}
+
+// AddDownloadIDs adds the "downloads" edge to the Download entity by IDs.
+func (_u *ItemUpdateOne) AddDownloadIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddDownloadIDs(ids...)
+	return _u
+}
+
+// AddDownloads adds the "downloads" edges to the Download entity.
+func (_u *ItemUpdateOne) AddDownloads(v ...*Download) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDownloadIDs(ids...)
+}
+
+// AddHistoryIDs adds the "history" edge to the HistoryEvent entity by IDs.
+func (_u *ItemUpdateOne) AddHistoryIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddHistoryIDs(ids...)
+	return _u
+}
+
+// AddHistory adds the "history" edges to the HistoryEvent entity.
+func (_u *ItemUpdateOne) AddHistory(v ...*HistoryEvent) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddHistoryIDs(ids...)
+}
+
+// AddBlocklistIDs adds the "blocklist" edge to the BlocklistEntry entity by IDs.
+func (_u *ItemUpdateOne) AddBlocklistIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddBlocklistIDs(ids...)
+	return _u
+}
+
+// AddBlocklist adds the "blocklist" edges to the BlocklistEntry entity.
+func (_u *ItemUpdateOne) AddBlocklist(v ...*BlocklistEntry) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddBlocklistIDs(ids...)
+}
+
+// AddPendingReleaseIDs adds the "pending_releases" edge to the PendingRelease entity by IDs.
+func (_u *ItemUpdateOne) AddPendingReleaseIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddPendingReleaseIDs(ids...)
+	return _u
+}
+
+// AddPendingReleases adds the "pending_releases" edges to the PendingRelease entity.
+func (_u *ItemUpdateOne) AddPendingReleases(v ...*PendingRelease) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPendingReleaseIDs(ids...)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_u *ItemUpdateOne) Mutation() *ItemMutation {
 	return _u.mutation
@@ -3918,6 +4380,96 @@ func (_u *ItemUpdateOne) RemoveLinkedIn(v ...*ItemLink) *ItemUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLinkedInIDs(ids...)
+}
+
+// ClearWanted clears the "wanted" edge to the Wanted entity.
+func (_u *ItemUpdateOne) ClearWanted() *ItemUpdateOne {
+	_u.mutation.ClearWanted()
+	return _u
+}
+
+// ClearDownloads clears all "downloads" edges to the Download entity.
+func (_u *ItemUpdateOne) ClearDownloads() *ItemUpdateOne {
+	_u.mutation.ClearDownloads()
+	return _u
+}
+
+// RemoveDownloadIDs removes the "downloads" edge to Download entities by IDs.
+func (_u *ItemUpdateOne) RemoveDownloadIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveDownloadIDs(ids...)
+	return _u
+}
+
+// RemoveDownloads removes "downloads" edges to Download entities.
+func (_u *ItemUpdateOne) RemoveDownloads(v ...*Download) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDownloadIDs(ids...)
+}
+
+// ClearHistory clears all "history" edges to the HistoryEvent entity.
+func (_u *ItemUpdateOne) ClearHistory() *ItemUpdateOne {
+	_u.mutation.ClearHistory()
+	return _u
+}
+
+// RemoveHistoryIDs removes the "history" edge to HistoryEvent entities by IDs.
+func (_u *ItemUpdateOne) RemoveHistoryIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveHistoryIDs(ids...)
+	return _u
+}
+
+// RemoveHistory removes "history" edges to HistoryEvent entities.
+func (_u *ItemUpdateOne) RemoveHistory(v ...*HistoryEvent) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveHistoryIDs(ids...)
+}
+
+// ClearBlocklist clears all "blocklist" edges to the BlocklistEntry entity.
+func (_u *ItemUpdateOne) ClearBlocklist() *ItemUpdateOne {
+	_u.mutation.ClearBlocklist()
+	return _u
+}
+
+// RemoveBlocklistIDs removes the "blocklist" edge to BlocklistEntry entities by IDs.
+func (_u *ItemUpdateOne) RemoveBlocklistIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveBlocklistIDs(ids...)
+	return _u
+}
+
+// RemoveBlocklist removes "blocklist" edges to BlocklistEntry entities.
+func (_u *ItemUpdateOne) RemoveBlocklist(v ...*BlocklistEntry) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveBlocklistIDs(ids...)
+}
+
+// ClearPendingReleases clears all "pending_releases" edges to the PendingRelease entity.
+func (_u *ItemUpdateOne) ClearPendingReleases() *ItemUpdateOne {
+	_u.mutation.ClearPendingReleases()
+	return _u
+}
+
+// RemovePendingReleaseIDs removes the "pending_releases" edge to PendingRelease entities by IDs.
+func (_u *ItemUpdateOne) RemovePendingReleaseIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemovePendingReleaseIDs(ids...)
+	return _u
+}
+
+// RemovePendingReleases removes "pending_releases" edges to PendingRelease entities.
+func (_u *ItemUpdateOne) RemovePendingReleases(v ...*PendingRelease) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePendingReleaseIDs(ids...)
 }
 
 // Where appends a list predicates to the ItemUpdate builder.
@@ -4888,6 +5440,215 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.WantedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.WantedTable,
+			Columns: []string{item.WantedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wanted.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.WantedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.WantedTable,
+			Columns: []string{item.WantedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wanted.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DownloadsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.DownloadsTable,
+			Columns: []string{item.DownloadsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(download.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDownloadsIDs(); len(nodes) > 0 && !_u.mutation.DownloadsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.DownloadsTable,
+			Columns: []string{item.DownloadsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(download.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DownloadsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.DownloadsTable,
+			Columns: []string{item.DownloadsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(download.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.HistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.HistoryTable,
+			Columns: []string{item.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(historyevent.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedHistoryIDs(); len(nodes) > 0 && !_u.mutation.HistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.HistoryTable,
+			Columns: []string{item.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(historyevent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.HistoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.HistoryTable,
+			Columns: []string{item.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(historyevent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.BlocklistCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.BlocklistTable,
+			Columns: []string{item.BlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedBlocklistIDs(); len(nodes) > 0 && !_u.mutation.BlocklistCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.BlocklistTable,
+			Columns: []string{item.BlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.BlocklistIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.BlocklistTable,
+			Columns: []string{item.BlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PendingReleasesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.PendingReleasesTable,
+			Columns: []string{item.PendingReleasesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPendingReleasesIDs(); len(nodes) > 0 && !_u.mutation.PendingReleasesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.PendingReleasesTable,
+			Columns: []string{item.PendingReleasesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PendingReleasesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.PendingReleasesTable,
+			Columns: []string{item.PendingReleasesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -45,6 +45,18 @@ func (f AuthSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuthSessionMutation", m)
 }
 
+// The BlocklistEntryFunc type is an adapter to allow the use of ordinary
+// function as BlocklistEntry mutator.
+type BlocklistEntryFunc func(context.Context, *ent.BlocklistEntryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BlocklistEntryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BlocklistEntryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BlocklistEntryMutation", m)
+}
+
 // The CreditFunc type is an adapter to allow the use of ordinary
 // function as Credit mutator.
 type CreditFunc func(context.Context, *ent.CreditMutation) (ent.Value, error)
@@ -55,6 +67,30 @@ func (f CreditFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreditMutation", m)
+}
+
+// The CustomFormatFunc type is an adapter to allow the use of ordinary
+// function as CustomFormat mutator.
+type CustomFormatFunc func(context.Context, *ent.CustomFormatMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CustomFormatFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CustomFormatMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CustomFormatMutation", m)
+}
+
+// The DelayProfileFunc type is an adapter to allow the use of ordinary
+// function as DelayProfile mutator.
+type DelayProfileFunc func(context.Context, *ent.DelayProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DelayProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DelayProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DelayProfileMutation", m)
 }
 
 // The DisplayPreferencesFunc type is an adapter to allow the use of ordinary
@@ -69,6 +105,18 @@ func (f DisplayPreferencesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DisplayPreferencesMutation", m)
 }
 
+// The DownloadFunc type is an adapter to allow the use of ordinary
+// function as Download mutator.
+type DownloadFunc func(context.Context, *ent.DownloadMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DownloadFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DownloadMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DownloadMutation", m)
+}
+
 // The FolderStateFunc type is an adapter to allow the use of ordinary
 // function as FolderState mutator.
 type FolderStateFunc func(context.Context, *ent.FolderStateMutation) (ent.Value, error)
@@ -79,6 +127,18 @@ func (f FolderStateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FolderStateMutation", m)
+}
+
+// The HistoryEventFunc type is an adapter to allow the use of ordinary
+// function as HistoryEvent mutator.
+type HistoryEventFunc func(context.Context, *ent.HistoryEventMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f HistoryEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.HistoryEventMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.HistoryEventMutation", m)
 }
 
 // The ImageFunc type is an adapter to allow the use of ordinary
@@ -177,6 +237,18 @@ func (f MediaSourceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MediaSourceMutation", m)
 }
 
+// The PendingReleaseFunc type is an adapter to allow the use of ordinary
+// function as PendingRelease mutator.
+type PendingReleaseFunc func(context.Context, *ent.PendingReleaseMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PendingReleaseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PendingReleaseMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PendingReleaseMutation", m)
+}
+
 // The PersonFunc type is an adapter to allow the use of ordinary
 // function as Person mutator.
 type PersonFunc func(context.Context, *ent.PersonMutation) (ent.Value, error)
@@ -199,6 +271,54 @@ func (f PluginConfigFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PluginConfigMutation", m)
+}
+
+// The QualityDefinitionFunc type is an adapter to allow the use of ordinary
+// function as QualityDefinition mutator.
+type QualityDefinitionFunc func(context.Context, *ent.QualityDefinitionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f QualityDefinitionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.QualityDefinitionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.QualityDefinitionMutation", m)
+}
+
+// The QualityProfileFunc type is an adapter to allow the use of ordinary
+// function as QualityProfile mutator.
+type QualityProfileFunc func(context.Context, *ent.QualityProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f QualityProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.QualityProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.QualityProfileMutation", m)
+}
+
+// The ReleaseProfileFunc type is an adapter to allow the use of ordinary
+// function as ReleaseProfile mutator.
+type ReleaseProfileFunc func(context.Context, *ent.ReleaseProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ReleaseProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ReleaseProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ReleaseProfileMutation", m)
+}
+
+// The RemotePathMappingFunc type is an adapter to allow the use of ordinary
+// function as RemotePathMapping mutator.
+type RemotePathMappingFunc func(context.Context, *ent.RemotePathMappingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RemotePathMappingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RemotePathMappingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RemotePathMappingMutation", m)
 }
 
 // The SettingFunc type is an adapter to allow the use of ordinary
@@ -247,6 +367,18 @@ func (f UserDataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserDataMutation", m)
+}
+
+// The WantedFunc type is an adapter to allow the use of ordinary
+// function as Wanted mutator.
+type WantedFunc func(context.Context, *ent.WantedMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WantedFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.WantedMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WantedMutation", m)
 }
 
 // Condition is a hook condition function.

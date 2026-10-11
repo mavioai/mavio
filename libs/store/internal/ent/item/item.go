@@ -157,6 +157,16 @@ const (
 	EdgeLinks = "links"
 	// EdgeLinkedIn holds the string denoting the linked_in edge name in mutations.
 	EdgeLinkedIn = "linked_in"
+	// EdgeWanted holds the string denoting the wanted edge name in mutations.
+	EdgeWanted = "wanted"
+	// EdgeDownloads holds the string denoting the downloads edge name in mutations.
+	EdgeDownloads = "downloads"
+	// EdgeHistory holds the string denoting the history edge name in mutations.
+	EdgeHistory = "history"
+	// EdgeBlocklist holds the string denoting the blocklist edge name in mutations.
+	EdgeBlocklist = "blocklist"
+	// EdgePendingReleases holds the string denoting the pending_releases edge name in mutations.
+	EdgePendingReleases = "pending_releases"
 	// Table holds the table name of the item in the database.
 	Table = "items"
 	// LibraryTable is the table that holds the library relation/edge.
@@ -252,6 +262,41 @@ const (
 	LinkedInInverseTable = "item_links"
 	// LinkedInColumn is the table column denoting the linked_in relation/edge.
 	LinkedInColumn = "item_id"
+	// WantedTable is the table that holds the wanted relation/edge.
+	WantedTable = "wanted"
+	// WantedInverseTable is the table name for the Wanted entity.
+	// It exists in this package in order to avoid circular dependency with the "wanted" package.
+	WantedInverseTable = "wanted"
+	// WantedColumn is the table column denoting the wanted relation/edge.
+	WantedColumn = "item_id"
+	// DownloadsTable is the table that holds the downloads relation/edge.
+	DownloadsTable = "downloads"
+	// DownloadsInverseTable is the table name for the Download entity.
+	// It exists in this package in order to avoid circular dependency with the "download" package.
+	DownloadsInverseTable = "downloads"
+	// DownloadsColumn is the table column denoting the downloads relation/edge.
+	DownloadsColumn = "item_id"
+	// HistoryTable is the table that holds the history relation/edge.
+	HistoryTable = "history_events"
+	// HistoryInverseTable is the table name for the HistoryEvent entity.
+	// It exists in this package in order to avoid circular dependency with the "historyevent" package.
+	HistoryInverseTable = "history_events"
+	// HistoryColumn is the table column denoting the history relation/edge.
+	HistoryColumn = "item_id"
+	// BlocklistTable is the table that holds the blocklist relation/edge.
+	BlocklistTable = "blocklist"
+	// BlocklistInverseTable is the table name for the BlocklistEntry entity.
+	// It exists in this package in order to avoid circular dependency with the "blocklistentry" package.
+	BlocklistInverseTable = "blocklist"
+	// BlocklistColumn is the table column denoting the blocklist relation/edge.
+	BlocklistColumn = "item_id"
+	// PendingReleasesTable is the table that holds the pending_releases relation/edge.
+	PendingReleasesTable = "pending_releases"
+	// PendingReleasesInverseTable is the table name for the PendingRelease entity.
+	// It exists in this package in order to avoid circular dependency with the "pendingrelease" package.
+	PendingReleasesInverseTable = "pending_releases"
+	// PendingReleasesColumn is the table column denoting the pending_releases relation/edge.
+	PendingReleasesColumn = "item_id"
 )
 
 // Columns holds all SQL columns for item fields.
@@ -828,6 +873,69 @@ func ByLinkedIn(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLinkedInStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByWantedField orders the results by wanted field.
+func ByWantedField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWantedStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByDownloadsCount orders the results by downloads count.
+func ByDownloadsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDownloadsStep(), opts...)
+	}
+}
+
+// ByDownloads orders the results by downloads terms.
+func ByDownloads(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDownloadsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByHistoryCount orders the results by history count.
+func ByHistoryCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newHistoryStep(), opts...)
+	}
+}
+
+// ByHistory orders the results by history terms.
+func ByHistory(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newHistoryStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByBlocklistCount orders the results by blocklist count.
+func ByBlocklistCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBlocklistStep(), opts...)
+	}
+}
+
+// ByBlocklist orders the results by blocklist terms.
+func ByBlocklist(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBlocklistStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPendingReleasesCount orders the results by pending_releases count.
+func ByPendingReleasesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPendingReleasesStep(), opts...)
+	}
+}
+
+// ByPendingReleases orders the results by pending_releases terms.
+func ByPendingReleases(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPendingReleasesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newLibraryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -931,5 +1039,40 @@ func newLinkedInStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LinkedInInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LinkedInTable, LinkedInColumn),
+	)
+}
+func newWantedStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WantedInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, WantedTable, WantedColumn),
+	)
+}
+func newDownloadsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DownloadsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DownloadsTable, DownloadsColumn),
+	)
+}
+func newHistoryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(HistoryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, HistoryTable, HistoryColumn),
+	)
+}
+func newBlocklistStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BlocklistInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, BlocklistTable, BlocklistColumn),
+	)
+}
+func newPendingReleasesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PendingReleasesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PendingReleasesTable, PendingReleasesColumn),
 	)
 }

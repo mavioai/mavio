@@ -117,6 +117,12 @@ func (Item) Edges() []ent.Edge {
 		// entries linking an item.
 		edge.To("links", ItemLink.Type).Annotations(cascade()),
 		edge.To("linked_in", ItemLink.Type).Annotations(cascade()),
+		// Acquisition state goes with its movie, series or episode.
+		edge.To("wanted", Wanted.Type).Annotations(cascade()).Unique(),
+		edge.To("downloads", Download.Type).Annotations(cascade()),
+		edge.To("history", HistoryEvent.Type).Annotations(cascade()),
+		edge.To("blocklist", BlocklistEntry.Type).Annotations(cascade()),
+		edge.To("pending_releases", PendingRelease.Type).Annotations(cascade()),
 	}
 }
 

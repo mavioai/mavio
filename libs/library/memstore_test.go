@@ -56,6 +56,17 @@ func (m *memStore) APIKeys() core.APIKeyRepository                          { pa
 func (m *memStore) Activities() core.ActivityRepository                     { panic("unused") }
 func (m *memStore) Trickplay() core.TrickplayRepository                     { return memTricks{m} }
 func (m *memStore) MediaSegments() core.MediaSegmentRepository              { return memSegs{m} }
+func (m *memStore) QualityDefinitions() core.QualityDefinitionRepository    { panic("unused") }
+func (m *memStore) QualityProfiles() core.QualityProfileRepository          { panic("unused") }
+func (m *memStore) CustomFormats() core.CustomFormatRepository              { panic("unused") }
+func (m *memStore) DelayProfiles() core.DelayProfileRepository              { panic("unused") }
+func (m *memStore) ReleaseProfiles() core.ReleaseProfileRepository          { panic("unused") }
+func (m *memStore) Wanted() core.WantedRepository                           { panic("unused") }
+func (m *memStore) Downloads() core.DownloadRepository                      { panic("unused") }
+func (m *memStore) History() core.HistoryRepository                         { panic("unused") }
+func (m *memStore) Blocklist() core.BlocklistRepository                     { panic("unused") }
+func (m *memStore) PendingReleases() core.PendingReleaseRepository          { panic("unused") }
+func (m *memStore) RemotePathMappings() core.RemotePathMappingRepository    { panic("unused") }
 func (m *memStore) InTx(_ context.Context, fn func(core.Store) error) error { return fn(m) }
 
 // present returns the items not missing, by path.

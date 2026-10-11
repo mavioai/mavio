@@ -11,9 +11,14 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/activity"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
+	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
+	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
@@ -22,13 +27,19 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
+	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
+	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
+	"github.com/mavioai/mavio/libs/store/internal/ent/wanted"
 )
 
 // The Query interface represents an operation that queries a graph.
@@ -168,6 +179,33 @@ func (f TraverseAuthSession) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.AuthSessionQuery", q)
 }
 
+// The BlocklistEntryFunc type is an adapter to allow the use of ordinary function as a Querier.
+type BlocklistEntryFunc func(context.Context, *ent.BlocklistEntryQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f BlocklistEntryFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.BlocklistEntryQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.BlocklistEntryQuery", q)
+}
+
+// The TraverseBlocklistEntry type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseBlocklistEntry func(context.Context, *ent.BlocklistEntryQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseBlocklistEntry) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseBlocklistEntry) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.BlocklistEntryQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.BlocklistEntryQuery", q)
+}
+
 // The CreditFunc type is an adapter to allow the use of ordinary function as a Querier.
 type CreditFunc func(context.Context, *ent.CreditQuery) (ent.Value, error)
 
@@ -193,6 +231,60 @@ func (f TraverseCredit) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.CreditQuery", q)
+}
+
+// The CustomFormatFunc type is an adapter to allow the use of ordinary function as a Querier.
+type CustomFormatFunc func(context.Context, *ent.CustomFormatQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f CustomFormatFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.CustomFormatQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.CustomFormatQuery", q)
+}
+
+// The TraverseCustomFormat type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseCustomFormat func(context.Context, *ent.CustomFormatQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseCustomFormat) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseCustomFormat) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.CustomFormatQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.CustomFormatQuery", q)
+}
+
+// The DelayProfileFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DelayProfileFunc func(context.Context, *ent.DelayProfileQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f DelayProfileFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.DelayProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.DelayProfileQuery", q)
+}
+
+// The TraverseDelayProfile type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDelayProfile func(context.Context, *ent.DelayProfileQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseDelayProfile) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseDelayProfile) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.DelayProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.DelayProfileQuery", q)
 }
 
 // The DisplayPreferencesFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -222,6 +314,33 @@ func (f TraverseDisplayPreferences) Traverse(ctx context.Context, q ent.Query) e
 	return fmt.Errorf("unexpected query type %T. expect *ent.DisplayPreferencesQuery", q)
 }
 
+// The DownloadFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DownloadFunc func(context.Context, *ent.DownloadQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f DownloadFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.DownloadQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.DownloadQuery", q)
+}
+
+// The TraverseDownload type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDownload func(context.Context, *ent.DownloadQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseDownload) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseDownload) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.DownloadQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.DownloadQuery", q)
+}
+
 // The FolderStateFunc type is an adapter to allow the use of ordinary function as a Querier.
 type FolderStateFunc func(context.Context, *ent.FolderStateQuery) (ent.Value, error)
 
@@ -247,6 +366,33 @@ func (f TraverseFolderState) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.FolderStateQuery", q)
+}
+
+// The HistoryEventFunc type is an adapter to allow the use of ordinary function as a Querier.
+type HistoryEventFunc func(context.Context, *ent.HistoryEventQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f HistoryEventFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.HistoryEventQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.HistoryEventQuery", q)
+}
+
+// The TraverseHistoryEvent type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseHistoryEvent func(context.Context, *ent.HistoryEventQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseHistoryEvent) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseHistoryEvent) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.HistoryEventQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.HistoryEventQuery", q)
 }
 
 // The ImageFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -465,6 +611,33 @@ func (f TraverseMediaSource) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.MediaSourceQuery", q)
 }
 
+// The PendingReleaseFunc type is an adapter to allow the use of ordinary function as a Querier.
+type PendingReleaseFunc func(context.Context, *ent.PendingReleaseQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f PendingReleaseFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.PendingReleaseQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.PendingReleaseQuery", q)
+}
+
+// The TraversePendingRelease type is an adapter to allow the use of ordinary function as Traverser.
+type TraversePendingRelease func(context.Context, *ent.PendingReleaseQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraversePendingRelease) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraversePendingRelease) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.PendingReleaseQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.PendingReleaseQuery", q)
+}
+
 // The PersonFunc type is an adapter to allow the use of ordinary function as a Querier.
 type PersonFunc func(context.Context, *ent.PersonQuery) (ent.Value, error)
 
@@ -517,6 +690,114 @@ func (f TraversePluginConfig) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.PluginConfigQuery", q)
+}
+
+// The QualityDefinitionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type QualityDefinitionFunc func(context.Context, *ent.QualityDefinitionQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f QualityDefinitionFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.QualityDefinitionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.QualityDefinitionQuery", q)
+}
+
+// The TraverseQualityDefinition type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseQualityDefinition func(context.Context, *ent.QualityDefinitionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseQualityDefinition) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseQualityDefinition) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.QualityDefinitionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.QualityDefinitionQuery", q)
+}
+
+// The QualityProfileFunc type is an adapter to allow the use of ordinary function as a Querier.
+type QualityProfileFunc func(context.Context, *ent.QualityProfileQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f QualityProfileFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.QualityProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.QualityProfileQuery", q)
+}
+
+// The TraverseQualityProfile type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseQualityProfile func(context.Context, *ent.QualityProfileQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseQualityProfile) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseQualityProfile) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.QualityProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.QualityProfileQuery", q)
+}
+
+// The ReleaseProfileFunc type is an adapter to allow the use of ordinary function as a Querier.
+type ReleaseProfileFunc func(context.Context, *ent.ReleaseProfileQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f ReleaseProfileFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.ReleaseProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.ReleaseProfileQuery", q)
+}
+
+// The TraverseReleaseProfile type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseReleaseProfile func(context.Context, *ent.ReleaseProfileQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseReleaseProfile) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseReleaseProfile) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ReleaseProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.ReleaseProfileQuery", q)
+}
+
+// The RemotePathMappingFunc type is an adapter to allow the use of ordinary function as a Querier.
+type RemotePathMappingFunc func(context.Context, *ent.RemotePathMappingQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f RemotePathMappingFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.RemotePathMappingQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.RemotePathMappingQuery", q)
+}
+
+// The TraverseRemotePathMapping type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseRemotePathMapping func(context.Context, *ent.RemotePathMappingQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseRemotePathMapping) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseRemotePathMapping) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.RemotePathMappingQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.RemotePathMappingQuery", q)
 }
 
 // The SettingFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -627,6 +908,33 @@ func (f TraverseUserData) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.UserDataQuery", q)
 }
 
+// The WantedFunc type is an adapter to allow the use of ordinary function as a Querier.
+type WantedFunc func(context.Context, *ent.WantedQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f WantedFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.WantedQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.WantedQuery", q)
+}
+
+// The TraverseWanted type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseWanted func(context.Context, *ent.WantedQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseWanted) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseWanted) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.WantedQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.WantedQuery", q)
+}
+
 // NewQuery returns the generic Query interface for the given typed query.
 func NewQuery(q ent.Query) (Query, error) {
 	switch q := q.(type) {
@@ -636,12 +944,22 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.ActivityQuery, predicate.Activity, activity.OrderOption]{typ: ent.TypeActivity, tq: q}, nil
 	case *ent.AuthSessionQuery:
 		return &query[*ent.AuthSessionQuery, predicate.AuthSession, authsession.OrderOption]{typ: ent.TypeAuthSession, tq: q}, nil
+	case *ent.BlocklistEntryQuery:
+		return &query[*ent.BlocklistEntryQuery, predicate.BlocklistEntry, blocklistentry.OrderOption]{typ: ent.TypeBlocklistEntry, tq: q}, nil
 	case *ent.CreditQuery:
 		return &query[*ent.CreditQuery, predicate.Credit, credit.OrderOption]{typ: ent.TypeCredit, tq: q}, nil
+	case *ent.CustomFormatQuery:
+		return &query[*ent.CustomFormatQuery, predicate.CustomFormat, customformat.OrderOption]{typ: ent.TypeCustomFormat, tq: q}, nil
+	case *ent.DelayProfileQuery:
+		return &query[*ent.DelayProfileQuery, predicate.DelayProfile, delayprofile.OrderOption]{typ: ent.TypeDelayProfile, tq: q}, nil
 	case *ent.DisplayPreferencesQuery:
 		return &query[*ent.DisplayPreferencesQuery, predicate.DisplayPreferences, displaypreferences.OrderOption]{typ: ent.TypeDisplayPreferences, tq: q}, nil
+	case *ent.DownloadQuery:
+		return &query[*ent.DownloadQuery, predicate.Download, download.OrderOption]{typ: ent.TypeDownload, tq: q}, nil
 	case *ent.FolderStateQuery:
 		return &query[*ent.FolderStateQuery, predicate.FolderState, folderstate.OrderOption]{typ: ent.TypeFolderState, tq: q}, nil
+	case *ent.HistoryEventQuery:
+		return &query[*ent.HistoryEventQuery, predicate.HistoryEvent, historyevent.OrderOption]{typ: ent.TypeHistoryEvent, tq: q}, nil
 	case *ent.ImageQuery:
 		return &query[*ent.ImageQuery, predicate.Image, image.OrderOption]{typ: ent.TypeImage, tq: q}, nil
 	case *ent.ItemQuery:
@@ -658,10 +976,20 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.MediaSegmentQuery, predicate.MediaSegment, mediasegment.OrderOption]{typ: ent.TypeMediaSegment, tq: q}, nil
 	case *ent.MediaSourceQuery:
 		return &query[*ent.MediaSourceQuery, predicate.MediaSource, mediasource.OrderOption]{typ: ent.TypeMediaSource, tq: q}, nil
+	case *ent.PendingReleaseQuery:
+		return &query[*ent.PendingReleaseQuery, predicate.PendingRelease, pendingrelease.OrderOption]{typ: ent.TypePendingRelease, tq: q}, nil
 	case *ent.PersonQuery:
 		return &query[*ent.PersonQuery, predicate.Person, person.OrderOption]{typ: ent.TypePerson, tq: q}, nil
 	case *ent.PluginConfigQuery:
 		return &query[*ent.PluginConfigQuery, predicate.PluginConfig, pluginconfig.OrderOption]{typ: ent.TypePluginConfig, tq: q}, nil
+	case *ent.QualityDefinitionQuery:
+		return &query[*ent.QualityDefinitionQuery, predicate.QualityDefinition, qualitydefinition.OrderOption]{typ: ent.TypeQualityDefinition, tq: q}, nil
+	case *ent.QualityProfileQuery:
+		return &query[*ent.QualityProfileQuery, predicate.QualityProfile, qualityprofile.OrderOption]{typ: ent.TypeQualityProfile, tq: q}, nil
+	case *ent.ReleaseProfileQuery:
+		return &query[*ent.ReleaseProfileQuery, predicate.ReleaseProfile, releaseprofile.OrderOption]{typ: ent.TypeReleaseProfile, tq: q}, nil
+	case *ent.RemotePathMappingQuery:
+		return &query[*ent.RemotePathMappingQuery, predicate.RemotePathMapping, remotepathmapping.OrderOption]{typ: ent.TypeRemotePathMapping, tq: q}, nil
 	case *ent.SettingQuery:
 		return &query[*ent.SettingQuery, predicate.Setting, setting.OrderOption]{typ: ent.TypeSetting, tq: q}, nil
 	case *ent.TrickplayQuery:
@@ -670,6 +998,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.UserQuery, predicate.User, user.OrderOption]{typ: ent.TypeUser, tq: q}, nil
 	case *ent.UserDataQuery:
 		return &query[*ent.UserDataQuery, predicate.UserData, userdata.OrderOption]{typ: ent.TypeUserData, tq: q}, nil
+	case *ent.WantedQuery:
+		return &query[*ent.WantedQuery, predicate.Wanted, wanted.OrderOption]{typ: ent.TypeWanted, tq: q}, nil
 	default:
 		return nil, fmt.Errorf("unknown query type %T", q)
 	}

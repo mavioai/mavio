@@ -9,9 +9,14 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/activity"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
+	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
+	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
@@ -20,13 +25,19 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
+	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
+	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
+	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/schema"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
+	"github.com/mavioai/mavio/libs/store/internal/ent/wanted"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -83,6 +94,32 @@ func init() {
 	authsessionDescID := authsessionFields[0].Descriptor()
 	// authsession.DefaultID holds the default value on creation for the id field.
 	authsession.DefaultID = authsessionDescID.Default.(func() core.ID)
+	blocklistentryFields := schema.BlocklistEntry{}.Fields()
+	_ = blocklistentryFields
+	// blocklistentryDescSize is the schema descriptor for size field.
+	blocklistentryDescSize := blocklistentryFields[8].Descriptor()
+	// blocklistentry.DefaultSize holds the default value on creation for the size field.
+	blocklistentry.DefaultSize = blocklistentryDescSize.Default.(int64)
+	// blocklistentryDescIndexerID is the schema descriptor for indexer_id field.
+	blocklistentryDescIndexerID := blocklistentryFields[10].Descriptor()
+	// blocklistentry.DefaultIndexerID holds the default value on creation for the indexer_id field.
+	blocklistentry.DefaultIndexerID = blocklistentryDescIndexerID.Default.(string)
+	// blocklistentryDescIndexer is the schema descriptor for indexer field.
+	blocklistentryDescIndexer := blocklistentryFields[11].Descriptor()
+	// blocklistentry.DefaultIndexer holds the default value on creation for the indexer field.
+	blocklistentry.DefaultIndexer = blocklistentryDescIndexer.Default.(string)
+	// blocklistentryDescMessage is the schema descriptor for message field.
+	blocklistentryDescMessage := blocklistentryFields[13].Descriptor()
+	// blocklistentry.DefaultMessage holds the default value on creation for the message field.
+	blocklistentry.DefaultMessage = blocklistentryDescMessage.Default.(string)
+	// blocklistentryDescTorrentInfoHash is the schema descriptor for torrent_info_hash field.
+	blocklistentryDescTorrentInfoHash := blocklistentryFields[14].Descriptor()
+	// blocklistentry.DefaultTorrentInfoHash holds the default value on creation for the torrent_info_hash field.
+	blocklistentry.DefaultTorrentInfoHash = blocklistentryDescTorrentInfoHash.Default.(string)
+	// blocklistentryDescID is the schema descriptor for id field.
+	blocklistentryDescID := blocklistentryFields[0].Descriptor()
+	// blocklistentry.DefaultID holds the default value on creation for the id field.
+	blocklistentry.DefaultID = blocklistentryDescID.Default.(func() core.ID)
 	creditFields := schema.Credit{}.Fields()
 	_ = creditFields
 	// creditDescRole is the schema descriptor for role field.
@@ -93,6 +130,58 @@ func init() {
 	creditDescOrd := creditFields[4].Descriptor()
 	// credit.DefaultOrd holds the default value on creation for the ord field.
 	credit.DefaultOrd = creditDescOrd.Default.(int)
+	customformatFields := schema.CustomFormat{}.Fields()
+	_ = customformatFields
+	// customformatDescIncludeWhenRenaming is the schema descriptor for include_when_renaming field.
+	customformatDescIncludeWhenRenaming := customformatFields[2].Descriptor()
+	// customformat.DefaultIncludeWhenRenaming holds the default value on creation for the include_when_renaming field.
+	customformat.DefaultIncludeWhenRenaming = customformatDescIncludeWhenRenaming.Default.(bool)
+	// customformatDescID is the schema descriptor for id field.
+	customformatDescID := customformatFields[0].Descriptor()
+	// customformat.DefaultID holds the default value on creation for the id field.
+	customformat.DefaultID = customformatDescID.Default.(func() core.ID)
+	delayprofileFields := schema.DelayProfile{}.Fields()
+	_ = delayprofileFields
+	// delayprofileDescIsDefault is the schema descriptor for is_default field.
+	delayprofileDescIsDefault := delayprofileFields[1].Descriptor()
+	// delayprofile.DefaultIsDefault holds the default value on creation for the is_default field.
+	delayprofile.DefaultIsDefault = delayprofileDescIsDefault.Default.(bool)
+	// delayprofileDescOrd is the schema descriptor for ord field.
+	delayprofileDescOrd := delayprofileFields[2].Descriptor()
+	// delayprofile.DefaultOrd holds the default value on creation for the ord field.
+	delayprofile.DefaultOrd = delayprofileDescOrd.Default.(int)
+	// delayprofileDescEnableUsenet is the schema descriptor for enable_usenet field.
+	delayprofileDescEnableUsenet := delayprofileFields[3].Descriptor()
+	// delayprofile.DefaultEnableUsenet holds the default value on creation for the enable_usenet field.
+	delayprofile.DefaultEnableUsenet = delayprofileDescEnableUsenet.Default.(bool)
+	// delayprofileDescEnableTorrent is the schema descriptor for enable_torrent field.
+	delayprofileDescEnableTorrent := delayprofileFields[4].Descriptor()
+	// delayprofile.DefaultEnableTorrent holds the default value on creation for the enable_torrent field.
+	delayprofile.DefaultEnableTorrent = delayprofileDescEnableTorrent.Default.(bool)
+	// delayprofileDescUsenetDelay is the schema descriptor for usenet_delay field.
+	delayprofileDescUsenetDelay := delayprofileFields[6].Descriptor()
+	// delayprofile.DefaultUsenetDelay holds the default value on creation for the usenet_delay field.
+	delayprofile.DefaultUsenetDelay = time.Duration(delayprofileDescUsenetDelay.Default.(int64))
+	// delayprofileDescTorrentDelay is the schema descriptor for torrent_delay field.
+	delayprofileDescTorrentDelay := delayprofileFields[7].Descriptor()
+	// delayprofile.DefaultTorrentDelay holds the default value on creation for the torrent_delay field.
+	delayprofile.DefaultTorrentDelay = time.Duration(delayprofileDescTorrentDelay.Default.(int64))
+	// delayprofileDescBypassIfHighestQuality is the schema descriptor for bypass_if_highest_quality field.
+	delayprofileDescBypassIfHighestQuality := delayprofileFields[8].Descriptor()
+	// delayprofile.DefaultBypassIfHighestQuality holds the default value on creation for the bypass_if_highest_quality field.
+	delayprofile.DefaultBypassIfHighestQuality = delayprofileDescBypassIfHighestQuality.Default.(bool)
+	// delayprofileDescBypassIfAboveCustomFormatScore is the schema descriptor for bypass_if_above_custom_format_score field.
+	delayprofileDescBypassIfAboveCustomFormatScore := delayprofileFields[9].Descriptor()
+	// delayprofile.DefaultBypassIfAboveCustomFormatScore holds the default value on creation for the bypass_if_above_custom_format_score field.
+	delayprofile.DefaultBypassIfAboveCustomFormatScore = delayprofileDescBypassIfAboveCustomFormatScore.Default.(bool)
+	// delayprofileDescMinimumCustomFormatScore is the schema descriptor for minimum_custom_format_score field.
+	delayprofileDescMinimumCustomFormatScore := delayprofileFields[10].Descriptor()
+	// delayprofile.DefaultMinimumCustomFormatScore holds the default value on creation for the minimum_custom_format_score field.
+	delayprofile.DefaultMinimumCustomFormatScore = delayprofileDescMinimumCustomFormatScore.Default.(int)
+	// delayprofileDescID is the schema descriptor for id field.
+	delayprofileDescID := delayprofileFields[0].Descriptor()
+	// delayprofile.DefaultID holds the default value on creation for the id field.
+	delayprofile.DefaultID = delayprofileDescID.Default.(func() core.ID)
 	displaypreferencesFields := schema.DisplayPreferences{}.Fields()
 	_ = displaypreferencesFields
 	// displaypreferencesDescUpdatedAt is the schema descriptor for updated_at field.
@@ -103,6 +192,28 @@ func init() {
 	displaypreferencesDescID := displaypreferencesFields[0].Descriptor()
 	// displaypreferences.DefaultID holds the default value on creation for the id field.
 	displaypreferences.DefaultID = displaypreferencesDescID.Default.(func() core.ID)
+	downloadFields := schema.Download{}.Fields()
+	_ = downloadFields
+	// downloadDescTitle is the schema descriptor for title field.
+	downloadDescTitle := downloadFields[6].Descriptor()
+	// download.DefaultTitle holds the default value on creation for the title field.
+	download.DefaultTitle = downloadDescTitle.Default.(string)
+	// downloadDescIndexerID is the schema descriptor for indexer_id field.
+	downloadDescIndexerID := downloadFields[7].Descriptor()
+	// download.DefaultIndexerID holds the default value on creation for the indexer_id field.
+	download.DefaultIndexerID = downloadDescIndexerID.Default.(string)
+	// downloadDescIndexer is the schema descriptor for indexer field.
+	downloadDescIndexer := downloadFields[8].Descriptor()
+	// download.DefaultIndexer holds the default value on creation for the indexer field.
+	download.DefaultIndexer = downloadDescIndexer.Default.(string)
+	// downloadDescSize is the schema descriptor for size field.
+	downloadDescSize := downloadFields[12].Descriptor()
+	// download.DefaultSize holds the default value on creation for the size field.
+	download.DefaultSize = downloadDescSize.Default.(int64)
+	// downloadDescID is the schema descriptor for id field.
+	downloadDescID := downloadFields[0].Descriptor()
+	// download.DefaultID holds the default value on creation for the id field.
+	download.DefaultID = downloadDescID.Default.(func() core.ID)
 	folderstateFields := schema.FolderState{}.Fields()
 	_ = folderstateFields
 	// folderstateDescModTime is the schema descriptor for mod_time field.
@@ -121,6 +232,20 @@ func init() {
 	folderstateDescID := folderstateFields[0].Descriptor()
 	// folderstate.DefaultID holds the default value on creation for the id field.
 	folderstate.DefaultID = folderstateDescID.Default.(func() core.ID)
+	historyeventFields := schema.HistoryEvent{}.Fields()
+	_ = historyeventFields
+	// historyeventDescSourceTitle is the schema descriptor for source_title field.
+	historyeventDescSourceTitle := historyeventFields[5].Descriptor()
+	// historyevent.DefaultSourceTitle holds the default value on creation for the source_title field.
+	historyevent.DefaultSourceTitle = historyeventDescSourceTitle.Default.(string)
+	// historyeventDescDownloadID is the schema descriptor for download_id field.
+	historyeventDescDownloadID := historyeventFields[8].Descriptor()
+	// historyevent.DefaultDownloadID holds the default value on creation for the download_id field.
+	historyevent.DefaultDownloadID = historyeventDescDownloadID.Default.(string)
+	// historyeventDescID is the schema descriptor for id field.
+	historyeventDescID := historyeventFields[0].Descriptor()
+	// historyevent.DefaultID holds the default value on creation for the id field.
+	historyevent.DefaultID = historyeventDescID.Default.(func() core.ID)
 	imageFields := schema.Image{}.Fields()
 	_ = imageFields
 	// imageDescIndex is the schema descriptor for index field.
@@ -411,6 +536,16 @@ func init() {
 	mediasourceDescID := mediasourceFields[0].Descriptor()
 	// mediasource.DefaultID holds the default value on creation for the id field.
 	mediasource.DefaultID = mediasourceDescID.Default.(func() core.ID)
+	pendingreleaseFields := schema.PendingRelease{}.Fields()
+	_ = pendingreleaseFields
+	// pendingreleaseDescTitle is the schema descriptor for title field.
+	pendingreleaseDescTitle := pendingreleaseFields[3].Descriptor()
+	// pendingrelease.DefaultTitle holds the default value on creation for the title field.
+	pendingrelease.DefaultTitle = pendingreleaseDescTitle.Default.(string)
+	// pendingreleaseDescID is the schema descriptor for id field.
+	pendingreleaseDescID := pendingreleaseFields[0].Descriptor()
+	// pendingrelease.DefaultID holds the default value on creation for the id field.
+	pendingrelease.DefaultID = pendingreleaseDescID.Default.(func() core.ID)
 	personFields := schema.Person{}.Fields()
 	_ = personFields
 	// personDescName is the schema descriptor for name field.
@@ -451,6 +586,78 @@ func init() {
 	pluginconfigDescID := pluginconfigFields[0].Descriptor()
 	// pluginconfig.DefaultID holds the default value on creation for the id field.
 	pluginconfig.DefaultID = pluginconfigDescID.Default.(func() core.ID)
+	qualitydefinitionFields := schema.QualityDefinition{}.Fields()
+	_ = qualitydefinitionFields
+	// qualitydefinitionDescMinSize is the schema descriptor for min_size field.
+	qualitydefinitionDescMinSize := qualitydefinitionFields[4].Descriptor()
+	// qualitydefinition.DefaultMinSize holds the default value on creation for the min_size field.
+	qualitydefinition.DefaultMinSize = qualitydefinitionDescMinSize.Default.(float64)
+	// qualitydefinitionDescMaxSize is the schema descriptor for max_size field.
+	qualitydefinitionDescMaxSize := qualitydefinitionFields[5].Descriptor()
+	// qualitydefinition.DefaultMaxSize holds the default value on creation for the max_size field.
+	qualitydefinition.DefaultMaxSize = qualitydefinitionDescMaxSize.Default.(float64)
+	// qualitydefinitionDescPreferredSize is the schema descriptor for preferred_size field.
+	qualitydefinitionDescPreferredSize := qualitydefinitionFields[6].Descriptor()
+	// qualitydefinition.DefaultPreferredSize holds the default value on creation for the preferred_size field.
+	qualitydefinition.DefaultPreferredSize = qualitydefinitionDescPreferredSize.Default.(float64)
+	// qualitydefinitionDescID is the schema descriptor for id field.
+	qualitydefinitionDescID := qualitydefinitionFields[0].Descriptor()
+	// qualitydefinition.DefaultID holds the default value on creation for the id field.
+	qualitydefinition.DefaultID = qualitydefinitionDescID.Default.(func() core.ID)
+	qualityprofileFields := schema.QualityProfile{}.Fields()
+	_ = qualityprofileFields
+	// qualityprofileDescUpgradeAllowed is the schema descriptor for upgrade_allowed field.
+	qualityprofileDescUpgradeAllowed := qualityprofileFields[3].Descriptor()
+	// qualityprofile.DefaultUpgradeAllowed holds the default value on creation for the upgrade_allowed field.
+	qualityprofile.DefaultUpgradeAllowed = qualityprofileDescUpgradeAllowed.Default.(bool)
+	// qualityprofileDescCutoff is the schema descriptor for cutoff field.
+	qualityprofileDescCutoff := qualityprofileFields[4].Descriptor()
+	// qualityprofile.DefaultCutoff holds the default value on creation for the cutoff field.
+	qualityprofile.DefaultCutoff = qualityprofileDescCutoff.Default.(int)
+	// qualityprofileDescMinFormatScore is the schema descriptor for min_format_score field.
+	qualityprofileDescMinFormatScore := qualityprofileFields[6].Descriptor()
+	// qualityprofile.DefaultMinFormatScore holds the default value on creation for the min_format_score field.
+	qualityprofile.DefaultMinFormatScore = qualityprofileDescMinFormatScore.Default.(int)
+	// qualityprofileDescCutoffFormatScore is the schema descriptor for cutoff_format_score field.
+	qualityprofileDescCutoffFormatScore := qualityprofileFields[7].Descriptor()
+	// qualityprofile.DefaultCutoffFormatScore holds the default value on creation for the cutoff_format_score field.
+	qualityprofile.DefaultCutoffFormatScore = qualityprofileDescCutoffFormatScore.Default.(int)
+	// qualityprofileDescMinUpgradeFormatScore is the schema descriptor for min_upgrade_format_score field.
+	qualityprofileDescMinUpgradeFormatScore := qualityprofileFields[8].Descriptor()
+	// qualityprofile.DefaultMinUpgradeFormatScore holds the default value on creation for the min_upgrade_format_score field.
+	qualityprofile.DefaultMinUpgradeFormatScore = qualityprofileDescMinUpgradeFormatScore.Default.(int)
+	// qualityprofileDescLanguage is the schema descriptor for language field.
+	qualityprofileDescLanguage := qualityprofileFields[10].Descriptor()
+	// qualityprofile.DefaultLanguage holds the default value on creation for the language field.
+	qualityprofile.DefaultLanguage = qualityprofileDescLanguage.Default.(string)
+	// qualityprofileDescID is the schema descriptor for id field.
+	qualityprofileDescID := qualityprofileFields[0].Descriptor()
+	// qualityprofile.DefaultID holds the default value on creation for the id field.
+	qualityprofile.DefaultID = qualityprofileDescID.Default.(func() core.ID)
+	releaseprofileFields := schema.ReleaseProfile{}.Fields()
+	_ = releaseprofileFields
+	// releaseprofileDescName is the schema descriptor for name field.
+	releaseprofileDescName := releaseprofileFields[1].Descriptor()
+	// releaseprofile.DefaultName holds the default value on creation for the name field.
+	releaseprofile.DefaultName = releaseprofileDescName.Default.(string)
+	// releaseprofileDescEnabled is the schema descriptor for enabled field.
+	releaseprofileDescEnabled := releaseprofileFields[2].Descriptor()
+	// releaseprofile.DefaultEnabled holds the default value on creation for the enabled field.
+	releaseprofile.DefaultEnabled = releaseprofileDescEnabled.Default.(bool)
+	// releaseprofileDescIndexerID is the schema descriptor for indexer_id field.
+	releaseprofileDescIndexerID := releaseprofileFields[5].Descriptor()
+	// releaseprofile.DefaultIndexerID holds the default value on creation for the indexer_id field.
+	releaseprofile.DefaultIndexerID = releaseprofileDescIndexerID.Default.(string)
+	// releaseprofileDescID is the schema descriptor for id field.
+	releaseprofileDescID := releaseprofileFields[0].Descriptor()
+	// releaseprofile.DefaultID holds the default value on creation for the id field.
+	releaseprofile.DefaultID = releaseprofileDescID.Default.(func() core.ID)
+	remotepathmappingFields := schema.RemotePathMapping{}.Fields()
+	_ = remotepathmappingFields
+	// remotepathmappingDescID is the schema descriptor for id field.
+	remotepathmappingDescID := remotepathmappingFields[0].Descriptor()
+	// remotepathmapping.DefaultID holds the default value on creation for the id field.
+	remotepathmapping.DefaultID = remotepathmappingDescID.Default.(func() core.ID)
 	settingFields := schema.Setting{}.Fields()
 	_ = settingFields
 	// settingDescUpdatedAt is the schema descriptor for updated_at field.
@@ -525,4 +732,14 @@ func init() {
 	userdata.DefaultUpdatedAt = userdataDescUpdatedAt.Default.(func() time.Time)
 	// userdata.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	userdata.UpdateDefaultUpdatedAt = userdataDescUpdatedAt.UpdateDefault.(func() time.Time)
+	wantedFields := schema.Wanted{}.Fields()
+	_ = wantedFields
+	// wantedDescMinimumAvailability is the schema descriptor for minimum_availability field.
+	wantedDescMinimumAvailability := wantedFields[3].Descriptor()
+	// wanted.DefaultMinimumAvailability holds the default value on creation for the minimum_availability field.
+	wanted.DefaultMinimumAvailability = wantedDescMinimumAvailability.Default.(string)
+	// wantedDescID is the schema descriptor for id field.
+	wantedDescID := wantedFields[0].Descriptor()
+	// wanted.DefaultID holds the default value on creation for the id field.
+	wanted.DefaultID = wantedDescID.Default.(func() core.ID)
 }

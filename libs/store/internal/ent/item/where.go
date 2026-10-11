@@ -3346,6 +3346,121 @@ func HasLinkedInWith(preds ...predicate.ItemLink) predicate.Item {
 	})
 }
 
+// HasWanted applies the HasEdge predicate on the "wanted" edge.
+func HasWanted() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, WantedTable, WantedColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWantedWith applies the HasEdge predicate on the "wanted" edge with a given conditions (other predicates).
+func HasWantedWith(preds ...predicate.Wanted) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newWantedStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDownloads applies the HasEdge predicate on the "downloads" edge.
+func HasDownloads() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DownloadsTable, DownloadsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDownloadsWith applies the HasEdge predicate on the "downloads" edge with a given conditions (other predicates).
+func HasDownloadsWith(preds ...predicate.Download) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newDownloadsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasHistory applies the HasEdge predicate on the "history" edge.
+func HasHistory() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, HistoryTable, HistoryColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasHistoryWith applies the HasEdge predicate on the "history" edge with a given conditions (other predicates).
+func HasHistoryWith(preds ...predicate.HistoryEvent) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newHistoryStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBlocklist applies the HasEdge predicate on the "blocklist" edge.
+func HasBlocklist() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, BlocklistTable, BlocklistColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBlocklistWith applies the HasEdge predicate on the "blocklist" edge with a given conditions (other predicates).
+func HasBlocklistWith(preds ...predicate.BlocklistEntry) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newBlocklistStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPendingReleases applies the HasEdge predicate on the "pending_releases" edge.
+func HasPendingReleases() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PendingReleasesTable, PendingReleasesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPendingReleasesWith applies the HasEdge predicate on the "pending_releases" edge with a given conditions (other predicates).
+func HasPendingReleasesWith(preds ...predicate.PendingRelease) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newPendingReleasesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Item) predicate.Item {
 	return predicate.Item(sql.AndPredicates(predicates...))

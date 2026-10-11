@@ -463,7 +463,8 @@ flowchart TD
   - [ ] 各客户端共用的辅助代码，取代各自的副本：远程路径拼接、.NET 版本解析、JSON-RPC 与 XML-RPC、URL base 校验、自由格式的标签字段、“发布被拒”错误、测试的警告、NZB 有效性检查、可配置的历史条数上限、保留客户端给出的 ID 大小写，以及把 `::1` 视为本机
 - [x] `libs/acquire`：质量及其定义、质量档案、custom formats、delay profile、release profile
 - [ ] 决策：Radarr 决策引擎的各项规格及其排序
-- [ ] 领域与存储：档案、custom formats、被跟踪下载的队列、历史、黑名单、远程路径映射、命名
+- [x] 领域与存储：档案、custom formats、被跟踪下载的队列、历史、黑名单、远程路径映射、命名（`libs/core/acquisition.go`、`libs/store`）
+  - [ ] 质量档案的格式评分对照已有的 custom formats 进行检查
 - [ ] 按 TMDB ID 把想要的电影加入媒体库，带质量档案与最低可用状态
 - [ ] 以作业执行的电影搜索与 RSS 同步；通过 `DownloadService` 抓取
 - [ ] 队列：从客户端轮询的被跟踪下载
