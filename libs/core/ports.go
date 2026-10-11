@@ -29,6 +29,17 @@ type Store interface {
 	Activities() ActivityRepository
 	Trickplay() TrickplayRepository
 	MediaSegments() MediaSegmentRepository
+	QualityDefinitions() QualityDefinitionRepository
+	QualityProfiles() QualityProfileRepository
+	CustomFormats() CustomFormatRepository
+	DelayProfiles() DelayProfileRepository
+	ReleaseProfiles() ReleaseProfileRepository
+	Wanted() WantedRepository
+	Downloads() DownloadRepository
+	History() HistoryRepository
+	Blocklist() BlocklistRepository
+	PendingReleases() PendingReleaseRepository
+	RemotePathMappings() RemotePathMappingRepository
 
 	// InTx runs fn in a transaction. The Store passed to fn is bound to the
 	// transaction; fn's error rolls it back.

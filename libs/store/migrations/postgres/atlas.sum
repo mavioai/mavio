@@ -1,4 +1,4 @@
-h1:JiWgWACphXgrRFJkw72jzGhIwII+QYO6IWQANDbhSro=
+h1:uYsYDPOKYc2Hp0otpv+HNNyFv/XDa6P9if0fBdxPyoY=
 20261008102530_init.sql h1:o0uo+qhPer0X6agAd1aYP3daRTG8Oo9KvezhTIWItp8=
 20261008120157_search_keys.sql h1:EoCIoI2HBgPjwiuALF6Hb/zjV/v0+5QZvJccYQSz+mQ=
 20261008125130_item_metadata.sql h1:3z4FTt0Fsqm9IpGTKxu4QrJgFob3IBUHbhKEZTyUHzs=
@@ -14,3 +14,4 @@ h1:JiWgWACphXgrRFJkw72jzGhIwII+QYO6IWQANDbhSro=
 20261009233324_media_extras.sql h1:WvrAJ5iFOfOtDRf5z/TbccM2A5V8alaMxJkjq0+S9eI=
 20261010103415_provider_order.sql h1:lFuaJEH4vX4EQ84sfvlTmO9hlKCO0zTG3zcimyR98QY=
 20261010172728_virtual_items.sql h1:WtgvkEO57Lu7M9qmTIRog7cgcOV19ivh+xFvTXWdmWI=
+20261011033154_acquisition.sql h1:wxAemBAQYxIIJ/OE7haVkkbpxYA6EP8SCdAvEBHJRR4=

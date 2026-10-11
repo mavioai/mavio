@@ -18,12 +18,22 @@ type Tx struct {
 	Activity *ActivityClient
 	// AuthSession is the client for interacting with the AuthSession builders.
 	AuthSession *AuthSessionClient
+	// BlocklistEntry is the client for interacting with the BlocklistEntry builders.
+	BlocklistEntry *BlocklistEntryClient
 	// Credit is the client for interacting with the Credit builders.
 	Credit *CreditClient
+	// CustomFormat is the client for interacting with the CustomFormat builders.
+	CustomFormat *CustomFormatClient
+	// DelayProfile is the client for interacting with the DelayProfile builders.
+	DelayProfile *DelayProfileClient
 	// DisplayPreferences is the client for interacting with the DisplayPreferences builders.
 	DisplayPreferences *DisplayPreferencesClient
+	// Download is the client for interacting with the Download builders.
+	Download *DownloadClient
 	// FolderState is the client for interacting with the FolderState builders.
 	FolderState *FolderStateClient
+	// HistoryEvent is the client for interacting with the HistoryEvent builders.
+	HistoryEvent *HistoryEventClient
 	// Image is the client for interacting with the Image builders.
 	Image *ImageClient
 	// Item is the client for interacting with the Item builders.
@@ -40,10 +50,20 @@ type Tx struct {
 	MediaSegment *MediaSegmentClient
 	// MediaSource is the client for interacting with the MediaSource builders.
 	MediaSource *MediaSourceClient
+	// PendingRelease is the client for interacting with the PendingRelease builders.
+	PendingRelease *PendingReleaseClient
 	// Person is the client for interacting with the Person builders.
 	Person *PersonClient
 	// PluginConfig is the client for interacting with the PluginConfig builders.
 	PluginConfig *PluginConfigClient
+	// QualityDefinition is the client for interacting with the QualityDefinition builders.
+	QualityDefinition *QualityDefinitionClient
+	// QualityProfile is the client for interacting with the QualityProfile builders.
+	QualityProfile *QualityProfileClient
+	// ReleaseProfile is the client for interacting with the ReleaseProfile builders.
+	ReleaseProfile *ReleaseProfileClient
+	// RemotePathMapping is the client for interacting with the RemotePathMapping builders.
+	RemotePathMapping *RemotePathMappingClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
 	// Trickplay is the client for interacting with the Trickplay builders.
@@ -52,6 +72,8 @@ type Tx struct {
 	User *UserClient
 	// UserData is the client for interacting with the UserData builders.
 	UserData *UserDataClient
+	// Wanted is the client for interacting with the Wanted builders.
+	Wanted *WantedClient
 
 	// lazily loaded.
 	client     *Client
@@ -186,9 +208,14 @@ func (tx *Tx) init() {
 	tx.APIKey = NewAPIKeyClient(tx.config)
 	tx.Activity = NewActivityClient(tx.config)
 	tx.AuthSession = NewAuthSessionClient(tx.config)
+	tx.BlocklistEntry = NewBlocklistEntryClient(tx.config)
 	tx.Credit = NewCreditClient(tx.config)
+	tx.CustomFormat = NewCustomFormatClient(tx.config)
+	tx.DelayProfile = NewDelayProfileClient(tx.config)
 	tx.DisplayPreferences = NewDisplayPreferencesClient(tx.config)
+	tx.Download = NewDownloadClient(tx.config)
 	tx.FolderState = NewFolderStateClient(tx.config)
+	tx.HistoryEvent = NewHistoryEventClient(tx.config)
 	tx.Image = NewImageClient(tx.config)
 	tx.Item = NewItemClient(tx.config)
 	tx.ItemLink = NewItemLinkClient(tx.config)
@@ -197,12 +224,18 @@ func (tx *Tx) init() {
 	tx.Library = NewLibraryClient(tx.config)
 	tx.MediaSegment = NewMediaSegmentClient(tx.config)
 	tx.MediaSource = NewMediaSourceClient(tx.config)
+	tx.PendingRelease = NewPendingReleaseClient(tx.config)
 	tx.Person = NewPersonClient(tx.config)
 	tx.PluginConfig = NewPluginConfigClient(tx.config)
+	tx.QualityDefinition = NewQualityDefinitionClient(tx.config)
+	tx.QualityProfile = NewQualityProfileClient(tx.config)
+	tx.ReleaseProfile = NewReleaseProfileClient(tx.config)
+	tx.RemotePathMapping = NewRemotePathMappingClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
 	tx.Trickplay = NewTrickplayClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserData = NewUserDataClient(tx.config)
+	tx.Wanted = NewWantedClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

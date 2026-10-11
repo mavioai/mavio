@@ -13,7 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
@@ -21,35 +24,42 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
+	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
+	"github.com/mavioai/mavio/libs/store/internal/ent/wanted"
 )
 
 // ItemQuery is the builder for querying Item entities.
 type ItemQuery struct {
 	config
-	ctx              *QueryContext
-	order            []item.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.Item
-	withLibrary      *LibraryQuery
-	withParent       *ItemQuery
-	withChildren     *ItemQuery
-	withOwner        *ItemQuery
-	withExtras       *ItemQuery
-	withValues       *ItemValueQuery
-	withMediaSources *MediaSourceQuery
-	withImages       *ImageQuery
-	withTrickplay    *TrickplayQuery
-	withSegments     *MediaSegmentQuery
-	withCredits      *CreditQuery
-	withUserData     *UserDataQuery
-	withUser         *UserQuery
-	withLinks        *ItemLinkQuery
-	withLinkedIn     *ItemLinkQuery
-	modifiers        []func(*sql.Selector)
+	ctx                 *QueryContext
+	order               []item.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.Item
+	withLibrary         *LibraryQuery
+	withParent          *ItemQuery
+	withChildren        *ItemQuery
+	withOwner           *ItemQuery
+	withExtras          *ItemQuery
+	withValues          *ItemValueQuery
+	withMediaSources    *MediaSourceQuery
+	withImages          *ImageQuery
+	withTrickplay       *TrickplayQuery
+	withSegments        *MediaSegmentQuery
+	withCredits         *CreditQuery
+	withUserData        *UserDataQuery
+	withUser            *UserQuery
+	withLinks           *ItemLinkQuery
+	withLinkedIn        *ItemLinkQuery
+	withWanted          *WantedQuery
+	withDownloads       *DownloadQuery
+	withHistory         *HistoryEventQuery
+	withBlocklist       *BlocklistEntryQuery
+	withPendingReleases *PendingReleaseQuery
+	modifiers           []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -416,6 +426,116 @@ func (_q *ItemQuery) QueryLinkedIn() *ItemLinkQuery {
 	return query
 }
 
+// QueryWanted chains the current query on the "wanted" edge.
+func (_q *ItemQuery) QueryWanted() *WantedQuery {
+	query := (&WantedClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(wanted.Table, wanted.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, item.WantedTable, item.WantedColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDownloads chains the current query on the "downloads" edge.
+func (_q *ItemQuery) QueryDownloads() *DownloadQuery {
+	query := (&DownloadClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(download.Table, download.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.DownloadsTable, item.DownloadsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryHistory chains the current query on the "history" edge.
+func (_q *ItemQuery) QueryHistory() *HistoryEventQuery {
+	query := (&HistoryEventClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(historyevent.Table, historyevent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.HistoryTable, item.HistoryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBlocklist chains the current query on the "blocklist" edge.
+func (_q *ItemQuery) QueryBlocklist() *BlocklistEntryQuery {
+	query := (&BlocklistEntryClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(blocklistentry.Table, blocklistentry.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.BlocklistTable, item.BlocklistColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPendingReleases chains the current query on the "pending_releases" edge.
+func (_q *ItemQuery) QueryPendingReleases() *PendingReleaseQuery {
+	query := (&PendingReleaseClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(pendingrelease.Table, pendingrelease.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.PendingReleasesTable, item.PendingReleasesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Item entity from the query.
 // Returns a *NotFoundError when no Item was found.
 func (_q *ItemQuery) First(ctx context.Context) (*Item, error) {
@@ -603,26 +723,31 @@ func (_q *ItemQuery) Clone() *ItemQuery {
 		return nil
 	}
 	return &ItemQuery{
-		config:           _q.config,
-		ctx:              _q.ctx.Clone(),
-		order:            append([]item.OrderOption{}, _q.order...),
-		inters:           append([]Interceptor{}, _q.inters...),
-		predicates:       append([]predicate.Item{}, _q.predicates...),
-		withLibrary:      _q.withLibrary.Clone(),
-		withParent:       _q.withParent.Clone(),
-		withChildren:     _q.withChildren.Clone(),
-		withOwner:        _q.withOwner.Clone(),
-		withExtras:       _q.withExtras.Clone(),
-		withValues:       _q.withValues.Clone(),
-		withMediaSources: _q.withMediaSources.Clone(),
-		withImages:       _q.withImages.Clone(),
-		withTrickplay:    _q.withTrickplay.Clone(),
-		withSegments:     _q.withSegments.Clone(),
-		withCredits:      _q.withCredits.Clone(),
-		withUserData:     _q.withUserData.Clone(),
-		withUser:         _q.withUser.Clone(),
-		withLinks:        _q.withLinks.Clone(),
-		withLinkedIn:     _q.withLinkedIn.Clone(),
+		config:              _q.config,
+		ctx:                 _q.ctx.Clone(),
+		order:               append([]item.OrderOption{}, _q.order...),
+		inters:              append([]Interceptor{}, _q.inters...),
+		predicates:          append([]predicate.Item{}, _q.predicates...),
+		withLibrary:         _q.withLibrary.Clone(),
+		withParent:          _q.withParent.Clone(),
+		withChildren:        _q.withChildren.Clone(),
+		withOwner:           _q.withOwner.Clone(),
+		withExtras:          _q.withExtras.Clone(),
+		withValues:          _q.withValues.Clone(),
+		withMediaSources:    _q.withMediaSources.Clone(),
+		withImages:          _q.withImages.Clone(),
+		withTrickplay:       _q.withTrickplay.Clone(),
+		withSegments:        _q.withSegments.Clone(),
+		withCredits:         _q.withCredits.Clone(),
+		withUserData:        _q.withUserData.Clone(),
+		withUser:            _q.withUser.Clone(),
+		withLinks:           _q.withLinks.Clone(),
+		withLinkedIn:        _q.withLinkedIn.Clone(),
+		withWanted:          _q.withWanted.Clone(),
+		withDownloads:       _q.withDownloads.Clone(),
+		withHistory:         _q.withHistory.Clone(),
+		withBlocklist:       _q.withBlocklist.Clone(),
+		withPendingReleases: _q.withPendingReleases.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -795,6 +920,61 @@ func (_q *ItemQuery) WithLinkedIn(opts ...func(*ItemLinkQuery)) *ItemQuery {
 	return _q
 }
 
+// WithWanted tells the query-builder to eager-load the nodes that are connected to
+// the "wanted" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithWanted(opts ...func(*WantedQuery)) *ItemQuery {
+	query := (&WantedClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withWanted = query
+	return _q
+}
+
+// WithDownloads tells the query-builder to eager-load the nodes that are connected to
+// the "downloads" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithDownloads(opts ...func(*DownloadQuery)) *ItemQuery {
+	query := (&DownloadClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withDownloads = query
+	return _q
+}
+
+// WithHistory tells the query-builder to eager-load the nodes that are connected to
+// the "history" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithHistory(opts ...func(*HistoryEventQuery)) *ItemQuery {
+	query := (&HistoryEventClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withHistory = query
+	return _q
+}
+
+// WithBlocklist tells the query-builder to eager-load the nodes that are connected to
+// the "blocklist" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithBlocklist(opts ...func(*BlocklistEntryQuery)) *ItemQuery {
+	query := (&BlocklistEntryClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withBlocklist = query
+	return _q
+}
+
+// WithPendingReleases tells the query-builder to eager-load the nodes that are connected to
+// the "pending_releases" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithPendingReleases(opts ...func(*PendingReleaseQuery)) *ItemQuery {
+	query := (&PendingReleaseClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPendingReleases = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -873,7 +1053,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	var (
 		nodes       = []*Item{}
 		_spec       = _q.querySpec()
-		loadedTypes = [15]bool{
+		loadedTypes = [20]bool{
 			_q.withLibrary != nil,
 			_q.withParent != nil,
 			_q.withChildren != nil,
@@ -889,6 +1069,11 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 			_q.withUser != nil,
 			_q.withLinks != nil,
 			_q.withLinkedIn != nil,
+			_q.withWanted != nil,
+			_q.withDownloads != nil,
+			_q.withHistory != nil,
+			_q.withBlocklist != nil,
+			_q.withPendingReleases != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -1010,6 +1195,40 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 		if err := _q.loadLinkedIn(ctx, query, nodes,
 			func(n *Item) { n.Edges.LinkedIn = []*ItemLink{} },
 			func(n *Item, e *ItemLink) { n.Edges.LinkedIn = append(n.Edges.LinkedIn, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withWanted; query != nil {
+		if err := _q.loadWanted(ctx, query, nodes, nil,
+			func(n *Item, e *Wanted) { n.Edges.Wanted = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withDownloads; query != nil {
+		if err := _q.loadDownloads(ctx, query, nodes,
+			func(n *Item) { n.Edges.Downloads = []*Download{} },
+			func(n *Item, e *Download) { n.Edges.Downloads = append(n.Edges.Downloads, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withHistory; query != nil {
+		if err := _q.loadHistory(ctx, query, nodes,
+			func(n *Item) { n.Edges.History = []*HistoryEvent{} },
+			func(n *Item, e *HistoryEvent) { n.Edges.History = append(n.Edges.History, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withBlocklist; query != nil {
+		if err := _q.loadBlocklist(ctx, query, nodes,
+			func(n *Item) { n.Edges.Blocklist = []*BlocklistEntry{} },
+			func(n *Item, e *BlocklistEntry) { n.Edges.Blocklist = append(n.Edges.Blocklist, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPendingReleases; query != nil {
+		if err := _q.loadPendingReleases(ctx, query, nodes,
+			func(n *Item) { n.Edges.PendingReleases = []*PendingRelease{} },
+			func(n *Item, e *PendingRelease) { n.Edges.PendingReleases = append(n.Edges.PendingReleases, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1465,6 +1684,153 @@ func (_q *ItemQuery) loadLinkedIn(ctx context.Context, query *ItemLinkQuery, nod
 	}
 	query.Where(predicate.ItemLink(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(item.LinkedInColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadWanted(ctx context.Context, query *WantedQuery, nodes []*Item, init func(*Item), assign func(*Item, *Wanted)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(wanted.FieldItemID)
+	}
+	query.Where(predicate.Wanted(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.WantedColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadDownloads(ctx context.Context, query *DownloadQuery, nodes []*Item, init func(*Item), assign func(*Item, *Download)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(download.FieldItemID)
+	}
+	query.Where(predicate.Download(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.DownloadsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadHistory(ctx context.Context, query *HistoryEventQuery, nodes []*Item, init func(*Item), assign func(*Item, *HistoryEvent)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(historyevent.FieldItemID)
+	}
+	query.Where(predicate.HistoryEvent(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.HistoryColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadBlocklist(ctx context.Context, query *BlocklistEntryQuery, nodes []*Item, init func(*Item), assign func(*Item, *BlocklistEntry)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(blocklistentry.FieldItemID)
+	}
+	query.Where(predicate.BlocklistEntry(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.BlocklistColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadPendingReleases(ctx context.Context, query *PendingReleaseQuery, nodes []*Item, init func(*Item), assign func(*Item, *PendingRelease)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pendingrelease.FieldItemID)
+	}
+	query.Where(predicate.PendingRelease(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.PendingReleasesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

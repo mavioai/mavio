@@ -90,6 +90,50 @@ var (
 			},
 		},
 	}
+	// BlocklistColumns holds the columns for the "blocklist" table.
+	BlocklistColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "item_ids", Type: field.TypeJSON, Nullable: true},
+		{Name: "source_title", Type: field.TypeString},
+		{Name: "quality", Type: field.TypeJSON},
+		{Name: "languages", Type: field.TypeJSON, Nullable: true},
+		{Name: "date", Type: field.TypeTime},
+		{Name: "published_date", Type: field.TypeTime, Nullable: true},
+		{Name: "size", Type: field.TypeInt64, Default: 0},
+		{Name: "protocol", Type: field.TypeString},
+		{Name: "indexer_id", Type: field.TypeString, Default: ""},
+		{Name: "indexer", Type: field.TypeString, Default: ""},
+		{Name: "indexer_flags", Type: field.TypeJSON, Nullable: true},
+		{Name: "message", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "torrent_info_hash", Type: field.TypeString, Default: ""},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// BlocklistTable holds the schema information for the "blocklist" table.
+	BlocklistTable = &schema.Table{
+		Name:       "blocklist",
+		Columns:    BlocklistColumns,
+		PrimaryKey: []*schema.Column{BlocklistColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "blocklist_items_blocklist",
+				Columns:    []*schema.Column{BlocklistColumns[14]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "blocklistentry_item_id_date",
+				Unique:  false,
+				Columns: []*schema.Column{BlocklistColumns[14], BlocklistColumns[5]},
+			},
+			{
+				Name:    "blocklistentry_date",
+				Unique:  false,
+				Columns: []*schema.Column{BlocklistColumns[5]},
+			},
+		},
+	}
 	// CreditsColumns holds the columns for the "credits" table.
 	CreditsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -131,6 +175,55 @@ var (
 			},
 		},
 	}
+	// CustomFormatsColumns holds the columns for the "custom_formats" table.
+	CustomFormatsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "include_when_renaming", Type: field.TypeBool, Default: false},
+		{Name: "specifications", Type: field.TypeJSON, Nullable: true},
+	}
+	// CustomFormatsTable holds the schema information for the "custom_formats" table.
+	CustomFormatsTable = &schema.Table{
+		Name:       "custom_formats",
+		Columns:    CustomFormatsColumns,
+		PrimaryKey: []*schema.Column{CustomFormatsColumns[0]},
+	}
+	// DelayProfilesColumns holds the columns for the "delay_profiles" table.
+	DelayProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "is_default", Type: field.TypeBool, Default: false},
+		{Name: "ord", Type: field.TypeInt, Default: 0},
+		{Name: "enable_usenet", Type: field.TypeBool, Default: false},
+		{Name: "enable_torrent", Type: field.TypeBool, Default: false},
+		{Name: "preferred_protocol", Type: field.TypeString},
+		{Name: "usenet_delay", Type: field.TypeInt64, Default: 0},
+		{Name: "torrent_delay", Type: field.TypeInt64, Default: 0},
+		{Name: "bypass_if_highest_quality", Type: field.TypeBool, Default: false},
+		{Name: "bypass_if_above_custom_format_score", Type: field.TypeBool, Default: false},
+		{Name: "minimum_custom_format_score", Type: field.TypeInt, Default: 0},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+	}
+	// DelayProfilesTable holds the schema information for the "delay_profiles" table.
+	DelayProfilesTable = &schema.Table{
+		Name:       "delay_profiles",
+		Columns:    DelayProfilesColumns,
+		PrimaryKey: []*schema.Column{DelayProfilesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "delayprofile_is_default",
+				Unique:  true,
+				Columns: []*schema.Column{DelayProfilesColumns[1]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "is_default",
+				},
+			},
+			{
+				Name:    "delayprofile_ord",
+				Unique:  false,
+				Columns: []*schema.Column{DelayProfilesColumns[2]},
+			},
+		},
+	}
 	// DisplayPreferencesColumns holds the columns for the "display_preferences" table.
 	DisplayPreferencesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -158,6 +251,57 @@ var (
 				Name:    "displaypreferences_user_id_client_view",
 				Unique:  true,
 				Columns: []*schema.Column{DisplayPreferencesColumns[5], DisplayPreferencesColumns[1], DisplayPreferencesColumns[2]},
+			},
+		},
+	}
+	// DownloadsColumns holds the columns for the "downloads" table.
+	DownloadsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "plugin_id", Type: field.TypeString},
+		{Name: "client_id", Type: field.TypeString},
+		{Name: "download_id", Type: field.TypeString},
+		{Name: "item_ids", Type: field.TypeJSON, Nullable: true},
+		{Name: "title", Type: field.TypeString, Default: ""},
+		{Name: "indexer_id", Type: field.TypeString, Default: ""},
+		{Name: "indexer", Type: field.TypeString, Default: ""},
+		{Name: "protocol", Type: field.TypeString},
+		{Name: "quality", Type: field.TypeJSON},
+		{Name: "languages", Type: field.TypeJSON, Nullable: true},
+		{Name: "size", Type: field.TypeInt64, Default: 0},
+		{Name: "state", Type: field.TypeString},
+		{Name: "messages", Type: field.TypeJSON, Nullable: true},
+		{Name: "grabbed_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// DownloadsTable holds the schema information for the "downloads" table.
+	DownloadsTable = &schema.Table{
+		Name:       "downloads",
+		Columns:    DownloadsColumns,
+		PrimaryKey: []*schema.Column{DownloadsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "downloads_items_downloads",
+				Columns:    []*schema.Column{DownloadsColumns[16]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "download_plugin_id_client_id_download_id",
+				Unique:  true,
+				Columns: []*schema.Column{DownloadsColumns[1], DownloadsColumns[2], DownloadsColumns[3]},
+			},
+			{
+				Name:    "download_item_id",
+				Unique:  false,
+				Columns: []*schema.Column{DownloadsColumns[16]},
+			},
+			{
+				Name:    "download_grabbed_at",
+				Unique:  false,
+				Columns: []*schema.Column{DownloadsColumns[14]},
 			},
 		},
 	}
@@ -194,6 +338,55 @@ var (
 				Name:    "folderstate_library_id_generation",
 				Unique:  false,
 				Columns: []*schema.Column{FolderStatesColumns[6], FolderStatesColumns[5]},
+			},
+		},
+	}
+	// HistoryEventsColumns holds the columns for the "history_events" table.
+	HistoryEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "type", Type: field.TypeString},
+		{Name: "parent_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "date", Type: field.TypeTime},
+		{Name: "source_title", Type: field.TypeString, Default: ""},
+		{Name: "quality", Type: field.TypeJSON},
+		{Name: "languages", Type: field.TypeJSON, Nullable: true},
+		{Name: "download_id", Type: field.TypeString, Default: ""},
+		{Name: "data", Type: field.TypeJSON, Nullable: true},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// HistoryEventsTable holds the schema information for the "history_events" table.
+	HistoryEventsTable = &schema.Table{
+		Name:       "history_events",
+		Columns:    HistoryEventsColumns,
+		PrimaryKey: []*schema.Column{HistoryEventsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "history_events_items_history",
+				Columns:    []*schema.Column{HistoryEventsColumns[9]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "historyevent_item_id_date",
+				Unique:  false,
+				Columns: []*schema.Column{HistoryEventsColumns[9], HistoryEventsColumns[3]},
+			},
+			{
+				Name:    "historyevent_parent_id_date",
+				Unique:  false,
+				Columns: []*schema.Column{HistoryEventsColumns[2], HistoryEventsColumns[3]},
+			},
+			{
+				Name:    "historyevent_download_id",
+				Unique:  false,
+				Columns: []*schema.Column{HistoryEventsColumns[7]},
+			},
+			{
+				Name:    "historyevent_date",
+				Unique:  false,
+				Columns: []*schema.Column{HistoryEventsColumns[3]},
 			},
 		},
 	}
@@ -590,6 +783,37 @@ var (
 			},
 		},
 	}
+	// PendingReleasesColumns holds the columns for the "pending_releases" table.
+	PendingReleasesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "item_ids", Type: field.TypeJSON, Nullable: true},
+		{Name: "title", Type: field.TypeString, Default: ""},
+		{Name: "added", Type: field.TypeTime},
+		{Name: "reason", Type: field.TypeString},
+		{Name: "release", Type: field.TypeString, Size: 2147483647},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// PendingReleasesTable holds the schema information for the "pending_releases" table.
+	PendingReleasesTable = &schema.Table{
+		Name:       "pending_releases",
+		Columns:    PendingReleasesColumns,
+		PrimaryKey: []*schema.Column{PendingReleasesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "pending_releases_items_pending_releases",
+				Columns:    []*schema.Column{PendingReleasesColumns[6]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "pendingrelease_item_id_added",
+				Unique:  false,
+				Columns: []*schema.Column{PendingReleasesColumns[6], PendingReleasesColumns[3]},
+			},
+		},
+	}
 	// PeopleColumns holds the columns for the "people" table.
 	PeopleColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -629,6 +853,92 @@ var (
 		Name:       "plugin_configs",
 		Columns:    PluginConfigsColumns,
 		PrimaryKey: []*schema.Column{PluginConfigsColumns[0]},
+	}
+	// QualityDefinitionsColumns holds the columns for the "quality_definitions" table.
+	QualityDefinitionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "quality", Type: field.TypeInt},
+		{Name: "title", Type: field.TypeString},
+		{Name: "min_size", Type: field.TypeFloat64, Default: 0},
+		{Name: "max_size", Type: field.TypeFloat64, Default: 0},
+		{Name: "preferred_size", Type: field.TypeFloat64, Default: 0},
+	}
+	// QualityDefinitionsTable holds the schema information for the "quality_definitions" table.
+	QualityDefinitionsTable = &schema.Table{
+		Name:       "quality_definitions",
+		Columns:    QualityDefinitionsColumns,
+		PrimaryKey: []*schema.Column{QualityDefinitionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "qualitydefinition_kind_quality",
+				Unique:  true,
+				Columns: []*schema.Column{QualityDefinitionsColumns[1], QualityDefinitionsColumns[2]},
+			},
+		},
+	}
+	// QualityProfilesColumns holds the columns for the "quality_profiles" table.
+	QualityProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "upgrade_allowed", Type: field.TypeBool, Default: false},
+		{Name: "cutoff", Type: field.TypeInt, Default: 0},
+		{Name: "items", Type: field.TypeJSON},
+		{Name: "min_format_score", Type: field.TypeInt, Default: 0},
+		{Name: "cutoff_format_score", Type: field.TypeInt, Default: 0},
+		{Name: "min_upgrade_format_score", Type: field.TypeInt, Default: 0},
+		{Name: "format_scores", Type: field.TypeJSON, Nullable: true},
+		{Name: "language", Type: field.TypeString, Default: ""},
+	}
+	// QualityProfilesTable holds the schema information for the "quality_profiles" table.
+	QualityProfilesTable = &schema.Table{
+		Name:       "quality_profiles",
+		Columns:    QualityProfilesColumns,
+		PrimaryKey: []*schema.Column{QualityProfilesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "qualityprofile_kind_name",
+				Unique:  true,
+				Columns: []*schema.Column{QualityProfilesColumns[1], QualityProfilesColumns[2]},
+			},
+		},
+	}
+	// ReleaseProfilesColumns holds the columns for the "release_profiles" table.
+	ReleaseProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Default: ""},
+		{Name: "enabled", Type: field.TypeBool, Default: false},
+		{Name: "required", Type: field.TypeJSON, Nullable: true},
+		{Name: "ignored", Type: field.TypeJSON, Nullable: true},
+		{Name: "indexer_id", Type: field.TypeString, Default: ""},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+	}
+	// ReleaseProfilesTable holds the schema information for the "release_profiles" table.
+	ReleaseProfilesTable = &schema.Table{
+		Name:       "release_profiles",
+		Columns:    ReleaseProfilesColumns,
+		PrimaryKey: []*schema.Column{ReleaseProfilesColumns[0]},
+	}
+	// RemotePathMappingsColumns holds the columns for the "remote_path_mappings" table.
+	RemotePathMappingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "host", Type: field.TypeString},
+		{Name: "remote_path", Type: field.TypeString},
+		{Name: "local_path", Type: field.TypeString},
+	}
+	// RemotePathMappingsTable holds the schema information for the "remote_path_mappings" table.
+	RemotePathMappingsTable = &schema.Table{
+		Name:       "remote_path_mappings",
+		Columns:    RemotePathMappingsColumns,
+		PrimaryKey: []*schema.Column{RemotePathMappingsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "remotepathmapping_host_remote_path",
+				Unique:  true,
+				Columns: []*schema.Column{RemotePathMappingsColumns[1], RemotePathMappingsColumns[2]},
+			},
+		},
 	}
 	// SettingsColumns holds the columns for the "settings" table.
 	SettingsColumns = []*schema.Column{
@@ -738,14 +1048,49 @@ var (
 			},
 		},
 	}
+	// WantedColumns holds the columns for the "wanted" table.
+	WantedColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "minimum_availability", Type: field.TypeString, Default: ""},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "added_at", Type: field.TypeTime},
+		{Name: "last_searched_at", Type: field.TypeTime, Nullable: true},
+		{Name: "item_id", Type: field.TypeUUID, Unique: true},
+		{Name: "quality_profile_id", Type: field.TypeUUID},
+	}
+	// WantedTable holds the schema information for the "wanted" table.
+	WantedTable = &schema.Table{
+		Name:       "wanted",
+		Columns:    WantedColumns,
+		PrimaryKey: []*schema.Column{WantedColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "wanted_items_wanted",
+				Columns:    []*schema.Column{WantedColumns[5]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "wanted_quality_profiles_wanted",
+				Columns:    []*schema.Column{WantedColumns[6]},
+				RefColumns: []*schema.Column{QualityProfilesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		APIKeysTable,
 		ActivitiesTable,
 		AuthSessionsTable,
+		BlocklistTable,
 		CreditsTable,
+		CustomFormatsTable,
+		DelayProfilesTable,
 		DisplayPreferencesTable,
+		DownloadsTable,
 		FolderStatesTable,
+		HistoryEventsTable,
 		ImagesTable,
 		ItemsTable,
 		ItemLinksTable,
@@ -754,12 +1099,18 @@ var (
 		LibrariesTable,
 		MediaSegmentsTable,
 		MediaSourcesTable,
+		PendingReleasesTable,
 		PeopleTable,
 		PluginConfigsTable,
+		QualityDefinitionsTable,
+		QualityProfilesTable,
+		ReleaseProfilesTable,
+		RemotePathMappingsTable,
 		SettingsTable,
 		TrickplayTable,
 		UsersTable,
 		UserDataTable,
+		WantedTable,
 	}
 )
 
@@ -775,18 +1126,36 @@ func init() {
 	AuthSessionsTable.Annotation = &entsql.Annotation{
 		Table: "auth_sessions",
 	}
+	BlocklistTable.ForeignKeys[0].RefTable = ItemsTable
+	BlocklistTable.Annotation = &entsql.Annotation{
+		Table: "blocklist",
+	}
 	CreditsTable.ForeignKeys[0].RefTable = ItemsTable
 	CreditsTable.ForeignKeys[1].RefTable = PeopleTable
 	CreditsTable.Annotation = &entsql.Annotation{
 		Table: "credits",
 	}
+	CustomFormatsTable.Annotation = &entsql.Annotation{
+		Table: "custom_formats",
+	}
+	DelayProfilesTable.Annotation = &entsql.Annotation{
+		Table: "delay_profiles",
+	}
 	DisplayPreferencesTable.ForeignKeys[0].RefTable = UsersTable
 	DisplayPreferencesTable.Annotation = &entsql.Annotation{
 		Table: "display_preferences",
 	}
+	DownloadsTable.ForeignKeys[0].RefTable = ItemsTable
+	DownloadsTable.Annotation = &entsql.Annotation{
+		Table: "downloads",
+	}
 	FolderStatesTable.ForeignKeys[0].RefTable = LibrariesTable
 	FolderStatesTable.Annotation = &entsql.Annotation{
 		Table: "folder_states",
+	}
+	HistoryEventsTable.ForeignKeys[0].RefTable = ItemsTable
+	HistoryEventsTable.Annotation = &entsql.Annotation{
+		Table: "history_events",
 	}
 	ImagesTable.ForeignKeys[0].RefTable = ItemsTable
 	ImagesTable.ForeignKeys[1].RefTable = PeopleTable
@@ -823,11 +1192,27 @@ func init() {
 	MediaSourcesTable.Annotation = &entsql.Annotation{
 		Table: "media_sources",
 	}
+	PendingReleasesTable.ForeignKeys[0].RefTable = ItemsTable
+	PendingReleasesTable.Annotation = &entsql.Annotation{
+		Table: "pending_releases",
+	}
 	PeopleTable.Annotation = &entsql.Annotation{
 		Table: "people",
 	}
 	PluginConfigsTable.Annotation = &entsql.Annotation{
 		Table: "plugin_configs",
+	}
+	QualityDefinitionsTable.Annotation = &entsql.Annotation{
+		Table: "quality_definitions",
+	}
+	QualityProfilesTable.Annotation = &entsql.Annotation{
+		Table: "quality_profiles",
+	}
+	ReleaseProfilesTable.Annotation = &entsql.Annotation{
+		Table: "release_profiles",
+	}
+	RemotePathMappingsTable.Annotation = &entsql.Annotation{
+		Table: "remote_path_mappings",
 	}
 	SettingsTable.Annotation = &entsql.Annotation{
 		Table: "settings",
@@ -843,5 +1228,10 @@ func init() {
 	UserDataTable.ForeignKeys[1].RefTable = UsersTable
 	UserDataTable.Annotation = &entsql.Annotation{
 		Table: "user_data",
+	}
+	WantedTable.ForeignKeys[0].RefTable = ItemsTable
+	WantedTable.ForeignKeys[1].RefTable = QualityProfilesTable
+	WantedTable.Annotation = &entsql.Annotation{
+		Table: "wanted",
 	}
 }

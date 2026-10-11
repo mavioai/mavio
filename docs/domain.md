@@ -42,6 +42,10 @@ erDiagram
 | `ServerSettings` | What administrators change while the server runs: transcoding, network, plugin catalogs, the password reset plugin |
 | `APIKey` | A token an integration calls the API with, as the administrator who created it |
 | `Activity` | Something that happened on the server, kept in the activity log |
+| `QualityDefinition`, `QualityProfile`, `CustomFormat`, `DelayProfile`, `ReleaseProfile` | What releases are wanted and how they rank (§13) |
+| `Wanted` | How a monitored movie or series is acquired: its quality profile, minimum availability and tags |
+| `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | A tracked download, an acquisition event, a release not to grab again, a release kept to grab later |
+| `RemotePathMapping` | How a download client's paths map to the server's |
 
 ---
 
@@ -76,6 +80,14 @@ All enumerations are string types with stable lowercase values (`DisplayOrder` k
 | `SubtitleMode` | `""` (follow stream flags), `always`, `foreign`, `forced`, `none`, `smart` |
 | `SortField` | `name`, `date_added`, `premiere_date`, `production_year`, `community_rating`, `runtime`, `index`, `random`, `last_played`, `play_count`, `list_order` |
 | `JobState` | `pending`, `running`, `succeeded`, `failed` |
+| `Protocol` | `usenet`, `torrent` |
+| `CustomFormatSpecKind` | `release_title`, `edition`, `language`, `indexer_flag`, `source`, `resolution`, `quality_modifier`, `size`, `release_group`, `year`, `release_type` |
+| `MovieAvailability` | `announced`, `in_cinemas`, `released` |
+| `DownloadState` | `downloading`, `import_blocked`, `import_pending`, `importing`, `imported`, `failed_pending`, `failed`, `ignored` |
+| `HistoryEventType` | `grabbed`, `imported`, `download_failed`, `file_deleted`, `file_renamed`, `ignored` |
+| `PendingReason` | `delay`, `client_unavailable`, `fallback` |
+| `ProperDownload` | `prefer_and_upgrade`, `do_not_upgrade`, `do_not_prefer` |
+| `ColonReplacement` | `delete`, `dash`, `space_dash`, `space_dash_space`, `smart` |
 | `Provider` | `tmdb`, `tmdb_collection`, `imdb`, `tvdb`, `tvmaze`, `anidb`, `anilist`, `anisearch` (anime databases, one entry per season), `musicbrainz_artist`, `musicbrainz_album_artist`, `musicbrainz_album`, `musicbrainz_release_group`, `musicbrainz_track` (well-known; plugins may add others) |
 
 ---
@@ -233,6 +245,14 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `ActivityRepository` | `Add`, `List` (paged, newest first, by time, user and least severity), `Purge` of activities before a time |
 | `TrickplayRepository` | `Put` an item's sheets at a width (replacing the earlier), `List` an item's (narrowest first), `Delete` them |
 | `MediaSegmentRepository` | `List` an item's segments by start, `Replace` them |
+| `QualityDefinitionRepository` | `List` a kind's definitions (none until stored), `Replace` them |
+| `QualityProfileRepository`, `CustomFormatRepository`, `DelayProfileRepository`, `ReleaseProfileRepository` | `Get`, `List`, `Put` (insert or replace by ID), `Delete`; see §13 for their constraints |
+| `WantedRepository` | `Get` (`ErrNotFound` when never wanted), `List` some items' or all, `Put`, `Delete`; deleting the item deletes it |
+| `DownloadRepository` | `Get`, `GetByDownloadID` (by plugin, client and the client's ID), `List` (paged, by item and state, most recently grabbed first), `Put`, `Delete` |
+| `HistoryRepository` | `Add`, `List` (paged, newest first, by items or their series, types, download ID and time), `Purge` of events before a time |
+| `BlocklistRepository` | `Add`, `List` (paged, newest first, an item's or all), `Delete` |
+| `PendingReleaseRepository` | `List` an item's or all (oldest first), `Add`, `Delete` |
+| `RemotePathMappingRepository` | `List`, `Put`, `Delete` |
 
 * **Transactions**: `Store.InTx` runs a function with a `Store` bound to one transaction; returning an error rolls it back.
 * **Replace semantics**: `Replace*` methods set the complete set for an owner, removing anything not in the new set — scans and metadata refreshes always write whole sets.
@@ -289,6 +309,7 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 * `Network`: the `ServerName` shown to clients (empty means the host name), the `BaseURL` a reverse proxy serves the server under (a clean path such as `/mavio`), an `HTTPSPort` with its PEM `CertificatePath` and `KeyPath`, and `LocalDiscovery`.
 * `PluginCatalogs`: the http or https URLs of the catalogs plugins are installed from.
 * `PasswordResetPlugin`: the ID of the plugin that delivers the PINs resetting forgotten passwords; empty when users cannot reset them.
+* `Acquisition`: how releases are chosen, downloaded and imported (§13.4).
 * `Validate` checks the known values and ranges.
 
 ### 12.2 API Keys
@@ -296,3 +317,33 @@ An `APIKey` lets an integration call the API without signing in: its token, show
 
 ### 12.3 Activity Log
 An `Activity` is something that happened: a dotted `Type`, a `Severity` (`info`, `warning`, `error`), a `Title` and `Message`, the `UserID` and `ItemID` it concerns and type-specific `Attributes`. The log keeps sign-ins (`user.login`) and failed ones (`user.login_failed`, a warning), API keys created and revoked (`apikey.created`, `apikey.revoked`), account changes (`user.created`, `user.updated`, `user.deleted`, `user.password_changed`), plugins installed, updated, configured, uninstalled and failing to start (`plugin.installed`, `plugin.updated`, `plugin.configured`, `plugin.uninstalled`, `plugin.failed`), settings changes (`settings.updated`), backups (`backup.created`), playbacks starting and stopping (`playback.started`, `playback.stopped`), and failed task runs and subtitle downloads (`task.failed`, `subtitle.download_failed`). It keeps them for 90 days, and they are sent to notification plugins as events; event-consuming plugins also get the events left out of the log (see [Plugins §4](plugins.md#4-events)).
+
+---
+
+## 13. Acquisition
+
+The server keeps what `libs/acquire` decides with and what happens to the releases it grabs. Qualities are Radarr's quality IDs, for series too; languages are the names `libs/release` gives them ("English", "Portuguese (Brazil)"); tags are free-form labels, shared by movies, series and the profiles that apply to them; indexers are named `<plugin ID>/<indexer ID>`.
+
+### 13.1 Profiles and Formats
+* A `QualityDefinition` bounds the size of a quality, for movies or for series, in megabytes per minute of runtime (`MinSize`, `MaxSize`, `PreferredSize`, 0 for none). None are stored until the server stores the defaults of `libs/acquire`.
+* A `QualityProfile`, for movies or for series, ranks its `Items`, qualities and groups of qualities (group IDs from 1000), lowest first, allowing some; `Cutoff` names the quality or group at which upgrades stop, `UpgradeAllowed` whether they happen at all. `FormatScores` score custom formats; releases need `MinFormatScore`, upgrades stop at `CutoffFormatScore` and must gain `MinUpgradeFormatScore`. `Language` is the language movie releases need: a name, `Original`, or empty for any. Names are unique per kind; a profile wanted items use cannot be deleted.
+* A `CustomFormat` is a named set of `Specifications`, each matching a kind of fact (release title, edition, language, indexer flag, source, resolution, quality modifier, size, release group, year, release type), negated or required. Names are unique; deleting a format removes its scores from profiles.
+* A `DelayProfile` enables protocols, prefers one, and delays releases of each protocol, unless they are of the profile's best quality or score enough, for the items sharing one of its `Tags`; the `Default` profile has no tags, comes last and cannot be deleted.
+* A `ReleaseProfile` requires or ignores terms (plain or `/regex/flags`) in release titles, for the items sharing one of its tags (all when none) and the releases of one indexer (all when none).
+
+### 13.2 Wanted Items
+A monitored movie or series (`Item.Monitored`) is acquired as its `Wanted` says: its `QualityProfileID`, a movie's `MinimumAvailability` (`announced`, `in_cinemas`, `released`), its `Tags`, `AddedAt` and `LastSearchedAt`. A wanted movie without a file is a virtual item (§4.8).
+
+### 13.3 Downloads, History and the Blocklist
+* A `Download` is a grabbed release, tracked from the grab until it is imported, fails or is ignored: its download client (`PluginID`, `ClientID`) and the client's `DownloadID`, its item and episodes, title, indexer, protocol, quality, languages and size, and its `State` (`downloading`, `import_blocked`, `import_pending`, `importing`, `imported`, `failed_pending`, `failed`, `ignored`) with `Messages`. A client's download is tracked once.
+* A `HistoryEvent` records a grab, an import from a download folder, a failed or ignored download, or a file deleted or renamed, for a movie or an episode (with its series as `ParentID`): the release's `SourceTitle`, quality and languages, the `DownloadID` and type-specific `Data`.
+* A `BlocklistEntry` is a release not to grab again for an item: its title, quality, languages, size, protocol, indexer and flags, publish date, torrent hash and why it was blocklisted.
+* A `PendingRelease` is a release kept to grab later: held by a delay profile, waiting for a download client, or kept as a fallback should better releases fail. `Release` is the release as `libs/acquire` encodes it.
+* Deleting an item deletes its wanted state, downloads, history, blocklist entries and pending releases.
+
+### 13.4 Settings
+`AcquisitionSettings`, part of the server settings, are Radarr's: how propers and repacks are treated (`prefer_and_upgrade`, `do_not_upgrade`, `do_not_prefer`), whether indexer flags are preferred, completed download handling and new searches after failures, the maximum release size, the minimum age and retention of usenet releases, hardcoded subtitles allowed or whitelisted, the free space an import must leave, the delay after which movies count as available, the RSS sync interval (10–120 minutes, 0 disabling it) and the download check interval, the recycle bin and its cleanup, hard links, extra files and empty folders, and `Naming`: whether movie files are renamed, illegal characters replaced, colons replaced (`delete`, `dash`, `space_dash`, `space_dash_space`, `smart`), and the movie folder and file templates.
+
+### 13.5 Remote Path Mappings
+A `RemotePathMapping` maps a folder a download client on `Host` reports (`RemotePath`) to the absolute folder the server sees (`LocalPath`). A host's remote path is mapped once.
+

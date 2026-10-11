@@ -15,9 +15,14 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/activity"
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
+	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
+	"github.com/mavioai/mavio/libs/store/internal/ent/download"
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
@@ -26,12 +31,18 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
+	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
+	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
+	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
+	"github.com/mavioai/mavio/libs/store/internal/ent/wanted"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -95,9 +106,14 @@ func checkColumn(t, c string) error {
 			apikey.Table:             apikey.ValidColumn,
 			activity.Table:           activity.ValidColumn,
 			authsession.Table:        authsession.ValidColumn,
+			blocklistentry.Table:     blocklistentry.ValidColumn,
 			credit.Table:             credit.ValidColumn,
+			customformat.Table:       customformat.ValidColumn,
+			delayprofile.Table:       delayprofile.ValidColumn,
 			displaypreferences.Table: displaypreferences.ValidColumn,
+			download.Table:           download.ValidColumn,
 			folderstate.Table:        folderstate.ValidColumn,
+			historyevent.Table:       historyevent.ValidColumn,
 			image.Table:              image.ValidColumn,
 			item.Table:               item.ValidColumn,
 			itemlink.Table:           itemlink.ValidColumn,
@@ -106,12 +122,18 @@ func checkColumn(t, c string) error {
 			library.Table:            library.ValidColumn,
 			mediasegment.Table:       mediasegment.ValidColumn,
 			mediasource.Table:        mediasource.ValidColumn,
+			pendingrelease.Table:     pendingrelease.ValidColumn,
 			person.Table:             person.ValidColumn,
 			pluginconfig.Table:       pluginconfig.ValidColumn,
+			qualitydefinition.Table:  qualitydefinition.ValidColumn,
+			qualityprofile.Table:     qualityprofile.ValidColumn,
+			releaseprofile.Table:     releaseprofile.ValidColumn,
+			remotepathmapping.Table:  remotepathmapping.ValidColumn,
 			setting.Table:            setting.ValidColumn,
 			trickplay.Table:          trickplay.ValidColumn,
 			user.Table:               user.ValidColumn,
 			userdata.Table:           userdata.ValidColumn,
+			wanted.Table:             wanted.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

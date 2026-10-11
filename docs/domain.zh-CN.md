@@ -41,6 +41,10 @@ erDiagram
 | `ServerSettings` | 管理员在服务端运行时修改的设置：转码、网络、插件目录、密码重置插件 |
 | `APIKey` | 集成调用 API 所用的令牌，以创建它的管理员身份行事 |
 | `Activity` | 服务端上发生的事情，记录在活动日志中 |
+| `QualityDefinition`、`QualityProfile`、`CustomFormat`、`DelayProfile`、`ReleaseProfile` | 想要哪些发布及其排序（§13） |
+| `Wanted` | 被监控的电影或剧集如何获取：其质量档案、最低可用状态与标签 |
+| `Download` / `HistoryEvent` / `BlocklistEntry` / `PendingRelease` | 被跟踪的下载、获取事件、不再抓取的发布、留待以后抓取的发布 |
+| `RemotePathMapping` | 下载客户端的路径如何映射到服务端的路径 |
 | `DisplayPreferences` | 用户对某个客户端如何显示某个视图的设置 |
 
 ---
@@ -76,6 +80,14 @@ erDiagram
 | `SubtitleMode` | `""`（遵循流标记）、`always`、`foreign`、`forced`、`none`、`smart` |
 | `SortField` | `name`、`date_added`、`premiere_date`、`production_year`、`community_rating`、`runtime`、`index`、`random`、`last_played`、`play_count`、`list_order` |
 | `JobState` | `pending`、`running`、`succeeded`、`failed` |
+| `Protocol` | `usenet`、`torrent` |
+| `CustomFormatSpecKind` | `release_title`、`edition`、`language`、`indexer_flag`、`source`、`resolution`、`quality_modifier`、`size`、`release_group`、`year`、`release_type` |
+| `MovieAvailability` | `announced`、`in_cinemas`、`released` |
+| `DownloadState` | `downloading`、`import_blocked`、`import_pending`、`importing`、`imported`、`failed_pending`、`failed`、`ignored` |
+| `HistoryEventType` | `grabbed`、`imported`、`download_failed`、`file_deleted`、`file_renamed`、`ignored` |
+| `PendingReason` | `delay`、`client_unavailable`、`fallback` |
+| `ProperDownload` | `prefer_and_upgrade`、`do_not_upgrade`、`do_not_prefer` |
+| `ColonReplacement` | `delete`、`dash`、`space_dash`、`space_dash_space`、`smart` |
 | `Provider` | `tmdb`、`tmdb_collection`、`imdb`、`tvdb`、`tvmaze`、`anidb`、`anilist`、`anisearch`（动画数据库，每季一个条目）、`musicbrainz_artist`、`musicbrainz_album_artist`、`musicbrainz_album`、`musicbrainz_release_group`、`musicbrainz_track`（常用取值；插件可使用其他名称） |
 
 ---
@@ -233,6 +245,14 @@ erDiagram
 | `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
 | `TrickplayRepository` | `Put` 某条目在某宽度下的拼图（替换之前的）、`List` 某条目的拼图（最窄的在前）、`Delete` 删除 |
 | `MediaSegmentRepository` | `List` 某条目的片段（按开始时间）、`Replace` 替换 |
+| `QualityDefinitionRepository` | `List` 某类型的定义（保存之前为空）、`Replace` 替换 |
+| `QualityProfileRepository`、`CustomFormatRepository`、`DelayProfileRepository`、`ReleaseProfileRepository` | `Get`、`List`、`Put`（按 ID 插入或替换）、`Delete`；约束见 §13 |
+| `WantedRepository` | `Get`（从未想要时为 `ErrNotFound`）、`List` 某些条目或全部、`Put`、`Delete`；删除条目时一并删除 |
+| `DownloadRepository` | `Get`、`GetByDownloadID`（按插件、客户端与客户端的 ID）、`List`（分页，按条目与状态，最近抓取的在前）、`Put`、`Delete` |
+| `HistoryRepository` | `Add`、`List`（分页，最新的在前，按条目或其剧集、类型、下载 ID 与时间）、`Purge` 清除某时间之前的事件 |
+| `BlocklistRepository` | `Add`、`List`（分页，最新的在前，某条目的或全部）、`Delete` |
+| `PendingReleaseRepository` | `List` 某条目的或全部（最早的在前）、`Add`、`Delete` |
+| `RemotePathMappingRepository` | `List`、`Put`、`Delete` |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
 * **Replace 语义**：`Replace*` 方法设置某个所有者的完整集合，删除不在新集合中的内容——扫描与元数据刷新总是整组写入。
@@ -289,6 +309,7 @@ erDiagram
 * `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort` 及其 PEM 格式的 `CertificatePath` 与 `KeyPath`，以及 `LocalDiscovery`。
 * `PluginCatalogs`：安装插件所用插件目录的 http 或 https URL。
 * `PasswordResetPlugin`：投递用于重置遗忘密码的 PIN 的插件 ID；为空时用户无法重置密码。
+* `Acquisition`：如何选择、下载与入库发布（§13.4）。
 * `Validate` 检查已知取值与范围。
 
 ### 12.2 API 密钥
@@ -296,3 +317,33 @@ erDiagram
 
 ### 12.3 活动日志
 `Activity` 是发生过的一件事：点分的 `Type`、`Severity`（`info`、`warning`、`error`）、`Title` 与 `Message`、相关的 `UserID` 与 `ItemID`，以及因类型而异的 `Attributes`。日志记录登录（`user.login`）与失败的登录（`user.login_failed`，警告）、API 密钥的创建与吊销（`apikey.created`、`apikey.revoked`）、账户变更（`user.created`、`user.updated`、`user.deleted`、`user.password_changed`）、插件的安装、更新、配置、卸载与启动失败（`plugin.installed`、`plugin.updated`、`plugin.configured`、`plugin.uninstalled`、`plugin.failed`）、设置的修改（`settings.updated`）、备份（`backup.created`）、播放的开始与停止（`playback.started`、`playback.stopped`），以及失败的任务运行与字幕下载（`task.failed`、`subtitle.download_failed`）。活动保留 90 天，并作为事件发送给通知插件；消费事件的插件还会收到不进入日志的事件（见[插件平台 §4](plugins.zh-CN.md#4-事件)）。
+
+---
+
+## 13. 资源获取
+
+服务端保存 `libs/acquire` 做决策所依据的内容，以及它所抓取的发布后续的经过。质量使用 Radarr 的质量 ID，剧集也是如此；语言使用 `libs/release` 给出的名称（"English"、"Portuguese (Brazil)"）；标签是自由格式的标记，由电影、剧集以及适用于它们的档案共用；索引器以 `<插件 ID>/<索引器 ID>` 命名。
+
+### 13.1 档案与格式
+* `QualityDefinition` 限定某个质量的大小，分电影与剧集，以每分钟时长的兆字节计（`MinSize`、`MaxSize`、`PreferredSize`，0 表示不限）。在服务端保存 `libs/acquire` 的默认值之前不存在任何定义。
+* `QualityProfile` 分电影与剧集，对其 `Items`（质量以及质量组，组 ID 从 1000 起）从低到高排序，并允许其中一部分；`Cutoff` 指出升级停止的质量或组，`UpgradeAllowed` 决定是否升级。`FormatScores` 为 custom format 打分；发布须达到 `MinFormatScore`，升级在 `CutoffFormatScore` 处停止，且每次至少提高 `MinUpgradeFormatScore`。`Language` 是电影发布须具备的语言：语言名称、`Original`，或为空表示任意。名称在同一类型内唯一；被想要的条目使用中的档案不能删除。
+* `CustomFormat` 是一组具名的 `Specifications`，每项匹配一类事实（发布标题、版本、语言、索引器标志、来源、分辨率、质量修饰、大小、发布组、年份、发布类型），可取反或设为必需。名称唯一；删除格式时从各档案中移除其分数。
+* `DelayProfile` 为与其某个 `Tags` 相同的条目启用协议、指定偏好的协议，并按协议延迟发布，除非发布已是档案中的最佳质量或分数足够高；`Default` 档案没有标签，排在最后且不能删除。
+* `ReleaseProfile` 要求或忽略发布标题中的词（普通词或 `/regex/flags`），适用于与其某个标签相同的条目（无标签时为全部），以及某个索引器的发布（未指定时为全部）。
+
+### 13.2 想要的条目
+被监控的电影或剧集（`Item.Monitored`）按其 `Wanted` 获取：`QualityProfileID`、电影的 `MinimumAvailability`（`announced`、`in_cinemas`、`released`）、`Tags`、`AddedAt` 与 `LastSearchedAt`。没有文件的想要的电影是虚拟条目（§4.8）。
+
+### 13.3 下载、历史与黑名单
+* `Download` 是被抓取的发布，从抓取起被跟踪，直到入库、失败或被忽略：其下载客户端（`PluginID`、`ClientID`）与客户端的 `DownloadID`、其条目与剧集、标题、索引器、协议、质量、语言与大小，以及 `State`（`downloading`、`import_blocked`、`import_pending`、`importing`、`imported`、`failed_pending`、`failed`、`ignored`）与 `Messages`。客户端的同一个下载只跟踪一次。
+* `HistoryEvent` 记录电影或单集（其剧集为 `ParentID`）的一次抓取、从下载目录入库、下载失败或被忽略、文件被删除或改名：发布的 `SourceTitle`、质量与语言、`DownloadID` 以及与类型相关的 `Data`。
+* `BlocklistEntry` 是某条目不再抓取的发布：其标题、质量、语言、大小、协议、索引器与标志、发布日期、种子哈希以及被拉黑的原因。
+* `PendingRelease` 是留待以后抓取的发布：被 delay profile 延迟、等待下载客户端，或作为更好的发布失败时的后备。`Release` 是 `libs/acquire` 编码后的发布。
+* 删除条目时一并删除其想要状态、下载、历史、黑名单条目与待定发布。
+
+### 13.4 设置
+`AcquisitionSettings` 属于服务器设置，沿用 Radarr 的设置：如何对待 proper 与 repack（`prefer_and_upgrade`、`do_not_upgrade`、`do_not_prefer`）、是否偏好索引器标志、已完成下载的处理与失败后重新搜索、发布的最大大小、Usenet 发布的最小时长与保留期、允许或白名单中的硬字幕、入库后须保留的空闲空间、电影视为可用的延迟、RSS 同步间隔（10–120 分钟，0 表示停用）与下载检查间隔、回收目录及其清理、硬链接、附加文件与空目录，以及 `Naming`：是否重命名电影文件、替换非法字符、替换冒号（`delete`、`dash`、`space_dash`、`space_dash_space`、`smart`），以及电影目录与文件的模板。
+
+### 13.5 远程路径映射
+`RemotePathMapping` 把 `Host` 上的下载客户端报告的目录（`RemotePath`）映射到服务端看到的绝对目录（`LocalPath`）。同一主机的同一远程路径只映射一次。
+

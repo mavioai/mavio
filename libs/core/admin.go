@@ -20,6 +20,7 @@ type ServerSettings struct {
 	// PasswordResetPlugin is the ID of the plugin that delivers the PINs
 	// resetting forgotten passwords; empty when users cannot reset them.
 	PasswordResetPlugin string
+	Acquisition         AcquisitionSettings
 	UpdatedAt           time.Time
 }
 
@@ -109,7 +110,8 @@ func DefaultServerSettings() ServerSettings {
 			DownmixBoost:         2,
 			CropBlackBorders:     true,
 		},
-		Network: NetworkSettings{LocalDiscovery: true},
+		Network:     NetworkSettings{LocalDiscovery: true},
+		Acquisition: DefaultAcquisitionSettings(),
 	}
 }
 
@@ -143,6 +145,9 @@ func (s *ServerSettings) Validate() error {
 		return fmt.Errorf("%w: HTTPS port %d", ErrInvalid, n.HTTPSPort)
 	case n.HTTPSPort > 0 && (n.CertificatePath == "" || n.KeyPath == ""):
 		return fmt.Errorf("%w: HTTPS needs a certificate and a key", ErrInvalid)
+	}
+	if err := s.Acquisition.Validate(); err != nil {
+		return err
 	}
 	for _, c := range s.PluginCatalogs {
 		if u, err := url.Parse(c); err != nil || u.Scheme != "https" && u.Scheme != "http" || u.Host == "" {

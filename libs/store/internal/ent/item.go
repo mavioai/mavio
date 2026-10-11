@@ -14,6 +14,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
+	"github.com/mavioai/mavio/libs/store/internal/ent/wanted"
 )
 
 // Item is the model entity for the Item schema.
@@ -171,9 +172,19 @@ type ItemEdges struct {
 	Links []*ItemLink `json:"links,omitempty"`
 	// LinkedIn holds the value of the linked_in edge.
 	LinkedIn []*ItemLink `json:"linked_in,omitempty"`
+	// Wanted holds the value of the wanted edge.
+	Wanted *Wanted `json:"wanted,omitempty"`
+	// Downloads holds the value of the downloads edge.
+	Downloads []*Download `json:"downloads,omitempty"`
+	// History holds the value of the history edge.
+	History []*HistoryEvent `json:"history,omitempty"`
+	// Blocklist holds the value of the blocklist edge.
+	Blocklist []*BlocklistEntry `json:"blocklist,omitempty"`
+	// PendingReleases holds the value of the pending_releases edge.
+	PendingReleases []*PendingRelease `json:"pending_releases,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [15]bool
+	loadedTypes [20]bool
 }
 
 // LibraryOrErr returns the Library value or an error if the edge
@@ -317,6 +328,53 @@ func (e ItemEdges) LinkedInOrErr() ([]*ItemLink, error) {
 		return e.LinkedIn, nil
 	}
 	return nil, &NotLoadedError{edge: "linked_in"}
+}
+
+// WantedOrErr returns the Wanted value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ItemEdges) WantedOrErr() (*Wanted, error) {
+	if e.Wanted != nil {
+		return e.Wanted, nil
+	} else if e.loadedTypes[15] {
+		return nil, &NotFoundError{label: wanted.Label}
+	}
+	return nil, &NotLoadedError{edge: "wanted"}
+}
+
+// DownloadsOrErr returns the Downloads value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) DownloadsOrErr() ([]*Download, error) {
+	if e.loadedTypes[16] {
+		return e.Downloads, nil
+	}
+	return nil, &NotLoadedError{edge: "downloads"}
+}
+
+// HistoryOrErr returns the History value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) HistoryOrErr() ([]*HistoryEvent, error) {
+	if e.loadedTypes[17] {
+		return e.History, nil
+	}
+	return nil, &NotLoadedError{edge: "history"}
+}
+
+// BlocklistOrErr returns the Blocklist value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) BlocklistOrErr() ([]*BlocklistEntry, error) {
+	if e.loadedTypes[18] {
+		return e.Blocklist, nil
+	}
+	return nil, &NotLoadedError{edge: "blocklist"}
+}
+
+// PendingReleasesOrErr returns the PendingReleases value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) PendingReleasesOrErr() ([]*PendingRelease, error) {
+	if e.loadedTypes[19] {
+		return e.PendingReleases, nil
+	}
+	return nil, &NotLoadedError{edge: "pending_releases"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -811,6 +869,31 @@ func (_m *Item) QueryLinks() *ItemLinkQuery {
 // QueryLinkedIn queries the "linked_in" edge of the Item entity.
 func (_m *Item) QueryLinkedIn() *ItemLinkQuery {
 	return NewItemClient(_m.config).QueryLinkedIn(_m)
+}
+
+// QueryWanted queries the "wanted" edge of the Item entity.
+func (_m *Item) QueryWanted() *WantedQuery {
+	return NewItemClient(_m.config).QueryWanted(_m)
+}
+
+// QueryDownloads queries the "downloads" edge of the Item entity.
+func (_m *Item) QueryDownloads() *DownloadQuery {
+	return NewItemClient(_m.config).QueryDownloads(_m)
+}
+
+// QueryHistory queries the "history" edge of the Item entity.
+func (_m *Item) QueryHistory() *HistoryEventQuery {
+	return NewItemClient(_m.config).QueryHistory(_m)
+}
+
+// QueryBlocklist queries the "blocklist" edge of the Item entity.
+func (_m *Item) QueryBlocklist() *BlocklistEntryQuery {
+	return NewItemClient(_m.config).QueryBlocklist(_m)
+}
+
+// QueryPendingReleases queries the "pending_releases" edge of the Item entity.
+func (_m *Item) QueryPendingReleases() *PendingReleaseQuery {
+	return NewItemClient(_m.config).QueryPendingReleases(_m)
 }
 
 // Update returns a builder for updating this Item.

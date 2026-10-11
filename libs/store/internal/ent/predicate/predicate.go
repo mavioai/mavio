@@ -15,14 +15,29 @@ type Activity func(*sql.Selector)
 // AuthSession is the predicate function for authsession builders.
 type AuthSession func(*sql.Selector)
 
+// BlocklistEntry is the predicate function for blocklistentry builders.
+type BlocklistEntry func(*sql.Selector)
+
 // Credit is the predicate function for credit builders.
 type Credit func(*sql.Selector)
+
+// CustomFormat is the predicate function for customformat builders.
+type CustomFormat func(*sql.Selector)
+
+// DelayProfile is the predicate function for delayprofile builders.
+type DelayProfile func(*sql.Selector)
 
 // DisplayPreferences is the predicate function for displaypreferences builders.
 type DisplayPreferences func(*sql.Selector)
 
+// Download is the predicate function for download builders.
+type Download func(*sql.Selector)
+
 // FolderState is the predicate function for folderstate builders.
 type FolderState func(*sql.Selector)
+
+// HistoryEvent is the predicate function for historyevent builders.
+type HistoryEvent func(*sql.Selector)
 
 // Image is the predicate function for image builders.
 type Image func(*sql.Selector)
@@ -48,11 +63,26 @@ type MediaSegment func(*sql.Selector)
 // MediaSource is the predicate function for mediasource builders.
 type MediaSource func(*sql.Selector)
 
+// PendingRelease is the predicate function for pendingrelease builders.
+type PendingRelease func(*sql.Selector)
+
 // Person is the predicate function for person builders.
 type Person func(*sql.Selector)
 
 // PluginConfig is the predicate function for pluginconfig builders.
 type PluginConfig func(*sql.Selector)
+
+// QualityDefinition is the predicate function for qualitydefinition builders.
+type QualityDefinition func(*sql.Selector)
+
+// QualityProfile is the predicate function for qualityprofile builders.
+type QualityProfile func(*sql.Selector)
+
+// ReleaseProfile is the predicate function for releaseprofile builders.
+type ReleaseProfile func(*sql.Selector)
+
+// RemotePathMapping is the predicate function for remotepathmapping builders.
+type RemotePathMapping func(*sql.Selector)
 
 // Setting is the predicate function for setting builders.
 type Setting func(*sql.Selector)
@@ -65,3 +95,6 @@ type User func(*sql.Selector)
 
 // UserData is the predicate function for userdata builders.
 type UserData func(*sql.Selector)
+
+// Wanted is the predicate function for wanted builders.
+type Wanted func(*sql.Selector)

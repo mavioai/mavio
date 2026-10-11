@@ -13,7 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
+	"github.com/mavioai/mavio/libs/store/internal/ent/download"
+	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/itemlink"
@@ -21,9 +24,11 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasegment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
+	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
+	"github.com/mavioai/mavio/libs/store/internal/ent/wanted"
 )
 
 // ItemCreate is the builder for creating a Item entity.
@@ -929,6 +934,85 @@ func (_c *ItemCreate) AddLinkedIn(v ...*ItemLink) *ItemCreate {
 	return _c.AddLinkedInIDs(ids...)
 }
 
+// SetWantedID sets the "wanted" edge to the Wanted entity by ID.
+func (_c *ItemCreate) SetWantedID(id core.ID) *ItemCreate {
+	_c.mutation.SetWantedID(id)
+	return _c
+}
+
+// SetNillableWantedID sets the "wanted" edge to the Wanted entity by ID if the given value is not nil.
+func (_c *ItemCreate) SetNillableWantedID(id *core.ID) *ItemCreate {
+	if id != nil {
+		_c = _c.SetWantedID(*id)
+	}
+	return _c
+}
+
+// SetWanted sets the "wanted" edge to the Wanted entity.
+func (_c *ItemCreate) SetWanted(v *Wanted) *ItemCreate {
+	return _c.SetWantedID(v.ID)
+}
+
+// AddDownloadIDs adds the "downloads" edge to the Download entity by IDs.
+func (_c *ItemCreate) AddDownloadIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddDownloadIDs(ids...)
+	return _c
+}
+
+// AddDownloads adds the "downloads" edges to the Download entity.
+func (_c *ItemCreate) AddDownloads(v ...*Download) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddDownloadIDs(ids...)
+}
+
+// AddHistoryIDs adds the "history" edge to the HistoryEvent entity by IDs.
+func (_c *ItemCreate) AddHistoryIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddHistoryIDs(ids...)
+	return _c
+}
+
+// AddHistory adds the "history" edges to the HistoryEvent entity.
+func (_c *ItemCreate) AddHistory(v ...*HistoryEvent) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddHistoryIDs(ids...)
+}
+
+// AddBlocklistIDs adds the "blocklist" edge to the BlocklistEntry entity by IDs.
+func (_c *ItemCreate) AddBlocklistIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddBlocklistIDs(ids...)
+	return _c
+}
+
+// AddBlocklist adds the "blocklist" edges to the BlocklistEntry entity.
+func (_c *ItemCreate) AddBlocklist(v ...*BlocklistEntry) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddBlocklistIDs(ids...)
+}
+
+// AddPendingReleaseIDs adds the "pending_releases" edge to the PendingRelease entity by IDs.
+func (_c *ItemCreate) AddPendingReleaseIDs(ids ...core.ID) *ItemCreate {
+	_c.mutation.AddPendingReleaseIDs(ids...)
+	return _c
+}
+
+// AddPendingReleases adds the "pending_releases" edges to the PendingRelease entity.
+func (_c *ItemCreate) AddPendingReleases(v ...*PendingRelease) *ItemCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPendingReleaseIDs(ids...)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_c *ItemCreate) Mutation() *ItemMutation {
 	return _c.mutation
@@ -1663,6 +1747,86 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(itemlink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.WantedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.WantedTable,
+			Columns: []string{item.WantedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wanted.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.DownloadsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.DownloadsTable,
+			Columns: []string{item.DownloadsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(download.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.HistoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.HistoryTable,
+			Columns: []string{item.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(historyevent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.BlocklistIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.BlocklistTable,
+			Columns: []string{item.BlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PendingReleasesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.PendingReleasesTable,
+			Columns: []string{item.PendingReleasesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrelease.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
