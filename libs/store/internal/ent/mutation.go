@@ -2266,6 +2266,8 @@ type BlockedTitleMutation struct {
 	tmdb_id       *int
 	addtmdb_id    *int
 	title         *string
+	tags          *[]string
+	appendtags    []string
 	created_at    *time.Time
 	clearedFields map[string]struct{}
 	user          *core.ID
@@ -2556,6 +2558,71 @@ func (m *BlockedTitleMutation) ResetUserID() {
 	delete(m.clearedFields, blockedtitle.FieldUserID)
 }
 
+// SetTags sets the "tags" field.
+func (m *BlockedTitleMutation) SetTags(s []string) {
+	m.tags = &s
+	m.appendtags = nil
+}
+
+// Tags returns the value of the "tags" field in the mutation.
+func (m *BlockedTitleMutation) Tags() (r []string, exists bool) {
+	v := m.tags
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTags returns the old "tags" field's value of the BlockedTitle entity.
+// If the BlockedTitle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BlockedTitleMutation) OldTags(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTags is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTags requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTags: %w", err)
+	}
+	return oldValue.Tags, nil
+}
+
+// AppendTags adds s to the "tags" field.
+func (m *BlockedTitleMutation) AppendTags(s []string) {
+	m.appendtags = append(m.appendtags, s...)
+}
+
+// AppendedTags returns the list of values that were appended to the "tags" field in this mutation.
+func (m *BlockedTitleMutation) AppendedTags() ([]string, bool) {
+	if len(m.appendtags) == 0 {
+		return nil, false
+	}
+	return m.appendtags, true
+}
+
+// ClearTags clears the value of the "tags" field.
+func (m *BlockedTitleMutation) ClearTags() {
+	m.tags = nil
+	m.appendtags = nil
+	m.clearedFields[blockedtitle.FieldTags] = struct{}{}
+}
+
+// TagsCleared returns if the "tags" field was cleared in this mutation.
+func (m *BlockedTitleMutation) TagsCleared() bool {
+	_, ok := m.clearedFields[blockedtitle.FieldTags]
+	return ok
+}
+
+// ResetTags resets all changes to the "tags" field.
+func (m *BlockedTitleMutation) ResetTags() {
+	m.tags = nil
+	m.appendtags = nil
+	delete(m.clearedFields, blockedtitle.FieldTags)
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *BlockedTitleMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -2653,7 +2720,7 @@ func (m *BlockedTitleMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BlockedTitleMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.kind != nil {
 		fields = append(fields, blockedtitle.FieldKind)
 	}
@@ -2665,6 +2732,9 @@ func (m *BlockedTitleMutation) Fields() []string {
 	}
 	if m.user != nil {
 		fields = append(fields, blockedtitle.FieldUserID)
+	}
+	if m.tags != nil {
+		fields = append(fields, blockedtitle.FieldTags)
 	}
 	if m.created_at != nil {
 		fields = append(fields, blockedtitle.FieldCreatedAt)
@@ -2685,6 +2755,8 @@ func (m *BlockedTitleMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case blockedtitle.FieldUserID:
 		return m.UserID()
+	case blockedtitle.FieldTags:
+		return m.Tags()
 	case blockedtitle.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -2704,6 +2776,8 @@ func (m *BlockedTitleMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldTitle(ctx)
 	case blockedtitle.FieldUserID:
 		return m.OldUserID(ctx)
+	case blockedtitle.FieldTags:
+		return m.OldTags(ctx)
 	case blockedtitle.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -2742,6 +2816,13 @@ func (m *BlockedTitleMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserID(v)
+		return nil
+	case blockedtitle.FieldTags:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTags(v)
 		return nil
 	case blockedtitle.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -2798,6 +2879,9 @@ func (m *BlockedTitleMutation) ClearedFields() []string {
 	if m.FieldCleared(blockedtitle.FieldUserID) {
 		fields = append(fields, blockedtitle.FieldUserID)
 	}
+	if m.FieldCleared(blockedtitle.FieldTags) {
+		fields = append(fields, blockedtitle.FieldTags)
+	}
 	return fields
 }
 
@@ -2814,6 +2898,9 @@ func (m *BlockedTitleMutation) ClearField(name string) error {
 	switch name {
 	case blockedtitle.FieldUserID:
 		m.ClearUserID()
+		return nil
+	case blockedtitle.FieldTags:
+		m.ClearTags()
 		return nil
 	}
 	return fmt.Errorf("unknown BlockedTitle nullable field %s", name)
@@ -2834,6 +2921,9 @@ func (m *BlockedTitleMutation) ResetField(name string) error {
 		return nil
 	case blockedtitle.FieldUserID:
 		m.ResetUserID()
+		return nil
+	case blockedtitle.FieldTags:
+		m.ResetTags()
 		return nil
 	case blockedtitle.FieldCreatedAt:
 		m.ResetCreatedAt()

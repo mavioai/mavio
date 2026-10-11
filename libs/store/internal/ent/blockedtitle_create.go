@@ -65,6 +65,12 @@ func (_c *BlockedTitleCreate) SetNillableUserID(v *core.ID) *BlockedTitleCreate 
 	return _c
 }
 
+// SetTags sets the "tags" field.
+func (_c *BlockedTitleCreate) SetTags(v []string) *BlockedTitleCreate {
+	_c.mutation.SetTags(v)
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *BlockedTitleCreate) SetCreatedAt(v time.Time) *BlockedTitleCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -196,6 +202,10 @@ func (_c *BlockedTitleCreate) createSpec() (*BlockedTitle, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.Title(); ok {
 		_spec.SetField(blockedtitle.FieldTitle, field.TypeString, value)
 		_node.Title = value
+	}
+	if value, ok := _c.mutation.Tags(); ok {
+		_spec.SetField(blockedtitle.FieldTags, field.TypeJSON, value)
+		_node.Tags = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(blockedtitle.FieldCreatedAt, field.TypeTime, value)
@@ -330,6 +340,24 @@ func (u *BlockedTitleUpsert) ClearUserID() *BlockedTitleUpsert {
 	return u
 }
 
+// SetTags sets the "tags" field.
+func (u *BlockedTitleUpsert) SetTags(v []string) *BlockedTitleUpsert {
+	u.Set(blockedtitle.FieldTags, v)
+	return u
+}
+
+// UpdateTags sets the "tags" field to the value that was provided on create.
+func (u *BlockedTitleUpsert) UpdateTags() *BlockedTitleUpsert {
+	u.SetExcluded(blockedtitle.FieldTags)
+	return u
+}
+
+// ClearTags clears the value of the "tags" field.
+func (u *BlockedTitleUpsert) ClearTags() *BlockedTitleUpsert {
+	u.SetNull(blockedtitle.FieldTags)
+	return u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (u *BlockedTitleUpsert) SetCreatedAt(v time.Time) *BlockedTitleUpsert {
 	u.Set(blockedtitle.FieldCreatedAt, v)
@@ -457,6 +485,27 @@ func (u *BlockedTitleUpsertOne) UpdateUserID() *BlockedTitleUpsertOne {
 func (u *BlockedTitleUpsertOne) ClearUserID() *BlockedTitleUpsertOne {
 	return u.Update(func(s *BlockedTitleUpsert) {
 		s.ClearUserID()
+	})
+}
+
+// SetTags sets the "tags" field.
+func (u *BlockedTitleUpsertOne) SetTags(v []string) *BlockedTitleUpsertOne {
+	return u.Update(func(s *BlockedTitleUpsert) {
+		s.SetTags(v)
+	})
+}
+
+// UpdateTags sets the "tags" field to the value that was provided on create.
+func (u *BlockedTitleUpsertOne) UpdateTags() *BlockedTitleUpsertOne {
+	return u.Update(func(s *BlockedTitleUpsert) {
+		s.UpdateTags()
+	})
+}
+
+// ClearTags clears the value of the "tags" field.
+func (u *BlockedTitleUpsertOne) ClearTags() *BlockedTitleUpsertOne {
+	return u.Update(func(s *BlockedTitleUpsert) {
+		s.ClearTags()
 	})
 }
 
@@ -756,6 +805,27 @@ func (u *BlockedTitleUpsertBulk) UpdateUserID() *BlockedTitleUpsertBulk {
 func (u *BlockedTitleUpsertBulk) ClearUserID() *BlockedTitleUpsertBulk {
 	return u.Update(func(s *BlockedTitleUpsert) {
 		s.ClearUserID()
+	})
+}
+
+// SetTags sets the "tags" field.
+func (u *BlockedTitleUpsertBulk) SetTags(v []string) *BlockedTitleUpsertBulk {
+	return u.Update(func(s *BlockedTitleUpsert) {
+		s.SetTags(v)
+	})
+}
+
+// UpdateTags sets the "tags" field to the value that was provided on create.
+func (u *BlockedTitleUpsertBulk) UpdateTags() *BlockedTitleUpsertBulk {
+	return u.Update(func(s *BlockedTitleUpsert) {
+		s.UpdateTags()
+	})
+}
+
+// ClearTags clears the value of the "tags" field.
+func (u *BlockedTitleUpsertBulk) ClearTags() *BlockedTitleUpsertBulk {
+	return u.Update(func(s *BlockedTitleUpsert) {
+		s.ClearTags()
 	})
 }
 

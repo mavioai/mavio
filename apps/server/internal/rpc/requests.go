@@ -260,8 +260,43 @@ func (s *RequestService) GetQuota(ctx context.Context, req *acquisitionv1.GetQuo
 func blockedTitleToProto(b *core.BlockedTitle) *acquisitionv1.BlockedTitle {
 	return acquisitionv1.BlockedTitle_builder{
 		MediaKind: new(keyOf(acquisitionKinds, b.Kind)), TmdbId: new(int32(b.TmdbID)), Title: new(b.Title),
-		UserId: optionalID(b.UserID), CreateTime: timestamp(b.CreatedAt),
+		UserId: optionalID(b.UserID), CreateTime: timestamp(b.CreatedAt), Tags: b.Tags,
 	}.Build()
+}
+
+var blockedTitleSources = map[core.BlockedTitleSource]acquisitionv1.BlockedTitleSource{
+	core.BlockedByHand: acquisitionv1.BlockedTitleSource_BLOCKED_TITLE_SOURCE_MANUAL,
+	core.BlockedByTags: acquisitionv1.BlockedTitleSource_BLOCKED_TITLE_SOURCE_TAGS,
+}
+
+// BlockCollection blocklists the movies of a collection; administrators.
+func (s *RequestService) BlockCollection(ctx context.Context, req *acquisitionv1.BlockCollectionRequest) (*acquisitionv1.BlockCollectionResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	blocked, err := s.requests.BlockCollection(ctx, p.User, int(req.GetTmdbCollectionId()))
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	out := make([]*acquisitionv1.BlockedTitle, len(blocked))
+	for i := range blocked {
+		out[i] = blockedTitleToProto(&blocked[i])
+	}
+	return acquisitionv1.BlockCollectionResponse_builder{BlockedTitles: out}.Build(), nil
+}
+
+// UnblockCollection takes the movies of a collection off the blocklist;
+// administrators.
+func (s *RequestService) UnblockCollection(ctx context.Context, req *acquisitionv1.UnblockCollectionRequest) (*acquisitionv1.UnblockCollectionResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.requests.UnblockCollection(ctx, p.User, int(req.GetTmdbCollectionId())); err != nil {
+		return nil, requestError(ctx, err)
+	}
+	return &acquisitionv1.UnblockCollectionResponse{}, nil
 }
 
 // BlockTitle puts a title on the blocklist; administrators.
@@ -303,8 +338,9 @@ func (s *RequestService) ListBlockedTitles(ctx context.Context, req *acquisition
 	if err != nil {
 		return nil, err
 	}
+	source := keyOf(blockedTitleSources, req.GetSource())
 	page, err := s.requests.ListBlocked(ctx, p.User, core.BlockedTitleQuery{
-		Search: req.GetSearch(), Limit: int(req.GetLimit()), Offset: int(req.GetOffset()),
+		Search: req.GetSearch(), Source: source, Limit: int(req.GetLimit()), Offset: int(req.GetOffset()),
 	})
 	if err != nil {
 		return nil, requestError(ctx, err)

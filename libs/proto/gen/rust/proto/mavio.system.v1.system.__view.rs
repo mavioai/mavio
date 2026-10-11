@@ -6470,6 +6470,17 @@ pub struct RequestSettingsView<'a> {
     pub anime_library_id: ::core::option::Option<&'a str>,
     /// Field 19: `anime_quality_profile_id`
     pub anime_quality_profile_id: ::core::option::Option<&'a str>,
+    /// Keywords of discovery providers, as "\<plugin\>/\<keyword\>", whose movies
+    /// and series the blocklisted tags job blocklists weekly, as Seerr's
+    /// blocklistedTags.
+    ///
+    /// Field 20: `blocklisted_tags`
+    pub blocklisted_tags: ::buffa::RepeatedView<'a, &'a str>,
+    /// How many pages of each order of a keyword's titles the job
+    /// blocklists, 0–250; 0 for 50.
+    ///
+    /// Field 21: `blocklisted_tags_limit`
+    pub blocklisted_tags_limit: ::core::option::Option<i32>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for RequestSettingsView<'a> {
@@ -6655,6 +6666,26 @@ impl<'a> ::buffa::MessageView<'a> for RequestSettingsView<'a> {
                     ::buffa::types::borrow_str(&mut cur)?,
                 );
             }
+            21u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.blocklisted_tags_limit = Some(
+                    ::buffa::types::decode_int32(&mut cur)?,
+                );
+            }
+            20u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.blocklisted_tags.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -6702,6 +6733,12 @@ impl<'a> ::buffa::MessageView<'a> for RequestSettingsView<'a> {
             anime_quality_profile_id: self
                 .anime_quality_profile_id
                 .map(|s| s.to_string()),
+            blocklisted_tags: self
+                .blocklisted_tags
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
+            blocklisted_tags_limit: self.blocklisted_tags_limit,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -6770,6 +6807,12 @@ impl<'a> ::buffa::ViewEncode<'a> for RequestSettingsView<'a> {
         if let Some(ref v) = self.anime_quality_profile_id {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.blocklisted_tags {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.blocklisted_tags_limit {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -6837,6 +6880,12 @@ impl<'a> ::buffa::ViewEncode<'a> for RequestSettingsView<'a> {
         }
         if let Some(ref v) = self.anime_quality_profile_id {
             ::buffa::types::put_string_field(19u32, v, buf);
+        }
+        for v in &self.blocklisted_tags {
+            ::buffa::types::put_string_field(20u32, v, buf);
+        }
+        if let Some(v) = self.blocklisted_tags_limit {
+            ::buffa::types::put_int32_field(21u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -7053,6 +7102,23 @@ impl RequestSettingsOwnedView {
     #[must_use]
     pub fn anime_quality_profile_id(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().anime_quality_profile_id
+    }
+    /// Keywords of discovery providers, as "\<plugin\>/\<keyword\>", whose movies
+    /// and series the blocklisted tags job blocklists weekly, as Seerr's
+    /// blocklistedTags.
+    ///
+    /// Field 20: `blocklisted_tags`
+    #[must_use]
+    pub fn blocklisted_tags(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().blocklisted_tags
+    }
+    /// How many pages of each order of a keyword's titles the job
+    /// blocklists, 0–250; 0 for 50.
+    ///
+    /// Field 21: `blocklisted_tags_limit`
+    #[must_use]
+    pub fn blocklisted_tags_limit(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().blocklisted_tags_limit
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<RequestSettingsView<'static>>>

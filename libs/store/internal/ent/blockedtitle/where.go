@@ -281,6 +281,16 @@ func UserIDNotNil() predicate.BlockedTitle {
 	return predicate.BlockedTitle(sql.FieldNotNull(FieldUserID))
 }
 
+// TagsIsNil applies the IsNil predicate on the "tags" field.
+func TagsIsNil() predicate.BlockedTitle {
+	return predicate.BlockedTitle(sql.FieldIsNull(FieldTags))
+}
+
+// TagsNotNil applies the NotNil predicate on the "tags" field.
+func TagsNotNil() predicate.BlockedTitle {
+	return predicate.BlockedTitle(sql.FieldNotNull(FieldTags))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.BlockedTitle {
 	return predicate.BlockedTitle(sql.FieldEQ(FieldCreatedAt, v))

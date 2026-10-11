@@ -21,6 +21,8 @@ const (
 	FieldTitle = "title"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldTags holds the string denoting the tags field in the database.
+	FieldTags = "tags"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldTmdbID,
 	FieldTitle,
 	FieldUserID,
+	FieldTags,
 	FieldCreatedAt,
 }
 

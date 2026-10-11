@@ -307,6 +307,16 @@ message RequestSettings {
   // Anime series are numbered absolutely either way.
   string anime_library_id = 18;
   string anime_quality_profile_id = 19;
+  // Keywords of discovery providers, as "<plugin>/<keyword>", whose movies
+  // and series the blocklisted tags job blocklists weekly, as Seerr's
+  // blocklistedTags.
+  repeated string blocklisted_tags = 20 [(buf.validate.field).repeated.items.string.pattern = "^[^/]+/.+$"];
+  // How many pages of each order of a keyword's titles the job
+  // blocklists, 0–250; 0 for 50.
+  int32 blocklisted_tags_limit = 21 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 250
+  }];
 }
 
 // MetadataSettings are the server's language and country of metadata

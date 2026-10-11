@@ -3355,6 +3355,8 @@ type RequestSettings struct {
 	xxx_hidden_Specials                 bool                    `protobuf:"varint,17,opt,name=specials"`
 	xxx_hidden_AnimeLibraryId           *string                 `protobuf:"bytes,18,opt,name=anime_library_id,json=animeLibraryId"`
 	xxx_hidden_AnimeQualityProfileId    *string                 `protobuf:"bytes,19,opt,name=anime_quality_profile_id,json=animeQualityProfileId"`
+	xxx_hidden_BlocklistedTags          []string                `protobuf:"bytes,20,rep,name=blocklisted_tags,json=blocklistedTags"`
+	xxx_hidden_BlocklistedTagsLimit     int32                   `protobuf:"varint,21,opt,name=blocklisted_tags_limit,json=blocklistedTagsLimit"`
 	XXX_raceDetectHookData              protoimpl.RaceDetectHookData
 	XXX_presence                        [1]uint32
 	unknownFields                       protoimpl.UnknownFields
@@ -3541,99 +3543,122 @@ func (x *RequestSettings) GetAnimeQualityProfileId() string {
 	return ""
 }
 
+func (x *RequestSettings) GetBlocklistedTags() []string {
+	if x != nil {
+		return x.xxx_hidden_BlocklistedTags
+	}
+	return nil
+}
+
+func (x *RequestSettings) GetBlocklistedTagsLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_BlocklistedTagsLimit
+	}
+	return 0
+}
+
 func (x *RequestSettings) SetDefaultRequestMovies(v bool) {
 	x.xxx_hidden_DefaultRequestMovies = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 21)
 }
 
 func (x *RequestSettings) SetDefaultRequestSeries(v bool) {
 	x.xxx_hidden_DefaultRequestSeries = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 21)
 }
 
 func (x *RequestSettings) SetDefaultAutoApproveMovies(v bool) {
 	x.xxx_hidden_DefaultAutoApproveMovies = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 21)
 }
 
 func (x *RequestSettings) SetDefaultAutoApproveSeries(v bool) {
 	x.xxx_hidden_DefaultAutoApproveSeries = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 21)
 }
 
 func (x *RequestSettings) SetDefaultReportIssues(v bool) {
 	x.xxx_hidden_DefaultReportIssues = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 21)
 }
 
 func (x *RequestSettings) SetMovieQuotaLimit(v int32) {
 	x.xxx_hidden_MovieQuotaLimit = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 21)
 }
 
 func (x *RequestSettings) SetMovieQuotaDays(v int32) {
 	x.xxx_hidden_MovieQuotaDays = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 21)
 }
 
 func (x *RequestSettings) SetSeriesQuotaLimit(v int32) {
 	x.xxx_hidden_SeriesQuotaLimit = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 21)
 }
 
 func (x *RequestSettings) SetSeriesQuotaDays(v int32) {
 	x.xxx_hidden_SeriesQuotaDays = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 21)
 }
 
 func (x *RequestSettings) SetMovieLibraryId(v string) {
 	x.xxx_hidden_MovieLibraryId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 21)
 }
 
 func (x *RequestSettings) SetMovieQualityProfileId(v string) {
 	x.xxx_hidden_MovieQualityProfileId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 21)
 }
 
 func (x *RequestSettings) SetMinimumAvailability(v v11.MinimumAvailability) {
 	x.xxx_hidden_MinimumAvailability = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 21)
 }
 
 func (x *RequestSettings) SetSeriesLibraryId(v string) {
 	x.xxx_hidden_SeriesLibraryId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 21)
 }
 
 func (x *RequestSettings) SetSeriesQualityProfileId(v string) {
 	x.xxx_hidden_SeriesQualityProfileId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 21)
 }
 
 func (x *RequestSettings) SetSeasonFolder(v bool) {
 	x.xxx_hidden_SeasonFolder = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 21)
 }
 
 func (x *RequestSettings) SetMonitorNewItems(v v11.NewItemMonitor) {
 	x.xxx_hidden_MonitorNewItems = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 21)
 }
 
 func (x *RequestSettings) SetSpecials(v bool) {
 	x.xxx_hidden_Specials = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 21)
 }
 
 func (x *RequestSettings) SetAnimeLibraryId(v string) {
 	x.xxx_hidden_AnimeLibraryId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 21)
 }
 
 func (x *RequestSettings) SetAnimeQualityProfileId(v string) {
 	x.xxx_hidden_AnimeQualityProfileId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 19)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 21)
+}
+
+func (x *RequestSettings) SetBlocklistedTags(v []string) {
+	x.xxx_hidden_BlocklistedTags = v
+}
+
+func (x *RequestSettings) SetBlocklistedTagsLimit(v int32) {
+	x.xxx_hidden_BlocklistedTagsLimit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 21)
 }
 
 func (x *RequestSettings) HasDefaultRequestMovies() bool {
@@ -3769,6 +3794,13 @@ func (x *RequestSettings) HasAnimeQualityProfileId() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 18)
 }
 
+func (x *RequestSettings) HasBlocklistedTagsLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 20)
+}
+
 func (x *RequestSettings) ClearDefaultRequestMovies() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_DefaultRequestMovies = false
@@ -3864,6 +3896,11 @@ func (x *RequestSettings) ClearAnimeQualityProfileId() {
 	x.xxx_hidden_AnimeQualityProfileId = nil
 }
 
+func (x *RequestSettings) ClearBlocklistedTagsLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 20)
+	x.xxx_hidden_BlocklistedTagsLimit = 0
+}
+
 type RequestSettings_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -3898,6 +3935,13 @@ type RequestSettings_builder struct {
 	// Anime series are numbered absolutely either way.
 	AnimeLibraryId        *string
 	AnimeQualityProfileId *string
+	// Keywords of discovery providers, as "<plugin>/<keyword>", whose movies
+	// and series the blocklisted tags job blocklists weekly, as Seerr's
+	// blocklistedTags.
+	BlocklistedTags []string
+	// How many pages of each order of a keyword's titles the job
+	// blocklists, 0–250; 0 for 50.
+	BlocklistedTagsLimit *int32
 }
 
 func (b0 RequestSettings_builder) Build() *RequestSettings {
@@ -3905,80 +3949,85 @@ func (b0 RequestSettings_builder) Build() *RequestSettings {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.DefaultRequestMovies != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 21)
 		x.xxx_hidden_DefaultRequestMovies = *b.DefaultRequestMovies
 	}
 	if b.DefaultRequestSeries != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 21)
 		x.xxx_hidden_DefaultRequestSeries = *b.DefaultRequestSeries
 	}
 	if b.DefaultAutoApproveMovies != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 21)
 		x.xxx_hidden_DefaultAutoApproveMovies = *b.DefaultAutoApproveMovies
 	}
 	if b.DefaultAutoApproveSeries != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 21)
 		x.xxx_hidden_DefaultAutoApproveSeries = *b.DefaultAutoApproveSeries
 	}
 	if b.DefaultReportIssues != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 21)
 		x.xxx_hidden_DefaultReportIssues = *b.DefaultReportIssues
 	}
 	if b.MovieQuotaLimit != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 21)
 		x.xxx_hidden_MovieQuotaLimit = *b.MovieQuotaLimit
 	}
 	if b.MovieQuotaDays != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 21)
 		x.xxx_hidden_MovieQuotaDays = *b.MovieQuotaDays
 	}
 	if b.SeriesQuotaLimit != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 21)
 		x.xxx_hidden_SeriesQuotaLimit = *b.SeriesQuotaLimit
 	}
 	if b.SeriesQuotaDays != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 21)
 		x.xxx_hidden_SeriesQuotaDays = *b.SeriesQuotaDays
 	}
 	if b.MovieLibraryId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 21)
 		x.xxx_hidden_MovieLibraryId = b.MovieLibraryId
 	}
 	if b.MovieQualityProfileId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 21)
 		x.xxx_hidden_MovieQualityProfileId = b.MovieQualityProfileId
 	}
 	if b.MinimumAvailability != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 21)
 		x.xxx_hidden_MinimumAvailability = *b.MinimumAvailability
 	}
 	if b.SeriesLibraryId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 21)
 		x.xxx_hidden_SeriesLibraryId = b.SeriesLibraryId
 	}
 	if b.SeriesQualityProfileId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 21)
 		x.xxx_hidden_SeriesQualityProfileId = b.SeriesQualityProfileId
 	}
 	if b.SeasonFolder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 21)
 		x.xxx_hidden_SeasonFolder = *b.SeasonFolder
 	}
 	if b.MonitorNewItems != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 21)
 		x.xxx_hidden_MonitorNewItems = *b.MonitorNewItems
 	}
 	if b.Specials != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 21)
 		x.xxx_hidden_Specials = *b.Specials
 	}
 	if b.AnimeLibraryId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 21)
 		x.xxx_hidden_AnimeLibraryId = b.AnimeLibraryId
 	}
 	if b.AnimeQualityProfileId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 19)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 21)
 		x.xxx_hidden_AnimeQualityProfileId = b.AnimeQualityProfileId
+	}
+	x.xxx_hidden_BlocklistedTags = b.BlocklistedTags
+	if b.BlocklistedTagsLimit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 21)
+		x.xxx_hidden_BlocklistedTagsLimit = *b.BlocklistedTagsLimit
 	}
 	return m0
 }
@@ -6384,7 +6433,7 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x15password_reset_plugin\x18\x05 \x01(\tR\x13passwordResetPlugin\x12F\n" +
 	"\vacquisition\x18\x06 \x01(\v2$.mavio.system.v1.AcquisitionSettingsR\vacquisition\x12<\n" +
 	"\brequests\x18\a \x01(\v2 .mavio.system.v1.RequestSettingsR\brequests\x12=\n" +
-	"\bmetadata\x18\b \x01(\v2!.mavio.system.v1.MetadataSettingsR\bmetadata\"\xb5\b\n" +
+	"\bmetadata\x18\b \x01(\v2!.mavio.system.v1.MetadataSettingsR\bmetadata\"\xba\t\n" +
 	"\x0fRequestSettings\x124\n" +
 	"\x16default_request_movies\x18\x01 \x01(\bR\x14defaultRequestMovies\x124\n" +
 	"\x16default_request_series\x18\x02 \x01(\bR\x14defaultRequestSeries\x12=\n" +
@@ -6405,7 +6454,11 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x11monitor_new_items\x18\x10 \x01(\x0e2$.mavio.acquisition.v1.NewItemMonitorB\b\xbaH\x05\x82\x01\x02\x10\x01R\x0fmonitorNewItems\x12\x1a\n" +
 	"\bspecials\x18\x11 \x01(\bR\bspecials\x12(\n" +
 	"\x10anime_library_id\x18\x12 \x01(\tR\x0eanimeLibraryId\x127\n" +
-	"\x18anime_quality_profile_id\x18\x13 \x01(\tR\x15animeQualityProfileId\"\x87\x01\n" +
+	"\x18anime_quality_profile_id\x18\x13 \x01(\tR\x15animeQualityProfileId\x12A\n" +
+	"\x10blocklisted_tags\x18\x14 \x03(\tB\x16\xbaH\x13\x92\x01\x10\"\x0er\f2\n" +
+	"^[^/]+/.+$R\x0fblocklistedTags\x12@\n" +
+	"\x16blocklisted_tags_limit\x18\x15 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xfa\x01(\x00R\x14blocklistedTagsLimit\"\x87\x01\n" +
 	"\x10MetadataSettings\x12C\n" +
 	"\x12preferred_language\x18\x01 \x01(\tB\x14\xbaH\x11r\x0f2\r^([a-z]{2})?$R\x11preferredLanguage\x12.\n" +
 	"\acountry\x18\x02 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\acountry\"\x8e\x11\n" +

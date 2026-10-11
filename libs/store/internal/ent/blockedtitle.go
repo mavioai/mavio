@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -27,6 +28,8 @@ type BlockedTitle struct {
 	Title string `json:"title,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID *core.ID `json:"user_id,omitempty"`
+	// Tags holds the value of the "tags" field.
+	Tags []string `json:"tags,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -62,6 +65,8 @@ func (*BlockedTitle) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case blockedtitle.FieldUserID:
 			values[i] = &sql.NullScanner{S: new(core.ID)}
+		case blockedtitle.FieldTags:
+			values[i] = new([]byte)
 		case blockedtitle.FieldID:
 			values[i] = new(core.ID)
 		case blockedtitle.FieldTmdbID:
@@ -115,6 +120,14 @@ func (_m *BlockedTitle) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UserID = new(core.ID)
 				*_m.UserID = *value.S.(*core.ID)
+			}
+		case blockedtitle.FieldTags:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field tags", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Tags); err != nil {
+					return fmt.Errorf("unmarshal field tags: %w", err)
+				}
 			}
 		case blockedtitle.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -176,6 +189,9 @@ func (_m *BlockedTitle) String() string {
 		builder.WriteString("user_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("tags=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Tags))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

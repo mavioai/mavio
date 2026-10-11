@@ -73,6 +73,9 @@ enum CatalogKind {
   CATALOG_KIND_SIMILAR = 6;
   // A list curated elsewhere, such as a chart.
   CATALOG_KIND_LIST = 7;
+  // The movies of a collection, such as a film series, named by its
+  // external IDs such as "tmdb_collection".
+  CATALOG_KIND_COLLECTION = 8;
 }
 
 // DiscoverFilter is a filter of discovery requests.
@@ -111,8 +114,9 @@ message DiscoverRequest {
   string catalog = 1 [(buf.validate.field).required = true];
   // Movies or series, for catalogs listing both.
   MediaKind media_kind = 2;
-  // The title of recommendations and similar titles, by its external IDs
-  // such as "tmdb".
+  // The title of recommendations and similar titles, or the collection of
+  // a collection catalog, by its external IDs such as "tmdb" or
+  // "tmdb_collection".
   map<string, string> external_ids = 3;
 
   // Filters by the provider's IDs of ListFilterValues; a title matches

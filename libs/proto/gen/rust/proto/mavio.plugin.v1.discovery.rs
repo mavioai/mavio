@@ -21,6 +21,9 @@ pub enum CatalogKind {
     CATALOG_KIND_SIMILAR = 6i32,
     /// A list curated elsewhere, such as a chart.
     CATALOG_KIND_LIST = 7i32,
+    /// The movies of a collection, such as a film series, named by its
+    /// external IDs such as "tmdb_collection".
+    CATALOG_KIND_COLLECTION = 8i32,
 }
 impl CatalogKind {
     ///Idiomatic alias for [`Self::CATALOG_KIND_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -47,6 +50,9 @@ impl CatalogKind {
     ///Idiomatic alias for [`Self::CATALOG_KIND_LIST`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const List: Self = Self::CATALOG_KIND_LIST;
+    ///Idiomatic alias for [`Self::CATALOG_KIND_COLLECTION`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Collection: Self = Self::CATALOG_KIND_COLLECTION;
 }
 impl ::core::default::Default for CatalogKind {
     fn default() -> Self {
@@ -64,6 +70,7 @@ impl ::buffa::Enumeration for CatalogKind {
             5i32 => ::core::option::Option::Some(Self::CATALOG_KIND_RECOMMENDATIONS),
             6i32 => ::core::option::Option::Some(Self::CATALOG_KIND_SIMILAR),
             7i32 => ::core::option::Option::Some(Self::CATALOG_KIND_LIST),
+            8i32 => ::core::option::Option::Some(Self::CATALOG_KIND_COLLECTION),
             _ => ::core::option::Option::None,
         }
     }
@@ -80,6 +87,7 @@ impl ::buffa::Enumeration for CatalogKind {
             Self::CATALOG_KIND_RECOMMENDATIONS => "CATALOG_KIND_RECOMMENDATIONS",
             Self::CATALOG_KIND_SIMILAR => "CATALOG_KIND_SIMILAR",
             Self::CATALOG_KIND_LIST => "CATALOG_KIND_LIST",
+            Self::CATALOG_KIND_COLLECTION => "CATALOG_KIND_COLLECTION",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -106,6 +114,9 @@ impl ::buffa::Enumeration for CatalogKind {
                 ::core::option::Option::Some(Self::CATALOG_KIND_SIMILAR)
             }
             "CATALOG_KIND_LIST" => ::core::option::Option::Some(Self::CATALOG_KIND_LIST),
+            "CATALOG_KIND_COLLECTION" => {
+                ::core::option::Option::Some(Self::CATALOG_KIND_COLLECTION)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -119,6 +130,7 @@ impl ::buffa::Enumeration for CatalogKind {
             Self::CATALOG_KIND_RECOMMENDATIONS,
             Self::CATALOG_KIND_SIMILAR,
             Self::CATALOG_KIND_LIST,
+            Self::CATALOG_KIND_COLLECTION,
         ]
     }
 }
@@ -983,8 +995,9 @@ pub struct DiscoverRequest {
     ///
     /// Field 2: `media_kind`
     pub media_kind: ::core::option::Option<::buffa::EnumValue<MediaKind>>,
-    /// The title of recommendations and similar titles, by its external IDs
-    /// such as "tmdb".
+    /// The title of recommendations and similar titles, or the collection of
+    /// a collection catalog, by its external IDs such as "tmdb" or
+    /// "tmdb_collection".
     ///
     /// Field 3: `external_ids`
     pub external_ids: ::buffa::__private::HashMap<

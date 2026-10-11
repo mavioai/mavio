@@ -543,7 +543,7 @@ flowchart TD
 - [x] `RequestService`: requests of movies and seasons checked as Seerr checks them (permissions, rating limit, quotas, duplicates), approved automatically or by an administrator, acquired through `WantedService`, completed when their items become available (`requests.availability`)
   - [x] A quality profile and library of their own for anime requested (`RequestSettings.AnimeQualityProfileID`, `AnimeLibraryID`), added as anime series, as Seerr's anime settings
   - [x] Seerr's blocklisted and deleted statuses of titles: the blocklist (`BlockTitle`, `UnblockTitle`, `ListBlockedTitles`, `core.BlockedTitle`) refuses requests of its titles; a title whose completed request's files are gone is deleted and may be requested again
-    - [ ] Seerr's blocklisted tags, blocklisting the titles of keywords automatically, and blocklisting a collection
+    - [x] Seerr's blocklisted tags, blocklisting the titles of keywords automatically (`BlocklistedTags`, `BlocklistedTagsLimit`, the weekly `requests.blocklisted_tags` job, titles tagged with `BlockedTitle.Tags`), and blocklisting a collection (`BlockCollection`, `UnblockCollection`, through collection catalogs of discovery providers, which `scraper-tmdb` gives)
   - [x] The country and language of a server-wide metadata setting (`ServerSettings.Metadata`) for ratings and names, rather than the destination library's
   - [x] The availability job listed among the tasks (`TaskService`, "Sync request availability")
 - [x] `IssueService`: problems with an item reported, commented on, resolved and reopened

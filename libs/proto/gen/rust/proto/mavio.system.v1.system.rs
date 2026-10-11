@@ -4553,6 +4553,17 @@ pub struct RequestSettings {
     pub anime_library_id: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 19: `anime_quality_profile_id`
     pub anime_quality_profile_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Keywords of discovery providers, as "\<plugin\>/\<keyword\>", whose movies
+    /// and series the blocklisted tags job blocklists weekly, as Seerr's
+    /// blocklistedTags.
+    ///
+    /// Field 20: `blocklisted_tags`
+    pub blocklisted_tags: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// How many pages of each order of a keyword's titles the job
+    /// blocklists, 0–250; 0 for 50.
+    ///
+    /// Field 21: `blocklisted_tags_limit`
+    pub blocklisted_tags_limit: ::core::option::Option<i32>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -4578,6 +4589,8 @@ impl ::core::fmt::Debug for RequestSettings {
             .field("specials", &self.specials)
             .field("anime_library_id", &self.anime_library_id)
             .field("anime_quality_profile_id", &self.anime_quality_profile_id)
+            .field("blocklisted_tags", &self.blocklisted_tags)
+            .field("blocklisted_tags_limit", &self.blocklisted_tags_limit)
             .finish()
     }
 }
@@ -4750,6 +4763,13 @@ impl RequestSettings {
         self.anime_quality_profile_id = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::blocklisted_tags_limit`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_blocklisted_tags_limit(mut self, value: i32) -> Self {
+        self.blocklisted_tags_limit = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(RequestSettings);
 impl ::buffa::MessageName for RequestSettings {
@@ -4828,6 +4848,12 @@ impl ::buffa::Message for RequestSettings {
         if let Some(ref v) = self.anime_quality_profile_id {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.blocklisted_tags {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.blocklisted_tags_limit {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4894,6 +4920,12 @@ impl ::buffa::Message for RequestSettings {
         }
         if let Some(ref v) = self.anime_quality_profile_id {
             ::buffa::types::put_string_field(19u32, v, buf);
+        }
+        for v in &self.blocklisted_tags {
+            ::buffa::types::put_string_field(20u32, v, buf);
+        }
+        if let Some(v) = self.blocklisted_tags_limit {
+            ::buffa::types::put_int32_field(21u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5097,6 +5129,26 @@ impl ::buffa::Message for RequestSettings {
                     buf,
                 )?;
             }
+            20u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.blocklisted_tags.push(__elem);
+            }
+            21u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.blocklisted_tags_limit = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5124,6 +5176,8 @@ impl ::buffa::Message for RequestSettings {
         self.specials = ::core::option::Option::None;
         self.anime_library_id = ::core::option::Option::None;
         self.anime_quality_profile_id = ::core::option::Option::None;
+        self.blocklisted_tags.clear();
+        self.blocklisted_tags_limit = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

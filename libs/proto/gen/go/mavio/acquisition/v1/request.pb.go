@@ -126,6 +126,54 @@ func (x RequestSort) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// BlockedTitleSource is how titles came on the blocklist.
+type BlockedTitleSource int32
+
+const (
+	// Any way.
+	BlockedTitleSource_BLOCKED_TITLE_SOURCE_UNSPECIFIED BlockedTitleSource = 0
+	// Blocklisted by administrators.
+	BlockedTitleSource_BLOCKED_TITLE_SOURCE_MANUAL BlockedTitleSource = 1
+	// Blocklisted by the blocklisted tags job.
+	BlockedTitleSource_BLOCKED_TITLE_SOURCE_TAGS BlockedTitleSource = 2
+)
+
+// Enum value maps for BlockedTitleSource.
+var (
+	BlockedTitleSource_name = map[int32]string{
+		0: "BLOCKED_TITLE_SOURCE_UNSPECIFIED",
+		1: "BLOCKED_TITLE_SOURCE_MANUAL",
+		2: "BLOCKED_TITLE_SOURCE_TAGS",
+	}
+	BlockedTitleSource_value = map[string]int32{
+		"BLOCKED_TITLE_SOURCE_UNSPECIFIED": 0,
+		"BLOCKED_TITLE_SOURCE_MANUAL":      1,
+		"BLOCKED_TITLE_SOURCE_TAGS":        2,
+	}
+)
+
+func (x BlockedTitleSource) Enum() *BlockedTitleSource {
+	p := new(BlockedTitleSource)
+	*p = x
+	return p
+}
+
+func (x BlockedTitleSource) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (BlockedTitleSource) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_acquisition_v1_request_proto_enumTypes[2].Descriptor()
+}
+
+func (BlockedTitleSource) Type() protoreflect.EnumType {
+	return &file_mavio_acquisition_v1_request_proto_enumTypes[2]
+}
+
+func (x BlockedTitleSource) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // SeasonRequest is a season a series request asks for.
 type SeasonRequest struct {
 	state                   protoimpl.MessageState `protogen:"opaque.v1"`
@@ -2643,6 +2691,7 @@ type BlockedTitle struct {
 	xxx_hidden_Title       *string                `protobuf:"bytes,3,opt,name=title"`
 	xxx_hidden_UserId      *string                `protobuf:"bytes,4,opt,name=user_id,json=userId"`
 	xxx_hidden_CreateTime  *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=create_time,json=createTime"`
+	xxx_hidden_Tags        []string               `protobuf:"bytes,6,rep,name=tags"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -2717,28 +2766,39 @@ func (x *BlockedTitle) GetCreateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *BlockedTitle) GetTags() []string {
+	if x != nil {
+		return x.xxx_hidden_Tags
+	}
+	return nil
+}
+
 func (x *BlockedTitle) SetMediaKind(v MediaKind) {
 	x.xxx_hidden_MediaKind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
 }
 
 func (x *BlockedTitle) SetTmdbId(v int32) {
 	x.xxx_hidden_TmdbId = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
 }
 
 func (x *BlockedTitle) SetTitle(v string) {
 	x.xxx_hidden_Title = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
 }
 
 func (x *BlockedTitle) SetUserId(v string) {
 	x.xxx_hidden_UserId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
 }
 
 func (x *BlockedTitle) SetCreateTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_CreateTime = v
+}
+
+func (x *BlockedTitle) SetTags(v []string) {
+	x.xxx_hidden_Tags = v
 }
 
 func (x *BlockedTitle) HasMediaKind() bool {
@@ -2811,6 +2871,9 @@ type BlockedTitle_builder struct {
 	// The administrator who blocklisted it, unless deleted since.
 	UserId     *string
 	CreateTime *timestamppb.Timestamp
+	// The blocklisted tags ("<plugin>/<keyword>") the blocklisted tags job
+	// blocklisted it for; empty when blocklisted by hand.
+	Tags []string
 }
 
 func (b0 BlockedTitle_builder) Build() *BlockedTitle {
@@ -2818,22 +2881,23 @@ func (b0 BlockedTitle_builder) Build() *BlockedTitle {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.MediaKind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
 		x.xxx_hidden_MediaKind = *b.MediaKind
 	}
 	if b.TmdbId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
 		x.xxx_hidden_TmdbId = *b.TmdbId
 	}
 	if b.Title != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
 		x.xxx_hidden_Title = b.Title
 	}
 	if b.UserId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
 		x.xxx_hidden_UserId = b.UserId
 	}
 	x.xxx_hidden_CreateTime = b.CreateTime
+	x.xxx_hidden_Tags = b.Tags
 	return m0
 }
 
@@ -3167,6 +3231,7 @@ type ListBlockedTitlesRequest struct {
 	xxx_hidden_Search      *string                `protobuf:"bytes,1,opt,name=search"`
 	xxx_hidden_Limit       int32                  `protobuf:"varint,2,opt,name=limit"`
 	xxx_hidden_Offset      int32                  `protobuf:"varint,3,opt,name=offset"`
+	xxx_hidden_Source      BlockedTitleSource     `protobuf:"varint,4,opt,name=source,enum=mavio.acquisition.v1.BlockedTitleSource"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -3222,19 +3287,33 @@ func (x *ListBlockedTitlesRequest) GetOffset() int32 {
 	return 0
 }
 
+func (x *ListBlockedTitlesRequest) GetSource() BlockedTitleSource {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 3) {
+			return x.xxx_hidden_Source
+		}
+	}
+	return BlockedTitleSource_BLOCKED_TITLE_SOURCE_UNSPECIFIED
+}
+
 func (x *ListBlockedTitlesRequest) SetSearch(v string) {
 	x.xxx_hidden_Search = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
 }
 
 func (x *ListBlockedTitlesRequest) SetLimit(v int32) {
 	x.xxx_hidden_Limit = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
 func (x *ListBlockedTitlesRequest) SetOffset(v int32) {
 	x.xxx_hidden_Offset = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *ListBlockedTitlesRequest) SetSource(v BlockedTitleSource) {
+	x.xxx_hidden_Source = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *ListBlockedTitlesRequest) HasSearch() bool {
@@ -3258,6 +3337,13 @@ func (x *ListBlockedTitlesRequest) HasOffset() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *ListBlockedTitlesRequest) HasSource() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *ListBlockedTitlesRequest) ClearSearch() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Search = nil
@@ -3273,6 +3359,11 @@ func (x *ListBlockedTitlesRequest) ClearOffset() {
 	x.xxx_hidden_Offset = 0
 }
 
+func (x *ListBlockedTitlesRequest) ClearSource() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Source = BlockedTitleSource_BLOCKED_TITLE_SOURCE_UNSPECIFIED
+}
+
 type ListBlockedTitlesRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -3281,6 +3372,8 @@ type ListBlockedTitlesRequest_builder struct {
 	// 1–1000; unset means 100.
 	Limit  *int32
 	Offset *int32
+	// The titles blocklisted one way; unset for all.
+	Source *BlockedTitleSource
 }
 
 func (b0 ListBlockedTitlesRequest_builder) Build() *ListBlockedTitlesRequest {
@@ -3288,16 +3381,20 @@ func (b0 ListBlockedTitlesRequest_builder) Build() *ListBlockedTitlesRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Search != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
 		x.xxx_hidden_Search = b.Search
 	}
 	if b.Limit != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_Limit = *b.Limit
 	}
 	if b.Offset != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
 		x.xxx_hidden_Offset = *b.Offset
+	}
+	if b.Source != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_Source = *b.Source
 	}
 	return m0
 }
@@ -3393,6 +3490,261 @@ func (b0 ListBlockedTitlesResponse_builder) Build() *ListBlockedTitlesResponse {
 	return m0
 }
 
+type BlockCollectionRequest struct {
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TmdbCollectionId int32                  `protobuf:"varint,1,opt,name=tmdb_collection_id,json=tmdbCollectionId"`
+	XXX_raceDetectHookData      protoimpl.RaceDetectHookData
+	XXX_presence                [1]uint32
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
+}
+
+func (x *BlockCollectionRequest) Reset() {
+	*x = BlockCollectionRequest{}
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BlockCollectionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BlockCollectionRequest) ProtoMessage() {}
+
+func (x *BlockCollectionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *BlockCollectionRequest) GetTmdbCollectionId() int32 {
+	if x != nil {
+		return x.xxx_hidden_TmdbCollectionId
+	}
+	return 0
+}
+
+func (x *BlockCollectionRequest) SetTmdbCollectionId(v int32) {
+	x.xxx_hidden_TmdbCollectionId = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *BlockCollectionRequest) HasTmdbCollectionId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *BlockCollectionRequest) ClearTmdbCollectionId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_TmdbCollectionId = 0
+}
+
+type BlockCollectionRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The TMDB ID of the collection.
+	TmdbCollectionId *int32
+}
+
+func (b0 BlockCollectionRequest_builder) Build() *BlockCollectionRequest {
+	m0 := &BlockCollectionRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.TmdbCollectionId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_TmdbCollectionId = *b.TmdbCollectionId
+	}
+	return m0
+}
+
+type BlockCollectionResponse struct {
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_BlockedTitles *[]*BlockedTitle       `protobuf:"bytes,1,rep,name=blocked_titles,json=blockedTitles"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *BlockCollectionResponse) Reset() {
+	*x = BlockCollectionResponse{}
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BlockCollectionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BlockCollectionResponse) ProtoMessage() {}
+
+func (x *BlockCollectionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *BlockCollectionResponse) GetBlockedTitles() []*BlockedTitle {
+	if x != nil {
+		if x.xxx_hidden_BlockedTitles != nil {
+			return *x.xxx_hidden_BlockedTitles
+		}
+	}
+	return nil
+}
+
+func (x *BlockCollectionResponse) SetBlockedTitles(v []*BlockedTitle) {
+	x.xxx_hidden_BlockedTitles = &v
+}
+
+type BlockCollectionResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The movies blocklisted, without those blocklisted already.
+	BlockedTitles []*BlockedTitle
+}
+
+func (b0 BlockCollectionResponse_builder) Build() *BlockCollectionResponse {
+	m0 := &BlockCollectionResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_BlockedTitles = &b.BlockedTitles
+	return m0
+}
+
+type UnblockCollectionRequest struct {
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TmdbCollectionId int32                  `protobuf:"varint,1,opt,name=tmdb_collection_id,json=tmdbCollectionId"`
+	XXX_raceDetectHookData      protoimpl.RaceDetectHookData
+	XXX_presence                [1]uint32
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
+}
+
+func (x *UnblockCollectionRequest) Reset() {
+	*x = UnblockCollectionRequest{}
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnblockCollectionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnblockCollectionRequest) ProtoMessage() {}
+
+func (x *UnblockCollectionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UnblockCollectionRequest) GetTmdbCollectionId() int32 {
+	if x != nil {
+		return x.xxx_hidden_TmdbCollectionId
+	}
+	return 0
+}
+
+func (x *UnblockCollectionRequest) SetTmdbCollectionId(v int32) {
+	x.xxx_hidden_TmdbCollectionId = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *UnblockCollectionRequest) HasTmdbCollectionId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *UnblockCollectionRequest) ClearTmdbCollectionId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_TmdbCollectionId = 0
+}
+
+type UnblockCollectionRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The TMDB ID of the collection.
+	TmdbCollectionId *int32
+}
+
+func (b0 UnblockCollectionRequest_builder) Build() *UnblockCollectionRequest {
+	m0 := &UnblockCollectionRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.TmdbCollectionId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_TmdbCollectionId = *b.TmdbCollectionId
+	}
+	return m0
+}
+
+type UnblockCollectionResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnblockCollectionResponse) Reset() {
+	*x = UnblockCollectionResponse{}
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnblockCollectionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnblockCollectionResponse) ProtoMessage() {}
+
+func (x *UnblockCollectionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_request_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type UnblockCollectionResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 UnblockCollectionResponse_builder) Build() *UnblockCollectionResponse {
+	m0 := &UnblockCollectionResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 var File_mavio_acquisition_v1_request_proto protoreflect.FileDescriptor
 
 const file_mavio_acquisition_v1_request_proto_rawDesc = "" +
@@ -3484,7 +3836,7 @@ const file_mavio_acquisition_v1_request_proto_rawDesc = "" +
 	"restricted\"z\n" +
 	"\x10GetQuotaResponse\x121\n" +
 	"\x05movie\x18\x01 \x01(\v2\x1b.mavio.acquisition.v1.QuotaR\x05movie\x123\n" +
-	"\x06series\x18\x02 \x01(\v2\x1b.mavio.acquisition.v1.QuotaR\x06series\"\xd3\x01\n" +
+	"\x06series\x18\x02 \x01(\v2\x1b.mavio.acquisition.v1.QuotaR\x06series\"\xe7\x01\n" +
 	"\fBlockedTitle\x12>\n" +
 	"\n" +
 	"media_kind\x18\x01 \x01(\x0e2\x1f.mavio.acquisition.v1.MediaKindR\tmediaKind\x12\x17\n" +
@@ -3492,7 +3844,8 @@ const file_mavio_acquisition_v1_request_proto_rawDesc = "" +
 	"\x05title\x18\x03 \x01(\tR\x05title\x12\x17\n" +
 	"\auser_id\x18\x04 \x01(\tR\x06userId\x12;\n" +
 	"\vcreate_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"createTime\"\x81\x01\n" +
+	"createTime\x12\x12\n" +
+	"\x04tags\x18\x06 \x03(\tR\x04tags\"\x81\x01\n" +
 	"\x11BlockTitleRequest\x12J\n" +
 	"\n" +
 	"media_kind\x18\x01 \x01(\x0e2\x1f.mavio.acquisition.v1.MediaKindB\n" +
@@ -3505,15 +3858,23 @@ const file_mavio_acquisition_v1_request_proto_rawDesc = "" +
 	"media_kind\x18\x01 \x01(\x0e2\x1f.mavio.acquisition.v1.MediaKindB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\tmediaKind\x12 \n" +
 	"\atmdb_id\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02 \x00R\x06tmdbId\"\x16\n" +
-	"\x14UnblockTitleResponse\"\x7f\n" +
+	"\x14UnblockTitleResponse\"\xcb\x01\n" +
 	"\x18ListBlockedTitlesRequest\x12 \n" +
 	"\x06search\x18\x01 \x01(\tB\b\xbaH\x05r\x03\x18\xc8\x01R\x06search\x12 \n" +
 	"\x05limit\x18\x02 \x01(\x05B\n" +
 	"\xbaH\a\x1a\x05\x18\xe8\a(\x00R\x05limit\x12\x1f\n" +
-	"\x06offset\x18\x03 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\"|\n" +
+	"\x06offset\x18\x03 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\x12J\n" +
+	"\x06source\x18\x04 \x01(\x0e2(.mavio.acquisition.v1.BlockedTitleSourceB\b\xbaH\x05\x82\x01\x02\x10\x01R\x06source\"|\n" +
 	"\x19ListBlockedTitlesResponse\x12I\n" +
 	"\x0eblocked_titles\x18\x01 \x03(\v2\".mavio.acquisition.v1.BlockedTitleR\rblockedTitles\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total*\xbe\x01\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"O\n" +
+	"\x16BlockCollectionRequest\x125\n" +
+	"\x12tmdb_collection_id\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02 \x00R\x10tmdbCollectionId\"d\n" +
+	"\x17BlockCollectionResponse\x12I\n" +
+	"\x0eblocked_titles\x18\x01 \x03(\v2\".mavio.acquisition.v1.BlockedTitleR\rblockedTitles\"Q\n" +
+	"\x18UnblockCollectionRequest\x125\n" +
+	"\x12tmdb_collection_id\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02 \x00R\x10tmdbCollectionId\"\x1b\n" +
+	"\x19UnblockCollectionResponse*\xbe\x01\n" +
 	"\rRequestStatus\x12\x1e\n" +
 	"\x1aREQUEST_STATUS_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16REQUEST_STATUS_PENDING\x10\x01\x12\x1b\n" +
@@ -3523,8 +3884,11 @@ const file_mavio_acquisition_v1_request_proto_rawDesc = "" +
 	"\x18REQUEST_STATUS_COMPLETED\x10\x05*F\n" +
 	"\vRequestSort\x12\x1c\n" +
 	"\x18REQUEST_SORT_UNSPECIFIED\x10\x00\x12\x19\n" +
-	"\x15REQUEST_SORT_MODIFIED\x10\x012\x93\n" +
-	"\n" +
+	"\x15REQUEST_SORT_MODIFIED\x10\x01*z\n" +
+	"\x12BlockedTitleSource\x12$\n" +
+	" BLOCKED_TITLE_SOURCE_UNSPECIFIED\x10\x00\x12\x1f\n" +
+	"\x1bBLOCKED_TITLE_SOURCE_MANUAL\x10\x01\x12\x1d\n" +
+	"\x19BLOCKED_TITLE_SOURCE_TAGS\x10\x022\xfe\v\n" +
 	"\x0eRequestService\x12h\n" +
 	"\rCreateRequest\x12*.mavio.acquisition.v1.CreateRequestRequest\x1a+.mavio.acquisition.v1.CreateRequestResponse\x12j\n" +
 	"\fListRequests\x12).mavio.acquisition.v1.ListRequestsRequest\x1a*.mavio.acquisition.v1.ListRequestsResponse\"\x03\x90\x02\x01\x12d\n" +
@@ -3539,100 +3903,113 @@ const file_mavio_acquisition_v1_request_proto_rawDesc = "" +
 	"\n" +
 	"BlockTitle\x12'.mavio.acquisition.v1.BlockTitleRequest\x1a(.mavio.acquisition.v1.BlockTitleResponse\x12j\n" +
 	"\fUnblockTitle\x12).mavio.acquisition.v1.UnblockTitleRequest\x1a*.mavio.acquisition.v1.UnblockTitleResponse\"\x03\x90\x02\x02\x12y\n" +
-	"\x11ListBlockedTitles\x12..mavio.acquisition.v1.ListBlockedTitlesRequest\x1a/.mavio.acquisition.v1.ListBlockedTitlesResponse\"\x03\x90\x02\x01B\xe9\x01\n" +
+	"\x11ListBlockedTitles\x12..mavio.acquisition.v1.ListBlockedTitlesRequest\x1a/.mavio.acquisition.v1.ListBlockedTitlesResponse\"\x03\x90\x02\x01\x12n\n" +
+	"\x0fBlockCollection\x12,.mavio.acquisition.v1.BlockCollectionRequest\x1a-.mavio.acquisition.v1.BlockCollectionResponse\x12y\n" +
+	"\x11UnblockCollection\x12..mavio.acquisition.v1.UnblockCollectionRequest\x1a/.mavio.acquisition.v1.UnblockCollectionResponse\"\x03\x90\x02\x02B\xe9\x01\n" +
 	"\x18com.mavio.acquisition.v1B\fRequestProtoP\x01ZMgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1;acquisitionv1\xa2\x02\x03MAX\xaa\x02\x14Mavio.Acquisition.V1\xca\x02\x14Mavio\\Acquisition\\V1\xe2\x02 Mavio\\Acquisition\\V1\\GPBMetadata\xea\x02\x16Mavio::Acquisition::V1b\beditionsp\xe8\a"
 
-var file_mavio_acquisition_v1_request_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_mavio_acquisition_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_mavio_acquisition_v1_request_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_mavio_acquisition_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_mavio_acquisition_v1_request_proto_goTypes = []any{
 	(RequestStatus)(0),                // 0: mavio.acquisition.v1.RequestStatus
 	(RequestSort)(0),                  // 1: mavio.acquisition.v1.RequestSort
-	(*SeasonRequest)(nil),             // 2: mavio.acquisition.v1.SeasonRequest
-	(*Request)(nil),                   // 3: mavio.acquisition.v1.Request
-	(*CreateRequestRequest)(nil),      // 4: mavio.acquisition.v1.CreateRequestRequest
-	(*CreateRequestResponse)(nil),     // 5: mavio.acquisition.v1.CreateRequestResponse
-	(*ListRequestsRequest)(nil),       // 6: mavio.acquisition.v1.ListRequestsRequest
-	(*ListRequestsResponse)(nil),      // 7: mavio.acquisition.v1.ListRequestsResponse
-	(*GetRequestRequest)(nil),         // 8: mavio.acquisition.v1.GetRequestRequest
-	(*GetRequestResponse)(nil),        // 9: mavio.acquisition.v1.GetRequestResponse
-	(*UpdateRequestRequest)(nil),      // 10: mavio.acquisition.v1.UpdateRequestRequest
-	(*UpdateRequestResponse)(nil),     // 11: mavio.acquisition.v1.UpdateRequestResponse
-	(*DeleteRequestRequest)(nil),      // 12: mavio.acquisition.v1.DeleteRequestRequest
-	(*DeleteRequestResponse)(nil),     // 13: mavio.acquisition.v1.DeleteRequestResponse
-	(*ApproveRequestRequest)(nil),     // 14: mavio.acquisition.v1.ApproveRequestRequest
-	(*ApproveRequestResponse)(nil),    // 15: mavio.acquisition.v1.ApproveRequestResponse
-	(*DeclineRequestRequest)(nil),     // 16: mavio.acquisition.v1.DeclineRequestRequest
-	(*DeclineRequestResponse)(nil),    // 17: mavio.acquisition.v1.DeclineRequestResponse
-	(*RetryRequestRequest)(nil),       // 18: mavio.acquisition.v1.RetryRequestRequest
-	(*RetryRequestResponse)(nil),      // 19: mavio.acquisition.v1.RetryRequestResponse
-	(*GetQuotaRequest)(nil),           // 20: mavio.acquisition.v1.GetQuotaRequest
-	(*Quota)(nil),                     // 21: mavio.acquisition.v1.Quota
-	(*GetQuotaResponse)(nil),          // 22: mavio.acquisition.v1.GetQuotaResponse
-	(*BlockedTitle)(nil),              // 23: mavio.acquisition.v1.BlockedTitle
-	(*BlockTitleRequest)(nil),         // 24: mavio.acquisition.v1.BlockTitleRequest
-	(*BlockTitleResponse)(nil),        // 25: mavio.acquisition.v1.BlockTitleResponse
-	(*UnblockTitleRequest)(nil),       // 26: mavio.acquisition.v1.UnblockTitleRequest
-	(*UnblockTitleResponse)(nil),      // 27: mavio.acquisition.v1.UnblockTitleResponse
-	(*ListBlockedTitlesRequest)(nil),  // 28: mavio.acquisition.v1.ListBlockedTitlesRequest
-	(*ListBlockedTitlesResponse)(nil), // 29: mavio.acquisition.v1.ListBlockedTitlesResponse
-	(MediaKind)(0),                    // 30: mavio.acquisition.v1.MediaKind
-	(*timestamppb.Timestamp)(nil),     // 31: google.protobuf.Timestamp
+	(BlockedTitleSource)(0),           // 2: mavio.acquisition.v1.BlockedTitleSource
+	(*SeasonRequest)(nil),             // 3: mavio.acquisition.v1.SeasonRequest
+	(*Request)(nil),                   // 4: mavio.acquisition.v1.Request
+	(*CreateRequestRequest)(nil),      // 5: mavio.acquisition.v1.CreateRequestRequest
+	(*CreateRequestResponse)(nil),     // 6: mavio.acquisition.v1.CreateRequestResponse
+	(*ListRequestsRequest)(nil),       // 7: mavio.acquisition.v1.ListRequestsRequest
+	(*ListRequestsResponse)(nil),      // 8: mavio.acquisition.v1.ListRequestsResponse
+	(*GetRequestRequest)(nil),         // 9: mavio.acquisition.v1.GetRequestRequest
+	(*GetRequestResponse)(nil),        // 10: mavio.acquisition.v1.GetRequestResponse
+	(*UpdateRequestRequest)(nil),      // 11: mavio.acquisition.v1.UpdateRequestRequest
+	(*UpdateRequestResponse)(nil),     // 12: mavio.acquisition.v1.UpdateRequestResponse
+	(*DeleteRequestRequest)(nil),      // 13: mavio.acquisition.v1.DeleteRequestRequest
+	(*DeleteRequestResponse)(nil),     // 14: mavio.acquisition.v1.DeleteRequestResponse
+	(*ApproveRequestRequest)(nil),     // 15: mavio.acquisition.v1.ApproveRequestRequest
+	(*ApproveRequestResponse)(nil),    // 16: mavio.acquisition.v1.ApproveRequestResponse
+	(*DeclineRequestRequest)(nil),     // 17: mavio.acquisition.v1.DeclineRequestRequest
+	(*DeclineRequestResponse)(nil),    // 18: mavio.acquisition.v1.DeclineRequestResponse
+	(*RetryRequestRequest)(nil),       // 19: mavio.acquisition.v1.RetryRequestRequest
+	(*RetryRequestResponse)(nil),      // 20: mavio.acquisition.v1.RetryRequestResponse
+	(*GetQuotaRequest)(nil),           // 21: mavio.acquisition.v1.GetQuotaRequest
+	(*Quota)(nil),                     // 22: mavio.acquisition.v1.Quota
+	(*GetQuotaResponse)(nil),          // 23: mavio.acquisition.v1.GetQuotaResponse
+	(*BlockedTitle)(nil),              // 24: mavio.acquisition.v1.BlockedTitle
+	(*BlockTitleRequest)(nil),         // 25: mavio.acquisition.v1.BlockTitleRequest
+	(*BlockTitleResponse)(nil),        // 26: mavio.acquisition.v1.BlockTitleResponse
+	(*UnblockTitleRequest)(nil),       // 27: mavio.acquisition.v1.UnblockTitleRequest
+	(*UnblockTitleResponse)(nil),      // 28: mavio.acquisition.v1.UnblockTitleResponse
+	(*ListBlockedTitlesRequest)(nil),  // 29: mavio.acquisition.v1.ListBlockedTitlesRequest
+	(*ListBlockedTitlesResponse)(nil), // 30: mavio.acquisition.v1.ListBlockedTitlesResponse
+	(*BlockCollectionRequest)(nil),    // 31: mavio.acquisition.v1.BlockCollectionRequest
+	(*BlockCollectionResponse)(nil),   // 32: mavio.acquisition.v1.BlockCollectionResponse
+	(*UnblockCollectionRequest)(nil),  // 33: mavio.acquisition.v1.UnblockCollectionRequest
+	(*UnblockCollectionResponse)(nil), // 34: mavio.acquisition.v1.UnblockCollectionResponse
+	(MediaKind)(0),                    // 35: mavio.acquisition.v1.MediaKind
+	(*timestamppb.Timestamp)(nil),     // 36: google.protobuf.Timestamp
 }
 var file_mavio_acquisition_v1_request_proto_depIdxs = []int32{
 	0,  // 0: mavio.acquisition.v1.SeasonRequest.status:type_name -> mavio.acquisition.v1.RequestStatus
-	30, // 1: mavio.acquisition.v1.Request.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	2,  // 2: mavio.acquisition.v1.Request.seasons:type_name -> mavio.acquisition.v1.SeasonRequest
+	35, // 1: mavio.acquisition.v1.Request.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	3,  // 2: mavio.acquisition.v1.Request.seasons:type_name -> mavio.acquisition.v1.SeasonRequest
 	0,  // 3: mavio.acquisition.v1.Request.status:type_name -> mavio.acquisition.v1.RequestStatus
-	31, // 4: mavio.acquisition.v1.Request.create_time:type_name -> google.protobuf.Timestamp
-	31, // 5: mavio.acquisition.v1.Request.update_time:type_name -> google.protobuf.Timestamp
-	30, // 6: mavio.acquisition.v1.CreateRequestRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	3,  // 7: mavio.acquisition.v1.CreateRequestResponse.request:type_name -> mavio.acquisition.v1.Request
+	36, // 4: mavio.acquisition.v1.Request.create_time:type_name -> google.protobuf.Timestamp
+	36, // 5: mavio.acquisition.v1.Request.update_time:type_name -> google.protobuf.Timestamp
+	35, // 6: mavio.acquisition.v1.CreateRequestRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	4,  // 7: mavio.acquisition.v1.CreateRequestResponse.request:type_name -> mavio.acquisition.v1.Request
 	0,  // 8: mavio.acquisition.v1.ListRequestsRequest.statuses:type_name -> mavio.acquisition.v1.RequestStatus
-	30, // 9: mavio.acquisition.v1.ListRequestsRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	35, // 9: mavio.acquisition.v1.ListRequestsRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
 	1,  // 10: mavio.acquisition.v1.ListRequestsRequest.sort:type_name -> mavio.acquisition.v1.RequestSort
-	3,  // 11: mavio.acquisition.v1.ListRequestsResponse.requests:type_name -> mavio.acquisition.v1.Request
-	3,  // 12: mavio.acquisition.v1.GetRequestResponse.request:type_name -> mavio.acquisition.v1.Request
-	3,  // 13: mavio.acquisition.v1.UpdateRequestResponse.request:type_name -> mavio.acquisition.v1.Request
-	3,  // 14: mavio.acquisition.v1.ApproveRequestResponse.request:type_name -> mavio.acquisition.v1.Request
-	3,  // 15: mavio.acquisition.v1.DeclineRequestResponse.request:type_name -> mavio.acquisition.v1.Request
-	3,  // 16: mavio.acquisition.v1.RetryRequestResponse.request:type_name -> mavio.acquisition.v1.Request
-	21, // 17: mavio.acquisition.v1.GetQuotaResponse.movie:type_name -> mavio.acquisition.v1.Quota
-	21, // 18: mavio.acquisition.v1.GetQuotaResponse.series:type_name -> mavio.acquisition.v1.Quota
-	30, // 19: mavio.acquisition.v1.BlockedTitle.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	31, // 20: mavio.acquisition.v1.BlockedTitle.create_time:type_name -> google.protobuf.Timestamp
-	30, // 21: mavio.acquisition.v1.BlockTitleRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	23, // 22: mavio.acquisition.v1.BlockTitleResponse.blocked_title:type_name -> mavio.acquisition.v1.BlockedTitle
-	30, // 23: mavio.acquisition.v1.UnblockTitleRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	23, // 24: mavio.acquisition.v1.ListBlockedTitlesResponse.blocked_titles:type_name -> mavio.acquisition.v1.BlockedTitle
-	4,  // 25: mavio.acquisition.v1.RequestService.CreateRequest:input_type -> mavio.acquisition.v1.CreateRequestRequest
-	6,  // 26: mavio.acquisition.v1.RequestService.ListRequests:input_type -> mavio.acquisition.v1.ListRequestsRequest
-	8,  // 27: mavio.acquisition.v1.RequestService.GetRequest:input_type -> mavio.acquisition.v1.GetRequestRequest
-	10, // 28: mavio.acquisition.v1.RequestService.UpdateRequest:input_type -> mavio.acquisition.v1.UpdateRequestRequest
-	12, // 29: mavio.acquisition.v1.RequestService.DeleteRequest:input_type -> mavio.acquisition.v1.DeleteRequestRequest
-	14, // 30: mavio.acquisition.v1.RequestService.ApproveRequest:input_type -> mavio.acquisition.v1.ApproveRequestRequest
-	16, // 31: mavio.acquisition.v1.RequestService.DeclineRequest:input_type -> mavio.acquisition.v1.DeclineRequestRequest
-	18, // 32: mavio.acquisition.v1.RequestService.RetryRequest:input_type -> mavio.acquisition.v1.RetryRequestRequest
-	20, // 33: mavio.acquisition.v1.RequestService.GetQuota:input_type -> mavio.acquisition.v1.GetQuotaRequest
-	24, // 34: mavio.acquisition.v1.RequestService.BlockTitle:input_type -> mavio.acquisition.v1.BlockTitleRequest
-	26, // 35: mavio.acquisition.v1.RequestService.UnblockTitle:input_type -> mavio.acquisition.v1.UnblockTitleRequest
-	28, // 36: mavio.acquisition.v1.RequestService.ListBlockedTitles:input_type -> mavio.acquisition.v1.ListBlockedTitlesRequest
-	5,  // 37: mavio.acquisition.v1.RequestService.CreateRequest:output_type -> mavio.acquisition.v1.CreateRequestResponse
-	7,  // 38: mavio.acquisition.v1.RequestService.ListRequests:output_type -> mavio.acquisition.v1.ListRequestsResponse
-	9,  // 39: mavio.acquisition.v1.RequestService.GetRequest:output_type -> mavio.acquisition.v1.GetRequestResponse
-	11, // 40: mavio.acquisition.v1.RequestService.UpdateRequest:output_type -> mavio.acquisition.v1.UpdateRequestResponse
-	13, // 41: mavio.acquisition.v1.RequestService.DeleteRequest:output_type -> mavio.acquisition.v1.DeleteRequestResponse
-	15, // 42: mavio.acquisition.v1.RequestService.ApproveRequest:output_type -> mavio.acquisition.v1.ApproveRequestResponse
-	17, // 43: mavio.acquisition.v1.RequestService.DeclineRequest:output_type -> mavio.acquisition.v1.DeclineRequestResponse
-	19, // 44: mavio.acquisition.v1.RequestService.RetryRequest:output_type -> mavio.acquisition.v1.RetryRequestResponse
-	22, // 45: mavio.acquisition.v1.RequestService.GetQuota:output_type -> mavio.acquisition.v1.GetQuotaResponse
-	25, // 46: mavio.acquisition.v1.RequestService.BlockTitle:output_type -> mavio.acquisition.v1.BlockTitleResponse
-	27, // 47: mavio.acquisition.v1.RequestService.UnblockTitle:output_type -> mavio.acquisition.v1.UnblockTitleResponse
-	29, // 48: mavio.acquisition.v1.RequestService.ListBlockedTitles:output_type -> mavio.acquisition.v1.ListBlockedTitlesResponse
-	37, // [37:49] is the sub-list for method output_type
-	25, // [25:37] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	4,  // 11: mavio.acquisition.v1.ListRequestsResponse.requests:type_name -> mavio.acquisition.v1.Request
+	4,  // 12: mavio.acquisition.v1.GetRequestResponse.request:type_name -> mavio.acquisition.v1.Request
+	4,  // 13: mavio.acquisition.v1.UpdateRequestResponse.request:type_name -> mavio.acquisition.v1.Request
+	4,  // 14: mavio.acquisition.v1.ApproveRequestResponse.request:type_name -> mavio.acquisition.v1.Request
+	4,  // 15: mavio.acquisition.v1.DeclineRequestResponse.request:type_name -> mavio.acquisition.v1.Request
+	4,  // 16: mavio.acquisition.v1.RetryRequestResponse.request:type_name -> mavio.acquisition.v1.Request
+	22, // 17: mavio.acquisition.v1.GetQuotaResponse.movie:type_name -> mavio.acquisition.v1.Quota
+	22, // 18: mavio.acquisition.v1.GetQuotaResponse.series:type_name -> mavio.acquisition.v1.Quota
+	35, // 19: mavio.acquisition.v1.BlockedTitle.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	36, // 20: mavio.acquisition.v1.BlockedTitle.create_time:type_name -> google.protobuf.Timestamp
+	35, // 21: mavio.acquisition.v1.BlockTitleRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	24, // 22: mavio.acquisition.v1.BlockTitleResponse.blocked_title:type_name -> mavio.acquisition.v1.BlockedTitle
+	35, // 23: mavio.acquisition.v1.UnblockTitleRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	2,  // 24: mavio.acquisition.v1.ListBlockedTitlesRequest.source:type_name -> mavio.acquisition.v1.BlockedTitleSource
+	24, // 25: mavio.acquisition.v1.ListBlockedTitlesResponse.blocked_titles:type_name -> mavio.acquisition.v1.BlockedTitle
+	24, // 26: mavio.acquisition.v1.BlockCollectionResponse.blocked_titles:type_name -> mavio.acquisition.v1.BlockedTitle
+	5,  // 27: mavio.acquisition.v1.RequestService.CreateRequest:input_type -> mavio.acquisition.v1.CreateRequestRequest
+	7,  // 28: mavio.acquisition.v1.RequestService.ListRequests:input_type -> mavio.acquisition.v1.ListRequestsRequest
+	9,  // 29: mavio.acquisition.v1.RequestService.GetRequest:input_type -> mavio.acquisition.v1.GetRequestRequest
+	11, // 30: mavio.acquisition.v1.RequestService.UpdateRequest:input_type -> mavio.acquisition.v1.UpdateRequestRequest
+	13, // 31: mavio.acquisition.v1.RequestService.DeleteRequest:input_type -> mavio.acquisition.v1.DeleteRequestRequest
+	15, // 32: mavio.acquisition.v1.RequestService.ApproveRequest:input_type -> mavio.acquisition.v1.ApproveRequestRequest
+	17, // 33: mavio.acquisition.v1.RequestService.DeclineRequest:input_type -> mavio.acquisition.v1.DeclineRequestRequest
+	19, // 34: mavio.acquisition.v1.RequestService.RetryRequest:input_type -> mavio.acquisition.v1.RetryRequestRequest
+	21, // 35: mavio.acquisition.v1.RequestService.GetQuota:input_type -> mavio.acquisition.v1.GetQuotaRequest
+	25, // 36: mavio.acquisition.v1.RequestService.BlockTitle:input_type -> mavio.acquisition.v1.BlockTitleRequest
+	27, // 37: mavio.acquisition.v1.RequestService.UnblockTitle:input_type -> mavio.acquisition.v1.UnblockTitleRequest
+	29, // 38: mavio.acquisition.v1.RequestService.ListBlockedTitles:input_type -> mavio.acquisition.v1.ListBlockedTitlesRequest
+	31, // 39: mavio.acquisition.v1.RequestService.BlockCollection:input_type -> mavio.acquisition.v1.BlockCollectionRequest
+	33, // 40: mavio.acquisition.v1.RequestService.UnblockCollection:input_type -> mavio.acquisition.v1.UnblockCollectionRequest
+	6,  // 41: mavio.acquisition.v1.RequestService.CreateRequest:output_type -> mavio.acquisition.v1.CreateRequestResponse
+	8,  // 42: mavio.acquisition.v1.RequestService.ListRequests:output_type -> mavio.acquisition.v1.ListRequestsResponse
+	10, // 43: mavio.acquisition.v1.RequestService.GetRequest:output_type -> mavio.acquisition.v1.GetRequestResponse
+	12, // 44: mavio.acquisition.v1.RequestService.UpdateRequest:output_type -> mavio.acquisition.v1.UpdateRequestResponse
+	14, // 45: mavio.acquisition.v1.RequestService.DeleteRequest:output_type -> mavio.acquisition.v1.DeleteRequestResponse
+	16, // 46: mavio.acquisition.v1.RequestService.ApproveRequest:output_type -> mavio.acquisition.v1.ApproveRequestResponse
+	18, // 47: mavio.acquisition.v1.RequestService.DeclineRequest:output_type -> mavio.acquisition.v1.DeclineRequestResponse
+	20, // 48: mavio.acquisition.v1.RequestService.RetryRequest:output_type -> mavio.acquisition.v1.RetryRequestResponse
+	23, // 49: mavio.acquisition.v1.RequestService.GetQuota:output_type -> mavio.acquisition.v1.GetQuotaResponse
+	26, // 50: mavio.acquisition.v1.RequestService.BlockTitle:output_type -> mavio.acquisition.v1.BlockTitleResponse
+	28, // 51: mavio.acquisition.v1.RequestService.UnblockTitle:output_type -> mavio.acquisition.v1.UnblockTitleResponse
+	30, // 52: mavio.acquisition.v1.RequestService.ListBlockedTitles:output_type -> mavio.acquisition.v1.ListBlockedTitlesResponse
+	32, // 53: mavio.acquisition.v1.RequestService.BlockCollection:output_type -> mavio.acquisition.v1.BlockCollectionResponse
+	34, // 54: mavio.acquisition.v1.RequestService.UnblockCollection:output_type -> mavio.acquisition.v1.UnblockCollectionResponse
+	41, // [41:55] is the sub-list for method output_type
+	27, // [27:41] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_mavio_acquisition_v1_request_proto_init() }
@@ -3646,8 +4023,8 @@ func file_mavio_acquisition_v1_request_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_acquisition_v1_request_proto_rawDesc), len(file_mavio_acquisition_v1_request_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   28,
+			NumEnums:      3,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

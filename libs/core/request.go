@@ -275,8 +275,13 @@ type BlockedTitle struct {
 	// Title names it as it was blocklisted; empty when unknown.
 	Title string
 	// UserID is the administrator who blocklisted it; zero once they are
-	// deleted.
+	// deleted, and for titles blocklisted by tags.
 	UserID ID
+	// Tags are the blocklisted tags ("<plugin>/<keyword>") of
+	// RequestSettings.BlocklistedTags the title has, for which the
+	// blocklisted tags job blocklisted it, as Seerr's
+	// Blocklist.blocklistedTags; empty for titles blocklisted by hand.
+	Tags []string
 	// CreatedAt is set by the repository when zero.
 	CreatedAt time.Time
 }
@@ -292,19 +297,37 @@ func (b *BlockedTitle) Validate() error {
 	return nil
 }
 
+// BlockedTitleSource is how titles came on the blocklist, as Seerr's
+// blocklist filters.
+type BlockedTitleSource string
+
+// The sources of blocked titles.
+const (
+	// BlockedByHand are the titles administrators blocklisted.
+	BlockedByHand BlockedTitleSource = "manual"
+	// BlockedByTags are the titles the blocklisted tags job blocklisted.
+	BlockedByTags BlockedTitleSource = "tags"
+)
+
 // BlockedTitleQuery selects blocked titles, newest first.
 type BlockedTitleQuery struct {
 	// Search matches titles containing it, ignoring case; empty matches
 	// all.
 	Search string
+	// Source selects the titles blocklisted by hand or by tags; empty
+	// selects both.
+	Source BlockedTitleSource
 	Limit  int // zero means MaxPageSize
 	Offset int
 }
 
 // Validate checks the query's bounds.
 func (q *BlockedTitleQuery) Validate() error {
-	if q.Limit < 0 || q.Limit > MaxPageSize || q.Offset < 0 {
+	switch {
+	case q.Limit < 0 || q.Limit > MaxPageSize || q.Offset < 0:
 		return fmt.Errorf("%w: page outside 0–%d", ErrInvalid, MaxPageSize)
+	case q.Source != "" && q.Source != BlockedByHand && q.Source != BlockedByTags:
+		return fmt.Errorf("%w: unknown blocked title source %q", ErrInvalid, q.Source)
 	}
 	return nil
 }
@@ -323,6 +346,9 @@ type (
 		// Delete takes a title off the blocklist; ErrNotFound when it is
 		// not on it.
 		Delete(ctx context.Context, kind ItemKind, tmdbID int) error
+		// DeleteTagged takes the titles blocklisted by tags off the
+		// blocklist and returns how many there were.
+		DeleteTagged(ctx context.Context) (int, error)
 	}
 
 	// RequestRepository stores requests; deleting the user deletes their
@@ -422,6 +448,30 @@ type RequestSettings struct {
 	// Specials allows requesting season 0 (Seerr's
 	// enableSpecialEpisodes).
 	Specials bool
+	// BlocklistedTags are keywords of discovery providers, as
+	// "<plugin>/<keyword>", whose movies and series the blocklisted tags
+	// job blocklists, as Seerr's blocklistedTags.
+	BlocklistedTags []string
+	// BlocklistedTagsLimit is how many pages of each order of a keyword's
+	// titles the job blocklists, as Seerr's blocklistedTagsLimit; 0 for
+	// DefaultBlocklistedTagsLimit.
+	BlocklistedTagsLimit int
+}
+
+// DefaultBlocklistedTagsLimit is Seerr's default blocklistedTagsLimit.
+const DefaultBlocklistedTagsLimit = 50
+
+// MaxBlocklistedTagsLimit is the most pages Seerr's blocklistedTagsLimit
+// allows.
+const MaxBlocklistedTagsLimit = 250
+
+// TagsLimit returns how many pages of each order of a keyword's titles the
+// blocklisted tags job blocklists.
+func (s *RequestSettings) TagsLimit() int {
+	if s.BlocklistedTagsLimit == 0 {
+		return DefaultBlocklistedTagsLimit
+	}
+	return s.BlocklistedTagsLimit
 }
 
 // DefaultRequestSettings are Seerr's defaults: users may request movies
@@ -444,6 +494,13 @@ func (s *RequestSettings) Validate() error {
 		return fmt.Errorf("%w: unknown minimum availability %q", ErrInvalid, s.MinimumAvailability)
 	case s.MonitorNewItems != "" && !s.MonitorNewItems.Valid():
 		return fmt.Errorf("%w: unknown new item monitoring %q", ErrInvalid, s.MonitorNewItems)
+	case s.BlocklistedTagsLimit < 0 || s.BlocklistedTagsLimit > MaxBlocklistedTagsLimit:
+		return fmt.Errorf("%w: blocklisted tags limit outside 0–%d", ErrInvalid, MaxBlocklistedTagsLimit)
+	}
+	for _, t := range s.BlocklistedTags {
+		if plugin, keyword, ok := strings.Cut(t, "/"); !ok || plugin == "" || keyword == "" {
+			return fmt.Errorf("%w: blocklisted tag %q is not <plugin>/<keyword>", ErrInvalid, t)
+		}
 	}
 	return nil
 }

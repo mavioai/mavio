@@ -68,6 +68,12 @@ const (
 	// RequestServiceListBlockedTitlesProcedure is the fully-qualified name of the RequestService's
 	// ListBlockedTitles RPC.
 	RequestServiceListBlockedTitlesProcedure = "/mavio.acquisition.v1.RequestService/ListBlockedTitles"
+	// RequestServiceBlockCollectionProcedure is the fully-qualified name of the RequestService's
+	// BlockCollection RPC.
+	RequestServiceBlockCollectionProcedure = "/mavio.acquisition.v1.RequestService/BlockCollection"
+	// RequestServiceUnblockCollectionProcedure is the fully-qualified name of the RequestService's
+	// UnblockCollection RPC.
+	RequestServiceUnblockCollectionProcedure = "/mavio.acquisition.v1.RequestService/UnblockCollection"
 )
 
 // RequestServiceClient is a client for the mavio.acquisition.v1.RequestService service.
@@ -110,6 +116,14 @@ type RequestServiceClient interface {
 	// ListBlockedTitles lists the blocklist, newest first. Administrators
 	// only.
 	ListBlockedTitles(context.Context, *v1.ListBlockedTitlesRequest) (*v1.ListBlockedTitlesResponse, error)
+	// BlockCollection blocklists the movies of a collection not blocklisted
+	// yet, as Seerr's POST /blocklist/collection/:id: the discovery
+	// providers' collection catalogs list them. Administrators only.
+	BlockCollection(context.Context, *v1.BlockCollectionRequest) (*v1.BlockCollectionResponse, error)
+	// UnblockCollection takes the movies of a collection off the
+	// blocklist, as Seerr's DELETE /blocklist/collection/:id.
+	// Administrators only.
+	UnblockCollection(context.Context, *v1.UnblockCollectionRequest) (*v1.UnblockCollectionResponse, error)
 }
 
 // NewRequestServiceClient constructs a client for the mavio.acquisition.v1.RequestService service.
@@ -202,6 +216,19 @@ func NewRequestServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		blockCollection: connect.NewClient[v1.BlockCollectionRequest, v1.BlockCollectionResponse](
+			httpClient,
+			baseURL+RequestServiceBlockCollectionProcedure,
+			connect.WithSchema(requestServiceMethods.ByName("BlockCollection")),
+			connect.WithClientOptions(opts...),
+		),
+		unblockCollection: connect.NewClient[v1.UnblockCollectionRequest, v1.UnblockCollectionResponse](
+			httpClient,
+			baseURL+RequestServiceUnblockCollectionProcedure,
+			connect.WithSchema(requestServiceMethods.ByName("UnblockCollection")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -219,6 +246,8 @@ type requestServiceClient struct {
 	blockTitle        *connect.Client[v1.BlockTitleRequest, v1.BlockTitleResponse]
 	unblockTitle      *connect.Client[v1.UnblockTitleRequest, v1.UnblockTitleResponse]
 	listBlockedTitles *connect.Client[v1.ListBlockedTitlesRequest, v1.ListBlockedTitlesResponse]
+	blockCollection   *connect.Client[v1.BlockCollectionRequest, v1.BlockCollectionResponse]
+	unblockCollection *connect.Client[v1.UnblockCollectionRequest, v1.UnblockCollectionResponse]
 }
 
 // CreateRequest calls mavio.acquisition.v1.RequestService.CreateRequest.
@@ -329,6 +358,24 @@ func (c *requestServiceClient) ListBlockedTitles(ctx context.Context, req *v1.Li
 	return nil, err
 }
 
+// BlockCollection calls mavio.acquisition.v1.RequestService.BlockCollection.
+func (c *requestServiceClient) BlockCollection(ctx context.Context, req *v1.BlockCollectionRequest) (*v1.BlockCollectionResponse, error) {
+	response, err := c.blockCollection.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// UnblockCollection calls mavio.acquisition.v1.RequestService.UnblockCollection.
+func (c *requestServiceClient) UnblockCollection(ctx context.Context, req *v1.UnblockCollectionRequest) (*v1.UnblockCollectionResponse, error) {
+	response, err := c.unblockCollection.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // RequestServiceHandler is an implementation of the mavio.acquisition.v1.RequestService service.
 type RequestServiceHandler interface {
 	// CreateRequest requests a movie, or seasons of a series, by its TMDB
@@ -369,6 +416,14 @@ type RequestServiceHandler interface {
 	// ListBlockedTitles lists the blocklist, newest first. Administrators
 	// only.
 	ListBlockedTitles(context.Context, *v1.ListBlockedTitlesRequest) (*v1.ListBlockedTitlesResponse, error)
+	// BlockCollection blocklists the movies of a collection not blocklisted
+	// yet, as Seerr's POST /blocklist/collection/:id: the discovery
+	// providers' collection catalogs list them. Administrators only.
+	BlockCollection(context.Context, *v1.BlockCollectionRequest) (*v1.BlockCollectionResponse, error)
+	// UnblockCollection takes the movies of a collection off the
+	// blocklist, as Seerr's DELETE /blocklist/collection/:id.
+	// Administrators only.
+	UnblockCollection(context.Context, *v1.UnblockCollectionRequest) (*v1.UnblockCollectionResponse, error)
 }
 
 // NewRequestServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -457,6 +512,19 @@ func NewRequestServiceHandler(svc RequestServiceHandler, opts ...connect.Handler
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	requestServiceBlockCollectionHandler := connect.NewUnaryHandlerSimple(
+		RequestServiceBlockCollectionProcedure,
+		svc.BlockCollection,
+		connect.WithSchema(requestServiceMethods.ByName("BlockCollection")),
+		connect.WithHandlerOptions(opts...),
+	)
+	requestServiceUnblockCollectionHandler := connect.NewUnaryHandlerSimple(
+		RequestServiceUnblockCollectionProcedure,
+		svc.UnblockCollection,
+		connect.WithSchema(requestServiceMethods.ByName("UnblockCollection")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.acquisition.v1.RequestService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case RequestServiceCreateRequestProcedure:
@@ -483,6 +551,10 @@ func NewRequestServiceHandler(svc RequestServiceHandler, opts ...connect.Handler
 			requestServiceUnblockTitleHandler.ServeHTTP(w, r)
 		case RequestServiceListBlockedTitlesProcedure:
 			requestServiceListBlockedTitlesHandler.ServeHTTP(w, r)
+		case RequestServiceBlockCollectionProcedure:
+			requestServiceBlockCollectionHandler.ServeHTTP(w, r)
+		case RequestServiceUnblockCollectionProcedure:
+			requestServiceUnblockCollectionHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -538,4 +610,12 @@ func (UnimplementedRequestServiceHandler) UnblockTitle(context.Context, *v1.Unbl
 
 func (UnimplementedRequestServiceHandler) ListBlockedTitles(context.Context, *v1.ListBlockedTitlesRequest) (*v1.ListBlockedTitlesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.RequestService.ListBlockedTitles is not implemented"))
+}
+
+func (UnimplementedRequestServiceHandler) BlockCollection(context.Context, *v1.BlockCollectionRequest) (*v1.BlockCollectionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.RequestService.BlockCollection is not implemented"))
+}
+
+func (UnimplementedRequestServiceHandler) UnblockCollection(context.Context, *v1.UnblockCollectionRequest) (*v1.UnblockCollectionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.RequestService.UnblockCollection is not implemented"))
 }

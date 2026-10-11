@@ -36,6 +36,12 @@ func (r blockedTitles) List(ctx context.Context, q core.BlockedTitleQuery) (core
 	if q.Search != "" {
 		query = query.Where(blockedtitle.TitleContainsFold(q.Search))
 	}
+	switch q.Source {
+	case core.BlockedByHand:
+		query = query.Where(blockedtitle.TagsIsNil())
+	case core.BlockedByTags:
+		query = query.Where(blockedtitle.TagsNotNil())
+	}
 	total, err := query.Clone().Count(ctx)
 	if err != nil {
 		return core.Page[core.BlockedTitle]{}, mapErr(err, "count blocked titles")
@@ -58,14 +64,25 @@ func (r blockedTitles) Add(ctx context.Context, b *core.BlockedTitle) error {
 		return err
 	}
 	b.CreatedAt = orNow(b.CreatedAt).UTC()
-	err := r.s.write.BlockedTitle.Create().
+	create := r.s.write.BlockedTitle.Create().
 		SetKind(string(b.Kind)).
 		SetTmdbID(b.TmdbID).
 		SetTitle(b.Title).
 		SetNillableUserID(nonZeroID(b.UserID)).
-		SetCreatedAt(b.CreatedAt).
-		Exec(ctx)
-	return mapErr(err, "add blocked title")
+		SetCreatedAt(b.CreatedAt)
+	if len(b.Tags) > 0 {
+		create.SetTags(b.Tags)
+	}
+	return mapErr(create.Exec(ctx), "add blocked title")
+}
+
+// DeleteTagged deletes the titles blocklisted by tags.
+func (r blockedTitles) DeleteTagged(ctx context.Context) (int, error) {
+	n, err := r.s.write.BlockedTitle.Delete().Where(blockedtitle.TagsNotNil()).Exec(ctx)
+	if err != nil {
+		return 0, mapErr(err, "delete tagged blocked titles")
+	}
+	return n, nil
 }
 
 func (r blockedTitles) Delete(ctx context.Context, kind core.ItemKind, tmdbID int) error {
@@ -82,7 +99,7 @@ func (r blockedTitles) Delete(ctx context.Context, kind core.ItemKind, tmdbID in
 }
 
 func toBlockedTitle(b *ent.BlockedTitle) core.BlockedTitle {
-	out := core.BlockedTitle{Kind: core.ItemKind(b.Kind), TmdbID: b.TmdbID, Title: b.Title, CreatedAt: b.CreatedAt.UTC()}
+	out := core.BlockedTitle{Kind: core.ItemKind(b.Kind), TmdbID: b.TmdbID, Title: b.Title, Tags: b.Tags, CreatedAt: b.CreatedAt.UTC()}
 	if b.UserID != nil {
 		out.UserID = *b.UserID
 	}

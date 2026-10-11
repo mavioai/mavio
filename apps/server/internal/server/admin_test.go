@@ -311,7 +311,7 @@ func TestAdministration(t *testing.T) {
 		}
 	}
 	tasks, err := systemv1connect.NewTaskServiceClient(http.DefaultClient, srv.url, token).ListTasks(ctx, &systemv1.ListTasksRequest{})
-	if err != nil || len(tasks.GetTasks()) != 8 || tasks.GetTasks()[0].GetLastRun() == nil {
+	if err != nil || len(tasks.GetTasks()) != 9 || tasks.GetTasks()[0].GetLastRun() == nil {
 		t.Errorf("ListTasks = %v, %v", tasks, err)
 	}
 

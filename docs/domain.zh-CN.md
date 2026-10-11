@@ -263,7 +263,7 @@ erDiagram
 | `RemotePathMappingRepository` | `List`、`Put`、`Delete` |
 | `RequestRepository` | `Get`、`List`（分页，可按用户、状态、类型、TMDB ID 与条目筛选，最新创建或最近修改的在前）、`Put`（按 ID 插入或替换）、`Delete`、`QuotaUsed`（见 §13.6）；删除用户会删除其请求 |
 | `IssueRepository` | `Get` 与 `List`（分页，带评论）、`Put`、`AddComment`、`Delete`；删除条目或用户会删除其问题 |
-| `BlockedTitleRepository` | 按类型与 TMDB ID `Get`、`List`（分页，最新在前，按标题搜索）、`Add`（已在阻止列表时返回 `ErrConflict`）、`Delete`；删除阻止作品的用户不会删除其条目 |
+| `BlockedTitleRepository` | 按类型与 TMDB ID `Get`、`List`（分页，最新在前，按标题搜索，可只列手动或按标签阻止的作品）、`Add`（已在阻止列表时返回 `ErrConflict`）、`Delete`、`DeleteTagged`（删除按标签阻止的作品）；删除阻止作品的用户不会删除其条目 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
 * **Replace 语义**：`Replace*` 方法设置某个所有者的完整集合，删除不在新集合中的内容——扫描与元数据刷新总是整组写入。
@@ -367,8 +367,8 @@ erDiagram
 * `Request` 是用户按 TMDB ID 对一部电影或一部剧集的请求（`Kind`、`TmdbID`，剧集在得知后还有 `TvdbID`），带有 `Title` 与 `Year`、它使之成为想要的条目的 `ItemID`、`RequestedBy` 与 `ModifiedBy` 用户、`IgnoreQuota`、`Message`（失败的原因）及其时间。剧集请求列出其 `Seasons`（`SeasonRequest`：季号，至少一个，各不重复，以及状态）；电影请求没有季。
 * `RequestStatus`：`pending`（等待管理员）、`approved`（其标题已成为想要的条目）、`declined`、`failed`（设为想要失败；可以重试）与 `completed`（已可用）。待审批、已通过与失败的请求是活动的：它们会阻止对同一标题或同一季的其他请求。一季在其已播出的单集全部有文件时完成；剧集请求在其所有季都完成时完成。
 * `Quota` 允许在最近 `Days` 天内（为 0 时不限时间）请求 `Limit` 部电影或剧集的 `Limit` 季；限额为 0 表示不限。`QuotaUsed` 统计用户自某时间起某类型的请求数，剧集按季计，不计被拒绝的请求与忽略配额的请求，与 Seerr 的 `User.getQuota` 一致。
-* `RequestSettings` 是服务端设置的一部分：新用户获得的 `DefaultPermissions`、默认的 `MovieQuota` 与 `SeriesQuota`、通过的电影请求加入的电影媒体库、质量档案与最低可用性、通过的剧集请求的剧集媒体库、质量档案、是否按季分目录与新条目的监控方式，通过的动漫剧集改用的 `AnimeLibraryID` 与 `AnimeQualityProfileID`（未设置时使用剧集的；动漫剧集总以 `anime` 类型添加），以及能否请求特别篇（第 0 季）。
-* `BlockedTitle` 是管理员禁止请求的电影或剧集，如 Seerr 的阻止列表：其 `Kind`（电影或剧集）与 `TmdbID`，各只一次，阻止时的 `Title`、管理员的 `UserID` 及其 `CreatedAt`。
+* `RequestSettings` 是服务端设置的一部分：新用户获得的 `DefaultPermissions`、默认的 `MovieQuota` 与 `SeriesQuota`、通过的电影请求加入的电影媒体库、质量档案与最低可用性、通过的剧集请求的剧集媒体库、质量档案、是否按季分目录与新条目的监控方式，通过的动漫剧集改用的 `AnimeLibraryID` 与 `AnimeQualityProfileID`（未设置时使用剧集的；动漫剧集总以 `anime` 类型添加），能否请求特别篇（第 0 季），以及 Seerr 的 `BlocklistedTags`（发现提供者的关键词，形如 `<plugin>/<keyword>`）与 `BlocklistedTagsLimit`，即阻止标签任务读取关键词作品时每种排序的页数（0–250，0 表示 50）。
+* `BlockedTitle` 是管理员禁止请求的电影或剧集，如 Seerr 的阻止列表：其 `Kind`（电影或剧集）与 `TmdbID`，各只一次，阻止时的 `Title`、管理员的 `UserID`、阻止标签任务据以阻止它的 `Tags`（手动阻止时为空，任务从不为其加标签）及其 `CreatedAt`。
 
 ### 13.7 问题
 `Issue` 是用户就某个条目报告的问题：`Type`（`video`、`audio`、`subtitles`、`other`）、`Status`（`open`、`resolved`）、可选的 `SeasonNumber` 与 `EpisodeNumber`、`CreatedBy`、`ModifiedBy` 及其时间。其 `Comments`（`IssueComment`：用户、消息与时间）是讨论串，最早的在前；第一条即报告的内容。

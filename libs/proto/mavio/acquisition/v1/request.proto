@@ -65,6 +65,16 @@ service RequestService {
   rpc ListBlockedTitles(ListBlockedTitlesRequest) returns (ListBlockedTitlesResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // BlockCollection blocklists the movies of a collection not blocklisted
+  // yet, as Seerr's POST /blocklist/collection/:id: the discovery
+  // providers' collection catalogs list them. Administrators only.
+  rpc BlockCollection(BlockCollectionRequest) returns (BlockCollectionResponse);
+  // UnblockCollection takes the movies of a collection off the
+  // blocklist, as Seerr's DELETE /blocklist/collection/:id.
+  // Administrators only.
+  rpc UnblockCollection(UnblockCollectionRequest) returns (UnblockCollectionResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
 }
 
 // RequestStatus is where a request is.
@@ -268,6 +278,19 @@ message BlockedTitle {
   // The administrator who blocklisted it, unless deleted since.
   string user_id = 4;
   google.protobuf.Timestamp create_time = 5;
+  // The blocklisted tags ("<plugin>/<keyword>") the blocklisted tags job
+  // blocklisted it for; empty when blocklisted by hand.
+  repeated string tags = 6;
+}
+
+// BlockedTitleSource is how titles came on the blocklist.
+enum BlockedTitleSource {
+  // Any way.
+  BLOCKED_TITLE_SOURCE_UNSPECIFIED = 0;
+  // Blocklisted by administrators.
+  BLOCKED_TITLE_SOURCE_MANUAL = 1;
+  // Blocklisted by the blocklisted tags job.
+  BLOCKED_TITLE_SOURCE_TAGS = 2;
 }
 
 message BlockTitleRequest {
@@ -301,9 +324,28 @@ message ListBlockedTitlesRequest {
     lte: 1000
   }];
   int32 offset = 3 [(buf.validate.field).int32.gte = 0];
+  // The titles blocklisted one way; unset for all.
+  BlockedTitleSource source = 4 [(buf.validate.field).enum.defined_only = true];
 }
 
 message ListBlockedTitlesResponse {
   repeated BlockedTitle blocked_titles = 1;
   int32 total = 2;
 }
+
+message BlockCollectionRequest {
+  // The TMDB ID of the collection.
+  int32 tmdb_collection_id = 1 [(buf.validate.field).int32.gt = 0];
+}
+
+message BlockCollectionResponse {
+  // The movies blocklisted, without those blocklisted already.
+  repeated BlockedTitle blocked_titles = 1;
+}
+
+message UnblockCollectionRequest {
+  // The TMDB ID of the collection.
+  int32 tmdb_collection_id = 1 [(buf.validate.field).int32.gt = 0];
+}
+
+message UnblockCollectionResponse {}

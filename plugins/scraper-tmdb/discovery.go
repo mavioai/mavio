@@ -18,8 +18,8 @@ import (
 
 // Discovery follows Seerr's use of TMDB: trending titles of the day,
 // popular and upcoming titles through TMDB's discover endpoints with
-// their filters, top rated titles, and the recommendations and similar
-// titles of a title.
+// their filters, top rated titles, the recommendations and similar
+// titles of a title, and the movies of a collection.
 
 const (
 	catalogTrending        = "trending"
@@ -28,6 +28,7 @@ const (
 	catalogTopRated        = "top_rated"
 	catalogRecommendations = "recommendations"
 	catalogSimilar         = "similar"
+	catalogCollection      = "collection"
 )
 
 var (
@@ -64,6 +65,8 @@ func (p *plugin) ListCatalogs(context.Context, *pluginv1.ListCatalogsRequest) (*
 		catalog(catalogTopRated, "Top Rated", pluginv1.CatalogKind_CATALOG_KIND_TOP_RATED, movieAndSeries, false),
 		catalog(catalogRecommendations, "Recommendations", pluginv1.CatalogKind_CATALOG_KIND_RECOMMENDATIONS, movieAndSeries, false),
 		catalog(catalogSimilar, "Similar", pluginv1.CatalogKind_CATALOG_KIND_SIMILAR, movieAndSeries, false),
+		catalog(catalogCollection, "Collection", pluginv1.CatalogKind_CATALOG_KIND_COLLECTION,
+			[]pluginv1.MediaKind{pluginv1.MediaKind_MEDIA_KIND_MOVIE}, false),
 	}}.Build(), nil
 }
 
@@ -100,6 +103,8 @@ func (p *plugin) Discover(ctx context.Context, req *pluginv1.DiscoverRequest) (*
 			return &pluginv1.DiscoverResponse{}, nil
 		}
 		path = fmt.Sprintf("/%s/%d/%s", kind, id, req.GetCatalog())
+	case catalogCollection:
+		return s.collection(ctx, req.GetExternalIds()[keyTMDBCollection], q)
 	default:
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("unknown catalog %q", req.GetCatalog()))
 	}
@@ -125,6 +130,34 @@ func (p *plugin) Discover(ctx context.Context, req *pluginv1.DiscoverRequest) (*
 			resp.SetTitles(append(resp.GetTitles(), t))
 		}
 	}
+	return resp, nil
+}
+
+// collection lists the movies of a TMDB collection, its parts, on one
+// page, as Seerr's TheMovieDb.getCollection; nothing for a collection TMDB
+// does not know.
+func (s session) collection(ctx context.Context, id string, q url.Values) (*pluginv1.DiscoverResponse, error) {
+	n, ok := parseTMDBID(id)
+	if !ok {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("collection catalog without a %s ID", keyTMDBCollection))
+	}
+	q.Del("page")
+	var c struct {
+		Parts []tmdbListResult `json:"parts"`
+	}
+	switch err := s.get(ctx, fmt.Sprintf("/collection/%d", n), q, &c); {
+	case errors.Is(err, errNotFound):
+		return &pluginv1.DiscoverResponse{}, nil
+	case err != nil:
+		return nil, err
+	}
+	resp := pluginv1.DiscoverResponse_builder{Page: proto.Int32(1), TotalPages: proto.Int32(1)}.Build()
+	for _, r := range c.Parts {
+		if t := r.title("movie"); t != nil && (s.adult || !r.Adult) {
+			resp.SetTitles(append(resp.GetTitles(), t))
+		}
+	}
+	resp.SetTotalResults(int32(len(resp.GetTitles())))
 	return resp, nil
 }
 
