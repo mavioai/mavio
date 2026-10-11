@@ -454,7 +454,13 @@ flowchart TD
 
 **进度**：
 - [x] `DOWNLOAD_CLIENT_PROVIDER` 契约（`mavio/plugin/v1/download_client.proto`）及其宿主客户端
-- [ ] `plugins/download-clients`：Radarr 与 Sonarr 的下载客户端，并移植其用例
+- [x] `plugins/download-clients`：Radarr 与 Sonarr 的下载客户端，并移植其用例（`internal/clients/<name>`：Aria2、Torrent 与 Usenet Blackhole、Deluge、Download Station、Flood、Freebox、Hadouken、NZBGet、NzbVortex、Pneumatic、qBittorrent、rqbit、rTorrent、SABnzbd、Transmission、uTorrent、Vuze）
+  - [ ] 抓取时给出的做种限制在重启后保留，如同 Radarr 保存其做种配置；目前只在插件重启前有效
+  - [ ] 下载客户端标签：电影或剧集只使用与其共享某个标签的客户端
+  - [ ] Flood 的附加标签（质量、语言、发布组等），待抓取携带这些信息之后
+  - [ ] Sonarr 对 Pneumatic 整季的拒绝，待抓取能表明是否为整季之后
+  - [ ] 抓取时检查已拉黑种子的哈希，如同 Radarr 拒绝哈希已被拉黑的种子
+  - [ ] 各客户端共用的辅助代码，取代各自的副本：远程路径拼接、.NET 版本解析、JSON-RPC 与 XML-RPC、URL base 校验、自由格式的标签字段、“发布被拒”错误、测试的警告、NZB 有效性检查、可配置的历史条数上限、保留客户端给出的 ID 大小写，以及把 `::1` 视为本机
 - [x] `libs/acquire`：质量及其定义、质量档案、custom formats、delay profile、release profile
 - [ ] 决策：Radarr 决策引擎的各项规格及其排序
 - [ ] 领域与存储：档案、custom formats、被跟踪下载的队列、历史、黑名单、远程路径映射、命名
