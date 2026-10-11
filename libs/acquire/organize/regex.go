@@ -42,6 +42,17 @@ func (r *regex) count(s string) int {
 	return n
 }
 
+// all returns every match in s.
+func (r *regex) all(s string) []*regexp2.Match {
+	var out []*regexp2.Match
+	m, err := r.re.FindStringMatch(s)
+	for err == nil && m != nil {
+		out = append(out, m)
+		m, err = r.re.FindNextMatch(m)
+	}
+	return out
+}
+
 // matches returns the text of every match in s.
 func (r *regex) matches(s string) []string {
 	var out []string

@@ -91,13 +91,19 @@ type CustomFormat struct {
 // SceneOrFileName returns the scene name of the file, or its file name
 // without the extension.
 func (f File) SceneOrFileName() string {
+	return sceneOrFileName(f.SceneName, f.RelativePath, f.Path)
+}
+
+// sceneOrFileName returns sceneName, or the file name without extension
+// of relativePath or else of path.
+func sceneOrFileName(sceneName, relativePath, path string) string {
 	switch {
-	case strings.TrimSpace(f.SceneName) != "":
-		return f.SceneName
-	case strings.TrimSpace(f.RelativePath) != "":
-		return fileNameWithoutExtension(f.RelativePath)
+	case strings.TrimSpace(sceneName) != "":
+		return sceneName
+	case strings.TrimSpace(relativePath) != "":
+		return fileNameWithoutExtension(relativePath)
 	}
-	return fileNameWithoutExtension(f.Path)
+	return fileNameWithoutExtension(path)
 }
 
 // titleRegex matches a token: {prefix Token:format suffix}, optionally in
@@ -121,7 +127,7 @@ const ellipsisPlaceholder = "{ellipsis}"
 // or original file name.
 func BuildFileName(n Naming, m Movie, f File) (string, error) {
 	if !n.RenameMovies {
-		return originalTitle(f, false), nil
+		return originalTitle(f.SceneName, f.RelativePath, f.Path, true), nil
 	}
 	if strings.TrimSpace(n.StandardMovieFormat) == "" {
 		return "", fmt.Errorf("standard movie format: %w", ErrEmptyFormat)
@@ -131,15 +137,15 @@ func BuildFileName(n Naming, m Movie, f File) (string, error) {
 	addMovieTokens(h, m)
 	addReleaseYearTokens(h, m.Year)
 	addIDTokens(h, m)
-	addQualityTokens(h, f)
-	addMediaInfoTokens(h, f)
+	addQualityTokens(h, f.Quality, f.Revision, false)
+	addMediaInfoTokens(h, f.MediaInfo)
 	addMovieFileTokens(h, f, titleRegex.count(pattern) > 1)
 	addEditionTagsTokens(h, f)
-	addCustomFormatTokens(h, f)
+	addCustomFormatTokens(h, f.CustomFormats)
 
 	var components []string
 	for _, p := range splitPattern(pattern) {
-		c := strings.TrimSpace(replaceTokens(p, h, n))
+		c := strings.TrimSpace(replaceTokens(p, h, n.cleaning()))
 		c = collapseSeparators(c)
 		c = strings.TrimRight(c, "- ._")
 		c = strings.ReplaceAll(c, ellipsisPlaceholder, "...")
@@ -161,7 +167,7 @@ func MovieFolder(n Naming, m Movie) string {
 
 	var components []string
 	for _, p := range splitPattern(n.MovieFolderFormat) {
-		c := CleanFolderName(replaceTokens(p, h, n))
+		c := CleanFolderName(replaceTokens(p, h, n.cleaning()))
 		c = strings.ReplaceAll(c, ellipsisPlaceholder, "...")
 		c = replaceReservedDeviceNames(c)
 		if strings.TrimSpace(c) != "" {
@@ -206,11 +212,21 @@ func simplifyToken(token string) string {
 	}, token)
 }
 
-func replaceTokens(pattern string, h handlers, n Naming) string {
-	return titleRegex.replaceFunc(pattern, func(m regexp2.Match) string { return replaceToken(m, h, n) })
+func replaceTokens(pattern string, h handlers, c charCleaning) string {
+	return titleRegex.replaceFunc(pattern, func(m regexp2.Match) string { return replaceToken(m, h, c) })
 }
 
-func replaceToken(m regexp2.Match, h handlers, n Naming) string {
+func replaceToken(m regexp2.Match, h handlers, c charCleaning) string {
+	t := newTokenMatch(m)
+	text := ""
+	if f, ok := h[simplifyToken(t.token)]; ok {
+		text = f(t)
+	}
+	return formatTokenValue(t, text, c)
+}
+
+// newTokenMatch reads a token from a match of a title expression.
+func newTokenMatch(m regexp2.Match) tokenMatch {
 	t := tokenMatch{
 		tag:          group(m, "tag"),
 		prefix:       group(m, "prefix"),
@@ -222,10 +238,13 @@ func replaceToken(m regexp2.Match, h handlers, n Naming) string {
 	if strings.TrimSpace(t.customFormat) == "" {
 		t.customFormat = ""
 	}
-	text := ""
-	if f, ok := h[simplifyToken(t.token)]; ok {
-		text = f(t)
-	}
+	return t
+}
+
+// formatTokenValue writes the value of token t: trimmed, cased as the
+// token name is, with the token's separator for spaces, cleaned of
+// illegal characters, and with the token's affixes when not empty.
+func formatTokenValue(t tokenMatch, text string, c charCleaning) string {
 	text = strings.TrimSpace(text)
 	switch {
 	case !strings.ContainsFunc(t.token, unicode.IsUpper):
@@ -236,7 +255,7 @@ func replaceToken(m regexp2.Match, h handlers, n Naming) string {
 	if strings.TrimSpace(t.separator) != "" {
 		text = strings.ReplaceAll(text, " ", t.separator)
 	}
-	text = cleanFileName(text, n)
+	text = cleanFileName(text, c)
 	if strings.TrimSpace(text) != "" {
 		text = t.tag + t.prefix + text + t.suffix
 	}
@@ -300,13 +319,18 @@ func addIDTokens(h handlers, m Movie) {
 	h.set("{TmdbId}", func(tokenMatch) string { return strconv.Itoa(m.TmdbID) })
 }
 
-func addQualityTokens(h handlers, f File) {
-	title, proper, realLabel := f.Quality, "", ""
+// addQualityTokens adds the quality tokens of a quality title and
+// revision; anime writes a proper as "v2", "v3" and so on.
+func addQualityTokens(h handlers, title string, revision Revision, anime bool) {
+	proper, realLabel := "", ""
 	if title != "" {
-		if f.Revision.Version > 1 {
+		if revision.Version > 1 {
 			proper = "Proper"
+			if anime {
+				proper = "v" + strconv.Itoa(revision.Version)
+			}
 		}
-		if f.Revision.Real > 0 {
+		if revision.Real > 0 {
 			realLabel = "REAL"
 		}
 	}
@@ -321,11 +345,11 @@ func addQualityTokens(h handlers, f File) {
 	h.set("{Quality Real}", func(tokenMatch) string { return realLabel })
 }
 
-func addMediaInfoTokens(h handlers, f File) {
-	if f.MediaInfo == nil {
+func addMediaInfoTokens(h handlers, info *MediaInfo) {
+	if info == nil {
 		return
 	}
-	mi := *f.MediaInfo
+	mi := *info
 	bitDepth := "8"
 	if mi.VideoBitDepth > 0 {
 		bitDepth = strconv.Itoa(mi.VideoBitDepth)
@@ -367,13 +391,23 @@ func addMediaInfoTokens(h handlers, f File) {
 }
 
 func addMovieFileTokens(h handlers, f File, multipleTokens bool) {
-	h.set("{Original Title}", func(tokenMatch) string { return originalTitle(f, multipleTokens) })
-	h.set("{Original Filename}", func(tokenMatch) string { return originalFileName(f, multipleTokens) })
+	h.set("{Original Title}", func(tokenMatch) string {
+		return originalTitle(f.SceneName, f.RelativePath, f.Path, !multipleTokens)
+	})
+	h.set("{Original Filename}", func(tokenMatch) string {
+		return originalFileName(f.RelativePath, f.Path, !multipleTokens)
+	})
+	addReleaseGroupToken(h, f.ReleaseGroup)
+}
+
+// addReleaseGroupToken adds {Release Group}, which a bare token writes as
+// DefaultReleaseGroup when the release group is unknown.
+func addReleaseGroupToken(h handlers, releaseGroup string) {
 	h.set("{Release Group}", func(t tokenMatch) string {
-		if strings.TrimSpace(f.ReleaseGroup) == "" {
+		if strings.TrimSpace(releaseGroup) == "" {
 			return t.defaultValue(DefaultReleaseGroup)
 		}
-		return truncate(f.ReleaseGroup, t.customFormat)
+		return truncate(releaseGroup, t.customFormat)
 	})
 }
 
@@ -418,13 +452,13 @@ func isWordSeparator(r rune) bool {
 		unicode.IsPunct(r) || unicode.IsSymbol(r) || unicode.In(r, unicode.Zl, unicode.Zp)
 }
 
-func addCustomFormatTokens(h handlers, f File) {
-	h.set("{Custom Formats}", func(t tokenMatch) string { return customFormatsToken(f.CustomFormats, t.customFormat) })
+func addCustomFormatTokens(h handlers, formats []CustomFormat) {
+	h.set("{Custom Formats}", func(t tokenMatch) string { return customFormatsToken(formats, t.customFormat) })
 	h.set("{Custom Format}", func(t tokenMatch) string {
 		if t.customFormat == "" {
 			return ""
 		}
-		for _, cf := range f.CustomFormats {
+		for _, cf := range formats {
 			if cf.IncludeWhenRenaming && cf.Name == t.customFormat {
 				return cf.Name
 			}
@@ -455,26 +489,26 @@ func customFormatsToken(formats []CustomFormat, filter string) string {
 	return strings.Join(out, " ")
 }
 
-// originalTitle returns the cleaned scene name of the file, or its
-// original file name.
-func originalTitle(f File, multipleTokens bool) string {
-	if strings.TrimSpace(f.SceneName) == "" {
-		return CleanFileName(originalFileName(f, multipleTokens))
+// originalTitle returns the cleaned scene name of a file, or its original
+// file name.
+func originalTitle(sceneName, relativePath, path string, useFileName bool) string {
+	if strings.TrimSpace(sceneName) == "" {
+		return CleanFileName(originalFileName(relativePath, path, useFileName))
 	}
-	return CleanFileName(f.SceneName)
+	return CleanFileName(sceneName)
 }
 
-// originalFileName returns the file name of the file without extension,
-// or "" in a format with other tokens, so that renaming does not nest the
-// current name in the new one.
-func originalFileName(f File, multipleTokens bool) string {
-	if multipleTokens {
+// originalFileName returns the file name of a file without extension, or
+// "" unless useFileName is set: renaming must not nest the current name
+// in the new one.
+func originalFileName(relativePath, path string, useFileName bool) string {
+	if !useFileName {
 		return ""
 	}
-	if strings.TrimSpace(f.RelativePath) == "" {
-		return fileNameWithoutExtension(f.Path)
+	if strings.TrimSpace(relativePath) == "" {
+		return fileNameWithoutExtension(path)
 	}
-	return fileNameWithoutExtension(f.RelativePath)
+	return fileNameWithoutExtension(relativePath)
 }
 
 // fileNameWithoutExtension returns the last element of a "/" or "\"
@@ -495,10 +529,7 @@ func truncate(input, formatter string) string {
 	if strings.TrimSpace(input) == "" {
 		return ""
 	}
-	maxLength, err := strconv.Atoi(strings.TrimSpace(formatter))
-	if err != nil {
-		maxLength = 0
-	}
+	maxLength := maxLengthFromFormatter(formatter)
 	runes := []rune(input)
 	limit := max(maxLength, -maxLength)
 	if maxLength == 0 || len(runes) <= limit {
@@ -509,4 +540,13 @@ func truncate(input, formatter string) string {
 		return ellipsisPlaceholder + strings.TrimLeft(string(runes[len(runes)-keep:]), " .")
 	}
 	return strings.TrimRight(string(runes[:keep]), " .") + ellipsisPlaceholder
+}
+
+// maxLengthFromFormatter returns the length a token's format sets, or 0.
+func maxLengthFromFormatter(formatter string) int {
+	n, err := strconv.Atoi(strings.TrimSpace(formatter))
+	if err != nil {
+		return 0
+	}
+	return n
 }
