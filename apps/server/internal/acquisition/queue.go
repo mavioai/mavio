@@ -114,7 +114,11 @@ func (r *Runtime) CheckQueue(ctx context.Context) error {
 			r.logger().WarnContext(ctx, "download client failed", "plugin", p.ID, "client", f.GetClientId(), "err", f.GetMessage())
 		}
 		for _, c := range clients {
-			if c.PluginID == p.ID && c.GetEnabled() && !failedClients[c.GetId()] {
+			// A client left out after failing is not asked, as Radarr's
+			// DownloadClientProvider.GetDownloadClients filters blocked
+			// clients: its downloads keep their last state.
+			backingOff := c.HasDisabledUntil() && c.GetDisabledUntil().AsTime().After(r.now())
+			if c.PluginID == p.ID && c.GetEnabled() && !backingOff && !failedClients[c.GetId()] {
 				answered[c.Ref()] = true
 			}
 		}

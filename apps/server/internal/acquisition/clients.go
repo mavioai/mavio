@@ -77,11 +77,14 @@ func (r *Runtime) indexerAPI(pluginID string) pluginv1connect.IndexerProviderSer
 	return nil
 }
 
-// chooseClient returns the client to send a release of a protocol to:
-// the requested one, else the first enabled client of the protocol by
-// priority that is not left out after failing, as Radarr's
-// DownloadClientProvider. No client fails with errClientUnavailable.
-func (r *Runtime) chooseClient(ctx context.Context, protocol core.Protocol, pluginID, clientID string) (Client, error) {
+// chooseClient returns the client to send a release of a protocol to for
+// an item of tags: the requested one, else, as Radarr's
+// DownloadClientProvider.GetDownloadClient, among the enabled clients of
+// the protocol, those sharing one of the tags, else those without tags;
+// of those, the ones not left out after failing; then, of those of the
+// first priority, the one after the client last used for the protocol,
+// in turn. No client fails with errClientUnavailable.
+func (r *Runtime) chooseClient(ctx context.Context, protocol core.Protocol, tags []string, pluginID, clientID string) (Client, error) {
 	clients, failures := r.ListClients(ctx)
 	if pluginID != "" || clientID != "" {
 		for _, c := range clients {
@@ -94,22 +97,44 @@ func (r *Runtime) chooseClient(ctx context.Context, protocol core.Protocol, plug
 		}
 		return Client{}, fmt.Errorf("download client %s/%s: %w", pluginID, clientID, core.ErrNotFound)
 	}
-	now := r.now()
-	var candidates []Client
+	var available []Client
 	for _, c := range clients {
-		if !c.GetEnabled() || ProtocolFromPlugin(c.GetProtocol()) != protocol {
-			continue
+		if c.GetEnabled() && ProtocolFromPlugin(c.GetProtocol()) == protocol {
+			available = append(available, c)
 		}
-		if c.HasDisabledUntil() && c.GetDisabledUntil().AsTime().After(now) {
-			continue
-		}
-		candidates = append(candidates, c)
 	}
+	if len(available) == 0 {
+		return Client{}, fmt.Errorf("%w: no %s download client is available", errClientUnavailable, protocol)
+	}
+	tagged := slices.DeleteFunc(slices.Clone(available), func(c Client) bool {
+		return !slices.ContainsFunc(c.GetTags(), func(t string) bool { return slices.Contains(tags, t) })
+	})
+	if len(tagged) == 0 {
+		tagged = slices.DeleteFunc(available, func(c Client) bool { return len(c.GetTags()) > 0 })
+	}
+	if len(tagged) == 0 {
+		return Client{}, fmt.Errorf("%w: no download client was found without tags or a matching tag", errClientUnavailable)
+	}
+	now := r.now()
+	candidates := slices.DeleteFunc(tagged, func(c Client) bool {
+		return c.HasDisabledUntil() && c.GetDisabledUntil().AsTime().After(now)
+	})
 	if len(candidates) == 0 {
 		return Client{}, fmt.Errorf("%w: no %s download client is available", errClientUnavailable, protocol)
 	}
-	slices.SortStableFunc(candidates, func(a, b Client) int {
-		return cmp.Or(cmp.Compare(a.GetPriority(), b.GetPriority()), cmp.Compare(a.GetName(), b.GetName()))
-	})
-	return candidates[0], nil
+	first := slices.MinFunc(candidates, func(a, b Client) int { return cmp.Compare(a.GetPriority(), b.GetPriority()) }).GetPriority()
+	candidates = slices.DeleteFunc(candidates, func(c Client) bool { return c.GetPriority() != first })
+	slices.SortFunc(candidates, func(a, b Client) int { return cmp.Compare(a.Ref(), b.Ref()) })
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	chosen := candidates[0]
+	if i := slices.IndexFunc(candidates, func(c Client) bool { return c.Ref() > r.lastClients[protocol] }); i >= 0 {
+		chosen = candidates[i]
+	}
+	if r.lastClients == nil {
+		r.lastClients = map[core.Protocol]string{}
+	}
+	r.lastClients[protocol] = chosen.Ref()
+	return chosen, nil
 }

@@ -92,6 +92,9 @@ type Runtime struct {
 	scene sceneCache
 	// indexerCache keeps the indexer providers' indexers for searches.
 	indexerCache *releases.IndexerCache
+	// lastClients name the clients last sent releases, by protocol, which
+	// chooseClient takes in turn.
+	lastClients map[core.Protocol]string
 }
 
 // IndexerCache returns the cache of the indexer providers' indexers the

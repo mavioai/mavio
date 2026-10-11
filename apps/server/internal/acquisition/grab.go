@@ -1,6 +1,7 @@
 package acquisition
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -104,6 +105,85 @@ func (rn *run) seedSettings(ctx context.Context, rel *Release, fullSeason bool) 
 	return ratio, seedTime
 }
 
+// wantedTags returns the tags of a wanted movie; none for nil.
+func (m *movie) wantedTags() []string {
+	if m == nil {
+		return nil
+	}
+	return m.wanted.Tags
+}
+
+// details returns what a grab tells download clients of its release and
+// its movie or series, which Radarr's and Sonarr's Flood tag downloads
+// with: the quality, languages, release group and indexer of the
+// release, the year and studio of the movie or the network of the
+// series, the movie's collection and the series' title as a slug.
+func (g grabRequest) details(rel *Release, c *acquire.Candidate) *pluginv1.DownloadDetails {
+	d := pluginv1.DownloadDetails_builder{
+		Quality: new(c.Quality.Quality.String()), Languages: languageNames(c.Languages),
+		ReleaseGroup: new(c.ReleaseGroup), Indexer: new(rel.IndexerName),
+	}
+	it := g.show.itemOrZero()
+	if g.movie != nil {
+		it = g.movie.item
+		d.Collection = new(it.CollectionName)
+	} else {
+		d.TitleSlug = new(release.URLSlug(it.Name, true, "-", "-"))
+	}
+	d.Year = new(int32(it.ProductionYear))
+	if len(it.Studios) > 0 {
+		d.Studio = new(it.Studios[0])
+	}
+	return d.Build()
+}
+
+// itemOrZero returns a series' item; the zero item for nil.
+func (sh *show) itemOrZero() core.Item {
+	if sh == nil {
+		return core.Item{}
+	}
+	return sh.item
+}
+
+// infoHash returns a download ID that is a torrent's info hash, in upper
+// case; "" for other IDs.
+func infoHash(id string) string {
+	if len(id) != 40 || strings.Trim(strings.ToLower(id), "0123456789abcdef") != "" {
+		return ""
+	}
+	return strings.ToUpper(id)
+}
+
+// blocklistedHashes returns the info hashes blocklisted for the movie or
+// series of a torrent grab whose hash the release did not give, for the
+// client to refuse a torrent among them, as Radarr's
+// TorrentClientBase.EnsureReleaseIsNotBlocklisted: only for releases not
+// from an interactive search, of indexers set to reject them.
+func (rn *run) blocklistedHashes(ctx context.Context, rel *Release, c *acquire.Candidate, itemID core.ID) ([]string, error) {
+	if rn == nil || c.Source == acquire.SourceInteractiveSearch {
+		return nil, nil
+	}
+	if ix, ok := rn.indexer(ctx, rel.IndexerRef()); !ok || !ix.GetRejectBlocklistedTorrentHashes() {
+		return nil, nil
+	}
+	var hashes []string
+	for offset := 0; ; {
+		page, err := rn.rt.Store.Blocklist().List(ctx, itemID, core.MaxPageSize, offset)
+		if err != nil {
+			return nil, fmt.Errorf("blocklisted hashes: %w", err)
+		}
+		for _, b := range page.Items {
+			if b.TorrentInfoHash != "" && !slices.ContainsFunc(hashes, func(h string) bool { return strings.EqualFold(h, b.TorrentInfoHash) }) {
+				hashes = append(hashes, b.TorrentInfoHash)
+			}
+		}
+		offset += len(page.Items)
+		if len(page.Items) == 0 || offset >= page.Total {
+			return hashes, nil
+		}
+	}
+}
+
 // recentEpisodes reports whether any of episodes aired in the last two
 // weeks or is to air, as Sonarr's RemoteEpisode.IsRecentEpisode.
 func recentEpisodes(episodes []*series.Episode, now time.Time) bool {
@@ -122,7 +202,11 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 	if rel == nil || c == nil || (g.movie == nil && (g.show == nil || len(g.episodes) == 0)) {
 		return core.Download{}, fmt.Errorf("%w: nothing to grab", core.ErrInvalid)
 	}
-	client, err := r.chooseClient(ctx, rel.Protocol, g.pluginID, g.clientID)
+	tags := g.movie.wantedTags()
+	if g.show != nil {
+		tags = g.show.wanted.Tags
+	}
+	client, err := r.chooseClient(ctx, rel.Protocol, tags, g.pluginID, g.clientID)
 	if err != nil {
 		return core.Download{}, err
 	}
@@ -144,10 +228,15 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 	}
 	req := pluginv1.AddDownloadRequest_builder{
 		ClientId: new(client.GetId()), Title: new(rel.Title), Kind: new(kind), Recent: new(recent),
+		FullSeason: new(g.fullSeason), Details: g.details(rel, c),
 	}.Build()
 	if rel.Protocol == core.ProtocolTorrent {
 		if rel.InfoHash != "" {
 			req.SetInfoHash(rel.InfoHash)
+		} else if hashes, err := rn.blocklistedHashes(ctx, rel, c, itemID); err != nil {
+			return core.Download{}, err
+		} else {
+			req.SetBlocklistedInfoHashes(hashes)
 		}
 		ratio, seedTime := rn.seedSettings(ctx, rel, g.fullSeason)
 		if ratio > 0 {
@@ -177,6 +266,10 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 			return core.Download{}, err
 		}
 		switch connect.CodeOf(err) {
+		case connect.CodeFailedPrecondition:
+			// The client refused the release, as Radarr's
+			// ReleaseBlockedException and ReleaseDownloadException: the
+			// release fails, not the client.
 		case connect.CodeUnavailable, connect.CodeUnauthenticated, connect.CodePermissionDenied, connect.CodeDeadlineExceeded:
 			return core.Download{}, fmt.Errorf("%w: %s: %w", errClientUnavailable, client.GetName(), err)
 		}
@@ -219,7 +312,9 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 		data[dataPublishedDate] = rel.PublishDate.UTC().Format(time.RFC3339)
 	}
 	if rel.Protocol == core.ProtocolTorrent {
-		data[dataTorrentInfoHash] = rel.InfoHash
+		// A hash the release did not give is the client's, as Radarr
+		// learns it from the torrent while grabbing.
+		data[dataTorrentInfoHash] = cmp.Or(rel.InfoHash, infoHash(d.DownloadID))
 	}
 	for k, v := range data {
 		if v == "" {
