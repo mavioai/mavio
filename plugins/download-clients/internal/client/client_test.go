@@ -83,14 +83,23 @@ func TestAddTorrent(t *testing.T) {
 		magnet     string
 		ok         bool
 	}{
-		{"file before magnet", Release{Title: "A: B?", Data: data, MagnetURL: link}, hash, "A - B!.torrent", "", true},
-		{"file name kept", Release{Title: "A", Data: data, FileName: "x.torrent"}, hash, "x.torrent", "", true},
+		// The client's hash is kept in the case the client gives it.
+		{"file before magnet", Release{Title: "A: B?", Data: data, MagnetURL: link}, strings.ToLower(hash), "A - B!.torrent", "", true},
+		{"file name kept", Release{Title: "A", Data: data, FileName: "x.torrent"}, strings.ToLower(hash), "x.torrent", "", true},
 		{"magnet", Release{Title: "A", MagnetURL: link}, "CBC2F069FE8BB2F544EAE707D75BCD3DE9DCF951", "", link, true},
 		{"neither", Release{Title: "A"}, "", "", "", false},
+		// Radarr's TorrentClientBase refuses torrents whose hash is
+		// blocklisted.
+		{"blocklisted file", Release{Title: "A", Data: data, BlocklistedHashes: []string{strings.ToLower(hash)}}, "", "", "", false},
+		{"blocklisted magnet", Release{Title: "A", MagnetURL: link, BlocklistedHashes: []string{"CBC2F069FE8BB2F544EAE707D75BCD3DE9DCF951"}}, "", "", "", false},
+		{"other hash blocklisted", Release{Title: "A", MagnetURL: link, BlocklistedHashes: []string{hash}}, "CBC2F069FE8BB2F544EAE707D75BCD3DE9DCF951", "", link, true},
 	}
 	for _, tt := range tests {
 		a := &adder{}
 		got, err := AddTorrent(context.Background(), nil, a, &tt.r)
+		if len(tt.r.BlocklistedHashes) > 0 && !tt.ok && !errors.Is(err, ErrReleaseBlocked) {
+			t.Errorf("%s: AddTorrent() err = %v, want = ErrReleaseBlocked", tt.name, err)
+		}
 		if got != tt.want || a.file != tt.file || a.magnet != tt.magnet || (err == nil) != tt.ok {
 			t.Errorf("%s: AddTorrent() = %q, %v with file %q, magnet %q, want = %q with %q, %q",
 				tt.name, got, err, a.file, a.magnet, tt.want, tt.file, tt.magnet)

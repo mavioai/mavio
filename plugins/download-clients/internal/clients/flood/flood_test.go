@@ -225,6 +225,26 @@ func TestAdd(t *testing.T) {
 			"CBC2F069FE8BB2F544EAE707D75BCD3DE9DCF951",
 			`/torrents/add-urls {"destination":"/tv","tags":["tv","x"],"urls":["` + magnet + `"]}`,
 		},
+		{
+			// Radarr's HandleTags: the additional tags of the movie and
+			// release, without blanks and duplicates.
+			"movie additional tags",
+			map[string]any{"additional_tags": []string{"collection", "title_slug", "quality", "languages", "release_group", "year", "indexer", "studio"}},
+			client.Release{Kind: client.Movie, MagnetURL: magnet, Details: client.Details{
+				Quality: "Bluray-2160p", Languages: []string{"English", "French"}, ReleaseGroup: "DRONE",
+				Indexer: "Torznab", Year: 2020, Collection: "Big Buck Bunny Series", Studio: "movies-mavio",
+			}},
+			"CBC2F069FE8BB2F544EAE707D75BCD3DE9DCF951",
+			`/torrents/add-urls {"start":true,"tags":["movies-mavio","Big Buck Bunny Series","Bluray-2160p","English","French","DRONE","2020","Torznab"],"urls":["` + magnet + `"]}`,
+		},
+		{
+			// Sonarr's HandleTags: the title slug and network of the series.
+			"series additional tags",
+			map[string]any{"additional_tags": []string{"title_slug", "studio", "year"}},
+			client.Release{Kind: client.Series, MagnetURL: magnet, Details: client.Details{TitleSlug: "the-series", Studio: "C-SPAN"}},
+			"CBC2F069FE8BB2F544EAE707D75BCD3DE9DCF951",
+			`/torrents/add-urls {"start":true,"tags":["tv-mavio","the-series","C-SPAN"],"urls":["` + magnet + `"]}`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -402,6 +422,9 @@ func TestSettings(t *testing.T) {
 	}{
 		{"defaults", `{}`, true},
 		{"tags", `{"movie_tags":["a","b"],"tv_post_import_tags":["done"]}`, true},
+		{"additional tags", `{"additional_tags":["quality","studio"]}`, true},
+		// Unexpected additional tag ID
+		{"unexpected additional tag", `{"additional_tags":["network"]}`, false},
 		{"unknown", `{"bogus":1}`, false},
 		{"no host", `{"host":""}`, false},
 		{"bad port", `{"port":0}`, false},

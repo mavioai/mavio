@@ -26,6 +26,9 @@ const (
 	FieldSelect
 	FieldMultiSelect
 	FieldInfo
+	// FieldTag is a list of strings entered freely, as Radarr's
+	// FieldType.Tag.
+	FieldTag
 )
 
 // Field is a setting of a client.
@@ -57,6 +60,18 @@ type Env struct {
 	// Now is the clock.
 	Now func() time.Time
 	Log *slog.Logger
+	// Seeds keeps the seed limits of the client's torrents across
+	// restarts; nil keeps them in memory.
+	Seeds *ClientSeeds
+}
+
+// SeedStore returns env.Seeds, or seed limits kept in memory when nil.
+func (e Env) SeedStore() *ClientSeeds {
+	if e.Seeds != nil {
+		return e.Seeds
+	}
+	s, _ := NewSeeds("")
+	return s.For("")
 }
 
 // Definition is a kind of download client.

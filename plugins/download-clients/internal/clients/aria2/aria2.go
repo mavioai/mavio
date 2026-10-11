@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path"
 	"slices"
-	"strconv"
 	"strings"
 	"time"
 
@@ -261,7 +260,7 @@ func (a *aria2) Remove(ctx context.Context, item client.Item, deleteData bool) e
 
 // Info implements client.Client.
 func (a *aria2) Info(ctx context.Context) (client.Info, error) {
-	info := client.Info{IsLocalhost: strings.Contains(a.settings.Host, "127.0.0.1") || strings.Contains(a.settings.Host, "localhost")}
+	info := client.Info{IsLocalhost: a.settings.IsLocalhost()}
 	var globalDir *string
 	for _, k := range client.Kinds {
 		dir := a.settings.Directory(k)
@@ -290,31 +289,14 @@ func (a *aria2) Test(ctx context.Context) error {
 		a.env.Log.ErrorContext(ctx, "failed to test Aria2", "err", err)
 		return fmt.Errorf("unable to connect to Aria2: %w", err)
 	}
-	v, ok := parseVersion(version)
-	if !ok {
-		return fmt.Errorf("unable to connect to Aria2: unable to parse version %q", version)
+	v, err := client.ParseVersion(version)
+	if err != nil {
+		return fmt.Errorf("unable to connect to Aria2: %w", err)
 	}
-	if slices.Compare(v, []int{1, 34, 0}) < 0 {
+	if !v.AtLeast(1, 34, 0) {
 		return fmt.Errorf("the Aria2 version %s is not supported; 1.34.0 or later is required", version)
 	}
 	return nil
-}
-
-// parseVersion reads a version such as "1.37.0", as .NET's Version.
-func parseVersion(s string) ([]int, bool) {
-	parts := strings.Split(strings.TrimSpace(s), ".")
-	if len(parts) < 2 || len(parts) > 4 {
-		return nil, false
-	}
-	out := make([]int, 0, len(parts))
-	for _, p := range parts {
-		n, err := strconv.Atoi(p)
-		if err != nil || n < 0 {
-			return nil, false
-		}
-		out = append(out, n)
-	}
-	return out, true
 }
 
 // containsPath reports whether folder holds p, as Radarr's

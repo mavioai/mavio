@@ -6,6 +6,8 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -26,6 +28,7 @@ type fakeClient struct {
 	removed   []string
 	imported  []string
 	noMagnets bool
+	opts      client.Options
 }
 
 func (c *fakeClient) Add(_ context.Context, r *client.Release) (string, error) {
@@ -39,7 +42,8 @@ func (c *fakeClient) Add(_ context.Context, r *client.Release) (string, error) {
 	return "ID", nil
 }
 
-func (c *fakeClient) Items(context.Context, client.Options) ([]client.Item, error) {
+func (c *fakeClient) Items(_ context.Context, opts client.Options) ([]client.Item, error) {
+	c.opts = opts
 	return c.items, c.err
 }
 
@@ -276,5 +280,137 @@ func TestTestDownloadClient(t *testing.T) {
 	resp, err = p.TestDownloadClient(ctx, pluginv1.TestDownloadClientRequest_builder{DefinitionId: proto.String("fake"), SettingsJson: proto.String(`{"name":"bad"}`)}.Build())
 	if err != nil || resp.GetFailure() != "no" {
 		t.Errorf("TestDownloadClient(bad) = %v, %v, want the failure", resp, err)
+	}
+}
+
+func TestAddDownloadDetails(t *testing.T) {
+	a := &fakeClient{}
+	p := newTestPlugin(t, map[string]*fakeClient{"a": a})
+	configure(t, p, "a")
+	ctx := context.Background()
+	_, err := p.AddDownload(ctx, pluginv1.AddDownloadRequest_builder{
+		ClientId: proto.String("a"), Title: proto.String("T"), Data: []byte("d"), FullSeason: proto.Bool(true),
+		BlocklistedInfoHashes: []string{"ABC"},
+		Details: pluginv1.DownloadDetails_builder{
+			Quality: proto.String("Bluray-2160p"), Languages: []string{"English"}, ReleaseGroup: proto.String("DRONE"),
+			Indexer: proto.String("Torznab"), Year: proto.Int32(2020), Collection: proto.String("C"), Studio: proto.String("S"),
+			TitleSlug: proto.String("the-series"),
+		}.Build(),
+	}.Build())
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := client.Details{
+		Quality: "Bluray-2160p", Languages: []string{"English"}, ReleaseGroup: "DRONE", Indexer: "Torznab", Year: 2020,
+		Collection: "C", Studio: "S", TitleSlug: "the-series",
+	}
+	r := a.added
+	if !r.FullSeason || len(r.BlocklistedHashes) != 1 || r.BlocklistedHashes[0] != "ABC" || !reflect.DeepEqual(r.Details, want) {
+		t.Errorf("release = %+v, want the full season, blocklisted hash and details", r)
+	}
+
+	// DownloadClientRejectedReleaseException and ReleaseBlockedException
+	// are not the client failing.
+	for _, e := range []error{client.Rejected("duplicate"), client.ErrReleaseBlocked} {
+		a.err = e
+		_, err := p.AddDownload(ctx, pluginv1.AddDownloadRequest_builder{ClientId: proto.String("a"), Data: []byte("d")}.Build())
+		if connect.CodeOf(err) != connect.CodeFailedPrecondition {
+			t.Errorf("AddDownload(%v) code = %v, want = %v", e, connect.CodeOf(err), connect.CodeFailedPrecondition)
+		}
+		if _, _, disabled := p.statuses.Disabled("a"); disabled {
+			t.Errorf("a is disabled after %v", e)
+		}
+	}
+}
+
+func TestAddDownloadInvalidNZB(t *testing.T) {
+	a := &fakeClient{}
+	p := newTestPlugin(t, map[string]*fakeClient{"a": a})
+	def := p.byID["fake"]
+	def.ID, def.Protocol = "fakenzb", client.Usenet
+	p.byID[def.ID] = def
+	data, _ := json.Marshal(config{Clients: []clientConfig{{ID: "a", Definition: "fakenzb", Settings: json.RawMessage(`{"name":"a"}`)}}})
+	if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(string(data))}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	_, err := p.AddDownload(context.Background(), pluginv1.AddDownloadRequest_builder{
+		ClientId: proto.String("a"), Title: proto.String("T"), Data: []byte("<html>not an nzb</html>"),
+	}.Build())
+	if connect.CodeOf(err) != connect.CodeInvalidArgument || a.added != nil {
+		t.Errorf("AddDownload(invalid NZB) code = %v, added = %v, want = %v and nothing added", connect.CodeOf(err), a.added, connect.CodeInvalidArgument)
+	}
+}
+
+func TestTestDownloadClientWarning(t *testing.T) {
+	p := newTestPlugin(t, map[string]*fakeClient{"a": {err: client.Warn("a category is recommended")}})
+	resp, err := p.TestDownloadClient(context.Background(), pluginv1.TestDownloadClientRequest_builder{DefinitionId: proto.String("fake"), SettingsJson: proto.String(`{"name":"a"}`)}.Build())
+	if err != nil || resp.HasFailure() || len(resp.GetWarnings()) != 1 || resp.GetWarnings()[0] != "a category is recommended" {
+		t.Errorf("TestDownloadClient() = %v, %v, want a passing test with the warning", resp, err)
+	}
+}
+
+func TestTagsAndHistoryLimit(t *testing.T) {
+	a := &fakeClient{}
+	p := newTestPlugin(t, map[string]*fakeClient{"a": a})
+	data := `{"history_limit":10,"clients":[{"id":"a","definition":"fake","tags":["anime"],"settings":{"name":"a"}}]}`
+	if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(data)}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	list, err := p.ListDownloadClients(context.Background(), &pluginv1.ListDownloadClientsRequest{})
+	if err != nil || len(list.GetClients()) != 1 || !slices.Equal(list.GetClients()[0].GetTags(), []string{"anime"}) {
+		t.Errorf("ListDownloadClients() = %v, %v, want a with its tag", list, err)
+	}
+	if _, err := p.ListDownloads(context.Background(), &pluginv1.ListDownloadsRequest{}); err != nil {
+		t.Fatal(err)
+	}
+	if a.opts.Limit() != 10 {
+		t.Errorf("history limit = %d, want = 10", a.opts.Limit())
+	}
+	bad := `{"history_limit":-1}`
+	if _, err := p.Configure(context.Background(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(bad)}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+		t.Errorf("Configure(negative history limit) code = %v, want = %v", connect.CodeOf(err), connect.CodeInvalidArgument)
+	}
+}
+
+// The seed limits of torrents are kept in the data folder across
+// restarts, and dropped with their client.
+func TestSeedsKeptAcrossRestarts(t *testing.T) {
+	dir := t.TempDir()
+	ratio := 2.0
+	start := func() (*plugin, map[string]client.Env) {
+		p, err := newPlugin(slog.New(slog.DiscardHandler), "test", dir, http.DefaultClient)
+		if err != nil {
+			t.Fatal(err)
+		}
+		envs := map[string]client.Env{}
+		def := client.Definition{
+			ID: "fake", Name: "Fake", Protocol: client.Torrent,
+			New: func(raw []byte, env client.Env) (client.Client, error) {
+				var s struct{ Name string }
+				if err := json.Unmarshal(raw, &s); err != nil {
+					return nil, err
+				}
+				envs[s.Name] = env
+				return &fakeClient{}, nil
+			},
+		}
+		p.defs = append(p.defs, def)
+		p.byID[def.ID] = def
+		return p, envs
+	}
+	p, envs := start()
+	configure(t, p, "a")
+	envs["a"].SeedStore().Remember("abc", &client.Release{SeedRatio: &ratio})
+
+	p, envs = start()
+	configure(t, p, "a")
+	if seed, ok := envs["a"].SeedStore().Get("ABC"); !ok || seed.Ratio == nil || *seed.Ratio != ratio {
+		t.Errorf("seed after a restart = %+v, %v, want the ratio of %v", seed, ok, ratio)
+	}
+	configure(t, p, "b")
+	p, envs = start()
+	configure(t, p, "a")
+	if _, ok := envs["a"].SeedStore().Get("ABC"); ok {
+		t.Errorf("seed of a removed client kept")
 	}
 }

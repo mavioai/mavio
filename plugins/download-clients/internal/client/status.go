@@ -7,7 +7,6 @@ import (
 	"io/fs"
 	"maps"
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
 )
@@ -173,19 +172,7 @@ func (s *Statuses) status(id string) *ClientStatus {
 // save writes the statuses to the file, if any; failures only lose them
 // on restart.
 func (s *Statuses) save() {
-	if s.file == "" {
-		return
+	if s.file != "" {
+		writeJSON(s.file, s.m)
 	}
-	data, err := json.Marshal(s.m)
-	if err != nil {
-		return
-	}
-	tmp := s.file + ".tmp"
-	if err := os.MkdirAll(filepath.Dir(s.file), 0o755); err != nil {
-		return
-	}
-	if err := os.WriteFile(tmp, data, 0o600); err != nil {
-		return
-	}
-	_ = os.Rename(tmp, s.file)
 }

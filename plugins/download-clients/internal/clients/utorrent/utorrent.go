@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"regexp"
 	"slices"
 	"strings"
 	"sync"
@@ -42,6 +41,9 @@ var stateActions = []string{"start", "forcestart", "pause", "stop"}
 
 func (s *settings) validate() error {
 	if err := s.Validate(); err != nil {
+		return err
+	}
+	if err := client.ValidateURLBase("url base", s.URLBase, "/gui"); err != nil {
 		return err
 	}
 	if strings.TrimSpace(s.MovieCategory) == "" || strings.TrimSpace(s.TVCategory) == "" {
@@ -212,7 +214,7 @@ func (u *utorrent) Items(ctx context.Context, opts client.Options) ([]client.Ite
 		}
 		ratio := t.Ratio
 		item := client.Item{
-			ID: strings.ToUpper(t.Hash), Title: t.Name, Category: t.Label, Kind: kind,
+			ID: t.Hash, Title: t.Name, Category: t.Label, Kind: kind,
 			TotalSize: t.Size, RemainingSize: t.Remaining, SeedRatio: &ratio,
 			OutputPath:            outputPath(t.RootDownloadPath, t.Name),
 			HasPostImportCategory: strings.TrimSpace(u.settings.ImportedCategory(kind)) != "",
@@ -245,10 +247,10 @@ func (u *utorrent) Items(ctx context.Context, opts client.Options) ([]client.Ite
 // outputPath is where a torrent's files are: its root download path when
 // that is named after the torrent, else the torrent's name in it.
 func outputPath(root, name string) string {
-	if pathBase(root) == name {
+	if client.RemoteBase(root) == name {
 		return root
 	}
-	return joinPath(root, name)
+	return client.JoinRemote(root, name)
 }
 
 // Remove implements client.Client.
@@ -298,7 +300,7 @@ func (u *utorrent) Info(ctx context.Context) (client.Info, error) {
 	for _, k := range client.Kinds {
 		d := dir
 		if completed && config["dir_add_label"] == "true" {
-			d = joinPath(dir, u.settings.Category(k))
+			d = client.JoinRemote(dir, u.settings.Category(k))
 		}
 		if !slices.Contains(info.OutputRootFolders, d) {
 			info.OutputRootFolders = append(info.OutputRootFolders, d)
@@ -327,27 +329,4 @@ func (u *utorrent) Test(ctx context.Context) error {
 		return fmt.Errorf("failed to get the list of torrents: %w", err)
 	}
 	return nil
-}
-
-var drivePattern = regexp.MustCompile(`^[A-Za-z]:`)
-
-// joinPath joins a folder of the client's machine, Windows' or not, and
-// a name, as Radarr's OsPath does.
-func joinPath(dir, name string) string {
-	if dir == "" {
-		return name
-	}
-	sep := "/"
-	if strings.Contains(dir, `\`) || !strings.Contains(dir, "/") && drivePattern.MatchString(dir) {
-		sep = `\`
-	}
-	return strings.TrimRight(dir, `/\`) + sep + name
-}
-
-func pathBase(p string) string {
-	p = strings.TrimRight(p, `/\`)
-	if i := strings.LastIndexAny(p, `/\`); i >= 0 {
-		return p[i+1:]
-	}
-	return p
 }

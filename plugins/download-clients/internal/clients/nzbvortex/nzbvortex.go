@@ -31,6 +31,9 @@ func (s *settings) validate() error {
 	if err := s.server().Validate(); err != nil {
 		return err
 	}
+	if err := client.ValidateURLBase("url base", s.URLBase, "/nzbvortex"); err != nil {
+		return err
+	}
 	if strings.TrimSpace(s.APIKey) == "" {
 		return errors.New("API key is required")
 	}
@@ -192,7 +195,7 @@ func (n *nzbVortex) Items(ctx context.Context, opts client.Options) ([]client.It
 // warning when there are several.
 func (n *nzbVortex) outputPath(ctx context.Context, q *queueItem, item *client.Item) error {
 	dest := q.DestinationPath
-	if dest != "" && pathBase(dest) == q.UITitle {
+	if dest != "" && client.RemoteBase(dest) == q.UITitle {
 		item.OutputPath = dest
 		return nil
 	}
@@ -212,7 +215,7 @@ func (n *nzbVortex) outputPath(ctx context.Context, q *queueItem, item *client.I
 		item.Message = "Download contains multiple files and is not in a job folder: " + dest
 		n.env.Log.DebugContext(ctx, item.Message)
 	}
-	item.OutputPath = joinPath(dest, files[0].FileName)
+	item.OutputPath = client.JoinRemote(dest, files[0].FileName)
 	return nil
 }
 
@@ -247,8 +250,8 @@ func (n *nzbVortex) Test(ctx context.Context) error {
 	}
 	level, err := n.proxy.apiVersion(ctx)
 	if err == nil {
-		var v []int
-		if v, err = parseVersion(level); err == nil && slices.Compare(v, []int{2, 3}) < 0 {
+		var v client.Version
+		if v, err = client.ParseVersion(level); err == nil && !v.AtLeast(2, 3) {
 			return fmt.Errorf("NZBVortex version should be at least 2.3; version reported is %s", level)
 		}
 	}
@@ -272,48 +275,4 @@ func (n *nzbVortex) Test(ctx context.Context) error {
 		}
 	}
 	return nil
-}
-
-// parseVersion parses a version as .NET's Version: two to four numbers
-// separated by dots.
-func parseVersion(s string) ([]int, error) {
-	parts := strings.Split(strings.TrimSpace(s), ".")
-	if len(parts) < 2 || len(parts) > 4 {
-		return nil, fmt.Errorf("unable to parse version %q", s)
-	}
-	v := make([]int, len(parts))
-	for i, p := range parts {
-		x, err := strconv.Atoi(p)
-		if err != nil || x < 0 {
-			return nil, fmt.Errorf("unable to parse version %q", s)
-		}
-		v[i] = x
-	}
-	return v, nil
-}
-
-// pathBase returns the last element of a path of the client's machine,
-// with either slashes.
-func pathBase(p string) string {
-	p = strings.TrimRight(p, `/\`)
-	if i := strings.LastIndexAny(p, `/\`); i >= 0 {
-		return p[i+1:]
-	}
-	return p
-}
-
-// joinPath joins a folder of the client's machine, with either slashes,
-// and a name, as Path.Combine.
-func joinPath(dir, name string) string {
-	if dir == "" {
-		return name
-	}
-	if strings.HasSuffix(dir, "/") || strings.HasSuffix(dir, `\`) {
-		return dir + name
-	}
-	sep := "/"
-	if strings.Contains(dir, `\`) && !strings.Contains(dir, "/") {
-		sep = `\`
-	}
-	return dir + sep + name
 }

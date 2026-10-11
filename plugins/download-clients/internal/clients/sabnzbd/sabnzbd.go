@@ -13,10 +13,6 @@ import (
 	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
 )
 
-// historyLimit is how many downloads of the history are listed, as
-// Radarr's DownloadClientHistoryLimit by default.
-const historyLimit = 60
-
 // settings are the settings of SABnzbd.
 type settings struct {
 	client.Server
@@ -27,15 +23,13 @@ type settings struct {
 	client.Priorities
 }
 
-var urlBasePattern = regexp.MustCompile(`(?i)^/?https?://[-_a-z0-9.]+`)
-
 // validate checks the settings as Radarr's SabnzbdSettingsValidator.
 func (s *settings) validate() error {
 	if err := s.Validate(); err != nil {
 		return err
 	}
-	if strings.TrimSpace(s.URLBase) != "" && urlBasePattern.MatchString(s.URLBase) {
-		return errors.New("url base must be a valid URL path (ie: '/sabnzbd')")
+	if err := client.ValidateURLBase("url base", s.URLBase, "/sabnzbd"); err != nil {
+		return err
 	}
 	noKey := strings.TrimSpace(s.APIKey) == ""
 	switch {
@@ -117,7 +111,7 @@ func (c *sabnzbd) Add(ctx context.Context, r *client.Release) (string, error) {
 		return "", err
 	}
 	if len(ids) == 0 {
-		return "", fmt.Errorf("SABnzbd rejected the NZB of %q for an unknown reason", r.Title)
+		return "", client.Rejected("SABnzbd rejected the NZB for an unknown reason")
 	}
 	return ids[0], nil
 }
@@ -189,10 +183,10 @@ func (c *sabnzbd) queueItems(ctx context.Context) ([]client.Item, error) {
 const unpackDiskFull = "Unpacking failed, write error or disk is full?"
 
 // historyItems lists the history, as Radarr's GetHistory.
-func (c *sabnzbd) historyItems(ctx context.Context) ([]client.Item, error) {
+func (c *sabnzbd) historyItems(ctx context.Context, limit int) ([]client.Item, error) {
 	var items []client.Item
 	for _, cat := range c.queryCategories() {
-		h, err := c.proxy.history(ctx, 0, historyLimit, cat)
+		h, err := c.proxy.history(ctx, 0, limit, cat)
 		if err != nil {
 			return nil, err
 		}
@@ -225,12 +219,12 @@ func (c *sabnzbd) historyItems(ctx context.Context) ([]client.Item, error) {
 }
 
 // Items implements client.Client.
-func (c *sabnzbd) Items(ctx context.Context, _ client.Options) ([]client.Item, error) {
+func (c *sabnzbd) Items(ctx context.Context, opts client.Options) ([]client.Item, error) {
 	queued, err := c.queueItems(ctx)
 	if err != nil {
 		return nil, err
 	}
-	done, err := c.historyItems(ctx)
+	done, err := c.historyItems(ctx, opts.Limit())
 	if err != nil {
 		return nil, err
 	}
@@ -428,7 +422,8 @@ func (c *sabnzbd) hasVersion(ctx context.Context, major, minor, patch int) (bool
 // Test implements client.Client as Radarr's Test: the connection and
 // version, the API key, the global settings and the categories.
 func (c *sabnzbd) Test(ctx context.Context) error {
-	if err := c.testConnectionAndVersion(ctx); err != nil {
+	warning, err := c.testConnectionAndVersion(ctx)
+	if err != nil {
 		return err
 	}
 	cfg, err := c.proxy.config(ctx)
@@ -463,26 +458,30 @@ func (c *sabnzbd) Test(ctx context.Context) error {
 			return err
 		}
 	}
+	if warning != nil {
+		return warning
+	}
 	return nil
 }
 
-func (c *sabnzbd) testConnectionAndVersion(ctx context.Context) error {
+// testConnectionAndVersion checks the version; a develop version is a
+// warning, as Radarr's IsWarning failure, which the other checks follow.
+func (c *sabnzbd) testConnectionAndVersion(ctx context.Context) (*client.TestWarning, error) {
 	raw, err := c.proxy.version(ctx)
 	if err != nil {
-		return fmt.Errorf("unable to connect to SABnzbd: %w", err)
+		return nil, fmt.Errorf("unable to connect to SABnzbd: %w", err)
 	}
 	v, ok := parseVersion(raw)
 	switch {
 	case !ok:
-		return fmt.Errorf("unknown SABnzbd version: %s", raw)
+		return nil, fmt.Errorf("unknown SABnzbd version: %s", raw)
 	case strings.EqualFold(raw, "develop"):
-		c.env.Log.WarnContext(ctx, "SABnzbd develop version, assuming version 3.0.0 or higher; "+
-			"Mavio may not be able to support new features added to SABnzbd when running develop versions")
-		return nil
+		return &client.TestWarning{Message: "SABnzbd develop version, assuming version 3.0.0 or higher; " +
+			"Mavio may not be able to support new features added to SABnzbd when running develop versions"}, nil
 	case v[0] >= 1 || v[1] >= 7:
-		return nil
+		return nil, nil
 	}
-	return fmt.Errorf("SABnzbd version should be at least 0.7.0; version reported is %d.%d.%d", v[0], v[1], v[2])
+	return nil, fmt.Errorf("SABnzbd version should be at least 0.7.0; version reported is %d.%d.%d", v[0], v[1], v[2])
 }
 
 // testCategory checks a category as Radarr's TestCategory: that it exists

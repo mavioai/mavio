@@ -40,6 +40,9 @@ func (s *settings) validate() error {
 	if err := s.Validate(); err != nil {
 		return err
 	}
+	if err := client.ValidateURLBase("url base", s.URLBase, "/transmission/"); err != nil {
+		return err
+	}
 	for _, k := range client.Kinds {
 		switch c := s.Category(k); {
 		case !categoryPattern.MatchString(c):
@@ -84,7 +87,7 @@ func Definitions() []client.Definition {
 				b.supportsLabels = t.supportsLabels
 				b.validateVersion = t.validateVersion
 				b.outputPath = func(dir string, t *torrent) string {
-					return joinPath(dir, strings.ReplaceAll(t.Name, ":", "_"))
+					return client.JoinRemote(dir, strings.ReplaceAll(t.Name, ":", "_"))
 				}
 				return t, nil
 			},
@@ -507,31 +510,10 @@ func (b *base) validateVuzeVersion(ctx context.Context) error {
 // multi-file torrent in a folder of its own, which downloadDir names, and a
 // single file in the folder.
 func vuzeOutputPath(dir string, t *torrent) string {
-	if dir == "" || pathBase(dir) == t.Name || t.fileCount() > 1 {
+	if dir == "" || client.RemoteBase(dir) == t.Name || t.fileCount() > 1 {
 		return dir
 	}
-	return joinPath(dir, t.Name)
-}
-
-// joinPath joins a folder of the client's machine, with either slashes,
-// and a name.
-func joinPath(dir, name string) string {
-	if dir == "" {
-		return name
-	}
-	sep := "/"
-	if strings.Contains(dir, `\`) && !strings.Contains(dir, "/") {
-		sep = `\`
-	}
-	return strings.TrimRight(dir, `/\`) + sep + name
-}
-
-func pathBase(p string) string {
-	p = strings.TrimRight(p, `/\`)
-	if i := strings.LastIndexAny(p, `/\`); i >= 0 {
-		return p[i+1:]
-	}
-	return p
+	return client.JoinRemote(dir, t.Name)
 }
 
 // containsPath reports whether folder holds p, as Radarr's

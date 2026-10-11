@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
 )
 
 // taskStatus is the status of a task, as Radarr's
@@ -362,9 +364,5 @@ func remap(path, share, physical string) string {
 	if rel == "" {
 		return physical
 	}
-	return joinPath(physical, rel)
-}
-
-func joinPath(dir, name string) string {
-	return strings.TrimRight(dir, "/") + "/" + name
+	return client.JoinRemote(physical, rel)
 }

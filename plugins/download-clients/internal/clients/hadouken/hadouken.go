@@ -5,9 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"regexp"
-	"slices"
-	"strconv"
 	"strings"
 	"time"
 
@@ -23,15 +20,14 @@ type settings struct {
 	client.Categories
 }
 
-var urlBasePattern = regexp.MustCompile(`(?i)^/?https?://[-_a-z0-9.]+`)
-
 func (s *settings) validate() error {
 	if err := s.Validate(); err != nil {
 		return err
 	}
+	if err := client.ValidateURLBase("url base", s.URLBase, "/hadouken"); err != nil {
+		return err
+	}
 	switch {
-	case strings.TrimSpace(s.URLBase) != "" && urlBasePattern.MatchString(s.URLBase):
-		return fmt.Errorf("url base %q: must be a valid URL path (ie: '/hadouken')", s.URLBase)
 	case s.Username == "":
 		return errors.New("username must not be empty")
 	case s.Password == "":
@@ -113,7 +109,7 @@ func (h *hadouken) Items(ctx context.Context, opts client.Options) ([]client.Ite
 		}
 		item := client.Item{
 			ID: strings.ToUpper(t.InfoHash), Title: t.Name, Category: category, Kind: kind,
-			OutputPath: joinPath(t.SavePath, t.Name), TotalSize: t.TotalSize, RemainingSize: t.TotalSize - t.DownloadedBytes,
+			OutputPath: client.JoinRemote(t.SavePath, t.Name), TotalSize: t.TotalSize, RemainingSize: t.TotalSize - t.DownloadedBytes,
 			RemainingTime: &eta, SeedRatio: &ratio,
 		}
 		switch {
@@ -199,9 +195,9 @@ func (h *hadouken) Test(ctx context.Context) error {
 func (h *hadouken) testConnection(ctx context.Context) error {
 	info, err := h.proxy.systemInfo(ctx)
 	if err == nil {
-		var v []int
-		if v, err = parseVersion(info.Versions["hadouken"]); err == nil {
-			if slices.Compare(v[:2], []int{5, 1}) < 0 {
+		var v client.Version
+		if v, err = client.ParseVersion(info.Versions["hadouken"]); err == nil {
+			if !v[:2].AtLeast(5, 1) {
 				return fmt.Errorf("hadouken version should be at least 5.1; version reported is %s", info.Versions["hadouken"])
 			}
 			return nil
@@ -212,34 +208,4 @@ func (h *hadouken) testConnection(ctx context.Context) error {
 		return fmt.Errorf("authentication failure: %w", err)
 	}
 	return fmt.Errorf("unable to connect to Hadouken: %w", err)
-}
-
-// parseVersion reads a version as .NET's Version: two to four numbers.
-func parseVersion(s string) ([]int, error) {
-	parts := strings.Split(s, ".")
-	if len(parts) < 2 || len(parts) > 4 {
-		return nil, fmt.Errorf("unable to parse version %q", s)
-	}
-	v := make([]int, len(parts))
-	for i, p := range parts {
-		n, err := strconv.Atoi(strings.TrimSpace(p))
-		if err != nil || n < 0 {
-			return nil, fmt.Errorf("unable to parse version %q", s)
-		}
-		v[i] = n
-	}
-	return v, nil
-}
-
-// joinPath joins a folder of the client's machine, with either slashes,
-// and a name, as Radarr's OsPath does.
-func joinPath(dir, name string) string {
-	if dir == "" {
-		return name
-	}
-	sep := "/"
-	if strings.Contains(dir, `\`) && !strings.Contains(dir, "/") {
-		sep = `\`
-	}
-	return strings.TrimRight(dir, `/\`) + sep + name
 }

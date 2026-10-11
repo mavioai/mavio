@@ -102,7 +102,14 @@ func TestDownloadFailed(t *testing.T) {
 
 // should_throw_if_full_season_download is Sonarr's.
 func TestDownloadFullSeason(t *testing.T) {
-	t.Skip("should_throw_if_full_season_download: releases carry no parsed episode info to tell full seasons by")
+	f := newFixture(t)
+	r := client.Release{Title: title, Kind: client.Series, Data: nzb, FullSeason: true}
+	if _, err := f.client(t).Add(context.Background(), &r); !errors.Is(err, client.ErrNotSupported) {
+		t.Errorf("Add() error = %v, want ErrNotSupported", err)
+	}
+	if entries, _ := os.ReadDir(f.nzbFolder); len(entries) != 0 {
+		t.Errorf("NZB folder = %d files, want none", len(entries))
+	}
 }
 
 // should_throw_item_is_removed

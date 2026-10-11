@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
+	"github.com/mavioai/mavio/plugins/download-clients/internal/xmlrpc"
 )
 
 const title = "Droned.1998.1080p.WEB-DL-DRONE"
@@ -47,7 +48,7 @@ type fake struct {
 
 type call struct {
 	Method string
-	Params []value
+	Params []xmlrpc.Value
 }
 
 func newFake(t *testing.T) *fake {
@@ -63,13 +64,13 @@ func (f *fake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	body, _ := io.ReadAll(r.Body)
 	var mc struct {
-		Method string  `xml:"methodName"`
-		Params []value `xml:"params>param>value"`
+		Method string         `xml:"methodName"`
+		Params []xmlrpc.Value `xml:"params>param>value"`
 	}
 	if err := xml.Unmarshal(body, &mc); err != nil {
 		f.t.Errorf("request body: %v", err)
 	}
-	if len(mc.Params) == 0 || mc.Params[0].str() != "token:secret" {
+	if len(mc.Params) == 0 || mc.Params[0].Str() != "token:secret" {
 		writeResponse(w, `<fault><value><struct><member><name>faultCode</name><value><int>1</int></value></member>`+
 			`<member><name>faultString</name><value><string>Unauthorized</string></value></member></struct></value></fault>`)
 		return
@@ -95,12 +96,12 @@ func (f *fake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "aria2.tellStatus":
 		v = "<value><struct></struct></value>"
 		for _, d := range slices.Concat(f.active, f.waiting, f.stopped) {
-			if d.GID == mc.Params[1].str() {
+			if d.GID == mc.Params[1].Str() {
 				v = statusOf(d)
 			}
 		}
 	case "aria2.forceRemove":
-		v = str(mc.Params[1].str())
+		v = str(mc.Params[1].Str())
 	case "aria2.removeDownloadResult":
 		v = str("OK")
 	default:
@@ -385,22 +386,22 @@ func TestAdd(t *testing.T) {
 				t.Fatalf("calls = %+v, want %s", calls, tt.method)
 			}
 			p := calls[0].Params
-			var opts value
+			var opts xmlrpc.Value
 			switch tt.method {
 			case "aria2.addUri":
-				if len(p) != 2 || len(p[0].values()) != 1 || p[0].values()[0].str() != magnet {
+				if len(p) != 2 || len(p[0].Values()) != 1 || p[0].Values()[0].Str() != magnet {
 					t.Fatalf("addUri params = %+v, want the magnet and options", p)
 				}
 				opts = p[1]
 			default:
-				if len(p) != 3 || strings.TrimSpace(*p[0].Base64) != base64.StdEncoding.EncodeToString(data) || p[1].Array == nil || len(p[1].values()) != 0 {
+				if len(p) != 3 || strings.TrimSpace(*p[0].Base64) != base64.StdEncoding.EncodeToString(data) || p[1].Array == nil || len(p[1].Values()) != 0 {
 					t.Fatalf("addTorrent params = %+v, want the torrent, no URIs and options", p)
 				}
 				opts = p[2]
 			}
 			got := ""
-			if m := opts.member("dir"); m != nil {
-				got = m.str()
+			if m := opts.Member("dir"); m != nil {
+				got = m.Str()
 			}
 			if opts.Struct == nil || got != tt.wantDir {
 				t.Errorf("dir = %q, want = %q in a struct", got, tt.wantDir)
@@ -453,7 +454,7 @@ func TestRemove(t *testing.T) {
 			t.Fatalf("%s: Remove() error = %v", tt.status, err)
 		}
 		calls := f.methods()
-		if len(calls) != 1 || calls[0].Method != tt.method || calls[0].Params[0].str() != d.GID {
+		if len(calls) != 1 || calls[0].Method != tt.method || calls[0].Params[0].Str() != d.GID {
 			t.Errorf("%s: calls = %+v, want %s of %s", tt.status, calls, tt.method, d.GID)
 		}
 	}
@@ -505,7 +506,7 @@ func TestTest(t *testing.T) {
 		if (err == nil) != tt.ok {
 			t.Errorf("%s: Test() error = %v, want ok = %v", tt.name, err, tt.ok)
 		}
-		var fault *faultError
+		var fault *xmlrpc.Fault
 		if tt.token == "wrong" && (!errors.As(err, &fault) || fault.Code != 1 || fault.Message != "Unauthorized") {
 			t.Errorf("%s: Test() error = %v, want the fault", tt.name, err)
 		}

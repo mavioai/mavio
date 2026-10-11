@@ -1,7 +1,6 @@
 package hadouken
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -10,9 +9,9 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
-	"sync"
 
 	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
+	"github.com/mavioai/mavio/plugins/download-clients/internal/jsonrpc"
 )
 
 // state is a torrent's state, as Radarr's HadoukenTorrentState.
@@ -65,30 +64,15 @@ type proxy struct {
 	username string
 	password string
 	log      *slog.Logger
-
-	mu sync.Mutex
-	id int
+	ids      jsonrpc.IDs
 }
 
 // call calls a method and decodes its result into out, when not nil.
 func (p *proxy) call(ctx context.Context, out any, method string, params ...any) error {
-	if params == nil {
-		params = []any{}
-	}
-	p.mu.Lock()
-	p.id++
-	id := p.id
-	p.mu.Unlock()
-	body, err := json.Marshal(map[string]any{"jsonrpc": "2.0", "method": method, "params": params, "id": id})
+	req, err := jsonrpc.NewRequest(ctx, p.url, p.ids.Next(), method, params...)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, p.url, bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Accept", "application/json-rpc, application/json")
-	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth(p.username, p.password)
 	resp, err := client.Send(p.http, req)
 	if err != nil {
@@ -97,17 +81,14 @@ func (p *proxy) call(ctx context.Context, out any, method string, params ...any)
 	if err := resp.Err(); err != nil {
 		return fmt.Errorf("unable to connect to Hadouken, please check your settings: %w", err)
 	}
-	var r struct {
-		Result json.RawMessage `json:"result"`
-		Error  json.RawMessage `json:"error"`
+	r, err := jsonrpc.Decode(resp.Body)
+	if err != nil {
+		return fmt.Errorf("hadouken: %s: %w", method, err)
 	}
-	if err := json.Unmarshal(resp.Body, &r); err != nil {
-		return fmt.Errorf("hadouken: %s: unexpected response: %w", method, err)
-	}
-	if len(r.Error) > 0 && string(r.Error) != "null" {
+	if r.Failed() {
 		return fmt.Errorf("error response received from Hadouken: %s", r.Error)
 	}
-	if out != nil && len(r.Result) > 0 && string(r.Result) != "null" {
+	if out != nil && r.HasResult() {
 		if err := json.Unmarshal(r.Result, out); err != nil {
 			return fmt.Errorf("hadouken: %s: %w", method, err)
 		}

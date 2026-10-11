@@ -26,6 +26,9 @@ func (s *settings) validate() error {
 	if err := s.Validate(); err != nil {
 		return err
 	}
+	if err := client.ValidateURLBase("url base", s.URLBase, "/nzbget"); err != nil {
+		return err
+	}
 	switch {
 	case strings.TrimSpace(s.Username) == "" && strings.TrimSpace(s.Password) != "":
 		return errors.New("username is required with a password")
@@ -87,10 +90,6 @@ func newNzbget(raw []byte, env client.Env) (client.Client, error) {
 	return n, nil
 }
 
-// historyLimit is how many downloads of the history are read, as
-// Radarr's default DownloadClientHistoryLimit.
-const historyLimit = 60
-
 // The statuses of the history that are success.
 var successStatus = []string{"SUCCESS", "NONE"}
 
@@ -118,7 +117,7 @@ func (n *nzbget) Add(ctx context.Context, r *client.Release) (string, error) {
 		return "", err
 	}
 	if id == "" {
-		return "", fmt.Errorf("NZBGet rejected the NZB for an unknown reason: %s", r.Title)
+		return "", client.Rejected("NZBGet rejected the NZB for an unknown reason")
 	}
 	return id, nil
 }
@@ -206,7 +205,7 @@ func (n *nzbget) historyItems(ctx context.Context, opts client.Options) ([]clien
 	if err != nil {
 		return nil, err
 	}
-	history = history[:min(len(history), historyLimit)]
+	history = history[:min(len(history), opts.Limit())]
 	var items []client.Item
 	for _, h := range history {
 		kind, ok := n.kindOf(h.Category)
@@ -298,7 +297,7 @@ func categories(config map[string]string) []category {
 		if strings.TrimSpace(dest) == "" {
 			dest = strings.ReplaceAll(config["DestDir"], "${MainDir}", config["MainDir"])
 			if appendDir, ok := config["AppendCategoryDir"]; !ok || appendDir == "yes" {
-				dest = joinPath(dest, name)
+				dest = client.JoinRemote(dest, name)
 			}
 		}
 		out = append(out, category{Name: name, DestDir: dest})
@@ -372,47 +371,13 @@ func (n *nzbget) testConnection(ctx context.Context) error {
 		return fmt.Errorf("unable to connect to NZBGet: %w", err)
 	}
 	version := strings.Split(s, "-")[0]
-	v, err := parseVersion(version)
+	v, err := client.ParseVersion(version)
 	if err != nil {
 		n.env.Log.ErrorContext(ctx, "unable to connect to NZBGet", "err", err)
 		return fmt.Errorf("unable to connect to NZBGet: %w", err)
 	}
-	if slices.Compare(v, []int{12, 0}) < 0 {
+	if !v.AtLeast(12, 0) {
 		return fmt.Errorf("NZBGet version should be at least 12.0; version reported is %s", version)
 	}
 	return nil
-}
-
-// parseVersion parses a version as .NET's Version.Parse: two to four
-// numbers separated by dots.
-func parseVersion(s string) ([]int, error) {
-	parts := strings.Split(strings.TrimSpace(s), ".")
-	if len(parts) < 2 || len(parts) > 4 {
-		return nil, fmt.Errorf("unable to parse version %q", s)
-	}
-	v := make([]int, len(parts))
-	for i, p := range parts {
-		n, err := parseDigits(p)
-		if err != nil {
-			return nil, fmt.Errorf("unable to parse version %q", s)
-		}
-		v[i] = n
-	}
-	return v, nil
-}
-
-// joinPath joins a folder of the client's machine, with either slashes,
-// and a name, as Path.Combine.
-func joinPath(dir, name string) string {
-	if dir == "" {
-		return name
-	}
-	if strings.HasSuffix(dir, "/") || strings.HasSuffix(dir, `\`) {
-		return dir + name
-	}
-	sep := "/"
-	if strings.Contains(dir, `\`) && !strings.Contains(dir, "/") {
-		sep = `\`
-	}
-	return dir + sep + name
 }

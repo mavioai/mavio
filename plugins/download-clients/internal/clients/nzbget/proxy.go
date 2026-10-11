@@ -1,7 +1,6 @@
 package nzbget
 
 import (
-	"bytes"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
@@ -13,10 +12,10 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
+	"github.com/mavioai/mavio/plugins/download-clients/internal/jsonrpc"
 )
 
 // parameter is a post-processing parameter of a download.
@@ -99,7 +98,7 @@ type proxy struct {
 	settings *settings
 	now      func() time.Time
 	log      *slog.Logger
-	ids      atomic.Int64
+	ids      jsonrpc.IDs
 
 	mu      sync.Mutex
 	version string
@@ -111,19 +110,10 @@ func (p *proxy) url() string { return p.settings.BaseURL() + "/jsonrpc" }
 // call calls a method with params and decodes its result into out, when
 // not nil.
 func (p *proxy) call(ctx context.Context, out any, method string, params ...any) error {
-	if params == nil {
-		params = []any{}
-	}
-	body, err := json.Marshal(map[string]any{"jsonrpc": "2.0", "method": method, "params": params, "id": p.ids.Add(1)})
+	req, err := jsonrpc.NewRequest(ctx, p.url(), p.ids.Next(), method, params...)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, p.url(), bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Accept", "application/json-rpc, application/json")
-	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth(p.settings.Username, p.settings.Password)
 	resp, err := client.Send(p.http, req)
 	if err != nil {
@@ -135,14 +125,11 @@ func (p *proxy) call(ctx context.Context, out any, method string, params ...any)
 	if err := resp.Err(); err != nil {
 		return fmt.Errorf("unable to connect to NZBGet: %w", err)
 	}
-	var r struct {
-		Result json.RawMessage `json:"result"`
-		Error  json.RawMessage `json:"error"`
-	}
-	if err := json.Unmarshal(resp.Body, &r); err != nil {
+	r, err := jsonrpc.Decode(resp.Body)
+	if err != nil {
 		return fmt.Errorf("NZBGet: %s: %w", method, err)
 	}
-	if len(r.Error) > 0 && string(r.Error) != "null" {
+	if r.Failed() {
 		return fmt.Errorf("error response received from NZBGet: %s", rpcError(r.Error))
 	}
 	if out != nil {

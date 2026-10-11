@@ -95,6 +95,10 @@ func downloadID(fi fs.FileInfo) string {
 // Add implements client.Client: the NZB goes to the NZB folder and a
 // .strm file of it to the strm folder, which is the download.
 func (p *pneumatic) Add(ctx context.Context, r *client.Release) (string, error) {
+	if r.FullSeason {
+		// Sonarr's Pneumatic.Download.
+		return "", fmt.Errorf("full season releases are not supported with Pneumatic: %w", client.ErrNotSupported)
+	}
 	if len(r.Data) == 0 {
 		return "", errors.New("the release has no NZB")
 	}

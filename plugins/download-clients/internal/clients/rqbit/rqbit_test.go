@@ -143,7 +143,7 @@ func TestItemStatus(t *testing.T) {
 			if item.Status != tt.want {
 				t.Errorf("Status = %v, want = %v", item.Status, tt.want)
 			}
-			if item.ID != "HASH" || item.Title != title || item.OutputPath != "/somepath/"+title {
+			if item.ID != "hash" || item.Title != title || item.OutputPath != "/somepath/"+title {
 				t.Errorf("item = %+v, want the torrent's hash, name and path", item)
 			}
 			if (item.RemainingSize == 0) != (tt.want == client.Completed) {
@@ -216,10 +216,11 @@ func TestAdd(t *testing.T) {
 		body    string
 		want    string
 	}{
-		// Download_should_return_unique_id
-		{"torrent file", client.Release{Data: torrentFile()}, strings.ToLower(hash), string(torrentFile()), hash},
+		// Download_should_return_unique_id: the ID in the case rqbit
+		// gives it.
+		{"torrent file", client.Release{Data: torrentFile()}, strings.ToLower(hash), string(torrentFile()), strings.ToLower(hash)},
 		// Download_should_get_hash_from_magnet_url
-		{"magnet", client.Release{MagnetURL: magnet}, strings.ToLower(hash), magnet, hash},
+		{"magnet", client.Release{MagnetURL: magnet}, strings.ToLower(hash), magnet, strings.ToLower(hash)},
 		{"no details", client.Release{MagnetURL: magnet}, "", magnet, hash},
 	}
 	for _, tt := range tests {

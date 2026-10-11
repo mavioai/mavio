@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"sync"
 
 	"connectrpc.com/connect"
@@ -25,6 +26,7 @@ var (
 		client.FieldSelect:      pluginv1.SettingFieldType_SETTING_FIELD_TYPE_SELECT,
 		client.FieldMultiSelect: pluginv1.SettingFieldType_SETTING_FIELD_TYPE_MULTI_SELECT,
 		client.FieldInfo:        pluginv1.SettingFieldType_SETTING_FIELD_TYPE_INFO,
+		client.FieldTag:         pluginv1.SettingFieldType_SETTING_FIELD_TYPE_TAG,
 	}
 	protocols = map[client.Protocol]pluginv1.DownloadProtocol{
 		client.Torrent: pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT,
@@ -87,13 +89,14 @@ func (p *plugin) ListDownloadClients(context.Context, *pluginv1.ListDownloadClie
 	p.mu.RUnlock()
 	out := make([]*pluginv1.DownloadClient, len(list))
 	for i, c := range list {
-		opts := c.cfg.options()
+		opts := c.options()
 		b := pluginv1.DownloadClient_builder{
 			Id: proto.String(c.cfg.ID), Name: proto.String(c.name()), DefinitionId: proto.String(c.def.ID),
 			Protocol: protocols[c.def.Protocol].Enum(), Enabled: proto.Bool(orTrue(c.cfg.Enabled)),
 			Priority:                 proto.Int32(int32(c.cfg.priority())),
 			RemoveCompletedDownloads: proto.Bool(opts.RemoveCompletedDownloads), RemoveFailedDownloads: proto.Bool(opts.RemoveFailedDownloads),
 			PrefersTorrentFile: proto.Bool(c.def.PrefersTorrentFile), Host: proto.String(c.client.Host()),
+			Tags: c.cfg.Tags,
 		}
 		if until, failure, ok := p.statuses.Disabled(c.cfg.ID); ok {
 			b.DisabledUntil, b.Failure = timestamppb.New(until), proto.String(failure)
@@ -107,7 +110,7 @@ func (p *plugin) ListDownloadClients(context.Context, *pluginv1.ListDownloadClie
 func (p *plugin) TestDownloadClient(ctx context.Context, req *pluginv1.TestDownloadClientRequest) (*pluginv1.TestDownloadClientResponse, error) {
 	var cl client.Client
 	if req.GetDefinitionId() != "" {
-		c, _, err := p.newClient(req.GetDefinitionId(), []byte(req.GetSettingsJson()))
+		c, _, err := p.newClient("", req.GetDefinitionId(), []byte(req.GetSettingsJson()))
 		if err != nil {
 			return pluginv1.TestDownloadClientResponse_builder{Failure: proto.String(err.Error())}.Build(), nil
 		}
@@ -120,6 +123,10 @@ func (p *plugin) TestDownloadClient(ctx context.Context, req *pluginv1.TestDownl
 		cl = c.client
 	}
 	if err := cl.Test(ctx); err != nil {
+		var warning *client.TestWarning
+		if errors.As(err, &warning) {
+			return pluginv1.TestDownloadClientResponse_builder{Warnings: []string{warning.Message}}.Build(), nil
+		}
 		return pluginv1.TestDownloadClientResponse_builder{Failure: proto.String(err.Error())}.Build(), nil
 	}
 	return &pluginv1.TestDownloadClientResponse{}, nil
@@ -131,9 +138,21 @@ func (p *plugin) AddDownload(ctx context.Context, req *pluginv1.AddDownloadReque
 	if err != nil {
 		return nil, err
 	}
+	if c.def.Protocol == client.Usenet && len(req.GetData()) > 0 {
+		// Radarr's UsenetClientBase validates the NZB before sending it.
+		if err := client.ValidateNZB(req.GetData()); err != nil {
+			return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("%s: %w", req.GetTitle(), err))
+		}
+	}
+	d := req.GetDetails()
 	r := &client.Release{
 		Title: req.GetTitle(), Recent: req.GetRecent(), Data: req.GetData(), FileName: req.GetFileName(),
-		MagnetURL: req.GetMagnetUrl(), InfoHash: req.GetInfoHash(),
+		MagnetURL: req.GetMagnetUrl(), InfoHash: req.GetInfoHash(), FullSeason: req.GetFullSeason(),
+		BlocklistedHashes: req.GetBlocklistedInfoHashes(),
+		Details: client.Details{
+			Quality: d.GetQuality(), Languages: d.GetLanguages(), ReleaseGroup: d.GetReleaseGroup(), Indexer: d.GetIndexer(),
+			Year: int(d.GetYear()), Collection: d.GetCollection(), Studio: d.GetStudio(), TitleSlug: d.GetTitleSlug(),
+		},
 	}
 	switch req.GetKind() {
 	case pluginv1.DownloadKind_DOWNLOAD_KIND_SERIES:
@@ -166,6 +185,10 @@ func (p *plugin) failure(c *configured, err error) error {
 		return connect.NewError(connect.CodeCanceled, err)
 	case errors.Is(err, client.ErrMagnetNotSupported), errors.Is(err, client.ErrNotSupported):
 		return connect.NewError(connect.CodeUnimplemented, err)
+	case errors.Is(err, client.ErrReleaseRejected), errors.Is(err, client.ErrReleaseBlocked):
+		return connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("%s: %w", c.name(), err))
+	case errors.Is(err, client.ErrInvalidNZB):
+		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("%s: %w", c.name(), err))
 	case errors.As(err, &auth):
 		p.statuses.RecordFailure(c.cfg.ID, err.Error())
 		return connect.NewError(connect.CodePermissionDenied, fmt.Errorf("%s: %w", c.name(), err))
@@ -214,7 +237,7 @@ func (p *plugin) ListDownloads(ctx context.Context, req *pluginv1.ListDownloadsR
 				}
 				results[i].failure = f.Build()
 			}
-			items, err := c.client.Items(ctx, c.cfg.options())
+			items, err := c.client.Items(ctx, c.options())
 			if err != nil {
 				fail(err)
 				return
@@ -277,12 +300,12 @@ func itemProto(clientID string, it client.Item) *pluginv1.Download {
 // item finds a client's download by ID; a download not listed is one of
 // that ID alone.
 func (p *plugin) item(ctx context.Context, c *configured, id string) (client.Item, bool, error) {
-	items, err := c.client.Items(ctx, c.cfg.options())
+	items, err := c.client.Items(ctx, c.options())
 	if err != nil {
 		return client.Item{}, false, p.failure(c, err)
 	}
 	for _, it := range items {
-		if it.ID == id {
+		if strings.EqualFold(it.ID, id) {
 			return it, true, nil
 		}
 	}
@@ -303,7 +326,7 @@ func (p *plugin) GetDownload(ctx context.Context, req *pluginv1.GetDownloadReque
 		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("download %s not found in %s", req.GetDownloadId(), c.name()))
 	}
 	if imp, ok := c.client.(client.Importer); ok {
-		if it, err = imp.ImportItem(ctx, it, c.cfg.options()); err != nil {
+		if it, err = imp.ImportItem(ctx, it, c.options()); err != nil {
 			return nil, p.failure(c, err)
 		}
 	}

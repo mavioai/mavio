@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
+	"github.com/mavioai/mavio/plugins/download-clients/internal/xmlrpc"
 )
 
 // torrent is a torrent of d.multicall2, as Radarr's RTorrentTorrent.
@@ -52,8 +53,8 @@ type proxy struct {
 }
 
 // call calls a method and returns its result.
-func (p *proxy) call(ctx context.Context, method string, params ...any) (*value, error) {
-	body, err := encodeCall(method, params...)
+func (p *proxy) call(ctx context.Context, method string, params ...any) (*xmlrpc.Value, error) {
+	body, err := xmlrpc.EncodeCall(method, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +73,7 @@ func (p *proxy) call(ctx context.Context, method string, params ...any) (*value,
 	if err := resp.Err(); err != nil {
 		return nil, err
 	}
-	return decodeResponse(resp.Body)
+	return xmlrpc.DecodeResponse(resp.Body, "rTorrent")
 }
 
 func (p *proxy) version(ctx context.Context) (string, error) {
@@ -80,7 +81,7 @@ func (p *proxy) version(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if s := v.str(); s != "" {
+	if s := v.Str(); s != "" {
 		return s, nil
 	}
 	return "0.0.0", nil
@@ -96,19 +97,19 @@ func (p *proxy) torrents(ctx context.Context) ([]torrent, error) {
 		return nil, err
 	}
 	var out []torrent
-	for _, row := range v.values() {
-		d := row.values()
+	for _, row := range v.Values() {
+		d := row.Values()
 		if len(d) < len(multicallFields) {
 			return nil, fmt.Errorf("rTorrent returned %d fields of a torrent, want %d", len(d), len(multicallFields))
 		}
-		category := d[3].str()
+		category := d[3].Str()
 		if c, err := url.QueryUnescape(category); err == nil {
 			category = c
 		}
 		out = append(out, torrent{
-			Name: d[0].str(), Hash: d[1].str(), Path: d[2].str(), Category: category,
-			TotalSize: d[4].int(), RemainingSize: d[5].int(), DownRate: d[6].int(), Ratio: d[7].int(),
-			IsOpen: d[8].int() != 0, IsActive: d[9].int() != 0, IsFinished: d[10].int() != 0, FinishedTime: d[11].int(),
+			Name: d[0].Str(), Hash: d[1].Str(), Path: d[2].Str(), Category: category,
+			TotalSize: d[4].Int64(), RemainingSize: d[5].Int64(), DownRate: d[6].Int64(), Ratio: d[7].Int64(),
+			IsOpen: d[8].Int64() != 0, IsActive: d[9].Int64() != 0, IsFinished: d[10].Int64() != 0, FinishedTime: d[11].Int64(),
 		})
 	}
 	return out, nil
@@ -141,7 +142,7 @@ func (p *proxy) load(ctx context.Context, stopped, start string, source any, nam
 	if err != nil {
 		return err
 	}
-	if v.int() != 0 {
+	if v.Int64() != 0 {
 		return fmt.Errorf("could not add torrent: %s", name)
 	}
 	return nil
@@ -160,7 +161,7 @@ func (p *proxy) remove(ctx context.Context, hash string) error {
 	if err != nil {
 		return err
 	}
-	if v.int() != 0 {
+	if v.Int64() != 0 {
 		return fmt.Errorf("could not remove torrent: %s", hash)
 	}
 	return nil
@@ -171,7 +172,7 @@ func (p *proxy) setLabel(ctx context.Context, hash, label string) error {
 	if err != nil {
 		return err
 	}
-	if v.str() != label {
+	if v.Str() != label {
 		return fmt.Errorf("could not set label to %s for torrent: %s", label, hash)
 	}
 	return nil
@@ -182,7 +183,7 @@ func (p *proxy) pushUniqueView(ctx context.Context, hash, view string) error {
 	if err != nil {
 		return err
 	}
-	if v.int() != 0 {
+	if v.Int64() != 0 {
 		return fmt.Errorf("could not push unique view %s for torrent: %s", view, hash)
 	}
 	return nil
@@ -199,6 +200,6 @@ func (p *proxy) hasTorrent(ctx context.Context, hash string) (bool, error) {
 		}
 		return false, nil
 	}
-	name := v.str()
+	name := v.Str()
 	return strings.TrimSpace(name) != "" && name != hash+".meta", nil
 }
