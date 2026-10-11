@@ -83,8 +83,8 @@ type ItemRepository interface {
 	Touch(ctx context.Context, libraryID ID, generation int64, paths ...string) error
 	// MarkMissing marks the library's items with a path that the scan of
 	// the given generation did not see as missing since now, and returns
-	// how many it marked.
-	MarkMissing(ctx context.Context, libraryID ID, generation int64, now time.Time) (int, error)
+	// the IDs of those it marked.
+	MarkMissing(ctx context.Context, libraryID ID, generation int64, now time.Time) ([]ID, error)
 	// PurgeMissing deletes the library's items missing since before, with
 	// what Delete removes, and returns their IDs.
 	PurgeMissing(ctx context.Context, libraryID ID, before time.Time) ([]ID, error)

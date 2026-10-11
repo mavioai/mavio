@@ -61,6 +61,14 @@ type Scanner struct {
 	// for a later scan; RunDeferred scans their libraries once they
 	// settle. Without it only files with download suffixes are left out.
 	GrowthPolicy *storage.GrowthPolicy
+
+	// NewSeasonMonitored tells whether a season a scan finds in a series,
+	// and that no refresh added before, is monitored, as for
+	// Refresher.NewSeasonMonitored; nil follows the series' monitoring.
+	NewSeasonMonitored func(ctx context.Context, series core.Item) bool
+	// OnMissing is told of the items a scan marked missing; nil ignores
+	// them.
+	OnMissing func(ctx context.Context, lib core.Library, ids []core.ID)
 }
 
 // ScanStats summarizes a scan.
@@ -111,8 +119,13 @@ func (s *Scanner) Scan(ctx context.Context, lib core.Library) (ScanStats, error)
 		}
 	}
 	now := s.now()
-	if sc.stats.Missing, err = s.Store.Items().MarkMissing(ctx, lib.ID, gen, now); err != nil {
+	missing, err := s.Store.Items().MarkMissing(ctx, lib.ID, gen, now)
+	if err != nil {
 		return sc.stats, err
+	}
+	sc.stats.Missing = len(missing)
+	if len(missing) > 0 && s.OnMissing != nil {
+		s.OnMissing(ctx, lib, missing)
 	}
 	if err := s.Store.Scans().DeleteFolders(ctx, lib.ID, gen); err != nil {
 		return sc.stats, err
@@ -532,6 +545,8 @@ func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.I
 				v.PremiereDate = n.Aired
 			}
 			it = v
+		} else if it.Monitored, err = p.monitored(ctx, n, parent); err != nil {
+			return core.NilID, err
 		}
 	} else if n.Extra != "" {
 		it.Name = RenewExtraName(it.Name, it.Locked || slices.Contains(it.LockedFields, core.FieldName), n)
@@ -629,6 +644,51 @@ func (p *saver) adopt(ctx context.Context, n Node, parent core.ID) (core.Item, b
 		}
 	}
 	return adopted, found, covered, nil
+}
+
+// monitored tells whether a new season or episode no refresh added before
+// is monitored, as Sonarr's RefreshEpisodeService.GetMonitoredStatus: a
+// season as the series' new seasons are, but not the specials; an episode
+// as its season, but not an episode 0 outside season 1.
+func (p *saver) monitored(ctx context.Context, n Node, parent core.ID) (bool, error) {
+	if n.Extra != "" || n.Index == nil || (n.Kind != core.KindSeason && n.Kind != core.KindEpisode) {
+		return false, nil
+	}
+	seriesID, err := p.seriesOf(ctx, parent)
+	if err != nil || seriesID.IsZero() {
+		return false, err
+	}
+	seasonNumber := *n.Index
+	if n.Kind == core.KindEpisode {
+		if n.ParentIndex == nil {
+			return false, nil
+		}
+		seasonNumber = *n.ParentIndex
+		if *n.Index == 0 && seasonNumber != 1 {
+			return false, nil
+		}
+		seasons, err := p.tx.Items().Query(ctx, core.ItemQuery{
+			ParentID: seriesID, Kinds: []core.ItemKind{core.KindSeason}, IndexNumber: &seasonNumber,
+			IncludeVirtual: true, IncludeMissing: true,
+		})
+		if err != nil {
+			return false, err
+		}
+		if len(seasons.Items) > 0 {
+			return seasons.Items[0].Monitored, nil
+		}
+	}
+	if seasonNumber == 0 {
+		return false, nil
+	}
+	series, err := p.tx.Items().Get(ctx, seriesID)
+	if err != nil {
+		return false, err
+	}
+	if p.scan.NewSeasonMonitored != nil {
+		return p.scan.NewSeasonMonitored(ctx, series), nil
+	}
+	return series.Monitored, nil
 }
 
 // seriesOf returns the series a season or episode under parent belongs

@@ -161,7 +161,7 @@ erDiagram
 ---
 
 ### 4.7 缺失条目
-每次媒体库扫描都有一个世代，比上一次多一。扫描为看到的条目记下自己的世代；完整扫描没有看到的、有路径的条目被标记为缺失（`MissingSince`）而不是删除，因此暂时不可用的挂载点不会丢失任何东西。扫描无法读取的文件夹，其条目保持原状：存在的仍存在，缺失的仍缺失。缺失条目在查询中隐藏（除非设置 `ItemQuery.IncludeMissing`），文件重新出现时恢复，超过宽限期后被清除。
+每次媒体库扫描都有一个世代，比上一次多一。扫描为看到的条目记下自己的世代；完整扫描没有看到的、有路径的条目被标记为缺失（`MissingSince`）而不是删除，因此暂时不可用的挂载点不会丢失任何东西。扫描无法读取的文件夹，其条目保持原状：存在的仍存在，缺失的仍缺失。缺失条目在查询中隐藏（除非设置 `ItemQuery.IncludeMissing`），文件重新出现时恢复，超过宽限期后被清除。`MarkMissing` 返回它标记的条目，以便取消监控文件丢失的想要剧集的单集（§13.2）。
 
 ### 4.8 虚拟条目
 虚拟条目是从元数据得知、但媒体库没有其文件或文件夹的电影、剧集、季或单集，与 Jellyfin 的虚拟条目相同（虚拟剧集是为获取而添加的剧集，§13.2）；与缺失条目（§4.7）不同，媒体库从未有过它。虚拟条目在查询中隐藏，除非设置 `ItemQuery.IncludeVirtual` 或 `OnlyVirtual`。
@@ -346,7 +346,7 @@ erDiagram
 * `ReleaseProfile` 要求或忽略发布标题中的词（普通词或 `/regex/flags`），适用于与其某个标签相同的条目（无标签时为全部），以及某个索引器的发布（未指定时为全部）。
 
 ### 13.2 想要的条目
-被监控的电影或剧集（`Item.Monitored`）按其 `Wanted` 获取：`QualityProfileID`、电影的 `MinimumAvailability`（`announced`、`in_cinemas`、`released`）、剧集的 `MonitorNewItems`（`all`，为空时的默认值，或 `none`：刷新新增的季和集是否被监控，与 Sonarr 的 `NewItemMonitorTypes` 相同）与 `SeasonFolder`（其单集是否导入到季文件夹中）、`Tags`、`AddedAt` 与 `LastSearchedAt`。没有文件的想要的电影、或没有文件夹的想要的剧集是虚拟条目（§4.8）。
+被监控的电影或剧集（`Item.Monitored`）按其 `Wanted` 获取：`QualityProfileID`、电影的 `MinimumAvailability`（`announced`、`in_cinemas`、`released`）、剧集的 `MonitorNewItems`（`all`，为空时的默认值，或 `none`：刷新或扫描新增的季和集是否被监控，与 Sonarr 的 `NewItemMonitorTypes` 相同；新单集随其季被监控，但第 1 季以外的第 0 集不被监控，新的特别篇季也不被监控）与 `SeasonFolder`（其单集是否导入到季文件夹中）、`Tags`、`AddedAt` 与 `LastSearchedAt`。没有文件的想要的电影、或没有文件夹的想要的剧集是虚拟条目（§4.8）。
 
 `EpisodeState` 在单集条目（扫描可能替换它）之外，按 TVDB 季号与集号（`EpisodeNumber`）保存 Sonarr 保存在其 `Episode` 上的内容：scene 如何为该集编号（`SceneSeason`、`SceneEpisode`、`SceneAbsolute`，与 TVDB 相同时为 nil；编号由其他单集的编号推算而非确认时设置 `UnverifiedSceneNumbering`），以及上次搜索它的时间（`LastSearchedAt`）。两者皆无的单集没有状态。
 

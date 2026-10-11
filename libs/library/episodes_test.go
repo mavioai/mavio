@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"testing"
@@ -341,5 +343,86 @@ func TestMultiEpisodeFileKeepsHistory(t *testing.T) {
 	}
 	if got := f.store.moved[third.ID]; got != second.ID {
 		t.Errorf("third episode's history went to %s, want = %s", got, second.ID)
+	}
+}
+
+func TestScannedEpisodesMonitored(t *testing.T) {
+	f := newScan(t, core.LibraryShows)
+	monitorNew := true
+	var asked []string
+	f.sc.NewSeasonMonitored = func(_ context.Context, series core.Item) bool {
+		asked = append(asked, series.Name)
+		return monitorNew
+	}
+	tree(t, f.root, "Show/Season 01/Show S01E01.mkv", "Show/Season 01/Show S01E00.mkv", "Show/Season 00/Show S00E01.mkv",
+		"Show/Season 02/Show S02E00.mkv", "Show/Season 02/Show S02E01.mkv")
+	f.scan()
+	for _, tt := range []struct {
+		path string
+		want bool
+	}{
+		{"Show/Season 01", true},
+		{"Show/Season 01/Show S01E01.mkv", true},
+		{"Show/Season 01/Show S01E00.mkv", true},
+		{"Show/Season 00", false},
+		{"Show/Season 00/Show S00E01.mkv", false},
+		{"Show/Season 02", true},
+		{"Show/Season 02/Show S02E00.mkv", false},
+		{"Show/Season 02/Show S02E01.mkv", true},
+	} {
+		if got := f.item(tt.path).Monitored; got != tt.want {
+			t.Errorf("%s monitored = %v, want = %v", tt.path, got, tt.want)
+		}
+	}
+	if len(asked) == 0 || asked[0] != "Show" {
+		t.Errorf("new seasons asked of %v, want = Show", asked)
+	}
+
+	// A season the series does not monitor keeps its new episodes
+	// unmonitored, and so are new seasons when the series wants none.
+	season := f.item("Show/Season 01")
+	season.Monitored = false
+	if err := f.store.Items().Upsert(t.Context(), season); err != nil {
+		t.Fatal(err)
+	}
+	monitorNew = false
+	tree(t, f.root, "Show/Season 01/Show S01E02.mkv", "Show/Season 03/Show S03E01.mkv")
+	f.clock = f.clock.Add(time.Hour)
+	f.scan()
+	for _, p := range []string{"Show/Season 01/Show S01E02.mkv", "Show/Season 03", "Show/Season 03/Show S03E01.mkv"} {
+		if f.item(p).Monitored {
+			t.Errorf("%s monitored, want = not", p)
+		}
+	}
+}
+
+func TestScanTellsOfMissingItems(t *testing.T) {
+	f := newScan(t, core.LibraryShows)
+	var missing []core.ID
+	f.sc.OnMissing = func(_ context.Context, lib core.Library, ids []core.ID) {
+		if lib.ID != f.lib.ID {
+			t.Errorf("missing items of library %s, want = %s", lib.ID, f.lib.ID)
+		}
+		missing = append(missing, ids...)
+	}
+	tree(t, f.root, "Show/Season 01/Show S01E01.mkv", "Show/Season 01/Show S01E02.mkv")
+	f.scan()
+	if len(missing) != 0 {
+		t.Fatalf("missing after the first scan = %v, want = none", missing)
+	}
+	gone := f.item("Show/Season 01/Show S01E02.mkv")
+	if err := os.Remove(filepath.Join(f.root, "Show/Season 01/Show S01E02.mkv")); err != nil {
+		t.Fatal(err)
+	}
+	f.clock = f.clock.Add(time.Hour)
+	f.scan()
+	if !slices.Equal(missing, []core.ID{gone.ID}) {
+		t.Errorf("missing = %v, want = [%s]", missing, gone.ID)
+	}
+	// Items already missing are not told of again.
+	f.clock = f.clock.Add(time.Hour)
+	f.scan()
+	if len(missing) != 1 {
+		t.Errorf("missing after another scan = %v, want = only %s", missing, gone.ID)
 	}
 }

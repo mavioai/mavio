@@ -265,9 +265,11 @@ func (r memItems) Touch(_ context.Context, lib core.ID, gen int64, paths ...stri
 	return nil
 }
 
-func (r memItems) MarkMissing(_ context.Context, lib core.ID, gen int64, now time.Time) (int, error) {
-	return r.update(lib, func(it core.Item) bool { return it.ScanGeneration < gen && it.MissingSince == nil },
-		func(it *core.Item) { t := now; it.MissingSince = &t }), nil
+func (r memItems) MarkMissing(_ context.Context, lib core.ID, gen int64, now time.Time) ([]core.ID, error) {
+	var ids []core.ID
+	r.update(lib, func(it core.Item) bool { return it.ScanGeneration < gen && it.MissingSince == nil },
+		func(it *core.Item) { t := now; it.MissingSince = &t; ids = append(ids, it.ID) })
+	return ids, nil
 }
 
 func (r memItems) PurgeMissing(ctx context.Context, lib core.ID, before time.Time) ([]core.ID, error) {

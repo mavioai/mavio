@@ -242,12 +242,18 @@ func (r items) Touch(ctx context.Context, libraryID core.ID, generation int64, p
 	return nil
 }
 
-func (r items) MarkMissing(ctx context.Context, libraryID core.ID, generation int64, now time.Time) (int, error) {
-	n, err := r.s.write.Item.Update().
-		Where(item.LibraryID(libraryID), item.PathNEQ(""), item.ScanGenerationLT(generation), item.MissingSinceIsNil()).
-		SetMissingSince(now.UTC()).
-		Save(ctx)
-	return n, mapErr(err, "mark items missing")
+func (r items) MarkMissing(ctx context.Context, libraryID core.ID, generation int64, now time.Time) ([]core.ID, error) {
+	var ids []core.ID
+	err := r.s.writeTx(ctx, func(tx *Store) error {
+		where := []predicate.Item{item.LibraryID(libraryID), item.PathNEQ(""), item.ScanGenerationLT(generation), item.MissingSinceIsNil()}
+		var err error
+		if ids, err = tx.write.Item.Query().Where(where...).IDs(ctx); err != nil || len(ids) == 0 {
+			return mapErr(err, "list items gone missing")
+		}
+		_, err = tx.write.Item.Update().Where(where...).SetMissingSince(now.UTC()).Save(ctx)
+		return mapErr(err, "mark items missing")
+	})
+	return ids, err
 }
 
 func (r items) PurgeMissing(ctx context.Context, libraryID core.ID, before time.Time) ([]core.ID, error) {

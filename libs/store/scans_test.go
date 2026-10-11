@@ -46,9 +46,9 @@ func TestScanGenerationsAndMissingItems(t *testing.T) {
 			t.Fatal(err)
 		}
 		now := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
-		n, err := s.Items().MarkMissing(ctx, lib.ID, 2, now)
-		if err != nil || n != 3 {
-			t.Fatalf("MarkMissing = %d, %v; want 3 (gone, sibling, upper)", n, err)
+		marked, err := s.Items().MarkMissing(ctx, lib.ID, 2, now)
+		if err != nil || len(marked) != 3 || !slices.Contains(marked, gone.ID) || !slices.Contains(marked, sibling.ID) || !slices.Contains(marked, upper.ID) {
+			t.Fatalf("MarkMissing = %v, %v; want = gone, sibling and upper", marked, err)
 		}
 		page, err := s.Items().Query(ctx, core.ItemQuery{LibraryIDs: []core.ID{lib.ID}, Sort: byName})
 		if err != nil {
@@ -66,8 +66,8 @@ func TestScanGenerationsAndMissingItems(t *testing.T) {
 			t.Errorf("gone = %+v, %v", g.MissingSince, err)
 		}
 		// Marking again keeps the first time.
-		if n, _ := s.Items().MarkMissing(ctx, lib.ID, 2, now.Add(time.Hour)); n != 0 {
-			t.Errorf("second MarkMissing = %d", n)
+		if marked, _ := s.Items().MarkMissing(ctx, lib.ID, 2, now.Add(time.Hour)); len(marked) != 0 {
+			t.Errorf("second MarkMissing = %v", marked)
 		}
 
 		// Touch marks exact paths only.
