@@ -485,9 +485,9 @@ flowchart TD
   - [ ] Qualities aggregated from the media info of files, and the media info tokens of file names
   - [ ] Extra files named by their language, and the old extras deleted on upgrades
   - [ ] Manual import of a download's files
-  - [ ] Free space checked on the volume an import writes to rather than the library folder
+  - [x] Free space checked on the volume of the movie folder an import writes to, or of its nearest existing parent, rather than the library folder, as Radarr's FreeSpaceSpecification
   - [ ] Download folders left empty by imports deleted
-  - [ ] A scan of the imported file only, rather than of its library
+  - [x] A scan of the folder a movie was imported to only (`library.scan_folder`), rather than of its library
 - [x] Failed downloads: the blocklist and a new search
 - [x] The acquisition jobs (RSS sync, the queue check, the recycle bin cleanup) listed and run on demand among the tasks of `TaskService`
 - [x] End-to-end test (`apps/server/internal/server/acquisition_test.go`): a Newznab indexer and SABnzbd simulated on the loopback interface, through the indexer and download client plugins; a wanted movie is searched, grabbed, tracked, imported under Radarr's naming and played, upgraded by a release found by RSS sync with the old file in the recycle bin, and a failed download is blocklisted and replaced by a new search

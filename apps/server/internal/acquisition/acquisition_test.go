@@ -764,8 +764,8 @@ func TestImport(t *testing.T) {
 			if got.Path != filepath.ToSlash(dest) || got.Virtual {
 				t.Errorf("item path = %q virtual %v, want = %q, not virtual", got.Path, got.Virtual, filepath.ToSlash(dest))
 			}
-			if scans := e.jobs(library.JobScan); len(scans) != 1 || !strings.Contains(string(scans[0].Payload), e.lib.ID.String()) {
-				t.Errorf("scan jobs = %v, want = one of the library", scans)
+			if scans := e.jobs(library.JobScanFolder); len(scans) != 1 || !strings.Contains(string(scans[0].Payload), "The Matrix (1999)") {
+				t.Errorf("scan jobs = %v, want = one of the movie's folder", scans)
 			}
 			imported := e.history(core.HistoryImported)
 			if len(imported) != 1 || imported[0].DownloadID != hash1080 || imported[0].Data[dataImportedPath] != filepath.ToSlash(dest) ||
