@@ -95,7 +95,7 @@ flowchart TD
 | P15 | Acquisition foundation | ✅ Done |
 | P16 | Acquisition data sources | In progress |
 | P17 | Indexers | ✅ Done |
-| P18 | Movie acquisition | Not started |
+| P18 | Movie acquisition | In progress |
 | P19 | Series acquisition | Not started |
 | P20 | Discovery and requests | Not started |
 | P21 | Clients and ecosystem | Not started |
@@ -451,6 +451,19 @@ flowchart TD
 - History
 
 **Done when**: an end-to-end test with a simulated indexer and download client on the loopback interface: a wanted movie is found, sent, tracked, imported and played, then upgraded by a better release; a failed download is blocklisted and replaced.
+
+**Progress**:
+- [x] The `DOWNLOAD_CLIENT_PROVIDER` contract (`mavio/plugin/v1/download_client.proto`) and its host client
+- [ ] `plugins/download-clients`: the download clients of Radarr and Sonarr, with their cases ported
+- [ ] `libs/acquire`: qualities and their definitions, quality profiles, custom formats, delay profiles
+- [ ] Decisions: the specifications of Radarr's decision engine and its ranking
+- [ ] Domain and storage: profiles, custom formats, the queue of tracked downloads, history, the blocklist, remote path mappings, naming
+- [ ] Adding a wanted movie to a library by its TMDB ID, with a quality profile and minimum availability
+- [ ] Movie searches and RSS sync as jobs; grabs through `DownloadService`
+- [ ] The queue: tracked downloads polled from the clients
+- [ ] Import, upgrades and the recycle folder
+- [ ] Failed downloads: the blocklist and a new search
+- [ ] End-to-end test
 
 ### P19 Series Acquisition
 **Scope**: `libs/acquire/series`, porting Sonarr: episode, season and series searches, season packs, multi-episode files, anime with absolute numbers, daily series by air date, scene mappings and XEM, monitoring of new seasons and episodes.

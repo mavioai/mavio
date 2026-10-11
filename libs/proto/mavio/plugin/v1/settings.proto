@@ -1,0 +1,45 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+// SettingField is a setting of something a plugin configures, such as an
+// indexer or a download client.
+message SettingField {
+  // The setting's key in the settings.
+  string name = 1;
+  string label = 2;
+  string help_text = 3;
+  SettingFieldType type = 4;
+  // The default value as JSON; empty for none.
+  string default_json = 5;
+  // The choices of a select.
+  repeated SettingFieldOption options = 6;
+  bool advanced = 7;
+  // A secret, such as a password, an API key or a cookie, which is never
+  // shown back.
+  bool secret = 8;
+}
+
+// SettingFieldType is how a setting is entered.
+enum SettingFieldType {
+  SETTING_FIELD_TYPE_UNSPECIFIED = 0;
+  // A string.
+  SETTING_FIELD_TYPE_TEXT = 1;
+  // A number.
+  SETTING_FIELD_TYPE_NUMBER = 2;
+  // A boolean.
+  SETTING_FIELD_TYPE_CHECKBOX = 3;
+  // One of the options' values.
+  SETTING_FIELD_TYPE_SELECT = 4;
+  // Any of the options' values, as a list.
+  SETTING_FIELD_TYPE_MULTI_SELECT = 5;
+  // Text shown to administrators, not a setting.
+  SETTING_FIELD_TYPE_INFO = 6;
+}
+
+// SettingFieldOption is a choice of a select.
+message SettingFieldOption {
+  // As JSON.
+  string value_json = 1;
+  string label = 2;
+}

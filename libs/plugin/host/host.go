@@ -45,6 +45,7 @@ type Plugin interface {
 	Discovery() pluginv1connect.DiscoveryProviderServiceClient
 	SceneMappings() pluginv1connect.SceneMappingProviderServiceClient
 	Indexers() pluginv1connect.IndexerProviderServiceClient
+	DownloadClients() pluginv1connect.DownloadClientProviderServiceClient
 	// HTTP returns the handler of the plugin's HTTP routes, or nil without
 	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
 	HTTP() http.Handler

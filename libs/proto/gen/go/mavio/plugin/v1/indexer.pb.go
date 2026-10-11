@@ -118,69 +118,6 @@ func (x IndexerPrivacy) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// IndexerFieldType is how a setting is entered.
-type IndexerFieldType int32
-
-const (
-	IndexerFieldType_INDEXER_FIELD_TYPE_UNSPECIFIED IndexerFieldType = 0
-	// A string.
-	IndexerFieldType_INDEXER_FIELD_TYPE_TEXT IndexerFieldType = 1
-	// A number.
-	IndexerFieldType_INDEXER_FIELD_TYPE_NUMBER IndexerFieldType = 2
-	// A boolean.
-	IndexerFieldType_INDEXER_FIELD_TYPE_CHECKBOX IndexerFieldType = 3
-	// One of the options' values.
-	IndexerFieldType_INDEXER_FIELD_TYPE_SELECT IndexerFieldType = 4
-	// Any of the options' values, as a list.
-	IndexerFieldType_INDEXER_FIELD_TYPE_MULTI_SELECT IndexerFieldType = 5
-	// Text shown to administrators, not a setting.
-	IndexerFieldType_INDEXER_FIELD_TYPE_INFO IndexerFieldType = 6
-)
-
-// Enum value maps for IndexerFieldType.
-var (
-	IndexerFieldType_name = map[int32]string{
-		0: "INDEXER_FIELD_TYPE_UNSPECIFIED",
-		1: "INDEXER_FIELD_TYPE_TEXT",
-		2: "INDEXER_FIELD_TYPE_NUMBER",
-		3: "INDEXER_FIELD_TYPE_CHECKBOX",
-		4: "INDEXER_FIELD_TYPE_SELECT",
-		5: "INDEXER_FIELD_TYPE_MULTI_SELECT",
-		6: "INDEXER_FIELD_TYPE_INFO",
-	}
-	IndexerFieldType_value = map[string]int32{
-		"INDEXER_FIELD_TYPE_UNSPECIFIED":  0,
-		"INDEXER_FIELD_TYPE_TEXT":         1,
-		"INDEXER_FIELD_TYPE_NUMBER":       2,
-		"INDEXER_FIELD_TYPE_CHECKBOX":     3,
-		"INDEXER_FIELD_TYPE_SELECT":       4,
-		"INDEXER_FIELD_TYPE_MULTI_SELECT": 5,
-		"INDEXER_FIELD_TYPE_INFO":         6,
-	}
-)
-
-func (x IndexerFieldType) Enum() *IndexerFieldType {
-	p := new(IndexerFieldType)
-	*p = x
-	return p
-}
-
-func (x IndexerFieldType) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (IndexerFieldType) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_plugin_v1_indexer_proto_enumTypes[2].Descriptor()
-}
-
-func (IndexerFieldType) Type() protoreflect.EnumType {
-	return &file_mavio_plugin_v1_indexer_proto_enumTypes[2]
-}
-
-func (x IndexerFieldType) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
 // IndexerSearchType is what a search looks for, as Newznab's t parameter
 // tells.
 type IndexerSearchType int32
@@ -217,11 +154,11 @@ func (x IndexerSearchType) String() string {
 }
 
 func (IndexerSearchType) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_plugin_v1_indexer_proto_enumTypes[3].Descriptor()
+	return file_mavio_plugin_v1_indexer_proto_enumTypes[2].Descriptor()
 }
 
 func (IndexerSearchType) Type() protoreflect.EnumType {
-	return &file_mavio_plugin_v1_indexer_proto_enumTypes[3]
+	return &file_mavio_plugin_v1_indexer_proto_enumTypes[2]
 }
 
 func (x IndexerSearchType) Number() protoreflect.EnumNumber {
@@ -341,7 +278,7 @@ type IndexerDefinition struct {
 	xxx_hidden_Privacy     IndexerPrivacy         `protobuf:"varint,5,opt,name=privacy,enum=mavio.plugin.v1.IndexerPrivacy"`
 	xxx_hidden_Language    *string                `protobuf:"bytes,6,opt,name=language"`
 	xxx_hidden_Links       []string               `protobuf:"bytes,7,rep,name=links"`
-	xxx_hidden_Fields      *[]*IndexerField       `protobuf:"bytes,8,rep,name=fields"`
+	xxx_hidden_Fields      *[]*SettingField       `protobuf:"bytes,8,rep,name=fields"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -438,7 +375,7 @@ func (x *IndexerDefinition) GetLinks() []string {
 	return nil
 }
 
-func (x *IndexerDefinition) GetFields() []*IndexerField {
+func (x *IndexerDefinition) GetFields() []*SettingField {
 	if x != nil {
 		if x.xxx_hidden_Fields != nil {
 			return *x.xxx_hidden_Fields
@@ -481,7 +418,7 @@ func (x *IndexerDefinition) SetLinks(v []string) {
 	x.xxx_hidden_Links = v
 }
 
-func (x *IndexerDefinition) SetFields(v []*IndexerField) {
+func (x *IndexerDefinition) SetFields(v []*SettingField) {
 	x.xxx_hidden_Fields = &v
 }
 
@@ -571,7 +508,7 @@ type IndexerDefinition_builder struct {
 	// The site's addresses, the first by default.
 	Links []string
 	// The settings an indexer of the definition takes.
-	Fields []*IndexerField
+	Fields []*SettingField
 }
 
 func (b0 IndexerDefinition_builder) Build() *IndexerDefinition {
@@ -607,410 +544,6 @@ func (b0 IndexerDefinition_builder) Build() *IndexerDefinition {
 	return m0
 }
 
-// IndexerField is a setting of an indexer.
-type IndexerField struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Name        *string                `protobuf:"bytes,1,opt,name=name"`
-	xxx_hidden_Label       *string                `protobuf:"bytes,2,opt,name=label"`
-	xxx_hidden_HelpText    *string                `protobuf:"bytes,3,opt,name=help_text,json=helpText"`
-	xxx_hidden_Type        IndexerFieldType       `protobuf:"varint,4,opt,name=type,enum=mavio.plugin.v1.IndexerFieldType"`
-	xxx_hidden_DefaultJson *string                `protobuf:"bytes,5,opt,name=default_json,json=defaultJson"`
-	xxx_hidden_Options     *[]*IndexerFieldOption `protobuf:"bytes,6,rep,name=options"`
-	xxx_hidden_Advanced    bool                   `protobuf:"varint,7,opt,name=advanced"`
-	xxx_hidden_Secret      bool                   `protobuf:"varint,8,opt,name=secret"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *IndexerField) Reset() {
-	*x = IndexerField{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *IndexerField) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IndexerField) ProtoMessage() {}
-
-func (x *IndexerField) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *IndexerField) GetName() string {
-	if x != nil {
-		if x.xxx_hidden_Name != nil {
-			return *x.xxx_hidden_Name
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *IndexerField) GetLabel() string {
-	if x != nil {
-		if x.xxx_hidden_Label != nil {
-			return *x.xxx_hidden_Label
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *IndexerField) GetHelpText() string {
-	if x != nil {
-		if x.xxx_hidden_HelpText != nil {
-			return *x.xxx_hidden_HelpText
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *IndexerField) GetType() IndexerFieldType {
-	if x != nil {
-		if protoimpl.X.Present(&(x.XXX_presence[0]), 3) {
-			return x.xxx_hidden_Type
-		}
-	}
-	return IndexerFieldType_INDEXER_FIELD_TYPE_UNSPECIFIED
-}
-
-func (x *IndexerField) GetDefaultJson() string {
-	if x != nil {
-		if x.xxx_hidden_DefaultJson != nil {
-			return *x.xxx_hidden_DefaultJson
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *IndexerField) GetOptions() []*IndexerFieldOption {
-	if x != nil {
-		if x.xxx_hidden_Options != nil {
-			return *x.xxx_hidden_Options
-		}
-	}
-	return nil
-}
-
-func (x *IndexerField) GetAdvanced() bool {
-	if x != nil {
-		return x.xxx_hidden_Advanced
-	}
-	return false
-}
-
-func (x *IndexerField) GetSecret() bool {
-	if x != nil {
-		return x.xxx_hidden_Secret
-	}
-	return false
-}
-
-func (x *IndexerField) SetName(v string) {
-	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
-}
-
-func (x *IndexerField) SetLabel(v string) {
-	x.xxx_hidden_Label = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
-}
-
-func (x *IndexerField) SetHelpText(v string) {
-	x.xxx_hidden_HelpText = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
-}
-
-func (x *IndexerField) SetType(v IndexerFieldType) {
-	x.xxx_hidden_Type = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
-}
-
-func (x *IndexerField) SetDefaultJson(v string) {
-	x.xxx_hidden_DefaultJson = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
-}
-
-func (x *IndexerField) SetOptions(v []*IndexerFieldOption) {
-	x.xxx_hidden_Options = &v
-}
-
-func (x *IndexerField) SetAdvanced(v bool) {
-	x.xxx_hidden_Advanced = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
-}
-
-func (x *IndexerField) SetSecret(v bool) {
-	x.xxx_hidden_Secret = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
-}
-
-func (x *IndexerField) HasName() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
-}
-
-func (x *IndexerField) HasLabel() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *IndexerField) HasHelpText() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
-}
-
-func (x *IndexerField) HasType() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
-}
-
-func (x *IndexerField) HasDefaultJson() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
-}
-
-func (x *IndexerField) HasAdvanced() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
-}
-
-func (x *IndexerField) HasSecret() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
-}
-
-func (x *IndexerField) ClearName() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Name = nil
-}
-
-func (x *IndexerField) ClearLabel() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Label = nil
-}
-
-func (x *IndexerField) ClearHelpText() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
-	x.xxx_hidden_HelpText = nil
-}
-
-func (x *IndexerField) ClearType() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
-	x.xxx_hidden_Type = IndexerFieldType_INDEXER_FIELD_TYPE_UNSPECIFIED
-}
-
-func (x *IndexerField) ClearDefaultJson() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
-	x.xxx_hidden_DefaultJson = nil
-}
-
-func (x *IndexerField) ClearAdvanced() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
-	x.xxx_hidden_Advanced = false
-}
-
-func (x *IndexerField) ClearSecret() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
-	x.xxx_hidden_Secret = false
-}
-
-type IndexerField_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// The setting's key in the indexer's settings.
-	Name     *string
-	Label    *string
-	HelpText *string
-	Type     *IndexerFieldType
-	// The default value as JSON; empty for none.
-	DefaultJson *string
-	// The choices of a select.
-	Options  []*IndexerFieldOption
-	Advanced *bool
-	// A secret, such as a password, an API key or a cookie, which is never
-	// shown back.
-	Secret *bool
-}
-
-func (b0 IndexerField_builder) Build() *IndexerField {
-	m0 := &IndexerField{}
-	b, x := &b0, m0
-	_, _ = b, x
-	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
-		x.xxx_hidden_Name = b.Name
-	}
-	if b.Label != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
-		x.xxx_hidden_Label = b.Label
-	}
-	if b.HelpText != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
-		x.xxx_hidden_HelpText = b.HelpText
-	}
-	if b.Type != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
-		x.xxx_hidden_Type = *b.Type
-	}
-	if b.DefaultJson != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
-		x.xxx_hidden_DefaultJson = b.DefaultJson
-	}
-	x.xxx_hidden_Options = &b.Options
-	if b.Advanced != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
-		x.xxx_hidden_Advanced = *b.Advanced
-	}
-	if b.Secret != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
-		x.xxx_hidden_Secret = *b.Secret
-	}
-	return m0
-}
-
-// IndexerFieldOption is a choice of a select.
-type IndexerFieldOption struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ValueJson   *string                `protobuf:"bytes,1,opt,name=value_json,json=valueJson"`
-	xxx_hidden_Label       *string                `protobuf:"bytes,2,opt,name=label"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *IndexerFieldOption) Reset() {
-	*x = IndexerFieldOption{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *IndexerFieldOption) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IndexerFieldOption) ProtoMessage() {}
-
-func (x *IndexerFieldOption) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *IndexerFieldOption) GetValueJson() string {
-	if x != nil {
-		if x.xxx_hidden_ValueJson != nil {
-			return *x.xxx_hidden_ValueJson
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *IndexerFieldOption) GetLabel() string {
-	if x != nil {
-		if x.xxx_hidden_Label != nil {
-			return *x.xxx_hidden_Label
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *IndexerFieldOption) SetValueJson(v string) {
-	x.xxx_hidden_ValueJson = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
-}
-
-func (x *IndexerFieldOption) SetLabel(v string) {
-	x.xxx_hidden_Label = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
-}
-
-func (x *IndexerFieldOption) HasValueJson() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
-}
-
-func (x *IndexerFieldOption) HasLabel() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *IndexerFieldOption) ClearValueJson() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_ValueJson = nil
-}
-
-func (x *IndexerFieldOption) ClearLabel() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Label = nil
-}
-
-type IndexerFieldOption_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// As JSON.
-	ValueJson *string
-	Label     *string
-}
-
-func (b0 IndexerFieldOption_builder) Build() *IndexerFieldOption {
-	m0 := &IndexerFieldOption{}
-	b, x := &b0, m0
-	_, _ = b, x
-	if b.ValueJson != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
-		x.xxx_hidden_ValueJson = b.ValueJson
-	}
-	if b.Label != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
-		x.xxx_hidden_Label = b.Label
-	}
-	return m0
-}
-
 type ListIndexersRequest struct {
 	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1019,7 +552,7 @@ type ListIndexersRequest struct {
 
 func (x *ListIndexersRequest) Reset() {
 	*x = ListIndexersRequest{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[5]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1031,7 +564,7 @@ func (x *ListIndexersRequest) String() string {
 func (*ListIndexersRequest) ProtoMessage() {}
 
 func (x *ListIndexersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[5]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1063,7 +596,7 @@ type ListIndexersResponse struct {
 
 func (x *ListIndexersResponse) Reset() {
 	*x = ListIndexersResponse{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[6]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1075,7 +608,7 @@ func (x *ListIndexersResponse) String() string {
 func (*ListIndexersResponse) ProtoMessage() {}
 
 func (x *ListIndexersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[6]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1134,7 +667,7 @@ type Indexer struct {
 
 func (x *Indexer) Reset() {
 	*x = Indexer{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[7]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1146,7 +679,7 @@ func (x *Indexer) String() string {
 func (*Indexer) ProtoMessage() {}
 
 func (x *Indexer) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[7]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1488,7 +1021,7 @@ type IndexerCapabilities struct {
 
 func (x *IndexerCapabilities) Reset() {
 	*x = IndexerCapabilities{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[8]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1500,7 +1033,7 @@ func (x *IndexerCapabilities) String() string {
 func (*IndexerCapabilities) ProtoMessage() {}
 
 func (x *IndexerCapabilities) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[8]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1686,7 +1219,7 @@ type IndexerCategory struct {
 
 func (x *IndexerCategory) Reset() {
 	*x = IndexerCategory{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[9]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1698,7 +1231,7 @@ func (x *IndexerCategory) String() string {
 func (*IndexerCategory) ProtoMessage() {}
 
 func (x *IndexerCategory) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[9]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1810,7 +1343,7 @@ type TestIndexerRequest struct {
 
 func (x *TestIndexerRequest) Reset() {
 	*x = TestIndexerRequest{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[10]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1822,7 +1355,7 @@ func (x *TestIndexerRequest) String() string {
 func (*TestIndexerRequest) ProtoMessage() {}
 
 func (x *TestIndexerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[10]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1954,7 +1487,7 @@ type TestIndexerResponse struct {
 
 func (x *TestIndexerResponse) Reset() {
 	*x = TestIndexerResponse{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[11]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1966,7 +1499,7 @@ func (x *TestIndexerResponse) String() string {
 func (*TestIndexerResponse) ProtoMessage() {}
 
 func (x *TestIndexerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[11]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2043,7 +1576,7 @@ type SearchReleasesRequest struct {
 
 func (x *SearchReleasesRequest) Reset() {
 	*x = SearchReleasesRequest{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[12]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2055,7 +1588,7 @@ func (x *SearchReleasesRequest) String() string {
 func (*SearchReleasesRequest) ProtoMessage() {}
 
 func (x *SearchReleasesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[12]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2378,7 +1911,7 @@ type SearchReleasesResponse struct {
 
 func (x *SearchReleasesResponse) Reset() {
 	*x = SearchReleasesResponse{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[13]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2390,7 +1923,7 @@ func (x *SearchReleasesResponse) String() string {
 func (*SearchReleasesResponse) ProtoMessage() {}
 
 func (x *SearchReleasesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[13]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2458,7 +1991,7 @@ type IndexerFailure struct {
 
 func (x *IndexerFailure) Reset() {
 	*x = IndexerFailure{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[14]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2470,7 +2003,7 @@ func (x *IndexerFailure) String() string {
 func (*IndexerFailure) ProtoMessage() {}
 
 func (x *IndexerFailure) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[14]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2621,7 +2154,7 @@ type Release struct {
 
 func (x *Release) Reset() {
 	*x = Release{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[15]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2633,7 +2166,7 @@ func (x *Release) String() string {
 func (*Release) ProtoMessage() {}
 
 func (x *Release) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[15]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3423,7 +2956,7 @@ type GetReleaseFileRequest struct {
 
 func (x *GetReleaseFileRequest) Reset() {
 	*x = GetReleaseFileRequest{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[16]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3435,7 +2968,7 @@ func (x *GetReleaseFileRequest) String() string {
 func (*GetReleaseFileRequest) ProtoMessage() {}
 
 func (x *GetReleaseFileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[16]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3537,7 +3070,7 @@ type GetReleaseFileResponse struct {
 
 func (x *GetReleaseFileResponse) Reset() {
 	*x = GetReleaseFileResponse{}
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[17]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3549,7 +3082,7 @@ func (x *GetReleaseFileResponse) String() string {
 func (*GetReleaseFileResponse) ProtoMessage() {}
 
 func (x *GetReleaseFileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[17]
+	mi := &file_mavio_plugin_v1_indexer_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3706,7 +3239,7 @@ var File_mavio_plugin_v1_indexer_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\n" +
-	"\x1dmavio/plugin/v1/indexer.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x18\n" +
+	"\x1dmavio/plugin/v1/indexer.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1emavio/plugin/v1/settings.proto\"\x18\n" +
 	"\x16ListDefinitionsRequest\"_\n" +
 	"\x17ListDefinitionsResponse\x12D\n" +
 	"\vdefinitions\x18\x01 \x03(\v2\".mavio.plugin.v1.IndexerDefinitionR\vdefinitions\"\xbc\x02\n" +
@@ -3718,20 +3251,7 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\aprivacy\x18\x05 \x01(\x0e2\x1f.mavio.plugin.v1.IndexerPrivacyR\aprivacy\x12\x1a\n" +
 	"\blanguage\x18\x06 \x01(\tR\blanguage\x12\x14\n" +
 	"\x05links\x18\a \x03(\tR\x05links\x125\n" +
-	"\x06fields\x18\b \x03(\v2\x1d.mavio.plugin.v1.IndexerFieldR\x06fields\"\xa2\x02\n" +
-	"\fIndexerField\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05label\x18\x02 \x01(\tR\x05label\x12\x1b\n" +
-	"\thelp_text\x18\x03 \x01(\tR\bhelpText\x125\n" +
-	"\x04type\x18\x04 \x01(\x0e2!.mavio.plugin.v1.IndexerFieldTypeR\x04type\x12!\n" +
-	"\fdefault_json\x18\x05 \x01(\tR\vdefaultJson\x12=\n" +
-	"\aoptions\x18\x06 \x03(\v2#.mavio.plugin.v1.IndexerFieldOptionR\aoptions\x12\x1a\n" +
-	"\badvanced\x18\a \x01(\bR\badvanced\x12\x16\n" +
-	"\x06secret\x18\b \x01(\bR\x06secret\"I\n" +
-	"\x12IndexerFieldOption\x12\x1d\n" +
-	"\n" +
-	"value_json\x18\x01 \x01(\tR\tvalueJson\x12\x14\n" +
-	"\x05label\x18\x02 \x01(\tR\x05label\"\x15\n" +
+	"\x06fields\x18\b \x03(\v2\x1d.mavio.plugin.v1.SettingFieldR\x06fields\"\x15\n" +
 	"\x13ListIndexersRequest\"L\n" +
 	"\x14ListIndexersResponse\x124\n" +
 	"\bindexers\x18\x01 \x03(\v2\x18.mavio.plugin.v1.IndexerR\bindexers\"\xa9\x03\n" +
@@ -3852,15 +3372,7 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\x1bINDEXER_PRIVACY_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16INDEXER_PRIVACY_PUBLIC\x10\x01\x12 \n" +
 	"\x1cINDEXER_PRIVACY_SEMI_PRIVATE\x10\x02\x12\x1b\n" +
-	"\x17INDEXER_PRIVACY_PRIVATE\x10\x03*\xf4\x01\n" +
-	"\x10IndexerFieldType\x12\"\n" +
-	"\x1eINDEXER_FIELD_TYPE_UNSPECIFIED\x10\x00\x12\x1b\n" +
-	"\x17INDEXER_FIELD_TYPE_TEXT\x10\x01\x12\x1d\n" +
-	"\x19INDEXER_FIELD_TYPE_NUMBER\x10\x02\x12\x1f\n" +
-	"\x1bINDEXER_FIELD_TYPE_CHECKBOX\x10\x03\x12\x1d\n" +
-	"\x19INDEXER_FIELD_TYPE_SELECT\x10\x04\x12#\n" +
-	"\x1fINDEXER_FIELD_TYPE_MULTI_SELECT\x10\x05\x12\x1b\n" +
-	"\x17INDEXER_FIELD_TYPE_INFO\x10\x06*s\n" +
+	"\x17INDEXER_PRIVACY_PRIVATE\x10\x03*s\n" +
 	"\x11IndexerSearchType\x12#\n" +
 	"\x1fINDEXER_SEARCH_TYPE_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19INDEXER_SEARCH_TYPE_MOVIE\x10\x01\x12\x1a\n" +
@@ -3873,72 +3385,68 @@ const file_mavio_plugin_v1_indexer_proto_rawDesc = "" +
 	"\x0eGetReleaseFile\x12&.mavio.plugin.v1.GetReleaseFileRequest\x1a'.mavio.plugin.v1.GetReleaseFileResponseB\xc6\x01\n" +
 	"\x13com.mavio.plugin.v1B\fIndexerProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
-var file_mavio_plugin_v1_indexer_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_mavio_plugin_v1_indexer_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_mavio_plugin_v1_indexer_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_mavio_plugin_v1_indexer_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_mavio_plugin_v1_indexer_proto_goTypes = []any{
 	(DownloadProtocol)(0),           // 0: mavio.plugin.v1.DownloadProtocol
 	(IndexerPrivacy)(0),             // 1: mavio.plugin.v1.IndexerPrivacy
-	(IndexerFieldType)(0),           // 2: mavio.plugin.v1.IndexerFieldType
-	(IndexerSearchType)(0),          // 3: mavio.plugin.v1.IndexerSearchType
-	(*ListDefinitionsRequest)(nil),  // 4: mavio.plugin.v1.ListDefinitionsRequest
-	(*ListDefinitionsResponse)(nil), // 5: mavio.plugin.v1.ListDefinitionsResponse
-	(*IndexerDefinition)(nil),       // 6: mavio.plugin.v1.IndexerDefinition
-	(*IndexerField)(nil),            // 7: mavio.plugin.v1.IndexerField
-	(*IndexerFieldOption)(nil),      // 8: mavio.plugin.v1.IndexerFieldOption
-	(*ListIndexersRequest)(nil),     // 9: mavio.plugin.v1.ListIndexersRequest
-	(*ListIndexersResponse)(nil),    // 10: mavio.plugin.v1.ListIndexersResponse
-	(*Indexer)(nil),                 // 11: mavio.plugin.v1.Indexer
-	(*IndexerCapabilities)(nil),     // 12: mavio.plugin.v1.IndexerCapabilities
-	(*IndexerCategory)(nil),         // 13: mavio.plugin.v1.IndexerCategory
-	(*TestIndexerRequest)(nil),      // 14: mavio.plugin.v1.TestIndexerRequest
-	(*TestIndexerResponse)(nil),     // 15: mavio.plugin.v1.TestIndexerResponse
-	(*SearchReleasesRequest)(nil),   // 16: mavio.plugin.v1.SearchReleasesRequest
-	(*SearchReleasesResponse)(nil),  // 17: mavio.plugin.v1.SearchReleasesResponse
-	(*IndexerFailure)(nil),          // 18: mavio.plugin.v1.IndexerFailure
-	(*Release)(nil),                 // 19: mavio.plugin.v1.Release
-	(*GetReleaseFileRequest)(nil),   // 20: mavio.plugin.v1.GetReleaseFileRequest
-	(*GetReleaseFileResponse)(nil),  // 21: mavio.plugin.v1.GetReleaseFileResponse
-	nil,                             // 22: mavio.plugin.v1.SearchReleasesRequest.ExternalIdsEntry
-	nil,                             // 23: mavio.plugin.v1.Release.ExternalIdsEntry
-	(*timestamppb.Timestamp)(nil),   // 24: google.protobuf.Timestamp
+	(IndexerSearchType)(0),          // 2: mavio.plugin.v1.IndexerSearchType
+	(*ListDefinitionsRequest)(nil),  // 3: mavio.plugin.v1.ListDefinitionsRequest
+	(*ListDefinitionsResponse)(nil), // 4: mavio.plugin.v1.ListDefinitionsResponse
+	(*IndexerDefinition)(nil),       // 5: mavio.plugin.v1.IndexerDefinition
+	(*ListIndexersRequest)(nil),     // 6: mavio.plugin.v1.ListIndexersRequest
+	(*ListIndexersResponse)(nil),    // 7: mavio.plugin.v1.ListIndexersResponse
+	(*Indexer)(nil),                 // 8: mavio.plugin.v1.Indexer
+	(*IndexerCapabilities)(nil),     // 9: mavio.plugin.v1.IndexerCapabilities
+	(*IndexerCategory)(nil),         // 10: mavio.plugin.v1.IndexerCategory
+	(*TestIndexerRequest)(nil),      // 11: mavio.plugin.v1.TestIndexerRequest
+	(*TestIndexerResponse)(nil),     // 12: mavio.plugin.v1.TestIndexerResponse
+	(*SearchReleasesRequest)(nil),   // 13: mavio.plugin.v1.SearchReleasesRequest
+	(*SearchReleasesResponse)(nil),  // 14: mavio.plugin.v1.SearchReleasesResponse
+	(*IndexerFailure)(nil),          // 15: mavio.plugin.v1.IndexerFailure
+	(*Release)(nil),                 // 16: mavio.plugin.v1.Release
+	(*GetReleaseFileRequest)(nil),   // 17: mavio.plugin.v1.GetReleaseFileRequest
+	(*GetReleaseFileResponse)(nil),  // 18: mavio.plugin.v1.GetReleaseFileResponse
+	nil,                             // 19: mavio.plugin.v1.SearchReleasesRequest.ExternalIdsEntry
+	nil,                             // 20: mavio.plugin.v1.Release.ExternalIdsEntry
+	(*SettingField)(nil),            // 21: mavio.plugin.v1.SettingField
+	(*timestamppb.Timestamp)(nil),   // 22: google.protobuf.Timestamp
 }
 var file_mavio_plugin_v1_indexer_proto_depIdxs = []int32{
-	6,  // 0: mavio.plugin.v1.ListDefinitionsResponse.definitions:type_name -> mavio.plugin.v1.IndexerDefinition
+	5,  // 0: mavio.plugin.v1.ListDefinitionsResponse.definitions:type_name -> mavio.plugin.v1.IndexerDefinition
 	0,  // 1: mavio.plugin.v1.IndexerDefinition.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
 	1,  // 2: mavio.plugin.v1.IndexerDefinition.privacy:type_name -> mavio.plugin.v1.IndexerPrivacy
-	7,  // 3: mavio.plugin.v1.IndexerDefinition.fields:type_name -> mavio.plugin.v1.IndexerField
-	2,  // 4: mavio.plugin.v1.IndexerField.type:type_name -> mavio.plugin.v1.IndexerFieldType
-	8,  // 5: mavio.plugin.v1.IndexerField.options:type_name -> mavio.plugin.v1.IndexerFieldOption
-	11, // 6: mavio.plugin.v1.ListIndexersResponse.indexers:type_name -> mavio.plugin.v1.Indexer
-	0,  // 7: mavio.plugin.v1.Indexer.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
-	1,  // 8: mavio.plugin.v1.Indexer.privacy:type_name -> mavio.plugin.v1.IndexerPrivacy
-	12, // 9: mavio.plugin.v1.Indexer.capabilities:type_name -> mavio.plugin.v1.IndexerCapabilities
-	24, // 10: mavio.plugin.v1.Indexer.disabled_until:type_name -> google.protobuf.Timestamp
-	13, // 11: mavio.plugin.v1.IndexerCapabilities.categories:type_name -> mavio.plugin.v1.IndexerCategory
-	13, // 12: mavio.plugin.v1.IndexerCategory.subcategories:type_name -> mavio.plugin.v1.IndexerCategory
-	3,  // 13: mavio.plugin.v1.SearchReleasesRequest.type:type_name -> mavio.plugin.v1.IndexerSearchType
-	22, // 14: mavio.plugin.v1.SearchReleasesRequest.external_ids:type_name -> mavio.plugin.v1.SearchReleasesRequest.ExternalIdsEntry
-	19, // 15: mavio.plugin.v1.SearchReleasesResponse.releases:type_name -> mavio.plugin.v1.Release
-	18, // 16: mavio.plugin.v1.SearchReleasesResponse.failures:type_name -> mavio.plugin.v1.IndexerFailure
-	24, // 17: mavio.plugin.v1.IndexerFailure.disabled_until:type_name -> google.protobuf.Timestamp
-	0,  // 18: mavio.plugin.v1.Release.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
-	24, // 19: mavio.plugin.v1.Release.publish_date:type_name -> google.protobuf.Timestamp
-	23, // 20: mavio.plugin.v1.Release.external_ids:type_name -> mavio.plugin.v1.Release.ExternalIdsEntry
-	4,  // 21: mavio.plugin.v1.IndexerProviderService.ListDefinitions:input_type -> mavio.plugin.v1.ListDefinitionsRequest
-	9,  // 22: mavio.plugin.v1.IndexerProviderService.ListIndexers:input_type -> mavio.plugin.v1.ListIndexersRequest
-	14, // 23: mavio.plugin.v1.IndexerProviderService.TestIndexer:input_type -> mavio.plugin.v1.TestIndexerRequest
-	16, // 24: mavio.plugin.v1.IndexerProviderService.SearchReleases:input_type -> mavio.plugin.v1.SearchReleasesRequest
-	20, // 25: mavio.plugin.v1.IndexerProviderService.GetReleaseFile:input_type -> mavio.plugin.v1.GetReleaseFileRequest
-	5,  // 26: mavio.plugin.v1.IndexerProviderService.ListDefinitions:output_type -> mavio.plugin.v1.ListDefinitionsResponse
-	10, // 27: mavio.plugin.v1.IndexerProviderService.ListIndexers:output_type -> mavio.plugin.v1.ListIndexersResponse
-	15, // 28: mavio.plugin.v1.IndexerProviderService.TestIndexer:output_type -> mavio.plugin.v1.TestIndexerResponse
-	17, // 29: mavio.plugin.v1.IndexerProviderService.SearchReleases:output_type -> mavio.plugin.v1.SearchReleasesResponse
-	21, // 30: mavio.plugin.v1.IndexerProviderService.GetReleaseFile:output_type -> mavio.plugin.v1.GetReleaseFileResponse
-	26, // [26:31] is the sub-list for method output_type
-	21, // [21:26] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	21, // 3: mavio.plugin.v1.IndexerDefinition.fields:type_name -> mavio.plugin.v1.SettingField
+	8,  // 4: mavio.plugin.v1.ListIndexersResponse.indexers:type_name -> mavio.plugin.v1.Indexer
+	0,  // 5: mavio.plugin.v1.Indexer.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
+	1,  // 6: mavio.plugin.v1.Indexer.privacy:type_name -> mavio.plugin.v1.IndexerPrivacy
+	9,  // 7: mavio.plugin.v1.Indexer.capabilities:type_name -> mavio.plugin.v1.IndexerCapabilities
+	22, // 8: mavio.plugin.v1.Indexer.disabled_until:type_name -> google.protobuf.Timestamp
+	10, // 9: mavio.plugin.v1.IndexerCapabilities.categories:type_name -> mavio.plugin.v1.IndexerCategory
+	10, // 10: mavio.plugin.v1.IndexerCategory.subcategories:type_name -> mavio.plugin.v1.IndexerCategory
+	2,  // 11: mavio.plugin.v1.SearchReleasesRequest.type:type_name -> mavio.plugin.v1.IndexerSearchType
+	19, // 12: mavio.plugin.v1.SearchReleasesRequest.external_ids:type_name -> mavio.plugin.v1.SearchReleasesRequest.ExternalIdsEntry
+	16, // 13: mavio.plugin.v1.SearchReleasesResponse.releases:type_name -> mavio.plugin.v1.Release
+	15, // 14: mavio.plugin.v1.SearchReleasesResponse.failures:type_name -> mavio.plugin.v1.IndexerFailure
+	22, // 15: mavio.plugin.v1.IndexerFailure.disabled_until:type_name -> google.protobuf.Timestamp
+	0,  // 16: mavio.plugin.v1.Release.protocol:type_name -> mavio.plugin.v1.DownloadProtocol
+	22, // 17: mavio.plugin.v1.Release.publish_date:type_name -> google.protobuf.Timestamp
+	20, // 18: mavio.plugin.v1.Release.external_ids:type_name -> mavio.plugin.v1.Release.ExternalIdsEntry
+	3,  // 19: mavio.plugin.v1.IndexerProviderService.ListDefinitions:input_type -> mavio.plugin.v1.ListDefinitionsRequest
+	6,  // 20: mavio.plugin.v1.IndexerProviderService.ListIndexers:input_type -> mavio.plugin.v1.ListIndexersRequest
+	11, // 21: mavio.plugin.v1.IndexerProviderService.TestIndexer:input_type -> mavio.plugin.v1.TestIndexerRequest
+	13, // 22: mavio.plugin.v1.IndexerProviderService.SearchReleases:input_type -> mavio.plugin.v1.SearchReleasesRequest
+	17, // 23: mavio.plugin.v1.IndexerProviderService.GetReleaseFile:input_type -> mavio.plugin.v1.GetReleaseFileRequest
+	4,  // 24: mavio.plugin.v1.IndexerProviderService.ListDefinitions:output_type -> mavio.plugin.v1.ListDefinitionsResponse
+	7,  // 25: mavio.plugin.v1.IndexerProviderService.ListIndexers:output_type -> mavio.plugin.v1.ListIndexersResponse
+	12, // 26: mavio.plugin.v1.IndexerProviderService.TestIndexer:output_type -> mavio.plugin.v1.TestIndexerResponse
+	14, // 27: mavio.plugin.v1.IndexerProviderService.SearchReleases:output_type -> mavio.plugin.v1.SearchReleasesResponse
+	18, // 28: mavio.plugin.v1.IndexerProviderService.GetReleaseFile:output_type -> mavio.plugin.v1.GetReleaseFileResponse
+	24, // [24:29] is the sub-list for method output_type
+	19, // [19:24] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_indexer_proto_init() }
@@ -3946,13 +3454,14 @@ func file_mavio_plugin_v1_indexer_proto_init() {
 	if File_mavio_plugin_v1_indexer_proto != nil {
 		return
 	}
+	file_mavio_plugin_v1_settings_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_indexer_proto_rawDesc), len(file_mavio_plugin_v1_indexer_proto_rawDesc)),
-			NumEnums:      4,
-			NumMessages:   20,
+			NumEnums:      3,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

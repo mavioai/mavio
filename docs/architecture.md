@@ -457,7 +457,7 @@ Mavio finds, downloads and imports the movies and series its users want, as Seer
 | Release parsing | `libs/release` | Radarr's and Sonarr's parsers |
 | Servarr's metadata | `plugins/scraper-servarr` (WASM) | Radarr's and Sonarr's metadata sources, scene mappings |
 | Indexers | `plugins/indexers` (process), `INDEXER_PROVIDER`; searched through `ReleaseService` | Prowlarr |
-| Download clients | `plugins/download-clients` (process), `DOWNLOAD_CLIENT`; reached through `DownloadService` | Radarr's and Sonarr's download clients |
+| Download clients | `plugins/download-clients` (process), `DOWNLOAD_CLIENT_PROVIDER`; reached through `DownloadService` | Radarr's and Sonarr's download clients |
 
 * **State in the server, networks in plugins.** Wanted items, profiles, decisions, the queue, history, imports and requests are the server's, next to the items and users they concern. What talks to indexers and download clients, and changes with them, is in plugins, upgraded from catalogs without a server release.
 * **One engine.** Movies and series share quality profiles, custom formats, decisions, the queue and imports; the `movie` and `series` packages differ in how they search, monitor and match releases to items.
@@ -484,7 +484,7 @@ Mavio finds, downloads and imports the movies and series its users want, as Seer
 A first-party process plugin porting Prowlarr: Newznab and Torznab, the Cardigann engine with definitions fetched from `indexers.prowlarr.com` at run time, and every site Prowlarr implements in code; capabilities and categories, rate limits and backoff after failures, indexer proxies (HTTP, SOCKS, FlareSolverr). Its configuration lists the configured indexers; the definitions and the fields each takes come from the plugin. `IndexerProviderService` lists the indexers with their capabilities, searches them (movie, series or text, with IDs, season and episode, categories), reads their RSS feeds and fetches a release's torrent file, magnet link or NZB.
 
 ### 13.5 Download Clients (`plugins/download-clients`)
-A first-party process plugin with every download client Radarr and Sonarr support, such as qBittorrent, Transmission, Deluge, rTorrent, Aria2, SABnzbd, NZBGet and a watch folder. Its configuration lists the configured clients. `DownloadClientService` adds a release (torrent file, magnet link or NZB, with category, tags and seeding limits), lists downloads with their state, progress and output path, and removes them. Remote path mappings are the server's.
+A first-party process plugin with every download client Radarr and Sonarr support, such as qBittorrent, Transmission, Deluge, rTorrent, Aria2, SABnzbd, NZBGet and a watch folder. Its configuration lists the configured clients, each with a category for movies and one for series. `DownloadClientProviderService` adds a release (torrent file, magnet link or NZB, in the category and with the priority of its kind, and with the seeding limits of its indexer), lists downloads with their state, progress and output path, marks them imported and removes them. Remote path mappings are the server's.
 
 ### 13.6 Storage
 Wanted state, quality definitions and profiles, custom formats, delay and release profiles, the queue, history, the blocklist and requests are in `libs/store`, on both databases, behind ports in `core`.

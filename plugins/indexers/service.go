@@ -32,13 +32,13 @@ func (p *plugin) ListDefinitions(context.Context, *pluginv1.ListDefinitionsReque
 }
 
 func definitionProto(d indexer.Definition) *pluginv1.IndexerDefinition {
-	fields := make([]*pluginv1.IndexerField, 0, len(d.Fields))
+	fields := make([]*pluginv1.SettingField, 0, len(d.Fields))
 	for _, f := range d.Fields {
-		var opts []*pluginv1.IndexerFieldOption
+		var opts []*pluginv1.SettingFieldOption
 		for _, o := range f.Options {
-			opts = append(opts, pluginv1.IndexerFieldOption_builder{ValueJson: proto.String(jsonValue(o.Value)), Label: proto.String(o.Label)}.Build())
+			opts = append(opts, pluginv1.SettingFieldOption_builder{ValueJson: proto.String(jsonValue(o.Value)), Label: proto.String(o.Label)}.Build())
 		}
-		fields = append(fields, pluginv1.IndexerField_builder{
+		fields = append(fields, pluginv1.SettingField_builder{
 			Name: proto.String(f.Name), Label: proto.String(f.Label), HelpText: proto.String(f.HelpText),
 			Type: fieldTypes[f.Type].Enum(), DefaultJson: proto.String(jsonValue(f.Default)),
 			Options: opts, Advanced: proto.Bool(f.Advanced), Secret: proto.Bool(f.Secret),
@@ -52,13 +52,13 @@ func definitionProto(d indexer.Definition) *pluginv1.IndexerDefinition {
 }
 
 var (
-	fieldTypes = map[indexer.FieldType]pluginv1.IndexerFieldType{
-		indexer.FieldText:        pluginv1.IndexerFieldType_INDEXER_FIELD_TYPE_TEXT,
-		indexer.FieldNumber:      pluginv1.IndexerFieldType_INDEXER_FIELD_TYPE_NUMBER,
-		indexer.FieldCheckbox:    pluginv1.IndexerFieldType_INDEXER_FIELD_TYPE_CHECKBOX,
-		indexer.FieldSelect:      pluginv1.IndexerFieldType_INDEXER_FIELD_TYPE_SELECT,
-		indexer.FieldMultiSelect: pluginv1.IndexerFieldType_INDEXER_FIELD_TYPE_MULTI_SELECT,
-		indexer.FieldInfo:        pluginv1.IndexerFieldType_INDEXER_FIELD_TYPE_INFO,
+	fieldTypes = map[indexer.FieldType]pluginv1.SettingFieldType{
+		indexer.FieldText:        pluginv1.SettingFieldType_SETTING_FIELD_TYPE_TEXT,
+		indexer.FieldNumber:      pluginv1.SettingFieldType_SETTING_FIELD_TYPE_NUMBER,
+		indexer.FieldCheckbox:    pluginv1.SettingFieldType_SETTING_FIELD_TYPE_CHECKBOX,
+		indexer.FieldSelect:      pluginv1.SettingFieldType_SETTING_FIELD_TYPE_SELECT,
+		indexer.FieldMultiSelect: pluginv1.SettingFieldType_SETTING_FIELD_TYPE_MULTI_SELECT,
+		indexer.FieldInfo:        pluginv1.SettingFieldType_SETTING_FIELD_TYPE_INFO,
 	}
 	protocols = map[indexer.Protocol]pluginv1.DownloadProtocol{
 		indexer.ProtocolTorrent: pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT,
