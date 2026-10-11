@@ -202,8 +202,8 @@ func Handler(opts Options) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	mux.Handle("GET /spec.json", docs)
-	mux.Handle("GET /{$}", docs)
+	mux.Handle("GET /api", docs)
+	mux.Handle("GET /api/", docs)
 	return mux, nil
 }
 

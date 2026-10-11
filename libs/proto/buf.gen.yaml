@@ -20,7 +20,7 @@ plugins:
       - simple
   # One OpenAPI document of the Connect services the server serves, without
   # the plugin contracts, embedded by package openapi and served at
-  # /spec.json. It runs by version rather than as a tool of this module, so
+  # /api/spec.json. It runs by version rather than as a tool of this module, so
   # that its dependencies stay out of the module plugins import.
   - local: ["go", "run", "github.com/sudorandom/protoc-gen-connect-openapi@v0.27.3"]
     out: openapi/gen

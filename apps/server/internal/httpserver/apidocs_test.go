@@ -29,10 +29,12 @@ func TestAPIDocs(t *testing.T) {
 	}
 
 	// The reference needs no token.
-	if typ, body := get("/"); !strings.HasPrefix(typ, "text/html") || !strings.Contains(body, "spec.json") {
-		t.Errorf("GET / = %s %.80q, want = the reference of spec.json", typ, body)
+	for _, path := range []string{"/api", "/api/"} {
+		if typ, body := get(path); !strings.HasPrefix(typ, "text/html") || !strings.Contains(body, "/api/spec.json") {
+			t.Errorf("GET %s = %s %.80q, want = the reference of /api/spec.json", path, typ, body)
+		}
 	}
-	typ, body := get("/spec.json")
+	typ, body := get("/api/spec.json")
 	if typ != "application/json" {
 		t.Errorf("spec content type = %q", typ)
 	}
@@ -103,7 +105,7 @@ func TestReflection(t *testing.T) {
 	}
 	slices.Sort(got)
 
-	resp, err := srv.Client().Get(srv.URL + "/spec.json")
+	resp, err := srv.Client().Get(srv.URL + "/api/spec.json")
 	if err != nil {
 		t.Fatal(err)
 	}

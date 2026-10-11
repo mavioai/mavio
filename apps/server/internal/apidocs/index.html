@@ -9,10 +9,11 @@
     <div id="app"></div>
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.70.0"></script>
     <script>
-      // The page may be served under a base URL; requests go where it is.
-      const base = new URL('.', location.href).href.replace(/\/$/, '')
+      // The page is served at <base>/api, where the base URL may have a path;
+      // requests go to the base.
+      const base = location.origin + location.pathname.replace(/\/api\/?$/, '')
       Scalar.createApiReference('#app', {
-        url: 'spec.json',
+        url: base + '/api/spec.json',
         servers: [{ url: base }],
         authentication: { preferredSecurityScheme: 'bearer' },
       })
