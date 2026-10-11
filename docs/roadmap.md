@@ -483,7 +483,8 @@ flowchart TD
   - [x] The downloads of a client that fails to answer, or is left out after failing, keep their last state rather than being flagged
 - [x] Import, upgrades and the recycle folder
   - [ ] Qualities aggregated from the media info of files, and the media info tokens of file names
-  - [ ] Extra files named by their language, and the old extras deleted on upgrades
+  - [x] Subtitles imported with a movie named by their language, tags and copy number, matched by the video's name, the movie's title and year, or taken when the video is the download's only one, as Radarr's SubtitleService; the extras of a file an upgrade replaces recycled with it
+    - [ ] Extra files tracked in the database, as Radarr's extra file tables, rather than found by name beside the movie file
   - [ ] Manual import of a download's files
   - [x] Free space checked on the volume of the movie folder an import writes to, or of its nearest existing parent, rather than the library folder, as Radarr's FreeSpaceSpecification
   - [x] Download folders an import moved the movie out of deleted when only samples and small RAR files are left, as Radarr's DownloadedMovieImportService.ShouldDeleteFolder; folders of libraries and remote path mappings are kept
