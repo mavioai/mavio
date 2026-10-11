@@ -737,6 +737,74 @@ func (_c *ItemCreate) SetNillableAbsoluteNumber(v *int) *ItemCreate {
 	return _c
 }
 
+// SetOriginalLanguage sets the "original_language" field.
+func (_c *ItemCreate) SetOriginalLanguage(v string) *ItemCreate {
+	_c.mutation.SetOriginalLanguage(v)
+	return _c
+}
+
+// SetNillableOriginalLanguage sets the "original_language" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableOriginalLanguage(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetOriginalLanguage(*v)
+	}
+	return _c
+}
+
+// SetDigitalReleaseDate sets the "digital_release_date" field.
+func (_c *ItemCreate) SetDigitalReleaseDate(v time.Time) *ItemCreate {
+	_c.mutation.SetDigitalReleaseDate(v)
+	return _c
+}
+
+// SetNillableDigitalReleaseDate sets the "digital_release_date" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableDigitalReleaseDate(v *time.Time) *ItemCreate {
+	if v != nil {
+		_c.SetDigitalReleaseDate(*v)
+	}
+	return _c
+}
+
+// SetPhysicalReleaseDate sets the "physical_release_date" field.
+func (_c *ItemCreate) SetPhysicalReleaseDate(v time.Time) *ItemCreate {
+	_c.mutation.SetPhysicalReleaseDate(v)
+	return _c
+}
+
+// SetNillablePhysicalReleaseDate sets the "physical_release_date" field if the given value is not nil.
+func (_c *ItemCreate) SetNillablePhysicalReleaseDate(v *time.Time) *ItemCreate {
+	if v != nil {
+		_c.SetPhysicalReleaseDate(*v)
+	}
+	return _c
+}
+
+// SetAlternativeTitles sets the "alternative_titles" field.
+func (_c *ItemCreate) SetAlternativeTitles(v []string) *ItemCreate {
+	_c.mutation.SetAlternativeTitles(v)
+	return _c
+}
+
+// SetTranslatedTitles sets the "translated_titles" field.
+func (_c *ItemCreate) SetTranslatedTitles(v []string) *ItemCreate {
+	_c.mutation.SetTranslatedTitles(v)
+	return _c
+}
+
+// SetSecondaryYear sets the "secondary_year" field.
+func (_c *ItemCreate) SetSecondaryYear(v int) *ItemCreate {
+	_c.mutation.SetSecondaryYear(v)
+	return _c
+}
+
+// SetNillableSecondaryYear sets the "secondary_year" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableSecondaryYear(v *int) *ItemCreate {
+	if v != nil {
+		_c.SetSecondaryYear(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *ItemCreate) SetID(v core.ID) *ItemCreate {
 	_c.mutation.SetID(v)
@@ -1188,6 +1256,14 @@ func (_c *ItemCreate) defaults() {
 		v := item.DefaultSeriesType
 		_c.mutation.SetSeriesType(v)
 	}
+	if _, ok := _c.mutation.OriginalLanguage(); !ok {
+		v := item.DefaultOriginalLanguage
+		_c.mutation.SetOriginalLanguage(v)
+	}
+	if _, ok := _c.mutation.SecondaryYear(); !ok {
+		v := item.DefaultSecondaryYear
+		_c.mutation.SetSecondaryYear(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := item.DefaultID()
 		_c.mutation.SetID(v)
@@ -1294,6 +1370,12 @@ func (_c *ItemCreate) check() error {
 	}
 	if _, ok := _c.mutation.SeriesType(); !ok {
 		return &ValidationError{Name: "series_type", err: errors.New(`ent: missing required field "Item.series_type"`)}
+	}
+	if _, ok := _c.mutation.OriginalLanguage(); !ok {
+		return &ValidationError{Name: "original_language", err: errors.New(`ent: missing required field "Item.original_language"`)}
+	}
+	if _, ok := _c.mutation.SecondaryYear(); !ok {
+		return &ValidationError{Name: "secondary_year", err: errors.New(`ent: missing required field "Item.secondary_year"`)}
 	}
 	if len(_c.mutation.LibraryIDs()) == 0 {
 		return &ValidationError{Name: "library", err: errors.New(`ent: missing required edge "Item.library"`)}
@@ -1541,6 +1623,30 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AbsoluteNumber(); ok {
 		_spec.SetField(item.FieldAbsoluteNumber, field.TypeInt, value)
 		_node.AbsoluteNumber = &value
+	}
+	if value, ok := _c.mutation.OriginalLanguage(); ok {
+		_spec.SetField(item.FieldOriginalLanguage, field.TypeString, value)
+		_node.OriginalLanguage = value
+	}
+	if value, ok := _c.mutation.DigitalReleaseDate(); ok {
+		_spec.SetField(item.FieldDigitalReleaseDate, field.TypeTime, value)
+		_node.DigitalReleaseDate = &value
+	}
+	if value, ok := _c.mutation.PhysicalReleaseDate(); ok {
+		_spec.SetField(item.FieldPhysicalReleaseDate, field.TypeTime, value)
+		_node.PhysicalReleaseDate = &value
+	}
+	if value, ok := _c.mutation.AlternativeTitles(); ok {
+		_spec.SetField(item.FieldAlternativeTitles, field.TypeJSON, value)
+		_node.AlternativeTitles = value
+	}
+	if value, ok := _c.mutation.TranslatedTitles(); ok {
+		_spec.SetField(item.FieldTranslatedTitles, field.TypeJSON, value)
+		_node.TranslatedTitles = value
+	}
+	if value, ok := _c.mutation.SecondaryYear(); ok {
+		_spec.SetField(item.FieldSecondaryYear, field.TypeInt, value)
+		_node.SecondaryYear = value
 	}
 	if nodes := _c.mutation.LibraryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -2850,6 +2956,108 @@ func (u *ItemUpsert) ClearAbsoluteNumber() *ItemUpsert {
 	return u
 }
 
+// SetOriginalLanguage sets the "original_language" field.
+func (u *ItemUpsert) SetOriginalLanguage(v string) *ItemUpsert {
+	u.Set(item.FieldOriginalLanguage, v)
+	return u
+}
+
+// UpdateOriginalLanguage sets the "original_language" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateOriginalLanguage() *ItemUpsert {
+	u.SetExcluded(item.FieldOriginalLanguage)
+	return u
+}
+
+// SetDigitalReleaseDate sets the "digital_release_date" field.
+func (u *ItemUpsert) SetDigitalReleaseDate(v time.Time) *ItemUpsert {
+	u.Set(item.FieldDigitalReleaseDate, v)
+	return u
+}
+
+// UpdateDigitalReleaseDate sets the "digital_release_date" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateDigitalReleaseDate() *ItemUpsert {
+	u.SetExcluded(item.FieldDigitalReleaseDate)
+	return u
+}
+
+// ClearDigitalReleaseDate clears the value of the "digital_release_date" field.
+func (u *ItemUpsert) ClearDigitalReleaseDate() *ItemUpsert {
+	u.SetNull(item.FieldDigitalReleaseDate)
+	return u
+}
+
+// SetPhysicalReleaseDate sets the "physical_release_date" field.
+func (u *ItemUpsert) SetPhysicalReleaseDate(v time.Time) *ItemUpsert {
+	u.Set(item.FieldPhysicalReleaseDate, v)
+	return u
+}
+
+// UpdatePhysicalReleaseDate sets the "physical_release_date" field to the value that was provided on create.
+func (u *ItemUpsert) UpdatePhysicalReleaseDate() *ItemUpsert {
+	u.SetExcluded(item.FieldPhysicalReleaseDate)
+	return u
+}
+
+// ClearPhysicalReleaseDate clears the value of the "physical_release_date" field.
+func (u *ItemUpsert) ClearPhysicalReleaseDate() *ItemUpsert {
+	u.SetNull(item.FieldPhysicalReleaseDate)
+	return u
+}
+
+// SetAlternativeTitles sets the "alternative_titles" field.
+func (u *ItemUpsert) SetAlternativeTitles(v []string) *ItemUpsert {
+	u.Set(item.FieldAlternativeTitles, v)
+	return u
+}
+
+// UpdateAlternativeTitles sets the "alternative_titles" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateAlternativeTitles() *ItemUpsert {
+	u.SetExcluded(item.FieldAlternativeTitles)
+	return u
+}
+
+// ClearAlternativeTitles clears the value of the "alternative_titles" field.
+func (u *ItemUpsert) ClearAlternativeTitles() *ItemUpsert {
+	u.SetNull(item.FieldAlternativeTitles)
+	return u
+}
+
+// SetTranslatedTitles sets the "translated_titles" field.
+func (u *ItemUpsert) SetTranslatedTitles(v []string) *ItemUpsert {
+	u.Set(item.FieldTranslatedTitles, v)
+	return u
+}
+
+// UpdateTranslatedTitles sets the "translated_titles" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateTranslatedTitles() *ItemUpsert {
+	u.SetExcluded(item.FieldTranslatedTitles)
+	return u
+}
+
+// ClearTranslatedTitles clears the value of the "translated_titles" field.
+func (u *ItemUpsert) ClearTranslatedTitles() *ItemUpsert {
+	u.SetNull(item.FieldTranslatedTitles)
+	return u
+}
+
+// SetSecondaryYear sets the "secondary_year" field.
+func (u *ItemUpsert) SetSecondaryYear(v int) *ItemUpsert {
+	u.Set(item.FieldSecondaryYear, v)
+	return u
+}
+
+// UpdateSecondaryYear sets the "secondary_year" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateSecondaryYear() *ItemUpsert {
+	u.SetExcluded(item.FieldSecondaryYear)
+	return u
+}
+
+// AddSecondaryYear adds v to the "secondary_year" field.
+func (u *ItemUpsert) AddSecondaryYear(v int) *ItemUpsert {
+	u.Add(item.FieldSecondaryYear, v)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -3945,6 +4153,125 @@ func (u *ItemUpsertOne) UpdateAbsoluteNumber() *ItemUpsertOne {
 func (u *ItemUpsertOne) ClearAbsoluteNumber() *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearAbsoluteNumber()
+	})
+}
+
+// SetOriginalLanguage sets the "original_language" field.
+func (u *ItemUpsertOne) SetOriginalLanguage(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetOriginalLanguage(v)
+	})
+}
+
+// UpdateOriginalLanguage sets the "original_language" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateOriginalLanguage() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateOriginalLanguage()
+	})
+}
+
+// SetDigitalReleaseDate sets the "digital_release_date" field.
+func (u *ItemUpsertOne) SetDigitalReleaseDate(v time.Time) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetDigitalReleaseDate(v)
+	})
+}
+
+// UpdateDigitalReleaseDate sets the "digital_release_date" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateDigitalReleaseDate() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateDigitalReleaseDate()
+	})
+}
+
+// ClearDigitalReleaseDate clears the value of the "digital_release_date" field.
+func (u *ItemUpsertOne) ClearDigitalReleaseDate() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearDigitalReleaseDate()
+	})
+}
+
+// SetPhysicalReleaseDate sets the "physical_release_date" field.
+func (u *ItemUpsertOne) SetPhysicalReleaseDate(v time.Time) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetPhysicalReleaseDate(v)
+	})
+}
+
+// UpdatePhysicalReleaseDate sets the "physical_release_date" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdatePhysicalReleaseDate() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdatePhysicalReleaseDate()
+	})
+}
+
+// ClearPhysicalReleaseDate clears the value of the "physical_release_date" field.
+func (u *ItemUpsertOne) ClearPhysicalReleaseDate() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearPhysicalReleaseDate()
+	})
+}
+
+// SetAlternativeTitles sets the "alternative_titles" field.
+func (u *ItemUpsertOne) SetAlternativeTitles(v []string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAlternativeTitles(v)
+	})
+}
+
+// UpdateAlternativeTitles sets the "alternative_titles" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateAlternativeTitles() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAlternativeTitles()
+	})
+}
+
+// ClearAlternativeTitles clears the value of the "alternative_titles" field.
+func (u *ItemUpsertOne) ClearAlternativeTitles() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAlternativeTitles()
+	})
+}
+
+// SetTranslatedTitles sets the "translated_titles" field.
+func (u *ItemUpsertOne) SetTranslatedTitles(v []string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetTranslatedTitles(v)
+	})
+}
+
+// UpdateTranslatedTitles sets the "translated_titles" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateTranslatedTitles() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateTranslatedTitles()
+	})
+}
+
+// ClearTranslatedTitles clears the value of the "translated_titles" field.
+func (u *ItemUpsertOne) ClearTranslatedTitles() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearTranslatedTitles()
+	})
+}
+
+// SetSecondaryYear sets the "secondary_year" field.
+func (u *ItemUpsertOne) SetSecondaryYear(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetSecondaryYear(v)
+	})
+}
+
+// AddSecondaryYear adds v to the "secondary_year" field.
+func (u *ItemUpsertOne) AddSecondaryYear(v int) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddSecondaryYear(v)
+	})
+}
+
+// UpdateSecondaryYear sets the "secondary_year" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateSecondaryYear() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateSecondaryYear()
 	})
 }
 
@@ -5210,6 +5537,125 @@ func (u *ItemUpsertBulk) UpdateAbsoluteNumber() *ItemUpsertBulk {
 func (u *ItemUpsertBulk) ClearAbsoluteNumber() *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearAbsoluteNumber()
+	})
+}
+
+// SetOriginalLanguage sets the "original_language" field.
+func (u *ItemUpsertBulk) SetOriginalLanguage(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetOriginalLanguage(v)
+	})
+}
+
+// UpdateOriginalLanguage sets the "original_language" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateOriginalLanguage() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateOriginalLanguage()
+	})
+}
+
+// SetDigitalReleaseDate sets the "digital_release_date" field.
+func (u *ItemUpsertBulk) SetDigitalReleaseDate(v time.Time) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetDigitalReleaseDate(v)
+	})
+}
+
+// UpdateDigitalReleaseDate sets the "digital_release_date" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateDigitalReleaseDate() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateDigitalReleaseDate()
+	})
+}
+
+// ClearDigitalReleaseDate clears the value of the "digital_release_date" field.
+func (u *ItemUpsertBulk) ClearDigitalReleaseDate() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearDigitalReleaseDate()
+	})
+}
+
+// SetPhysicalReleaseDate sets the "physical_release_date" field.
+func (u *ItemUpsertBulk) SetPhysicalReleaseDate(v time.Time) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetPhysicalReleaseDate(v)
+	})
+}
+
+// UpdatePhysicalReleaseDate sets the "physical_release_date" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdatePhysicalReleaseDate() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdatePhysicalReleaseDate()
+	})
+}
+
+// ClearPhysicalReleaseDate clears the value of the "physical_release_date" field.
+func (u *ItemUpsertBulk) ClearPhysicalReleaseDate() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearPhysicalReleaseDate()
+	})
+}
+
+// SetAlternativeTitles sets the "alternative_titles" field.
+func (u *ItemUpsertBulk) SetAlternativeTitles(v []string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetAlternativeTitles(v)
+	})
+}
+
+// UpdateAlternativeTitles sets the "alternative_titles" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateAlternativeTitles() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateAlternativeTitles()
+	})
+}
+
+// ClearAlternativeTitles clears the value of the "alternative_titles" field.
+func (u *ItemUpsertBulk) ClearAlternativeTitles() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearAlternativeTitles()
+	})
+}
+
+// SetTranslatedTitles sets the "translated_titles" field.
+func (u *ItemUpsertBulk) SetTranslatedTitles(v []string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetTranslatedTitles(v)
+	})
+}
+
+// UpdateTranslatedTitles sets the "translated_titles" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateTranslatedTitles() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateTranslatedTitles()
+	})
+}
+
+// ClearTranslatedTitles clears the value of the "translated_titles" field.
+func (u *ItemUpsertBulk) ClearTranslatedTitles() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearTranslatedTitles()
+	})
+}
+
+// SetSecondaryYear sets the "secondary_year" field.
+func (u *ItemUpsertBulk) SetSecondaryYear(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetSecondaryYear(v)
+	})
+}
+
+// AddSecondaryYear adds v to the "secondary_year" field.
+func (u *ItemUpsertBulk) AddSecondaryYear(v int) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.AddSecondaryYear(v)
+	})
+}
+
+// UpdateSecondaryYear sets the "secondary_year" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateSecondaryYear() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateSecondaryYear()
 	})
 }
 

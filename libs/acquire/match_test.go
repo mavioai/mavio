@@ -14,6 +14,9 @@ func TestMatchMovie(t *testing.T) {
 		{ID: tid(3), Title: "Amélie", OriginalTitle: "Le Fabuleux Destin d'Amélie Poulain", Year: 2001},
 		{ID: tid(4), Title: "Twin", Year: 2010},
 		{ID: tid(5), Title: "Twin", Year: 2010},
+		{ID: tid(6), Title: "Crouching Tiger, Hidden Dragon", Year: 2000, SecondaryYear: 2001, TmdbID: 146,
+			AlternativeTitles: []string{"Wo Hu Cang Long"}, TranslatedTitles: []string{"Tiger and Dragon"}},
+		{ID: tid(7), Title: "Spirited Away", Year: 2001, TranslatedTitles: []string{"Chihiros Reise ins Zauberland"}},
 	}
 	tests := []struct {
 		name     string
@@ -39,6 +42,14 @@ func TestMatchMovie(t *testing.T) {
 		{"search for another title", "Another.Movie.2020.1080p.WEB-DL-GRP", "", 0, 0, -1, nil},
 		{"search with wrong year, matching id", "Rocky.II.1985.1080p.BluRay-GRP", "", 1367, 1, 1, nil},
 		{"search with wrong year", "Rocky.II.1985.1080p.BluRay-GRP", "", 0, 1, -1, nil},
+		{"secondary year", "Crouching.Tiger.Hidden.Dragon.2001.1080p.BluRay-GRP", "", 0, -1, 5, nil},
+		{"tmdb id with secondary year", "Whatever.2001.720p.WEB-DL-GRP", "", 146, -1, 5, nil},
+		{"alternative title", "Wo.Hu.Cang.Long.2000.1080p.BluRay-GRP", "", 0, -1, 5, nil},
+		{"alternative title with secondary year", "Wo.Hu.Cang.Long.2001.1080p.BluRay-GRP", "", 0, -1, 5, nil},
+		{"alternative title with wrong year", "Wo.Hu.Cang.Long.2005.1080p.BluRay-GRP", "", 0, -1, -1, nil},
+		{"translation", "Chihiros.Reise.ins.Zauberland.2001.German.1080p.BluRay-GRP", "", 0, -1, 6, nil},
+		{"search by alternative title", "Wo.Hu.Cang.Long.2000.1080p.BluRay-GRP", "", 0, 5, 5, nil},
+		{"search by translation", "Tiger.and.Dragon.2001.German.1080p.BluRay-GRP", "", 0, 5, 5, nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

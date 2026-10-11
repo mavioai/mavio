@@ -469,11 +469,11 @@ flowchart TD
 - [x] Domain and storage: profiles, custom formats, the queue of tracked downloads, history, the blocklist, remote path mappings, naming (`libs/core/acquisition.go`, `libs/store`)
   - [x] The format scores of quality profiles checked against the custom formats that exist, as Radarr's QualityProfileController: no score of a missing format or two of one, a minimum score that can be reached; deleting the last format resets the profiles' format scores, as Radarr's QualityProfileService
 - [x] Adding a wanted movie to a library by its TMDB ID, with a quality profile and minimum availability (`WantedService`, `apps/server/internal/acquisition`)
-  - [ ] Digital and physical release dates of movies, which availability needs; until then a movie is released 90 days after its premiere, as Radarr assumes without them
-  - [ ] The original language of movies, which profiles wanting "Original" need; until then they accept any language
+  - [x] Digital and physical release dates of movies (from TMDB's release dates, or Radarr's metadata), which minimum availability uses as Radarr's Movie.IsAvailable; a movie without them is released 90 days after its premiere
+  - [x] The original language of movies, which profiles wanting "Original" take and releases without languages are in; profiles accept any language for movies whose original language is unknown
   - [ ] A movie whose identification fails is kept under its placeholder name ("TMDB <id>")
 - [x] Movie searches and RSS sync as jobs; grabs through `DownloadService`; decisions in `SearchReleases`
-  - [ ] Releases matched to movies by their alternative titles, translations and secondary years
+  - [x] Releases matched to movies by their alternative titles, translations and secondary years, as Radarr's MovieService.FindByTitle and TryGetMovieBySearchCriteria
   - [x] Tags, required flags, minimum seeders and MULTi languages of indexers, which the indexer plugin reports from its configuration
   - [x] Download client tags and round robin among the clients of the first priority, as Radarr's DownloadClientProvider.GetDownloadClient
   - [ ] An indexer's own download client, which Radarr always sends the indexer's releases to

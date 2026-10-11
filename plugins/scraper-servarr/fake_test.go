@@ -79,7 +79,8 @@ func newTestPlugin(t *testing.T, routes map[string]string) (*plugin, *fakeServar
 const matrix = `{
   "TmdbId": 603, "ImdbId": "tt0133093", "Title": "The Matrix", "OriginalTitle": "The Matrix", "OriginalLanguage": "en",
   "Overview": "A hacker learns the truth.", "Runtime": 136, "Popularity": 47.2, "Year": 1999,
-  "Premier": "1999-03-24T00:00:00Z", "InCinema": "1999-03-31T00:00:00Z", "PhysicalRelease": "1999-11-25T00:00:00Z",
+  "Premier": "1998-12-24T00:00:00Z", "InCinema": "1999-03-31T00:00:00Z", "PhysicalRelease": "1999-11-25T00:00:00Z",
+  "DigitalRelease": "1999-09-21T00:00:00Z",
   "Images": [
     {"CoverType": "Poster", "Url": "https://image.tmdb.org/t/p/original/poster.jpg"},
     {"CoverType": "Fanart", "Url": "https://image.tmdb.org/t/p/original/fanart.jpg"},

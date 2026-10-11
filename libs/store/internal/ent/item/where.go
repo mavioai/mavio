@@ -312,6 +312,26 @@ func AbsoluteNumber(v int) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldAbsoluteNumber, v))
 }
 
+// OriginalLanguage applies equality check predicate on the "original_language" field. It's identical to OriginalLanguageEQ.
+func OriginalLanguage(v string) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldOriginalLanguage, v))
+}
+
+// DigitalReleaseDate applies equality check predicate on the "digital_release_date" field. It's identical to DigitalReleaseDateEQ.
+func DigitalReleaseDate(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldDigitalReleaseDate, v))
+}
+
+// PhysicalReleaseDate applies equality check predicate on the "physical_release_date" field. It's identical to PhysicalReleaseDateEQ.
+func PhysicalReleaseDate(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldPhysicalReleaseDate, v))
+}
+
+// SecondaryYear applies equality check predicate on the "secondary_year" field. It's identical to SecondaryYearEQ.
+func SecondaryYear(v int) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldSecondaryYear, v))
+}
+
 // LibraryIDEQ applies the EQ predicate on the "library_id" field.
 func LibraryIDEQ(v core.ID) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldLibraryID, v))
@@ -2999,6 +3019,231 @@ func AbsoluteNumberIsNil() predicate.Item {
 // AbsoluteNumberNotNil applies the NotNil predicate on the "absolute_number" field.
 func AbsoluteNumberNotNil() predicate.Item {
 	return predicate.Item(sql.FieldNotNull(FieldAbsoluteNumber))
+}
+
+// OriginalLanguageEQ applies the EQ predicate on the "original_language" field.
+func OriginalLanguageEQ(v string) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldOriginalLanguage, v))
+}
+
+// OriginalLanguageNEQ applies the NEQ predicate on the "original_language" field.
+func OriginalLanguageNEQ(v string) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldOriginalLanguage, v))
+}
+
+// OriginalLanguageIn applies the In predicate on the "original_language" field.
+func OriginalLanguageIn(vs ...string) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldOriginalLanguage, vs...))
+}
+
+// OriginalLanguageNotIn applies the NotIn predicate on the "original_language" field.
+func OriginalLanguageNotIn(vs ...string) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldOriginalLanguage, vs...))
+}
+
+// OriginalLanguageGT applies the GT predicate on the "original_language" field.
+func OriginalLanguageGT(v string) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldOriginalLanguage, v))
+}
+
+// OriginalLanguageGTE applies the GTE predicate on the "original_language" field.
+func OriginalLanguageGTE(v string) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldOriginalLanguage, v))
+}
+
+// OriginalLanguageLT applies the LT predicate on the "original_language" field.
+func OriginalLanguageLT(v string) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldOriginalLanguage, v))
+}
+
+// OriginalLanguageLTE applies the LTE predicate on the "original_language" field.
+func OriginalLanguageLTE(v string) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldOriginalLanguage, v))
+}
+
+// OriginalLanguageContains applies the Contains predicate on the "original_language" field.
+func OriginalLanguageContains(v string) predicate.Item {
+	return predicate.Item(sql.FieldContains(FieldOriginalLanguage, v))
+}
+
+// OriginalLanguageHasPrefix applies the HasPrefix predicate on the "original_language" field.
+func OriginalLanguageHasPrefix(v string) predicate.Item {
+	return predicate.Item(sql.FieldHasPrefix(FieldOriginalLanguage, v))
+}
+
+// OriginalLanguageHasSuffix applies the HasSuffix predicate on the "original_language" field.
+func OriginalLanguageHasSuffix(v string) predicate.Item {
+	return predicate.Item(sql.FieldHasSuffix(FieldOriginalLanguage, v))
+}
+
+// OriginalLanguageEqualFold applies the EqualFold predicate on the "original_language" field.
+func OriginalLanguageEqualFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldEqualFold(FieldOriginalLanguage, v))
+}
+
+// OriginalLanguageContainsFold applies the ContainsFold predicate on the "original_language" field.
+func OriginalLanguageContainsFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldContainsFold(FieldOriginalLanguage, v))
+}
+
+// DigitalReleaseDateEQ applies the EQ predicate on the "digital_release_date" field.
+func DigitalReleaseDateEQ(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldDigitalReleaseDate, v))
+}
+
+// DigitalReleaseDateNEQ applies the NEQ predicate on the "digital_release_date" field.
+func DigitalReleaseDateNEQ(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldDigitalReleaseDate, v))
+}
+
+// DigitalReleaseDateIn applies the In predicate on the "digital_release_date" field.
+func DigitalReleaseDateIn(vs ...time.Time) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldDigitalReleaseDate, vs...))
+}
+
+// DigitalReleaseDateNotIn applies the NotIn predicate on the "digital_release_date" field.
+func DigitalReleaseDateNotIn(vs ...time.Time) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldDigitalReleaseDate, vs...))
+}
+
+// DigitalReleaseDateGT applies the GT predicate on the "digital_release_date" field.
+func DigitalReleaseDateGT(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldDigitalReleaseDate, v))
+}
+
+// DigitalReleaseDateGTE applies the GTE predicate on the "digital_release_date" field.
+func DigitalReleaseDateGTE(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldDigitalReleaseDate, v))
+}
+
+// DigitalReleaseDateLT applies the LT predicate on the "digital_release_date" field.
+func DigitalReleaseDateLT(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldDigitalReleaseDate, v))
+}
+
+// DigitalReleaseDateLTE applies the LTE predicate on the "digital_release_date" field.
+func DigitalReleaseDateLTE(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldDigitalReleaseDate, v))
+}
+
+// DigitalReleaseDateIsNil applies the IsNil predicate on the "digital_release_date" field.
+func DigitalReleaseDateIsNil() predicate.Item {
+	return predicate.Item(sql.FieldIsNull(FieldDigitalReleaseDate))
+}
+
+// DigitalReleaseDateNotNil applies the NotNil predicate on the "digital_release_date" field.
+func DigitalReleaseDateNotNil() predicate.Item {
+	return predicate.Item(sql.FieldNotNull(FieldDigitalReleaseDate))
+}
+
+// PhysicalReleaseDateEQ applies the EQ predicate on the "physical_release_date" field.
+func PhysicalReleaseDateEQ(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldPhysicalReleaseDate, v))
+}
+
+// PhysicalReleaseDateNEQ applies the NEQ predicate on the "physical_release_date" field.
+func PhysicalReleaseDateNEQ(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldPhysicalReleaseDate, v))
+}
+
+// PhysicalReleaseDateIn applies the In predicate on the "physical_release_date" field.
+func PhysicalReleaseDateIn(vs ...time.Time) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldPhysicalReleaseDate, vs...))
+}
+
+// PhysicalReleaseDateNotIn applies the NotIn predicate on the "physical_release_date" field.
+func PhysicalReleaseDateNotIn(vs ...time.Time) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldPhysicalReleaseDate, vs...))
+}
+
+// PhysicalReleaseDateGT applies the GT predicate on the "physical_release_date" field.
+func PhysicalReleaseDateGT(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldPhysicalReleaseDate, v))
+}
+
+// PhysicalReleaseDateGTE applies the GTE predicate on the "physical_release_date" field.
+func PhysicalReleaseDateGTE(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldPhysicalReleaseDate, v))
+}
+
+// PhysicalReleaseDateLT applies the LT predicate on the "physical_release_date" field.
+func PhysicalReleaseDateLT(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldPhysicalReleaseDate, v))
+}
+
+// PhysicalReleaseDateLTE applies the LTE predicate on the "physical_release_date" field.
+func PhysicalReleaseDateLTE(v time.Time) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldPhysicalReleaseDate, v))
+}
+
+// PhysicalReleaseDateIsNil applies the IsNil predicate on the "physical_release_date" field.
+func PhysicalReleaseDateIsNil() predicate.Item {
+	return predicate.Item(sql.FieldIsNull(FieldPhysicalReleaseDate))
+}
+
+// PhysicalReleaseDateNotNil applies the NotNil predicate on the "physical_release_date" field.
+func PhysicalReleaseDateNotNil() predicate.Item {
+	return predicate.Item(sql.FieldNotNull(FieldPhysicalReleaseDate))
+}
+
+// AlternativeTitlesIsNil applies the IsNil predicate on the "alternative_titles" field.
+func AlternativeTitlesIsNil() predicate.Item {
+	return predicate.Item(sql.FieldIsNull(FieldAlternativeTitles))
+}
+
+// AlternativeTitlesNotNil applies the NotNil predicate on the "alternative_titles" field.
+func AlternativeTitlesNotNil() predicate.Item {
+	return predicate.Item(sql.FieldNotNull(FieldAlternativeTitles))
+}
+
+// TranslatedTitlesIsNil applies the IsNil predicate on the "translated_titles" field.
+func TranslatedTitlesIsNil() predicate.Item {
+	return predicate.Item(sql.FieldIsNull(FieldTranslatedTitles))
+}
+
+// TranslatedTitlesNotNil applies the NotNil predicate on the "translated_titles" field.
+func TranslatedTitlesNotNil() predicate.Item {
+	return predicate.Item(sql.FieldNotNull(FieldTranslatedTitles))
+}
+
+// SecondaryYearEQ applies the EQ predicate on the "secondary_year" field.
+func SecondaryYearEQ(v int) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldSecondaryYear, v))
+}
+
+// SecondaryYearNEQ applies the NEQ predicate on the "secondary_year" field.
+func SecondaryYearNEQ(v int) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldSecondaryYear, v))
+}
+
+// SecondaryYearIn applies the In predicate on the "secondary_year" field.
+func SecondaryYearIn(vs ...int) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldSecondaryYear, vs...))
+}
+
+// SecondaryYearNotIn applies the NotIn predicate on the "secondary_year" field.
+func SecondaryYearNotIn(vs ...int) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldSecondaryYear, vs...))
+}
+
+// SecondaryYearGT applies the GT predicate on the "secondary_year" field.
+func SecondaryYearGT(v int) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldSecondaryYear, v))
+}
+
+// SecondaryYearGTE applies the GTE predicate on the "secondary_year" field.
+func SecondaryYearGTE(v int) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldSecondaryYear, v))
+}
+
+// SecondaryYearLT applies the LT predicate on the "secondary_year" field.
+func SecondaryYearLT(v int) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldSecondaryYear, v))
+}
+
+// SecondaryYearLTE applies the LTE predicate on the "secondary_year" field.
+func SecondaryYearLTE(v int) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldSecondaryYear, v))
 }
 
 // HasLibrary applies the HasEdge predicate on the "library" edge.

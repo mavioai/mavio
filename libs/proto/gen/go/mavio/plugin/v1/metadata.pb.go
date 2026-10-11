@@ -1228,36 +1228,42 @@ func (b0 GetMetadataResponse_builder) Build() *GetMetadataResponse {
 // Metadata is what a provider knows about an item. Unset fields are left
 // unchanged by the host.
 type Metadata struct {
-	state                      protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Name            *string                `protobuf:"bytes,1,opt,name=name"`
-	xxx_hidden_OriginalTitle   *string                `protobuf:"bytes,2,opt,name=original_title,json=originalTitle"`
-	xxx_hidden_SortName        *string                `protobuf:"bytes,3,opt,name=sort_name,json=sortName"`
-	xxx_hidden_Overview        *string                `protobuf:"bytes,4,opt,name=overview"`
-	xxx_hidden_Tagline         *string                `protobuf:"bytes,5,opt,name=tagline"`
-	xxx_hidden_ProductionYear  int32                  `protobuf:"varint,6,opt,name=production_year,json=productionYear"`
-	xxx_hidden_PremiereDate    *string                `protobuf:"bytes,7,opt,name=premiere_date,json=premiereDate"`
-	xxx_hidden_EndDate         *string                `protobuf:"bytes,8,opt,name=end_date,json=endDate"`
-	xxx_hidden_Runtime         *durationpb.Duration   `protobuf:"bytes,9,opt,name=runtime"`
-	xxx_hidden_OfficialRating  *string                `protobuf:"bytes,10,opt,name=official_rating,json=officialRating"`
-	xxx_hidden_CommunityRating float64                `protobuf:"fixed64,11,opt,name=community_rating,json=communityRating"`
-	xxx_hidden_CriticRating    float64                `protobuf:"fixed64,12,opt,name=critic_rating,json=criticRating"`
-	xxx_hidden_Genres          []string               `protobuf:"bytes,13,rep,name=genres"`
-	xxx_hidden_Tags            []string               `protobuf:"bytes,14,rep,name=tags"`
-	xxx_hidden_Studios         []string               `protobuf:"bytes,15,rep,name=studios"`
-	xxx_hidden_ExternalIds     map[string]string      `protobuf:"bytes,16,rep,name=external_ids,json=externalIds" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	xxx_hidden_SeriesStatus    SeriesStatus           `protobuf:"varint,17,opt,name=series_status,json=seriesStatus,enum=mavio.plugin.v1.SeriesStatus"`
-	xxx_hidden_Artists         []string               `protobuf:"bytes,18,rep,name=artists"`
-	xxx_hidden_AlbumArtists    []string               `protobuf:"bytes,19,rep,name=album_artists,json=albumArtists"`
-	xxx_hidden_People          *[]*PersonCredit       `protobuf:"bytes,20,rep,name=people"`
-	xxx_hidden_Images          *[]*RemoteImage        `protobuf:"bytes,21,rep,name=images"`
-	xxx_hidden_BirthDate       *string                `protobuf:"bytes,22,opt,name=birth_date,json=birthDate"`
-	xxx_hidden_DeathDate       *string                `protobuf:"bytes,23,opt,name=death_date,json=deathDate"`
-	xxx_hidden_BirthPlace      *string                `protobuf:"bytes,24,opt,name=birth_place,json=birthPlace"`
-	xxx_hidden_CollectionName  *string                `protobuf:"bytes,25,opt,name=collection_name,json=collectionName"`
-	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
-	XXX_presence               [1]uint32
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+	state                          protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name                *string                `protobuf:"bytes,1,opt,name=name"`
+	xxx_hidden_OriginalTitle       *string                `protobuf:"bytes,2,opt,name=original_title,json=originalTitle"`
+	xxx_hidden_SortName            *string                `protobuf:"bytes,3,opt,name=sort_name,json=sortName"`
+	xxx_hidden_Overview            *string                `protobuf:"bytes,4,opt,name=overview"`
+	xxx_hidden_Tagline             *string                `protobuf:"bytes,5,opt,name=tagline"`
+	xxx_hidden_ProductionYear      int32                  `protobuf:"varint,6,opt,name=production_year,json=productionYear"`
+	xxx_hidden_PremiereDate        *string                `protobuf:"bytes,7,opt,name=premiere_date,json=premiereDate"`
+	xxx_hidden_EndDate             *string                `protobuf:"bytes,8,opt,name=end_date,json=endDate"`
+	xxx_hidden_Runtime             *durationpb.Duration   `protobuf:"bytes,9,opt,name=runtime"`
+	xxx_hidden_OfficialRating      *string                `protobuf:"bytes,10,opt,name=official_rating,json=officialRating"`
+	xxx_hidden_CommunityRating     float64                `protobuf:"fixed64,11,opt,name=community_rating,json=communityRating"`
+	xxx_hidden_CriticRating        float64                `protobuf:"fixed64,12,opt,name=critic_rating,json=criticRating"`
+	xxx_hidden_Genres              []string               `protobuf:"bytes,13,rep,name=genres"`
+	xxx_hidden_Tags                []string               `protobuf:"bytes,14,rep,name=tags"`
+	xxx_hidden_Studios             []string               `protobuf:"bytes,15,rep,name=studios"`
+	xxx_hidden_ExternalIds         map[string]string      `protobuf:"bytes,16,rep,name=external_ids,json=externalIds" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_SeriesStatus        SeriesStatus           `protobuf:"varint,17,opt,name=series_status,json=seriesStatus,enum=mavio.plugin.v1.SeriesStatus"`
+	xxx_hidden_Artists             []string               `protobuf:"bytes,18,rep,name=artists"`
+	xxx_hidden_AlbumArtists        []string               `protobuf:"bytes,19,rep,name=album_artists,json=albumArtists"`
+	xxx_hidden_People              *[]*PersonCredit       `protobuf:"bytes,20,rep,name=people"`
+	xxx_hidden_Images              *[]*RemoteImage        `protobuf:"bytes,21,rep,name=images"`
+	xxx_hidden_BirthDate           *string                `protobuf:"bytes,22,opt,name=birth_date,json=birthDate"`
+	xxx_hidden_DeathDate           *string                `protobuf:"bytes,23,opt,name=death_date,json=deathDate"`
+	xxx_hidden_BirthPlace          *string                `protobuf:"bytes,24,opt,name=birth_place,json=birthPlace"`
+	xxx_hidden_CollectionName      *string                `protobuf:"bytes,25,opt,name=collection_name,json=collectionName"`
+	xxx_hidden_OriginalLanguage    *string                `protobuf:"bytes,26,opt,name=original_language,json=originalLanguage"`
+	xxx_hidden_DigitalReleaseDate  *string                `protobuf:"bytes,27,opt,name=digital_release_date,json=digitalReleaseDate"`
+	xxx_hidden_PhysicalReleaseDate *string                `protobuf:"bytes,28,opt,name=physical_release_date,json=physicalReleaseDate"`
+	xxx_hidden_AlternativeTitles   []string               `protobuf:"bytes,29,rep,name=alternative_titles,json=alternativeTitles"`
+	xxx_hidden_TranslatedTitles    []string               `protobuf:"bytes,30,rep,name=translated_titles,json=translatedTitles"`
+	xxx_hidden_SecondaryYear       int32                  `protobuf:"varint,31,opt,name=secondary_year,json=secondaryYear"`
+	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
+	XXX_presence                   [1]uint32
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
 func (x *Metadata) Reset() {
@@ -1502,44 +1508,95 @@ func (x *Metadata) GetCollectionName() string {
 	return ""
 }
 
+func (x *Metadata) GetOriginalLanguage() string {
+	if x != nil {
+		if x.xxx_hidden_OriginalLanguage != nil {
+			return *x.xxx_hidden_OriginalLanguage
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Metadata) GetDigitalReleaseDate() string {
+	if x != nil {
+		if x.xxx_hidden_DigitalReleaseDate != nil {
+			return *x.xxx_hidden_DigitalReleaseDate
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Metadata) GetPhysicalReleaseDate() string {
+	if x != nil {
+		if x.xxx_hidden_PhysicalReleaseDate != nil {
+			return *x.xxx_hidden_PhysicalReleaseDate
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Metadata) GetAlternativeTitles() []string {
+	if x != nil {
+		return x.xxx_hidden_AlternativeTitles
+	}
+	return nil
+}
+
+func (x *Metadata) GetTranslatedTitles() []string {
+	if x != nil {
+		return x.xxx_hidden_TranslatedTitles
+	}
+	return nil
+}
+
+func (x *Metadata) GetSecondaryYear() int32 {
+	if x != nil {
+		return x.xxx_hidden_SecondaryYear
+	}
+	return 0
+}
+
 func (x *Metadata) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 31)
 }
 
 func (x *Metadata) SetOriginalTitle(v string) {
 	x.xxx_hidden_OriginalTitle = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 31)
 }
 
 func (x *Metadata) SetSortName(v string) {
 	x.xxx_hidden_SortName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 31)
 }
 
 func (x *Metadata) SetOverview(v string) {
 	x.xxx_hidden_Overview = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 31)
 }
 
 func (x *Metadata) SetTagline(v string) {
 	x.xxx_hidden_Tagline = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 31)
 }
 
 func (x *Metadata) SetProductionYear(v int32) {
 	x.xxx_hidden_ProductionYear = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 31)
 }
 
 func (x *Metadata) SetPremiereDate(v string) {
 	x.xxx_hidden_PremiereDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 31)
 }
 
 func (x *Metadata) SetEndDate(v string) {
 	x.xxx_hidden_EndDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 31)
 }
 
 func (x *Metadata) SetRuntime(v *durationpb.Duration) {
@@ -1548,17 +1605,17 @@ func (x *Metadata) SetRuntime(v *durationpb.Duration) {
 
 func (x *Metadata) SetOfficialRating(v string) {
 	x.xxx_hidden_OfficialRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 31)
 }
 
 func (x *Metadata) SetCommunityRating(v float64) {
 	x.xxx_hidden_CommunityRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 31)
 }
 
 func (x *Metadata) SetCriticRating(v float64) {
 	x.xxx_hidden_CriticRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 31)
 }
 
 func (x *Metadata) SetGenres(v []string) {
@@ -1579,7 +1636,7 @@ func (x *Metadata) SetExternalIds(v map[string]string) {
 
 func (x *Metadata) SetSeriesStatus(v SeriesStatus) {
 	x.xxx_hidden_SeriesStatus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 31)
 }
 
 func (x *Metadata) SetArtists(v []string) {
@@ -1600,22 +1657,50 @@ func (x *Metadata) SetImages(v []*RemoteImage) {
 
 func (x *Metadata) SetBirthDate(v string) {
 	x.xxx_hidden_BirthDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 31)
 }
 
 func (x *Metadata) SetDeathDate(v string) {
 	x.xxx_hidden_DeathDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 31)
 }
 
 func (x *Metadata) SetBirthPlace(v string) {
 	x.xxx_hidden_BirthPlace = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 31)
 }
 
 func (x *Metadata) SetCollectionName(v string) {
 	x.xxx_hidden_CollectionName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 31)
+}
+
+func (x *Metadata) SetOriginalLanguage(v string) {
+	x.xxx_hidden_OriginalLanguage = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 25, 31)
+}
+
+func (x *Metadata) SetDigitalReleaseDate(v string) {
+	x.xxx_hidden_DigitalReleaseDate = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 31)
+}
+
+func (x *Metadata) SetPhysicalReleaseDate(v string) {
+	x.xxx_hidden_PhysicalReleaseDate = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 31)
+}
+
+func (x *Metadata) SetAlternativeTitles(v []string) {
+	x.xxx_hidden_AlternativeTitles = v
+}
+
+func (x *Metadata) SetTranslatedTitles(v []string) {
+	x.xxx_hidden_TranslatedTitles = v
+}
+
+func (x *Metadata) SetSecondaryYear(v int32) {
+	x.xxx_hidden_SecondaryYear = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 30, 31)
 }
 
 func (x *Metadata) HasName() bool {
@@ -1737,6 +1822,34 @@ func (x *Metadata) HasCollectionName() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 24)
 }
 
+func (x *Metadata) HasOriginalLanguage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 25)
+}
+
+func (x *Metadata) HasDigitalReleaseDate() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 26)
+}
+
+func (x *Metadata) HasPhysicalReleaseDate() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 27)
+}
+
+func (x *Metadata) HasSecondaryYear() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 30)
+}
+
 func (x *Metadata) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -1821,6 +1934,26 @@ func (x *Metadata) ClearCollectionName() {
 	x.xxx_hidden_CollectionName = nil
 }
 
+func (x *Metadata) ClearOriginalLanguage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 25)
+	x.xxx_hidden_OriginalLanguage = nil
+}
+
+func (x *Metadata) ClearDigitalReleaseDate() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 26)
+	x.xxx_hidden_DigitalReleaseDate = nil
+}
+
+func (x *Metadata) ClearPhysicalReleaseDate() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 27)
+	x.xxx_hidden_PhysicalReleaseDate = nil
+}
+
+func (x *Metadata) ClearSecondaryYear() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 30)
+	x.xxx_hidden_SecondaryYear = 0
+}
+
 type Metadata_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1856,6 +1989,19 @@ type Metadata_builder struct {
 	// The collection (movie set) a movie belongs to; its ID is among the
 	// external IDs, such as "tmdb_collection".
 	CollectionName *string
+	// For movies: the language (ISO 639-1) the movie was made in.
+	OriginalLanguage *string
+	// For movies: when the movie came out digitally and on disc, as ISO 8601
+	// calendar dates; premiere_date is its release in cinemas.
+	DigitalReleaseDate  *string
+	PhysicalReleaseDate *string
+	// For movies: other titles of the movie, and its titles in other
+	// languages, by which releases may name it.
+	AlternativeTitles []string
+	TranslatedTitles  []string
+	// For movies: another year releases may give the movie, such as that of
+	// its premiere when it differs from production_year.
+	SecondaryYear *int32
 }
 
 func (b0 Metadata_builder) Build() *Metadata {
@@ -1863,48 +2009,48 @@ func (b0 Metadata_builder) Build() *Metadata {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 31)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.OriginalTitle != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 31)
 		x.xxx_hidden_OriginalTitle = b.OriginalTitle
 	}
 	if b.SortName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 31)
 		x.xxx_hidden_SortName = b.SortName
 	}
 	if b.Overview != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 31)
 		x.xxx_hidden_Overview = b.Overview
 	}
 	if b.Tagline != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 31)
 		x.xxx_hidden_Tagline = b.Tagline
 	}
 	if b.ProductionYear != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 31)
 		x.xxx_hidden_ProductionYear = *b.ProductionYear
 	}
 	if b.PremiereDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 31)
 		x.xxx_hidden_PremiereDate = b.PremiereDate
 	}
 	if b.EndDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 31)
 		x.xxx_hidden_EndDate = b.EndDate
 	}
 	x.xxx_hidden_Runtime = b.Runtime
 	if b.OfficialRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 31)
 		x.xxx_hidden_OfficialRating = b.OfficialRating
 	}
 	if b.CommunityRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 31)
 		x.xxx_hidden_CommunityRating = *b.CommunityRating
 	}
 	if b.CriticRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 31)
 		x.xxx_hidden_CriticRating = *b.CriticRating
 	}
 	x.xxx_hidden_Genres = b.Genres
@@ -1912,7 +2058,7 @@ func (b0 Metadata_builder) Build() *Metadata {
 	x.xxx_hidden_Studios = b.Studios
 	x.xxx_hidden_ExternalIds = b.ExternalIds
 	if b.SeriesStatus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 31)
 		x.xxx_hidden_SeriesStatus = *b.SeriesStatus
 	}
 	x.xxx_hidden_Artists = b.Artists
@@ -1920,20 +2066,38 @@ func (b0 Metadata_builder) Build() *Metadata {
 	x.xxx_hidden_People = &b.People
 	x.xxx_hidden_Images = &b.Images
 	if b.BirthDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 31)
 		x.xxx_hidden_BirthDate = b.BirthDate
 	}
 	if b.DeathDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 31)
 		x.xxx_hidden_DeathDate = b.DeathDate
 	}
 	if b.BirthPlace != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 31)
 		x.xxx_hidden_BirthPlace = b.BirthPlace
 	}
 	if b.CollectionName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 31)
 		x.xxx_hidden_CollectionName = b.CollectionName
+	}
+	if b.OriginalLanguage != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 25, 31)
+		x.xxx_hidden_OriginalLanguage = b.OriginalLanguage
+	}
+	if b.DigitalReleaseDate != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 31)
+		x.xxx_hidden_DigitalReleaseDate = b.DigitalReleaseDate
+	}
+	if b.PhysicalReleaseDate != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 31)
+		x.xxx_hidden_PhysicalReleaseDate = b.PhysicalReleaseDate
+	}
+	x.xxx_hidden_AlternativeTitles = b.AlternativeTitles
+	x.xxx_hidden_TranslatedTitles = b.TranslatedTitles
+	if b.SecondaryYear != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 30, 31)
+		x.xxx_hidden_SecondaryYear = *b.SecondaryYear
 	}
 	return m0
 }
@@ -2438,7 +2602,8 @@ const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"\x06lookup\x18\x01 \x01(\v2\x17.mavio.plugin.v1.LookupR\x06lookup\"b\n" +
 	"\x13GetMetadataResponse\x12\x14\n" +
 	"\x05found\x18\x01 \x01(\bR\x05found\x125\n" +
-	"\bmetadata\x18\x02 \x01(\v2\x19.mavio.plugin.v1.MetadataR\bmetadata\"\xfc\a\n" +
+	"\bmetadata\x18\x02 \x01(\v2\x19.mavio.plugin.v1.MetadataR\bmetadata\"\x92\n" +
+	"\n" +
 	"\bMetadata\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12%\n" +
 	"\x0eoriginal_title\x18\x02 \x01(\tR\roriginalTitle\x12\x1b\n" +
@@ -2468,7 +2633,13 @@ const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"death_date\x18\x17 \x01(\tR\tdeathDate\x12\x1f\n" +
 	"\vbirth_place\x18\x18 \x01(\tR\n" +
 	"birthPlace\x12'\n" +
-	"\x0fcollection_name\x18\x19 \x01(\tR\x0ecollectionName\x1a>\n" +
+	"\x0fcollection_name\x18\x19 \x01(\tR\x0ecollectionName\x12+\n" +
+	"\x11original_language\x18\x1a \x01(\tR\x10originalLanguage\x120\n" +
+	"\x14digital_release_date\x18\x1b \x01(\tR\x12digitalReleaseDate\x122\n" +
+	"\x15physical_release_date\x18\x1c \x01(\tR\x13physicalReleaseDate\x12-\n" +
+	"\x12alternative_titles\x18\x1d \x03(\tR\x11alternativeTitles\x12+\n" +
+	"\x11translated_titles\x18\x1e \x03(\tR\x10translatedTitles\x12%\n" +
+	"\x0esecondary_year\x18\x1f \x01(\x05R\rsecondaryYear\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xad\x02\n" +

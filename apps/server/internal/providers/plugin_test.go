@@ -193,3 +193,25 @@ func TestImagePlugin(t *testing.T) {
 		t.Errorf("Images(folder) = %v, %v; asked %v", got, err, f.got)
 	}
 }
+
+func TestToResultMovieAcquisition(t *testing.T) {
+	md := pluginv1.Metadata_builder{
+		OriginalLanguage:    proto.String("fr"),
+		DigitalReleaseDate:  proto.String("2020-03-01"),
+		PhysicalReleaseDate: proto.String("2020-04-01"),
+		AlternativeTitles:   []string{"Other"},
+		TranslatedTitles:    []string{"Autre"},
+		SecondaryYear:       proto.Int32(2019),
+	}.Build()
+	it := toResult(md).Item
+	if it.OriginalLanguage != "fr" || it.SecondaryYear != 2019 ||
+		!slices.Equal(it.AlternativeTitles, []string{"Other"}) || !slices.Equal(it.TranslatedTitles, []string{"Autre"}) {
+		t.Errorf("toResult = %+v", it)
+	}
+	if it.DigitalReleaseDate == nil || !it.DigitalReleaseDate.Equal(time.Date(2020, 3, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Errorf("digital release = %v, want = 2020-03-01", it.DigitalReleaseDate)
+	}
+	if it.PhysicalReleaseDate == nil || !it.PhysicalReleaseDate.Equal(time.Date(2020, 4, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Errorf("physical release = %v, want = 2020-04-01", it.PhysicalReleaseDate)
+	}
+}

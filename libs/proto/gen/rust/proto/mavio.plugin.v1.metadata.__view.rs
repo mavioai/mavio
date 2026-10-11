@@ -2119,6 +2119,29 @@ pub struct MetadataView<'a> {
     ///
     /// Field 25: `collection_name`
     pub collection_name: ::core::option::Option<&'a str>,
+    /// For movies: the language (ISO 639-1) the movie was made in.
+    ///
+    /// Field 26: `original_language`
+    pub original_language: ::core::option::Option<&'a str>,
+    /// For movies: when the movie came out digitally and on disc, as ISO 8601
+    /// calendar dates; premiere_date is its release in cinemas.
+    ///
+    /// Field 27: `digital_release_date`
+    pub digital_release_date: ::core::option::Option<&'a str>,
+    /// Field 28: `physical_release_date`
+    pub physical_release_date: ::core::option::Option<&'a str>,
+    /// For movies: other titles of the movie, and its titles in other
+    /// languages, by which releases may name it.
+    ///
+    /// Field 29: `alternative_titles`
+    pub alternative_titles: ::buffa::RepeatedView<'a, &'a str>,
+    /// Field 30: `translated_titles`
+    pub translated_titles: ::buffa::RepeatedView<'a, &'a str>,
+    /// For movies: another year releases may give the movie, such as that of
+    /// its premiere when it differs from production_year.
+    ///
+    /// Field 31: `secondary_year`
+    pub secondary_year: ::core::option::Option<i32>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for MetadataView<'a> {
@@ -2286,6 +2309,34 @@ impl<'a> ::buffa::MessageView<'a> for MetadataView<'a> {
                 )?;
                 view.collection_name = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            26u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.original_language = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            27u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.digital_release_date = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            28u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.physical_release_date = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            31u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.secondary_year = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
             13u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -2380,6 +2431,28 @@ impl<'a> ::buffa::MessageView<'a> for MetadataView<'a> {
                             __sub_ctx,
                         )?,
                     );
+            }
+            29u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.alternative_titles.push(__elem);
+            }
+            30u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.translated_titles.push(__elem);
             }
             16u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -2489,6 +2562,20 @@ impl<'a> ::buffa::MessageView<'a> for MetadataView<'a> {
             death_date: self.death_date.map(|s| s.to_string()),
             birth_place: self.birth_place.map(|s| s.to_string()),
             collection_name: self.collection_name.map(|s| s.to_string()),
+            original_language: self.original_language.map(|s| s.to_string()),
+            digital_release_date: self.digital_release_date.map(|s| s.to_string()),
+            physical_release_date: self.physical_release_date.map(|s| s.to_string()),
+            alternative_titles: self
+                .alternative_titles
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
+            translated_titles: self
+                .translated_titles
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
+            secondary_year: self.secondary_year,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2592,6 +2679,24 @@ impl<'a> ::buffa::ViewEncode<'a> for MetadataView<'a> {
         }
         if let Some(ref v) = self.collection_name {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.original_language {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.digital_release_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.physical_release_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.alternative_titles {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.translated_titles {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.secondary_year {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -2712,6 +2817,24 @@ impl<'a> ::buffa::ViewEncode<'a> for MetadataView<'a> {
         }
         if let Some(ref v) = self.collection_name {
             ::buffa::types::put_string_field(25u32, v, buf);
+        }
+        if let Some(ref v) = self.original_language {
+            ::buffa::types::put_string_field(26u32, v, buf);
+        }
+        if let Some(ref v) = self.digital_release_date {
+            ::buffa::types::put_string_field(27u32, v, buf);
+        }
+        if let Some(ref v) = self.physical_release_date {
+            ::buffa::types::put_string_field(28u32, v, buf);
+        }
+        for v in &self.alternative_titles {
+            ::buffa::types::put_string_field(29u32, v, buf);
+        }
+        for v in &self.translated_titles {
+            ::buffa::types::put_string_field(30u32, v, buf);
+        }
+        if let Some(v) = self.secondary_year {
+            ::buffa::types::put_int32_field(31u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2949,6 +3072,47 @@ impl MetadataOwnedView {
     #[must_use]
     pub fn collection_name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().collection_name
+    }
+    /// For movies: the language (ISO 639-1) the movie was made in.
+    ///
+    /// Field 26: `original_language`
+    #[must_use]
+    pub fn original_language(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().original_language
+    }
+    /// For movies: when the movie came out digitally and on disc, as ISO 8601
+    /// calendar dates; premiere_date is its release in cinemas.
+    ///
+    /// Field 27: `digital_release_date`
+    #[must_use]
+    pub fn digital_release_date(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().digital_release_date
+    }
+    /// Field 28: `physical_release_date`
+    #[must_use]
+    pub fn physical_release_date(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().physical_release_date
+    }
+    /// For movies: other titles of the movie, and its titles in other
+    /// languages, by which releases may name it.
+    ///
+    /// Field 29: `alternative_titles`
+    #[must_use]
+    pub fn alternative_titles(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().alternative_titles
+    }
+    /// Field 30: `translated_titles`
+    #[must_use]
+    pub fn translated_titles(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().translated_titles
+    }
+    /// For movies: another year releases may give the movie, such as that of
+    /// its premiere when it differs from production_year.
+    ///
+    /// Field 31: `secondary_year`
+    #[must_use]
+    pub fn secondary_year(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().secondary_year
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<MetadataView<'static>>>

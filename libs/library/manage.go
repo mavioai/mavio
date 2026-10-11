@@ -227,6 +227,9 @@ func clearMetadata(it *core.Item) {
 	it.PremiereDate, it.EndDate = nil, nil
 	it.CommunityRating, it.CriticRating = 0, 0
 	it.SeriesStatus, it.AirDays, it.RemoteTrailers = "", nil, nil
+	it.OriginalLanguage, it.SecondaryYear = "", 0
+	it.DigitalReleaseDate, it.PhysicalReleaseDate = nil, nil
+	it.AlternativeTitles, it.TranslatedTitles = nil, nil
 }
 
 // saveLocal writes an item's NFO file and the savers' files next to its

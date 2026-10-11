@@ -13838,6 +13838,15 @@ type ItemMutation struct {
 	series_type                   *string
 	absolute_number               *int
 	addabsolute_number            *int
+	original_language             *string
+	digital_release_date          *time.Time
+	physical_release_date         *time.Time
+	alternative_titles            *[]string
+	appendalternative_titles      []string
+	translated_titles             *[]string
+	appendtranslated_titles       []string
+	secondary_year                *int
+	addsecondary_year             *int
 	clearedFields                 map[string]struct{}
 	library                       *core.ID
 	clearedlibrary                bool
@@ -16698,6 +16707,326 @@ func (m *ItemMutation) ResetAbsoluteNumber() {
 	delete(m.clearedFields, item.FieldAbsoluteNumber)
 }
 
+// SetOriginalLanguage sets the "original_language" field.
+func (m *ItemMutation) SetOriginalLanguage(s string) {
+	m.original_language = &s
+}
+
+// OriginalLanguage returns the value of the "original_language" field in the mutation.
+func (m *ItemMutation) OriginalLanguage() (r string, exists bool) {
+	v := m.original_language
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOriginalLanguage returns the old "original_language" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldOriginalLanguage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOriginalLanguage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOriginalLanguage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOriginalLanguage: %w", err)
+	}
+	return oldValue.OriginalLanguage, nil
+}
+
+// ResetOriginalLanguage resets all changes to the "original_language" field.
+func (m *ItemMutation) ResetOriginalLanguage() {
+	m.original_language = nil
+}
+
+// SetDigitalReleaseDate sets the "digital_release_date" field.
+func (m *ItemMutation) SetDigitalReleaseDate(t time.Time) {
+	m.digital_release_date = &t
+}
+
+// DigitalReleaseDate returns the value of the "digital_release_date" field in the mutation.
+func (m *ItemMutation) DigitalReleaseDate() (r time.Time, exists bool) {
+	v := m.digital_release_date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDigitalReleaseDate returns the old "digital_release_date" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldDigitalReleaseDate(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDigitalReleaseDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDigitalReleaseDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDigitalReleaseDate: %w", err)
+	}
+	return oldValue.DigitalReleaseDate, nil
+}
+
+// ClearDigitalReleaseDate clears the value of the "digital_release_date" field.
+func (m *ItemMutation) ClearDigitalReleaseDate() {
+	m.digital_release_date = nil
+	m.clearedFields[item.FieldDigitalReleaseDate] = struct{}{}
+}
+
+// DigitalReleaseDateCleared returns if the "digital_release_date" field was cleared in this mutation.
+func (m *ItemMutation) DigitalReleaseDateCleared() bool {
+	_, ok := m.clearedFields[item.FieldDigitalReleaseDate]
+	return ok
+}
+
+// ResetDigitalReleaseDate resets all changes to the "digital_release_date" field.
+func (m *ItemMutation) ResetDigitalReleaseDate() {
+	m.digital_release_date = nil
+	delete(m.clearedFields, item.FieldDigitalReleaseDate)
+}
+
+// SetPhysicalReleaseDate sets the "physical_release_date" field.
+func (m *ItemMutation) SetPhysicalReleaseDate(t time.Time) {
+	m.physical_release_date = &t
+}
+
+// PhysicalReleaseDate returns the value of the "physical_release_date" field in the mutation.
+func (m *ItemMutation) PhysicalReleaseDate() (r time.Time, exists bool) {
+	v := m.physical_release_date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhysicalReleaseDate returns the old "physical_release_date" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldPhysicalReleaseDate(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhysicalReleaseDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhysicalReleaseDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhysicalReleaseDate: %w", err)
+	}
+	return oldValue.PhysicalReleaseDate, nil
+}
+
+// ClearPhysicalReleaseDate clears the value of the "physical_release_date" field.
+func (m *ItemMutation) ClearPhysicalReleaseDate() {
+	m.physical_release_date = nil
+	m.clearedFields[item.FieldPhysicalReleaseDate] = struct{}{}
+}
+
+// PhysicalReleaseDateCleared returns if the "physical_release_date" field was cleared in this mutation.
+func (m *ItemMutation) PhysicalReleaseDateCleared() bool {
+	_, ok := m.clearedFields[item.FieldPhysicalReleaseDate]
+	return ok
+}
+
+// ResetPhysicalReleaseDate resets all changes to the "physical_release_date" field.
+func (m *ItemMutation) ResetPhysicalReleaseDate() {
+	m.physical_release_date = nil
+	delete(m.clearedFields, item.FieldPhysicalReleaseDate)
+}
+
+// SetAlternativeTitles sets the "alternative_titles" field.
+func (m *ItemMutation) SetAlternativeTitles(s []string) {
+	m.alternative_titles = &s
+	m.appendalternative_titles = nil
+}
+
+// AlternativeTitles returns the value of the "alternative_titles" field in the mutation.
+func (m *ItemMutation) AlternativeTitles() (r []string, exists bool) {
+	v := m.alternative_titles
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAlternativeTitles returns the old "alternative_titles" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldAlternativeTitles(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAlternativeTitles is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAlternativeTitles requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAlternativeTitles: %w", err)
+	}
+	return oldValue.AlternativeTitles, nil
+}
+
+// AppendAlternativeTitles adds s to the "alternative_titles" field.
+func (m *ItemMutation) AppendAlternativeTitles(s []string) {
+	m.appendalternative_titles = append(m.appendalternative_titles, s...)
+}
+
+// AppendedAlternativeTitles returns the list of values that were appended to the "alternative_titles" field in this mutation.
+func (m *ItemMutation) AppendedAlternativeTitles() ([]string, bool) {
+	if len(m.appendalternative_titles) == 0 {
+		return nil, false
+	}
+	return m.appendalternative_titles, true
+}
+
+// ClearAlternativeTitles clears the value of the "alternative_titles" field.
+func (m *ItemMutation) ClearAlternativeTitles() {
+	m.alternative_titles = nil
+	m.appendalternative_titles = nil
+	m.clearedFields[item.FieldAlternativeTitles] = struct{}{}
+}
+
+// AlternativeTitlesCleared returns if the "alternative_titles" field was cleared in this mutation.
+func (m *ItemMutation) AlternativeTitlesCleared() bool {
+	_, ok := m.clearedFields[item.FieldAlternativeTitles]
+	return ok
+}
+
+// ResetAlternativeTitles resets all changes to the "alternative_titles" field.
+func (m *ItemMutation) ResetAlternativeTitles() {
+	m.alternative_titles = nil
+	m.appendalternative_titles = nil
+	delete(m.clearedFields, item.FieldAlternativeTitles)
+}
+
+// SetTranslatedTitles sets the "translated_titles" field.
+func (m *ItemMutation) SetTranslatedTitles(s []string) {
+	m.translated_titles = &s
+	m.appendtranslated_titles = nil
+}
+
+// TranslatedTitles returns the value of the "translated_titles" field in the mutation.
+func (m *ItemMutation) TranslatedTitles() (r []string, exists bool) {
+	v := m.translated_titles
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTranslatedTitles returns the old "translated_titles" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldTranslatedTitles(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTranslatedTitles is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTranslatedTitles requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTranslatedTitles: %w", err)
+	}
+	return oldValue.TranslatedTitles, nil
+}
+
+// AppendTranslatedTitles adds s to the "translated_titles" field.
+func (m *ItemMutation) AppendTranslatedTitles(s []string) {
+	m.appendtranslated_titles = append(m.appendtranslated_titles, s...)
+}
+
+// AppendedTranslatedTitles returns the list of values that were appended to the "translated_titles" field in this mutation.
+func (m *ItemMutation) AppendedTranslatedTitles() ([]string, bool) {
+	if len(m.appendtranslated_titles) == 0 {
+		return nil, false
+	}
+	return m.appendtranslated_titles, true
+}
+
+// ClearTranslatedTitles clears the value of the "translated_titles" field.
+func (m *ItemMutation) ClearTranslatedTitles() {
+	m.translated_titles = nil
+	m.appendtranslated_titles = nil
+	m.clearedFields[item.FieldTranslatedTitles] = struct{}{}
+}
+
+// TranslatedTitlesCleared returns if the "translated_titles" field was cleared in this mutation.
+func (m *ItemMutation) TranslatedTitlesCleared() bool {
+	_, ok := m.clearedFields[item.FieldTranslatedTitles]
+	return ok
+}
+
+// ResetTranslatedTitles resets all changes to the "translated_titles" field.
+func (m *ItemMutation) ResetTranslatedTitles() {
+	m.translated_titles = nil
+	m.appendtranslated_titles = nil
+	delete(m.clearedFields, item.FieldTranslatedTitles)
+}
+
+// SetSecondaryYear sets the "secondary_year" field.
+func (m *ItemMutation) SetSecondaryYear(i int) {
+	m.secondary_year = &i
+	m.addsecondary_year = nil
+}
+
+// SecondaryYear returns the value of the "secondary_year" field in the mutation.
+func (m *ItemMutation) SecondaryYear() (r int, exists bool) {
+	v := m.secondary_year
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSecondaryYear returns the old "secondary_year" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldSecondaryYear(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSecondaryYear is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSecondaryYear requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSecondaryYear: %w", err)
+	}
+	return oldValue.SecondaryYear, nil
+}
+
+// AddSecondaryYear adds i to the "secondary_year" field.
+func (m *ItemMutation) AddSecondaryYear(i int) {
+	if m.addsecondary_year != nil {
+		*m.addsecondary_year += i
+	} else {
+		m.addsecondary_year = &i
+	}
+}
+
+// AddedSecondaryYear returns the value that was added to the "secondary_year" field in this mutation.
+func (m *ItemMutation) AddedSecondaryYear() (r int, exists bool) {
+	v := m.addsecondary_year
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSecondaryYear resets all changes to the "secondary_year" field.
+func (m *ItemMutation) ResetSecondaryYear() {
+	m.secondary_year = nil
+	m.addsecondary_year = nil
+}
+
 // ClearLibrary clears the "library" edge to the Library entity.
 func (m *ItemMutation) ClearLibrary() {
 	m.clearedlibrary = true
@@ -17797,7 +18126,7 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 56)
+	fields := make([]string, 0, 62)
 	if m.library != nil {
 		fields = append(fields, item.FieldLibraryID)
 	}
@@ -17966,6 +18295,24 @@ func (m *ItemMutation) Fields() []string {
 	if m.absolute_number != nil {
 		fields = append(fields, item.FieldAbsoluteNumber)
 	}
+	if m.original_language != nil {
+		fields = append(fields, item.FieldOriginalLanguage)
+	}
+	if m.digital_release_date != nil {
+		fields = append(fields, item.FieldDigitalReleaseDate)
+	}
+	if m.physical_release_date != nil {
+		fields = append(fields, item.FieldPhysicalReleaseDate)
+	}
+	if m.alternative_titles != nil {
+		fields = append(fields, item.FieldAlternativeTitles)
+	}
+	if m.translated_titles != nil {
+		fields = append(fields, item.FieldTranslatedTitles)
+	}
+	if m.secondary_year != nil {
+		fields = append(fields, item.FieldSecondaryYear)
+	}
 	return fields
 }
 
@@ -18086,6 +18433,18 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 		return m.SeriesType()
 	case item.FieldAbsoluteNumber:
 		return m.AbsoluteNumber()
+	case item.FieldOriginalLanguage:
+		return m.OriginalLanguage()
+	case item.FieldDigitalReleaseDate:
+		return m.DigitalReleaseDate()
+	case item.FieldPhysicalReleaseDate:
+		return m.PhysicalReleaseDate()
+	case item.FieldAlternativeTitles:
+		return m.AlternativeTitles()
+	case item.FieldTranslatedTitles:
+		return m.TranslatedTitles()
+	case item.FieldSecondaryYear:
+		return m.SecondaryYear()
 	}
 	return nil, false
 }
@@ -18207,6 +18566,18 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldSeriesType(ctx)
 	case item.FieldAbsoluteNumber:
 		return m.OldAbsoluteNumber(ctx)
+	case item.FieldOriginalLanguage:
+		return m.OldOriginalLanguage(ctx)
+	case item.FieldDigitalReleaseDate:
+		return m.OldDigitalReleaseDate(ctx)
+	case item.FieldPhysicalReleaseDate:
+		return m.OldPhysicalReleaseDate(ctx)
+	case item.FieldAlternativeTitles:
+		return m.OldAlternativeTitles(ctx)
+	case item.FieldTranslatedTitles:
+		return m.OldTranslatedTitles(ctx)
+	case item.FieldSecondaryYear:
+		return m.OldSecondaryYear(ctx)
 	}
 	return nil, fmt.Errorf("unknown Item field %s", name)
 }
@@ -18608,6 +18979,48 @@ func (m *ItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAbsoluteNumber(v)
 		return nil
+	case item.FieldOriginalLanguage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOriginalLanguage(v)
+		return nil
+	case item.FieldDigitalReleaseDate:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDigitalReleaseDate(v)
+		return nil
+	case item.FieldPhysicalReleaseDate:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhysicalReleaseDate(v)
+		return nil
+	case item.FieldAlternativeTitles:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAlternativeTitles(v)
+		return nil
+	case item.FieldTranslatedTitles:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTranslatedTitles(v)
+		return nil
+	case item.FieldSecondaryYear:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSecondaryYear(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Item field %s", name)
 }
@@ -18661,6 +19074,9 @@ func (m *ItemMutation) AddedFields() []string {
 	if m.addabsolute_number != nil {
 		fields = append(fields, item.FieldAbsoluteNumber)
 	}
+	if m.addsecondary_year != nil {
+		fields = append(fields, item.FieldSecondaryYear)
+	}
 	return fields
 }
 
@@ -18699,6 +19115,8 @@ func (m *ItemMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedScanGeneration()
 	case item.FieldAbsoluteNumber:
 		return m.AddedAbsoluteNumber()
+	case item.FieldSecondaryYear:
+		return m.AddedSecondaryYear()
 	}
 	return nil, false
 }
@@ -18813,6 +19231,13 @@ func (m *ItemMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddAbsoluteNumber(v)
 		return nil
+	case item.FieldSecondaryYear:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSecondaryYear(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Item numeric field %s", name)
 }
@@ -18889,6 +19314,18 @@ func (m *ItemMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(item.FieldAbsoluteNumber) {
 		fields = append(fields, item.FieldAbsoluteNumber)
+	}
+	if m.FieldCleared(item.FieldDigitalReleaseDate) {
+		fields = append(fields, item.FieldDigitalReleaseDate)
+	}
+	if m.FieldCleared(item.FieldPhysicalReleaseDate) {
+		fields = append(fields, item.FieldPhysicalReleaseDate)
+	}
+	if m.FieldCleared(item.FieldAlternativeTitles) {
+		fields = append(fields, item.FieldAlternativeTitles)
+	}
+	if m.FieldCleared(item.FieldTranslatedTitles) {
+		fields = append(fields, item.FieldTranslatedTitles)
 	}
 	return fields
 }
@@ -18972,6 +19409,18 @@ func (m *ItemMutation) ClearField(name string) error {
 		return nil
 	case item.FieldAbsoluteNumber:
 		m.ClearAbsoluteNumber()
+		return nil
+	case item.FieldDigitalReleaseDate:
+		m.ClearDigitalReleaseDate()
+		return nil
+	case item.FieldPhysicalReleaseDate:
+		m.ClearPhysicalReleaseDate()
+		return nil
+	case item.FieldAlternativeTitles:
+		m.ClearAlternativeTitles()
+		return nil
+	case item.FieldTranslatedTitles:
+		m.ClearTranslatedTitles()
 		return nil
 	}
 	return fmt.Errorf("unknown Item nullable field %s", name)
@@ -19148,6 +19597,24 @@ func (m *ItemMutation) ResetField(name string) error {
 		return nil
 	case item.FieldAbsoluteNumber:
 		m.ResetAbsoluteNumber()
+		return nil
+	case item.FieldOriginalLanguage:
+		m.ResetOriginalLanguage()
+		return nil
+	case item.FieldDigitalReleaseDate:
+		m.ResetDigitalReleaseDate()
+		return nil
+	case item.FieldPhysicalReleaseDate:
+		m.ResetPhysicalReleaseDate()
+		return nil
+	case item.FieldAlternativeTitles:
+		m.ResetAlternativeTitles()
+		return nil
+	case item.FieldTranslatedTitles:
+		m.ResetTranslatedTitles()
+		return nil
+	case item.FieldSecondaryYear:
+		m.ResetSecondaryYear()
 		return nil
 	}
 	return fmt.Errorf("unknown Item field %s", name)

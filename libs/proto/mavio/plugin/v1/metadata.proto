@@ -139,6 +139,19 @@ message Metadata {
   // The collection (movie set) a movie belongs to; its ID is among the
   // external IDs, such as "tmdb_collection".
   string collection_name = 25;
+  // For movies: the language (ISO 639-1) the movie was made in.
+  string original_language = 26;
+  // For movies: when the movie came out digitally and on disc, as ISO 8601
+  // calendar dates; premiere_date is its release in cinemas.
+  string digital_release_date = 27;
+  string physical_release_date = 28;
+  // For movies: other titles of the movie, and its titles in other
+  // languages, by which releases may name it.
+  repeated string alternative_titles = 29;
+  repeated string translated_titles = 30;
+  // For movies: another year releases may give the movie, such as that of
+  // its premiere when it differs from production_year.
+  int32 secondary_year = 31;
 }
 
 enum CreditKind {

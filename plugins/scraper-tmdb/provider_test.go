@@ -82,8 +82,13 @@ var routes = map[string]string{
 				{"file_path":"/bd.jpg","iso_639_1":null,"vote_average":6}]},
 		"keywords":{"keywords":[{"name":"warrior"}]},
 		"release_dates":{"results":[
-			{"iso_3166_1":"US","release_dates":[{"certification":""},{"certification":"PG-13"}]},
-			{"iso_3166_1":"DE","release_dates":[{"certification":"12"}]}]}}`,
+			{"iso_3166_1":"US","release_dates":[{"certification":"","type":4,"release_date":"2020-09-04T00:00:00.000Z"},
+				{"certification":"PG-13","type":5,"release_date":"2020-11-10T00:00:00.000Z"}]},
+			{"iso_3166_1":"DE","release_dates":[{"certification":"12","type":4,"release_date":"2020-09-04T00:00:00.000Z"}]},
+			{"iso_3166_1":"CN","release_dates":[{"type":3,"release_date":"2019-12-31T00:00:00.000Z"}]}]},
+		"original_language":"en",
+		"alternative_titles":{"titles":[{"iso_3166_1":"US","title":"Mulan (2020)"},{"iso_3166_1":"US","title":"Mulan"}]},
+		"translations":{"translations":[{"iso_639_1":"zh","data":{"title":"花木兰"}},{"iso_639_1":"de","data":{"title":""}}]}}`,
 	"/3/find/tt0120762": `{"movie_results":[{"id":10674}],"tv_results":[]}`,
 	"/3/movie/10674":    `{"id":10674,"title":"Mulan","release_date":"1998-06-18"}`,
 	"/3/find/81189":     `{"movie_results":[],"tv_results":[{"id":1396}]}`,
@@ -199,6 +204,10 @@ func TestMovieBySearch(t *testing.T) {
 		{"premiere date", md.GetPremiereDate(), "2020-09-04"},
 		{"official rating", md.GetOfficialRating(), "FSK-12"},
 		{"tagline", md.GetTagline(), "Loyal. Brave. True."},
+		{"original language", md.GetOriginalLanguage(), "en"},
+		{"digital release date", md.GetDigitalReleaseDate(), "2020-09-04"},
+		// No physical release in Germany: the earliest anywhere.
+		{"physical release date", md.GetPhysicalReleaseDate(), "2020-11-10"},
 	} {
 		if c.got != c.want {
 			t.Errorf("%s = %q, want = %q", c.name, c.got, c.want)
@@ -206,6 +215,15 @@ func TestMovieBySearch(t *testing.T) {
 	}
 	if got := md.GetProductionYear(); got != 2020 {
 		t.Errorf("production year = %d, want = 2020", got)
+	}
+	if got := md.GetSecondaryYear(); got != 2019 {
+		t.Errorf("secondary year = %d, want = 2019", got)
+	}
+	if got, want := md.GetAlternativeTitles(), []string{"Mulan (2020)"}; !slices.Equal(got, want) {
+		t.Errorf("alternative titles = %v, want = %v", got, want)
+	}
+	if got, want := md.GetTranslatedTitles(), []string{"花木兰"}; !slices.Equal(got, want) {
+		t.Errorf("translated titles = %v, want = %v", got, want)
 	}
 	if got := md.GetRuntime().AsDuration(); got != 115*time.Minute {
 		t.Errorf("runtime = %v, want = 1h55m", got)

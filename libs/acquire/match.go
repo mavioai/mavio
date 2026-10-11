@@ -17,10 +17,21 @@ type MovieRef struct {
 	Title         string
 	OriginalTitle string
 	Year          int
+	// SecondaryYear is another year releases may give the movie; 0 for
+	// none.
+	SecondaryYear int
+	// AlternativeTitles and TranslatedTitles are the movie's other titles
+	// and its titles in other languages.
+	AlternativeTitles, TranslatedTitles []string
 	// ImdbID is as "tt0111161"; empty when unknown.
 	ImdbID string
 	// TmdbID is 0 when unknown.
 	TmdbID int
+}
+
+// hasYear reports whether year is the movie's year or secondary year.
+func (m *MovieRef) hasYear(year int) bool {
+	return m.Year == year || m.SecondaryYear != 0 && m.SecondaryYear == year
 }
 
 // ErrMultipleMovies is returned when a release's titles match more than
@@ -66,16 +77,28 @@ func MatchMovie(parsed *release.ParsedMovieInfo, imdbID string, tmdbID int, sear
 }
 
 // yearMatches reports whether a parsed year, which is below 1800 when
-// unknown, is the movie's.
-func yearMatches(year int, m *MovieRef) bool { return year < 1800 || m.Year == year }
+// unknown, is the movie's year or secondary year.
+func yearMatches(year int, m *MovieRef) bool { return year < 1800 || m.hasYear(year) }
+
+// cleanTitles returns the clean titles of titles.
+func cleanTitles(titles []string) []string {
+	out := make([]string, 0, len(titles))
+	for _, t := range titles {
+		out = append(out, release.CleanMovieTitle(t))
+	}
+	return out
+}
 
 // matchSearched matches a release to the movie searched for, as Radarr's
-// TryGetMovieBySearchCriteria.
+// TryGetMovieBySearchCriteria: by its title, original title, alternative
+// titles or translations.
 func matchSearched(parsed *release.ParsedMovieInfo, imdbID string, tmdbID int, m *MovieRef) *MovieRef {
 	possible := []string{release.CleanMovieTitle(m.Title)}
 	if m.OriginalTitle != "" {
 		possible = append(possible, release.CleanMovieTitle(m.OriginalTitle))
 	}
+	possible = append(possible, cleanTitles(m.AlternativeTitles)...)
+	possible = append(possible, cleanTitles(m.TranslatedTitles)...)
 	clean := make([]string, len(parsed.MovieTitles))
 	for i, t := range parsed.MovieTitles {
 		clean[i] = release.CleanMovieTitle(t)
@@ -100,7 +123,8 @@ func matchSearched(parsed *release.ParsedMovieInfo, imdbID string, tmdbID int, m
 // matchTitle matches a release among movies by its titles and year, as
 // Radarr's TryGetMovieByTitleAndOrYear and MovieService.FindByTitle: by
 // a movie's title or original title, then by its title with numbers
-// written in Roman or Arabic numerals.
+// written in Roman or Arabic numerals, then by its alternative titles,
+// then by its translations; in the year or secondary year parsed.
 func matchTitle(parsed *release.ParsedMovieInfo, movies []MovieRef) (*MovieRef, error) {
 	var clean, other []string
 	for _, t := range parsed.MovieTitles {
@@ -121,7 +145,7 @@ func matchTitle(parsed *release.ParsedMovieInfo, movies []MovieRef) (*MovieRef, 
 		var out []*MovieRef
 		for i := range movies {
 			m := &movies[i]
-			if match(m) && (year == 0 || m.Year == year) {
+			if match(m) && (year == 0 || m.hasYear(year)) {
 				out = append(out, m)
 			}
 		}
@@ -133,6 +157,15 @@ func matchTitle(parsed *release.ParsedMovieInfo, movies []MovieRef) (*MovieRef, 
 	})
 	if len(found) == 0 {
 		found = withYear(func(m *MovieRef) bool { return slices.Contains(other, release.CleanMovieTitle(m.Title)) })
+	}
+	anyOf := func(titles []string) bool {
+		return slices.ContainsFunc(cleanTitles(titles), func(t string) bool { return slices.Contains(clean, t) || slices.Contains(other, t) })
+	}
+	if len(found) == 0 {
+		found = withYear(func(m *MovieRef) bool { return anyOf(m.AlternativeTitles) })
+	}
+	if len(found) == 0 {
+		found = withYear(func(m *MovieRef) bool { return anyOf(m.TranslatedTitles) })
 	}
 	switch len(found) {
 	case 0:
