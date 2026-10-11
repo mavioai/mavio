@@ -510,7 +510,7 @@ flowchart TD
 - [x] Episode, season and series searches and RSS sync as jobs; releases matched to episodes through scene mappings, XEM, absolute numbers and air dates (`libs/acquire/series`, job `acquisition.episode_search`, scene mappings refreshed by `acquisition.scene_mappings`)
   - [x] Scene numbering kept on episodes (`EpisodeState`), extrapolated and marked unverified as Sonarr's `XemService` does, refreshed when a series is added and with the scene mappings
   - [x] Anime searched by season and episode, and anime season packs by season, of indexers set to (`anime_standard_format_search`, Sonarr's `AnimeStandardFormatSearch`); scene mappings searched by both IDs and title
-  - [ ] Interactive searches of a whole series
+  - [x] Interactive searches of a whole series: each season but the specials searched as Sonarr's series search does, anime episode by episode, and the releases decided on as by RSS
   - [x] The series and movie engines log with the server's logger rather than the default one
 - [x] Import of episodes, season packs and multi-episode files; upgrades
   - [x] Series naming settings: whether episodes are renamed, the episode file formats, the series, season and specials folder formats and the multi-episode style, with Sonarr's defaults when empty

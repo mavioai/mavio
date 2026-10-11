@@ -510,7 +510,7 @@ flowchart TD
 - [x] 以作业执行的单集、整季与整剧搜索及 RSS 同步；通过 scene 映射、XEM、绝对集数与播出日期把发布匹配到单集（`libs/acquire/series`、作业 `acquisition.episode_search`，scene 映射由 `acquisition.scene_mappings` 刷新）
   - [x] 像 Sonarr 一样把 scene 编号保存在单集上（`EpisodeState`），并像 Sonarr 的 `XemService` 那样推算并标记为未验证；在剧集加入时以及随 scene 映射一同刷新
   - [x] 对设置了 `anime_standard_format_search`（Sonarr 的 `AnimeStandardFormatSearch`）的索引器，按季与集搜索动漫，按季搜索动漫整季包；同时按 ID 与标题搜索的 scene 映射
-  - [ ] 整部剧集的交互式搜索
+  - [x] 整部剧集的交互式搜索：如 Sonarr 的剧集搜索那样逐季搜索（特别篇除外），动画逐集搜索，发布如 RSS 那样决策
   - [x] 剧集与电影引擎使用服务器的日志记录器，而不是默认的
 - [x] 单集、整季包与多集文件的入库；升级
   - [x] 剧集命名设置：是否重命名单集、单集文件格式、剧集、季与特别篇目录格式与多集样式，为空时使用 Sonarr 的默认值
