@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"testing"
 	"time"
@@ -176,8 +177,20 @@ func TestSettings(t *testing.T) {
 		{`{"nzb_folder": "n", "strm_folder": "/s"}`, false},
 	}
 	for _, tt := range tests {
-		if _, err := Definitions()[0].New([]byte(tt.settings), client.Env{}); (err == nil) != tt.ok {
+		if _, err := Definitions()[0].New([]byte(absPaths(tt.settings)), client.Env{}); (err == nil) != tt.ok {
 			t.Errorf("New(%s) error = %v, want ok = %v", tt.settings, err, tt.ok)
 		}
 	}
+}
+
+// absPaths replaces the folders "/x" of settings with absolute paths of the
+// system the test runs on, where "/x" may not be absolute.
+func absPaths(settings string) string {
+	return regexp.MustCompile(`"/(\w+)"`).ReplaceAllStringFunc(settings, func(m string) string {
+		b, err := json.Marshal(filepath.Join(os.TempDir(), m[2:len(m)-1]))
+		if err != nil {
+			panic(err)
+		}
+		return string(b)
+	})
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 	"time"
 
@@ -389,9 +390,21 @@ func TestSettings(t *testing.T) {
 			if d.ID != tt.def {
 				continue
 			}
-			if _, err := d.New([]byte(tt.settings), env(newClock())); (err == nil) != tt.ok {
+			if _, err := d.New([]byte(absPaths(tt.settings)), env(newClock())); (err == nil) != tt.ok {
 				t.Errorf("%s %s: New() error = %v, want ok = %v", tt.def, tt.settings, err, tt.ok)
 			}
 		}
 	}
+}
+
+// absPaths replaces the folders "/x" of settings with absolute paths of the
+// system the test runs on, where "/x" may not be absolute.
+func absPaths(settings string) string {
+	return regexp.MustCompile(`"/(\w+)"`).ReplaceAllStringFunc(settings, func(m string) string {
+		b, err := json.Marshal(filepath.Join(os.TempDir(), m[2:len(m)-1]))
+		if err != nil {
+			panic(err)
+		}
+		return string(b)
+	})
 }
