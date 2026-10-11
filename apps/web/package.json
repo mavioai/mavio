@@ -10,10 +10,13 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "2.16.0",
     "@mavio/client-ts": "workspace:*",
     "@mavio/design": "workspace:*",
+    "@mavio/proto": "workspace:*",
     "@tanstack/react-query": "5.104.1",
     "@tanstack/react-router": "1.170.42",
+    "hls.js": "1.7.3",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
@@ -30,7 +33,9 @@
     "name": "web",
     "targets": {
       "build": {
-        "outputs": ["{workspaceRoot}/apps/server/internal/webui/dist"]
+        "outputs": [
+          "{workspaceRoot}/apps/server/internal/webui/dist"
+        ]
       }
     }
   }

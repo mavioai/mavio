@@ -588,7 +588,14 @@ flowchart TD
 - [x] `libs/client-rust`：服务器、其发现与登录（密码、首个用户、Quick Connect）、带退避的事件流、离线存储、带离线补发的播放上报、下载、页面状态、多台服务器的合并（首页、搜索、条目在其他服务器上的副本）；Swift 与 Kotlin 绑定
   - [ ] Go 绑定（`capi`、`proto`），随 Windows 与 Linux 应用
   - [ ] 经由事件流的远程控制命令与 SyncPlay，随接收它们的应用播放器
-- [ ] Web UI（`apps/web`、`libs/client-ts`）
+- [x] Web UI（`apps/web`、`libs/client-ts`）：登录（密码、首个用户、Quick Connect）、多台服务器及其顺序、合并的首页、带推荐与全部标签的媒体库、推荐栏、跨服务器搜索、带版本与其他服务器副本的详情、播放器（直放与 HLS、音轨与字幕轨、外部播放器）、授权设备；由事件流刷新
+  - [ ] 发现与请求页面，随 P20
+  - [ ] 管理页面：媒体库、用户、设备、插件、任务、设置
+  - [ ] 人物页面、合集与播放列表
+  - [ ] 一集结束时播放下一集
+  - [ ] 借助 JASSUB 保留样式的 ASS 字幕
+  - [ ] 离线保存查询缓存
+  - [ ] 组件的 Storybook 与页面的 Playwright 截图
 - [ ] iPhone 与 iPad 应用（`apps/ios`、`libs/apple`）
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）
 - [ ] Apple TV 与 Android TV 应用

@@ -1,17 +1,34 @@
+import { Servers, ServersProvider } from "@mavio/client-ts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
+import { locale } from "./i18n.ts";
 import { router } from "./router.tsx";
 import "./styles.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // An unreachable server fails fast: Home shows the others meanwhile.
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// The web UI is served by a Mavio server at its root (docs/clients.md §4.1).
+const servers = new Servers(localStorage, location.origin);
+
+document.documentElement.lang = locale;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <ServersProvider value={servers}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ServersProvider>
   </StrictMode>,
 );
