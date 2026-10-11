@@ -97,7 +97,7 @@ flowchart TD
 | P17 | Indexers | ✅ Done |
 | P18 | Movie acquisition | ✅ Done |
 | P19 | Series acquisition | ✅ Done |
-| P20 | Discovery and requests | In progress |
+| P20 | Discovery and requests | ✅ Done |
 | P21 | Clients and ecosystem | In progress |
 | P22 | Real-device acceptance | Not started |
 | P23 | Packaging and release | Not started |
@@ -541,7 +541,10 @@ flowchart TD
 - [x] `IssueService`: problems with an item reported, commented on, resolved and reopened
 - [x] Notifications: activities of the user concerned, read through `ActivityService.ListMyActivities` and delivered by notifier plugins
   - [ ] An event pushed to the user's sessions
-- [ ] End-to-end test
+- [x] End-to-end test (`apps/server/internal/server/requests_test.go`): a user limited to PG discovers a film and a series through scraper-tmdb, is refused an R-rated film, requests the others; an administrator approves; they are grabbed, imported and played, and the user is notified that they are available; an issue the user reports is resolved
+  - [ ] Declined requests, exhausted quotas and retried failed requests in the end-to-end test
+  - [ ] Changed seasons of pending requests and requests of every season in the end-to-end test
+  - [ ] Unrated titles hidden from users whose policy blocks them in the end-to-end test
 
 ### P21 Clients and Ecosystem
 **Scope**: the [clients](clients.md), built on the finished server API: the web UI embedded in the server (`apps/web`, served at `/`), the Apple apps for iPhone and iPad, Apple TV and the Mac (`apps/ios`, `apps/tvos`, `apps/macos`), the Android apps for phones and tablets and for Android TV (`apps/android`, `apps/android-tv`), the Windows and Linux app on MyGo (`apps/windows-linux`), and the libraries they share (`libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`); the decision on a Jellyfin API compatibility shim ([evaluation](jellyfin-compat.md)). Its foundation does not wait for P20: the toolchains and build targets, the TypeScript and Rust code generated from `libs/proto`, `libs/design`, the prototypes the open items of §4 name for clients, and the skeletons of the apps and libraries. Only the discovery and request screens wait for P20. The clients then come in this order, each proving the shared core and the design system before the next platform builds on them: the web UI with `libs/client-ts` and `libs/design`; the iPhone and iPad app with `libs/client-rust` and `libs/apple`; the Android phone and tablet app with `libs/android`; the Apple TV and Android TV apps; the Mac app; the Windows and Linux app. Its completion criteria will be defined after P20.

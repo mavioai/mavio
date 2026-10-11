@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -83,8 +84,10 @@ type fakeServices struct {
 
 	mu      sync.Mutex
 	unknown []string
-	// served counts the requests answered, by host and path.
-	served map[string]int
+	// served counts the requests answered, by host and path; queries
+	// holds the query of the last one.
+	served  map[string]int
+	queries map[string]url.Values
 	// keyed counts TMDB's answers to Mavio's key.
 	keyed int
 }
@@ -152,9 +155,10 @@ func (f *fakeServices) serve(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		f.mu.Lock()
 		if f.served == nil {
-			f.served = map[string]int{}
+			f.served, f.queries = map[string]int{}, map[string]url.Values{}
 		}
 		f.served[r.URL.Host+r.URL.Path]++
+		f.queries[r.URL.Host+r.URL.Path] = r.URL.Query()
 		f.mu.Unlock()
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(body))
