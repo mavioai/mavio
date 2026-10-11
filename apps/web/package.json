@@ -1,0 +1,37 @@
+{
+  "name": "@mavio/web",
+  "version": "0.0.0",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@mavio/client-ts": "workspace:*",
+    "@mavio/design": "workspace:*",
+    "@tanstack/react-query": "5.104.1",
+    "@tanstack/react-router": "1.170.42",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
+  },
+  "nx": {
+    "name": "web",
+    "targets": {
+      "build": {
+        "outputs": ["{workspaceRoot}/apps/server/internal/webui/dist"]
+      }
+    }
+  }
+}

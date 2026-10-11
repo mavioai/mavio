@@ -9,12 +9,23 @@
 # multi-platform builds need no emulation.
 
 ARG GO_VERSION=1.27.2
+ARG NODE_VERSION=26.11.1
 ARG JELLYFIN_FFMPEG_VERSION=8.1.3-1
+
+# The web UI, which the server embeds.
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-trixie-slim AS web
+WORKDIR /src
+COPY . .
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+	npm install -g "$(node -p 'require("./package.json").packageManager')" \
+	&& pnpm install --frozen-lockfile --filter @mavio/web... \
+	&& pnpm --filter @mavio/web build
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-trixie AS server
 ARG TARGETOS TARGETARCH VERSION
 WORKDIR /src
 COPY . .
+COPY --from=web /src/apps/server/internal/webui/dist/ apps/server/internal/webui/dist/
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
 	cd apps/server && CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath \
 	-ldflags "-s -w ${VERSION:+-X github.com/mavioai/mavio/apps/server/internal/buildinfo.version=$VERSION}" \

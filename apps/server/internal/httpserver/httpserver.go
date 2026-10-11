@@ -29,6 +29,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
+	"github.com/mavioai/mavio/apps/server/internal/webui"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
@@ -228,6 +229,8 @@ func Handler(opts Options) (http.Handler, error) {
 	}
 	mux.Handle("GET /api", docs)
 	mux.Handle("GET /api/", docs)
+	// Without a method, so that it does not conflict with the services' patterns.
+	mux.Handle("/", webui.Handler())
 	return cors(mux), nil
 }
 

@@ -80,7 +80,7 @@ mavio/
 │
 ├── apps/
 │   ├── server/                  # [Go] Server: cmd/mavio, dependency wiring, config, Connect service implementations
-│   ├── web/                     # (later) [TS] Web UI, embedded in the server (see clients.md)
+│   ├── web/                     # [TS] Web UI, embedded in the server (see clients.md)
 │   ├── ios/ tvos/ macos/        # (later) [Swift] iPhone and iPad, Apple TV, Mac (see clients.md)
 │   ├── android/ android-tv/     # (later) [Kotlin] Phones and tablets, Android TV (see clients.md)
 │   └── windows-linux/           # (later) [Go] Windows and Linux: MyGo, libmpv (see clients.md)
@@ -99,10 +99,10 @@ mavio/
 │   ├── streaming/               # [Go] HLS (CMAF) playlists, on-demand segmenting, segment cache
 │   ├── release/                 # [Go] Release title parsing: numbering, quality, languages, edition, group
 │   ├── acquire/                 # [Go] Acquisition engine: profiles, decisions, searches, queue, import (movie, series)
-│   ├── client-ts/               # (later) [TS] connect-es client and Query hooks of the web UI (see clients.md)
-│   ├── client-rust/             # (later) [Rust] Shared core of the native clients (see clients.md)
+│   ├── client-ts/               # [TS] connect-es client and Query hooks of the web UI (see clients.md)
+│   ├── client-rust/             # [Rust] Shared core of the native clients (see clients.md)
 │   ├── apple/ android/          # (later) [Swift] [Kotlin] Code shared by the Apple apps and by the Android apps (see clients.md)
-│   └── design/                  # (later) Design tokens and icons for every client (see clients.md)
+│   └── design/                  # Design tokens and icons for every client (see clients.md)
 │
 ├── plugins/
 │   ├── scraper-tmdb/            # [Go → wasm] TMDB metadata scraper
@@ -162,7 +162,7 @@ libs/proto/
 │                               #   MetadataProviderService, SubtitleProviderService, MediaSegmentProviderService,
 │                               #   AuthProviderService, NotifierService
 ├── gen/go/                     # Generated protobuf-go + connect-go (Go module)
-└── gen/ts/                     # (later) Generated protobuf-es + connect-es (npm package)
+└── gen/ts/                     # Generated protobuf-es + connect-es (npm package)
 ```
 
 * Client capabilities are expressed with Mavio's own `ClientCapabilities` (containers, codecs, levels, HDR capabilities, subtitle delivery methods, bandwidth), in place of Jellyfin's `DeviceProfile`. The Go type lives in `libs/media/decision`, which stays free of `libs/proto`; the `playback/v1` message mirrors it and `apps/server` converts between them. When porting the StreamBuilder tests, Jellyfin profiles are converted into this type.

@@ -1,9 +1,15 @@
 {
   "name": "server",
+  "implicitDependencies": ["web"],
   "targets": {
+    "build": {
+      "dependsOn": [{ "projects": ["web"], "target": "build" }],
+      "inputs": ["go", "^go", { "dependentTasksOutputFiles": "**/*", "transitive": false }]
+    },
     "dist": {
       "executor": "nx:run-commands",
       "options": { "command": "sh scripts/dist.sh", "cwd": "{projectRoot}" },
+      "dependsOn": [{ "projects": ["web"], "target": "build" }],
       "cache": false,
       "outputs": ["{projectRoot}/dist"]
     }

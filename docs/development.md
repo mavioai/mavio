@@ -63,6 +63,8 @@ A project overrides a default target with a `project.json` next to its `go.mod`;
 
 The scripts of a `package.json` are targets too: `libs/proto` and `libs/design` have `typecheck` (`tsc -p tsconfig.json`, TypeScript 7), and `libs/design` has `generate` (§4.4). A directory with both a `go.mod` and a `package.json`, such as `libs/design`, is one project with the targets of both.
 
+`libs/client-ts` and `apps/web` have `typecheck` as well, `libs/client-ts` has `test` (Vitest) and `apps/web` has `build` (Vite), which writes the web UI into `apps/server/internal/webui/dist`. The server's `build` and `dist` depend on it (`apps/server/project.json`), so that the binaries embed the UI; a plain `go build` embeds whatever the directory holds, and with only its `.gitkeep` the server serves a page saying it was built without the UI. `pnpm --filter @mavio/web dev` serves the UI with Vite, sending its API calls to a server on port 8686.
+
 ### 2.3 Common Commands
 ```bash
 pnpm nx run-many -t build test lint tidy-check     # Check everything

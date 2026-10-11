@@ -63,6 +63,8 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 
 `package.json` 的脚本同样是目标：`libs/proto` 与 `libs/design` 有 `typecheck`（`tsc -p tsconfig.json`，TypeScript 7），`libs/design` 还有 `generate`（§4.4）。同时含 `go.mod` 与 `package.json` 的目录（如 `libs/design`）是一个项目，具有两者的目标。
 
+`libs/client-ts` 与 `apps/web` 同样有 `typecheck`，`libs/client-ts` 有 `test`（Vitest），`apps/web` 有 `build`（Vite），它把 Web UI 写入 `apps/server/internal/webui/dist`。服务端的 `build` 与 `dist` 依赖它（`apps/server/project.json`），使二进制内嵌该 UI；直接 `go build` 则内嵌该目录现有的内容，目录中只有 `.gitkeep` 时，服务端提供一个说明未随 UI 构建的页面。`pnpm --filter @mavio/web dev` 用 Vite 提供 UI，并把其 API 调用发往 8686 端口上的服务端。
+
 ### 2.3 常用命令
 ```bash
 pnpm nx run-many -t build test lint tidy-check     # 全量检查

@@ -4,3 +4,4 @@
 .nx
 .fixtures
 **/dist
+**/target

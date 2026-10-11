@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@import "@mavio/design/tokens.css";
+
+/* Tailwind's theme draws on the design tokens (libs/design), so utilities
+   such as bg-surface follow the dark and light themes. */
+@theme inline {
+  --font-sans: var(--mavio-font-family);
+  --color-background: var(--mavio-color-background);
+  --color-surface: var(--mavio-color-surface);
+  --color-surface-raised: var(--mavio-color-surface-raised);
+  --color-surface-overlay: var(--mavio-color-surface-overlay);
+  --color-border: var(--mavio-color-border);
+  --color-on-background: var(--mavio-color-text-primary);
+  --color-text-secondary: var(--mavio-color-text-secondary);
+  --color-text-tertiary: var(--mavio-color-text-tertiary);
+  --color-accent: var(--mavio-color-accent);
+  --color-on-accent: var(--mavio-color-on-accent);
+  --color-focus: var(--mavio-color-focus);
+  --color-danger: var(--mavio-color-danger);
+}

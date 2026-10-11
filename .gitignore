@@ -11,6 +11,10 @@ dist/
 *.test
 *.out
 coverage/
+# the web UI's build, embedded by the server; the directory itself is kept
+!apps/server/internal/webui/dist/
+apps/server/internal/webui/dist/*
+!apps/server/internal/webui/dist/.gitkeep
 
 # generated test media (see tools/fixtures)
 .fixtures/

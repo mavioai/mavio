@@ -80,7 +80,7 @@ mavio/
 │
 ├── apps/
 │   ├── server/                  # [Go] 服务端：cmd/mavio、依赖装配、配置、Connect 服务实现
-│   ├── web/                     # (后期) [TS] Web UI，内嵌于服务端（见 clients.zh-CN.md）
+│   ├── web/                     # [TS] Web UI，内嵌于服务端（见 clients.zh-CN.md）
 │   ├── ios/ tvos/ macos/        # (后期) [Swift] iPhone 与 iPad、Apple TV、Mac（见 clients.zh-CN.md）
 │   ├── android/ android-tv/     # (后期) [Kotlin] 手机与平板、Android TV（见 clients.zh-CN.md）
 │   └── windows-linux/           # (后期) [Go] Windows 与 Linux：MyGo、libmpv（见 clients.zh-CN.md）
@@ -99,10 +99,10 @@ mavio/
 │   ├── streaming/               # [Go] HLS (CMAF) 播放列表、按需分片、分片缓存
 │   ├── release/                 # [Go] release 标题解析：编号、质量、语言、版本、发布组
 │   ├── acquire/                 # [Go] 资源获取引擎：档案、决策、搜索、队列、入库（movie、series）
-│   ├── client-ts/               # (后期) [TS] Web UI 的 connect-es 客户端与 Query hooks（见 clients.zh-CN.md）
-│   ├── client-rust/             # (后期) [Rust] 原生客户端的共享核心（见 clients.zh-CN.md）
+│   ├── client-ts/               # [TS] Web UI 的 connect-es 客户端与 Query hooks（见 clients.zh-CN.md）
+│   ├── client-rust/             # [Rust] 原生客户端的共享核心（见 clients.zh-CN.md）
 │   ├── apple/ android/          # (后期) [Swift] [Kotlin] Apple 各应用与 Android 各应用的共享代码（见 clients.zh-CN.md）
-│   └── design/                  # (后期) 所有客户端的设计 tokens 与图标（见 clients.zh-CN.md）
+│   └── design/                  # 所有客户端的设计 tokens 与图标（见 clients.zh-CN.md）
 │
 ├── plugins/
 │   ├── scraper-tmdb/            # [Go → wasm] TMDB 元数据刮削
@@ -162,7 +162,7 @@ libs/proto/
 │                               #   MetadataProviderService、SubtitleProviderService、MediaSegmentProviderService、
 │                               #   AuthProviderService、NotifierService
 ├── gen/go/                     # 生成的 protobuf-go + connect-go（Go 模块）
-└── gen/ts/                     # (后期) 生成的 protobuf-es + connect-es（npm 包）
+└── gen/ts/                     # 生成的 protobuf-es + connect-es（npm 包）
 ```
 
 * 客户端能力用 Mavio 自己的 `ClientCapabilities` 表达（容器、编解码器、等级、HDR 能力、字幕交付方式、带宽），替代 Jellyfin 的 `DeviceProfile`。Go 类型位于 `libs/media/decision`，该包不依赖 `libs/proto`；`playback/v1` 中的消息与之对应，由 `apps/server` 负责二者转换。移植 StreamBuilder 测试时把 Jellyfin 的 profile 转换成该类型。
