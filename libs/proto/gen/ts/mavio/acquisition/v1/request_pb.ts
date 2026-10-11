@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/acquisition/v1/request.proto.
  */
 export const file_mavio_acquisition_v1_request: GenFile = /*@__PURE__*/
-  fileDesc("CiJtYXZpby9hY3F1aXNpdGlvbi92MS9yZXF1ZXN0LnByb3RvEhRtYXZpby5hY3F1aXNpdGlvbi52MSJbCg1TZWFzb25SZXF1ZXN0EhUKDXNlYXNvbl9udW1iZXIYASABKAUSMwoGc3RhdHVzGAIgASgOMiMubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdFN0YXR1cyK5AwoHUmVxdWVzdBIKCgJpZBgBIAEoCRIzCgptZWRpYV9raW5kGAIgASgOMh8ubWF2aW8uYWNxdWlzaXRpb24udjEuTWVkaWFLaW5kEg8KB3RtZGJfaWQYAyABKAUSDwoHdHZkYl9pZBgEIAEoBRINCgV0aXRsZRgFIAEoCRIMCgR5ZWFyGAYgASgFEg8KB2l0ZW1faWQYByABKAkSNAoHc2Vhc29ucxgIIAMoCzIjLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlNlYXNvblJlcXVlc3QSMwoGc3RhdHVzGAkgASgOMiMubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdFN0YXR1cxIUCgxyZXF1ZXN0ZWRfYnkYCiABKAkSEwoLbW9kaWZpZWRfYnkYCyABKAkSFAoMaWdub3JlX3F1b3RhGAwgASgIEg8KB21lc3NhZ2UYDSABKAkSLwoLY3JlYXRlX3RpbWUYDiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi8KC3VwZGF0ZV90aW1lGA8gASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCLbAQoUQ3JlYXRlUmVxdWVzdFJlcXVlc3QSPwoKbWVkaWFfa2luZBgBIAEoDjIfLm1hdmlvLmFjcXVpc2l0aW9uLnYxLk1lZGlhS2luZEIKukgHggEEEAEgABIYCgd0bWRiX2lkGAIgASgFQge6SAQaAiAAEiIKB3NlYXNvbnMYAyADKAVCEbpIDpIBCxDoBxgBIgQaAigAEhMKC2FsbF9zZWFzb25zGAQgASgIEhkKB3VzZXJfaWQYBSABKAlCCLpIBXIDsAEBEhQKDGlnbm9yZV9xdW90YRgGIAEoCCJHChVDcmVhdGVSZXF1ZXN0UmVzcG9uc2USLgoHcmVxdWVzdBgBIAEoCzIdLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlJlcXVlc3Qi0wIKE0xpc3RSZXF1ZXN0c1JlcXVlc3QSRgoIc3RhdHVzZXMYASADKA4yIy5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXF1ZXN0U3RhdHVzQg+6SAySAQkiB4IBBBABIAASPQoKbWVkaWFfa2luZBgCIAEoDjIfLm1hdmlvLmFjcXVpc2l0aW9uLnYxLk1lZGlhS2luZEIIukgFggECEAESGQoHdXNlcl9pZBgDIAEoCUIIukgFcgOwAQESGAoHdG1kYl9pZBgEIAEoBUIHukgEGgIoABI5CgRzb3J0GAUgASgOMiEubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdFNvcnRCCLpIBYIBAhABEhEKCWFzY2VuZGluZxgGIAEoCBIZCgVsaW1pdBgHIAEoBUIKukgHGgUY6AcoABIXCgZvZmZzZXQYCCABKAVCB7pIBBoCKAAiVgoUTGlzdFJlcXVlc3RzUmVzcG9uc2USLwoIcmVxdWVzdHMYASADKAsyHS5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXF1ZXN0Eg0KBXRvdGFsGAIgASgFIikKEUdldFJlcXVlc3RSZXF1ZXN0EhQKAmlkGAEgASgJQgi6SAVyA7ABASJEChJHZXRSZXF1ZXN0UmVzcG9uc2USLgoHcmVxdWVzdBgBIAEoCzIdLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlJlcXVlc3QiUgoUVXBkYXRlUmVxdWVzdFJlcXVlc3QSFAoCaWQYASABKAlCCLpIBXIDsAEBEiQKB3NlYXNvbnMYAiADKAVCE7pIEJIBDQgBEOgHGAEiBBoCKAAiRwoVVXBkYXRlUmVxdWVzdFJlc3BvbnNlEi4KB3JlcXVlc3QYASABKAsyHS5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXF1ZXN0IiwKFERlbGV0ZVJlcXVlc3RSZXF1ZXN0EhQKAmlkGAEgASgJQgi6SAVyA7ABASIXChVEZWxldGVSZXF1ZXN0UmVzcG9uc2UiLQoVQXBwcm92ZVJlcXVlc3RSZXF1ZXN0EhQKAmlkGAEgASgJQgi6SAVyA7ABASJIChZBcHByb3ZlUmVxdWVzdFJlc3BvbnNlEi4KB3JlcXVlc3QYASABKAsyHS5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXF1ZXN0Ii0KFURlY2xpbmVSZXF1ZXN0UmVxdWVzdBIUCgJpZBgBIAEoCUIIukgFcgOwAQEiSAoWRGVjbGluZVJlcXVlc3RSZXNwb25zZRIuCgdyZXF1ZXN0GAEgASgLMh0ubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdCIrChNSZXRyeVJlcXVlc3RSZXF1ZXN0EhQKAmlkGAEgASgJQgi6SAVyA7ABASJGChRSZXRyeVJlcXVlc3RSZXNwb25zZRIuCgdyZXF1ZXN0GAEgASgLMh0ubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdCIsCg9HZXRRdW90YVJlcXVlc3QSGQoHdXNlcl9pZBgBIAEoCUIIukgFcgOwAQEiWQoFUXVvdGESDQoFbGltaXQYASABKAUSDAoEZGF5cxgCIAEoBRIMCgR1c2VkGAMgASgFEhEKCXJlbWFpbmluZxgEIAEoBRISCgpyZXN0cmljdGVkGAUgASgIImsKEEdldFF1b3RhUmVzcG9uc2USKgoFbW92aWUYASABKAsyGy5tYXZpby5hY3F1aXNpdGlvbi52MS5RdW90YRIrCgZzZXJpZXMYAiABKAsyGy5tYXZpby5hY3F1aXNpdGlvbi52MS5RdW90YSq+AQoNUmVxdWVzdFN0YXR1cxIeChpSRVFVRVNUX1NUQVRVU19VTlNQRUNJRklFRBAAEhoKFlJFUVVFU1RfU1RBVFVTX1BFTkRJTkcQARIbChdSRVFVRVNUX1NUQVRVU19BUFBST1ZFRBACEhsKF1JFUVVFU1RfU1RBVFVTX0RFQ0xJTkVEEAMSGQoVUkVRVUVTVF9TVEFUVVNfRkFJTEVEEAQSHAoYUkVRVUVTVF9TVEFUVVNfQ09NUExFVEVEEAUqRgoLUmVxdWVzdFNvcnQSHAoYUkVRVUVTVF9TT1JUX1VOU1BFQ0lGSUVEEAASGQoVUkVRVUVTVF9TT1JUX01PRElGSUVEEAEyywcKDlJlcXVlc3RTZXJ2aWNlEmgKDUNyZWF0ZVJlcXVlc3QSKi5tYXZpby5hY3F1aXNpdGlvbi52MS5DcmVhdGVSZXF1ZXN0UmVxdWVzdBorLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkNyZWF0ZVJlcXVlc3RSZXNwb25zZRJqCgxMaXN0UmVxdWVzdHMSKS5tYXZpby5hY3F1aXNpdGlvbi52MS5MaXN0UmVxdWVzdHNSZXF1ZXN0GioubWF2aW8uYWNxdWlzaXRpb24udjEuTGlzdFJlcXVlc3RzUmVzcG9uc2UiA5ACARJkCgpHZXRSZXF1ZXN0EicubWF2aW8uYWNxdWlzaXRpb24udjEuR2V0UmVxdWVzdFJlcXVlc3QaKC5tYXZpby5hY3F1aXNpdGlvbi52MS5HZXRSZXF1ZXN0UmVzcG9uc2UiA5ACARJtCg1VcGRhdGVSZXF1ZXN0EioubWF2aW8uYWNxdWlzaXRpb24udjEuVXBkYXRlUmVxdWVzdFJlcXVlc3QaKy5tYXZpby5hY3F1aXNpdGlvbi52MS5VcGRhdGVSZXF1ZXN0UmVzcG9uc2UiA5ACAhJtCg1EZWxldGVSZXF1ZXN0EioubWF2aW8uYWNxdWlzaXRpb24udjEuRGVsZXRlUmVxdWVzdFJlcXVlc3QaKy5tYXZpby5hY3F1aXNpdGlvbi52MS5EZWxldGVSZXF1ZXN0UmVzcG9uc2UiA5ACAhJrCg5BcHByb3ZlUmVxdWVzdBIrLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkFwcHJvdmVSZXF1ZXN0UmVxdWVzdBosLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkFwcHJvdmVSZXF1ZXN0UmVzcG9uc2USawoORGVjbGluZVJlcXVlc3QSKy5tYXZpby5hY3F1aXNpdGlvbi52MS5EZWNsaW5lUmVxdWVzdFJlcXVlc3QaLC5tYXZpby5hY3F1aXNpdGlvbi52MS5EZWNsaW5lUmVxdWVzdFJlc3BvbnNlEmUKDFJldHJ5UmVxdWVzdBIpLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlJldHJ5UmVxdWVzdFJlcXVlc3QaKi5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXRyeVJlcXVlc3RSZXNwb25zZRJeCghHZXRRdW90YRIlLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkdldFF1b3RhUmVxdWVzdBomLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkdldFF1b3RhUmVzcG9uc2UiA5ACAULpAQoYY29tLm1hdmlvLmFjcXVpc2l0aW9uLnYxQgxSZXF1ZXN0UHJvdG9QAVpNZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL2FjcXVpc2l0aW9uL3YxO2FjcXVpc2l0aW9udjGiAgNNQViqAhRNYXZpby5BY3F1aXNpdGlvbi5WMcoCFE1hdmlvXEFjcXVpc2l0aW9uXFYx4gIgTWF2aW9cQWNxdWlzaXRpb25cVjFcR1BCTWV0YWRhdGHqAhZNYXZpbzo6QWNxdWlzaXRpb246OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_acquisition_v1_profile]);
+  fileDesc("CiJtYXZpby9hY3F1aXNpdGlvbi92MS9yZXF1ZXN0LnByb3RvEhRtYXZpby5hY3F1aXNpdGlvbi52MSJbCg1TZWFzb25SZXF1ZXN0EhUKDXNlYXNvbl9udW1iZXIYASABKAUSMwoGc3RhdHVzGAIgASgOMiMubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdFN0YXR1cyK5AwoHUmVxdWVzdBIKCgJpZBgBIAEoCRIzCgptZWRpYV9raW5kGAIgASgOMh8ubWF2aW8uYWNxdWlzaXRpb24udjEuTWVkaWFLaW5kEg8KB3RtZGJfaWQYAyABKAUSDwoHdHZkYl9pZBgEIAEoBRINCgV0aXRsZRgFIAEoCRIMCgR5ZWFyGAYgASgFEg8KB2l0ZW1faWQYByABKAkSNAoHc2Vhc29ucxgIIAMoCzIjLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlNlYXNvblJlcXVlc3QSMwoGc3RhdHVzGAkgASgOMiMubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdFN0YXR1cxIUCgxyZXF1ZXN0ZWRfYnkYCiABKAkSEwoLbW9kaWZpZWRfYnkYCyABKAkSFAoMaWdub3JlX3F1b3RhGAwgASgIEg8KB21lc3NhZ2UYDSABKAkSLwoLY3JlYXRlX3RpbWUYDiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi8KC3VwZGF0ZV90aW1lGA8gASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCLbAQoUQ3JlYXRlUmVxdWVzdFJlcXVlc3QSPwoKbWVkaWFfa2luZBgBIAEoDjIfLm1hdmlvLmFjcXVpc2l0aW9uLnYxLk1lZGlhS2luZEIKukgHggEEEAEgABIYCgd0bWRiX2lkGAIgASgFQge6SAQaAiAAEiIKB3NlYXNvbnMYAyADKAVCEbpIDpIBCxDoBxgBIgQaAigAEhMKC2FsbF9zZWFzb25zGAQgASgIEhkKB3VzZXJfaWQYBSABKAlCCLpIBXIDsAEBEhQKDGlnbm9yZV9xdW90YRgGIAEoCCJHChVDcmVhdGVSZXF1ZXN0UmVzcG9uc2USLgoHcmVxdWVzdBgBIAEoCzIdLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlJlcXVlc3Qi0wIKE0xpc3RSZXF1ZXN0c1JlcXVlc3QSRgoIc3RhdHVzZXMYASADKA4yIy5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXF1ZXN0U3RhdHVzQg+6SAySAQkiB4IBBBABIAASPQoKbWVkaWFfa2luZBgCIAEoDjIfLm1hdmlvLmFjcXVpc2l0aW9uLnYxLk1lZGlhS2luZEIIukgFggECEAESGQoHdXNlcl9pZBgDIAEoCUIIukgFcgOwAQESGAoHdG1kYl9pZBgEIAEoBUIHukgEGgIoABI5CgRzb3J0GAUgASgOMiEubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdFNvcnRCCLpIBYIBAhABEhEKCWFzY2VuZGluZxgGIAEoCBIZCgVsaW1pdBgHIAEoBUIKukgHGgUY6AcoABIXCgZvZmZzZXQYCCABKAVCB7pIBBoCKAAiVgoUTGlzdFJlcXVlc3RzUmVzcG9uc2USLwoIcmVxdWVzdHMYASADKAsyHS5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXF1ZXN0Eg0KBXRvdGFsGAIgASgFIikKEUdldFJlcXVlc3RSZXF1ZXN0EhQKAmlkGAEgASgJQgi6SAVyA7ABASJEChJHZXRSZXF1ZXN0UmVzcG9uc2USLgoHcmVxdWVzdBgBIAEoCzIdLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlJlcXVlc3QiUgoUVXBkYXRlUmVxdWVzdFJlcXVlc3QSFAoCaWQYASABKAlCCLpIBXIDsAEBEiQKB3NlYXNvbnMYAiADKAVCE7pIEJIBDQgBEOgHGAEiBBoCKAAiRwoVVXBkYXRlUmVxdWVzdFJlc3BvbnNlEi4KB3JlcXVlc3QYASABKAsyHS5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXF1ZXN0IiwKFERlbGV0ZVJlcXVlc3RSZXF1ZXN0EhQKAmlkGAEgASgJQgi6SAVyA7ABASIXChVEZWxldGVSZXF1ZXN0UmVzcG9uc2UiLQoVQXBwcm92ZVJlcXVlc3RSZXF1ZXN0EhQKAmlkGAEgASgJQgi6SAVyA7ABASJIChZBcHByb3ZlUmVxdWVzdFJlc3BvbnNlEi4KB3JlcXVlc3QYASABKAsyHS5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXF1ZXN0Ii0KFURlY2xpbmVSZXF1ZXN0UmVxdWVzdBIUCgJpZBgBIAEoCUIIukgFcgOwAQEiSAoWRGVjbGluZVJlcXVlc3RSZXNwb25zZRIuCgdyZXF1ZXN0GAEgASgLMh0ubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdCIrChNSZXRyeVJlcXVlc3RSZXF1ZXN0EhQKAmlkGAEgASgJQgi6SAVyA7ABASJGChRSZXRyeVJlcXVlc3RSZXNwb25zZRIuCgdyZXF1ZXN0GAEgASgLMh0ubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdCIsCg9HZXRRdW90YVJlcXVlc3QSGQoHdXNlcl9pZBgBIAEoCUIIukgFcgOwAQEiWQoFUXVvdGESDQoFbGltaXQYASABKAUSDAoEZGF5cxgCIAEoBRIMCgR1c2VkGAMgASgFEhEKCXJlbWFpbmluZxgEIAEoBRISCgpyZXN0cmljdGVkGAUgASgIImsKEEdldFF1b3RhUmVzcG9uc2USKgoFbW92aWUYASABKAsyGy5tYXZpby5hY3F1aXNpdGlvbi52MS5RdW90YRIrCgZzZXJpZXMYAiABKAsyGy5tYXZpby5hY3F1aXNpdGlvbi52MS5RdW90YSKlAQoMQmxvY2tlZFRpdGxlEjMKCm1lZGlhX2tpbmQYASABKA4yHy5tYXZpby5hY3F1aXNpdGlvbi52MS5NZWRpYUtpbmQSDwoHdG1kYl9pZBgCIAEoBRINCgV0aXRsZRgDIAEoCRIPCgd1c2VyX2lkGAQgASgJEi8KC2NyZWF0ZV90aW1lGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJuChFCbG9ja1RpdGxlUmVxdWVzdBI/CgptZWRpYV9raW5kGAEgASgOMh8ubWF2aW8uYWNxdWlzaXRpb24udjEuTWVkaWFLaW5kQgq6SAeCAQQQASAAEhgKB3RtZGJfaWQYAiABKAVCB7pIBBoCIAAiTwoSQmxvY2tUaXRsZVJlc3BvbnNlEjkKDWJsb2NrZWRfdGl0bGUYASABKAsyIi5tYXZpby5hY3F1aXNpdGlvbi52MS5CbG9ja2VkVGl0bGUicAoTVW5ibG9ja1RpdGxlUmVxdWVzdBI/CgptZWRpYV9raW5kGAEgASgOMh8ubWF2aW8uYWNxdWlzaXRpb24udjEuTWVkaWFLaW5kQgq6SAeCAQQQASAAEhgKB3RtZGJfaWQYAiABKAVCB7pIBBoCIAAiFgoUVW5ibG9ja1RpdGxlUmVzcG9uc2UiaAoYTGlzdEJsb2NrZWRUaXRsZXNSZXF1ZXN0EhgKBnNlYXJjaBgBIAEoCUIIukgFcgMYyAESGQoFbGltaXQYAiABKAVCCrpIBxoFGOgHKAASFwoGb2Zmc2V0GAMgASgFQge6SAQaAigAImYKGUxpc3RCbG9ja2VkVGl0bGVzUmVzcG9uc2USOgoOYmxvY2tlZF90aXRsZXMYASADKAsyIi5tYXZpby5hY3F1aXNpdGlvbi52MS5CbG9ja2VkVGl0bGUSDQoFdG90YWwYAiABKAUqvgEKDVJlcXVlc3RTdGF0dXMSHgoaUkVRVUVTVF9TVEFUVVNfVU5TUEVDSUZJRUQQABIaChZSRVFVRVNUX1NUQVRVU19QRU5ESU5HEAESGwoXUkVRVUVTVF9TVEFUVVNfQVBQUk9WRUQQAhIbChdSRVFVRVNUX1NUQVRVU19ERUNMSU5FRBADEhkKFVJFUVVFU1RfU1RBVFVTX0ZBSUxFRBAEEhwKGFJFUVVFU1RfU1RBVFVTX0NPTVBMRVRFRBAFKkYKC1JlcXVlc3RTb3J0EhwKGFJFUVVFU1RfU09SVF9VTlNQRUNJRklFRBAAEhkKFVJFUVVFU1RfU09SVF9NT0RJRklFRBABMpMKCg5SZXF1ZXN0U2VydmljZRJoCg1DcmVhdGVSZXF1ZXN0EioubWF2aW8uYWNxdWlzaXRpb24udjEuQ3JlYXRlUmVxdWVzdFJlcXVlc3QaKy5tYXZpby5hY3F1aXNpdGlvbi52MS5DcmVhdGVSZXF1ZXN0UmVzcG9uc2USagoMTGlzdFJlcXVlc3RzEikubWF2aW8uYWNxdWlzaXRpb24udjEuTGlzdFJlcXVlc3RzUmVxdWVzdBoqLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkxpc3RSZXF1ZXN0c1Jlc3BvbnNlIgOQAgESZAoKR2V0UmVxdWVzdBInLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkdldFJlcXVlc3RSZXF1ZXN0GigubWF2aW8uYWNxdWlzaXRpb24udjEuR2V0UmVxdWVzdFJlc3BvbnNlIgOQAgESbQoNVXBkYXRlUmVxdWVzdBIqLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlVwZGF0ZVJlcXVlc3RSZXF1ZXN0GisubWF2aW8uYWNxdWlzaXRpb24udjEuVXBkYXRlUmVxdWVzdFJlc3BvbnNlIgOQAgISbQoNRGVsZXRlUmVxdWVzdBIqLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkRlbGV0ZVJlcXVlc3RSZXF1ZXN0GisubWF2aW8uYWNxdWlzaXRpb24udjEuRGVsZXRlUmVxdWVzdFJlc3BvbnNlIgOQAgISawoOQXBwcm92ZVJlcXVlc3QSKy5tYXZpby5hY3F1aXNpdGlvbi52MS5BcHByb3ZlUmVxdWVzdFJlcXVlc3QaLC5tYXZpby5hY3F1aXNpdGlvbi52MS5BcHByb3ZlUmVxdWVzdFJlc3BvbnNlEmsKDkRlY2xpbmVSZXF1ZXN0EisubWF2aW8uYWNxdWlzaXRpb24udjEuRGVjbGluZVJlcXVlc3RSZXF1ZXN0GiwubWF2aW8uYWNxdWlzaXRpb24udjEuRGVjbGluZVJlcXVlc3RSZXNwb25zZRJlCgxSZXRyeVJlcXVlc3QSKS5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXRyeVJlcXVlc3RSZXF1ZXN0GioubWF2aW8uYWNxdWlzaXRpb24udjEuUmV0cnlSZXF1ZXN0UmVzcG9uc2USXgoIR2V0UXVvdGESJS5tYXZpby5hY3F1aXNpdGlvbi52MS5HZXRRdW90YVJlcXVlc3QaJi5tYXZpby5hY3F1aXNpdGlvbi52MS5HZXRRdW90YVJlc3BvbnNlIgOQAgESXwoKQmxvY2tUaXRsZRInLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkJsb2NrVGl0bGVSZXF1ZXN0GigubWF2aW8uYWNxdWlzaXRpb24udjEuQmxvY2tUaXRsZVJlc3BvbnNlEmoKDFVuYmxvY2tUaXRsZRIpLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlVuYmxvY2tUaXRsZVJlcXVlc3QaKi5tYXZpby5hY3F1aXNpdGlvbi52MS5VbmJsb2NrVGl0bGVSZXNwb25zZSIDkAICEnkKEUxpc3RCbG9ja2VkVGl0bGVzEi4ubWF2aW8uYWNxdWlzaXRpb24udjEuTGlzdEJsb2NrZWRUaXRsZXNSZXF1ZXN0Gi8ubWF2aW8uYWNxdWlzaXRpb24udjEuTGlzdEJsb2NrZWRUaXRsZXNSZXNwb25zZSIDkAIBQukBChhjb20ubWF2aW8uYWNxdWlzaXRpb24udjFCDFJlcXVlc3RQcm90b1ABWk1naXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vYWNxdWlzaXRpb24vdjE7YWNxdWlzaXRpb252MaICA01BWKoCFE1hdmlvLkFjcXVpc2l0aW9uLlYxygIUTWF2aW9cQWNxdWlzaXRpb25cVjHiAiBNYXZpb1xBY3F1aXNpdGlvblxWMVxHUEJNZXRhZGF0YeoCFk1hdmlvOjpBY3F1aXNpdGlvbjo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_acquisition_v1_profile]);
 
 /**
  * SeasonRequest is a season a series request asks for.
@@ -594,6 +594,179 @@ export const GetQuotaResponseSchema: GenMessage<GetQuotaResponse> = /*@__PURE__*
   messageDesc(file_mavio_acquisition_v1_request, 20);
 
 /**
+ * BlockedTitle is a movie or series administrators blocked from being
+ * requested.
+ *
+ * @generated from message mavio.acquisition.v1.BlockedTitle
+ */
+export type BlockedTitle = Message<"mavio.acquisition.v1.BlockedTitle"> & {
+  /**
+   * MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+   *
+   * @generated from field: mavio.acquisition.v1.MediaKind media_kind = 1;
+   */
+  mediaKind: MediaKind;
+
+  /**
+   * @generated from field: int32 tmdb_id = 2;
+   */
+  tmdbId: number;
+
+  /**
+   * Its name when it was blocklisted, if the metadata providers knew it.
+   *
+   * @generated from field: string title = 3;
+   */
+  title: string;
+
+  /**
+   * The administrator who blocklisted it, unless deleted since.
+   *
+   * @generated from field: string user_id = 4;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp create_time = 5;
+   */
+  createTime?: Timestamp | undefined;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.BlockedTitle.
+ * Use `create(BlockedTitleSchema)` to create a new message.
+ */
+export const BlockedTitleSchema: GenMessage<BlockedTitle> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_request, 21);
+
+/**
+ * @generated from message mavio.acquisition.v1.BlockTitleRequest
+ */
+export type BlockTitleRequest = Message<"mavio.acquisition.v1.BlockTitleRequest"> & {
+  /**
+   * @generated from field: mavio.acquisition.v1.MediaKind media_kind = 1;
+   */
+  mediaKind: MediaKind;
+
+  /**
+   * @generated from field: int32 tmdb_id = 2;
+   */
+  tmdbId: number;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.BlockTitleRequest.
+ * Use `create(BlockTitleRequestSchema)` to create a new message.
+ */
+export const BlockTitleRequestSchema: GenMessage<BlockTitleRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_request, 22);
+
+/**
+ * @generated from message mavio.acquisition.v1.BlockTitleResponse
+ */
+export type BlockTitleResponse = Message<"mavio.acquisition.v1.BlockTitleResponse"> & {
+  /**
+   * @generated from field: mavio.acquisition.v1.BlockedTitle blocked_title = 1;
+   */
+  blockedTitle?: BlockedTitle | undefined;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.BlockTitleResponse.
+ * Use `create(BlockTitleResponseSchema)` to create a new message.
+ */
+export const BlockTitleResponseSchema: GenMessage<BlockTitleResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_request, 23);
+
+/**
+ * @generated from message mavio.acquisition.v1.UnblockTitleRequest
+ */
+export type UnblockTitleRequest = Message<"mavio.acquisition.v1.UnblockTitleRequest"> & {
+  /**
+   * @generated from field: mavio.acquisition.v1.MediaKind media_kind = 1;
+   */
+  mediaKind: MediaKind;
+
+  /**
+   * @generated from field: int32 tmdb_id = 2;
+   */
+  tmdbId: number;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.UnblockTitleRequest.
+ * Use `create(UnblockTitleRequestSchema)` to create a new message.
+ */
+export const UnblockTitleRequestSchema: GenMessage<UnblockTitleRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_request, 24);
+
+/**
+ * @generated from message mavio.acquisition.v1.UnblockTitleResponse
+ */
+export type UnblockTitleResponse = Message<"mavio.acquisition.v1.UnblockTitleResponse"> & {
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.UnblockTitleResponse.
+ * Use `create(UnblockTitleResponseSchema)` to create a new message.
+ */
+export const UnblockTitleResponseSchema: GenMessage<UnblockTitleResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_request, 25);
+
+/**
+ * @generated from message mavio.acquisition.v1.ListBlockedTitlesRequest
+ */
+export type ListBlockedTitlesRequest = Message<"mavio.acquisition.v1.ListBlockedTitlesRequest"> & {
+  /**
+   * Matched against the titles' names; unset for all.
+   *
+   * @generated from field: string search = 1;
+   */
+  search: string;
+
+  /**
+   * 1–1000; unset means 100.
+   *
+   * @generated from field: int32 limit = 2;
+   */
+  limit: number;
+
+  /**
+   * @generated from field: int32 offset = 3;
+   */
+  offset: number;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.ListBlockedTitlesRequest.
+ * Use `create(ListBlockedTitlesRequestSchema)` to create a new message.
+ */
+export const ListBlockedTitlesRequestSchema: GenMessage<ListBlockedTitlesRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_request, 26);
+
+/**
+ * @generated from message mavio.acquisition.v1.ListBlockedTitlesResponse
+ */
+export type ListBlockedTitlesResponse = Message<"mavio.acquisition.v1.ListBlockedTitlesResponse"> & {
+  /**
+   * @generated from field: repeated mavio.acquisition.v1.BlockedTitle blocked_titles = 1;
+   */
+  blockedTitles: BlockedTitle[];
+
+  /**
+   * @generated from field: int32 total = 2;
+   */
+  total: number;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.ListBlockedTitlesResponse.
+ * Use `create(ListBlockedTitlesResponseSchema)` to create a new message.
+ */
+export const ListBlockedTitlesResponseSchema: GenMessage<ListBlockedTitlesResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_request, 27);
+
+/**
  * RequestStatus is where a request is.
  *
  * @generated from enum mavio.acquisition.v1.RequestStatus
@@ -688,9 +861,9 @@ export const RequestService: GenService<{
   /**
    * CreateRequest requests a movie, or seasons of a series, by its TMDB
    * ID. It fails with PERMISSION_DENIED when the user may not request it
-   * (its kind, or its rating above the user's limit), RESOURCE_EXHAUSTED
-   * past the user's quota, and ALREADY_EXISTS when it is requested,
-   * wanted or available already.
+   * (its kind, its rating above the user's limit, or the title
+   * blocklisted), RESOURCE_EXHAUSTED past the user's quota, and
+   * ALREADY_EXISTS when it is requested, wanted or available already.
    *
    * @generated from rpc mavio.acquisition.v1.RequestService.CreateRequest
    */
@@ -785,6 +958,39 @@ export const RequestService: GenService<{
     methodKind: "unary";
     input: typeof GetQuotaRequestSchema;
     output: typeof GetQuotaResponseSchema;
+  },
+  /**
+   * BlockTitle blocklists a movie or series, as Seerr's blocklist: it can
+   * no longer be requested. It fails with ALREADY_EXISTS when the title is
+   * blocklisted already. Administrators only.
+   *
+   * @generated from rpc mavio.acquisition.v1.RequestService.BlockTitle
+   */
+  blockTitle: {
+    methodKind: "unary";
+    input: typeof BlockTitleRequestSchema;
+    output: typeof BlockTitleResponseSchema;
+  },
+  /**
+   * UnblockTitle takes a title off the blocklist. Administrators only.
+   *
+   * @generated from rpc mavio.acquisition.v1.RequestService.UnblockTitle
+   */
+  unblockTitle: {
+    methodKind: "unary";
+    input: typeof UnblockTitleRequestSchema;
+    output: typeof UnblockTitleResponseSchema;
+  },
+  /**
+   * ListBlockedTitles lists the blocklist, newest first. Administrators
+   * only.
+   *
+   * @generated from rpc mavio.acquisition.v1.RequestService.ListBlockedTitles
+   */
+  listBlockedTitles: {
+    methodKind: "unary";
+    input: typeof ListBlockedTitlesRequestSchema;
+    output: typeof ListBlockedTitlesResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_acquisition_v1_request, 0);

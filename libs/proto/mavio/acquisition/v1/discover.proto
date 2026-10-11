@@ -8,9 +8,11 @@ import "mavio/acquisition/v1/request.proto";
 import "mavio/plugin/v1/discovery.proto";
 
 // DiscoverService lists the movies and series the discovery providers
-// offer, such as trending or popular titles, marked with what the server
-// has of them: available, wanted or requested. Titles rated above the
-// caller's rating limit are left out. Signed-in users.
+// offer, such as trending or popular titles, and those they find by name,
+// marked with what the server has of them: available, wanted or
+// requested; it details a title with the status of each of its seasons.
+// Titles rated above the caller's rating limit are left out. Signed-in
+// users.
 service DiscoverService {
   // ListCatalogs lists the catalogs of every discovery provider.
   rpc ListCatalogs(ListCatalogsRequest) returns (ListCatalogsResponse) {
@@ -23,6 +25,19 @@ service DiscoverService {
   // ListFilterValues lists the values a catalog's filter takes, such as
   // genres, or the keywords and studios matching a query.
   rpc ListFilterValues(ListFilterValuesRequest) returns (ListFilterValuesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SearchTitles finds movies and series by name through a discovery
+  // provider, as Seerr's /search, marked as Discover marks them.
+  rpc SearchTitles(SearchTitlesRequest) returns (SearchTitlesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetTitle returns a movie or series by its TMDB ID, as the metadata
+  // providers tell it, with what the server has of it and of each of its
+  // seasons, as Seerr's movie and series details with their media. It
+  // fails with PERMISSION_DENIED when the title is rated above the
+  // caller's limit, and NOT_FOUND when no metadata provider knows it.
+  rpc GetTitle(GetTitleRequest) returns (GetTitleResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
 }
@@ -105,11 +120,22 @@ message DiscoverRequest {
   }];
 }
 
+// DiscoverResponse is a page of a catalog. Its pages are the provider's:
+// a page holds fewer titles than the provider's, or none, when titles are
+// left out of it, and the next page is still page + 1 while page <
+// total_pages.
 message DiscoverResponse {
   repeated DiscoveredTitle titles = 1;
   int32 page = 2;
+  // Exact: pages are the provider's.
   int32 total_pages = 3;
+  // The provider's total less the titles left out of this page: exact
+  // when there is one page or nothing was left out, else an upper bound,
+  // for the other pages may leave titles out too.
   int32 total_results = 4;
+  // The titles left out of this page: rated above the caller's limit,
+  // unrated when the caller's policy blocks them, or adult.
+  int32 hidden_results = 5;
 }
 
 // MediaStatus is what the server has of a discovered title, as Seerr's
@@ -126,6 +152,11 @@ enum MediaStatus {
   // A movie with a file, or a series whose monitored aired episodes all
   // have files.
   MEDIA_STATUS_AVAILABLE = 4;
+  // Administrators blocked it from being requested.
+  MEDIA_STATUS_BLOCKLISTED = 5;
+  // It was available through a completed request, but its files are gone
+  // and it is not wanted; it may be requested again.
+  MEDIA_STATUS_DELETED = 6;
 }
 
 // DiscoveredTitle is a movie or series a catalog lists.
@@ -157,7 +188,8 @@ message DiscoveredTitle {
   string request_id = 17;
   RequestStatus request_status = 18;
   // Whether the caller may request it now: their policy allows its
-  // kind, and it is neither available nor wholly requested or wanted.
+  // kind, and it is neither available, blocklisted, nor wholly requested
+  // or wanted.
   bool requestable = 19;
 }
 
@@ -182,4 +214,114 @@ message ListFilterValuesRequest {
 
 message ListFilterValuesResponse {
   repeated mavio.plugin.v1.FilterValue values = 1;
+}
+
+message SearchTitlesRequest {
+  // The text to find; the provider may understand prefixes, such as
+  // scraper-tmdb's "tmdb:603", "imdb:tt0133093", "tvdb:81189" and
+  // "year:1999".
+  string query = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 200
+  ];
+  // Movies or series; unset for both.
+  MediaKind media_kind = 2 [(buf.validate.field).enum.defined_only = true];
+  // The year of a movie's release or a series' first air date; unset for
+  // any.
+  int32 year = 3 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 9999
+  }];
+  // ISO 639-1 language of names and overviews.
+  string language = 4;
+  // From 1; unset for the first page.
+  int32 page = 5 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 500
+  }];
+  // The discovery provider searching; unset for the first that searches.
+  string plugin_id = 6;
+}
+
+// SearchTitlesResponse is a page of a search, whose pages and totals are as
+// DiscoverResponse's.
+message SearchTitlesResponse {
+  repeated DiscoveredTitle titles = 1;
+  int32 page = 2;
+  int32 total_pages = 3;
+  int32 total_results = 4;
+  int32 hidden_results = 5;
+  // The plugin that searched.
+  string plugin_id = 6;
+}
+
+message GetTitleRequest {
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+  MediaKind media_kind = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  int32 tmdb_id = 2 [(buf.validate.field).int32.gt = 0];
+}
+
+message GetTitleResponse {
+  Title title = 1;
+}
+
+// Title is a movie or series as the metadata providers tell it, in the
+// server's metadata language and country, with what the server has of it.
+message Title {
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+  MediaKind media_kind = 1;
+  int32 tmdb_id = 2;
+  // Of series, when known.
+  int32 tvdb_id = 3;
+  string name = 4;
+  string original_title = 5;
+  string overview = 6;
+  // ISO 8601 calendar date: a movie's release, a series' first air date.
+  string premiere_date = 7;
+  int32 year = 8;
+  // The content rating in rating_country (ISO 3166-1), such as "PG-13";
+  // empty when unrated.
+  string official_rating = 9;
+  string rating_country = 10;
+  // Genre names.
+  repeated string genres = 11;
+  // 0–10.
+  double community_rating = 12;
+  // Such as "tmdb", "imdb" and "tvdb".
+  map<string, string> external_ids = 13;
+  string poster_url = 14;
+  string backdrop_url = 15;
+  // A series the metadata providers tag as anime, which requests add with
+  // the anime quality profile and library.
+  bool anime = 16;
+  MediaStatus status = 17;
+  // The movie or series in a library, if any.
+  string item_id = 18;
+  // Its active requests: pending, approved or failed.
+  repeated Request requests = 19;
+  // Whether the caller may request it, or some of its seasons, now.
+  bool requestable = 20;
+  // The seasons of a series, in order; specials only when the server
+  // allows requesting them.
+  repeated SeasonStatus seasons = 21;
+}
+
+// SeasonStatus is a season of a series with what the server has of it, as
+// Seerr's season statuses.
+message SeasonStatus {
+  int32 season_number = 1;
+  int32 episode_count = 2;
+  // ISO 8601 calendar date of its first episode, when known.
+  string premiere_date = 3;
+  // Requested, wanted, partially available or available, blocklisted with
+  // its series, or deleted.
+  MediaStatus status = 4;
+  // The active request asking for it, if any, and that request's status.
+  string request_id = 5;
+  RequestStatus request_status = 6;
+  // Whether the caller may request it now.
+  bool requestable = 7;
 }

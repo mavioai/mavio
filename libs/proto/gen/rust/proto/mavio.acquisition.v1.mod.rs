@@ -374,6 +374,34 @@ pub use self::__buffa::view::GetQuotaResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetQuotaResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::BlockedTitleView;
+#[doc(inline)]
+pub use self::__buffa::view::BlockedTitleOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::BlockTitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::BlockTitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::BlockTitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::BlockTitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UnblockTitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UnblockTitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UnblockTitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UnblockTitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListBlockedTitlesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListBlockedTitlesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListBlockedTitlesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListBlockedTitlesResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ListCatalogsRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ListCatalogsRequestOwnedView;
@@ -405,6 +433,30 @@ pub use self::__buffa::view::ListFilterValuesRequestOwnedView;
 pub use self::__buffa::view::ListFilterValuesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListFilterValuesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchTitlesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchTitlesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchTitlesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchTitlesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetTitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetTitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetTitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetTitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TitleView;
+#[doc(inline)]
+pub use self::__buffa::view::TitleOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SeasonStatusView;
+#[doc(inline)]
+pub use self::__buffa::view::SeasonStatusOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::DownloadClientView;
 #[doc(inline)]

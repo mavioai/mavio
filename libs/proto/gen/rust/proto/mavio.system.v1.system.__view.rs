@@ -5815,6 +5815,13 @@ pub struct ServerSettingsView<'a> {
     pub requests: ::buffa::MessageFieldView<
         super::super::__buffa::view::RequestSettingsView<'a>,
     >,
+    /// The language and country of metadata beside libraries'; unset in an
+    /// update keeps the current ones.
+    ///
+    /// Field 8: `metadata`
+    pub metadata: ::buffa::MessageFieldView<
+        super::super::__buffa::view::MetadataSettingsView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ServerSettingsView<'a> {
@@ -5959,6 +5966,27 @@ impl<'a> ::buffa::MessageView<'a> for ServerSettingsView<'a> {
                     }
                 }
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.metadata.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.metadata = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::MetadataSettingsView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -6043,6 +6071,15 @@ impl<'a> ::buffa::MessageView<'a> for ServerSettingsView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            metadata: match self.metadata.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::MetadataSettings,
+                        ::buffa::Inline<super::super::MetadataSettings>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -6095,6 +6132,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ServerSettingsView<'a> {
         if self.requests.is_set() {
             let __slot = __cache.reserve();
             let inner_size = self.requests.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.metadata.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.metadata.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -6156,6 +6201,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ServerSettingsView<'a> {
                 buf,
             );
             self.requests.write_to(__cache, buf);
+        }
+        if self.metadata.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                8u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.metadata.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -6316,6 +6369,18 @@ impl ServerSettingsOwnedView {
     > {
         &self.0.reborrow().requests
     }
+    /// The language and country of metadata beside libraries'; unset in an
+    /// update keeps the current ones.
+    ///
+    /// Field 8: `metadata`
+    #[must_use]
+    pub fn metadata(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::MetadataSettingsView<'_>,
+    > {
+        &self.0.reborrow().metadata
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<ServerSettingsView<'static>>>
 for ServerSettingsOwnedView {
@@ -6397,6 +6462,14 @@ pub struct RequestSettingsView<'a> {
     ///
     /// Field 17: `specials`
     pub specials: ::core::option::Option<bool>,
+    /// The show library and quality profile approved anime series are added
+    /// to, as Seerr's anime settings of Sonarr; empty uses those of series.
+    /// Anime series are numbered absolutely either way.
+    ///
+    /// Field 18: `anime_library_id`
+    pub anime_library_id: ::core::option::Option<&'a str>,
+    /// Field 19: `anime_quality_profile_id`
+    pub anime_quality_profile_id: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for RequestSettingsView<'a> {
@@ -6566,6 +6639,22 @@ impl<'a> ::buffa::MessageView<'a> for RequestSettingsView<'a> {
                 )?;
                 view.specials = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.anime_library_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.anime_quality_profile_id = Some(
+                    ::buffa::types::borrow_str(&mut cur)?,
+                );
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -6609,6 +6698,10 @@ impl<'a> ::buffa::MessageView<'a> for RequestSettingsView<'a> {
             season_folder: self.season_folder,
             monitor_new_items: self.monitor_new_items,
             specials: self.specials,
+            anime_library_id: self.anime_library_id.map(|s| s.to_string()),
+            anime_quality_profile_id: self
+                .anime_quality_profile_id
+                .map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -6671,6 +6764,12 @@ impl<'a> ::buffa::ViewEncode<'a> for RequestSettingsView<'a> {
         if self.specials.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.anime_library_id {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.anime_quality_profile_id {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -6732,6 +6831,12 @@ impl<'a> ::buffa::ViewEncode<'a> for RequestSettingsView<'a> {
         }
         if let Some(v) = self.specials {
             ::buffa::types::put_bool_field(17u32, v, buf);
+        }
+        if let Some(ref v) = self.anime_library_id {
+            ::buffa::types::put_string_field(18u32, v, buf);
+        }
+        if let Some(ref v) = self.anime_quality_profile_id {
+            ::buffa::types::put_string_field(19u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -6935,6 +7040,20 @@ impl RequestSettingsOwnedView {
     pub fn specials(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().specials
     }
+    /// The show library and quality profile approved anime series are added
+    /// to, as Seerr's anime settings of Sonarr; empty uses those of series.
+    /// Anime series are numbered absolutely either way.
+    ///
+    /// Field 18: `anime_library_id`
+    #[must_use]
+    pub fn anime_library_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().anime_library_id
+    }
+    /// Field 19: `anime_quality_profile_id`
+    #[must_use]
+    pub fn anime_quality_profile_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().anime_quality_profile_id
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<RequestSettingsView<'static>>>
 for RequestSettingsOwnedView {
@@ -6957,6 +7076,253 @@ for RequestSettingsOwnedView {
 impl ::buffa::HasMessageView for super::super::RequestSettings {
     type View<'a> = RequestSettingsView<'a>;
     type ViewHandle = RequestSettingsOwnedView;
+}
+/// MetadataSettings are the server's language and country of metadata
+/// beside libraries', as Jellyfin's: requests and discovery name titles in
+/// them and rate titles in the country.
+#[derive(Clone, Debug, Default)]
+pub struct MetadataSettingsView<'a> {
+    /// ISO 639-1, such as "en"; empty for English.
+    ///
+    /// Field 1: `preferred_language`
+    pub preferred_language: ::core::option::Option<&'a str>,
+    /// ISO 3166-1, such as "US"; empty for the United States.
+    ///
+    /// Field 2: `country`
+    pub country: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for MetadataSettingsView<'a> {
+    type Owned = super::super::MetadataSettings;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.preferred_language = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.country = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::MetadataSettings, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::MetadataSettings, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::MetadataSettings {
+            preferred_language: self.preferred_language.map(|s| s.to_string()),
+            country: self.country.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for MetadataSettingsView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.preferred_language {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.country {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.preferred_language {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.country {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for MetadataSettingsView<'a> {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "MetadataSettings";
+    const FULL_NAME: &'static str = "mavio.system.v1.MetadataSettings";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.MetadataSettings";
+}
+::buffa::impl_default_view_instance!(MetadataSettingsView);
+::buffa::impl_view_reborrow!(MetadataSettingsView);
+/** Self-contained, `'static` owned view of a `MetadataSettings` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`MetadataSettingsView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`MetadataSettingsView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct MetadataSettingsOwnedView(::buffa::OwnedView<MetadataSettingsView<'static>>);
+impl MetadataSettingsOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            MetadataSettingsOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            MetadataSettingsOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::MetadataSettings,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            MetadataSettingsOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`MetadataSettingsView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &MetadataSettingsView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::MetadataSettings {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// ISO 639-1, such as "en"; empty for English.
+    ///
+    /// Field 1: `preferred_language`
+    #[must_use]
+    pub fn preferred_language(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().preferred_language
+    }
+    /// ISO 3166-1, such as "US"; empty for the United States.
+    ///
+    /// Field 2: `country`
+    #[must_use]
+    pub fn country(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().country
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<MetadataSettingsView<'static>>>
+for MetadataSettingsOwnedView {
+    fn from(inner: ::buffa::OwnedView<MetadataSettingsView<'static>>) -> Self {
+        MetadataSettingsOwnedView(inner)
+    }
+}
+impl ::core::convert::From<MetadataSettingsOwnedView>
+for ::buffa::OwnedView<MetadataSettingsView<'static>> {
+    fn from(wrapper: MetadataSettingsOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<MetadataSettingsView<'static>>>
+for MetadataSettingsOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<MetadataSettingsView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::MetadataSettings {
+    type View<'a> = MetadataSettingsView<'a>;
+    type ViewHandle = MetadataSettingsOwnedView;
 }
 /// AcquisitionSettings are how releases are chosen, downloaded and
 /// imported, as Radarr's settings.

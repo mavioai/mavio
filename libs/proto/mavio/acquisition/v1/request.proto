@@ -15,9 +15,9 @@ import "mavio/acquisition/v1/profile.proto";
 service RequestService {
   // CreateRequest requests a movie, or seasons of a series, by its TMDB
   // ID. It fails with PERMISSION_DENIED when the user may not request it
-  // (its kind, or its rating above the user's limit), RESOURCE_EXHAUSTED
-  // past the user's quota, and ALREADY_EXISTS when it is requested,
-  // wanted or available already.
+  // (its kind, its rating above the user's limit, or the title
+  // blocklisted), RESOURCE_EXHAUSTED past the user's quota, and
+  // ALREADY_EXISTS when it is requested, wanted or available already.
   rpc CreateRequest(CreateRequestRequest) returns (CreateRequestResponse);
   // ListRequests lists the caller's requests, or anyone's for
   // administrators.
@@ -50,6 +50,19 @@ service RequestService {
   // GetQuota returns how much of their quotas a user has used: the
   // caller's own, or anyone's for administrators.
   rpc GetQuota(GetQuotaRequest) returns (GetQuotaResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // BlockTitle blocklists a movie or series, as Seerr's blocklist: it can
+  // no longer be requested. It fails with ALREADY_EXISTS when the title is
+  // blocklisted already. Administrators only.
+  rpc BlockTitle(BlockTitleRequest) returns (BlockTitleResponse);
+  // UnblockTitle takes a title off the blocklist. Administrators only.
+  rpc UnblockTitle(UnblockTitleRequest) returns (UnblockTitleResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // ListBlockedTitles lists the blocklist, newest first. Administrators
+  // only.
+  rpc ListBlockedTitles(ListBlockedTitlesRequest) returns (ListBlockedTitlesResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
 }
@@ -242,4 +255,55 @@ message Quota {
 message GetQuotaResponse {
   Quota movie = 1;
   Quota series = 2;
+}
+
+// BlockedTitle is a movie or series administrators blocked from being
+// requested.
+message BlockedTitle {
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+  MediaKind media_kind = 1;
+  int32 tmdb_id = 2;
+  // Its name when it was blocklisted, if the metadata providers knew it.
+  string title = 3;
+  // The administrator who blocklisted it, unless deleted since.
+  string user_id = 4;
+  google.protobuf.Timestamp create_time = 5;
+}
+
+message BlockTitleRequest {
+  MediaKind media_kind = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  int32 tmdb_id = 2 [(buf.validate.field).int32.gt = 0];
+}
+
+message BlockTitleResponse {
+  BlockedTitle blocked_title = 1;
+}
+
+message UnblockTitleRequest {
+  MediaKind media_kind = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  int32 tmdb_id = 2 [(buf.validate.field).int32.gt = 0];
+}
+
+message UnblockTitleResponse {}
+
+message ListBlockedTitlesRequest {
+  // Matched against the titles' names; unset for all.
+  string search = 1 [(buf.validate.field).string.max_len = 200];
+  // 1–1000; unset means 100.
+  int32 limit = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 3 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListBlockedTitlesResponse {
+  repeated BlockedTitle blocked_titles = 1;
+  int32 total = 2;
 }

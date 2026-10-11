@@ -2367,6 +2367,399 @@ func (b0 FilterValue_builder) Build() *FilterValue {
 	return m0
 }
 
+type SearchTitlesRequest struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Query        *string                `protobuf:"bytes,1,opt,name=query"`
+	xxx_hidden_MediaKind    MediaKind              `protobuf:"varint,2,opt,name=media_kind,json=mediaKind,enum=mavio.plugin.v1.MediaKind"`
+	xxx_hidden_Year         int32                  `protobuf:"varint,3,opt,name=year"`
+	xxx_hidden_Language     *string                `protobuf:"bytes,4,opt,name=language"`
+	xxx_hidden_IncludeAdult bool                   `protobuf:"varint,5,opt,name=include_adult,json=includeAdult"`
+	xxx_hidden_Page         int32                  `protobuf:"varint,6,opt,name=page"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *SearchTitlesRequest) Reset() {
+	*x = SearchTitlesRequest{}
+	mi := &file_mavio_plugin_v1_discovery_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchTitlesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchTitlesRequest) ProtoMessage() {}
+
+func (x *SearchTitlesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_discovery_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SearchTitlesRequest) GetQuery() string {
+	if x != nil {
+		if x.xxx_hidden_Query != nil {
+			return *x.xxx_hidden_Query
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SearchTitlesRequest) GetMediaKind() MediaKind {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 1) {
+			return x.xxx_hidden_MediaKind
+		}
+	}
+	return MediaKind_MEDIA_KIND_UNSPECIFIED
+}
+
+func (x *SearchTitlesRequest) GetYear() int32 {
+	if x != nil {
+		return x.xxx_hidden_Year
+	}
+	return 0
+}
+
+func (x *SearchTitlesRequest) GetLanguage() string {
+	if x != nil {
+		if x.xxx_hidden_Language != nil {
+			return *x.xxx_hidden_Language
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SearchTitlesRequest) GetIncludeAdult() bool {
+	if x != nil {
+		return x.xxx_hidden_IncludeAdult
+	}
+	return false
+}
+
+func (x *SearchTitlesRequest) GetPage() int32 {
+	if x != nil {
+		return x.xxx_hidden_Page
+	}
+	return 0
+}
+
+func (x *SearchTitlesRequest) SetQuery(v string) {
+	x.xxx_hidden_Query = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+}
+
+func (x *SearchTitlesRequest) SetMediaKind(v MediaKind) {
+	x.xxx_hidden_MediaKind = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+}
+
+func (x *SearchTitlesRequest) SetYear(v int32) {
+	x.xxx_hidden_Year = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
+}
+
+func (x *SearchTitlesRequest) SetLanguage(v string) {
+	x.xxx_hidden_Language = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+}
+
+func (x *SearchTitlesRequest) SetIncludeAdult(v bool) {
+	x.xxx_hidden_IncludeAdult = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *SearchTitlesRequest) SetPage(v int32) {
+	x.xxx_hidden_Page = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+}
+
+func (x *SearchTitlesRequest) HasQuery() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SearchTitlesRequest) HasMediaKind() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SearchTitlesRequest) HasYear() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *SearchTitlesRequest) HasLanguage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *SearchTitlesRequest) HasIncludeAdult() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *SearchTitlesRequest) HasPage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *SearchTitlesRequest) ClearQuery() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Query = nil
+}
+
+func (x *SearchTitlesRequest) ClearMediaKind() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_MediaKind = MediaKind_MEDIA_KIND_UNSPECIFIED
+}
+
+func (x *SearchTitlesRequest) ClearYear() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Year = 0
+}
+
+func (x *SearchTitlesRequest) ClearLanguage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Language = nil
+}
+
+func (x *SearchTitlesRequest) ClearIncludeAdult() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_IncludeAdult = false
+}
+
+func (x *SearchTitlesRequest) ClearPage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_Page = 0
+}
+
+type SearchTitlesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The text to find. A provider may understand prefixes of its own, such
+	// as "tmdb:603" or "imdb:tt0133093" finding a title by an external ID,
+	// or "year:1999" restricting names to a year, as Seerr's searches do.
+	Query *string
+	// Movies or series; unspecified for both.
+	MediaKind *MediaKind
+	// The year of a movie's release or a series' first air date; unset for
+	// any.
+	Year *int32
+	// ISO 639-1 language of names and overviews.
+	Language     *string
+	IncludeAdult *bool
+	// From 1; unset for the first page.
+	Page *int32
+}
+
+func (b0 SearchTitlesRequest_builder) Build() *SearchTitlesRequest {
+	m0 := &SearchTitlesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Query != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		x.xxx_hidden_Query = b.Query
+	}
+	if b.MediaKind != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		x.xxx_hidden_MediaKind = *b.MediaKind
+	}
+	if b.Year != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
+		x.xxx_hidden_Year = *b.Year
+	}
+	if b.Language != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		x.xxx_hidden_Language = b.Language
+	}
+	if b.IncludeAdult != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		x.xxx_hidden_IncludeAdult = *b.IncludeAdult
+	}
+	if b.Page != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		x.xxx_hidden_Page = *b.Page
+	}
+	return m0
+}
+
+type SearchTitlesResponse struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Titles       *[]*DiscoveredTitle    `protobuf:"bytes,1,rep,name=titles"`
+	xxx_hidden_Page         int32                  `protobuf:"varint,2,opt,name=page"`
+	xxx_hidden_TotalPages   int32                  `protobuf:"varint,3,opt,name=total_pages,json=totalPages"`
+	xxx_hidden_TotalResults int32                  `protobuf:"varint,4,opt,name=total_results,json=totalResults"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *SearchTitlesResponse) Reset() {
+	*x = SearchTitlesResponse{}
+	mi := &file_mavio_plugin_v1_discovery_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchTitlesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchTitlesResponse) ProtoMessage() {}
+
+func (x *SearchTitlesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_discovery_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SearchTitlesResponse) GetTitles() []*DiscoveredTitle {
+	if x != nil {
+		if x.xxx_hidden_Titles != nil {
+			return *x.xxx_hidden_Titles
+		}
+	}
+	return nil
+}
+
+func (x *SearchTitlesResponse) GetPage() int32 {
+	if x != nil {
+		return x.xxx_hidden_Page
+	}
+	return 0
+}
+
+func (x *SearchTitlesResponse) GetTotalPages() int32 {
+	if x != nil {
+		return x.xxx_hidden_TotalPages
+	}
+	return 0
+}
+
+func (x *SearchTitlesResponse) GetTotalResults() int32 {
+	if x != nil {
+		return x.xxx_hidden_TotalResults
+	}
+	return 0
+}
+
+func (x *SearchTitlesResponse) SetTitles(v []*DiscoveredTitle) {
+	x.xxx_hidden_Titles = &v
+}
+
+func (x *SearchTitlesResponse) SetPage(v int32) {
+	x.xxx_hidden_Page = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+}
+
+func (x *SearchTitlesResponse) SetTotalPages(v int32) {
+	x.xxx_hidden_TotalPages = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *SearchTitlesResponse) SetTotalResults(v int32) {
+	x.xxx_hidden_TotalResults = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+}
+
+func (x *SearchTitlesResponse) HasPage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SearchTitlesResponse) HasTotalPages() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *SearchTitlesResponse) HasTotalResults() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *SearchTitlesResponse) ClearPage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Page = 0
+}
+
+func (x *SearchTitlesResponse) ClearTotalPages() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_TotalPages = 0
+}
+
+func (x *SearchTitlesResponse) ClearTotalResults() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_TotalResults = 0
+}
+
+type SearchTitlesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Movies and series only, best matches first.
+	Titles       []*DiscoveredTitle
+	Page         *int32
+	TotalPages   *int32
+	TotalResults *int32
+}
+
+func (b0 SearchTitlesResponse_builder) Build() *SearchTitlesResponse {
+	m0 := &SearchTitlesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Titles = &b.Titles
+	if b.Page != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		x.xxx_hidden_Page = *b.Page
+	}
+	if b.TotalPages != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		x.xxx_hidden_TotalPages = *b.TotalPages
+	}
+	if b.TotalResults != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_TotalResults = *b.TotalResults
+	}
+	return m0
+}
+
 var File_mavio_plugin_v1_discovery_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_discovery_proto_rawDesc = "" +
@@ -2466,7 +2859,22 @@ const file_mavio_plugin_v1_discovery_proto_rawDesc = "" +
 	"\vFilterValue\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
-	"\timage_url\x18\x03 \x01(\tR\bimageUrl*\xea\x01\n" +
+	"\timage_url\x18\x03 \x01(\tR\bimageUrl\"\xf0\x01\n" +
+	"\x13SearchTitlesRequest\x12\x1c\n" +
+	"\x05query\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x05query\x129\n" +
+	"\n" +
+	"media_kind\x18\x02 \x01(\x0e2\x1a.mavio.plugin.v1.MediaKindR\tmediaKind\x12\x1f\n" +
+	"\x04year\x18\x03 \x01(\x05B\v\xbaH\b\x1a\x06\x18\x8fN(\x88\x0eR\x04year\x12\x1a\n" +
+	"\blanguage\x18\x04 \x01(\tR\blanguage\x12#\n" +
+	"\rinclude_adult\x18\x05 \x01(\bR\fincludeAdult\x12\x1e\n" +
+	"\x04page\x18\x06 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xf4\x03(\x01R\x04page\"\xaa\x01\n" +
+	"\x14SearchTitlesResponse\x128\n" +
+	"\x06titles\x18\x01 \x03(\v2 .mavio.plugin.v1.DiscoveredTitleR\x06titles\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1f\n" +
+	"\vtotal_pages\x18\x03 \x01(\x05R\n" +
+	"totalPages\x12#\n" +
+	"\rtotal_results\x18\x04 \x01(\x05R\ftotalResults*\xea\x01\n" +
 	"\vCatalogKind\x12\x1c\n" +
 	"\x18CATALOG_KIND_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15CATALOG_KIND_TRENDING\x10\x01\x12\x18\n" +
@@ -2496,15 +2904,16 @@ const file_mavio_plugin_v1_discovery_proto_rawDesc = "" +
 	"\x1aDISCOVER_SORT_RELEASE_DATE\x10\x02\x12\x18\n" +
 	"\x14DISCOVER_SORT_RATING\x10\x03\x12\x1c\n" +
 	"\x18DISCOVER_SORT_VOTE_COUNT\x10\x04\x12\x17\n" +
-	"\x13DISCOVER_SORT_TITLE\x10\x052\xc0\x02\n" +
+	"\x13DISCOVER_SORT_TITLE\x10\x052\xa2\x03\n" +
 	"\x18DiscoveryProviderService\x12`\n" +
 	"\fListCatalogs\x12$.mavio.plugin.v1.ListCatalogsRequest\x1a%.mavio.plugin.v1.ListCatalogsResponse\"\x03\x90\x02\x01\x12T\n" +
 	"\bDiscover\x12 .mavio.plugin.v1.DiscoverRequest\x1a!.mavio.plugin.v1.DiscoverResponse\"\x03\x90\x02\x01\x12l\n" +
-	"\x10ListFilterValues\x12(.mavio.plugin.v1.ListFilterValuesRequest\x1a).mavio.plugin.v1.ListFilterValuesResponse\"\x03\x90\x02\x01B\xc8\x01\n" +
+	"\x10ListFilterValues\x12(.mavio.plugin.v1.ListFilterValuesRequest\x1a).mavio.plugin.v1.ListFilterValuesResponse\"\x03\x90\x02\x01\x12`\n" +
+	"\fSearchTitles\x12$.mavio.plugin.v1.SearchTitlesRequest\x1a%.mavio.plugin.v1.SearchTitlesResponse\"\x03\x90\x02\x01B\xc8\x01\n" +
 	"\x13com.mavio.plugin.v1B\x0eDiscoveryProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
 var file_mavio_plugin_v1_discovery_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_mavio_plugin_v1_discovery_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_mavio_plugin_v1_discovery_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_mavio_plugin_v1_discovery_proto_goTypes = []any{
 	(CatalogKind)(0),                 // 0: mavio.plugin.v1.CatalogKind
 	(DiscoverFilter)(0),              // 1: mavio.plugin.v1.DiscoverFilter
@@ -2518,36 +2927,42 @@ var file_mavio_plugin_v1_discovery_proto_goTypes = []any{
 	(*ListFilterValuesRequest)(nil),  // 9: mavio.plugin.v1.ListFilterValuesRequest
 	(*ListFilterValuesResponse)(nil), // 10: mavio.plugin.v1.ListFilterValuesResponse
 	(*FilterValue)(nil),              // 11: mavio.plugin.v1.FilterValue
-	nil,                              // 12: mavio.plugin.v1.DiscoverRequest.ExternalIdsEntry
-	nil,                              // 13: mavio.plugin.v1.DiscoveredTitle.ExternalIdsEntry
-	(MediaKind)(0),                   // 14: mavio.plugin.v1.MediaKind
+	(*SearchTitlesRequest)(nil),      // 12: mavio.plugin.v1.SearchTitlesRequest
+	(*SearchTitlesResponse)(nil),     // 13: mavio.plugin.v1.SearchTitlesResponse
+	nil,                              // 14: mavio.plugin.v1.DiscoverRequest.ExternalIdsEntry
+	nil,                              // 15: mavio.plugin.v1.DiscoveredTitle.ExternalIdsEntry
+	(MediaKind)(0),                   // 16: mavio.plugin.v1.MediaKind
 }
 var file_mavio_plugin_v1_discovery_proto_depIdxs = []int32{
 	5,  // 0: mavio.plugin.v1.ListCatalogsResponse.catalogs:type_name -> mavio.plugin.v1.Catalog
 	0,  // 1: mavio.plugin.v1.Catalog.kind:type_name -> mavio.plugin.v1.CatalogKind
-	14, // 2: mavio.plugin.v1.Catalog.media_kinds:type_name -> mavio.plugin.v1.MediaKind
+	16, // 2: mavio.plugin.v1.Catalog.media_kinds:type_name -> mavio.plugin.v1.MediaKind
 	1,  // 3: mavio.plugin.v1.Catalog.filters:type_name -> mavio.plugin.v1.DiscoverFilter
 	2,  // 4: mavio.plugin.v1.Catalog.sorts:type_name -> mavio.plugin.v1.DiscoverSort
-	14, // 5: mavio.plugin.v1.DiscoverRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
-	12, // 6: mavio.plugin.v1.DiscoverRequest.external_ids:type_name -> mavio.plugin.v1.DiscoverRequest.ExternalIdsEntry
+	16, // 5: mavio.plugin.v1.DiscoverRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
+	14, // 6: mavio.plugin.v1.DiscoverRequest.external_ids:type_name -> mavio.plugin.v1.DiscoverRequest.ExternalIdsEntry
 	2,  // 7: mavio.plugin.v1.DiscoverRequest.sort:type_name -> mavio.plugin.v1.DiscoverSort
 	8,  // 8: mavio.plugin.v1.DiscoverResponse.titles:type_name -> mavio.plugin.v1.DiscoveredTitle
-	14, // 9: mavio.plugin.v1.DiscoveredTitle.media_kind:type_name -> mavio.plugin.v1.MediaKind
-	13, // 10: mavio.plugin.v1.DiscoveredTitle.external_ids:type_name -> mavio.plugin.v1.DiscoveredTitle.ExternalIdsEntry
+	16, // 9: mavio.plugin.v1.DiscoveredTitle.media_kind:type_name -> mavio.plugin.v1.MediaKind
+	15, // 10: mavio.plugin.v1.DiscoveredTitle.external_ids:type_name -> mavio.plugin.v1.DiscoveredTitle.ExternalIdsEntry
 	1,  // 11: mavio.plugin.v1.ListFilterValuesRequest.filter:type_name -> mavio.plugin.v1.DiscoverFilter
-	14, // 12: mavio.plugin.v1.ListFilterValuesRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
+	16, // 12: mavio.plugin.v1.ListFilterValuesRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
 	11, // 13: mavio.plugin.v1.ListFilterValuesResponse.values:type_name -> mavio.plugin.v1.FilterValue
-	3,  // 14: mavio.plugin.v1.DiscoveryProviderService.ListCatalogs:input_type -> mavio.plugin.v1.ListCatalogsRequest
-	6,  // 15: mavio.plugin.v1.DiscoveryProviderService.Discover:input_type -> mavio.plugin.v1.DiscoverRequest
-	9,  // 16: mavio.plugin.v1.DiscoveryProviderService.ListFilterValues:input_type -> mavio.plugin.v1.ListFilterValuesRequest
-	4,  // 17: mavio.plugin.v1.DiscoveryProviderService.ListCatalogs:output_type -> mavio.plugin.v1.ListCatalogsResponse
-	7,  // 18: mavio.plugin.v1.DiscoveryProviderService.Discover:output_type -> mavio.plugin.v1.DiscoverResponse
-	10, // 19: mavio.plugin.v1.DiscoveryProviderService.ListFilterValues:output_type -> mavio.plugin.v1.ListFilterValuesResponse
-	17, // [17:20] is the sub-list for method output_type
-	14, // [14:17] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	16, // 14: mavio.plugin.v1.SearchTitlesRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
+	8,  // 15: mavio.plugin.v1.SearchTitlesResponse.titles:type_name -> mavio.plugin.v1.DiscoveredTitle
+	3,  // 16: mavio.plugin.v1.DiscoveryProviderService.ListCatalogs:input_type -> mavio.plugin.v1.ListCatalogsRequest
+	6,  // 17: mavio.plugin.v1.DiscoveryProviderService.Discover:input_type -> mavio.plugin.v1.DiscoverRequest
+	9,  // 18: mavio.plugin.v1.DiscoveryProviderService.ListFilterValues:input_type -> mavio.plugin.v1.ListFilterValuesRequest
+	12, // 19: mavio.plugin.v1.DiscoveryProviderService.SearchTitles:input_type -> mavio.plugin.v1.SearchTitlesRequest
+	4,  // 20: mavio.plugin.v1.DiscoveryProviderService.ListCatalogs:output_type -> mavio.plugin.v1.ListCatalogsResponse
+	7,  // 21: mavio.plugin.v1.DiscoveryProviderService.Discover:output_type -> mavio.plugin.v1.DiscoverResponse
+	10, // 22: mavio.plugin.v1.DiscoveryProviderService.ListFilterValues:output_type -> mavio.plugin.v1.ListFilterValuesResponse
+	13, // 23: mavio.plugin.v1.DiscoveryProviderService.SearchTitles:output_type -> mavio.plugin.v1.SearchTitlesResponse
+	20, // [20:24] is the sub-list for method output_type
+	16, // [16:20] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_discovery_proto_init() }
@@ -2562,7 +2977,7 @@ func file_mavio_plugin_v1_discovery_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_discovery_proto_rawDesc), len(file_mavio_plugin_v1_discovery_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   11,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

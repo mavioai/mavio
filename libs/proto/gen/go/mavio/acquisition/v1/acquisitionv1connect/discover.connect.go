@@ -42,6 +42,12 @@ const (
 	// DiscoverServiceListFilterValuesProcedure is the fully-qualified name of the DiscoverService's
 	// ListFilterValues RPC.
 	DiscoverServiceListFilterValuesProcedure = "/mavio.acquisition.v1.DiscoverService/ListFilterValues"
+	// DiscoverServiceSearchTitlesProcedure is the fully-qualified name of the DiscoverService's
+	// SearchTitles RPC.
+	DiscoverServiceSearchTitlesProcedure = "/mavio.acquisition.v1.DiscoverService/SearchTitles"
+	// DiscoverServiceGetTitleProcedure is the fully-qualified name of the DiscoverService's GetTitle
+	// RPC.
+	DiscoverServiceGetTitleProcedure = "/mavio.acquisition.v1.DiscoverService/GetTitle"
 )
 
 // DiscoverServiceClient is a client for the mavio.acquisition.v1.DiscoverService service.
@@ -53,6 +59,15 @@ type DiscoverServiceClient interface {
 	// ListFilterValues lists the values a catalog's filter takes, such as
 	// genres, or the keywords and studios matching a query.
 	ListFilterValues(context.Context, *v1.ListFilterValuesRequest) (*v1.ListFilterValuesResponse, error)
+	// SearchTitles finds movies and series by name through a discovery
+	// provider, as Seerr's /search, marked as Discover marks them.
+	SearchTitles(context.Context, *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error)
+	// GetTitle returns a movie or series by its TMDB ID, as the metadata
+	// providers tell it, with what the server has of it and of each of its
+	// seasons, as Seerr's movie and series details with their media. It
+	// fails with PERMISSION_DENIED when the title is rated above the
+	// caller's limit, and NOT_FOUND when no metadata provider knows it.
+	GetTitle(context.Context, *v1.GetTitleRequest) (*v1.GetTitleResponse, error)
 }
 
 // NewDiscoverServiceClient constructs a client for the mavio.acquisition.v1.DiscoverService
@@ -87,6 +102,20 @@ func NewDiscoverServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		searchTitles: connect.NewClient[v1.SearchTitlesRequest, v1.SearchTitlesResponse](
+			httpClient,
+			baseURL+DiscoverServiceSearchTitlesProcedure,
+			connect.WithSchema(discoverServiceMethods.ByName("SearchTitles")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		getTitle: connect.NewClient[v1.GetTitleRequest, v1.GetTitleResponse](
+			httpClient,
+			baseURL+DiscoverServiceGetTitleProcedure,
+			connect.WithSchema(discoverServiceMethods.ByName("GetTitle")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -95,6 +124,8 @@ type discoverServiceClient struct {
 	listCatalogs     *connect.Client[v1.ListCatalogsRequest, v1.ListCatalogsResponse]
 	discover         *connect.Client[v1.DiscoverRequest, v1.DiscoverResponse]
 	listFilterValues *connect.Client[v1.ListFilterValuesRequest, v1.ListFilterValuesResponse]
+	searchTitles     *connect.Client[v1.SearchTitlesRequest, v1.SearchTitlesResponse]
+	getTitle         *connect.Client[v1.GetTitleRequest, v1.GetTitleResponse]
 }
 
 // ListCatalogs calls mavio.acquisition.v1.DiscoverService.ListCatalogs.
@@ -124,6 +155,24 @@ func (c *discoverServiceClient) ListFilterValues(ctx context.Context, req *v1.Li
 	return nil, err
 }
 
+// SearchTitles calls mavio.acquisition.v1.DiscoverService.SearchTitles.
+func (c *discoverServiceClient) SearchTitles(ctx context.Context, req *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error) {
+	response, err := c.searchTitles.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// GetTitle calls mavio.acquisition.v1.DiscoverService.GetTitle.
+func (c *discoverServiceClient) GetTitle(ctx context.Context, req *v1.GetTitleRequest) (*v1.GetTitleResponse, error) {
+	response, err := c.getTitle.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // DiscoverServiceHandler is an implementation of the mavio.acquisition.v1.DiscoverService service.
 type DiscoverServiceHandler interface {
 	// ListCatalogs lists the catalogs of every discovery provider.
@@ -133,6 +182,15 @@ type DiscoverServiceHandler interface {
 	// ListFilterValues lists the values a catalog's filter takes, such as
 	// genres, or the keywords and studios matching a query.
 	ListFilterValues(context.Context, *v1.ListFilterValuesRequest) (*v1.ListFilterValuesResponse, error)
+	// SearchTitles finds movies and series by name through a discovery
+	// provider, as Seerr's /search, marked as Discover marks them.
+	SearchTitles(context.Context, *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error)
+	// GetTitle returns a movie or series by its TMDB ID, as the metadata
+	// providers tell it, with what the server has of it and of each of its
+	// seasons, as Seerr's movie and series details with their media. It
+	// fails with PERMISSION_DENIED when the title is rated above the
+	// caller's limit, and NOT_FOUND when no metadata provider knows it.
+	GetTitle(context.Context, *v1.GetTitleRequest) (*v1.GetTitleResponse, error)
 }
 
 // NewDiscoverServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -163,6 +221,20 @@ func NewDiscoverServiceHandler(svc DiscoverServiceHandler, opts ...connect.Handl
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	discoverServiceSearchTitlesHandler := connect.NewUnaryHandlerSimple(
+		DiscoverServiceSearchTitlesProcedure,
+		svc.SearchTitles,
+		connect.WithSchema(discoverServiceMethods.ByName("SearchTitles")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	discoverServiceGetTitleHandler := connect.NewUnaryHandlerSimple(
+		DiscoverServiceGetTitleProcedure,
+		svc.GetTitle,
+		connect.WithSchema(discoverServiceMethods.ByName("GetTitle")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.acquisition.v1.DiscoverService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DiscoverServiceListCatalogsProcedure:
@@ -171,6 +243,10 @@ func NewDiscoverServiceHandler(svc DiscoverServiceHandler, opts ...connect.Handl
 			discoverServiceDiscoverHandler.ServeHTTP(w, r)
 		case DiscoverServiceListFilterValuesProcedure:
 			discoverServiceListFilterValuesHandler.ServeHTTP(w, r)
+		case DiscoverServiceSearchTitlesProcedure:
+			discoverServiceSearchTitlesHandler.ServeHTTP(w, r)
+		case DiscoverServiceGetTitleProcedure:
+			discoverServiceGetTitleHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -190,4 +266,12 @@ func (UnimplementedDiscoverServiceHandler) Discover(context.Context, *v1.Discove
 
 func (UnimplementedDiscoverServiceHandler) ListFilterValues(context.Context, *v1.ListFilterValuesRequest) (*v1.ListFilterValuesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DiscoverService.ListFilterValues is not implemented"))
+}
+
+func (UnimplementedDiscoverServiceHandler) SearchTitles(context.Context, *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DiscoverService.SearchTitles is not implemented"))
+}
+
+func (UnimplementedDiscoverServiceHandler) GetTitle(context.Context, *v1.GetTitleRequest) (*v1.GetTitleResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DiscoverService.GetTitle is not implemented"))
 }
