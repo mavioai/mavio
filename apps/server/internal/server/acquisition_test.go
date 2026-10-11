@@ -2,6 +2,8 @@ package server_test
 
 import (
 	"bytes"
+	"crypto/sha1" //nolint:gosec // made-up BitTorrent v1 info hashes.
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html"
@@ -9,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -87,11 +90,43 @@ type offered struct {
 var newznabCategoryNames = map[int]string{2000: "Movies", 2040: "Movies &gt; HD", 5000: "TV", 5040: "TV &gt; HD", 5070: "TV &gt; Anime"}
 
 // fakeNewznab is a Newznab indexer listing the releases offered, for
-// every search and its RSS feed alike, and serving their NZBs.
+// every search and its RSS feed alike, and serving their NZBs; or, when
+// torznab is set, a Torznab indexer listing them with their magnet links.
 type fakeNewznab struct {
 	*httptest.Server
+	torznab bool
+
 	mu       sync.Mutex
 	releases []offered
+	// queries are the queries of the searches and RSS feeds asked for.
+	queries []url.Values
+}
+
+// newFakeTorznab returns a Torznab indexer listing the releases offered,
+// with their magnet links and fifty seeders.
+func newFakeTorznab(t *testing.T) *fakeNewznab {
+	f := &fakeNewznab{torznab: true}
+	f.Server = httptest.NewServer(http.HandlerFunc(f.serve))
+	t.Cleanup(f.Close)
+	return f
+}
+
+// infoHash is the info hash of a release's torrent, in lower-case hex.
+func infoHash(id string) string {
+	sum := sha1.Sum([]byte(id)) //nolint:gosec // a made-up BitTorrent v1 info hash.
+	return hex.EncodeToString(sum[:])
+}
+
+// magnet is the magnet link of a release's torrent.
+func magnet(rel offered) string {
+	return "magnet:?xt=urn:btih:" + infoHash(rel.id) + "&dn=" + url.QueryEscape(rel.title)
+}
+
+// searched returns the queries asked for so far.
+func (f *fakeNewznab) searched() []url.Values {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return slices.Clone(f.queries)
 }
 
 func newFakeNewznab(t *testing.T) *fakeNewznab {
@@ -138,13 +173,21 @@ func (f *fakeNewznab) serve(w http.ResponseWriter, r *http.Request) {
 	}
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	f.queries = append(f.queries, r.URL.Query())
+	ns, namespace, enclosure := "newznab", "http://www.newznab.com/DTD/2010/feeds/attributes/", "application/x-nzb"
+	if f.torznab {
+		ns, namespace, enclosure = "torznab", "http://torznab.com/schemas/2015/feed", "application/x-bittorrent"
+	}
 	var b strings.Builder
-	b.WriteString(`<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:newznab="http://www.newznab.com/DTD/2010/feeds/attributes/">
-<channel><title>E2E</title>`)
-	fmt.Fprintf(&b, `<newznab:response offset="0" total="%d"/>`, len(f.releases))
+	fmt.Fprintf(&b, `<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:%s="%s">
+<channel><title>E2E</title>`, ns, namespace)
+	fmt.Fprintf(&b, `<%s:response offset="0" total="%d"/>`, ns, len(f.releases))
 	for _, rel := range f.releases {
 		link := f.URL + "/getnzb/" + rel.id + ".nzb"
+		if f.torznab {
+			link = f.URL + "/gettorrent/" + rel.id + ".torrent"
+		}
 		categories, attrs := rel.categories, rel.attrs
 		if len(categories) == 0 {
 			categories = []int{2000, 2040}
@@ -154,14 +197,17 @@ func (f *fakeNewznab) serve(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprintf(&b, `<item><title>%s</title><guid isPermaLink="true">%s/details/%s</guid><link>%s</link>
 <pubDate>%s</pubDate><category>%s</category>
-<enclosure url="%s" length="%d" type="application/x-nzb"/>
-`, html.EscapeString(rel.title), f.URL, rel.id, link, rel.published.Format(time.RFC1123Z), newznabCategoryNames[categories[len(categories)-1]], link, rel.size)
+<enclosure url="%s" length="%d" type="%s"/>
+`, html.EscapeString(rel.title), f.URL, rel.id, link, rel.published.Format(time.RFC1123Z), newznabCategoryNames[categories[len(categories)-1]], link, rel.size, enclosure)
 		for _, c := range categories {
-			fmt.Fprintf(&b, `<newznab:attr name="category" value="%d"/>`, c)
+			fmt.Fprintf(&b, `<%s:attr name="category" value="%d"/>`, ns, c)
 		}
-		fmt.Fprintf(&b, `<newznab:attr name="size" value="%d"/><newznab:attr name="guid" value="%s"/>`, rel.size, rel.id)
+		fmt.Fprintf(&b, `<%[1]s:attr name="size" value="%[2]d"/><%[1]s:attr name="guid" value="%[3]s"/>`, ns, rel.size, rel.id)
+		if f.torznab {
+			attrs = append(slices.Clip(attrs), [][2]string{{"magneturl", magnet(rel)}, {"infohash", infoHash(rel.id)}, {"seeders", "50"}, {"peers", "60"}}...)
+		}
 		for _, a := range attrs {
-			fmt.Fprintf(&b, `<newznab:attr name="%s" value="%s"/>`, a[0], html.EscapeString(a[1]))
+			fmt.Fprintf(&b, `<%s:attr name="%s" value="%s"/>`, ns, a[0], html.EscapeString(a[1]))
 		}
 		b.WriteString("\n</item>")
 	}
