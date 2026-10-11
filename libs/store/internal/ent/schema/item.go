@@ -94,6 +94,15 @@ func (Item) Fields() []ent.Field {
 		field.Bool("monitored").Default(false),
 		field.String("series_type").Default(""),
 		field.Int("absolute_number").Optional().Nillable(),
+		// What movie acquisition knows of a movie: its original language
+		// (ISO 639-1), digital and physical releases, other titles and
+		// secondary year.
+		field.String("original_language").Default(""),
+		field.Time("digital_release_date").Optional().Nillable(),
+		field.Time("physical_release_date").Optional().Nillable(),
+		field.JSON("alternative_titles", []string{}).Optional(),
+		field.JSON("translated_titles", []string{}).Optional(),
+		field.Int("secondary_year").Default(0),
 	}
 }
 

@@ -1812,6 +1812,29 @@ pub struct Metadata {
     ///
     /// Field 25: `collection_name`
     pub collection_name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// For movies: the language (ISO 639-1) the movie was made in.
+    ///
+    /// Field 26: `original_language`
+    pub original_language: ::core::option::Option<::buffa::alloc::string::String>,
+    /// For movies: when the movie came out digitally and on disc, as ISO 8601
+    /// calendar dates; premiere_date is its release in cinemas.
+    ///
+    /// Field 27: `digital_release_date`
+    pub digital_release_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 28: `physical_release_date`
+    pub physical_release_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// For movies: other titles of the movie, and its titles in other
+    /// languages, by which releases may name it.
+    ///
+    /// Field 29: `alternative_titles`
+    pub alternative_titles: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Field 30: `translated_titles`
+    pub translated_titles: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// For movies: another year releases may give the movie, such as that of
+    /// its premiere when it differs from production_year.
+    ///
+    /// Field 31: `secondary_year`
+    pub secondary_year: ::core::option::Option<i32>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1843,6 +1866,12 @@ impl ::core::fmt::Debug for Metadata {
             .field("death_date", &self.death_date)
             .field("birth_place", &self.birth_place)
             .field("collection_name", &self.collection_name)
+            .field("original_language", &self.original_language)
+            .field("digital_release_date", &self.digital_release_date)
+            .field("physical_release_date", &self.physical_release_date)
+            .field("alternative_titles", &self.alternative_titles)
+            .field("translated_titles", &self.translated_titles)
+            .field("secondary_year", &self.secondary_year)
             .finish()
     }
 }
@@ -2005,6 +2034,43 @@ impl Metadata {
         self.collection_name = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::original_language`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_original_language(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.original_language = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::digital_release_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_digital_release_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.digital_release_date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::physical_release_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_physical_release_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.physical_release_date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::secondary_year`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_secondary_year(mut self, value: i32) -> Self {
+        self.secondary_year = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Metadata);
 impl ::buffa::MessageName for Metadata {
@@ -2119,6 +2185,24 @@ impl ::buffa::Message for Metadata {
         if let Some(ref v) = self.collection_name {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.original_language {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.digital_release_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.physical_release_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.alternative_titles {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.translated_titles {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.secondary_year {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2220,6 +2304,24 @@ impl ::buffa::Message for Metadata {
         }
         if let Some(ref v) = self.collection_name {
             ::buffa::types::put_string_field(25u32, v, buf);
+        }
+        if let Some(ref v) = self.original_language {
+            ::buffa::types::put_string_field(26u32, v, buf);
+        }
+        if let Some(ref v) = self.digital_release_date {
+            ::buffa::types::put_string_field(27u32, v, buf);
+        }
+        if let Some(ref v) = self.physical_release_date {
+            ::buffa::types::put_string_field(28u32, v, buf);
+        }
+        for v in &self.alternative_titles {
+            ::buffa::types::put_string_field(29u32, v, buf);
+        }
+        for v in &self.translated_titles {
+            ::buffa::types::put_string_field(30u32, v, buf);
+        }
+        if let Some(v) = self.secondary_year {
+            ::buffa::types::put_int32_field(31u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2511,6 +2613,73 @@ impl ::buffa::Message for Metadata {
                     buf,
                 )?;
             }
+            26u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .original_language
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            27u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .digital_release_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            28u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .physical_release_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            29u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.alternative_titles.push(__elem);
+            }
+            30u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.translated_titles.push(__elem);
+            }
+            31u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.secondary_year = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2544,6 +2713,12 @@ impl ::buffa::Message for Metadata {
         self.death_date = ::core::option::Option::None;
         self.birth_place = ::core::option::Option::None;
         self.collection_name = ::core::option::Option::None;
+        self.original_language = ::core::option::Option::None;
+        self.digital_release_date = ::core::option::Option::None;
+        self.physical_release_date = ::core::option::Option::None;
+        self.alternative_titles.clear();
+        self.translated_titles.clear();
+        self.secondary_year = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

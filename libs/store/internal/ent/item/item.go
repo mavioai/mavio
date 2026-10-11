@@ -127,6 +127,18 @@ const (
 	FieldSeriesType = "series_type"
 	// FieldAbsoluteNumber holds the string denoting the absolute_number field in the database.
 	FieldAbsoluteNumber = "absolute_number"
+	// FieldOriginalLanguage holds the string denoting the original_language field in the database.
+	FieldOriginalLanguage = "original_language"
+	// FieldDigitalReleaseDate holds the string denoting the digital_release_date field in the database.
+	FieldDigitalReleaseDate = "digital_release_date"
+	// FieldPhysicalReleaseDate holds the string denoting the physical_release_date field in the database.
+	FieldPhysicalReleaseDate = "physical_release_date"
+	// FieldAlternativeTitles holds the string denoting the alternative_titles field in the database.
+	FieldAlternativeTitles = "alternative_titles"
+	// FieldTranslatedTitles holds the string denoting the translated_titles field in the database.
+	FieldTranslatedTitles = "translated_titles"
+	// FieldSecondaryYear holds the string denoting the secondary_year field in the database.
+	FieldSecondaryYear = "secondary_year"
 	// EdgeLibrary holds the string denoting the library edge name in mutations.
 	EdgeLibrary = "library"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
@@ -376,6 +388,12 @@ var Columns = []string{
 	FieldMonitored,
 	FieldSeriesType,
 	FieldAbsoluteNumber,
+	FieldOriginalLanguage,
+	FieldDigitalReleaseDate,
+	FieldPhysicalReleaseDate,
+	FieldAlternativeTitles,
+	FieldTranslatedTitles,
+	FieldSecondaryYear,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -443,6 +461,10 @@ var (
 	DefaultMonitored bool
 	// DefaultSeriesType holds the default value on creation for the "series_type" field.
 	DefaultSeriesType string
+	// DefaultOriginalLanguage holds the default value on creation for the "original_language" field.
+	DefaultOriginalLanguage string
+	// DefaultSecondaryYear holds the default value on creation for the "secondary_year" field.
+	DefaultSecondaryYear int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() core.ID
 )
@@ -708,6 +730,26 @@ func BySeriesType(opts ...sql.OrderTermOption) OrderOption {
 // ByAbsoluteNumber orders the results by the absolute_number field.
 func ByAbsoluteNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAbsoluteNumber, opts...).ToFunc()
+}
+
+// ByOriginalLanguage orders the results by the original_language field.
+func ByOriginalLanguage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOriginalLanguage, opts...).ToFunc()
+}
+
+// ByDigitalReleaseDate orders the results by the digital_release_date field.
+func ByDigitalReleaseDate(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDigitalReleaseDate, opts...).ToFunc()
+}
+
+// ByPhysicalReleaseDate orders the results by the physical_release_date field.
+func ByPhysicalReleaseDate(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPhysicalReleaseDate, opts...).ToFunc()
+}
+
+// BySecondaryYear orders the results by the secondary_year field.
+func BySecondaryYear(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSecondaryYear, opts...).ToFunc()
 }
 
 // ByLibraryField orders the results by library field.

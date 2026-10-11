@@ -306,7 +306,40 @@ func (m radarrMovie) metadata(language, country string) *pluginv1.Metadata {
 	if m.Collection != nil && m.Collection.Name != "" {
 		md.SetCollectionName(m.Collection.Name)
 	}
+	m.setAcquisition(md)
 	return md
+}
+
+// setAcquisition sets what movie acquisition needs of the movie, as
+// SkyHookProxy.MapMovie maps it: its original language, its digital and
+// physical releases, its premiere's year when it differs from its year,
+// and its other titles.
+func (m radarrMovie) setAcquisition(md *pluginv1.Metadata) {
+	if lang := strings.ToLower(m.OriginalLanguage); len(lang) == 2 {
+		md.SetOriginalLanguage(lang)
+	}
+	if m.DigitalRelease != nil {
+		md.SetDigitalReleaseDate(m.DigitalRelease.Format(time.DateOnly))
+	}
+	if m.PhysicalRelease != nil {
+		md.SetPhysicalReleaseDate(m.PhysicalRelease.Format(time.DateOnly))
+	}
+	if m.Premier != nil && m.Year > 0 && m.Premier.Year() != m.Year {
+		md.SetSecondaryYear(int32(m.Premier.Year()))
+	}
+	var alt, translated []string
+	for _, a := range m.AlternativeTitles {
+		if a.Title != "" && a.Title != m.Title && !slices.Contains(alt, a.Title) {
+			alt = append(alt, a.Title)
+		}
+	}
+	for _, t := range m.Translations {
+		if t.Title != "" && t.Title != m.Title && !slices.Contains(translated, t.Title) {
+			translated = append(translated, t.Title)
+		}
+	}
+	md.SetAlternativeTitles(alt)
+	md.SetTranslatedTitles(translated)
 }
 
 // translation finds the movie's translation into language, preferring

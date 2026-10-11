@@ -191,6 +191,13 @@ func toResult(md *pluginv1.Metadata) *metadata.Result {
 		AlbumArtists:   md.GetAlbumArtists(),
 		SeriesStatus:   seriesStatuses[md.GetSeriesStatus()],
 		CollectionName: md.GetCollectionName(),
+
+		OriginalLanguage:    md.GetOriginalLanguage(),
+		DigitalReleaseDate:  date(md.GetDigitalReleaseDate()),
+		PhysicalReleaseDate: date(md.GetPhysicalReleaseDate()),
+		AlternativeTitles:   md.GetAlternativeTitles(),
+		TranslatedTitles:    md.GetTranslatedTitles(),
+		SecondaryYear:       int(md.GetSecondaryYear()),
 	}
 	if md.HasRuntime() {
 		it.Runtime = md.GetRuntime().AsDuration()

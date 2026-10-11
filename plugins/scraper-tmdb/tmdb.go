@@ -130,7 +130,7 @@ func (c *client) find(ctx context.Context, id, source string) (tmdbFind, error) 
 
 func (c *client) movie(ctx context.Context, id int, language, country string) (tmdbMovie, error) {
 	var m tmdbMovie
-	q := detailsQuery(language, country, "credits,images,keywords,release_dates")
+	q := detailsQuery(language, country, "credits,images,keywords,release_dates,alternative_titles,translations")
 	return m, c.get(ctx, "/movie/"+strconv.Itoa(id), q, &m)
 }
 
@@ -256,6 +256,7 @@ type (
 		Runtime       int        `json:"runtime"`
 		VoteAverage   float64    `json:"vote_average"`
 		IMDbID        string     `json:"imdb_id"`
+		Language      string     `json:"original_language"`
 		Genres        []tmdbName `json:"genres"`
 		Companies     []tmdbName `json:"production_companies"`
 		Collection    *struct {
@@ -272,9 +273,25 @@ type (
 				Country string `json:"iso_3166_1"`
 				Dates   []struct {
 					Certification string `json:"certification"`
+					// Type is TMDB's release type: 1 premiere, 2 limited
+					// theatrical, 3 theatrical, 4 digital, 5 physical, 6 TV.
+					Type int    `json:"type"`
+					Date string `json:"release_date"`
 				} `json:"release_dates"`
 			} `json:"results"`
 		} `json:"release_dates"`
+		AlternativeTitles struct {
+			Titles []struct {
+				Title string `json:"title"`
+			} `json:"titles"`
+		} `json:"alternative_titles"`
+		Translations struct {
+			Translations []struct {
+				Data struct {
+					Title string `json:"title"`
+				} `json:"data"`
+			} `json:"translations"`
+		} `json:"translations"`
 	}
 
 	tmdbSeries struct {

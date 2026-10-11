@@ -140,6 +140,10 @@ func TestItemRoundTrip(t *testing.T) {
 		meta.ProductionLocations = []string{"US", "CA"}
 		meta.RemoteTrailers = []string{"https://www.youtube.com/watch?v=x"}
 		meta.CollectionName = "Set"
+		meta.OriginalLanguage, meta.SecondaryYear = "fr", 2019
+		meta.DigitalReleaseDate = ptr(time.Date(2020, 3, 1, 0, 0, 0, 0, time.UTC))
+		meta.PhysicalReleaseDate = ptr(time.Date(2020, 4, 1, 0, 0, 0, 0, time.UTC))
+		meta.AlternativeTitles, meta.TranslatedTitles = []string{"Other"}, []string{"Autre"}
 		meta.AspectRatio = "2.35:1"
 		meta.Video3DFormat = core.Video3DHalfSideBySide
 		meta.Album = "Arrival"

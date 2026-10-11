@@ -650,6 +650,12 @@ var (
 		{Name: "monitored", Type: field.TypeBool, Default: false},
 		{Name: "series_type", Type: field.TypeString, Default: ""},
 		{Name: "absolute_number", Type: field.TypeInt, Nullable: true},
+		{Name: "original_language", Type: field.TypeString, Default: ""},
+		{Name: "digital_release_date", Type: field.TypeTime, Nullable: true},
+		{Name: "physical_release_date", Type: field.TypeTime, Nullable: true},
+		{Name: "alternative_titles", Type: field.TypeJSON, Nullable: true},
+		{Name: "translated_titles", Type: field.TypeJSON, Nullable: true},
+		{Name: "secondary_year", Type: field.TypeInt, Default: 0},
 		{Name: "parent_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "owner_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "library_id", Type: field.TypeUUID},
@@ -663,25 +669,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "items_items_children",
-				Columns:    []*schema.Column{ItemsColumns[53]},
+				Columns:    []*schema.Column{ItemsColumns[59]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_items_extras",
-				Columns:    []*schema.Column{ItemsColumns[54]},
+				Columns:    []*schema.Column{ItemsColumns[60]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_libraries_items",
-				Columns:    []*schema.Column{ItemsColumns[55]},
+				Columns:    []*schema.Column{ItemsColumns[61]},
 				RefColumns: []*schema.Column{LibrariesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_users_playlists",
-				Columns:    []*schema.Column{ItemsColumns[56]},
+				Columns:    []*schema.Column{ItemsColumns[62]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -690,7 +696,7 @@ var (
 			{
 				Name:    "item_library_id_path",
 				Unique:  true,
-				Columns: []*schema.Column{ItemsColumns[55], ItemsColumns[10]},
+				Columns: []*schema.Column{ItemsColumns[61], ItemsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "path <> ''",
 				},
@@ -698,17 +704,17 @@ var (
 			{
 				Name:    "item_parent_id_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[53], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[59], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_library_id_kind_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[55], ItemsColumns[1], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[61], ItemsColumns[1], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_owner_id",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[54]},
+				Columns: []*schema.Column{ItemsColumns[60]},
 			},
 			{
 				Name:    "item_date_added",
@@ -718,7 +724,7 @@ var (
 			{
 				Name:    "item_library_id_scan_generation",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[55], ItemsColumns[47]},
+				Columns: []*schema.Column{ItemsColumns[61], ItemsColumns[47]},
 			},
 		},
 	}

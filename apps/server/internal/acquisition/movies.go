@@ -52,10 +52,18 @@ func (rn *run) movie(ctx context.Context, itemID core.ID) (*movie, error) {
 	if err != nil {
 		return nil, err
 	}
+	original := originalLanguage(it)
+	if p.Language == release.Original && original == release.LanguageUnknown {
+		// Without the movie's original language, a profile wanting it
+		// takes any.
+		cp := *p
+		cp.Language = release.Any
+		p = &cp
+	}
 	m := &movie{item: it, wanted: w, lib: lib}
 	m.target = &acquire.Target{
 		ID: it.ID, Kind: release.Movie, Title: it.Name, Year: it.ProductionYear,
-		OriginalLanguage: release.LanguageUnknown, Tags: w.Tags, Profile: p, Monitored: it.Monitored,
+		OriginalLanguage: original, Tags: w.Tags, Profile: p, Monitored: it.Monitored,
 	}
 	m.acq = &acquire.Item{ID: it.ID, Monitored: it.Monitored, Runtime: int(it.Runtime.Minutes()), Availability: availability(it, w)}
 	if !it.Virtual && it.Path != "" {
@@ -84,9 +92,21 @@ func (rn *run) library(ctx context.Context, id core.ID) (core.Library, error) {
 	return lib, nil
 }
 
-// profile returns a movie quality profile, read once per run. Without
-// the movie's original language stored, a profile wanting the original
-// language takes any.
+// originalLanguage returns the language a movie was made in, as
+// SkyHookProxy.MapMovie looks its ISO code up; LanguageUnknown when the
+// metadata providers did not give it.
+func originalLanguage(it core.Item) release.Language {
+	if it.OriginalLanguage == "" {
+		return release.LanguageUnknown
+	}
+	iso, ok := release.FindIsoLanguage(it.OriginalLanguage, release.Movie)
+	if !ok {
+		return release.LanguageUnknown
+	}
+	return iso.Language
+}
+
+// profile returns a movie quality profile, read once per run.
 func (rn *run) profile(ctx context.Context, id core.ID) (*acquire.QualityProfile, error) {
 	if p, ok := rn.profiles[id]; ok {
 		return p, nil
@@ -99,19 +119,23 @@ func (rn *run) profile(ctx context.Context, id core.ID) (*acquire.QualityProfile
 	if err != nil {
 		return nil, err
 	}
-	if p.Language == release.Original {
-		p.Language = release.Any
-	}
 	rn.profiles[id] = &p
 	return &p, nil
 }
 
-// availability returns when a movie counts as available. Only the
-// premiere date is stored, as the date in cinemas.
+// availability returns when a movie counts as available: its premiere
+// date is its release in cinemas, besides its digital and physical
+// releases.
 func availability(it core.Item, w core.Wanted) *acquire.Availability {
 	a := &acquire.Availability{Minimum: minimumStatus(w.MinimumAvailability)}
 	if it.PremiereDate != nil {
 		a.InCinemas = *it.PremiereDate
+	}
+	if it.DigitalReleaseDate != nil {
+		a.Digital = *it.DigitalReleaseDate
+	}
+	if it.PhysicalReleaseDate != nil {
+		a.Physical = *it.PhysicalReleaseDate
 	}
 	return a
 }
@@ -224,7 +248,10 @@ func (rn *run) movieRefs(ctx context.Context) ([]acquire.MovieRef, error) {
 }
 
 func movieRef(it core.Item) acquire.MovieRef {
-	ref := acquire.MovieRef{ID: it.ID, Title: it.Name, OriginalTitle: it.OriginalTitle, Year: it.ProductionYear, ImdbID: it.ExternalIDs[core.ProviderIMDb]}
+	ref := acquire.MovieRef{
+		ID: it.ID, Title: it.Name, OriginalTitle: it.OriginalTitle, Year: it.ProductionYear, SecondaryYear: it.SecondaryYear,
+		AlternativeTitles: it.AlternativeTitles, TranslatedTitles: it.TranslatedTitles, ImdbID: it.ExternalIDs[core.ProviderIMDb],
+	}
 	ref.TmdbID, _ = strconv.Atoi(it.ExternalIDs[core.ProviderTMDB])
 	return ref
 }

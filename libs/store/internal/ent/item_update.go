@@ -1059,6 +1059,117 @@ func (_u *ItemUpdate) ClearAbsoluteNumber() *ItemUpdate {
 	return _u
 }
 
+// SetOriginalLanguage sets the "original_language" field.
+func (_u *ItemUpdate) SetOriginalLanguage(v string) *ItemUpdate {
+	_u.mutation.SetOriginalLanguage(v)
+	return _u
+}
+
+// SetNillableOriginalLanguage sets the "original_language" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableOriginalLanguage(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetOriginalLanguage(*v)
+	}
+	return _u
+}
+
+// SetDigitalReleaseDate sets the "digital_release_date" field.
+func (_u *ItemUpdate) SetDigitalReleaseDate(v time.Time) *ItemUpdate {
+	_u.mutation.SetDigitalReleaseDate(v)
+	return _u
+}
+
+// SetNillableDigitalReleaseDate sets the "digital_release_date" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableDigitalReleaseDate(v *time.Time) *ItemUpdate {
+	if v != nil {
+		_u.SetDigitalReleaseDate(*v)
+	}
+	return _u
+}
+
+// ClearDigitalReleaseDate clears the value of the "digital_release_date" field.
+func (_u *ItemUpdate) ClearDigitalReleaseDate() *ItemUpdate {
+	_u.mutation.ClearDigitalReleaseDate()
+	return _u
+}
+
+// SetPhysicalReleaseDate sets the "physical_release_date" field.
+func (_u *ItemUpdate) SetPhysicalReleaseDate(v time.Time) *ItemUpdate {
+	_u.mutation.SetPhysicalReleaseDate(v)
+	return _u
+}
+
+// SetNillablePhysicalReleaseDate sets the "physical_release_date" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillablePhysicalReleaseDate(v *time.Time) *ItemUpdate {
+	if v != nil {
+		_u.SetPhysicalReleaseDate(*v)
+	}
+	return _u
+}
+
+// ClearPhysicalReleaseDate clears the value of the "physical_release_date" field.
+func (_u *ItemUpdate) ClearPhysicalReleaseDate() *ItemUpdate {
+	_u.mutation.ClearPhysicalReleaseDate()
+	return _u
+}
+
+// SetAlternativeTitles sets the "alternative_titles" field.
+func (_u *ItemUpdate) SetAlternativeTitles(v []string) *ItemUpdate {
+	_u.mutation.SetAlternativeTitles(v)
+	return _u
+}
+
+// AppendAlternativeTitles appends value to the "alternative_titles" field.
+func (_u *ItemUpdate) AppendAlternativeTitles(v []string) *ItemUpdate {
+	_u.mutation.AppendAlternativeTitles(v)
+	return _u
+}
+
+// ClearAlternativeTitles clears the value of the "alternative_titles" field.
+func (_u *ItemUpdate) ClearAlternativeTitles() *ItemUpdate {
+	_u.mutation.ClearAlternativeTitles()
+	return _u
+}
+
+// SetTranslatedTitles sets the "translated_titles" field.
+func (_u *ItemUpdate) SetTranslatedTitles(v []string) *ItemUpdate {
+	_u.mutation.SetTranslatedTitles(v)
+	return _u
+}
+
+// AppendTranslatedTitles appends value to the "translated_titles" field.
+func (_u *ItemUpdate) AppendTranslatedTitles(v []string) *ItemUpdate {
+	_u.mutation.AppendTranslatedTitles(v)
+	return _u
+}
+
+// ClearTranslatedTitles clears the value of the "translated_titles" field.
+func (_u *ItemUpdate) ClearTranslatedTitles() *ItemUpdate {
+	_u.mutation.ClearTranslatedTitles()
+	return _u
+}
+
+// SetSecondaryYear sets the "secondary_year" field.
+func (_u *ItemUpdate) SetSecondaryYear(v int) *ItemUpdate {
+	_u.mutation.ResetSecondaryYear()
+	_u.mutation.SetSecondaryYear(v)
+	return _u
+}
+
+// SetNillableSecondaryYear sets the "secondary_year" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableSecondaryYear(v *int) *ItemUpdate {
+	if v != nil {
+		_u.SetSecondaryYear(*v)
+	}
+	return _u
+}
+
+// AddSecondaryYear adds value to the "secondary_year" field.
+func (_u *ItemUpdate) AddSecondaryYear(v int) *ItemUpdate {
+	_u.mutation.AddSecondaryYear(v)
+	return _u
+}
+
 // SetLibrary sets the "library" edge to the Library entity.
 func (_u *ItemUpdate) SetLibrary(v *Library) *ItemUpdate {
 	return _u.SetLibraryID(v.ID)
@@ -2078,6 +2189,49 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.AbsoluteNumberCleared() {
 		_spec.ClearField(item.FieldAbsoluteNumber, field.TypeInt)
+	}
+	if value, ok := _u.mutation.OriginalLanguage(); ok {
+		_spec.SetField(item.FieldOriginalLanguage, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DigitalReleaseDate(); ok {
+		_spec.SetField(item.FieldDigitalReleaseDate, field.TypeTime, value)
+	}
+	if _u.mutation.DigitalReleaseDateCleared() {
+		_spec.ClearField(item.FieldDigitalReleaseDate, field.TypeTime)
+	}
+	if value, ok := _u.mutation.PhysicalReleaseDate(); ok {
+		_spec.SetField(item.FieldPhysicalReleaseDate, field.TypeTime, value)
+	}
+	if _u.mutation.PhysicalReleaseDateCleared() {
+		_spec.ClearField(item.FieldPhysicalReleaseDate, field.TypeTime)
+	}
+	if value, ok := _u.mutation.AlternativeTitles(); ok {
+		_spec.SetField(item.FieldAlternativeTitles, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedAlternativeTitles(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldAlternativeTitles, value)
+		})
+	}
+	if _u.mutation.AlternativeTitlesCleared() {
+		_spec.ClearField(item.FieldAlternativeTitles, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.TranslatedTitles(); ok {
+		_spec.SetField(item.FieldTranslatedTitles, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedTranslatedTitles(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldTranslatedTitles, value)
+		})
+	}
+	if _u.mutation.TranslatedTitlesCleared() {
+		_spec.ClearField(item.FieldTranslatedTitles, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SecondaryYear(); ok {
+		_spec.SetField(item.FieldSecondaryYear, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSecondaryYear(); ok {
+		_spec.AddField(item.FieldSecondaryYear, field.TypeInt, value)
 	}
 	if _u.mutation.LibraryCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -4022,6 +4176,117 @@ func (_u *ItemUpdateOne) ClearAbsoluteNumber() *ItemUpdateOne {
 	return _u
 }
 
+// SetOriginalLanguage sets the "original_language" field.
+func (_u *ItemUpdateOne) SetOriginalLanguage(v string) *ItemUpdateOne {
+	_u.mutation.SetOriginalLanguage(v)
+	return _u
+}
+
+// SetNillableOriginalLanguage sets the "original_language" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableOriginalLanguage(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetOriginalLanguage(*v)
+	}
+	return _u
+}
+
+// SetDigitalReleaseDate sets the "digital_release_date" field.
+func (_u *ItemUpdateOne) SetDigitalReleaseDate(v time.Time) *ItemUpdateOne {
+	_u.mutation.SetDigitalReleaseDate(v)
+	return _u
+}
+
+// SetNillableDigitalReleaseDate sets the "digital_release_date" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableDigitalReleaseDate(v *time.Time) *ItemUpdateOne {
+	if v != nil {
+		_u.SetDigitalReleaseDate(*v)
+	}
+	return _u
+}
+
+// ClearDigitalReleaseDate clears the value of the "digital_release_date" field.
+func (_u *ItemUpdateOne) ClearDigitalReleaseDate() *ItemUpdateOne {
+	_u.mutation.ClearDigitalReleaseDate()
+	return _u
+}
+
+// SetPhysicalReleaseDate sets the "physical_release_date" field.
+func (_u *ItemUpdateOne) SetPhysicalReleaseDate(v time.Time) *ItemUpdateOne {
+	_u.mutation.SetPhysicalReleaseDate(v)
+	return _u
+}
+
+// SetNillablePhysicalReleaseDate sets the "physical_release_date" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillablePhysicalReleaseDate(v *time.Time) *ItemUpdateOne {
+	if v != nil {
+		_u.SetPhysicalReleaseDate(*v)
+	}
+	return _u
+}
+
+// ClearPhysicalReleaseDate clears the value of the "physical_release_date" field.
+func (_u *ItemUpdateOne) ClearPhysicalReleaseDate() *ItemUpdateOne {
+	_u.mutation.ClearPhysicalReleaseDate()
+	return _u
+}
+
+// SetAlternativeTitles sets the "alternative_titles" field.
+func (_u *ItemUpdateOne) SetAlternativeTitles(v []string) *ItemUpdateOne {
+	_u.mutation.SetAlternativeTitles(v)
+	return _u
+}
+
+// AppendAlternativeTitles appends value to the "alternative_titles" field.
+func (_u *ItemUpdateOne) AppendAlternativeTitles(v []string) *ItemUpdateOne {
+	_u.mutation.AppendAlternativeTitles(v)
+	return _u
+}
+
+// ClearAlternativeTitles clears the value of the "alternative_titles" field.
+func (_u *ItemUpdateOne) ClearAlternativeTitles() *ItemUpdateOne {
+	_u.mutation.ClearAlternativeTitles()
+	return _u
+}
+
+// SetTranslatedTitles sets the "translated_titles" field.
+func (_u *ItemUpdateOne) SetTranslatedTitles(v []string) *ItemUpdateOne {
+	_u.mutation.SetTranslatedTitles(v)
+	return _u
+}
+
+// AppendTranslatedTitles appends value to the "translated_titles" field.
+func (_u *ItemUpdateOne) AppendTranslatedTitles(v []string) *ItemUpdateOne {
+	_u.mutation.AppendTranslatedTitles(v)
+	return _u
+}
+
+// ClearTranslatedTitles clears the value of the "translated_titles" field.
+func (_u *ItemUpdateOne) ClearTranslatedTitles() *ItemUpdateOne {
+	_u.mutation.ClearTranslatedTitles()
+	return _u
+}
+
+// SetSecondaryYear sets the "secondary_year" field.
+func (_u *ItemUpdateOne) SetSecondaryYear(v int) *ItemUpdateOne {
+	_u.mutation.ResetSecondaryYear()
+	_u.mutation.SetSecondaryYear(v)
+	return _u
+}
+
+// SetNillableSecondaryYear sets the "secondary_year" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableSecondaryYear(v *int) *ItemUpdateOne {
+	if v != nil {
+		_u.SetSecondaryYear(*v)
+	}
+	return _u
+}
+
+// AddSecondaryYear adds value to the "secondary_year" field.
+func (_u *ItemUpdateOne) AddSecondaryYear(v int) *ItemUpdateOne {
+	_u.mutation.AddSecondaryYear(v)
+	return _u
+}
+
 // SetLibrary sets the "library" edge to the Library entity.
 func (_u *ItemUpdateOne) SetLibrary(v *Library) *ItemUpdateOne {
 	return _u.SetLibraryID(v.ID)
@@ -5071,6 +5336,49 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 	}
 	if _u.mutation.AbsoluteNumberCleared() {
 		_spec.ClearField(item.FieldAbsoluteNumber, field.TypeInt)
+	}
+	if value, ok := _u.mutation.OriginalLanguage(); ok {
+		_spec.SetField(item.FieldOriginalLanguage, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DigitalReleaseDate(); ok {
+		_spec.SetField(item.FieldDigitalReleaseDate, field.TypeTime, value)
+	}
+	if _u.mutation.DigitalReleaseDateCleared() {
+		_spec.ClearField(item.FieldDigitalReleaseDate, field.TypeTime)
+	}
+	if value, ok := _u.mutation.PhysicalReleaseDate(); ok {
+		_spec.SetField(item.FieldPhysicalReleaseDate, field.TypeTime, value)
+	}
+	if _u.mutation.PhysicalReleaseDateCleared() {
+		_spec.ClearField(item.FieldPhysicalReleaseDate, field.TypeTime)
+	}
+	if value, ok := _u.mutation.AlternativeTitles(); ok {
+		_spec.SetField(item.FieldAlternativeTitles, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedAlternativeTitles(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldAlternativeTitles, value)
+		})
+	}
+	if _u.mutation.AlternativeTitlesCleared() {
+		_spec.ClearField(item.FieldAlternativeTitles, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.TranslatedTitles(); ok {
+		_spec.SetField(item.FieldTranslatedTitles, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedTranslatedTitles(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, item.FieldTranslatedTitles, value)
+		})
+	}
+	if _u.mutation.TranslatedTitlesCleared() {
+		_spec.ClearField(item.FieldTranslatedTitles, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SecondaryYear(); ok {
+		_spec.SetField(item.FieldSecondaryYear, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSecondaryYear(); ok {
+		_spec.AddField(item.FieldSecondaryYear, field.TypeInt, value)
 	}
 	if _u.mutation.LibraryCleared() {
 		edge := &sqlgraph.EdgeSpec{

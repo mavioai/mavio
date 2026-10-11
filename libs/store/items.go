@@ -719,6 +719,12 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 		SetProductionLocations(it.ProductionLocations).
 		SetRemoteTrailers(it.RemoteTrailers).
 		SetCollectionName(it.CollectionName).
+		SetOriginalLanguage(it.OriginalLanguage).
+		SetNillableDigitalReleaseDate(utcPtr(it.DigitalReleaseDate)).
+		SetNillablePhysicalReleaseDate(utcPtr(it.PhysicalReleaseDate)).
+		SetAlternativeTitles(it.AlternativeTitles).
+		SetTranslatedTitles(it.TranslatedTitles).
+		SetSecondaryYear(it.SecondaryYear).
 		SetAspectRatio(it.AspectRatio).
 		SetVideo3dFormat(string(it.Video3DFormat)).
 		SetAlbum(it.Album).
@@ -800,6 +806,12 @@ func toItem(e *ent.Item) core.Item {
 		ProductionLocations:     e.ProductionLocations,
 		RemoteTrailers:          e.RemoteTrailers,
 		CollectionName:          e.CollectionName,
+		OriginalLanguage:        e.OriginalLanguage,
+		DigitalReleaseDate:      utcPtr(e.DigitalReleaseDate),
+		PhysicalReleaseDate:     utcPtr(e.PhysicalReleaseDate),
+		AlternativeTitles:       e.AlternativeTitles,
+		TranslatedTitles:        e.TranslatedTitles,
+		SecondaryYear:           e.SecondaryYear,
 		AspectRatio:             e.AspectRatio,
 		Video3DFormat:           core.Video3DFormat(e.Video3dFormat),
 		Album:                   e.Album,

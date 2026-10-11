@@ -431,6 +431,14 @@ func init() {
 	itemDescSeriesType := itemFields[55].Descriptor()
 	// item.DefaultSeriesType holds the default value on creation for the series_type field.
 	item.DefaultSeriesType = itemDescSeriesType.Default.(string)
+	// itemDescOriginalLanguage is the schema descriptor for original_language field.
+	itemDescOriginalLanguage := itemFields[57].Descriptor()
+	// item.DefaultOriginalLanguage holds the default value on creation for the original_language field.
+	item.DefaultOriginalLanguage = itemDescOriginalLanguage.Default.(string)
+	// itemDescSecondaryYear is the schema descriptor for secondary_year field.
+	itemDescSecondaryYear := itemFields[62].Descriptor()
+	// item.DefaultSecondaryYear holds the default value on creation for the secondary_year field.
+	item.DefaultSecondaryYear = itemDescSecondaryYear.Default.(int)
 	// itemDescID is the schema descriptor for id field.
 	itemDescID := itemFields[0].Descriptor()
 	// item.DefaultID holds the default value on creation for the id field.

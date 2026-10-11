@@ -155,6 +155,12 @@ func TestMovieMetadata(t *testing.T) {
 		{"tags", md.GetTags(), []string{"cyberpunk", "simulated reality"}},
 		{"studios", md.GetStudios(), []string{"Village Roadshow Pictures"}},
 		{"collection", md.GetCollectionName(), "The Matrix Collection"},
+		{"original language", md.GetOriginalLanguage(), "en"},
+		{"digital release date", md.GetDigitalReleaseDate(), "1999-09-21"},
+		{"physical release date", md.GetPhysicalReleaseDate(), "1999-11-25"},
+		{"secondary year", md.GetSecondaryYear(), int32(1998)},
+		{"alternative titles", md.GetAlternativeTitles(), []string{"Matrix"}},
+		{"translated titles", md.GetTranslatedTitles(), []string{"Matrix", "Matrix (AT)"}},
 		{"external IDs", md.GetExternalIds(), map[string]string{"tmdb": "603", "imdb": "tt0133093", "tmdb_collection": "2344"}},
 	}
 	for _, c := range checks {

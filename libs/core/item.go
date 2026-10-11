@@ -302,6 +302,21 @@ type Item struct {
 	// Movie.
 	// CollectionName is the collection (movie set) the movie belongs to.
 	CollectionName string
+	// OriginalLanguage is the language (ISO 639-1) the movie was made in;
+	// empty when unknown.
+	OriginalLanguage string
+	// DigitalReleaseDate and PhysicalReleaseDate are when the movie came
+	// out digitally and on disc; PremiereDate is its release in cinemas.
+	DigitalReleaseDate  *time.Time
+	PhysicalReleaseDate *time.Time
+	// AlternativeTitles are other titles of the movie, and
+	// TranslatedTitles its titles in other languages, by which releases
+	// may name it.
+	AlternativeTitles []string
+	TranslatedTitles  []string
+	// SecondaryYear is another year releases may give the movie, that of
+	// its premiere when it differs from ProductionYear; 0 for none.
+	SecondaryYear int
 
 	// Video.
 	AspectRatio   string // display aspect ratio, e.g. "16:9" or "2.35:1"

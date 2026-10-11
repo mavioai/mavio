@@ -473,6 +473,7 @@ func applyMetadata(dst *core.Item, src core.Item, local bool) {
 	str(&dst.CustomRating, src.CustomRating, core.FieldOfficialRating)
 	str(&dst.Album, src.Album, "")
 	str(&dst.CollectionName, src.CollectionName, "")
+	str(&dst.OriginalLanguage, src.OriginalLanguage, "")
 	str(&dst.AirTime, src.AirTime, "")
 	if src.DisplayOrder != core.OrderAired {
 		dst.DisplayOrder = src.DisplayOrder
@@ -487,6 +488,17 @@ func applyMetadata(dst *core.Item, src core.Item, local bool) {
 	list(&dst.Artists, src.Artists, "")
 	list(&dst.AlbumArtists, src.AlbumArtists, "")
 	list(&dst.RemoteTrailers, src.RemoteTrailers, "")
+	list(&dst.AlternativeTitles, src.AlternativeTitles, "")
+	list(&dst.TranslatedTitles, src.TranslatedTitles, "")
+	if src.SecondaryYear != 0 {
+		dst.SecondaryYear = src.SecondaryYear
+	}
+	if src.DigitalReleaseDate != nil {
+		dst.DigitalReleaseDate = src.DigitalReleaseDate
+	}
+	if src.PhysicalReleaseDate != nil {
+		dst.PhysicalReleaseDate = src.PhysicalReleaseDate
+	}
 	if src.ProductionYear != 0 {
 		dst.ProductionYear = src.ProductionYear
 	}

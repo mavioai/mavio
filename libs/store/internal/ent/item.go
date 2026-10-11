@@ -134,6 +134,18 @@ type Item struct {
 	SeriesType string `json:"series_type,omitempty"`
 	// AbsoluteNumber holds the value of the "absolute_number" field.
 	AbsoluteNumber *int `json:"absolute_number,omitempty"`
+	// OriginalLanguage holds the value of the "original_language" field.
+	OriginalLanguage string `json:"original_language,omitempty"`
+	// DigitalReleaseDate holds the value of the "digital_release_date" field.
+	DigitalReleaseDate *time.Time `json:"digital_release_date,omitempty"`
+	// PhysicalReleaseDate holds the value of the "physical_release_date" field.
+	PhysicalReleaseDate *time.Time `json:"physical_release_date,omitempty"`
+	// AlternativeTitles holds the value of the "alternative_titles" field.
+	AlternativeTitles []string `json:"alternative_titles,omitempty"`
+	// TranslatedTitles holds the value of the "translated_titles" field.
+	TranslatedTitles []string `json:"translated_titles,omitempty"`
+	// SecondaryYear holds the value of the "secondary_year" field.
+	SecondaryYear int `json:"secondary_year,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ItemQuery when eager-loading is set.
 	Edges        ItemEdges `json:"edges"`
@@ -406,7 +418,7 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case item.FieldParentID, item.FieldOwnerID, item.FieldUserID:
 			values[i] = &sql.NullScanner{S: new(core.ID)}
-		case item.FieldExternalIds, item.FieldProductionLocations, item.FieldRemoteTrailers, item.FieldAirDays, item.FieldLockedFields:
+		case item.FieldExternalIds, item.FieldProductionLocations, item.FieldRemoteTrailers, item.FieldAirDays, item.FieldLockedFields, item.FieldAlternativeTitles, item.FieldTranslatedTitles:
 			values[i] = new([]byte)
 		case item.FieldID, item.FieldLibraryID:
 			values[i] = new(core.ID)
@@ -414,11 +426,11 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case item.FieldCommunityRating, item.FieldCriticRating, item.FieldLoudness:
 			values[i] = new(sql.NullFloat64)
-		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldInheritedRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber, item.FieldScanGeneration, item.FieldAbsoluteNumber:
+		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldInheritedRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber, item.FieldScanGeneration, item.FieldAbsoluteNumber, item.FieldSecondaryYear:
 			values[i] = new(sql.NullInt64)
-		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldCustomRating, item.FieldCollectionName, item.FieldAspectRatio, item.FieldVideo3dFormat, item.FieldAlbum, item.FieldSeriesStatus, item.FieldAirTime, item.FieldDisplayOrder, item.FieldMetadataLanguage, item.FieldMetadataCountry, item.FieldExtra, item.FieldSeriesType:
+		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldCustomRating, item.FieldCollectionName, item.FieldAspectRatio, item.FieldVideo3dFormat, item.FieldAlbum, item.FieldSeriesStatus, item.FieldAirTime, item.FieldDisplayOrder, item.FieldMetadataLanguage, item.FieldMetadataCountry, item.FieldExtra, item.FieldSeriesType, item.FieldOriginalLanguage:
 			values[i] = new(sql.NullString)
-		case item.FieldPremiereDate, item.FieldEndDate, item.FieldDateAdded, item.FieldFileModified, item.FieldMetadataRefreshedAt, item.FieldMissingSince:
+		case item.FieldPremiereDate, item.FieldEndDate, item.FieldDateAdded, item.FieldFileModified, item.FieldMetadataRefreshedAt, item.FieldMissingSince, item.FieldDigitalReleaseDate, item.FieldPhysicalReleaseDate:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -805,6 +817,48 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 				_m.AbsoluteNumber = new(int)
 				*_m.AbsoluteNumber = int(value.Int64)
 			}
+		case item.FieldOriginalLanguage:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field original_language", values[i])
+			} else if value.Valid {
+				_m.OriginalLanguage = value.String
+			}
+		case item.FieldDigitalReleaseDate:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field digital_release_date", values[i])
+			} else if value.Valid {
+				_m.DigitalReleaseDate = new(time.Time)
+				*_m.DigitalReleaseDate = value.Time
+			}
+		case item.FieldPhysicalReleaseDate:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field physical_release_date", values[i])
+			} else if value.Valid {
+				_m.PhysicalReleaseDate = new(time.Time)
+				*_m.PhysicalReleaseDate = value.Time
+			}
+		case item.FieldAlternativeTitles:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field alternative_titles", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.AlternativeTitles); err != nil {
+					return fmt.Errorf("unmarshal field alternative_titles: %w", err)
+				}
+			}
+		case item.FieldTranslatedTitles:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field translated_titles", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.TranslatedTitles); err != nil {
+					return fmt.Errorf("unmarshal field translated_titles: %w", err)
+				}
+			}
+		case item.FieldSecondaryYear:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field secondary_year", values[i])
+			} else if value.Valid {
+				_m.SecondaryYear = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -1154,6 +1208,28 @@ func (_m *Item) String() string {
 		builder.WriteString("absolute_number=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("original_language=")
+	builder.WriteString(_m.OriginalLanguage)
+	builder.WriteString(", ")
+	if v := _m.DigitalReleaseDate; v != nil {
+		builder.WriteString("digital_release_date=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.PhysicalReleaseDate; v != nil {
+		builder.WriteString("physical_release_date=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("alternative_titles=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AlternativeTitles))
+	builder.WriteString(", ")
+	builder.WriteString("translated_titles=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TranslatedTitles))
+	builder.WriteString(", ")
+	builder.WriteString("secondary_year=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SecondaryYear))
 	builder.WriteByte(')')
 	return builder.String()
 }

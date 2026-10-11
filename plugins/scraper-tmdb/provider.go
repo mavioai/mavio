@@ -257,6 +257,7 @@ func (s session) movieMetadata(ctx context.Context, l *pluginv1.Lookup) (*plugin
 		}
 	}
 	setRating(md, r, ratings)
+	setMovieReleases(md, m, r)
 	people := castCredits(mapCast(m.Credits.Cast, s.cast), pluginv1.CreditKind_CREDIT_KIND_ACTOR)
 	people = append(people, crewCredits(m.Credits.Crew)...)
 	md.SetPeople(people)
@@ -440,6 +441,65 @@ func setDate(md *pluginv1.Metadata, date string) {
 		md.SetPremiereDate(date)
 		md.SetProductionYear(int32(y))
 	}
+}
+
+// Release types of TMDB's release dates.
+const (
+	releaseTheatrical = 3
+	releaseDigital    = 4
+	releasePhysical   = 5
+)
+
+// setMovieReleases sets what movie acquisition needs of a movie: its
+// original language, its digital and physical releases (in the requested
+// country, else the earliest anywhere), the year of its earliest cinema
+// release when it differs from its production year, and its other titles.
+func setMovieReleases(md *pluginv1.Metadata, m tmdbMovie, r request) {
+	if m.Language != "" && m.Language != "xx" {
+		md.SetOriginalLanguage(strings.ToLower(m.Language))
+	}
+	country := r.ratingCountry()
+	earliest := func(match func(typ int) bool) string {
+		local, anywhere := "", ""
+		for _, rd := range m.ReleaseDates.Results {
+			for _, d := range rd.Dates {
+				day := d.Date[:min(len(d.Date), 10)]
+				if _, ok := yearOf(day); !ok || !match(d.Type) {
+					continue
+				}
+				if anywhere == "" || day < anywhere {
+					anywhere = day
+				}
+				if strings.EqualFold(rd.Country, country) && (local == "" || day < local) {
+					local = day
+				}
+			}
+		}
+		return cmp.Or(local, anywhere)
+	}
+	if d := earliest(func(typ int) bool { return typ == releaseDigital }); d != "" {
+		md.SetDigitalReleaseDate(d)
+	}
+	if d := earliest(func(typ int) bool { return typ == releasePhysical }); d != "" {
+		md.SetPhysicalReleaseDate(d)
+	}
+	cinema := earliest(func(typ int) bool { return typ >= 1 && typ <= releaseTheatrical })
+	if y, ok := yearOf(cinema); ok && int32(y) != md.GetProductionYear() && md.GetProductionYear() != 0 {
+		md.SetSecondaryYear(int32(y))
+	}
+	var alt, translated []string
+	for _, t := range m.AlternativeTitles.Titles {
+		if t.Title != "" && t.Title != m.Title && !slices.Contains(alt, t.Title) {
+			alt = append(alt, t.Title)
+		}
+	}
+	for _, t := range m.Translations.Translations {
+		if t.Data.Title != "" && t.Data.Title != m.Title && !slices.Contains(translated, t.Data.Title) {
+			translated = append(translated, t.Data.Title)
+		}
+	}
+	md.SetAlternativeTitles(alt)
+	md.SetTranslatedTitles(translated)
 }
 
 func setRuntime(md *pluginv1.Metadata, minutes int) {
