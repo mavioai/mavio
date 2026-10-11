@@ -216,6 +216,15 @@ func (r *Runtime) CleanRecycleBin(ctx context.Context) error {
 	return nil
 }
 
+// freeSpace returns the bytes free on the volume of path, or of its
+// nearest existing parent; unknown reports false.
+func (r *Runtime) freeSpace(path string) (int64, bool) {
+	if r.FreeSpace != nil {
+		return r.FreeSpace(path)
+	}
+	return freeSpace(path)
+}
+
 // pace waits for playback to quiet down and takes the slot of the volume
 // holding path when its reads are serialized, as scans do; the returned
 // function gives the slot back.

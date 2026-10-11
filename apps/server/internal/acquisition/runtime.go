@@ -79,8 +79,11 @@ type Runtime struct {
 	// a file was imported for; nil tells none. It runs without the
 	// runtime's locks held.
 	Imported func(ctx context.Context, itemID core.ID)
-	Now      func() time.Time
-	Logger   *slog.Logger
+	// FreeSpace returns the bytes free on the volume of a path, or of its
+	// nearest existing parent, which imports check; nil reads the volume.
+	FreeSpace func(path string) (int64, bool)
+	Now       func() time.Time
+	Logger    *slog.Logger
 
 	mu sync.Mutex
 	// statuses are what the clients last told of the tracked downloads,

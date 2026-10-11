@@ -212,7 +212,11 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 	}
 	s := r.settings()
 	if !s.SkipFreeSpaceCheck {
-		if free, known := freeSpace(libPath); known && free < f.size+int64(s.MinimumFreeSpace)*1024*1024 {
+		// The volume of the movie's folder, which may be another than the
+		// library folder's, or of its nearest parent until it exists, as
+		// Radarr's FreeSpaceSpecification.
+		dir := filepath.Join(libPath, filepath.FromSlash(folder))
+		if free, known := r.freeSpace(dir); known && free < f.size+int64(s.MinimumFreeSpace)*1024*1024 {
 			return []string{msgNoFreeSpace}, nil
 		}
 	}
@@ -290,7 +294,8 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 	if err := r.Store.Items().Upsert(ctx, it); err != nil {
 		return nil, err
 	}
-	job := library.ScanJob(m.lib, r.now(), false)
+	// A scan of the movie's folder alone, rather than of its library.
+	job := library.ScanFolderJob(m.lib, filepath.Dir(dest), r.now())
 	if _, err := r.Store.Jobs().Enqueue(ctx, &job); err != nil {
 		return nil, fmt.Errorf("queue scan: %w", err)
 	}
