@@ -455,12 +455,12 @@ flowchart TD
 **进度**：
 - [x] `DOWNLOAD_CLIENT_PROVIDER` 契约（`mavio/plugin/v1/download_client.proto`）及其宿主客户端
 - [x] `plugins/download-clients`：Radarr 与 Sonarr 的下载客户端，并移植其用例（`internal/clients/<name>`：Aria2、Torrent 与 Usenet Blackhole、Deluge、Download Station、Flood、Freebox、Hadouken、NZBGet、NzbVortex、Pneumatic、qBittorrent、rqbit、rTorrent、SABnzbd、Transmission、uTorrent、Vuze）
-  - [ ] 抓取时给出的做种限制在重启后保留，如同 Radarr 保存其做种配置；目前只在插件重启前有效
-  - [ ] 下载客户端标签：电影或剧集只使用与其共享某个标签的客户端
-  - [ ] Flood 的附加标签（质量、语言、发布组等），待抓取携带这些信息之后
-  - [ ] Sonarr 对 Pneumatic 整季的拒绝，待抓取能表明是否为整季之后
-  - [ ] 抓取时检查已拉黑种子的哈希，如同 Radarr 拒绝哈希已被拉黑的种子
-  - [ ] 各客户端共用的辅助代码，取代各自的副本：远程路径拼接、.NET 版本解析、JSON-RPC 与 XML-RPC、URL base 校验、自由格式的标签字段、“发布被拒”错误、测试的警告、NZB 有效性检查、可配置的历史条数上限、保留客户端给出的 ID 大小写，以及把 `::1` 视为本机
+  - [x] 抓取时给出的做种限制保存在插件数据目录（`seeds.json`）中，重启后保留，如同 Radarr 保存其做种配置
+  - [x] 下载客户端标签（`tags`）：电影或剧集只使用与其共享某个标签的客户端，否则使用无标签的客户端
+  - [x] Flood 的附加标签（标题 slug、质量、语言、发布组、年份、索引器、制片公司或电视网、合集），取自抓取携带的信息
+  - [x] Sonarr 对 Pneumatic 整季的拒绝，由抓取表明是否为整季
+  - [x] release 未给出哈希的种子，若其哈希已被拉黑则被拒绝，仅针对设置为拒绝的索引器与非交互式搜索的 release，如同 Radarr 的 TorrentClientBase.EnsureReleaseIsNotBlocklisted；客户端得知的哈希随抓取记录
+  - [x] 各客户端共用的辅助代码，取代各自的副本：远程路径拼接、.NET 版本解析、JSON-RPC 与 XML-RPC、URL base 校验、自由格式的标签字段、“发布被拒”与“发布被拉黑”错误、测试的警告、NZB 有效性检查、可配置的历史条数上限（`history_limit`）、保留客户端给出的 ID 大小写，以及把 `::1` 视为本机
 - [x] `libs/acquire`：质量及其定义、质量档案、custom formats、delay profile、release profile
 - [x] 决策：Radarr 决策引擎的各项规格及其排序，并移植其用例（`libs/acquire`）
   - [x] 按 ID 找不到索引器时按名称查找，如同 Radarr 的 AggregateLanguages
@@ -475,10 +475,12 @@ flowchart TD
 - [x] 以作业执行的电影搜索与 RSS 同步；通过 `DownloadService` 抓取；`SearchReleases` 给出决策
   - [ ] 按电影的别名、译名与次要年份匹配发布
   - [x] 索引器的标签、必需标志、最少做种数与 MULTi 语言，由索引器插件按其配置提供
-  - [ ] 下载客户端的标签，以及同一优先级的客户端之间轮流使用；目前使用优先级最高的第一个客户端
+  - [x] 下载客户端的标签，以及优先级最高的客户端之间轮流使用，如同 Radarr 的 DownloadClientProvider.GetDownloadClient
+  - [ ] 索引器指定的下载客户端，Radarr 总把该索引器的 release 发送给它
+  - [ ] 某协议的客户端都因失败而暂被排除时，非待定 release 的抓取仍尝试其中之一，如同 Radarr；目前该 release 转为待定
   - [x] 交互式搜索抓取的失败发布仅在开启 `AutoRedownloadFailedFromInteractiveSearch` 时重新搜索，如同 Radarr 的 RedownloadFailedDownloadService
 - [x] 队列：从客户端轮询的被跟踪下载
-  - [ ] 无法应答的客户端的下载保留最后状态，而非被标记
+  - [x] 无法应答或因失败而暂被排除的客户端的下载保留最后状态，而非被标记
 - [x] 入库、升级与回收目录
   - [ ] 由文件的媒体信息汇总质量，以及文件名中的媒体信息标记
   - [ ] 按语言命名的附加文件，以及升级时删除旧的附加文件

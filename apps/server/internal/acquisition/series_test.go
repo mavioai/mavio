@@ -469,6 +469,9 @@ func TestSeasonSearchPrefersSeasonPack(t *testing.T) {
 	if got := e.client.titles(); !slices.Equal(got, []string{pack}) {
 		t.Fatalf("grabbed = %v, want = [%s]", got, pack)
 	}
+	if add := e.client.added[0]; !add.GetFullSeason() || add.GetDetails().GetTitleSlug() != "breaking-bad" || add.GetDetails().GetCollection() != "" {
+		t.Errorf("full season, details = %v, %v, want = a full season of breaking-bad", add.GetFullSeason(), add.GetDetails())
+	}
 	eps := []core.Item{e.episode(s.ID, 1, 1), e.episode(s.ID, 1, 2), e.episode(s.ID, 1, 3)}
 	d := e.download(hashOf(pack))
 	if got := slices.Sorted(slices.Values(idStrings(d.ItemIDs))); !slices.Equal(got, slices.Sorted(slices.Values(idStrings(ids(eps...))))) {

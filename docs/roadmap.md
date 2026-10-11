@@ -455,12 +455,12 @@ flowchart TD
 **Progress**:
 - [x] The `DOWNLOAD_CLIENT_PROVIDER` contract (`mavio/plugin/v1/download_client.proto`) and its host client
 - [x] `plugins/download-clients`: the download clients of Radarr and Sonarr, with their cases ported (`internal/clients/<name>`: Aria2, Torrent and Usenet Blackhole, Deluge, Download Station, Flood, Freebox, Hadouken, NZBGet, NzbVortex, Pneumatic, qBittorrent, rqbit, rTorrent, SABnzbd, Transmission, uTorrent, Vuze)
-  - [ ] Seed limits given with grabs kept across restarts, as Radarr keeps its seed configuration; they apply only until the plugin restarts
-  - [ ] Download client tags, so that a movie or series only uses the clients that share one of its tags
-  - [ ] Flood's additional tags (quality, languages, release group and the like), once grabs carry them
-  - [ ] Sonarr's refusal of full seasons by Pneumatic, once grabs say whether they are a full season
-  - [ ] Hashes of blocklisted torrents checked when grabbing, as Radarr refuses a torrent whose hash is blocklisted
-  - [ ] Helpers the clients share instead of each keeping its own: remote path joining, .NET version parsing, JSON-RPC and XML-RPC, URL base validation, a free-form tag field, a "release rejected" error, warnings from tests, NZB validity checks, a configurable history limit, IDs kept in the case clients give them, and `::1` counted as localhost
+  - [x] Seed limits given with grabs kept in the plugin's data folder (`seeds.json`) across restarts, as Radarr keeps its seed configuration
+  - [x] Download client tags (`tags`), so that a movie or series only uses the clients that share one of its tags, else those without tags
+  - [x] Flood's additional tags (title slug, quality, languages, release group, year, indexer, studio or network, collection), from the details grabs carry
+  - [x] Sonarr's refusal of full seasons by Pneumatic, which grabs tell
+  - [x] Torrents whose hash the release did not give refused when their hash is blocklisted, for indexers set to reject them and releases not from an interactive search, as Radarr's TorrentClientBase.EnsureReleaseIsNotBlocklisted; the hash the client learnt is recorded with the grab
+  - [x] Helpers the clients share instead of each keeping its own: remote path joining, .NET version parsing, JSON-RPC and XML-RPC, URL base validation, a free-form tag field, "release rejected" and "release blocked" errors, warnings from tests, NZB validity checks, a configurable history limit (`history_limit`), IDs kept in the case clients give them, and `::1` counted as localhost
 - [x] `libs/acquire`: qualities and their definitions, quality profiles, custom formats, delay profiles, release profiles
 - [x] Decisions: the specifications of Radarr's decision engine and its ranking, with its cases ported (`libs/acquire`)
   - [x] Indexers found by name when their ID finds none, as Radarr's AggregateLanguages
@@ -475,10 +475,12 @@ flowchart TD
 - [x] Movie searches and RSS sync as jobs; grabs through `DownloadService`; decisions in `SearchReleases`
   - [ ] Releases matched to movies by their alternative titles, translations and secondary years
   - [x] Tags, required flags, minimum seeders and MULTi languages of indexers, which the indexer plugin reports from its configuration
-  - [ ] Download client tags and round robin among clients of one priority; the first client by priority is used
+  - [x] Download client tags and round robin among the clients of the first priority, as Radarr's DownloadClientProvider.GetDownloadClient
+  - [ ] An indexer's own download client, which Radarr always sends the indexer's releases to
+  - [ ] When every client of a protocol is left out after failing, a grab that is not of a pending release still tries one, as Radarr does; until then the release waits pending
   - [x] Failed releases grabbed from an interactive search searched for again only with `AutoRedownloadFailedFromInteractiveSearch`, as Radarr's RedownloadFailedDownloadService
 - [x] The queue: tracked downloads polled from the clients
-  - [ ] The downloads of a client that fails to answer keep their last state rather than being flagged
+  - [x] The downloads of a client that fails to answer, or is left out after failing, keep their last state rather than being flagged
 - [x] Import, upgrades and the recycle folder
   - [ ] Qualities aggregated from the media info of files, and the media info tokens of file names
   - [ ] Extra files named by their language, and the old extras deleted on upgrades

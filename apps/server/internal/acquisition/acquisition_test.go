@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -104,6 +105,11 @@ type fakeClient struct {
 	downloads         []*pluginv1.Download
 	added             []*pluginv1.AddDownloadRequest
 	removed, imported []string
+	// hash is the info hash of torrents grabbed without one, which the
+	// client refuses when blocklisted, as the plugin does.
+	hash string
+	// disabledUntil leaves the client out after failing.
+	disabledUntil time.Time
 }
 
 func (f *fakeClient) ListDownloadClients(context.Context, *pluginv1.ListDownloadClientsRequest) (*pluginv1.ListDownloadClientsResponse, error) {
@@ -111,6 +117,11 @@ func (f *fakeClient) ListDownloadClients(context.Context, *pluginv1.ListDownload
 		Id: new("qb"), Name: new("qBittorrent"), Protocol: new(pluginv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT), Enabled: new(true),
 		Priority: new(int32(1)), Host: new("seedbox"), RemoveCompletedDownloads: new(true), RemoveFailedDownloads: new(true),
 	}.Build()
+	f.mu.Lock()
+	if !f.disabledUntil.IsZero() {
+		c.SetDisabledUntil(timestamppb.New(f.disabledUntil))
+	}
+	f.mu.Unlock()
 	return pluginv1.ListDownloadClientsResponse_builder{Clients: []*pluginv1.DownloadClient{c}}.Build(), nil
 }
 
@@ -118,7 +129,14 @@ func (f *fakeClient) AddDownload(_ context.Context, req *pluginv1.AddDownloadReq
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.added = append(f.added, req)
-	return pluginv1.AddDownloadResponse_builder{DownloadId: new(req.GetInfoHash())}.Build(), nil
+	id := req.GetInfoHash()
+	if id == "" {
+		id = f.hash
+		if slices.ContainsFunc(req.GetBlocklistedInfoHashes(), func(h string) bool { return strings.EqualFold(h, id) }) {
+			return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("release previously added to blocklist"))
+		}
+	}
+	return pluginv1.AddDownloadResponse_builder{DownloadId: new(id)}.Build(), nil
 }
 
 func (f *fakeClient) ListDownloads(context.Context, *pluginv1.ListDownloadsRequest) (*pluginv1.ListDownloadsResponse, error) {
@@ -461,6 +479,101 @@ func TestSearchGrabsBest(t *testing.T) {
 	}
 	if _, err := e.rt.Decide(e.ctx, core.NewID(), found.Releases); !errors.Is(err, ErrNotWanted) {
 		t.Errorf("Decide(unknown) err = %v, want = ErrNotWanted", err)
+	}
+}
+
+// TestGrabDetails checks grabs tell the client what the release and the
+// movie are, which Radarr's Flood tags downloads with, and that a movie
+// release is not a full season.
+func TestGrabDetails(t *testing.T) {
+	e := newEnv(t)
+	it := e.addMovie()
+	it.CollectionName, it.Studios = "The Matrix Collection", []string{"Warner Bros. Pictures", "Village Roadshow"}
+	if err := e.db.Items().Upsert(e.ctx, it); err != nil {
+		t.Fatal(err)
+	}
+	e.indexer.set(e.both(), nil)
+	if err := e.rt.SearchMovie(e.ctx, it.ID, false); err != nil {
+		t.Fatal(err)
+	}
+	if len(e.client.added) != 1 {
+		t.Fatalf("grabs = %d, want = 1", len(e.client.added))
+	}
+	add := e.client.added[0]
+	d := add.GetDetails()
+	if add.GetFullSeason() || d.GetQuality() != "Bluray-1080p" || d.GetReleaseGroup() != "GROUP" || d.GetIndexer() != "Indexer" ||
+		d.GetYear() != 1999 || d.GetCollection() != "The Matrix Collection" || d.GetStudio() != "Warner Bros. Pictures" || d.GetTitleSlug() != "" {
+		t.Errorf("full season, details = %v, %v, want = false and the 1080p release of The Matrix (1999)", add.GetFullSeason(), d)
+	}
+	// The release names no language and the movie's original one is not known.
+	if !slices.Equal(d.GetLanguages(), []string{"Unknown"}) {
+		t.Errorf("languages = %v, want = [Unknown]", d.GetLanguages())
+	}
+}
+
+// TestGrabBlocklistedHash checks a torrent whose hash the release did not
+// give is refused when its hash is blocklisted, as Radarr's
+// TorrentClientBase.EnsureReleaseIsNotBlocklisted: the client is sent the
+// blocklisted hashes only for indexers set to reject them and releases not
+// from an interactive search; the hash the client learnt is recorded.
+func TestGrabBlocklistedHash(t *testing.T) {
+	const blocked = "BADBADBADBADBADBADBADBADBADBADBADBADBADB"
+	for _, tc := range []struct {
+		name        string
+		reject      bool
+		interactive bool
+		hash        string
+		wantHashes  bool
+		wantGrab    bool
+	}{
+		{"rejected", true, false, blocked, true, false},
+		{"other hash", true, false, hash1080, true, true},
+		{"indexer not rejecting", false, false, blocked, false, true},
+		{"interactive search", true, true, blocked, false, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			e := newEnv(t)
+			it := e.addMovie()
+			e.indexer.settings = func(b *pluginv1.Indexer_builder) { b.RejectBlocklistedTorrentHashes = new(tc.reject) }
+			e.client.hash = tc.hash
+			if err := e.db.Blocklist().Add(e.ctx, &core.BlocklistEntry{
+				ID: core.NewID(), ItemID: it.ID, Date: e.clock.Add(-time.Hour), SourceTitle: "The.Matrix.1999.2160p.UHD.BluRay.x265-OLD",
+				Protocol: core.ProtocolTorrent, TorrentInfoHash: strings.ToLower(blocked),
+			}); err != nil {
+				t.Fatal(err)
+			}
+			rel := torrent("g1080", title1080, 8*gb, hash1080, e.clock.Add(-time.Hour))
+			rel.ClearInfoHash()
+			rel.ClearMagnetUrl()
+			var err error
+			if tc.interactive {
+				_, err = e.rt.GrabRelease(e.ctx, it.ID, &Release{
+					PluginID: "idx", IndexerID: "ix", IndexerName: "Indexer", GUID: "g1080", Title: title1080, Size: 8 * gb,
+					DownloadURL: "https://indexer.test/g1080", Protocol: core.ProtocolTorrent, PublishDate: e.clock,
+				}, "", "")
+			} else {
+				e.indexer.set([]*pluginv1.Release{rel}, nil)
+				err = e.rt.SearchMovie(e.ctx, it.ID, false)
+			}
+			if err != nil && tc.wantGrab {
+				t.Fatal(err)
+			}
+			if len(e.client.added) != 1 {
+				t.Fatalf("grabs sent = %d, want = 1", len(e.client.added))
+			}
+			if got := e.client.added[0].GetBlocklistedInfoHashes(); (len(got) > 0) != tc.wantHashes {
+				t.Errorf("blocklisted hashes = %v, want sent = %v", got, tc.wantHashes)
+			}
+			grabs := e.history(core.HistoryGrabbed)
+			if (len(grabs) == 1) != tc.wantGrab {
+				t.Fatalf("grab events = %d, want grabbed = %v", len(grabs), tc.wantGrab)
+			}
+			if tc.wantGrab {
+				if got := grabs[0].Data[dataTorrentInfoHash]; got != strings.ToUpper(tc.hash) {
+					t.Errorf("grab hash = %q, want = %q", got, strings.ToUpper(tc.hash))
+				}
+			}
+		})
 	}
 }
 
@@ -993,6 +1106,37 @@ func TestQueueStatusAndMissing(t *testing.T) {
 	}
 	if _, ok := e.rt.Status(d.ID); ok {
 		t.Errorf("Status() kept for a download gone from its client")
+	}
+}
+
+// TestQueueKeepsBackingOffClient checks the downloads of a client left
+// out after failing, which its plugin does not ask, keep their last state
+// rather than being flagged as gone from it.
+func TestQueueKeepsBackingOffClient(t *testing.T) {
+	e := newEnv(t)
+	it := e.addMovie()
+	e.indexer.set(e.both(), nil)
+	if err := e.rt.SearchMovie(e.ctx, it.ID, false); err != nil {
+		t.Fatal(err)
+	}
+	e.client.mu.Lock()
+	e.client.disabledUntil = e.clock.Add(time.Hour)
+	e.client.mu.Unlock()
+	e.client.setDownloads()
+	if err := e.rt.CheckQueue(e.ctx); err != nil {
+		t.Fatal(err)
+	}
+	if d := e.download(hash1080); d.State != core.DownloadDownloading || len(d.Messages) != 0 {
+		t.Errorf("download = %s %v, want = downloading without messages", d.State, d.Messages)
+	}
+
+	// Back from backing off, the client answers.
+	e.clock = e.clock.Add(2 * time.Hour)
+	if err := e.rt.CheckQueue(e.ctx); err != nil {
+		t.Fatal(err)
+	}
+	if d := e.download(hash1080); !slices.Contains(d.Messages, msgNotInClient) {
+		t.Errorf("messages = %v, want = %q", d.Messages, msgNotInClient)
 	}
 }
 
