@@ -15,6 +15,7 @@ export {
 export {
   type Copy,
   errorMessage,
+  isUnauthenticated,
   type Filter,
   libraryItemsRequest,
   type SearchResults,

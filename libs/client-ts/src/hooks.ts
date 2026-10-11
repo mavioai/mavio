@@ -2,10 +2,11 @@
 // server the user is signed in to. Query keys start with ["mavio", serverId],
 // so that a server's events invalidate its queries alone.
 import { create } from "@bufbuild/protobuf";
-import { ConnectError } from "@connectrpc/connect";
+import { Code, ConnectError } from "@connectrpc/connect";
 import { HomeService } from "@mavio/proto/mavio/home/v1/home_pb";
 import {
   type Item,
+  ItemKind,
   ItemService,
   type ListItemsRequest,
   ListItemsRequestSchema,
@@ -64,6 +65,11 @@ export function serverKey(serverId: string, ...rest: unknown[]): QueryKey {
 /** A message for an error of a call. */
 export function errorMessage(err: unknown): string {
   return err instanceof ConnectError ? err.rawMessage : err instanceof Error ? err.message : String(err);
+}
+
+/** Whether a call failed for lack of a valid sign-in, such as a wrong password. */
+export function isUnauthenticated(err: unknown): boolean {
+  return err instanceof ConnectError && err.code === Code.Unauthenticated;
 }
 
 function hubsOf(q: UseQueryResult<Awaited<ReturnType<typeof listHubs>>>): Hubs {
@@ -289,6 +295,23 @@ export interface SearchResults {
   error?: string;
 }
 
+/** The kinds search finds: titles, not the seasons and folders inside them. */
+const searchKinds = [
+  ItemKind.MOVIE,
+  ItemKind.SERIES,
+  ItemKind.EPISODE,
+  ItemKind.VIDEO,
+  ItemKind.MUSIC_ARTIST,
+  ItemKind.MUSIC_ALBUM,
+  ItemKind.TRACK,
+  ItemKind.MUSIC_VIDEO,
+  ItemKind.AUDIOBOOK,
+  ItemKind.BOOK,
+  ItemKind.PHOTO_ALBUM,
+  ItemKind.COLLECTION,
+  ItemKind.PLAYLIST,
+];
+
 /** Searches every server at once, the results in the user's order of servers. */
 export function useSearch(query: string): SearchResults[] {
   const servers = useServersStore();
@@ -298,7 +321,7 @@ export function useSearch(query: string): SearchResults[] {
     queries: list.map((s) => ({
       queryKey: serverKey(s.id, "search", q),
       queryFn: async () =>
-        (await servers.client(ItemService, s).listItems({ search: q, recursive: true, limit: 50 })).items,
+        (await servers.client(ItemService, s).listItems({ search: q, kinds: searchKinds, limit: 50 })).items,
       enabled: q !== "",
       staleTime: 60_000,
     })),
