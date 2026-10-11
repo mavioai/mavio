@@ -479,6 +479,7 @@ flowchart TD
   - [x] 索引器指定的下载客户端（`download_client_id`），其 release 总发送给它，如同 Radarr 的 IndexerDefinition.DownloadClientId；索引器指定的客户端不存在时，release 转为待定
   - [x] 某协议的客户端都因失败而暂被排除时，抓取仍尝试其中之一，如同 Radarr 的 DownloadClientProvider；只有因等待客户端恢复而待定的 release 继续等待
   - [x] 交互式搜索抓取的失败发布仅在开启 `AutoRedownloadFailedFromInteractiveSearch` 时重新搜索，如同 Radarr 的 RedownloadFailedDownloadService
+  - [ ] 在另一次 RSS 同步待执行或执行中时请求的 RSS 同步，如同 Radarr 的命令队列，在其后再执行一次；目前会被丢弃
 - [x] 队列：从客户端轮询的被跟踪下载
   - [x] 无法应答或因失败而暂被排除的客户端的下载保留最后状态，而非被标记
 - [x] 入库、升级与回收目录

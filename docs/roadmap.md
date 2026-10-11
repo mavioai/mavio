@@ -479,6 +479,7 @@ flowchart TD
   - [x] An indexer's own download client (`download_client_id`), which its releases are always sent to, as Radarr's IndexerDefinition.DownloadClientId; a release whose indexer's client is missing waits pending
   - [x] When every client of a protocol is left out after failing, a grab still tries one, as Radarr's DownloadClientProvider; only releases kept pending until a client is back wait for one
   - [x] Failed releases grabbed from an interactive search searched for again only with `AutoRedownloadFailedFromInteractiveSearch`, as Radarr's RedownloadFailedDownloadService
+  - [ ] An RSS sync asked for while another is pending or running runs again after it, as Radarr's command queue does; it is dropped for now
 - [x] The queue: tracked downloads polled from the clients
   - [x] The downloads of a client that fails to answer, or is left out after failing, keep their last state rather than being flagged
 - [x] Import, upgrades and the recycle folder
