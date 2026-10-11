@@ -7417,6 +7417,11 @@ pub struct AcquisitionSettingsView<'a> {
     pub movie_folder_format: ::core::option::Option<&'a str>,
     /// Field 25: `standard_movie_format`
     pub standard_movie_format: ::core::option::Option<&'a str>,
+    /// Search again when a download grabbed from an interactive search
+    /// fails, when auto_redownload_failed is set.
+    ///
+    /// Field 26: `auto_redownload_failed_from_interactive_search`
+    pub auto_redownload_failed_from_interactive_search: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
@@ -7626,6 +7631,15 @@ impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
                 )?;
                 view.standard_movie_format = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            26u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.auto_redownload_failed_from_interactive_search = Some(
+                    ::buffa::types::decode_bool(&mut cur)?,
+                );
+            }
             9u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -7709,6 +7723,8 @@ impl<'a> ::buffa::MessageView<'a> for AcquisitionSettingsView<'a> {
             colon_replacement: self.colon_replacement,
             movie_folder_format: self.movie_folder_format.map(|s| s.to_string()),
             standard_movie_format: self.standard_movie_format.map(|s| s.to_string()),
+            auto_redownload_failed_from_interactive_search: self
+                .auto_redownload_failed_from_interactive_search,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -7795,6 +7811,9 @@ impl<'a> ::buffa::ViewEncode<'a> for AcquisitionSettingsView<'a> {
         if let Some(ref v) = self.standard_movie_format {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.auto_redownload_failed_from_interactive_search.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -7880,6 +7899,9 @@ impl<'a> ::buffa::ViewEncode<'a> for AcquisitionSettingsView<'a> {
         }
         if let Some(ref v) = self.standard_movie_format {
             ::buffa::types::put_string_field(25u32, v, buf);
+        }
+        if let Some(v) = self.auto_redownload_failed_from_interactive_search {
+            ::buffa::types::put_bool_field(26u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8139,6 +8161,16 @@ impl AcquisitionSettingsOwnedView {
     #[must_use]
     pub fn standard_movie_format(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().standard_movie_format
+    }
+    /// Search again when a download grabbed from an interactive search
+    /// fails, when auto_redownload_failed is set.
+    ///
+    /// Field 26: `auto_redownload_failed_from_interactive_search`
+    #[must_use]
+    pub fn auto_redownload_failed_from_interactive_search(
+        &self,
+    ) -> ::core::option::Option<bool> {
+        self.0.reborrow().auto_redownload_failed_from_interactive_search
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<AcquisitionSettingsView<'static>>>

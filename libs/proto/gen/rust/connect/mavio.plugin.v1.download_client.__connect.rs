@@ -552,7 +552,11 @@ pub trait DownloadClientProviderService: Send + Sync + 'static {
     > + Send;
     /// AddDownload sends a release to a download client. It fails with
     /// CodeUnimplemented when the client cannot take a magnet link, which is
-    /// then sent as a torrent file where the release has one.
+    /// then sent as a torrent file where the release has one, or a release of
+    /// a full season it cannot take; with CodeFailedPrecondition when the
+    /// client rejects the release, as a duplicate, or the torrent's hash is
+    /// among the blocklisted hashes; with CodeInvalidArgument for an NZB that
+    /// is not valid.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///

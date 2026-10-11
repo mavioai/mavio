@@ -35,6 +35,8 @@ enum SettingFieldType {
   SETTING_FIELD_TYPE_MULTI_SELECT = 5;
   // Text shown to administrators, not a setting.
   SETTING_FIELD_TYPE_INFO = 6;
+  // Strings entered freely, such as tags, as a list.
+  SETTING_FIELD_TYPE_TAG = 7;
 }
 
 // SettingFieldOption is a choice of a select.

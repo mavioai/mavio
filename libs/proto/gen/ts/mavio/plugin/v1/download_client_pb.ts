@@ -17,7 +17,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/download_client.proto.
  */
 export const file_mavio_plugin_v1_download_client: GenFile = /*@__PURE__*/
-  fileDesc("CiVtYXZpby9wbHVnaW4vdjEvZG93bmxvYWRfY2xpZW50LnByb3RvEg9tYXZpby5wbHVnaW4udjEiJgokTGlzdERvd25sb2FkQ2xpZW50RGVmaW5pdGlvbnNSZXF1ZXN0ImcKJUxpc3REb3dubG9hZENsaWVudERlZmluaXRpb25zUmVzcG9uc2USPgoLZGVmaW5pdGlvbnMYASADKAsyKS5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRDbGllbnREZWZpbml0aW9uIq0BChhEb3dubG9hZENsaWVudERlZmluaXRpb24SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIzCghwcm90b2NvbBgEIAEoDjIhLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFByb3RvY29sEi0KBmZpZWxkcxgFIAMoCzIdLm1hdmlvLnBsdWdpbi52MS5TZXR0aW5nRmllbGQiHAoaTGlzdERvd25sb2FkQ2xpZW50c1JlcXVlc3QiTwobTGlzdERvd25sb2FkQ2xpZW50c1Jlc3BvbnNlEjAKB2NsaWVudHMYASADKAsyHy5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRDbGllbnQizwIKDkRvd25sb2FkQ2xpZW50EgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSFQoNZGVmaW5pdGlvbl9pZBgDIAEoCRIzCghwcm90b2NvbBgEIAEoDjIhLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFByb3RvY29sEg8KB2VuYWJsZWQYBSABKAgSEAoIcHJpb3JpdHkYBiABKAUSIgoacmVtb3ZlX2NvbXBsZXRlZF9kb3dubG9hZHMYByABKAgSHwoXcmVtb3ZlX2ZhaWxlZF9kb3dubG9hZHMYCCABKAgSMgoOZGlzYWJsZWRfdW50aWwYCSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg8KB2ZhaWx1cmUYCiABKAkSHAoUcHJlZmVyc190b3JyZW50X2ZpbGUYCyABKAgSDAoEaG9zdBgMIAEoCSJcChlUZXN0RG93bmxvYWRDbGllbnRSZXF1ZXN0EhEKCWNsaWVudF9pZBgBIAEoCRIVCg1kZWZpbml0aW9uX2lkGAIgASgJEhUKDXNldHRpbmdzX2pzb24YAyABKAkiLQoaVGVzdERvd25sb2FkQ2xpZW50UmVzcG9uc2USDwoHZmFpbHVyZRgBIAEoCSK8AgoSQWRkRG93bmxvYWRSZXF1ZXN0EhkKCWNsaWVudF9pZBgBIAEoCUIGukgDyAEBEhcKBXRpdGxlGAIgASgJQgi6SAVyAxjoBxI1CgRraW5kGAMgASgOMh0ubWF2aW8ucGx1Z2luLnYxLkRvd25sb2FkS2luZEIIukgFggECEAESDgoGcmVjZW50GAQgASgIEgwKBGRhdGEYBSABKAwSGwoJZmlsZV9uYW1lGAYgASgJQgi6SAVyAxjoBxISCgptYWduZXRfdXJsGAcgASgJEhoKCWluZm9faGFzaBgIIAEoCUIHukgEcgIYQBIiCgpzZWVkX3JhdGlvGAkgASgBQg66SAsSCSkAAAAAAAAAABIsCglzZWVkX3RpbWUYCiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24iKgoTQWRkRG93bmxvYWRSZXNwb25zZRITCgtkb3dubG9hZF9pZBgBIAEoCSJEChRMaXN0RG93bmxvYWRzUmVxdWVzdBISCgpjbGllbnRfaWRzGAEgAygJEhgKEGluY2x1ZGVfc3RhdHVzZXMYAiABKAgiuAEKFUxpc3REb3dubG9hZHNSZXNwb25zZRIsCglkb3dubG9hZHMYASADKAsyGS5tYXZpby5wbHVnaW4udjEuRG93bmxvYWQSNwoIc3RhdHVzZXMYAiADKAsyJS5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRDbGllbnRTdGF0dXMSOAoIZmFpbHVyZXMYAyADKAsyJi5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRDbGllbnRGYWlsdXJlIqYDCghEb3dubG9hZBIRCgljbGllbnRfaWQYASABKAkSCgoCaWQYAiABKAkSDQoFdGl0bGUYAyABKAkSEAoIY2F0ZWdvcnkYBCABKAkSKwoEa2luZBgFIAEoDjIdLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZEtpbmQSEgoKdG90YWxfc2l6ZRgGIAEoAxIWCg5yZW1haW5pbmdfc2l6ZRgHIAEoAxIxCg5yZW1haW5pbmdfdGltZRgIIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhISCgpzZWVkX3JhdGlvGAkgASgBEhMKC291dHB1dF9wYXRoGAogASgJEg8KB21lc3NhZ2UYCyABKAkSLwoGc3RhdHVzGAwgASgOMh8ubWF2aW8ucGx1Z2luLnYxLkRvd25sb2FkU3RhdHVzEhEKCWVuY3J5cHRlZBgNIAEoCBIWCg5jYW5fbW92ZV9maWxlcxgOIAEoCBIWCg5jYW5fYmVfcmVtb3ZlZBgPIAEoCBIgChhoYXNfcG9zdF9pbXBvcnRfY2F0ZWdvcnkYECABKAgilwEKFERvd25sb2FkQ2xpZW50U3RhdHVzEhEKCWNsaWVudF9pZBgBIAEoCRIUCgxpc19sb2NhbGhvc3QYAiABKAgSFAoMc29ydGluZ19tb2RlGAMgASgJEiMKG3JlbW92ZXNfY29tcGxldGVkX2Rvd25sb2FkcxgEIAEoCBIbChNvdXRwdXRfcm9vdF9mb2xkZXJzGAUgAygJIm8KFURvd25sb2FkQ2xpZW50RmFpbHVyZRIRCgljbGllbnRfaWQYASABKAkSDwoHbWVzc2FnZRgCIAEoCRIyCg5kaXNhYmxlZF91bnRpbBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiTAoSR2V0RG93bmxvYWRSZXF1ZXN0EhkKCWNsaWVudF9pZBgBIAEoCUIGukgDyAEBEhsKC2Rvd25sb2FkX2lkGAIgASgJQga6SAPIAQEiQgoTR2V0RG93bmxvYWRSZXNwb25zZRIrCghkb3dubG9hZBgBIAEoCzIZLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZCJkChVSZW1vdmVEb3dubG9hZFJlcXVlc3QSGQoJY2xpZW50X2lkGAEgASgJQga6SAPIAQESGwoLZG93bmxvYWRfaWQYAiABKAlCBrpIA8gBARITCgtkZWxldGVfZGF0YRgDIAEoCCIYChZSZW1vdmVEb3dubG9hZFJlc3BvbnNlIlUKG01hcmtEb3dubG9hZEltcG9ydGVkUmVxdWVzdBIZCgljbGllbnRfaWQYASABKAlCBrpIA8gBARIbCgtkb3dubG9hZF9pZBgCIAEoCUIGukgDyAEBIh4KHE1hcmtEb3dubG9hZEltcG9ydGVkUmVzcG9uc2UqYAoMRG93bmxvYWRLaW5kEh0KGURPV05MT0FEX0tJTkRfVU5TUEVDSUZJRUQQABIXChNET1dOTE9BRF9LSU5EX01PVklFEAESGAoURE9XTkxPQURfS0lORF9TRVJJRVMQAiriAQoORG93bmxvYWRTdGF0dXMSHwobRE9XTkxPQURfU1RBVFVTX1VOU1BFQ0lGSUVEEAASGgoWRE9XTkxPQURfU1RBVFVTX1FVRVVFRBABEhoKFkRPV05MT0FEX1NUQVRVU19QQVVTRUQQAhIfChtET1dOTE9BRF9TVEFUVVNfRE9XTkxPQURJTkcQAxIdChlET1dOTE9BRF9TVEFUVVNfQ09NUExFVEVEEAQSGgoWRE9XTkxPQURfU1RBVFVTX0ZBSUxFRBAFEhsKF0RPV05MT0FEX1NUQVRVU19XQVJOSU5HEAYykQcKHURvd25sb2FkQ2xpZW50UHJvdmlkZXJTZXJ2aWNlEpMBCh1MaXN0RG93bmxvYWRDbGllbnREZWZpbml0aW9ucxI1Lm1hdmlvLnBsdWdpbi52MS5MaXN0RG93bmxvYWRDbGllbnREZWZpbml0aW9uc1JlcXVlc3QaNi5tYXZpby5wbHVnaW4udjEuTGlzdERvd25sb2FkQ2xpZW50RGVmaW5pdGlvbnNSZXNwb25zZSIDkAIBEnUKE0xpc3REb3dubG9hZENsaWVudHMSKy5tYXZpby5wbHVnaW4udjEuTGlzdERvd25sb2FkQ2xpZW50c1JlcXVlc3QaLC5tYXZpby5wbHVnaW4udjEuTGlzdERvd25sb2FkQ2xpZW50c1Jlc3BvbnNlIgOQAgESbQoSVGVzdERvd25sb2FkQ2xpZW50EioubWF2aW8ucGx1Z2luLnYxLlRlc3REb3dubG9hZENsaWVudFJlcXVlc3QaKy5tYXZpby5wbHVnaW4udjEuVGVzdERvd25sb2FkQ2xpZW50UmVzcG9uc2USWAoLQWRkRG93bmxvYWQSIy5tYXZpby5wbHVnaW4udjEuQWRkRG93bmxvYWRSZXF1ZXN0GiQubWF2aW8ucGx1Z2luLnYxLkFkZERvd25sb2FkUmVzcG9uc2USYwoNTGlzdERvd25sb2FkcxIlLm1hdmlvLnBsdWdpbi52MS5MaXN0RG93bmxvYWRzUmVxdWVzdBomLm1hdmlvLnBsdWdpbi52MS5MaXN0RG93bmxvYWRzUmVzcG9uc2UiA5ACARJdCgtHZXREb3dubG9hZBIjLm1hdmlvLnBsdWdpbi52MS5HZXREb3dubG9hZFJlcXVlc3QaJC5tYXZpby5wbHVnaW4udjEuR2V0RG93bmxvYWRSZXNwb25zZSIDkAIBEmEKDlJlbW92ZURvd25sb2FkEiYubWF2aW8ucGx1Z2luLnYxLlJlbW92ZURvd25sb2FkUmVxdWVzdBonLm1hdmlvLnBsdWdpbi52MS5SZW1vdmVEb3dubG9hZFJlc3BvbnNlEnMKFE1hcmtEb3dubG9hZEltcG9ydGVkEiwubWF2aW8ucGx1Z2luLnYxLk1hcmtEb3dubG9hZEltcG9ydGVkUmVxdWVzdBotLm1hdmlvLnBsdWdpbi52MS5NYXJrRG93bmxvYWRJbXBvcnRlZFJlc3BvbnNlQs0BChNjb20ubWF2aW8ucGx1Z2luLnYxQhNEb3dubG9hZENsaWVudFByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9wbHVnaW4vdjE7cGx1Z2ludjGiAgNNUFiqAg9NYXZpby5QbHVnaW4uVjHKAg9NYXZpb1xQbHVnaW5cVjHiAhtNYXZpb1xQbHVnaW5cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6UGx1Z2luOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_mavio_plugin_v1_indexer, file_mavio_plugin_v1_settings]);
+  fileDesc("CiVtYXZpby9wbHVnaW4vdjEvZG93bmxvYWRfY2xpZW50LnByb3RvEg9tYXZpby5wbHVnaW4udjEiJgokTGlzdERvd25sb2FkQ2xpZW50RGVmaW5pdGlvbnNSZXF1ZXN0ImcKJUxpc3REb3dubG9hZENsaWVudERlZmluaXRpb25zUmVzcG9uc2USPgoLZGVmaW5pdGlvbnMYASADKAsyKS5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRDbGllbnREZWZpbml0aW9uIq0BChhEb3dubG9hZENsaWVudERlZmluaXRpb24SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIzCghwcm90b2NvbBgEIAEoDjIhLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFByb3RvY29sEi0KBmZpZWxkcxgFIAMoCzIdLm1hdmlvLnBsdWdpbi52MS5TZXR0aW5nRmllbGQiHAoaTGlzdERvd25sb2FkQ2xpZW50c1JlcXVlc3QiTwobTGlzdERvd25sb2FkQ2xpZW50c1Jlc3BvbnNlEjAKB2NsaWVudHMYASADKAsyHy5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRDbGllbnQi3QIKDkRvd25sb2FkQ2xpZW50EgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSFQoNZGVmaW5pdGlvbl9pZBgDIAEoCRIzCghwcm90b2NvbBgEIAEoDjIhLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFByb3RvY29sEg8KB2VuYWJsZWQYBSABKAgSEAoIcHJpb3JpdHkYBiABKAUSIgoacmVtb3ZlX2NvbXBsZXRlZF9kb3dubG9hZHMYByABKAgSHwoXcmVtb3ZlX2ZhaWxlZF9kb3dubG9hZHMYCCABKAgSMgoOZGlzYWJsZWRfdW50aWwYCSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg8KB2ZhaWx1cmUYCiABKAkSHAoUcHJlZmVyc190b3JyZW50X2ZpbGUYCyABKAgSDAoEaG9zdBgMIAEoCRIMCgR0YWdzGA0gAygJIlwKGVRlc3REb3dubG9hZENsaWVudFJlcXVlc3QSEQoJY2xpZW50X2lkGAEgASgJEhUKDWRlZmluaXRpb25faWQYAiABKAkSFQoNc2V0dGluZ3NfanNvbhgDIAEoCSI/ChpUZXN0RG93bmxvYWRDbGllbnRSZXNwb25zZRIPCgdmYWlsdXJlGAEgASgJEhAKCHdhcm5pbmdzGAIgAygJIrMDChJBZGREb3dubG9hZFJlcXVlc3QSGQoJY2xpZW50X2lkGAEgASgJQga6SAPIAQESFwoFdGl0bGUYAiABKAlCCLpIBXIDGOgHEjUKBGtpbmQYAyABKA4yHS5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRLaW5kQgi6SAWCAQIQARIOCgZyZWNlbnQYBCABKAgSDAoEZGF0YRgFIAEoDBIbCglmaWxlX25hbWUYBiABKAlCCLpIBXIDGOgHEhIKCm1hZ25ldF91cmwYByABKAkSGgoJaW5mb19oYXNoGAggASgJQge6SARyAhhAEiIKCnNlZWRfcmF0aW8YCSABKAFCDrpICxIJKQAAAAAAAAAAEiwKCXNlZWRfdGltZRgKIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhITCgtmdWxsX3NlYXNvbhgLIAEoCBIxCgdkZXRhaWxzGAwgASgLMiAubWF2aW8ucGx1Z2luLnYxLkRvd25sb2FkRGV0YWlscxItChdibG9ja2xpc3RlZF9pbmZvX2hhc2hlcxgNIAMoCUIMukgJkgEGIgRyAhhAIqMBCg9Eb3dubG9hZERldGFpbHMSDwoHcXVhbGl0eRgBIAEoCRIRCglsYW5ndWFnZXMYAiADKAkSFQoNcmVsZWFzZV9ncm91cBgDIAEoCRIPCgdpbmRleGVyGAQgASgJEgwKBHllYXIYBSABKAUSEgoKY29sbGVjdGlvbhgGIAEoCRIOCgZzdHVkaW8YByABKAkSEgoKdGl0bGVfc2x1ZxgIIAEoCSIqChNBZGREb3dubG9hZFJlc3BvbnNlEhMKC2Rvd25sb2FkX2lkGAEgASgJIkQKFExpc3REb3dubG9hZHNSZXF1ZXN0EhIKCmNsaWVudF9pZHMYASADKAkSGAoQaW5jbHVkZV9zdGF0dXNlcxgCIAEoCCK4AQoVTGlzdERvd25sb2Fkc1Jlc3BvbnNlEiwKCWRvd25sb2FkcxgBIAMoCzIZLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZBI3CghzdGF0dXNlcxgCIAMoCzIlLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZENsaWVudFN0YXR1cxI4CghmYWlsdXJlcxgDIAMoCzImLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZENsaWVudEZhaWx1cmUipgMKCERvd25sb2FkEhEKCWNsaWVudF9pZBgBIAEoCRIKCgJpZBgCIAEoCRINCgV0aXRsZRgDIAEoCRIQCghjYXRlZ29yeRgEIAEoCRIrCgRraW5kGAUgASgOMh0ubWF2aW8ucGx1Z2luLnYxLkRvd25sb2FkS2luZBISCgp0b3RhbF9zaXplGAYgASgDEhYKDnJlbWFpbmluZ19zaXplGAcgASgDEjEKDnJlbWFpbmluZ190aW1lGAggASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEhIKCnNlZWRfcmF0aW8YCSABKAESEwoLb3V0cHV0X3BhdGgYCiABKAkSDwoHbWVzc2FnZRgLIAEoCRIvCgZzdGF0dXMYDCABKA4yHy5tYXZpby5wbHVnaW4udjEuRG93bmxvYWRTdGF0dXMSEQoJZW5jcnlwdGVkGA0gASgIEhYKDmNhbl9tb3ZlX2ZpbGVzGA4gASgIEhYKDmNhbl9iZV9yZW1vdmVkGA8gASgIEiAKGGhhc19wb3N0X2ltcG9ydF9jYXRlZ29yeRgQIAEoCCKXAQoURG93bmxvYWRDbGllbnRTdGF0dXMSEQoJY2xpZW50X2lkGAEgASgJEhQKDGlzX2xvY2FsaG9zdBgCIAEoCBIUCgxzb3J0aW5nX21vZGUYAyABKAkSIwobcmVtb3Zlc19jb21wbGV0ZWRfZG93bmxvYWRzGAQgASgIEhsKE291dHB1dF9yb290X2ZvbGRlcnMYBSADKAkibwoVRG93bmxvYWRDbGllbnRGYWlsdXJlEhEKCWNsaWVudF9pZBgBIAEoCRIPCgdtZXNzYWdlGAIgASgJEjIKDmRpc2FibGVkX3VudGlsGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJMChJHZXREb3dubG9hZFJlcXVlc3QSGQoJY2xpZW50X2lkGAEgASgJQga6SAPIAQESGwoLZG93bmxvYWRfaWQYAiABKAlCBrpIA8gBASJCChNHZXREb3dubG9hZFJlc3BvbnNlEisKCGRvd25sb2FkGAEgASgLMhkubWF2aW8ucGx1Z2luLnYxLkRvd25sb2FkImQKFVJlbW92ZURvd25sb2FkUmVxdWVzdBIZCgljbGllbnRfaWQYASABKAlCBrpIA8gBARIbCgtkb3dubG9hZF9pZBgCIAEoCUIGukgDyAEBEhMKC2RlbGV0ZV9kYXRhGAMgASgIIhgKFlJlbW92ZURvd25sb2FkUmVzcG9uc2UiVQobTWFya0Rvd25sb2FkSW1wb3J0ZWRSZXF1ZXN0EhkKCWNsaWVudF9pZBgBIAEoCUIGukgDyAEBEhsKC2Rvd25sb2FkX2lkGAIgASgJQga6SAPIAQEiHgocTWFya0Rvd25sb2FkSW1wb3J0ZWRSZXNwb25zZSpgCgxEb3dubG9hZEtpbmQSHQoZRE9XTkxPQURfS0lORF9VTlNQRUNJRklFRBAAEhcKE0RPV05MT0FEX0tJTkRfTU9WSUUQARIYChRET1dOTE9BRF9LSU5EX1NFUklFUxACKuIBCg5Eb3dubG9hZFN0YXR1cxIfChtET1dOTE9BRF9TVEFUVVNfVU5TUEVDSUZJRUQQABIaChZET1dOTE9BRF9TVEFUVVNfUVVFVUVEEAESGgoWRE9XTkxPQURfU1RBVFVTX1BBVVNFRBACEh8KG0RPV05MT0FEX1NUQVRVU19ET1dOTE9BRElORxADEh0KGURPV05MT0FEX1NUQVRVU19DT01QTEVURUQQBBIaChZET1dOTE9BRF9TVEFUVVNfRkFJTEVEEAUSGwoXRE9XTkxPQURfU1RBVFVTX1dBUk5JTkcQBjKRBwodRG93bmxvYWRDbGllbnRQcm92aWRlclNlcnZpY2USkwEKHUxpc3REb3dubG9hZENsaWVudERlZmluaXRpb25zEjUubWF2aW8ucGx1Z2luLnYxLkxpc3REb3dubG9hZENsaWVudERlZmluaXRpb25zUmVxdWVzdBo2Lm1hdmlvLnBsdWdpbi52MS5MaXN0RG93bmxvYWRDbGllbnREZWZpbml0aW9uc1Jlc3BvbnNlIgOQAgESdQoTTGlzdERvd25sb2FkQ2xpZW50cxIrLm1hdmlvLnBsdWdpbi52MS5MaXN0RG93bmxvYWRDbGllbnRzUmVxdWVzdBosLm1hdmlvLnBsdWdpbi52MS5MaXN0RG93bmxvYWRDbGllbnRzUmVzcG9uc2UiA5ACARJtChJUZXN0RG93bmxvYWRDbGllbnQSKi5tYXZpby5wbHVnaW4udjEuVGVzdERvd25sb2FkQ2xpZW50UmVxdWVzdBorLm1hdmlvLnBsdWdpbi52MS5UZXN0RG93bmxvYWRDbGllbnRSZXNwb25zZRJYCgtBZGREb3dubG9hZBIjLm1hdmlvLnBsdWdpbi52MS5BZGREb3dubG9hZFJlcXVlc3QaJC5tYXZpby5wbHVnaW4udjEuQWRkRG93bmxvYWRSZXNwb25zZRJjCg1MaXN0RG93bmxvYWRzEiUubWF2aW8ucGx1Z2luLnYxLkxpc3REb3dubG9hZHNSZXF1ZXN0GiYubWF2aW8ucGx1Z2luLnYxLkxpc3REb3dubG9hZHNSZXNwb25zZSIDkAIBEl0KC0dldERvd25sb2FkEiMubWF2aW8ucGx1Z2luLnYxLkdldERvd25sb2FkUmVxdWVzdBokLm1hdmlvLnBsdWdpbi52MS5HZXREb3dubG9hZFJlc3BvbnNlIgOQAgESYQoOUmVtb3ZlRG93bmxvYWQSJi5tYXZpby5wbHVnaW4udjEuUmVtb3ZlRG93bmxvYWRSZXF1ZXN0GicubWF2aW8ucGx1Z2luLnYxLlJlbW92ZURvd25sb2FkUmVzcG9uc2UScwoUTWFya0Rvd25sb2FkSW1wb3J0ZWQSLC5tYXZpby5wbHVnaW4udjEuTWFya0Rvd25sb2FkSW1wb3J0ZWRSZXF1ZXN0Gi0ubWF2aW8ucGx1Z2luLnYxLk1hcmtEb3dubG9hZEltcG9ydGVkUmVzcG9uc2VCzQEKE2NvbS5tYXZpby5wbHVnaW4udjFCE0Rvd25sb2FkQ2xpZW50UHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_mavio_plugin_v1_indexer, file_mavio_plugin_v1_settings]);
 
 /**
  * @generated from message mavio.plugin.v1.ListDownloadClientDefinitionsRequest
@@ -205,6 +205,14 @@ export type DownloadClient = Message<"mavio.plugin.v1.DownloadClient"> & {
    * @generated from field: string host = 12;
    */
   host: string;
+
+  /**
+   * The client's tags: a movie or series with tags only uses the clients
+   * sharing one of them, else those without tags, as Radarr's.
+   *
+   * @generated from field: repeated string tags = 13;
+   */
+  tags: string[];
 };
 
 /**
@@ -255,6 +263,14 @@ export type TestDownloadClientResponse = Message<"mavio.plugin.v1.TestDownloadCl
    * @generated from field: string failure = 1;
    */
   failure: string;
+
+  /**
+   * What the test warns of, though it passed, such as a category
+   * recommended.
+   *
+   * @generated from field: repeated string warnings = 2;
+   */
+  warnings: string[];
 };
 
 /**
@@ -334,6 +350,30 @@ export type AddDownloadRequest = Message<"mavio.plugin.v1.AddDownloadRequest"> &
    * @generated from field: google.protobuf.Duration seed_time = 10;
    */
   seedTime?: Duration | undefined;
+
+  /**
+   * The release is of a full season, which some clients cannot take.
+   *
+   * @generated from field: bool full_season = 11;
+   */
+  fullSeason: boolean;
+
+  /**
+   * What the release and its movie or series are, which clients such as
+   * Flood tag downloads with.
+   *
+   * @generated from field: mavio.plugin.v1.DownloadDetails details = 12;
+   */
+  details?: DownloadDetails | undefined;
+
+  /**
+   * The info hashes of torrents blocklisted for the movie or series, in
+   * hex: a torrent whose hash is among them is refused, as Radarr refuses
+   * blocklisted torrents whose hash was not known before grabbing.
+   *
+   * @generated from field: repeated string blocklisted_info_hashes = 13;
+   */
+  blocklistedInfoHashes: string[];
 };
 
 /**
@@ -342,6 +382,75 @@ export type AddDownloadRequest = Message<"mavio.plugin.v1.AddDownloadRequest"> &
  */
 export const AddDownloadRequestSchema: GenMessage<AddDownloadRequest> = /*@__PURE__*/
   messageDesc(file_mavio_plugin_v1_download_client, 8);
+
+/**
+ * DownloadDetails are what a release and its movie or series are, as
+ * Radarr's and Sonarr's Flood tags them.
+ *
+ * @generated from message mavio.plugin.v1.DownloadDetails
+ */
+export type DownloadDetails = Message<"mavio.plugin.v1.DownloadDetails"> & {
+  /**
+   * The release's quality, e.g. "Bluray-2160p".
+   *
+   * @generated from field: string quality = 1;
+   */
+  quality: string;
+
+  /**
+   * The release's languages, by English name.
+   *
+   * @generated from field: repeated string languages = 2;
+   */
+  languages: string[];
+
+  /**
+   * @generated from field: string release_group = 3;
+   */
+  releaseGroup: string;
+
+  /**
+   * The name of the release's indexer.
+   *
+   * @generated from field: string indexer = 4;
+   */
+  indexer: string;
+
+  /**
+   * The movie's or series' year; 0 when unknown.
+   *
+   * @generated from field: int32 year = 5;
+   */
+  year: number;
+
+  /**
+   * The movie's collection.
+   *
+   * @generated from field: string collection = 6;
+   */
+  collection: string;
+
+  /**
+   * The movie's studio, or the series' network.
+   *
+   * @generated from field: string studio = 7;
+   */
+  studio: string;
+
+  /**
+   * The series' title as a URL slug, e.g. "big-buck-bunny".
+   *
+   * @generated from field: string title_slug = 8;
+   */
+  titleSlug: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.DownloadDetails.
+ * Use `create(DownloadDetailsSchema)` to create a new message.
+ */
+export const DownloadDetailsSchema: GenMessage<DownloadDetails> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_download_client, 9);
 
 /**
  * @generated from message mavio.plugin.v1.AddDownloadResponse
@@ -361,7 +470,7 @@ export type AddDownloadResponse = Message<"mavio.plugin.v1.AddDownloadResponse">
  * Use `create(AddDownloadResponseSchema)` to create a new message.
  */
 export const AddDownloadResponseSchema: GenMessage<AddDownloadResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 9);
+  messageDesc(file_mavio_plugin_v1_download_client, 10);
 
 /**
  * @generated from message mavio.plugin.v1.ListDownloadsRequest
@@ -388,7 +497,7 @@ export type ListDownloadsRequest = Message<"mavio.plugin.v1.ListDownloadsRequest
  * Use `create(ListDownloadsRequestSchema)` to create a new message.
  */
 export const ListDownloadsRequestSchema: GenMessage<ListDownloadsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 10);
+  messageDesc(file_mavio_plugin_v1_download_client, 11);
 
 /**
  * @generated from message mavio.plugin.v1.ListDownloadsResponse
@@ -419,7 +528,7 @@ export type ListDownloadsResponse = Message<"mavio.plugin.v1.ListDownloadsRespon
  * Use `create(ListDownloadsResponseSchema)` to create a new message.
  */
 export const ListDownloadsResponseSchema: GenMessage<ListDownloadsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 11);
+  messageDesc(file_mavio_plugin_v1_download_client, 12);
 
 /**
  * Download is a download in a client.
@@ -539,7 +648,7 @@ export type Download = Message<"mavio.plugin.v1.Download"> & {
  * Use `create(DownloadSchema)` to create a new message.
  */
 export const DownloadSchema: GenMessage<Download> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 12);
+  messageDesc(file_mavio_plugin_v1_download_client, 13);
 
 /**
  * DownloadClientStatus is what a client tells of itself, as Radarr's
@@ -588,7 +697,7 @@ export type DownloadClientStatus = Message<"mavio.plugin.v1.DownloadClientStatus
  * Use `create(DownloadClientStatusSchema)` to create a new message.
  */
 export const DownloadClientStatusSchema: GenMessage<DownloadClientStatus> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 13);
+  messageDesc(file_mavio_plugin_v1_download_client, 14);
 
 /**
  * DownloadClientFailure is a client that failed.
@@ -619,7 +728,7 @@ export type DownloadClientFailure = Message<"mavio.plugin.v1.DownloadClientFailu
  * Use `create(DownloadClientFailureSchema)` to create a new message.
  */
 export const DownloadClientFailureSchema: GenMessage<DownloadClientFailure> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 14);
+  messageDesc(file_mavio_plugin_v1_download_client, 15);
 
 /**
  * @generated from message mavio.plugin.v1.GetDownloadRequest
@@ -641,7 +750,7 @@ export type GetDownloadRequest = Message<"mavio.plugin.v1.GetDownloadRequest"> &
  * Use `create(GetDownloadRequestSchema)` to create a new message.
  */
 export const GetDownloadRequestSchema: GenMessage<GetDownloadRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 15);
+  messageDesc(file_mavio_plugin_v1_download_client, 16);
 
 /**
  * @generated from message mavio.plugin.v1.GetDownloadResponse
@@ -658,7 +767,7 @@ export type GetDownloadResponse = Message<"mavio.plugin.v1.GetDownloadResponse">
  * Use `create(GetDownloadResponseSchema)` to create a new message.
  */
 export const GetDownloadResponseSchema: GenMessage<GetDownloadResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 16);
+  messageDesc(file_mavio_plugin_v1_download_client, 17);
 
 /**
  * @generated from message mavio.plugin.v1.RemoveDownloadRequest
@@ -687,7 +796,7 @@ export type RemoveDownloadRequest = Message<"mavio.plugin.v1.RemoveDownloadReque
  * Use `create(RemoveDownloadRequestSchema)` to create a new message.
  */
 export const RemoveDownloadRequestSchema: GenMessage<RemoveDownloadRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 17);
+  messageDesc(file_mavio_plugin_v1_download_client, 18);
 
 /**
  * @generated from message mavio.plugin.v1.RemoveDownloadResponse
@@ -700,7 +809,7 @@ export type RemoveDownloadResponse = Message<"mavio.plugin.v1.RemoveDownloadResp
  * Use `create(RemoveDownloadResponseSchema)` to create a new message.
  */
 export const RemoveDownloadResponseSchema: GenMessage<RemoveDownloadResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 18);
+  messageDesc(file_mavio_plugin_v1_download_client, 19);
 
 /**
  * @generated from message mavio.plugin.v1.MarkDownloadImportedRequest
@@ -722,7 +831,7 @@ export type MarkDownloadImportedRequest = Message<"mavio.plugin.v1.MarkDownloadI
  * Use `create(MarkDownloadImportedRequestSchema)` to create a new message.
  */
 export const MarkDownloadImportedRequestSchema: GenMessage<MarkDownloadImportedRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 19);
+  messageDesc(file_mavio_plugin_v1_download_client, 20);
 
 /**
  * @generated from message mavio.plugin.v1.MarkDownloadImportedResponse
@@ -735,7 +844,7 @@ export type MarkDownloadImportedResponse = Message<"mavio.plugin.v1.MarkDownload
  * Use `create(MarkDownloadImportedResponseSchema)` to create a new message.
  */
 export const MarkDownloadImportedResponseSchema: GenMessage<MarkDownloadImportedResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_download_client, 20);
+  messageDesc(file_mavio_plugin_v1_download_client, 21);
 
 /**
  * DownloadKind is what a download is of, which chooses its category and
@@ -863,7 +972,11 @@ export const DownloadClientProviderService: GenService<{
   /**
    * AddDownload sends a release to a download client. It fails with
    * CodeUnimplemented when the client cannot take a magnet link, which is
-   * then sent as a torrent file where the release has one.
+   * then sent as a torrent file where the release has one, or a release of
+   * a full season it cannot take; with CodeFailedPrecondition when the
+   * client rejects the release, as a duplicate, or the torrent's hash is
+   * among the blocklisted hashes; with CodeInvalidArgument for an NZB that
+   * is not valid.
    *
    * @generated from rpc mavio.plugin.v1.DownloadClientProviderService.AddDownload
    */

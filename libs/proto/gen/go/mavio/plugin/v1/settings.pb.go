@@ -37,6 +37,8 @@ const (
 	SettingFieldType_SETTING_FIELD_TYPE_MULTI_SELECT SettingFieldType = 5
 	// Text shown to administrators, not a setting.
 	SettingFieldType_SETTING_FIELD_TYPE_INFO SettingFieldType = 6
+	// Strings entered freely, such as tags, as a list.
+	SettingFieldType_SETTING_FIELD_TYPE_TAG SettingFieldType = 7
 )
 
 // Enum value maps for SettingFieldType.
@@ -49,6 +51,7 @@ var (
 		4: "SETTING_FIELD_TYPE_SELECT",
 		5: "SETTING_FIELD_TYPE_MULTI_SELECT",
 		6: "SETTING_FIELD_TYPE_INFO",
+		7: "SETTING_FIELD_TYPE_TAG",
 	}
 	SettingFieldType_value = map[string]int32{
 		"SETTING_FIELD_TYPE_UNSPECIFIED":  0,
@@ -58,6 +61,7 @@ var (
 		"SETTING_FIELD_TYPE_SELECT":       4,
 		"SETTING_FIELD_TYPE_MULTI_SELECT": 5,
 		"SETTING_FIELD_TYPE_INFO":         6,
+		"SETTING_FIELD_TYPE_TAG":          7,
 	}
 )
 
@@ -505,7 +509,7 @@ const file_mavio_plugin_v1_settings_proto_rawDesc = "" +
 	"\x12SettingFieldOption\x12\x1d\n" +
 	"\n" +
 	"value_json\x18\x01 \x01(\tR\tvalueJson\x12\x14\n" +
-	"\x05label\x18\x02 \x01(\tR\x05label*\xf4\x01\n" +
+	"\x05label\x18\x02 \x01(\tR\x05label*\x90\x02\n" +
 	"\x10SettingFieldType\x12\"\n" +
 	"\x1eSETTING_FIELD_TYPE_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17SETTING_FIELD_TYPE_TEXT\x10\x01\x12\x1d\n" +
@@ -513,7 +517,8 @@ const file_mavio_plugin_v1_settings_proto_rawDesc = "" +
 	"\x1bSETTING_FIELD_TYPE_CHECKBOX\x10\x03\x12\x1d\n" +
 	"\x19SETTING_FIELD_TYPE_SELECT\x10\x04\x12#\n" +
 	"\x1fSETTING_FIELD_TYPE_MULTI_SELECT\x10\x05\x12\x1b\n" +
-	"\x17SETTING_FIELD_TYPE_INFO\x10\x06B\xc7\x01\n" +
+	"\x17SETTING_FIELD_TYPE_INFO\x10\x06\x12\x1a\n" +
+	"\x16SETTING_FIELD_TYPE_TAG\x10\aB\xc7\x01\n" +
 	"\x13com.mavio.plugin.v1B\rSettingsProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
 var file_mavio_plugin_v1_settings_proto_enumTypes = make([]protoimpl.EnumInfo, 1)

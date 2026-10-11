@@ -393,6 +393,9 @@ message AcquisitionSettings {
   // Templates, such as "{Movie Title} ({Release Year})".
   string movie_folder_format = 24 [(buf.validate.field).string.min_len = 1];
   string standard_movie_format = 25 [(buf.validate.field).string.min_len = 1];
+  // Search again when a download grabbed from an interactive search
+  // fails, when auto_redownload_failed is set.
+  bool auto_redownload_failed_from_interactive_search = 26;
 }
 
 message GetServerSettingsRequest {}

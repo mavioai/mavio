@@ -316,6 +316,10 @@ pub use self::__buffa::view::AddDownloadRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::AddDownloadRequestOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::DownloadDetailsView;
+#[doc(inline)]
+pub use self::__buffa::view::DownloadDetailsOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::AddDownloadResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::AddDownloadResponseOwnedView;

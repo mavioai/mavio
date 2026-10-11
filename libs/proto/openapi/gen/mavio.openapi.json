@@ -12509,6 +12509,11 @@
             "type": "string",
             "title": "standard_movie_format",
             "minLength": 1
+          },
+          "autoRedownloadFailedFromInteractiveSearch": {
+            "type": "boolean",
+            "title": "auto_redownload_failed_from_interactive_search",
+            "description": "Search again when a download grabbed from an interactive search\n fails, when auto_redownload_failed is set."
           }
         },
         "title": "AcquisitionSettings",

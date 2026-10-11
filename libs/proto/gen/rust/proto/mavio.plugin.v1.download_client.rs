@@ -849,6 +849,11 @@ pub struct DownloadClient {
     ///
     /// Field 12: `host`
     pub host: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The client's tags: a movie or series with tags only uses the clients
+    /// sharing one of them, else those without tags, as Radarr's.
+    ///
+    /// Field 13: `tags`
+    pub tags: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -867,6 +872,7 @@ impl ::core::fmt::Debug for DownloadClient {
             .field("failure", &self.failure)
             .field("prefers_torrent_file", &self.prefers_torrent_file)
             .field("host", &self.host)
+            .field("tags", &self.tags)
             .finish()
     }
 }
@@ -1032,6 +1038,9 @@ impl ::buffa::Message for DownloadClient {
         if let Some(ref v) = self.host {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.tags {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1082,6 +1091,9 @@ impl ::buffa::Message for DownloadClient {
         }
         if let Some(ref v) = self.host {
             ::buffa::types::put_string_field(12u32, v, buf);
+        }
+        for v in &self.tags {
+            ::buffa::types::put_string_field(13u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1213,6 +1225,17 @@ impl ::buffa::Message for DownloadClient {
                     buf,
                 )?;
             }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.tags.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1233,6 +1256,7 @@ impl ::buffa::Message for DownloadClient {
         self.failure = ::core::option::Option::None;
         self.prefers_torrent_file = ::core::option::Option::None;
         self.host = ::core::option::Option::None;
+        self.tags.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1434,6 +1458,11 @@ pub struct TestDownloadClientResponse {
     ///
     /// Field 1: `failure`
     pub failure: ::core::option::Option<::buffa::alloc::string::String>,
+    /// What the test warns of, though it passed, such as a category
+    /// recommended.
+    ///
+    /// Field 2: `warnings`
+    pub warnings: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1441,6 +1470,7 @@ impl ::core::fmt::Debug for TestDownloadClientResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         f.debug_struct("TestDownloadClientResponse")
             .field("failure", &self.failure)
+            .field("warnings", &self.warnings)
             .finish()
     }
 }
@@ -1486,6 +1516,9 @@ impl ::buffa::Message for TestDownloadClientResponse {
         if let Some(ref v) = self.failure {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.warnings {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1498,6 +1531,9 @@ impl ::buffa::Message for TestDownloadClientResponse {
         use ::buffa::Enumeration as _;
         if let Some(ref v) = self.failure {
             ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        for v in &self.warnings {
+            ::buffa::types::put_string_field(2u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1522,6 +1558,17 @@ impl ::buffa::Message for TestDownloadClientResponse {
                     buf,
                 )?;
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.warnings.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1531,6 +1578,7 @@ impl ::buffa::Message for TestDownloadClientResponse {
     }
     fn clear(&mut self) {
         self.failure = ::core::option::Option::None;
+        self.warnings.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1585,6 +1633,26 @@ pub struct AddDownloadRequest {
         ::buffa_types::google::protobuf::Duration,
         ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
     >,
+    /// The release is of a full season, which some clients cannot take.
+    ///
+    /// Field 11: `full_season`
+    pub full_season: ::core::option::Option<bool>,
+    /// What the release and its movie or series are, which clients such as
+    /// Flood tag downloads with.
+    ///
+    /// Field 12: `details`
+    pub details: ::buffa::MessageField<
+        DownloadDetails,
+        ::buffa::Inline<DownloadDetails>,
+    >,
+    /// The info hashes of torrents blocklisted for the movie or series, in
+    /// hex: a torrent whose hash is among them is refused, as Radarr refuses
+    /// blocklisted torrents whose hash was not known before grabbing.
+    ///
+    /// Field 13: `blocklisted_info_hashes`
+    pub blocklisted_info_hashes: ::buffa::alloc::vec::Vec<
+        ::buffa::alloc::string::String,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1601,6 +1669,9 @@ impl ::core::fmt::Debug for AddDownloadRequest {
             .field("info_hash", &self.info_hash)
             .field("seed_ratio", &self.seed_ratio)
             .field("seed_time", &self.seed_time)
+            .field("full_season", &self.full_season)
+            .field("details", &self.details)
+            .field("blocklisted_info_hashes", &self.blocklisted_info_hashes)
             .finish()
     }
 }
@@ -1693,6 +1764,13 @@ impl AddDownloadRequest {
         self.seed_ratio = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::full_season`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_full_season(mut self, value: bool) -> Self {
+        self.full_season = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(AddDownloadRequest);
 impl ::buffa::MessageName for AddDownloadRequest {
@@ -1749,6 +1827,20 @@ impl ::buffa::Message for AddDownloadRequest {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.full_season.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.details.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.details.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.blocklisted_info_hashes {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1793,6 +1885,20 @@ impl ::buffa::Message for AddDownloadRequest {
                 buf,
             );
             self.seed_time.write_to(__cache, buf);
+        }
+        if let Some(v) = self.full_season {
+            ::buffa::types::put_bool_field(11u32, v, buf);
+        }
+        if self.details.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                12u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.details.write_to(__cache, buf);
+        }
+        for v in &self.blocklisted_info_hashes {
+            ::buffa::types::put_string_field(13u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1913,6 +2019,37 @@ impl ::buffa::Message for AddDownloadRequest {
                     ctx,
                 )?;
             }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.full_season = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.details.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.blocklisted_info_hashes.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1931,11 +2068,346 @@ impl ::buffa::Message for AddDownloadRequest {
         self.info_hash = ::core::option::Option::None;
         self.seed_ratio = ::core::option::Option::None;
         self.seed_time = ::buffa::MessageField::none();
+        self.full_season = ::core::option::Option::None;
+        self.details = ::buffa::MessageField::none();
+        self.blocklisted_info_hashes.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for AddDownloadRequest {
     const PROTO_FQN: &'static str = "mavio.plugin.v1.AddDownloadRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// DownloadDetails are what a release and its movie or series are, as
+/// Radarr's and Sonarr's Flood tags them.
+#[derive(Clone, PartialEq, Default)]
+pub struct DownloadDetails {
+    /// The release's quality, e.g. "Bluray-2160p".
+    ///
+    /// Field 1: `quality`
+    pub quality: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The release's languages, by English name.
+    ///
+    /// Field 2: `languages`
+    pub languages: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Field 3: `release_group`
+    pub release_group: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The name of the release's indexer.
+    ///
+    /// Field 4: `indexer`
+    pub indexer: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The movie's or series' year; 0 when unknown.
+    ///
+    /// Field 5: `year`
+    pub year: ::core::option::Option<i32>,
+    /// The movie's collection.
+    ///
+    /// Field 6: `collection`
+    pub collection: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The movie's studio, or the series' network.
+    ///
+    /// Field 7: `studio`
+    pub studio: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The series' title as a URL slug, e.g. "big-buck-bunny".
+    ///
+    /// Field 8: `title_slug`
+    pub title_slug: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for DownloadDetails {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("DownloadDetails")
+            .field("quality", &self.quality)
+            .field("languages", &self.languages)
+            .field("release_group", &self.release_group)
+            .field("indexer", &self.indexer)
+            .field("year", &self.year)
+            .field("collection", &self.collection)
+            .field("studio", &self.studio)
+            .field("title_slug", &self.title_slug)
+            .finish()
+    }
+}
+impl DownloadDetails {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.DownloadDetails";
+}
+impl DownloadDetails {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::quality`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_quality(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.quality = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::release_group`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_release_group(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.release_group = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::indexer`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_indexer(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.indexer = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::year`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_year(mut self, value: i32) -> Self {
+        self.year = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::collection`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_collection(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.collection = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::studio`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_studio(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.studio = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::title_slug`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_title_slug(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.title_slug = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(DownloadDetails);
+impl ::buffa::MessageName for DownloadDetails {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "DownloadDetails";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.DownloadDetails";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.DownloadDetails";
+}
+impl ::buffa::Message for DownloadDetails {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.quality {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.release_group {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.indexer {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.year {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.collection {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.studio {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.title_slug {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.quality {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        for v in &self.languages {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.release_group {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.indexer {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(v) = self.year {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(ref v) = self.collection {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        if let Some(ref v) = self.studio {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.title_slug {
+            ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.quality.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.languages.push(__elem);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .release_group
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.indexer.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.year = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .collection
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.studio.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .title_slug
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.quality = ::core::option::Option::None;
+        self.languages.clear();
+        self.release_group = ::core::option::Option::None;
+        self.indexer = ::core::option::Option::None;
+        self.year = ::core::option::Option::None;
+        self.collection = ::core::option::Option::None;
+        self.studio = ::core::option::Option::None;
+        self.title_slug = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for DownloadDetails {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.DownloadDetails";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

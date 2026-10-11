@@ -3987,36 +3987,37 @@ func (b0 MetadataSettings_builder) Build() *MetadataSettings {
 // AcquisitionSettings are how releases are chosen, downloaded and
 // imported, as Radarr's settings.
 type AcquisitionSettings struct {
-	state                                protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Propers                   ProperDownload         `protobuf:"varint,1,opt,name=propers,enum=mavio.system.v1.ProperDownload"`
-	xxx_hidden_PreferIndexerFlags        bool                   `protobuf:"varint,2,opt,name=prefer_indexer_flags,json=preferIndexerFlags"`
-	xxx_hidden_CompletedDownloadHandling bool                   `protobuf:"varint,3,opt,name=completed_download_handling,json=completedDownloadHandling"`
-	xxx_hidden_AutoRedownloadFailed      bool                   `protobuf:"varint,4,opt,name=auto_redownload_failed,json=autoRedownloadFailed"`
-	xxx_hidden_MaximumSize               int32                  `protobuf:"varint,5,opt,name=maximum_size,json=maximumSize"`
-	xxx_hidden_MinimumAge                int32                  `protobuf:"varint,6,opt,name=minimum_age,json=minimumAge"`
-	xxx_hidden_Retention                 int32                  `protobuf:"varint,7,opt,name=retention"`
-	xxx_hidden_AllowHardcodedSubs        bool                   `protobuf:"varint,8,opt,name=allow_hardcoded_subs,json=allowHardcodedSubs"`
-	xxx_hidden_WhitelistedHardcodedSubs  []string               `protobuf:"bytes,9,rep,name=whitelisted_hardcoded_subs,json=whitelistedHardcodedSubs"`
-	xxx_hidden_SkipFreeSpaceCheck        bool                   `protobuf:"varint,10,opt,name=skip_free_space_check,json=skipFreeSpaceCheck"`
-	xxx_hidden_MinimumFreeSpace          int32                  `protobuf:"varint,11,opt,name=minimum_free_space,json=minimumFreeSpace"`
-	xxx_hidden_AvailabilityDelay         int32                  `protobuf:"varint,12,opt,name=availability_delay,json=availabilityDelay"`
-	xxx_hidden_RssSyncInterval           int32                  `protobuf:"varint,13,opt,name=rss_sync_interval,json=rssSyncInterval"`
-	xxx_hidden_CheckFinishedInterval     int32                  `protobuf:"varint,14,opt,name=check_finished_interval,json=checkFinishedInterval"`
-	xxx_hidden_RecycleBin                *string                `protobuf:"bytes,15,opt,name=recycle_bin,json=recycleBin"`
-	xxx_hidden_RecycleBinCleanupDays     int32                  `protobuf:"varint,16,opt,name=recycle_bin_cleanup_days,json=recycleBinCleanupDays"`
-	xxx_hidden_CopyUsingHardlinks        bool                   `protobuf:"varint,17,opt,name=copy_using_hardlinks,json=copyUsingHardlinks"`
-	xxx_hidden_ImportExtraFiles          bool                   `protobuf:"varint,18,opt,name=import_extra_files,json=importExtraFiles"`
-	xxx_hidden_ExtraFileExtensions       []string               `protobuf:"bytes,19,rep,name=extra_file_extensions,json=extraFileExtensions"`
-	xxx_hidden_DeleteEmptyFolders        bool                   `protobuf:"varint,20,opt,name=delete_empty_folders,json=deleteEmptyFolders"`
-	xxx_hidden_RenameMovies              bool                   `protobuf:"varint,21,opt,name=rename_movies,json=renameMovies"`
-	xxx_hidden_ReplaceIllegalCharacters  bool                   `protobuf:"varint,22,opt,name=replace_illegal_characters,json=replaceIllegalCharacters"`
-	xxx_hidden_ColonReplacement          ColonReplacement       `protobuf:"varint,23,opt,name=colon_replacement,json=colonReplacement,enum=mavio.system.v1.ColonReplacement"`
-	xxx_hidden_MovieFolderFormat         *string                `protobuf:"bytes,24,opt,name=movie_folder_format,json=movieFolderFormat"`
-	xxx_hidden_StandardMovieFormat       *string                `protobuf:"bytes,25,opt,name=standard_movie_format,json=standardMovieFormat"`
-	XXX_raceDetectHookData               protoimpl.RaceDetectHookData
-	XXX_presence                         [1]uint32
-	unknownFields                        protoimpl.UnknownFields
-	sizeCache                            protoimpl.SizeCache
+	state                                                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Propers                                   ProperDownload         `protobuf:"varint,1,opt,name=propers,enum=mavio.system.v1.ProperDownload"`
+	xxx_hidden_PreferIndexerFlags                        bool                   `protobuf:"varint,2,opt,name=prefer_indexer_flags,json=preferIndexerFlags"`
+	xxx_hidden_CompletedDownloadHandling                 bool                   `protobuf:"varint,3,opt,name=completed_download_handling,json=completedDownloadHandling"`
+	xxx_hidden_AutoRedownloadFailed                      bool                   `protobuf:"varint,4,opt,name=auto_redownload_failed,json=autoRedownloadFailed"`
+	xxx_hidden_MaximumSize                               int32                  `protobuf:"varint,5,opt,name=maximum_size,json=maximumSize"`
+	xxx_hidden_MinimumAge                                int32                  `protobuf:"varint,6,opt,name=minimum_age,json=minimumAge"`
+	xxx_hidden_Retention                                 int32                  `protobuf:"varint,7,opt,name=retention"`
+	xxx_hidden_AllowHardcodedSubs                        bool                   `protobuf:"varint,8,opt,name=allow_hardcoded_subs,json=allowHardcodedSubs"`
+	xxx_hidden_WhitelistedHardcodedSubs                  []string               `protobuf:"bytes,9,rep,name=whitelisted_hardcoded_subs,json=whitelistedHardcodedSubs"`
+	xxx_hidden_SkipFreeSpaceCheck                        bool                   `protobuf:"varint,10,opt,name=skip_free_space_check,json=skipFreeSpaceCheck"`
+	xxx_hidden_MinimumFreeSpace                          int32                  `protobuf:"varint,11,opt,name=minimum_free_space,json=minimumFreeSpace"`
+	xxx_hidden_AvailabilityDelay                         int32                  `protobuf:"varint,12,opt,name=availability_delay,json=availabilityDelay"`
+	xxx_hidden_RssSyncInterval                           int32                  `protobuf:"varint,13,opt,name=rss_sync_interval,json=rssSyncInterval"`
+	xxx_hidden_CheckFinishedInterval                     int32                  `protobuf:"varint,14,opt,name=check_finished_interval,json=checkFinishedInterval"`
+	xxx_hidden_RecycleBin                                *string                `protobuf:"bytes,15,opt,name=recycle_bin,json=recycleBin"`
+	xxx_hidden_RecycleBinCleanupDays                     int32                  `protobuf:"varint,16,opt,name=recycle_bin_cleanup_days,json=recycleBinCleanupDays"`
+	xxx_hidden_CopyUsingHardlinks                        bool                   `protobuf:"varint,17,opt,name=copy_using_hardlinks,json=copyUsingHardlinks"`
+	xxx_hidden_ImportExtraFiles                          bool                   `protobuf:"varint,18,opt,name=import_extra_files,json=importExtraFiles"`
+	xxx_hidden_ExtraFileExtensions                       []string               `protobuf:"bytes,19,rep,name=extra_file_extensions,json=extraFileExtensions"`
+	xxx_hidden_DeleteEmptyFolders                        bool                   `protobuf:"varint,20,opt,name=delete_empty_folders,json=deleteEmptyFolders"`
+	xxx_hidden_RenameMovies                              bool                   `protobuf:"varint,21,opt,name=rename_movies,json=renameMovies"`
+	xxx_hidden_ReplaceIllegalCharacters                  bool                   `protobuf:"varint,22,opt,name=replace_illegal_characters,json=replaceIllegalCharacters"`
+	xxx_hidden_ColonReplacement                          ColonReplacement       `protobuf:"varint,23,opt,name=colon_replacement,json=colonReplacement,enum=mavio.system.v1.ColonReplacement"`
+	xxx_hidden_MovieFolderFormat                         *string                `protobuf:"bytes,24,opt,name=movie_folder_format,json=movieFolderFormat"`
+	xxx_hidden_StandardMovieFormat                       *string                `protobuf:"bytes,25,opt,name=standard_movie_format,json=standardMovieFormat"`
+	xxx_hidden_AutoRedownloadFailedFromInteractiveSearch bool                   `protobuf:"varint,26,opt,name=auto_redownload_failed_from_interactive_search,json=autoRedownloadFailedFromInteractiveSearch"`
+	XXX_raceDetectHookData                               protoimpl.RaceDetectHookData
+	XXX_presence                                         [1]uint32
+	unknownFields                                        protoimpl.UnknownFields
+	sizeCache                                            protoimpl.SizeCache
 }
 
 func (x *AcquisitionSettings) Reset() {
@@ -4232,44 +4233,51 @@ func (x *AcquisitionSettings) GetStandardMovieFormat() string {
 	return ""
 }
 
+func (x *AcquisitionSettings) GetAutoRedownloadFailedFromInteractiveSearch() bool {
+	if x != nil {
+		return x.xxx_hidden_AutoRedownloadFailedFromInteractiveSearch
+	}
+	return false
+}
+
 func (x *AcquisitionSettings) SetPropers(v ProperDownload) {
 	x.xxx_hidden_Propers = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 26)
 }
 
 func (x *AcquisitionSettings) SetPreferIndexerFlags(v bool) {
 	x.xxx_hidden_PreferIndexerFlags = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 26)
 }
 
 func (x *AcquisitionSettings) SetCompletedDownloadHandling(v bool) {
 	x.xxx_hidden_CompletedDownloadHandling = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 26)
 }
 
 func (x *AcquisitionSettings) SetAutoRedownloadFailed(v bool) {
 	x.xxx_hidden_AutoRedownloadFailed = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 26)
 }
 
 func (x *AcquisitionSettings) SetMaximumSize(v int32) {
 	x.xxx_hidden_MaximumSize = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 26)
 }
 
 func (x *AcquisitionSettings) SetMinimumAge(v int32) {
 	x.xxx_hidden_MinimumAge = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 26)
 }
 
 func (x *AcquisitionSettings) SetRetention(v int32) {
 	x.xxx_hidden_Retention = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 26)
 }
 
 func (x *AcquisitionSettings) SetAllowHardcodedSubs(v bool) {
 	x.xxx_hidden_AllowHardcodedSubs = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 26)
 }
 
 func (x *AcquisitionSettings) SetWhitelistedHardcodedSubs(v []string) {
@@ -4278,47 +4286,47 @@ func (x *AcquisitionSettings) SetWhitelistedHardcodedSubs(v []string) {
 
 func (x *AcquisitionSettings) SetSkipFreeSpaceCheck(v bool) {
 	x.xxx_hidden_SkipFreeSpaceCheck = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 26)
 }
 
 func (x *AcquisitionSettings) SetMinimumFreeSpace(v int32) {
 	x.xxx_hidden_MinimumFreeSpace = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 26)
 }
 
 func (x *AcquisitionSettings) SetAvailabilityDelay(v int32) {
 	x.xxx_hidden_AvailabilityDelay = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 26)
 }
 
 func (x *AcquisitionSettings) SetRssSyncInterval(v int32) {
 	x.xxx_hidden_RssSyncInterval = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 26)
 }
 
 func (x *AcquisitionSettings) SetCheckFinishedInterval(v int32) {
 	x.xxx_hidden_CheckFinishedInterval = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 26)
 }
 
 func (x *AcquisitionSettings) SetRecycleBin(v string) {
 	x.xxx_hidden_RecycleBin = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 26)
 }
 
 func (x *AcquisitionSettings) SetRecycleBinCleanupDays(v int32) {
 	x.xxx_hidden_RecycleBinCleanupDays = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 26)
 }
 
 func (x *AcquisitionSettings) SetCopyUsingHardlinks(v bool) {
 	x.xxx_hidden_CopyUsingHardlinks = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 26)
 }
 
 func (x *AcquisitionSettings) SetImportExtraFiles(v bool) {
 	x.xxx_hidden_ImportExtraFiles = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 26)
 }
 
 func (x *AcquisitionSettings) SetExtraFileExtensions(v []string) {
@@ -4327,32 +4335,37 @@ func (x *AcquisitionSettings) SetExtraFileExtensions(v []string) {
 
 func (x *AcquisitionSettings) SetDeleteEmptyFolders(v bool) {
 	x.xxx_hidden_DeleteEmptyFolders = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 26)
 }
 
 func (x *AcquisitionSettings) SetRenameMovies(v bool) {
 	x.xxx_hidden_RenameMovies = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 26)
 }
 
 func (x *AcquisitionSettings) SetReplaceIllegalCharacters(v bool) {
 	x.xxx_hidden_ReplaceIllegalCharacters = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 26)
 }
 
 func (x *AcquisitionSettings) SetColonReplacement(v ColonReplacement) {
 	x.xxx_hidden_ColonReplacement = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 26)
 }
 
 func (x *AcquisitionSettings) SetMovieFolderFormat(v string) {
 	x.xxx_hidden_MovieFolderFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 26)
 }
 
 func (x *AcquisitionSettings) SetStandardMovieFormat(v string) {
 	x.xxx_hidden_StandardMovieFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 25)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 26)
+}
+
+func (x *AcquisitionSettings) SetAutoRedownloadFailedFromInteractiveSearch(v bool) {
+	x.xxx_hidden_AutoRedownloadFailedFromInteractiveSearch = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 25, 26)
 }
 
 func (x *AcquisitionSettings) HasPropers() bool {
@@ -4516,6 +4529,13 @@ func (x *AcquisitionSettings) HasStandardMovieFormat() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 24)
 }
 
+func (x *AcquisitionSettings) HasAutoRedownloadFailedFromInteractiveSearch() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 25)
+}
+
 func (x *AcquisitionSettings) ClearPropers() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Propers = ProperDownload_PROPER_DOWNLOAD_UNSPECIFIED
@@ -4631,6 +4651,11 @@ func (x *AcquisitionSettings) ClearStandardMovieFormat() {
 	x.xxx_hidden_StandardMovieFormat = nil
 }
 
+func (x *AcquisitionSettings) ClearAutoRedownloadFailedFromInteractiveSearch() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 25)
+	x.xxx_hidden_AutoRedownloadFailedFromInteractiveSearch = false
+}
+
 type AcquisitionSettings_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -4677,6 +4702,9 @@ type AcquisitionSettings_builder struct {
 	// Templates, such as "{Movie Title} ({Release Year})".
 	MovieFolderFormat   *string
 	StandardMovieFormat *string
+	// Search again when a download grabbed from an interactive search
+	// fails, when auto_redownload_failed is set.
+	AutoRedownloadFailedFromInteractiveSearch *bool
 }
 
 func (b0 AcquisitionSettings_builder) Build() *AcquisitionSettings {
@@ -4684,98 +4712,102 @@ func (b0 AcquisitionSettings_builder) Build() *AcquisitionSettings {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Propers != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 26)
 		x.xxx_hidden_Propers = *b.Propers
 	}
 	if b.PreferIndexerFlags != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 26)
 		x.xxx_hidden_PreferIndexerFlags = *b.PreferIndexerFlags
 	}
 	if b.CompletedDownloadHandling != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 26)
 		x.xxx_hidden_CompletedDownloadHandling = *b.CompletedDownloadHandling
 	}
 	if b.AutoRedownloadFailed != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 26)
 		x.xxx_hidden_AutoRedownloadFailed = *b.AutoRedownloadFailed
 	}
 	if b.MaximumSize != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 26)
 		x.xxx_hidden_MaximumSize = *b.MaximumSize
 	}
 	if b.MinimumAge != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 26)
 		x.xxx_hidden_MinimumAge = *b.MinimumAge
 	}
 	if b.Retention != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 26)
 		x.xxx_hidden_Retention = *b.Retention
 	}
 	if b.AllowHardcodedSubs != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 26)
 		x.xxx_hidden_AllowHardcodedSubs = *b.AllowHardcodedSubs
 	}
 	x.xxx_hidden_WhitelistedHardcodedSubs = b.WhitelistedHardcodedSubs
 	if b.SkipFreeSpaceCheck != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 26)
 		x.xxx_hidden_SkipFreeSpaceCheck = *b.SkipFreeSpaceCheck
 	}
 	if b.MinimumFreeSpace != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 26)
 		x.xxx_hidden_MinimumFreeSpace = *b.MinimumFreeSpace
 	}
 	if b.AvailabilityDelay != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 26)
 		x.xxx_hidden_AvailabilityDelay = *b.AvailabilityDelay
 	}
 	if b.RssSyncInterval != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 26)
 		x.xxx_hidden_RssSyncInterval = *b.RssSyncInterval
 	}
 	if b.CheckFinishedInterval != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 26)
 		x.xxx_hidden_CheckFinishedInterval = *b.CheckFinishedInterval
 	}
 	if b.RecycleBin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 26)
 		x.xxx_hidden_RecycleBin = b.RecycleBin
 	}
 	if b.RecycleBinCleanupDays != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 26)
 		x.xxx_hidden_RecycleBinCleanupDays = *b.RecycleBinCleanupDays
 	}
 	if b.CopyUsingHardlinks != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 26)
 		x.xxx_hidden_CopyUsingHardlinks = *b.CopyUsingHardlinks
 	}
 	if b.ImportExtraFiles != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 26)
 		x.xxx_hidden_ImportExtraFiles = *b.ImportExtraFiles
 	}
 	x.xxx_hidden_ExtraFileExtensions = b.ExtraFileExtensions
 	if b.DeleteEmptyFolders != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 26)
 		x.xxx_hidden_DeleteEmptyFolders = *b.DeleteEmptyFolders
 	}
 	if b.RenameMovies != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 26)
 		x.xxx_hidden_RenameMovies = *b.RenameMovies
 	}
 	if b.ReplaceIllegalCharacters != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 26)
 		x.xxx_hidden_ReplaceIllegalCharacters = *b.ReplaceIllegalCharacters
 	}
 	if b.ColonReplacement != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 26)
 		x.xxx_hidden_ColonReplacement = *b.ColonReplacement
 	}
 	if b.MovieFolderFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 26)
 		x.xxx_hidden_MovieFolderFormat = b.MovieFolderFormat
 	}
 	if b.StandardMovieFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 25)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 26)
 		x.xxx_hidden_StandardMovieFormat = b.StandardMovieFormat
+	}
+	if b.AutoRedownloadFailedFromInteractiveSearch != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 25, 26)
+		x.xxx_hidden_AutoRedownloadFailedFromInteractiveSearch = *b.AutoRedownloadFailedFromInteractiveSearch
 	}
 	return m0
 }
@@ -5896,8 +5928,7 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x18anime_quality_profile_id\x18\x13 \x01(\tR\x15animeQualityProfileId\"\x87\x01\n" +
 	"\x10MetadataSettings\x12C\n" +
 	"\x12preferred_language\x18\x01 \x01(\tB\x14\xbaH\x11r\x0f2\r^([a-z]{2})?$R\x11preferredLanguage\x12.\n" +
-	"\acountry\x18\x02 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\acountry\"\xde\n" +
-	"\n" +
+	"\acountry\x18\x02 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\acountry\"\xc1\v\n" +
 	"\x13AcquisitionSettings\x12E\n" +
 	"\apropers\x18\x01 \x01(\x0e2\x1f.mavio.system.v1.ProperDownloadB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\apropers\x120\n" +
@@ -5928,7 +5959,8 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x11colon_replacement\x18\x17 \x01(\x0e2!.mavio.system.v1.ColonReplacementB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x10colonReplacement\x127\n" +
 	"\x13movie_folder_format\x18\x18 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x11movieFolderFormat\x12;\n" +
-	"\x15standard_movie_format\x18\x19 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x13standardMovieFormat\"\x1a\n" +
+	"\x15standard_movie_format\x18\x19 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x13standardMovieFormat\x12a\n" +
+	".auto_redownload_failed_from_interactive_search\x18\x1a \x01(\bR)autoRedownloadFailedFromInteractiveSearch\"\x1a\n" +
 	"\x18GetServerSettingsRequest\"\xc9\x01\n" +
 	"\x19GetServerSettingsResponse\x12;\n" +
 	"\bsettings\x18\x01 \x01(\v2\x1f.mavio.system.v1.ServerSettingsR\bsettings\x12o\n" +

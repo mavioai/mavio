@@ -73,7 +73,11 @@ type DownloadClientProviderServiceClient interface {
 	TestDownloadClient(context.Context, *v1.TestDownloadClientRequest) (*v1.TestDownloadClientResponse, error)
 	// AddDownload sends a release to a download client. It fails with
 	// CodeUnimplemented when the client cannot take a magnet link, which is
-	// then sent as a torrent file where the release has one.
+	// then sent as a torrent file where the release has one, or a release of
+	// a full season it cannot take; with CodeFailedPrecondition when the
+	// client rejects the release, as a duplicate, or the torrent's hash is
+	// among the blocklisted hashes; with CodeInvalidArgument for an NZB that
+	// is not valid.
 	AddDownload(context.Context, *v1.AddDownloadRequest) (*v1.AddDownloadResponse, error)
 	// ListDownloads lists the downloads of download clients in their
 	// categories for movies and series, with what each client tells of
@@ -256,7 +260,11 @@ type DownloadClientProviderServiceHandler interface {
 	TestDownloadClient(context.Context, *v1.TestDownloadClientRequest) (*v1.TestDownloadClientResponse, error)
 	// AddDownload sends a release to a download client. It fails with
 	// CodeUnimplemented when the client cannot take a magnet link, which is
-	// then sent as a torrent file where the release has one.
+	// then sent as a torrent file where the release has one, or a release of
+	// a full season it cannot take; with CodeFailedPrecondition when the
+	// client rejects the release, as a duplicate, or the torrent's hash is
+	// among the blocklisted hashes; with CodeInvalidArgument for an NZB that
+	// is not valid.
 	AddDownload(context.Context, *v1.AddDownloadRequest) (*v1.AddDownloadResponse, error)
 	// ListDownloads lists the downloads of download clients in their
 	// categories for movies and series, with what each client tells of
