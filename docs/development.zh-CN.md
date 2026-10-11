@@ -159,9 +159,9 @@ CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** �
 
 其余模块只在仓库内使用，不承诺对外 API 稳定。
 
-服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件，两处锁定不一致时一个测试（`apps/server/internal/buildinfo`）会失败。镜像还会构建 DLNA 插件，并将其放在插件种子目录 `/usr/lib/mavio/plugins` 中。
+服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件，两处锁定不一致时一个测试（`apps/server/internal/buildinfo`）会失败。镜像还会构建 DLNA 与索引器插件，并将它们放在插件种子目录 `/usr/lib/mavio/plugins` 中。
 
-第一方进程插件用其 `dist` 目标打包：`pnpm nx run dlna:dist` 按清单中的版本为服务端的每个平台构建 DLNA 插件到 `plugins/dlna/dist/`，每个平台一个目录 zip 包，并生成列出它们及其 SHA-256 摘要的 `catalog.json`；zip 包的 URL 相对于目录。
+第一方进程插件用其 `dist` 目标打包：`pnpm nx run dlna:dist`（或 `indexers:dist`）按清单中的版本为服务端的每个平台构建 DLNA（或索引器）插件到 `plugins/dlna/dist/`（`plugins/indexers/dist/`），每个平台一个目录 zip 包，并生成列出它们及其 SHA-256 摘要的 `catalog.json`；zip 包的 URL 相对于目录。
 
 `scraper-tmdb` 的发布构建把 `MAVIO_TMDB_KEY` 设为 Mavio 自己的 TMDB API 密钥，`pnpm nx run scraper-tmdb:build` 把它编入插件，作为 TMDB 拒绝 Radarr 令牌后使用的密钥（[架构 §13.2](architecture.zh-CN.md#132-数据源与编号)）；该密钥从不提交。
 

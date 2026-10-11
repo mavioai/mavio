@@ -20,7 +20,9 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 	-ldflags "-s -w ${VERSION:+-X github.com/mavioai/mavio/apps/server/internal/buildinfo.version=$VERSION}" \
 	-o /out/mavio ./cmd/mavio \
 	&& cd ../../plugins/dlna && mkdir -p /out/plugins/dlna && cp manifest.json /out/plugins/dlna/ \
-	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/dlna/plugin .
+	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/dlna/plugin . \
+	&& cd ../indexers && mkdir -p /out/plugins/indexers && cp manifest.json /out/plugins/indexers/ \
+	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/indexers/plugin .
 
 FROM --platform=$BUILDPLATFORM debian:trixie-slim AS ffmpeg
 ARG TARGETARCH JELLYFIN_FFMPEG_VERSION
