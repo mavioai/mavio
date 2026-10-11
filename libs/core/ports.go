@@ -42,6 +42,7 @@ type Store interface {
 	RemotePathMappings() RemotePathMappingRepository
 	Requests() RequestRepository
 	Issues() IssueRepository
+	BlockedTitles() BlockedTitleRepository
 
 	// InTx runs fn in a transaction. The Store passed to fn is bound to the
 	// transaction; fn's error rolls it back.

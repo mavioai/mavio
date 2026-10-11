@@ -29,6 +29,10 @@ func TestServerSettingsValidate(t *testing.T) {
 		{"Windows transcode folder", func(s *ServerSettings) { s.Transcoding.TranscodeDir = `D:\transcodes` }, true},
 		{"downmix boost", func(s *ServerSettings) { s.Transcoding.DownmixBoost = 4 }, false},
 		{"catalog", func(s *ServerSettings) { s.PluginCatalogs = []string{"https://example.com/catalog.json"} }, true},
+		{"metadata language and country", func(s *ServerSettings) { s.Metadata = MetadataSettings{PreferredLanguage: "de", Country: "DE"} }, true},
+		{"no metadata language or country", func(s *ServerSettings) { s.Metadata = MetadataSettings{} }, true},
+		{"metadata language of a region", func(s *ServerSettings) { s.Metadata.PreferredLanguage = "en-US" }, false},
+		{"lower-case metadata country", func(s *ServerSettings) { s.Metadata.Country = "de" }, false},
 		{"catalog without a scheme", func(s *ServerSettings) { s.PluginCatalogs = []string{"example.com/catalog.json"} }, false},
 	}
 	for _, tt := range tests {

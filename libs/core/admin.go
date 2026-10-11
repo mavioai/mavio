@@ -22,8 +22,35 @@ type ServerSettings struct {
 	PasswordResetPlugin string
 	Acquisition         AcquisitionSettings
 	// Requests are the defaults and destinations of users' requests.
-	Requests  RequestSettings
+	Requests RequestSettings
+	// Metadata are the language and country of metadata beside
+	// libraries'.
+	Metadata  MetadataSettings
 	UpdatedAt time.Time
+}
+
+// MetadataSettings are the server's language and country of metadata
+// beside libraries', as Jellyfin's PreferredMetadataLanguage and
+// MetadataCountryCode: requests and discovery name titles in the language
+// and rate them in the country.
+type MetadataSettings struct {
+	// PreferredLanguage is ISO 639-1, such as "en".
+	PreferredLanguage string
+	// Country is ISO 3166-1, such as "US".
+	Country string
+}
+
+// Validate checks the settings' codes.
+func (m *MetadataSettings) Validate() error {
+	notLower := func(r rune) bool { return r < 'a' || r > 'z' }
+	notUpper := func(r rune) bool { return r < 'A' || r > 'Z' }
+	switch {
+	case m.PreferredLanguage != "" && (len(m.PreferredLanguage) != 2 || strings.ContainsFunc(m.PreferredLanguage, notLower)):
+		return fmt.Errorf("%w: metadata language %q is not ISO 639-1", ErrInvalid, m.PreferredLanguage)
+	case m.Country != "" && (len(m.Country) != 2 || strings.ContainsFunc(m.Country, notUpper)):
+		return fmt.Errorf("%w: metadata country %q is not ISO 3166-1", ErrInvalid, m.Country)
+	}
+	return nil
 }
 
 // HardwareAcceleration chooses how video is decoded and encoded.
@@ -115,6 +142,7 @@ func DefaultServerSettings() ServerSettings {
 		Network:     NetworkSettings{LocalDiscovery: true},
 		Acquisition: DefaultAcquisitionSettings(),
 		Requests:    DefaultRequestSettings(),
+		Metadata:    MetadataSettings{PreferredLanguage: "en", Country: "US"},
 	}
 }
 
@@ -153,6 +181,9 @@ func (s *ServerSettings) Validate() error {
 		return err
 	}
 	if err := s.Requests.Validate(); err != nil {
+		return err
+	}
+	if err := s.Metadata.Validate(); err != nil {
 		return err
 	}
 	for _, c := range s.PluginCatalogs {
