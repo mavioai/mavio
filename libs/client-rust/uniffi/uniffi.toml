@@ -5,3 +5,5 @@ ffi_module_name = "MavioCoreFFI"
 
 [bindings.kotlin]
 package_name = "dev.mavio.core"
+# Android's own cleaner of native objects, from API level 34.
+android = true

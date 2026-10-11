@@ -5,6 +5,7 @@
 
 mod client;
 mod connection;
+mod discovery;
 mod downloads;
 mod error;
 mod events;
@@ -17,10 +18,11 @@ mod store;
 mod view;
 
 pub use client::{
-    Core, CreditEntry, Details, Filter, HomeObserver, Libraries, LibraryEntry, LibraryType,
-    Listener, Page, SearchResults, Sort, Source,
+    Core, CreditEntry, Details, DownloadEntry, Filter, HomeObserver, Libraries, LibraryEntry,
+    LibraryType, Listener, Page, SearchResults, Sort, Source,
 };
 pub use connection::{Connection, DEFAULT_PORT, parse_address};
+pub use discovery::{DISCOVERY_PORT, FoundServer, discover};
 pub use downloads::{Downloads, Transfer};
 pub use error::{Error, Result};
 pub use events::{Backoff, EventSink, StreamState, spawn as stream_events};

@@ -849,6 +849,8 @@ dependencies = [
  "mavio-api",
  "rusqlite",
  "rustls",
+ "serde",
+ "serde_json",
  "tokio",
  "webpki-roots",
 ]
@@ -857,7 +859,9 @@ dependencies = [
 name = "mavio-uniffi"
 version = "0.0.0"
 dependencies = [
+ "mavio-api",
  "mavio-core",
+ "tokio",
  "uniffi",
 ]
 

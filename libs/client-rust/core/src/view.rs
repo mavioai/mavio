@@ -2,6 +2,7 @@
 //! the servers' messages, with image URLs resolved, so that every app draws
 //! the same thing and none reads a message itself.
 
+use std::collections::HashMap;
 use std::time::Duration;
 
 use mavio_api::proto::mavio::acquisition::v1::{DiscoveredTitle, MediaKind};
@@ -218,7 +219,7 @@ pub struct TitleCard {
     /// A backdrop, from the metadata provider.
     pub backdrop_url: Option<String>,
     /// Its external IDs, which name it to requests.
-    pub external_ids: Vec<(String, String)>,
+    pub external_ids: HashMap<String, String>,
     /// Whether the user may request it from the section's server.
     pub requestable: bool,
     /// Whether the section's server has requested it.
@@ -229,12 +230,11 @@ pub struct TitleCard {
 
 impl TitleCard {
     fn new(title: &DiscoveredTitle, available: Vec<Version>) -> Self {
-        let mut external_ids: Vec<(String, String)> = title
+        let external_ids = title
             .external_ids
             .iter()
             .map(|(k, v)| (k.clone(), v.clone()))
             .collect();
-        external_ids.sort();
         TitleCard {
             movie: title.media_kind.as_ref().and_then(|k| k.as_known())
                 == Some(MediaKind::MEDIA_KIND_MOVIE),

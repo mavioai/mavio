@@ -23,7 +23,7 @@ use crate::events::{self, EventSink, StreamState};
 use crate::home::{self, Hubs, ServerHubs, Version};
 use crate::reporting::Reporter;
 use crate::servers::{DeviceInfo, QuickConnect, Servers, TokenStore};
-use crate::store::{ServerRecord, Store};
+use crate::store::{DownloadState, ServerRecord, Store};
 use crate::view::{self, Artwork, Card, Row};
 
 /// The items of a search asked of each server.
@@ -227,8 +227,31 @@ pub struct SearchResults {
     pub server_id: String,
     /// Its name.
     pub server_name: String,
-    /// What it found, or why it could not search.
-    pub result: std::result::Result<Vec<Card>, String>,
+    /// What it found.
+    pub cards: Vec<Card>,
+    /// Why it could not search.
+    pub error: Option<String>,
+}
+
+/// A download, as the Downloads screen shows it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct DownloadEntry {
+    /// The item, as its card.
+    pub card: Card,
+    /// The name of its server.
+    pub server_name: String,
+    /// How far it is.
+    pub state: DownloadState,
+    /// Where the app keeps the file, relative to its downloads folder.
+    pub file: String,
+    /// The bytes received.
+    pub received: u64,
+    /// The bytes in all; zero until the transfer starts.
+    pub total: u64,
+    /// Why it failed.
+    pub error: Option<String>,
+    /// When it was queued.
+    pub added: SystemTime,
 }
 
 /// The core of an app: its servers, their event streams, playback
@@ -328,6 +351,35 @@ impl Core {
     /// The downloads.
     pub fn downloads(&self) -> &Downloads {
         &self.downloads
+    }
+
+    /// The downloads of every server, in the order they were queued.
+    pub fn download_entries(&self) -> Result<Vec<DownloadEntry>> {
+        let servers: HashMap<String, ServerRecord> = self
+            .servers
+            .list()?
+            .into_iter()
+            .map(|s| (s.id.clone(), s))
+            .collect();
+        Ok(self
+            .downloads
+            .list()?
+            .into_iter()
+            .filter_map(|d| {
+                let server = servers.get(&d.server_id)?;
+                let base = self.base(server)?;
+                Some(DownloadEntry {
+                    card: Card::new(&base, &d.server_id, &d.item),
+                    server_name: server.name.clone(),
+                    state: d.state,
+                    file: d.file,
+                    received: d.received,
+                    total: d.total,
+                    error: Some(d.error).filter(|e| !e.is_empty()),
+                    added: d.added,
+                })
+            })
+            .collect())
     }
 
     /// Follows the event streams of every signed-in server; the app calls
@@ -550,7 +602,7 @@ impl Core {
         let mut calls = JoinSet::new();
         let mut out: Vec<SearchResults> = Vec::with_capacity(list.len());
         for (i, s) in list.into_iter().enumerate() {
-            let result = match self.servers.connection(&s.id) {
+            let error = match self.servers.connection(&s.id) {
                 Ok(conn) => {
                     let req = ListItemsRequest {
                         search: Some(query.to_owned()),
@@ -570,19 +622,23 @@ impl Core {
                         });
                         (i, cards)
                     });
-                    Ok(Vec::new())
+                    None
                 }
-                Err(e) => Err(e.to_string()),
+                Err(e) => Some(e.to_string()),
             };
             out.push(SearchResults {
                 server_id: s.id,
                 server_name: s.name,
-                result,
+                cards: Vec::new(),
+                error,
             });
         }
         while let Some(done) = calls.join_next().await {
             let Ok((i, result)) = done else { continue };
-            out[i].result = result.map_err(|e| e.to_string());
+            match result {
+                Ok(cards) => out[i].cards = cards,
+                Err(e) => out[i].error = Some(e.to_string()),
+            }
         }
         Ok(out)
     }
@@ -1083,12 +1139,8 @@ mod tests {
 
         let got = core.search(" brazil ").await.unwrap();
         assert_eq!(got.len(), 2);
-        assert_eq!(
-            got[0].result.as_ref().unwrap()[0].item_id,
-            "a1",
-            "got = {got:?}"
-        );
-        assert!(got[1].result.is_err(), "got = {:?}", got[1]);
+        assert_eq!(got[0].cards[0].item_id, "a1", "got = {got:?}");
+        assert!(got[1].error.is_some(), "got = {:?}", got[1]);
     }
 
     #[tokio::test]

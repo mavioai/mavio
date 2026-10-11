@@ -372,7 +372,10 @@ fn server_sections(servers: &[ServerHubs], s: usize, titles: &mut Titles) -> Vec
     let offline = matches!(server.hubs, Hubs::Cached(..));
     let mut out = Vec::new();
     for hub in server.hubs.hubs() {
-        let k = kind(hub).unwrap_or(HubKind::HUB_KIND_UNSPECIFIED);
+        // A kind newer than the core has no name to show.
+        let Some(k) = kind(hub).filter(|k| *k != HubKind::HUB_KIND_UNSPECIFIED) else {
+            continue;
+        };
         if matches!(
             k,
             HubKind::HUB_KIND_CONTINUE_WATCHING | HubKind::HUB_KIND_TRENDING
