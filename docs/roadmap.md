@@ -476,8 +476,8 @@ flowchart TD
   - [x] Releases matched to movies by their alternative titles, translations and secondary years, as Radarr's MovieService.FindByTitle and TryGetMovieBySearchCriteria
   - [x] Tags, required flags, minimum seeders and MULTi languages of indexers, which the indexer plugin reports from its configuration
   - [x] Download client tags and round robin among the clients of the first priority, as Radarr's DownloadClientProvider.GetDownloadClient
-  - [ ] An indexer's own download client, which Radarr always sends the indexer's releases to
-  - [ ] When every client of a protocol is left out after failing, a grab that is not of a pending release still tries one, as Radarr does; until then the release waits pending
+  - [x] An indexer's own download client (`download_client_id`), which its releases are always sent to, as Radarr's IndexerDefinition.DownloadClientId; a release whose indexer's client is missing waits pending
+  - [x] When every client of a protocol is left out after failing, a grab still tries one, as Radarr's DownloadClientProvider; only releases kept pending until a client is back wait for one
   - [x] Failed releases grabbed from an interactive search searched for again only with `AutoRedownloadFailedFromInteractiveSearch`, as Radarr's RedownloadFailedDownloadService
 - [x] The queue: tracked downloads polled from the clients
   - [x] The downloads of a client that fails to answer, or is left out after failing, keep their last state rather than being flagged

@@ -863,7 +863,7 @@ func (r *Runtime) grabEpisodeDecision(ctx context.Context, rn *run, b *batch, d 
 	}
 	_, err = r.grab(ctx, rn, grabRequest{
 		show: sh, episodes: c.Episodes, rel: b.of[c.Release], candidate: c.Candidate,
-		fullSeason: c.Parsed != nil && c.Parsed.FullSeason,
+		fullSeason: c.Parsed != nil && c.Parsed.FullSeason, filterBlocked: b.waitsForClient(c.Release),
 	})
 	switch {
 	case err == nil:

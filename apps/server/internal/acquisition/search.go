@@ -86,11 +86,12 @@ func (r *Runtime) SyncRSS(ctx context.Context) error {
 		if ix, ok := rn.indexer(ctx, p.release.IndexerRef()); ok && ix.HasDisabledUntil() && ix.GetDisabledUntil().AsTime().After(r.now()) {
 			continue
 		}
+		pb := b
 		if isSeriesPending(p.PendingRelease) {
-			eb.targets[eb.add(p.release)] = p.ItemID
-		} else {
-			b.targets[b.add(p.release)] = p.ItemID
+			pb = eb
 		}
+		ar := pb.add(p.release)
+		pb.targets[ar], pb.reasons[ar] = p.ItemID, p.Reason
 	}
 	decisions := rn.engine.DecideMovies(ctx, b.releases, nil, false, rn.findMovie(b))
 	processed, err := r.process(ctx, rn, b, decisions)
@@ -215,7 +216,7 @@ func (r *Runtime) grabDecision(ctx context.Context, rn *run, b *batch, d acquire
 		r.logger().WarnContext(ctx, "couldn't grab release", "release", c.Release.Title, "err", err)
 		return grabSkipped
 	}
-	_, err = r.grab(ctx, rn, grabRequest{movie: m, rel: b.of[c.Release], candidate: c})
+	_, err = r.grab(ctx, rn, grabRequest{movie: m, rel: b.of[c.Release], candidate: c, filterBlocked: b.waitsForClient(c.Release)})
 	switch {
 	case err == nil:
 		return grabGrabbed

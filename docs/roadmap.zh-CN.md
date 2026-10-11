@@ -476,8 +476,8 @@ flowchart TD
   - [x] 按电影的别名、译名与次要年份匹配发布，如同 Radarr 的 MovieService.FindByTitle 与 TryGetMovieBySearchCriteria
   - [x] 索引器的标签、必需标志、最少做种数与 MULTi 语言，由索引器插件按其配置提供
   - [x] 下载客户端的标签，以及优先级最高的客户端之间轮流使用，如同 Radarr 的 DownloadClientProvider.GetDownloadClient
-  - [ ] 索引器指定的下载客户端，Radarr 总把该索引器的 release 发送给它
-  - [ ] 某协议的客户端都因失败而暂被排除时，非待定 release 的抓取仍尝试其中之一，如同 Radarr；目前该 release 转为待定
+  - [x] 索引器指定的下载客户端（`download_client_id`），其 release 总发送给它，如同 Radarr 的 IndexerDefinition.DownloadClientId；索引器指定的客户端不存在时，release 转为待定
+  - [x] 某协议的客户端都因失败而暂被排除时，抓取仍尝试其中之一，如同 Radarr 的 DownloadClientProvider；只有因等待客户端恢复而待定的 release 继续等待
   - [x] 交互式搜索抓取的失败发布仅在开启 `AutoRedownloadFailedFromInteractiveSearch` 时重新搜索，如同 Radarr 的 RedownloadFailedDownloadService
 - [x] 队列：从客户端轮询的被跟踪下载
   - [x] 无法应答或因失败而暂被排除的客户端的下载保留最后状态，而非被标记
