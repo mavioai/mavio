@@ -16,7 +16,9 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
+	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
+	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
@@ -49,6 +51,9 @@ type TaskService struct {
 	Plugins func() []plugins.Task
 	// Acquisition lists the acquisition tasks; nil lists none.
 	Acquisition *acquisition.Runtime
+	// Requests adds the requests' availability task; false leaves it
+	// out.
+	Requests bool
 }
 
 var _ systemv1connect.TaskServiceHandler = (*TaskService)(nil)
@@ -138,6 +143,17 @@ func (s *TaskService) tasks(ctx context.Context) ([]task, error) {
 			})
 		}
 	}
+	if s.Requests {
+		out = append(out, task{
+			proto: systemv1.Task_builder{
+				Id: new(requests.JobAvailability), Name: new("Sync request availability"), Kind: new(requests.JobAvailability),
+				Description: new("Completes the requests whose movie or seasons became available, as Seerr's availability sync."),
+				Interval:    durationpb.New(requests.AvailabilityInterval),
+			}.Build(),
+			matches: func(j *core.Job) bool { return j.Kind == requests.JobAvailability },
+			run:     requests.RunJob,
+		})
+	}
 	out = append(out, task{
 		proto: systemv1.Task_builder{
 			Id: new(library.JobCleanup), Name: new("Clean up jobs"), Kind: new(library.JobCleanup),
@@ -158,7 +174,7 @@ func (s *TaskService) ListTasks(ctx context.Context, _ *systemv1.ListTasksReques
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask, acquisition.JobRSS, acquisition.JobQueue, acquisition.JobRecycleBin, acquisition.JobSceneMappings}
+	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask, acquisition.JobRSS, acquisition.JobQueue, acquisition.JobRecycleBin, acquisition.JobSceneMappings, requests.JobAvailability}
 	active, err := s.store.Jobs().List(ctx, core.JobQuery{Kinds: kinds, States: []core.JobState{core.JobPending, core.JobRunning}})
 	if err != nil {
 		return nil, connectError(ctx, err)
@@ -302,17 +318,8 @@ func (s *ActivityService) ListMyActivities(ctx context.Context, req *systemv1.Li
 
 func activitiesToProto(items []core.Activity) []*systemv1.Activity {
 	out := make([]*systemv1.Activity, len(items))
-	for i, a := range items {
-		out[i] = systemv1.Activity_builder{
-			Id: new(a.ID.String()), Time: timestamppb.New(a.Time), Type: &a.Type, Severity: new(severities[a.Severity]),
-			Title: &a.Title, Message: &a.Message, Attributes: a.Attributes,
-		}.Build()
-		if !a.UserID.IsZero() {
-			out[i].SetUserId(a.UserID.String())
-		}
-		if !a.ItemID.IsZero() {
-			out[i].SetItemId(a.ItemID.String())
-		}
+	for i := range items {
+		out[i] = events.ActivityToProto(&items[i])
 	}
 	return out
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -27,6 +28,28 @@ type Title struct {
 	// when unrated.
 	Rating  string
 	Country string
+
+	// The details of a title's page, from the first provider giving
+	// each.
+	OriginalTitle   string
+	Overview        string
+	PremiereDate    *time.Time
+	Genres          []string
+	Tags            []string
+	CommunityRating float64
+	ExternalIDs     map[core.Provider]string
+	PosterURL       string
+	BackdropURL     string
+}
+
+// animeKeyword is the TMDB keyword of anime, which the TMDB provider
+// gives as a tag: Seerr's ANIME_KEYWORD_ID (210024).
+const animeKeyword = "anime"
+
+// Anime reports whether a title is anime, as Seerr tells anime series by
+// their TMDB keyword.
+func (t *Title) Anime() bool {
+	return slices.ContainsFunc(t.Tags, func(tag string) bool { return strings.EqualFold(tag, animeKeyword) })
 }
 
 // titleTTL is how long looked up titles are kept.
@@ -65,21 +88,15 @@ func (c *titleCache) put(key string, t Title, now time.Time) {
 	c.entries[key] = cachedTitle{t, now}
 }
 
-// region is the country and language titles of a kind are looked up in:
-// those of the library requests of the kind go to, else the US and
-// English.
-func (s *Service) region(ctx context.Context, kind core.ItemKind) (country, language string) {
-	set := s.settings()
-	id := set.MovieLibraryID
-	if kind == core.KindSeries {
-		id = set.SeriesLibraryID
+// region is the country and language titles are looked up and rated in:
+// the server's metadata settings, as Seerr's region and locale settings,
+// else the US and English.
+func (s *Service) region() (country, language string) {
+	var m core.MetadataSettings
+	if s.MetadataSettings != nil {
+		m = s.MetadataSettings()
 	}
-	if !id.IsZero() {
-		if lib, err := s.Store.Libraries().Get(ctx, id); err == nil {
-			country, language = lib.MetadataCountry, lib.PreferredLanguage
-		}
-	}
-	return cmp.Or(country, "US"), cmp.Or(language, "en")
+	return cmp.Or(m.Country, "US"), cmp.Or(m.PreferredLanguage, "en")
 }
 
 // Title looks a movie or series up by its TMDB ID through the metadata
@@ -90,12 +107,12 @@ func (s *Service) Title(ctx context.Context, kind core.ItemKind, tmdbID int) (Ti
 	if kind != core.KindMovie && kind != core.KindSeries {
 		return Title{}, fmt.Errorf("%w: request of kind %q", core.ErrInvalid, kind)
 	}
-	country, language := s.region(ctx, kind)
+	country, language := s.region()
 	key := fmt.Sprintf("%s:%d:%s:%s", kind, tmdbID, country, language)
 	if t, ok := s.cache.get(key, s.now()); ok {
 		return t, nil
 	}
-	t := Title{Kind: kind, TmdbID: tmdbID, Country: country}
+	t := Title{Kind: kind, TmdbID: tmdbID, Country: country, ExternalIDs: map[core.Provider]string{}}
 	found := false
 	var providers []library.Provider
 	if s.Metadata != nil {
@@ -130,7 +147,33 @@ func (s *Service) Title(ctx context.Context, kind core.ItemKind, tmdbID int) (Ti
 		if t.TvdbID == 0 {
 			t.TvdbID, _ = strconv.Atoi(it.ExternalIDs[core.ProviderTVDB])
 		}
+		t.OriginalTitle = cmp.Or(t.OriginalTitle, it.OriginalTitle)
+		t.Overview = cmp.Or(t.Overview, it.Overview)
+		if t.PremiereDate == nil {
+			t.PremiereDate = it.PremiereDate
+		}
+		if len(t.Genres) == 0 {
+			t.Genres = it.Genres
+		}
+		if len(t.Tags) == 0 {
+			t.Tags = it.Tags
+		}
+		t.CommunityRating = cmp.Or(t.CommunityRating, it.CommunityRating)
+		for p, id := range it.ExternalIDs {
+			if _, ok := t.ExternalIDs[p]; !ok && id != "" {
+				t.ExternalIDs[p] = id
+			}
+		}
+		for _, img := range res.RemoteImages {
+			switch {
+			case img.Kind == core.ImagePrimary && t.PosterURL == "":
+				t.PosterURL = img.URL
+			case img.Kind == core.ImageBackdrop && t.BackdropURL == "":
+				t.BackdropURL = img.URL
+			}
+		}
 	}
+	t.ExternalIDs[core.ProviderTMDB] = strconv.Itoa(tmdbID)
 	if !found {
 		return Title{}, fmt.Errorf("%w: no metadata provider knows the %s with TMDB ID %d", core.ErrNotFound, kind, tmdbID)
 	}
@@ -151,6 +194,27 @@ func yearOf(it *core.Item) int {
 // Seasons lists the numbers of a series' seasons that have episodes,
 // through the episode listers, as Seerr counts the seasons of "all".
 func (s *Service) Seasons(ctx context.Context, t Title) ([]int, error) {
+	infos, err := s.seasonInfos(ctx, t)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]int, len(infos))
+	for i, si := range infos {
+		out[i] = si.number
+	}
+	return out, nil
+}
+
+// seasonInfo is what the episode listers tell of a season.
+type seasonInfo struct {
+	number, episodes int
+	// premiere is its first episode's air date, if known.
+	premiere *time.Time
+}
+
+// seasonInfos lists a series' seasons that have episodes, by number,
+// through the first episode lister knowing it.
+func (s *Service) seasonInfos(ctx context.Context, t Title) ([]seasonInfo, error) {
 	var listers []library.EpisodeLister
 	if s.Episodes != nil {
 		listers = s.Episodes()
@@ -159,7 +223,7 @@ func (s *Service) Seasons(ctx context.Context, t Title) ([]int, error) {
 	if t.TvdbID > 0 {
 		ids[core.ProviderTVDB] = strconv.Itoa(t.TvdbID)
 	}
-	_, language := s.region(ctx, core.KindSeries)
+	_, language := s.region()
 	for _, l := range listers {
 		list, err := l.Episodes(ctx, library.Lookup{Kind: core.KindSeries, ExternalIDs: ids, Language: language, Country: t.Country})
 		if err != nil {
@@ -172,13 +236,27 @@ func (s *Service) Seasons(ctx context.Context, t Title) ([]int, error) {
 		if list == nil {
 			continue
 		}
-		var out []int
+		byNumber := map[int]*seasonInfo{}
 		for _, ep := range list.Episodes {
-			if n := ep.Item.ParentIndexNumber; n != nil && !slices.Contains(out, *n) {
-				out = append(out, *n)
+			n := ep.Item.ParentIndexNumber
+			if n == nil {
+				continue
+			}
+			si := byNumber[*n]
+			if si == nil {
+				si = &seasonInfo{number: *n}
+				byNumber[*n] = si
+			}
+			si.episodes++
+			if d := ep.Item.PremiereDate; d != nil && (si.premiere == nil || d.Before(*si.premiere)) {
+				si.premiere = d
 			}
 		}
-		slices.Sort(out)
+		out := make([]seasonInfo, 0, len(byNumber))
+		for _, si := range byNumber {
+			out = append(out, *si)
+		}
+		slices.SortFunc(out, func(a, b seasonInfo) int { return cmp.Compare(a.number, b.number) })
 		return out, nil
 	}
 	return nil, fmt.Errorf("%w: no episode lister knows the series with TMDB ID %d", core.ErrNotFound, t.TmdbID)

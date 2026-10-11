@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"connectrpc.com/connect"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -99,29 +100,36 @@ type DiscoveredTitle struct {
 	Requestable bool
 }
 
-// DiscoverPage is a page of a catalog.
+// DiscoverPage is a page of a catalog or of search results. Pages are
+// the provider's: TotalPages is exact, TotalResults the provider's total
+// less the titles left out of this page, Hidden, since the titles left
+// out of other pages are not known without reading them; Seerr leaves
+// none out, and so does not tell.
 type DiscoverPage struct {
 	Titles                         []DiscoveredTitle
 	Page, TotalPages, TotalResults int
+	// Hidden counts the titles of this page left out: adult, above the
+	// user's rating limit, or unrated when the user's policy blocks them.
+	Hidden int
+	// PluginID is the discovery provider that searched.
+	PluginID string
 }
 
 // Discover lists a page of a catalog, marked with what the server has of
 // each title, as Seerr's /discover routes. The user's rating limit
-// applies: catalogs filtering by certification list only the
-// certifications of the requests' country within it; of other catalogs,
-// the titles the metadata providers rate above it are left out, as are
-// unrated ones when the user's policy blocks them. Adult titles are never
-// listed.
+// applies: catalogs filtering by certification are asked for the
+// certifications of the server's country within it when the caller
+// filters by certification or the user's policy blocks unrated titles,
+// since asking for certifications leaves the unrated titles out; of other
+// pages, the titles the metadata providers rate above the limit are left
+// out, as are unrated ones when the policy blocks them. Adult titles are
+// never listed.
 func (s *Service) Discover(ctx context.Context, caller core.User, catalogID string, req *pluginv1.DiscoverRequest) (DiscoverPage, error) {
 	p, c, err := s.catalog(ctx, catalogID)
 	if err != nil {
 		return DiscoverPage{}, err
 	}
-	kind := core.KindMovie
-	if req.GetMediaKind() == pluginv1.MediaKind_MEDIA_KIND_SERIES {
-		kind = core.KindSeries
-	}
-	country, _ := s.region(ctx, kind)
+	country, _ := s.region()
 	req.SetCatalog(c.GetId())
 	req.SetIncludeAdult(false)
 	restricted := caller.Policy.MaxParentalRating != nil
@@ -130,15 +138,16 @@ func (s *Service) Discover(ctx context.Context, caller core.User, catalogID stri
 		certs := req.GetCertifications()
 		if restricted {
 			allowed := Certifications(&caller, country)
-			if len(certs) > 0 {
+			switch {
+			case len(certs) > 0:
 				certs = slices.DeleteFunc(slices.Clone(certs), func(c string) bool { return !slices.Contains(allowed, c) })
 				if len(certs) == 0 {
-					return DiscoverPage{Page: max(1, int(req.GetPage()))}, nil
+					return DiscoverPage{Page: max(1, int(req.GetPage())), PluginID: p.ID}, nil
 				}
-			} else {
-				certs = allowed
+				filtered = true
+			case caller.Policy.BlockUnrated:
+				certs, filtered = allowed, true
 			}
-			filtered = true
 		}
 		if len(certs) > 0 {
 			req.SetCertificationCountry(country)
@@ -152,24 +161,57 @@ func (s *Service) Discover(ctx context.Context, caller core.User, catalogID stri
 	if err != nil {
 		return DiscoverPage{}, fmt.Errorf("discover %s: %w", catalogID, err)
 	}
-	out := DiscoverPage{Page: int(res.GetPage()), TotalPages: int(res.GetTotalPages()), TotalResults: int(res.GetTotalResults())}
-	for _, t := range res.GetTitles() {
+	return s.page(ctx, &caller, p.ID, res.GetTitles(), int(res.GetPage()), int(res.GetTotalPages()), int(res.GetTotalResults()), restricted && !filtered)
+}
+
+// Search finds titles by name through a discovery provider, as Seerr's
+// GET /search (server/routes/search.ts): the one named, else the first
+// that searches. Titles are marked and left out as Discover's.
+func (s *Service) Search(ctx context.Context, caller core.User, pluginID string, req *pluginv1.SearchTitlesRequest) (DiscoverPage, error) {
+	req.SetIncludeAdult(false)
+	for _, p := range s.discoveryProviders() {
+		if pluginID != "" && p.ID != pluginID {
+			continue
+		}
+		res, err := p.Client.SearchTitles(ctx, req)
+		switch {
+		case connect.CodeOf(err) == connect.CodeUnimplemented:
+			continue
+		case err != nil:
+			return DiscoverPage{}, fmt.Errorf("search %s: %w", p.ID, err)
+		}
+		return s.page(ctx, &caller, p.ID, res.GetTitles(), int(res.GetPage()), int(res.GetTotalPages()), int(res.GetTotalResults()),
+			caller.Policy.MaxParentalRating != nil)
+	}
+	return DiscoverPage{}, fmt.Errorf("discovery provider %q searching titles: %w", pluginID, core.ErrNotFound)
+}
+
+// page marks a provider's page of titles, leaving out adult titles and,
+// when rate, those the user's rating limit does not allow.
+func (s *Service) page(ctx context.Context, u *core.User, pluginID string, titles []*pluginv1.DiscoveredTitle, page, pages, total int, rate bool) (DiscoverPage, error) {
+	out := DiscoverPage{Page: page, TotalPages: pages, PluginID: pluginID}
+	for _, t := range titles {
+		if t.GetAdult() {
+			out.Hidden++
+			continue
+		}
 		d := DiscoveredTitle{Title: t, Kind: core.KindMovie}
 		if t.GetMediaKind() == pluginv1.MediaKind_MEDIA_KIND_SERIES {
 			d.Kind = core.KindSeries
 		}
 		d.TmdbID, _ = strconv.Atoi(t.GetExternalIds()[string(core.ProviderTMDB)])
-		if t.GetAdult() {
-			continue
-		}
 		out.Titles = append(out.Titles, d)
 	}
-	if restricted && !filtered {
-		if out.Titles, err = s.rated(ctx, &caller, out.Titles); err != nil {
+	if rate {
+		n := len(out.Titles)
+		var err error
+		if out.Titles, err = s.rated(ctx, u, out.Titles); err != nil {
 			return DiscoverPage{}, err
 		}
+		out.Hidden += n - len(out.Titles)
 	}
-	if err := s.mark(ctx, &caller, out.Titles); err != nil {
+	out.TotalResults = max(0, total-out.Hidden)
+	if err := s.mark(ctx, u, out.Titles); err != nil {
 		return DiscoverPage{}, err
 	}
 	return out, nil
@@ -183,7 +225,7 @@ func (s *Service) rated(ctx context.Context, u *core.User, titles []DiscoveredTi
 	g.SetLimit(lookupConcurrency)
 	for i, d := range titles {
 		g.Go(func() error {
-			rating, country := "", "US"
+			rating, country := "", ""
 			if d.TmdbID > 0 {
 				t, err := s.Title(gctx, d.Kind, d.TmdbID)
 				switch {
@@ -191,9 +233,10 @@ func (s *Service) rated(ctx context.Context, u *core.User, titles []DiscoveredTi
 					return gctx.Err()
 				case err == nil:
 					rating, country = t.Rating, t.Country
-				default:
-					country, _ = s.region(gctx, d.Kind)
 				}
+			}
+			if country == "" {
+				country, _ = s.region()
 			}
 			keep[i] = RatingAllowed(u, rating, country)
 			return nil
@@ -215,63 +258,98 @@ func (s *Service) rated(ctx context.Context, u *core.User, titles []DiscoveredTi
 // requests.
 func (s *Service) mark(ctx context.Context, u *core.User, titles []DiscoveredTitle) error {
 	indexes := map[core.ItemKind]*mediaIndex{}
-	index := func(kind core.ItemKind) (*mediaIndex, error) {
-		if x := indexes[kind]; x != nil {
-			return x, nil
-		}
-		x, err := s.index(ctx, kind)
-		if err != nil {
-			return nil, err
-		}
-		indexes[kind] = &x
-		return &x, nil
-	}
 	for i := range titles {
 		d := &titles[i]
 		if d.TmdbID <= 0 {
 			continue
 		}
-		x, err := index(d.Kind)
-		if err != nil {
-			return err
-		}
-		// The title's requests, of any status, know the TVDB ID of series
-		// whose items may lack their TMDB ID.
-		all, err := s.Store.Requests().List(ctx, core.RequestQuery{Kind: d.Kind, TmdbID: d.TmdbID})
-		if err != nil {
-			return err
-		}
-		tvdb, _ := strconv.Atoi(d.Title.GetExternalIds()[string(core.ProviderTVDB)])
-		var active []core.Request
-		for _, r := range all.Items {
-			if tvdb == 0 {
-				tvdb = r.TvdbID
-			}
-			if r.Status.Active() {
-				active = append(active, r)
-			}
-		}
-		m := x.find(d.TmdbID, tvdb)
-		if d.Kind == core.KindMovie {
-			if d.Status, d.ItemID, err = s.movieStatus(ctx, m); err != nil {
-				return err
-			}
-		} else {
-			st, err := s.seriesState(ctx, m)
+		x := indexes[d.Kind]
+		if x == nil {
+			idx, err := s.index(ctx, d.Kind)
 			if err != nil {
 				return err
 			}
-			d.Status, d.ItemID = st.status(), st.itemID
+			x = &idx
+			indexes[d.Kind] = x
 		}
-		if len(active) > 0 {
-			d.RequestID, d.RequestStatus = active[0].ID, active[0].Status
-			if d.Status == StatusNone {
-				d.Status = StatusRequested
-			}
+		tvdb, _ := strconv.Atoi(d.Title.GetExternalIds()[string(core.ProviderTVDB)])
+		st, err := s.titleState(ctx, u, x, d.Kind, d.TmdbID, tvdb)
+		if err != nil {
+			return err
 		}
-		d.Requestable = mayRequest(u, d.Kind) && (d.Status == StatusNone || d.Kind == core.KindSeries && d.Status != StatusAvailable)
+		d.Status, d.ItemID, d.Requestable = st.status, st.itemID, st.requestable
+		if len(st.active) > 0 {
+			d.RequestID, d.RequestStatus = st.active[0].ID, st.active[0].Status
+		}
 	}
 	return nil
+}
+
+// titleState is what the server has of a title.
+type titleState struct {
+	status MediaStatus
+	itemID core.ID
+	// all are the title's requests, active those pending, approved or
+	// failed, newest first.
+	all, active []core.Request
+	// series is what the libraries have of a series.
+	series seriesState
+	// blocked is a title on the blocklist.
+	blocked     bool
+	requestable bool
+}
+
+// titleState finds what the server has of a title, as Seerr's media
+// statuses: what the libraries have of it, requested when they have
+// nothing and a request is active, deleted when they have nothing and a
+// request was completed, blocklisted whatever they have when it is on the
+// blocklist.
+func (s *Service) titleState(ctx context.Context, u *core.User, x *mediaIndex, kind core.ItemKind, tmdbID, tvdbID int) (titleState, error) {
+	var st titleState
+	// The title's requests, of any status, know the TVDB ID of series
+	// whose items may lack their TMDB ID.
+	all, err := s.Store.Requests().List(ctx, core.RequestQuery{Kind: kind, TmdbID: tmdbID})
+	if err != nil {
+		return titleState{}, err
+	}
+	st.all = all.Items
+	completed := false
+	for _, r := range all.Items {
+		if tvdbID == 0 {
+			tvdbID = r.TvdbID
+		}
+		if r.Status.Active() {
+			st.active = append(st.active, r)
+		}
+		completed = completed || r.Status == core.RequestCompleted
+	}
+	m := x.find(tmdbID, tvdbID)
+	if kind == core.KindMovie {
+		if st.status, st.itemID, err = s.movieStatus(ctx, m); err != nil {
+			return titleState{}, err
+		}
+	} else {
+		if st.series, err = s.seriesState(ctx, m); err != nil {
+			return titleState{}, err
+		}
+		st.status, st.itemID = st.series.status(), st.series.itemID
+	}
+	switch {
+	case st.status != StatusNone:
+	case len(st.active) > 0:
+		st.status = StatusRequested
+	case completed:
+		st.status = StatusDeleted
+	}
+	if st.blocked, err = s.isBlocked(ctx, kind, tmdbID); err != nil {
+		return titleState{}, err
+	}
+	if st.blocked {
+		st.status = StatusBlocklisted
+	}
+	st.requestable = mayRequest(u, kind) && (st.status == StatusNone || st.status == StatusDeleted ||
+		kind == core.KindSeries && st.status != StatusAvailable && st.status != StatusBlocklisted)
+	return st, nil
 }
 
 // FilterValues lists the values a catalog's filter takes.

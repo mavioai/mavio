@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"connectrpc.com/connect"
+
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
@@ -25,6 +27,7 @@ type title struct {
 	rating  string
 	tvdb    int
 	seasons []int
+	tags    []string
 }
 
 // fakeMetadata is a metadata provider and episode lister knowing titles
@@ -33,6 +36,7 @@ type fakeMetadata struct {
 	mu      sync.Mutex
 	titles  map[string]title
 	lookups int
+	last    library.Lookup
 }
 
 func titleID(kind core.ItemKind, tmdb int) string { return string(kind) + ":" + strconv.Itoa(tmdb) }
@@ -43,6 +47,7 @@ func (f *fakeMetadata) lookup(l library.Lookup) (title, bool) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.lookups++
+	f.last = l
 	t, ok := f.titles[titleID(l.Kind, atoi(l.ExternalIDs[core.ProviderTMDB]))]
 	return t, ok
 }
@@ -54,11 +59,14 @@ func (f *fakeMetadata) Metadata(_ context.Context, l library.Lookup) (*metadata.
 	if !ok {
 		return nil, nil
 	}
-	it := core.Item{Name: t.name, ProductionYear: t.year, OfficialRating: t.rating, ExternalIDs: map[core.Provider]string{}}
+	it := core.Item{
+		Name: t.name, ProductionYear: t.year, OfficialRating: t.rating, Overview: "About " + t.name, Tags: t.tags,
+		ExternalIDs: map[core.Provider]string{core.ProviderIMDb: "tt" + l.ExternalIDs[core.ProviderTMDB]},
+	}
 	if t.tvdb > 0 {
 		it.ExternalIDs[core.ProviderTVDB] = strconv.Itoa(t.tvdb)
 	}
-	return &metadata.Result{Item: it}, nil
+	return &metadata.Result{Item: it, RemoteImages: []metadata.RemoteImage{{Kind: core.ImagePrimary, URL: "https://img/" + t.name}}}, nil
 }
 
 func (f *fakeMetadata) Episodes(_ context.Context, l library.Lookup) (*library.EpisodeList, error) {
@@ -68,8 +76,11 @@ func (f *fakeMetadata) Episodes(_ context.Context, l library.Lookup) (*library.E
 	}
 	out := &library.EpisodeList{Provider: core.ProviderTMDB}
 	for _, n := range t.seasons {
+		aired := time.Date(2020+n, 1, 1, 0, 0, 0, 0, time.UTC)
 		for e := 1; e <= 2; e++ {
-			out.Episodes = append(out.Episodes, metadata.Result{Item: core.Item{Name: "Episode", ParentIndexNumber: new(n), IndexNumber: new(e)}})
+			out.Episodes = append(out.Episodes, metadata.Result{Item: core.Item{
+				Name: "Episode", ParentIndexNumber: new(n), IndexNumber: new(e), PremiereDate: new(aired.AddDate(0, 0, 7*(e-1))),
+			}})
 		}
 	}
 	return out, nil
@@ -83,6 +94,7 @@ type fakeAcquirer struct {
 	fail     error
 	searches []core.ID
 	seasons  []int
+	series   []acquisition.NewSeries
 	mu       sync.Mutex
 }
 
@@ -114,6 +126,9 @@ func (f *fakeAcquirer) AddSeries(ctx context.Context, n acquisition.NewSeries) (
 	if n.Monitor != acquisition.MonitorNone {
 		f.t.Errorf("AddSeries monitor = %v, want none", n.Monitor)
 	}
+	f.mu.Lock()
+	f.series = append(f.series, n)
+	f.mu.Unlock()
 	series := core.Item{
 		ID: core.NewID(), LibraryID: n.LibraryID, Kind: core.KindSeries, Name: "Series", Virtual: true, Monitored: true,
 		ExternalIDs: map[core.Provider]string{core.ProviderTVDB: strconv.Itoa(n.TvdbID)},
@@ -702,9 +717,22 @@ func TestIssues(t *testing.T) {
 // fakeDiscovery is a discovery provider of one catalog filtering by
 // certification and one that does not.
 type fakeDiscovery struct {
-	mu     sync.Mutex
-	titles []*pluginv1.DiscoveredTitle
-	last   *pluginv1.DiscoverRequest
+	mu         sync.Mutex
+	titles     []*pluginv1.DiscoveredTitle
+	last       *pluginv1.DiscoverRequest
+	lastSearch *pluginv1.SearchTitlesRequest
+	// noSearch answers searches unimplemented.
+	noSearch bool
+}
+
+func (f *fakeDiscovery) SearchTitles(_ context.Context, req *pluginv1.SearchTitlesRequest) (*pluginv1.SearchTitlesResponse, error) {
+	if f.noSearch {
+		return nil, connect.NewError(connect.CodeUnimplemented, errors.New("no search"))
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.lastSearch = req
+	return pluginv1.SearchTitlesResponse_builder{Titles: f.titles, Page: new(int32(1)), TotalPages: new(int32(3)), TotalResults: new(int32(60))}.Build(), nil
 }
 
 func (f *fakeDiscovery) ListCatalogs(context.Context, *pluginv1.ListCatalogsRequest) (*pluginv1.ListCatalogsResponse, error) {
@@ -769,15 +797,38 @@ func TestDiscover(t *testing.T) {
 	e.giveFiles(sr.ItemID, 1)
 
 	// The certification catalog is asked for the certifications within
-	// the limit.
-	if _, err := e.svc.Discover(e.ctx, pg, "tmdb/popular", pluginv1.DiscoverRequest_builder{MediaKind: new(movie)}.Build()); err != nil {
+	// the limit when the user's policy blocks unrated titles, or of those
+	// the caller asks for; else its titles are rated by the server, which
+	// keeps the unrated ones.
+	strict := e.user("strict", func(u *core.User) { u.Policy.MaxParentalRating, u.Policy.BlockUnrated = score(t, "PG"), true })
+	if _, err := e.svc.Discover(e.ctx, strict, "tmdb/popular", pluginv1.DiscoverRequest_builder{MediaKind: new(movie)}.Build()); err != nil {
 		t.Fatal(err)
 	}
 	if got := d.last.GetCertifications(); !slices.Contains(got, "PG") || slices.Contains(got, "R") || d.last.GetCertificationCountry() != "US" || d.last.GetIncludeAdult() {
 		t.Errorf("certifications asked = %v in %q", got, d.last.GetCertificationCountry())
 	}
+	if _, err := e.svc.Discover(e.ctx, pg, "tmdb/popular", pluginv1.DiscoverRequest_builder{MediaKind: new(movie), Certifications: []string{"PG", "R"}}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	if got := d.last.GetCertifications(); !slices.Equal(got, []string{"PG"}) {
+		t.Errorf("certifications asked of those given = %v, want [PG]", got)
+	}
+	page, err := e.svc.Discover(e.ctx, pg, "tmdb/popular", pluginv1.DiscoverRequest_builder{MediaKind: new(movie)}.Build())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(d.last.GetCertifications()) > 0 || !slices.ContainsFunc(page.Titles, func(d DiscoveredTitle) bool { return d.TmdbID == 3 }) {
+		t.Errorf("certifications asked when unrated titles are allowed = %v; unrated title kept = %v", d.last.GetCertifications(), page.Titles)
+	}
+	strictPage, err := e.svc.Discover(e.ctx, strict, "tmdb/trending", &pluginv1.DiscoverRequest{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if slices.ContainsFunc(strictPage.Titles, func(d DiscoveredTitle) bool { return d.TmdbID == 3 }) {
+		t.Errorf("unrated title listed to a user blocking them")
+	}
 	// Others' titles are looked up and those above the limit left out.
-	page, err := e.svc.Discover(e.ctx, pg, "tmdb/trending", &pluginv1.DiscoverRequest{})
+	page, err = e.svc.Discover(e.ctx, pg, "tmdb/trending", &pluginv1.DiscoverRequest{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -803,5 +854,9 @@ func TestDiscover(t *testing.T) {
 	// The series is wanted in season 1 only, which has its files.
 	if !slices.Equal(got, want) {
 		t.Errorf("Discover() = %+v, want %+v", got, want)
+	}
+	// The adult title and the one rated R are left out of the page.
+	if page.Hidden != 2 || page.TotalResults != 4 || page.TotalPages != 1 {
+		t.Errorf("Discover() hidden = %d of %d results in %d pages, want 2 of 4 in 1", page.Hidden, page.TotalResults, page.TotalPages)
 	}
 }

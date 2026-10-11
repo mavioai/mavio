@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"slices"
-	"strings"
 	"testing"
 	"time"
 
@@ -322,7 +321,9 @@ func TestRequests(t *testing.T) {
 		films[0].GetStatus() != acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED || !films[0].GetRequestable() || films[0].GetRequestId() != "" {
 		t.Errorf("trending films = %q, want = The Matrix alone, neither available nor requested, requestable", describeTitles(films))
 	}
-	// The popular catalog asks TMDB for the certifications up to PG.
+	// The popular catalog, for a user who does not block unrated titles,
+	// asks TMDB for no certification, which would leave the unrated
+	// titles out: the server rates the titles itself.
 	series := discoverTitles(popular, acquisitionv1.MediaKind_MEDIA_KIND_SERIES)
 	if len(series) != 1 || series[0].GetName() != "Breaking Bad" || series[0].GetExternalIds()["tmdb"] != "1396" ||
 		series[0].GetStatus() != acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED || !series[0].GetRequestable() {
@@ -331,10 +332,8 @@ func TestRequests(t *testing.T) {
 	fake.mu.Lock()
 	q := fake.queries["api.themoviedb.org/3/discover/tv"]
 	fake.mu.Unlock()
-	certs := strings.Split(q.Get("certification"), "|")
-	if q.Get("certification_country") != "US" || !slices.Contains(certs, "TV-PG") || !slices.Contains(certs, "PG") ||
-		slices.Contains(certs, "TV-14") || slices.Contains(certs, "R") || q.Get("include_adult") != "false" {
-		t.Errorf("TMDB's discover query = %v, want = US certifications up to PG, no adult titles", q)
+	if q.Has("certification") || q.Has("certification_lte") || q.Get("include_adult") != "false" {
+		t.Errorf("TMDB's discover query = %v, want = no certification, no adult titles", q)
 	}
 
 	// The film rated R cannot be requested.

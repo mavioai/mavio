@@ -48,6 +48,13 @@ func (stubDiscovery) ListCatalogs(context.Context, *pluginv1.ListCatalogsRequest
 	}.Build()}}.Build(), nil
 }
 
+func (stubDiscovery) SearchTitles(context.Context, *pluginv1.SearchTitlesRequest) (*pluginv1.SearchTitlesResponse, error) {
+	page, _ := stubDiscovery{}.Discover(context.Background(), nil)
+	return pluginv1.SearchTitlesResponse_builder{
+		Titles: page.GetTitles(), Page: new(int32(1)), TotalPages: new(int32(1)), TotalResults: new(int32(2)),
+	}.Build(), nil
+}
+
 func (stubDiscovery) Discover(context.Context, *pluginv1.DiscoverRequest) (*pluginv1.DiscoverResponse, error) {
 	var titles []*pluginv1.DiscoveredTitle
 	for _, id := range []int{1, 2} {
@@ -138,6 +145,25 @@ func TestRequestServices(t *testing.T) {
 		got[0].GetStatus() != acquisitionv1.MediaStatus_MEDIA_STATUS_UNSPECIFIED {
 		t.Errorf("Discover() = %v, want Movie 1 requestable", got)
 	}
+	if page.GetHiddenResults() != 1 || page.GetTotalResults() != 1 {
+		t.Errorf("Discover() hidden = %d of %d, want 1 of 1", page.GetHiddenResults(), page.GetTotalResults())
+	}
+	discover := acquisitionv1connect.NewDiscoverServiceClient(http.DefaultClient, url, asUser("pg"))
+	found, err := discover.SearchTitles(ctx, acquisitionv1.SearchTitlesRequest_builder{Query: new("movie")}.Build())
+	if err != nil || len(found.GetTitles()) != 1 || found.GetHiddenResults() != 1 || found.GetPluginId() != "stub" {
+		t.Errorf("SearchTitles() = %v, %v", found, err)
+	}
+	_, err = discover.SearchTitles(ctx, &acquisitionv1.SearchTitlesRequest{})
+	wantCode(t, "SearchTitles without a query", err, connect.CodeInvalidArgument)
+	_, err = discover.GetTitle(ctx, acquisitionv1.GetTitleRequest_builder{MediaKind: new(acquisitionv1.MediaKind_MEDIA_KIND_MOVIE), TmdbId: new(int32(2))}.Build())
+	wantCode(t, "GetTitle above the rating limit", err, connect.CodePermissionDenied)
+	_, err = discover.GetTitle(ctx, acquisitionv1.GetTitleRequest_builder{MediaKind: new(acquisitionv1.MediaKind_MEDIA_KIND_MOVIE), TmdbId: new(int32(404))}.Build())
+	wantCode(t, "GetTitle of an unknown title", err, connect.CodeNotFound)
+	title, err := discover.GetTitle(ctx, acquisitionv1.GetTitleRequest_builder{MediaKind: new(acquisitionv1.MediaKind_MEDIA_KIND_MOVIE), TmdbId: new(int32(1))}.Build())
+	if err != nil || title.GetTitle().GetName() != "Movie 1" || title.GetTitle().GetOfficialRating() != "PG" || !title.GetTitle().GetRequestable() ||
+		title.GetTitle().GetExternalIds()["tmdb"] != "1" {
+		t.Errorf("GetTitle() = %v, %v", title, err)
+	}
 	cats, err := acquisitionv1connect.NewDiscoverServiceClient(http.DefaultClient, url, asUser("none")).
 		ListCatalogs(ctx, &acquisitionv1.ListCatalogsRequest{})
 	if err != nil || len(cats.GetCatalogs()) != 1 || cats.GetCatalogs()[0].GetId() != "stub/popular" || !cats.GetCatalogs()[0].GetMixed() {
@@ -161,6 +187,29 @@ func TestRequestServices(t *testing.T) {
 	}
 	_, err = reqs("admin").CreateRequest(ctx, movie(1))
 	wantCode(t, "CreateRequest of a requested movie", err, connect.CodeAlreadyExists)
+
+	// The blocklist.
+	block := acquisitionv1.BlockTitleRequest_builder{MediaKind: new(acquisitionv1.MediaKind_MEDIA_KIND_MOVIE), TmdbId: new(int32(2))}.Build()
+	_, err = reqs("pg").BlockTitle(ctx, block)
+	wantCode(t, "BlockTitle by a user", err, connect.CodePermissionDenied)
+	blocked, err := reqs("admin").BlockTitle(ctx, block)
+	if err != nil || blocked.GetBlockedTitle().GetTitle() != "Movie 2" || blocked.GetBlockedTitle().GetUserId() != users["admin"].ID.String() {
+		t.Errorf("BlockTitle() = %v, %v", blocked, err)
+	}
+	_, err = reqs("admin").BlockTitle(ctx, block)
+	wantCode(t, "BlockTitle twice", err, connect.CodeAlreadyExists)
+	_, err = reqs("admin").CreateRequest(ctx, movie(2))
+	wantCode(t, "CreateRequest of a blocked movie", err, connect.CodePermissionDenied)
+	if l, err := reqs("admin").ListBlockedTitles(ctx, &acquisitionv1.ListBlockedTitlesRequest{}); err != nil || l.GetTotal() != 1 {
+		t.Errorf("ListBlockedTitles() = %v, %v", l, err)
+	}
+	_, err = reqs("pg").ListBlockedTitles(ctx, &acquisitionv1.ListBlockedTitlesRequest{})
+	wantCode(t, "ListBlockedTitles by a user", err, connect.CodePermissionDenied)
+	if _, err := reqs("admin").UnblockTitle(ctx, acquisitionv1.UnblockTitleRequest_builder{
+		MediaKind: new(acquisitionv1.MediaKind_MEDIA_KIND_MOVIE), TmdbId: new(int32(2)),
+	}.Build()); err != nil {
+		t.Errorf("UnblockTitle() = %v", err)
+	}
 
 	quota, err := reqs("pg").GetQuota(ctx, &acquisitionv1.GetQuotaRequest{})
 	if err != nil || quota.GetMovie().GetLimit() != 1 || quota.GetMovie().GetUsed() != 1 || !quota.GetMovie().GetRestricted() {
@@ -265,6 +314,7 @@ func TestRequestSettingsRoundTrip(t *testing.T) {
 	in.MovieQuota, in.SeriesQuota = core.Quota{Limit: 3, Days: 7}, core.Quota{Limit: 10}
 	in.MovieLibraryID, in.SeriesQualityProfileID = core.NewID(), core.NewID()
 	in.MinimumAvailability, in.MonitorNewItems, in.Specials = core.AvailabilityInCinemas, core.NewItemsAll, true
+	in.AnimeLibraryID, in.AnimeQualityProfileID = core.NewID(), core.NewID()
 	out, err := requestSettingsFromProto(requestSettingsToProto(&in))
 	if err != nil || out != in {
 		t.Errorf("round trip = %+v, %v, want %+v", out, err, in)
@@ -282,6 +332,17 @@ func TestRequestSettingsRoundTrip(t *testing.T) {
 	got, err := settingsFromProto(p, &current)
 	if err != nil || got.Requests != in {
 		t.Errorf("settings without requests = %+v, %v", got.Requests, err)
+	}
+	// Metadata settings round trip; settings without them keep the
+	// current ones.
+	current.Metadata = core.MetadataSettings{PreferredLanguage: "de", Country: "DE"}
+	if got, err := settingsFromProto(settingsToProto(&current), &core.ServerSettings{}); err != nil || got.Metadata != current.Metadata {
+		t.Errorf("metadata settings = %+v, %v, want %+v", got.Metadata, err, current.Metadata)
+	}
+	p = settingsToProto(&current)
+	p.ClearMetadata()
+	if got, err := settingsFromProto(p, &current); err != nil || got.Metadata != current.Metadata {
+		t.Errorf("settings without metadata = %+v, %v", got.Metadata, err)
 	}
 }
 

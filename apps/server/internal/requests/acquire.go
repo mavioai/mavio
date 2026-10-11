@@ -1,6 +1,7 @@
 package requests
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -94,12 +95,29 @@ func (s *Service) want(ctx context.Context, it *core.Item, w core.Wanted) error 
 // monitored and searched for, as Seerr asks Sonarr to.
 func (s *Service) acquireSeries(ctx context.Context, r *core.Request) error {
 	set := s.settings()
-	if r.TvdbID == 0 {
-		t, err := s.Title(ctx, core.KindSeries, r.TmdbID)
-		if err != nil {
-			return err
+	anime := false
+	switch t, err := s.Title(ctx, core.KindSeries, r.TmdbID); {
+	case err == nil:
+		anime = t.Anime()
+		if r.TvdbID == 0 {
+			r.TvdbID = t.TvdbID
 		}
-		r.TvdbID = t.TvdbID
+	case ctx.Err() != nil:
+		return ctx.Err()
+	case r.TvdbID == 0:
+		return err
+	default:
+		s.logger().WarnContext(ctx, "couldn't look series up; taken as not anime", "tmdb", r.TmdbID, "err", err)
+	}
+	// Anime series go to the anime library and profile when set, as
+	// Seerr's MediaRequestSubscriber picks activeAnimeDirectory and
+	// activeAnimeProfileId, and are numbered as anime.
+	libraryID, profileID := set.SeriesLibraryID, set.SeriesQualityProfileID
+	var seriesType *core.SeriesType
+	if anime {
+		libraryID = cmp.Or(set.AnimeLibraryID, libraryID)
+		profileID = cmp.Or(set.AnimeQualityProfileID, profileID)
+		seriesType = new(core.SeriesAnime)
 	}
 	if r.TvdbID == 0 {
 		return errors.New("no metadata provider knows the series' TVDB ID")
@@ -112,7 +130,7 @@ func (s *Service) acquireSeries(ctx context.Context, r *core.Request) error {
 	if err != nil {
 		return err
 	}
-	if set.SeriesQualityProfileID.IsZero() && !st.wanted {
+	if profileID.IsZero() && !st.wanted {
 		return errors.New("no quality profile is set for series requests")
 	}
 	var series core.Item
@@ -122,16 +140,16 @@ func (s *Service) acquireSeries(ctx context.Context, r *core.Request) error {
 			return err
 		}
 		if !st.wanted {
-			w := core.Wanted{QualityProfileID: set.SeriesQualityProfileID, MonitorNewItems: set.MonitorNewItems, SeasonFolder: set.SeasonFolder}
+			w := core.Wanted{QualityProfileID: profileID, MonitorNewItems: set.MonitorNewItems, SeasonFolder: set.SeasonFolder}
 			if err := s.want(ctx, &series, w); err != nil {
 				return err
 			}
 		}
-	case set.SeriesLibraryID.IsZero():
+	case libraryID.IsZero():
 		return errors.New("no library is set for series requests")
 	default:
 		series, _, err = s.Acquisition.AddSeries(ctx, acquisition.NewSeries{
-			LibraryID: set.SeriesLibraryID, TvdbID: r.TvdbID, QualityProfileID: set.SeriesQualityProfileID,
+			LibraryID: libraryID, TvdbID: r.TvdbID, QualityProfileID: profileID, SeriesType: seriesType,
 			SeasonFolder: set.SeasonFolder, Monitor: acquisition.MonitorNone, MonitorNewItems: set.MonitorNewItems,
 		})
 		if err != nil {

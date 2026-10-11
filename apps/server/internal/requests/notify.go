@@ -100,9 +100,14 @@ func (s *Service) notify(ctx context.Context, typ string, r *core.Request, userI
 	if !actor.IsZero() {
 		attrs[AttrActor] = actor.String()
 	}
+	// As Seerr's notification agents: pending and auto-approved requests
+	// go to administrators, failed ones to them and the requester, the
+	// others to the requester.
+	admins := typ == TypePending || typ == TypeAutoApproved || typ == TypeFailed
+	user := !admins || typ == TypeFailed
 	s.record(ctx, core.Activity{
 		Type: typ, Severity: sev, Title: title, Message: msg, UserID: userID, ItemID: r.ItemID, Attributes: attrs,
-	})
+	}, user, admins)
 }
 
 // notifyIssue records an issue's activity for a user.
@@ -123,5 +128,8 @@ func (s *Service) notifyIssue(ctx context.Context, typ string, i *core.Issue, us
 		attrs[AttrComment] = comment.ID.String()
 		msg = comment.Message
 	}
-	s.record(ctx, core.Activity{Type: typ, Title: title, Message: msg, UserID: userID, ItemID: i.ItemID, Attributes: attrs})
+	// Reported issues, and comments of their reporters, go to
+	// administrators; the others to the reporter.
+	admins := typ == TypeIssueCreated || typ == TypeIssueCommented && actor == i.CreatedBy
+	s.record(ctx, core.Activity{Type: typ, Title: title, Message: msg, UserID: userID, ItemID: i.ItemID, Attributes: attrs}, !admins, admins)
 }

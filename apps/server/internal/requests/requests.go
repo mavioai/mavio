@@ -47,8 +47,8 @@ func autoApproves(u *core.User, kind core.ItemKind) bool {
 // Create requests a movie or seasons of a series, as Seerr's
 // MediaRequest.request (server/entity/MediaRequest.ts): the user's
 // permission, then the title's rating against the user's limit, then the
-// user's quota, then requests of the same title and what the libraries
-// have of it; the request is approved at once when the user's requests
+// blocklist, then the user's quota, then requests of the same title and
+// what the libraries have of it; the request is approved at once when the user's requests
 // are, which makes its movie or seasons wanted.
 func (s *Service) Create(ctx context.Context, caller core.User, n NewRequest) (core.Request, error) {
 	if n.Kind != core.KindMovie && n.Kind != core.KindSeries {
@@ -84,6 +84,13 @@ func (s *Service) Create(ctx context.Context, caller core.User, n NewRequest) (c
 
 	defer s.users.lock(user.ID.String())()
 	defer s.titles.lock(titleKey(n.Kind, n.TmdbID))()
+	// Seerr's BlocklistedMediaError.
+	switch blocked, err := s.isBlocked(ctx, n.Kind, n.TmdbID); {
+	case err != nil:
+		return core.Request{}, err
+	case blocked:
+		return core.Request{}, fmt.Errorf("%w: %s is blocklisted", ErrPermission, t.Name)
+	}
 	quota, err := s.Quota(ctx, user, n.Kind)
 	if err != nil {
 		return core.Request{}, err
