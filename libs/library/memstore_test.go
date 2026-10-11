@@ -27,7 +27,29 @@ type memStore struct {
 	links   map[core.ID][]core.Link
 	tricks  map[core.ID][]core.Trickplay
 	segs    map[core.ID][]core.MediaSegment
-	clock   func() time.Time
+	// moved are the items whose history went to others.
+	moved map[core.ID]core.ID
+	clock func() time.Time
+}
+
+// memHistory records the items whose history moves.
+type memHistory struct{ m *memStore }
+
+func (memHistory) Add(context.Context, ...core.HistoryEvent) error { panic("unused") }
+
+func (memHistory) List(context.Context, core.HistoryQuery) (core.Page[core.HistoryEvent], error) {
+	panic("unused")
+}
+
+func (memHistory) Purge(context.Context, time.Time) (int, error) { panic("unused") }
+
+func (h memHistory) MoveItems(_ context.Context, to core.ID, from ...core.ID) error {
+	h.m.mu.Lock()
+	defer h.m.mu.Unlock()
+	for _, id := range from {
+		h.m.moved[id] = to
+	}
+	return nil
 }
 
 func newMemStore() *memStore {
@@ -35,7 +57,7 @@ func newMemStore() *memStore {
 		items: map[core.ID]core.Item{}, sources: map[core.ID][]core.MediaSource{}, folders: map[string]core.FolderState{},
 		gens: map[core.ID]int64{}, libs: map[core.ID]core.Library{}, people: map[core.ID]core.Person{},
 		credits: map[core.ID][]core.Credit{}, images: map[core.ID][]core.Image{}, links: map[core.ID][]core.Link{},
-		tricks: map[core.ID][]core.Trickplay{}, segs: map[core.ID][]core.MediaSegment{}, clock: time.Now,
+		tricks: map[core.ID][]core.Trickplay{}, segs: map[core.ID][]core.MediaSegment{}, moved: map[core.ID]core.ID{}, clock: time.Now,
 	}
 }
 
@@ -64,7 +86,7 @@ func (m *memStore) ReleaseProfiles() core.ReleaseProfileRepository          { pa
 func (m *memStore) Wanted() core.WantedRepository                           { panic("unused") }
 func (m *memStore) EpisodeStates() core.EpisodeStateRepository              { panic("unused") }
 func (m *memStore) Downloads() core.DownloadRepository                      { panic("unused") }
-func (m *memStore) History() core.HistoryRepository                         { panic("unused") }
+func (m *memStore) History() core.HistoryRepository                         { return memHistory{m} }
 func (m *memStore) Blocklist() core.BlocklistRepository                     { panic("unused") }
 func (m *memStore) PendingReleases() core.PendingReleaseRepository          { panic("unused") }
 func (m *memStore) RemotePathMappings() core.RemotePathMappingRepository    { panic("unused") }

@@ -255,7 +255,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `WantedRepository` | `Get` (`ErrNotFound` when never wanted), `List` some items' or all, `Put`, `Delete`; deleting the item deletes it |
 | `EpisodeStateRepository` | `List` a series' states by season and episode, `PutSceneNumbering` (replacing the scene numbering of a series' episodes, keeping their search times), `Searched` (recording when episodes were searched for); deleting the series deletes them |
 | `DownloadRepository` | `Get`, `GetByDownloadID` (by plugin, client and the client's ID), `List` (paged, by item and state, most recently grabbed first), `Put`, `Delete` |
-| `HistoryRepository` | `Add`, `List` (paged, newest first, by items or their series, types, download ID and time), `Purge` of events before a time |
+| `HistoryRepository` | `Add`, `List` (paged, newest first, by items or their series, types, download ID and time), `Purge` of events before a time, `MoveItems` (giving the events of items to the item taking their place) |
 | `BlocklistRepository` | `Add`, `List` (paged, newest first, an item's or all), `Delete` |
 | `PendingReleaseRepository` | `List` an item's or all (oldest first), `Add`, `Delete` |
 | `RemotePathMappingRepository` | `List`, `Put`, `Delete` |
@@ -350,7 +350,7 @@ An `EpisodeState` keeps, apart from the episode's item, which a scan may replace
 
 ### 13.3 Downloads, History and the Blocklist
 * A `Download` is a grabbed release, tracked from the grab until it is imported, fails or is ignored: its download client (`PluginID`, `ClientID`) and the client's `DownloadID`, its item and episodes, title, indexer, protocol, quality, languages and size, and its `State` (`downloading`, `import_blocked`, `import_pending`, `importing`, `imported`, `failed_pending`, `failed`, `ignored`) with `Messages`. A client's download is tracked once.
-* A `HistoryEvent` records a grab, an import from a download folder, a failed or ignored download, or a file deleted or renamed, for a movie or an episode (with its series as `ParentID`): the release's `SourceTitle`, quality and languages, the `DownloadID` and type-specific `Data`.
+* A `HistoryEvent` records a grab, an import from a download folder, a failed or ignored download, or a file deleted or renamed, for a movie or an episode (with its series as `ParentID`): the release's `SourceTitle`, quality and languages, the `DownloadID` and type-specific `Data`. When the item of a multi-episode file takes the place of the items of the episodes it covers, imported or found by a scan, it takes their events too.
 * A `BlocklistEntry` is a release not to grab again for an item: its title, quality, languages, size, protocol, indexer and flags, publish date, torrent hash and why it was blocklisted.
 * A `PendingRelease` is a release kept to grab later: held by a delay profile, waiting for a download client, or kept as a fallback should better releases fail. `Release` is the release as `libs/acquire` encodes it.
 * Deleting an item deletes its wanted state, episode states, downloads, history, blocklist entries and pending releases.

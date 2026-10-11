@@ -531,6 +531,22 @@ func TestHistory(t *testing.T) {
 			t.Errorf("Add of an unknown type: %v, want ErrInvalid", err)
 		}
 
+		// The events of an item move to the item taking its place, which
+		// keeps them when the item goes.
+		if err := repo.MoveItems(ctx, episodes[1].ID, episodes[0].ID, episodes[1].ID); err != nil {
+			t.Fatal(err)
+		}
+		if err := s.Items().Delete(ctx, episodes[0].ID); err != nil {
+			t.Fatal(err)
+		}
+		page, err = repo.List(ctx, core.HistoryQuery{ItemIDs: []core.ID{episodes[1].ID}})
+		if err != nil || len(page.Items) != 1 || page.Items[0].ID != episode.ID || page.Items[0].ItemID != episodes[1].ID {
+			t.Errorf("events of the item taking the place = %+v, %v; want = the moved grab", page.Items, err)
+		}
+		if err := repo.MoveItems(ctx, episodes[1].ID); err != nil {
+			t.Errorf("MoveItems of none: %v", err)
+		}
+
 		n, err := repo.Purge(ctx, base.Add(90*time.Minute))
 		if err != nil || n != 2 {
 			t.Errorf("Purge = %d, %v; want = 2", n, err)

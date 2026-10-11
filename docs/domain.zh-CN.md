@@ -255,7 +255,7 @@ erDiagram
 | `WantedRepository` | `Get`（从未想要时为 `ErrNotFound`）、`List` 某些条目或全部、`Put`、`Delete`；删除条目时一并删除 |
 | `EpisodeStateRepository` | `List` 某剧集按季与集排序的状态、`PutSceneNumbering`（替换某剧集各集的 scene 编号，保留其搜索时间）、`Searched`（记录单集被搜索的时间）；删除剧集时一并删除 |
 | `DownloadRepository` | `Get`、`GetByDownloadID`（按插件、客户端与客户端的 ID）、`List`（分页，按条目与状态，最近抓取的在前）、`Put`、`Delete` |
-| `HistoryRepository` | `Add`、`List`（分页，最新的在前，按条目或其剧集、类型、下载 ID 与时间）、`Purge` 清除某时间之前的事件 |
+| `HistoryRepository` | `Add`、`List`（分页，最新的在前，按条目或其剧集、类型、下载 ID 与时间）、`Purge` 清除某时间之前的事件、`MoveItems`（把条目的事件交给取代它们的条目） |
 | `BlocklistRepository` | `Add`、`List`（分页，最新的在前，某条目的或全部）、`Delete` |
 | `PendingReleaseRepository` | `List` 某条目的或全部（最早的在前）、`Add`、`Delete` |
 | `RemotePathMappingRepository` | `List`、`Put`、`Delete` |
@@ -350,7 +350,7 @@ erDiagram
 
 ### 13.3 下载、历史与黑名单
 * `Download` 是被抓取的发布，从抓取起被跟踪，直到入库、失败或被忽略：其下载客户端（`PluginID`、`ClientID`）与客户端的 `DownloadID`、其条目与剧集、标题、索引器、协议、质量、语言与大小，以及 `State`（`downloading`、`import_blocked`、`import_pending`、`importing`、`imported`、`failed_pending`、`failed`、`ignored`）与 `Messages`。客户端的同一个下载只跟踪一次。
-* `HistoryEvent` 记录电影或单集（其剧集为 `ParentID`）的一次抓取、从下载目录入库、下载失败或被忽略、文件被删除或改名：发布的 `SourceTitle`、质量与语言、`DownloadID` 以及与类型相关的 `Data`。
+* `HistoryEvent` 记录电影或单集（其剧集为 `ParentID`）的一次抓取、从下载目录入库、下载失败或被忽略、文件被删除或改名：发布的 `SourceTitle`、质量与语言、`DownloadID` 以及与类型相关的 `Data`。多集文件的条目（入库或扫描发现时）取代其涵盖的各集的条目时，也接管它们的事件。
 * `BlocklistEntry` 是某条目不再抓取的发布：其标题、质量、语言、大小、协议、索引器与标志、发布日期、种子哈希以及被拉黑的原因。
 * `PendingRelease` 是留待以后抓取的发布：被 delay profile 延迟、等待下载客户端，或作为更好的发布失败时的后备。`Release` 是 `libs/acquire` 编码后的发布。
 * 删除条目时一并删除其想要状态、单集状态、下载、历史、黑名单条目与待定发布。
