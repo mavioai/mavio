@@ -117,10 +117,19 @@ type batch struct {
 	// targets are the movies or series of pending releases, which are
 	// known.
 	targets map[*acquire.Release]core.ID
+	// reasons are why pending releases are pending.
+	reasons map[*acquire.Release]core.PendingReason
 }
 
 func newBatch() *batch {
-	return &batch{of: map[*acquire.Release]*Release{}, targets: map[*acquire.Release]core.ID{}}
+	return &batch{of: map[*acquire.Release]*Release{}, targets: map[*acquire.Release]core.ID{}, reasons: map[*acquire.Release]core.PendingReason{}}
+}
+
+// waitsForClient reports whether a release is pending until a download
+// client is back, which leaves out the clients that failed recently even
+// when they all did, as Radarr's DownloadService.
+func (b *batch) waitsForClient(r *acquire.Release) bool {
+	return b.reasons[r] == core.PendingClientUnavailable
 }
 
 func (b *batch) add(r *Release) *acquire.Release {

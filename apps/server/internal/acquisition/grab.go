@@ -79,6 +79,9 @@ type grabRequest struct {
 	// fullSeason is set for releases of full seasons, which seed for the
 	// indexer's season pack seed time.
 	fullSeason bool
+	// filterBlocked is set for releases pending until a download client
+	// is back: they wait while every client has failed recently.
+	filterBlocked bool
 }
 
 // seedSettings returns how long a torrent release seeds, as Radarr's and
@@ -206,7 +209,16 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 	if g.show != nil {
 		tags = g.show.wanted.Tags
 	}
-	client, err := r.chooseClient(ctx, rel.Protocol, tags, g.pluginID, g.clientID)
+	ch := clientChoice{
+		protocol: rel.Protocol, tags: tags, pluginID: g.pluginID, clientID: g.clientID,
+		indexer: rel.IndexerName, filterBlocked: g.filterBlocked,
+	}
+	if rn != nil {
+		if ix, ok := rn.indexer(ctx, rel.IndexerRef()); ok {
+			ch.indexerClient = ix.GetDownloadClientId()
+		}
+	}
+	client, err := r.chooseClient(ctx, ch)
 	if err != nil {
 		return core.Download{}, err
 	}
