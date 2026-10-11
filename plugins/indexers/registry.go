@@ -10,15 +10,21 @@ import (
 
 	"github.com/mavioai/mavio/plugins/indexers/internal/indexer"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/avistaz"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/bithdtv"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/broadcasthenet"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/cardigann"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/filelist"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/gazelle"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/gazellegames"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/hdbits"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/hdtorrents"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/immortalseed"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/iptorrents"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/libble"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/newznab"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/norbits"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/passthepopcorn"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/pixelhd"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/speedapp"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentrss"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torznab"
@@ -33,12 +39,18 @@ func codeDefinitions() []indexer.Definition {
 	defs = append(defs, gazelle.Definitions...)
 	defs = append(defs, speedapp.Definitions...)
 	defs = append(defs,
+		bithdtv.Definition,
 		broadcasthenet.Definition,
 		filelist.Definition,
 		gazellegames.Definition,
 		hdbits.Definition,
+		hdtorrents.Definition,
+		immortalseed.Definition,
 		iptorrents.Definition,
+		libble.Definition,
+		norbits.Definition,
 		passthepopcorn.Definition,
+		pixelhd.Definition,
 	)
 	return defs
 }

@@ -420,6 +420,7 @@ flowchart TD
   - [x] GazelleGames (`internal/sites/gazellegames`), asking for the passkey on testing or on the first download
     - [ ] Its size limits (`sizesmall`, `sizeslarge`), sent once queries carry `minsize` and `maxsize`
   - [x] IPTorrents (`internal/sites/iptorrents`), scraping its pages with the cookie and User-Agent of a browser
+  - [x] BitHDTV, HD-Torrents, ImmortalSeed, Libble, NorBits and PiXELHD (`internal/sites/<name>`), scraping their pages
   - [ ] The API tokens of AvistaZ and SpeedApp sites kept across restarts, as Prowlarr keeps them in the settings; they log in again after each start
   - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
