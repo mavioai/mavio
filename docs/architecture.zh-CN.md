@@ -440,7 +440,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 
 * **服务端二进制**：`pnpm nx run server:dist` 以 `CGO_ENABLED=0` 和 `-trimpath` 将 `cmd/mavio` 交叉编译为 Linux、macOS、Windows 的 amd64 与 arm64 版本，输出到 `apps/server/dist/`；设置了 `$VERSION` 时将其写入 `internal/buildinfo`。所有二进制均为静态链接。
 * **容器镜像**（`apps/server/Dockerfile`，从仓库根目录构建）：服务端在构建机自身平台上交叉编译，因此构建 linux/amd64 与 linux/arm64 镜像时 Go 部分无需模拟。镜像在 `/usr/lib/jellyfin-ffmpeg` 内置 jellyfin-ffmpeg 便携版，即 `mise.toml` 锁定的版本，并按 GitHub 为该发布文件给出的 SHA-256 摘要校验；基础镜像为 Debian slim，附带 CA 证书与时区数据。
-* **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。DLNA 插件随服务端一起构建，并从 `/usr/lib/mavio/plugins` 播种；它在 UDP 1900 端口上的 SSDP 只有在 `--network host` 下才能到达容器。索引器插件同样从此播种；未配置索引器时它只每日拉取 Cardigann 定义。健康检查调用 `SystemService.GetHealth`。
+* **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。DLNA 插件随服务端一起构建，并从 `/usr/lib/mavio/plugins` 播种；它在 UDP 1900 端口上的 SSDP 只有在 `--network host` 下才能到达容器。索引器与下载客户端插件同样从此播种；未配置索引器时前者只每日拉取 Cardigann 定义，未配置客户端时后者什么也不做。健康检查调用 `SystemService.GetHealth`。
 
 ---
 

@@ -542,6 +542,8 @@ type DownloadClient struct {
 	xxx_hidden_RemoveFailedDownloads    bool                   `protobuf:"varint,8,opt,name=remove_failed_downloads,json=removeFailedDownloads"`
 	xxx_hidden_DisabledUntil            *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=disabled_until,json=disabledUntil"`
 	xxx_hidden_Failure                  *string                `protobuf:"bytes,10,opt,name=failure"`
+	xxx_hidden_PrefersTorrentFile       bool                   `protobuf:"varint,11,opt,name=prefers_torrent_file,json=prefersTorrentFile"`
+	xxx_hidden_Host                     *string                `protobuf:"bytes,12,opt,name=host"`
 	XXX_raceDetectHookData              protoimpl.RaceDetectHookData
 	XXX_presence                        [1]uint32
 	unknownFields                       protoimpl.UnknownFields
@@ -657,44 +659,61 @@ func (x *DownloadClient) GetFailure() string {
 	return ""
 }
 
+func (x *DownloadClient) GetPrefersTorrentFile() bool {
+	if x != nil {
+		return x.xxx_hidden_PrefersTorrentFile
+	}
+	return false
+}
+
+func (x *DownloadClient) GetHost() string {
+	if x != nil {
+		if x.xxx_hidden_Host != nil {
+			return *x.xxx_hidden_Host
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *DownloadClient) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
 }
 
 func (x *DownloadClient) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
 }
 
 func (x *DownloadClient) SetDefinitionId(v string) {
 	x.xxx_hidden_DefinitionId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 12)
 }
 
 func (x *DownloadClient) SetProtocol(v DownloadProtocol) {
 	x.xxx_hidden_Protocol = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 12)
 }
 
 func (x *DownloadClient) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 12)
 }
 
 func (x *DownloadClient) SetPriority(v int32) {
 	x.xxx_hidden_Priority = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 12)
 }
 
 func (x *DownloadClient) SetRemoveCompletedDownloads(v bool) {
 	x.xxx_hidden_RemoveCompletedDownloads = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 12)
 }
 
 func (x *DownloadClient) SetRemoveFailedDownloads(v bool) {
 	x.xxx_hidden_RemoveFailedDownloads = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 12)
 }
 
 func (x *DownloadClient) SetDisabledUntil(v *timestamppb.Timestamp) {
@@ -703,7 +722,17 @@ func (x *DownloadClient) SetDisabledUntil(v *timestamppb.Timestamp) {
 
 func (x *DownloadClient) SetFailure(v string) {
 	x.xxx_hidden_Failure = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 12)
+}
+
+func (x *DownloadClient) SetPrefersTorrentFile(v bool) {
+	x.xxx_hidden_PrefersTorrentFile = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 12)
+}
+
+func (x *DownloadClient) SetHost(v string) {
+	x.xxx_hidden_Host = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
 }
 
 func (x *DownloadClient) HasId() bool {
@@ -776,6 +805,20 @@ func (x *DownloadClient) HasFailure() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
 }
 
+func (x *DownloadClient) HasPrefersTorrentFile() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
+func (x *DownloadClient) HasHost() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
 func (x *DownloadClient) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -825,6 +868,16 @@ func (x *DownloadClient) ClearFailure() {
 	x.xxx_hidden_Failure = nil
 }
 
+func (x *DownloadClient) ClearPrefersTorrentFile() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_PrefersTorrentFile = false
+}
+
+func (x *DownloadClient) ClearHost() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_Host = nil
+}
+
 type DownloadClient_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -844,6 +897,12 @@ type DownloadClient_builder struct {
 	DisabledUntil *timestamppb.Timestamp
 	// The failure that left it out.
 	Failure *string
+	// The client takes torrent files rather than magnet links, so a
+	// release's torrent file is fetched first.
+	PrefersTorrentFile *bool
+	// The host the client runs on, which remote path mappings are kept by;
+	// empty for clients that are folders.
+	Host *string
 }
 
 func (b0 DownloadClient_builder) Build() *DownloadClient {
@@ -851,41 +910,49 @@ func (b0 DownloadClient_builder) Build() *DownloadClient {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.DefinitionId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 12)
 		x.xxx_hidden_DefinitionId = b.DefinitionId
 	}
 	if b.Protocol != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 12)
 		x.xxx_hidden_Protocol = *b.Protocol
 	}
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 12)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.Priority != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 12)
 		x.xxx_hidden_Priority = *b.Priority
 	}
 	if b.RemoveCompletedDownloads != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 12)
 		x.xxx_hidden_RemoveCompletedDownloads = *b.RemoveCompletedDownloads
 	}
 	if b.RemoveFailedDownloads != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 12)
 		x.xxx_hidden_RemoveFailedDownloads = *b.RemoveFailedDownloads
 	}
 	x.xxx_hidden_DisabledUntil = b.DisabledUntil
 	if b.Failure != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 12)
 		x.xxx_hidden_Failure = b.Failure
+	}
+	if b.PrefersTorrentFile != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 12)
+		x.xxx_hidden_PrefersTorrentFile = *b.PrefersTorrentFile
+	}
+	if b.Host != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
+		x.xxx_hidden_Host = b.Host
 	}
 	return m0
 }
@@ -1428,7 +1495,8 @@ type AddDownloadRequest_builder struct {
 	// takes the client's priority for recent releases.
 	Recent *bool
 	// The torrent file or NZB, as GetReleaseFile fetched it; empty for a
-	// magnet link.
+	// magnet link. A torrent file is sent rather than the magnet link when
+	// both are set.
 	Data []byte
 	// The file's name, for the clients that keep it.
 	FileName  *string
@@ -1566,10 +1634,13 @@ func (b0 AddDownloadResponse_builder) Build() *AddDownloadResponse {
 }
 
 type ListDownloadsRequest struct {
-	state                protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ClientIds []string               `protobuf:"bytes,1,rep,name=client_ids,json=clientIds"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ClientIds       []string               `protobuf:"bytes,1,rep,name=client_ids,json=clientIds"`
+	xxx_hidden_IncludeStatuses bool                   `protobuf:"varint,2,opt,name=include_statuses,json=includeStatuses"`
+	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
+	XXX_presence               [1]uint32
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *ListDownloadsRequest) Reset() {
@@ -1604,15 +1675,42 @@ func (x *ListDownloadsRequest) GetClientIds() []string {
 	return nil
 }
 
+func (x *ListDownloadsRequest) GetIncludeStatuses() bool {
+	if x != nil {
+		return x.xxx_hidden_IncludeStatuses
+	}
+	return false
+}
+
 func (x *ListDownloadsRequest) SetClientIds(v []string) {
 	x.xxx_hidden_ClientIds = v
+}
+
+func (x *ListDownloadsRequest) SetIncludeStatuses(v bool) {
+	x.xxx_hidden_IncludeStatuses = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *ListDownloadsRequest) HasIncludeStatuses() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ListDownloadsRequest) ClearIncludeStatuses() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_IncludeStatuses = false
 }
 
 type ListDownloadsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// The clients to list; empty for every enabled client.
+	// The clients to list; empty for every enabled client not left out
+	// after failing.
 	ClientIds []string
+	// Also tell what each client tells of itself, which costs requests.
+	IncludeStatuses *bool
 }
 
 func (b0 ListDownloadsRequest_builder) Build() *ListDownloadsRequest {
@@ -1620,6 +1718,10 @@ func (b0 ListDownloadsRequest_builder) Build() *ListDownloadsRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_ClientIds = b.ClientIds
+	if b.IncludeStatuses != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_IncludeStatuses = *b.IncludeStatuses
+	}
 	return m0
 }
 
@@ -1700,7 +1802,7 @@ type ListDownloadsResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Downloads []*Download
-	// What each listed client tells of itself.
+	// What each listed client tells of itself, when asked.
 	Statuses []*DownloadClientStatus
 	// The clients that failed, which the downloads leave out.
 	Failures []*DownloadClientFailure
@@ -2189,7 +2291,8 @@ type Download_builder struct {
 	RemainingTime *durationpb.Duration
 	// A torrent's ratio of upload to download; unset when unknown.
 	SeedRatio *float64
-	// Where the download's files are, as the client sees them.
+	// Where the download's files are, as the client sees them: remote path
+	// mappings of the client's host apply.
 	OutputPath *string
 	// What the client says of the download, such as why it failed.
 	Message *string
@@ -3136,7 +3239,7 @@ const file_mavio_plugin_v1_download_client_proto_rawDesc = "" +
 	"\x06fields\x18\x05 \x03(\v2\x1d.mavio.plugin.v1.SettingFieldR\x06fields\"\x1c\n" +
 	"\x1aListDownloadClientsRequest\"X\n" +
 	"\x1bListDownloadClientsResponse\x129\n" +
-	"\aclients\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.DownloadClientR\aclients\"\xa1\x03\n" +
+	"\aclients\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.DownloadClientR\aclients\"\xe7\x03\n" +
 	"\x0eDownloadClient\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
@@ -3148,7 +3251,9 @@ const file_mavio_plugin_v1_download_client_proto_rawDesc = "" +
 	"\x17remove_failed_downloads\x18\b \x01(\bR\x15removeFailedDownloads\x12A\n" +
 	"\x0edisabled_until\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\rdisabledUntil\x12\x18\n" +
 	"\afailure\x18\n" +
-	" \x01(\tR\afailure\"\x82\x01\n" +
+	" \x01(\tR\afailure\x120\n" +
+	"\x14prefers_torrent_file\x18\v \x01(\bR\x12prefersTorrentFile\x12\x12\n" +
+	"\x04host\x18\f \x01(\tR\x04host\"\x82\x01\n" +
 	"\x19TestDownloadClientRequest\x12\x1b\n" +
 	"\tclient_id\x18\x01 \x01(\tR\bclientId\x12#\n" +
 	"\rdefinition_id\x18\x02 \x01(\tR\fdefinitionId\x12#\n" +
@@ -3171,10 +3276,11 @@ const file_mavio_plugin_v1_download_client_proto_rawDesc = "" +
 	" \x01(\v2\x19.google.protobuf.DurationR\bseedTime\"6\n" +
 	"\x13AddDownloadResponse\x12\x1f\n" +
 	"\vdownload_id\x18\x01 \x01(\tR\n" +
-	"downloadId\"5\n" +
+	"downloadId\"`\n" +
 	"\x14ListDownloadsRequest\x12\x1d\n" +
 	"\n" +
-	"client_ids\x18\x01 \x03(\tR\tclientIds\"\xd7\x01\n" +
+	"client_ids\x18\x01 \x03(\tR\tclientIds\x12)\n" +
+	"\x10include_statuses\x18\x02 \x01(\bR\x0fincludeStatuses\"\xd7\x01\n" +
 	"\x15ListDownloadsResponse\x127\n" +
 	"\tdownloads\x18\x01 \x03(\v2\x19.mavio.plugin.v1.DownloadR\tdownloads\x12A\n" +
 	"\bstatuses\x18\x02 \x03(\v2%.mavio.plugin.v1.DownloadClientStatusR\bstatuses\x12B\n" +
