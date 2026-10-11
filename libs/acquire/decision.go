@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"fmt"
+	"log/slog"
 	"slices"
 	"strings"
 	"time"
@@ -312,6 +313,16 @@ func (e *Env) terms() *TermMatcher {
 type Engine struct {
 	Env   *Env
 	Specs []Spec
+	// Logger logs releases that could not be processed; nil logs
+	// nothing.
+	Logger *slog.Logger
+}
+
+func (e *Engine) logger() *slog.Logger {
+	if e.Logger != nil {
+		return e.Logger
+	}
+	return slog.New(slog.DiscardHandler)
 }
 
 // Evaluate runs the specifications on a candidate by priority, stopping

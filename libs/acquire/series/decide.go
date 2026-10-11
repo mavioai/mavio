@@ -3,7 +3,6 @@ package series
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"slices"
 	"strings"
 
@@ -73,8 +72,8 @@ func sourceOf(s *Search, pushed bool) acquire.Source {
 }
 
 // failed returns the decision on a release that could not be processed.
-func failed(ctx context.Context, r *acquire.Release, err error) Decision {
-	slog.ErrorContext(ctx, "couldn't process release", "release", r.Title, "error", err)
+func (e *Engine) failed(ctx context.Context, r *acquire.Release, err error) Decision {
+	e.logger().ErrorContext(ctx, "couldn't process release", "release", r.Title, "error", err)
 	return Decision{
 		Candidate:  NewCandidate(r, nil, nil, nil),
 		Rejections: []acquire.Rejection{{Reason: acquire.ReasonError, Message: "Unexpected error processing release"}},
@@ -86,7 +85,7 @@ func (e *Engine) decideEpisode(ctx context.Context, r *acquire.Release, s *Searc
 	if (parsed == nil || parsed.IsPossibleSpecialEpisode()) && special != nil {
 		sp, err := special(ctx, parsed, r, s)
 		if err != nil {
-			return failed(ctx, r, err), true
+			return e.failed(ctx, r, err), true
 		}
 		if sp != nil {
 			parsed = sp
@@ -97,7 +96,7 @@ func (e *Engine) decideEpisode(ctx context.Context, r *acquire.Release, s *Searc
 	if parsed != nil && strings.TrimSpace(parsed.SeriesTitle) != "" {
 		m, err := find(ctx, parsed, r, s)
 		if err != nil {
-			return failed(ctx, r, err), true
+			return e.failed(ctx, r, err), true
 		}
 		if m == nil {
 			m = &Match{}
@@ -119,7 +118,7 @@ func (e *Engine) decideEpisode(ctx context.Context, r *acquire.Release, s *Searc
 			d = Decision{Candidate: c, Rejections: []acquire.Rejection{{Reason: ReasonUnknownEpisode, Message: "Unable to identify correct episode(s) using release name and scene mappings"}}}
 		default:
 			if err := e.augment(ctx, c); err != nil {
-				return failed(ctx, r, err), true
+				return e.failed(ctx, r, err), true
 			}
 			d = e.Evaluate(ctx, c, s)
 		}
