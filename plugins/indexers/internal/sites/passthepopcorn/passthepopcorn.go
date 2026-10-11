@@ -153,6 +153,8 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		p.Set("page", strconv.Itoa(q.Offset/q.Limit+1))
 	}
 	r := indexer.NewRequest(strings.TrimRight(strings.TrimSpace(s.baseURL), "/")+"/torrents.php?"+p.Encode(), indexer.AcceptJSON)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
 	s.authorize(r)
 	r.AllowedStatus = []int{http.StatusTooManyRequests}
 	c.AddRequests(r)

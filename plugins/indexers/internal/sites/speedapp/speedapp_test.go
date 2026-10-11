@@ -118,6 +118,10 @@ func TestSearchRequests(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			// Prowlarr's IndexerRequests of URLs follow redirects.
+			if r := c.First(); r != nil && !r.FollowRedirects {
+				t.Errorf("FollowRedirects = false, want = true")
+			}
 			if got := c.First().URL; got != tt.want {
 				t.Errorf("URL = %q, want = %q", got, tt.want)
 			}
@@ -290,6 +294,31 @@ func TestDownload(t *testing.T) {
 		}
 		if string(data) != "d4:infod" || logins != 1 {
 			t.Errorf("Download() = %q with %d logins, want = %q with 1", data, logins, "d4:infod")
+		}
+	})
+}
+
+// TestLoginFollowsRedirects checks that logins follow redirects, as
+// Prowlarr's login request, built with AllowAutoRedirect, does.
+func TestLoginFollowsRedirects(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		ix := newIndexer(t, "speedapp", testSettings, func(r *http.Request) *http.Response {
+			switch r.URL.Path {
+			case "/api/login":
+				return &http.Response{StatusCode: http.StatusTemporaryRedirect, Header: http.Header{"Location": {"/api/v2/login"}}, Body: http.NoBody}
+			case "/api/v2/login":
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want = POST", r.Method)
+				}
+				return jsonResponse(http.StatusOK, `{"token":"tok"}`)
+			}
+			return jsonResponse(http.StatusNotFound, "")
+		})
+		if err := ix.Site.(indexer.LoginSite).Login(context.Background(), ix); err != nil {
+			t.Fatal(err)
+		}
+		if got := ix.Site.(*Site).getToken(); got != "tok" {
+			t.Errorf("token = %q, want = tok", got)
 		}
 	})
 }

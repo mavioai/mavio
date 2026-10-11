@@ -82,6 +82,10 @@ func TestSearchRequests(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			// Prowlarr's IndexerRequests of URLs follow redirects.
+			if r := c.First(); r != nil && !r.FollowRedirects {
+				t.Errorf("FollowRedirects = false, want = true")
+			}
 			r := c.First()
 			if tt.story == "" {
 				if r.URL != "https://tr.anidub.com/" || r.Method != "" && r.Method != http.MethodGet {
@@ -271,4 +275,28 @@ func TestLoginNeeded(t *testing.T) {
 			t.Errorf("LoginNeeded(%q) = %v, want = %v", tt.body, got, tt.want)
 		}
 	}
+}
+
+// TestLoginMainPageFollowsRedirects checks that the main page is fetched
+// following redirects, as Prowlarr's new HttpRequest(BaseUrl) is.
+func TestLoginMainPageFollowsRedirects(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		var cookie string
+		ix := newIndexer(t, func(r *http.Request) *http.Response {
+			switch {
+			case r.Method == http.MethodPost:
+				cookie = r.Header.Get("Cookie")
+				return html200(`<a href="index.php?action=logout">Выход</a>`, "dle_user_id=42; Path=/")
+			case r.URL.Path == "/":
+				return &http.Response{StatusCode: http.StatusFound, Header: http.Header{"Location": {"/home/"}}, Body: http.NoBody}
+			}
+			return html200("<html></html>", "PHPSESSID=abc; Path=/")
+		})
+		if err := ix.Site.(indexer.LoginSite).Login(context.Background(), ix); err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(cookie, "PHPSESSID=abc") {
+			t.Errorf("Cookie = %q, want = the main page's", cookie)
+		}
+	})
 }

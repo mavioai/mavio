@@ -143,6 +143,8 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		parts = append(parts, "categories[]="+indexer.URLEncode(c))
 	}
 	r := indexer.NewRequest(s.baseURL+"api/torrent?"+strings.Join(parts, "&"), indexer.AcceptJSON)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
 	s.ModifyRequest(r)
 	var c indexer.Chain
 	c.AddRequests(r)
@@ -183,6 +185,8 @@ func (s *Site) newToken(ctx context.Context, ix *indexer.Indexer) (string, error
 		return "", err
 	}
 	r := indexer.NewRequest(s.baseURL+"api/login", indexer.AcceptJSON)
+	// Prowlarr builds the login with AllowAutoRedirect.
+	r.FollowRedirects = true
 	r.Method = http.MethodPost
 	r.Body = body
 	r.Header.Set("Content-Type", "application/json")

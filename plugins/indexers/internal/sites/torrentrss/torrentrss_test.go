@@ -1,6 +1,7 @@
 package torrentrss
 
 import (
+	"context"
 	"errors"
 	"math"
 	"net/http"
@@ -343,5 +344,25 @@ func TestParserFactory(t *testing.T) {
 	}
 	if calls != 2 {
 		t.Errorf("detections for other settings got = %d, want = 2", calls)
+	}
+}
+
+// TestSearchFollowsRedirects checks that the feed is fetched following
+// redirects, as Prowlarr's IndexerRequest of its URL is.
+func TestSearchFollowsRedirects(t *testing.T) {
+	site, err := New(Settings{BaseURL: feedURL})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, err := site.SearchRequests(context.Background(), nil, &indexer.Query{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := c.First()
+	if r == nil {
+		t.Fatal("no request, want = one")
+	}
+	if !r.FollowRedirects {
+		t.Errorf("FollowRedirects = false, want = true")
 	}
 }

@@ -90,6 +90,10 @@ func TestSearchRequests(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			// Prowlarr's IndexerRequests of URLs follow redirects.
+			if r := c.First(); r != nil && !r.FollowRedirects {
+				t.Errorf("FollowRedirects = false, want = true")
+			}
 			r := c.First()
 			if r.URL != tt.want {
 				t.Errorf("URL = %q, want = %q", r.URL, tt.want)
@@ -294,4 +298,29 @@ func TestLogin(t *testing.T) {
 			})
 		})
 	}
+}
+
+// TestLoginPageFollowsRedirects checks that the login page is fetched
+// following redirects, as Prowlarr's new HttpRequest(loginUrl) is.
+func TestLoginPageFollowsRedirects(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		var form url.Values
+		ix := newIndexer(t, Settings{}, func(r *http.Request) *http.Response {
+			switch {
+			case r.Method == http.MethodPost:
+				b, _ := io.ReadAll(r.Body)
+				form, _ = url.ParseQuery(string(b))
+				return html200(`<a href="logout.php">Logout</a>`, "uid=7; Path=/")
+			case r.URL.Path == "/login.php":
+				return &http.Response{StatusCode: http.StatusFound, Header: http.Header{"Location": {"/login2.php"}}, Body: http.NoBody}
+			}
+			return html200(`<form id="loginForm"><input name="loginKey" value="k3y"></form>`, "PHPSESSID=abc; Path=/")
+		})
+		if err := ix.Site.(indexer.LoginSite).Login(context.Background(), ix); err != nil {
+			t.Fatal(err)
+		}
+		if got := form.Get("loginKey"); got != "k3y" {
+			t.Errorf("loginKey = %q, want = k3y", got)
+		}
+	})
 }

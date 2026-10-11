@@ -185,6 +185,8 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 	}
 	u += indexer.URLEncode(term)
 	r := indexer.NewRequest(u, indexer.AcceptRSS)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
 	r.Cookies = s.cookies()
 	var c indexer.Chain
 	c.AddRequests(r)

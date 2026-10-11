@@ -187,6 +187,8 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		p.Set("freeleech", "1")
 	}
 	r := indexer.NewRequest(strings.TrimRight(s.baseURL, "/")+"/api.php?"+p.Encode(), indexer.AcceptJSON)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
 	auth := strings.TrimSpace(s.settings.Username) + ":" + strings.TrimSpace(s.settings.Passkey)
 	r.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(auth)))
 	c.AddRequests(r)

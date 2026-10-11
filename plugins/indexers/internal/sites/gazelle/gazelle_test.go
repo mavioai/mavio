@@ -519,6 +519,11 @@ func TestAPISearchRequests(t *testing.T) {
 			var got string
 			if r := chain.First(); r != nil {
 				got = r.URL
+				// Redacted's searches are IndexerRequests of URLs, which
+				// follow redirects; Orpheus's are built, which do not.
+				if want := tt.id == "redacted"; r.FollowRedirects != want {
+					t.Errorf("FollowRedirects = %t, want = %t", r.FollowRedirects, want)
+				}
 			}
 			if got != tt.want {
 				t.Errorf("URL = %q, want = %q", got, tt.want)

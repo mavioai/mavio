@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/indexers/internal/indexer"
@@ -103,6 +104,10 @@ func TestSearchRequests(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			// Prowlarr's IndexerRequests of URLs follow redirects.
+			if r := c.First(); r != nil && !r.FollowRedirects {
+				t.Errorf("FollowRedirects = false, want = true")
+			}
 			r := c.First()
 			if r.URL != tt.want {
 				t.Errorf("URL = %q, want = %q", r.URL, tt.want)
@@ -196,6 +201,29 @@ func TestParse(t *testing.T) {
 	if want := before.Add(-150 * time.Minute); r.PublishDate.Sub(want).Abs() > time.Minute {
 		t.Errorf("PublishDate = %v, want = %v", r.PublishDate, want)
 	}
+}
+
+// TestSearchFollowsRedirects checks that searches follow redirects, as
+// Prowlarr's IndexerRequests of URLs do in production.
+func TestSearchFollowsRedirects(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		ix := newIndexer(t, testSettings, func(r *http.Request) *http.Response {
+			if r.URL.Path == "/t" {
+				return &http.Response{StatusCode: http.StatusFound, Header: http.Header{"Location": {"/t/moved"}}, Body: http.NoBody}
+			}
+			return respond(page)(r)
+		})
+		releases, err := ix.Search(context.Background(), &indexer.Query{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(releases) != 2 {
+			t.Fatalf("releases = %d, want = 2", len(releases))
+		}
+		if got, want := releases[0].DownloadURL, "https://iptorrents.com/download.php/4123456/The.Show.S02E01.720p.HDTV.x264-GRP.torrent"; got != want {
+			t.Errorf("DownloadURL = %q, want = %q", got, want)
+		}
+	})
 }
 
 func equal(a, b any) bool {

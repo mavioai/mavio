@@ -265,6 +265,8 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		u += "?" + strings.Join(parts, "&")
 	}
 	r := indexer.NewRequest(u, indexer.AcceptHTML)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
 	r.Cookies = indexer.ParseCookieHeader(s.settings.Cookie)
 	r.Header.Set("User-Agent", s.settings.UserAgent)
 	var c indexer.Chain

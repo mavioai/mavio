@@ -199,6 +199,10 @@ func TestSearchRequests(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			// Prowlarr's IndexerRequests of URLs follow redirects.
+			if r := c.First(); r != nil && !r.FollowRedirects {
+				t.Errorf("FollowRedirects = false, want = true")
+			}
 			if got := c.First().URL; got != tt.want {
 				t.Errorf("URL = %q, want = %q", got, tt.want)
 			}

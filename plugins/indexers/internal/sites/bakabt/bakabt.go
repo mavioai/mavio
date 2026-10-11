@@ -122,7 +122,10 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		term = m[1]
 	}
 	var c indexer.Chain
-	c.AddRequests(indexer.NewRequest(u+indexer.URLEncode(term), ""))
+	r := indexer.NewRequest(u+indexer.URLEncode(term), "")
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
+	c.AddRequests(r)
 	return &c, nil
 }
 
@@ -143,7 +146,9 @@ var (
 func (s *Site) Login(ctx context.Context, ix *indexer.Indexer) error {
 	ix.SetCookies(nil, time.Time{})
 	loginURL := s.baseURL + "login.php"
-	page, err := ix.Do(ctx, indexer.NewRequest(loginURL, ""))
+	pageReq := indexer.NewRequest(loginURL, "")
+	pageReq.FollowRedirects = true // new HttpRequest(loginUrl) follows redirects.
+	page, err := ix.Do(ctx, pageReq)
 	if err != nil {
 		return fmt.Errorf("bakabt login: %w", err)
 	}

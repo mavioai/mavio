@@ -242,6 +242,8 @@ func (s *Site) request(p *query) *indexer.Request {
 		parts[i] = e.key + "=" + indexer.URLEncode(e.value)
 	}
 	r := indexer.NewRequest(s.baseURL+"api/v1/jackett/torrents?"+strings.Join(parts, "&"), indexer.AcceptJSON)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
 	r.Header.Set("Authorization", "Bearer "+s.getToken())
 	r.AllowedStatus = []int{http.StatusNotFound}
 	return r

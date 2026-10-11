@@ -259,7 +259,10 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		p.Set("hentai", "0")
 	}
 	var c indexer.Chain
-	c.AddRequests(indexer.NewRequest(strings.TrimRight(s.baseURL, "/")+"/scrape.php?"+p.Encode(), indexer.AcceptJSON))
+	r := indexer.NewRequest(strings.TrimRight(s.baseURL, "/")+"/scrape.php?"+p.Encode(), indexer.AcceptJSON)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
+	c.AddRequests(r)
 	return &c, nil
 }
 

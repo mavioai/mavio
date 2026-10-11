@@ -171,7 +171,10 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		}
 		u += "&lang_id=" + strings.Join(ids, ",")
 	}
-	c.AddRequests(indexer.NewRequest(u, indexer.AcceptHTML))
+	r := indexer.NewRequest(u, indexer.AcceptHTML)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
+	c.AddRequests(r)
 	return &c, nil
 }
 

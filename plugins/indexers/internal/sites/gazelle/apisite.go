@@ -28,6 +28,8 @@ type apiSite struct {
 	// fuzzyGroupTime reads the times of groups listed as torrents that
 	// are not Unix times as fuzzy dates, instead of as the epoch.
 	fuzzyGroupTime bool
+	// followRedirects is whether searches follow redirects.
+	followRedirects bool
 }
 
 // APISettings are the settings of a site searched with an API key.
@@ -147,6 +149,7 @@ func (s *APISite) SearchRequests(_ context.Context, _ *indexer.Indexer, q *index
 	}
 	r := indexer.NewRequest(s.baseURL+"ajax.php?"+p.Encode(), indexer.AcceptJSON)
 	r.Header.Set("Authorization", s.authorization(s.settings.APIKey))
+	r.FollowRedirects = s.followRedirects
 	c.AddRequests(r)
 	return &c, nil
 }
