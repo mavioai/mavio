@@ -421,6 +421,9 @@ flowchart TD
     - [ ] Its size limits (`sizesmall`, `sizeslarge`), sent once queries carry `minsize` and `maxsize`
   - [x] IPTorrents (`internal/sites/iptorrents`), scraping its pages with the cookie and User-Agent of a browser
   - [x] BitHDTV, HD-Torrents, ImmortalSeed, Libble, NorBits and PiXELHD (`internal/sites/<name>`), scraping their pages
+  - [x] Headphones, Knaben, NzbIndex, RuTracker, TorrentPotato and TorrentsCSV (`internal/sites/<name>`)
+    - [ ] Downloaded NZBs checked before they are sent on, as Prowlarr's NZB validation does, for NzbIndex, Headphones and Newznab
+    - [ ] RuTracker's login captcha, which fails automatic logins as no UI shows it yet
   - [ ] The API tokens of AvistaZ and SpeedApp sites kept across restarts, as Prowlarr keeps them in the settings; they log in again after each start
   - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
