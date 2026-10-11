@@ -18,8 +18,8 @@ mod store;
 mod view;
 
 pub use client::{
-    Core, CreditEntry, Details, DownloadEntry, Filter, HomeObserver, Libraries, LibraryEntry,
-    LibraryType, Listener, Page, SearchResults, Sort, Source,
+    AudioStream, Core, CreditEntry, Details, DownloadEntry, Filter, HomeObserver, Libraries,
+    LibraryEntry, LibraryType, Listener, Page, SearchResults, Sort, Source,
 };
 pub use connection::{Connection, DEFAULT_PORT, parse_address};
 pub use discovery::{DISCOVERY_PORT, FoundServer, discover};
