@@ -1000,6 +1000,11 @@ pub struct Indexer {
     ///
     /// Field 18: `reject_blocklisted_torrent_hashes`
     pub reject_blocklisted_torrent_hashes: ::core::option::Option<bool>,
+    /// Anime is searched for by season and episode too, and season packs of
+    /// anime by season, as Sonarr's AnimeStandardFormatSearch.
+    ///
+    /// Field 19: `anime_standard_format_search`
+    pub anime_standard_format_search: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1027,6 +1032,7 @@ impl ::core::fmt::Debug for Indexer {
                 "reject_blocklisted_torrent_hashes",
                 &self.reject_blocklisted_torrent_hashes,
             )
+            .field("anime_standard_format_search", &self.anime_standard_format_search)
             .finish()
     }
 }
@@ -1130,6 +1136,13 @@ impl Indexer {
         self.reject_blocklisted_torrent_hashes = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::anime_standard_format_search`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_anime_standard_format_search(mut self, value: bool) -> Self {
+        self.anime_standard_format_search = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Indexer);
 impl ::buffa::MessageName for Indexer {
@@ -1225,6 +1238,9 @@ impl ::buffa::Message for Indexer {
         if self.reject_blocklisted_torrent_hashes.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.anime_standard_format_search.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1308,6 +1324,9 @@ impl ::buffa::Message for Indexer {
         }
         if let Some(v) = self.reject_blocklisted_torrent_hashes {
             ::buffa::types::put_bool_field(18u32, v, buf);
+        }
+        if let Some(v) = self.anime_standard_format_search {
+            ::buffa::types::put_bool_field(19u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1504,6 +1523,15 @@ impl ::buffa::Message for Indexer {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.anime_standard_format_search = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1530,6 +1558,7 @@ impl ::buffa::Message for Indexer {
         self.seed_time = ::buffa::MessageField::none();
         self.season_pack_seed_time = ::buffa::MessageField::none();
         self.reject_blocklisted_torrent_hashes = ::core::option::Option::None;
+        self.anime_standard_format_search = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

@@ -1423,6 +1423,11 @@ pub struct IndexerView<'a> {
     ///
     /// Field 18: `reject_blocklisted_torrent_hashes`
     pub reject_blocklisted_torrent_hashes: ::core::option::Option<bool>,
+    /// Anime is searched for by season and episode too, and season packs of
+    /// anime by season, as Sonarr's AnimeStandardFormatSearch.
+    ///
+    /// Field 19: `anime_standard_format_search`
+    pub anime_standard_format_search: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for IndexerView<'a> {
@@ -1622,6 +1627,15 @@ impl<'a> ::buffa::MessageView<'a> for IndexerView<'a> {
                     ::buffa::types::decode_bool(&mut cur)?,
                 );
             }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.anime_standard_format_search = Some(
+                    ::buffa::types::decode_bool(&mut cur)?,
+                );
+            }
             11u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -1731,6 +1745,7 @@ impl<'a> ::buffa::MessageView<'a> for IndexerView<'a> {
                 None => ::buffa::MessageField::none(),
             },
             reject_blocklisted_torrent_hashes: self.reject_blocklisted_torrent_hashes,
+            anime_standard_format_search: self.anime_standard_format_search,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1814,6 +1829,9 @@ impl<'a> ::buffa::ViewEncode<'a> for IndexerView<'a> {
                     + inner_size as u64;
         }
         if self.reject_blocklisted_torrent_hashes.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.anime_standard_format_search.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -1900,6 +1918,9 @@ impl<'a> ::buffa::ViewEncode<'a> for IndexerView<'a> {
         }
         if let Some(v) = self.reject_blocklisted_torrent_hashes {
             ::buffa::types::put_bool_field(18u32, v, buf);
+        }
+        if let Some(v) = self.anime_standard_format_search {
+            ::buffa::types::put_bool_field(19u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2125,6 +2146,14 @@ impl IndexerOwnedView {
     #[must_use]
     pub fn reject_blocklisted_torrent_hashes(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().reject_blocklisted_torrent_hashes
+    }
+    /// Anime is searched for by season and episode too, and season packs of
+    /// anime by season, as Sonarr's AnimeStandardFormatSearch.
+    ///
+    /// Field 19: `anime_standard_format_search`
+    #[must_use]
+    pub fn anime_standard_format_search(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().anime_standard_format_search
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<IndexerView<'static>>>

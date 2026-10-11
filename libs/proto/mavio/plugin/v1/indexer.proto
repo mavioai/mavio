@@ -117,6 +117,9 @@ message Indexer {
   // Torrents of the indexer whose hash is blocklisted are refused when
   // grabbed, even though their hash was not known when they were chosen.
   bool reject_blocklisted_torrent_hashes = 18;
+  // Anime is searched for by season and episode too, and season packs of
+  // anime by season, as Sonarr's AnimeStandardFormatSearch.
+  bool anime_standard_format_search = 19;
 }
 
 // IndexerCapabilities is what an indexer can be searched by, as Newznab's

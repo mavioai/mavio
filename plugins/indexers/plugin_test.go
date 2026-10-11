@@ -201,7 +201,7 @@ func TestTorznabIndexer(t *testing.T) {
 			map[string]any{
 				"id": "tosho", "definition": "torznab", "settings": map[string]any{"base_url": srv.URL},
 				"tags": []any{"anime"}, "required_flags": []any{"freeleech"}, "minimum_seeders": 3, "multi_languages": []any{"French", "Original"},
-				"seed_ratio": 1.5, "seed_time": 60, "season_pack_seed_time": 120, "reject_blocklisted_torrent_hashes": true,
+				"seed_ratio": 1.5, "seed_time": 60, "season_pack_seed_time": 120, "reject_blocklisted_torrent_hashes": true, "anime_standard_format_search": true,
 			},
 			map[string]any{"id": "off", "definition": "torznab", "enabled": false, "settings": map[string]any{"base_url": srv.URL}},
 			map[string]any{"id": "broken", "definition": "nosuchdefinition"},
@@ -237,6 +237,8 @@ func TestTorznabIndexer(t *testing.T) {
 		{"SeedRatio", tosho.GetSeedRatio(), 1.5},
 		{"SeedTime", tosho.GetSeedTime().AsDuration(), time.Hour},
 		{"SeasonPackSeedTime", tosho.GetSeasonPackSeedTime().AsDuration(), 2 * time.Hour},
+		{"AnimeStandardFormatSearch", tosho.GetAnimeStandardFormatSearch(), true},
+		{"off AnimeStandardFormatSearch", list.GetIndexers()[1].GetAnimeStandardFormatSearch(), false},
 		{"off MinimumSeeders", list.GetIndexers()[1].GetMinimumSeeders(), int32(1)},
 		{"off HasSeedRatio", list.GetIndexers()[1].HasSeedRatio(), false},
 		{"off HasSeedTime", list.GetIndexers()[1].HasSeedTime(), false},
