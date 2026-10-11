@@ -231,6 +231,121 @@ func (x ColonReplacement) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// MultiEpisodeStyle is how the name of a file of several episodes writes
+// their numbers, shown for episodes 6 to 8 of season 15.
+type MultiEpisodeStyle int32
+
+const (
+	MultiEpisodeStyle_MULTI_EPISODE_STYLE_UNSPECIFIED MultiEpisodeStyle = 0
+	// S15E06-07-08.
+	MultiEpisodeStyle_MULTI_EPISODE_STYLE_EXTEND MultiEpisodeStyle = 1
+	// S15E06 - S15E07 - S15E08.
+	MultiEpisodeStyle_MULTI_EPISODE_STYLE_DUPLICATE MultiEpisodeStyle = 2
+	// S15E06E07E08.
+	MultiEpisodeStyle_MULTI_EPISODE_STYLE_REPEAT MultiEpisodeStyle = 3
+	// S15E06-E07-E08.
+	MultiEpisodeStyle_MULTI_EPISODE_STYLE_SCENE MultiEpisodeStyle = 4
+	// S15E06-08.
+	MultiEpisodeStyle_MULTI_EPISODE_STYLE_RANGE MultiEpisodeStyle = 5
+	// S15E06-E08.
+	MultiEpisodeStyle_MULTI_EPISODE_STYLE_PREFIXED_RANGE MultiEpisodeStyle = 6
+)
+
+// Enum value maps for MultiEpisodeStyle.
+var (
+	MultiEpisodeStyle_name = map[int32]string{
+		0: "MULTI_EPISODE_STYLE_UNSPECIFIED",
+		1: "MULTI_EPISODE_STYLE_EXTEND",
+		2: "MULTI_EPISODE_STYLE_DUPLICATE",
+		3: "MULTI_EPISODE_STYLE_REPEAT",
+		4: "MULTI_EPISODE_STYLE_SCENE",
+		5: "MULTI_EPISODE_STYLE_RANGE",
+		6: "MULTI_EPISODE_STYLE_PREFIXED_RANGE",
+	}
+	MultiEpisodeStyle_value = map[string]int32{
+		"MULTI_EPISODE_STYLE_UNSPECIFIED":    0,
+		"MULTI_EPISODE_STYLE_EXTEND":         1,
+		"MULTI_EPISODE_STYLE_DUPLICATE":      2,
+		"MULTI_EPISODE_STYLE_REPEAT":         3,
+		"MULTI_EPISODE_STYLE_SCENE":          4,
+		"MULTI_EPISODE_STYLE_RANGE":          5,
+		"MULTI_EPISODE_STYLE_PREFIXED_RANGE": 6,
+	}
+)
+
+func (x MultiEpisodeStyle) Enum() *MultiEpisodeStyle {
+	p := new(MultiEpisodeStyle)
+	*p = x
+	return p
+}
+
+func (x MultiEpisodeStyle) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (MultiEpisodeStyle) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_system_v1_system_proto_enumTypes[4].Descriptor()
+}
+
+func (MultiEpisodeStyle) Type() protoreflect.EnumType {
+	return &file_mavio_system_v1_system_proto_enumTypes[4]
+}
+
+func (x MultiEpisodeStyle) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// EpisodeTitleRequired is when an episode imported under a name showing
+// its title must have one.
+type EpisodeTitleRequired int32
+
+const (
+	EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_UNSPECIFIED EpisodeTitleRequired = 0
+	// Of episodes aired within the last two days.
+	EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_ALWAYS EpisodeTitleRequired = 1
+	// As always, but not of the episodes of a season released at once.
+	EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES EpisodeTitleRequired = 2
+	EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_NEVER                EpisodeTitleRequired = 3
+)
+
+// Enum value maps for EpisodeTitleRequired.
+var (
+	EpisodeTitleRequired_name = map[int32]string{
+		0: "EPISODE_TITLE_REQUIRED_UNSPECIFIED",
+		1: "EPISODE_TITLE_REQUIRED_ALWAYS",
+		2: "EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES",
+		3: "EPISODE_TITLE_REQUIRED_NEVER",
+	}
+	EpisodeTitleRequired_value = map[string]int32{
+		"EPISODE_TITLE_REQUIRED_UNSPECIFIED":          0,
+		"EPISODE_TITLE_REQUIRED_ALWAYS":               1,
+		"EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES": 2,
+		"EPISODE_TITLE_REQUIRED_NEVER":                3,
+	}
+)
+
+func (x EpisodeTitleRequired) Enum() *EpisodeTitleRequired {
+	p := new(EpisodeTitleRequired)
+	*p = x
+	return p
+}
+
+func (x EpisodeTitleRequired) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (EpisodeTitleRequired) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_system_v1_system_proto_enumTypes[5].Descriptor()
+}
+
+func (EpisodeTitleRequired) Type() protoreflect.EnumType {
+	return &file_mavio_system_v1_system_proto_enumTypes[5]
+}
+
+func (x EpisodeTitleRequired) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 type LogLevel int32
 
 const (
@@ -270,11 +385,11 @@ func (x LogLevel) String() string {
 }
 
 func (LogLevel) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_system_v1_system_proto_enumTypes[4].Descriptor()
+	return file_mavio_system_v1_system_proto_enumTypes[6].Descriptor()
 }
 
 func (LogLevel) Type() protoreflect.EnumType {
-	return &file_mavio_system_v1_system_proto_enumTypes[4]
+	return &file_mavio_system_v1_system_proto_enumTypes[6]
 }
 
 func (x LogLevel) Number() protoreflect.EnumNumber {
@@ -314,11 +429,11 @@ func (x GetHealthResponse_Status) String() string {
 }
 
 func (GetHealthResponse_Status) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_system_v1_system_proto_enumTypes[5].Descriptor()
+	return file_mavio_system_v1_system_proto_enumTypes[7].Descriptor()
 }
 
 func (GetHealthResponse_Status) Type() protoreflect.EnumType {
-	return &file_mavio_system_v1_system_proto_enumTypes[5]
+	return &file_mavio_system_v1_system_proto_enumTypes[7]
 }
 
 func (x GetHealthResponse_Status) Number() protoreflect.EnumNumber {
@@ -3985,7 +4100,7 @@ func (b0 MetadataSettings_builder) Build() *MetadataSettings {
 }
 
 // AcquisitionSettings are how releases are chosen, downloaded and
-// imported, as Radarr's settings.
+// imported, as Radarr's and Sonarr's settings.
 type AcquisitionSettings struct {
 	state                                                protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Propers                                   ProperDownload         `protobuf:"varint,1,opt,name=propers,enum=mavio.system.v1.ProperDownload"`
@@ -4014,8 +4129,18 @@ type AcquisitionSettings struct {
 	xxx_hidden_MovieFolderFormat                         *string                `protobuf:"bytes,24,opt,name=movie_folder_format,json=movieFolderFormat"`
 	xxx_hidden_StandardMovieFormat                       *string                `protobuf:"bytes,25,opt,name=standard_movie_format,json=standardMovieFormat"`
 	xxx_hidden_AutoRedownloadFailedFromInteractiveSearch bool                   `protobuf:"varint,26,opt,name=auto_redownload_failed_from_interactive_search,json=autoRedownloadFailedFromInteractiveSearch"`
+	xxx_hidden_RenameEpisodes                            bool                   `protobuf:"varint,40,opt,name=rename_episodes,json=renameEpisodes"`
+	xxx_hidden_StandardEpisodeFormat                     *string                `protobuf:"bytes,41,opt,name=standard_episode_format,json=standardEpisodeFormat"`
+	xxx_hidden_DailyEpisodeFormat                        *string                `protobuf:"bytes,42,opt,name=daily_episode_format,json=dailyEpisodeFormat"`
+	xxx_hidden_AnimeEpisodeFormat                        *string                `protobuf:"bytes,43,opt,name=anime_episode_format,json=animeEpisodeFormat"`
+	xxx_hidden_SeriesFolderFormat                        *string                `protobuf:"bytes,44,opt,name=series_folder_format,json=seriesFolderFormat"`
+	xxx_hidden_SeasonFolderFormat                        *string                `protobuf:"bytes,45,opt,name=season_folder_format,json=seasonFolderFormat"`
+	xxx_hidden_SpecialsFolderFormat                      *string                `protobuf:"bytes,46,opt,name=specials_folder_format,json=specialsFolderFormat"`
+	xxx_hidden_MultiEpisodeStyle                         MultiEpisodeStyle      `protobuf:"varint,47,opt,name=multi_episode_style,json=multiEpisodeStyle,enum=mavio.system.v1.MultiEpisodeStyle"`
+	xxx_hidden_AutoUnmonitorPreviouslyDownloadedEpisodes bool                   `protobuf:"varint,48,opt,name=auto_unmonitor_previously_downloaded_episodes,json=autoUnmonitorPreviouslyDownloadedEpisodes"`
+	xxx_hidden_EpisodeTitleRequired                      EpisodeTitleRequired   `protobuf:"varint,49,opt,name=episode_title_required,json=episodeTitleRequired,enum=mavio.system.v1.EpisodeTitleRequired"`
 	XXX_raceDetectHookData                               protoimpl.RaceDetectHookData
-	XXX_presence                                         [1]uint32
+	XXX_presence                                         [2]uint32
 	unknownFields                                        protoimpl.UnknownFields
 	sizeCache                                            protoimpl.SizeCache
 }
@@ -4240,44 +4365,136 @@ func (x *AcquisitionSettings) GetAutoRedownloadFailedFromInteractiveSearch() boo
 	return false
 }
 
+func (x *AcquisitionSettings) GetRenameEpisodes() bool {
+	if x != nil {
+		return x.xxx_hidden_RenameEpisodes
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetStandardEpisodeFormat() string {
+	if x != nil {
+		if x.xxx_hidden_StandardEpisodeFormat != nil {
+			return *x.xxx_hidden_StandardEpisodeFormat
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AcquisitionSettings) GetDailyEpisodeFormat() string {
+	if x != nil {
+		if x.xxx_hidden_DailyEpisodeFormat != nil {
+			return *x.xxx_hidden_DailyEpisodeFormat
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AcquisitionSettings) GetAnimeEpisodeFormat() string {
+	if x != nil {
+		if x.xxx_hidden_AnimeEpisodeFormat != nil {
+			return *x.xxx_hidden_AnimeEpisodeFormat
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AcquisitionSettings) GetSeriesFolderFormat() string {
+	if x != nil {
+		if x.xxx_hidden_SeriesFolderFormat != nil {
+			return *x.xxx_hidden_SeriesFolderFormat
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AcquisitionSettings) GetSeasonFolderFormat() string {
+	if x != nil {
+		if x.xxx_hidden_SeasonFolderFormat != nil {
+			return *x.xxx_hidden_SeasonFolderFormat
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AcquisitionSettings) GetSpecialsFolderFormat() string {
+	if x != nil {
+		if x.xxx_hidden_SpecialsFolderFormat != nil {
+			return *x.xxx_hidden_SpecialsFolderFormat
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AcquisitionSettings) GetMultiEpisodeStyle() MultiEpisodeStyle {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[1]), 33) {
+			return x.xxx_hidden_MultiEpisodeStyle
+		}
+	}
+	return MultiEpisodeStyle_MULTI_EPISODE_STYLE_UNSPECIFIED
+}
+
+func (x *AcquisitionSettings) GetAutoUnmonitorPreviouslyDownloadedEpisodes() bool {
+	if x != nil {
+		return x.xxx_hidden_AutoUnmonitorPreviouslyDownloadedEpisodes
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetEpisodeTitleRequired() EpisodeTitleRequired {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[1]), 35) {
+			return x.xxx_hidden_EpisodeTitleRequired
+		}
+	}
+	return EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_UNSPECIFIED
+}
+
 func (x *AcquisitionSettings) SetPropers(v ProperDownload) {
 	x.xxx_hidden_Propers = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 36)
 }
 
 func (x *AcquisitionSettings) SetPreferIndexerFlags(v bool) {
 	x.xxx_hidden_PreferIndexerFlags = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 36)
 }
 
 func (x *AcquisitionSettings) SetCompletedDownloadHandling(v bool) {
 	x.xxx_hidden_CompletedDownloadHandling = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 36)
 }
 
 func (x *AcquisitionSettings) SetAutoRedownloadFailed(v bool) {
 	x.xxx_hidden_AutoRedownloadFailed = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 36)
 }
 
 func (x *AcquisitionSettings) SetMaximumSize(v int32) {
 	x.xxx_hidden_MaximumSize = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 36)
 }
 
 func (x *AcquisitionSettings) SetMinimumAge(v int32) {
 	x.xxx_hidden_MinimumAge = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 36)
 }
 
 func (x *AcquisitionSettings) SetRetention(v int32) {
 	x.xxx_hidden_Retention = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 36)
 }
 
 func (x *AcquisitionSettings) SetAllowHardcodedSubs(v bool) {
 	x.xxx_hidden_AllowHardcodedSubs = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 36)
 }
 
 func (x *AcquisitionSettings) SetWhitelistedHardcodedSubs(v []string) {
@@ -4286,47 +4503,47 @@ func (x *AcquisitionSettings) SetWhitelistedHardcodedSubs(v []string) {
 
 func (x *AcquisitionSettings) SetSkipFreeSpaceCheck(v bool) {
 	x.xxx_hidden_SkipFreeSpaceCheck = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 36)
 }
 
 func (x *AcquisitionSettings) SetMinimumFreeSpace(v int32) {
 	x.xxx_hidden_MinimumFreeSpace = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 36)
 }
 
 func (x *AcquisitionSettings) SetAvailabilityDelay(v int32) {
 	x.xxx_hidden_AvailabilityDelay = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 36)
 }
 
 func (x *AcquisitionSettings) SetRssSyncInterval(v int32) {
 	x.xxx_hidden_RssSyncInterval = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 36)
 }
 
 func (x *AcquisitionSettings) SetCheckFinishedInterval(v int32) {
 	x.xxx_hidden_CheckFinishedInterval = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 36)
 }
 
 func (x *AcquisitionSettings) SetRecycleBin(v string) {
 	x.xxx_hidden_RecycleBin = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 36)
 }
 
 func (x *AcquisitionSettings) SetRecycleBinCleanupDays(v int32) {
 	x.xxx_hidden_RecycleBinCleanupDays = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 36)
 }
 
 func (x *AcquisitionSettings) SetCopyUsingHardlinks(v bool) {
 	x.xxx_hidden_CopyUsingHardlinks = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 36)
 }
 
 func (x *AcquisitionSettings) SetImportExtraFiles(v bool) {
 	x.xxx_hidden_ImportExtraFiles = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 36)
 }
 
 func (x *AcquisitionSettings) SetExtraFileExtensions(v []string) {
@@ -4335,37 +4552,87 @@ func (x *AcquisitionSettings) SetExtraFileExtensions(v []string) {
 
 func (x *AcquisitionSettings) SetDeleteEmptyFolders(v bool) {
 	x.xxx_hidden_DeleteEmptyFolders = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 36)
 }
 
 func (x *AcquisitionSettings) SetRenameMovies(v bool) {
 	x.xxx_hidden_RenameMovies = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 36)
 }
 
 func (x *AcquisitionSettings) SetReplaceIllegalCharacters(v bool) {
 	x.xxx_hidden_ReplaceIllegalCharacters = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 36)
 }
 
 func (x *AcquisitionSettings) SetColonReplacement(v ColonReplacement) {
 	x.xxx_hidden_ColonReplacement = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 36)
 }
 
 func (x *AcquisitionSettings) SetMovieFolderFormat(v string) {
 	x.xxx_hidden_MovieFolderFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 36)
 }
 
 func (x *AcquisitionSettings) SetStandardMovieFormat(v string) {
 	x.xxx_hidden_StandardMovieFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 36)
 }
 
 func (x *AcquisitionSettings) SetAutoRedownloadFailedFromInteractiveSearch(v bool) {
 	x.xxx_hidden_AutoRedownloadFailedFromInteractiveSearch = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 25, 26)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 25, 36)
+}
+
+func (x *AcquisitionSettings) SetRenameEpisodes(v bool) {
+	x.xxx_hidden_RenameEpisodes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 36)
+}
+
+func (x *AcquisitionSettings) SetStandardEpisodeFormat(v string) {
+	x.xxx_hidden_StandardEpisodeFormat = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 36)
+}
+
+func (x *AcquisitionSettings) SetDailyEpisodeFormat(v string) {
+	x.xxx_hidden_DailyEpisodeFormat = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 36)
+}
+
+func (x *AcquisitionSettings) SetAnimeEpisodeFormat(v string) {
+	x.xxx_hidden_AnimeEpisodeFormat = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 29, 36)
+}
+
+func (x *AcquisitionSettings) SetSeriesFolderFormat(v string) {
+	x.xxx_hidden_SeriesFolderFormat = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 30, 36)
+}
+
+func (x *AcquisitionSettings) SetSeasonFolderFormat(v string) {
+	x.xxx_hidden_SeasonFolderFormat = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 31, 36)
+}
+
+func (x *AcquisitionSettings) SetSpecialsFolderFormat(v string) {
+	x.xxx_hidden_SpecialsFolderFormat = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 36)
+}
+
+func (x *AcquisitionSettings) SetMultiEpisodeStyle(v MultiEpisodeStyle) {
+	x.xxx_hidden_MultiEpisodeStyle = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 36)
+}
+
+func (x *AcquisitionSettings) SetAutoUnmonitorPreviouslyDownloadedEpisodes(v bool) {
+	x.xxx_hidden_AutoUnmonitorPreviouslyDownloadedEpisodes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 36)
+}
+
+func (x *AcquisitionSettings) SetEpisodeTitleRequired(v EpisodeTitleRequired) {
+	x.xxx_hidden_EpisodeTitleRequired = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 35, 36)
 }
 
 func (x *AcquisitionSettings) HasPropers() bool {
@@ -4536,6 +4803,76 @@ func (x *AcquisitionSettings) HasAutoRedownloadFailedFromInteractiveSearch() boo
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 25)
 }
 
+func (x *AcquisitionSettings) HasRenameEpisodes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 26)
+}
+
+func (x *AcquisitionSettings) HasStandardEpisodeFormat() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 27)
+}
+
+func (x *AcquisitionSettings) HasDailyEpisodeFormat() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 28)
+}
+
+func (x *AcquisitionSettings) HasAnimeEpisodeFormat() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 29)
+}
+
+func (x *AcquisitionSettings) HasSeriesFolderFormat() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 30)
+}
+
+func (x *AcquisitionSettings) HasSeasonFolderFormat() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 31)
+}
+
+func (x *AcquisitionSettings) HasSpecialsFolderFormat() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 32)
+}
+
+func (x *AcquisitionSettings) HasMultiEpisodeStyle() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 33)
+}
+
+func (x *AcquisitionSettings) HasAutoUnmonitorPreviouslyDownloadedEpisodes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 34)
+}
+
+func (x *AcquisitionSettings) HasEpisodeTitleRequired() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 35)
+}
+
 func (x *AcquisitionSettings) ClearPropers() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Propers = ProperDownload_PROPER_DOWNLOAD_UNSPECIFIED
@@ -4656,6 +4993,56 @@ func (x *AcquisitionSettings) ClearAutoRedownloadFailedFromInteractiveSearch() {
 	x.xxx_hidden_AutoRedownloadFailedFromInteractiveSearch = false
 }
 
+func (x *AcquisitionSettings) ClearRenameEpisodes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 26)
+	x.xxx_hidden_RenameEpisodes = false
+}
+
+func (x *AcquisitionSettings) ClearStandardEpisodeFormat() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 27)
+	x.xxx_hidden_StandardEpisodeFormat = nil
+}
+
+func (x *AcquisitionSettings) ClearDailyEpisodeFormat() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 28)
+	x.xxx_hidden_DailyEpisodeFormat = nil
+}
+
+func (x *AcquisitionSettings) ClearAnimeEpisodeFormat() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 29)
+	x.xxx_hidden_AnimeEpisodeFormat = nil
+}
+
+func (x *AcquisitionSettings) ClearSeriesFolderFormat() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 30)
+	x.xxx_hidden_SeriesFolderFormat = nil
+}
+
+func (x *AcquisitionSettings) ClearSeasonFolderFormat() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 31)
+	x.xxx_hidden_SeasonFolderFormat = nil
+}
+
+func (x *AcquisitionSettings) ClearSpecialsFolderFormat() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 32)
+	x.xxx_hidden_SpecialsFolderFormat = nil
+}
+
+func (x *AcquisitionSettings) ClearMultiEpisodeStyle() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 33)
+	x.xxx_hidden_MultiEpisodeStyle = MultiEpisodeStyle_MULTI_EPISODE_STYLE_UNSPECIFIED
+}
+
+func (x *AcquisitionSettings) ClearAutoUnmonitorPreviouslyDownloadedEpisodes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 34)
+	x.xxx_hidden_AutoUnmonitorPreviouslyDownloadedEpisodes = false
+}
+
+func (x *AcquisitionSettings) ClearEpisodeTitleRequired() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 35)
+	x.xxx_hidden_EpisodeTitleRequired = EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_UNSPECIFIED
+}
+
 type AcquisitionSettings_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -4705,6 +5092,23 @@ type AcquisitionSettings_builder struct {
 	// Search again when a download grabbed from an interactive search
 	// fails, when auto_redownload_failed is set.
 	AutoRedownloadFailedFromInteractiveSearch *bool
+	// Whether episode files are named by the episode formats.
+	RenameEpisodes *bool
+	// Templates of episode files of standard, daily and anime series and of
+	// the folders of series, seasons and specials, such as
+	// "{Series Title} - S{season:00}E{episode:00}"; empty for the defaults.
+	StandardEpisodeFormat *string
+	DailyEpisodeFormat    *string
+	AnimeEpisodeFormat    *string
+	SeriesFolderFormat    *string
+	SeasonFolderFormat    *string
+	SpecialsFolderFormat  *string
+	// Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.
+	MultiEpisodeStyle *MultiEpisodeStyle
+	// Unmonitors the episodes of wanted series whose files go missing.
+	AutoUnmonitorPreviouslyDownloadedEpisodes *bool
+	// Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
+	EpisodeTitleRequired *EpisodeTitleRequired
 }
 
 func (b0 AcquisitionSettings_builder) Build() *AcquisitionSettings {
@@ -4712,102 +5116,142 @@ func (b0 AcquisitionSettings_builder) Build() *AcquisitionSettings {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Propers != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 36)
 		x.xxx_hidden_Propers = *b.Propers
 	}
 	if b.PreferIndexerFlags != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 36)
 		x.xxx_hidden_PreferIndexerFlags = *b.PreferIndexerFlags
 	}
 	if b.CompletedDownloadHandling != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 36)
 		x.xxx_hidden_CompletedDownloadHandling = *b.CompletedDownloadHandling
 	}
 	if b.AutoRedownloadFailed != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 36)
 		x.xxx_hidden_AutoRedownloadFailed = *b.AutoRedownloadFailed
 	}
 	if b.MaximumSize != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 36)
 		x.xxx_hidden_MaximumSize = *b.MaximumSize
 	}
 	if b.MinimumAge != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 36)
 		x.xxx_hidden_MinimumAge = *b.MinimumAge
 	}
 	if b.Retention != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 36)
 		x.xxx_hidden_Retention = *b.Retention
 	}
 	if b.AllowHardcodedSubs != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 36)
 		x.xxx_hidden_AllowHardcodedSubs = *b.AllowHardcodedSubs
 	}
 	x.xxx_hidden_WhitelistedHardcodedSubs = b.WhitelistedHardcodedSubs
 	if b.SkipFreeSpaceCheck != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 36)
 		x.xxx_hidden_SkipFreeSpaceCheck = *b.SkipFreeSpaceCheck
 	}
 	if b.MinimumFreeSpace != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 36)
 		x.xxx_hidden_MinimumFreeSpace = *b.MinimumFreeSpace
 	}
 	if b.AvailabilityDelay != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 36)
 		x.xxx_hidden_AvailabilityDelay = *b.AvailabilityDelay
 	}
 	if b.RssSyncInterval != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 36)
 		x.xxx_hidden_RssSyncInterval = *b.RssSyncInterval
 	}
 	if b.CheckFinishedInterval != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 36)
 		x.xxx_hidden_CheckFinishedInterval = *b.CheckFinishedInterval
 	}
 	if b.RecycleBin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 36)
 		x.xxx_hidden_RecycleBin = b.RecycleBin
 	}
 	if b.RecycleBinCleanupDays != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 36)
 		x.xxx_hidden_RecycleBinCleanupDays = *b.RecycleBinCleanupDays
 	}
 	if b.CopyUsingHardlinks != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 36)
 		x.xxx_hidden_CopyUsingHardlinks = *b.CopyUsingHardlinks
 	}
 	if b.ImportExtraFiles != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 36)
 		x.xxx_hidden_ImportExtraFiles = *b.ImportExtraFiles
 	}
 	x.xxx_hidden_ExtraFileExtensions = b.ExtraFileExtensions
 	if b.DeleteEmptyFolders != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 36)
 		x.xxx_hidden_DeleteEmptyFolders = *b.DeleteEmptyFolders
 	}
 	if b.RenameMovies != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 36)
 		x.xxx_hidden_RenameMovies = *b.RenameMovies
 	}
 	if b.ReplaceIllegalCharacters != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 36)
 		x.xxx_hidden_ReplaceIllegalCharacters = *b.ReplaceIllegalCharacters
 	}
 	if b.ColonReplacement != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 36)
 		x.xxx_hidden_ColonReplacement = *b.ColonReplacement
 	}
 	if b.MovieFolderFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 36)
 		x.xxx_hidden_MovieFolderFormat = b.MovieFolderFormat
 	}
 	if b.StandardMovieFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 36)
 		x.xxx_hidden_StandardMovieFormat = b.StandardMovieFormat
 	}
 	if b.AutoRedownloadFailedFromInteractiveSearch != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 25, 26)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 25, 36)
 		x.xxx_hidden_AutoRedownloadFailedFromInteractiveSearch = *b.AutoRedownloadFailedFromInteractiveSearch
+	}
+	if b.RenameEpisodes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 36)
+		x.xxx_hidden_RenameEpisodes = *b.RenameEpisodes
+	}
+	if b.StandardEpisodeFormat != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 36)
+		x.xxx_hidden_StandardEpisodeFormat = b.StandardEpisodeFormat
+	}
+	if b.DailyEpisodeFormat != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 36)
+		x.xxx_hidden_DailyEpisodeFormat = b.DailyEpisodeFormat
+	}
+	if b.AnimeEpisodeFormat != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 29, 36)
+		x.xxx_hidden_AnimeEpisodeFormat = b.AnimeEpisodeFormat
+	}
+	if b.SeriesFolderFormat != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 30, 36)
+		x.xxx_hidden_SeriesFolderFormat = b.SeriesFolderFormat
+	}
+	if b.SeasonFolderFormat != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 31, 36)
+		x.xxx_hidden_SeasonFolderFormat = b.SeasonFolderFormat
+	}
+	if b.SpecialsFolderFormat != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 36)
+		x.xxx_hidden_SpecialsFolderFormat = b.SpecialsFolderFormat
+	}
+	if b.MultiEpisodeStyle != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 36)
+		x.xxx_hidden_MultiEpisodeStyle = *b.MultiEpisodeStyle
+	}
+	if b.AutoUnmonitorPreviouslyDownloadedEpisodes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 36)
+		x.xxx_hidden_AutoUnmonitorPreviouslyDownloadedEpisodes = *b.AutoUnmonitorPreviouslyDownloadedEpisodes
+	}
+	if b.EpisodeTitleRequired != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 35, 36)
+		x.xxx_hidden_EpisodeTitleRequired = *b.EpisodeTitleRequired
 	}
 	return m0
 }
@@ -5928,7 +6372,7 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x18anime_quality_profile_id\x18\x13 \x01(\tR\x15animeQualityProfileId\"\x87\x01\n" +
 	"\x10MetadataSettings\x12C\n" +
 	"\x12preferred_language\x18\x01 \x01(\tB\x14\xbaH\x11r\x0f2\r^([a-z]{2})?$R\x11preferredLanguage\x12.\n" +
-	"\acountry\x18\x02 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\acountry\"\xc1\v\n" +
+	"\acountry\x18\x02 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\acountry\"\xc7\x10\n" +
 	"\x13AcquisitionSettings\x12E\n" +
 	"\apropers\x18\x01 \x01(\x0e2\x1f.mavio.system.v1.ProperDownloadB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\apropers\x120\n" +
@@ -5960,7 +6404,17 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x10colonReplacement\x127\n" +
 	"\x13movie_folder_format\x18\x18 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x11movieFolderFormat\x12;\n" +
 	"\x15standard_movie_format\x18\x19 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x13standardMovieFormat\x12a\n" +
-	".auto_redownload_failed_from_interactive_search\x18\x1a \x01(\bR)autoRedownloadFailedFromInteractiveSearch\"\x1a\n" +
+	".auto_redownload_failed_from_interactive_search\x18\x1a \x01(\bR)autoRedownloadFailedFromInteractiveSearch\x12'\n" +
+	"\x0frename_episodes\x18( \x01(\bR\x0erenameEpisodes\x126\n" +
+	"\x17standard_episode_format\x18) \x01(\tR\x15standardEpisodeFormat\x120\n" +
+	"\x14daily_episode_format\x18* \x01(\tR\x12dailyEpisodeFormat\x120\n" +
+	"\x14anime_episode_format\x18+ \x01(\tR\x12animeEpisodeFormat\x120\n" +
+	"\x14series_folder_format\x18, \x01(\tR\x12seriesFolderFormat\x120\n" +
+	"\x14season_folder_format\x18- \x01(\tR\x12seasonFolderFormat\x124\n" +
+	"\x16specials_folder_format\x18. \x01(\tR\x14specialsFolderFormat\x12\\\n" +
+	"\x13multi_episode_style\x18/ \x01(\x0e2\".mavio.system.v1.MultiEpisodeStyleB\b\xbaH\x05\x82\x01\x02\x10\x01R\x11multiEpisodeStyle\x12`\n" +
+	"-auto_unmonitor_previously_downloaded_episodes\x180 \x01(\bR)autoUnmonitorPreviouslyDownloadedEpisodes\x12e\n" +
+	"\x16episode_title_required\x181 \x01(\x0e2%.mavio.system.v1.EpisodeTitleRequiredB\b\xbaH\x05\x82\x01\x02\x10\x01R\x14episodeTitleRequired\"\x1a\n" +
 	"\x18GetServerSettingsRequest\"\xc9\x01\n" +
 	"\x19GetServerSettingsResponse\x12;\n" +
 	"\bsettings\x18\x01 \x01(\v2\x1f.mavio.system.v1.ServerSettingsR\bsettings\x12o\n" +
@@ -6018,7 +6472,20 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x16COLON_REPLACEMENT_DASH\x10\x02\x12 \n" +
 	"\x1cCOLON_REPLACEMENT_SPACE_DASH\x10\x03\x12&\n" +
 	"\"COLON_REPLACEMENT_SPACE_DASH_SPACE\x10\x04\x12\x1b\n" +
-	"\x17COLON_REPLACEMENT_SMART\x10\x05*w\n" +
+	"\x17COLON_REPLACEMENT_SMART\x10\x05*\x81\x02\n" +
+	"\x11MultiEpisodeStyle\x12#\n" +
+	"\x1fMULTI_EPISODE_STYLE_UNSPECIFIED\x10\x00\x12\x1e\n" +
+	"\x1aMULTI_EPISODE_STYLE_EXTEND\x10\x01\x12!\n" +
+	"\x1dMULTI_EPISODE_STYLE_DUPLICATE\x10\x02\x12\x1e\n" +
+	"\x1aMULTI_EPISODE_STYLE_REPEAT\x10\x03\x12\x1d\n" +
+	"\x19MULTI_EPISODE_STYLE_SCENE\x10\x04\x12\x1d\n" +
+	"\x19MULTI_EPISODE_STYLE_RANGE\x10\x05\x12&\n" +
+	"\"MULTI_EPISODE_STYLE_PREFIXED_RANGE\x10\x06*\xb4\x01\n" +
+	"\x14EpisodeTitleRequired\x12&\n" +
+	"\"EPISODE_TITLE_REQUIRED_UNSPECIFIED\x10\x00\x12!\n" +
+	"\x1dEPISODE_TITLE_REQUIRED_ALWAYS\x10\x01\x12/\n" +
+	"+EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES\x10\x02\x12 \n" +
+	"\x1cEPISODE_TITLE_REQUIRED_NEVER\x10\x03*w\n" +
 	"\bLogLevel\x12\x19\n" +
 	"\x15LOG_LEVEL_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fLOG_LEVEL_DEBUG\x10\x01\x12\x12\n" +
@@ -6040,120 +6507,124 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\bListLogs\x12 .mavio.system.v1.ListLogsRequest\x1a!.mavio.system.v1.ListLogsResponse\"\x03\x90\x02\x01B\xc5\x01\n" +
 	"\x13com.mavio.system.v1B\vSystemProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1;systemv1\xa2\x02\x03MSX\xaa\x02\x0fMavio.System.V1\xca\x02\x0fMavio\\System\\V1\xe2\x02\x1bMavio\\System\\V1\\GPBMetadata\xea\x02\x11Mavio::System::V1b\beditionsp\xe8\a"
 
-var file_mavio_system_v1_system_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
+var file_mavio_system_v1_system_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
 var file_mavio_system_v1_system_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
 var file_mavio_system_v1_system_proto_goTypes = []any{
 	(PluginState)(0),                     // 0: mavio.system.v1.PluginState
 	(HardwareAcceleration)(0),            // 1: mavio.system.v1.HardwareAcceleration
 	(ProperDownload)(0),                  // 2: mavio.system.v1.ProperDownload
 	(ColonReplacement)(0),                // 3: mavio.system.v1.ColonReplacement
-	(LogLevel)(0),                        // 4: mavio.system.v1.LogLevel
-	(GetHealthResponse_Status)(0),        // 5: mavio.system.v1.GetHealthResponse.Status
-	(*GetHealthRequest)(nil),             // 6: mavio.system.v1.GetHealthRequest
-	(*GetHealthResponse)(nil),            // 7: mavio.system.v1.GetHealthResponse
-	(*GetSystemInfoRequest)(nil),         // 8: mavio.system.v1.GetSystemInfoRequest
-	(*GetSystemInfoResponse)(nil),        // 9: mavio.system.v1.GetSystemInfoResponse
-	(*Plugin)(nil),                       // 10: mavio.system.v1.Plugin
-	(*ListPluginsRequest)(nil),           // 11: mavio.system.v1.ListPluginsRequest
-	(*ListPluginsResponse)(nil),          // 12: mavio.system.v1.ListPluginsResponse
-	(*GetPluginConfigRequest)(nil),       // 13: mavio.system.v1.GetPluginConfigRequest
-	(*GetPluginConfigResponse)(nil),      // 14: mavio.system.v1.GetPluginConfigResponse
-	(*SetPluginConfigRequest)(nil),       // 15: mavio.system.v1.SetPluginConfigRequest
-	(*SetPluginConfigResponse)(nil),      // 16: mavio.system.v1.SetPluginConfigResponse
-	(*CatalogPlugin)(nil),                // 17: mavio.system.v1.CatalogPlugin
-	(*CatalogVersion)(nil),               // 18: mavio.system.v1.CatalogVersion
-	(*ListCatalogPluginsRequest)(nil),    // 19: mavio.system.v1.ListCatalogPluginsRequest
-	(*ListCatalogPluginsResponse)(nil),   // 20: mavio.system.v1.ListCatalogPluginsResponse
-	(*InstallPluginRequest)(nil),         // 21: mavio.system.v1.InstallPluginRequest
-	(*InstallPluginResponse)(nil),        // 22: mavio.system.v1.InstallPluginResponse
-	(*UninstallPluginRequest)(nil),       // 23: mavio.system.v1.UninstallPluginRequest
-	(*UninstallPluginResponse)(nil),      // 24: mavio.system.v1.UninstallPluginResponse
-	(*TranscodingSettings)(nil),          // 25: mavio.system.v1.TranscodingSettings
-	(*NetworkSettings)(nil),              // 26: mavio.system.v1.NetworkSettings
-	(*ServerSettings)(nil),               // 27: mavio.system.v1.ServerSettings
-	(*RequestSettings)(nil),              // 28: mavio.system.v1.RequestSettings
-	(*MetadataSettings)(nil),             // 29: mavio.system.v1.MetadataSettings
-	(*AcquisitionSettings)(nil),          // 30: mavio.system.v1.AcquisitionSettings
-	(*GetServerSettingsRequest)(nil),     // 31: mavio.system.v1.GetServerSettingsRequest
-	(*GetServerSettingsResponse)(nil),    // 32: mavio.system.v1.GetServerSettingsResponse
-	(*UpdateServerSettingsRequest)(nil),  // 33: mavio.system.v1.UpdateServerSettingsRequest
-	(*UpdateServerSettingsResponse)(nil), // 34: mavio.system.v1.UpdateServerSettingsResponse
-	(*ListDirectoryRequest)(nil),         // 35: mavio.system.v1.ListDirectoryRequest
-	(*DirectoryEntry)(nil),               // 36: mavio.system.v1.DirectoryEntry
-	(*ListDirectoryResponse)(nil),        // 37: mavio.system.v1.ListDirectoryResponse
-	(*LogRecord)(nil),                    // 38: mavio.system.v1.LogRecord
-	(*ListLogsRequest)(nil),              // 39: mavio.system.v1.ListLogsRequest
-	(*ListLogsResponse)(nil),             // 40: mavio.system.v1.ListLogsResponse
-	nil,                                  // 41: mavio.system.v1.LogRecord.AttributesEntry
-	(*timestamppb.Timestamp)(nil),        // 42: google.protobuf.Timestamp
-	(*v1.Manifest)(nil),                  // 43: mavio.plugin.v1.Manifest
-	(v11.MinimumAvailability)(0),         // 44: mavio.acquisition.v1.MinimumAvailability
-	(v11.NewItemMonitor)(0),              // 45: mavio.acquisition.v1.NewItemMonitor
-	(*durationpb.Duration)(nil),          // 46: google.protobuf.Duration
+	(MultiEpisodeStyle)(0),               // 4: mavio.system.v1.MultiEpisodeStyle
+	(EpisodeTitleRequired)(0),            // 5: mavio.system.v1.EpisodeTitleRequired
+	(LogLevel)(0),                        // 6: mavio.system.v1.LogLevel
+	(GetHealthResponse_Status)(0),        // 7: mavio.system.v1.GetHealthResponse.Status
+	(*GetHealthRequest)(nil),             // 8: mavio.system.v1.GetHealthRequest
+	(*GetHealthResponse)(nil),            // 9: mavio.system.v1.GetHealthResponse
+	(*GetSystemInfoRequest)(nil),         // 10: mavio.system.v1.GetSystemInfoRequest
+	(*GetSystemInfoResponse)(nil),        // 11: mavio.system.v1.GetSystemInfoResponse
+	(*Plugin)(nil),                       // 12: mavio.system.v1.Plugin
+	(*ListPluginsRequest)(nil),           // 13: mavio.system.v1.ListPluginsRequest
+	(*ListPluginsResponse)(nil),          // 14: mavio.system.v1.ListPluginsResponse
+	(*GetPluginConfigRequest)(nil),       // 15: mavio.system.v1.GetPluginConfigRequest
+	(*GetPluginConfigResponse)(nil),      // 16: mavio.system.v1.GetPluginConfigResponse
+	(*SetPluginConfigRequest)(nil),       // 17: mavio.system.v1.SetPluginConfigRequest
+	(*SetPluginConfigResponse)(nil),      // 18: mavio.system.v1.SetPluginConfigResponse
+	(*CatalogPlugin)(nil),                // 19: mavio.system.v1.CatalogPlugin
+	(*CatalogVersion)(nil),               // 20: mavio.system.v1.CatalogVersion
+	(*ListCatalogPluginsRequest)(nil),    // 21: mavio.system.v1.ListCatalogPluginsRequest
+	(*ListCatalogPluginsResponse)(nil),   // 22: mavio.system.v1.ListCatalogPluginsResponse
+	(*InstallPluginRequest)(nil),         // 23: mavio.system.v1.InstallPluginRequest
+	(*InstallPluginResponse)(nil),        // 24: mavio.system.v1.InstallPluginResponse
+	(*UninstallPluginRequest)(nil),       // 25: mavio.system.v1.UninstallPluginRequest
+	(*UninstallPluginResponse)(nil),      // 26: mavio.system.v1.UninstallPluginResponse
+	(*TranscodingSettings)(nil),          // 27: mavio.system.v1.TranscodingSettings
+	(*NetworkSettings)(nil),              // 28: mavio.system.v1.NetworkSettings
+	(*ServerSettings)(nil),               // 29: mavio.system.v1.ServerSettings
+	(*RequestSettings)(nil),              // 30: mavio.system.v1.RequestSettings
+	(*MetadataSettings)(nil),             // 31: mavio.system.v1.MetadataSettings
+	(*AcquisitionSettings)(nil),          // 32: mavio.system.v1.AcquisitionSettings
+	(*GetServerSettingsRequest)(nil),     // 33: mavio.system.v1.GetServerSettingsRequest
+	(*GetServerSettingsResponse)(nil),    // 34: mavio.system.v1.GetServerSettingsResponse
+	(*UpdateServerSettingsRequest)(nil),  // 35: mavio.system.v1.UpdateServerSettingsRequest
+	(*UpdateServerSettingsResponse)(nil), // 36: mavio.system.v1.UpdateServerSettingsResponse
+	(*ListDirectoryRequest)(nil),         // 37: mavio.system.v1.ListDirectoryRequest
+	(*DirectoryEntry)(nil),               // 38: mavio.system.v1.DirectoryEntry
+	(*ListDirectoryResponse)(nil),        // 39: mavio.system.v1.ListDirectoryResponse
+	(*LogRecord)(nil),                    // 40: mavio.system.v1.LogRecord
+	(*ListLogsRequest)(nil),              // 41: mavio.system.v1.ListLogsRequest
+	(*ListLogsResponse)(nil),             // 42: mavio.system.v1.ListLogsResponse
+	nil,                                  // 43: mavio.system.v1.LogRecord.AttributesEntry
+	(*timestamppb.Timestamp)(nil),        // 44: google.protobuf.Timestamp
+	(*v1.Manifest)(nil),                  // 45: mavio.plugin.v1.Manifest
+	(v11.MinimumAvailability)(0),         // 46: mavio.acquisition.v1.MinimumAvailability
+	(v11.NewItemMonitor)(0),              // 47: mavio.acquisition.v1.NewItemMonitor
+	(*durationpb.Duration)(nil),          // 48: google.protobuf.Duration
 }
 var file_mavio_system_v1_system_proto_depIdxs = []int32{
-	5,  // 0: mavio.system.v1.GetHealthResponse.status:type_name -> mavio.system.v1.GetHealthResponse.Status
-	42, // 1: mavio.system.v1.GetSystemInfoResponse.start_time:type_name -> google.protobuf.Timestamp
-	43, // 2: mavio.system.v1.Plugin.manifest:type_name -> mavio.plugin.v1.Manifest
+	7,  // 0: mavio.system.v1.GetHealthResponse.status:type_name -> mavio.system.v1.GetHealthResponse.Status
+	44, // 1: mavio.system.v1.GetSystemInfoResponse.start_time:type_name -> google.protobuf.Timestamp
+	45, // 2: mavio.system.v1.Plugin.manifest:type_name -> mavio.plugin.v1.Manifest
 	0,  // 3: mavio.system.v1.Plugin.state:type_name -> mavio.system.v1.PluginState
-	10, // 4: mavio.system.v1.ListPluginsResponse.plugins:type_name -> mavio.system.v1.Plugin
-	42, // 5: mavio.system.v1.GetPluginConfigResponse.update_time:type_name -> google.protobuf.Timestamp
-	10, // 6: mavio.system.v1.SetPluginConfigResponse.plugin:type_name -> mavio.system.v1.Plugin
-	18, // 7: mavio.system.v1.CatalogPlugin.versions:type_name -> mavio.system.v1.CatalogVersion
-	42, // 8: mavio.system.v1.CatalogVersion.release_time:type_name -> google.protobuf.Timestamp
-	17, // 9: mavio.system.v1.ListCatalogPluginsResponse.plugins:type_name -> mavio.system.v1.CatalogPlugin
-	10, // 10: mavio.system.v1.InstallPluginResponse.plugin:type_name -> mavio.system.v1.Plugin
+	12, // 4: mavio.system.v1.ListPluginsResponse.plugins:type_name -> mavio.system.v1.Plugin
+	44, // 5: mavio.system.v1.GetPluginConfigResponse.update_time:type_name -> google.protobuf.Timestamp
+	12, // 6: mavio.system.v1.SetPluginConfigResponse.plugin:type_name -> mavio.system.v1.Plugin
+	20, // 7: mavio.system.v1.CatalogPlugin.versions:type_name -> mavio.system.v1.CatalogVersion
+	44, // 8: mavio.system.v1.CatalogVersion.release_time:type_name -> google.protobuf.Timestamp
+	19, // 9: mavio.system.v1.ListCatalogPluginsResponse.plugins:type_name -> mavio.system.v1.CatalogPlugin
+	12, // 10: mavio.system.v1.InstallPluginResponse.plugin:type_name -> mavio.system.v1.Plugin
 	1,  // 11: mavio.system.v1.TranscodingSettings.hardware_acceleration:type_name -> mavio.system.v1.HardwareAcceleration
-	25, // 12: mavio.system.v1.ServerSettings.transcoding:type_name -> mavio.system.v1.TranscodingSettings
-	26, // 13: mavio.system.v1.ServerSettings.network:type_name -> mavio.system.v1.NetworkSettings
-	42, // 14: mavio.system.v1.ServerSettings.update_time:type_name -> google.protobuf.Timestamp
-	30, // 15: mavio.system.v1.ServerSettings.acquisition:type_name -> mavio.system.v1.AcquisitionSettings
-	28, // 16: mavio.system.v1.ServerSettings.requests:type_name -> mavio.system.v1.RequestSettings
-	29, // 17: mavio.system.v1.ServerSettings.metadata:type_name -> mavio.system.v1.MetadataSettings
-	44, // 18: mavio.system.v1.RequestSettings.minimum_availability:type_name -> mavio.acquisition.v1.MinimumAvailability
-	45, // 19: mavio.system.v1.RequestSettings.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
+	27, // 12: mavio.system.v1.ServerSettings.transcoding:type_name -> mavio.system.v1.TranscodingSettings
+	28, // 13: mavio.system.v1.ServerSettings.network:type_name -> mavio.system.v1.NetworkSettings
+	44, // 14: mavio.system.v1.ServerSettings.update_time:type_name -> google.protobuf.Timestamp
+	32, // 15: mavio.system.v1.ServerSettings.acquisition:type_name -> mavio.system.v1.AcquisitionSettings
+	30, // 16: mavio.system.v1.ServerSettings.requests:type_name -> mavio.system.v1.RequestSettings
+	31, // 17: mavio.system.v1.ServerSettings.metadata:type_name -> mavio.system.v1.MetadataSettings
+	46, // 18: mavio.system.v1.RequestSettings.minimum_availability:type_name -> mavio.acquisition.v1.MinimumAvailability
+	47, // 19: mavio.system.v1.RequestSettings.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
 	2,  // 20: mavio.system.v1.AcquisitionSettings.propers:type_name -> mavio.system.v1.ProperDownload
 	3,  // 21: mavio.system.v1.AcquisitionSettings.colon_replacement:type_name -> mavio.system.v1.ColonReplacement
-	27, // 22: mavio.system.v1.GetServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
-	1,  // 23: mavio.system.v1.GetServerSettingsResponse.available_hardware_accelerations:type_name -> mavio.system.v1.HardwareAcceleration
-	27, // 24: mavio.system.v1.UpdateServerSettingsRequest.settings:type_name -> mavio.system.v1.ServerSettings
-	27, // 25: mavio.system.v1.UpdateServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
-	36, // 26: mavio.system.v1.ListDirectoryResponse.entries:type_name -> mavio.system.v1.DirectoryEntry
-	42, // 27: mavio.system.v1.LogRecord.time:type_name -> google.protobuf.Timestamp
-	4,  // 28: mavio.system.v1.LogRecord.level:type_name -> mavio.system.v1.LogLevel
-	41, // 29: mavio.system.v1.LogRecord.attributes:type_name -> mavio.system.v1.LogRecord.AttributesEntry
-	4,  // 30: mavio.system.v1.ListLogsRequest.min_level:type_name -> mavio.system.v1.LogLevel
-	46, // 31: mavio.system.v1.ListLogsRequest.max_age:type_name -> google.protobuf.Duration
-	38, // 32: mavio.system.v1.ListLogsResponse.records:type_name -> mavio.system.v1.LogRecord
-	6,  // 33: mavio.system.v1.SystemService.GetHealth:input_type -> mavio.system.v1.GetHealthRequest
-	8,  // 34: mavio.system.v1.SystemService.GetSystemInfo:input_type -> mavio.system.v1.GetSystemInfoRequest
-	11, // 35: mavio.system.v1.SystemService.ListPlugins:input_type -> mavio.system.v1.ListPluginsRequest
-	13, // 36: mavio.system.v1.SystemService.GetPluginConfig:input_type -> mavio.system.v1.GetPluginConfigRequest
-	15, // 37: mavio.system.v1.SystemService.SetPluginConfig:input_type -> mavio.system.v1.SetPluginConfigRequest
-	19, // 38: mavio.system.v1.SystemService.ListCatalogPlugins:input_type -> mavio.system.v1.ListCatalogPluginsRequest
-	21, // 39: mavio.system.v1.SystemService.InstallPlugin:input_type -> mavio.system.v1.InstallPluginRequest
-	23, // 40: mavio.system.v1.SystemService.UninstallPlugin:input_type -> mavio.system.v1.UninstallPluginRequest
-	31, // 41: mavio.system.v1.SystemService.GetServerSettings:input_type -> mavio.system.v1.GetServerSettingsRequest
-	33, // 42: mavio.system.v1.SystemService.UpdateServerSettings:input_type -> mavio.system.v1.UpdateServerSettingsRequest
-	35, // 43: mavio.system.v1.SystemService.ListDirectory:input_type -> mavio.system.v1.ListDirectoryRequest
-	39, // 44: mavio.system.v1.SystemService.ListLogs:input_type -> mavio.system.v1.ListLogsRequest
-	7,  // 45: mavio.system.v1.SystemService.GetHealth:output_type -> mavio.system.v1.GetHealthResponse
-	9,  // 46: mavio.system.v1.SystemService.GetSystemInfo:output_type -> mavio.system.v1.GetSystemInfoResponse
-	12, // 47: mavio.system.v1.SystemService.ListPlugins:output_type -> mavio.system.v1.ListPluginsResponse
-	14, // 48: mavio.system.v1.SystemService.GetPluginConfig:output_type -> mavio.system.v1.GetPluginConfigResponse
-	16, // 49: mavio.system.v1.SystemService.SetPluginConfig:output_type -> mavio.system.v1.SetPluginConfigResponse
-	20, // 50: mavio.system.v1.SystemService.ListCatalogPlugins:output_type -> mavio.system.v1.ListCatalogPluginsResponse
-	22, // 51: mavio.system.v1.SystemService.InstallPlugin:output_type -> mavio.system.v1.InstallPluginResponse
-	24, // 52: mavio.system.v1.SystemService.UninstallPlugin:output_type -> mavio.system.v1.UninstallPluginResponse
-	32, // 53: mavio.system.v1.SystemService.GetServerSettings:output_type -> mavio.system.v1.GetServerSettingsResponse
-	34, // 54: mavio.system.v1.SystemService.UpdateServerSettings:output_type -> mavio.system.v1.UpdateServerSettingsResponse
-	37, // 55: mavio.system.v1.SystemService.ListDirectory:output_type -> mavio.system.v1.ListDirectoryResponse
-	40, // 56: mavio.system.v1.SystemService.ListLogs:output_type -> mavio.system.v1.ListLogsResponse
-	45, // [45:57] is the sub-list for method output_type
-	33, // [33:45] is the sub-list for method input_type
-	33, // [33:33] is the sub-list for extension type_name
-	33, // [33:33] is the sub-list for extension extendee
-	0,  // [0:33] is the sub-list for field type_name
+	4,  // 22: mavio.system.v1.AcquisitionSettings.multi_episode_style:type_name -> mavio.system.v1.MultiEpisodeStyle
+	5,  // 23: mavio.system.v1.AcquisitionSettings.episode_title_required:type_name -> mavio.system.v1.EpisodeTitleRequired
+	29, // 24: mavio.system.v1.GetServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
+	1,  // 25: mavio.system.v1.GetServerSettingsResponse.available_hardware_accelerations:type_name -> mavio.system.v1.HardwareAcceleration
+	29, // 26: mavio.system.v1.UpdateServerSettingsRequest.settings:type_name -> mavio.system.v1.ServerSettings
+	29, // 27: mavio.system.v1.UpdateServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
+	38, // 28: mavio.system.v1.ListDirectoryResponse.entries:type_name -> mavio.system.v1.DirectoryEntry
+	44, // 29: mavio.system.v1.LogRecord.time:type_name -> google.protobuf.Timestamp
+	6,  // 30: mavio.system.v1.LogRecord.level:type_name -> mavio.system.v1.LogLevel
+	43, // 31: mavio.system.v1.LogRecord.attributes:type_name -> mavio.system.v1.LogRecord.AttributesEntry
+	6,  // 32: mavio.system.v1.ListLogsRequest.min_level:type_name -> mavio.system.v1.LogLevel
+	48, // 33: mavio.system.v1.ListLogsRequest.max_age:type_name -> google.protobuf.Duration
+	40, // 34: mavio.system.v1.ListLogsResponse.records:type_name -> mavio.system.v1.LogRecord
+	8,  // 35: mavio.system.v1.SystemService.GetHealth:input_type -> mavio.system.v1.GetHealthRequest
+	10, // 36: mavio.system.v1.SystemService.GetSystemInfo:input_type -> mavio.system.v1.GetSystemInfoRequest
+	13, // 37: mavio.system.v1.SystemService.ListPlugins:input_type -> mavio.system.v1.ListPluginsRequest
+	15, // 38: mavio.system.v1.SystemService.GetPluginConfig:input_type -> mavio.system.v1.GetPluginConfigRequest
+	17, // 39: mavio.system.v1.SystemService.SetPluginConfig:input_type -> mavio.system.v1.SetPluginConfigRequest
+	21, // 40: mavio.system.v1.SystemService.ListCatalogPlugins:input_type -> mavio.system.v1.ListCatalogPluginsRequest
+	23, // 41: mavio.system.v1.SystemService.InstallPlugin:input_type -> mavio.system.v1.InstallPluginRequest
+	25, // 42: mavio.system.v1.SystemService.UninstallPlugin:input_type -> mavio.system.v1.UninstallPluginRequest
+	33, // 43: mavio.system.v1.SystemService.GetServerSettings:input_type -> mavio.system.v1.GetServerSettingsRequest
+	35, // 44: mavio.system.v1.SystemService.UpdateServerSettings:input_type -> mavio.system.v1.UpdateServerSettingsRequest
+	37, // 45: mavio.system.v1.SystemService.ListDirectory:input_type -> mavio.system.v1.ListDirectoryRequest
+	41, // 46: mavio.system.v1.SystemService.ListLogs:input_type -> mavio.system.v1.ListLogsRequest
+	9,  // 47: mavio.system.v1.SystemService.GetHealth:output_type -> mavio.system.v1.GetHealthResponse
+	11, // 48: mavio.system.v1.SystemService.GetSystemInfo:output_type -> mavio.system.v1.GetSystemInfoResponse
+	14, // 49: mavio.system.v1.SystemService.ListPlugins:output_type -> mavio.system.v1.ListPluginsResponse
+	16, // 50: mavio.system.v1.SystemService.GetPluginConfig:output_type -> mavio.system.v1.GetPluginConfigResponse
+	18, // 51: mavio.system.v1.SystemService.SetPluginConfig:output_type -> mavio.system.v1.SetPluginConfigResponse
+	22, // 52: mavio.system.v1.SystemService.ListCatalogPlugins:output_type -> mavio.system.v1.ListCatalogPluginsResponse
+	24, // 53: mavio.system.v1.SystemService.InstallPlugin:output_type -> mavio.system.v1.InstallPluginResponse
+	26, // 54: mavio.system.v1.SystemService.UninstallPlugin:output_type -> mavio.system.v1.UninstallPluginResponse
+	34, // 55: mavio.system.v1.SystemService.GetServerSettings:output_type -> mavio.system.v1.GetServerSettingsResponse
+	36, // 56: mavio.system.v1.SystemService.UpdateServerSettings:output_type -> mavio.system.v1.UpdateServerSettingsResponse
+	39, // 57: mavio.system.v1.SystemService.ListDirectory:output_type -> mavio.system.v1.ListDirectoryResponse
+	42, // 58: mavio.system.v1.SystemService.ListLogs:output_type -> mavio.system.v1.ListLogsResponse
+	47, // [47:59] is the sub-list for method output_type
+	35, // [35:47] is the sub-list for method input_type
+	35, // [35:35] is the sub-list for extension type_name
+	35, // [35:35] is the sub-list for extension extendee
+	0,  // [0:35] is the sub-list for field type_name
 }
 
 func init() { file_mavio_system_v1_system_proto_init() }
@@ -6166,7 +6637,7 @@ func file_mavio_system_v1_system_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_system_v1_system_proto_rawDesc), len(file_mavio_system_v1_system_proto_rawDesc)),
-			NumEnums:      6,
+			NumEnums:      8,
 			NumMessages:   36,
 			NumExtensions: 0,
 			NumServices:   1,

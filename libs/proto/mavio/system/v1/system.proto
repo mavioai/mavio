@@ -341,8 +341,37 @@ enum ColonReplacement {
   COLON_REPLACEMENT_SMART = 5;
 }
 
+// MultiEpisodeStyle is how the name of a file of several episodes writes
+// their numbers, shown for episodes 6 to 8 of season 15.
+enum MultiEpisodeStyle {
+  MULTI_EPISODE_STYLE_UNSPECIFIED = 0;
+  // S15E06-07-08.
+  MULTI_EPISODE_STYLE_EXTEND = 1;
+  // S15E06 - S15E07 - S15E08.
+  MULTI_EPISODE_STYLE_DUPLICATE = 2;
+  // S15E06E07E08.
+  MULTI_EPISODE_STYLE_REPEAT = 3;
+  // S15E06-E07-E08.
+  MULTI_EPISODE_STYLE_SCENE = 4;
+  // S15E06-08.
+  MULTI_EPISODE_STYLE_RANGE = 5;
+  // S15E06-E08.
+  MULTI_EPISODE_STYLE_PREFIXED_RANGE = 6;
+}
+
+// EpisodeTitleRequired is when an episode imported under a name showing
+// its title must have one.
+enum EpisodeTitleRequired {
+  EPISODE_TITLE_REQUIRED_UNSPECIFIED = 0;
+  // Of episodes aired within the last two days.
+  EPISODE_TITLE_REQUIRED_ALWAYS = 1;
+  // As always, but not of the episodes of a season released at once.
+  EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES = 2;
+  EPISODE_TITLE_REQUIRED_NEVER = 3;
+}
+
 // AcquisitionSettings are how releases are chosen, downloaded and
-// imported, as Radarr's settings.
+// imported, as Radarr's and Sonarr's settings.
 message AcquisitionSettings {
   ProperDownload propers = 1 [(buf.validate.field).enum = {
     defined_only: true
@@ -396,6 +425,23 @@ message AcquisitionSettings {
   // Search again when a download grabbed from an interactive search
   // fails, when auto_redownload_failed is set.
   bool auto_redownload_failed_from_interactive_search = 26;
+  // Whether episode files are named by the episode formats.
+  bool rename_episodes = 40;
+  // Templates of episode files of standard, daily and anime series and of
+  // the folders of series, seasons and specials, such as
+  // "{Series Title} - S{season:00}E{episode:00}"; empty for the defaults.
+  string standard_episode_format = 41;
+  string daily_episode_format = 42;
+  string anime_episode_format = 43;
+  string series_folder_format = 44;
+  string season_folder_format = 45;
+  string specials_folder_format = 46;
+  // Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.
+  MultiEpisodeStyle multi_episode_style = 47 [(buf.validate.field).enum.defined_only = true];
+  // Unmonitors the episodes of wanted series whose files go missing.
+  bool auto_unmonitor_previously_downloaded_episodes = 48;
+  // Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
+  EpisodeTitleRequired episode_title_required = 49 [(buf.validate.field).enum.defined_only = true];
 }
 
 message GetServerSettingsRequest {}

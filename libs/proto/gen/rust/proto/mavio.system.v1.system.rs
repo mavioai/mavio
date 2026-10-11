@@ -347,6 +347,214 @@ impl ::buffa::Enumeration for ColonReplacement {
         ]
     }
 }
+/// MultiEpisodeStyle is how the name of a file of several episodes writes
+/// their numbers, shown for episodes 6 to 8 of season 15.
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[repr(i32)]
+pub enum MultiEpisodeStyle {
+    MULTI_EPISODE_STYLE_UNSPECIFIED = 0i32,
+    /// S15E06-07-08.
+    MULTI_EPISODE_STYLE_EXTEND = 1i32,
+    /// S15E06 - S15E07 - S15E08.
+    MULTI_EPISODE_STYLE_DUPLICATE = 2i32,
+    /// S15E06E07E08.
+    MULTI_EPISODE_STYLE_REPEAT = 3i32,
+    /// S15E06-E07-E08.
+    MULTI_EPISODE_STYLE_SCENE = 4i32,
+    /// S15E06-08.
+    MULTI_EPISODE_STYLE_RANGE = 5i32,
+    /// S15E06-E08.
+    MULTI_EPISODE_STYLE_PREFIXED_RANGE = 6i32,
+}
+impl MultiEpisodeStyle {
+    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_UNSPECIFIED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Unspecified: Self = Self::MULTI_EPISODE_STYLE_UNSPECIFIED;
+    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_EXTEND`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Extend: Self = Self::MULTI_EPISODE_STYLE_EXTEND;
+    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_DUPLICATE`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Duplicate: Self = Self::MULTI_EPISODE_STYLE_DUPLICATE;
+    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_REPEAT`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Repeat: Self = Self::MULTI_EPISODE_STYLE_REPEAT;
+    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_SCENE`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Scene: Self = Self::MULTI_EPISODE_STYLE_SCENE;
+    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_RANGE`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Range: Self = Self::MULTI_EPISODE_STYLE_RANGE;
+    ///Idiomatic alias for [`Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const PrefixedRange: Self = Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE;
+}
+impl ::core::default::Default for MultiEpisodeStyle {
+    fn default() -> Self {
+        Self::MULTI_EPISODE_STYLE_UNSPECIFIED
+    }
+}
+impl ::buffa::Enumeration for MultiEpisodeStyle {
+    fn from_i32(value: i32) -> ::core::option::Option<Self> {
+        match value {
+            0i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_UNSPECIFIED),
+            1i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_EXTEND),
+            2i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_DUPLICATE),
+            3i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_REPEAT),
+            4i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_SCENE),
+            5i32 => ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_RANGE),
+            6i32 => {
+                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE)
+            }
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn to_i32(&self) -> i32 {
+        *self as i32
+    }
+    fn proto_name(&self) -> &'static str {
+        match self {
+            Self::MULTI_EPISODE_STYLE_UNSPECIFIED => "MULTI_EPISODE_STYLE_UNSPECIFIED",
+            Self::MULTI_EPISODE_STYLE_EXTEND => "MULTI_EPISODE_STYLE_EXTEND",
+            Self::MULTI_EPISODE_STYLE_DUPLICATE => "MULTI_EPISODE_STYLE_DUPLICATE",
+            Self::MULTI_EPISODE_STYLE_REPEAT => "MULTI_EPISODE_STYLE_REPEAT",
+            Self::MULTI_EPISODE_STYLE_SCENE => "MULTI_EPISODE_STYLE_SCENE",
+            Self::MULTI_EPISODE_STYLE_RANGE => "MULTI_EPISODE_STYLE_RANGE",
+            Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE => {
+                "MULTI_EPISODE_STYLE_PREFIXED_RANGE"
+            }
+        }
+    }
+    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
+        match name {
+            "MULTI_EPISODE_STYLE_UNSPECIFIED" => {
+                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_UNSPECIFIED)
+            }
+            "MULTI_EPISODE_STYLE_EXTEND" => {
+                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_EXTEND)
+            }
+            "MULTI_EPISODE_STYLE_DUPLICATE" => {
+                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_DUPLICATE)
+            }
+            "MULTI_EPISODE_STYLE_REPEAT" => {
+                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_REPEAT)
+            }
+            "MULTI_EPISODE_STYLE_SCENE" => {
+                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_SCENE)
+            }
+            "MULTI_EPISODE_STYLE_RANGE" => {
+                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_RANGE)
+            }
+            "MULTI_EPISODE_STYLE_PREFIXED_RANGE" => {
+                ::core::option::Option::Some(Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE)
+            }
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn values() -> &'static [Self] {
+        &[
+            Self::MULTI_EPISODE_STYLE_UNSPECIFIED,
+            Self::MULTI_EPISODE_STYLE_EXTEND,
+            Self::MULTI_EPISODE_STYLE_DUPLICATE,
+            Self::MULTI_EPISODE_STYLE_REPEAT,
+            Self::MULTI_EPISODE_STYLE_SCENE,
+            Self::MULTI_EPISODE_STYLE_RANGE,
+            Self::MULTI_EPISODE_STYLE_PREFIXED_RANGE,
+        ]
+    }
+}
+/// EpisodeTitleRequired is when an episode imported under a name showing
+/// its title must have one.
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[repr(i32)]
+pub enum EpisodeTitleRequired {
+    EPISODE_TITLE_REQUIRED_UNSPECIFIED = 0i32,
+    /// Of episodes aired within the last two days.
+    EPISODE_TITLE_REQUIRED_ALWAYS = 1i32,
+    /// As always, but not of the episodes of a season released at once.
+    EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES = 2i32,
+    EPISODE_TITLE_REQUIRED_NEVER = 3i32,
+}
+impl EpisodeTitleRequired {
+    ///Idiomatic alias for [`Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Unspecified: Self = Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED;
+    ///Idiomatic alias for [`Self::EPISODE_TITLE_REQUIRED_ALWAYS`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Always: Self = Self::EPISODE_TITLE_REQUIRED_ALWAYS;
+    ///Idiomatic alias for [`Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const BulkSeasonReleases: Self = Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES;
+    ///Idiomatic alias for [`Self::EPISODE_TITLE_REQUIRED_NEVER`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Never: Self = Self::EPISODE_TITLE_REQUIRED_NEVER;
+}
+impl ::core::default::Default for EpisodeTitleRequired {
+    fn default() -> Self {
+        Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED
+    }
+}
+impl ::buffa::Enumeration for EpisodeTitleRequired {
+    fn from_i32(value: i32) -> ::core::option::Option<Self> {
+        match value {
+            0i32 => {
+                ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED)
+            }
+            1i32 => ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_ALWAYS),
+            2i32 => {
+                ::core::option::Option::Some(
+                    Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES,
+                )
+            }
+            3i32 => ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_NEVER),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn to_i32(&self) -> i32 {
+        *self as i32
+    }
+    fn proto_name(&self) -> &'static str {
+        match self {
+            Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED => {
+                "EPISODE_TITLE_REQUIRED_UNSPECIFIED"
+            }
+            Self::EPISODE_TITLE_REQUIRED_ALWAYS => "EPISODE_TITLE_REQUIRED_ALWAYS",
+            Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES => {
+                "EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES"
+            }
+            Self::EPISODE_TITLE_REQUIRED_NEVER => "EPISODE_TITLE_REQUIRED_NEVER",
+        }
+    }
+    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
+        match name {
+            "EPISODE_TITLE_REQUIRED_UNSPECIFIED" => {
+                ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED)
+            }
+            "EPISODE_TITLE_REQUIRED_ALWAYS" => {
+                ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_ALWAYS)
+            }
+            "EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES" => {
+                ::core::option::Option::Some(
+                    Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES,
+                )
+            }
+            "EPISODE_TITLE_REQUIRED_NEVER" => {
+                ::core::option::Option::Some(Self::EPISODE_TITLE_REQUIRED_NEVER)
+            }
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn values() -> &'static [Self] {
+        &[
+            Self::EPISODE_TITLE_REQUIRED_UNSPECIFIED,
+            Self::EPISODE_TITLE_REQUIRED_ALWAYS,
+            Self::EPISODE_TITLE_REQUIRED_BULK_SEASON_RELEASES,
+            Self::EPISODE_TITLE_REQUIRED_NEVER,
+        ]
+    }
+}
 #[allow(non_camel_case_types)]
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
@@ -5081,7 +5289,7 @@ impl ::buffa::ExtensionSet for MetadataSettings {
     }
 }
 /// AcquisitionSettings are how releases are chosen, downloaded and
-/// imported, as Radarr's settings.
+/// imported, as Radarr's and Sonarr's settings.
 #[derive(Clone, PartialEq, Default)]
 pub struct AcquisitionSettings {
     /// Field 1: `propers`
@@ -5176,6 +5384,42 @@ pub struct AcquisitionSettings {
     ///
     /// Field 26: `auto_redownload_failed_from_interactive_search`
     pub auto_redownload_failed_from_interactive_search: ::core::option::Option<bool>,
+    /// Whether episode files are named by the episode formats.
+    ///
+    /// Field 40: `rename_episodes`
+    pub rename_episodes: ::core::option::Option<bool>,
+    /// Templates of episode files of standard, daily and anime series and of
+    /// the folders of series, seasons and specials, such as
+    /// "{Series Title} - S{season:00}E{episode:00}"; empty for the defaults.
+    ///
+    /// Field 41: `standard_episode_format`
+    pub standard_episode_format: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 42: `daily_episode_format`
+    pub daily_episode_format: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 43: `anime_episode_format`
+    pub anime_episode_format: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 44: `series_folder_format`
+    pub series_folder_format: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 45: `season_folder_format`
+    pub season_folder_format: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 46: `specials_folder_format`
+    pub specials_folder_format: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Unspecified for MULTI_EPISODE_STYLE_PREFIXED_RANGE.
+    ///
+    /// Field 47: `multi_episode_style`
+    pub multi_episode_style: ::core::option::Option<
+        ::buffa::EnumValue<MultiEpisodeStyle>,
+    >,
+    /// Unmonitors the episodes of wanted series whose files go missing.
+    ///
+    /// Field 48: `auto_unmonitor_previously_downloaded_episodes`
+    pub auto_unmonitor_previously_downloaded_episodes: ::core::option::Option<bool>,
+    /// Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
+    ///
+    /// Field 49: `episode_title_required`
+    pub episode_title_required: ::core::option::Option<
+        ::buffa::EnumValue<EpisodeTitleRequired>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -5211,6 +5455,19 @@ impl ::core::fmt::Debug for AcquisitionSettings {
                 "auto_redownload_failed_from_interactive_search",
                 &self.auto_redownload_failed_from_interactive_search,
             )
+            .field("rename_episodes", &self.rename_episodes)
+            .field("standard_episode_format", &self.standard_episode_format)
+            .field("daily_episode_format", &self.daily_episode_format)
+            .field("anime_episode_format", &self.anime_episode_format)
+            .field("series_folder_format", &self.series_folder_format)
+            .field("season_folder_format", &self.season_folder_format)
+            .field("specials_folder_format", &self.specials_folder_format)
+            .field("multi_episode_style", &self.multi_episode_style)
+            .field(
+                "auto_unmonitor_previously_downloaded_episodes",
+                &self.auto_unmonitor_previously_downloaded_episodes,
+            )
+            .field("episode_title_required", &self.episode_title_required)
             .finish()
     }
 }
@@ -5408,6 +5665,103 @@ impl AcquisitionSettings {
         self.auto_redownload_failed_from_interactive_search = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::rename_episodes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_rename_episodes(mut self, value: bool) -> Self {
+        self.rename_episodes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::standard_episode_format`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_standard_episode_format(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.standard_episode_format = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::daily_episode_format`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_daily_episode_format(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.daily_episode_format = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::anime_episode_format`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_anime_episode_format(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.anime_episode_format = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::series_folder_format`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_series_folder_format(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.series_folder_format = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::season_folder_format`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_season_folder_format(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.season_folder_format = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::specials_folder_format`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_specials_folder_format(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.specials_folder_format = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::multi_episode_style`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_multi_episode_style(
+        mut self,
+        value: impl Into<::buffa::EnumValue<MultiEpisodeStyle>>,
+    ) -> Self {
+        self.multi_episode_style = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::auto_unmonitor_previously_downloaded_episodes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_auto_unmonitor_previously_downloaded_episodes(
+        mut self,
+        value: bool,
+    ) -> Self {
+        self.auto_unmonitor_previously_downloaded_episodes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::episode_title_required`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_episode_title_required(
+        mut self,
+        value: impl Into<::buffa::EnumValue<EpisodeTitleRequired>>,
+    ) -> Self {
+        self.episode_title_required = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(AcquisitionSettings);
 impl ::buffa::MessageName for AcquisitionSettings {
@@ -5507,6 +5861,36 @@ impl ::buffa::Message for AcquisitionSettings {
         if self.auto_redownload_failed_from_interactive_search.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.rename_episodes.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.standard_episode_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.daily_episode_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.anime_episode_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.series_folder_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.season_folder_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.specials_folder_format {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.multi_episode_style {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if self.auto_unmonitor_previously_downloaded_episodes.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.episode_title_required {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -5594,6 +5978,36 @@ impl ::buffa::Message for AcquisitionSettings {
         }
         if let Some(v) = self.auto_redownload_failed_from_interactive_search {
             ::buffa::types::put_bool_field(26u32, v, buf);
+        }
+        if let Some(v) = self.rename_episodes {
+            ::buffa::types::put_bool_field(40u32, v, buf);
+        }
+        if let Some(ref v) = self.standard_episode_format {
+            ::buffa::types::put_string_field(41u32, v, buf);
+        }
+        if let Some(ref v) = self.daily_episode_format {
+            ::buffa::types::put_string_field(42u32, v, buf);
+        }
+        if let Some(ref v) = self.anime_episode_format {
+            ::buffa::types::put_string_field(43u32, v, buf);
+        }
+        if let Some(ref v) = self.series_folder_format {
+            ::buffa::types::put_string_field(44u32, v, buf);
+        }
+        if let Some(ref v) = self.season_folder_format {
+            ::buffa::types::put_string_field(45u32, v, buf);
+        }
+        if let Some(ref v) = self.specials_folder_format {
+            ::buffa::types::put_string_field(46u32, v, buf);
+        }
+        if let Some(ref v) = self.multi_episode_style {
+            ::buffa::types::put_int32_field(47u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.auto_unmonitor_previously_downloaded_episodes {
+            ::buffa::types::put_bool_field(48u32, v, buf);
+        }
+        if let Some(ref v) = self.episode_title_required {
+            ::buffa::types::put_int32_field(49u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5855,6 +6269,114 @@ impl ::buffa::Message for AcquisitionSettings {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            40u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.rename_episodes = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            41u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .standard_episode_format
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            42u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .daily_episode_format
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            43u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .anime_episode_format
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            44u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .series_folder_format
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            45u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .season_folder_format
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            46u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .specials_folder_format
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            47u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.multi_episode_style = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            48u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.auto_unmonitor_previously_downloaded_episodes = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            49u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.episode_title_required = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5889,6 +6411,16 @@ impl ::buffa::Message for AcquisitionSettings {
         self.movie_folder_format = ::core::option::Option::None;
         self.standard_movie_format = ::core::option::Option::None;
         self.auto_redownload_failed_from_interactive_search = ::core::option::Option::None;
+        self.rename_episodes = ::core::option::Option::None;
+        self.standard_episode_format = ::core::option::Option::None;
+        self.daily_episode_format = ::core::option::Option::None;
+        self.anime_episode_format = ::core::option::Option::None;
+        self.series_folder_format = ::core::option::Option::None;
+        self.season_folder_format = ::core::option::Option::None;
+        self.specials_folder_format = ::core::option::Option::None;
+        self.multi_episode_style = ::core::option::Option::None;
+        self.auto_unmonitor_previously_downloaded_episodes = ::core::option::Option::None;
+        self.episode_title_required = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
