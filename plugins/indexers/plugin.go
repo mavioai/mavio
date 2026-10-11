@@ -72,6 +72,11 @@ type indexerConfig struct {
 	SeedRatio          float64 `json:"seed_ratio"`
 	SeedTime           int     `json:"seed_time"`
 	SeasonPackSeedTime int     `json:"season_pack_seed_time"`
+	// RejectBlocklistedTorrentHashes refuses, when grabbing a torrent
+	// whose hash the release did not tell, a torrent whose hash is
+	// blocklisted, as Radarr's and Sonarr's
+	// RejectBlocklistedTorrentHashesWhileGrabbing.
+	RejectBlocklistedTorrentHashes bool `json:"reject_blocklisted_torrent_hashes"`
 }
 
 // minimumSeeders returns the fewest seeders a torrent release may have.
