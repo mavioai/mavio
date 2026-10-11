@@ -124,6 +124,112 @@ func (x HardwareAcceleration) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// ProperDownload is what to do with propers and repacks.
+type ProperDownload int32
+
+const (
+	ProperDownload_PROPER_DOWNLOAD_UNSPECIFIED ProperDownload = 0
+	// Prefer them, and upgrade to them.
+	ProperDownload_PROPER_DOWNLOAD_PREFER_AND_UPGRADE ProperDownload = 1
+	// Prefer them, but do not upgrade to them.
+	ProperDownload_PROPER_DOWNLOAD_DO_NOT_UPGRADE ProperDownload = 2
+	// Rank them as other releases, by custom formats.
+	ProperDownload_PROPER_DOWNLOAD_DO_NOT_PREFER ProperDownload = 3
+)
+
+// Enum value maps for ProperDownload.
+var (
+	ProperDownload_name = map[int32]string{
+		0: "PROPER_DOWNLOAD_UNSPECIFIED",
+		1: "PROPER_DOWNLOAD_PREFER_AND_UPGRADE",
+		2: "PROPER_DOWNLOAD_DO_NOT_UPGRADE",
+		3: "PROPER_DOWNLOAD_DO_NOT_PREFER",
+	}
+	ProperDownload_value = map[string]int32{
+		"PROPER_DOWNLOAD_UNSPECIFIED":        0,
+		"PROPER_DOWNLOAD_PREFER_AND_UPGRADE": 1,
+		"PROPER_DOWNLOAD_DO_NOT_UPGRADE":     2,
+		"PROPER_DOWNLOAD_DO_NOT_PREFER":      3,
+	}
+)
+
+func (x ProperDownload) Enum() *ProperDownload {
+	p := new(ProperDownload)
+	*p = x
+	return p
+}
+
+func (x ProperDownload) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ProperDownload) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_system_v1_system_proto_enumTypes[2].Descriptor()
+}
+
+func (ProperDownload) Type() protoreflect.EnumType {
+	return &file_mavio_system_v1_system_proto_enumTypes[2]
+}
+
+func (x ProperDownload) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// ColonReplacement is what replaces colons in file names.
+type ColonReplacement int32
+
+const (
+	ColonReplacement_COLON_REPLACEMENT_UNSPECIFIED      ColonReplacement = 0
+	ColonReplacement_COLON_REPLACEMENT_DELETE           ColonReplacement = 1
+	ColonReplacement_COLON_REPLACEMENT_DASH             ColonReplacement = 2
+	ColonReplacement_COLON_REPLACEMENT_SPACE_DASH       ColonReplacement = 3
+	ColonReplacement_COLON_REPLACEMENT_SPACE_DASH_SPACE ColonReplacement = 4
+	// A dash between words, else deleted.
+	ColonReplacement_COLON_REPLACEMENT_SMART ColonReplacement = 5
+)
+
+// Enum value maps for ColonReplacement.
+var (
+	ColonReplacement_name = map[int32]string{
+		0: "COLON_REPLACEMENT_UNSPECIFIED",
+		1: "COLON_REPLACEMENT_DELETE",
+		2: "COLON_REPLACEMENT_DASH",
+		3: "COLON_REPLACEMENT_SPACE_DASH",
+		4: "COLON_REPLACEMENT_SPACE_DASH_SPACE",
+		5: "COLON_REPLACEMENT_SMART",
+	}
+	ColonReplacement_value = map[string]int32{
+		"COLON_REPLACEMENT_UNSPECIFIED":      0,
+		"COLON_REPLACEMENT_DELETE":           1,
+		"COLON_REPLACEMENT_DASH":             2,
+		"COLON_REPLACEMENT_SPACE_DASH":       3,
+		"COLON_REPLACEMENT_SPACE_DASH_SPACE": 4,
+		"COLON_REPLACEMENT_SMART":            5,
+	}
+)
+
+func (x ColonReplacement) Enum() *ColonReplacement {
+	p := new(ColonReplacement)
+	*p = x
+	return p
+}
+
+func (x ColonReplacement) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ColonReplacement) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_system_v1_system_proto_enumTypes[3].Descriptor()
+}
+
+func (ColonReplacement) Type() protoreflect.EnumType {
+	return &file_mavio_system_v1_system_proto_enumTypes[3]
+}
+
+func (x ColonReplacement) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 type LogLevel int32
 
 const (
@@ -163,11 +269,11 @@ func (x LogLevel) String() string {
 }
 
 func (LogLevel) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_system_v1_system_proto_enumTypes[2].Descriptor()
+	return file_mavio_system_v1_system_proto_enumTypes[4].Descriptor()
 }
 
 func (LogLevel) Type() protoreflect.EnumType {
-	return &file_mavio_system_v1_system_proto_enumTypes[2]
+	return &file_mavio_system_v1_system_proto_enumTypes[4]
 }
 
 func (x LogLevel) Number() protoreflect.EnumNumber {
@@ -207,11 +313,11 @@ func (x GetHealthResponse_Status) String() string {
 }
 
 func (GetHealthResponse_Status) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_system_v1_system_proto_enumTypes[3].Descriptor()
+	return file_mavio_system_v1_system_proto_enumTypes[5].Descriptor()
 }
 
 func (GetHealthResponse_Status) Type() protoreflect.EnumType {
-	return &file_mavio_system_v1_system_proto_enumTypes[3]
+	return &file_mavio_system_v1_system_proto_enumTypes[5]
 }
 
 func (x GetHealthResponse_Status) Number() protoreflect.EnumNumber {
@@ -2866,6 +2972,7 @@ type ServerSettings struct {
 	xxx_hidden_PluginCatalogs      []string               `protobuf:"bytes,3,rep,name=plugin_catalogs,json=pluginCatalogs"`
 	xxx_hidden_UpdateTime          *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=update_time,json=updateTime"`
 	xxx_hidden_PasswordResetPlugin *string                `protobuf:"bytes,5,opt,name=password_reset_plugin,json=passwordResetPlugin"`
+	xxx_hidden_Acquisition         *AcquisitionSettings   `protobuf:"bytes,6,opt,name=acquisition"`
 	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
 	XXX_presence                   [1]uint32
 	unknownFields                  protoimpl.UnknownFields
@@ -2935,6 +3042,13 @@ func (x *ServerSettings) GetPasswordResetPlugin() string {
 	return ""
 }
 
+func (x *ServerSettings) GetAcquisition() *AcquisitionSettings {
+	if x != nil {
+		return x.xxx_hidden_Acquisition
+	}
+	return nil
+}
+
 func (x *ServerSettings) SetTranscoding(v *TranscodingSettings) {
 	x.xxx_hidden_Transcoding = v
 }
@@ -2953,7 +3067,11 @@ func (x *ServerSettings) SetUpdateTime(v *timestamppb.Timestamp) {
 
 func (x *ServerSettings) SetPasswordResetPlugin(v string) {
 	x.xxx_hidden_PasswordResetPlugin = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *ServerSettings) SetAcquisition(v *AcquisitionSettings) {
+	x.xxx_hidden_Acquisition = v
 }
 
 func (x *ServerSettings) HasTranscoding() bool {
@@ -2984,6 +3102,13 @@ func (x *ServerSettings) HasPasswordResetPlugin() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
 }
 
+func (x *ServerSettings) HasAcquisition() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Acquisition != nil
+}
+
 func (x *ServerSettings) ClearTranscoding() {
 	x.xxx_hidden_Transcoding = nil
 }
@@ -3001,6 +3126,10 @@ func (x *ServerSettings) ClearPasswordResetPlugin() {
 	x.xxx_hidden_PasswordResetPlugin = nil
 }
 
+func (x *ServerSettings) ClearAcquisition() {
+	x.xxx_hidden_Acquisition = nil
+}
+
 type ServerSettings_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -3012,6 +3141,9 @@ type ServerSettings_builder struct {
 	// ID of the plugin that delivers the PINs resetting forgotten passwords;
 	// empty when users cannot reset them.
 	PasswordResetPlugin *string
+	// How releases are chosen, downloaded and imported; unset in an update
+	// keeps the current ones.
+	Acquisition *AcquisitionSettings
 }
 
 func (b0 ServerSettings_builder) Build() *ServerSettings {
@@ -3023,8 +3155,805 @@ func (b0 ServerSettings_builder) Build() *ServerSettings {
 	x.xxx_hidden_PluginCatalogs = b.PluginCatalogs
 	x.xxx_hidden_UpdateTime = b.UpdateTime
 	if b.PasswordResetPlugin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
 		x.xxx_hidden_PasswordResetPlugin = b.PasswordResetPlugin
+	}
+	x.xxx_hidden_Acquisition = b.Acquisition
+	return m0
+}
+
+// AcquisitionSettings are how releases are chosen, downloaded and
+// imported, as Radarr's settings.
+type AcquisitionSettings struct {
+	state                                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Propers                   ProperDownload         `protobuf:"varint,1,opt,name=propers,enum=mavio.system.v1.ProperDownload"`
+	xxx_hidden_PreferIndexerFlags        bool                   `protobuf:"varint,2,opt,name=prefer_indexer_flags,json=preferIndexerFlags"`
+	xxx_hidden_CompletedDownloadHandling bool                   `protobuf:"varint,3,opt,name=completed_download_handling,json=completedDownloadHandling"`
+	xxx_hidden_AutoRedownloadFailed      bool                   `protobuf:"varint,4,opt,name=auto_redownload_failed,json=autoRedownloadFailed"`
+	xxx_hidden_MaximumSize               int32                  `protobuf:"varint,5,opt,name=maximum_size,json=maximumSize"`
+	xxx_hidden_MinimumAge                int32                  `protobuf:"varint,6,opt,name=minimum_age,json=minimumAge"`
+	xxx_hidden_Retention                 int32                  `protobuf:"varint,7,opt,name=retention"`
+	xxx_hidden_AllowHardcodedSubs        bool                   `protobuf:"varint,8,opt,name=allow_hardcoded_subs,json=allowHardcodedSubs"`
+	xxx_hidden_WhitelistedHardcodedSubs  []string               `protobuf:"bytes,9,rep,name=whitelisted_hardcoded_subs,json=whitelistedHardcodedSubs"`
+	xxx_hidden_SkipFreeSpaceCheck        bool                   `protobuf:"varint,10,opt,name=skip_free_space_check,json=skipFreeSpaceCheck"`
+	xxx_hidden_MinimumFreeSpace          int32                  `protobuf:"varint,11,opt,name=minimum_free_space,json=minimumFreeSpace"`
+	xxx_hidden_AvailabilityDelay         int32                  `protobuf:"varint,12,opt,name=availability_delay,json=availabilityDelay"`
+	xxx_hidden_RssSyncInterval           int32                  `protobuf:"varint,13,opt,name=rss_sync_interval,json=rssSyncInterval"`
+	xxx_hidden_CheckFinishedInterval     int32                  `protobuf:"varint,14,opt,name=check_finished_interval,json=checkFinishedInterval"`
+	xxx_hidden_RecycleBin                *string                `protobuf:"bytes,15,opt,name=recycle_bin,json=recycleBin"`
+	xxx_hidden_RecycleBinCleanupDays     int32                  `protobuf:"varint,16,opt,name=recycle_bin_cleanup_days,json=recycleBinCleanupDays"`
+	xxx_hidden_CopyUsingHardlinks        bool                   `protobuf:"varint,17,opt,name=copy_using_hardlinks,json=copyUsingHardlinks"`
+	xxx_hidden_ImportExtraFiles          bool                   `protobuf:"varint,18,opt,name=import_extra_files,json=importExtraFiles"`
+	xxx_hidden_ExtraFileExtensions       []string               `protobuf:"bytes,19,rep,name=extra_file_extensions,json=extraFileExtensions"`
+	xxx_hidden_DeleteEmptyFolders        bool                   `protobuf:"varint,20,opt,name=delete_empty_folders,json=deleteEmptyFolders"`
+	xxx_hidden_RenameMovies              bool                   `protobuf:"varint,21,opt,name=rename_movies,json=renameMovies"`
+	xxx_hidden_ReplaceIllegalCharacters  bool                   `protobuf:"varint,22,opt,name=replace_illegal_characters,json=replaceIllegalCharacters"`
+	xxx_hidden_ColonReplacement          ColonReplacement       `protobuf:"varint,23,opt,name=colon_replacement,json=colonReplacement,enum=mavio.system.v1.ColonReplacement"`
+	xxx_hidden_MovieFolderFormat         *string                `protobuf:"bytes,24,opt,name=movie_folder_format,json=movieFolderFormat"`
+	xxx_hidden_StandardMovieFormat       *string                `protobuf:"bytes,25,opt,name=standard_movie_format,json=standardMovieFormat"`
+	XXX_raceDetectHookData               protoimpl.RaceDetectHookData
+	XXX_presence                         [1]uint32
+	unknownFields                        protoimpl.UnknownFields
+	sizeCache                            protoimpl.SizeCache
+}
+
+func (x *AcquisitionSettings) Reset() {
+	*x = AcquisitionSettings{}
+	mi := &file_mavio_system_v1_system_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcquisitionSettings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcquisitionSettings) ProtoMessage() {}
+
+func (x *AcquisitionSettings) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_system_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *AcquisitionSettings) GetPropers() ProperDownload {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 0) {
+			return x.xxx_hidden_Propers
+		}
+	}
+	return ProperDownload_PROPER_DOWNLOAD_UNSPECIFIED
+}
+
+func (x *AcquisitionSettings) GetPreferIndexerFlags() bool {
+	if x != nil {
+		return x.xxx_hidden_PreferIndexerFlags
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetCompletedDownloadHandling() bool {
+	if x != nil {
+		return x.xxx_hidden_CompletedDownloadHandling
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetAutoRedownloadFailed() bool {
+	if x != nil {
+		return x.xxx_hidden_AutoRedownloadFailed
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetMaximumSize() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaximumSize
+	}
+	return 0
+}
+
+func (x *AcquisitionSettings) GetMinimumAge() int32 {
+	if x != nil {
+		return x.xxx_hidden_MinimumAge
+	}
+	return 0
+}
+
+func (x *AcquisitionSettings) GetRetention() int32 {
+	if x != nil {
+		return x.xxx_hidden_Retention
+	}
+	return 0
+}
+
+func (x *AcquisitionSettings) GetAllowHardcodedSubs() bool {
+	if x != nil {
+		return x.xxx_hidden_AllowHardcodedSubs
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetWhitelistedHardcodedSubs() []string {
+	if x != nil {
+		return x.xxx_hidden_WhitelistedHardcodedSubs
+	}
+	return nil
+}
+
+func (x *AcquisitionSettings) GetSkipFreeSpaceCheck() bool {
+	if x != nil {
+		return x.xxx_hidden_SkipFreeSpaceCheck
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetMinimumFreeSpace() int32 {
+	if x != nil {
+		return x.xxx_hidden_MinimumFreeSpace
+	}
+	return 0
+}
+
+func (x *AcquisitionSettings) GetAvailabilityDelay() int32 {
+	if x != nil {
+		return x.xxx_hidden_AvailabilityDelay
+	}
+	return 0
+}
+
+func (x *AcquisitionSettings) GetRssSyncInterval() int32 {
+	if x != nil {
+		return x.xxx_hidden_RssSyncInterval
+	}
+	return 0
+}
+
+func (x *AcquisitionSettings) GetCheckFinishedInterval() int32 {
+	if x != nil {
+		return x.xxx_hidden_CheckFinishedInterval
+	}
+	return 0
+}
+
+func (x *AcquisitionSettings) GetRecycleBin() string {
+	if x != nil {
+		if x.xxx_hidden_RecycleBin != nil {
+			return *x.xxx_hidden_RecycleBin
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AcquisitionSettings) GetRecycleBinCleanupDays() int32 {
+	if x != nil {
+		return x.xxx_hidden_RecycleBinCleanupDays
+	}
+	return 0
+}
+
+func (x *AcquisitionSettings) GetCopyUsingHardlinks() bool {
+	if x != nil {
+		return x.xxx_hidden_CopyUsingHardlinks
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetImportExtraFiles() bool {
+	if x != nil {
+		return x.xxx_hidden_ImportExtraFiles
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetExtraFileExtensions() []string {
+	if x != nil {
+		return x.xxx_hidden_ExtraFileExtensions
+	}
+	return nil
+}
+
+func (x *AcquisitionSettings) GetDeleteEmptyFolders() bool {
+	if x != nil {
+		return x.xxx_hidden_DeleteEmptyFolders
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetRenameMovies() bool {
+	if x != nil {
+		return x.xxx_hidden_RenameMovies
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetReplaceIllegalCharacters() bool {
+	if x != nil {
+		return x.xxx_hidden_ReplaceIllegalCharacters
+	}
+	return false
+}
+
+func (x *AcquisitionSettings) GetColonReplacement() ColonReplacement {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 22) {
+			return x.xxx_hidden_ColonReplacement
+		}
+	}
+	return ColonReplacement_COLON_REPLACEMENT_UNSPECIFIED
+}
+
+func (x *AcquisitionSettings) GetMovieFolderFormat() string {
+	if x != nil {
+		if x.xxx_hidden_MovieFolderFormat != nil {
+			return *x.xxx_hidden_MovieFolderFormat
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AcquisitionSettings) GetStandardMovieFormat() string {
+	if x != nil {
+		if x.xxx_hidden_StandardMovieFormat != nil {
+			return *x.xxx_hidden_StandardMovieFormat
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AcquisitionSettings) SetPropers(v ProperDownload) {
+	x.xxx_hidden_Propers = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 25)
+}
+
+func (x *AcquisitionSettings) SetPreferIndexerFlags(v bool) {
+	x.xxx_hidden_PreferIndexerFlags = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 25)
+}
+
+func (x *AcquisitionSettings) SetCompletedDownloadHandling(v bool) {
+	x.xxx_hidden_CompletedDownloadHandling = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 25)
+}
+
+func (x *AcquisitionSettings) SetAutoRedownloadFailed(v bool) {
+	x.xxx_hidden_AutoRedownloadFailed = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 25)
+}
+
+func (x *AcquisitionSettings) SetMaximumSize(v int32) {
+	x.xxx_hidden_MaximumSize = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 25)
+}
+
+func (x *AcquisitionSettings) SetMinimumAge(v int32) {
+	x.xxx_hidden_MinimumAge = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 25)
+}
+
+func (x *AcquisitionSettings) SetRetention(v int32) {
+	x.xxx_hidden_Retention = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 25)
+}
+
+func (x *AcquisitionSettings) SetAllowHardcodedSubs(v bool) {
+	x.xxx_hidden_AllowHardcodedSubs = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 25)
+}
+
+func (x *AcquisitionSettings) SetWhitelistedHardcodedSubs(v []string) {
+	x.xxx_hidden_WhitelistedHardcodedSubs = v
+}
+
+func (x *AcquisitionSettings) SetSkipFreeSpaceCheck(v bool) {
+	x.xxx_hidden_SkipFreeSpaceCheck = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 25)
+}
+
+func (x *AcquisitionSettings) SetMinimumFreeSpace(v int32) {
+	x.xxx_hidden_MinimumFreeSpace = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 25)
+}
+
+func (x *AcquisitionSettings) SetAvailabilityDelay(v int32) {
+	x.xxx_hidden_AvailabilityDelay = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 25)
+}
+
+func (x *AcquisitionSettings) SetRssSyncInterval(v int32) {
+	x.xxx_hidden_RssSyncInterval = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 25)
+}
+
+func (x *AcquisitionSettings) SetCheckFinishedInterval(v int32) {
+	x.xxx_hidden_CheckFinishedInterval = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 25)
+}
+
+func (x *AcquisitionSettings) SetRecycleBin(v string) {
+	x.xxx_hidden_RecycleBin = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 25)
+}
+
+func (x *AcquisitionSettings) SetRecycleBinCleanupDays(v int32) {
+	x.xxx_hidden_RecycleBinCleanupDays = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 25)
+}
+
+func (x *AcquisitionSettings) SetCopyUsingHardlinks(v bool) {
+	x.xxx_hidden_CopyUsingHardlinks = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 25)
+}
+
+func (x *AcquisitionSettings) SetImportExtraFiles(v bool) {
+	x.xxx_hidden_ImportExtraFiles = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 25)
+}
+
+func (x *AcquisitionSettings) SetExtraFileExtensions(v []string) {
+	x.xxx_hidden_ExtraFileExtensions = v
+}
+
+func (x *AcquisitionSettings) SetDeleteEmptyFolders(v bool) {
+	x.xxx_hidden_DeleteEmptyFolders = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 25)
+}
+
+func (x *AcquisitionSettings) SetRenameMovies(v bool) {
+	x.xxx_hidden_RenameMovies = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 25)
+}
+
+func (x *AcquisitionSettings) SetReplaceIllegalCharacters(v bool) {
+	x.xxx_hidden_ReplaceIllegalCharacters = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 25)
+}
+
+func (x *AcquisitionSettings) SetColonReplacement(v ColonReplacement) {
+	x.xxx_hidden_ColonReplacement = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 25)
+}
+
+func (x *AcquisitionSettings) SetMovieFolderFormat(v string) {
+	x.xxx_hidden_MovieFolderFormat = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 25)
+}
+
+func (x *AcquisitionSettings) SetStandardMovieFormat(v string) {
+	x.xxx_hidden_StandardMovieFormat = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 25)
+}
+
+func (x *AcquisitionSettings) HasPropers() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *AcquisitionSettings) HasPreferIndexerFlags() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *AcquisitionSettings) HasCompletedDownloadHandling() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *AcquisitionSettings) HasAutoRedownloadFailed() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *AcquisitionSettings) HasMaximumSize() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *AcquisitionSettings) HasMinimumAge() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *AcquisitionSettings) HasRetention() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *AcquisitionSettings) HasAllowHardcodedSubs() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *AcquisitionSettings) HasSkipFreeSpaceCheck() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
+func (x *AcquisitionSettings) HasMinimumFreeSpace() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
+func (x *AcquisitionSettings) HasAvailabilityDelay() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
+func (x *AcquisitionSettings) HasRssSyncInterval() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
+func (x *AcquisitionSettings) HasCheckFinishedInterval() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
+}
+
+func (x *AcquisitionSettings) HasRecycleBin() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 14)
+}
+
+func (x *AcquisitionSettings) HasRecycleBinCleanupDays() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 15)
+}
+
+func (x *AcquisitionSettings) HasCopyUsingHardlinks() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 16)
+}
+
+func (x *AcquisitionSettings) HasImportExtraFiles() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 17)
+}
+
+func (x *AcquisitionSettings) HasDeleteEmptyFolders() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 19)
+}
+
+func (x *AcquisitionSettings) HasRenameMovies() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 20)
+}
+
+func (x *AcquisitionSettings) HasReplaceIllegalCharacters() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 21)
+}
+
+func (x *AcquisitionSettings) HasColonReplacement() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 22)
+}
+
+func (x *AcquisitionSettings) HasMovieFolderFormat() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 23)
+}
+
+func (x *AcquisitionSettings) HasStandardMovieFormat() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 24)
+}
+
+func (x *AcquisitionSettings) ClearPropers() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Propers = ProperDownload_PROPER_DOWNLOAD_UNSPECIFIED
+}
+
+func (x *AcquisitionSettings) ClearPreferIndexerFlags() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_PreferIndexerFlags = false
+}
+
+func (x *AcquisitionSettings) ClearCompletedDownloadHandling() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_CompletedDownloadHandling = false
+}
+
+func (x *AcquisitionSettings) ClearAutoRedownloadFailed() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_AutoRedownloadFailed = false
+}
+
+func (x *AcquisitionSettings) ClearMaximumSize() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_MaximumSize = 0
+}
+
+func (x *AcquisitionSettings) ClearMinimumAge() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_MinimumAge = 0
+}
+
+func (x *AcquisitionSettings) ClearRetention() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_Retention = 0
+}
+
+func (x *AcquisitionSettings) ClearAllowHardcodedSubs() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_AllowHardcodedSubs = false
+}
+
+func (x *AcquisitionSettings) ClearSkipFreeSpaceCheck() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_SkipFreeSpaceCheck = false
+}
+
+func (x *AcquisitionSettings) ClearMinimumFreeSpace() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_MinimumFreeSpace = 0
+}
+
+func (x *AcquisitionSettings) ClearAvailabilityDelay() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_AvailabilityDelay = 0
+}
+
+func (x *AcquisitionSettings) ClearRssSyncInterval() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_RssSyncInterval = 0
+}
+
+func (x *AcquisitionSettings) ClearCheckFinishedInterval() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 13)
+	x.xxx_hidden_CheckFinishedInterval = 0
+}
+
+func (x *AcquisitionSettings) ClearRecycleBin() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 14)
+	x.xxx_hidden_RecycleBin = nil
+}
+
+func (x *AcquisitionSettings) ClearRecycleBinCleanupDays() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 15)
+	x.xxx_hidden_RecycleBinCleanupDays = 0
+}
+
+func (x *AcquisitionSettings) ClearCopyUsingHardlinks() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 16)
+	x.xxx_hidden_CopyUsingHardlinks = false
+}
+
+func (x *AcquisitionSettings) ClearImportExtraFiles() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 17)
+	x.xxx_hidden_ImportExtraFiles = false
+}
+
+func (x *AcquisitionSettings) ClearDeleteEmptyFolders() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 19)
+	x.xxx_hidden_DeleteEmptyFolders = false
+}
+
+func (x *AcquisitionSettings) ClearRenameMovies() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 20)
+	x.xxx_hidden_RenameMovies = false
+}
+
+func (x *AcquisitionSettings) ClearReplaceIllegalCharacters() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 21)
+	x.xxx_hidden_ReplaceIllegalCharacters = false
+}
+
+func (x *AcquisitionSettings) ClearColonReplacement() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 22)
+	x.xxx_hidden_ColonReplacement = ColonReplacement_COLON_REPLACEMENT_UNSPECIFIED
+}
+
+func (x *AcquisitionSettings) ClearMovieFolderFormat() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 23)
+	x.xxx_hidden_MovieFolderFormat = nil
+}
+
+func (x *AcquisitionSettings) ClearStandardMovieFormat() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 24)
+	x.xxx_hidden_StandardMovieFormat = nil
+}
+
+type AcquisitionSettings_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Propers *ProperDownload
+	// Rank releases by their indexer flags.
+	PreferIndexerFlags *bool
+	// Import finished downloads.
+	CompletedDownloadHandling *bool
+	// Search again when a download fails.
+	AutoRedownloadFailed *bool
+	// In megabytes; 0 for none.
+	MaximumSize *int32
+	// How old usenet releases must be, in minutes.
+	MinimumAge *int32
+	// Usenet retention in days; 0 for none.
+	Retention          *int32
+	AllowHardcodedSubs *bool
+	// Hardcoded subtitles allowed when others are not.
+	WhitelistedHardcodedSubs []string
+	SkipFreeSpaceCheck       *bool
+	// What an import must leave free, in megabytes.
+	MinimumFreeSpace *int32
+	// Shifts when movies count as available, in days.
+	AvailabilityDelay *int32
+	// In minutes, 0 or at least 10; 0 disables RSS sync.
+	RssSyncInterval *int32
+	// How often download clients are polled, in minutes.
+	CheckFinishedInterval *int32
+	// Absolute folder replaced and deleted files go to; empty deletes them.
+	RecycleBin *string
+	// Days files stay in the recycle bin; 0 keeps them.
+	RecycleBinCleanupDays *int32
+	// Hard link instead of copying files whose download keeps seeding.
+	CopyUsingHardlinks *bool
+	ImportExtraFiles   *bool
+	// Extensions of extra files imported with the media, such as "srt".
+	ExtraFileExtensions []string
+	DeleteEmptyFolders  *bool
+	// Name movie files by standard_movie_format; otherwise they keep their
+	// names.
+	RenameMovies             *bool
+	ReplaceIllegalCharacters *bool
+	ColonReplacement         *ColonReplacement
+	// Templates, such as "{Movie Title} ({Release Year})".
+	MovieFolderFormat   *string
+	StandardMovieFormat *string
+}
+
+func (b0 AcquisitionSettings_builder) Build() *AcquisitionSettings {
+	m0 := &AcquisitionSettings{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Propers != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 25)
+		x.xxx_hidden_Propers = *b.Propers
+	}
+	if b.PreferIndexerFlags != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 25)
+		x.xxx_hidden_PreferIndexerFlags = *b.PreferIndexerFlags
+	}
+	if b.CompletedDownloadHandling != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 25)
+		x.xxx_hidden_CompletedDownloadHandling = *b.CompletedDownloadHandling
+	}
+	if b.AutoRedownloadFailed != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 25)
+		x.xxx_hidden_AutoRedownloadFailed = *b.AutoRedownloadFailed
+	}
+	if b.MaximumSize != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 25)
+		x.xxx_hidden_MaximumSize = *b.MaximumSize
+	}
+	if b.MinimumAge != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 25)
+		x.xxx_hidden_MinimumAge = *b.MinimumAge
+	}
+	if b.Retention != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 25)
+		x.xxx_hidden_Retention = *b.Retention
+	}
+	if b.AllowHardcodedSubs != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 25)
+		x.xxx_hidden_AllowHardcodedSubs = *b.AllowHardcodedSubs
+	}
+	x.xxx_hidden_WhitelistedHardcodedSubs = b.WhitelistedHardcodedSubs
+	if b.SkipFreeSpaceCheck != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 25)
+		x.xxx_hidden_SkipFreeSpaceCheck = *b.SkipFreeSpaceCheck
+	}
+	if b.MinimumFreeSpace != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 25)
+		x.xxx_hidden_MinimumFreeSpace = *b.MinimumFreeSpace
+	}
+	if b.AvailabilityDelay != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 25)
+		x.xxx_hidden_AvailabilityDelay = *b.AvailabilityDelay
+	}
+	if b.RssSyncInterval != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 25)
+		x.xxx_hidden_RssSyncInterval = *b.RssSyncInterval
+	}
+	if b.CheckFinishedInterval != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 25)
+		x.xxx_hidden_CheckFinishedInterval = *b.CheckFinishedInterval
+	}
+	if b.RecycleBin != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 25)
+		x.xxx_hidden_RecycleBin = b.RecycleBin
+	}
+	if b.RecycleBinCleanupDays != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 25)
+		x.xxx_hidden_RecycleBinCleanupDays = *b.RecycleBinCleanupDays
+	}
+	if b.CopyUsingHardlinks != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 25)
+		x.xxx_hidden_CopyUsingHardlinks = *b.CopyUsingHardlinks
+	}
+	if b.ImportExtraFiles != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 25)
+		x.xxx_hidden_ImportExtraFiles = *b.ImportExtraFiles
+	}
+	x.xxx_hidden_ExtraFileExtensions = b.ExtraFileExtensions
+	if b.DeleteEmptyFolders != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 25)
+		x.xxx_hidden_DeleteEmptyFolders = *b.DeleteEmptyFolders
+	}
+	if b.RenameMovies != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 25)
+		x.xxx_hidden_RenameMovies = *b.RenameMovies
+	}
+	if b.ReplaceIllegalCharacters != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 25)
+		x.xxx_hidden_ReplaceIllegalCharacters = *b.ReplaceIllegalCharacters
+	}
+	if b.ColonReplacement != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 25)
+		x.xxx_hidden_ColonReplacement = *b.ColonReplacement
+	}
+	if b.MovieFolderFormat != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 25)
+		x.xxx_hidden_MovieFolderFormat = b.MovieFolderFormat
+	}
+	if b.StandardMovieFormat != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 25)
+		x.xxx_hidden_StandardMovieFormat = b.StandardMovieFormat
 	}
 	return m0
 }
@@ -3037,7 +3966,7 @@ type GetServerSettingsRequest struct {
 
 func (x *GetServerSettingsRequest) Reset() {
 	*x = GetServerSettingsRequest{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[22]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3049,7 +3978,7 @@ func (x *GetServerSettingsRequest) String() string {
 func (*GetServerSettingsRequest) ProtoMessage() {}
 
 func (x *GetServerSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[22]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3082,7 +4011,7 @@ type GetServerSettingsResponse struct {
 
 func (x *GetServerSettingsResponse) Reset() {
 	*x = GetServerSettingsResponse{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[23]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3094,7 +4023,7 @@ func (x *GetServerSettingsResponse) String() string {
 func (*GetServerSettingsResponse) ProtoMessage() {}
 
 func (x *GetServerSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[23]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3165,7 +4094,7 @@ type UpdateServerSettingsRequest struct {
 
 func (x *UpdateServerSettingsRequest) Reset() {
 	*x = UpdateServerSettingsRequest{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[24]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3177,7 +4106,7 @@ func (x *UpdateServerSettingsRequest) String() string {
 func (*UpdateServerSettingsRequest) ProtoMessage() {}
 
 func (x *UpdateServerSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[24]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3233,7 +4162,7 @@ type UpdateServerSettingsResponse struct {
 
 func (x *UpdateServerSettingsResponse) Reset() {
 	*x = UpdateServerSettingsResponse{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[25]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3245,7 +4174,7 @@ func (x *UpdateServerSettingsResponse) String() string {
 func (*UpdateServerSettingsResponse) ProtoMessage() {}
 
 func (x *UpdateServerSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[25]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3304,7 +4233,7 @@ type ListDirectoryRequest struct {
 
 func (x *ListDirectoryRequest) Reset() {
 	*x = ListDirectoryRequest{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[26]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3316,7 +4245,7 @@ func (x *ListDirectoryRequest) String() string {
 func (*ListDirectoryRequest) ProtoMessage() {}
 
 func (x *ListDirectoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[26]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3416,7 +4345,7 @@ type DirectoryEntry struct {
 
 func (x *DirectoryEntry) Reset() {
 	*x = DirectoryEntry{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[27]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3428,7 +4357,7 @@ func (x *DirectoryEntry) String() string {
 func (*DirectoryEntry) ProtoMessage() {}
 
 func (x *DirectoryEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[27]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3557,7 +4486,7 @@ type ListDirectoryResponse struct {
 
 func (x *ListDirectoryResponse) Reset() {
 	*x = ListDirectoryResponse{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[28]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3569,7 +4498,7 @@ func (x *ListDirectoryResponse) String() string {
 func (*ListDirectoryResponse) ProtoMessage() {}
 
 func (x *ListDirectoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[28]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3688,7 +4617,7 @@ type LogRecord struct {
 
 func (x *LogRecord) Reset() {
 	*x = LogRecord{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[29]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3700,7 +4629,7 @@ func (x *LogRecord) String() string {
 func (*LogRecord) ProtoMessage() {}
 
 func (x *LogRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[29]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3836,7 +4765,7 @@ type ListLogsRequest struct {
 
 func (x *ListLogsRequest) Reset() {
 	*x = ListLogsRequest{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[30]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3848,7 +4777,7 @@ func (x *ListLogsRequest) String() string {
 func (*ListLogsRequest) ProtoMessage() {}
 
 func (x *ListLogsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[30]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3967,7 +4896,7 @@ type ListLogsResponse struct {
 
 func (x *ListLogsResponse) Reset() {
 	*x = ListLogsResponse{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[31]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3979,7 +4908,7 @@ func (x *ListLogsResponse) String() string {
 func (*ListLogsResponse) ProtoMessage() {}
 
 func (x *ListLogsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[31]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4110,7 +5039,7 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"https_port\x18\x03 \x01(\x05B\v\xbaH\b\x1a\x06\x18\xff\xff\x03(\x00R\thttpsPort\x12)\n" +
 	"\x10certificate_path\x18\x04 \x01(\tR\x0fcertificatePath\x12\x19\n" +
 	"\bkey_path\x18\x05 \x01(\tR\akeyPath\x12'\n" +
-	"\x0flocal_discovery\x18\x06 \x01(\bR\x0elocalDiscovery\"\xcd\x02\n" +
+	"\x0flocal_discovery\x18\x06 \x01(\bR\x0elocalDiscovery\"\x95\x03\n" +
 	"\x0eServerSettings\x12N\n" +
 	"\vtranscoding\x18\x01 \x01(\v2$.mavio.system.v1.TranscodingSettingsB\x06\xbaH\x03\xc8\x01\x01R\vtranscoding\x12B\n" +
 	"\anetwork\x18\x02 \x01(\v2 .mavio.system.v1.NetworkSettingsB\x06\xbaH\x03\xc8\x01\x01R\anetwork\x126\n" +
@@ -4118,7 +5047,40 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x92\x01\a\"\x05r\x03\x88\x01\x01R\x0epluginCatalogs\x12;\n" +
 	"\vupdate_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"updateTime\x122\n" +
-	"\x15password_reset_plugin\x18\x05 \x01(\tR\x13passwordResetPlugin\"\x1a\n" +
+	"\x15password_reset_plugin\x18\x05 \x01(\tR\x13passwordResetPlugin\x12F\n" +
+	"\vacquisition\x18\x06 \x01(\v2$.mavio.system.v1.AcquisitionSettingsR\vacquisition\"\xde\n" +
+	"\n" +
+	"\x13AcquisitionSettings\x12E\n" +
+	"\apropers\x18\x01 \x01(\x0e2\x1f.mavio.system.v1.ProperDownloadB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\apropers\x120\n" +
+	"\x14prefer_indexer_flags\x18\x02 \x01(\bR\x12preferIndexerFlags\x12>\n" +
+	"\x1bcompleted_download_handling\x18\x03 \x01(\bR\x19completedDownloadHandling\x124\n" +
+	"\x16auto_redownload_failed\x18\x04 \x01(\bR\x14autoRedownloadFailed\x12*\n" +
+	"\fmaximum_size\x18\x05 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\vmaximumSize\x12(\n" +
+	"\vminimum_age\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\n" +
+	"minimumAge\x12%\n" +
+	"\tretention\x18\a \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\tretention\x120\n" +
+	"\x14allow_hardcoded_subs\x18\b \x01(\bR\x12allowHardcodedSubs\x12<\n" +
+	"\x1awhitelisted_hardcoded_subs\x18\t \x03(\tR\x18whitelistedHardcodedSubs\x121\n" +
+	"\x15skip_free_space_check\x18\n" +
+	" \x01(\bR\x12skipFreeSpaceCheck\x125\n" +
+	"\x12minimum_free_space\x18\v \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x10minimumFreeSpace\x12-\n" +
+	"\x12availability_delay\x18\f \x01(\x05R\x11availabilityDelay\x123\n" +
+	"\x11rss_sync_interval\x18\r \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x0frssSyncInterval\x12?\n" +
+	"\x17check_finished_interval\x18\x0e \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\x15checkFinishedInterval\x12\x1f\n" +
+	"\vrecycle_bin\x18\x0f \x01(\tR\n" +
+	"recycleBin\x12@\n" +
+	"\x18recycle_bin_cleanup_days\x18\x10 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x15recycleBinCleanupDays\x120\n" +
+	"\x14copy_using_hardlinks\x18\x11 \x01(\bR\x12copyUsingHardlinks\x12,\n" +
+	"\x12import_extra_files\x18\x12 \x01(\bR\x10importExtraFiles\x122\n" +
+	"\x15extra_file_extensions\x18\x13 \x03(\tR\x13extraFileExtensions\x120\n" +
+	"\x14delete_empty_folders\x18\x14 \x01(\bR\x12deleteEmptyFolders\x12#\n" +
+	"\rrename_movies\x18\x15 \x01(\bR\frenameMovies\x12<\n" +
+	"\x1areplace_illegal_characters\x18\x16 \x01(\bR\x18replaceIllegalCharacters\x12Z\n" +
+	"\x11colon_replacement\x18\x17 \x01(\x0e2!.mavio.system.v1.ColonReplacementB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x10colonReplacement\x127\n" +
+	"\x13movie_folder_format\x18\x18 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x11movieFolderFormat\x12;\n" +
+	"\x15standard_movie_format\x18\x19 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x13standardMovieFormat\"\x1a\n" +
 	"\x18GetServerSettingsRequest\"\xc9\x01\n" +
 	"\x19GetServerSettingsResponse\x12;\n" +
 	"\bsettings\x18\x01 \x01(\v2\x1f.mavio.system.v1.ServerSettingsR\bsettings\x12o\n" +
@@ -4164,7 +5126,19 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"!HARDWARE_ACCELERATION_UNSPECIFIED\x10\x00\x12\x1e\n" +
 	"\x1aHARDWARE_ACCELERATION_AUTO\x10\x01\x12\x1e\n" +
 	"\x1aHARDWARE_ACCELERATION_NONE\x10\x02\x12&\n" +
-	"\"HARDWARE_ACCELERATION_VIDEOTOOLBOX\x10\x03*w\n" +
+	"\"HARDWARE_ACCELERATION_VIDEOTOOLBOX\x10\x03*\xa0\x01\n" +
+	"\x0eProperDownload\x12\x1f\n" +
+	"\x1bPROPER_DOWNLOAD_UNSPECIFIED\x10\x00\x12&\n" +
+	"\"PROPER_DOWNLOAD_PREFER_AND_UPGRADE\x10\x01\x12\"\n" +
+	"\x1ePROPER_DOWNLOAD_DO_NOT_UPGRADE\x10\x02\x12!\n" +
+	"\x1dPROPER_DOWNLOAD_DO_NOT_PREFER\x10\x03*\xd6\x01\n" +
+	"\x10ColonReplacement\x12!\n" +
+	"\x1dCOLON_REPLACEMENT_UNSPECIFIED\x10\x00\x12\x1c\n" +
+	"\x18COLON_REPLACEMENT_DELETE\x10\x01\x12\x1a\n" +
+	"\x16COLON_REPLACEMENT_DASH\x10\x02\x12 \n" +
+	"\x1cCOLON_REPLACEMENT_SPACE_DASH\x10\x03\x12&\n" +
+	"\"COLON_REPLACEMENT_SPACE_DASH_SPACE\x10\x04\x12\x1b\n" +
+	"\x17COLON_REPLACEMENT_SMART\x10\x05*w\n" +
 	"\bLogLevel\x12\x19\n" +
 	"\x15LOG_LEVEL_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fLOG_LEVEL_DEBUG\x10\x01\x12\x12\n" +
@@ -4186,106 +5160,112 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\bListLogs\x12 .mavio.system.v1.ListLogsRequest\x1a!.mavio.system.v1.ListLogsResponse\"\x03\x90\x02\x01B\xc5\x01\n" +
 	"\x13com.mavio.system.v1B\vSystemProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1;systemv1\xa2\x02\x03MSX\xaa\x02\x0fMavio.System.V1\xca\x02\x0fMavio\\System\\V1\xe2\x02\x1bMavio\\System\\V1\\GPBMetadata\xea\x02\x11Mavio::System::V1b\beditionsp\xe8\a"
 
-var file_mavio_system_v1_system_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_mavio_system_v1_system_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
+var file_mavio_system_v1_system_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
+var file_mavio_system_v1_system_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
 var file_mavio_system_v1_system_proto_goTypes = []any{
 	(PluginState)(0),                     // 0: mavio.system.v1.PluginState
 	(HardwareAcceleration)(0),            // 1: mavio.system.v1.HardwareAcceleration
-	(LogLevel)(0),                        // 2: mavio.system.v1.LogLevel
-	(GetHealthResponse_Status)(0),        // 3: mavio.system.v1.GetHealthResponse.Status
-	(*GetHealthRequest)(nil),             // 4: mavio.system.v1.GetHealthRequest
-	(*GetHealthResponse)(nil),            // 5: mavio.system.v1.GetHealthResponse
-	(*GetSystemInfoRequest)(nil),         // 6: mavio.system.v1.GetSystemInfoRequest
-	(*GetSystemInfoResponse)(nil),        // 7: mavio.system.v1.GetSystemInfoResponse
-	(*Plugin)(nil),                       // 8: mavio.system.v1.Plugin
-	(*ListPluginsRequest)(nil),           // 9: mavio.system.v1.ListPluginsRequest
-	(*ListPluginsResponse)(nil),          // 10: mavio.system.v1.ListPluginsResponse
-	(*GetPluginConfigRequest)(nil),       // 11: mavio.system.v1.GetPluginConfigRequest
-	(*GetPluginConfigResponse)(nil),      // 12: mavio.system.v1.GetPluginConfigResponse
-	(*SetPluginConfigRequest)(nil),       // 13: mavio.system.v1.SetPluginConfigRequest
-	(*SetPluginConfigResponse)(nil),      // 14: mavio.system.v1.SetPluginConfigResponse
-	(*CatalogPlugin)(nil),                // 15: mavio.system.v1.CatalogPlugin
-	(*CatalogVersion)(nil),               // 16: mavio.system.v1.CatalogVersion
-	(*ListCatalogPluginsRequest)(nil),    // 17: mavio.system.v1.ListCatalogPluginsRequest
-	(*ListCatalogPluginsResponse)(nil),   // 18: mavio.system.v1.ListCatalogPluginsResponse
-	(*InstallPluginRequest)(nil),         // 19: mavio.system.v1.InstallPluginRequest
-	(*InstallPluginResponse)(nil),        // 20: mavio.system.v1.InstallPluginResponse
-	(*UninstallPluginRequest)(nil),       // 21: mavio.system.v1.UninstallPluginRequest
-	(*UninstallPluginResponse)(nil),      // 22: mavio.system.v1.UninstallPluginResponse
-	(*TranscodingSettings)(nil),          // 23: mavio.system.v1.TranscodingSettings
-	(*NetworkSettings)(nil),              // 24: mavio.system.v1.NetworkSettings
-	(*ServerSettings)(nil),               // 25: mavio.system.v1.ServerSettings
-	(*GetServerSettingsRequest)(nil),     // 26: mavio.system.v1.GetServerSettingsRequest
-	(*GetServerSettingsResponse)(nil),    // 27: mavio.system.v1.GetServerSettingsResponse
-	(*UpdateServerSettingsRequest)(nil),  // 28: mavio.system.v1.UpdateServerSettingsRequest
-	(*UpdateServerSettingsResponse)(nil), // 29: mavio.system.v1.UpdateServerSettingsResponse
-	(*ListDirectoryRequest)(nil),         // 30: mavio.system.v1.ListDirectoryRequest
-	(*DirectoryEntry)(nil),               // 31: mavio.system.v1.DirectoryEntry
-	(*ListDirectoryResponse)(nil),        // 32: mavio.system.v1.ListDirectoryResponse
-	(*LogRecord)(nil),                    // 33: mavio.system.v1.LogRecord
-	(*ListLogsRequest)(nil),              // 34: mavio.system.v1.ListLogsRequest
-	(*ListLogsResponse)(nil),             // 35: mavio.system.v1.ListLogsResponse
-	nil,                                  // 36: mavio.system.v1.LogRecord.AttributesEntry
-	(*timestamppb.Timestamp)(nil),        // 37: google.protobuf.Timestamp
-	(*v1.Manifest)(nil),                  // 38: mavio.plugin.v1.Manifest
-	(*durationpb.Duration)(nil),          // 39: google.protobuf.Duration
+	(ProperDownload)(0),                  // 2: mavio.system.v1.ProperDownload
+	(ColonReplacement)(0),                // 3: mavio.system.v1.ColonReplacement
+	(LogLevel)(0),                        // 4: mavio.system.v1.LogLevel
+	(GetHealthResponse_Status)(0),        // 5: mavio.system.v1.GetHealthResponse.Status
+	(*GetHealthRequest)(nil),             // 6: mavio.system.v1.GetHealthRequest
+	(*GetHealthResponse)(nil),            // 7: mavio.system.v1.GetHealthResponse
+	(*GetSystemInfoRequest)(nil),         // 8: mavio.system.v1.GetSystemInfoRequest
+	(*GetSystemInfoResponse)(nil),        // 9: mavio.system.v1.GetSystemInfoResponse
+	(*Plugin)(nil),                       // 10: mavio.system.v1.Plugin
+	(*ListPluginsRequest)(nil),           // 11: mavio.system.v1.ListPluginsRequest
+	(*ListPluginsResponse)(nil),          // 12: mavio.system.v1.ListPluginsResponse
+	(*GetPluginConfigRequest)(nil),       // 13: mavio.system.v1.GetPluginConfigRequest
+	(*GetPluginConfigResponse)(nil),      // 14: mavio.system.v1.GetPluginConfigResponse
+	(*SetPluginConfigRequest)(nil),       // 15: mavio.system.v1.SetPluginConfigRequest
+	(*SetPluginConfigResponse)(nil),      // 16: mavio.system.v1.SetPluginConfigResponse
+	(*CatalogPlugin)(nil),                // 17: mavio.system.v1.CatalogPlugin
+	(*CatalogVersion)(nil),               // 18: mavio.system.v1.CatalogVersion
+	(*ListCatalogPluginsRequest)(nil),    // 19: mavio.system.v1.ListCatalogPluginsRequest
+	(*ListCatalogPluginsResponse)(nil),   // 20: mavio.system.v1.ListCatalogPluginsResponse
+	(*InstallPluginRequest)(nil),         // 21: mavio.system.v1.InstallPluginRequest
+	(*InstallPluginResponse)(nil),        // 22: mavio.system.v1.InstallPluginResponse
+	(*UninstallPluginRequest)(nil),       // 23: mavio.system.v1.UninstallPluginRequest
+	(*UninstallPluginResponse)(nil),      // 24: mavio.system.v1.UninstallPluginResponse
+	(*TranscodingSettings)(nil),          // 25: mavio.system.v1.TranscodingSettings
+	(*NetworkSettings)(nil),              // 26: mavio.system.v1.NetworkSettings
+	(*ServerSettings)(nil),               // 27: mavio.system.v1.ServerSettings
+	(*AcquisitionSettings)(nil),          // 28: mavio.system.v1.AcquisitionSettings
+	(*GetServerSettingsRequest)(nil),     // 29: mavio.system.v1.GetServerSettingsRequest
+	(*GetServerSettingsResponse)(nil),    // 30: mavio.system.v1.GetServerSettingsResponse
+	(*UpdateServerSettingsRequest)(nil),  // 31: mavio.system.v1.UpdateServerSettingsRequest
+	(*UpdateServerSettingsResponse)(nil), // 32: mavio.system.v1.UpdateServerSettingsResponse
+	(*ListDirectoryRequest)(nil),         // 33: mavio.system.v1.ListDirectoryRequest
+	(*DirectoryEntry)(nil),               // 34: mavio.system.v1.DirectoryEntry
+	(*ListDirectoryResponse)(nil),        // 35: mavio.system.v1.ListDirectoryResponse
+	(*LogRecord)(nil),                    // 36: mavio.system.v1.LogRecord
+	(*ListLogsRequest)(nil),              // 37: mavio.system.v1.ListLogsRequest
+	(*ListLogsResponse)(nil),             // 38: mavio.system.v1.ListLogsResponse
+	nil,                                  // 39: mavio.system.v1.LogRecord.AttributesEntry
+	(*timestamppb.Timestamp)(nil),        // 40: google.protobuf.Timestamp
+	(*v1.Manifest)(nil),                  // 41: mavio.plugin.v1.Manifest
+	(*durationpb.Duration)(nil),          // 42: google.protobuf.Duration
 }
 var file_mavio_system_v1_system_proto_depIdxs = []int32{
-	3,  // 0: mavio.system.v1.GetHealthResponse.status:type_name -> mavio.system.v1.GetHealthResponse.Status
-	37, // 1: mavio.system.v1.GetSystemInfoResponse.start_time:type_name -> google.protobuf.Timestamp
-	38, // 2: mavio.system.v1.Plugin.manifest:type_name -> mavio.plugin.v1.Manifest
+	5,  // 0: mavio.system.v1.GetHealthResponse.status:type_name -> mavio.system.v1.GetHealthResponse.Status
+	40, // 1: mavio.system.v1.GetSystemInfoResponse.start_time:type_name -> google.protobuf.Timestamp
+	41, // 2: mavio.system.v1.Plugin.manifest:type_name -> mavio.plugin.v1.Manifest
 	0,  // 3: mavio.system.v1.Plugin.state:type_name -> mavio.system.v1.PluginState
-	8,  // 4: mavio.system.v1.ListPluginsResponse.plugins:type_name -> mavio.system.v1.Plugin
-	37, // 5: mavio.system.v1.GetPluginConfigResponse.update_time:type_name -> google.protobuf.Timestamp
-	8,  // 6: mavio.system.v1.SetPluginConfigResponse.plugin:type_name -> mavio.system.v1.Plugin
-	16, // 7: mavio.system.v1.CatalogPlugin.versions:type_name -> mavio.system.v1.CatalogVersion
-	37, // 8: mavio.system.v1.CatalogVersion.release_time:type_name -> google.protobuf.Timestamp
-	15, // 9: mavio.system.v1.ListCatalogPluginsResponse.plugins:type_name -> mavio.system.v1.CatalogPlugin
-	8,  // 10: mavio.system.v1.InstallPluginResponse.plugin:type_name -> mavio.system.v1.Plugin
+	10, // 4: mavio.system.v1.ListPluginsResponse.plugins:type_name -> mavio.system.v1.Plugin
+	40, // 5: mavio.system.v1.GetPluginConfigResponse.update_time:type_name -> google.protobuf.Timestamp
+	10, // 6: mavio.system.v1.SetPluginConfigResponse.plugin:type_name -> mavio.system.v1.Plugin
+	18, // 7: mavio.system.v1.CatalogPlugin.versions:type_name -> mavio.system.v1.CatalogVersion
+	40, // 8: mavio.system.v1.CatalogVersion.release_time:type_name -> google.protobuf.Timestamp
+	17, // 9: mavio.system.v1.ListCatalogPluginsResponse.plugins:type_name -> mavio.system.v1.CatalogPlugin
+	10, // 10: mavio.system.v1.InstallPluginResponse.plugin:type_name -> mavio.system.v1.Plugin
 	1,  // 11: mavio.system.v1.TranscodingSettings.hardware_acceleration:type_name -> mavio.system.v1.HardwareAcceleration
-	23, // 12: mavio.system.v1.ServerSettings.transcoding:type_name -> mavio.system.v1.TranscodingSettings
-	24, // 13: mavio.system.v1.ServerSettings.network:type_name -> mavio.system.v1.NetworkSettings
-	37, // 14: mavio.system.v1.ServerSettings.update_time:type_name -> google.protobuf.Timestamp
-	25, // 15: mavio.system.v1.GetServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
-	1,  // 16: mavio.system.v1.GetServerSettingsResponse.available_hardware_accelerations:type_name -> mavio.system.v1.HardwareAcceleration
-	25, // 17: mavio.system.v1.UpdateServerSettingsRequest.settings:type_name -> mavio.system.v1.ServerSettings
-	25, // 18: mavio.system.v1.UpdateServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
-	31, // 19: mavio.system.v1.ListDirectoryResponse.entries:type_name -> mavio.system.v1.DirectoryEntry
-	37, // 20: mavio.system.v1.LogRecord.time:type_name -> google.protobuf.Timestamp
-	2,  // 21: mavio.system.v1.LogRecord.level:type_name -> mavio.system.v1.LogLevel
-	36, // 22: mavio.system.v1.LogRecord.attributes:type_name -> mavio.system.v1.LogRecord.AttributesEntry
-	2,  // 23: mavio.system.v1.ListLogsRequest.min_level:type_name -> mavio.system.v1.LogLevel
-	39, // 24: mavio.system.v1.ListLogsRequest.max_age:type_name -> google.protobuf.Duration
-	33, // 25: mavio.system.v1.ListLogsResponse.records:type_name -> mavio.system.v1.LogRecord
-	4,  // 26: mavio.system.v1.SystemService.GetHealth:input_type -> mavio.system.v1.GetHealthRequest
-	6,  // 27: mavio.system.v1.SystemService.GetSystemInfo:input_type -> mavio.system.v1.GetSystemInfoRequest
-	9,  // 28: mavio.system.v1.SystemService.ListPlugins:input_type -> mavio.system.v1.ListPluginsRequest
-	11, // 29: mavio.system.v1.SystemService.GetPluginConfig:input_type -> mavio.system.v1.GetPluginConfigRequest
-	13, // 30: mavio.system.v1.SystemService.SetPluginConfig:input_type -> mavio.system.v1.SetPluginConfigRequest
-	17, // 31: mavio.system.v1.SystemService.ListCatalogPlugins:input_type -> mavio.system.v1.ListCatalogPluginsRequest
-	19, // 32: mavio.system.v1.SystemService.InstallPlugin:input_type -> mavio.system.v1.InstallPluginRequest
-	21, // 33: mavio.system.v1.SystemService.UninstallPlugin:input_type -> mavio.system.v1.UninstallPluginRequest
-	26, // 34: mavio.system.v1.SystemService.GetServerSettings:input_type -> mavio.system.v1.GetServerSettingsRequest
-	28, // 35: mavio.system.v1.SystemService.UpdateServerSettings:input_type -> mavio.system.v1.UpdateServerSettingsRequest
-	30, // 36: mavio.system.v1.SystemService.ListDirectory:input_type -> mavio.system.v1.ListDirectoryRequest
-	34, // 37: mavio.system.v1.SystemService.ListLogs:input_type -> mavio.system.v1.ListLogsRequest
-	5,  // 38: mavio.system.v1.SystemService.GetHealth:output_type -> mavio.system.v1.GetHealthResponse
-	7,  // 39: mavio.system.v1.SystemService.GetSystemInfo:output_type -> mavio.system.v1.GetSystemInfoResponse
-	10, // 40: mavio.system.v1.SystemService.ListPlugins:output_type -> mavio.system.v1.ListPluginsResponse
-	12, // 41: mavio.system.v1.SystemService.GetPluginConfig:output_type -> mavio.system.v1.GetPluginConfigResponse
-	14, // 42: mavio.system.v1.SystemService.SetPluginConfig:output_type -> mavio.system.v1.SetPluginConfigResponse
-	18, // 43: mavio.system.v1.SystemService.ListCatalogPlugins:output_type -> mavio.system.v1.ListCatalogPluginsResponse
-	20, // 44: mavio.system.v1.SystemService.InstallPlugin:output_type -> mavio.system.v1.InstallPluginResponse
-	22, // 45: mavio.system.v1.SystemService.UninstallPlugin:output_type -> mavio.system.v1.UninstallPluginResponse
-	27, // 46: mavio.system.v1.SystemService.GetServerSettings:output_type -> mavio.system.v1.GetServerSettingsResponse
-	29, // 47: mavio.system.v1.SystemService.UpdateServerSettings:output_type -> mavio.system.v1.UpdateServerSettingsResponse
-	32, // 48: mavio.system.v1.SystemService.ListDirectory:output_type -> mavio.system.v1.ListDirectoryResponse
-	35, // 49: mavio.system.v1.SystemService.ListLogs:output_type -> mavio.system.v1.ListLogsResponse
-	38, // [38:50] is the sub-list for method output_type
-	26, // [26:38] is the sub-list for method input_type
-	26, // [26:26] is the sub-list for extension type_name
-	26, // [26:26] is the sub-list for extension extendee
-	0,  // [0:26] is the sub-list for field type_name
+	25, // 12: mavio.system.v1.ServerSettings.transcoding:type_name -> mavio.system.v1.TranscodingSettings
+	26, // 13: mavio.system.v1.ServerSettings.network:type_name -> mavio.system.v1.NetworkSettings
+	40, // 14: mavio.system.v1.ServerSettings.update_time:type_name -> google.protobuf.Timestamp
+	28, // 15: mavio.system.v1.ServerSettings.acquisition:type_name -> mavio.system.v1.AcquisitionSettings
+	2,  // 16: mavio.system.v1.AcquisitionSettings.propers:type_name -> mavio.system.v1.ProperDownload
+	3,  // 17: mavio.system.v1.AcquisitionSettings.colon_replacement:type_name -> mavio.system.v1.ColonReplacement
+	27, // 18: mavio.system.v1.GetServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
+	1,  // 19: mavio.system.v1.GetServerSettingsResponse.available_hardware_accelerations:type_name -> mavio.system.v1.HardwareAcceleration
+	27, // 20: mavio.system.v1.UpdateServerSettingsRequest.settings:type_name -> mavio.system.v1.ServerSettings
+	27, // 21: mavio.system.v1.UpdateServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
+	34, // 22: mavio.system.v1.ListDirectoryResponse.entries:type_name -> mavio.system.v1.DirectoryEntry
+	40, // 23: mavio.system.v1.LogRecord.time:type_name -> google.protobuf.Timestamp
+	4,  // 24: mavio.system.v1.LogRecord.level:type_name -> mavio.system.v1.LogLevel
+	39, // 25: mavio.system.v1.LogRecord.attributes:type_name -> mavio.system.v1.LogRecord.AttributesEntry
+	4,  // 26: mavio.system.v1.ListLogsRequest.min_level:type_name -> mavio.system.v1.LogLevel
+	42, // 27: mavio.system.v1.ListLogsRequest.max_age:type_name -> google.protobuf.Duration
+	36, // 28: mavio.system.v1.ListLogsResponse.records:type_name -> mavio.system.v1.LogRecord
+	6,  // 29: mavio.system.v1.SystemService.GetHealth:input_type -> mavio.system.v1.GetHealthRequest
+	8,  // 30: mavio.system.v1.SystemService.GetSystemInfo:input_type -> mavio.system.v1.GetSystemInfoRequest
+	11, // 31: mavio.system.v1.SystemService.ListPlugins:input_type -> mavio.system.v1.ListPluginsRequest
+	13, // 32: mavio.system.v1.SystemService.GetPluginConfig:input_type -> mavio.system.v1.GetPluginConfigRequest
+	15, // 33: mavio.system.v1.SystemService.SetPluginConfig:input_type -> mavio.system.v1.SetPluginConfigRequest
+	19, // 34: mavio.system.v1.SystemService.ListCatalogPlugins:input_type -> mavio.system.v1.ListCatalogPluginsRequest
+	21, // 35: mavio.system.v1.SystemService.InstallPlugin:input_type -> mavio.system.v1.InstallPluginRequest
+	23, // 36: mavio.system.v1.SystemService.UninstallPlugin:input_type -> mavio.system.v1.UninstallPluginRequest
+	29, // 37: mavio.system.v1.SystemService.GetServerSettings:input_type -> mavio.system.v1.GetServerSettingsRequest
+	31, // 38: mavio.system.v1.SystemService.UpdateServerSettings:input_type -> mavio.system.v1.UpdateServerSettingsRequest
+	33, // 39: mavio.system.v1.SystemService.ListDirectory:input_type -> mavio.system.v1.ListDirectoryRequest
+	37, // 40: mavio.system.v1.SystemService.ListLogs:input_type -> mavio.system.v1.ListLogsRequest
+	7,  // 41: mavio.system.v1.SystemService.GetHealth:output_type -> mavio.system.v1.GetHealthResponse
+	9,  // 42: mavio.system.v1.SystemService.GetSystemInfo:output_type -> mavio.system.v1.GetSystemInfoResponse
+	12, // 43: mavio.system.v1.SystemService.ListPlugins:output_type -> mavio.system.v1.ListPluginsResponse
+	14, // 44: mavio.system.v1.SystemService.GetPluginConfig:output_type -> mavio.system.v1.GetPluginConfigResponse
+	16, // 45: mavio.system.v1.SystemService.SetPluginConfig:output_type -> mavio.system.v1.SetPluginConfigResponse
+	20, // 46: mavio.system.v1.SystemService.ListCatalogPlugins:output_type -> mavio.system.v1.ListCatalogPluginsResponse
+	22, // 47: mavio.system.v1.SystemService.InstallPlugin:output_type -> mavio.system.v1.InstallPluginResponse
+	24, // 48: mavio.system.v1.SystemService.UninstallPlugin:output_type -> mavio.system.v1.UninstallPluginResponse
+	30, // 49: mavio.system.v1.SystemService.GetServerSettings:output_type -> mavio.system.v1.GetServerSettingsResponse
+	32, // 50: mavio.system.v1.SystemService.UpdateServerSettings:output_type -> mavio.system.v1.UpdateServerSettingsResponse
+	35, // 51: mavio.system.v1.SystemService.ListDirectory:output_type -> mavio.system.v1.ListDirectoryResponse
+	38, // 52: mavio.system.v1.SystemService.ListLogs:output_type -> mavio.system.v1.ListLogsResponse
+	41, // [41:53] is the sub-list for method output_type
+	29, // [29:41] is the sub-list for method input_type
+	29, // [29:29] is the sub-list for extension type_name
+	29, // [29:29] is the sub-list for extension extendee
+	0,  // [0:29] is the sub-list for field type_name
 }
 
 func init() { file_mavio_system_v1_system_proto_init() }
@@ -4298,8 +5278,8 @@ func file_mavio_system_v1_system_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_system_v1_system_proto_rawDesc), len(file_mavio_system_v1_system_proto_rawDesc)),
-			NumEnums:      4,
-			NumMessages:   33,
+			NumEnums:      6,
+			NumMessages:   34,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

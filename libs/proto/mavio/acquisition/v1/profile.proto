@@ -1,0 +1,471 @@
+edition = "2023";
+
+package mavio.acquisition.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "mavio/acquisition/v1/release.proto";
+
+// ProfileService keeps what decides which releases are grabbed: quality
+// definitions, quality profiles, custom formats, delay and release
+// profiles; and the remote path mappings of download clients.
+// Administrators only, but for listing quality profiles, which users who
+// may request media read too.
+service ProfileService {
+  // ListQualityDefinitions lists the qualities of a kind with their
+  // sizes, Radarr's defaults for movies and Sonarr's for series until
+  // changed.
+  rpc ListQualityDefinitions(ListQualityDefinitionsRequest) returns (ListQualityDefinitionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateQualityDefinitions changes the sizes of qualities of a kind.
+  rpc UpdateQualityDefinitions(UpdateQualityDefinitionsRequest) returns (UpdateQualityDefinitionsResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+
+  rpc ListQualityProfiles(ListQualityProfilesRequest) returns (ListQualityProfilesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc CreateQualityProfile(CreateQualityProfileRequest) returns (CreateQualityProfileResponse);
+  rpc UpdateQualityProfile(UpdateQualityProfileRequest) returns (UpdateQualityProfileResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // DeleteQualityProfile fails with FAILED_PRECONDITION while movies or
+  // series use the profile.
+  rpc DeleteQualityProfile(DeleteQualityProfileRequest) returns (DeleteQualityProfileResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+
+  rpc ListCustomFormats(ListCustomFormatsRequest) returns (ListCustomFormatsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc CreateCustomFormat(CreateCustomFormatRequest) returns (CreateCustomFormatResponse);
+  rpc UpdateCustomFormat(UpdateCustomFormatRequest) returns (UpdateCustomFormatResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // DeleteCustomFormat also removes the format's scores from profiles.
+  rpc DeleteCustomFormat(DeleteCustomFormatRequest) returns (DeleteCustomFormatResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+
+  // ListDelayProfiles lists the delay profiles by order, the default
+  // last.
+  rpc ListDelayProfiles(ListDelayProfilesRequest) returns (ListDelayProfilesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // CreateDelayProfile adds a profile before the default one.
+  rpc CreateDelayProfile(CreateDelayProfileRequest) returns (CreateDelayProfileResponse);
+  rpc UpdateDelayProfile(UpdateDelayProfileRequest) returns (UpdateDelayProfileResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // DeleteDelayProfile fails with FAILED_PRECONDITION for the default
+  // profile.
+  rpc DeleteDelayProfile(DeleteDelayProfileRequest) returns (DeleteDelayProfileResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // ReorderDelayProfiles orders the profiles other than the default one.
+  rpc ReorderDelayProfiles(ReorderDelayProfilesRequest) returns (ReorderDelayProfilesResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+
+  rpc ListReleaseProfiles(ListReleaseProfilesRequest) returns (ListReleaseProfilesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc CreateReleaseProfile(CreateReleaseProfileRequest) returns (CreateReleaseProfileResponse);
+  rpc UpdateReleaseProfile(UpdateReleaseProfileRequest) returns (UpdateReleaseProfileResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  rpc DeleteReleaseProfile(DeleteReleaseProfileRequest) returns (DeleteReleaseProfileResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+
+  rpc ListRemotePathMappings(ListRemotePathMappingsRequest) returns (ListRemotePathMappingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc CreateRemotePathMapping(CreateRemotePathMappingRequest) returns (CreateRemotePathMappingResponse);
+  rpc DeleteRemotePathMapping(DeleteRemotePathMappingRequest) returns (DeleteRemotePathMappingResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+}
+
+// MediaKind is what a profile or definition is for.
+enum MediaKind {
+  MEDIA_KIND_UNSPECIFIED = 0;
+  MEDIA_KIND_MOVIE = 1;
+  MEDIA_KIND_SERIES = 2;
+}
+
+// QualityDefinition is the size a quality may have, in megabytes per
+// minute of runtime.
+message QualityDefinition {
+  // Radarr's quality ID.
+  int32 quality = 1;
+  string title = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 100
+  }];
+  // Zero for none.
+  double min_size = 3 [(buf.validate.field).double.gte = 0];
+  double max_size = 4 [(buf.validate.field).double.gte = 0];
+  double preferred_size = 5 [(buf.validate.field).double.gte = 0];
+}
+
+message ListQualityDefinitionsRequest {
+  MediaKind kind = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+}
+
+message ListQualityDefinitionsResponse {
+  // By quality, lowest first.
+  repeated QualityDefinition definitions = 1;
+}
+
+message UpdateQualityDefinitionsRequest {
+  MediaKind kind = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  // The definitions to change; others keep theirs.
+  repeated QualityDefinition definitions = 2 [(buf.validate.field).repeated.min_items = 1];
+}
+
+message UpdateQualityDefinitionsResponse {
+  repeated QualityDefinition definitions = 1;
+}
+
+// QualityProfileItem is a quality, or a group of qualities ranked as one.
+message QualityProfileItem {
+  // A group's ID, 1000 or more; zero for a quality.
+  int32 id = 1 [(buf.validate.field).int32.gte = 0];
+  // A group's name.
+  string name = 2 [(buf.validate.field).string.max_len = 100];
+  // Radarr's quality ID, for a quality.
+  int32 quality = 3 [(buf.validate.field).int32.gte = 0];
+  // A group's qualities.
+  repeated QualityProfileItem items = 4;
+  bool allowed = 5;
+}
+
+// FormatScore is a custom format's score in a profile.
+message FormatScore {
+  string format_id = 1 [(buf.validate.field).string.uuid = true];
+  int32 score = 2;
+}
+
+// QualityProfile ranks qualities and custom formats: what to grab and
+// when to stop upgrading.
+message QualityProfile {
+  // Set by the server.
+  string id = 1;
+  MediaKind kind = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  string name = 3 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 100
+  }];
+  bool upgrade_allowed = 4;
+  // The ID of a quality or of a group of the items.
+  int32 cutoff = 5;
+  // Lowest first.
+  repeated QualityProfileItem items = 6 [(buf.validate.field).repeated.min_items = 1];
+  int32 min_format_score = 7;
+  int32 cutoff_format_score = 8;
+  int32 min_upgrade_format_score = 9;
+  repeated FormatScore format_scores = 10;
+  // The language movie releases must have: an English language name,
+  // "Original" for the movie's own, empty for any.
+  string language = 11 [(buf.validate.field).string.max_len = 100];
+}
+
+message ListQualityProfilesRequest {
+  // Unspecified for every kind.
+  MediaKind kind = 1 [(buf.validate.field).enum.defined_only = true];
+}
+
+message ListQualityProfilesResponse {
+  // By name.
+  repeated QualityProfile profiles = 1;
+}
+
+message CreateQualityProfileRequest {
+  QualityProfile profile = 1 [(buf.validate.field).required = true];
+}
+
+message CreateQualityProfileResponse {
+  QualityProfile profile = 1;
+}
+
+message UpdateQualityProfileRequest {
+  // Its id names the profile; its kind cannot change.
+  QualityProfile profile = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateQualityProfileResponse {
+  QualityProfile profile = 1;
+}
+
+message DeleteQualityProfileRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteQualityProfileResponse {}
+
+// CustomFormatSpecKind is what a custom format's condition looks at.
+enum CustomFormatSpecKind {
+  CUSTOM_FORMAT_SPEC_KIND_UNSPECIFIED = 0;
+  CUSTOM_FORMAT_SPEC_KIND_RELEASE_TITLE = 1;
+  CUSTOM_FORMAT_SPEC_KIND_EDITION = 2;
+  CUSTOM_FORMAT_SPEC_KIND_LANGUAGE = 3;
+  CUSTOM_FORMAT_SPEC_KIND_INDEXER_FLAG = 4;
+  CUSTOM_FORMAT_SPEC_KIND_SOURCE = 5;
+  CUSTOM_FORMAT_SPEC_KIND_RESOLUTION = 6;
+  CUSTOM_FORMAT_SPEC_KIND_QUALITY_MODIFIER = 7;
+  CUSTOM_FORMAT_SPEC_KIND_SIZE = 8;
+  CUSTOM_FORMAT_SPEC_KIND_RELEASE_GROUP = 9;
+  CUSTOM_FORMAT_SPEC_KIND_YEAR = 10;
+  CUSTOM_FORMAT_SPEC_KIND_RELEASE_TYPE = 11;
+}
+
+// CustomFormatSpec is a condition of a custom format.
+message CustomFormatSpec {
+  CustomFormatSpecKind kind = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  string name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 100
+  }];
+  // Inverts the condition.
+  bool negate = 3;
+  // Makes the condition necessary among those of its kind.
+  bool required = 4;
+  // The regular expression of title, edition and release group
+  // conditions; the language, indexer flag, source, resolution, modifier
+  // or release type of the others, by the names libs/acquire gives them.
+  string value = 5 [(buf.validate.field).string.max_len = 1000];
+  // Of language conditions: any language but the value.
+  bool except_language = 6;
+  // Bound size (in gigabytes) and year conditions.
+  double min = 7;
+  double max = 8;
+}
+
+// CustomFormat is a named set of conditions on releases, which profiles
+// score.
+message CustomFormat {
+  // Set by the server.
+  string id = 1;
+  string name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 100
+  }];
+  // Puts the format's name into file names.
+  bool include_when_renaming = 3;
+  repeated CustomFormatSpec specifications = 4;
+}
+
+message ListCustomFormatsRequest {}
+
+message ListCustomFormatsResponse {
+  // By name.
+  repeated CustomFormat formats = 1;
+}
+
+message CreateCustomFormatRequest {
+  CustomFormat format = 1 [(buf.validate.field).required = true];
+}
+
+message CreateCustomFormatResponse {
+  CustomFormat format = 1;
+}
+
+message UpdateCustomFormatRequest {
+  // Its id names the format.
+  CustomFormat format = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateCustomFormatResponse {
+  CustomFormat format = 1;
+}
+
+message DeleteCustomFormatRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteCustomFormatResponse {}
+
+// DelayProfile holds releases back for a while, waiting for better ones,
+// for the movies and series sharing one of its tags.
+message DelayProfile {
+  // Set by the server.
+  string id = 1;
+  // The default profile, which has no tags and comes last; set by the
+  // server.
+  bool default = 2;
+  // Set by the server; ReorderDelayProfiles changes it.
+  int32 order = 3;
+  bool enable_usenet = 4;
+  bool enable_torrent = 5;
+  DownloadProtocol preferred_protocol = 6 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  google.protobuf.Duration usenet_delay = 7 [(buf.validate.field).duration.gte = {}];
+  google.protobuf.Duration torrent_delay = 8 [(buf.validate.field).duration.gte = {}];
+  // The delay is bypassed for releases of the profile's best quality, or
+  // scoring at least minimum_custom_format_score.
+  bool bypass_if_highest_quality = 9;
+  bool bypass_if_above_custom_format_score = 10;
+  int32 minimum_custom_format_score = 11;
+  // Required but for the default profile.
+  repeated string tags = 12 [(buf.validate.field).repeated.items.string = {
+    min_len: 1
+    max_len: 100
+  }];
+}
+
+message ListDelayProfilesRequest {}
+
+message ListDelayProfilesResponse {
+  repeated DelayProfile profiles = 1;
+}
+
+message CreateDelayProfileRequest {
+  DelayProfile profile = 1 [(buf.validate.field).required = true];
+}
+
+message CreateDelayProfileResponse {
+  DelayProfile profile = 1;
+}
+
+message UpdateDelayProfileRequest {
+  // Its id names the profile.
+  DelayProfile profile = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateDelayProfileResponse {
+  DelayProfile profile = 1;
+}
+
+message DeleteDelayProfileRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteDelayProfileResponse {}
+
+message ReorderDelayProfilesRequest {
+  // Every profile but the default one, in their new order.
+  repeated string ids = 1 [(buf.validate.field).repeated.items.string.uuid = true];
+}
+
+message ReorderDelayProfilesResponse {
+  repeated DelayProfile profiles = 1;
+}
+
+// ReleaseProfile requires or ignores terms in the titles of releases.
+message ReleaseProfile {
+  // Set by the server.
+  string id = 1;
+  string name = 2 [(buf.validate.field).string.max_len = 100];
+  bool enabled = 3;
+  // Plain terms, matched case-insensitively, or regular expressions as
+  // /pattern/flags.
+  repeated string required = 4 [(buf.validate.field).repeated.items.string = {
+    min_len: 1
+    max_len: 1000
+  }];
+  repeated string ignored = 5 [(buf.validate.field).repeated.items.string = {
+    min_len: 1
+    max_len: 1000
+  }];
+  // The only indexer whose releases it applies to; unset for all.
+  IndexerRef indexer = 6;
+  // The movies and series it applies to; empty for all.
+  repeated string tags = 7 [(buf.validate.field).repeated.items.string = {
+    min_len: 1
+    max_len: 100
+  }];
+}
+
+message ListReleaseProfilesRequest {}
+
+message ListReleaseProfilesResponse {
+  // By name.
+  repeated ReleaseProfile profiles = 1;
+}
+
+message CreateReleaseProfileRequest {
+  ReleaseProfile profile = 1 [(buf.validate.field).required = true];
+}
+
+message CreateReleaseProfileResponse {
+  ReleaseProfile profile = 1;
+}
+
+message UpdateReleaseProfileRequest {
+  // Its id names the profile.
+  ReleaseProfile profile = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateReleaseProfileResponse {
+  ReleaseProfile profile = 1;
+}
+
+message DeleteReleaseProfileRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteReleaseProfileResponse {}
+
+// RemotePathMapping maps the folders a download client on another host
+// reports to the folders the server sees.
+message RemotePathMapping {
+  // Set by the server.
+  string id = 1;
+  // The download client's host, as its settings name it.
+  string host = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 255
+  }];
+  string remote_path = 3 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 4096
+  }];
+  // Absolute.
+  string local_path = 4 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 4096
+  }];
+}
+
+message ListRemotePathMappingsRequest {}
+
+message ListRemotePathMappingsResponse {
+  // By host and remote path.
+  repeated RemotePathMapping mappings = 1;
+}
+
+message CreateRemotePathMappingRequest {
+  RemotePathMapping mapping = 1 [(buf.validate.field).required = true];
+}
+
+message CreateRemotePathMappingResponse {
+  RemotePathMapping mapping = 1;
+}
+
+message DeleteRemotePathMappingRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteRemotePathMappingResponse {}

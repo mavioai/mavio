@@ -261,6 +261,85 @@ message ServerSettings {
   // ID of the plugin that delivers the PINs resetting forgotten passwords;
   // empty when users cannot reset them.
   string password_reset_plugin = 5;
+  // How releases are chosen, downloaded and imported; unset in an update
+  // keeps the current ones.
+  AcquisitionSettings acquisition = 6;
+}
+
+// ProperDownload is what to do with propers and repacks.
+enum ProperDownload {
+  PROPER_DOWNLOAD_UNSPECIFIED = 0;
+  // Prefer them, and upgrade to them.
+  PROPER_DOWNLOAD_PREFER_AND_UPGRADE = 1;
+  // Prefer them, but do not upgrade to them.
+  PROPER_DOWNLOAD_DO_NOT_UPGRADE = 2;
+  // Rank them as other releases, by custom formats.
+  PROPER_DOWNLOAD_DO_NOT_PREFER = 3;
+}
+
+// ColonReplacement is what replaces colons in file names.
+enum ColonReplacement {
+  COLON_REPLACEMENT_UNSPECIFIED = 0;
+  COLON_REPLACEMENT_DELETE = 1;
+  COLON_REPLACEMENT_DASH = 2;
+  COLON_REPLACEMENT_SPACE_DASH = 3;
+  COLON_REPLACEMENT_SPACE_DASH_SPACE = 4;
+  // A dash between words, else deleted.
+  COLON_REPLACEMENT_SMART = 5;
+}
+
+// AcquisitionSettings are how releases are chosen, downloaded and
+// imported, as Radarr's settings.
+message AcquisitionSettings {
+  ProperDownload propers = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // Rank releases by their indexer flags.
+  bool prefer_indexer_flags = 2;
+  // Import finished downloads.
+  bool completed_download_handling = 3;
+  // Search again when a download fails.
+  bool auto_redownload_failed = 4;
+  // In megabytes; 0 for none.
+  int32 maximum_size = 5 [(buf.validate.field).int32.gte = 0];
+  // How old usenet releases must be, in minutes.
+  int32 minimum_age = 6 [(buf.validate.field).int32.gte = 0];
+  // Usenet retention in days; 0 for none.
+  int32 retention = 7 [(buf.validate.field).int32.gte = 0];
+  bool allow_hardcoded_subs = 8;
+  // Hardcoded subtitles allowed when others are not.
+  repeated string whitelisted_hardcoded_subs = 9;
+  bool skip_free_space_check = 10;
+  // What an import must leave free, in megabytes.
+  int32 minimum_free_space = 11 [(buf.validate.field).int32.gte = 0];
+  // Shifts when movies count as available, in days.
+  int32 availability_delay = 12;
+  // In minutes, 0 or at least 10; 0 disables RSS sync.
+  int32 rss_sync_interval = 13 [(buf.validate.field).int32.gte = 0];
+  // How often download clients are polled, in minutes.
+  int32 check_finished_interval = 14 [(buf.validate.field).int32.gte = 1];
+  // Absolute folder replaced and deleted files go to; empty deletes them.
+  string recycle_bin = 15;
+  // Days files stay in the recycle bin; 0 keeps them.
+  int32 recycle_bin_cleanup_days = 16 [(buf.validate.field).int32.gte = 0];
+  // Hard link instead of copying files whose download keeps seeding.
+  bool copy_using_hardlinks = 17;
+  bool import_extra_files = 18;
+  // Extensions of extra files imported with the media, such as "srt".
+  repeated string extra_file_extensions = 19;
+  bool delete_empty_folders = 20;
+  // Name movie files by standard_movie_format; otherwise they keep their
+  // names.
+  bool rename_movies = 21;
+  bool replace_illegal_characters = 22;
+  ColonReplacement colon_replacement = 23 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // Templates, such as "{Movie Title} ({Release Year})".
+  string movie_folder_format = 24 [(buf.validate.field).string.min_len = 1];
+  string standard_movie_format = 25 [(buf.validate.field).string.min_len = 1];
 }
 
 message GetServerSettingsRequest {}
