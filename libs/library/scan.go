@@ -178,7 +178,11 @@ func (sc *scan) root(ctx context.Context, base string) error {
 	defer r.Close()
 	rfs := rootFS{root: r, base: base}
 	ignores := &IgnoreFiles{FS: r.FS()}
+	return sc.walk(ctx, rfs, ignores, dev, task{dir: base, scope: Scope{Kind: sc.lib.Kind, Root: base}})
+}
 
+// walk scans a folder of a root on dev and every folder below it.
+func (sc *scan) walk(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, dev storage.DeviceInfo, start task) error {
 	g, gctx := errgroup.WithContext(ctx)
 	g.SetLimit(sc.walkers(dev))
 	var visit func(t task)
@@ -201,7 +205,7 @@ func (sc *scan) root(ctx context.Context, base string) error {
 			}
 		}
 	}
-	visit(task{dir: base, scope: Scope{Kind: sc.lib.Kind, Root: base}})
+	visit(start)
 	return g.Wait()
 }
 

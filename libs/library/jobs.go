@@ -119,6 +119,7 @@ func (j *Jobs) now() time.Time {
 func (j *Jobs) Handlers() map[string]Handler {
 	return map[string]Handler{
 		JobScan:         j.scan,
+		JobScanFolder:   j.scanFolder,
 		JobProbe:        j.probe,
 		JobRefresh:      j.refresh,
 		JobKeyframes:    j.keyframes,
