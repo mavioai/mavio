@@ -130,9 +130,10 @@ func TestSeriesAcquisition(t *testing.T) {
 	ctx := t.Context()
 
 	// The episode the downloads hold: twenty seconds with audio, no sample
-	// of an episode of three minutes.
+	// of an episode of three minutes, of the 1080p the releases name, as
+	// the imports aggregate the frame size into their qualities.
 	video := filepath.Join(t.TempDir(), "episode.mkv")
-	run(t, ffmpeg, "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=160x120:rate=1",
+	run(t, ffmpeg, "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=1920x1080:rate=1",
 		"-f", "lavfi", "-i", "sine=frequency=440:sample_rate=8000", "-t", "20",
 		"-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-b:a", "16k", video)
 	settled(t, video)
