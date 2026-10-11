@@ -178,8 +178,12 @@ func TestAdministration(t *testing.T) {
 	set.SetPluginCatalogs([]string{catalogURL})
 	set.GetTranscoding().SetTranscodeDir(transcodes)
 	set.GetTranscoding().SetEncoderPreset("ultrafast")
+	set.GetAcquisition().SetMinimumAge(20)
 	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: set}.Build()); err != nil {
 		t.Fatalf("UpdateServerSettings: %v", err)
+	}
+	if got, err := system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{}); err != nil || got.GetSettings().GetAcquisition().GetMinimumAge() != 20 {
+		t.Errorf("acquisition settings after the update = %v, %v", got.GetSettings().GetAcquisition(), err)
 	}
 	bad := proto.Clone(set).(*systemv1.ServerSettings)
 	bad.GetTranscoding().SetTranscodeDir("relative")

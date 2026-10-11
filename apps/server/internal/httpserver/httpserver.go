@@ -167,6 +167,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(pluginv1connect.NewHostServiceHandler(rpc.NewHostService(opts.Devices, opts.ServerInfo), interceptors))
 	mux.Handle(sessionv1connect.NewSyncPlayServiceHandler(rpc.NewSyncPlayService(opts.Store, opts.Hub), interceptors))
 	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(rpc.NewReleaseService(opts.Store, opts.Indexers), interceptors))
+	mux.Handle(acquisitionv1connect.NewProfileServiceHandler(rpc.NewProfileService(opts.Store), interceptors))
 	mux.Handle("GET /media/", opts.Playbacks.Handler())
 	mux.Handle("GET /images/", opts.Images.Handler())
 	mux.Handle("/plugins/{id}/", pluginRoutes(authn, opts.PluginRoutes))
@@ -204,7 +205,7 @@ func connectHTTPStatus(err error) int {
 
 // services are the Connect services the server serves.
 var services = []string{
-	acquisitionv1connect.ReleaseServiceName,
+	acquisitionv1connect.ProfileServiceName, acquisitionv1connect.ReleaseServiceName,
 	authv1connect.AuthServiceName,
 	libraryv1connect.LibraryServiceName, libraryv1connect.ItemServiceName, libraryv1connect.CollectionServiceName,
 	libraryv1connect.MetadataServiceName, libraryv1connect.PlaylistServiceName,

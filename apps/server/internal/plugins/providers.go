@@ -9,6 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
+	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/apps/server/internal/releases"
 	"github.com/mavioai/mavio/libs/core"
@@ -444,6 +445,18 @@ func (m *Manager) IndexerProviders() []releases.Provider {
 	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_INDEXER_PROVIDER) {
 		if pl, ok := m.running(id); ok && pl.Indexers() != nil {
 			out = append(out, releases.Provider{ID: id, Client: pl.Indexers()})
+		}
+	}
+	return out
+}
+
+// DownloadClientProviders returns the download client providers among the
+// ready plugins.
+func (m *Manager) DownloadClientProviders() []downloads.Provider {
+	var out []downloads.Provider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_DOWNLOAD_CLIENT_PROVIDER) {
+		if pl, ok := m.running(id); ok && pl.DownloadClients() != nil {
+			out = append(out, downloads.Provider{ID: id, Client: pl.DownloadClients()})
 		}
 	}
 	return out

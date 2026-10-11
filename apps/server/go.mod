@@ -6,6 +6,7 @@ require (
 	buf.build/go/protovalidate v1.4.0
 	connectrpc.com/connect v1.21.0
 	connectrpc.com/grpcreflect v1.3.1
+	github.com/mavioai/mavio/libs/acquire v0.0.0
 	github.com/mavioai/mavio/libs/core v0.0.0
 	github.com/mavioai/mavio/libs/imaging v0.0.0
 	github.com/mavioai/mavio/libs/library v0.0.0
@@ -149,3 +150,5 @@ replace github.com/mavioai/mavio/tools/fixtures => ../../tools/fixtures
 replace github.com/mavioai/mavio/libs/library => ../../libs/library
 
 replace github.com/mavioai/mavio/libs/release => ../../libs/release
+
+replace github.com/mavioai/mavio/libs/acquire => ../../libs/acquire

@@ -1324,7 +1324,9 @@ func (x *SearchReleasesResponse) SetFailures(v []*IndexerFailure) {
 type SearchReleasesResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// By indexer priority, then newest first.
+	// By indexer priority, then newest first; for a search of a monitored
+	// movie, best first as the decision engine ranks them, the rejected
+	// last.
 	Releases []*Release
 	// The indexers that failed, which the releases leave out.
 	Failures []*IndexerFailure
@@ -1363,6 +1365,10 @@ type Release struct {
 	xxx_hidden_UploadVolumeFactor   float64                `protobuf:"fixed64,19,opt,name=upload_volume_factor,json=uploadVolumeFactor"`
 	xxx_hidden_Flags                []string               `protobuf:"bytes,20,rep,name=flags"`
 	xxx_hidden_Parsed               *ParsedRelease         `protobuf:"bytes,21,opt,name=parsed"`
+	xxx_hidden_Rejections           *[]*Rejection          `protobuf:"bytes,22,rep,name=rejections"`
+	xxx_hidden_Evaluated            bool                   `protobuf:"varint,23,opt,name=evaluated"`
+	xxx_hidden_CustomFormats        []string               `protobuf:"bytes,24,rep,name=custom_formats,json=customFormats"`
+	xxx_hidden_CustomFormatScore    int32                  `protobuf:"varint,25,opt,name=custom_format_score,json=customFormatScore"`
 	XXX_raceDetectHookData          protoimpl.RaceDetectHookData
 	XXX_presence                    [1]uint32
 	unknownFields                   protoimpl.UnknownFields
@@ -1570,59 +1576,89 @@ func (x *Release) GetParsed() *ParsedRelease {
 	return nil
 }
 
+func (x *Release) GetRejections() []*Rejection {
+	if x != nil {
+		if x.xxx_hidden_Rejections != nil {
+			return *x.xxx_hidden_Rejections
+		}
+	}
+	return nil
+}
+
+func (x *Release) GetEvaluated() bool {
+	if x != nil {
+		return x.xxx_hidden_Evaluated
+	}
+	return false
+}
+
+func (x *Release) GetCustomFormats() []string {
+	if x != nil {
+		return x.xxx_hidden_CustomFormats
+	}
+	return nil
+}
+
+func (x *Release) GetCustomFormatScore() int32 {
+	if x != nil {
+		return x.xxx_hidden_CustomFormatScore
+	}
+	return 0
+}
+
 func (x *Release) SetPluginId(v string) {
 	x.xxx_hidden_PluginId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 25)
 }
 
 func (x *Release) SetIndexerId(v string) {
 	x.xxx_hidden_IndexerId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 25)
 }
 
 func (x *Release) SetIndexerName(v string) {
 	x.xxx_hidden_IndexerName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 25)
 }
 
 func (x *Release) SetGuid(v string) {
 	x.xxx_hidden_Guid = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 25)
 }
 
 func (x *Release) SetTitle(v string) {
 	x.xxx_hidden_Title = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 25)
 }
 
 func (x *Release) SetSize(v int64) {
 	x.xxx_hidden_Size = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 25)
 }
 
 func (x *Release) SetDownloadUrl(v string) {
 	x.xxx_hidden_DownloadUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 25)
 }
 
 func (x *Release) SetMagnetUrl(v string) {
 	x.xxx_hidden_MagnetUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 25)
 }
 
 func (x *Release) SetInfoHash(v string) {
 	x.xxx_hidden_InfoHash = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 25)
 }
 
 func (x *Release) SetInfoUrl(v string) {
 	x.xxx_hidden_InfoUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 25)
 }
 
 func (x *Release) SetProtocol(v DownloadProtocol) {
 	x.xxx_hidden_Protocol = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 25)
 }
 
 func (x *Release) SetPublishDate(v *timestamppb.Timestamp) {
@@ -1639,27 +1675,27 @@ func (x *Release) SetExternalIds(v map[string]string) {
 
 func (x *Release) SetGrabs(v int32) {
 	x.xxx_hidden_Grabs = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 25)
 }
 
 func (x *Release) SetSeeders(v int32) {
 	x.xxx_hidden_Seeders = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 25)
 }
 
 func (x *Release) SetPeers(v int32) {
 	x.xxx_hidden_Peers = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 25)
 }
 
 func (x *Release) SetDownloadVolumeFactor(v float64) {
 	x.xxx_hidden_DownloadVolumeFactor = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 25)
 }
 
 func (x *Release) SetUploadVolumeFactor(v float64) {
 	x.xxx_hidden_UploadVolumeFactor = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 21)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 25)
 }
 
 func (x *Release) SetFlags(v []string) {
@@ -1668,6 +1704,24 @@ func (x *Release) SetFlags(v []string) {
 
 func (x *Release) SetParsed(v *ParsedRelease) {
 	x.xxx_hidden_Parsed = v
+}
+
+func (x *Release) SetRejections(v []*Rejection) {
+	x.xxx_hidden_Rejections = &v
+}
+
+func (x *Release) SetEvaluated(v bool) {
+	x.xxx_hidden_Evaluated = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 25)
+}
+
+func (x *Release) SetCustomFormats(v []string) {
+	x.xxx_hidden_CustomFormats = v
+}
+
+func (x *Release) SetCustomFormatScore(v int32) {
+	x.xxx_hidden_CustomFormatScore = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 25)
 }
 
 func (x *Release) HasPluginId() bool {
@@ -1796,6 +1850,20 @@ func (x *Release) HasParsed() bool {
 	return x.xxx_hidden_Parsed != nil
 }
 
+func (x *Release) HasEvaluated() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 22)
+}
+
+func (x *Release) HasCustomFormatScore() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 24)
+}
+
 func (x *Release) ClearPluginId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_PluginId = nil
@@ -1884,6 +1952,16 @@ func (x *Release) ClearParsed() {
 	x.xxx_hidden_Parsed = nil
 }
 
+func (x *Release) ClearEvaluated() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 22)
+	x.xxx_hidden_Evaluated = false
+}
+
+func (x *Release) ClearCustomFormatScore() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 24)
+	x.xxx_hidden_CustomFormatScore = 0
+}
+
 type Release_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1920,6 +1998,14 @@ type Release_builder struct {
 	Flags []string
 	// What the title tells; unset when it cannot be parsed.
 	Parsed *ParsedRelease
+	// For a search of a monitored movie: why the release would not be
+	// grabbed, as the decision engine says; empty when it would be.
+	Rejections []*Rejection
+	// For a search of a monitored movie: whether the decision engine
+	// evaluated the release, and its custom formats and score.
+	Evaluated         *bool
+	CustomFormats     []string
+	CustomFormatScore *int32
 }
 
 func (b0 Release_builder) Build() *Release {
@@ -1927,74 +2013,228 @@ func (b0 Release_builder) Build() *Release {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.PluginId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 25)
 		x.xxx_hidden_PluginId = b.PluginId
 	}
 	if b.IndexerId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 25)
 		x.xxx_hidden_IndexerId = b.IndexerId
 	}
 	if b.IndexerName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 25)
 		x.xxx_hidden_IndexerName = b.IndexerName
 	}
 	if b.Guid != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 25)
 		x.xxx_hidden_Guid = b.Guid
 	}
 	if b.Title != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 25)
 		x.xxx_hidden_Title = b.Title
 	}
 	if b.Size != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 25)
 		x.xxx_hidden_Size = *b.Size
 	}
 	if b.DownloadUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 25)
 		x.xxx_hidden_DownloadUrl = b.DownloadUrl
 	}
 	if b.MagnetUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 25)
 		x.xxx_hidden_MagnetUrl = b.MagnetUrl
 	}
 	if b.InfoHash != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 25)
 		x.xxx_hidden_InfoHash = b.InfoHash
 	}
 	if b.InfoUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 25)
 		x.xxx_hidden_InfoUrl = b.InfoUrl
 	}
 	if b.Protocol != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 25)
 		x.xxx_hidden_Protocol = *b.Protocol
 	}
 	x.xxx_hidden_PublishDate = b.PublishDate
 	x.xxx_hidden_Categories = b.Categories
 	x.xxx_hidden_ExternalIds = b.ExternalIds
 	if b.Grabs != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 25)
 		x.xxx_hidden_Grabs = *b.Grabs
 	}
 	if b.Seeders != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 25)
 		x.xxx_hidden_Seeders = *b.Seeders
 	}
 	if b.Peers != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 25)
 		x.xxx_hidden_Peers = *b.Peers
 	}
 	if b.DownloadVolumeFactor != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 25)
 		x.xxx_hidden_DownloadVolumeFactor = *b.DownloadVolumeFactor
 	}
 	if b.UploadVolumeFactor != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 21)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 25)
 		x.xxx_hidden_UploadVolumeFactor = *b.UploadVolumeFactor
 	}
 	x.xxx_hidden_Flags = b.Flags
 	x.xxx_hidden_Parsed = b.Parsed
+	x.xxx_hidden_Rejections = &b.Rejections
+	if b.Evaluated != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 25)
+		x.xxx_hidden_Evaluated = *b.Evaluated
+	}
+	x.xxx_hidden_CustomFormats = b.CustomFormats
+	if b.CustomFormatScore != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 25)
+		x.xxx_hidden_CustomFormatScore = *b.CustomFormatScore
+	}
+	return m0
+}
+
+// Rejection is why the decision engine rejects a release.
+type Rejection struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Reason      *string                `protobuf:"bytes,1,opt,name=reason"`
+	xxx_hidden_Message     *string                `protobuf:"bytes,2,opt,name=message"`
+	xxx_hidden_Temporary   bool                   `protobuf:"varint,3,opt,name=temporary"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *Rejection) Reset() {
+	*x = Rejection{}
+	mi := &file_mavio_acquisition_v1_release_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Rejection) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Rejection) ProtoMessage() {}
+
+func (x *Rejection) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_release_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *Rejection) GetReason() string {
+	if x != nil {
+		if x.xxx_hidden_Reason != nil {
+			return *x.xxx_hidden_Reason
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Rejection) GetMessage() string {
+	if x != nil {
+		if x.xxx_hidden_Message != nil {
+			return *x.xxx_hidden_Message
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Rejection) GetTemporary() bool {
+	if x != nil {
+		return x.xxx_hidden_Temporary
+	}
+	return false
+}
+
+func (x *Rejection) SetReason(v string) {
+	x.xxx_hidden_Reason = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *Rejection) SetMessage(v string) {
+	x.xxx_hidden_Message = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *Rejection) SetTemporary(v bool) {
+	x.xxx_hidden_Temporary = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *Rejection) HasReason() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *Rejection) HasMessage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *Rejection) HasTemporary() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *Rejection) ClearReason() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Reason = nil
+}
+
+func (x *Rejection) ClearMessage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Message = nil
+}
+
+func (x *Rejection) ClearTemporary() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Temporary = false
+}
+
+type Rejection_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// A stable code, such as "quality_not_wanted".
+	Reason  *string
+	Message *string
+	// The release may be grabbed later, as when delayed.
+	Temporary *bool
+}
+
+func (b0 Rejection_builder) Build() *Rejection {
+	m0 := &Rejection{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Reason != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_Reason = b.Reason
+	}
+	if b.Message != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Message = b.Message
+	}
+	if b.Temporary != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Temporary = *b.Temporary
+	}
 	return m0
 }
 
@@ -2024,7 +2264,7 @@ type ParsedRelease struct {
 
 func (x *ParsedRelease) Reset() {
 	*x = ParsedRelease{}
-	mi := &file_mavio_acquisition_v1_release_proto_msgTypes[8]
+	mi := &file_mavio_acquisition_v1_release_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2036,7 +2276,7 @@ func (x *ParsedRelease) String() string {
 func (*ParsedRelease) ProtoMessage() {}
 
 func (x *ParsedRelease) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_release_proto_msgTypes[8]
+	mi := &file_mavio_acquisition_v1_release_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2434,7 +2674,7 @@ type ReleaseQuality struct {
 
 func (x *ReleaseQuality) Reset() {
 	*x = ReleaseQuality{}
-	mi := &file_mavio_acquisition_v1_release_proto_msgTypes[9]
+	mi := &file_mavio_acquisition_v1_release_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2446,7 +2686,7 @@ func (x *ReleaseQuality) String() string {
 func (*ReleaseQuality) ProtoMessage() {}
 
 func (x *ReleaseQuality) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_release_proto_msgTypes[9]
+	mi := &file_mavio_acquisition_v1_release_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2735,7 +2975,7 @@ const file_mavio_acquisition_v1_release_proto_rawDesc = "" +
 	"\bindexers\x18\a \x03(\v2 .mavio.acquisition.v1.IndexerRefR\bindexers\"\x95\x01\n" +
 	"\x16SearchReleasesResponse\x129\n" +
 	"\breleases\x18\x01 \x03(\v2\x1d.mavio.acquisition.v1.ReleaseR\breleases\x12@\n" +
-	"\bfailures\x18\x02 \x03(\v2$.mavio.acquisition.v1.IndexerFailureR\bfailures\"\xd7\x06\n" +
+	"\bfailures\x18\x02 \x03(\v2$.mavio.acquisition.v1.IndexerFailureR\bfailures\"\x8d\b\n" +
 	"\aRelease\x12\x1b\n" +
 	"\tplugin_id\x18\x01 \x01(\tR\bpluginId\x12\x1d\n" +
 	"\n" +
@@ -2762,10 +3002,20 @@ const file_mavio_acquisition_v1_release_proto_rawDesc = "" +
 	"\x16download_volume_factor\x18\x12 \x01(\x01R\x14downloadVolumeFactor\x120\n" +
 	"\x14upload_volume_factor\x18\x13 \x01(\x01R\x12uploadVolumeFactor\x12\x14\n" +
 	"\x05flags\x18\x14 \x03(\tR\x05flags\x12;\n" +
-	"\x06parsed\x18\x15 \x01(\v2#.mavio.acquisition.v1.ParsedReleaseR\x06parsed\x1a>\n" +
+	"\x06parsed\x18\x15 \x01(\v2#.mavio.acquisition.v1.ParsedReleaseR\x06parsed\x12?\n" +
+	"\n" +
+	"rejections\x18\x16 \x03(\v2\x1f.mavio.acquisition.v1.RejectionR\n" +
+	"rejections\x12\x1c\n" +
+	"\tevaluated\x18\x17 \x01(\bR\tevaluated\x12%\n" +
+	"\x0ecustom_formats\x18\x18 \x03(\tR\rcustomFormats\x12.\n" +
+	"\x13custom_format_score\x18\x19 \x01(\x05R\x11customFormatScore\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xde\x03\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"[\n" +
+	"\tRejection\x12\x16\n" +
+	"\x06reason\x18\x01 \x01(\tR\x06reason\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1c\n" +
+	"\ttemporary\x18\x03 \x01(\bR\ttemporary\"\xde\x03\n" +
 	"\rParsedRelease\x125\n" +
 	"\x04kind\x18\x01 \x01(\x0e2!.mavio.acquisition.v1.ReleaseKindR\x04kind\x12\x16\n" +
 	"\x06titles\x18\x02 \x03(\tR\x06titles\x12\x12\n" +
@@ -2816,7 +3066,7 @@ const file_mavio_acquisition_v1_release_proto_rawDesc = "" +
 	"\x18com.mavio.acquisition.v1B\fReleaseProtoP\x01ZMgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1;acquisitionv1\xa2\x02\x03MAX\xaa\x02\x14Mavio.Acquisition.V1\xca\x02\x14Mavio\\Acquisition\\V1\xe2\x02 Mavio\\Acquisition\\V1\\GPBMetadata\xea\x02\x16Mavio::Acquisition::V1b\beditionsp\xe8\a"
 
 var file_mavio_acquisition_v1_release_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_mavio_acquisition_v1_release_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_mavio_acquisition_v1_release_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_mavio_acquisition_v1_release_proto_goTypes = []any{
 	(DownloadProtocol)(0),          // 0: mavio.acquisition.v1.DownloadProtocol
 	(IndexerPrivacy)(0),            // 1: mavio.acquisition.v1.IndexerPrivacy
@@ -2830,37 +3080,39 @@ var file_mavio_acquisition_v1_release_proto_goTypes = []any{
 	(*SearchReleasesRequest)(nil),  // 9: mavio.acquisition.v1.SearchReleasesRequest
 	(*SearchReleasesResponse)(nil), // 10: mavio.acquisition.v1.SearchReleasesResponse
 	(*Release)(nil),                // 11: mavio.acquisition.v1.Release
-	(*ParsedRelease)(nil),          // 12: mavio.acquisition.v1.ParsedRelease
-	(*ReleaseQuality)(nil),         // 13: mavio.acquisition.v1.ReleaseQuality
-	nil,                            // 14: mavio.acquisition.v1.Release.ExternalIdsEntry
-	(*timestamppb.Timestamp)(nil),  // 15: google.protobuf.Timestamp
+	(*Rejection)(nil),              // 12: mavio.acquisition.v1.Rejection
+	(*ParsedRelease)(nil),          // 13: mavio.acquisition.v1.ParsedRelease
+	(*ReleaseQuality)(nil),         // 14: mavio.acquisition.v1.ReleaseQuality
+	nil,                            // 15: mavio.acquisition.v1.Release.ExternalIdsEntry
+	(*timestamppb.Timestamp)(nil),  // 16: google.protobuf.Timestamp
 }
 var file_mavio_acquisition_v1_release_proto_depIdxs = []int32{
 	0,  // 0: mavio.acquisition.v1.Indexer.protocol:type_name -> mavio.acquisition.v1.DownloadProtocol
 	1,  // 1: mavio.acquisition.v1.Indexer.privacy:type_name -> mavio.acquisition.v1.IndexerPrivacy
-	15, // 2: mavio.acquisition.v1.Indexer.disabled_until:type_name -> google.protobuf.Timestamp
+	16, // 2: mavio.acquisition.v1.Indexer.disabled_until:type_name -> google.protobuf.Timestamp
 	5,  // 3: mavio.acquisition.v1.ListIndexersResponse.indexers:type_name -> mavio.acquisition.v1.Indexer
 	8,  // 4: mavio.acquisition.v1.ListIndexersResponse.failures:type_name -> mavio.acquisition.v1.IndexerFailure
-	15, // 5: mavio.acquisition.v1.IndexerFailure.disabled_until:type_name -> google.protobuf.Timestamp
+	16, // 5: mavio.acquisition.v1.IndexerFailure.disabled_until:type_name -> google.protobuf.Timestamp
 	2,  // 6: mavio.acquisition.v1.SearchReleasesRequest.type:type_name -> mavio.acquisition.v1.ReleaseSearchType
 	4,  // 7: mavio.acquisition.v1.SearchReleasesRequest.indexers:type_name -> mavio.acquisition.v1.IndexerRef
 	11, // 8: mavio.acquisition.v1.SearchReleasesResponse.releases:type_name -> mavio.acquisition.v1.Release
 	8,  // 9: mavio.acquisition.v1.SearchReleasesResponse.failures:type_name -> mavio.acquisition.v1.IndexerFailure
 	0,  // 10: mavio.acquisition.v1.Release.protocol:type_name -> mavio.acquisition.v1.DownloadProtocol
-	15, // 11: mavio.acquisition.v1.Release.publish_date:type_name -> google.protobuf.Timestamp
-	14, // 12: mavio.acquisition.v1.Release.external_ids:type_name -> mavio.acquisition.v1.Release.ExternalIdsEntry
-	12, // 13: mavio.acquisition.v1.Release.parsed:type_name -> mavio.acquisition.v1.ParsedRelease
-	3,  // 14: mavio.acquisition.v1.ParsedRelease.kind:type_name -> mavio.acquisition.v1.ReleaseKind
-	13, // 15: mavio.acquisition.v1.ParsedRelease.quality:type_name -> mavio.acquisition.v1.ReleaseQuality
-	6,  // 16: mavio.acquisition.v1.ReleaseService.ListIndexers:input_type -> mavio.acquisition.v1.ListIndexersRequest
-	9,  // 17: mavio.acquisition.v1.ReleaseService.SearchReleases:input_type -> mavio.acquisition.v1.SearchReleasesRequest
-	7,  // 18: mavio.acquisition.v1.ReleaseService.ListIndexers:output_type -> mavio.acquisition.v1.ListIndexersResponse
-	10, // 19: mavio.acquisition.v1.ReleaseService.SearchReleases:output_type -> mavio.acquisition.v1.SearchReleasesResponse
-	18, // [18:20] is the sub-list for method output_type
-	16, // [16:18] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	16, // 11: mavio.acquisition.v1.Release.publish_date:type_name -> google.protobuf.Timestamp
+	15, // 12: mavio.acquisition.v1.Release.external_ids:type_name -> mavio.acquisition.v1.Release.ExternalIdsEntry
+	13, // 13: mavio.acquisition.v1.Release.parsed:type_name -> mavio.acquisition.v1.ParsedRelease
+	12, // 14: mavio.acquisition.v1.Release.rejections:type_name -> mavio.acquisition.v1.Rejection
+	3,  // 15: mavio.acquisition.v1.ParsedRelease.kind:type_name -> mavio.acquisition.v1.ReleaseKind
+	14, // 16: mavio.acquisition.v1.ParsedRelease.quality:type_name -> mavio.acquisition.v1.ReleaseQuality
+	6,  // 17: mavio.acquisition.v1.ReleaseService.ListIndexers:input_type -> mavio.acquisition.v1.ListIndexersRequest
+	9,  // 18: mavio.acquisition.v1.ReleaseService.SearchReleases:input_type -> mavio.acquisition.v1.SearchReleasesRequest
+	7,  // 19: mavio.acquisition.v1.ReleaseService.ListIndexers:output_type -> mavio.acquisition.v1.ListIndexersResponse
+	10, // 20: mavio.acquisition.v1.ReleaseService.SearchReleases:output_type -> mavio.acquisition.v1.SearchReleasesResponse
+	19, // [19:21] is the sub-list for method output_type
+	17, // [17:19] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_mavio_acquisition_v1_release_proto_init() }
@@ -2874,7 +3126,7 @@ func file_mavio_acquisition_v1_release_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_acquisition_v1_release_proto_rawDesc), len(file_mavio_acquisition_v1_release_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

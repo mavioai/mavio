@@ -127,6 +127,7 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 			KeyPath: &n.KeyPath, LocalDiscovery: &n.LocalDiscovery,
 		}.Build(),
 		PluginCatalogs: s.PluginCatalogs, PasswordResetPlugin: &s.PasswordResetPlugin,
+		Acquisition: acquisitionSettingsToProto(&s.Acquisition),
 	}.Build()
 	if !s.UpdatedAt.IsZero() {
 		out.SetUpdateTime(timestamppb.New(s.UpdatedAt))
@@ -134,8 +135,14 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 	return out
 }
 
-func settingsFromProto(p *systemv1.ServerSettings) core.ServerSettings {
+// settingsFromProto returns the settings of p, keeping the current
+// acquisition settings when p has none.
+func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings) core.ServerSettings {
 	t, n := p.GetTranscoding(), p.GetNetwork()
+	acquisition := current.Acquisition
+	if p.HasAcquisition() {
+		acquisition = acquisitionSettingsFromProto(p.GetAcquisition())
+	}
 	var hw core.HardwareAcceleration
 	for k, v := range hardwareAccelerations {
 		if v == t.GetHardwareAcceleration() {
@@ -155,6 +162,70 @@ func settingsFromProto(p *systemv1.ServerSettings) core.ServerSettings {
 			CertificatePath: n.GetCertificatePath(), KeyPath: n.GetKeyPath(), LocalDiscovery: n.GetLocalDiscovery(),
 		},
 		PluginCatalogs: p.GetPluginCatalogs(), PasswordResetPlugin: p.GetPasswordResetPlugin(),
+		Acquisition: acquisition,
+	}
+}
+
+var properDownloads = map[core.ProperDownload]systemv1.ProperDownload{
+	core.PropersPreferAndUpgrade: systemv1.ProperDownload_PROPER_DOWNLOAD_PREFER_AND_UPGRADE,
+	core.PropersDoNotUpgrade:     systemv1.ProperDownload_PROPER_DOWNLOAD_DO_NOT_UPGRADE,
+	core.PropersDoNotPrefer:      systemv1.ProperDownload_PROPER_DOWNLOAD_DO_NOT_PREFER,
+}
+
+var colonReplacements = map[core.ColonReplacement]systemv1.ColonReplacement{
+	core.ColonDelete:         systemv1.ColonReplacement_COLON_REPLACEMENT_DELETE,
+	core.ColonDash:           systemv1.ColonReplacement_COLON_REPLACEMENT_DASH,
+	core.ColonSpaceDash:      systemv1.ColonReplacement_COLON_REPLACEMENT_SPACE_DASH,
+	core.ColonSpaceDashSpace: systemv1.ColonReplacement_COLON_REPLACEMENT_SPACE_DASH_SPACE,
+	core.ColonSmart:          systemv1.ColonReplacement_COLON_REPLACEMENT_SMART,
+}
+
+// keyOf returns the key of v in m, the zero key when there is none.
+func keyOf[K, V comparable](m map[K]V, v V) K {
+	for k, mv := range m {
+		if mv == v {
+			return k
+		}
+	}
+	var zero K
+	return zero
+}
+
+func acquisitionSettingsToProto(a *core.AcquisitionSettings) *systemv1.AcquisitionSettings {
+	n := &a.Naming
+	return systemv1.AcquisitionSettings_builder{
+		Propers: new(properDownloads[a.Propers]), PreferIndexerFlags: &a.PreferIndexerFlags,
+		CompletedDownloadHandling: &a.CompletedDownloadHandling, AutoRedownloadFailed: &a.AutoRedownloadFailed,
+		MaximumSize: new(int32(a.MaximumSize)), MinimumAge: new(int32(a.MinimumAge)), Retention: new(int32(a.Retention)),
+		AllowHardcodedSubs: &a.AllowHardcodedSubs, WhitelistedHardcodedSubs: a.WhitelistedHardcodedSubs,
+		SkipFreeSpaceCheck: &a.SkipFreeSpaceCheck, MinimumFreeSpace: new(int32(a.MinimumFreeSpace)),
+		AvailabilityDelay: new(int32(a.AvailabilityDelay)), RssSyncInterval: new(int32(a.RSSSyncInterval)),
+		CheckFinishedInterval: new(int32(a.CheckFinishedInterval)), RecycleBin: &a.RecycleBin,
+		RecycleBinCleanupDays: new(int32(a.RecycleBinCleanupDays)), CopyUsingHardlinks: &a.CopyUsingHardlinks,
+		ImportExtraFiles: &a.ImportExtraFiles, ExtraFileExtensions: a.ExtraFileExtensions, DeleteEmptyFolders: &a.DeleteEmptyFolders,
+		RenameMovies: &n.RenameMovies, ReplaceIllegalCharacters: &n.ReplaceIllegalCharacters,
+		ColonReplacement:  new(colonReplacements[n.ColonReplacement]),
+		MovieFolderFormat: &n.MovieFolderFormat, StandardMovieFormat: &n.StandardMovieFormat,
+	}.Build()
+}
+
+func acquisitionSettingsFromProto(p *systemv1.AcquisitionSettings) core.AcquisitionSettings {
+	return core.AcquisitionSettings{
+		Propers: keyOf(properDownloads, p.GetPropers()), PreferIndexerFlags: p.GetPreferIndexerFlags(),
+		CompletedDownloadHandling: p.GetCompletedDownloadHandling(), AutoRedownloadFailed: p.GetAutoRedownloadFailed(),
+		MaximumSize: int(p.GetMaximumSize()), MinimumAge: int(p.GetMinimumAge()), Retention: int(p.GetRetention()),
+		AllowHardcodedSubs: p.GetAllowHardcodedSubs(), WhitelistedHardcodedSubs: p.GetWhitelistedHardcodedSubs(),
+		SkipFreeSpaceCheck: p.GetSkipFreeSpaceCheck(), MinimumFreeSpace: int(p.GetMinimumFreeSpace()),
+		AvailabilityDelay: int(p.GetAvailabilityDelay()), RSSSyncInterval: int(p.GetRssSyncInterval()),
+		CheckFinishedInterval: int(p.GetCheckFinishedInterval()), RecycleBin: p.GetRecycleBin(),
+		RecycleBinCleanupDays: int(p.GetRecycleBinCleanupDays()), CopyUsingHardlinks: p.GetCopyUsingHardlinks(),
+		ImportExtraFiles: p.GetImportExtraFiles(), ExtraFileExtensions: p.GetExtraFileExtensions(),
+		DeleteEmptyFolders: p.GetDeleteEmptyFolders(),
+		Naming: core.NamingSettings{
+			RenameMovies: p.GetRenameMovies(), ReplaceIllegalCharacters: p.GetReplaceIllegalCharacters(),
+			ColonReplacement:  keyOf(colonReplacements, p.GetColonReplacement()),
+			MovieFolderFormat: p.GetMovieFolderFormat(), StandardMovieFormat: p.GetStandardMovieFormat(),
+		},
 	}
 }
 
@@ -191,7 +262,8 @@ func (s *SystemService) UpdateServerSettings(ctx context.Context, req *systemv1.
 	if s.Settings == nil {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("settings cannot be changed"))
 	}
-	set, err := s.Settings.Update(ctx, settingsFromProto(req.GetSettings()))
+	current := s.currentSettings()
+	set, err := s.Settings.Update(ctx, settingsFromProto(req.GetSettings(), &current))
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
