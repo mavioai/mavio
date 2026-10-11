@@ -54,7 +54,7 @@ func TestCodeDefinitions(t *testing.T) {
 		}
 		seen[d.ID] = true
 	}
-	for _, id := range []string{"newznab", "torznab", "torrentrss", "nzbgeek", "nzb-life", "tabula-rasa", "animetosho-usenet", "animetosho", "torrent-network", "iptorrents", "bithdtv", "hdtorrents", "immortalseed", "libble", "norbits", "pixelhd", "nzbindex", "torrentscsv", "knaben", "torrentpotato", "headphones", "rutracker", "beyondhd", "mteamtp", "nebulance", "torrentday", "myanonamouse", "shazbat", "pretome", "revolutiontt", "scenehd", "speedcd", "torrentbytes", "torrentsyndikat", "uniotaku", "xspeeds"} {
+	for _, id := range []string{"newznab", "torznab", "torrentrss", "nzbgeek", "nzb-life", "tabula-rasa", "animetosho-usenet", "animetosho", "torrent-network", "iptorrents", "bithdtv", "hdtorrents", "immortalseed", "libble", "norbits", "pixelhd", "nzbindex", "torrentscsv", "knaben", "torrentpotato", "headphones", "rutracker", "beyondhd", "mteamtp", "nebulance", "torrentday", "myanonamouse", "shazbat", "pretome", "revolutiontt", "scenehd", "speedcd", "torrentbytes", "torrentsyndikat", "uniotaku", "xspeeds", "animebytes", "anidex", "anidub", "bakabt", "subsplease", "toloka"} {
 		if !seen[id] {
 			t.Errorf("definition %q is missing", id)
 		}

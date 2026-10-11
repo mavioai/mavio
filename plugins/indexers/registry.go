@@ -9,7 +9,11 @@ import (
 	"strings"
 
 	"github.com/mavioai/mavio/plugins/indexers/internal/indexer"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/anidex"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/anidub"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/animebytes"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/avistaz"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/bakabt"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/beyondhd"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/bithdtv"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/broadcasthenet"
@@ -39,6 +43,8 @@ import (
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/shazbat"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/speedapp"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/speedcd"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/subsplease"
+	"github.com/mavioai/mavio/plugins/indexers/internal/sites/toloka"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentbytes"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentday"
 	"github.com/mavioai/mavio/plugins/indexers/internal/sites/torrentpotato"
@@ -59,6 +65,10 @@ func codeDefinitions() []indexer.Definition {
 	defs = append(defs, gazelle.Definitions...)
 	defs = append(defs, speedapp.Definitions...)
 	defs = append(defs,
+		anidex.Definition,
+		anidub.Definition,
+		animebytes.Definition,
+		bakabt.Definition,
 		beyondhd.Definition,
 		bithdtv.Definition,
 		broadcasthenet.Definition,
@@ -84,6 +94,8 @@ func codeDefinitions() []indexer.Definition {
 		scenehd.Definition,
 		shazbat.Definition,
 		speedcd.Definition,
+		subsplease.Definition,
+		toloka.Definition,
 		torrentbytes.Definition,
 		torrentday.Definition,
 		torrentpotato.Definition,

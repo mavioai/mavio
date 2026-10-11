@@ -408,7 +408,7 @@ flowchart TD
   - [ ] Fetching and updating the definitions of `indexers.prowlarr.com`, which the plugin's wiring does
   - [ ] Captchas solved by hand: an image captcha fails automatic logins, as no UI shows it yet
   - [ ] Cookies of the `cookie` setting replacing those responses set, as Prowlarr's GetCookies does; they are only sent besides them
-- [ ] The sites Prowlarr implements in code
+- [x] The sites Prowlarr implements in code, but those it marks obsolete
   - [x] Gazelle (`internal/sites/gazelle`): AlphaRatio, BrokenStones, DesiGaane, DICMusic, GreatPosterWall, Secret Cinema; with an API key, Orpheus and Redacted
   - [x] AvistaZ (`internal/sites/avistaz`): AnimeZ, AvistaZ, CinemaZ, ExoticaZ, PrivateHD
   - [x] SpeedApp (`internal/sites/speedapp`): RetroFlix, SpeedApp.io
@@ -428,6 +428,9 @@ flowchart TD
     - [ ] MyAnonamouse's size limits (`tor[minSize]`, `tor[maxSize]`), sent once queries carry `minsize` and `maxsize`
     - [ ] MyAnonamouse's cookies cleared before a test, as Prowlarr does
   - [x] PreToMe, RevolutionTT, SceneHD, SpeedCD, TorrentBytes, TorrentSyndikat, Uniotaku and XSpeeds (`internal/sites/<name>`)
+  - [x] AnimeBytes, Anidex, Anidub, BakaBT, SubsPlease and Toloka.to (`internal/sites/<name>`)
+    - [ ] AnimeBytes' results kept for three minutes, as Prowlarr caches them
+    - [ ] Anidub's resolution, which Prowlarr's releases keep and Mavio's do not have yet
   - [ ] The API tokens of AvistaZ and SpeedApp sites kept across restarts, as Prowlarr keeps them in the settings; they log in again after each start
   - [ ] The seeding settings of torrent indexers (minimum seeders, seed ratio and time), which download clients are given with grabs
 - [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
