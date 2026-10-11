@@ -7917,6 +7917,16 @@
             "type": "boolean",
             "title": "monitored",
             "description": "Only monitored or only unmonitored items."
+          },
+          "externalIds": {
+            "type": "object",
+            "title": "external_ids",
+            "maxProperties": 10,
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            },
+            "description": "Only items with any of these IDs, keyed by provider as Item's: the same\n title as another server's."
           }
         },
         "title": "ListItemsRequest",

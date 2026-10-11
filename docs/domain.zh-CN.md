@@ -275,7 +275,7 @@ erDiagram
 `ItemQuery` 中零值字段表示"不过滤"：
 
 * 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`MemberOf`（链接进合集或播放列表的条目，每个一次）或 `TopLevel`（没有父级的条目）、`Kinds`、`IncludeExtras`、`IncludeMissing`、`IncludeVirtual` 或 `OnlyVirtual`（§4.8）。
-* 内容：`Search`（见 §9.2）；`Monitored`（nil 表示不限）；`IndexNumber` 与 `ParentIndexNumber`（如某季的某一集）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`YearFrom`–`YearTo`；`MaxRating`，与 `InheritedRating` 比较，nil 表示不限制（未分级的条目默认包含，除非设置 `SkipUnrated`）。
+* 内容：`Search`（见 §9.2）；`Monitored`（nil 表示不限）；`IndexNumber` 与 `ParentIndexNumber`（如某季的某一集）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`ExternalIDs`（匹配任意一个，即另一个服务端上的同一作品）；`YearFrom`–`YearTo`；`MaxRating`，与 `InheritedRating` 比较，nil 表示不限制（未分级的条目默认包含，除非设置 `SkipUnrated`）。
 * 名称按排序名以 Jellyfin 的方式排序：不区分大小写和重音，忽略开头、中间和结尾的冠词（"the"、"a"、"an"），去掉标点 `,&-{}'` 并把 `.+%` 视为空格，数字按数值排序（"Rocky 2" 在 "Rocky 10" 之前），非拉丁文字转写为拉丁字母（中文按拼音排序）。按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
 * 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`、`Started`（用户是否播放过该条目）、`PlayedAfter` 与 `PlayedBefore`（最后播放时间在该范围内，两端均不含），以及 `last_played` / `play_count` 排序。对于 `Started`、`PlayedAfter` 与 `PlayedBefore`，剧集与季按其各集的播放计算。设置了 `UserID` 时，其他用户的播放列表不在结果中。
 * 相似度：`SimilarTo` 保留与某条目共有类型、标签、工作室或人物的条目（该条目本身除外），并在排序规格之前按相似度排序，评分方式同 Jellyfin 的相似电影：每个共有类型计 10 分，每个标签与每个工作室计 5 分，两者共同署名的每个人物，若该条目将其列为导演计 50 分、列为演员或客串演员计 15 分。

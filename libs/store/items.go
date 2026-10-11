@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"iter"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	entsql "entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqljson"
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent"
@@ -502,6 +504,15 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 	}
 	if !q.PersonID.IsZero() {
 		ps = append(ps, item.HasCreditsWith(credit.PersonID(q.PersonID)))
+	}
+	if len(q.ExternalIDs) > 0 {
+		ps = append(ps, predicate.Item(func(s *entsql.Selector) {
+			var anyOf []*entsql.Predicate
+			for _, p := range slices.Sorted(maps.Keys(q.ExternalIDs)) {
+				anyOf = append(anyOf, sqljson.ValueEQ(s.C(item.FieldExternalIds), q.ExternalIDs[p], sqljson.Path(string(p))))
+			}
+			s.Where(entsql.Or(anyOf...))
+		}))
 	}
 	if q.YearFrom != 0 {
 		ps = append(ps, item.ProductionYearGTE(q.YearFrom))

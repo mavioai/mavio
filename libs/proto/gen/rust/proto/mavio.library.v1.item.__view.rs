@@ -7515,6 +7515,11 @@ pub struct ListItemsRequestView<'a> {
     ///
     /// Field 21: `monitored`
     pub monitored: ::core::option::Option<bool>,
+    /// Only items with any of these IDs, keyed by provider as Item's: the same
+    /// title as another server's.
+    ///
+    /// Field 22: `external_ids` (map)
+    pub external_ids: ::buffa::MapView<'a, &'a str, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ListItemsRequestView<'a> {
@@ -7743,6 +7748,47 @@ impl<'a> ::buffa::MessageView<'a> for ListItemsRequestView<'a> {
                         )?,
                     );
             }
+            22u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let entry_bytes = ::buffa::types::borrow_bytes(&mut cur)?;
+                let mut entry_cur: &'a [u8] = entry_bytes;
+                let mut key = "";
+                let mut val = "";
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&key)
+                        + ::buffa::__private::element_footprint(&val),
+                )?;
+                while !entry_cur.is_empty() {
+                    let entry_tag = ::buffa::encoding::Tag::decode(&mut entry_cur)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            key = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        2 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            val = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(
+                                entry_tag,
+                                &mut entry_cur,
+                                ctx.depth(),
+                            )?;
+                        }
+                    }
+                }
+                view.external_ids.push(key, val);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -7790,6 +7836,11 @@ impl<'a> ::buffa::MessageView<'a> for ListItemsRequestView<'a> {
             top_level: self.top_level,
             include_virtual: self.include_virtual,
             monitored: self.monitored,
+            external_ids: self
+                .external_ids
+                .iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -7873,6 +7924,12 @@ impl<'a> ::buffa::ViewEncode<'a> for ListItemsRequestView<'a> {
         }
         if self.monitored.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.external_ids {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+            size += 2u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -7960,6 +8017,28 @@ impl<'a> ::buffa::ViewEncode<'a> for ListItemsRequestView<'a> {
         }
         if let Some(v) = self.monitored {
             ::buffa::types::put_bool_field(21u32, v, buf);
+        }
+        for (k, v) in &self.external_ids {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+            ::buffa::encoding::Tag::new(
+                    22u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(
+                    2u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8174,6 +8253,14 @@ impl ListItemsRequestOwnedView {
     #[must_use]
     pub fn monitored(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().monitored
+    }
+    /// Only items with any of these IDs, keyed by provider as Item's: the same
+    /// title as another server's.
+    ///
+    /// Field 22: `external_ids` (map)
+    #[must_use]
+    pub fn external_ids(&self) -> &::buffa::MapView<'_, &'_ str, &'_ str> {
+        &self.0.reborrow().external_ids
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ListItemsRequestView<'static>>>

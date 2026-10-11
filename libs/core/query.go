@@ -49,6 +49,9 @@ type ItemQuery struct {
 	Tags     []string // any of
 	Studios  []string // any of
 	PersonID ID
+	// ExternalIDs restricts results to items with any of these IDs, such
+	// as the same title in another server's library.
+	ExternalIDs map[Provider]string
 	YearFrom int
 	YearTo   int
 	// MaxRating is the maximum parental rating score, compared with
