@@ -33,10 +33,16 @@ var (
 // spaces, brackets, lone punctuation and apostrophes are removed, and
 // diacritics are stripped.
 func CleanTitle(title string) string {
+	return removeDiacritics(scenify(title))
+}
+
+// scenify is CleanTitle without stripping diacritics, as Sonarr cleans
+// titles: "&" becomes "and", slashes become spaces, and brackets, lone
+// punctuation and apostrophes are removed.
+func scenify(title string) string {
 	title = strings.ReplaceAll(title, "&", "and")
 	title = strings.ReplaceAll(title, "/", " ")
-	title = scenifyRemoveChars.replace(title, "")
-	return removeDiacritics(title)
+	return scenifyRemoveChars.replace(title, "")
 }
 
 // TitleThe moves a leading "The", "An" or "A" behind the title, before
@@ -51,14 +57,19 @@ func TitleThe(title string) string {
 
 // CleanTitleThe is TitleThe of a CleanTitle.
 func CleanTitleThe(title string) string {
+	return cleanTitleTheWith(title, CleanTitle)
+}
+
+// cleanTitleTheWith is TitleThe of a title cleaned with clean.
+func cleanTitleTheWith(title string, clean func(string) string) string {
 	if strings.TrimSpace(title) == "" {
 		return ""
 	}
 	if m := titlePrefixRegex.match(title); m != nil {
 		g := m.Groups()
-		return strings.TrimSpace(CleanTitle(g[2].String())) + ", " + g[1].String() + CleanTitle(g[3].String())
+		return strings.TrimSpace(clean(g[2].String())) + ", " + g[1].String() + clean(g[3].String())
 	}
-	return CleanTitle(title)
+	return clean(title)
 }
 
 // TitleFirstCharacter returns the upper-case first letter or digit of a
@@ -77,7 +88,7 @@ func TitleFirstCharacter(title string) string {
 // CleanFileName replaces or removes the characters of name that are
 // illegal in file names with the default naming configuration.
 func CleanFileName(name string) string {
-	return cleanFileName(name, DefaultNaming())
+	return cleanFileName(name, DefaultNaming().cleaning())
 }
 
 // CleanFolderName collapses repeated separators of name and trims spaces
@@ -86,24 +97,36 @@ func CleanFolderName(name string) string {
 	return strings.Trim(collapseSeparators(name), " .")
 }
 
+// charCleaning is how illegal characters are replaced in file names.
+type charCleaning struct {
+	// replaceIllegal replaces illegal characters instead of removing them.
+	replaceIllegal bool
+	// colon is how colons are replaced when replaceIllegal is set.
+	colon ColonReplacement
+	// customColon replaces colons for ColonCustom.
+	customColon string
+}
+
 // cleanFileName replaces or removes the characters of name that are
-// illegal in file names as n says, and trims leading spaces and periods
+// illegal in file names as c says, and trims leading spaces and periods
 // and trailing spaces.
-func cleanFileName(name string, n Naming) string {
+func cleanFileName(name string, c charCleaning) string {
 	result := name
-	if n.ReplaceIllegalCharacters {
-		if n.ColonReplacement == ColonSmart {
+	if c.replaceIllegal {
+		if c.colon == ColonSmart {
 			result = strings.ReplaceAll(result, ": ", " - ")
 			result = strings.ReplaceAll(result, ":", "-")
 		} else {
 			replacement := ""
-			switch n.ColonReplacement {
+			switch c.colon {
 			case ColonDash:
 				replacement = "-"
 			case ColonSpaceDash:
 				replacement = " -"
 			case ColonSpaceDashSpace:
 				replacement = " - "
+			case ColonCustom:
+				replacement = c.customColon
 			}
 			result = strings.ReplaceAll(result, ":", replacement)
 		}
@@ -112,7 +135,7 @@ func cleanFileName(name string, n Naming) string {
 	}
 	for i, bad := range badCharacters {
 		good := ""
-		if n.ReplaceIllegalCharacters {
+		if c.replaceIllegal {
 			good = goodCharacters[i]
 		}
 		result = strings.ReplaceAll(result, bad, good)

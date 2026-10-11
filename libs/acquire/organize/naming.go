@@ -25,12 +25,15 @@ const (
 	ColonSpaceDashSpace ColonReplacement = "space_dash_space"
 	// ColonSmart replaces ": " with " - " and any other colon with "-".
 	ColonSmart ColonReplacement = "smart"
+	// ColonCustom replaces a colon with a configured string; only series
+	// naming supports it.
+	ColonCustom ColonReplacement = "custom"
 )
 
 // Valid reports whether c is one of the colon replacements.
 func (c ColonReplacement) Valid() bool {
 	switch c {
-	case ColonDelete, ColonDash, ColonSpaceDash, ColonSpaceDashSpace, ColonSmart:
+	case ColonDelete, ColonDash, ColonSpaceDash, ColonSpaceDashSpace, ColonSmart, ColonCustom:
 		return true
 	}
 	return false
@@ -97,7 +100,7 @@ var (
 
 // Validate checks both formats and the colon replacement.
 func (n Naming) Validate() error {
-	if !n.ColonReplacement.Valid() {
+	if !n.ColonReplacement.Valid() || n.ColonReplacement == ColonCustom {
 		return fmt.Errorf("%w: %q", ErrInvalidColonReplacement, n.ColonReplacement)
 	}
 	if err := ValidateMovieFormat(n.StandardMovieFormat); err != nil {
@@ -135,6 +138,11 @@ func ValidateMovieFolderFormat(format string) error {
 		return fmt.Errorf("%w: must contain movie title", ErrMissingTokens)
 	}
 	return nil
+}
+
+// cleaning returns how n replaces illegal characters.
+func (n Naming) cleaning() charCleaning {
+	return charCleaning{replaceIllegal: n.ReplaceIllegalCharacters, colon: n.ColonReplacement}
 }
 
 func validateCommon(format string) error {
