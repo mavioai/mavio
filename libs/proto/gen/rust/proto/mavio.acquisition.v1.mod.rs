@@ -538,6 +538,26 @@ pub use self::__buffa::view::DeleteBlocklistResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DeleteBlocklistResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ManualImportFileView;
+#[doc(inline)]
+pub use self::__buffa::view::ManualImportFileOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListManualImportRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListManualImportRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListManualImportResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListManualImportResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ManualImportRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ManualImportRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ManualImportResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ManualImportResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::IssueView;
 #[doc(inline)]
 pub use self::__buffa::view::IssueOwnedView;

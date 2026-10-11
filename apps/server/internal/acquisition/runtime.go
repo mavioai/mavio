@@ -85,7 +85,9 @@ type Runtime struct {
 	Now       func() time.Time
 	Logger    *slog.Logger
 
-	mu sync.Mutex
+	// importing serializes queue checks and manual imports.
+	importing sync.Mutex
+	mu        sync.Mutex
 	// statuses are what the clients last told of the tracked downloads,
 	// by download ID.
 	statuses map[core.ID]ClientStatus

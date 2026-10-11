@@ -39,6 +39,16 @@ service DownloadService {
   rpc DeleteBlocklist(DeleteBlocklistRequest) returns (DeleteBlocklistResponse) {
     option idempotency_level = IDEMPOTENT;
   }
+  // ListManualImport lists the video files of a tracked movie download
+  // with the quality an import would give them and why the import
+  // specifications reject them, as Radarr's manual import.
+  rpc ListManualImport(ListManualImportRequest) returns (ListManualImportResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ManualImport imports a video file of a tracked movie download for its
+  // movie whatever the import specifications reject, and completes the
+  // download.
+  rpc ManualImport(ManualImportRequest) returns (ManualImportResponse);
 }
 
 // DownloadClient is a download client a plugin has configured.
@@ -262,3 +272,48 @@ message DeleteBlocklistRequest {
 }
 
 message DeleteBlocklistResponse {}
+
+// ManualImportFile is a video file of a tracked download.
+message ManualImportFile {
+  // The server's path.
+  string path = 1;
+  // The path below the download's.
+  string relative_path = 2;
+  // In bytes.
+  int64 size = 3;
+  // Radarr's name of the quality an import would give the file, e.g.
+  // "Bluray-1080p".
+  string quality = 4;
+  // The quality's revision.
+  int32 revision = 5;
+  // Why the import specifications reject the file.
+  repeated string rejections = 6;
+}
+
+message ListManualImportRequest {
+  // The tracked download, a queue item.
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message ListManualImportResponse {
+  // The largest first.
+  repeated ManualImportFile files = 1;
+}
+
+message ManualImportRequest {
+  // The tracked download, a queue item.
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // The path of the file, as ListManualImport lists it.
+  string path = 2 [(buf.validate.field).required = true];
+  // Radarr's name of the file's quality; unset for that ListManualImport
+  // lists.
+  string quality = 3;
+}
+
+message ManualImportResponse {}
