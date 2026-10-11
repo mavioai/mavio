@@ -19,6 +19,38 @@
     <string name="home_next_up">Next Up</string>
     <!-- Shelf of the items added last to a library; library is its name. -->
     <string name="home_latest">Latest in %s</string>
+    <!-- Shelf of a library's items released last; library is its name. -->
+    <string name="home_recently_released">Recently Released in %s</string>
+    <!-- Shelf of the episodes aired last in a library; library is its name. -->
+    <string name="home_recently_aired">Recently Aired in %s</string>
+    <!-- Shelf of a library's best rated items; library is its name. -->
+    <string name="home_top_rated">Top Rated in %s</string>
+    <!-- Shelf of a library's best rated items the user has not watched; library is its name. -->
+    <string name="home_top_unplayed">Top Unplayed in %s</string>
+    <!-- Shelf of series in a library the user has not begun; library is its name. -->
+    <string name="home_start_watching">Start Watching in %s</string>
+    <!-- Shelf of items the user watched long ago; library is its name. -->
+    <string name="home_rediscover">Rediscover in %s</string>
+    <!-- Shelf of items like one the user watched; title is its name. -->
+    <string name="home_because_you_watched">Because You Watched %s</string>
+    <!-- Shelf of items like a favorite of the user; title is its name. -->
+    <string name="home_because_you_like">Because You Like %s</string>
+    <!-- Shelf of items of a genre the user watches; genre is its name. -->
+    <string name="home_more_in_genre">More in %s</string>
+    <!-- Shelf of items with an actor the user watches; name is theirs. -->
+    <string name="home_starring">Starring %s</string>
+    <!-- Shelf of items by a director the user watches; name is theirs. -->
+    <string name="home_directed_by">Directed by %s</string>
+    <!-- Shelf of the user's requests that became available. -->
+    <string name="home_available_requests">Now Available</string>
+    <!-- Shelf of popular titles no server has yet, to request. -->
+    <string name="home_trending">Trending</string>
+    <!-- Badge of a shelf shown from what was kept while its server is unreachable. -->
+    <string name="home_offline">Offline</string>
+    <!-- Placeholder of a server whose shelves cannot be loaded; server is its name. -->
+    <string name="home_server_unreachable">%s is unreachable</string>
+    <!-- Action opening all the items of a shelf. -->
+    <string name="home_more">See All</string>
     <!-- Button opening the sort options of a library. -->
     <string name="library_sort">Sort</string>
     <!-- Button opening the filters of a library. -->
@@ -28,6 +60,30 @@
         <item quantity="one">%d item</item>
         <item quantity="other">%d items</item>
     </plurals>
+    <!-- Tab of a library showing its shelves. -->
+    <string name="library_recommended">Recommended</string>
+    <!-- Tab of a library showing the grid of all its items. -->
+    <string name="library_all">Library</string>
+    <!-- Sort option: by name. -->
+    <string name="library_sort_name">Name</string>
+    <!-- Sort option: newest added first. -->
+    <string name="library_sort_date_added">Date Added</string>
+    <!-- Sort option: newest released first. -->
+    <string name="library_sort_released">Release Date</string>
+    <!-- Sort option: best rated first. -->
+    <string name="library_sort_rating">Rating</string>
+    <!-- Sort option: played last first. -->
+    <string name="library_sort_last_played">Last Played</string>
+    <!-- Sort option: random order. -->
+    <string name="library_sort_random">Random</string>
+    <!-- Filter option: every item. -->
+    <string name="library_filter_all">All</string>
+    <!-- Filter option: items not watched. -->
+    <string name="library_filter_unplayed">Unplayed</string>
+    <!-- Filter option: items watched. -->
+    <string name="library_filter_played">Played</string>
+    <!-- Filter option: the user's favorites. -->
+    <string name="library_filter_favorites">Favorites</string>
     <!-- Starts playback of an item from the beginning. -->
     <string name="item_play">Play</string>
     <!-- Resumes playback of an item where it was left. -->
@@ -57,6 +113,23 @@
     </plurals>
     <!-- Section listing the people of an item. -->
     <string name="item_cast">Cast &amp; Crew</string>
+    <!-- Section listing the seasons of a series. -->
+    <string name="item_seasons">Seasons</string>
+    <!-- Section listing the episodes of a season. -->
+    <string name="item_episodes">Episodes</string>
+    <!-- Section listing the tracks of an album. -->
+    <string name="item_tracks">Tracks</string>
+    <!-- Section of items similar to the one shown. -->
+    <string name="item_similar">More Like This</string>
+    <!-- Section listing the media files of an item and its copies on the user's other servers. -->
+    <string name="item_versions">Versions</string>
+    <!-- Where an item or one of its versions is; server is the server's name. -->
+    <string name="item_on_server">On %s</string>
+    <!-- Badge of the number of unwatched episodes of a series or season. -->
+    <plurals name="item_unplayed_count">
+        <item quantity="one">%d unplayed</item>
+        <item quantity="other">%d unplayed</item>
+    </plurals>
     <!-- Accessibility label of the play button of the player. -->
     <string name="player_play">Play</string>
     <!-- Accessibility label of the pause button of the player. -->
@@ -87,6 +160,16 @@
     <string name="player_chapters">Chapters</string>
     <!-- Starts the next episode. -->
     <string name="player_next_episode">Next Episode</string>
+    <!-- Accessibility label of the button leaving the player. -->
+    <string name="player_back">Back</string>
+    <!-- Opens the stream in a player such as mpv or VLC. -->
+    <string name="player_open_external">Open in External Player</string>
+    <!-- Copies the stream's address for an external player. -->
+    <string name="player_copy_link">Copy Stream Link</string>
+    <!-- Accessibility label of the button muting the sound. -->
+    <string name="player_mute">Mute</string>
+    <!-- Accessibility label of the button restoring the sound. -->
+    <string name="player_unmute">Unmute</string>
     <!-- Shown while content loads. -->
     <string name="state_loading">Loading…</string>
     <!-- Title of an empty list or library. -->
@@ -113,4 +196,40 @@
     <string name="auth_quick_connect">Use Quick Connect</string>
     <!-- Instruction of Quick Connect; code is six digits. -->
     <string name="auth_quick_connect_code">Enter %s on a device that is signed in</string>
+    <!-- Title of the first sign-in screen. -->
+    <string name="auth_welcome">Welcome to Mavio</string>
+    <!-- Title of the screen creating the first user of a new server; server is its name. -->
+    <string name="auth_set_up">Set Up %s</string>
+    <!-- Explanation on the screen creating the first user of a new server. -->
+    <string name="auth_set_up_message">Create the administrator account of this server.</string>
+    <!-- Creates the first user of a new server and signs in. -->
+    <string name="auth_create_account">Create Account</string>
+    <!-- Adds another server to sign in to. -->
+    <string name="auth_add_server">Add Server</string>
+    <!-- Signs out of a server and forgets it. -->
+    <string name="auth_sign_out">Sign Out</string>
+    <!-- State of a server whose session ended; the user signs in again. -->
+    <string name="auth_signed_out">Signed out</string>
+    <!-- The user signed in to a server; name is the user's. -->
+    <string name="auth_signed_in_as">Signed in as %s</string>
+    <!-- Section of the profile listing the servers the user signed in to. -->
+    <string name="auth_servers">Servers</string>
+    <!-- Section where the user enters a Quick Connect code shown by another device. -->
+    <string name="auth_authorize_device">Authorize a Device</string>
+    <!-- Approves the Quick Connect code entered. -->
+    <string name="auth_authorize">Authorize</string>
+    <!-- Confirmation after approving a Quick Connect code. -->
+    <string name="auth_authorized">The device is signed in.</string>
+    <!-- Error when the address entered answers but is not a Mavio server. -->
+    <string name="auth_not_mavio">This address is not a Mavio server.</string>
+    <!-- Error when signing in fails. -->
+    <string name="auth_wrong_password">The username or password is incorrect.</string>
+    <!-- Moves a server earlier in the user's order of servers. -->
+    <string name="auth_move_up">Move Up</string>
+    <!-- Moves a server later in the user's order of servers. -->
+    <string name="auth_move_down">Move Down</string>
+    <!-- Placeholder of the search field. -->
+    <string name="search_placeholder">Search movies, shows and more</string>
+    <!-- Shown when a search finds nothing on any server. -->
+    <string name="search_no_results">No results</string>
 </resources>
