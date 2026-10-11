@@ -543,7 +543,7 @@ flowchart TD
 - [x] `RequestService`：按 Seerr 的方式检查电影与季的请求（权限、分级限制、配额、重复），自动或由管理员审批，经 `WantedService` 获取，其条目可用时完成（`requests.availability`）
   - [x] 为请求的动漫使用单独的质量档案与媒体库（`RequestSettings.AnimeQualityProfileID`、`AnimeLibraryID`），并作为动漫剧集添加，如 Seerr 的动漫设置
   - [x] Seerr 中作品的已阻止与已删除状态：阻止列表（`BlockTitle`、`UnblockTitle`、`ListBlockedTitles`、`core.BlockedTitle`）拒绝其中作品的请求；已完成请求的文件已不存在的作品为已删除，可再次请求
-    - [ ] Seerr 的阻止标签（按关键词自动阻止作品）与阻止整个合集
+    - [x] Seerr 的阻止标签，按关键词自动阻止作品（`BlocklistedTags`、`BlocklistedTagsLimit`、每周的 `requests.blocklisted_tags` 任务，作品以 `BlockedTitle.Tags` 标记），以及阻止整个合集（`BlockCollection`、`UnblockCollection`，经由发现提供者的合集目录，由 `scraper-tmdb` 提供）
   - [x] 分级与名称使用服务器级元数据设置（`ServerSettings.Metadata`）的国家与语言，而非目标媒体库的
   - [x] 可用性作业列入任务列表（`TaskService`，“Sync request availability”）
 - [x] `IssueService`：报告条目的问题，评论、解决与重新打开

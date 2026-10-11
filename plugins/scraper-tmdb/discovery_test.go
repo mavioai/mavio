@@ -29,6 +29,8 @@ var discoveryRoutes = map[string]string{
 	"/3/watch/providers/tv": `{"results":[{"provider_id":8,"provider_name":"Netflix","logo_path":"/nf.jpg"}]}`,
 	"/3/search/keyword":     `{"results":[{"id":9882,"name":"space"}]}`,
 	"/3/network/49":         `{"id":49,"name":"HBO","logo_path":"/hbo.png"}`,
+	"/3/collection/726871": `{"id":726871,"name":"Dune Collection","parts":[
+		{"id":438631,"title":"Dune","release_date":"2021-09-15"},{"id":693134,"title":"Dune: Part Two","release_date":"2024-02-27"}]}`,
 }
 
 // newDiscoveryPlugin returns a plugin over the TMDB fake serving the
@@ -65,7 +67,7 @@ func TestListCatalogs(t *testing.T) {
 	for _, c := range resp.GetCatalogs() {
 		ids = append(ids, c.GetId())
 	}
-	if want := []string{"trending", "popular", "upcoming", "top_rated", "recommendations", "similar"}; !slices.Equal(ids, want) {
+	if want := []string{"trending", "popular", "upcoming", "top_rated", "recommendations", "similar", "collection"}; !slices.Equal(ids, want) {
 		t.Errorf("catalogs = %v, want = %v", ids, want)
 	}
 	if popular := resp.GetCatalogs()[1]; len(popular.GetFilters()) == 0 || len(popular.GetSorts()) == 0 {
@@ -161,6 +163,35 @@ func TestDiscoverRelated(t *testing.T) {
 	}
 	if _, err := p.Discover(t.Context(), pluginv1.DiscoverRequest_builder{Catalog: proto.String("nope")}.Build()); err == nil {
 		t.Error("Discover(unknown catalog) = nil error")
+	}
+}
+
+func TestDiscoverCollection(t *testing.T) {
+	p, fake := newDiscoveryPlugin(t)
+	resp := discover(t, p, pluginv1.DiscoverRequest_builder{
+		Catalog: proto.String("collection"), MediaKind: pluginv1.MediaKind_MEDIA_KIND_MOVIE.Enum(),
+		ExternalIds: map[string]string{"tmdb_collection": "726871"},
+	}.Build())
+	if got, want := fake.paths(), []string{"/3/collection/726871"}; !slices.Equal(got, want) {
+		t.Errorf("requests = %v, want = %v", got, want)
+	}
+	var names []string
+	for _, title := range resp.GetTitles() {
+		names = append(names, title.GetName())
+	}
+	if want := []string{"Dune", "Dune: Part Two"}; !slices.Equal(names, want) || resp.GetTotalPages() != 1 || resp.GetTotalResults() != 2 {
+		t.Errorf("Discover(collection) = %v (%d pages), want = %v", names, resp.GetTotalPages(), want)
+	}
+	if resp.GetTitles()[0].GetMediaKind() != pluginv1.MediaKind_MEDIA_KIND_MOVIE || resp.GetTitles()[0].GetExternalIds()["tmdb"] != "438631" {
+		t.Errorf("Discover(collection) title = %v", resp.GetTitles()[0])
+	}
+	if resp := discover(t, p, pluginv1.DiscoverRequest_builder{
+		Catalog: proto.String("collection"), ExternalIds: map[string]string{"tmdb_collection": "1"},
+	}.Build()); len(resp.GetTitles()) != 0 {
+		t.Errorf("Discover(unknown collection) = %v, want = nothing", resp)
+	}
+	if _, err := p.Discover(t.Context(), pluginv1.DiscoverRequest_builder{Catalog: proto.String("collection")}.Build()); err == nil {
+		t.Error("Discover(collection without an ID) = nil error")
 	}
 }
 

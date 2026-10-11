@@ -96,6 +96,7 @@ var (
 		{Name: "kind", Type: field.TypeString},
 		{Name: "tmdb_id", Type: field.TypeInt},
 		{Name: "title", Type: field.TypeString, Default: ""},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
 	}
@@ -107,7 +108,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "blocked_titles_users_blocked_titles",
-				Columns:    []*schema.Column{BlockedTitlesColumns[5]},
+				Columns:    []*schema.Column{BlockedTitlesColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -121,7 +122,7 @@ var (
 			{
 				Name:    "blockedtitle_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{BlockedTitlesColumns[4]},
+				Columns: []*schema.Column{BlockedTitlesColumns[5]},
 			},
 		},
 	}

@@ -158,6 +158,75 @@ impl ::buffa::Enumeration for RequestSort {
         &[Self::REQUEST_SORT_UNSPECIFIED, Self::REQUEST_SORT_MODIFIED]
     }
 }
+/// BlockedTitleSource is how titles came on the blocklist.
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[repr(i32)]
+pub enum BlockedTitleSource {
+    /// Any way.
+    BLOCKED_TITLE_SOURCE_UNSPECIFIED = 0i32,
+    /// Blocklisted by administrators.
+    BLOCKED_TITLE_SOURCE_MANUAL = 1i32,
+    /// Blocklisted by the blocklisted tags job.
+    BLOCKED_TITLE_SOURCE_TAGS = 2i32,
+}
+impl BlockedTitleSource {
+    ///Idiomatic alias for [`Self::BLOCKED_TITLE_SOURCE_UNSPECIFIED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Unspecified: Self = Self::BLOCKED_TITLE_SOURCE_UNSPECIFIED;
+    ///Idiomatic alias for [`Self::BLOCKED_TITLE_SOURCE_MANUAL`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Manual: Self = Self::BLOCKED_TITLE_SOURCE_MANUAL;
+    ///Idiomatic alias for [`Self::BLOCKED_TITLE_SOURCE_TAGS`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Tags: Self = Self::BLOCKED_TITLE_SOURCE_TAGS;
+}
+impl ::core::default::Default for BlockedTitleSource {
+    fn default() -> Self {
+        Self::BLOCKED_TITLE_SOURCE_UNSPECIFIED
+    }
+}
+impl ::buffa::Enumeration for BlockedTitleSource {
+    fn from_i32(value: i32) -> ::core::option::Option<Self> {
+        match value {
+            0i32 => ::core::option::Option::Some(Self::BLOCKED_TITLE_SOURCE_UNSPECIFIED),
+            1i32 => ::core::option::Option::Some(Self::BLOCKED_TITLE_SOURCE_MANUAL),
+            2i32 => ::core::option::Option::Some(Self::BLOCKED_TITLE_SOURCE_TAGS),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn to_i32(&self) -> i32 {
+        *self as i32
+    }
+    fn proto_name(&self) -> &'static str {
+        match self {
+            Self::BLOCKED_TITLE_SOURCE_UNSPECIFIED => "BLOCKED_TITLE_SOURCE_UNSPECIFIED",
+            Self::BLOCKED_TITLE_SOURCE_MANUAL => "BLOCKED_TITLE_SOURCE_MANUAL",
+            Self::BLOCKED_TITLE_SOURCE_TAGS => "BLOCKED_TITLE_SOURCE_TAGS",
+        }
+    }
+    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
+        match name {
+            "BLOCKED_TITLE_SOURCE_UNSPECIFIED" => {
+                ::core::option::Option::Some(Self::BLOCKED_TITLE_SOURCE_UNSPECIFIED)
+            }
+            "BLOCKED_TITLE_SOURCE_MANUAL" => {
+                ::core::option::Option::Some(Self::BLOCKED_TITLE_SOURCE_MANUAL)
+            }
+            "BLOCKED_TITLE_SOURCE_TAGS" => {
+                ::core::option::Option::Some(Self::BLOCKED_TITLE_SOURCE_TAGS)
+            }
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn values() -> &'static [Self] {
+        &[
+            Self::BLOCKED_TITLE_SOURCE_UNSPECIFIED,
+            Self::BLOCKED_TITLE_SOURCE_MANUAL,
+            Self::BLOCKED_TITLE_SOURCE_TAGS,
+        ]
+    }
+}
 /// SeasonRequest is a season a series request asks for.
 #[derive(Clone, PartialEq, Default)]
 pub struct SeasonRequest {
@@ -3575,6 +3644,11 @@ pub struct BlockedTitle {
         ::buffa_types::google::protobuf::Timestamp,
         ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
     >,
+    /// The blocklisted tags ("\<plugin\>/\<keyword\>") the blocklisted tags job
+    /// blocklisted it for; empty when blocklisted by hand.
+    ///
+    /// Field 6: `tags`
+    pub tags: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3586,6 +3660,7 @@ impl ::core::fmt::Debug for BlockedTitle {
             .field("title", &self.title)
             .field("user_id", &self.user_id)
             .field("create_time", &self.create_time)
+            .field("tags", &self.tags)
             .finish()
     }
 }
@@ -3675,6 +3750,9 @@ impl ::buffa::Message for BlockedTitle {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.tags {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3704,6 +3782,9 @@ impl ::buffa::Message for BlockedTitle {
                 buf,
             );
             self.create_time.write_to(__cache, buf);
+        }
+        for v in &self.tags {
+            ::buffa::types::put_string_field(6u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3767,6 +3848,17 @@ impl ::buffa::Message for BlockedTitle {
                     ctx,
                 )?;
             }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.tags.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3780,6 +3872,7 @@ impl ::buffa::Message for BlockedTitle {
         self.title = ::core::option::Option::None;
         self.user_id = ::core::option::Option::None;
         self.create_time = ::buffa::MessageField::none();
+        self.tags.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -4275,6 +4368,10 @@ pub struct ListBlockedTitlesRequest {
     pub limit: ::core::option::Option<i32>,
     /// Field 3: `offset`
     pub offset: ::core::option::Option<i32>,
+    /// The titles blocklisted one way; unset for all.
+    ///
+    /// Field 4: `source`
+    pub source: ::core::option::Option<::buffa::EnumValue<BlockedTitleSource>>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -4284,6 +4381,7 @@ impl ::core::fmt::Debug for ListBlockedTitlesRequest {
             .field("search", &self.search)
             .field("limit", &self.limit)
             .field("offset", &self.offset)
+            .field("source", &self.source)
             .finish()
     }
 }
@@ -4319,6 +4417,16 @@ impl ListBlockedTitlesRequest {
         self.offset = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::source`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_source(
+        mut self,
+        value: impl Into<::buffa::EnumValue<BlockedTitleSource>>,
+    ) -> Self {
+        self.source = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(ListBlockedTitlesRequest);
 impl ::buffa::MessageName for ListBlockedTitlesRequest {
@@ -4349,6 +4457,9 @@ impl ::buffa::Message for ListBlockedTitlesRequest {
         if let Some(v) = self.offset {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.source {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4367,6 +4478,9 @@ impl ::buffa::Message for ListBlockedTitlesRequest {
         }
         if let Some(v) = self.offset {
             ::buffa::types::put_int32_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.source {
+            ::buffa::types::put_int32_field(4u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4409,6 +4523,15 @@ impl ::buffa::Message for ListBlockedTitlesRequest {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.source = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4420,6 +4543,7 @@ impl ::buffa::Message for ListBlockedTitlesRequest {
         self.search = ::core::option::Option::None;
         self.limit = ::core::option::Option::None;
         self.offset = ::core::option::Option::None;
+        self.source = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -4566,6 +4690,423 @@ impl ::buffa::Message for ListBlockedTitlesResponse {
 }
 impl ::buffa::ExtensionSet for ListBlockedTitlesResponse {
     const PROTO_FQN: &'static str = "mavio.acquisition.v1.ListBlockedTitlesResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct BlockCollectionRequest {
+    /// The TMDB ID of the collection.
+    ///
+    /// Field 1: `tmdb_collection_id`
+    pub tmdb_collection_id: ::core::option::Option<i32>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for BlockCollectionRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("BlockCollectionRequest")
+            .field("tmdb_collection_id", &self.tmdb_collection_id)
+            .finish()
+    }
+}
+impl BlockCollectionRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.BlockCollectionRequest";
+}
+impl BlockCollectionRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tmdb_collection_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tmdb_collection_id(mut self, value: i32) -> Self {
+        self.tmdb_collection_id = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(BlockCollectionRequest);
+impl ::buffa::MessageName for BlockCollectionRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "BlockCollectionRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.BlockCollectionRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.BlockCollectionRequest";
+}
+impl ::buffa::Message for BlockCollectionRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.tmdb_collection_id {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.tmdb_collection_id {
+            ::buffa::types::put_int32_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.tmdb_collection_id = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.tmdb_collection_id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for BlockCollectionRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.BlockCollectionRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct BlockCollectionResponse {
+    /// The movies blocklisted, without those blocklisted already.
+    ///
+    /// Field 1: `blocked_titles`
+    pub blocked_titles: ::buffa::alloc::vec::Vec<BlockedTitle>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for BlockCollectionResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("BlockCollectionResponse")
+            .field("blocked_titles", &self.blocked_titles)
+            .finish()
+    }
+}
+impl BlockCollectionResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.BlockCollectionResponse";
+}
+::buffa::impl_default_instance!(BlockCollectionResponse);
+impl ::buffa::MessageName for BlockCollectionResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "BlockCollectionResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.BlockCollectionResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.BlockCollectionResponse";
+}
+impl ::buffa::Message for BlockCollectionResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        for v in &self.blocked_titles {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        for v in &self.blocked_titles {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.blocked_titles.push(elem);
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.blocked_titles.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for BlockCollectionResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.BlockCollectionResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct UnblockCollectionRequest {
+    /// The TMDB ID of the collection.
+    ///
+    /// Field 1: `tmdb_collection_id`
+    pub tmdb_collection_id: ::core::option::Option<i32>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for UnblockCollectionRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("UnblockCollectionRequest")
+            .field("tmdb_collection_id", &self.tmdb_collection_id)
+            .finish()
+    }
+}
+impl UnblockCollectionRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.UnblockCollectionRequest";
+}
+impl UnblockCollectionRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tmdb_collection_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tmdb_collection_id(mut self, value: i32) -> Self {
+        self.tmdb_collection_id = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(UnblockCollectionRequest);
+impl ::buffa::MessageName for UnblockCollectionRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "UnblockCollectionRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.UnblockCollectionRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.UnblockCollectionRequest";
+}
+impl ::buffa::Message for UnblockCollectionRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.tmdb_collection_id {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.tmdb_collection_id {
+            ::buffa::types::put_int32_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.tmdb_collection_id = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.tmdb_collection_id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for UnblockCollectionRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.UnblockCollectionRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct UnblockCollectionResponse {
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for UnblockCollectionResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("UnblockCollectionResponse").finish()
+    }
+}
+impl UnblockCollectionResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.UnblockCollectionResponse";
+}
+::buffa::impl_default_instance!(UnblockCollectionResponse);
+impl ::buffa::MessageName for UnblockCollectionResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "UnblockCollectionResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.UnblockCollectionResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.UnblockCollectionResponse";
+}
+impl ::buffa::Message for UnblockCollectionResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for UnblockCollectionResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.UnblockCollectionResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

@@ -152,6 +152,14 @@ func (s *TaskService) tasks(ctx context.Context) ([]task, error) {
 			}.Build(),
 			matches: func(j *core.Job) bool { return j.Kind == requests.JobAvailability },
 			run:     requests.RunJob,
+		}, task{
+			proto: systemv1.Task_builder{
+				Id: new(requests.JobBlocklistedTags), Name: new("Process blocklisted tags"), Kind: new(requests.JobBlocklistedTags),
+				Description: new("Blocklists the movies and series of the blocklisted tags, as Seerr's job."),
+				Interval:    durationpb.New(requests.BlocklistedTagsInterval),
+			}.Build(),
+			matches: func(j *core.Job) bool { return j.Kind == requests.JobBlocklistedTags },
+			run:     requests.RunBlocklistedTagsJob,
 		})
 	}
 	out = append(out, task{
@@ -174,7 +182,7 @@ func (s *TaskService) ListTasks(ctx context.Context, _ *systemv1.ListTasksReques
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask, acquisition.JobRSS, acquisition.JobQueue, acquisition.JobRecycleBin, acquisition.JobRefreshMovies, acquisition.JobSceneMappings, requests.JobAvailability}
+	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask, acquisition.JobRSS, acquisition.JobQueue, acquisition.JobRecycleBin, acquisition.JobRefreshMovies, acquisition.JobSceneMappings, requests.JobAvailability, requests.JobBlocklistedTags}
 	active, err := s.store.Jobs().List(ctx, core.JobQuery{Kinds: kinds, States: []core.JobState{core.JobPending, core.JobRunning}})
 	if err != nil {
 		return nil, connectError(ctx, err)

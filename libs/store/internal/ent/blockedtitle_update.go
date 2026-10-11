@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
@@ -100,6 +101,24 @@ func (_u *BlockedTitleUpdate) ClearUserID() *BlockedTitleUpdate {
 	return _u
 }
 
+// SetTags sets the "tags" field.
+func (_u *BlockedTitleUpdate) SetTags(v []string) *BlockedTitleUpdate {
+	_u.mutation.SetTags(v)
+	return _u
+}
+
+// AppendTags appends value to the "tags" field.
+func (_u *BlockedTitleUpdate) AppendTags(v []string) *BlockedTitleUpdate {
+	_u.mutation.AppendTags(v)
+	return _u
+}
+
+// ClearTags clears the value of the "tags" field.
+func (_u *BlockedTitleUpdate) ClearTags() *BlockedTitleUpdate {
+	_u.mutation.ClearTags()
+	return _u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_u *BlockedTitleUpdate) SetCreatedAt(v time.Time) *BlockedTitleUpdate {
 	_u.mutation.SetCreatedAt(v)
@@ -183,6 +202,17 @@ func (_u *BlockedTitleUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(blockedtitle.FieldTitle, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Tags(); ok {
+		_spec.SetField(blockedtitle.FieldTags, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedTags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, blockedtitle.FieldTags, value)
+		})
+	}
+	if _u.mutation.TagsCleared() {
+		_spec.ClearField(blockedtitle.FieldTags, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(blockedtitle.FieldCreatedAt, field.TypeTime, value)
@@ -307,6 +337,24 @@ func (_u *BlockedTitleUpdateOne) ClearUserID() *BlockedTitleUpdateOne {
 	return _u
 }
 
+// SetTags sets the "tags" field.
+func (_u *BlockedTitleUpdateOne) SetTags(v []string) *BlockedTitleUpdateOne {
+	_u.mutation.SetTags(v)
+	return _u
+}
+
+// AppendTags appends value to the "tags" field.
+func (_u *BlockedTitleUpdateOne) AppendTags(v []string) *BlockedTitleUpdateOne {
+	_u.mutation.AppendTags(v)
+	return _u
+}
+
+// ClearTags clears the value of the "tags" field.
+func (_u *BlockedTitleUpdateOne) ClearTags() *BlockedTitleUpdateOne {
+	_u.mutation.ClearTags()
+	return _u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_u *BlockedTitleUpdateOne) SetCreatedAt(v time.Time) *BlockedTitleUpdateOne {
 	_u.mutation.SetCreatedAt(v)
@@ -420,6 +468,17 @@ func (_u *BlockedTitleUpdateOne) sqlSave(ctx context.Context) (_node *BlockedTit
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(blockedtitle.FieldTitle, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Tags(); ok {
+		_spec.SetField(blockedtitle.FieldTags, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedTags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, blockedtitle.FieldTags, value)
+		})
+	}
+	if _u.mutation.TagsCleared() {
+		_spec.ClearField(blockedtitle.FieldTags, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(blockedtitle.FieldCreatedAt, field.TypeTime, value)

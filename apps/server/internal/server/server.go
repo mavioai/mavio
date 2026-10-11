@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"sync/atomic"
 	"time"
 
@@ -226,6 +227,12 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Metadata: plugs.MetadataProviders, Episodes: plugs.EpisodeListers, Discovery: plugs.DiscoveryProviders,
 		Activity: activityLog, Events: hub.Notify, Logger: log,
 		MetadataSettings: func() core.MetadataSettings { return set.Get().Metadata },
+		DropBlocklistedTags: func(ctx context.Context, tags []string) error {
+			s := set.Get()
+			s.Requests.BlocklistedTags = slices.DeleteFunc(slices.Clone(s.Requests.BlocklistedTags), func(t string) bool { return slices.Contains(tags, t) })
+			_, err := set.Update(ctx, s)
+			return err
+		},
 	}
 	// Imports complete the requests of what they import.
 	acq.Imported = reqs.Imported

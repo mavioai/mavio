@@ -124,6 +124,30 @@ pub type OwnedListBlockedTitlesResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<BlockCollectionRequestView<'static>>`.
+pub type OwnedBlockCollectionRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::BlockCollectionRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<BlockCollectionResponseView<'static>>`.
+pub type OwnedBlockCollectionResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::BlockCollectionResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UnblockCollectionRequestView<'static>>`.
+pub type OwnedUnblockCollectionRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UnblockCollectionRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UnblockCollectionResponseView<'static>>`.
+pub type OwnedUnblockCollectionResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UnblockCollectionResponseView<
+        'static,
+    >,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::CreateRequestResponse>
 for crate::proto::mavio::acquisition::v1::__buffa::view::CreateRequestResponseView<'_> {
     fn encode(
@@ -564,6 +588,90 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::BlockCollectionResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::BlockCollectionResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::BlockCollectionResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::BlockCollectionResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::UnblockCollectionResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::UnblockCollectionResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::UnblockCollectionResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UnblockCollectionResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const REQUEST_SERVICE_SERVICE_NAME: &str = "mavio.acquisition.v1.RequestService";
 /// Static [`Spec`](::connectrpc::Spec) for the `CreateRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -638,6 +746,18 @@ pub const REQUEST_SERVICE_LIST_BLOCKED_TITLES_SPEC: ::connectrpc::Spec = ::conne
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `BlockCollection` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const REQUEST_SERVICE_BLOCK_COLLECTION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.RequestService/BlockCollection",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `UnblockCollection` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const REQUEST_SERVICE_UNBLOCK_COLLECTION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.RequestService/UnblockCollection",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
 /// RequestService takes users' requests of movies and seasons of series,
 /// as Seerr's: administrators approve or decline them, unless the user's
 /// requests are approved at once, and approved requests are acquired.
@@ -981,6 +1101,56 @@ pub trait RequestService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::acquisition::v1::ListBlockedTitlesResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// BlockCollection blocklists the movies of a collection not blocklisted
+    /// yet, as Seerr's POST /blocklist/collection/:id: the discovery
+    /// providers' collection catalogs list them. Administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn block_collection<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::BlockCollectionRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::BlockCollectionResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// UnblockCollection takes the movies of a collection off the
+    /// blocklist, as Seerr's DELETE /blocklist/collection/:id.
+    /// Administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn unblock_collection<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::UnblockCollectionRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::UnblockCollectionResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1364,6 +1534,64 @@ impl<S: RequestService> RequestServiceExt for S {
                 },
             )
             .with_spec(REQUEST_SERVICE_LIST_BLOCKED_TITLES_SPEC)
+            .route_view(
+                REQUEST_SERVICE_SERVICE_NAME,
+                "BlockCollection",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::BlockCollectionRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::BlockCollectionRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.block_collection(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::BlockCollectionResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(REQUEST_SERVICE_BLOCK_COLLECTION_SPEC)
+            .route_view(
+                REQUEST_SERVICE_SERVICE_NAME,
+                "UnblockCollection",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::UnblockCollectionRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::UnblockCollectionRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.unblock_collection(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::UnblockCollectionResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(REQUEST_SERVICE_UNBLOCK_COLLECTION_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -1488,6 +1716,18 @@ impl<T: RequestService> ::connectrpc::Dispatcher for RequestServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(REQUEST_SERVICE_LIST_BLOCKED_TITLES_SPEC),
+                )
+            }
+            "BlockCollection" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(REQUEST_SERVICE_BLOCK_COLLECTION_SPEC),
+                )
+            }
+            "UnblockCollection" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(REQUEST_SERVICE_UNBLOCK_COLLECTION_SPEC),
                 )
             }
             _ => None,
@@ -1767,6 +2007,50 @@ impl<T: RequestService> ::connectrpc::Dispatcher for RequestServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::ListBlockedTitlesResponse,
+                        >(format)
+                })
+            }
+            "BlockCollection" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::BlockCollectionRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::BlockCollectionRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::BlockCollectionRequest,
+                    >::from_parts(&req, &body);
+                    svc.block_collection(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::BlockCollectionResponse,
+                        >(format)
+                })
+            }
+            "UnblockCollection" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::UnblockCollectionRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::UnblockCollectionRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::UnblockCollectionRequest,
+                    >::from_parts(&req, &body);
+                    svc.unblock_collection(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::UnblockCollectionResponse,
                         >(format)
                 })
             }
@@ -2435,6 +2719,96 @@ where
                 &self.transport,
                 &self.config,
                 REQUEST_SERVICE_LIST_BLOCKED_TITLES_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the BlockCollection RPC. Sends a request to /mavio.acquisition.v1.RequestService/BlockCollection.
+    pub async fn block_collection(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::BlockCollectionRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::BlockCollectionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.block_collection_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the BlockCollection RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn block_collection_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::BlockCollectionRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::BlockCollectionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                REQUEST_SERVICE_BLOCK_COLLECTION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the UnblockCollection RPC. Sends a request to /mavio.acquisition.v1.RequestService/UnblockCollection.
+    pub async fn unblock_collection(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::UnblockCollectionRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::UnblockCollectionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.unblock_collection_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the UnblockCollection RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn unblock_collection_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::UnblockCollectionRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::UnblockCollectionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                REQUEST_SERVICE_UNBLOCK_COLLECTION_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

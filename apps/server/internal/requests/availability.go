@@ -23,46 +23,59 @@ type scheduledPayload struct {
 	Scheduled bool `json:"scheduled,omitempty"`
 }
 
-// availabilityJob returns an availability job at a time; scheduled and
-// requested runs have separate keys.
-func availabilityJob(at time.Time, scheduled bool) core.Job {
+// requestsJob returns a job of a kind at a time; scheduled and requested
+// runs have separate keys.
+func requestsJob(kind string, at time.Time, scheduled bool) core.Job {
 	payload, _ := json.Marshal(scheduledPayload{Scheduled: scheduled})
-	key := JobAvailability
+	key := kind
 	if scheduled {
 		key += ":scheduled"
 	}
-	return core.Job{ID: core.NewID(), Kind: JobAvailability, Payload: payload, UniqueKey: key, MaxAttempts: 1, RunAt: at}
+	return core.Job{ID: core.NewID(), Kind: kind, Payload: payload, UniqueKey: key, MaxAttempts: 1, RunAt: at}
 }
 
 // RunJob returns the availability job running it now, on demand: the
 // TaskService's task. It does not schedule another run.
-func RunJob(at time.Time) core.Job { return availabilityJob(at, false) }
+func RunJob(at time.Time) core.Job { return requestsJob(JobAvailability, at, false) }
 
-// Handlers returns the handler of the availability job, which schedules
-// its next run.
+// RunBlocklistedTagsJob returns the blocklisted tags job running it now,
+// on demand: the TaskService's task. It does not schedule another run.
+func RunBlocklistedTagsJob(at time.Time) core.Job { return requestsJob(JobBlocklistedTags, at, false) }
+
+// Handlers returns the handlers of the availability and blocklisted tags
+// jobs, which schedule their next runs.
 func (s *Service) Handlers() map[string]library.Handler {
-	return map[string]library.Handler{
-		JobAvailability: func(ctx context.Context, job core.Job) ([]core.Job, error) {
+	recurring := func(kind string, every time.Duration, run func(context.Context) error) library.Handler {
+		return func(ctx context.Context, job core.Job) ([]core.Job, error) {
 			var p scheduledPayload
 			if len(job.Payload) > 0 {
 				if err := json.Unmarshal(job.Payload, &p); err != nil {
-					return nil, fmt.Errorf("%s payload: %w", JobAvailability, err)
+					return nil, fmt.Errorf("%s payload: %w", kind, err)
 				}
 			}
-			err := s.Reconcile(ctx)
+			err := run(ctx)
 			if !p.Scheduled {
 				return nil, err
 			}
-			return []core.Job{availabilityJob(s.now().Add(AvailabilityInterval), true)}, err
-		},
+			return []core.Job{requestsJob(kind, s.now().Add(every), true)}, err
+		}
+	}
+	return map[string]library.Handler{
+		JobAvailability:    recurring(JobAvailability, AvailabilityInterval, s.Reconcile),
+		JobBlocklistedTags: recurring(JobBlocklistedTags, BlocklistedTagsInterval, s.BlocklistTags),
 	}
 }
 
-// Schedule enqueues the availability job unless it is pending.
+// Schedule enqueues the availability job, now, and the blocklisted tags
+// job, a week from now as Seerr's schedule, unless they are pending.
 func (s *Service) Schedule(ctx context.Context) error {
-	job := availabilityJob(s.now(), true)
-	if _, err := s.Store.Jobs().Enqueue(ctx, &job); err != nil {
-		return fmt.Errorf("schedule %s: %w", JobAvailability, err)
+	for _, job := range []core.Job{
+		requestsJob(JobAvailability, s.now(), true),
+		requestsJob(JobBlocklistedTags, s.now().Add(BlocklistedTagsInterval), true),
+	} {
+		if _, err := s.Store.Jobs().Enqueue(ctx, &job); err != nil {
+			return fmt.Errorf("schedule %s: %w", job.Kind, err)
+		}
 	}
 	return nil
 }

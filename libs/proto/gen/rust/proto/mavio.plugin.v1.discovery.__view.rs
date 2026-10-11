@@ -954,8 +954,9 @@ pub struct DiscoverRequestView<'a> {
     ///
     /// Field 2: `media_kind`
     pub media_kind: ::core::option::Option<::buffa::EnumValue<super::super::MediaKind>>,
-    /// The title of recommendations and similar titles, by its external IDs
-    /// such as "tmdb".
+    /// The title of recommendations and similar titles, or the collection of
+    /// a collection catalog, by its external IDs such as "tmdb" or
+    /// "tmdb_collection".
     ///
     /// Field 3: `external_ids` (map)
     pub external_ids: ::buffa::MapView<'a, &'a str, &'a str>,
@@ -1674,8 +1675,9 @@ impl DiscoverRequestOwnedView {
     ) -> ::core::option::Option<::buffa::EnumValue<super::super::MediaKind>> {
         self.0.reborrow().media_kind
     }
-    /// The title of recommendations and similar titles, by its external IDs
-    /// such as "tmdb".
+    /// The title of recommendations and similar titles, or the collection of
+    /// a collection catalog, by its external IDs such as "tmdb" or
+    /// "tmdb_collection".
     ///
     /// Field 3: `external_ids` (map)
     #[must_use]

@@ -193,7 +193,7 @@ func requestSettingsToProto(r *core.RequestSettings) *systemv1.RequestSettings {
 		SeriesQuotaLimit: new(int32(r.SeriesQuota.Limit)), SeriesQuotaDays: new(int32(r.SeriesQuota.Days)),
 		MinimumAvailability: new(minimumAvailabilityToProto(r.MinimumAvailability)),
 		SeasonFolder:        &r.SeasonFolder, MonitorNewItems: new(newItemMonitorToProto(r.MonitorNewItems)),
-		Specials: &r.Specials,
+		Specials: &r.Specials, BlocklistedTags: r.BlocklistedTags, BlocklistedTagsLimit: new(int32(r.BlocklistedTagsLimit)),
 	}
 	for _, f := range []struct {
 		id core.ID
@@ -223,6 +223,7 @@ func requestSettingsFromProto(p *systemv1.RequestSettings) (core.RequestSettings
 		MovieQuota:   core.Quota{Limit: int(p.GetMovieQuotaLimit()), Days: int(p.GetMovieQuotaDays())},
 		SeriesQuota:  core.Quota{Limit: int(p.GetSeriesQuotaLimit()), Days: int(p.GetSeriesQuotaDays())},
 		SeasonFolder: p.GetSeasonFolder(), Specials: p.GetSpecials(),
+		BlocklistedTags: p.GetBlocklistedTags(), BlocklistedTagsLimit: int(p.GetBlocklistedTagsLimit()),
 	}
 	var err error
 	if out.MinimumAvailability, err = minimumAvailability(p.GetMinimumAvailability()); err != nil {

@@ -122,6 +122,8 @@ func (BlockedTitle) Fields() []ent.Field {
 		field.Int("tmdb_id"),
 		field.String("title").Default(""),
 		field.UUID("user_id", core.ID{}).Optional().Nillable(),
+		// tags is NULL for titles blocklisted by hand.
+		field.Strings("tags").Optional(),
 		field.Time("created_at"),
 	}
 }

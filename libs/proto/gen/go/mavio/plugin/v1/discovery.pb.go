@@ -40,6 +40,9 @@ const (
 	CatalogKind_CATALOG_KIND_SIMILAR CatalogKind = 6
 	// A list curated elsewhere, such as a chart.
 	CatalogKind_CATALOG_KIND_LIST CatalogKind = 7
+	// The movies of a collection, such as a film series, named by its
+	// external IDs such as "tmdb_collection".
+	CatalogKind_CATALOG_KIND_COLLECTION CatalogKind = 8
 )
 
 // Enum value maps for CatalogKind.
@@ -53,6 +56,7 @@ var (
 		5: "CATALOG_KIND_RECOMMENDATIONS",
 		6: "CATALOG_KIND_SIMILAR",
 		7: "CATALOG_KIND_LIST",
+		8: "CATALOG_KIND_COLLECTION",
 	}
 	CatalogKind_value = map[string]int32{
 		"CATALOG_KIND_UNSPECIFIED":     0,
@@ -63,6 +67,7 @@ var (
 		"CATALOG_KIND_RECOMMENDATIONS": 5,
 		"CATALOG_KIND_SIMILAR":         6,
 		"CATALOG_KIND_LIST":            7,
+		"CATALOG_KIND_COLLECTION":      8,
 	}
 )
 
@@ -1165,8 +1170,9 @@ type DiscoverRequest_builder struct {
 	Catalog *string
 	// Movies or series, for catalogs listing both.
 	MediaKind *MediaKind
-	// The title of recommendations and similar titles, by its external IDs
-	// such as "tmdb".
+	// The title of recommendations and similar titles, or the collection of
+	// a collection catalog, by its external IDs such as "tmdb" or
+	// "tmdb_collection".
 	ExternalIds map[string]string
 	// Filters by the provider's IDs of ListFilterValues; a title matches
 	// any of a filter's values.
@@ -2874,7 +2880,7 @@ const file_mavio_plugin_v1_discovery_proto_rawDesc = "" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1f\n" +
 	"\vtotal_pages\x18\x03 \x01(\x05R\n" +
 	"totalPages\x12#\n" +
-	"\rtotal_results\x18\x04 \x01(\x05R\ftotalResults*\xea\x01\n" +
+	"\rtotal_results\x18\x04 \x01(\x05R\ftotalResults*\x87\x02\n" +
 	"\vCatalogKind\x12\x1c\n" +
 	"\x18CATALOG_KIND_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15CATALOG_KIND_TRENDING\x10\x01\x12\x18\n" +
@@ -2883,7 +2889,8 @@ const file_mavio_plugin_v1_discovery_proto_rawDesc = "" +
 	"\x16CATALOG_KIND_TOP_RATED\x10\x04\x12 \n" +
 	"\x1cCATALOG_KIND_RECOMMENDATIONS\x10\x05\x12\x18\n" +
 	"\x14CATALOG_KIND_SIMILAR\x10\x06\x12\x15\n" +
-	"\x11CATALOG_KIND_LIST\x10\a*\x8b\x03\n" +
+	"\x11CATALOG_KIND_LIST\x10\a\x12\x1b\n" +
+	"\x17CATALOG_KIND_COLLECTION\x10\b*\x8b\x03\n" +
 	"\x0eDiscoverFilter\x12\x1f\n" +
 	"\x1bDISCOVER_FILTER_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15DISCOVER_FILTER_GENRE\x10\x01\x12\x1a\n" +

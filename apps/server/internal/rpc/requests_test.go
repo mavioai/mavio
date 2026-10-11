@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"net/http"
+	"reflect"
 	"slices"
 	"strconv"
 	"testing"
@@ -315,8 +316,9 @@ func TestRequestSettingsRoundTrip(t *testing.T) {
 	in.MovieLibraryID, in.SeriesQualityProfileID = core.NewID(), core.NewID()
 	in.MinimumAvailability, in.MonitorNewItems, in.Specials = core.AvailabilityInCinemas, core.NewItemsAll, true
 	in.AnimeLibraryID, in.AnimeQualityProfileID = core.NewID(), core.NewID()
+	in.BlocklistedTags, in.BlocklistedTagsLimit = []string{"tmdb/9882"}, 100
 	out, err := requestSettingsFromProto(requestSettingsToProto(&in))
-	if err != nil || out != in {
+	if err != nil || !reflect.DeepEqual(out, in) {
 		t.Errorf("round trip = %+v, %v, want %+v", out, err, in)
 	}
 	bad := requestSettingsToProto(&in)
@@ -330,7 +332,7 @@ func TestRequestSettingsRoundTrip(t *testing.T) {
 	p := settingsToProto(&current)
 	p.ClearRequests()
 	got, err := settingsFromProto(p, &current)
-	if err != nil || got.Requests != in {
+	if err != nil || !reflect.DeepEqual(got.Requests, in) {
 		t.Errorf("settings without requests = %+v, %v", got.Requests, err)
 	}
 	// Metadata settings round trip; settings without them keep the

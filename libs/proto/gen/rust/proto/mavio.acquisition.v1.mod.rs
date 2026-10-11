@@ -402,6 +402,22 @@ pub use self::__buffa::view::ListBlockedTitlesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListBlockedTitlesResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::BlockCollectionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::BlockCollectionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::BlockCollectionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::BlockCollectionResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UnblockCollectionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UnblockCollectionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UnblockCollectionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UnblockCollectionResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ListCatalogsRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ListCatalogsRequestOwnedView;

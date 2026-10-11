@@ -65,8 +65,15 @@ type Service struct {
 	// country, which titles are looked up and rated in; nil uses English
 	// and the US.
 	MetadataSettings func() core.MetadataSettings
-	Now              func() time.Time
-	Logger           *slog.Logger
+	// DropBlocklistedTags takes tags off the request settings'
+	// blocklisted tags, those the blocklisted tags job found invalid; nil
+	// leaves them.
+	DropBlocklistedTags func(ctx context.Context, tags []string) error
+	// Sleep waits between the queries of the blocklisted tags job; nil
+	// waits on a timer.
+	Sleep  func(ctx context.Context, d time.Duration) error
+	Now    func() time.Time
+	Logger *slog.Logger
 
 	// users serializes each user's requests, for quotas; titles each
 	// title's requests and approvals, for duplicates. A user's lock is
