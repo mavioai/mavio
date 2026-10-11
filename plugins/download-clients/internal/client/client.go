@@ -36,6 +36,27 @@ type Release struct {
 	// the client's own.
 	SeedRatio *float64
 	SeedTime  *time.Duration
+	// FullSeason is set for releases of a full season.
+	FullSeason bool
+	// Details are what the release and its movie or series are.
+	Details Details
+	// BlocklistedHashes are the info hashes, in upper case, of torrents
+	// blocklisted for the movie or series, which are refused.
+	BlocklistedHashes []string
+}
+
+// Details are what a release and its movie or series are, which Radarr's
+// and Sonarr's Flood tag downloads with.
+type Details struct {
+	Quality      string
+	Languages    []string
+	ReleaseGroup string
+	Indexer      string
+	Year         int
+	Collection   string
+	// Studio is a movie's studio or a series' network.
+	Studio    string
+	TitleSlug string
 }
 
 // Status is the state of a download, as Radarr's DownloadItemStatus.
@@ -94,6 +115,20 @@ type Options struct {
 	// once they are done seeding.
 	RemoveCompletedDownloads bool
 	RemoveFailedDownloads    bool
+	// HistoryLimit is how many downloads of a client's history are read,
+	// as Radarr's DownloadClientHistoryLimit; DefaultHistoryLimit when 0.
+	HistoryLimit int
+}
+
+// DefaultHistoryLimit is Radarr's default DownloadClientHistoryLimit.
+const DefaultHistoryLimit = 60
+
+// Limit returns the history limit, DefaultHistoryLimit when unset.
+func (o Options) Limit() int {
+	if o.HistoryLimit <= 0 {
+		return DefaultHistoryLimit
+	}
+	return o.HistoryLimit
 }
 
 // Client is a configured download client.
@@ -132,6 +167,31 @@ var ErrMagnetNotSupported = errors.New("magnet links are not supported")
 // ErrNotSupported is returned for what a client cannot do, such as
 // marking downloads imported.
 var ErrNotSupported = errors.New("not supported")
+
+// ErrReleaseRejected is a client refusing a release, as Radarr's
+// DownloadClientRejectedReleaseException, such as a duplicate.
+var ErrReleaseRejected = errors.New("release rejected by the download client")
+
+// Rejected returns an error wrapping ErrReleaseRejected with why.
+func Rejected(format string, args ...any) error {
+	return fmt.Errorf("%w: %s", ErrReleaseRejected, fmt.Sprintf(format, args...))
+}
+
+// ErrReleaseBlocked is a torrent whose hash is blocklisted, as Radarr's
+// ReleaseBlockedException.
+var ErrReleaseBlocked = errors.New("release previously added to blocklist")
+
+// TestWarning is what Test returns when the client answers but warns of
+// something, as Radarr's validation failures marked IsWarning: the test
+// passes with the warning.
+type TestWarning struct{ Message string }
+
+func (w *TestWarning) Error() string { return w.Message }
+
+// Warn returns a TestWarning.
+func Warn(format string, args ...any) error {
+	return &TestWarning{Message: fmt.Sprintf(format, args...)}
+}
 
 // AuthError is a client refusing the credentials, as Radarr's
 // DownloadClientAuthenticationException.

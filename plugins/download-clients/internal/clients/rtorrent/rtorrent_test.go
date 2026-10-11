@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
+	"github.com/mavioai/mavio/plugins/download-clients/internal/xmlrpc"
 )
 
 const title = "Droned.1998.1080p.WEB-DL-DRONE"
@@ -65,15 +66,15 @@ func (f *fake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	body, _ := io.ReadAll(r.Body)
 	var mc struct {
-		Method string  `xml:"methodName"`
-		Params []value `xml:"params>param>value"`
+		Method string         `xml:"methodName"`
+		Params []xmlrpc.Value `xml:"params>param>value"`
 	}
 	if err := xml.Unmarshal(body, &mc); err != nil {
 		f.t.Errorf("request body: %v", err)
 	}
 	c := call{Method: mc.Method}
 	for i := range mc.Params {
-		c.Params = append(c.Params, mc.Params[i].str())
+		c.Params = append(c.Params, mc.Params[i].Str())
 	}
 	f.calls = append(f.calls, c)
 	if f.fault {
@@ -545,7 +546,7 @@ func TestFaultAndAuth(t *testing.T) {
 	f := newFake(t)
 	f.fault = true
 	_, err := newClient(t, f, nil).Items(context.Background(), client.Options{})
-	var fe *faultError
+	var fe *xmlrpc.Fault
 	if !errors.As(err, &fe) || fe.Code != -506 || fe.Message != "Method 'x' not defined" {
 		t.Errorf("Items() error = %v, want the fault -506", err)
 	}

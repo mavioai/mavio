@@ -22,6 +22,9 @@ import (
 // config is the plugin's configuration.
 type config struct {
 	Clients []clientConfig `json:"clients"`
+	// HistoryLimit is how many downloads of the clients' histories are
+	// read, as Radarr's DownloadClientHistoryLimit; 60 when 0.
+	HistoryLimit int `json:"history_limit"`
 }
 
 // clientConfig is a configured download client.
@@ -36,6 +39,10 @@ type clientConfig struct {
 	RemoveFailedDownloads    *bool `json:"remove_failed_downloads"`
 	// Priority orders the clients of a protocol, lower first; 1 when 0.
 	Priority int `json:"priority"`
+	// Tags limit the client to the media of a tag, as Radarr's
+	// download client tags; a client without tags takes the media no
+	// tagged client does.
+	Tags []string `json:"tags"`
 	// Settings are the definition's settings.
 	Settings json.RawMessage `json:"settings"`
 }
@@ -49,18 +56,21 @@ func (c *clientConfig) priority() int {
 	return c.Priority
 }
 
-func (c *clientConfig) options() client.Options {
-	return client.Options{
-		RemoveCompletedDownloads: orTrue(c.RemoveCompletedDownloads),
-		RemoveFailedDownloads:    orTrue(c.RemoveFailedDownloads),
-	}
-}
-
 // configured is a client of the configuration.
 type configured struct {
 	cfg    clientConfig
 	def    client.Definition
 	client client.Client
+	// historyLimit is the configuration's.
+	historyLimit int
+}
+
+func (c *configured) options() client.Options {
+	return client.Options{
+		RemoveCompletedDownloads: orTrue(c.cfg.RemoveCompletedDownloads),
+		RemoveFailedDownloads:    orTrue(c.cfg.RemoveFailedDownloads),
+		HistoryLimit:             c.historyLimit,
+	}
 }
 
 func (c *configured) name() string {
@@ -76,6 +86,7 @@ type plugin struct {
 	version  string
 	http     *http.Client
 	statuses *client.Statuses
+	seeds    *client.Seeds
 	defs     []client.Definition
 	byID     map[string]client.Definition
 	// now is the clock; time.Now when nil.
@@ -85,18 +96,22 @@ type plugin struct {
 	clients []*configured
 }
 
-// newPlugin returns the plugin keeping the clients' statuses in dataDir
-// and reaching them with hc.
+// newPlugin returns the plugin keeping the clients' statuses and the seed
+// limits of their torrents in dataDir, and reaching them with hc.
 func newPlugin(log *slog.Logger, version, dataDir string, hc *http.Client) (*plugin, error) {
-	file := ""
+	statusFile, seedFile := "", ""
 	if dataDir != "" {
-		file = filepath.Join(dataDir, "status.json")
+		statusFile, seedFile = filepath.Join(dataDir, "status.json"), filepath.Join(dataDir, "seeds.json")
 	}
-	statuses, err := client.NewStatuses(file, time.Now)
+	statuses, err := client.NewStatuses(statusFile, time.Now)
 	if err != nil {
 		return nil, err
 	}
-	p := &plugin{log: log, version: version, http: hc, statuses: statuses, byID: map[string]client.Definition{}}
+	seeds, err := client.NewSeeds(seedFile)
+	if err != nil {
+		return nil, err
+	}
+	p := &plugin{log: log, version: version, http: hc, statuses: statuses, seeds: seeds, byID: map[string]client.Definition{}}
 	p.defs = definitions()
 	for _, d := range p.defs {
 		p.byID[d.ID] = d
@@ -111,8 +126,14 @@ func (p *plugin) clock() time.Time {
 	return time.Now()
 }
 
-func (p *plugin) env() client.Env {
-	return client.Env{HTTP: p.http, Now: p.clock, Log: p.log}
+// env is what the client of an ID is made with; seed limits are kept in
+// memory alone for "", a client being tested before it is saved.
+func (p *plugin) env(clientID string) client.Env {
+	env := client.Env{HTTP: p.http, Now: p.clock, Log: p.log}
+	if clientID != "" {
+		env.Seeds = p.seeds.For(clientID)
+	}
+	return env
 }
 
 // Describe implements PluginService.
@@ -137,6 +158,7 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 		keep[cc.ID] = true
 	}
 	p.statuses.Remove(func(id string) bool { return keep[id] })
+	p.seeds.Remove(func(id string) bool { return keep[id] })
 	p.mu.Lock()
 	p.clients = clients
 	p.mu.Unlock()
@@ -159,6 +181,9 @@ func (c *config) validate() error {
 		}
 		seen[cc.ID] = true
 	}
+	if c.HistoryLimit < 0 {
+		return errors.New("history limit must not be negative")
+	}
 	return nil
 }
 
@@ -167,18 +192,18 @@ func (c *config) validate() error {
 func (p *plugin) build(c config) []*configured {
 	var out []*configured
 	for _, cc := range c.Clients {
-		cl, def, err := p.newClient(cc.Definition, cc.Settings)
+		cl, def, err := p.newClient(cc.ID, cc.Definition, cc.Settings)
 		if err != nil {
 			p.log.Error("configure download client", "client", cc.ID, "err", err)
 			continue
 		}
-		out = append(out, &configured{cfg: cc, def: def, client: cl})
+		out = append(out, &configured{cfg: cc, def: def, client: cl, historyLimit: c.HistoryLimit})
 	}
 	return out
 }
 
-// newClient makes a client of a definition.
-func (p *plugin) newClient(definition string, settings []byte) (client.Client, client.Definition, error) {
+// newClient makes the client of an ID, "" for none, of a definition.
+func (p *plugin) newClient(id, definition string, settings []byte) (client.Client, client.Definition, error) {
 	def, ok := p.byID[definition]
 	if !ok {
 		return nil, def, fmt.Errorf("unknown definition %q", definition)
@@ -186,7 +211,7 @@ func (p *plugin) newClient(definition string, settings []byte) (client.Client, c
 	if len(settings) == 0 {
 		settings = []byte("{}")
 	}
-	cl, err := def.New(settings, p.env())
+	cl, err := def.New(settings, p.env(id))
 	if err != nil {
 		return nil, def, fmt.Errorf("settings of %s: %w", def.Name, err)
 	}

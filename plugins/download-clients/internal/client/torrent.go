@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"slices"
 	"strings"
 )
 
@@ -23,7 +24,10 @@ type TorrentAdder interface {
 
 // AddTorrent sends a release to a torrent client as Radarr's
 // TorrentClientBase.Download does: its torrent file when it has one, else
-// its magnet link. It returns the download's ID, the info hash.
+// its magnet link, refusing it with ErrReleaseBlocked when its hash is
+// among the release's blocklisted hashes. It returns the download's ID:
+// the hash the client returned, in the case it gave it, else the info
+// hash in upper case.
 func AddTorrent(ctx context.Context, log *slog.Logger, c TorrentAdder, r *Release) (string, error) {
 	var hash, actual string
 	var err error
@@ -36,9 +40,15 @@ func AddTorrent(ctx context.Context, log *slog.Logger, c TorrentAdder, r *Releas
 		if name == "" || !strings.HasSuffix(strings.ToLower(name), ".torrent") {
 			name = CleanFileName(r.Title) + ".torrent"
 		}
+		if err := notBlocked(r, hash); err != nil {
+			return "", err
+		}
 		actual, err = c.AddTorrentFile(ctx, r, hash, name, r.Data)
 	case r.MagnetURL != "":
 		if hash, err = MagnetHash(r.MagnetURL); err != nil {
+			return "", err
+		}
+		if err := notBlocked(r, hash); err != nil {
 			return "", err
 		}
 		actual, err = c.AddMagnet(ctx, r, hash, r.MagnetURL)
@@ -51,12 +61,21 @@ func AddTorrent(ctx context.Context, log *slog.Logger, c TorrentAdder, r *Releas
 	if actual == "" {
 		return hash, nil
 	}
-	actual = strings.ToUpper(actual)
-	if actual != hash && log != nil {
+	if !strings.EqualFold(actual, hash) && log != nil {
 		log.DebugContext(ctx, "the client did not return the expected info hash, the download may be lost track of",
 			"release", r.Title, "hash", hash, "returned", actual)
 	}
 	return actual, nil
+}
+
+// notBlocked fails with ErrReleaseBlocked when a torrent's hash is among
+// the release's blocklisted hashes, as Radarr's
+// EnsureReleaseIsNotBlocklisted.
+func notBlocked(r *Release, hash string) error {
+	if slices.ContainsFunc(r.BlocklistedHashes, func(h string) bool { return strings.EqualFold(h, hash) }) {
+		return fmt.Errorf("%w: %s", ErrReleaseBlocked, r.Title)
+	}
+	return nil
 }
 
 // MagnetHash returns a magnet link's info hash in upper-case hex: the v1

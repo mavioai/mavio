@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -32,9 +33,32 @@ func (s Server) BaseURL() string {
 	return fmt.Sprintf("%s://%s%s", scheme, net.JoinHostPort(s.Host, strconv.Itoa(s.Port)), strings.TrimRight(base, "/"))
 }
 
-// IsLocalhost reports whether the host is this machine, as Radarr's
-// clients tell.
-func (s Server) IsLocalhost() bool { return s.Host == "127.0.0.1" || s.Host == "localhost" }
+// IsLocalhost reports whether the host is this machine.
+func (s Server) IsLocalhost() bool { return IsLocalhost(s.Host) }
+
+// IsLocalhost reports whether a host is this machine, as Radarr's clients
+// tell: 127.0.0.1, ::1 or localhost.
+func IsLocalhost(host string) bool {
+	switch strings.ToLower(strings.Trim(strings.TrimSpace(host), "[]")) {
+	case "127.0.0.1", "::1", "localhost":
+		return true
+	}
+	return false
+}
+
+// urlBasePattern matches URL bases that are whole URLs, which Radarr's
+// ValidUrlBase refuses.
+var urlBasePattern = regexp.MustCompile(`(?i)^/?https?://[-_a-z0-9.]+`)
+
+// ValidateURLBase checks that the URL base of a setting, named field, is a
+// path rather than a URL, as Radarr's ValidUrlBase; example is a valid
+// one, such as "/sabnzbd". A blank URL base is valid.
+func ValidateURLBase(field, urlBase, example string) error {
+	if urlBasePattern.MatchString(strings.TrimSpace(urlBase)) {
+		return fmt.Errorf("%s: must be a valid URL path (ie: '%s')", field, example)
+	}
+	return nil
+}
 
 // Validate checks the host and port.
 func (s Server) Validate() error {

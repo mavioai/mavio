@@ -333,7 +333,7 @@ func (s *station) Items(ctx context.Context, opts client.Options) ([]client.Item
 			if err != nil {
 				return nil, err
 			}
-			item.OutputPath = joinPath(full, t.Title)
+			item.OutputPath = client.JoinRemote(full, t.Title)
 		}
 		items = append(items, item)
 	}

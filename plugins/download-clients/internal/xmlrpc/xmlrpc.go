@@ -1,4 +1,6 @@
-package rtorrent
+// Package xmlrpc is the XML-RPC the clients that speak it share, Aria2
+// and rTorrent, as Radarr's XmlRpcRequestBuilder and its responses.
+package xmlrpc
 
 import (
 	"bytes"
@@ -11,10 +13,10 @@ import (
 	"strings"
 )
 
-// encodeCall writes an XML-RPC method call as Radarr's
+// EncodeCall writes an XML-RPC method call as Radarr's
 // XmlRpcRequestBuilder: strings, ints, byte slices as base64, string
 // slices as arrays and string maps as structs.
-func encodeCall(method string, params ...any) ([]byte, error) {
+func EncodeCall(method string, params ...any) ([]byte, error) {
 	var b bytes.Buffer
 	b.WriteString(`<?xml version="1.0" encoding="utf-8"?><methodCall><methodName>`)
 	if err := xml.EscapeText(&b, []byte(method)); err != nil {
@@ -81,8 +83,8 @@ func encodeValue(b *bytes.Buffer, v any) error {
 	return nil
 }
 
-// value is an XML-RPC value.
-type value struct {
+// Value is an XML-RPC value.
+type Value struct {
 	String  *string  `xml:"string"`
 	Int     *string  `xml:"int"`
 	I4      *string  `xml:"i4"`
@@ -97,7 +99,7 @@ type value struct {
 }
 
 type array struct {
-	Values []value `xml:"data>value"`
+	Values []Value `xml:"data>value"`
 }
 
 type members struct {
@@ -106,11 +108,11 @@ type members struct {
 
 type member struct {
 	Name  string `xml:"name"`
-	Value value  `xml:"value"`
+	Value Value  `xml:"value"`
 }
 
-// str returns a value as a string; numbers are given as written.
-func (v *value) str() string {
+// Str returns a value as a string; numbers are given as written.
+func (v *Value) Str() string {
 	for _, s := range []*string{v.String, v.I8, v.I4, v.Int, v.Double, v.Boolean, v.Base64} {
 		if s != nil {
 			return *s
@@ -122,22 +124,22 @@ func (v *value) str() string {
 	return v.Text
 }
 
-// int returns a value as an integer; zero when it is not one.
-func (v *value) int() int64 {
-	n, _ := strconv.ParseInt(strings.TrimSpace(v.str()), 10, 64)
+// Int64 returns a value as an integer; zero when it is not one.
+func (v *Value) Int64() int64 {
+	n, _ := strconv.ParseInt(strings.TrimSpace(v.Str()), 10, 64)
 	return n
 }
 
-// values returns the elements of an array value.
-func (v *value) values() []value {
+// Values returns the elements of an array value.
+func (v *Value) Values() []Value {
 	if v.Array == nil {
 		return nil
 	}
 	return v.Array.Values
 }
 
-// member returns the member of a struct value by name.
-func (v *value) member(name string) *value {
+// Member returns the member of a struct value by name.
+func (v *Value) Member(name string) *Value {
 	if v.Struct == nil {
 		return nil
 	}
@@ -151,39 +153,40 @@ func (v *value) member(name string) *value {
 
 // methodResponse is an XML-RPC response: a value or a fault.
 type methodResponse struct {
-	Params []value `xml:"params>param>value"`
-	Fault  *value  `xml:"fault>value"`
+	Params []Value `xml:"params>param>value"`
+	Fault  *Value  `xml:"fault>value"`
 }
 
-// faultError is an XML-RPC fault.
-type faultError struct {
+// Fault is an XML-RPC fault of a client.
+type Fault struct {
+	Client  string
 	Code    int64
 	Message string
 }
 
-func (e *faultError) Error() string {
-	return fmt.Sprintf("rTorrent returned error code %d: %s", e.Code, e.Message)
+func (e *Fault) Error() string {
+	return fmt.Sprintf("%s returned error code %d: %s", e.Client, e.Code, e.Message)
 }
 
-// decodeResponse reads an XML-RPC response and returns its value, or its
-// fault as a *faultError.
-func decodeResponse(body []byte) (*value, error) {
+// DecodeResponse reads a client's XML-RPC response and returns its value,
+// or its fault as a *Fault.
+func DecodeResponse(body []byte, client string) (*Value, error) {
 	var r methodResponse
 	if err := xml.Unmarshal(body, &r); err != nil {
-		return nil, fmt.Errorf("read rTorrent response: %w", err)
+		return nil, fmt.Errorf("read %s response: %w", client, err)
 	}
 	if r.Fault != nil {
-		f := &faultError{}
-		if c := r.Fault.member("faultCode"); c != nil {
-			f.Code = c.int()
+		f := &Fault{Client: client}
+		if c := r.Fault.Member("faultCode"); c != nil {
+			f.Code = c.Int64()
 		}
-		if s := r.Fault.member("faultString"); s != nil {
-			f.Message = s.str()
+		if s := r.Fault.Member("faultString"); s != nil {
+			f.Message = s.Str()
 		}
 		return nil, f
 	}
 	if len(r.Params) == 0 {
-		return &value{}, nil
+		return &Value{}, nil
 	}
 	return &r.Params[0], nil
 }

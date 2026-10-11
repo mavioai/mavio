@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
+	"github.com/mavioai/mavio/plugins/download-clients/internal/xmlrpc"
 )
 
 // status is a download of aria2.tellStatus and its kin, as Radarr's
@@ -25,11 +26,11 @@ type status struct {
 	ErrorMessage    string
 }
 
-func parseStatus(v *value) status {
+func parseStatus(v *xmlrpc.Value) status {
 	s := status{}
 	str := func(name string) string {
-		if m := v.member(name); m != nil {
-			return m.str()
+		if m := v.Member(name); m != nil {
+			return m.Str()
 		}
 		return ""
 	}
@@ -37,22 +38,22 @@ func parseStatus(v *value) status {
 		n, _ := strconv.ParseInt(str(name), 10, 64)
 		return n
 	}
-	if bt := v.member("bittorrent"); bt != nil {
-		if info := bt.member("info"); info != nil {
-			if n := info.member("name"); n != nil {
-				s.Name = n.str()
+	if bt := v.Member("bittorrent"); bt != nil {
+		if info := bt.Member("info"); info != nil {
+			if n := info.Member("name"); n != nil {
+				s.Name = n.Str()
 			}
 		}
 		if s.Name == "" {
-			if n := bt.member("name"); n != nil {
-				s.Name = n.str()
+			if n := bt.Member("name"); n != nil {
+				s.Name = n.Str()
 			}
 		}
 	}
-	if files := v.member("files"); files != nil {
-		for _, f := range files.values() {
-			if p := f.member("path"); p != nil {
-				s.Files = append(s.Files, p.str())
+	if files := v.Member("files"); files != nil {
+		for _, f := range files.Values() {
+			if p := f.Member("path"); p != nil {
+				s.Files = append(s.Files, p.Str())
 			}
 		}
 	}
@@ -74,8 +75,8 @@ type proxy struct {
 func (p *proxy) token() string { return "token:" + p.settings.SecretToken }
 
 // call calls a method with the secret token and returns its result.
-func (p *proxy) call(ctx context.Context, method string, params ...any) (*value, error) {
-	body, err := encodeCall(method, append([]any{p.token()}, params...)...)
+func (p *proxy) call(ctx context.Context, method string, params ...any) (*xmlrpc.Value, error) {
+	body, err := xmlrpc.EncodeCall(method, append([]any{p.token()}, params...)...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,13 +91,13 @@ func (p *proxy) call(ctx context.Context, method string, params ...any) (*value,
 	}
 	if err := resp.Err(); err != nil {
 		// A fault answered with a failure status is the fault.
-		var fault *faultError
-		if _, ferr := decodeResponse(resp.Body); errors.As(ferr, &fault) {
+		var fault *xmlrpc.Fault
+		if _, ferr := xmlrpc.DecodeResponse(resp.Body, "Aria2"); errors.As(ferr, &fault) {
 			return nil, fault
 		}
 		return nil, err
 	}
-	return decodeResponse(resp.Body)
+	return xmlrpc.DecodeResponse(resp.Body, "Aria2")
 }
 
 func (p *proxy) version(ctx context.Context) (string, error) {
@@ -104,8 +105,8 @@ func (p *proxy) version(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if m := v.member("version"); m != nil {
-		return m.str(), nil
+	if m := v.Member("version"); m != nil {
+		return m.Str(), nil
 	}
 	return "", nil
 }
@@ -124,7 +125,7 @@ func (p *proxy) list(ctx context.Context, method string, params ...any) ([]statu
 		return nil, err
 	}
 	var out []status
-	for _, s := range v.values() {
+	for _, s := range v.Values() {
 		out = append(out, parseStatus(&s))
 	}
 	return out, nil
@@ -156,7 +157,7 @@ func (p *proxy) globals(ctx context.Context) (map[string]string, error) {
 	out := map[string]string{}
 	if v.Struct != nil {
 		for i := range v.Struct.Members {
-			out[v.Struct.Members[i].Name] = v.Struct.Members[i].Value.str()
+			out[v.Struct.Members[i].Name] = v.Struct.Members[i].Value.Str()
 		}
 	}
 	return out, nil
@@ -176,7 +177,7 @@ func (p *proxy) addMagnet(ctx context.Context, link, dir string) (string, error)
 	if err != nil {
 		return "", err
 	}
-	return v.str(), nil
+	return v.Str(), nil
 }
 
 // addTorrent adds a torrent file and returns its GID; the URIs, none,
@@ -186,7 +187,7 @@ func (p *proxy) addTorrent(ctx context.Context, data []byte, dir string) (string
 	if err != nil {
 		return "", err
 	}
-	return v.str(), nil
+	return v.Str(), nil
 }
 
 // remove removes an active or waiting download.
@@ -195,7 +196,7 @@ func (p *proxy) remove(ctx context.Context, gid string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return v.str() == gid, nil
+	return v.Str() == gid, nil
 }
 
 // removeResult removes a stopped download.
@@ -204,5 +205,5 @@ func (p *proxy) removeResult(ctx context.Context, gid string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return v.str() == "OK", nil
+	return v.Str() == "OK", nil
 }

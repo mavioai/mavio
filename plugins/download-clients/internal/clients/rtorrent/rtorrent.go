@@ -7,9 +7,7 @@ import (
 	"os"
 	"regexp"
 	"slices"
-	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
@@ -73,18 +71,11 @@ func Definitions() []client.Definition {
 			if err := s.Validate(); err != nil {
 				return nil, err
 			}
-			r := &rtorrent{settings: s, env: env, retryDelay: 500 * time.Millisecond, seeds: map[string]seedConfig{}}
+			r := &rtorrent{settings: s, env: env, retryDelay: 500 * time.Millisecond, seeds: env.SeedStore()}
 			r.proxy = &proxy{http: env.HTTP, settings: &r.settings}
 			return r, nil
 		},
 	}}
-}
-
-// seedConfig is the seeding a release's indexer asks for, as Radarr's
-// TorrentSeedConfiguration.
-type seedConfig struct {
-	Ratio *float64
-	Time  *time.Duration
 }
 
 // rtorrent is the client of Radarr's RTorrent.
@@ -96,9 +87,8 @@ type rtorrent struct {
 	retryDelay time.Duration
 
 	// seeds are the seed configurations of added torrents by hash, as
-	// Radarr's DownloadSeedConfigProvider caches them.
-	mu    sync.Mutex
-	seeds map[string]seedConfig
+	// Radarr's DownloadSeedConfigProvider finds them.
+	seeds *client.ClientSeeds
 }
 
 // Host implements client.Client.
@@ -116,7 +106,7 @@ func (r *rtorrent) AddMagnet(ctx context.Context, rel *client.Release, hash, lin
 	if err := r.proxy.addURL(ctx, link, r.settings.Category(rel.Kind), priority, r.settings.Directory(rel.Kind)); err != nil {
 		return "", err
 	}
-	r.remember(hash, rel)
+	r.seeds.Remember(hash, rel)
 	ok, err := r.waitForTorrent(ctx, hash)
 	if err != nil {
 		return "", err
@@ -141,18 +131,8 @@ func (r *rtorrent) AddTorrentFile(ctx context.Context, rel *client.Release, hash
 		r.env.Log.DebugContext(ctx, "rTorrent didn't add the torrent within 5 seconds", "file", fileName)
 		return "", errors.New("downloading torrent failed")
 	}
-	r.remember(hash, rel)
+	r.seeds.Remember(hash, rel)
 	return hash, nil
-}
-
-// remember keeps the seeding a release asks for.
-func (r *rtorrent) remember(hash string, rel *client.Release) {
-	if rel.SeedRatio == nil && rel.SeedTime == nil {
-		return
-	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.seeds[strings.ToUpper(hash)] = seedConfig{Ratio: rel.SeedRatio, Time: rel.SeedTime}
 }
 
 // waitForTorrent checks 10 times, retryDelay apart, that rTorrent has a
@@ -206,7 +186,7 @@ func (r *rtorrent) Items(ctx context.Context, opts client.Options) ([]client.Ite
 			remaining = time.Duration(t.RemainingSize/t.DownRate) * time.Second
 		}
 		item := client.Item{
-			ID: strings.ToUpper(t.Hash), Title: t.Name, Category: t.Category, Kind: kind,
+			ID: t.Hash, Title: t.Name, Category: t.Category, Kind: kind,
 			OutputPath: t.Path, TotalSize: t.TotalSize, RemainingSize: t.RemainingSize,
 			RemainingTime: &remaining, SeedRatio: &ratio,
 			HasPostImportCategory: strings.TrimSpace(r.settings.ImportedCategory(kind)) != "",
@@ -220,7 +200,7 @@ func (r *rtorrent) Items(ctx context.Context, opts client.Options) ([]client.Ite
 			item.Status = client.Paused
 		}
 		if opts.RemoveCompletedDownloads && t.IsFinished {
-			if seed, ok := r.seedConfig(t.Hash); ok {
+			if seed, ok := r.seeds.Get(t.Hash); ok {
 				item.CanBeRemoved = r.seedingDone(t, ratio, seed)
 				item.CanMoveFiles = item.CanBeRemoved
 			}
@@ -232,29 +212,18 @@ func (r *rtorrent) Items(ctx context.Context, opts client.Options) ([]client.Ite
 
 // seedingDone reports whether a finished torrent met its seed ratio or
 // seed time.
-func (r *rtorrent) seedingDone(t *torrent, ratio float64, seed seedConfig) bool {
+func (r *rtorrent) seedingDone(t *torrent, ratio float64, seed client.Seed) bool {
 	if seed.Ratio != nil && ratio >= *seed.Ratio {
 		return true
 	}
 	return seed.Time != nil && r.env.Now().Sub(time.Unix(t.FinishedTime, 0)) >= *seed.Time
 }
 
-func (r *rtorrent) seedConfig(hash string) (seedConfig, bool) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	s, ok := r.seeds[strings.ToUpper(hash)]
-	return s, ok
-}
-
 // forget drops the seed configurations of torrents no longer in rTorrent.
 func (r *rtorrent) forget(torrents []torrent) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	for hash := range r.seeds {
-		if !slices.ContainsFunc(torrents, func(t torrent) bool { return strings.EqualFold(t.Hash, hash) }) {
-			delete(r.seeds, hash)
-		}
-	}
+	r.seeds.Forget(func(hash string) bool {
+		return slices.ContainsFunc(torrents, func(t torrent) bool { return strings.EqualFold(t.Hash, hash) })
+	})
 }
 
 // Remove implements client.Client: the files are deleted by Mavio, then
@@ -300,7 +269,7 @@ func (r *rtorrent) Test(ctx context.Context) error {
 		r.env.Log.ErrorContext(ctx, "failed to test rTorrent", "err", err)
 		return fmt.Errorf("unable to connect to rTorrent: %w", err)
 	}
-	if v, ok := parseVersion(version); !ok || slices.Compare(v, []int{0, 9, 0}) < 0 {
+	if v, err := client.ParseVersion(version); err != nil || !v.AtLeast(0, 9, 0) {
 		return fmt.Errorf("rTorrent version %s is not supported; 0.9.0 or later is required", version)
 	}
 	if _, err := r.proxy.torrents(ctx); err != nil {
@@ -308,23 +277,6 @@ func (r *rtorrent) Test(ctx context.Context) error {
 		return fmt.Errorf("failed to get the list of torrents: %w", err)
 	}
 	return r.testDirectories()
-}
-
-// parseVersion reads a version such as "0.9.8", as .NET's Version.
-func parseVersion(s string) ([]int, bool) {
-	parts := strings.Split(strings.TrimSpace(s), ".")
-	if len(parts) < 2 || len(parts) > 4 {
-		return nil, false
-	}
-	out := make([]int, 0, len(parts))
-	for _, p := range parts {
-		n, err := strconv.Atoi(p)
-		if err != nil || n < 0 {
-			return nil, false
-		}
-		out = append(out, n)
-	}
-	return out, true
 }
 
 var windowsPath = regexp.MustCompile(`^[a-zA-Z]:[\\/]|^\\\\`)

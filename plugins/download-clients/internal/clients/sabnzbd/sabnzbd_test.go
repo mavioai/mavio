@@ -130,8 +130,8 @@ func (f *fake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			f.write(w, map[string]any{"queue": v})
 			return
 		}
-		if q.Get("limit") != strconv.Itoa(historyLimit) {
-			f.t.Errorf("history limit = %q, want = %d", q.Get("limit"), historyLimit)
+		if q.Get("limit") != strconv.Itoa(client.DefaultHistoryLimit) {
+			f.t.Errorf("history limit = %q, want = %d", q.Get("limit"), client.DefaultHistoryLimit)
 		}
 		f.write(w, map[string]any{"history": map[string]any{"slots": filter(f.history, "category", q.Get("category"))}})
 	case "addfile":
@@ -454,8 +454,12 @@ func TestAddRejected(t *testing.T) {
 		f := newFake(t)
 		f.addAnswer = answer
 		r := client.Release{Title: movieTitle, Kind: client.Movie, Data: []byte("<nzb/>")}
-		if got, err := newClient(t, f, nil).Add(context.Background(), &r); err == nil {
+		got, err := newClient(t, f, nil).Add(context.Background(), &r)
+		if err == nil {
 			t.Errorf("Add() answered %s = %q, want an error", answer, got)
+		}
+		if rejected := !strings.Contains(answer, `"status":false`); errors.Is(err, client.ErrReleaseRejected) != rejected {
+			t.Errorf("Add() answered %s error = %v, want rejected = %v", answer, err, rejected)
 		}
 	}
 }
@@ -620,27 +624,29 @@ func TestRemovesCompletedDownloads(t *testing.T) {
 
 func TestTestVersion(t *testing.T) {
 	tests := []struct {
-		version string
-		ok      bool
+		version     string
+		ok, warning bool
 	}{
 		// should_test_version
-		{"0.6.9", false},
-		{"0.7.0", true},
-		{"0.8.0", true},
-		{"1.0.0", true},
-		{"1.0.0RC1", true},
-		{"1.1.x", true},
-		// should_test_develop_version_successfully, with a warning logged
-		{"develop", true},
-		{"", false},
-		{"nightly", false},
+		{"0.6.9", false, false},
+		{"0.7.0", true, false},
+		{"0.8.0", true, false},
+		{"1.0.0", true, false},
+		{"1.0.0RC1", true, false},
+		{"1.1.x", true, false},
+		// should_test_develop_version_successfully: valid, with a warning
+		{"develop", true, true},
+		{"", false, false},
+		{"nightly", false, false},
 	}
 	for _, tt := range tests {
 		f := newFake(t)
 		f.version = tt.version
 		err := newClient(t, f, nil).Test(context.Background())
-		if (err == nil) != tt.ok {
-			t.Errorf("%q: Test() error = %v, want ok = %v", tt.version, err, tt.ok)
+		var warning *client.TestWarning
+		isWarning := errors.As(err, &warning)
+		if ok := err == nil || isWarning; ok != tt.ok || isWarning != tt.warning {
+			t.Errorf("%q: Test() error = %v, want ok = %v, warning = %v", tt.version, err, tt.ok, tt.warning)
 		}
 	}
 }

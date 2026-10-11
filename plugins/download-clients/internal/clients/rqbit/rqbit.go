@@ -8,7 +8,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
@@ -19,16 +18,11 @@ type settings struct {
 	client.Server
 }
 
-var urlBasePattern = regexp.MustCompile(`(?i)^/?https?://[-_a-z0-9.]+`)
-
 func (s *settings) validate() error {
 	if err := s.Validate(); err != nil {
 		return err
 	}
-	if urlBasePattern.MatchString(s.URLBase) {
-		return errors.New("url base: must be a valid URL path (ie: '/rqbit')")
-	}
-	return nil
+	return client.ValidateURLBase("url base", s.URLBase, "/rqbit")
 }
 
 // Definitions returns the definition of rqbit.
@@ -46,18 +40,11 @@ func Definitions() []client.Definition {
 			if err := s.validate(); err != nil {
 				return nil, err
 			}
-			r := &rqbit{settings: s, env: env, seeds: map[string]seedConfig{}}
+			r := &rqbit{settings: s, env: env, seeds: env.SeedStore()}
 			r.proxy = &proxy{http: env.HTTP, settings: &r.settings}
 			return r, nil
 		},
 	}}
-}
-
-// seedConfig is the seeding a release's indexer asks for, as Radarr's
-// TorrentSeedConfiguration.
-type seedConfig struct {
-	Ratio *float64
-	Time  *time.Duration
 }
 
 // rqbit is the client of Radarr's RQBit.
@@ -67,9 +54,8 @@ type rqbit struct {
 	env      client.Env
 
 	// seeds are the seed configurations of added torrents by hash, as
-	// Radarr's DownloadSeedConfigProvider caches them.
-	mu    sync.Mutex
-	seeds map[string]seedConfig
+	// Radarr's DownloadSeedConfigProvider finds them.
+	seeds *client.ClientSeeds
 }
 
 // Host implements client.Client.
@@ -81,11 +67,7 @@ func (r *rqbit) Add(ctx context.Context, rel *client.Release) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if rel.SeedRatio != nil || rel.SeedTime != nil {
-		r.mu.Lock()
-		r.seeds[id] = seedConfig{Ratio: rel.SeedRatio, Time: rel.SeedTime}
-		r.mu.Unlock()
-	}
+	r.seeds.Remember(id, rel)
 	return id, nil
 }
 
@@ -124,7 +106,7 @@ func (r *rqbit) Items(ctx context.Context, opts client.Options) ([]client.Item, 
 			remaining = time.Duration(t.RemainingSize/t.DownRate) * time.Second
 		}
 		item := client.Item{
-			ID: strings.ToUpper(t.Hash), Title: t.Name, Message: t.Message, OutputPath: t.Path,
+			ID: t.Hash, Title: t.Name, Message: t.Message, OutputPath: t.Path,
 			TotalSize: t.TotalSize, RemainingSize: t.RemainingSize, RemainingTime: &remaining, SeedRatio: &ratio,
 		}
 		switch {
@@ -138,7 +120,7 @@ func (r *rqbit) Items(ctx context.Context, opts client.Options) ([]client.Item, 
 			item.Status = client.Paused
 		}
 		if opts.RemoveCompletedDownloads && t.IsFinished {
-			if seed, ok := r.seedConfig(t.Hash); ok {
+			if seed, ok := r.seeds.Get(t.Hash); ok {
 				// rqbit tells no time of finishing, so the seed time
 				// cannot be told to be reached.
 				item.CanBeRemoved = seed.Ratio != nil && ratio >= *seed.Ratio
@@ -150,22 +132,11 @@ func (r *rqbit) Items(ctx context.Context, opts client.Options) ([]client.Item, 
 	return items, nil
 }
 
-func (r *rqbit) seedConfig(hash string) (seedConfig, bool) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	s, ok := r.seeds[strings.ToUpper(hash)]
-	return s, ok
-}
-
 // forget drops the seed configurations of torrents no longer in rqbit.
 func (r *rqbit) forget(torrents []torrent) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	for hash := range r.seeds {
-		if !slices.ContainsFunc(torrents, func(t torrent) bool { return strings.EqualFold(t.Hash, hash) }) {
-			delete(r.seeds, hash)
-		}
-	}
+	r.seeds.Forget(func(hash string) bool {
+		return slices.ContainsFunc(torrents, func(t torrent) bool { return strings.EqualFold(t.Hash, hash) })
+	})
 }
 
 // Remove implements client.Client: rqbit deletes the files itself.

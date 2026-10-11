@@ -53,17 +53,14 @@ const (
 	layoutSubfolder = 2
 )
 
-var (
-	categoryPattern = regexp.MustCompile(`^([^\\/](/?[^\\/])*)?$`)
-	urlBasePattern  = regexp.MustCompile(`(?i)^/?https?://[-_a-z0-9.]+`)
-)
+var categoryPattern = regexp.MustCompile(`^([^\\/](/?[^\\/])*)?$`)
 
 func (s *settings) validate() error {
 	if err := s.Validate(); err != nil {
 		return err
 	}
-	if !blank(s.URLBase) && urlBasePattern.MatchString(s.URLBase) {
-		return errors.New("url base: must be a valid URL path (ie: '/qbittorrent')")
+	if err := client.ValidateURLBase("url base", s.URLBase, "/qbittorrent"); err != nil {
+		return err
 	}
 	if !blank(s.APIKey) {
 		switch {
@@ -167,10 +164,6 @@ type seedingTime struct {
 
 // Host implements client.Client.
 func (q *qbittorrent) Host() string { return q.settings.Host }
-
-// atLeast reports whether version v is at least min, as .NET compares
-// versions.
-func atLeast(v []int, minimum ...int) bool { return slices.Compare(v, minimum) >= 0 }
 
 // orMovie is the kind whose settings serve a download of both kinds.
 func orMovie(k client.Kind) client.Kind {
@@ -282,7 +275,7 @@ func (q *qbittorrent) Items(ctx context.Context, opts client.Options) ([]client.
 			q.env.Log.InfoContext(ctx, "unknown qBittorrent download state", "state", t.State)
 			item.Status, item.Message = client.Downloading, "Unknown download state: "+t.State
 		}
-		if atLeast(version, 2, 6, 1) && item.Status == client.Completed {
+		if version.AtLeast(2, 6, 1) && item.Status == client.Completed {
 			if !samePath(t.ContentPath, t.SavePath) {
 				item.OutputPath = t.ContentPath
 			} else {
@@ -441,7 +434,7 @@ func (q *qbittorrent) ImportItem(ctx context.Context, item client.Item, _ client
 	if i := strings.IndexAny(first, `/\`); i >= 0 {
 		first = first[:i]
 	}
-	item.OutputPath = joinPath(props.SavePath, first)
+	item.OutputPath = client.JoinRemote(props.SavePath, first)
 	return item, nil
 }
 
@@ -495,7 +488,7 @@ func (q *qbittorrent) Info(ctx context.Context) (client.Info, error) {
 	var categories map[string]category
 	for _, k := range client.Kinds {
 		dir := config.SavePath
-		if c := q.settings.Category(k); !blank(c) && atLeast(version, 2, 0) {
+		if c := q.settings.Category(k); !blank(c) && version.AtLeast(2, 0) {
 			if categories == nil {
 				if categories, err = p.categories(ctx); err != nil {
 					return info, err
@@ -511,7 +504,7 @@ func (q *qbittorrent) Info(ctx context.Context) (client.Info, error) {
 				if isRooted(savePath) {
 					dir = savePath
 				} else {
-					dir = joinPath(dir, savePath)
+					dir = client.JoinRemote(dir, savePath)
 				}
 			}
 		}
@@ -560,9 +553,9 @@ func (q *qbittorrent) AddTorrentFile(ctx context.Context, r *client.Release, has
 // add adds a torrent, with its seeding limits from API 2.8.1, and then
 // sets what adding it could not: the seeding limits before, the top of
 // the queue and force start. Failures of these are logged.
-func (q *qbittorrent) add(ctx context.Context, p api, version []int, r *client.Release, hash string, add func(seed *client.Release) error) (string, error) {
+func (q *qbittorrent) add(ctx context.Context, p api, version client.Version, r *client.Release, hash string, add func(seed *client.Release) error) (string, error) {
 	setShareLimits := r.SeedRatio != nil || r.SeedTime != nil
-	addSetsShareLimits := setShareLimits && atLeast(version, 2, 8, 1)
+	addSetsShareLimits := setShareLimits && version.AtLeast(2, 8, 1)
 	moveToTop := q.settings.Priority(r.Kind, r.Recent) == priorityFirst
 	forceStart := q.settings.InitialState == stateForceStart
 	var seed *client.Release
@@ -620,7 +613,7 @@ func (q *qbittorrent) waitForTorrent(ctx context.Context, p api, hash string) (b
 
 // Test implements client.Client.
 func (q *qbittorrent) Test(ctx context.Context) error {
-	p, err := q.testConnection(ctx)
+	p, warning, err := q.testConnection(ctx)
 	if err != nil {
 		return err
 	}
@@ -633,12 +626,17 @@ func (q *qbittorrent) Test(ctx context.Context) error {
 	if _, err := q.torrents(ctx, p); err != nil {
 		return fmt.Errorf("failed to get the list of torrents: %w", err)
 	}
+	if warning != nil {
+		return warning
+	}
 	return nil
 }
 
 // testConnection selects the API again and checks its version, the
 // categories it supports and that qBittorrent does not remove torrents.
-func (q *qbittorrent) testConnection(ctx context.Context) (api, error) {
+// A missing category is a warning, as Radarr's IsWarning failure; the
+// other checks still follow it.
+func (q *qbittorrent) testConnection(ctx context.Context) (api, *client.TestWarning, error) {
 	wrap := func(err error) error {
 		var auth *client.AuthError
 		var unavailable *client.UnavailableError
@@ -654,38 +652,39 @@ func (q *qbittorrent) testConnection(ctx context.Context) (api, error) {
 	}
 	p, _, err := q.selector.get(ctx, true)
 	if err != nil {
-		return nil, wrap(err)
+		return nil, nil, wrap(err)
 	}
 	version, err := p.apiVersion(ctx)
 	if err != nil {
-		return nil, wrap(err)
+		return nil, nil, wrap(err)
 	}
+	var warning *client.TestWarning
 	switch {
-	case !atLeast(version, 1, 5):
+	case !version.AtLeast(1, 5):
 		// API 5 brought the save path of torrents.
-		return nil, fmt.Errorf("qBittorrent version should be at least 3.2.4. Version reported is %s", formatVersion(version))
-	case !atLeast(version, 1, 6):
+		return nil, nil, fmt.Errorf("qBittorrent version should be at least 3.2.4. Version reported is %s", version)
+	case !version.AtLeast(1, 6):
 		// API 6 brought labels.
 		for _, k := range client.Kinds {
 			if !blank(q.settings.Category(k)) {
-				return nil, errors.New("category is not supported: categories are not supported until qBittorrent version 3.3.0. Please upgrade or try again with an empty category")
+				return nil, nil, errors.New("category is not supported: categories are not supported until qBittorrent version 3.3.0. Please upgrade or try again with an empty category")
 			}
 		}
 	default:
 		for _, k := range client.Kinds {
-			if blank(q.settings.Category(k)) {
-				q.env.Log.WarnContext(ctx, "a category is recommended: completed downloads without a category are not imported", "kind", k)
+			if blank(q.settings.Category(k)) && warning == nil {
+				warning = &client.TestWarning{Message: "a category is recommended: Mavio will not attempt to import completed downloads without a category"}
 			}
 		}
 	}
 	config, err := p.config(ctx)
 	if err != nil {
-		return nil, wrap(err)
+		return nil, nil, wrap(err)
 	}
 	if removesCompletedDownloads(config) {
-		return nil, errors.New("qBittorrent is configured to remove torrents when they reach their Share Ratio Limit; completed download handling will not work as configured. Change 'Options -> BitTorrent -> Share Ratio Limiting' from 'Remove them' to 'Pause them' in qBittorrent")
+		return nil, nil, errors.New("qBittorrent is configured to remove torrents when they reach their Share Ratio Limit; completed download handling will not work as configured. Change 'Options -> BitTorrent -> Share Ratio Limiting' from 'Remove them' to 'Pause them' in qBittorrent")
 	}
-	return p, nil
+	return p, warning, nil
 }
 
 // testCategories creates the categories qBittorrent lacks, from API 2.0;
@@ -706,7 +705,7 @@ func (q *qbittorrent) testCategories(ctx context.Context, p api) error {
 	if err != nil {
 		return err
 	}
-	if !atLeast(version, 2, 0) {
+	if !version.AtLeast(2, 0) {
 		return nil
 	}
 	categories, err := p.categories(ctx)
@@ -746,19 +745,6 @@ func (q *qbittorrent) testPrioritySupport(ctx context.Context, p api) error {
 		return errors.New("queueing not enabled: Torrent Queueing is not enabled in your qBittorrent settings. Enable it in qBittorrent or select 'Last' as priority")
 	}
 	return nil
-}
-
-// joinPath joins a folder of the client's machine, with either slashes,
-// and a name.
-func joinPath(dir, name string) string {
-	if dir == "" {
-		return name
-	}
-	sep := "/"
-	if strings.Contains(dir, `\`) && !strings.Contains(dir, "/") {
-		sep = `\`
-	}
-	return strings.TrimRight(dir, `/\`) + sep + name
 }
 
 // isRooted reports whether a path of the client's machine is absolute:

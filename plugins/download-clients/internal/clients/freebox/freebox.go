@@ -37,7 +37,6 @@ const (
 
 var (
 	categoryPattern = regexp.MustCompile(`(?i)^\.?[-a-z]*$`)
-	absoluteURL     = regexp.MustCompile(`(?i)^/?https?://[-_a-z0-9.]+`)
 	windowsPath     = regexp.MustCompile(`^[a-zA-Z]:[\\/]`)
 )
 
@@ -46,11 +45,13 @@ func (s *settings) validate() error {
 	if err := server.Validate(); err != nil {
 		return err
 	}
-	switch {
-	case strings.TrimSpace(s.APIURL) == "":
+	if strings.TrimSpace(s.APIURL) == "" {
 		return errors.New("'API URL' must not be empty")
-	case absoluteURL.MatchString(s.APIURL):
-		return errors.New("'API URL' must be a valid URL path (ie: '/api/v1/')")
+	}
+	if err := client.ValidateURLBase("'API URL'", s.APIURL, "/api/v1/"); err != nil {
+		return err
+	}
+	switch {
 	case strings.TrimSpace(s.AppID) == "":
 		return errors.New("'App ID' must not be empty")
 	case strings.TrimSpace(s.AppToken) == "":
@@ -250,7 +251,7 @@ func (f *freebox) downloadDirectory(ctx context.Context, k client.Kind, title st
 
 // Info implements client.Client.
 func (f *freebox) Info(ctx context.Context) (client.Info, error) {
-	info := client.Info{IsLocalhost: f.settings.Host == "127.0.0.1" || f.settings.Host == "::1" || f.settings.Host == "localhost"}
+	info := client.Info{IsLocalhost: client.IsLocalhost(f.settings.Host)}
 	for _, k := range client.Kinds {
 		dir, err := f.downloadDirectory(ctx, k, "")
 		if err != nil {

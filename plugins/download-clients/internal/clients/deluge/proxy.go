@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/plugins/download-clients/internal/client"
+	"github.com/mavioai/mavio/plugins/download-clients/internal/jsonrpc"
 )
 
 // torrent is a torrent of web.update_ui.
@@ -84,33 +85,20 @@ type proxy struct {
 	password string
 	log      *slog.Logger
 
+	ids     jsonrpc.IDs
 	mu      sync.Mutex
 	cookies []*http.Cookie
-	id      int
 }
 
 // execute sends a JSON-RPC request; a timeout answers as a broken daemon
 // connection would, error code 2, as Radarr's ExecuteRequest.
 func (p *proxy) execute(ctx context.Context, cookies []*http.Cookie, method string, params ...any) (*rpcResponse, *client.Response, error) {
-	if params == nil {
-		params = []any{}
-	}
-	p.mu.Lock()
-	p.id++
-	id := p.id
-	p.mu.Unlock()
-	body, err := json.Marshal(map[string]any{"jsonrpc": "2.0", "method": method, "params": params, "id": id})
-	if err != nil {
-		return nil, nil, err
-	}
 	ctx, cancel := context.WithTimeout(ctx, requestTimeout)
 	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, p.url, bytes.NewReader(body))
+	req, err := jsonrpc.NewRequest(ctx, p.url, p.ids.Next(), method, params...)
 	if err != nil {
 		return nil, nil, err
 	}
-	req.Header.Set("Accept", "application/json-rpc, application/json")
-	req.Header.Set("Content-Type", "application/json")
 	for _, c := range cookies {
 		req.AddCookie(c)
 	}
@@ -125,11 +113,18 @@ func (p *proxy) execute(ctx context.Context, cookies []*http.Cookie, method stri
 	if resp.StatusCode >= 400 {
 		return nil, nil, fmt.Errorf("unable to connect to Deluge, please check your settings: %w", resp.Err())
 	}
-	var r rpcResponse
-	if err := json.Unmarshal(resp.Body, &r); err != nil {
-		return nil, nil, fmt.Errorf("deluge: %s: unexpected response: %w", method, err)
+	raw, err := jsonrpc.Decode(resp.Body)
+	if err != nil {
+		return nil, nil, fmt.Errorf("deluge: %s: %w", method, err)
 	}
-	return &r, resp, nil
+	r := &rpcResponse{Result: raw.Result}
+	if raw.Failed() {
+		r.Error = &rpcError{}
+		if err := json.Unmarshal(raw.Error, r.Error); err != nil {
+			return nil, nil, fmt.Errorf("deluge: %s: unexpected error: %w", method, err)
+		}
+	}
+	return r, resp, nil
 }
 
 // verified returns the error of an answer, if any.

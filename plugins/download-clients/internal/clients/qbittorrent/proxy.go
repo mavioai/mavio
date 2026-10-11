@@ -98,7 +98,7 @@ type category struct {
 type api interface {
 	// supported reports whether qBittorrent speaks the version.
 	supported(ctx context.Context) (bool, error)
-	apiVersion(ctx context.Context) ([]int, error)
+	apiVersion(ctx context.Context) (client.Version, error)
 	config(ctx context.Context) (*preferences, error)
 	// torrents lists the torrents of a category; all for "".
 	torrents(ctx context.Context, category string) ([]torrent, error)
@@ -313,31 +313,13 @@ func (c *conn) probe(ctx context.Context, path string) (bool, error) {
 	return true, nil
 }
 
-// parseVersion reads a version as .NET's Version.Parse: two to four
-// numbers.
-func parseVersion(s string) ([]int, error) {
-	parts := strings.Split(strings.TrimSpace(s), ".")
-	if len(parts) < 2 || len(parts) > 4 {
-		return nil, fmt.Errorf("unable to parse the qBittorrent API version %q", s)
+// apiVersion reads the API version qBittorrent reports.
+func apiVersion(s string) (client.Version, error) {
+	v, err := client.ParseVersion(s)
+	if err != nil {
+		return nil, fmt.Errorf("qBittorrent API version: %w", err)
 	}
-	out := make([]int, len(parts))
-	for i, p := range parts {
-		n, err := strconv.Atoi(p)
-		if err != nil || n < 0 {
-			return nil, fmt.Errorf("unable to parse the qBittorrent API version %q", s)
-		}
-		out[i] = n
-	}
-	return out, nil
-}
-
-// formatVersion writes a version back.
-func formatVersion(v []int) string {
-	s := make([]string, len(v))
-	for i, n := range v {
-		s[i] = strconv.Itoa(n)
-	}
-	return strings.Join(s, ".")
+	return v, nil
 }
 
 // failed checks the answer of adding a torrent: "Fails." is a failure,
@@ -363,12 +345,12 @@ func (p v2) supported(ctx context.Context) (bool, error) {
 	return p.probe(ctx, "/api/v2/app/webapiVersion")
 }
 
-func (p v2) apiVersion(ctx context.Context) ([]int, error) {
+func (p v2) apiVersion(ctx context.Context) (client.Version, error) {
 	body, err := p.process(ctx, request{path: "/api/v2/app/webapiVersion"})
 	if err != nil {
 		return nil, err
 	}
-	return parseVersion(string(body))
+	return apiVersion(string(body))
 }
 
 func (p v2) config(ctx context.Context) (*preferences, error) {
@@ -413,7 +395,7 @@ func (p v2) addForm(ctx context.Context, form url.Values, category string, r *cl
 			return err
 		}
 		name := "paused"
-		if atLeast(v, 2, 11, 0) {
+		if v.AtLeast(2, 11, 0) {
 			name = "stopped"
 		}
 		form.Set(name, strconv.FormatBool(s.InitialState == stateStop))
@@ -535,12 +517,12 @@ func (p v1) supported(ctx context.Context) (bool, error) {
 	return p.probe(ctx, "/version/api")
 }
 
-func (p v1) apiVersion(ctx context.Context) ([]int, error) {
+func (p v1) apiVersion(ctx context.Context) (client.Version, error) {
 	body, err := p.process(ctx, request{path: "/version/api"})
 	if err != nil {
 		return nil, err
 	}
-	return parseVersion("1." + strings.TrimSpace(string(body)))
+	return apiVersion("1." + strings.TrimSpace(string(body)))
 }
 
 func (p v1) config(ctx context.Context) (*preferences, error) {
@@ -658,12 +640,12 @@ type selector struct {
 
 	mu       sync.Mutex
 	api      api
-	version  []int
+	version  client.Version
 	selected time.Time
 }
 
 // get returns the API and its version, asking again when force is set.
-func (s *selector) get(ctx context.Context, force bool) (api, []int, error) {
+func (s *selector) get(ctx context.Context, force bool) (api, client.Version, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	now := s.now()

@@ -411,11 +411,17 @@ func TestOutputPath(t *testing.T) {
 
 func TestItemsHistoryLimit(t *testing.T) {
 	f := newFake(t)
-	for range historyLimit + 5 {
+	for range client.DefaultHistoryLimit + 5 {
 		f.history = append(f.history, completed("movie", movieTitle))
 	}
-	if got := items(t, newClient(t, f, nil)); len(got) != historyLimit {
-		t.Errorf("Items() = %d items, want %d", len(got), historyLimit)
+	if got := items(t, newClient(t, f, nil)); len(got) != client.DefaultHistoryLimit {
+		t.Errorf("Items() = %d items, want %d", len(got), client.DefaultHistoryLimit)
+	}
+	opts := allOptions
+	opts.HistoryLimit = 10
+	got, err := newClient(t, f, nil).Items(context.Background(), opts)
+	if err != nil || len(got) != 10 {
+		t.Errorf("Items() with a history limit of 10 = %d items, %v, want 10", len(got), err)
 	}
 }
 
@@ -474,8 +480,8 @@ func TestAddRejected(t *testing.T) {
 	f.version = "16.0"
 	f.appendResult = 0
 	c := newClient(t, f, nil)
-	if _, err := c.Add(context.Background(), &client.Release{Title: movieTitle, Kind: client.Movie, Data: []byte("nzb")}); err == nil {
-		t.Errorf("Add() error = nil, want rejected")
+	if _, err := c.Add(context.Background(), &client.Release{Title: movieTitle, Kind: client.Movie, Data: []byte("nzb")}); !errors.Is(err, client.ErrReleaseRejected) {
+		t.Errorf("Add() error = %v, want rejected", err)
 	}
 }
 

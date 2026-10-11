@@ -967,7 +967,8 @@ func TestTest(t *testing.T) {
 			func(f *fake) { f.categories["tv"] = map[string]any{"name": "tv"} }, "",
 			[]string{"movies-radarr", "done"},
 		},
-		{"no categories", 2, "2.0", map[string]any{"movie_category": "", "tv_category": ""}, nil, "", nil},
+		// A warning, as Radarr's IsWarning failure.
+		{"no categories", 2, "2.0", map[string]any{"movie_category": "", "tv_category": ""}, nil, "a category is recommended", nil},
 		{"category not created", 2, "2.0", nil, func(f *fake) { f.noCreate = true }, "configuration of category", []string{"movies-radarr"}},
 		{"v1 creates on set", 1, "18", nil, nil, "", nil},
 		{"v1 too old", 1, "4", nil, nil, "3.2.4", nil},
@@ -1012,6 +1013,10 @@ func TestTest(t *testing.T) {
 				t.Fatalf("Test() error = %v, want = nil", err)
 			case tt.want != "" && (err == nil || !strings.Contains(err.Error(), tt.want)):
 				t.Fatalf("Test() error = %v, want = %q", err, tt.want)
+			}
+			var warning *client.TestWarning
+			if errors.As(err, &warning) != (tt.name == "no categories") {
+				t.Errorf("Test() error = %v, want a warning only without categories", err)
 			}
 			if strings.Contains(tt.name, "password") {
 				var auth *client.AuthError

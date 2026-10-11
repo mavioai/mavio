@@ -154,7 +154,7 @@ func (p *proxy) torrents(ctx context.Context) ([]torrent, error) {
 			HasError: s.State == stateError || s.State == stateInvalid,
 		}
 		if !strings.HasSuffix(t.OutputFolder, t.Name) {
-			tor.Path = joinPath(t.OutputFolder, t.Name)
+			tor.Path = client.JoinRemote(t.OutputFolder, t.Name)
 		}
 		if s.Live != nil && s.Live.DownloadSpeed != nil {
 			// MiB a second.
@@ -192,20 +192,4 @@ func (p *proxy) remove(ctx context.Context, hash string, deleteData bool) error 
 		action = "/delete"
 	}
 	return p.do(ctx, http.MethodPost, "/torrents/"+url.PathEscape(hash)+action, "", nil, nil)
-}
-
-// joinPath joins a folder of the client's machine, with either slashes,
-// and a name.
-func joinPath(dir, name string) string {
-	if dir == "" {
-		return name
-	}
-	if strings.HasSuffix(dir, "/") || strings.HasSuffix(dir, `\`) {
-		return dir + name
-	}
-	sep := "/"
-	if strings.Contains(dir, `\`) && !strings.Contains(dir, "/") {
-		sep = `\`
-	}
-	return dir + sep + name
 }

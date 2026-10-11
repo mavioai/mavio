@@ -212,7 +212,7 @@ func (d *deluge) item(t *torrent, kind client.Kind, opts client.Options) client.
 	eta := etaDuration(t.ETA)
 	item := client.Item{
 		ID: strings.ToUpper(t.Hash), Title: t.Name, Category: d.category(kind), Kind: kind,
-		OutputPath: joinPath(t.SavePath, t.Name), TotalSize: t.TotalSize, RemainingSize: t.TotalSize - t.TotalDone,
+		OutputPath: client.JoinRemote(t.SavePath, t.Name), TotalSize: t.TotalSize, RemainingSize: t.TotalSize - t.TotalDone,
 		SeedRatio: &ratio, RemainingTime: &eta,
 		HasPostImportCategory: d.settings.ImportedCategory(kind) != "" ||
 			kind == 0 && d.settings.TVImportedCategory != "",
@@ -435,17 +435,4 @@ func (d *deluge) testCategories(ctx context.Context) error {
 		}
 	}
 	return nil
-}
-
-// joinPath joins a folder of the client's machine, with either slashes,
-// and a name, as Radarr's OsPath does.
-func joinPath(dir, name string) string {
-	if dir == "" {
-		return name
-	}
-	sep := "/"
-	if strings.Contains(dir, `\`) && !strings.Contains(dir, "/") {
-		sep = `\`
-	}
-	return strings.TrimRight(dir, `/\`) + sep + name
 }
