@@ -114,7 +114,7 @@ func (s *MetadataService) target(ctx context.Context, id string) (core.Item, cor
 
 // item returns an item as administrators see it.
 func (s *MetadataService) item(ctx context.Context, it core.Item) (*libraryv1.Item, error) {
-	out, err := itemsToProto(ctx, s.store, []core.Item{it}, true)
+	out, err := itemsToProto(ctx, s.store, []core.Item{it}, true, core.NilID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}

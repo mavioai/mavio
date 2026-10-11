@@ -153,6 +153,13 @@ pub struct ItemView<'a> {
     ///
     /// Field 49: `absolute_number`
     pub absolute_number: ::core::option::Option<i32>,
+    /// The caller's state of the item, unset when it has none; set where the
+    /// item is listed for the caller.
+    ///
+    /// Field 50: `user_data`
+    pub user_data: ::buffa::MessageFieldView<
+        super::super::super::super::user::v1::__buffa::view::UserDataView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
@@ -524,6 +531,27 @@ impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
                 )?;
                 view.absolute_number = Some(::buffa::types::decode_int32(&mut cur)?);
             }
+            50u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.user_data.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.user_data = ::buffa::MessageFieldView::set(
+                            <super::super::super::super::user::v1::__buffa::view::UserDataView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
             21u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -818,6 +846,15 @@ impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
             series_type: self.series_type,
             display_order: self.display_order,
             absolute_number: self.absolute_number,
+            user_data: match self.user_data.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::super::super::user::v1::UserData,
+                        ::buffa::Inline<super::super::super::super::user::v1::UserData>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1013,6 +1050,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ItemView<'a> {
         }
         if let Some(v) = self.absolute_number {
             size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.user_data.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.user_data.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -1228,6 +1273,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ItemView<'a> {
         }
         if let Some(v) = self.absolute_number {
             ::buffa::types::put_int32_field(49u32, v, buf);
+        }
+        if self.user_data.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                50u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.user_data.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1622,6 +1675,18 @@ impl ItemOwnedView {
     #[must_use]
     pub fn absolute_number(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().absolute_number
+    }
+    /// The caller's state of the item, unset when it has none; set where the
+    /// item is listed for the caller.
+    ///
+    /// Field 50: `user_data`
+    #[must_use]
+    pub fn user_data(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::super::super::user::v1::__buffa::view::UserDataView<'_>,
+    > {
+        &self.0.reborrow().user_data
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ItemView<'static>>> for ItemOwnedView {

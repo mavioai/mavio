@@ -63,7 +63,7 @@ func (s *PlaybackService) ListIntros(ctx context.Context, req *playbackv1.ListIn
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, items, p.User.Admin)
+	out, err := itemsToProto(ctx, s.store, items, p.User.Admin, p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}

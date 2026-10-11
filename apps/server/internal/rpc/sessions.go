@@ -175,7 +175,7 @@ func (s *SessionService) nowPlaying(ctx context.Context, session core.ID, admin 
 	if pb == nil {
 		return nil, nil
 	}
-	items, err := itemsToProto(ctx, s.store, []core.Item{pb.Item}, admin)
+	items, err := itemsToProto(ctx, s.store, []core.Item{pb.Item}, admin, core.NilID)
 	if err != nil {
 		return nil, err
 	}

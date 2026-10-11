@@ -11,6 +11,8 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
+	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
@@ -123,7 +125,9 @@ func mustCurrent(t *testing.T, c userv1connect.UserServiceClient) *userv1.User {
 func TestUserDataService(t *testing.T) {
 	ctx := t.Context()
 	url, s := startServer(t, nil)
-	data := userv1connect.NewUserDataServiceClient(http.DefaultClient, url, withToken(signUp(t, url)))
+	token := signUp(t, url)
+	data := userv1connect.NewUserDataServiceClient(http.DefaultClient, url, withToken(token))
+	items := libraryv1connect.NewItemServiceClient(http.DefaultClient, url, withToken(token))
 
 	lib := core.Library{Name: "Shows", Kind: core.LibraryShows, Paths: []string{t.TempDir()}}
 	if err := s.Libraries().Create(ctx, &lib); err != nil {
@@ -166,6 +170,20 @@ func TestUserDataService(t *testing.T) {
 	if d.GetPosition().AsDuration() != 20*time.Minute || !d.GetFavorite() || d.GetRating() != 8.5 || d.GetPlayed() {
 		t.Errorf("episode after update = %v", d)
 	}
+	// Items carry the caller's state where they are listed.
+	item, err := items.GetItem(ctx, libraryv1.GetItemRequest_builder{Id: new(ep1.ID.String())}.Build())
+	if err != nil || item.GetItem().GetUserData().GetPosition().AsDuration() != 20*time.Minute {
+		t.Errorf("GetItem = %v, %v", item, err)
+	}
+	listed, err := items.ListItems(ctx, libraryv1.ListItemsRequest_builder{ParentId: new(season.ID.String())}.Build())
+	if err != nil || len(listed.GetItems()) != 2 {
+		t.Fatalf("ListItems = %v, %v", listed, err)
+	}
+	for _, it := range listed.GetItems() {
+		if got, want := it.HasUserData(), it.GetId() == ep1.ID.String(); got != want {
+			t.Errorf("%s has user data = %v, want = %v", it.GetName(), got, want)
+		}
+	}
 
 	// Marking the series played marks its episodes.
 	update(series.ID, userv1.UpdateUserDataRequest_builder{Played: new(true)})
@@ -183,7 +201,7 @@ func TestUserDataService(t *testing.T) {
 		t.Errorf("after unmarking the season = %v", d)
 	}
 
-	_, err := data.UpdateUserData(ctx, userv1.UpdateUserDataRequest_builder{ItemId: new(core.NewID().String()), Favorite: new(true)}.Build())
+	_, err = data.UpdateUserData(ctx, userv1.UpdateUserDataRequest_builder{ItemId: new(core.NewID().String()), Favorite: new(true)}.Build())
 	wantCode(t, "unknown item", err, connect.CodeNotFound)
 	_, err = data.UpdateUserData(ctx, userv1.UpdateUserDataRequest_builder{ItemId: new(ep1.ID.String()), Rating: new(11.0)}.Build())
 	wantCode(t, "rating out of range", err, connect.CodeInvalidArgument)

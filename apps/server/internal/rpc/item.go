@@ -16,6 +16,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/mavioai/mavio/apps/server/internal/browse"
+	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
@@ -161,6 +162,12 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 		return nil, connectError(ctx, err)
 	}
 	out := itemToProto(&item, images[item.ID], p.User.Admin)
+	switch d, err := s.store.UserData().Get(ctx, p.User.ID, item.ID); {
+	case err == nil:
+		out.SetUserData(events.UserDataToProto(&d))
+	case !errors.Is(err, core.ErrNotFound):
+		return nil, connectError(ctx, err)
+	}
 	out.SetExternalUrls(externalURLsToProto(metadata.ItemExternalURLs(externalIDKinds(s.ExternalIDKinds), item.Kind, item.ExternalIDs)))
 	if err := newAncestry(s.store).describe(ctx, &item, out); err != nil {
 		return nil, connectError(ctx, err)
@@ -412,7 +419,7 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, page.Items, p.User.Admin)
+	out, err := itemsToProto(ctx, s.store, page.Items, p.User.Admin, p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -441,7 +448,7 @@ func (s *ItemService) ListLatestItems(ctx context.Context, req *libraryv1.ListLa
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, items, p.User.Admin)
+	out, err := itemsToProto(ctx, s.store, items, p.User.Admin, p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -473,7 +480,7 @@ func (s *ItemService) ListNextUp(ctx context.Context, req *libraryv1.ListNextUpR
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, items, p.User.Admin)
+	out, err := itemsToProto(ctx, s.store, items, p.User.Admin, p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -520,7 +527,7 @@ func (s *ItemService) ListSimilarItems(ctx context.Context, req *libraryv1.ListS
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, page.Items, p.User.Admin)
+	out, err := itemsToProto(ctx, s.store, page.Items, p.User.Admin, p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -540,8 +547,8 @@ func browseScope(u *core.User, libraries []string) (browse.Scope, bool) {
 }
 
 // itemsToProto describes items with their images, series, seasons and
-// albums.
-func itemsToProto(ctx context.Context, store core.Store, items []core.Item, admin bool) ([]*libraryv1.Item, error) {
+// albums, and with the state of the user viewer when it is set.
+func itemsToProto(ctx context.Context, store core.Store, items []core.Item, admin bool, viewer core.ID) ([]*libraryv1.Item, error) {
 	owners := make([]core.ID, len(items))
 	for i := range items {
 		owners[i] = items[i].ID
@@ -550,10 +557,19 @@ func itemsToProto(ctx context.Context, store core.Store, items []core.Item, admi
 	if err != nil {
 		return nil, err
 	}
+	var data map[core.ID]core.UserData
+	if !viewer.IsZero() {
+		if data, err = store.UserData().GetMany(ctx, viewer, owners); err != nil {
+			return nil, err
+		}
+	}
 	anc := newAncestry(store)
 	out := make([]*libraryv1.Item, len(items))
 	for i := range items {
 		out[i] = itemToProto(&items[i], images[items[i].ID], admin)
+		if d, ok := data[items[i].ID]; ok {
+			out[i].SetUserData(events.UserDataToProto(&d))
+		}
 		if err := anc.describe(ctx, &items[i], out[i]); err != nil {
 			return nil, err
 		}
