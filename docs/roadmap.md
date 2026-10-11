@@ -517,7 +517,7 @@ flowchart TD
 - [x] Import of episodes, season packs and multi-episode files; upgrades
   - [x] Series naming settings: whether episodes are renamed, the episode file formats, the series, season and specials folder formats and the multi-episode style, with Sonarr's defaults when empty
   - [x] Sonarr's import specifications for episode titles (with the `EpisodeTitleRequired` setting), unpacking, unverified scene numbering, absolute numbers and matching folders, and its scene name calculation
-    - [ ] The download client working folders as a setting; Sonarr's default `_UNPACK_|_FAILED_` applies
+    - [x] The download client working folders as a setting (`DownloadClientWorkingFolders`), with Sonarr's default `_UNPACK_|_FAILED_`
   - [x] The qualities of episode files aggregated as Sonarr's AggregateQuality: from the names of the file, the download's folder, the download and the grabbed release, and the frame size of the file's video
     - [ ] The source the title tag of a file's container tells, as Sonarr's AugmentQualityFromMediaInfo reads it; probes do not keep that tag
   - [x] Episode imports as movie imports where Sonarr behaves as Radarr: free space checked for each file on the volume of the series folder, as Sonarr's FreeSpaceSpecification; subtitles named by their language, tags and copy number and matched by the video's name or the season and episodes theirs hold, as Sonarr's SubtitleService; the extras of replaced files recycled; download folders emptied by moves deleted, as Sonarr's ShouldDeleteFolder; a scan of the series folder only

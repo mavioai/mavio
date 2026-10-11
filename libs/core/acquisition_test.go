@@ -2,6 +2,7 @@ package core
 
 import (
 	"errors"
+	"slices"
 	"testing"
 	"time"
 )
@@ -91,6 +92,24 @@ func TestDownloadStateFinished(t *testing.T) {
 		want := s == DownloadImported || s == DownloadFailed || s == DownloadIgnored
 		if got := s.Finished(); got != want {
 			t.Errorf("%s.Finished() = %v, want = %v", s, got, want)
+		}
+	}
+}
+
+func TestWorkingFolders(t *testing.T) {
+	tests := []struct {
+		setting string
+		want    []string
+	}{
+		{"", []string{"_UNPACK_", "_FAILED_"}},
+		{"  ", []string{"_UNPACK_", "_FAILED_"}},
+		{"_TMP_", []string{"_TMP_"}},
+		{" _TMP_ || .partial ", []string{"_TMP_", ".partial"}},
+	}
+	for _, tt := range tests {
+		s := AcquisitionSettings{DownloadClientWorkingFolders: tt.setting}
+		if got := s.WorkingFolders(); !slices.Equal(got, tt.want) {
+			t.Errorf("WorkingFolders(%q) = %q, want = %q", tt.setting, got, tt.want)
 		}
 	}
 }

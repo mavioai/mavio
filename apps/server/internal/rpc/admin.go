@@ -317,6 +317,7 @@ func acquisitionSettingsToProto(a *core.AcquisitionSettings) *systemv1.Acquisiti
 		SpecialsFolderFormat: &n.SpecialsFolderFormat, MultiEpisodeStyle: new(multiEpisodeStyles[n.MultiEpisodeStyle]),
 		AutoUnmonitorPreviouslyDownloadedEpisodes: &a.AutoUnmonitorPreviouslyDownloadedEpisodes,
 		EpisodeTitleRequired:                      new(episodeTitleRequirements[a.EpisodeTitleRequired]),
+		DownloadClientWorkingFolders:              &a.DownloadClientWorkingFolders,
 	}.Build()
 }
 
@@ -337,6 +338,7 @@ func acquisitionSettingsFromProto(p *systemv1.AcquisitionSettings) core.Acquisit
 		DeleteEmptyFolders:                        p.GetDeleteEmptyFolders(),
 		AutoUnmonitorPreviouslyDownloadedEpisodes: p.GetAutoUnmonitorPreviouslyDownloadedEpisodes(),
 		EpisodeTitleRequired:                      keyOf(episodeTitleRequirements, p.GetEpisodeTitleRequired()),
+		DownloadClientWorkingFolders:              p.GetDownloadClientWorkingFolders(),
 		Naming: core.NamingSettings{
 			RenameMovies: p.GetRenameMovies(), ReplaceIllegalCharacters: p.GetReplaceIllegalCharacters(),
 			ColonReplacement:  keyOf(colonReplacements, p.GetColonReplacement()),

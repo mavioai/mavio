@@ -4139,6 +4139,7 @@ type AcquisitionSettings struct {
 	xxx_hidden_MultiEpisodeStyle                         MultiEpisodeStyle      `protobuf:"varint,47,opt,name=multi_episode_style,json=multiEpisodeStyle,enum=mavio.system.v1.MultiEpisodeStyle"`
 	xxx_hidden_AutoUnmonitorPreviouslyDownloadedEpisodes bool                   `protobuf:"varint,48,opt,name=auto_unmonitor_previously_downloaded_episodes,json=autoUnmonitorPreviouslyDownloadedEpisodes"`
 	xxx_hidden_EpisodeTitleRequired                      EpisodeTitleRequired   `protobuf:"varint,49,opt,name=episode_title_required,json=episodeTitleRequired,enum=mavio.system.v1.EpisodeTitleRequired"`
+	xxx_hidden_DownloadClientWorkingFolders              *string                `protobuf:"bytes,50,opt,name=download_client_working_folders,json=downloadClientWorkingFolders"`
 	XXX_raceDetectHookData                               protoimpl.RaceDetectHookData
 	XXX_presence                                         [2]uint32
 	unknownFields                                        protoimpl.UnknownFields
@@ -4457,44 +4458,54 @@ func (x *AcquisitionSettings) GetEpisodeTitleRequired() EpisodeTitleRequired {
 	return EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_UNSPECIFIED
 }
 
+func (x *AcquisitionSettings) GetDownloadClientWorkingFolders() string {
+	if x != nil {
+		if x.xxx_hidden_DownloadClientWorkingFolders != nil {
+			return *x.xxx_hidden_DownloadClientWorkingFolders
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *AcquisitionSettings) SetPropers(v ProperDownload) {
 	x.xxx_hidden_Propers = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 37)
 }
 
 func (x *AcquisitionSettings) SetPreferIndexerFlags(v bool) {
 	x.xxx_hidden_PreferIndexerFlags = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 37)
 }
 
 func (x *AcquisitionSettings) SetCompletedDownloadHandling(v bool) {
 	x.xxx_hidden_CompletedDownloadHandling = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 37)
 }
 
 func (x *AcquisitionSettings) SetAutoRedownloadFailed(v bool) {
 	x.xxx_hidden_AutoRedownloadFailed = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 37)
 }
 
 func (x *AcquisitionSettings) SetMaximumSize(v int32) {
 	x.xxx_hidden_MaximumSize = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 37)
 }
 
 func (x *AcquisitionSettings) SetMinimumAge(v int32) {
 	x.xxx_hidden_MinimumAge = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 37)
 }
 
 func (x *AcquisitionSettings) SetRetention(v int32) {
 	x.xxx_hidden_Retention = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 37)
 }
 
 func (x *AcquisitionSettings) SetAllowHardcodedSubs(v bool) {
 	x.xxx_hidden_AllowHardcodedSubs = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 37)
 }
 
 func (x *AcquisitionSettings) SetWhitelistedHardcodedSubs(v []string) {
@@ -4503,47 +4514,47 @@ func (x *AcquisitionSettings) SetWhitelistedHardcodedSubs(v []string) {
 
 func (x *AcquisitionSettings) SetSkipFreeSpaceCheck(v bool) {
 	x.xxx_hidden_SkipFreeSpaceCheck = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 37)
 }
 
 func (x *AcquisitionSettings) SetMinimumFreeSpace(v int32) {
 	x.xxx_hidden_MinimumFreeSpace = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 37)
 }
 
 func (x *AcquisitionSettings) SetAvailabilityDelay(v int32) {
 	x.xxx_hidden_AvailabilityDelay = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 37)
 }
 
 func (x *AcquisitionSettings) SetRssSyncInterval(v int32) {
 	x.xxx_hidden_RssSyncInterval = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 37)
 }
 
 func (x *AcquisitionSettings) SetCheckFinishedInterval(v int32) {
 	x.xxx_hidden_CheckFinishedInterval = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 37)
 }
 
 func (x *AcquisitionSettings) SetRecycleBin(v string) {
 	x.xxx_hidden_RecycleBin = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 37)
 }
 
 func (x *AcquisitionSettings) SetRecycleBinCleanupDays(v int32) {
 	x.xxx_hidden_RecycleBinCleanupDays = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 37)
 }
 
 func (x *AcquisitionSettings) SetCopyUsingHardlinks(v bool) {
 	x.xxx_hidden_CopyUsingHardlinks = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 37)
 }
 
 func (x *AcquisitionSettings) SetImportExtraFiles(v bool) {
 	x.xxx_hidden_ImportExtraFiles = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 37)
 }
 
 func (x *AcquisitionSettings) SetExtraFileExtensions(v []string) {
@@ -4552,87 +4563,92 @@ func (x *AcquisitionSettings) SetExtraFileExtensions(v []string) {
 
 func (x *AcquisitionSettings) SetDeleteEmptyFolders(v bool) {
 	x.xxx_hidden_DeleteEmptyFolders = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 37)
 }
 
 func (x *AcquisitionSettings) SetRenameMovies(v bool) {
 	x.xxx_hidden_RenameMovies = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 37)
 }
 
 func (x *AcquisitionSettings) SetReplaceIllegalCharacters(v bool) {
 	x.xxx_hidden_ReplaceIllegalCharacters = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 37)
 }
 
 func (x *AcquisitionSettings) SetColonReplacement(v ColonReplacement) {
 	x.xxx_hidden_ColonReplacement = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 37)
 }
 
 func (x *AcquisitionSettings) SetMovieFolderFormat(v string) {
 	x.xxx_hidden_MovieFolderFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 37)
 }
 
 func (x *AcquisitionSettings) SetStandardMovieFormat(v string) {
 	x.xxx_hidden_StandardMovieFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 37)
 }
 
 func (x *AcquisitionSettings) SetAutoRedownloadFailedFromInteractiveSearch(v bool) {
 	x.xxx_hidden_AutoRedownloadFailedFromInteractiveSearch = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 25, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 25, 37)
 }
 
 func (x *AcquisitionSettings) SetRenameEpisodes(v bool) {
 	x.xxx_hidden_RenameEpisodes = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 37)
 }
 
 func (x *AcquisitionSettings) SetStandardEpisodeFormat(v string) {
 	x.xxx_hidden_StandardEpisodeFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 37)
 }
 
 func (x *AcquisitionSettings) SetDailyEpisodeFormat(v string) {
 	x.xxx_hidden_DailyEpisodeFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 28, 37)
 }
 
 func (x *AcquisitionSettings) SetAnimeEpisodeFormat(v string) {
 	x.xxx_hidden_AnimeEpisodeFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 29, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 29, 37)
 }
 
 func (x *AcquisitionSettings) SetSeriesFolderFormat(v string) {
 	x.xxx_hidden_SeriesFolderFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 30, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 30, 37)
 }
 
 func (x *AcquisitionSettings) SetSeasonFolderFormat(v string) {
 	x.xxx_hidden_SeasonFolderFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 31, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 31, 37)
 }
 
 func (x *AcquisitionSettings) SetSpecialsFolderFormat(v string) {
 	x.xxx_hidden_SpecialsFolderFormat = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 37)
 }
 
 func (x *AcquisitionSettings) SetMultiEpisodeStyle(v MultiEpisodeStyle) {
 	x.xxx_hidden_MultiEpisodeStyle = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 37)
 }
 
 func (x *AcquisitionSettings) SetAutoUnmonitorPreviouslyDownloadedEpisodes(v bool) {
 	x.xxx_hidden_AutoUnmonitorPreviouslyDownloadedEpisodes = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 37)
 }
 
 func (x *AcquisitionSettings) SetEpisodeTitleRequired(v EpisodeTitleRequired) {
 	x.xxx_hidden_EpisodeTitleRequired = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 35, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 35, 37)
+}
+
+func (x *AcquisitionSettings) SetDownloadClientWorkingFolders(v string) {
+	x.xxx_hidden_DownloadClientWorkingFolders = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 36, 37)
 }
 
 func (x *AcquisitionSettings) HasPropers() bool {
@@ -4873,6 +4889,13 @@ func (x *AcquisitionSettings) HasEpisodeTitleRequired() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[1]), 35)
 }
 
+func (x *AcquisitionSettings) HasDownloadClientWorkingFolders() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 36)
+}
+
 func (x *AcquisitionSettings) ClearPropers() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Propers = ProperDownload_PROPER_DOWNLOAD_UNSPECIFIED
@@ -5043,6 +5066,11 @@ func (x *AcquisitionSettings) ClearEpisodeTitleRequired() {
 	x.xxx_hidden_EpisodeTitleRequired = EpisodeTitleRequired_EPISODE_TITLE_REQUIRED_UNSPECIFIED
 }
 
+func (x *AcquisitionSettings) ClearDownloadClientWorkingFolders() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 36)
+	x.xxx_hidden_DownloadClientWorkingFolders = nil
+}
+
 type AcquisitionSettings_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -5109,6 +5137,10 @@ type AcquisitionSettings_builder struct {
 	AutoUnmonitorPreviouslyDownloadedEpisodes *bool
 	// Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
 	EpisodeTitleRequired *EpisodeTitleRequired
+	// The prefixes, separated by "|", of the folders download clients
+	// unpack into or leave failed downloads in, whose files are not
+	// imported; empty for "_UNPACK_|_FAILED_".
+	DownloadClientWorkingFolders *string
 }
 
 func (b0 AcquisitionSettings_builder) Build() *AcquisitionSettings {
@@ -5116,142 +5148,146 @@ func (b0 AcquisitionSettings_builder) Build() *AcquisitionSettings {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Propers != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 37)
 		x.xxx_hidden_Propers = *b.Propers
 	}
 	if b.PreferIndexerFlags != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 37)
 		x.xxx_hidden_PreferIndexerFlags = *b.PreferIndexerFlags
 	}
 	if b.CompletedDownloadHandling != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 37)
 		x.xxx_hidden_CompletedDownloadHandling = *b.CompletedDownloadHandling
 	}
 	if b.AutoRedownloadFailed != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 37)
 		x.xxx_hidden_AutoRedownloadFailed = *b.AutoRedownloadFailed
 	}
 	if b.MaximumSize != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 37)
 		x.xxx_hidden_MaximumSize = *b.MaximumSize
 	}
 	if b.MinimumAge != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 37)
 		x.xxx_hidden_MinimumAge = *b.MinimumAge
 	}
 	if b.Retention != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 37)
 		x.xxx_hidden_Retention = *b.Retention
 	}
 	if b.AllowHardcodedSubs != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 37)
 		x.xxx_hidden_AllowHardcodedSubs = *b.AllowHardcodedSubs
 	}
 	x.xxx_hidden_WhitelistedHardcodedSubs = b.WhitelistedHardcodedSubs
 	if b.SkipFreeSpaceCheck != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 37)
 		x.xxx_hidden_SkipFreeSpaceCheck = *b.SkipFreeSpaceCheck
 	}
 	if b.MinimumFreeSpace != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 37)
 		x.xxx_hidden_MinimumFreeSpace = *b.MinimumFreeSpace
 	}
 	if b.AvailabilityDelay != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 37)
 		x.xxx_hidden_AvailabilityDelay = *b.AvailabilityDelay
 	}
 	if b.RssSyncInterval != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 37)
 		x.xxx_hidden_RssSyncInterval = *b.RssSyncInterval
 	}
 	if b.CheckFinishedInterval != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 37)
 		x.xxx_hidden_CheckFinishedInterval = *b.CheckFinishedInterval
 	}
 	if b.RecycleBin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 37)
 		x.xxx_hidden_RecycleBin = b.RecycleBin
 	}
 	if b.RecycleBinCleanupDays != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 37)
 		x.xxx_hidden_RecycleBinCleanupDays = *b.RecycleBinCleanupDays
 	}
 	if b.CopyUsingHardlinks != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 37)
 		x.xxx_hidden_CopyUsingHardlinks = *b.CopyUsingHardlinks
 	}
 	if b.ImportExtraFiles != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 37)
 		x.xxx_hidden_ImportExtraFiles = *b.ImportExtraFiles
 	}
 	x.xxx_hidden_ExtraFileExtensions = b.ExtraFileExtensions
 	if b.DeleteEmptyFolders != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 37)
 		x.xxx_hidden_DeleteEmptyFolders = *b.DeleteEmptyFolders
 	}
 	if b.RenameMovies != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 37)
 		x.xxx_hidden_RenameMovies = *b.RenameMovies
 	}
 	if b.ReplaceIllegalCharacters != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 37)
 		x.xxx_hidden_ReplaceIllegalCharacters = *b.ReplaceIllegalCharacters
 	}
 	if b.ColonReplacement != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 37)
 		x.xxx_hidden_ColonReplacement = *b.ColonReplacement
 	}
 	if b.MovieFolderFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 37)
 		x.xxx_hidden_MovieFolderFormat = b.MovieFolderFormat
 	}
 	if b.StandardMovieFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 37)
 		x.xxx_hidden_StandardMovieFormat = b.StandardMovieFormat
 	}
 	if b.AutoRedownloadFailedFromInteractiveSearch != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 25, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 25, 37)
 		x.xxx_hidden_AutoRedownloadFailedFromInteractiveSearch = *b.AutoRedownloadFailedFromInteractiveSearch
 	}
 	if b.RenameEpisodes != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 37)
 		x.xxx_hidden_RenameEpisodes = *b.RenameEpisodes
 	}
 	if b.StandardEpisodeFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 37)
 		x.xxx_hidden_StandardEpisodeFormat = b.StandardEpisodeFormat
 	}
 	if b.DailyEpisodeFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 28, 37)
 		x.xxx_hidden_DailyEpisodeFormat = b.DailyEpisodeFormat
 	}
 	if b.AnimeEpisodeFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 29, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 29, 37)
 		x.xxx_hidden_AnimeEpisodeFormat = b.AnimeEpisodeFormat
 	}
 	if b.SeriesFolderFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 30, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 30, 37)
 		x.xxx_hidden_SeriesFolderFormat = b.SeriesFolderFormat
 	}
 	if b.SeasonFolderFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 31, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 31, 37)
 		x.xxx_hidden_SeasonFolderFormat = b.SeasonFolderFormat
 	}
 	if b.SpecialsFolderFormat != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 37)
 		x.xxx_hidden_SpecialsFolderFormat = b.SpecialsFolderFormat
 	}
 	if b.MultiEpisodeStyle != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 37)
 		x.xxx_hidden_MultiEpisodeStyle = *b.MultiEpisodeStyle
 	}
 	if b.AutoUnmonitorPreviouslyDownloadedEpisodes != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 37)
 		x.xxx_hidden_AutoUnmonitorPreviouslyDownloadedEpisodes = *b.AutoUnmonitorPreviouslyDownloadedEpisodes
 	}
 	if b.EpisodeTitleRequired != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 35, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 35, 37)
 		x.xxx_hidden_EpisodeTitleRequired = *b.EpisodeTitleRequired
+	}
+	if b.DownloadClientWorkingFolders != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 36, 37)
+		x.xxx_hidden_DownloadClientWorkingFolders = b.DownloadClientWorkingFolders
 	}
 	return m0
 }
@@ -6372,7 +6408,7 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x18anime_quality_profile_id\x18\x13 \x01(\tR\x15animeQualityProfileId\"\x87\x01\n" +
 	"\x10MetadataSettings\x12C\n" +
 	"\x12preferred_language\x18\x01 \x01(\tB\x14\xbaH\x11r\x0f2\r^([a-z]{2})?$R\x11preferredLanguage\x12.\n" +
-	"\acountry\x18\x02 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\acountry\"\xc7\x10\n" +
+	"\acountry\x18\x02 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\acountry\"\x8e\x11\n" +
 	"\x13AcquisitionSettings\x12E\n" +
 	"\apropers\x18\x01 \x01(\x0e2\x1f.mavio.system.v1.ProperDownloadB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\apropers\x120\n" +
@@ -6414,7 +6450,8 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x16specials_folder_format\x18. \x01(\tR\x14specialsFolderFormat\x12\\\n" +
 	"\x13multi_episode_style\x18/ \x01(\x0e2\".mavio.system.v1.MultiEpisodeStyleB\b\xbaH\x05\x82\x01\x02\x10\x01R\x11multiEpisodeStyle\x12`\n" +
 	"-auto_unmonitor_previously_downloaded_episodes\x180 \x01(\bR)autoUnmonitorPreviouslyDownloadedEpisodes\x12e\n" +
-	"\x16episode_title_required\x181 \x01(\x0e2%.mavio.system.v1.EpisodeTitleRequiredB\b\xbaH\x05\x82\x01\x02\x10\x01R\x14episodeTitleRequired\"\x1a\n" +
+	"\x16episode_title_required\x181 \x01(\x0e2%.mavio.system.v1.EpisodeTitleRequiredB\b\xbaH\x05\x82\x01\x02\x10\x01R\x14episodeTitleRequired\x12E\n" +
+	"\x1fdownload_client_working_folders\x182 \x01(\tR\x1cdownloadClientWorkingFolders\"\x1a\n" +
 	"\x18GetServerSettingsRequest\"\xc9\x01\n" +
 	"\x19GetServerSettingsResponse\x12;\n" +
 	"\bsettings\x18\x01 \x01(\v2\x1f.mavio.system.v1.ServerSettingsR\bsettings\x12o\n" +

@@ -442,6 +442,10 @@ message AcquisitionSettings {
   bool auto_unmonitor_previously_downloaded_episodes = 48;
   // Unspecified for EPISODE_TITLE_REQUIRED_ALWAYS.
   EpisodeTitleRequired episode_title_required = 49 [(buf.validate.field).enum.defined_only = true];
+  // The prefixes, separated by "|", of the folders download clients
+  // unpack into or leave failed downloads in, whose files are not
+  // imported; empty for "_UNPACK_|_FAILED_".
+  string download_client_working_folders = 50;
 }
 
 message GetServerSettingsRequest {}

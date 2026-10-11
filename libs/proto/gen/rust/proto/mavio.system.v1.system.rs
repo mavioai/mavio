@@ -5420,6 +5420,14 @@ pub struct AcquisitionSettings {
     pub episode_title_required: ::core::option::Option<
         ::buffa::EnumValue<EpisodeTitleRequired>,
     >,
+    /// The prefixes, separated by "|", of the folders download clients
+    /// unpack into or leave failed downloads in, whose files are not
+    /// imported; empty for "_UNPACK_|_FAILED_".
+    ///
+    /// Field 50: `download_client_working_folders`
+    pub download_client_working_folders: ::core::option::Option<
+        ::buffa::alloc::string::String,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -5468,6 +5476,10 @@ impl ::core::fmt::Debug for AcquisitionSettings {
                 &self.auto_unmonitor_previously_downloaded_episodes,
             )
             .field("episode_title_required", &self.episode_title_required)
+            .field(
+                "download_client_working_folders",
+                &self.download_client_working_folders,
+            )
             .finish()
     }
 }
@@ -5762,6 +5774,16 @@ impl AcquisitionSettings {
         self.episode_title_required = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::download_client_working_folders`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_download_client_working_folders(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.download_client_working_folders = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(AcquisitionSettings);
 impl ::buffa::MessageName for AcquisitionSettings {
@@ -5891,6 +5913,9 @@ impl ::buffa::Message for AcquisitionSettings {
         if let Some(ref v) = self.episode_title_required {
             size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
         }
+        if let Some(ref v) = self.download_client_working_folders {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -6008,6 +6033,9 @@ impl ::buffa::Message for AcquisitionSettings {
         }
         if let Some(ref v) = self.episode_title_required {
             ::buffa::types::put_int32_field(49u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.download_client_working_folders {
+            ::buffa::types::put_string_field(50u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -6377,6 +6405,18 @@ impl ::buffa::Message for AcquisitionSettings {
                     ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
                 );
             }
+            50u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .download_client_working_folders
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -6421,6 +6461,7 @@ impl ::buffa::Message for AcquisitionSettings {
         self.multi_episode_style = ::core::option::Option::None;
         self.auto_unmonitor_previously_downloaded_episodes = ::core::option::Option::None;
         self.episode_title_required = ::core::option::Option::None;
+        self.download_client_working_folders = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
