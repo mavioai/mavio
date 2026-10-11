@@ -106,7 +106,7 @@ func (r *Runtime) newRun(ctx context.Context) (*run, error) {
 	}
 	senv := *env
 	senv.Definitions = sdefs
-	rn.senv = &series.Env{Env: &senv, Episodes: episodePorts{rn}}
+	rn.senv = &series.Env{Env: &senv, Episodes: episodePorts{rn}, AutoUnmonitorPreviouslyDownloaded: s.AutoUnmonitorPreviouslyDownloadedEpisodes}
 	rn.sengine = &series.Engine{Env: rn.senv, Specs: series.Specs(), Logger: r.logger()}
 	return rn, nil
 }

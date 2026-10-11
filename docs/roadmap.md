@@ -504,8 +504,8 @@ flowchart TD
   - [x] Indexers found by name when their ID finds none, as Sonarr's AggregateLanguages
 - [x] Episode file names, series and season folders named as Sonarr names them (`libs/acquire/organize`)
 - [x] Wanted series and episodes: series added by TVDB ID, with a quality profile, monitoring of new seasons and episodes (`WantedService.AddSeries`, `apps/server/internal/acquisition`)
-  - [ ] Episodes found on disk by scans of a wanted series monitored as Sonarr monitors them
-  - [ ] Sonarr's `AutoUnmonitorPreviouslyDownloadedEpisodes`
+  - [x] Seasons and episodes scans find on disk monitored as Sonarr's GetMonitoredStatus: an episode as its season, but not an episode 0 outside season 1; a season as the series' new seasons, but not the specials
+  - [x] Sonarr's `AutoUnmonitorPreviouslyDownloadedEpisodes`: episodes of wanted series whose files a scan finds missing are unmonitored, and RSS syncs skip them until then
   - [x] Each episode's own last search time (`EpisodeState.LastSearchedAt`), set when an indexer was searched for it and ordering the bulk searches of missing episodes
 - [x] Episode, season and series searches and RSS sync as jobs; releases matched to episodes through scene mappings, XEM, absolute numbers and air dates (`libs/acquire/series`, job `acquisition.episode_search`, scene mappings refreshed by `acquisition.scene_mappings`)
   - [x] Scene numbering kept on episodes (`EpisodeState`), extrapolated and marked unverified as Sonarr's `XemService` does, refreshed when a series is added and with the scene mappings
