@@ -44,6 +44,8 @@ type importFile struct {
 	// path is the server's path; rel is that below the download's.
 	path, rel string
 	size      int64
+	// inFolder reports whether the download is a folder.
+	inFolder bool
 }
 
 // importDownload imports the best video file of a completed download into
@@ -181,7 +183,7 @@ func importFiles(ctx context.Context, local string) ([]importFile, error) {
 	var out []importFile
 	for _, p := range acquire.FilterImportPaths(local, paths) {
 		rel, _ := filepath.Rel(local, p)
-		out = append(out, importFile{path: p, rel: rel, size: sizes[p]})
+		out = append(out, importFile{path: p, rel: rel, size: sizes[p], inFolder: true})
 	}
 	slices.SortStableFunc(out, func(a, b importFile) int { return cmp.Compare(b.size, a.size) })
 	return out, nil
@@ -273,6 +275,7 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 		if err := r.recycle(ctx, old, path.Base(path.Dir(m.file))); err != nil {
 			return nil, err
 		}
+		r.recycleExtras(ctx, old, path.Base(path.Dir(m.file)), s.ExtraFileExtensions)
 		if err := r.Store.History().Add(ctx, core.HistoryEvent{
 			ID: core.NewID(), Type: core.HistoryFileDeleted, ItemID: m.item.ID, Date: r.now(), SourceTitle: m.file,
 			Quality: qualityRef(m.acq.File.Quality), Languages: languageNames(m.acq.File.Languages), Data: map[string]string{dataReason: "Upgrade"},
@@ -285,7 +288,7 @@ func (r *Runtime) importOne(ctx context.Context, rn *run, m *movie, d *core.Down
 	}
 	r.logger().InfoContext(ctx, "imported movie file", "item", m.item.ID, "from", f.path, "to", dest, "mode", mode.String())
 	if s.ImportExtraFiles {
-		r.importExtras(ctx, root, f.path, rel, mode, s.ExtraFileExtensions)
+		r.importMovieExtras(ctx, root, m, f, rel, mode, s.ExtraFileExtensions)
 	}
 
 	imported := filepath.ToSlash(dest)

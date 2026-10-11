@@ -272,7 +272,7 @@ func FindIsoLanguage(code string, kind Kind) (IsoLanguage, bool) {
 	alternate, isAlternate := alternateIsoCodes[kind][code]
 	// Radarr checks alternate codes first, Sonarr after two-letter codes.
 	if isAlternate && (kind == Movie || len(lang) != 2) {
-		return isoLanguageOf(alternate, kind)
+		return IsoLanguageOf(alternate, kind)
 	}
 	all := isoLanguages[kind]
 	switch len(lang) {
@@ -315,7 +315,8 @@ func FindIsoLanguage(code string, kind Kind) (IsoLanguage, bool) {
 	return IsoLanguage{}, false
 }
 
-func isoLanguageOf(language Language, kind Kind) (IsoLanguage, bool) {
+// IsoLanguageOf returns the ISO codes of a language, if it has them.
+func IsoLanguageOf(language Language, kind Kind) (IsoLanguage, bool) {
 	for _, l := range isoLanguages[kind] {
 		if l.Language == language {
 			return l, true
