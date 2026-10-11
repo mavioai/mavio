@@ -149,7 +149,10 @@ func (s *Site) SearchRequests(ctx context.Context, _ *indexer.Indexer, q *indexe
 	if q.Limit > 0 && q.Offset > 0 {
 		p.Set("page", strconv.Itoa(q.Offset/q.Limit))
 	}
-	c.AddRequests(indexer.NewRequest(s.baseURL+"api.php?"+p.Encode(), indexer.AcceptJSON))
+	r := indexer.NewRequest(s.baseURL+"api.php?"+p.Encode(), indexer.AcceptJSON)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
+	c.AddRequests(r)
 	return &c, nil
 }
 

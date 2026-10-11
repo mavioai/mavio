@@ -113,7 +113,10 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		p.Set("f", "search")
 		p.Set("s", t)
 	}
-	c.AddRequests(indexer.NewRequest(strings.TrimRight(s.baseURL, "/")+"/api/?"+p.Encode(), indexer.AcceptJSON))
+	r := indexer.NewRequest(strings.TrimRight(s.baseURL, "/")+"/api/?"+p.Encode(), indexer.AcceptJSON)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
+	c.AddRequests(r)
 	return &c, nil
 }
 

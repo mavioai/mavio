@@ -375,6 +375,8 @@ func (s *Site) SearchRequests(ctx context.Context, ix *indexer.Indexer, q *index
 		p.Set("tor[cat][]", "0")
 	}
 	r := indexer.NewRequest(s.baseURL+"tor/js/loadSearchJSONbasic.php?"+p.Encode(), indexer.AcceptJSON)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
 	r.Cookies = s.cookies(ix)
 	c.AddRequests(r)
 	return &c, nil

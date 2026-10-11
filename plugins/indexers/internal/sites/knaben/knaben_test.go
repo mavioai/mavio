@@ -71,6 +71,10 @@ func TestSearchRequests(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			// Prowlarr's IndexerRequests of URLs follow redirects.
+			if r := c.First(); r != nil && !r.FollowRedirects {
+				t.Errorf("FollowRedirects = false, want = true")
+			}
 			r := c.First()
 			if r.URL != "https://api.knaben.org/v1" || r.Method != http.MethodPost {
 				t.Errorf("request = %s %s, want = POST https://api.knaben.org/v1", r.Method, r.URL)

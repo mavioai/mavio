@@ -106,10 +106,15 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 	}
 	var c indexer.Chain
 	if strings.TrimSpace(term) == "" {
-		c.AddRequests(indexer.NewRequest(s.baseURL, indexer.AcceptHTML))
+		r := indexer.NewRequest(s.baseURL, indexer.AcceptHTML)
+		// Prowlarr's IndexerRequest of a URL follows redirects.
+		r.FollowRedirects = true
+		c.AddRequests(r)
 		return &c, nil
 	}
 	r := indexer.NewRequest(strings.TrimRight(s.baseURL, "/")+"/index.php?do=search", indexer.AcceptHTML)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
 	var form indexer.Params
 	form.Set("do", "search")
 	form.Set("subaction", "search")
@@ -147,7 +152,9 @@ var loginError = cascadia.MustCompile(`#content .berror .berror_c`)
 // days.
 func (s *Site) Login(ctx context.Context, ix *indexer.Indexer) error {
 	ix.SetCookies(nil, time.Time{})
-	main, err := ix.Do(ctx, indexer.NewRequest(s.baseURL, ""))
+	mainReq := indexer.NewRequest(s.baseURL, "")
+	mainReq.FollowRedirects = true // new HttpRequest(BaseUrl) follows redirects.
+	main, err := ix.Do(ctx, mainReq)
 	if err != nil {
 		return fmt.Errorf("anidub login: %w", err)
 	}

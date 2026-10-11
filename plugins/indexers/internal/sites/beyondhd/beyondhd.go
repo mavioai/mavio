@@ -213,6 +213,8 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		return nil, err
 	}
 	r := indexer.NewRequest(s.baseURL+"api/torrents/"+s.settings.APIKey, indexer.AcceptJSON)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
 	r.Method = http.MethodPost
 	r.Header.Set("Content-Type", "application/json")
 	r.Body = data

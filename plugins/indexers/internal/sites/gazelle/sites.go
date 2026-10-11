@@ -54,6 +54,9 @@ var redacted = apiSite{
 	legacy:        []string{"https://redacted.ch/"},
 	authorization: func(key string) string { return key },
 	freeload:      true,
+	// Redacted's searches are IndexerRequests of URLs, which follow
+	// redirects; Orpheus's are built, which do not.
+	followRedirects: true,
 }
 
 var alphaRatio = site{

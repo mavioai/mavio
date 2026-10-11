@@ -77,6 +77,8 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 	var c indexer.Chain
 	if q.IsRSS() {
 		r := indexer.NewRequest(strings.TrimRight(strings.TrimSpace(s.settings.BaseURL), "/"), indexer.AcceptRSS)
+		// Prowlarr's IndexerRequest of a URL follows redirects.
+		r.FollowRedirects = true
 		r.Cookies = ParseCookies(s.settings.Cookie)
 		c.AddRequests(r)
 	}

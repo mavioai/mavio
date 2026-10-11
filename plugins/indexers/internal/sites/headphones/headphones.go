@@ -109,6 +109,8 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 	}
 	p.Set("offset", strconv.Itoa(q.Offset))
 	r := indexer.NewRequest(u+"&"+p.Encode(), indexer.AcceptRSS)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
 	s.authorize(r)
 	c.AddRequests(r)
 	return &c, nil

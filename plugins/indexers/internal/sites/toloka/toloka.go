@@ -109,7 +109,10 @@ func (s *Site) SearchRequests(_ context.Context, _ *indexer.Indexer, q *indexer.
 		u += "&f[]=" + indexer.URLEncode(cat)
 	}
 	var c indexer.Chain
-	c.AddRequests(indexer.NewRequest(u, indexer.AcceptHTML))
+	r := indexer.NewRequest(u, indexer.AcceptHTML)
+	// Prowlarr's IndexerRequest of a URL follows redirects.
+	r.FollowRedirects = true
+	c.AddRequests(r)
 	return &c, nil
 }
 

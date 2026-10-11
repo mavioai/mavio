@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/indexers/internal/indexer"
@@ -151,14 +152,41 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestRedirects(t *testing.T) {
+// TestSearchFollowsRedirects checks that searches follow redirects, as
+// Prowlarr's IndexerRequests of URLs do in production.
+func TestSearchFollowsRedirects(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		ix := newIndexer(t, testSettings, func(r *http.Request) *http.Response {
+			if r.URL.Path == "/t.json" {
+				return &http.Response{StatusCode: http.StatusFound, Header: http.Header{"Location": {"/moved.json"}}, Body: http.NoBody}
+			}
+			return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(feed))}
+		})
+		releases, err := ix.Search(context.Background(), &indexer.Query{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(releases) != 2 {
+			t.Errorf("releases = %d, want = 2", len(releases))
+		}
+	})
+}
+
+// TestParseRedirects checks the errors of redirects the parser is given,
+// which searches only return when redirects are not followed.
+func TestParseRedirects(t *testing.T) {
 	tests := []struct{ location, want string }{
 		{"https://www.torrentday.com/login.php?returnto=%2Ft.json", "We are being redirected to the login page"},
 		{"https://www.torrentday.com/elsewhere", "Redirected to https://www.torrentday.com/elsewhere from indexer request"},
 	}
 	for _, tt := range tests {
-		ix := newIndexer(t, testSettings, respond(http.StatusFound, http.Header{"Location": {tt.location}}, ""))
-		_, err := ix.Search(context.Background(), &indexer.Query{})
+		ix := newIndexer(t, testSettings, nil)
+		r := &indexer.Response{
+			URL:        "https://www.torrentday.com/t.json",
+			StatusCode: http.StatusFound,
+			Header:     http.Header{"Location": {tt.location}},
+		}
+		_, err := ix.Site.ParseResponse(context.Background(), ix, r)
 		if err == nil || !strings.Contains(err.Error(), tt.want) {
 			t.Errorf("err = %v, want = containing %q", err, tt.want)
 		}
