@@ -139,3 +139,17 @@ func TestJobListAndPurge(t *testing.T) {
 		}
 	})
 }
+
+func TestServerID(t *testing.T) {
+	eachBackend(t, func(t *testing.T, s *store.Store) {
+		ctx := t.Context()
+		first, err := s.Settings().ServerID(ctx)
+		if err != nil || first.IsZero() {
+			t.Fatalf("ServerID = %v, %v", first, err)
+		}
+		again, err := s.Settings().ServerID(ctx)
+		if err != nil || again != first {
+			t.Errorf("ServerID again = %v, %v, want = %v", again, err, first)
+		}
+	})
+}

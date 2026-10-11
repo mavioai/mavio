@@ -248,7 +248,7 @@ erDiagram
 | `ItemRepository`（整理类） | `Links` 按顺序列出合集或播放列表的条目项；`ReplaceLinks` 设置它们，保留给定的 ID，并为没有 ID 的条目项分配新 ID |
 | `PluginConfigRepository` | `Get` 某个插件的配置（从未配置时返回 `ErrNotFound`），`Put` 写入并替换之前的配置，`Delete` 删除 |
 | `DisplayPreferencesRepository` | `Get` 用户对某个客户端视图的偏好（从未设置时返回 `ErrNotFound`），`Put` 写入并替换之前的偏好 |
-| `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入 |
+| `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入；`ServerID` 在首次调用时创建，供客户端把该服务端与其他服务端区分开 |
 | `APIKeyRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Touch`、`Delete`；删除用户时一并删除其密钥 |
 | `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户、类型与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
 | `TrickplayRepository` | `Put` 某条目在某宽度下的拼图（替换之前的）、`List` 某条目的拼图（最窄的在前）、`Delete` 删除 |

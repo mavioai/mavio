@@ -19,7 +19,7 @@ type HostService struct {
 
 // ServerInfo is how the server is reached.
 type ServerInfo struct {
-	Name, Version, BaseURL string
+	ID, Name, Version, BaseURL string
 	HTTPPort, HTTPSPort    int
 }
 

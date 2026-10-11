@@ -535,6 +535,17 @@ pub struct GetAuthInfoResponse {
     ///
     /// Field 1: `setup_required`
     pub setup_required: ::core::option::Option<bool>,
+    /// Tells the server apart from others whatever address reaches it; stable
+    /// for the server's database.
+    ///
+    /// Field 2: `server_id`
+    pub server_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The name the server shows, its host name unless administrators set one.
+    ///
+    /// Field 3: `server_name`
+    pub server_name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 4: `version`
+    pub version: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -542,6 +553,9 @@ impl ::core::fmt::Debug for GetAuthInfoResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         f.debug_struct("GetAuthInfoResponse")
             .field("setup_required", &self.setup_required)
+            .field("server_id", &self.server_id)
+            .field("server_name", &self.server_name)
+            .field("version", &self.version)
             .finish()
     }
 }
@@ -558,6 +572,36 @@ impl GetAuthInfoResponse {
     ///Sets [`Self::setup_required`] to `Some(value)`, consuming and returning `self`.
     pub fn with_setup_required(mut self, value: bool) -> Self {
         self.setup_required = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::server_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_server_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.server_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::server_name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_server_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.server_name = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::version`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_version(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.version = Some(value.into());
         self
     }
 }
@@ -584,6 +628,15 @@ impl ::buffa::Message for GetAuthInfoResponse {
         if self.setup_required.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.server_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.server_name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.version {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -596,6 +649,15 @@ impl ::buffa::Message for GetAuthInfoResponse {
         use ::buffa::Enumeration as _;
         if let Some(v) = self.setup_required {
             ::buffa::types::put_bool_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.server_id {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.server_name {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.version {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -619,6 +681,40 @@ impl ::buffa::Message for GetAuthInfoResponse {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .server_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .server_name
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.version.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -628,6 +724,9 @@ impl ::buffa::Message for GetAuthInfoResponse {
     }
     fn clear(&mut self) {
         self.setup_required = ::core::option::Option::None;
+        self.server_id = ::core::option::Option::None;
+        self.server_name = ::core::option::Option::None;
+        self.version = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

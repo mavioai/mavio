@@ -118,7 +118,7 @@ func TestHTTPS(t *testing.T) {
 
 func TestDiscovery(t *testing.T) {
 	ctx := t.Context()
-	d := &Discovery{Addr: "127.0.0.1:0", Port: 8686, Reply: func() DiscoveryReply { return DiscoveryReply{Name: "Home", Version: "v1"} }}
+	d := &Discovery{Addr: "127.0.0.1:0", Port: 8686, Reply: func() DiscoveryReply { return DiscoveryReply{ID: "id", Name: "Home", Version: "v1"} }}
 	t.Cleanup(func() { _ = d.Close() })
 	if err := d.Apply(ctx, core.NetworkSettings{LocalDiscovery: true}); err != nil {
 		t.Fatal(err)
@@ -138,7 +138,7 @@ func TestDiscovery(t *testing.T) {
 		t.Fatal(err)
 	}
 	var reply DiscoveryReply
-	if err := json.Unmarshal(buf[:n], &reply); err != nil || reply.Name != "Home" || reply.Address != "http://127.0.0.1:8686" {
+	if err := json.Unmarshal(buf[:n], &reply); err != nil || reply.ID != "id" || reply.Name != "Home" || reply.Address != "http://127.0.0.1:8686" {
 		t.Errorf("reply = %+v, %v", reply, err)
 	}
 	if err := d.Apply(ctx, core.NetworkSettings{}); err != nil || d.LocalAddr() != nil {

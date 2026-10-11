@@ -248,7 +248,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `ItemRepository` (curated) | `Links` lists a collection's or playlist's entries in order; `ReplaceLinks` sets them, keeping the IDs given and assigning new ones |
 | `PluginConfigRepository` | `Get` a plugin's configuration (`ErrNotFound` when never configured), `Put` it, replacing the earlier one, `Delete` it |
 | `DisplayPreferencesRepository` | `Get` a user's preferences for a client's view (`ErrNotFound` when never set), `Put` them, replacing the earlier ones |
-| `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate` |
+| `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate`; `ServerID`, created on the first call, tells the server apart from others to clients |
 | `APIKeyRepository` | `Create`, `GetByTokenHash`, `List` (newest first), `Touch`, `Delete`; deleting the user deletes their keys |
 | `ActivityRepository` | `Add`, `List` (paged, newest first, by time, user, types and least severity), `Purge` of activities before a time |
 | `TrickplayRepository` | `Put` an item's sheets at a width (replacing the earlier), `List` an item's (narrowest first), `Delete` them |

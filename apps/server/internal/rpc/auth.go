@@ -81,6 +81,9 @@ type AuthService struct {
 	// Authenticate checks the credentials of users of authentication
 	// plugins; nil lets none of them sign in.
 	Authenticate func(ctx context.Context, pluginID, name, password string) (plugins.AuthResult, error)
+	// Info names the server to clients before they sign in; nil names
+	// nothing.
+	Info func() ServerInfo
 	// ResetPlugin names the plugin delivering password reset PINs, empty
 	// when there is none; nil means none.
 	ResetPlugin func() string
@@ -156,7 +159,12 @@ func (s *AuthService) GetAuthInfo(ctx context.Context, _ *authv1.GetAuthInfoRequ
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return authv1.GetAuthInfoResponse_builder{SetupRequired: new(len(users) == 0)}.Build(), nil
+	b := authv1.GetAuthInfoResponse_builder{SetupRequired: new(len(users) == 0)}
+	if s.Info != nil {
+		i := s.Info()
+		b.ServerId, b.ServerName, b.Version = &i.ID, &i.Name, &i.Version
+	}
+	return b.Build(), nil
 }
 
 // CreateFirstUser creates an administrator while no user exists and signs

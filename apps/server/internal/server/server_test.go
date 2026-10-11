@@ -20,6 +20,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	"github.com/mavioai/mavio/apps/server/internal/server"
+	"github.com/mavioai/mavio/libs/core"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
@@ -79,6 +80,10 @@ func TestEndToEnd(t *testing.T) {
 	})
 	url := "http://" + ln.Addr().String()
 
+	info, err := authv1connect.NewAuthServiceClient(http.DefaultClient, url).GetAuthInfo(ctx, &authv1.GetAuthInfoRequest{})
+	if _, idErr := core.ParseID(info.GetServerId()); err != nil || idErr != nil || info.GetVersion() != "v-test" || info.GetServerName() == "" {
+		t.Errorf("GetAuthInfo = %v, %v", info, err)
+	}
 	first, err := authv1connect.NewAuthServiceClient(http.DefaultClient, url).CreateFirstUser(ctx, authv1.CreateFirstUserRequest_builder{
 		Name: new("admin"), Password: new("secret"),
 		Device: authv1.Device_builder{Id: new("e2e"), Name: new("Test"), Client: new("Test"), ClientVersion: new("0")}.Build(),

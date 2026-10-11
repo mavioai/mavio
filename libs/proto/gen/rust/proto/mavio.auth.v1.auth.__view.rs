@@ -898,6 +898,17 @@ pub struct GetAuthInfoResponseView<'a> {
     ///
     /// Field 1: `setup_required`
     pub setup_required: ::core::option::Option<bool>,
+    /// Tells the server apart from others whatever address reaches it; stable
+    /// for the server's database.
+    ///
+    /// Field 2: `server_id`
+    pub server_id: ::core::option::Option<&'a str>,
+    /// The name the server shows, its host name unless administrators set one.
+    ///
+    /// Field 3: `server_name`
+    pub server_name: ::core::option::Option<&'a str>,
+    /// Field 4: `version`
+    pub version: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for GetAuthInfoResponseView<'a> {
@@ -937,6 +948,27 @@ impl<'a> ::buffa::MessageView<'a> for GetAuthInfoResponseView<'a> {
                 )?;
                 view.setup_required = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.server_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.server_name = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.version = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -966,6 +998,9 @@ impl<'a> ::buffa::MessageView<'a> for GetAuthInfoResponseView<'a> {
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::GetAuthInfoResponse {
             setup_required: self.setup_required,
+            server_id: self.server_id.map(|s| s.to_string()),
+            server_name: self.server_name.map(|s| s.to_string()),
+            version: self.version.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -980,6 +1015,15 @@ impl<'a> ::buffa::ViewEncode<'a> for GetAuthInfoResponseView<'a> {
         if self.setup_required.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.server_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.server_name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.version {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -993,6 +1037,15 @@ impl<'a> ::buffa::ViewEncode<'a> for GetAuthInfoResponseView<'a> {
         use ::buffa::Enumeration as _;
         if let Some(v) = self.setup_required {
             ::buffa::types::put_bool_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.server_id {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.server_name {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.version {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1095,6 +1148,26 @@ impl GetAuthInfoResponseOwnedView {
     #[must_use]
     pub fn setup_required(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().setup_required
+    }
+    /// Tells the server apart from others whatever address reaches it; stable
+    /// for the server's database.
+    ///
+    /// Field 2: `server_id`
+    #[must_use]
+    pub fn server_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().server_id
+    }
+    /// The name the server shows, its host name unless administrators set one.
+    ///
+    /// Field 3: `server_name`
+    #[must_use]
+    pub fn server_name(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().server_name
+    }
+    /// Field 4: `version`
+    #[must_use]
+    pub fn version(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().version
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<GetAuthInfoResponseView<'static>>>

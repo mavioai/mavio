@@ -436,6 +436,9 @@ func (b0 GetAuthInfoRequest_builder) Build() *GetAuthInfoRequest {
 type GetAuthInfoResponse struct {
 	state                    protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_SetupRequired bool                   `protobuf:"varint,1,opt,name=setup_required,json=setupRequired"`
+	xxx_hidden_ServerId      *string                `protobuf:"bytes,2,opt,name=server_id,json=serverId"`
+	xxx_hidden_ServerName    *string                `protobuf:"bytes,3,opt,name=server_name,json=serverName"`
+	xxx_hidden_Version       *string                `protobuf:"bytes,4,opt,name=version"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -474,9 +477,54 @@ func (x *GetAuthInfoResponse) GetSetupRequired() bool {
 	return false
 }
 
+func (x *GetAuthInfoResponse) GetServerId() string {
+	if x != nil {
+		if x.xxx_hidden_ServerId != nil {
+			return *x.xxx_hidden_ServerId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetAuthInfoResponse) GetServerName() string {
+	if x != nil {
+		if x.xxx_hidden_ServerName != nil {
+			return *x.xxx_hidden_ServerName
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetAuthInfoResponse) GetVersion() string {
+	if x != nil {
+		if x.xxx_hidden_Version != nil {
+			return *x.xxx_hidden_Version
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *GetAuthInfoResponse) SetSetupRequired(v bool) {
 	x.xxx_hidden_SetupRequired = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+}
+
+func (x *GetAuthInfoResponse) SetServerId(v string) {
+	x.xxx_hidden_ServerId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+}
+
+func (x *GetAuthInfoResponse) SetServerName(v string) {
+	x.xxx_hidden_ServerName = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *GetAuthInfoResponse) SetVersion(v string) {
+	x.xxx_hidden_Version = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *GetAuthInfoResponse) HasSetupRequired() bool {
@@ -486,9 +534,45 @@ func (x *GetAuthInfoResponse) HasSetupRequired() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
+func (x *GetAuthInfoResponse) HasServerId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *GetAuthInfoResponse) HasServerName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *GetAuthInfoResponse) HasVersion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *GetAuthInfoResponse) ClearSetupRequired() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_SetupRequired = false
+}
+
+func (x *GetAuthInfoResponse) ClearServerId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_ServerId = nil
+}
+
+func (x *GetAuthInfoResponse) ClearServerName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_ServerName = nil
+}
+
+func (x *GetAuthInfoResponse) ClearVersion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Version = nil
 }
 
 type GetAuthInfoResponse_builder struct {
@@ -496,6 +580,12 @@ type GetAuthInfoResponse_builder struct {
 
 	// True until the first user is created.
 	SetupRequired *bool
+	// Tells the server apart from others whatever address reaches it; stable
+	// for the server's database.
+	ServerId *string
+	// The name the server shows, its host name unless administrators set one.
+	ServerName *string
+	Version    *string
 }
 
 func (b0 GetAuthInfoResponse_builder) Build() *GetAuthInfoResponse {
@@ -503,8 +593,20 @@ func (b0 GetAuthInfoResponse_builder) Build() *GetAuthInfoResponse {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.SetupRequired != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
 		x.xxx_hidden_SetupRequired = *b.SetupRequired
+	}
+	if b.ServerId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		x.xxx_hidden_ServerId = b.ServerId
+	}
+	if b.ServerName != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		x.xxx_hidden_ServerName = b.ServerName
+	}
+	if b.Version != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_Version = b.Version
 	}
 	return m0
 }
@@ -3038,9 +3140,13 @@ const file_mavio_auth_v1_auth_proto_rawDesc = "" +
 	"createTime\x12@\n" +
 	"\x0elast_seen_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\flastSeenTime\x12\x18\n" +
 	"\acurrent\x18\x05 \x01(\bR\acurrent\"\x14\n" +
-	"\x12GetAuthInfoRequest\"<\n" +
+	"\x12GetAuthInfoRequest\"\x94\x01\n" +
 	"\x13GetAuthInfoResponse\x12%\n" +
-	"\x0esetup_required\x18\x01 \x01(\bR\rsetupRequired\"\x9c\x01\n" +
+	"\x0esetup_required\x18\x01 \x01(\bR\rsetupRequired\x12\x1b\n" +
+	"\tserver_id\x18\x02 \x01(\tR\bserverId\x12\x1f\n" +
+	"\vserver_name\x18\x03 \x01(\tR\n" +
+	"serverName\x12\x18\n" +
+	"\aversion\x18\x04 \x01(\tR\aversion\"\x9c\x01\n" +
 	"\x16CreateFirstUserRequest\x12 \n" +
 	"\x04name\x18\x01 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01\x18dR\x04name\x12)\n" +
 	"\bpassword\x18\x02 \x01(\tB\r\xbaH\n" +
