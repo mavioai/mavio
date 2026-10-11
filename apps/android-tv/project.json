@@ -1,0 +1,61 @@
+{
+  "name": "android-tv",
+  "tags": [
+    "platform:android"
+  ],
+  "implicitDependencies": [
+    "android-lib"
+  ],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "gradle --console=plain assembleDebug",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "android-lib"
+          ],
+          "target": "core"
+        }
+      ],
+      "inputs": [
+        "gradle",
+        "^gradle",
+        {
+          "dependentTasksOutputFiles": "**/*",
+          "transitive": true
+        }
+      ],
+      "cache": true,
+      "parallelism": false
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "gradle --console=plain lintDebug",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "android-lib"
+          ],
+          "target": "core"
+        }
+      ],
+      "inputs": [
+        "gradle",
+        "^gradle",
+        {
+          "dependentTasksOutputFiles": "**/*",
+          "transitive": true
+        }
+      ],
+      "cache": true,
+      "parallelism": false
+    }
+  }
+}

@@ -82,7 +82,7 @@ mavio/
 │   ├── server/                  # [Go] Server: cmd/mavio, dependency wiring, config, Connect service implementations
 │   ├── web/                     # [TS] Web UI, embedded in the server (see clients.md)
 │   ├── ios/ tvos/ macos/        # [Swift] iPhone and iPad, Apple TV, Mac (see clients.md)
-│   ├── android/ android-tv/     # (later) [Kotlin] Phones and tablets, Android TV (see clients.md)
+│   ├── android/ android-tv/     # [Kotlin] Phones and tablets, Android TV (see clients.md)
 │   └── windows-linux/           # (later) [Go] Windows and Linux: MyGo, libmpv (see clients.md)
 │
 ├── libs/
@@ -102,7 +102,7 @@ mavio/
 │   ├── client-ts/               # [TS] connect-es client and Query hooks of the web UI (see clients.md)
 │   ├── client-rust/             # [Rust] Shared core of the native clients (see clients.md)
 │   ├── apple/                   # [Swift] Code shared by the Apple apps (see clients.md)
-│   ├── android/                 # (later) [Kotlin] Code shared by the Android apps (see clients.md)
+│   ├── android/                 # [Kotlin] Code shared by the Android apps (see clients.md)
 │   └── design/                  # Design tokens and icons for every client (see clients.md)
 │
 ├── plugins/

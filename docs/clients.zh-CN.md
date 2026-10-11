@@ -112,7 +112,7 @@ flowchart LR
 * **画中画**：只用公开且被 App Store 允许的 `AVPictureInPictureController`。AVPlayer 直接支持，AetherEngine 经由其 `AVPlayerLayer` 或 `AVSampleBufferDisplayLayer` 内容源接入。tvOS 不显示样本缓冲显示层的画中画，因此 AetherEngine 在软件路径上播放时进入画中画，改由 AVPlayer 重新开始播放，由服务端处理该源。
 
 ### 4.3 Android（`apps/android`、`apps/android-tv`、`libs/android`）
-* **每种交互模型一个应用。** 手机、平板与折叠屏共用一个以 Compose 编写、采用自适应布局的应用；Android TV 与 Google TV 有自己的 Compose for TV 应用，围绕方向键焦点构建，并提供主屏上的 Watch Next 与频道。两者作为同一个 Play 商店条目发布，TV 应用面向 TV 设备类型。
+* **每种交互模型一个应用。** 手机、平板与折叠屏共用一个以 Compose 编写、采用自适应布局的应用；Android TV 与 Google TV 有自己的 Compose for TV 应用，围绕方向键焦点构建，并提供主屏上的 Watch Next 与频道。两者以同一应用 ID `dev.mavio.app` 作为同一个 Play 商店条目发布，TV 应用面向 TV 设备类型；两者都支持 Android 8.0（API 26）及以上。
 * **`libs/android`**，两个应用以复合构建（composite build）引入的共享 Gradle 模块：
   * `core`：核心的 Kotlin API 及其上的应用服务——账户、能力探测、以 WorkManager 下载；
   * `player`：一个播放器接口、两个引擎，其上是提供后台播放与系统控制的 `MediaSessionService`，以及画中画（Android 的画中画可用于任何 `SurfaceView`）；
@@ -240,7 +240,7 @@ flowchart LR
 * `apps/windows-linux` → `libs/client-rust`（C ABI）与 `libs/proto`（Go）。它与服务端的模块一样是 Go 模块，遵循仓库的 Go 约定；depguard 规则不允许它依赖任何服务端库。
 * `libs/client-rust` → `libs/proto`（Rust）。
 * 应用之间互不依赖。服务端只为内嵌的文件依赖 `apps/web`。
-* 所有客户端由 Nx 编排：`tools/nx-go` 像推断其他 Go 模块一样推断 `apps/windows-linux`，Vite 与 TypeScript 用其 Nx 插件，Gradle 用 `@nx/gradle`，Cargo 与 `xcodebuild` 用各自的目标。macOS runner 成本高，CI 中的 Apple 与 Android 任务只在受影响时运行。
+* 所有客户端由 Nx 编排：`tools/nx-go` 像推断其他 Go 模块一样推断 `apps/windows-linux`，Vite 与 TypeScript 用其 Nx 插件，Cargo、Gradle 与 `xcodebuild` 用各自的目标。macOS runner 成本高，CI 中的 Apple 与 Android 任务只在受影响时运行。
 
 ---
 

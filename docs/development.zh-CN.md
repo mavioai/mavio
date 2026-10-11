@@ -18,6 +18,7 @@
 | golangci-lint | Go 代码检查与格式检查 |
 | sqlc | 生成 `libs/store` 中的方言专属查询代码 |
 | protoc-gen-buffa、protoc-gen-buffa-packaging、protoc-gen-connect-rust | `libs/proto` 的 Rust 代码生成，取自其发布构建 |
+| java（Temurin）+ gradle | Android 各应用与 `libs/android` |
 | jellyfin-ffmpeg | 媒体管线、测试媒体生成与集成测试（`PATH` 上的 `ffmpeg` / `ffprobe`） |
 
 ```bash
@@ -37,7 +38,7 @@ tvOS 目标 `aarch64-apple-tvos` 与 `aarch64-apple-tvos-sim` 属于 tier 3，�
 
 ### 2.1 为什么用 Nx
 Go 是服务端主语言；未来还会加入以 TypeScript（Web UI）、Swift、Kotlin、Go（Windows 与 Linux 应用）与 Rust（它们的共享核心）编写的[客户端](clients.zh-CN.md)，并使用由 `libs/proto` 生成的客户端代码。这是一个跨语言的 monorepo，需要统一的依赖图、受影响分析与任务缓存：
-* Nx 对 Vite / React 与 Gradle（`@nx/gradle`）有官方插件；Cargo 与 `xcodebuild` 通过各自的目标运行；
+* Nx 对 Vite / React 有官方插件；Cargo、Gradle 与 `xcodebuild` 通过各自的目标运行；
 * Go 项目由仓库内的本地 Nx 插件 `tools/nx-go` 推断：每个 `go.mod` 自动成为一个项目，并根据 `go.mod` 中的仓库内 `require` 生成依赖图；
 * Cargo workspace 由本地 Nx 插件 `tools/nx-cargo` 推断：每个含 `[workspace]` 表的 `Cargo.toml` 成为一个项目，依赖其 `[workspace.metadata.nx]` 的 `implicitDependencies` 所列的项目（`libs/client-rust` 列出 `proto`，它包含后者生成的 Rust 代码）；
 * 用 tags 表达边界：`type:app|lib|plugin`、`lang:go|ts|rust|swift|kotlin`、`scope:server|client|shared`。TS 侧由 `@nx/enforce-module-boundaries` 约束，Go 侧由 depguard 约束（§5）。
@@ -66,6 +67,8 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 `libs/client-ts` 与 `apps/web` 同样有 `typecheck`，`libs/client-ts` 有 `test`（Vitest），`apps/web` 有 `build`（Vite），它把 Web UI 写入 `apps/server/internal/webui/dist`。服务端的 `build` 与 `dist` 依赖它（`apps/server/project.json`），使二进制内嵌该 UI；直接 `go build` 则内嵌该目录现有的内容，目录中只有 `.gitkeep` 时，服务端提供一个说明未随 UI 构建的页面。`pnpm --filter @mavio/web dev` 用 Vite 提供 UI，并把其 API 调用发往 8686 端口上的服务端。
 
 Apple 各项目需要 Xcode，只在 macOS 上构建；它们带有标签 `platform:apple`，Linux 与 Windows 的 CI 任务将其排除。`libs/apple` 有 `core`，运行 `scripts/build-core.sh`：为每个 Apple 目标构建 `mavio-uniffi`，把每个共享库包装为动态 framework，写出 `build/MavioCoreFFI.xcframework`，以及 UniFFI 生成的 Swift API（`build/MavioCore`）；采用 framework 而非静态库，是因为应用中其他 Rust 代码的静态库（AetherEngine 的 LibDovi）各自带有 Rust 标准库，其符号会冲突。其 `build` 与 `test` 在 `core` 之后运行 `swift build` 与 `swift test`，`lint` 以仓库的 `.swift-format` 运行 `swift format lint --strict`。`apps/ios`、`apps/tvos` 与 `apps/macos` 有 `build`（不签名的 `xcodebuild`，iPhone 与 Apple TV 面向模拟器；只构建 arm64，与 AetherEngine 的模拟器库一致）、`lint`，以及 `generate`：它用 `libs/apple/scripts/gen-project.py` 写出应用的 `Mavio.xcodeproj`，该工程提交入库、不手工编辑，其源码是同步文件夹 `Mavio/`，添加文件无须改动工程。
+
+Android 各项目需要 Android SDK（通过 `ANDROID_HOME` 找到），运行 `mise.toml` 锁定的 Gradle 与 JDK；每个 Gradle 构建的 `gradle/wrapper/gradle-wrapper.properties` 为 Android Studio 指明同一 Gradle 版本，不带 wrapper 脚本。它们带有标签 `platform:android`。`libs/android`（Nx 名称 `android-lib`）是由模块 `core`、`player` 与 `ui` 组成的 Gradle 构建，带有一份版本目录（`gradle/libs.versions.toml`），各应用的 settings 也读取它；其 `core` 目标运行 `scripts/build-core.sh`：用锁定的 NDK（缺失时以 `sdkmanager` 安装）为 `arm64-v8a`、`armeabi-v7a` 与 `x86_64` 构建 `mavio-uniffi`，把各个库、UniFFI 生成的 Kotlin API，以及为本机构建、由单元测试通过 JNA 加载的核心写入 `core/build/rust`。其 `build`、`test` 与 `lint` 运行 `assembleDebug`、`testDebugUnitTest` 与 `lintDebug`。`apps/android` 与 `apps/android-tv` 是引入 `libs/android` 的 Gradle 构建，按坐标（`dev.mavio.android:core`）依赖其模块；它们有 `build` 与 `lint`。各应用的构建共享该 included build，因此 Gradle 目标逐个运行。
 
 ### 2.3 常用命令
 ```bash
@@ -178,12 +181,13 @@ go build -o plugin .                                                     # 子�
 * **check**（Linux）：`nx affected -t buf-lint lint tidy-check typecheck build test`；重新生成代码，有任何差异即失败；PR 上对照目标分支运行 `buf breaking`。
 * **test**：在 linux arm64、macOS、Windows 上运行 `nx run-many -t test build`。
 * **apple**（macOS），在 **check** 发现 Apple 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，生成的 Xcode 工程与 `generate` 写出的不一致时失败。
+* **android**（Linux），在 **check** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`。
 * **media**（Linux、macOS）：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
 
 * **dist**（Linux）：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台。
 * **image**（Linux）：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
 
-CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check**、**test** 与 **apple** 缓存 Cargo 的构建（`Swatinem/rust-cache`）。
+CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg，**android** 以外的任务不安装 Java 与 Gradle（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check**、**test**、**apple** 与 **android** 缓存 Cargo 的构建（`Swatinem/rust-cache`）。
 
 ---
 

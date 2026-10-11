@@ -112,7 +112,7 @@ The server owns every decision that depends on the library, the user or other de
 * **Picture in Picture**: `AVPictureInPictureController` only, which is public and allowed in the App Store. AVPlayer gives it directly, and AetherEngine through its `AVPlayerLayer` or its `AVSampleBufferDisplayLayer` content source. tvOS shows no Picture in Picture of a sample buffer display layer, so entering it while AetherEngine plays on its software path starts the playback again on AVPlayer, the server processing the source.
 
 ### 4.3 Android (`apps/android`, `apps/android-tv`, `libs/android`)
-* **One app per interaction model.** Phones, tablets and foldables share an app in Compose with adaptive layouts; Android TV and Google TV have their own in Compose for TV, built around D-pad focus, with Watch Next and channels on the home screen. They are published as one Play listing, the TV app for the TV form factor.
+* **One app per interaction model.** Phones, tablets and foldables share an app in Compose with adaptive layouts; Android TV and Google TV have their own in Compose for TV, built around D-pad focus, with Watch Next and channels on the home screen. They are published as one Play listing under one application ID, `dev.mavio.app`, the TV app for the TV form factor; both run on Android 8.0 (API 26) and later.
 * **`libs/android`**, Gradle modules shared by both apps, which include it as a composite build:
   * `core`: the core's Kotlin API with the app services above it — accounts, capability probing, downloads with WorkManager;
   * `player`: one player interface with two engines, behind a `MediaSessionService` for background playback and system controls, and Picture in Picture, which on Android takes any `SurfaceView`;
@@ -240,7 +240,7 @@ Consistency of brand does not override the platforms:
 * `apps/windows-linux` → `libs/client-rust` (C ABI) and `libs/proto` (Go). It is a Go module like the server's and follows the repository's Go conventions; the depguard rules let it depend on no server library.
 * `libs/client-rust` → `libs/proto` (Rust).
 * No app depends on another app. The server depends on `apps/web` only for the files it embeds.
-* Nx runs every client: `tools/nx-go` infers `apps/windows-linux` as it does every Go module, Vite and TypeScript run through their Nx plugins, Gradle through `@nx/gradle`, and Cargo and `xcodebuild` through targets of their own. The Apple and Android jobs in CI run only when they are affected, macOS runners being costly.
+* Nx runs every client: `tools/nx-go` infers `apps/windows-linux` as it does every Go module, Vite and TypeScript run through their Nx plugins, and Cargo, Gradle and `xcodebuild` through targets of their own. The Apple and Android jobs in CI run only when they are affected, macOS runners being costly.
 
 ---
 

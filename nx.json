@@ -40,6 +40,14 @@
       "{projectRoot}/**/*.xcstrings",
       "{projectRoot}/Package.resolved"
     ],
+    "gradle": [
+      "{projectRoot}/**/*.kt",
+      "{projectRoot}/**/*.kts",
+      "{projectRoot}/**/*.xml",
+      "{projectRoot}/gradle/**/*",
+      "{projectRoot}/gradle.properties",
+      "!{projectRoot}/**/build/**/*"
+    ],
     "rustGen": [
       "{projectRoot}/gen/rust/**/*"
     ]

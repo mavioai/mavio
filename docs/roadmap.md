@@ -571,6 +571,8 @@ flowchart TD
   - [x] `libs/client-rust`: `mavio-core`, and `mavio-uniffi`, whose `uniffi-bindgen` generates the Swift module `MavioCore` and the Kotlin package `dev.mavio.core`; the C ABI and its messages (`capi`, `proto`) come with the Windows and Linux app, their only user
   - [x] Web: `apps/web` (React, Vite, TanStack Router and Query, Tailwind CSS on the design tokens) and `libs/client-ts`; the server embeds the build (`apps/server/internal/webui`) and serves it at `/`, its container image building it first
   - [x] Apple: `libs/apple` (`MavioKit` over the core's XCFramework, `MavioPlayer` with AetherEngine, `MavioUI` over `MavioDesign`, the Swift package of `libs/design`) and the apps `apps/ios`, `apps/tvos` and `apps/macos`, each showing the core's version on the simulator and the Mac
+  - [x] Android: `libs/android` (`core` with the core's Kotlin API and libraries, `player` with Media3, `ui` with the design tokens, icons and strings) and the apps `apps/android` and `apps/android-tv`, which build and pass Android lint
+  - [ ] Windows and Linux: `apps/windows-linux` with the core's C ABI (`capi`, `proto`); deferred with MyGo's video element until a Windows machine is available
 - [ ] `libs/client-rust`: servers and sign-in, the event stream, the offline store, playback reporting, downloads, screen state, the merging of several servers; the Swift, Kotlin and Go bindings
 - [ ] Web UI (`apps/web`, `libs/client-ts`)
 - [ ] iPhone and iPad app (`apps/ios`, `libs/apple`)

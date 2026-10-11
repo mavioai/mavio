@@ -1,0 +1,84 @@
+{
+  "name": "android-lib",
+  "tags": [
+    "platform:android"
+  ],
+  "implicitDependencies": [
+    "client-rust",
+    "design"
+  ],
+  "targets": {
+    "core": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "sh scripts/build-core.sh",
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "{projectRoot}/scripts/build-core.sh",
+        "^rust"
+      ],
+      "outputs": [
+        "{projectRoot}/core/build/rust"
+      ],
+      "cache": true
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "gradle --console=plain assembleDebug",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        "core"
+      ],
+      "inputs": [
+        "gradle",
+        "^gradle",
+        {
+          "dependentTasksOutputFiles": "**/*"
+        }
+      ],
+      "cache": true,
+      "parallelism": false
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "gradle --console=plain testDebugUnitTest",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        "core"
+      ],
+      "inputs": [
+        "gradle",
+        "^gradle",
+        {
+          "dependentTasksOutputFiles": "**/*"
+        }
+      ],
+      "cache": true,
+      "parallelism": false
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "gradle --console=plain lintDebug",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        "core"
+      ],
+      "inputs": [
+        "gradle",
+        "^gradle",
+        {
+          "dependentTasksOutputFiles": "**/*"
+        }
+      ],
+      "cache": true,
+      "parallelism": false
+    }
+  }
+}

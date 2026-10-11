@@ -82,7 +82,7 @@ mavio/
 │   ├── server/                  # [Go] 服务端：cmd/mavio、依赖装配、配置、Connect 服务实现
 │   ├── web/                     # [TS] Web UI，内嵌于服务端（见 clients.zh-CN.md）
 │   ├── ios/ tvos/ macos/        # [Swift] iPhone 与 iPad、Apple TV、Mac（见 clients.zh-CN.md）
-│   ├── android/ android-tv/     # (后期) [Kotlin] 手机与平板、Android TV（见 clients.zh-CN.md）
+│   ├── android/ android-tv/     # [Kotlin] 手机与平板、Android TV（见 clients.zh-CN.md）
 │   └── windows-linux/           # (后期) [Go] Windows 与 Linux：MyGo、libmpv（见 clients.zh-CN.md）
 │
 ├── libs/
@@ -102,7 +102,7 @@ mavio/
 │   ├── client-ts/               # [TS] Web UI 的 connect-es 客户端与 Query hooks（见 clients.zh-CN.md）
 │   ├── client-rust/             # [Rust] 原生客户端的共享核心（见 clients.zh-CN.md）
 │   ├── apple/                   # [Swift] Apple 各应用的共享代码（见 clients.zh-CN.md）
-│   ├── android/                 # (后期) [Kotlin] Android 各应用的共享代码（见 clients.zh-CN.md）
+│   ├── android/                 # [Kotlin] Android 各应用的共享代码（见 clients.zh-CN.md）
 │   └── design/                  # 所有客户端的设计 tokens 与图标（见 clients.zh-CN.md）
 │
 ├── plugins/

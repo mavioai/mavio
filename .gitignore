@@ -27,3 +27,8 @@ apps/server/internal/webui/dist/*
 
 # Xcode
 xcuserdata/
+
+# Gradle
+.gradle/
+.kotlin/
+local.properties

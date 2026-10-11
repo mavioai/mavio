@@ -8,9 +8,10 @@ on:
 permissions:
   contents: read
 
-# Only the media job needs ffmpeg; it installs jellyfin-ffmpeg from mise.toml.
+# Only the media job needs ffmpeg, and only the android job Java and Gradle;
+# they install them from mise.toml.
 env:
-  MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg
+  MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,java,gradle
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,7 +22,8 @@ jobs:
     name: Lint, test, build (affected)
     runs-on: ubuntu-latest
     outputs:
-      apple: ${{ steps.apple.outputs.projects }}
+      apple: ${{ steps.platforms.outputs.apple }}
+      android: ${{ steps.platforms.outputs.android }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,14 +35,17 @@ jobs:
           workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
       - uses: nrwl/nx-set-shas@v4
-      # The Apple projects build only on macOS, in the apple job, which runs
+      # The Apple and Android projects build in jobs of their own, which run
       # when they are affected.
-      - run: pnpm nx affected -t buf-lint lint tidy-check typecheck build test --exclude 'tag:platform:apple' --output-style=static
-      - id: apple
-        run: echo "projects=$(pnpm exec nx show projects --affected --projects 'tag:platform:apple' --json)" >> "$GITHUB_OUTPUT"
+      - run: pnpm nx affected -t buf-lint lint tidy-check typecheck build test --exclude 'tag:platform:apple,tag:platform:android' --output-style=static
+      - id: platforms
+        run: |
+          for p in apple android; do
+            echo "$p=$(pnpm exec nx show projects --affected --projects "tag:platform:$p" --json)" >> "$GITHUB_OUTPUT"
+          done
       - name: Generated code is up to date
         run: |
-          pnpm nx run-many -t generate --exclude 'tag:platform:apple' --output-style=static
+          pnpm nx run-many -t generate --exclude 'tag:platform:apple,tag:platform:android' --output-style=static
           git diff --exit-code
       - name: Protobuf breaking changes
         if: github.event_name == 'pull_request'
@@ -62,7 +67,7 @@ jobs:
         with:
           workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx run-many -t typecheck test build --exclude 'tag:platform:apple' --output-style=static
+      - run: pnpm nx run-many -t typecheck test build --exclude 'tag:platform:apple,tag:platform:android' --output-style=static
 
   apple:
     name: Apple
@@ -82,6 +87,22 @@ jobs:
           pnpm nx run-many -t generate --projects '${{ join(fromJSON(needs.check.outputs.apple), ',') }}' --output-style=static
           git diff --exit-code
 
+
+  android:
+    name: Android
+    needs: check
+    if: needs.check.outputs.android != '[]'
+    runs-on: ubuntu-latest
+    env:
+      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: libs/client-rust
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.check.outputs.android), ',') }}' --output-style=static
   media:
     name: Media integration (${{ matrix.os }})
     needs: check
@@ -91,7 +112,7 @@ jobs:
         os: [ubuntu-24.04, macos-latest]
     runs-on: ${{ matrix.os }}
     env:
-      MISE_DISABLE_TOOLS: ""
+      MISE_DISABLE_TOOLS: java,gradle
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
