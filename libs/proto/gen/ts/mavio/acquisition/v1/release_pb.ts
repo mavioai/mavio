@@ -211,7 +211,7 @@ export const IndexerFailureSchema: GenMessage<IndexerFailure> = /*@__PURE__*/
  */
 export type SearchReleasesRequest = Message<"mavio.acquisition.v1.SearchReleasesRequest"> & {
   /**
-   * A movie, season or episode of the library, wanted or not; searches by
+   * A movie, series, season or episode of the library, wanted or not; searches by
    * its own or its series' IDs, title, year and numbers.
    *
    * @generated from field: string item_id = 1;
@@ -475,7 +475,7 @@ export type Release = Message<"mavio.acquisition.v1.Release"> & {
   customFormatScore: number;
 
   /**
-   * For a search of a wanted series' season or episode: the episodes the
+   * For a search of a wanted series, its season or episode: the episodes the
    * release was matched to.
    *
    * @generated from field: repeated string episode_ids = 26;
@@ -818,8 +818,8 @@ export const ReleaseService: GenService<{
     output: typeof ListIndexersResponseSchema;
   },
   /**
-   * SearchReleases searches indexers for a movie, season or episode of the
-   * library, by the IDs and numbers each indexer can search by and else by
+   * SearchReleases searches indexers for a movie, series, season or episode
+   * of the library (a series season by season, but its specials), by the IDs and numbers each indexer can search by and else by
    * title, as Radarr and Sonarr do; or for text; or reads their recent
    * releases when given neither.
    *

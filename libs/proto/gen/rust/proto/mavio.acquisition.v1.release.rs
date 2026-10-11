@@ -1324,7 +1324,7 @@ impl ::buffa::ExtensionSet for IndexerFailure {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct SearchReleasesRequest {
-    /// A movie, season or episode of the library, wanted or not; searches by
+    /// A movie, series, season or episode of the library, wanted or not; searches by
     /// its own or its series' IDs, title, year and numbers.
     ///
     /// Field 1: `item_id`
@@ -2001,7 +2001,7 @@ pub struct Release {
     pub custom_formats: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     /// Field 25: `custom_format_score`
     pub custom_format_score: ::core::option::Option<i32>,
-    /// For a search of a wanted series' season or episode: the episodes the
+    /// For a search of a wanted series, its season or episode: the episodes the
     /// release was matched to.
     ///
     /// Field 26: `episode_ids`

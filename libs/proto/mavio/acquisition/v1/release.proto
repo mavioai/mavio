@@ -14,8 +14,8 @@ service ReleaseService {
   rpc ListIndexers(ListIndexersRequest) returns (ListIndexersResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // SearchReleases searches indexers for a movie, season or episode of the
-  // library, by the IDs and numbers each indexer can search by and else by
+  // SearchReleases searches indexers for a movie, series, season or episode
+  // of the library (a series season by season, but its specials), by the IDs and numbers each indexer can search by and else by
   // title, as Radarr and Sonarr do; or for text; or reads their recent
   // releases when given neither.
   rpc SearchReleases(SearchReleasesRequest) returns (SearchReleasesResponse) {
@@ -96,7 +96,7 @@ enum ReleaseSearchType {
 }
 
 message SearchReleasesRequest {
-  // A movie, season or episode of the library, wanted or not; searches by
+  // A movie, series, season or episode of the library, wanted or not; searches by
   // its own or its series' IDs, title, year and numbers.
   string item_id = 1 [(buf.validate.field).string.uuid = true];
   // A text search when item_id is unset; nothing reads recent releases.
@@ -170,7 +170,7 @@ message Release {
   bool evaluated = 23;
   repeated string custom_formats = 24;
   int32 custom_format_score = 25;
-  // For a search of a wanted series' season or episode: the episodes the
+  // For a search of a wanted series, its season or episode: the episodes the
   // release was matched to.
   repeated string episode_ids = 26;
 }
