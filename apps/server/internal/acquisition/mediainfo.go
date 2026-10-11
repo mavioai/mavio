@@ -23,7 +23,7 @@ func importQuality(d *core.Download, f importFile, probed library.ProbeResult) a
 		}
 	}
 	if v := videoStream(probed.Source); v != nil {
-		augments = append(augments, acquire.AugmentMediaInfoQuality(v.Width, v.Height, probed.Tags.Name))
+		augments = append(augments, acquire.AugmentMediaInfoQuality(v.Width, v.Height, probed.ContainerTitle))
 	}
 	grabbed := release.ParseQuality(d.Title, release.Movie)
 	if q := qualityModel(d.Quality); grabbed.Quality == release.Unknown && q.Quality != release.Unknown {

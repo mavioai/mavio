@@ -1,5 +1,7 @@
 package release
 
+import "strings"
+
 // SeriesSource is the source of a quality as Sonarr's QualitySource.
 type SeriesSource int
 
@@ -71,10 +73,19 @@ func AugmentFromName(p ParsedQuality) QualityAugment {
 	}
 }
 
-// AugmentFromVideo returns the resolution the frame size of a file's
-// video tells, as Sonarr's AugmentQualityFromMediaInfo; false without a
-// frame size.
-func AugmentFromVideo(width, height int) (QualityAugment, bool) {
+// AugmentFromVideo returns what the media info of a file tells of its
+// quality, as Sonarr's AugmentQualityFromMediaInfo: the resolution of
+// its video's frame size, and the source of title, the title tag of its
+// container, when a source is named there; false without a frame size.
+func AugmentFromVideo(width, height int, title string) (QualityAugment, bool) {
+	source, sourceConfidence := SeriesSourceUnknown, ConfidenceDefault
+	if title = strings.TrimSpace(title); title != "" {
+		if p := ParseQualityName(title, Series); p.SourceDetection == DetectedName {
+			if s := SeriesSourceOf(p.Quality); s != SeriesSourceUnknown {
+				source, sourceConfidence = s, ConfidenceMediaInfo
+			}
+		}
+	}
 	resolution := 0
 	switch {
 	case width >= 3200 || height >= 2100:
@@ -90,7 +101,7 @@ func AugmentFromVideo(width, height int) (QualityAugment, bool) {
 	default:
 		return QualityAugment{}, false
 	}
-	return QualityAugment{SourceConfidence: ConfidenceDefault, Resolution: resolution, ResolutionConfidence: ConfidenceMediaInfo}, true
+	return QualityAugment{Source: source, SourceConfidence: sourceConfidence, Resolution: resolution, ResolutionConfidence: ConfidenceMediaInfo}, true
 }
 
 // AggregateSeriesQuality returns the quality of a file from what its

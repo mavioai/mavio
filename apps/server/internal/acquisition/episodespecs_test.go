@@ -18,6 +18,10 @@ func TestAggregateEpisodeQuality(t *testing.T) {
 	video := func(w, h int) *library.ProbeResult {
 		return &library.ProbeResult{Source: core.MediaSource{Streams: []core.MediaStream{{Kind: core.StreamAudio}, {Kind: core.StreamVideo, Width: w, Height: h}}}}
 	}
+	titled := func(p *library.ProbeResult, title string) *library.ProbeResult {
+		p.ContainerTitle = title
+		return p
+	}
 	parse := release.ParseSeriesTitle
 	for _, tt := range []struct {
 		name                   string
@@ -30,6 +34,8 @@ func TestAggregateEpisodeQuality(t *testing.T) {
 		{name: "video over the name", file: "Show.S01E01.720p.WEB-DL-GRP", probe: video(1920, 1080), want: release.WEBDL1080p},
 		{name: "source from the folder", file: "Show.S01E01.1080p", folder: "Show.S01E01.1080p.WEB-DL-GRP", want: release.WEBDL1080p},
 		{name: "grabbed release only", download: "Show.S01E01.720p.WEB-DL-GRP", want: release.WEBDL720p},
+		{name: "source from the container's title", file: "Show.S01E01.x264-GRP", probe: titled(video(1920, 1080), "Show.S01E01.WEB.x264-GRP"), want: release.WEBDL1080p},
+		{name: "container's title naming no source", file: "Show.S01E01.WEB-DL-GRP", probe: titled(video(1920, 1080), "Show.S01E01"), want: release.WEBDL1080p},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			var file, folder, download *release.ParsedEpisodeInfo
