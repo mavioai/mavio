@@ -2,6 +2,7 @@ package library
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"path/filepath"
 	"testing"
@@ -21,7 +22,11 @@ func (p *fakeProber) Probe(_ context.Context, path string, audio bool) (ProbeRes
 	}}, nil
 }
 
-type fakeProvider struct{ lookups []Lookup }
+type fakeProvider struct {
+	lookups []Lookup
+	// runtime is the runtime the provider gives movies; 0 for none.
+	runtime time.Duration
+}
 
 func (p *fakeProvider) Name() string { return "fake" }
 
@@ -34,6 +39,7 @@ func (p *fakeProvider) Metadata(_ context.Context, l Lookup) (*metadata.Result, 
 		Item: core.Item{
 			Name: "Remote " + l.Name, Overview: "From the provider.", Genres: []string{"Animation"},
 			ExternalIDs: map[core.Provider]string{core.ProviderTMDB: "14160"},
+			Runtime:     p.runtime,
 		},
 		People:       []metadata.Person{{Name: "Pete Docter", Kind: core.CreditDirector}},
 		RemoteImages: []metadata.RemoteImage{{Kind: core.ImagePrimary, URL: "https://image.example/up.jpg"}},
@@ -129,6 +135,45 @@ func TestJobs(t *testing.T) {
 	}
 	if pending != 1 {
 		t.Errorf("pending jobs = %d", pending)
+	}
+}
+
+// The runtime the metadata gives an item stays its runtime while its file
+// is probed again, until the refresh the probe queues: acquisition
+// decisions read it meanwhile.
+func TestProbeKeepsMetadataRuntime(t *testing.T) {
+	f := newScan(t, core.LibraryMovies)
+	tree(t, f.root, "Up (2009)/Up (2009).mkv")
+	if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
+		t.Fatal(err)
+	}
+	f.store.clock = func() time.Time { return f.clock }
+	now := func() time.Time { return f.clock }
+	jobs := &Jobs{
+		Store: f.store, Scanner: f.sc, Prober: &fakeProber{}, Now: now,
+		Refresher: &Refresher{Store: f.store, Providers: []Provider{&fakeProvider{runtime: 96 * time.Minute}}, Now: now},
+	}
+	w := &Worker{Queue: f.store.Jobs(), Owner: "test", Handlers: jobs.Handlers()}
+	if _, err := f.store.Jobs().Enqueue(t.Context(), new(ScanJob(f.lib, f.clock, false))); err != nil {
+		t.Fatal(err)
+	}
+	drain(t, w)
+	up := f.item("Up (2009)/Up (2009).mkv")
+	if up.Runtime != 96*time.Minute {
+		t.Fatalf("runtime = %v, want = %v", up.Runtime, 96*time.Minute)
+	}
+
+	// The file changed, so it is probed again.
+	f.clock = f.clock.Add(time.Hour)
+	for i := range f.store.sources[up.ID] {
+		f.store.sources[up.ID][i].ProbedAt = time.Time{}
+	}
+	payload, _ := json.Marshal(ProbePayload{ItemID: up.ID})
+	if _, err := jobs.probe(t.Context(), core.Job{ID: core.NewID(), Kind: JobProbe, Payload: payload}); err != nil {
+		t.Fatal(err)
+	}
+	if got := f.item("Up (2009)/Up (2009).mkv").Runtime; got != 96*time.Minute {
+		t.Errorf("runtime after the probe = %v, want = %v", got, 96*time.Minute)
 	}
 }
 

@@ -282,7 +282,12 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 			if err != nil {
 				return err
 			}
-			if len(current) > 0 && current[0].Duration > 0 && !slices.Contains(it.LockedFields, core.FieldRuntime) {
+			// The file gives its runtime to an item without one. A runtime
+			// the metadata gave stays, rather than being the file's until the
+			// refresh queued below gives it back, as acquisition decisions
+			// read it meanwhile; that refresh takes the file's when the
+			// metadata gives none.
+			if it.Runtime == 0 && len(current) > 0 && current[0].Duration > 0 && !slices.Contains(it.LockedFields, core.FieldRuntime) {
 				it.Runtime = current[0].Duration
 			}
 			if audio {
