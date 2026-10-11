@@ -279,9 +279,12 @@ func (rn *run) seriesNaming() organize.SeriesNaming {
 		to   *string
 		from string
 	}{
-		{&n.StandardEpisodeFormat, s.StandardEpisodeFormat}, {&n.DailyEpisodeFormat, s.DailyEpisodeFormat},
-		{&n.AnimeEpisodeFormat, s.AnimeEpisodeFormat}, {&n.SeriesFolderFormat, s.SeriesFolderFormat},
-		{&n.SeasonFolderFormat, s.SeasonFolderFormat}, {&n.SpecialsFolderFormat, s.SpecialsFolderFormat},
+		{&n.StandardEpisodeFormat, s.StandardEpisodeFormat},
+		{&n.DailyEpisodeFormat, s.DailyEpisodeFormat},
+		{&n.AnimeEpisodeFormat, s.AnimeEpisodeFormat},
+		{&n.SeriesFolderFormat, s.SeriesFolderFormat},
+		{&n.SeasonFolderFormat, s.SeasonFolderFormat},
+		{&n.SpecialsFolderFormat, s.SpecialsFolderFormat},
 	} {
 		if strings.TrimSpace(f.from) != "" {
 			*f.to = f.from
