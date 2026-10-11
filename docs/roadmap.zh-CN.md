@@ -408,7 +408,7 @@ flowchart TD
   - [ ] 拉取并更新 `indexers.prowlarr.com` 的定义，由插件的装配完成
   - [ ] 手动解答验证码：目前没有界面展示图片验证码，自动登录遇到时失败
   - [ ] 像 Prowlarr 的 GetCookies 那样，以 `cookie` 设置的 cookie 取代响应设置的 cookie；目前只是与之一并发送
-- [ ] Prowlarr 以代码实现的站点
+- [x] Prowlarr 以代码实现的站点，其标记为过时者除外
   - [x] Gazelle（`internal/sites/gazelle`）：AlphaRatio、BrokenStones、DesiGaane、DICMusic、GreatPosterWall、Secret Cinema；使用 API 密钥的 Orpheus、Redacted
   - [x] AvistaZ（`internal/sites/avistaz`）：AnimeZ、AvistaZ、CinemaZ、ExoticaZ、PrivateHD
   - [x] SpeedApp（`internal/sites/speedapp`）：RetroFlix、SpeedApp.io
@@ -428,6 +428,9 @@ flowchart TD
     - [ ] MyAnonamouse 的大小限制（`tor[minSize]`、`tor[maxSize]`），待查询带上 `minsize` 和 `maxsize` 后发送
     - [ ] 像 Prowlarr 那样在测试 MyAnonamouse 前清除其 Cookie
   - [x] PreToMe、RevolutionTT、SceneHD、SpeedCD、TorrentBytes、TorrentSyndikat、Uniotaku 和 XSpeeds（`internal/sites/<name>`）
+  - [x] AnimeBytes、Anidex、Anidub、BakaBT、SubsPlease 和 Toloka.to（`internal/sites/<name>`）
+    - [ ] 像 Prowlarr 那样将 AnimeBytes 的结果缓存三分钟
+    - [ ] Anidub 的分辨率：Prowlarr 的发布保留它，Mavio 的发布尚无此字段
   - [ ] 像 Prowlarr 存入设置那样跨重启保存 AvistaZ 与 SpeedApp 站点的 API 令牌；目前每次启动后重新登录
   - [ ] torrent 索引器的做种设置（最少做种数、分享率与做种时间），抓取时交给下载客户端
 - [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
