@@ -148,6 +148,14 @@ pub use self::__buffa::view::FilterValueView;
 #[doc(inline)]
 pub use self::__buffa::view::FilterValueOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SearchTitlesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchTitlesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchTitlesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchTitlesResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::DeviceView;
 #[doc(inline)]
 pub use self::__buffa::view::DeviceOwnedView;

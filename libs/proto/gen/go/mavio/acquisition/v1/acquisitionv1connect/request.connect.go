@@ -59,15 +59,24 @@ const (
 	RequestServiceRetryRequestProcedure = "/mavio.acquisition.v1.RequestService/RetryRequest"
 	// RequestServiceGetQuotaProcedure is the fully-qualified name of the RequestService's GetQuota RPC.
 	RequestServiceGetQuotaProcedure = "/mavio.acquisition.v1.RequestService/GetQuota"
+	// RequestServiceBlockTitleProcedure is the fully-qualified name of the RequestService's BlockTitle
+	// RPC.
+	RequestServiceBlockTitleProcedure = "/mavio.acquisition.v1.RequestService/BlockTitle"
+	// RequestServiceUnblockTitleProcedure is the fully-qualified name of the RequestService's
+	// UnblockTitle RPC.
+	RequestServiceUnblockTitleProcedure = "/mavio.acquisition.v1.RequestService/UnblockTitle"
+	// RequestServiceListBlockedTitlesProcedure is the fully-qualified name of the RequestService's
+	// ListBlockedTitles RPC.
+	RequestServiceListBlockedTitlesProcedure = "/mavio.acquisition.v1.RequestService/ListBlockedTitles"
 )
 
 // RequestServiceClient is a client for the mavio.acquisition.v1.RequestService service.
 type RequestServiceClient interface {
 	// CreateRequest requests a movie, or seasons of a series, by its TMDB
 	// ID. It fails with PERMISSION_DENIED when the user may not request it
-	// (its kind, or its rating above the user's limit), RESOURCE_EXHAUSTED
-	// past the user's quota, and ALREADY_EXISTS when it is requested,
-	// wanted or available already.
+	// (its kind, its rating above the user's limit, or the title
+	// blocklisted), RESOURCE_EXHAUSTED past the user's quota, and
+	// ALREADY_EXISTS when it is requested, wanted or available already.
 	CreateRequest(context.Context, *v1.CreateRequestRequest) (*v1.CreateRequestResponse, error)
 	// ListRequests lists the caller's requests, or anyone's for
 	// administrators.
@@ -92,6 +101,15 @@ type RequestServiceClient interface {
 	// GetQuota returns how much of their quotas a user has used: the
 	// caller's own, or anyone's for administrators.
 	GetQuota(context.Context, *v1.GetQuotaRequest) (*v1.GetQuotaResponse, error)
+	// BlockTitle blocklists a movie or series, as Seerr's blocklist: it can
+	// no longer be requested. It fails with ALREADY_EXISTS when the title is
+	// blocklisted already. Administrators only.
+	BlockTitle(context.Context, *v1.BlockTitleRequest) (*v1.BlockTitleResponse, error)
+	// UnblockTitle takes a title off the blocklist. Administrators only.
+	UnblockTitle(context.Context, *v1.UnblockTitleRequest) (*v1.UnblockTitleResponse, error)
+	// ListBlockedTitles lists the blocklist, newest first. Administrators
+	// only.
+	ListBlockedTitles(context.Context, *v1.ListBlockedTitlesRequest) (*v1.ListBlockedTitlesResponse, error)
 }
 
 // NewRequestServiceClient constructs a client for the mavio.acquisition.v1.RequestService service.
@@ -164,20 +182,43 @@ func NewRequestServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		blockTitle: connect.NewClient[v1.BlockTitleRequest, v1.BlockTitleResponse](
+			httpClient,
+			baseURL+RequestServiceBlockTitleProcedure,
+			connect.WithSchema(requestServiceMethods.ByName("BlockTitle")),
+			connect.WithClientOptions(opts...),
+		),
+		unblockTitle: connect.NewClient[v1.UnblockTitleRequest, v1.UnblockTitleResponse](
+			httpClient,
+			baseURL+RequestServiceUnblockTitleProcedure,
+			connect.WithSchema(requestServiceMethods.ByName("UnblockTitle")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
+		listBlockedTitles: connect.NewClient[v1.ListBlockedTitlesRequest, v1.ListBlockedTitlesResponse](
+			httpClient,
+			baseURL+RequestServiceListBlockedTitlesProcedure,
+			connect.WithSchema(requestServiceMethods.ByName("ListBlockedTitles")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // requestServiceClient implements RequestServiceClient.
 type requestServiceClient struct {
-	createRequest  *connect.Client[v1.CreateRequestRequest, v1.CreateRequestResponse]
-	listRequests   *connect.Client[v1.ListRequestsRequest, v1.ListRequestsResponse]
-	getRequest     *connect.Client[v1.GetRequestRequest, v1.GetRequestResponse]
-	updateRequest  *connect.Client[v1.UpdateRequestRequest, v1.UpdateRequestResponse]
-	deleteRequest  *connect.Client[v1.DeleteRequestRequest, v1.DeleteRequestResponse]
-	approveRequest *connect.Client[v1.ApproveRequestRequest, v1.ApproveRequestResponse]
-	declineRequest *connect.Client[v1.DeclineRequestRequest, v1.DeclineRequestResponse]
-	retryRequest   *connect.Client[v1.RetryRequestRequest, v1.RetryRequestResponse]
-	getQuota       *connect.Client[v1.GetQuotaRequest, v1.GetQuotaResponse]
+	createRequest     *connect.Client[v1.CreateRequestRequest, v1.CreateRequestResponse]
+	listRequests      *connect.Client[v1.ListRequestsRequest, v1.ListRequestsResponse]
+	getRequest        *connect.Client[v1.GetRequestRequest, v1.GetRequestResponse]
+	updateRequest     *connect.Client[v1.UpdateRequestRequest, v1.UpdateRequestResponse]
+	deleteRequest     *connect.Client[v1.DeleteRequestRequest, v1.DeleteRequestResponse]
+	approveRequest    *connect.Client[v1.ApproveRequestRequest, v1.ApproveRequestResponse]
+	declineRequest    *connect.Client[v1.DeclineRequestRequest, v1.DeclineRequestResponse]
+	retryRequest      *connect.Client[v1.RetryRequestRequest, v1.RetryRequestResponse]
+	getQuota          *connect.Client[v1.GetQuotaRequest, v1.GetQuotaResponse]
+	blockTitle        *connect.Client[v1.BlockTitleRequest, v1.BlockTitleResponse]
+	unblockTitle      *connect.Client[v1.UnblockTitleRequest, v1.UnblockTitleResponse]
+	listBlockedTitles *connect.Client[v1.ListBlockedTitlesRequest, v1.ListBlockedTitlesResponse]
 }
 
 // CreateRequest calls mavio.acquisition.v1.RequestService.CreateRequest.
@@ -261,13 +302,40 @@ func (c *requestServiceClient) GetQuota(ctx context.Context, req *v1.GetQuotaReq
 	return nil, err
 }
 
+// BlockTitle calls mavio.acquisition.v1.RequestService.BlockTitle.
+func (c *requestServiceClient) BlockTitle(ctx context.Context, req *v1.BlockTitleRequest) (*v1.BlockTitleResponse, error) {
+	response, err := c.blockTitle.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// UnblockTitle calls mavio.acquisition.v1.RequestService.UnblockTitle.
+func (c *requestServiceClient) UnblockTitle(ctx context.Context, req *v1.UnblockTitleRequest) (*v1.UnblockTitleResponse, error) {
+	response, err := c.unblockTitle.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListBlockedTitles calls mavio.acquisition.v1.RequestService.ListBlockedTitles.
+func (c *requestServiceClient) ListBlockedTitles(ctx context.Context, req *v1.ListBlockedTitlesRequest) (*v1.ListBlockedTitlesResponse, error) {
+	response, err := c.listBlockedTitles.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // RequestServiceHandler is an implementation of the mavio.acquisition.v1.RequestService service.
 type RequestServiceHandler interface {
 	// CreateRequest requests a movie, or seasons of a series, by its TMDB
 	// ID. It fails with PERMISSION_DENIED when the user may not request it
-	// (its kind, or its rating above the user's limit), RESOURCE_EXHAUSTED
-	// past the user's quota, and ALREADY_EXISTS when it is requested,
-	// wanted or available already.
+	// (its kind, its rating above the user's limit, or the title
+	// blocklisted), RESOURCE_EXHAUSTED past the user's quota, and
+	// ALREADY_EXISTS when it is requested, wanted or available already.
 	CreateRequest(context.Context, *v1.CreateRequestRequest) (*v1.CreateRequestResponse, error)
 	// ListRequests lists the caller's requests, or anyone's for
 	// administrators.
@@ -292,6 +360,15 @@ type RequestServiceHandler interface {
 	// GetQuota returns how much of their quotas a user has used: the
 	// caller's own, or anyone's for administrators.
 	GetQuota(context.Context, *v1.GetQuotaRequest) (*v1.GetQuotaResponse, error)
+	// BlockTitle blocklists a movie or series, as Seerr's blocklist: it can
+	// no longer be requested. It fails with ALREADY_EXISTS when the title is
+	// blocklisted already. Administrators only.
+	BlockTitle(context.Context, *v1.BlockTitleRequest) (*v1.BlockTitleResponse, error)
+	// UnblockTitle takes a title off the blocklist. Administrators only.
+	UnblockTitle(context.Context, *v1.UnblockTitleRequest) (*v1.UnblockTitleResponse, error)
+	// ListBlockedTitles lists the blocklist, newest first. Administrators
+	// only.
+	ListBlockedTitles(context.Context, *v1.ListBlockedTitlesRequest) (*v1.ListBlockedTitlesResponse, error)
 }
 
 // NewRequestServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -360,6 +437,26 @@ func NewRequestServiceHandler(svc RequestServiceHandler, opts ...connect.Handler
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	requestServiceBlockTitleHandler := connect.NewUnaryHandlerSimple(
+		RequestServiceBlockTitleProcedure,
+		svc.BlockTitle,
+		connect.WithSchema(requestServiceMethods.ByName("BlockTitle")),
+		connect.WithHandlerOptions(opts...),
+	)
+	requestServiceUnblockTitleHandler := connect.NewUnaryHandlerSimple(
+		RequestServiceUnblockTitleProcedure,
+		svc.UnblockTitle,
+		connect.WithSchema(requestServiceMethods.ByName("UnblockTitle")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
+	requestServiceListBlockedTitlesHandler := connect.NewUnaryHandlerSimple(
+		RequestServiceListBlockedTitlesProcedure,
+		svc.ListBlockedTitles,
+		connect.WithSchema(requestServiceMethods.ByName("ListBlockedTitles")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.acquisition.v1.RequestService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case RequestServiceCreateRequestProcedure:
@@ -380,6 +477,12 @@ func NewRequestServiceHandler(svc RequestServiceHandler, opts ...connect.Handler
 			requestServiceRetryRequestHandler.ServeHTTP(w, r)
 		case RequestServiceGetQuotaProcedure:
 			requestServiceGetQuotaHandler.ServeHTTP(w, r)
+		case RequestServiceBlockTitleProcedure:
+			requestServiceBlockTitleHandler.ServeHTTP(w, r)
+		case RequestServiceUnblockTitleProcedure:
+			requestServiceUnblockTitleHandler.ServeHTTP(w, r)
+		case RequestServiceListBlockedTitlesProcedure:
+			requestServiceListBlockedTitlesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -423,4 +526,16 @@ func (UnimplementedRequestServiceHandler) RetryRequest(context.Context, *v1.Retr
 
 func (UnimplementedRequestServiceHandler) GetQuota(context.Context, *v1.GetQuotaRequest) (*v1.GetQuotaResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.RequestService.GetQuota is not implemented"))
+}
+
+func (UnimplementedRequestServiceHandler) BlockTitle(context.Context, *v1.BlockTitleRequest) (*v1.BlockTitleResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.RequestService.BlockTitle is not implemented"))
+}
+
+func (UnimplementedRequestServiceHandler) UnblockTitle(context.Context, *v1.UnblockTitleRequest) (*v1.UnblockTitleResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.RequestService.UnblockTitle is not implemented"))
+}
+
+func (UnimplementedRequestServiceHandler) ListBlockedTitles(context.Context, *v1.ListBlockedTitlesRequest) (*v1.ListBlockedTitlesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.RequestService.ListBlockedTitles is not implemented"))
 }

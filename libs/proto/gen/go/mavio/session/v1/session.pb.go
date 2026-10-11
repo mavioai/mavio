@@ -363,6 +363,15 @@ func (x *Event) GetSyncPlay() *SyncPlayUpdate {
 	return nil
 }
 
+func (x *Event) GetNotification() *NotificationReceived {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*event_Notification); ok {
+			return x.Notification
+		}
+	}
+	return nil
+}
+
 func (x *Event) SetTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_Time = v
 }
@@ -437,6 +446,14 @@ func (x *Event) SetSyncPlay(v *SyncPlayUpdate) {
 		return
 	}
 	x.xxx_hidden_Kind = &event_SyncPlay{v}
+}
+
+func (x *Event) SetNotification(v *NotificationReceived) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &event_Notification{v}
 }
 
 func (x *Event) HasTime() bool {
@@ -525,6 +542,14 @@ func (x *Event) HasSyncPlay() bool {
 	return ok
 }
 
+func (x *Event) HasNotification() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*event_Notification)
+	return ok
+}
+
 func (x *Event) ClearTime() {
 	x.xxx_hidden_Time = nil
 }
@@ -587,6 +612,12 @@ func (x *Event) ClearSyncPlay() {
 	}
 }
 
+func (x *Event) ClearNotification() {
+	if _, ok := x.xxx_hidden_Kind.(*event_Notification); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
 const Event_Kind_not_set_case case_Event_Kind = 0
 const Event_Connected_case case_Event_Kind = 2
 const Event_Heartbeat_case case_Event_Kind = 3
@@ -597,6 +628,7 @@ const Event_Command_case case_Event_Kind = 7
 const Event_JobChanged_case case_Event_Kind = 8
 const Event_PluginChanged_case case_Event_Kind = 9
 const Event_SyncPlay_case case_Event_Kind = 10
+const Event_Notification_case case_Event_Kind = 11
 
 func (x *Event) WhichKind() case_Event_Kind {
 	if x == nil {
@@ -621,6 +653,8 @@ func (x *Event) WhichKind() case_Event_Kind {
 		return Event_PluginChanged_case
 	case *event_SyncPlay:
 		return Event_SyncPlay_case
+	case *event_Notification:
+		return Event_Notification_case
 	default:
 		return Event_Kind_not_set_case
 	}
@@ -640,6 +674,7 @@ type Event_builder struct {
 	JobChanged      *JobChanged
 	PluginChanged   *PluginChanged
 	SyncPlay        *SyncPlayUpdate
+	Notification    *NotificationReceived
 	// -- end of xxx_hidden_Kind
 }
 
@@ -674,6 +709,9 @@ func (b0 Event_builder) Build() *Event {
 	}
 	if b.SyncPlay != nil {
 		x.xxx_hidden_Kind = &event_SyncPlay{b.SyncPlay}
+	}
+	if b.Notification != nil {
+		x.xxx_hidden_Kind = &event_Notification{b.Notification}
 	}
 	return m0
 }
@@ -728,6 +766,10 @@ type event_SyncPlay struct {
 	SyncPlay *SyncPlayUpdate `protobuf:"bytes,10,opt,name=sync_play,json=syncPlay,oneof"`
 }
 
+type event_Notification struct {
+	Notification *NotificationReceived `protobuf:"bytes,11,opt,name=notification,oneof"`
+}
+
 func (*event_Connected) isEvent_Kind() {}
 
 func (*event_Heartbeat) isEvent_Kind() {}
@@ -745,6 +787,8 @@ func (*event_JobChanged) isEvent_Kind() {}
 func (*event_PluginChanged) isEvent_Kind() {}
 
 func (*event_SyncPlay) isEvent_Kind() {}
+
+func (*event_Notification) isEvent_Kind() {}
 
 // Connected starts a stream.
 type Connected struct {
@@ -1416,6 +1460,79 @@ func (b0 JobChanged_builder) Build() *JobChanged {
 	return m0
 }
 
+// NotificationReceived tells the user of a notification as it is
+// recorded: an activity concerning them, such as their request approved
+// or available or their issue resolved, as ActivityService lists their
+// own; administrators also receive those they act on, such as requests
+// waiting for approval and issues reported.
+type NotificationReceived struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Activity *v11.Activity          `protobuf:"bytes,1,opt,name=activity"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *NotificationReceived) Reset() {
+	*x = NotificationReceived{}
+	mi := &file_mavio_session_v1_session_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NotificationReceived) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NotificationReceived) ProtoMessage() {}
+
+func (x *NotificationReceived) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_session_v1_session_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *NotificationReceived) GetActivity() *v11.Activity {
+	if x != nil {
+		return x.xxx_hidden_Activity
+	}
+	return nil
+}
+
+func (x *NotificationReceived) SetActivity(v *v11.Activity) {
+	x.xxx_hidden_Activity = v
+}
+
+func (x *NotificationReceived) HasActivity() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Activity != nil
+}
+
+func (x *NotificationReceived) ClearActivity() {
+	x.xxx_hidden_Activity = nil
+}
+
+type NotificationReceived_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Activity *v11.Activity
+}
+
+func (b0 NotificationReceived_builder) Build() *NotificationReceived {
+	m0 := &NotificationReceived{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Activity = b.Activity
+	return m0
+}
+
 // PluginChanged tells administrators a plugin's new state.
 type PluginChanged struct {
 	state             protoimpl.MessageState `protogen:"opaque.v1"`
@@ -1426,7 +1543,7 @@ type PluginChanged struct {
 
 func (x *PluginChanged) Reset() {
 	*x = PluginChanged{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[10]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1438,7 +1555,7 @@ func (x *PluginChanged) String() string {
 func (*PluginChanged) ProtoMessage() {}
 
 func (x *PluginChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[10]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1507,7 +1624,7 @@ type Session struct {
 
 func (x *Session) Reset() {
 	*x = Session{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[11]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1519,7 +1636,7 @@ func (x *Session) String() string {
 func (*Session) ProtoMessage() {}
 
 func (x *Session) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[11]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1895,7 +2012,7 @@ type NowPlaying struct {
 
 func (x *NowPlaying) Reset() {
 	*x = NowPlaying{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[12]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1907,7 +2024,7 @@ func (x *NowPlaying) String() string {
 func (*NowPlaying) ProtoMessage() {}
 
 func (x *NowPlaying) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[12]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2081,7 +2198,7 @@ type Command struct {
 
 func (x *Command) Reset() {
 	*x = Command{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[13]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2093,7 +2210,7 @@ func (x *Command) String() string {
 func (*Command) ProtoMessage() {}
 
 func (x *Command) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[13]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2334,7 +2451,7 @@ func (b0 Command_builder) Build() *Command {
 type case_Command_Kind protoreflect.FieldNumber
 
 func (x case_Command_Kind) String() string {
-	md := file_mavio_session_v1_session_proto_msgTypes[13].Descriptor()
+	md := file_mavio_session_v1_session_proto_msgTypes[14].Descriptor()
 	if x == 0 {
 		return "not set"
 	}
@@ -2389,7 +2506,7 @@ type Play struct {
 
 func (x *Play) Reset() {
 	*x = Play{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[14]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2401,7 +2518,7 @@ func (x *Play) String() string {
 func (*Play) ProtoMessage() {}
 
 func (x *Play) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[14]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2503,7 +2620,7 @@ type PlayState struct {
 
 func (x *PlayState) Reset() {
 	*x = PlayState{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[15]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2515,7 +2632,7 @@ func (x *PlayState) String() string {
 func (*PlayState) ProtoMessage() {}
 
 func (x *PlayState) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[15]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2579,7 +2696,7 @@ type Seek struct {
 
 func (x *Seek) Reset() {
 	*x = Seek{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[16]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2591,7 +2708,7 @@ func (x *Seek) String() string {
 func (*Seek) ProtoMessage() {}
 
 func (x *Seek) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[16]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2651,7 +2768,7 @@ type Message struct {
 
 func (x *Message) Reset() {
 	*x = Message{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[17]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2663,7 +2780,7 @@ func (x *Message) String() string {
 func (*Message) ProtoMessage() {}
 
 func (x *Message) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[17]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2756,7 +2873,7 @@ type Volume struct {
 
 func (x *Volume) Reset() {
 	*x = Volume{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[18]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2768,7 +2885,7 @@ func (x *Volume) String() string {
 func (*Volume) ProtoMessage() {}
 
 func (x *Volume) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[18]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2861,7 +2978,7 @@ type ListSessionsRequest struct {
 
 func (x *ListSessionsRequest) Reset() {
 	*x = ListSessionsRequest{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[19]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2873,7 +2990,7 @@ func (x *ListSessionsRequest) String() string {
 func (*ListSessionsRequest) ProtoMessage() {}
 
 func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[19]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2935,7 +3052,7 @@ type ListSessionsResponse struct {
 
 func (x *ListSessionsResponse) Reset() {
 	*x = ListSessionsResponse{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[20]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2947,7 +3064,7 @@ func (x *ListSessionsResponse) String() string {
 func (*ListSessionsResponse) ProtoMessage() {}
 
 func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[20]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2997,7 +3114,7 @@ type SendCommandRequest struct {
 
 func (x *SendCommandRequest) Reset() {
 	*x = SendCommandRequest{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[21]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3009,7 +3126,7 @@ func (x *SendCommandRequest) String() string {
 func (*SendCommandRequest) ProtoMessage() {}
 
 func (x *SendCommandRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[21]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3096,7 +3213,7 @@ type SendCommandResponse struct {
 
 func (x *SendCommandResponse) Reset() {
 	*x = SendCommandResponse{}
-	mi := &file_mavio_session_v1_session_proto_msgTypes[22]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3108,7 +3225,7 @@ func (x *SendCommandResponse) String() string {
 func (*SendCommandResponse) ProtoMessage() {}
 
 func (x *SendCommandResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_session_proto_msgTypes[22]
+	mi := &file_mavio_session_v1_session_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3135,10 +3252,10 @@ var File_mavio_session_v1_session_proto protoreflect.FileDescriptor
 
 const file_mavio_session_v1_session_proto_rawDesc = "" +
 	"\n" +
-	"\x1emavio/session/v1/session.proto\x12\x10mavio.session.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\x1a mavio/playback/v1/playback.proto\x1a\x1fmavio/session/v1/syncplay.proto\x1a\x1cmavio/system/v1/system.proto\x1a\x18mavio/user/v1/user.proto\"\x12\n" +
+	"\x1emavio/session/v1/session.proto\x12\x10mavio.session.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\x1a mavio/playback/v1/playback.proto\x1a\x1fmavio/session/v1/syncplay.proto\x1a\x1emavio/system/v1/activity.proto\x1a\x1cmavio/system/v1/system.proto\x1a\x18mavio/user/v1/user.proto\"\x12\n" +
 	"\x10SubscribeRequest\"B\n" +
 	"\x11SubscribeResponse\x12-\n" +
-	"\x05event\x18\x01 \x01(\v2\x17.mavio.session.v1.EventR\x05event\"\xb2\x05\n" +
+	"\x05event\x18\x01 \x01(\v2\x17.mavio.session.v1.EventR\x05event\"\x80\x06\n" +
 	"\x05Event\x12.\n" +
 	"\x04time\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x04time\x12;\n" +
 	"\tconnected\x18\x02 \x01(\v2\x1b.mavio.session.v1.ConnectedH\x00R\tconnected\x12;\n" +
@@ -3151,7 +3268,8 @@ const file_mavio_session_v1_session_proto_rawDesc = "" +
 	"jobChanged\x12H\n" +
 	"\x0eplugin_changed\x18\t \x01(\v2\x1f.mavio.session.v1.PluginChangedH\x00R\rpluginChanged\x12?\n" +
 	"\tsync_play\x18\n" +
-	" \x01(\v2 .mavio.session.v1.SyncPlayUpdateH\x00R\bsyncPlayB\x06\n" +
+	" \x01(\v2 .mavio.session.v1.SyncPlayUpdateH\x00R\bsyncPlay\x12L\n" +
+	"\fnotification\x18\v \x01(\v2&.mavio.session.v1.NotificationReceivedH\x00R\fnotificationB\x06\n" +
 	"\x04kind\"*\n" +
 	"\tConnected\x12\x1d\n" +
 	"\n" +
@@ -3177,7 +3295,9 @@ const file_mavio_session_v1_session_proto_rawDesc = "" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x1d\n" +
 	"\n" +
 	"library_id\x18\x03 \x01(\tR\tlibraryId\x120\n" +
-	"\x05state\x18\x04 \x01(\x0e2\x1a.mavio.session.v1.JobStateR\x05state\"@\n" +
+	"\x05state\x18\x04 \x01(\x0e2\x1a.mavio.session.v1.JobStateR\x05state\"M\n" +
+	"\x14NotificationReceived\x125\n" +
+	"\bactivity\x18\x01 \x01(\v2\x19.mavio.system.v1.ActivityR\bactivity\"@\n" +
 	"\rPluginChanged\x12/\n" +
 	"\x06plugin\x18\x01 \x01(\v2\x17.mavio.system.v1.PluginR\x06plugin\"\x82\x03\n" +
 	"\aSession\x12\x0e\n" +
@@ -3259,7 +3379,7 @@ const file_mavio_session_v1_session_proto_rawDesc = "" +
 	"\x14com.mavio.session.v1B\fSessionProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1;sessionv1\xa2\x02\x03MSX\xaa\x02\x10Mavio.Session.V1\xca\x02\x10Mavio\\Session\\V1\xe2\x02\x1cMavio\\Session\\V1\\GPBMetadata\xea\x02\x12Mavio::Session::V1b\beditionsp\xe8\a"
 
 var file_mavio_session_v1_session_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_mavio_session_v1_session_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_mavio_session_v1_session_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_mavio_session_v1_session_proto_goTypes = []any{
 	(JobState)(0),                 // 0: mavio.session.v1.JobState
 	(PlayStateCommand)(0),         // 1: mavio.session.v1.PlayStateCommand
@@ -3273,30 +3393,32 @@ var file_mavio_session_v1_session_proto_goTypes = []any{
 	(*SessionsChanged)(nil),       // 9: mavio.session.v1.SessionsChanged
 	(*CommandReceived)(nil),       // 10: mavio.session.v1.CommandReceived
 	(*JobChanged)(nil),            // 11: mavio.session.v1.JobChanged
-	(*PluginChanged)(nil),         // 12: mavio.session.v1.PluginChanged
-	(*Session)(nil),               // 13: mavio.session.v1.Session
-	(*NowPlaying)(nil),            // 14: mavio.session.v1.NowPlaying
-	(*Command)(nil),               // 15: mavio.session.v1.Command
-	(*Play)(nil),                  // 16: mavio.session.v1.Play
-	(*PlayState)(nil),             // 17: mavio.session.v1.PlayState
-	(*Seek)(nil),                  // 18: mavio.session.v1.Seek
-	(*Message)(nil),               // 19: mavio.session.v1.Message
-	(*Volume)(nil),                // 20: mavio.session.v1.Volume
-	(*ListSessionsRequest)(nil),   // 21: mavio.session.v1.ListSessionsRequest
-	(*ListSessionsResponse)(nil),  // 22: mavio.session.v1.ListSessionsResponse
-	(*SendCommandRequest)(nil),    // 23: mavio.session.v1.SendCommandRequest
-	(*SendCommandResponse)(nil),   // 24: mavio.session.v1.SendCommandResponse
-	(*timestamppb.Timestamp)(nil), // 25: google.protobuf.Timestamp
-	(*SyncPlayUpdate)(nil),        // 26: mavio.session.v1.SyncPlayUpdate
-	(*v1.UserData)(nil),           // 27: mavio.user.v1.UserData
-	(*v11.Plugin)(nil),            // 28: mavio.system.v1.Plugin
-	(*v12.Item)(nil),              // 29: mavio.library.v1.Item
-	(*durationpb.Duration)(nil),   // 30: google.protobuf.Duration
-	(v13.PlayMethod)(0),           // 31: mavio.playback.v1.PlayMethod
+	(*NotificationReceived)(nil),  // 12: mavio.session.v1.NotificationReceived
+	(*PluginChanged)(nil),         // 13: mavio.session.v1.PluginChanged
+	(*Session)(nil),               // 14: mavio.session.v1.Session
+	(*NowPlaying)(nil),            // 15: mavio.session.v1.NowPlaying
+	(*Command)(nil),               // 16: mavio.session.v1.Command
+	(*Play)(nil),                  // 17: mavio.session.v1.Play
+	(*PlayState)(nil),             // 18: mavio.session.v1.PlayState
+	(*Seek)(nil),                  // 19: mavio.session.v1.Seek
+	(*Message)(nil),               // 20: mavio.session.v1.Message
+	(*Volume)(nil),                // 21: mavio.session.v1.Volume
+	(*ListSessionsRequest)(nil),   // 22: mavio.session.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil),  // 23: mavio.session.v1.ListSessionsResponse
+	(*SendCommandRequest)(nil),    // 24: mavio.session.v1.SendCommandRequest
+	(*SendCommandResponse)(nil),   // 25: mavio.session.v1.SendCommandResponse
+	(*timestamppb.Timestamp)(nil), // 26: google.protobuf.Timestamp
+	(*SyncPlayUpdate)(nil),        // 27: mavio.session.v1.SyncPlayUpdate
+	(*v1.UserData)(nil),           // 28: mavio.user.v1.UserData
+	(*v11.Activity)(nil),          // 29: mavio.system.v1.Activity
+	(*v11.Plugin)(nil),            // 30: mavio.system.v1.Plugin
+	(*v12.Item)(nil),              // 31: mavio.library.v1.Item
+	(*durationpb.Duration)(nil),   // 32: google.protobuf.Duration
+	(v13.PlayMethod)(0),           // 33: mavio.playback.v1.PlayMethod
 }
 var file_mavio_session_v1_session_proto_depIdxs = []int32{
 	4,  // 0: mavio.session.v1.SubscribeResponse.event:type_name -> mavio.session.v1.Event
-	25, // 1: mavio.session.v1.Event.time:type_name -> google.protobuf.Timestamp
+	26, // 1: mavio.session.v1.Event.time:type_name -> google.protobuf.Timestamp
 	5,  // 2: mavio.session.v1.Event.connected:type_name -> mavio.session.v1.Connected
 	6,  // 3: mavio.session.v1.Event.heartbeat:type_name -> mavio.session.v1.Heartbeat
 	7,  // 4: mavio.session.v1.Event.library_changed:type_name -> mavio.session.v1.LibraryChanged
@@ -3304,39 +3426,41 @@ var file_mavio_session_v1_session_proto_depIdxs = []int32{
 	9,  // 6: mavio.session.v1.Event.sessions_changed:type_name -> mavio.session.v1.SessionsChanged
 	10, // 7: mavio.session.v1.Event.command:type_name -> mavio.session.v1.CommandReceived
 	11, // 8: mavio.session.v1.Event.job_changed:type_name -> mavio.session.v1.JobChanged
-	12, // 9: mavio.session.v1.Event.plugin_changed:type_name -> mavio.session.v1.PluginChanged
-	26, // 10: mavio.session.v1.Event.sync_play:type_name -> mavio.session.v1.SyncPlayUpdate
-	27, // 11: mavio.session.v1.UserDataChanged.user_data:type_name -> mavio.user.v1.UserData
-	15, // 12: mavio.session.v1.CommandReceived.command:type_name -> mavio.session.v1.Command
-	0,  // 13: mavio.session.v1.JobChanged.state:type_name -> mavio.session.v1.JobState
-	28, // 14: mavio.session.v1.PluginChanged.plugin:type_name -> mavio.system.v1.Plugin
-	25, // 15: mavio.session.v1.Session.last_seen_time:type_name -> google.protobuf.Timestamp
-	14, // 16: mavio.session.v1.Session.now_playing:type_name -> mavio.session.v1.NowPlaying
-	29, // 17: mavio.session.v1.NowPlaying.item:type_name -> mavio.library.v1.Item
-	30, // 18: mavio.session.v1.NowPlaying.position:type_name -> google.protobuf.Duration
-	31, // 19: mavio.session.v1.NowPlaying.method:type_name -> mavio.playback.v1.PlayMethod
-	16, // 20: mavio.session.v1.Command.play:type_name -> mavio.session.v1.Play
-	17, // 21: mavio.session.v1.Command.play_state:type_name -> mavio.session.v1.PlayState
-	18, // 22: mavio.session.v1.Command.seek:type_name -> mavio.session.v1.Seek
-	19, // 23: mavio.session.v1.Command.message:type_name -> mavio.session.v1.Message
-	20, // 24: mavio.session.v1.Command.volume:type_name -> mavio.session.v1.Volume
-	30, // 25: mavio.session.v1.Play.start_position:type_name -> google.protobuf.Duration
-	1,  // 26: mavio.session.v1.PlayState.command:type_name -> mavio.session.v1.PlayStateCommand
-	30, // 27: mavio.session.v1.Seek.position:type_name -> google.protobuf.Duration
-	30, // 28: mavio.session.v1.Message.timeout:type_name -> google.protobuf.Duration
-	13, // 29: mavio.session.v1.ListSessionsResponse.sessions:type_name -> mavio.session.v1.Session
-	15, // 30: mavio.session.v1.SendCommandRequest.command:type_name -> mavio.session.v1.Command
-	2,  // 31: mavio.session.v1.EventService.Subscribe:input_type -> mavio.session.v1.SubscribeRequest
-	21, // 32: mavio.session.v1.SessionService.ListSessions:input_type -> mavio.session.v1.ListSessionsRequest
-	23, // 33: mavio.session.v1.SessionService.SendCommand:input_type -> mavio.session.v1.SendCommandRequest
-	3,  // 34: mavio.session.v1.EventService.Subscribe:output_type -> mavio.session.v1.SubscribeResponse
-	22, // 35: mavio.session.v1.SessionService.ListSessions:output_type -> mavio.session.v1.ListSessionsResponse
-	24, // 36: mavio.session.v1.SessionService.SendCommand:output_type -> mavio.session.v1.SendCommandResponse
-	34, // [34:37] is the sub-list for method output_type
-	31, // [31:34] is the sub-list for method input_type
-	31, // [31:31] is the sub-list for extension type_name
-	31, // [31:31] is the sub-list for extension extendee
-	0,  // [0:31] is the sub-list for field type_name
+	13, // 9: mavio.session.v1.Event.plugin_changed:type_name -> mavio.session.v1.PluginChanged
+	27, // 10: mavio.session.v1.Event.sync_play:type_name -> mavio.session.v1.SyncPlayUpdate
+	12, // 11: mavio.session.v1.Event.notification:type_name -> mavio.session.v1.NotificationReceived
+	28, // 12: mavio.session.v1.UserDataChanged.user_data:type_name -> mavio.user.v1.UserData
+	16, // 13: mavio.session.v1.CommandReceived.command:type_name -> mavio.session.v1.Command
+	0,  // 14: mavio.session.v1.JobChanged.state:type_name -> mavio.session.v1.JobState
+	29, // 15: mavio.session.v1.NotificationReceived.activity:type_name -> mavio.system.v1.Activity
+	30, // 16: mavio.session.v1.PluginChanged.plugin:type_name -> mavio.system.v1.Plugin
+	26, // 17: mavio.session.v1.Session.last_seen_time:type_name -> google.protobuf.Timestamp
+	15, // 18: mavio.session.v1.Session.now_playing:type_name -> mavio.session.v1.NowPlaying
+	31, // 19: mavio.session.v1.NowPlaying.item:type_name -> mavio.library.v1.Item
+	32, // 20: mavio.session.v1.NowPlaying.position:type_name -> google.protobuf.Duration
+	33, // 21: mavio.session.v1.NowPlaying.method:type_name -> mavio.playback.v1.PlayMethod
+	17, // 22: mavio.session.v1.Command.play:type_name -> mavio.session.v1.Play
+	18, // 23: mavio.session.v1.Command.play_state:type_name -> mavio.session.v1.PlayState
+	19, // 24: mavio.session.v1.Command.seek:type_name -> mavio.session.v1.Seek
+	20, // 25: mavio.session.v1.Command.message:type_name -> mavio.session.v1.Message
+	21, // 26: mavio.session.v1.Command.volume:type_name -> mavio.session.v1.Volume
+	32, // 27: mavio.session.v1.Play.start_position:type_name -> google.protobuf.Duration
+	1,  // 28: mavio.session.v1.PlayState.command:type_name -> mavio.session.v1.PlayStateCommand
+	32, // 29: mavio.session.v1.Seek.position:type_name -> google.protobuf.Duration
+	32, // 30: mavio.session.v1.Message.timeout:type_name -> google.protobuf.Duration
+	14, // 31: mavio.session.v1.ListSessionsResponse.sessions:type_name -> mavio.session.v1.Session
+	16, // 32: mavio.session.v1.SendCommandRequest.command:type_name -> mavio.session.v1.Command
+	2,  // 33: mavio.session.v1.EventService.Subscribe:input_type -> mavio.session.v1.SubscribeRequest
+	22, // 34: mavio.session.v1.SessionService.ListSessions:input_type -> mavio.session.v1.ListSessionsRequest
+	24, // 35: mavio.session.v1.SessionService.SendCommand:input_type -> mavio.session.v1.SendCommandRequest
+	3,  // 36: mavio.session.v1.EventService.Subscribe:output_type -> mavio.session.v1.SubscribeResponse
+	23, // 37: mavio.session.v1.SessionService.ListSessions:output_type -> mavio.session.v1.ListSessionsResponse
+	25, // 38: mavio.session.v1.SessionService.SendCommand:output_type -> mavio.session.v1.SendCommandResponse
+	36, // [36:39] is the sub-list for method output_type
+	33, // [33:36] is the sub-list for method input_type
+	33, // [33:33] is the sub-list for extension type_name
+	33, // [33:33] is the sub-list for extension extendee
+	0,  // [0:33] is the sub-list for field type_name
 }
 
 func init() { file_mavio_session_v1_session_proto_init() }
@@ -3355,8 +3479,9 @@ func file_mavio_session_v1_session_proto_init() {
 		(*event_JobChanged)(nil),
 		(*event_PluginChanged)(nil),
 		(*event_SyncPlay)(nil),
+		(*event_Notification)(nil),
 	}
-	file_mavio_session_v1_session_proto_msgTypes[13].OneofWrappers = []any{
+	file_mavio_session_v1_session_proto_msgTypes[14].OneofWrappers = []any{
 		(*command_Play)(nil),
 		(*command_PlayState)(nil),
 		(*command_Seek)(nil),
@@ -3369,7 +3494,7 @@ func file_mavio_session_v1_session_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_session_v1_session_proto_rawDesc), len(file_mavio_session_v1_session_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   23,
+			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

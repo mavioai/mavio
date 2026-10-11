@@ -22,6 +22,14 @@ pub type OwnedListFilterValuesRequestView = ::buffa::view::OwnedView<
 pub type OwnedListFilterValuesResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::ListFilterValuesResponseView<'static>,
 >;
+///Shorthand for `OwnedView<SearchTitlesRequestView<'static>>`.
+pub type OwnedSearchTitlesRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SearchTitlesRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SearchTitlesResponseView<'static>>`.
+pub type OwnedSearchTitlesResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SearchTitlesResponseView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::ListCatalogsResponse>
 for crate::proto::mavio::plugin::v1::__buffa::view::ListCatalogsResponseView<'_> {
     fn encode(
@@ -124,6 +132,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::SearchTitlesResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::SearchTitlesResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::SearchTitlesResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SearchTitlesResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const DISCOVERY_PROVIDER_SERVICE_SERVICE_NAME: &str = "mavio.plugin.v1.DiscoveryProviderService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ListCatalogs` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -144,9 +186,15 @@ pub const DISCOVERY_PROVIDER_SERVICE_LIST_FILTER_VALUES_SPEC: ::connectrpc::Spec
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `SearchTitles` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const DISCOVERY_PROVIDER_SERVICE_SEARCH_TITLES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.DiscoveryProviderService/SearchTitles",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// DiscoveryProviderService lists movies and series to discover from an
 /// external source, such as trending or popular titles, in catalogs the
-/// provider declares.
+/// provider declares, and finds them by name.
 ///
 /// # Implementing handlers
 ///
@@ -264,6 +312,30 @@ pub trait DiscoveryProviderService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::plugin::v1::ListFilterValuesResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SearchTitles finds movies and series by name, a page at a time. A
+    /// provider that does not search answers UNIMPLEMENTED.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn search_titles<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::SearchTitlesRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::SearchTitlesResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -386,6 +458,35 @@ impl<S: DiscoveryProviderService> DiscoveryProviderServiceExt for S {
                 },
             )
             .with_spec(DISCOVERY_PROVIDER_SERVICE_LIST_FILTER_VALUES_SPEC)
+            .route_view_idempotent(
+                DISCOVERY_PROVIDER_SERVICE_SERVICE_NAME,
+                "SearchTitles",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::SearchTitlesRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::SearchTitlesRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.search_titles(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::SearchTitlesResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(DISCOVERY_PROVIDER_SERVICE_SEARCH_TITLES_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -459,6 +560,12 @@ for DiscoveryProviderServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(DISCOVERY_PROVIDER_SERVICE_LIST_FILTER_VALUES_SPEC),
+                )
+            }
+            "SearchTitles" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(DISCOVERY_PROVIDER_SERVICE_SEARCH_TITLES_SPEC),
                 )
             }
             _ => None,
@@ -540,6 +647,28 @@ for DiscoveryProviderServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::plugin::v1::ListFilterValuesResponse,
+                        >(format)
+                })
+            }
+            "SearchTitles" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::SearchTitlesRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::SearchTitlesRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::SearchTitlesRequest,
+                    >::from_parts(&req, &body);
+                    svc.search_titles(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::SearchTitlesResponse,
                         >(format)
                 })
             }
@@ -800,6 +929,51 @@ where
                 &self.transport,
                 &self.config,
                 DISCOVERY_PROVIDER_SERVICE_LIST_FILTER_VALUES_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SearchTitles RPC. Sends a request to /mavio.plugin.v1.DiscoveryProviderService/SearchTitles.
+    pub async fn search_titles(
+        &self,
+        request: crate::proto::mavio::plugin::v1::SearchTitlesRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::SearchTitlesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.search_titles_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SearchTitles RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn search_titles_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::SearchTitlesRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::SearchTitlesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                DISCOVERY_PROVIDER_SERVICE_SEARCH_TITLES_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

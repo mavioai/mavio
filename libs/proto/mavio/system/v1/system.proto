@@ -268,6 +268,9 @@ message ServerSettings {
   // What users may request by default and where approved requests go;
   // unset in an update keeps the current ones.
   RequestSettings requests = 7;
+  // The language and country of metadata beside libraries'; unset in an
+  // update keeps the current ones.
+  MetadataSettings metadata = 8;
 }
 
 // RequestSettings are the defaults of users' requests and where approved
@@ -299,6 +302,21 @@ message RequestSettings {
   mavio.acquisition.v1.NewItemMonitor monitor_new_items = 16 [(buf.validate.field).enum.defined_only = true];
   // Allow requesting specials, season 0.
   bool specials = 17;
+  // The show library and quality profile approved anime series are added
+  // to, as Seerr's anime settings of Sonarr; empty uses those of series.
+  // Anime series are numbered absolutely either way.
+  string anime_library_id = 18;
+  string anime_quality_profile_id = 19;
+}
+
+// MetadataSettings are the server's language and country of metadata
+// beside libraries', as Jellyfin's: requests and discovery name titles in
+// them and rate titles in the country.
+message MetadataSettings {
+  // ISO 639-1, such as "en"; empty for English.
+  string preferred_language = 1 [(buf.validate.field).string.pattern = "^([a-z]{2})?$"];
+  // ISO 3166-1, such as "US"; empty for the United States.
+  string country = 2 [(buf.validate.field).string.pattern = "^([A-Z]{2})?$"];
 }
 
 // ProperDownload is what to do with propers and repacks.

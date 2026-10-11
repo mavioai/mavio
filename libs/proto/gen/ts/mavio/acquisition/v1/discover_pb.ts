@@ -7,7 +7,7 @@ import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf
 import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import type { MediaKind } from "./profile_pb";
 import { file_mavio_acquisition_v1_profile } from "./profile_pb";
-import type { RequestStatus } from "./request_pb";
+import type { Request, RequestStatus } from "./request_pb";
 import { file_mavio_acquisition_v1_request } from "./request_pb";
 import type { CatalogKind, DiscoverFilter, DiscoverSort, FilterValue } from "../../plugin/v1/discovery_pb";
 import { file_mavio_plugin_v1_discovery } from "../../plugin/v1/discovery_pb";
@@ -17,7 +17,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/acquisition/v1/discover.proto.
  */
 export const file_mavio_acquisition_v1_discover: GenFile = /*@__PURE__*/
-  fileDesc("CiNtYXZpby9hY3F1aXNpdGlvbi92MS9kaXNjb3Zlci5wcm90bxIUbWF2aW8uYWNxdWlzaXRpb24udjEiJwoTTGlzdENhdGFsb2dzUmVxdWVzdBIQCghsYW5ndWFnZRgBIAEoCSJHChRMaXN0Q2F0YWxvZ3NSZXNwb25zZRIvCghjYXRhbG9ncxgBIAMoCzIdLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkNhdGFsb2cihwIKB0NhdGFsb2cSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIqCgRraW5kGAMgASgOMhwubWF2aW8ucGx1Z2luLnYxLkNhdGFsb2dLaW5kEjQKC21lZGlhX2tpbmRzGAQgAygOMh8ubWF2aW8uYWNxdWlzaXRpb24udjEuTWVkaWFLaW5kEg0KBW1peGVkGAUgASgIEjAKB2ZpbHRlcnMYBiADKA4yHy5tYXZpby5wbHVnaW4udjEuRGlzY292ZXJGaWx0ZXISLAoFc29ydHMYByADKA4yHS5tYXZpby5wbHVnaW4udjEuRGlzY292ZXJTb3J0EhEKCXBsdWdpbl9pZBgIIAEoCSKaBQoPRGlzY292ZXJSZXF1ZXN0EhgKB2NhdGFsb2cYASABKAlCB7pIBHICEAESPQoKbWVkaWFfa2luZBgCIAEoDjIfLm1hdmlvLmFjcXVpc2l0aW9uLnYxLk1lZGlhS2luZEIIukgFggECEAESGAoHdG1kYl9pZBgDIAEoBUIHukgEGgIoABIOCgZnZW5yZXMYBCADKAkSDwoHc3R1ZGlvcxgFIAMoCRIQCghuZXR3b3JrcxgGIAMoCRIQCghrZXl3b3JkcxgHIAMoCRIZChFleGNsdWRlZF9rZXl3b3JkcxgIIAMoCRIXCg93YXRjaF9wcm92aWRlcnMYCSADKAkSFAoMd2F0Y2hfcmVnaW9uGAogASgJEhkKEW9yaWdpbmFsX2xhbmd1YWdlGAsgASgJEhUKDXJlbGVhc2VkX2Zyb20YDCABKAkSEwoLcmVsZWFzZWRfdG8YDSABKAkSHAoLcnVudGltZV9taW4YDiABKAVCB7pIBBoCKAASHAoLcnVudGltZV9tYXgYDyABKAVCB7pIBBoCKAASKwoKcmF0aW5nX21pbhgQIAEoAUIXukgUEhIZAAAAAAAAJEApAAAAAAAAAAASKwoKcmF0aW5nX21heBgRIAEoAUIXukgUEhIZAAAAAAAAJEApAAAAAAAAAAASGgoJdm90ZXNfbWluGBIgASgFQge6SAQaAigAEhYKDmNlcnRpZmljYXRpb25zGBMgAygJEjUKBHNvcnQYFCABKA4yHS5tYXZpby5wbHVnaW4udjEuRGlzY292ZXJTb3J0Qgi6SAWCAQIQARIRCglhc2NlbmRpbmcYFSABKAgSEAoIbGFuZ3VhZ2UYFiABKAkSGAoEcGFnZRgXIAEoBUIKukgHGgUY9AMoACKDAQoQRGlzY292ZXJSZXNwb25zZRI1CgZ0aXRsZXMYASADKAsyJS5tYXZpby5hY3F1aXNpdGlvbi52MS5EaXNjb3ZlcmVkVGl0bGUSDAoEcGFnZRgCIAEoBRITCgt0b3RhbF9wYWdlcxgDIAEoBRIVCg10b3RhbF9yZXN1bHRzGAQgASgFIuYECg9EaXNjb3ZlcmVkVGl0bGUSMwoKbWVkaWFfa2luZBgBIAEoDjIfLm1hdmlvLmFjcXVpc2l0aW9uLnYxLk1lZGlhS2luZBIMCgRuYW1lGAIgASgJEhYKDm9yaWdpbmFsX3RpdGxlGAMgASgJEhkKEW9yaWdpbmFsX2xhbmd1YWdlGAQgASgJEhAKCG92ZXJ2aWV3GAUgASgJEhUKDXByZW1pZXJlX2RhdGUYBiABKAkSDAoEeWVhchgHIAEoBRJMCgxleHRlcm5hbF9pZHMYCCADKAsyNi5tYXZpby5hY3F1aXNpdGlvbi52MS5EaXNjb3ZlcmVkVGl0bGUuRXh0ZXJuYWxJZHNFbnRyeRIOCgZnZW5yZXMYCSADKAkSEgoKcG9zdGVyX3VybBgKIAEoCRIUCgxiYWNrZHJvcF91cmwYCyABKAkSGAoQY29tbXVuaXR5X3JhdGluZxgMIAEoARISCgp2b3RlX2NvdW50GA0gASgFEhIKCnBvcHVsYXJpdHkYDiABKAESMQoGc3RhdHVzGA8gASgOMiEubWF2aW8uYWNxdWlzaXRpb24udjEuTWVkaWFTdGF0dXMSDwoHaXRlbV9pZBgQIAEoCRISCgpyZXF1ZXN0X2lkGBEgASgJEjsKDnJlcXVlc3Rfc3RhdHVzGBIgASgOMiMubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdFN0YXR1cxITCgtyZXF1ZXN0YWJsZRgTIAEoCBoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEi7QEKF0xpc3RGaWx0ZXJWYWx1ZXNSZXF1ZXN0EhgKB2NhdGFsb2cYASABKAlCB7pIBHICEAESOwoGZmlsdGVyGAIgASgOMh8ubWF2aW8ucGx1Z2luLnYxLkRpc2NvdmVyRmlsdGVyQgq6SAeCAQQQASAAEj0KCm1lZGlhX2tpbmQYAyABKA4yHy5tYXZpby5hY3F1aXNpdGlvbi52MS5NZWRpYUtpbmRCCLpIBYIBAhABEg0KBXF1ZXJ5GAQgASgJEgsKA2lkcxgFIAMoCRIQCghsYW5ndWFnZRgGIAEoCRIOCgZyZWdpb24YByABKAkiSAoYTGlzdEZpbHRlclZhbHVlc1Jlc3BvbnNlEiwKBnZhbHVlcxgBIAMoCzIcLm1hdmlvLnBsdWdpbi52MS5GaWx0ZXJWYWx1ZSqiAQoLTWVkaWFTdGF0dXMSHAoYTUVESUFfU1RBVFVTX1VOU1BFQ0lGSUVEEAASGgoWTUVESUFfU1RBVFVTX1JFUVVFU1RFRBABEhcKE01FRElBX1NUQVRVU19XQU5URUQQAhIkCiBNRURJQV9TVEFUVVNfUEFSVElBTExZX0FWQUlMQUJMRRADEhoKFk1FRElBX1NUQVRVU19BVkFJTEFCTEUQBDLVAgoPRGlzY292ZXJTZXJ2aWNlEmoKDExpc3RDYXRhbG9ncxIpLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkxpc3RDYXRhbG9nc1JlcXVlc3QaKi5tYXZpby5hY3F1aXNpdGlvbi52MS5MaXN0Q2F0YWxvZ3NSZXNwb25zZSIDkAIBEl4KCERpc2NvdmVyEiUubWF2aW8uYWNxdWlzaXRpb24udjEuRGlzY292ZXJSZXF1ZXN0GiYubWF2aW8uYWNxdWlzaXRpb24udjEuRGlzY292ZXJSZXNwb25zZSIDkAIBEnYKEExpc3RGaWx0ZXJWYWx1ZXMSLS5tYXZpby5hY3F1aXNpdGlvbi52MS5MaXN0RmlsdGVyVmFsdWVzUmVxdWVzdBouLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkxpc3RGaWx0ZXJWYWx1ZXNSZXNwb25zZSIDkAIBQuoBChhjb20ubWF2aW8uYWNxdWlzaXRpb24udjFCDURpc2NvdmVyUHJvdG9QAVpNZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL2FjcXVpc2l0aW9uL3YxO2FjcXVpc2l0aW9udjGiAgNNQViqAhRNYXZpby5BY3F1aXNpdGlvbi5WMcoCFE1hdmlvXEFjcXVpc2l0aW9uXFYx4gIgTWF2aW9cQWNxdWlzaXRpb25cVjFcR1BCTWV0YWRhdGHqAhZNYXZpbzo6QWNxdWlzaXRpb246OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_mavio_acquisition_v1_profile, file_mavio_acquisition_v1_request, file_mavio_plugin_v1_discovery]);
+  fileDesc("CiNtYXZpby9hY3F1aXNpdGlvbi92MS9kaXNjb3Zlci5wcm90bxIUbWF2aW8uYWNxdWlzaXRpb24udjEiJwoTTGlzdENhdGFsb2dzUmVxdWVzdBIQCghsYW5ndWFnZRgBIAEoCSJHChRMaXN0Q2F0YWxvZ3NSZXNwb25zZRIvCghjYXRhbG9ncxgBIAMoCzIdLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkNhdGFsb2cihwIKB0NhdGFsb2cSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIqCgRraW5kGAMgASgOMhwubWF2aW8ucGx1Z2luLnYxLkNhdGFsb2dLaW5kEjQKC21lZGlhX2tpbmRzGAQgAygOMh8ubWF2aW8uYWNxdWlzaXRpb24udjEuTWVkaWFLaW5kEg0KBW1peGVkGAUgASgIEjAKB2ZpbHRlcnMYBiADKA4yHy5tYXZpby5wbHVnaW4udjEuRGlzY292ZXJGaWx0ZXISLAoFc29ydHMYByADKA4yHS5tYXZpby5wbHVnaW4udjEuRGlzY292ZXJTb3J0EhEKCXBsdWdpbl9pZBgIIAEoCSKaBQoPRGlzY292ZXJSZXF1ZXN0EhgKB2NhdGFsb2cYASABKAlCB7pIBHICEAESPQoKbWVkaWFfa2luZBgCIAEoDjIfLm1hdmlvLmFjcXVpc2l0aW9uLnYxLk1lZGlhS2luZEIIukgFggECEAESGAoHdG1kYl9pZBgDIAEoBUIHukgEGgIoABIOCgZnZW5yZXMYBCADKAkSDwoHc3R1ZGlvcxgFIAMoCRIQCghuZXR3b3JrcxgGIAMoCRIQCghrZXl3b3JkcxgHIAMoCRIZChFleGNsdWRlZF9rZXl3b3JkcxgIIAMoCRIXCg93YXRjaF9wcm92aWRlcnMYCSADKAkSFAoMd2F0Y2hfcmVnaW9uGAogASgJEhkKEW9yaWdpbmFsX2xhbmd1YWdlGAsgASgJEhUKDXJlbGVhc2VkX2Zyb20YDCABKAkSEwoLcmVsZWFzZWRfdG8YDSABKAkSHAoLcnVudGltZV9taW4YDiABKAVCB7pIBBoCKAASHAoLcnVudGltZV9tYXgYDyABKAVCB7pIBBoCKAASKwoKcmF0aW5nX21pbhgQIAEoAUIXukgUEhIZAAAAAAAAJEApAAAAAAAAAAASKwoKcmF0aW5nX21heBgRIAEoAUIXukgUEhIZAAAAAAAAJEApAAAAAAAAAAASGgoJdm90ZXNfbWluGBIgASgFQge6SAQaAigAEhYKDmNlcnRpZmljYXRpb25zGBMgAygJEjUKBHNvcnQYFCABKA4yHS5tYXZpby5wbHVnaW4udjEuRGlzY292ZXJTb3J0Qgi6SAWCAQIQARIRCglhc2NlbmRpbmcYFSABKAgSEAoIbGFuZ3VhZ2UYFiABKAkSGAoEcGFnZRgXIAEoBUIKukgHGgUY9AMoACKbAQoQRGlzY292ZXJSZXNwb25zZRI1CgZ0aXRsZXMYASADKAsyJS5tYXZpby5hY3F1aXNpdGlvbi52MS5EaXNjb3ZlcmVkVGl0bGUSDAoEcGFnZRgCIAEoBRITCgt0b3RhbF9wYWdlcxgDIAEoBRIVCg10b3RhbF9yZXN1bHRzGAQgASgFEhYKDmhpZGRlbl9yZXN1bHRzGAUgASgFIuYECg9EaXNjb3ZlcmVkVGl0bGUSMwoKbWVkaWFfa2luZBgBIAEoDjIfLm1hdmlvLmFjcXVpc2l0aW9uLnYxLk1lZGlhS2luZBIMCgRuYW1lGAIgASgJEhYKDm9yaWdpbmFsX3RpdGxlGAMgASgJEhkKEW9yaWdpbmFsX2xhbmd1YWdlGAQgASgJEhAKCG92ZXJ2aWV3GAUgASgJEhUKDXByZW1pZXJlX2RhdGUYBiABKAkSDAoEeWVhchgHIAEoBRJMCgxleHRlcm5hbF9pZHMYCCADKAsyNi5tYXZpby5hY3F1aXNpdGlvbi52MS5EaXNjb3ZlcmVkVGl0bGUuRXh0ZXJuYWxJZHNFbnRyeRIOCgZnZW5yZXMYCSADKAkSEgoKcG9zdGVyX3VybBgKIAEoCRIUCgxiYWNrZHJvcF91cmwYCyABKAkSGAoQY29tbXVuaXR5X3JhdGluZxgMIAEoARISCgp2b3RlX2NvdW50GA0gASgFEhIKCnBvcHVsYXJpdHkYDiABKAESMQoGc3RhdHVzGA8gASgOMiEubWF2aW8uYWNxdWlzaXRpb24udjEuTWVkaWFTdGF0dXMSDwoHaXRlbV9pZBgQIAEoCRISCgpyZXF1ZXN0X2lkGBEgASgJEjsKDnJlcXVlc3Rfc3RhdHVzGBIgASgOMiMubWF2aW8uYWNxdWlzaXRpb24udjEuUmVxdWVzdFN0YXR1cxITCgtyZXF1ZXN0YWJsZRgTIAEoCBoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEi7QEKF0xpc3RGaWx0ZXJWYWx1ZXNSZXF1ZXN0EhgKB2NhdGFsb2cYASABKAlCB7pIBHICEAESOwoGZmlsdGVyGAIgASgOMh8ubWF2aW8ucGx1Z2luLnYxLkRpc2NvdmVyRmlsdGVyQgq6SAeCAQQQASAAEj0KCm1lZGlhX2tpbmQYAyABKA4yHy5tYXZpby5hY3F1aXNpdGlvbi52MS5NZWRpYUtpbmRCCLpIBYIBAhABEg0KBXF1ZXJ5GAQgASgJEgsKA2lkcxgFIAMoCRIQCghsYW5ndWFnZRgGIAEoCRIOCgZyZWdpb24YByABKAkiSAoYTGlzdEZpbHRlclZhbHVlc1Jlc3BvbnNlEiwKBnZhbHVlcxgBIAMoCzIcLm1hdmlvLnBsdWdpbi52MS5GaWx0ZXJWYWx1ZSLJAQoTU2VhcmNoVGl0bGVzUmVxdWVzdBIaCgVxdWVyeRgBIAEoCUILukgIyAEBcgMYyAESPQoKbWVkaWFfa2luZBgCIAEoDjIfLm1hdmlvLmFjcXVpc2l0aW9uLnYxLk1lZGlhS2luZEIIukgFggECEAESGAoEeWVhchgDIAEoBUIKukgHGgUYj04oABIQCghsYW5ndWFnZRgEIAEoCRIYCgRwYWdlGAUgASgFQgq6SAcaBRj0AygAEhEKCXBsdWdpbl9pZBgGIAEoCSKyAQoUU2VhcmNoVGl0bGVzUmVzcG9uc2USNQoGdGl0bGVzGAEgAygLMiUubWF2aW8uYWNxdWlzaXRpb24udjEuRGlzY292ZXJlZFRpdGxlEgwKBHBhZ2UYAiABKAUSEwoLdG90YWxfcGFnZXMYAyABKAUSFQoNdG90YWxfcmVzdWx0cxgEIAEoBRIWCg5oaWRkZW5fcmVzdWx0cxgFIAEoBRIRCglwbHVnaW5faWQYBiABKAkibAoPR2V0VGl0bGVSZXF1ZXN0Ej8KCm1lZGlhX2tpbmQYASABKA4yHy5tYXZpby5hY3F1aXNpdGlvbi52MS5NZWRpYUtpbmRCCrpIB4IBBBABIAASGAoHdG1kYl9pZBgCIAEoBUIHukgEGgIgACI+ChBHZXRUaXRsZVJlc3BvbnNlEioKBXRpdGxlGAEgASgLMhsubWF2aW8uYWNxdWlzaXRpb24udjEuVGl0bGUihgUKBVRpdGxlEjMKCm1lZGlhX2tpbmQYASABKA4yHy5tYXZpby5hY3F1aXNpdGlvbi52MS5NZWRpYUtpbmQSDwoHdG1kYl9pZBgCIAEoBRIPCgd0dmRiX2lkGAMgASgFEgwKBG5hbWUYBCABKAkSFgoOb3JpZ2luYWxfdGl0bGUYBSABKAkSEAoIb3ZlcnZpZXcYBiABKAkSFQoNcHJlbWllcmVfZGF0ZRgHIAEoCRIMCgR5ZWFyGAggASgFEhcKD29mZmljaWFsX3JhdGluZxgJIAEoCRIWCg5yYXRpbmdfY291bnRyeRgKIAEoCRIOCgZnZW5yZXMYCyADKAkSGAoQY29tbXVuaXR5X3JhdGluZxgMIAEoARJCCgxleHRlcm5hbF9pZHMYDSADKAsyLC5tYXZpby5hY3F1aXNpdGlvbi52MS5UaXRsZS5FeHRlcm5hbElkc0VudHJ5EhIKCnBvc3Rlcl91cmwYDiABKAkSFAoMYmFja2Ryb3BfdXJsGA8gASgJEg0KBWFuaW1lGBAgASgIEjEKBnN0YXR1cxgRIAEoDjIhLm1hdmlvLmFjcXVpc2l0aW9uLnYxLk1lZGlhU3RhdHVzEg8KB2l0ZW1faWQYEiABKAkSLwoIcmVxdWVzdHMYEyADKAsyHS5tYXZpby5hY3F1aXNpdGlvbi52MS5SZXF1ZXN0EhMKC3JlcXVlc3RhYmxlGBQgASgIEjMKB3NlYXNvbnMYFSADKAsyIi5tYXZpby5hY3F1aXNpdGlvbi52MS5TZWFzb25TdGF0dXMaMgoQRXh0ZXJuYWxJZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIuwBCgxTZWFzb25TdGF0dXMSFQoNc2Vhc29uX251bWJlchgBIAEoBRIVCg1lcGlzb2RlX2NvdW50GAIgASgFEhUKDXByZW1pZXJlX2RhdGUYAyABKAkSMQoGc3RhdHVzGAQgASgOMiEubWF2aW8uYWNxdWlzaXRpb24udjEuTWVkaWFTdGF0dXMSEgoKcmVxdWVzdF9pZBgFIAEoCRI7Cg5yZXF1ZXN0X3N0YXR1cxgGIAEoDjIjLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlJlcXVlc3RTdGF0dXMSEwoLcmVxdWVzdGFibGUYByABKAgq2gEKC01lZGlhU3RhdHVzEhwKGE1FRElBX1NUQVRVU19VTlNQRUNJRklFRBAAEhoKFk1FRElBX1NUQVRVU19SRVFVRVNURUQQARIXChNNRURJQV9TVEFUVVNfV0FOVEVEEAISJAogTUVESUFfU1RBVFVTX1BBUlRJQUxMWV9BVkFJTEFCTEUQAxIaChZNRURJQV9TVEFUVVNfQVZBSUxBQkxFEAQSHAoYTUVESUFfU1RBVFVTX0JMT0NLTElTVEVEEAUSGAoUTUVESUFfU1RBVFVTX0RFTEVURUQQBjKhBAoPRGlzY292ZXJTZXJ2aWNlEmoKDExpc3RDYXRhbG9ncxIpLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkxpc3RDYXRhbG9nc1JlcXVlc3QaKi5tYXZpby5hY3F1aXNpdGlvbi52MS5MaXN0Q2F0YWxvZ3NSZXNwb25zZSIDkAIBEl4KCERpc2NvdmVyEiUubWF2aW8uYWNxdWlzaXRpb24udjEuRGlzY292ZXJSZXF1ZXN0GiYubWF2aW8uYWNxdWlzaXRpb24udjEuRGlzY292ZXJSZXNwb25zZSIDkAIBEnYKEExpc3RGaWx0ZXJWYWx1ZXMSLS5tYXZpby5hY3F1aXNpdGlvbi52MS5MaXN0RmlsdGVyVmFsdWVzUmVxdWVzdBouLm1hdmlvLmFjcXVpc2l0aW9uLnYxLkxpc3RGaWx0ZXJWYWx1ZXNSZXNwb25zZSIDkAIBEmoKDFNlYXJjaFRpdGxlcxIpLm1hdmlvLmFjcXVpc2l0aW9uLnYxLlNlYXJjaFRpdGxlc1JlcXVlc3QaKi5tYXZpby5hY3F1aXNpdGlvbi52MS5TZWFyY2hUaXRsZXNSZXNwb25zZSIDkAIBEl4KCEdldFRpdGxlEiUubWF2aW8uYWNxdWlzaXRpb24udjEuR2V0VGl0bGVSZXF1ZXN0GiYubWF2aW8uYWNxdWlzaXRpb24udjEuR2V0VGl0bGVSZXNwb25zZSIDkAIBQuoBChhjb20ubWF2aW8uYWNxdWlzaXRpb24udjFCDURpc2NvdmVyUHJvdG9QAVpNZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL2FjcXVpc2l0aW9uL3YxO2FjcXVpc2l0aW9udjGiAgNNQViqAhRNYXZpby5BY3F1aXNpdGlvbi5WMcoCFE1hdmlvXEFjcXVpc2l0aW9uXFYx4gIgTWF2aW9cQWNxdWlzaXRpb25cVjFcR1BCTWV0YWRhdGHqAhZNYXZpbzo6QWNxdWlzaXRpb246OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_mavio_acquisition_v1_profile, file_mavio_acquisition_v1_request, file_mavio_plugin_v1_discovery]);
 
 /**
  * @generated from message mavio.acquisition.v1.ListCatalogsRequest
@@ -276,6 +276,11 @@ export const DiscoverRequestSchema: GenMessage<DiscoverRequest> = /*@__PURE__*/
   messageDesc(file_mavio_acquisition_v1_discover, 3);
 
 /**
+ * DiscoverResponse is a page of a catalog. Its pages are the provider's:
+ * a page holds fewer titles than the provider's, or none, when titles are
+ * left out of it, and the next page is still page + 1 while page <
+ * total_pages.
+ *
  * @generated from message mavio.acquisition.v1.DiscoverResponse
  */
 export type DiscoverResponse = Message<"mavio.acquisition.v1.DiscoverResponse"> & {
@@ -290,14 +295,28 @@ export type DiscoverResponse = Message<"mavio.acquisition.v1.DiscoverResponse"> 
   page: number;
 
   /**
+   * Exact: pages are the provider's.
+   *
    * @generated from field: int32 total_pages = 3;
    */
   totalPages: number;
 
   /**
+   * The provider's total less the titles left out of this page: exact
+   * when there is one page or nothing was left out, else an upper bound,
+   * for the other pages may leave titles out too.
+   *
    * @generated from field: int32 total_results = 4;
    */
   totalResults: number;
+
+  /**
+   * The titles left out of this page: rated above the caller's limit,
+   * unrated when the caller's policy blocks them, or adult.
+   *
+   * @generated from field: int32 hidden_results = 5;
+   */
+  hiddenResults: number;
 };
 
 /**
@@ -421,7 +440,8 @@ export type DiscoveredTitle = Message<"mavio.acquisition.v1.DiscoveredTitle"> & 
 
   /**
    * Whether the caller may request it now: their policy allows its
-   * kind, and it is neither available nor wholly requested or wanted.
+   * kind, and it is neither available, blocklisted, nor wholly requested
+   * or wanted.
    *
    * @generated from field: bool requestable = 19;
    */
@@ -512,6 +532,357 @@ export const ListFilterValuesResponseSchema: GenMessage<ListFilterValuesResponse
   messageDesc(file_mavio_acquisition_v1_discover, 7);
 
 /**
+ * @generated from message mavio.acquisition.v1.SearchTitlesRequest
+ */
+export type SearchTitlesRequest = Message<"mavio.acquisition.v1.SearchTitlesRequest"> & {
+  /**
+   * The text to find; the provider may understand prefixes, such as
+   * scraper-tmdb's "tmdb:603", "imdb:tt0133093", "tvdb:81189" and
+   * "year:1999".
+   *
+   * @generated from field: string query = 1;
+   */
+  query: string;
+
+  /**
+   * Movies or series; unset for both.
+   *
+   * @generated from field: mavio.acquisition.v1.MediaKind media_kind = 2;
+   */
+  mediaKind: MediaKind;
+
+  /**
+   * The year of a movie's release or a series' first air date; unset for
+   * any.
+   *
+   * @generated from field: int32 year = 3;
+   */
+  year: number;
+
+  /**
+   * ISO 639-1 language of names and overviews.
+   *
+   * @generated from field: string language = 4;
+   */
+  language: string;
+
+  /**
+   * From 1; unset for the first page.
+   *
+   * @generated from field: int32 page = 5;
+   */
+  page: number;
+
+  /**
+   * The discovery provider searching; unset for the first that searches.
+   *
+   * @generated from field: string plugin_id = 6;
+   */
+  pluginId: string;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.SearchTitlesRequest.
+ * Use `create(SearchTitlesRequestSchema)` to create a new message.
+ */
+export const SearchTitlesRequestSchema: GenMessage<SearchTitlesRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_discover, 8);
+
+/**
+ * SearchTitlesResponse is a page of a search, whose pages and totals are as
+ * DiscoverResponse's.
+ *
+ * @generated from message mavio.acquisition.v1.SearchTitlesResponse
+ */
+export type SearchTitlesResponse = Message<"mavio.acquisition.v1.SearchTitlesResponse"> & {
+  /**
+   * @generated from field: repeated mavio.acquisition.v1.DiscoveredTitle titles = 1;
+   */
+  titles: DiscoveredTitle[];
+
+  /**
+   * @generated from field: int32 page = 2;
+   */
+  page: number;
+
+  /**
+   * @generated from field: int32 total_pages = 3;
+   */
+  totalPages: number;
+
+  /**
+   * @generated from field: int32 total_results = 4;
+   */
+  totalResults: number;
+
+  /**
+   * @generated from field: int32 hidden_results = 5;
+   */
+  hiddenResults: number;
+
+  /**
+   * The plugin that searched.
+   *
+   * @generated from field: string plugin_id = 6;
+   */
+  pluginId: string;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.SearchTitlesResponse.
+ * Use `create(SearchTitlesResponseSchema)` to create a new message.
+ */
+export const SearchTitlesResponseSchema: GenMessage<SearchTitlesResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_discover, 9);
+
+/**
+ * @generated from message mavio.acquisition.v1.GetTitleRequest
+ */
+export type GetTitleRequest = Message<"mavio.acquisition.v1.GetTitleRequest"> & {
+  /**
+   * MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+   *
+   * @generated from field: mavio.acquisition.v1.MediaKind media_kind = 1;
+   */
+  mediaKind: MediaKind;
+
+  /**
+   * @generated from field: int32 tmdb_id = 2;
+   */
+  tmdbId: number;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.GetTitleRequest.
+ * Use `create(GetTitleRequestSchema)` to create a new message.
+ */
+export const GetTitleRequestSchema: GenMessage<GetTitleRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_discover, 10);
+
+/**
+ * @generated from message mavio.acquisition.v1.GetTitleResponse
+ */
+export type GetTitleResponse = Message<"mavio.acquisition.v1.GetTitleResponse"> & {
+  /**
+   * @generated from field: mavio.acquisition.v1.Title title = 1;
+   */
+  title?: Title | undefined;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.GetTitleResponse.
+ * Use `create(GetTitleResponseSchema)` to create a new message.
+ */
+export const GetTitleResponseSchema: GenMessage<GetTitleResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_discover, 11);
+
+/**
+ * Title is a movie or series as the metadata providers tell it, in the
+ * server's metadata language and country, with what the server has of it.
+ *
+ * @generated from message mavio.acquisition.v1.Title
+ */
+export type Title = Message<"mavio.acquisition.v1.Title"> & {
+  /**
+   * MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+   *
+   * @generated from field: mavio.acquisition.v1.MediaKind media_kind = 1;
+   */
+  mediaKind: MediaKind;
+
+  /**
+   * @generated from field: int32 tmdb_id = 2;
+   */
+  tmdbId: number;
+
+  /**
+   * Of series, when known.
+   *
+   * @generated from field: int32 tvdb_id = 3;
+   */
+  tvdbId: number;
+
+  /**
+   * @generated from field: string name = 4;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string original_title = 5;
+   */
+  originalTitle: string;
+
+  /**
+   * @generated from field: string overview = 6;
+   */
+  overview: string;
+
+  /**
+   * ISO 8601 calendar date: a movie's release, a series' first air date.
+   *
+   * @generated from field: string premiere_date = 7;
+   */
+  premiereDate: string;
+
+  /**
+   * @generated from field: int32 year = 8;
+   */
+  year: number;
+
+  /**
+   * The content rating in rating_country (ISO 3166-1), such as "PG-13";
+   * empty when unrated.
+   *
+   * @generated from field: string official_rating = 9;
+   */
+  officialRating: string;
+
+  /**
+   * @generated from field: string rating_country = 10;
+   */
+  ratingCountry: string;
+
+  /**
+   * Genre names.
+   *
+   * @generated from field: repeated string genres = 11;
+   */
+  genres: string[];
+
+  /**
+   * 0–10.
+   *
+   * @generated from field: double community_rating = 12;
+   */
+  communityRating: number;
+
+  /**
+   * Such as "tmdb", "imdb" and "tvdb".
+   *
+   * @generated from field: map<string, string> external_ids = 13;
+   */
+  externalIds: { [key: string]: string };
+
+  /**
+   * @generated from field: string poster_url = 14;
+   */
+  posterUrl: string;
+
+  /**
+   * @generated from field: string backdrop_url = 15;
+   */
+  backdropUrl: string;
+
+  /**
+   * A series the metadata providers tag as anime, which requests add with
+   * the anime quality profile and library.
+   *
+   * @generated from field: bool anime = 16;
+   */
+  anime: boolean;
+
+  /**
+   * @generated from field: mavio.acquisition.v1.MediaStatus status = 17;
+   */
+  status: MediaStatus;
+
+  /**
+   * The movie or series in a library, if any.
+   *
+   * @generated from field: string item_id = 18;
+   */
+  itemId: string;
+
+  /**
+   * Its active requests: pending, approved or failed.
+   *
+   * @generated from field: repeated mavio.acquisition.v1.Request requests = 19;
+   */
+  requests: Request[];
+
+  /**
+   * Whether the caller may request it, or some of its seasons, now.
+   *
+   * @generated from field: bool requestable = 20;
+   */
+  requestable: boolean;
+
+  /**
+   * The seasons of a series, in order; specials only when the server
+   * allows requesting them.
+   *
+   * @generated from field: repeated mavio.acquisition.v1.SeasonStatus seasons = 21;
+   */
+  seasons: SeasonStatus[];
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.Title.
+ * Use `create(TitleSchema)` to create a new message.
+ */
+export const TitleSchema: GenMessage<Title> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_discover, 12);
+
+/**
+ * SeasonStatus is a season of a series with what the server has of it, as
+ * Seerr's season statuses.
+ *
+ * @generated from message mavio.acquisition.v1.SeasonStatus
+ */
+export type SeasonStatus = Message<"mavio.acquisition.v1.SeasonStatus"> & {
+  /**
+   * @generated from field: int32 season_number = 1;
+   */
+  seasonNumber: number;
+
+  /**
+   * @generated from field: int32 episode_count = 2;
+   */
+  episodeCount: number;
+
+  /**
+   * ISO 8601 calendar date of its first episode, when known.
+   *
+   * @generated from field: string premiere_date = 3;
+   */
+  premiereDate: string;
+
+  /**
+   * Requested, wanted, partially available or available, blocklisted with
+   * its series, or deleted.
+   *
+   * @generated from field: mavio.acquisition.v1.MediaStatus status = 4;
+   */
+  status: MediaStatus;
+
+  /**
+   * The active request asking for it, if any, and that request's status.
+   *
+   * @generated from field: string request_id = 5;
+   */
+  requestId: string;
+
+  /**
+   * @generated from field: mavio.acquisition.v1.RequestStatus request_status = 6;
+   */
+  requestStatus: RequestStatus;
+
+  /**
+   * Whether the caller may request it now.
+   *
+   * @generated from field: bool requestable = 7;
+   */
+  requestable: boolean;
+};
+
+/**
+ * Describes the message mavio.acquisition.v1.SeasonStatus.
+ * Use `create(SeasonStatusSchema)` to create a new message.
+ */
+export const SeasonStatusSchema: GenMessage<SeasonStatus> = /*@__PURE__*/
+  messageDesc(file_mavio_acquisition_v1_discover, 13);
+
+/**
  * MediaStatus is what the server has of a discovered title, as Seerr's
  * media statuses.
  *
@@ -553,6 +924,21 @@ export enum MediaStatus {
    * @generated from enum value: MEDIA_STATUS_AVAILABLE = 4;
    */
   AVAILABLE = 4,
+
+  /**
+   * Administrators blocked it from being requested.
+   *
+   * @generated from enum value: MEDIA_STATUS_BLOCKLISTED = 5;
+   */
+  BLOCKLISTED = 5,
+
+  /**
+   * It was available through a completed request, but its files are gone
+   * and it is not wanted; it may be requested again.
+   *
+   * @generated from enum value: MEDIA_STATUS_DELETED = 6;
+   */
+  DELETED = 6,
 }
 
 /**
@@ -563,9 +949,11 @@ export const MediaStatusSchema: GenEnum<MediaStatus> = /*@__PURE__*/
 
 /**
  * DiscoverService lists the movies and series the discovery providers
- * offer, such as trending or popular titles, marked with what the server
- * has of them: available, wanted or requested. Titles rated above the
- * caller's rating limit are left out. Signed-in users.
+ * offer, such as trending or popular titles, and those they find by name,
+ * marked with what the server has of them: available, wanted or
+ * requested; it details a title with the status of each of its seasons.
+ * Titles rated above the caller's rating limit are left out. Signed-in
+ * users.
  *
  * @generated from service mavio.acquisition.v1.DiscoverService
  */
@@ -600,6 +988,31 @@ export const DiscoverService: GenService<{
     methodKind: "unary";
     input: typeof ListFilterValuesRequestSchema;
     output: typeof ListFilterValuesResponseSchema;
+  },
+  /**
+   * SearchTitles finds movies and series by name through a discovery
+   * provider, as Seerr's /search, marked as Discover marks them.
+   *
+   * @generated from rpc mavio.acquisition.v1.DiscoverService.SearchTitles
+   */
+  searchTitles: {
+    methodKind: "unary";
+    input: typeof SearchTitlesRequestSchema;
+    output: typeof SearchTitlesResponseSchema;
+  },
+  /**
+   * GetTitle returns a movie or series by its TMDB ID, as the metadata
+   * providers tell it, with what the server has of it and of each of its
+   * seasons, as Seerr's movie and series details with their media. It
+   * fails with PERMISSION_DENIED when the title is rated above the
+   * caller's limit, and NOT_FOUND when no metadata provider knows it.
+   *
+   * @generated from rpc mavio.acquisition.v1.DiscoverService.GetTitle
+   */
+  getTitle: {
+    methodKind: "unary";
+    input: typeof GetTitleRequestSchema;
+    output: typeof GetTitleResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_acquisition_v1_discover, 0);

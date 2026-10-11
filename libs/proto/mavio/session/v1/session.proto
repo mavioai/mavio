@@ -8,6 +8,7 @@ import "google/protobuf/timestamp.proto";
 import "mavio/library/v1/item.proto";
 import "mavio/playback/v1/playback.proto";
 import "mavio/session/v1/syncplay.proto";
+import "mavio/system/v1/activity.proto";
 import "mavio/system/v1/system.proto";
 import "mavio/user/v1/user.proto";
 
@@ -58,6 +59,7 @@ message Event {
     JobChanged job_changed = 8;
     PluginChanged plugin_changed = 9;
     SyncPlayUpdate sync_play = 10;
+    NotificationReceived notification = 11;
   }
 }
 
@@ -115,6 +117,15 @@ enum JobState {
   JOB_STATE_SUCCEEDED = 2;
   // Retried later unless its attempts are used up.
   JOB_STATE_FAILED = 3;
+}
+
+// NotificationReceived tells the user of a notification as it is
+// recorded: an activity concerning them, such as their request approved
+// or available or their issue resolved, as ActivityService lists their
+// own; administrators also receive those they act on, such as requests
+// waiting for approval and issues reported.
+message NotificationReceived {
+  mavio.system.v1.Activity activity = 1;
 }
 
 // PluginChanged tells administrators a plugin's new state.

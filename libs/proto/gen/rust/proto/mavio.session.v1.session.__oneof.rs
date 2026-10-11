@@ -19,6 +19,9 @@ pub mod event {
         JobChanged(::buffa::alloc::boxed::Box<super::super::super::JobChanged>),
         PluginChanged(::buffa::alloc::boxed::Box<super::super::super::PluginChanged>),
         SyncPlay(::buffa::alloc::boxed::Box<super::super::super::SyncPlayUpdate>),
+        Notification(
+            ::buffa::alloc::boxed::Box<super::super::super::NotificationReceived>,
+        ),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Connected> for Kind {
@@ -108,6 +111,17 @@ pub mod event {
     }
     impl From<super::super::super::SyncPlayUpdate> for ::core::option::Option<Kind> {
         fn from(v: super::super::super::SyncPlayUpdate) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::NotificationReceived> for Kind {
+        fn from(v: super::super::super::NotificationReceived) -> Self {
+            Self::Notification(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::NotificationReceived>
+    for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::NotificationReceived) -> Self {
             Self::Some(Kind::from(v))
         }
     }

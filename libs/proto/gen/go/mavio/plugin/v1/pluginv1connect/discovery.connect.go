@@ -42,6 +42,9 @@ const (
 	// DiscoveryProviderServiceListFilterValuesProcedure is the fully-qualified name of the
 	// DiscoveryProviderService's ListFilterValues RPC.
 	DiscoveryProviderServiceListFilterValuesProcedure = "/mavio.plugin.v1.DiscoveryProviderService/ListFilterValues"
+	// DiscoveryProviderServiceSearchTitlesProcedure is the fully-qualified name of the
+	// DiscoveryProviderService's SearchTitles RPC.
+	DiscoveryProviderServiceSearchTitlesProcedure = "/mavio.plugin.v1.DiscoveryProviderService/SearchTitles"
 )
 
 // DiscoveryProviderServiceClient is a client for the mavio.plugin.v1.DiscoveryProviderService
@@ -54,6 +57,9 @@ type DiscoveryProviderServiceClient interface {
 	// ListFilterValues lists the values a filter takes, such as genres, or
 	// the keywords and studios matching a query.
 	ListFilterValues(context.Context, *v1.ListFilterValuesRequest) (*v1.ListFilterValuesResponse, error)
+	// SearchTitles finds movies and series by name, a page at a time. A
+	// provider that does not search answers UNIMPLEMENTED.
+	SearchTitles(context.Context, *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error)
 }
 
 // NewDiscoveryProviderServiceClient constructs a client for the
@@ -88,6 +94,13 @@ func NewDiscoveryProviderServiceClient(httpClient connect.HTTPClient, baseURL st
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		searchTitles: connect.NewClient[v1.SearchTitlesRequest, v1.SearchTitlesResponse](
+			httpClient,
+			baseURL+DiscoveryProviderServiceSearchTitlesProcedure,
+			connect.WithSchema(discoveryProviderServiceMethods.ByName("SearchTitles")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -96,6 +109,7 @@ type discoveryProviderServiceClient struct {
 	listCatalogs     *connect.Client[v1.ListCatalogsRequest, v1.ListCatalogsResponse]
 	discover         *connect.Client[v1.DiscoverRequest, v1.DiscoverResponse]
 	listFilterValues *connect.Client[v1.ListFilterValuesRequest, v1.ListFilterValuesResponse]
+	searchTitles     *connect.Client[v1.SearchTitlesRequest, v1.SearchTitlesResponse]
 }
 
 // ListCatalogs calls mavio.plugin.v1.DiscoveryProviderService.ListCatalogs.
@@ -125,6 +139,15 @@ func (c *discoveryProviderServiceClient) ListFilterValues(ctx context.Context, r
 	return nil, err
 }
 
+// SearchTitles calls mavio.plugin.v1.DiscoveryProviderService.SearchTitles.
+func (c *discoveryProviderServiceClient) SearchTitles(ctx context.Context, req *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error) {
+	response, err := c.searchTitles.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // DiscoveryProviderServiceHandler is an implementation of the
 // mavio.plugin.v1.DiscoveryProviderService service.
 type DiscoveryProviderServiceHandler interface {
@@ -135,6 +158,9 @@ type DiscoveryProviderServiceHandler interface {
 	// ListFilterValues lists the values a filter takes, such as genres, or
 	// the keywords and studios matching a query.
 	ListFilterValues(context.Context, *v1.ListFilterValuesRequest) (*v1.ListFilterValuesResponse, error)
+	// SearchTitles finds movies and series by name, a page at a time. A
+	// provider that does not search answers UNIMPLEMENTED.
+	SearchTitles(context.Context, *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error)
 }
 
 // NewDiscoveryProviderServiceHandler builds an HTTP handler from the service implementation. It
@@ -165,6 +191,13 @@ func NewDiscoveryProviderServiceHandler(svc DiscoveryProviderServiceHandler, opt
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	discoveryProviderServiceSearchTitlesHandler := connect.NewUnaryHandlerSimple(
+		DiscoveryProviderServiceSearchTitlesProcedure,
+		svc.SearchTitles,
+		connect.WithSchema(discoveryProviderServiceMethods.ByName("SearchTitles")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.plugin.v1.DiscoveryProviderService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DiscoveryProviderServiceListCatalogsProcedure:
@@ -173,6 +206,8 @@ func NewDiscoveryProviderServiceHandler(svc DiscoveryProviderServiceHandler, opt
 			discoveryProviderServiceDiscoverHandler.ServeHTTP(w, r)
 		case DiscoveryProviderServiceListFilterValuesProcedure:
 			discoveryProviderServiceListFilterValuesHandler.ServeHTTP(w, r)
+		case DiscoveryProviderServiceSearchTitlesProcedure:
+			discoveryProviderServiceSearchTitlesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -192,4 +227,8 @@ func (UnimplementedDiscoveryProviderServiceHandler) Discover(context.Context, *v
 
 func (UnimplementedDiscoveryProviderServiceHandler) ListFilterValues(context.Context, *v1.ListFilterValuesRequest) (*v1.ListFilterValuesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.DiscoveryProviderService.ListFilterValues is not implemented"))
+}
+
+func (UnimplementedDiscoveryProviderServiceHandler) SearchTitles(context.Context, *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.DiscoveryProviderService.SearchTitles is not implemented"))
 }

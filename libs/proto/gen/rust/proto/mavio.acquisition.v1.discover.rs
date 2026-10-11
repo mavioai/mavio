@@ -18,6 +18,11 @@ pub enum MediaStatus {
     /// A movie with a file, or a series whose monitored aired episodes all
     /// have files.
     MEDIA_STATUS_AVAILABLE = 4i32,
+    /// Administrators blocked it from being requested.
+    MEDIA_STATUS_BLOCKLISTED = 5i32,
+    /// It was available through a completed request, but its files are gone
+    /// and it is not wanted; it may be requested again.
+    MEDIA_STATUS_DELETED = 6i32,
 }
 impl MediaStatus {
     ///Idiomatic alias for [`Self::MEDIA_STATUS_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -35,6 +40,12 @@ impl MediaStatus {
     ///Idiomatic alias for [`Self::MEDIA_STATUS_AVAILABLE`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const Available: Self = Self::MEDIA_STATUS_AVAILABLE;
+    ///Idiomatic alias for [`Self::MEDIA_STATUS_BLOCKLISTED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Blocklisted: Self = Self::MEDIA_STATUS_BLOCKLISTED;
+    ///Idiomatic alias for [`Self::MEDIA_STATUS_DELETED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Deleted: Self = Self::MEDIA_STATUS_DELETED;
 }
 impl ::core::default::Default for MediaStatus {
     fn default() -> Self {
@@ -49,6 +60,8 @@ impl ::buffa::Enumeration for MediaStatus {
             2i32 => ::core::option::Option::Some(Self::MEDIA_STATUS_WANTED),
             3i32 => ::core::option::Option::Some(Self::MEDIA_STATUS_PARTIALLY_AVAILABLE),
             4i32 => ::core::option::Option::Some(Self::MEDIA_STATUS_AVAILABLE),
+            5i32 => ::core::option::Option::Some(Self::MEDIA_STATUS_BLOCKLISTED),
+            6i32 => ::core::option::Option::Some(Self::MEDIA_STATUS_DELETED),
             _ => ::core::option::Option::None,
         }
     }
@@ -62,6 +75,8 @@ impl ::buffa::Enumeration for MediaStatus {
             Self::MEDIA_STATUS_WANTED => "MEDIA_STATUS_WANTED",
             Self::MEDIA_STATUS_PARTIALLY_AVAILABLE => "MEDIA_STATUS_PARTIALLY_AVAILABLE",
             Self::MEDIA_STATUS_AVAILABLE => "MEDIA_STATUS_AVAILABLE",
+            Self::MEDIA_STATUS_BLOCKLISTED => "MEDIA_STATUS_BLOCKLISTED",
+            Self::MEDIA_STATUS_DELETED => "MEDIA_STATUS_DELETED",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -81,6 +96,12 @@ impl ::buffa::Enumeration for MediaStatus {
             "MEDIA_STATUS_AVAILABLE" => {
                 ::core::option::Option::Some(Self::MEDIA_STATUS_AVAILABLE)
             }
+            "MEDIA_STATUS_BLOCKLISTED" => {
+                ::core::option::Option::Some(Self::MEDIA_STATUS_BLOCKLISTED)
+            }
+            "MEDIA_STATUS_DELETED" => {
+                ::core::option::Option::Some(Self::MEDIA_STATUS_DELETED)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -91,6 +112,8 @@ impl ::buffa::Enumeration for MediaStatus {
             Self::MEDIA_STATUS_WANTED,
             Self::MEDIA_STATUS_PARTIALLY_AVAILABLE,
             Self::MEDIA_STATUS_AVAILABLE,
+            Self::MEDIA_STATUS_BLOCKLISTED,
+            Self::MEDIA_STATUS_DELETED,
         ]
     }
 }
@@ -1464,16 +1487,31 @@ impl ::buffa::ExtensionSet for DiscoverRequest {
         &mut self.__buffa_unknown_fields
     }
 }
+/// DiscoverResponse is a page of a catalog. Its pages are the provider's:
+/// a page holds fewer titles than the provider's, or none, when titles are
+/// left out of it, and the next page is still page + 1 while page \<
+/// total_pages.
 #[derive(Clone, PartialEq, Default)]
 pub struct DiscoverResponse {
     /// Field 1: `titles`
     pub titles: ::buffa::alloc::vec::Vec<DiscoveredTitle>,
     /// Field 2: `page`
     pub page: ::core::option::Option<i32>,
+    /// Exact: pages are the provider's.
+    ///
     /// Field 3: `total_pages`
     pub total_pages: ::core::option::Option<i32>,
+    /// The provider's total less the titles left out of this page: exact
+    /// when there is one page or nothing was left out, else an upper bound,
+    /// for the other pages may leave titles out too.
+    ///
     /// Field 4: `total_results`
     pub total_results: ::core::option::Option<i32>,
+    /// The titles left out of this page: rated above the caller's limit,
+    /// unrated when the caller's policy blocks them, or adult.
+    ///
+    /// Field 5: `hidden_results`
+    pub hidden_results: ::core::option::Option<i32>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1484,6 +1522,7 @@ impl ::core::fmt::Debug for DiscoverResponse {
             .field("page", &self.page)
             .field("total_pages", &self.total_pages)
             .field("total_results", &self.total_results)
+            .field("hidden_results", &self.hidden_results)
             .finish()
     }
 }
@@ -1514,6 +1553,13 @@ impl DiscoverResponse {
     ///Sets [`Self::total_results`] to `Some(value)`, consuming and returning `self`.
     pub fn with_total_results(mut self, value: i32) -> Self {
         self.total_results = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::hidden_results`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_hidden_results(mut self, value: i32) -> Self {
+        self.hidden_results = Some(value);
         self
     }
 }
@@ -1554,6 +1600,9 @@ impl ::buffa::Message for DiscoverResponse {
         if let Some(v) = self.total_results {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(v) = self.hidden_results {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1580,6 +1629,9 @@ impl ::buffa::Message for DiscoverResponse {
         }
         if let Some(v) = self.total_results {
             ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(v) = self.hidden_results {
+            ::buffa::types::put_int32_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1633,6 +1685,15 @@ impl ::buffa::Message for DiscoverResponse {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.hidden_results = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1645,6 +1706,7 @@ impl ::buffa::Message for DiscoverResponse {
         self.page = ::core::option::Option::None;
         self.total_pages = ::core::option::Option::None;
         self.total_results = ::core::option::Option::None;
+        self.hidden_results = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1716,7 +1778,8 @@ pub struct DiscoveredTitle {
     /// Field 18: `request_status`
     pub request_status: ::core::option::Option<::buffa::EnumValue<RequestStatus>>,
     /// Whether the caller may request it now: their policy allows its
-    /// kind, and it is neither available nor wholly requested or wanted.
+    /// kind, and it is neither available, blocklisted, nor wholly requested
+    /// or wanted.
     ///
     /// Field 19: `requestable`
     pub requestable: ::core::option::Option<bool>,
@@ -2713,6 +2776,1802 @@ impl ::buffa::Message for ListFilterValuesResponse {
 }
 impl ::buffa::ExtensionSet for ListFilterValuesResponse {
     const PROTO_FQN: &'static str = "mavio.acquisition.v1.ListFilterValuesResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct SearchTitlesRequest {
+    /// The text to find; the provider may understand prefixes, such as
+    /// scraper-tmdb's "tmdb:603", "imdb:tt0133093", "tvdb:81189" and
+    /// "year:1999".
+    ///
+    /// Field 1: `query`
+    pub query: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Movies or series; unset for both.
+    ///
+    /// Field 2: `media_kind`
+    pub media_kind: ::core::option::Option<::buffa::EnumValue<MediaKind>>,
+    /// The year of a movie's release or a series' first air date; unset for
+    /// any.
+    ///
+    /// Field 3: `year`
+    pub year: ::core::option::Option<i32>,
+    /// ISO 639-1 language of names and overviews.
+    ///
+    /// Field 4: `language`
+    pub language: ::core::option::Option<::buffa::alloc::string::String>,
+    /// From 1; unset for the first page.
+    ///
+    /// Field 5: `page`
+    pub page: ::core::option::Option<i32>,
+    /// The discovery provider searching; unset for the first that searches.
+    ///
+    /// Field 6: `plugin_id`
+    pub plugin_id: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SearchTitlesRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SearchTitlesRequest")
+            .field("query", &self.query)
+            .field("media_kind", &self.media_kind)
+            .field("year", &self.year)
+            .field("language", &self.language)
+            .field("page", &self.page)
+            .field("plugin_id", &self.plugin_id)
+            .finish()
+    }
+}
+impl SearchTitlesRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SearchTitlesRequest";
+}
+impl SearchTitlesRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::query`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_query(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.query = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::media_kind`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_media_kind(
+        mut self,
+        value: impl Into<::buffa::EnumValue<MediaKind>>,
+    ) -> Self {
+        self.media_kind = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::year`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_year(mut self, value: i32) -> Self {
+        self.year = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::language`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_language(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.language = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::page`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_page(mut self, value: i32) -> Self {
+        self.page = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::plugin_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_plugin_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.plugin_id = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(SearchTitlesRequest);
+impl ::buffa::MessageName for SearchTitlesRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SearchTitlesRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SearchTitlesRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SearchTitlesRequest";
+}
+impl ::buffa::Message for SearchTitlesRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.query {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.media_kind {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(v) = self.year {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.language {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.page {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.plugin_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.query {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.media_kind {
+            ::buffa::types::put_int32_field(2u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.year {
+            ::buffa::types::put_int32_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.language {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(v) = self.page {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(ref v) = self.plugin_id {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.query.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.media_kind = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.year = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .language
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.page = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .plugin_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.query = ::core::option::Option::None;
+        self.media_kind = ::core::option::Option::None;
+        self.year = ::core::option::Option::None;
+        self.language = ::core::option::Option::None;
+        self.page = ::core::option::Option::None;
+        self.plugin_id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SearchTitlesRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.SearchTitlesRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// SearchTitlesResponse is a page of a search, whose pages and totals are as
+/// DiscoverResponse's.
+#[derive(Clone, PartialEq, Default)]
+pub struct SearchTitlesResponse {
+    /// Field 1: `titles`
+    pub titles: ::buffa::alloc::vec::Vec<DiscoveredTitle>,
+    /// Field 2: `page`
+    pub page: ::core::option::Option<i32>,
+    /// Field 3: `total_pages`
+    pub total_pages: ::core::option::Option<i32>,
+    /// Field 4: `total_results`
+    pub total_results: ::core::option::Option<i32>,
+    /// Field 5: `hidden_results`
+    pub hidden_results: ::core::option::Option<i32>,
+    /// The plugin that searched.
+    ///
+    /// Field 6: `plugin_id`
+    pub plugin_id: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SearchTitlesResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SearchTitlesResponse")
+            .field("titles", &self.titles)
+            .field("page", &self.page)
+            .field("total_pages", &self.total_pages)
+            .field("total_results", &self.total_results)
+            .field("hidden_results", &self.hidden_results)
+            .field("plugin_id", &self.plugin_id)
+            .finish()
+    }
+}
+impl SearchTitlesResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SearchTitlesResponse";
+}
+impl SearchTitlesResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::page`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_page(mut self, value: i32) -> Self {
+        self.page = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::total_pages`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_total_pages(mut self, value: i32) -> Self {
+        self.total_pages = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::total_results`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_total_results(mut self, value: i32) -> Self {
+        self.total_results = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::hidden_results`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_hidden_results(mut self, value: i32) -> Self {
+        self.hidden_results = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::plugin_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_plugin_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.plugin_id = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(SearchTitlesResponse);
+impl ::buffa::MessageName for SearchTitlesResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SearchTitlesResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SearchTitlesResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SearchTitlesResponse";
+}
+impl ::buffa::Message for SearchTitlesResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        for v in &self.titles {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if let Some(v) = self.page {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.total_pages {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.total_results {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.hidden_results {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.plugin_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        for v in &self.titles {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        if let Some(v) = self.page {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        if let Some(v) = self.total_pages {
+            ::buffa::types::put_int32_field(3u32, v, buf);
+        }
+        if let Some(v) = self.total_results {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(v) = self.hidden_results {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(ref v) = self.plugin_id {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.titles.push(elem);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.page = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.total_pages = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.total_results = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.hidden_results = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .plugin_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.titles.clear();
+        self.page = ::core::option::Option::None;
+        self.total_pages = ::core::option::Option::None;
+        self.total_results = ::core::option::Option::None;
+        self.hidden_results = ::core::option::Option::None;
+        self.plugin_id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SearchTitlesResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.SearchTitlesResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct GetTitleRequest {
+    /// MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+    ///
+    /// Field 1: `media_kind`
+    pub media_kind: ::core::option::Option<::buffa::EnumValue<MediaKind>>,
+    /// Field 2: `tmdb_id`
+    pub tmdb_id: ::core::option::Option<i32>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetTitleRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetTitleRequest")
+            .field("media_kind", &self.media_kind)
+            .field("tmdb_id", &self.tmdb_id)
+            .finish()
+    }
+}
+impl GetTitleRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetTitleRequest";
+}
+impl GetTitleRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::media_kind`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_media_kind(
+        mut self,
+        value: impl Into<::buffa::EnumValue<MediaKind>>,
+    ) -> Self {
+        self.media_kind = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tmdb_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tmdb_id(mut self, value: i32) -> Self {
+        self.tmdb_id = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(GetTitleRequest);
+impl ::buffa::MessageName for GetTitleRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "GetTitleRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.GetTitleRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetTitleRequest";
+}
+impl ::buffa::Message for GetTitleRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.media_kind {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(v) = self.tmdb_id {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.media_kind {
+            ::buffa::types::put_int32_field(1u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.tmdb_id {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.media_kind = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.tmdb_id = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.media_kind = ::core::option::Option::None;
+        self.tmdb_id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetTitleRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.GetTitleRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct GetTitleResponse {
+    /// Field 1: `title`
+    pub title: ::buffa::MessageField<Title, ::buffa::Inline<Title>>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetTitleResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetTitleResponse").field("title", &self.title).finish()
+    }
+}
+impl GetTitleResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetTitleResponse";
+}
+::buffa::impl_default_instance!(GetTitleResponse);
+impl ::buffa::MessageName for GetTitleResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "GetTitleResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.GetTitleResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetTitleResponse";
+}
+impl ::buffa::Message for GetTitleResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.title.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.title.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.title.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.title.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.title.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.title = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetTitleResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.GetTitleResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// Title is a movie or series as the metadata providers tell it, in the
+/// server's metadata language and country, with what the server has of it.
+#[derive(Clone, PartialEq, Default)]
+pub struct Title {
+    /// MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+    ///
+    /// Field 1: `media_kind`
+    pub media_kind: ::core::option::Option<::buffa::EnumValue<MediaKind>>,
+    /// Field 2: `tmdb_id`
+    pub tmdb_id: ::core::option::Option<i32>,
+    /// Of series, when known.
+    ///
+    /// Field 3: `tvdb_id`
+    pub tvdb_id: ::core::option::Option<i32>,
+    /// Field 4: `name`
+    pub name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 5: `original_title`
+    pub original_title: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 6: `overview`
+    pub overview: ::core::option::Option<::buffa::alloc::string::String>,
+    /// ISO 8601 calendar date: a movie's release, a series' first air date.
+    ///
+    /// Field 7: `premiere_date`
+    pub premiere_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 8: `year`
+    pub year: ::core::option::Option<i32>,
+    /// The content rating in rating_country (ISO 3166-1), such as "PG-13";
+    /// empty when unrated.
+    ///
+    /// Field 9: `official_rating`
+    pub official_rating: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 10: `rating_country`
+    pub rating_country: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Genre names.
+    ///
+    /// Field 11: `genres`
+    pub genres: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// 0–10.
+    ///
+    /// Field 12: `community_rating`
+    pub community_rating: ::core::option::Option<f64>,
+    /// Such as "tmdb", "imdb" and "tvdb".
+    ///
+    /// Field 13: `external_ids`
+    pub external_ids: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        ::buffa::alloc::string::String,
+    >,
+    /// Field 14: `poster_url`
+    pub poster_url: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 15: `backdrop_url`
+    pub backdrop_url: ::core::option::Option<::buffa::alloc::string::String>,
+    /// A series the metadata providers tag as anime, which requests add with
+    /// the anime quality profile and library.
+    ///
+    /// Field 16: `anime`
+    pub anime: ::core::option::Option<bool>,
+    /// Field 17: `status`
+    pub status: ::core::option::Option<::buffa::EnumValue<MediaStatus>>,
+    /// The movie or series in a library, if any.
+    ///
+    /// Field 18: `item_id`
+    pub item_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Its active requests: pending, approved or failed.
+    ///
+    /// Field 19: `requests`
+    pub requests: ::buffa::alloc::vec::Vec<Request>,
+    /// Whether the caller may request it, or some of its seasons, now.
+    ///
+    /// Field 20: `requestable`
+    pub requestable: ::core::option::Option<bool>,
+    /// The seasons of a series, in order; specials only when the server
+    /// allows requesting them.
+    ///
+    /// Field 21: `seasons`
+    pub seasons: ::buffa::alloc::vec::Vec<SeasonStatus>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for Title {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("Title")
+            .field("media_kind", &self.media_kind)
+            .field("tmdb_id", &self.tmdb_id)
+            .field("tvdb_id", &self.tvdb_id)
+            .field("name", &self.name)
+            .field("original_title", &self.original_title)
+            .field("overview", &self.overview)
+            .field("premiere_date", &self.premiere_date)
+            .field("year", &self.year)
+            .field("official_rating", &self.official_rating)
+            .field("rating_country", &self.rating_country)
+            .field("genres", &self.genres)
+            .field("community_rating", &self.community_rating)
+            .field("external_ids", &self.external_ids)
+            .field("poster_url", &self.poster_url)
+            .field("backdrop_url", &self.backdrop_url)
+            .field("anime", &self.anime)
+            .field("status", &self.status)
+            .field("item_id", &self.item_id)
+            .field("requests", &self.requests)
+            .field("requestable", &self.requestable)
+            .field("seasons", &self.seasons)
+            .finish()
+    }
+}
+impl Title {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.Title";
+}
+impl Title {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::media_kind`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_media_kind(
+        mut self,
+        value: impl Into<::buffa::EnumValue<MediaKind>>,
+    ) -> Self {
+        self.media_kind = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tmdb_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tmdb_id(mut self, value: i32) -> Self {
+        self.tmdb_id = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tvdb_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tvdb_id(mut self, value: i32) -> Self {
+        self.tvdb_id = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.name = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::original_title`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_original_title(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.original_title = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::overview`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_overview(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.overview = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::premiere_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_premiere_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.premiere_date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::year`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_year(mut self, value: i32) -> Self {
+        self.year = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::official_rating`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_official_rating(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.official_rating = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::rating_country`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_rating_country(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.rating_country = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::community_rating`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_community_rating(mut self, value: f64) -> Self {
+        self.community_rating = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::poster_url`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_poster_url(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.poster_url = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::backdrop_url`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_backdrop_url(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.backdrop_url = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::anime`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_anime(mut self, value: bool) -> Self {
+        self.anime = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::status`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_status(
+        mut self,
+        value: impl Into<::buffa::EnumValue<MediaStatus>>,
+    ) -> Self {
+        self.status = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::item_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_item_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.item_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::requestable`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_requestable(mut self, value: bool) -> Self {
+        self.requestable = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(Title);
+impl ::buffa::MessageName for Title {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "Title";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.Title";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.Title";
+}
+impl ::buffa::Message for Title {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.media_kind {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(v) = self.tmdb_id {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.tvdb_id {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.original_title {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.overview {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.premiere_date {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.year {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.official_rating {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.rating_country {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.genres {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.community_rating.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::Str,
+                _,
+            >(&self.external_ids, 1u64);
+        if let Some(ref v) = self.poster_url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.backdrop_url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.anime.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.status {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.item_id {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.requests {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.requestable.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        for v in &self.seasons {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.media_kind {
+            ::buffa::types::put_int32_field(1u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.tmdb_id {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        if let Some(v) = self.tvdb_id {
+            ::buffa::types::put_int32_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.name {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.original_title {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        if let Some(ref v) = self.overview {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        if let Some(ref v) = self.premiere_date {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(v) = self.year {
+            ::buffa::types::put_int32_field(8u32, v, buf);
+        }
+        if let Some(ref v) = self.official_rating {
+            ::buffa::types::put_string_field(9u32, v, buf);
+        }
+        if let Some(ref v) = self.rating_country {
+            ::buffa::types::put_string_field(10u32, v, buf);
+        }
+        for v in &self.genres {
+            ::buffa::types::put_string_field(11u32, v, buf);
+        }
+        if let Some(v) = self.community_rating {
+            ::buffa::types::put_double_field(12u32, v, buf);
+        }
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::Str,
+            _,
+        >(&self.external_ids, 13u32, buf);
+        if let Some(ref v) = self.poster_url {
+            ::buffa::types::put_string_field(14u32, v, buf);
+        }
+        if let Some(ref v) = self.backdrop_url {
+            ::buffa::types::put_string_field(15u32, v, buf);
+        }
+        if let Some(v) = self.anime {
+            ::buffa::types::put_bool_field(16u32, v, buf);
+        }
+        if let Some(ref v) = self.status {
+            ::buffa::types::put_int32_field(17u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.item_id {
+            ::buffa::types::put_string_field(18u32, v, buf);
+        }
+        for v in &self.requests {
+            ::buffa::types::put_len_delimited_header(
+                19u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        if let Some(v) = self.requestable {
+            ::buffa::types::put_bool_field(20u32, v, buf);
+        }
+        for v in &self.seasons {
+            ::buffa::types::put_len_delimited_header(
+                21u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.media_kind = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.tmdb_id = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.tvdb_id = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.name.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .original_title
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .overview
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .premiere_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.year = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .official_rating
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .rating_country
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.genres.push(__elem);
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.community_rating = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::Str,
+                    _,
+                >(&mut self.external_ids, buf, ctx)?;
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .poster_url
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .backdrop_url
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.anime = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.status = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.item_id.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.requests.push(elem);
+            }
+            20u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.requestable = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            21u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.seasons.push(elem);
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.media_kind = ::core::option::Option::None;
+        self.tmdb_id = ::core::option::Option::None;
+        self.tvdb_id = ::core::option::Option::None;
+        self.name = ::core::option::Option::None;
+        self.original_title = ::core::option::Option::None;
+        self.overview = ::core::option::Option::None;
+        self.premiere_date = ::core::option::Option::None;
+        self.year = ::core::option::Option::None;
+        self.official_rating = ::core::option::Option::None;
+        self.rating_country = ::core::option::Option::None;
+        self.genres.clear();
+        self.community_rating = ::core::option::Option::None;
+        self.external_ids.clear();
+        self.poster_url = ::core::option::Option::None;
+        self.backdrop_url = ::core::option::Option::None;
+        self.anime = ::core::option::Option::None;
+        self.status = ::core::option::Option::None;
+        self.item_id = ::core::option::Option::None;
+        self.requests.clear();
+        self.requestable = ::core::option::Option::None;
+        self.seasons.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for Title {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.Title";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// SeasonStatus is a season of a series with what the server has of it, as
+/// Seerr's season statuses.
+#[derive(Clone, PartialEq, Default)]
+pub struct SeasonStatus {
+    /// Field 1: `season_number`
+    pub season_number: ::core::option::Option<i32>,
+    /// Field 2: `episode_count`
+    pub episode_count: ::core::option::Option<i32>,
+    /// ISO 8601 calendar date of its first episode, when known.
+    ///
+    /// Field 3: `premiere_date`
+    pub premiere_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Requested, wanted, partially available or available, blocklisted with
+    /// its series, or deleted.
+    ///
+    /// Field 4: `status`
+    pub status: ::core::option::Option<::buffa::EnumValue<MediaStatus>>,
+    /// The active request asking for it, if any, and that request's status.
+    ///
+    /// Field 5: `request_id`
+    pub request_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 6: `request_status`
+    pub request_status: ::core::option::Option<::buffa::EnumValue<RequestStatus>>,
+    /// Whether the caller may request it now.
+    ///
+    /// Field 7: `requestable`
+    pub requestable: ::core::option::Option<bool>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SeasonStatus {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SeasonStatus")
+            .field("season_number", &self.season_number)
+            .field("episode_count", &self.episode_count)
+            .field("premiere_date", &self.premiere_date)
+            .field("status", &self.status)
+            .field("request_id", &self.request_id)
+            .field("request_status", &self.request_status)
+            .field("requestable", &self.requestable)
+            .finish()
+    }
+}
+impl SeasonStatus {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SeasonStatus";
+}
+impl SeasonStatus {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::season_number`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_season_number(mut self, value: i32) -> Self {
+        self.season_number = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::episode_count`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_episode_count(mut self, value: i32) -> Self {
+        self.episode_count = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::premiere_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_premiere_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.premiere_date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::status`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_status(
+        mut self,
+        value: impl Into<::buffa::EnumValue<MediaStatus>>,
+    ) -> Self {
+        self.status = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::request_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_request_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.request_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::request_status`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_request_status(
+        mut self,
+        value: impl Into<::buffa::EnumValue<RequestStatus>>,
+    ) -> Self {
+        self.request_status = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::requestable`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_requestable(mut self, value: bool) -> Self {
+        self.requestable = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(SeasonStatus);
+impl ::buffa::MessageName for SeasonStatus {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SeasonStatus";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SeasonStatus";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SeasonStatus";
+}
+impl ::buffa::Message for SeasonStatus {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.season_number {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.episode_count {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.premiere_date {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.status {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.request_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.request_status {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if self.requestable.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.season_number {
+            ::buffa::types::put_int32_field(1u32, v, buf);
+        }
+        if let Some(v) = self.episode_count {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.premiere_date {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.status {
+            ::buffa::types::put_int32_field(4u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.request_id {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        if let Some(ref v) = self.request_status {
+            ::buffa::types::put_int32_field(6u32, v.to_i32(), buf);
+        }
+        if let Some(v) = self.requestable {
+            ::buffa::types::put_bool_field(7u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.season_number = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.episode_count = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .premiere_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.status = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .request_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.request_status = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.requestable = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.season_number = ::core::option::Option::None;
+        self.episode_count = ::core::option::Option::None;
+        self.premiere_date = ::core::option::Option::None;
+        self.status = ::core::option::Option::None;
+        self.request_id = ::core::option::Option::None;
+        self.request_status = ::core::option::Option::None;
+        self.requestable = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SeasonStatus {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.SeasonStatus";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

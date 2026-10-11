@@ -94,6 +94,36 @@ pub type OwnedGetQuotaRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetQuotaResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::acquisition::v1::__buffa::view::GetQuotaResponseView<'static>,
 >;
+///Shorthand for `OwnedView<BlockTitleRequestView<'static>>`.
+pub type OwnedBlockTitleRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::BlockTitleRequestView<'static>,
+>;
+///Shorthand for `OwnedView<BlockTitleResponseView<'static>>`.
+pub type OwnedBlockTitleResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::BlockTitleResponseView<'static>,
+>;
+///Shorthand for `OwnedView<UnblockTitleRequestView<'static>>`.
+pub type OwnedUnblockTitleRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UnblockTitleRequestView<'static>,
+>;
+///Shorthand for `OwnedView<UnblockTitleResponseView<'static>>`.
+pub type OwnedUnblockTitleResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UnblockTitleResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListBlockedTitlesRequestView<'static>>`.
+pub type OwnedListBlockedTitlesRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::ListBlockedTitlesRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListBlockedTitlesResponseView<'static>>`.
+pub type OwnedListBlockedTitlesResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::ListBlockedTitlesResponseView<
+        'static,
+    >,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::CreateRequestResponse>
 for crate::proto::mavio::acquisition::v1::__buffa::view::CreateRequestResponseView<'_> {
     fn encode(
@@ -422,6 +452,118 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::BlockTitleResponse>
+for crate::proto::mavio::acquisition::v1::__buffa::view::BlockTitleResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::BlockTitleResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::BlockTitleResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::UnblockTitleResponse>
+for crate::proto::mavio::acquisition::v1::__buffa::view::UnblockTitleResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::UnblockTitleResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::UnblockTitleResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::ListBlockedTitlesResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::ListBlockedTitlesResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::ListBlockedTitlesResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::ListBlockedTitlesResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const REQUEST_SERVICE_SERVICE_NAME: &str = "mavio.acquisition.v1.RequestService";
 /// Static [`Spec`](::connectrpc::Spec) for the `CreateRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -475,6 +617,24 @@ pub const REQUEST_SERVICE_RETRY_REQUEST_SPEC: ::connectrpc::Spec = ::connectrpc:
 /// Static [`Spec`](::connectrpc::Spec) for the `GetQuota` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const REQUEST_SERVICE_GET_QUOTA_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.acquisition.v1.RequestService/GetQuota",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `BlockTitle` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const REQUEST_SERVICE_BLOCK_TITLE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.RequestService/BlockTitle",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `UnblockTitle` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const REQUEST_SERVICE_UNBLOCK_TITLE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.RequestService/UnblockTitle",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListBlockedTitles` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const REQUEST_SERVICE_LIST_BLOCKED_TITLES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.RequestService/ListBlockedTitles",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
@@ -536,9 +696,9 @@ pub const REQUEST_SERVICE_GET_QUOTA_SPEC: ::connectrpc::Spec = ::connectrpc::Spe
 pub trait RequestService: Send + Sync + 'static {
     /// CreateRequest requests a movie, or seasons of a series, by its TMDB
     /// ID. It fails with PERMISSION_DENIED when the user may not request it
-    /// (its kind, or its rating above the user's limit), RESOURCE_EXHAUSTED
-    /// past the user's quota, and ALREADY_EXISTS when it is requested,
-    /// wanted or available already.
+    /// (its kind, its rating above the user's limit, or the title
+    /// blocklisted), RESOURCE_EXHAUSTED past the user's quota, and
+    /// ALREADY_EXISTS when it is requested, wanted or available already.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -749,6 +909,78 @@ pub trait RequestService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::acquisition::v1::GetQuotaResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// BlockTitle blocklists a movie or series, as Seerr's blocklist: it can
+    /// no longer be requested. It fails with ALREADY_EXISTS when the title is
+    /// blocklisted already. Administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn block_title<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::BlockTitleRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::BlockTitleResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// UnblockTitle takes a title off the blocklist. Administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn unblock_title<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::UnblockTitleRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::UnblockTitleResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListBlockedTitles lists the blocklist, newest first. Administrators
+    /// only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_blocked_titles<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::ListBlockedTitlesRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::ListBlockedTitlesResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1045,6 +1277,93 @@ impl<S: RequestService> RequestServiceExt for S {
                 },
             )
             .with_spec(REQUEST_SERVICE_GET_QUOTA_SPEC)
+            .route_view(
+                REQUEST_SERVICE_SERVICE_NAME,
+                "BlockTitle",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::BlockTitleRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::BlockTitleRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.block_title(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::BlockTitleResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(REQUEST_SERVICE_BLOCK_TITLE_SPEC)
+            .route_view(
+                REQUEST_SERVICE_SERVICE_NAME,
+                "UnblockTitle",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::UnblockTitleRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::UnblockTitleRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.unblock_title(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::UnblockTitleResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(REQUEST_SERVICE_UNBLOCK_TITLE_SPEC)
+            .route_view_idempotent(
+                REQUEST_SERVICE_SERVICE_NAME,
+                "ListBlockedTitles",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::ListBlockedTitlesRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::ListBlockedTitlesRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_blocked_titles(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::ListBlockedTitlesResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(REQUEST_SERVICE_LIST_BLOCKED_TITLES_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -1151,6 +1470,24 @@ impl<T: RequestService> ::connectrpc::Dispatcher for RequestServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(REQUEST_SERVICE_GET_QUOTA_SPEC),
+                )
+            }
+            "BlockTitle" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(REQUEST_SERVICE_BLOCK_TITLE_SPEC),
+                )
+            }
+            "UnblockTitle" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(REQUEST_SERVICE_UNBLOCK_TITLE_SPEC),
+                )
+            }
+            "ListBlockedTitles" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(REQUEST_SERVICE_LIST_BLOCKED_TITLES_SPEC),
                 )
             }
             _ => None,
@@ -1364,6 +1701,72 @@ impl<T: RequestService> ::connectrpc::Dispatcher for RequestServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::GetQuotaResponse,
+                        >(format)
+                })
+            }
+            "BlockTitle" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::BlockTitleRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::BlockTitleRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::BlockTitleRequest,
+                    >::from_parts(&req, &body);
+                    svc.block_title(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::BlockTitleResponse,
+                        >(format)
+                })
+            }
+            "UnblockTitle" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::UnblockTitleRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::UnblockTitleRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::UnblockTitleRequest,
+                    >::from_parts(&req, &body);
+                    svc.unblock_title(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::UnblockTitleResponse,
+                        >(format)
+                })
+            }
+            "ListBlockedTitles" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::ListBlockedTitlesRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::ListBlockedTitlesRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::ListBlockedTitlesRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_blocked_titles(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::ListBlockedTitlesResponse,
                         >(format)
                 })
             }
@@ -1897,6 +2300,141 @@ where
                 &self.transport,
                 &self.config,
                 REQUEST_SERVICE_GET_QUOTA_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the BlockTitle RPC. Sends a request to /mavio.acquisition.v1.RequestService/BlockTitle.
+    pub async fn block_title(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::BlockTitleRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::BlockTitleResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.block_title_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the BlockTitle RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn block_title_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::BlockTitleRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::BlockTitleResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                REQUEST_SERVICE_BLOCK_TITLE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the UnblockTitle RPC. Sends a request to /mavio.acquisition.v1.RequestService/UnblockTitle.
+    pub async fn unblock_title(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::UnblockTitleRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::UnblockTitleResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.unblock_title_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the UnblockTitle RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn unblock_title_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::UnblockTitleRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::UnblockTitleResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                REQUEST_SERVICE_UNBLOCK_TITLE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListBlockedTitles RPC. Sends a request to /mavio.acquisition.v1.RequestService/ListBlockedTitles.
+    pub async fn list_blocked_titles(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::ListBlockedTitlesRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::ListBlockedTitlesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_blocked_titles_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListBlockedTitles RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_blocked_titles_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::ListBlockedTitlesRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::ListBlockedTitlesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                REQUEST_SERVICE_LIST_BLOCKED_TITLES_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

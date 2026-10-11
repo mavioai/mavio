@@ -7,7 +7,7 @@ import "mavio/plugin/v1/metadata.proto";
 
 // DiscoveryProviderService lists movies and series to discover from an
 // external source, such as trending or popular titles, in catalogs the
-// provider declares.
+// provider declares, and finds them by name.
 service DiscoveryProviderService {
   // ListCatalogs lists the catalogs the provider offers.
   rpc ListCatalogs(ListCatalogsRequest) returns (ListCatalogsResponse) {
@@ -20,6 +20,11 @@ service DiscoveryProviderService {
   // ListFilterValues lists the values a filter takes, such as genres, or
   // the keywords and studios matching a query.
   rpc ListFilterValues(ListFilterValuesRequest) returns (ListFilterValuesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SearchTitles finds movies and series by name, a page at a time. A
+  // provider that does not search answers UNIMPLEMENTED.
+  rpc SearchTitles(SearchTitlesRequest) returns (SearchTitlesResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
 }
@@ -212,4 +217,35 @@ message FilterValue {
   string name = 2;
   // A logo or an illustrative backdrop.
   string image_url = 3;
+}
+
+message SearchTitlesRequest {
+  // The text to find. A provider may understand prefixes of its own, such
+  // as "tmdb:603" or "imdb:tt0133093" finding a title by an external ID,
+  // or "year:1999" restricting names to a year, as Seerr's searches do.
+  string query = 1 [(buf.validate.field).required = true];
+  // Movies or series; unspecified for both.
+  MediaKind media_kind = 2;
+  // The year of a movie's release or a series' first air date; unset for
+  // any.
+  int32 year = 3 [(buf.validate.field).int32 = {
+    gte: 1800
+    lte: 9999
+  }];
+  // ISO 639-1 language of names and overviews.
+  string language = 4;
+  bool include_adult = 5;
+  // From 1; unset for the first page.
+  int32 page = 6 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 500
+  }];
+}
+
+message SearchTitlesResponse {
+  // Movies and series only, best matches first.
+  repeated DiscoveredTitle titles = 1;
+  int32 page = 2;
+  int32 total_pages = 3;
+  int32 total_results = 4;
 }
