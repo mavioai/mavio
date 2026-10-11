@@ -85,13 +85,14 @@ type DownloadServiceClient interface {
 	MarkFailed(context.Context, *v1.MarkFailedRequest) (*v1.MarkFailedResponse, error)
 	ListBlocklist(context.Context, *v1.ListBlocklistRequest) (*v1.ListBlocklistResponse, error)
 	DeleteBlocklist(context.Context, *v1.DeleteBlocklistRequest) (*v1.DeleteBlocklistResponse, error)
-	// ListManualImport lists the video files of a tracked movie download
-	// with the quality an import would give them and why the import
-	// specifications reject them, as Radarr's manual import.
+	// ListManualImport lists the video files of a tracked movie download,
+	// or of a folder that is not one, with the movie each is for, the
+	// quality, languages and release group an import would give them and
+	// why the import specifications reject them, as Radarr's manual import.
 	ListManualImport(context.Context, *v1.ListManualImportRequest) (*v1.ListManualImportResponse, error)
-	// ManualImport imports a video file of a tracked movie download for its
-	// movie whatever the import specifications reject, and completes the
-	// download.
+	// ManualImport imports a video file of a tracked movie download, or of
+	// a folder that is not one, for the movie chosen whatever the import
+	// specifications reject, and completes a tracked download.
 	ManualImport(context.Context, *v1.ManualImportRequest) (*v1.ManualImportResponse, error)
 }
 
@@ -299,13 +300,14 @@ type DownloadServiceHandler interface {
 	MarkFailed(context.Context, *v1.MarkFailedRequest) (*v1.MarkFailedResponse, error)
 	ListBlocklist(context.Context, *v1.ListBlocklistRequest) (*v1.ListBlocklistResponse, error)
 	DeleteBlocklist(context.Context, *v1.DeleteBlocklistRequest) (*v1.DeleteBlocklistResponse, error)
-	// ListManualImport lists the video files of a tracked movie download
-	// with the quality an import would give them and why the import
-	// specifications reject them, as Radarr's manual import.
+	// ListManualImport lists the video files of a tracked movie download,
+	// or of a folder that is not one, with the movie each is for, the
+	// quality, languages and release group an import would give them and
+	// why the import specifications reject them, as Radarr's manual import.
 	ListManualImport(context.Context, *v1.ListManualImportRequest) (*v1.ListManualImportResponse, error)
-	// ManualImport imports a video file of a tracked movie download for its
-	// movie whatever the import specifications reject, and completes the
-	// download.
+	// ManualImport imports a video file of a tracked movie download, or of
+	// a folder that is not one, for the movie chosen whatever the import
+	// specifications reject, and completes a tracked download.
 	ManualImport(context.Context, *v1.ManualImportRequest) (*v1.ManualImportResponse, error)
 }
 

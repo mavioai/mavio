@@ -486,7 +486,7 @@ flowchart TD
   - [x] 随电影入库的字幕按其语言、标签与副本编号命名，按视频文件名或电影标题与年份匹配，视频是下载中唯一的视频时全部采用，如同 Radarr 的 SubtitleService；升级替换的文件，其附加文件一并移入回收站
     - [x] 在数据库中记录附加文件（`core.ExtraFile`、`extra_files`），如同 Radarr 与 Sonarr 的 SubtitleFile 与 OtherExtraFile 表，涵盖电影与单集：入库时连同语言与标签记录它们，升级回收所记录的文件，而非按名称在旧文件旁查找的文件
   - [x] 手动导入跟踪中的电影下载的文件（`DownloadService` 的 `ListManualImport`、`ManualImport`）：列出其视频文件及入库将给出的质量与拒绝原因，并无视拒绝原因、按所选质量导入所选文件，如同 Radarr 的 ManualImportService
-    - [ ] 手动导入非跟踪下载的文件夹、为下载所属电影以外的电影导入文件，以及选择语言与发布组
+    - [x] 手动导入非跟踪下载的文件夹与文件（其文件按名称匹配想要的电影，否则以“Unknown Movie”拒绝）、为下载所属电影以外的电影导入文件，以及选择语言、发布组与导入方式（移动或复制），如同 Radarr 的 ManualImportService 与 ImportMode
   - [x] 在入库写入的电影文件夹（或其最近的已存在上层文件夹）所在的卷上检查剩余空间，而非媒体库文件夹，如同 Radarr 的 FreeSpaceSpecification
   - [x] 入库把电影移出下载文件夹后，若其中只剩样片与小 RAR 文件，则删除该文件夹，如同 Radarr 的 DownloadedMovieImportService.ShouldDeleteFolder；媒体库与远程路径映射的文件夹保留
   - [x] 只扫描电影入库写入的文件夹（`library.scan_folder`），而非其所在的整个媒体库

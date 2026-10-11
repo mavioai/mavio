@@ -6447,14 +6447,14 @@ impl ::buffa::HasMessageView for super::super::DeleteBlocklistResponse {
     type View<'a> = DeleteBlocklistResponseView<'a>;
     type ViewHandle = DeleteBlocklistResponseOwnedView;
 }
-/// ManualImportFile is a video file of a tracked download.
+/// ManualImportFile is a video file of a tracked download or a folder.
 #[derive(Clone, Debug, Default)]
 pub struct ManualImportFileView<'a> {
     /// The server's path.
     ///
     /// Field 1: `path`
     pub path: ::core::option::Option<&'a str>,
-    /// The path below the download's.
+    /// The path below the download's or the folder's.
     ///
     /// Field 2: `relative_path`
     pub relative_path: ::core::option::Option<&'a str>,
@@ -6471,10 +6471,22 @@ pub struct ManualImportFileView<'a> {
     ///
     /// Field 5: `revision`
     pub revision: ::core::option::Option<i32>,
-    /// Why the import specifications reject the file.
+    /// Why the import specifications reject the file; "Unknown Movie" when
+    /// no movie matches it.
     ///
     /// Field 6: `rejections`
     pub rejections: ::buffa::RepeatedView<'a, &'a str>,
+    /// The movie the file is for; unset when no movie matches it.
+    ///
+    /// Field 7: `movie_id`
+    pub movie_id: ::core::option::Option<&'a str>,
+    /// The names of the languages and the release group an import would
+    /// give the file.
+    ///
+    /// Field 8: `languages`
+    pub languages: ::buffa::RepeatedView<'a, &'a str>,
+    /// Field 9: `release_group`
+    pub release_group: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ManualImportFileView<'a> {
@@ -6542,6 +6554,20 @@ impl<'a> ::buffa::MessageView<'a> for ManualImportFileView<'a> {
                 )?;
                 view.revision = Some(::buffa::types::decode_int32(&mut cur)?);
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.movie_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.release_group = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -6552,6 +6578,17 @@ impl<'a> ::buffa::MessageView<'a> for ManualImportFileView<'a> {
                     ::buffa::__private::element_footprint(&__elem),
                 )?;
                 view.rejections.push(__elem);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.languages.push(__elem);
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -6581,6 +6618,9 @@ impl<'a> ::buffa::MessageView<'a> for ManualImportFileView<'a> {
             quality: self.quality.map(|s| s.to_string()),
             revision: self.revision,
             rejections: self.rejections.iter().map(|s| s.to_string()).collect(),
+            movie_id: self.movie_id.map(|s| s.to_string()),
+            languages: self.languages.iter().map(|s| s.to_string()).collect(),
+            release_group: self.release_group.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -6608,6 +6648,15 @@ impl<'a> ::buffa::ViewEncode<'a> for ManualImportFileView<'a> {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
         for v in &self.rejections {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.movie_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.release_group {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -6638,6 +6687,15 @@ impl<'a> ::buffa::ViewEncode<'a> for ManualImportFileView<'a> {
         }
         for v in &self.rejections {
             ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        if let Some(ref v) = self.movie_id {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        for v in &self.languages {
+            ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        if let Some(ref v) = self.release_group {
+            ::buffa::types::put_string_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -6739,7 +6797,7 @@ impl ManualImportFileOwnedView {
     pub fn path(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().path
     }
-    /// The path below the download's.
+    /// The path below the download's or the folder's.
     ///
     /// Field 2: `relative_path`
     #[must_use]
@@ -6768,12 +6826,33 @@ impl ManualImportFileOwnedView {
     pub fn revision(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().revision
     }
-    /// Why the import specifications reject the file.
+    /// Why the import specifications reject the file; "Unknown Movie" when
+    /// no movie matches it.
     ///
     /// Field 6: `rejections`
     #[must_use]
     pub fn rejections(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
         &self.0.reborrow().rejections
+    }
+    /// The movie the file is for; unset when no movie matches it.
+    ///
+    /// Field 7: `movie_id`
+    #[must_use]
+    pub fn movie_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().movie_id
+    }
+    /// The names of the languages and the release group an import would
+    /// give the file.
+    ///
+    /// Field 8: `languages`
+    #[must_use]
+    pub fn languages(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().languages
+    }
+    /// Field 9: `release_group`
+    #[must_use]
+    pub fn release_group(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().release_group
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ManualImportFileView<'static>>>
@@ -6800,10 +6879,19 @@ impl ::buffa::HasMessageView for super::super::ManualImportFile {
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListManualImportRequestView<'a> {
-    /// The tracked download, a queue item.
+    /// The tracked download, a queue item; unset for folder.
     ///
     /// Field 1: `id`
     pub id: ::core::option::Option<&'a str>,
+    /// The absolute path of a folder or file that is not a tracked download.
+    ///
+    /// Field 2: `folder`
+    pub folder: ::core::option::Option<&'a str>,
+    /// The movie the files are for; unset for the download's movie, or for
+    /// the wanted movie each file's name matches.
+    ///
+    /// Field 3: `movie_id`
+    pub movie_id: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ListManualImportRequestView<'a> {
@@ -6843,6 +6931,20 @@ impl<'a> ::buffa::MessageView<'a> for ListManualImportRequestView<'a> {
                 )?;
                 view.id = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.folder = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.movie_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -6872,6 +6974,8 @@ impl<'a> ::buffa::MessageView<'a> for ListManualImportRequestView<'a> {
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::ListManualImportRequest {
             id: self.id.map(|s| s.to_string()),
+            folder: self.folder.map(|s| s.to_string()),
+            movie_id: self.movie_id.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -6884,6 +6988,12 @@ impl<'a> ::buffa::ViewEncode<'a> for ListManualImportRequestView<'a> {
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
         if let Some(ref v) = self.id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.folder {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.movie_id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -6899,6 +7009,12 @@ impl<'a> ::buffa::ViewEncode<'a> for ListManualImportRequestView<'a> {
         use ::buffa::Enumeration as _;
         if let Some(ref v) = self.id {
             ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.folder {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.movie_id {
+            ::buffa::types::put_string_field(3u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -6995,12 +7111,27 @@ impl ListManualImportRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// The tracked download, a queue item.
+    /// The tracked download, a queue item; unset for folder.
     ///
     /// Field 1: `id`
     #[must_use]
     pub fn id(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().id
+    }
+    /// The absolute path of a folder or file that is not a tracked download.
+    ///
+    /// Field 2: `folder`
+    #[must_use]
+    pub fn folder(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().folder
+    }
+    /// The movie the files are for; unset for the download's movie, or for
+    /// the wanted movie each file's name matches.
+    ///
+    /// Field 3: `movie_id`
+    #[must_use]
+    pub fn movie_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().movie_id
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ListManualImportRequestView<'static>>>
@@ -7289,7 +7420,7 @@ impl ::buffa::HasMessageView for super::super::ListManualImportResponse {
 }
 #[derive(Clone, Debug, Default)]
 pub struct ManualImportRequestView<'a> {
-    /// The tracked download, a queue item.
+    /// The tracked download, a queue item; unset for folder.
     ///
     /// Field 1: `id`
     pub id: ::core::option::Option<&'a str>,
@@ -7302,6 +7433,27 @@ pub struct ManualImportRequestView<'a> {
     ///
     /// Field 3: `quality`
     pub quality: ::core::option::Option<&'a str>,
+    /// The absolute path of a folder or file that is not a tracked download.
+    ///
+    /// Field 4: `folder`
+    pub folder: ::core::option::Option<&'a str>,
+    /// The movie to import the file for; unset for that ListManualImport
+    /// lists.
+    ///
+    /// Field 5: `movie_id`
+    pub movie_id: ::core::option::Option<&'a str>,
+    /// The names of the file's languages; empty for those ListManualImport
+    /// lists.
+    ///
+    /// Field 6: `languages`
+    pub languages: ::buffa::RepeatedView<'a, &'a str>,
+    /// The file's release group, which may be empty; unset for that
+    /// ListManualImport lists.
+    ///
+    /// Field 7: `release_group`
+    pub release_group: ::core::option::Option<&'a str>,
+    /// Field 8: `mode`
+    pub mode: ::core::option::Option<::buffa::EnumValue<super::super::ImportMode>>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ManualImportRequestView<'a> {
@@ -7355,6 +7507,47 @@ impl<'a> ::buffa::MessageView<'a> for ManualImportRequestView<'a> {
                 )?;
                 view.quality = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.folder = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.movie_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.release_group = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.mode = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.languages.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -7386,6 +7579,11 @@ impl<'a> ::buffa::MessageView<'a> for ManualImportRequestView<'a> {
             id: self.id.map(|s| s.to_string()),
             path: self.path.map(|s| s.to_string()),
             quality: self.quality.map(|s| s.to_string()),
+            folder: self.folder.map(|s| s.to_string()),
+            movie_id: self.movie_id.map(|s| s.to_string()),
+            languages: self.languages.iter().map(|s| s.to_string()).collect(),
+            release_group: self.release_group.map(|s| s.to_string()),
+            mode: self.mode,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -7406,6 +7604,21 @@ impl<'a> ::buffa::ViewEncode<'a> for ManualImportRequestView<'a> {
         if let Some(ref v) = self.quality {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.folder {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.movie_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.release_group {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.mode {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -7425,6 +7638,21 @@ impl<'a> ::buffa::ViewEncode<'a> for ManualImportRequestView<'a> {
         }
         if let Some(ref v) = self.quality {
             ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.folder {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.movie_id {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        for v in &self.languages {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        if let Some(ref v) = self.release_group {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.mode {
+            ::buffa::types::put_int32_field(8u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -7521,7 +7749,7 @@ impl ManualImportRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// The tracked download, a queue item.
+    /// The tracked download, a queue item; unset for folder.
     ///
     /// Field 1: `id`
     #[must_use]
@@ -7542,6 +7770,44 @@ impl ManualImportRequestOwnedView {
     #[must_use]
     pub fn quality(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().quality
+    }
+    /// The absolute path of a folder or file that is not a tracked download.
+    ///
+    /// Field 4: `folder`
+    #[must_use]
+    pub fn folder(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().folder
+    }
+    /// The movie to import the file for; unset for that ListManualImport
+    /// lists.
+    ///
+    /// Field 5: `movie_id`
+    #[must_use]
+    pub fn movie_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().movie_id
+    }
+    /// The names of the file's languages; empty for those ListManualImport
+    /// lists.
+    ///
+    /// Field 6: `languages`
+    #[must_use]
+    pub fn languages(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().languages
+    }
+    /// The file's release group, which may be empty; unset for that
+    /// ListManualImport lists.
+    ///
+    /// Field 7: `release_group`
+    #[must_use]
+    pub fn release_group(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().release_group
+    }
+    /// Field 8: `mode`
+    #[must_use]
+    pub fn mode(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<super::super::ImportMode>> {
+        self.0.reborrow().mode
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ManualImportRequestView<'static>>>

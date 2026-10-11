@@ -203,6 +203,54 @@ func (x HistoryEventType) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// ImportMode is how a manual import transfers a file, as Radarr's.
+type ImportMode int32
+
+const (
+	// Moves the files of downloads whose client lets them be moved and of
+	// folders, and copies the others.
+	ImportMode_IMPORT_MODE_UNSPECIFIED ImportMode = 0
+	ImportMode_IMPORT_MODE_MOVE        ImportMode = 1
+	// Copies, or hard links with copy_using_hardlinks.
+	ImportMode_IMPORT_MODE_COPY ImportMode = 2
+)
+
+// Enum value maps for ImportMode.
+var (
+	ImportMode_name = map[int32]string{
+		0: "IMPORT_MODE_UNSPECIFIED",
+		1: "IMPORT_MODE_MOVE",
+		2: "IMPORT_MODE_COPY",
+	}
+	ImportMode_value = map[string]int32{
+		"IMPORT_MODE_UNSPECIFIED": 0,
+		"IMPORT_MODE_MOVE":        1,
+		"IMPORT_MODE_COPY":        2,
+	}
+)
+
+func (x ImportMode) Enum() *ImportMode {
+	p := new(ImportMode)
+	*p = x
+	return p
+}
+
+func (x ImportMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ImportMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_acquisition_v1_download_proto_enumTypes[3].Descriptor()
+}
+
+func (ImportMode) Type() protoreflect.EnumType {
+	return &file_mavio_acquisition_v1_download_proto_enumTypes[3]
+}
+
+func (x ImportMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // DownloadClient is a download client a plugin has configured.
 type DownloadClient struct {
 	state                    protoimpl.MessageState `protogen:"opaque.v1"`
@@ -3368,7 +3416,7 @@ func (b0 DeleteBlocklistResponse_builder) Build() *DeleteBlocklistResponse {
 	return m0
 }
 
-// ManualImportFile is a video file of a tracked download.
+// ManualImportFile is a video file of a tracked download or a folder.
 type ManualImportFile struct {
 	state                   protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Path         *string                `protobuf:"bytes,1,opt,name=path"`
@@ -3377,6 +3425,9 @@ type ManualImportFile struct {
 	xxx_hidden_Quality      *string                `protobuf:"bytes,4,opt,name=quality"`
 	xxx_hidden_Revision     int32                  `protobuf:"varint,5,opt,name=revision"`
 	xxx_hidden_Rejections   []string               `protobuf:"bytes,6,rep,name=rejections"`
+	xxx_hidden_MovieId      *string                `protobuf:"bytes,7,opt,name=movie_id,json=movieId"`
+	xxx_hidden_Languages    []string               `protobuf:"bytes,8,rep,name=languages"`
+	xxx_hidden_ReleaseGroup *string                `protobuf:"bytes,9,opt,name=release_group,json=releaseGroup"`
 	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
 	XXX_presence            [1]uint32
 	unknownFields           protoimpl.UnknownFields
@@ -3459,33 +3510,74 @@ func (x *ManualImportFile) GetRejections() []string {
 	return nil
 }
 
+func (x *ManualImportFile) GetMovieId() string {
+	if x != nil {
+		if x.xxx_hidden_MovieId != nil {
+			return *x.xxx_hidden_MovieId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ManualImportFile) GetLanguages() []string {
+	if x != nil {
+		return x.xxx_hidden_Languages
+	}
+	return nil
+}
+
+func (x *ManualImportFile) GetReleaseGroup() string {
+	if x != nil {
+		if x.xxx_hidden_ReleaseGroup != nil {
+			return *x.xxx_hidden_ReleaseGroup
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ManualImportFile) SetPath(v string) {
 	x.xxx_hidden_Path = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
 }
 
 func (x *ManualImportFile) SetRelativePath(v string) {
 	x.xxx_hidden_RelativePath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
 }
 
 func (x *ManualImportFile) SetSize(v int64) {
 	x.xxx_hidden_Size = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
 }
 
 func (x *ManualImportFile) SetQuality(v string) {
 	x.xxx_hidden_Quality = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
 }
 
 func (x *ManualImportFile) SetRevision(v int32) {
 	x.xxx_hidden_Revision = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 9)
 }
 
 func (x *ManualImportFile) SetRejections(v []string) {
 	x.xxx_hidden_Rejections = v
+}
+
+func (x *ManualImportFile) SetMovieId(v string) {
+	x.xxx_hidden_MovieId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 9)
+}
+
+func (x *ManualImportFile) SetLanguages(v []string) {
+	x.xxx_hidden_Languages = v
+}
+
+func (x *ManualImportFile) SetReleaseGroup(v string) {
+	x.xxx_hidden_ReleaseGroup = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
 }
 
 func (x *ManualImportFile) HasPath() bool {
@@ -3523,6 +3615,20 @@ func (x *ManualImportFile) HasRevision() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
 }
 
+func (x *ManualImportFile) HasMovieId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *ManualImportFile) HasReleaseGroup() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
 func (x *ManualImportFile) ClearPath() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Path = nil
@@ -3548,12 +3654,22 @@ func (x *ManualImportFile) ClearRevision() {
 	x.xxx_hidden_Revision = 0
 }
 
+func (x *ManualImportFile) ClearMovieId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_MovieId = nil
+}
+
+func (x *ManualImportFile) ClearReleaseGroup() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_ReleaseGroup = nil
+}
+
 type ManualImportFile_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// The server's path.
 	Path *string
-	// The path below the download's.
+	// The path below the download's or the folder's.
 	RelativePath *string
 	// In bytes.
 	Size *int64
@@ -3562,8 +3678,15 @@ type ManualImportFile_builder struct {
 	Quality *string
 	// The quality's revision.
 	Revision *int32
-	// Why the import specifications reject the file.
+	// Why the import specifications reject the file; "Unknown Movie" when
+	// no movie matches it.
 	Rejections []string
+	// The movie the file is for; unset when no movie matches it.
+	MovieId *string
+	// The names of the languages and the release group an import would
+	// give the file.
+	Languages    []string
+	ReleaseGroup *string
 }
 
 func (b0 ManualImportFile_builder) Build() *ManualImportFile {
@@ -3571,32 +3694,43 @@ func (b0 ManualImportFile_builder) Build() *ManualImportFile {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Path != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
 		x.xxx_hidden_Path = b.Path
 	}
 	if b.RelativePath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
 		x.xxx_hidden_RelativePath = b.RelativePath
 	}
 	if b.Size != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
 		x.xxx_hidden_Size = *b.Size
 	}
 	if b.Quality != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
 		x.xxx_hidden_Quality = b.Quality
 	}
 	if b.Revision != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 9)
 		x.xxx_hidden_Revision = *b.Revision
 	}
 	x.xxx_hidden_Rejections = b.Rejections
+	if b.MovieId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 9)
+		x.xxx_hidden_MovieId = b.MovieId
+	}
+	x.xxx_hidden_Languages = b.Languages
+	if b.ReleaseGroup != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
+		x.xxx_hidden_ReleaseGroup = b.ReleaseGroup
+	}
 	return m0
 }
 
 type ListManualImportRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Folder      *string                `protobuf:"bytes,2,opt,name=folder"`
+	xxx_hidden_MovieId     *string                `protobuf:"bytes,3,opt,name=movie_id,json=movieId"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -3638,9 +3772,39 @@ func (x *ListManualImportRequest) GetId() string {
 	return ""
 }
 
+func (x *ListManualImportRequest) GetFolder() string {
+	if x != nil {
+		if x.xxx_hidden_Folder != nil {
+			return *x.xxx_hidden_Folder
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ListManualImportRequest) GetMovieId() string {
+	if x != nil {
+		if x.xxx_hidden_MovieId != nil {
+			return *x.xxx_hidden_MovieId
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ListManualImportRequest) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *ListManualImportRequest) SetFolder(v string) {
+	x.xxx_hidden_Folder = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *ListManualImportRequest) SetMovieId(v string) {
+	x.xxx_hidden_MovieId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
 }
 
 func (x *ListManualImportRequest) HasId() bool {
@@ -3650,16 +3814,45 @@ func (x *ListManualImportRequest) HasId() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
+func (x *ListManualImportRequest) HasFolder() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ListManualImportRequest) HasMovieId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
 func (x *ListManualImportRequest) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
 }
 
+func (x *ListManualImportRequest) ClearFolder() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Folder = nil
+}
+
+func (x *ListManualImportRequest) ClearMovieId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_MovieId = nil
+}
+
 type ListManualImportRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// The tracked download, a queue item.
+	// The tracked download, a queue item; unset for folder.
 	Id *string
+	// The absolute path of a folder or file that is not a tracked download.
+	Folder *string
+	// The movie the files are for; unset for the download's movie, or for
+	// the wanted movie each file's name matches.
+	MovieId *string
 }
 
 func (b0 ListManualImportRequest_builder) Build() *ListManualImportRequest {
@@ -3667,8 +3860,16 @@ func (b0 ListManualImportRequest_builder) Build() *ListManualImportRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
 		x.xxx_hidden_Id = b.Id
+	}
+	if b.Folder != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Folder = b.Folder
+	}
+	if b.MovieId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_MovieId = b.MovieId
 	}
 	return m0
 }
@@ -3734,14 +3935,19 @@ func (b0 ListManualImportResponse_builder) Build() *ListManualImportResponse {
 }
 
 type ManualImportRequest struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Path        *string                `protobuf:"bytes,2,opt,name=path"`
-	xxx_hidden_Quality     *string                `protobuf:"bytes,3,opt,name=quality"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id           *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Path         *string                `protobuf:"bytes,2,opt,name=path"`
+	xxx_hidden_Quality      *string                `protobuf:"bytes,3,opt,name=quality"`
+	xxx_hidden_Folder       *string                `protobuf:"bytes,4,opt,name=folder"`
+	xxx_hidden_MovieId      *string                `protobuf:"bytes,5,opt,name=movie_id,json=movieId"`
+	xxx_hidden_Languages    []string               `protobuf:"bytes,6,rep,name=languages"`
+	xxx_hidden_ReleaseGroup *string                `protobuf:"bytes,7,opt,name=release_group,json=releaseGroup"`
+	xxx_hidden_Mode         ImportMode             `protobuf:"varint,8,opt,name=mode,enum=mavio.acquisition.v1.ImportMode"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *ManualImportRequest) Reset() {
@@ -3799,19 +4005,89 @@ func (x *ManualImportRequest) GetQuality() string {
 	return ""
 }
 
+func (x *ManualImportRequest) GetFolder() string {
+	if x != nil {
+		if x.xxx_hidden_Folder != nil {
+			return *x.xxx_hidden_Folder
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ManualImportRequest) GetMovieId() string {
+	if x != nil {
+		if x.xxx_hidden_MovieId != nil {
+			return *x.xxx_hidden_MovieId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ManualImportRequest) GetLanguages() []string {
+	if x != nil {
+		return x.xxx_hidden_Languages
+	}
+	return nil
+}
+
+func (x *ManualImportRequest) GetReleaseGroup() string {
+	if x != nil {
+		if x.xxx_hidden_ReleaseGroup != nil {
+			return *x.xxx_hidden_ReleaseGroup
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ManualImportRequest) GetMode() ImportMode {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 7) {
+			return x.xxx_hidden_Mode
+		}
+	}
+	return ImportMode_IMPORT_MODE_UNSPECIFIED
+}
+
 func (x *ManualImportRequest) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
 func (x *ManualImportRequest) SetPath(v string) {
 	x.xxx_hidden_Path = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
 func (x *ManualImportRequest) SetQuality(v string) {
 	x.xxx_hidden_Quality = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
+}
+
+func (x *ManualImportRequest) SetFolder(v string) {
+	x.xxx_hidden_Folder = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
+}
+
+func (x *ManualImportRequest) SetMovieId(v string) {
+	x.xxx_hidden_MovieId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+}
+
+func (x *ManualImportRequest) SetLanguages(v []string) {
+	x.xxx_hidden_Languages = v
+}
+
+func (x *ManualImportRequest) SetReleaseGroup(v string) {
+	x.xxx_hidden_ReleaseGroup = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+}
+
+func (x *ManualImportRequest) SetMode(v ImportMode) {
+	x.xxx_hidden_Mode = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
 }
 
 func (x *ManualImportRequest) HasId() bool {
@@ -3835,6 +4111,34 @@ func (x *ManualImportRequest) HasQuality() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *ManualImportRequest) HasFolder() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *ManualImportRequest) HasMovieId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *ManualImportRequest) HasReleaseGroup() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *ManualImportRequest) HasMode() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
 func (x *ManualImportRequest) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -3850,16 +4154,48 @@ func (x *ManualImportRequest) ClearQuality() {
 	x.xxx_hidden_Quality = nil
 }
 
+func (x *ManualImportRequest) ClearFolder() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Folder = nil
+}
+
+func (x *ManualImportRequest) ClearMovieId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_MovieId = nil
+}
+
+func (x *ManualImportRequest) ClearReleaseGroup() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_ReleaseGroup = nil
+}
+
+func (x *ManualImportRequest) ClearMode() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_Mode = ImportMode_IMPORT_MODE_UNSPECIFIED
+}
+
 type ManualImportRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// The tracked download, a queue item.
+	// The tracked download, a queue item; unset for folder.
 	Id *string
 	// The path of the file, as ListManualImport lists it.
 	Path *string
 	// Radarr's name of the file's quality; unset for that ListManualImport
 	// lists.
 	Quality *string
+	// The absolute path of a folder or file that is not a tracked download.
+	Folder *string
+	// The movie to import the file for; unset for that ListManualImport
+	// lists.
+	MovieId *string
+	// The names of the file's languages; empty for those ListManualImport
+	// lists.
+	Languages []string
+	// The file's release group, which may be empty; unset for that
+	// ListManualImport lists.
+	ReleaseGroup *string
+	Mode         *ImportMode
 }
 
 func (b0 ManualImportRequest_builder) Build() *ManualImportRequest {
@@ -3867,16 +4203,33 @@ func (b0 ManualImportRequest_builder) Build() *ManualImportRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Path != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_Path = b.Path
 	}
 	if b.Quality != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
 		x.xxx_hidden_Quality = b.Quality
+	}
+	if b.Folder != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
+		x.xxx_hidden_Folder = b.Folder
+	}
+	if b.MovieId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		x.xxx_hidden_MovieId = b.MovieId
+	}
+	x.xxx_hidden_Languages = b.Languages
+	if b.ReleaseGroup != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		x.xxx_hidden_ReleaseGroup = b.ReleaseGroup
+	}
+	if b.Mode != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		x.xxx_hidden_Mode = *b.Mode
 	}
 	return m0
 }
@@ -4040,7 +4393,7 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\";\n" +
 	"\x16DeleteBlocklistRequest\x12!\n" +
 	"\x03ids\x18\x01 \x03(\tB\x0f\xbaH\f\x92\x01\t\b\x01\"\x05r\x03\xb0\x01\x01R\x03ids\"\x19\n" +
-	"\x17DeleteBlocklistResponse\"\xb5\x01\n" +
+	"\x17DeleteBlocklistResponse\"\x93\x02\n" +
 	"\x10ManualImportFile\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12#\n" +
 	"\rrelative_path\x18\x02 \x01(\tR\frelativePath\x12\x12\n" +
@@ -4049,15 +4402,25 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\brevision\x18\x05 \x01(\x05R\brevision\x12\x1e\n" +
 	"\n" +
 	"rejections\x18\x06 \x03(\tR\n" +
-	"rejections\"6\n" +
-	"\x17ListManualImportRequest\x12\x1b\n" +
-	"\x02id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\"X\n" +
+	"rejections\x12\x19\n" +
+	"\bmovie_id\x18\a \x01(\tR\amovieId\x12\x1c\n" +
+	"\tlanguages\x18\b \x03(\tR\tlanguages\x12#\n" +
+	"\rrelease_group\x18\t \x01(\tR\freleaseGroup\"p\n" +
+	"\x17ListManualImportRequest\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\x16\n" +
+	"\x06folder\x18\x02 \x01(\tR\x06folder\x12#\n" +
+	"\bmovie_id\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\amovieId\"X\n" +
 	"\x18ListManualImportResponse\x12<\n" +
-	"\x05files\x18\x01 \x03(\v2&.mavio.acquisition.v1.ManualImportFileR\x05files\"h\n" +
-	"\x13ManualImportRequest\x12\x1b\n" +
-	"\x02id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\x12\x1a\n" +
+	"\x05files\x18\x01 \x03(\v2&.mavio.acquisition.v1.ManualImportFileR\x05files\"\x9b\x02\n" +
+	"\x13ManualImportRequest\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\x1a\n" +
 	"\x04path\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04path\x12\x18\n" +
-	"\aquality\x18\x03 \x01(\tR\aquality\"\x16\n" +
+	"\aquality\x18\x03 \x01(\tR\aquality\x12\x16\n" +
+	"\x06folder\x18\x04 \x01(\tR\x06folder\x12#\n" +
+	"\bmovie_id\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\amovieId\x12\x1c\n" +
+	"\tlanguages\x18\x06 \x03(\tR\tlanguages\x12#\n" +
+	"\rrelease_group\x18\a \x01(\tR\freleaseGroup\x124\n" +
+	"\x04mode\x18\b \x01(\x0e2 .mavio.acquisition.v1.ImportModeR\x04mode\"\x16\n" +
 	"\x14ManualImportResponse*\xaa\x02\n" +
 	"\rDownloadState\x12\x1e\n" +
 	"\x1aDOWNLOAD_STATE_UNSPECIFIED\x10\x00\x12\x1e\n" +
@@ -4084,7 +4447,12 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\"HISTORY_EVENT_TYPE_DOWNLOAD_FAILED\x10\x03\x12#\n" +
 	"\x1fHISTORY_EVENT_TYPE_FILE_DELETED\x10\x04\x12#\n" +
 	"\x1fHISTORY_EVENT_TYPE_FILE_RENAMED\x10\x05\x12\x1e\n" +
-	"\x1aHISTORY_EVENT_TYPE_IGNORED\x10\x062\xd6\b\n" +
+	"\x1aHISTORY_EVENT_TYPE_IGNORED\x10\x06*U\n" +
+	"\n" +
+	"ImportMode\x12\x1b\n" +
+	"\x17IMPORT_MODE_UNSPECIFIED\x10\x00\x12\x14\n" +
+	"\x10IMPORT_MODE_MOVE\x10\x01\x12\x14\n" +
+	"\x10IMPORT_MODE_COPY\x10\x022\xd6\b\n" +
 	"\x0fDownloadService\x12\x7f\n" +
 	"\x13ListDownloadClients\x120.mavio.acquisition.v1.ListDownloadClientsRequest\x1a1.mavio.acquisition.v1.ListDownloadClientsResponse\"\x03\x90\x02\x01\x12b\n" +
 	"\vGrabRelease\x12(.mavio.acquisition.v1.GrabReleaseRequest\x1a).mavio.acquisition.v1.GrabReleaseResponse\x12a\n" +
@@ -4099,95 +4467,97 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\fManualImport\x12).mavio.acquisition.v1.ManualImportRequest\x1a*.mavio.acquisition.v1.ManualImportResponseB\xea\x01\n" +
 	"\x18com.mavio.acquisition.v1B\rDownloadProtoP\x01ZMgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1;acquisitionv1\xa2\x02\x03MAX\xaa\x02\x14Mavio.Acquisition.V1\xca\x02\x14Mavio\\Acquisition\\V1\xe2\x02 Mavio\\Acquisition\\V1\\GPBMetadata\xea\x02\x16Mavio::Acquisition::V1b\beditionsp\xe8\a"
 
-var file_mavio_acquisition_v1_download_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_mavio_acquisition_v1_download_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
 var file_mavio_acquisition_v1_download_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_mavio_acquisition_v1_download_proto_goTypes = []any{
 	(DownloadState)(0),                  // 0: mavio.acquisition.v1.DownloadState
 	(DownloadStatus)(0),                 // 1: mavio.acquisition.v1.DownloadStatus
 	(HistoryEventType)(0),               // 2: mavio.acquisition.v1.HistoryEventType
-	(*DownloadClient)(nil),              // 3: mavio.acquisition.v1.DownloadClient
-	(*ListDownloadClientsRequest)(nil),  // 4: mavio.acquisition.v1.ListDownloadClientsRequest
-	(*ListDownloadClientsResponse)(nil), // 5: mavio.acquisition.v1.ListDownloadClientsResponse
-	(*GrabReleaseRequest)(nil),          // 6: mavio.acquisition.v1.GrabReleaseRequest
-	(*GrabReleaseResponse)(nil),         // 7: mavio.acquisition.v1.GrabReleaseResponse
-	(*QueueItem)(nil),                   // 8: mavio.acquisition.v1.QueueItem
-	(*ListQueueRequest)(nil),            // 9: mavio.acquisition.v1.ListQueueRequest
-	(*ListQueueResponse)(nil),           // 10: mavio.acquisition.v1.ListQueueResponse
-	(*RemoveFromQueueRequest)(nil),      // 11: mavio.acquisition.v1.RemoveFromQueueRequest
-	(*RemoveFromQueueResponse)(nil),     // 12: mavio.acquisition.v1.RemoveFromQueueResponse
-	(*HistoryEvent)(nil),                // 13: mavio.acquisition.v1.HistoryEvent
-	(*ListHistoryRequest)(nil),          // 14: mavio.acquisition.v1.ListHistoryRequest
-	(*ListHistoryResponse)(nil),         // 15: mavio.acquisition.v1.ListHistoryResponse
-	(*MarkFailedRequest)(nil),           // 16: mavio.acquisition.v1.MarkFailedRequest
-	(*MarkFailedResponse)(nil),          // 17: mavio.acquisition.v1.MarkFailedResponse
-	(*BlocklistEntry)(nil),              // 18: mavio.acquisition.v1.BlocklistEntry
-	(*ListBlocklistRequest)(nil),        // 19: mavio.acquisition.v1.ListBlocklistRequest
-	(*ListBlocklistResponse)(nil),       // 20: mavio.acquisition.v1.ListBlocklistResponse
-	(*DeleteBlocklistRequest)(nil),      // 21: mavio.acquisition.v1.DeleteBlocklistRequest
-	(*DeleteBlocklistResponse)(nil),     // 22: mavio.acquisition.v1.DeleteBlocklistResponse
-	(*ManualImportFile)(nil),            // 23: mavio.acquisition.v1.ManualImportFile
-	(*ListManualImportRequest)(nil),     // 24: mavio.acquisition.v1.ListManualImportRequest
-	(*ListManualImportResponse)(nil),    // 25: mavio.acquisition.v1.ListManualImportResponse
-	(*ManualImportRequest)(nil),         // 26: mavio.acquisition.v1.ManualImportRequest
-	(*ManualImportResponse)(nil),        // 27: mavio.acquisition.v1.ManualImportResponse
-	nil,                                 // 28: mavio.acquisition.v1.ListDownloadClientsResponse.FailuresEntry
-	nil,                                 // 29: mavio.acquisition.v1.HistoryEvent.DataEntry
-	(DownloadProtocol)(0),               // 30: mavio.acquisition.v1.DownloadProtocol
-	(*timestamppb.Timestamp)(nil),       // 31: google.protobuf.Timestamp
-	(*Release)(nil),                     // 32: mavio.acquisition.v1.Release
-	(*IndexerRef)(nil),                  // 33: mavio.acquisition.v1.IndexerRef
-	(*durationpb.Duration)(nil),         // 34: google.protobuf.Duration
+	(ImportMode)(0),                     // 3: mavio.acquisition.v1.ImportMode
+	(*DownloadClient)(nil),              // 4: mavio.acquisition.v1.DownloadClient
+	(*ListDownloadClientsRequest)(nil),  // 5: mavio.acquisition.v1.ListDownloadClientsRequest
+	(*ListDownloadClientsResponse)(nil), // 6: mavio.acquisition.v1.ListDownloadClientsResponse
+	(*GrabReleaseRequest)(nil),          // 7: mavio.acquisition.v1.GrabReleaseRequest
+	(*GrabReleaseResponse)(nil),         // 8: mavio.acquisition.v1.GrabReleaseResponse
+	(*QueueItem)(nil),                   // 9: mavio.acquisition.v1.QueueItem
+	(*ListQueueRequest)(nil),            // 10: mavio.acquisition.v1.ListQueueRequest
+	(*ListQueueResponse)(nil),           // 11: mavio.acquisition.v1.ListQueueResponse
+	(*RemoveFromQueueRequest)(nil),      // 12: mavio.acquisition.v1.RemoveFromQueueRequest
+	(*RemoveFromQueueResponse)(nil),     // 13: mavio.acquisition.v1.RemoveFromQueueResponse
+	(*HistoryEvent)(nil),                // 14: mavio.acquisition.v1.HistoryEvent
+	(*ListHistoryRequest)(nil),          // 15: mavio.acquisition.v1.ListHistoryRequest
+	(*ListHistoryResponse)(nil),         // 16: mavio.acquisition.v1.ListHistoryResponse
+	(*MarkFailedRequest)(nil),           // 17: mavio.acquisition.v1.MarkFailedRequest
+	(*MarkFailedResponse)(nil),          // 18: mavio.acquisition.v1.MarkFailedResponse
+	(*BlocklistEntry)(nil),              // 19: mavio.acquisition.v1.BlocklistEntry
+	(*ListBlocklistRequest)(nil),        // 20: mavio.acquisition.v1.ListBlocklistRequest
+	(*ListBlocklistResponse)(nil),       // 21: mavio.acquisition.v1.ListBlocklistResponse
+	(*DeleteBlocklistRequest)(nil),      // 22: mavio.acquisition.v1.DeleteBlocklistRequest
+	(*DeleteBlocklistResponse)(nil),     // 23: mavio.acquisition.v1.DeleteBlocklistResponse
+	(*ManualImportFile)(nil),            // 24: mavio.acquisition.v1.ManualImportFile
+	(*ListManualImportRequest)(nil),     // 25: mavio.acquisition.v1.ListManualImportRequest
+	(*ListManualImportResponse)(nil),    // 26: mavio.acquisition.v1.ListManualImportResponse
+	(*ManualImportRequest)(nil),         // 27: mavio.acquisition.v1.ManualImportRequest
+	(*ManualImportResponse)(nil),        // 28: mavio.acquisition.v1.ManualImportResponse
+	nil,                                 // 29: mavio.acquisition.v1.ListDownloadClientsResponse.FailuresEntry
+	nil,                                 // 30: mavio.acquisition.v1.HistoryEvent.DataEntry
+	(DownloadProtocol)(0),               // 31: mavio.acquisition.v1.DownloadProtocol
+	(*timestamppb.Timestamp)(nil),       // 32: google.protobuf.Timestamp
+	(*Release)(nil),                     // 33: mavio.acquisition.v1.Release
+	(*IndexerRef)(nil),                  // 34: mavio.acquisition.v1.IndexerRef
+	(*durationpb.Duration)(nil),         // 35: google.protobuf.Duration
 }
 var file_mavio_acquisition_v1_download_proto_depIdxs = []int32{
-	30, // 0: mavio.acquisition.v1.DownloadClient.protocol:type_name -> mavio.acquisition.v1.DownloadProtocol
-	31, // 1: mavio.acquisition.v1.DownloadClient.disabled_until:type_name -> google.protobuf.Timestamp
-	3,  // 2: mavio.acquisition.v1.ListDownloadClientsResponse.clients:type_name -> mavio.acquisition.v1.DownloadClient
-	28, // 3: mavio.acquisition.v1.ListDownloadClientsResponse.failures:type_name -> mavio.acquisition.v1.ListDownloadClientsResponse.FailuresEntry
-	32, // 4: mavio.acquisition.v1.GrabReleaseRequest.release:type_name -> mavio.acquisition.v1.Release
-	8,  // 5: mavio.acquisition.v1.GrabReleaseResponse.item:type_name -> mavio.acquisition.v1.QueueItem
-	33, // 6: mavio.acquisition.v1.QueueItem.indexer:type_name -> mavio.acquisition.v1.IndexerRef
-	30, // 7: mavio.acquisition.v1.QueueItem.protocol:type_name -> mavio.acquisition.v1.DownloadProtocol
+	31, // 0: mavio.acquisition.v1.DownloadClient.protocol:type_name -> mavio.acquisition.v1.DownloadProtocol
+	32, // 1: mavio.acquisition.v1.DownloadClient.disabled_until:type_name -> google.protobuf.Timestamp
+	4,  // 2: mavio.acquisition.v1.ListDownloadClientsResponse.clients:type_name -> mavio.acquisition.v1.DownloadClient
+	29, // 3: mavio.acquisition.v1.ListDownloadClientsResponse.failures:type_name -> mavio.acquisition.v1.ListDownloadClientsResponse.FailuresEntry
+	33, // 4: mavio.acquisition.v1.GrabReleaseRequest.release:type_name -> mavio.acquisition.v1.Release
+	9,  // 5: mavio.acquisition.v1.GrabReleaseResponse.item:type_name -> mavio.acquisition.v1.QueueItem
+	34, // 6: mavio.acquisition.v1.QueueItem.indexer:type_name -> mavio.acquisition.v1.IndexerRef
+	31, // 7: mavio.acquisition.v1.QueueItem.protocol:type_name -> mavio.acquisition.v1.DownloadProtocol
 	0,  // 8: mavio.acquisition.v1.QueueItem.state:type_name -> mavio.acquisition.v1.DownloadState
-	31, // 9: mavio.acquisition.v1.QueueItem.grab_time:type_name -> google.protobuf.Timestamp
+	32, // 9: mavio.acquisition.v1.QueueItem.grab_time:type_name -> google.protobuf.Timestamp
 	1,  // 10: mavio.acquisition.v1.QueueItem.status:type_name -> mavio.acquisition.v1.DownloadStatus
-	34, // 11: mavio.acquisition.v1.QueueItem.remaining_time:type_name -> google.protobuf.Duration
-	8,  // 12: mavio.acquisition.v1.ListQueueResponse.items:type_name -> mavio.acquisition.v1.QueueItem
+	35, // 11: mavio.acquisition.v1.QueueItem.remaining_time:type_name -> google.protobuf.Duration
+	9,  // 12: mavio.acquisition.v1.ListQueueResponse.items:type_name -> mavio.acquisition.v1.QueueItem
 	2,  // 13: mavio.acquisition.v1.HistoryEvent.type:type_name -> mavio.acquisition.v1.HistoryEventType
-	31, // 14: mavio.acquisition.v1.HistoryEvent.time:type_name -> google.protobuf.Timestamp
-	29, // 15: mavio.acquisition.v1.HistoryEvent.data:type_name -> mavio.acquisition.v1.HistoryEvent.DataEntry
+	32, // 14: mavio.acquisition.v1.HistoryEvent.time:type_name -> google.protobuf.Timestamp
+	30, // 15: mavio.acquisition.v1.HistoryEvent.data:type_name -> mavio.acquisition.v1.HistoryEvent.DataEntry
 	2,  // 16: mavio.acquisition.v1.ListHistoryRequest.types:type_name -> mavio.acquisition.v1.HistoryEventType
-	13, // 17: mavio.acquisition.v1.ListHistoryResponse.events:type_name -> mavio.acquisition.v1.HistoryEvent
-	31, // 18: mavio.acquisition.v1.BlocklistEntry.time:type_name -> google.protobuf.Timestamp
-	31, // 19: mavio.acquisition.v1.BlocklistEntry.publish_time:type_name -> google.protobuf.Timestamp
-	30, // 20: mavio.acquisition.v1.BlocklistEntry.protocol:type_name -> mavio.acquisition.v1.DownloadProtocol
-	33, // 21: mavio.acquisition.v1.BlocklistEntry.indexer:type_name -> mavio.acquisition.v1.IndexerRef
-	18, // 22: mavio.acquisition.v1.ListBlocklistResponse.entries:type_name -> mavio.acquisition.v1.BlocklistEntry
-	23, // 23: mavio.acquisition.v1.ListManualImportResponse.files:type_name -> mavio.acquisition.v1.ManualImportFile
-	4,  // 24: mavio.acquisition.v1.DownloadService.ListDownloadClients:input_type -> mavio.acquisition.v1.ListDownloadClientsRequest
-	6,  // 25: mavio.acquisition.v1.DownloadService.GrabRelease:input_type -> mavio.acquisition.v1.GrabReleaseRequest
-	9,  // 26: mavio.acquisition.v1.DownloadService.ListQueue:input_type -> mavio.acquisition.v1.ListQueueRequest
-	11, // 27: mavio.acquisition.v1.DownloadService.RemoveFromQueue:input_type -> mavio.acquisition.v1.RemoveFromQueueRequest
-	14, // 28: mavio.acquisition.v1.DownloadService.ListHistory:input_type -> mavio.acquisition.v1.ListHistoryRequest
-	16, // 29: mavio.acquisition.v1.DownloadService.MarkFailed:input_type -> mavio.acquisition.v1.MarkFailedRequest
-	19, // 30: mavio.acquisition.v1.DownloadService.ListBlocklist:input_type -> mavio.acquisition.v1.ListBlocklistRequest
-	21, // 31: mavio.acquisition.v1.DownloadService.DeleteBlocklist:input_type -> mavio.acquisition.v1.DeleteBlocklistRequest
-	24, // 32: mavio.acquisition.v1.DownloadService.ListManualImport:input_type -> mavio.acquisition.v1.ListManualImportRequest
-	26, // 33: mavio.acquisition.v1.DownloadService.ManualImport:input_type -> mavio.acquisition.v1.ManualImportRequest
-	5,  // 34: mavio.acquisition.v1.DownloadService.ListDownloadClients:output_type -> mavio.acquisition.v1.ListDownloadClientsResponse
-	7,  // 35: mavio.acquisition.v1.DownloadService.GrabRelease:output_type -> mavio.acquisition.v1.GrabReleaseResponse
-	10, // 36: mavio.acquisition.v1.DownloadService.ListQueue:output_type -> mavio.acquisition.v1.ListQueueResponse
-	12, // 37: mavio.acquisition.v1.DownloadService.RemoveFromQueue:output_type -> mavio.acquisition.v1.RemoveFromQueueResponse
-	15, // 38: mavio.acquisition.v1.DownloadService.ListHistory:output_type -> mavio.acquisition.v1.ListHistoryResponse
-	17, // 39: mavio.acquisition.v1.DownloadService.MarkFailed:output_type -> mavio.acquisition.v1.MarkFailedResponse
-	20, // 40: mavio.acquisition.v1.DownloadService.ListBlocklist:output_type -> mavio.acquisition.v1.ListBlocklistResponse
-	22, // 41: mavio.acquisition.v1.DownloadService.DeleteBlocklist:output_type -> mavio.acquisition.v1.DeleteBlocklistResponse
-	25, // 42: mavio.acquisition.v1.DownloadService.ListManualImport:output_type -> mavio.acquisition.v1.ListManualImportResponse
-	27, // 43: mavio.acquisition.v1.DownloadService.ManualImport:output_type -> mavio.acquisition.v1.ManualImportResponse
-	34, // [34:44] is the sub-list for method output_type
-	24, // [24:34] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	14, // 17: mavio.acquisition.v1.ListHistoryResponse.events:type_name -> mavio.acquisition.v1.HistoryEvent
+	32, // 18: mavio.acquisition.v1.BlocklistEntry.time:type_name -> google.protobuf.Timestamp
+	32, // 19: mavio.acquisition.v1.BlocklistEntry.publish_time:type_name -> google.protobuf.Timestamp
+	31, // 20: mavio.acquisition.v1.BlocklistEntry.protocol:type_name -> mavio.acquisition.v1.DownloadProtocol
+	34, // 21: mavio.acquisition.v1.BlocklistEntry.indexer:type_name -> mavio.acquisition.v1.IndexerRef
+	19, // 22: mavio.acquisition.v1.ListBlocklistResponse.entries:type_name -> mavio.acquisition.v1.BlocklistEntry
+	24, // 23: mavio.acquisition.v1.ListManualImportResponse.files:type_name -> mavio.acquisition.v1.ManualImportFile
+	3,  // 24: mavio.acquisition.v1.ManualImportRequest.mode:type_name -> mavio.acquisition.v1.ImportMode
+	5,  // 25: mavio.acquisition.v1.DownloadService.ListDownloadClients:input_type -> mavio.acquisition.v1.ListDownloadClientsRequest
+	7,  // 26: mavio.acquisition.v1.DownloadService.GrabRelease:input_type -> mavio.acquisition.v1.GrabReleaseRequest
+	10, // 27: mavio.acquisition.v1.DownloadService.ListQueue:input_type -> mavio.acquisition.v1.ListQueueRequest
+	12, // 28: mavio.acquisition.v1.DownloadService.RemoveFromQueue:input_type -> mavio.acquisition.v1.RemoveFromQueueRequest
+	15, // 29: mavio.acquisition.v1.DownloadService.ListHistory:input_type -> mavio.acquisition.v1.ListHistoryRequest
+	17, // 30: mavio.acquisition.v1.DownloadService.MarkFailed:input_type -> mavio.acquisition.v1.MarkFailedRequest
+	20, // 31: mavio.acquisition.v1.DownloadService.ListBlocklist:input_type -> mavio.acquisition.v1.ListBlocklistRequest
+	22, // 32: mavio.acquisition.v1.DownloadService.DeleteBlocklist:input_type -> mavio.acquisition.v1.DeleteBlocklistRequest
+	25, // 33: mavio.acquisition.v1.DownloadService.ListManualImport:input_type -> mavio.acquisition.v1.ListManualImportRequest
+	27, // 34: mavio.acquisition.v1.DownloadService.ManualImport:input_type -> mavio.acquisition.v1.ManualImportRequest
+	6,  // 35: mavio.acquisition.v1.DownloadService.ListDownloadClients:output_type -> mavio.acquisition.v1.ListDownloadClientsResponse
+	8,  // 36: mavio.acquisition.v1.DownloadService.GrabRelease:output_type -> mavio.acquisition.v1.GrabReleaseResponse
+	11, // 37: mavio.acquisition.v1.DownloadService.ListQueue:output_type -> mavio.acquisition.v1.ListQueueResponse
+	13, // 38: mavio.acquisition.v1.DownloadService.RemoveFromQueue:output_type -> mavio.acquisition.v1.RemoveFromQueueResponse
+	16, // 39: mavio.acquisition.v1.DownloadService.ListHistory:output_type -> mavio.acquisition.v1.ListHistoryResponse
+	18, // 40: mavio.acquisition.v1.DownloadService.MarkFailed:output_type -> mavio.acquisition.v1.MarkFailedResponse
+	21, // 41: mavio.acquisition.v1.DownloadService.ListBlocklist:output_type -> mavio.acquisition.v1.ListBlocklistResponse
+	23, // 42: mavio.acquisition.v1.DownloadService.DeleteBlocklist:output_type -> mavio.acquisition.v1.DeleteBlocklistResponse
+	26, // 43: mavio.acquisition.v1.DownloadService.ListManualImport:output_type -> mavio.acquisition.v1.ListManualImportResponse
+	28, // 44: mavio.acquisition.v1.DownloadService.ManualImport:output_type -> mavio.acquisition.v1.ManualImportResponse
+	35, // [35:45] is the sub-list for method output_type
+	25, // [25:35] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_mavio_acquisition_v1_download_proto_init() }
@@ -4201,7 +4571,7 @@ func file_mavio_acquisition_v1_download_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_acquisition_v1_download_proto_rawDesc), len(file_mavio_acquisition_v1_download_proto_rawDesc)),
-			NumEnums:      3,
+			NumEnums:      4,
 			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
