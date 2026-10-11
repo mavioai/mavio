@@ -230,7 +230,7 @@ func TestListEpisodes(t *testing.T) {
 		t.Errorf("pilot absolute number = %v, want = 1", pilot.AbsoluteNumber)
 	}
 	var second core.Item
-	for it := range f.store.Items().Walk(t.Context(), core.ItemQuery{ParentID: series.ID, Recursive: true, OnlyVirtual: true, IndexNumber: new(2)}) {
+	for it := range f.store.Items().Walk(t.Context(), core.ItemQuery{ParentID: series.ID, Recursive: true, Kinds: []core.ItemKind{core.KindEpisode}, OnlyVirtual: true, IndexNumber: new(2)}) {
 		second = it
 	}
 	if second.ParentID != f.item("Show/Season 01").ID || *second.AbsoluteNumber != 2 || second.Monitored {
