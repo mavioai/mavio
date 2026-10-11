@@ -3710,7 +3710,7 @@
               "type": "string"
             },
             "title": "episode_ids",
-            "description": "For a search of a wanted series' season or episode: the episodes the\n release was matched to."
+            "description": "For a search of a wanted series, its season or episode: the episodes the\n release was matched to."
           }
         },
         "title": "Release",
@@ -4143,7 +4143,7 @@
             "type": "string",
             "title": "item_id",
             "format": "uuid",
-            "description": "A movie, season or episode of the library, wanted or not; searches by\n its own or its series' IDs, title, year and numbers."
+            "description": "A movie, series, season or episode of the library, wanted or not; searches by\n its own or its series' IDs, title, year and numbers."
           },
           "query": {
             "type": "string",
@@ -18029,7 +18029,7 @@
           "ReleaseService"
         ],
         "summary": "SearchReleases",
-        "description": "SearchReleases searches indexers for a movie, season or episode of the\n library, by the IDs and numbers each indexer can search by and else by\n title, as Radarr and Sonarr do; or for text; or reads their recent\n releases when given neither.",
+        "description": "SearchReleases searches indexers for a movie, series, season or episode\n of the library (a series season by season, but its specials), by the IDs and numbers each indexer can search by and else by\n title, as Radarr and Sonarr do; or for text; or reads their recent\n releases when given neither.",
         "operationId": "mavio.acquisition.v1.ReleaseService.SearchReleases",
         "parameters": [
           {

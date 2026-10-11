@@ -46,8 +46,8 @@ type ReleaseServiceClient interface {
 	// ListIndexers lists the indexers every ready indexer provider has
 	// configured.
 	ListIndexers(context.Context, *v1.ListIndexersRequest) (*v1.ListIndexersResponse, error)
-	// SearchReleases searches indexers for a movie, season or episode of the
-	// library, by the IDs and numbers each indexer can search by and else by
+	// SearchReleases searches indexers for a movie, series, season or episode
+	// of the library (a series season by season, but its specials), by the IDs and numbers each indexer can search by and else by
 	// title, as Radarr and Sonarr do; or for text; or reads their recent
 	// releases when given neither.
 	SearchReleases(context.Context, *v1.SearchReleasesRequest) (*v1.SearchReleasesResponse, error)
@@ -110,8 +110,8 @@ type ReleaseServiceHandler interface {
 	// ListIndexers lists the indexers every ready indexer provider has
 	// configured.
 	ListIndexers(context.Context, *v1.ListIndexersRequest) (*v1.ListIndexersResponse, error)
-	// SearchReleases searches indexers for a movie, season or episode of the
-	// library, by the IDs and numbers each indexer can search by and else by
+	// SearchReleases searches indexers for a movie, series, season or episode
+	// of the library (a series season by season, but its specials), by the IDs and numbers each indexer can search by and else by
 	// title, as Radarr and Sonarr do; or for text; or reads their recent
 	// releases when given neither.
 	SearchReleases(context.Context, *v1.SearchReleasesRequest) (*v1.SearchReleasesResponse, error)

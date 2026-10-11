@@ -1317,7 +1317,7 @@ func (x *SearchReleasesRequest) ClearMaxSize() {
 type SearchReleasesRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// A movie, season or episode of the library, wanted or not; searches by
+	// A movie, series, season or episode of the library, wanted or not; searches by
 	// its own or its series' IDs, title, year and numbers.
 	ItemId *string
 	// A text search when item_id is unset; nothing reads recent releases.
@@ -2140,7 +2140,7 @@ type Release_builder struct {
 	Evaluated         *bool
 	CustomFormats     []string
 	CustomFormatScore *int32
-	// For a search of a wanted series' season or episode: the episodes the
+	// For a search of a wanted series, its season or episode: the episodes the
 	// release was matched to.
 	EpisodeIds []string
 }
