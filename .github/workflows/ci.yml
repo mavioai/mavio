@@ -126,6 +126,8 @@ jobs:
     env:
       # The core built without optimizations, which take most of its time.
       MAVIO_CORE_PROFILE: dev
+      # The core and the macOS app for Apple silicon only, as the runner is.
+      MAVIO_MACOS_ARCHS: arm64
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
@@ -135,8 +137,20 @@ jobs:
           # The key changes with the profile, whose builds the cache keeps.
           key: ${{ env.MAVIO_CORE_PROFILE }}
           save-if: ${{ github.ref == 'refs/heads/main' }}
+      # The clones of the Swift packages, which SwiftPM and xcodebuild share.
+      - id: swiftpm
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/Library/Caches/org.swift.swiftpm
+          key: swiftpm-${{ hashFiles('libs/apple/Package.resolved', 'apps/*/Mavio.xcodeproj/**/Package.resolved') }}
+          restore-keys: swiftpm-
       - run: pnpm install --frozen-lockfile
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
+      - if: github.ref == 'refs/heads/main' && steps.swiftpm.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/Library/Caches/org.swift.swiftpm
+          key: ${{ steps.swiftpm.outputs.cache-primary-key }}
       - name: Generated projects are up to date
         run: |
           pnpm nx run-many -t generate --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
@@ -160,6 +174,9 @@ jobs:
           # The key changes with the profile, whose builds the cache keeps.
           key: ${{ env.MAVIO_CORE_PROFILE }}
           save-if: ${{ github.ref == 'refs/heads/main' }}
+      # Caches Gradle's home: the dependencies, and the outputs of the build
+      # cache that gradle.properties enables. Only main writes it.
+      - uses: gradle/actions/setup-gradle@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
 
@@ -257,7 +274,7 @@ jobs:
             --jq '.[] | "\(.id) \(.key)"' |
             awk '{
               n = split($2, part, "-")
-              drop = $2 ~ /^v0-rust-/ ? 2 : $2 ~ /^(go|mise-v0)-/ ? 1 : 0
+              drop = $2 ~ /^v0-rust-/ ? 2 : $2 ~ /^(go|mise-v0|swiftpm|gradle-home)-/ ? 1 : 0
               if (!drop) next
               what = part[1]; for (i = 2; i <= n - drop; i++) what = what "-" part[i]
               if (seen[what]++) print $1
