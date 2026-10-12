@@ -76,7 +76,8 @@
       },
       "dependsOn": [
         "core",
-        "ass"
+        "ass",
+        "build"
       ],
       "inputs": [
         "swift",
