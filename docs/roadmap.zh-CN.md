@@ -596,7 +596,17 @@ flowchart TD
   - [ ] 借助 JASSUB 保留样式的 ASS 字幕
   - [ ] 离线保存查询缓存
   - [ ] 组件的 Storybook 与页面的 Playwright 截图
-- [ ] iPhone 与 iPad 应用（`apps/ios`、`libs/apple`）
+- [x] iPhone 与 iPad 应用（`apps/ios`、`libs/apple`）：登录（密码、首个用户、Quick Connect、附近发现的服务器）、多台服务器且令牌保存在钥匙串、合并的首页、带推荐与媒体库标签的媒体库、排序与筛选、推荐栏、跨服务器搜索、带版本与其他服务器副本的详情、播放器（按应用声明的能力选用 AVPlayer 或 AetherEngine、服务端的 HLS、音轨与字幕轨、播放速度、AirPlay、AVPlayer 的画中画）、以后台 `URLSession` 下载并离线播放且补报进度、授权设备；iPhone 上为标签栏，iPad 上为侧边栏
+  - [ ] 发现与请求页面，随 P20
+  - [ ] AetherEngine 播放时的画中画
+  - [ ] 借助 libass 保留样式的 ASS 字幕
+  - [ ] 正在播放与远程命令（`MPNowPlayingInfoCenter`、`MPRemoteCommandCenter`）
+  - [ ] 一集结束时播放下一集
+  - [ ] 手势：长按倍速、滑动调节亮度与音量
+  - [ ] 服务端发送 HLS 时的外挂字幕文件
+  - [ ] AetherEngine 暂停时跳转后重绘画面，以及拖动缩略图
+  - [ ] 多播权限（entitlement），使真机而不只是模拟器能发现网络中的服务器
+  - [ ] 页面的快照测试
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）
 - [ ] Apple TV 与 Android TV 应用
 - [ ] Mac 应用

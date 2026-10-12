@@ -596,7 +596,17 @@ flowchart TD
   - [ ] Styled ASS subtitles with JASSUB
   - [ ] The query cache kept offline
   - [ ] Storybook of the components and Playwright screenshots of the screens
-- [ ] iPhone and iPad app (`apps/ios`, `libs/apple`)
+- [x] iPhone and iPad app (`apps/ios`, `libs/apple`): sign-in (password, first user, Quick Connect, servers found nearby), several servers with tokens in the Keychain, the merged Home, libraries with their Recommended and Library tabs, sorting and filters, hubs, search across servers, details with versions and copies on other servers, the player (AVPlayer and AetherEngine chosen by the capabilities the app declares, HLS from the server, audio and subtitle tracks, playback speed, AirPlay, Picture in Picture on AVPlayer), downloads with a background `URLSession` and offline playback with replayed progress, authorizing devices; a tab bar on the iPhone and a sidebar on the iPad
+  - [ ] Discovery and request screens, with P20
+  - [ ] Picture in Picture while AetherEngine plays
+  - [ ] Styled ASS subtitles with libass
+  - [ ] Now Playing and the remote commands (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`)
+  - [ ] Playing the next episode at the end of one
+  - [ ] Gestures: hold for double speed, swipe for brightness and volume
+  - [ ] External subtitle files while the server sends HLS
+  - [ ] A redrawn frame when AetherEngine seeks while paused, and scrub thumbnails
+  - [ ] The multicast entitlement, so that servers on the network are found on a device and not only in the simulator
+  - [ ] Snapshot tests of the screens
 - [ ] Android phone and tablet app (`apps/android`, `libs/android`)
 - [ ] Apple TV and Android TV apps
 - [ ] Mac app
