@@ -1,0 +1,21 @@
+name: Pull request caches
+
+# A closed pull request's caches are never restored again.
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  actions: write
+
+jobs:
+  delete:
+    name: Delete caches
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh cache list --ref "refs/pull/${{ github.event.pull_request.number }}/merge" --limit 100 --json id --jq '.[].id' |
+            xargs -r -n1 gh cache delete
