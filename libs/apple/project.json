@@ -25,7 +25,22 @@
         }
       ],
       "outputs": [
-        "{projectRoot}/build"
+        "{projectRoot}/build/MavioCoreFFI.xcframework",
+        "{projectRoot}/build/MavioCore"
+      ],
+      "cache": true
+    },
+    "ass": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "sh scripts/build-ass.sh",
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "{projectRoot}/scripts/build-ass.sh"
+      ],
+      "outputs": [
+        "{projectRoot}/build/Libass.xcframework"
       ],
       "cache": true
     },
@@ -36,7 +51,8 @@
         "cwd": "{projectRoot}"
       },
       "dependsOn": [
-        "core"
+        "core",
+        "ass"
       ],
       "inputs": [
         "swift",
@@ -54,7 +70,8 @@
         "cwd": "{projectRoot}"
       },
       "dependsOn": [
-        "core"
+        "core",
+        "ass"
       ],
       "inputs": [
         "swift",

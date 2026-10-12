@@ -1,7 +1,8 @@
 // swift-tools-version: 6.2
 // The Swift packages the iPhone and iPad, Apple TV and Mac apps share
 // (docs/clients.md §4.2). MavioCore is the shared core's Swift API, which
-// scripts/build-core.sh builds into build/ with its XCFramework.
+// scripts/build-core.sh builds into build/ with its XCFramework; Libass is
+// libass, which scripts/build-ass.sh builds into build/.
 import PackageDescription
 
 let package = Package(
@@ -19,6 +20,7 @@ let package = Package(
     ],
     targets: [
         .binaryTarget(name: "MavioCoreFFI", path: "build/MavioCoreFFI.xcframework"),
+        .binaryTarget(name: "Libass", path: "build/Libass.xcframework"),
         .target(
             name: "MavioCore",
             dependencies: ["MavioCoreFFI"],
@@ -27,8 +29,12 @@ let package = Package(
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .target(name: "MavioKit", dependencies: ["MavioCore"]),
-        .target(name: "MavioPlayer", dependencies: [.product(name: "AetherEngine", package: "AetherEngine")]),
+        .target(
+            name: "MavioPlayer",
+            dependencies: ["Libass", .product(name: "AetherEngine", package: "AetherEngine")]
+        ),
         .target(name: "MavioUI", dependencies: ["MavioKit", .product(name: "MavioDesign", package: "design")]),
         .testTarget(name: "MavioKitTests", dependencies: ["MavioKit"]),
+        .testTarget(name: "MavioPlayerTests", dependencies: ["MavioPlayer"]),
     ]
 )
