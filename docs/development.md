@@ -70,6 +70,8 @@ The Apple projects need Xcode and build only on macOS; they carry the tag `platf
 
 The Android projects need the Android SDK, found through `ANDROID_HOME`, and run the Gradle and the JDK that `mise.toml` pins; each Gradle build's `gradle/wrapper/gradle-wrapper.properties` names the same Gradle for Android Studio, without a wrapper script. They carry the tag `platform:android`. `libs/android` (Nx name `android-lib`) is a Gradle build of the modules `core`, `player` and `ui`, with one version catalog (`gradle/libs.versions.toml`) that the apps' settings read too; its `core` target runs `scripts/build-core.sh`, which builds `mavio-uniffi` with the pinned NDK (installed with `sdkmanager` when missing) for `arm64-v8a`, `armeabi-v7a` and `x86_64`, and writes the libraries, the Kotlin API UniFFI generates and the core built for this machine, which the unit tests load through JNA, into `core/build/rust`. Its `build`, `test` and `lint` run `assembleDebug`, `testDebugUnitTest` and `lintDebug`. `apps/android` and `apps/android-tv` are Gradle builds that include `libs/android` and depend on its modules by their coordinates (`dev.mavio.android:core`); they have `build` and `lint`. Gradle targets run one at a time, as the apps' builds share the included build.
 
+The `core` targets of `libs/apple` and `libs/android` build the core for all their targets in one Cargo build per toolchain, so that the targets compile in parallel, with the `release` profile; `MAVIO_CORE_PROFILE=dev` builds it without optimizations instead, which takes a fraction of the time, as CI does.
+
 ### 2.3 Common Commands
 ```bash
 pnpm nx run-many -t build test lint tidy-check     # Check everything
@@ -181,8 +183,8 @@ A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.
 * **plan** (Linux): lists the affected Apple and Android projects.
 * **check** (Linux): `nx affected -t buf-lint lint tidy-check typecheck build test`; regenerates code and fails on any diff; runs `buf breaking` against the base branch on pull requests.
 * **test**: `nx run-many -t typecheck test build` on linux arm64, macOS and Windows; pull requests run `nx affected` instead.
-* **apple** (macOS), when **plan** finds Apple projects affected: `nx run-many -t lint build test` over them, and fails when their generated Xcode projects differ from what `generate` writes.
-* **android** (Linux), when **plan** finds Android projects affected: `nx run-many -t lint build test` over them.
+* **apple** (macOS), when **plan** finds Apple projects affected: `nx run-many -t lint build test` over them, with the core built by the `dev` profile, and fails when their generated Xcode projects differ from what `generate` writes.
+* **android** (Linux), when **plan** finds Android projects affected: `nx run-many -t lint build test` over them, with the core built by the `dev` profile.
 * **media** (Linux, macOS): installs jellyfin-ffmpeg, generates the fixtures and runs the `media`, `streaming` and `server` tests without the Nx cache, so the ffmpeg integration and smoke tests run on the runners' hardware.
 
 * **dist** (Linux): `nx run server:dist`, so the server cross-compiles for every supported platform; the platforms build in parallel.
