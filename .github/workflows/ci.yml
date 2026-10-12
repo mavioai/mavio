@@ -64,6 +64,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: libs/client-rust
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: pnpm install --frozen-lockfile
       - uses: nrwl/nx-set-shas@v4
       - uses: ./.github/actions/go-cache
@@ -103,6 +104,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: libs/client-rust
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: pnpm install --frozen-lockfile
       - uses: ./.github/actions/go-cache
         with:
@@ -130,6 +132,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: libs/client-rust
+          # The key changes with the profile, whose builds the cache keeps.
+          key: ${{ env.MAVIO_CORE_PROFILE }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: pnpm install --frozen-lockfile
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
       - name: Generated projects are up to date
@@ -152,6 +157,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: libs/client-rust
+          # The key changes with the profile, whose builds the cache keeps.
+          key: ${{ env.MAVIO_CORE_PROFILE }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: pnpm install --frozen-lockfile
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
 
@@ -229,3 +237,29 @@ jobs:
           docker exec mavio mavio version
           docker exec mavio /usr/lib/jellyfin-ffmpeg/ffmpeg -version
 
+  # Deletes the caches of main that newer caches replaced: the caches a job
+  # saved for earlier commits, and those of earlier toolchains.
+  caches:
+    name: Prune caches
+    needs: [check, test, apple, android, media, dist]
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # Newest first; a key without its trailing hashes names what the
+          # cache is for, and only the newest cache of each is kept.
+          gh cache list --ref refs/heads/main --sort created_at --order desc --limit 100 --json id,key \
+            --jq '.[] | "\(.id) \(.key)"' |
+            awk '{
+              n = split($2, part, "-")
+              drop = $2 ~ /^v0-rust-/ ? 2 : $2 ~ /^(go|mise-v0)-/ ? 1 : 0
+              if (!drop) next
+              what = part[1]; for (i = 2; i <= n - drop; i++) what = what "-" part[i]
+              if (seen[what]++) print $1
+            }' |
+            xargs -r -n1 gh cache delete
