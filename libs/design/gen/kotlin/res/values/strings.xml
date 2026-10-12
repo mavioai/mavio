@@ -130,6 +130,22 @@
         <item quantity="one">%d unplayed</item>
         <item quantity="other">%d unplayed</item>
     </plurals>
+    <!-- Downloads an item for offline playback. -->
+    <string name="item_download">Download</string>
+    <!-- Deletes the downloaded file of an item. -->
+    <string name="item_remove_download">Remove Download</string>
+    <!-- State of a download not started yet. -->
+    <string name="download_waiting">Waiting</string>
+    <!-- State of a download interrupted, to be resumed. -->
+    <string name="download_paused">Paused</string>
+    <!-- State of a download that failed. -->
+    <string name="download_failed">Download failed</string>
+    <!-- Progress of a download; received and total are sizes such as 1.2 GB. -->
+    <string name="download_progress">%1$s of %2$s</string>
+    <!-- Resumes a paused or failed download. -->
+    <string name="download_resume">Resume Download</string>
+    <!-- Message of the empty Downloads screen. -->
+    <string name="download_empty_message">Items you download play here without a connection.</string>
     <!-- Accessibility label of the play button of the player. -->
     <string name="player_play">Play</string>
     <!-- Accessibility label of the pause button of the player. -->
@@ -228,6 +244,8 @@
     <string name="auth_move_up">Move Up</string>
     <!-- Moves a server later in the user's order of servers. -->
     <string name="auth_move_down">Move Down</string>
+    <!-- Section of the sign-in screen listing the servers found on the local network. -->
+    <string name="auth_nearby">On This Network</string>
     <!-- Placeholder of the search field. -->
     <string name="search_placeholder">Search movies, shows and more</string>
     <!-- Shown when a search finds nothing on any server. -->
