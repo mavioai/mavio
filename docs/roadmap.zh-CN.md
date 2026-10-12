@@ -579,7 +579,7 @@ flowchart TD
   - [x] macOS、iOS 与 tvOS 上的 AetherEngine 7.34.0：在 Mac 上，HDR10 Matroska 源经引擎重封装由 AVPlayer 播放、VideoToolbox 解码，并提高显示器的 EDR 余量；画中画在其 `AVPlayerLayer` 上启动，VP9、AV1 与 MPEG-2 走软件路径时则在其 `AVSampleBufferDisplayLayer` 上启动；ASS 轨道以原始事件行连同脚本头送达。iPad 与 Apple TV 模拟器以软件路径播放相同的源，iPad 模拟器在应用转入后台时在样本缓冲显示层上进入画中画
     - [ ] 在用户的设备上：iPhone 或 iPad 上画中画内的画面、Apple TV 上的 HDR10 与显示条件，以及杜比视界源
   - [ ] MyGo 的视频元素，含 Windows 上的 HDR10：延后到有 Windows 机器时，在 Windows 与 Linux 应用开始之前完成
-  - [ ] Android 上的核心：Kotlin 绑定在模拟器中登录、接收事件流并送达首页
+  - [x] Android 上的核心：在 `libs/android/core` 的插桩测试（`ClientTest`，服务器与账户以运行器参数传入）中，Kotlin 绑定登录、经事件流上线、收到事件并送达首页，运行于 16 KB 页面的 Android 17 模拟器，64 位库按 16 KB 对齐。访问局域网中的服务器需要运行时权限 `ACCESS_LOCAL_NETWORK`
   - [ ] Media3 播放服务端的 fMP4 HLS，其音频可能从负的解码时间开始（§4）
   - [ ] Media3 的 FFmpeg 解码扩展，它没有发布的构件：以 NDK 从源码按 LGPL 构建，纳入 Gradle 与 CI 构建
   - [ ] Android 上的 libmpv：其来源（按 mpv-android 的构建方式）、渲染到 `SurfaceView`，以及由 Media3 `SimpleBasePlayer` 适配，与 Media3 共用同一媒体会话

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The core talks to servers over its own HTTP stack. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Self-hosted servers are mostly on the local network, which Android 17 guards. -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+</manifest>
