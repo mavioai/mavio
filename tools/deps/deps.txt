@@ -5,5 +5,5 @@
 # media3-ffmpeg's version must be the Media3 of
 # libs/android/gradle/libs.versions.toml, which libs/android/player checks.
 media3-ffmpeg media3-ffmpeg-1.11.1-1 media3-ffmpeg-1.11.1-1.tar.gz 4b2f882c5b0d61f10d7025344b68eb42808eb35e168da63d504c694266bacc5a libs/android/player/build
-libass libass-0.17.5-1 libass-0.17.5-1.xcframework.zip 55f6ac7ebb137934e9b915992dd6b96f1486e6d022e8742ca6094222f171ef3d libs/apple/build
+libass libass-0.17.5-2 libass-0.17.5-2.xcframework.zip 55f44317ad62985e8e91034c96ed3ed66306044d1d3f882980395ca24d16116d libs/apple/build
 mpv mpv-0.41.0.g88eb9f2-1 mpv-0.41.0.g88eb9f2-1.tar.gz dfd054cbefa47daa1721587e34083713b21f25b7ed3c88ff71f6b7a6c2bd687d libs/android/player/build
