@@ -8,7 +8,8 @@
     "./tokens": "./gen/ts/tokens.ts",
     "./tokens.css": "./gen/ts/tokens.css",
     "./icons": "./gen/ts/icons.ts",
-    "./strings": "./gen/ts/strings.ts"
+    "./strings": "./gen/ts/strings.ts",
+    "./snapshots/screens.json": "./snapshots/screens.json"
   },
   "scripts": {
     "generate": "node build/build.js",
