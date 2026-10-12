@@ -233,6 +233,11 @@ flowchart LR
 ### 6.8 组件画廊与视觉评审
 * **组件画廊**：每个平台以固定数据浏览所有组件的所有状态——Web 用 Storybook，Apple 平台用 SwiftUI 预览，Android 用 Compose 预览，桌面应用用一个画廊窗口。
 * **快照测试**：每个客户端在快照测试中以固定数据渲染同一组页面——Web 用 Playwright，Apple 平台用 swift-snapshot-testing，Android 用 Roborazzi，桌面应用用 MyGo 的测试器（`ui.NewTester`，在内存中绘制帧）。CI 将其与入库的参考图比对，并生成一个把每个页面的各平台并排展示的页面，修改 UI 的 PR 附上该页面的链接以供评审。
+  * `libs/design/snapshots/screens.json` 列出各页面、各形态（手机、平板、桌面、电视）的尺寸，以及绘制它们所用的固定数据——一个虚构的媒体库；每个客户端把数据映射到自己的模型，快照命名为 `<screen>-<size>.png`。
+  * Web UI 的测试（`apps/web/snapshots`）在 `http://mavio.test` 向浏览器提供构建好的 UI、由固定数据生成的服务端应答以及生成的图片，固定时钟，Inter 字体随 UI 一同发布，因此不依赖网络与本机字体。浏览器运行在 Playwright 的容器镜像中，在每台机器上都相同，测试连接到它；参考图位于 `apps/web/snapshots/references`。
+  * Apple 的测试（`libs/apple/Tests/MavioUITests`）在 iOS 模拟器上以英文用 `MavioUI` 绘制各页面，在 Mac 上跳过；参考图位于 `libs/apple/snapshots`。
+  * Android 的测试是 `libs/android/ui` 的单元测试，在 JVM 上由 Robolectric 的原生图形绘制，无需模拟器；参考图位于 `libs/android/ui/snapshots`。
+  * 每个客户端的 `snapshot` 目标负责比对，`snapshot-record` 录制参考图，参考图随改变它的改动一同提交；在 Android 上由 `test` 比对。`design:gallery` 把参考图汇集到 `dist/snapshots/gallery`，即把各平台并排展示的页面。
 * **功能对齐**：`libs/design/parity.md` 列出每个功能在各客户端的状态（已上线、计划中、不适用），使客户端缺少某功能只能出于决定；为某个客户端增加功能的 PR 同时更新它。
 
 ---

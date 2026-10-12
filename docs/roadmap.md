@@ -588,13 +588,17 @@ flowchart TD
   - [x] libass on Apple platforms: `apple:ass` builds libass 0.17.5 with FreeType, FriBidi and HarfBuzz as a static XCFramework for macOS, iOS and tvOS and their simulators, with Core Text as the font provider, in about four minutes (cached in CI); the apps link it. `ASSRenderer` in `MavioPlayer` takes the script header, fonts as memory fonts and the event lines of AetherEngine's cues, and renders a frame's subtitles into a `CGImage`; its tests render an event in its style and the lines of a cue on the Mac
   - [x] The Go binding on macOS: `mavio-capi` exports the C ABI (`mavio_open`, `mavio_call`, `mavio_close`) with the messages of `mavio.capi.v1` for opening the core, its version, probing, signing in, the event streams and the servers, and the Go module `libs/client-rust/capi` loads it with purego without cgo. Its tests (`capi:test`, `CGO_ENABLED=0`) receive answers and errors through the one callback on the core's threads, 200 calls at once among them, and, given a server and account in the environment, sign in, receive the token to keep and follow the event stream to Connected
     - [ ] Linux and Windows: the same tests on their runners (`syscall` on Windows), unverified until CI runs them
-  - [ ] Snapshot testing on every platform: the tools for the Apple apps, the Android apps and the web UI
+  - [x] Snapshot testing on every platform: the screens and their fixed data in `libs/design/snapshots/screens.json`; Playwright 1.63 on the web with the browser in its container image, drawing sign-in and Home at the phone, tablet and desktop sizes; swift-snapshot-testing 1.19 on the iOS simulator, drawing Home with `MavioUI` on the iPhone and iPad; Roborazzi 1.76 with Robolectric 4.17 on the JVM, drawing the wordmark on a phone and a TV; `design:gallery` placing them side by side, and the CI jobs comparing them
+    - [ ] The desktop app's snapshot tests with MyGo's tester, with its skeleton
+    - [ ] The Android apps' screens, with their slice
+    - [ ] References recorded again on the CI runners if their drawing differs from the Mac's (the Android tests run on linux amd64)
 - [ ] Skeletons of the apps and libraries
   - [x] `libs/client-rust`: `mavio-core`, and `mavio-uniffi`, whose `uniffi-bindgen` generates the Swift module `MavioCore` and the Kotlin package `dev.mavio.core`; the C ABI and its messages (`capi`, `proto`) with the calls of the Go binding prototype; the rest comes with the desktop app, their only user
   - [x] Web: `apps/web` (React, Vite, TanStack Router and Query, Tailwind CSS on the design tokens) and `libs/client-ts`; the server embeds the build (`apps/server/internal/webui`) and serves it at `/`, its container image building it first
   - [x] Apple: `libs/apple` (`MavioKit` over the core's XCFramework, `MavioPlayer` with AetherEngine, `MavioUI` over `MavioDesign`, the Swift package of `libs/design`) and the apps `apps/ios`, `apps/tvos` and `apps/macos`, each showing the core's version on the simulator and the Mac
   - [x] Android: `libs/android` (`core` with the core's Kotlin API and libraries, `player` with Media3, `ui` with the design tokens, icons and strings) and the apps `apps/android` and `apps/android-tv`, which build and pass Android lint
   - [ ] Desktop: `apps/desktop` with the core's C ABI (`capi`, `proto`), on macOS first, after MyGo's video element there; libmpv for macOS, Windows and Linux built in mavio-deps
+  - [ ] Prebuilt dependencies: libass, libmpv and Media3's FFmpeg extension downloaded from mavio-deps' releases and verified by their checksums instead of built, once its first releases are published
 - [x] `libs/client-rust`: servers, their discovery and sign-in (password, first user, Quick Connect), the event streams with backoff, the offline store, playback reporting with offline replay, downloads, screen state, the merging of several servers (Home, Search, items' copies on other servers); the Swift and Kotlin bindings
   - [ ] The rest of the core's calls in the C ABI and the Go binding (`capi`, `proto`): Quick Connect, Home, libraries, details, search, playback and downloads, with the desktop app
   - [ ] Remote control commands and SyncPlay over the event stream, with the players of the apps that take them
@@ -605,7 +609,8 @@ flowchart TD
   - [ ] Playing the next episode at the end of one
   - [ ] Styled ASS subtitles with JASSUB
   - [ ] The query cache kept offline
-  - [ ] Storybook of the components and Playwright screenshots of the screens
+  - [ ] Storybook of the components
+  - [ ] Snapshot tests of the screens beyond sign-in and Home
 - [x] iPhone and iPad app (`apps/ios`, `libs/apple`): sign-in (password, first user, Quick Connect, servers found nearby), several servers with tokens in the Keychain, the merged Home, libraries with their Recommended and Library tabs, sorting and filters, hubs, search across servers, details with versions and copies on other servers, the player (AVPlayer and AetherEngine chosen by the capabilities the app declares, HLS from the server, audio and subtitle tracks, playback speed, AirPlay, Picture in Picture on AVPlayer), downloads with a background `URLSession` and offline playback with replayed progress, authorizing devices; a tab bar on the iPhone and a sidebar on the iPad
   - [ ] Discovery and request screens, with P20
   - [ ] Picture in Picture while AetherEngine plays
@@ -616,7 +621,7 @@ flowchart TD
   - [ ] External subtitle files while the server sends HLS
   - [ ] A redrawn frame when AetherEngine seeks while paused, and scrub thumbnails
   - [ ] The multicast entitlement, so that servers on the network are found on a device and not only in the simulator
-  - [ ] Snapshot tests of the screens
+  - [ ] Snapshot tests of the screens beyond Home
 - [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app
 - [ ] Android phone and tablet app (`apps/android`, `libs/android`)
 - [ ] Apple TV and Android TV apps
