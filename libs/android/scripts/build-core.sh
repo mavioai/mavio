@@ -37,7 +37,10 @@ for spec in $specs; do
 	target=${spec%%:*} rest=${spec#*:}
 	clang=${rest%%:*}
 	env=$(echo "$target" | tr '[:lower:]-' '[:upper:]_')
-	export "CARGO_TARGET_${env}_LINKER=$bin/$clang$api-clang" "CC_$target=$bin/$clang$api-clang" "AR_$target=$bin/llvm-ar"
+	# cc reads CC_<target> with the target's hyphens as underscores, the
+	# only form a shell can export.
+	cc=$(echo "$target" | tr - _)
+	export "CARGO_TARGET_${env}_LINKER=$bin/$clang$api-clang" "CC_$cc=$bin/$clang$api-clang" "AR_$cc=$bin/llvm-ar"
 	set -- "$@" --target "$target"
 done
 cargo build --locked --profile "$profile" -p mavio-uniffi --lib "$@"
