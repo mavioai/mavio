@@ -28,6 +28,7 @@ jobs:
       all: ${{ steps.affected.outputs.all }}
       apple: ${{ steps.affected.outputs.apple }}
       android: ${{ steps.affected.outputs.android }}
+      web: ${{ steps.affected.outputs.web }}
       server: ${{ steps.affected.outputs.server }}
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +49,7 @@ jobs:
             for p in apple android; do
               echo "$p=$(pnpm exec nx show projects $affected --projects "tag:platform:$p" --json)"
             done
+            echo "web=$(pnpm exec nx show projects $affected --projects web --json | jq 'length > 0')"
             # The media, dist and image jobs build and test the server.
             echo "server=$(pnpm exec nx show projects $affected --projects server,media,streaming,fixtures --json | jq 'length > 0')"
           } >> "$GITHUB_OUTPUT"
@@ -159,6 +161,15 @@ jobs:
             libs/apple/build/libass/stamp
           key: libass-${{ env.MAVIO_MACOS_ARCHS }}-${{ hashFiles('libs/apple/scripts/build-ass.sh') }}
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
+      # The snapshot tests on the iOS simulator (docs/clients.md §6.8).
+      - if: contains(fromJSON(needs.plan.outputs.apple), 'apple')
+        run: pnpm nx run apple:snapshot --output-style=static
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots-ios
+          path: libs/apple/build/snapshots/*.png
+          if-no-files-found: ignore
       - if: github.ref == 'refs/heads/main' && steps.swiftpm.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
@@ -206,6 +217,39 @@ jobs:
           path: libs/android/player/build/ffmpeg
           key: ffmpeg-${{ hashFiles('libs/android/scripts/build-ffmpeg.sh', 'libs/android/gradle/libs.versions.toml') }}
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
+      # The tests compare the snapshots with their references; the images
+      # of a failed comparison.
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots-android
+          path: libs/android/ui/build/outputs/roborazzi
+          if-no-files-found: ignore
+
+  # The snapshot tests of the web UI (docs/clients.md §6.8), in the browser of
+  # Playwright's image on arm64, as they are recorded on Apple silicon; the
+  # results of a failed comparison, and the gallery of every client's
+  # references.
+  web-snapshots:
+    name: Web snapshots
+    needs: plan
+    if: needs.plan.outputs.web == 'true'
+    runs-on: ubuntu-24.04-arm
+    env:
+      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,java,gradle
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm nx run web:snapshot --output-style=static
+      - if: always()
+        run: pnpm nx run design:gallery --output-style=static
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots
+          path: dist/snapshots
+          if-no-files-found: ignore
 
   media:
     name: Media integration (${{ matrix.os }})
