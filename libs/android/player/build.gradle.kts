@@ -1,7 +1,6 @@
 // One player interface over two engines, Media3 and libmpv, behind a media
-// session. libmpv and its Kotlin API come from scripts/build-mpv.sh, in
-// build/mpv, and Media3's FFmpeg decoder extension from mavio-deps
-// (tools/deps), in build/ffmpeg.
+// session. libmpv with its Kotlin API, in build/mpv, and Media3's FFmpeg
+// decoder extension, in build/ffmpeg, come from mavio-deps (tools/deps).
 plugins {
     alias(libs.plugins.android.library)
 }

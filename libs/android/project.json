@@ -29,14 +29,16 @@
     "mpv": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "sh scripts/build-mpv.sh",
-        "cwd": "{projectRoot}"
+        "command": "sh tools/deps/fetch.sh mpv",
+        "cwd": "."
       },
       "inputs": [
-        "{projectRoot}/scripts/build-mpv.sh"
+        "{workspaceRoot}/tools/deps/fetch.sh",
+        "{workspaceRoot}/tools/deps/deps.txt"
       ],
       "outputs": [
-        "{projectRoot}/player/build/mpv"
+        "{projectRoot}/player/build/mpv",
+        "{projectRoot}/player/build/.mpv.stamp"
       ],
       "cache": true
     },
