@@ -28,7 +28,7 @@ pnpm install            # 安装 Nx
 
 Rust 由 `libs/client-rust/rust-toolchain.toml` 固定，rustup 在该目录首次运行 `cargo` 时安装它；只需安装 rustup 本身。
 
-tvOS 目标 `aarch64-apple-tvos` 与 `aarch64-apple-tvos-sim` 属于 tier 3，没有预编译的标准库：它们在固定的 nightly `nightly-2026-10-10` 上构建，由其 `rust-src` 组件构建标准库（`rustup toolchain install nightly-2026-10-10 --component rust-src`，然后 `cargo +nightly-2026-10-10 build -Zbuild-std=std,panic_abort --target aarch64-apple-tvos`）。
+客户端的所有目标都在该工具链上构建，包括 tvOS 目标 `aarch64-apple-tvos` 与 `aarch64-apple-tvos-sim`，其标准库与其他目标一样由 rustup 安装（`rustup target add aarch64-apple-tvos`）。
 
 迁移由 `libs/store/internal/cmd/migrategen` 生成，它以库的形式使用 Atlas，不需要 Atlas CLI。生成 PostgreSQL 迁移和运行 PostgreSQL 一致性测试需要 Docker。`libs/store/pgtest` 依次在 `DOCKER_HOST`、Docker CLI 当前上下文（`docker context use`）的引擎、Docker Desktop / OrbStack / Colima / Rancher Desktop / Podman 的常见 socket 中找到的第一个引擎上启动容器，无需额外配置。
 
@@ -189,7 +189,7 @@ go build -o plugin .                                                     # 子�
 * **dist**（Linux），在服务端受影响时运行：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台；各平台并行构建。
 * **image**（Linux），在服务端受影响时运行：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
 
-CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg，**android** 以外的任务不安装 Java 与 Gradle（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check**、**test**、**apple** 与 **android** 缓存 Cargo 的构建（`Swatinem/rust-cache`），**apple** 与 **android** 以其核心的 profile 作为缓存键的一部分。**apple** 另缓存 tvOS 核心的构建：它把标准库一并构建到 `libs/client-rust/target-std`，而标准库的 crate 不在 `Cargo.lock` 中，`Swatinem/rust-cache` 会丢弃它们；它还把 nightly 的标准库源码的时间改到过去，因为 Cargo 比较源码与构建产物的时间，否则每次安装后都会重新构建。**apple** 还缓存 SwiftPM 与 `xcodebuild` 共用的 Swift 包克隆（`~/Library/Caches/org.swift.swiftpm`），以 `Package.resolved` 文件作为缓存键；**android** 缓存 Gradle 的用户目录，包括其依赖与构建缓存（`gradle/actions/setup-gradle`）。**check**、**test**、**media** 与 **dist** 缓存 Go 的构建与模块，**check** 另缓存 golangci-lint 的结果（`.github/actions/go-cache`）：缓存只在推送到 `main` 时保存，PR 恢复其中最新的一份。**media** 以 `-count=1` 运行 Go 的测试，避免重放缓存的测试结果。缓存只在推送到 `main` 时保存；这类推送的任务结束后，**caches** 删除 `main` 上已被更新缓存取代的缓存，即为较早提交或较早工具链保存的缓存；`.github/workflows/pr-caches.yml` 在 PR 关闭后删除其缓存。
+CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg，**android** 以外的任务不安装 Java 与 Gradle（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check**、**test**、**apple** 与 **android** 缓存 Cargo 的构建（`Swatinem/rust-cache`），**apple** 与 **android** 以其核心的 profile 作为缓存键的一部分。**apple** 缓存 SwiftPM 与 `xcodebuild` 共用的 Swift 包克隆（`~/Library/Caches/org.swift.swiftpm`），以 `Package.resolved` 文件作为缓存键；**android** 缓存 Gradle 的用户目录，包括其依赖与构建缓存（`gradle/actions/setup-gradle`）。**check**、**test**、**media** 与 **dist** 缓存 Go 的构建与模块，**check** 另缓存 golangci-lint 的结果（`.github/actions/go-cache`）：缓存只在推送到 `main` 时保存，PR 恢复其中最新的一份。**media** 以 `-count=1` 运行 Go 的测试，避免重放缓存的测试结果。缓存只在推送到 `main` 时保存；这类推送的任务结束后，**caches** 删除 `main` 上已被更新缓存取代的缓存，即为较早提交或较早工具链保存的缓存；`.github/workflows/pr-caches.yml` 在 PR 关闭后删除其缓存。
 
 ---
 
