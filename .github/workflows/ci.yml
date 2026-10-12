@@ -18,12 +18,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Lint, test, build (affected)
+  # Finds the affected Apple and Android projects, so that their jobs start
+  # without waiting for check; every job but these runs right away.
+  plan:
+    name: Plan
     runs-on: ubuntu-latest
     outputs:
       apple: ${{ steps.platforms.outputs.apple }}
       android: ${{ steps.platforms.outputs.android }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v2
+      - run: pnpm install --frozen-lockfile
+      - uses: nrwl/nx-set-shas@v4
+      - id: platforms
+        run: |
+          for p in apple android; do
+            echo "$p=$(pnpm exec nx show projects --affected --projects "tag:platform:$p" --json)" >> "$GITHUB_OUTPUT"
+          done
+
+  check:
+    name: Lint, test, build (affected)
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,11 +56,6 @@ jobs:
       # The Apple and Android projects build in jobs of their own, which run
       # when they are affected.
       - run: pnpm nx affected -t buf-lint lint tidy-check typecheck build test --exclude 'tag:platform:apple,tag:platform:android' --output-style=static
-      - id: platforms
-        run: |
-          for p in apple android; do
-            echo "$p=$(pnpm exec nx show projects --affected --projects "tag:platform:$p" --json)" >> "$GITHUB_OUTPUT"
-          done
       - name: Generated code is up to date
         run: |
           pnpm nx run-many -t generate --exclude 'tag:platform:apple,tag:platform:android' --output-style=static
@@ -54,7 +67,6 @@ jobs:
 
   test:
     name: Test (${{ matrix.os }})
-    needs: check
     strategy:
       fail-fast: false
       matrix:
@@ -71,8 +83,8 @@ jobs:
 
   apple:
     name: Apple
-    needs: check
-    if: needs.check.outputs.apple != '[]'
+    needs: plan
+    if: needs.plan.outputs.apple != '[]'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -81,17 +93,16 @@ jobs:
         with:
           workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.check.outputs.apple), ',') }}' --output-style=static
+      - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
       - name: Generated projects are up to date
         run: |
-          pnpm nx run-many -t generate --projects '${{ join(fromJSON(needs.check.outputs.apple), ',') }}' --output-style=static
+          pnpm nx run-many -t generate --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
           git diff --exit-code
-
 
   android:
     name: Android
-    needs: check
-    if: needs.check.outputs.android != '[]'
+    needs: plan
+    if: needs.plan.outputs.android != '[]'
     runs-on: ubuntu-latest
     env:
       MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg
@@ -102,10 +113,9 @@ jobs:
         with:
           workspaces: libs/client-rust
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.check.outputs.android), ',') }}' --output-style=static
+      - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
   media:
     name: Media integration (${{ matrix.os }})
-    needs: check
     strategy:
       fail-fast: false
       matrix:
@@ -125,7 +135,6 @@ jobs:
 
   dist:
     name: Cross-compile
-    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -137,7 +146,6 @@ jobs:
 
   image:
     name: Container image
-    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

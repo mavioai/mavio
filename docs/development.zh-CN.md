@@ -177,13 +177,13 @@ go build -o plugin .                                                     # 子�
 
 ## 6. 持续集成
 
-`.github/workflows/ci.yml` 在推送到 `main` 和提交 PR 时运行：
+`.github/workflows/ci.yml` 在推送到 `main` 和提交 PR 时运行。除 **apple** 与 **android** 等待 **plan** 外，所有任务同时开始：
+* **plan**（Linux）：列出受影响的 Apple 与 Android 项目。
 * **check**（Linux）：`nx affected -t buf-lint lint tidy-check typecheck build test`；重新生成代码，有任何差异即失败；PR 上对照目标分支运行 `buf breaking`。
 * **test**：在 linux arm64、macOS、Windows 上运行 `nx run-many -t test build`。
-* **apple**（macOS），在 **check** 发现 Apple 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，生成的 Xcode 工程与 `generate` 写出的不一致时失败。
-* **android**（Linux），在 **check** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`。
+* **apple**（macOS），在 **plan** 发现 Apple 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，生成的 Xcode 工程与 `generate` 写出的不一致时失败。
+* **android**（Linux），在 **plan** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`。
 * **media**（Linux、macOS）：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
-
 * **dist**（Linux）：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台。
 * **image**（Linux）：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
 
