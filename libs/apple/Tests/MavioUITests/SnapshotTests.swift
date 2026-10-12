@@ -144,7 +144,9 @@
             let apple = URL(filePath: "\(file)")
                 .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
             let reference = apple.appending(path: "snapshots/\(name).png")
-            let diffing = Diffing<UIImage>.image(precision: 1, perceptualPrecision: 0.98, scale: size.scale)
+            // Text antialiases a little differently on other versions of the
+            // simulator, at the edges of the glyphs.
+            let diffing = Diffing<UIImage>.image(precision: 0.99, perceptualPrecision: 0.98, scale: size.scale)
             let record = ProcessInfo.processInfo.environment["MAVIO_SNAPSHOT_RECORD"] != nil
             guard !record, let data = try? Data(contentsOf: reference) else {
                 try FileManager.default.createDirectory(
