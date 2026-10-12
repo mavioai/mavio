@@ -7,6 +7,7 @@ compose-bom = "2026.09.00"
 activity-compose = "1.13.0"
 core-ktx = "1.19.1"
 annotation = "1.9.1"
+# mavio-deps releases the FFmpeg extension of this version (tools/deps).
 media3 = "1.11.1"
 # As Media3 compiles against, for the sources of its FFmpeg extension.
 checkerframework = "3.13.0"

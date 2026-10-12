@@ -211,11 +211,6 @@ jobs:
           key: mpv-${{ hashFiles('libs/android/scripts/build-mpv.sh') }}
       - if: steps.mpv.outputs.cache-hit != 'true'
         run: sudo apt-get install -y autoconf automake libtool pkg-config gperf nasm
-      # Media3's FFmpeg extension, rebuilt when its script or Media3 changes.
-      - uses: actions/cache@v4
-        with:
-          path: libs/android/player/build/ffmpeg
-          key: ffmpeg-${{ hashFiles('libs/android/scripts/build-ffmpeg.sh', 'libs/android/gradle/libs.versions.toml') }}
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
       # The tests compare the snapshots with their references; the images
       # of a failed comparison.
@@ -345,7 +340,7 @@ jobs:
             --jq '.[] | "\(.id) \(.key)"' |
             awk '{
               n = split($2, part, "-")
-              drop = $2 ~ /^v0-rust-/ ? 2 : $2 ~ /^(go|mise-v0|swiftpm|gradle-home|mpv|ffmpeg|libass)-/ ? 1 : 0
+              drop = $2 ~ /^v0-rust-/ ? 2 : $2 ~ /^(go|mise-v0|swiftpm|gradle-home|mpv|libass)-/ ? 1 : 0
               if (!drop) next
               what = part[1]; for (i = 2; i <= n - drop; i++) what = what "-" part[i]
               if (seen[what]++) print $1
