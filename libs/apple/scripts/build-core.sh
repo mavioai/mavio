@@ -31,7 +31,9 @@ rustup target add $targets >/dev/null
 # shellcheck disable=SC2046,SC2086
 cargo build --locked --profile "$profile" -p mavio-uniffi --lib $(printf -- ' --target %s' $targets)
 
-rm -rf "$out" && mkdir -p "$out/MavioCore" "$out/frameworks"
+# Only what this script writes; build/ holds the other libraries too.
+rm -rf "$out/MavioCore" "$out/MavioCoreFFI.xcframework" "$out/gen" "$out/frameworks"
+mkdir -p "$out/MavioCore" "$out/frameworks"
 cargo run --locked --profile "$profile" -q --bin uniffi-bindgen -- generate \
 	--library "target/aarch64-apple-ios/$build/libmavio.dylib" --language swift --out-dir "$out/gen"
 mv "$out/gen/MavioCore.swift" "$out/MavioCore/"

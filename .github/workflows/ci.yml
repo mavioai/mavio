@@ -126,6 +126,8 @@ jobs:
     # A hung build stops at the cap.
     timeout-minutes: 60
     env:
+      # meson and ninja build libass.
+      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,java,gradle
       # The core built without optimizations, which take most of its time.
       MAVIO_CORE_PROFILE: dev
       # The core and the macOS app for Apple silicon only, as the runner is.
@@ -147,6 +149,14 @@ jobs:
           key: swiftpm-${{ hashFiles('libs/apple/Package.resolved', 'apps/*/Mavio.xcodeproj/**/Package.resolved') }}
           restore-keys: swiftpm-
       - run: pnpm install --frozen-lockfile
+      # libass, rebuilt only when its build script, which pins every
+      # version, changes.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            libs/apple/build/Libass.xcframework
+            libs/apple/build/libass/stamp
+          key: libass-${{ hashFiles('libs/apple/scripts/build-ass.sh') }}
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
       - if: github.ref == 'refs/heads/main' && steps.swiftpm.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4

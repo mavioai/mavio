@@ -19,6 +19,12 @@
             "apple"
           ],
           "target": "core"
+        },
+        {
+          "projects": [
+            "apple"
+          ],
+          "target": "ass"
         }
       ],
       "inputs": [
