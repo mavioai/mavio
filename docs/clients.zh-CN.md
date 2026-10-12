@@ -124,7 +124,7 @@ flowchart LR
   * **选择**：直接播放的源，Media3 能原样播放时交给 Media3，否则交给 libmpv；服务端重封装或转码的结果交给 Media3。
   * **杜比视界与 HDR**：libmpv 的配置排除杜比视界视频，在有 HDR 输出的设备上还排除 HDR 视频——Media3 能把它们输出到显示器，libmpv 只能做色调映射。
   * **Media3** ExoPlayer 是首选引擎，播放 Matroska 与 MP4 中设备能解码的格式，借助其 FFmpeg 解码扩展播放平台缺少的音频格式（DTS、TrueHD 等），并支持 PGS 字幕与不带样式的 SSA。它渲染到 `SurfaceView` 以支持 HDR 并降低功耗，电视支持时使用隧道播放，并以 `Surface.setFrameRate` 匹配帧率。
-  * **libmpv** 是第二引擎，按 mpv-android 的方式构建，直接播放 Media3 不能播放的内容，如带样式的 ASS 字幕与没有硬件解码器的编码；以 OpenGL ES 渲染到它自己的 `SurfaceView`，能用 MediaCodec 时以其解码。它由一个 Media3 `SimpleBasePlayer` 适配，使媒体会话与控制器同等对待两个引擎。
+  * **libmpv** 是第二引擎，按 mpv-android 的方式构建，直接播放 Media3 不能播放的内容，如带样式的 ASS 字幕与没有硬件解码器的编码；以 OpenGL ES 渲染到它自己的 `SurfaceView`，能用 MediaCodec 时以其解码。它由一个 Media3 `SimpleBasePlayer` 适配（`MpvPlayer`），使媒体会话与控制器同等对待两个引擎。它以 mpv-android 的构建脚本及其 JNI 层（`is.xyz.mpv.MPVLib`）按 `scripts/build-mpv.sh` 锁定的版本从源码构建，FFmpeg 与 mpv 按 GPL-3.0 构建；文件未内嵌字体时，libass 以系统字体绘制。
 
 ### 4.4 Windows 与 Linux（`apps/windows-linux`）
 * **结构**：基于 MyGo 的 Go 应用，所有窗口都是 MyGo 在 GPU 上绘制的原生 UI（Windows 上为 Direct3D 11，Linux 上为 OpenGL）；不使用 Web 视图。它与服务端一样以 `CGO_ENABLED=0` 构建，随附两个共享库：libmpv 与核心。
