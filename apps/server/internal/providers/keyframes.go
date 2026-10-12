@@ -2,22 +2,35 @@ package providers
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/mavioai/mavio/libs/media/keyframes"
 )
 
-// Keyframes extracts keyframes with ffprobe as a
-// library.KeyframeExtractor.
+// Keyframes reads keyframes from container indexes, and with ffprobe from
+// files without one, as a library.KeyframeExtractor.
 type Keyframes struct {
 	Extractor *keyframes.Extractor
 }
 
-// Keyframes returns the keyframe times of the file's first video stream.
-func (k Keyframes) Keyframes(ctx context.Context, path string) ([]time.Duration, error) {
-	d, err := k.Extractor.Extract(ctx, path)
-	if err != nil {
-		return nil, err
+// Keyframes returns the keyframe times of the file's first video stream:
+// from its index, or when whole is set, with ffprobe.
+func (k Keyframes) Keyframes(ctx context.Context, path string, whole bool) ([]time.Duration, bool, error) {
+	d, err := keyframes.FromFile(path)
+	if err == nil {
+		return d.Keyframes, true, nil
 	}
-	return d.Keyframes, nil
+	if !whole {
+		if errors.Is(err, keyframes.ErrNoIndex) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	// A malformed index is no index: ffprobe reads the packets.
+	d, err = k.Extractor.Extract(ctx, path)
+	if err != nil {
+		return nil, false, err
+	}
+	return d.Keyframes, true, nil
 }

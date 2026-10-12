@@ -49,22 +49,12 @@ func TestPlaylistGeneratorCases(t *testing.T) {
 					t.Errorf("EqualSegments() error = %v, want = %v", err, ErrNoSegments)
 				}
 			},
-			"IsExtractionAllowedForFile_Valid_Success": func(t *testing.T, a args) {
-				var exts []string
-				var want bool
-				a.decode(t, "allowedExtensions", &exts)
-				a.decode(t, "isAllowed", &want)
-				if got := KeyframeExtractionAllowed(a.str(t, "filePath"), exts); got != want {
-					t.Errorf("KeyframeExtractionAllowed() = %v, want = %v", got, want)
-				}
-			},
-			"IsExtractionAllowedForFile_Invalid_ReturnsFalse": func(t *testing.T, a args) {
-				var exts []string
-				a.decode(t, "allowedExtensions", &exts)
-				if KeyframeExtractionAllowed(a.str(t, "filePath"), exts) {
-					t.Error("KeyframeExtractionAllowed() = true, want = false")
-				}
-			},
+		},
+		skip: map[string]string{
+			"IsExtractionAllowedForFile_Valid_Success": "keyframes are read from every container with an index, " +
+				"and by reading every packet where the storage class allows, not by extension",
+			"IsExtractionAllowedForFile_Invalid_ReturnsFalse": "keyframes are read from every container with an index, " +
+				"and by reading every packet where the storage class allows, not by extension",
 		},
 		facts: map[string]string{
 			"ComputeSegments_ZeroDurationOvershoot_ClampsToDuration":  "TestKeyframeSegmentsOvershoot",

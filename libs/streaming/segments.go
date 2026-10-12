@@ -2,8 +2,6 @@ package streaming
 
 import (
 	"errors"
-	"path"
-	"strings"
 	"time"
 )
 
@@ -52,22 +50,6 @@ func EqualSegments(desired, duration time.Duration) ([]time.Duration, error) {
 		segments = append(segments, rest)
 	}
 	return segments, nil
-}
-
-// KeyframeExtractionAllowed reports whether keyframes may be read on
-// demand from a file with this name: its extension, with or without the
-// dot, is one of the allowed ones.
-func KeyframeExtractionAllowed(file string, extensions []string) bool {
-	ext := path.Ext(strings.ReplaceAll(file, `\`, "/"))
-	if ext == "" {
-		return false
-	}
-	for _, e := range extensions {
-		if strings.EqualFold(ext[1:], strings.TrimPrefix(e, ".")) {
-			return true
-		}
-	}
-	return false
 }
 
 // Starts returns the start times of segments.

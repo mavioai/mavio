@@ -23,9 +23,12 @@ const (
 )
 
 // KeyframeExtractor reads the keyframe times of a video file's first video
-// stream, such as with ffprobe.
+// stream: from its container's index, which takes a few small reads, and
+// for a file without one when whole is set, by reading every packet, such
+// as with ffprobe. read is false when the keyframes are not read: the file
+// has no index and whole is unset.
 type KeyframeExtractor interface {
-	Keyframes(ctx context.Context, path string) ([]time.Duration, error)
+	Keyframes(ctx context.Context, path string, whole bool) (kf []time.Duration, read bool, err error)
 }
 
 // KeyframesJob returns a job extracting the keyframes of an item's video
@@ -41,8 +44,11 @@ func KeyframesJob(itemID core.ID, at time.Time, priority int) core.Job {
 // NeedsKeyframes reports whether a media source is a probed video file
 // without keyframes.
 func NeedsKeyframes(src *core.MediaSource) bool {
-	return src.Keyframes == nil && !src.ProbedAt.IsZero() && src.Disc == "" &&
-		slices.ContainsFunc(src.Streams, func(st core.MediaStream) bool { return st.Kind == core.StreamVideo })
+	return src.Keyframes == nil && !src.ProbedAt.IsZero() && src.Disc == "" && hasVideo(src.Streams)
+}
+
+func hasVideo(streams []core.MediaStream) bool {
+	return slices.ContainsFunc(streams, func(st core.MediaStream) bool { return st.Kind == core.StreamVideo })
 }
 
 func (j *Jobs) keyframes(ctx context.Context, job core.Job) ([]core.Job, error) {
@@ -64,14 +70,15 @@ func (j *Jobs) keyframes(ctx context.Context, job core.Job) ([]core.Job, error) 
 		if err != nil {
 			return nil, ignoreGone(err)
 		}
-		if !policy.WholeFiles {
-			// Reading every keyframe reads the whole file; HLS of such
-			// files transcodes the video.
-			continue
-		}
-		kf, err := j.Keyframes.Keyframes(ctx, src.Path)
+		// Without an index, reading every keyframe reads the whole file,
+		// which the policy may forbid; HLS of such files transcodes the
+		// video.
+		kf, read, err := j.Keyframes.Keyframes(ctx, src.Path, policy.WholeFiles)
 		if err != nil {
 			return nil, fmt.Errorf("keyframes of %s: %w", src.Path, err)
+		}
+		if !read {
+			continue
 		}
 		if kf == nil {
 			// Stored as extracted, so that the job does not run again.

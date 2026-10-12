@@ -668,7 +668,7 @@ flowchart TD
 - [x] Detection: FUSE mounts by their subtype on Linux, loopback NFS and SMB and macFUSE on macOS, WinFsp volumes on Windows
 - [x] Storage policy: whole-file reads, samples, speculative reads and folder pruning by class (`library.PolicyOf`)
 - [ ] Setting storage classes in the web UI, with its library administration
-- [ ] Keyframes from Matroska Cues and MP4 sample tables, extracted with the probe; ffprobe only without an index and off cloud storage
+- [x] Keyframes from Matroska Cues and MP4 sample tables, `mfra` and `sidx`, extracted with the probe; ffprobe only without an index and off cloud storage
 - [ ] Trickplay from keyframes only, with the normal mode as fallback; on cloud storage, sampled through the container index
 - [ ] Embedded text subtitles extracted once into a persistent cache on local storage; on cloud storage, delivered by the stream that plays the video and never extracted whole
 - [ ] Subtitle search and download, which writes sidecar subtitles beside the video

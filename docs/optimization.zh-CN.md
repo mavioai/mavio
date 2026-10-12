@@ -133,7 +133,7 @@ Mavio 对媒体存储的全部读写，及其代价和时机：
 | :--- | :--- | :--- | :--- |
 | 扫描 | 每个目录 list 一次，每个条目 stat；策略允许时，未变化的目录沿用上次扫描 | 主要是 API 调用次数 | 扫描周期、手动、导入后的定向扫描 |
 | probe | ffprobe 读容器头部，索引在文件尾时再读文件尾 | 几 MB，2–5 次 Range | 新文件和变化的文件 |
-| keyframes | ffprobe 读视频流的每个包 | 整个文件 | probe 之后，策略允许整文件读取时 |
+| keyframes | 容器的索引：Matroska Cues，或 MP4 的样本表、`mfra`、`sidx`（§2.4）；没有索引时，ffprobe 读视频流的每个包 | 读几次头部和索引；没有索引时整个文件 | 随 probe 一起；没有索引时在 probe 之后，策略允许整文件读取时 |
 | 黑边检测 | 在 5 个点各 seek 一次并解码几帧 | 每点约 3–4 MB | probe 之后，策略允许抽样时 |
 | trickplay | ffmpeg 按间隔解码视频 | 整个文件 | 媒体库开启且策略允许整文件读取时 |
 | 章节图 | 每个章节 seek 一次 | 每章约 3–4 MB | 媒体库开启且策略允许抽样时 |
@@ -151,7 +151,7 @@ Mavio 对媒体存储的全部读写，及其代价和时机：
 
 | 读取方 | 本地和网络 | 云 |
 | :--- | :--- | :--- |
-| 整文件读取：ffprobe 提取 keyframes、trickplay、响度 | 是 | 否；没有关键帧的文件走 HLS 时转码视频 |
+| 整文件读取：没有索引的文件的 keyframes、trickplay、响度 | 是 | 否；没有关键帧的文件走 HLS 时转码视频 |
 | 抽样：黑边、章节图 | 是 | 否；黑边保持未知 |
 | 推测式读取：probe 前的头尾预读、起播预读、保活和唤醒 | 是 | 否；只按播放的需要读取 |
 | 扫描时跳过未变化的目录 | 是 | 否；云盘目录的修改时间反映不了下层的变化 |
@@ -159,7 +159,17 @@ Mavio 对媒体存储的全部读写，及其代价和时机：
 
 入队和运行时都检查策略，因此中途修改的类别立即生效。
 
-### 2.4 落地对照索引
+### 2.4 从容器索引读取关键帧
+
+HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需要关键帧时间。支持定位的容器本身就列出了关键帧，Mavio 读这份列表而不是读每个包（`keyframes.FromIndex`），随文件的 probe 一起进行：
+
+* **Matroska 和 WebM**：通过 SeekHead（以及它指向的第二个 SeekHead）找到 Info（时间刻度和时长）、Tracks（第一条视频轨）和 Cues；视频轨的 cue 点就是它的关键帧。
+* **MP4 和 QuickTime**：`moov` 中的第一条视频轨（`hdlr` 为 `vide`），逐个读取顶层 box 的头部找到 `moov`，不论它在文件的什么位置。关键帧是同步样本（`stss`；没有它时每个样本都是），时间为解码时间（`stts`）加合成偏移（`ctts`），再按编辑列表（`elst`）平移。分片文件的样本表是空的：由文件末尾 `mfra` 中该轨的 `tfra`（通过 `mfro` 找到），或第一个分片之前、各子分段以关键帧开头的 `sidx` 给出关键帧。
+* 时间取整到微秒，即 ffprobe 包时间的精度，两者因此得到相同的分段。
+
+读取的只是几个元素或 box：在测试媒体上不到每个文件的 2%。只有没有索引的文件才由 `media.keyframes` 任务整个读取，云存储上不读。复制没有关键帧的文件的视频的播放，和以前一样转码视频。
+
+### 2.5 落地对照索引
 
 | 机制 | 实现 | 阶段 |
 | :--- | :--- | :--- |
@@ -167,4 +177,5 @@ Mavio 对媒体存储的全部读写，及其代价和时机：
 | 分类 | `libs/library/storage/class.go`（`DeviceInfo.Class`、`Classifier`、`PathClasses`）；`device.go` 中的 `Detector.Folder` | P24 |
 | FUSE 与本机回环识别 | `libs/library/storage/fuse.go`（`fuseKind`、`loopbackSource`、`findMount`、`mountKind`）；由 `device_{linux,darwin,windows}.go` 使用 | P24 |
 | 存储策略 | `libs/library/policy.go`（`StoragePolicy`、`PolicyOf`）；由 `scan.go`（`scan.policy`、`Scanner.walkers`、`scan.state`）、`jobs.go`（`Jobs.probeFile`）、`keyframes.go`、`borders.go`、`mediaextras.go`（`Jobs.extrasJobs`、`trickplay`、`chapterImages`、`loudness`）使用 | P24 |
+| 从容器索引读取关键帧 | `libs/media/keyframes/index.go`（`FromIndex`、`FromFile`、`ErrNoIndex`）、`matroska.go`、`mp4.go`；`apps/server/internal/providers/keyframes.go`；`libs/library/jobs.go`（`Jobs.probe`）、`keyframes.go`（`KeyframeExtractor`） | P24 |
 | 不对云存储做推测式读取 | `libs/library/storage/keeper.go`（`Keeper.Class`）；`apps/server/internal/playback/resume.go`（`Manager.prepareStart`）；在 `apps/server/internal/server/server.go` 中装配 | P24 |

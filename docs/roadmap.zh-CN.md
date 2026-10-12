@@ -668,7 +668,7 @@ flowchart TD
 - [x] 检测：Linux 按子类型识别 FUSE 挂载，macOS 识别本机回环的 NFS、SMB 和 macFUSE，Windows 识别 WinFsp 卷
 - [x] 存储策略：按类别决定整文件读取、抽样、推测式读取和目录跳过（`library.PolicyOf`）
 - [ ] 在 Web 界面中设定存储类别，随其媒体库管理一起实现
-- [ ] 从 Matroska Cues 和 MP4 样本表读取关键帧，随 probe 一起提取；只在没有索引且不在云存储上时用 ffprobe
+- [x] 从 Matroska Cues 和 MP4 的样本表、`mfra`、`sidx` 读取关键帧，随 probe 一起提取；只在没有索引且不在云存储上时用 ffprobe
 - [ ] trickplay 只解码关键帧，失败时退回普通方式；云存储上按容器索引抽样
 - [ ] 本地存储上内嵌文字字幕一次提取到持久缓存；云存储上由播放视频的流一并输出，绝不整条提取
 - [ ] 字幕搜索下载，把字幕文件写在视频旁边

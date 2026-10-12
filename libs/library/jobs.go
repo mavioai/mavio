@@ -244,6 +244,8 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 	}
 	audio := it.Kind == core.KindTrack || it.Kind == core.KindAudioBook
 	probed := map[string]ProbeResult{}
+	// keyframes is set when a probed video file has no index of them.
+	keyframes := false
 	for _, src := range sources {
 		if !src.ProbedAt.IsZero() || src.Disc != "" {
 			continue
@@ -256,6 +258,20 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 		res, err := j.probeFile(ctx, src.Path, audio, j.policy(&lib, src.Path))
 		if err != nil {
 			return nil, fmt.Errorf("probe %s: %w", src.Path, err)
+		}
+		if j.Keyframes != nil && !audio && hasVideo(res.Source.Streams) {
+			// A container index gives the keyframes in a few reads of the
+			// file just probed; files without one wait for the keyframe job.
+			kf, read, err := j.Keyframes.Keyframes(ctx, src.Path, false)
+			switch {
+			case err != nil:
+				j.logger().WarnContext(ctx, "keyframe index", "path", src.Path, "err", err)
+			case read:
+				if kf == nil {
+					kf = []time.Duration{}
+				}
+				res.Source.Keyframes = kf
+			}
 		}
 		probed[src.Path] = res
 	}
@@ -279,8 +295,12 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 				// Probing finds the embedded streams; the sidecar files the
 				// scan found stay after them.
 				src.Streams, src.Chapters = withSidecars(r.Streams, sidecarsOf(src.Streams)), r.Chapters
+				src.Keyframes = r.Keyframes
 				src.ProbedAt = j.now()
 				current[i] = src
+				if NeedsKeyframes(&src) {
+					keyframes = true
+				}
 			}
 			if err := tx.MediaSources().Replace(ctx, it.ID, current); err != nil {
 				return err
@@ -309,7 +329,7 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 		}
 	}
 	next := []core.Job{RefreshJob(it.ID, j.now())}
-	if j.Keyframes != nil && !audio && len(probed) > 0 {
+	if j.Keyframes != nil && !audio && keyframes {
 		next = append(next, KeyframesJob(it.ID, j.now(), KeyframesBackground))
 	}
 	if j.Borders != nil && !audio && len(probed) > 0 {

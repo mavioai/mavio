@@ -68,6 +68,18 @@ func concat(parts ...[]string) []string {
 	return out
 }
 
+// keyframeArgs encodes the first input as H.264 with B-frames and a
+// keyframe every 48 frames, 2 s at 24 fps, and with audio the second as
+// AAC, mapped first so that the video is not the first track.
+func keyframeArgs(audio bool) []string {
+	var out []string
+	if audio {
+		out = []string{"-map", "1:a", "-c:a", "aac", "-ac", "2"}
+	}
+	return append(out, "-map", "0:v", "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", "-bf", "2",
+		"-g", "48", "-keyint_min", "48", "-sc_threshold", "0")
+}
+
 // Catalog returns every fixture in a stable order.
 func Catalog() []Spec {
 	return []Spec{
@@ -152,6 +164,32 @@ func Catalog() []Spec {
 			Args: concat(video("640x360", "24", "2"), tone("440", "2"),
 				[]string{"-i", "{file:chapters.txt}", "-map", "0:v", "-map", "1:a", "-map_metadata", "2", "-map_chapters", "2"},
 				[]string{"-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", "-c:a", "aac"}),
+		},
+		{
+			Name:        "keyframes.mkv",
+			Description: "Container index: 20 s of H.264 with B-frames and a keyframe every 2 s, plus AAC, in Matroska with Cues.",
+			Encoders:    []string{"libx264", "aac"},
+			Args:        concat(video("320x180", "24", "20"), tone("440", "20"), keyframeArgs(true)),
+		},
+		{
+			Name:        "keyframes.mp4",
+			Description: "Container index: the video of keyframes.mkv in MP4 with the moov first, its keyframes in stss.",
+			Encoders:    []string{"libx264", "aac"},
+			Args:        concat(video("320x180", "24", "20"), tone("440", "20"), keyframeArgs(true), []string{"-movflags", "+faststart"}),
+		},
+		{
+			Name:        "keyframes_fragmented.mp4",
+			Description: "Container index: the video of keyframes.mkv in fragmented MP4, a fragment per keyframe, with an mfra index.",
+			Encoders:    []string{"libx264", "aac"},
+			Args: concat(video("320x180", "24", "20"), tone("440", "20"), keyframeArgs(true),
+				[]string{"-movflags", "+frag_keyframe+empty_moov+default_base_moof"}),
+		},
+		{
+			Name:        "keyframes_sidx.mp4",
+			Description: "Container index: the video of keyframes.mkv alone in fragmented MP4 with a global sidx and no mfra.",
+			Encoders:    []string{"libx264"},
+			Args: concat(video("320x180", "24", "20"), keyframeArgs(false),
+				[]string{"-movflags", "+frag_keyframe+empty_moov+default_base_moof+global_sidx+skip_trailer"}),
 		},
 		{
 			Name:        "tagged.flac",

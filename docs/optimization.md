@@ -133,7 +133,7 @@ Everything Mavio reads from or writes to media storage, with its cost and when i
 | :--- | :--- | :--- | :--- |
 | Scan | one listing per folder, a stat per entry; unchanged folders are taken from the previous scan where the policy allows | API calls rather than bytes | scan interval, by hand, targeted scans after imports |
 | Probe | ffprobe reads the container header, and the tail when the index is there | a few MB, 2–5 range reads | new and changed files |
-| Keyframes | ffprobe reads every packet of the video stream | the whole file | after the probe, where the policy allows whole-file reads |
+| Keyframes | the container's index: Matroska Cues, or MP4 sample tables, `mfra` or `sidx` (§2.4); without one, ffprobe reads every packet of the video stream | a few header and index reads; without an index, the whole file | with the probe; without an index, after it where the policy allows whole-file reads |
 | Black borders | a seek and a few decoded frames at 5 points | about 3–4 MB a point | after the probe, where the policy allows samples |
 | Trickplay | ffmpeg decodes the video at an interval | the whole file | when the library asks for it and the policy allows whole-file reads |
 | Chapter images | a seek per chapter | about 3–4 MB a chapter | when the library asks for it and the policy allows samples |
@@ -151,7 +151,7 @@ Everything Mavio reads from or writes to media storage, with its cost and when i
 
 | Reader | Local and network | Cloud |
 | :--- | :--- | :--- |
-| Whole-file reads: keyframes by ffprobe, trickplay, loudness | yes | no; HLS of files without keyframes transcodes the video |
+| Whole-file reads: keyframes of files without an index, trickplay, loudness | yes | no; HLS of files without keyframes transcodes the video |
 | Samples: black borders, chapter images | yes | no; the borders stay unknown |
 | Speculative reads: head and tail prefetch before probes, playback start prefetch, keep-alive and wakes | yes | no; storage is read only as playback asks |
 | Pruning unchanged folders in scans | yes | no; folder modification times of cloud drives do not tell changes below them |
@@ -159,7 +159,17 @@ Everything Mavio reads from or writes to media storage, with its cost and when i
 
 The policy is checked both when the jobs are queued and when they run, so a class changed in between takes effect at once.
 
-### 2.4 Implementation Index
+### 2.4 Keyframes from Container Indexes
+
+HLS cuts copied video at its keyframes, so every video file needs their times. Containers that support seeking already list them, and Mavio reads that list instead of every packet (`keyframes.FromIndex`), with the probe of the file:
+
+* **Matroska and WebM**: the SeekHead, and a second one it points to, locates Info (the timestamp scale and duration), Tracks (the first video track) and Cues; the cue points of the video track are its keyframes.
+* **MP4 and QuickTime**: the first video track (`hdlr` `vide`) of the `moov`, found by walking the top-level box headers wherever it is in the file. Its keyframes are the sync samples (`stss`; every sample without it) at their decode times (`stts`) plus composition offsets (`ctts`), shifted by the edit list (`elst`). A fragmented file's sample tables are empty: the track's `tfra` in the `mfra` at the end of the file, found through `mfro`, or else a `sidx` before the first fragment whose subsegments start with a keyframe, gives them.
+* Times are rounded to the microsecond, the precision of ffprobe's packet times, so that both give the same segments.
+
+The reads are a few elements or boxes: on the test media, under 2% of each file. Only files without an index are read whole, by the `media.keyframes` job, and not on cloud storage. A playback copying the video of a file without keyframes transcodes it, as before.
+
+### 2.5 Implementation Index
 
 | Mechanism | Implementation | Phase |
 | :--- | :--- | :--- |
@@ -167,4 +177,5 @@ The policy is checked both when the jobs are queued and when they run, so a clas
 | Classification | `libs/library/storage/class.go` (`DeviceInfo.Class`, `Classifier`, `PathClasses`); `Detector.Folder` in `device.go` | P24 |
 | FUSE and loopback detection | `libs/library/storage/fuse.go` (`fuseKind`, `loopbackSource`, `findMount`, `mountKind`); used by `device_{linux,darwin,windows}.go` | P24 |
 | Storage policy | `libs/library/policy.go` (`StoragePolicy`, `PolicyOf`); used by `scan.go` (`scan.policy`, `Scanner.walkers`, `scan.state`), `jobs.go` (`Jobs.probeFile`), `keyframes.go`, `borders.go`, `mediaextras.go` (`Jobs.extrasJobs`, `trickplay`, `chapterImages`, `loudness`) | P24 |
+| Keyframes from container indexes | `libs/media/keyframes/index.go` (`FromIndex`, `FromFile`, `ErrNoIndex`), `matroska.go`, `mp4.go`; `apps/server/internal/providers/keyframes.go`; `libs/library/jobs.go` (`Jobs.probe`), `keyframes.go` (`KeyframeExtractor`) | P24 |
 | No speculative reads of cloud storage | `libs/library/storage/keeper.go` (`Keeper.Class`); `apps/server/internal/playback/resume.go` (`Manager.prepareStart`); wired in `apps/server/internal/server/server.go` | P24 |
