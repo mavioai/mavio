@@ -52,8 +52,8 @@ type ItemQuery struct {
 	// ExternalIDs restricts results to items with any of these IDs, such
 	// as the same title in another server's library.
 	ExternalIDs map[Provider]string
-	YearFrom int
-	YearTo   int
+	YearFrom    int
+	YearTo      int
 	// MaxRating is the maximum parental rating score, compared with
 	// InheritedRating; nil means unrestricted. Under a maximum, SkipUnrated
 	// also excludes items without a rating.
