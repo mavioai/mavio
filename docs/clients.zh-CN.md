@@ -130,8 +130,8 @@ flowchart LR
 * **结构**：基于 MyGo 的 Go 应用，面向 macOS、Windows 与 Linux，所有窗口都是 MyGo 在 GPU 上绘制的原生 UI（macOS 上为 Metal，Windows 上为 Direct3D 11，Linux 上为 OpenGL）；不使用 Web 视图。它与服务端一样以 `CGO_ENABLED=0` 构建，随附两个共享库：libmpv 与核心。
 * **在 Mac 上**：它是 `apps/macos` 之外的第二个 Mac 应用；`apps/macos` 仍是基于系统播放器与工具包的 Mac 应用。桌面应用与 Windows、Linux 共用一份代码，因此可在 Mac 上构建与试用；它以经过公证的磁盘映像在 App Store 之外分发，使用自己的 ID（`dev.mavio.desktop`）。
 * **核心**：通过 C ABI 使用 `libs/client-rust`，与 MyGo 加载原生 API 的方式相同，在运行时加载——macOS 与 Linux 上用 purego，Windows 上用 `syscall` 包。请求、结果与事件以核心 API 的 protobuf 消息跨越该接口，并为 Go 生成代码。
-* **播放器**：libmpv，以同样方式加载，通过其 client API 驱动（命令、属性，以及由一个 goroutine 读取的事件）。视频由 mpv 自己绘制，位于它自己的原生表面中，该表面放在 MyGo 绘制 UI 的表面之下。MyGo 原生 UI 中的视频元素负责放置该表面：在视频显示处，它在窗口绘制的内容上打出一个洞，使 MyGo 绘制的屏幕控制器（§6.5）、菜单与对话框显示在视频之上，而 MyGo 绘有内容之处的指针事件仍归 MyGo。
-  * **macOS**：mpv 以 `gpu-next` 渲染到 MyGo 以 layer 为后备的视图之下、它自己的视图中，经 EDR 输出 HDR。
+* **播放器**：libmpv，以同样方式加载，通过其 client API 驱动（命令、属性，以及由一个 goroutine 读取的事件）。视频由 mpv 自己绘制，位于它自己的原生表面中，该表面放在 MyGo 绘制 UI 的表面之下。MyGo 的视频元素负责放置该表面：`Window.NewVideoView` 创建视频视图，mpv 以其原生句柄为 `wid`；`ui.Video` 显示它，在视频显示处于窗口绘制的内容上打出一个洞，使 MyGo 绘制的屏幕控制器（§6.5）、菜单与对话框显示在视频之上；视频之上的指针与键盘仍归 MyGo。MyGo 使用其分叉 [mavioai/mygo](https://github.com/mavioai/mygo) 的 `v0.4.5-mavio` 分支，它在 0.4.5 版之上加入视频元素，并固定到某一提交。mpv 的视频输出在主线程之外关闭，因为它要等待主线程完成。
+  * **macOS**：mpv 以 `gpu-next` 经 MoltenVK 在 Vulkan 上（`gpu-context=macvk`）渲染到视频视图内、它自己的视图中，位于 MyGo 以 layer 为后备的视图之下，以 VideoToolbox 解码，经 EDR 输出 HDR（`target-colorspace-hint`）。mpv 的 macOS 输出会打开自己的窗口；Mavio 的一个补丁改为把它嵌入 `wid` 所指的视图中，该补丁构建进 mavio-deps 中的 macOS 版 libmpv（`mpv-macos`，适用于 macOS 13 及以上的通用库，与 MoltenVK 的库并列）。
   * **Windows**：mpv 以 Direct3D 11 与 `gpu-next` 渲染到子窗口（`wid`），并以 `target-colorspace-hint` 输出 HDR10；MyGo 的帧位于窗口最顶层的 DirectComposition 目标中，处于其上方。
   * **Linux**：mpv 的 OpenGL render API 绘制到 MyGo 表面之下、位于其 `GtkOverlay` 中的 `GtkGLArea`，X11 与 Wayland 相同；HDR 色调映射为 SDR。
 * **系统集成**：macOS 上的「正在播放」与远程命令、Windows 上的 System Media Transport Controls 与 Linux 上的 MPRIS，同时提供媒体键；播放期间由 MyGo 的电源 API 保持屏幕常亮。
