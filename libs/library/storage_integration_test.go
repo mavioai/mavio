@@ -104,11 +104,15 @@ func TestScanner_SerializedDevice(t *testing.T) {
 	tree(t, f.root, "Up (2009)/Up (2009).mkv", "Heat (1995)/Heat (1995).mkv", "Alien (1979)/Alien (1979).mkv")
 	ledger := storage.NewVolumeLedger()
 	f.sc.VolumeLedger, f.sc.Devices = ledger, rotational(&calls)
-	if got := f.sc.walkers(storage.DeviceInfo{Kind: storage.KindLocalSSD}); got != 4 {
+	local := PolicyOf(core.StorageLocal)
+	if got := f.sc.walkers(storage.DeviceInfo{Kind: storage.KindLocalSSD}, local); got != 4 {
 		t.Errorf("walkers on an SSD = %d, want 4", got)
 	}
-	if got := f.sc.walkers(storage.DeviceInfo{Rotational: true}); got != 1 {
+	if got := f.sc.walkers(storage.DeviceInfo{Rotational: true}, local); got != 1 {
 		t.Errorf("walkers on a hard disk = %d, want 1", got)
+	}
+	if got := f.sc.walkers(storage.DeviceInfo{Kind: storage.KindLocalSSD}, PolicyOf(core.StorageCloud)); got != 2 {
+		t.Errorf("walkers on a cloud drive = %d, want 2", got)
 	}
 
 	// A scan reads the disk's folders only while it holds the disk.

@@ -55,6 +55,9 @@ type Scanner struct {
 	// Devices detects the device of each folder; nil detects anew in each
 	// scan.
 	Devices *storage.Detector
+	// Classifier classifies the folders of libraries, whose storage policy
+	// decides what scans and jobs read; nil classifies with Devices.
+	Classifier *storage.Classifier
 	// QuietGate pauses or throttles background scans during active client streaming.
 	QuietGate *storage.QuietGate
 	// GrowthPolicy leaves files still being written, such as downloads,
@@ -69,6 +72,14 @@ type Scanner struct {
 	// OnMissing is told of the items a scan marked missing; nil ignores
 	// them.
 	OnMissing func(ctx context.Context, lib core.Library, ids []core.ID)
+}
+
+// classify returns the storage class of a file or folder of lib.
+func (s *Scanner) classify(lib *core.Library, path string) core.StorageClass {
+	if s.Classifier != nil {
+		return s.Classifier.Classify(lib, path)
+	}
+	return storage.NewClassifier(s.Devices).Classify(lib, path)
 }
 
 // ScanStats summarizes a scan.
@@ -178,13 +189,19 @@ func (sc *scan) root(ctx context.Context, base string) error {
 	defer r.Close()
 	rfs := rootFS{root: r, base: base}
 	ignores := &IgnoreFiles{FS: r.FS()}
-	return sc.walk(ctx, rfs, ignores, dev, task{dir: base, scope: Scope{Kind: sc.lib.Kind, Root: base}})
+	return sc.walk(ctx, rfs, ignores, sc.walkers(dev, sc.policy(base)), task{dir: base, scope: Scope{Kind: sc.lib.Kind, Root: base}})
 }
 
-// walk scans a folder of a root on dev and every folder below it.
-func (sc *scan) walk(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, dev storage.DeviceInfo, start task) error {
+// policy returns the storage policy of a folder of the library.
+func (sc *scan) policy(dir string) StoragePolicy {
+	return PolicyOf(sc.classify(&sc.lib, filepath.FromSlash(dir)))
+}
+
+// walk scans a folder of a root and every folder below it, walkers folders
+// at once.
+func (sc *scan) walk(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, walkers int, start task) error {
 	g, gctx := errgroup.WithContext(ctx)
-	g.SetLimit(sc.walkers(dev))
+	g.SetLimit(walkers)
 	var visit func(t task)
 	visit = func(t task) {
 		run := func() error {
@@ -209,9 +226,13 @@ func (sc *scan) walk(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, dev 
 	return g.Wait()
 }
 
-// walkers returns how many folders of a device a scan reads at once: one
-// on serialized devices, else the configured concurrency, four by default.
-func (sc *Scanner) walkers(dev storage.DeviceInfo) int {
+// walkers returns how many folders of a device a scan reads at once: the
+// bound of the storage policy, else one on serialized devices, else the
+// configured concurrency, four by default.
+func (sc *Scanner) walkers(dev storage.DeviceInfo, policy StoragePolicy) int {
+	if policy.ScanConcurrency > 0 {
+		return policy.ScanConcurrency
+	}
 	if dev.Serialized() {
 		return 1
 	}
@@ -299,7 +320,7 @@ func (sc *scan) state(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, dir
 	case errors.Is(err, core.ErrNotFound):
 	case err != nil:
 		return st, false, err
-	case !sc.NoPruning && prev.ModTime.Equal(st.ModTime) && prev.FileID == st.FileID:
+	case !sc.NoPruning && prev.ModTime.Equal(st.ModTime) && prev.FileID == st.FileID && sc.policy(dir).PruneFolders:
 		// Entries are as before; files may still have new contents.
 		changed := false
 		st.Entries = make([]core.FolderEntry, 0, len(prev.Entries))

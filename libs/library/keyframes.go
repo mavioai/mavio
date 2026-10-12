@@ -60,6 +60,15 @@ func (j *Jobs) keyframes(ctx context.Context, job core.Job) ([]core.Job, error) 
 		if !NeedsKeyframes(src) {
 			continue
 		}
+		policy, err := j.itemPolicy(ctx, p.ItemID, src.Path)
+		if err != nil {
+			return nil, ignoreGone(err)
+		}
+		if !policy.WholeFiles {
+			// Reading every keyframe reads the whole file; HLS of such
+			// files transcodes the video.
+			continue
+		}
 		kf, err := j.Keyframes.Keyframes(ctx, src.Path)
 		if err != nil {
 			return nil, fmt.Errorf("keyframes of %s: %w", src.Path, err)

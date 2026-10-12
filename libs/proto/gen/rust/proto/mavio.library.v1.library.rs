@@ -151,6 +151,89 @@ impl ::buffa::Enumeration for LibraryKind {
         ]
     }
 }
+/// StorageClass tells what reading a file of a storage costs, which decides
+/// how much of the media the server reads on its own.
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[repr(i32)]
+pub enum StorageClass {
+    /// Classified by the device holding the path.
+    STORAGE_CLASS_UNSPECIFIED = 0i32,
+    /// A disk of the server: reads are cheap.
+    STORAGE_CLASS_LOCAL = 1i32,
+    /// A share on the local network, such as SMB or NFS: reads are slower but
+    /// not counted.
+    STORAGE_CLASS_NETWORK = 2i32,
+    /// A cloud drive: reads count against quotas and rate limits, so the
+    /// server reads only what playback needs and the few bytes around it.
+    STORAGE_CLASS_CLOUD = 3i32,
+}
+impl StorageClass {
+    ///Idiomatic alias for [`Self::STORAGE_CLASS_UNSPECIFIED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Unspecified: Self = Self::STORAGE_CLASS_UNSPECIFIED;
+    ///Idiomatic alias for [`Self::STORAGE_CLASS_LOCAL`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Local: Self = Self::STORAGE_CLASS_LOCAL;
+    ///Idiomatic alias for [`Self::STORAGE_CLASS_NETWORK`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Network: Self = Self::STORAGE_CLASS_NETWORK;
+    ///Idiomatic alias for [`Self::STORAGE_CLASS_CLOUD`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Cloud: Self = Self::STORAGE_CLASS_CLOUD;
+}
+impl ::core::default::Default for StorageClass {
+    fn default() -> Self {
+        Self::STORAGE_CLASS_UNSPECIFIED
+    }
+}
+impl ::buffa::Enumeration for StorageClass {
+    fn from_i32(value: i32) -> ::core::option::Option<Self> {
+        match value {
+            0i32 => ::core::option::Option::Some(Self::STORAGE_CLASS_UNSPECIFIED),
+            1i32 => ::core::option::Option::Some(Self::STORAGE_CLASS_LOCAL),
+            2i32 => ::core::option::Option::Some(Self::STORAGE_CLASS_NETWORK),
+            3i32 => ::core::option::Option::Some(Self::STORAGE_CLASS_CLOUD),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn to_i32(&self) -> i32 {
+        *self as i32
+    }
+    fn proto_name(&self) -> &'static str {
+        match self {
+            Self::STORAGE_CLASS_UNSPECIFIED => "STORAGE_CLASS_UNSPECIFIED",
+            Self::STORAGE_CLASS_LOCAL => "STORAGE_CLASS_LOCAL",
+            Self::STORAGE_CLASS_NETWORK => "STORAGE_CLASS_NETWORK",
+            Self::STORAGE_CLASS_CLOUD => "STORAGE_CLASS_CLOUD",
+        }
+    }
+    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
+        match name {
+            "STORAGE_CLASS_UNSPECIFIED" => {
+                ::core::option::Option::Some(Self::STORAGE_CLASS_UNSPECIFIED)
+            }
+            "STORAGE_CLASS_LOCAL" => {
+                ::core::option::Option::Some(Self::STORAGE_CLASS_LOCAL)
+            }
+            "STORAGE_CLASS_NETWORK" => {
+                ::core::option::Option::Some(Self::STORAGE_CLASS_NETWORK)
+            }
+            "STORAGE_CLASS_CLOUD" => {
+                ::core::option::Option::Some(Self::STORAGE_CLASS_CLOUD)
+            }
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn values() -> &'static [Self] {
+        &[
+            Self::STORAGE_CLASS_UNSPECIFIED,
+            Self::STORAGE_CLASS_LOCAL,
+            Self::STORAGE_CLASS_NETWORK,
+            Self::STORAGE_CLASS_CLOUD,
+        ]
+    }
+}
 /// HubKind is a kind of hub: a row of items on Home or on a library's
 /// Recommended tab, each a reason to watch something.
 #[allow(non_camel_case_types)]
@@ -435,6 +518,22 @@ pub struct Library {
     ///
     /// Field 18: `hubs`
     pub hubs: ::buffa::MessageField<LibraryHubs, ::buffa::Inline<LibraryHubs>>,
+    /// The storage classes the administrator set, by path; the other paths
+    /// are classified by the device holding them.
+    ///
+    /// Field 19: `storage_classes`
+    pub storage_classes: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        ::buffa::EnumValue<StorageClass>,
+    >,
+    /// The storage class of each path as the server classifies it: the one
+    /// set, or the one of the device holding it.
+    ///
+    /// Field 20: `effective_storage_classes`
+    pub effective_storage_classes: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        ::buffa::EnumValue<StorageClass>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -459,6 +558,8 @@ impl ::core::fmt::Debug for Library {
             .field("provider_order", &self.provider_order)
             .field("virtual_episodes", &self.virtual_episodes)
             .field("hubs", &self.hubs)
+            .field("storage_classes", &self.storage_classes)
+            .field("effective_storage_classes", &self.effective_storage_classes)
             .finish()
     }
 }
@@ -664,6 +765,18 @@ impl ::buffa::Message for Library {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::OpenEnum<_>,
+                _,
+            >(&self.storage_classes, 2u64);
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::OpenEnum<_>,
+                _,
+            >(&self.effective_storage_classes, 2u64);
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -758,6 +871,16 @@ impl ::buffa::Message for Library {
             );
             self.hubs.write_to(__cache, buf);
         }
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::OpenEnum<_>,
+            _,
+        >(&self.storage_classes, 19u32, buf);
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::OpenEnum<_>,
+            _,
+        >(&self.effective_storage_classes, 20u32, buf);
         self.__buffa_unknown_fields.write_to(buf);
     }
     fn merge_field(
@@ -955,6 +1078,28 @@ impl ::buffa::Message for Library {
                     ctx,
                 )?;
             }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::OpenEnum<_>,
+                    _,
+                >(&mut self.storage_classes, buf, ctx)?;
+            }
+            20u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::OpenEnum<_>,
+                    _,
+                >(&mut self.effective_storage_classes, buf, ctx)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -981,6 +1126,8 @@ impl ::buffa::Message for Library {
         self.provider_order = ::buffa::MessageField::none();
         self.virtual_episodes = ::buffa::MessageField::none();
         self.hubs = ::buffa::MessageField::none();
+        self.storage_classes.clear();
+        self.effective_storage_classes.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1895,6 +2042,14 @@ pub struct LibrarySpec {
     >,
     /// Field 15: `hubs`
     pub hubs: ::buffa::MessageField<LibraryHubs, ::buffa::Inline<LibraryHubs>>,
+    /// Storage classes by path, for paths the device would misclassify. Each
+    /// key must be one of paths.
+    ///
+    /// Field 16: `storage_classes`
+    pub storage_classes: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        ::buffa::EnumValue<StorageClass>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1916,6 +2071,7 @@ impl ::core::fmt::Debug for LibrarySpec {
             .field("provider_order", &self.provider_order)
             .field("virtual_episodes", &self.virtual_episodes)
             .field("hubs", &self.hubs)
+            .field("storage_classes", &self.storage_classes)
             .finish()
     }
 }
@@ -2095,6 +2251,12 @@ impl ::buffa::Message for LibrarySpec {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::OpenEnum<_>,
+                _,
+            >(&self.storage_classes, 2u64);
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2170,6 +2332,11 @@ impl ::buffa::Message for LibrarySpec {
             );
             self.hubs.write_to(__cache, buf);
         }
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::OpenEnum<_>,
+            _,
+        >(&self.storage_classes, 16u32, buf);
         self.__buffa_unknown_fields.write_to(buf);
     }
     fn merge_field(
@@ -2335,6 +2502,17 @@ impl ::buffa::Message for LibrarySpec {
                     ctx,
                 )?;
             }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::OpenEnum<_>,
+                    _,
+                >(&mut self.storage_classes, buf, ctx)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2358,6 +2536,7 @@ impl ::buffa::Message for LibrarySpec {
         self.provider_order = ::buffa::MessageField::none();
         self.virtual_episodes = ::buffa::MessageField::none();
         self.hubs = ::buffa::MessageField::none();
+        self.storage_classes.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

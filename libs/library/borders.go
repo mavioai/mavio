@@ -67,6 +67,15 @@ func (j *Jobs) borders(ctx context.Context, job core.Job) ([]core.Job, error) {
 		if st == nil {
 			continue
 		}
+		policy, err := j.itemPolicy(ctx, p.ItemID, src.Path)
+		if err != nil {
+			return nil, ignoreGone(err)
+		}
+		if !policy.Samples {
+			// The borders stay unknown where the storage policy allows no
+			// sampling.
+			continue
+		}
 		if j.Scanner != nil && j.Scanner.QuietGate != nil {
 			if err := j.Scanner.QuietGate.PauseOrCancel(ctx); err != nil {
 				return nil, err

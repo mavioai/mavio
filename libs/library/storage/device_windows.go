@@ -41,13 +41,23 @@ func detectDevice(path string) (DeviceInfo, error) {
 		devID = fmt.Sprintf("path:%s", strings.ToLower(volPath))
 	}
 
+	// WinFsp names the volumes of userspace file systems, rclone's among
+	// them, "FUSE-<name>" or by the name they give.
+	fuse := strings.HasPrefix(strings.ToUpper(fsType), "FUSE-") || strings.EqualFold(fsType, "rclone")
+
 	rotational := false
-	if !isRemote {
+	if !isRemote && !fuse {
 		rotational = checkWindowsSeekPenalty(volPath)
 	}
 
 	var kind DeviceKind
 	switch {
+	case isCloudPath(path):
+		kind, isRemote, rotational = KindCloudMount, false, false
+	case fuse:
+		kind = fuseKind(fsType)
+		isRemote = kind == KindRemoteNAS
+		rotational = kind != KindCloudMount
 	case isRemote:
 		kind = KindRemoteNAS
 		rotational = true

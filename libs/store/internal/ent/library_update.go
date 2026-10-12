@@ -73,6 +73,18 @@ func (_u *LibraryUpdate) AppendPaths(v []string) *LibraryUpdate {
 	return _u
 }
 
+// SetStorageClasses sets the "storage_classes" field.
+func (_u *LibraryUpdate) SetStorageClasses(v map[string]core.StorageClass) *LibraryUpdate {
+	_u.mutation.SetStorageClasses(v)
+	return _u
+}
+
+// ClearStorageClasses clears the value of the "storage_classes" field.
+func (_u *LibraryUpdate) ClearStorageClasses() *LibraryUpdate {
+	_u.mutation.ClearStorageClasses()
+	return _u
+}
+
 // SetScanInterval sets the "scan_interval" field.
 func (_u *LibraryUpdate) SetScanInterval(v time.Duration) *LibraryUpdate {
 	_u.mutation.ResetScanInterval()
@@ -448,6 +460,12 @@ func (_u *LibraryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			sqljson.Append(u, library.FieldPaths, value)
 		})
 	}
+	if value, ok := _u.mutation.StorageClasses(); ok {
+		_spec.SetField(library.FieldStorageClasses, field.TypeJSON, value)
+	}
+	if _u.mutation.StorageClassesCleared() {
+		_spec.ClearField(library.FieldStorageClasses, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.ScanInterval(); ok {
 		_spec.SetField(library.FieldScanInterval, field.TypeInt64, value)
 	}
@@ -654,6 +672,18 @@ func (_u *LibraryUpdateOne) SetPaths(v []string) *LibraryUpdateOne {
 // AppendPaths appends value to the "paths" field.
 func (_u *LibraryUpdateOne) AppendPaths(v []string) *LibraryUpdateOne {
 	_u.mutation.AppendPaths(v)
+	return _u
+}
+
+// SetStorageClasses sets the "storage_classes" field.
+func (_u *LibraryUpdateOne) SetStorageClasses(v map[string]core.StorageClass) *LibraryUpdateOne {
+	_u.mutation.SetStorageClasses(v)
+	return _u
+}
+
+// ClearStorageClasses clears the value of the "storage_classes" field.
+func (_u *LibraryUpdateOne) ClearStorageClasses() *LibraryUpdateOne {
+	_u.mutation.ClearStorageClasses()
 	return _u
 }
 
@@ -1061,6 +1091,12 @@ func (_u *LibraryUpdateOne) sqlSave(ctx context.Context) (_node *Library, err er
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, library.FieldPaths, value)
 		})
+	}
+	if value, ok := _u.mutation.StorageClasses(); ok {
+		_spec.SetField(library.FieldStorageClasses, field.TypeJSON, value)
+	}
+	if _u.mutation.StorageClassesCleared() {
+		_spec.ClearField(library.FieldStorageClasses, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.ScanInterval(); ok {
 		_spec.SetField(library.FieldScanInterval, field.TypeInt64, value)

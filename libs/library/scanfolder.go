@@ -84,7 +84,7 @@ func (s *Scanner) ScanFolder(ctx context.Context, lib core.Library, dir string) 
 		t = subs[i]
 	}
 	dev := sc.devices.Device(filepath.Join(filepath.FromSlash(dir), "."))
-	if err := sc.walk(ctx, rfs, ignores, dev, t); err != nil {
+	if err := sc.walk(ctx, rfs, ignores, sc.walkers(dev, sc.policy(dir)), t); err != nil {
 		return sc.stats, err
 	}
 	s.logger().InfoContext(ctx, "library folder scanned", "library", lib.Name, "path", dir, "generation", gen,

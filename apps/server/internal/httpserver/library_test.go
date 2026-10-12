@@ -1,6 +1,7 @@
 package httpserver_test
 
 import (
+	"maps"
 	"net/http"
 	"path/filepath"
 	"slices"
@@ -83,6 +84,26 @@ func TestLibraryService(t *testing.T) {
 		}.Build(),
 	}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Errorf("UpdateLibrary naming a provider twice = %v, want InvalidArgument", err)
+	}
+	cloud := map[string]libraryv1.StorageClass{movies: libraryv1.StorageClass_STORAGE_CLASS_CLOUD}
+	classed, err := asAdmin.UpdateLibrary(ctx, libraryv1.UpdateLibraryRequest_builder{
+		Id: new(films.GetId()), Spec: libraryv1.LibrarySpec_builder{
+			Name: new("Movies"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_MOVIES), Paths: []string{movies}, StorageClasses: cloud,
+		}.Build(),
+	}.Build())
+	if err != nil || !maps.Equal(classed.GetLibrary().GetStorageClasses(), cloud) || !maps.Equal(classed.GetLibrary().GetEffectiveStorageClasses(), cloud) {
+		t.Errorf("UpdateLibrary with storage classes = %v, %v", classed, err)
+	}
+	if got, _ := asAdmin.GetLibrary(ctx, libraryv1.GetLibraryRequest_builder{Id: new(tv.GetId())}.Build()); len(got.GetLibrary().GetEffectiveStorageClasses()) != 1 {
+		t.Errorf("effective storage classes of a library setting none = %v", got.GetLibrary().GetEffectiveStorageClasses())
+	}
+	if _, err := asAdmin.UpdateLibrary(ctx, libraryv1.UpdateLibraryRequest_builder{
+		Id: new(films.GetId()), Spec: libraryv1.LibrarySpec_builder{
+			Name: new("Movies"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_MOVIES), Paths: []string{movies},
+			StorageClasses: map[string]libraryv1.StorageClass{shows: libraryv1.StorageClass_STORAGE_CLASS_LOCAL},
+		}.Build(),
+	}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+		t.Errorf("UpdateLibrary classing a path of another library = %v, want InvalidArgument", err)
 	}
 
 	// A user limited to the TV library sees it, without paths.

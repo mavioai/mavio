@@ -90,8 +90,16 @@ type Detector struct {
 
 // Device returns the device holding the folder of path; an undetectable
 // device is unknown and not serialized.
-func (d *Detector) Device(path string) DeviceInfo {
-	dir := filepath.Dir(path)
+func (d *Detector) Device(path string) DeviceInfo { return d.lookup(filepath.Dir(path), path) }
+
+// Folder returns the device holding the folder dir itself, such as a
+// library path that is a mount point.
+func (d *Detector) Folder(dir string) DeviceInfo {
+	dir = filepath.Clean(dir)
+	return d.lookup(dir, dir)
+}
+
+func (d *Detector) lookup(dir, path string) DeviceInfo {
 	d.mu.Lock()
 	info, ok := d.cache[dir]
 	d.mu.Unlock()

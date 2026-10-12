@@ -34,14 +34,15 @@ The principles adopted:
 
 | Platform | Volume ID | Hard disk | Remote share | Cloud mount |
 | :--- | :--- | :--- | :--- | :--- |
-| Linux | `st_dev` | `/sys/dev/block/<major>:<minor>/queue/rotational` is `1` | `statfs.f_type` SMB (`0x517B`), SMB2 (`0xFE534D42`), CIFS, NFS (`0x6969`) | FUSE (`0x65735546`: rclone, Alist, …) |
-| Windows | volume serial number | `IOCTL_STORAGE_QUERY_PROPERTY` with `StorageDeviceSeekPenaltyProperty` | `GetDriveTypeW` is `DRIVE_REMOTE`, or a UNC path | path under OneDrive or iCloud Drive |
-| macOS | `statfs.f_fsid` | volumes under `/Volumes` (external enclosures) | `f_fstypename` `smbfs`, `nfs`, `afpfs`, `webdav`, or no `MNT_LOCAL` | path under `~/Library/Mobile Documents` or `~/Library/CloudStorage` |
+| Linux | `st_dev` | `/sys/dev/block/<major>:<minor>/queue/rotational` is `1`; FUSE file systems layered over local disks (`fuse.mergerfs`, `fuseblk`, `fuse.gocryptfs`, …) | `statfs.f_type` SMB (`0x517B`), SMB2 (`0xFE534D42`), CIFS, NFS (`0x6969`) served by another host; `fuse.sshfs` and other FUSE network protocols | FUSE (`0x65735546`) by the subtype in `/proc/self/mountinfo`: `fuse.rclone`, `fuse.s3fs`, cloud drive clients and unknown subtypes; NFS served by this machine (`127.0.0.1:/`, rclone nfsmount) |
+| Windows | volume serial number | `IOCTL_STORAGE_QUERY_PROPERTY` with `StorageDeviceSeekPenaltyProperty` | `GetDriveTypeW` is `DRIVE_REMOTE`, or a UNC path | path under OneDrive or iCloud Drive; WinFsp volumes named `rclone` or `FUSE-<name>` |
+| macOS | `statfs.f_fsid` | volumes under `/Volumes` (external enclosures) | `f_fstypename` `smbfs`, `nfs`, `afpfs`, `webdav`, or no `MNT_LOCAL` | path under `~/Library/Mobile Documents` or `~/Library/CloudStorage`; macFUSE mounts; NFS, SMB and WebDAV served by this machine (rclone nfsmount, FUSE-T) |
+| Other | `filepath.VolumeName` | every volume | — | — |
 
 Two properties are derived from a device:
 
 * **Serialized** (`DeviceInfo.Serialized`): hard disks, remote shares and cloud mounts; their background reads run one at a time.
-* **Sleeps** (`DeviceInfo.Sleeps`): hard disks and remote shares; they are kept awake and woken. Cloud mounts are never read speculatively, since reading a placeholder downloads it.
+* **Sleeps** (`DeviceInfo.Sleeps`): hard disks and remote shares; they are kept awake and woken. Cloud mounts, and paths whose library classes them cloud (§2.1), are never read speculatively, since reading a placeholder downloads it.
 
 ### 1.3 Per-volume Serialization
 
@@ -111,3 +112,59 @@ Two properties are derived from a device:
 | Deferred reconciliation | `libs/library/deferred.go` (`Scanner.RunDeferred`, `Scanner.ReconcileDeferred`); run by `apps/server/internal/server/server.go` | P9 | **Differs**: replaces Jellyfin's real-time file system monitor for files still being written; Mavio has no file system monitor (full reconciliation scans, [Architecture §9](architecture.md)) |
 | Keyframe snapping | `apps/server/internal/playback/resume.go` (`Playback.startPosition`); `libs/streaming/layout.go` (`Layout.Index`); `StartPlaybackResponse.start_position` in `libs/proto/mavio/playback/v1/playback.proto` | P9 | **Differs**: Jellyfin starts at the requested position; Mavio may start up to 5 seconds earlier and returns the position it used |
 | Seek folding | `libs/streaming/stream.go` (`Stream.Prepare`); called by `apps/server/internal/playback/resume.go` (`Manager.prepareStart`) | P9 | **Differs**: Jellyfin starts ffmpeg on the first segment request; Mavio starts it when the playback starts |
+
+---
+
+## 2. Storage Access by Storage Class
+
+### 2.1 Storage Classes
+
+Reading a file costs differently by where it is: a disk of the server is cheap, a share on the local network slower but uncounted, and a cloud drive, mounted with rclone or a vendor client, counts every byte against a download quota and every request against a rate limit. Mavio classes each library path as `local`, `network` or `cloud` (`core.StorageClass`) and lets the class decide what the server reads of the media on its own.
+
+* **Classification** (`storage.Classifier`): the class the library sets for the path (`Library.StorageClasses`, for storage the device detection would misclassify), else the class of the device holding it (§1.2): cloud mounts are `cloud`, remote shares `network`, every other device `local`. A library path is detected as a folder of its own, so that a mount point is classified by its mount and not by the folder above it.
+* **Paths without a library** (`storage.PathClasses`): mechanisms that know only a path, such as keeping volumes awake, find the library holding it among the libraries, listed again every minute.
+* `LibraryService` returns each path's effective class (`effective_storage_classes`) to administrators, beside the classes they set.
+
+### 2.2 Storage Access Inventory
+
+Everything Mavio reads from or writes to media storage, with its cost and when it happens:
+
+| Source | Operation | Bytes or requests | When |
+| :--- | :--- | :--- | :--- |
+| Scan | one listing per folder, a stat per entry; unchanged folders are taken from the previous scan where the policy allows | API calls rather than bytes | scan interval, by hand, targeted scans after imports |
+| Probe | ffprobe reads the container header, and the tail when the index is there | a few MB, 2–5 range reads | new and changed files |
+| Keyframes | ffprobe reads every packet of the video stream | the whole file | after the probe, where the policy allows whole-file reads |
+| Black borders | a seek and a few decoded frames at 5 points | about 3–4 MB a point | after the probe, where the policy allows samples |
+| Trickplay | ffmpeg decodes the video at an interval | the whole file | when the library asks for it and the policy allows whole-file reads |
+| Chapter images | a seek per chapter | about 3–4 MB a chapter | when the library asks for it and the policy allows samples |
+| Loudness | ffmpeg reads the whole track | the whole file | when the library asks for it and the policy allows whole-file reads |
+| NFO, artwork, lyrics, sidecar subtitles | small files | small | refreshes, scans |
+| OpenSubtitles hash | 64 KB at the head and at the tail | 2 range reads | subtitle searches |
+| Playback | range reads for direct play, sequential reads by ffmpeg for remuxes and transcodes | proportional to what is watched | playback |
+| Embedded subtitles | ffmpeg copies the text stream out of the file | the whole file once a playback | playback of an embedded text subtitle delivered as a file |
+| Prefetch, keep-alive, wakes | head and tail, the start position, 4 KB heartbeats (§1.5, §1.6) | under 70 MB a playback, 4 KB a heartbeat | probes, playbacks, presence, where the policy allows speculative reads |
+| Writes | NFO, artwork, subtitles, lyrics (written aside and renamed); imports move, copy or hard link; the recycle bin | small files; an import may copy a whole file | refreshes, downloads, imports |
+
+### 2.3 Policy by Storage Class
+
+`library.PolicyOf` turns a class into a `StoragePolicy`, consulted in one place by every reader:
+
+| Reader | Local and network | Cloud |
+| :--- | :--- | :--- |
+| Whole-file reads: keyframes by ffprobe, trickplay, loudness | yes | no; HLS of files without keyframes transcodes the video |
+| Samples: black borders, chapter images | yes | no; the borders stay unknown |
+| Speculative reads: head and tail prefetch before probes, playback start prefetch, keep-alive and wakes | yes | no; storage is read only as playback asks |
+| Pruning unchanged folders in scans | yes | no; folder modification times of cloud drives do not tell changes below them |
+| Folders a scan lists at once | by device (§1.3) | 2 |
+
+The policy is checked both when the jobs are queued and when they run, so a class changed in between takes effect at once.
+
+### 2.4 Implementation Index
+
+| Mechanism | Implementation | Phase |
+| :--- | :--- | :--- |
+| Storage classes of library paths | `libs/core/library.go` (`StorageClass`, `Library.StorageClasses`, `Library.StorageClassOf`); `libs/store/libraries.go`; `storage_classes` and `effective_storage_classes` in `libs/proto/mavio/library/v1/library.proto`; `apps/server/internal/rpc/library.go` | P24 |
+| Classification | `libs/library/storage/class.go` (`DeviceInfo.Class`, `Classifier`, `PathClasses`); `Detector.Folder` in `device.go` | P24 |
+| FUSE and loopback detection | `libs/library/storage/fuse.go` (`fuseKind`, `loopbackSource`, `findMount`, `mountKind`); used by `device_{linux,darwin,windows}.go` | P24 |
+| Storage policy | `libs/library/policy.go` (`StoragePolicy`, `PolicyOf`); used by `scan.go` (`scan.policy`, `Scanner.walkers`, `scan.state`), `jobs.go` (`Jobs.probeFile`), `keyframes.go`, `borders.go`, `mediaextras.go` (`Jobs.extrasJobs`, `trickplay`, `chapterImages`, `loudness`) | P24 |
+| No speculative reads of cloud storage | `libs/library/storage/keeper.go` (`Keeper.Class`); `apps/server/internal/playback/resume.go` (`Manager.prepareStart`); wired in `apps/server/internal/server/server.go` | P24 |

@@ -257,6 +257,16 @@ func KindContainsFold(v string) predicate.Library {
 	return predicate.Library(sql.FieldContainsFold(FieldKind, v))
 }
 
+// StorageClassesIsNil applies the IsNil predicate on the "storage_classes" field.
+func StorageClassesIsNil() predicate.Library {
+	return predicate.Library(sql.FieldIsNull(FieldStorageClasses))
+}
+
+// StorageClassesNotNil applies the NotNil predicate on the "storage_classes" field.
+func StorageClassesNotNil() predicate.Library {
+	return predicate.Library(sql.FieldNotNull(FieldStorageClasses))
+}
+
 // ScanIntervalEQ applies the EQ predicate on the "scan_interval" field.
 func ScanIntervalEQ(v time.Duration) predicate.Library {
 	vc := int64(v)

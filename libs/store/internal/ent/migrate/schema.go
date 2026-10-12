@@ -889,6 +889,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "kind", Type: field.TypeString},
 		{Name: "paths", Type: field.TypeJSON},
+		{Name: "storage_classes", Type: field.TypeJSON, Nullable: true},
 		{Name: "scan_interval", Type: field.TypeInt64, Default: 0},
 		{Name: "preferred_language", Type: field.TypeString, Default: ""},
 		{Name: "metadata_country", Type: field.TypeString, Default: ""},

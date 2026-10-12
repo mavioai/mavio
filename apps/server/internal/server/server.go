@@ -191,11 +191,17 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	quietGate := storage.NewQuietGate(0)
 	volumeLedger := storage.NewVolumeLedger()
 	devices := &storage.Detector{}
+	classifier := storage.NewClassifier(devices)
 	growthPolicy := storage.NewGrowthPolicy()
-	keeper := &storage.Keeper{Devices: devices}
+	// Paths are classified by the libraries holding them, whose storage
+	// classes decide what the server reads on its own.
+	pathClasses := &storage.PathClasses{Classifier: classifier, Libraries: db.Libraries().List}
+	keeper := &storage.Keeper{Devices: devices, Class: func(p string) core.StorageClass {
+		return pathClasses.Class(context.WithoutCancel(ctx), p)
+	}}
 	warmer := warming.New(warming.Config{Store: db, Keeper: keeper, Online: hub.OnlineSessions, Logger: log})
 
-	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, activityLog, plugs, cfg, quietGate, keeper)
+	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, activityLog, plugs, cfg, quietGate, keeper, pathClasses)
 	if err := set.Register(ctx, func(_ context.Context, s core.ServerSettings) error {
 		return playbacks.SetTranscoding(s.Transcoding)
 	}); err != nil {
@@ -249,7 +255,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	acq.Imported = reqs.Imported
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher,
+		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier,
 		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Logger: log},
 		Lyrics:    lyrics,
 		Intros:    &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
@@ -439,6 +445,7 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 			QuietGate:    quietGate,
 			VolumeLedger: volumeLedger,
 			Devices:      devices,
+			Classifier:   storage.NewClassifier(devices),
 			GrowthPolicy: growthPolicy,
 		},
 		Prober:    providers.FFprobe{Prober: &probe.Prober{FFprobe: path}},
@@ -470,10 +477,10 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 // newPlaybacks sets up playback with the configured ffmpeg, or for direct
 // play only without one. It returns the ffmpeg version, empty without
 // ffmpeg.
-func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, activityLog *activity.Log, plugs *plugins.Manager, cfg Config, quietGate *storage.QuietGate, keeper *storage.Keeper) (*playback.Manager, string) {
+func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, activityLog *activity.Log, plugs *plugins.Manager, cfg Config, quietGate *storage.QuietGate, keeper *storage.Keeper, classes *storage.PathClasses) (*playback.Manager, string) {
 	pc := playback.Config{
 		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, Record: activityLog.Record, Device: plugs.IsDevice,
-		QuietGate: quietGate, Keeper: keeper, Logger: log,
+		QuietGate: quietGate, Keeper: keeper, Class: classes.Class, Logger: log,
 	}
 	if path, err := exec.LookPath(cfg.FFprobe); err == nil {
 		remote := &library.RemoteSources{

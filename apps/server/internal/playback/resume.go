@@ -68,6 +68,10 @@ func (m *Manager) prepareStart(ctx context.Context, p *Playback) {
 	if ms.Path == "" || ms.Disc != "" || p.Remote() {
 		return
 	}
+	if m.cfg.Class != nil && m.cfg.Class(ctx, ms.Path) == core.StorageCloud {
+		// Cloud storage is read only as playback asks.
+		return
+	}
 	go warmResume(*ms, p.StartPosition)
 }
 

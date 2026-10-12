@@ -21,6 +21,8 @@ const (
 	FieldKind = "kind"
 	// FieldPaths holds the string denoting the paths field in the database.
 	FieldPaths = "paths"
+	// FieldStorageClasses holds the string denoting the storage_classes field in the database.
+	FieldStorageClasses = "storage_classes"
 	// FieldScanInterval holds the string denoting the scan_interval field in the database.
 	FieldScanInterval = "scan_interval"
 	// FieldPreferredLanguage holds the string denoting the preferred_language field in the database.
@@ -79,6 +81,7 @@ var Columns = []string{
 	FieldName,
 	FieldKind,
 	FieldPaths,
+	FieldStorageClasses,
 	FieldScanInterval,
 	FieldPreferredLanguage,
 	FieldMetadataCountry,

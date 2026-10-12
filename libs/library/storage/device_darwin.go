@@ -17,6 +17,7 @@ func detectDevice(path string) (DeviceInfo, error) {
 
 	fstype := charsToString(sfs.Fstypename[:])
 	mpath := charsToString(sfs.Mntonname[:])
+	source := charsToString(sfs.Mntfromname[:])
 	devID := fmt.Sprintf("fsid:%d:%d", sfs.Fsid.Val[0], sfs.Fsid.Val[1])
 
 	isLocal := (sfs.Flags & unix.MNT_LOCAL) != 0
@@ -26,8 +27,9 @@ func detectDevice(path string) (DeviceInfo, error) {
 	rotational := false
 
 	switch {
-	case isCloudPath(path):
+	case isCloudPath(path) || darwinCloudMount(fstype, source):
 		kind = KindCloudMount
+		isRemote = false
 	case isRemote:
 		kind = KindRemoteNAS
 		rotational = true // Treat remote network storage with rotational queue semantics to serialize I/O
@@ -49,6 +51,19 @@ func detectDevice(path string) (DeviceInfo, error) {
 		Rotational: rotational,
 		Remote:     isRemote,
 	}, nil
+}
+
+// darwinCloudMount reports whether a mount is a userspace file system
+// taken for a cloud drive: a macFUSE mount, or an NFS or SMB share this
+// machine serves, as rclone nfsmount and FUSE-T mounts are.
+func darwinCloudMount(fstype, source string) bool {
+	switch strings.ToLower(fstype) {
+	case "macfuse", "osxfuse", "fusefs":
+		return true
+	case "nfs", "smbfs", "webdav":
+		return loopbackSource(source)
+	}
+	return false
 }
 
 func isRemoteFSType(fstype string) bool {

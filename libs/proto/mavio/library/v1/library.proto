@@ -78,6 +78,27 @@ message Library {
   VirtualEpisodes virtual_episodes = 17;
   // The hubs of the library on Home and on its Recommended tab.
   LibraryHubs hubs = 18;
+  // The storage classes the administrator set, by path; the other paths
+  // are classified by the device holding them.
+  map<string, StorageClass> storage_classes = 19;
+  // The storage class of each path as the server classifies it: the one
+  // set, or the one of the device holding it.
+  map<string, StorageClass> effective_storage_classes = 20;
+}
+
+// StorageClass tells what reading a file of a storage costs, which decides
+// how much of the media the server reads on its own.
+enum StorageClass {
+  // Classified by the device holding the path.
+  STORAGE_CLASS_UNSPECIFIED = 0;
+  // A disk of the server: reads are cheap.
+  STORAGE_CLASS_LOCAL = 1;
+  // A share on the local network, such as SMB or NFS: reads are slower but
+  // not counted.
+  STORAGE_CLASS_NETWORK = 2;
+  // A cloud drive: reads count against quotas and rate limits, so the
+  // server reads only what playback needs and the few bytes around it.
+  STORAGE_CLASS_CLOUD = 3;
 }
 
 // VirtualEpisodes configures which episodes refreshes list as virtual
@@ -215,6 +236,17 @@ message LibrarySpec {
   ProviderOrder provider_order = 13;
   VirtualEpisodes virtual_episodes = 14;
   LibraryHubs hubs = 15;
+  // Storage classes by path, for paths the device would misclassify. Each
+  // key must be one of paths.
+  map<string, StorageClass> storage_classes = 16 [(buf.validate.field).map = {
+    max_pairs: 64
+    values: {
+      enum: {
+        defined_only: true
+        not_in: [0]
+      }
+    }
+  }];
 }
 
 message ListLibrariesRequest {}

@@ -43,6 +43,8 @@ flowchart TD
     P21["P21 客户端与生态<br/>apps/web, Apple、Android 与桌面应用, libs/client-rust, Jellyfin shim 决定"]
     P22["P22 真实设备验收<br/>在真实电视与客户端上端到端播放"]
     P23["P23 打包与发布<br/>libs/proto 与 libs/plugin 标签、服务端二进制与容器镜像"]
+    P24["P24 存储 I/O 效率<br/>存储类别、容器索引、关键帧 trickplay、字幕缓存"]
+    P25["P25 存储后端与 rclone<br/>存储端口、libs/rclone、rcd、离线下载"]
 
     P0 --> P1
     P1 --> P2
@@ -73,6 +75,10 @@ flowchart TD
     P14 --> P22
     P21 --> P22
     P22 --> P23
+    P9 --> P24
+    P12 --> P24
+    P24 --> P25
+    P18 --> P25
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -101,6 +107,8 @@ flowchart TD
 | P21 | 客户端与生态 | 进行中 |
 | P22 | 真实设备验收 | 未开始 |
 | P23 | 打包与发布 | 未开始 |
+| P24 | 存储 I/O 效率 | 进行中 |
+| P25 | 存储后端与 rclone | 未开始 |
 
 ---
 
@@ -649,6 +657,34 @@ flowchart TD
 - [ ] 为 `libs/proto` 与 `libs/plugin` 打发布标签
 - [ ] 发布服务端的版本二进制与容器镜像
 - [ ] 发布官方插件目录
+
+### P24 存储 I/O 效率
+**范围**：按读取的代价决定服务端自行读取多少媒体（[优化 §2](optimization.zh-CN.md#2-按存储类别访问存储storage-access-by-storage-class)）：媒体库路径的存储类别；从容器索引读取关键帧；只用关键帧生成 trickplay；本地存储上的内嵌字幕一次提取并缓存，云存储上边播边读。
+
+**完成标准**：在归为云存储的媒体库上，扫描、probe、keyframes、trickplay 和带内嵌字幕的播放只读取每个文件的一小部分，由测试中的字节数断言；在本地存储上，内嵌文字字幕每个文件只提取一次，供之后的所有播放使用。
+
+**进度**：
+- [x] 存储类别：`core.StorageClass` 按媒体库路径设定或由设备检测得出，`LibraryService` 同时返回实际类别
+- [x] 检测：Linux 按子类型识别 FUSE 挂载，macOS 识别本机回环的 NFS、SMB 和 macFUSE，Windows 识别 WinFsp 卷
+- [x] 存储策略：按类别决定整文件读取、抽样、推测式读取和目录跳过（`library.PolicyOf`）
+- [ ] 在 Web 界面中设定存储类别，随其媒体库管理一起实现
+- [ ] 从 Matroska Cues 和 MP4 样本表读取关键帧，随 probe 一起提取；只在没有索引且不在云存储上时用 ffprobe
+- [ ] trickplay 只解码关键帧，失败时退回普通方式；云存储上按容器索引抽样
+- [ ] 本地存储上内嵌文字字幕一次提取到持久缓存；云存储上由播放视频的流一并输出，绝不整条提取
+- [ ] 字幕搜索下载，把字幕文件写在视频旁边
+
+### P25 存储后端与 rclone
+**范围**：服务端经存储端口而非文件系统访问的媒体库：基于 `os.Root` 的本地实现，以及经服务端运行或连接的 `rclone rcd` 访问 rclone 远端（[架构 §9](architecture.zh-CN.md)）。
+
+**完成标准**：rclone 远端上的媒体库经 `rclone rcd` 完成扫描、probe、播放和下载导入，以 rclone 的 memory 后端测试；远端通过 API 配置；云盘离线下载作为下载客户端使用。
+
+**进度**：
+- [ ] `core.Storage` 端口及其本地实现；扫描、本地元数据、外挂文件、写入、播放和导入都经由它
+- [ ] `libs/rclone`：rc 客户端和基于 `rclone rcd` 的存储，媒体字节经本机回环代理
+- [ ] 托管和外部 `rclone rcd`；远端配置 API（`mavio.storage.v1`）
+- [ ] 离线下载作为内置下载客户端，其任务记录在数据库中
+- [ ] 分发 mavioai/rclone 二进制
+- [ ] 后续：远端插件（运行在其他机器上的插件进程）、云盘直链、按变更通知增量扫描、媒体读取的块缓存
 
 ---
 

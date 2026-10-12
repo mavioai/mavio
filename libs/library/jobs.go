@@ -201,8 +201,9 @@ func (j *Jobs) scan(ctx context.Context, job core.Job) ([]core.Job, error) {
 }
 
 // probeFile probes one file: on a serialized device while holding the
-// device, with its head and tail read ahead.
-func (j *Jobs) probeFile(ctx context.Context, path string, audio bool) (ProbeResult, error) {
+// device, with its head and tail read ahead where the storage policy
+// allows speculative reads.
+func (j *Jobs) probeFile(ctx context.Context, path string, audio bool, policy StoragePolicy) (ProbeResult, error) {
 	if sc := j.Scanner; sc != nil && sc.VolumeLedger != nil {
 		devices := sc.Devices
 		if devices == nil {
@@ -216,7 +217,9 @@ func (j *Jobs) probeFile(ctx context.Context, path string, audio bool) (ProbeRes
 			defer release()
 		}
 	}
-	_ = storage.PrefetchHeadTail(path, 1024*1024, 256*1024)
+	if policy.Speculative {
+		_ = storage.PrefetchHeadTail(path, 1024*1024, 256*1024)
+	}
 	return j.Prober.Probe(ctx, path, audio)
 }
 
@@ -235,6 +238,10 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 	if err != nil {
 		return nil, err
 	}
+	lib, err := j.Store.Libraries().Get(ctx, it.LibraryID)
+	if err != nil {
+		return nil, ignoreGone(err)
+	}
 	audio := it.Kind == core.KindTrack || it.Kind == core.KindAudioBook
 	probed := map[string]ProbeResult{}
 	for _, src := range sources {
@@ -246,7 +253,7 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 				return nil, err
 			}
 		}
-		res, err := j.probeFile(ctx, src.Path, audio)
+		res, err := j.probeFile(ctx, src.Path, audio, j.policy(&lib, src.Path))
 		if err != nil {
 			return nil, fmt.Errorf("probe %s: %w", src.Path, err)
 		}
@@ -309,16 +316,12 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 		next = append(next, BordersJob(it.ID, j.now()))
 	}
 	if len(probed) > 0 {
-		lib, err := j.Store.Libraries().Get(ctx, it.LibraryID)
-		if err != nil {
-			return nil, ignoreGone(err)
-		}
 		current, err := j.Store.MediaSources().ListForItem(ctx, it.ID)
 		if err != nil {
 			return nil, ignoreGone(err)
 		}
 		src, _ := videoSource(current)
-		next = append(next, j.extrasJobs(lib, it, src != nil, src != nil && len(src.Chapters) > 0)...)
+		next = append(next, j.extrasJobs(lib, it, src)...)
 	}
 	return next, nil
 }

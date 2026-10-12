@@ -34,14 +34,15 @@ Mavio 部署在家用服务器、NAS（Synology、TrueNAS、Unraid）和低功�
 
 | 平台 | 卷 ID | 机械硬盘 | 远程共享 | 云挂载 |
 | :--- | :--- | :--- | :--- | :--- |
-| Linux | `st_dev` | `/sys/dev/block/<major>:<minor>/queue/rotational` 为 `1` | `statfs.f_type` 为 SMB（`0x517B`）、SMB2（`0xFE534D42`）、CIFS、NFS（`0x6969`） | FUSE（`0x65735546`：rclone、Alist 等） |
-| Windows | 卷序列号 | `IOCTL_STORAGE_QUERY_PROPERTY` 查询 `StorageDeviceSeekPenaltyProperty` | `GetDriveTypeW` 为 `DRIVE_REMOTE`，或 UNC 路径 | 位于 OneDrive 或 iCloud Drive 下的路径 |
-| macOS | `statfs.f_fsid` | `/Volumes` 下的卷（外置硬盘盒） | `f_fstypename` 为 `smbfs`、`nfs`、`afpfs`、`webdav`，或无 `MNT_LOCAL` | 位于 `~/Library/Mobile Documents` 或 `~/Library/CloudStorage` 下的路径 |
+| Linux | `st_dev` | `/sys/dev/block/<major>:<minor>/queue/rotational` 为 `1`；叠加在本地磁盘上的 FUSE 文件系统（`fuse.mergerfs`、`fuseblk`、`fuse.gocryptfs` 等） | `statfs.f_type` 为 SMB（`0x517B`）、SMB2（`0xFE534D42`）、CIFS、NFS（`0x6969`）且由其他主机提供；`fuse.sshfs` 等走网络协议的 FUSE | FUSE（`0x65735546`）按 `/proc/self/mountinfo` 中的子类型：`fuse.rclone`、`fuse.s3fs`、各云盘客户端和未知子类型；由本机提供的 NFS（`127.0.0.1:/`，rclone nfsmount） |
+| Windows | 卷序列号 | `IOCTL_STORAGE_QUERY_PROPERTY` 查询 `StorageDeviceSeekPenaltyProperty` | `GetDriveTypeW` 为 `DRIVE_REMOTE`，或 UNC 路径 | 位于 OneDrive 或 iCloud Drive 下的路径；名为 `rclone` 或 `FUSE-<name>` 的 WinFsp 卷 |
+| macOS | `statfs.f_fsid` | `/Volumes` 下的卷（外置硬盘盒） | `f_fstypename` 为 `smbfs`、`nfs`、`afpfs`、`webdav`，或无 `MNT_LOCAL` | 位于 `~/Library/Mobile Documents` 或 `~/Library/CloudStorage` 下的路径；macFUSE 挂载；由本机提供的 NFS、SMB 和 WebDAV（rclone nfsmount、FUSE-T） |
+| 其他 | `filepath.VolumeName` | 所有卷 | — | — |
 
 由设备派生两个属性：
 
 * **串行化**（`DeviceInfo.Serialized`）：机械硬盘、远程共享和云挂载；它们的后台读取一次只进行一个。
-* **会休眠**（`DeviceInfo.Sleeps`）：机械硬盘和远程共享；对它们保活和唤醒。云挂载从不做推测式读取，因为读取占位文件会触发下载。
+* **会休眠**（`DeviceInfo.Sleeps`）：机械硬盘和远程共享；对它们保活和唤醒。云挂载，以及所属媒体库将其归为云存储的路径（§2.1），从不做推测式读取，因为读取占位文件会触发下载。
 
 ### 1.3 按卷串行化
 
@@ -111,3 +112,59 @@ Mavio 部署在家用服务器、NAS（Synology、TrueNAS、Unraid）和低功�
 | 推迟协调 | `libs/library/deferred.go`（`Scanner.RunDeferred`、`Scanner.ReconcileDeferred`）；由 `apps/server/internal/server/server.go` 运行 | P9 | **有差异**：对仍在写入的文件，替代了 Jellyfin 的实时文件系统监视器；Mavio 没有文件系统监视器（全量协调扫描，见[架构 §9](architecture.zh-CN.md)） |
 | 关键帧吸附 | `apps/server/internal/playback/resume.go`（`Playback.startPosition`）；`libs/streaming/layout.go`（`Layout.Index`）；`libs/proto/mavio/playback/v1/playback.proto` 中的 `StartPlaybackResponse.start_position` | P9 | **有差异**：Jellyfin 从请求的位置开始；Mavio 可能提前至多 5 秒开始，并返回实际采用的位置 |
 | 寻道折叠 | `libs/streaming/stream.go`（`Stream.Prepare`）；由 `apps/server/internal/playback/resume.go`（`Manager.prepareStart`）调用 | P9 | **有差异**：Jellyfin 在第一个分段请求时启动 ffmpeg；Mavio 在播放开始时启动 |
+
+---
+
+## 2. 按存储类别访问存储（Storage Access by Storage Class）
+
+### 2.1 存储类别
+
+读取文件的代价因位置而异：服务器自己的磁盘很便宜；局域网共享较慢但不计量；云盘（用 rclone 或厂商客户端挂载）的每个字节计入下载配额，每个请求计入限流。Mavio 把每个媒体库路径归为 `local`、`network` 或 `cloud`（`core.StorageClass`），由类别决定服务端自行读取多少媒体。
+
+* **分类**（`storage.Classifier`）：优先用媒体库为该路径设定的类别（`Library.StorageClasses`，用于设备检测会判错的存储），否则用所在设备的类别（§1.2）：云挂载为 `cloud`，远程共享为 `network`，其余设备为 `local`。媒体库路径按其自身检测，挂载点按挂载本身而不是上一级目录分类。
+* **不知道媒体库的路径**（`storage.PathClasses`）：保活等只知道路径的机制，在媒体库中查找包含该路径的媒体库；媒体库列表每分钟重新读取。
+* `LibraryService` 向管理员返回每个路径的实际类别（`effective_storage_classes`），与管理员设定的类别并列。
+
+### 2.2 存储访问清单
+
+Mavio 对媒体存储的全部读写，及其代价和时机：
+
+| 来源 | 操作 | 读取量或请求数 | 时机 |
+| :--- | :--- | :--- | :--- |
+| 扫描 | 每个目录 list 一次，每个条目 stat；策略允许时，未变化的目录沿用上次扫描 | 主要是 API 调用次数 | 扫描周期、手动、导入后的定向扫描 |
+| probe | ffprobe 读容器头部，索引在文件尾时再读文件尾 | 几 MB，2–5 次 Range | 新文件和变化的文件 |
+| keyframes | ffprobe 读视频流的每个包 | 整个文件 | probe 之后，策略允许整文件读取时 |
+| 黑边检测 | 在 5 个点各 seek 一次并解码几帧 | 每点约 3–4 MB | probe 之后，策略允许抽样时 |
+| trickplay | ffmpeg 按间隔解码视频 | 整个文件 | 媒体库开启且策略允许整文件读取时 |
+| 章节图 | 每个章节 seek 一次 | 每章约 3–4 MB | 媒体库开启且策略允许抽样时 |
+| 响度 | ffmpeg 读整条音轨 | 整个文件 | 媒体库开启且策略允许整文件读取时 |
+| NFO、图片、歌词、外挂字幕 | 小文件 | 小 | 刷新、扫描 |
+| OpenSubtitles 哈希 | 文件头尾各 64 KB | 2 次 Range | 搜索字幕时 |
+| 播放 | 直接播放的 Range 读取，转封装和转码时 ffmpeg 顺序读 | 与观看量成正比 | 播放 |
+| 内嵌字幕 | ffmpeg 把文字字幕流复制出来 | 每次播放整个文件一次 | 以文件形式提供内嵌文字字幕的播放 |
+| 预读、保活、唤醒 | 头尾、起播位置、4 KB 心跳（§1.5、§1.6） | 每次播放不到 70 MB，每次心跳 4 KB | probe、播放、用户在场时，策略允许推测式读取时 |
+| 写入 | NFO、图片、字幕、歌词（先写到旁边再 rename）；导入时 move、copy 或硬链接；回收站 | 小文件；导入可能复制整个文件 | 刷新、下载、导入 |
+
+### 2.3 按存储类别的策略
+
+`library.PolicyOf` 把类别转换为 `StoragePolicy`，所有读取方都在同一处查询：
+
+| 读取方 | 本地和网络 | 云 |
+| :--- | :--- | :--- |
+| 整文件读取：ffprobe 提取 keyframes、trickplay、响度 | 是 | 否；没有关键帧的文件走 HLS 时转码视频 |
+| 抽样：黑边、章节图 | 是 | 否；黑边保持未知 |
+| 推测式读取：probe 前的头尾预读、起播预读、保活和唤醒 | 是 | 否；只按播放的需要读取 |
+| 扫描时跳过未变化的目录 | 是 | 否；云盘目录的修改时间反映不了下层的变化 |
+| 扫描同时 list 的目录数 | 按设备（§1.3） | 2 |
+
+入队和运行时都检查策略，因此中途修改的类别立即生效。
+
+### 2.4 落地对照索引
+
+| 机制 | 实现 | 阶段 |
+| :--- | :--- | :--- |
+| 媒体库路径的存储类别 | `libs/core/library.go`（`StorageClass`、`Library.StorageClasses`、`Library.StorageClassOf`）；`libs/store/libraries.go`；`libs/proto/mavio/library/v1/library.proto` 中的 `storage_classes` 和 `effective_storage_classes`；`apps/server/internal/rpc/library.go` | P24 |
+| 分类 | `libs/library/storage/class.go`（`DeviceInfo.Class`、`Classifier`、`PathClasses`）；`device.go` 中的 `Detector.Folder` | P24 |
+| FUSE 与本机回环识别 | `libs/library/storage/fuse.go`（`fuseKind`、`loopbackSource`、`findMount`、`mountKind`）；由 `device_{linux,darwin,windows}.go` 使用 | P24 |
+| 存储策略 | `libs/library/policy.go`（`StoragePolicy`、`PolicyOf`）；由 `scan.go`（`scan.policy`、`Scanner.walkers`、`scan.state`）、`jobs.go`（`Jobs.probeFile`）、`keyframes.go`、`borders.go`、`mediaextras.go`（`Jobs.extrasJobs`、`trickplay`、`chapterImages`、`loudness`）使用 | P24 |
+| 不对云存储做推测式读取 | `libs/library/storage/keeper.go`（`Keeper.Class`）；`apps/server/internal/playback/resume.go`（`Manager.prepareStart`）；在 `apps/server/internal/server/server.go` 中装配 | P24 |

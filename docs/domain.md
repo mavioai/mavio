@@ -68,6 +68,7 @@ All enumerations are string types with stable lowercase values (`DisplayOrder` k
 | Type | Values |
 | :--- | :--- |
 | `LibraryKind` | `movies`, `shows`, `music`, `music_videos`, `home_videos`, `books`, `photos`, `mixed`, `collections`, `playlists` |
+| `StorageClass` | `""` (auto), `local`, `network`, `cloud` |
 | `ItemKind` | `movie`, `series`, `season`, `episode`, `video`, `music_artist`, `music_album`, `track`, `music_video`, `audiobook`, `book`, `photo_album`, `photo`, `folder`, `collection`, `playlist` |
 | `ExtraKind` | `trailer`, `clip`, `behind_the_scenes`, `deleted_scene`, `interview`, `scene`, `sample`, `featurette`, `short`, `theme_song`, `theme_video`, `other` |
 | `StreamKind` | `video`, `audio`, `subtitle`, `attachment`, `image`, `data` |
@@ -102,6 +103,7 @@ All enumerations are string types with stable lowercase values (`DisplayOrder` k
 
 ### 4.1 Library
 * `Kind` decides how the scanner interprets the folders; `Paths` are absolute root folders, and a path belongs to at most one library: a library's paths may not equal, contain or lie inside another library's paths (`ErrConflict`). The curated kinds (`LibraryKind.Curated`), `collections` and `playlists`, hold the collections and playlists users curate instead of scanned folders: they have no paths, are never scanned, and there is at most one library of each (`ErrConflict`), which the server creates when first needed.
+* `StorageClasses` sets the `StorageClass` of some of the paths, by path, for storage the server would misclassify; each key must be one of `Paths` and each value a class other than auto (`ErrInvalid`). The other paths are auto: classified by the device holding them. The class tells what reading a file costs: `local` (a disk of the server), `network` (a share on the local network) or `cloud` (a cloud drive, whose reads count against quotas and rate limits), and decides what the server reads of the media on its own ([optimization §2](optimization.md)). `Library.StorageClassOf` returns the class set for the longest path holding a file or folder.
 * `ScanInterval` is the period of scheduled reconciliation scans (zero disables them); `PreferredLanguage` (ISO 639-1) and `MetadataCountry` (ISO 3166-1 alpha-2) steer metadata providers.
 * `SaveLocalMetadata` writes each item's NFO file and the artwork chosen or downloaded for it next to its media, where scans read them back; `AutoCollections` puts movies into collections named after the providers' collections (movie sets), found by their `tmdb_collection` ID, else by name, and created when first needed.
 * `ExtractTrickplay` and `ExtractChapterImages` make thumbnail sheets of videos and an image of each chapter; `AnalyzeLoudness` measures the loudness of tracks.

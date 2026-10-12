@@ -33,41 +33,45 @@ func detectDevice(path string) (DeviceInfo, error) {
 	devID := fmt.Sprintf("dev:%d", st.Dev)
 
 	fsType := linuxFSTypeName(sfs.Type)
-	isRemote := false
-	isCloud := false
-
+	mountPoint := path
+	var kind DeviceKind
 	switch sfs.Type {
-	case magicSMB, magicSMB2, magicCIFS, magicNFS:
-		isRemote = true
-	case magicFUSE:
-		isCloud = true
+	case magicSMB, magicSMB2, magicCIFS:
+		kind = KindRemoteNAS
+	case magicNFS, magicFUSE:
+		// The mount tells a userspace file system and the server of a share.
+		kind = KindCloudMount
+		if sfs.Type == magicNFS {
+			kind = KindRemoteNAS
+		}
+		if data, err := os.ReadFile("/proc/self/mountinfo"); err == nil {
+			if m, ok := findMount(data, path); ok {
+				fsType, mountPoint = m.FSType, m.Point
+				kind = mountKind(m)
+			}
+		}
 	}
 
 	rotational := false
-	if !isRemote && !isCloud {
-		rotational = checkLinuxRotational(st.Dev)
-	}
-
-	var kind DeviceKind
-	switch {
-	case isCloud:
-		kind = KindCloudMount
-	case isRemote:
-		kind = KindRemoteNAS
+	switch kind {
+	case KindRemoteNAS, KindLocalHDD:
 		rotational = true
-	case rotational:
-		kind = KindLocalHDD
+	case KindCloudMount:
 	default:
-		kind = KindLocalSSD
+		if rotational = checkLinuxRotational(st.Dev); rotational {
+			kind = KindLocalHDD
+		} else {
+			kind = KindLocalSSD
+		}
 	}
 
 	return DeviceInfo{
 		ID:         devID,
 		Kind:       kind,
 		FSType:     fsType,
-		MountPoint: path,
+		MountPoint: mountPoint,
 		Rotational: rotational,
-		Remote:     isRemote,
+		Remote:     kind == KindRemoteNAS,
 	}, nil
 }
 

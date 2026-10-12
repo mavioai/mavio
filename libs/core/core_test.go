@@ -101,6 +101,7 @@ func TestValidate(t *testing.T) {
 		{"virtual episode", (&Item{ID: NewID(), LibraryID: NewID(), Kind: KindEpisode, Name: "Pilot", Virtual: true}).Validate()},
 		{"virtual series", (&Item{ID: NewID(), LibraryID: NewID(), Kind: KindSeries, Name: "Show", Virtual: true}).Validate()},
 		{"valid library", (&Library{Name: "Movies", Kind: LibraryMovies, Paths: []string{"/media"}}).Validate()},
+		{"library storage class", (&Library{Name: "Movies", Kind: LibraryMovies, Paths: []string{"/media"}, StorageClasses: map[string]StorageClass{"/media": StorageCloud}}).Validate()},
 		{"valid user", (&User{ID: NewID(), Name: "alice", PasswordHash: "$argon2id$x"}).Validate()},
 		{"valid job", (&Job{ID: NewID(), Kind: "library.scan", MaxAttempts: 3}).Validate()},
 		{"valid session", (&AuthSession{ID: NewID(), UserID: NewID(), TokenHash: make([]byte, 32), DeviceID: "d"}).Validate()},
@@ -129,6 +130,9 @@ func TestValidate(t *testing.T) {
 		{"virtual with path", func() error { it := validItem(); it.Path, it.Virtual = "/a.mkv", true; return it.Validate() }()},
 		{"library without paths", (&Library{Name: "x", Kind: LibraryMovies}).Validate()},
 		{"library unknown kind", (&Library{Name: "x", Kind: "tv", Paths: []string{"/"}}).Validate()},
+		{"storage class of another path", (&Library{Name: "x", Kind: LibraryMovies, Paths: []string{"/a"}, StorageClasses: map[string]StorageClass{"/b": StorageCloud}}).Validate()},
+		{"storage class auto", (&Library{Name: "x", Kind: LibraryMovies, Paths: []string{"/a"}, StorageClasses: map[string]StorageClass{"/a": StorageAuto}}).Validate()},
+		{"storage class unknown", (&Library{Name: "x", Kind: LibraryMovies, Paths: []string{"/a"}, StorageClasses: map[string]StorageClass{"/a": "tape"}}).Validate()},
 		{"user without credentials", (&User{ID: NewID(), Name: "bob"}).Validate()},
 		{"user bad subtitle mode", (&User{ID: NewID(), Name: "bob", AuthProvider: "ldap", Preferences: UserPreferences{SubtitleMode: "sometimes"}}).Validate()},
 		{"user data rating", (&UserData{UserID: NewID(), ItemID: NewID(), Rating: &ten}).Validate()},
@@ -439,6 +443,30 @@ func TestDisplayPreferences(t *testing.T) {
 	for _, tt := range tests {
 		if err := tt.p.Validate(); (err == nil) != tt.ok || (err != nil && !errors.Is(err, ErrInvalid)) {
 			t.Errorf("%s: Validate() = %v", tt.name, err)
+		}
+	}
+}
+
+func TestStorageClassOf(t *testing.T) {
+	lib := Library{
+		Paths:          []string{"/media", "/media/cloud/", `D:\Films`, "/other"},
+		StorageClasses: map[string]StorageClass{"/media/cloud/": StorageCloud, `D:\Films`: StorageNetwork, "/media": StorageLocal},
+	}
+	tests := []struct {
+		path string
+		want StorageClass
+	}{
+		{"/media/a.mkv", StorageLocal},
+		{"/media/cloud", StorageCloud},
+		{"/media/cloud/b/c.mkv", StorageCloud},
+		{"/media/cloudy/c.mkv", StorageLocal},
+		{`D:\Films\x.mkv`, StorageNetwork},
+		{"/other/y.mkv", StorageAuto},
+		{"/elsewhere/y.mkv", StorageAuto},
+	}
+	for _, tt := range tests {
+		if got := lib.StorageClassOf(tt.path); got != tt.want {
+			t.Errorf("StorageClassOf(%q) = %q, want = %q", tt.path, got, tt.want)
 		}
 	}
 }

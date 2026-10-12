@@ -25,6 +25,8 @@ type Library struct {
 	Kind string `json:"kind,omitempty"`
 	// Paths holds the value of the "paths" field.
 	Paths []string `json:"paths,omitempty"`
+	// StorageClasses holds the value of the "storage_classes" field.
+	StorageClasses map[string]core.StorageClass `json:"storage_classes,omitempty"`
 	// ScanInterval holds the value of the "scan_interval" field.
 	ScanInterval time.Duration `json:"scan_interval,omitempty"`
 	// PreferredLanguage holds the value of the "preferred_language" field.
@@ -95,7 +97,7 @@ func (*Library) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case library.FieldPaths, library.FieldProviderOrder, library.FieldVirtualEpisodes, library.FieldHubs:
+		case library.FieldPaths, library.FieldStorageClasses, library.FieldProviderOrder, library.FieldVirtualEpisodes, library.FieldHubs:
 			values[i] = new([]byte)
 		case library.FieldID:
 			values[i] = new(core.ID)
@@ -146,6 +148,14 @@ func (_m *Library) assignValues(columns []string, values []any) error {
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &_m.Paths); err != nil {
 					return fmt.Errorf("unmarshal field paths: %w", err)
+				}
+			}
+		case library.FieldStorageClasses:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field storage_classes", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.StorageClasses); err != nil {
+					return fmt.Errorf("unmarshal field storage_classes: %w", err)
 				}
 			}
 		case library.FieldScanInterval:
@@ -298,6 +308,9 @@ func (_m *Library) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("paths=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Paths))
+	builder.WriteString(", ")
+	builder.WriteString("storage_classes=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StorageClasses))
 	builder.WriteString(", ")
 	builder.WriteString("scan_interval=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ScanInterval))

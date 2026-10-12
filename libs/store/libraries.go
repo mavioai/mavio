@@ -51,6 +51,7 @@ func (r libraries) Create(ctx context.Context, lib *core.Library) error {
 			SetName(lib.Name).
 			SetKind(string(lib.Kind)).
 			SetPaths(cleanPaths(lib.Paths)).
+			SetStorageClasses(cleanClasses(lib.StorageClasses)).
 			SetScanInterval(lib.ScanInterval).
 			SetPreferredLanguage(lib.PreferredLanguage).
 			SetMetadataCountry(lib.MetadataCountry).
@@ -86,6 +87,7 @@ func (r libraries) Update(ctx context.Context, lib *core.Library) error {
 			SetName(lib.Name).
 			SetKind(string(lib.Kind)).
 			SetPaths(cleanPaths(lib.Paths)).
+			SetStorageClasses(cleanClasses(lib.StorageClasses)).
 			SetScanInterval(lib.ScanInterval).
 			SetPreferredLanguage(lib.PreferredLanguage).
 			SetMetadataCountry(lib.MetadataCountry).
@@ -139,6 +141,17 @@ func cleanPaths(paths []string) []string {
 	return out
 }
 
+func cleanClasses(classes map[string]core.StorageClass) map[string]core.StorageClass {
+	if len(classes) == 0 {
+		return nil
+	}
+	out := make(map[string]core.StorageClass, len(classes))
+	for p, c := range classes {
+		out[filepath.Clean(p)] = c
+	}
+	return out
+}
+
 func pathOverlaps(a, b string) bool {
 	within := func(child, parent string) bool {
 		return child == parent || strings.HasPrefix(child, strings.TrimSuffix(parent, string(filepath.Separator))+string(filepath.Separator))
@@ -152,6 +165,7 @@ func toLibrary(l *ent.Library) core.Library {
 		Name:              l.Name,
 		Kind:              core.LibraryKind(l.Kind),
 		Paths:             l.Paths,
+		StorageClasses:    l.StorageClasses,
 		ScanInterval:      l.ScanInterval,
 		PreferredLanguage: l.PreferredLanguage,
 		MetadataCountry:   l.MetadataCountry,

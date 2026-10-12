@@ -28,6 +28,8 @@ func (Library) Fields() []ent.Field {
 		field.String("name").NotEmpty(),
 		field.String("kind"),
 		field.Strings("paths"),
+		// storage_classes sets the storage class of some paths, by path.
+		field.JSON("storage_classes", map[string]core.StorageClass{}).Optional(),
 		field.Int64("scan_interval").GoType(time.Duration(0)).Default(0),
 		field.String("preferred_language").Default(""),
 		field.String("metadata_country").Default(""),

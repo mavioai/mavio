@@ -159,24 +159,26 @@ func ExtrasJob(lib core.Library, at time.Time) core.Job {
 	}
 }
 
-// extrasJobs returns the extras jobs of a probed item: those its library
-// asks for and the server can do.
-func (j *Jobs) extrasJobs(lib core.Library, it core.Item, video bool, chapters bool) []core.Job {
+// extrasJobs returns the extras jobs of a probed item, given its video
+// source if it has one: those its library asks for, the storage policy of
+// its file allows and the server can do.
+func (j *Jobs) extrasJobs(lib core.Library, it core.Item, video *core.MediaSource) []core.Job {
 	now := j.now()
 	var out []core.Job
 	switch {
-	case video:
-		if j.Thumbnails != nil && lib.ExtractTrickplay {
+	case video != nil:
+		policy := j.policy(&lib, video.Path)
+		if j.Thumbnails != nil && lib.ExtractTrickplay && policy.WholeFiles {
 			out = append(out, ItemJob(JobTrickplay, it.ID, now))
 		}
-		if j.Thumbnails != nil && lib.ExtractChapterImages && chapters {
+		if j.Thumbnails != nil && lib.ExtractChapterImages && len(video.Chapters) > 0 && policy.Samples {
 			out = append(out, ItemJob(JobChapterImages, it.ID, now))
 		}
 		if j.Segments != nil && it.Extra == "" && (it.Kind == core.KindMovie || it.Kind == core.KindEpisode) {
 			out = append(out, ItemJob(JobSegments, it.ID, now))
 		}
 	case it.Kind == core.KindTrack:
-		if j.Loudness != nil && lib.AnalyzeLoudness {
+		if j.Loudness != nil && lib.AnalyzeLoudness && j.policy(&lib, it.Path).WholeFiles {
 			out = append(out, ItemJob(JobLoudness, it.ID, now))
 		}
 	}
@@ -261,7 +263,7 @@ func (j *Jobs) trickplay(ctx context.Context, job core.Job) ([]core.Job, error) 
 		return nil, ignoreGone(err)
 	}
 	src, st := videoSource(sources)
-	if src == nil {
+	if src == nil || !j.policy(&lib, src.Path).WholeFiles {
 		return nil, nil
 	}
 	key := failKey(JobTrickplay, src)
@@ -326,7 +328,7 @@ func (j *Jobs) chapterImages(ctx context.Context, job core.Job) ([]core.Job, err
 		return nil, ignoreGone(err)
 	}
 	src, st := videoSource(sources)
-	if src == nil || len(src.Chapters) == 0 {
+	if src == nil || len(src.Chapters) == 0 || !j.policy(&lib, src.Path).Samples {
 		return nil, nil
 	}
 	key := failKey(JobChapterImages, src)
@@ -385,7 +387,7 @@ func (j *Jobs) loudness(ctx context.Context, job core.Job) ([]core.Job, error) {
 		return nil, ignoreGone(err)
 	}
 	sources, err := j.Store.MediaSources().ListForItem(ctx, it.ID)
-	if err != nil || len(sources) == 0 {
+	if err != nil || len(sources) == 0 || !j.policy(&lib, sources[0].Path).WholeFiles {
 		return nil, ignoreGone(err)
 	}
 	key := failKey(JobLoudness, &sources[0])
@@ -519,7 +521,7 @@ func (j *Jobs) extras(ctx context.Context, job core.Job) ([]core.Job, error) {
 			return nil, err
 		}
 		src, _ := videoSource(sources)
-		next = append(next, j.extrasJobs(lib, it, src != nil, src != nil && len(src.Chapters) > 0)...)
+		next = append(next, j.extrasJobs(lib, it, src)...)
 	}
 	return next, nil
 }

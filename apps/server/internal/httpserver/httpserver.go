@@ -32,6 +32,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/webui"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
+	"github.com/mavioai/mavio/libs/library/storage"
 	"github.com/mavioai/mavio/libs/metadata"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
@@ -63,6 +64,9 @@ type Options struct {
 	Plugins rpc.PluginManager
 	// Devices keeps the plugins' remote devices; nil means none.
 	Devices rpc.DeviceController
+	// Storage classifies the paths of libraries; nil classifies with a
+	// device detector of its own.
+	Storage *storage.Classifier
 	// ServerInfo names the server to clients and tells plugins how it is
 	// reached.
 	ServerInfo func() rpc.ServerInfo
@@ -157,7 +161,11 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(systemv1connect.NewBackupServiceHandler(rpc.NewBackupService(opts.Backups, opts.Activity), interceptors))
 	mux.Handle(systemv1connect.NewLocalizationServiceHandler(rpc.LocalizationService{}, interceptors))
 	mux.Handle("GET /system/backups/{name}", backupDownload(authn, opts.Backups))
-	mux.Handle(libraryv1connect.NewLibraryServiceHandler(rpc.NewLibraryService(opts.Store), interceptors))
+	libraries := rpc.NewLibraryService(opts.Store)
+	if libraries.Classes = storage.NewClassifier(nil).Classes; opts.Storage != nil {
+		libraries.Classes = opts.Storage.Classes
+	}
+	mux.Handle(libraryv1connect.NewLibraryServiceHandler(libraries, interceptors))
 	items := rpc.NewItemService(opts.Store)
 	items.Wake, items.ExternalIDKinds, items.Lyrics = opts.Wake, opts.ExternalIDKinds, opts.Lyrics
 	mux.Handle(libraryv1connect.NewItemServiceHandler(items, interceptors))

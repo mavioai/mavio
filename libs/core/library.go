@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -47,6 +48,9 @@ type Library struct {
 	Kind LibraryKind
 	// Paths are absolute root folders. A path belongs to at most one library.
 	Paths []string
+	// StorageClasses sets the storage class of some of the paths, by path;
+	// the others are classified by the device holding them.
+	StorageClasses map[string]StorageClass
 	// ScanInterval is the period between scheduled reconciliation scans; zero
 	// disables scheduled scans.
 	ScanInterval time.Duration
@@ -140,8 +144,65 @@ func (l *Library) Validate() error {
 	case l.VirtualEpisodes.GraceDays < 0:
 		return fmt.Errorf("%w: negative grace period of virtual episodes", ErrInvalid)
 	}
+	for path, class := range l.StorageClasses {
+		switch {
+		case !slices.Contains(l.Paths, path):
+			return fmt.Errorf("%w: storage class of %q, which is not a path of library %q", ErrInvalid, path, l.Name)
+		case class == StorageAuto || !class.Valid():
+			return fmt.Errorf("%w: storage class %q of %q", ErrInvalid, class, path)
+		}
+	}
 	if err := l.Hubs.validate(l.Kind); err != nil {
 		return err
 	}
 	return l.Providers.validate()
+}
+
+// StorageClass tells what reading a file of a storage costs, which decides
+// how much of the media the server reads on its own.
+type StorageClass string
+
+// Storage classes.
+const (
+	// StorageAuto classifies the storage by the device holding it.
+	StorageAuto StorageClass = ""
+	// StorageLocal is a disk of the server: reads are cheap.
+	StorageLocal StorageClass = "local"
+	// StorageNetwork is a share on the local network, such as SMB or NFS:
+	// reads are slower but not counted.
+	StorageNetwork StorageClass = "network"
+	// StorageCloud is a cloud drive, mounted or reached through a storage
+	// backend: reads are counted against quotas and rate limits, so the
+	// server reads only what playback needs and the few bytes around it.
+	StorageCloud StorageClass = "cloud"
+)
+
+// StorageClasses lists every storage class.
+var StorageClasses = []StorageClass{StorageAuto, StorageLocal, StorageNetwork, StorageCloud}
+
+// Valid reports whether c is a known storage class.
+func (c StorageClass) Valid() bool { return slices.Contains(StorageClasses, c) }
+
+// StorageClassOf returns the storage class the library sets for the path
+// holding the file at p, or StorageAuto: the class of the longest path of
+// the library that p is in or below.
+func (l *Library) StorageClassOf(p string) StorageClass {
+	best, class := -1, StorageAuto
+	for _, root := range l.Paths {
+		if len(root) > best && InFolder(p, root) {
+			best, class = len(root), l.StorageClasses[root]
+		}
+	}
+	return class
+}
+
+// InFolder reports whether p is folder or a path below it; '/' and '\'
+// both separate names, and a trailing separator of folder is ignored.
+func InFolder(p, folder string) bool {
+	folder = strings.TrimRight(folder, `/\`)
+	if !strings.HasPrefix(p, folder) {
+		return false
+	}
+	rest := p[len(folder):]
+	return rest == "" || rest[0] == '/' || rest[0] == '\\' || folder == ""
 }

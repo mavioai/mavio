@@ -43,6 +43,8 @@ flowchart TD
     P21["P21 Clients and ecosystem<br/>apps/web, Apple, Android and desktop apps, libs/client-rust, Jellyfin shim decision"]
     P22["P22 Real-device acceptance<br/>end-to-end playback on real televisions and clients"]
     P23["P23 Packaging and release<br/>libs/proto and libs/plugin tags, server binaries and container images"]
+    P24["P24 Storage I/O efficiency<br/>storage classes, container indexes, keyframe trickplay, subtitle caching"]
+    P25["P25 Storage backends and rclone<br/>storage port, libs/rclone, rcd, offline downloads"]
 
     P0 --> P1
     P1 --> P2
@@ -73,6 +75,10 @@ flowchart TD
     P14 --> P22
     P21 --> P22
     P22 --> P23
+    P9 --> P24
+    P12 --> P24
+    P24 --> P25
+    P18 --> P25
 ```
 
 | Phase | Theme | Status |
@@ -101,6 +107,8 @@ flowchart TD
 | P21 | Clients and ecosystem | In progress |
 | P22 | Real-device acceptance | Not started |
 | P23 | Packaging and release | Not started |
+| P24 | Storage I/O efficiency | In progress |
+| P25 | Storage backends and rclone | Not started |
 
 ---
 
@@ -649,6 +657,34 @@ flowchart TD
 - [ ] Tag `libs/proto` and `libs/plugin` releases
 - [ ] Publish the server's release binaries and container images
 - [ ] Publish the official plugin catalog
+
+### P24 Storage I/O Efficiency
+**Scope**: what the server reads of media on its own, by the cost of reading it ([Optimization §2](optimization.md#2-storage-access-by-storage-class)): storage classes of library paths, keyframes from container indexes, trickplay from keyframes, embedded subtitles cached once on local storage and read while playing on cloud storage.
+
+**Done when**: on a library classed cloud, scans, probes, keyframes, trickplay and playback with embedded subtitles read only a small fraction of each file, asserted by byte counts in tests; on local storage, embedded text subtitles are extracted once per file for every playback after.
+
+**Progress**:
+- [x] Storage classes: `core.StorageClass` set per library path or detected from the device, returned with the effective classes by `LibraryService`
+- [x] Detection: FUSE mounts by their subtype on Linux, loopback NFS and SMB and macFUSE on macOS, WinFsp volumes on Windows
+- [x] Storage policy: whole-file reads, samples, speculative reads and folder pruning by class (`library.PolicyOf`)
+- [ ] Setting storage classes in the web UI, with its library administration
+- [ ] Keyframes from Matroska Cues and MP4 sample tables, extracted with the probe; ffprobe only without an index and off cloud storage
+- [ ] Trickplay from keyframes only, with the normal mode as fallback; on cloud storage, sampled through the container index
+- [ ] Embedded text subtitles extracted once into a persistent cache on local storage; on cloud storage, delivered by the stream that plays the video and never extracted whole
+- [ ] Subtitle search and download, which writes sidecar subtitles beside the video
+
+### P25 Storage Backends and rclone
+**Scope**: libraries on storage the server reaches through a storage port rather than the file system: the local implementation over `os.Root`, and rclone's remotes through an `rclone rcd` the server runs or reaches ([Architecture §9](architecture.md)).
+
+**Done when**: a library on an rclone remote scans, probes, plays and imports downloads through `rclone rcd`, tested against rclone's memory backend; remotes are configured through the API; offline downloads of cloud drives act as a download client.
+
+**Progress**:
+- [ ] `core.Storage` port and its local implementation; scanning, local metadata, sidecars, writes, playback and imports through it
+- [ ] `libs/rclone`: rc client and storage over `rclone rcd`, media bytes through a loopback proxy
+- [ ] Managed and external `rclone rcd`; remote configuration API (`mavio.storage.v1`)
+- [ ] Offline downloads as a built-in download client, with their jobs recorded in the database
+- [ ] Distribution of the mavioai/rclone binary
+- [ ] Later: remote plugins (plugin processes on other machines), direct links of cloud drives, incremental scans by change notification, a block cache for media reads
 
 ---
 

@@ -68,6 +68,7 @@ erDiagram
 | 类型 | 取值 |
 | :--- | :--- |
 | `LibraryKind` | `movies`、`shows`、`music`、`music_videos`、`home_videos`、`books`、`photos`、`mixed`、`collections`、`playlists` |
+| `StorageClass` | `""`（自动）、`local`、`network`、`cloud` |
 | `ItemKind` | `movie`、`series`、`season`、`episode`、`video`、`music_artist`、`music_album`、`track`、`music_video`、`audiobook`、`book`、`photo_album`、`photo`、`folder`、`collection`、`playlist` |
 | `ExtraKind` | `trailer`、`clip`、`behind_the_scenes`、`deleted_scene`、`interview`、`scene`、`sample`、`featurette`、`short`、`theme_song`、`theme_video`、`other` |
 | `StreamKind` | `video`、`audio`、`subtitle`、`attachment`、`image`、`data` |
@@ -102,6 +103,7 @@ erDiagram
 
 ### 4.1 媒体库
 * `Kind` 决定扫描器如何解读目录；`Paths` 是绝对路径的根目录，一个路径最多属于一个媒体库：媒体库的路径不能与其他媒体库的路径相同、包含或被包含（`ErrConflict`）。整理类种类（`LibraryKind.Curated`），即 `collections` 与 `playlists`，存放用户整理的合集与播放列表而非扫描的目录：它们没有路径，从不扫描，每种至多一个媒体库（`ErrConflict`），由服务端在首次需要时创建。
+* `StorageClasses` 按路径为部分路径设定 `StorageClass`，用于服务端会判错的存储；每个键必须是 `Paths` 之一，每个值不能是自动（`ErrInvalid`）。其余路径为自动：按所在设备分类。存储类别说明读取文件的代价：`local`（服务器自己的磁盘）、`network`（局域网共享）或 `cloud`（云盘，读取计入配额和限流），并决定服务端自行读取多少媒体（[优化 §2](optimization.zh-CN.md)）。`Library.StorageClassOf` 返回包含某文件或目录的最长路径所设定的类别。
 * `ScanInterval` 是定时对账扫描的周期（为零则不定时扫描）；`PreferredLanguage`（ISO 639-1）与 `MetadataCountry`（ISO 3166-1 alpha-2）影响元数据提供者的取数。
 * `SaveLocalMetadata` 把每个条目的 NFO 文件以及为它选择或下载的图片写到媒体旁边，扫描时再读回；`AutoCollections` 把电影放入以提供者的合集（电影系列）命名的合集，先按 `tmdb_collection` ID 查找，否则按名称，首次需要时创建。
 * `ExtractTrickplay` 与 `ExtractChapterImages` 为视频生成缩略图拼图与各章节的图片；`AnalyzeLoudness` 测量音轨的响度。

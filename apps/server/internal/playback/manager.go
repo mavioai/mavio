@@ -89,6 +89,9 @@ type Config struct {
 	// Keeper keeps the volumes of the playbacks in progress awake; nil
 	// leaves them be.
 	Keeper *storage.Keeper
+	// Class returns the storage class of a media file; files on cloud
+	// storage are not read ahead. Nil reads every file ahead.
+	Class func(ctx context.Context, path string) core.StorageClass
 	// RemoteSources gives an item's media sources read over HTTP, which
 	// playbacks consider after its files; nil gives none.
 	RemoteSources func(ctx context.Context, it core.Item) []core.MediaSource

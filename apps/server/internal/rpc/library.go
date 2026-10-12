@@ -39,6 +39,10 @@ var errCurated = errors.New("the collections and playlists libraries are managed
 // libraries their policy allows; only administrators see folder paths and
 // manage libraries.
 type LibraryService struct {
+	// Classes returns the storage class of each path of a library; nil
+	// reports the classes the library sets.
+	Classes func(lib *core.Library) map[string]core.StorageClass
+
 	store core.Store
 	now   func() time.Time
 }
@@ -63,7 +67,7 @@ func (s *LibraryService) ListLibraries(ctx context.Context, _ *libraryv1.ListLib
 	var out []*libraryv1.Library
 	for i := range libs {
 		if canAccessLibrary(&p.User, &libs[i]) {
-			out = append(out, libraryToProto(&libs[i], p.User.Admin))
+			out = append(out, s.toProto(&libs[i], p.User.Admin))
 		}
 	}
 	return libraryv1.ListLibrariesResponse_builder{Libraries: out}.Build(), nil
@@ -82,7 +86,7 @@ func (s *LibraryService) GetLibrary(ctx context.Context, req *libraryv1.GetLibra
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return libraryv1.GetLibraryResponse_builder{Library: libraryToProto(&lib, p.User.Admin)}.Build(), nil
+	return libraryv1.GetLibraryResponse_builder{Library: s.toProto(&lib, p.User.Admin)}.Build(), nil
 }
 
 // canAccessLibrary reports whether the user may see a library: every user
@@ -109,7 +113,7 @@ func (s *LibraryService) CreateLibrary(ctx context.Context, req *libraryv1.Creat
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return libraryv1.CreateLibraryResponse_builder{Library: libraryToProto(&lib, true)}.Build(), nil
+	return libraryv1.CreateLibraryResponse_builder{Library: s.toProto(&lib, true)}.Build(), nil
 }
 
 // UpdateLibrary changes a library and queues a scan of it.
@@ -134,6 +138,7 @@ func (s *LibraryService) UpdateLibrary(ctx context.Context, req *libraryv1.Updat
 		lib.SaveLocalMetadata, lib.AutoCollections = spec.SaveLocalMetadata, spec.AutoCollections
 		lib.ExtractTrickplay, lib.ExtractChapterImages, lib.AnalyzeLoudness = spec.ExtractTrickplay, spec.ExtractChapterImages, spec.AnalyzeLoudness
 		lib.DownloadLyrics, lib.Providers, lib.VirtualEpisodes = spec.DownloadLyrics, spec.Providers, spec.VirtualEpisodes
+		lib.StorageClasses = spec.StorageClasses
 		if err := tx.Libraries().Update(ctx, &lib); err != nil {
 			return err
 		}
@@ -142,7 +147,7 @@ func (s *LibraryService) UpdateLibrary(ctx context.Context, req *libraryv1.Updat
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return libraryv1.UpdateLibraryResponse_builder{Library: libraryToProto(&lib, true)}.Build(), nil
+	return libraryv1.UpdateLibraryResponse_builder{Library: s.toProto(&lib, true)}.Build(), nil
 }
 
 // queueScans queues a scan of the library now and, with a scan interval,
@@ -219,6 +224,12 @@ func libraryFromSpec(spec *libraryv1.LibrarySpec) (core.Library, error) {
 			lib.Kind = k
 		}
 	}
+	for p, c := range spec.GetStorageClasses() {
+		if lib.StorageClasses == nil {
+			lib.StorageClasses = map[string]core.StorageClass{}
+		}
+		lib.StorageClasses[p] = storageClassFromProto(c)
+	}
 	if lib.Kind.Curated() {
 		return lib, connect.NewError(connect.CodeInvalidArgument, errCurated)
 	}
@@ -234,6 +245,48 @@ func libraryFromSpec(spec *libraryv1.LibrarySpec) (core.Library, error) {
 		}
 	}
 	return lib, nil
+}
+
+// toProto converts a library; folder paths and their storage classes only
+// for administrators.
+func (s *LibraryService) toProto(lib *core.Library, admin bool) *libraryv1.Library {
+	l := libraryToProto(lib, admin)
+	if admin && len(lib.Paths) > 0 {
+		classes := lib.StorageClasses
+		if s.Classes != nil {
+			classes = s.Classes(lib)
+		}
+		l.SetEffectiveStorageClasses(storageClassesToProto(classes))
+	}
+	return l
+}
+
+// storageClasses maps the storage classes to their protobuf values.
+var storageClasses = map[core.StorageClass]libraryv1.StorageClass{
+	core.StorageAuto:    libraryv1.StorageClass_STORAGE_CLASS_UNSPECIFIED,
+	core.StorageLocal:   libraryv1.StorageClass_STORAGE_CLASS_LOCAL,
+	core.StorageNetwork: libraryv1.StorageClass_STORAGE_CLASS_NETWORK,
+	core.StorageCloud:   libraryv1.StorageClass_STORAGE_CLASS_CLOUD,
+}
+
+func storageClassFromProto(c libraryv1.StorageClass) core.StorageClass {
+	for k, v := range storageClasses {
+		if v == c {
+			return k
+		}
+	}
+	return core.StorageAuto
+}
+
+func storageClassesToProto(classes map[string]core.StorageClass) map[string]libraryv1.StorageClass {
+	if len(classes) == 0 {
+		return nil
+	}
+	out := make(map[string]libraryv1.StorageClass, len(classes))
+	for p, c := range classes {
+		out[p] = storageClasses[c]
+	}
+	return out
 }
 
 // libraryToProto converts a library; folder paths only for administrators.
@@ -262,6 +315,7 @@ func libraryToProto(lib *core.Library, admin bool) *libraryv1.Library {
 	}
 	if admin {
 		b.Paths = lib.Paths
+		b.StorageClasses = storageClassesToProto(lib.StorageClasses)
 	}
 	if lib.ScanInterval > 0 {
 		b.ScanInterval = durationpb.New(lib.ScanInterval)

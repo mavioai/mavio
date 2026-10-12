@@ -44,6 +44,12 @@ func (_c *LibraryCreate) SetPaths(v []string) *LibraryCreate {
 	return _c
 }
 
+// SetStorageClasses sets the "storage_classes" field.
+func (_c *LibraryCreate) SetStorageClasses(v map[string]core.StorageClass) *LibraryCreate {
+	_c.mutation.SetStorageClasses(v)
+	return _c
+}
+
 // SetScanInterval sets the "scan_interval" field.
 func (_c *LibraryCreate) SetScanInterval(v time.Duration) *LibraryCreate {
 	_c.mutation.SetScanInterval(v)
@@ -487,6 +493,10 @@ func (_c *LibraryCreate) createSpec() (*Library, *sqlgraph.CreateSpec) {
 		_spec.SetField(library.FieldPaths, field.TypeJSON, value)
 		_node.Paths = value
 	}
+	if value, ok := _c.mutation.StorageClasses(); ok {
+		_spec.SetField(library.FieldStorageClasses, field.TypeJSON, value)
+		_node.StorageClasses = value
+	}
 	if value, ok := _c.mutation.ScanInterval(); ok {
 		_spec.SetField(library.FieldScanInterval, field.TypeInt64, value)
 		_node.ScanInterval = value
@@ -664,6 +674,24 @@ func (u *LibraryUpsert) SetPaths(v []string) *LibraryUpsert {
 // UpdatePaths sets the "paths" field to the value that was provided on create.
 func (u *LibraryUpsert) UpdatePaths() *LibraryUpsert {
 	u.SetExcluded(library.FieldPaths)
+	return u
+}
+
+// SetStorageClasses sets the "storage_classes" field.
+func (u *LibraryUpsert) SetStorageClasses(v map[string]core.StorageClass) *LibraryUpsert {
+	u.Set(library.FieldStorageClasses, v)
+	return u
+}
+
+// UpdateStorageClasses sets the "storage_classes" field to the value that was provided on create.
+func (u *LibraryUpsert) UpdateStorageClasses() *LibraryUpsert {
+	u.SetExcluded(library.FieldStorageClasses)
+	return u
+}
+
+// ClearStorageClasses clears the value of the "storage_classes" field.
+func (u *LibraryUpsert) ClearStorageClasses() *LibraryUpsert {
+	u.SetNull(library.FieldStorageClasses)
 	return u
 }
 
@@ -955,6 +983,27 @@ func (u *LibraryUpsertOne) SetPaths(v []string) *LibraryUpsertOne {
 func (u *LibraryUpsertOne) UpdatePaths() *LibraryUpsertOne {
 	return u.Update(func(s *LibraryUpsert) {
 		s.UpdatePaths()
+	})
+}
+
+// SetStorageClasses sets the "storage_classes" field.
+func (u *LibraryUpsertOne) SetStorageClasses(v map[string]core.StorageClass) *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetStorageClasses(v)
+	})
+}
+
+// UpdateStorageClasses sets the "storage_classes" field to the value that was provided on create.
+func (u *LibraryUpsertOne) UpdateStorageClasses() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateStorageClasses()
+	})
+}
+
+// ClearStorageClasses clears the value of the "storage_classes" field.
+func (u *LibraryUpsertOne) ClearStorageClasses() *LibraryUpsertOne {
+	return u.Update(func(s *LibraryUpsert) {
+		s.ClearStorageClasses()
 	})
 }
 
@@ -1446,6 +1495,27 @@ func (u *LibraryUpsertBulk) SetPaths(v []string) *LibraryUpsertBulk {
 func (u *LibraryUpsertBulk) UpdatePaths() *LibraryUpsertBulk {
 	return u.Update(func(s *LibraryUpsert) {
 		s.UpdatePaths()
+	})
+}
+
+// SetStorageClasses sets the "storage_classes" field.
+func (u *LibraryUpsertBulk) SetStorageClasses(v map[string]core.StorageClass) *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.SetStorageClasses(v)
+	})
+}
+
+// UpdateStorageClasses sets the "storage_classes" field to the value that was provided on create.
+func (u *LibraryUpsertBulk) UpdateStorageClasses() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.UpdateStorageClasses()
+	})
+}
+
+// ClearStorageClasses clears the value of the "storage_classes" field.
+func (u *LibraryUpsertBulk) ClearStorageClasses() *LibraryUpsertBulk {
+	return u.Update(func(s *LibraryUpsert) {
+		s.ClearStorageClasses()
 	})
 }
 

@@ -77,6 +77,24 @@ pub struct LibraryView<'a> {
     pub hubs: ::buffa::MessageFieldView<
         super::super::__buffa::view::LibraryHubsView<'a>,
     >,
+    /// The storage classes the administrator set, by path; the other paths
+    /// are classified by the device holding them.
+    ///
+    /// Field 19: `storage_classes` (map)
+    pub storage_classes: ::buffa::MapView<
+        'a,
+        &'a str,
+        ::buffa::EnumValue<super::super::StorageClass>,
+    >,
+    /// The storage class of each path as the server classifies it: the one
+    /// set, or the one of the device holding it.
+    ///
+    /// Field 20: `effective_storage_classes` (map)
+    pub effective_storage_classes: ::buffa::MapView<
+        'a,
+        &'a str,
+        ::buffa::EnumValue<super::super::StorageClass>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
@@ -327,6 +345,92 @@ impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
                 )?;
                 view.paths.push(__elem);
             }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let entry_bytes = ::buffa::types::borrow_bytes(&mut cur)?;
+                let mut entry_cur: &'a [u8] = entry_bytes;
+                let mut key = "";
+                let mut val = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&key)
+                        + ::buffa::__private::element_footprint(&val),
+                )?;
+                while !entry_cur.is_empty() {
+                    let entry_tag = ::buffa::encoding::Tag::decode(&mut entry_cur)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            key = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        2 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::Varint,
+                            )?;
+                            val = ::buffa::EnumValue::from(
+                                ::buffa::types::decode_int32(&mut entry_cur)?,
+                            );
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(
+                                entry_tag,
+                                &mut entry_cur,
+                                ctx.depth(),
+                            )?;
+                        }
+                    }
+                }
+                view.storage_classes.push(key, val);
+            }
+            20u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let entry_bytes = ::buffa::types::borrow_bytes(&mut cur)?;
+                let mut entry_cur: &'a [u8] = entry_bytes;
+                let mut key = "";
+                let mut val = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&key)
+                        + ::buffa::__private::element_footprint(&val),
+                )?;
+                while !entry_cur.is_empty() {
+                    let entry_tag = ::buffa::encoding::Tag::decode(&mut entry_cur)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            key = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        2 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::Varint,
+                            )?;
+                            val = ::buffa::EnumValue::from(
+                                ::buffa::types::decode_int32(&mut entry_cur)?,
+                            );
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(
+                                entry_tag,
+                                &mut entry_cur,
+                                ctx.depth(),
+                            )?;
+                        }
+                    }
+                }
+                view.effective_storage_classes.push(key, val);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -415,6 +519,16 @@ impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            storage_classes: self
+                .storage_classes
+                .iter()
+                .map(|(k, v)| (k.to_string(), *v))
+                .collect(),
+            effective_storage_classes: self
+                .effective_storage_classes
+                .iter()
+                .map(|(k, v)| (k.to_string(), *v))
+                .collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -510,6 +624,18 @@ impl<'a> ::buffa::ViewEncode<'a> for LibraryView<'a> {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.storage_classes {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+            size += 2u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.effective_storage_classes {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+            size += 2u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -604,6 +730,44 @@ impl<'a> ::buffa::ViewEncode<'a> for LibraryView<'a> {
                 buf,
             );
             self.hubs.write_to(__cache, buf);
+        }
+        for (k, v) in &self.storage_classes {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+            ::buffa::encoding::Tag::new(
+                    19u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(2u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int32(v.to_i32(), buf);
+        }
+        for (k, v) in &self.effective_storage_classes {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+            ::buffa::encoding::Tag::new(
+                    20u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(2u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int32(v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -830,6 +994,26 @@ impl LibraryOwnedView {
         &self,
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::LibraryHubsView<'_>> {
         &self.0.reborrow().hubs
+    }
+    /// The storage classes the administrator set, by path; the other paths
+    /// are classified by the device holding them.
+    ///
+    /// Field 19: `storage_classes` (map)
+    #[must_use]
+    pub fn storage_classes(
+        &self,
+    ) -> &::buffa::MapView<'_, &'_ str, ::buffa::EnumValue<super::super::StorageClass>> {
+        &self.0.reborrow().storage_classes
+    }
+    /// The storage class of each path as the server classifies it: the one
+    /// set, or the one of the device holding it.
+    ///
+    /// Field 20: `effective_storage_classes` (map)
+    #[must_use]
+    pub fn effective_storage_classes(
+        &self,
+    ) -> &::buffa::MapView<'_, &'_ str, ::buffa::EnumValue<super::super::StorageClass>> {
+        &self.0.reborrow().effective_storage_classes
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<LibraryView<'static>>>
@@ -2510,6 +2694,15 @@ pub struct LibrarySpecView<'a> {
     pub hubs: ::buffa::MessageFieldView<
         super::super::__buffa::view::LibraryHubsView<'a>,
     >,
+    /// Storage classes by path, for paths the device would misclassify. Each
+    /// key must be one of paths.
+    ///
+    /// Field 16: `storage_classes` (map)
+    pub storage_classes: ::buffa::MapView<
+        'a,
+        &'a str,
+        ::buffa::EnumValue<super::super::StorageClass>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for LibrarySpecView<'a> {
@@ -2711,6 +2904,49 @@ impl<'a> ::buffa::MessageView<'a> for LibrarySpecView<'a> {
                 )?;
                 view.paths.push(__elem);
             }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let entry_bytes = ::buffa::types::borrow_bytes(&mut cur)?;
+                let mut entry_cur: &'a [u8] = entry_bytes;
+                let mut key = "";
+                let mut val = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&key)
+                        + ::buffa::__private::element_footprint(&val),
+                )?;
+                while !entry_cur.is_empty() {
+                    let entry_tag = ::buffa::encoding::Tag::decode(&mut entry_cur)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            key = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        2 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::Varint,
+                            )?;
+                            val = ::buffa::EnumValue::from(
+                                ::buffa::types::decode_int32(&mut entry_cur)?,
+                            );
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(
+                                entry_tag,
+                                &mut entry_cur,
+                                ctx.depth(),
+                            )?;
+                        }
+                    }
+                }
+                view.storage_classes.push(key, val);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -2780,6 +3016,11 @@ impl<'a> ::buffa::MessageView<'a> for LibrarySpecView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            storage_classes: self
+                .storage_classes
+                .iter()
+                .map(|(k, v)| (k.to_string(), *v))
+                .collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2856,6 +3097,12 @@ impl<'a> ::buffa::ViewEncode<'a> for LibrarySpecView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.storage_classes {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+            size += 2u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2931,6 +3178,25 @@ impl<'a> ::buffa::ViewEncode<'a> for LibrarySpecView<'a> {
                 buf,
             );
             self.hubs.write_to(__cache, buf);
+        }
+        for (k, v) in &self.storage_classes {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+            ::buffa::encoding::Tag::new(
+                    16u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(2u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int32(v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3111,6 +3377,16 @@ impl LibrarySpecOwnedView {
         &self,
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::LibraryHubsView<'_>> {
         &self.0.reborrow().hubs
+    }
+    /// Storage classes by path, for paths the device would misclassify. Each
+    /// key must be one of paths.
+    ///
+    /// Field 16: `storage_classes` (map)
+    #[must_use]
+    pub fn storage_classes(
+        &self,
+    ) -> &::buffa::MapView<'_, &'_ str, ::buffa::EnumValue<super::super::StorageClass>> {
+        &self.0.reborrow().storage_classes
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<LibrarySpecView<'static>>>

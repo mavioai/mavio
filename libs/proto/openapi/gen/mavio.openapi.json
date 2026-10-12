@@ -7611,6 +7611,32 @@
             ],
             "title": "hubs",
             "description": "The hubs of the library on Home and on its Recommended tab."
+          },
+          "storageClasses": {
+            "type": "object",
+            "title": "storage_classes",
+            "additionalProperties": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/mavio.library.v1.StorageClass"
+                }
+              ],
+              "title": "value"
+            },
+            "description": "The storage classes the administrator set, by path; the other paths\n are classified by the device holding them."
+          },
+          "effectiveStorageClasses": {
+            "type": "object",
+            "title": "effective_storage_classes",
+            "additionalProperties": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/mavio.library.v1.StorageClass"
+                }
+              ],
+              "title": "value"
+            },
+            "description": "The storage class of each path as the server classifies it: the one\n set, or the one of the device holding it."
           }
         },
         "title": "Library",
@@ -7757,6 +7783,26 @@
               }
             ],
             "title": "hubs"
+          },
+          "storageClasses": {
+            "type": "object",
+            "title": "storage_classes",
+            "maxProperties": 64,
+            "additionalProperties": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/mavio.library.v1.StorageClass"
+                }
+              ],
+              "not": {
+                "enum": [
+                  "STORAGE_CLASS_UNSPECIFIED"
+                ]
+              },
+              "title": "value",
+              "description": "enum.defined_only = true\n"
+            },
+            "description": "Storage classes by path, for paths the device would misclassify. Each\n key must be one of paths."
           }
         },
         "title": "LibrarySpec",
@@ -9641,6 +9687,17 @@
           "field"
         ],
         "additionalProperties": false
+      },
+      "mavio.library.v1.StorageClass": {
+        "type": "string",
+        "title": "StorageClass",
+        "enum": [
+          "STORAGE_CLASS_UNSPECIFIED",
+          "STORAGE_CLASS_LOCAL",
+          "STORAGE_CLASS_NETWORK",
+          "STORAGE_CLASS_CLOUD"
+        ],
+        "description": "StorageClass tells what reading a file of a storage costs, which decides\n how much of the media the server reads on its own."
       },
       "mavio.library.v1.StreamKind": {
         "type": "string",

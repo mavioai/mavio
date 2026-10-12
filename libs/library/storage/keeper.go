@@ -3,6 +3,8 @@ package storage
 import (
 	"sync"
 	"time"
+
+	"github.com/mavioai/mavio/libs/core"
 )
 
 // DefaultWakeCooldown is how long after waking a volume another wake of
@@ -18,6 +20,9 @@ const DefaultWakeCooldown = 30 * time.Second
 type Keeper struct {
 	// Devices detects devices; nil detects with a Detector of its own.
 	Devices *Detector
+	// Class returns the storage class of a path; paths on cloud storage
+	// are never read. Nil reads every path whose device sleeps.
+	Class func(path string) core.StorageClass
 	// Interval spaces the heartbeats of a volume; default
 	// DefaultHeartbeatInterval.
 	Interval time.Duration
@@ -86,7 +91,7 @@ func (k *Keeper) Beat(paths ...string) int {
 	seen := map[string]bool{}
 	for _, p := range paths {
 		dev := k.Devices.Device(p)
-		if !dev.Sleeps() || seen[dev.ID] {
+		if !dev.Sleeps() || seen[dev.ID] || k.cloud(p) {
 			continue
 		}
 		seen[dev.ID] = true
@@ -105,7 +110,7 @@ func (k *Keeper) Beat(paths ...string) int {
 func (k *Keeper) Wake(path string) bool {
 	k.init()
 	dev := k.Devices.Device(path)
-	if !dev.Sleeps() || k.busy(dev.ID) || !k.wakes.Claim(dev.ID, k.now()) {
+	if !dev.Sleeps() || k.cloud(path) || k.busy(dev.ID) || !k.wakes.Claim(dev.ID, k.now()) {
 		return false
 	}
 	k.start(dev.ID, func() {
@@ -114,6 +119,12 @@ func (k *Keeper) Wake(path string) bool {
 		}
 	})
 	return true
+}
+
+// cloud reports whether path is on cloud storage, which is never read
+// speculatively.
+func (k *Keeper) cloud(path string) bool {
+	return k.Class != nil && k.Class(path) == core.StorageCloud
 }
 
 func (k *Keeper) busy(volume string) bool {

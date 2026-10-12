@@ -4,8 +4,11 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/mavioai/mavio/libs/core"
 )
 
 func TestKeeper(t *testing.T) {
@@ -98,4 +101,34 @@ func TestKeeper(t *testing.T) {
 		t.Error("Wake after the cooldown = false, want true")
 	}
 	got()
+}
+
+func TestKeeperCloudClass(t *testing.T) {
+	var reads atomic.Int32
+	k := &Keeper{
+		Devices: &Detector{Detect: func(string) (DeviceInfo, error) {
+			return DeviceInfo{ID: "fsid:3", Kind: KindRemoteNAS, Remote: true}, nil
+		}},
+		Class: func(p string) core.StorageClass {
+			if strings.HasPrefix(p, "/nas/rclone/") {
+				return core.StorageCloud
+			}
+			return core.StorageNetwork
+		},
+		Read:     func(string) error { reads.Add(1); return nil },
+		Prefetch: func(string) error { return nil },
+	}
+	if n := k.Beat("/nas/rclone/a.mkv"); n != 0 {
+		t.Errorf("Beat of a path classed cloud started %d reads, want 0", n)
+	}
+	if k.Wake("/nas/rclone/a.mkv") {
+		t.Error("Wake of a path classed cloud = true, want false")
+	}
+	if n := k.Beat("/nas/films/a.mkv"); n != 1 {
+		t.Errorf("Beat of a share started %d reads, want 1", n)
+	}
+	k.Wait()
+	if n := reads.Load(); n != 1 {
+		t.Errorf("reads = %d, want 1", n)
+	}
 }

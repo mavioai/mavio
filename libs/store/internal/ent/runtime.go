@@ -511,51 +511,51 @@ func init() {
 	// library.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	library.NameValidator = libraryDescName.Validators[0].(func(string) error)
 	// libraryDescScanInterval is the schema descriptor for scan_interval field.
-	libraryDescScanInterval := libraryFields[4].Descriptor()
+	libraryDescScanInterval := libraryFields[5].Descriptor()
 	// library.DefaultScanInterval holds the default value on creation for the scan_interval field.
 	library.DefaultScanInterval = time.Duration(libraryDescScanInterval.Default.(int64))
 	// libraryDescPreferredLanguage is the schema descriptor for preferred_language field.
-	libraryDescPreferredLanguage := libraryFields[5].Descriptor()
+	libraryDescPreferredLanguage := libraryFields[6].Descriptor()
 	// library.DefaultPreferredLanguage holds the default value on creation for the preferred_language field.
 	library.DefaultPreferredLanguage = libraryDescPreferredLanguage.Default.(string)
 	// libraryDescMetadataCountry is the schema descriptor for metadata_country field.
-	libraryDescMetadataCountry := libraryFields[6].Descriptor()
+	libraryDescMetadataCountry := libraryFields[7].Descriptor()
 	// library.DefaultMetadataCountry holds the default value on creation for the metadata_country field.
 	library.DefaultMetadataCountry = libraryDescMetadataCountry.Default.(string)
 	// libraryDescSaveLocalMetadata is the schema descriptor for save_local_metadata field.
-	libraryDescSaveLocalMetadata := libraryFields[7].Descriptor()
+	libraryDescSaveLocalMetadata := libraryFields[8].Descriptor()
 	// library.DefaultSaveLocalMetadata holds the default value on creation for the save_local_metadata field.
 	library.DefaultSaveLocalMetadata = libraryDescSaveLocalMetadata.Default.(bool)
 	// libraryDescAutoCollections is the schema descriptor for auto_collections field.
-	libraryDescAutoCollections := libraryFields[8].Descriptor()
+	libraryDescAutoCollections := libraryFields[9].Descriptor()
 	// library.DefaultAutoCollections holds the default value on creation for the auto_collections field.
 	library.DefaultAutoCollections = libraryDescAutoCollections.Default.(bool)
 	// libraryDescExtractTrickplay is the schema descriptor for extract_trickplay field.
-	libraryDescExtractTrickplay := libraryFields[9].Descriptor()
+	libraryDescExtractTrickplay := libraryFields[10].Descriptor()
 	// library.DefaultExtractTrickplay holds the default value on creation for the extract_trickplay field.
 	library.DefaultExtractTrickplay = libraryDescExtractTrickplay.Default.(bool)
 	// libraryDescExtractChapterImages is the schema descriptor for extract_chapter_images field.
-	libraryDescExtractChapterImages := libraryFields[10].Descriptor()
+	libraryDescExtractChapterImages := libraryFields[11].Descriptor()
 	// library.DefaultExtractChapterImages holds the default value on creation for the extract_chapter_images field.
 	library.DefaultExtractChapterImages = libraryDescExtractChapterImages.Default.(bool)
 	// libraryDescAnalyzeLoudness is the schema descriptor for analyze_loudness field.
-	libraryDescAnalyzeLoudness := libraryFields[11].Descriptor()
+	libraryDescAnalyzeLoudness := libraryFields[12].Descriptor()
 	// library.DefaultAnalyzeLoudness holds the default value on creation for the analyze_loudness field.
 	library.DefaultAnalyzeLoudness = libraryDescAnalyzeLoudness.Default.(bool)
 	// libraryDescDownloadLyrics is the schema descriptor for download_lyrics field.
-	libraryDescDownloadLyrics := libraryFields[12].Descriptor()
+	libraryDescDownloadLyrics := libraryFields[13].Descriptor()
 	// library.DefaultDownloadLyrics holds the default value on creation for the download_lyrics field.
 	library.DefaultDownloadLyrics = libraryDescDownloadLyrics.Default.(bool)
 	// libraryDescScanGeneration is the schema descriptor for scan_generation field.
-	libraryDescScanGeneration := libraryFields[16].Descriptor()
+	libraryDescScanGeneration := libraryFields[17].Descriptor()
 	// library.DefaultScanGeneration holds the default value on creation for the scan_generation field.
 	library.DefaultScanGeneration = libraryDescScanGeneration.Default.(int64)
 	// libraryDescCreatedAt is the schema descriptor for created_at field.
-	libraryDescCreatedAt := libraryFields[17].Descriptor()
+	libraryDescCreatedAt := libraryFields[18].Descriptor()
 	// library.DefaultCreatedAt holds the default value on creation for the created_at field.
 	library.DefaultCreatedAt = libraryDescCreatedAt.Default.(func() time.Time)
 	// libraryDescUpdatedAt is the schema descriptor for updated_at field.
-	libraryDescUpdatedAt := libraryFields[18].Descriptor()
+	libraryDescUpdatedAt := libraryFields[19].Descriptor()
 	// library.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	library.DefaultUpdatedAt = libraryDescUpdatedAt.Default.(func() time.Time)
 	// library.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

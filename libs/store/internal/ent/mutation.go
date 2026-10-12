@@ -23602,6 +23602,7 @@ type LibraryMutation struct {
 	kind                   *string
 	paths                  *[]string
 	appendpaths            []string
+	storage_classes        *map[string]core.StorageClass
 	scan_interval          *time.Duration
 	addscan_interval       *time.Duration
 	preferred_language     *string
@@ -23856,6 +23857,55 @@ func (m *LibraryMutation) AppendedPaths() ([]string, bool) {
 func (m *LibraryMutation) ResetPaths() {
 	m.paths = nil
 	m.appendpaths = nil
+}
+
+// SetStorageClasses sets the "storage_classes" field.
+func (m *LibraryMutation) SetStorageClasses(mc map[string]core.StorageClass) {
+	m.storage_classes = &mc
+}
+
+// StorageClasses returns the value of the "storage_classes" field in the mutation.
+func (m *LibraryMutation) StorageClasses() (r map[string]core.StorageClass, exists bool) {
+	v := m.storage_classes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStorageClasses returns the old "storage_classes" field's value of the Library entity.
+// If the Library object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryMutation) OldStorageClasses(ctx context.Context) (v map[string]core.StorageClass, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStorageClasses is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStorageClasses requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStorageClasses: %w", err)
+	}
+	return oldValue.StorageClasses, nil
+}
+
+// ClearStorageClasses clears the value of the "storage_classes" field.
+func (m *LibraryMutation) ClearStorageClasses() {
+	m.storage_classes = nil
+	m.clearedFields[library.FieldStorageClasses] = struct{}{}
+}
+
+// StorageClassesCleared returns if the "storage_classes" field was cleared in this mutation.
+func (m *LibraryMutation) StorageClassesCleared() bool {
+	_, ok := m.clearedFields[library.FieldStorageClasses]
+	return ok
+}
+
+// ResetStorageClasses resets all changes to the "storage_classes" field.
+func (m *LibraryMutation) ResetStorageClasses() {
+	m.storage_classes = nil
+	delete(m.clearedFields, library.FieldStorageClasses)
 }
 
 // SetScanInterval sets the "scan_interval" field.
@@ -24619,7 +24669,7 @@ func (m *LibraryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LibraryMutation) Fields() []string {
-	fields := make([]string, 0, 18)
+	fields := make([]string, 0, 19)
 	if m.name != nil {
 		fields = append(fields, library.FieldName)
 	}
@@ -24628,6 +24678,9 @@ func (m *LibraryMutation) Fields() []string {
 	}
 	if m.paths != nil {
 		fields = append(fields, library.FieldPaths)
+	}
+	if m.storage_classes != nil {
+		fields = append(fields, library.FieldStorageClasses)
 	}
 	if m.scan_interval != nil {
 		fields = append(fields, library.FieldScanInterval)
@@ -24688,6 +24741,8 @@ func (m *LibraryMutation) Field(name string) (ent.Value, bool) {
 		return m.Kind()
 	case library.FieldPaths:
 		return m.Paths()
+	case library.FieldStorageClasses:
+		return m.StorageClasses()
 	case library.FieldScanInterval:
 		return m.ScanInterval()
 	case library.FieldPreferredLanguage:
@@ -24733,6 +24788,8 @@ func (m *LibraryMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldKind(ctx)
 	case library.FieldPaths:
 		return m.OldPaths(ctx)
+	case library.FieldStorageClasses:
+		return m.OldStorageClasses(ctx)
 	case library.FieldScanInterval:
 		return m.OldScanInterval(ctx)
 	case library.FieldPreferredLanguage:
@@ -24792,6 +24849,13 @@ func (m *LibraryMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPaths(v)
+		return nil
+	case library.FieldStorageClasses:
+		v, ok := value.(map[string]core.StorageClass)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStorageClasses(v)
 		return nil
 	case library.FieldScanInterval:
 		v, ok := value.(time.Duration)
@@ -24955,6 +25019,9 @@ func (m *LibraryMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *LibraryMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(library.FieldStorageClasses) {
+		fields = append(fields, library.FieldStorageClasses)
+	}
 	if m.FieldCleared(library.FieldProviderOrder) {
 		fields = append(fields, library.FieldProviderOrder)
 	}
@@ -24978,6 +25045,9 @@ func (m *LibraryMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *LibraryMutation) ClearField(name string) error {
 	switch name {
+	case library.FieldStorageClasses:
+		m.ClearStorageClasses()
+		return nil
 	case library.FieldProviderOrder:
 		m.ClearProviderOrder()
 		return nil
@@ -25003,6 +25073,9 @@ func (m *LibraryMutation) ResetField(name string) error {
 		return nil
 	case library.FieldPaths:
 		m.ResetPaths()
+		return nil
+	case library.FieldStorageClasses:
+		m.ResetStorageClasses()
 		return nil
 	case library.FieldScanInterval:
 		m.ResetScanInterval()
