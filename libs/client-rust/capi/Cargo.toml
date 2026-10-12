@@ -1,0 +1,23 @@
+[package]
+name = "mavio-capi"
+description = "The C ABI of the Mavio clients' shared core, which the Windows and Linux app calls from Go"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "maviocore"
+crate-type = ["lib", "cdylib"]
+# The generated code's doc comments quote the .proto files, not Rust.
+doctest = false
+
+[dependencies]
+buffa.workspace = true
+mavio-api = { path = "../api" }
+mavio-core = { path = "../core" }
+tokio = { version = "1", features = ["rt-multi-thread"] }
+
+[lints]
+workspace = true

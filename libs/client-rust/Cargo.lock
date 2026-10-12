@@ -836,6 +836,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "mavio-capi"
+version = "0.0.0"
+dependencies = [
+ "buffa",
+ "mavio-api",
+ "mavio-core",
+ "tokio",
+]
+
+[[package]]
 name = "mavio-core"
 version = "0.0.0"
 dependencies = [

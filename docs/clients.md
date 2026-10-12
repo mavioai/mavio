@@ -157,7 +157,7 @@ The server owns every decision that depends on the library, the user or other de
 * **The UniFFI API** (`mavio-uniffi`): the object `Client`, whose async functions run on one Tokio runtime of the process and are cancelled when the app drops their future; the interfaces the app implements: `SecureTokens` for the tokens, `CoreListener` for the streams' states and events, `HomeListener` for Home; and the client's capabilities as typed records, converted to `ClientCapabilities`.
 * **Swift**: UniFFI generates the Swift API, packaged with the shared libraries as an XCFramework of dynamic frameworks that `MavioKit` depends on.
 * **Kotlin**: UniFFI generates the Kotlin API, packaged with the shared libraries in the `core` module of `libs/android`.
-* **Go**: a C ABI of a few functions taking and returning byte buffers, which hold protobuf messages of the core's API, defined in `libs/client-rust/proto`; results and events come back through one callback, so that purego creates a single callback for the process. The Go API is generated from those messages.
+* **Go**: a C ABI of three functions (`mavio-capi`, the library `maviocore`): `mavio_open` opens a client with the process's one callback and a context of the app's, `mavio_call` sends it a request with a call number of the app's choosing, and `mavio_close` closes it. Requests and answers are protobuf messages of `mavio.capi.v1`, defined in `libs/client-rust/proto`, in byte buffers; each answer, and every event of the servers under call number zero, comes back through the callback on the core's threads, so that purego creates a single callback for the process. The core keeps no tokens of its own: the app gives it those it keeps in the system's secure storage when it opens it, and stores the new and forgotten ones events tell it of. The Go binding is the Go module in `libs/client-rust/capi`, next to the C ABI: package `capi` loads the library without cgo, with purego on Linux and macOS and the `syscall` package on Windows, and turns each call into a function returning the answer; its messages are generated for Go into `capi/gen`.
 
 ### 5.4 Several Servers
 A client is signed in at once to every server the user added — their own and those of friends and family — each with its own user and access token. The servers do not know each other; the client alone puts them together, in the user's order of servers.
@@ -240,7 +240,7 @@ Consistency of brand does not override the platforms:
 * `apps/web` → `libs/client-ts` → `libs/proto` (TypeScript); every client → `libs/design`.
 * `apps/ios`, `apps/tvos`, `apps/macos` → `libs/apple` → `libs/client-rust` (Swift bindings).
 * `apps/android`, `apps/android-tv` → `libs/android` → `libs/client-rust` (Kotlin bindings).
-* `apps/windows-linux` → `libs/client-rust` (C ABI) and `libs/proto` (Go). It is a Go module like the server's and follows the repository's Go conventions; the depguard rules let it depend on no server library.
+* `apps/windows-linux` → `libs/client-rust` (the C ABI, through its Go binding `libs/client-rust/capi`) and `libs/proto` (Go). It is a Go module like the server's and follows the repository's Go conventions; the depguard rules let it depend on no server library.
 * `libs/client-rust` → `libs/proto` (Rust).
 * No app depends on another app. The server depends on `apps/web` only for the files it embeds.
 * Nx runs every client: `tools/nx-go` infers `apps/windows-linux` as it does every Go module, Vite and TypeScript run through their Nx plugins, and Cargo, Gradle and `xcodebuild` through targets of their own. The Apple and Android jobs in CI run only when they are affected, macOS runners being costly.
@@ -268,8 +268,8 @@ mavio/
 │   │   ├── api/                 # Generated messages and Connect clients (mavio-api)
 │   │   ├── core/                # Servers, events, offline store, reporting, downloads
 │   │   ├── uniffi/              # UniFFI exports for Swift and Kotlin
-│   │   ├── capi/                # C ABI for Go
-│   │   └── proto/               # Messages of the C ABI
+│   │   ├── capi/                # C ABI for Go, and its Go binding (a Go module)
+│   │   └── proto/               # Messages of the C ABI (mavio.capi.v1)
 │   ├── apple/                   # [Swift] MavioKit, MavioPlayer, MavioUI
 │   ├── android/                 # [Kotlin] core, player, ui
 │   └── design/                  # Tokens, icons, components, strings; gen/{ts,swift,kotlin,go}

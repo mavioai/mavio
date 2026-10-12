@@ -157,7 +157,7 @@ flowchart LR
 * **UniFFI API**（`mavio-uniffi`）：对象 `Client`，其异步函数运行在进程唯一的 Tokio 运行时上，应用丢弃其 future 时即被取消；应用实现的接口：保存令牌的 `SecureTokens`、接收流状态与事件的 `CoreListener`、接收首页的 `HomeListener`；客户端能力以类型化记录表示，转换为 `ClientCapabilities`。
 * **Swift**：UniFFI 生成 Swift API，与共享库一起打包为 `MavioKit` 所依赖的、由动态 framework 组成的 XCFramework。
 * **Kotlin**：UniFFI 生成 Kotlin API，与共享库一起打包在 `libs/android` 的 `core` 模块中。
-* **Go**：一个由少量函数组成的 C ABI，参数与返回值是字节缓冲区，其中是核心 API 的 protobuf 消息，定义在 `libs/client-rust/proto`；结果与事件通过同一个回调返回，因此 purego 在整个进程中只需创建一个回调。Go API 由这些消息生成。
+* **Go**：一个由三个函数组成的 C ABI（`mavio-capi`，库名 `maviocore`）：`mavio_open` 以进程唯一的回调和应用自己的上下文打开一个客户端，`mavio_call` 以应用自选的调用编号向它发送请求，`mavio_close` 关闭它。请求与应答是 `mavio.capi.v1` 的 protobuf 消息（定义在 `libs/client-rust/proto`），放在字节缓冲区中；每个应答，以及调用编号为零的各服务器事件，都在核心的线程上经回调返回，因此 purego 在整个进程中只需创建一个回调。核心自己不保存令牌：应用打开核心时交给它保存在系统安全存储中的令牌，并按事件告知保存新令牌、删除被遗忘的令牌。Go 绑定是 `libs/client-rust/capi` 中与 C ABI 并列的 Go 模块：`capi` 包不经 cgo 加载该库——Linux 与 macOS 上用 purego，Windows 上用 `syscall` 包——并把每次调用变为返回其应答的函数；其消息的 Go 代码生成到 `capi/gen`。
 
 ### 5.4 多台服务器
 客户端同时登录用户添加的每台服务器——用户自己的以及亲友的——每台都有各自的用户与访问令牌。服务器彼此不知道对方；只有客户端按用户的服务器顺序把它们组合起来。
@@ -240,7 +240,7 @@ flowchart LR
 * `apps/web` → `libs/client-ts` → `libs/proto`（TypeScript）；所有客户端 → `libs/design`。
 * `apps/ios`、`apps/tvos`、`apps/macos` → `libs/apple` → `libs/client-rust`（Swift 绑定）。
 * `apps/android`、`apps/android-tv` → `libs/android` → `libs/client-rust`（Kotlin 绑定）。
-* `apps/windows-linux` → `libs/client-rust`（C ABI）与 `libs/proto`（Go）。它与服务端的模块一样是 Go 模块，遵循仓库的 Go 约定；depguard 规则不允许它依赖任何服务端库。
+* `apps/windows-linux` → `libs/client-rust`（C ABI，经其 Go 绑定 `libs/client-rust/capi`）与 `libs/proto`（Go）。它与服务端的模块一样是 Go 模块，遵循仓库的 Go 约定；depguard 规则不允许它依赖任何服务端库。
 * `libs/client-rust` → `libs/proto`（Rust）。
 * 应用之间互不依赖。服务端只为内嵌的文件依赖 `apps/web`。
 * 所有客户端由 Nx 编排：`tools/nx-go` 像推断其他 Go 模块一样推断 `apps/windows-linux`，Vite 与 TypeScript 用其 Nx 插件，Cargo、Gradle 与 `xcodebuild` 用各自的目标。macOS runner 成本高，CI 中的 Apple 与 Android 任务只在受影响时运行。
@@ -268,8 +268,8 @@ mavio/
 │   │   ├── api/                 # 生成的消息与 Connect 客户端（mavio-api）
 │   │   ├── core/                # 服务器、事件、离线存储、上报、下载
 │   │   ├── uniffi/              # 面向 Swift 与 Kotlin 的 UniFFI 导出
-│   │   ├── capi/                # 面向 Go 的 C ABI
-│   │   └── proto/               # C ABI 的消息
+│   │   ├── capi/                # 面向 Go 的 C ABI 及其 Go 绑定（Go 模块）
+│   │   └── proto/               # C ABI 的消息（mavio.capi.v1）
 │   ├── apple/                   # [Swift] MavioKit、MavioPlayer、MavioUI
 │   ├── android/                 # [Kotlin] core、player、ui
 │   └── design/                  # tokens、图标、组件、字符串；gen/{ts,swift,kotlin,go}

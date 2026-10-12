@@ -1,0 +1,23 @@
+# Generates the messages of ../proto: Go for the binding (gen/) and Rust for
+# the C ABI (src/gen/).
+version: v2
+clean: true
+inputs:
+  - directory: ../proto
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/mavioai/mavio/libs/client-rust/capi/gen
+plugins:
+  - local: ["go", "tool", "protoc-gen-go"]
+    out: gen
+    opt:
+      - paths=source_relative
+      - default_api_level=API_OPAQUE
+  - local: protoc-gen-buffa
+    out: src/gen
+    strategy: all
+  - local: protoc-gen-buffa-packaging
+    out: src/gen
+    strategy: all

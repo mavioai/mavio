@@ -1,0 +1,14 @@
+{
+  "name": "client-rust",
+  "targets": {
+    "build": {
+      "inputs": ["rust", "^rustGen", "{workspaceRoot}/libs/client-rust/capi/**/*.rs", "{workspaceRoot}/libs/client-rust/capi/Cargo.toml"]
+    },
+    "test": {
+      "inputs": ["rust", "^rustGen", "{workspaceRoot}/libs/client-rust/capi/**/*.rs", "{workspaceRoot}/libs/client-rust/capi/Cargo.toml"]
+    },
+    "lint": {
+      "inputs": ["rust", "^rustGen", "{workspaceRoot}/libs/client-rust/capi/**/*.rs", "{workspaceRoot}/libs/client-rust/capi/Cargo.toml"]
+    }
+  }
+}

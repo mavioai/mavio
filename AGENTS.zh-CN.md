@@ -46,7 +46,7 @@ apps/{ios,tvos,macos}/  Apple 各应用（SwiftUI）；其 Xcode 工程由 libs/
 libs/apple/           Apple 各应用共享的 Swift 包：MavioKit、MavioPlayer、MavioUI，以及核心的 XCFramework
 apps/android{,-tv}/   Android 各应用（Compose、Compose for TV），引入 libs/android 的 Gradle 构建
 libs/android/         Android 各应用共享的 Gradle 模块：core、player、ui
-libs/client-rust/     客户端的 Rust 共享核心（Cargo workspace；api 为生成的消息与客户端）
+libs/client-rust/     客户端的 Rust 共享核心（Cargo workspace；api 为生成的消息与客户端；capi 为 C ABI 及其 Go 绑定）
 libs/design/          客户端的设计系统：tokens、图标、字符串、组件规范；gen/ 为每个客户端生成
 tools/nx-go/          本地 Nx 插件：把每个 go.mod 推断为 Nx 项目并生成依赖图
 tools/nx-cargo/       本地 Nx 插件：把每个 Cargo workspace 推断为 Nx 项目
@@ -75,7 +75,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 
 每个 Go 模块也能脱离 Nx 直接使用：`cd libs/naming && go test ./...`。
 
-每个 Go 项目都有这些推断出来的 Nx 目标：`build`（`CGO_ENABLED=0`）、`test`、`bench`、`lint`、`tidy-check`（`GOWORK=off go mod tidy -diff`）。`libs/proto` 另有 `generate` 和 `buf-lint`；它生成 Go、TypeScript（`gen/ts`，即 npm 包 `@mavio/proto`）与 Rust（`gen/rust`，由 `libs/client-rust/api` 包含）。每个 Cargo workspace 有 `build`、`test`、`bench` 与 `lint`（`cargo fmt --check` 加上 `-D warnings` 的 clippy）。`libs/proto`、`libs/design`、`libs/client-ts` 与 `apps/web` 有 `typecheck`（TypeScript），`libs/client-ts` 有 `test`（Vitest），`apps/web` 有 `build`（Vite），服务端的 `build` 与 `dist` 依赖它，`libs/design` 还有 `generate`（`pnpm nx run design:generate`，其 `gen/` 提交入库）。Apple 各项目（标签 `platform:apple`）只在 macOS 上构建：`libs/apple` 有 `core`（把共享核心构建为 `build/MavioCoreFFI.xcframework`）、`ass`（把 libass 构建为 `build/Libass.xcframework`）、`build` 与 `test`（SwiftPM）以及 `lint`（`swift format`）；`apps/ios`、`apps/tvos` 与 `apps/macos` 有 `build`（不签名的 `xcodebuild`）、`lint` 与 `generate`（其提交入库的 Xcode 工程）。Android 各项目（标签 `platform:android`，需设置 `ANDROID_HOME`）运行 Gradle：`libs/android`（Nx 名称 `android-lib`）有 `core`（把共享核心构建到 `core/build/rust`）、`mpv`（把 libmpv 构建到 `player/build/mpv`）、`ffmpeg`（把 Media3 的 FFmpeg 扩展构建到 `player/build/ffmpeg`）、`build`、`test` 与 `lint`（Android lint）；`apps/android` 与 `apps/android-tv` 有 `build` 与 `lint`。详见 [docs/development.zh-CN.md](docs/development.zh-CN.md) §2。
+每个 Go 项目都有这些推断出来的 Nx 目标：`build`（`CGO_ENABLED=0`）、`test`、`bench`、`lint`、`tidy-check`（`GOWORK=off go mod tidy -diff`）。`libs/proto` 另有 `generate` 和 `buf-lint`；它生成 Go、TypeScript（`gen/ts`，即 npm 包 `@mavio/proto`）与 Rust（`gen/rust`，由 `libs/client-rust/api` 包含）。`capi`（`libs/client-rust/capi`，核心 C ABI 的 Go 绑定）同样有这两个目标，用于 `libs/client-rust/proto` 中 C ABI 的消息，其 `test` 在 `client-rust:build` 之后运行。每个 Cargo workspace 有 `build`、`test`、`bench` 与 `lint`（`cargo fmt --check` 加上 `-D warnings` 的 clippy）。`libs/proto`、`libs/design`、`libs/client-ts` 与 `apps/web` 有 `typecheck`（TypeScript），`libs/client-ts` 有 `test`（Vitest），`apps/web` 有 `build`（Vite），服务端的 `build` 与 `dist` 依赖它，`libs/design` 还有 `generate`（`pnpm nx run design:generate`，其 `gen/` 提交入库）。Apple 各项目（标签 `platform:apple`）只在 macOS 上构建：`libs/apple` 有 `core`（把共享核心构建为 `build/MavioCoreFFI.xcframework`）、`ass`（把 libass 构建为 `build/Libass.xcframework`）、`build` 与 `test`（SwiftPM）以及 `lint`（`swift format`）；`apps/ios`、`apps/tvos` 与 `apps/macos` 有 `build`（不签名的 `xcodebuild`）、`lint` 与 `generate`（其提交入库的 Xcode 工程）。Android 各项目（标签 `platform:android`，需设置 `ANDROID_HOME`）运行 Gradle：`libs/android`（Nx 名称 `android-lib`）有 `core`（把共享核心构建到 `core/build/rust`）、`mpv`（把 libmpv 构建到 `player/build/mpv`）、`ffmpeg`（把 Media3 的 FFmpeg 扩展构建到 `player/build/ffmpeg`）、`build`、`test` 与 `lint`（Android lint）；`apps/android` 与 `apps/android-tv` 有 `build` 与 `lint`。详见 [docs/development.zh-CN.md](docs/development.zh-CN.md) §2。
 
 ## Go 约定
 

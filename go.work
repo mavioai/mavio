@@ -3,6 +3,7 @@ go 1.27.0
 use (
 	./apps/server
 	./libs/acquire
+	./libs/client-rust/capi
 	./libs/core
 	./libs/design
 	./libs/imaging
