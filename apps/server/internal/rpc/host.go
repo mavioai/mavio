@@ -20,7 +20,7 @@ type HostService struct {
 // ServerInfo is how the server is reached.
 type ServerInfo struct {
 	ID, Name, Version, BaseURL string
-	HTTPPort, HTTPSPort    int
+	HTTPPort, HTTPSPort        int
 }
 
 var _ pluginv1connect.HostServiceHandler = (*HostService)(nil)
