@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	"github.com/mavioai/mavio/apps/server/internal/server"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
@@ -137,7 +138,7 @@ func TestEndToEnd(t *testing.T) {
 	// Playback decision → HLS playback.
 	playback := playbackv1connect.NewPlaybackServiceClient(http.DefaultClient, url, token)
 	video := playbackv1.MediaKind_MEDIA_KIND_VIDEO
-	resp, err := playback.StartPlayback(ctx, playbackv1.StartPlaybackRequest_builder{
+	start := playbackv1.StartPlaybackRequest_builder{
 		ItemId: new(movie.GetId()),
 		Capabilities: playbackv1.ClientCapabilities_builder{
 			Name: new("e2e"),
@@ -149,9 +150,22 @@ func TestEndToEnd(t *testing.T) {
 				VideoCodec: new("h264"), AudioCodec: new("aac"), MaxAudioChannels: new(int32(2)),
 			}.Build()},
 		}.Build(),
-	}.Build())
-	if err != nil {
-		t.Fatalf("StartPlayback: %v", err)
+	}.Build()
+	// The video is copied once its keyframes are extracted, which a
+	// background job does after the probe; until then it is encoded.
+	var resp *playbackv1.StartPlaybackResponse
+	for deadline := time.Now().Add(time.Minute); ; time.Sleep(100 * time.Millisecond) {
+		if resp, err = playback.StartPlayback(ctx, start); err != nil {
+			t.Fatalf("StartPlayback: %v", err)
+		}
+		if resp.GetMethod() != playbackv1.PlayMethod_PLAY_METHOD_TRANSCODE || time.Now().After(deadline) {
+			break
+		}
+		if _, err := playback.StopPlayback(ctx, playbackv1.StopPlaybackRequest_builder{
+			PlaybackId: new(resp.GetPlaybackId()), Position: durationpb.New(0),
+		}.Build()); err != nil {
+			t.Fatalf("StopPlayback: %v", err)
+		}
 	}
 	if resp.GetMethod() != playbackv1.PlayMethod_PLAY_METHOD_DIRECT_STREAM || !strings.HasSuffix(resp.GetUrl(), "master.m3u8") {
 		t.Fatalf("StartPlayback = %v %s, want an HLS direct stream", resp.GetMethod(), resp.GetUrl())
