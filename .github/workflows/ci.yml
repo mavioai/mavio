@@ -133,6 +133,9 @@ jobs:
       MAVIO_CORE_PROFILE: dev
       # The core and the macOS app for Apple silicon only, as the runner is.
       MAVIO_MACOS_ARCHS: arm64
+      # The core for the simulators and macOS, which the builds and tests
+      # run on; no device.
+      MAVIO_APPLE_PLATFORMS: ios-sim tvos-sim macos
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2

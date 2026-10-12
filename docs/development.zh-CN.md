@@ -74,7 +74,7 @@ Android 各项目需要 Android SDK（通过 `ANDROID_HOME` 找到），运行 `
 
 客户端中构建耗时的原生库从 [mavio-deps](https://github.com/mavioai/mavio-deps) 预构建获取：它按锁定的版本从源码构建这些库，每个库以 tag `<library>-<version>-<revision>` 发布，附带二进制、其源码、manifest 与校验和。`tools/deps/deps.txt` 锁定每个库的 tag 及其二进制资产的 SHA-256；上述目标运行的 `tools/deps/fetch.sh <library>` 把资产下载到 `dist/deps`，摘要不符时失败，然后解压；已按锁定版本解压的库保持不动。升级一个库，就是在 mavio-deps 发布新版本，并在此更新锁定。
 
-`libs/apple` 与 `libs/android` 的 `core` 目标对每个工具链只运行一次 Cargo 构建，覆盖其全部目标，使各目标并行编译，使用 `release` profile；设置 `MAVIO_CORE_PROFILE=dev` 则不做优化地构建，耗时只是其一小部分，CI 即如此。macOS 的核心与应用是通用二进制，包含 `arm64` 与 `x86_64`；设置 `MAVIO_MACOS_ARCHS=arm64` 则它们都只为 Apple 芯片构建，CI 即如此。
+`libs/apple` 与 `libs/android` 的 `core` 目标对每个工具链只运行一次 Cargo 构建，覆盖其全部目标，使各目标并行编译，使用 `release` profile；设置 `MAVIO_CORE_PROFILE=dev` 则不做优化地构建，耗时只是其一小部分，CI 即如此。macOS 的核心与应用是通用二进制，包含 `arm64` 与 `x86_64`；设置 `MAVIO_MACOS_ARCHS=arm64` 则它们都只为 Apple 芯片构建，CI 即如此。Apple 平台的核心覆盖 iOS、iOS 模拟器、tvOS、tvOS 模拟器与 macOS；`MAVIO_APPLE_PLATFORMS` 列出要构建的平台，取值为 `ios`、`ios-sim`、`tvos`、`tvos-sim` 与 `macos`，CI 构建 `ios-sim tvos-sim macos`，即其构建与测试所运行的平台。
 
 ### 2.3 常用命令
 ```bash
