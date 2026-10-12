@@ -33,6 +33,7 @@ import (
 // plugin, through its API only: a library is scanned, its film scraped by
 // the plugin once an administrator configured it, and played over HLS.
 func TestEndToEnd(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

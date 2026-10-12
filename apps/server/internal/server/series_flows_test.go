@@ -89,6 +89,7 @@ func (s *acquisitionServer) cutoffUnmet() []string {
 // which grabs another release, as Sonarr's FailedDownloadService and
 // RedownloadFailedDownloadService.
 func TestSeriesRSSUpgradesAndFailures(t *testing.T) {
+	t.Parallel()
 	s := startAcquisition(t, seriesRoutes(t), true)
 	ctx := t.Context()
 	// Two minutes, no sample of one or two episodes of three minutes (Sonarr's
@@ -233,6 +234,7 @@ func TestSeriesRSSUpgradesAndFailures(t *testing.T) {
 // the release named by them is imported as TVDB numbers the episode, as
 // Sonarr's XemService and SceneMappingService.
 func TestSceneNumbering(t *testing.T) {
+	t.Parallel()
 	routes := seriesRoutes(t)
 	routes[fmt.Sprintf("skyhook.sonarr.tv/v1/tvdb/shows/en/%d", sceneTvdbID)] = skyHookJSON(t, sceneTvdbID, "Scene Shuffle", "2021-02-01", nil, []map[string]any{
 		{"tvdbId": 930001, "seasonNumber": 1, "episodeNumber": 1, "absoluteEpisodeNumber": 1, "title": "Opening", "airDate": "2021-02-01"},

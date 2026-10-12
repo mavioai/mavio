@@ -45,6 +45,7 @@ func requestFlowRoutes(t *testing.T) map[string]string {
 // specials; a user whose policy blocks unrated titles does not find them,
 // while one whose policy does not does.
 func TestRequestFlows(t *testing.T) {
+	t.Parallel()
 	s := startAcquisition(t, requestFlowRoutes(t), false)
 	ctx := t.Context()
 	movies, shows := t.TempDir(), t.TempDir()

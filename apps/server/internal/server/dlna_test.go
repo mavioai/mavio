@@ -76,6 +76,7 @@ func installDLNA(t *testing.T) string {
 // found and driven through play, pause, seek, volume and stop, with
 // progress reported.
 func TestDLNA(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

@@ -107,6 +107,7 @@ func installSmoke(t *testing.T, rt, fields string) string {
 // plugin platform, without ffmpeg, in both runtimes: its tasks, data
 // folder, events, HTTP routes and remote devices.
 func TestPluginPlatform(t *testing.T) {
+	t.Parallel()
 	for _, rt := range []string{"wasm", "process"} {
 		t.Run(rt, func(t *testing.T) { testPluginPlatform(t, rt) })
 	}

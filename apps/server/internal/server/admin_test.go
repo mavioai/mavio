@@ -136,6 +136,7 @@ func start(t *testing.T, cfg server.Config) running {
 // uninstalled while the server serves; a backup is restored into a new
 // server.
 func TestAdministration(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")
