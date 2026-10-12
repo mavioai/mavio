@@ -556,7 +556,7 @@ flowchart TD
   - [x] 端到端测试中对策略屏蔽未分级内容的用户隐藏未分级作品（`request_flows_test.go`）：从目录中略去，`GetTitle` 与请求被拒绝，并按分级向 TMDB 查询
 
 ### P21 客户端与生态
-**范围**：基于完成的服务端 API 构建[客户端](clients.zh-CN.md)：内嵌于服务端的 Web UI（`apps/web`，在 `/` 提供）、面向 iPhone 与 iPad、Apple TV 与 Mac 的 Apple 应用（`apps/ios`、`apps/tvos`、`apps/macos`）、面向手机与平板及 Android TV 的 Android 应用（`apps/android`、`apps/android-tv`）、基于 MyGo 的 Windows 与 Linux 应用（`apps/windows-linux`），以及它们共享的库（`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。其基础部分不等待 P20：工具链与构建目标、从 `libs/proto` 生成的 TypeScript 与 Rust 代码、`libs/design`、§4 中客户端待决事项所列的原型，以及各应用与库的骨架。只有发现与请求页面等待 P20。之后按以下顺序构建客户端，每一个都先验证共享核心与设计系统，下一个平台再在其上构建：Web UI，连同 `libs/client-ts` 与 `libs/design`；iPhone 与 iPad 应用，连同 `libs/client-rust` 与 `libs/apple`；Android 手机与平板应用，连同 `libs/android`；Apple TV 与 Android TV 应用；Mac 应用；Windows 与 Linux 应用。
+**范围**：基于完成的服务端 API 构建[客户端](clients.zh-CN.md)：内嵌于服务端的 Web UI（`apps/web`，在 `/` 提供）、面向 iPhone 与 iPad、Apple TV 与 Mac 的 Apple 应用（`apps/ios`、`apps/tvos`、`apps/macos`）、面向手机与平板及 Android TV 的 Android 应用（`apps/android`、`apps/android-tv`）、基于 MyGo 的 Windows 与 Linux 应用（`apps/windows-linux`），以及它们共享的库（`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。其基础部分不等待 P20：工具链与构建目标、从 `libs/proto` 生成的 TypeScript 与 Rust 代码、`libs/design`、§4 中客户端待决事项所列的原型，以及各应用与库的骨架。只有发现与请求页面等待 P20。基础部分以每个应用的一个切片收尾，在完成任何客户端之前一并验证共享核心、设计系统与该平台的播放器：登录两台服务器，显示合并的首页，打开条目详情，直接播放一个源并播放一个由服务端以 HLS 发送的源，上报进度并可继续播放。Web UI 与 iPhone 和 iPad 应用已超出其切片。之后选定先完成哪个客户端，其余随后。
 
 **完成标准**：每个客户端同时登录两台服务器，显示一个合并了两者推荐行的首页，两台服务器都有的作品只显示一次；浏览媒体库，在两台服务器中搜索，打开条目并播放——直接播放，以及客户端需要时的转码——可选择音轨与字幕，上报进度并在另一个客户端上继续播放；从热门中请求一部作品，经批准、获取后显示为可观看；原生应用离线时以缓存内容启动，支持下载的应用离线播放已下载的条目。每个客户端的页面通过截图测试，`libs/design/parity.md` 中不再有计划中的功能。
 
@@ -579,6 +579,13 @@ flowchart TD
   - [x] macOS、iOS 与 tvOS 上的 AetherEngine 7.34.0：在 Mac 上，HDR10 Matroska 源经引擎重封装由 AVPlayer 播放、VideoToolbox 解码，并提高显示器的 EDR 余量；画中画在其 `AVPlayerLayer` 上启动，VP9、AV1 与 MPEG-2 走软件路径时则在其 `AVSampleBufferDisplayLayer` 上启动；ASS 轨道以原始事件行连同脚本头送达。iPad 与 Apple TV 模拟器以软件路径播放相同的源，iPad 模拟器在应用转入后台时在样本缓冲显示层上进入画中画
     - [ ] 在用户的设备上：iPhone 或 iPad 上画中画内的画面、Apple TV 上的 HDR10 与显示条件，以及杜比视界源
   - [ ] MyGo 的视频元素，含 Windows 上的 HDR10：延后到有 Windows 机器时，在 Windows 与 Linux 应用开始之前完成
+  - [ ] Android 上的核心：Kotlin 绑定在模拟器中登录、接收事件流并送达首页
+  - [ ] Media3 播放服务端的 fMP4 HLS，其音频可能从负的解码时间开始（§4）
+  - [ ] Media3 的 FFmpeg 解码扩展，它没有发布的构件：以 NDK 从源码按 LGPL 构建，纳入 Gradle 与 CI 构建
+  - [ ] Android 上的 libmpv：其来源（按 mpv-android 的构建方式）、渲染到 `SurfaceView`，以及由 Media3 `SimpleBasePlayer` 适配，与 Media3 共用同一媒体会话
+  - [ ] Apple 平台上的 libass：为三个平台构建为 XCFramework，渲染 AetherEngine 送达的 ASS 事件、脚本头与字体
+  - [ ] macOS 上的 Go 绑定：purego 加载核心，以字节缓冲中的 protobuf 消息跨越 C ABI，结果与事件经同一回调返回
+  - [ ] 各平台的截图测试：Apple 应用、Android 应用与 Web UI 所用的工具
 - [ ] 各应用与库的骨架
   - [x] `libs/client-rust`：`mavio-core`，以及 `mavio-uniffi`，其 `uniffi-bindgen` 生成 Swift 模块 `MavioCore` 与 Kotlin 包 `dev.mavio.core`；C ABI 及其消息（`capi`、`proto`）随其唯一使用者 Windows 与 Linux 应用一同到来
   - [x] Web：`apps/web`（React、Vite、TanStack Router 与 Query、基于设计 tokens 的 Tailwind CSS）与 `libs/client-ts`；服务端内嵌其构建（`apps/server/internal/webui`）并在 `/` 提供，容器镜像先构建它
@@ -607,6 +614,7 @@ flowchart TD
   - [ ] AetherEngine 暂停时跳转后重绘画面，以及拖动缩略图
   - [ ] 多播权限（entitlement），使真机而不只是模拟器能发现网络中的服务器
   - [ ] 页面的快照测试
+- [ ] 切片：Android 手机与平板应用、Apple TV 与 Android TV 应用、Mac 应用
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）
 - [ ] Apple TV 与 Android TV 应用
 - [ ] Mac 应用
