@@ -144,6 +144,13 @@ jobs:
           path: libs/client-rust/target-std
           key: cargo-std-${{ env.MAVIO_CORE_PROFILE }}-${{ github.sha }}
           restore-keys: cargo-std-${{ env.MAVIO_CORE_PROFILE }}-
+      # Cargo rebuilds the standard library when its sources are newer than
+      # the cached builds, which every install of the nightly makes them.
+      - name: Date the nightly's standard library sources back
+        run: |
+          nightly=$(sed -n 's/^nightly=//p' libs/apple/scripts/build-core.sh)
+          rustup toolchain install "$nightly" --profile minimal --component rust-src
+          find "$(rustc "+$nightly" --print sysroot)/lib/rustlib/src" -exec touch -h -t 202001010000 {} +
       # The clones of the Swift packages, which SwiftPM and xcodebuild share.
       - id: swiftpm
         uses: actions/cache/restore@v4
