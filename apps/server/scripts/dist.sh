@@ -12,12 +12,19 @@ if [ -n "${VERSION:-}" ]; then
 fi
 
 rm -rf dist
+# The platforms build in parallel, as each build's tail is serial.
+pids=
 for target in $targets; do
 	os=${target%/*}
 	arch=${target#*/}
 	ext=
 	[ "$os" = windows ] && ext=.exe
 	out="dist/mavio-$os-$arch$ext"
-	CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath -ldflags "$ldflags" -o "$out" ./cmd/mavio
-	echo "$out"
+	(CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath -ldflags "$ldflags" -o "$out" ./cmd/mavio && echo "$out") &
+	pids="$pids $!"
 done
+failed=0
+for pid in $pids; do
+	wait "$pid" || failed=1
+done
+exit $failed

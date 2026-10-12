@@ -184,7 +184,7 @@ go build -o plugin .                                                     # 子�
 * **apple**（macOS），在 **plan** 发现 Apple 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，生成的 Xcode 工程与 `generate` 写出的不一致时失败。
 * **android**（Linux），在 **plan** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`。
 * **media**（Linux、macOS）：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
-* **dist**（Linux）：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台。
+* **dist**（Linux）：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台；各平台并行构建。
 * **image**（Linux）：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
 
 CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg，**android** 以外的任务不安装 Java 与 Gradle（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check**、**test**、**apple** 与 **android** 缓存 Cargo 的构建（`Swatinem/rust-cache`）。**check**、**test**、**media** 与 **dist** 缓存 Go 的构建与模块，**check** 另缓存 golangci-lint 的结果（`.github/actions/go-cache`）：缓存只在推送到 `main` 时保存，PR 恢复其中最新的一份。**media** 以 `-count=1` 运行 Go 的测试，避免重放缓存的测试结果。

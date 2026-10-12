@@ -185,7 +185,7 @@ A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.
 * **android** (Linux), when **plan** finds Android projects affected: `nx run-many -t lint build test` over them.
 * **media** (Linux, macOS): installs jellyfin-ffmpeg, generates the fixtures and runs the `media`, `streaming` and `server` tests without the Nx cache, so the ffmpeg integration and smoke tests run on the runners' hardware.
 
-* **dist** (Linux): `nx run server:dist`, so the server cross-compiles for every supported platform.
+* **dist** (Linux): `nx run server:dist`, so the server cross-compiles for every supported platform; the platforms build in parallel.
 * **image** (Linux): builds the container image for linux/amd64 and linux/arm64 without pushing it, then runs the amd64 image until its health check passes.
 
 Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`); jobs other than **media** leave jellyfin-ffmpeg out, and jobs other than **android** Java and Gradle (`MISE_DISABLE_TOOLS`). Rust comes from `rust-toolchain.toml` through the runners' rustup, and **check**, **test**, **apple** and **android** cache Cargo's builds (`Swatinem/rust-cache`). **check**, **test**, **media** and **dist** cache Go's builds and modules, and **check** golangci-lint's results (`.github/actions/go-cache`): the caches are saved only on pushes to `main`, and pull requests restore the latest of them. **media** runs Go's tests with `-count=1`, so that their cached results do not replay.
