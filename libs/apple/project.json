@@ -82,6 +82,30 @@
       ],
       "cache": true
     },
+    "snapshot": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "sh scripts/snapshot.sh",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        "core",
+        "ass"
+      ],
+      "cache": false
+    },
+    "snapshot-record": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "sh scripts/snapshot.sh --record",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        "core",
+        "ass"
+      ],
+      "cache": false
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {

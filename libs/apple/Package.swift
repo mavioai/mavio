@@ -17,6 +17,7 @@ let package = Package(
     dependencies: [
         .package(path: "../design"),
         .package(url: "https://github.com/superuser404notfound/AetherEngine", exact: "7.34.0"),
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.6"),
     ],
     targets: [
         .binaryTarget(name: "MavioCoreFFI", path: "build/MavioCoreFFI.xcframework"),
@@ -36,5 +37,11 @@ let package = Package(
         .target(name: "MavioUI", dependencies: ["MavioKit", .product(name: "MavioDesign", package: "design")]),
         .testTarget(name: "MavioKitTests", dependencies: ["MavioKit"]),
         .testTarget(name: "MavioPlayerTests", dependencies: ["MavioPlayer"]),
+        // The snapshot tests (docs/clients.md §6.8), which draw on the iOS
+        // simulator: scripts/snapshot.sh.
+        .testTarget(
+            name: "MavioUITests",
+            dependencies: ["MavioUI", .product(name: "SnapshotTesting", package: "swift-snapshot-testing")]
+        ),
     ]
 )
