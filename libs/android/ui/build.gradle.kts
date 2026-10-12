@@ -23,6 +23,9 @@ android {
                 "--add-opens=java.base/java.io=ALL-UNNAMED",
                 "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
             )
+            // Draws with the native hardware renderer: without it every
+            // capture after the first in a JVM comes out empty.
+            it.systemProperty("robolectric.screenshot.hwrdr.native", "true")
         }
     }
 }
