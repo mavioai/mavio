@@ -64,9 +64,11 @@ func (s *Stream) Subtitle(ctx context.Context, stream, index int) ([]byte, error
 	return s.readSubtitle(j, stream)
 }
 
-// covers reports whether a run has read all of segment index's subtitles:
-// it started at or before the segment and wrote the file after it, or it
-// ended after the segment, or the segment is the last.
+// covers reports whether a run has written all of segment index's
+// subtitles: it started at or before the segment and wrote two more video
+// files after it, or it ended after the segment. ffmpeg muxes each output
+// in a thread of its own, so the subtitles may lag a little behind the
+// video files.
 func (s *Stream) covers(j *job, index int) bool {
 	l := s.cfg.Layout
 	first, last := l.files(index)
@@ -78,7 +80,7 @@ func (s *Stream) covers(j *job, index int) bool {
 		next = s.ranTo(j)
 	}
 	ended := !j.stopped && s.job == j && s.ended() && j.session.Err() == nil
-	return next > last+1 || (next > last && (ended || index == len(l.Segments)-1))
+	return next > last+2 || (next > last && ended)
 }
 
 // ranTo returns the first file after those a run wrote in a row from its

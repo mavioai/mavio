@@ -58,7 +58,7 @@ func TestStreamSubtitles(t *testing.T) {
 	if got := subtitleOf(t, s, 0); !strings.Contains(got, "file0") || !strings.Contains(got, "file1") {
 		t.Errorf("segment 0 = %q, want = the cues through file1", got)
 	}
-	read(t, s, 3)
+	read(t, s, 4)
 	// Far ahead: a new run, as for the video.
 	if got := subtitleOf(t, s, 20); !strings.Contains(got, "file20") || strings.Contains(got, "file3\n") {
 		t.Errorf("segment 20 = %q, want = the new run's cues", got)
