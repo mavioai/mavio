@@ -152,6 +152,14 @@ jobs:
           path: ~/Library/Caches/org.swift.swiftpm
           key: swiftpm-${{ hashFiles('libs/apple/Package.resolved', 'apps/*/Mavio.xcodeproj/**/Package.resolved') }}
           restore-keys: swiftpm-
+      # The downloads of the prebuilt libraries from mavio-deps, which
+      # tools/deps/fetch.sh checks and keeps in dist/deps, so that a run
+      # does not depend on GitHub's release downloads.
+      - id: deps
+        uses: actions/cache/restore@v4
+        with:
+          path: dist/deps
+          key: deps-apple-${{ hashFiles('tools/deps/deps.txt') }}
       - run: pnpm install --frozen-lockfile
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
       # The snapshot tests on the iOS simulator (docs/clients.md §6.8).
@@ -168,6 +176,11 @@ jobs:
         with:
           path: ~/Library/Caches/org.swift.swiftpm
           key: ${{ steps.swiftpm.outputs.cache-primary-key }}
+      - if: ${{ !cancelled() && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: dist/deps
+          key: ${{ steps.deps.outputs.cache-primary-key }}
       - name: Generated projects are up to date
         run: |
           pnpm nx run-many -t generate --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
@@ -194,6 +207,14 @@ jobs:
       # Caches Gradle's home: the dependencies, and the outputs of the build
       # cache that gradle.properties enables. Only main writes it.
       - uses: gradle/actions/setup-gradle@v4
+      # The downloads of the prebuilt libraries from mavio-deps, which
+      # tools/deps/fetch.sh checks and keeps in dist/deps, so that a run
+      # does not depend on GitHub's release downloads.
+      - id: deps
+        uses: actions/cache/restore@v4
+        with:
+          path: dist/deps
+          key: deps-android-${{ hashFiles('tools/deps/deps.txt') }}
       - run: pnpm install --frozen-lockfile
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
       # The tests compare the snapshots with their references; the images
@@ -204,6 +225,11 @@ jobs:
           name: snapshots-android
           path: libs/android/ui/build/outputs/roborazzi
           if-no-files-found: ignore
+      - if: ${{ !cancelled() && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: dist/deps
+          key: ${{ steps.deps.outputs.cache-primary-key }}
 
   # The snapshot tests of the web UI (docs/clients.md §6.8), in the browser of
   # Playwright's image on arm64, as they are recorded on Apple silicon; the
