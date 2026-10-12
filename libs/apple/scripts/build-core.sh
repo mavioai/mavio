@@ -4,7 +4,9 @@
 # per platform, and generates its Swift API into build/MavioCore, which the
 # package's MavioCore target compiles. Usage: scripts/build-core.sh
 # MAVIO_CORE_PROFILE picks the Cargo profile, release by default; CI builds
-# with dev, which compiles much faster.
+# with dev, which compiles much faster. MAVIO_MACOS_ARCHS lists the
+# architectures of the macOS framework, arm64 and x86_64 by default; CI
+# builds arm64 only.
 set -eu
 cd "$(dirname "$0")/.."
 apple=$(pwd)
@@ -15,21 +17,28 @@ nightly=nightly-2026-10-10
 profile=${MAVIO_CORE_PROFILE:-release}
 build=$profile
 [ "$profile" = dev ] && build=debug
+darwin=""
+for arch in ${MAVIO_MACOS_ARCHS:-arm64 x86_64}; do
+	[ "$arch" = arm64 ] && arch=aarch64
+	darwin="$darwin $arch-apple-darwin"
+done
 
 export IPHONEOS_DEPLOYMENT_TARGET=18.0 TVOS_DEPLOYMENT_TARGET=18.0 MACOSX_DEPLOYMENT_TARGET=15.0
 
 cd "$core"
-rustup target add aarch64-apple-ios aarch64-apple-ios-sim aarch64-apple-darwin x86_64-apple-darwin >/dev/null
+# shellcheck disable=SC2086
+rustup target add aarch64-apple-ios aarch64-apple-ios-sim $darwin >/dev/null
 rustup toolchain install "$nightly" --profile minimal --component rust-src >/dev/null
 # One build per toolchain, so that Cargo compiles the targets in parallel.
+# shellcheck disable=SC2046,SC2086
 cargo build --locked --profile "$profile" -p mavio-uniffi --lib \
-	--target aarch64-apple-ios --target aarch64-apple-ios-sim --target aarch64-apple-darwin --target x86_64-apple-darwin
+	--target aarch64-apple-ios --target aarch64-apple-ios-sim $(printf -- ' --target %s' $darwin)
 cargo "+$nightly" build --locked --profile "$profile" -p mavio-uniffi --lib -Zbuild-std=std,panic_abort \
 	--target aarch64-apple-tvos --target aarch64-apple-tvos-sim
 
 rm -rf "$out" && mkdir -p "$out/MavioCore" "$out/frameworks"
 cargo run --locked --profile "$profile" -q --bin uniffi-bindgen -- generate \
-	--library "target/aarch64-apple-darwin/$build/libmavio.dylib" --language swift --out-dir "$out/gen"
+	--library "target/aarch64-apple-ios/$build/libmavio.dylib" --language swift --out-dir "$out/gen"
 mv "$out/gen/MavioCore.swift" "$out/MavioCore/"
 
 # framework <dir> <library> <min-os> <platform>...: wraps a library into
@@ -76,8 +85,8 @@ PLIST
 	fi
 }
 
-lipo -create "target/aarch64-apple-darwin/$build/libmavio.dylib" "target/x86_64-apple-darwin/$build/libmavio.dylib" \
-	-output "$out/gen/libmavio-macos.dylib"
+# shellcheck disable=SC2046,SC2086
+lipo -create $(printf "target/%s/$build/libmavio.dylib " $darwin) -output "$out/gen/libmavio-macos.dylib"
 framework "$out/frameworks/ios" "target/aarch64-apple-ios/$build/libmavio.dylib" 18.0 iPhoneOS
 framework "$out/frameworks/ios-sim" "target/aarch64-apple-ios-sim/$build/libmavio.dylib" 18.0 iPhoneSimulator
 framework "$out/frameworks/tvos" "target/aarch64-apple-tvos/$build/libmavio.dylib" 18.0 AppleTVOS

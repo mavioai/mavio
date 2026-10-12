@@ -10,7 +10,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "xcodebuild -project Mavio.xcodeproj -scheme Mavio -destination 'generic/platform=macOS' -derivedDataPath ../../dist/xcode/macos CODE_SIGNING_ALLOWED=NO -quiet build",
+        "command": "xcodebuild -project Mavio.xcodeproj -scheme Mavio -destination 'generic/platform=macOS' -derivedDataPath ../../dist/xcode/macos ARCHS=\"${MAVIO_MACOS_ARCHS:-arm64 x86_64}\" CODE_SIGNING_ALLOWED=NO -quiet build",
         "cwd": "{projectRoot}"
       },
       "dependsOn": [
@@ -25,6 +25,9 @@
         "swift",
         "^swift",
         "{projectRoot}/Mavio.xcodeproj/**/*",
+        {
+          "env": "MAVIO_MACOS_ARCHS"
+        },
         {
           "dependentTasksOutputFiles": "**/*",
           "transitive": true

@@ -19,6 +19,9 @@
         "^rust",
         {
           "env": "MAVIO_CORE_PROFILE"
+        },
+        {
+          "env": "MAVIO_MACOS_ARCHS"
         }
       ],
       "outputs": [
