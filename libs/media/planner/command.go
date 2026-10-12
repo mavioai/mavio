@@ -2,6 +2,7 @@ package planner
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -116,8 +117,19 @@ func (p *Planner) streamArgs(j *Job, keyframes bool, segmentContainer string) []
 		encoder = Copy
 	}
 	args = append(args, p.audioArgs(j, encoder)...)
+	var filters []string
 	if encoder == Copy {
-		args = append(args, p.audioBitstreamArgs(j, segmentContainer, j.inputContainer())...)
+		filters = p.audioBitstreamFilters(j, segmentContainer, j.inputContainer())
+	}
+	if segmentContainer == "mp4" {
+		// fMP4 segments time each track by its tfdt, an unsigned field
+		// that Media3 rejects when negative; audio that starts before
+		// zero, as encoder priming and the priming of AAC in MP4 sources
+		// do, is shifted to zero, and plays that much late.
+		filters = append(filters, `setts=ts=TS-min(STARTPTS\,0)`)
+	}
+	if len(filters) > 0 {
+		args = append(args, "-bsf:a", strings.Join(filters, ","))
 	}
 	return args
 }
@@ -133,9 +145,10 @@ func dropVideoMap(maps []string) []string {
 // Segments are fMP4 (CMAF) unless the job asks for MPEG-TS. Their
 // timestamps are the source's from where it starts, as ffmpeg times
 // extracted subtitles: they continue from the start position so that
-// seeking transcodes line up with the playlist, and they may be negative
-// (-avoid_negative_ts disabled), as in Jellyfin, rather than shifting the
-// output by the delay of reordered video or of audio priming.
+// seeking transcodes line up with the playlist, and the video's may be
+// negative (-avoid_negative_ts disabled) rather than shifting the output
+// by the delay of reordered frames. Audio in fMP4 starts at zero at the
+// earliest (streamArgs).
 func (p *Planner) HLSArgs(j *Job, out HLSOutput) []string {
 	seg := j.SegmentContainer
 	if seg == "" {
@@ -169,17 +182,9 @@ func (p *Planner) HLSArgs(j *Job, out HLSOutput) []string {
 		}
 		args = append(args, "-hls_segment_type", "fmp4", "-hls_fmp4_init_filename", init)
 		if j.Video != nil && j.isVideo() {
-			// frag_discont writes each track's first timestamp, with the
-			// audio's initial delay, into the fragments; without a sidx
-			// ffmpeg leaves the presentation times of open-GOP boundaries
-			// as they are.
-			//
-			// Audio that starts before zero, as encoder priming does, thus
-			// gets a negative tfdt, although the format defines it as
-			// unsigned. This is deliberate, as in Jellyfin, whose fMP4
-			// clients play it, as do hls.js and Safari; shifting the
-			// output instead would delay the video against its subtitles.
-			// See the roadmap's risks.
+			// frag_discont writes each track's first timestamp into the
+			// fragments; without a sidx ffmpeg leaves the presentation
+			// times of open-GOP boundaries as they are.
 			args = append(args, "-hls_segment_options", "movflags=+frag_discont+skip_sidx")
 		}
 	} else {

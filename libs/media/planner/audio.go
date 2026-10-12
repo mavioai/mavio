@@ -304,10 +304,19 @@ func (p *Planner) ProgressiveAudioArgs(j *Job, output string) []string {
 	return append(args, "-map_metadata", "-1", "-id3v2_version", "3", "-write_id3v1", "1", "-y", output)
 }
 
-// audioBitstreamArgs returns the bitstream filters for copied audio:
+// audioBitstreamArgs returns audioBitstreamFilters as an ffmpeg option.
+func (p *Planner) audioBitstreamArgs(j *Job, segmentContainer, sourceContainer string) []string {
+	filters := p.audioBitstreamFilters(j, segmentContainer, sourceContainer)
+	if len(filters) == 0 {
+		return nil
+	}
+	return []string{"-bsf:a", strings.Join(filters, ",")}
+}
+
+// audioBitstreamFilters returns the bitstream filters for copied audio:
 // dropping packets before the start of a seeked HLS transcode, whose video
 // is trimmed exactly, and converting ADTS AAC for MP4 segments.
-func (p *Planner) audioBitstreamArgs(j *Job, segmentContainer, sourceContainer string) []string {
+func (p *Planner) audioBitstreamFilters(j *Job, segmentContainer, sourceContainer string) []string {
 	var filters []string
 	if f := p.copiedAudioTrim(j); f != "" {
 		filters = append(filters, f)
@@ -316,10 +325,7 @@ func (p *Planner) audioBitstreamArgs(j *Job, segmentContainer, sourceContainer s
 	if strings.EqualFold(format, "mp4") && isADTSContainer(sourceContainer) && j.Audio != nil && isAAC(j.Audio) {
 		filters = append(filters, "aac_adtstoasc")
 	}
-	if len(filters) == 0 {
-		return nil
-	}
-	return []string{"-bsf:a", strings.Join(filters, ",")}
+	return filters
 }
 
 func isADTSContainer(c string) bool {
