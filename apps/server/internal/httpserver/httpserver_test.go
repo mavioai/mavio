@@ -48,7 +48,7 @@ func newHandler(t *testing.T, configure func(*playback.Config), options ...func(
 	t.Cleanup(func() { _ = s.Close() })
 	hub := events.New(events.Config{Store: s, LibraryDelay: 100 * time.Millisecond})
 	db := events.Observe(s, hub)
-	cfg := playback.Config{Store: db, Dir: t.TempDir(), OnChange: hub.SessionsChanged}
+	cfg := playback.Config{Store: db, Dir: t.TempDir(), MetadataDir: t.TempDir(), OnChange: hub.SessionsChanged}
 	if configure != nil {
 		configure(&cfg)
 	}

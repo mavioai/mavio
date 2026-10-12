@@ -25,6 +25,16 @@ type HLSOutput struct {
 	// and is numbered by its keyframe whatever position the transcode
 	// started at; segments are then made of consecutive files.
 	KeyframeChunks bool
+	// Subtitles are embedded text streams of the source written alongside
+	// the segments, each as one WebVTT file that grows as the transcode
+	// reads on, with the segments' timestamps.
+	Subtitles []SubtitleOutput
+}
+
+// SubtitleOutput is an embedded subtitle stream written as WebVTT.
+type SubtitleOutput struct {
+	Stream *core.MediaStream
+	Path   string
 }
 
 func (p *Planner) commonArgs() []string {
@@ -190,7 +200,16 @@ func (p *Planner) HLSArgs(j *Job, out HLSOutput) []string {
 	} else {
 		args = append(args, "-hls_segment_type", "mpegts")
 	}
-	return append(args, "-hls_segment_filename", out.Segments, "-y", out.Playlist)
+	args = append(args, "-hls_segment_filename", out.Segments, "-y", out.Playlist)
+	for _, s := range out.Subtitles {
+		// Each cue is written out as soon as it is read.
+		args = append(args, "-map", "0:"+strconv.Itoa(inFileIndex(j.Source, s.Stream)), "-c:s", "webvtt", "-flush_packets", "1")
+		if j.Start > 0 {
+			args = append(args, "-output_ts_offset", formatSeconds(j.Start))
+		}
+		args = append(args, "-f", "webvtt", "-y", s.Path)
+	}
+	return args
 }
 
 // ProgressiveArgs returns the ffmpeg arguments writing a video job as one

@@ -141,7 +141,7 @@ Everything Mavio reads from or writes to media storage, with its cost and when i
 | NFO, artwork, lyrics, sidecar subtitles | small files | small | refreshes, scans |
 | OpenSubtitles hash | 64 KB at the head and at the tail | 2 range reads | subtitle searches |
 | Playback | range reads for direct play, sequential reads by ffmpeg for remuxes and transcodes | proportional to what is watched | playback |
-| Embedded subtitles | ffmpeg copies the text stream out of the file | the whole file once a playback | playback of an embedded text subtitle delivered as a file |
+| Embedded subtitles | local and network: ffmpeg copies every text stream out at once, into the metadata folder (§2.6); cloud: the transcode playing the video writes them as it reads | local and network: the whole file once while it is unchanged; cloud: nothing beyond the playback | playback of an embedded text subtitle the client does not demux |
 | Prefetch, keep-alive, wakes | head and tail, the start position, 4 KB heartbeats (§1.5, §1.6) | under 70 MB a playback, 4 KB a heartbeat | probes, playbacks, presence, where the policy allows speculative reads |
 | Writes | NFO, artwork, subtitles, lyrics (written aside and renamed); imports move, copy or hard link; the recycle bin | small files; an import may copy a whole file | refreshes, downloads, imports |
 
@@ -156,6 +156,7 @@ Everything Mavio reads from or writes to media storage, with its cost and when i
 | Speculative reads: head and tail prefetch before probes, playback start prefetch, keep-alive and wakes | yes | no; storage is read only as playback asks |
 | Pruning unchanged folders in scans | yes | no; folder modification times of cloud drives do not tell changes below them |
 | Folders a scan lists at once | by device (§1.3) | 2 |
+| Embedded text subtitles the client does not demux | extracted once, kept in the metadata folder | streamed by the HLS transcode; otherwise burned in |
 
 The policy is checked both when the jobs are queued and when they run, so a class changed in between takes effect at once.
 
@@ -178,7 +179,15 @@ A trickplay thumbnail needs one picture near its time, not every frame before it
 * **Every frame**: the fallback when the keyframes-only run fails.
 * In every mode a thumbnail is the first picture at or after its time (`fps=…:round=down:eof_action=pass`), so the last thumbnail is kept when the keyframes end before the next time. ffmpeg runs on one thread and at a low priority (nice 10, or the below normal class on Windows), leaving the CPU to playbacks.
 
-### 2.6 Implementation Index
+### 2.6 Embedded Subtitles
+
+A client that does not demux a file's subtitles itself gets them from the server, as a file or as an HLS rendition. How the server reads them depends on the storage class:
+
+* **Local and network storage**: the first playback that needs one extracts every embedded text stream of the file in a single ffmpeg run, which reads the file once (ASS keeps its styling, other text becomes SRT), into the item's metadata folder (`library.SubtitlesDir`), stamped with the file's size and modification time. Later playbacks of any stream read it from there until the file changes; playbacks asking at once wait for the one run.
+* **Cloud storage, and sources read over HTTP**: an embedded stream is never extracted (`decision.Source.StreamedSubtitles`). Native clients demux it from the file they play. Clients that take subtitles as files get them as an HLS rendition instead: the playback becomes an HLS remux or transcode, and the ffmpeg run producing the video also writes each embedded text stream as WebVTT (`planner.HLSOutput.Subtitles`). A subtitle segment is served once the run has read past it (`Stream.Subtitle`); a seek restarts the run, and with it the subtitles, while what earlier runs read is kept. Clients that take neither get them burned in.
+* **Sidecar files** beside the video are small and read as they are, on every storage class.
+
+### 2.7 Implementation Index
 
 | Mechanism | Implementation | Phase |
 | :--- | :--- | :--- |
@@ -188,4 +197,5 @@ A trickplay thumbnail needs one picture near its time, not every frame before it
 | Storage policy | `libs/library/policy.go` (`StoragePolicy`, `PolicyOf`); used by `scan.go` (`scan.policy`, `Scanner.walkers`, `scan.state`), `jobs.go` (`Jobs.probeFile`), `keyframes.go`, `borders.go`, `mediaextras.go` (`Jobs.extrasJobs`, `trickplay`, `chapterImages`, `loudness`) | P24 |
 | Keyframes from container indexes | `libs/media/keyframes/index.go` (`FromIndex`, `FromFile`, `ErrNoIndex`), `matroska.go`, `mp4.go`; `apps/server/internal/providers/keyframes.go`; `libs/library/jobs.go` (`Jobs.probe`), `keyframes.go` (`KeyframeExtractor`) | P24 |
 | Trickplay from keyframes | `libs/media/keyframes/sample.go` (`Matroska.WriteSamples`), `matroska.go` (`ReadMatroska`); `libs/media/thumbnails/thumbnails.go` (`Mode`, `TrickplayArgs`, `Maker.Trickplay`), `priority_{unix,windows,other}.go`; `libs/library/mediaextras.go` (`Thumbnailer`, `Jobs.trickplay`) | P24 |
+| Embedded subtitles | `apps/server/internal/playback/subcache.go` (`Manager.extracted`, `extractAll`), `subtitles.go` (`Playback.liveSubtitles`, `liveSubtitle`, `Manager.loadSubtitle`), `manager.go` (`Manager.Start`); `libs/library/mediaextras.go` (`SubtitlesDir`); `libs/media/decision/source.go` (`Source.StreamedSubtitles`), `subtitles.go`; `libs/media/planner/command.go` (`HLSOutput.Subtitles`); `libs/streaming/subtitles.go` (`Stream.Subtitle`) | P24 |
 | No speculative reads of cloud storage | `libs/library/storage/keeper.go` (`Keeper.Class`); `apps/server/internal/playback/resume.go` (`Manager.prepareStart`); wired in `apps/server/internal/server/server.go` | P24 |

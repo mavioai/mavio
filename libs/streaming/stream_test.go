@@ -20,7 +20,8 @@ import (
 
 // fakeFFmpeg writes numbered files as ffmpeg's HLS muxer does: each under
 // a temporary name first, one every interval, until it has written files
-// up to last or is told to quit. With failAt set, every run fails instead
+// up to last or is told to quit; with each file, a cue "file{n}" at n
+// seconds into every WebVTT output named by -vtt. With failAt set, every run fails instead
 // of writing that file, as on corrupt input.
 type fakeFFmpeg struct {
 	last     int
@@ -60,6 +61,13 @@ func (f *fakeFFmpeg) start(_ context.Context, args []string) (supervisor.Process
 	pattern := arg("-hls_segment_filename")
 	dir := filepath.Dir(arg("-y"))
 	init := filepath.Join(dir, arg("-hls_fmp4_init_filename"))
+	var vtts []string
+	for i, a := range args {
+		if a == "-vtt" {
+			vtts = append(vtts, args[i+1])
+			_ = os.WriteFile(args[i+1], []byte("WEBVTT\n"), 0o644)
+		}
+	}
 	f.mu.Lock()
 	f.runs = append(f.runs, run{start: time.Duration(seconds(arg("-output_ts_offset"))), first: first})
 	f.mu.Unlock()
@@ -95,6 +103,11 @@ func (f *fakeFFmpeg) start(_ context.Context, args []string) (supervisor.Process
 				return
 			}
 			write(path, "file"+strconv.Itoa(n))
+			for _, v := range vtts {
+				vf, _ := os.OpenFile(v, os.O_APPEND|os.O_WRONLY, 0)
+				_, _ = fmt.Fprintf(vf, "\n00:%02d.000 --> 00:%02d.500\nfile%d\n", n, n, n)
+				_ = vf.Close()
+			}
 		}
 		p.done <- nil
 	}()

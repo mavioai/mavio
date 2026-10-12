@@ -58,6 +58,10 @@ type Config struct {
 	// FFmpegPath runs ffmpeg for subtitle extraction; empty serves only
 	// external subtitle files.
 	FFmpegPath string
+	// MetadataDir keeps the embedded text subtitles extracted from media
+	// sources, see [library.SubtitlesDir]; without it, embedded subtitles
+	// are streamed as on cloud storage.
+	MetadataDir string
 	// PauseKey says the ffmpeg build pauses on "p", see
 	// [supervisor.Config].
 	PauseKey bool
@@ -107,6 +111,8 @@ type Manager struct {
 	// replace them while others run.
 	planner atomic.Pointer[planner.Planner]
 	dir     atomic.Pointer[string]
+	// subLocks serializes subtitle extraction by source.
+	subLocks sourceLocks
 
 	mu        sync.Mutex
 	playbacks map[string]*Playback
@@ -352,6 +358,10 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	for i := range mediaSources {
 		s := sourceFor(&mediaSources[i], &r.User.Preferences, &data)
 		s.Remote = i >= local
+		// Embedded subtitles of files read over the network as playback
+		// asks are never extracted whole.
+		s.StreamedSubtitles = s.Remote || m.cfg.MetadataDir == "" ||
+			(m.cfg.Class != nil && m.cfg.Class(ctx, s.Path) == core.StorageCloud)
 		s.NoTranscoding = !r.User.Policy.AllowTranscoding || m.cfg.FFmpeg == nil
 		s.NoDirectStream = m.cfg.FFmpeg == nil
 		sources[i] = s
@@ -604,7 +614,7 @@ func (m *Manager) prepareHLS(ctx context.Context, p *Playback) error {
 	p.variant = streaming.VariantOf(out, int(ms.Bitrate), pixelFormat)
 	p.segExt = job.SegmentContainer
 	s, err := streaming.NewStream(streaming.Config{
-		Dir: filepath.Join(dir, p.ID), Layout: p.layout, Container: job.SegmentContainer,
+		Dir: filepath.Join(dir, p.ID), Layout: p.layout, Container: job.SegmentContainer, Subtitles: p.liveSubtitles(),
 		Args: func(start time.Duration, out planner.HLSOutput) []string {
 			j := *job
 			j.Start = start

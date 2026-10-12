@@ -79,6 +79,11 @@ func externalSubtitleProfile(s *Source, st *core.MediaStream, profiles []Subtitl
 		if !p.supportsLanguage(st.Language) {
 			continue
 		}
+		// A separate file of an embedded stream is extracted from the whole
+		// source.
+		if p.Method == SubtitleExternal && !isExternal(st) && s.StreamedSubtitles {
+			continue
+		}
 		// Embedded streams must be extracted while transcoding; PGS and
 		// VobSub always can be.
 		if !isExternal(st) && method == Transcode && (t == nil || !t.CanExtractSubtitles(st.Codec)) &&

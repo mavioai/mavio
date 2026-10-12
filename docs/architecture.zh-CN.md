@@ -439,7 +439,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **拼贴图**：`/images/collages/{id}` 以相同参数合成媒体库的图片（其最近添加条目的海报并排，16:9）、合集的图片（其条目的海报，2 × 2 网格，2:3）或播放列表的图片（其条目所属剧集与专辑的海报，或条目自身的海报，正方形网格），与 Jellyfin 的动态图片一样；所有者的 ID 即凭证。拼贴图按所用图片缓存，因此会随之更新；没有可用的图片时返回未找到。
 * **开发用播放器**：带 `--dev` 启动时，服务端还提供 `/dev/player`：一个单页面，可登录、列出视频并通过 `PlaybackService` 播放，使用 hls.js 或 Safari 自带的 HLS 播放器（`?engine=native|hlsjs`），可选的串流码率上限会使视频转码（`?bitrate=<每秒比特数>`），用于在客户端完成之前于真实浏览器上检查播放。`-dev-library <dir>` 把 `pnpm nx run fixtures:dev-library` 生成的示例媒体库中的 `Movies` 与 `Shows` 文件夹添加为媒体库。
 * **API 参考与反射**（`internal/apidocs`）：`/api/spec.json` 提供 `libs/proto/openapi` 中的 OpenAPI 文档（服务端提供的 Connect 服务，仅 JSON，以及 `openapi/base.yaml` 中的普通 HTTP 媒体路由），填入服务端版本，并把公开过程标为无需令牌。`/api` 用 Scalar 渲染该文档，Scalar 以固定版本从 jsdelivr CDN 加载，请求发往打开页面时的地址（包括基础 URL）。服务端还为所有服务应答 gRPC 反射（v1 与 v1alpha）。三者都无需令牌：它们描述 API，但不授予任何权限。
-* **字幕**：以文件交付的文本字幕在 `/media/{playback}/subtitles/{index}.{format}` 提供，由 `libs/subtitle` 从媒体库中的外挂文件或内嵌流转换而来；内嵌流由 ffmpeg 在每次播放中提取一次（ASS 保留样式，其他文本转为 SRT）。对接受清单内字幕的 HLS 客户端，每条文本字幕是主播放列表的一个字幕轨：一个 WebVTT 播放列表，语言以 BCP 47 标签表示，按视频分片切分：每个分片 `subtitles/{index}-{segment}.vtt` 包含在其期间显示的字幕，与视频一样以源文件的时间轴计时，最后一个分片还包含超出媒体结尾的字幕。图形字幕（PGS、VobSub）只能烧录；服务端无法写出的外挂文件，或没有 ffmpeg 时无法提取的内嵌字幕，将被丢弃。
+* **字幕**：以文件交付的文本字幕在 `/media/{playback}/subtitles/{index}.{format}` 提供，由 `libs/subtitle` 从媒体库中的外挂文件或内嵌流转换而来；内嵌流由 ffmpeg 连同文件中其他内嵌文字字幕流一起提取，文件不变时只提取一次，存入条目的元数据目录（ASS 保留样式，其他文本转为 SRT）。云存储上不提取内嵌流：这类客户端改为通过 HLS 字幕轨获得，由转码在读取视频时一并写出（[优化 §2.6](optimization.zh-CN.md#26-内嵌字幕)）。对接受清单内字幕的 HLS 客户端，每条文本字幕是主播放列表的一个字幕轨：一个 WebVTT 播放列表，语言以 BCP 47 标签表示，按视频分片切分：每个分片 `subtitles/{index}-{segment}.vtt` 包含在其期间显示的字幕，与视频一样以源文件的时间轴计时，最后一个分片还包含超出媒体结尾的字幕。图形字幕（PGS、VobSub）只能烧录；服务端无法写出的外挂文件，或没有 ffmpeg 时无法提取的内嵌字幕，将被丢弃。
 
 ---
 

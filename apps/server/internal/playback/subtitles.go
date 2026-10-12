@@ -1,13 +1,10 @@
 package playback
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
-	"os/exec"
 	"slices"
 	"strconv"
 	"strings"
@@ -65,6 +62,27 @@ func (p *Playback) hlsSubtitles() []streaming.Subtitle {
 		})
 	}
 	return out
+}
+
+// liveSubtitles lists the embedded text subtitle streams that the HLS
+// transcode writes as it reads them, for sources whose subtitles are not
+// extracted: the renditions of such streams.
+func (p *Playback) liveSubtitles() []*core.MediaStream {
+	if !p.Decision.Source.StreamedSubtitles {
+		return nil
+	}
+	var out []*core.MediaStream
+	for i := range p.Subtitles {
+		if s := &p.Subtitles[i]; s.Method == decision.SubtitleHLS && s.Stream.ExternalPath == "" && s.Stream.IsTextSubtitle() {
+			out = append(out, s.Stream)
+		}
+	}
+	return out
+}
+
+// live reports whether a subtitle stream's cues come from the transcode.
+func (p *Playback) live(st *core.MediaStream) bool {
+	return p.stream != nil && slices.Contains(p.liveSubtitles(), st)
 }
 
 // bcp47 converts an ISO 639-2 code to the BCP 47 tag HLS expects, "" when
@@ -137,8 +155,13 @@ func (m *Manager) serveSubtitle(w http.ResponseWriter, r *http.Request, p *Playb
 		http.NotFound(w, r)
 		return
 	}
-	s, err := m.loadSubtitle(r.Context(), p, sub.Stream)
-	if errors.Is(err, errNoSubtitle) {
+	var s *subtitle.Subtitle
+	if p.live(sub.Stream) && segment >= 0 {
+		s, err = liveSubtitle(r.Context(), p, sub.Stream, segment)
+	} else {
+		s, err = m.loadSubtitle(r.Context(), p, sub.Stream)
+	}
+	if errors.Is(err, errNoSubtitle) || errors.Is(err, streaming.ErrSegmentRange) {
 		http.NotFound(w, r)
 		return
 	} else if err != nil {
@@ -180,8 +203,20 @@ var subtitleTypes = map[string]string{
 	subtitle.TTML: "application/ttml+xml; charset=utf-8", subtitle.JSON: "application/json",
 }
 
+// liveSubtitle reads the cues of a subtitle stream the transcode wrote
+// while reading a segment.
+func liveSubtitle(ctx context.Context, p *Playback, st *core.MediaStream, segment int) (*subtitle.Subtitle, error) {
+	data, err := p.stream.Subtitle(ctx, st.Index, segment)
+	if err != nil {
+		return nil, err
+	}
+	return subtitle.Parse(data, subtitle.VTT)
+}
+
 // loadSubtitle reads a text subtitle stream once per playback: an external
-// file from the library, or an embedded stream extracted with ffmpeg.
+// file from the library, or an embedded stream extracted into the metadata
+// folder. Embedded streams of sources whose subtitles are streamed are
+// never extracted.
 func (m *Manager) loadSubtitle(ctx context.Context, p *Playback, st *core.MediaStream) (*subtitle.Subtitle, error) {
 	format := sourceFormat(st)
 	if !st.IsTextSubtitle() || format == "" {
@@ -204,11 +239,11 @@ func (m *Manager) loadSubtitle(ctx context.Context, p *Playback, st *core.MediaS
 			return nil, err
 		}
 	} else {
-		if m.cfg.FFmpegPath == "" {
+		if p.Decision.Source.StreamedSubtitles {
 			return nil, errNoSubtitle
 		}
 		var err error
-		if data, err = extractSubtitle(ctx, m.cfg.FFmpegPath, p.Source().Path, st.Index, format); err != nil {
+		if data, err = m.extracted(ctx, p.Item.ID, p.Source(), st); err != nil {
 			return nil, err
 		}
 	}
@@ -225,23 +260,4 @@ func (m *Manager) loadSubtitle(ctx context.Context, p *Playback, st *core.MediaS
 	}
 	p.subs[st.Index] = s
 	return s, nil
-}
-
-// extractSubtitle copies an embedded text subtitle stream out of a file,
-// converted to format: ASS keeps its styling, other text becomes SRT.
-// Cues are timed from the source's start, as HLS outputs are.
-func extractSubtitle(ctx context.Context, ffmpeg, path string, index int, format string) ([]byte, error) {
-	codec := "srt"
-	if format == subtitle.ASS {
-		codec = "ass"
-	}
-	cmd := exec.CommandContext(ctx, ffmpeg, "-hide_banner", "-nostdin", "-loglevel", "error",
-		"-i", path, "-map", "0:"+strconv.Itoa(index), "-c:s", codec, "-f", codec, "pipe:1")
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	out, err := cmd.Output()
-	if err != nil {
-		return nil, fmt.Errorf("extract subtitle %d: %w: %s", index, err, bytes.TrimSpace(stderr.Bytes()))
-	}
-	return out, nil
 }

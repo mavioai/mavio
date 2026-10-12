@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/media/planner"
 	"github.com/mavioai/mavio/libs/media/supervisor"
 )
@@ -33,6 +34,9 @@ type Config struct {
 	// starting at start.
 	Args  func(start time.Duration, out planner.HLSOutput) []string
 	Start supervisor.Starter
+	// Subtitles are embedded text subtitle streams that every run also
+	// writes as WebVTT, read with [Stream.Subtitle].
+	Subtitles []*core.MediaStream
 	// Supervision configures each ffmpeg run; its Args are replaced.
 	Supervision supervisor.Config
 	// MaxGap is how far ahead of what ffmpeg has written a request may
@@ -60,12 +64,22 @@ type Stream struct {
 	// begin is the segment the stream begins at, where the
 	// initialization segment starts ffmpeg.
 	begin int
+	// past are the stopped runs whose subtitles are kept; runs counts
+	// every run.
+	past []*job
+	runs int
 }
 
 type job struct {
 	session *supervisor.Session
 	// first is the number of the first file the run writes.
 	first int
+	// run numbers the run's subtitle files; started is when it started.
+	run     int
+	started time.Time
+	// next is, once the run is stopped, the first file it did not write.
+	next    int
+	stopped bool
 }
 
 // NewStream creates a stream; ffmpeg starts with Prepare or the first
@@ -266,6 +280,7 @@ func (s *Stream) runStart() time.Duration {
 func (s *Stream) startAt(ctx context.Context, index int) error {
 	s.stopJob()
 	start, first := s.cfg.Layout.seek(index)
+	s.runs++
 	out := planner.HLSOutput{
 		Playlist:       filepath.Join(s.cfg.Dir, "run.m3u8"),
 		Segments:       s.filePattern("%d"),
@@ -273,6 +288,11 @@ func (s *Stream) startAt(ctx context.Context, index int) error {
 		StartNumber:    first,
 		KeyframeChunks: s.cfg.Layout.Chunked(),
 	}
+	for _, st := range s.cfg.Subtitles {
+		out.Subtitles = append(out.Subtitles, planner.SubtitleOutput{Stream: st, Path: s.subtitleFile(st.Index, s.runs)})
+	}
+	// File times may be whole seconds.
+	started := time.Now().Truncate(time.Second)
 	cfg := s.cfg.Supervision
 	cfg.Args = s.cfg.Args(start, out)
 	if cfg.Logger == nil {
@@ -283,7 +303,7 @@ func (s *Stream) startAt(ctx context.Context, index int) error {
 		return err
 	}
 	s.cfg.Logger.DebugContext(ctx, "transcode started", "segment", index, "start", start)
-	s.job = &job{session: session, first: first}
+	s.job = &job{session: session, first: first, run: s.runs, started: started}
 	return nil
 }
 
@@ -293,6 +313,10 @@ func (s *Stream) stopJob() {
 		return
 	}
 	_ = s.job.session.Stop()
+	if len(s.cfg.Subtitles) > 0 {
+		s.job.next, s.job.stopped = s.ranTo(s.job), true
+		s.past = append(s.past, s.job)
+	}
 	s.job = nil
 	tmp, _ := filepath.Glob(filepath.Join(s.cfg.Dir, "*.tmp"))
 	for _, f := range tmp {

@@ -141,7 +141,7 @@ Mavio 对媒体存储的全部读写，及其代价和时机：
 | NFO、图片、歌词、外挂字幕 | 小文件 | 小 | 刷新、扫描 |
 | OpenSubtitles 哈希 | 文件头尾各 64 KB | 2 次 Range | 搜索字幕时 |
 | 播放 | 直接播放的 Range 读取，转封装和转码时 ffmpeg 顺序读 | 与观看量成正比 | 播放 |
-| 内嵌字幕 | ffmpeg 把文字字幕流复制出来 | 每次播放整个文件一次 | 以文件形式提供内嵌文字字幕的播放 |
+| 内嵌字幕 | 本地和网络：ffmpeg 一次复制出所有文字字幕流，存入元数据目录（§2.6）；云：播放视频的转码边读边写出 | 本地和网络：文件不变时整个文件读一次；云：播放之外不再读取 | 客户端不自行解复用内嵌文字字幕的播放 |
 | 预读、保活、唤醒 | 头尾、起播位置、4 KB 心跳（§1.5、§1.6） | 每次播放不到 70 MB，每次心跳 4 KB | probe、播放、用户在场时，策略允许推测式读取时 |
 | 写入 | NFO、图片、字幕、歌词（先写到旁边再 rename）；导入时 move、copy 或硬链接；回收站 | 小文件；导入可能复制整个文件 | 刷新、下载、导入 |
 
@@ -156,6 +156,7 @@ Mavio 对媒体存储的全部读写，及其代价和时机：
 | 推测式读取：probe 前的头尾预读、起播预读、保活和唤醒 | 是 | 否；只按播放的需要读取 |
 | 扫描时跳过未变化的目录 | 是 | 否；云盘目录的修改时间反映不了下层的变化 |
 | 扫描同时 list 的目录数 | 按设备（§1.3） | 2 |
+| 客户端不自行解复用的内嵌文字字幕 | 提取一次，保存在元数据目录 | 由 HLS 转码边读边输出；否则烧录 |
 
 入队和运行时都检查策略，因此中途修改的类别立即生效。
 
@@ -178,7 +179,15 @@ HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需�
 * **解码每一帧**：只解码关键帧失败时的兜底。
 * 每种方式下，缩略图都取不早于其时间的第一幅画面（`fps=…:round=down:eof_action=pass`），因此关键帧在下一个时间之前结束时，最后一张缩略图仍然保留。ffmpeg 单线程、低优先级运行（nice 10，Windows 上为低于正常的优先级类），把 CPU 留给播放。
 
-### 2.6 落地对照索引
+### 2.6 内嵌字幕
+
+客户端不自行解复用文件中的字幕时，由服务端以文件或 HLS 字幕轨的形式提供。服务端如何读取，取决于存储类别：
+
+* **本地和网络存储**：第一个需要内嵌字幕的播放，用一次 ffmpeg 运行提取文件中所有内嵌文字字幕流，只读一遍文件（ASS 保留样式，其他文本转为 SRT），存入条目的元数据目录（`library.SubtitlesDir`），并记下文件的大小和修改时间。之后任何字幕流的播放都从那里读取，直到文件变化；同时请求的播放等待这一次运行。
+* **云存储，以及通过 HTTP 读取的媒体源**：内嵌字幕流绝不提取（`decision.Source.StreamedSubtitles`）。原生客户端从所播放的文件中自行解复用。以文件形式接收字幕的客户端改为通过 HLS 字幕轨获得：播放变为 HLS 转封装或转码，产生视频的那次 ffmpeg 运行同时把每条内嵌文字字幕流写成 WebVTT（`planner.HLSOutput.Subtitles`）。运行读过某个字幕分片之后才提供该分片（`Stream.Subtitle`）；拖动会重启运行，字幕随之重启，之前各次运行读到的内容仍然保留。两者都不接受的客户端则烧录字幕。
+* **视频旁的字幕文件**很小，在所有存储类别上都直接读取。
+
+### 2.7 落地对照索引
 
 | 机制 | 实现 | 阶段 |
 | :--- | :--- | :--- |
@@ -188,4 +197,5 @@ HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需�
 | 存储策略 | `libs/library/policy.go`（`StoragePolicy`、`PolicyOf`）；由 `scan.go`（`scan.policy`、`Scanner.walkers`、`scan.state`）、`jobs.go`（`Jobs.probeFile`）、`keyframes.go`、`borders.go`、`mediaextras.go`（`Jobs.extrasJobs`、`trickplay`、`chapterImages`、`loudness`）使用 | P24 |
 | 从容器索引读取关键帧 | `libs/media/keyframes/index.go`（`FromIndex`、`FromFile`、`ErrNoIndex`）、`matroska.go`、`mp4.go`；`apps/server/internal/providers/keyframes.go`；`libs/library/jobs.go`（`Jobs.probe`）、`keyframes.go`（`KeyframeExtractor`） | P24 |
 | 用关键帧生成 trickplay | `libs/media/keyframes/sample.go`（`Matroska.WriteSamples`）、`matroska.go`（`ReadMatroska`）；`libs/media/thumbnails/thumbnails.go`（`Mode`、`TrickplayArgs`、`Maker.Trickplay`）、`priority_{unix,windows,other}.go`；`libs/library/mediaextras.go`（`Thumbnailer`、`Jobs.trickplay`） | P24 |
+| 内嵌字幕 | `apps/server/internal/playback/subcache.go`（`Manager.extracted`、`extractAll`）、`subtitles.go`（`Playback.liveSubtitles`、`liveSubtitle`、`Manager.loadSubtitle`）、`manager.go`（`Manager.Start`）；`libs/library/mediaextras.go`（`SubtitlesDir`）；`libs/media/decision/source.go`（`Source.StreamedSubtitles`）、`subtitles.go`；`libs/media/planner/command.go`（`HLSOutput.Subtitles`）；`libs/streaming/subtitles.go`（`Stream.Subtitle`） | P24 |
 | 不对云存储做推测式读取 | `libs/library/storage/keeper.go`（`Keeper.Class`）；`apps/server/internal/playback/resume.go`（`Manager.prepareStart`）；在 `apps/server/internal/server/server.go` 中装配 | P24 |

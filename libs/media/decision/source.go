@@ -19,6 +19,11 @@ type Source struct {
 	// Infinite sources, such as live streams, have no end; their subtitles
 	// cannot be converted ahead of playback.
 	Infinite bool
+	// StreamedSubtitles sources, such as files on cloud storage, have their
+	// embedded subtitles read only as they play: the client demuxes them,
+	// or the transcode writes them as an HLS rendition; they are never
+	// extracted into a separate file.
+	StreamedSubtitles bool
 	// NoDirectPlay, NoDirectStream and NoTranscoding rule out play methods.
 	NoDirectPlay, NoDirectStream, NoTranscoding bool
 	// MostCompatible restricts transcoding to MPEG-TS.

@@ -482,6 +482,9 @@ func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *eve
 		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, Record: activityLog.Record, Device: plugs.IsDevice,
 		QuietGate: quietGate, Keeper: keeper, Class: classes.Class, Logger: log,
 	}
+	if dir, err := filepath.Abs(cfg.MetadataDir); err == nil && cfg.MetadataDir != "" {
+		pc.MetadataDir = dir
+	}
 	if path, err := exec.LookPath(cfg.FFprobe); err == nil {
 		remote := &library.RemoteSources{
 			Source: plugs.MediaSourceProviders, Prober: providers.FFprobe{Prober: &probe.Prober{FFprobe: path}}, Logger: log,

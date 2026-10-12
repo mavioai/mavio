@@ -91,7 +91,7 @@ func newEnv(t *testing.T) *env {
 	if err := s.AuthSessions().Create(ctx, &e.sess); err != nil {
 		t.Fatal(err)
 	}
-	e.m = NewManager(Config{Store: s, Dir: t.TempDir()})
+	e.m = NewManager(Config{Store: s, Dir: t.TempDir(), MetadataDir: t.TempDir()})
 	return e
 }
 
@@ -428,7 +428,7 @@ func TestRemoteSource(t *testing.T) {
 			{Index: 1, Kind: core.StreamAudio, Codec: "aac", Channels: 2, SampleRate: 48000},
 		},
 	}
-	e.m = NewManager(Config{Store: e.store, Dir: t.TempDir(), RemoteSources: func(context.Context, core.Item) []core.MediaSource {
+	e.m = NewManager(Config{Store: e.store, Dir: t.TempDir(), MetadataDir: t.TempDir(), RemoteSources: func(context.Context, core.Item) []core.MediaSource {
 		return []core.MediaSource{remote}
 	}})
 	// Local sources come first.
