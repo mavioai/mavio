@@ -70,7 +70,7 @@ Apple 各项目需要 Xcode，只在 macOS 上构建；它们带有标签 `platf
 
 Android 各项目需要 Android SDK（通过 `ANDROID_HOME` 找到），运行 `mise.toml` 锁定的 Gradle 与 JDK；每个 Gradle 构建的 `gradle/wrapper/gradle-wrapper.properties` 为 Android Studio 指明同一 Gradle 版本，不带 wrapper 脚本。它们带有标签 `platform:android`。`libs/android`（Nx 名称 `android-lib`）是由模块 `core`、`player` 与 `ui` 组成的 Gradle 构建，带有一份版本目录（`gradle/libs.versions.toml`），各应用的 settings 也读取它；其 `core` 目标运行 `scripts/build-core.sh`：用锁定的 NDK（缺失时以 `sdkmanager` 安装）为 `arm64-v8a`、`armeabi-v7a` 与 `x86_64` 构建 `mavio-uniffi`，把各个库、UniFFI 生成的 Kotlin API，以及为本机构建、由单元测试通过 JNA 加载的核心写入 `core/build/rust`。其 `build`、`test` 与 `lint` 运行 `assembleDebug`、`testDebugUnitTest` 与 `lintDebug`。`apps/android` 与 `apps/android-tv` 是引入 `libs/android` 的 Gradle 构建，按坐标（`dev.mavio.android:core`）依赖其模块；它们有 `build` 与 `lint`。各应用的构建共享该 included build，因此 Gradle 目标逐个运行。
 
-`libs/apple` 与 `libs/android` 的 `core` 目标对每个工具链只运行一次 Cargo 构建，覆盖其全部目标，使各目标并行编译，使用 `release` profile；设置 `MAVIO_CORE_PROFILE=dev` 则不做优化地构建，耗时只是其一小部分，CI 即如此。
+`libs/apple` 与 `libs/android` 的 `core` 目标对每个工具链只运行一次 Cargo 构建，覆盖其全部目标，使各目标并行编译，使用 `release` profile；设置 `MAVIO_CORE_PROFILE=dev` 则不做优化地构建，耗时只是其一小部分，CI 即如此。macOS 的核心与应用是通用二进制，包含 `arm64` 与 `x86_64`；设置 `MAVIO_MACOS_ARCHS=arm64` 则两者都只为 Apple 芯片构建，CI 即如此。
 
 ### 2.3 常用命令
 ```bash
