@@ -51,7 +51,8 @@
         "{workspaceRoot}/tools/deps/deps.txt"
       ],
       "outputs": [
-        "{projectRoot}/player/build/ffmpeg"
+        "{projectRoot}/player/build/ffmpeg",
+        "{projectRoot}/player/build/.media3-ffmpeg.stamp"
       ],
       "cache": true
     },

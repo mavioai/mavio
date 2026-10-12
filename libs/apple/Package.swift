@@ -2,7 +2,7 @@
 // The Swift packages the iPhone and iPad, Apple TV and Mac apps share
 // (docs/clients.md §4.2). MavioCore is the shared core's Swift API, which
 // scripts/build-core.sh builds into build/ with its XCFramework; Libass is
-// libass, which scripts/build-ass.sh builds into build/.
+// libass, which mavio-deps releases and tools/deps fetches into build/.
 import PackageDescription
 
 let package = Package(
