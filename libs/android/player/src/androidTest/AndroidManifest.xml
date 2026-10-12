@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
-    <application>
+    <application android:usesCleartextTraffic="true">
         <activity android:name="dev.mavio.player.SurfaceActivity" android:exported="false" />
     </application>
 </manifest>
