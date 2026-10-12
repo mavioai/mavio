@@ -6,7 +6,9 @@
 # MAVIO_CORE_PROFILE picks the Cargo profile, release by default; CI builds
 # with dev, which compiles much faster. MAVIO_MACOS_ARCHS lists the
 # architectures of the macOS framework, arm64 and x86_64 by default; CI
-# builds arm64 only.
+# builds arm64 only. MAVIO_APPLE_PLATFORMS lists the platforms of the
+# XCFramework, of ios, ios-sim, tvos, tvos-sim and macos, all by default; CI
+# builds the simulators and macOS only, which its builds and tests run on.
 set -eu
 cd "$(dirname "$0")/.."
 apple=$(pwd)
@@ -15,16 +17,32 @@ out=$apple/build
 profile=${MAVIO_CORE_PROFILE:-release}
 build=$profile
 [ "$profile" = dev ] && build=debug
+platforms=${MAVIO_APPLE_PLATFORMS:-ios ios-sim tvos tvos-sim macos}
 darwin=""
 for arch in ${MAVIO_MACOS_ARCHS:-arm64 x86_64}; do
 	[ "$arch" = arm64 ] && arch=aarch64
 	darwin="$darwin $arch-apple-darwin"
 done
+# The Rust targets of a platform.
+targets_of() {
+	case $1 in
+	ios) echo aarch64-apple-ios ;;
+	ios-sim) echo aarch64-apple-ios-sim ;;
+	tvos) echo aarch64-apple-tvos ;;
+	tvos-sim) echo aarch64-apple-tvos-sim ;;
+	macos) echo "$darwin" ;;
+	*)
+		echo "unknown platform $1 in MAVIO_APPLE_PLATFORMS" >&2
+		exit 1
+		;;
+	esac
+}
+targets=""
+for p in $platforms; do targets="$targets $(targets_of "$p")"; done
 
 export IPHONEOS_DEPLOYMENT_TARGET=18.0 TVOS_DEPLOYMENT_TARGET=18.0 MACOSX_DEPLOYMENT_TARGET=15.0
 
 cd "$core"
-targets="aarch64-apple-ios aarch64-apple-ios-sim aarch64-apple-tvos aarch64-apple-tvos-sim$darwin"
 # shellcheck disable=SC2086
 rustup target add $targets >/dev/null
 # One build, so that Cargo compiles the targets in parallel.
@@ -34,8 +52,11 @@ cargo build --locked --profile "$profile" -p mavio-uniffi --lib $(printf -- ' --
 # Only what this script writes; build/ holds the other libraries too.
 rm -rf "$out/MavioCore" "$out/MavioCoreFFI.xcframework" "$out/gen" "$out/frameworks"
 mkdir -p "$out/MavioCore" "$out/frameworks"
+# The bindings are the same whichever target's library they come from.
+# shellcheck disable=SC2086
+set -- $targets
 cargo run --locked --profile "$profile" -q --bin uniffi-bindgen -- generate \
-	--library "target/aarch64-apple-ios/$build/libmavio.dylib" --language swift --out-dir "$out/gen"
+	--library "target/$1/$build/libmavio.dylib" --language swift --out-dir "$out/gen"
 mv "$out/gen/MavioCore.swift" "$out/MavioCore/"
 
 # framework <dir> <library> <min-os> <platform>...: wraps a library into
@@ -82,16 +103,21 @@ PLIST
 	fi
 }
 
-# shellcheck disable=SC2046,SC2086
-lipo -create $(printf "target/%s/$build/libmavio.dylib " $darwin) -output "$out/gen/libmavio-macos.dylib"
-framework "$out/frameworks/ios" "target/aarch64-apple-ios/$build/libmavio.dylib" 18.0 iPhoneOS
-framework "$out/frameworks/ios-sim" "target/aarch64-apple-ios-sim/$build/libmavio.dylib" 18.0 iPhoneSimulator
-framework "$out/frameworks/tvos" "target/aarch64-apple-tvos/$build/libmavio.dylib" 18.0 AppleTVOS
-framework "$out/frameworks/tvos-sim" "target/aarch64-apple-tvos-sim/$build/libmavio.dylib" 18.0 AppleTVSimulator
-framework "$out/frameworks/macos" "$out/gen/libmavio-macos.dylib" 15.0 MacOSX
 args=""
-for p in ios ios-sim tvos tvos-sim macos; do
-	args="$args -framework $out/frameworks/$p/MavioCoreFFI.framework"
+for platform in $platforms; do
+	lib=target/aarch64-apple-$platform/$build/libmavio.dylib
+	case $platform in
+	ios) framework "$out/frameworks/$platform" "$lib" 18.0 iPhoneOS ;;
+	ios-sim) framework "$out/frameworks/$platform" "$lib" 18.0 iPhoneSimulator ;;
+	tvos) framework "$out/frameworks/$platform" "$lib" 18.0 AppleTVOS ;;
+	tvos-sim) framework "$out/frameworks/$platform" "$lib" 18.0 AppleTVSimulator ;;
+	macos)
+		# shellcheck disable=SC2046,SC2086
+		lipo -create $(printf "target/%s/$build/libmavio.dylib " $darwin) -output "$out/gen/libmavio-macos.dylib"
+		framework "$out/frameworks/$platform" "$out/gen/libmavio-macos.dylib" 15.0 MacOSX
+		;;
+	esac
+	args="$args -framework $out/frameworks/$platform/MavioCoreFFI.framework"
 done
 # shellcheck disable=SC2086
 xcodebuild -create-xcframework $args -output "$out/MavioCoreFFI.xcframework" >/dev/null

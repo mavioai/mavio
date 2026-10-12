@@ -22,6 +22,9 @@
         },
         {
           "env": "MAVIO_MACOS_ARCHS"
+        },
+        {
+          "env": "MAVIO_APPLE_PLATFORMS"
         }
       ],
       "outputs": [
