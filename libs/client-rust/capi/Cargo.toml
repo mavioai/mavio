@@ -1,6 +1,6 @@
 [package]
 name = "mavio-capi"
-description = "The C ABI of the Mavio clients' shared core, which the Windows and Linux app calls from Go"
+description = "The C ABI of the Mavio clients' shared core, which the desktop app calls from Go"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

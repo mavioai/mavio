@@ -9,7 +9,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { parse, TYPE } from '@formatjs/icu-messageformat-parser';
 
 export const SOURCE_LOCALE = 'en';
-export const PLATFORMS = ['web', 'apple', 'android', 'windows-linux'];
+export const PLATFORMS = ['web', 'apple', 'android', 'desktop'];
 const PLURAL_FORMS = ['zero', 'one', 'two', 'few', 'many', 'other'];
 
 // Parts are strings (text), { arg } and { count: true } for #.

@@ -6,7 +6,7 @@
 
 ✓ 已上线 · ○ 计划中 · — 不适用
 
-| 功能 | Web | iPhone、iPad | Apple TV | Mac | Android | Android TV | Windows、Linux |
+| 功能 | Web | iPhone、iPad | Apple TV | Mac | Android | Android TV | 桌面 |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **服务器与登录** | | | | | | | |
 | 局域网服务器发现 | — | ○ | ○ | ○ | ○ | ○ | ○ |
@@ -51,9 +51,9 @@
 ## 不适用说明
 
 * **Web 上的服务器发现与以缓存内容启动**：浏览器无法发现局域网中的服务器，而 Web UI 从服务器加载，先连上服务器才有其他一切。
-* **Web 与 Windows、Linux 上的第二引擎**：Web 使用浏览器的播放器；Windows 与 Linux 只用 libmpv 播放。
-* **Android TV 与 Windows、Linux 上的画中画**：Android TV 与 Google TV 设备不提供画中画；桌面应用改用自己的窗口。
-* **Apple TV、Android 与 Windows、Linux 上的 AirPlay**：Apple TV 是 AirPlay 的接收端而非发送端；其余平台没有 AirPlay。
+* **Web 与桌面应用中的第二引擎**：Web 使用浏览器的播放器；桌面应用只用 libmpv 播放。
+* **Android TV 与桌面应用中的画中画**：Android TV 与 Google TV 设备不提供画中画；桌面应用改用自己的窗口。
+* **Apple TV、Android 与桌面应用中的 AirPlay**：Apple TV 是 AirPlay 的接收端而非发送端；其余平台没有 AirPlay。
 * **Web 以外的在外部播放器中打开**：浏览器无法播放的内容，各应用用其第二引擎直接播放。
 * **Web 与电视上的下载**：浏览器没有用于媒体的后台传输与存储；电视应用以流式播放。
 * **其他平台上的电视主屏幕**：它们各属其平台。

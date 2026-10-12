@@ -4,7 +4,7 @@
 
 > Related: [Architecture](architecture.md) · [Domain Model](domain.md) · [Roadmap](roadmap.md) · [Development](development.md) · [AGENTS.md](../AGENTS.md)
 
-> Mavio's clients are a web UI embedded in the server binary and a native app for each way people watch: iPhone and iPad, Apple TV, Mac, Android phones and tablets, Android TV, and Windows and Linux desktops. The server makes the decisions; the clients declare what they can play, play it, and keep what they need offline. A shared Rust core gives every native app one implementation of the connection, event, offline and playback-reporting logic. The clients are built in phase P21 of the [Roadmap](roadmap.md).
+> Mavio's clients are a web UI embedded in the server binary and a native app for each way people watch: iPhone and iPad, Apple TV, Mac, Android phones and tablets, Android TV, and desktops on macOS, Windows and Linux. The server makes the decisions; the clients declare what they can play, play it, and keep what they need offline. A shared Rust core gives every native app one implementation of the connection, event, offline and playback-reporting logic. The clients are built in phase P21 of the [Roadmap](roadmap.md).
 
 ---
 
@@ -20,7 +20,7 @@ Each app is built for one interaction model — touch, the television remote, th
 | `apps/macos` | Swift, AppKit (SwiftUI where it fits) | Mac |
 | `apps/android` | Kotlin, Jetpack Compose | Android phones, tablets and foldables |
 | `apps/android-tv` | Kotlin, Compose for TV | Android TV and Google TV |
-| `apps/windows-linux` | Go, [MyGo](https://github.com/egoist/mygo) native UI, libmpv | Windows and Linux |
+| `apps/desktop` | Go, [MyGo](https://github.com/egoist/mygo) native UI, libmpv | macOS, Windows and Linux |
 
 | Library | Contents | Used by |
 | :--- | :--- | :--- |
@@ -54,7 +54,7 @@ flowchart LR
     macOS["apps/macos"]
     Android["apps/android"]
     AndroidTV["apps/android-tv"]
-    WinLin["apps/windows-linux<br/>MyGo · libmpv"]
+    Desktop["apps/desktop<br/>MyGo · libmpv"]
 
     Server -->|"embeds"| Web
     Web --> ClientTS
@@ -62,10 +62,10 @@ flowchart LR
     Core -->|"Connect"| Server
     AppleLib -->|"UniFFI (Swift)"| Core
     AndroidLib -->|"UniFFI (Kotlin)"| Core
-    WinLin -->|"C ABI (purego)"| Core
+    Desktop -->|"C ABI (purego)"| Core
     iOS & tvOS & macOS --> AppleLib
     Android & AndroidTV --> AndroidLib
-    Web & AppleLib & AndroidLib & WinLin -->|"HTTP: /media, /images"| Server
+    Web & AppleLib & AndroidLib & Desktop -->|"HTTP: /media, /images"| Server
 ```
 
 ---
@@ -126,14 +126,16 @@ The server owns every decision that depends on the library, the user or other de
   * **Media3** ExoPlayer, the first engine, plays Matroska and MP4 in the formats the device decodes, the audio formats the platform lacks (DTS, TrueHD and the like) through its FFmpeg decoder extension, built from source with FFmpeg's audio decoders as LGPL (`scripts/build-ffmpeg.sh`), and PGS subtitles and SSA without its styling. It renders to a `SurfaceView` for HDR and low power, with tunneled playback where the TV supports it and frame rate matching with `Surface.setFrameRate`.
   * **libmpv**, the second, as mpv-android builds it, direct plays what Media3 does not, such as styled ASS subtitles and codecs without a hardware decoder, rendering with OpenGL ES into its own `SurfaceView` and decoding with MediaCodec where it can. A Media3 `SimpleBasePlayer` adapts it (`MpvPlayer`), so that the media session and the controller treat both engines alike. It is built from source with mpv-android's build scripts and its JNI layer (`is.xyz.mpv.MPVLib`) at versions `scripts/build-mpv.sh` pins, FFmpeg and mpv as GPL-3.0; libass draws with the system's fonts where a file embeds none.
 
-### 4.4 Windows and Linux (`apps/windows-linux`)
-* **Structure**: a Go app on MyGo, all of its windows native UI that MyGo draws on the GPU (Direct3D 11 on Windows, OpenGL on Linux); no web view. It builds with `CGO_ENABLED=0` like the server and ships with two shared libraries, libmpv and the core.
-* **Core**: `libs/client-rust` through its C ABI, loaded at run time as MyGo loads native APIs — purego on Linux, the `syscall` package on Windows. Requests, results and events cross it as protobuf messages of the core's API, generated for Go.
+### 4.4 Desktop (`apps/desktop`)
+* **Structure**: a Go app on MyGo for macOS, Windows and Linux, all of its windows native UI that MyGo draws on the GPU (Metal on macOS, Direct3D 11 on Windows, OpenGL on Linux); no web view. It builds with `CGO_ENABLED=0` like the server and ships with two shared libraries, libmpv and the core.
+* **On the Mac**: a second Mac app beside `apps/macos`, which stays the Mac app built on the system's player and toolkit. The desktop app shares one code base with Windows and Linux, so that it is built and tried on a Mac; it is distributed as a notarized disk image outside the App Store, under an ID of its own (`dev.mavio.desktop`).
+* **Core**: `libs/client-rust` through its C ABI, loaded at run time as MyGo loads native APIs — purego on macOS and Linux, the `syscall` package on Windows. Requests, results and events cross it as protobuf messages of the core's API, generated for Go.
 * **Player**: libmpv, loaded the same way and driven through its client API (commands, properties, and events read by a goroutine). mpv draws the video itself, in a native surface of its own placed under the surface MyGo draws the UI in. A video element of MyGo's native UI places that surface: it makes a hole through what the window paints where the video shows, so that the on-screen controller (§6.5), menus and dialogs, drawn by MyGo, show over the video, and the pointer reaches MyGo wherever it draws something.
+  * **macOS**: mpv renders with `gpu-next` into a view of its own under MyGo's layer-backed view, outputting HDR through EDR.
   * **Windows**: mpv renders into a child window (`wid`) with Direct3D 11 and `gpu-next`, outputting HDR10 with `target-colorspace-hint`; MyGo's frames are in the window's topmost DirectComposition target, above it.
   * **Linux**: mpv's OpenGL render API draws into a `GtkGLArea` under MyGo's surface in its `GtkOverlay`, on X11 and Wayland alike; HDR is tone mapped to SDR.
-* **System integration**: System Media Transport Controls on Windows and MPRIS on Linux, which also bring the media keys; MyGo's power API keeps the display awake during playback.
-* **Packaging and updates**: MyGo's — Windows installers, Debian packages and a Linux install script, code signing, and signed automatic updates with delta updates.
+* **System integration**: Now Playing and the remote commands on macOS, System Media Transport Controls on Windows and MPRIS on Linux, which also bring the media keys; MyGo's power API keeps the display awake during playback.
+* **Packaging and updates**: MyGo's — app bundles and notarized disk images, Windows installers, Debian packages and a Linux install script, code signing, and signed automatic updates with delta updates.
 
 ---
 
@@ -196,7 +198,7 @@ Content and brand icons are [Phosphor](https://phosphoricons.com/) (MIT), pinned
 Every client has the same screens with the same names, reached the same way:
 * **Top-level destinations**: Home (§6.3.1), the libraries, Search, Downloads (the apps), and the profile with settings.
 * **Screens below them**: a library (grid with sort and filters), an item's details (movie, series, season, person, collection), the player, and settings.
-* **Navigation container**, mapped per platform: a tab bar on iPhone, a sidebar on iPad, Mac, Windows, Linux and wide web windows, a navigation bar or rail on Android by window size class, a top tab bar on Apple TV, and a side menu on Android TV.
+* **Navigation container**, mapped per platform: a tab bar on iPhone, a sidebar on iPad, Mac, desktops and wide web windows, a navigation bar or rail on Android by window size class, a top tab bar on Apple TV, and a side menu on Android TV.
 
 #### 6.3.1 Home
 Home is a column of hubs, after Plex's: rows of items, each a reason to watch something.
@@ -217,7 +219,7 @@ Every player follows one layout and state machine:
 * **Input**: keyboard shortcuts on desktops and the web (space, arrows, `f`, `m`, `j`/`l`); the D-pad and remote on television, where the controller follows the platform's focus (the tvOS focus engine, Compose for TV focus) and stays up while it has focus.
 
 ### 6.6 Copy and Localization
-The strings of every client are defined once in `libs/design/strings` in ICU MessageFormat, with English the source language, and compiled into the web UI's message catalogs, String Catalogs (`.xcstrings`) for Apple platforms, `strings.xml` for Android and a Go package for Windows and Linux. The same term names the same thing everywhere, plurals follow CLDR rules, and each string is translated once. Strings only one platform uses carry that platform's tag.
+The strings of every client are defined once in `libs/design/strings` in ICU MessageFormat, with English the source language, and compiled into the web UI's message catalogs, String Catalogs (`.xcstrings`) for Apple platforms, `strings.xml` for Android and a Go package for the desktop app. The same term names the same thing everywhere, plurals follow CLDR rules, and each string is translated once. Strings only one platform uses carry that platform's tag.
 
 ### 6.7 Platform Conventions
 Consistency of brand does not override the platforms:
@@ -229,8 +231,8 @@ Consistency of brand does not override the platforms:
 * **Accessibility**: VoiceOver, TalkBack and screen readers, Dynamic Type and font scaling, Reduce Motion, and contrast meeting WCAG AA.
 
 ### 6.8 Galleries and Visual Review
-* **Component galleries**: every platform browses its components in every state with fixed data — Storybook on the web, SwiftUI previews on Apple platforms, Compose previews on Android and a gallery window on Windows and Linux.
-* **Snapshot tests**: every client renders the same set of screens with fixed data in snapshot tests — Playwright on the web, swift-snapshot-testing on Apple platforms, Roborazzi on Android and MyGo's offscreen rendering on Windows and Linux. CI compares them with the committed references and builds one page placing each screen's platforms side by side, which a pull request that changes the UI links for review.
+* **Component galleries**: every platform browses its components in every state with fixed data — Storybook on the web, SwiftUI previews on Apple platforms, Compose previews on Android and a gallery window in the desktop app.
+* **Snapshot tests**: every client renders the same set of screens with fixed data in snapshot tests — Playwright on the web, swift-snapshot-testing on Apple platforms, Roborazzi on Android and MyGo's tester (`ui.NewTester`), which draws frames in memory, in the desktop app. CI compares them with the committed references and builds one page placing each screen's platforms side by side, which a pull request that changes the UI links for review.
 * **Feature parity**: `libs/design/parity.md` lists every feature with its state on each client (shipped, planned, not applicable), so that a client lacks a feature only by decision; a pull request adding a feature to one client updates it.
 
 ---
@@ -240,10 +242,10 @@ Consistency of brand does not override the platforms:
 * `apps/web` → `libs/client-ts` → `libs/proto` (TypeScript); every client → `libs/design`.
 * `apps/ios`, `apps/tvos`, `apps/macos` → `libs/apple` → `libs/client-rust` (Swift bindings).
 * `apps/android`, `apps/android-tv` → `libs/android` → `libs/client-rust` (Kotlin bindings).
-* `apps/windows-linux` → `libs/client-rust` (the C ABI, through its Go binding `libs/client-rust/capi`) and `libs/proto` (Go). It is a Go module like the server's and follows the repository's Go conventions; the depguard rules let it depend on no server library.
+* `apps/desktop` → `libs/client-rust` (the C ABI, through its Go binding `libs/client-rust/capi`) and `libs/proto` (Go). It is a Go module like the server's and follows the repository's Go conventions; the depguard rules let it depend on no server library.
 * `libs/client-rust` → `libs/proto` (Rust).
 * No app depends on another app. The server depends on `apps/web` only for the files it embeds.
-* Nx runs every client: `tools/nx-go` infers `apps/windows-linux` as it does every Go module, Vite and TypeScript run through their Nx plugins, and Cargo, Gradle and `xcodebuild` through targets of their own. The Apple and Android jobs in CI run only when they are affected, macOS runners being costly.
+* Nx runs every client: `tools/nx-go` infers `apps/desktop` as it does every Go module, Vite and TypeScript run through their Nx plugins, and Cargo, Gradle and `xcodebuild` through targets of their own. The Apple and Android jobs in CI run only when they are affected, macOS runners being costly.
 
 ---
 
@@ -259,7 +261,7 @@ mavio/
 │   ├── macos/                   # [Swift] Mac (AppKit)
 │   ├── android/                 # [Kotlin] Phones, tablets, foldables
 │   ├── android-tv/              # [Kotlin] Android TV, Google TV
-│   └── windows-linux/           # [Go] Windows and Linux (MyGo, libmpv)
+│   └── desktop/                 # [Go] macOS, Windows and Linux (MyGo, libmpv)
 │
 ├── libs/
 │   ├── proto/                   # Contracts; gen/go, gen/ts, gen/rust

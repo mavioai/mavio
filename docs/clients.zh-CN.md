@@ -4,7 +4,7 @@
 
 > 相关文档：[系统架构](architecture.zh-CN.md) · [领域模型](domain.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [开发指南](development.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
-> Mavio 的客户端包括内嵌于服务端二进制的 Web UI，以及面向每种观看方式的原生应用：iPhone 与 iPad、Apple TV、Mac、Android 手机与平板、Android TV，以及 Windows 与 Linux 桌面。决策由服务端做出；客户端声明自己能播放什么、负责播放，并离线保留所需内容。共享的 Rust 核心让所有原生应用的连接、事件、离线与播放上报逻辑只有一份实现。客户端在[路线图](roadmap.zh-CN.md)的 P21 阶段构建。
+> Mavio 的客户端包括内嵌于服务端二进制的 Web UI，以及面向每种观看方式的原生应用：iPhone 与 iPad、Apple TV、Mac、Android 手机与平板、Android TV，以及 macOS、Windows 与 Linux 桌面。决策由服务端做出；客户端声明自己能播放什么、负责播放，并离线保留所需内容。共享的 Rust 核心让所有原生应用的连接、事件、离线与播放上报逻辑只有一份实现。客户端在[路线图](roadmap.zh-CN.md)的 P21 阶段构建。
 
 ---
 
@@ -20,7 +20,7 @@
 | `apps/macos` | Swift、AppKit（合适处用 SwiftUI） | Mac |
 | `apps/android` | Kotlin、Jetpack Compose | Android 手机、平板与折叠屏 |
 | `apps/android-tv` | Kotlin、Compose for TV | Android TV 与 Google TV |
-| `apps/windows-linux` | Go、[MyGo](https://github.com/egoist/mygo) 原生 UI、libmpv | Windows 与 Linux |
+| `apps/desktop` | Go、[MyGo](https://github.com/egoist/mygo) 原生 UI、libmpv | macOS、Windows 与 Linux |
 
 | 库 | 内容 | 使用者 |
 | :--- | :--- | :--- |
@@ -54,7 +54,7 @@ flowchart LR
     macOS["apps/macos"]
     Android["apps/android"]
     AndroidTV["apps/android-tv"]
-    WinLin["apps/windows-linux<br/>MyGo · libmpv"]
+    Desktop["apps/desktop<br/>MyGo · libmpv"]
 
     Server -->|"内嵌"| Web
     Web --> ClientTS
@@ -62,10 +62,10 @@ flowchart LR
     Core -->|"Connect"| Server
     AppleLib -->|"UniFFI（Swift）"| Core
     AndroidLib -->|"UniFFI（Kotlin）"| Core
-    WinLin -->|"C ABI（purego）"| Core
+    Desktop -->|"C ABI（purego）"| Core
     iOS & tvOS & macOS --> AppleLib
     Android & AndroidTV --> AndroidLib
-    Web & AppleLib & AndroidLib & WinLin -->|"HTTP：/media、/images"| Server
+    Web & AppleLib & AndroidLib & Desktop -->|"HTTP：/media、/images"| Server
 ```
 
 ---
@@ -126,14 +126,16 @@ flowchart LR
   * **Media3** ExoPlayer 是首选引擎，播放 Matroska 与 MP4 中设备能解码的格式，借助其 FFmpeg 解码扩展（以 FFmpeg 的音频解码器按 LGPL 从源码构建，`scripts/build-ffmpeg.sh`）播放平台缺少的音频格式（DTS、TrueHD 等），并支持 PGS 字幕与不带样式的 SSA。它渲染到 `SurfaceView` 以支持 HDR 并降低功耗，电视支持时使用隧道播放，并以 `Surface.setFrameRate` 匹配帧率。
   * **libmpv** 是第二引擎，按 mpv-android 的方式构建，直接播放 Media3 不能播放的内容，如带样式的 ASS 字幕与没有硬件解码器的编码；以 OpenGL ES 渲染到它自己的 `SurfaceView`，能用 MediaCodec 时以其解码。它由一个 Media3 `SimpleBasePlayer` 适配（`MpvPlayer`），使媒体会话与控制器同等对待两个引擎。它以 mpv-android 的构建脚本及其 JNI 层（`is.xyz.mpv.MPVLib`）按 `scripts/build-mpv.sh` 锁定的版本从源码构建，FFmpeg 与 mpv 按 GPL-3.0 构建；文件未内嵌字体时，libass 以系统字体绘制。
 
-### 4.4 Windows 与 Linux（`apps/windows-linux`）
-* **结构**：基于 MyGo 的 Go 应用，所有窗口都是 MyGo 在 GPU 上绘制的原生 UI（Windows 上为 Direct3D 11，Linux 上为 OpenGL）；不使用 Web 视图。它与服务端一样以 `CGO_ENABLED=0` 构建，随附两个共享库：libmpv 与核心。
-* **核心**：通过 C ABI 使用 `libs/client-rust`，与 MyGo 加载原生 API 的方式相同，在运行时加载——Linux 上用 purego，Windows 上用 `syscall` 包。请求、结果与事件以核心 API 的 protobuf 消息跨越该接口，并为 Go 生成代码。
+### 4.4 桌面（`apps/desktop`）
+* **结构**：基于 MyGo 的 Go 应用，面向 macOS、Windows 与 Linux，所有窗口都是 MyGo 在 GPU 上绘制的原生 UI（macOS 上为 Metal，Windows 上为 Direct3D 11，Linux 上为 OpenGL）；不使用 Web 视图。它与服务端一样以 `CGO_ENABLED=0` 构建，随附两个共享库：libmpv 与核心。
+* **在 Mac 上**：它是 `apps/macos` 之外的第二个 Mac 应用；`apps/macos` 仍是基于系统播放器与工具包的 Mac 应用。桌面应用与 Windows、Linux 共用一份代码，因此可在 Mac 上构建与试用；它以经过公证的磁盘映像在 App Store 之外分发，使用自己的 ID（`dev.mavio.desktop`）。
+* **核心**：通过 C ABI 使用 `libs/client-rust`，与 MyGo 加载原生 API 的方式相同，在运行时加载——macOS 与 Linux 上用 purego，Windows 上用 `syscall` 包。请求、结果与事件以核心 API 的 protobuf 消息跨越该接口，并为 Go 生成代码。
 * **播放器**：libmpv，以同样方式加载，通过其 client API 驱动（命令、属性，以及由一个 goroutine 读取的事件）。视频由 mpv 自己绘制，位于它自己的原生表面中，该表面放在 MyGo 绘制 UI 的表面之下。MyGo 原生 UI 中的视频元素负责放置该表面：在视频显示处，它在窗口绘制的内容上打出一个洞，使 MyGo 绘制的屏幕控制器（§6.5）、菜单与对话框显示在视频之上，而 MyGo 绘有内容之处的指针事件仍归 MyGo。
+  * **macOS**：mpv 以 `gpu-next` 渲染到 MyGo 以 layer 为后备的视图之下、它自己的视图中，经 EDR 输出 HDR。
   * **Windows**：mpv 以 Direct3D 11 与 `gpu-next` 渲染到子窗口（`wid`），并以 `target-colorspace-hint` 输出 HDR10；MyGo 的帧位于窗口最顶层的 DirectComposition 目标中，处于其上方。
   * **Linux**：mpv 的 OpenGL render API 绘制到 MyGo 表面之下、位于其 `GtkOverlay` 中的 `GtkGLArea`，X11 与 Wayland 相同；HDR 色调映射为 SDR。
-* **系统集成**：Windows 上的 System Media Transport Controls 与 Linux 上的 MPRIS，同时提供媒体键；播放期间由 MyGo 的电源 API 保持屏幕常亮。
-* **打包与更新**：使用 MyGo 提供的能力——Windows 安装程序、Debian 包与 Linux 安装脚本、代码签名，以及带增量更新的签名自动更新。
+* **系统集成**：macOS 上的「正在播放」与远程命令、Windows 上的 System Media Transport Controls 与 Linux 上的 MPRIS，同时提供媒体键；播放期间由 MyGo 的电源 API 保持屏幕常亮。
+* **打包与更新**：使用 MyGo 提供的能力——应用包与经过公证的磁盘映像、Windows 安装程序、Debian 包与 Linux 安装脚本、代码签名，以及带增量更新的签名自动更新。
 
 ---
 
@@ -196,7 +198,7 @@ flowchart LR
 所有客户端拥有相同的页面、相同的名称与相同的到达路径：
 * **一级目的地**：首页（§6.3.1）、各媒体库、搜索、下载（仅应用），以及含设置的个人资料。
 * **下级页面**：媒体库（带排序与筛选的网格）、条目详情（电影、剧集、季、人物、合集）、播放器与设置。
-* **导航容器**，按平台映射：iPhone 用标签栏；iPad、Mac、Windows、Linux 与宽 Web 窗口用侧边栏；Android 按窗口尺寸类别用导航栏或导航侧栏；Apple TV 用顶部标签栏；Android TV 用侧边菜单。
+* **导航容器**，按平台映射：iPhone 用标签栏；iPad、Mac、桌面与宽 Web 窗口用侧边栏；Android 按窗口尺寸类别用导航栏或导航侧栏；Apple TV 用顶部标签栏；Android TV 用侧边菜单。
 
 #### 6.3.1 首页
 首页是一列推荐行，仿照 Plex：每一行条目都是观看某些内容的一个理由。
@@ -217,7 +219,7 @@ flowchart LR
 * **输入**：桌面与 Web 上的键盘快捷键（空格、方向键、`f`、`m`、`j`/`l`）；电视上的方向键与遥控器，控制器遵循平台的焦点机制（tvOS 焦点引擎、Compose for TV 焦点），获得焦点时保持显示。
 
 ### 6.6 文案与本地化
-所有客户端的字符串在 `libs/design/strings` 中以 ICU MessageFormat 一次定义，以英文为源语言，编译为 Web UI 的消息包、Apple 平台的 String Catalog（`.xcstrings`）、Android 的 `strings.xml`，以及供 Windows 与 Linux 使用的 Go 包。同一事物在各处使用同一术语，复数遵循 CLDR 规则，每个字符串只翻译一次。仅某一平台使用的字符串带有该平台的标签。
+所有客户端的字符串在 `libs/design/strings` 中以 ICU MessageFormat 一次定义，以英文为源语言，编译为 Web UI 的消息包、Apple 平台的 String Catalog（`.xcstrings`）、Android 的 `strings.xml`，以及供桌面应用使用的 Go 包。同一事物在各处使用同一术语，复数遵循 CLDR 规则，每个字符串只翻译一次。仅某一平台使用的字符串带有该平台的标签。
 
 ### 6.7 平台惯例
 品牌一致不凌驾于平台之上：
@@ -229,8 +231,8 @@ flowchart LR
 * **无障碍**：VoiceOver、TalkBack 与屏幕阅读器，Dynamic Type 与字体缩放，减少动态效果，对比度达到 WCAG AA。
 
 ### 6.8 组件画廊与视觉评审
-* **组件画廊**：每个平台以固定数据浏览所有组件的所有状态——Web 用 Storybook，Apple 平台用 SwiftUI 预览，Android 用 Compose 预览，Windows 与 Linux 用一个画廊窗口。
-* **快照测试**：每个客户端在快照测试中以固定数据渲染同一组页面——Web 用 Playwright，Apple 平台用 swift-snapshot-testing，Android 用 Roborazzi，Windows 与 Linux 用 MyGo 的离屏渲染。CI 将其与入库的参考图比对，并生成一个把每个页面的各平台并排展示的页面，修改 UI 的 PR 附上该页面的链接以供评审。
+* **组件画廊**：每个平台以固定数据浏览所有组件的所有状态——Web 用 Storybook，Apple 平台用 SwiftUI 预览，Android 用 Compose 预览，桌面应用用一个画廊窗口。
+* **快照测试**：每个客户端在快照测试中以固定数据渲染同一组页面——Web 用 Playwright，Apple 平台用 swift-snapshot-testing，Android 用 Roborazzi，桌面应用用 MyGo 的测试器（`ui.NewTester`，在内存中绘制帧）。CI 将其与入库的参考图比对，并生成一个把每个页面的各平台并排展示的页面，修改 UI 的 PR 附上该页面的链接以供评审。
 * **功能对齐**：`libs/design/parity.md` 列出每个功能在各客户端的状态（已上线、计划中、不适用），使客户端缺少某功能只能出于决定；为某个客户端增加功能的 PR 同时更新它。
 
 ---
@@ -240,10 +242,10 @@ flowchart LR
 * `apps/web` → `libs/client-ts` → `libs/proto`（TypeScript）；所有客户端 → `libs/design`。
 * `apps/ios`、`apps/tvos`、`apps/macos` → `libs/apple` → `libs/client-rust`（Swift 绑定）。
 * `apps/android`、`apps/android-tv` → `libs/android` → `libs/client-rust`（Kotlin 绑定）。
-* `apps/windows-linux` → `libs/client-rust`（C ABI，经其 Go 绑定 `libs/client-rust/capi`）与 `libs/proto`（Go）。它与服务端的模块一样是 Go 模块，遵循仓库的 Go 约定；depguard 规则不允许它依赖任何服务端库。
+* `apps/desktop` → `libs/client-rust`（C ABI，经其 Go 绑定 `libs/client-rust/capi`）与 `libs/proto`（Go）。它与服务端的模块一样是 Go 模块，遵循仓库的 Go 约定；depguard 规则不允许它依赖任何服务端库。
 * `libs/client-rust` → `libs/proto`（Rust）。
 * 应用之间互不依赖。服务端只为内嵌的文件依赖 `apps/web`。
-* 所有客户端由 Nx 编排：`tools/nx-go` 像推断其他 Go 模块一样推断 `apps/windows-linux`，Vite 与 TypeScript 用其 Nx 插件，Cargo、Gradle 与 `xcodebuild` 用各自的目标。macOS runner 成本高，CI 中的 Apple 与 Android 任务只在受影响时运行。
+* 所有客户端由 Nx 编排：`tools/nx-go` 像推断其他 Go 模块一样推断 `apps/desktop`，Vite 与 TypeScript 用其 Nx 插件，Cargo、Gradle 与 `xcodebuild` 用各自的目标。macOS runner 成本高，CI 中的 Apple 与 Android 任务只在受影响时运行。
 
 ---
 
@@ -259,7 +261,7 @@ mavio/
 │   ├── macos/                   # [Swift] Mac（AppKit）
 │   ├── android/                 # [Kotlin] 手机、平板、折叠屏
 │   ├── android-tv/              # [Kotlin] Android TV、Google TV
-│   └── windows-linux/           # [Go] Windows 与 Linux（MyGo、libmpv）
+│   └── desktop/                 # [Go] macOS、Windows 与 Linux（MyGo、libmpv）
 │
 ├── libs/
 │   ├── proto/                   # 契约；gen/go、gen/ts、gen/rust

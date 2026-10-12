@@ -40,7 +40,7 @@ flowchart TD
     P18["P18 电影资源获取<br/>libs/acquire、plugins/download-clients"]
     P19["P19 剧集资源获取<br/>整季包、动漫、日播剧、scene 映射"]
     P20["P20 发现与请求<br/>DiscoverService、RequestService"]
-    P21["P21 客户端与生态<br/>apps/web, Apple、Android、Windows 与 Linux 应用, libs/client-rust, Jellyfin shim 决定"]
+    P21["P21 客户端与生态<br/>apps/web, Apple、Android 与桌面应用, libs/client-rust, Jellyfin shim 决定"]
     P22["P22 真实设备验收<br/>在真实电视与客户端上端到端播放"]
     P23["P23 打包与发布<br/>libs/proto 与 libs/plugin 标签、服务端二进制与容器镜像"]
 
@@ -556,7 +556,7 @@ flowchart TD
   - [x] 端到端测试中对策略屏蔽未分级内容的用户隐藏未分级作品（`request_flows_test.go`）：从目录中略去，`GetTitle` 与请求被拒绝，并按分级向 TMDB 查询
 
 ### P21 客户端与生态
-**范围**：基于完成的服务端 API 构建[客户端](clients.zh-CN.md)：内嵌于服务端的 Web UI（`apps/web`，在 `/` 提供）、面向 iPhone 与 iPad、Apple TV 与 Mac 的 Apple 应用（`apps/ios`、`apps/tvos`、`apps/macos`）、面向手机与平板及 Android TV 的 Android 应用（`apps/android`、`apps/android-tv`）、基于 MyGo 的 Windows 与 Linux 应用（`apps/windows-linux`），以及它们共享的库（`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。其基础部分不等待 P20：工具链与构建目标、从 `libs/proto` 生成的 TypeScript 与 Rust 代码、`libs/design`、§4 中客户端待决事项所列的原型，以及各应用与库的骨架。只有发现与请求页面等待 P20。基础部分以每个应用的一个切片收尾，在完成任何客户端之前一并验证共享核心、设计系统与该平台的播放器：登录两台服务器，显示合并的首页，打开条目详情，直接播放一个源并播放一个由服务端以 HLS 发送的源，上报进度并可继续播放。Web UI 与 iPhone 和 iPad 应用已超出其切片。之后选定先完成哪个客户端，其余随后。
+**范围**：基于完成的服务端 API 构建[客户端](clients.zh-CN.md)：内嵌于服务端的 Web UI（`apps/web`，在 `/` 提供）、面向 iPhone 与 iPad、Apple TV 与 Mac 的 Apple 应用（`apps/ios`、`apps/tvos`、`apps/macos`）、面向手机与平板及 Android TV 的 Android 应用（`apps/android`、`apps/android-tv`）、基于 MyGo、面向 macOS、Windows 与 Linux 的桌面应用（`apps/desktop`），以及它们共享的库（`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）；决定是否采用 Jellyfin API 兼容垫片（shim）（[评估](jellyfin-compat.zh-CN.md)）。其基础部分不等待 P20：工具链与构建目标、从 `libs/proto` 生成的 TypeScript 与 Rust 代码、`libs/design`、§4 中客户端待决事项所列的原型，以及各应用与库的骨架。只有发现与请求页面等待 P20。基础部分以每个应用的一个切片收尾，在完成任何客户端之前一并验证共享核心、设计系统与该平台的播放器：登录两台服务器，显示合并的首页，打开条目详情，直接播放一个源并播放一个由服务端以 HLS 发送的源，上报进度并可继续播放。Web UI 与 iPhone 和 iPad 应用已超出其切片。之后选定先完成哪个客户端，其余随后。
 
 **完成标准**：每个客户端同时登录两台服务器，显示一个合并了两者推荐行的首页，两台服务器都有的作品只显示一次；浏览媒体库，在两台服务器中搜索，打开条目并播放——直接播放，以及客户端需要时的转码——可选择音轨与字幕，上报进度并在另一个客户端上继续播放；从热门中请求一部作品，经批准、获取后显示为可观看；原生应用离线时以缓存内容启动，支持下载的应用离线播放已下载的条目。每个客户端的页面通过截图测试，`libs/design/parity.md` 中不再有计划中的功能。
 
@@ -578,7 +578,7 @@ flowchart TD
   - [x] connect-rust 与 `EventService` 的流：`libs/client-rust/api/examples/events.rs` 登录并打印设备的事件，在 macOS 与 tvOS 模拟器上均可运行
   - [x] macOS、iOS 与 tvOS 上的 AetherEngine 7.34.0：在 Mac 上，HDR10 Matroska 源经引擎重封装由 AVPlayer 播放、VideoToolbox 解码，并提高显示器的 EDR 余量；画中画在其 `AVPlayerLayer` 上启动，VP9、AV1 与 MPEG-2 走软件路径时则在其 `AVSampleBufferDisplayLayer` 上启动；ASS 轨道以原始事件行连同脚本头送达。iPad 与 Apple TV 模拟器以软件路径播放相同的源，iPad 模拟器在应用转入后台时在样本缓冲显示层上进入画中画
     - [ ] 在用户的设备上：iPhone 或 iPad 上画中画内的画面、Apple TV 上的 HDR10 与显示条件，以及杜比视界源
-  - [ ] MyGo 的视频元素，含 Windows 上的 HDR10：延后到有 Windows 机器时，在 Windows 与 Linux 应用开始之前完成
+  - [ ] MyGo 的视频元素：先在 macOS 上完成，无需其他机器，并需要 macOS 版 libmpv；Windows 上的 HDR10 在有 Windows 机器时完成，于桌面应用在 Windows 上发布之前
   - [x] Android 上的核心：在 `libs/android/core` 的插桩测试（`ClientTest`，服务器与账户以运行器参数传入）中，Kotlin 绑定登录、经事件流上线、收到事件并送达首页，运行于 16 KB 页面的 Android 17 模拟器，64 位库按 16 KB 对齐。访问局域网中的服务器需要运行时权限 `ACCESS_LOCAL_NETWORK`
   - [x] Media3 播放服务端的 fMP4 HLS：Media3 1.11.1 拒绝早于零点开始的音频所写出的负 `tfdt`，因此服务端现在把这样的音频平移到零点。在 `libs/android/player` 的插桩测试（`HlsTest`，以运行器参数传入一次播放的主播放列表）中，ExoPlayer 播放一个音频转码为 AAC 的重封装，跨越分片，跳转到服务端重启转码之处并播放到结尾。除非应用允许，Media3 拒绝明文 HTTP
   - [x] Media3 的 FFmpeg 解码扩展，当前的 Media3 版本没有其发布的构件：`android-lib:ffmpeg` 按 LGPL 构建 FFmpeg 的音频解码器，并把 Media3 的 JNI 层与之链接，版本取版本目录中的 Media3，约需四分钟（CI 中缓存）。在 `libs/android/player` 的插桩测试（`FfmpegAudioTest`，以运行器参数传入文件）中，ExoPlayer 在模拟器上以它解码 DTS 与 TrueHD
@@ -590,13 +590,13 @@ flowchart TD
     - [ ] Linux 与 Windows：在其 runner 上运行同样的测试（Windows 上用 `syscall`），CI 运行之前未经验证
   - [ ] 各平台的截图测试：Apple 应用、Android 应用与 Web UI 所用的工具
 - [ ] 各应用与库的骨架
-  - [x] `libs/client-rust`：`mavio-core`，以及 `mavio-uniffi`，其 `uniffi-bindgen` 生成 Swift 模块 `MavioCore` 与 Kotlin 包 `dev.mavio.core`；C ABI 及其消息（`capi`、`proto`），含 Go 绑定原型的调用；其余随其唯一使用者 Windows 与 Linux 应用一同到来
+  - [x] `libs/client-rust`：`mavio-core`，以及 `mavio-uniffi`，其 `uniffi-bindgen` 生成 Swift 模块 `MavioCore` 与 Kotlin 包 `dev.mavio.core`；C ABI 及其消息（`capi`、`proto`），含 Go 绑定原型的调用；其余随其唯一使用者桌面应用一同到来
   - [x] Web：`apps/web`（React、Vite、TanStack Router 与 Query、基于设计 tokens 的 Tailwind CSS）与 `libs/client-ts`；服务端内嵌其构建（`apps/server/internal/webui`）并在 `/` 提供，容器镜像先构建它
   - [x] Apple：`libs/apple`（基于核心 XCFramework 的 `MavioKit`、使用 AetherEngine 的 `MavioPlayer`、基于 `libs/design` 的 Swift 包 `MavioDesign` 的 `MavioUI`）与应用 `apps/ios`、`apps/tvos`、`apps/macos`，各自在模拟器与 Mac 上显示核心的版本
   - [x] Android：`libs/android`（含核心 Kotlin API 与库的 `core`、使用 Media3 的 `player`、含设计 tokens、图标与字符串的 `ui`）与应用 `apps/android`、`apps/android-tv`，均能构建并通过 Android lint
-  - [ ] Windows 与 Linux：`apps/windows-linux` 及核心的 C ABI（`capi`、`proto`）；与 MyGo 的视频元素一同延后到有 Windows 机器时
+  - [ ] 桌面：`apps/desktop` 及核心的 C ABI（`capi`、`proto`），先在 macOS 上，在那里的 MyGo 视频元素之后；macOS、Windows 与 Linux 的 libmpv 在 mavio-deps 中构建
 - [x] `libs/client-rust`：服务器、其发现与登录（密码、首个用户、Quick Connect）、带退避的事件流、离线存储、带离线补发的播放上报、下载、页面状态、多台服务器的合并（首页、搜索、条目在其他服务器上的副本）；Swift 与 Kotlin 绑定
-  - [ ] C ABI 与 Go 绑定（`capi`、`proto`）中核心的其余调用：Quick Connect、首页、媒体库、详情、搜索、播放与下载，随 Windows 与 Linux 应用
+  - [ ] C ABI 与 Go 绑定（`capi`、`proto`）中核心的其余调用：Quick Connect、首页、媒体库、详情、搜索、播放与下载，随桌面应用
   - [ ] 经由事件流的远程控制命令与 SyncPlay，随接收它们的应用播放器
 - [x] Web UI（`apps/web`、`libs/client-ts`）：登录（密码、首个用户、Quick Connect）、多台服务器及其顺序、合并的首页、带推荐与全部标签的媒体库、推荐栏、跨服务器搜索、带版本与其他服务器副本的详情、播放器（直放与 HLS、音轨与字幕轨、外部播放器）、授权设备；由事件流刷新
   - [ ] 发现与请求页面，随 P20
@@ -621,7 +621,7 @@ flowchart TD
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）
 - [ ] Apple TV 与 Android TV 应用
 - [ ] Mac 应用
-- [ ] Windows 与 Linux 应用
+- [ ] 桌面应用（macOS、Windows 与 Linux）
 - [ ] 关于 Jellyfin API 兼容层的决定
 
 ### P22 真实设备验收
@@ -664,4 +664,4 @@ flowchart TD
 | Android 上的 libmpv | libmpv 是 Android 应用的第二引擎；在 Android TV 设备（其中许多为 32 位）孱弱的 GPU 上，其 OpenGL ES 渲染可能过慢，且不能输出 HDR | P21 在低端 Android TV 设备上实测；libmpv 跟不上的设备，应用不在能力中声明它，由服务端处理该源 |
 | 1.0 之前的 connect-rust | `libs/client-rust` 使用的 connect-rust 仍处于 0.x，API 可能变化 | 固定版本；跟进其发布 |
 | Linux 上的 HDR | Linux 应用以 OpenGL 在 GTK 3 的 `GtkGLArea` 中绘制视频，后者只能呈现 SDR，因此 HDR 经色调映射输出 | MyGo 的 Linux 后端能呈现 HDR 表面时再评估 |
-| MyGo | `apps/windows-linux` 基于 MyGo 构建，该框架始于 2026 年 9 月，仍处于 0.x，主要由一位维护者开发。它还没有能把由其他渲染器绘制的原生表面放在其原生 UI 之下的元素，而播放器显示 mpv 的视频需要它（Windows 上的子窗口、Linux 上的 `GtkGLArea`）；可参照它放置自身 Web 视图的方式实现 | P21 先做原型：视频元素（贡献给 MyGo），以及 Windows 上的 HDR10；固定 MyGo 版本 |
+| MyGo | `apps/desktop` 基于 MyGo 构建，该框架始于 2026 年 9 月，仍处于 0.x，主要由一位维护者开发。它还没有能把由其他渲染器绘制的原生表面放在其原生 UI 之下的元素，而播放器显示 mpv 的视频需要它（macOS 上的视图、Windows 上的子窗口、Linux 上的 `GtkGLArea`）；可参照它放置自身 Web 视图的方式实现 | P21 先做原型：视频元素（贡献给 MyGo），先在 macOS 上，以及 Windows 上的 HDR10；固定 MyGo 版本 |
