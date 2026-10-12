@@ -22,7 +22,7 @@ download=$root/dist/deps/$asset
 digest() { { sha256sum "$1" 2>/dev/null || shasum -a 256 "$1"; } | cut -d' ' -f1; }
 if [ ! -f "$download" ] || [ "$(digest "$download")" != "$sha256" ]; then
 	mkdir -p "$root/dist/deps"
-	curl -fsSL --retry 3 -o "$download.part" \
+	curl -fsSL --retry 5 --retry-delay 10 --retry-all-errors -o "$download.part" \
 		"https://github.com/mavioai/mavio-deps/releases/download/$tag/$asset"
 	got=$(digest "$download.part")
 	if [ "$got" != "$sha256" ]; then
