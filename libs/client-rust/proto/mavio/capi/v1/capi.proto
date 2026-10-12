@@ -1,0 +1,191 @@
+// The messages of the core's C ABI (libs/client-rust/capi), through which
+// the Windows and Linux app calls the core: the app sends a Request with a
+// call number, and the core answers each with a Message of that number
+// through the one callback the app gave it, which also carries the events
+// of the servers under call number zero.
+edition = "2023";
+
+package mavio.capi.v1;
+
+option features.field_presence = IMPLICIT;
+
+// A call of the app.
+message Request {
+  oneof kind {
+    Open open = 1;
+    GetVersion get_version = 2;
+    Probe probe = 3;
+    SignIn sign_in = 4;
+    Start start = 5;
+    Stop stop = 6;
+    ListServers list_servers = 7;
+  }
+}
+
+// Opens the core, before any other call.
+message Open {
+  // The offline store's database.
+  string database_path = 1;
+  Device device = 2;
+  // The access tokens the app keeps, by server ID; TokenChanged tells it of
+  // new and forgotten ones.
+  map<string, string> tokens = 3;
+}
+
+// The device, as servers list it.
+message Device {
+  // Stable for the installation.
+  string id = 1;
+  // Shown to the user, such as "Living room PC".
+  string name = 2;
+  // The app, such as "Mavio for Windows".
+  string client = 3;
+  string client_version = 4;
+}
+
+// Answered with the version of the core.
+message GetVersion {}
+
+// Asks the server at an address who it is; answered with its ServerInfo.
+message Probe {
+  string address = 1;
+}
+
+// Signs in to a server, adding it; answered with its ServerRecord.
+message SignIn {
+  string address = 1;
+  string name = 2;
+  string password = 3;
+}
+
+// Follows the event streams of the signed-in servers.
+message Start {}
+
+// Stops the event streams.
+message Stop {}
+
+// Answered with the servers, in the user's order.
+message ListServers {}
+
+// What the core sends the app: the answer to a call, or an event.
+message Message {
+  // The call answered; zero for an event.
+  uint64 call = 1;
+  oneof kind {
+    Error error = 2;
+    Done done = 3;
+    string version = 4;
+    ServerInfo server_info = 5;
+    ServerRecord server = 6;
+    Servers servers = 7;
+    Event event = 8;
+  }
+}
+
+// Why a call failed.
+message Error {
+  Code code = 1;
+  string reason = 2;
+
+  // The kind of failure.
+  enum Code {
+    CODE_UNSPECIFIED = 0;
+    // The server did not answer; the call may be retried.
+    CODE_UNREACHABLE = 1;
+    // The server does not know the user or token; they sign in again.
+    CODE_UNAUTHENTICATED = 2;
+    CODE_PERMISSION_DENIED = 3;
+    CODE_NOT_FOUND = 4;
+    // The request was wrong, such as a malformed address.
+    CODE_INVALID = 5;
+    CODE_FAILED_PRECONDITION = 6;
+    CODE_SERVER = 7;
+    // The offline store failed.
+    CODE_STORE = 8;
+  }
+}
+
+// A call without an answer of its own succeeded.
+message Done {}
+
+// A server, as it answered at an address.
+message ServerInfo {
+  // The server's own ID, the same at every address.
+  string id = 1;
+  string name = 2;
+  string version = 3;
+  string address = 4;
+  // The server has no user yet, and the first one is created instead of
+  // signing in.
+  bool setup_required = 5;
+}
+
+// A server the device is signed in to.
+message ServerRecord {
+  string id = 1;
+  string address = 2;
+  string name = 3;
+  string version = 4;
+  string user_id = 5;
+  string user_name = 6;
+}
+
+// The servers, in the user's order.
+message Servers {
+  repeated ServerRecord servers = 1;
+}
+
+// What happened on a server.
+message Event {
+  string server_id = 1;
+  oneof kind {
+    StreamState state = 2;
+    Connected connected = 3;
+    LibraryChanged library_changed = 4;
+    UserDataChanged user_data_changed = 5;
+    SessionsChanged sessions_changed = 6;
+    TokenChanged token_changed = 7;
+  }
+}
+
+// The server's stream came up or went down, or the server signed the
+// device out.
+message StreamState {
+  State state = 1;
+  // Why it is offline.
+  string reason = 2;
+
+  // The state of a stream.
+  enum State {
+    STATE_UNSPECIFIED = 0;
+    // Connecting, or waiting to reconnect.
+    STATE_OFFLINE = 1;
+    STATE_ONLINE = 2;
+    // The server rejected the token; the user signs in again.
+    STATE_SIGNED_OUT = 3;
+  }
+}
+
+// The stream came up; the app reloads what it shows of the server.
+message Connected {}
+
+// Items of libraries changed.
+message LibraryChanged {
+  repeated string library_ids = 1;
+  repeated string changed_item_ids = 2;
+  repeated string removed_item_ids = 3;
+}
+
+// The user's data of items changed, from this device or another.
+message UserDataChanged {
+  repeated string item_ids = 1;
+}
+
+// The sessions of the user's devices changed.
+message SessionsChanged {}
+
+// The core has a new access token for the server, which the app keeps in
+// the system's secure storage, or forgot it when the token is empty.
+message TokenChanged {
+  string token = 1;
+}

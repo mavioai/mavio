@@ -1,0 +1,31 @@
+{
+  "name": "capi",
+  "implicitDependencies": ["client-rust"],
+  "targets": {
+    "test": {
+      "options": {
+        "env": { "CGO_ENABLED": "0" }
+      },
+      "dependsOn": [{ "projects": ["client-rust"], "target": "build" }],
+      "inputs": ["go", "^rust", "{projectRoot}/**/*.rs", "{projectRoot}/Cargo.toml"]
+    },
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "buf generate",
+        "cwd": "{projectRoot}"
+      },
+      "outputs": ["{projectRoot}/gen", "{projectRoot}/src/gen"],
+      "cache": false
+    },
+    "buf-lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "buf lint ../proto && buf format ../proto --diff --exit-code",
+        "cwd": "{projectRoot}"
+      },
+      "inputs": ["{workspaceRoot}/libs/client-rust/proto/**/*"],
+      "cache": true
+    }
+  }
+}

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["api", "core", "uniffi", "uniffi-bindgen"]
+members = ["api", "capi", "core", "uniffi", "uniffi-bindgen"]
 
 [workspace.package]
 version = "0.0.0"
