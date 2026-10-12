@@ -79,7 +79,7 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "gradle --console=plain testDebugUnitTest",
+        "command": "gradle --console=plain testDebugUnitTest verifyRoborazziDebug",
         "cwd": "{projectRoot}"
       },
       "dependsOn": [
@@ -95,6 +95,20 @@
         }
       ],
       "cache": true,
+      "parallelism": false
+    },
+    "snapshot-record": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "gradle --console=plain recordRoborazziDebug",
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        "core",
+        "mpv",
+        "ffmpeg"
+      ],
+      "cache": false,
       "parallelism": false
     },
     "lint": {
