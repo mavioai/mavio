@@ -187,7 +187,7 @@ go build -o plugin .                                                     # 子�
 * **plan**（Linux）：列出受影响的 Apple 与 Android 项目，并判断 Web UI、服务端或构成它的库是否受影响。
 * **check**（Linux）：`nx affected -t buf-lint lint tidy-check typecheck build test`；重新生成代码，有任何差异即失败；PR 上对照目标分支运行 `buf breaking`。
 * **test**：在 linux arm64、macOS、Windows 上运行 `nx run-many -t typecheck test build`；PR 上改为运行 `nx affected`。
-* **apple**（macOS），在 **plan** 发现 Apple 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 构建，生成的 Xcode 工程与 `generate` 写出的不一致时失败；`libs/apple` 受影响时在模拟器上运行其快照测试，并上传不一致的快照。
+* **apple**（macOS 与 Xcode 27，即 runner 的 `xcode-27` 镜像，因为 `Package.resolved` 文件与快照的参考图都以 Xcode 27 生成），在 **plan** 发现 Apple 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 构建，生成的 Xcode 工程与 `generate` 写出的不一致时失败；`libs/apple` 受影响时在模拟器上运行其快照测试，并上传不一致的快照。
 * **android**（Linux），在 **plan** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 构建；上传不一致快照的图片。
 * **web-snapshots**（linux arm64，因为参考图在 Apple silicon 上录制），在 Web UI 受影响时运行：`nx run web:snapshot`，然后运行 `design:gallery`，上传画廊与比对结果。
 * **media**（Linux、macOS），在服务端受影响时运行：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。

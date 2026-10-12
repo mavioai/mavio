@@ -124,7 +124,10 @@ jobs:
     name: Apple
     needs: plan
     if: needs.plan.outputs.apple != '[]'
-    runs-on: macos-latest
+    # Xcode 27, which the Package.resolved files and the references of the
+    # snapshots are made with: SwiftPM resolves some packages differently
+    # with older Swift.
+    runs-on: xcode-27
     # A hung build stops at the cap.
     timeout-minutes: 60
     env:
