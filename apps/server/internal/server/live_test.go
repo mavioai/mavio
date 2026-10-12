@@ -31,6 +31,7 @@ import (
 // the film together in a SyncPlay group, told to start at the same time
 // and position.
 func TestLiveEvents(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

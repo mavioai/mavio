@@ -119,6 +119,7 @@ func seriesRoutes(t *testing.T) map[string]string {
 // its air date; each episode is imported under Sonarr's naming and
 // becomes playable.
 func TestSeriesAcquisition(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

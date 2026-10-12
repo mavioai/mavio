@@ -411,6 +411,7 @@ func profileItemsToProto(items []core.QualityProfileItem) []*acquisitionv1.Quali
 // download SABnzbd fails is blocklisted and replaced by a new search,
 // which upgrades the movie to its cutoff.
 func TestAcquisition(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

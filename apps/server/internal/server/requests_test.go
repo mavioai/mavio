@@ -102,6 +102,7 @@ func runTask(t *testing.T, tasks systemv1connect.TaskServiceClient, id string) {
 // film; the user reports an issue with it, which the administrator
 // resolves.
 func TestRequests(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

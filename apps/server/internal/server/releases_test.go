@@ -200,6 +200,7 @@ search:
 // implemented in code, for a movie and an episode of the library by what
 // each indexer can search by, and for text, and parses the releases.
 func TestReleases(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

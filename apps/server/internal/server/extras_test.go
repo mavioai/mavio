@@ -49,6 +49,7 @@ func settled(t *testing.T, paths ...string) {
 // segments from a plugin, and downloads as a progressive transcode that
 // plays; a track gets its loudness measured and its lyrics read.
 func TestMediaExtras(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

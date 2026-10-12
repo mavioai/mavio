@@ -30,6 +30,7 @@ import (
 // content rated PG builds a playlist and never sees the episodes of a
 // series rated above that.
 func TestBrowsing(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

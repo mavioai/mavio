@@ -22,6 +22,7 @@ import (
 // an administrator monitors it, which lists the episodes it lacks at once;
 // queries show them only when asked.
 func TestVirtualEpisodes(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

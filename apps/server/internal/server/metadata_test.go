@@ -31,6 +31,7 @@ import (
 // the poster chosen is written next to the film, where the scan of a new
 // library reads it back with the NFO file.
 func TestMetadataManagement(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")

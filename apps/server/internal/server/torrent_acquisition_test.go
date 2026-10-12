@@ -196,6 +196,7 @@ func (f *fakeQBittorrent) pause(hash string, ratio float64) {
 // TransferMode; a download is removed from qBittorrent with its files
 // once paused at its seeding limits, as Radarr's DownloadEventHub.
 func TestTorrentAcquisition(t *testing.T) {
+	t.Parallel()
 	s := startAcquisition(t, nil, true)
 	ctx := t.Context()
 	film, film1080 := s.video("1280x720", 610), s.video("1920x1080", 610)

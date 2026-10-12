@@ -178,6 +178,7 @@ func (f *fakeServices) serve(w http.ResponseWriter, r *http.Request) {
 // numbered as TVDB numbers them, and get TMDB's metadata by their TVDB
 // IDs even where TMDB numbers them otherwise.
 func TestAcquisitionSources(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")
@@ -194,7 +195,10 @@ func TestAcquisitionSources(t *testing.T) {
 		{"TMDB rejects Radarr's token", tmdbRejectsRadarr},
 		{"TMDB down", tmdbDown},
 	} {
-		t.Run(tt.name, func(t *testing.T) { testAcquisitionSources(t, ffmpeg, ffprobe, tt.mode) })
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			testAcquisitionSources(t, ffmpeg, ffprobe, tt.mode)
+		})
 	}
 }
 

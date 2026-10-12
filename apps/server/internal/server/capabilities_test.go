@@ -32,6 +32,7 @@ import (
 // plugin of every provider capability, in both runtimes; TestPluginPlatform
 // covers the platform's other capabilities.
 func TestPluginCapabilities(t *testing.T) {
+	t.Parallel()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")
