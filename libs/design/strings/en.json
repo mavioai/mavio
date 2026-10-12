@@ -57,6 +57,14 @@
   "item.versions": { "message": "Versions", "description": "Section listing the media files of an item and its copies on the user's other servers." },
   "item.onServer": { "message": "On {server}", "description": "Where an item or one of its versions is; server is the server's name." },
   "item.unplayedCount": { "message": "{count, plural, one {# unplayed} other {# unplayed}}", "description": "Badge of the number of unwatched episodes of a series or season." },
+  "item.download": { "message": "Download", "description": "Downloads an item for offline playback.", "platforms": ["apple", "android", "windows-linux"] },
+  "item.removeDownload": { "message": "Remove Download", "description": "Deletes the downloaded file of an item.", "platforms": ["apple", "android", "windows-linux"] },
+  "download.waiting": { "message": "Waiting", "description": "State of a download not started yet.", "platforms": ["apple", "android", "windows-linux"] },
+  "download.paused": { "message": "Paused", "description": "State of a download interrupted, to be resumed.", "platforms": ["apple", "android", "windows-linux"] },
+  "download.failed": { "message": "Download failed", "description": "State of a download that failed.", "platforms": ["apple", "android", "windows-linux"] },
+  "download.progress": { "message": "{received} of {total}", "description": "Progress of a download; received and total are sizes such as 1.2 GB.", "platforms": ["apple", "android", "windows-linux"] },
+  "download.resume": { "message": "Resume Download", "description": "Resumes a paused or failed download.", "platforms": ["apple", "android", "windows-linux"] },
+  "download.emptyMessage": { "message": "Items you download play here without a connection.", "description": "Message of the empty Downloads screen.", "platforms": ["apple", "android", "windows-linux"] },
   "player.play": { "message": "Play", "description": "Accessibility label of the play button of the player." },
   "player.pause": { "message": "Pause", "description": "Accessibility label of the pause button of the player." },
   "player.seekBack": { "message": "Back {count, plural, one {# second} other {# seconds}}", "description": "Accessibility label of the button seeking backward." },
@@ -104,6 +112,7 @@
   "auth.wrongPassword": { "message": "The username or password is incorrect.", "description": "Error when signing in fails." },
   "auth.moveUp": { "message": "Move Up", "description": "Moves a server earlier in the user's order of servers." },
   "auth.moveDown": { "message": "Move Down", "description": "Moves a server later in the user's order of servers." },
+  "auth.nearby": { "message": "On This Network", "description": "Section of the sign-in screen listing the servers found on the local network.", "platforms": ["apple", "android", "windows-linux"] },
   "search.placeholder": { "message": "Search movies, shows and more", "description": "Placeholder of the search field." },
   "search.noResults": { "message": "No results", "description": "Shown when a search finds nothing on any server." }
 }

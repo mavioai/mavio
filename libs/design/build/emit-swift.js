@@ -1,5 +1,6 @@
-// Writes gen/swift: MavioTokens.swift (SwiftUI), Icons.xcassets and
-// Localizable.xcstrings for the Apple apps.
+// Writes gen/swift: MavioTokens.swift (SwiftUI), Icons.xcassets,
+// Localizable.xcstrings and MavioStrings.swift, its typed accessors, for
+// the Apple apps.
 import { HEADER, num, pascal, write } from './util.js';
 import { argsOf, entriesFor, formParts, SOURCE_LOCALE } from './strings.js';
 import { VIEWBOX } from './icons.js';
@@ -102,13 +103,15 @@ function emitIcons(icons) {
 }
 
 // The text of a message's parts in Apple format specifiers: arguments are
-// %N$@, the count %lld.
+// %@ and the count %lld, numbered (%N$@) when there are several, the
+// count first.
 function format(ps, args) {
+  const at = (arg) => (args.length === 1 ? '%' : `%${args.indexOf(arg) + 1}$`);
   return ps
     .map((p) => {
       if (typeof p === 'string') return p.replace(/%/g, '%%');
-      if (p.count) return '%lld';
-      return args.length === 1 ? '%@' : `%${args.indexOf(p.arg) + 1}$@`;
+      if (p.count) return `${at(args[0])}lld`;
+      return `${at(p.arg)}@`;
     })
     .join('');
 }
@@ -134,8 +137,43 @@ function xcstrings(s) {
   return JSON.stringify({ sourceLanguage: SOURCE_LOCALE, strings, version: '1.0' }, null, 2) + '\n';
 }
 
+const camel = (key) => key.split(/[._]/).map((w, i) => (i ? w[0].toUpperCase() + w.slice(1) : w)).join('');
+
+// An accessor per string: a property for a constant one, a function taking
+// its arguments for one with arguments, the count as an Int.
+function stringsSwift(s) {
+  const lines = [
+    HEADER('//'),
+    'import Foundation',
+    '',
+    '/// The strings of the design system in the user\'s language.',
+    'public enum MavioStrings {',
+    '    /// The bundle of the string catalog.',
+    '    public static let bundle = Bundle.module',
+  ];
+  for (const { key, description } of entriesFor(s, 'apple')) {
+    const msg = s.messages[SOURCE_LOCALE][key];
+    const args = argsOf(msg);
+    const lookup = `NSLocalizedString(${JSON.stringify(key)}, bundle: .module, comment: "")`;
+    lines.push('', `    /// ${description}`);
+    if (args.length === 0) {
+      lines.push(`    public static var ${camel(key)}: String { ${lookup} }`);
+      continue;
+    }
+    const params = args.map((a) => `${camel(a)}: ${msg.plural === a ? 'Int' : 'String'}`).join(', ');
+    lines.push(
+      `    public static func ${camel(key)}(${params}) -> String {`,
+      `        String.localizedStringWithFormat(${lookup}, ${args.map(camel).join(', ')})`,
+      '    }',
+    );
+  }
+  lines.push('}', '');
+  return lines.join('\n');
+}
+
 export function emitSwift(tokens, icons, strings) {
   write('gen/swift/MavioTokens.swift', tokensSwift(tokens));
   emitIcons(icons);
   write('gen/swift/Localizable.xcstrings', xcstrings(strings));
+  write('gen/swift/MavioStrings.swift', stringsSwift(strings));
 }
