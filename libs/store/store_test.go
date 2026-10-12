@@ -680,10 +680,6 @@ func TestJobQueue(t *testing.T) {
 			t.Errorf("lease of several kinds = %+v, %v, want = the other job", j, err)
 		}
 
-		// While running, the unique key still deduplicates.
-		if added, _ := q.Enqueue(ctx, &core.Job{Kind: "scan", UniqueKey: "scan:lib1", MaxAttempts: 1}); added {
-			t.Error("duplicate of a running job was enqueued")
-		}
 		if err := q.Complete(ctx, high.ID, "intruder"); !errors.Is(err, core.ErrConflict) {
 			t.Errorf("complete by non-owner: %v, want ErrConflict", err)
 		}
@@ -704,6 +700,103 @@ func TestJobQueue(t *testing.T) {
 		}
 		if _, err := q.Lease(ctx, "w2", []string{"scan"}, time.Minute); !errors.Is(err, core.ErrNotFound) {
 			t.Errorf("lease during backoff: %v, want ErrNotFound", err)
+		}
+	})
+}
+
+func TestJobUniqueKeys(t *testing.T) {
+	eachBackend(t, func(t *testing.T, s *store.Store) {
+		ctx := t.Context()
+		q := s.Jobs()
+		kinds := []string{"refresh"}
+		enqueue := func(key string) (core.Job, bool) {
+			t.Helper()
+			j := core.Job{Kind: "refresh", UniqueKey: key, MaxAttempts: 3}
+			added, err := q.Enqueue(ctx, &j)
+			if err != nil {
+				t.Fatalf("Enqueue(%s): %v", key, err)
+			}
+			return j, added
+		}
+		lease := func(owner string, ttl time.Duration) (core.Job, error) {
+			t.Helper()
+			return q.Lease(ctx, owner, kinds, ttl)
+		}
+
+		// A pending job deduplicates.
+		first, added := enqueue("refresh:1")
+		if !added {
+			t.Fatal("first job not enqueued")
+		}
+		if _, added := enqueue("refresh:1"); added {
+			t.Error("duplicate of a pending job: added = true, want = false")
+		}
+
+		// A running one does not: the job asked for while it runs is queued.
+		if j, err := lease("w1", time.Minute); err != nil || j.ID != first.ID {
+			t.Fatalf("lease = %v, %v, want = the first job", j.ID, err)
+		}
+		second, added := enqueue("refresh:1")
+		if !added {
+			t.Fatal("job asked for while another runs: added = false, want = true")
+		}
+		if _, added := enqueue("refresh:1"); added {
+			t.Error("duplicate of the queued job: added = true, want = false")
+		}
+		// It waits while the first runs; other keys do not.
+		other, _ := enqueue("refresh:2")
+		if j, err := lease("w2", time.Minute); err != nil || j.ID != other.ID {
+			t.Fatalf("lease = %v, %v, want = the job of another key", j.ID, err)
+		}
+		if j, err := lease("w2", time.Minute); !errors.Is(err, core.ErrNotFound) {
+			t.Fatalf("lease while the key runs = %v, %v, want = ErrNotFound", j.ID, err)
+		}
+		// Once the first is done, the second is leased.
+		if err := q.Complete(ctx, first.ID, "w1"); err != nil {
+			t.Fatal(err)
+		}
+		if j, err := lease("w2", time.Minute); err != nil || j.ID != second.ID {
+			t.Fatalf("lease after completion = %v, %v, want = the second job", j.ID, err)
+		}
+
+		// An expired lease is taken over before the pending job of its key,
+		// which waits until the job is done.
+		third, _ := enqueue("refresh:1")
+		if err := q.Complete(ctx, second.ID, "w2"); err != nil {
+			t.Fatal(err)
+		}
+		if j, err := lease("crashed", 10*time.Millisecond); err != nil || j.ID != third.ID {
+			t.Fatalf("lease = %v, %v, want = the third job", j.ID, err)
+		}
+		fourth, _ := enqueue("refresh:1")
+		time.Sleep(30 * time.Millisecond)
+		if j, err := lease("w3", time.Minute); err != nil || j.ID != third.ID || j.Attempts != 2 {
+			t.Fatalf("lease after expiry = %v (attempt %d), %v, want = the third job again", j.ID, j.Attempts, err)
+		}
+		if j, err := lease("w3", time.Minute); !errors.Is(err, core.ErrNotFound) {
+			t.Fatalf("lease while the key runs again = %v, %v, want = ErrNotFound", j.ID, err)
+		}
+		// A failure retried under the key: the queued job stands for the
+		// retry, so the failed one finishes for good.
+		if err := q.Fail(ctx, third.ID, "w3", errors.New("boom")); err != nil {
+			t.Fatal(err)
+		}
+		if j, err := lease("w3", time.Minute); err != nil || j.ID != fourth.ID {
+			t.Fatalf("lease after failure = %v, %v, want = the fourth job", j.ID, err)
+		}
+		page, err := q.List(ctx, core.JobQuery{States: []core.JobState{core.JobFailed}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if page.Total != 1 || page.Items[0].ID != third.ID {
+			t.Errorf("failed jobs = %d, want = the third job", page.Total)
+		}
+		// Without one queued, a failure is retried under the key.
+		if err := q.Fail(ctx, fourth.ID, "w3", errors.New("boom")); err != nil {
+			t.Fatal(err)
+		}
+		if _, added := enqueue("refresh:1"); added {
+			t.Error("duplicate of a job awaiting its retry: added = true, want = false")
 		}
 	})
 }

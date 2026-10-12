@@ -456,7 +456,8 @@ pub trait LibraryService: Send + Sync + 'static {
         >,
     > + Send;
     /// ScanLibrary enqueues a reconciliation scan. A scan that is already
-    /// pending or running is not enqueued again.
+    /// pending is not enqueued again; one asked for while a scan runs is
+    /// enqueued, and runs after it.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///

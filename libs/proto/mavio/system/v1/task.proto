@@ -13,8 +13,9 @@ service TaskService {
   rpc ListTasks(ListTasksRequest) returns (ListTasksResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // RunTask queues a task to run now; a run already queued or running is
-  // not queued again.
+  // RunTask queues a task to run now; a run already queued is not queued
+  // again. One asked for while a run is running is queued, and runs after
+  // it.
   rpc RunTask(RunTaskRequest) returns (RunTaskResponse);
   // ListJobs lists the jobs of the job queue, most recently created first.
   rpc ListJobs(ListJobsRequest) returns (ListJobsResponse) {
@@ -79,9 +80,9 @@ message RunTaskRequest {
 }
 
 message RunTaskResponse {
-  // The queued job, or the run already queued or running.
+  // The queued job, or the run already queued.
   string job_id = 1;
-  // False when a run was already queued or running.
+  // False when a run was already queued.
   bool enqueued = 2;
 }
 

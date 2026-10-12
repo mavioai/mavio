@@ -585,7 +585,7 @@ export type ScanLibraryResponse = Message<"mavio.library.v1.ScanLibraryResponse"
   jobId: string;
 
   /**
-   * False when a scan was already pending or running.
+   * False when a scan was already pending.
    *
    * @generated from field: bool enqueued = 2;
    */
@@ -838,7 +838,8 @@ export const LibraryService: GenService<{
   },
   /**
    * ScanLibrary enqueues a reconciliation scan. A scan that is already
-   * pending or running is not enqueued again.
+   * pending is not enqueued again; one asked for while a scan runs is
+   * enqueued, and runs after it.
    *
    * @generated from rpc mavio.library.v1.LibraryService.ScanLibrary
    */

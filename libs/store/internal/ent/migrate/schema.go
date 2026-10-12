@@ -865,7 +865,15 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{JobsColumns[3]},
 				Annotation: &entsql.IndexAnnotation{
-					Where: "unique_key <> '' AND state IN ('pending', 'running')",
+					Where: "unique_key <> '' AND state = 'pending'",
+				},
+			},
+			{
+				Name:    "job_unique_key_running",
+				Unique:  false,
+				Columns: []*schema.Column{JobsColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "unique_key <> '' AND state = 'running'",
 				},
 			},
 			{

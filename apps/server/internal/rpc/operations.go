@@ -183,7 +183,7 @@ func (s *TaskService) ListTasks(ctx context.Context, _ *systemv1.ListTasksReques
 		return nil, connectError(ctx, err)
 	}
 	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask, acquisition.JobRSS, acquisition.JobQueue, acquisition.JobRecycleBin, acquisition.JobRefreshMovies, acquisition.JobSceneMappings, requests.JobAvailability, requests.JobBlocklistedTags}
-	active, err := s.store.Jobs().List(ctx, core.JobQuery{Kinds: kinds, States: []core.JobState{core.JobPending, core.JobRunning}})
+	active, err := s.store.Jobs().List(ctx, core.JobQuery{Kinds: kinds, States: []core.JobState{core.JobPending}})
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -242,7 +242,8 @@ func (s *TaskService) RunTask(ctx context.Context, req *systemv1.RunTaskRequest)
 		return nil, connectError(ctx, err)
 	}
 	if !added {
-		// The run already queued or running stands for this one.
+		// The run already queued stands for this one; one running does
+		// not, as it may have read what this run is asked for to see.
 		queued, err := s.queuedJob(ctx, &job)
 		if err != nil {
 			return nil, connectError(ctx, err)
@@ -252,11 +253,11 @@ func (s *TaskService) RunTask(ctx context.Context, req *systemv1.RunTaskRequest)
 	return systemv1.RunTaskResponse_builder{JobId: new(job.ID.String()), Enqueued: &added}.Build(), nil
 }
 
-// queuedJob finds the pending or running job sharing job's kind and unique
-// key, which kept job from being queued; the zero ID when it finished in
-// the meantime.
+// queuedJob finds the pending job sharing job's kind and unique key, which
+// kept job from being queued; the zero ID when it was leased in the
+// meantime.
 func (s *TaskService) queuedJob(ctx context.Context, job *core.Job) (core.ID, error) {
-	q := core.JobQuery{Kinds: []string{job.Kind}, States: []core.JobState{core.JobPending, core.JobRunning}}
+	q := core.JobQuery{Kinds: []string{job.Kind}, States: []core.JobState{core.JobPending}}
 	for {
 		page, err := s.store.Jobs().List(ctx, q)
 		if err != nil {

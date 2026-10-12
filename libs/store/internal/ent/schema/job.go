@@ -42,9 +42,14 @@ func (Job) Fields() []ent.Field {
 // Indexes of Job.
 func (Job) Indexes() []ent.Index {
 	return []ent.Index{
-		// At most one pending or running job per unique key.
+		// At most one pending job per unique key; a running job with the
+		// key does not keep another from being queued, which runs after it.
 		index.Fields("unique_key").Unique().
-			Annotations(entsql.IndexWhere("unique_key <> '' AND state IN ('pending', 'running')")),
+			Annotations(entsql.IndexWhere("unique_key <> '' AND state = 'pending'")),
+		// The running jobs of a unique key, which keep a pending job with
+		// the key from being leased.
+		index.Fields("unique_key").StorageKey("job_unique_key_running").
+			Annotations(entsql.IndexWhere("unique_key <> '' AND state = 'running'")),
 		// Lease scans.
 		index.Fields("state", "kind", "priority", "run_at"),
 	}

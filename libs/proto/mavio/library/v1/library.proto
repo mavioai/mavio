@@ -20,7 +20,8 @@ service LibraryService {
   // touched.
   rpc DeleteLibrary(DeleteLibraryRequest) returns (DeleteLibraryResponse);
   // ScanLibrary enqueues a reconciliation scan. A scan that is already
-  // pending or running is not enqueued again.
+  // pending is not enqueued again; one asked for while a scan runs is
+  // enqueued, and runs after it.
   rpc ScanLibrary(ScanLibraryRequest) returns (ScanLibraryResponse);
 }
 
@@ -271,6 +272,6 @@ message ScanLibraryRequest {
 
 message ScanLibraryResponse {
   string job_id = 1;
-  // False when a scan was already pending or running.
+  // False when a scan was already pending.
   bool enqueued = 2;
 }

@@ -5757,7 +5757,7 @@ impl ::buffa::HasMessageView for super::super::ScanLibraryRequest {
 pub struct ScanLibraryResponseView<'a> {
     /// Field 1: `job_id`
     pub job_id: ::core::option::Option<&'a str>,
-    /// False when a scan was already pending or running.
+    /// False when a scan was already pending.
     ///
     /// Field 2: `enqueued`
     pub enqueued: ::core::option::Option<bool>,
@@ -5971,7 +5971,7 @@ impl ScanLibraryResponseOwnedView {
     pub fn job_id(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().job_id
     }
-    /// False when a scan was already pending or running.
+    /// False when a scan was already pending.
     ///
     /// Field 2: `enqueued`
     #[must_use]

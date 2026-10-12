@@ -178,7 +178,7 @@ libs/proto/
 ### 5.1 职责划分
 | ent 负责 | sqlc 负责 |
 | :--- | :--- |
-| **Schema 的唯一来源**（`internal/ent/schema`） | ent 无法以可移植方式表达的方言专属 SQL：任务队列（`INSERT … ON CONFLICT … WHERE` 去重；PostgreSQL 上用 `FOR UPDATE SKIP LOCKED` 原子租用） |
+| **Schema 的唯一来源**（`internal/ent/schema`） | ent 无法以可移植方式表达的方言专属 SQL：任务队列（`INSERT … ON CONFLICT … WHERE` 对待执行任务去重；原子租用，从不同时执行同一唯一 key 的两个任务，PostgreSQL 上用 `FOR UPDATE SKIP LOCKED`） |
 | 增删改查、批量 upsert（`CreateBulk` + `ON CONFLICT`）、关系遍历 | |
 | 动态条目查询：可选过滤条件、递归后代（两种方言都支持的递归 CTE）、关联用户数据、排序、分页 | |
 

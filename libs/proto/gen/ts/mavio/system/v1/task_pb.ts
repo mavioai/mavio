@@ -214,14 +214,14 @@ export const RunTaskRequestSchema: GenMessage<RunTaskRequest> = /*@__PURE__*/
  */
 export type RunTaskResponse = Message<"mavio.system.v1.RunTaskResponse"> & {
   /**
-   * The queued job, or the run already queued or running.
+   * The queued job, or the run already queued.
    *
    * @generated from field: string job_id = 1;
    */
   jobId: string;
 
   /**
-   * False when a run was already queued or running.
+   * False when a run was already queued.
    *
    * @generated from field: bool enqueued = 2;
    */
@@ -345,8 +345,9 @@ export const TaskService: GenService<{
     output: typeof ListTasksResponseSchema;
   },
   /**
-   * RunTask queues a task to run now; a run already queued or running is
-   * not queued again.
+   * RunTask queues a task to run now; a run already queued is not queued
+   * again. One asked for while a run is running is queued, and runs after
+   * it.
    *
    * @generated from rpc mavio.system.v1.TaskService.RunTask
    */

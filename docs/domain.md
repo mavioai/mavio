@@ -220,10 +220,10 @@ A virtual item is a movie, series, season or episode known from metadata whose f
 A `Job` is durable background work stored in the database (scans, metadata refreshes, image extraction, …).
 
 * `Kind` names the work (e.g. `library.scan`); `Payload` is its kind-specific argument, typically JSON.
-* `UniqueKey` deduplicates: enqueueing while a pending or running job has the same key does nothing (e.g. `library.scan:<library id>`).
+* `UniqueKey` deduplicates: enqueueing while a pending job has the same key does nothing (e.g. `library.scan:<library id>`). A job running with the key does not: the new job is queued and leased only once the running one is done (or its expired lease is taken over and finished), so that work asked for while it runs, after it read its input, is not lost, and two jobs with one key never run at once.
 * Workers **lease** due jobs by priority (then by `RunAt`); a lease expires at `LeaseExpiresAt` unless extended, after which the job becomes available again, so a crashed worker never loses work. `Attempts` counts leases, so an attempt cut short by a crash counts too.
 * `Extend`, `Complete` and `Fail` require the lease owner; a worker whose lease has expired and been taken over gets `ErrConflict`.
-* A failed attempt is retried after `RetryDelay(attempts)` — 30 s, then doubling (1 min, 2 min, …) up to one hour — until `MaxAttempts` is reached; then the job is `failed`.
+* A failed attempt is retried after `RetryDelay(attempts)` — 30 s, then doubling (1 min, 2 min, …) up to one hour — until `MaxAttempts` is reached; then the job is `failed`. A job queued with the same key while it ran stands for its retry, so it is `failed` at once.
 * States: `pending` → `running` → `succeeded` / back to `pending` for a retry / `failed`.
 * `JobQuery` lists jobs by kind and state, most recently created first; finished jobs are purged after a week by the `jobs.cleanup` job, which runs daily.
 

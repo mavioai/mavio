@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/store/internal/ent/job"
 	"github.com/mavioai/mavio/libs/store/internal/sqlcpg"
 	"github.com/mavioai/mavio/libs/store/internal/sqlcsqlite"
 )
@@ -161,7 +162,18 @@ func (r jobs) Fail(ctx context.Context, id core.ID, owner string, cause error) e
 			ID:        id,
 			Owner:     owner,
 		}
-		if j.Attempts >= j.MaxAttempts {
+		// A job queued with the same unique key while this one ran stands
+		// for its retry: at most one job of a key is pending.
+		queued := false
+		if j.UniqueKey != "" && j.Attempts < j.MaxAttempts {
+			queued, err = tx.write.Job.Query().
+				Where(job.UniqueKey(j.UniqueKey), job.State(string(core.JobPending))).
+				Exist(ctx)
+			if err != nil {
+				return mapErr(err, "fail job "+id.String())
+			}
+		}
+		if j.Attempts >= j.MaxAttempts || queued {
 			params.State = string(core.JobFailed)
 			params.RunAt = j.RunAt
 			params.FinishedAt = sql.NullTime{Time: now, Valid: true}

@@ -228,7 +228,7 @@ func TestSeriesAcquisition(t *testing.T) {
 	})
 
 	// runTask runs a task and waits for its run to finish, unless a run of
-	// it was queued or running already.
+	// it was queued already.
 	runTask := func(id string) {
 		t.Helper()
 		resp, err := tasks.RunTask(ctx, systemv1.RunTaskRequest_builder{Id: new(id)}.Build())

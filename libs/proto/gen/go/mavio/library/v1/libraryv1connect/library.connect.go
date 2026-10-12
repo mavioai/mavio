@@ -63,7 +63,8 @@ type LibraryServiceClient interface {
 	// touched.
 	DeleteLibrary(context.Context, *v1.DeleteLibraryRequest) (*v1.DeleteLibraryResponse, error)
 	// ScanLibrary enqueues a reconciliation scan. A scan that is already
-	// pending or running is not enqueued again.
+	// pending is not enqueued again; one asked for while a scan runs is
+	// enqueued, and runs after it.
 	ScanLibrary(context.Context, *v1.ScanLibraryRequest) (*v1.ScanLibraryResponse, error)
 }
 
@@ -193,7 +194,8 @@ type LibraryServiceHandler interface {
 	// touched.
 	DeleteLibrary(context.Context, *v1.DeleteLibraryRequest) (*v1.DeleteLibraryResponse, error)
 	// ScanLibrary enqueues a reconciliation scan. A scan that is already
-	// pending or running is not enqueued again.
+	// pending is not enqueued again; one asked for while a scan runs is
+	// enqueued, and runs after it.
 	ScanLibrary(context.Context, *v1.ScanLibraryRequest) (*v1.ScanLibraryResponse, error)
 }
 

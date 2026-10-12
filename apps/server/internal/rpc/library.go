@@ -172,7 +172,8 @@ func (s *LibraryService) DeleteLibrary(ctx context.Context, req *libraryv1.Delet
 	return &libraryv1.DeleteLibraryResponse{}, nil
 }
 
-// ScanLibrary queues a scan unless one is pending or running.
+// ScanLibrary queues a scan unless one is pending; one asked for while a
+// scan runs runs after it.
 func (s *LibraryService) ScanLibrary(ctx context.Context, req *libraryv1.ScanLibraryRequest) (*libraryv1.ScanLibraryResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err

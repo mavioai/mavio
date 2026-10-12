@@ -63,7 +63,7 @@ func requestRoutes(t *testing.T) map[string]string {
 }
 
 // runTask runs a task and waits for its run to finish, unless a run of
-// it was queued or running already.
+// it was queued already.
 func runTask(t *testing.T, tasks systemv1connect.TaskServiceClient, id string) {
 	t.Helper()
 	ctx := t.Context()

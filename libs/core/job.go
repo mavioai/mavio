@@ -25,7 +25,8 @@ type Job struct {
 	// Payload is the kind-specific argument, typically JSON.
 	Payload []byte
 	// UniqueKey deduplicates pending work: enqueueing a job whose key matches
-	// a pending or running job is a no-op. Empty means no deduplication.
+	// a pending job is a no-op, and a pending job is not leased while a job
+	// with its key runs. Empty means no deduplication.
 	UniqueKey   string
 	State       JobState
 	Priority    int // higher runs first
