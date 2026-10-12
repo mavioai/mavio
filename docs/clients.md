@@ -116,7 +116,7 @@ The server owns every decision that depends on the library, the user or other de
 ### 4.3 Android (`apps/android`, `apps/android-tv`, `libs/android`)
 * **One app per interaction model.** Phones, tablets and foldables share an app in Compose with adaptive layouts; Android TV and Google TV have their own in Compose for TV, built around D-pad focus, with Watch Next and channels on the home screen. They are published as one Play listing under one application ID, `dev.mavio.app`, the TV app for the TV form factor; both run on Android 8.0 (API 26) and later.
 * **`libs/android`**, Gradle modules shared by both apps, which include it as a composite build:
-  * `core`: the core's Kotlin API with the app services above it — accounts, capability probing, downloads with WorkManager;
+  * `core`: the core's Kotlin API with the app services above it — accounts, capability probing, downloads with WorkManager. It declares the `INTERNET` permission and `ACCESS_LOCAL_NETWORK`, which Android 17 requires to reach an address on the local network, where most servers are; the apps request the latter before discovery or sign-in;
   * `player`: one player interface with two engines, behind a `MediaSessionService` for background playback and system controls, and Picture in Picture, which on Android takes any `SurfaceView`;
   * `ui`: shared Compose components and the design tokens.
 * **Player engines**, in order of preference as on Apple platforms: Media3, then libmpv, then the server's processing.
