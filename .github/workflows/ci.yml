@@ -156,7 +156,7 @@ jobs:
           path: |
             libs/apple/build/Libass.xcframework
             libs/apple/build/libass/stamp
-          key: libass-${{ hashFiles('libs/apple/scripts/build-ass.sh') }}
+          key: libass-${{ env.MAVIO_MACOS_ARCHS }}-${{ hashFiles('libs/apple/scripts/build-ass.sh') }}
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
       - if: github.ref == 'refs/heads/main' && steps.swiftpm.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4

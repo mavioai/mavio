@@ -5,6 +5,8 @@
 # player renders AetherEngine's ASS events with it. Sources and intermediate
 # builds are kept in build/libass; a run with the same pins does nothing.
 # Needs meson and ninja (mise.toml). Usage: scripts/build-ass.sh
+# MAVIO_MACOS_ARCHS lists the architectures of the macOS library, arm64 and
+# x86_64 by default, as for the core (build-core.sh).
 set -eu
 cd "$(dirname "$0")/.."
 apple=$(pwd)
@@ -15,9 +17,11 @@ libass=0.17.5
 freetype=VER-2-14-3
 fribidi=v1.0.17
 harfbuzz=12.3.2
+archs=${MAVIO_MACOS_ARCHS:-arm64 x86_64}
 
-# The library is built once for each version of this script.
-stamp=$(cksum <"$apple/scripts/build-ass.sh")
+# The library is built once for each version of this script and macOS
+# architectures.
+stamp="$(cksum <"$apple/scripts/build-ass.sh") $archs"
 if [ "$(cat "$work/stamp" 2>/dev/null)" = "$stamp" ] && [ -d "$out" ]; then
 	echo "$out"
 	exit 0
@@ -106,9 +110,13 @@ slice ios iphoneos arm64 -miphoneos-version-min=18.0
 slice ios-sim iphonesimulator arm64 -mios-simulator-version-min=18.0
 slice tvos appletvos arm64 -mtvos-version-min=18.0
 slice tvos-sim appletvsimulator arm64 -mtvos-simulator-version-min=18.0
-slice macos-arm64 macosx arm64 -mmacosx-version-min=15.0
-slice macos-x86_64 macosx x86_64 -mmacosx-version-min=15.0
-lipo -create "$work/macos-arm64.a" "$work/macos-x86_64.a" -output "$work/macos.a"
+macos=""
+for arch in $archs; do
+	slice "macos-$arch" macosx "$arch" -mmacosx-version-min=15.0
+	macos="$macos $work/macos-$arch.a"
+done
+# shellcheck disable=SC2086
+lipo -create $macos -output "$work/macos.a"
 
 # The headers and module map in a directory of their own, apart from those
 # of other libraries in the same build.
