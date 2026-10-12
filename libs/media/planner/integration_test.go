@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -154,8 +155,13 @@ func TestHLSTranscodes(t *testing.T) {
 				if err != nil {
 					t.Fatalf("ffprobe audio packets: %v\n%s", err, audio)
 				}
-				if len(strings.Fields(string(audio))) == 0 {
-					t.Error("segment has no audio packets")
+				times := strings.Fields(string(audio))
+				if len(times) == 0 {
+					t.Fatal("segment has no audio packets")
+				}
+				// Media3 rejects a negative tfdt.
+				if first, err := strconv.ParseFloat(times[0], 64); err != nil || first < tt.start.Seconds() {
+					t.Errorf("audio starts at %s, want = at or after %v", times[0], tt.start)
 				}
 				if !tt.copy {
 					for _, w := range []string{",1280", ",1920"} {
