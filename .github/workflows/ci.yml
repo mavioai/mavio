@@ -46,13 +46,14 @@ jobs:
           {
             echo "all=$all"
             apple=$(pnpm exec nx show projects $affected --projects tag:platform:apple --json)
-            # The apple jobs, one per platform, each with the affected
-            # projects it builds; the iOS one runs the snapshot tests.
+            # The apple jobs, one per platform with the affected projects it
+            # builds, and one for the snapshot tests of libs/apple.
             echo "apple=$(jq -c '. as $a | [
                 {name: "macOS", platforms: "macos", projects: ["apple", "macos"]},
-                {name: "iOS", platforms: "ios-sim", projects: ["ios"], snapshot: any($a[]; . == "apple")},
-                {name: "tvOS", platforms: "tvos-sim", projects: ["tvos"]}
-              ] | map(.projects |= map(select(IN($a[])))) | map(select(.projects != []))' <<< "$apple")"
+                {name: "iOS", platforms: "ios-sim", projects: ["ios"]},
+                {name: "tvOS", platforms: "tvos-sim", projects: ["tvos"]},
+                {name: "iOS snapshots", platforms: "ios-sim", projects: [], snapshot: any($a[]; . == "apple")}
+              ] | map(.projects |= map(select(IN($a[])))) | map(select(.projects != [] or .snapshot))' <<< "$apple")"
             echo "android=$(pnpm exec nx show projects $affected --projects tag:platform:android --json)"
             echo "web=$(pnpm exec nx show projects $affected --projects web --json | jq 'length > 0')"
             # The media, dist and image jobs build and test the server.
@@ -126,7 +127,8 @@ jobs:
           key: test
           save: true
 
-  # A job per platform, so that the builds do not share a runner's cores.
+  # A job per platform, and one for the snapshot tests, so that the builds
+  # do not share a runner's cores.
   apple:
     name: Apple (${{ matrix.name }})
     needs: plan
@@ -152,9 +154,6 @@ jobs:
       MAVIO_APPLE_PLATFORMS: ${{ matrix.platforms }}
     steps:
       - uses: actions/checkout@v4
-      # The simulator boots while the builds run.
-      - if: matrix.snapshot
-        run: sh libs/apple/scripts/snapshot.sh --boot
       - uses: jdx/mise-action@v2
       - uses: Swatinem/rust-cache@v2
         with:
@@ -179,7 +178,8 @@ jobs:
           path: dist/deps
           key: deps-apple-${{ hashFiles('tools/deps/deps.txt') }}
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx run-many -t lint build test --projects '${{ join(matrix.projects, ',') }}' --output-style=static
+      - if: matrix.projects[0]
+        run: pnpm nx run-many -t lint build test --projects '${{ join(matrix.projects, ',') }}' --output-style=static
       # The snapshot tests on the iOS simulator (docs/clients.md §6.8).
       - if: matrix.snapshot
         run: pnpm nx run apple:snapshot --output-style=static
@@ -199,7 +199,8 @@ jobs:
         with:
           path: dist/deps
           key: ${{ steps.deps.outputs.cache-primary-key }}
-      - name: Generated projects are up to date
+      - if: matrix.projects[0]
+        name: Generated projects are up to date
         run: |
           pnpm nx run-many -t generate --projects '${{ join(matrix.projects, ',') }}' --output-style=static
           git diff --exit-code
