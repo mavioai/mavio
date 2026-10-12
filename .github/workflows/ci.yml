@@ -45,9 +45,15 @@ jobs:
           fi
           {
             echo "all=$all"
-            for p in apple android; do
-              echo "$p=$(pnpm exec nx show projects $affected --projects "tag:platform:$p" --json)"
-            done
+            apple=$(pnpm exec nx show projects $affected --projects tag:platform:apple --json)
+            # The apple jobs, one per platform, each with the affected
+            # projects it builds; the iOS one runs the snapshot tests.
+            echo "apple=$(jq -c '. as $a | [
+                {name: "macOS", platforms: "macos", projects: ["apple", "macos"]},
+                {name: "iOS", platforms: "ios-sim", projects: ["ios"], snapshot: any($a[]; . == "apple")},
+                {name: "tvOS", platforms: "tvos-sim", projects: ["tvos"]}
+              ] | map(.projects |= map(select(IN($a[])))) | map(select(.projects != []))' <<< "$apple")"
+            echo "android=$(pnpm exec nx show projects $affected --projects tag:platform:android --json)"
             echo "web=$(pnpm exec nx show projects $affected --projects web --json | jq 'length > 0')"
             # The media, dist and image jobs build and test the server.
             echo "server=$(pnpm exec nx show projects $affected --projects server,media,streaming,fixtures --json | jq 'length > 0')"
@@ -120,10 +126,15 @@ jobs:
           key: test
           save: true
 
+  # A job per platform, so that the builds do not share a runner's cores.
   apple:
-    name: Apple
+    name: Apple (${{ matrix.name }})
     needs: plan
     if: needs.plan.outputs.apple != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.apple) }}
     # Xcode 27, which the Package.resolved files and the references of the
     # snapshots are made with: SwiftPM resolves some packages differently
     # with older Swift.
@@ -136,17 +147,21 @@ jobs:
       MAVIO_CORE_PROFILE: dev
       # The core and the macOS app for Apple silicon only, as the runner is.
       MAVIO_MACOS_ARCHS: arm64
-      # The core for the simulators and macOS, which the builds and tests
-      # run on; no device.
-      MAVIO_APPLE_PLATFORMS: ios-sim tvos-sim macos
+      # The core for the platform of the job, a simulator or macOS, which
+      # its builds and tests run on; no device.
+      MAVIO_APPLE_PLATFORMS: ${{ matrix.platforms }}
     steps:
       - uses: actions/checkout@v4
+      # The simulator boots while the builds run.
+      - if: matrix.snapshot
+        run: sh libs/apple/scripts/snapshot.sh --boot
       - uses: jdx/mise-action@v2
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: libs/client-rust
-          # The key changes with the profile, whose builds the cache keeps.
-          key: ${{ env.MAVIO_CORE_PROFILE }}
+          # The key changes with the profile and the platforms, whose builds
+          # the cache keeps.
+          key: ${{ env.MAVIO_CORE_PROFILE }}-${{ matrix.platforms }}
           save-if: ${{ github.ref == 'refs/heads/main' }}
       # The clones of the Swift packages, which SwiftPM and xcodebuild share.
       - id: swiftpm
@@ -164,11 +179,11 @@ jobs:
           path: dist/deps
           key: deps-apple-${{ hashFiles('tools/deps/deps.txt') }}
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
+      - run: pnpm nx run-many -t lint build test --projects '${{ join(matrix.projects, ',') }}' --output-style=static
       # The snapshot tests on the iOS simulator (docs/clients.md §6.8).
-      - if: contains(fromJSON(needs.plan.outputs.apple), 'apple')
+      - if: matrix.snapshot
         run: pnpm nx run apple:snapshot --output-style=static
-      - if: failure()
+      - if: failure() && matrix.snapshot
         uses: actions/upload-artifact@v4
         with:
           name: snapshots-ios
@@ -186,7 +201,7 @@ jobs:
           key: ${{ steps.deps.outputs.cache-primary-key }}
       - name: Generated projects are up to date
         run: |
-          pnpm nx run-many -t generate --projects '${{ join(fromJSON(needs.plan.outputs.apple), ',') }}' --output-style=static
+          pnpm nx run-many -t generate --projects '${{ join(matrix.projects, ',') }}' --output-style=static
           git diff --exit-code
 
   android:
