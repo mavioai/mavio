@@ -145,6 +145,29 @@ func TestFinishes(t *testing.T) {
 	})
 }
 
+// exitedProcess has exited already, its progress still unread, as an
+// ffmpeg that finishes quickly is when it is waited for.
+type exitedProcess struct{ progress io.Reader }
+
+func (p exitedProcess) Stdin() io.Writer    { return io.Discard }
+func (p exitedProcess) Progress() io.Reader { return p.progress }
+func (p exitedProcess) Wait() error         { return nil }
+func (p exitedProcess) Kill() error         { return nil }
+
+func TestDoneAfterTheLastProgress(t *testing.T) {
+	for range 100 {
+		proc := exitedProcess{strings.NewReader("out_time_us=1000000\nprogress=end\n")}
+		s, err := Start(t.Context(), func(context.Context, []string) (Process, error) { return proc, nil }, Config{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		<-s.Done()
+		if p := s.Progress(); !p.Ended || p.Position != time.Second {
+			t.Fatalf("progress: got = %+v, want = the last report", p)
+		}
+	}
+}
+
 func TestFailureReported(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		f := newFake(false)

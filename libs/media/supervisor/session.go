@@ -77,9 +77,13 @@ func Start(ctx context.Context, start Starter, cfg Config) (*Session, error) {
 		stop:         make(chan error, 1),
 		done:         make(chan struct{}),
 	}
+	// Wait follows the end of the progress, so that the last of it is
+	// read before the session is done and before exec closes the pipe.
 	exited := make(chan error, 1)
-	go func() { exited <- proc.Wait() }()
-	go parseProgress(proc.Progress(), s.setProgress)
+	go func() {
+		parseProgress(proc.Progress(), s.setProgress)
+		exited <- proc.Wait()
+	}()
 	go s.supervise(ctx, exited)
 	return s, nil
 }
