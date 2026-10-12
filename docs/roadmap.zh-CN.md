@@ -588,13 +588,17 @@ flowchart TD
   - [x] Apple 平台上的 libass：`apple:ass` 把 libass 0.17.5 及 FreeType、FriBidi 与 HarfBuzz 构建为面向 macOS、iOS、tvOS 及其模拟器的静态 XCFramework，以 Core Text 为字体提供者，耗时约四分钟（CI 中缓存）；应用链接它。`MavioPlayer` 中的 `ASSRenderer` 接收脚本头、作为内存字体的字体与 AetherEngine cue 中的事件行，把一帧的字幕渲染为 `CGImage`；其测试在 Mac 上按样式渲染一个事件以及一个 cue 的各行
   - [x] macOS 上的 Go 绑定：`mavio-capi` 导出 C ABI（`mavio_open`、`mavio_call`、`mavio_close`），以 `mavio.capi.v1` 的消息支持打开核心、其版本、探测、登录、事件流与服务器列表；Go 模块 `libs/client-rust/capi` 不经 cgo、以 purego 加载它。其测试（`capi:test`，`CGO_ENABLED=0`）在核心的线程上经同一回调收到应答与错误，其中包括同时进行的 200 个调用；在环境中给出服务器与账户时，登录、收到要保存的令牌，并跟随事件流直到 Connected
     - [ ] Linux 与 Windows：在其 runner 上运行同样的测试（Windows 上用 `syscall`），CI 运行之前未经验证
-  - [ ] 各平台的截图测试：Apple 应用、Android 应用与 Web UI 所用的工具
+  - [x] 各平台的快照测试：`libs/design/snapshots/screens.json` 中的页面及其固定数据；Web 上用 Playwright 1.63，浏览器运行在其容器镜像中，以手机、平板与桌面尺寸绘制登录与首页；iOS 模拟器上用 swift-snapshot-testing 1.19，以 `MavioUI` 在 iPhone 与 iPad 上绘制首页；JVM 上用 Roborazzi 1.76 与 Robolectric 4.17，在手机与电视上绘制 wordmark；`design:gallery` 把它们并排展示，CI 任务负责比对
+    - [ ] 桌面应用以 MyGo 测试器进行的快照测试，随其骨架
+    - [ ] Android 应用的页面，随其切片
+    - [ ] 若 CI runner 上的绘制与 Mac 不同，在其上重新录制参考图（Android 测试运行在 linux amd64 上）
 - [ ] 各应用与库的骨架
   - [x] `libs/client-rust`：`mavio-core`，以及 `mavio-uniffi`，其 `uniffi-bindgen` 生成 Swift 模块 `MavioCore` 与 Kotlin 包 `dev.mavio.core`；C ABI 及其消息（`capi`、`proto`），含 Go 绑定原型的调用；其余随其唯一使用者桌面应用一同到来
   - [x] Web：`apps/web`（React、Vite、TanStack Router 与 Query、基于设计 tokens 的 Tailwind CSS）与 `libs/client-ts`；服务端内嵌其构建（`apps/server/internal/webui`）并在 `/` 提供，容器镜像先构建它
   - [x] Apple：`libs/apple`（基于核心 XCFramework 的 `MavioKit`、使用 AetherEngine 的 `MavioPlayer`、基于 `libs/design` 的 Swift 包 `MavioDesign` 的 `MavioUI`）与应用 `apps/ios`、`apps/tvos`、`apps/macos`，各自在模拟器与 Mac 上显示核心的版本
   - [x] Android：`libs/android`（含核心 Kotlin API 与库的 `core`、使用 Media3 的 `player`、含设计 tokens、图标与字符串的 `ui`）与应用 `apps/android`、`apps/android-tv`，均能构建并通过 Android lint
   - [ ] 桌面：`apps/desktop` 及核心的 C ABI（`capi`、`proto`），先在 macOS 上，在那里的 MyGo 视频元素之后；macOS、Windows 与 Linux 的 libmpv 在 mavio-deps 中构建
+  - [ ] 预构建的依赖：libass、libmpv 与 Media3 的 FFmpeg 扩展从 mavio-deps 的发布中下载并按校验和验证，不再自行构建，待其首批发布完成
 - [x] `libs/client-rust`：服务器、其发现与登录（密码、首个用户、Quick Connect）、带退避的事件流、离线存储、带离线补发的播放上报、下载、页面状态、多台服务器的合并（首页、搜索、条目在其他服务器上的副本）；Swift 与 Kotlin 绑定
   - [ ] C ABI 与 Go 绑定（`capi`、`proto`）中核心的其余调用：Quick Connect、首页、媒体库、详情、搜索、播放与下载，随桌面应用
   - [ ] 经由事件流的远程控制命令与 SyncPlay，随接收它们的应用播放器
@@ -605,7 +609,8 @@ flowchart TD
   - [ ] 一集结束时播放下一集
   - [ ] 借助 JASSUB 保留样式的 ASS 字幕
   - [ ] 离线保存查询缓存
-  - [ ] 组件的 Storybook 与页面的 Playwright 截图
+  - [ ] 组件的 Storybook
+  - [ ] 登录与首页以外页面的快照测试
 - [x] iPhone 与 iPad 应用（`apps/ios`、`libs/apple`）：登录（密码、首个用户、Quick Connect、附近发现的服务器）、多台服务器且令牌保存在钥匙串、合并的首页、带推荐与媒体库标签的媒体库、排序与筛选、推荐栏、跨服务器搜索、带版本与其他服务器副本的详情、播放器（按应用声明的能力选用 AVPlayer 或 AetherEngine、服务端的 HLS、音轨与字幕轨、播放速度、AirPlay、AVPlayer 的画中画）、以后台 `URLSession` 下载并离线播放且补报进度、授权设备；iPhone 上为标签栏，iPad 上为侧边栏
   - [ ] 发现与请求页面，随 P20
   - [ ] AetherEngine 播放时的画中画
@@ -616,7 +621,7 @@ flowchart TD
   - [ ] 服务端发送 HLS 时的外挂字幕文件
   - [ ] AetherEngine 暂停时跳转后重绘画面，以及拖动缩略图
   - [ ] 多播权限（entitlement），使真机而不只是模拟器能发现网络中的服务器
-  - [ ] 页面的快照测试
+  - [ ] 首页以外页面的快照测试
 - [ ] 切片：Android 手机与平板应用、Apple TV 与 Android TV 应用、Mac 应用
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）
 - [ ] Apple TV 与 Android TV 应用
