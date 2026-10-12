@@ -448,7 +448,9 @@ pub struct Library {
     pub name: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 3: `kind`
     pub kind: ::core::option::Option<::buffa::EnumValue<LibraryKind>>,
-    /// Absolute root folders. A path belongs to at most one library.
+    /// Root folders: absolute paths of the server's file system, or
+    /// "rclone:\<remote\>:\<path\>" for a folder below an rclone remote's root. A
+    /// path belongs to at most one library.
     ///
     /// Field 4: `paths`
     pub paths: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,

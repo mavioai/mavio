@@ -15,7 +15,8 @@ import (
 // "still".
 type fakeKeyframes struct{ read, whole []string }
 
-func (k *fakeKeyframes) Keyframes(_ context.Context, path string, whole bool) ([]time.Duration, bool, error) {
+func (k *fakeKeyframes) Keyframes(_ context.Context, f MediaFile, whole bool) ([]time.Duration, bool, error) {
+	path := f.Path
 	if !strings.Contains(path, "indexed") {
 		if !whole {
 			return nil, false, nil

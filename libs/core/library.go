@@ -46,7 +46,9 @@ type Library struct {
 	ID   ID
 	Name string
 	Kind LibraryKind
-	// Paths are absolute root folders. A path belongs to at most one library.
+	// Paths are root folders: absolute paths of the server's file system,
+	// or folders of rclone remotes ("rclone:<remote>:<path>", see
+	// [Storage]). A path belongs to at most one library.
 	Paths []string
 	// StorageClasses sets the storage class of some of the paths, by path;
 	// the others are classified by the device holding them.
@@ -143,6 +145,11 @@ func (l *Library) Validate() error {
 		return fmt.Errorf("%w: negative scan interval", ErrInvalid)
 	case l.VirtualEpisodes.GraceDays < 0:
 		return fmt.Errorf("%w: negative grace period of virtual episodes", ErrInvalid)
+	}
+	for _, p := range l.Paths {
+		if err := validLibraryPath(p); err != nil {
+			return err
+		}
 	}
 	for path, class := range l.StorageClasses {
 		switch {

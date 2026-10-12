@@ -114,7 +114,7 @@ func TestImportDeletesEmptiedDownloadFolder(t *testing.T) {
 // audio.
 type sizedProber struct{}
 
-func (sizedProber) Probe(_ context.Context, _ string, _ bool) (library.ProbeResult, error) {
+func (sizedProber) Probe(_ context.Context, _ library.MediaFile, _ bool) (library.ProbeResult, error) {
 	return library.ProbeResult{Source: core.MediaSource{Duration: 2 * time.Hour, Streams: []core.MediaStream{
 		{Kind: core.StreamVideo, Codec: "hevc", Width: 3840, Height: 1600, BitDepth: 10},
 		{Kind: core.StreamAudio, Codec: "eac3", Channels: 6, ChannelLayout: "5.1(side)", Language: "eng"},

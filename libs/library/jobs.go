@@ -68,7 +68,7 @@ type ProbeResult struct {
 
 // Prober reads the facts of a media file, such as with ffprobe.
 type Prober interface {
-	Probe(ctx context.Context, path string, audio bool) (ProbeResult, error)
+	Probe(ctx context.Context, f MediaFile, audio bool) (ProbeResult, error)
 }
 
 // Jobs runs the library's background jobs: scans, probes of new and changed
@@ -76,7 +76,10 @@ type Prober interface {
 type Jobs struct {
 	Store   core.Store
 	Scanner *Scanner
-	Prober  Prober
+	// Storages opens the storage of media files; nil opens local files
+	// only.
+	Storages *Storages
+	Prober   Prober
 	// Keyframes extracts the keyframes of probed video files; nil skips
 	// them.
 	Keyframes KeyframeExtractor
@@ -203,7 +206,8 @@ func (j *Jobs) scan(ctx context.Context, job core.Job) ([]core.Job, error) {
 // probeFile probes one file: on a serialized device while holding the
 // device, with its head and tail read ahead where the storage policy
 // allows speculative reads.
-func (j *Jobs) probeFile(ctx context.Context, path string, audio bool, policy StoragePolicy) (ProbeResult, error) {
+func (j *Jobs) probeFile(ctx context.Context, f MediaFile, audio bool, policy StoragePolicy) (ProbeResult, error) {
+	path := f.Path
 	if sc := j.Scanner; sc != nil && sc.VolumeLedger != nil {
 		devices := sc.Devices
 		if devices == nil {
@@ -217,10 +221,10 @@ func (j *Jobs) probeFile(ctx context.Context, path string, audio bool, policy St
 			defer release()
 		}
 	}
-	if policy.Speculative {
-		_ = storage.PrefetchHeadTail(path, 1024*1024, 256*1024)
+	if policy.Speculative && f.Local != "" {
+		_ = storage.PrefetchHeadTail(f.Local, 1024*1024, 256*1024)
 	}
-	return j.Prober.Probe(ctx, path, audio)
+	return j.Prober.Probe(ctx, f, audio)
 }
 
 // probe probes an item's media sources that have not been probed since
@@ -255,14 +259,19 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 				return nil, err
 			}
 		}
-		res, err := j.probeFile(ctx, src.Path, audio, j.policy(&lib, src.Path))
+		f, err := j.Storages.Media(ctx, src.Path)
 		if err != nil {
+			return nil, fmt.Errorf("probe %s: %w", src.Path, err)
+		}
+		res, err := j.probeFile(ctx, f, audio, j.policy(&lib, src.Path))
+		if err != nil {
+			_ = f.Close()
 			return nil, fmt.Errorf("probe %s: %w", src.Path, err)
 		}
 		if j.Keyframes != nil && !audio && hasVideo(res.Source.Streams) {
 			// A container index gives the keyframes in a few reads of the
 			// file just probed; files without one wait for the keyframe job.
-			kf, read, err := j.Keyframes.Keyframes(ctx, src.Path, false)
+			kf, read, err := j.Keyframes.Keyframes(ctx, f, false)
 			switch {
 			case err != nil:
 				j.logger().WarnContext(ctx, "keyframe index", "path", src.Path, "err", err)
@@ -273,6 +282,7 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 				res.Source.Keyframes = kf
 			}
 		}
+		_ = f.Close()
 		probed[src.Path] = res
 	}
 	if len(probed) > 0 {

@@ -38,19 +38,19 @@ type Detector struct {
 
 // Args returns the ffmpeg arguments writing the frame at offset of the
 // first video stream as raw 8-bit luma of width × height.
-func Args(path string, offset time.Duration, width, height int) []string {
+func Args(input string, offset time.Duration, width, height int) []string {
 	return []string{
 		"-v", "error", "-nostdin",
 		"-ss", strconv.FormatFloat(offset.Seconds(), 'f', 3, 64),
-		"-i", path, "-map", "0:v:0", "-frames:v", "1",
+		"-i", input, "-map", "0:v:0", "-frames:v", "1",
 		"-vf", fmt.Sprintf("scale=%d:%d,format=gray", width, height),
 		"-f", "rawvideo", "-",
 	}
 }
 
 // Detect returns the borders of a video of the given duration and frame
-// size: zero when it has none.
-func (d *Detector) Detect(ctx context.Context, path string, duration time.Duration, width, height int) (core.Crop, error) {
+// size, read from input, the URL ffmpeg reads: zero when it has none.
+func (d *Detector) Detect(ctx context.Context, input string, duration time.Duration, width, height int) (core.Crop, error) {
 	if duration <= 0 || width < 16 || height < 16 {
 		return core.Crop{}, errors.New("borders: unknown duration or frame size")
 	}
@@ -62,7 +62,7 @@ func (d *Detector) Detect(ctx context.Context, path string, duration time.Durati
 	for i := range n {
 		offset := duration * time.Duration(i+1) / time.Duration(n+1)
 		var out, stderr bytes.Buffer
-		cmd := exec.CommandContext(ctx, d.FFmpeg, Args(path, offset, width, height)...)
+		cmd := exec.CommandContext(ctx, d.FFmpeg, Args(input, offset, width, height)...)
 		cmd.Stdout, cmd.Stderr = &out, &stderr
 		if err := cmd.Run(); err != nil {
 			return core.Crop{}, fmt.Errorf("borders: frame at %v: %w: %s", offset, err, bytes.TrimSpace(stderr.Bytes()))

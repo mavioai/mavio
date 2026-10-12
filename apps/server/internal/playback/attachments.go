@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/media/planner"
 )
 
 // fontTypes are the MIME types of font attachments by codec, for files
@@ -85,7 +86,7 @@ func (m *Manager) extractAttachment(r *http.Request, p *Playback, index int, dir
 	// ffmpeg dumps the attachment while opening the input; the null output
 	// only satisfies its need for one.
 	cmd := exec.CommandContext(r.Context(), m.cfg.FFmpegPath, "-v", "error", "-nostdin", "-y",
-		"-dump_attachment:"+strconv.Itoa(index), tmp, "-i", p.Source().Path, "-t", "0", "-f", "null", "-")
+		"-dump_attachment:"+strconv.Itoa(index), tmp, "-i", planner.InputURL(p.Source().Path, p.Decision.Source), "-t", "0", "-f", "null", "-")
 	cmd.Stderr = &limitedBuffer{b: &stderr, max: 16 << 10}
 	_ = cmd.Run() // ffmpeg may report the null output's lack of streams
 	if info, err := os.Stat(tmp); err != nil || info.Size() == 0 {

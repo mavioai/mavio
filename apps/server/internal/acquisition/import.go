@@ -300,12 +300,12 @@ func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.
 	if !filepath.IsLocal(rel) {
 		return fmt.Errorf("file name %q leaves the library folder", rel)
 	}
-	root, err := os.OpenRoot(libPath)
+	root, err := r.openFolder(ctx, libPath)
 	if err != nil {
 		return fmt.Errorf("library folder: %w", err)
 	}
 	defer func() { _ = root.Close() }()
-	if err := root.MkdirAll(filepath.Dir(rel), 0o755); err != nil {
+	if err := root.MkdirAll(ctx, path.Dir(filepath.ToSlash(rel))); err != nil {
 		return fmt.Errorf("movie folder: %w", err)
 	}
 
@@ -319,7 +319,7 @@ func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.
 	if plan.mode != nil {
 		mode = *plan.mode
 	}
-	dest := filepath.Join(libPath, rel)
+	dest := root.path(rel)
 	done, err := r.pace(ctx, dest)
 	if err != nil {
 		return err
@@ -338,7 +338,7 @@ func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.
 			return err
 		}
 	}
-	if err := transfer(root, f.path, rel, mode); err != nil {
+	if err := r.transfer(ctx, root, f.path, rel, mode); err != nil {
 		return fmt.Errorf("%s file: %w", mode, err)
 	}
 	r.logger().InfoContext(ctx, "imported movie file", "item", m.item.ID, "from", f.path, "to", dest, "mode", mode.String())
@@ -346,7 +346,7 @@ func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.
 		r.recordExtras(ctx, m.item.ID, r.importMovieExtras(ctx, root, m, f, rel, mode, s.ExtraFileExtensions))
 	}
 
-	imported := filepath.ToSlash(dest)
+	imported := dest
 	it, err := r.Store.Items().Get(ctx, m.item.ID)
 	if err != nil {
 		return err
@@ -356,7 +356,7 @@ func (r *Runtime) importPlanned(ctx context.Context, rn *run, m *movie, d *core.
 		return err
 	}
 	// A scan of the movie's folder alone, rather than of its library.
-	job := library.ScanFolderJob(m.lib, filepath.Dir(dest), r.now())
+	job := library.ScanFolderJob(m.lib, path.Dir(dest), r.now())
 	if _, err := r.Store.Jobs().Enqueue(ctx, &job); err != nil {
 		return fmt.Errorf("queue scan: %w", err)
 	}
@@ -404,7 +404,7 @@ func (r *Runtime) probeFile(ctx context.Context, f importFile) (*library.ProbeRe
 	if err != nil {
 		return nil, nil, err
 	}
-	res, err := r.Prober.Probe(ctx, f.path, false)
+	res, err := r.probe(ctx, f.path)
 	done()
 	if err != nil {
 		if ctx.Err() != nil {

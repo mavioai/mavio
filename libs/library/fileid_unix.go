@@ -8,9 +8,9 @@ import (
 	"syscall"
 )
 
-// fileID identifies a file by device and inode, which renaming keeps and
+// osFileID identifies a file by device and inode, which renaming keeps and
 // replacing changes.
-func fileID(info fs.FileInfo) string {
+func osFileID(info fs.FileInfo) string {
 	st, ok := info.Sys().(*syscall.Stat_t)
 	if !ok {
 		return ""

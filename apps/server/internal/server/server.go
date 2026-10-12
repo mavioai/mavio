@@ -201,18 +201,21 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}}
 	warmer := warming.New(warming.Config{Store: db, Keeper: keeper, Online: hub.OnlineSessions, Logger: log})
 
-	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, activityLog, plugs, cfg, quietGate, keeper, pathClasses)
+	// Library paths are local folders.
+	storages := &library.Storages{}
+	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, activityLog, plugs, cfg, quietGate, keeper, pathClasses, storages)
 	if err := set.Register(ctx, func(_ context.Context, s core.ServerSettings) error {
 		return playbacks.SetTranscoding(s.Transcoding)
 	}); err != nil {
 		log.ErrorContext(ctx, "stored transcoding settings do not apply; change them", "err", err)
 	}
 	imageServer := images.New(images.Config{
-		Store: db, Dir: filepath.Join(cfg.CacheDir, "images"), MetadataDir: metadataDir, Logger: log,
+		Store: db, Dir: filepath.Join(cfg.CacheDir, "images"), MetadataDir: metadataDir, Storages: storages, Logger: log,
 	})
-	lyrics := &library.Lyrics{Store: db, Source: plugs.LyricsProviders, Logger: log}
+	lyrics := &library.Lyrics{Store: db, Source: plugs.LyricsProviders, Storages: storages, Logger: log}
 	refresher := &library.Refresher{
-		Store: db, Source: plugs.MetadataProviders, Episodes: plugs.EpisodeListers, Images: plugs.ImageProviders, Local: plugs.LocalReaders, Savers: plugs.Savers,
+		Storages: storages,
+		Store:    db, Source: plugs.MetadataProviders, Episodes: plugs.EpisodeListers, Images: plugs.ImageProviders, Local: plugs.LocalReaders, Savers: plugs.Savers,
 		Processors: plugs.Processors, Generators: plugs.ImageGenerators, Lyrics: lyrics,
 		MetadataDir: filepath.ToSlash(metadataDir), Fetch: imageServer.Fetch, Logger: log,
 	}
@@ -255,8 +258,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	acq.Imported = reqs.Imported
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier,
-		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Logger: log},
+		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages,
+		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Logger: log},
 		Lyrics:    lyrics,
 		Intros:    &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
 		Settings:  set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
@@ -404,7 +407,7 @@ func newAcquisition(log *slog.Logger, db core.Store, set *settings.Manager, plug
 ) *acquisition.Runtime {
 	rt := &acquisition.Runtime{
 		Store: db, Settings: func() core.AcquisitionSettings { return set.Get().Acquisition },
-		Indexers: plugs.IndexerProviders, Clients: plugs.DownloadClientProviders, Identifier: refresher,
+		Indexers: plugs.IndexerProviders, Clients: plugs.DownloadClientProviders, Identifier: refresher, Storages: refresher.Storages,
 		VolumeLedger: volumeLedger, QuietGate: quietGate, Devices: devices, Logger: log,
 		SceneProviders: func() []acquisition.SceneProvider {
 			var out []acquisition.SceneProvider
@@ -438,9 +441,9 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 		return nil, nil
 	}
 	jobs := &library.Jobs{
-		Store: db,
+		Store: db, Storages: refresher.Storages,
 		Scanner: &library.Scanner{
-			Store: db, Resolver: library.NewResolver(), Logger: log,
+			Store: db, Resolver: library.NewResolver(), Logger: log, Storages: refresher.Storages,
 			Resolvers:    resolvers,
 			QuietGate:    quietGate,
 			VolumeLedger: volumeLedger,
@@ -460,7 +463,7 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 	if ffmpeg, err := exec.LookPath(ffmpeg); err == nil {
 		maker := &thumbnails.Maker{FFmpeg: ffmpeg}
 		jobs.Thumbnails = providers.Thumbnails{Maker: maker, Options: thumbnails.DefaultOptions()}
-		jobs.Loudness = maker
+		jobs.Loudness = providers.Loudness{Maker: maker}
 	}
 	if err := jobs.Schedule(ctx); err != nil {
 		log.ErrorContext(ctx, "schedule library scans", "err", err)
@@ -477,10 +480,10 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 // newPlaybacks sets up playback with the configured ffmpeg, or for direct
 // play only without one. It returns the ffmpeg version, empty without
 // ffmpeg.
-func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, activityLog *activity.Log, plugs *plugins.Manager, cfg Config, quietGate *storage.QuietGate, keeper *storage.Keeper, classes *storage.PathClasses) (*playback.Manager, string) {
+func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *events.Hub, activityLog *activity.Log, plugs *plugins.Manager, cfg Config, quietGate *storage.QuietGate, keeper *storage.Keeper, classes *storage.PathClasses, storages *library.Storages) (*playback.Manager, string) {
 	pc := playback.Config{
 		Store: db, Dir: cfg.TranscodeDir, OnChange: hub.SessionsChanged, Record: activityLog.Record, Device: plugs.IsDevice,
-		QuietGate: quietGate, Keeper: keeper, Class: classes.Class, Logger: log,
+		QuietGate: quietGate, Keeper: keeper, Class: classes.Class, Storages: storages, Logger: log,
 	}
 	if dir, err := filepath.Abs(cfg.MetadataDir); err == nil && cfg.MetadataDir != "" {
 		pc.MetadataDir = dir

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/mavioai/mavio/libs/acquire"
+	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/naming"
 	"github.com/mavioai/mavio/libs/release"
 )
@@ -119,6 +120,16 @@ func onlySamplesLeft(ctx context.Context, folder string, sample func(path string
 
 // isSample reports whether a video file is a sample of a title of a
 // runtime in minutes, as Radarr's and Sonarr's DetectSample.
+// probe probes a file to import.
+func (r *Runtime) probe(ctx context.Context, path string) (library.ProbeResult, error) {
+	f, err := r.Storages.Media(ctx, path)
+	if err != nil {
+		return library.ProbeResult{}, err
+	}
+	defer f.Close()
+	return r.Prober.Probe(ctx, f, false)
+}
+
 func (r *Runtime) isSample(ctx context.Context, path string, runtime int) bool {
 	if r.Prober == nil {
 		return false
@@ -127,7 +138,7 @@ func (r *Runtime) isSample(ctx context.Context, path string, runtime int) bool {
 	if err != nil {
 		return false
 	}
-	res, err := r.Prober.Probe(ctx, path, false)
+	res, err := r.probe(ctx, path)
 	done()
 	if err != nil {
 		return false

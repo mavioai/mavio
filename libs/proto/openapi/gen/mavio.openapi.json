@@ -7520,7 +7520,7 @@
               "type": "string"
             },
             "title": "paths",
-            "description": "Absolute root folders. A path belongs to at most one library."
+            "description": "Root folders: absolute paths of the server's file system, or\n \"rclone:\u003cremote\u003e:\u003cpath\u003e\" for a folder below an rclone remote's root. A\n path belongs to at most one library."
           },
           "scanInterval": {
             "allOf": [

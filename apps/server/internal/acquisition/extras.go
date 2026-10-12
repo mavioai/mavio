@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"context"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -46,7 +45,7 @@ func wantedExtensions(extensions []string) map[string]bool {
 // tags and, among those alike, a copy number, such as ".1.en.forced.srt";
 // other extras keep what follows the video's name in theirs. It returns
 // the extras imported, for recordExtras. Failures are logged.
-func (r *Runtime) importMovieExtras(ctx context.Context, root *os.Root, m *movie, f importFile, rel string, mode transferMode, extensions []string) []core.ExtraFile {
+func (r *Runtime) importMovieExtras(ctx context.Context, root folder, m *movie, f importFile, rel string, mode transferMode, extensions []string) []core.ExtraFile {
 	parsed := release.ParseMoviePath(f.path)
 	sameMovie := func(p string) bool {
 		if parsed == nil || parsed.PrimaryMovieTitle() == "" {
@@ -64,7 +63,7 @@ func (r *Runtime) importMovieExtras(ctx context.Context, root *os.Root, m *movie
 // and OtherExtraService: as importMovieExtras, but the files below the
 // video's folder are looked at when the download's folder name parsed,
 // and extras match by the season and episodes their names hold.
-func (r *Runtime) importEpisodeExtras(ctx context.Context, root *os.Root, sh *show, le *localEpisode, recurse bool, rel string, mode transferMode, extensions []string) []core.ExtraFile {
+func (r *Runtime) importEpisodeExtras(ctx context.Context, root folder, sh *show, le *localEpisode, recurse bool, rel string, mode transferMode, extensions []string) []core.ExtraFile {
 	fileInfo := release.ParseSeriesPath(le.file.path)
 	sameEpisodes := func(p string) bool {
 		if fileInfo == nil {
@@ -83,7 +82,7 @@ func (r *Runtime) importEpisodeExtras(ctx context.Context, root *os.Root, sh *sh
 // video is its folder's only one besides a sample; recurse looks below
 // the video's folder too. It returns the extras imported, without their
 // item.
-func (r *Runtime) importExtras(ctx context.Context, root *os.Root, video string, recurse bool, rel string, mode transferMode, extensions []string,
+func (r *Runtime) importExtras(ctx context.Context, root folder, video string, recurse bool, rel string, mode transferMode, extensions []string,
 	kind release.Kind, matches, isSample func(path string) bool,
 ) []core.ExtraFile {
 	wanted := wantedExtensions(extensions)
@@ -95,12 +94,12 @@ func (r *Runtime) importExtras(ctx context.Context, root *os.Root, video string,
 	var out []core.ExtraFile
 	for _, e := range nameExtras(video, files, kind) {
 		dest := destBase + e.suffix
-		if err := transfer(root, e.src, dest, mode); err != nil {
+		if err := r.transfer(ctx, root, e.src, dest, mode); err != nil {
 			r.logger().WarnContext(ctx, "couldn't import extra file", "path", e.src, "err", err)
 			continue
 		}
 		out = append(out, core.ExtraFile{
-			Kind: e.kind, Path: filepath.ToSlash(filepath.Join(root.Name(), dest)), Extension: strings.ToLower(filepath.Ext(dest)),
+			Kind: e.kind, Path: root.path(dest), Extension: strings.ToLower(filepath.Ext(dest)),
 			Language: e.language, LanguageTags: e.tags,
 		})
 	}

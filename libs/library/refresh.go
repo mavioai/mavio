@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
-	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -94,6 +93,9 @@ type Refresher struct {
 	// Lyrics downloads lyrics for tracks without any, in libraries that
 	// download lyrics; nil downloads none.
 	Lyrics *Lyrics
+	// Storages opens the storage of library paths; nil opens local
+	// folders only.
+	Storages *Storages
 	// MetadataDir holds the artwork chosen for items whose library does
 	// not save local metadata, one folder per item; empty keeps none.
 	MetadataDir string
@@ -154,7 +156,7 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 	}
 	var local *metadata.Result
 	if !opts.ReplaceMetadata {
-		if local, err = r.readNFO(lib, it); err != nil {
+		if local, err = r.readNFO(ctx, lib, it); err != nil {
 			r.logger().WarnContext(ctx, "reading NFO failed", "item", it.ID, "err", err)
 		}
 	}
@@ -162,7 +164,7 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 	// the NFO names.
 	art := r.storedArt(it)
 	if !opts.ReplaceMetadata || !lib.SaveLocalMetadata {
-		for _, img := range r.localArt(lib, it) {
+		for _, img := range r.localArt(ctx, lib, it) {
 			if !slices.ContainsFunc(art, func(a metadata.LocalImage) bool { return a.Kind == img.Kind && img.Kind != core.ImageBackdrop }) {
 				art = append(art, img)
 			}
@@ -624,24 +626,25 @@ func numberImages(images []core.Image) {
 }
 
 // localArt finds the artwork beside an item in its library folder.
-func (r *Refresher) localArt(lib core.Library, it core.Item) []metadata.LocalImage {
+func (r *Refresher) localArt(ctx context.Context, lib core.Library, it core.Item) []metadata.LocalImage {
 	root, rel, ok := libraryRoot(lib, it.Path)
 	if !ok {
 		return nil
 	}
-	rt, err := os.OpenRoot(filepath.FromSlash(root))
+	st, err := r.Storages.Open(ctx, root)
 	if err != nil {
 		return nil
 	}
-	defer rt.Close()
-	info, err := fs.Stat(rt.FS(), rel)
+	defer st.Close()
+	fsys := core.StorageFS(ctx, st)
+	info, err := st.Stat(ctx, rel)
 	if err != nil {
 		return nil
 	}
 	mixed := false
 	if !info.IsDir() {
 		// A file shares its folder when other videos lie beside it.
-		entries, _ := fs.ReadDir(rt.FS(), path.Dir(rel))
+		entries, _ := st.ReadDir(ctx, path.Dir(rel))
 		videos := 0
 		for _, e := range entries {
 			if !e.IsDir() && naming.Default().IsVideoFile(e.Name()) {
@@ -650,7 +653,7 @@ func (r *Refresher) localArt(lib core.Library, it core.Item) []metadata.LocalIma
 		}
 		mixed = videos > 1
 	}
-	images := localImages(rt.FS(), &it, rel, info.IsDir(), mixed)
+	images := localImages(fsys, &it, rel, info.IsDir(), mixed)
 	for i := range images {
 		images[i].Path = path.Join(root, images[i].Path)
 	}
@@ -673,18 +676,19 @@ func keepImages(images, existing []core.Image) {
 
 // readNFO reads the item's local NFO file, through the library folder that
 // holds it; nil when there is none.
-func (r *Refresher) readNFO(lib core.Library, it core.Item) (*metadata.Result, error) {
+func (r *Refresher) readNFO(ctx context.Context, lib core.Library, it core.Item) (*metadata.Result, error) {
 	root, rel, ok := libraryRoot(lib, it.Path)
 	if !ok {
 		return nil, nil
 	}
-	rt, err := os.OpenRoot(filepath.FromSlash(root))
+	st, err := r.Storages.Open(ctx, root)
 	if err != nil {
 		return nil, err
 	}
-	defer rt.Close()
+	defer st.Close()
+	fsys := core.StorageFS(ctx, st)
 	for _, p := range nfoPaths(it, rel, root) {
-		data, err := fs.ReadFile(rt.FS(), p)
+		data, err := fs.ReadFile(fsys, p)
 		if errors.Is(err, fs.ErrNotExist) {
 			continue
 		}
@@ -698,7 +702,7 @@ func (r *Refresher) readNFO(lib core.Library, it core.Item) (*metadata.Result, e
 				if !ok {
 					return false
 				}
-				info, err := fs.Stat(rt.FS(), rel)
+				info, err := st.Stat(ctx, rel)
 				return err == nil && info.Mode().IsRegular()
 			},
 		})
@@ -718,13 +722,7 @@ func (r *Refresher) readNFO(lib core.Library, it core.Item) (*metadata.Result, e
 
 // libraryRoot returns the library folder holding p, and p relative to it.
 func libraryRoot(lib core.Library, p string) (string, string, bool) {
-	for _, root := range lib.Paths {
-		root = strings.TrimSuffix(filepath.ToSlash(filepath.Clean(root)), "/")
-		if rel, ok := strings.CutPrefix(p, root+"/"); ok {
-			return root, rel, true
-		}
-	}
-	return "", "", false
+	return RootOf(lib.Paths, p)
 }
 
 // nfoPaths lists where an item's NFO file may be, relative to its library

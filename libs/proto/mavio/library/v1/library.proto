@@ -49,7 +49,9 @@ message Library {
   string id = 1;
   string name = 2;
   LibraryKind kind = 3;
-  // Absolute root folders. A path belongs to at most one library.
+  // Root folders: absolute paths of the server's file system, or
+  // "rclone:<remote>:<path>" for a folder below an rclone remote's root. A
+  // path belongs to at most one library.
   repeated string paths = 4;
   // Period of scheduled reconciliation scans; unset disables them.
   google.protobuf.Duration scan_interval = 5;

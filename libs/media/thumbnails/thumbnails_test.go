@@ -71,7 +71,7 @@ func TestTrickplay(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			film := letterboxed(t, ffmpeg, tt.ext)
 			dir := t.TempDir()
-			tp, err := m.Trickplay(t.Context(), film, v, o, dir, tt.whole)
+			tp, err := m.Trickplay(t.Context(), LocalInput(film), v, o, dir, tt.whole)
 			if tt.noIndex {
 				if !errors.Is(err, keyframes.ErrNoIndex) {
 					t.Errorf("Trickplay() error = %v, want = %v", err, keyframes.ErrNoIndex)
@@ -122,17 +122,17 @@ func TestChapterImagesAndLoudness(t *testing.T) {
 	m := &Maker{FFmpeg: ffmpeg}
 	v := Video{Duration: 25 * time.Second, Width: 320, Height: 240, Crop: core.Crop{Top: 30, Bottom: 30}}
 	file := filepath.Join(t.TempDir(), "chapter.jpg")
-	if err := m.ChapterImage(t.Context(), film, 12*time.Second, v, 320, file); err != nil {
+	if err := m.ChapterImage(t.Context(), "file:"+film, 12*time.Second, v, 320, file); err != nil {
 		t.Fatal(err)
 	}
 	if w, h := dims(t, file); w != 320 || h != 180 {
 		t.Errorf("chapter image = %dx%d, want 320x180", w, h)
 	}
-	if err := m.ChapterImage(t.Context(), film, time.Hour, v, 320, filepath.Join(t.TempDir(), "late.jpg")); err == nil {
+	if err := m.ChapterImage(t.Context(), "file:"+film, time.Hour, v, 320, filepath.Join(t.TempDir(), "late.jpg")); err == nil {
 		t.Error("an image past the end: no error")
 	}
 
-	lufs, err := m.Loudness(t.Context(), film)
+	lufs, err := m.Loudness(t.Context(), "file:"+film)
 	if err != nil || lufs > -10 || lufs < -40 {
 		t.Errorf("Loudness = %v, %v", lufs, err)
 	}

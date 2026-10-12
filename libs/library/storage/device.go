@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/mavioai/mavio/libs/core"
 )
 
 // DeviceKind classifies the physical or network characteristics of a storage device.
@@ -100,6 +102,10 @@ func (d *Detector) Folder(dir string) DeviceInfo {
 }
 
 func (d *Detector) lookup(dir, path string) DeviceInfo {
+	if core.IsRemotePath(path) {
+		// Remote storage is no device of the server.
+		return DeviceInfo{Kind: KindCloudMount, Remote: true}
+	}
 	d.mu.Lock()
 	info, ok := d.cache[dir]
 	d.mu.Unlock()

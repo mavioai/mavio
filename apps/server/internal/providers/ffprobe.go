@@ -13,9 +13,14 @@ type FFprobe struct {
 	Prober *probe.Prober
 }
 
-// Probe probes the file at path, with its chapters.
-func (f FFprobe) Probe(ctx context.Context, path string, audio bool) (library.ProbeResult, error) {
-	r, err := f.Prober.Probe(ctx, probe.Request{Path: path, Audio: audio, Chapters: true})
+// Probe probes a media file, with its chapters: a local one by its path,
+// and others through their URL, read as little as ffprobe can.
+func (f FFprobe) Probe(ctx context.Context, m library.MediaFile, audio bool) (library.ProbeResult, error) {
+	req := probe.Request{Path: m.Local, Audio: audio, Chapters: true}
+	if m.Remote() {
+		req.Path, req.Remote = m.URL, true
+	}
+	r, err := f.Prober.Probe(ctx, req)
 	if err != nil {
 		return library.ProbeResult{}, err
 	}

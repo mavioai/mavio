@@ -239,11 +239,12 @@ func (r *Refresher) saveLocal(ctx context.Context, lib core.Library, it core.Ite
 	if !ok || it.Extra != "" {
 		return nil
 	}
-	rt, err := os.OpenRoot(filepath.FromSlash(root))
+	st, err := r.Storages.Open(ctx, root)
 	if err != nil {
 		return fmt.Errorf("save metadata of %s: %w", it.ID, err)
 	}
-	defer rt.Close()
+	defer st.Close()
+	fsys := core.StorageFS(ctx, st)
 	images, err := r.Store.Images().ListForOwner(ctx, it.ID)
 	if err != nil {
 		return err
@@ -254,7 +255,7 @@ func (r *Refresher) saveLocal(ctx context.Context, lib core.Library, it core.Ite
 		if img.Path != "" || img.RemoteURL == "" || r.Fetch == nil {
 			continue
 		}
-		base, ok := artBase(rt.FS(), &it, rel, img.Kind, img.Index)
+		base, ok := artBase(fsys, &it, rel, img.Kind, img.Index)
 		if !ok {
 			continue
 		}
@@ -263,7 +264,7 @@ func (r *Refresher) saveLocal(ctx context.Context, lib core.Library, it core.Ite
 			r.logger().WarnContext(ctx, "download image failed", "item", it.ID, "url", img.RemoteURL, "err", err)
 			continue
 		}
-		file, err := writeArt(rt, base, data)
+		file, err := writeArt(ctx, st, base, data)
 		if err != nil {
 			return fmt.Errorf("save image of %s: %w", it.ID, err)
 		}
@@ -297,11 +298,11 @@ func (r *Refresher) saveLocal(ctx context.Context, lib core.Library, it core.Ite
 	if err != nil {
 		return err
 	}
-	target := nfoTarget(rt.FS(), it, rel, root)
-	if old, err := fs.ReadFile(rt.FS(), target); err == nil && bytes.Equal(old, data) {
+	target := nfoTarget(fsys, it, rel, root)
+	if old, err := fs.ReadFile(fsys, target); err == nil && bytes.Equal(old, data) {
 		return nil
 	}
-	if err := writeFileIn(rt, target, data); err != nil {
+	if err := st.WriteFile(ctx, target, data); err != nil {
 		return fmt.Errorf("save NFO of %s: %w", it.ID, err)
 	}
 	return nil
@@ -436,43 +437,27 @@ func imageExtension(data []byte) (string, error) {
 	return ext, nil
 }
 
-// writeArt writes an image at base plus its extension within rt, removing
+// writeArt writes an image at base plus its extension within st, removing
 // the artwork of other formats at base, which would be found first, and
 // returns its path.
-func writeArt(rt *os.Root, base string, data []byte) (string, error) {
+func writeArt(ctx context.Context, st core.Storage, base string, data []byte) (string, error) {
 	ext, err := imageExtension(data)
 	if err != nil {
 		return "", err
 	}
-	if entries, err := fs.ReadDir(rt.FS(), path.Dir(base)); err == nil {
+	if entries, err := st.ReadDir(ctx, path.Dir(base)); err == nil {
 		for _, e := range entries {
 			n := e.Name()
 			if !e.IsDir() && strings.EqualFold(strings.TrimSuffix(n, path.Ext(n)), path.Base(base)) &&
 				slices.Contains(artworkExtensions, strings.ToLower(path.Ext(n))) {
-				if err := rt.Remove(path.Join(path.Dir(base), n)); err != nil {
+				if err := st.Remove(ctx, path.Join(path.Dir(base), n)); err != nil {
 					return "", err
 				}
 			}
 		}
 	}
 	file := base + ext
-	return file, writeFileIn(rt, file, data)
-}
-
-// writeFileIn replaces a file within rt atomically.
-func writeFileIn(rt *os.Root, name string, data []byte) error {
-	if err := rt.MkdirAll(path.Dir(name), 0o755); err != nil {
-		return err
-	}
-	tmp := path.Join(path.Dir(name), "."+path.Base(name)+".tmp")
-	if err := rt.WriteFile(tmp, data, 0o644); err != nil {
-		return err
-	}
-	if err := rt.Rename(tmp, name); err != nil {
-		_ = rt.Remove(tmp)
-		return err
-	}
-	return nil
+	return file, st.WriteFile(ctx, file, data)
 }
 
 // storedFolder is an item's folder within MetadataDir.
@@ -519,7 +504,7 @@ func (r *Refresher) SetImage(ctx context.Context, lib core.Library, itemID core.
 	if err != nil {
 		return core.Image{}, err
 	}
-	file, err := r.saveImage(lib, it, kind, data)
+	file, err := r.saveImage(ctx, lib, it, kind, data)
 	if err != nil {
 		return core.Image{}, err
 	}
@@ -542,16 +527,16 @@ func (r *Refresher) SetImage(ctx context.Context, lib core.Library, itemID core.
 }
 
 // saveImage writes an item's chosen image and returns its path.
-func (r *Refresher) saveImage(lib core.Library, it core.Item, kind core.ImageKind, data []byte) (string, error) {
+func (r *Refresher) saveImage(ctx context.Context, lib core.Library, it core.Item, kind core.ImageKind, data []byte) (string, error) {
 	if lib.SaveLocalMetadata {
 		if root, rel, ok := libraryRoot(lib, it.Path); ok {
-			rt, err := os.OpenRoot(filepath.FromSlash(root))
+			st, err := r.Storages.Open(ctx, root)
 			if err != nil {
 				return "", err
 			}
-			defer rt.Close()
-			if base, ok := artBase(rt.FS(), &it, rel, kind, 0); ok {
-				file, err := writeArt(rt, base, data)
+			defer st.Close()
+			if base, ok := artBase(core.StorageFS(ctx, st), &it, rel, kind, 0); ok {
+				file, err := writeArt(ctx, st, base, data)
 				if err != nil {
 					return "", err
 				}
@@ -565,12 +550,12 @@ func (r *Refresher) saveImage(lib core.Library, it core.Item, kind core.ImageKin
 	if err := os.MkdirAll(r.MetadataDir, 0o755); err != nil {
 		return "", err
 	}
-	rt, err := os.OpenRoot(r.MetadataDir)
+	st, err := OpenLocalStorage(r.MetadataDir)
 	if err != nil {
 		return "", err
 	}
-	defer rt.Close()
-	file, err := writeArt(rt, path.Join(r.storedFolder(it.ID), string(kind)), data)
+	defer st.Close()
+	file, err := writeArt(ctx, st, path.Join(r.storedFolder(it.ID), string(kind)), data)
 	if err != nil {
 		return "", err
 	}
@@ -603,16 +588,17 @@ func (r *Refresher) DeleteImage(ctx context.Context, lib core.Library, itemID, i
 		roots = append(roots, r.MetadataDir)
 	}
 	for _, root := range roots {
-		rel, err := filepath.Rel(root, filepath.FromSlash(removed.Path))
-		if err != nil || !filepath.IsLocal(rel) {
+		root = cleanRoot(root)
+		rel, ok := core.StorageName(root, removed.Path)
+		if !ok || rel == "." {
 			continue
 		}
-		rt, err := os.OpenRoot(root)
+		st, err := r.Storages.Open(ctx, root)
 		if err != nil {
 			return err
 		}
-		defer rt.Close()
-		if err := rt.Remove(rel); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		defer st.Close()
+		if err := st.Remove(ctx, rel); err != nil && !errors.Is(err, fs.ErrNotExist) {
 			return err
 		}
 		return nil

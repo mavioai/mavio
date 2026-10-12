@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
-	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -65,22 +64,22 @@ func (r *Refresher) savers() []Saver {
 	return r.Savers()
 }
 
-// itemFolder opens the library folder holding an item and returns the
-// item's folder and media within it: the item's folder is the item itself
-// when it is a folder.
-func itemFolder(lib core.Library, it core.Item) (rt *os.Root, dir, rel string, err error) {
+// itemFolder opens the storage of the library folder holding an item and
+// returns the item's folder and media within it: the item's folder is the
+// item itself when it is a folder.
+func itemFolder(ctx context.Context, storages *Storages, lib core.Library, it core.Item) (st core.Storage, dir, rel string, err error) {
 	root, rel, ok := libraryRoot(lib, it.Path)
 	if !ok {
 		return nil, "", "", nil
 	}
-	if rt, err = os.OpenRoot(filepath.FromSlash(root)); err != nil {
+	if st, err = storages.Open(ctx, root); err != nil {
 		return nil, "", "", err
 	}
 	dir = path.Dir(rel)
-	if info, err := fs.Stat(rt.FS(), rel); err == nil && info.IsDir() {
+	if info, err := st.Stat(ctx, rel); err == nil && info.IsDir() {
 		dir = rel
 	}
-	return rt, dir, rel, nil
+	return st, dir, rel, nil
 }
 
 // readLocal has the local readers read an item's files, each returning
@@ -90,15 +89,16 @@ func (r *Refresher) readLocal(ctx context.Context, lib core.Library, it core.Ite
 	if len(readers) == 0 {
 		return nil
 	}
-	rt, dir, rel, err := itemFolder(lib, it)
-	if err != nil || rt == nil {
+	st, dir, rel, err := itemFolder(ctx, r.Storages, lib, it)
+	if err != nil || st == nil {
 		if err != nil {
 			r.logger().WarnContext(ctx, "reading local metadata failed", "item", it.ID, "err", err)
 		}
 		return nil
 	}
-	defer rt.Close()
-	entries, err := fs.ReadDir(rt.FS(), dir)
+	defer st.Close()
+	fsys := core.StorageFS(ctx, st)
+	entries, err := st.ReadDir(ctx, dir)
 	if err != nil {
 		r.logger().WarnContext(ctx, "reading local metadata failed", "item", it.ID, "err", err)
 		return nil
@@ -119,7 +119,7 @@ func (r *Refresher) readLocal(ctx context.Context, lib core.Library, it core.Ite
 			if info, err := e.Info(); err != nil || info.Size() > MaxLocalFileSize {
 				continue
 			}
-			data, err := fs.ReadFile(rt.FS(), path.Join(dir, e.Name()))
+			data, err := fs.ReadFile(fsys, path.Join(dir, e.Name()))
 			if err != nil {
 				r.logger().WarnContext(ctx, "reading local metadata failed", "item", it.ID, "file", e.Name(), "err", err)
 				continue
@@ -147,11 +147,11 @@ func (r *Refresher) save(ctx context.Context, lib core.Library, it core.Item, re
 	if len(savers) == 0 {
 		return nil
 	}
-	rt, dir, rel, err := itemFolder(lib, it)
-	if err != nil || rt == nil {
+	st, dir, rel, err := itemFolder(ctx, r.Storages, lib, it)
+	if err != nil || st == nil {
 		return err
 	}
-	defer rt.Close()
+	defer st.Close()
 	for _, s := range savers {
 		files, err := s.Save(ctx, path.Base(rel), res)
 		if err != nil {
@@ -164,10 +164,10 @@ func (r *Refresher) save(ctx context.Context, lib core.Library, it core.Item, re
 		}
 		for _, f := range files {
 			name := path.Join(dir, f.Name)
-			if old, err := fs.ReadFile(rt.FS(), name); err == nil && bytes.Equal(old, f.Content) {
+			if old, err := fs.ReadFile(core.StorageFS(ctx, st), name); err == nil && bytes.Equal(old, f.Content) {
 				continue
 			}
-			if err := writeFileIn(rt, name, f.Content); err != nil {
+			if err := st.WriteFile(ctx, name, f.Content); err != nil {
 				return fmt.Errorf("save %s of %s: %w", f.Name, it.ID, err)
 			}
 		}

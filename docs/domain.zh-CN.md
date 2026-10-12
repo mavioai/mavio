@@ -102,7 +102,7 @@ erDiagram
 ## 4. 媒体库与条目
 
 ### 4.1 媒体库
-* `Kind` 决定扫描器如何解读目录；`Paths` 是绝对路径的根目录，一个路径最多属于一个媒体库：媒体库的路径不能与其他媒体库的路径相同、包含或被包含（`ErrConflict`）。整理类种类（`LibraryKind.Curated`），即 `collections` 与 `playlists`，存放用户整理的合集与播放列表而非扫描的目录：它们没有路径，从不扫描，每种至多一个媒体库（`ErrConflict`），由服务端在首次需要时创建。
+* `Kind` 决定扫描器如何解读目录；`Paths` 是根目录：服务器文件系统的绝对路径，或 rclone 远端根目录之下的目录 `rclone:<remote>:<path>`（`core.RemoteScheme`）。媒体库路径之下的条目与媒体文件的路径，是媒体库路径加斜杠再加文件在其中以斜杠分隔的名称（`core.StoragePath`、`core.StorageName`）。一个路径最多属于一个媒体库：媒体库的路径不能与其他媒体库的路径相同、包含或被包含（`ErrConflict`）。整理类种类（`LibraryKind.Curated`），即 `collections` 与 `playlists`，存放用户整理的合集与播放列表而非扫描的目录：它们没有路径，从不扫描，每种至多一个媒体库（`ErrConflict`），由服务端在首次需要时创建。
 * `StorageClasses` 按路径为部分路径设定 `StorageClass`，用于服务端会判错的存储；每个键必须是 `Paths` 之一，每个值不能是自动（`ErrInvalid`）。其余路径为自动：按所在设备分类。存储类别说明读取文件的代价：`local`（服务器自己的磁盘）、`network`（局域网共享）或 `cloud`（云盘，读取计入配额和限流），并决定服务端自行读取多少媒体（[优化 §2](optimization.zh-CN.md)）。`Library.StorageClassOf` 返回包含某文件或目录的最长路径所设定的类别。
 * `ScanInterval` 是定时对账扫描的周期（为零则不定时扫描）；`PreferredLanguage`（ISO 639-1）与 `MetadataCountry`（ISO 3166-1 alpha-2）影响元数据提供者的取数。
 * `SaveLocalMetadata` 把每个条目的 NFO 文件以及为它选择或下载的图片写到媒体旁边，扫描时再读回；`AutoCollections` 把电影放入以提供者的合集（电影系列）命名的合集，先按 `tmdb_collection` ID 查找，否则按名称，首次需要时创建。
@@ -272,6 +272,7 @@ erDiagram
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
 * **Replace 语义**：`Replace*` 方法设置某个所有者的完整集合，删除不在新集合中的内容——扫描与元数据刷新总是整组写入。
 * **错误**：实现包装 `ErrNotFound`、`ErrConflict`（唯一键或状态冲突）与 `ErrInvalid`（违反领域规则），调用方用 `errors.Is` 判断。
+* **存储**：`core.Storage` 存放一个媒体库路径的文件，名称以斜杠分隔并相对于该路径：`Stat`、`ReadDir`、`Open`（返回可按偏移读取的 `core.File`）、`WriteFile`（小文件；能原子重命名的存储先写在旁边再换入）、`Create`（大文件，已存在时为 `fs.ErrExist`）、`MkdirAll`、`Rename`、`Copy` 与 `Link`（存储做不到时为 `ErrUnsupported`）、`Remove`、`Chtimes`、`MediaURL`（ffmpeg 与 ffprobe 读取的输入：`file:` URL 或 HTTP URL）以及 `Capabilities`（`core.StorageCapabilities`：本地、服务端复制、硬链接、原子重命名、目录修改时间）。`core.StorageTransfers` 从同一后端的其他路径移动和复制文件；`core.FileIDer` 给出文件跨重命名不变的标识；`core.StorageFS` 把存储适配为 `fs.FS`。`libs/library` 基于 `os.Root` 为本地目录实现它。
 
 ### 9.1 条目查询
 `ItemQuery` 中零值字段表示"不过滤"：

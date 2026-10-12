@@ -93,6 +93,9 @@ type Config struct {
 	// Keeper keeps the volumes of the playbacks in progress awake; nil
 	// leaves them be.
 	Keeper *storage.Keeper
+	// Storages opens the storage of library paths; nil opens local
+	// folders only.
+	Storages *library.Storages
 	// Class returns the storage class of a media file; files on cloud
 	// storage are not read ahead. Nil reads every file ahead.
 	Class func(ctx context.Context, path string) core.StorageClass
@@ -412,8 +415,17 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 		p.SubtitleStream = *i
 	}
 	p.Subtitles = m.subtitles(d, r.Client)
-	if p.root = libraryRoot(&lib, ms.Path); p.root == "" && !d.Source.Remote {
-		return nil, fmt.Errorf("%w: %s lies outside its library", ErrNotPlayable, ms.Path)
+	if !d.Source.Remote {
+		root, _, ok := library.RootOf(lib.Paths, ms.Path)
+		if !ok {
+			return nil, fmt.Errorf("%w: %s lies outside its library", ErrNotPlayable, ms.Path)
+		}
+		p.root = root
+		if core.IsRemotePath(ms.Path) {
+			if err := m.resolveInputs(ctx, d.Source); err != nil {
+				return nil, err
+			}
+		}
 	}
 	switch {
 	case d.Method == decision.DirectPlay:
@@ -853,14 +865,25 @@ func (m *Manager) check(ctx context.Context) {
 	}
 }
 
-// libraryRoot returns the library folder holding path, or "".
-func libraryRoot(lib *core.Library, path string) string {
-	for _, root := range lib.Paths {
-		if rel, err := filepath.Rel(root, path); err == nil && filepath.IsLocal(rel) {
-			return root
+// resolveInputs sets the URLs ffmpeg reads a source on remote storage and
+// its sidecar files from.
+func (m *Manager) resolveInputs(ctx context.Context, s *decision.Source) error {
+	paths := []string{s.Path}
+	for _, st := range s.Streams {
+		if st.ExternalPath != "" {
+			paths = append(paths, st.ExternalPath)
 		}
 	}
-	return ""
+	s.Inputs = make(map[string]string, len(paths))
+	for _, p := range paths {
+		f, err := m.cfg.Storages.Media(ctx, p)
+		if err != nil {
+			return fmt.Errorf("%w: %s: %w", ErrNotPlayable, p, err)
+		}
+		s.Inputs[p] = f.URL
+		_ = f.Close()
+	}
+	return nil
 }
 
 // noTranscoder stands in for ffmpeg when there is none.

@@ -16,7 +16,7 @@ import (
 // tracks as audio.
 type chapteredProber struct{}
 
-func (chapteredProber) Probe(_ context.Context, _ string, audio bool) (ProbeResult, error) {
+func (chapteredProber) Probe(_ context.Context, _ MediaFile, audio bool) (ProbeResult, error) {
 	if audio {
 		return ProbeResult{Source: core.MediaSource{
 			Container: "flac", Duration: 3 * time.Minute,
@@ -39,7 +39,7 @@ type fakeThumbs struct {
 	fail, noIndex        bool
 }
 
-func (f *fakeThumbs) Trickplay(_ context.Context, _ string, v VideoFrame, dir string, whole bool) (core.Trickplay, bool, error) {
+func (f *fakeThumbs) Trickplay(_ context.Context, _ MediaFile, v VideoFrame, dir string, whole bool) (core.Trickplay, bool, error) {
 	if f.noIndex && !whole {
 		return core.Trickplay{}, false, nil
 	}
@@ -54,7 +54,7 @@ func (f *fakeThumbs) Trickplay(_ context.Context, _ string, v VideoFrame, dir st
 	return core.Trickplay{Width: 320, Height: 133, TileWidth: 10, TileHeight: 10, ThumbnailCount: 180, Interval: 10 * time.Second}, true, nil
 }
 
-func (f *fakeThumbs) ChapterImage(_ context.Context, _ string, at time.Duration, _ VideoFrame, file string) error {
+func (f *fakeThumbs) ChapterImage(_ context.Context, _ MediaFile, at time.Duration, _ VideoFrame, file string) error {
 	f.chapters++
 	f.at = append(f.at, at)
 	return os.WriteFile(file, []byte("jpg"), 0o644)
@@ -62,8 +62,8 @@ func (f *fakeThumbs) ChapterImage(_ context.Context, _ string, at time.Duration,
 
 type fakeLoudness map[string]float64
 
-func (f fakeLoudness) Loudness(_ context.Context, path string) (float64, error) {
-	return f[filepath.Base(path)], nil
+func (l fakeLoudness) Loudness(_ context.Context, f MediaFile) (float64, error) {
+	return l[filepath.Base(f.Path)], nil
 }
 
 type fakeSegments struct{ name string }

@@ -42,6 +42,9 @@ func (c *Classifier) Classify(lib *core.Library, path string) core.StorageClass 
 	if class := lib.StorageClassOf(path); class != core.StorageAuto {
 		return class
 	}
+	if core.IsRemotePath(path) {
+		return core.StorageCloud
+	}
 	if slices.Contains(lib.Paths, path) {
 		// A library path may be a mount point: detect the folder itself.
 		return c.devices.Folder(path).Class()

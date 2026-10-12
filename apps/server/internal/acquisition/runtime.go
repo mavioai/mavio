@@ -70,6 +70,9 @@ type Runtime struct {
 	// Prober reads imported files; without it no file is imported, as
 	// none can be told from a sample.
 	Prober library.Prober
+	// Storages opens the storage of library and download paths; nil
+	// opens local folders only.
+	Storages *library.Storages
 	// VolumeLedger, QuietGate and Devices pace imports on rotational and
 	// remote volumes, as for scans; nil leaves imports unpaced.
 	VolumeLedger *storage.VolumeLedger

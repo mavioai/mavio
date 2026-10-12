@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -457,7 +456,12 @@ func (p episodePorts) FileExists(ctx context.Context, s *series.Series, f *acqui
 	if err != nil || it.Path == "" {
 		return false, err
 	}
-	_, err = os.Stat(filepath.FromSlash(it.Path))
+	st, name, err := p.rn.rt.openFile(ctx, it.Path)
+	if err != nil {
+		return false, nil
+	}
+	defer func() { _ = st.Close() }()
+	_, err = st.Stat(ctx, name)
 	return err == nil, nil
 }
 

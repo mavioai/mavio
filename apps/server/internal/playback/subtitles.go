@@ -229,7 +229,7 @@ func (m *Manager) loadSubtitle(ctx context.Context, p *Playback, st *core.MediaS
 	}
 	var data []byte
 	if st.ExternalPath != "" {
-		f, _, err := openInRoot(p.root, st.ExternalPath)
+		f, _, err := m.open(ctx, p, st.ExternalPath)
 		if err != nil {
 			return nil, err
 		}

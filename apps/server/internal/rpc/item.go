@@ -6,8 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
+	"path"
 	"strings"
 	"time"
 
@@ -112,6 +111,9 @@ type ItemService struct {
 	ExternalIDKinds func() []metadata.ExternalIDKind
 	// Lyrics finds lyrics through the lyrics providers; nil finds none.
 	Lyrics *library.Lyrics
+	// Storages opens the storage of library paths; nil opens local
+	// folders only.
+	Storages *library.Storages
 }
 
 var _ libraryv1connect.ItemServiceHandler = (*ItemService)(nil)
@@ -231,7 +233,7 @@ func (s *ItemService) GetLyrics(ctx context.Context, req *libraryv1.GetLyricsReq
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	name, content, ok := lyricFile(&lib, item.Path)
+	name, content, ok := s.lyricFile(ctx, &lib, item.Path)
 	if !ok {
 		return nil, notFound
 	}
@@ -323,28 +325,31 @@ const maxLyrics = 1 << 20
 
 // lyricFile reads the lyric file beside a media file within its library
 // folder, the preferred extension first.
-func lyricFile(lib *core.Library, media string) (string, string, bool) {
-	for _, root := range lib.Paths {
-		rel, err := filepath.Rel(root, filepath.FromSlash(media))
-		if err != nil || !filepath.IsLocal(rel) {
+func (s *ItemService) lyricFile(ctx context.Context, lib *core.Library, media string) (string, string, bool) {
+	root, rel, ok := library.RootOf(lib.Paths, media)
+	if !ok {
+		return "", "", false
+	}
+	st, err := s.Storages.Open(ctx, root)
+	if err != nil {
+		return "", "", false
+	}
+	defer st.Close()
+	stem := strings.TrimSuffix(rel, path.Ext(rel))
+	for _, ext := range metadata.LyricExtensions {
+		f, err := st.Open(ctx, stem+ext)
+		if err != nil {
 			continue
 		}
-		stem := strings.TrimSuffix(rel, filepath.Ext(rel))
-		for _, ext := range metadata.LyricExtensions {
-			f, err := os.OpenInRoot(root, stem+ext)
-			if err != nil {
-				continue
-			}
-			data, err := io.ReadAll(io.LimitReader(f, maxLyrics))
-			_ = f.Close()
-			if err != nil {
-				continue
-			}
-			if utf8, _, err := subtitle.ToUTF8(data); err == nil {
-				data = utf8
-			}
-			return filepath.Base(stem + ext), string(data), true
+		data, err := io.ReadAll(io.LimitReader(f, maxLyrics))
+		_ = f.Close()
+		if err != nil {
+			continue
 		}
+		if utf8, _, err := subtitle.ToUTF8(data); err == nil {
+			data = utf8
+		}
+		return path.Base(stem + ext), string(data), true
 	}
 	return "", "", false
 }

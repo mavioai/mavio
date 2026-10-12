@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/url"
-	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/streaming"
 )
 
@@ -188,7 +189,7 @@ func (m *Manager) serveFile(w http.ResponseWriter, r *http.Request, p *Playback)
 		http.Redirect(w, r, p.Source().Path, http.StatusFound)
 		return
 	}
-	f, info, err := openInRoot(p.root, p.Source().Path)
+	f, info, err := m.open(r.Context(), p, p.Source().Path)
 	if err != nil {
 		m.log.ErrorContext(r.Context(), "open media", "playback", p.ID, "err", err)
 		http.Error(w, "media unavailable", http.StatusNotFound)
@@ -201,12 +202,13 @@ func (m *Manager) serveFile(w http.ResponseWriter, r *http.Request, p *Playback)
 	http.ServeContent(w, r, info.Name(), info.ModTime(), f)
 }
 
-func openInRoot(root, path string) (*os.File, os.FileInfo, error) {
-	rel, err := filepath.Rel(root, path)
-	if err != nil {
-		return nil, nil, err
+// open opens a file of a playback's source within its library folder.
+func (m *Manager) open(ctx context.Context, p *Playback, path string) (core.File, fs.FileInfo, error) {
+	name, ok := core.StorageName(p.root, path)
+	if !ok {
+		return nil, nil, fmt.Errorf("%s lies outside its library", path)
 	}
-	f, err := os.OpenInRoot(root, rel)
+	f, err := m.cfg.Storages.OpenFile(ctx, p.root, name)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -59,19 +58,19 @@ func (r *Refresher) generate(ctx context.Context, it core.Item, have []core.Imag
 	has := func(kind core.ImageKind) bool {
 		return slices.ContainsFunc(have, func(img core.Image) bool { return img.Kind == kind && !strings.HasPrefix(img.Path, prefix) })
 	}
-	rt, err := os.OpenRoot(r.MetadataDir)
+	st, err := OpenLocalStorage(r.MetadataDir)
 	if err != nil {
 		r.logger().WarnContext(ctx, "generating images failed", "item", it.ID, "err", err)
 		return nil
 	}
-	defer rt.Close()
+	defer st.Close()
 	made := map[core.ImageKind]string{}
-	if entries, err := fs.ReadDir(rt.FS(), dir); err == nil {
+	if entries, err := st.ReadDir(ctx, dir); err == nil {
 		for _, e := range entries {
 			kind := core.ImageKind(strings.TrimSuffix(e.Name(), path.Ext(e.Name())))
 			file := path.Join(dir, e.Name())
 			if e.IsDir() || !kind.Valid() || renew || has(kind) {
-				if err := rt.Remove(file); err != nil && !errors.Is(err, fs.ErrNotExist) {
+				if err := st.Remove(ctx, file); err != nil && !errors.Is(err, fs.ErrNotExist) {
 					r.logger().WarnContext(ctx, "removing a generated image failed", "item", it.ID, "file", file, "err", err)
 				}
 				continue
@@ -95,7 +94,7 @@ func (r *Refresher) generate(ctx context.Context, it core.Item, have []core.Imag
 			continue
 		}
 		for _, img := range images {
-			if err := r.keepGenerated(rt, dir, ask, img, made); err != nil {
+			if err := r.keepGenerated(ctx, st, dir, ask, img, made); err != nil {
 				r.logger().WarnContext(ctx, "image generator failed", "generator", g.Name(), "item", it.ID, "kind", img.Kind, "err", err)
 				continue
 			}
@@ -113,14 +112,14 @@ func (r *Refresher) generate(ctx context.Context, it core.Item, have []core.Imag
 
 // keepGenerated checks an image a generator made of one of the kinds
 // asked for and writes it to dir.
-func (r *Refresher) keepGenerated(rt *os.Root, dir string, ask []core.ImageKind, img GeneratedImage, made map[core.ImageKind]string) error {
+func (r *Refresher) keepGenerated(ctx context.Context, st core.Storage, dir string, ask []core.ImageKind, img GeneratedImage, made map[core.ImageKind]string) error {
 	switch {
 	case !slices.Contains(ask, img.Kind):
 		return fmt.Errorf("an image of kind %q was not asked for", img.Kind)
 	case len(img.Content) > MaxGeneratedImageSize:
 		return fmt.Errorf("%d bytes; at most %d", len(img.Content), MaxGeneratedImageSize)
 	}
-	file, err := writeArt(rt, path.Join(dir, string(img.Kind)), img.Content)
+	file, err := writeArt(ctx, st, path.Join(dir, string(img.Kind)), img.Content)
 	if err != nil {
 		return err
 	}

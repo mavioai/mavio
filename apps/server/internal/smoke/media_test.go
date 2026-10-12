@@ -53,7 +53,7 @@ func TestPlayHDRMovie(t *testing.T) {
 	}
 	ms := res.Source
 	ms.ID, ms.ItemID, ms.Path = core.NewID(), core.NewID(), path
-	kf, err := (&keyframes.Extractor{FFprobe: ffprobe}).Extract(ctx, path)
+	kf, err := (&keyframes.Extractor{FFprobe: ffprobe}).Extract(ctx, "file:"+path)
 	if err != nil {
 		t.Fatal(err)
 	}

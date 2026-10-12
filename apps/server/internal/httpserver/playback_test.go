@@ -202,7 +202,7 @@ func addMovie(t *testing.T, s interface {
 	if err != nil {
 		t.Fatal(err)
 	}
-	kf, err := (&keyframes.Extractor{FFprobe: ffprobe}).Extract(ctx, path)
+	kf, err := (&keyframes.Extractor{FFprobe: ffprobe}).Extract(ctx, "file:"+path)
 	if err != nil {
 		t.Fatal(err)
 	}

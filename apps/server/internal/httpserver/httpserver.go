@@ -67,6 +67,9 @@ type Options struct {
 	// Storage classifies the paths of libraries; nil classifies with a
 	// device detector of its own.
 	Storage *storage.Classifier
+	// Storages opens the storage of library paths; nil opens local
+	// folders only.
+	Storages *library.Storages
 	// ServerInfo names the server to clients and tells plugins how it is
 	// reached.
 	ServerInfo func() rpc.ServerInfo
@@ -162,12 +165,13 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(systemv1connect.NewLocalizationServiceHandler(rpc.LocalizationService{}, interceptors))
 	mux.Handle("GET /system/backups/{name}", backupDownload(authn, opts.Backups))
 	libraries := rpc.NewLibraryService(opts.Store)
+	libraries.Storages = opts.Storages
 	if libraries.Classes = storage.NewClassifier(nil).Classes; opts.Storage != nil {
 		libraries.Classes = opts.Storage.Classes
 	}
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(libraries, interceptors))
 	items := rpc.NewItemService(opts.Store)
-	items.Wake, items.ExternalIDKinds, items.Lyrics = opts.Wake, opts.ExternalIDKinds, opts.Lyrics
+	items.Wake, items.ExternalIDKinds, items.Lyrics, items.Storages = opts.Wake, opts.ExternalIDKinds, opts.Lyrics, opts.Storages
 	mux.Handle(libraryv1connect.NewItemServiceHandler(items, interceptors))
 	mux.Handle(libraryv1connect.NewCollectionServiceHandler(rpc.NewCollectionService(opts.Store), interceptors))
 	refresher, subtitles := opts.Refresher, opts.Subtitles

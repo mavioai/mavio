@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
-	"os"
 	"path"
-	"path/filepath"
 	"slices"
 	"strings"
 	"time"
@@ -57,7 +55,10 @@ type Lyrics struct {
 	Store core.Store
 	// Source gives the providers, in order.
 	Source func() []LyricsProvider
-	Logger *slog.Logger
+	// Storages opens the storage of library paths; nil opens local
+	// folders only.
+	Storages *Storages
+	Logger   *slog.Logger
 }
 
 // providers returns the lyrics providers a library uses, in its order.
@@ -153,18 +154,18 @@ func (l *Lyrics) save(ctx context.Context, lib core.Library, it core.Item, p Lyr
 	if !ok {
 		return fmt.Errorf("%w: %s is outside the library's folders", core.ErrInvalid, it.Path)
 	}
-	rt, err := os.OpenRoot(filepath.FromSlash(root))
+	st, err := l.Storages.Open(ctx, root)
 	if err != nil {
 		return err
 	}
-	defer rt.Close()
+	defer st.Close()
 	stem := strings.TrimSuffix(rel, path.Ext(rel))
-	if err := writeFileIn(rt, stem+ext, []byte(content)); err != nil {
+	if err := st.WriteFile(ctx, stem+ext, []byte(content)); err != nil {
 		return fmt.Errorf("save lyrics: %w", err)
 	}
 	for _, other := range metadata.LyricExtensions {
 		if other != ext {
-			if err := rt.Remove(stem + other); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			if err := st.Remove(ctx, stem+other); err != nil && !errors.Is(err, fs.ErrNotExist) {
 				return fmt.Errorf("remove old lyrics: %w", err)
 			}
 		}
@@ -175,7 +176,7 @@ func (l *Lyrics) save(ctx context.Context, lib core.Library, it core.Item, p Lyr
 // Fetch saves the first lyrics the library's providers find that download
 // beside a track without lyric files; a track with any is left alone.
 func (l *Lyrics) Fetch(ctx context.Context, lib core.Library, it core.Item) error {
-	if hasLyrics(lib, it.Path) {
+	if l.hasLyrics(ctx, lib, it.Path) {
 		return nil
 	}
 	found, err := l.Search(ctx, lib, it.ID)
@@ -199,19 +200,19 @@ func (l *Lyrics) Fetch(ctx context.Context, lib core.Library, it core.Item) erro
 
 // hasLyrics reports whether a lyric file lies beside a media file; when it
 // cannot tell, it says there is one.
-func hasLyrics(lib core.Library, media string) bool {
+func (l *Lyrics) hasLyrics(ctx context.Context, lib core.Library, media string) bool {
 	root, rel, ok := libraryRoot(lib, media)
 	if !ok {
 		return true
 	}
-	rt, err := os.OpenRoot(filepath.FromSlash(root))
+	st, err := l.Storages.Open(ctx, root)
 	if err != nil {
 		return true
 	}
-	defer rt.Close()
+	defer st.Close()
 	stem := strings.TrimSuffix(rel, path.Ext(rel))
 	for _, ext := range metadata.LyricExtensions {
-		if _, err := rt.Stat(stem + ext); !errors.Is(err, fs.ErrNotExist) {
+		if _, err := st.Stat(ctx, stem+ext); !errors.Is(err, fs.ErrNotExist) {
 			return true
 		}
 	}

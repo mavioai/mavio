@@ -3,7 +3,9 @@ package library
 import (
 	"context"
 	"errors"
+	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"time"
 
@@ -44,7 +46,7 @@ func (s *Scanner) ReconcileDeferred(ctx context.Context) {
 		return
 	}
 	owners := s.GrowthPolicy.Reconcile(func(name string) (storage.FileStamp, bool) {
-		fi, err := os.Stat(filepath.FromSlash(name))
+		fi, err := s.statFile(ctx, name)
 		if err != nil {
 			return storage.FileStamp{}, false
 		}
@@ -70,4 +72,17 @@ func (s *Scanner) ReconcileDeferred(ctx context.Context) {
 		}
 		s.logger().InfoContext(ctx, "files finished writing; scanning", "library", lib.Name)
 	}
+}
+
+// statFile stats a file by the path items record.
+func (s *Scanner) statFile(ctx context.Context, name string) (fs.FileInfo, error) {
+	if !core.IsRemotePath(name) {
+		return os.Stat(filepath.FromSlash(name))
+	}
+	st, err := s.Storages.Open(ctx, path.Dir(name))
+	if err != nil {
+		return nil, err
+	}
+	defer st.Close()
+	return st.Stat(ctx, path.Base(name))
 }

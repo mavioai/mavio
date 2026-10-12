@@ -179,7 +179,8 @@ func (f *fakeClient) titles() []string {
 // seconds.
 type fakeProber struct{}
 
-func (fakeProber) Probe(_ context.Context, path string, _ bool) (library.ProbeResult, error) {
+func (fakeProber) Probe(_ context.Context, f library.MediaFile, _ bool) (library.ProbeResult, error) {
+	path := f.Path
 	d := 2 * time.Hour
 	if strings.Contains(strings.ToLower(filepath.Base(path)), "sample") {
 		d = 30 * time.Second

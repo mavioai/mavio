@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
-	"os"
 	"path"
-	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -81,7 +79,10 @@ type Subtitles struct {
 	Providers []SubtitleProvider
 	// Source, when set, gives the providers instead of Providers.
 	Source func() []SubtitleProvider
-	Logger *slog.Logger
+	// Storages opens the storage of library paths; nil opens local
+	// folders only.
+	Storages *Storages
+	Logger   *slog.Logger
 }
 
 // providers returns the subtitle providers a library uses, in its order.
@@ -146,7 +147,7 @@ func (s *Subtitles) Search(ctx context.Context, lib core.Library, itemID, source
 			id = p.ParentID
 		}
 	}
-	if hash, err := fileHash(lib, src.Path); err == nil {
+	if hash, err := s.fileHash(ctx, lib, src.Path); err == nil {
 		q.FileHash = hash
 	} else {
 		s.logger().DebugContext(ctx, "no hash for subtitle search", "path", src.Path, "err", err)
@@ -167,12 +168,17 @@ func (s *Subtitles) Search(ctx context.Context, lib core.Library, itemID, source
 }
 
 // fileHash hashes a video within its library folder.
-func fileHash(lib core.Library, p string) (string, error) {
+func (s *Subtitles) fileHash(ctx context.Context, lib core.Library, p string) (string, error) {
 	root, rel, ok := libraryRoot(lib, p)
 	if !ok {
 		return "", fmt.Errorf("%s is outside the library's folders", p)
 	}
-	f, err := os.OpenInRoot(filepath.FromSlash(root), rel)
+	st, err := s.Storages.Open(ctx, root)
+	if err != nil {
+		return "", err
+	}
+	defer st.Close()
+	f, err := st.Open(ctx, rel)
 	if err != nil {
 		return "", err
 	}
@@ -216,19 +222,19 @@ func (s *Subtitles) Download(ctx context.Context, lib core.Library, itemID, sour
 	if !ok {
 		return core.MediaStream{}, fmt.Errorf("%w: %s is outside the library's folders", core.ErrInvalid, src.Path)
 	}
-	rt, err := os.OpenRoot(filepath.FromSlash(root))
+	st, err := s.Storages.Open(ctx, root)
 	if err != nil {
 		return core.MediaStream{}, err
 	}
-	defer rt.Close()
-	name := subtitleName(rt.FS(), rel, sub, format)
-	if err := writeFileIn(rt, name, data); err != nil {
+	defer st.Close()
+	name := subtitleName(core.StorageFS(ctx, st), rel, sub, format)
+	if err := st.WriteFile(ctx, name, data); err != nil {
 		return core.MediaStream{}, fmt.Errorf("save subtitle: %w", err)
 	}
 
 	// The folder's subtitle files, as a scan sees them.
 	dir := path.Dir(rel)
-	entries, err := fs.ReadDir(rt.FS(), dir)
+	entries, err := st.ReadDir(ctx, dir)
 	if err != nil {
 		return core.MediaStream{}, err
 	}

@@ -37,7 +37,9 @@ export type Library = Message<"mavio.library.v1.Library"> & {
   kind: LibraryKind;
 
   /**
-   * Absolute root folders. A path belongs to at most one library.
+   * Root folders: absolute paths of the server's file system, or
+   * "rclone:<remote>:<path>" for a folder below an rclone remote's root. A
+   * path belongs to at most one library.
    *
    * @generated from field: repeated string paths = 4;
    */

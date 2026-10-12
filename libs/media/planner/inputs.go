@@ -132,23 +132,30 @@ func (p *Planner) inputArgs(j *Job) []string {
 	if j.Source != nil && j.Source.MediaSource != nil {
 		path = j.Source.Path
 	}
-	args = append(args, "-i", inputURL(path, j.Source))
+	args = append(args, "-i", InputURL(path, j.Source))
 	if p.externalSubtitleInput(j) {
 		args = append(args, j.seekArgs()...)
-		args = append(args, "-i", "file:"+p.subtitleInputPath(j.Subtitle.ExternalPath))
+		args = append(args, "-i", InputURL(p.subtitleInputPath(j.Subtitle.ExternalPath), j.Source))
 	}
 	if j.Audio != nil && j.Audio.ExternalPath != "" {
 		args = append(args, j.seekArgs()...)
-		args = append(args, "-i", "file:"+j.Audio.ExternalPath)
+		args = append(args, "-i", InputURL(j.Audio.ExternalPath, j.Source))
 	}
 	return args
 }
 
-// inputURL prefixes local paths with "file:" so that names with colons are
-// not taken for protocols.
-func inputURL(path string, src *decision.Source) string {
-	if src != nil && src.Remote {
-		return path
+// InputURL returns the URL ffmpeg reads a file of src from: its input for
+// files on remote storage, a remote source's own URL, and local paths
+// prefixed with "file:" so that names with colons are not taken for
+// protocols.
+func InputURL(path string, src *decision.Source) string {
+	if src != nil {
+		if u, ok := src.Inputs[path]; ok {
+			return u
+		}
+		if src.Remote && src.MediaSource != nil && path == src.Path {
+			return path
+		}
 	}
 	return "file:" + path
 }

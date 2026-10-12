@@ -751,7 +751,9 @@ type Library_builder struct {
 	Id   *string
 	Name *string
 	Kind *LibraryKind
-	// Absolute root folders. A path belongs to at most one library.
+	// Root folders: absolute paths of the server's file system, or
+	// "rclone:<remote>:<path>" for a folder below an rclone remote's root. A
+	// path belongs to at most one library.
 	Paths []string
 	// Period of scheduled reconciliation scans; unset disables them.
 	ScanInterval *durationpb.Duration

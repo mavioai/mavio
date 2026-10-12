@@ -42,6 +42,9 @@ type Config struct {
 	// MetadataDir holds the images chosen for items, beside those in the
 	// library folders.
 	MetadataDir string
+	// Storages opens the storage of library paths; nil opens local
+	// folders only.
+	Storages *library.Storages
 	// Client downloads provider images; nil uses one with a 30 second
 	// timeout.
 	Client *http.Client
@@ -218,20 +221,17 @@ func (s *Server) local(ctx context.Context, img *core.Image) ([]byte, error) {
 	if s.cfg.MetadataDir != "" {
 		roots = append(slices.Clip(roots), s.cfg.MetadataDir)
 	}
-	for _, root := range roots {
-		rel, err := filepath.Rel(root, filepath.FromSlash(img.Path))
-		if err != nil || !filepath.IsLocal(rel) {
-			continue
-		}
-		f, err := os.OpenInRoot(root, rel)
-		if err != nil {
-			s.log.WarnContext(ctx, "open image", "path", img.Path, "err", err)
-			return nil, errUnavailable
-		}
-		defer func() { _ = f.Close() }()
-		return io.ReadAll(io.LimitReader(f, maxDownload))
+	root, name, ok := library.RootOf(roots, img.Path)
+	if !ok {
+		return nil, errUnavailable
 	}
-	return nil, errUnavailable
+	f, err := s.cfg.Storages.OpenFile(ctx, root, name)
+	if err != nil {
+		s.log.WarnContext(ctx, "open image", "path", img.Path, "err", err)
+		return nil, errUnavailable
+	}
+	defer func() { _ = f.Close() }()
+	return io.ReadAll(io.LimitReader(f, maxDownload))
 }
 
 // download fetches a provider image into file.

@@ -45,7 +45,7 @@ func TestDetect(t *testing.T) {
 	if _, err := os.Stat(file); err != nil {
 		t.Fatal(err)
 	}
-	crop, err := (&Detector{FFmpeg: ffmpeg, Samples: 3}).Detect(t.Context(), file, 3*time.Second, 640, 360)
+	crop, err := (&Detector{FFmpeg: ffmpeg, Samples: 3}).Detect(t.Context(), "file:"+file, 3*time.Second, 640, 360)
 	if err != nil {
 		t.Fatal(err)
 	}

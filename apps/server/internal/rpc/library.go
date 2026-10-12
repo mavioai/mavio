@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -42,6 +41,9 @@ type LibraryService struct {
 	// Classes returns the storage class of each path of a library; nil
 	// reports the classes the library sets.
 	Classes func(lib *core.Library) map[string]core.StorageClass
+	// Storages opens the storage of library paths, which must be folders;
+	// nil opens local folders only.
+	Storages *library.Storages
 
 	store core.Store
 	now   func() time.Time
@@ -100,7 +102,7 @@ func (s *LibraryService) CreateLibrary(ctx context.Context, req *libraryv1.Creat
 	if _, err := admin(ctx); err != nil {
 		return nil, err
 	}
-	lib, err := libraryFromSpec(req.GetSpec())
+	lib, err := s.libraryFromSpec(ctx, req.GetSpec())
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +123,7 @@ func (s *LibraryService) UpdateLibrary(ctx context.Context, req *libraryv1.Updat
 	if _, err := admin(ctx); err != nil {
 		return nil, err
 	}
-	spec, err := libraryFromSpec(req.GetSpec())
+	spec, err := s.libraryFromSpec(ctx, req.GetSpec())
 	if err != nil {
 		return nil, err
 	}
@@ -203,8 +205,8 @@ func (s *LibraryService) ScanLibrary(ctx context.Context, req *libraryv1.ScanLib
 }
 
 // libraryFromSpec converts a validated spec, checking that its paths are
-// absolute folders.
-func libraryFromSpec(spec *libraryv1.LibrarySpec) (core.Library, error) {
+// absolute folders or folders of rclone remotes.
+func (s *LibraryService) libraryFromSpec(ctx context.Context, spec *libraryv1.LibrarySpec) (core.Library, error) {
 	lib := core.Library{
 		Name: spec.GetName(), Paths: spec.GetPaths(),
 		PreferredLanguage: spec.GetPreferredLanguage(), MetadataCountry: spec.GetMetadataCountry(),
@@ -237,14 +239,25 @@ func libraryFromSpec(spec *libraryv1.LibrarySpec) (core.Library, error) {
 		lib.ScanInterval = spec.GetScanInterval().AsDuration()
 	}
 	for _, p := range lib.Paths {
-		if !filepath.IsAbs(p) {
+		if !core.IsRemotePath(p) && !filepath.IsAbs(p) {
 			return lib, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("library path %q is not absolute", p))
 		}
-		if info, err := os.Stat(p); err != nil || !info.IsDir() {
+		if !s.isFolder(ctx, p) {
 			return lib, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("library path %q is not a folder", p))
 		}
 	}
 	return lib, nil
+}
+
+// isFolder reports whether a library path is a folder of its storage.
+func (s *LibraryService) isFolder(ctx context.Context, p string) bool {
+	st, err := s.Storages.Open(ctx, p)
+	if err != nil {
+		return false
+	}
+	defer st.Close()
+	info, err := st.Stat(ctx, ".")
+	return err == nil && info.IsDir()
 }
 
 // toProto converts a library; folder paths and their storage classes only

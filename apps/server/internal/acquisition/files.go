@@ -7,11 +7,12 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
+	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library/storage"
 )
 
@@ -40,45 +41,102 @@ func (m transferMode) String() string {
 // errDestinationExists is returned when an import would overwrite a file.
 var errDestinationExists = errors.New("destination already exists")
 
-// transfer moves, links or copies src to rel in root, whose folder must
-// exist. The destination is confined to root: copies are written through
-// it, and moves and links go to the path it resolves.
-func transfer(root *os.Root, src, rel string, mode transferMode) error {
-	if _, err := root.Lstat(rel); err == nil {
+// folder is the storage of a library path or recycle bin that imports
+// write to.
+type folder struct {
+	core.Storage
+	// root is the folder's path, as items record it.
+	root string
+}
+
+// path returns the path, as items record it, of rel in the folder.
+func (f folder) path(rel string) string { return core.StoragePath(f.root, filepath.ToSlash(rel)) }
+
+// openFolder opens the storage of a library path or recycle bin; the
+// caller closes it.
+func (r *Runtime) openFolder(ctx context.Context, root string) (folder, error) {
+	if !core.IsRemotePath(root) {
+		root = filepath.ToSlash(filepath.Clean(root))
+	}
+	st, err := r.Storages.Open(ctx, root)
+	if err != nil {
+		return folder{}, err
+	}
+	return folder{st, root}, nil
+}
+
+// openFile opens the storage of the folder holding p, a local path or a
+// path on a remote, and returns p's name in it; the caller closes it.
+func (r *Runtime) openFile(ctx context.Context, p string) (core.Storage, string, error) {
+	p = filepath.ToSlash(p)
+	st, err := r.Storages.Open(ctx, path.Dir(p))
+	if err != nil {
+		return nil, "", err
+	}
+	return st, path.Base(p), nil
+}
+
+// transfer moves, links or copies src, a local path or a path on a
+// remote, to rel in dst, whose folder must exist. Local files move and
+// link to the path dst resolves; a remote that holds both moves and
+// copies the file itself; otherwise the file is copied through the
+// server, and a move then deletes it.
+func (r *Runtime) transfer(ctx context.Context, dst folder, src, rel string, mode transferMode) error {
+	name := filepath.ToSlash(rel)
+	if _, err := dst.Stat(ctx, name); err == nil {
 		return fmt.Errorf("%s: %w", rel, errDestinationExists)
 	} else if !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
-	// Stat resolves the folder within root, failing for one that escapes.
-	if _, err := root.Stat(filepath.Dir(rel)); err != nil {
+	// Stat resolves the folder within dst, failing for one that escapes.
+	if _, err := dst.Stat(ctx, path.Dir(name)); err != nil {
 		return err
 	}
-	dst := filepath.Join(root.Name(), rel)
-	switch mode {
-	case transferMove:
-		if err := os.Rename(src, dst); err == nil {
-			return nil
+	switch to, local := core.LocalPath(dst.Storage, name); {
+	case local && !core.IsRemotePath(src):
+		switch mode {
+		case transferMove:
+			if err := os.Rename(src, to); err == nil {
+				return nil
+			}
+		case transferHardLinkOrCopy:
+			if err := os.Link(src, to); err == nil {
+				return nil
+			}
 		}
-		// Across volumes: copy, then delete the source.
-		if err := copyFile(root, src, rel); err != nil {
-			return err
-		}
-		if err := os.Remove(src); err != nil {
-			return fmt.Errorf("remove moved file: %w", err)
-		}
-		return nil
-	case transferHardLinkOrCopy:
-		if err := os.Link(src, dst); err == nil {
-			return nil
+	case core.IsRemotePath(src):
+		if t, ok := dst.Storage.(core.StorageTransfers); ok {
+			var err error
+			if mode == transferMove {
+				err = t.MoveFrom(ctx, src, name)
+			} else {
+				err = t.CopyFrom(ctx, src, name)
+			}
+			if !errors.Is(err, core.ErrUnsupported) {
+				return err
+			}
 		}
 	}
-	return copyFile(root, src, rel)
+	if err := r.copyFile(ctx, dst, src, name); err != nil {
+		return err
+	}
+	if mode == transferMove {
+		if err := r.removeFile(ctx, src); err != nil {
+			return fmt.Errorf("remove moved file: %w", err)
+		}
+	}
+	return nil
 }
 
-// copyFile copies src to rel in root, keeping its modification time; a
+// copyFile copies src to name in dst, keeping its modification time; a
 // partial copy is removed.
-func copyFile(root *os.Root, src, rel string) (err error) {
-	in, err := os.Open(src)
+func (r *Runtime) copyFile(ctx context.Context, dst folder, src, name string) (err error) {
+	st, base, err := r.openFile(ctx, src)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = st.Close() }()
+	in, err := st.Open(ctx, base)
 	if err != nil {
 		return err
 	}
@@ -87,7 +145,7 @@ func copyFile(root *os.Root, src, rel string) (err error) {
 	if err != nil {
 		return err
 	}
-	out, err := root.OpenFile(rel, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	out, err := dst.Create(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -96,16 +154,34 @@ func copyFile(root *os.Root, src, rel string) (err error) {
 			err = cerr
 		}
 		if err != nil {
-			_ = root.Remove(rel)
+			_ = dst.Remove(ctx, name)
 		}
 	}()
 	if _, err = io.Copy(out, in); err != nil {
 		return fmt.Errorf("copy %s: %w", src, err)
 	}
-	if err = out.Sync(); err != nil {
+	if f, ok := out.(interface{ Sync() error }); ok {
+		if err = f.Sync(); err != nil {
+			return err
+		}
+	}
+	if err := dst.Chtimes(ctx, name, fi.ModTime()); err != nil && !errors.Is(err, core.ErrUnsupported) {
 		return err
 	}
-	return root.Chtimes(rel, time.Time{}, fi.ModTime())
+	return nil
+}
+
+// removeFile deletes a local file or a file on a remote.
+func (r *Runtime) removeFile(ctx context.Context, p string) error {
+	if !core.IsRemotePath(p) {
+		return os.Remove(p)
+	}
+	st, name, err := r.openFile(ctx, p)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = st.Close() }()
+	return st.Remove(ctx, name)
 }
 
 // recycle sends a file to the recycle bin, into a folder named sub, or
@@ -114,42 +190,50 @@ func copyFile(root *os.Root, src, rel string) (err error) {
 // "_3"…, and the file's modification time becomes now, for the cleanup.
 // A file already gone is no error.
 func (r *Runtime) recycle(ctx context.Context, file, sub string) error {
-	if _, err := os.Lstat(file); errors.Is(err, fs.ErrNotExist) {
+	st, name, err := r.openFile(ctx, file)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	} else if err != nil {
+		return err
+	}
+	_, err = st.Stat(ctx, name)
+	_ = st.Close()
+	if errors.Is(err, fs.ErrNotExist) {
 		return nil
 	}
 	bin := r.settings().RecycleBin
 	if strings.TrimSpace(bin) == "" {
 		r.logger().InfoContext(ctx, "recycle bin is not set; deleting permanently", "path", file)
-		return os.Remove(file)
+		return r.removeFile(ctx, file)
 	}
-	if err := os.MkdirAll(bin, 0o755); err != nil {
-		return fmt.Errorf("recycle bin: %w", err)
+	if !core.IsRemotePath(bin) {
+		if err := os.MkdirAll(bin, 0o755); err != nil {
+			return fmt.Errorf("recycle bin: %w", err)
+		}
 	}
-	root, err := os.OpenRoot(bin)
+	dst, err := r.openFolder(ctx, bin)
 	if err != nil {
 		return fmt.Errorf("recycle bin: %w", err)
 	}
-	defer func() { _ = root.Close() }()
-	if sub = filepath.Base(sub); sub == "." || sub == string(filepath.Separator) || !filepath.IsLocal(sub) {
+	defer func() { _ = dst.Close() }()
+	if sub = path.Base(filepath.ToSlash(sub)); !fs.ValidPath(sub) || sub == "." || sub == "/" {
 		sub = ""
 	}
-	if err := root.MkdirAll(filepath.Join(".", sub), 0o755); err != nil {
+	if err := dst.MkdirAll(ctx, path.Join(".", sub)); err != nil {
 		return fmt.Errorf("recycle bin folder %q: %w", sub, err)
 	}
-	name := filepath.Base(file)
-	ext := filepath.Ext(name)
-	rel := filepath.Join(sub, name)
+	ext := path.Ext(name)
+	rel := path.Join(sub, name)
 	for i := 2; ; i++ {
-		if _, err := root.Lstat(rel); errors.Is(err, fs.ErrNotExist) {
+		if _, err := dst.Stat(ctx, rel); errors.Is(err, fs.ErrNotExist) {
 			break
 		}
-		rel = filepath.Join(sub, strings.TrimSuffix(name, ext)+"_"+strconv.Itoa(i)+ext)
+		rel = path.Join(sub, strings.TrimSuffix(name, ext)+"_"+strconv.Itoa(i)+ext)
 	}
-	if err := transfer(root, file, rel, transferMove); err != nil {
+	if err := r.transfer(ctx, dst, file, rel, transferMove); err != nil {
 		return fmt.Errorf("move %s to the recycle bin: %w", file, err)
 	}
-	now := r.now()
-	if err := root.Chtimes(rel, now, now); err != nil {
+	if err := dst.Chtimes(ctx, rel, r.now()); err != nil {
 		r.logger().WarnContext(ctx, "couldn't set the time of a recycled file", "path", rel, "err", err)
 	}
 	r.logger().DebugContext(ctx, "moved file to the recycle bin", "path", file, "to", rel)
@@ -164,7 +248,7 @@ func (r *Runtime) CleanRecycleBin(ctx context.Context) error {
 	if strings.TrimSpace(s.RecycleBin) == "" || s.RecycleBinCleanupDays == 0 {
 		return nil
 	}
-	root, err := os.OpenRoot(s.RecycleBin)
+	root, err := r.openFolder(ctx, s.RecycleBin)
 	if errors.Is(err, fs.ErrNotExist) {
 		return nil
 	}
@@ -175,7 +259,7 @@ func (r *Runtime) CleanRecycleBin(ctx context.Context) error {
 	cutoff := r.now().AddDate(0, 0, -s.RecycleBinCleanupDays)
 	var dirs []string
 	deleted := 0
-	err = fs.WalkDir(root.FS(), ".", func(p string, d fs.DirEntry, err error) error {
+	err = fs.WalkDir(core.StorageFS(ctx, root), ".", func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -195,7 +279,7 @@ func (r *Runtime) CleanRecycleBin(ctx context.Context) error {
 		if fi.ModTime().After(cutoff) {
 			return nil
 		}
-		if err := root.Remove(filepath.FromSlash(p)); err != nil {
+		if err := root.Remove(ctx, p); err != nil {
 			r.logger().ErrorContext(ctx, "couldn't delete file from the recycle bin", "path", p, "err", err)
 			return nil
 		}
@@ -207,9 +291,9 @@ func (r *Runtime) CleanRecycleBin(ctx context.Context) error {
 	}
 	// Deepest first, so that emptied parents go too.
 	for i := len(dirs) - 1; i >= 0; i-- {
-		entries, err := fs.ReadDir(root.FS(), dirs[i])
+		entries, err := root.ReadDir(ctx, dirs[i])
 		if err == nil && len(entries) == 0 {
-			_ = root.Remove(filepath.FromSlash(dirs[i]))
+			_ = root.Remove(ctx, dirs[i])
 		}
 	}
 	r.logger().InfoContext(ctx, "cleaned the recycle bin", "deleted", deleted, "days", s.RecycleBinCleanupDays)

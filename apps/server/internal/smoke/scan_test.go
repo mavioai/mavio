@@ -27,7 +27,8 @@ type countingProber struct {
 	probes map[string]int
 }
 
-func (p *countingProber) Probe(_ context.Context, file string, _ bool) (library.ProbeResult, error) {
+func (p *countingProber) Probe(_ context.Context, f library.MediaFile, _ bool) (library.ProbeResult, error) {
+	file := f.Path
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.probes[file]++

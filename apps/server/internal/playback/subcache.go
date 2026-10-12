@@ -78,7 +78,12 @@ func (m *Manager) extracted(ctx context.Context, itemID core.ID, ms *core.MediaS
 	defer unlock()
 	stamp := sourceStamp(ms)
 	if b, err := os.ReadFile(filepath.Join(dir, stampFile)); err != nil || string(b) != stamp {
-		if err := extractAll(ctx, m.cfg.FFmpegPath, ms, dir, stamp); err != nil {
+		f, err := m.cfg.Storages.Media(ctx, ms.Path)
+		if err != nil {
+			return nil, err
+		}
+		_ = f.Close()
+		if err := extractAll(ctx, m.cfg.FFmpegPath, f.URL, ms, dir, stamp); err != nil {
 			return nil, err
 		}
 	}
@@ -102,7 +107,7 @@ func extractedName(st *core.MediaStream) string {
 // extractAll extracts every embedded text subtitle stream of a source into
 // dir, replacing what it held: ASS keeps its styling, other text becomes
 // SRT. Cues are timed from the source's start, as HLS outputs are.
-func extractAll(ctx context.Context, ffmpeg string, ms *core.MediaSource, dir, stamp string) error {
+func extractAll(ctx context.Context, ffmpeg, input string, ms *core.MediaSource, dir, stamp string) error {
 	if err := os.MkdirAll(filepath.Dir(dir), 0o755); err != nil {
 		return err
 	}
@@ -111,7 +116,7 @@ func extractAll(ctx context.Context, ffmpeg string, ms *core.MediaSource, dir, s
 		return err
 	}
 	defer os.RemoveAll(tmp)
-	args := []string{"-hide_banner", "-nostdin", "-loglevel", "error", "-i", "file:" + ms.Path}
+	args := []string{"-hide_banner", "-nostdin", "-loglevel", "error", "-i", input}
 	n := 0
 	for i := range ms.Streams {
 		st := &ms.Streams[i]

@@ -14,7 +14,8 @@ import (
 
 type fakeProber struct{ probed []string }
 
-func (p *fakeProber) Probe(_ context.Context, path string, audio bool) (ProbeResult, error) {
+func (p *fakeProber) Probe(_ context.Context, f MediaFile, audio bool) (ProbeResult, error) {
+	path := f.Path
 	p.probed = append(p.probed, path)
 	return ProbeResult{Source: core.MediaSource{
 		Container: "mkv", Duration: 90 * time.Minute,
@@ -246,7 +247,7 @@ func TestJobsRefreshNewSeries(t *testing.T) {
 
 type fakeBorders struct{ calls int }
 
-func (b *fakeBorders) Borders(_ context.Context, _ string, duration time.Duration, width, height int) (core.Crop, error) {
+func (b *fakeBorders) Borders(_ context.Context, _ MediaFile, duration time.Duration, width, height int) (core.Crop, error) {
 	b.calls++
 	if duration <= 0 || width == 0 || height == 0 {
 		return core.Crop{}, errors.New("no size")
@@ -288,7 +289,7 @@ func TestJobsBorders(t *testing.T) {
 // sizedProber probes a 1080p video.
 type sizedProber struct{}
 
-func (sizedProber) Probe(context.Context, string, bool) (ProbeResult, error) {
+func (sizedProber) Probe(context.Context, MediaFile, bool) (ProbeResult, error) {
 	return ProbeResult{Source: core.MediaSource{
 		Container: "mkv", Duration: 90 * time.Minute,
 		Streams: []core.MediaStream{{Index: 0, Kind: core.StreamVideo, Codec: "h264", Width: 1920, Height: 1080}},

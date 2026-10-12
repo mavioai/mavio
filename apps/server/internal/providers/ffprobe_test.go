@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/media/probe"
 	"github.com/mavioai/mavio/tools/fixtures"
 )
@@ -15,7 +16,12 @@ func TestFFprobe(t *testing.T) {
 		t.Skip("ffprobe not found on PATH")
 	}
 	path := fixtures.Require(t, "chapters.mkv")
-	res, err := FFprobe{Prober: &probe.Prober{FFprobe: ffprobe}}.Probe(t.Context(), path, false)
+	f, err := (*library.Storages)(nil).Media(t.Context(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	res, err := FFprobe{Prober: &probe.Prober{FFprobe: ffprobe}}.Probe(t.Context(), f, false)
 	if err != nil {
 		t.Fatal(err)
 	}

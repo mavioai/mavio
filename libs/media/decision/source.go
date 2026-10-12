@@ -13,6 +13,10 @@ type Source struct {
 	// Remote sources are not local files; their bitrate is not capped and
 	// they rank after local files.
 	Remote bool
+	// Inputs are the URLs ffmpeg reads the files of sources on remote
+	// storage from, the source's and its sidecars', by path; files not in
+	// it are local.
+	Inputs map[string]string
 	// Disc sources are DVD or Blu-ray folders, which cannot be direct
 	// played.
 	Disc bool

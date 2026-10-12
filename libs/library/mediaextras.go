@@ -40,9 +40,9 @@ type Thumbnailer interface {
 	// container's index, and for a file without one when whole is set, by
 	// decoding the whole file. made is false when the sheets are not made:
 	// the file has no index and whole is unset.
-	Trickplay(ctx context.Context, path string, v VideoFrame, dir string, whole bool) (t core.Trickplay, made bool, err error)
+	Trickplay(ctx context.Context, f MediaFile, v VideoFrame, dir string, whole bool) (t core.Trickplay, made bool, err error)
 	// ChapterImage writes the frame at a time into file.
-	ChapterImage(ctx context.Context, path string, at time.Duration, v VideoFrame, file string) error
+	ChapterImage(ctx context.Context, f MediaFile, at time.Duration, v VideoFrame, file string) error
 }
 
 // VideoFrame describes the picture of a video.
@@ -54,7 +54,7 @@ type VideoFrame struct {
 
 // LoudnessMeter measures the integrated loudness of audio, in LUFS.
 type LoudnessMeter interface {
-	Loudness(ctx context.Context, path string) (float64, error)
+	Loudness(ctx context.Context, f MediaFile) (float64, error)
 }
 
 // SegmentProvider finds the segments of videos, such as a segment plugin.
@@ -294,7 +294,12 @@ func (j *Jobs) trickplay(ctx context.Context, job core.Job) ([]core.Job, error) 
 		return nil, err
 	}
 	defer os.RemoveAll(tmp)
-	t, made, err := j.Thumbnails.Trickplay(ctx, src.Path, frameOf(src, st), tmp, j.policy(&lib, src.Path).WholeFiles)
+	f, err := j.Storages.Media(ctx, src.Path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	t, made, err := j.Thumbnails.Trickplay(ctx, f, frameOf(src, st), tmp, j.policy(&lib, src.Path).WholeFiles)
 	if err != nil {
 		if ctx.Err() == nil {
 			j.Fails.Note(key)
@@ -353,6 +358,11 @@ func (j *Jobs) chapterImages(ctx context.Context, job core.Job) ([]core.Job, err
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}
+	f, err := j.Storages.Media(ctx, src.Path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
 	images := map[int]string{}
 	for i := range src.Chapters {
 		if src.Chapters[i].ImagePath != "" {
@@ -362,7 +372,7 @@ func (j *Jobs) chapterImages(ctx context.Context, job core.Job) ([]core.Job, err
 			return nil, err
 		}
 		file := ChapterImagePath(j.MetadataDir, it.ID, src.ID, i)
-		if err := j.Thumbnails.ChapterImage(ctx, src.Path, chapterTime(src.Chapters, i, src.Duration), frameOf(src, st), file); err != nil {
+		if err := j.Thumbnails.ChapterImage(ctx, f, chapterTime(src.Chapters, i, src.Duration), frameOf(src, st), file); err != nil {
 			if ctx.Err() != nil {
 				return nil, err
 			}
@@ -411,7 +421,12 @@ func (j *Jobs) loudness(ctx context.Context, job core.Job) ([]core.Job, error) {
 	if err := j.quiet(ctx); err != nil {
 		return nil, err
 	}
-	lufs, err := j.Loudness.Loudness(ctx, sources[0].Path)
+	f, err := j.Storages.Media(ctx, sources[0].Path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	lufs, err := j.Loudness.Loudness(ctx, f)
 	if err != nil {
 		if ctx.Err() == nil {
 			j.Fails.Note(key)

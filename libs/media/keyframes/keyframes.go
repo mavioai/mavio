@@ -34,27 +34,29 @@ type Extractor struct {
 }
 
 // Args returns the ffprobe arguments that list the keyframe packets of
-// path's video streams together with the stream and format durations.
-func Args(path string) []string {
+// the video streams of input, the URL ffprobe reads, together with the
+// stream and format durations.
+func Args(input string) []string {
 	return []string{
 		"-fflags", "+genpts", "-v", "error", "-skip_frame", "nokey",
 		"-show_entries", "format=duration", "-show_entries", "stream=duration",
 		"-show_entries", "packet=pts_time,flags",
-		"-select_streams", "v", "-of", "csv", "file:" + path,
+		"-select_streams", "v", "-of", "csv", input,
 	}
 }
 
-// Extract runs ffprobe on the local file at path and parses its output.
-func (e *Extractor) Extract(ctx context.Context, path string) (Data, error) {
-	cmd := exec.CommandContext(ctx, e.FFprobe, Args(path)...)
+// Extract runs ffprobe on input, a file: or HTTP URL, and parses its
+// output.
+func (e *Extractor) Extract(ctx context.Context, input string) (Data, error) {
+	cmd := exec.CommandContext(ctx, e.FFprobe, Args(input)...)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
 	if err := cmd.Run(); err != nil {
-		return Data{}, fmt.Errorf("ffprobe keyframes %s: %w: %s", path, err, strings.TrimSpace(stderr.String()))
+		return Data{}, fmt.Errorf("ffprobe keyframes %s: %w: %s", input, err, strings.TrimSpace(stderr.String()))
 	}
 	d, err := Parse(&stdout)
 	if err != nil {
-		return Data{}, fmt.Errorf("ffprobe keyframes %s: %w", path, err)
+		return Data{}, fmt.Errorf("ffprobe keyframes %s: %w", input, err)
 	}
 	return d, nil
 }

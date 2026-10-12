@@ -20,7 +20,7 @@ const BordersPriority = -20
 // BorderDetector finds the black borders of a video file's frames, such as
 // by sampling them with ffmpeg.
 type BorderDetector interface {
-	Borders(ctx context.Context, path string, duration time.Duration, width, height int) (core.Crop, error)
+	Borders(ctx context.Context, f MediaFile, duration time.Duration, width, height int) (core.Crop, error)
 }
 
 // BordersJob returns a job finding the black borders of an item's video
@@ -81,7 +81,12 @@ func (j *Jobs) borders(ctx context.Context, job core.Job) ([]core.Job, error) {
 				return nil, err
 			}
 		}
-		crop, err := j.Borders.Borders(ctx, src.Path, src.Duration, st.Width, st.Height)
+		f, err := j.Storages.Media(ctx, src.Path)
+		if err != nil {
+			return nil, fmt.Errorf("borders of %s: %w", src.Path, err)
+		}
+		crop, err := j.Borders.Borders(ctx, f, src.Duration, st.Width, st.Height)
+		_ = f.Close()
 		if err != nil {
 			return nil, fmt.Errorf("borders of %s: %w", src.Path, err)
 		}

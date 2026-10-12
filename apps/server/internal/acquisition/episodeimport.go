@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -410,12 +409,12 @@ func (r *Runtime) importEpisodeFile(ctx context.Context, rn *run, sh *show, d *c
 func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *core.Download, p polled, le *localEpisode,
 	episodes []*series.Episode, libPath, rel string, q acquire.QualityModel,
 ) (string, []string, error) {
-	root, err := os.OpenRoot(libPath)
+	root, err := r.openFolder(ctx, libPath)
 	if err != nil {
 		return "", nil, fmt.Errorf("library folder: %w", err)
 	}
 	defer func() { _ = root.Close() }()
-	if err := root.MkdirAll(filepath.Dir(rel), 0o755); err != nil {
+	if err := root.MkdirAll(ctx, path.Dir(filepath.ToSlash(rel))); err != nil {
 		return "", nil, fmt.Errorf("season folder: %w", err)
 	}
 	s := r.settings()
@@ -426,7 +425,7 @@ func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *co
 	case s.CopyUsingHardlinks:
 		mode = transferHardLinkOrCopy
 	}
-	dest := filepath.Join(libPath, rel)
+	dest := root.path(rel)
 	done, err := r.pace(ctx, dest)
 	if err != nil {
 		return "", nil, err
@@ -455,7 +454,7 @@ func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *co
 			return "", nil, err
 		}
 	}
-	if err := transfer(root, le.file.path, rel, mode); err != nil {
+	if err := r.transfer(ctx, root, le.file.path, rel, mode); err != nil {
 		return "", nil, fmt.Errorf("%s file: %w", mode, err)
 	}
 	r.logger().InfoContext(ctx, "imported episode file", "series", sh.item.Name, "from", le.file.path, "to", dest, "mode", mode.String())
@@ -463,16 +462,16 @@ func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *co
 	if s.ImportExtraFiles {
 		extras = r.importEpisodeExtras(ctx, root, sh, le, le.folderInfo != nil, rel, mode, s.ExtraFileExtensions)
 	}
-	imported := filepath.ToSlash(dest)
+	imported := dest
 	holder, err := r.recordEpisodeItems(ctx, sh, episodes, imported)
 	if err != nil {
 		return "", nil, err
 	}
 	r.recordExtras(ctx, holder, extras)
 	// A scan of the series' folder alone, rather than of its library.
-	seriesDir := libPath
+	seriesDir := root.root
 	if _, seriesRel, ok := seriesLibraryFolder(sh); ok {
-		seriesDir = filepath.Join(libPath, filepath.FromSlash(seriesRel))
+		seriesDir = root.path(seriesRel)
 	}
 	job := library.ScanFolderJob(sh.lib, seriesDir, r.now())
 	if _, err := r.Store.Jobs().Enqueue(ctx, &job); err != nil {

@@ -28,7 +28,7 @@ const (
 // as with ffprobe. read is false when the keyframes are not read: the file
 // has no index and whole is unset.
 type KeyframeExtractor interface {
-	Keyframes(ctx context.Context, path string, whole bool) (kf []time.Duration, read bool, err error)
+	Keyframes(ctx context.Context, f MediaFile, whole bool) (kf []time.Duration, read bool, err error)
 }
 
 // KeyframesJob returns a job extracting the keyframes of an item's video
@@ -73,7 +73,12 @@ func (j *Jobs) keyframes(ctx context.Context, job core.Job) ([]core.Job, error) 
 		// Without an index, reading every keyframe reads the whole file,
 		// which the policy may forbid; HLS of such files transcodes the
 		// video.
-		kf, read, err := j.Keyframes.Keyframes(ctx, src.Path, policy.WholeFiles)
+		f, err := j.Storages.Media(ctx, src.Path)
+		if err != nil {
+			return nil, fmt.Errorf("keyframes of %s: %w", src.Path, err)
+		}
+		kf, read, err := j.Keyframes.Keyframes(ctx, f, policy.WholeFiles)
+		_ = f.Close()
 		if err != nil {
 			return nil, fmt.Errorf("keyframes of %s: %w", src.Path, err)
 		}

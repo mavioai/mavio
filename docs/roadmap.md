@@ -679,7 +679,7 @@ flowchart TD
 **Done when**: a library on an rclone remote scans, probes, plays and imports downloads through `rclone rcd`, tested against rclone's memory backend; remotes are configured through the API; offline downloads of cloud drives act as a download client.
 
 **Progress**:
-- [ ] `core.Storage` port and its local implementation; scanning, local metadata, sidecars, writes, playback and imports through it
+- [x] `core.Storage` port and its local implementation; scanning, local metadata, sidecars, writes, playback and imports through it
 - [ ] `libs/rclone`: rc client and storage over `rclone rcd`, media bytes through a loopback proxy
 - [ ] Managed and external `rclone rcd`; remote configuration API (`mavio.storage.v1`)
 - [ ] Offline downloads as a built-in download client, with their jobs recorded in the database

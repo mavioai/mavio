@@ -679,7 +679,7 @@ flowchart TD
 **完成标准**：rclone 远端上的媒体库经 `rclone rcd` 完成扫描、probe、播放和下载导入，以 rclone 的 memory 后端测试；远端通过 API 配置；云盘离线下载作为下载客户端使用。
 
 **进度**：
-- [ ] `core.Storage` 端口及其本地实现；扫描、本地元数据、外挂文件、写入、播放和导入都经由它
+- [x] `core.Storage` 端口及其本地实现；扫描、本地元数据、外挂文件、写入、播放和导入都经由它
 - [ ] `libs/rclone`：rc 客户端和基于 `rclone rcd` 的存储，媒体字节经本机回环代理
 - [ ] 托管和外部 `rclone rcd`；远端配置 API（`mavio.storage.v1`）
 - [ ] 离线下载作为内置下载客户端，其任务记录在数据库中

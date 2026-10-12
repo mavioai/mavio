@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
-	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -60,6 +59,9 @@ type Scanner struct {
 	Classifier *storage.Classifier
 	// QuietGate pauses or throttles background scans during active client streaming.
 	QuietGate *storage.QuietGate
+	// Storages opens the storage of library paths; nil opens local
+	// folders only.
+	Storages *Storages
 	// GrowthPolicy leaves files still being written, such as downloads,
 	// for a later scan; RunDeferred scans their libraries once they
 	// settle. Without it only files with download suffixes are left out.
@@ -177,18 +179,23 @@ type task struct {
 }
 
 func (sc *scan) root(ctx context.Context, base string) error {
-	base = filepath.ToSlash(filepath.Clean(base))
-	dev := sc.devices.Device(filepath.Join(filepath.FromSlash(base), "."))
-	r, err := os.OpenRoot(filepath.FromSlash(base))
+	base = cleanRoot(base)
+	dev := sc.devices.Device(path.Join(base, "."))
+	s, err := sc.Storages.Open(ctx, base)
+	if err == nil {
+		if _, err = s.Stat(ctx, "."); err != nil {
+			_ = s.Close()
+		}
+	}
 	if err != nil {
 		// An unmounted or unreadable root keeps its items until it is back.
 		sc.logger().WarnContext(ctx, "library folder unavailable", "path", base, "err", err)
 		sc.count(func(s *ScanStats) { s.Unreadable++ })
 		return sc.Store.Items().MarkSeen(ctx, sc.lib.ID, base, sc.gen)
 	}
-	defer r.Close()
-	rfs := rootFS{root: r, base: base}
-	ignores := &IgnoreFiles{FS: r.FS()}
+	defer s.Close()
+	rfs := rootFS{ctx: ctx, s: s, base: base}
+	ignores := &IgnoreFiles{FS: core.StorageFS(ctx, s)}
 	return sc.walk(ctx, rfs, ignores, sc.walkers(dev, sc.policy(base)), task{dir: base, scope: Scope{Kind: sc.lib.Kind, Root: base}})
 }
 
@@ -320,7 +327,8 @@ func (sc *scan) state(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, dir
 	case errors.Is(err, core.ErrNotFound):
 	case err != nil:
 		return st, false, err
-	case !sc.NoPruning && prev.ModTime.Equal(st.ModTime) && prev.FileID == st.FileID && sc.policy(dir).PruneFolders:
+	case !sc.NoPruning && prev.ModTime.Equal(st.ModTime) && prev.FileID == st.FileID && sc.policy(dir).PruneFolders &&
+		rfs.s.Capabilities().FolderModTimes:
 		// Entries are as before; files may still have new contents.
 		changed := false
 		st.Entries = make([]core.FolderEntry, 0, len(prev.Entries))
@@ -387,7 +395,7 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 // the previous scan recorded.
 func modTime(fi fs.FileInfo) time.Time { return fi.ModTime().UTC().Truncate(time.Microsecond) }
 
-func slashRel(rfs rootFS, p string) string { return filepath.ToSlash(rfs.rel(p)) }
+func slashRel(rfs rootFS, p string) string { return rfs.rel(p) }
 
 // filtered lists folders for the resolver without what .ignore files
 // exclude.
@@ -526,7 +534,7 @@ func (p *saver) stat(path string) (core.FolderEntry, bool) {
 	if e, ok := p.stats[path]; ok {
 		return e, true
 	}
-	if p.rfs.root == nil {
+	if p.rfs.s == nil {
 		return core.FolderEntry{}, false
 	}
 	fi, err := p.rfs.stat(path)

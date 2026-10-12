@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"math"
 	"os"
 	"os/exec"
@@ -26,6 +27,27 @@ import (
 // Maker runs ffmpeg.
 type Maker struct {
 	FFmpeg string
+}
+
+// Input is a video as Maker reads it.
+type Input struct {
+	// URL is what ffmpeg reads: a file: URL, or an HTTP URL.
+	URL string
+	// Open opens the video for reads at offsets, which sampling through
+	// its index takes.
+	Open func() (File, error)
+}
+
+// File is an open video.
+type File interface {
+	io.ReaderAt
+	io.Closer
+	Stat() (fs.FileInfo, error)
+}
+
+// LocalInput returns the input of the local file at path.
+func LocalInput(path string) Input {
+	return Input{URL: "file:" + path, Open: func() (File, error) { return os.Open(path) }}
 }
 
 // Video describes the video a thumbnail is taken of.
@@ -87,19 +109,19 @@ const (
 
 // TrickplayArgs returns the ffmpeg arguments writing the sheets of a
 // video into dir as 0.jpg, 1.jpg, …: in Sampled mode from the pictures on
-// stdin, a thumbnail each, and otherwise from the file at path at the
-// interval. ffmpeg decodes and filters on one thread, as a background
+// stdin, a thumbnail each, and otherwise from input, the URL ffmpeg reads,
+// at the interval. ffmpeg decodes and filters on one thread, as a background
 // task.
-func TrickplayArgs(path string, mode Mode, v Video, o Options, dir string) []string {
+func TrickplayArgs(input string, mode Mode, v Video, o Options, dir string) []string {
 	args := []string{"-v", "error", "-filter_threads", "1", "-threads", "1"}
 	var vf []string
 	switch mode {
 	case Sampled:
 		args = append(args, "-f", "matroska", "-i", "pipe:0")
 	case KeyframesOnly:
-		args = append(args, "-nostdin", "-skip_frame", "nokey", "-i", path)
+		args = append(args, "-nostdin", "-skip_frame", "nokey", "-i", input)
 	default:
-		args = append(args, "-nostdin", "-i", path)
+		args = append(args, "-nostdin", "-i", input)
 	}
 	// A thumbnail is the first picture at or after its time, so that the
 	// last is there when the keyframes end before the next time.
@@ -116,24 +138,24 @@ func TrickplayArgs(path string, mode Mode, v Video, o Options, dir string) []str
 // through its index; when whole is set, it otherwise decodes the keyframes
 // of the whole file, or failing that every frame, and when it is not,
 // files without an index give keyframes.ErrNoIndex.
-func (m *Maker) Trickplay(ctx context.Context, path string, v Video, o Options, dir string, whole bool) (core.Trickplay, error) {
+func (m *Maker) Trickplay(ctx context.Context, in Input, v Video, o Options, dir string, whole bool) (core.Trickplay, error) {
 	if v.Duration <= 0 {
 		return core.Trickplay{}, errors.New("thumbnails: video of unknown duration")
 	}
 	count := int(math.Ceil(v.Duration.Seconds() / o.Interval.Seconds()))
-	err := m.sampled(ctx, path, v, o, dir, count)
+	err := m.sampled(ctx, in, v, o, dir, count)
 	if err != nil && whole && ctx.Err() == nil {
 		for _, mode := range []Mode{KeyframesOnly, AllFrames} {
 			if err = empty(dir); err != nil {
 				break
 			}
-			if err = m.run(ctx, TrickplayArgs(path, mode, v, o, dir), nil); err == nil && sheets(dir) > 0 {
+			if err = m.run(ctx, TrickplayArgs(in.URL, mode, v, o, dir), nil); err == nil && sheets(dir) > 0 {
 				break
 			}
 		}
 	}
 	if err != nil {
-		return core.Trickplay{}, fmt.Errorf("trickplay of %s: %w", path, err)
+		return core.Trickplay{}, fmt.Errorf("trickplay of %s: %w", in.URL, err)
 	}
 	t := core.Trickplay{
 		Width: o.Width, Height: v.height(o.Width), TileWidth: o.TileWidth, TileHeight: o.TileHeight,
@@ -142,7 +164,7 @@ func (m *Maker) Trickplay(ctx context.Context, path string, v Video, o Options, 
 	// The sheets ffmpeg wrote decide the count: the last may be partial.
 	n := sheets(dir)
 	if n == 0 {
-		return core.Trickplay{}, fmt.Errorf("trickplay of %s: ffmpeg wrote no sheets", path)
+		return core.Trickplay{}, fmt.Errorf("trickplay of %s: ffmpeg wrote no sheets", in.URL)
 	}
 	largest := int64(0)
 	for i := range n {
@@ -162,8 +184,11 @@ func (m *Maker) Trickplay(ctx context.Context, path string, v Video, o Options, 
 
 // sampled writes the sheets from the keyframe at or before each
 // thumbnail's time, read through the file's Matroska index.
-func (m *Maker) sampled(ctx context.Context, path string, v Video, o Options, dir string, count int) error {
-	f, err := os.Open(path)
+func (m *Maker) sampled(ctx context.Context, in Input, v Video, o Options, dir string, count int) error {
+	if in.Open == nil {
+		return keyframes.ErrNoIndex
+	}
+	f, err := in.Open()
 	if err != nil {
 		return err
 	}
@@ -221,30 +246,32 @@ func empty(dir string) error {
 }
 
 // ChapterImageArgs returns the ffmpeg arguments writing the frame at a
-// time as a JPEG file width pixels wide.
-func ChapterImageArgs(path string, at time.Duration, v Video, width int, file string) []string {
+// time as a JPEG file width pixels wide, reading input, the URL ffmpeg
+// reads.
+func ChapterImageArgs(input string, at time.Duration, v Video, width int, file string) []string {
 	return []string{
-		"-v", "error", "-nostdin", "-ss", strconv.FormatFloat(at.Seconds(), 'f', 3, 64), "-i", path,
+		"-v", "error", "-nostdin", "-ss", strconv.FormatFloat(at.Seconds(), 'f', 3, 64), "-i", input,
 		"-map", "0:v:0", "-an", "-sn", "-dn", "-frames:v", "1", "-vf", strings.Join(v.filters(width), ","),
 		"-q:v", "3", "-f", "image2", "-update", "1", file,
 	}
 }
 
-// ChapterImage writes the frame of a video at a time into file.
-func (m *Maker) ChapterImage(ctx context.Context, path string, at time.Duration, v Video, width int, file string) error {
-	if err := m.run(ctx, ChapterImageArgs(path, at, v, width, file), nil); err != nil {
-		return fmt.Errorf("chapter image of %s at %v: %w", path, at, err)
+// ChapterImage writes the frame at a time of the video ffmpeg reads at
+// input, a URL, into file.
+func (m *Maker) ChapterImage(ctx context.Context, input string, at time.Duration, v Video, width int, file string) error {
+	if err := m.run(ctx, ChapterImageArgs(input, at, v, width, file), nil); err != nil {
+		return fmt.Errorf("chapter image of %s at %v: %w", input, at, err)
 	}
 	if info, err := os.Stat(file); err != nil || info.Size() == 0 {
-		return fmt.Errorf("chapter image of %s at %v: ffmpeg wrote no frame", path, at)
+		return fmt.Errorf("chapter image of %s at %v: ffmpeg wrote no frame", input, at)
 	}
 	return nil
 }
 
 // LoudnessArgs returns the ffmpeg arguments measuring the first audio
-// stream of a file.
-func LoudnessArgs(path string) []string {
-	return []string{"-hide_banner", "-nostats", "-nostdin", "-v", "info", "-i", path, "-map", "0:a:0", "-af", "ebur128=framelog=quiet", "-f", "null", "-"}
+// stream of the file ffmpeg reads at input, a URL.
+func LoudnessArgs(input string) []string {
+	return []string{"-hide_banner", "-nostats", "-nostdin", "-v", "info", "-i", input, "-map", "0:a:0", "-af", "ebur128=framelog=quiet", "-f", "null", "-"}
 }
 
 // integrated finds the summary's integrated loudness.
@@ -265,15 +292,15 @@ func ParseLoudness(stderr string) (float64, bool) {
 }
 
 // Loudness measures the integrated loudness of a file's first audio
-// stream, in LUFS.
-func (m *Maker) Loudness(ctx context.Context, path string) (float64, error) {
+// stream, in LUFS; input is the URL ffmpeg reads.
+func (m *Maker) Loudness(ctx context.Context, input string) (float64, error) {
 	var stderr bytes.Buffer
-	if err := m.start(ctx, LoudnessArgs(path), nil, &stderr); err != nil {
-		return 0, fmt.Errorf("loudness of %s: %w: %s", path, err, lastLines(stderr.String()))
+	if err := m.start(ctx, LoudnessArgs(input), nil, &stderr); err != nil {
+		return 0, fmt.Errorf("loudness of %s: %w: %s", input, err, lastLines(stderr.String()))
 	}
 	v, ok := ParseLoudness(stderr.String())
 	if !ok {
-		return 0, fmt.Errorf("loudness of %s: no integrated loudness", path)
+		return 0, fmt.Errorf("loudness of %s: no integrated loudness", input)
 	}
 	return v, nil
 }

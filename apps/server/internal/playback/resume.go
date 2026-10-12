@@ -65,7 +65,7 @@ func (m *Manager) prepareStart(ctx context.Context, p *Playback) {
 		}
 	}
 	ms := p.Source()
-	if ms.Path == "" || ms.Disc != "" || p.Remote() {
+	if ms.Path == "" || ms.Disc != "" || p.Remote() || core.IsRemotePath(ms.Path) {
 		return
 	}
 	if m.cfg.Class != nil && m.cfg.Class(ctx, ms.Path) == core.StorageCloud {
@@ -95,7 +95,7 @@ func (m *Manager) keepAwake() {
 	m.mu.Lock()
 	paths := make([]string, 0, len(m.playbacks))
 	for _, p := range m.playbacks {
-		if ms := p.Source(); ms.Path != "" && ms.Disc == "" && !p.Remote() {
+		if ms := p.Source(); ms.Path != "" && ms.Disc == "" && !p.Remote() && !core.IsRemotePath(ms.Path) {
 			paths = append(paths, ms.Path)
 		}
 	}

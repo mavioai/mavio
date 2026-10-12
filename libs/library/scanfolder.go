@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -42,10 +42,10 @@ func ScanFolderJob(lib core.Library, dir string, at time.Time) core.Job {
 // parents, but none beside them. Items whose files are gone are left for
 // the next scan of the library to mark missing.
 func (s *Scanner) ScanFolder(ctx context.Context, lib core.Library, dir string) (ScanStats, error) {
-	dir = filepath.ToSlash(filepath.Clean(dir))
+	dir = cleanRoot(dir)
 	base := ""
 	for _, p := range lib.Paths {
-		b := filepath.ToSlash(filepath.Clean(p))
+		b := cleanRoot(p)
 		if dir == b || strings.HasPrefix(dir, strings.TrimSuffix(b, "/")+"/") {
 			base = b
 			break
@@ -62,13 +62,13 @@ func (s *Scanner) ScanFolder(ctx context.Context, lib core.Library, dir string) 
 	if sc.devices == nil {
 		sc.devices = &storage.Detector{}
 	}
-	r, err := os.OpenRoot(filepath.FromSlash(base))
+	st, err := s.Storages.Open(ctx, base)
 	if err != nil {
 		return sc.stats, fmt.Errorf("library folder: %w", err)
 	}
-	defer r.Close()
-	rfs := rootFS{root: r, base: base}
-	ignores := &IgnoreFiles{FS: r.FS()}
+	defer st.Close()
+	rfs := rootFS{ctx: ctx, s: st, base: base}
+	ignores := &IgnoreFiles{FS: core.StorageFS(ctx, st)}
 	t := task{dir: base, scope: Scope{Kind: lib.Kind, Root: base}}
 	for t.dir != dir {
 		subs, err := sc.folder(ctx, rfs, ignores, t)
@@ -83,7 +83,7 @@ func (s *Scanner) ScanFolder(ctx context.Context, lib core.Library, dir string) 
 		}
 		t = subs[i]
 	}
-	dev := sc.devices.Device(filepath.Join(filepath.FromSlash(dir), "."))
+	dev := sc.devices.Device(path.Join(dir, "."))
 	if err := sc.walk(ctx, rfs, ignores, sc.walkers(dev, sc.policy(dir)), t); err != nil {
 		return sc.stats, err
 	}
