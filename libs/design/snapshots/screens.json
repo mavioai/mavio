@@ -1,0 +1,37 @@
+{
+  "$comment": "The screens every client's snapshot tests draw, at the sizes of its form factors, and the fixed data they draw them with (docs/clients.md §6.8). Each client maps the data into its own models; the titles are made up. A snapshot is named <screen>-<size>.png.",
+  "now": "2026-10-01T12:00:00Z",
+  "sizes": {
+    "phone": { "width": 390, "height": 844, "scale": 3 },
+    "tablet": { "width": 1180, "height": 820, "scale": 2 },
+    "desktop": { "width": 1280, "height": 800, "scale": 1 },
+    "tv": { "width": 1920, "height": 1080, "scale": 1 }
+  },
+  "screens": {
+    "sign-in": { "description": "Sign-in with no server added yet." },
+    "home": { "description": "Home of one server: Continue Watching, then the hubs of its two libraries." }
+  },
+  "server": { "id": "4f6c2a7e-0d1b-4c8e-9a35-2b7d1e8f6a01", "name": "Living Room", "version": "0.1.0", "userId": "8a1d4c2e-5b3f-4e6a-9c7d-0f2b4a6c8e10", "userName": "Ada" },
+  "libraries": [
+    { "id": "lib-movies", "name": "Movies", "kind": "movies" },
+    { "id": "lib-shows", "name": "Shows", "kind": "shows" }
+  ],
+  "items": {
+    "orbit": { "kind": "movie", "name": "The Long Orbit", "year": 2024, "runtimeMinutes": 128, "library": "lib-movies" },
+    "harbor": { "kind": "movie", "name": "Harbor Lights", "year": 2023, "runtimeMinutes": 104, "library": "lib-movies" },
+    "glass": { "kind": "movie", "name": "A House of Glass", "year": 2025, "runtimeMinutes": 117, "library": "lib-movies" },
+    "tide": { "kind": "movie", "name": "Low Tide", "year": 2022, "runtimeMinutes": 96, "library": "lib-movies" },
+    "summit": { "kind": "movie", "name": "Summit", "year": 2021, "runtimeMinutes": 141, "library": "lib-movies" },
+    "lantern": { "kind": "movie", "name": "The Lantern Keeper", "year": 2025, "runtimeMinutes": 112, "library": "lib-movies" },
+    "atlas": { "kind": "series", "name": "Atlas Station", "year": 2023, "library": "lib-shows" },
+    "fernwood": { "kind": "series", "name": "Fernwood", "year": 2024, "library": "lib-shows" },
+    "signal": { "kind": "series", "name": "Signal & Noise", "year": 2025, "library": "lib-shows" },
+    "meridian": { "kind": "series", "name": "Meridian", "year": 2022, "library": "lib-shows" },
+    "atlas-s2e3": { "kind": "episode", "name": "Dead Reckoning", "series": "atlas", "season": 2, "episode": 3, "runtimeMinutes": 52, "library": "lib-shows" }
+  },
+  "home": [
+    { "kind": "continueWatching", "items": [{ "id": "orbit", "progressMinutes": 47 }, { "id": "atlas-s2e3", "progressMinutes": 12 }, { "id": "harbor", "progressMinutes": 81 }] },
+    { "kind": "recentlyAdded", "library": "lib-movies", "items": [{ "id": "lantern" }, { "id": "glass" }, { "id": "summit", "played": true }, { "id": "tide" }] },
+    { "kind": "recentlyAdded", "library": "lib-shows", "items": [{ "id": "signal" }, { "id": "fernwood" }, { "id": "meridian" }, { "id": "atlas" }] }
+  ]
+}
