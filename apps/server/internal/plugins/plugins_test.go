@@ -19,12 +19,17 @@ import (
 // wasmPlugin is the smoke tests' metadata provider built for WASM.
 var wasmPlugin string
 
+// compiled holds the compiled WASM plugins, which every manager of the
+// test binary shares so that each plugin compiles once.
+var compiled string
+
 func TestMain(m *testing.M) {
 	dir, err := os.MkdirTemp("", "mavio-plugins-")
 	if err != nil {
 		panic(err)
 	}
 	wasmPlugin = filepath.Join(dir, "plugin.wasm")
+	compiled = filepath.Join(dir, "compiled")
 	build := exec.Command("go", "build", "-buildmode=c-shared", "-o", wasmPlugin,
 		"github.com/mavioai/mavio/apps/server/internal/smoke/smokeplugin")
 	build.Env = append(os.Environ(), "GOOS=wasip1", "GOARCH=wasm")
@@ -70,7 +75,7 @@ func installWith(t *testing.T, root, folder, schema, fields string) {
 
 func open(t *testing.T, dir string, s core.Store) *plugins.Manager {
 	t.Helper()
-	m, err := plugins.Open(t.Context(), plugins.Config{Dir: dir, CacheDir: t.TempDir(), DataDir: t.TempDir(), Store: s})
+	m, err := plugins.Open(t.Context(), plugins.Config{Dir: dir, CacheDir: compiled, DataDir: t.TempDir(), Store: s})
 	if err != nil {
 		t.Fatal(err)
 	}

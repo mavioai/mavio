@@ -108,6 +108,10 @@ func start(t *testing.T, cfg server.Config) running {
 		t.Fatal(err)
 	}
 	cfg.Version, cfg.Logger = "v-test", slog.New(slog.DiscardHandler)
+	if cfg.PluginCacheDir == "" {
+		// The servers of a test binary compile each plugin once.
+		cfg.PluginCacheDir = filepath.Join(smokeRoot, "compiled")
+	}
 	runCtx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
 	go func() { done <- server.Run(runCtx, cfg, ln) }()
