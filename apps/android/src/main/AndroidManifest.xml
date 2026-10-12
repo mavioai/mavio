@@ -3,9 +3,11 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Servers on the local network serve their media over plain HTTP. -->
     <application
         android:label="Mavio"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.Mavio">
         <activity
             android:name=".MainActivity"

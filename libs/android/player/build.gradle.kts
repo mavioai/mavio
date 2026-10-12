@@ -23,6 +23,7 @@ androidComponents {
 
 dependencies {
     api(libs.media3.exoplayer)
+    api(libs.media3.exoplayer.hls)
     api(libs.media3.session)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
