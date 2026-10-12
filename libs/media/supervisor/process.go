@@ -12,7 +12,8 @@ import (
 type Process interface {
 	// Stdin receives ffmpeg's interactive keys.
 	Stdin() io.Writer
-	// Progress yields the output of -progress.
+	// Progress yields the output of -progress, and ends when ffmpeg
+	// exits; Wait is called once it has ended.
 	Progress() io.Reader
 	// Wait waits for the exit.
 	Wait() error

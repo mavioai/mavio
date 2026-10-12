@@ -50,4 +50,7 @@ func parseProgress(r io.Reader, report func(Progress)) {
 			report(p)
 		}
 	}
+	// A line too long for the scanner ends the parsing, not the output,
+	// which ffmpeg would block on.
+	_, _ = io.Copy(io.Discard, r)
 }
