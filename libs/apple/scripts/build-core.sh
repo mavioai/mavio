@@ -12,8 +12,12 @@ cd "$(dirname "$0")/.."
 apple=$(pwd)
 core=$apple/../client-rust
 out=$apple/build
-# tvOS is a tier 3 target, built with the standard library on this nightly.
+# tvOS is a tier 3 target, built with the standard library on this nightly,
+# into a target directory of its own: the standard library's crates are not
+# in Cargo.lock, so tools that keep the locked crates' builds, such as CI's
+# cache, would drop them.
 nightly=nightly-2026-10-10
+std=target-std
 profile=${MAVIO_CORE_PROFILE:-release}
 build=$profile
 [ "$profile" = dev ] && build=debug
@@ -33,7 +37,7 @@ rustup toolchain install "$nightly" --profile minimal --component rust-src >/dev
 # shellcheck disable=SC2046,SC2086
 cargo build --locked --profile "$profile" -p mavio-uniffi --lib \
 	--target aarch64-apple-ios --target aarch64-apple-ios-sim $(printf -- ' --target %s' $darwin)
-cargo "+$nightly" build --locked --profile "$profile" -p mavio-uniffi --lib -Zbuild-std=std,panic_abort \
+cargo "+$nightly" build --locked --profile "$profile" -p mavio-uniffi --lib -Zbuild-std=std,panic_abort --target-dir "$std" \
 	--target aarch64-apple-tvos --target aarch64-apple-tvos-sim
 
 rm -rf "$out" && mkdir -p "$out/MavioCore" "$out/frameworks"
@@ -89,8 +93,8 @@ PLIST
 lipo -create $(printf "target/%s/$build/libmavio.dylib " $darwin) -output "$out/gen/libmavio-macos.dylib"
 framework "$out/frameworks/ios" "target/aarch64-apple-ios/$build/libmavio.dylib" 18.0 iPhoneOS
 framework "$out/frameworks/ios-sim" "target/aarch64-apple-ios-sim/$build/libmavio.dylib" 18.0 iPhoneSimulator
-framework "$out/frameworks/tvos" "target/aarch64-apple-tvos/$build/libmavio.dylib" 18.0 AppleTVOS
-framework "$out/frameworks/tvos-sim" "target/aarch64-apple-tvos-sim/$build/libmavio.dylib" 18.0 AppleTVSimulator
+framework "$out/frameworks/tvos" "$std/aarch64-apple-tvos/$build/libmavio.dylib" 18.0 AppleTVOS
+framework "$out/frameworks/tvos-sim" "$std/aarch64-apple-tvos-sim/$build/libmavio.dylib" 18.0 AppleTVSimulator
 framework "$out/frameworks/macos" "$out/gen/libmavio-macos.dylib" 15.0 MacOSX
 args=""
 for p in ios ios-sim tvos tvos-sim macos; do
