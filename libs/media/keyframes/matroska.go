@@ -28,6 +28,14 @@ const (
 	mkvCueTime         = 0xB3
 	mkvCueTrackPos     = 0xB7
 	mkvCueTrack        = 0xF7
+	mkvCueClusterPos   = 0xF1
+	mkvCueRelativePos  = 0xF0
+	mkvCluster         = 0x1F43B675
+	mkvTimestamp       = 0xE7
+	mkvSimpleBlock     = 0xA3
+	mkvBlockGroup      = 0xA0
+	mkvBlock           = 0xA1
+	mkvReferenceBlock  = 0xFB
 	mkvTrackTypeVideo  = 1
 	mkvDefaultTSScale  = 1000000
 	maxMatroskaElement = 64 << 20
@@ -154,18 +162,47 @@ func readElement(r io.ReaderAt, e element) ([]byte, error) {
 	return b, nil
 }
 
-// matroska reads the keyframes of the first video track of a Matroska or
+// Matroska is the index of a Matroska or WebM file: the elements a decoder
+// of its first video track needs, and the cue points of that track.
+type Matroska struct {
+	// header holds the EBML header element; info the Info element's
+	// contents and track the video TrackEntry's.
+	header, info, track []byte
+	// number is the video track's number; scale the nanoseconds of a
+	// timestamp tick.
+	number, scale uint64
+	duration      time.Duration
+	// Cues are the cue points of the video track, which point at its
+	// keyframes.
+	Cues []Cue
+}
+
+// Cue is a cue point of a Matroska video track.
+type Cue struct {
+	// Time is the keyframe's presentation time.
+	Time time.Duration
+	// cluster is the file offset of the cluster holding the keyframe;
+	// block the offset of its block within the cluster's data, -1 when
+	// the cue does not tell.
+	cluster, block int64
+}
+
+// ReadMatroska reads the index of the first video track of a Matroska or
 // WebM file from its Cues, found through the SeekHead, as Jellyfin's
 // MatroskaKeyframeExtractor does; a SeekHead pointing to a second one is
 // followed. It reads the file's headers and its index, not its clusters.
-func matroska(r io.ReaderAt, size int64) (Data, error) {
+func ReadMatroska(r io.ReaderAt, size int64) (*Matroska, error) {
 	ebml, err := readHeader(r, 0)
-	if err != nil || ebml.id != mkvEBML {
-		return Data{}, errNotMatroska
+	if err != nil || ebml.id != mkvEBML || ebml.size < 0 {
+		return nil, errNotMatroska
+	}
+	m := &Matroska{scale: mkvDefaultTSScale}
+	if m.header, err = readRange(r, 0, ebml.end(size)); err != nil {
+		return nil, err
 	}
 	seg, err := readHeader(r, ebml.end(size))
 	if err != nil || seg.id != mkvSegment {
-		return Data{}, fmt.Errorf("matroska: no segment: %w", ErrNoIndex)
+		return nil, fmt.Errorf("matroska: no segment: %w", ErrNoIndex)
 	}
 	segEnd := seg.end(size)
 	// Seek positions are relative to the start of the segment's data.
@@ -213,19 +250,19 @@ func matroska(r io.ReaderAt, size int64) (Data, error) {
 	// The SeekHead is the segment's first element, or follows a Void.
 	head, err := readHeader(r, seg.data)
 	if err != nil {
-		return Data{}, err
+		return nil, err
 	}
 	at := seg.data
 	if head.id != mkvSeekHead && head.size >= 0 {
 		at = head.end(segEnd)
 	}
 	if err := readSeekHead(at, 0); err != nil {
-		return Data{}, err
+		return nil, err
 	}
 	if pos[mkvInfo] == 0 || pos[mkvTracks] == 0 || pos[mkvCues] == 0 {
-		return Data{}, fmt.Errorf("matroska: SeekHead lacks Info, Tracks or Cues: %w", ErrNoIndex)
+		return nil, fmt.Errorf("matroska: SeekHead lacks Info, Tracks or Cues: %w", ErrNoIndex)
 	}
-	read := func(id uint64) ([]elementData, error) {
+	read := func(id uint64) ([]byte, error) {
 		e, err := readHeader(r, pos[id])
 		if err != nil {
 			return nil, err
@@ -233,29 +270,27 @@ func matroska(r io.ReaderAt, size int64) (Data, error) {
 		if e.id != id {
 			return nil, fmt.Errorf("matroska: element %#x at %d is not %#x: %w", e.id, pos[id], id, ErrNoIndex)
 		}
-		b, err := readElement(r, e)
-		return children(b), err
+		return readElement(r, e)
 	}
 
-	info, err := read(mkvInfo)
-	if err != nil {
-		return Data{}, err
+	if m.info, err = read(mkvInfo); err != nil {
+		return nil, err
 	}
-	scale, duration := uint64(mkvDefaultTSScale), 0.0
-	for _, c := range info {
+	duration := 0.0
+	for _, c := range children(m.info) {
 		switch c.id {
 		case mkvTimestampScale:
-			scale = c.uint()
+			m.scale = c.uint()
 		case mkvDuration:
 			duration = c.float()
 		}
 	}
+	m.duration = ticks(duration * float64(m.scale))
 	tracks, err := read(mkvTracks)
 	if err != nil {
-		return Data{}, err
+		return nil, err
 	}
-	video := uint64(0)
-	for _, t := range tracks {
+	for _, t := range children(tracks) {
 		if t.id != mkvTrackEntry {
 			continue
 		}
@@ -269,42 +304,69 @@ func matroska(r io.ReaderAt, size int64) (Data, error) {
 			}
 		}
 		if kind == mkvTrackTypeVideo {
-			video = number
+			m.number, m.track = number, t.b
 			break
 		}
 	}
-	if video == 0 {
-		return Data{}, fmt.Errorf("matroska: no video track: %w", ErrNoIndex)
+	if m.number == 0 {
+		return nil, fmt.Errorf("matroska: no video track: %w", ErrNoIndex)
 	}
 	cues, err := read(mkvCues)
 	if err != nil {
-		return Data{}, err
+		return nil, err
 	}
-	d := Data{Duration: ticks(duration * float64(scale))}
-	for _, cp := range cues {
+	for _, cp := range children(cues) {
 		if cp.id != mkvCuePoint {
 			continue
 		}
-		var at uint64
+		cue := Cue{cluster: -1, block: -1}
 		found := false
 		for _, c := range children(cp.b) {
 			switch c.id {
 			case mkvCueTime:
-				at = c.uint()
+				cue.Time = ticks(float64(c.uint()) * float64(m.scale))
 			case mkvCueTrackPos:
+				var track uint64
+				cluster, block := int64(-1), int64(-1)
 				for _, p := range children(c.b) {
-					if p.id == mkvCueTrack && p.uint() == video {
-						found = true
+					switch p.id {
+					case mkvCueTrack:
+						track = p.uint()
+					case mkvCueClusterPos:
+						cluster = seg.data + int64(p.uint())
+					case mkvCueRelativePos:
+						block = int64(p.uint())
 					}
+				}
+				if track == m.number && !found {
+					found, cue.cluster, cue.block = true, cluster, block
 				}
 			}
 		}
 		if found {
-			d.Keyframes = append(d.Keyframes, ticks(float64(at)*float64(scale)))
+			m.Cues = append(m.Cues, cue)
 		}
 	}
-	if len(d.Keyframes) == 0 {
-		return Data{}, fmt.Errorf("matroska: no cues of the video track: %w", ErrNoIndex)
+	if len(m.Cues) == 0 {
+		return nil, fmt.Errorf("matroska: no cues of the video track: %w", ErrNoIndex)
+	}
+	return m, nil
+}
+
+// readRange reads the bytes from off to end.
+func readRange(r io.ReaderAt, off, end int64) ([]byte, error) {
+	return readElement(r, element{data: off, size: end - off})
+}
+
+// matroska reads the keyframes of a Matroska or WebM file from its index.
+func matroska(r io.ReaderAt, size int64) (Data, error) {
+	m, err := ReadMatroska(r, size)
+	if err != nil {
+		return Data{}, err
+	}
+	d := Data{Duration: m.duration, Keyframes: make([]time.Duration, len(m.Cues))}
+	for i, c := range m.Cues {
+		d.Keyframes[i] = c.Time
 	}
 	return d, nil
 }

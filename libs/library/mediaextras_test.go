@@ -30,24 +30,28 @@ func (chapteredProber) Probe(_ context.Context, _ string, audio bool) (ProbeResu
 	}}, nil
 }
 
-// fakeThumbs writes empty images, failing for files named in fail.
+// fakeThumbs writes empty images, failing when fail is set; files without
+// an index, when noIndex is set, are made only when they may be read whole.
 type fakeThumbs struct {
 	trickplays, chapters int
 	at                   []time.Duration
 	frames               []VideoFrame
-	fail                 bool
+	fail, noIndex        bool
 }
 
-func (f *fakeThumbs) Trickplay(_ context.Context, _ string, v VideoFrame, dir string) (core.Trickplay, error) {
+func (f *fakeThumbs) Trickplay(_ context.Context, _ string, v VideoFrame, dir string, whole bool) (core.Trickplay, bool, error) {
+	if f.noIndex && !whole {
+		return core.Trickplay{}, false, nil
+	}
 	f.trickplays++
 	f.frames = append(f.frames, v)
 	if f.fail {
-		return core.Trickplay{}, errors.New("broken GOP")
+		return core.Trickplay{}, false, errors.New("broken GOP")
 	}
 	if err := os.WriteFile(filepath.Join(dir, "0.jpg"), []byte("jpg"), 0o644); err != nil {
-		return core.Trickplay{}, err
+		return core.Trickplay{}, false, err
 	}
-	return core.Trickplay{Width: 320, Height: 133, TileWidth: 10, TileHeight: 10, ThumbnailCount: 180, Interval: 10 * time.Second}, nil
+	return core.Trickplay{Width: 320, Height: 133, TileWidth: 10, TileHeight: 10, ThumbnailCount: 180, Interval: 10 * time.Second}, true, nil
 }
 
 func (f *fakeThumbs) ChapterImage(_ context.Context, _ string, at time.Duration, _ VideoFrame, file string) error {
@@ -122,6 +126,46 @@ func TestMediaExtras(t *testing.T) {
 	}
 	if _, err := jobs.trickplay(t.Context(), job); err != nil || thumbs.trickplays != 2 {
 		t.Errorf("retry within the note: err %v, trickplays %d, want 2", err, thumbs.trickplays)
+	}
+}
+
+func TestTrickplayCloud(t *testing.T) {
+	for _, tt := range []struct {
+		name    string
+		noIndex bool
+		made    int
+	}{
+		{"index", false, 1},
+		// A file without an index is not read whole on cloud storage.
+		{"no index", true, 0},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			f := newScan(t, core.LibraryMovies)
+			f.lib.ExtractTrickplay = true
+			f.lib.StorageClasses = map[string]core.StorageClass{f.root: core.StorageCloud}
+			if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
+				t.Fatal(err)
+			}
+			tree(t, f.root, "Up (2009)/Up (2009).mkv")
+			thumbs := &fakeThumbs{noIndex: tt.noIndex}
+			jobs := &Jobs{
+				Store: f.store, Scanner: f.sc, Prober: chapteredProber{}, Now: func() time.Time { return f.clock },
+				Refresher: &Refresher{Store: f.store}, Thumbnails: thumbs, MetadataDir: t.TempDir(),
+				Fails: NewFailNotes(time.Hour, 10),
+			}
+			f.store.clock = func() time.Time { return f.clock }
+			w := &Worker{Queue: f.store.Jobs(), Owner: "test", Handlers: jobs.Handlers()}
+			f.scan()
+			drain(t, w)
+			up := f.item("Up (2009)/Up (2009).mkv")
+			if got := len(f.store.tricks[up.ID]); thumbs.trickplays != tt.made || got != tt.made {
+				t.Errorf("trickplays = %d, stored %d, want = %d", thumbs.trickplays, got, tt.made)
+			}
+			// Chapter images take samples, which cloud storage does not.
+			if thumbs.chapters != 0 {
+				t.Errorf("chapter images = %d, want = 0", thumbs.chapters)
+			}
+		})
 	}
 }
 

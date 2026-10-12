@@ -135,7 +135,7 @@ Everything Mavio reads from or writes to media storage, with its cost and when i
 | Probe | ffprobe reads the container header, and the tail when the index is there | a few MB, 2–5 range reads | new and changed files |
 | Keyframes | the container's index: Matroska Cues, or MP4 sample tables, `mfra` or `sidx` (§2.4); without one, ffprobe reads every packet of the video stream | a few header and index reads; without an index, the whole file | with the probe; without an index, after it where the policy allows whole-file reads |
 | Black borders | a seek and a few decoded frames at 5 points | about 3–4 MB a point | after the probe, where the policy allows samples |
-| Trickplay | ffmpeg decodes the video at an interval | the whole file | when the library asks for it and the policy allows whole-file reads |
+| Trickplay | Matroska: a keyframe a thumbnail, read through the Cues (§2.5); other files: ffmpeg decodes the keyframes, or failing that every frame | a keyframe a thumbnail; without an index, the whole file | when the library asks for it; without an index, where the policy allows whole-file reads |
 | Chapter images | a seek per chapter | about 3–4 MB a chapter | when the library asks for it and the policy allows samples |
 | Loudness | ffmpeg reads the whole track | the whole file | when the library asks for it and the policy allows whole-file reads |
 | NFO, artwork, lyrics, sidecar subtitles | small files | small | refreshes, scans |
@@ -151,7 +151,7 @@ Everything Mavio reads from or writes to media storage, with its cost and when i
 
 | Reader | Local and network | Cloud |
 | :--- | :--- | :--- |
-| Whole-file reads: keyframes of files without an index, trickplay, loudness | yes | no; HLS of files without keyframes transcodes the video |
+| Whole-file reads: keyframes and trickplay of files without an index, loudness | yes | no; HLS of files without keyframes transcodes the video, and they have no trickplay |
 | Samples: black borders, chapter images | yes | no; the borders stay unknown |
 | Speculative reads: head and tail prefetch before probes, playback start prefetch, keep-alive and wakes | yes | no; storage is read only as playback asks |
 | Pruning unchanged folders in scans | yes | no; folder modification times of cloud drives do not tell changes below them |
@@ -169,7 +169,16 @@ HLS cuts copied video at its keyframes, so every video file needs their times. C
 
 The reads are a few elements or boxes: on the test media, under 2% of each file. Only files without an index are read whole, by the `media.keyframes` job, and not on cloud storage. A playback copying the video of a file without keyframes transcodes it, as before.
 
-### 2.5 Implementation Index
+### 2.5 Trickplay from Keyframes
+
+A trickplay thumbnail needs one picture near its time, not every frame before it:
+
+* **Sampled through the index** (Matroska and WebM): for each thumbnail time, the cue at or before it gives the cluster of its keyframe, and the cue's relative position the block within it (without one, the cluster's block headers are read until the video track's keyframe). Mavio writes a Matroska stream of the EBML header, Info, the video track's entry and a cluster per thumbnail holding that keyframe at the thumbnail's time (`Matroska.WriteSamples`), and pipes it to a single ffmpeg run that scales and tiles the pictures. It reads a keyframe a thumbnail, the same one once for neighboring times, and decodes nothing else.
+* **Keyframes only** (other files, where whole-file reads are allowed): ffmpeg decodes the keyframes alone (`-skip_frame nokey`). It still reads the file but does a fraction of the decoding.
+* **Every frame**: the fallback when the keyframes-only run fails.
+* In every mode a thumbnail is the first picture at or after its time (`fps=…:round=down:eof_action=pass`), so the last thumbnail is kept when the keyframes end before the next time. ffmpeg runs on one thread and at a low priority (nice 10, or the below normal class on Windows), leaving the CPU to playbacks.
+
+### 2.6 Implementation Index
 
 | Mechanism | Implementation | Phase |
 | :--- | :--- | :--- |
@@ -178,4 +187,5 @@ The reads are a few elements or boxes: on the test media, under 2% of each file.
 | FUSE and loopback detection | `libs/library/storage/fuse.go` (`fuseKind`, `loopbackSource`, `findMount`, `mountKind`); used by `device_{linux,darwin,windows}.go` | P24 |
 | Storage policy | `libs/library/policy.go` (`StoragePolicy`, `PolicyOf`); used by `scan.go` (`scan.policy`, `Scanner.walkers`, `scan.state`), `jobs.go` (`Jobs.probeFile`), `keyframes.go`, `borders.go`, `mediaextras.go` (`Jobs.extrasJobs`, `trickplay`, `chapterImages`, `loudness`) | P24 |
 | Keyframes from container indexes | `libs/media/keyframes/index.go` (`FromIndex`, `FromFile`, `ErrNoIndex`), `matroska.go`, `mp4.go`; `apps/server/internal/providers/keyframes.go`; `libs/library/jobs.go` (`Jobs.probe`), `keyframes.go` (`KeyframeExtractor`) | P24 |
+| Trickplay from keyframes | `libs/media/keyframes/sample.go` (`Matroska.WriteSamples`), `matroska.go` (`ReadMatroska`); `libs/media/thumbnails/thumbnails.go` (`Mode`, `TrickplayArgs`, `Maker.Trickplay`), `priority_{unix,windows,other}.go`; `libs/library/mediaextras.go` (`Thumbnailer`, `Jobs.trickplay`) | P24 |
 | No speculative reads of cloud storage | `libs/library/storage/keeper.go` (`Keeper.Class`); `apps/server/internal/playback/resume.go` (`Manager.prepareStart`); wired in `apps/server/internal/server/server.go` | P24 |

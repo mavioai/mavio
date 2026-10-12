@@ -1,7 +1,7 @@
 // Package thumbnails makes the images and measurements of media that ffmpeg
-// reads off it: trickplay thumbnail sheets, which the fps, scale and tile
-// filters produce in one pass, chapter images, and the integrated
-// loudness of audio (EBU R128).
+// reads off it: trickplay thumbnail sheets, which the scale and tile
+// filters produce in one pass from a keyframe a thumbnail, chapter images,
+// and the integrated loudness of audio (EBU R128).
 package thumbnails
 
 import (
@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"os/exec"
@@ -19,6 +20,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/media/keyframes"
 )
 
 // Maker runs ffmpeg.
@@ -70,53 +72,152 @@ func DefaultOptions() Options {
 	return Options{Width: 320, Interval: 10 * time.Second, TileWidth: 10, TileHeight: 10, Quality: 4}
 }
 
+// Mode is how trickplay reads a video.
+type Mode int
+
+const (
+	// Sampled decodes a keyframe a thumbnail, each read on its own through
+	// the Matroska index, from a stream on stdin.
+	Sampled Mode = iota
+	// KeyframesOnly decodes the keyframes alone, reading the whole file.
+	KeyframesOnly
+	// AllFrames decodes every frame.
+	AllFrames
+)
+
 // TrickplayArgs returns the ffmpeg arguments writing the sheets of a
-// video into dir as 0.jpg, 1.jpg, ….
-func TrickplayArgs(path string, v Video, o Options, dir string) []string {
-	vf := append([]string{"fps=1/" + strconv.FormatFloat(o.Interval.Seconds(), 'f', -1, 64)}, v.filters(o.Width)...)
-	vf = append(vf, fmt.Sprintf("tile=%dx%d", o.TileWidth, o.TileHeight))
-	return []string{
-		"-v", "error", "-nostdin", "-i", path, "-map", "0:v:0", "-an", "-sn", "-dn",
-		"-vf", strings.Join(vf, ","), "-q:v", strconv.Itoa(o.Quality), "-f", "image2", "-start_number", "0",
-		filepath.Join(dir, "%d.jpg"),
+// video into dir as 0.jpg, 1.jpg, …: in Sampled mode from the pictures on
+// stdin, a thumbnail each, and otherwise from the file at path at the
+// interval. ffmpeg decodes and filters on one thread, as a background
+// task.
+func TrickplayArgs(path string, mode Mode, v Video, o Options, dir string) []string {
+	args := []string{"-v", "error", "-filter_threads", "1", "-threads", "1"}
+	var vf []string
+	switch mode {
+	case Sampled:
+		args = append(args, "-f", "matroska", "-i", "pipe:0")
+	case KeyframesOnly:
+		args = append(args, "-nostdin", "-skip_frame", "nokey", "-i", path)
+	default:
+		args = append(args, "-nostdin", "-i", path)
 	}
+	// A thumbnail is the first picture at or after its time, so that the
+	// last is there when the keyframes end before the next time.
+	vf = append(vf, "fps=1/"+strconv.FormatFloat(o.Interval.Seconds(), 'f', -1, 64)+":round=down:eof_action=pass")
+	vf = append(vf, v.filters(o.Width)...)
+	vf = append(vf, fmt.Sprintf("tile=%dx%d", o.TileWidth, o.TileHeight))
+	return append(args, "-map", "0:v:0", "-an", "-sn", "-dn",
+		"-vf", strings.Join(vf, ","), "-q:v", strconv.Itoa(o.Quality), "-f", "image2", "-start_number", "0",
+		filepath.Join(dir, "%d.jpg"))
 }
 
-// Trickplay writes the sheets of a video into dir, which must exist, and
-// describes them.
-func (m *Maker) Trickplay(ctx context.Context, path string, v Video, o Options, dir string) (core.Trickplay, error) {
+// Trickplay writes the sheets of a video into dir, which must exist and be
+// empty, and describes them. It samples a Matroska file's keyframes
+// through its index; when whole is set, it otherwise decodes the keyframes
+// of the whole file, or failing that every frame, and when it is not,
+// files without an index give keyframes.ErrNoIndex.
+func (m *Maker) Trickplay(ctx context.Context, path string, v Video, o Options, dir string, whole bool) (core.Trickplay, error) {
 	if v.Duration <= 0 {
 		return core.Trickplay{}, errors.New("thumbnails: video of unknown duration")
 	}
-	if err := m.run(ctx, TrickplayArgs(path, v, o, dir)); err != nil {
+	count := int(math.Ceil(v.Duration.Seconds() / o.Interval.Seconds()))
+	err := m.sampled(ctx, path, v, o, dir, count)
+	if err != nil && whole && ctx.Err() == nil {
+		for _, mode := range []Mode{KeyframesOnly, AllFrames} {
+			if err = empty(dir); err != nil {
+				break
+			}
+			if err = m.run(ctx, TrickplayArgs(path, mode, v, o, dir), nil); err == nil && sheets(dir) > 0 {
+				break
+			}
+		}
+	}
+	if err != nil {
 		return core.Trickplay{}, fmt.Errorf("trickplay of %s: %w", path, err)
 	}
-	count := int(math.Ceil(v.Duration.Seconds() / o.Interval.Seconds()))
 	t := core.Trickplay{
 		Width: o.Width, Height: v.height(o.Width), TileWidth: o.TileWidth, TileHeight: o.TileHeight,
 		ThumbnailCount: count, Interval: o.Interval,
 	}
 	// The sheets ffmpeg wrote decide the count: the last may be partial.
-	sheets := 0
-	largest := int64(0)
-	for ; ; sheets++ {
-		info, err := os.Stat(filepath.Join(dir, strconv.Itoa(sheets)+".jpg"))
-		if err != nil {
-			break
-		}
-		largest = max(largest, info.Size())
-	}
-	if sheets == 0 {
+	n := sheets(dir)
+	if n == 0 {
 		return core.Trickplay{}, fmt.Errorf("trickplay of %s: ffmpeg wrote no sheets", path)
 	}
+	largest := int64(0)
+	for i := range n {
+		if info, err := os.Stat(filepath.Join(dir, strconv.Itoa(i)+".jpg")); err == nil {
+			largest = max(largest, info.Size())
+		}
+	}
 	per := o.TileWidth * o.TileHeight
-	t.ThumbnailCount = min(count, sheets*per)
-	if t.ThumbnailCount <= (sheets-1)*per {
-		t.ThumbnailCount = (sheets-1)*per + 1
+	t.ThumbnailCount = min(count, n*per)
+	if t.ThumbnailCount <= (n-1)*per {
+		t.ThumbnailCount = (n-1)*per + 1
 	}
 	// A sheet serves per thumbnails' worth of playback.
 	t.Bandwidth = int(math.Ceil(float64(largest*8) / (float64(per) * o.Interval.Seconds())))
 	return t, nil
+}
+
+// sampled writes the sheets from the keyframe at or before each
+// thumbnail's time, read through the file's Matroska index.
+func (m *Maker) sampled(ctx context.Context, path string, v Video, o Options, dir string, count int) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	fi, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	idx, err := keyframes.ReadMatroska(f, fi.Size())
+	if err != nil {
+		return err
+	}
+	at := make([]time.Duration, count)
+	for i := range at {
+		at[i] = time.Duration(i) * o.Interval
+	}
+	pr, pw := io.Pipe()
+	written := make(chan error, 1)
+	go func() {
+		err := idx.WriteSamples(ctx, pw, f, fi.Size(), at)
+		pw.CloseWithError(err)
+		written <- err
+	}()
+	err = m.run(ctx, TrickplayArgs("", Sampled, v, o, dir), pr)
+	// ffmpeg stopping early ends the writer.
+	pr.CloseWithError(io.ErrClosedPipe)
+	if werr := <-written; werr != nil && !errors.Is(werr, io.ErrClosedPipe) {
+		return werr
+	}
+	return err
+}
+
+// sheets counts the sheets in dir, 0.jpg, 1.jpg, ….
+func sheets(dir string) int {
+	n := 0
+	for ; ; n++ {
+		if _, err := os.Stat(filepath.Join(dir, strconv.Itoa(n)+".jpg")); err != nil {
+			return n
+		}
+	}
+}
+
+// empty removes what a failed run left in dir.
+func empty(dir string) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		if err := os.RemoveAll(filepath.Join(dir, e.Name())); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // ChapterImageArgs returns the ffmpeg arguments writing the frame at a
@@ -131,7 +232,7 @@ func ChapterImageArgs(path string, at time.Duration, v Video, width int, file st
 
 // ChapterImage writes the frame of a video at a time into file.
 func (m *Maker) ChapterImage(ctx context.Context, path string, at time.Duration, v Video, width int, file string) error {
-	if err := m.run(ctx, ChapterImageArgs(path, at, v, width, file)); err != nil {
+	if err := m.run(ctx, ChapterImageArgs(path, at, v, width, file), nil); err != nil {
 		return fmt.Errorf("chapter image of %s at %v: %w", path, at, err)
 	}
 	if info, err := os.Stat(file); err != nil || info.Size() == 0 {
@@ -167,9 +268,7 @@ func ParseLoudness(stderr string) (float64, bool) {
 // stream, in LUFS.
 func (m *Maker) Loudness(ctx context.Context, path string) (float64, error) {
 	var stderr bytes.Buffer
-	cmd := exec.CommandContext(ctx, m.FFmpeg, LoudnessArgs(path)...)
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
+	if err := m.start(ctx, LoudnessArgs(path), nil, &stderr); err != nil {
 		return 0, fmt.Errorf("loudness of %s: %w: %s", path, err, lastLines(stderr.String()))
 	}
 	v, ok := ParseLoudness(stderr.String())
@@ -179,14 +278,25 @@ func (m *Maker) Loudness(ctx context.Context, path string) (float64, error) {
 	return v, nil
 }
 
-func (m *Maker) run(ctx context.Context, args []string) error {
+func (m *Maker) run(ctx context.Context, args []string, stdin io.Reader) error {
 	var stderr bytes.Buffer
-	cmd := exec.CommandContext(ctx, m.FFmpeg, args...)
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
+	if err := m.start(ctx, args, stdin, &stderr); err != nil {
 		return fmt.Errorf("%w: %s", err, lastLines(stderr.String()))
 	}
 	return nil
+}
+
+// start runs ffmpeg at a low priority, as its runs are background tasks
+// beside playbacks.
+func (m *Maker) start(ctx context.Context, args []string, stdin io.Reader, stderr io.Writer) error {
+	cmd := exec.CommandContext(ctx, m.FFmpeg, args...)
+	cmd.Stdin, cmd.Stderr = stdin, stderr
+	started := lowPriority(cmd)
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	started()
+	return cmd.Wait()
 }
 
 // lastLines keeps the end of ffmpeg's output, where its errors are.

@@ -669,7 +669,7 @@ flowchart TD
 - [x] Storage policy: whole-file reads, samples, speculative reads and folder pruning by class (`library.PolicyOf`)
 - [ ] Setting storage classes in the web UI, with its library administration
 - [x] Keyframes from Matroska Cues and MP4 sample tables, `mfra` and `sidx`, extracted with the probe; ffprobe only without an index and off cloud storage
-- [ ] Trickplay from keyframes only, with the normal mode as fallback; on cloud storage, sampled through the container index
+- [x] Trickplay from keyframes: Matroska sampled through its index, on every storage class; other files decode only their keyframes, falling back to every frame, off cloud storage; ffmpeg on one thread at a low priority
 - [ ] Embedded text subtitles extracted once into a persistent cache on local storage; on cloud storage, delivered by the stream that plays the video and never extracted whole
 - [ ] Subtitle search and download, which writes sidecar subtitles beside the video
 

@@ -36,8 +36,11 @@ const ExtrasPriority = BordersPriority - 10
 // Thumbnailer takes images of videos, such as with ffmpeg.
 type Thumbnailer interface {
 	// Trickplay writes the sheets of a video into dir as 0.jpg, 1.jpg, …
-	// and describes them.
-	Trickplay(ctx context.Context, path string, v VideoFrame, dir string) (core.Trickplay, error)
+	// and describes them: from a keyframe a thumbnail read through the
+	// container's index, and for a file without one when whole is set, by
+	// decoding the whole file. made is false when the sheets are not made:
+	// the file has no index and whole is unset.
+	Trickplay(ctx context.Context, path string, v VideoFrame, dir string, whole bool) (t core.Trickplay, made bool, err error)
 	// ChapterImage writes the frame at a time into file.
 	ChapterImage(ctx context.Context, path string, at time.Duration, v VideoFrame, file string) error
 }
@@ -168,7 +171,9 @@ func (j *Jobs) extrasJobs(lib core.Library, it core.Item, video *core.MediaSourc
 	switch {
 	case video != nil:
 		policy := j.policy(&lib, video.Path)
-		if j.Thumbnails != nil && lib.ExtractTrickplay && policy.WholeFiles {
+		// Trickplay of a file without an index reads it whole where the
+		// policy allows.
+		if j.Thumbnails != nil && lib.ExtractTrickplay {
 			out = append(out, ItemJob(JobTrickplay, it.ID, now))
 		}
 		if j.Thumbnails != nil && lib.ExtractChapterImages && len(video.Chapters) > 0 && policy.Samples {
@@ -263,7 +268,7 @@ func (j *Jobs) trickplay(ctx context.Context, job core.Job) ([]core.Job, error) 
 		return nil, ignoreGone(err)
 	}
 	src, st := videoSource(sources)
-	if src == nil || !j.policy(&lib, src.Path).WholeFiles {
+	if src == nil {
 		return nil, nil
 	}
 	key := failKey(JobTrickplay, src)
@@ -283,12 +288,15 @@ func (j *Jobs) trickplay(ctx context.Context, job core.Job) ([]core.Job, error) 
 		return nil, err
 	}
 	defer os.RemoveAll(tmp)
-	t, err := j.Thumbnails.Trickplay(ctx, src.Path, frameOf(src, st), tmp)
+	t, made, err := j.Thumbnails.Trickplay(ctx, src.Path, frameOf(src, st), tmp, j.policy(&lib, src.Path).WholeFiles)
 	if err != nil {
 		if ctx.Err() == nil {
 			j.Fails.Note(key)
 		}
 		return nil, err
+	}
+	if !made {
+		return nil, nil
 	}
 	t.ItemID = it.ID
 	dir := TrickplayDir(j.MetadataDir, it.ID, t.Width)

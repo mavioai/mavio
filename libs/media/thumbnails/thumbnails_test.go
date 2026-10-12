@@ -1,14 +1,17 @@
 package thumbnails
 
 import (
+	"errors"
 	"image/jpeg"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/media/keyframes"
 )
 
 func ffmpegOrSkip(t *testing.T) string {
@@ -21,10 +24,10 @@ func ffmpegOrSkip(t *testing.T) string {
 }
 
 // letterboxed makes a 25-second 320x240 video whose picture is 320x180
-// between black bars, with a tone.
-func letterboxed(t *testing.T, ffmpeg string) string {
+// between black bars, with a tone, in a file of an extension.
+func letterboxed(t *testing.T, ffmpeg, ext string) string {
 	t.Helper()
-	file := filepath.Join(t.TempDir(), "film.mkv")
+	file := filepath.Join(t.TempDir(), "film."+ext)
 	cmd := exec.CommandContext(t.Context(), ffmpeg, "-v", "error", "-f", "lavfi", "-i", "testsrc2=size=320x180:rate=10",
 		"-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000", "-t", "25", "-vf", "pad=320:240:0:30:black",
 		"-c:v", "libx264", "-g", "10", "-c:a", "aac", file)
@@ -48,30 +51,76 @@ func dims(t *testing.T, file string) (int, int) {
 	return cfg.Width, cfg.Height
 }
 
-func TestTrickplayAndChapterImages(t *testing.T) {
+func TestTrickplay(t *testing.T) {
 	ffmpeg := ffmpegOrSkip(t)
-	film := letterboxed(t, ffmpeg)
 	m := &Maker{FFmpeg: ffmpeg}
 	v := Video{Duration: 25 * time.Second, Width: 320, Height: 240, Crop: core.Crop{Top: 30, Bottom: 30}}
 	o := DefaultOptions()
 	o.Width, o.TileWidth, o.TileHeight = 160, 2, 1
-	dir := t.TempDir()
-	tp, err := m.Trickplay(t.Context(), film, v, o, dir)
-	if err != nil {
-		t.Fatal(err)
+	for _, tt := range []struct {
+		name  string
+		ext   string
+		whole bool
+		// noIndex is set when the file is not read without an index.
+		noIndex bool
+	}{
+		{"sampled through the index", "mkv", false, false},
+		{"keyframes of the whole file", "mp4", true, false},
+		{"no index", "mp4", false, true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			film := letterboxed(t, ffmpeg, tt.ext)
+			dir := t.TempDir()
+			tp, err := m.Trickplay(t.Context(), film, v, o, dir, tt.whole)
+			if tt.noIndex {
+				if !errors.Is(err, keyframes.ErrNoIndex) {
+					t.Errorf("Trickplay() error = %v, want = %v", err, keyframes.ErrNoIndex)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			// Three thumbnails, at 0, 10 and 20 seconds, two to a sheet; the
+			// borders are cropped away, so thumbnails are 16:9.
+			if tp.ThumbnailCount != 3 || tp.Width != 160 || tp.Height != 90 || tp.Sheets() != 2 || tp.Bandwidth <= 0 {
+				t.Errorf("trickplay = %+v", tp)
+			}
+			if w, h := dims(t, filepath.Join(dir, "0.jpg")); w != 320 || h != 90 {
+				t.Errorf("sheet = %dx%d, want 320x90", w, h)
+			}
+			if _, err := os.Stat(filepath.Join(dir, "1.jpg")); err != nil {
+				t.Errorf("second sheet: %v", err)
+			}
+		})
 	}
-	// Three thumbnails, at 0, 10 and 20 seconds, two to a sheet; the
-	// borders are cropped away, so thumbnails are 16:9.
-	if tp.ThumbnailCount != 3 || tp.Width != 160 || tp.Height != 90 || tp.Sheets() != 2 || tp.Bandwidth <= 0 {
-		t.Errorf("trickplay = %+v", tp)
-	}
-	if w, h := dims(t, filepath.Join(dir, "0.jpg")); w != 320 || h != 90 {
-		t.Errorf("sheet = %dx%d, want 320x90", w, h)
-	}
-	if _, err := os.Stat(filepath.Join(dir, "1.jpg")); err != nil {
-		t.Errorf("second sheet: %v", err)
-	}
+}
 
+func TestTrickplayArgs(t *testing.T) {
+	v := Video{Width: 320, Height: 180}
+	o := DefaultOptions()
+	for _, tt := range []struct {
+		mode       Mode
+		input, vf  string
+		skipFrames bool
+	}{
+		{Sampled, "pipe:0", "fps=1/10:round=down:eof_action=pass,scale=320:180,tile=10x10", false},
+		{KeyframesOnly, "film.mkv", "fps=1/10:round=down:eof_action=pass,scale=320:180,tile=10x10", true},
+		{AllFrames, "film.mkv", "fps=1/10:round=down:eof_action=pass,scale=320:180,tile=10x10", false},
+	} {
+		args := strings.Join(TrickplayArgs("film.mkv", tt.mode, v, o, "out"), " ")
+		if !strings.Contains(args, "-i "+tt.input+" ") || !strings.Contains(args, "-vf "+tt.vf+" ") ||
+			strings.Contains(args, "-skip_frame nokey") != tt.skipFrames || !strings.Contains(args, "-threads 1") {
+			t.Errorf("TrickplayArgs(%v) = %s", tt.mode, args)
+		}
+	}
+}
+
+func TestChapterImagesAndLoudness(t *testing.T) {
+	ffmpeg := ffmpegOrSkip(t)
+	film := letterboxed(t, ffmpeg, "mkv")
+	m := &Maker{FFmpeg: ffmpeg}
+	v := Video{Duration: 25 * time.Second, Width: 320, Height: 240, Crop: core.Crop{Top: 30, Bottom: 30}}
 	file := filepath.Join(t.TempDir(), "chapter.jpg")
 	if err := m.ChapterImage(t.Context(), film, 12*time.Second, v, 320, file); err != nil {
 		t.Fatal(err)
