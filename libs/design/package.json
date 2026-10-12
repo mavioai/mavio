@@ -13,7 +13,8 @@
   },
   "scripts": {
     "generate": "node build/build.js",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "gallery": "node snapshots/gallery.js"
   },
   "devDependencies": {
     "@formatjs/icu-messageformat-parser": "3.5.21",
