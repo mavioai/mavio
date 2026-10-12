@@ -19,6 +19,12 @@
             "android-lib"
           ],
           "target": "core"
+        },
+        {
+          "projects": [
+            "android-lib"
+          ],
+          "target": "mpv"
         }
       ],
       "inputs": [
@@ -44,6 +50,12 @@
             "android-lib"
           ],
           "target": "core"
+        },
+        {
+          "projects": [
+            "android-lib"
+          ],
+          "target": "mpv"
         }
       ],
       "inputs": [

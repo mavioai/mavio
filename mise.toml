@@ -8,6 +8,9 @@ sqlc = "1.31.1"
 # The Android apps and libs/android.
 java = "temurin-21.0.12+8.0.LTS"
 gradle = "9.8.1"
+# libmpv for Android (libs/android/scripts/build-mpv.sh).
+meson = "1.12.1"
+ninja = "1.13.2"
 
 # The server's media pipeline; one portable build per platform, verified
 # against its SHA-256 (apps/server/Dockerfile pins the same Linux builds).

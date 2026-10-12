@@ -8,10 +8,10 @@ on:
 permissions:
   contents: read
 
-# Only the media job needs ffmpeg, and only the android job Java and Gradle;
-# they install them from mise.toml.
+# Only the media job needs ffmpeg, and only the android job Java, Gradle,
+# meson and ninja; they install them from mise.toml.
 env:
-  MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,java,gradle
+  MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,java,gradle,meson,ninja
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -180,6 +180,15 @@ jobs:
       # cache that gradle.properties enables. Only main writes it.
       - uses: gradle/actions/setup-gradle@v4
       - run: pnpm install --frozen-lockfile
+      # libmpv takes an hour to build; it is rebuilt only when its build
+      # script, which pins every version, changes.
+      - id: mpv
+        uses: actions/cache@v4
+        with:
+          path: libs/android/player/build/mpv
+          key: mpv-${{ hashFiles('libs/android/scripts/build-mpv.sh') }}
+      - if: steps.mpv.outputs.cache-hit != 'true'
+        run: sudo apt-get install -y autoconf automake libtool pkg-config gperf nasm
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
 
   media:
@@ -192,7 +201,7 @@ jobs:
         os: [ubuntu-24.04, macos-latest]
     runs-on: ${{ matrix.os }}
     env:
-      MISE_DISABLE_TOOLS: java,gradle
+      MISE_DISABLE_TOOLS: java,gradle,meson,ninja
       # Go's cached test results would replay too.
       GOFLAGS: -count=1
     steps:
