@@ -479,7 +479,7 @@ flowchart TD
   - [x] An indexer's own download client (`download_client_id`), which its releases are always sent to, as Radarr's IndexerDefinition.DownloadClientId; a release whose indexer's client is missing waits pending
   - [x] When every client of a protocol is left out after failing, a grab still tries one, as Radarr's DownloadClientProvider; only releases kept pending until a client is back wait for one
   - [x] Failed releases grabbed from an interactive search searched for again only with `AutoRedownloadFailedFromInteractiveSearch`, as Radarr's RedownloadFailedDownloadService
-  - [ ] An RSS sync asked for while another is pending or running runs again after it, as Radarr's command queue does; it is dropped for now
+  - [x] An RSS sync asked for while another is running runs again after it, rather than being dropped (one asked for while another is pending is answered by that one): the job queue deduplicates only pending jobs and never leases two jobs of one unique key at once
 - [x] The queue: tracked downloads polled from the clients
   - [x] The downloads of a client that fails to answer, or is left out after failing, keep their last state rather than being flagged
 - [x] Import, upgrades and the recycle folder
@@ -527,7 +527,7 @@ flowchart TD
   - [x] RSS syncs of series, multi-episode files and upgrades of episodes in the end-to-end test (`series_flows_test.go`): a release of two episodes grabbed by an RSS sync and imported as one file, upgraded by another
   - [x] XEM's scene numbering in the end-to-end test (`series_flows_test.go`): the indexer searched by the scene's numbers, and the release named by them imported as TVDB numbers the episode
   - [x] Failed episode downloads, the blocklist and the searches replacing them in the end-to-end test (`series_flows_test.go`)
-  - [x] `RunTask` answers with the queued or running job when it does not queue another
+  - [x] `RunTask` answers with the queued job when it does not queue another
 
 ### P20 Discovery and Requests
 **Scope**: porting Seerr. `DiscoverService` lists what the discovery providers offer, marked as available, wanted or requested; `RequestService`: requests of movies and seasons, approval by administrators or automatic, quotas per user, users' limits on ratings applied to what they may request, notifications of the requester; reporting problems with an item.

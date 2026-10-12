@@ -219,8 +219,9 @@ pub trait TaskService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// RunTask queues a task to run now; a run already queued or running is
-    /// not queued again.
+    /// RunTask queues a task to run now; a run already queued is not queued
+    /// again. One asked for while a run is running is queued, and runs after
+    /// it.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///

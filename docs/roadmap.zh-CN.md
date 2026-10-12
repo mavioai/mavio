@@ -479,7 +479,7 @@ flowchart TD
   - [x] 索引器指定的下载客户端（`download_client_id`），其 release 总发送给它，如同 Radarr 的 IndexerDefinition.DownloadClientId；索引器指定的客户端不存在时，release 转为待定
   - [x] 某协议的客户端都因失败而暂被排除时，抓取仍尝试其中之一，如同 Radarr 的 DownloadClientProvider；只有因等待客户端恢复而待定的 release 继续等待
   - [x] 交互式搜索抓取的失败发布仅在开启 `AutoRedownloadFailedFromInteractiveSearch` 时重新搜索，如同 Radarr 的 RedownloadFailedDownloadService
-  - [ ] 在另一次 RSS 同步待执行或执行中时请求的 RSS 同步，如同 Radarr 的命令队列，在其后再执行一次；目前会被丢弃
+  - [x] 在另一次 RSS 同步执行中时请求的 RSS 同步在其后再执行一次，而非被丢弃（在另一次待执行时请求的由那一次应答）：作业队列只对待执行的作业去重，且从不同时租用同一唯一 key 的两个作业
 - [x] 队列：从客户端轮询的被跟踪下载
   - [x] 无法应答或因失败而暂被排除的客户端的下载保留最后状态，而非被标记
 - [x] 入库、升级与回收目录
@@ -527,7 +527,7 @@ flowchart TD
   - [x] 端到端测试中的剧集 RSS 同步、多集文件与单集升级（`series_flows_test.go`）：RSS 同步抓取包含两集的 release 并作为一个文件入库，随后被另一个 release 升级
   - [x] 端到端测试中 XEM 的 scene 编号（`series_flows_test.go`）：按 scene 编号搜索索引器，以其命名的 release 按 TVDB 的编号入库
   - [x] 端到端测试中失败的单集下载、阻止列表以及替代它们的搜索（`series_flows_test.go`）
-  - [x] `RunTask` 在未排入新作业时返回已排队或运行中的作业
+  - [x] `RunTask` 在未排入新作业时返回已排队的作业
 
 ### P20 发现与请求
 **范围**：移植 Seerr。`DiscoverService` 列出发现提供者给出的内容，并标明已入库、想要或已请求；`RequestService`：电影与季的请求，由管理员审批或自动通过，按用户的配额，用户的分级限制同样作用于其可请求的内容，通知请求者；报告条目的问题。

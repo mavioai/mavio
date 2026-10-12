@@ -17,7 +17,7 @@ import (
 const enqueueJob = `-- name: EnqueueJob :execrows
 INSERT INTO jobs (id, kind, payload, unique_key, state, priority, attempts, max_attempts, run_at, lease_owner, last_error, created_at)
 VALUES ($1, $2, $3, $4, 'pending', $5, 0, $6, $7, '', '', $8)
-ON CONFLICT (unique_key) WHERE unique_key <> '' AND state IN ('pending', 'running') DO NOTHING
+ON CONFLICT (unique_key) WHERE unique_key <> '' AND state = 'pending' DO NOTHING
 `
 
 type EnqueueJobParams struct {
@@ -31,6 +31,8 @@ type EnqueueJobParams struct {
 	CreatedAt   time.Time
 }
 
+// Only a pending job deduplicates: one asked for while another runs is
+// queued, and leased once that one is done.
 func (q *Queries) EnqueueJob(ctx context.Context, arg EnqueueJobParams) (int64, error) {
 	result, err := q.db.ExecContext(ctx, enqueueJob,
 		arg.ID,
@@ -136,7 +138,12 @@ WHERE id = (
   SELECT j.id FROM jobs j
   -- Parameters in the order of the SQLite query, so that the generated
   -- parameter structs convert.
-  WHERE ((j.state = 'pending' AND j.run_at <= $3) OR (j.state = 'running' AND j.lease_expires_at < $3))
+  -- A pending job waits while a job with its unique key runs, or holds an
+  -- expired lease, which is leased again first.
+  WHERE ((j.state = 'pending' AND j.run_at <= $3
+          AND (j.unique_key = '' OR NOT EXISTS (
+            SELECT 1 FROM jobs r WHERE r.unique_key = j.unique_key AND r.state = 'running')))
+         OR (j.state = 'running' AND j.lease_expires_at < $3))
     AND j.kind = ANY($4::text[])
   ORDER BY j.priority DESC, j.run_at, j.id
   LIMIT 1

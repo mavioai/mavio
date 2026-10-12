@@ -178,7 +178,7 @@ libs/proto/
 ### 5.1 Responsibilities
 | ent | sqlc |
 | :--- | :--- |
-| **Single source of truth for the schema** (`internal/ent/schema`) | Dialect-specific SQL that ent cannot express portably: the job queue (`INSERT … ON CONFLICT … WHERE` deduplication, atomic leasing with `FOR UPDATE SKIP LOCKED` on PostgreSQL) |
+| **Single source of truth for the schema** (`internal/ent/schema`) | Dialect-specific SQL that ent cannot express portably: the job queue (`INSERT … ON CONFLICT … WHERE` deduplication of pending jobs, atomic leasing that never runs two jobs of one unique key at once, with `FOR UPDATE SKIP LOCKED` on PostgreSQL) |
 | CRUD, batch upserts (`CreateBulk` + `ON CONFLICT`), relationship traversal | |
 | Dynamic item queries: optional filters, recursive descendants (a recursive CTE both dialects support), user-data joins, sorting, paging | |
 

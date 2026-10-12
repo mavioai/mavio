@@ -77,6 +77,15 @@ func TestTaskServiceAcquisition(t *testing.T) {
 	if err != nil || len(jobs.Items) != 1 || jobs.Items[0].State != core.JobPending {
 		t.Errorf("queue check jobs = %+v, %v, want = 1 pending", jobs, err)
 	}
+	// Once the run is running, running the task again queues one more,
+	// which runs after it.
+	if _, err := db.Jobs().Lease(ctx, "worker", []string{acquisition.JobQueue}, time.Minute); err != nil {
+		t.Fatalf("Lease: %v", err)
+	}
+	run, err := admin.RunTask(ctx, systemv1.RunTaskRequest_builder{Id: new(acquisition.JobQueue)}.Build())
+	if err != nil || !run.GetEnqueued() || run.GetJobId() == queued {
+		t.Errorf("RunTask while running = %v, %v, want = a new job enqueued", run, err)
+	}
 	resp, err = admin.ListTasks(ctx, &systemv1.ListTasksRequest{})
 	if err != nil {
 		t.Fatalf("ListTasks: %v", err)

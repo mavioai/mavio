@@ -2659,7 +2659,7 @@ type ScanLibraryResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	JobId *string
-	// False when a scan was already pending or running.
+	// False when a scan was already pending.
 	Enqueued *bool
 }
 

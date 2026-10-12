@@ -1,7 +1,9 @@
 -- name: EnqueueJob :execrows
 INSERT INTO jobs (id, kind, payload, unique_key, state, priority, attempts, max_attempts, run_at, lease_owner, last_error, created_at)
 VALUES (@id, @kind, @payload, @unique_key, 'pending', @priority, 0, @max_attempts, @run_at, '', '', @created_at)
-ON CONFLICT (unique_key) WHERE unique_key <> '' AND state IN ('pending', 'running') DO NOTHING;
+-- Only a pending job deduplicates: one asked for while another runs is
+-- queued, and leased once that one is done.
+ON CONFLICT (unique_key) WHERE unique_key <> '' AND state = 'pending' DO NOTHING;
 
 -- name: LeaseJob :one
 UPDATE jobs
@@ -10,7 +12,12 @@ WHERE id = (
   SELECT j.id FROM jobs j
   -- The slice comes last: sqlc expands it to unnumbered parameters, which
   -- SQLite numbers after the highest numbered one before them.
-  WHERE ((j.state = 'pending' AND j.run_at <= @now) OR (j.state = 'running' AND j.lease_expires_at < @now))
+  -- A pending job waits while a job with its unique key runs, or holds an
+  -- expired lease, which is leased again first.
+  WHERE ((j.state = 'pending' AND j.run_at <= @now
+          AND (j.unique_key = '' OR NOT EXISTS (
+            SELECT 1 FROM jobs r WHERE r.unique_key = j.unique_key AND r.state = 'running')))
+         OR (j.state = 'running' AND j.lease_expires_at < @now))
     AND j.kind IN (sqlc.slice('kinds'))
   ORDER BY j.priority DESC, j.run_at, j.id
   LIMIT 1

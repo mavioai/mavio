@@ -180,8 +180,9 @@ func TestProbeKeepsMetadataRuntime(t *testing.T) {
 func TestLibraryManagerScanCases(t *testing.T) {
 	portedCases(t, "library_manager_scan.json", ported{
 		run: map[string]func(t *testing.T, a args){
-			// Requesting a scan while one is queued or running queues
-			// nothing more.
+			// Requesting a scan while one is queued queues nothing
+			// more. Unlike Jellyfin, a scan asked for while one runs is
+			// queued, and runs after it (see the store's job tests).
 			"StartScanInBackground_QueuesOnlyWhenIdle": func(t *testing.T, a args) {
 				m := newMemStore()
 				lib := core.Library{ID: core.NewID()}

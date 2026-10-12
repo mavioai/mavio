@@ -207,18 +207,24 @@ type FolderEntry struct {
 
 // JobQueue is a durable queue of background jobs.
 type JobQueue interface {
-	// Enqueue adds a pending job, or does nothing when a pending or running
-	// job has the same UniqueKey. It reports whether the job was added.
+	// Enqueue adds a pending job, or does nothing when a pending job has the
+	// same UniqueKey. A job running with the key does not keep it from
+	// being added; it is leased once that one is done. It reports whether
+	// the job was added.
 	Enqueue(ctx context.Context, job *Job) (bool, error)
 	// Lease claims the highest-priority due job of one of the kinds for
-	// owner until now+ttl. It returns ErrNotFound when no job is due.
+	// owner until now+ttl; a pending job waits while a job with its
+	// UniqueKey is running, so that two never run at once. It returns
+	// ErrNotFound when no job is due.
 	Lease(ctx context.Context, owner string, kinds []string, ttl time.Duration) (Job, error)
 	// Extend renews a lease held by owner.
 	Extend(ctx context.Context, id ID, owner string, ttl time.Duration) error
 	// Complete marks a leased job succeeded.
 	Complete(ctx context.Context, id ID, owner string) error
 	// Fail records a failed attempt; the job is retried after RetryDelay
-	// until MaxAttempts is reached, then marked failed.
+	// until MaxAttempts is reached, then marked failed. A job queued with
+	// the same UniqueKey while it ran stands for its retry: it is marked
+	// failed at once.
 	Fail(ctx context.Context, id ID, owner string, cause error) error
 	// List returns the jobs q selects, most recently created first.
 	List(ctx context.Context, q JobQuery) (Page[Job], error)

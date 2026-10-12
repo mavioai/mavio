@@ -3552,7 +3552,7 @@ impl ::buffa::ExtensionSet for ScanLibraryRequest {
 pub struct ScanLibraryResponse {
     /// Field 1: `job_id`
     pub job_id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// False when a scan was already pending or running.
+    /// False when a scan was already pending.
     ///
     /// Field 2: `enqueued`
     pub enqueued: ::core::option::Option<bool>,

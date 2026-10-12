@@ -45,8 +45,9 @@ const (
 type TaskServiceClient interface {
 	// ListTasks lists the tasks with their last and next runs.
 	ListTasks(context.Context, *v1.ListTasksRequest) (*v1.ListTasksResponse, error)
-	// RunTask queues a task to run now; a run already queued or running is
-	// not queued again.
+	// RunTask queues a task to run now; a run already queued is not queued
+	// again. One asked for while a run is running is queued, and runs after
+	// it.
 	RunTask(context.Context, *v1.RunTaskRequest) (*v1.RunTaskResponse, error)
 	// ListJobs lists the jobs of the job queue, most recently created first.
 	ListJobs(context.Context, *v1.ListJobsRequest) (*v1.ListJobsResponse, error)
@@ -124,8 +125,9 @@ func (c *taskServiceClient) ListJobs(ctx context.Context, req *v1.ListJobsReques
 type TaskServiceHandler interface {
 	// ListTasks lists the tasks with their last and next runs.
 	ListTasks(context.Context, *v1.ListTasksRequest) (*v1.ListTasksResponse, error)
-	// RunTask queues a task to run now; a run already queued or running is
-	// not queued again.
+	// RunTask queues a task to run now; a run already queued is not queued
+	// again. One asked for while a run is running is queued, and runs after
+	// it.
 	RunTask(context.Context, *v1.RunTaskRequest) (*v1.RunTaskResponse, error)
 	// ListJobs lists the jobs of the job queue, most recently created first.
 	ListJobs(context.Context, *v1.ListJobsRequest) (*v1.ListJobsResponse, error)

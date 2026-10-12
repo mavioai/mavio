@@ -9268,7 +9268,7 @@
           "enqueued": {
             "type": "boolean",
             "title": "enqueued",
-            "description": "False when a scan was already pending or running."
+            "description": "False when a scan was already pending."
           }
         },
         "title": "ScanLibraryResponse",
@@ -14125,12 +14125,12 @@
           "jobId": {
             "type": "string",
             "title": "job_id",
-            "description": "The queued job, or the run already queued or running."
+            "description": "The queued job, or the run already queued."
           },
           "enqueued": {
             "type": "boolean",
             "title": "enqueued",
-            "description": "False when a run was already queued or running."
+            "description": "False when a run was already queued."
           }
         },
         "title": "RunTaskResponse",
@@ -22196,7 +22196,7 @@
           "LibraryService"
         ],
         "summary": "ScanLibrary",
-        "description": "ScanLibrary enqueues a reconciliation scan. A scan that is already\n pending or running is not enqueued again.",
+        "description": "ScanLibrary enqueues a reconciliation scan. A scan that is already\n pending is not enqueued again; one asked for while a scan runs is\n enqueued, and runs after it.",
         "operationId": "mavio.library.v1.LibraryService.ScanLibrary",
         "parameters": [
           {
@@ -26084,7 +26084,7 @@
           "TaskService"
         ],
         "summary": "RunTask",
-        "description": "RunTask queues a task to run now; a run already queued or running is\n not queued again.",
+        "description": "RunTask queues a task to run now; a run already queued is not queued\n again. One asked for while a run is running is queued, and runs after\n it.",
         "operationId": "mavio.system.v1.TaskService.RunTask",
         "parameters": [
           {

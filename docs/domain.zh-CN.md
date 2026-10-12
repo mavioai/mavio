@@ -220,10 +220,10 @@ erDiagram
 `Job` 是保存在数据库中的持久化后台任务（扫描、元数据刷新、图片提取等）。
 
 * `Kind` 标识任务类型（如 `library.scan`）；`Payload` 是该类型的参数，通常为 JSON。
-* `UniqueKey` 用于去重：若已有相同 key 的待执行或执行中任务，再次入队不做任何事（如 `library.scan:<媒体库 ID>`）。
+* `UniqueKey` 用于去重：若已有相同 key 的待执行任务，再次入队不做任何事（如 `library.scan:<媒体库 ID>`）。执行中的同 key 任务则不会阻止入队：新任务排入队列，待执行中的任务结束（或其过期租约被接管并结束）后才被租用，从而在任务读取输入之后才请求的工作不会丢失，且同一 key 的两个任务永不同时执行。
 * 工作者按优先级（其次按 `RunAt`）**租用**到期的任务；租约在 `LeaseExpiresAt` 到期且未续租时，任务重新变为可用，因此工作者崩溃也不会丢失任务。`Attempts` 统计的是租用次数，因此因崩溃中断的尝试也会计入。
 * `Extend`、`Complete` 与 `Fail` 要求调用者持有租约；租约已过期并被接管的工作者会得到 `ErrConflict`。
-* 一次尝试失败后，在 `RetryDelay(attempts)` 之后重试——30 秒，此后翻倍（1 分钟、2 分钟……），最长一小时——直到达到 `MaxAttempts`，此时任务变为 `failed`。
+* 一次尝试失败后，在 `RetryDelay(attempts)` 之后重试——30 秒，此后翻倍（1 分钟、2 分钟……），最长一小时——直到达到 `MaxAttempts`，此时任务变为 `failed`。若在其执行期间已有同 key 的任务入队，则由后者代替重试，该任务立即变为 `failed`。
 * 状态流转：`pending` → `running` → `succeeded` / 重试时回到 `pending` / `failed`。
 * `JobQuery` 按类型与状态列出任务，最近创建的在前；已结束的任务在一周后由每日运行的 `jobs.cleanup` 任务清除。
 
