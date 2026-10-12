@@ -13,14 +13,14 @@
 | [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md) | 阶段划分、完成标准、当前进度、风险 |
 | [docs/optimization.zh-CN.md](docs/optimization.zh-CN.md) | 优化主题，每个附落地对照索引：存储 I/O 延迟缓解与推测式预热 |
 | [docs/plugins.zh-CN.md](docs/plugins.zh-CN.md) | 插件平台：宿主 API、事件、HTTP 路由、任务、远程设备、提供者类型；DLNA 插件 |
-| [docs/clients.zh-CN.md](docs/clients.zh-CN.md) | 客户端：内嵌 Web UI，Apple、Android、Windows 与 Linux 应用，共享 Rust 核心，设计系统 |
+| [docs/clients.zh-CN.md](docs/clients.zh-CN.md) | 客户端：内嵌 Web UI，Apple、Android 与桌面应用，共享 Rust 核心，设计系统 |
 | [docs/jellyfin-compat.zh-CN.md](docs/jellyfin-compat.zh-CN.md) | Jellyfin API 兼容垫片评估（未采用） |
 
 ## 项目概览
 
 Mavio 是以 Go 为服务端核心的自托管媒体服务器，借鉴 Jellyfin 的领域知识与测试资产，但不兼容 Jellyfin 生态。许可证为 **GPL-3.0**。
 
-当前阶段：**P6 服务端装配与分发**、**P16 资源获取数据源**（只差 Mavio 自己的 TMDB key）和 **P21 客户端与生态**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。[docs/clients.zh-CN.md](docs/clients.zh-CN.md) 中的客户端按路线图给出的顺序构建；客户端的目录（`apps/web`、`apps/ios`、`apps/tvos`、`apps/macos`、`apps/android`、`apps/android-tv`、`apps/windows-linux`、`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）在其步骤开始时才创建。
+当前阶段：**P6 服务端装配与分发**、**P16 资源获取数据源**（只差 Mavio 自己的 TMDB key）和 **P21 客户端与生态**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。[docs/clients.zh-CN.md](docs/clients.zh-CN.md) 中的客户端按路线图给出的顺序构建；客户端的目录（`apps/web`、`apps/ios`、`apps/tvos`、`apps/macos`、`apps/android`、`apps/android-tv`、`apps/desktop`、`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）在其步骤开始时才创建。
 
 ## 目录结构
 

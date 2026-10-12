@@ -109,7 +109,7 @@ function goParts(ps) {
 const FORMS = { zero: 'Zero', one: 'One', two: 'Two', few: 'Few', many: 'Many', other: 'Other' };
 
 function stringsGo(s) {
-  const entries = entriesFor(s, 'windows-linux');
+  const entries = entriesFor(s, 'desktop');
   const locales = s.locales
     .map((locale) => {
       const msgs = entries

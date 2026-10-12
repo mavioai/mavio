@@ -37,7 +37,7 @@ Rust 由 `libs/client-rust/rust-toolchain.toml` 固定，rustup 在该目录首�
 ## 2. Monorepo 与 Nx
 
 ### 2.1 为什么用 Nx
-Go 是服务端主语言；未来还会加入以 TypeScript（Web UI）、Swift、Kotlin、Go（Windows 与 Linux 应用）与 Rust（它们的共享核心）编写的[客户端](clients.zh-CN.md)，并使用由 `libs/proto` 生成的客户端代码。这是一个跨语言的 monorepo，需要统一的依赖图、受影响分析与任务缓存：
+Go 是服务端主语言；未来还会加入以 TypeScript（Web UI）、Swift、Kotlin、Go（桌面应用）与 Rust（它们的共享核心）编写的[客户端](clients.zh-CN.md)，并使用由 `libs/proto` 生成的客户端代码。这是一个跨语言的 monorepo，需要统一的依赖图、受影响分析与任务缓存：
 * Nx 对 Vite / React 有官方插件；Cargo、Gradle 与 `xcodebuild` 通过各自的目标运行；
 * Go 项目由仓库内的本地 Nx 插件 `tools/nx-go` 推断：每个 `go.mod` 自动成为一个项目，并根据 `go.mod` 中的仓库内 `require` 生成依赖图；
 * Cargo workspace 由本地 Nx 插件 `tools/nx-cargo` 推断：每个含 `[workspace]` 表的 `Cargo.toml` 成为一个项目，依赖其 `[workspace.metadata.nx]` 的 `implicitDependencies` 所列的项目（`libs/client-rust` 列出 `proto`，它包含后者生成的 Rust 代码）；
@@ -162,7 +162,7 @@ go build -o plugin .                                                     # 子�
 | `gen/ts` | Web UI：`tokens.ts`、`tokens.css`（CSS 自定义属性，浅色主题位于 `prefers-color-scheme` 下）、`icons.ts`（路径数据）、`strings.ts`；由 npm 包 `@mavio/design` 导出 |
 | `gen/swift` | Apple 平台：`MavioTokens.swift`（SwiftUI）、`Icons.xcassets`、`Localizable.xcstrings` |
 | `gen/kotlin` | Android：`dev/mavio/design/MavioTokens.kt`（Compose）、`res/drawable`（矢量图）、`res/values*/strings.xml` |
-| `gen/go` | Windows 与 Linux 应用：Go 包 `design`（模块 `github.com/mavioai/mavio/libs/design`），含 tokens、图标路径数据、字符串及其格式化函数 |
+| `gen/go` | 桌面应用：Go 包 `design`（模块 `github.com/mavioai/mavio/libs/design`），含 tokens、图标路径数据、字符串及其格式化函数 |
 
 * 任一主题中有文字与背景组合低于 WCAG AA 对比度（4.5:1）、某条消息的复数缺少其语言的 CLDR 类别、或某条译文的参数与源语言不同时，生成器报错。
 * 消息限于每个平台的格式都能表达的 ICU 子集：文本、`{arg}`，以及覆盖整条消息、各形式只含计数（`#`）与文本的一个复数。

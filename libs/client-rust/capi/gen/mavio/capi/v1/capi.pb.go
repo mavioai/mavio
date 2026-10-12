@@ -1,5 +1,5 @@
 // The messages of the core's C ABI (libs/client-rust/capi), through which
-// the Windows and Linux app calls the core: the app sends a Request with a
+// the desktop app calls the core: the app sends a Request with a
 // call number, and the core answers each with a Message of that number
 // through the one callback the app gave it, which also carries the events
 // of the servers under call number zero.

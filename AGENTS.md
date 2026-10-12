@@ -13,14 +13,14 @@ This is the repository working guide for AI coding agents (and new developers). 
 | [docs/roadmap.md](docs/roadmap.md) | Phases, completion criteria, current status, risks |
 | [docs/optimization.md](docs/optimization.md) | Optimization topics, each with an implementation index: storage I/O latency mitigation and speculative warming |
 | [docs/plugins.md](docs/plugins.md) | Plugin platform: host API, events, HTTP routes, tasks, remote devices, provider types; the DLNA plugin |
-| [docs/clients.md](docs/clients.md) | Clients: the embedded web UI, the Apple, Android, Windows and Linux apps, the shared Rust core, the design system |
+| [docs/clients.md](docs/clients.md) | Clients: the embedded web UI, the Apple, Android and desktop apps, the shared Rust core, the design system |
 | [docs/jellyfin-compat.md](docs/jellyfin-compat.md) | Evaluation of a Jellyfin API compatibility shim (not adopted) |
 
 ## Project Overview
 
 Mavio is a self-hosted media server with a Go server at its core. It draws on Jellyfin's domain knowledge and test assets but is not compatible with the Jellyfin ecosystem. It is licensed under **GPL-3.0**.
 
-Current phases: **P6 server assembly and distribution**, **P16 acquisition data sources** (waiting only on Mavio's own TMDB key) and **P21 clients and ecosystem** (see [docs/roadmap.md](docs/roadmap.md)). The clients of [docs/clients.md](docs/clients.md) are built in the order the roadmap gives; create a client's directory (`apps/web`, `apps/ios`, `apps/tvos`, `apps/macos`, `apps/android`, `apps/android-tv`, `apps/windows-linux`, `libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`) only when its step starts.
+Current phases: **P6 server assembly and distribution**, **P16 acquisition data sources** (waiting only on Mavio's own TMDB key) and **P21 clients and ecosystem** (see [docs/roadmap.md](docs/roadmap.md)). The clients of [docs/clients.md](docs/clients.md) are built in the order the roadmap gives; create a client's directory (`apps/web`, `apps/ios`, `apps/tvos`, `apps/macos`, `apps/android`, `apps/android-tv`, `apps/desktop`, `libs/client-ts`, `libs/client-rust`, `libs/apple`, `libs/android`, `libs/design`) only when its step starts.
 
 ## Directory Structure
 

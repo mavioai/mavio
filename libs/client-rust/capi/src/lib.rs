@@ -1,4 +1,4 @@
-//! The C ABI of the shared core, through which the Windows and Linux app
+//! The C ABI of the shared core, through which the desktop app
 //! calls it from Go with purego (`docs/clients.md` §5.3).
 //!
 //! Requests and answers are messages of `mavio.capi.v1` (`libs/client-rust/

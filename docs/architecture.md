@@ -83,7 +83,7 @@ mavio/
 │   ├── web/                     # [TS] Web UI, embedded in the server (see clients.md)
 │   ├── ios/ tvos/ macos/        # [Swift] iPhone and iPad, Apple TV, Mac (see clients.md)
 │   ├── android/ android-tv/     # [Kotlin] Phones and tablets, Android TV (see clients.md)
-│   └── windows-linux/           # (later) [Go] Windows and Linux: MyGo, libmpv (see clients.md)
+│   └── desktop/                 # (later) [Go] macOS, Windows and Linux: MyGo, libmpv (see clients.md)
 │
 ├── libs/
 │   ├── proto/                   # [Go + TS] Contracts: *.proto sources, buf config, generated Go/TS code

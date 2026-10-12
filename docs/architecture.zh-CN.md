@@ -83,7 +83,7 @@ mavio/
 │   ├── web/                     # [TS] Web UI，内嵌于服务端（见 clients.zh-CN.md）
 │   ├── ios/ tvos/ macos/        # [Swift] iPhone 与 iPad、Apple TV、Mac（见 clients.zh-CN.md）
 │   ├── android/ android-tv/     # [Kotlin] 手机与平板、Android TV（见 clients.zh-CN.md）
-│   └── windows-linux/           # (后期) [Go] Windows 与 Linux：MyGo、libmpv（见 clients.zh-CN.md）
+│   └── desktop/                 # (后期) [Go] macOS、Windows 与 Linux：MyGo、libmpv（见 clients.zh-CN.md）
 │
 ├── libs/
 │   ├── proto/                   # [Go + TS] 契约：*.proto 源文件、buf 配置、生成的 Go/TS 代码
