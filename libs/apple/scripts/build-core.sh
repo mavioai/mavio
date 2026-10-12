@@ -12,12 +12,6 @@ cd "$(dirname "$0")/.."
 apple=$(pwd)
 core=$apple/../client-rust
 out=$apple/build
-# tvOS is a tier 3 target, built with the standard library on this nightly,
-# into a target directory of its own: the standard library's crates are not
-# in Cargo.lock, so tools that keep the locked crates' builds, such as CI's
-# cache, would drop them.
-nightly=nightly-2026-10-10
-std=target-std
 profile=${MAVIO_CORE_PROFILE:-release}
 build=$profile
 [ "$profile" = dev ] && build=debug
@@ -30,15 +24,12 @@ done
 export IPHONEOS_DEPLOYMENT_TARGET=18.0 TVOS_DEPLOYMENT_TARGET=18.0 MACOSX_DEPLOYMENT_TARGET=15.0
 
 cd "$core"
+targets="aarch64-apple-ios aarch64-apple-ios-sim aarch64-apple-tvos aarch64-apple-tvos-sim$darwin"
 # shellcheck disable=SC2086
-rustup target add aarch64-apple-ios aarch64-apple-ios-sim $darwin >/dev/null
-rustup toolchain install "$nightly" --profile minimal --component rust-src >/dev/null
-# One build per toolchain, so that Cargo compiles the targets in parallel.
+rustup target add $targets >/dev/null
+# One build, so that Cargo compiles the targets in parallel.
 # shellcheck disable=SC2046,SC2086
-cargo build --locked --profile "$profile" -p mavio-uniffi --lib \
-	--target aarch64-apple-ios --target aarch64-apple-ios-sim $(printf -- ' --target %s' $darwin)
-cargo "+$nightly" build --locked --profile "$profile" -p mavio-uniffi --lib -Zbuild-std=std,panic_abort --target-dir "$std" \
-	--target aarch64-apple-tvos --target aarch64-apple-tvos-sim
+cargo build --locked --profile "$profile" -p mavio-uniffi --lib $(printf -- ' --target %s' $targets)
 
 rm -rf "$out" && mkdir -p "$out/MavioCore" "$out/frameworks"
 cargo run --locked --profile "$profile" -q --bin uniffi-bindgen -- generate \
@@ -93,8 +84,8 @@ PLIST
 lipo -create $(printf "target/%s/$build/libmavio.dylib " $darwin) -output "$out/gen/libmavio-macos.dylib"
 framework "$out/frameworks/ios" "target/aarch64-apple-ios/$build/libmavio.dylib" 18.0 iPhoneOS
 framework "$out/frameworks/ios-sim" "target/aarch64-apple-ios-sim/$build/libmavio.dylib" 18.0 iPhoneSimulator
-framework "$out/frameworks/tvos" "$std/aarch64-apple-tvos/$build/libmavio.dylib" 18.0 AppleTVOS
-framework "$out/frameworks/tvos-sim" "$std/aarch64-apple-tvos-sim/$build/libmavio.dylib" 18.0 AppleTVSimulator
+framework "$out/frameworks/tvos" "target/aarch64-apple-tvos/$build/libmavio.dylib" 18.0 AppleTVOS
+framework "$out/frameworks/tvos-sim" "target/aarch64-apple-tvos-sim/$build/libmavio.dylib" 18.0 AppleTVSimulator
 framework "$out/frameworks/macos" "$out/gen/libmavio-macos.dylib" 15.0 MacOSX
 args=""
 for p in ios ios-sim tvos tvos-sim macos; do

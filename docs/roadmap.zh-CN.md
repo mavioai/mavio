@@ -630,7 +630,6 @@ flowchart TD
 | 客户端许可证与应用商店 | 客户端将与仓库其余部分一样采用 GPL-3.0，其条款与 App Store 的条款冲突；以 LGPL 构建的 FFmpeg（Apple 平台上为 AetherEngine 的框架）与 libmpv 还要求允许用户重新链接 | 首次在 App Store 发布前决定：为客户端另定许可证、要求贡献者协议，或不通过 App Store 分发 |
 | AetherEngine | Apple 应用的第二引擎是一个年轻的包，主要由一位维护者开发，7.x 版本发布频繁 | P21 先做原型：macOS、iOS 与 tvOS 上 HDR10 Matroska 源的 EDR 输出、杜比视界、带样式的 ASS 字幕与画中画；固定版本并跟进其发布 |
 | Android 上的 libmpv | libmpv 是 Android 应用的第二引擎；在 Android TV 设备（其中许多为 32 位）孱弱的 GPU 上，其 OpenGL ES 渲染可能过慢，且不能输出 HDR | P21 在低端 Android TV 设备上实测；libmpv 跟不上的设备，应用不在能力中声明它，由服务端处理该源 |
-| tvOS 上的 Rust | `aarch64-apple-tvos` 是 Rust 的 tier 3 目标：没有预编译的标准库，需在 nightly 上以 `-Zbuild-std` 构建 | P21 已做原型：核心的依赖在 `nightly-2026-10-10` 上可构建并运行（[开发 §1](development.zh-CN.md#1-工具链与环境)）；有意识地推进该固定版本 |
 | 1.0 之前的 connect-rust | `libs/client-rust` 使用的 connect-rust 仍处于 0.x，API 可能变化 | 固定版本；跟进其发布 |
 | Linux 上的 HDR | Linux 应用以 OpenGL 在 GTK 3 的 `GtkGLArea` 中绘制视频，后者只能呈现 SDR，因此 HDR 经色调映射输出 | MyGo 的 Linux 后端能呈现 HDR 表面时再评估 |
 | MyGo | `apps/windows-linux` 基于 MyGo 构建，该框架始于 2026 年 9 月，仍处于 0.x，主要由一位维护者开发。它还没有能把由其他渲染器绘制的原生表面放在其原生 UI 之下的元素，而播放器显示 mpv 的视频需要它（Windows 上的子窗口、Linux 上的 `GtkGLArea`）；可参照它放置自身 Web 视图的方式实现 | P21 先做原型：视频元素（贡献给 MyGo），以及 Windows 上的 HDR10；固定 MyGo 版本 |
