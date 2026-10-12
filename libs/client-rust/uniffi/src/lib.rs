@@ -778,6 +778,9 @@ mod tests {
             matches!(wrong, Err(CoreError::Invalid { .. })),
             "got = {wrong:?}"
         );
+        // Windows keeps the directory while the database is open.
+        core.stop();
+        drop(core);
         std::fs::remove_dir_all(dir).unwrap();
     }
 
