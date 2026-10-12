@@ -11,7 +11,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/storage/v1/storage.proto.
  */
 export const file_mavio_storage_v1_storage: GenFile = /*@__PURE__*/
-  fileDesc("Ch5tYXZpby9zdG9yYWdlL3YxL3N0b3JhZ2UucHJvdG8SEG1hdmlvLnN0b3JhZ2UudjEiEgoQR2V0U3RhdHVzUmVxdWVzdCJXChFHZXRTdGF0dXNSZXNwb25zZRIRCglhdmFpbGFibGUYASABKAgSDwoHdmVyc2lvbhgCIAEoCRIPCgdtYW5hZ2VkGAMgASgIEg0KBWVycm9yGAQgASgJIhYKFExpc3RQcm92aWRlcnNSZXF1ZXN0IkYKFUxpc3RQcm92aWRlcnNSZXNwb25zZRItCglwcm92aWRlcnMYASADKAsyGi5tYXZpby5zdG9yYWdlLnYxLlByb3ZpZGVyIlgKCFByb3ZpZGVyEgwKBG5hbWUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSKQoHb3B0aW9ucxgDIAMoCzIYLm1hdmlvLnN0b3JhZ2UudjEuT3B0aW9uIuQBCgZPcHRpb24SDAoEbmFtZRgBIAEoCRIMCgRoZWxwGAIgASgJEhAKCHByb3ZpZGVyGAMgASgJEhUKDWRlZmF1bHRfdmFsdWUYBCABKAkSDAoEdHlwZRgFIAEoCRIQCghyZXF1aXJlZBgGIAEoCBIQCghwYXNzd29yZBgHIAEoCBIQCghhZHZhbmNlZBgIIAEoCBIRCglzZW5zaXRpdmUYCSABKAgSEQoJZXhjbHVzaXZlGAogASgIEisKCGV4YW1wbGVzGAsgAygLMhkubWF2aW8uc3RvcmFnZS52MS5FeGFtcGxlIjgKB0V4YW1wbGUSDQoFdmFsdWUYASABKAkSDAoEaGVscBgCIAEoCRIQCghwcm92aWRlchgDIAEoCSIUChJMaXN0UmVtb3Rlc1JlcXVlc3QiQAoTTGlzdFJlbW90ZXNSZXNwb25zZRIpCgdyZW1vdGVzGAEgAygLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUilQEKBlJlbW90ZRIMCgRuYW1lGAEgASgJEgwKBHR5cGUYAiABKAkSPAoKcGFyYW1ldGVycxgDIAMoCzIoLm1hdmlvLnN0b3JhZ2UudjEuUmVtb3RlLlBhcmFtZXRlcnNFbnRyeRoxCg9QYXJhbWV0ZXJzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJYCg5Db25maWdRdWVzdGlvbhINCgVzdGF0ZRgBIAEoCRIoCgZvcHRpb24YAiABKAsyGC5tYXZpby5zdG9yYWdlLnYxLk9wdGlvbhINCgVlcnJvchgDIAEoCSLoAQoTQ3JlYXRlUmVtb3RlUmVxdWVzdBI5CgRuYW1lGAEgASgJQiu6SCjIAQFyIxhAMh9eW0EtWmEtejAtOV9dW0EtWmEtejAtOV8uK0AtXSokEhgKBHR5cGUYAiABKAlCCrpIB8gBAXICGEASSQoKcGFyYW1ldGVycxgDIAMoCzI1Lm1hdmlvLnN0b3JhZ2UudjEuQ3JlYXRlUmVtb3RlUmVxdWVzdC5QYXJhbWV0ZXJzRW50cnkaMQoPUGFyYW1ldGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEidAoUQ3JlYXRlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIq0BChNVcGRhdGVSZW1vdGVSZXF1ZXN0EhgKBG5hbWUYASABKAlCCrpIB8gBAXICGEASSQoKcGFyYW1ldGVycxgCIAMoCzI1Lm1hdmlvLnN0b3JhZ2UudjEuVXBkYXRlUmVtb3RlUmVxdWVzdC5QYXJhbWV0ZXJzRW50cnkaMQoPUGFyYW1ldGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEidAoUVXBkYXRlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIlgKFUNvbnRpbnVlUmVtb3RlUmVxdWVzdBIYCgRuYW1lGAEgASgJQgq6SAfIAQFyAhhAEhUKBXN0YXRlGAIgASgJQga6SAPIAQESDgoGYW5zd2VyGAMgASgJInYKFkNvbnRpbnVlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIi8KE0RlbGV0ZVJlbW90ZVJlcXVlc3QSGAoEbmFtZRgBIAEoCUIKukgHyAEBcgIYQCIWChREZWxldGVSZW1vdGVSZXNwb25zZSI4ChJMaXN0Rm9sZGVyc1JlcXVlc3QSIgoEcGF0aBgBIAEoCUIUukgRyAEBcgwYgCA6B3JjbG9uZToiJgoTTGlzdEZvbGRlcnNSZXNwb25zZRIPCgdmb2xkZXJzGAEgAygJMpYGCg5TdG9yYWdlU2VydmljZRJZCglHZXRTdGF0dXMSIi5tYXZpby5zdG9yYWdlLnYxLkdldFN0YXR1c1JlcXVlc3QaIy5tYXZpby5zdG9yYWdlLnYxLkdldFN0YXR1c1Jlc3BvbnNlIgOQAgESZQoNTGlzdFByb3ZpZGVycxImLm1hdmlvLnN0b3JhZ2UudjEuTGlzdFByb3ZpZGVyc1JlcXVlc3QaJy5tYXZpby5zdG9yYWdlLnYxLkxpc3RQcm92aWRlcnNSZXNwb25zZSIDkAIBEl8KC0xpc3RSZW1vdGVzEiQubWF2aW8uc3RvcmFnZS52MS5MaXN0UmVtb3Rlc1JlcXVlc3QaJS5tYXZpby5zdG9yYWdlLnYxLkxpc3RSZW1vdGVzUmVzcG9uc2UiA5ACARJdCgxDcmVhdGVSZW1vdGUSJS5tYXZpby5zdG9yYWdlLnYxLkNyZWF0ZVJlbW90ZVJlcXVlc3QaJi5tYXZpby5zdG9yYWdlLnYxLkNyZWF0ZVJlbW90ZVJlc3BvbnNlEl0KDFVwZGF0ZVJlbW90ZRIlLm1hdmlvLnN0b3JhZ2UudjEuVXBkYXRlUmVtb3RlUmVxdWVzdBomLm1hdmlvLnN0b3JhZ2UudjEuVXBkYXRlUmVtb3RlUmVzcG9uc2USYwoOQ29udGludWVSZW1vdGUSJy5tYXZpby5zdG9yYWdlLnYxLkNvbnRpbnVlUmVtb3RlUmVxdWVzdBooLm1hdmlvLnN0b3JhZ2UudjEuQ29udGludWVSZW1vdGVSZXNwb25zZRJdCgxEZWxldGVSZW1vdGUSJS5tYXZpby5zdG9yYWdlLnYxLkRlbGV0ZVJlbW90ZVJlcXVlc3QaJi5tYXZpby5zdG9yYWdlLnYxLkRlbGV0ZVJlbW90ZVJlc3BvbnNlEl8KC0xpc3RGb2xkZXJzEiQubWF2aW8uc3RvcmFnZS52MS5MaXN0Rm9sZGVyc1JlcXVlc3QaJS5tYXZpby5zdG9yYWdlLnYxLkxpc3RGb2xkZXJzUmVzcG9uc2UiA5ACAULNAQoUY29tLm1hdmlvLnN0b3JhZ2UudjFCDFN0b3JhZ2VQcm90b1ABWkVnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vc3RvcmFnZS92MTtzdG9yYWdldjGiAgNNU1iqAhBNYXZpby5TdG9yYWdlLlYxygIQTWF2aW9cU3RvcmFnZVxWMeICHE1hdmlvXFN0b3JhZ2VcVjFcR1BCTWV0YWRhdGHqAhJNYXZpbzo6U3RvcmFnZTo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate]);
+  fileDesc("Ch5tYXZpby9zdG9yYWdlL3YxL3N0b3JhZ2UucHJvdG8SEG1hdmlvLnN0b3JhZ2UudjEiEgoQR2V0U3RhdHVzUmVxdWVzdCJXChFHZXRTdGF0dXNSZXNwb25zZRIRCglhdmFpbGFibGUYASABKAgSDwoHdmVyc2lvbhgCIAEoCRIPCgdtYW5hZ2VkGAMgASgIEg0KBWVycm9yGAQgASgJIhYKFExpc3RQcm92aWRlcnNSZXF1ZXN0IkYKFUxpc3RQcm92aWRlcnNSZXNwb25zZRItCglwcm92aWRlcnMYASADKAsyGi5tYXZpby5zdG9yYWdlLnYxLlByb3ZpZGVyIlgKCFByb3ZpZGVyEgwKBG5hbWUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSKQoHb3B0aW9ucxgDIAMoCzIYLm1hdmlvLnN0b3JhZ2UudjEuT3B0aW9uIuQBCgZPcHRpb24SDAoEbmFtZRgBIAEoCRIMCgRoZWxwGAIgASgJEhAKCHByb3ZpZGVyGAMgASgJEhUKDWRlZmF1bHRfdmFsdWUYBCABKAkSDAoEdHlwZRgFIAEoCRIQCghyZXF1aXJlZBgGIAEoCBIQCghwYXNzd29yZBgHIAEoCBIQCghhZHZhbmNlZBgIIAEoCBIRCglzZW5zaXRpdmUYCSABKAgSEQoJZXhjbHVzaXZlGAogASgIEisKCGV4YW1wbGVzGAsgAygLMhkubWF2aW8uc3RvcmFnZS52MS5FeGFtcGxlIjgKB0V4YW1wbGUSDQoFdmFsdWUYASABKAkSDAoEaGVscBgCIAEoCRIQCghwcm92aWRlchgDIAEoCSIUChJMaXN0UmVtb3Rlc1JlcXVlc3QiQAoTTGlzdFJlbW90ZXNSZXNwb25zZRIpCgdyZW1vdGVzGAEgAygLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUilQEKBlJlbW90ZRIMCgRuYW1lGAEgASgJEgwKBHR5cGUYAiABKAkSPAoKcGFyYW1ldGVycxgDIAMoCzIoLm1hdmlvLnN0b3JhZ2UudjEuUmVtb3RlLlBhcmFtZXRlcnNFbnRyeRoxCg9QYXJhbWV0ZXJzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJYCg5Db25maWdRdWVzdGlvbhINCgVzdGF0ZRgBIAEoCRIoCgZvcHRpb24YAiABKAsyGC5tYXZpby5zdG9yYWdlLnYxLk9wdGlvbhINCgVlcnJvchgDIAEoCSLoAQoTQ3JlYXRlUmVtb3RlUmVxdWVzdBI5CgRuYW1lGAEgASgJQiu6SCjIAQFyIxhAMh9eW0EtWmEtejAtOV9dW0EtWmEtejAtOV8uK0AtXSokEhgKBHR5cGUYAiABKAlCCrpIB8gBAXICGEASSQoKcGFyYW1ldGVycxgDIAMoCzI1Lm1hdmlvLnN0b3JhZ2UudjEuQ3JlYXRlUmVtb3RlUmVxdWVzdC5QYXJhbWV0ZXJzRW50cnkaMQoPUGFyYW1ldGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEidAoUQ3JlYXRlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIq0BChNVcGRhdGVSZW1vdGVSZXF1ZXN0EhgKBG5hbWUYASABKAlCCrpIB8gBAXICGEASSQoKcGFyYW1ldGVycxgCIAMoCzI1Lm1hdmlvLnN0b3JhZ2UudjEuVXBkYXRlUmVtb3RlUmVxdWVzdC5QYXJhbWV0ZXJzRW50cnkaMQoPUGFyYW1ldGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEidAoUVXBkYXRlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIlgKFUNvbnRpbnVlUmVtb3RlUmVxdWVzdBIYCgRuYW1lGAEgASgJQgq6SAfIAQFyAhhAEhUKBXN0YXRlGAIgASgJQga6SAPIAQESDgoGYW5zd2VyGAMgASgJInYKFkNvbnRpbnVlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIi8KE0RlbGV0ZVJlbW90ZVJlcXVlc3QSGAoEbmFtZRgBIAEoCUIKukgHyAEBcgIYQCIWChREZWxldGVSZW1vdGVSZXNwb25zZSI4ChJMaXN0Rm9sZGVyc1JlcXVlc3QSIgoEcGF0aBgBIAEoCUIUukgRyAEBcgwYgCA6B3JjbG9uZToiJgoTTGlzdEZvbGRlcnNSZXNwb25zZRIPCgdmb2xkZXJzGAEgAygJIocCCg1PZmZsaW5lQ2xpZW50EigKAmlkGAEgASgJQhy6SBnIAQFyFBhAMhBeW0EtWmEtejAtOV8tXSskEhkKBG5hbWUYAiABKAlCC7pICMgBAXIDGMgBEg8KB2VuYWJsZWQYAyABKAgSGQoIcHJpb3JpdHkYBCABKAVCB7pIBBoCKAASJAoGZm9sZGVyGAUgASgJQhS6SBHIAQFyDBiAIDoHcmNsb25lOhIaCgR0YWdzGAYgAygJQgy6SAmSAQYiBHICGGQSIgoacmVtb3ZlX2NvbXBsZXRlZF9kb3dubG9hZHMYByABKAgSHwoXcmVtb3ZlX2ZhaWxlZF9kb3dubG9hZHMYCCABKAgiGwoZTGlzdE9mZmxpbmVDbGllbnRzUmVxdWVzdCJOChpMaXN0T2ZmbGluZUNsaWVudHNSZXNwb25zZRIwCgdjbGllbnRzGAEgAygLMh8ubWF2aW8uc3RvcmFnZS52MS5PZmZsaW5lQ2xpZW50IlYKGFNldE9mZmxpbmVDbGllbnRzUmVxdWVzdBI6CgdjbGllbnRzGAEgAygLMh8ubWF2aW8uc3RvcmFnZS52MS5PZmZsaW5lQ2xpZW50Qgi6SAWSAQIQZCIbChlTZXRPZmZsaW5lQ2xpZW50c1Jlc3BvbnNlMvoHCg5TdG9yYWdlU2VydmljZRJZCglHZXRTdGF0dXMSIi5tYXZpby5zdG9yYWdlLnYxLkdldFN0YXR1c1JlcXVlc3QaIy5tYXZpby5zdG9yYWdlLnYxLkdldFN0YXR1c1Jlc3BvbnNlIgOQAgESZQoNTGlzdFByb3ZpZGVycxImLm1hdmlvLnN0b3JhZ2UudjEuTGlzdFByb3ZpZGVyc1JlcXVlc3QaJy5tYXZpby5zdG9yYWdlLnYxLkxpc3RQcm92aWRlcnNSZXNwb25zZSIDkAIBEl8KC0xpc3RSZW1vdGVzEiQubWF2aW8uc3RvcmFnZS52MS5MaXN0UmVtb3Rlc1JlcXVlc3QaJS5tYXZpby5zdG9yYWdlLnYxLkxpc3RSZW1vdGVzUmVzcG9uc2UiA5ACARJdCgxDcmVhdGVSZW1vdGUSJS5tYXZpby5zdG9yYWdlLnYxLkNyZWF0ZVJlbW90ZVJlcXVlc3QaJi5tYXZpby5zdG9yYWdlLnYxLkNyZWF0ZVJlbW90ZVJlc3BvbnNlEl0KDFVwZGF0ZVJlbW90ZRIlLm1hdmlvLnN0b3JhZ2UudjEuVXBkYXRlUmVtb3RlUmVxdWVzdBomLm1hdmlvLnN0b3JhZ2UudjEuVXBkYXRlUmVtb3RlUmVzcG9uc2USYwoOQ29udGludWVSZW1vdGUSJy5tYXZpby5zdG9yYWdlLnYxLkNvbnRpbnVlUmVtb3RlUmVxdWVzdBooLm1hdmlvLnN0b3JhZ2UudjEuQ29udGludWVSZW1vdGVSZXNwb25zZRJdCgxEZWxldGVSZW1vdGUSJS5tYXZpby5zdG9yYWdlLnYxLkRlbGV0ZVJlbW90ZVJlcXVlc3QaJi5tYXZpby5zdG9yYWdlLnYxLkRlbGV0ZVJlbW90ZVJlc3BvbnNlEl8KC0xpc3RGb2xkZXJzEiQubWF2aW8uc3RvcmFnZS52MS5MaXN0Rm9sZGVyc1JlcXVlc3QaJS5tYXZpby5zdG9yYWdlLnYxLkxpc3RGb2xkZXJzUmVzcG9uc2UiA5ACARJ0ChJMaXN0T2ZmbGluZUNsaWVudHMSKy5tYXZpby5zdG9yYWdlLnYxLkxpc3RPZmZsaW5lQ2xpZW50c1JlcXVlc3QaLC5tYXZpby5zdG9yYWdlLnYxLkxpc3RPZmZsaW5lQ2xpZW50c1Jlc3BvbnNlIgOQAgESbAoRU2V0T2ZmbGluZUNsaWVudHMSKi5tYXZpby5zdG9yYWdlLnYxLlNldE9mZmxpbmVDbGllbnRzUmVxdWVzdBorLm1hdmlvLnN0b3JhZ2UudjEuU2V0T2ZmbGluZUNsaWVudHNSZXNwb25zZULNAQoUY29tLm1hdmlvLnN0b3JhZ2UudjFCDFN0b3JhZ2VQcm90b1ABWkVnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vc3RvcmFnZS92MTtzdG9yYWdldjGiAgNNU1iqAhBNYXZpby5TdG9yYWdlLlYxygIQTWF2aW9cU3RvcmFnZVxWMeICHE1hdmlvXFN0b3JhZ2VcVjFcR1BCTWV0YWRhdGHqAhJNYXZpbzo6U3RvcmFnZTo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate]);
 
 /**
  * @generated from message mavio.storage.v1.GetStatusRequest
@@ -545,6 +545,135 @@ export const ListFoldersResponseSchema: GenMessage<ListFoldersResponse> = /*@__P
   messageDesc(file_mavio_storage_v1_storage, 20);
 
 /**
+ * OfflineClient is a download client of a cloud drive's offline downloads:
+ * the drive downloads magnet links itself into a folder of its remote,
+ * movies into "movies" and series into "series" below it, and imports move
+ * the files within the remote.
+ *
+ * @generated from message mavio.storage.v1.OfflineClient
+ */
+export type OfflineClient = Message<"mavio.storage.v1.OfflineClient"> & {
+  /**
+   * Stable among the clients; letters, digits, "-" and "_".
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: bool enabled = 3;
+   */
+  enabled: boolean;
+
+  /**
+   * Lower first among the torrent clients; 1 when 0.
+   *
+   * @generated from field: int32 priority = 4;
+   */
+  priority: number;
+
+  /**
+   * The folder downloads go to, "rclone:<remote>:<path>"; the remote's
+   * backend must make offline downloads.
+   *
+   * @generated from field: string folder = 5;
+   */
+  folder: string;
+
+  /**
+   * As a download client's tags.
+   *
+   * @generated from field: repeated string tags = 6;
+   */
+  tags: string[];
+
+  /**
+   * Remove imported downloads, and failed ones, from the drive's list of
+   * offline downloads.
+   *
+   * @generated from field: bool remove_completed_downloads = 7;
+   */
+  removeCompletedDownloads: boolean;
+
+  /**
+   * @generated from field: bool remove_failed_downloads = 8;
+   */
+  removeFailedDownloads: boolean;
+};
+
+/**
+ * Describes the message mavio.storage.v1.OfflineClient.
+ * Use `create(OfflineClientSchema)` to create a new message.
+ */
+export const OfflineClientSchema: GenMessage<OfflineClient> = /*@__PURE__*/
+  messageDesc(file_mavio_storage_v1_storage, 21);
+
+/**
+ * @generated from message mavio.storage.v1.ListOfflineClientsRequest
+ */
+export type ListOfflineClientsRequest = Message<"mavio.storage.v1.ListOfflineClientsRequest"> & {
+};
+
+/**
+ * Describes the message mavio.storage.v1.ListOfflineClientsRequest.
+ * Use `create(ListOfflineClientsRequestSchema)` to create a new message.
+ */
+export const ListOfflineClientsRequestSchema: GenMessage<ListOfflineClientsRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_storage_v1_storage, 22);
+
+/**
+ * @generated from message mavio.storage.v1.ListOfflineClientsResponse
+ */
+export type ListOfflineClientsResponse = Message<"mavio.storage.v1.ListOfflineClientsResponse"> & {
+  /**
+   * @generated from field: repeated mavio.storage.v1.OfflineClient clients = 1;
+   */
+  clients: OfflineClient[];
+};
+
+/**
+ * Describes the message mavio.storage.v1.ListOfflineClientsResponse.
+ * Use `create(ListOfflineClientsResponseSchema)` to create a new message.
+ */
+export const ListOfflineClientsResponseSchema: GenMessage<ListOfflineClientsResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_storage_v1_storage, 23);
+
+/**
+ * @generated from message mavio.storage.v1.SetOfflineClientsRequest
+ */
+export type SetOfflineClientsRequest = Message<"mavio.storage.v1.SetOfflineClientsRequest"> & {
+  /**
+   * @generated from field: repeated mavio.storage.v1.OfflineClient clients = 1;
+   */
+  clients: OfflineClient[];
+};
+
+/**
+ * Describes the message mavio.storage.v1.SetOfflineClientsRequest.
+ * Use `create(SetOfflineClientsRequestSchema)` to create a new message.
+ */
+export const SetOfflineClientsRequestSchema: GenMessage<SetOfflineClientsRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_storage_v1_storage, 24);
+
+/**
+ * @generated from message mavio.storage.v1.SetOfflineClientsResponse
+ */
+export type SetOfflineClientsResponse = Message<"mavio.storage.v1.SetOfflineClientsResponse"> & {
+};
+
+/**
+ * Describes the message mavio.storage.v1.SetOfflineClientsResponse.
+ * Use `create(SetOfflineClientsResponseSchema)` to create a new message.
+ */
+export const SetOfflineClientsResponseSchema: GenMessage<SetOfflineClientsResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_storage_v1_storage, 25);
+
+/**
  * StorageService configures the rclone remotes that library folders may lie
  * on, as "rclone:<remote>:<path>", through the rclone rcd the server runs or
  * reaches. Administrators only.
@@ -635,6 +764,27 @@ export const StorageService: GenService<{
     methodKind: "unary";
     input: typeof ListFoldersRequestSchema;
     output: typeof ListFoldersResponseSchema;
+  },
+  /**
+   * ListOfflineClients lists the download clients of cloud drives' offline
+   * downloads, which acquisition sends magnet links to.
+   *
+   * @generated from rpc mavio.storage.v1.StorageService.ListOfflineClients
+   */
+  listOfflineClients: {
+    methodKind: "unary";
+    input: typeof ListOfflineClientsRequestSchema;
+    output: typeof ListOfflineClientsResponseSchema;
+  },
+  /**
+   * SetOfflineClients replaces the download clients of offline downloads.
+   *
+   * @generated from rpc mavio.storage.v1.StorageService.SetOfflineClients
+   */
+  setOfflineClients: {
+    methodKind: "unary";
+    input: typeof SetOfflineClientsRequestSchema;
+    output: typeof SetOfflineClientsResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_storage_v1_storage, 0);

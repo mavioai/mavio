@@ -105,6 +105,9 @@ type Request func(*sql.Selector)
 // Setting is the predicate function for setting builders.
 type Setting func(*sql.Selector)
 
+// StorageJob is the predicate function for storagejob builders.
+type StorageJob func(*sql.Selector)
+
 // Trickplay is the predicate function for trickplay builders.
 type Trickplay func(*sql.Selector)
 

@@ -403,8 +403,10 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **托管的 rcd**：默认由服务端自己运行 `rclone rcd`（`rclone` 设置可执行文件；找不到时远端不可用，服务端其余部分照常工作）。它监听私有目录中的 Unix 套接字，用户名和密码在每次启动时随机生成；以 `rc/noopauth` 判断就绪；退出后延迟重启，延迟逐次翻倍、最长一分钟，运行满一分钟后重置；关闭时先请求其退出（`core/quit`），再终止，最后强制结束。它的日志按级别写入服务端日志。
 * **外部 rcd**：`rclone-url` 连同 `rclone-user` 与 `rclone-pass` 连接不由服务端运行的 rcd，只允许 HTTPS、Unix 套接字，或仅限本机回环接口的 HTTP，因此凭证不会以明文穿过网络。
 * **配置**：托管的 rcd 把远端保存在 `<home>/rclone/rclone.conf`。该文件由服务端创建时会被加密，随机口令保存在旁边的 `rclone.pass`（权限 0600），并以 `RCLONE_CONFIG_PASS` 交给 rcd；不是服务端创建的文件按原样读取。`mavio.storage.v1.StorageService`（仅管理员）列出提供者及其选项，供客户端生成表单（`config/providers`）；创建、更新与删除远端；回答 rclone 非交互式配置提出的问题，包括 OAuth（`config/create`、带 `continue` 的 `config/update`）；并列出目录供选择媒体库路径。列表中不含密码、敏感选项与令牌。
-* **存储**：`rclone.Remotes` 为远端上的目录打开 `core.Storage`：列目录与 stat（`operations/list`、`operations/stat`，以后端的原始 ID 作为文件 ID）、上传（`operations/uploadfile`，以 multipart 流式发送）、目录、删除，以及在 rcd 内部的移动与复制（`operations/movefile`、`operations/copyfile`，后端支持时在服务端完成；能力来自 `operations/fsinfo`，缓存一分钟）。耗时操作作为 rc 任务运行（`_async`）并轮询；rcd 重启后不再认识的任务以 `rclone.ErrJobLost` 失败。远端无法设置修改时间，调用方会跳过这一步。
+* **存储**：`rclone.Remotes` 为远端上的目录打开 `core.Storage`：列目录与 stat（`operations/list`、`operations/stat`，以后端的原始 ID 作为文件 ID）、上传（`operations/uploadfile`，以 multipart 流式发送）、目录、删除，以及在 rcd 内部的移动与复制（`operations/movefile`、`operations/copyfile`，后端支持时在服务端完成；能力来自 `operations/fsinfo`，缓存一分钟）。耗时操作作为 rc 任务运行（`_async`）并轮询；rcd 重启后不再认识的任务以 `rclone.ErrJobLost` 失败。运行中的传输记录在存储任务台账（`core.StorageJob`）中：服务端重启后再次请求同一传输（例如重试导入）时，会等待仍在运行的任务，而不是另起一个；已经完成的不会再运行。启动时，台账丢弃已结束或 rcd 已遗忘的任务。远端无法设置修改时间，调用方会跳过这一步。
 * **媒体字节**：读取是对 rcd 的 `--rc-serve` 发起的 HTTP Range 请求。ffmpeg 与 ffprobe 经服务端在本机回环接口上运行的代理读取：每个媒体 URL 带一个随机令牌（最后一次使用后保留十二小时），代理把它映射到对象并加上 rcd 的凭证，因此凭证不会出现在 ffmpeg 的命令行上；代理流式转发响应，并转发 Range 与条件请求头。
+* **离线下载**：rclone 后端能自行下载链接的云盘（mavioai/rclone 的 `operations/addurl`、`listoffline` 与 `deleteoffline`，如 PikPak 与 115）是服务端内置的下载客户端（`downloads.Offline`，提供者 `dev.mavio.rclone-offline`），通过 `StorageService.ListOfflineClients` 与 `SetOfflineClients` 配置。一个客户端对应远端上的一个目录；电影的磁力链接下载到其中的 `movies` 目录，剧集下载到 `series`，下载以种子的 info hash 标识。台账保存每个下载的任务、标题、分类与最近一次看到的状态，据此把服务端发起的下载与云盘上的其他下载区分开，云盘不再列出的下载也能保留。已完成下载的输出路径位于远端上，因此导入到同一远端上的媒体库时，文件在远端内部移动。
+* **从远端导入**：导入经存储读取远端上的下载目录，经媒体代理探测其中的文件，由远端移动或复制它们（`core.StorageTransfers`），并以 `operations/purge` 删除清空后的下载目录。
 
 ---
 
@@ -507,7 +509,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 移植 Prowlarr 的第一方进程插件：Newznab 与 Torznab、在运行时从 `indexers.prowlarr.com` 拉取定义的 Cardigann 引擎，以及 Prowlarr 以代码实现的全部站点；能力与分类、限速与失败后的退避、索引器代理（HTTP、SOCKS、FlareSolverr）。其配置列出已配置的索引器；定义以及每个定义所需的字段由插件给出。`IndexerProviderService` 列出索引器及其能力，搜索它们（电影、剧集或文本，带 ID、季与集、分类），读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB。
 
 ### 13.5 下载客户端（`plugins/download-clients`）
-包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件，如 qBittorrent、Transmission、Deluge、rTorrent、Aria2、SABnzbd、NZBGet 与监视目录。其配置列出已配置的客户端，每个客户端有电影与剧集各自的分类。`DownloadClientProviderService` 添加 release（种子文件、磁力链接或 NZB，使用其类型的分类与优先级，以及其索引器的做种限制），列出下载及其状态、进度与输出路径，将下载标记为已入库，并删除下载。远程路径映射属于服务端。
+包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件，如 qBittorrent、Transmission、Deluge、rTorrent、Aria2、SABnzbd、NZBGet 与监视目录。其配置列出已配置的客户端，每个客户端有电影与剧集各自的分类。`DownloadClientProviderService` 添加 release（种子文件、磁力链接或 NZB，使用其类型的分类与优先级，以及其索引器的做种限制），列出下载及其状态、进度与输出路径，将下载标记为已入库，并删除下载。远程路径映射属于服务端。云盘的离线下载是服务端内置的下载客户端（§9.2）。
 
 ### 13.6 存储
 想要的状态、质量定义与质量档案、custom formats、delay profile 与 release profile、队列、历史、黑名单与请求都存放在 `libs/store` 中，支持两种数据库，并通过 `core` 中的端口访问。

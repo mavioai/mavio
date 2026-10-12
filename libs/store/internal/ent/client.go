@@ -49,6 +49,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
+	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -126,6 +127,8 @@ type Client struct {
 	Request *RequestClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
+	// StorageJob is the client for interacting with the StorageJob builders.
+	StorageJob *StorageJobClient
 	// Trickplay is the client for interacting with the Trickplay builders.
 	Trickplay *TrickplayClient
 	// User is the client for interacting with the User builders.
@@ -178,6 +181,7 @@ func (c *Client) init() {
 	c.RemotePathMapping = NewRemotePathMappingClient(c.config)
 	c.Request = NewRequestClient(c.config)
 	c.Setting = NewSettingClient(c.config)
+	c.StorageJob = NewStorageJobClient(c.config)
 	c.Trickplay = NewTrickplayClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserData = NewUserDataClient(c.config)
@@ -307,6 +311,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		RemotePathMapping:  NewRemotePathMappingClient(cfg),
 		Request:            NewRequestClient(cfg),
 		Setting:            NewSettingClient(cfg),
+		StorageJob:         NewStorageJobClient(cfg),
 		Trickplay:          NewTrickplayClient(cfg),
 		User:               NewUserClient(cfg),
 		UserData:           NewUserDataClient(cfg),
@@ -363,6 +368,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		RemotePathMapping:  NewRemotePathMappingClient(cfg),
 		Request:            NewRequestClient(cfg),
 		Setting:            NewSettingClient(cfg),
+		StorageJob:         NewStorageJobClient(cfg),
 		Trickplay:          NewTrickplayClient(cfg),
 		User:               NewUserClient(cfg),
 		UserData:           NewUserDataClient(cfg),
@@ -402,7 +408,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
 		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
 		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
-		c.Request, c.Setting, c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.Request, c.Setting, c.StorageJob, c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Use(hooks...)
 	}
@@ -418,7 +424,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
 		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
 		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
-		c.Request, c.Setting, c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.Request, c.Setting, c.StorageJob, c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -493,6 +499,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Request.mutate(ctx, m)
 	case *SettingMutation:
 		return c.Setting.mutate(ctx, m)
+	case *StorageJobMutation:
+		return c.StorageJob.mutate(ctx, m)
 	case *TrickplayMutation:
 		return c.Trickplay.mutate(ctx, m)
 	case *UserMutation:
@@ -5759,6 +5767,139 @@ func (c *SettingClient) mutate(ctx context.Context, m *SettingMutation) (Value, 
 	}
 }
 
+// StorageJobClient is a client for the StorageJob schema.
+type StorageJobClient struct {
+	config
+}
+
+// NewStorageJobClient returns a client for the StorageJob from the given config.
+func NewStorageJobClient(c config) *StorageJobClient {
+	return &StorageJobClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `storagejob.Hooks(f(g(h())))`.
+func (c *StorageJobClient) Use(hooks ...Hook) {
+	c.hooks.StorageJob = append(c.hooks.StorageJob, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `storagejob.Intercept(f(g(h())))`.
+func (c *StorageJobClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StorageJob = append(c.inters.StorageJob, interceptors...)
+}
+
+// Create returns a builder for creating a StorageJob entity.
+func (c *StorageJobClient) Create() *StorageJobCreate {
+	mutation := newStorageJobMutation(c.config, OpCreate)
+	return &StorageJobCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StorageJob entities.
+func (c *StorageJobClient) CreateBulk(builders ...*StorageJobCreate) *StorageJobCreateBulk {
+	return &StorageJobCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StorageJobClient) MapCreateBulk(slice any, setFunc func(*StorageJobCreate, int)) *StorageJobCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StorageJobCreateBulk{err: fmt.Errorf("calling to StorageJobClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StorageJobCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StorageJobCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StorageJob.
+func (c *StorageJobClient) Update() *StorageJobUpdate {
+	mutation := newStorageJobMutation(c.config, OpUpdate)
+	return &StorageJobUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StorageJobClient) UpdateOne(_m *StorageJob) *StorageJobUpdateOne {
+	mutation := newStorageJobMutation(c.config, OpUpdateOne, withStorageJob(_m))
+	return &StorageJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StorageJobClient) UpdateOneID(id core.ID) *StorageJobUpdateOne {
+	mutation := newStorageJobMutation(c.config, OpUpdateOne, withStorageJobID(id))
+	return &StorageJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StorageJob.
+func (c *StorageJobClient) Delete() *StorageJobDelete {
+	mutation := newStorageJobMutation(c.config, OpDelete)
+	return &StorageJobDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StorageJobClient) DeleteOne(_m *StorageJob) *StorageJobDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StorageJobClient) DeleteOneID(id core.ID) *StorageJobDeleteOne {
+	builder := c.Delete().Where(storagejob.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StorageJobDeleteOne{builder}
+}
+
+// Query returns a query builder for StorageJob.
+func (c *StorageJobClient) Query() *StorageJobQuery {
+	return &StorageJobQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStorageJob},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StorageJob entity by its id.
+func (c *StorageJobClient) Get(ctx context.Context, id core.ID) (*StorageJob, error) {
+	return c.Query().Where(storagejob.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StorageJobClient) GetX(ctx context.Context, id core.ID) *StorageJob {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StorageJobClient) Hooks() []Hook {
+	return c.hooks.StorageJob
+}
+
+// Interceptors returns the client interceptors.
+func (c *StorageJobClient) Interceptors() []Interceptor {
+	return c.inters.StorageJob
+}
+
+func (c *StorageJobClient) mutate(ctx context.Context, m *StorageJobMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StorageJobCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StorageJobUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StorageJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StorageJobDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StorageJob mutation op: %q", m.Op())
+	}
+}
+
 // TrickplayClient is a client for the Trickplay schema.
 type TrickplayClient struct {
 	config
@@ -6523,7 +6664,7 @@ type (
 		ExtraFile, FolderState, HistoryEvent, Image, Issue, IssueComment, Item,
 		ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease,
 		Person, PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
-		RemotePathMapping, Request, Setting, Trickplay, User, UserData,
+		RemotePathMapping, Request, Setting, StorageJob, Trickplay, User, UserData,
 		Wanted []ent.Hook
 	}
 	inters struct {
@@ -6532,7 +6673,7 @@ type (
 		ExtraFile, FolderState, HistoryEvent, Image, Issue, IssueComment, Item,
 		ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease,
 		Person, PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
-		RemotePathMapping, Request, Setting, Trickplay, User, UserData,
+		RemotePathMapping, Request, Setting, StorageJob, Trickplay, User, UserData,
 		Wanted []ent.Interceptor
 	}
 )

@@ -105,6 +105,67 @@ type FileIDer interface {
 	FileID() string
 }
 
+// StorageJobKind is what a storage job is.
+type StorageJobKind string
+
+// Storage job kinds.
+const (
+	// StorageJobTransfer is a move or copy an rcd runs within its
+	// remotes, keyed by its source and target.
+	StorageJobTransfer StorageJobKind = "transfer"
+	// StorageJobOffline is an offline download a cloud drive runs, keyed
+	// by its download client and its torrent's info hash.
+	StorageJobOffline StorageJobKind = "offline"
+)
+
+// StorageJob is a long operation of a storage backend the server follows,
+// kept so that the server finds it again after it or the backend
+// restarted: an rcd forgets its jobs when it restarts and numbers new ones
+// from 1 again, so a transfer is known by its rcd run (ExecuteID) and job
+// number (JobID) together.
+type StorageJob struct {
+	Kind StorageJobKind
+	// Key is unique within the kind.
+	Key string
+	// Remote is the rclone remote the job runs on.
+	Remote string
+	// ExecuteID and JobID name a transfer's rcd job; empty and 0 for
+	// offline downloads.
+	ExecuteID string
+	JobID     int64
+	// Data is what the job's owner keeps of it, such as an offline
+	// download's task ID, title and last seen status.
+	Data      map[string]string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+// Validate checks the job's invariants.
+func (j *StorageJob) Validate() error {
+	switch {
+	case j.Kind != StorageJobTransfer && j.Kind != StorageJobOffline:
+		return fmt.Errorf("%w: storage job kind %q", ErrInvalid, j.Kind)
+	case j.Key == "":
+		return fmt.Errorf("%w: storage job requires a key", ErrInvalid)
+	case j.Remote == "":
+		return fmt.Errorf("%w: storage job %s requires a remote", ErrInvalid, j.Key)
+	}
+	return nil
+}
+
+// StorageJobRepository stores storage jobs.
+type StorageJobRepository interface {
+	// Get returns ErrNotFound for a job not stored.
+	Get(ctx context.Context, kind StorageJobKind, key string) (StorageJob, error)
+	// List returns the jobs of a kind, oldest first.
+	List(ctx context.Context, kind StorageJobKind) ([]StorageJob, error)
+	// Put stores the job, replacing the one of the same kind and key but
+	// keeping its CreatedAt; it sets UpdatedAt.
+	Put(ctx context.Context, j *StorageJob) error
+	// Delete removes a job; none is no error.
+	Delete(ctx context.Context, kind StorageJobKind, key string) error
+}
+
 // IsRemotePath reports whether a library path is on an rclone remote.
 func IsRemotePath(p string) bool { return strings.HasPrefix(p, RemoteScheme) }
 

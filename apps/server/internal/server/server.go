@@ -20,6 +20,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
+	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
 	"github.com/mavioai/mavio/apps/server/internal/images"
@@ -210,11 +211,19 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	warmer := warming.New(warming.Config{Store: db, Keeper: keeper, Online: hub.OnlineSessions, Logger: log})
 
 	// Library paths are local folders, or folders of rclone remotes.
-	rc := startRclone(ctx, log, cfg)
+	rc := startRclone(ctx, log, cfg, db.StorageJobs())
 	defer rc.Close()
 	storages := &library.Storages{}
+	// Cloud drives of rclone remotes that download magnet links themselves
+	// are download clients built into the server.
+	offline := &downloads.Offline{Jobs: db.StorageJobs(), Configs: db.PluginConfigs()}
+	clients := plugs.DownloadClientProviders
 	if rc != nil {
 		storages.Remote = rc.Remotes.Open
+		offline.Remotes = rc.Remotes
+		clients = func() []downloads.Provider {
+			return append(plugs.DownloadClientProviders(), downloads.Provider{ID: downloads.OfflineID, Client: offline})
+		}
 	}
 	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, activityLog, plugs, cfg, quietGate, keeper, pathClasses, storages)
 	if err := set.Register(ctx, func(_ context.Context, s core.ServerSettings) error {
@@ -254,7 +263,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		name, _ := os.Hostname()
 		return name
 	}
-	acq := newAcquisition(log, db, set, plugs, refresher, cfg.FFprobe, quietGate, volumeLedger, devices)
+	acq := newAcquisition(log, db, set, plugs, clients, refresher, cfg.FFprobe, quietGate, volumeLedger, devices)
 	reqs := &requests.Service{
 		Store: db, Acquisition: acq, Settings: func() core.RequestSettings { return set.Get().Requests },
 		Metadata: plugs.MetadataProviders, Episodes: plugs.EpisodeListers, Discovery: plugs.DiscoveryProviders,
@@ -271,7 +280,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	acq.Imported = reqs.Imported
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(),
+		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline),
 		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Logger: log},
 		Lyrics:    lyrics,
 		Intros:    &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
@@ -415,12 +424,12 @@ func addDevLibraries(ctx context.Context, log *slog.Logger, db core.Store, dir s
 // settings' acquisition settings, the plugins' indexers, download clients
 // and scene mapping providers, and ffprobe to verify imports with when
 // there is one.
-func newAcquisition(log *slog.Logger, db core.Store, set *settings.Manager, plugs *plugins.Manager, refresher *library.Refresher, ffprobe string,
+func newAcquisition(log *slog.Logger, db core.Store, set *settings.Manager, plugs *plugins.Manager, clients func() []downloads.Provider, refresher *library.Refresher, ffprobe string,
 	quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
 ) *acquisition.Runtime {
 	rt := &acquisition.Runtime{
 		Store: db, Settings: func() core.AcquisitionSettings { return set.Get().Acquisition },
-		Indexers: plugs.IndexerProviders, Clients: plugs.DownloadClientProviders, Identifier: refresher, Storages: refresher.Storages,
+		Indexers: plugs.IndexerProviders, Clients: clients, Identifier: refresher, Storages: refresher.Storages,
 		VolumeLedger: volumeLedger, QuietGate: quietGate, Devices: devices, Logger: log,
 		SceneProviders: func() []acquisition.SceneProvider {
 			var out []acquisition.SceneProvider

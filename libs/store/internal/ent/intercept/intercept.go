@@ -42,6 +42,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
+	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -995,6 +996,33 @@ func (f TraverseSetting) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.SettingQuery", q)
 }
 
+// The StorageJobFunc type is an adapter to allow the use of ordinary function as a Querier.
+type StorageJobFunc func(context.Context, *ent.StorageJobQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f StorageJobFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.StorageJobQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.StorageJobQuery", q)
+}
+
+// The TraverseStorageJob type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseStorageJob func(context.Context, *ent.StorageJobQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseStorageJob) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseStorageJob) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.StorageJobQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.StorageJobQuery", q)
+}
+
 // The TrickplayFunc type is an adapter to allow the use of ordinary function as a Querier.
 type TrickplayFunc func(context.Context, *ent.TrickplayQuery) (ent.Value, error)
 
@@ -1172,6 +1200,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.RequestQuery, predicate.Request, request.OrderOption]{typ: ent.TypeRequest, tq: q}, nil
 	case *ent.SettingQuery:
 		return &query[*ent.SettingQuery, predicate.Setting, setting.OrderOption]{typ: ent.TypeSetting, tq: q}, nil
+	case *ent.StorageJobQuery:
+		return &query[*ent.StorageJobQuery, predicate.StorageJob, storagejob.OrderOption]{typ: ent.TypeStorageJob, tq: q}, nil
 	case *ent.TrickplayQuery:
 		return &query[*ent.TrickplayQuery, predicate.Trickplay, trickplay.OrderOption]{typ: ent.TypeTrickplay, tq: q}, nil
 	case *ent.UserQuery:

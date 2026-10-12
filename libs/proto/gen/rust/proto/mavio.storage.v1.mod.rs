@@ -105,3 +105,23 @@ pub use self::__buffa::view::ListFoldersRequestOwnedView;
 pub use self::__buffa::view::ListFoldersResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListFoldersResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::OfflineClientView;
+#[doc(inline)]
+pub use self::__buffa::view::OfflineClientOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListOfflineClientsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListOfflineClientsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListOfflineClientsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListOfflineClientsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetOfflineClientsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetOfflineClientsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetOfflineClientsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetOfflineClientsResponseOwnedView;

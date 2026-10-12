@@ -16,7 +16,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
+	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/rclone"
 )
 
@@ -35,7 +37,7 @@ type rcloneRuntime struct {
 // cfg.RcloneURL. Without rclone the server serves no remotes, which nil
 // tells; an rcd that does not start is logged and leaves the server
 // without them too.
-func startRclone(ctx context.Context, log *slog.Logger, cfg Config) *rcloneRuntime {
+func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.StorageJobRepository) *rcloneRuntime {
 	rt := &rcloneRuntime{}
 	switch {
 	case cfg.RcloneURL != "":
@@ -80,7 +82,12 @@ func startRclone(ctx context.Context, log *slog.Logger, cfg Config) *rcloneRunti
 	if err := rt.proxy.Listen(); err != nil {
 		log.ErrorContext(ctx, "rclone media proxy", "err", err)
 	}
-	rt.Remotes = &rclone.Remotes{Client: rt.Client, MediaURL: rt.proxy.URL}
+	rt.Remotes = &rclone.Remotes{Client: rt.Client, MediaURL: rt.proxy.URL, Jobs: jobs, Log: log}
+	go func() {
+		if err := rt.Remotes.Sweep(ctx); err != nil {
+			log.WarnContext(ctx, "sweep rclone transfers", "err", err)
+		}
+	}()
 	return rt
 }
 
@@ -95,12 +102,13 @@ func (rt *rcloneRuntime) Close() {
 	}
 }
 
-// Service returns the StorageService of the rcd.
-func (rt *rcloneRuntime) Service() *rpc.StorageService {
+// Service returns the StorageService of the rcd, keeping the offline
+// download clients in offline.
+func (rt *rcloneRuntime) Service(offline *downloads.Offline) *rpc.StorageService {
 	if rt == nil {
-		return &rpc.StorageService{}
+		return &rpc.StorageService{Offline: offline}
 	}
-	return &rpc.StorageService{Client: rt.Client, Managed: rt.Managed, Changed: rt.Remotes.Forget}
+	return &rpc.StorageService{Client: rt.Client, Managed: rt.Managed, Changed: rt.Remotes.Forget, Offline: offline}
 }
 
 // externalEndpoint checks the address of an rcd the server reaches: its

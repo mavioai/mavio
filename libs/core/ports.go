@@ -45,6 +45,7 @@ type Store interface {
 	Requests() RequestRepository
 	Issues() IssueRepository
 	BlockedTitles() BlockedTitleRepository
+	StorageJobs() StorageJobRepository
 
 	// InTx runs fn in a transaction. The Store passed to fn is bound to the
 	// transaction; fn's error rolls it back.

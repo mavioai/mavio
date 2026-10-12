@@ -405,6 +405,18 @@ func (f SettingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SettingMutation", m)
 }
 
+// The StorageJobFunc type is an adapter to allow the use of ordinary
+// function as StorageJob mutator.
+type StorageJobFunc func(context.Context, *ent.StorageJobMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StorageJobFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StorageJobMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StorageJobMutation", m)
+}
+
 // The TrickplayFunc type is an adapter to allow the use of ordinary
 // function as Trickplay mutator.
 type TrickplayFunc func(context.Context, *ent.TrickplayMutation) (ent.Value, error)

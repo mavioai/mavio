@@ -1222,6 +1222,31 @@ var (
 		Columns:    SettingsColumns,
 		PrimaryKey: []*schema.Column{SettingsColumns[0]},
 	}
+	// StorageJobsColumns holds the columns for the "storage_jobs" table.
+	StorageJobsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "key", Type: field.TypeString},
+		{Name: "remote", Type: field.TypeString},
+		{Name: "execute_id", Type: field.TypeString, Nullable: true},
+		{Name: "job_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "data", Type: field.TypeJSON, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// StorageJobsTable holds the schema information for the "storage_jobs" table.
+	StorageJobsTable = &schema.Table{
+		Name:       "storage_jobs",
+		Columns:    StorageJobsColumns,
+		PrimaryKey: []*schema.Column{StorageJobsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "storagejob_kind_key",
+				Unique:  true,
+				Columns: []*schema.Column{StorageJobsColumns[1], StorageJobsColumns[2]},
+			},
+		},
+	}
 	// TrickplayColumns holds the columns for the "trickplay" table.
 	TrickplayColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1384,6 +1409,7 @@ var (
 		RemotePathMappingsTable,
 		RequestsTable,
 		SettingsTable,
+		StorageJobsTable,
 		TrickplayTable,
 		UsersTable,
 		UserDataTable,
@@ -1519,6 +1545,9 @@ func init() {
 	}
 	SettingsTable.Annotation = &entsql.Annotation{
 		Table: "settings",
+	}
+	StorageJobsTable.Annotation = &entsql.Annotation{
+		Table: "storage_jobs",
 	}
 	TrickplayTable.ForeignKeys[0].RefTable = ItemsTable
 	TrickplayTable.Annotation = &entsql.Annotation{

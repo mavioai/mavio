@@ -682,9 +682,10 @@ flowchart TD
 - [x] `core.Storage` port and its local implementation; scanning, local metadata, sidecars, writes, playback and imports through it
 - [x] `libs/rclone`: rc client and storage over `rclone rcd`, media bytes through a loopback proxy
 - [x] Managed and external `rclone rcd`; remote configuration API (`mavio.storage.v1`)
-- [ ] Offline downloads as a built-in download client, with their jobs recorded in the database
+- [x] Offline downloads as a built-in download client, with their jobs recorded in the database
 - [ ] Distribution of the mavioai/rclone binary
-- [ ] Web UI: remotes in the server settings, and rclone folders in the library form's folder picker (`StorageService.ListFolders`)
+- [ ] Web UI: remotes in the server settings, rclone folders in the library form's folder picker (`StorageService.ListFolders`), and the offline download clients in the download client settings
+- [ ] Manual imports from folders on remotes in the web UI's folder picker
 - [ ] Later: remote plugins (plugin processes on other machines), direct links of cloud drives, incremental scans by change notification, a block cache for media reads
 
 ---

@@ -78,6 +78,8 @@ type Tx struct {
 	Request *RequestClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
+	// StorageJob is the client for interacting with the StorageJob builders.
+	StorageJob *StorageJobClient
 	// Trickplay is the client for interacting with the Trickplay builders.
 	Trickplay *TrickplayClient
 	// User is the client for interacting with the User builders.
@@ -250,6 +252,7 @@ func (tx *Tx) init() {
 	tx.RemotePathMapping = NewRemotePathMappingClient(tx.config)
 	tx.Request = NewRequestClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
+	tx.StorageJob = NewStorageJobClient(tx.config)
 	tx.Trickplay = NewTrickplayClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserData = NewUserDataClient(tx.config)

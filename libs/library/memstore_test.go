@@ -94,6 +94,7 @@ func (m *memStore) Requests() core.RequestRepository                        { pa
 func (m *memStore) Issues() core.IssueRepository                            { panic("unused") }
 func (m *memStore) BlockedTitles() core.BlockedTitleRepository              { panic("unused") }
 func (m *memStore) ExtraFiles() core.ExtraFileRepository                    { panic("unused") }
+func (m *memStore) StorageJobs() core.StorageJobRepository                  { panic("unused") }
 func (m *memStore) InTx(_ context.Context, fn func(core.Store) error) error { return fn(m) }
 
 // present returns the items not missing, by path.

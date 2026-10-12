@@ -62,6 +62,30 @@ pub type OwnedListFoldersRequestView = ::buffa::view::OwnedView<
 pub type OwnedListFoldersResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::storage::v1::__buffa::view::ListFoldersResponseView<'static>,
 >;
+///Shorthand for `OwnedView<ListOfflineClientsRequestView<'static>>`.
+pub type OwnedListOfflineClientsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListOfflineClientsResponseView<'static>>`.
+pub type OwnedListOfflineClientsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<SetOfflineClientsRequestView<'static>>`.
+pub type OwnedSetOfflineClientsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<SetOfflineClientsResponseView<'static>>`.
+pub type OwnedSetOfflineClientsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseView<
+        'static,
+    >,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::storage::v1::GetStatusResponse>
 for crate::proto::mavio::storage::v1::__buffa::view::GetStatusResponseView<'_> {
     fn encode(
@@ -334,6 +358,82 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
+>
+for crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::storage::v1::SetOfflineClientsResponse>
+for crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::storage::v1::SetOfflineClientsResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const STORAGE_SERVICE_SERVICE_NAME: &str = "mavio.storage.v1.StorageService";
 /// Static [`Spec`](::connectrpc::Spec) for the `GetStatus` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -384,6 +484,18 @@ pub const STORAGE_SERVICE_LIST_FOLDERS_SPEC: ::connectrpc::Spec = ::connectrpc::
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListOfflineClients` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const STORAGE_SERVICE_LIST_OFFLINE_CLIENTS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.storage.v1.StorageService/ListOfflineClients",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `SetOfflineClients` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.storage.v1.StorageService/SetOfflineClients",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// StorageService configures the rclone remotes that library folders may lie
 /// on, as "rclone:\<remote\>:\<path\>", through the rclone rcd the server runs or
 /// reaches. Administrators only.
@@ -622,6 +734,53 @@ pub trait StorageService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::storage::v1::ListFoldersResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListOfflineClients lists the download clients of cloud drives' offline
+    /// downloads, which acquisition sends magnet links to.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_offline_clients<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SetOfflineClients replaces the download clients of offline downloads.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn set_offline_clients<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::storage::v1::SetOfflineClientsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -889,6 +1048,64 @@ impl<S: StorageService> StorageServiceExt for S {
                 },
             )
             .with_spec(STORAGE_SERVICE_LIST_FOLDERS_SPEC)
+            .route_view_idempotent(
+                STORAGE_SERVICE_SERVICE_NAME,
+                "ListOfflineClients",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_offline_clients(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(STORAGE_SERVICE_LIST_OFFLINE_CLIENTS_SPEC)
+            .route_view(
+                STORAGE_SERVICE_SERVICE_NAME,
+                "SetOfflineClients",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.set_offline_clients(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::storage::v1::SetOfflineClientsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -989,6 +1206,18 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(STORAGE_SERVICE_LIST_FOLDERS_SPEC),
+                )
+            }
+            "ListOfflineClients" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(STORAGE_SERVICE_LIST_OFFLINE_CLIENTS_SPEC),
+                )
+            }
+            "SetOfflineClients" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC),
                 )
             }
             _ => None,
@@ -1179,6 +1408,50 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::storage::v1::ListFoldersResponse,
+                        >(format)
+                })
+            }
+            "ListOfflineClients" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_offline_clients(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
+                        >(format)
+                })
+            }
+            "SetOfflineClients" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+                    >::from_parts(&req, &body);
+                    svc.set_offline_clients(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::storage::v1::SetOfflineClientsResponse,
                         >(format)
                 })
             }
@@ -1664,6 +1937,96 @@ where
                 &self.transport,
                 &self.config,
                 STORAGE_SERVICE_LIST_FOLDERS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListOfflineClients RPC. Sends a request to /mavio.storage.v1.StorageService/ListOfflineClients.
+    pub async fn list_offline_clients(
+        &self,
+        request: crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_offline_clients_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListOfflineClients RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_offline_clients_with_options(
+        &self,
+        request: crate::proto::mavio::storage::v1::ListOfflineClientsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                STORAGE_SERVICE_LIST_OFFLINE_CLIENTS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SetOfflineClients RPC. Sends a request to /mavio.storage.v1.StorageService/SetOfflineClients.
+    pub async fn set_offline_clients(
+        &self,
+        request: crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.set_offline_clients_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SetOfflineClients RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn set_offline_clients_with_options(
+        &self,
+        request: crate::proto::mavio::storage::v1::SetOfflineClientsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::storage::v1::__buffa::view::SetOfflineClientsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

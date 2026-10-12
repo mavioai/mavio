@@ -40,6 +40,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/schema"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
+	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -766,6 +767,20 @@ func init() {
 	settingDescID := settingFields[0].Descriptor()
 	// setting.DefaultID holds the default value on creation for the id field.
 	setting.DefaultID = settingDescID.Default.(func() core.ID)
+	storagejobFields := schema.StorageJob{}.Fields()
+	_ = storagejobFields
+	// storagejobDescCreatedAt is the schema descriptor for created_at field.
+	storagejobDescCreatedAt := storagejobFields[7].Descriptor()
+	// storagejob.DefaultCreatedAt holds the default value on creation for the created_at field.
+	storagejob.DefaultCreatedAt = storagejobDescCreatedAt.Default.(func() time.Time)
+	// storagejobDescUpdatedAt is the schema descriptor for updated_at field.
+	storagejobDescUpdatedAt := storagejobFields[8].Descriptor()
+	// storagejob.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	storagejob.DefaultUpdatedAt = storagejobDescUpdatedAt.Default.(func() time.Time)
+	// storagejobDescID is the schema descriptor for id field.
+	storagejobDescID := storagejobFields[0].Descriptor()
+	// storagejob.DefaultID holds the default value on creation for the id field.
+	storagejob.DefaultID = storagejobDescID.Default.(func() core.ID)
 	trickplayFields := schema.Trickplay{}.Fields()
 	_ = trickplayFields
 	// trickplayDescBandwidth is the schema descriptor for bandwidth field.

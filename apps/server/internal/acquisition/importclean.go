@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"context"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -48,7 +47,7 @@ func (r *Runtime) cleanEpisodeDownloadFolder(ctx context.Context, sh *show, fold
 // libraries and of remote path mappings, and those holding them, and
 // folders in libraries are never deleted. Failures are logged.
 func (r *Runtime) deleteDownloadFolder(ctx context.Context, folder string, mappings []acquire.RemotePathMapping, sample func(path string) bool) {
-	if fi, err := os.Stat(folder); err != nil || !fi.IsDir() {
+	if fi, err := r.statDownload(ctx, folder); err != nil || !fi.IsDir() {
 		return
 	}
 	for _, mp := range mappings {
@@ -68,10 +67,10 @@ func (r *Runtime) deleteDownloadFolder(ctx context.Context, folder string, mappi
 			}
 		}
 	}
-	if !onlySamplesLeft(ctx, folder, sample) {
+	if !r.onlySamplesLeft(ctx, folder, sample) {
 		return
 	}
-	if err := os.RemoveAll(folder); err != nil {
+	if err := r.removeDownload(ctx, folder); err != nil {
 		r.logger().WarnContext(ctx, "couldn't delete download folder after importing", "path", folder, "err", err)
 		return
 	}
@@ -86,10 +85,10 @@ func within(path, dir string) bool {
 
 // onlySamplesLeft reports whether every video file left in a folder is a
 // sample, and no RAR file of 10 MiB or more is left.
-func onlySamplesLeft(ctx context.Context, folder string, sample func(path string) bool) bool {
+func (r *Runtime) onlySamplesLeft(ctx context.Context, folder string, sample func(path string) bool) bool {
 	parser := naming.Default()
 	ok := true
-	err := filepath.WalkDir(folder, func(p string, d fs.DirEntry, err error) error {
+	err := r.walkDownload(ctx, folder, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}

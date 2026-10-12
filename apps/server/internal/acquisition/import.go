@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -58,11 +57,10 @@ func (r *Runtime) importDownload(ctx context.Context, rn *run, d *core.Download,
 	if strings.TrimSpace(out) == "" {
 		return r.warn(ctx, d, msgNoOutputPath)
 	}
-	local := acquire.RemapRemoteToLocal(mappings, p.client.GetHost(), out)
-	if !filepath.IsAbs(local) {
+	local, ok := downloadPath(acquire.RemapRemoteToLocal(mappings, p.client.GetHost(), out))
+	if !ok {
 		return r.warn(ctx, d, fmt.Sprintf(msgNotLocalPath, local))
 	}
-	local = filepath.Clean(local)
 	if isSeriesDownload(*d) {
 		return r.importEpisodeDownload(ctx, rn, d, p, local, mappings)
 	}
@@ -84,7 +82,7 @@ func (r *Runtime) importDownload(ctx context.Context, rn *run, d *core.Download,
 	if err := r.putDownload(ctx, d); err != nil {
 		return err
 	}
-	files, err := importFiles(ctx, local)
+	files, err := r.importFiles(ctx, local)
 	if err != nil {
 		r.logger().WarnContext(ctx, "couldn't read download", "path", local, "err", err)
 	}
@@ -145,9 +143,9 @@ func (r *Runtime) completeImport(ctx context.Context, d *core.Download, p polled
 // importFiles returns the video files of a download, the largest first,
 // leaving out those of extras, samples and hidden folders, as Radarr's
 // DiskScanService.
-func importFiles(ctx context.Context, local string) ([]importFile, error) {
+func (r *Runtime) importFiles(ctx context.Context, local string) ([]importFile, error) {
 	parser := naming.Default()
-	fi, err := os.Stat(local)
+	fi, err := r.statDownload(ctx, local)
 	if err != nil {
 		return nil, err
 	}
@@ -155,11 +153,11 @@ func importFiles(ctx context.Context, local string) ([]importFile, error) {
 		if !parser.IsVideoFile(local) {
 			return nil, nil
 		}
-		return []importFile{{path: local, rel: filepath.Base(local), size: fi.Size()}}, nil
+		return []importFile{{path: local, rel: fi.Name(), size: fi.Size()}}, nil
 	}
 	sizes := map[string]int64{}
 	var paths []string
-	err = filepath.WalkDir(local, func(p string, d fs.DirEntry, err error) error {
+	err = r.walkDownload(ctx, local, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -182,8 +180,8 @@ func importFiles(ctx context.Context, local string) ([]importFile, error) {
 	}
 	var out []importFile
 	for _, p := range acquire.FilterImportPaths(local, paths) {
-		rel, _ := filepath.Rel(local, p)
-		out = append(out, importFile{path: p, rel: rel, size: sizes[p], inFolder: true})
+		rel, _ := core.StorageName(local, p)
+		out = append(out, importFile{path: p, rel: filepath.FromSlash(rel), size: sizes[p], inFolder: true})
 	}
 	slices.SortStableFunc(out, func(a, b importFile) int { return cmp.Compare(b.size, a.size) })
 	return out, nil

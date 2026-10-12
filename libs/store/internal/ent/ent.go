@@ -45,6 +45,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/remotepathmapping"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
+	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -142,6 +143,7 @@ func checkColumn(t, c string) error {
 			remotepathmapping.Table:  remotepathmapping.ValidColumn,
 			request.Table:            request.ValidColumn,
 			setting.Table:            setting.ValidColumn,
+			storagejob.Table:         storagejob.ValidColumn,
 			trickplay.Table:          trickplay.ValidColumn,
 			user.Table:               user.ValidColumn,
 			userdata.Table:           userdata.ValidColumn,

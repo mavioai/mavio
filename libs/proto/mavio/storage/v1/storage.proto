@@ -36,6 +36,13 @@ service StorageService {
   rpc ListFolders(ListFoldersRequest) returns (ListFoldersResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // ListOfflineClients lists the download clients of cloud drives' offline
+  // downloads, which acquisition sends magnet links to.
+  rpc ListOfflineClients(ListOfflineClientsRequest) returns (ListOfflineClientsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SetOfflineClients replaces the download clients of offline downloads.
+  rpc SetOfflineClients(SetOfflineClientsRequest) returns (SetOfflineClientsResponse);
 }
 
 message GetStatusRequest {}
@@ -190,3 +197,52 @@ message ListFoldersResponse {
   // The folders' paths, as library paths, by name.
   repeated string folders = 1;
 }
+
+// OfflineClient is a download client of a cloud drive's offline downloads:
+// the drive downloads magnet links itself into a folder of its remote,
+// movies into "movies" and series into "series" below it, and imports move
+// the files within the remote.
+message OfflineClient {
+  // Stable among the clients; letters, digits, "-" and "_".
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      max_len: 64
+      pattern: "^[A-Za-z0-9_-]+$"
+    }
+  ];
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 200
+  ];
+  bool enabled = 3;
+  // Lower first among the torrent clients; 1 when 0.
+  int32 priority = 4 [(buf.validate.field).int32.gte = 0];
+  // The folder downloads go to, "rclone:<remote>:<path>"; the remote's
+  // backend must make offline downloads.
+  string folder = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      prefix: "rclone:"
+      max_len: 4096
+    }
+  ];
+  // As a download client's tags.
+  repeated string tags = 6 [(buf.validate.field).repeated.items.string.max_len = 100];
+  // Remove imported downloads, and failed ones, from the drive's list of
+  // offline downloads.
+  bool remove_completed_downloads = 7;
+  bool remove_failed_downloads = 8;
+}
+
+message ListOfflineClientsRequest {}
+
+message ListOfflineClientsResponse {
+  repeated OfflineClient clients = 1;
+}
+
+message SetOfflineClientsRequest {
+  repeated OfflineClient clients = 1 [(buf.validate.field).repeated.max_items = 100];
+}
+
+message SetOfflineClientsResponse {}

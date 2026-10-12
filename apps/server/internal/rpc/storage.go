@@ -10,6 +10,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/libs/core"
 	storagev1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1"
 	"github.com/mavioai/mavio/libs/rclone"
@@ -24,6 +25,8 @@ type StorageService struct {
 	// Changed is told of remotes whose configuration changed; nil tells
 	// no one.
 	Changed func(remote string)
+	// Offline keeps the offline download clients; nil keeps none.
+	Offline *downloads.Offline
 }
 
 // client returns the rcd's client, after checking the caller is an
@@ -303,4 +306,47 @@ func (s *StorageService) ListFolders(ctx context.Context, req *storagev1.ListFol
 	}
 	slices.Sort(folders)
 	return storagev1.ListFoldersResponse_builder{Folders: folders}.Build(), nil
+}
+
+// ListOfflineClients lists the download clients of offline downloads.
+func (s *StorageService) ListOfflineClients(ctx context.Context, _ *storagev1.ListOfflineClientsRequest) (*storagev1.ListOfflineClientsResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	if s.Offline == nil {
+		return &storagev1.ListOfflineClientsResponse{}, nil
+	}
+	cfg, err := s.Offline.Config(ctx)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out := make([]*storagev1.OfflineClient, len(cfg.Clients))
+	for i, c := range cfg.Clients {
+		out[i] = storagev1.OfflineClient_builder{
+			Id: &c.ID, Name: &c.Name, Enabled: &c.Enabled, Priority: &c.Priority, Folder: &c.Folder, Tags: c.Tags,
+			RemoveCompletedDownloads: &c.RemoveCompleted, RemoveFailedDownloads: &c.RemoveFailed,
+		}.Build()
+	}
+	return storagev1.ListOfflineClientsResponse_builder{Clients: out}.Build(), nil
+}
+
+// SetOfflineClients replaces the download clients of offline downloads.
+func (s *StorageService) SetOfflineClients(ctx context.Context, req *storagev1.SetOfflineClientsRequest) (*storagev1.SetOfflineClientsResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	if s.Offline == nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the server keeps no offline download clients"))
+	}
+	var cfg downloads.OfflineConfig
+	for _, c := range req.GetClients() {
+		cfg.Clients = append(cfg.Clients, downloads.OfflineClient{
+			ID: c.GetId(), Name: c.GetName(), Enabled: c.GetEnabled(), Priority: c.GetPriority(), Folder: c.GetFolder(),
+			Tags: c.GetTags(), RemoveCompleted: c.GetRemoveCompletedDownloads(), RemoveFailed: c.GetRemoveFailedDownloads(),
+		})
+	}
+	if err := s.Offline.SetConfig(ctx, cfg); err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return &storagev1.SetOfflineClientsResponse{}, nil
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -25,16 +26,21 @@ type Remotes struct {
 	// MediaURL returns the URL ffmpeg reads the object remote of the rclone
 	// file system fsName from, such as Proxy.URL; nil gives no URLs.
 	MediaURL func(fsName, remote string) (string, error)
+	// Jobs is the ledger of transfers, which finds them again after the
+	// server restarted; nil keeps none.
+	Jobs core.StorageJobRepository
+	// Log is where failures of the ledger go; slog.Default when nil.
+	Log *slog.Logger
 	// now is the clock; time.Now when nil.
 	now func() time.Time
 
-	mu       sync.Mutex
-	features map[string]cachedFeatures
+	mu    sync.Mutex
+	cache map[string]cachedFeatures
 }
 
 type cachedFeatures struct {
-	caps core.StorageCapabilities
-	at   time.Time
+	features map[string]bool
+	at       time.Time
 }
 
 // featuresTTL is how long a remote's features are kept.
@@ -60,35 +66,51 @@ func (r *Remotes) Open(ctx context.Context, remote, dir string) (core.Storage, e
 // Forget drops what is known of a remote, after its configuration changed.
 func (r *Remotes) Forget(remote string) {
 	r.mu.Lock()
-	delete(r.features, remote)
+	delete(r.cache, remote)
 	r.mu.Unlock()
 }
 
 func (r *Remotes) capabilities(ctx context.Context, remote string) (core.StorageCapabilities, error) {
+	f, err := r.features(ctx, remote)
+	if err != nil {
+		return core.StorageCapabilities{}, err
+	}
+	return core.StorageCapabilities{ServerCopy: f["Copy"]}, nil
+}
+
+// OfflineDownloads reports whether a remote's backend downloads links
+// itself (operations/addurl).
+func (r *Remotes) OfflineDownloads(ctx context.Context, remote string) (bool, error) {
+	f, err := r.features(ctx, remote)
+	return f["AddURL"], err
+}
+
+// features returns the optional features of a remote's backend, as
+// operations/fsinfo tells them.
+func (r *Remotes) features(ctx context.Context, remote string) (map[string]bool, error) {
 	now := time.Now
 	if r.now != nil {
 		now = r.now
 	}
 	r.mu.Lock()
-	c, ok := r.features[remote]
+	c, ok := r.cache[remote]
 	r.mu.Unlock()
 	if ok && now().Sub(c.at) < featuresTTL {
-		return c.caps, nil
+		return c.features, nil
 	}
 	var info struct {
 		Features map[string]bool `json:"Features"`
 	}
 	if err := r.Client.Call(ctx, "operations/fsinfo", map[string]any{"fs": remote + ":"}, &info); err != nil {
-		return core.StorageCapabilities{}, err
+		return nil, err
 	}
-	caps := core.StorageCapabilities{ServerCopy: info.Features["Copy"]}
 	r.mu.Lock()
-	if r.features == nil {
-		r.features = map[string]cachedFeatures{}
+	if r.cache == nil {
+		r.cache = map[string]cachedFeatures{}
 	}
-	r.features[remote] = cachedFeatures{caps, now()}
+	r.cache[remote] = cachedFeatures{info.Features, now()}
 	r.mu.Unlock()
-	return caps, nil
+	return info.Features, nil
 }
 
 // Storage is a folder of a remote. It implements core.Storage and
@@ -287,7 +309,7 @@ func (s *Storage) transfer(ctx context.Context, method, srcFs, from, to string) 
 	if _, err := rel("transfer", to); err != nil || to == "." {
 		return &fs.PathError{Op: "transfer", Path: to, Err: fs.ErrInvalid}
 	}
-	err := s.r.Client.Run(ctx, method, map[string]any{"srcFs": srcFs, "srcRemote": from, "dstFs": s.fsName(), "dstRemote": to})
+	err := s.r.run(ctx, s.remote, method, map[string]any{"srcFs": srcFs, "srcRemote": from, "dstFs": s.fsName(), "dstRemote": to})
 	if err != nil {
 		return &fs.PathError{Op: "transfer", Path: to, Err: err}
 	}
@@ -327,6 +349,23 @@ func (s *Storage) Remove(ctx context.Context, name string) error {
 	method := "operations/deletefile"
 	if info.IsDir() {
 		method = "operations/rmdir"
+	}
+	return s.call(ctx, method, "remove", name, map[string]any{"fs": s.fsName(), "remote": remote})
+}
+
+// RemoveAll removes a file, or a folder and everything in it; nothing is
+// no error.
+func (s *Storage) RemoveAll(ctx context.Context, name string) error {
+	info, err := s.Stat(ctx, name)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	} else if err != nil {
+		return err
+	}
+	remote, _ := rel("remove", name)
+	method := "operations/deletefile"
+	if info.IsDir() {
+		method = "operations/purge"
 	}
 	return s.call(ctx, method, "remove", name, map[string]any{"fs": s.fsName(), "remote": remote})
 }

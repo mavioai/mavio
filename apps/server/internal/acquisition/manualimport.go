@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"strings"
 
@@ -279,18 +279,19 @@ func (r *Runtime) manualSource(ctx context.Context, downloadID core.ID, folder s
 	}
 	src := &manualSource{rn: rn}
 	if downloadID.IsZero() {
-		if !filepath.IsAbs(folder) {
+		local, ok := downloadPath(folder)
+		if !ok {
 			return nil, fmt.Errorf("%w: folder %q is not absolute", core.ErrInvalid, folder)
 		}
-		src.local = filepath.Clean(folder)
-		fi, err := os.Stat(src.local)
-		if errors.Is(err, os.ErrNotExist) {
+		src.local = local
+		fi, err := r.statDownload(ctx, src.local)
+		if errors.Is(err, fs.ErrNotExist) {
 			return nil, fmt.Errorf("%w: %s", core.ErrNotFound, src.local)
 		}
 		if err != nil {
 			return nil, err
 		}
-		name := filepath.Base(src.local)
+		name := fi.Name()
 		if !fi.IsDir() {
 			name = strings.TrimSuffix(name, filepath.Ext(name))
 		}
@@ -319,13 +320,13 @@ func (r *Runtime) manualSource(ctx context.Context, downloadID core.ID, folder s
 		if err != nil {
 			return nil, err
 		}
-		local := acquire.RemapRemoteToLocal(mappings, p.client.GetHost(), out)
-		if !filepath.IsAbs(local) {
+		local, ok := downloadPath(acquire.RemapRemoteToLocal(mappings, p.client.GetHost(), out))
+		if !ok {
 			return nil, fmt.Errorf("%w: %s", core.ErrConflict, fmt.Sprintf(msgNotLocalPath, local))
 		}
-		src.d, src.tracked, src.p, src.local, src.mappings = d, true, p, filepath.Clean(local), mappings
+		src.d, src.tracked, src.p, src.local, src.mappings = d, true, p, local, mappings
 	}
-	files, err := importFiles(ctx, src.local)
+	files, err := r.importFiles(ctx, src.local)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", src.local, err)
 	}

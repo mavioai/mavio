@@ -57,6 +57,12 @@ const (
 	// StorageServiceListFoldersProcedure is the fully-qualified name of the StorageService's
 	// ListFolders RPC.
 	StorageServiceListFoldersProcedure = "/mavio.storage.v1.StorageService/ListFolders"
+	// StorageServiceListOfflineClientsProcedure is the fully-qualified name of the StorageService's
+	// ListOfflineClients RPC.
+	StorageServiceListOfflineClientsProcedure = "/mavio.storage.v1.StorageService/ListOfflineClients"
+	// StorageServiceSetOfflineClientsProcedure is the fully-qualified name of the StorageService's
+	// SetOfflineClients RPC.
+	StorageServiceSetOfflineClientsProcedure = "/mavio.storage.v1.StorageService/SetOfflineClients"
 )
 
 // StorageServiceClient is a client for the mavio.storage.v1.StorageService service.
@@ -81,6 +87,11 @@ type StorageServiceClient interface {
 	// ListFolders lists the folders of a folder of a remote, for choosing
 	// library folders.
 	ListFolders(context.Context, *v1.ListFoldersRequest) (*v1.ListFoldersResponse, error)
+	// ListOfflineClients lists the download clients of cloud drives' offline
+	// downloads, which acquisition sends magnet links to.
+	ListOfflineClients(context.Context, *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error)
+	// SetOfflineClients replaces the download clients of offline downloads.
+	SetOfflineClients(context.Context, *v1.SetOfflineClientsRequest) (*v1.SetOfflineClientsResponse, error)
 }
 
 // NewStorageServiceClient constructs a client for the mavio.storage.v1.StorageService service. By
@@ -146,19 +157,34 @@ func NewStorageServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		listOfflineClients: connect.NewClient[v1.ListOfflineClientsRequest, v1.ListOfflineClientsResponse](
+			httpClient,
+			baseURL+StorageServiceListOfflineClientsProcedure,
+			connect.WithSchema(storageServiceMethods.ByName("ListOfflineClients")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		setOfflineClients: connect.NewClient[v1.SetOfflineClientsRequest, v1.SetOfflineClientsResponse](
+			httpClient,
+			baseURL+StorageServiceSetOfflineClientsProcedure,
+			connect.WithSchema(storageServiceMethods.ByName("SetOfflineClients")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // storageServiceClient implements StorageServiceClient.
 type storageServiceClient struct {
-	getStatus      *connect.Client[v1.GetStatusRequest, v1.GetStatusResponse]
-	listProviders  *connect.Client[v1.ListProvidersRequest, v1.ListProvidersResponse]
-	listRemotes    *connect.Client[v1.ListRemotesRequest, v1.ListRemotesResponse]
-	createRemote   *connect.Client[v1.CreateRemoteRequest, v1.CreateRemoteResponse]
-	updateRemote   *connect.Client[v1.UpdateRemoteRequest, v1.UpdateRemoteResponse]
-	continueRemote *connect.Client[v1.ContinueRemoteRequest, v1.ContinueRemoteResponse]
-	deleteRemote   *connect.Client[v1.DeleteRemoteRequest, v1.DeleteRemoteResponse]
-	listFolders    *connect.Client[v1.ListFoldersRequest, v1.ListFoldersResponse]
+	getStatus          *connect.Client[v1.GetStatusRequest, v1.GetStatusResponse]
+	listProviders      *connect.Client[v1.ListProvidersRequest, v1.ListProvidersResponse]
+	listRemotes        *connect.Client[v1.ListRemotesRequest, v1.ListRemotesResponse]
+	createRemote       *connect.Client[v1.CreateRemoteRequest, v1.CreateRemoteResponse]
+	updateRemote       *connect.Client[v1.UpdateRemoteRequest, v1.UpdateRemoteResponse]
+	continueRemote     *connect.Client[v1.ContinueRemoteRequest, v1.ContinueRemoteResponse]
+	deleteRemote       *connect.Client[v1.DeleteRemoteRequest, v1.DeleteRemoteResponse]
+	listFolders        *connect.Client[v1.ListFoldersRequest, v1.ListFoldersResponse]
+	listOfflineClients *connect.Client[v1.ListOfflineClientsRequest, v1.ListOfflineClientsResponse]
+	setOfflineClients  *connect.Client[v1.SetOfflineClientsRequest, v1.SetOfflineClientsResponse]
 }
 
 // GetStatus calls mavio.storage.v1.StorageService.GetStatus.
@@ -233,6 +259,24 @@ func (c *storageServiceClient) ListFolders(ctx context.Context, req *v1.ListFold
 	return nil, err
 }
 
+// ListOfflineClients calls mavio.storage.v1.StorageService.ListOfflineClients.
+func (c *storageServiceClient) ListOfflineClients(ctx context.Context, req *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error) {
+	response, err := c.listOfflineClients.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// SetOfflineClients calls mavio.storage.v1.StorageService.SetOfflineClients.
+func (c *storageServiceClient) SetOfflineClients(ctx context.Context, req *v1.SetOfflineClientsRequest) (*v1.SetOfflineClientsResponse, error) {
+	response, err := c.setOfflineClients.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // StorageServiceHandler is an implementation of the mavio.storage.v1.StorageService service.
 type StorageServiceHandler interface {
 	// GetStatus tells whether the server reaches an rcd.
@@ -255,6 +299,11 @@ type StorageServiceHandler interface {
 	// ListFolders lists the folders of a folder of a remote, for choosing
 	// library folders.
 	ListFolders(context.Context, *v1.ListFoldersRequest) (*v1.ListFoldersResponse, error)
+	// ListOfflineClients lists the download clients of cloud drives' offline
+	// downloads, which acquisition sends magnet links to.
+	ListOfflineClients(context.Context, *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error)
+	// SetOfflineClients replaces the download clients of offline downloads.
+	SetOfflineClients(context.Context, *v1.SetOfflineClientsRequest) (*v1.SetOfflineClientsResponse, error)
 }
 
 // NewStorageServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -316,6 +365,19 @@ func NewStorageServiceHandler(svc StorageServiceHandler, opts ...connect.Handler
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	storageServiceListOfflineClientsHandler := connect.NewUnaryHandlerSimple(
+		StorageServiceListOfflineClientsProcedure,
+		svc.ListOfflineClients,
+		connect.WithSchema(storageServiceMethods.ByName("ListOfflineClients")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	storageServiceSetOfflineClientsHandler := connect.NewUnaryHandlerSimple(
+		StorageServiceSetOfflineClientsProcedure,
+		svc.SetOfflineClients,
+		connect.WithSchema(storageServiceMethods.ByName("SetOfflineClients")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.storage.v1.StorageService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case StorageServiceGetStatusProcedure:
@@ -334,6 +396,10 @@ func NewStorageServiceHandler(svc StorageServiceHandler, opts ...connect.Handler
 			storageServiceDeleteRemoteHandler.ServeHTTP(w, r)
 		case StorageServiceListFoldersProcedure:
 			storageServiceListFoldersHandler.ServeHTTP(w, r)
+		case StorageServiceListOfflineClientsProcedure:
+			storageServiceListOfflineClientsHandler.ServeHTTP(w, r)
+		case StorageServiceSetOfflineClientsProcedure:
+			storageServiceSetOfflineClientsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -373,4 +439,12 @@ func (UnimplementedStorageServiceHandler) DeleteRemote(context.Context, *v1.Dele
 
 func (UnimplementedStorageServiceHandler) ListFolders(context.Context, *v1.ListFoldersRequest) (*v1.ListFoldersResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.ListFolders is not implemented"))
+}
+
+func (UnimplementedStorageServiceHandler) ListOfflineClients(context.Context, *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.ListOfflineClients is not implemented"))
+}
+
+func (UnimplementedStorageServiceHandler) SetOfflineClients(context.Context, *v1.SetOfflineClientsRequest) (*v1.SetOfflineClientsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.SetOfflineClients is not implemented"))
 }

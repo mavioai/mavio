@@ -87,7 +87,7 @@ func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Do
 	if err := r.putDownload(ctx, d); err != nil {
 		return err
 	}
-	files, err := importFiles(ctx, local)
+	files, err := r.importFiles(ctx, local)
 	if err != nil {
 		r.logger().WarnContext(ctx, "couldn't read download", "path", local, "err", err)
 	}
