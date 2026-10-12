@@ -28,7 +28,7 @@ let package = Package(
         ),
         .target(name: "MavioKit", dependencies: ["MavioCore"]),
         .target(name: "MavioPlayer", dependencies: [.product(name: "AetherEngine", package: "AetherEngine")]),
-        .target(name: "MavioUI", dependencies: [.product(name: "MavioDesign", package: "design")]),
+        .target(name: "MavioUI", dependencies: ["MavioKit", .product(name: "MavioDesign", package: "design")]),
         .testTarget(name: "MavioKitTests", dependencies: ["MavioKit"]),
     ]
 )
