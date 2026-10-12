@@ -683,7 +683,8 @@ flowchart TD
 - [x] `libs/rclone`：rc 客户端和基于 `rclone rcd` 的存储，媒体字节经本机回环代理
 - [x] 托管和外部 `rclone rcd`；远端配置 API（`mavio.storage.v1`）
 - [x] 离线下载作为内置下载客户端，其任务记录在数据库中
-- [ ] 分发 mavioai/rclone 二进制
+- [x] 分发 mavioai/rclone 二进制：`mise.toml` 锁定其发布构建，容器镜像从源码构建
+- [ ] mavioai/rclone 的发布版本加入 Linux arm64 构建，使 `mise.toml` 也锁定它
 - [ ] Web UI：服务器设置中的远端管理、媒体库表单目录选择器中的 rclone 目录（`StorageService.ListFolders`），以及下载客户端设置中的离线下载客户端
 - [ ] Web UI 目录选择器中从远端目录手动导入
 - [ ] 后续：远端插件（运行在其他机器上的插件进程）、云盘直链、按变更通知增量扫描、媒体读取的块缓存

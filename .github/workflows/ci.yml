@@ -11,7 +11,7 @@ permissions:
 # Only the media job needs ffmpeg, and only the android job Java and Gradle;
 # they install them from mise.toml.
 env:
-  MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,java,gradle
+  MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,http:rclone,java,gradle
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -144,7 +144,7 @@ jobs:
     # A hung build stops at the cap.
     timeout-minutes: 60
     env:
-      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,java,gradle
+      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,http:rclone,java,gradle
       # The core built without optimizations, which take most of its time.
       MAVIO_CORE_PROFILE: dev
       # The core and the macOS app for Apple silicon only, as the runner is.
@@ -211,7 +211,7 @@ jobs:
     if: needs.plan.outputs.android != '[]'
     runs-on: ubuntu-latest
     env:
-      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg
+      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,http:rclone
       # The core built without optimizations, which take most of its time.
       MAVIO_CORE_PROFILE: dev
     steps:
@@ -260,7 +260,7 @@ jobs:
     if: needs.plan.outputs.web == 'true'
     runs-on: ubuntu-24.04-arm
     env:
-      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,java,gradle
+      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,http:rclone,java,gradle
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
@@ -293,13 +293,14 @@ jobs:
       - uses: jdx/mise-action@v2
       - run: pnpm install --frozen-lockfile
       - run: ffmpeg -version | head -1
+      - run: rclone version | head -1
       - uses: ./.github/actions/go-cache
         with:
           key: media
       - run: pnpm nx run fixtures:media --output-style=static
       # Real ffmpeg runs on the runner's hardware; the cache would replay
       # results from runs without fixtures.
-      - run: pnpm nx run-many -t test -p media streaming server --skip-nx-cache --output-style=static
+      - run: pnpm nx run-many -t test -p media streaming rclone server --skip-nx-cache --output-style=static
       - uses: ./.github/actions/go-cache
         with:
           key: media

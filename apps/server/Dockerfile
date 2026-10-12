@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 #
-# The Mavio server with jellyfin-ffmpeg's portable build, the one mise.toml
-# pins. Build from the repository root, for one or more platforms:
+# The Mavio server with jellyfin-ffmpeg's portable build and Mavio's fork of
+# rclone, the versions mise.toml pins. Build from the repository root, for one or more platforms:
 #
 #   docker buildx build -f apps/server/Dockerfile --platform linux/amd64,linux/arm64 .
 #
@@ -11,6 +11,7 @@
 ARG GO_VERSION=1.27.2
 ARG NODE_VERSION=26.11.1
 ARG JELLYFIN_FFMPEG_VERSION=8.1.3-1
+ARG RCLONE_VERSION=1.75.2-mavio
 
 # The web UI, which the server embeds.
 FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-trixie-slim AS web
@@ -36,6 +37,19 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/indexers/plugin . \
 	&& cd ../download-clients && mkdir -p /out/plugins/download-clients && cp manifest.json /out/plugins/download-clients/ \
 	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/download-clients/plugin .
+
+# Mavio's fork of rclone, the release mise.toml pins, built from source as
+# the release is: the commit its tag names.
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-trixie AS rclone
+ARG TARGETOS TARGETARCH RCLONE_VERSION
+ARG RCLONE_COMMIT=3f116e2d721336a984df3880b7eb509c12c86596
+WORKDIR /src
+RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
+	set -eu; \
+	git init -q . && git fetch -q --depth 1 https://github.com/mavioai/rclone.git "$RCLONE_COMMIT" \
+	&& git checkout -q FETCH_HEAD; \
+	CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath \
+		-ldflags "-s -X github.com/rclone/rclone/fs.Version=v${RCLONE_VERSION}" -o /out/rclone .
 
 FROM --platform=$BUILDPLATFORM debian:trixie-slim AS ffmpeg
 ARG TARGETARCH JELLYFIN_FFMPEG_VERSION
@@ -64,6 +78,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 	&& mkdir -p /config /cache /media && chown -R mavio:mavio /config /cache
 COPY --from=ffmpeg /out/ /usr/lib/jellyfin-ffmpeg/
 COPY --from=server /out/mavio /usr/local/bin/mavio
+# Run as the rcd of libraries on rclone remotes; its config is /config/rclone/rclone.conf.
+COPY --from=rclone /out/rclone /usr/local/bin/rclone
 # The plugins the image ships, installed into /config/plugins on the first start.
 COPY --from=server /out/plugins/ /usr/lib/mavio/plugins/
 USER mavio

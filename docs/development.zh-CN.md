@@ -20,6 +20,7 @@
 | protoc-gen-buffa、protoc-gen-buffa-packaging、protoc-gen-connect-rust | `libs/proto` 的 Rust 代码生成，取自其发布构建 |
 | java（Temurin）+ gradle | Android 各应用与 `libs/android` |
 | jellyfin-ffmpeg | 媒体管线、测试媒体生成与集成测试（`PATH` 上的 `ffmpeg` / `ffprobe`） |
+| rclone（mavioai/rclone） | rclone 远端上的媒体库及其集成测试（`PATH` 上的 `rclone`），取自 fork 为 Linux x64、macOS 与 Windows x64 发布的构建 |
 
 ```bash
 mise install            # 安装锁定版本的工具链
@@ -190,11 +191,11 @@ go build -o plugin .                                                     # 子�
 * **apple**（macOS 与 Xcode 27，即 runner 的 `xcode-27` 镜像，因为 `Package.resolved` 文件与快照的参考图都以 Xcode 27 生成），每个平台一个任务，快照测试另一个任务，使各自的构建不争用同一 runner 的 CPU：**Apple (macOS)** 负责 `libs/apple` 与 `apps/macos`，**Apple (iOS)** 负责 `apps/ios`，**Apple (tvOS)** 负责 `apps/tvos`，各自在 **plan** 发现其任一项目受影响时运行。每个任务对其受影响的项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 只为其平台构建，生成的 Xcode 工程与 `generate` 写出的不一致时失败；`libs/apple` 受影响时，**Apple (iOS snapshots)** 以为 iOS 模拟器构建的核心，在模拟器上运行其快照测试，并上传不一致的快照。
 * **android**（Linux），在 **plan** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 构建；上传不一致快照的图片。
 * **web-snapshots**（linux arm64，因为参考图在 Apple silicon 上录制），在 Web UI 受影响时运行：`nx run web:snapshot`，然后运行 `design:gallery`，上传画廊与比对结果。
-* **media**（Linux、macOS），在服务端受影响时运行：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
+* **media**（Linux、macOS），在服务端受影响时运行：安装 jellyfin-ffmpeg 与 rclone，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming`、`rclone` 与 `server` 的测试，使 ffmpeg 与 rclone 的集成测试与冒烟测试在 runner 的硬件上执行。
 * **dist**（Linux），在服务端受影响时运行：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台；各平台并行构建。
 * **image**（Linux），在服务端受影响时运行：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
 
-CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg，**android** 以外的任务不安装 Java 与 Gradle（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check**、**test**、**apple** 与 **android** 缓存 Cargo 的构建（`Swatinem/rust-cache`），**apple** 与 **android** 以其核心的 profile 作为缓存键的一部分，**apple** 还加上其平台。**apple** 缓存 SwiftPM 与 `xcodebuild` 共用的 Swift 包克隆（`~/Library/Caches/org.swift.swiftpm`），以 `Package.resolved` 文件作为缓存键；**android** 缓存 Gradle 的用户目录，包括其依赖与构建缓存（`gradle/actions/setup-gradle`）。**check**、**test**、**media** 与 **dist** 缓存 Go 的构建与模块，**check** 另缓存 golangci-lint 的结果（`.github/actions/go-cache`）：缓存只在推送到 `main` 时保存，PR 恢复其中最新的一份。**media** 以 `-count=1` 运行 Go 的测试，避免重放缓存的测试结果。缓存只在推送到 `main` 时保存；这类推送的任务结束后，**caches** 删除 `main` 上已被更新缓存取代的缓存，即为较早提交或较早工具链保存的缓存；`.github/workflows/pr-caches.yml` 在 PR 关闭后删除其缓存。
+CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg 与 rclone，**android** 以外的任务不安装 Java 与 Gradle（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check**、**test**、**apple** 与 **android** 缓存 Cargo 的构建（`Swatinem/rust-cache`），**apple** 与 **android** 以其核心的 profile 作为缓存键的一部分，**apple** 还加上其平台。**apple** 缓存 SwiftPM 与 `xcodebuild` 共用的 Swift 包克隆（`~/Library/Caches/org.swift.swiftpm`），以 `Package.resolved` 文件作为缓存键；**android** 缓存 Gradle 的用户目录，包括其依赖与构建缓存（`gradle/actions/setup-gradle`）。**check**、**test**、**media** 与 **dist** 缓存 Go 的构建与模块，**check** 另缓存 golangci-lint 的结果（`.github/actions/go-cache`）：缓存只在推送到 `main` 时保存，PR 恢复其中最新的一份。**media** 以 `-count=1` 运行 Go 的测试，避免重放缓存的测试结果。缓存只在推送到 `main` 时保存；这类推送的任务结束后，**caches** 删除 `main` 上已被更新缓存取代的缓存，即为较早提交或较早工具链保存的缓存；`.github/workflows/pr-caches.yml` 在 PR 关闭后删除其缓存。
 
 ---
 
@@ -206,7 +207,7 @@ CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** �
 
 其余模块只在仓库内使用，不承诺对外 API 稳定。
 
-服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件，两处锁定不一致时一个测试（`apps/server/internal/buildinfo`）会失败。镜像还会构建 DLNA、索引器与下载客户端插件，并将它们放在插件种子目录 `/usr/lib/mavio/plugins` 中。
+服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件，两处锁定不一致时一个测试（`apps/server/internal/buildinfo`）会失败。镜像从 `mise.toml` 锁定的 mavioai/rclone 发布版本所在的提交为两个平台构建 rclone（该发布没有 Linux arm64 构建），放在 `/usr/local/bin/rclone`；同一测试检查两处指向同一发布版本。fork 的发布版本是其标签 `v<rclone 版本>-mavio`，由 fork 的 CI 构建；升级时需修改版本、摘要与 Dockerfile 中的提交。镜像还会构建 DLNA、索引器与下载客户端插件，并将它们放在插件种子目录 `/usr/lib/mavio/plugins` 中。
 
 第一方进程插件用其 `dist` 目标打包：`pnpm nx run dlna:dist`（或 `indexers:dist`、`download-clients:dist`）按清单中的版本为服务端的每个平台构建 DLNA（或索引器、下载客户端）插件到 `plugins/<name>/dist/`，每个平台一个目录 zip 包，并生成列出它们及其 SHA-256 摘要的 `catalog.json`；zip 包的 URL 相对于目录。
 
