@@ -83,6 +83,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
       - uses: jdx/mise-action@v2
       - uses: Swatinem/rust-cache@v2
         with:
@@ -91,7 +93,10 @@ jobs:
       - uses: ./.github/actions/go-cache
         with:
           key: test
-      - run: pnpm nx run-many -t typecheck test build --exclude 'tag:platform:apple,tag:platform:android' --output-style=static
+      # Pull requests test the affected projects; main tests every project.
+      - if: github.event_name == 'pull_request'
+        uses: nrwl/nx-set-shas@v4
+      - run: pnpm nx ${{ github.event_name == 'pull_request' && 'affected' || 'run-many' }} -t typecheck test build --exclude 'tag:platform:apple,tag:platform:android' --output-style=static
       - uses: ./.github/actions/go-cache
         with:
           key: test
