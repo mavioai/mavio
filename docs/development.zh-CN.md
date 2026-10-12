@@ -179,15 +179,15 @@ go build -o plugin .                                                     # 子�
 
 ## 6. 持续集成
 
-`.github/workflows/ci.yml` 在推送到 `main` 和提交 PR 时运行。除 **apple** 与 **android** 等待 **plan** 外，所有任务同时开始：
-* **plan**（Linux）：列出受影响的 Apple 与 Android 项目。
+`.github/workflows/ci.yml` 在推送到 `main` 和提交 PR 时运行。**plan** 找出改动影响的范围后，所有任务同时开始，改动未影响其项目的任务被跳过；对 `.github` 或 `mise.toml` 的改动影响所有项目：
+* **plan**（Linux）：列出受影响的 Apple 与 Android 项目，并判断服务端或构成它的库是否受影响。
 * **check**（Linux）：`nx affected -t buf-lint lint tidy-check typecheck build test`；重新生成代码，有任何差异即失败；PR 上对照目标分支运行 `buf breaking`。
 * **test**：在 linux arm64、macOS、Windows 上运行 `nx run-many -t typecheck test build`；PR 上改为运行 `nx affected`。
 * **apple**（macOS），在 **plan** 发现 Apple 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 构建，生成的 Xcode 工程与 `generate` 写出的不一致时失败。
 * **android**（Linux），在 **plan** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 构建。
-* **media**（Linux、macOS）：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
-* **dist**（Linux）：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台；各平台并行构建。
-* **image**（Linux）：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
+* **media**（Linux、macOS），在服务端受影响时运行：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
+* **dist**（Linux），在服务端受影响时运行：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台；各平台并行构建。
+* **image**（Linux），在服务端受影响时运行：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
 
 CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg，**android** 以外的任务不安装 Java 与 Gradle（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check**、**test**、**apple** 与 **android** 缓存 Cargo 的构建（`Swatinem/rust-cache`）。**check**、**test**、**media** 与 **dist** 缓存 Go 的构建与模块，**check** 另缓存 golangci-lint 的结果（`.github/actions/go-cache`）：缓存只在推送到 `main` 时保存，PR 恢复其中最新的一份。**media** 以 `-count=1` 运行 Go 的测试，避免重放缓存的测试结果。
 
