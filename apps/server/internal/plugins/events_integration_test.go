@@ -20,7 +20,7 @@ func TestPublish(t *testing.T) {
 	t.Cleanup(func() { _ = s.Close() })
 	dir, data := t.TempDir(), t.TempDir()
 	installWith(t, dir, "smoke", "{}", `"capabilities":["CAPABILITY_EVENT_CONSUMER"],"permissions":{"events":["item.*"]}`)
-	m, err := plugins.Open(ctx, plugins.Config{Dir: dir, CacheDir: t.TempDir(), DataDir: data, Store: s})
+	m, err := plugins.Open(ctx, plugins.Config{Dir: dir, CacheDir: compiled, DataDir: data, Store: s})
 	if err != nil {
 		t.Fatal(err)
 	}

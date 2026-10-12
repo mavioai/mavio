@@ -55,6 +55,9 @@ type Config struct {
 	TranscodeDir string
 	// CacheDir holds downloaded and resized images and compiled plugins.
 	CacheDir string
+	// PluginCacheDir holds the compiled WASM plugins, which other servers
+	// may share; empty keeps them under CacheDir.
+	PluginCacheDir string
 	// PluginDir holds one folder per plugin; empty means no plugins.
 	PluginDir string
 	// PluginSeedDir holds plugin folders installed into PluginDir once,
@@ -165,8 +168,12 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			log.WarnContext(ctx, "seed plugins", "err", err)
 		}
 	}
+	pluginCache := cfg.PluginCacheDir
+	if pluginCache == "" {
+		pluginCache = filepath.Join(cfg.CacheDir, "plugins")
+	}
 	plugs, err := plugins.Open(ctx, plugins.Config{
-		Dir: cfg.PluginDir, CacheDir: filepath.Join(cfg.CacheDir, "plugins"), Store: db, Logger: log, HostAPI: hostAPI,
+		Dir: cfg.PluginDir, CacheDir: pluginCache, Store: db, Logger: log, HostAPI: hostAPI,
 		DataDir: cfg.PluginDataDir, Fetch: cfg.PluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
 		Catalogs: func() []string { return set.Get().PluginCatalogs },
 	})

@@ -24,7 +24,7 @@ func TestTasks(t *testing.T) {
 		"tasks":[{"id":"count","name":"Count","interval":"3600s"},{"id":"fail","name":"Fail"}]`)
 	now := time.Date(2026, 10, 10, 12, 0, 0, 0, time.UTC)
 	m, err := plugins.Open(ctx, plugins.Config{
-		Dir: dir, CacheDir: t.TempDir(), DataDir: data, Store: s, Now: func() time.Time { return now },
+		Dir: dir, CacheDir: compiled, DataDir: data, Store: s, Now: func() time.Time { return now },
 	})
 	if err != nil {
 		t.Fatal(err)

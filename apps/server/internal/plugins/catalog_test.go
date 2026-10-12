@@ -67,7 +67,7 @@ func TestCatalogInstall(t *testing.T) {
 	t.Cleanup(func() { _ = db.Close() })
 	root := t.TempDir()
 	m, err := plugins.Open(ctx, plugins.Config{
-		Dir: root, CacheDir: t.TempDir(), Store: db,
+		Dir: root, CacheDir: compiled, Store: db,
 		Catalogs: func() []string { return []string{srv.URL + "/missing.json", srv.URL + "/index.json"} },
 	})
 	if err != nil {
