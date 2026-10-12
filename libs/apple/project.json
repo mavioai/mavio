@@ -16,7 +16,10 @@
       },
       "inputs": [
         "{projectRoot}/scripts/build-core.sh",
-        "^rust"
+        "^rust",
+        {
+          "env": "MAVIO_CORE_PROFILE"
+        }
       ],
       "outputs": [
         "{projectRoot}/build"

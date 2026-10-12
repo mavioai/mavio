@@ -107,6 +107,9 @@ jobs:
     needs: plan
     if: needs.plan.outputs.apple != '[]'
     runs-on: macos-latest
+    env:
+      # The core built without optimizations, which take most of its time.
+      MAVIO_CORE_PROFILE: dev
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
@@ -127,6 +130,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg
+      # The core built without optimizations, which take most of its time.
+      MAVIO_CORE_PROFILE: dev
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2

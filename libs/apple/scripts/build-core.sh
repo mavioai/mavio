@@ -3,6 +3,8 @@
 # Apple platforms into build/MavioCoreFFI.xcframework, a dynamic framework
 # per platform, and generates its Swift API into build/MavioCore, which the
 # package's MavioCore target compiles. Usage: scripts/build-core.sh
+# MAVIO_CORE_PROFILE picks the Cargo profile, release by default; CI builds
+# with dev, which compiles much faster.
 set -eu
 cd "$(dirname "$0")/.."
 apple=$(pwd)
@@ -10,22 +12,24 @@ core=$apple/../client-rust
 out=$apple/build
 # tvOS is a tier 3 target, built with the standard library on this nightly.
 nightly=nightly-2026-10-10
+profile=${MAVIO_CORE_PROFILE:-release}
+build=$profile
+[ "$profile" = dev ] && build=debug
 
 export IPHONEOS_DEPLOYMENT_TARGET=18.0 TVOS_DEPLOYMENT_TARGET=18.0 MACOSX_DEPLOYMENT_TARGET=15.0
 
 cd "$core"
 rustup target add aarch64-apple-ios aarch64-apple-ios-sim aarch64-apple-darwin x86_64-apple-darwin >/dev/null
 rustup toolchain install "$nightly" --profile minimal --component rust-src >/dev/null
-for target in aarch64-apple-ios aarch64-apple-ios-sim aarch64-apple-darwin x86_64-apple-darwin; do
-	cargo build --locked --release -p mavio-uniffi --lib --target "$target"
-done
-for target in aarch64-apple-tvos aarch64-apple-tvos-sim; do
-	cargo "+$nightly" build --locked --release -p mavio-uniffi --lib --target "$target" -Zbuild-std=std,panic_abort
-done
+# One build per toolchain, so that Cargo compiles the targets in parallel.
+cargo build --locked --profile "$profile" -p mavio-uniffi --lib \
+	--target aarch64-apple-ios --target aarch64-apple-ios-sim --target aarch64-apple-darwin --target x86_64-apple-darwin
+cargo "+$nightly" build --locked --profile "$profile" -p mavio-uniffi --lib -Zbuild-std=std,panic_abort \
+	--target aarch64-apple-tvos --target aarch64-apple-tvos-sim
 
 rm -rf "$out" && mkdir -p "$out/MavioCore" "$out/frameworks"
-cargo run --locked --release -q --bin uniffi-bindgen -- generate \
-	--library target/aarch64-apple-darwin/release/libmavio.dylib --language swift --out-dir "$out/gen"
+cargo run --locked --profile "$profile" -q --bin uniffi-bindgen -- generate \
+	--library "target/aarch64-apple-darwin/$build/libmavio.dylib" --language swift --out-dir "$out/gen"
 mv "$out/gen/MavioCore.swift" "$out/MavioCore/"
 
 # framework <dir> <library> <min-os> <platform>...: wraps a library into
@@ -72,12 +76,12 @@ PLIST
 	fi
 }
 
-lipo -create target/aarch64-apple-darwin/release/libmavio.dylib target/x86_64-apple-darwin/release/libmavio.dylib \
+lipo -create "target/aarch64-apple-darwin/$build/libmavio.dylib" "target/x86_64-apple-darwin/$build/libmavio.dylib" \
 	-output "$out/gen/libmavio-macos.dylib"
-framework "$out/frameworks/ios" target/aarch64-apple-ios/release/libmavio.dylib 18.0 iPhoneOS
-framework "$out/frameworks/ios-sim" target/aarch64-apple-ios-sim/release/libmavio.dylib 18.0 iPhoneSimulator
-framework "$out/frameworks/tvos" target/aarch64-apple-tvos/release/libmavio.dylib 18.0 AppleTVOS
-framework "$out/frameworks/tvos-sim" target/aarch64-apple-tvos-sim/release/libmavio.dylib 18.0 AppleTVSimulator
+framework "$out/frameworks/ios" "target/aarch64-apple-ios/$build/libmavio.dylib" 18.0 iPhoneOS
+framework "$out/frameworks/ios-sim" "target/aarch64-apple-ios-sim/$build/libmavio.dylib" 18.0 iPhoneSimulator
+framework "$out/frameworks/tvos" "target/aarch64-apple-tvos/$build/libmavio.dylib" 18.0 AppleTVOS
+framework "$out/frameworks/tvos-sim" "target/aarch64-apple-tvos-sim/$build/libmavio.dylib" 18.0 AppleTVSimulator
 framework "$out/frameworks/macos" "$out/gen/libmavio-macos.dylib" 15.0 MacOSX
 args=""
 for p in ios ios-sim tvos tvos-sim macos; do

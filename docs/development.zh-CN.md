@@ -70,6 +70,8 @@ Apple 各项目需要 Xcode，只在 macOS 上构建；它们带有标签 `platf
 
 Android 各项目需要 Android SDK（通过 `ANDROID_HOME` 找到），运行 `mise.toml` 锁定的 Gradle 与 JDK；每个 Gradle 构建的 `gradle/wrapper/gradle-wrapper.properties` 为 Android Studio 指明同一 Gradle 版本，不带 wrapper 脚本。它们带有标签 `platform:android`。`libs/android`（Nx 名称 `android-lib`）是由模块 `core`、`player` 与 `ui` 组成的 Gradle 构建，带有一份版本目录（`gradle/libs.versions.toml`），各应用的 settings 也读取它；其 `core` 目标运行 `scripts/build-core.sh`：用锁定的 NDK（缺失时以 `sdkmanager` 安装）为 `arm64-v8a`、`armeabi-v7a` 与 `x86_64` 构建 `mavio-uniffi`，把各个库、UniFFI 生成的 Kotlin API，以及为本机构建、由单元测试通过 JNA 加载的核心写入 `core/build/rust`。其 `build`、`test` 与 `lint` 运行 `assembleDebug`、`testDebugUnitTest` 与 `lintDebug`。`apps/android` 与 `apps/android-tv` 是引入 `libs/android` 的 Gradle 构建，按坐标（`dev.mavio.android:core`）依赖其模块；它们有 `build` 与 `lint`。各应用的构建共享该 included build，因此 Gradle 目标逐个运行。
 
+`libs/apple` 与 `libs/android` 的 `core` 目标对每个工具链只运行一次 Cargo 构建，覆盖其全部目标，使各目标并行编译，使用 `release` profile；设置 `MAVIO_CORE_PROFILE=dev` 则不做优化地构建，耗时只是其一小部分，CI 即如此。
+
 ### 2.3 常用命令
 ```bash
 pnpm nx run-many -t build test lint tidy-check     # 全量检查
@@ -181,8 +183,8 @@ go build -o plugin .                                                     # 子�
 * **plan**（Linux）：列出受影响的 Apple 与 Android 项目。
 * **check**（Linux）：`nx affected -t buf-lint lint tidy-check typecheck build test`；重新生成代码，有任何差异即失败；PR 上对照目标分支运行 `buf breaking`。
 * **test**：在 linux arm64、macOS、Windows 上运行 `nx run-many -t typecheck test build`；PR 上改为运行 `nx affected`。
-* **apple**（macOS），在 **plan** 发现 Apple 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，生成的 Xcode 工程与 `generate` 写出的不一致时失败。
-* **android**（Linux），在 **plan** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`。
+* **apple**（macOS），在 **plan** 发现 Apple 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 构建，生成的 Xcode 工程与 `generate` 写出的不一致时失败。
+* **android**（Linux），在 **plan** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 构建。
 * **media**（Linux、macOS）：安装 jellyfin-ffmpeg，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming` 与 `server` 的测试，使 ffmpeg 集成测试与冒烟测试在 runner 的硬件上执行。
 * **dist**（Linux）：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台；各平台并行构建。
 * **image**（Linux）：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
