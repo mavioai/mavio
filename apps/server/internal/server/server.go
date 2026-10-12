@@ -51,6 +51,14 @@ type Config struct {
 	// ffmpeg media plays directly only, without ffprobe libraries are not
 	// scanned.
 	FFmpeg, FFprobe string
+	// Rclone is the rclone binary the server runs as an rcd for libraries
+	// on rclone remotes; empty, or not found, serves no remotes.
+	Rclone string
+	// RcloneConfig is the rclone.conf file of that rcd.
+	RcloneConfig string
+	// RcloneURL is the address of an rcd the server reaches instead of
+	// running one, and RcloneUser and RclonePass its credentials.
+	RcloneURL, RcloneUser, RclonePass string
 	// TranscodeDir holds the segments of running transcodes.
 	TranscodeDir string
 	// CacheDir holds downloaded and resized images and compiled plugins.
@@ -201,8 +209,13 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}}
 	warmer := warming.New(warming.Config{Store: db, Keeper: keeper, Online: hub.OnlineSessions, Logger: log})
 
-	// Library paths are local folders.
+	// Library paths are local folders, or folders of rclone remotes.
+	rc := startRclone(ctx, log, cfg)
+	defer rc.Close()
 	storages := &library.Storages{}
+	if rc != nil {
+		storages.Remote = rc.Remotes.Open
+	}
 	playbacks, ffmpegVersion := newPlaybacks(ctx, log, db, hub, activityLog, plugs, cfg, quietGate, keeper, pathClasses, storages)
 	if err := set.Register(ctx, func(_ context.Context, s core.ServerSettings) error {
 		return playbacks.SetTranscoding(s.Transcoding)
@@ -258,7 +271,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	acq.Imported = reqs.Imported
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages,
+		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(),
 		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Logger: log},
 		Lyrics:    lyrics,
 		Intros:    &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},

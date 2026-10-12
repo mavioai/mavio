@@ -64,5 +64,6 @@ plugins:
       - services=mavio.library.v1.*
       - services=mavio.playback.v1.*
       - services=mavio.session.v1.*
+      - services=mavio.storage.v1.*
       - services=mavio.system.v1.*
       - services=mavio.user.v1.*

@@ -41,6 +41,7 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1/storagev1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
@@ -70,6 +71,8 @@ type Options struct {
 	// Storages opens the storage of library paths; nil opens local
 	// folders only.
 	Storages *library.Storages
+	// Remotes configures rclone's remotes; nil reaches no rclone.
+	Remotes *rpc.StorageService
 	// ServerInfo names the server to clients and tells plugins how it is
 	// reached.
 	ServerInfo func() rpc.ServerInfo
@@ -163,6 +166,11 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(systemv1connect.NewActivityServiceHandler(rpc.NewActivityService(opts.Store), interceptors))
 	mux.Handle(systemv1connect.NewBackupServiceHandler(rpc.NewBackupService(opts.Backups, opts.Activity), interceptors))
 	mux.Handle(systemv1connect.NewLocalizationServiceHandler(rpc.LocalizationService{}, interceptors))
+	remotes := opts.Remotes
+	if remotes == nil {
+		remotes = &rpc.StorageService{}
+	}
+	mux.Handle(storagev1connect.NewStorageServiceHandler(remotes, interceptors))
 	mux.Handle("GET /system/backups/{name}", backupDownload(authn, opts.Backups))
 	libraries := rpc.NewLibraryService(opts.Store)
 	libraries.Storages = opts.Storages
@@ -277,6 +285,7 @@ var services = []string{
 	libraryv1connect.MetadataServiceName, libraryv1connect.PlaylistServiceName,
 	playbackv1connect.PlaybackServiceName,
 	sessionv1connect.EventServiceName, sessionv1connect.SessionServiceName, sessionv1connect.SyncPlayServiceName,
+	storagev1connect.StorageServiceName,
 	systemv1connect.SystemServiceName, systemv1connect.TaskServiceName, systemv1connect.ActivityServiceName,
 	systemv1connect.BackupServiceName, systemv1connect.LocalizationServiceName,
 	userv1connect.UserServiceName, userv1connect.UserDataServiceName, userv1connect.DisplayPreferencesServiceName,

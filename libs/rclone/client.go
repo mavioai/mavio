@@ -1,0 +1,253 @@
+package rclone
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"io/fs"
+	"net"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+)
+
+// Endpoint is where an rcd listens and the credentials it takes.
+type Endpoint struct {
+	// URL is the rcd's address: http(s)://host:port, or unix:///path for
+	// a Unix socket.
+	URL string
+	// User and Password are the rcd's --rc-user and --rc-pass; empty for
+	// an rcd without authentication.
+	User, Password string
+}
+
+// Client calls an rcd's rc API.
+type Client struct {
+	ep   Endpoint
+	base *url.URL
+	http *http.Client
+	// poll is the period of job status checks.
+	poll time.Duration
+}
+
+// NewClient returns a client of the rcd at ep; transport, nil for the
+// default, carries requests to TCP addresses.
+func NewClient(ep Endpoint, transport http.RoundTripper) (*Client, error) {
+	u, err := url.Parse(ep.URL)
+	if err != nil {
+		return nil, fmt.Errorf("rclone address: %w", err)
+	}
+	c := &Client{ep: ep, poll: 500 * time.Millisecond}
+	switch u.Scheme {
+	case "unix":
+		socket := u.Path
+		c.base = &url.URL{Scheme: "http", Host: "rclone"}
+		c.http = &http.Client{Transport: &http.Transport{
+			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+				var d net.Dialer
+				return d.DialContext(ctx, "unix", socket)
+			},
+			MaxIdleConnsPerHost: 16,
+		}}
+	case "http", "https":
+		u.Path = strings.TrimSuffix(u.Path, "/")
+		c.base = u
+		c.http = &http.Client{Transport: transport}
+	default:
+		return nil, fmt.Errorf("rclone address %q: want http, https or unix", ep.URL)
+	}
+	return c, nil
+}
+
+// Error is an error the rc API returned.
+type Error struct {
+	Method  string
+	Status  int
+	Message string
+}
+
+func (e *Error) Error() string {
+	return fmt.Sprintf("rclone %s: %s (status %d)", e.Method, e.Message, e.Status)
+}
+
+// Unwrap gives fs.ErrNotExist for objects and folders not found.
+func (e *Error) Unwrap() error {
+	if e.Status == http.StatusNotFound {
+		return fs.ErrNotExist
+	}
+	return nil
+}
+
+// Call calls an rc method with the JSON of in, decoding its answer into
+// out unless out is nil.
+func (c *Client) Call(ctx context.Context, method string, in, out any) error {
+	body, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	req, err := c.request(ctx, http.MethodPost, c.methodURL(method, nil), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return c.do(req, method, out)
+}
+
+func (c *Client) methodURL(method string, query url.Values) string {
+	u := *c.base
+	u.Path += "/" + method
+	u.RawQuery = query.Encode()
+	return u.String()
+}
+
+func (c *Client) request(ctx context.Context, method, u string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, method, u, body)
+	if err != nil {
+		return nil, err
+	}
+	if c.ep.User != "" || c.ep.Password != "" {
+		req.SetBasicAuth(c.ep.User, c.ep.Password)
+	}
+	return req, nil
+}
+
+func (c *Client) do(req *http.Request, method string, out any) error {
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return fmt.Errorf("rclone %s: %w", method, err)
+	}
+	defer resp.Body.Close()
+	data, err := io.ReadAll(io.LimitReader(resp.Body, 64<<20))
+	if err != nil {
+		return fmt.Errorf("rclone %s: %w", method, err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		var e struct {
+			Error  string `json:"error"`
+			Status int    `json:"status"`
+		}
+		if json.Unmarshal(data, &e) != nil || e.Error == "" {
+			e.Error = strings.TrimSpace(string(data))
+		}
+		if e.Status == 0 {
+			e.Status = resp.StatusCode
+		}
+		return &Error{Method: method, Status: e.Status, Message: e.Error}
+	}
+	if out == nil {
+		return nil
+	}
+	if err := json.Unmarshal(data, out); err != nil {
+		return fmt.Errorf("rclone %s: %w", method, err)
+	}
+	return nil
+}
+
+// Noop checks that the rcd answers, with the credentials when it asks for
+// them.
+func (c *Client) Noop(ctx context.Context) error {
+	method := "rc/noop"
+	if c.ep.User != "" {
+		method = "rc/noopauth"
+	}
+	return c.Call(ctx, method, struct{}{}, nil)
+}
+
+// Version returns the rcd's rclone version.
+func (c *Client) Version(ctx context.Context) (string, error) {
+	var out struct {
+		Version string `json:"version"`
+	}
+	err := c.Call(ctx, "core/version", struct{}{}, &out)
+	return out.Version, err
+}
+
+// JobStatus is the state of an rc job, as job/status gives it.
+type JobStatus struct {
+	ID        int64   `json:"id"`
+	ExecuteID string  `json:"executeId"`
+	Finished  bool    `json:"finished"`
+	Success   bool    `json:"success"`
+	Error     string  `json:"error"`
+	Duration  float64 `json:"duration"`
+}
+
+// Start starts an rc method as a job and returns its ID and the rcd's
+// execution ID, which tells the rcd's runs apart: job IDs start again when
+// it restarts.
+func (c *Client) Start(ctx context.Context, method string, in map[string]any) (JobStatus, error) {
+	params := map[string]any{"_async": true}
+	for k, v := range in {
+		params[k] = v
+	}
+	var out struct {
+		JobID     int64  `json:"jobid"`
+		ExecuteID string `json:"executeId"`
+	}
+	if err := c.Call(ctx, method, params, &out); err != nil {
+		return JobStatus{}, err
+	}
+	return JobStatus{ID: out.JobID, ExecuteID: out.ExecuteID}, nil
+}
+
+// Job reads the state of a job.
+func (c *Client) Job(ctx context.Context, id int64) (JobStatus, error) {
+	var st JobStatus
+	err := c.Call(ctx, "job/status", map[string]any{"jobid": id}, &st)
+	return st, err
+}
+
+// StopJob stops a job.
+func (c *Client) StopJob(ctx context.Context, id int64) error {
+	return c.Call(ctx, "job/stop", map[string]any{"jobid": id}, nil)
+}
+
+// ErrJobLost is returned for a job of an rcd run that ended: the rcd
+// restarted and forgot it.
+var ErrJobLost = errors.New("rclone job lost: the rcd restarted")
+
+// Wait waits for a job of the rcd run executeID to finish, stopping it when
+// ctx ends.
+func (c *Client) Wait(ctx context.Context, job JobStatus) error {
+	t := time.NewTicker(c.poll)
+	defer t.Stop()
+	for {
+		st, err := c.Job(ctx, job.ID)
+		switch {
+		case ctx.Err() != nil:
+			_ = c.StopJob(context.WithoutCancel(ctx), job.ID)
+			return ctx.Err()
+		case jobNotFound(err) || (err == nil && job.ExecuteID != "" && st.ExecuteID != job.ExecuteID):
+			return ErrJobLost
+		case err != nil:
+			return err
+		case st.Finished && st.Success:
+			return nil
+		case st.Finished:
+			return &Error{Method: "job", Status: http.StatusInternalServerError, Message: st.Error}
+		}
+		select {
+		case <-ctx.Done():
+		case <-t.C:
+		}
+	}
+}
+
+// jobNotFound reports whether err says the rcd knows no such job.
+func jobNotFound(err error) bool {
+	var e *Error
+	return errors.As(err, &e) && strings.Contains(e.Message, "job not found")
+}
+
+// Run starts a method as a job and waits for it.
+func (c *Client) Run(ctx context.Context, method string, in map[string]any) error {
+	job, err := c.Start(ctx, method, in)
+	if err != nil {
+		return err
+	}
+	return c.Wait(ctx, job)
+}

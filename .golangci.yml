@@ -66,6 +66,13 @@ linters:
             - pkg: github.com/mavioai/mavio/libs
               desc: "acquire depends on release, naming and core; apps/server wires the rest through ports in core"
           allow: ["$gostd", github.com/mavioai/mavio/libs/acquire, github.com/mavioai/mavio/libs/release, github.com/mavioai/mavio/libs/naming, github.com/mavioai/mavio/libs/core]
+        rclone:
+          list-mode: lax
+          files: ["**/libs/rclone/**"]
+          deny:
+            - pkg: github.com/mavioai/mavio/libs
+              desc: "rclone depends only on libs/core"
+          allow: ["$gostd", github.com/mavioai/mavio/libs/rclone, github.com/mavioai/mavio/libs/core]
         plugin-sdk:
           list-mode: lax
           files: ["**/libs/plugin/**"]

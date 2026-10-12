@@ -1,0 +1,192 @@
+edition = "2023";
+
+package mavio.storage.v1;
+
+import "buf/validate/validate.proto";
+
+// StorageService configures the rclone remotes that library folders may lie
+// on, as "rclone:<remote>:<path>", through the rclone rcd the server runs or
+// reaches. Administrators only.
+service StorageService {
+  // GetStatus tells whether the server reaches an rcd.
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListProviders lists the kinds of remotes and the settings each takes,
+  // from which clients build their forms.
+  rpc ListProviders(ListProvidersRequest) returns (ListProvidersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListRemotes lists the configured remotes.
+  rpc ListRemotes(ListRemotesRequest) returns (ListRemotesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // CreateRemote configures a remote. Providers that need more, such as an
+  // OAuth token, ask a question, which ContinueRemote answers.
+  rpc CreateRemote(CreateRemoteRequest) returns (CreateRemoteResponse);
+  // UpdateRemote changes settings of a remote.
+  rpc UpdateRemote(UpdateRemoteRequest) returns (UpdateRemoteResponse);
+  // ContinueRemote answers the question of a remote's configuration.
+  rpc ContinueRemote(ContinueRemoteRequest) returns (ContinueRemoteResponse);
+  // DeleteRemote removes a remote's configuration. Libraries on it become
+  // unreadable; their items are kept until a scan finds it again.
+  rpc DeleteRemote(DeleteRemoteRequest) returns (DeleteRemoteResponse);
+  // ListFolders lists the folders of a folder of a remote, for choosing
+  // library folders.
+  rpc ListFolders(ListFoldersRequest) returns (ListFoldersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message GetStatusRequest {}
+
+message GetStatusResponse {
+  // The rcd answers.
+  bool available = 1;
+  // The rcd's rclone version.
+  string version = 2;
+  // The server runs the rcd itself, rather than reaching one.
+  bool managed = 3;
+  // Why the rcd is unavailable.
+  string error = 4;
+}
+
+message ListProvidersRequest {}
+
+message ListProvidersResponse {
+  repeated Provider providers = 1;
+}
+
+// Provider is a kind of remote, such as "drive" or "s3".
+message Provider {
+  string name = 1;
+  string description = 2;
+  repeated Option options = 3;
+}
+
+// Option is a setting of a provider, or a question of a remote's
+// configuration.
+message Option {
+  string name = 1;
+  string help = 2;
+  // The provider of the backend the option applies to, such as an S3
+  // provider; empty for all.
+  string provider = 3;
+  string default_value = 4;
+  // rclone's type of the value, such as "string", "bool", "int",
+  // "SizeSuffix" or "Duration".
+  string type = 5;
+  bool required = 6;
+  // The value is a password, given in clear and kept obscured.
+  bool password = 7;
+  bool advanced = 8;
+  // The value is a secret, such as a token, which listings leave out.
+  bool sensitive = 9;
+  // Only the examples' values are allowed.
+  bool exclusive = 10;
+  repeated Example examples = 11;
+}
+
+message Example {
+  string value = 1;
+  string help = 2;
+  string provider = 3;
+}
+
+message ListRemotesRequest {}
+
+message ListRemotesResponse {
+  repeated Remote remotes = 1;
+}
+
+// Remote is a configured remote.
+message Remote {
+  string name = 1;
+  // The provider's name.
+  string type = 2;
+  // The remote's settings; passwords and secrets are left out.
+  map<string, string> parameters = 3;
+}
+
+// ConfigQuestion asks for what a remote's configuration needs next.
+message ConfigQuestion {
+  // Passed back to ContinueRemote.
+  string state = 1;
+  Option option = 2;
+  // What was wrong with the previous answer.
+  string error = 3;
+}
+
+message CreateRemoteRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      max_len: 64
+      pattern: "^[A-Za-z0-9_][A-Za-z0-9_.+@-]*$"
+    }
+  ];
+  // The provider's name.
+  string type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+  map<string, string> parameters = 3;
+}
+
+message CreateRemoteResponse {
+  Remote remote = 1;
+  // Set while the configuration needs an answer.
+  ConfigQuestion question = 2;
+}
+
+message UpdateRemoteRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+  map<string, string> parameters = 2;
+}
+
+message UpdateRemoteResponse {
+  Remote remote = 1;
+  ConfigQuestion question = 2;
+}
+
+message ContinueRemoteRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+  string state = 2 [(buf.validate.field).required = true];
+  string answer = 3;
+}
+
+message ContinueRemoteResponse {
+  Remote remote = 1;
+  ConfigQuestion question = 2;
+}
+
+message DeleteRemoteRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+}
+
+message DeleteRemoteResponse {}
+
+message ListFoldersRequest {
+  // "rclone:<remote>:" for the remote's root, or "rclone:<remote>:<path>".
+  string path = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      prefix: "rclone:"
+      max_len: 4096
+    }
+  ];
+}
+
+message ListFoldersResponse {
+  // The folders' paths, as library paths, by name.
+  repeated string folders = 1;
+}

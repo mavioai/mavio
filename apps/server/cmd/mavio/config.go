@@ -22,6 +22,8 @@ import (
 //	plugins/      one folder per plugin
 //	metadata/     artwork chosen for items
 //	backups/      backups
+//	rclone/       rclone.conf of the rcd the server runs, and rclone.pass,
+//	              the password it is encrypted with
 //	cache/        downloaded and resized images, compiled plugins and,
 //	              in transcodes/, the segments of running transcodes
 //
@@ -54,6 +56,13 @@ var settings = []setting{
 	}},
 	{key: "ffmpeg", usage: "ffmpeg binary; without it media is only played directly", def: constant("ffmpeg")},
 	{key: "ffprobe", usage: "ffprobe binary; without it libraries are not scanned", def: constant("ffprobe")},
+	{key: "rclone", usage: "rclone binary run as an rcd for libraries on rclone remotes; empty runs none", def: constant("rclone")},
+	{key: "rclone-config", path: true, usage: "rclone.conf of the rcd the server runs, created encrypted when missing", def: func(home string, _ *server.Config) string {
+		return filepath.Join(home, "rclone", "rclone.conf")
+	}},
+	{key: "rclone-url", usage: "address of an rclone rcd to reach instead of running one: https://…, http:// on the loopback interface, or unix:///path", def: constant("")},
+	{key: "rclone-user", usage: "user of the rcd at rclone-url", def: constant("")},
+	{key: "rclone-pass", usage: "password of the rcd at rclone-url", def: constant("")},
 	{key: "cache-dir", path: true, usage: "directory for downloaded and resized images, compiled plugins and transcodes", def: under("cache")},
 	{key: "transcode-dir", path: true, usage: "directory for the segments of running transcodes", def: func(_ string, cfg *server.Config) string {
 		return filepath.Join(cfg.CacheDir, "transcodes")
@@ -207,6 +216,8 @@ func assign(o *options, key, value string) error {
 	cfg := &o.Server
 	targets := map[string]*string{
 		"addr": &o.Addr, "database": &cfg.Database, "ffmpeg": &cfg.FFmpeg, "ffprobe": &cfg.FFprobe,
+		"rclone": &cfg.Rclone, "rclone-config": &cfg.RcloneConfig, "rclone-url": &cfg.RcloneURL,
+		"rclone-user": &cfg.RcloneUser, "rclone-pass": &cfg.RclonePass,
 		"cache-dir": &cfg.CacheDir, "transcode-dir": &cfg.TranscodeDir, "plugin-dir": &cfg.PluginDir,
 		"plugin-seed-dir": &cfg.PluginSeedDir, "plugin-data-dir": &cfg.PluginDataDir,
 		"metadata-dir": &cfg.MetadataDir, "backup-dir": &cfg.BackupDir, "discovery-addr": &cfg.DiscoveryAddr,

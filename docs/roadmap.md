@@ -108,7 +108,7 @@ flowchart TD
 | P22 | Real-device acceptance | Not started |
 | P23 | Packaging and release | Not started |
 | P24 | Storage I/O efficiency | In progress |
-| P25 | Storage backends and rclone | Not started |
+| P25 | Storage backends and rclone | In progress |
 
 ---
 
@@ -680,10 +680,11 @@ flowchart TD
 
 **Progress**:
 - [x] `core.Storage` port and its local implementation; scanning, local metadata, sidecars, writes, playback and imports through it
-- [ ] `libs/rclone`: rc client and storage over `rclone rcd`, media bytes through a loopback proxy
-- [ ] Managed and external `rclone rcd`; remote configuration API (`mavio.storage.v1`)
+- [x] `libs/rclone`: rc client and storage over `rclone rcd`, media bytes through a loopback proxy
+- [x] Managed and external `rclone rcd`; remote configuration API (`mavio.storage.v1`)
 - [ ] Offline downloads as a built-in download client, with their jobs recorded in the database
 - [ ] Distribution of the mavioai/rclone binary
+- [ ] Web UI: remotes in the server settings, and rclone folders in the library form's folder picker (`StorageService.ListFolders`)
 - [ ] Later: remote plugins (plugin processes on other machines), direct links of cloud drives, incremental scans by change notification, a block cache for media reads
 
 ---

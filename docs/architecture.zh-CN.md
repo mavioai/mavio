@@ -12,7 +12,7 @@
 
 ### 1.1 目标
 * **轻量高效**：低常驻内存、快速冷启动、高扫描吞吐与低首分片延迟来自现代技术栈本身——无运行时虚拟机的原生 Go 单二进制、以 WASM 沙箱代替重量级隔离、ffmpeg 硬件管线。
-* **单二进制交付**：服务端为 `CGO_ENABLED=0` 的单一 Go 二进制；唯一外部运行时依赖是 `jellyfin-ffmpeg`。
+* **单二进制交付**：服务端为 `CGO_ENABLED=0` 的单一 Go 二进制；唯一必需的外部运行时依赖是 `jellyfin-ffmpeg`；位于云存储上的媒体库另需 `rclone`（§9.2）。
 * **强类型契约**：对内对外统一使用 Protobuf + Connect-RPC，未来的客户端（[客户端](clients.zh-CN.md)）直接从契约生成 SDK。
 * **插件隔离**：插件不进入宿主地址空间，WASM（wazero）沙箱与独立子进程（UDS）两种运行时共享同一套契约。
 * **多数据库**：SQLite 与 PostgreSQL 均为一等公民。
@@ -99,6 +99,7 @@ mavio/
 │   ├── streaming/               # [Go] HLS (CMAF) 播放列表、按需分片、分片缓存
 │   ├── release/                 # [Go] release 标题解析：编号、质量、语言、版本、发布组
 │   ├── acquire/                 # [Go] 资源获取引擎：档案、决策、搜索、队列、入库（movie、series）
+│   ├── rclone/                  # [Go] rclone rcd：rc 客户端、远端上的存储、媒体代理、rcd 托管
 │   ├── client-ts/               # [TS] Web UI 的 connect-es 客户端与 Query hooks（见 clients.zh-CN.md）
 │   ├── client-rust/             # [Rust] 原生客户端的共享核心（见 clients.zh-CN.md）
 │   ├── apple/                   # [Swift] Apple 各应用的共享代码（见 clients.zh-CN.md）
@@ -135,6 +136,7 @@ apps/server ──▶ streaming ──▶ media ──▶ core
      │             │
      ├──────▶ acquire ──▶ release / naming ──▶ core
      ├──────▶ store ──▶ core
+     ├──────▶ rclone ──▶ core
      └──────▶ plugin ──▶ proto
 
 plugins/* ──▶ plugin ──▶ proto
@@ -142,6 +144,7 @@ plugins/* ──▶ plugin ──▶ proto
 * `core` 不依赖任何其他库；`naming`、`subtitle`、`release` 是纯函数库。
 * `acquire` 与 `library` 一样，只通过 `core` 中的端口访问存储、扫描与插件，这些端口由 `apps/server` 实现。
 * `media` 只依赖 `core`，不感知数据库与插件。
+* `rclone` 只依赖 `core`：它基于 rcd 的 HTTP API 实现 `core.Storage`，不链接 rclone 的任何代码。
 * 只有 `apps/server` 负责装配。依赖方向由 depguard 规则在 CI 中强制。
 
 ---
@@ -393,6 +396,16 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **外挂字幕发现**（`libs/library`）：扫描把视频旁的字幕文件作为其外部流附加上去：文件名与视频相同，或以视频名加分隔符开头（基名得分至少 500）。语言、标题以及默认、强制、听障标记取自文件名，可识别中文变体（`zh-Hans`、`zh-Hant`、`chi`）；三字母代码只认同时有两字母代码的语言，使 `sdh` 等标记仍作为标记。它们按不含用户语言的得分排序，编号排在内嵌流之后；之后增删的文件无需重新探测视频即可更新这些流，重新探测时也会保留它们。
 * **播放选择**（`libs/media/decision`）：用户偏好的字幕语言按规范化后的别名匹配，因此偏好中文时可找到简体、繁体与地区变体，听障字幕排名较低。
 
+### 9.2 rclone 远端（libs/rclone）
+
+媒体库路径 `rclone:<remote>:<path>` 位于 rclone 的某个远端上，经 `rclone rcd` 的 HTTP API（rc API）访问；服务端不链接 rclone 的任何代码，rcd 可以运行在其他机器上。
+
+* **托管的 rcd**：默认由服务端自己运行 `rclone rcd`（`rclone` 设置可执行文件；找不到时远端不可用，服务端其余部分照常工作）。它监听私有目录中的 Unix 套接字，用户名和密码在每次启动时随机生成；以 `rc/noopauth` 判断就绪；退出后延迟重启，延迟逐次翻倍、最长一分钟，运行满一分钟后重置；关闭时先请求其退出（`core/quit`），再终止，最后强制结束。它的日志按级别写入服务端日志。
+* **外部 rcd**：`rclone-url` 连同 `rclone-user` 与 `rclone-pass` 连接不由服务端运行的 rcd，只允许 HTTPS、Unix 套接字，或仅限本机回环接口的 HTTP，因此凭证不会以明文穿过网络。
+* **配置**：托管的 rcd 把远端保存在 `<home>/rclone/rclone.conf`。该文件由服务端创建时会被加密，随机口令保存在旁边的 `rclone.pass`（权限 0600），并以 `RCLONE_CONFIG_PASS` 交给 rcd；不是服务端创建的文件按原样读取。`mavio.storage.v1.StorageService`（仅管理员）列出提供者及其选项，供客户端生成表单（`config/providers`）；创建、更新与删除远端；回答 rclone 非交互式配置提出的问题，包括 OAuth（`config/create`、带 `continue` 的 `config/update`）；并列出目录供选择媒体库路径。列表中不含密码、敏感选项与令牌。
+* **存储**：`rclone.Remotes` 为远端上的目录打开 `core.Storage`：列目录与 stat（`operations/list`、`operations/stat`，以后端的原始 ID 作为文件 ID）、上传（`operations/uploadfile`，以 multipart 流式发送）、目录、删除，以及在 rcd 内部的移动与复制（`operations/movefile`、`operations/copyfile`，后端支持时在服务端完成；能力来自 `operations/fsinfo`，缓存一分钟）。耗时操作作为 rc 任务运行（`_async`）并轮询；rcd 重启后不再认识的任务以 `rclone.ErrJobLost` 失败。远端无法设置修改时间，调用方会跳过这一步。
+* **媒体字节**：读取是对 rcd 的 `--rc-serve` 发起的 HTTP Range 请求。ffmpeg 与 ffprobe 经服务端在本机回环接口上运行的代理读取：每个媒体 URL 带一个随机令牌（最后一次使用后保留十二小时），代理把它映射到对象并加上 rcd 的凭证，因此凭证不会出现在 ffmpeg 的命令行上；代理流式转发响应，并转发 Range 与条件请求头。
+
 ---
 
 ## 10. HLS 流媒体（libs/streaming）
@@ -408,7 +421,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 ## 11. API 与认证（apps/server）
 
 * **装配**：`apps/server/internal/server` 把存储、插件、播放、图片、媒体库后台任务与处理器树组装起来并运行到关闭；`cmd/mavio` 只负责解析出它的配置，端到端测试运行的也是同一套装配。
-* **主目录与设置**：服务端保存的一切都在其主目录中，默认为 `~/.mavio`，可由 `--home` 或 `MAVIO_HOME` 另行指定：`config.toml`（可选）、SQLite 数据库 `mavio.db`、`plugins/`、`plugin-data/`（插件的数据目录）、`metadata/`（选定的图片）、`backups/` 与 `cache/`（下载与缩放后的图片、编译后的插件，以及位于 `cache/transcodes/` 的进行中转码），缺失时自动创建。约定无需配置；确实存在的设置（`addr`、`database`、`ffmpeg`、`ffprobe`、`cache-dir`、`transcode-dir`、`plugin-dir`、`plugin-seed-dir`、`plugin-data-dir`、`metadata-dir`、`backup-dir`、`discovery-addr`、`dev`、`dev-library`）由 Viper 依次从命令的参数（`--cache-dir`）、环境变量（`MAVIO_CACHE_DIR`）与 `config.toml`（`cache-dir = "/srv/cache"`）读取，默认取上述布局；转码目录跟随缓存目录。`config.toml` 中的路径必须是绝对路径，填相对路径时服务端拒绝启动；参数与环境变量中的相对路径相对于工作目录；`plugin-dir`、`backup-dir` 或 `discovery-addr` 为空时分别关闭插件、备份或局域网发现。`config.toml` 中有未知的键时服务端拒绝启动。`mavio version` 打印版本，`--restore <备份>` 在提供服务前把备份恢复到空数据库中。
+* **主目录与设置**：服务端保存的一切都在其主目录中，默认为 `~/.mavio`，可由 `--home` 或 `MAVIO_HOME` 另行指定：`config.toml`（可选）、SQLite 数据库 `mavio.db`、`plugins/`、`plugin-data/`（插件的数据目录）、`metadata/`（选定的图片）、`backups/` 与 `cache/`（下载与缩放后的图片、编译后的插件，以及位于 `cache/transcodes/` 的进行中转码），缺失时自动创建。约定无需配置；确实存在的设置（`addr`、`database`、`ffmpeg`、`ffprobe`、`cache-dir`、`transcode-dir`、`plugin-dir`、`plugin-seed-dir`、`plugin-data-dir`、`metadata-dir`、`backup-dir`、`discovery-addr`、`rclone`、`rclone-config`、`rclone-url`、`rclone-user`、`rclone-pass`、`dev`、`dev-library`）由 Viper 依次从命令的参数（`--cache-dir`）、环境变量（`MAVIO_CACHE_DIR`）与 `config.toml`（`cache-dir = "/srv/cache"`）读取，默认取上述布局；转码目录跟随缓存目录。`config.toml` 中的路径必须是绝对路径，填相对路径时服务端拒绝启动；参数与环境变量中的相对路径相对于工作目录；`plugin-dir`、`backup-dir` 或 `discovery-addr` 为空时分别关闭插件、备份或局域网发现。`config.toml` 中有未知的键时服务端拒绝启动。`mavio version` 打印版本，`--restore <备份>` 在提供服务前把备份恢复到空数据库中。
 * **单一处理器树**：`apps/server/internal/httpserver` 把 Connect 服务（实现位于 `internal/rpc`）与普通 HTTP 媒体端点挂载在同一个 `http.ServeMux` 上。每个 Connect 请求在到达服务之前先按其 protovalidate 规则校验，违反规则返回 `invalid_argument`。
 * **跨域请求**（`httpserver.cors`）：每个路由都响应来自任何来源的请求（CORS，包括预检请求与私有网络请求），使一台服务器提供的 Web UI 能登录其他服务器（[客户端 §5.4](clients.zh-CN.md#54-多台服务器)）。它们的凭据是 Bearer 令牌与不可猜测的 ID，从不是 Cookie，因此其他来源得不到它自己发出请求所得不到的东西。
 * **账户**：密码以 argon2id（19 MiB、2 轮、1 条并行通道）散列为 PHC 字符串；使用其他参数的散列仍被接受，并在下一次成功登录时替换。以不存在的用户名登录与密码错误的耗时相同。通过插件认证的用户没有密码散列。

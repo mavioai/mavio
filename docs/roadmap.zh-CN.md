@@ -108,7 +108,7 @@ flowchart TD
 | P22 | 真实设备验收 | 未开始 |
 | P23 | 打包与发布 | 未开始 |
 | P24 | 存储 I/O 效率 | 进行中 |
-| P25 | 存储后端与 rclone | 未开始 |
+| P25 | 存储后端与 rclone | 进行中 |
 
 ---
 
@@ -680,10 +680,11 @@ flowchart TD
 
 **进度**：
 - [x] `core.Storage` 端口及其本地实现；扫描、本地元数据、外挂文件、写入、播放和导入都经由它
-- [ ] `libs/rclone`：rc 客户端和基于 `rclone rcd` 的存储，媒体字节经本机回环代理
-- [ ] 托管和外部 `rclone rcd`；远端配置 API（`mavio.storage.v1`）
+- [x] `libs/rclone`：rc 客户端和基于 `rclone rcd` 的存储，媒体字节经本机回环代理
+- [x] 托管和外部 `rclone rcd`；远端配置 API（`mavio.storage.v1`）
 - [ ] 离线下载作为内置下载客户端，其任务记录在数据库中
 - [ ] 分发 mavioai/rclone 二进制
+- [ ] Web UI：服务器设置中的远端管理，以及媒体库表单目录选择器中的 rclone 目录（`StorageService.ListFolders`）
 - [ ] 后续：远端插件（运行在其他机器上的插件进程）、云盘直链、按变更通知增量扫描、媒体读取的块缓存
 
 ---

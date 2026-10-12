@@ -12,7 +12,7 @@
 
 ### 1.1 Goals
 * **Lightweight and efficient**: low resident memory, fast cold starts, high scan throughput and low first-segment latency follow from the modern stack — a single native Go binary with no runtime VM, WASM sandboxing instead of heavyweight isolation, and ffmpeg hardware pipelines.
-* **Single-binary delivery**: the server is a single `CGO_ENABLED=0` Go binary; its only external runtime dependency is `jellyfin-ffmpeg`.
+* **Single-binary delivery**: the server is a single `CGO_ENABLED=0` Go binary; its only required external runtime dependency is `jellyfin-ffmpeg`; libraries on cloud storage also need `rclone` (§9.2).
 * **Strongly typed contracts**: Protobuf + Connect-RPC is used for all internal and external APIs; the future clients ([Clients](clients.md)) generate their SDKs directly from the contracts.
 * **Plugin isolation**: plugins never enter the host's address space. Two runtimes — a WASM (wazero) sandbox and a child process (UDS) — share one set of contracts.
 * **Multiple databases**: SQLite and PostgreSQL are both first-class.
@@ -99,6 +99,7 @@ mavio/
 │   ├── streaming/               # [Go] HLS (CMAF) playlists, on-demand segmenting, segment cache
 │   ├── release/                 # [Go] Release title parsing: numbering, quality, languages, edition, group
 │   ├── acquire/                 # [Go] Acquisition engine: profiles, decisions, searches, queue, import (movie, series)
+│   ├── rclone/                  # [Go] rclone rcd: rc client, storage on remotes, media proxy, rcd supervision
 │   ├── client-ts/               # [TS] connect-es client and Query hooks of the web UI (see clients.md)
 │   ├── client-rust/             # [Rust] Shared core of the native clients (see clients.md)
 │   ├── apple/                   # [Swift] Code shared by the Apple apps (see clients.md)
@@ -135,6 +136,7 @@ apps/server ──▶ streaming ──▶ media ──▶ core
      │             │
      ├──────▶ acquire ──▶ release / naming ──▶ core
      ├──────▶ store ──▶ core
+     ├──────▶ rclone ──▶ core
      └──────▶ plugin ──▶ proto
 
 plugins/* ──▶ plugin ──▶ proto
@@ -142,6 +144,7 @@ plugins/* ──▶ plugin ──▶ proto
 * `core` depends on no other library; `naming`, `subtitle` and `release` are pure-function libraries.
 * `acquire`, like `library`, reaches storage, scans and plugins only through ports in `core`, which `apps/server` implements.
 * `media` depends only on `core` and knows nothing about databases or plugins.
+* `rclone` depends only on `core`: it implements `core.Storage` over an rcd's HTTP API and links none of rclone's code.
 * Only `apps/server` does wiring. The dependency direction is enforced in CI by depguard rules.
 
 ---
@@ -393,6 +396,16 @@ Scoring:
 * **Sidecar discovery** (`libs/library`): scans attach the subtitle files beside a video as its external streams: files whose name is the video's, or starts with it and a delimiter (a stem score of at least 500). Their language, title and default, forced and hearing-impaired flags come from the file name, with Chinese variants recognized (`zh-Hans`, `zh-Hant`, `chi`) and three-letter codes taken only for languages that also have a two-letter one, so that flags such as `sdh` stay flags. They are ordered by the score without a user's languages and numbered after the embedded streams; files added or removed later update the streams without probing the video again, and probing keeps them.
 * **Playback selection** (`libs/media/decision`): a user's preferred subtitle language matches streams by the normalized aliases, so a preference for Chinese finds simplified, traditional and regional variants, and hearing-impaired streams rank lower.
 
+### 9.2 rclone Remotes (libs/rclone)
+
+A library path `rclone:<remote>:<path>` lies on a remote of rclone, reached through an `rclone rcd` over its HTTP API (the rc API); the server links none of rclone's code, and an rcd may run on another machine.
+
+* **Managed rcd**: by default the server runs `rclone rcd` itself (`rclone` names the executable; without one, remotes are unavailable and the rest of the server works). It listens on a Unix socket in a private folder, with a random user and password made at each start; readiness is `rc/noopauth`; when it exits it is restarted after a delay that doubles up to a minute and resets after a minute of running; on shutdown it is asked to quit (`core/quit`), then terminated, then killed. Its log lines go to the server's log at their levels.
+* **External rcd**: `rclone-url`, with `rclone-user` and `rclone-pass`, reaches an rcd the server does not run, over HTTPS, a Unix socket, or HTTP on the loopback interface only, so its credentials never cross a network in clear.
+* **Configuration**: the managed rcd keeps its remotes in `<home>/rclone/rclone.conf`. When the server creates the file it encrypts it, with a random password kept in `rclone.pass` beside it (mode 0600) and passed to the rcd as `RCLONE_CONFIG_PASS`; a file the server did not create is read as it is. `mavio.storage.v1.StorageService` (administrators only) lists the providers and their options, from which clients build their forms (`config/providers`), creates, updates and deletes remotes, answers the questions of rclone's non-interactive configuration, OAuth included (`config/create`, `config/update` with `continue`), and lists folders for choosing library paths; listings leave out passwords, sensitive options and tokens.
+* **Storage**: `rclone.Remotes` opens a `core.Storage` for a remote's folder: listings and stats (`operations/list`, `operations/stat`, with the backend's original IDs as file IDs), uploads (`operations/uploadfile`, streamed as multipart), folders, deletes, and moves and copies within the rcd (`operations/movefile`, `operations/copyfile`, server-side where the backend allows; capabilities from `operations/fsinfo`, cached for a minute). Long operations run as rc jobs (`_async`) and are polled; a job the rcd no longer knows, after it restarted, fails with `rclone.ErrJobLost`. Remotes have no settable modification times; callers skip them.
+* **Media bytes**: reads are HTTP range requests to the rcd's `--rc-serve`. ffmpeg and ffprobe read through a proxy the server runs on the loopback interface: each media URL carries a random token (kept twelve hours after its last use) that the proxy maps to the object, adding the rcd's credentials, so they never appear on ffmpeg's command line; the proxy streams responses and forwards range and conditional headers.
+
 ---
 
 ## 10. HLS Streaming (libs/streaming)
@@ -408,7 +421,7 @@ Scoring:
 ## 11. API and Authentication (apps/server)
 
 * **Assembly**: `apps/server/internal/server` wires storage, plugins, playback, images, the library worker and the handler tree, and runs them until shutdown; `cmd/mavio` only resolves its configuration, and the end-to-end test runs the same assembly.
-* **Home and settings**: everything the server keeps lives in its home, `~/.mavio` unless `--home` or `MAVIO_HOME` names another: `config.toml` (optional), the SQLite database `mavio.db`, `plugins/`, `plugin-data/` (the plugins' data folders), `metadata/` (chosen artwork), `backups/` and `cache/` (downloaded and resized images, compiled plugins, and running transcodes in `cache/transcodes/`), each created when missing. Conventions need no configuration; the settings that do exist (`addr`, `database`, `ffmpeg`, `ffprobe`, `cache-dir`, `transcode-dir`, `plugin-dir`, `plugin-seed-dir`, `plugin-data-dir`, `metadata-dir`, `backup-dir`, `discovery-addr`, `dev`, `dev-library`) are read with Viper from, in order, the command's flag (`--cache-dir`), an environment variable (`MAVIO_CACHE_DIR`) and `config.toml` (`cache-dir = "/srv/cache"`), and default to the layout above; the transcode folder follows the cache folder. Paths in `config.toml` must be absolute, and a relative one stops the server; relative paths in flags and variables are relative to the working directory; an empty `plugin-dir`, `backup-dir` or `discovery-addr` turns plugins, backups or discovery off. Unknown keys in `config.toml` stop the server. `mavio version` prints the version, and `--restore <backup>` restores a backup into the empty database before serving.
+* **Home and settings**: everything the server keeps lives in its home, `~/.mavio` unless `--home` or `MAVIO_HOME` names another: `config.toml` (optional), the SQLite database `mavio.db`, `plugins/`, `plugin-data/` (the plugins' data folders), `metadata/` (chosen artwork), `backups/` and `cache/` (downloaded and resized images, compiled plugins, and running transcodes in `cache/transcodes/`), each created when missing. Conventions need no configuration; the settings that do exist (`addr`, `database`, `ffmpeg`, `ffprobe`, `cache-dir`, `transcode-dir`, `plugin-dir`, `plugin-seed-dir`, `plugin-data-dir`, `metadata-dir`, `backup-dir`, `discovery-addr`, `rclone`, `rclone-config`, `rclone-url`, `rclone-user`, `rclone-pass`, `dev`, `dev-library`) are read with Viper from, in order, the command's flag (`--cache-dir`), an environment variable (`MAVIO_CACHE_DIR`) and `config.toml` (`cache-dir = "/srv/cache"`), and default to the layout above; the transcode folder follows the cache folder. Paths in `config.toml` must be absolute, and a relative one stops the server; relative paths in flags and variables are relative to the working directory; an empty `plugin-dir`, `backup-dir` or `discovery-addr` turns plugins, backups or discovery off. Unknown keys in `config.toml` stop the server. `mavio version` prints the version, and `--restore <backup>` restores a backup into the empty database before serving.
 * **One handler tree**: `apps/server/internal/httpserver` mounts the Connect services (implemented in `internal/rpc`) and the plain HTTP media endpoints on one `http.ServeMux`. Every Connect request is checked against its protovalidate rules before it reaches the service; violations are `invalid_argument`.
 * **Cross-origin requests** (`httpserver.cors`): every route answers requests from any origin (CORS, preflights and private network requests included), so that a web UI served by one server signs in to others ([Clients §5.4](clients.md#54-several-servers)). Their credentials are bearer tokens and unguessable IDs, never cookies, so another origin gains nothing a request of its own would not.
 * **Accounts**: passwords are hashed with argon2id (19 MiB, 2 passes, 1 lane) into a PHC string; a hash with other parameters is still accepted and replaced at the next successful sign-in. Signing in with an unknown name costs the same as a wrong password. Users that authenticate through a plugin have no password hash.
