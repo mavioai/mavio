@@ -1,0 +1,7 @@
+# The prebuilt native libraries of the clients, released by mavio-deps
+# (https://github.com/mavioai/mavio-deps), which builds them from source:
+# <library> <tag> <binary asset> <its SHA-256> <directory it is extracted into>
+# fetch.sh downloads a library's asset, checks its digest and extracts it.
+# media3-ffmpeg's version must be the Media3 of
+# libs/android/gradle/libs.versions.toml, which libs/android/player checks.
+media3-ffmpeg media3-ffmpeg-1.11.1-1 media3-ffmpeg-1.11.1-1.tar.gz 4b2f882c5b0d61f10d7025344b68eb42808eb35e168da63d504c694266bacc5a libs/android/player/build
