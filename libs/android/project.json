@@ -40,6 +40,21 @@
       ],
       "cache": true
     },
+    "ffmpeg": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "sh scripts/build-ffmpeg.sh",
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "{projectRoot}/scripts/build-ffmpeg.sh",
+        "{projectRoot}/gradle/libs.versions.toml"
+      ],
+      "outputs": [
+        "{projectRoot}/player/build/ffmpeg"
+      ],
+      "cache": true
+    },
     "build": {
       "executor": "nx:run-commands",
       "options": {
@@ -48,7 +63,8 @@
       },
       "dependsOn": [
         "core",
-        "mpv"
+        "mpv",
+        "ffmpeg"
       ],
       "inputs": [
         "gradle",
@@ -68,7 +84,8 @@
       },
       "dependsOn": [
         "core",
-        "mpv"
+        "mpv",
+        "ffmpeg"
       ],
       "inputs": [
         "gradle",
@@ -88,7 +105,8 @@
       },
       "dependsOn": [
         "core",
-        "mpv"
+        "mpv",
+        "ffmpeg"
       ],
       "inputs": [
         "gradle",

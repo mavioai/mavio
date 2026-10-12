@@ -581,7 +581,7 @@ flowchart TD
   - [ ] MyGo 的视频元素，含 Windows 上的 HDR10：延后到有 Windows 机器时，在 Windows 与 Linux 应用开始之前完成
   - [x] Android 上的核心：在 `libs/android/core` 的插桩测试（`ClientTest`，服务器与账户以运行器参数传入）中，Kotlin 绑定登录、经事件流上线、收到事件并送达首页，运行于 16 KB 页面的 Android 17 模拟器，64 位库按 16 KB 对齐。访问局域网中的服务器需要运行时权限 `ACCESS_LOCAL_NETWORK`
   - [x] Media3 播放服务端的 fMP4 HLS：Media3 1.11.1 拒绝早于零点开始的音频所写出的负 `tfdt`，因此服务端现在把这样的音频平移到零点。在 `libs/android/player` 的插桩测试（`HlsTest`，以运行器参数传入一次播放的主播放列表）中，ExoPlayer 播放一个音频转码为 AAC 的重封装，跨越分片，跳转到服务端重启转码之处并播放到结尾。除非应用允许，Media3 拒绝明文 HTTP
-  - [ ] Media3 的 FFmpeg 解码扩展，它没有发布的构件：以 NDK 从源码按 LGPL 构建，纳入 Gradle 与 CI 构建
+  - [x] Media3 的 FFmpeg 解码扩展，当前的 Media3 版本没有其发布的构件：`android-lib:ffmpeg` 按 LGPL 构建 FFmpeg 的音频解码器，并把 Media3 的 JNI 层与之链接，版本取版本目录中的 Media3，约需四分钟（CI 中缓存）。在 `libs/android/player` 的插桩测试（`FfmpegAudioTest`，以运行器参数传入文件）中，ExoPlayer 在模拟器上以它解码 DTS 与 TrueHD
   - [x] Android 上的 libmpv：以 mpv-android 的构建脚本与 JNI 层按锁定版本从源码构建（`android-lib:mpv`，三个 ABI 约需一小时，CI 中缓存），FFmpeg 与 mpv 按 GPL-3.0 构建。在 `libs/android/player` 的插桩测试（`MpvPlayerTest`，以运行器参数传入一个 Matroska 文件）中，Media3 `SimpleBasePlayer` 实现的 `MpvPlayer` 以 OpenGL ES 渲染到 `SurfaceView`；在 `MediaSession` 之后，控制器从某一偏移开始播放，看到其就绪并播放，暂停、跳转并播放到结尾；释放安全。模拟器上 MediaCodec 会使 libmpv 停滞，因此测试以软件解码
     - [ ] 在用户的设备上：MediaCodec 解码（`mediacodec`，以 `mediacodec-copy` 为后备），以及叠加在画面上的带样式 ASS 字幕
     - [ ] HTTPS 源：libmpv 的 TLS（mbedtls）需要 CA 文件，如 mpv-android 随附的那样（`tls-ca-file`）

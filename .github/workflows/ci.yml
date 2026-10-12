@@ -189,6 +189,11 @@ jobs:
           key: mpv-${{ hashFiles('libs/android/scripts/build-mpv.sh') }}
       - if: steps.mpv.outputs.cache-hit != 'true'
         run: sudo apt-get install -y autoconf automake libtool pkg-config gperf nasm
+      # Media3's FFmpeg extension, rebuilt when its script or Media3 changes.
+      - uses: actions/cache@v4
+        with:
+          path: libs/android/player/build/ffmpeg
+          key: ffmpeg-${{ hashFiles('libs/android/scripts/build-ffmpeg.sh', 'libs/android/gradle/libs.versions.toml') }}
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
 
   media:

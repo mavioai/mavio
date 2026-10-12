@@ -8,6 +8,8 @@ activity-compose = "1.13.0"
 core-ktx = "1.19.1"
 annotation = "1.9.1"
 media3 = "1.11.1"
+# As Media3 compiles against, for the sources of its FFmpeg extension.
+checkerframework = "3.13.0"
 tv-material = "1.1.0"
 jna = "5.19.1"
 coroutines = "1.11.0"
@@ -27,6 +29,7 @@ compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview"
 media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
 media3-exoplayer-hls = { module = "androidx.media3:media3-exoplayer-hls", version.ref = "media3" }
 media3-session = { module = "androidx.media3:media3-session", version.ref = "media3" }
+checkerframework-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }
 tv-material = { module = "androidx.tv:tv-material", version.ref = "tv-material" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }

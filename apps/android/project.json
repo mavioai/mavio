@@ -25,6 +25,12 @@
             "android-lib"
           ],
           "target": "mpv"
+        },
+        {
+          "projects": [
+            "android-lib"
+          ],
+          "target": "ffmpeg"
         }
       ],
       "inputs": [
@@ -56,6 +62,12 @@
             "android-lib"
           ],
           "target": "mpv"
+        },
+        {
+          "projects": [
+            "android-lib"
+          ],
+          "target": "ffmpeg"
         }
       ],
       "inputs": [
