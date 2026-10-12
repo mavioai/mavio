@@ -179,16 +179,15 @@ A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.
 
 ## 6. Continuous Integration
 
-`.github/workflows/ci.yml` runs on pushes to `main` and on pull requests. Every job starts at once, except **apple** and **android**, which wait for **plan**:
-* **plan** (Linux): lists the affected Apple and Android projects.
+`.github/workflows/ci.yml` runs on pushes to `main` and on pull requests. Every job starts once **plan** has found what the change affects, and a job whose projects it does not affect is skipped; a change to `.github` or `mise.toml` affects every project:
+* **plan** (Linux): lists the affected Apple and Android projects, and whether the server or a library it is built from is affected.
 * **check** (Linux): `nx affected -t buf-lint lint tidy-check typecheck build test`; regenerates code and fails on any diff; runs `buf breaking` against the base branch on pull requests.
 * **test**: `nx run-many -t typecheck test build` on linux arm64, macOS and Windows; pull requests run `nx affected` instead.
 * **apple** (macOS), when **plan** finds Apple projects affected: `nx run-many -t lint build test` over them, with the core built by the `dev` profile, and fails when their generated Xcode projects differ from what `generate` writes.
 * **android** (Linux), when **plan** finds Android projects affected: `nx run-many -t lint build test` over them, with the core built by the `dev` profile.
-* **media** (Linux, macOS): installs jellyfin-ffmpeg, generates the fixtures and runs the `media`, `streaming` and `server` tests without the Nx cache, so the ffmpeg integration and smoke tests run on the runners' hardware.
-
-* **dist** (Linux): `nx run server:dist`, so the server cross-compiles for every supported platform; the platforms build in parallel.
-* **image** (Linux): builds the container image for linux/amd64 and linux/arm64 without pushing it, then runs the amd64 image until its health check passes.
+* **media** (Linux, macOS), when the server is affected: installs jellyfin-ffmpeg, generates the fixtures and runs the `media`, `streaming` and `server` tests without the Nx cache, so the ffmpeg integration and smoke tests run on the runners' hardware.
+* **dist** (Linux), when the server is affected: `nx run server:dist`, so the server cross-compiles for every supported platform; the platforms build in parallel.
+* **image** (Linux), when the server is affected: builds the container image for linux/amd64 and linux/arm64 without pushing it, then runs the amd64 image until its health check passes.
 
 Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`); jobs other than **media** leave jellyfin-ffmpeg out, and jobs other than **android** Java and Gradle (`MISE_DISABLE_TOOLS`). Rust comes from `rust-toolchain.toml` through the runners' rustup, and **check**, **test**, **apple** and **android** cache Cargo's builds (`Swatinem/rust-cache`). **check**, **test**, **media** and **dist** cache Go's builds and modules, and **check** golangci-lint's results (`.github/actions/go-cache`): the caches are saved only on pushes to `main`, and pull requests restore the latest of them. **media** runs Go's tests with `-count=1`, so that their cached results do not replay.
 
