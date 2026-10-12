@@ -8,8 +8,9 @@ on:
 permissions:
   contents: read
 
-# Only the media job needs ffmpeg, and only the android job Java, Gradle,
-# meson and ninja; they install them from mise.toml.
+# Only the media job needs ffmpeg, only the android job Java and Gradle, and
+# only the android and apple jobs meson and ninja; they install them from
+# mise.toml.
 env:
   MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,java,gradle,meson,ninja
 
@@ -300,7 +301,7 @@ jobs:
             --jq '.[] | "\(.id) \(.key)"' |
             awk '{
               n = split($2, part, "-")
-              drop = $2 ~ /^v0-rust-/ ? 2 : $2 ~ /^(go|mise-v0|swiftpm|gradle-home)-/ ? 1 : 0
+              drop = $2 ~ /^v0-rust-/ ? 2 : $2 ~ /^(go|mise-v0|swiftpm|gradle-home|mpv|ffmpeg|libass)-/ ? 1 : 0
               if (!drop) next
               what = part[1]; for (i = 2; i <= n - drop; i++) what = what "-" part[i]
               if (seen[what]++) print $1
