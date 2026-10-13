@@ -7,7 +7,9 @@ require (
 	github.com/mavioai/mavio/libs/imaging v0.0.0
 	github.com/mavioai/mavio/libs/subtitle v0.0.0
 	github.com/mavioai/mavio/tools/fixtures v0.0.0
+	golang.org/x/sync v0.23.0
 	golang.org/x/sys v0.48.0
+	google.golang.org/protobuf v1.36.12
 )
 
 require (
