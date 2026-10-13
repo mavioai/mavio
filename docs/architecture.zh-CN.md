@@ -541,7 +541,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 | 运行时与 API | `apps/server/internal/subtitles`、`SubtitleService` | `subtitles/wanted`、`upgrade`、`manual`、调度器的作业 |
 | 提供者 | `plugins/subtitles`（进程）、`SUBTITLE_PROVIDER` | `subliminal_patch/providers`、`pitcher.py`、`get_providers.py` 的限流 |
 | 修正、编码、语言识别 | `libs/subtitle` | subzero、字符集检测、`guess_language` |
-| 时间轴同步 | `libs/media/subsync` | ffsubsync |
+| 时间轴同步 | `libs/media/subsync`，语音由以 Go 运行的 Silero VAD 检测（`libs/media/vad`） | ffsubsync 及其 Silero 检测器 |
 
 * **以服务端自己的数据代替 Bazarr 的同步。** 电影、剧集与单集是服务端的条目；文件来自的 release 是其入库所记录的抓取（Bazarr 的 `sceneName` 与历史 refiner），否则是文件名；release 名称由 `libs/release` 解析，代替 guessit；编码、分辨率与音轨语言来自已保存的 probe 结果。Bazarr 的 Sonarr 与 Radarr 同步、路径映射、Plex 与 Jellyfin 刷新、Apprise、调度器、备份与公告，分别对应入库与扫描、条目的流、活动日志与通知插件、`TaskService` 以及 P11。
 * **规则与网络分开**，如资源获取（§13）：配置、决策、历史与阻止列表属于服务端；与字幕站点通信、随站点变化的部分在插件中，从插件目录升级，无需发布服务端。

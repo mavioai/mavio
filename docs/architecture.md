@@ -541,7 +541,7 @@ Mavio finds the subtitles its movies and episodes lack, as Bazarr does beside So
 | Runtime and API | `apps/server/internal/subtitles`, `SubtitleService` | `subtitles/wanted`, `upgrade`, `manual`, the scheduler's jobs |
 | Providers | `plugins/subtitles` (process), `SUBTITLE_PROVIDER` | `subliminal_patch/providers`, `pitcher.py`, the throttling of `get_providers.py` |
 | Mods, encodings, language detection | `libs/subtitle` | subzero, character set detection, `guess_language` |
-| Synchronization | `libs/media/subsync` | ffsubsync |
+| Synchronization | `libs/media/subsync`, speech detected by Silero VAD run in Go (`libs/media/vad`) | ffsubsync with its Silero detector |
 
 * **The server's own data stands in for Bazarr's sync.** Movies, series and episodes are the server's items; the release a file came from is the grab its import recorded (Bazarr's `sceneName` and history refiner), else the file's name; release names are parsed by `libs/release`, in place of guessit; codecs, resolution and audio languages come from the stored probe. Bazarr's Sonarr and Radarr sync, path mappings, Plex and Jellyfin refreshes, Apprise, scheduler, backup and announcements have their counterparts in imports and scans, the item's streams, the activity log with notifier plugins, `TaskService` and P11.
 * **Rules apart from networks**, as acquisition (§13): profiles, decisions, history and the blocklist are the server's; what talks to subtitle sites, and changes with them, is in the plugin, upgraded from the catalog without a server release.

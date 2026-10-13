@@ -725,7 +725,8 @@ flowchart TD
 - [ ] 每个文件的 OpenSubtitles 哈希保存到文件变化为止
 - [ ] 内嵌字幕：按设置计为已有；本地和网络存储上手动从播放缓存提取为外挂字幕，云存储上从不提取
 - [ ] `libs/subtitle` 中的 subzero 修正（common、标签、去除听障内容、带词典的 OCR 修正、颜色、emoji、RTL、大写、偏移、帧率、两点拟合）与 UTF-8；按文本识别听障字幕；识别没有语言的外挂字幕的语言，区分中文简繁
-- [ ] 时间轴同步（`libs/media/subsync`，ffsubsync 的算法）：本地和网络存储上按音频，所有存储类别上按另一个字幕文件；下载后按设置的分数阈值同步，以及手动同步
+- [ ] Silero VAD（`libs/media/vad`）：以 Go 实现 16 kHz 模型的推理，其权重由工具从 Silero 的 ONNX 文件读出，概率与 onnxruntime 的结果比对
+- [ ] 时间轴同步（`libs/media/subsync`，基于 Silero 语音检测的 ffsubsync 算法）：本地和网络存储上按音频，所有存储类别上按另一个字幕文件；下载后按设置的分数阈值同步，以及手动同步
 - [ ] 端到端测试（`apps/server/internal/server/subtitles_test.go`）
 - [ ] 后续：翻译（Google、Gemini、Lingarr）与 Whisper 转写，作为各自的提供者类型
 
@@ -746,7 +747,7 @@ flowchart TD
 | 剧集编号 | release 与文件按 TVDB 编号，TMDB 的元数据可能对同样的单集另行编号，动漫尤甚 | P15 与 P16 的显示顺序（TMDB episode groups）与单集 TVDB ID；P19 的 scene 映射与 XEM |
 | 索引器变动 | 站点会改变页面与 API | Cardigann 定义在运行时拉取；索引器插件从插件目录升级，无需发布服务端 |
 | 字幕站点变动 | Bazarr 的大多数提供者抓取的站点会改版、拦截机器人或关闭 | 提供者在 `plugins/subtitles` 中，从插件目录升级，无需发布服务端；录制的响应保证其解析器有测试覆盖 |
-| 同步所需的语音检测 | ffsubsync 用 WebRTC 的 VAD 检测语音，这是个 C 库，服务端不用 CGO 就无法链接 | 在 P26 中用 Go 实现 VAD，并在录制的样本上与 ffsubsync 的偏移量比较 |
+| 同步所需的语音检测 | Silero VAD 是神经网络，纯 Go 实现每 32 ms 音频约 70 万次乘加，一部电影需数分钟 CPU；ffsubsync 默认用 WebRTC 的 VAD 得出偏移量 | 卷积并行计算，只有 LSTM 按顺序，作为给播放让路的低优先级作业；在 P26 中于录制的样本上与 ffsubsync 的偏移量比较 |
 | 电视直播、录像与频道 | Jellyfin 中体量很大的部分，Mavio 既未采纳也未排除；插件平台不包含它们的提供者类型 | P21 之前决定 |
 | 客户端许可证与应用商店 | 客户端将与仓库其余部分一样采用 GPL-3.0，其条款与 App Store 的条款冲突；以 LGPL 构建的 FFmpeg（Apple 平台上为 AetherEngine 的框架）还要求允许用户重新链接，而 Android 应用中按 GPL-3.0 构建的 libmpv 使其受 GPL-3.0 约束 | 首次在 App Store 发布前决定：为客户端另定许可证、要求贡献者协议，或不通过 App Store 分发 |
 | AetherEngine | Apple 应用的第二引擎是一个年轻的包，主要由一位维护者开发，7.x 版本发布频繁 | P21 先做原型：macOS、iOS 与 tvOS 上 HDR10 Matroska 源的 EDR 输出、杜比视界、带样式的 ASS 字幕与画中画；固定版本并跟进其发布 |

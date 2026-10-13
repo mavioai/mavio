@@ -725,7 +725,8 @@ flowchart TD
 - [ ] OpenSubtitles hashes kept per file until it changes
 - [ ] Embedded subtitles: counted as present where the settings say so; extracted to sidecars by hand on local and network storage from the playback cache, never on cloud storage
 - [ ] Subzero's mods (common, tags, HI removal, OCR fixes with its dictionaries, colors, emoji, RTL, upper case, offsets, frame rates, two-point fit) and UTF-8 in `libs/subtitle`; hearing-impaired detection from text; language detection of sidecars without a language, Chinese scripts told apart
-- [ ] Synchronization (`libs/media/subsync`, ffsubsync's algorithm): against the audio on local and network storage, against another subtitle file on every storage class; after downloads under the settings' score thresholds, and by hand
+- [ ] Silero VAD (`libs/media/vad`): the 16 kHz model's inference in Go, its weights read from Silero's ONNX file by a tool, probabilities checked against onnxruntime's
+- [ ] Synchronization (`libs/media/subsync`, ffsubsync's algorithm over Silero's speech): against the audio on local and network storage, against another subtitle file on every storage class; after downloads under the settings' score thresholds, and by hand
 - [ ] End-to-end test (`apps/server/internal/server/subtitles_test.go`)
 - [ ] Later: translation (Google, Gemini, Lingarr) and Whisper transcription, as provider types of their own
 
@@ -746,7 +747,7 @@ flowchart TD
 | Series numbering | Releases and files follow TVDB's numbering, TMDB's metadata may number the same episodes otherwise, anime in particular | Display orders with TMDB episode groups and episode TVDB IDs in P15 and P16; scene mappings and XEM in P19 |
 | Indexer churn | Sites change their pages and APIs | Cardigann definitions are fetched at run time; the indexers plugin is upgraded from the catalog without a server release |
 | Subtitle site churn | Most of Bazarr's providers scrape sites that change their pages, block bots or close | The providers are in `plugins/subtitles`, upgraded from the catalog without a server release; recorded responses keep their parsers tested |
-| Speech detection for synchronization | ffsubsync detects speech with WebRTC's VAD, a C library the server cannot link without CGO | A VAD in Go, compared with ffsubsync's offsets on recorded samples in P26 |
+| Speech detection for synchronization | Silero VAD, a neural network, costs about 0.7 million multiply-adds every 32 ms of audio in pure Go, minutes of CPU for a film; ffsubsync's offsets come from WebRTC's VAD by default | The convolutions run in parallel and only the LSTM in order, as a low-priority job yielding to playback; offsets compared with ffsubsync's on recorded samples in P26 |
 | Live TV, DVR and channels | Large parts of Jellyfin that Mavio has neither adopted nor ruled out; the plugin platform leaves out their provider types | Decide before P21 |
 | Client licensing and app stores | The clients would be GPL-3.0 like the rest of the repository, whose terms conflict with the App Store's; LGPL builds of FFmpeg (AetherEngine's frameworks on Apple platforms) also oblige letting users relink them, and the Android apps' libmpv, built as GPL-3.0, binds them to GPL-3.0 | Decide before the first App Store release: a separate license for the clients, a contributor agreement, or no App Store distribution |
 | AetherEngine | The second engine of the Apple apps is a young package, mostly by one maintainer, releasing often in 7.x | Prototype first in P21: EDR output of an HDR10 Matroska source, Dolby Vision, styled ASS subtitles and Picture in Picture on macOS, iOS and tvOS; pin the version and follow its releases |
