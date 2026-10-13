@@ -9,6 +9,7 @@ require (
 	github.com/mavioai/mavio/libs/plugin v0.0.0
 	github.com/mavioai/mavio/libs/proto v0.0.0
 	github.com/nwaples/rardecode/v2 v2.4.5
+	github.com/ulikunitz/xz v0.5.15
 	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/net v0.61.0
 	golang.org/x/text v0.43.0
@@ -25,7 +26,6 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.27 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/stangelandcl/ppmd v0.1.1 // indirect
-	github.com/ulikunitz/xz v0.5.15 // indirect
 	go4.org v0.0.0-20260112195520-a5071408f32f // indirect
 )
 
