@@ -33,6 +33,9 @@ type LibraryPayload struct {
 // ItemPayload is the payload of JobRefresh jobs.
 type ItemPayload struct {
 	ItemID core.ID `json:"item_id"`
+	// Probed marks a refresh following a probe of new or changed media
+	// files.
+	Probed bool `json:"probed,omitempty"`
 }
 
 // ScanJob returns a job scanning lib at the given time. Scheduled and
@@ -51,6 +54,13 @@ func ScanJob(lib core.Library, at time.Time, scheduled bool) core.Job {
 func RefreshJob(itemID core.ID, at time.Time) core.Job {
 	payload, _ := json.Marshal(ItemPayload{ItemID: itemID})
 	return core.Job{ID: core.NewID(), Kind: JobRefresh, Payload: payload, UniqueKey: JobRefresh + ":" + itemID.String(), MaxAttempts: 3, RunAt: at}
+}
+
+// ProbedRefreshJob returns a job refreshing an item's metadata after its
+// new or changed media files were probed, which Jobs.Probed is told of.
+func ProbedRefreshJob(itemID core.ID, at time.Time) core.Job {
+	payload, _ := json.Marshal(ItemPayload{ItemID: itemID, Probed: true})
+	return core.Job{ID: core.NewID(), Kind: JobRefresh, Payload: payload, UniqueKey: JobRefresh + ":probed:" + itemID.String(), MaxAttempts: 3, RunAt: at}
 }
 
 // ProbeResult is what probing a media file found.
@@ -97,6 +107,10 @@ type Jobs struct {
 	// Loudness measures the loudness of tracks for libraries that ask for
 	// it; nil measures none.
 	Loudness LoudnessMeter
+	// Probed is told of the items refreshed after their new or changed
+	// media files were probed, with their metadata and streams; nil
+	// ignores them.
+	Probed func(ctx context.Context, lib core.Library, it core.Item)
 	// Segments returns the segment providers; nil asks none.
 	Segments func() []SegmentProvider
 	// Fails suppresses images of media that failed lately; nil retries.
@@ -339,6 +353,9 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 		}
 	}
 	next := []core.Job{RefreshJob(it.ID, j.now())}
+	if len(probed) > 0 {
+		next[0] = ProbedRefreshJob(it.ID, j.now())
+	}
 	if j.Keyframes != nil && !audio && keyframes {
 		next = append(next, KeyframesJob(it.ID, j.now(), KeyframesBackground))
 	}
@@ -371,6 +388,12 @@ func (j *Jobs) refresh(ctx context.Context, job core.Job) ([]core.Job, error) {
 	}
 	if err := j.Refresher.Refresh(ctx, lib, it.ID); err != nil {
 		return nil, ignoreGone(err)
+	}
+	if p.Probed && j.Probed != nil {
+		if it, err = j.Store.Items().Get(ctx, it.ID); err != nil {
+			return nil, ignoreGone(err)
+		}
+		j.Probed(ctx, lib, it)
 	}
 	if j.Images == nil {
 		return nil, nil

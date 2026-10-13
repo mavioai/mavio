@@ -234,6 +234,18 @@ func (r *Runtime) QueueSearch(ctx context.Context, itemIDs []core.ID) (int, erro
 	return len(itemIDs), nil
 }
 
+// Probed queues a search for the subtitles of a movie or episode whose
+// new or changed video files were probed, once its metadata is refreshed,
+// as Bazarr searches for those of the files Radarr and Sonarr add.
+func (r *Runtime) Probed(ctx context.Context, _ core.Library, it core.Item) {
+	if it.Kind != core.KindMovie && it.Kind != core.KindEpisode {
+		return
+	}
+	if _, err := r.QueueSearch(ctx, []core.ID{it.ID}); err != nil {
+		r.logger().WarnContext(ctx, "queue subtitle search", "item", it.ID, "err", err)
+	}
+}
+
 // Queue enqueues a run of a recurring job.
 func (r *Runtime) Queue(ctx context.Context, kind string) error {
 	job := RunJob(kind, r.now())

@@ -286,14 +286,9 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Subtitles: subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
 		Activity: activityLog, Logger: log,
 	}
-	// Imports complete the requests of what they import and search for
-	// its subtitles.
-	acq.Imported = func(ctx context.Context, itemID core.ID) {
-		reqs.Imported(ctx, itemID)
-		if _, err := subs.QueueSearch(ctx, []core.ID{itemID}); err != nil {
-			log.WarnContext(ctx, "queue subtitle search", "item", itemID, "err", err)
-		}
-	}
+	// Imports complete the requests of what they import; their scans
+	// search for its subtitles once the files are probed.
+	acq.Imported = reqs.Imported
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline),
@@ -392,7 +387,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		}
 		return nil
 	})
-	if worker, scanner := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, plugs.SegmentProviders, plugs.Resolvers, quietGate, volumeLedger, devices, growthPolicy); worker != nil {
+	if worker, scanner := newLibraryWorker(ctx, log, db, cfg.FFprobe, cfg.FFmpeg, imageServer, refresher, plugs.SegmentProviders, plugs.Resolvers, quietGate, volumeLedger, devices, growthPolicy, subs.Probed); worker != nil {
 		// Seasons and episodes scans find in wanted series are monitored
 		// as the series says, and episodes whose files go missing are
 		// unmonitored when the settings say to.
@@ -476,7 +471,7 @@ func newAcquisition(log *slog.Logger, db core.Store, set *settings.Manager, plug
 func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffprobe, ffmpeg string, analyzer library.ImageAnalyzer,
 	refresher *library.Refresher, segments func() []library.SegmentProvider, resolvers func() []library.FolderResolver,
 	quietGate *storage.QuietGate, volumeLedger *storage.VolumeLedger, devices *storage.Detector,
-	growthPolicy *storage.GrowthPolicy,
+	growthPolicy *storage.GrowthPolicy, probed func(ctx context.Context, lib core.Library, it core.Item),
 ) (*library.Worker, *library.Scanner) {
 	path, err := exec.LookPath(ffprobe)
 	if err != nil {
@@ -484,7 +479,7 @@ func newLibraryWorker(ctx context.Context, log *slog.Logger, db core.Store, ffpr
 		return nil, nil
 	}
 	jobs := &library.Jobs{
-		Store: db, Storages: refresher.Storages,
+		Store: db, Storages: refresher.Storages, Probed: probed,
 		Scanner: &library.Scanner{
 			Store: db, Resolver: library.NewResolver(), Logger: log, Storages: refresher.Storages,
 			Resolvers:    resolvers,

@@ -53,3 +53,35 @@ func TestPlaceholdersJob(t *testing.T) {
 		t.Errorf("after refresh = %+v, analyzed %v", again, analyzer.analyzed)
 	}
 }
+
+func TestProbedJobs(t *testing.T) {
+	f := newScan(t, core.LibraryMovies)
+	tree(t, f.root, "Up (2009)/Up (2009).mkv")
+	if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
+		t.Fatal(err)
+	}
+	now := func() time.Time { return f.clock }
+	var told []string
+	jobs := &Jobs{
+		Store: f.store, Scanner: f.sc, Prober: &fakeProber{}, Now: now,
+		Refresher: &Refresher{Store: f.store, Providers: []Provider{&fakeProvider{}}, Now: now},
+		Probed:    func(_ context.Context, _ core.Library, it core.Item) { told = append(told, it.Name) },
+	}
+	w := &Worker{Queue: f.store.Jobs(), Owner: "test", Handlers: jobs.Handlers()}
+	if err := jobs.Schedule(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	drain(t, w)
+	if len(told) != 1 || told[0] == "" {
+		t.Fatalf("told of %q, want the new film once, refreshed", told)
+	}
+	// A refresh without new files tells nothing.
+	job := RefreshJob(f.item("Up (2009)/Up (2009).mkv").ID, f.clock)
+	if _, err := f.store.Jobs().Enqueue(t.Context(), &job); err != nil {
+		t.Fatal(err)
+	}
+	drain(t, w)
+	if len(told) != 1 {
+		t.Errorf("told of %q after a plain refresh", told)
+	}
+}
