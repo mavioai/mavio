@@ -35,7 +35,7 @@ func (n Node) All(selector string) []Node {
 	if n.Node == nil {
 		return nil
 	}
-	sel, err := cascadia.Parse(selector)
+	sel, err := cascadia.ParseGroup(selector)
 	if err != nil {
 		return nil
 	}
