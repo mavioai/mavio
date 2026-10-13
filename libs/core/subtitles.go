@@ -289,10 +289,12 @@ const (
 	// SubtitleFolderCurrent saves subtitles beside the video.
 	SubtitleFolderCurrent SubtitleFolder = "current"
 	// SubtitleFolderRelative saves them in a folder of the video's
-	// folder, SubtitleSettings.CustomFolder.
+	// folder, named SubtitleSettings.CustomFolder.
 	SubtitleFolderRelative SubtitleFolder = "relative"
-	// SubtitleFolderAbsolute saves them in an absolute folder,
-	// SubtitleSettings.CustomFolder.
+	// SubtitleFolderAbsolute saves them in one folder for every video,
+	// SubtitleSettings.CustomFolder: an absolute path or a remote path,
+	// as library paths. Subtitles are named after their videos' file
+	// names, so videos named alike share them.
 	SubtitleFolderAbsolute SubtitleFolder = "absolute"
 )
 
@@ -427,9 +429,10 @@ func (s *SubtitleSettings) Validate() error {
 		return fmt.Errorf("%w: hearing-impaired extension %q", ErrInvalid, s.HIExtension)
 	case s.Folder != SubtitleFolderCurrent && s.Folder != SubtitleFolderRelative && s.Folder != SubtitleFolderAbsolute:
 		return fmt.Errorf("%w: subtitle folder %q", ErrInvalid, s.Folder)
-	case s.Folder == SubtitleFolderRelative && (s.CustomFolder == "" || isAbs(s.CustomFolder) || slices.Contains(strings.Split(s.CustomFolder, "/"), "..")):
+	case s.Folder == SubtitleFolderRelative && (s.CustomFolder == "" || s.CustomFolder == "." || s.CustomFolder == ".." ||
+		strings.ContainsAny(s.CustomFolder, `/\:`)):
 		return fmt.Errorf("%w: relative subtitle folder %q", ErrInvalid, s.CustomFolder)
-	case s.Folder == SubtitleFolderAbsolute && !isAbs(s.CustomFolder):
+	case s.Folder == SubtitleFolderAbsolute && validLibraryPath(s.CustomFolder) != nil:
 		return fmt.Errorf("%w: absolute subtitle folder %q", ErrInvalid, s.CustomFolder)
 	case s.UpgradeDays < 0 || s.UpgradeDays > 30:
 		return fmt.Errorf("%w: subtitle upgrade days outside 0–30", ErrInvalid)

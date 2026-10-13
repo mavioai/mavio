@@ -280,7 +280,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			return err
 		},
 	}
-	subFiles := &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Logger: log}
+	subFiles := &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Folder: subtitleFolder(set), Logger: log}
 	subs := &subtitles.Runtime{
 		Store: db, Settings: func() core.SubtitleSettings { return set.Get().Subtitles }, Providers: plugs.SubtitlePlugins,
 		Subtitles: subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
@@ -397,6 +397,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		// as the series says, and episodes whose files go missing are
 		// unmonitored when the settings say to.
 		scanner.NewSeasonMonitored, scanner.OnMissing = acq.NewSeasonMonitored, acq.UnmonitorMissing
+		scanner.SubtitleFolder = subtitleFolder(set)
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err
@@ -587,5 +588,13 @@ func (l *lateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		l.h.ServeHTTP(w, r)
 	case <-r.Context().Done():
 		http.Error(w, "server starting", http.StatusServiceUnavailable)
+	}
+}
+
+// subtitleFolder gives where the settings save subtitle files.
+func subtitleFolder(set *settings.Manager) func() library.SubtitleFolder {
+	return func() library.SubtitleFolder {
+		s := set.Get().Subtitles
+		return library.SubtitleFolder{Kind: s.Folder, Custom: s.CustomFolder}
 	}
 }

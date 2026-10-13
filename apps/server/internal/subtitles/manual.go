@@ -237,7 +237,7 @@ func (r *Runtime) Modify(ctx context.Context, itemID core.ID, p string, mods []s
 	if err != nil {
 		return err
 	}
-	data, err := r.Subtitles.ReadFile(ctx, t.lib, itemID, p)
+	data, err := r.Subtitles.ReadFile(ctx, itemID, p)
 	if err != nil {
 		return err
 	}
@@ -256,7 +256,7 @@ func (r *Runtime) Modify(ctx context.Context, itemID core.ID, p string, mods []s
 	if data, err = applyMods(parsed, format, sub.language.Language, mods); err != nil {
 		return err
 	}
-	return r.Subtitles.WriteFile(ctx, t.lib, itemID, p, data)
+	return r.Subtitles.WriteFile(ctx, itemID, p, data)
 }
 
 // Sync synchronizes a subtitle file of an item against its video's audio.

@@ -726,10 +726,9 @@ flowchart TD
   - [x] 需要登录、cookie 或验证码的站点：Addic7ed、AvistaZ、CinemaZ、Karagarga、LegendasDivx、Pipocas、Subs4Series、Titulky、TurkceAltyazi.org、XSubs、Zimuku
   - [ ] 后续：Jimaku 通过 `internal/anidb` 获取动漫 ID；以统一的发布名解析器替代 `scrape` 与 `archivemix` 中对 guessit 的近似（季、集、年份与标题之外的属性）；合并 `scrape` 与 `sitekit` 的名称清理与发布组辅助函数，并为 `sitekit` 补充测试；提供者缓存在重启之间保存在数据目录中；Tsukihime 的流媒体服务猜测；GreekSubtitles 的编码提示；Bazarr 随机挑选 user agent 之处也随机挑选
 - [ ] `SubtitleService` 与作业：字幕配置及其分配与字幕设置、缺少的字幕、缺字幕搜索、升级、入库与扫描时的搜索、手动搜索、下载、上传、删除、历史、阻止列表；`subtitle.downloaded` 活动；下载后按设置的分数阈值同步时间轴，以及手动同步，本地和网络存储上按音频，所有存储类别上按另一个字幕文件
-  - [x] `apps/server/internal/subtitles` 与 `SubtitleService`：字幕配置、分配与设置；缺少的字幕按配置与流即时求出；缺字幕搜索与升级作为周期作业；文件入库时搜索；手动搜索、下载、上传、删除、修正与加入阻止列表；历史与阻止列表；无法使用的字幕加入阻止列表，保存失败的不加入；`subtitle.*` 活动；下载后按阈值以及手动按音频同步时间轴，仅限本地和网络存储；本地和网络文件的 NapiProjekt 哈希；字幕保存在视频旁，拒绝其他文件夹设置
+  - [x] `apps/server/internal/subtitles` 与 `SubtitleService`：字幕配置、分配与设置；缺少的字幕按配置与流即时求出；缺字幕搜索与升级作为周期作业；文件入库时搜索；手动搜索、下载、上传、删除、修正与加入阻止列表；历史与阻止列表；无法使用的字幕加入阻止列表，保存失败的不加入；`subtitle.*` 活动；下载后按阈值以及手动按音频同步时间轴，仅限本地和网络存储；本地和网络文件的 NapiProjekt 哈希；字幕保存在视频旁、视频所在目录下的某个目录或一个绝对目录中，扫描也在那里查找
   - [ ] 扫描发现文件时的搜索（在此之前由缺字幕搜索找到它）
   - [ ] 按另一个字幕文件同步时间轴
-  - [ ] 相对于视频的字幕文件夹与绝对字幕文件夹，待扫描能在那里找到外挂字幕
   - [ ] 若大型媒体库即时列出缺少的字幕太慢，则将其保存在表中
 - [x] 每个文件的 OpenSubtitles 哈希保存到文件变化为止：保存在其媒体源上，文件变化时扫描会替换媒体源
 - [ ] 内嵌字幕：按设置计为已有；本地和网络存储上手动从播放缓存提取为外挂字幕，云存储上从不提取

@@ -110,7 +110,7 @@ func (r *Runtime) sync(ctx context.Context, t *target, file string, l core.Subti
 	if !subtitle.CanParse(format) {
 		return SyncResult{}, fmt.Errorf("%w: %s subtitles are not synchronized", ErrUnavailable, format)
 	}
-	data, err := r.Subtitles.ReadFile(ctx, t.lib, t.item.ID, file)
+	data, err := r.Subtitles.ReadFile(ctx, t.item.ID, file)
 	if err != nil {
 		return SyncResult{}, err
 	}
@@ -158,7 +158,7 @@ func (r *Runtime) sync(ctx context.Context, t *target, file string, l core.Subti
 	if err != nil {
 		return SyncResult{}, err
 	}
-	if err := r.Subtitles.WriteFile(ctx, t.lib, t.item.ID, file, out); err != nil {
+	if err := r.Subtitles.WriteFile(ctx, t.item.ID, file, out); err != nil {
 		return SyncResult{}, err
 	}
 	e := core.SubtitleHistoryEvent{

@@ -308,9 +308,6 @@ func (s *SubtitleService) UpdateSubtitleSettings(ctx context.Context, req *acqui
 			return nil, invalid(err)
 		}
 	}
-	if sub.Folder != core.SubtitleFolderCurrent {
-		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("subtitles are saved beside their videos only"))
-	}
 	all := s.Settings.Get()
 	all.Subtitles = sub
 	all, err = s.Settings.Update(ctx, all)

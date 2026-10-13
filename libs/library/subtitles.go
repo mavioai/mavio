@@ -75,7 +75,7 @@ type DownloadedSubtitle struct {
 var subtitleFormats = []string{"srt", "ass", "ssa", "vtt", "sub"}
 
 // Subtitles finds subtitles for videos and saves them beside the videos,
-// where they become subtitle streams.
+// or in the subtitle folder, where they become subtitle streams.
 type Subtitles struct {
 	Store     core.Store
 	Providers []SubtitleProvider
@@ -84,7 +84,10 @@ type Subtitles struct {
 	// Storages opens the storage of library paths; nil opens local
 	// folders only.
 	Storages *Storages
-	Logger   *slog.Logger
+	// Folder gives where subtitle files are saved and found; nil keeps
+	// them beside their videos.
+	Folder func() SubtitleFolder
+	Logger *slog.Logger
 }
 
 // providers returns the subtitle providers a library uses, in its order.
@@ -219,15 +222,17 @@ func (s *Subtitles) Download(ctx context.Context, lib core.Library, itemID, sour
 			return core.MediaStream{}, fmt.Errorf("download subtitle: %w", err)
 		}
 	}
-	return s.Save(ctx, lib, itemID, sources[si].ID, func(fsys fs.FS, video string) (string, error) {
-		return subtitleName(fsys, video, sub, format), nil
+	return s.Save(ctx, lib, itemID, sources[si].ID, func(fsys fs.FS, stem string) (string, error) {
+		return subtitleName(fsys, stem, sub, format), nil
 	}, data)
 }
 
-// Save writes a subtitle file beside an item's video and adds it to the
-// video's streams, which it returns. name names the file from the video's
-// path, both relative to the library folder, given the folder's files.
-func (s *Subtitles) Save(ctx context.Context, lib core.Library, itemID, sourceID core.ID, name func(fsys fs.FS, video string) (string, error), data []byte) (core.MediaStream, error) {
+// Save writes a subtitle file of an item's video, beside it or in the
+// subtitle folder, and adds it to the video's streams, which it returns.
+// name names the file from stem, the video's name without its extension
+// in the folder saved to, given the folder's files; both are relative to
+// the folder's storage.
+func (s *Subtitles) Save(ctx context.Context, lib core.Library, itemID, sourceID core.ID, name func(fsys fs.FS, stem string) (string, error), data []byte) (core.MediaStream, error) {
 	_, sources, si, err := s.video(ctx, itemID, sourceID)
 	if err != nil {
 		return core.MediaStream{}, err
@@ -237,22 +242,36 @@ func (s *Subtitles) Save(ctx context.Context, lib core.Library, itemID, sourceID
 	if !ok {
 		return core.MediaStream{}, fmt.Errorf("%w: %s is outside the library's folders", core.ErrInvalid, src.Path)
 	}
+	folder := s.folder()
+	dir := path.Dir(rel)
+	switch {
+	case folder.relative() != "":
+		dir = path.Join(dir, folder.relative())
+	case folder.absolute() != "":
+		root, dir = folder.absolute(), "."
+	}
 	st, err := s.Storages.Open(ctx, root)
 	if err != nil {
 		return core.MediaStream{}, err
 	}
 	defer st.Close()
-	file, err := name(core.StorageFS(ctx, st), rel)
+	stem := path.Join(dir, fileNameWithoutExt(rel))
+	file, err := name(core.StorageFS(ctx, st), stem)
 	if err != nil {
 		return core.MediaStream{}, err
 	}
-	if path.Dir(file) != path.Dir(rel) {
-		return core.MediaStream{}, fmt.Errorf("%w: subtitle %s is not beside its video", core.ErrInvalid, file)
+	if path.Dir(file) != dir {
+		return core.MediaStream{}, fmt.Errorf("%w: subtitle %s is not in the subtitle folder %s", core.ErrInvalid, file, dir)
+	}
+	if dir != path.Dir(rel) && dir != "." {
+		if err := st.MkdirAll(ctx, dir); err != nil {
+			return core.MediaStream{}, fmt.Errorf("save subtitle: %w", err)
+		}
 	}
 	if err := st.WriteFile(ctx, file, data); err != nil {
 		return core.MediaStream{}, fmt.Errorf("save subtitle: %w", err)
 	}
-	if err := s.refreshSidecars(ctx, st, root, rel, itemID, sources, si); err != nil {
+	if err := s.refreshSidecars(ctx, lib, itemID, sources, si); err != nil {
 		return core.MediaStream{}, err
 	}
 	saved := path.Join(root, file)
@@ -271,20 +290,16 @@ func (s *Subtitles) Remove(ctx context.Context, lib core.Library, itemID core.ID
 	if err != nil {
 		return err
 	}
-	root, rel, ok := libraryRoot(lib, sources[si].Path)
-	if !ok {
-		return fmt.Errorf("%w: %s is outside the library's folders", core.ErrInvalid, sources[si].Path)
-	}
-	_, name, _ := RootOf([]string{root}, file)
-	st, err := s.Storages.Open(ctx, root)
+	st, err := s.Storages.Open(ctx, cleanRoot(path.Dir(file)))
 	if err != nil {
 		return err
 	}
-	defer st.Close()
-	if err := st.Remove(ctx, name); err != nil && !errors.Is(err, fs.ErrNotExist) {
+	err = st.Remove(ctx, path.Base(file))
+	_ = st.Close()
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return fmt.Errorf("delete subtitle: %w", err)
 	}
-	return s.refreshSidecars(ctx, st, root, rel, itemID, sources, si)
+	return s.refreshSidecars(ctx, lib, itemID, sources, si)
 }
 
 // sourceWith returns an item's media sources and which has the subtitle
@@ -304,15 +319,11 @@ func (s *Subtitles) sourceWith(ctx context.Context, itemID core.ID, file string)
 
 // ReadFile reads a subtitle file of an item's video, the ExternalPath of
 // one of its streams.
-func (s *Subtitles) ReadFile(ctx context.Context, lib core.Library, itemID core.ID, file string) ([]byte, error) {
+func (s *Subtitles) ReadFile(ctx context.Context, itemID core.ID, file string) ([]byte, error) {
 	if _, _, err := s.sourceWith(ctx, itemID, file); err != nil {
 		return nil, err
 	}
-	root, name, ok := libraryRoot(lib, file)
-	if !ok {
-		return nil, fmt.Errorf("%w: %s is outside the library's folders", core.ErrInvalid, file)
-	}
-	f, err := s.Storages.OpenFile(ctx, root, name)
+	f, err := s.Storages.OpenPath(ctx, file)
 	if err != nil {
 		return nil, err
 	}
@@ -322,20 +333,16 @@ func (s *Subtitles) ReadFile(ctx context.Context, lib core.Library, itemID core.
 
 // WriteFile replaces a subtitle file of an item's video, the ExternalPath
 // of one of its streams, as after modifying or synchronizing it.
-func (s *Subtitles) WriteFile(ctx context.Context, lib core.Library, itemID core.ID, file string, data []byte) error {
+func (s *Subtitles) WriteFile(ctx context.Context, itemID core.ID, file string, data []byte) error {
 	if _, _, err := s.sourceWith(ctx, itemID, file); err != nil {
 		return err
 	}
-	root, name, ok := libraryRoot(lib, file)
-	if !ok {
-		return fmt.Errorf("%w: %s is outside the library's folders", core.ErrInvalid, file)
-	}
-	st, err := s.Storages.Open(ctx, root)
+	st, err := s.Storages.Open(ctx, cleanRoot(path.Dir(file)))
 	if err != nil {
 		return err
 	}
 	defer st.Close()
-	if err := st.WriteFile(ctx, name, data); err != nil {
+	if err := st.WriteFile(ctx, path.Base(file), data); err != nil {
 		return fmt.Errorf("save subtitle: %w", err)
 	}
 	return nil
@@ -344,30 +351,21 @@ func (s *Subtitles) WriteFile(ctx context.Context, lib core.Library, itemID core
 // maxSubtitleSize bounds the subtitle files read.
 const maxSubtitleSize = 64 << 20
 
-// refreshSidecars reads the subtitle files of a video's folder again, as
-// a scan sees them, into the streams of sources[si], and stores the
-// sources.
-func (s *Subtitles) refreshSidecars(ctx context.Context, st core.Storage, root, rel string, itemID core.ID, sources []core.MediaSource, si int) error {
+// refreshSidecars reads the subtitle files of a video again, as a scan
+// sees them, into the streams of sources[si], and stores the sources.
+func (s *Subtitles) refreshSidecars(ctx context.Context, lib core.Library, itemID core.ID, sources []core.MediaSource, si int) error {
 	src := &sources[si]
-	dir := path.Dir(rel)
-	entries, err := st.ReadDir(ctx, dir)
+	files, err := s.readSidecarDirs(ctx, lib, src.Path)
 	if err != nil {
 		return err
 	}
-	files := map[string]core.FolderEntry{}
-	for _, e := range entries {
-		if info, err := e.Info(); err == nil {
-			files[path.Join(root, dir, e.Name())] = core.FolderEntry{Name: e.Name(), IsDir: e.IsDir(), Size: info.Size(), ModTime: info.ModTime()}
-		}
-	}
-	src.Streams = withSidecars(src.Streams, sidecars(naming.Default(), src.Path, files))
+	src.Streams = withSidecars(src.Streams, sidecars(naming.Default(), src.Path, s.folder().dirs(src.Path), files))
 	return s.Store.MediaSources().Replace(ctx, itemID, sources)
 }
 
-// subtitleName returns a free name for a subtitle beside a video, both
-// relative to the library folder.
-func subtitleName(fsys fs.FS, video string, sub DownloadedSubtitle, format string) string {
-	stem := strings.TrimSuffix(video, path.Ext(video))
+// subtitleName returns a free name for a subtitle of the video named
+// stem, without its extension.
+func subtitleName(fsys fs.FS, stem string, sub DownloadedSubtitle, format string) string {
 	base := stem + "." + cmp.Or(sub.Language, "und")
 	if sub.HearingImpaired {
 		base += ".sdh"

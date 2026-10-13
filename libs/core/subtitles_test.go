@@ -104,6 +104,8 @@ func TestSubtitleSettingsValidate(t *testing.T) {
 		{"relative folder escaping", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderRelative, "../subs" }, false},
 		{"relative folder absolute", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderRelative, "/subs" }, false},
 		{"absolute folder relative", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderAbsolute, "subs" }, false},
+		{"relative folder nested", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderRelative, "Subs/en" }, false},
+		{"absolute folder remote", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderAbsolute, "rclone:gdrive:subs" }, true},
 		{"upgrade days", func(s *SubtitleSettings) { s.UpgradeDays = 31 }, false},
 		{"interval", func(s *SubtitleSettings) { s.UpgradeInterval = time.Minute }, false},
 		{"default language", func(s *SubtitleSettings) { s.DefaultAudioLanguage = "e n" }, false},

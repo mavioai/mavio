@@ -253,12 +253,12 @@ func (r *Runtime) prepare(data []byte, format, lang string, original bool, s *co
 	return text, format, nil
 }
 
-// fileName returns the name of a subtitle beside a video, both relative
-// to the library folder, as Bazarr names them:
+// fileName returns the name of a subtitle of the video named stem,
+// without its extension, as Bazarr names them:
 // "<video>.<language>[.forced|.<hi>].<format>", or "<video>.<format>"
 // when the settings save a single language.
-func fileName(video string, l core.SubtitleLanguage, format string, s *core.SubtitleSettings) string {
-	name := strings.TrimSuffix(video, path.Ext(video))
+func fileName(stem string, l core.SubtitleLanguage, format string, s *core.SubtitleSettings) string {
+	name := stem
 	if !s.SingleLanguage {
 		name += "." + l.Language
 		switch {
@@ -271,11 +271,11 @@ func fileName(video string, l core.SubtitleLanguage, format string, s *core.Subt
 	return name + "." + format
 }
 
-// save writes a subtitle beside the target's video, replacing one of the
-// same name, and returns its path.
+// save writes a subtitle of the target's video, beside it or in the
+// subtitle folder, replacing one of the same name, and returns its path.
 func (r *Runtime) save(ctx context.Context, t *target, l core.SubtitleLanguage, format string, data []byte, s *core.SubtitleSettings) (string, error) {
-	st, err := r.Subtitles.Save(ctx, t.lib, t.item.ID, t.source().ID, func(_ fs.FS, video string) (string, error) {
-		return fileName(video, l, format, s), nil
+	st, err := r.Subtitles.Save(ctx, t.lib, t.item.ID, t.source().ID, func(_ fs.FS, stem string) (string, error) {
+		return fileName(stem, l, format, s), nil
 	}, data)
 	if err != nil {
 		return "", err

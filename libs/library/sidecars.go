@@ -28,20 +28,21 @@ var sidecarCodecs = map[string]string{
 // (subtitle.ScoreSubtitle).
 const minSidecarScore = 500
 
-// sidecars returns the subtitle files beside a video as external streams,
+// sidecars returns the subtitle files of a video in dirs, the folders
+// SubtitleFolder.dirs gives, as external streams,
 // best first: the subtitle scoring of docs/architecture.md §9.1 without a
 // user's languages, so files named exactly like the video, unflagged and
 // in richer formats come first. Languages come from the file names,
 // Chinese variants included. entries are the folder's files.
-func sidecars(parser *naming.Parser, video string, entries map[string]core.FolderEntry) []core.MediaStream {
-	dir, stem := path.Dir(video), fileNameWithoutExt(video)
+func sidecars(parser *naming.Parser, video string, dirs []string, entries map[string]core.FolderEntry) []core.MediaStream {
+	stem := fileNameWithoutExt(video)
 	type candidate struct {
 		stream core.MediaStream
 		score  int
 	}
 	var found []candidate
 	for p, e := range entries {
-		if e.IsDir || path.Dir(p) != dir || p == video {
+		if e.IsDir || !slices.Contains(dirs, path.Dir(p)) || p == video {
 			continue
 		}
 		ext := strings.ToLower(path.Ext(p))

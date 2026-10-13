@@ -216,16 +216,38 @@ func TestSubtitles(t *testing.T) {
 		t.Errorf("modified subtitles = %q, %v", data, err)
 	}
 
-	// Subtitles are saved beside their videos only.
+	// Subtitles are saved in a folder of the video's folder, or in one
+	// folder for every video.
 	settings, err := subs.GetSubtitleSettings(ctx, &acquisitionv1.GetSubtitleSettingsRequest{})
 	if err != nil {
 		t.Fatalf("GetSubtitleSettings: %v", err)
 	}
 	s := settings.GetSettings()
+	absolute := filepath.ToSlash(t.TempDir())
+	upload := func(folder acquisitionv1.SubtitleFolder, custom, lang, want string) {
+		t.Helper()
+		s.SetFolder(folder)
+		s.SetCustomFolder(custom)
+		if _, err := subs.UpdateSubtitleSettings(ctx, acquisitionv1.UpdateSubtitleSettingsRequest_builder{Settings: s}.Build()); err != nil {
+			t.Fatalf("UpdateSubtitleSettings with folder %s: %v", custom, err)
+		}
+		up, err := subs.UploadSubtitle(ctx, acquisitionv1.UploadSubtitleRequest_builder{
+			ItemId: new(movieID), Data: []byte("1\n00:00:01,000 --> 00:00:02,000\nHi\n"), Format: new("srt"),
+			Language: acquisitionv1.SubtitleLanguageSpec_builder{Language: new(lang)}.Build(),
+		}.Build())
+		if err != nil || filepath.ToSlash(up.GetPath()) != want {
+			t.Fatalf("UploadSubtitle into %s = %v, %v, want %s", custom, up, err, want)
+		}
+		if _, err := os.Stat(want); err != nil {
+			t.Errorf("uploaded subtitle: %v", err)
+		}
+	}
+	upload(acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_RELATIVE, "Subs", "de", filepath.ToSlash(folder)+"/Subs/The Matrix (1999).de.srt")
+	upload(acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_ABSOLUTE, absolute, "es", absolute+"/The Matrix (1999).es.srt")
 	s.SetFolder(acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_RELATIVE)
-	s.SetCustomFolder("Subs")
-	if _, err := subs.UpdateSubtitleSettings(ctx, acquisitionv1.UpdateSubtitleSettingsRequest_builder{Settings: s}.Build()); connect.CodeOf(err) != connect.CodeFailedPrecondition {
-		t.Errorf("UpdateSubtitleSettings with a relative folder: err = %v, want FailedPrecondition", err)
+	s.SetCustomFolder("Subs/de")
+	if _, err := subs.UpdateSubtitleSettings(ctx, acquisitionv1.UpdateSubtitleSettingsRequest_builder{Settings: s}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+		t.Errorf("UpdateSubtitleSettings with a nested relative folder: err = %v, want InvalidArgument", err)
 	}
 	s.SetFolder(acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_UNSPECIFIED)
 	s.SetCustomFolder("")

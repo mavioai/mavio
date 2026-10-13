@@ -193,3 +193,9 @@ func (l *localStorage) LocalPath(name string) string {
 func (l *localStorage) Capabilities() core.StorageCapabilities {
 	return core.StorageCapabilities{Local: true, HardLinks: true, AtomicRename: true, FolderModTimes: true}
 }
+
+// OpenPath opens a file by its path, such as a subtitle file a stream
+// records; closing the file releases its storage.
+func (s *Storages) OpenPath(ctx context.Context, p string) (core.File, error) {
+	return s.OpenFile(ctx, cleanRoot(path.Dir(p)), path.Base(p))
+}

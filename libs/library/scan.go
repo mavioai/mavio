@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"maps"
 	"path"
 	"path/filepath"
 	"slices"
@@ -74,6 +75,9 @@ type Scanner struct {
 	// OnMissing is told of the items a scan marked missing; nil ignores
 	// them.
 	OnMissing func(ctx context.Context, lib core.Library, ids []core.ID)
+	// SubtitleFolder gives where subtitle files are found besides beside
+	// their videos; nil finds them beside their videos only.
+	SubtitleFolder func() SubtitleFolder
 }
 
 // classify returns the storage class of a file or folder of lib.
@@ -123,6 +127,20 @@ func (s *Scanner) Scan(ctx context.Context, lib core.Library) (ScanStats, error)
 		return ScanStats{}, err
 	}
 	sc := &scan{Scanner: s, lib: lib, gen: gen, devices: s.Devices, stats: ScanStats{Generation: gen}}
+	if s.SubtitleFolder != nil {
+		sc.subFolder = s.SubtitleFolder()
+	}
+	sc.absSubs = sync.OnceValue(func() *sidecarIndex {
+		dir := sc.subFolder.absolute()
+		if dir == "" {
+			return nil
+		}
+		x, err := readSidecarIndex(ctx, s.Storages, dir)
+		if err != nil {
+			s.logger().WarnContext(ctx, "subtitle folder unreadable", "path", dir, "err", err)
+		}
+		return x
+	})
 	if sc.devices == nil {
 		sc.devices = &storage.Detector{}
 	}
@@ -163,6 +181,11 @@ type scan struct {
 	devices *storage.Detector
 	mu      sync.Mutex
 	stats   ScanStats
+	// subFolder is where subtitle files are found besides beside their
+	// videos; absSubs lists the absolute subtitle folder once, when the
+	// scan saves a video.
+	subFolder SubtitleFolder
+	absSubs   func() *sidecarIndex
 }
 
 func (sc *scan) count(f func(*ScanStats)) {
@@ -448,16 +471,44 @@ func (sc *scan) touch(ctx context.Context, res Result, parent core.ID) (core.ID,
 	return it.ID, err
 }
 
+// subtitleFiles lists the relative subtitle folders among a folder's
+// entries, if the folder has videos; nil when there are none.
+func (sc *scan) subtitleFiles(ctx context.Context, rfs rootFS, res Result, stats map[string]core.FolderEntry) map[string]core.FolderEntry {
+	name := sc.subFolder.relative()
+	if name == "" || (res.Item == nil && len(res.Items) == 0) {
+		return nil
+	}
+	var out map[string]core.FolderEntry
+	for p, e := range stats {
+		if !e.IsDir || path.Base(p) != name {
+			continue
+		}
+		entries, err := rfs.List(p)
+		if err != nil {
+			sc.logger().WarnContext(ctx, "subtitle folder unreadable", "path", p, "err", err)
+			continue
+		}
+		if out == nil {
+			out = map[string]core.FolderEntry{}
+		}
+		for _, e := range entries {
+			out[e.Path] = core.FolderEntry{Name: path.Base(e.Path), IsDir: e.IsDir}
+		}
+	}
+	return out
+}
+
 // save writes the items of a folder, queues probes of new or changed
 // media files, which refresh their items' metadata once probed, and
 // refreshes of new items without media, such as series and albums. It
 // returns the item the folder's subfolders belong to.
 func (sc *scan) save(ctx context.Context, rfs rootFS, res Result, parent core.ID, stats map[string]core.FolderEntry) (core.ID, error) {
 	folderParent := parent
+	subStats := sc.subtitleFiles(ctx, rfs, res, stats)
 	var probes, refreshes []core.ID
 	err := sc.Store.InTx(ctx, func(tx core.Store) error {
 		probes, refreshes = nil, nil
-		p := saver{scan: sc, tx: tx, rfs: rfs, stats: stats, probes: &probes, refreshes: &refreshes}
+		p := saver{scan: sc, tx: tx, rfs: rfs, stats: stats, subStats: subStats, probes: &probes, refreshes: &refreshes}
 		if res.Item != nil {
 			id, err := p.node(ctx, *res.Item, parent, core.NilID)
 			if err != nil {
@@ -514,9 +565,24 @@ type saver struct {
 	tx    core.Store
 	rfs   rootFS
 	stats map[string]core.FolderEntry
-	saved int
+	// subStats are the files of the subtitle folders, as subtitleFiles
+	// gives them.
+	subStats map[string]core.FolderEntry
+	saved    int
 	// probes and refreshes collect the items to probe and to refresh.
 	probes, refreshes *[]core.ID
+}
+
+// sidecarFiles returns the files a video's subtitle files are found
+// among.
+func (p *saver) sidecarFiles(video string) map[string]core.FolderEntry {
+	if p.subStats == nil && p.scan.subFolder.absolute() == "" {
+		return p.stats
+	}
+	files := maps.Clone(p.stats)
+	maps.Copy(files, p.subStats)
+	p.scan.absSubs().add(video, files)
+	return files
 }
 
 func (p *saver) extras(ctx context.Context, extras []Node, owner core.ID) error {
@@ -799,8 +865,8 @@ func (p *saver) sources(ctx context.Context, n Node, itemID core.ID, isNew bool)
 		if !reused {
 			probe = true
 		}
-		// Subtitle files beside the video come and go without probing.
-		subs := sidecars(p.scan.Resolver.Parser, v.Path, p.stats)
+		// Subtitle files come and go without probing.
+		subs := sidecars(p.scan.Resolver.Parser, v.Path, p.scan.subFolder.dirs(v.Path), p.sidecarFiles(v.Path))
 		if !sameSidecars(sidecarsOf(src.Streams), subs) {
 			src.Streams = withSidecars(src.Streams, subs)
 			same = false

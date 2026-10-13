@@ -1862,14 +1862,17 @@ export enum SubtitleFolder {
   UNSPECIFIED = 0,
 
   /**
-   * In a folder of the video's folder, custom_folder.
+   * In a folder of the video's folder, named custom_folder: a single
+   * folder name.
    *
    * @generated from enum value: SUBTITLE_FOLDER_RELATIVE = 1;
    */
   RELATIVE = 1,
 
   /**
-   * In an absolute folder, custom_folder.
+   * In one folder for every video, custom_folder: an absolute path or a
+   * remote path, as library paths. Subtitles there are named after
+   * their videos' file names.
    *
    * @generated from enum value: SUBTITLE_FOLDER_ABSOLUTE = 2;
    */

@@ -1,7 +1,9 @@
 package library
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"slices"
 	"testing"
@@ -73,4 +75,88 @@ func TestScanSidecarSubtitles(t *testing.T) {
 	if got := describe(f.store.sources[up.ID][0].Streams); len(got) != 6 || !slices.Contains(got, "1 Up (2009).fr.srt subrip fre") {
 		t.Errorf("after adding a subtitle = %q", got)
 	}
+}
+
+func TestSubtitleFolders(t *testing.T) {
+	sub := []byte("1\n00:00:01,000 --> 00:00:02,000\nHi\n")
+	paths := func(streams []core.MediaStream) []string {
+		var out []string
+		for _, s := range sidecarsOf(streams) {
+			out = append(out, s.ExternalPath)
+		}
+		slices.Sort(out)
+		return out
+	}
+	t.Run("relative", func(t *testing.T) {
+		f := newScan(t, core.LibraryMovies)
+		folder := SubtitleFolder{Kind: core.SubtitleFolderRelative, Custom: "Subs"}
+		f.sc.SubtitleFolder = func() SubtitleFolder { return folder }
+		tree(t, f.root, "Up (2009)/Up (2009).mkv", "Up (2009)/Up (2009).en.srt", "Up (2009)/Subs/Up (2009).ja.srt", "Up (2009)/Subs/Other.srt")
+		f.scan()
+		up := f.item("Up (2009)/Up (2009).mkv")
+		dir := f.root + "/Up (2009)"
+		want := []string{dir + "/Subs/Up (2009).ja.srt", dir + "/Up (2009).en.srt"}
+		if got := paths(f.store.sources[up.ID][0].Streams); !slices.Equal(got, want) {
+			t.Errorf("scanned = %q, want = %q", got, want)
+		}
+		// A file added to the subtitle folder changes the video's folder.
+		f.store.sources[up.ID][0].ProbedAt = f.clock
+		tree(t, f.root, "Up (2009)/Subs/Up (2009).fr.srt")
+		touchLater(t, filepath.Join(f.root, "Up (2009)", "Subs"), time.Minute)
+		f.scan()
+		if got := paths(f.store.sources[up.ID][0].Streams); len(got) != 3 {
+			t.Errorf("after adding = %q", got)
+		}
+
+		s := &Subtitles{Store: f.store, Folder: func() SubtitleFolder { return folder }}
+		st, err := s.Save(t.Context(), f.lib, up.ID, core.ID{}, func(_ fs.FS, stem string) (string, error) { return stem + ".de.srt", nil }, sub)
+		if err != nil || st.ExternalPath != dir+"/Subs/Up (2009).de.srt" || st.Language != "ger" {
+			t.Fatalf("Save = %+v, %v", st, err)
+		}
+		if data, err := s.ReadFile(t.Context(), up.ID, st.ExternalPath); err != nil || string(data) != string(sub) {
+			t.Errorf("ReadFile = %q, %v", data, err)
+		}
+		if err := s.Remove(t.Context(), f.lib, up.ID, st.ExternalPath); err != nil || exists(f.root, "Up (2009)/Subs/Up (2009).de.srt") {
+			t.Errorf("Remove = %v", err)
+		}
+		if got := paths(f.store.sources[up.ID][0].Streams); len(got) != 3 {
+			t.Errorf("after removing = %q", got)
+		}
+	})
+	t.Run("absolute", func(t *testing.T) {
+		f := newScan(t, core.LibraryMovies)
+		abs := filepath.ToSlash(t.TempDir())
+		folder := SubtitleFolder{Kind: core.SubtitleFolderAbsolute, Custom: abs}
+		f.sc.SubtitleFolder = func() SubtitleFolder { return folder }
+		tree(t, f.root, "Up (2009)/Up (2009).mkv", "Cars (2006)/Cars (2006).mkv")
+		tree(t, abs, "Up (2009).en.srt", "up (2009).fr.srt", "Up (2009) extended.srt", "Cars (2006).srt", "Upside Down.srt")
+		f.scan()
+		up := f.item("Up (2009)/Up (2009).mkv")
+		want := []string{abs + "/Up (2009) extended.srt", abs + "/Up (2009).en.srt", abs + "/up (2009).fr.srt"}
+		if got := paths(f.store.sources[up.ID][0].Streams); !slices.Equal(got, want) {
+			t.Errorf("scanned = %q, want = %q", got, want)
+		}
+
+		s := &Subtitles{Store: f.store, Folder: func() SubtitleFolder { return folder }}
+		st, err := s.Save(t.Context(), f.lib, up.ID, core.ID{}, func(_ fs.FS, stem string) (string, error) { return stem + ".de.srt", nil }, sub)
+		if err != nil || st.ExternalPath != abs+"/Up (2009).de.srt" {
+			t.Fatalf("Save = %+v, %v", st, err)
+		}
+		if err := s.WriteFile(t.Context(), up.ID, st.ExternalPath, []byte("changed")); err != nil {
+			t.Fatal(err)
+		}
+		if data, err := s.ReadFile(t.Context(), up.ID, st.ExternalPath); err != nil || string(data) != "changed" {
+			t.Errorf("ReadFile = %q, %v", data, err)
+		}
+		if err := s.Remove(t.Context(), f.lib, up.ID, st.ExternalPath); err != nil || exists(abs, "Up (2009).de.srt") {
+			t.Errorf("Remove = %v", err)
+		}
+		if got := paths(f.store.sources[up.ID][0].Streams); !slices.Equal(got, want) {
+			t.Errorf("after removing = %q, want = %q", got, want)
+		}
+		// Files of other videos are no subtitles of this one.
+		if _, err := s.ReadFile(t.Context(), up.ID, abs+"/Cars (2006).srt"); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("ReadFile of another video's subtitle = %v, want ErrNotFound", err)
+		}
+	})
 }

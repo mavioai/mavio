@@ -76,9 +76,12 @@ type SubtitleFolder int32
 const (
 	// Beside the video.
 	SubtitleFolder_SUBTITLE_FOLDER_UNSPECIFIED SubtitleFolder = 0
-	// In a folder of the video's folder, custom_folder.
+	// In a folder of the video's folder, named custom_folder: a single
+	// folder name.
 	SubtitleFolder_SUBTITLE_FOLDER_RELATIVE SubtitleFolder = 1
-	// In an absolute folder, custom_folder.
+	// In one folder for every video, custom_folder: an absolute path or a
+	// remote path, as library paths. Subtitles there are named after
+	// their videos' file names.
 	SubtitleFolder_SUBTITLE_FOLDER_ABSOLUTE SubtitleFolder = 2
 )
 
