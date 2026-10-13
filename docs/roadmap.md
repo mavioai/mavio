@@ -714,7 +714,7 @@ flowchart TD
 - [x] Domain and storage: subtitle profiles and their assignment, subtitle history, blocklist and failed attempts, the subtitle settings (`libs/core`, `libs/store`)
 - [x] `tools/testport` reads pytest cases; Bazarr's score, mod and provider cases ported
 - [ ] `libs/acquire/subtitles`: wanted subtitles, scores, choice, upgrades, adaptive searching
-  - [ ] The fields guessit gives Bazarr's scores that `libs/release` lacks (streaming service, edition of subtitle release names), added to it
+  - [x] The fields guessit gives Bazarr's scores that `libs/release` lacked, added to it with guessit's patterns: streaming service, audio and video codecs (editions come from Radarr's rules); the same values as guessit for all but 4 of the 940 release names of the ported cases
 - [ ] `SUBTITLE_PROVIDER` extended: provider listing, video descriptions and several languages in queries, matched properties in results, kinds of failures
 - [ ] `plugins/subtitles`: the plugin, archives (zip, RAR, 7z), throttling, proxies and FlareSolverr, anti-captcha services (Anti-Captcha, CaptchaAI, DeathByCaptcha); OpenSubtitles.com moved in, `subtitles-opensubtitles` removed
   - [ ] JSON APIs with accounts: SubDL, SubSource, Jimaku, Assrt, BetaSeries, Titlovi, LegendasNet, SubX, Subs.ro, HDBits, Ktuvit, SubsDump, Subsarr

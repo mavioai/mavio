@@ -714,7 +714,7 @@ flowchart TD
 - [x] 领域与存储：字幕配置及其分配、字幕历史、阻止列表与失败记录、字幕设置（`libs/core`、`libs/store`）
 - [x] `tools/testport` 读取 pytest 用例；移植 Bazarr 的评分、修正与提供者用例
 - [ ] `libs/acquire/subtitles`：缺少的字幕、评分、择优、升级、自适应搜索
-  - [ ] guessit 为 Bazarr 评分提供而 `libs/release` 缺少的字段（流媒体服务、字幕 release 名称中的版本），补入 `libs/release`
+  - [x] guessit 为 Bazarr 评分提供而 `libs/release` 原先缺少的字段，按 guessit 的模式补入：流媒体服务、音频与视频编码（版本沿用 Radarr 的规则）；在已移植用例的 940 个 release 名称上，除 4 个外都与 guessit 的结果相同
 - [ ] 扩展 `SUBTITLE_PROVIDER`：列出提供者、查询中的视频描述与多种语言、结果中的匹配属性、失败类型
 - [ ] `plugins/subtitles`：插件本身、压缩包（zip、RAR、7z）、限流、代理与 FlareSolverr、验证码识别服务（Anti-Captcha、CaptchaAI、DeathByCaptcha）；移入 OpenSubtitles.com，删除 `subtitles-opensubtitles`
   - [ ] 需要账号的 JSON API：SubDL、SubSource、Jimaku、Assrt、BetaSeries、Titlovi、LegendasNet、SubX、Subs.ro、HDBits、Ktuvit、SubsDump、Subsarr
