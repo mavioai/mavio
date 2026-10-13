@@ -158,7 +158,7 @@ func TestOffline(t *testing.T) {
 	if _, err := o.RemoveDownload(ctx, pluginv1.RemoveDownloadRequest_builder{ClientId: new("pp"), DownloadId: new(hash), DeleteData: new(true)}.Build()); err != nil {
 		t.Fatal(err)
 	}
-	if len(drive.purged) != 1 || drive.purged[0] != "pp:Downloads/series|Show.S01.1080p" {
+	if len(drive.purged) != 1 || drive.purged[0] != "pp:|Downloads/series/Show.S01.1080p" {
 		t.Errorf("purged = %v, want the download's folder", drive.purged)
 	}
 	if _, err := o.GetDownload(ctx, pluginv1.GetDownloadRequest_builder{ClientId: new("pp"), DownloadId: new(hash)}.Build()); connect.CodeOf(err) != connect.CodeNotFound {

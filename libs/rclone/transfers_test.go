@@ -85,7 +85,7 @@ func TestTransferLedger(t *testing.T) {
 	}
 
 	// A transfer the rcd forgot starts again.
-	in := map[string]any{"srcFs": "mem:lib", "srcRemote": "a.mkv", "dstFs": "mem:lib", "dstRemote": "b.mkv"}
+	in := map[string]any{"srcFs": "mem:", "srcRemote": "lib/a.mkv", "dstFs": "mem:", "dstRemote": "lib/b.mkv"}
 	lost := core.StorageJob{Kind: core.StorageJobTransfer, Key: transferKey("operations/copyfile", in), Remote: "mem", ExecuteID: "gone", JobID: 9999}
 	if err := jobs.Put(ctx, &lost); err != nil {
 		t.Fatal(err)
@@ -102,7 +102,7 @@ func TestTransferLedger(t *testing.T) {
 
 	// A transfer the rcd finished is not run again: the copy removed
 	// since stays removed.
-	in["dstRemote"] = "c.mkv"
+	in["dstRemote"] = "lib/c.mkv"
 	job, err := c.Start(ctx, "operations/copyfile", in)
 	if err != nil {
 		t.Fatal(err)

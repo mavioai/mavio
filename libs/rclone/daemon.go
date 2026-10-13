@@ -158,6 +158,9 @@ func (d *Daemon) launch(ctx context.Context) error {
 		"--rc-user", d.ep.User,
 		"--rc-pass", d.ep.Password,
 		"--rc-serve",
+		// A remote's file system, with its folder IDs and the objects
+		// --rc-serve found, outlives pauses of its reads.
+		"--fs-cache-expire-duration", "1h",
 		"--config", d.opts.Config,
 		"--log-level", "NOTICE",
 	}

@@ -58,7 +58,7 @@ func (r *Remotes) Open(ctx context.Context, remote, dir string) (core.Storage, e
 		return nil, err
 	}
 	if !info.IsDir() {
-		return nil, &fs.PathError{Op: "open", Path: s.fsName(), Err: errors.New("not a folder")}
+		return nil, &fs.PathError{Op: "open", Path: s.fsName() + s.dir, Err: errors.New("not a folder")}
 	}
 	return s, nil
 }
@@ -122,8 +122,14 @@ type Storage struct {
 	caps   core.StorageCapabilities
 }
 
-// fsName is the rclone file system of the folder.
-func (s *Storage) fsName() string { return s.remote + ":" + s.dir }
+// fsName is the rclone file system of the folder: the remote's root, so
+// that every folder of a remote shares one file system in the rcd, and
+// its caches.
+func (s *Storage) fsName() string { return s.remote + ":" }
+
+// abs returns the path from the remote's root of remote, a path of the
+// folder.
+func (s *Storage) abs(remote string) string { return path.Join(s.dir, remote) }
 
 // rel returns the rclone path of name, "" for the folder itself.
 func rel(op, name string) (string, error) {
@@ -157,7 +163,7 @@ func (s *Storage) Stat(ctx context.Context, name string) (fs.FileInfo, error) {
 	var out struct {
 		Item *item `json:"item"`
 	}
-	if err := s.r.Client.Call(ctx, "operations/stat", map[string]any{"fs": s.fsName(), "remote": remote, "opt": listOpt}, &out); err != nil {
+	if err := s.r.Client.Call(ctx, "operations/stat", map[string]any{"fs": s.fsName(), "remote": s.abs(remote), "opt": listOpt}, &out); err != nil {
 		return nil, &fs.PathError{Op: "stat", Path: name, Err: err}
 	}
 	if out.Item == nil {
@@ -178,7 +184,7 @@ func (s *Storage) ReadDir(ctx context.Context, name string) ([]fs.DirEntry, erro
 	var out struct {
 		List []item `json:"list"`
 	}
-	if err := s.r.Client.Call(ctx, "operations/list", map[string]any{"fs": s.fsName(), "remote": remote, "opt": listOpt}, &out); err != nil {
+	if err := s.r.Client.Call(ctx, "operations/list", map[string]any{"fs": s.fsName(), "remote": s.abs(remote), "opt": listOpt}, &out); err != nil {
 		return nil, &fs.PathError{Op: "readdir", Path: name, Err: err}
 	}
 	entries := make([]fs.DirEntry, 0, len(out.List))
@@ -198,7 +204,7 @@ func (s *Storage) Open(ctx context.Context, name string) (core.File, error) {
 	if info.IsDir() {
 		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("is a directory")}
 	}
-	return &file{ctx: context.WithoutCancel(ctx), c: s.r.Client, url: s.r.Client.objectURL(s.fsName(), name), info: info}, nil
+	return &file{ctx: context.WithoutCancel(ctx), c: s.r.Client, url: s.r.Client.objectURL(s.fsName(), s.abs(name)), info: info}, nil
 }
 
 // WriteFile implements core.Storage. The remote replaces the file as it
@@ -225,7 +231,7 @@ func (s *Storage) upload(ctx context.Context, name string, r io.Reader) error {
 		}
 		_ = pw.CloseWithError(err)
 	}()
-	q := url.Values{"fs": {s.fsName()}, "remote": {strings.TrimSuffix(dir, "/")}}
+	q := url.Values{"fs": {s.fsName()}, "remote": {s.abs(dir)}}
 	req, err := s.r.Client.request(ctx, http.MethodPost, s.r.Client.methodURL("operations/uploadfile", q), pr)
 	if err != nil {
 		_ = pr.CloseWithError(err)
@@ -277,7 +283,7 @@ func (s *Storage) MkdirAll(ctx context.Context, name string) error {
 	if err != nil {
 		return err
 	}
-	return s.call(ctx, "operations/mkdir", "mkdir", name, map[string]any{"fs": s.fsName(), "remote": remote})
+	return s.call(ctx, "operations/mkdir", "mkdir", name, map[string]any{"fs": s.fsName(), "remote": s.abs(remote)})
 }
 
 func (s *Storage) call(ctx context.Context, method, op, name string, in map[string]any) error {
@@ -289,7 +295,7 @@ func (s *Storage) call(ctx context.Context, method, op, name string, in map[stri
 
 // Rename implements core.Storage.
 func (s *Storage) Rename(ctx context.Context, from, to string) error {
-	return s.transfer(ctx, "operations/movefile", s.fsName(), from, to)
+	return s.within(ctx, "operations/movefile", from, to)
 }
 
 // Copy implements core.Storage; core.ErrUnsupported when the remote cannot
@@ -298,18 +304,23 @@ func (s *Storage) Copy(ctx context.Context, from, to string) error {
 	if !s.caps.ServerCopy {
 		return core.ErrUnsupported
 	}
-	return s.transfer(ctx, "operations/copyfile", s.fsName(), from, to)
+	return s.within(ctx, "operations/copyfile", from, to)
+}
+
+// within runs movefile or copyfile from the file from of the folder to to.
+func (s *Storage) within(ctx context.Context, method, from, to string) error {
+	if !fs.ValidPath(from) || from == "." {
+		return &fs.PathError{Op: "transfer", Path: from, Err: fs.ErrInvalid}
+	}
+	return s.transfer(ctx, method, s.fsName(), s.abs(from), to)
 }
 
 // transfer runs movefile or copyfile from the file from of srcFs to to.
 func (s *Storage) transfer(ctx context.Context, method, srcFs, from, to string) error {
-	if !fs.ValidPath(from) && srcFs == s.fsName() {
-		return &fs.PathError{Op: "transfer", Path: from, Err: fs.ErrInvalid}
-	}
 	if _, err := rel("transfer", to); err != nil || to == "." {
 		return &fs.PathError{Op: "transfer", Path: to, Err: fs.ErrInvalid}
 	}
-	err := s.r.run(ctx, s.remote, method, map[string]any{"srcFs": srcFs, "srcRemote": from, "dstFs": s.fsName(), "dstRemote": to})
+	err := s.r.run(ctx, s.remote, method, map[string]any{"srcFs": srcFs, "srcRemote": from, "dstFs": s.fsName(), "dstRemote": s.abs(to)})
 	if err != nil {
 		return &fs.PathError{Op: "transfer", Path: to, Err: err}
 	}
@@ -350,7 +361,7 @@ func (s *Storage) Remove(ctx context.Context, name string) error {
 	if info.IsDir() {
 		method = "operations/rmdir"
 	}
-	return s.call(ctx, method, "remove", name, map[string]any{"fs": s.fsName(), "remote": remote})
+	return s.call(ctx, method, "remove", name, map[string]any{"fs": s.fsName(), "remote": s.abs(remote)})
 }
 
 // RemoveAll removes a file, or a folder and everything in it; nothing is
@@ -367,7 +378,7 @@ func (s *Storage) RemoveAll(ctx context.Context, name string) error {
 	if info.IsDir() {
 		method = "operations/purge"
 	}
-	return s.call(ctx, method, "remove", name, map[string]any{"fs": s.fsName(), "remote": remote})
+	return s.call(ctx, method, "remove", name, map[string]any{"fs": s.fsName(), "remote": s.abs(remote)})
 }
 
 // Chtimes implements core.Storage: the rc API sets no times.
@@ -381,7 +392,7 @@ func (s *Storage) MediaURL(_ context.Context, name string) (string, error) {
 	if s.r.MediaURL == nil {
 		return "", core.ErrUnsupported
 	}
-	return s.r.MediaURL(s.fsName(), name)
+	return s.r.MediaURL(s.fsName(), s.abs(name))
 }
 
 // Capabilities implements core.Storage.
@@ -432,11 +443,16 @@ func (c *Client) objectURL(fsName, remote string) string {
 
 // file is an object of a remote, read through --rc-serve with ranged
 // requests.
+//
+// The first response names the object's version (its ETag), and every
+// later request asks for that version (If-Match): a file changed while
+// it is read fails with ErrChanged instead of mixing two versions.
 type file struct {
 	ctx  context.Context
 	c    *Client
 	url  string
 	info fs.FileInfo
+	ver  version
 
 	mu sync.Mutex
 	// off is where Read reads next; body reads from bodyOff on.
@@ -458,6 +474,7 @@ func (f *file) get(off, n int64) (io.ReadCloser, error) {
 	} else if off > 0 {
 		req.Header.Set("Range", fmt.Sprintf("bytes=%d-", off))
 	}
+	f.ver.ask(req)
 	resp, err := f.c.http.Do(req)
 	if err != nil {
 		return nil, err
@@ -467,8 +484,11 @@ func (f *file) get(off, n int64) (io.ReadCloser, error) {
 	case resp.StatusCode == http.StatusOK && off == 0:
 	default:
 		_ = resp.Body.Close()
-		e := &Error{Method: "serve", Status: resp.StatusCode, Message: resp.Status}
-		return nil, &fs.PathError{Op: "read", Path: f.info.Name(), Err: e}
+		return nil, &fs.PathError{Op: "read", Path: f.info.Name(), Err: serveError(resp)}
+	}
+	if err := f.ver.check(resp, f.info.Size()); err != nil {
+		_ = resp.Body.Close()
+		return nil, &fs.PathError{Op: "read", Path: f.info.Name(), Err: err}
 	}
 	return resp.Body, nil
 }

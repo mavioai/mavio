@@ -79,16 +79,23 @@ type Error struct {
 	Method  string
 	Status  int
 	Message string
+	// RetryAfter is how long the rcd asks to wait before trying again,
+	// for statuses 429 and 503.
+	RetryAfter time.Duration
 }
 
 func (e *Error) Error() string {
 	return fmt.Sprintf("rclone %s: %s (status %d)", e.Method, e.Message, e.Status)
 }
 
-// Unwrap gives fs.ErrNotExist for objects and folders not found.
+// Unwrap gives fs.ErrNotExist for objects and folders not found, and
+// ErrChanged for objects whose version changed.
 func (e *Error) Unwrap() error {
-	if e.Status == http.StatusNotFound {
+	switch e.Status {
+	case http.StatusNotFound:
 		return fs.ErrNotExist
+	case http.StatusPreconditionFailed:
+		return ErrChanged
 	}
 	return nil
 }

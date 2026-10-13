@@ -39,6 +39,8 @@ type Proxy struct {
 type target struct {
 	fsName, remote string
 	used           time.Time
+	// ver is the version of the object the token reads.
+	ver version
 }
 
 // proxyTTL is how long a token lives after its last use: a paused
@@ -136,6 +138,8 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			req.Header.Set(h, v)
 		}
 	}
+	// Every request of a token reads the version its first one did
+	t.ver.ask(req)
 	resp, err := p.c.http.Do(req)
 	if err != nil {
 		if r.Context().Err() == nil {
@@ -145,6 +149,9 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusPartialContent {
+		_ = t.ver.check(resp, -1)
+	}
 	for _, h := range []string{"Content-Type", "Content-Length", "Content-Range", "Accept-Ranges", "Last-Modified", "ETag"} {
 		if v := resp.Header.Get(h); v != "" {
 			w.Header().Set(h, v)

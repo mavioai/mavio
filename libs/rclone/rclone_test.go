@@ -220,6 +220,53 @@ func TestStorageWithoutProxy(t *testing.T) {
 	}
 }
 
+func TestFileVersions(t *testing.T) {
+	d, disk := startDaemon(t)
+	ctx := t.Context()
+	name := filepath.Join(disk, "a.mkv")
+	if err := os.WriteFile(name, []byte("0123456789"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	r := &Remotes{Client: d.Client()}
+	st, err := r.Open(ctx, "disk", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f, err := st.Open(ctx, "a.mkv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	b := make([]byte, 3)
+	if n, err := f.ReadAt(b, 2); err != nil || string(b[:n]) != "234" {
+		t.Fatalf("ReadAt() = %q, %v, want = 234", b[:n], err)
+	}
+
+	// The file is replaced, and a scan sees the new version.
+	if err := os.WriteFile(name, []byte("abcdefghijklmnop"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chtimes(name, time.Now(), time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.Stat(ctx, "a.mkv"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.ReadAt(b, 4); !errors.Is(err, ErrChanged) {
+		t.Errorf("ReadAt() of a replaced file error = %v, want = %v", err, ErrChanged)
+	}
+
+	// A file opened since reads the new version.
+	g, err := st.Open(ctx, "a.mkv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer g.Close()
+	if n, err := g.ReadAt(b, 4); err != nil || string(b[:n]) != "efg" {
+		t.Errorf("ReadAt() = %q, %v, want = efg", b[:n], err)
+	}
+}
+
 func TestDaemonRestarts(t *testing.T) {
 	d, _ := startDaemon(t)
 	ctx := t.Context()
