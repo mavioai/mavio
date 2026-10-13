@@ -10,7 +10,7 @@
 
 | 层次 | 范围 | 位置 | 运行时机 |
 | :--- | :--- | :--- | :--- |
-| 单元测试 | 纯逻辑；不访问网络、不依赖真实 ffmpeg 或硬件。表驱动，很多用例移植自 Jellyfin、Sonarr、Radarr 与 Prowlarr | 代码旁的 `*_test.go`，数据放在 `testdata/` | 每次 CI，全部平台 |
+| 单元测试 | 纯逻辑；不访问网络、不依赖真实 ffmpeg 或硬件。表驱动，很多用例移植自 Jellyfin、Sonarr、Radarr、Prowlarr 与 Bazarr | 代码旁的 `*_test.go`，数据放在 `testdata/` | 每次 CI，全部平台 |
 | 一致性测试 | 同一套仓储测试分别跑在 SQLite（临时文件）与 PostgreSQL（由 `libs/store/pgtest` 启动的容器，或 `MAVIO_TEST_POSTGRES_DSN` 指定的服务器；没有 Docker 或使用 `-short` 时跳过）上，两者都必须通过 | `libs/store` | 每次 CI（PostgreSQL 在 Linux 上运行） |
 | 集成测试 | 真实 ffmpeg / ffprobe、生成的测试媒体、真实硬件编码器；条件不满足时 `t.Skip` 并写明原因 | 代码旁，依赖前置条件 | 具备条件的 CI；厂商路径只在现有硬件（维护者的机器、GitHub 托管 runner）上运行 |
 | 快照测试 | 以固定数据绘制客户端的页面，与入库的参考图比对（[客户端 §6.8](clients.zh-CN.md#68-组件画廊与视觉评审)） | `apps/web/snapshots`、`libs/apple/Tests/MavioUITests`、`libs/android/ui/src/test` | 各客户端的 CI 任务 |
@@ -23,14 +23,15 @@
 ## 2. 移植测试用例
 
 ### 2.1 方法
-提取由 `tools/testport` 完成；`tools/testport/mapping.json` 列出来源仓库（使用 xUnit 测试的 Jellyfin；使用 NUnit 测试的 Sonarr、Radarr 与 Prowlarr），并把它们的测试工程与测试数据目录映射到 Mavio 的目标位置（即 §2.2 的映射表）。
+提取由 `tools/testport` 完成；`tools/testport/mapping.json` 列出来源仓库（使用 xUnit 测试的 Jellyfin；使用 NUnit 测试的 Sonarr、Radarr 与 Prowlarr；使用 pytest 测试的 Bazarr），并把它们的测试工程与测试数据目录映射到 Mavio 的目标位置（即 §2.2 的映射表）。
 
 1. **参数化用例**：xUnit 的 `[InlineData]` 与 NUnit 的 `[TestCase]` 用例，以及由 `TheoryData.Add(…)`、`yield return` 或集合初始化器提供数据的 `[MemberData]` / `[TestCaseSource]` 用例，按 C# 测试类各输出一个 JSON 文件，放在目标的 `testdata/cases/` 下，文件名为去掉 `Tests` 或 `Fixture` 后缀的 snake_case（如 `TV/EpisodeNumberTests.cs` → `testdata/cases/tv/episode_number.json`）。参数按形参名记录，并补全声明的默认值；NUnit 的 `ExpectedResult` 记录在 `$result` 下。常量转为 JSON 值；枚举成员等符号转为 `{"$symbol": …}`，标志组合转为 `{"$flags": […]}`，构造调用转为 `{"$new": …}`，其余非常量表达式以源码原文保留为 `{"$expr": …}`。
+   pytest 模块按同样方式读取：每个 `test_*.py` 模块输出一个用例文件，文件名为去掉 `test_` 前缀的模块名（如 `test_score.py` → `testdata/cases/score.json`）；以 `test` 开头的函数及 `Test*` 类中以 `test` 开头的方法为其测试；`@pytest.mark.parametrize` 的用例按参数名记录（叠加的标记取其笛卡尔积），元组、列表与集合转为数组，模块级赋以字面量的名字会被解析为其值。
 2. **来源记录**：每个用例文件记录来源仓库、提交与源文件；每条用例记录方法、行号与稳定 ID（`Method/n`）。
-3. **上游自身的跳过**：上游标记跳过的用例（xUnit 的 `Skip = …`；NUnit 的 `Ignore = …`、`[Ignore]`、`[Explicit]`，包括标在测试类上的），以及被上游注释掉的 `[InlineData]` / `[TestCase]` 行（通常是 `// TODO:` / `// FIXME:` 标注的已知失败），保留并带上 `skip` 原因。
+3. **上游自身的跳过**：上游标记跳过的用例（xUnit 的 `Skip = …`；NUnit 的 `Ignore = …`、`[Ignore]`、`[Explicit]`，包括标在测试类上的；pytest 的 `skip`、带条件的 `skipif` 与 `xfail` 标记，包括 `pytestmark` 中与 `pytest.param` 上的），以及被上游注释掉的 `[InlineData]` / `[TestCase]` 行（通常是 `// TODO:` / `// FIXME:` 标注的已知失败），保留并带上 `skip` 原因。
 4. **生成的文件不得手工修改。** 依赖 .NET 特有行为、或与 Mavio 设计取舍不同的用例，在 Go 测试中按用例 ID 跳过并写明原因；**不允许静默丢弃**。
-5. **非参数化测试**（`[Fact]`、`[Test]`）列在每个用例文件的 `facts` 中，人工翻译成 Go 测试；运行时计算的 `[MemberData]` 与 `[ClassData]` 列在 `unsupported` 中并写明原因，人工移植。
-6. **测试资产**（NFO 样例、ffprobe JSON、字幕文件、关键帧数据、设备配置）复制到目标的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），并附带 `SOURCES.json` 记录每个文件的来源。用例引用的、定义在其他 C# 文件中的常量（如捕获的 ffmpeg 输出）提取为一个 JSON 文件，其 `constants` 映射以 `Class.Name` 为键，测试据此解析 `{"$symbol": …}` 参数。仓库中不出现以来源项目命名的目录。
+5. **非参数化测试**（`[Fact]`、`[Test]`）列在每个用例文件的 `facts` 中，人工翻译成 Go 测试；运行时计算的 `[MemberData]`、`[ClassData]` 与运行时计算的 `parametrize` 取值列在 `unsupported` 中并写明原因，人工移植。
+6. **测试资产**（NFO 样例、ffprobe JSON、字幕文件、关键帧数据、设备配置）复制到目标的 `testdata/` 下，按用途命名子目录（如 `testdata/nfo/`、`testdata/probe/`），并附带 `SOURCES.json` 记录每个文件的来源；资产映射可按文件名包含与排除文件，借此不把二进制媒体放进仓库。用例引用的、定义在其他 C# 文件中的常量（如捕获的 ffmpeg 输出）提取为一个 JSON 文件，其 `constants` 映射以 `Class.Name` 为键，测试据此解析 `{"$symbol": …}` 参数。仓库中不出现以来源项目命名的目录。
 7. 每实现一个库时按目标运行：在 `tools/testport` 下执行 `go run ./cmd/testport -checkout jellyfin=<仓库路径> -only libs/naming`；来源仓库路径也可以用 `$MAVIO_<NAME>` 给出（如 `$MAVIO_SONARR`），没有给出路径的来源会被跳过。一个库移植完成后，新增用例直接写在 Mavio 中。
 
 ### 2.2 映射表
@@ -60,6 +61,11 @@
 | Sonarr / Radarr `ParserTests/ParsingServiceTests` | 把解析出的发布与媒体库中的剧集、单集、电影匹配 | `libs/acquire`（P18 起） |
 | Prowlarr `src/NzbDrone.Core.Test/IndexerTests`、`ParserTests` 与 `Files/Indexers`（录制的响应） | 索引器响应解析（Newznab、Torznab、RSS、Cardigann 与代码实现的站点）、分类映射、退避；数字、大小与日期解析 | `plugins/indexers`（`testdata/cases`、`testdata/responses`） |
 | Sonarr `src/NzbDrone.Core.Test/IndexerTests/TorrentRssIndexerTests`（Prowlarr 保留了这些订阅源，但没有保留测试） | 通用的种子 RSS 订阅源：检测订阅源的读取方式、EZRSS | `plugins/indexers`（`testdata/cases/torrent_rss_tests`） |
+| Bazarr `tests/subliminal_patch`（提供者测试，以及录制响应的 `data` 与 `cassettes`） | 字幕提供者基于录制响应的搜索、匹配与下载；压缩包、视频与字幕工具函数 | `plugins/subtitles`（`testdata/cases`、`testdata/responses`；`data` 中的两个 `.mkv` 文件不复制） |
+| Bazarr `tests/subliminal_patch/test_score.py`、`test_core.py`、`tests/bazarr/test_app_get_providers.py` | 字幕评分、字幕选择、提供者池与限流 | `libs/acquire/subtitles` |
+| Bazarr `tests/subliminal_patch/test_mods.py` 与 `data` 中的字幕 | 字幕修改（去除听障文本等） | `libs/subtitle`（`testdata/cases/mods.json`、`testdata/mods`） |
+| Bazarr `test_embeddedsubtitles.py`、`tests/bazarr/test_download_blacklist_on_failure.py`、`test_get_providers_blacklist.py`、`test_subtitles_manual.py`、`test_subtitles_pool.py`、`test_subtitles_sync.py`、`test_utilities_video_analyzer.py` | 内嵌字幕、下载失败加入黑名单、提供者限流、手动搜索结果的发布信息、提供者池、同步决策、视频分析 | `apps/server/internal/subtitles` |
+| Bazarr `tests/bazarr`（其他模块：配置、Jellyfin、通知、日志、UI、翻译、Sonarr 单集同步、后处理、同步性能路径） | Mavio 没有或已延后（翻译）的功能 | 不移植 |
 
 ---
 

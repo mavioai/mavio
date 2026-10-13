@@ -71,6 +71,29 @@
       "assets": [
         { "source": "src/NzbDrone.Core.Test/Files/Indexers", "target": "plugins/indexers/testdata/responses", "recursive": true }
       ]
+    },
+    {
+      "name": "Bazarr",
+      "repository": "https://github.com/morpheus65535/bazarr",
+      "cases": [
+        { "source": "tests/subliminal_patch", "target": "plugins/subtitles/testdata/cases" },
+        { "source": "tests/subliminal_patch/test_score.py", "target": "libs/acquire/subtitles/testdata/cases" },
+        { "source": "tests/subliminal_patch/test_core.py", "target": "libs/acquire/subtitles/testdata/cases" },
+        { "source": "tests/subliminal_patch/test_mods.py", "target": "libs/subtitle/testdata/cases" },
+        { "source": "tests/subliminal_patch/test_embeddedsubtitles.py", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "tests/bazarr/test_app_get_providers.py", "target": "libs/acquire/subtitles/testdata/cases" },
+        { "source": "tests/bazarr/test_download_blacklist_on_failure.py", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "tests/bazarr/test_get_providers_blacklist.py", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "tests/bazarr/test_subtitles_manual.py", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "tests/bazarr/test_subtitles_pool.py", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "tests/bazarr/test_subtitles_sync.py", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "tests/bazarr/test_utilities_video_analyzer.py", "target": "apps/server/internal/subtitles/testdata/cases" }
+      ],
+      "assets": [
+        { "source": "tests/subliminal_patch/data", "target": "plugins/subtitles/testdata/responses", "exclude": ["*.mkv", "subs*"] },
+        { "source": "tests/subliminal_patch/cassettes", "target": "plugins/subtitles/testdata/responses/cassettes", "recursive": true },
+        { "source": "tests/subliminal_patch/data", "target": "libs/subtitle/testdata/mods", "include": "subs*" }
+      ]
     }
   ]
 }
