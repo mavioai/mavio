@@ -206,7 +206,7 @@ HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需�
 
 ## 3. 通过 rclone 读取远端存储（Reading Remote Storage through rclone）
 
-状态：部分实现（P25）。已实现：对象缓存及其按 `ChangeNotify` 的失效与版本校验、按路径读取的后端的条件读取、状态码、经 `fsinfo` 报告拖动方式、数据流限制、对 webdav、http 与 crypt 的修正、每个远端一个 `Fs`，以及块缓存及其读取意图、按关键帧的预取和已打开项内部的淘汰。计划中（下文逐项标明）：`FindByListing`、链接缓存及其他单个后端的修正、各后端的数据流限制，以及实测（[路线图](roadmap.zh-CN.md) P25）。
+状态：部分实现（P25）。已实现：对象缓存及其按 `ChangeNotify` 的失效与版本校验、按路径读取的后端的条件读取、`FindByListing`、链接缓存及对单个后端的修正、状态码、经 `fsinfo` 报告拖动方式、数据流限制及各后端的默认值、每个远端一个 `Fs`，以及块缓存及其读取意图、按关键帧的预取和已打开项内部的淘汰。计划中（下文逐项标明）：实测，用以取代估计的链接有效期与数据流限制，并找出需要顺序读取的远端（[路线图](roadmap.zh-CN.md) P25）。
 
 rclone 远端上的媒体库（[架构](architecture.zh-CN.md) §9.2）经 `rclone rcd` 读取媒体。本章针对 rclone 提供的所有后端，使这些读取发出的请求更少、拖动时更稳定、读过的数据可以复用：
 
@@ -280,7 +280,7 @@ fork 对 rcd 与后端做以下修改；能对所有后端统一完成的，就�
 * **缓存来源：**
   * `serveRemote` 在调用 `NewObject` 之前先在这里查找对象，并缓存找到的对象。
   * `operations/list` 与 `operations/stat` 服务于 Mavio 的扫描与 `Stat`，它们总是查询后端，从不读取缓存。`stat` 缓存它返回的对象，找不到对象时丢弃对应条目。`list` 用返回的对象替换已有条目而不新增条目；对一个目录的完整列举（既不递归也不过滤）还会丢弃该目录中已不存在的对象的条目。只有 `--rc-serve` 读取缓存，所以扫描能立即看到存储上的变化，Mavio 的 `Stat` 给出的也总是存储上的当前版本。
-  * *计划中：* 通过列目录查找文件的后端，以 fork 的特性 `FindByListing` 声明这一点，即查找表中最后三行除 union 与 compress 之外的后端。对它们而言，未命中时列一次父目录并缓存其中所有对象，随后对相邻文件的请求即可命中；同一目录的并发未命中共用一次列举。
+  * 通过列目录查找文件的后端，以 fork 的特性 `FindByListing` 声明这一点：查找表中最后三行除 union 与 compress 之外的后端，其中 ftp 只在不支持 `MLST` 的服务器上声明。crypt 与 hasher 从被包装的远端继承它；union、combine 与 compress 从不声明。对这些后端，未命中时列一次父目录并缓存其中的对象（最多占缓存的四分之一），随后对相邻文件（如视频的字幕与图片）的请求即可命中。同一目录的并发未命中共用一次列举，列举中没有的文件视为不存在。
 * **随缓存的 `Object` 一起存活的数据：**
   * pikpak、thunder 与 pcloud 的链接；
   * premiumizeme、gofile、drime、linkbox 与 googlephotos 取自列举结果的链接；
@@ -302,34 +302,42 @@ fork 对 rcd 与后端做以下修改；能对所有后端统一完成的，就�
   * 在这段时间内，按路径读取的后端会以旧版本提供新内容。因此 s3、webdav、azureblob、swift、oracleobjectstorage 与 qingstor 读取时以找到对象时存储给出的 ETag 发送 `If-Match`，使此后（包括读取中途）被替换的文件以 412 失败（对回应有误的 S3 兼容存储，可用 `--s3-no-read-if-match` 关闭；webdav 只发送强 ETag）。googlecloudstorage 读取找到时的 generation，b2 按文件 ID 读取，两者本就只读一个版本。
   * 原地改写且 ID、大小与修改时间都不变的文件，只有在指纹包含哈希时才能发现。
 
-**链接缓存**（`lib/linkcache`，计划中）：每个需要申请链接的后端在 `Open` 中使用。
+**链接缓存**（`lib/linkcache`）：需要申请链接的后端在 `Open` 中使用。
 
-* 以对象 ID 与指纹（大小，以及哈希或修改时间）为键，每个条目连同链接绑定的请求头与 cookie 一起保存。
-* 过期时间依次取响应中的过期字段（aliyundrive 的 `Expiration`）、URL 中的过期参数、后端声明的有效期。存储未给出过期时间时，声明的有效期来自实测（§3.5）。
-* 链接在有效期过去五分之四时更新；同一文件的并发打开共用一次申请。
-* 存储对链接回应 401、403、404 或 410 时，丢弃链接、申请新链接并重试一次，与 thunder 现在的做法相同。
+* 以远端、对象的 ID 或路径及其指纹（大小，以及哈希或修改时间）为键，新版本因此不会复用旧链接。每个条目连同链接绑定的请求头与 cookie 一起保存。
+* 过期时间依次取响应中的过期字段（如 aliyundrive 的 `expiration`、ulozto 的 `download_url_valid_until`）、URL 中的过期参数（S3、GCS 与 Azure 签名、`Expires`、`t`、`auth_key` 中的时间戳等）、后端声明的有效期。声明的有效期是估计值，没有更好依据时为 10 分钟（见下表）。链接最长存活 24 小时。
+* 链接在有效期过去五分之四时更新；更新失败时继续使用仍然有效的链接。同一文件的并发打开共用一次申请。
+* 存储对链接回应 401、403、404 或 410 时，丢弃链接、申请新链接并重试一次。下载错误原本不带状态码的后端，现在带上状态码。
 * 跟随重定向的后端以同样方式缓存重定向的目标地址。
 
-| 后端 | 链接缓存保存的内容 | 另外 |
-| :--- | :--- | :--- |
-| cloud115 | 链接，按 pick code；绑定 user agent 与 cookie | API 调用把响应传给 `shouldRetry`，使 429 能被识别 |
-| aliyundrive | 链接，4 小时（`expire_sec`） | — |
-| baidunetdisk | `dlink` 及其解析出的重定向地址 | 加上 `dircache`（它目前没有）；`Open` 中的 HEAD 与 GET 经过 pacer 及其重试 |
-| cloud123 | 链接；列举结果中有 `DownloadURL` 时直接使用 | — |
-| guangyadrive、quark、weiyun | 链接 | weiyun 的下载状态错误转为 `shouldRetry` 能识别的 HTTP 错误 |
-| yandex、putio、sharefile、quatrix、ulozto、seafile | 链接 | — |
-| filelu | 链接 | `Open` 发送范围而不是丢弃数据，其错误经过 `shouldRetry` |
-| iclouddrive | 列举结果中的 `downloadURL`，否则为链接 | — |
-| filescom | `DownloadUri`，传给 SDK | — |
-| mega | `g` 命令返回的 URL | — |
-| protondrive | 链接、会话密钥与当前版本 | — |
-| internxt | 文件的 bucket 信息 | — |
-| onedrive、box、shade、internetarchive | 重定向的目标地址 | shade 在第一个请求中就带上范围 |
-| pikpak、pcloud | —（链接存在缓存的 `Object` 上） | — |
-| thunder | —（链接存在缓存的 `Object` 上） | 加上过期检查 |
-| fichier | —（其令牌只能使用一次） | — |
+| 后端 | 链接缓存保存的内容 | 未标明过期时间时的有效期 | 另外 |
+| :--- | :--- | :--- | :--- |
+| cloud115 | 链接，按 pick code；绑定 user agent 与 cookie | 10 分钟（URL 中的 `t` 会标明） | API 调用把响应的状态码交给 `shouldRetry`，429 因此会重试 |
+| aliyundrive | 链接 | 其 `expiration`，4 小时 | — |
+| baidunetdisk | `dlink` 重定向到的目标地址 | 1 小时 | `Open` 中的 HEAD 与 GET 经过 pacer 及其重试 |
+| cloud123 | 优先用列举结果中的 `DownloadUrl`，其次为申请的链接 | 10 分钟 | — |
+| guangyadrive、quark | 链接；quark 的绑定其 cookie | 10 分钟 | — |
+| weiyun | 链接，绑定其 cookie | 10 分钟 | 下载状态错误转为 `shouldRetry` 能识别的 HTTP 错误 |
+| yandex、putio | 链接 | 10 分钟 | putio 的下载错误带上状态码 |
+| quatrix | 链接 ID | 10 分钟 | 以防链接 ID 只能用于一次下载，链接 ID 得到任何 4xx 都视为被拒绝 |
+| sharefile | 链接 | 5 分钟 | — |
+| ulozto | 链接 | 其 `download_url_valid_until` | — |
+| seafile | 链接，申请为可重复使用（`reuse=1`） | 1 小时 | — |
+| filelu | 链接 | 10 分钟 | `Open` 发送范围而不是丢弃数据，其错误经过 `shouldRetry` |
+| iclouddrive | 列举结果中的 `downloadURL`，否则为链接 | 10 分钟 | — |
+| filescom | `DownloadUri`，传给 SDK | URI 自身的过期时间 | 下载的错误回应不再被当作内容读取 |
+| mega | SDK 的下载，含 `g` 命令返回的 URL | 10 分钟 | 整个读完的文件只校验一次 MAC |
+| internxt | 分片 URL、密钥与 IV | 10 分钟 | 完整读取在读到结尾时校验哈希，不再在关闭时继续读完 |
+| onedrive | 重定向的目标地址 | 5 分钟，按 Graph 文档 | — |
+| box | 重定向的目标地址 | 10 分钟 | 不再把 API 令牌发给下载服务器 |
+| shade | 重定向的目标地址 | 10 分钟 | 第一个请求就带上范围 |
+| internetarchive | 重定向的目标地址，即条目所在的存储节点 | 1 小时 | — |
+| pikpak、pcloud | —（链接存在缓存的 `Object` 上） | — | — |
+| thunder | —（链接存在缓存的 `Object` 上） | — | 在其 URL 标明的过期时间之前更新 |
+| protondrive | —（其 SDK 只能通过自己的调用读取） | — | — |
+| fichier | —（其令牌只能使用一次） | — | — |
 
-**对个别后端的修正**（filelu 以及上表"另外"一列为计划中）：
+**对个别后端的修正**，上表"另外"一列之外：
 
 * webdav 与 http：请求了范围而服务器回应 200 时，`Open` 丢弃偏移之前的字节（与 mailru 的做法相同），使 body 与范围一致。
 * crypt：第一次读取后把 nonce 保存在其 `Object` 上，使一次拖动只需一个请求。
@@ -355,8 +363,19 @@ fork 的限制器（`lib/connlimit`）为所有后端限制 `--rc-serve` 同时�
 * **文件名额已满时：** 关闭该文件中最久没有读取的数据流，把名额交给新的打开。播放器拖动、浏览器请求新范围时，都是先打开下一个数据流再关闭上一个，而上一个的读取方已经不再读它。被关闭数据流的读取方会收到错误，如果仍要读取就重新打开。
 * **账号名额已满时：** 打开操作等待名额，直到其 context 结束；它从不占用其他文件的名额。
 * **限制值：**
-  * 由选项 `--rc-serve-max-file-streams` 与 `--rc-serve-max-streams` 设定；未设定时不限制数据流。
-  * *计划中：* 各后端以 fork 的特性（`MaxFileStreams`、`MaxStreams`）声明默认限制值，按实测结果（§3.5）或存储公布的限制设定，如 mailru 每台下载服务器 4 个数据流。远端自身选项已设定的值优先：ftp 的 `--ftp-concurrency` 与 sftp 的 `--sftp-connections`。既未实测、也没有公布限制的后端不设限制。
+  * 由选项 `--rc-serve-max-file-streams` 与 `--rc-serve-max-streams` 设定；-1 关闭该限制。
+  * 未设定时，取各后端以 fork 的特性（`MaxFileStreams`、`MaxStreams`）声明的限制值。这些值是对限制并发下载的云盘的估计，每个文件至少 2 个数据流，使拖动时能在关闭上一个数据流之前打开下一个：
+
+    | 后端 | 每个文件的数据流 | 每个账号的数据流 |
+    | :--- | :--- | :--- |
+    | cloud115、baidunetdisk、quark、weiyun | 2 | 4 |
+    | guangyadrive、mega、protondrive | 2 | 6 |
+    | cloud123、thunder、pikpak、pcloud、iclouddrive | 3 | 8 |
+    | aliyundrive、yandex | 4 | 10 |
+    | drive、onedrive、dropbox、box | 4 | 16 |
+    | mailru | 4 | 4，因为一台下载服务器只服务 4 个数据流 |
+
+    ftp 与 sftp 以自身选项（`--ftp-concurrency`、`--sftp-connections`）限制连接，不声明限制值；其他后端也不声明。
 
 ### 3.4 块缓存
 
@@ -410,7 +429,7 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 
 ### 3.5 实测
 
-计划中。限制值、链接有效期与顺序读取设置的默认值来自实测。用测试账号经 rcd 逐个后端实测，先测 fork 的云盘与常用的个人云盘（drive、onedrive、dropbox、box、pcloud、mega、yandex、protondrive）。实测内容：
+计划中。数据流限制与未标明过期时间的链接有效期目前是估计值（§3.2、§3.3）；实测将取代它们，并找出需要顺序读取的远端。用测试账号经 rcd 逐个后端实测，先测 fork 的云盘与常用的个人云盘（drive、onedrive、dropbox、box、pcloud、mega、yandex、protondrive）。实测内容：
 
 * 顺序读取；
 * 向前与向后跳转；
@@ -424,12 +443,12 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 
 | 机制 | 实现 | 阶段 |
 | :--- | :--- | :--- |
-| 对象缓存 | mavioai/rclone `fs/objcache`；`fs/rc/rcserver/serveobject.go`（`serveObject`）、`fs/operations/lsjson.go`（`list`、`stat`）、`fs/operations/rc.go` 与 `fs/sync/rc.go`（各写操作）；`fs/objcache` 中的 `ChangeNotify` 轮询（`Cache.startNotifier`、`Cache.notify`）与 `fs/rc/rc.go` 中的 `--rc-serve-poll-interval`；通过列目录查找文件的后端的 `FindByListing` 特性为计划中 | P25，已实现 |
+| 对象缓存 | mavioai/rclone `fs/objcache`；`fs/rc/rcserver/serveobject.go`（`serveObject`）、`fs/operations/lsjson.go`（`list`、`stat`）、`fs/operations/rc.go` 与 `fs/sync/rc.go`（各写操作）；`fs/objcache` 中的 `ChangeNotify` 轮询（`Cache.startNotifier`、`Cache.notify`）与 `fs/rc/rc.go` 中的 `--rc-serve-poll-interval`；`Cache.Find`，以及 `fs/features.go` 与通过列目录查找文件的各后端中的 `FindByListing` 特性 | P25，已实现 |
 | 版本校验 | mavioai/rclone `fs/rc/rcserver/serveobject.go`（ETag、`If-Match` 与 412）；`libs/rclone/version.go`、`storage.go`（`file`）、`proxy.go`、`blocks.go`；`fs/types.go` 中的 `fs.VersionTagger`，以及 `backend/{s3,webdav,azureblob,swift,oracleobjectstorage,qingstor}` 的 `Object.Open` 中的 `If-Match` | P25，已实现 |
-| 链接缓存 | mavioai/rclone `lib/linkcache`；§3.2 表中各后端的 `Object.Open` | P25，计划中 |
-| 后端修正 | mavioai/rclone `backend/webdav`、`backend/http`（以 200 回应的范围请求，`lib/readers/skiprange.go`）、`backend/crypt`（nonce）；`backend/filelu`（范围）与 §3.2 表中"另外"一列为计划中 | P25，已实现 |
+| 链接缓存 | mavioai/rclone `lib/linkcache`；§3.2 表中各后端的 `Object.Open` | P25，已实现 |
+| 后端修正 | mavioai/rclone `backend/webdav`、`backend/http`（以 200 回应的范围请求，`lib/readers/skiprange.go`）、`backend/crypt`（nonce）、`backend/filelu`（范围）、`backend/shade`（第一个范围）以及 §3.2 表中"另外"一列的各后端 | P25，已实现 |
 | 经 rcd 传递状态码与拖动方式 | mavioai/rclone `lib/http/serve/status.go`（`ErrorStatus`）、`serve.go`（`ObjectWith`）、`fs/rc/rcserver/serveobject.go`、`fs/features.go`（`SeekReadsFromStart`） | P25，已实现 |
 | 每个远端一个 `Fs`、更长的 `Fs` 缓存 | `libs/rclone/storage.go`（`Storage.fsName`、`Storage.abs`）、`daemon.go`（`Daemon.launch`） | P25，已实现 |
-| 连接数限制 | mavioai/rclone `lib/connlimit`、`fs/rc/rcserver/serveobject.go`（`Server.open`）、`fs/rc/rc.go`（选项）；`MaxFileStreams` 与 `MaxStreams` 特性为计划中 | P25，已实现 |
+| 连接数限制 | mavioai/rclone `lib/connlimit`、`fs/rc/rcserver/serveobject.go`（`Server.open`）、`fs/rc/rc.go`（选项）；`fs/features.go` 与 §3.3 中各后端的 `MaxFileStreams` 与 `MaxStreams` 特性 | P25，已实现 |
 | 块缓存 | `libs/rclone`（`blocks.go`、`ranges.go`、`cached.go`）、`storage.go`（`Storage.Open`、`Storage.MediaURL`）、`proxy.go`（`Proxy.serveCached`）；`core.ReadIntent` 来自 `libs/library`（probe、后台任务）、`apps/server/internal/playback`（播放）与 `apps/server/internal/acquisition`（导入时的 probe）；`apps/server/internal/server/rclone.go` 与设置 `rclone-cache-size`；已打开项内部的淘汰在 `blocks.go`（`BlockCache.trimOpen`、`blockItem.evict`）与 `punch_{linux,darwin,windows,other}.go`；按关键帧预取经 `core.Prefetcher`（`cachedFile.Prefetch`）、`libs/media/keyframes`（`Data.Offsets`）与 `apps/server/internal/playback/prefetch.go`（`sourcePrefetch`；`Manager.prepareStart`、`serveSegment`、`Manager.Progress`） | P25，已实现 |
 | 实测 | mavioai/rclone `MAVIO_PROVIDERS.md` | P25，计划中 |

@@ -206,7 +206,7 @@ A client that does not demux a file's subtitles itself gets them from the server
 
 ## 3. Reading Remote Storage through rclone
 
-Status: partly implemented (P25). Implemented: the object cache with its invalidation by `ChangeNotify` and its version checks, conditional reads in the backends that read by path, statuses, seeking through `fsinfo`, stream limits, the webdav, http and crypt fixes, one `Fs` per remote, and the block cache with its read intents, its read-ahead from keyframes and its eviction within open items. Planned, and marked so below: `FindByListing`, the link cache with the other single-backend fixes, per-backend stream limits, and the measurements ([Roadmap](roadmap.md) P25).
+Status: partly implemented (P25). Implemented: the object cache with its invalidation by `ChangeNotify` and its version checks, conditional reads in the backends that read by path, `FindByListing`, the link cache with the single-backend fixes, statuses, seeking through `fsinfo`, stream limits with per-backend defaults, one `Fs` per remote, and the block cache with its read intents, its read-ahead from keyframes and its eviction within open items. Planned, and marked so below: the measurements, which are to replace the estimated link lifetimes and stream limits and to find the remotes to read sequentially ([Roadmap](roadmap.md) P25).
 
 Libraries on rclone remotes (§9.2 of the [Architecture](architecture.md)) read their media through `rclone rcd`. This chapter makes those reads cheap in requests, steady under seeking and reusable, for every backend rclone offers:
 
@@ -280,7 +280,7 @@ The fork changes the rcd and the backends as follows. Where a change can be made
 * **Filling it:**
   * `serveRemote` looks an object up here before calling `NewObject`, and caches what it finds.
   * `operations/list` and `operations/stat`, which serve Mavio's scans and `Stat`, always ask the backend and never read the cache. `stat` caches the object it returns and drops the entry of one not found. `list` replaces the entries of the objects it returns without adding any, and a complete listing of a folder (neither recursive nor filtered) drops the entries of the folder's objects missing from it. Only `--rc-serve` reads the cache, so scans see changes as soon as the storage does, and Mavio's `Stat` reports the storage's current version.
-  * *Planned:* backends that find a file by listing its folder declare it with a feature of the fork, `FindByListing`. The backends are those of the last three rows of the lookup table, except union and compress. For them, a miss lists the parent folder once and caches all its objects, so the next requests for its neighbors hit; concurrent misses of one folder share the listing.
+  * Backends that find a file by listing its folder declare it with a feature of the fork, `FindByListing`: those of the last three rows of the lookup table except union and compress, with ftp only on servers without `MLST`. crypt and hasher inherit it from what they wrap; union, combine and compress never have it. For them, a miss lists the parent folder once and caches its objects, at most a quarter of the cache, so the next requests for its neighbors, such as a video's subtitles and images, hit. Concurrent misses of one folder share the listing, and a file missing from it is not found.
 * **What lives on with the cached `Object`:**
   * the links of pikpak, thunder and pcloud;
   * the links that premiumizeme, gofile, drime, linkbox and googlephotos take from their listings;
@@ -302,34 +302,42 @@ The fork changes the rcd and the backends as follows. Where a change can be made
   * Within that window, a backend that reads by path would serve new content under the old version. s3, webdav, azureblob, swift, oracleobjectstorage and qingstor therefore read with `If-Match` set to the storage's ETag of the object they found, so that a file replaced since, even in the middle of a read, fails with 412 (`--s3-no-read-if-match` turns this off for S3-compatible storage that answers it wrongly; webdav sends only strong ETags). googlecloudstorage reads the generation it found, and b2 reads by file ID, so both read one version already.
   * A file rewritten in place while keeping its ID, size and modification time is detected only where the hash is part of the fingerprint.
 
-**Link cache** (`lib/linkcache`, planned): used inside `Open` by every backend that requests a link.
+**Link cache** (`lib/linkcache`): used inside `Open` by the backends that request a link.
 
-* Links are keyed by the object's ID and fingerprint (size, and hash or modification time). Each entry keeps the headers and cookies the link is bound to.
-* A link's expiry is taken from the response's expiry field (aliyundrive's `Expiration`), else from the URL's expiry parameter, else from a lifetime the backend declares. When the storage states no expiry, the declared lifetime comes from measurements (§3.5).
-* A link is renewed at four fifths of its life. Concurrent opens of one file share a request.
-* When the storage answers a link with 401, 403, 404 or 410, the link is dropped, a new one fetched and the request retried once, as thunder does today.
+* Links are keyed by the remote, the object's ID or path, and its fingerprint (size, and hash or modification time), so that a new version never reuses an old link. Each entry keeps the headers and cookies the link is bound to.
+* A link's expiry is taken from the response's expiry field (such as aliyundrive's `expiration` or ulozto's `download_url_valid_until`), else from the URL's expiry parameter (S3, GCS and Azure signatures, `Expires`, `t`, the timestamp of `auth_key` and the like), else from a lifetime the backend declares: an estimate, 10 minutes where nothing better is known (the table below). No link lives more than 24 hours.
+* A link is renewed at four fifths of its life; when the renewal fails, the link still alive is used. Concurrent opens of one file share a request.
+* When the storage answers a link with 401, 403, 404 or 410, the link is dropped, a new one fetched and the request retried once. Backends whose download errors carried no status now carry it.
 * The backends that follow a redirect cache the redirect's target the same way.
 
-| Backend | What the link cache keeps | Also |
-| :--- | :--- | :--- |
-| cloud115 | the link, by pick code; bound to the user agent and cookies | API calls pass their response to `shouldRetry`, so a 429 is seen |
-| aliyundrive | the link, 4 hours (`expire_sec`) | — |
-| baidunetdisk | the `dlink` and the redirect it resolves | `dircache` (it has none); the HEAD and GET of `Open` go through the pacer and its retries |
-| cloud123 | the link; the listing's `DownloadURL` where present | — |
-| guangyadrive, quark, weiyun | the link | weiyun's download status errors become HTTP errors `shouldRetry` sees |
-| yandex, putio, sharefile, quatrix, ulozto, seafile | the link | — |
-| filelu | the link | `Open` sends a range instead of discarding, and its errors go through `shouldRetry` |
-| iclouddrive | the listing's `downloadURL`, else the link | — |
-| filescom | the `DownloadUri`, passed to the SDK | — |
-| mega | the URL of the `g` command | — |
-| protondrive | the link, the session key and the active revision | — |
-| internxt | the file's bucket information | — |
-| onedrive, box, shade, internetarchive | the redirect's target | shade asks for the range on its first request |
-| pikpak, pcloud | — (the link on the cached `Object`) | — |
-| thunder | — (the link on the cached `Object`) | an expiry check |
-| fichier | — (its tokens are single-use) | — |
+| Backend | What the link cache keeps | Lifetime without a stated expiry | Also |
+| :--- | :--- | :--- | :--- |
+| cloud115 | the link, by pick code; bound to the user agent and cookies | 10 minutes (the URL's `t` states it) | API calls pass their response's status to `shouldRetry`, so a 429 is retried |
+| aliyundrive | the link | its `expiration`, 4 hours | — |
+| baidunetdisk | the target the `dlink` redirects to | 1 hour | the HEAD and GET of `Open` go through the pacer and its retries |
+| cloud123 | the listing's `DownloadUrl` first, then the requested link | 10 minutes | — |
+| guangyadrive, quark | the link; quark's bound to its cookies | 10 minutes | — |
+| weiyun | the link, bound to its cookie | 10 minutes | download status errors become HTTP errors `shouldRetry` sees |
+| yandex, putio | the link | 10 minutes | putio's download errors carry their status |
+| quatrix | the link ID | 10 minutes | any 4xx of a link ID counts as refused, in case the IDs serve one download |
+| sharefile | the link | 5 minutes | — |
+| ulozto | the link | its `download_url_valid_until` | — |
+| seafile | the link, requested reusable (`reuse=1`) | 1 hour | — |
+| filelu | the link | 10 minutes | `Open` sends a range instead of discarding, and its errors go through `shouldRetry` |
+| iclouddrive | the listing's `downloadURL`, else the link | 10 minutes | — |
+| filescom | the `DownloadUri`, passed to the SDK | the URI's own expiry | error answers of downloads fail instead of being read as content |
+| mega | the SDK's download, with the URL of the `g` command | 10 minutes | the MAC of a file read whole is checked once |
+| internxt | the shard URL, key and IV | 10 minutes | the hash of a whole read is checked at its end instead of by reading on at close |
+| onedrive | the redirect's target | 5 minutes, as Graph documents | — |
+| box | the redirect's target | 10 minutes | download servers no longer get the API token |
+| shade | the redirect's target | 10 minutes | the first request asks for the range |
+| internetarchive | the redirect's target, the item's storage node | 1 hour | — |
+| pikpak, pcloud | — (the link on the cached `Object`) | — | — |
+| thunder | — (the link on the cached `Object`) | — | renewed before the expiry its URL states |
+| protondrive | — (its SDK reads only through its own calls) | — | — |
+| fichier | — (its tokens are single-use) | — | — |
 
-**Fixes to single backends** (filelu and the "Also" column of the table above are planned):
+**Fixes to single backends**, besides the "Also" column above:
 
 * webdav and http: when a range is asked for and the server answers 200, `Open` discards the bytes before the offset, as mailru does, so the body matches the range.
 * crypt: keeps the nonce on its `Object` after the first read, so a seek costs one request.
@@ -355,8 +363,19 @@ The fork's limiter (`lib/connlimit`) caps the streams `--rc-serve` has open, for
 * **When the file's slots are full:** the stream of that file read least recently is closed and its slot given to the new open. Players seeking and browsers requesting a new range open the next stream before closing the last, whose reader has moved on. The reader of the closed stream gets an error, and reopens if it still reads.
 * **When the account's slots are full:** the open waits for a slot until its context ends. It never takes a slot of another file.
 * **Limits:**
-  * The options `--rc-serve-max-file-streams` and `--rc-serve-max-streams` set them. Unset, streams are not limited.
-  * *Planned:* each backend declares default limits with features of the fork (`MaxFileStreams`, `MaxStreams`), set from measurements (§3.5) or from the storage's documented limits, such as mailru's 4 streams to a download server. Limits that a remote's own options already set win: ftp's `--ftp-concurrency` and sftp's `--sftp-connections`. A backend neither measured nor documented keeps no limit.
+  * The options `--rc-serve-max-file-streams` and `--rc-serve-max-streams` set them; -1 turns a limit off.
+  * Unset, they are the limits each backend declares with features of the fork (`MaxFileStreams`, `MaxStreams`). These are estimates for the drives that throttle concurrent downloads, at least 2 streams of a file so that a seek can open the next stream before the last closes:
+
+    | Backend | Streams of a file | Streams of an account |
+    | :--- | :--- | :--- |
+    | cloud115, baidunetdisk, quark, weiyun | 2 | 4 |
+    | guangyadrive, mega, protondrive | 2 | 6 |
+    | cloud123, thunder, pikpak, pcloud, iclouddrive | 3 | 8 |
+    | aliyundrive, yandex | 4 | 10 |
+    | drive, onedrive, dropbox, box | 4 | 16 |
+    | mailru | 4 | 4, as a download server serves 4 streams |
+
+    ftp and sftp limit their connections with their own options (`--ftp-concurrency`, `--sftp-connections`) and declare none; nor do the other backends.
 
 ### 3.4 Block Cache
 
@@ -410,7 +429,7 @@ A file of a sequential remote has one downloader. A read ahead of it extends it,
 
 ### 3.5 Measurements
 
-Planned. The limits, link lifetimes and sequential settings get their defaults from measurements. Each backend is measured through the rcd with a test account, starting with the drives of the fork and the consumer drives (drive, onedrive, dropbox, box, pcloud, mega, yandex, protondrive). The measurements:
+Planned. The stream limits and the link lifetimes without a stated expiry are estimates for now (§3.2, §3.3); measurements are to replace them and to find the remotes to read sequentially. Each backend is measured through the rcd with a test account, starting with the drives of the fork and the consumer drives (drive, onedrive, dropbox, box, pcloud, mega, yandex, protondrive). The measurements:
 
 * sequential reads;
 * forward and backward jumps;
@@ -424,12 +443,12 @@ The results set each backend's stream limits, link lifetimes and whether its rem
 
 | Mechanism | Implementation | Phase |
 | :--- | :--- | :--- |
-| Object cache | mavioai/rclone `fs/objcache`; `fs/rc/rcserver/serveobject.go` (`serveObject`), `fs/operations/lsjson.go` (`list`, `stat`), `fs/operations/rc.go` and `fs/sync/rc.go` (the write operations); the `ChangeNotify` pollers in `fs/objcache` (`Cache.startNotifier`, `Cache.notify`) and `--rc-serve-poll-interval` in `fs/rc/rc.go`; the `FindByListing` feature of the backends that list to find is planned | P25, implemented |
+| Object cache | mavioai/rclone `fs/objcache`; `fs/rc/rcserver/serveobject.go` (`serveObject`), `fs/operations/lsjson.go` (`list`, `stat`), `fs/operations/rc.go` and `fs/sync/rc.go` (the write operations); the `ChangeNotify` pollers in `fs/objcache` (`Cache.startNotifier`, `Cache.notify`) and `--rc-serve-poll-interval` in `fs/rc/rc.go`; `Cache.Find` and the `FindByListing` feature in `fs/features.go` and the backends that list to find | P25, implemented |
 | Version checks | mavioai/rclone `fs/rc/rcserver/serveobject.go` (the ETag, `If-Match` and 412); `libs/rclone/version.go`, `storage.go` (`file`), `proxy.go`, `blocks.go`; `fs.VersionTagger` in `fs/types.go`, and `If-Match` in `Object.Open` of `backend/{s3,webdav,azureblob,swift,oracleobjectstorage,qingstor}` | P25, implemented |
-| Link cache | mavioai/rclone `lib/linkcache`; `Object.Open` of the backends in the table of §3.2 | P25, planned |
-| Backend fixes | mavioai/rclone `backend/webdav`, `backend/http` (ranges answered with 200, `lib/readers/skiprange.go`), `backend/crypt` (the nonce); `backend/filelu` (ranges) and the "Also" column of §3.2 are planned | P25, implemented |
+| Link cache | mavioai/rclone `lib/linkcache`; `Object.Open` of the backends in the table of §3.2 | P25, implemented |
+| Backend fixes | mavioai/rclone `backend/webdav`, `backend/http` (ranges answered with 200, `lib/readers/skiprange.go`), `backend/crypt` (the nonce), `backend/filelu` (ranges), `backend/shade` (the first range) and the backends of the "Also" column of §3.2 | P25, implemented |
 | Statuses and seeking through the rcd | mavioai/rclone `lib/http/serve/status.go` (`ErrorStatus`), `serve.go` (`ObjectWith`), `fs/rc/rcserver/serveobject.go`, `fs/features.go` (`SeekReadsFromStart`) | P25, implemented |
 | One `Fs` per remote, longer `Fs` cache | `libs/rclone/storage.go` (`Storage.fsName`, `Storage.abs`), `daemon.go` (`Daemon.launch`) | P25, implemented |
-| Connection limits | mavioai/rclone `lib/connlimit`, `fs/rc/rcserver/serveobject.go` (`Server.open`), `fs/rc/rc.go` (the options); the `MaxFileStreams` and `MaxStreams` features are planned | P25, implemented |
+| Connection limits | mavioai/rclone `lib/connlimit`, `fs/rc/rcserver/serveobject.go` (`Server.open`), `fs/rc/rc.go` (the options); the `MaxFileStreams` and `MaxStreams` features in `fs/features.go` and the backends of §3.3 | P25, implemented |
 | Block cache | `libs/rclone` (`blocks.go`, `ranges.go`, `cached.go`), `storage.go` (`Storage.Open`, `Storage.MediaURL`), `proxy.go` (`Proxy.serveCached`); `core.ReadIntent` from `libs/library` (probes, background jobs), `apps/server/internal/playback` (playback) and `apps/server/internal/acquisition` (probes of imports); `apps/server/internal/server/rclone.go` and the `rclone-cache-size` setting; eviction within open items in `blocks.go` (`BlockCache.trimOpen`, `blockItem.evict`) and `punch_{linux,darwin,windows,other}.go`; read-ahead from keyframes through `core.Prefetcher` (`cachedFile.Prefetch`), `libs/media/keyframes` (`Data.Offsets`) and `apps/server/internal/playback/prefetch.go` (`sourcePrefetch`; `Manager.prepareStart`, `serveSegment`, `Manager.Progress`) | P25, implemented |
 | Measurements | mavioai/rclone `MAVIO_PROVIDERS.md` | P25, planned |
