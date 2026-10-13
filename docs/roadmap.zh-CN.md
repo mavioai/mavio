@@ -689,7 +689,7 @@ flowchart TD
 - [ ] rclone 远端读取（[优化 §3](optimization.zh-CN.md#3-通过-rclone-读取远端存储reading-remote-storage-through-rclone)），按以下顺序：
   - [x] 经 rcd 与 Mavio 惠及所有后端：mavioai/rclone 中带版本校验的对象缓存、经 `--rc-serve` 传递存储状态码与拖动方式、由选项设定的数据流限制，以及对 webdav 与 http（以 200 回应的范围请求）和 crypt（nonce）的修正；Mavio 中每个远端一个 `Fs`、每次读取固定版本，以及 `libs/rclone` 中按意图预读的块缓存
   - [x] 块缓存：播放开始或拖动时按源的关键帧预读，HLS 时预读其后几个分段的字节范围；淘汰已打开项中落后于读取位置最远的范围
-  - [ ] 对象缓存：按缓存中远端的 `ChangeNotify` 失效，以及按路径读取的后端（s3、b2、googlecloudstorage、azureblob、webdav 等）在 `Object.Open` 中以存储的 ETag 发送 `If-Match`
+  - [x] 对象缓存：按缓存中远端的 `ChangeNotify` 失效，以及按路径读取的后端（s3、webdav、azureblob、swift、oracleobjectstorage 与 qingstor；googlecloudstorage 与 b2 本就只读一个版本）在 `Object.Open` 中以存储的 ETag 发送 `If-Match`
   - [ ] fork 的云盘与常用个人云盘：先实测，再为 cloud115、aliyundrive、baidunetdisk、cloud123、guangyadrive、quark、weiyun、pikpak 与 thunder，以及 onedrive、box、pcloud、mega、yandex、protondrive 与 iclouddrive 加上 `FindByListing`、链接缓存、默认数据流限制与 §3.2 中的修正
   - [ ] §3.2 中的其余后端（`FindByListing`、链接缓存与修正，如 filelu 的范围请求与 shade 的第一个请求），各自在 Mavio 用户实际使用时再做
 - [ ] 后续：远端插件（运行在其他机器上的插件进程）、云盘直链、按变更通知增量扫描

@@ -206,7 +206,7 @@ A client that does not demux a file's subtitles itself gets them from the server
 
 ## 3. Reading Remote Storage through rclone
 
-Status: partly implemented (P25). Implemented: the object cache and version checks, statuses, seeking through `fsinfo`, stream limits, the webdav, http and crypt fixes, one `Fs` per remote, and the block cache with its read intents, its read-ahead from keyframes and its eviction within open items. Planned, and marked so below: `FindByListing`, invalidation by `ChangeNotify`, conditional reads in the backends, the link cache with the other single-backend fixes, per-backend stream limits, and the measurements ([Roadmap](roadmap.md) P25).
+Status: partly implemented (P25). Implemented: the object cache with its invalidation by `ChangeNotify` and its version checks, conditional reads in the backends that read by path, statuses, seeking through `fsinfo`, stream limits, the webdav, http and crypt fixes, one `Fs` per remote, and the block cache with its read intents, its read-ahead from keyframes and its eviction within open items. Planned, and marked so below: `FindByListing`, the link cache with the other single-backend fixes, per-backend stream limits, and the measurements ([Roadmap](roadmap.md) P25).
 
 Libraries on rclone remotes (§9.2 of the [Architecture](architecture.md)) read their media through `rclone rcd`. This chapter makes those reads cheap in requests, steady under seeking and reusable, for every backend rclone offers:
 
@@ -291,15 +291,15 @@ The fork changes the rcd and the backends as follows. Where a change can be made
 * **Lifetime and invalidation:**
   * Entries live 5 minutes, and the cache holds 10,000 of them, by default (the options `--rc-serve-cache-duration` and `--rc-serve-cache-size`).
   * Writes through the rcd (`operations/*`, `sync/*`, `backend/command`) drop the entries of the paths and folders they touch, in every `Fs` of the remote whatever its root.
-  * *Planned:* while a remote whose backend has `ChangeNotify` (drive, onedrive, dropbox, box, pcloud, mega and others) is in the cache, the changes it reports drop their entries.
-  * A change made elsewhere surfaces as a version that does not match (below) or as a failed `Open`. The entry is then dropped and the object looked up again; the open is retried once unless the object's version changed.
+  * While objects of a remote whose backend has `ChangeNotify` (drive, onedrive, dropbox, box, pcloud, mega and others) are in the cache, the rcd polls its changes, every minute by default (`--rc-serve-poll-interval`), and the changes drop the entries of the paths and folders they name. The polling stops when none of the remote's objects are left.
+  * A change made elsewhere and not yet reported surfaces as a version that does not match (below) or as a failed `Open`. The entry is then replaced by the object looked up again. The open is retried once when the version is the same; when it changed, a request with `If-Match` gets 412, and one without is served the fresh object from the start.
   * Misses are not cached.
 * **Version checks:** a read never mixes two versions of a file.
-  * `--rc-serve` gives every response the object's version as its ETag: a hash of the object's ID and its fingerprint (size and modification time, and the hash where the backend has one at no cost).
+  * `--rc-serve` gives every response the object's version as its ETag: a hash of the object's ID and its fingerprint (size and modification time, the hash where the backend has one at no cost, and the storage's own ETag where the backend keeps one).
   * Mavio's readers keep the ETag of a file's first response and send it as `If-Match` with every later request. The block cache keeps it with the file's item, across restarts.
   * When a cached object does not match `If-Match`, the rcd looks the object up again. When the fresh object does not match either, it answers 412. Mavio takes that, or a response whose total size differs from the size `Stat` gave, as a changed file: the read fails with `ErrChanged`, and the file's block-cache item is dropped.
   * Mavio's `Stat` asks the backend and so refreshes the cached object. A cached object is older than the storage only between a change made elsewhere and the next `Stat` or listing of its folder, and at most for an entry's lifetime.
-  * *Planned:* within that window, backends that read by path (s3, b2, googlecloudstorage, azureblob, webdav and others) serve new content under the old version. Where they support conditional reads by ETag, `Open` will also send `If-Match` with the storage's ETag of the object, so that a file replaced in the middle of a read fails with 412.
+  * Within that window, a backend that reads by path would serve new content under the old version. s3, webdav, azureblob, swift, oracleobjectstorage and qingstor therefore read with `If-Match` set to the storage's ETag of the object they found, so that a file replaced since, even in the middle of a read, fails with 412 (`--s3-no-read-if-match` turns this off for S3-compatible storage that answers it wrongly; webdav sends only strong ETags). googlecloudstorage reads the generation it found, and b2 reads by file ID, so both read one version already.
   * A file rewritten in place while keeping its ID, size and modification time is detected only where the hash is part of the fingerprint.
 
 **Link cache** (`lib/linkcache`, planned): used inside `Open` by every backend that requests a link.
@@ -424,8 +424,8 @@ The results set each backend's stream limits, link lifetimes and whether its rem
 
 | Mechanism | Implementation | Phase |
 | :--- | :--- | :--- |
-| Object cache | mavioai/rclone `fs/objcache`; `fs/rc/rcserver/serveobject.go` (`serveObject`), `fs/operations/lsjson.go` (`list`, `stat`), `fs/operations/rc.go` and `fs/sync/rc.go` (the write operations); the `FindByListing` feature of the backends that list to find is planned | P25, implemented |
-| Version checks | mavioai/rclone `fs/rc/rcserver/serveobject.go` (the ETag, `If-Match` and 412); `libs/rclone/version.go`, `storage.go` (`file`), `proxy.go`, `blocks.go`; `If-Match` in `Object.Open` of the backends with ETags is planned | P25, implemented |
+| Object cache | mavioai/rclone `fs/objcache`; `fs/rc/rcserver/serveobject.go` (`serveObject`), `fs/operations/lsjson.go` (`list`, `stat`), `fs/operations/rc.go` and `fs/sync/rc.go` (the write operations); the `ChangeNotify` pollers in `fs/objcache` (`Cache.startNotifier`, `Cache.notify`) and `--rc-serve-poll-interval` in `fs/rc/rc.go`; the `FindByListing` feature of the backends that list to find is planned | P25, implemented |
+| Version checks | mavioai/rclone `fs/rc/rcserver/serveobject.go` (the ETag, `If-Match` and 412); `libs/rclone/version.go`, `storage.go` (`file`), `proxy.go`, `blocks.go`; `fs.VersionTagger` in `fs/types.go`, and `If-Match` in `Object.Open` of `backend/{s3,webdav,azureblob,swift,oracleobjectstorage,qingstor}` | P25, implemented |
 | Link cache | mavioai/rclone `lib/linkcache`; `Object.Open` of the backends in the table of §3.2 | P25, planned |
 | Backend fixes | mavioai/rclone `backend/webdav`, `backend/http` (ranges answered with 200, `lib/readers/skiprange.go`), `backend/crypt` (the nonce); `backend/filelu` (ranges) and the "Also" column of §3.2 are planned | P25, implemented |
 | Statuses and seeking through the rcd | mavioai/rclone `lib/http/serve/status.go` (`ErrorStatus`), `serve.go` (`ObjectWith`), `fs/rc/rcserver/serveobject.go`, `fs/features.go` (`SeekReadsFromStart`) | P25, implemented |

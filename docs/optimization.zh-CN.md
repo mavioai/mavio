@@ -206,7 +206,7 @@ HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需�
 
 ## 3. 通过 rclone 读取远端存储（Reading Remote Storage through rclone）
 
-状态：部分实现（P25）。已实现：对象缓存与版本校验、状态码、经 `fsinfo` 报告拖动方式、数据流限制、对 webdav、http 与 crypt 的修正、每个远端一个 `Fs`，以及块缓存及其读取意图、按关键帧的预取和已打开项内部的淘汰。计划中（下文逐项标明）：`FindByListing`、按 `ChangeNotify` 失效、后端的条件读取、链接缓存及其他单个后端的修正、各后端的数据流限制，以及实测（[路线图](roadmap.zh-CN.md) P25）。
+状态：部分实现（P25）。已实现：对象缓存及其按 `ChangeNotify` 的失效与版本校验、按路径读取的后端的条件读取、状态码、经 `fsinfo` 报告拖动方式、数据流限制、对 webdav、http 与 crypt 的修正、每个远端一个 `Fs`，以及块缓存及其读取意图、按关键帧的预取和已打开项内部的淘汰。计划中（下文逐项标明）：`FindByListing`、链接缓存及其他单个后端的修正、各后端的数据流限制，以及实测（[路线图](roadmap.zh-CN.md) P25）。
 
 rclone 远端上的媒体库（[架构](architecture.zh-CN.md) §9.2）经 `rclone rcd` 读取媒体。本章针对 rclone 提供的所有后端，使这些读取发出的请求更少、拖动时更稳定、读过的数据可以复用：
 
@@ -291,15 +291,15 @@ fork 对 rcd 与后端做以下修改；能对所有后端统一完成的，就�
 * **有效期与失效：**
   * 条目默认存活 5 分钟，缓存默认最多保存 10,000 个条目（选项 `--rc-serve-cache-duration` 与 `--rc-serve-cache-size`）。
   * 经 rcd 的写操作（`operations/*`、`sync/*`、`backend/command`）会丢弃所涉及路径与目录的条目，无论该远端的 `Fs` 以哪个目录为根。
-  * *计划中：* 后端支持 `ChangeNotify` 的远端（drive、onedrive、dropbox、box、pcloud、mega 等）留在缓存中期间，它报告的变化会丢弃对应条目。
-  * 在别处做的修改表现为版本不符（见下）或 `Open` 失败；此时丢弃条目并重新查找对象，若对象版本未变则重试一次打开。
+  * 后端支持 `ChangeNotify` 的远端（drive、onedrive、dropbox、box、pcloud、mega 等）有对象在缓存中期间，rcd 轮询其变化，默认每分钟一次（`--rc-serve-poll-interval`），变化会丢弃所涉路径与目录的条目。该远端的对象全部离开缓存后，轮询停止。
+  * 在别处做的、尚未报告的修改表现为版本不符（见下）或 `Open` 失败；此时以重新查找到的对象替换条目。版本未变则重试一次打开；版本已变时，带 `If-Match` 的请求得到 412，不带的请求从头得到新对象。
   * 未命中不缓存。
 * **版本校验：** 一次读取永远不会混入一个文件的两个版本。
-  * `--rc-serve` 在每个响应中以 ETag 给出对象的版本：对象 ID 与其指纹（大小、修改时间，以及后端无需额外代价即可得到的哈希）的哈希值。
+  * `--rc-serve` 在每个响应中以 ETag 给出对象的版本：对象 ID 与其指纹（大小、修改时间、后端无需额外代价即可得到的哈希，以及后端保存的存储自身 ETag）的哈希值。
   * Mavio 的读取器保存文件第一个响应的 ETag，并在之后的每个请求中以 `If-Match` 发送。块缓存把它与文件的缓存项一起保存，重启后仍然保留。
   * 缓存的对象与 `If-Match` 不符时，rcd 重新查找对象；重新查找到的对象仍不相符时，回应 412。Mavio 把 412、以及总大小与 `Stat` 给出的大小不同的响应，视为文件已变化：读取以 `ErrChanged` 失败，并丢弃该文件的块缓存项。
   * Mavio 的 `Stat` 查询后端，因而会刷新缓存的对象。缓存的对象只在别处修改之后、该文件下一次 `Stat` 或其所在目录下一次列举之前比存储上的旧，且最长不超过一个条目的有效期。
-  * *计划中：* 在这段时间内，按路径读取的后端（s3、b2、googlecloudstorage、azureblob、webdav 等）会以旧版本提供新内容。对于支持按 ETag 条件读取的后端，`Open` 将同时以存储给出的对象 ETag 发送 `If-Match`，使读取中途被替换的文件以 412 失败。
+  * 在这段时间内，按路径读取的后端会以旧版本提供新内容。因此 s3、webdav、azureblob、swift、oracleobjectstorage 与 qingstor 读取时以找到对象时存储给出的 ETag 发送 `If-Match`，使此后（包括读取中途）被替换的文件以 412 失败（对回应有误的 S3 兼容存储，可用 `--s3-no-read-if-match` 关闭；webdav 只发送强 ETag）。googlecloudstorage 读取找到时的 generation，b2 按文件 ID 读取，两者本就只读一个版本。
   * 原地改写且 ID、大小与修改时间都不变的文件，只有在指纹包含哈希时才能发现。
 
 **链接缓存**（`lib/linkcache`，计划中）：每个需要申请链接的后端在 `Open` 中使用。
@@ -424,8 +424,8 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 
 | 机制 | 实现 | 阶段 |
 | :--- | :--- | :--- |
-| 对象缓存 | mavioai/rclone `fs/objcache`；`fs/rc/rcserver/serveobject.go`（`serveObject`）、`fs/operations/lsjson.go`（`list`、`stat`）、`fs/operations/rc.go` 与 `fs/sync/rc.go`（各写操作）；通过列目录查找文件的后端的 `FindByListing` 特性为计划中 | P25，已实现 |
-| 版本校验 | mavioai/rclone `fs/rc/rcserver/serveobject.go`（ETag、`If-Match` 与 412）；`libs/rclone/version.go`、`storage.go`（`file`）、`proxy.go`、`blocks.go`；支持 ETag 的后端在 `Object.Open` 中发送 `If-Match` 为计划中 | P25，已实现 |
+| 对象缓存 | mavioai/rclone `fs/objcache`；`fs/rc/rcserver/serveobject.go`（`serveObject`）、`fs/operations/lsjson.go`（`list`、`stat`）、`fs/operations/rc.go` 与 `fs/sync/rc.go`（各写操作）；`fs/objcache` 中的 `ChangeNotify` 轮询（`Cache.startNotifier`、`Cache.notify`）与 `fs/rc/rc.go` 中的 `--rc-serve-poll-interval`；通过列目录查找文件的后端的 `FindByListing` 特性为计划中 | P25，已实现 |
+| 版本校验 | mavioai/rclone `fs/rc/rcserver/serveobject.go`（ETag、`If-Match` 与 412）；`libs/rclone/version.go`、`storage.go`（`file`）、`proxy.go`、`blocks.go`；`fs/types.go` 中的 `fs.VersionTagger`，以及 `backend/{s3,webdav,azureblob,swift,oracleobjectstorage,qingstor}` 的 `Object.Open` 中的 `If-Match` | P25，已实现 |
 | 链接缓存 | mavioai/rclone `lib/linkcache`；§3.2 表中各后端的 `Object.Open` | P25，计划中 |
 | 后端修正 | mavioai/rclone `backend/webdav`、`backend/http`（以 200 回应的范围请求，`lib/readers/skiprange.go`）、`backend/crypt`（nonce）；`backend/filelu`（范围）与 §3.2 表中"另外"一列为计划中 | P25，已实现 |
 | 经 rcd 传递状态码与拖动方式 | mavioai/rclone `lib/http/serve/status.go`（`ErrorStatus`）、`serve.go`（`ObjectWith`）、`fs/rc/rcserver/serveobject.go`、`fs/features.go`（`SeekReadsFromStart`） | P25，已实现 |
