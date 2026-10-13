@@ -265,6 +265,9 @@ type Playback struct {
 	// counted says the play was counted, once per playback.
 	counted bool
 	ended   bool
+	// prefetch fetches the source ahead, on storage that keeps what it
+	// reads; nil otherwise.
+	prefetch *sourcePrefetch
 }
 
 // Subtitle is a subtitle stream of a playback.
@@ -710,6 +713,9 @@ func (m *Manager) Progress(ctx context.Context, userID core.ID, id string, pos t
 	if toggled {
 		m.changed(p)
 	}
+	if s := p.prefetcher(); s != nil {
+		s.follow(pos)
+	}
 	if p.stream != nil {
 		if err := p.stream.ReportPosition(ctx, pos); err != nil {
 			return err
@@ -774,7 +780,12 @@ func (p *Playback) close() {
 	p.mu.Lock()
 	ended := p.ended
 	p.ended = true
+	pre := p.prefetch
+	p.prefetch = nil
 	p.mu.Unlock()
+	if pre != nil {
+		pre.close()
+	}
 	if !ended && p.stream != nil {
 		_ = p.stream.Close()
 	}

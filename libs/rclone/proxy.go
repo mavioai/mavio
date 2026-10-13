@@ -105,8 +105,8 @@ func (p *Proxy) URL(_ context.Context, m Media) (string, error) {
 	p.mu.Unlock()
 	if m.blocks != nil && m.Intent.Kind == core.ReadProbe {
 		if it, err := m.blocks.open(m.key, p.c.objectURL(m.FsName, m.Remote), m.size, m.seq); err == nil {
-			it.prefetch(0, probeHead)
-			it.prefetch(m.size-probeTail, m.size)
+			it.prefetch(nil, 0, probeHead)
+			it.prefetch(nil, m.size-probeTail, m.size)
 			it.release()
 		}
 	}
@@ -196,7 +196,9 @@ func (p *Proxy) serveCached(w http.ResponseWriter, r *http.Request, m Media) boo
 	}
 	// ServeContent sniffs no type, which would read the head.
 	w.Header().Set("Content-Type", ctype)
-	rd := itemReader{ctx: r.Context(), it: it, ahead: aheadOf(m.Intent)}
+	cur := it.attach(0)
+	defer it.detach(cur)
+	rd := itemReader{ctx: r.Context(), it: it, cur: cur, ahead: aheadOf(m.Intent)}
 	http.ServeContent(w, r, "", time.Time{}, io.NewSectionReader(rd, 0, m.size))
 	return true
 }

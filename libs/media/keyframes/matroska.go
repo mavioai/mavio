@@ -364,9 +364,13 @@ func matroska(r io.ReaderAt, size int64) (Data, error) {
 	if err != nil {
 		return Data{}, err
 	}
-	d := Data{Duration: m.duration, Keyframes: make([]time.Duration, len(m.Cues))}
+	d := Data{Duration: m.duration, Keyframes: make([]time.Duration, len(m.Cues)), Offsets: make([]int64, len(m.Cues))}
 	for i, c := range m.Cues {
 		d.Keyframes[i] = c.Time
+		d.Offsets[i] = c.cluster
+		if c.cluster < 0 {
+			d.Offsets = nil
+		}
 	}
 	return d, nil
 }

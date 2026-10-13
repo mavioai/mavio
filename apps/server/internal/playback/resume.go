@@ -57,13 +57,15 @@ func (p *Playback) startPosition(at time.Duration) time.Duration {
 
 // prepareStart begins the playback where it starts: an HLS stream starts
 // ffmpeg there at once, and the source's container header and index and
-// the media there are read ahead in the background.
+// the media there are read ahead in the background, or on rclone
+// remotes fetched into the block cache.
 func (m *Manager) prepareStart(ctx context.Context, p *Playback) {
 	if p.stream != nil {
 		if err := p.stream.Prepare(context.WithoutCancel(ctx), p.StartPosition); err != nil {
 			m.log.WarnContext(ctx, "start transcode", "playback", p.ID, "err", err)
 		}
 	}
+	m.startPrefetch(ctx, p)
 	ms := p.Source()
 	if ms.Path == "" || ms.Disc != "" || p.Remote() || core.IsRemotePath(ms.Path) {
 		return

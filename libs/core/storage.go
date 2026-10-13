@@ -111,6 +111,14 @@ type File interface {
 	Stat() (fs.FileInfo, error)
 }
 
+// Prefetcher is a File of storage that keeps the bytes it reads, such as
+// the block cache of rclone remotes. Prefetch has the bytes [off, end)
+// fetched without waiting for them, and marks off as where the file is
+// read, so that what lies behind it is evicted before what lies ahead.
+type Prefetcher interface {
+	Prefetch(off, end int64)
+}
+
 // StorageCapabilities say what a storage does beyond reading and writing
 // files.
 type StorageCapabilities struct {

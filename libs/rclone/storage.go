@@ -216,7 +216,7 @@ func (s *Storage) Open(ctx context.Context, name string) (core.File, error) {
 		it, err := s.blocks.open(itemKey(s.fsName(), s.abs(name), info.(fileInfo)), u, info.Size(), s.seq)
 		if err == nil {
 			ahead := aheadOf(core.ReadIntentOf(ctx))
-			return &cachedFile{ctx: context.WithoutCancel(ctx), it: it, info: info, ahead: ahead}, nil
+			return &cachedFile{ctx: context.WithoutCancel(ctx), it: it, cur: it.attach(0), info: info, ahead: ahead}, nil
 		}
 		s.blocks.log.WarnContext(ctx, "read past the block cache", "remote", s.remote, "file", name, "err", err)
 	}

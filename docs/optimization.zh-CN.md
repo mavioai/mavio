@@ -167,6 +167,7 @@ HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需�
 * **Matroska 和 WebM**：通过 SeekHead（以及它指向的第二个 SeekHead）找到 Info（时间刻度和时长）、Tracks（第一条视频轨）和 Cues；视频轨的 cue 点就是它的关键帧。
 * **MP4 和 QuickTime**：`moov` 中的第一条视频轨（`hdlr` 为 `vide`），逐个读取顶层 box 的头部找到 `moov`，不论它在文件的什么位置。关键帧是同步样本（`stss`；没有它时每个样本都是），时间为解码时间（`stts`）加合成偏移（`ctts`），再按编辑列表（`elst`）平移。分片文件的样本表是空的：由文件末尾 `mfra` 中该轨的 `tfra`（通过 `mfro` 找到），或第一个分片之前、各子分段以关键帧开头的 `sidx` 给出关键帧。
 * 时间取整到微秒，即 ffprobe 包时间的精度，两者因此得到相同的分段。
+* 索引还给出每个关键帧在文件中的位置：Matroska cue 点所在的簇；MP4 同步样本的偏移，由其所在块（`stsc`、`stco` 或 `co64`）及块中此前各样本的大小（`stsz`）得出；`tfra` 条目或 `sidx` 子分段指向的分片。播放在 rclone 远端上据此预取（§3.4）。
 
 读取的只是几个元素或 box：在测试媒体上不到每个文件的 2%。只有没有索引的文件才由 `media.keyframes` 任务整个读取，云存储上不读。复制没有关键帧的文件的视频的播放，和以前一样转码视频。
 
@@ -205,7 +206,7 @@ HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需�
 
 ## 3. 通过 rclone 读取远端存储（Reading Remote Storage through rclone）
 
-状态：部分实现（P25）。已实现：对象缓存与版本校验、状态码、经 `fsinfo` 报告拖动方式、数据流限制、对 webdav、http 与 crypt 的修正、每个远端一个 `Fs`，以及块缓存及其读取意图。计划中（下文逐项标明）：`FindByListing`、按 `ChangeNotify` 失效、后端的条件读取、链接缓存及其他单个后端的修正、各后端的数据流限制、为拖动与 HLS 按关键帧预读、已打开项内部的淘汰，以及实测（[路线图](roadmap.zh-CN.md) P25）。
+状态：部分实现（P25）。已实现：对象缓存与版本校验、状态码、经 `fsinfo` 报告拖动方式、数据流限制、对 webdav、http 与 crypt 的修正、每个远端一个 `Fs`，以及块缓存及其读取意图、按关键帧的预取和已打开项内部的淘汰。计划中（下文逐项标明）：`FindByListing`、按 `ChangeNotify` 失效、后端的条件读取、链接缓存及其他单个后端的修正、各后端的数据流限制，以及实测（[路线图](roadmap.zh-CN.md) P25）。
 
 rclone 远端上的媒体库（[架构](architecture.zh-CN.md) §9.2）经 `rclone rcd` 读取媒体。本章针对 rclone 提供的所有后端，使这些读取发出的请求更少、拖动时更稳定、读过的数据可以复用：
 
@@ -379,7 +380,7 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | 下载器结束 | 空闲 5 秒，或连续遇到 1 MiB 已有数据 | 相同 |
 | 错误 | 连续 10 次错误后，等待者失败 | 相同；两次请求之间按 `Retry-After` 等待，没有时从 200 毫秒起翻倍至 5 秒 |
 | 磁盘读取 | 持有该项的锁 | 不持锁；只保护范围信息 |
-| 淘汰 | 先淘汰未在使用的项，最久未用者优先；超出配额时整体丢弃已打开的项 | 淘汰未在使用的项，最久未读者优先；已打开的项完整保留 |
+| 淘汰 | 先淘汰未在使用的项，最久未用者优先；超出配额时整体丢弃已打开的项 | 淘汰未在使用的项，最久未读者优先；然后以 16 MiB 为单位，淘汰已打开项中落后于其所有读取方最远的范围，保留每项的第一个 MiB 及读取方身后 16 MiB；磁盘不能释放文件中的范围时，已打开的项完整保留 |
 
 预读按每次读取的意图进行，这是文件系统层面的缓存无法知道的。意图（`core.ReadIntent`）随 `Storage.Open` 与 `Storage.MediaURL` 的 context 传递：
 
@@ -388,10 +389,12 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 * **播放：** 直接播放，以及 ffmpeg 为播放进行的读取，保持领先 30 秒的源码率，最多 256 MiB；码率未知时为 32 MiB。
 * **后台任务：** 读取时不预读。
 * **其他读取：** 16 MiB。
-* *计划中：* **seek：** 播放开始或拖动到某个时间时，Mavio 在源的 keyframes 中查出对应关键帧，并在 ffmpeg 或客户端请求之前，从该关键帧的字节位置启动下载器。
-* *计划中：* **HLS：** 请求某个分段时，下载器延伸到其后几个分段的字节范围。复制视频时这些范围由关键帧位置得出，否则按码率估算。
+* **播放开始：** 播放开始时，Mavio 打开源文件，从容器索引读出各关键帧在文件中的位置（§2.4）；这些索引读取大多命中 probe 留在缓存中的数据。在 ffmpeg 或客户端请求之前，它预取从开始位置处或之前的关键帧，到 30 秒媒体之后第一个关键帧为止的字节，最多 256 MiB。没有索引时，按文件的大小与时长估算这段范围。
+* **HLS：** 每次请求分段（包括拖动）都以同样方式从该分段的开始预取，使领先客户端足够多时被暂停的 ffmpeg 恢复后发现其后几个分段的字节已在缓存中。
 
 同一文件的多个读取方共用一个缓存项，如 probe 与播放，或两个观看者。一段范围无论有多少读取方在等待，都只下载一次。
+
+缓存项的每个读取方都标记自己的读取位置：客户端直接播放的请求、ffmpeg 经代理的请求，以及播放用来预取的文件，它随播放的进度报告移动。未在使用的项释放不够时，淘汰已打开项中落后于其所有读取方的范围，最远的优先，并在数据文件中打洞释放其磁盘空间（Linux 上用 `fallocate`，macOS 上用 `F_PUNCHHOLE`，Windows 上用稀疏文件）。缓存项的元数据先去掉这些范围再保存，然后才释放数据；正在读写的范围不淘汰。一部从头看到尾的长片，只保留播放位置附近的数据。
 
 * **大小：** 一项设置，`rclone-cache-size`，默认 10 GiB，并保留最少 5% 的空闲磁盘空间；设为 0 时关闭缓存。
 * **时限：** 7 天未读的项会被删除。
@@ -428,5 +431,5 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | 经 rcd 传递状态码与拖动方式 | mavioai/rclone `lib/http/serve/status.go`（`ErrorStatus`）、`serve.go`（`ObjectWith`）、`fs/rc/rcserver/serveobject.go`、`fs/features.go`（`SeekReadsFromStart`） | P25，已实现 |
 | 每个远端一个 `Fs`、更长的 `Fs` 缓存 | `libs/rclone/storage.go`（`Storage.fsName`、`Storage.abs`）、`daemon.go`（`Daemon.launch`） | P25，已实现 |
 | 连接数限制 | mavioai/rclone `lib/connlimit`、`fs/rc/rcserver/serveobject.go`（`Server.open`）、`fs/rc/rc.go`（选项）；`MaxFileStreams` 与 `MaxStreams` 特性为计划中 | P25，已实现 |
-| 块缓存 | `libs/rclone`（`blocks.go`、`ranges.go`、`cached.go`）、`storage.go`（`Storage.Open`、`Storage.MediaURL`）、`proxy.go`（`Proxy.serveCached`）；`core.ReadIntent` 来自 `libs/library`（probe、后台任务）、`apps/server/internal/playback`（播放）与 `apps/server/internal/acquisition`（导入时的 probe）；`apps/server/internal/server/rclone.go` 与设置 `rclone-cache-size`；为拖动与 HLS 预读、已打开项内部的淘汰为计划中 | P25，已实现 |
+| 块缓存 | `libs/rclone`（`blocks.go`、`ranges.go`、`cached.go`）、`storage.go`（`Storage.Open`、`Storage.MediaURL`）、`proxy.go`（`Proxy.serveCached`）；`core.ReadIntent` 来自 `libs/library`（probe、后台任务）、`apps/server/internal/playback`（播放）与 `apps/server/internal/acquisition`（导入时的 probe）；`apps/server/internal/server/rclone.go` 与设置 `rclone-cache-size`；已打开项内部的淘汰在 `blocks.go`（`BlockCache.trimOpen`、`blockItem.evict`）与 `punch_{linux,darwin,windows,other}.go`；按关键帧预取经 `core.Prefetcher`（`cachedFile.Prefetch`）、`libs/media/keyframes`（`Data.Offsets`）与 `apps/server/internal/playback/prefetch.go`（`sourcePrefetch`；`Manager.prepareStart`、`serveSegment`、`Manager.Progress`） | P25，已实现 |
 | 实测 | mavioai/rclone `MAVIO_PROVIDERS.md` | P25，计划中 |

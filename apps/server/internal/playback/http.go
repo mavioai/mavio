@@ -157,6 +157,10 @@ func (p *Playback) segmentIndex(file string) (int, bool) {
 }
 
 func (m *Manager) serveSegment(w http.ResponseWriter, r *http.Request, p *Playback, index int) {
+	if s := p.prefetcher(); s != nil && index >= 0 {
+		// ffmpeg reads on through the next segments.
+		s.ahead(p.layout.Start(index))
+	}
 	rc, size, err := p.stream.Segment(r.Context(), index)
 	switch {
 	case errors.Is(err, streaming.ErrSegmentRange):

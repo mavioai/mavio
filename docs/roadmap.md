@@ -688,7 +688,7 @@ flowchart TD
 - [ ] Manual imports from folders on remotes in the web UI's folder picker
 - [ ] Reads of rclone remotes ([Optimization §3](optimization.md#3-reading-remote-storage-through-rclone)), in this order:
   - [x] Every backend, through the rcd and Mavio: in mavioai/rclone, the object cache with its version checks, the storage's statuses and seeking through `--rc-serve`, stream limits set by options, and the fixes of webdav and http (ranges answered with 200) and crypt (the nonce); in Mavio, one `Fs` per remote, the version pinned on every read and the block cache in `libs/rclone` with read-ahead by intent
-  - [ ] The block cache: read-ahead from the source's keyframes when a playback starts or seeks, and through the next segments' byte ranges for HLS; eviction of the ranges of open items furthest behind their readers
+  - [x] The block cache: read-ahead from the source's keyframes when a playback starts or seeks, and through the next segments' byte ranges for HLS; eviction of the ranges of open items furthest behind their readers
   - [ ] The object cache: invalidation by the `ChangeNotify` of the remotes in it, and `If-Match` with the storage's ETag in `Object.Open` of the backends that read by path (s3, b2, googlecloudstorage, azureblob, webdav and others)
   - [ ] The fork's drives and the common consumer drives: measurements, then `FindByListing`, link caches, default stream limits and the fixes of §3.2 for cloud115, aliyundrive, baidunetdisk, cloud123, guangyadrive, quark, weiyun, pikpak and thunder, and for onedrive, box, pcloud, mega, yandex, protondrive and iclouddrive
   - [ ] The other backends of §3.2 (`FindByListing`, link caches and fixes, such as filelu's ranges and shade's first request), each when Mavio's users rely on it

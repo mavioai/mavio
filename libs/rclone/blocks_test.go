@@ -8,6 +8,7 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -134,10 +135,10 @@ func TestBlockCacheReads(t *testing.T) {
 	}
 	reqs, _ := o.stats()
 	p := make([]byte, 1000)
-	if n, err := it.ReadAt(ctx, p, size-500, 0); n != 500 || !errors.Is(err, io.EOF) || !bytes.Equal(p[:n], o.data[size-500:]) {
+	if n, err := it.ReadAt(ctx, nil, p, size-500, 0); n != 500 || !errors.Is(err, io.EOF) || !bytes.Equal(p[:n], o.data[size-500:]) {
 		t.Errorf("ReadAt(tail) = %d, %v; want = 500, EOF and the tail", n, err)
 	}
-	if n, err := it.ReadAt(ctx, p, 7<<20, 0); n != len(p) || err != nil || !bytes.Equal(p, o.data[7<<20:7<<20+1000]) {
+	if n, err := it.ReadAt(ctx, nil, p, 7<<20, 0); n != len(p) || err != nil || !bytes.Equal(p, o.data[7<<20:7<<20+1000]) {
 		t.Errorf("ReadAt() = %d, %v; want = %d, nil", n, err, len(p))
 	}
 	if again, _ := o.stats(); again != reqs {
@@ -156,7 +157,7 @@ func TestBlockCacheSmallReads(t *testing.T) {
 	defer it.release()
 	p := make([]byte, 4096)
 	for _, off := range []int64{size - 4096, 30 << 20, 30<<20 + 100<<10} {
-		if n, err := it.ReadAt(t.Context(), p, off, 0); n != len(p) || err != nil || !bytes.Equal(p, o.data[off:off+4096]) {
+		if n, err := it.ReadAt(t.Context(), nil, p, off, 0); n != len(p) || err != nil || !bytes.Equal(p, o.data[off:off+4096]) {
 			t.Errorf("ReadAt(%d) = %d, %v; want = %d, nil", off, n, err, len(p))
 		}
 	}
@@ -176,16 +177,16 @@ func TestBlockCacheChanged(t *testing.T) {
 	}
 	defer it.release()
 	p := make([]byte, 1000)
-	if _, err := it.ReadAt(t.Context(), p, 0, 0); err != nil {
+	if _, err := it.ReadAt(t.Context(), nil, p, 0, 0); err != nil {
 		t.Fatalf("ReadAt() error = %v", err)
 	}
 	o.mu.Lock()
 	o.etag = `"v2"`
 	o.mu.Unlock()
-	if _, err := it.ReadAt(t.Context(), p, 4<<20, 0); !errors.Is(err, ErrChanged) {
+	if _, err := it.ReadAt(t.Context(), nil, p, 4<<20, 0); !errors.Is(err, ErrChanged) {
 		t.Errorf("ReadAt() after a change error = %v, want = %v", err, ErrChanged)
 	}
-	if _, err := it.ReadAt(t.Context(), p, 0, 0); !errors.Is(err, ErrChanged) {
+	if _, err := it.ReadAt(t.Context(), nil, p, 0, 0); !errors.Is(err, ErrChanged) {
 		t.Errorf("ReadAt() of present bytes after a change error = %v, want = %v", err, ErrChanged)
 	}
 }
@@ -208,7 +209,7 @@ func TestBlockCacheFailures(t *testing.T) {
 		return time.Millisecond
 	}
 	var e *Error
-	if _, err := it.ReadAt(t.Context(), make([]byte, 10), 0, 0); !errors.As(err, &e) || e.Status != http.StatusServiceUnavailable {
+	if _, err := it.ReadAt(t.Context(), nil, make([]byte, 10), 0, 0); !errors.As(err, &e) || e.Status != http.StatusServiceUnavailable {
 		t.Fatalf("ReadAt() error = %v, want = the 503", err)
 	}
 	if reqs, _ := o.stats(); reqs != maxErrors {
@@ -231,7 +232,7 @@ func TestBlockCacheEviction(t *testing.T) {
 			t.Fatal(err)
 		}
 		p := make([]byte, size)
-		if n, err := it.ReadAt(t.Context(), p, 0, 0); n != size || err != nil {
+		if n, err := it.ReadAt(t.Context(), nil, p, 0, 0); n != size || err != nil {
 			t.Fatalf("ReadAt() = %d, %v", n, err)
 		}
 		return it
@@ -266,6 +267,96 @@ func TestBlockCacheEviction(t *testing.T) {
 	}
 }
 
+func TestBlockCacheEvictsBehindReaders(t *testing.T) {
+	const (
+		size = 96 << 20
+		max  = 48 << 20
+	)
+	o, bc, u := newOrigin(t, size, t.TempDir(), max)
+	it, err := bc.open("k", u, size, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := &cachedFile{ctx: t.Context(), it: it, cur: it.attach(0), info: fileInfo{item{Name: "a.mkv", Size: size}}}
+	defer f.Close()
+	got, err := io.ReadAll(f)
+	if err != nil || !bytes.Equal(got, o.data) {
+		t.Fatalf("ReadAll() = %d bytes, %v; want = the %d bytes served", len(got), err, size)
+	}
+	bc.mu.Lock()
+	used, noPunch := bc.used, bc.noPunch
+	bc.mu.Unlock()
+	if noPunch {
+		t.Skip("the disk of the test's folder frees no ranges of files")
+	}
+	if used > max {
+		t.Errorf("used = %d, want <= %d", used, max)
+	}
+	it.mu.Lock()
+	head := it.have.present(0, keepHead)
+	behind := it.have.present(size-keepBehind, size)
+	evicted := !it.have.present(keepHead, keepHead+evictUnit)
+	durable := slices.Clone(it.durable)
+	it.mu.Unlock()
+	if !head || !behind || !evicted {
+		t.Errorf("present: head %v, the last %d bytes %v, evicted after the head %v; want = true, true, true", head, keepBehind, behind, evicted)
+	}
+	// The saved ranges record no evicted data.
+	if durable.present(keepHead, keepHead+evictUnit) {
+		t.Errorf("saved ranges = %v, want = without the evicted bytes", durable)
+	}
+	if n, ok := diskUsage(it.dataPath()); ok && n > max+evictUnit {
+		t.Errorf("disk usage = %d, want <= %d", n, max+evictUnit)
+	}
+	// Evicted bytes are fetched again.
+	p := make([]byte, 4096)
+	if n, err := f.ReadAt(p, 5<<20); n != len(p) || err != nil || !bytes.Equal(p, o.data[5<<20:5<<20+4096]) {
+		t.Errorf("ReadAt(evicted) = %d, %v; want = %d, nil and the bytes served", n, err, len(p))
+	}
+}
+
+func TestCachedFilePrefetch(t *testing.T) {
+	const size = 8 << 20
+	o, bc, u := newOrigin(t, size, t.TempDir(), 1<<30)
+	it, err := bc.open("k", u, size, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := &cachedFile{ctx: t.Context(), it: it, cur: it.attach(0), info: fileInfo{item{Name: "a.mkv", Size: size}}}
+	defer f.Close()
+	f.Prefetch(2<<20, 4<<20)
+	present := false
+	for range 5000 {
+		it.mu.Lock()
+		present = it.have.present(2<<20, 4<<20)
+		pos := f.cur.pos
+		it.mu.Unlock()
+		if pos != 2<<20 {
+			t.Fatalf("reader at %d, want = %d", pos, 2<<20)
+		}
+		if present {
+			break
+		}
+		time.Sleep(time.Millisecond)
+	}
+	if !present {
+		t.Fatal("prefetched bytes never arrived")
+	}
+	if _, served := o.stats(); served > 2<<20 {
+		t.Errorf("served = %d bytes, want <= %d", served, 2<<20)
+	}
+}
+
+func TestRangesRemove(t *testing.T) {
+	r := ranges{{0, 10}, {20, 30}, {40, 50}}
+	if n := r.remove(5, 45); n != 5+10+5 {
+		t.Errorf("remove() = %d, want = %d", n, 20)
+	}
+	if want := (ranges{{0, 5}, {45, 50}}); !slices.Equal(r, want) {
+		t.Errorf("ranges = %v, want = %v", r, want)
+	}
+}
+
 func TestBlockCacheDownloaders(t *testing.T) {
 	const size = 128 << 20
 	_, bc, u := newOrigin(t, size, t.TempDir(), 1<<30)
@@ -278,7 +369,7 @@ func TestBlockCacheDownloaders(t *testing.T) {
 	defer cancel()
 	p := make([]byte, 10)
 	for _, off := range []int64{0, 50 << 20, 100 << 20} {
-		if _, err := it.ReadAt(ctx, p, off, 64<<20); err != nil {
+		if _, err := it.ReadAt(ctx, nil, p, off, 64<<20); err != nil {
 			t.Fatalf("ReadAt(%d) error = %v", off, err)
 		}
 		it.mu.Lock()

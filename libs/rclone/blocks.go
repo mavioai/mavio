@@ -49,6 +49,15 @@ const (
 	// checked as every diskCheckEvery bytes arrive.
 	minFreeShare   = 0.05
 	diskCheckEvery = 64 << 20
+	// keepBehind is how much of an open item behind its readers eviction
+	// keeps, for short rewinds; keepHead how much of its head, which
+	// every opening of the file reads. Eviction drops evictUnit pieces,
+	// and frees evictSlack bytes past what it must, so that it does not
+	// run for every write.
+	keepBehind = 16 << 20
+	keepHead   = 1 << 20
+	evictUnit  = 16 << 20
+	evictSlack = 64 << 20
 	// DefaultBlockCacheAge is how long items not read are kept.
 	DefaultBlockCacheAge = 7 * 24 * time.Hour
 )
@@ -82,6 +91,9 @@ type BlockCache struct {
 	// last checked.
 	unchecked int64
 	swept     time.Time
+	// noPunch: the disk frees no ranges of files, so open items are
+	// kept whole.
+	noPunch bool
 
 	// wg counts the running downloaders; closed stops new ones.
 	wg     sync.WaitGroup
@@ -199,7 +211,7 @@ func (bc *BlockCache) load() error {
 			it.removeFiles()
 			continue
 		}
-		it.key, it.size, it.etag, it.have, it.used = m.Key, m.Size, m.ETag, m.Ranges, m.Used
+		it.key, it.size, it.etag, it.have, it.durable, it.used = m.Key, m.Size, m.ETag, m.Ranges, slices.Clone(m.Ranges), m.Used
 		it.changed = make(chan struct{})
 		bc.items[name] = it
 		bc.used += it.have.size()
@@ -226,9 +238,11 @@ type blockItem struct {
 
 	mu sync.Mutex
 	// refs counts the users of the item, readers and downloaders.
-	refs    int
-	f       *os.File
-	have    ranges
+	refs int
+	f    *os.File
+	have ranges
+	// durable is what the saved metadata records present.
+	durable ranges
 	etag    string
 	used    time.Time
 	dirty   bool
@@ -236,6 +250,10 @@ type blockItem struct {
 	changed chan struct{} // closed when the item changes
 	dls     []*downloader
 	waits   map[*int64]struct{} // offsets reads wait for
+	// readers are where the item's readers read; busy the spans read
+	// from or written to its data now, which eviction leaves.
+	readers map[*cursor]struct{}
+	busy    map[*span]struct{}
 	// err fails every read: the file changed on the remote.
 	err error
 	// errs counts failed requests in a row; failGen counts the times
@@ -285,6 +303,9 @@ func (bc *BlockCache) open(key, url string, size int64, seq bool) (*blockItem, e
 	it.used = bc.now()
 	if it.f == nil {
 		f, err := os.OpenFile(it.dataPath(), os.O_RDWR|os.O_CREATE, 0o640)
+		if err == nil {
+			err = markSparse(f)
+		}
 		if err == nil {
 			err = f.Truncate(size)
 		}
@@ -371,15 +392,10 @@ func (bc *BlockCache) sweep() {
 
 // trim removes the items no one uses, least recently read first, while
 // the cache holds more than its size or leaves too little of its disk
-// free. Items in use are kept. Call with bc.mu held.
+// free; then the ranges of open items furthest behind their readers.
+// Call with bc.mu held.
 func (bc *BlockCache) trim() {
-	over := func() bool {
-		if bc.used > bc.max {
-			return true
-		}
-		free, total, ok := bc.diskSpace(bc.dir)
-		return ok && float64(free) < minFreeShare*float64(total)
-	}
+	over := func() bool { return bc.deficit() > 0 }
 	if !over() {
 		return
 	}
@@ -402,6 +418,136 @@ func (bc *BlockCache) trim() {
 		}
 		bc.remove(i.it)
 	}
+	if need := bc.deficit(); need > 0 && !bc.noPunch {
+		bc.trimOpen(need + evictSlack)
+	}
+}
+
+// deficit returns how many bytes the cache holds past its size, or past
+// the disk space it must leave free, whichever is more; 0 when neither.
+// Call with bc.mu held.
+func (bc *BlockCache) deficit() int64 {
+	need := bc.used - bc.max
+	if free, total, ok := bc.diskSpace(bc.dir); ok {
+		need = max(need, int64(minFreeShare*float64(total))-free)
+	}
+	return max(need, 0)
+}
+
+// trimOpen drops about need bytes of open items: their ranges behind
+// every reader, by keepBehind and past keepHead, those furthest behind
+// first. Call with bc.mu held.
+func (bc *BlockCache) trimOpen(need int64) {
+	type piece struct {
+		it     *blockItem
+		s      span
+		behind int64
+	}
+	var pieces []piece
+	for _, it := range bc.items {
+		it.mu.Lock()
+		if limit, ok := it.evictLimit(); ok {
+			for _, r := range it.have {
+				start := max(r.Start, keepHead)
+				end := min(r.End, limit)
+				// Pieces are whole MiBs, which every file system's
+				// blocks divide.
+				start = (start + blockWrite - 1) / blockWrite * blockWrite
+				end = end / blockWrite * blockWrite
+				for start < end {
+					e := min((start/evictUnit+1)*evictUnit, end)
+					pieces = append(pieces, piece{it, span{start, e}, limit - e})
+					start = e
+				}
+			}
+		}
+		it.mu.Unlock()
+	}
+	slices.SortFunc(pieces, func(a, b piece) int { return cmp.Compare(b.behind, a.behind) })
+	byItem := map[*blockItem][]span{}
+	var items []*blockItem
+	for _, p := range pieces {
+		if need <= 0 {
+			break
+		}
+		if byItem[p.it] == nil {
+			items = append(items, p.it)
+		}
+		byItem[p.it] = append(byItem[p.it], p.s)
+		need -= p.s.End - p.s.Start
+	}
+	for _, it := range items {
+		n, err := it.evict(byItem[it])
+		bc.used -= n
+		if errors.Is(err, errors.ErrUnsupported) {
+			bc.noPunch = true
+			bc.log.Info("block cache keeps open items whole: the disk frees no ranges of files", "dir", bc.dir)
+			return
+		}
+		if err != nil {
+			bc.log.Warn("evict from block cache item", "item", it.name, "err", err)
+		}
+	}
+}
+
+// evictLimit returns the offset before which an open item's ranges may be
+// evicted: keepBehind before its readers; false when it has none. Call
+// with it.mu held.
+func (it *blockItem) evictLimit() (int64, bool) {
+	if it.refs == 0 || it.removed || it.f == nil || len(it.readers) == 0 {
+		return 0, false
+	}
+	lo := it.size
+	for c := range it.readers {
+		lo = min(lo, c.pos)
+	}
+	return lo - keepBehind, lo-keepBehind > keepHead
+}
+
+// evict drops the spans of the item's data, those still behind its
+// readers and not read or written now, and returns the bytes dropped.
+// The metadata is saved without them before their data goes, so that it
+// never records data that is gone.
+func (it *blockItem) evict(spans []span) (int64, error) {
+	it.saveMu.Lock()
+	defer it.saveMu.Unlock()
+	it.mu.Lock()
+	defer it.mu.Unlock()
+	limit, ok := it.evictLimit()
+	if !ok {
+		return 0, nil
+	}
+	spans = slices.DeleteFunc(spans, func(s span) bool {
+		if s.End > limit {
+			return true
+		}
+		for b := range it.busy {
+			if overlap(*b, s.Start, s.End) > 0 {
+				return true
+			}
+		}
+		return false
+	})
+	if len(spans) == 0 {
+		return 0, nil
+	}
+	durable := slices.Clone(it.durable)
+	for _, s := range spans {
+		durable.remove(s.Start, s.End)
+	}
+	if err := it.writeMeta(itemMeta{Key: it.key, Size: it.size, ETag: it.etag, Ranges: durable, Used: it.used}, true); err != nil {
+		return 0, err
+	}
+	it.durable = durable
+	var n int64
+	for _, s := range spans {
+		if err := punchHole(it.f, s.Start, s.End-s.Start); err != nil {
+			return n, err
+		}
+		n += it.have.remove(s.Start, s.End)
+	}
+	it.dirty = true
+	return n, nil
 }
 
 // account adds n bytes newly present, trimming the cache when it is full.
@@ -438,16 +584,37 @@ func (it *blockItem) save(f *os.File) {
 			return
 		}
 	}
+	if err := it.writeMeta(m, false); err != nil {
+		it.bc.log.Warn("save block cache item", "item", it.name, "err", err)
+		return
+	}
+	it.mu.Lock()
+	it.durable = m.Ranges
+	it.mu.Unlock()
+}
+
+// writeMeta writes the item's metadata m, synced to disk when sync is set.
+func (it *blockItem) writeMeta(m itemMeta, sync bool) error {
 	data, err := json.Marshal(m)
-	if err == nil {
-		tmp := it.metaPath() + ".tmp"
-		if err = os.WriteFile(tmp, data, 0o640); err == nil {
-			err = os.Rename(tmp, it.metaPath())
-		}
+	if err != nil {
+		return err
+	}
+	tmp := it.metaPath() + ".tmp"
+	f, err := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o640)
+	if err != nil {
+		return err
+	}
+	_, err = f.Write(data)
+	if err == nil && sync {
+		err = f.Sync()
+	}
+	if cerr := f.Close(); err == nil {
+		err = cerr
 	}
 	if err != nil {
-		it.bc.log.Warn("save block cache item", "item", it.name, "err", err)
+		return err
 	}
+	return os.Rename(tmp, it.metaPath())
 }
 
 // broadcast wakes the reads waiting for the item. Call with it.mu held.
@@ -456,10 +623,39 @@ func (it *blockItem) broadcast() {
 	it.changed = make(chan struct{})
 }
 
+// cursor is where a reader of an item reads, guarded by the item's mu.
+type cursor struct {
+	pos int64
+}
+
+// attach adds a reader of the item reading at pos.
+func (it *blockItem) attach(pos int64) *cursor {
+	it.mu.Lock()
+	defer it.mu.Unlock()
+	c := &cursor{pos: pos}
+	if it.readers == nil {
+		it.readers = map[*cursor]struct{}{}
+	}
+	it.readers[c] = struct{}{}
+	return c
+}
+
+// detach removes the reader c.
+func (it *blockItem) detach(c *cursor) {
+	it.mu.Lock()
+	defer it.mu.Unlock()
+	delete(it.readers, c)
+}
+
 // ReadAt reads len(p) bytes at off, waiting for the downloaders to fetch
 // what is missing, and has ahead bytes past them fetched without
-// waiting.
-func (it *blockItem) ReadAt(ctx context.Context, p []byte, off, ahead int64) (int, error) {
+// waiting. cur, when not nil, is the reader's, which moves to off.
+func (it *blockItem) ReadAt(ctx context.Context, cur *cursor, p []byte, off, ahead int64) (int, error) {
+	if cur != nil {
+		it.mu.Lock()
+		cur.pos = off
+		it.mu.Unlock()
+	}
 	if off >= it.size {
 		return 0, io.EOF
 	}
@@ -509,18 +705,36 @@ func (it *blockItem) ReadAt(ctx context.Context, p []byte, off, ahead int64) (in
 	}
 	it.used = it.bc.now()
 	f := it.f
+	// Eviction leaves the span while it is read.
+	reading := &span{off, end}
+	it.addBusy(reading)
 	it.mu.Unlock()
 	n, err := f.ReadAt(p[:end-off], off)
+	it.mu.Lock()
+	delete(it.busy, reading)
+	it.mu.Unlock()
 	if err == nil && n < len(p) {
 		err = io.EOF
 	}
 	return n, err
 }
 
-// prefetch has the bytes [start, end) fetched without waiting for them.
-func (it *blockItem) prefetch(start, end int64) {
+// addBusy marks s as read or written now. Call with it.mu held.
+func (it *blockItem) addBusy(s *span) {
+	if it.busy == nil {
+		it.busy = map[*span]struct{}{}
+	}
+	it.busy[s] = struct{}{}
+}
+
+// prefetch has the bytes [start, end) fetched without waiting for them;
+// cur, when not nil, is the reader's, which moves to start.
+func (it *blockItem) prefetch(cur *cursor, start, end int64) {
 	it.mu.Lock()
 	defer it.mu.Unlock()
+	if cur != nil {
+		cur.pos = start
+	}
 	end = min(end, it.size)
 	if gap, ok := it.have.missing(max(start, 0), end); ok && it.err == nil {
 		it.fetch(gap.Start, end)
@@ -677,9 +891,15 @@ func (d *downloader) run() {
 		// that short reads fetch little; reading on, requests grow.
 		pos, etag, url := d.pos, it.etag, it.url
 		n := min(chunk, it.size-pos, (d.target-pos+blockWrite-1)/blockWrite*blockWrite)
+		// Eviction leaves the span while it is written.
+		writing := &span{pos, pos + n}
+		it.addBusy(writing)
 		it.mu.Unlock()
 
 		err := d.download(pos, n, etag, url)
+		it.mu.Lock()
+		delete(it.busy, writing)
+		it.mu.Unlock()
 		if n == chunk {
 			chunk = min(chunk*2, chunkMax)
 		}

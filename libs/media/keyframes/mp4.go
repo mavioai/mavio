@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"slices"
 	"time"
 )
 
@@ -237,7 +238,7 @@ func mp4(r io.ReaderAt, size int64) (Data, error) {
 		if err != nil {
 			return Data{}, err
 		}
-		if d, ok := t.sidx(buf); ok {
+		if d, ok := t.sidx(buf, b.data+b.size); ok {
 			return d, nil
 		}
 	}
@@ -327,6 +328,7 @@ func (t *mp4Track) samples(movieScale uint64) (Data, bool) {
 	}
 	shift := t.shift(movieScale)
 	d := Data{Duration: t.at(int64(t.duration))}
+	loc, located := newLocator(tables, total)
 	// Walks the samples once, in step with the sync samples.
 	var (
 		sample, dts  uint64 = 1, 0
@@ -345,10 +347,16 @@ func (t *mp4Track) samples(movieScale uint64) (Data, bool) {
 				pts += int64(int32(uint32(ctts[ci].delta)))
 			}
 			d.Keyframes = append(d.Keyframes, t.at(pts))
+			if located {
+				d.Offsets = append(d.Offsets, loc.offset)
+			}
 			next++
 			if sync != nil && next == len(sync) {
 				break
 			}
+		}
+		if located {
+			located = loc.next(sample)
 		}
 		dts += stts[si].delta
 		if sttsLeft--; sttsLeft == 0 && si+1 < len(stts) {
@@ -364,7 +372,108 @@ func (t *mp4Track) samples(movieScale uint64) (Data, bool) {
 		}
 		sample++
 	}
+	if !located || len(d.Offsets) != len(d.Keyframes) || slices.ContainsFunc(d.Offsets, func(o int64) bool { return o < 0 }) {
+		d.Offsets = nil
+	}
 	return d, len(d.Keyframes) > 0
+}
+
+// locator walks the file offsets of a track's samples, from its sample
+// to chunk (stsc), chunk offset (stco or co64) and sample size (stsz)
+// tables.
+type locator struct {
+	stsc   [][2]uint64 // first chunk, samples per chunk
+	chunks []uint64
+	sizes  []uint64 // nil when every sample is size bytes
+	size   uint64
+	// chunk is the 1-based chunk of the current sample, left how many
+	// samples of the chunk follow it, si the stsc entry of the chunk.
+	chunk, left uint64
+	si          int
+	// offset is the current sample's.
+	offset int64
+}
+
+// newLocator reads the tables of total samples, positioned at the first;
+// false when they are missing or inconsistent.
+func newLocator(tables map[string][][]byte, total uint64) (*locator, bool) {
+	l := &locator{}
+	f := fields{b: first(tables, "stsz")}
+	if f.b == nil {
+		return nil, false
+	}
+	f.header()
+	l.size = f.u32()
+	if count := f.u32(); l.size == 0 {
+		if count < total {
+			return nil, false
+		}
+		l.sizes = make([]uint64, total)
+		for i := range l.sizes {
+			l.sizes[i] = f.u32()
+		}
+	}
+	f = fields{b: first(tables, "stsc")}
+	f.header()
+	for range f.u32() {
+		e := [2]uint64{f.u32(), f.u32()}
+		f.u32() // sample description
+		if e[0] == 0 || e[1] == 0 || (len(l.stsc) > 0 && e[0] <= l.stsc[len(l.stsc)-1][0]) {
+			return nil, false
+		}
+		l.stsc = append(l.stsc, e)
+	}
+	if f.err || len(l.stsc) == 0 || l.stsc[0][0] != 1 {
+		return nil, false
+	}
+	wide := false
+	b := first(tables, "stco")
+	if b == nil {
+		b, wide = first(tables, "co64"), true
+	}
+	f = fields{b: b}
+	f.header()
+	for range f.u32() {
+		if wide {
+			l.chunks = append(l.chunks, f.u64())
+		} else {
+			l.chunks = append(l.chunks, f.u32())
+		}
+		if f.err {
+			return nil, false
+		}
+	}
+	if f.err || len(l.chunks) == 0 {
+		return nil, false
+	}
+	l.chunk, l.left = 1, l.stsc[0][1]
+	l.offset = int64(l.chunks[0])
+	return l, true
+}
+
+// next moves from the 1-based sample to the one after it; false when the
+// tables end first.
+func (l *locator) next(sample uint64) bool {
+	size := l.size
+	if l.sizes != nil {
+		size = l.sizes[sample-1]
+	}
+	l.offset += int64(size)
+	if l.left--; l.left > 0 {
+		return true
+	}
+	l.chunk++
+	if l.si+1 < len(l.stsc) && l.stsc[l.si+1][0] == l.chunk {
+		l.si++
+	}
+	l.left = l.stsc[l.si][1]
+	if l.chunk > uint64(len(l.chunks)) {
+		// Past the last chunk: fine when no sample follows.
+		l.offset = -1
+		return true
+	}
+	l.offset = int64(l.chunks[l.chunk-1])
+	return true
 }
 
 // mfra reads the keyframes from the track's tfra in the movie fragment
@@ -403,7 +512,7 @@ func (t *mp4Track) mfra(r io.ReaderAt, size int64) (Data, bool, error) {
 		d := Data{Duration: t.at(int64(t.duration))}
 		for range f.u32() {
 			at := int64(f.uv(v))
-			f.uv(v) // moof offset
+			moof := f.uv(v)
 			for _, s := range sizes {
 				f.n(s)
 			}
@@ -411,6 +520,7 @@ func (t *mp4Track) mfra(r io.ReaderAt, size int64) (Data, bool, error) {
 				return Data{}, false, nil
 			}
 			d.Keyframes = append(d.Keyframes, t.at(at))
+			d.Offsets = append(d.Offsets, int64(moof))
 		}
 		return d, len(d.Keyframes) > 0, nil
 	}
@@ -418,8 +528,9 @@ func (t *mp4Track) mfra(r io.ReaderAt, size int64) (Data, bool, error) {
 }
 
 // sidx reads the keyframes from a segment index of the track whose
-// subsegments start with a stream access point, the keyframe.
-func (t *mp4Track) sidx(b []byte) (Data, bool) {
+// subsegments start with a stream access point, the keyframe; anchor is
+// the offset after the index, which its offsets count from.
+func (t *mp4Track) sidx(b []byte, anchor int64) (Data, bool) {
 	f := fields{b: b}
 	v, _ := f.header()
 	if f.u32() != t.id {
@@ -427,7 +538,7 @@ func (t *mp4Track) sidx(b []byte) (Data, bool) {
 	}
 	scale := f.u32()
 	at := f.uv(v)
-	f.uv(v) // first offset
+	off := anchor + int64(f.uv(v))
 	f.take(2)
 	n := f.n(2)
 	if f.err || scale == 0 {
@@ -445,8 +556,10 @@ func (t *mp4Track) sidx(b []byte) (Data, bool) {
 		}
 		if sap>>31 == 1 {
 			d.Keyframes = append(d.Keyframes, ts.at(int64(at+sap&0x0FFFFFFF)))
+			d.Offsets = append(d.Offsets, off)
 		}
 		at += duration
+		off += int64(ref & 0x7FFFFFFF)
 	}
 	d.Duration = ts.at(int64(at))
 	return d, len(d.Keyframes) > 0

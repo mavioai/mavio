@@ -45,11 +45,12 @@ func aheadOf(intent core.ReadIntent) int64 {
 type itemReader struct {
 	ctx   context.Context
 	it    *blockItem
+	cur   *cursor
 	ahead int64
 }
 
 func (r itemReader) ReadAt(p []byte, off int64) (int, error) {
-	return r.it.ReadAt(r.ctx, p, off, r.ahead)
+	return r.it.ReadAt(r.ctx, r.cur, p, off, r.ahead)
 }
 
 // cachedFile is an object of a remote read through the block cache:
@@ -58,6 +59,7 @@ func (r itemReader) ReadAt(p []byte, off int64) (int, error) {
 type cachedFile struct {
 	ctx   context.Context
 	it    *blockItem
+	cur   *cursor
 	info  fs.FileInfo
 	ahead int64
 
@@ -72,7 +74,7 @@ func (f *cachedFile) ReadAt(p []byte, off int64) (int, error) {
 	if off < 0 {
 		return 0, &fs.PathError{Op: "readat", Path: f.info.Name(), Err: fs.ErrInvalid}
 	}
-	n, err := f.it.ReadAt(f.ctx, p, off, 0)
+	n, err := f.it.ReadAt(f.ctx, f.cur, p, off, 0)
 	if err != nil && !errors.Is(err, io.EOF) {
 		err = &fs.PathError{Op: "read", Path: f.info.Name(), Err: err}
 	}
@@ -85,7 +87,7 @@ func (f *cachedFile) Read(p []byte) (int, error) {
 	if f.closed {
 		return 0, fs.ErrClosed
 	}
-	n, err := f.it.ReadAt(f.ctx, p, f.off, f.ahead)
+	n, err := f.it.ReadAt(f.ctx, f.cur, p, f.off, f.ahead)
 	f.off += int64(n)
 	if errors.Is(err, io.EOF) && n > 0 {
 		err = nil
@@ -115,14 +117,27 @@ func (f *cachedFile) Seek(offset int64, whence int) (int64, error) {
 	return offset, nil
 }
 
+// Prefetch implements core.Prefetcher.
+func (f *cachedFile) Prefetch(off, end int64) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if !f.closed {
+		f.it.prefetch(f.cur, off, end)
+	}
+}
+
 func (f *cachedFile) Close() error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if !f.closed {
 		f.closed = true
+		f.it.detach(f.cur)
 		f.it.release()
 	}
 	return nil
 }
 
-var _ core.File = (*cachedFile)(nil)
+var (
+	_ core.File       = (*cachedFile)(nil)
+	_ core.Prefetcher = (*cachedFile)(nil)
+)

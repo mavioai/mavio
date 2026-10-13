@@ -37,6 +37,28 @@ func (r *ranges) add(start, end int64) int64 {
 	return added
 }
 
+// remove removes [start, end) and returns how many bytes were present.
+func (r *ranges) remove(start, end int64) int64 {
+	var out ranges
+	var removed int64
+	for _, s := range *r {
+		n := overlap(s, start, end)
+		if n == 0 {
+			out = append(out, s)
+			continue
+		}
+		removed += n
+		if s.Start < start {
+			out = append(out, span{s.Start, start})
+		}
+		if s.End > end {
+			out = append(out, span{end, s.End})
+		}
+	}
+	*r = out
+	return removed
+}
+
 // overlap returns how many bytes of [start, end) s holds.
 func overlap(s span, start, end int64) int64 {
 	return max(0, min(s.End, end)-max(s.Start, start))

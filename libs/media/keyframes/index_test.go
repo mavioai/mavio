@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"slices"
+	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -87,6 +89,17 @@ func TestFromIndexFixtures(t *testing.T) {
 			if diff := got.Duration - full.Duration; got.Duration != 0 && (diff < -100*time.Millisecond || diff > 100*time.Millisecond) {
 				t.Errorf("FromIndex() duration = %v, want = %v (ffprobe)", got.Duration, full.Duration)
 			}
+			// Each offset is at or before its keyframe's packet, and past
+			// the keyframe before.
+			pos := keyframePositions(t, ffprobe, path)
+			if len(got.Offsets) != len(pos) {
+				t.Fatalf("FromIndex() offsets = %d, want = %d (ffprobe)", len(got.Offsets), len(pos))
+			}
+			for i, off := range got.Offsets {
+				if off > pos[i] || (i > 0 && off <= pos[i-1]) {
+					t.Errorf("FromIndex() offset %d = %d, want = in (%d, %d] (ffprobe)", i, off, prev(pos, i), pos[i])
+				}
+			}
 			if tt.want != nil {
 				if n := cr.n.Load(); n*50 > fi.Size() {
 					t.Errorf("FromIndex() read %d bytes of %d, want = under 2%%", n, fi.Size())
@@ -94,6 +107,38 @@ func TestFromIndexFixtures(t *testing.T) {
 			}
 		})
 	}
+}
+
+// keyframePositions returns the file offsets of the keyframe packets of
+// the first video stream, as ffprobe reads them.
+func keyframePositions(t *testing.T, ffprobe, path string) []int64 {
+	t.Helper()
+	out, err := exec.CommandContext(t.Context(), ffprobe, "-v", "error", "-select_streams", "v:0",
+		"-show_entries", "packet=pos,flags", "-of", "csv=p=0", path).Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var pos []int64
+	for line := range strings.Lines(string(out)) {
+		p, flags, _ := strings.Cut(strings.TrimSpace(line), ",")
+		if !strings.HasPrefix(flags, "K") {
+			continue
+		}
+		n, err := strconv.ParseInt(p, 10, 64)
+		if err != nil {
+			t.Fatalf("ffprobe packet position %q: %v", p, err)
+		}
+		pos = append(pos, n)
+	}
+	return pos
+}
+
+// prev returns the position before the i-th, -1 for the first.
+func prev(pos []int64, i int) int64 {
+	if i == 0 {
+		return -1
+	}
+	return pos[i-1]
 }
 
 func TestFromIndexNoIndex(t *testing.T) {

@@ -167,6 +167,7 @@ HLS cuts copied video at its keyframes, so every video file needs their times. C
 * **Matroska and WebM**: the SeekHead, and a second one it points to, locates Info (the timestamp scale and duration), Tracks (the first video track) and Cues; the cue points of the video track are its keyframes.
 * **MP4 and QuickTime**: the first video track (`hdlr` `vide`) of the `moov`, found by walking the top-level box headers wherever it is in the file. Its keyframes are the sync samples (`stss`; every sample without it) at their decode times (`stts`) plus composition offsets (`ctts`), shifted by the edit list (`elst`). A fragmented file's sample tables are empty: the track's `tfra` in the `mfra` at the end of the file, found through `mfro`, or else a `sidx` before the first fragment whose subsegments start with a keyframe, gives them.
 * Times are rounded to the microsecond, the precision of ffprobe's packet times, so that both give the same segments.
+* The index also gives where each keyframe lies in the file: the cluster of a Matroska cue point; the offset of an MP4 sync sample, through its chunk (`stsc`, `stco` or `co64`) and the sizes of the samples before it in the chunk (`stsz`); the fragment a `tfra` entry or `sidx` subsegment points to. Playback fetches ahead with them on rclone remotes (§3.4).
 
 The reads are a few elements or boxes: on the test media, under 2% of each file. Only files without an index are read whole, by the `media.keyframes` job, and not on cloud storage. A playback copying the video of a file without keyframes transcodes it, as before.
 
@@ -205,7 +206,7 @@ A client that does not demux a file's subtitles itself gets them from the server
 
 ## 3. Reading Remote Storage through rclone
 
-Status: partly implemented (P25). Implemented: the object cache and version checks, statuses, seeking through `fsinfo`, stream limits, the webdav, http and crypt fixes, one `Fs` per remote, and the block cache with its read intents. Planned, and marked so below: `FindByListing`, invalidation by `ChangeNotify`, conditional reads in the backends, the link cache with the other single-backend fixes, per-backend stream limits, read-ahead from keyframes for seeks and HLS, eviction within open items, and the measurements ([Roadmap](roadmap.md) P25).
+Status: partly implemented (P25). Implemented: the object cache and version checks, statuses, seeking through `fsinfo`, stream limits, the webdav, http and crypt fixes, one `Fs` per remote, and the block cache with its read intents, its read-ahead from keyframes and its eviction within open items. Planned, and marked so below: `FindByListing`, invalidation by `ChangeNotify`, conditional reads in the backends, the link cache with the other single-backend fixes, per-backend stream limits, and the measurements ([Roadmap](roadmap.md) P25).
 
 Libraries on rclone remotes (§9.2 of the [Architecture](architecture.md)) read their media through `rclone rcd`. This chapter makes those reads cheap in requests, steady under seeking and reusable, for every backend rclone offers:
 
@@ -379,7 +380,7 @@ The cache follows rclone's VFS cache (`--vfs-cache-mode full`) where that works,
 | Downloader end | idle for 5 s, or 1 MiB of present data in a row | the same |
 | Errors | waiters fail after 10 errors in a row | the same, waiting between requests as long as `Retry-After` asks, else from 200 ms doubling to 5 s |
 | Disk reads | under the item's lock | without the lock; only the ranges are guarded |
-| Eviction | items not in use, least recently used first; open items over quota are discarded whole | items not in use, least recently read first; open items are kept whole |
+| Eviction | items not in use, least recently used first; open items over quota are discarded whole | items not in use, least recently read first; then the ranges of open items furthest behind all their readers, in 16 MiB pieces, keeping each item's first MiB and the 16 MiB behind its readers; where the disk frees no ranges of files, open items are kept whole |
 
 Read-ahead follows the intent of each read, which a file system cache cannot know. The intent (`core.ReadIntent`) travels in the context of `Storage.Open` and `Storage.MediaURL`:
 
@@ -388,10 +389,12 @@ Read-ahead follows the intent of each read, which a file system cache cannot kno
 * **Playback:** direct play, and ffmpeg's reads for a playback, stay ahead by 30 seconds of the source's bitrate, at most 256 MiB, or 32 MiB when the bitrate is unknown.
 * **Background jobs:** they read without read-ahead.
 * **Other reads:** 16 MiB.
-* *Planned:* **seeks:** when a playback starts or seeks to a time, Mavio looks up the keyframe in the source's keyframes. It starts a downloader at that keyframe's byte position before ffmpeg or the client asks.
-* *Planned:* **HLS:** a request for a segment extends the downloader through the next segments' byte ranges. When the video is copied, those ranges come from the keyframes' positions; otherwise they are estimated from the bitrate.
+* **Playback start:** when a playback starts, Mavio opens its source and reads where its keyframes lie from the container's index (§2.4); the index reads mostly hit what the probe left in the cache. Before ffmpeg or the client asks, it fetches from the keyframe at or before the start through the first keyframe after 30 seconds of media, at most 256 MiB. Without an index the range is estimated from the file's size and duration.
+* **HLS:** each request for a segment, a seek included, fetches the same way from the segment's start, so that ffmpeg, paused while far enough ahead of the client, finds on resuming the next segments' bytes present.
 
 Readers of one file share its item, such as a probe and a playback, or two viewers. A range is downloaded once, however many readers wait for it.
+
+Each reader of an item marks where it reads: a client's request for direct play, ffmpeg's request through the proxy, and the file a playback fetches ahead with, which follows the playback's progress reports. When the items not in use do not free enough, eviction drops the ranges of open items behind all their readers, those furthest behind first, and frees their disk space by punching holes in the data (`fallocate` on Linux, `F_PUNCHHOLE` on macOS, sparse files on Windows). An item's metadata is saved without the ranges before their data goes, and ranges being read or written are left. A long film watched through keeps only what lies about its playback.
 
 * **Size:** a setting, `rclone-cache-size`, 10 GiB by default, with a floor of 5% free disk space; 0 turns the cache off.
 * **Age:** items not read for 7 days are removed.
@@ -428,5 +431,5 @@ The results set each backend's stream limits, link lifetimes and whether its rem
 | Statuses and seeking through the rcd | mavioai/rclone `lib/http/serve/status.go` (`ErrorStatus`), `serve.go` (`ObjectWith`), `fs/rc/rcserver/serveobject.go`, `fs/features.go` (`SeekReadsFromStart`) | P25, implemented |
 | One `Fs` per remote, longer `Fs` cache | `libs/rclone/storage.go` (`Storage.fsName`, `Storage.abs`), `daemon.go` (`Daemon.launch`) | P25, implemented |
 | Connection limits | mavioai/rclone `lib/connlimit`, `fs/rc/rcserver/serveobject.go` (`Server.open`), `fs/rc/rc.go` (the options); the `MaxFileStreams` and `MaxStreams` features are planned | P25, implemented |
-| Block cache | `libs/rclone` (`blocks.go`, `ranges.go`, `cached.go`), `storage.go` (`Storage.Open`, `Storage.MediaURL`), `proxy.go` (`Proxy.serveCached`); `core.ReadIntent` from `libs/library` (probes, background jobs), `apps/server/internal/playback` (playback) and `apps/server/internal/acquisition` (probes of imports); `apps/server/internal/server/rclone.go` and the `rclone-cache-size` setting; read-ahead for seeks and HLS and eviction within open items are planned | P25, implemented |
+| Block cache | `libs/rclone` (`blocks.go`, `ranges.go`, `cached.go`), `storage.go` (`Storage.Open`, `Storage.MediaURL`), `proxy.go` (`Proxy.serveCached`); `core.ReadIntent` from `libs/library` (probes, background jobs), `apps/server/internal/playback` (playback) and `apps/server/internal/acquisition` (probes of imports); `apps/server/internal/server/rclone.go` and the `rclone-cache-size` setting; eviction within open items in `blocks.go` (`BlockCache.trimOpen`, `blockItem.evict`) and `punch_{linux,darwin,windows,other}.go`; read-ahead from keyframes through `core.Prefetcher` (`cachedFile.Prefetch`), `libs/media/keyframes` (`Data.Offsets`) and `apps/server/internal/playback/prefetch.go` (`sourcePrefetch`; `Manager.prepareStart`, `serveSegment`, `Manager.Progress`) | P25, implemented |
 | Measurements | mavioai/rclone `MAVIO_PROVIDERS.md` | P25, planned |

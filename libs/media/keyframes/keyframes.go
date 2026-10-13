@@ -21,6 +21,10 @@ type Data struct {
 	// Keyframes holds the presentation times of the keyframes in packet
 	// order.
 	Keyframes []time.Duration
+	// Offsets holds, for each keyframe, the file offset where its data
+	// starts, or where the Matroska cluster or MP4 fragment holding it
+	// starts, when the index gives them; nil otherwise.
+	Offsets []int64
 }
 
 // tick is the 100 ns unit ffprobe times are rounded to, matching the
