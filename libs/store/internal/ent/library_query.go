@@ -17,18 +17,20 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 )
 
 // LibraryQuery is the builder for querying Library entities.
 type LibraryQuery struct {
 	config
-	ctx              *QueryContext
-	order            []library.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.Library
-	withItems        *ItemQuery
-	withFolderStates *FolderStateQuery
-	modifiers        []func(*sql.Selector)
+	ctx                 *QueryContext
+	order               []library.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.Library
+	withItems           *ItemQuery
+	withFolderStates    *FolderStateQuery
+	withSubtitleProfile *SubtitleProfileAssignmentQuery
+	modifiers           []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -102,6 +104,28 @@ func (_q *LibraryQuery) QueryFolderStates() *FolderStateQuery {
 			sqlgraph.From(library.Table, library.FieldID, selector),
 			sqlgraph.To(folderstate.Table, folderstate.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, library.FolderStatesTable, library.FolderStatesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySubtitleProfile chains the current query on the "subtitle_profile" edge.
+func (_q *LibraryQuery) QuerySubtitleProfile() *SubtitleProfileAssignmentQuery {
+	query := (&SubtitleProfileAssignmentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(library.Table, library.FieldID, selector),
+			sqlgraph.To(subtitleprofileassignment.Table, subtitleprofileassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, library.SubtitleProfileTable, library.SubtitleProfileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -296,13 +320,14 @@ func (_q *LibraryQuery) Clone() *LibraryQuery {
 		return nil
 	}
 	return &LibraryQuery{
-		config:           _q.config,
-		ctx:              _q.ctx.Clone(),
-		order:            append([]library.OrderOption{}, _q.order...),
-		inters:           append([]Interceptor{}, _q.inters...),
-		predicates:       append([]predicate.Library{}, _q.predicates...),
-		withItems:        _q.withItems.Clone(),
-		withFolderStates: _q.withFolderStates.Clone(),
+		config:              _q.config,
+		ctx:                 _q.ctx.Clone(),
+		order:               append([]library.OrderOption{}, _q.order...),
+		inters:              append([]Interceptor{}, _q.inters...),
+		predicates:          append([]predicate.Library{}, _q.predicates...),
+		withItems:           _q.withItems.Clone(),
+		withFolderStates:    _q.withFolderStates.Clone(),
+		withSubtitleProfile: _q.withSubtitleProfile.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -329,6 +354,17 @@ func (_q *LibraryQuery) WithFolderStates(opts ...func(*FolderStateQuery)) *Libra
 		opt(query)
 	}
 	_q.withFolderStates = query
+	return _q
+}
+
+// WithSubtitleProfile tells the query-builder to eager-load the nodes that are connected to
+// the "subtitle_profile" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *LibraryQuery) WithSubtitleProfile(opts ...func(*SubtitleProfileAssignmentQuery)) *LibraryQuery {
+	query := (&SubtitleProfileAssignmentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSubtitleProfile = query
 	return _q
 }
 
@@ -410,9 +446,10 @@ func (_q *LibraryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Libr
 	var (
 		nodes       = []*Library{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			_q.withItems != nil,
 			_q.withFolderStates != nil,
+			_q.withSubtitleProfile != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -447,6 +484,12 @@ func (_q *LibraryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Libr
 		if err := _q.loadFolderStates(ctx, query, nodes,
 			func(n *Library) { n.Edges.FolderStates = []*FolderState{} },
 			func(n *Library, e *FolderState) { n.Edges.FolderStates = append(n.Edges.FolderStates, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSubtitleProfile; query != nil {
+		if err := _q.loadSubtitleProfile(ctx, query, nodes, nil,
+			func(n *Library, e *SubtitleProfileAssignment) { n.Edges.SubtitleProfile = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -508,6 +551,36 @@ func (_q *LibraryQuery) loadFolderStates(ctx context.Context, query *FolderState
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "library_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *LibraryQuery) loadSubtitleProfile(ctx context.Context, query *SubtitleProfileAssignmentQuery, nodes []*Library, init func(*Library), assign func(*Library, *SubtitleProfileAssignment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Library)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(subtitleprofileassignment.FieldLibraryID)
+	}
+	query.Where(predicate.SubtitleProfileAssignment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(library.SubtitleProfileColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.LibraryID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "library_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "library_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

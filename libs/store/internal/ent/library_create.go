@@ -16,6 +16,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 )
 
 // LibraryCreate is the builder for creating a Library entity.
@@ -304,6 +305,25 @@ func (_c *LibraryCreate) AddFolderStates(v ...*FolderState) *LibraryCreate {
 	return _c.AddFolderStateIDs(ids...)
 }
 
+// SetSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by ID.
+func (_c *LibraryCreate) SetSubtitleProfileID(id core.ID) *LibraryCreate {
+	_c.mutation.SetSubtitleProfileID(id)
+	return _c
+}
+
+// SetNillableSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by ID if the given value is not nil.
+func (_c *LibraryCreate) SetNillableSubtitleProfileID(id *core.ID) *LibraryCreate {
+	if id != nil {
+		_c = _c.SetSubtitleProfileID(*id)
+	}
+	return _c
+}
+
+// SetSubtitleProfile sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (_c *LibraryCreate) SetSubtitleProfile(v *SubtitleProfileAssignment) *LibraryCreate {
+	return _c.SetSubtitleProfileID(v.ID)
+}
+
 // Mutation returns the LibraryMutation object of the builder.
 func (_c *LibraryCreate) Mutation() *LibraryMutation {
 	return _c.mutation
@@ -582,6 +602,22 @@ func (_c *LibraryCreate) createSpec() (*Library, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SubtitleProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   library.SubtitleProfileTable,
+			Columns: []string{library.SubtitleProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleprofileassignment.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

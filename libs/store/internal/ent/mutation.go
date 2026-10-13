@@ -47,6 +47,11 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlehistoryevent"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -62,44 +67,49 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAPIKey             = "APIKey"
-	TypeActivity           = "Activity"
-	TypeAuthSession        = "AuthSession"
-	TypeBlockedTitle       = "BlockedTitle"
-	TypeBlocklistEntry     = "BlocklistEntry"
-	TypeCredit             = "Credit"
-	TypeCustomFormat       = "CustomFormat"
-	TypeDelayProfile       = "DelayProfile"
-	TypeDisplayPreferences = "DisplayPreferences"
-	TypeDownload           = "Download"
-	TypeEpisodeState       = "EpisodeState"
-	TypeExtraFile          = "ExtraFile"
-	TypeFolderState        = "FolderState"
-	TypeHistoryEvent       = "HistoryEvent"
-	TypeImage              = "Image"
-	TypeIssue              = "Issue"
-	TypeIssueComment       = "IssueComment"
-	TypeItem               = "Item"
-	TypeItemLink           = "ItemLink"
-	TypeItemValue          = "ItemValue"
-	TypeJob                = "Job"
-	TypeLibrary            = "Library"
-	TypeMediaSegment       = "MediaSegment"
-	TypeMediaSource        = "MediaSource"
-	TypePendingRelease     = "PendingRelease"
-	TypePerson             = "Person"
-	TypePluginConfig       = "PluginConfig"
-	TypeQualityDefinition  = "QualityDefinition"
-	TypeQualityProfile     = "QualityProfile"
-	TypeReleaseProfile     = "ReleaseProfile"
-	TypeRemotePathMapping  = "RemotePathMapping"
-	TypeRequest            = "Request"
-	TypeSetting            = "Setting"
-	TypeStorageJob         = "StorageJob"
-	TypeTrickplay          = "Trickplay"
-	TypeUser               = "User"
-	TypeUserData           = "UserData"
-	TypeWanted             = "Wanted"
+	TypeAPIKey                    = "APIKey"
+	TypeActivity                  = "Activity"
+	TypeAuthSession               = "AuthSession"
+	TypeBlockedTitle              = "BlockedTitle"
+	TypeBlocklistEntry            = "BlocklistEntry"
+	TypeCredit                    = "Credit"
+	TypeCustomFormat              = "CustomFormat"
+	TypeDelayProfile              = "DelayProfile"
+	TypeDisplayPreferences        = "DisplayPreferences"
+	TypeDownload                  = "Download"
+	TypeEpisodeState              = "EpisodeState"
+	TypeExtraFile                 = "ExtraFile"
+	TypeFolderState               = "FolderState"
+	TypeHistoryEvent              = "HistoryEvent"
+	TypeImage                     = "Image"
+	TypeIssue                     = "Issue"
+	TypeIssueComment              = "IssueComment"
+	TypeItem                      = "Item"
+	TypeItemLink                  = "ItemLink"
+	TypeItemValue                 = "ItemValue"
+	TypeJob                       = "Job"
+	TypeLibrary                   = "Library"
+	TypeMediaSegment              = "MediaSegment"
+	TypeMediaSource               = "MediaSource"
+	TypePendingRelease            = "PendingRelease"
+	TypePerson                    = "Person"
+	TypePluginConfig              = "PluginConfig"
+	TypeQualityDefinition         = "QualityDefinition"
+	TypeQualityProfile            = "QualityProfile"
+	TypeReleaseProfile            = "ReleaseProfile"
+	TypeRemotePathMapping         = "RemotePathMapping"
+	TypeRequest                   = "Request"
+	TypeSetting                   = "Setting"
+	TypeStorageJob                = "StorageJob"
+	TypeSubtitleBlocklistEntry    = "SubtitleBlocklistEntry"
+	TypeSubtitleHistoryEvent      = "SubtitleHistoryEvent"
+	TypeSubtitleProfile           = "SubtitleProfile"
+	TypeSubtitleProfileAssignment = "SubtitleProfileAssignment"
+	TypeSubtitleSearchAttempt     = "SubtitleSearchAttempt"
+	TypeTrickplay                 = "Trickplay"
+	TypeUser                      = "User"
+	TypeUserData                  = "UserData"
+	TypeWanted                    = "Wanted"
 )
 
 // APIKeyMutation represents an operation that mutates the APIKey nodes in the graph.
@@ -14661,157 +14671,168 @@ func (m *IssueCommentMutation) ResetEdge(name string) error {
 // ItemMutation represents an operation that mutates the Item nodes in the graph.
 type ItemMutation struct {
 	config
-	op                            Op
-	typ                           string
-	id                            *core.ID
-	kind                          *string
-	name                          *string
-	sort_name                     *string
-	sort_key                      *string
-	original_title                *string
-	search_key                    *string
-	original_key                  *string
-	overview                      *string
-	tagline                       *string
-	_path                         *string
-	index_number                  *int
-	addindex_number               *int
-	parent_index_number           *int
-	addparent_index_number        *int
-	index_number_end              *int
-	addindex_number_end           *int
-	production_year               *int
-	addproduction_year            *int
-	premiere_date                 *time.Time
-	end_date                      *time.Time
-	runtime                       *time.Duration
-	addruntime                    *time.Duration
-	official_rating               *string
-	custom_rating                 *string
-	parental_rating               *int
-	addparental_rating            *int
-	inherited_rating              *int
-	addinherited_rating           *int
-	community_rating              *float64
-	addcommunity_rating           *float64
-	critic_rating                 *float64
-	addcritic_rating              *float64
-	external_ids                  *map[string]string
-	production_locations          *[]string
-	appendproduction_locations    []string
-	remote_trailers               *[]string
-	appendremote_trailers         []string
-	collection_name               *string
-	aspect_ratio                  *string
-	video_3d_format               *string
-	album                         *string
-	series_status                 *string
-	air_days                      *[]int
-	appendair_days                []int
-	air_time                      *string
-	display_order                 *string
-	airs_before_season_number     *int
-	addairs_before_season_number  *int
-	airs_after_season_number      *int
-	addairs_after_season_number   *int
-	airs_before_episode_number    *int
-	addairs_before_episode_number *int
-	metadata_language             *string
-	metadata_country              *string
-	locked                        *bool
-	locked_fields                 *[]string
-	appendlocked_fields           []string
-	loudness                      *float64
-	addloudness                   *float64
-	extra                         *string
-	date_added                    *time.Time
-	file_modified                 *time.Time
-	metadata_refreshed_at         *time.Time
-	scan_generation               *int64
-	addscan_generation            *int64
-	missing_since                 *time.Time
-	virtual                       *bool
-	monitored                     *bool
-	series_type                   *string
-	absolute_number               *int
-	addabsolute_number            *int
-	original_language             *string
-	digital_release_date          *time.Time
-	physical_release_date         *time.Time
-	alternative_titles            *[]string
-	appendalternative_titles      []string
-	translated_titles             *[]string
-	appendtranslated_titles       []string
-	secondary_year                *int
-	addsecondary_year             *int
-	clearedFields                 map[string]struct{}
-	library                       *core.ID
-	clearedlibrary                bool
-	parent                        *core.ID
-	clearedparent                 bool
-	children                      map[core.ID]struct{}
-	removedchildren               map[core.ID]struct{}
-	clearedchildren               bool
-	owner                         *core.ID
-	clearedowner                  bool
-	extras                        map[core.ID]struct{}
-	removedextras                 map[core.ID]struct{}
-	clearedextras                 bool
-	values                        map[int]struct{}
-	removedvalues                 map[int]struct{}
-	clearedvalues                 bool
-	media_sources                 map[core.ID]struct{}
-	removedmedia_sources          map[core.ID]struct{}
-	clearedmedia_sources          bool
-	images                        map[core.ID]struct{}
-	removedimages                 map[core.ID]struct{}
-	clearedimages                 bool
-	trickplay                     map[core.ID]struct{}
-	removedtrickplay              map[core.ID]struct{}
-	clearedtrickplay              bool
-	segments                      map[core.ID]struct{}
-	removedsegments               map[core.ID]struct{}
-	clearedsegments               bool
-	credits                       map[int]struct{}
-	removedcredits                map[int]struct{}
-	clearedcredits                bool
-	user_data                     map[int]struct{}
-	removeduser_data              map[int]struct{}
-	cleareduser_data              bool
-	user                          *core.ID
-	cleareduser                   bool
-	links                         map[core.ID]struct{}
-	removedlinks                  map[core.ID]struct{}
-	clearedlinks                  bool
-	linked_in                     map[core.ID]struct{}
-	removedlinked_in              map[core.ID]struct{}
-	clearedlinked_in              bool
-	wanted                        *core.ID
-	clearedwanted                 bool
-	episode_states                map[core.ID]struct{}
-	removedepisode_states         map[core.ID]struct{}
-	clearedepisode_states         bool
-	downloads                     map[core.ID]struct{}
-	removeddownloads              map[core.ID]struct{}
-	cleareddownloads              bool
-	history                       map[core.ID]struct{}
-	removedhistory                map[core.ID]struct{}
-	clearedhistory                bool
-	blocklist                     map[core.ID]struct{}
-	removedblocklist              map[core.ID]struct{}
-	clearedblocklist              bool
-	pending_releases              map[core.ID]struct{}
-	removedpending_releases       map[core.ID]struct{}
-	clearedpending_releases       bool
-	extra_files                   map[core.ID]struct{}
-	removedextra_files            map[core.ID]struct{}
-	clearedextra_files            bool
-	issues                        map[core.ID]struct{}
-	removedissues                 map[core.ID]struct{}
-	clearedissues                 bool
-	done                          bool
-	oldValue                      func(context.Context) (*Item, error)
-	predicates                    []predicate.Item
+	op                              Op
+	typ                             string
+	id                              *core.ID
+	kind                            *string
+	name                            *string
+	sort_name                       *string
+	sort_key                        *string
+	original_title                  *string
+	search_key                      *string
+	original_key                    *string
+	overview                        *string
+	tagline                         *string
+	_path                           *string
+	index_number                    *int
+	addindex_number                 *int
+	parent_index_number             *int
+	addparent_index_number          *int
+	index_number_end                *int
+	addindex_number_end             *int
+	production_year                 *int
+	addproduction_year              *int
+	premiere_date                   *time.Time
+	end_date                        *time.Time
+	runtime                         *time.Duration
+	addruntime                      *time.Duration
+	official_rating                 *string
+	custom_rating                   *string
+	parental_rating                 *int
+	addparental_rating              *int
+	inherited_rating                *int
+	addinherited_rating             *int
+	community_rating                *float64
+	addcommunity_rating             *float64
+	critic_rating                   *float64
+	addcritic_rating                *float64
+	external_ids                    *map[string]string
+	production_locations            *[]string
+	appendproduction_locations      []string
+	remote_trailers                 *[]string
+	appendremote_trailers           []string
+	collection_name                 *string
+	aspect_ratio                    *string
+	video_3d_format                 *string
+	album                           *string
+	series_status                   *string
+	air_days                        *[]int
+	appendair_days                  []int
+	air_time                        *string
+	display_order                   *string
+	airs_before_season_number       *int
+	addairs_before_season_number    *int
+	airs_after_season_number        *int
+	addairs_after_season_number     *int
+	airs_before_episode_number      *int
+	addairs_before_episode_number   *int
+	metadata_language               *string
+	metadata_country                *string
+	locked                          *bool
+	locked_fields                   *[]string
+	appendlocked_fields             []string
+	loudness                        *float64
+	addloudness                     *float64
+	extra                           *string
+	date_added                      *time.Time
+	file_modified                   *time.Time
+	metadata_refreshed_at           *time.Time
+	scan_generation                 *int64
+	addscan_generation              *int64
+	missing_since                   *time.Time
+	virtual                         *bool
+	monitored                       *bool
+	series_type                     *string
+	absolute_number                 *int
+	addabsolute_number              *int
+	original_language               *string
+	digital_release_date            *time.Time
+	physical_release_date           *time.Time
+	alternative_titles              *[]string
+	appendalternative_titles        []string
+	translated_titles               *[]string
+	appendtranslated_titles         []string
+	secondary_year                  *int
+	addsecondary_year               *int
+	clearedFields                   map[string]struct{}
+	library                         *core.ID
+	clearedlibrary                  bool
+	parent                          *core.ID
+	clearedparent                   bool
+	children                        map[core.ID]struct{}
+	removedchildren                 map[core.ID]struct{}
+	clearedchildren                 bool
+	owner                           *core.ID
+	clearedowner                    bool
+	extras                          map[core.ID]struct{}
+	removedextras                   map[core.ID]struct{}
+	clearedextras                   bool
+	values                          map[int]struct{}
+	removedvalues                   map[int]struct{}
+	clearedvalues                   bool
+	media_sources                   map[core.ID]struct{}
+	removedmedia_sources            map[core.ID]struct{}
+	clearedmedia_sources            bool
+	images                          map[core.ID]struct{}
+	removedimages                   map[core.ID]struct{}
+	clearedimages                   bool
+	trickplay                       map[core.ID]struct{}
+	removedtrickplay                map[core.ID]struct{}
+	clearedtrickplay                bool
+	segments                        map[core.ID]struct{}
+	removedsegments                 map[core.ID]struct{}
+	clearedsegments                 bool
+	credits                         map[int]struct{}
+	removedcredits                  map[int]struct{}
+	clearedcredits                  bool
+	user_data                       map[int]struct{}
+	removeduser_data                map[int]struct{}
+	cleareduser_data                bool
+	user                            *core.ID
+	cleareduser                     bool
+	links                           map[core.ID]struct{}
+	removedlinks                    map[core.ID]struct{}
+	clearedlinks                    bool
+	linked_in                       map[core.ID]struct{}
+	removedlinked_in                map[core.ID]struct{}
+	clearedlinked_in                bool
+	wanted                          *core.ID
+	clearedwanted                   bool
+	episode_states                  map[core.ID]struct{}
+	removedepisode_states           map[core.ID]struct{}
+	clearedepisode_states           bool
+	downloads                       map[core.ID]struct{}
+	removeddownloads                map[core.ID]struct{}
+	cleareddownloads                bool
+	history                         map[core.ID]struct{}
+	removedhistory                  map[core.ID]struct{}
+	clearedhistory                  bool
+	blocklist                       map[core.ID]struct{}
+	removedblocklist                map[core.ID]struct{}
+	clearedblocklist                bool
+	pending_releases                map[core.ID]struct{}
+	removedpending_releases         map[core.ID]struct{}
+	clearedpending_releases         bool
+	extra_files                     map[core.ID]struct{}
+	removedextra_files              map[core.ID]struct{}
+	clearedextra_files              bool
+	issues                          map[core.ID]struct{}
+	removedissues                   map[core.ID]struct{}
+	clearedissues                   bool
+	subtitle_profile                *core.ID
+	clearedsubtitle_profile         bool
+	subtitle_history                map[core.ID]struct{}
+	removedsubtitle_history         map[core.ID]struct{}
+	clearedsubtitle_history         bool
+	subtitle_blocklist              map[core.ID]struct{}
+	removedsubtitle_blocklist       map[core.ID]struct{}
+	clearedsubtitle_blocklist       bool
+	subtitle_search_attempts        map[core.ID]struct{}
+	removedsubtitle_search_attempts map[core.ID]struct{}
+	clearedsubtitle_search_attempts bool
+	done                            bool
+	oldValue                        func(context.Context) (*Item, error)
+	predicates                      []predicate.Item
 }
 
 var _ ent.Mutation = (*ItemMutation)(nil)
@@ -19046,6 +19067,207 @@ func (m *ItemMutation) ResetIssues() {
 	m.removedissues = nil
 }
 
+// SetSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by id.
+func (m *ItemMutation) SetSubtitleProfileID(id core.ID) {
+	m.subtitle_profile = &id
+}
+
+// ClearSubtitleProfile clears the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (m *ItemMutation) ClearSubtitleProfile() {
+	m.clearedsubtitle_profile = true
+}
+
+// SubtitleProfileCleared reports if the "subtitle_profile" edge to the SubtitleProfileAssignment entity was cleared.
+func (m *ItemMutation) SubtitleProfileCleared() bool {
+	return m.clearedsubtitle_profile
+}
+
+// SubtitleProfileID returns the "subtitle_profile" edge ID in the mutation.
+func (m *ItemMutation) SubtitleProfileID() (id core.ID, exists bool) {
+	if m.subtitle_profile != nil {
+		return *m.subtitle_profile, true
+	}
+	return
+}
+
+// SubtitleProfileIDs returns the "subtitle_profile" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SubtitleProfileID instead. It exists only for internal usage by the builders.
+func (m *ItemMutation) SubtitleProfileIDs() (ids []core.ID) {
+	if id := m.subtitle_profile; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSubtitleProfile resets all changes to the "subtitle_profile" edge.
+func (m *ItemMutation) ResetSubtitleProfile() {
+	m.subtitle_profile = nil
+	m.clearedsubtitle_profile = false
+}
+
+// AddSubtitleHistoryIDs adds the "subtitle_history" edge to the SubtitleHistoryEvent entity by ids.
+func (m *ItemMutation) AddSubtitleHistoryIDs(ids ...core.ID) {
+	if m.subtitle_history == nil {
+		m.subtitle_history = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.subtitle_history[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSubtitleHistory clears the "subtitle_history" edge to the SubtitleHistoryEvent entity.
+func (m *ItemMutation) ClearSubtitleHistory() {
+	m.clearedsubtitle_history = true
+}
+
+// SubtitleHistoryCleared reports if the "subtitle_history" edge to the SubtitleHistoryEvent entity was cleared.
+func (m *ItemMutation) SubtitleHistoryCleared() bool {
+	return m.clearedsubtitle_history
+}
+
+// RemoveSubtitleHistoryIDs removes the "subtitle_history" edge to the SubtitleHistoryEvent entity by IDs.
+func (m *ItemMutation) RemoveSubtitleHistoryIDs(ids ...core.ID) {
+	if m.removedsubtitle_history == nil {
+		m.removedsubtitle_history = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.subtitle_history, ids[i])
+		m.removedsubtitle_history[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSubtitleHistory returns the removed IDs of the "subtitle_history" edge to the SubtitleHistoryEvent entity.
+func (m *ItemMutation) RemovedSubtitleHistoryIDs() (ids []core.ID) {
+	for id := range m.removedsubtitle_history {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SubtitleHistoryIDs returns the "subtitle_history" edge IDs in the mutation.
+func (m *ItemMutation) SubtitleHistoryIDs() (ids []core.ID) {
+	for id := range m.subtitle_history {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSubtitleHistory resets all changes to the "subtitle_history" edge.
+func (m *ItemMutation) ResetSubtitleHistory() {
+	m.subtitle_history = nil
+	m.clearedsubtitle_history = false
+	m.removedsubtitle_history = nil
+}
+
+// AddSubtitleBlocklistIDs adds the "subtitle_blocklist" edge to the SubtitleBlocklistEntry entity by ids.
+func (m *ItemMutation) AddSubtitleBlocklistIDs(ids ...core.ID) {
+	if m.subtitle_blocklist == nil {
+		m.subtitle_blocklist = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.subtitle_blocklist[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSubtitleBlocklist clears the "subtitle_blocklist" edge to the SubtitleBlocklistEntry entity.
+func (m *ItemMutation) ClearSubtitleBlocklist() {
+	m.clearedsubtitle_blocklist = true
+}
+
+// SubtitleBlocklistCleared reports if the "subtitle_blocklist" edge to the SubtitleBlocklistEntry entity was cleared.
+func (m *ItemMutation) SubtitleBlocklistCleared() bool {
+	return m.clearedsubtitle_blocklist
+}
+
+// RemoveSubtitleBlocklistIDs removes the "subtitle_blocklist" edge to the SubtitleBlocklistEntry entity by IDs.
+func (m *ItemMutation) RemoveSubtitleBlocklistIDs(ids ...core.ID) {
+	if m.removedsubtitle_blocklist == nil {
+		m.removedsubtitle_blocklist = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.subtitle_blocklist, ids[i])
+		m.removedsubtitle_blocklist[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSubtitleBlocklist returns the removed IDs of the "subtitle_blocklist" edge to the SubtitleBlocklistEntry entity.
+func (m *ItemMutation) RemovedSubtitleBlocklistIDs() (ids []core.ID) {
+	for id := range m.removedsubtitle_blocklist {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SubtitleBlocklistIDs returns the "subtitle_blocklist" edge IDs in the mutation.
+func (m *ItemMutation) SubtitleBlocklistIDs() (ids []core.ID) {
+	for id := range m.subtitle_blocklist {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSubtitleBlocklist resets all changes to the "subtitle_blocklist" edge.
+func (m *ItemMutation) ResetSubtitleBlocklist() {
+	m.subtitle_blocklist = nil
+	m.clearedsubtitle_blocklist = false
+	m.removedsubtitle_blocklist = nil
+}
+
+// AddSubtitleSearchAttemptIDs adds the "subtitle_search_attempts" edge to the SubtitleSearchAttempt entity by ids.
+func (m *ItemMutation) AddSubtitleSearchAttemptIDs(ids ...core.ID) {
+	if m.subtitle_search_attempts == nil {
+		m.subtitle_search_attempts = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.subtitle_search_attempts[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSubtitleSearchAttempts clears the "subtitle_search_attempts" edge to the SubtitleSearchAttempt entity.
+func (m *ItemMutation) ClearSubtitleSearchAttempts() {
+	m.clearedsubtitle_search_attempts = true
+}
+
+// SubtitleSearchAttemptsCleared reports if the "subtitle_search_attempts" edge to the SubtitleSearchAttempt entity was cleared.
+func (m *ItemMutation) SubtitleSearchAttemptsCleared() bool {
+	return m.clearedsubtitle_search_attempts
+}
+
+// RemoveSubtitleSearchAttemptIDs removes the "subtitle_search_attempts" edge to the SubtitleSearchAttempt entity by IDs.
+func (m *ItemMutation) RemoveSubtitleSearchAttemptIDs(ids ...core.ID) {
+	if m.removedsubtitle_search_attempts == nil {
+		m.removedsubtitle_search_attempts = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.subtitle_search_attempts, ids[i])
+		m.removedsubtitle_search_attempts[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSubtitleSearchAttempts returns the removed IDs of the "subtitle_search_attempts" edge to the SubtitleSearchAttempt entity.
+func (m *ItemMutation) RemovedSubtitleSearchAttemptsIDs() (ids []core.ID) {
+	for id := range m.removedsubtitle_search_attempts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SubtitleSearchAttemptsIDs returns the "subtitle_search_attempts" edge IDs in the mutation.
+func (m *ItemMutation) SubtitleSearchAttemptsIDs() (ids []core.ID) {
+	for id := range m.subtitle_search_attempts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSubtitleSearchAttempts resets all changes to the "subtitle_search_attempts" edge.
+func (m *ItemMutation) ResetSubtitleSearchAttempts() {
+	m.subtitle_search_attempts = nil
+	m.clearedsubtitle_search_attempts = false
+	m.removedsubtitle_search_attempts = nil
+}
+
 // Where appends a list predicates to the ItemMutation builder.
 func (m *ItemMutation) Where(ps ...predicate.Item) {
 	m.predicates = append(m.predicates, ps...)
@@ -20576,7 +20798,7 @@ func (m *ItemMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ItemMutation) AddedEdges() []string {
-	edges := make([]string, 0, 23)
+	edges := make([]string, 0, 27)
 	if m.library != nil {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -20645,6 +20867,18 @@ func (m *ItemMutation) AddedEdges() []string {
 	}
 	if m.issues != nil {
 		edges = append(edges, item.EdgeIssues)
+	}
+	if m.subtitle_profile != nil {
+		edges = append(edges, item.EdgeSubtitleProfile)
+	}
+	if m.subtitle_history != nil {
+		edges = append(edges, item.EdgeSubtitleHistory)
+	}
+	if m.subtitle_blocklist != nil {
+		edges = append(edges, item.EdgeSubtitleBlocklist)
+	}
+	if m.subtitle_search_attempts != nil {
+		edges = append(edges, item.EdgeSubtitleSearchAttempts)
 	}
 	return edges
 }
@@ -20781,13 +21015,35 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeSubtitleProfile:
+		if id := m.subtitle_profile; id != nil {
+			return []ent.Value{*id}
+		}
+	case item.EdgeSubtitleHistory:
+		ids := make([]ent.Value, 0, len(m.subtitle_history))
+		for id := range m.subtitle_history {
+			ids = append(ids, id)
+		}
+		return ids
+	case item.EdgeSubtitleBlocklist:
+		ids := make([]ent.Value, 0, len(m.subtitle_blocklist))
+		for id := range m.subtitle_blocklist {
+			ids = append(ids, id)
+		}
+		return ids
+	case item.EdgeSubtitleSearchAttempts:
+		ids := make([]ent.Value, 0, len(m.subtitle_search_attempts))
+		for id := range m.subtitle_search_attempts {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ItemMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 23)
+	edges := make([]string, 0, 27)
 	if m.removedchildren != nil {
 		edges = append(edges, item.EdgeChildren)
 	}
@@ -20841,6 +21097,15 @@ func (m *ItemMutation) RemovedEdges() []string {
 	}
 	if m.removedissues != nil {
 		edges = append(edges, item.EdgeIssues)
+	}
+	if m.removedsubtitle_history != nil {
+		edges = append(edges, item.EdgeSubtitleHistory)
+	}
+	if m.removedsubtitle_blocklist != nil {
+		edges = append(edges, item.EdgeSubtitleBlocklist)
+	}
+	if m.removedsubtitle_search_attempts != nil {
+		edges = append(edges, item.EdgeSubtitleSearchAttempts)
 	}
 	return edges
 }
@@ -20957,13 +21222,31 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeSubtitleHistory:
+		ids := make([]ent.Value, 0, len(m.removedsubtitle_history))
+		for id := range m.removedsubtitle_history {
+			ids = append(ids, id)
+		}
+		return ids
+	case item.EdgeSubtitleBlocklist:
+		ids := make([]ent.Value, 0, len(m.removedsubtitle_blocklist))
+		for id := range m.removedsubtitle_blocklist {
+			ids = append(ids, id)
+		}
+		return ids
+	case item.EdgeSubtitleSearchAttempts:
+		ids := make([]ent.Value, 0, len(m.removedsubtitle_search_attempts))
+		for id := range m.removedsubtitle_search_attempts {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ItemMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 23)
+	edges := make([]string, 0, 27)
 	if m.clearedlibrary {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -21033,6 +21316,18 @@ func (m *ItemMutation) ClearedEdges() []string {
 	if m.clearedissues {
 		edges = append(edges, item.EdgeIssues)
 	}
+	if m.clearedsubtitle_profile {
+		edges = append(edges, item.EdgeSubtitleProfile)
+	}
+	if m.clearedsubtitle_history {
+		edges = append(edges, item.EdgeSubtitleHistory)
+	}
+	if m.clearedsubtitle_blocklist {
+		edges = append(edges, item.EdgeSubtitleBlocklist)
+	}
+	if m.clearedsubtitle_search_attempts {
+		edges = append(edges, item.EdgeSubtitleSearchAttempts)
+	}
 	return edges
 }
 
@@ -21086,6 +21381,14 @@ func (m *ItemMutation) EdgeCleared(name string) bool {
 		return m.clearedextra_files
 	case item.EdgeIssues:
 		return m.clearedissues
+	case item.EdgeSubtitleProfile:
+		return m.clearedsubtitle_profile
+	case item.EdgeSubtitleHistory:
+		return m.clearedsubtitle_history
+	case item.EdgeSubtitleBlocklist:
+		return m.clearedsubtitle_blocklist
+	case item.EdgeSubtitleSearchAttempts:
+		return m.clearedsubtitle_search_attempts
 	}
 	return false
 }
@@ -21108,6 +21411,9 @@ func (m *ItemMutation) ClearEdge(name string) error {
 		return nil
 	case item.EdgeWanted:
 		m.ClearWanted()
+		return nil
+	case item.EdgeSubtitleProfile:
+		m.ClearSubtitleProfile()
 		return nil
 	}
 	return fmt.Errorf("unknown Item unique edge %s", name)
@@ -21185,6 +21491,18 @@ func (m *ItemMutation) ResetEdge(name string) error {
 		return nil
 	case item.EdgeIssues:
 		m.ResetIssues()
+		return nil
+	case item.EdgeSubtitleProfile:
+		m.ResetSubtitleProfile()
+		return nil
+	case item.EdgeSubtitleHistory:
+		m.ResetSubtitleHistory()
+		return nil
+	case item.EdgeSubtitleBlocklist:
+		m.ResetSubtitleBlocklist()
+		return nil
+	case item.EdgeSubtitleSearchAttempts:
+		m.ResetSubtitleSearchAttempts()
 		return nil
 	}
 	return fmt.Errorf("unknown Item edge %s", name)
@@ -23597,41 +23915,43 @@ func (m *JobMutation) ResetEdge(name string) error {
 // LibraryMutation represents an operation that mutates the Library nodes in the graph.
 type LibraryMutation struct {
 	config
-	op                     Op
-	typ                    string
-	id                     *core.ID
-	name                   *string
-	kind                   *string
-	paths                  *[]string
-	appendpaths            []string
-	storage_classes        *map[string]core.StorageClass
-	scan_interval          *time.Duration
-	addscan_interval       *time.Duration
-	preferred_language     *string
-	metadata_country       *string
-	save_local_metadata    *bool
-	auto_collections       *bool
-	extract_trickplay      *bool
-	extract_chapter_images *bool
-	analyze_loudness       *bool
-	download_lyrics        *bool
-	provider_order         *core.ProviderOrder
-	virtual_episodes       *core.VirtualEpisodes
-	hubs                   *core.LibraryHubs
-	scan_generation        *int64
-	addscan_generation     *int64
-	created_at             *time.Time
-	updated_at             *time.Time
-	clearedFields          map[string]struct{}
-	items                  map[core.ID]struct{}
-	removeditems           map[core.ID]struct{}
-	cleareditems           bool
-	folder_states          map[core.ID]struct{}
-	removedfolder_states   map[core.ID]struct{}
-	clearedfolder_states   bool
-	done                   bool
-	oldValue               func(context.Context) (*Library, error)
-	predicates             []predicate.Library
+	op                      Op
+	typ                     string
+	id                      *core.ID
+	name                    *string
+	kind                    *string
+	paths                   *[]string
+	appendpaths             []string
+	storage_classes         *map[string]core.StorageClass
+	scan_interval           *time.Duration
+	addscan_interval        *time.Duration
+	preferred_language      *string
+	metadata_country        *string
+	save_local_metadata     *bool
+	auto_collections        *bool
+	extract_trickplay       *bool
+	extract_chapter_images  *bool
+	analyze_loudness        *bool
+	download_lyrics         *bool
+	provider_order          *core.ProviderOrder
+	virtual_episodes        *core.VirtualEpisodes
+	hubs                    *core.LibraryHubs
+	scan_generation         *int64
+	addscan_generation      *int64
+	created_at              *time.Time
+	updated_at              *time.Time
+	clearedFields           map[string]struct{}
+	items                   map[core.ID]struct{}
+	removeditems            map[core.ID]struct{}
+	cleareditems            bool
+	folder_states           map[core.ID]struct{}
+	removedfolder_states    map[core.ID]struct{}
+	clearedfolder_states    bool
+	subtitle_profile        *core.ID
+	clearedsubtitle_profile bool
+	done                    bool
+	oldValue                func(context.Context) (*Library, error)
+	predicates              []predicate.Library
 }
 
 var _ ent.Mutation = (*LibraryMutation)(nil)
@@ -24637,6 +24957,45 @@ func (m *LibraryMutation) ResetFolderStates() {
 	m.removedfolder_states = nil
 }
 
+// SetSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by id.
+func (m *LibraryMutation) SetSubtitleProfileID(id core.ID) {
+	m.subtitle_profile = &id
+}
+
+// ClearSubtitleProfile clears the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (m *LibraryMutation) ClearSubtitleProfile() {
+	m.clearedsubtitle_profile = true
+}
+
+// SubtitleProfileCleared reports if the "subtitle_profile" edge to the SubtitleProfileAssignment entity was cleared.
+func (m *LibraryMutation) SubtitleProfileCleared() bool {
+	return m.clearedsubtitle_profile
+}
+
+// SubtitleProfileID returns the "subtitle_profile" edge ID in the mutation.
+func (m *LibraryMutation) SubtitleProfileID() (id core.ID, exists bool) {
+	if m.subtitle_profile != nil {
+		return *m.subtitle_profile, true
+	}
+	return
+}
+
+// SubtitleProfileIDs returns the "subtitle_profile" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SubtitleProfileID instead. It exists only for internal usage by the builders.
+func (m *LibraryMutation) SubtitleProfileIDs() (ids []core.ID) {
+	if id := m.subtitle_profile; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSubtitleProfile resets all changes to the "subtitle_profile" edge.
+func (m *LibraryMutation) ResetSubtitleProfile() {
+	m.subtitle_profile = nil
+	m.clearedsubtitle_profile = false
+}
+
 // Where appends a list predicates to the LibraryMutation builder.
 func (m *LibraryMutation) Where(ps ...predicate.Library) {
 	m.predicates = append(m.predicates, ps...)
@@ -25130,12 +25489,15 @@ func (m *LibraryMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *LibraryMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.items != nil {
 		edges = append(edges, library.EdgeItems)
 	}
 	if m.folder_states != nil {
 		edges = append(edges, library.EdgeFolderStates)
+	}
+	if m.subtitle_profile != nil {
+		edges = append(edges, library.EdgeSubtitleProfile)
 	}
 	return edges
 }
@@ -25156,13 +25518,17 @@ func (m *LibraryMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case library.EdgeSubtitleProfile:
+		if id := m.subtitle_profile; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *LibraryMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removeditems != nil {
 		edges = append(edges, library.EdgeItems)
 	}
@@ -25194,12 +25560,15 @@ func (m *LibraryMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *LibraryMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.cleareditems {
 		edges = append(edges, library.EdgeItems)
 	}
 	if m.clearedfolder_states {
 		edges = append(edges, library.EdgeFolderStates)
+	}
+	if m.clearedsubtitle_profile {
+		edges = append(edges, library.EdgeSubtitleProfile)
 	}
 	return edges
 }
@@ -25212,6 +25581,8 @@ func (m *LibraryMutation) EdgeCleared(name string) bool {
 		return m.cleareditems
 	case library.EdgeFolderStates:
 		return m.clearedfolder_states
+	case library.EdgeSubtitleProfile:
+		return m.clearedsubtitle_profile
 	}
 	return false
 }
@@ -25220,6 +25591,9 @@ func (m *LibraryMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *LibraryMutation) ClearEdge(name string) error {
 	switch name {
+	case library.EdgeSubtitleProfile:
+		m.ClearSubtitleProfile()
+		return nil
 	}
 	return fmt.Errorf("unknown Library unique edge %s", name)
 }
@@ -25233,6 +25607,9 @@ func (m *LibraryMutation) ResetEdge(name string) error {
 		return nil
 	case library.EdgeFolderStates:
 		m.ResetFolderStates()
+		return nil
+	case library.EdgeSubtitleProfile:
+		m.ResetSubtitleProfile()
 		return nil
 	}
 	return fmt.Errorf("unknown Library edge %s", name)
@@ -35163,6 +35540,4456 @@ func (m *StorageJobMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *StorageJobMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown StorageJob edge %s", name)
+}
+
+// SubtitleBlocklistEntryMutation represents an operation that mutates the SubtitleBlocklistEntry nodes in the graph.
+type SubtitleBlocklistEntryMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *core.ID
+	parent_id        *core.ID
+	provider         *string
+	subtitle_id      *string
+	language         *string
+	forced           *bool
+	hearing_impaired *bool
+	date             *time.Time
+	message          *string
+	clearedFields    map[string]struct{}
+	item             *core.ID
+	cleareditem      bool
+	done             bool
+	oldValue         func(context.Context) (*SubtitleBlocklistEntry, error)
+	predicates       []predicate.SubtitleBlocklistEntry
+}
+
+var _ ent.Mutation = (*SubtitleBlocklistEntryMutation)(nil)
+
+// subtitleblocklistentryOption allows management of the mutation configuration using functional options.
+type subtitleblocklistentryOption func(*SubtitleBlocklistEntryMutation)
+
+// newSubtitleBlocklistEntryMutation creates new mutation for the SubtitleBlocklistEntry entity.
+func newSubtitleBlocklistEntryMutation(c config, op Op, opts ...subtitleblocklistentryOption) *SubtitleBlocklistEntryMutation {
+	m := &SubtitleBlocklistEntryMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubtitleBlocklistEntry,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubtitleBlocklistEntryID sets the ID field of the mutation.
+func withSubtitleBlocklistEntryID(id core.ID) subtitleblocklistentryOption {
+	return func(m *SubtitleBlocklistEntryMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SubtitleBlocklistEntry
+		)
+		m.oldValue = func(ctx context.Context) (*SubtitleBlocklistEntry, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SubtitleBlocklistEntry.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubtitleBlocklistEntry sets the old SubtitleBlocklistEntry of the mutation.
+func withSubtitleBlocklistEntry(node *SubtitleBlocklistEntry) subtitleblocklistentryOption {
+	return func(m *SubtitleBlocklistEntryMutation) {
+		m.oldValue = func(context.Context) (*SubtitleBlocklistEntry, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubtitleBlocklistEntryMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubtitleBlocklistEntryMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SubtitleBlocklistEntry entities.
+func (m *SubtitleBlocklistEntryMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubtitleBlocklistEntryMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubtitleBlocklistEntryMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SubtitleBlocklistEntry.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetItemID sets the "item_id" field.
+func (m *SubtitleBlocklistEntryMutation) SetItemID(c core.ID) {
+	m.item = &c
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *SubtitleBlocklistEntryMutation) ItemID() (r core.ID, exists bool) {
+	v := m.item
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the SubtitleBlocklistEntry entity.
+// If the SubtitleBlocklistEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleBlocklistEntryMutation) OldItemID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *SubtitleBlocklistEntryMutation) ResetItemID() {
+	m.item = nil
+}
+
+// SetParentID sets the "parent_id" field.
+func (m *SubtitleBlocklistEntryMutation) SetParentID(c core.ID) {
+	m.parent_id = &c
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *SubtitleBlocklistEntryMutation) ParentID() (r core.ID, exists bool) {
+	v := m.parent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the SubtitleBlocklistEntry entity.
+// If the SubtitleBlocklistEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleBlocklistEntryMutation) OldParentID(ctx context.Context) (v *core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (m *SubtitleBlocklistEntryMutation) ClearParentID() {
+	m.parent_id = nil
+	m.clearedFields[subtitleblocklistentry.FieldParentID] = struct{}{}
+}
+
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *SubtitleBlocklistEntryMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[subtitleblocklistentry.FieldParentID]
+	return ok
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *SubtitleBlocklistEntryMutation) ResetParentID() {
+	m.parent_id = nil
+	delete(m.clearedFields, subtitleblocklistentry.FieldParentID)
+}
+
+// SetProvider sets the "provider" field.
+func (m *SubtitleBlocklistEntryMutation) SetProvider(s string) {
+	m.provider = &s
+}
+
+// Provider returns the value of the "provider" field in the mutation.
+func (m *SubtitleBlocklistEntryMutation) Provider() (r string, exists bool) {
+	v := m.provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProvider returns the old "provider" field's value of the SubtitleBlocklistEntry entity.
+// If the SubtitleBlocklistEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleBlocklistEntryMutation) OldProvider(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProvider: %w", err)
+	}
+	return oldValue.Provider, nil
+}
+
+// ResetProvider resets all changes to the "provider" field.
+func (m *SubtitleBlocklistEntryMutation) ResetProvider() {
+	m.provider = nil
+}
+
+// SetSubtitleID sets the "subtitle_id" field.
+func (m *SubtitleBlocklistEntryMutation) SetSubtitleID(s string) {
+	m.subtitle_id = &s
+}
+
+// SubtitleID returns the value of the "subtitle_id" field in the mutation.
+func (m *SubtitleBlocklistEntryMutation) SubtitleID() (r string, exists bool) {
+	v := m.subtitle_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubtitleID returns the old "subtitle_id" field's value of the SubtitleBlocklistEntry entity.
+// If the SubtitleBlocklistEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleBlocklistEntryMutation) OldSubtitleID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubtitleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubtitleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubtitleID: %w", err)
+	}
+	return oldValue.SubtitleID, nil
+}
+
+// ResetSubtitleID resets all changes to the "subtitle_id" field.
+func (m *SubtitleBlocklistEntryMutation) ResetSubtitleID() {
+	m.subtitle_id = nil
+}
+
+// SetLanguage sets the "language" field.
+func (m *SubtitleBlocklistEntryMutation) SetLanguage(s string) {
+	m.language = &s
+}
+
+// Language returns the value of the "language" field in the mutation.
+func (m *SubtitleBlocklistEntryMutation) Language() (r string, exists bool) {
+	v := m.language
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLanguage returns the old "language" field's value of the SubtitleBlocklistEntry entity.
+// If the SubtitleBlocklistEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleBlocklistEntryMutation) OldLanguage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLanguage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLanguage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLanguage: %w", err)
+	}
+	return oldValue.Language, nil
+}
+
+// ResetLanguage resets all changes to the "language" field.
+func (m *SubtitleBlocklistEntryMutation) ResetLanguage() {
+	m.language = nil
+}
+
+// SetForced sets the "forced" field.
+func (m *SubtitleBlocklistEntryMutation) SetForced(b bool) {
+	m.forced = &b
+}
+
+// Forced returns the value of the "forced" field in the mutation.
+func (m *SubtitleBlocklistEntryMutation) Forced() (r bool, exists bool) {
+	v := m.forced
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldForced returns the old "forced" field's value of the SubtitleBlocklistEntry entity.
+// If the SubtitleBlocklistEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleBlocklistEntryMutation) OldForced(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldForced is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldForced requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldForced: %w", err)
+	}
+	return oldValue.Forced, nil
+}
+
+// ResetForced resets all changes to the "forced" field.
+func (m *SubtitleBlocklistEntryMutation) ResetForced() {
+	m.forced = nil
+}
+
+// SetHearingImpaired sets the "hearing_impaired" field.
+func (m *SubtitleBlocklistEntryMutation) SetHearingImpaired(b bool) {
+	m.hearing_impaired = &b
+}
+
+// HearingImpaired returns the value of the "hearing_impaired" field in the mutation.
+func (m *SubtitleBlocklistEntryMutation) HearingImpaired() (r bool, exists bool) {
+	v := m.hearing_impaired
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHearingImpaired returns the old "hearing_impaired" field's value of the SubtitleBlocklistEntry entity.
+// If the SubtitleBlocklistEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleBlocklistEntryMutation) OldHearingImpaired(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHearingImpaired is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHearingImpaired requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHearingImpaired: %w", err)
+	}
+	return oldValue.HearingImpaired, nil
+}
+
+// ResetHearingImpaired resets all changes to the "hearing_impaired" field.
+func (m *SubtitleBlocklistEntryMutation) ResetHearingImpaired() {
+	m.hearing_impaired = nil
+}
+
+// SetDate sets the "date" field.
+func (m *SubtitleBlocklistEntryMutation) SetDate(t time.Time) {
+	m.date = &t
+}
+
+// Date returns the value of the "date" field in the mutation.
+func (m *SubtitleBlocklistEntryMutation) Date() (r time.Time, exists bool) {
+	v := m.date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDate returns the old "date" field's value of the SubtitleBlocklistEntry entity.
+// If the SubtitleBlocklistEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleBlocklistEntryMutation) OldDate(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDate: %w", err)
+	}
+	return oldValue.Date, nil
+}
+
+// ResetDate resets all changes to the "date" field.
+func (m *SubtitleBlocklistEntryMutation) ResetDate() {
+	m.date = nil
+}
+
+// SetMessage sets the "message" field.
+func (m *SubtitleBlocklistEntryMutation) SetMessage(s string) {
+	m.message = &s
+}
+
+// Message returns the value of the "message" field in the mutation.
+func (m *SubtitleBlocklistEntryMutation) Message() (r string, exists bool) {
+	v := m.message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMessage returns the old "message" field's value of the SubtitleBlocklistEntry entity.
+// If the SubtitleBlocklistEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleBlocklistEntryMutation) OldMessage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMessage: %w", err)
+	}
+	return oldValue.Message, nil
+}
+
+// ResetMessage resets all changes to the "message" field.
+func (m *SubtitleBlocklistEntryMutation) ResetMessage() {
+	m.message = nil
+}
+
+// ClearItem clears the "item" edge to the Item entity.
+func (m *SubtitleBlocklistEntryMutation) ClearItem() {
+	m.cleareditem = true
+	m.clearedFields[subtitleblocklistentry.FieldItemID] = struct{}{}
+}
+
+// ItemCleared reports if the "item" edge to the Item entity was cleared.
+func (m *SubtitleBlocklistEntryMutation) ItemCleared() bool {
+	return m.cleareditem
+}
+
+// ItemIDs returns the "item" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemID instead. It exists only for internal usage by the builders.
+func (m *SubtitleBlocklistEntryMutation) ItemIDs() (ids []core.ID) {
+	if id := m.item; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItem resets all changes to the "item" edge.
+func (m *SubtitleBlocklistEntryMutation) ResetItem() {
+	m.item = nil
+	m.cleareditem = false
+}
+
+// Where appends a list predicates to the SubtitleBlocklistEntryMutation builder.
+func (m *SubtitleBlocklistEntryMutation) Where(ps ...predicate.SubtitleBlocklistEntry) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubtitleBlocklistEntryMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubtitleBlocklistEntryMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SubtitleBlocklistEntry, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubtitleBlocklistEntryMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubtitleBlocklistEntryMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SubtitleBlocklistEntry).
+func (m *SubtitleBlocklistEntryMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubtitleBlocklistEntryMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.item != nil {
+		fields = append(fields, subtitleblocklistentry.FieldItemID)
+	}
+	if m.parent_id != nil {
+		fields = append(fields, subtitleblocklistentry.FieldParentID)
+	}
+	if m.provider != nil {
+		fields = append(fields, subtitleblocklistentry.FieldProvider)
+	}
+	if m.subtitle_id != nil {
+		fields = append(fields, subtitleblocklistentry.FieldSubtitleID)
+	}
+	if m.language != nil {
+		fields = append(fields, subtitleblocklistentry.FieldLanguage)
+	}
+	if m.forced != nil {
+		fields = append(fields, subtitleblocklistentry.FieldForced)
+	}
+	if m.hearing_impaired != nil {
+		fields = append(fields, subtitleblocklistentry.FieldHearingImpaired)
+	}
+	if m.date != nil {
+		fields = append(fields, subtitleblocklistentry.FieldDate)
+	}
+	if m.message != nil {
+		fields = append(fields, subtitleblocklistentry.FieldMessage)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubtitleBlocklistEntryMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subtitleblocklistentry.FieldItemID:
+		return m.ItemID()
+	case subtitleblocklistentry.FieldParentID:
+		return m.ParentID()
+	case subtitleblocklistentry.FieldProvider:
+		return m.Provider()
+	case subtitleblocklistentry.FieldSubtitleID:
+		return m.SubtitleID()
+	case subtitleblocklistentry.FieldLanguage:
+		return m.Language()
+	case subtitleblocklistentry.FieldForced:
+		return m.Forced()
+	case subtitleblocklistentry.FieldHearingImpaired:
+		return m.HearingImpaired()
+	case subtitleblocklistentry.FieldDate:
+		return m.Date()
+	case subtitleblocklistentry.FieldMessage:
+		return m.Message()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubtitleBlocklistEntryMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subtitleblocklistentry.FieldItemID:
+		return m.OldItemID(ctx)
+	case subtitleblocklistentry.FieldParentID:
+		return m.OldParentID(ctx)
+	case subtitleblocklistentry.FieldProvider:
+		return m.OldProvider(ctx)
+	case subtitleblocklistentry.FieldSubtitleID:
+		return m.OldSubtitleID(ctx)
+	case subtitleblocklistentry.FieldLanguage:
+		return m.OldLanguage(ctx)
+	case subtitleblocklistentry.FieldForced:
+		return m.OldForced(ctx)
+	case subtitleblocklistentry.FieldHearingImpaired:
+		return m.OldHearingImpaired(ctx)
+	case subtitleblocklistentry.FieldDate:
+		return m.OldDate(ctx)
+	case subtitleblocklistentry.FieldMessage:
+		return m.OldMessage(ctx)
+	}
+	return nil, fmt.Errorf("unknown SubtitleBlocklistEntry field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleBlocklistEntryMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subtitleblocklistentry.FieldItemID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case subtitleblocklistentry.FieldParentID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
+		return nil
+	case subtitleblocklistentry.FieldProvider:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProvider(v)
+		return nil
+	case subtitleblocklistentry.FieldSubtitleID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubtitleID(v)
+		return nil
+	case subtitleblocklistentry.FieldLanguage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLanguage(v)
+		return nil
+	case subtitleblocklistentry.FieldForced:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetForced(v)
+		return nil
+	case subtitleblocklistentry.FieldHearingImpaired:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHearingImpaired(v)
+		return nil
+	case subtitleblocklistentry.FieldDate:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDate(v)
+		return nil
+	case subtitleblocklistentry.FieldMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMessage(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleBlocklistEntry field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubtitleBlocklistEntryMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubtitleBlocklistEntryMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleBlocklistEntryMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SubtitleBlocklistEntry numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubtitleBlocklistEntryMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(subtitleblocklistentry.FieldParentID) {
+		fields = append(fields, subtitleblocklistentry.FieldParentID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubtitleBlocklistEntryMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubtitleBlocklistEntryMutation) ClearField(name string) error {
+	switch name {
+	case subtitleblocklistentry.FieldParentID:
+		m.ClearParentID()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleBlocklistEntry nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubtitleBlocklistEntryMutation) ResetField(name string) error {
+	switch name {
+	case subtitleblocklistentry.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case subtitleblocklistentry.FieldParentID:
+		m.ResetParentID()
+		return nil
+	case subtitleblocklistentry.FieldProvider:
+		m.ResetProvider()
+		return nil
+	case subtitleblocklistentry.FieldSubtitleID:
+		m.ResetSubtitleID()
+		return nil
+	case subtitleblocklistentry.FieldLanguage:
+		m.ResetLanguage()
+		return nil
+	case subtitleblocklistentry.FieldForced:
+		m.ResetForced()
+		return nil
+	case subtitleblocklistentry.FieldHearingImpaired:
+		m.ResetHearingImpaired()
+		return nil
+	case subtitleblocklistentry.FieldDate:
+		m.ResetDate()
+		return nil
+	case subtitleblocklistentry.FieldMessage:
+		m.ResetMessage()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleBlocklistEntry field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubtitleBlocklistEntryMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.item != nil {
+		edges = append(edges, subtitleblocklistentry.EdgeItem)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubtitleBlocklistEntryMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case subtitleblocklistentry.EdgeItem:
+		if id := m.item; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubtitleBlocklistEntryMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubtitleBlocklistEntryMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubtitleBlocklistEntryMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareditem {
+		edges = append(edges, subtitleblocklistentry.EdgeItem)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubtitleBlocklistEntryMutation) EdgeCleared(name string) bool {
+	switch name {
+	case subtitleblocklistentry.EdgeItem:
+		return m.cleareditem
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubtitleBlocklistEntryMutation) ClearEdge(name string) error {
+	switch name {
+	case subtitleblocklistentry.EdgeItem:
+		m.ClearItem()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleBlocklistEntry unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubtitleBlocklistEntryMutation) ResetEdge(name string) error {
+	switch name {
+	case subtitleblocklistentry.EdgeItem:
+		m.ResetItem()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleBlocklistEntry edge %s", name)
+}
+
+// SubtitleHistoryEventMutation represents an operation that mutates the SubtitleHistoryEvent nodes in the graph.
+type SubtitleHistoryEventMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *core.ID
+	action            *string
+	parent_id         *core.ID
+	date              *time.Time
+	language          *string
+	forced            *bool
+	hearing_impaired  *bool
+	provider          *string
+	subtitle_id       *string
+	score             *int
+	addscore          *int
+	max_score         *int
+	addmax_score      *int
+	_path             *string
+	video_path        *string
+	description       *string
+	matched           *[]string
+	appendmatched     []string
+	not_matched       *[]string
+	appendnot_matched []string
+	upgraded_from     *core.ID
+	clearedFields     map[string]struct{}
+	item              *core.ID
+	cleareditem       bool
+	done              bool
+	oldValue          func(context.Context) (*SubtitleHistoryEvent, error)
+	predicates        []predicate.SubtitleHistoryEvent
+}
+
+var _ ent.Mutation = (*SubtitleHistoryEventMutation)(nil)
+
+// subtitlehistoryeventOption allows management of the mutation configuration using functional options.
+type subtitlehistoryeventOption func(*SubtitleHistoryEventMutation)
+
+// newSubtitleHistoryEventMutation creates new mutation for the SubtitleHistoryEvent entity.
+func newSubtitleHistoryEventMutation(c config, op Op, opts ...subtitlehistoryeventOption) *SubtitleHistoryEventMutation {
+	m := &SubtitleHistoryEventMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubtitleHistoryEvent,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubtitleHistoryEventID sets the ID field of the mutation.
+func withSubtitleHistoryEventID(id core.ID) subtitlehistoryeventOption {
+	return func(m *SubtitleHistoryEventMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SubtitleHistoryEvent
+		)
+		m.oldValue = func(ctx context.Context) (*SubtitleHistoryEvent, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SubtitleHistoryEvent.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubtitleHistoryEvent sets the old SubtitleHistoryEvent of the mutation.
+func withSubtitleHistoryEvent(node *SubtitleHistoryEvent) subtitlehistoryeventOption {
+	return func(m *SubtitleHistoryEventMutation) {
+		m.oldValue = func(context.Context) (*SubtitleHistoryEvent, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubtitleHistoryEventMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubtitleHistoryEventMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SubtitleHistoryEvent entities.
+func (m *SubtitleHistoryEventMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubtitleHistoryEventMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubtitleHistoryEventMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SubtitleHistoryEvent.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAction sets the "action" field.
+func (m *SubtitleHistoryEventMutation) SetAction(s string) {
+	m.action = &s
+}
+
+// Action returns the value of the "action" field in the mutation.
+func (m *SubtitleHistoryEventMutation) Action() (r string, exists bool) {
+	v := m.action
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAction returns the old "action" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldAction(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAction is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAction requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAction: %w", err)
+	}
+	return oldValue.Action, nil
+}
+
+// ResetAction resets all changes to the "action" field.
+func (m *SubtitleHistoryEventMutation) ResetAction() {
+	m.action = nil
+}
+
+// SetItemID sets the "item_id" field.
+func (m *SubtitleHistoryEventMutation) SetItemID(c core.ID) {
+	m.item = &c
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *SubtitleHistoryEventMutation) ItemID() (r core.ID, exists bool) {
+	v := m.item
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldItemID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *SubtitleHistoryEventMutation) ResetItemID() {
+	m.item = nil
+}
+
+// SetParentID sets the "parent_id" field.
+func (m *SubtitleHistoryEventMutation) SetParentID(c core.ID) {
+	m.parent_id = &c
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *SubtitleHistoryEventMutation) ParentID() (r core.ID, exists bool) {
+	v := m.parent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldParentID(ctx context.Context) (v *core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (m *SubtitleHistoryEventMutation) ClearParentID() {
+	m.parent_id = nil
+	m.clearedFields[subtitlehistoryevent.FieldParentID] = struct{}{}
+}
+
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *SubtitleHistoryEventMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[subtitlehistoryevent.FieldParentID]
+	return ok
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *SubtitleHistoryEventMutation) ResetParentID() {
+	m.parent_id = nil
+	delete(m.clearedFields, subtitlehistoryevent.FieldParentID)
+}
+
+// SetDate sets the "date" field.
+func (m *SubtitleHistoryEventMutation) SetDate(t time.Time) {
+	m.date = &t
+}
+
+// Date returns the value of the "date" field in the mutation.
+func (m *SubtitleHistoryEventMutation) Date() (r time.Time, exists bool) {
+	v := m.date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDate returns the old "date" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldDate(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDate: %w", err)
+	}
+	return oldValue.Date, nil
+}
+
+// ResetDate resets all changes to the "date" field.
+func (m *SubtitleHistoryEventMutation) ResetDate() {
+	m.date = nil
+}
+
+// SetLanguage sets the "language" field.
+func (m *SubtitleHistoryEventMutation) SetLanguage(s string) {
+	m.language = &s
+}
+
+// Language returns the value of the "language" field in the mutation.
+func (m *SubtitleHistoryEventMutation) Language() (r string, exists bool) {
+	v := m.language
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLanguage returns the old "language" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldLanguage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLanguage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLanguage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLanguage: %w", err)
+	}
+	return oldValue.Language, nil
+}
+
+// ResetLanguage resets all changes to the "language" field.
+func (m *SubtitleHistoryEventMutation) ResetLanguage() {
+	m.language = nil
+}
+
+// SetForced sets the "forced" field.
+func (m *SubtitleHistoryEventMutation) SetForced(b bool) {
+	m.forced = &b
+}
+
+// Forced returns the value of the "forced" field in the mutation.
+func (m *SubtitleHistoryEventMutation) Forced() (r bool, exists bool) {
+	v := m.forced
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldForced returns the old "forced" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldForced(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldForced is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldForced requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldForced: %w", err)
+	}
+	return oldValue.Forced, nil
+}
+
+// ResetForced resets all changes to the "forced" field.
+func (m *SubtitleHistoryEventMutation) ResetForced() {
+	m.forced = nil
+}
+
+// SetHearingImpaired sets the "hearing_impaired" field.
+func (m *SubtitleHistoryEventMutation) SetHearingImpaired(b bool) {
+	m.hearing_impaired = &b
+}
+
+// HearingImpaired returns the value of the "hearing_impaired" field in the mutation.
+func (m *SubtitleHistoryEventMutation) HearingImpaired() (r bool, exists bool) {
+	v := m.hearing_impaired
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHearingImpaired returns the old "hearing_impaired" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldHearingImpaired(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHearingImpaired is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHearingImpaired requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHearingImpaired: %w", err)
+	}
+	return oldValue.HearingImpaired, nil
+}
+
+// ResetHearingImpaired resets all changes to the "hearing_impaired" field.
+func (m *SubtitleHistoryEventMutation) ResetHearingImpaired() {
+	m.hearing_impaired = nil
+}
+
+// SetProvider sets the "provider" field.
+func (m *SubtitleHistoryEventMutation) SetProvider(s string) {
+	m.provider = &s
+}
+
+// Provider returns the value of the "provider" field in the mutation.
+func (m *SubtitleHistoryEventMutation) Provider() (r string, exists bool) {
+	v := m.provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProvider returns the old "provider" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldProvider(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProvider: %w", err)
+	}
+	return oldValue.Provider, nil
+}
+
+// ResetProvider resets all changes to the "provider" field.
+func (m *SubtitleHistoryEventMutation) ResetProvider() {
+	m.provider = nil
+}
+
+// SetSubtitleID sets the "subtitle_id" field.
+func (m *SubtitleHistoryEventMutation) SetSubtitleID(s string) {
+	m.subtitle_id = &s
+}
+
+// SubtitleID returns the value of the "subtitle_id" field in the mutation.
+func (m *SubtitleHistoryEventMutation) SubtitleID() (r string, exists bool) {
+	v := m.subtitle_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubtitleID returns the old "subtitle_id" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldSubtitleID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubtitleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubtitleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubtitleID: %w", err)
+	}
+	return oldValue.SubtitleID, nil
+}
+
+// ResetSubtitleID resets all changes to the "subtitle_id" field.
+func (m *SubtitleHistoryEventMutation) ResetSubtitleID() {
+	m.subtitle_id = nil
+}
+
+// SetScore sets the "score" field.
+func (m *SubtitleHistoryEventMutation) SetScore(i int) {
+	m.score = &i
+	m.addscore = nil
+}
+
+// Score returns the value of the "score" field in the mutation.
+func (m *SubtitleHistoryEventMutation) Score() (r int, exists bool) {
+	v := m.score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScore returns the old "score" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldScore(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScore: %w", err)
+	}
+	return oldValue.Score, nil
+}
+
+// AddScore adds i to the "score" field.
+func (m *SubtitleHistoryEventMutation) AddScore(i int) {
+	if m.addscore != nil {
+		*m.addscore += i
+	} else {
+		m.addscore = &i
+	}
+}
+
+// AddedScore returns the value that was added to the "score" field in this mutation.
+func (m *SubtitleHistoryEventMutation) AddedScore() (r int, exists bool) {
+	v := m.addscore
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetScore resets all changes to the "score" field.
+func (m *SubtitleHistoryEventMutation) ResetScore() {
+	m.score = nil
+	m.addscore = nil
+}
+
+// SetMaxScore sets the "max_score" field.
+func (m *SubtitleHistoryEventMutation) SetMaxScore(i int) {
+	m.max_score = &i
+	m.addmax_score = nil
+}
+
+// MaxScore returns the value of the "max_score" field in the mutation.
+func (m *SubtitleHistoryEventMutation) MaxScore() (r int, exists bool) {
+	v := m.max_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxScore returns the old "max_score" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldMaxScore(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxScore: %w", err)
+	}
+	return oldValue.MaxScore, nil
+}
+
+// AddMaxScore adds i to the "max_score" field.
+func (m *SubtitleHistoryEventMutation) AddMaxScore(i int) {
+	if m.addmax_score != nil {
+		*m.addmax_score += i
+	} else {
+		m.addmax_score = &i
+	}
+}
+
+// AddedMaxScore returns the value that was added to the "max_score" field in this mutation.
+func (m *SubtitleHistoryEventMutation) AddedMaxScore() (r int, exists bool) {
+	v := m.addmax_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMaxScore resets all changes to the "max_score" field.
+func (m *SubtitleHistoryEventMutation) ResetMaxScore() {
+	m.max_score = nil
+	m.addmax_score = nil
+}
+
+// SetPath sets the "path" field.
+func (m *SubtitleHistoryEventMutation) SetPath(s string) {
+	m._path = &s
+}
+
+// Path returns the value of the "path" field in the mutation.
+func (m *SubtitleHistoryEventMutation) Path() (r string, exists bool) {
+	v := m._path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPath returns the old "path" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPath: %w", err)
+	}
+	return oldValue.Path, nil
+}
+
+// ResetPath resets all changes to the "path" field.
+func (m *SubtitleHistoryEventMutation) ResetPath() {
+	m._path = nil
+}
+
+// SetVideoPath sets the "video_path" field.
+func (m *SubtitleHistoryEventMutation) SetVideoPath(s string) {
+	m.video_path = &s
+}
+
+// VideoPath returns the value of the "video_path" field in the mutation.
+func (m *SubtitleHistoryEventMutation) VideoPath() (r string, exists bool) {
+	v := m.video_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVideoPath returns the old "video_path" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldVideoPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVideoPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVideoPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVideoPath: %w", err)
+	}
+	return oldValue.VideoPath, nil
+}
+
+// ResetVideoPath resets all changes to the "video_path" field.
+func (m *SubtitleHistoryEventMutation) ResetVideoPath() {
+	m.video_path = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *SubtitleHistoryEventMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *SubtitleHistoryEventMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *SubtitleHistoryEventMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetMatched sets the "matched" field.
+func (m *SubtitleHistoryEventMutation) SetMatched(s []string) {
+	m.matched = &s
+	m.appendmatched = nil
+}
+
+// Matched returns the value of the "matched" field in the mutation.
+func (m *SubtitleHistoryEventMutation) Matched() (r []string, exists bool) {
+	v := m.matched
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMatched returns the old "matched" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldMatched(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMatched is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMatched requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMatched: %w", err)
+	}
+	return oldValue.Matched, nil
+}
+
+// AppendMatched adds s to the "matched" field.
+func (m *SubtitleHistoryEventMutation) AppendMatched(s []string) {
+	m.appendmatched = append(m.appendmatched, s...)
+}
+
+// AppendedMatched returns the list of values that were appended to the "matched" field in this mutation.
+func (m *SubtitleHistoryEventMutation) AppendedMatched() ([]string, bool) {
+	if len(m.appendmatched) == 0 {
+		return nil, false
+	}
+	return m.appendmatched, true
+}
+
+// ClearMatched clears the value of the "matched" field.
+func (m *SubtitleHistoryEventMutation) ClearMatched() {
+	m.matched = nil
+	m.appendmatched = nil
+	m.clearedFields[subtitlehistoryevent.FieldMatched] = struct{}{}
+}
+
+// MatchedCleared returns if the "matched" field was cleared in this mutation.
+func (m *SubtitleHistoryEventMutation) MatchedCleared() bool {
+	_, ok := m.clearedFields[subtitlehistoryevent.FieldMatched]
+	return ok
+}
+
+// ResetMatched resets all changes to the "matched" field.
+func (m *SubtitleHistoryEventMutation) ResetMatched() {
+	m.matched = nil
+	m.appendmatched = nil
+	delete(m.clearedFields, subtitlehistoryevent.FieldMatched)
+}
+
+// SetNotMatched sets the "not_matched" field.
+func (m *SubtitleHistoryEventMutation) SetNotMatched(s []string) {
+	m.not_matched = &s
+	m.appendnot_matched = nil
+}
+
+// NotMatched returns the value of the "not_matched" field in the mutation.
+func (m *SubtitleHistoryEventMutation) NotMatched() (r []string, exists bool) {
+	v := m.not_matched
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNotMatched returns the old "not_matched" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldNotMatched(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNotMatched is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNotMatched requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNotMatched: %w", err)
+	}
+	return oldValue.NotMatched, nil
+}
+
+// AppendNotMatched adds s to the "not_matched" field.
+func (m *SubtitleHistoryEventMutation) AppendNotMatched(s []string) {
+	m.appendnot_matched = append(m.appendnot_matched, s...)
+}
+
+// AppendedNotMatched returns the list of values that were appended to the "not_matched" field in this mutation.
+func (m *SubtitleHistoryEventMutation) AppendedNotMatched() ([]string, bool) {
+	if len(m.appendnot_matched) == 0 {
+		return nil, false
+	}
+	return m.appendnot_matched, true
+}
+
+// ClearNotMatched clears the value of the "not_matched" field.
+func (m *SubtitleHistoryEventMutation) ClearNotMatched() {
+	m.not_matched = nil
+	m.appendnot_matched = nil
+	m.clearedFields[subtitlehistoryevent.FieldNotMatched] = struct{}{}
+}
+
+// NotMatchedCleared returns if the "not_matched" field was cleared in this mutation.
+func (m *SubtitleHistoryEventMutation) NotMatchedCleared() bool {
+	_, ok := m.clearedFields[subtitlehistoryevent.FieldNotMatched]
+	return ok
+}
+
+// ResetNotMatched resets all changes to the "not_matched" field.
+func (m *SubtitleHistoryEventMutation) ResetNotMatched() {
+	m.not_matched = nil
+	m.appendnot_matched = nil
+	delete(m.clearedFields, subtitlehistoryevent.FieldNotMatched)
+}
+
+// SetUpgradedFrom sets the "upgraded_from" field.
+func (m *SubtitleHistoryEventMutation) SetUpgradedFrom(c core.ID) {
+	m.upgraded_from = &c
+}
+
+// UpgradedFrom returns the value of the "upgraded_from" field in the mutation.
+func (m *SubtitleHistoryEventMutation) UpgradedFrom() (r core.ID, exists bool) {
+	v := m.upgraded_from
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpgradedFrom returns the old "upgraded_from" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldUpgradedFrom(ctx context.Context) (v *core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpgradedFrom is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpgradedFrom requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpgradedFrom: %w", err)
+	}
+	return oldValue.UpgradedFrom, nil
+}
+
+// ClearUpgradedFrom clears the value of the "upgraded_from" field.
+func (m *SubtitleHistoryEventMutation) ClearUpgradedFrom() {
+	m.upgraded_from = nil
+	m.clearedFields[subtitlehistoryevent.FieldUpgradedFrom] = struct{}{}
+}
+
+// UpgradedFromCleared returns if the "upgraded_from" field was cleared in this mutation.
+func (m *SubtitleHistoryEventMutation) UpgradedFromCleared() bool {
+	_, ok := m.clearedFields[subtitlehistoryevent.FieldUpgradedFrom]
+	return ok
+}
+
+// ResetUpgradedFrom resets all changes to the "upgraded_from" field.
+func (m *SubtitleHistoryEventMutation) ResetUpgradedFrom() {
+	m.upgraded_from = nil
+	delete(m.clearedFields, subtitlehistoryevent.FieldUpgradedFrom)
+}
+
+// ClearItem clears the "item" edge to the Item entity.
+func (m *SubtitleHistoryEventMutation) ClearItem() {
+	m.cleareditem = true
+	m.clearedFields[subtitlehistoryevent.FieldItemID] = struct{}{}
+}
+
+// ItemCleared reports if the "item" edge to the Item entity was cleared.
+func (m *SubtitleHistoryEventMutation) ItemCleared() bool {
+	return m.cleareditem
+}
+
+// ItemIDs returns the "item" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemID instead. It exists only for internal usage by the builders.
+func (m *SubtitleHistoryEventMutation) ItemIDs() (ids []core.ID) {
+	if id := m.item; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItem resets all changes to the "item" edge.
+func (m *SubtitleHistoryEventMutation) ResetItem() {
+	m.item = nil
+	m.cleareditem = false
+}
+
+// Where appends a list predicates to the SubtitleHistoryEventMutation builder.
+func (m *SubtitleHistoryEventMutation) Where(ps ...predicate.SubtitleHistoryEvent) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubtitleHistoryEventMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubtitleHistoryEventMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SubtitleHistoryEvent, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubtitleHistoryEventMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubtitleHistoryEventMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SubtitleHistoryEvent).
+func (m *SubtitleHistoryEventMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubtitleHistoryEventMutation) Fields() []string {
+	fields := make([]string, 0, 17)
+	if m.action != nil {
+		fields = append(fields, subtitlehistoryevent.FieldAction)
+	}
+	if m.item != nil {
+		fields = append(fields, subtitlehistoryevent.FieldItemID)
+	}
+	if m.parent_id != nil {
+		fields = append(fields, subtitlehistoryevent.FieldParentID)
+	}
+	if m.date != nil {
+		fields = append(fields, subtitlehistoryevent.FieldDate)
+	}
+	if m.language != nil {
+		fields = append(fields, subtitlehistoryevent.FieldLanguage)
+	}
+	if m.forced != nil {
+		fields = append(fields, subtitlehistoryevent.FieldForced)
+	}
+	if m.hearing_impaired != nil {
+		fields = append(fields, subtitlehistoryevent.FieldHearingImpaired)
+	}
+	if m.provider != nil {
+		fields = append(fields, subtitlehistoryevent.FieldProvider)
+	}
+	if m.subtitle_id != nil {
+		fields = append(fields, subtitlehistoryevent.FieldSubtitleID)
+	}
+	if m.score != nil {
+		fields = append(fields, subtitlehistoryevent.FieldScore)
+	}
+	if m.max_score != nil {
+		fields = append(fields, subtitlehistoryevent.FieldMaxScore)
+	}
+	if m._path != nil {
+		fields = append(fields, subtitlehistoryevent.FieldPath)
+	}
+	if m.video_path != nil {
+		fields = append(fields, subtitlehistoryevent.FieldVideoPath)
+	}
+	if m.description != nil {
+		fields = append(fields, subtitlehistoryevent.FieldDescription)
+	}
+	if m.matched != nil {
+		fields = append(fields, subtitlehistoryevent.FieldMatched)
+	}
+	if m.not_matched != nil {
+		fields = append(fields, subtitlehistoryevent.FieldNotMatched)
+	}
+	if m.upgraded_from != nil {
+		fields = append(fields, subtitlehistoryevent.FieldUpgradedFrom)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubtitleHistoryEventMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subtitlehistoryevent.FieldAction:
+		return m.Action()
+	case subtitlehistoryevent.FieldItemID:
+		return m.ItemID()
+	case subtitlehistoryevent.FieldParentID:
+		return m.ParentID()
+	case subtitlehistoryevent.FieldDate:
+		return m.Date()
+	case subtitlehistoryevent.FieldLanguage:
+		return m.Language()
+	case subtitlehistoryevent.FieldForced:
+		return m.Forced()
+	case subtitlehistoryevent.FieldHearingImpaired:
+		return m.HearingImpaired()
+	case subtitlehistoryevent.FieldProvider:
+		return m.Provider()
+	case subtitlehistoryevent.FieldSubtitleID:
+		return m.SubtitleID()
+	case subtitlehistoryevent.FieldScore:
+		return m.Score()
+	case subtitlehistoryevent.FieldMaxScore:
+		return m.MaxScore()
+	case subtitlehistoryevent.FieldPath:
+		return m.Path()
+	case subtitlehistoryevent.FieldVideoPath:
+		return m.VideoPath()
+	case subtitlehistoryevent.FieldDescription:
+		return m.Description()
+	case subtitlehistoryevent.FieldMatched:
+		return m.Matched()
+	case subtitlehistoryevent.FieldNotMatched:
+		return m.NotMatched()
+	case subtitlehistoryevent.FieldUpgradedFrom:
+		return m.UpgradedFrom()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubtitleHistoryEventMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subtitlehistoryevent.FieldAction:
+		return m.OldAction(ctx)
+	case subtitlehistoryevent.FieldItemID:
+		return m.OldItemID(ctx)
+	case subtitlehistoryevent.FieldParentID:
+		return m.OldParentID(ctx)
+	case subtitlehistoryevent.FieldDate:
+		return m.OldDate(ctx)
+	case subtitlehistoryevent.FieldLanguage:
+		return m.OldLanguage(ctx)
+	case subtitlehistoryevent.FieldForced:
+		return m.OldForced(ctx)
+	case subtitlehistoryevent.FieldHearingImpaired:
+		return m.OldHearingImpaired(ctx)
+	case subtitlehistoryevent.FieldProvider:
+		return m.OldProvider(ctx)
+	case subtitlehistoryevent.FieldSubtitleID:
+		return m.OldSubtitleID(ctx)
+	case subtitlehistoryevent.FieldScore:
+		return m.OldScore(ctx)
+	case subtitlehistoryevent.FieldMaxScore:
+		return m.OldMaxScore(ctx)
+	case subtitlehistoryevent.FieldPath:
+		return m.OldPath(ctx)
+	case subtitlehistoryevent.FieldVideoPath:
+		return m.OldVideoPath(ctx)
+	case subtitlehistoryevent.FieldDescription:
+		return m.OldDescription(ctx)
+	case subtitlehistoryevent.FieldMatched:
+		return m.OldMatched(ctx)
+	case subtitlehistoryevent.FieldNotMatched:
+		return m.OldNotMatched(ctx)
+	case subtitlehistoryevent.FieldUpgradedFrom:
+		return m.OldUpgradedFrom(ctx)
+	}
+	return nil, fmt.Errorf("unknown SubtitleHistoryEvent field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleHistoryEventMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subtitlehistoryevent.FieldAction:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAction(v)
+		return nil
+	case subtitlehistoryevent.FieldItemID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case subtitlehistoryevent.FieldParentID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
+		return nil
+	case subtitlehistoryevent.FieldDate:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDate(v)
+		return nil
+	case subtitlehistoryevent.FieldLanguage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLanguage(v)
+		return nil
+	case subtitlehistoryevent.FieldForced:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetForced(v)
+		return nil
+	case subtitlehistoryevent.FieldHearingImpaired:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHearingImpaired(v)
+		return nil
+	case subtitlehistoryevent.FieldProvider:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProvider(v)
+		return nil
+	case subtitlehistoryevent.FieldSubtitleID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubtitleID(v)
+		return nil
+	case subtitlehistoryevent.FieldScore:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScore(v)
+		return nil
+	case subtitlehistoryevent.FieldMaxScore:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxScore(v)
+		return nil
+	case subtitlehistoryevent.FieldPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPath(v)
+		return nil
+	case subtitlehistoryevent.FieldVideoPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVideoPath(v)
+		return nil
+	case subtitlehistoryevent.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case subtitlehistoryevent.FieldMatched:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMatched(v)
+		return nil
+	case subtitlehistoryevent.FieldNotMatched:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNotMatched(v)
+		return nil
+	case subtitlehistoryevent.FieldUpgradedFrom:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpgradedFrom(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleHistoryEvent field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubtitleHistoryEventMutation) AddedFields() []string {
+	var fields []string
+	if m.addscore != nil {
+		fields = append(fields, subtitlehistoryevent.FieldScore)
+	}
+	if m.addmax_score != nil {
+		fields = append(fields, subtitlehistoryevent.FieldMaxScore)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubtitleHistoryEventMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case subtitlehistoryevent.FieldScore:
+		return m.AddedScore()
+	case subtitlehistoryevent.FieldMaxScore:
+		return m.AddedMaxScore()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleHistoryEventMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case subtitlehistoryevent.FieldScore:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScore(v)
+		return nil
+	case subtitlehistoryevent.FieldMaxScore:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxScore(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleHistoryEvent numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubtitleHistoryEventMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(subtitlehistoryevent.FieldParentID) {
+		fields = append(fields, subtitlehistoryevent.FieldParentID)
+	}
+	if m.FieldCleared(subtitlehistoryevent.FieldMatched) {
+		fields = append(fields, subtitlehistoryevent.FieldMatched)
+	}
+	if m.FieldCleared(subtitlehistoryevent.FieldNotMatched) {
+		fields = append(fields, subtitlehistoryevent.FieldNotMatched)
+	}
+	if m.FieldCleared(subtitlehistoryevent.FieldUpgradedFrom) {
+		fields = append(fields, subtitlehistoryevent.FieldUpgradedFrom)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubtitleHistoryEventMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubtitleHistoryEventMutation) ClearField(name string) error {
+	switch name {
+	case subtitlehistoryevent.FieldParentID:
+		m.ClearParentID()
+		return nil
+	case subtitlehistoryevent.FieldMatched:
+		m.ClearMatched()
+		return nil
+	case subtitlehistoryevent.FieldNotMatched:
+		m.ClearNotMatched()
+		return nil
+	case subtitlehistoryevent.FieldUpgradedFrom:
+		m.ClearUpgradedFrom()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleHistoryEvent nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubtitleHistoryEventMutation) ResetField(name string) error {
+	switch name {
+	case subtitlehistoryevent.FieldAction:
+		m.ResetAction()
+		return nil
+	case subtitlehistoryevent.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case subtitlehistoryevent.FieldParentID:
+		m.ResetParentID()
+		return nil
+	case subtitlehistoryevent.FieldDate:
+		m.ResetDate()
+		return nil
+	case subtitlehistoryevent.FieldLanguage:
+		m.ResetLanguage()
+		return nil
+	case subtitlehistoryevent.FieldForced:
+		m.ResetForced()
+		return nil
+	case subtitlehistoryevent.FieldHearingImpaired:
+		m.ResetHearingImpaired()
+		return nil
+	case subtitlehistoryevent.FieldProvider:
+		m.ResetProvider()
+		return nil
+	case subtitlehistoryevent.FieldSubtitleID:
+		m.ResetSubtitleID()
+		return nil
+	case subtitlehistoryevent.FieldScore:
+		m.ResetScore()
+		return nil
+	case subtitlehistoryevent.FieldMaxScore:
+		m.ResetMaxScore()
+		return nil
+	case subtitlehistoryevent.FieldPath:
+		m.ResetPath()
+		return nil
+	case subtitlehistoryevent.FieldVideoPath:
+		m.ResetVideoPath()
+		return nil
+	case subtitlehistoryevent.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case subtitlehistoryevent.FieldMatched:
+		m.ResetMatched()
+		return nil
+	case subtitlehistoryevent.FieldNotMatched:
+		m.ResetNotMatched()
+		return nil
+	case subtitlehistoryevent.FieldUpgradedFrom:
+		m.ResetUpgradedFrom()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleHistoryEvent field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubtitleHistoryEventMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.item != nil {
+		edges = append(edges, subtitlehistoryevent.EdgeItem)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubtitleHistoryEventMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case subtitlehistoryevent.EdgeItem:
+		if id := m.item; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubtitleHistoryEventMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubtitleHistoryEventMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubtitleHistoryEventMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareditem {
+		edges = append(edges, subtitlehistoryevent.EdgeItem)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubtitleHistoryEventMutation) EdgeCleared(name string) bool {
+	switch name {
+	case subtitlehistoryevent.EdgeItem:
+		return m.cleareditem
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubtitleHistoryEventMutation) ClearEdge(name string) error {
+	switch name {
+	case subtitlehistoryevent.EdgeItem:
+		m.ClearItem()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleHistoryEvent unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubtitleHistoryEventMutation) ResetEdge(name string) error {
+	switch name {
+	case subtitlehistoryevent.EdgeItem:
+		m.ResetItem()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleHistoryEvent edge %s", name)
+}
+
+// SubtitleProfileMutation represents an operation that mutates the SubtitleProfile nodes in the graph.
+type SubtitleProfileMutation struct {
+	config
+	op                     Op
+	typ                    string
+	id                     *core.ID
+	name                   *string
+	items                  *[]core.SubtitleProfileItem
+	appenditems            []core.SubtitleProfileItem
+	cutoff                 *int
+	addcutoff              *int
+	must_contain           *[]string
+	appendmust_contain     []string
+	must_not_contain       *[]string
+	appendmust_not_contain []string
+	original_format        *bool
+	tag                    *string
+	clearedFields          map[string]struct{}
+	assignments            map[core.ID]struct{}
+	removedassignments     map[core.ID]struct{}
+	clearedassignments     bool
+	done                   bool
+	oldValue               func(context.Context) (*SubtitleProfile, error)
+	predicates             []predicate.SubtitleProfile
+}
+
+var _ ent.Mutation = (*SubtitleProfileMutation)(nil)
+
+// subtitleprofileOption allows management of the mutation configuration using functional options.
+type subtitleprofileOption func(*SubtitleProfileMutation)
+
+// newSubtitleProfileMutation creates new mutation for the SubtitleProfile entity.
+func newSubtitleProfileMutation(c config, op Op, opts ...subtitleprofileOption) *SubtitleProfileMutation {
+	m := &SubtitleProfileMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubtitleProfile,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubtitleProfileID sets the ID field of the mutation.
+func withSubtitleProfileID(id core.ID) subtitleprofileOption {
+	return func(m *SubtitleProfileMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SubtitleProfile
+		)
+		m.oldValue = func(ctx context.Context) (*SubtitleProfile, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SubtitleProfile.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubtitleProfile sets the old SubtitleProfile of the mutation.
+func withSubtitleProfile(node *SubtitleProfile) subtitleprofileOption {
+	return func(m *SubtitleProfileMutation) {
+		m.oldValue = func(context.Context) (*SubtitleProfile, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubtitleProfileMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubtitleProfileMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SubtitleProfile entities.
+func (m *SubtitleProfileMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubtitleProfileMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubtitleProfileMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SubtitleProfile.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *SubtitleProfileMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *SubtitleProfileMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the SubtitleProfile entity.
+// If the SubtitleProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleProfileMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *SubtitleProfileMutation) ResetName() {
+	m.name = nil
+}
+
+// SetItems sets the "items" field.
+func (m *SubtitleProfileMutation) SetItems(cpi []core.SubtitleProfileItem) {
+	m.items = &cpi
+	m.appenditems = nil
+}
+
+// Items returns the value of the "items" field in the mutation.
+func (m *SubtitleProfileMutation) Items() (r []core.SubtitleProfileItem, exists bool) {
+	v := m.items
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItems returns the old "items" field's value of the SubtitleProfile entity.
+// If the SubtitleProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleProfileMutation) OldItems(ctx context.Context) (v []core.SubtitleProfileItem, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItems is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItems requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItems: %w", err)
+	}
+	return oldValue.Items, nil
+}
+
+// AppendItems adds cpi to the "items" field.
+func (m *SubtitleProfileMutation) AppendItems(cpi []core.SubtitleProfileItem) {
+	m.appenditems = append(m.appenditems, cpi...)
+}
+
+// AppendedItems returns the list of values that were appended to the "items" field in this mutation.
+func (m *SubtitleProfileMutation) AppendedItems() ([]core.SubtitleProfileItem, bool) {
+	if len(m.appenditems) == 0 {
+		return nil, false
+	}
+	return m.appenditems, true
+}
+
+// ResetItems resets all changes to the "items" field.
+func (m *SubtitleProfileMutation) ResetItems() {
+	m.items = nil
+	m.appenditems = nil
+}
+
+// SetCutoff sets the "cutoff" field.
+func (m *SubtitleProfileMutation) SetCutoff(i int) {
+	m.cutoff = &i
+	m.addcutoff = nil
+}
+
+// Cutoff returns the value of the "cutoff" field in the mutation.
+func (m *SubtitleProfileMutation) Cutoff() (r int, exists bool) {
+	v := m.cutoff
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCutoff returns the old "cutoff" field's value of the SubtitleProfile entity.
+// If the SubtitleProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleProfileMutation) OldCutoff(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCutoff is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCutoff requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCutoff: %w", err)
+	}
+	return oldValue.Cutoff, nil
+}
+
+// AddCutoff adds i to the "cutoff" field.
+func (m *SubtitleProfileMutation) AddCutoff(i int) {
+	if m.addcutoff != nil {
+		*m.addcutoff += i
+	} else {
+		m.addcutoff = &i
+	}
+}
+
+// AddedCutoff returns the value that was added to the "cutoff" field in this mutation.
+func (m *SubtitleProfileMutation) AddedCutoff() (r int, exists bool) {
+	v := m.addcutoff
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCutoff resets all changes to the "cutoff" field.
+func (m *SubtitleProfileMutation) ResetCutoff() {
+	m.cutoff = nil
+	m.addcutoff = nil
+}
+
+// SetMustContain sets the "must_contain" field.
+func (m *SubtitleProfileMutation) SetMustContain(s []string) {
+	m.must_contain = &s
+	m.appendmust_contain = nil
+}
+
+// MustContain returns the value of the "must_contain" field in the mutation.
+func (m *SubtitleProfileMutation) MustContain() (r []string, exists bool) {
+	v := m.must_contain
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMustContain returns the old "must_contain" field's value of the SubtitleProfile entity.
+// If the SubtitleProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleProfileMutation) OldMustContain(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMustContain is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMustContain requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMustContain: %w", err)
+	}
+	return oldValue.MustContain, nil
+}
+
+// AppendMustContain adds s to the "must_contain" field.
+func (m *SubtitleProfileMutation) AppendMustContain(s []string) {
+	m.appendmust_contain = append(m.appendmust_contain, s...)
+}
+
+// AppendedMustContain returns the list of values that were appended to the "must_contain" field in this mutation.
+func (m *SubtitleProfileMutation) AppendedMustContain() ([]string, bool) {
+	if len(m.appendmust_contain) == 0 {
+		return nil, false
+	}
+	return m.appendmust_contain, true
+}
+
+// ClearMustContain clears the value of the "must_contain" field.
+func (m *SubtitleProfileMutation) ClearMustContain() {
+	m.must_contain = nil
+	m.appendmust_contain = nil
+	m.clearedFields[subtitleprofile.FieldMustContain] = struct{}{}
+}
+
+// MustContainCleared returns if the "must_contain" field was cleared in this mutation.
+func (m *SubtitleProfileMutation) MustContainCleared() bool {
+	_, ok := m.clearedFields[subtitleprofile.FieldMustContain]
+	return ok
+}
+
+// ResetMustContain resets all changes to the "must_contain" field.
+func (m *SubtitleProfileMutation) ResetMustContain() {
+	m.must_contain = nil
+	m.appendmust_contain = nil
+	delete(m.clearedFields, subtitleprofile.FieldMustContain)
+}
+
+// SetMustNotContain sets the "must_not_contain" field.
+func (m *SubtitleProfileMutation) SetMustNotContain(s []string) {
+	m.must_not_contain = &s
+	m.appendmust_not_contain = nil
+}
+
+// MustNotContain returns the value of the "must_not_contain" field in the mutation.
+func (m *SubtitleProfileMutation) MustNotContain() (r []string, exists bool) {
+	v := m.must_not_contain
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMustNotContain returns the old "must_not_contain" field's value of the SubtitleProfile entity.
+// If the SubtitleProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleProfileMutation) OldMustNotContain(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMustNotContain is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMustNotContain requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMustNotContain: %w", err)
+	}
+	return oldValue.MustNotContain, nil
+}
+
+// AppendMustNotContain adds s to the "must_not_contain" field.
+func (m *SubtitleProfileMutation) AppendMustNotContain(s []string) {
+	m.appendmust_not_contain = append(m.appendmust_not_contain, s...)
+}
+
+// AppendedMustNotContain returns the list of values that were appended to the "must_not_contain" field in this mutation.
+func (m *SubtitleProfileMutation) AppendedMustNotContain() ([]string, bool) {
+	if len(m.appendmust_not_contain) == 0 {
+		return nil, false
+	}
+	return m.appendmust_not_contain, true
+}
+
+// ClearMustNotContain clears the value of the "must_not_contain" field.
+func (m *SubtitleProfileMutation) ClearMustNotContain() {
+	m.must_not_contain = nil
+	m.appendmust_not_contain = nil
+	m.clearedFields[subtitleprofile.FieldMustNotContain] = struct{}{}
+}
+
+// MustNotContainCleared returns if the "must_not_contain" field was cleared in this mutation.
+func (m *SubtitleProfileMutation) MustNotContainCleared() bool {
+	_, ok := m.clearedFields[subtitleprofile.FieldMustNotContain]
+	return ok
+}
+
+// ResetMustNotContain resets all changes to the "must_not_contain" field.
+func (m *SubtitleProfileMutation) ResetMustNotContain() {
+	m.must_not_contain = nil
+	m.appendmust_not_contain = nil
+	delete(m.clearedFields, subtitleprofile.FieldMustNotContain)
+}
+
+// SetOriginalFormat sets the "original_format" field.
+func (m *SubtitleProfileMutation) SetOriginalFormat(b bool) {
+	m.original_format = &b
+}
+
+// OriginalFormat returns the value of the "original_format" field in the mutation.
+func (m *SubtitleProfileMutation) OriginalFormat() (r bool, exists bool) {
+	v := m.original_format
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOriginalFormat returns the old "original_format" field's value of the SubtitleProfile entity.
+// If the SubtitleProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleProfileMutation) OldOriginalFormat(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOriginalFormat is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOriginalFormat requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOriginalFormat: %w", err)
+	}
+	return oldValue.OriginalFormat, nil
+}
+
+// ResetOriginalFormat resets all changes to the "original_format" field.
+func (m *SubtitleProfileMutation) ResetOriginalFormat() {
+	m.original_format = nil
+}
+
+// SetTag sets the "tag" field.
+func (m *SubtitleProfileMutation) SetTag(s string) {
+	m.tag = &s
+}
+
+// Tag returns the value of the "tag" field in the mutation.
+func (m *SubtitleProfileMutation) Tag() (r string, exists bool) {
+	v := m.tag
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTag returns the old "tag" field's value of the SubtitleProfile entity.
+// If the SubtitleProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleProfileMutation) OldTag(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTag is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTag requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTag: %w", err)
+	}
+	return oldValue.Tag, nil
+}
+
+// ResetTag resets all changes to the "tag" field.
+func (m *SubtitleProfileMutation) ResetTag() {
+	m.tag = nil
+}
+
+// AddAssignmentIDs adds the "assignments" edge to the SubtitleProfileAssignment entity by ids.
+func (m *SubtitleProfileMutation) AddAssignmentIDs(ids ...core.ID) {
+	if m.assignments == nil {
+		m.assignments = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		m.assignments[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAssignments clears the "assignments" edge to the SubtitleProfileAssignment entity.
+func (m *SubtitleProfileMutation) ClearAssignments() {
+	m.clearedassignments = true
+}
+
+// AssignmentsCleared reports if the "assignments" edge to the SubtitleProfileAssignment entity was cleared.
+func (m *SubtitleProfileMutation) AssignmentsCleared() bool {
+	return m.clearedassignments
+}
+
+// RemoveAssignmentIDs removes the "assignments" edge to the SubtitleProfileAssignment entity by IDs.
+func (m *SubtitleProfileMutation) RemoveAssignmentIDs(ids ...core.ID) {
+	if m.removedassignments == nil {
+		m.removedassignments = make(map[core.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.assignments, ids[i])
+		m.removedassignments[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAssignments returns the removed IDs of the "assignments" edge to the SubtitleProfileAssignment entity.
+func (m *SubtitleProfileMutation) RemovedAssignmentsIDs() (ids []core.ID) {
+	for id := range m.removedassignments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AssignmentsIDs returns the "assignments" edge IDs in the mutation.
+func (m *SubtitleProfileMutation) AssignmentsIDs() (ids []core.ID) {
+	for id := range m.assignments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAssignments resets all changes to the "assignments" edge.
+func (m *SubtitleProfileMutation) ResetAssignments() {
+	m.assignments = nil
+	m.clearedassignments = false
+	m.removedassignments = nil
+}
+
+// Where appends a list predicates to the SubtitleProfileMutation builder.
+func (m *SubtitleProfileMutation) Where(ps ...predicate.SubtitleProfile) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubtitleProfileMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubtitleProfileMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SubtitleProfile, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubtitleProfileMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubtitleProfileMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SubtitleProfile).
+func (m *SubtitleProfileMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubtitleProfileMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.name != nil {
+		fields = append(fields, subtitleprofile.FieldName)
+	}
+	if m.items != nil {
+		fields = append(fields, subtitleprofile.FieldItems)
+	}
+	if m.cutoff != nil {
+		fields = append(fields, subtitleprofile.FieldCutoff)
+	}
+	if m.must_contain != nil {
+		fields = append(fields, subtitleprofile.FieldMustContain)
+	}
+	if m.must_not_contain != nil {
+		fields = append(fields, subtitleprofile.FieldMustNotContain)
+	}
+	if m.original_format != nil {
+		fields = append(fields, subtitleprofile.FieldOriginalFormat)
+	}
+	if m.tag != nil {
+		fields = append(fields, subtitleprofile.FieldTag)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubtitleProfileMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subtitleprofile.FieldName:
+		return m.Name()
+	case subtitleprofile.FieldItems:
+		return m.Items()
+	case subtitleprofile.FieldCutoff:
+		return m.Cutoff()
+	case subtitleprofile.FieldMustContain:
+		return m.MustContain()
+	case subtitleprofile.FieldMustNotContain:
+		return m.MustNotContain()
+	case subtitleprofile.FieldOriginalFormat:
+		return m.OriginalFormat()
+	case subtitleprofile.FieldTag:
+		return m.Tag()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubtitleProfileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subtitleprofile.FieldName:
+		return m.OldName(ctx)
+	case subtitleprofile.FieldItems:
+		return m.OldItems(ctx)
+	case subtitleprofile.FieldCutoff:
+		return m.OldCutoff(ctx)
+	case subtitleprofile.FieldMustContain:
+		return m.OldMustContain(ctx)
+	case subtitleprofile.FieldMustNotContain:
+		return m.OldMustNotContain(ctx)
+	case subtitleprofile.FieldOriginalFormat:
+		return m.OldOriginalFormat(ctx)
+	case subtitleprofile.FieldTag:
+		return m.OldTag(ctx)
+	}
+	return nil, fmt.Errorf("unknown SubtitleProfile field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleProfileMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subtitleprofile.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case subtitleprofile.FieldItems:
+		v, ok := value.([]core.SubtitleProfileItem)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItems(v)
+		return nil
+	case subtitleprofile.FieldCutoff:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCutoff(v)
+		return nil
+	case subtitleprofile.FieldMustContain:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMustContain(v)
+		return nil
+	case subtitleprofile.FieldMustNotContain:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMustNotContain(v)
+		return nil
+	case subtitleprofile.FieldOriginalFormat:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOriginalFormat(v)
+		return nil
+	case subtitleprofile.FieldTag:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTag(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleProfile field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubtitleProfileMutation) AddedFields() []string {
+	var fields []string
+	if m.addcutoff != nil {
+		fields = append(fields, subtitleprofile.FieldCutoff)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubtitleProfileMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case subtitleprofile.FieldCutoff:
+		return m.AddedCutoff()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleProfileMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case subtitleprofile.FieldCutoff:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCutoff(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleProfile numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubtitleProfileMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(subtitleprofile.FieldMustContain) {
+		fields = append(fields, subtitleprofile.FieldMustContain)
+	}
+	if m.FieldCleared(subtitleprofile.FieldMustNotContain) {
+		fields = append(fields, subtitleprofile.FieldMustNotContain)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubtitleProfileMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubtitleProfileMutation) ClearField(name string) error {
+	switch name {
+	case subtitleprofile.FieldMustContain:
+		m.ClearMustContain()
+		return nil
+	case subtitleprofile.FieldMustNotContain:
+		m.ClearMustNotContain()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleProfile nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubtitleProfileMutation) ResetField(name string) error {
+	switch name {
+	case subtitleprofile.FieldName:
+		m.ResetName()
+		return nil
+	case subtitleprofile.FieldItems:
+		m.ResetItems()
+		return nil
+	case subtitleprofile.FieldCutoff:
+		m.ResetCutoff()
+		return nil
+	case subtitleprofile.FieldMustContain:
+		m.ResetMustContain()
+		return nil
+	case subtitleprofile.FieldMustNotContain:
+		m.ResetMustNotContain()
+		return nil
+	case subtitleprofile.FieldOriginalFormat:
+		m.ResetOriginalFormat()
+		return nil
+	case subtitleprofile.FieldTag:
+		m.ResetTag()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleProfile field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubtitleProfileMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.assignments != nil {
+		edges = append(edges, subtitleprofile.EdgeAssignments)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubtitleProfileMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case subtitleprofile.EdgeAssignments:
+		ids := make([]ent.Value, 0, len(m.assignments))
+		for id := range m.assignments {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubtitleProfileMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedassignments != nil {
+		edges = append(edges, subtitleprofile.EdgeAssignments)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubtitleProfileMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case subtitleprofile.EdgeAssignments:
+		ids := make([]ent.Value, 0, len(m.removedassignments))
+		for id := range m.removedassignments {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubtitleProfileMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedassignments {
+		edges = append(edges, subtitleprofile.EdgeAssignments)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubtitleProfileMutation) EdgeCleared(name string) bool {
+	switch name {
+	case subtitleprofile.EdgeAssignments:
+		return m.clearedassignments
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubtitleProfileMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SubtitleProfile unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubtitleProfileMutation) ResetEdge(name string) error {
+	switch name {
+	case subtitleprofile.EdgeAssignments:
+		m.ResetAssignments()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleProfile edge %s", name)
+}
+
+// SubtitleProfileAssignmentMutation represents an operation that mutates the SubtitleProfileAssignment nodes in the graph.
+type SubtitleProfileAssignmentMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *core.ID
+	clearedFields  map[string]struct{}
+	library        *core.ID
+	clearedlibrary bool
+	item           *core.ID
+	cleareditem    bool
+	profile        *core.ID
+	clearedprofile bool
+	done           bool
+	oldValue       func(context.Context) (*SubtitleProfileAssignment, error)
+	predicates     []predicate.SubtitleProfileAssignment
+}
+
+var _ ent.Mutation = (*SubtitleProfileAssignmentMutation)(nil)
+
+// subtitleprofileassignmentOption allows management of the mutation configuration using functional options.
+type subtitleprofileassignmentOption func(*SubtitleProfileAssignmentMutation)
+
+// newSubtitleProfileAssignmentMutation creates new mutation for the SubtitleProfileAssignment entity.
+func newSubtitleProfileAssignmentMutation(c config, op Op, opts ...subtitleprofileassignmentOption) *SubtitleProfileAssignmentMutation {
+	m := &SubtitleProfileAssignmentMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubtitleProfileAssignment,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubtitleProfileAssignmentID sets the ID field of the mutation.
+func withSubtitleProfileAssignmentID(id core.ID) subtitleprofileassignmentOption {
+	return func(m *SubtitleProfileAssignmentMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SubtitleProfileAssignment
+		)
+		m.oldValue = func(ctx context.Context) (*SubtitleProfileAssignment, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SubtitleProfileAssignment.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubtitleProfileAssignment sets the old SubtitleProfileAssignment of the mutation.
+func withSubtitleProfileAssignment(node *SubtitleProfileAssignment) subtitleprofileassignmentOption {
+	return func(m *SubtitleProfileAssignmentMutation) {
+		m.oldValue = func(context.Context) (*SubtitleProfileAssignment, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubtitleProfileAssignmentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubtitleProfileAssignmentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SubtitleProfileAssignment entities.
+func (m *SubtitleProfileAssignmentMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubtitleProfileAssignmentMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubtitleProfileAssignmentMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SubtitleProfileAssignment.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetLibraryID sets the "library_id" field.
+func (m *SubtitleProfileAssignmentMutation) SetLibraryID(c core.ID) {
+	m.library = &c
+}
+
+// LibraryID returns the value of the "library_id" field in the mutation.
+func (m *SubtitleProfileAssignmentMutation) LibraryID() (r core.ID, exists bool) {
+	v := m.library
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLibraryID returns the old "library_id" field's value of the SubtitleProfileAssignment entity.
+// If the SubtitleProfileAssignment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleProfileAssignmentMutation) OldLibraryID(ctx context.Context) (v *core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLibraryID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLibraryID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLibraryID: %w", err)
+	}
+	return oldValue.LibraryID, nil
+}
+
+// ClearLibraryID clears the value of the "library_id" field.
+func (m *SubtitleProfileAssignmentMutation) ClearLibraryID() {
+	m.library = nil
+	m.clearedFields[subtitleprofileassignment.FieldLibraryID] = struct{}{}
+}
+
+// LibraryIDCleared returns if the "library_id" field was cleared in this mutation.
+func (m *SubtitleProfileAssignmentMutation) LibraryIDCleared() bool {
+	_, ok := m.clearedFields[subtitleprofileassignment.FieldLibraryID]
+	return ok
+}
+
+// ResetLibraryID resets all changes to the "library_id" field.
+func (m *SubtitleProfileAssignmentMutation) ResetLibraryID() {
+	m.library = nil
+	delete(m.clearedFields, subtitleprofileassignment.FieldLibraryID)
+}
+
+// SetItemID sets the "item_id" field.
+func (m *SubtitleProfileAssignmentMutation) SetItemID(c core.ID) {
+	m.item = &c
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *SubtitleProfileAssignmentMutation) ItemID() (r core.ID, exists bool) {
+	v := m.item
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the SubtitleProfileAssignment entity.
+// If the SubtitleProfileAssignment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleProfileAssignmentMutation) OldItemID(ctx context.Context) (v *core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ClearItemID clears the value of the "item_id" field.
+func (m *SubtitleProfileAssignmentMutation) ClearItemID() {
+	m.item = nil
+	m.clearedFields[subtitleprofileassignment.FieldItemID] = struct{}{}
+}
+
+// ItemIDCleared returns if the "item_id" field was cleared in this mutation.
+func (m *SubtitleProfileAssignmentMutation) ItemIDCleared() bool {
+	_, ok := m.clearedFields[subtitleprofileassignment.FieldItemID]
+	return ok
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *SubtitleProfileAssignmentMutation) ResetItemID() {
+	m.item = nil
+	delete(m.clearedFields, subtitleprofileassignment.FieldItemID)
+}
+
+// SetProfileID sets the "profile_id" field.
+func (m *SubtitleProfileAssignmentMutation) SetProfileID(c core.ID) {
+	m.profile = &c
+}
+
+// ProfileID returns the value of the "profile_id" field in the mutation.
+func (m *SubtitleProfileAssignmentMutation) ProfileID() (r core.ID, exists bool) {
+	v := m.profile
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProfileID returns the old "profile_id" field's value of the SubtitleProfileAssignment entity.
+// If the SubtitleProfileAssignment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleProfileAssignmentMutation) OldProfileID(ctx context.Context) (v *core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProfileID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProfileID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProfileID: %w", err)
+	}
+	return oldValue.ProfileID, nil
+}
+
+// ClearProfileID clears the value of the "profile_id" field.
+func (m *SubtitleProfileAssignmentMutation) ClearProfileID() {
+	m.profile = nil
+	m.clearedFields[subtitleprofileassignment.FieldProfileID] = struct{}{}
+}
+
+// ProfileIDCleared returns if the "profile_id" field was cleared in this mutation.
+func (m *SubtitleProfileAssignmentMutation) ProfileIDCleared() bool {
+	_, ok := m.clearedFields[subtitleprofileassignment.FieldProfileID]
+	return ok
+}
+
+// ResetProfileID resets all changes to the "profile_id" field.
+func (m *SubtitleProfileAssignmentMutation) ResetProfileID() {
+	m.profile = nil
+	delete(m.clearedFields, subtitleprofileassignment.FieldProfileID)
+}
+
+// ClearLibrary clears the "library" edge to the Library entity.
+func (m *SubtitleProfileAssignmentMutation) ClearLibrary() {
+	m.clearedlibrary = true
+	m.clearedFields[subtitleprofileassignment.FieldLibraryID] = struct{}{}
+}
+
+// LibraryCleared reports if the "library" edge to the Library entity was cleared.
+func (m *SubtitleProfileAssignmentMutation) LibraryCleared() bool {
+	return m.LibraryIDCleared() || m.clearedlibrary
+}
+
+// LibraryIDs returns the "library" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LibraryID instead. It exists only for internal usage by the builders.
+func (m *SubtitleProfileAssignmentMutation) LibraryIDs() (ids []core.ID) {
+	if id := m.library; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLibrary resets all changes to the "library" edge.
+func (m *SubtitleProfileAssignmentMutation) ResetLibrary() {
+	m.library = nil
+	m.clearedlibrary = false
+}
+
+// ClearItem clears the "item" edge to the Item entity.
+func (m *SubtitleProfileAssignmentMutation) ClearItem() {
+	m.cleareditem = true
+	m.clearedFields[subtitleprofileassignment.FieldItemID] = struct{}{}
+}
+
+// ItemCleared reports if the "item" edge to the Item entity was cleared.
+func (m *SubtitleProfileAssignmentMutation) ItemCleared() bool {
+	return m.ItemIDCleared() || m.cleareditem
+}
+
+// ItemIDs returns the "item" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemID instead. It exists only for internal usage by the builders.
+func (m *SubtitleProfileAssignmentMutation) ItemIDs() (ids []core.ID) {
+	if id := m.item; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItem resets all changes to the "item" edge.
+func (m *SubtitleProfileAssignmentMutation) ResetItem() {
+	m.item = nil
+	m.cleareditem = false
+}
+
+// ClearProfile clears the "profile" edge to the SubtitleProfile entity.
+func (m *SubtitleProfileAssignmentMutation) ClearProfile() {
+	m.clearedprofile = true
+	m.clearedFields[subtitleprofileassignment.FieldProfileID] = struct{}{}
+}
+
+// ProfileCleared reports if the "profile" edge to the SubtitleProfile entity was cleared.
+func (m *SubtitleProfileAssignmentMutation) ProfileCleared() bool {
+	return m.ProfileIDCleared() || m.clearedprofile
+}
+
+// ProfileIDs returns the "profile" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ProfileID instead. It exists only for internal usage by the builders.
+func (m *SubtitleProfileAssignmentMutation) ProfileIDs() (ids []core.ID) {
+	if id := m.profile; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetProfile resets all changes to the "profile" edge.
+func (m *SubtitleProfileAssignmentMutation) ResetProfile() {
+	m.profile = nil
+	m.clearedprofile = false
+}
+
+// Where appends a list predicates to the SubtitleProfileAssignmentMutation builder.
+func (m *SubtitleProfileAssignmentMutation) Where(ps ...predicate.SubtitleProfileAssignment) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubtitleProfileAssignmentMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubtitleProfileAssignmentMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SubtitleProfileAssignment, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubtitleProfileAssignmentMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubtitleProfileAssignmentMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SubtitleProfileAssignment).
+func (m *SubtitleProfileAssignmentMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubtitleProfileAssignmentMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.library != nil {
+		fields = append(fields, subtitleprofileassignment.FieldLibraryID)
+	}
+	if m.item != nil {
+		fields = append(fields, subtitleprofileassignment.FieldItemID)
+	}
+	if m.profile != nil {
+		fields = append(fields, subtitleprofileassignment.FieldProfileID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubtitleProfileAssignmentMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subtitleprofileassignment.FieldLibraryID:
+		return m.LibraryID()
+	case subtitleprofileassignment.FieldItemID:
+		return m.ItemID()
+	case subtitleprofileassignment.FieldProfileID:
+		return m.ProfileID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubtitleProfileAssignmentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subtitleprofileassignment.FieldLibraryID:
+		return m.OldLibraryID(ctx)
+	case subtitleprofileassignment.FieldItemID:
+		return m.OldItemID(ctx)
+	case subtitleprofileassignment.FieldProfileID:
+		return m.OldProfileID(ctx)
+	}
+	return nil, fmt.Errorf("unknown SubtitleProfileAssignment field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleProfileAssignmentMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subtitleprofileassignment.FieldLibraryID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLibraryID(v)
+		return nil
+	case subtitleprofileassignment.FieldItemID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case subtitleprofileassignment.FieldProfileID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProfileID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleProfileAssignment field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubtitleProfileAssignmentMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubtitleProfileAssignmentMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleProfileAssignmentMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SubtitleProfileAssignment numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubtitleProfileAssignmentMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(subtitleprofileassignment.FieldLibraryID) {
+		fields = append(fields, subtitleprofileassignment.FieldLibraryID)
+	}
+	if m.FieldCleared(subtitleprofileassignment.FieldItemID) {
+		fields = append(fields, subtitleprofileassignment.FieldItemID)
+	}
+	if m.FieldCleared(subtitleprofileassignment.FieldProfileID) {
+		fields = append(fields, subtitleprofileassignment.FieldProfileID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubtitleProfileAssignmentMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubtitleProfileAssignmentMutation) ClearField(name string) error {
+	switch name {
+	case subtitleprofileassignment.FieldLibraryID:
+		m.ClearLibraryID()
+		return nil
+	case subtitleprofileassignment.FieldItemID:
+		m.ClearItemID()
+		return nil
+	case subtitleprofileassignment.FieldProfileID:
+		m.ClearProfileID()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleProfileAssignment nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubtitleProfileAssignmentMutation) ResetField(name string) error {
+	switch name {
+	case subtitleprofileassignment.FieldLibraryID:
+		m.ResetLibraryID()
+		return nil
+	case subtitleprofileassignment.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case subtitleprofileassignment.FieldProfileID:
+		m.ResetProfileID()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleProfileAssignment field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubtitleProfileAssignmentMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.library != nil {
+		edges = append(edges, subtitleprofileassignment.EdgeLibrary)
+	}
+	if m.item != nil {
+		edges = append(edges, subtitleprofileassignment.EdgeItem)
+	}
+	if m.profile != nil {
+		edges = append(edges, subtitleprofileassignment.EdgeProfile)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubtitleProfileAssignmentMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case subtitleprofileassignment.EdgeLibrary:
+		if id := m.library; id != nil {
+			return []ent.Value{*id}
+		}
+	case subtitleprofileassignment.EdgeItem:
+		if id := m.item; id != nil {
+			return []ent.Value{*id}
+		}
+	case subtitleprofileassignment.EdgeProfile:
+		if id := m.profile; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubtitleProfileAssignmentMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubtitleProfileAssignmentMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubtitleProfileAssignmentMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedlibrary {
+		edges = append(edges, subtitleprofileassignment.EdgeLibrary)
+	}
+	if m.cleareditem {
+		edges = append(edges, subtitleprofileassignment.EdgeItem)
+	}
+	if m.clearedprofile {
+		edges = append(edges, subtitleprofileassignment.EdgeProfile)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubtitleProfileAssignmentMutation) EdgeCleared(name string) bool {
+	switch name {
+	case subtitleprofileassignment.EdgeLibrary:
+		return m.clearedlibrary
+	case subtitleprofileassignment.EdgeItem:
+		return m.cleareditem
+	case subtitleprofileassignment.EdgeProfile:
+		return m.clearedprofile
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubtitleProfileAssignmentMutation) ClearEdge(name string) error {
+	switch name {
+	case subtitleprofileassignment.EdgeLibrary:
+		m.ClearLibrary()
+		return nil
+	case subtitleprofileassignment.EdgeItem:
+		m.ClearItem()
+		return nil
+	case subtitleprofileassignment.EdgeProfile:
+		m.ClearProfile()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleProfileAssignment unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubtitleProfileAssignmentMutation) ResetEdge(name string) error {
+	switch name {
+	case subtitleprofileassignment.EdgeLibrary:
+		m.ResetLibrary()
+		return nil
+	case subtitleprofileassignment.EdgeItem:
+		m.ResetItem()
+		return nil
+	case subtitleprofileassignment.EdgeProfile:
+		m.ResetProfile()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleProfileAssignment edge %s", name)
+}
+
+// SubtitleSearchAttemptMutation represents an operation that mutates the SubtitleSearchAttempt nodes in the graph.
+type SubtitleSearchAttemptMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *core.ID
+	language         *string
+	forced           *bool
+	hearing_impaired *bool
+	first            *time.Time
+	last             *time.Time
+	clearedFields    map[string]struct{}
+	item             *core.ID
+	cleareditem      bool
+	done             bool
+	oldValue         func(context.Context) (*SubtitleSearchAttempt, error)
+	predicates       []predicate.SubtitleSearchAttempt
+}
+
+var _ ent.Mutation = (*SubtitleSearchAttemptMutation)(nil)
+
+// subtitlesearchattemptOption allows management of the mutation configuration using functional options.
+type subtitlesearchattemptOption func(*SubtitleSearchAttemptMutation)
+
+// newSubtitleSearchAttemptMutation creates new mutation for the SubtitleSearchAttempt entity.
+func newSubtitleSearchAttemptMutation(c config, op Op, opts ...subtitlesearchattemptOption) *SubtitleSearchAttemptMutation {
+	m := &SubtitleSearchAttemptMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubtitleSearchAttempt,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubtitleSearchAttemptID sets the ID field of the mutation.
+func withSubtitleSearchAttemptID(id core.ID) subtitlesearchattemptOption {
+	return func(m *SubtitleSearchAttemptMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SubtitleSearchAttempt
+		)
+		m.oldValue = func(ctx context.Context) (*SubtitleSearchAttempt, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SubtitleSearchAttempt.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubtitleSearchAttempt sets the old SubtitleSearchAttempt of the mutation.
+func withSubtitleSearchAttempt(node *SubtitleSearchAttempt) subtitlesearchattemptOption {
+	return func(m *SubtitleSearchAttemptMutation) {
+		m.oldValue = func(context.Context) (*SubtitleSearchAttempt, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubtitleSearchAttemptMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubtitleSearchAttemptMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SubtitleSearchAttempt entities.
+func (m *SubtitleSearchAttemptMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubtitleSearchAttemptMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubtitleSearchAttemptMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SubtitleSearchAttempt.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetItemID sets the "item_id" field.
+func (m *SubtitleSearchAttemptMutation) SetItemID(c core.ID) {
+	m.item = &c
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *SubtitleSearchAttemptMutation) ItemID() (r core.ID, exists bool) {
+	v := m.item
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the SubtitleSearchAttempt entity.
+// If the SubtitleSearchAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleSearchAttemptMutation) OldItemID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *SubtitleSearchAttemptMutation) ResetItemID() {
+	m.item = nil
+}
+
+// SetLanguage sets the "language" field.
+func (m *SubtitleSearchAttemptMutation) SetLanguage(s string) {
+	m.language = &s
+}
+
+// Language returns the value of the "language" field in the mutation.
+func (m *SubtitleSearchAttemptMutation) Language() (r string, exists bool) {
+	v := m.language
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLanguage returns the old "language" field's value of the SubtitleSearchAttempt entity.
+// If the SubtitleSearchAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleSearchAttemptMutation) OldLanguage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLanguage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLanguage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLanguage: %w", err)
+	}
+	return oldValue.Language, nil
+}
+
+// ResetLanguage resets all changes to the "language" field.
+func (m *SubtitleSearchAttemptMutation) ResetLanguage() {
+	m.language = nil
+}
+
+// SetForced sets the "forced" field.
+func (m *SubtitleSearchAttemptMutation) SetForced(b bool) {
+	m.forced = &b
+}
+
+// Forced returns the value of the "forced" field in the mutation.
+func (m *SubtitleSearchAttemptMutation) Forced() (r bool, exists bool) {
+	v := m.forced
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldForced returns the old "forced" field's value of the SubtitleSearchAttempt entity.
+// If the SubtitleSearchAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleSearchAttemptMutation) OldForced(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldForced is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldForced requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldForced: %w", err)
+	}
+	return oldValue.Forced, nil
+}
+
+// ResetForced resets all changes to the "forced" field.
+func (m *SubtitleSearchAttemptMutation) ResetForced() {
+	m.forced = nil
+}
+
+// SetHearingImpaired sets the "hearing_impaired" field.
+func (m *SubtitleSearchAttemptMutation) SetHearingImpaired(b bool) {
+	m.hearing_impaired = &b
+}
+
+// HearingImpaired returns the value of the "hearing_impaired" field in the mutation.
+func (m *SubtitleSearchAttemptMutation) HearingImpaired() (r bool, exists bool) {
+	v := m.hearing_impaired
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHearingImpaired returns the old "hearing_impaired" field's value of the SubtitleSearchAttempt entity.
+// If the SubtitleSearchAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleSearchAttemptMutation) OldHearingImpaired(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHearingImpaired is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHearingImpaired requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHearingImpaired: %w", err)
+	}
+	return oldValue.HearingImpaired, nil
+}
+
+// ResetHearingImpaired resets all changes to the "hearing_impaired" field.
+func (m *SubtitleSearchAttemptMutation) ResetHearingImpaired() {
+	m.hearing_impaired = nil
+}
+
+// SetFirst sets the "first" field.
+func (m *SubtitleSearchAttemptMutation) SetFirst(t time.Time) {
+	m.first = &t
+}
+
+// First returns the value of the "first" field in the mutation.
+func (m *SubtitleSearchAttemptMutation) First() (r time.Time, exists bool) {
+	v := m.first
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirst returns the old "first" field's value of the SubtitleSearchAttempt entity.
+// If the SubtitleSearchAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleSearchAttemptMutation) OldFirst(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirst is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirst requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirst: %w", err)
+	}
+	return oldValue.First, nil
+}
+
+// ResetFirst resets all changes to the "first" field.
+func (m *SubtitleSearchAttemptMutation) ResetFirst() {
+	m.first = nil
+}
+
+// SetLast sets the "last" field.
+func (m *SubtitleSearchAttemptMutation) SetLast(t time.Time) {
+	m.last = &t
+}
+
+// Last returns the value of the "last" field in the mutation.
+func (m *SubtitleSearchAttemptMutation) Last() (r time.Time, exists bool) {
+	v := m.last
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLast returns the old "last" field's value of the SubtitleSearchAttempt entity.
+// If the SubtitleSearchAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleSearchAttemptMutation) OldLast(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLast is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLast requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLast: %w", err)
+	}
+	return oldValue.Last, nil
+}
+
+// ResetLast resets all changes to the "last" field.
+func (m *SubtitleSearchAttemptMutation) ResetLast() {
+	m.last = nil
+}
+
+// ClearItem clears the "item" edge to the Item entity.
+func (m *SubtitleSearchAttemptMutation) ClearItem() {
+	m.cleareditem = true
+	m.clearedFields[subtitlesearchattempt.FieldItemID] = struct{}{}
+}
+
+// ItemCleared reports if the "item" edge to the Item entity was cleared.
+func (m *SubtitleSearchAttemptMutation) ItemCleared() bool {
+	return m.cleareditem
+}
+
+// ItemIDs returns the "item" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemID instead. It exists only for internal usage by the builders.
+func (m *SubtitleSearchAttemptMutation) ItemIDs() (ids []core.ID) {
+	if id := m.item; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItem resets all changes to the "item" edge.
+func (m *SubtitleSearchAttemptMutation) ResetItem() {
+	m.item = nil
+	m.cleareditem = false
+}
+
+// Where appends a list predicates to the SubtitleSearchAttemptMutation builder.
+func (m *SubtitleSearchAttemptMutation) Where(ps ...predicate.SubtitleSearchAttempt) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubtitleSearchAttemptMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubtitleSearchAttemptMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SubtitleSearchAttempt, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubtitleSearchAttemptMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubtitleSearchAttemptMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SubtitleSearchAttempt).
+func (m *SubtitleSearchAttemptMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubtitleSearchAttemptMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.item != nil {
+		fields = append(fields, subtitlesearchattempt.FieldItemID)
+	}
+	if m.language != nil {
+		fields = append(fields, subtitlesearchattempt.FieldLanguage)
+	}
+	if m.forced != nil {
+		fields = append(fields, subtitlesearchattempt.FieldForced)
+	}
+	if m.hearing_impaired != nil {
+		fields = append(fields, subtitlesearchattempt.FieldHearingImpaired)
+	}
+	if m.first != nil {
+		fields = append(fields, subtitlesearchattempt.FieldFirst)
+	}
+	if m.last != nil {
+		fields = append(fields, subtitlesearchattempt.FieldLast)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubtitleSearchAttemptMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subtitlesearchattempt.FieldItemID:
+		return m.ItemID()
+	case subtitlesearchattempt.FieldLanguage:
+		return m.Language()
+	case subtitlesearchattempt.FieldForced:
+		return m.Forced()
+	case subtitlesearchattempt.FieldHearingImpaired:
+		return m.HearingImpaired()
+	case subtitlesearchattempt.FieldFirst:
+		return m.First()
+	case subtitlesearchattempt.FieldLast:
+		return m.Last()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubtitleSearchAttemptMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subtitlesearchattempt.FieldItemID:
+		return m.OldItemID(ctx)
+	case subtitlesearchattempt.FieldLanguage:
+		return m.OldLanguage(ctx)
+	case subtitlesearchattempt.FieldForced:
+		return m.OldForced(ctx)
+	case subtitlesearchattempt.FieldHearingImpaired:
+		return m.OldHearingImpaired(ctx)
+	case subtitlesearchattempt.FieldFirst:
+		return m.OldFirst(ctx)
+	case subtitlesearchattempt.FieldLast:
+		return m.OldLast(ctx)
+	}
+	return nil, fmt.Errorf("unknown SubtitleSearchAttempt field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleSearchAttemptMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subtitlesearchattempt.FieldItemID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case subtitlesearchattempt.FieldLanguage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLanguage(v)
+		return nil
+	case subtitlesearchattempt.FieldForced:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetForced(v)
+		return nil
+	case subtitlesearchattempt.FieldHearingImpaired:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHearingImpaired(v)
+		return nil
+	case subtitlesearchattempt.FieldFirst:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirst(v)
+		return nil
+	case subtitlesearchattempt.FieldLast:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLast(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleSearchAttempt field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubtitleSearchAttemptMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubtitleSearchAttemptMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleSearchAttemptMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SubtitleSearchAttempt numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubtitleSearchAttemptMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubtitleSearchAttemptMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubtitleSearchAttemptMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown SubtitleSearchAttempt nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubtitleSearchAttemptMutation) ResetField(name string) error {
+	switch name {
+	case subtitlesearchattempt.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case subtitlesearchattempt.FieldLanguage:
+		m.ResetLanguage()
+		return nil
+	case subtitlesearchattempt.FieldForced:
+		m.ResetForced()
+		return nil
+	case subtitlesearchattempt.FieldHearingImpaired:
+		m.ResetHearingImpaired()
+		return nil
+	case subtitlesearchattempt.FieldFirst:
+		m.ResetFirst()
+		return nil
+	case subtitlesearchattempt.FieldLast:
+		m.ResetLast()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleSearchAttempt field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubtitleSearchAttemptMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.item != nil {
+		edges = append(edges, subtitlesearchattempt.EdgeItem)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubtitleSearchAttemptMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case subtitlesearchattempt.EdgeItem:
+		if id := m.item; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubtitleSearchAttemptMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubtitleSearchAttemptMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubtitleSearchAttemptMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareditem {
+		edges = append(edges, subtitlesearchattempt.EdgeItem)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubtitleSearchAttemptMutation) EdgeCleared(name string) bool {
+	switch name {
+	case subtitlesearchattempt.EdgeItem:
+		return m.cleareditem
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubtitleSearchAttemptMutation) ClearEdge(name string) error {
+	switch name {
+	case subtitlesearchattempt.EdgeItem:
+		m.ClearItem()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleSearchAttempt unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubtitleSearchAttemptMutation) ResetEdge(name string) error {
+	switch name {
+	case subtitlesearchattempt.EdgeItem:
+		m.ResetItem()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleSearchAttempt edge %s", name)
 }
 
 // TrickplayMutation represents an operation that mutates the Trickplay nodes in the graph.

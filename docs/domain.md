@@ -50,6 +50,8 @@ erDiagram
 | `RemotePathMapping` | How a download client's paths map to the server's |
 | `Request` / `SeasonRequest` | A user's request of a movie or of seasons of a series (§13.6) |
 | `Issue` / `IssueComment` | A problem a user reports with an item, and its thread (§13.7) |
+| `SubtitleProfile` / `SubtitleProfileAssignment` | The subtitles movies and episodes want, and the libraries, movies and series they are assigned to (§14) |
+| `SubtitleHistoryEvent` / `SubtitleBlocklistEntry` / `SubtitleSearchAttempt` | What happened to a subtitle, a subtitle not to download again, the failed searches of a language (§14) |
 
 ---
 
@@ -268,6 +270,11 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `RemotePathMappingRepository` | `List`, `Put`, `Delete` |
 | `RequestRepository` | `Get`, `List` (paged, by user, statuses, kind, TMDB ID and item, newest or most recently modified first), `Put` (insert or replace by ID), `Delete`, `QuotaUsed` (see §13.6); deleting the user deletes their requests |
 | `IssueRepository` | `Get` and `List` (paged, with their comments), `Put`, `AddComment`, `Delete`; deleting the item or the user deletes their issues |
+| `SubtitleProfileRepository` | `Get`, `List` (by name), `Put` (insert or replace by ID; names are unique: `ErrConflict`), `Delete` (deleting its assignments) |
+| `SubtitleProfileAssignmentRepository` | `Get` a target's (`ErrNotFound` when none), `List` some targets' or all, `Put` (replacing the target's; `ErrNotFound` for an unknown target or profile), `Delete`; deleting the library or item deletes it |
+| `SubtitleHistoryRepository` | `Add`, `List` (paged, newest first, by items or their series, actions and time), `Purge` of events before a time |
+| `SubtitleBlocklistRepository` | `Add`, `List` (paged, newest first, an item's or all), `Delete`, `Clear` |
+| `SubtitleSearchAttemptRepository` | `List` an item's by language, `Record` a failed search (keeping the first time, replacing the latest) |
 | `BlockedTitleRepository` | `Get` by kind and TMDB ID, `List` (paged, newest first, searched by title, of the titles blocklisted by hand or by tags), `Add` (`ErrConflict` when blocklisted already), `Delete`, `DeleteTagged` (the titles blocklisted by tags); deleting the user who blocklisted a title keeps it |
 
 * **Transactions**: `Store.InTx` runs a function with a `Store` bound to one transaction; returning an error rolls it back.
@@ -330,6 +337,7 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 * `Acquisition`: how releases are chosen, downloaded and imported (§13.4).
 * `Requests`: the permissions new users get, the default quotas, and where approved requests go (§13.6).
 * `Metadata` (`MetadataSettings`): the server's `PreferredLanguage` (ISO 639-1) and `Country` (ISO 3166-1) of metadata, as Jellyfin's `PreferredMetadataLanguage` and `MetadataCountryCode`; requests and discovery name titles in the language and rate them in the country. The defaults are `en` and `US`.
+* `Subtitles`: how subtitles are searched, chosen, saved and synchronized (§14.3).
 * `Validate` checks the known values and ranges.
 
 ### 12.2 API Keys
@@ -379,3 +387,20 @@ A `RemotePathMapping` maps a folder a download client on `Host` reports (`Remote
 
 ### 13.7 Issues
 An `Issue` is a problem a user reports with an item: its `Type` (`video`, `audio`, `subtitles`, `other`), `Status` (`open`, `resolved`), an optional `SeasonNumber` and `EpisodeNumber`, `CreatedBy`, `ModifiedBy` and its times. Its `Comments` (`IssueComment`: a user, a message and times) are its thread, oldest first; the first is the report's message.
+
+## 14. Subtitle Acquisition
+
+The server keeps what `libs/acquire/subtitles` decides with and what happens to the subtitles it downloads, as Bazarr keeps its language profiles, history, blacklist and failed attempts. Subtitle languages are BCP 47 tags (`en`, `pt-BR`, `zh-Hant`); a `SubtitleLanguage` is a tag with whether the subtitles are `Forced` or `HearingImpaired`, never both, written as Bazarr writes it (`en`, `en:forced`, `en:hi`). Providers are named `<plugin ID>/<provider>`.
+
+### 14.1 Profiles
+* A `SubtitleProfile` is Bazarr's language profile: its unique `Name`, its `Items`, the languages it wants, each with an `ID` (from 1) unique in the profile, whether it wants `Forced` subtitles, its hearing-impaired mode `HI` (`""`: normal subtitles, hearing-impaired ones taken in their place; `required`; `excluded`), and whether it is not wanted when an audio stream has the language (`AudioExclude`) or wanted only then (`AudioOnlyInclude`). `Cutoff` is the item whose subtitles end the search for the others, `SubtitleCutoffAny` (65535) for any item's, or 0 for none. `MustContain` and `MustNotContain` are words subtitle release names must and must not contain; `OriginalFormat` keeps subtitles in their provider's format instead of converting them to SubRip; `Tag` assigns the profile to movies and series with the tag, when the settings allow it. An item wanting the same language and kind twice, a forced hearing-impaired item, or a cutoff naming no item is `ErrInvalid`.
+* A `SubtitleProfileAssignment` assigns a profile to a library, a movie or a series (`TargetID`); a zero `ProfileID` assigns none, so that nothing is wanted. A movie's or series' profile is, where the settings let tags assign profiles as Bazarr's sync does, none when it has one of the settings' `NoProfileTags`, else that of the first profile by name whose tag it has; else its own assignment, else its library's. Deleting a profile deletes its assignments; deleting the library, movie or series deletes its assignment.
+
+### 14.2 History, Blocklist and Failed Attempts
+* A `SubtitleHistoryEvent` records a subtitle of a movie or an episode (with its series as `ParentID`) `deleted`, `downloaded`, downloaded from a `manual` search, `upgraded`, `uploaded`, `synced` or `extracted`, as Bazarr's history actions: its language, `Provider` and the provider's `SubtitleID`, its `Score` out of `MaxScore` (0 when not scored), the subtitle's and the video's `Path` and `VideoPath`, a `Description`, the properties of the video it `Matched` and did not (`NotMatched`), and for an upgrade the event of the download it replaced (`UpgradedFrom`).
+* A `SubtitleBlocklistEntry` is a subtitle not to download again for a movie or an episode: its provider, subtitle ID, language and why it was blocklisted.
+* A `SubtitleSearchAttempt` keeps, for a movie or an episode and a language, the `First` and `Last` failed searches, as Bazarr's `failedAttempts`, for adaptive searching.
+* Deleting an item deletes its subtitle history, blocklist entries and failed attempts.
+
+### 14.3 Settings
+`SubtitleSettings`, part of the server settings, are Bazarr's general and synchronization settings, with Bazarr's defaults (`DefaultSubtitleSettings`): the minimum scores of episodes' and movies' subtitles (percentages of the maximum, 90 and 70), whether videos are described by the release names their files came from, whether embedded subtitle streams count as present (but not PGS, VobSub or ASS ones when ignored), UTF-8 conversion, the `Mods` applied to downloads, the hearing-impaired suffix (`hi`, `cc` or `sdh`), names without languages (`SingleLanguage`), the `Folder` subtitles are saved in (`current`, beside the video; `relative`, a folder of the video's folder; `absolute`) with its `CustomFolder`, upgrades (whether, every `UpgradeInterval`, for the subtitles of the last `UpgradeDays` (0–30), including those downloaded by hand or not), adaptive searching (`AdaptiveDelay` after the first failure, then once per `AdaptiveDelta`; three weeks and one week), the intervals of the wanted searches of episodes and movies (at least an hour, 0 for never), the languages of audio and embedded subtitle streams without one, whether hashes are skipped, `LanguageEquals` (subtitles in one language counting as another), whether movies and series take profiles from their tags and the `NoProfileTags`, and `Sync`: whether downloads are synchronized, only below the episode and movie thresholds or always, against the audio even when another subtitle could serve, against the audio stream in the original language, the providers and languages excluded, the maximum offset (60 s), frame rate fixing, the golden-section search, and the quality bounds applied when frame rates are fixed (minimum score, maximum offset 30 s, scale deviation 0.1).

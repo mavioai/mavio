@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 )
 
 // LibraryUpdate is the builder for updating Library entities.
@@ -335,6 +336,25 @@ func (_u *LibraryUpdate) AddFolderStates(v ...*FolderState) *LibraryUpdate {
 	return _u.AddFolderStateIDs(ids...)
 }
 
+// SetSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by ID.
+func (_u *LibraryUpdate) SetSubtitleProfileID(id core.ID) *LibraryUpdate {
+	_u.mutation.SetSubtitleProfileID(id)
+	return _u
+}
+
+// SetNillableSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by ID if the given value is not nil.
+func (_u *LibraryUpdate) SetNillableSubtitleProfileID(id *core.ID) *LibraryUpdate {
+	if id != nil {
+		_u = _u.SetSubtitleProfileID(*id)
+	}
+	return _u
+}
+
+// SetSubtitleProfile sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (_u *LibraryUpdate) SetSubtitleProfile(v *SubtitleProfileAssignment) *LibraryUpdate {
+	return _u.SetSubtitleProfileID(v.ID)
+}
+
 // Mutation returns the LibraryMutation object of the builder.
 func (_u *LibraryUpdate) Mutation() *LibraryMutation {
 	return _u.mutation
@@ -380,6 +400,12 @@ func (_u *LibraryUpdate) RemoveFolderStates(v ...*FolderState) *LibraryUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveFolderStateIDs(ids...)
+}
+
+// ClearSubtitleProfile clears the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (_u *LibraryUpdate) ClearSubtitleProfile() *LibraryUpdate {
+	_u.mutation.ClearSubtitleProfile()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -606,6 +632,35 @@ func (_u *LibraryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   library.SubtitleProfileTable,
+			Columns: []string{library.SubtitleProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleprofileassignment.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   library.SubtitleProfileTable,
+			Columns: []string{library.SubtitleProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleprofileassignment.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -937,6 +992,25 @@ func (_u *LibraryUpdateOne) AddFolderStates(v ...*FolderState) *LibraryUpdateOne
 	return _u.AddFolderStateIDs(ids...)
 }
 
+// SetSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by ID.
+func (_u *LibraryUpdateOne) SetSubtitleProfileID(id core.ID) *LibraryUpdateOne {
+	_u.mutation.SetSubtitleProfileID(id)
+	return _u
+}
+
+// SetNillableSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by ID if the given value is not nil.
+func (_u *LibraryUpdateOne) SetNillableSubtitleProfileID(id *core.ID) *LibraryUpdateOne {
+	if id != nil {
+		_u = _u.SetSubtitleProfileID(*id)
+	}
+	return _u
+}
+
+// SetSubtitleProfile sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (_u *LibraryUpdateOne) SetSubtitleProfile(v *SubtitleProfileAssignment) *LibraryUpdateOne {
+	return _u.SetSubtitleProfileID(v.ID)
+}
+
 // Mutation returns the LibraryMutation object of the builder.
 func (_u *LibraryUpdateOne) Mutation() *LibraryMutation {
 	return _u.mutation
@@ -982,6 +1056,12 @@ func (_u *LibraryUpdateOne) RemoveFolderStates(v ...*FolderState) *LibraryUpdate
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveFolderStateIDs(ids...)
+}
+
+// ClearSubtitleProfile clears the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (_u *LibraryUpdateOne) ClearSubtitleProfile() *LibraryUpdateOne {
+	_u.mutation.ClearSubtitleProfile()
+	return _u
 }
 
 // Where appends a list predicates to the LibraryUpdate builder.
@@ -1238,6 +1318,35 @@ func (_u *LibraryUpdateOne) sqlSave(ctx context.Context) (_node *Library, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(folderstate.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   library.SubtitleProfileTable,
+			Columns: []string{library.SubtitleProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleprofileassignment.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   library.SubtitleProfileTable,
+			Columns: []string{library.SubtitleProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleprofileassignment.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

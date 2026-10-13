@@ -25,7 +25,9 @@ type ServerSettings struct {
 	Requests RequestSettings
 	// Metadata are the language and country of metadata beside
 	// libraries'.
-	Metadata  MetadataSettings
+	Metadata MetadataSettings
+	// Subtitles are how subtitles are acquired.
+	Subtitles SubtitleSettings
 	UpdatedAt time.Time
 }
 
@@ -143,6 +145,7 @@ func DefaultServerSettings() ServerSettings {
 		Acquisition: DefaultAcquisitionSettings(),
 		Requests:    DefaultRequestSettings(),
 		Metadata:    MetadataSettings{PreferredLanguage: "en", Country: "US"},
+		Subtitles:   DefaultSubtitleSettings(),
 	}
 }
 
@@ -184,6 +187,9 @@ func (s *ServerSettings) Validate() error {
 		return err
 	}
 	if err := s.Metadata.Validate(); err != nil {
+		return err
+	}
+	if err := s.Subtitles.Validate(); err != nil {
 		return err
 	}
 	for _, c := range s.PluginCatalogs {

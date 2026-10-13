@@ -57,6 +57,8 @@ const (
 	EdgeItems = "items"
 	// EdgeFolderStates holds the string denoting the folder_states edge name in mutations.
 	EdgeFolderStates = "folder_states"
+	// EdgeSubtitleProfile holds the string denoting the subtitle_profile edge name in mutations.
+	EdgeSubtitleProfile = "subtitle_profile"
 	// Table holds the table name of the library in the database.
 	Table = "libraries"
 	// ItemsTable is the table that holds the items relation/edge.
@@ -73,6 +75,13 @@ const (
 	FolderStatesInverseTable = "folder_states"
 	// FolderStatesColumn is the table column denoting the folder_states relation/edge.
 	FolderStatesColumn = "library_id"
+	// SubtitleProfileTable is the table that holds the subtitle_profile relation/edge.
+	SubtitleProfileTable = "subtitle_profile_assignments"
+	// SubtitleProfileInverseTable is the table name for the SubtitleProfileAssignment entity.
+	// It exists in this package in order to avoid circular dependency with the "subtitleprofileassignment" package.
+	SubtitleProfileInverseTable = "subtitle_profile_assignments"
+	// SubtitleProfileColumn is the table column denoting the subtitle_profile relation/edge.
+	SubtitleProfileColumn = "library_id"
 )
 
 // Columns holds all SQL columns for library fields.
@@ -247,6 +256,13 @@ func ByFolderStates(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newFolderStatesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySubtitleProfileField orders the results by subtitle_profile field.
+func BySubtitleProfileField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSubtitleProfileStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newItemsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -259,5 +275,12 @@ func newFolderStatesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(FolderStatesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, FolderStatesTable, FolderStatesColumn),
+	)
+}
+func newSubtitleProfileStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SubtitleProfileInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, SubtitleProfileTable, SubtitleProfileColumn),
 	)
 }

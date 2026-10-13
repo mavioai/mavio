@@ -711,7 +711,7 @@ flowchart TD
 **Done when**: Bazarr's ported cases pass or are skipped with a reason; an end-to-end test with subtitle providers simulated on the loopback interface: an imported movie and episode get the subtitles their profiles want, one is upgraded by a better subtitle, one failing to decode is blocklisted and replaced, and one out of sync is synchronized.
 
 **Progress**:
-- [ ] Domain and storage: subtitle profiles and their assignment, subtitle history, blocklist and failed attempts, the subtitle settings (`libs/core`, `libs/store`)
+- [x] Domain and storage: subtitle profiles and their assignment, subtitle history, blocklist and failed attempts, the subtitle settings (`libs/core`, `libs/store`)
 - [ ] `tools/testport` reads pytest cases; Bazarr's score, mod and provider cases ported
 - [ ] `libs/acquire/subtitles`: wanted subtitles, scores, choice, upgrades, adaptive searching
   - [ ] The fields guessit gives Bazarr's scores that `libs/release` lacks (streaming service, edition of subtitle release names), added to it
@@ -721,7 +721,7 @@ flowchart TD
   - [ ] JSON APIs without accounts and other protocols: Gestdown, AnimeTosho (both), Tsukihime, Subtis, RegieLive, Bayflix, Vladoonmooo, Subsynchro, Wizdom, BSPlayer, NapiProjekt, Napisy24; AniDB and the anime lists for anime IDs
   - [ ] Sites scraped without accounts: AnimeKalesi, AnimeSubInfo, GreekSubs, GreekSubtitles, Hosszupuska, Nekur, PrijevodiOnline, SousTitres.eu, SubClub, Subf2m, Subs4Free, SubsCenter, SubsSabbz, SubsUnacs, SubtitleCat, Subtitrari Noi, Subtitriid, SubtitulamosTV, SuperSubtitles, Titrari, TVSubtitles, YavkaNet, YIFY Subtitles
   - [ ] Sites with logins, cookies or captchas: Addic7ed, AvistaZ, CinemaZ, Karagarga, LegendasDivx, Pipocas, Subs4Series, Titulky, TurkceAltyazi.org, XSubs, Zimuku
-- [ ] `SubtitleService` and the jobs: wanted subtitles, wanted searches, upgrades, a search at import and scan, manual search, download, upload, deletion, history, blocklist; `subtitle.downloaded` activities; synchronization after downloads under the settings' score thresholds and by hand, against the audio on local and network storage and against another subtitle file on every storage class
+- [ ] `SubtitleService` and the jobs: subtitle profiles, their assignments and the subtitle settings, wanted subtitles, wanted searches, upgrades, a search at import and scan, manual search, download, upload, deletion, history, blocklist; `subtitle.downloaded` activities; synchronization after downloads under the settings' score thresholds and by hand, against the audio on local and network storage and against another subtitle file on every storage class
 - [ ] OpenSubtitles hashes kept per file until it changes
 - [ ] Embedded subtitles: counted as present where the settings say so; extracted to sidecars by hand on local and network storage from the playback cache, never on cloud storage
 - [ ] Subzero's mods (common, tags, HI removal, OCR fixes with its dictionaries, colors, emoji, RTL, upper case, offsets, frame rates, two-point fit) and UTF-8 in `libs/subtitle`; hearing-impaired detection from text; language detection of sidecars without a language, Chinese scripts told apart

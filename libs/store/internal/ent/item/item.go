@@ -185,6 +185,14 @@ const (
 	EdgeExtraFiles = "extra_files"
 	// EdgeIssues holds the string denoting the issues edge name in mutations.
 	EdgeIssues = "issues"
+	// EdgeSubtitleProfile holds the string denoting the subtitle_profile edge name in mutations.
+	EdgeSubtitleProfile = "subtitle_profile"
+	// EdgeSubtitleHistory holds the string denoting the subtitle_history edge name in mutations.
+	EdgeSubtitleHistory = "subtitle_history"
+	// EdgeSubtitleBlocklist holds the string denoting the subtitle_blocklist edge name in mutations.
+	EdgeSubtitleBlocklist = "subtitle_blocklist"
+	// EdgeSubtitleSearchAttempts holds the string denoting the subtitle_search_attempts edge name in mutations.
+	EdgeSubtitleSearchAttempts = "subtitle_search_attempts"
 	// Table holds the table name of the item in the database.
 	Table = "items"
 	// LibraryTable is the table that holds the library relation/edge.
@@ -336,6 +344,34 @@ const (
 	IssuesInverseTable = "issues"
 	// IssuesColumn is the table column denoting the issues relation/edge.
 	IssuesColumn = "item_id"
+	// SubtitleProfileTable is the table that holds the subtitle_profile relation/edge.
+	SubtitleProfileTable = "subtitle_profile_assignments"
+	// SubtitleProfileInverseTable is the table name for the SubtitleProfileAssignment entity.
+	// It exists in this package in order to avoid circular dependency with the "subtitleprofileassignment" package.
+	SubtitleProfileInverseTable = "subtitle_profile_assignments"
+	// SubtitleProfileColumn is the table column denoting the subtitle_profile relation/edge.
+	SubtitleProfileColumn = "item_id"
+	// SubtitleHistoryTable is the table that holds the subtitle_history relation/edge.
+	SubtitleHistoryTable = "subtitle_history"
+	// SubtitleHistoryInverseTable is the table name for the SubtitleHistoryEvent entity.
+	// It exists in this package in order to avoid circular dependency with the "subtitlehistoryevent" package.
+	SubtitleHistoryInverseTable = "subtitle_history"
+	// SubtitleHistoryColumn is the table column denoting the subtitle_history relation/edge.
+	SubtitleHistoryColumn = "item_id"
+	// SubtitleBlocklistTable is the table that holds the subtitle_blocklist relation/edge.
+	SubtitleBlocklistTable = "subtitle_blocklist"
+	// SubtitleBlocklistInverseTable is the table name for the SubtitleBlocklistEntry entity.
+	// It exists in this package in order to avoid circular dependency with the "subtitleblocklistentry" package.
+	SubtitleBlocklistInverseTable = "subtitle_blocklist"
+	// SubtitleBlocklistColumn is the table column denoting the subtitle_blocklist relation/edge.
+	SubtitleBlocklistColumn = "item_id"
+	// SubtitleSearchAttemptsTable is the table that holds the subtitle_search_attempts relation/edge.
+	SubtitleSearchAttemptsTable = "subtitle_search_attempts"
+	// SubtitleSearchAttemptsInverseTable is the table name for the SubtitleSearchAttempt entity.
+	// It exists in this package in order to avoid circular dependency with the "subtitlesearchattempt" package.
+	SubtitleSearchAttemptsInverseTable = "subtitle_search_attempts"
+	// SubtitleSearchAttemptsColumn is the table column denoting the subtitle_search_attempts relation/edge.
+	SubtitleSearchAttemptsColumn = "item_id"
 )
 
 // Columns holds all SQL columns for item fields.
@@ -1047,6 +1083,55 @@ func ByIssues(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newIssuesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySubtitleProfileField orders the results by subtitle_profile field.
+func BySubtitleProfileField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSubtitleProfileStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// BySubtitleHistoryCount orders the results by subtitle_history count.
+func BySubtitleHistoryCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSubtitleHistoryStep(), opts...)
+	}
+}
+
+// BySubtitleHistory orders the results by subtitle_history terms.
+func BySubtitleHistory(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSubtitleHistoryStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySubtitleBlocklistCount orders the results by subtitle_blocklist count.
+func BySubtitleBlocklistCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSubtitleBlocklistStep(), opts...)
+	}
+}
+
+// BySubtitleBlocklist orders the results by subtitle_blocklist terms.
+func BySubtitleBlocklist(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSubtitleBlocklistStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySubtitleSearchAttemptsCount orders the results by subtitle_search_attempts count.
+func BySubtitleSearchAttemptsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSubtitleSearchAttemptsStep(), opts...)
+	}
+}
+
+// BySubtitleSearchAttempts orders the results by subtitle_search_attempts terms.
+func BySubtitleSearchAttempts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSubtitleSearchAttemptsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newLibraryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -1206,5 +1291,33 @@ func newIssuesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(IssuesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, IssuesTable, IssuesColumn),
+	)
+}
+func newSubtitleProfileStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SubtitleProfileInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, SubtitleProfileTable, SubtitleProfileColumn),
+	)
+}
+func newSubtitleHistoryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SubtitleHistoryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SubtitleHistoryTable, SubtitleHistoryColumn),
+	)
+}
+func newSubtitleBlocklistStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SubtitleBlocklistInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SubtitleBlocklistTable, SubtitleBlocklistColumn),
+	)
+}
+func newSubtitleSearchAttemptsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SubtitleSearchAttemptsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SubtitleSearchAttemptsTable, SubtitleSearchAttemptsColumn),
 	)
 }

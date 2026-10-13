@@ -49,6 +49,8 @@ erDiagram
 | `RemotePathMapping` | 下载客户端的路径如何映射到服务端的路径 |
 | `Request` / `SeasonRequest` | 用户对一部电影或一部剧集若干季的请求（§13.6） |
 | `Issue` / `IssueComment` | 用户就某个条目报告的问题及其讨论（§13.7） |
+| `SubtitleProfile` / `SubtitleProfileAssignment` | 电影与单集想要的字幕，以及它被指派到的媒体库、电影与剧集（§14） |
+| `SubtitleHistoryEvent` / `SubtitleBlocklistEntry` / `SubtitleSearchAttempt` | 字幕发生的事情、不再下载的字幕、某种语言的失败搜索（§14） |
 | `DisplayPreferences` | 用户对某个客户端如何显示某个视图的设置 |
 
 ---
@@ -268,6 +270,11 @@ erDiagram
 | `RemotePathMappingRepository` | `List`、`Put`、`Delete` |
 | `RequestRepository` | `Get`、`List`（分页，可按用户、状态、类型、TMDB ID 与条目筛选，最新创建或最近修改的在前）、`Put`（按 ID 插入或替换）、`Delete`、`QuotaUsed`（见 §13.6）；删除用户会删除其请求 |
 | `IssueRepository` | `Get` 与 `List`（分页，带评论）、`Put`、`AddComment`、`Delete`；删除条目或用户会删除其问题 |
+| `SubtitleProfileRepository` | `Get`、`List`（按名称）、`Put`（按 ID 插入或替换；名称唯一：`ErrConflict`）、`Delete`（同时删除其指派） |
+| `SubtitleProfileAssignmentRepository` | `Get` 某个目标的指派（没有时为 `ErrNotFound`）、`List` 一些目标的或全部、`Put`（替换该目标的指派；目标或档案不存在时为 `ErrNotFound`）、`Delete`；删除媒体库或条目会删除它 |
+| `SubtitleHistoryRepository` | `Add`、`List`（分页，最新在前，可按条目或其剧集、动作与时间筛选）、`Purge` 某时间之前的事件 |
+| `SubtitleBlocklistRepository` | `Add`、`List`（分页，最新在前，某条目的或全部）、`Delete`、`Clear` |
+| `SubtitleSearchAttemptRepository` | 按语言 `List` 某条目的记录、`Record` 一次失败搜索（保留首次时间，替换最近时间） |
 | `BlockedTitleRepository` | 按类型与 TMDB ID `Get`、`List`（分页，最新在前，按标题搜索，可只列手动或按标签阻止的作品）、`Add`（已在阻止列表时返回 `ErrConflict`）、`Delete`、`DeleteTagged`（删除按标签阻止的作品）；删除阻止作品的用户不会删除其条目 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
@@ -330,6 +337,7 @@ erDiagram
 * `Acquisition`：如何选择、下载与入库发布（§13.4）。
 * `Requests`：新用户获得的权限、默认配额，以及通过的请求去向（§13.6）。
 * `Metadata`（`MetadataSettings`）：服务端元数据的 `PreferredLanguage`（ISO 639-1）与 `Country`（ISO 3166-1），如 Jellyfin 的 `PreferredMetadataLanguage` 与 `MetadataCountryCode`；请求与发现以该语言命名作品，按该国家分级。默认为 `en` 与 `US`。
+* `Subtitles`：如何搜索、选择、保存与同步字幕（§14.3）。
 * `Validate` 检查已知取值与范围。
 
 ### 12.2 API 密钥
@@ -379,3 +387,20 @@ erDiagram
 
 ### 13.7 问题
 `Issue` 是用户就某个条目报告的问题：`Type`（`video`、`audio`、`subtitles`、`other`）、`Status`（`open`、`resolved`）、可选的 `SeasonNumber` 与 `EpisodeNumber`、`CreatedBy`、`ModifiedBy` 及其时间。其 `Comments`（`IssueComment`：用户、消息与时间）是讨论串，最早的在前；第一条即报告的内容。
+
+## 14. 字幕获取
+
+服务端保存 `libs/acquire/subtitles` 决策所需的数据以及它所下载字幕的经历，如同 Bazarr 保存其语言档案、历史、黑名单与失败尝试。字幕语言是 BCP 47 标签（`en`、`pt-BR`、`zh-Hant`）；`SubtitleLanguage` 是一个标签加上字幕是否为 `Forced`（强制）或 `HearingImpaired`（听障），二者不能同时成立，写法同 Bazarr（`en`、`en:forced`、`en:hi`）。提供者命名为 `<插件 ID>/<提供者>`。
+
+### 14.1 档案
+* `SubtitleProfile` 即 Bazarr 的语言档案：唯一的 `Name`；`Items`，即它想要的语言，每项有在档案内唯一的 `ID`（从 1 开始）、是否想要 `Forced` 字幕、听障模式 `HI`（`""`：普通字幕，可用听障字幕代替；`required`；`excluded`），以及音频流已有该语言时是否不想要（`AudioExclude`）或仅在此时才想要（`AudioOnlyInclude`）。`Cutoff` 是其字幕一经获得便停止搜索其余语言的项，`SubtitleCutoffAny`（65535）表示任一项，0 表示没有。`MustContain` 与 `MustNotContain` 是字幕发布名必须包含与不得包含的词；`OriginalFormat` 保留提供者给出的字幕格式而不转换为 SubRip；`Tag` 在设置允许时把档案指派给带该标签的电影与剧集。同一语言与种类出现两次、强制且听障的项，或 cutoff 不指向任何项，均为 `ErrInvalid`。
+* `SubtitleProfileAssignment` 把档案指派给一个媒体库、一部电影或一部剧集（`TargetID`）；`ProfileID` 为零表示指派“无档案”，即什么都不想要。电影或剧集的档案依次为：在设置允许像 Bazarr 的同步那样由标签指派档案时，带有设置中某个 `NoProfileTags` 标签则为无，否则为按名称排序、标签为它所带标签之一的第一个档案；然后为它自己的指派；最后为其媒体库的指派。删除档案会删除其指派；删除媒体库、电影或剧集会删除其指派。
+
+### 14.2 历史、黑名单与失败尝试
+* `SubtitleHistoryEvent` 记录电影或单集（单集以其剧集为 `ParentID`）的某个字幕被 `deleted`、`downloaded`、从 `manual` 手动搜索下载、`upgraded`、`uploaded`、`synced` 或 `extracted`，对应 Bazarr 的历史动作：其语言、`Provider` 与提供者的 `SubtitleID`、`Score` 与满分 `MaxScore`（未评分时为 0）、字幕与视频的路径 `Path` 和 `VideoPath`、描述 `Description`、它匹配（`Matched`）与未匹配（`NotMatched`）的视频属性，以及升级时所替换下载的事件（`UpgradedFrom`）。
+* `SubtitleBlocklistEntry` 是某部电影或某一集不再下载的字幕：其提供者、字幕 ID、语言与被列入黑名单的原因。
+* `SubtitleSearchAttempt` 为某部电影或某一集的某种语言保存首次（`First`）与最近（`Last`）失败的搜索，对应 Bazarr 的 `failedAttempts`，供自适应搜索使用。
+* 删除条目会删除其字幕历史、黑名单条目与失败尝试。
+
+### 14.3 设置
+`SubtitleSettings` 是服务端设置的一部分，即 Bazarr 的通用设置与同步设置，默认值同 Bazarr（`DefaultSubtitleSettings`）：单集与电影字幕的最低分（满分的百分比，90 与 70）；是否用文件来源的发布名描述视频；内嵌字幕流是否算作已有（被忽略时 PGS、VobSub 或 ASS 不算）；UTF-8 转换；下载后应用的 `Mods`；听障后缀（`hi`、`cc` 或 `sdh`）；不带语言的文件名（`SingleLanguage`）；字幕保存的 `Folder`（`current`，视频旁；`relative`，视频所在目录下的某个目录；`absolute`）及其 `CustomFolder`；升级（是否升级、每隔 `UpgradeInterval`、针对最近 `UpgradeDays`（0–30）天的字幕、是否包括手动下载的）；自适应搜索（首次失败后 `AdaptiveDelay`，之后每 `AdaptiveDelta` 一次；三周与一周）；单集与电影想要字幕的搜索间隔（至少一小时，0 为从不）；没有语言的音频流与内嵌字幕流的语言；是否跳过哈希；`LanguageEquals`（某语言的字幕算作另一语言）；电影与剧集是否按标签取得档案以及 `NoProfileTags`；以及 `Sync`：是否同步下载的字幕、仅在低于单集与电影阈值时还是总是同步、即使有其他字幕可作参照也对照音频、对照原始语言的音频流、排除的提供者与语言、最大偏移（60 秒）、帧率修正、黄金分割搜索，以及修正帧率时应用的质量界限（最低分、最大偏移 30 秒、缩放偏差 0.1）。

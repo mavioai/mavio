@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 )
 
 // Library is the model entity for the Library schema.
@@ -69,9 +70,11 @@ type LibraryEdges struct {
 	Items []*Item `json:"items,omitempty"`
 	// FolderStates holds the value of the folder_states edge.
 	FolderStates []*FolderState `json:"folder_states,omitempty"`
+	// SubtitleProfile holds the value of the subtitle_profile edge.
+	SubtitleProfile *SubtitleProfileAssignment `json:"subtitle_profile,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // ItemsOrErr returns the Items value or an error if the edge
@@ -90,6 +93,17 @@ func (e LibraryEdges) FolderStatesOrErr() ([]*FolderState, error) {
 		return e.FolderStates, nil
 	}
 	return nil, &NotLoadedError{edge: "folder_states"}
+}
+
+// SubtitleProfileOrErr returns the SubtitleProfile value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e LibraryEdges) SubtitleProfileOrErr() (*SubtitleProfileAssignment, error) {
+	if e.SubtitleProfile != nil {
+		return e.SubtitleProfile, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: subtitleprofileassignment.Label}
+	}
+	return nil, &NotLoadedError{edge: "subtitle_profile"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -275,6 +289,11 @@ func (_m *Library) QueryItems() *ItemQuery {
 // QueryFolderStates queries the "folder_states" edge of the Library entity.
 func (_m *Library) QueryFolderStates() *FolderStateQuery {
 	return NewLibraryClient(_m.config).QueryFolderStates(_m)
+}
+
+// QuerySubtitleProfile queries the "subtitle_profile" edge of the Library entity.
+func (_m *Library) QuerySubtitleProfile() *SubtitleProfileAssignmentQuery {
+	return NewLibraryClient(_m.config).QuerySubtitleProfile(_m)
 }
 
 // Update returns a builder for updating this Library.

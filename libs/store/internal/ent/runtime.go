@@ -41,6 +41,11 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/schema"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlehistoryevent"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -781,6 +786,104 @@ func init() {
 	storagejobDescID := storagejobFields[0].Descriptor()
 	// storagejob.DefaultID holds the default value on creation for the id field.
 	storagejob.DefaultID = storagejobDescID.Default.(func() core.ID)
+	subtitleblocklistentryFields := schema.SubtitleBlocklistEntry{}.Fields()
+	_ = subtitleblocklistentryFields
+	// subtitleblocklistentryDescForced is the schema descriptor for forced field.
+	subtitleblocklistentryDescForced := subtitleblocklistentryFields[6].Descriptor()
+	// subtitleblocklistentry.DefaultForced holds the default value on creation for the forced field.
+	subtitleblocklistentry.DefaultForced = subtitleblocklistentryDescForced.Default.(bool)
+	// subtitleblocklistentryDescHearingImpaired is the schema descriptor for hearing_impaired field.
+	subtitleblocklistentryDescHearingImpaired := subtitleblocklistentryFields[7].Descriptor()
+	// subtitleblocklistentry.DefaultHearingImpaired holds the default value on creation for the hearing_impaired field.
+	subtitleblocklistentry.DefaultHearingImpaired = subtitleblocklistentryDescHearingImpaired.Default.(bool)
+	// subtitleblocklistentryDescMessage is the schema descriptor for message field.
+	subtitleblocklistentryDescMessage := subtitleblocklistentryFields[9].Descriptor()
+	// subtitleblocklistentry.DefaultMessage holds the default value on creation for the message field.
+	subtitleblocklistentry.DefaultMessage = subtitleblocklistentryDescMessage.Default.(string)
+	// subtitleblocklistentryDescID is the schema descriptor for id field.
+	subtitleblocklistentryDescID := subtitleblocklistentryFields[0].Descriptor()
+	// subtitleblocklistentry.DefaultID holds the default value on creation for the id field.
+	subtitleblocklistentry.DefaultID = subtitleblocklistentryDescID.Default.(func() core.ID)
+	subtitlehistoryeventFields := schema.SubtitleHistoryEvent{}.Fields()
+	_ = subtitlehistoryeventFields
+	// subtitlehistoryeventDescForced is the schema descriptor for forced field.
+	subtitlehistoryeventDescForced := subtitlehistoryeventFields[6].Descriptor()
+	// subtitlehistoryevent.DefaultForced holds the default value on creation for the forced field.
+	subtitlehistoryevent.DefaultForced = subtitlehistoryeventDescForced.Default.(bool)
+	// subtitlehistoryeventDescHearingImpaired is the schema descriptor for hearing_impaired field.
+	subtitlehistoryeventDescHearingImpaired := subtitlehistoryeventFields[7].Descriptor()
+	// subtitlehistoryevent.DefaultHearingImpaired holds the default value on creation for the hearing_impaired field.
+	subtitlehistoryevent.DefaultHearingImpaired = subtitlehistoryeventDescHearingImpaired.Default.(bool)
+	// subtitlehistoryeventDescProvider is the schema descriptor for provider field.
+	subtitlehistoryeventDescProvider := subtitlehistoryeventFields[8].Descriptor()
+	// subtitlehistoryevent.DefaultProvider holds the default value on creation for the provider field.
+	subtitlehistoryevent.DefaultProvider = subtitlehistoryeventDescProvider.Default.(string)
+	// subtitlehistoryeventDescSubtitleID is the schema descriptor for subtitle_id field.
+	subtitlehistoryeventDescSubtitleID := subtitlehistoryeventFields[9].Descriptor()
+	// subtitlehistoryevent.DefaultSubtitleID holds the default value on creation for the subtitle_id field.
+	subtitlehistoryevent.DefaultSubtitleID = subtitlehistoryeventDescSubtitleID.Default.(string)
+	// subtitlehistoryeventDescScore is the schema descriptor for score field.
+	subtitlehistoryeventDescScore := subtitlehistoryeventFields[10].Descriptor()
+	// subtitlehistoryevent.DefaultScore holds the default value on creation for the score field.
+	subtitlehistoryevent.DefaultScore = subtitlehistoryeventDescScore.Default.(int)
+	// subtitlehistoryeventDescMaxScore is the schema descriptor for max_score field.
+	subtitlehistoryeventDescMaxScore := subtitlehistoryeventFields[11].Descriptor()
+	// subtitlehistoryevent.DefaultMaxScore holds the default value on creation for the max_score field.
+	subtitlehistoryevent.DefaultMaxScore = subtitlehistoryeventDescMaxScore.Default.(int)
+	// subtitlehistoryeventDescPath is the schema descriptor for path field.
+	subtitlehistoryeventDescPath := subtitlehistoryeventFields[12].Descriptor()
+	// subtitlehistoryevent.DefaultPath holds the default value on creation for the path field.
+	subtitlehistoryevent.DefaultPath = subtitlehistoryeventDescPath.Default.(string)
+	// subtitlehistoryeventDescVideoPath is the schema descriptor for video_path field.
+	subtitlehistoryeventDescVideoPath := subtitlehistoryeventFields[13].Descriptor()
+	// subtitlehistoryevent.DefaultVideoPath holds the default value on creation for the video_path field.
+	subtitlehistoryevent.DefaultVideoPath = subtitlehistoryeventDescVideoPath.Default.(string)
+	// subtitlehistoryeventDescDescription is the schema descriptor for description field.
+	subtitlehistoryeventDescDescription := subtitlehistoryeventFields[14].Descriptor()
+	// subtitlehistoryevent.DefaultDescription holds the default value on creation for the description field.
+	subtitlehistoryevent.DefaultDescription = subtitlehistoryeventDescDescription.Default.(string)
+	// subtitlehistoryeventDescID is the schema descriptor for id field.
+	subtitlehistoryeventDescID := subtitlehistoryeventFields[0].Descriptor()
+	// subtitlehistoryevent.DefaultID holds the default value on creation for the id field.
+	subtitlehistoryevent.DefaultID = subtitlehistoryeventDescID.Default.(func() core.ID)
+	subtitleprofileFields := schema.SubtitleProfile{}.Fields()
+	_ = subtitleprofileFields
+	// subtitleprofileDescCutoff is the schema descriptor for cutoff field.
+	subtitleprofileDescCutoff := subtitleprofileFields[3].Descriptor()
+	// subtitleprofile.DefaultCutoff holds the default value on creation for the cutoff field.
+	subtitleprofile.DefaultCutoff = subtitleprofileDescCutoff.Default.(int)
+	// subtitleprofileDescOriginalFormat is the schema descriptor for original_format field.
+	subtitleprofileDescOriginalFormat := subtitleprofileFields[6].Descriptor()
+	// subtitleprofile.DefaultOriginalFormat holds the default value on creation for the original_format field.
+	subtitleprofile.DefaultOriginalFormat = subtitleprofileDescOriginalFormat.Default.(bool)
+	// subtitleprofileDescTag is the schema descriptor for tag field.
+	subtitleprofileDescTag := subtitleprofileFields[7].Descriptor()
+	// subtitleprofile.DefaultTag holds the default value on creation for the tag field.
+	subtitleprofile.DefaultTag = subtitleprofileDescTag.Default.(string)
+	// subtitleprofileDescID is the schema descriptor for id field.
+	subtitleprofileDescID := subtitleprofileFields[0].Descriptor()
+	// subtitleprofile.DefaultID holds the default value on creation for the id field.
+	subtitleprofile.DefaultID = subtitleprofileDescID.Default.(func() core.ID)
+	subtitleprofileassignmentFields := schema.SubtitleProfileAssignment{}.Fields()
+	_ = subtitleprofileassignmentFields
+	// subtitleprofileassignmentDescID is the schema descriptor for id field.
+	subtitleprofileassignmentDescID := subtitleprofileassignmentFields[0].Descriptor()
+	// subtitleprofileassignment.DefaultID holds the default value on creation for the id field.
+	subtitleprofileassignment.DefaultID = subtitleprofileassignmentDescID.Default.(func() core.ID)
+	subtitlesearchattemptFields := schema.SubtitleSearchAttempt{}.Fields()
+	_ = subtitlesearchattemptFields
+	// subtitlesearchattemptDescForced is the schema descriptor for forced field.
+	subtitlesearchattemptDescForced := subtitlesearchattemptFields[3].Descriptor()
+	// subtitlesearchattempt.DefaultForced holds the default value on creation for the forced field.
+	subtitlesearchattempt.DefaultForced = subtitlesearchattemptDescForced.Default.(bool)
+	// subtitlesearchattemptDescHearingImpaired is the schema descriptor for hearing_impaired field.
+	subtitlesearchattemptDescHearingImpaired := subtitlesearchattemptFields[4].Descriptor()
+	// subtitlesearchattempt.DefaultHearingImpaired holds the default value on creation for the hearing_impaired field.
+	subtitlesearchattempt.DefaultHearingImpaired = subtitlesearchattemptDescHearingImpaired.Default.(bool)
+	// subtitlesearchattemptDescID is the schema descriptor for id field.
+	subtitlesearchattemptDescID := subtitlesearchattemptFields[0].Descriptor()
+	// subtitlesearchattempt.DefaultID holds the default value on creation for the id field.
+	subtitlesearchattempt.DefaultID = subtitlesearchattemptDescID.Default.(func() core.ID)
 	trickplayFields := schema.Trickplay{}.Fields()
 	_ = trickplayFields
 	// trickplayDescBandwidth is the schema descriptor for bandwidth field.

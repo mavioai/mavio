@@ -707,6 +707,29 @@ func HasFolderStatesWith(preds ...predicate.FolderState) predicate.Library {
 	})
 }
 
+// HasSubtitleProfile applies the HasEdge predicate on the "subtitle_profile" edge.
+func HasSubtitleProfile() predicate.Library {
+	return predicate.Library(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, SubtitleProfileTable, SubtitleProfileColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSubtitleProfileWith applies the HasEdge predicate on the "subtitle_profile" edge with a given conditions (other predicates).
+func HasSubtitleProfileWith(preds ...predicate.SubtitleProfileAssignment) predicate.Library {
+	return predicate.Library(func(s *sql.Selector) {
+		step := newSubtitleProfileStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Library) predicate.Library {
 	return predicate.Library(sql.AndPredicates(predicates...))

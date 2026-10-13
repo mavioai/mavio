@@ -13,6 +13,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/wanted"
 )
@@ -200,9 +201,17 @@ type ItemEdges struct {
 	ExtraFiles []*ExtraFile `json:"extra_files,omitempty"`
 	// Issues holds the value of the issues edge.
 	Issues []*Issue `json:"issues,omitempty"`
+	// SubtitleProfile holds the value of the subtitle_profile edge.
+	SubtitleProfile *SubtitleProfileAssignment `json:"subtitle_profile,omitempty"`
+	// SubtitleHistory holds the value of the subtitle_history edge.
+	SubtitleHistory []*SubtitleHistoryEvent `json:"subtitle_history,omitempty"`
+	// SubtitleBlocklist holds the value of the subtitle_blocklist edge.
+	SubtitleBlocklist []*SubtitleBlocklistEntry `json:"subtitle_blocklist,omitempty"`
+	// SubtitleSearchAttempts holds the value of the subtitle_search_attempts edge.
+	SubtitleSearchAttempts []*SubtitleSearchAttempt `json:"subtitle_search_attempts,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [23]bool
+	loadedTypes [27]bool
 }
 
 // LibraryOrErr returns the Library value or an error if the edge
@@ -420,6 +429,44 @@ func (e ItemEdges) IssuesOrErr() ([]*Issue, error) {
 		return e.Issues, nil
 	}
 	return nil, &NotLoadedError{edge: "issues"}
+}
+
+// SubtitleProfileOrErr returns the SubtitleProfile value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ItemEdges) SubtitleProfileOrErr() (*SubtitleProfileAssignment, error) {
+	if e.SubtitleProfile != nil {
+		return e.SubtitleProfile, nil
+	} else if e.loadedTypes[23] {
+		return nil, &NotFoundError{label: subtitleprofileassignment.Label}
+	}
+	return nil, &NotLoadedError{edge: "subtitle_profile"}
+}
+
+// SubtitleHistoryOrErr returns the SubtitleHistory value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) SubtitleHistoryOrErr() ([]*SubtitleHistoryEvent, error) {
+	if e.loadedTypes[24] {
+		return e.SubtitleHistory, nil
+	}
+	return nil, &NotLoadedError{edge: "subtitle_history"}
+}
+
+// SubtitleBlocklistOrErr returns the SubtitleBlocklist value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) SubtitleBlocklistOrErr() ([]*SubtitleBlocklistEntry, error) {
+	if e.loadedTypes[25] {
+		return e.SubtitleBlocklist, nil
+	}
+	return nil, &NotLoadedError{edge: "subtitle_blocklist"}
+}
+
+// SubtitleSearchAttemptsOrErr returns the SubtitleSearchAttempts value or an error if the edge
+// was not loaded in eager-loading.
+func (e ItemEdges) SubtitleSearchAttemptsOrErr() ([]*SubtitleSearchAttempt, error) {
+	if e.loadedTypes[26] {
+		return e.SubtitleSearchAttempts, nil
+	}
+	return nil, &NotLoadedError{edge: "subtitle_search_attempts"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -996,6 +1043,26 @@ func (_m *Item) QueryExtraFiles() *ExtraFileQuery {
 // QueryIssues queries the "issues" edge of the Item entity.
 func (_m *Item) QueryIssues() *IssueQuery {
 	return NewItemClient(_m.config).QueryIssues(_m)
+}
+
+// QuerySubtitleProfile queries the "subtitle_profile" edge of the Item entity.
+func (_m *Item) QuerySubtitleProfile() *SubtitleProfileAssignmentQuery {
+	return NewItemClient(_m.config).QuerySubtitleProfile(_m)
+}
+
+// QuerySubtitleHistory queries the "subtitle_history" edge of the Item entity.
+func (_m *Item) QuerySubtitleHistory() *SubtitleHistoryEventQuery {
+	return NewItemClient(_m.config).QuerySubtitleHistory(_m)
+}
+
+// QuerySubtitleBlocklist queries the "subtitle_blocklist" edge of the Item entity.
+func (_m *Item) QuerySubtitleBlocklist() *SubtitleBlocklistEntryQuery {
+	return NewItemClient(_m.config).QuerySubtitleBlocklist(_m)
+}
+
+// QuerySubtitleSearchAttempts queries the "subtitle_search_attempts" edge of the Item entity.
+func (_m *Item) QuerySubtitleSearchAttempts() *SubtitleSearchAttemptQuery {
+	return NewItemClient(_m.config).QuerySubtitleSearchAttempts(_m)
 }
 
 // Update returns a builder for updating this Item.

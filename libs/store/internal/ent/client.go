@@ -50,6 +50,11 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlehistoryevent"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -129,6 +134,16 @@ type Client struct {
 	Setting *SettingClient
 	// StorageJob is the client for interacting with the StorageJob builders.
 	StorageJob *StorageJobClient
+	// SubtitleBlocklistEntry is the client for interacting with the SubtitleBlocklistEntry builders.
+	SubtitleBlocklistEntry *SubtitleBlocklistEntryClient
+	// SubtitleHistoryEvent is the client for interacting with the SubtitleHistoryEvent builders.
+	SubtitleHistoryEvent *SubtitleHistoryEventClient
+	// SubtitleProfile is the client for interacting with the SubtitleProfile builders.
+	SubtitleProfile *SubtitleProfileClient
+	// SubtitleProfileAssignment is the client for interacting with the SubtitleProfileAssignment builders.
+	SubtitleProfileAssignment *SubtitleProfileAssignmentClient
+	// SubtitleSearchAttempt is the client for interacting with the SubtitleSearchAttempt builders.
+	SubtitleSearchAttempt *SubtitleSearchAttemptClient
 	// Trickplay is the client for interacting with the Trickplay builders.
 	Trickplay *TrickplayClient
 	// User is the client for interacting with the User builders.
@@ -182,6 +197,11 @@ func (c *Client) init() {
 	c.Request = NewRequestClient(c.config)
 	c.Setting = NewSettingClient(c.config)
 	c.StorageJob = NewStorageJobClient(c.config)
+	c.SubtitleBlocklistEntry = NewSubtitleBlocklistEntryClient(c.config)
+	c.SubtitleHistoryEvent = NewSubtitleHistoryEventClient(c.config)
+	c.SubtitleProfile = NewSubtitleProfileClient(c.config)
+	c.SubtitleProfileAssignment = NewSubtitleProfileAssignmentClient(c.config)
+	c.SubtitleSearchAttempt = NewSubtitleSearchAttemptClient(c.config)
 	c.Trickplay = NewTrickplayClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserData = NewUserDataClient(c.config)
@@ -276,46 +296,51 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                ctx,
-		config:             cfg,
-		APIKey:             NewAPIKeyClient(cfg),
-		Activity:           NewActivityClient(cfg),
-		AuthSession:        NewAuthSessionClient(cfg),
-		BlockedTitle:       NewBlockedTitleClient(cfg),
-		BlocklistEntry:     NewBlocklistEntryClient(cfg),
-		Credit:             NewCreditClient(cfg),
-		CustomFormat:       NewCustomFormatClient(cfg),
-		DelayProfile:       NewDelayProfileClient(cfg),
-		DisplayPreferences: NewDisplayPreferencesClient(cfg),
-		Download:           NewDownloadClient(cfg),
-		EpisodeState:       NewEpisodeStateClient(cfg),
-		ExtraFile:          NewExtraFileClient(cfg),
-		FolderState:        NewFolderStateClient(cfg),
-		HistoryEvent:       NewHistoryEventClient(cfg),
-		Image:              NewImageClient(cfg),
-		Issue:              NewIssueClient(cfg),
-		IssueComment:       NewIssueCommentClient(cfg),
-		Item:               NewItemClient(cfg),
-		ItemLink:           NewItemLinkClient(cfg),
-		ItemValue:          NewItemValueClient(cfg),
-		Job:                NewJobClient(cfg),
-		Library:            NewLibraryClient(cfg),
-		MediaSegment:       NewMediaSegmentClient(cfg),
-		MediaSource:        NewMediaSourceClient(cfg),
-		PendingRelease:     NewPendingReleaseClient(cfg),
-		Person:             NewPersonClient(cfg),
-		PluginConfig:       NewPluginConfigClient(cfg),
-		QualityDefinition:  NewQualityDefinitionClient(cfg),
-		QualityProfile:     NewQualityProfileClient(cfg),
-		ReleaseProfile:     NewReleaseProfileClient(cfg),
-		RemotePathMapping:  NewRemotePathMappingClient(cfg),
-		Request:            NewRequestClient(cfg),
-		Setting:            NewSettingClient(cfg),
-		StorageJob:         NewStorageJobClient(cfg),
-		Trickplay:          NewTrickplayClient(cfg),
-		User:               NewUserClient(cfg),
-		UserData:           NewUserDataClient(cfg),
-		Wanted:             NewWantedClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		APIKey:                    NewAPIKeyClient(cfg),
+		Activity:                  NewActivityClient(cfg),
+		AuthSession:               NewAuthSessionClient(cfg),
+		BlockedTitle:              NewBlockedTitleClient(cfg),
+		BlocklistEntry:            NewBlocklistEntryClient(cfg),
+		Credit:                    NewCreditClient(cfg),
+		CustomFormat:              NewCustomFormatClient(cfg),
+		DelayProfile:              NewDelayProfileClient(cfg),
+		DisplayPreferences:        NewDisplayPreferencesClient(cfg),
+		Download:                  NewDownloadClient(cfg),
+		EpisodeState:              NewEpisodeStateClient(cfg),
+		ExtraFile:                 NewExtraFileClient(cfg),
+		FolderState:               NewFolderStateClient(cfg),
+		HistoryEvent:              NewHistoryEventClient(cfg),
+		Image:                     NewImageClient(cfg),
+		Issue:                     NewIssueClient(cfg),
+		IssueComment:              NewIssueCommentClient(cfg),
+		Item:                      NewItemClient(cfg),
+		ItemLink:                  NewItemLinkClient(cfg),
+		ItemValue:                 NewItemValueClient(cfg),
+		Job:                       NewJobClient(cfg),
+		Library:                   NewLibraryClient(cfg),
+		MediaSegment:              NewMediaSegmentClient(cfg),
+		MediaSource:               NewMediaSourceClient(cfg),
+		PendingRelease:            NewPendingReleaseClient(cfg),
+		Person:                    NewPersonClient(cfg),
+		PluginConfig:              NewPluginConfigClient(cfg),
+		QualityDefinition:         NewQualityDefinitionClient(cfg),
+		QualityProfile:            NewQualityProfileClient(cfg),
+		ReleaseProfile:            NewReleaseProfileClient(cfg),
+		RemotePathMapping:         NewRemotePathMappingClient(cfg),
+		Request:                   NewRequestClient(cfg),
+		Setting:                   NewSettingClient(cfg),
+		StorageJob:                NewStorageJobClient(cfg),
+		SubtitleBlocklistEntry:    NewSubtitleBlocklistEntryClient(cfg),
+		SubtitleHistoryEvent:      NewSubtitleHistoryEventClient(cfg),
+		SubtitleProfile:           NewSubtitleProfileClient(cfg),
+		SubtitleProfileAssignment: NewSubtitleProfileAssignmentClient(cfg),
+		SubtitleSearchAttempt:     NewSubtitleSearchAttemptClient(cfg),
+		Trickplay:                 NewTrickplayClient(cfg),
+		User:                      NewUserClient(cfg),
+		UserData:                  NewUserDataClient(cfg),
+		Wanted:                    NewWantedClient(cfg),
 	}, nil
 }
 
@@ -333,46 +358,51 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                ctx,
-		config:             cfg,
-		APIKey:             NewAPIKeyClient(cfg),
-		Activity:           NewActivityClient(cfg),
-		AuthSession:        NewAuthSessionClient(cfg),
-		BlockedTitle:       NewBlockedTitleClient(cfg),
-		BlocklistEntry:     NewBlocklistEntryClient(cfg),
-		Credit:             NewCreditClient(cfg),
-		CustomFormat:       NewCustomFormatClient(cfg),
-		DelayProfile:       NewDelayProfileClient(cfg),
-		DisplayPreferences: NewDisplayPreferencesClient(cfg),
-		Download:           NewDownloadClient(cfg),
-		EpisodeState:       NewEpisodeStateClient(cfg),
-		ExtraFile:          NewExtraFileClient(cfg),
-		FolderState:        NewFolderStateClient(cfg),
-		HistoryEvent:       NewHistoryEventClient(cfg),
-		Image:              NewImageClient(cfg),
-		Issue:              NewIssueClient(cfg),
-		IssueComment:       NewIssueCommentClient(cfg),
-		Item:               NewItemClient(cfg),
-		ItemLink:           NewItemLinkClient(cfg),
-		ItemValue:          NewItemValueClient(cfg),
-		Job:                NewJobClient(cfg),
-		Library:            NewLibraryClient(cfg),
-		MediaSegment:       NewMediaSegmentClient(cfg),
-		MediaSource:        NewMediaSourceClient(cfg),
-		PendingRelease:     NewPendingReleaseClient(cfg),
-		Person:             NewPersonClient(cfg),
-		PluginConfig:       NewPluginConfigClient(cfg),
-		QualityDefinition:  NewQualityDefinitionClient(cfg),
-		QualityProfile:     NewQualityProfileClient(cfg),
-		ReleaseProfile:     NewReleaseProfileClient(cfg),
-		RemotePathMapping:  NewRemotePathMappingClient(cfg),
-		Request:            NewRequestClient(cfg),
-		Setting:            NewSettingClient(cfg),
-		StorageJob:         NewStorageJobClient(cfg),
-		Trickplay:          NewTrickplayClient(cfg),
-		User:               NewUserClient(cfg),
-		UserData:           NewUserDataClient(cfg),
-		Wanted:             NewWantedClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		APIKey:                    NewAPIKeyClient(cfg),
+		Activity:                  NewActivityClient(cfg),
+		AuthSession:               NewAuthSessionClient(cfg),
+		BlockedTitle:              NewBlockedTitleClient(cfg),
+		BlocklistEntry:            NewBlocklistEntryClient(cfg),
+		Credit:                    NewCreditClient(cfg),
+		CustomFormat:              NewCustomFormatClient(cfg),
+		DelayProfile:              NewDelayProfileClient(cfg),
+		DisplayPreferences:        NewDisplayPreferencesClient(cfg),
+		Download:                  NewDownloadClient(cfg),
+		EpisodeState:              NewEpisodeStateClient(cfg),
+		ExtraFile:                 NewExtraFileClient(cfg),
+		FolderState:               NewFolderStateClient(cfg),
+		HistoryEvent:              NewHistoryEventClient(cfg),
+		Image:                     NewImageClient(cfg),
+		Issue:                     NewIssueClient(cfg),
+		IssueComment:              NewIssueCommentClient(cfg),
+		Item:                      NewItemClient(cfg),
+		ItemLink:                  NewItemLinkClient(cfg),
+		ItemValue:                 NewItemValueClient(cfg),
+		Job:                       NewJobClient(cfg),
+		Library:                   NewLibraryClient(cfg),
+		MediaSegment:              NewMediaSegmentClient(cfg),
+		MediaSource:               NewMediaSourceClient(cfg),
+		PendingRelease:            NewPendingReleaseClient(cfg),
+		Person:                    NewPersonClient(cfg),
+		PluginConfig:              NewPluginConfigClient(cfg),
+		QualityDefinition:         NewQualityDefinitionClient(cfg),
+		QualityProfile:            NewQualityProfileClient(cfg),
+		ReleaseProfile:            NewReleaseProfileClient(cfg),
+		RemotePathMapping:         NewRemotePathMappingClient(cfg),
+		Request:                   NewRequestClient(cfg),
+		Setting:                   NewSettingClient(cfg),
+		StorageJob:                NewStorageJobClient(cfg),
+		SubtitleBlocklistEntry:    NewSubtitleBlocklistEntryClient(cfg),
+		SubtitleHistoryEvent:      NewSubtitleHistoryEventClient(cfg),
+		SubtitleProfile:           NewSubtitleProfileClient(cfg),
+		SubtitleProfileAssignment: NewSubtitleProfileAssignmentClient(cfg),
+		SubtitleSearchAttempt:     NewSubtitleSearchAttemptClient(cfg),
+		Trickplay:                 NewTrickplayClient(cfg),
+		User:                      NewUserClient(cfg),
+		UserData:                  NewUserDataClient(cfg),
+		Wanted:                    NewWantedClient(cfg),
 	}, nil
 }
 
@@ -408,7 +438,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
 		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
 		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
-		c.Request, c.Setting, c.StorageJob, c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.Request, c.Setting, c.StorageJob, c.SubtitleBlocklistEntry,
+		c.SubtitleHistoryEvent, c.SubtitleProfile, c.SubtitleProfileAssignment,
+		c.SubtitleSearchAttempt, c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Use(hooks...)
 	}
@@ -424,7 +456,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
 		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
 		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
-		c.Request, c.Setting, c.StorageJob, c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.Request, c.Setting, c.StorageJob, c.SubtitleBlocklistEntry,
+		c.SubtitleHistoryEvent, c.SubtitleProfile, c.SubtitleProfileAssignment,
+		c.SubtitleSearchAttempt, c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -501,6 +535,16 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Setting.mutate(ctx, m)
 	case *StorageJobMutation:
 		return c.StorageJob.mutate(ctx, m)
+	case *SubtitleBlocklistEntryMutation:
+		return c.SubtitleBlocklistEntry.mutate(ctx, m)
+	case *SubtitleHistoryEventMutation:
+		return c.SubtitleHistoryEvent.mutate(ctx, m)
+	case *SubtitleProfileMutation:
+		return c.SubtitleProfile.mutate(ctx, m)
+	case *SubtitleProfileAssignmentMutation:
+		return c.SubtitleProfileAssignment.mutate(ctx, m)
+	case *SubtitleSearchAttemptMutation:
+		return c.SubtitleSearchAttempt.mutate(ctx, m)
 	case *TrickplayMutation:
 		return c.Trickplay.mutate(ctx, m)
 	case *UserMutation:
@@ -3555,6 +3599,70 @@ func (c *ItemClient) QueryIssues(_m *Item) *IssueQuery {
 	return query
 }
 
+// QuerySubtitleProfile queries the subtitle_profile edge of a Item.
+func (c *ItemClient) QuerySubtitleProfile(_m *Item) *SubtitleProfileAssignmentQuery {
+	query := (&SubtitleProfileAssignmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(subtitleprofileassignment.Table, subtitleprofileassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, item.SubtitleProfileTable, item.SubtitleProfileColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySubtitleHistory queries the subtitle_history edge of a Item.
+func (c *ItemClient) QuerySubtitleHistory(_m *Item) *SubtitleHistoryEventQuery {
+	query := (&SubtitleHistoryEventClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(subtitlehistoryevent.Table, subtitlehistoryevent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.SubtitleHistoryTable, item.SubtitleHistoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySubtitleBlocklist queries the subtitle_blocklist edge of a Item.
+func (c *ItemClient) QuerySubtitleBlocklist(_m *Item) *SubtitleBlocklistEntryQuery {
+	query := (&SubtitleBlocklistEntryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(subtitleblocklistentry.Table, subtitleblocklistentry.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.SubtitleBlocklistTable, item.SubtitleBlocklistColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySubtitleSearchAttempts queries the subtitle_search_attempts edge of a Item.
+func (c *ItemClient) QuerySubtitleSearchAttempts(_m *Item) *SubtitleSearchAttemptQuery {
+	query := (&SubtitleSearchAttemptClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(subtitlesearchattempt.Table, subtitlesearchattempt.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.SubtitleSearchAttemptsTable, item.SubtitleSearchAttemptsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ItemClient) Hooks() []Hook {
 	return c.hooks.Item
@@ -4160,6 +4268,22 @@ func (c *LibraryClient) QueryFolderStates(_m *Library) *FolderStateQuery {
 			sqlgraph.From(library.Table, library.FieldID, id),
 			sqlgraph.To(folderstate.Table, folderstate.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, library.FolderStatesTable, library.FolderStatesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySubtitleProfile queries the subtitle_profile edge of a Library.
+func (c *LibraryClient) QuerySubtitleProfile(_m *Library) *SubtitleProfileAssignmentQuery {
+	query := (&SubtitleProfileAssignmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(library.Table, library.FieldID, id),
+			sqlgraph.To(subtitleprofileassignment.Table, subtitleprofileassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, library.SubtitleProfileTable, library.SubtitleProfileColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -5900,6 +6024,783 @@ func (c *StorageJobClient) mutate(ctx context.Context, m *StorageJobMutation) (V
 	}
 }
 
+// SubtitleBlocklistEntryClient is a client for the SubtitleBlocklistEntry schema.
+type SubtitleBlocklistEntryClient struct {
+	config
+}
+
+// NewSubtitleBlocklistEntryClient returns a client for the SubtitleBlocklistEntry from the given config.
+func NewSubtitleBlocklistEntryClient(c config) *SubtitleBlocklistEntryClient {
+	return &SubtitleBlocklistEntryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subtitleblocklistentry.Hooks(f(g(h())))`.
+func (c *SubtitleBlocklistEntryClient) Use(hooks ...Hook) {
+	c.hooks.SubtitleBlocklistEntry = append(c.hooks.SubtitleBlocklistEntry, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subtitleblocklistentry.Intercept(f(g(h())))`.
+func (c *SubtitleBlocklistEntryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubtitleBlocklistEntry = append(c.inters.SubtitleBlocklistEntry, interceptors...)
+}
+
+// Create returns a builder for creating a SubtitleBlocklistEntry entity.
+func (c *SubtitleBlocklistEntryClient) Create() *SubtitleBlocklistEntryCreate {
+	mutation := newSubtitleBlocklistEntryMutation(c.config, OpCreate)
+	return &SubtitleBlocklistEntryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubtitleBlocklistEntry entities.
+func (c *SubtitleBlocklistEntryClient) CreateBulk(builders ...*SubtitleBlocklistEntryCreate) *SubtitleBlocklistEntryCreateBulk {
+	return &SubtitleBlocklistEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubtitleBlocklistEntryClient) MapCreateBulk(slice any, setFunc func(*SubtitleBlocklistEntryCreate, int)) *SubtitleBlocklistEntryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubtitleBlocklistEntryCreateBulk{err: fmt.Errorf("calling to SubtitleBlocklistEntryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubtitleBlocklistEntryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubtitleBlocklistEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubtitleBlocklistEntry.
+func (c *SubtitleBlocklistEntryClient) Update() *SubtitleBlocklistEntryUpdate {
+	mutation := newSubtitleBlocklistEntryMutation(c.config, OpUpdate)
+	return &SubtitleBlocklistEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubtitleBlocklistEntryClient) UpdateOne(_m *SubtitleBlocklistEntry) *SubtitleBlocklistEntryUpdateOne {
+	mutation := newSubtitleBlocklistEntryMutation(c.config, OpUpdateOne, withSubtitleBlocklistEntry(_m))
+	return &SubtitleBlocklistEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubtitleBlocklistEntryClient) UpdateOneID(id core.ID) *SubtitleBlocklistEntryUpdateOne {
+	mutation := newSubtitleBlocklistEntryMutation(c.config, OpUpdateOne, withSubtitleBlocklistEntryID(id))
+	return &SubtitleBlocklistEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubtitleBlocklistEntry.
+func (c *SubtitleBlocklistEntryClient) Delete() *SubtitleBlocklistEntryDelete {
+	mutation := newSubtitleBlocklistEntryMutation(c.config, OpDelete)
+	return &SubtitleBlocklistEntryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubtitleBlocklistEntryClient) DeleteOne(_m *SubtitleBlocklistEntry) *SubtitleBlocklistEntryDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubtitleBlocklistEntryClient) DeleteOneID(id core.ID) *SubtitleBlocklistEntryDeleteOne {
+	builder := c.Delete().Where(subtitleblocklistentry.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubtitleBlocklistEntryDeleteOne{builder}
+}
+
+// Query returns a query builder for SubtitleBlocklistEntry.
+func (c *SubtitleBlocklistEntryClient) Query() *SubtitleBlocklistEntryQuery {
+	return &SubtitleBlocklistEntryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubtitleBlocklistEntry},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubtitleBlocklistEntry entity by its id.
+func (c *SubtitleBlocklistEntryClient) Get(ctx context.Context, id core.ID) (*SubtitleBlocklistEntry, error) {
+	return c.Query().Where(subtitleblocklistentry.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubtitleBlocklistEntryClient) GetX(ctx context.Context, id core.ID) *SubtitleBlocklistEntry {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryItem queries the item edge of a SubtitleBlocklistEntry.
+func (c *SubtitleBlocklistEntryClient) QueryItem(_m *SubtitleBlocklistEntry) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subtitleblocklistentry.Table, subtitleblocklistentry.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, subtitleblocklistentry.ItemTable, subtitleblocklistentry.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SubtitleBlocklistEntryClient) Hooks() []Hook {
+	return c.hooks.SubtitleBlocklistEntry
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubtitleBlocklistEntryClient) Interceptors() []Interceptor {
+	return c.inters.SubtitleBlocklistEntry
+}
+
+func (c *SubtitleBlocklistEntryClient) mutate(ctx context.Context, m *SubtitleBlocklistEntryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubtitleBlocklistEntryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubtitleBlocklistEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubtitleBlocklistEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubtitleBlocklistEntryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubtitleBlocklistEntry mutation op: %q", m.Op())
+	}
+}
+
+// SubtitleHistoryEventClient is a client for the SubtitleHistoryEvent schema.
+type SubtitleHistoryEventClient struct {
+	config
+}
+
+// NewSubtitleHistoryEventClient returns a client for the SubtitleHistoryEvent from the given config.
+func NewSubtitleHistoryEventClient(c config) *SubtitleHistoryEventClient {
+	return &SubtitleHistoryEventClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subtitlehistoryevent.Hooks(f(g(h())))`.
+func (c *SubtitleHistoryEventClient) Use(hooks ...Hook) {
+	c.hooks.SubtitleHistoryEvent = append(c.hooks.SubtitleHistoryEvent, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subtitlehistoryevent.Intercept(f(g(h())))`.
+func (c *SubtitleHistoryEventClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubtitleHistoryEvent = append(c.inters.SubtitleHistoryEvent, interceptors...)
+}
+
+// Create returns a builder for creating a SubtitleHistoryEvent entity.
+func (c *SubtitleHistoryEventClient) Create() *SubtitleHistoryEventCreate {
+	mutation := newSubtitleHistoryEventMutation(c.config, OpCreate)
+	return &SubtitleHistoryEventCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubtitleHistoryEvent entities.
+func (c *SubtitleHistoryEventClient) CreateBulk(builders ...*SubtitleHistoryEventCreate) *SubtitleHistoryEventCreateBulk {
+	return &SubtitleHistoryEventCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubtitleHistoryEventClient) MapCreateBulk(slice any, setFunc func(*SubtitleHistoryEventCreate, int)) *SubtitleHistoryEventCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubtitleHistoryEventCreateBulk{err: fmt.Errorf("calling to SubtitleHistoryEventClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubtitleHistoryEventCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubtitleHistoryEventCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubtitleHistoryEvent.
+func (c *SubtitleHistoryEventClient) Update() *SubtitleHistoryEventUpdate {
+	mutation := newSubtitleHistoryEventMutation(c.config, OpUpdate)
+	return &SubtitleHistoryEventUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubtitleHistoryEventClient) UpdateOne(_m *SubtitleHistoryEvent) *SubtitleHistoryEventUpdateOne {
+	mutation := newSubtitleHistoryEventMutation(c.config, OpUpdateOne, withSubtitleHistoryEvent(_m))
+	return &SubtitleHistoryEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubtitleHistoryEventClient) UpdateOneID(id core.ID) *SubtitleHistoryEventUpdateOne {
+	mutation := newSubtitleHistoryEventMutation(c.config, OpUpdateOne, withSubtitleHistoryEventID(id))
+	return &SubtitleHistoryEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubtitleHistoryEvent.
+func (c *SubtitleHistoryEventClient) Delete() *SubtitleHistoryEventDelete {
+	mutation := newSubtitleHistoryEventMutation(c.config, OpDelete)
+	return &SubtitleHistoryEventDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubtitleHistoryEventClient) DeleteOne(_m *SubtitleHistoryEvent) *SubtitleHistoryEventDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubtitleHistoryEventClient) DeleteOneID(id core.ID) *SubtitleHistoryEventDeleteOne {
+	builder := c.Delete().Where(subtitlehistoryevent.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubtitleHistoryEventDeleteOne{builder}
+}
+
+// Query returns a query builder for SubtitleHistoryEvent.
+func (c *SubtitleHistoryEventClient) Query() *SubtitleHistoryEventQuery {
+	return &SubtitleHistoryEventQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubtitleHistoryEvent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubtitleHistoryEvent entity by its id.
+func (c *SubtitleHistoryEventClient) Get(ctx context.Context, id core.ID) (*SubtitleHistoryEvent, error) {
+	return c.Query().Where(subtitlehistoryevent.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubtitleHistoryEventClient) GetX(ctx context.Context, id core.ID) *SubtitleHistoryEvent {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryItem queries the item edge of a SubtitleHistoryEvent.
+func (c *SubtitleHistoryEventClient) QueryItem(_m *SubtitleHistoryEvent) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subtitlehistoryevent.Table, subtitlehistoryevent.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, subtitlehistoryevent.ItemTable, subtitlehistoryevent.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SubtitleHistoryEventClient) Hooks() []Hook {
+	return c.hooks.SubtitleHistoryEvent
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubtitleHistoryEventClient) Interceptors() []Interceptor {
+	return c.inters.SubtitleHistoryEvent
+}
+
+func (c *SubtitleHistoryEventClient) mutate(ctx context.Context, m *SubtitleHistoryEventMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubtitleHistoryEventCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubtitleHistoryEventUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubtitleHistoryEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubtitleHistoryEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubtitleHistoryEvent mutation op: %q", m.Op())
+	}
+}
+
+// SubtitleProfileClient is a client for the SubtitleProfile schema.
+type SubtitleProfileClient struct {
+	config
+}
+
+// NewSubtitleProfileClient returns a client for the SubtitleProfile from the given config.
+func NewSubtitleProfileClient(c config) *SubtitleProfileClient {
+	return &SubtitleProfileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subtitleprofile.Hooks(f(g(h())))`.
+func (c *SubtitleProfileClient) Use(hooks ...Hook) {
+	c.hooks.SubtitleProfile = append(c.hooks.SubtitleProfile, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subtitleprofile.Intercept(f(g(h())))`.
+func (c *SubtitleProfileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubtitleProfile = append(c.inters.SubtitleProfile, interceptors...)
+}
+
+// Create returns a builder for creating a SubtitleProfile entity.
+func (c *SubtitleProfileClient) Create() *SubtitleProfileCreate {
+	mutation := newSubtitleProfileMutation(c.config, OpCreate)
+	return &SubtitleProfileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubtitleProfile entities.
+func (c *SubtitleProfileClient) CreateBulk(builders ...*SubtitleProfileCreate) *SubtitleProfileCreateBulk {
+	return &SubtitleProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubtitleProfileClient) MapCreateBulk(slice any, setFunc func(*SubtitleProfileCreate, int)) *SubtitleProfileCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubtitleProfileCreateBulk{err: fmt.Errorf("calling to SubtitleProfileClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubtitleProfileCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubtitleProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubtitleProfile.
+func (c *SubtitleProfileClient) Update() *SubtitleProfileUpdate {
+	mutation := newSubtitleProfileMutation(c.config, OpUpdate)
+	return &SubtitleProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubtitleProfileClient) UpdateOne(_m *SubtitleProfile) *SubtitleProfileUpdateOne {
+	mutation := newSubtitleProfileMutation(c.config, OpUpdateOne, withSubtitleProfile(_m))
+	return &SubtitleProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubtitleProfileClient) UpdateOneID(id core.ID) *SubtitleProfileUpdateOne {
+	mutation := newSubtitleProfileMutation(c.config, OpUpdateOne, withSubtitleProfileID(id))
+	return &SubtitleProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubtitleProfile.
+func (c *SubtitleProfileClient) Delete() *SubtitleProfileDelete {
+	mutation := newSubtitleProfileMutation(c.config, OpDelete)
+	return &SubtitleProfileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubtitleProfileClient) DeleteOne(_m *SubtitleProfile) *SubtitleProfileDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubtitleProfileClient) DeleteOneID(id core.ID) *SubtitleProfileDeleteOne {
+	builder := c.Delete().Where(subtitleprofile.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubtitleProfileDeleteOne{builder}
+}
+
+// Query returns a query builder for SubtitleProfile.
+func (c *SubtitleProfileClient) Query() *SubtitleProfileQuery {
+	return &SubtitleProfileQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubtitleProfile},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubtitleProfile entity by its id.
+func (c *SubtitleProfileClient) Get(ctx context.Context, id core.ID) (*SubtitleProfile, error) {
+	return c.Query().Where(subtitleprofile.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubtitleProfileClient) GetX(ctx context.Context, id core.ID) *SubtitleProfile {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAssignments queries the assignments edge of a SubtitleProfile.
+func (c *SubtitleProfileClient) QueryAssignments(_m *SubtitleProfile) *SubtitleProfileAssignmentQuery {
+	query := (&SubtitleProfileAssignmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subtitleprofile.Table, subtitleprofile.FieldID, id),
+			sqlgraph.To(subtitleprofileassignment.Table, subtitleprofileassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, subtitleprofile.AssignmentsTable, subtitleprofile.AssignmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SubtitleProfileClient) Hooks() []Hook {
+	return c.hooks.SubtitleProfile
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubtitleProfileClient) Interceptors() []Interceptor {
+	return c.inters.SubtitleProfile
+}
+
+func (c *SubtitleProfileClient) mutate(ctx context.Context, m *SubtitleProfileMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubtitleProfileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubtitleProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubtitleProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubtitleProfileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubtitleProfile mutation op: %q", m.Op())
+	}
+}
+
+// SubtitleProfileAssignmentClient is a client for the SubtitleProfileAssignment schema.
+type SubtitleProfileAssignmentClient struct {
+	config
+}
+
+// NewSubtitleProfileAssignmentClient returns a client for the SubtitleProfileAssignment from the given config.
+func NewSubtitleProfileAssignmentClient(c config) *SubtitleProfileAssignmentClient {
+	return &SubtitleProfileAssignmentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subtitleprofileassignment.Hooks(f(g(h())))`.
+func (c *SubtitleProfileAssignmentClient) Use(hooks ...Hook) {
+	c.hooks.SubtitleProfileAssignment = append(c.hooks.SubtitleProfileAssignment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subtitleprofileassignment.Intercept(f(g(h())))`.
+func (c *SubtitleProfileAssignmentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubtitleProfileAssignment = append(c.inters.SubtitleProfileAssignment, interceptors...)
+}
+
+// Create returns a builder for creating a SubtitleProfileAssignment entity.
+func (c *SubtitleProfileAssignmentClient) Create() *SubtitleProfileAssignmentCreate {
+	mutation := newSubtitleProfileAssignmentMutation(c.config, OpCreate)
+	return &SubtitleProfileAssignmentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubtitleProfileAssignment entities.
+func (c *SubtitleProfileAssignmentClient) CreateBulk(builders ...*SubtitleProfileAssignmentCreate) *SubtitleProfileAssignmentCreateBulk {
+	return &SubtitleProfileAssignmentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubtitleProfileAssignmentClient) MapCreateBulk(slice any, setFunc func(*SubtitleProfileAssignmentCreate, int)) *SubtitleProfileAssignmentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubtitleProfileAssignmentCreateBulk{err: fmt.Errorf("calling to SubtitleProfileAssignmentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubtitleProfileAssignmentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubtitleProfileAssignmentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubtitleProfileAssignment.
+func (c *SubtitleProfileAssignmentClient) Update() *SubtitleProfileAssignmentUpdate {
+	mutation := newSubtitleProfileAssignmentMutation(c.config, OpUpdate)
+	return &SubtitleProfileAssignmentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubtitleProfileAssignmentClient) UpdateOne(_m *SubtitleProfileAssignment) *SubtitleProfileAssignmentUpdateOne {
+	mutation := newSubtitleProfileAssignmentMutation(c.config, OpUpdateOne, withSubtitleProfileAssignment(_m))
+	return &SubtitleProfileAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubtitleProfileAssignmentClient) UpdateOneID(id core.ID) *SubtitleProfileAssignmentUpdateOne {
+	mutation := newSubtitleProfileAssignmentMutation(c.config, OpUpdateOne, withSubtitleProfileAssignmentID(id))
+	return &SubtitleProfileAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubtitleProfileAssignment.
+func (c *SubtitleProfileAssignmentClient) Delete() *SubtitleProfileAssignmentDelete {
+	mutation := newSubtitleProfileAssignmentMutation(c.config, OpDelete)
+	return &SubtitleProfileAssignmentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubtitleProfileAssignmentClient) DeleteOne(_m *SubtitleProfileAssignment) *SubtitleProfileAssignmentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubtitleProfileAssignmentClient) DeleteOneID(id core.ID) *SubtitleProfileAssignmentDeleteOne {
+	builder := c.Delete().Where(subtitleprofileassignment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubtitleProfileAssignmentDeleteOne{builder}
+}
+
+// Query returns a query builder for SubtitleProfileAssignment.
+func (c *SubtitleProfileAssignmentClient) Query() *SubtitleProfileAssignmentQuery {
+	return &SubtitleProfileAssignmentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubtitleProfileAssignment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubtitleProfileAssignment entity by its id.
+func (c *SubtitleProfileAssignmentClient) Get(ctx context.Context, id core.ID) (*SubtitleProfileAssignment, error) {
+	return c.Query().Where(subtitleprofileassignment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubtitleProfileAssignmentClient) GetX(ctx context.Context, id core.ID) *SubtitleProfileAssignment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryLibrary queries the library edge of a SubtitleProfileAssignment.
+func (c *SubtitleProfileAssignmentClient) QueryLibrary(_m *SubtitleProfileAssignment) *LibraryQuery {
+	query := (&LibraryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subtitleprofileassignment.Table, subtitleprofileassignment.FieldID, id),
+			sqlgraph.To(library.Table, library.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, subtitleprofileassignment.LibraryTable, subtitleprofileassignment.LibraryColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryItem queries the item edge of a SubtitleProfileAssignment.
+func (c *SubtitleProfileAssignmentClient) QueryItem(_m *SubtitleProfileAssignment) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subtitleprofileassignment.Table, subtitleprofileassignment.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, subtitleprofileassignment.ItemTable, subtitleprofileassignment.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryProfile queries the profile edge of a SubtitleProfileAssignment.
+func (c *SubtitleProfileAssignmentClient) QueryProfile(_m *SubtitleProfileAssignment) *SubtitleProfileQuery {
+	query := (&SubtitleProfileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subtitleprofileassignment.Table, subtitleprofileassignment.FieldID, id),
+			sqlgraph.To(subtitleprofile.Table, subtitleprofile.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, subtitleprofileassignment.ProfileTable, subtitleprofileassignment.ProfileColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SubtitleProfileAssignmentClient) Hooks() []Hook {
+	return c.hooks.SubtitleProfileAssignment
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubtitleProfileAssignmentClient) Interceptors() []Interceptor {
+	return c.inters.SubtitleProfileAssignment
+}
+
+func (c *SubtitleProfileAssignmentClient) mutate(ctx context.Context, m *SubtitleProfileAssignmentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubtitleProfileAssignmentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubtitleProfileAssignmentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubtitleProfileAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubtitleProfileAssignmentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubtitleProfileAssignment mutation op: %q", m.Op())
+	}
+}
+
+// SubtitleSearchAttemptClient is a client for the SubtitleSearchAttempt schema.
+type SubtitleSearchAttemptClient struct {
+	config
+}
+
+// NewSubtitleSearchAttemptClient returns a client for the SubtitleSearchAttempt from the given config.
+func NewSubtitleSearchAttemptClient(c config) *SubtitleSearchAttemptClient {
+	return &SubtitleSearchAttemptClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subtitlesearchattempt.Hooks(f(g(h())))`.
+func (c *SubtitleSearchAttemptClient) Use(hooks ...Hook) {
+	c.hooks.SubtitleSearchAttempt = append(c.hooks.SubtitleSearchAttempt, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subtitlesearchattempt.Intercept(f(g(h())))`.
+func (c *SubtitleSearchAttemptClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubtitleSearchAttempt = append(c.inters.SubtitleSearchAttempt, interceptors...)
+}
+
+// Create returns a builder for creating a SubtitleSearchAttempt entity.
+func (c *SubtitleSearchAttemptClient) Create() *SubtitleSearchAttemptCreate {
+	mutation := newSubtitleSearchAttemptMutation(c.config, OpCreate)
+	return &SubtitleSearchAttemptCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubtitleSearchAttempt entities.
+func (c *SubtitleSearchAttemptClient) CreateBulk(builders ...*SubtitleSearchAttemptCreate) *SubtitleSearchAttemptCreateBulk {
+	return &SubtitleSearchAttemptCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubtitleSearchAttemptClient) MapCreateBulk(slice any, setFunc func(*SubtitleSearchAttemptCreate, int)) *SubtitleSearchAttemptCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubtitleSearchAttemptCreateBulk{err: fmt.Errorf("calling to SubtitleSearchAttemptClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubtitleSearchAttemptCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubtitleSearchAttemptCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubtitleSearchAttempt.
+func (c *SubtitleSearchAttemptClient) Update() *SubtitleSearchAttemptUpdate {
+	mutation := newSubtitleSearchAttemptMutation(c.config, OpUpdate)
+	return &SubtitleSearchAttemptUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubtitleSearchAttemptClient) UpdateOne(_m *SubtitleSearchAttempt) *SubtitleSearchAttemptUpdateOne {
+	mutation := newSubtitleSearchAttemptMutation(c.config, OpUpdateOne, withSubtitleSearchAttempt(_m))
+	return &SubtitleSearchAttemptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubtitleSearchAttemptClient) UpdateOneID(id core.ID) *SubtitleSearchAttemptUpdateOne {
+	mutation := newSubtitleSearchAttemptMutation(c.config, OpUpdateOne, withSubtitleSearchAttemptID(id))
+	return &SubtitleSearchAttemptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubtitleSearchAttempt.
+func (c *SubtitleSearchAttemptClient) Delete() *SubtitleSearchAttemptDelete {
+	mutation := newSubtitleSearchAttemptMutation(c.config, OpDelete)
+	return &SubtitleSearchAttemptDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubtitleSearchAttemptClient) DeleteOne(_m *SubtitleSearchAttempt) *SubtitleSearchAttemptDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubtitleSearchAttemptClient) DeleteOneID(id core.ID) *SubtitleSearchAttemptDeleteOne {
+	builder := c.Delete().Where(subtitlesearchattempt.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubtitleSearchAttemptDeleteOne{builder}
+}
+
+// Query returns a query builder for SubtitleSearchAttempt.
+func (c *SubtitleSearchAttemptClient) Query() *SubtitleSearchAttemptQuery {
+	return &SubtitleSearchAttemptQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubtitleSearchAttempt},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubtitleSearchAttempt entity by its id.
+func (c *SubtitleSearchAttemptClient) Get(ctx context.Context, id core.ID) (*SubtitleSearchAttempt, error) {
+	return c.Query().Where(subtitlesearchattempt.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubtitleSearchAttemptClient) GetX(ctx context.Context, id core.ID) *SubtitleSearchAttempt {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryItem queries the item edge of a SubtitleSearchAttempt.
+func (c *SubtitleSearchAttemptClient) QueryItem(_m *SubtitleSearchAttempt) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subtitlesearchattempt.Table, subtitlesearchattempt.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, subtitlesearchattempt.ItemTable, subtitlesearchattempt.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SubtitleSearchAttemptClient) Hooks() []Hook {
+	return c.hooks.SubtitleSearchAttempt
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubtitleSearchAttemptClient) Interceptors() []Interceptor {
+	return c.inters.SubtitleSearchAttempt
+}
+
+func (c *SubtitleSearchAttemptClient) mutate(ctx context.Context, m *SubtitleSearchAttemptMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubtitleSearchAttemptCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubtitleSearchAttemptUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubtitleSearchAttemptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubtitleSearchAttemptDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubtitleSearchAttempt mutation op: %q", m.Op())
+	}
+}
+
 // TrickplayClient is a client for the Trickplay schema.
 type TrickplayClient struct {
 	config
@@ -6664,8 +7565,9 @@ type (
 		ExtraFile, FolderState, HistoryEvent, Image, Issue, IssueComment, Item,
 		ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease,
 		Person, PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
-		RemotePathMapping, Request, Setting, StorageJob, Trickplay, User, UserData,
-		Wanted []ent.Hook
+		RemotePathMapping, Request, Setting, StorageJob, SubtitleBlocklistEntry,
+		SubtitleHistoryEvent, SubtitleProfile, SubtitleProfileAssignment,
+		SubtitleSearchAttempt, Trickplay, User, UserData, Wanted []ent.Hook
 	}
 	inters struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credit,
@@ -6673,7 +7575,8 @@ type (
 		ExtraFile, FolderState, HistoryEvent, Image, Issue, IssueComment, Item,
 		ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease,
 		Person, PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
-		RemotePathMapping, Request, Setting, StorageJob, Trickplay, User, UserData,
-		Wanted []ent.Interceptor
+		RemotePathMapping, Request, Setting, StorageJob, SubtitleBlocklistEntry,
+		SubtitleHistoryEvent, SubtitleProfile, SubtitleProfileAssignment,
+		SubtitleSearchAttempt, Trickplay, User, UserData, Wanted []ent.Interceptor
 	}
 )

@@ -1247,6 +1247,178 @@ var (
 			},
 		},
 	}
+	// SubtitleBlocklistColumns holds the columns for the "subtitle_blocklist" table.
+	SubtitleBlocklistColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "parent_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "subtitle_id", Type: field.TypeString},
+		{Name: "language", Type: field.TypeString},
+		{Name: "forced", Type: field.TypeBool, Default: false},
+		{Name: "hearing_impaired", Type: field.TypeBool, Default: false},
+		{Name: "date", Type: field.TypeTime},
+		{Name: "message", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// SubtitleBlocklistTable holds the schema information for the "subtitle_blocklist" table.
+	SubtitleBlocklistTable = &schema.Table{
+		Name:       "subtitle_blocklist",
+		Columns:    SubtitleBlocklistColumns,
+		PrimaryKey: []*schema.Column{SubtitleBlocklistColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subtitle_blocklist_items_subtitle_blocklist",
+				Columns:    []*schema.Column{SubtitleBlocklistColumns[9]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subtitleblocklistentry_item_id_date",
+				Unique:  false,
+				Columns: []*schema.Column{SubtitleBlocklistColumns[9], SubtitleBlocklistColumns[7]},
+			},
+			{
+				Name:    "subtitleblocklistentry_date",
+				Unique:  false,
+				Columns: []*schema.Column{SubtitleBlocklistColumns[7]},
+			},
+		},
+	}
+	// SubtitleHistoryColumns holds the columns for the "subtitle_history" table.
+	SubtitleHistoryColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "action", Type: field.TypeString},
+		{Name: "parent_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "date", Type: field.TypeTime},
+		{Name: "language", Type: field.TypeString},
+		{Name: "forced", Type: field.TypeBool, Default: false},
+		{Name: "hearing_impaired", Type: field.TypeBool, Default: false},
+		{Name: "provider", Type: field.TypeString, Default: ""},
+		{Name: "subtitle_id", Type: field.TypeString, Default: ""},
+		{Name: "score", Type: field.TypeInt, Default: 0},
+		{Name: "max_score", Type: field.TypeInt, Default: 0},
+		{Name: "path", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "video_path", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "description", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "matched", Type: field.TypeJSON, Nullable: true},
+		{Name: "not_matched", Type: field.TypeJSON, Nullable: true},
+		{Name: "upgraded_from", Type: field.TypeUUID, Nullable: true},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// SubtitleHistoryTable holds the schema information for the "subtitle_history" table.
+	SubtitleHistoryTable = &schema.Table{
+		Name:       "subtitle_history",
+		Columns:    SubtitleHistoryColumns,
+		PrimaryKey: []*schema.Column{SubtitleHistoryColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subtitle_history_items_subtitle_history",
+				Columns:    []*schema.Column{SubtitleHistoryColumns[17]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subtitlehistoryevent_item_id_date",
+				Unique:  false,
+				Columns: []*schema.Column{SubtitleHistoryColumns[17], SubtitleHistoryColumns[3]},
+			},
+			{
+				Name:    "subtitlehistoryevent_parent_id_date",
+				Unique:  false,
+				Columns: []*schema.Column{SubtitleHistoryColumns[2], SubtitleHistoryColumns[3]},
+			},
+			{
+				Name:    "subtitlehistoryevent_date",
+				Unique:  false,
+				Columns: []*schema.Column{SubtitleHistoryColumns[3]},
+			},
+		},
+	}
+	// SubtitleProfilesColumns holds the columns for the "subtitle_profiles" table.
+	SubtitleProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "items", Type: field.TypeJSON},
+		{Name: "cutoff", Type: field.TypeInt, Default: 0},
+		{Name: "must_contain", Type: field.TypeJSON, Nullable: true},
+		{Name: "must_not_contain", Type: field.TypeJSON, Nullable: true},
+		{Name: "original_format", Type: field.TypeBool, Default: false},
+		{Name: "tag", Type: field.TypeString, Default: ""},
+	}
+	// SubtitleProfilesTable holds the schema information for the "subtitle_profiles" table.
+	SubtitleProfilesTable = &schema.Table{
+		Name:       "subtitle_profiles",
+		Columns:    SubtitleProfilesColumns,
+		PrimaryKey: []*schema.Column{SubtitleProfilesColumns[0]},
+	}
+	// SubtitleProfileAssignmentsColumns holds the columns for the "subtitle_profile_assignments" table.
+	SubtitleProfileAssignmentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "item_id", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "library_id", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "profile_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// SubtitleProfileAssignmentsTable holds the schema information for the "subtitle_profile_assignments" table.
+	SubtitleProfileAssignmentsTable = &schema.Table{
+		Name:       "subtitle_profile_assignments",
+		Columns:    SubtitleProfileAssignmentsColumns,
+		PrimaryKey: []*schema.Column{SubtitleProfileAssignmentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subtitle_profile_assignments_items_subtitle_profile",
+				Columns:    []*schema.Column{SubtitleProfileAssignmentsColumns[1]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "subtitle_profile_assignments_libraries_subtitle_profile",
+				Columns:    []*schema.Column{SubtitleProfileAssignmentsColumns[2]},
+				RefColumns: []*schema.Column{LibrariesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "subtitle_profile_assignments_subtitle_profiles_assignments",
+				Columns:    []*schema.Column{SubtitleProfileAssignmentsColumns[3]},
+				RefColumns: []*schema.Column{SubtitleProfilesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// SubtitleSearchAttemptsColumns holds the columns for the "subtitle_search_attempts" table.
+	SubtitleSearchAttemptsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "language", Type: field.TypeString},
+		{Name: "forced", Type: field.TypeBool, Default: false},
+		{Name: "hearing_impaired", Type: field.TypeBool, Default: false},
+		{Name: "first", Type: field.TypeTime},
+		{Name: "last", Type: field.TypeTime},
+		{Name: "item_id", Type: field.TypeUUID},
+	}
+	// SubtitleSearchAttemptsTable holds the schema information for the "subtitle_search_attempts" table.
+	SubtitleSearchAttemptsTable = &schema.Table{
+		Name:       "subtitle_search_attempts",
+		Columns:    SubtitleSearchAttemptsColumns,
+		PrimaryKey: []*schema.Column{SubtitleSearchAttemptsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subtitle_search_attempts_items_subtitle_search_attempts",
+				Columns:    []*schema.Column{SubtitleSearchAttemptsColumns[6]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subtitlesearchattempt_item_id_language_forced_hearing_impaired",
+				Unique:  true,
+				Columns: []*schema.Column{SubtitleSearchAttemptsColumns[6], SubtitleSearchAttemptsColumns[1], SubtitleSearchAttemptsColumns[2], SubtitleSearchAttemptsColumns[3]},
+			},
+		},
+	}
 	// TrickplayColumns holds the columns for the "trickplay" table.
 	TrickplayColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1410,6 +1582,11 @@ var (
 		RequestsTable,
 		SettingsTable,
 		StorageJobsTable,
+		SubtitleBlocklistTable,
+		SubtitleHistoryTable,
+		SubtitleProfilesTable,
+		SubtitleProfileAssignmentsTable,
+		SubtitleSearchAttemptsTable,
 		TrickplayTable,
 		UsersTable,
 		UserDataTable,
@@ -1548,6 +1725,27 @@ func init() {
 	}
 	StorageJobsTable.Annotation = &entsql.Annotation{
 		Table: "storage_jobs",
+	}
+	SubtitleBlocklistTable.ForeignKeys[0].RefTable = ItemsTable
+	SubtitleBlocklistTable.Annotation = &entsql.Annotation{
+		Table: "subtitle_blocklist",
+	}
+	SubtitleHistoryTable.ForeignKeys[0].RefTable = ItemsTable
+	SubtitleHistoryTable.Annotation = &entsql.Annotation{
+		Table: "subtitle_history",
+	}
+	SubtitleProfilesTable.Annotation = &entsql.Annotation{
+		Table: "subtitle_profiles",
+	}
+	SubtitleProfileAssignmentsTable.ForeignKeys[0].RefTable = ItemsTable
+	SubtitleProfileAssignmentsTable.ForeignKeys[1].RefTable = LibrariesTable
+	SubtitleProfileAssignmentsTable.ForeignKeys[2].RefTable = SubtitleProfilesTable
+	SubtitleProfileAssignmentsTable.Annotation = &entsql.Annotation{
+		Table: "subtitle_profile_assignments",
+	}
+	SubtitleSearchAttemptsTable.ForeignKeys[0].RefTable = ItemsTable
+	SubtitleSearchAttemptsTable.Annotation = &entsql.Annotation{
+		Table: "subtitle_search_attempts",
 	}
 	TrickplayTable.ForeignKeys[0].RefTable = ItemsTable
 	TrickplayTable.Annotation = &entsql.Annotation{

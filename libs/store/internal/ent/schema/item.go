@@ -135,6 +135,10 @@ func (Item) Edges() []ent.Edge {
 		edge.To("pending_releases", PendingRelease.Type).Annotations(cascade()),
 		edge.To("extra_files", ExtraFile.Type).Annotations(cascade()),
 		edge.To("issues", Issue.Type).Annotations(cascade()),
+		edge.To("subtitle_profile", SubtitleProfileAssignment.Type).Annotations(cascade()).Unique(),
+		edge.To("subtitle_history", SubtitleHistoryEvent.Type).Annotations(cascade()),
+		edge.To("subtitle_blocklist", SubtitleBlocklistEntry.Type).Annotations(cascade()),
+		edge.To("subtitle_search_attempts", SubtitleSearchAttempt.Type).Annotations(cascade()),
 	}
 }
 

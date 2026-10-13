@@ -29,6 +29,10 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlehistoryevent"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -1480,6 +1484,70 @@ func (_u *ItemUpdate) AddIssues(v ...*Issue) *ItemUpdate {
 	return _u.AddIssueIDs(ids...)
 }
 
+// SetSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by ID.
+func (_u *ItemUpdate) SetSubtitleProfileID(id core.ID) *ItemUpdate {
+	_u.mutation.SetSubtitleProfileID(id)
+	return _u
+}
+
+// SetNillableSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by ID if the given value is not nil.
+func (_u *ItemUpdate) SetNillableSubtitleProfileID(id *core.ID) *ItemUpdate {
+	if id != nil {
+		_u = _u.SetSubtitleProfileID(*id)
+	}
+	return _u
+}
+
+// SetSubtitleProfile sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (_u *ItemUpdate) SetSubtitleProfile(v *SubtitleProfileAssignment) *ItemUpdate {
+	return _u.SetSubtitleProfileID(v.ID)
+}
+
+// AddSubtitleHistoryIDs adds the "subtitle_history" edge to the SubtitleHistoryEvent entity by IDs.
+func (_u *ItemUpdate) AddSubtitleHistoryIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddSubtitleHistoryIDs(ids...)
+	return _u
+}
+
+// AddSubtitleHistory adds the "subtitle_history" edges to the SubtitleHistoryEvent entity.
+func (_u *ItemUpdate) AddSubtitleHistory(v ...*SubtitleHistoryEvent) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSubtitleHistoryIDs(ids...)
+}
+
+// AddSubtitleBlocklistIDs adds the "subtitle_blocklist" edge to the SubtitleBlocklistEntry entity by IDs.
+func (_u *ItemUpdate) AddSubtitleBlocklistIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddSubtitleBlocklistIDs(ids...)
+	return _u
+}
+
+// AddSubtitleBlocklist adds the "subtitle_blocklist" edges to the SubtitleBlocklistEntry entity.
+func (_u *ItemUpdate) AddSubtitleBlocklist(v ...*SubtitleBlocklistEntry) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSubtitleBlocklistIDs(ids...)
+}
+
+// AddSubtitleSearchAttemptIDs adds the "subtitle_search_attempts" edge to the SubtitleSearchAttempt entity by IDs.
+func (_u *ItemUpdate) AddSubtitleSearchAttemptIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.AddSubtitleSearchAttemptIDs(ids...)
+	return _u
+}
+
+// AddSubtitleSearchAttempts adds the "subtitle_search_attempts" edges to the SubtitleSearchAttempt entity.
+func (_u *ItemUpdate) AddSubtitleSearchAttempts(v ...*SubtitleSearchAttempt) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSubtitleSearchAttemptIDs(ids...)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_u *ItemUpdate) Mutation() *ItemMutation {
 	return _u.mutation
@@ -1891,6 +1959,75 @@ func (_u *ItemUpdate) RemoveIssues(v ...*Issue) *ItemUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveIssueIDs(ids...)
+}
+
+// ClearSubtitleProfile clears the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (_u *ItemUpdate) ClearSubtitleProfile() *ItemUpdate {
+	_u.mutation.ClearSubtitleProfile()
+	return _u
+}
+
+// ClearSubtitleHistory clears all "subtitle_history" edges to the SubtitleHistoryEvent entity.
+func (_u *ItemUpdate) ClearSubtitleHistory() *ItemUpdate {
+	_u.mutation.ClearSubtitleHistory()
+	return _u
+}
+
+// RemoveSubtitleHistoryIDs removes the "subtitle_history" edge to SubtitleHistoryEvent entities by IDs.
+func (_u *ItemUpdate) RemoveSubtitleHistoryIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveSubtitleHistoryIDs(ids...)
+	return _u
+}
+
+// RemoveSubtitleHistory removes "subtitle_history" edges to SubtitleHistoryEvent entities.
+func (_u *ItemUpdate) RemoveSubtitleHistory(v ...*SubtitleHistoryEvent) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSubtitleHistoryIDs(ids...)
+}
+
+// ClearSubtitleBlocklist clears all "subtitle_blocklist" edges to the SubtitleBlocklistEntry entity.
+func (_u *ItemUpdate) ClearSubtitleBlocklist() *ItemUpdate {
+	_u.mutation.ClearSubtitleBlocklist()
+	return _u
+}
+
+// RemoveSubtitleBlocklistIDs removes the "subtitle_blocklist" edge to SubtitleBlocklistEntry entities by IDs.
+func (_u *ItemUpdate) RemoveSubtitleBlocklistIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveSubtitleBlocklistIDs(ids...)
+	return _u
+}
+
+// RemoveSubtitleBlocklist removes "subtitle_blocklist" edges to SubtitleBlocklistEntry entities.
+func (_u *ItemUpdate) RemoveSubtitleBlocklist(v ...*SubtitleBlocklistEntry) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSubtitleBlocklistIDs(ids...)
+}
+
+// ClearSubtitleSearchAttempts clears all "subtitle_search_attempts" edges to the SubtitleSearchAttempt entity.
+func (_u *ItemUpdate) ClearSubtitleSearchAttempts() *ItemUpdate {
+	_u.mutation.ClearSubtitleSearchAttempts()
+	return _u
+}
+
+// RemoveSubtitleSearchAttemptIDs removes the "subtitle_search_attempts" edge to SubtitleSearchAttempt entities by IDs.
+func (_u *ItemUpdate) RemoveSubtitleSearchAttemptIDs(ids ...core.ID) *ItemUpdate {
+	_u.mutation.RemoveSubtitleSearchAttemptIDs(ids...)
+	return _u
+}
+
+// RemoveSubtitleSearchAttempts removes "subtitle_search_attempts" edges to SubtitleSearchAttempt entities.
+func (_u *ItemUpdate) RemoveSubtitleSearchAttempts(v ...*SubtitleSearchAttempt) *ItemUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSubtitleSearchAttemptIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -3218,6 +3355,170 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.SubtitleProfileTable,
+			Columns: []string{item.SubtitleProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleprofileassignment.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.SubtitleProfileTable,
+			Columns: []string{item.SubtitleProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleprofileassignment.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleHistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleHistoryTable,
+			Columns: []string{item.SubtitleHistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlehistoryevent.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSubtitleHistoryIDs(); len(nodes) > 0 && !_u.mutation.SubtitleHistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleHistoryTable,
+			Columns: []string{item.SubtitleHistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlehistoryevent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleHistoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleHistoryTable,
+			Columns: []string{item.SubtitleHistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlehistoryevent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleBlocklistCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleBlocklistTable,
+			Columns: []string{item.SubtitleBlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleblocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSubtitleBlocklistIDs(); len(nodes) > 0 && !_u.mutation.SubtitleBlocklistCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleBlocklistTable,
+			Columns: []string{item.SubtitleBlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleblocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleBlocklistIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleBlocklistTable,
+			Columns: []string{item.SubtitleBlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleblocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleSearchAttemptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleSearchAttemptsTable,
+			Columns: []string{item.SubtitleSearchAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlesearchattempt.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSubtitleSearchAttemptsIDs(); len(nodes) > 0 && !_u.mutation.SubtitleSearchAttemptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleSearchAttemptsTable,
+			Columns: []string{item.SubtitleSearchAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlesearchattempt.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleSearchAttemptsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleSearchAttemptsTable,
+			Columns: []string{item.SubtitleSearchAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlesearchattempt.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -4678,6 +4979,70 @@ func (_u *ItemUpdateOne) AddIssues(v ...*Issue) *ItemUpdateOne {
 	return _u.AddIssueIDs(ids...)
 }
 
+// SetSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by ID.
+func (_u *ItemUpdateOne) SetSubtitleProfileID(id core.ID) *ItemUpdateOne {
+	_u.mutation.SetSubtitleProfileID(id)
+	return _u
+}
+
+// SetNillableSubtitleProfileID sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity by ID if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableSubtitleProfileID(id *core.ID) *ItemUpdateOne {
+	if id != nil {
+		_u = _u.SetSubtitleProfileID(*id)
+	}
+	return _u
+}
+
+// SetSubtitleProfile sets the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (_u *ItemUpdateOne) SetSubtitleProfile(v *SubtitleProfileAssignment) *ItemUpdateOne {
+	return _u.SetSubtitleProfileID(v.ID)
+}
+
+// AddSubtitleHistoryIDs adds the "subtitle_history" edge to the SubtitleHistoryEvent entity by IDs.
+func (_u *ItemUpdateOne) AddSubtitleHistoryIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddSubtitleHistoryIDs(ids...)
+	return _u
+}
+
+// AddSubtitleHistory adds the "subtitle_history" edges to the SubtitleHistoryEvent entity.
+func (_u *ItemUpdateOne) AddSubtitleHistory(v ...*SubtitleHistoryEvent) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSubtitleHistoryIDs(ids...)
+}
+
+// AddSubtitleBlocklistIDs adds the "subtitle_blocklist" edge to the SubtitleBlocklistEntry entity by IDs.
+func (_u *ItemUpdateOne) AddSubtitleBlocklistIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddSubtitleBlocklistIDs(ids...)
+	return _u
+}
+
+// AddSubtitleBlocklist adds the "subtitle_blocklist" edges to the SubtitleBlocklistEntry entity.
+func (_u *ItemUpdateOne) AddSubtitleBlocklist(v ...*SubtitleBlocklistEntry) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSubtitleBlocklistIDs(ids...)
+}
+
+// AddSubtitleSearchAttemptIDs adds the "subtitle_search_attempts" edge to the SubtitleSearchAttempt entity by IDs.
+func (_u *ItemUpdateOne) AddSubtitleSearchAttemptIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.AddSubtitleSearchAttemptIDs(ids...)
+	return _u
+}
+
+// AddSubtitleSearchAttempts adds the "subtitle_search_attempts" edges to the SubtitleSearchAttempt entity.
+func (_u *ItemUpdateOne) AddSubtitleSearchAttempts(v ...*SubtitleSearchAttempt) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSubtitleSearchAttemptIDs(ids...)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_u *ItemUpdateOne) Mutation() *ItemMutation {
 	return _u.mutation
@@ -5089,6 +5454,75 @@ func (_u *ItemUpdateOne) RemoveIssues(v ...*Issue) *ItemUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveIssueIDs(ids...)
+}
+
+// ClearSubtitleProfile clears the "subtitle_profile" edge to the SubtitleProfileAssignment entity.
+func (_u *ItemUpdateOne) ClearSubtitleProfile() *ItemUpdateOne {
+	_u.mutation.ClearSubtitleProfile()
+	return _u
+}
+
+// ClearSubtitleHistory clears all "subtitle_history" edges to the SubtitleHistoryEvent entity.
+func (_u *ItemUpdateOne) ClearSubtitleHistory() *ItemUpdateOne {
+	_u.mutation.ClearSubtitleHistory()
+	return _u
+}
+
+// RemoveSubtitleHistoryIDs removes the "subtitle_history" edge to SubtitleHistoryEvent entities by IDs.
+func (_u *ItemUpdateOne) RemoveSubtitleHistoryIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveSubtitleHistoryIDs(ids...)
+	return _u
+}
+
+// RemoveSubtitleHistory removes "subtitle_history" edges to SubtitleHistoryEvent entities.
+func (_u *ItemUpdateOne) RemoveSubtitleHistory(v ...*SubtitleHistoryEvent) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSubtitleHistoryIDs(ids...)
+}
+
+// ClearSubtitleBlocklist clears all "subtitle_blocklist" edges to the SubtitleBlocklistEntry entity.
+func (_u *ItemUpdateOne) ClearSubtitleBlocklist() *ItemUpdateOne {
+	_u.mutation.ClearSubtitleBlocklist()
+	return _u
+}
+
+// RemoveSubtitleBlocklistIDs removes the "subtitle_blocklist" edge to SubtitleBlocklistEntry entities by IDs.
+func (_u *ItemUpdateOne) RemoveSubtitleBlocklistIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveSubtitleBlocklistIDs(ids...)
+	return _u
+}
+
+// RemoveSubtitleBlocklist removes "subtitle_blocklist" edges to SubtitleBlocklistEntry entities.
+func (_u *ItemUpdateOne) RemoveSubtitleBlocklist(v ...*SubtitleBlocklistEntry) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSubtitleBlocklistIDs(ids...)
+}
+
+// ClearSubtitleSearchAttempts clears all "subtitle_search_attempts" edges to the SubtitleSearchAttempt entity.
+func (_u *ItemUpdateOne) ClearSubtitleSearchAttempts() *ItemUpdateOne {
+	_u.mutation.ClearSubtitleSearchAttempts()
+	return _u
+}
+
+// RemoveSubtitleSearchAttemptIDs removes the "subtitle_search_attempts" edge to SubtitleSearchAttempt entities by IDs.
+func (_u *ItemUpdateOne) RemoveSubtitleSearchAttemptIDs(ids ...core.ID) *ItemUpdateOne {
+	_u.mutation.RemoveSubtitleSearchAttemptIDs(ids...)
+	return _u
+}
+
+// RemoveSubtitleSearchAttempts removes "subtitle_search_attempts" edges to SubtitleSearchAttempt entities.
+func (_u *ItemUpdateOne) RemoveSubtitleSearchAttempts(v ...*SubtitleSearchAttempt) *ItemUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSubtitleSearchAttemptIDs(ids...)
 }
 
 // Where appends a list predicates to the ItemUpdate builder.
@@ -6446,6 +6880,170 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.SubtitleProfileTable,
+			Columns: []string{item.SubtitleProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleprofileassignment.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.SubtitleProfileTable,
+			Columns: []string{item.SubtitleProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleprofileassignment.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleHistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleHistoryTable,
+			Columns: []string{item.SubtitleHistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlehistoryevent.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSubtitleHistoryIDs(); len(nodes) > 0 && !_u.mutation.SubtitleHistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleHistoryTable,
+			Columns: []string{item.SubtitleHistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlehistoryevent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleHistoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleHistoryTable,
+			Columns: []string{item.SubtitleHistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlehistoryevent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleBlocklistCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleBlocklistTable,
+			Columns: []string{item.SubtitleBlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleblocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSubtitleBlocklistIDs(); len(nodes) > 0 && !_u.mutation.SubtitleBlocklistCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleBlocklistTable,
+			Columns: []string{item.SubtitleBlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleblocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleBlocklistIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleBlocklistTable,
+			Columns: []string{item.SubtitleBlocklistColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitleblocklistentry.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleSearchAttemptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleSearchAttemptsTable,
+			Columns: []string{item.SubtitleSearchAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlesearchattempt.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSubtitleSearchAttemptsIDs(); len(nodes) > 0 && !_u.mutation.SubtitleSearchAttemptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleSearchAttemptsTable,
+			Columns: []string{item.SubtitleSearchAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlesearchattempt.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleSearchAttemptsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   item.SubtitleSearchAttemptsTable,
+			Columns: []string{item.SubtitleSearchAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlesearchattempt.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

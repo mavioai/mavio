@@ -80,6 +80,16 @@ type Tx struct {
 	Setting *SettingClient
 	// StorageJob is the client for interacting with the StorageJob builders.
 	StorageJob *StorageJobClient
+	// SubtitleBlocklistEntry is the client for interacting with the SubtitleBlocklistEntry builders.
+	SubtitleBlocklistEntry *SubtitleBlocklistEntryClient
+	// SubtitleHistoryEvent is the client for interacting with the SubtitleHistoryEvent builders.
+	SubtitleHistoryEvent *SubtitleHistoryEventClient
+	// SubtitleProfile is the client for interacting with the SubtitleProfile builders.
+	SubtitleProfile *SubtitleProfileClient
+	// SubtitleProfileAssignment is the client for interacting with the SubtitleProfileAssignment builders.
+	SubtitleProfileAssignment *SubtitleProfileAssignmentClient
+	// SubtitleSearchAttempt is the client for interacting with the SubtitleSearchAttempt builders.
+	SubtitleSearchAttempt *SubtitleSearchAttemptClient
 	// Trickplay is the client for interacting with the Trickplay builders.
 	Trickplay *TrickplayClient
 	// User is the client for interacting with the User builders.
@@ -253,6 +263,11 @@ func (tx *Tx) init() {
 	tx.Request = NewRequestClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
 	tx.StorageJob = NewStorageJobClient(tx.config)
+	tx.SubtitleBlocklistEntry = NewSubtitleBlocklistEntryClient(tx.config)
+	tx.SubtitleHistoryEvent = NewSubtitleHistoryEventClient(tx.config)
+	tx.SubtitleProfile = NewSubtitleProfileClient(tx.config)
+	tx.SubtitleProfileAssignment = NewSubtitleProfileAssignmentClient(tx.config)
+	tx.SubtitleSearchAttempt = NewSubtitleSearchAttemptClient(tx.config)
 	tx.Trickplay = NewTrickplayClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserData = NewUserDataClient(tx.config)

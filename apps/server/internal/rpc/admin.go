@@ -180,6 +180,8 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 		Acquisition: acquisition,
 		Requests:    requests,
 		Metadata:    meta,
+		// The subtitle settings are changed through SubtitleService.
+		Subtitles: current.Subtitles,
 	}, nil
 }
 

@@ -3775,6 +3775,98 @@ func HasIssuesWith(preds ...predicate.Issue) predicate.Item {
 	})
 }
 
+// HasSubtitleProfile applies the HasEdge predicate on the "subtitle_profile" edge.
+func HasSubtitleProfile() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, SubtitleProfileTable, SubtitleProfileColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSubtitleProfileWith applies the HasEdge predicate on the "subtitle_profile" edge with a given conditions (other predicates).
+func HasSubtitleProfileWith(preds ...predicate.SubtitleProfileAssignment) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newSubtitleProfileStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSubtitleHistory applies the HasEdge predicate on the "subtitle_history" edge.
+func HasSubtitleHistory() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SubtitleHistoryTable, SubtitleHistoryColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSubtitleHistoryWith applies the HasEdge predicate on the "subtitle_history" edge with a given conditions (other predicates).
+func HasSubtitleHistoryWith(preds ...predicate.SubtitleHistoryEvent) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newSubtitleHistoryStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSubtitleBlocklist applies the HasEdge predicate on the "subtitle_blocklist" edge.
+func HasSubtitleBlocklist() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SubtitleBlocklistTable, SubtitleBlocklistColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSubtitleBlocklistWith applies the HasEdge predicate on the "subtitle_blocklist" edge with a given conditions (other predicates).
+func HasSubtitleBlocklistWith(preds ...predicate.SubtitleBlocklistEntry) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newSubtitleBlocklistStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSubtitleSearchAttempts applies the HasEdge predicate on the "subtitle_search_attempts" edge.
+func HasSubtitleSearchAttempts() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SubtitleSearchAttemptsTable, SubtitleSearchAttemptsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSubtitleSearchAttemptsWith applies the HasEdge predicate on the "subtitle_search_attempts" edge with a given conditions (other predicates).
+func HasSubtitleSearchAttemptsWith(preds ...predicate.SubtitleSearchAttempt) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newSubtitleSearchAttemptsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Item) predicate.Item {
 	return predicate.Item(sql.AndPredicates(predicates...))

@@ -108,6 +108,21 @@ type Setting func(*sql.Selector)
 // StorageJob is the predicate function for storagejob builders.
 type StorageJob func(*sql.Selector)
 
+// SubtitleBlocklistEntry is the predicate function for subtitleblocklistentry builders.
+type SubtitleBlocklistEntry func(*sql.Selector)
+
+// SubtitleHistoryEvent is the predicate function for subtitlehistoryevent builders.
+type SubtitleHistoryEvent func(*sql.Selector)
+
+// SubtitleProfile is the predicate function for subtitleprofile builders.
+type SubtitleProfile func(*sql.Selector)
+
+// SubtitleProfileAssignment is the predicate function for subtitleprofileassignment builders.
+type SubtitleProfileAssignment func(*sql.Selector)
+
+// SubtitleSearchAttempt is the predicate function for subtitlesearchattempt builders.
+type SubtitleSearchAttempt func(*sql.Selector)
+
 // Trickplay is the predicate function for trickplay builders.
 type Trickplay func(*sql.Selector)
 

@@ -63,5 +63,6 @@ func (Library) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("items", Item.Type).Annotations(cascade()),
 		edge.To("folder_states", FolderState.Type).Annotations(cascade()),
+		edge.To("subtitle_profile", SubtitleProfileAssignment.Type).Annotations(cascade()).Unique(),
 	}
 }

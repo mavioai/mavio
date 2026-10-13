@@ -29,6 +29,10 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/mediasource"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pendingrelease"
 	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlehistoryevent"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -38,34 +42,38 @@ import (
 // ItemQuery is the builder for querying Item entities.
 type ItemQuery struct {
 	config
-	ctx                 *QueryContext
-	order               []item.OrderOption
-	inters              []Interceptor
-	predicates          []predicate.Item
-	withLibrary         *LibraryQuery
-	withParent          *ItemQuery
-	withChildren        *ItemQuery
-	withOwner           *ItemQuery
-	withExtras          *ItemQuery
-	withValues          *ItemValueQuery
-	withMediaSources    *MediaSourceQuery
-	withImages          *ImageQuery
-	withTrickplay       *TrickplayQuery
-	withSegments        *MediaSegmentQuery
-	withCredits         *CreditQuery
-	withUserData        *UserDataQuery
-	withUser            *UserQuery
-	withLinks           *ItemLinkQuery
-	withLinkedIn        *ItemLinkQuery
-	withWanted          *WantedQuery
-	withEpisodeStates   *EpisodeStateQuery
-	withDownloads       *DownloadQuery
-	withHistory         *HistoryEventQuery
-	withBlocklist       *BlocklistEntryQuery
-	withPendingReleases *PendingReleaseQuery
-	withExtraFiles      *ExtraFileQuery
-	withIssues          *IssueQuery
-	modifiers           []func(*sql.Selector)
+	ctx                        *QueryContext
+	order                      []item.OrderOption
+	inters                     []Interceptor
+	predicates                 []predicate.Item
+	withLibrary                *LibraryQuery
+	withParent                 *ItemQuery
+	withChildren               *ItemQuery
+	withOwner                  *ItemQuery
+	withExtras                 *ItemQuery
+	withValues                 *ItemValueQuery
+	withMediaSources           *MediaSourceQuery
+	withImages                 *ImageQuery
+	withTrickplay              *TrickplayQuery
+	withSegments               *MediaSegmentQuery
+	withCredits                *CreditQuery
+	withUserData               *UserDataQuery
+	withUser                   *UserQuery
+	withLinks                  *ItemLinkQuery
+	withLinkedIn               *ItemLinkQuery
+	withWanted                 *WantedQuery
+	withEpisodeStates          *EpisodeStateQuery
+	withDownloads              *DownloadQuery
+	withHistory                *HistoryEventQuery
+	withBlocklist              *BlocklistEntryQuery
+	withPendingReleases        *PendingReleaseQuery
+	withExtraFiles             *ExtraFileQuery
+	withIssues                 *IssueQuery
+	withSubtitleProfile        *SubtitleProfileAssignmentQuery
+	withSubtitleHistory        *SubtitleHistoryEventQuery
+	withSubtitleBlocklist      *SubtitleBlocklistEntryQuery
+	withSubtitleSearchAttempts *SubtitleSearchAttemptQuery
+	modifiers                  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -608,6 +616,94 @@ func (_q *ItemQuery) QueryIssues() *IssueQuery {
 	return query
 }
 
+// QuerySubtitleProfile chains the current query on the "subtitle_profile" edge.
+func (_q *ItemQuery) QuerySubtitleProfile() *SubtitleProfileAssignmentQuery {
+	query := (&SubtitleProfileAssignmentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(subtitleprofileassignment.Table, subtitleprofileassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, item.SubtitleProfileTable, item.SubtitleProfileColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySubtitleHistory chains the current query on the "subtitle_history" edge.
+func (_q *ItemQuery) QuerySubtitleHistory() *SubtitleHistoryEventQuery {
+	query := (&SubtitleHistoryEventClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(subtitlehistoryevent.Table, subtitlehistoryevent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.SubtitleHistoryTable, item.SubtitleHistoryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySubtitleBlocklist chains the current query on the "subtitle_blocklist" edge.
+func (_q *ItemQuery) QuerySubtitleBlocklist() *SubtitleBlocklistEntryQuery {
+	query := (&SubtitleBlocklistEntryClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(subtitleblocklistentry.Table, subtitleblocklistentry.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.SubtitleBlocklistTable, item.SubtitleBlocklistColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySubtitleSearchAttempts chains the current query on the "subtitle_search_attempts" edge.
+func (_q *ItemQuery) QuerySubtitleSearchAttempts() *SubtitleSearchAttemptQuery {
+	query := (&SubtitleSearchAttemptClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(subtitlesearchattempt.Table, subtitlesearchattempt.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, item.SubtitleSearchAttemptsTable, item.SubtitleSearchAttemptsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Item entity from the query.
 // Returns a *NotFoundError when no Item was found.
 func (_q *ItemQuery) First(ctx context.Context) (*Item, error) {
@@ -795,34 +891,38 @@ func (_q *ItemQuery) Clone() *ItemQuery {
 		return nil
 	}
 	return &ItemQuery{
-		config:              _q.config,
-		ctx:                 _q.ctx.Clone(),
-		order:               append([]item.OrderOption{}, _q.order...),
-		inters:              append([]Interceptor{}, _q.inters...),
-		predicates:          append([]predicate.Item{}, _q.predicates...),
-		withLibrary:         _q.withLibrary.Clone(),
-		withParent:          _q.withParent.Clone(),
-		withChildren:        _q.withChildren.Clone(),
-		withOwner:           _q.withOwner.Clone(),
-		withExtras:          _q.withExtras.Clone(),
-		withValues:          _q.withValues.Clone(),
-		withMediaSources:    _q.withMediaSources.Clone(),
-		withImages:          _q.withImages.Clone(),
-		withTrickplay:       _q.withTrickplay.Clone(),
-		withSegments:        _q.withSegments.Clone(),
-		withCredits:         _q.withCredits.Clone(),
-		withUserData:        _q.withUserData.Clone(),
-		withUser:            _q.withUser.Clone(),
-		withLinks:           _q.withLinks.Clone(),
-		withLinkedIn:        _q.withLinkedIn.Clone(),
-		withWanted:          _q.withWanted.Clone(),
-		withEpisodeStates:   _q.withEpisodeStates.Clone(),
-		withDownloads:       _q.withDownloads.Clone(),
-		withHistory:         _q.withHistory.Clone(),
-		withBlocklist:       _q.withBlocklist.Clone(),
-		withPendingReleases: _q.withPendingReleases.Clone(),
-		withExtraFiles:      _q.withExtraFiles.Clone(),
-		withIssues:          _q.withIssues.Clone(),
+		config:                     _q.config,
+		ctx:                        _q.ctx.Clone(),
+		order:                      append([]item.OrderOption{}, _q.order...),
+		inters:                     append([]Interceptor{}, _q.inters...),
+		predicates:                 append([]predicate.Item{}, _q.predicates...),
+		withLibrary:                _q.withLibrary.Clone(),
+		withParent:                 _q.withParent.Clone(),
+		withChildren:               _q.withChildren.Clone(),
+		withOwner:                  _q.withOwner.Clone(),
+		withExtras:                 _q.withExtras.Clone(),
+		withValues:                 _q.withValues.Clone(),
+		withMediaSources:           _q.withMediaSources.Clone(),
+		withImages:                 _q.withImages.Clone(),
+		withTrickplay:              _q.withTrickplay.Clone(),
+		withSegments:               _q.withSegments.Clone(),
+		withCredits:                _q.withCredits.Clone(),
+		withUserData:               _q.withUserData.Clone(),
+		withUser:                   _q.withUser.Clone(),
+		withLinks:                  _q.withLinks.Clone(),
+		withLinkedIn:               _q.withLinkedIn.Clone(),
+		withWanted:                 _q.withWanted.Clone(),
+		withEpisodeStates:          _q.withEpisodeStates.Clone(),
+		withDownloads:              _q.withDownloads.Clone(),
+		withHistory:                _q.withHistory.Clone(),
+		withBlocklist:              _q.withBlocklist.Clone(),
+		withPendingReleases:        _q.withPendingReleases.Clone(),
+		withExtraFiles:             _q.withExtraFiles.Clone(),
+		withIssues:                 _q.withIssues.Clone(),
+		withSubtitleProfile:        _q.withSubtitleProfile.Clone(),
+		withSubtitleHistory:        _q.withSubtitleHistory.Clone(),
+		withSubtitleBlocklist:      _q.withSubtitleBlocklist.Clone(),
+		withSubtitleSearchAttempts: _q.withSubtitleSearchAttempts.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -1083,6 +1183,50 @@ func (_q *ItemQuery) WithIssues(opts ...func(*IssueQuery)) *ItemQuery {
 	return _q
 }
 
+// WithSubtitleProfile tells the query-builder to eager-load the nodes that are connected to
+// the "subtitle_profile" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithSubtitleProfile(opts ...func(*SubtitleProfileAssignmentQuery)) *ItemQuery {
+	query := (&SubtitleProfileAssignmentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSubtitleProfile = query
+	return _q
+}
+
+// WithSubtitleHistory tells the query-builder to eager-load the nodes that are connected to
+// the "subtitle_history" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithSubtitleHistory(opts ...func(*SubtitleHistoryEventQuery)) *ItemQuery {
+	query := (&SubtitleHistoryEventClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSubtitleHistory = query
+	return _q
+}
+
+// WithSubtitleBlocklist tells the query-builder to eager-load the nodes that are connected to
+// the "subtitle_blocklist" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithSubtitleBlocklist(opts ...func(*SubtitleBlocklistEntryQuery)) *ItemQuery {
+	query := (&SubtitleBlocklistEntryClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSubtitleBlocklist = query
+	return _q
+}
+
+// WithSubtitleSearchAttempts tells the query-builder to eager-load the nodes that are connected to
+// the "subtitle_search_attempts" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithSubtitleSearchAttempts(opts ...func(*SubtitleSearchAttemptQuery)) *ItemQuery {
+	query := (&SubtitleSearchAttemptClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSubtitleSearchAttempts = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -1161,7 +1305,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	var (
 		nodes       = []*Item{}
 		_spec       = _q.querySpec()
-		loadedTypes = [23]bool{
+		loadedTypes = [27]bool{
 			_q.withLibrary != nil,
 			_q.withParent != nil,
 			_q.withChildren != nil,
@@ -1185,6 +1329,10 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 			_q.withPendingReleases != nil,
 			_q.withExtraFiles != nil,
 			_q.withIssues != nil,
+			_q.withSubtitleProfile != nil,
+			_q.withSubtitleHistory != nil,
+			_q.withSubtitleBlocklist != nil,
+			_q.withSubtitleSearchAttempts != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -1361,6 +1509,37 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 		if err := _q.loadIssues(ctx, query, nodes,
 			func(n *Item) { n.Edges.Issues = []*Issue{} },
 			func(n *Item, e *Issue) { n.Edges.Issues = append(n.Edges.Issues, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSubtitleProfile; query != nil {
+		if err := _q.loadSubtitleProfile(ctx, query, nodes, nil,
+			func(n *Item, e *SubtitleProfileAssignment) { n.Edges.SubtitleProfile = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSubtitleHistory; query != nil {
+		if err := _q.loadSubtitleHistory(ctx, query, nodes,
+			func(n *Item) { n.Edges.SubtitleHistory = []*SubtitleHistoryEvent{} },
+			func(n *Item, e *SubtitleHistoryEvent) { n.Edges.SubtitleHistory = append(n.Edges.SubtitleHistory, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSubtitleBlocklist; query != nil {
+		if err := _q.loadSubtitleBlocklist(ctx, query, nodes,
+			func(n *Item) { n.Edges.SubtitleBlocklist = []*SubtitleBlocklistEntry{} },
+			func(n *Item, e *SubtitleBlocklistEntry) {
+				n.Edges.SubtitleBlocklist = append(n.Edges.SubtitleBlocklist, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSubtitleSearchAttempts; query != nil {
+		if err := _q.loadSubtitleSearchAttempts(ctx, query, nodes,
+			func(n *Item) { n.Edges.SubtitleSearchAttempts = []*SubtitleSearchAttempt{} },
+			func(n *Item, e *SubtitleSearchAttempt) {
+				n.Edges.SubtitleSearchAttempts = append(n.Edges.SubtitleSearchAttempts, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -2053,6 +2232,126 @@ func (_q *ItemQuery) loadIssues(ctx context.Context, query *IssueQuery, nodes []
 	}
 	query.Where(predicate.Issue(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(item.IssuesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadSubtitleProfile(ctx context.Context, query *SubtitleProfileAssignmentQuery, nodes []*Item, init func(*Item), assign func(*Item, *SubtitleProfileAssignment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(subtitleprofileassignment.FieldItemID)
+	}
+	query.Where(predicate.SubtitleProfileAssignment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.SubtitleProfileColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "item_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadSubtitleHistory(ctx context.Context, query *SubtitleHistoryEventQuery, nodes []*Item, init func(*Item), assign func(*Item, *SubtitleHistoryEvent)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(subtitlehistoryevent.FieldItemID)
+	}
+	query.Where(predicate.SubtitleHistoryEvent(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.SubtitleHistoryColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadSubtitleBlocklist(ctx context.Context, query *SubtitleBlocklistEntryQuery, nodes []*Item, init func(*Item), assign func(*Item, *SubtitleBlocklistEntry)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(subtitleblocklistentry.FieldItemID)
+	}
+	query.Where(predicate.SubtitleBlocklistEntry(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.SubtitleBlocklistColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadSubtitleSearchAttempts(ctx context.Context, query *SubtitleSearchAttemptQuery, nodes []*Item, init func(*Item), assign func(*Item, *SubtitleSearchAttempt)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(subtitlesearchattempt.FieldItemID)
+	}
+	query.Where(predicate.SubtitleSearchAttempt(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.SubtitleSearchAttemptsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

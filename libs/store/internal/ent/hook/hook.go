@@ -417,6 +417,66 @@ func (f StorageJobFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StorageJobMutation", m)
 }
 
+// The SubtitleBlocklistEntryFunc type is an adapter to allow the use of ordinary
+// function as SubtitleBlocklistEntry mutator.
+type SubtitleBlocklistEntryFunc func(context.Context, *ent.SubtitleBlocklistEntryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubtitleBlocklistEntryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubtitleBlocklistEntryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubtitleBlocklistEntryMutation", m)
+}
+
+// The SubtitleHistoryEventFunc type is an adapter to allow the use of ordinary
+// function as SubtitleHistoryEvent mutator.
+type SubtitleHistoryEventFunc func(context.Context, *ent.SubtitleHistoryEventMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubtitleHistoryEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubtitleHistoryEventMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubtitleHistoryEventMutation", m)
+}
+
+// The SubtitleProfileFunc type is an adapter to allow the use of ordinary
+// function as SubtitleProfile mutator.
+type SubtitleProfileFunc func(context.Context, *ent.SubtitleProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubtitleProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubtitleProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubtitleProfileMutation", m)
+}
+
+// The SubtitleProfileAssignmentFunc type is an adapter to allow the use of ordinary
+// function as SubtitleProfileAssignment mutator.
+type SubtitleProfileAssignmentFunc func(context.Context, *ent.SubtitleProfileAssignmentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubtitleProfileAssignmentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubtitleProfileAssignmentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubtitleProfileAssignmentMutation", m)
+}
+
+// The SubtitleSearchAttemptFunc type is an adapter to allow the use of ordinary
+// function as SubtitleSearchAttempt mutator.
+type SubtitleSearchAttemptFunc func(context.Context, *ent.SubtitleSearchAttemptMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubtitleSearchAttemptFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubtitleSearchAttemptMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubtitleSearchAttemptMutation", m)
+}
+
 // The TrickplayFunc type is an adapter to allow the use of ordinary
 // function as Trickplay mutator.
 type TrickplayFunc func(context.Context, *ent.TrickplayMutation) (ent.Value, error)

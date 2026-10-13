@@ -43,6 +43,11 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlehistoryevent"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofile"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -1023,6 +1028,141 @@ func (f TraverseStorageJob) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.StorageJobQuery", q)
 }
 
+// The SubtitleBlocklistEntryFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SubtitleBlocklistEntryFunc func(context.Context, *ent.SubtitleBlocklistEntryQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f SubtitleBlocklistEntryFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.SubtitleBlocklistEntryQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.SubtitleBlocklistEntryQuery", q)
+}
+
+// The TraverseSubtitleBlocklistEntry type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSubtitleBlocklistEntry func(context.Context, *ent.SubtitleBlocklistEntryQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSubtitleBlocklistEntry) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSubtitleBlocklistEntry) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.SubtitleBlocklistEntryQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.SubtitleBlocklistEntryQuery", q)
+}
+
+// The SubtitleHistoryEventFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SubtitleHistoryEventFunc func(context.Context, *ent.SubtitleHistoryEventQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f SubtitleHistoryEventFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.SubtitleHistoryEventQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.SubtitleHistoryEventQuery", q)
+}
+
+// The TraverseSubtitleHistoryEvent type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSubtitleHistoryEvent func(context.Context, *ent.SubtitleHistoryEventQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSubtitleHistoryEvent) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSubtitleHistoryEvent) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.SubtitleHistoryEventQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.SubtitleHistoryEventQuery", q)
+}
+
+// The SubtitleProfileFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SubtitleProfileFunc func(context.Context, *ent.SubtitleProfileQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f SubtitleProfileFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.SubtitleProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.SubtitleProfileQuery", q)
+}
+
+// The TraverseSubtitleProfile type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSubtitleProfile func(context.Context, *ent.SubtitleProfileQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSubtitleProfile) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSubtitleProfile) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.SubtitleProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.SubtitleProfileQuery", q)
+}
+
+// The SubtitleProfileAssignmentFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SubtitleProfileAssignmentFunc func(context.Context, *ent.SubtitleProfileAssignmentQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f SubtitleProfileAssignmentFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.SubtitleProfileAssignmentQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.SubtitleProfileAssignmentQuery", q)
+}
+
+// The TraverseSubtitleProfileAssignment type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSubtitleProfileAssignment func(context.Context, *ent.SubtitleProfileAssignmentQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSubtitleProfileAssignment) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSubtitleProfileAssignment) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.SubtitleProfileAssignmentQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.SubtitleProfileAssignmentQuery", q)
+}
+
+// The SubtitleSearchAttemptFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SubtitleSearchAttemptFunc func(context.Context, *ent.SubtitleSearchAttemptQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f SubtitleSearchAttemptFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.SubtitleSearchAttemptQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.SubtitleSearchAttemptQuery", q)
+}
+
+// The TraverseSubtitleSearchAttempt type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSubtitleSearchAttempt func(context.Context, *ent.SubtitleSearchAttemptQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSubtitleSearchAttempt) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSubtitleSearchAttempt) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.SubtitleSearchAttemptQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.SubtitleSearchAttemptQuery", q)
+}
+
 // The TrickplayFunc type is an adapter to allow the use of ordinary function as a Querier.
 type TrickplayFunc func(context.Context, *ent.TrickplayQuery) (ent.Value, error)
 
@@ -1202,6 +1342,16 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.SettingQuery, predicate.Setting, setting.OrderOption]{typ: ent.TypeSetting, tq: q}, nil
 	case *ent.StorageJobQuery:
 		return &query[*ent.StorageJobQuery, predicate.StorageJob, storagejob.OrderOption]{typ: ent.TypeStorageJob, tq: q}, nil
+	case *ent.SubtitleBlocklistEntryQuery:
+		return &query[*ent.SubtitleBlocklistEntryQuery, predicate.SubtitleBlocklistEntry, subtitleblocklistentry.OrderOption]{typ: ent.TypeSubtitleBlocklistEntry, tq: q}, nil
+	case *ent.SubtitleHistoryEventQuery:
+		return &query[*ent.SubtitleHistoryEventQuery, predicate.SubtitleHistoryEvent, subtitlehistoryevent.OrderOption]{typ: ent.TypeSubtitleHistoryEvent, tq: q}, nil
+	case *ent.SubtitleProfileQuery:
+		return &query[*ent.SubtitleProfileQuery, predicate.SubtitleProfile, subtitleprofile.OrderOption]{typ: ent.TypeSubtitleProfile, tq: q}, nil
+	case *ent.SubtitleProfileAssignmentQuery:
+		return &query[*ent.SubtitleProfileAssignmentQuery, predicate.SubtitleProfileAssignment, subtitleprofileassignment.OrderOption]{typ: ent.TypeSubtitleProfileAssignment, tq: q}, nil
+	case *ent.SubtitleSearchAttemptQuery:
+		return &query[*ent.SubtitleSearchAttemptQuery, predicate.SubtitleSearchAttempt, subtitlesearchattempt.OrderOption]{typ: ent.TypeSubtitleSearchAttempt, tq: q}, nil
 	case *ent.TrickplayQuery:
 		return &query[*ent.TrickplayQuery, predicate.Trickplay, trickplay.OrderOption]{typ: ent.TypeTrickplay, tq: q}, nil
 	case *ent.UserQuery:
