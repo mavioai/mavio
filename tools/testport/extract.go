@@ -1,6 +1,6 @@
 // Package testport extracts test cases and test assets from C# test projects
-// (xUnit in Jellyfin, NUnit in Sonarr, Radarr and Prowlarr) into
-// language-neutral JSON for Mavio's Go tests.
+// (xUnit in Jellyfin, NUnit in Sonarr, Radarr and Prowlarr) and pytest
+// modules (Bazarr) into language-neutral JSON for Mavio's Go tests.
 package testport
 
 import (
@@ -35,7 +35,7 @@ type Theory struct {
 // Param describes a theory parameter.
 type Param struct {
 	Name string `json:"name"`
-	Type string `json:"type"`
+	Type string `json:"type,omitempty"` // empty for pytest, which has no types
 }
 
 // TheoryCase is one set of arguments for a theory. The expected value of an

@@ -35,7 +35,7 @@ type Mapping struct {
 	Constants  []ConstMapping `json:"constants"`
 }
 
-// CaseMapping maps C# test files under Source (a directory or file, relative
+// CaseMapping maps C# test files and pytest modules under Source (a directory or file, relative
 // to the source repository) to JSON case files under Target (relative to
 // the Mavio repository). The longest matching Source wins.
 type CaseMapping struct {
@@ -45,10 +45,11 @@ type CaseMapping struct {
 
 // AssetMapping copies test data files from Source to Target.
 type AssetMapping struct {
-	Source    string `json:"source"`
-	Target    string `json:"target"`
-	Include   string `json:"include,omitempty"` // glob on the file name; empty means all
-	Recursive bool   `json:"recursive,omitempty"`
+	Source    string   `json:"source"`
+	Target    string   `json:"target"`
+	Include   string   `json:"include,omitempty"` // glob on the file name; empty means all
+	Exclude   []string `json:"exclude,omitempty"` // globs on the file name of files left out
+	Recursive bool     `json:"recursive,omitempty"`
 }
 
 // ConstMapping extracts the constant fields of the C# file Source into the
@@ -117,7 +118,7 @@ func Port(ctx context.Context, opts Options) (Summary, error) {
 		})
 	}
 
-	files, err := csharpFiles(opts.Checkout, opts.Mapping.Cases)
+	files, err := testFiles(opts.Checkout, opts.Mapping.Cases)
 	if err != nil {
 		return sum, err
 	}
@@ -131,12 +132,15 @@ func Port(ctx context.Context, opts Options) (Summary, error) {
 		if err != nil {
 			return sum, err
 		}
-		classes, err := Extract(string(src), opts.Mapping.Name)
+		classes, err := extractFile(rel, string(src), opts.Mapping.Name)
 		if err != nil {
 			return sum, fmt.Errorf("%s: %w", rel, err)
 		}
 		for _, tc := range classes {
 			out := outputPath(cm, rel, tc.Class)
+			if module, ok := strings.CutSuffix(path.Base(rel), ".py"); ok {
+				out = outputPath(cm, rel, strings.TrimSuffix(strings.TrimPrefix(module, "test_"), "_test"))
+			}
 			if prev, dup := written[out]; dup {
 				return sum, fmt.Errorf("%s and %s both map to %s", prev, rel, out)
 			}
@@ -217,9 +221,33 @@ func writeConstants(opts Options, cm ConstMapping, commit string) (int, error) {
 	return len(consts), nil
 }
 
-// csharpFiles lists the .cs files under every case mapping source, as
-// slash-separated paths relative to root.
-func csharpFiles(root string, cases []CaseMapping) ([]string, error) {
+// extractFile extracts the test classes of a C# file, or the tests of a
+// pytest module as one class named after it.
+func extractFile(rel, src, origin string) ([]TestClass, error) {
+	module, ok := strings.CutSuffix(path.Base(rel), ".py")
+	if !ok {
+		return Extract(src, origin)
+	}
+	tc, err := ExtractPytest(src, module, origin)
+	if err != nil || len(tc.Theories)+len(tc.Facts)+len(tc.Unsupported) == 0 {
+		return nil, err
+	}
+	return []TestClass{tc}, nil
+}
+
+// isTestFile reports whether name is a C# file or a pytest module
+// (test_*.py or *_test.py).
+func isTestFile(name string) bool {
+	if strings.HasSuffix(name, ".cs") {
+		return true
+	}
+	module, ok := strings.CutSuffix(name, ".py")
+	return ok && (strings.HasPrefix(module, "test_") || strings.HasSuffix(module, "_test"))
+}
+
+// testFiles lists the C# files and pytest modules under every case
+// mapping source, as slash-separated paths relative to root.
+func testFiles(root string, cases []CaseMapping) ([]string, error) {
 	set := map[string]bool{}
 	for _, cm := range cases {
 		base := filepath.Join(root, filepath.FromSlash(cm.Source))
@@ -227,10 +255,10 @@ func csharpFiles(root string, cases []CaseMapping) ([]string, error) {
 			if err != nil {
 				return err
 			}
-			if d.IsDir() && (d.Name() == "bin" || d.Name() == "obj") {
+			if d.IsDir() && (d.Name() == "bin" || d.Name() == "obj" || d.Name() == "__pycache__") {
 				return filepath.SkipDir
 			}
-			if !d.IsDir() && strings.HasSuffix(p, ".cs") {
+			if !d.IsDir() && isTestFile(d.Name()) {
 				rel, err := filepath.Rel(root, p)
 				if err != nil {
 					return err
@@ -321,6 +349,11 @@ func copyAssets(opts Options, am AssetMapping, commit string) (int, error) {
 		}
 		if am.Include != "" {
 			if ok, _ := path.Match(am.Include, d.Name()); !ok {
+				return nil
+			}
+		}
+		for _, x := range am.Exclude {
+			if ok, _ := path.Match(x, d.Name()); ok {
 				return nil
 			}
 		}

@@ -2,7 +2,7 @@
 
 > [English](README.md) | 简体中文
 
-从 Jellyfin、Sonarr、Radarr 与 Prowlarr 的仓库中提取参数化测试用例与测试资产，写入 Mavio 各库的 `testdata/` 目录。格式与规则见 `docs/testing.zh-CN.md` §2。
+从 Jellyfin、Sonarr、Radarr、Prowlarr 与 Bazarr 的仓库中提取参数化测试用例与测试资产，写入 Mavio 各库的 `testdata/` 目录。格式与规则见 `docs/testing.zh-CN.md` §2。
 
 ```bash
 # 在 tools/testport 下
@@ -14,5 +14,7 @@ go run ./cmd/testport -dry-run                                              # �
 `mapping.json` 列出各来源仓库，每个来源把自己的测试工程、测试数据目录与常量文件映射到 Mavio 的目标位置，匹配时取最长的源路径。来源仓库路径用 `-checkout <name>=<dir>` 或 `$MAVIO_<NAME>`（如 `$MAVIO_JELLYFIN`）给出；没有给出路径的来源会被跳过。
 
 - `internal/csharp`：C# 词法分析器，以及覆盖 xUnit 与 NUnit 测试所用声明与表达式子集的解析器。
+- `internal/python`：Python 词法分析器，以及读取 pytest 模块中测试函数、装饰器与字面量值的读取器。
 - `extract.go`：把 xUnit 的 `[Theory]` / `[Fact]` 与 NUnit 的 `[TestCase]` / `[TestCaseSource]` / `[Test]` 方法转换为用例。
-- `port.go`：应用映射，写出用例文件，复制资产并生成 `SOURCES.json`，提取所映射 C# 文件中的 `const` 字段。
+- `pytest.go`：把 pytest 的 `test*` 函数转换为用例：带 `@pytest.mark.parametrize` 的为 theory（叠加的标记取其笛卡尔积，`pytest.param` 带其标记），其余为 fact，并记录 `skip`、`skipif` 与 `xfail` 的原因。
+- `port.go`：应用映射，写出用例文件，复制资产并生成 `SOURCES.json`（每条资产映射可按文件名包含与排除文件），提取所映射 C# 文件中的 `const` 字段。
