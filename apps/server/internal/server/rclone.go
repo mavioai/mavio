@@ -31,13 +31,16 @@ type rcloneRuntime struct {
 	Managed bool
 	proxy   *rclone.Proxy
 	daemon  *rclone.Daemon
+	blocks  *rclone.BlockCache
 }
 
 // startRclone starts the rcd cfg asks for, or reaches the one at
 // cfg.RcloneURL. Without rclone the server serves no remotes, which nil
 // tells; an rcd that does not start is logged and leaves the server
 // without them too.
-func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.StorageJobRepository) *rcloneRuntime {
+// class gives the storage class of library paths, which decides whether
+// the files of a folder are cached.
+func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.StorageJobRepository, class func(context.Context, string) core.StorageClass) *rcloneRuntime {
 	rt := &rcloneRuntime{}
 	switch {
 	case cfg.RcloneURL != "":
@@ -82,7 +85,17 @@ func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.St
 	if err := rt.proxy.Listen(); err != nil {
 		log.ErrorContext(ctx, "rclone media proxy", "err", err)
 	}
-	rt.Remotes = &rclone.Remotes{Client: rt.Client, MediaURL: rt.proxy.URL, Jobs: jobs, Log: log}
+	rt.Remotes = &rclone.Remotes{Client: rt.Client, MediaURL: rt.proxy.URL, Jobs: jobs, Log: log, Class: class}
+	if cfg.RcloneCacheSize > 0 {
+		bc, err := rclone.NewBlockCache(rt.Client, rclone.BlockCacheOptions{
+			Dir: filepath.Join(cfg.CacheDir, "rclone", "blocks"), MaxSize: cfg.RcloneCacheSize, Logger: log,
+		})
+		if err != nil {
+			log.ErrorContext(ctx, "files on cloud storage are read uncached", "err", err)
+		} else {
+			rt.blocks, rt.Remotes.Blocks = bc, bc
+		}
+	}
 	go func() {
 		if err := rt.Remotes.Sweep(ctx); err != nil {
 			log.WarnContext(ctx, "sweep rclone transfers", "err", err)
@@ -97,6 +110,9 @@ func (rt *rcloneRuntime) Close() {
 		return
 	}
 	_ = rt.proxy.Close()
+	if rt.blocks != nil {
+		_ = rt.blocks.Close()
+	}
 	if rt.daemon != nil {
 		_ = rt.daemon.Close()
 	}

@@ -205,13 +205,15 @@ HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需�
 
 ## 3. 通过 rclone 读取远端存储（Reading Remote Storage through rclone）
 
-状态：已设计，尚未实现（P25）。rclone 远端上的媒体库（[架构](architecture.zh-CN.md) §9.2）经 `rclone rcd` 读取媒体。本章针对 rclone 提供的所有后端，使这些读取发出的请求更少、拖动时更稳定、读过的数据可以复用：
+状态：部分实现（P25）。已实现：对象缓存与版本校验、状态码、经 `fsinfo` 报告拖动方式、数据流限制、对 webdav、http 与 crypt 的修正、每个远端一个 `Fs`，以及块缓存及其读取意图。计划中（下文逐项标明）：`FindByListing`、按 `ChangeNotify` 失效、后端的条件读取、链接缓存及其他单个后端的修正、各后端的数据流限制、为拖动与 HLS 按关键帧预读、已打开项内部的淘汰，以及实测（[路线图](roadmap.zh-CN.md) P25）。
+
+rclone 远端上的媒体库（[架构](architecture.zh-CN.md) §9.2）经 `rclone rcd` 读取媒体。本章针对 rclone 提供的所有后端，使这些读取发出的请求更少、拖动时更稳定、读过的数据可以复用：
 
 * mavioai/rclone 的 rcd 保留它找到的对象和取得的下载链接，限制同时打开的数据流，并如实报告存储返回的错误。
 * 修正代价超出必要的后端。
 * Mavio 缓存媒体数据块。
 
-### 3.1 目前一次读取的代价
+### 3.1 这些改动之前一次读取的代价
 
 每次读取一段媒体字节都要经过 Mavio → `rclone rcd`（`--rc-serve`）→ 后端 → 存储，每一步都可能付出超出必要的代价。
 
@@ -276,8 +278,8 @@ fork 对 rcd 与后端做以下修改；能对所有后端统一完成的，就�
 
 * **缓存来源：**
   * `serveRemote` 在调用 `NewObject` 之前先在这里查找对象，并缓存找到的对象。
-  * `operations/list` 与 `operations/stat` 服务于 Mavio 的扫描与 `Stat`，它们总是查询后端，从不读取缓存，并用返回的对象替换对应条目。只有 `--rc-serve` 读取缓存，所以扫描能立即看到存储上的变化，Mavio 的 `Stat` 给出的也总是存储上的当前版本。
-  * 通过列目录查找文件的后端，以 fork 的特性 `FindByListing` 声明这一点，即查找表中最后三行除 union 与 compress 之外的后端。对它们而言，未命中时列一次父目录并缓存其中所有对象，随后对相邻文件的请求即可命中；同一目录的并发未命中共用一次列举。
+  * `operations/list` 与 `operations/stat` 服务于 Mavio 的扫描与 `Stat`，它们总是查询后端，从不读取缓存。`stat` 缓存它返回的对象，找不到对象时丢弃对应条目。`list` 用返回的对象替换已有条目而不新增条目；对一个目录的完整列举（既不递归也不过滤）还会丢弃该目录中已不存在的对象的条目。只有 `--rc-serve` 读取缓存，所以扫描能立即看到存储上的变化，Mavio 的 `Stat` 给出的也总是存储上的当前版本。
+  * *计划中：* 通过列目录查找文件的后端，以 fork 的特性 `FindByListing` 声明这一点，即查找表中最后三行除 union 与 compress 之外的后端。对它们而言，未命中时列一次父目录并缓存其中所有对象，随后对相邻文件的请求即可命中；同一目录的并发未命中共用一次列举。
 * **随缓存的 `Object` 一起存活的数据：**
   * pikpak、thunder 与 pcloud 的链接；
   * premiumizeme、gofile、drime、linkbox 与 googlephotos 取自列举结果的链接；
@@ -286,19 +288,20 @@ fork 对 rcd 与后端做以下修改；能对所有后端统一完成的，就�
   * crypt 的 nonce（见下）；
   * union 选定的上游。
 * **有效期与失效：**
-  * 条目默认存活 5 分钟（可配置）。
-  * 经 rcd 的写操作（`operations/*`、`sync/*`）会丢弃所涉及路径与目录的条目。
-  * 后端支持 `ChangeNotify` 的远端（drive、onedrive、dropbox、box、pcloud、mega 等）留在缓存中期间，它报告的变化会丢弃对应条目。
-  * 在别处做的修改表现为指纹不符（见下）或 `Open` 失败；此时丢弃条目、重新查找对象并重试一次。
+  * 条目默认存活 5 分钟，缓存默认最多保存 10,000 个条目（选项 `--rc-serve-cache-duration` 与 `--rc-serve-cache-size`）。
+  * 经 rcd 的写操作（`operations/*`、`sync/*`、`backend/command`）会丢弃所涉及路径与目录的条目，无论该远端的 `Fs` 以哪个目录为根。
+  * *计划中：* 后端支持 `ChangeNotify` 的远端（drive、onedrive、dropbox、box、pcloud、mega 等）留在缓存中期间，它报告的变化会丢弃对应条目。
+  * 在别处做的修改表现为版本不符（见下）或 `Open` 失败；此时丢弃条目并重新查找对象，若对象版本未变则重试一次打开。
   * 未命中不缓存。
-* **版本校验：** 缓存的对象永远不会比 Mavio 打开文件时看到的版本更旧。
-  * Mavio 的读取器打开文件时调用 `Stat`，并把结果随每个发往 `--rc-serve` 的请求一起发送：ID、大小、修改时间，以及后端列举结果中无需额外代价即可得到的哈希。
-  * rcd 只在指纹相符时使用缓存的对象，否则重新查找。
-  * 重新查找到的对象仍不相符时，rcd 回应 412。Mavio 将其视为文件已变化：丢弃该文件的块缓存项，并重新调用 `Stat`。
-  * 按路径读取的后端（s3、b2、googlecloudstorage、azureblob、webdav 等）否则会以旧的大小提供新内容。对于支持按 ETag 条件读取的后端，`Open` 还会带上对象 ETag 的 `If-Match`。这样，读取中途被替换的文件会以 412 失败，而不会混入两个版本的数据。
+* **版本校验：** 一次读取永远不会混入一个文件的两个版本。
+  * `--rc-serve` 在每个响应中以 ETag 给出对象的版本：对象 ID 与其指纹（大小、修改时间，以及后端无需额外代价即可得到的哈希）的哈希值。
+  * Mavio 的读取器保存文件第一个响应的 ETag，并在之后的每个请求中以 `If-Match` 发送。块缓存把它与文件的缓存项一起保存，重启后仍然保留。
+  * 缓存的对象与 `If-Match` 不符时，rcd 重新查找对象；重新查找到的对象仍不相符时，回应 412。Mavio 把 412、以及总大小与 `Stat` 给出的大小不同的响应，视为文件已变化：读取以 `ErrChanged` 失败，并丢弃该文件的块缓存项。
+  * Mavio 的 `Stat` 查询后端，因而会刷新缓存的对象。缓存的对象只在别处修改之后、该文件下一次 `Stat` 或其所在目录下一次列举之前比存储上的旧，且最长不超过一个条目的有效期。
+  * *计划中：* 在这段时间内，按路径读取的后端（s3、b2、googlecloudstorage、azureblob、webdav 等）会以旧版本提供新内容。对于支持按 ETag 条件读取的后端，`Open` 将同时以存储给出的对象 ETag 发送 `If-Match`，使读取中途被替换的文件以 412 失败。
   * 原地改写且 ID、大小与修改时间都不变的文件，只有在指纹包含哈希时才能发现。
 
-**链接缓存**（`lib/linkcache`）：每个需要申请链接的后端在 `Open` 中使用。
+**链接缓存**（`lib/linkcache`，计划中）：每个需要申请链接的后端在 `Open` 中使用。
 
 * 以对象 ID 与指纹（大小，以及哈希或修改时间）为键，每个条目连同链接绑定的请求头与 cookie 一起保存。
 * 过期时间依次取响应中的过期字段（aliyundrive 的 `Expiration`）、URL 中的过期参数、后端声明的有效期。存储未给出过期时间时，声明的有效期来自实测（§3.5）。
@@ -325,21 +328,21 @@ fork 对 rcd 与后端做以下修改；能对所有后端统一完成的，就�
 | thunder | —（链接存在缓存的 `Object` 上） | 加上过期检查 |
 | fichier | —（其令牌只能使用一次） | — |
 
-**对个别后端的修正：**
+**对个别后端的修正**（filelu 以及上表"另外"一列为计划中）：
 
 * webdav 与 http：请求了范围而服务器回应 200 时，`Open` 丢弃偏移之前的字节（与 mailru 的做法相同），使 body 与范围一致。
 * crypt：第一次读取后把 nonce 保存在其 `Object` 上，使一次拖动只需一个请求。
 
 **经 `--rc-serve` 与 `operations/fsinfo`：**
 
-* **状态码：** 查找与打开回应存储错误对应的状态码，而不是 404 与 500：
+* **状态码：** 查找与打开回应存储错误对应的状态码（rcd 从错误链中找出），而不是 404 与 500：
   * 对象不存在时为 404；
-  * 对象版本与 Mavio 发送的指纹不符时为 412；
+  * 对象版本与 Mavio 发送的 `If-Match` 不符时为 412；
   * 403；
-  * 429 与 503，带上它们的 `Retry-After`（`fserrors.ErrorRetryAfter`）；
-  * 配额错误（drive 的 `downloadQuotaExceeded`、mega 的 509）回应为 429，存储给出重置时间时一并带上；
+  * 429 与 503，存储说明了何时重试时带上 `Retry-After`（`fserrors.ErrorRetryAfter`）；
+  * 配额或带宽限制（drive 的 `downloadQuotaExceeded`、mega 的流量配额、509）回应为 429；
   * 其他错误为 502。
-* **拖动：** `operations/fsinfo` 报告需要从开头读到偏移处的远端：seafile 的加密资料库与 archive 的 zip 成员。Mavio 顺序读取这些远端（§3.4）。
+* **拖动：** `operations/fsinfo` 以 fork 的特性 `SeekReadsFromStart` 报告需要从开头读到偏移处的远端：seafile 的加密资料库与 archive 的 zip 成员。Mavio 顺序读取这些远端（§3.4）。
 * **每个远端一个 `Fs`：** Mavio 以远端根目录命名对象（`remote:` 加完整路径），使同一远端的所有媒体库共用一个 `Fs` 及其缓存。Mavio 以 `--fs-cache-expire-duration 1h` 启动 rcd。
 
 ### 3.3 连接数限制
@@ -351,19 +354,15 @@ fork 的限制器（`lib/connlimit`）为所有后端限制 `--rc-serve` 同时�
 * **文件名额已满时：** 关闭该文件中最久没有读取的数据流，把名额交给新的打开。播放器拖动、浏览器请求新范围时，都是先打开下一个数据流再关闭上一个，而上一个的读取方已经不再读它。被关闭数据流的读取方会收到错误，如果仍要读取就重新打开。
 * **账号名额已满时：** 打开操作等待名额，直到其 context 结束；它从不占用其他文件的名额。
 * **限制值：**
-  * 各后端以 fork 的特性（`MaxFileStreams`、`MaxStreams`）声明默认限制值，按实测结果（§3.5）或存储公布的限制设定，如 mailru 每台下载服务器 4 个数据流。
-  * 远端自身选项已设定的值优先：
-    * ftp 的 `--ftp-concurrency`；
-    * sftp 的 `--sftp-connections`。
-  * 选项 `--rc-serve-max-file-streams` 与 `--rc-serve-max-streams` 覆盖默认值。
-  * 既未实测、也没有公布限制的后端不设限制。
+  * 由选项 `--rc-serve-max-file-streams` 与 `--rc-serve-max-streams` 设定；未设定时不限制数据流。
+  * *计划中：* 各后端以 fork 的特性（`MaxFileStreams`、`MaxStreams`）声明默认限制值，按实测结果（§3.5）或存储公布的限制设定，如 mailru 每台下载服务器 4 个数据流。远端自身选项已设定的值优先：ftp 的 `--ftp-concurrency` 与 sftp 的 `--sftp-connections`。既未实测、也没有公布限制的后端不设限制。
 
 ### 3.4 块缓存
 
 Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs/rclone`。缓存处在 Mavio 的两条读取路径之下：
 
-* `rclone.Storage.Open` 的读取器，用于直接播放、probe、keyframes 与 trickplay 的容器索引读取以及外挂文件。
-* ffmpeg 读取的媒体代理。代理从缓存提供数据，不再直接转发。
+* `rclone.Storage.Open` 的读取器，用于直接播放、keyframes 与 trickplay 的容器索引读取以及外挂文件。
+* ffmpeg 与 ffprobe 读取的媒体代理。代理从缓存提供数据，不再直接转发。
 
 它在 rclone VFS 缓存（`--vfs-cache-mode full`）行之有效的地方沿用其做法，在 Mavio 掌握更多信息的地方有所不同：
 
@@ -371,43 +370,44 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | :--- | :--- | :--- |
 | 数据 | 每个对象一个稀疏文件，大小与原文件相同 | 相同 |
 | 已有数据 | 有序、合并后的字节范围（`lib/ranges`） | 相同 |
-| 元数据 | 打开与关闭时写入 JSON；数据到达时不保存范围 | 带范围的 JSON，最多每隔几秒及关闭时保存，且在它记录的数据写入之后 |
-| 过期判断 | 打开时检查指纹（大小、修改时间、哈希） | 打开时检查 `Stat` 给出的 §3.2 中的指纹；读取中大小变化或收到 412 则丢弃该项 |
-| 缺失范围 | 若某个下载器的位置与之相距不超过 `--buffer-size`（16 MiB），就延长该下载器；否则启动新的下载器 | 相同，窗口大小可配置 |
-| 每个文件的下载器 | 不限 | 不超过该文件的连接数限制（默认 2）；超出时停止离所有等待中的读取最远的下载器 |
-| 上游请求 | 128 MiB 的块，大小无上限地翻倍 | 16 MiB 的块，翻倍至 256 MiB 为止，使放弃的读取浪费很少 |
+| 元数据 | 打开与关闭时写入 JSON；数据到达时不保存范围 | 带范围与 ETag 的 JSON，数据到达期间每 5 秒及关闭时保存，且先同步它记录的数据 |
+| 过期判断 | 打开时检查指纹（大小、修改时间、哈希） | 缓存项以 `Stat` 给出的 ID、大小与修改时间为键；第一个响应的 ETag 与缓存项一起保存，并以 `If-Match` 发送（§3.2）；读取中收到 412 或大小变化则丢弃该项 |
+| 缺失范围 | 若某个下载器的位置与之相距不超过 `--buffer-size`（16 MiB），就延长该下载器；否则启动新的下载器 | 相同 |
+| 每个文件的下载器 | 不限 | 最多 2 个；超出时停止离所有等待中的读取最远的下载器 |
+| 上游请求 | 128 MiB 的块，大小无上限地翻倍 | 16 MiB 的块，翻倍至 256 MiB 为止，且不超过预读的终点（向上取整到 1 MiB），使放弃的读取浪费很少 |
 | 预读 | `--vfs-read-ahead`，默认 0，另有 16 MiB 内存缓冲 | 按意图预读（见下）；数据以 1 MiB 为单位直接写入文件，不经内存缓冲 |
 | 下载器结束 | 空闲 5 秒，或连续遇到 1 MiB 已有数据 | 相同 |
-| 错误 | 连续 10 次错误后，等待者失败 | 相同，并对 403、429 与 503 按 `Retry-After` 退避 |
+| 错误 | 连续 10 次错误后，等待者失败 | 相同；两次请求之间按 `Retry-After` 等待，没有时从 200 毫秒起翻倍至 5 秒 |
 | 磁盘读取 | 持有该项的锁 | 不持锁；只保护范围信息 |
-| 淘汰 | 先淘汰未在使用的项，最久未用者优先；超出配额时整体丢弃已打开的项 | 先淘汰未在使用的项；再淘汰已打开项中落后于所有读取位置最远的范围，保留读取位置前方的数据 |
+| 淘汰 | 先淘汰未在使用的项，最久未用者优先；超出配额时整体丢弃已打开的项 | 淘汰未在使用的项，最久未读者优先；已打开的项完整保留 |
 
-预读按每次读取的意图进行，这是文件系统层面的缓存无法知道的：
+预读按每次读取的意图进行，这是文件系统层面的缓存无法知道的。意图（`core.ReadIntent`）随 `Storage.Open` 与 `Storage.MediaURL` 的 context 传递：
 
-* **probe：** 在 ffprobe 运行前，用两个请求同时取回文件头（1 MB）和文件尾（256 KB）；ffprobe 随后从缓存读取。
-* **容器索引：** 读取 Matroska 元素与 MP4 box 的大量小读取扩展到 256 KB 对齐，使相邻元素共用一个请求。
-* **seek：** 播放开始或拖动到某个时间时，Mavio 在源的 keyframes 中查出对应关键帧，并在 ffmpeg 或客户端请求之前，从该关键帧的字节位置启动下载器。
-* **HLS：** 请求某个分段时，下载器延伸到其后几个分段的字节范围。复制视频时这些范围由关键帧位置得出，否则按码率估算。
-* **直接播放：** 下载器保持领先客户端最近一次请求的范围 30 秒的码率，最多 256 MiB。
+* **probe：** probe 请求文件的 URL 时，用两个请求同时取回文件头（1 MiB）和文件尾（256 KiB）；ffprobe 随后从缓存读取。
+* **容器索引：** 未命中的读取至少取回 256 KiB，使读取 Matroska 元素与 MP4 box 的大量小读取共用请求。
+* **播放：** 直接播放，以及 ffmpeg 为播放进行的读取，保持领先 30 秒的源码率，最多 256 MiB；码率未知时为 32 MiB。
 * **后台任务：** 读取时不预读。
+* **其他读取：** 16 MiB。
+* *计划中：* **seek：** 播放开始或拖动到某个时间时，Mavio 在源的 keyframes 中查出对应关键帧，并在 ffmpeg 或客户端请求之前，从该关键帧的字节位置启动下载器。
+* *计划中：* **HLS：** 请求某个分段时，下载器延伸到其后几个分段的字节范围。复制视频时这些范围由关键帧位置得出，否则按码率估算。
 
 同一文件的多个读取方共用一个缓存项，如 probe 与播放，或两个观看者。一段范围无论有多少读取方在等待，都只下载一次。
 
-* **大小：** 一项设置，`rclone-cache-size`，默认 10 GiB，并保留最少 5% 的空闲磁盘空间。
+* **大小：** 一项设置，`rclone-cache-size`，默认 10 GiB，并保留最少 5% 的空闲磁盘空间；设为 0 时关闭缓存。
 * **时限：** 7 天未读的项会被删除。
 * **位置：** `<cache>/rclone/blocks`，重启后保留。
-* **范围：** `cloud` 存储类别（§2.1）的远端。媒体库未另行设置时，rclone 路径即属此类。
+* **范围：** `cloud` 存储类别（§2.1）的目录。媒体库未另行设置时，rclone 路径即属此类；媒体库之外的 rclone 路径（如下载目录）也属此类。
 
 以下远端按顺序读取：
 
 * rcd 报告需要从开头读起的远端（§3.2）；
-* 经实测（§3.5）其存储拒绝不能接续已打开数据流的范围请求、并在远端上设置了此项的远端。
+* *计划中：* 经实测（§3.5）其存储拒绝不能接续已打开数据流的范围请求、并在远端上设置了此项的远端。
 
-在顺序读取的远端上，下载器不会在超出最远已打开位置的新位置启动，而是让那个数据流一直读到目标位置。在这种远端上远距离拖动要等待之前的字节。
+顺序读取的远端上，每个文件只有一个下载器。在它前方的读取延长它，无论多远；在它后方的读取让它从该处重新开始。在这种远端上向前远距离拖动要等待之前的字节。
 
 ### 3.5 实测
 
-限制值、链接有效期与顺序读取设置的默认值来自实测。用测试账号经 rcd 逐个后端实测，先测 fork 的云盘与常用的个人云盘（drive、onedrive、dropbox、box、pcloud、mega、yandex、protondrive）。实测内容：
+计划中。限制值、链接有效期与顺序读取设置的默认值来自实测。用测试账号经 rcd 逐个后端实测，先测 fork 的云盘与常用的个人云盘（drive、onedrive、dropbox、box、pcloud、mega、yandex、protondrive）。实测内容：
 
 * 顺序读取；
 * 向前与向后跳转；
@@ -421,12 +421,12 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 
 | 机制 | 实现 | 阶段 |
 | :--- | :--- | :--- |
-| 对象缓存 | mavioai/rclone `fs/objcache`；`fs/rc/rcserver`（`serveRemote`）、`fs/operations/rc.go`（`list`、`stat` 与各写操作），以及通过列目录查找文件的后端的 `FindByListing` 特性 | P25，计划中 |
-| 版本校验 | mavioai/rclone `fs/objcache`、`lib/http/serve/serve.go`（指纹与 412）、支持 ETag 的后端的 `Object.Open` 中的 `If-Match`；`libs/rclone/storage.go`（`file`）、`proxy.go`（发送指纹） | P25，计划中 |
+| 对象缓存 | mavioai/rclone `fs/objcache`；`fs/rc/rcserver/serveobject.go`（`serveObject`）、`fs/operations/lsjson.go`（`list`、`stat`）、`fs/operations/rc.go` 与 `fs/sync/rc.go`（各写操作）；通过列目录查找文件的后端的 `FindByListing` 特性为计划中 | P25，已实现 |
+| 版本校验 | mavioai/rclone `fs/rc/rcserver/serveobject.go`（ETag、`If-Match` 与 412）；`libs/rclone/version.go`、`storage.go`（`file`）、`proxy.go`、`blocks.go`；支持 ETag 的后端在 `Object.Open` 中发送 `If-Match` 为计划中 | P25，已实现 |
 | 链接缓存 | mavioai/rclone `lib/linkcache`；§3.2 表中各后端的 `Object.Open` | P25，计划中 |
-| 后端修正 | mavioai/rclone `backend/webdav`、`backend/http`（以 200 回应的范围请求）、`backend/crypt`（nonce）、`backend/filelu`（范围），以及 §3.2 表中"另外"一列 | P25，计划中 |
-| 经 rcd 传递状态码与拖动方式 | mavioai/rclone `lib/http/serve/serve.go`（`Object`）、`fs/rc/rcserver`、`fs/operations/rc.go`（`fsinfo`） | P25，计划中 |
-| 每个远端一个 `Fs`、更长的 `Fs` 缓存 | `libs/rclone/storage.go`（`Storage.fsName`、`Client.objectURL`）、`daemon.go`（`Daemon.launch`） | P25，计划中 |
-| 连接数限制 | mavioai/rclone `lib/connlimit`；`lib/http/serve/serve.go`；`MaxFileStreams` 与 `MaxStreams` 特性 | P25，计划中 |
-| 块缓存 | `libs/rclone`（缓存及其下载器与范围）；`storage.go`（`file`）、`proxy.go`（`Proxy.ServeHTTP`）；意图来自 `apps/server/internal/playback` 与 `libs/library`（`Jobs.probeFile`） | P25，计划中 |
+| 后端修正 | mavioai/rclone `backend/webdav`、`backend/http`（以 200 回应的范围请求，`lib/readers/skiprange.go`）、`backend/crypt`（nonce）；`backend/filelu`（范围）与 §3.2 表中"另外"一列为计划中 | P25，已实现 |
+| 经 rcd 传递状态码与拖动方式 | mavioai/rclone `lib/http/serve/status.go`（`ErrorStatus`）、`serve.go`（`ObjectWith`）、`fs/rc/rcserver/serveobject.go`、`fs/features.go`（`SeekReadsFromStart`） | P25，已实现 |
+| 每个远端一个 `Fs`、更长的 `Fs` 缓存 | `libs/rclone/storage.go`（`Storage.fsName`、`Storage.abs`）、`daemon.go`（`Daemon.launch`） | P25，已实现 |
+| 连接数限制 | mavioai/rclone `lib/connlimit`、`fs/rc/rcserver/serveobject.go`（`Server.open`）、`fs/rc/rc.go`（选项）；`MaxFileStreams` 与 `MaxStreams` 特性为计划中 | P25，已实现 |
+| 块缓存 | `libs/rclone`（`blocks.go`、`ranges.go`、`cached.go`）、`storage.go`（`Storage.Open`、`Storage.MediaURL`）、`proxy.go`（`Proxy.serveCached`）；`core.ReadIntent` 来自 `libs/library`（probe、后台任务）、`apps/server/internal/playback`（播放）与 `apps/server/internal/acquisition`（导入时的 probe）；`apps/server/internal/server/rclone.go` 与设置 `rclone-cache-size`；为拖动与 HLS 预读、已打开项内部的淘汰为计划中 | P25，已实现 |
 | 实测 | mavioai/rclone `MAVIO_PROVIDERS.md` | P25，计划中 |

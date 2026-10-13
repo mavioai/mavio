@@ -70,7 +70,8 @@ type PathClasses struct {
 }
 
 // Class returns the storage class of path: as the library holding it
-// classifies it, or the class of its device when no library holds it.
+// classifies it, or, when no library holds it, cloud for paths of rclone
+// remotes and the class of its device for other paths.
 func (p *PathClasses) Class(ctx context.Context, path string) core.StorageClass {
 	p.mu.Lock()
 	if p.Classifier == nil {
@@ -90,7 +91,11 @@ func (p *PathClasses) Class(ctx context.Context, path string) core.StorageClass 
 	}
 	c := p.Classifier
 	p.mu.Unlock()
-	if lib == nil {
+	switch {
+	case lib != nil:
+	case core.IsRemotePath(path):
+		return core.StorageCloud
+	default:
 		return c.devices.Device(path).Class()
 	}
 	return c.Classify(lib, path)

@@ -133,3 +133,13 @@ func TestStorageFS(t *testing.T) {
 		t.Errorf("Stat(../x) error = %v, want = %v", err, fs.ErrInvalid)
 	}
 }
+
+func TestReadIntent(t *testing.T) {
+	if got := ReadIntentOf(context.Background()); got != (ReadIntent{}) {
+		t.Errorf("ReadIntentOf(background) = %+v, want = ReadAny", got)
+	}
+	want := ReadIntent{Kind: ReadPlayback, Bitrate: 8_000_000}
+	if got := ReadIntentOf(WithReadIntent(context.Background(), want)); got != want {
+		t.Errorf("ReadIntentOf() = %+v, want = %+v", got, want)
+	}
+}

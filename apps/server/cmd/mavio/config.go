@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"math"
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/pflag"
@@ -24,8 +26,9 @@ import (
 //	backups/      backups
 //	rclone/       rclone.conf of the rcd the server runs, and rclone.pass,
 //	              the password it is encrypted with
-//	cache/        downloaded and resized images, compiled plugins and,
-//	              in transcodes/, the segments of running transcodes
+//	cache/        downloaded and resized images, compiled plugins, in
+//	              transcodes/ the segments of running transcodes and, in
+//	              rclone/blocks/, the files read from cloud storage
 //
 // A setting comes from, in order, its flag, its MAVIO_* environment
 // variable (MAVIO_CACHE_DIR for cache-dir), config.toml and the layout
@@ -63,6 +66,7 @@ var settings = []setting{
 	{key: "rclone-url", usage: "address of an rclone rcd to reach instead of running one: https://…, http:// on the loopback interface, or unix:///path", def: constant("")},
 	{key: "rclone-user", usage: "user of the rcd at rclone-url", def: constant("")},
 	{key: "rclone-pass", usage: "password of the rcd at rclone-url", def: constant("")},
+	{key: "rclone-cache-size", usage: "disk space the files of libraries on cloud storage are cached in, such as 10GiB; 0 caches none", def: constant("10GiB")},
 	{key: "cache-dir", path: true, usage: "directory for downloaded and resized images, compiled plugins and transcodes", def: under("cache")},
 	{key: "transcode-dir", path: true, usage: "directory for the segments of running transcodes", def: func(_ string, cfg *server.Config) string {
 		return filepath.Join(cfg.CacheDir, "transcodes")
@@ -223,6 +227,14 @@ func assign(o *options, key, value string) error {
 		"metadata-dir": &cfg.MetadataDir, "backup-dir": &cfg.BackupDir, "discovery-addr": &cfg.DiscoveryAddr,
 		"dev-library": &cfg.DevLibrary,
 	}
+	if key == "rclone-cache-size" {
+		n, err := parseSize(value)
+		if err != nil {
+			return fmt.Errorf("rclone-cache-size: %w", err)
+		}
+		cfg.RcloneCacheSize = n
+		return nil
+	}
 	if key == "dev" {
 		switch strings.ToLower(value) {
 		case "true", "1", "yes":
@@ -236,4 +248,25 @@ func assign(o *options, key, value string) error {
 	}
 	*targets[key] = value
 	return nil
+}
+
+// parseSize parses a size in bytes, with an optional binary suffix: K,
+// M, G or T, with or without "i" and "B" ("10GiB", "512M", "0").
+func parseSize(s string) (int64, error) {
+	t := strings.TrimSpace(s)
+	shift := 0
+	lower := strings.ToLower(t)
+	lower = strings.TrimSuffix(lower, "b")
+	lower = strings.TrimSuffix(lower, "i")
+	if n := len(lower); n > 0 {
+		if i := strings.IndexByte("kmgt", lower[n-1]); i >= 0 {
+			shift = 10 * (i + 1)
+			lower = lower[:n-1]
+		}
+	}
+	n, err := strconv.ParseInt(strings.TrimSpace(lower), 10, 64)
+	if err != nil || n < 0 || n > math.MaxInt64>>shift {
+		return 0, fmt.Errorf("%q is not a size", s)
+	}
+	return n << shift, nil
 }

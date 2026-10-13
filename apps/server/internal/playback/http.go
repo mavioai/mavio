@@ -189,7 +189,9 @@ func (m *Manager) serveFile(w http.ResponseWriter, r *http.Request, p *Playback)
 		http.Redirect(w, r, p.Source().Path, http.StatusFound)
 		return
 	}
-	f, info, err := m.open(r.Context(), p, p.Source().Path)
+	// The client reads on ahead of its player.
+	ctx := core.WithReadIntent(r.Context(), core.ReadIntent{Kind: core.ReadPlayback, Bitrate: p.Source().Bitrate})
+	f, info, err := m.open(ctx, p, p.Source().Path)
 	if err != nil {
 		m.log.ErrorContext(r.Context(), "open media", "playback", p.ID, "err", err)
 		http.Error(w, "media unavailable", http.StatusNotFound)

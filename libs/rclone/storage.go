@@ -23,9 +23,16 @@ import (
 // Remotes opens the storages of library folders on the remotes of an rcd.
 type Remotes struct {
 	Client *Client
-	// MediaURL returns the URL ffmpeg reads the object remote of the rclone
-	// file system fsName from, such as Proxy.URL; nil gives no URLs.
-	MediaURL func(fsName, remote string) (string, error)
+	// MediaURL returns the URL ffmpeg reads an object from, such as
+	// Proxy.URL; nil gives no URLs.
+	MediaURL func(ctx context.Context, m Media) (string, error)
+	// Blocks is the cache the files of folders on cloud storage are read
+	// through; nil reads them from the rcd.
+	Blocks *BlockCache
+	// Class returns the storage class of a library path
+	// ("rclone:<remote>:<path>"); nil takes every remote for cloud
+	// storage. Only folders on cloud storage are read through Blocks.
+	Class func(ctx context.Context, path string) core.StorageClass
 	// Jobs is the ledger of transfers, which finds them again after the
 	// server restarted; nil keeps none.
 	Jobs core.StorageJobRepository
@@ -48,11 +55,14 @@ const featuresTTL = time.Minute
 
 // Open opens the storage of folder dir of remote, which must exist.
 func (r *Remotes) Open(ctx context.Context, remote, dir string) (core.Storage, error) {
-	caps, err := r.capabilities(ctx, remote)
+	f, err := r.features(ctx, remote)
 	if err != nil {
 		return nil, err
 	}
-	s := &Storage{r: r, remote: remote, dir: dir, caps: caps}
+	s := &Storage{r: r, remote: remote, dir: dir, caps: core.StorageCapabilities{ServerCopy: f["Copy"]}}
+	if r.Blocks != nil && (r.Class == nil || r.Class(ctx, "rclone:"+remote+":"+dir) == core.StorageCloud) {
+		s.blocks, s.seq = r.Blocks, f["SeekReadsFromStart"]
+	}
 	info, err := s.Stat(ctx, ".")
 	if err != nil {
 		return nil, err
@@ -68,14 +78,6 @@ func (r *Remotes) Forget(remote string) {
 	r.mu.Lock()
 	delete(r.cache, remote)
 	r.mu.Unlock()
-}
-
-func (r *Remotes) capabilities(ctx context.Context, remote string) (core.StorageCapabilities, error) {
-	f, err := r.features(ctx, remote)
-	if err != nil {
-		return core.StorageCapabilities{}, err
-	}
-	return core.StorageCapabilities{ServerCopy: f["Copy"]}, nil
 }
 
 // OfflineDownloads reports whether a remote's backend downloads links
@@ -120,6 +122,11 @@ type Storage struct {
 	remote string
 	dir    string
 	caps   core.StorageCapabilities
+	// blocks is the cache the folder's files are read through, nil when
+	// they are read from the rcd; seq tells a remote that reads from
+	// the start to reach an offset.
+	blocks *BlockCache
+	seq    bool
 }
 
 // fsName is the rclone file system of the folder: the remote's root, so
@@ -204,7 +211,16 @@ func (s *Storage) Open(ctx context.Context, name string) (core.File, error) {
 	if info.IsDir() {
 		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("is a directory")}
 	}
-	return &file{ctx: context.WithoutCancel(ctx), c: s.r.Client, url: s.r.Client.objectURL(s.fsName(), s.abs(name)), info: info}, nil
+	u := s.r.Client.objectURL(s.fsName(), s.abs(name))
+	if s.blocks != nil {
+		it, err := s.blocks.open(itemKey(s.fsName(), s.abs(name), info.(fileInfo)), u, info.Size(), s.seq)
+		if err == nil {
+			ahead := aheadOf(core.ReadIntentOf(ctx))
+			return &cachedFile{ctx: context.WithoutCancel(ctx), it: it, info: info, ahead: ahead}, nil
+		}
+		s.blocks.log.WarnContext(ctx, "read past the block cache", "remote", s.remote, "file", name, "err", err)
+	}
+	return &file{ctx: context.WithoutCancel(ctx), c: s.r.Client, url: u, info: info}, nil
 }
 
 // WriteFile implements core.Storage. The remote replaces the file as it
@@ -384,15 +400,41 @@ func (s *Storage) RemoveAll(ctx context.Context, name string) error {
 // Chtimes implements core.Storage: the rc API sets no times.
 func (*Storage) Chtimes(context.Context, string, time.Time) error { return core.ErrUnsupported }
 
-// MediaURL implements core.Storage.
-func (s *Storage) MediaURL(_ context.Context, name string) (string, error) {
+// MediaURL implements core.Storage. The read intent of ctx tells how
+// the block cache, if the folder has it, reads ahead of ffmpeg.
+func (s *Storage) MediaURL(ctx context.Context, name string) (string, error) {
 	if _, err := rel("media", name); err != nil {
 		return "", err
 	}
 	if s.r.MediaURL == nil {
 		return "", core.ErrUnsupported
 	}
-	return s.r.MediaURL(s.fsName(), s.abs(name))
+	m := Media{FsName: s.fsName(), Remote: s.abs(name), Intent: core.ReadIntentOf(ctx)}
+	if s.blocks != nil {
+		info, err := s.Stat(ctx, name)
+		if err != nil {
+			return "", err
+		}
+		if !info.IsDir() {
+			m.blocks, m.key, m.size, m.seq = s.blocks, itemKey(m.FsName, m.Remote, info.(fileInfo)), info.Size(), s.seq
+		}
+	}
+	return s.r.MediaURL(ctx, m)
+}
+
+// Media is an object of a remote that ffmpeg reads.
+type Media struct {
+	// FsName is the rclone file system, Remote the object's path in it.
+	FsName, Remote string
+	// Intent is what the object is read for.
+	Intent core.ReadIntent
+
+	// blocks is the cache the object is read through, nil when it is
+	// read from the rcd; key, size and seq are its item's.
+	blocks *BlockCache
+	key    string
+	size   int64
+	seq    bool
 }
 
 // Capabilities implements core.Storage.

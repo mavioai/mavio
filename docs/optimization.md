@@ -205,13 +205,15 @@ A client that does not demux a file's subtitles itself gets them from the server
 
 ## 3. Reading Remote Storage through rclone
 
-Status: designed, not yet implemented (P25). Libraries on rclone remotes (§9.2 of the [Architecture](architecture.md)) read their media through `rclone rcd`. This chapter makes those reads cheap in requests, steady under seeking and reusable, for every backend rclone offers:
+Status: partly implemented (P25). Implemented: the object cache and version checks, statuses, seeking through `fsinfo`, stream limits, the webdav, http and crypt fixes, one `Fs` per remote, and the block cache with its read intents. Planned, and marked so below: `FindByListing`, invalidation by `ChangeNotify`, conditional reads in the backends, the link cache with the other single-backend fixes, per-backend stream limits, read-ahead from keyframes for seeks and HLS, eviction within open items, and the measurements ([Roadmap](roadmap.md) P25).
+
+Libraries on rclone remotes (§9.2 of the [Architecture](architecture.md)) read their media through `rclone rcd`. This chapter makes those reads cheap in requests, steady under seeking and reusable, for every backend rclone offers:
 
 * The rcd of mavioai/rclone keeps the objects it finds and the download links it gets, limits the streams it has open and reports the storage's errors.
 * The backends that cost more than they must are fixed.
 * Mavio caches media blocks.
 
-### 3.1 Costs of a Read Today
+### 3.1 Costs of a Read before These Changes
 
 Every read of a media byte range travels Mavio → `rclone rcd` (`--rc-serve`) → the backend → the storage, and each step can cost more than it needs to.
 
@@ -276,8 +278,8 @@ The fork changes the rcd and the backends as follows. Where a change can be made
 
 * **Filling it:**
   * `serveRemote` looks an object up here before calling `NewObject`, and caches what it finds.
-  * `operations/list` and `operations/stat`, which serve Mavio's scans and `Stat`, always ask the backend and never read the cache. They replace the entries of the objects they return. Only `--rc-serve` reads the cache, so scans see changes as soon as the storage does, and Mavio's `Stat` reports the storage's current version.
-  * Backends that find a file by listing its folder declare it with a feature of the fork, `FindByListing`. The backends are those of the last three rows of the lookup table, except union and compress. For them, a miss lists the parent folder once and caches all its objects, so the next requests for its neighbors hit; concurrent misses of one folder share the listing.
+  * `operations/list` and `operations/stat`, which serve Mavio's scans and `Stat`, always ask the backend and never read the cache. `stat` caches the object it returns and drops the entry of one not found. `list` replaces the entries of the objects it returns without adding any, and a complete listing of a folder (neither recursive nor filtered) drops the entries of the folder's objects missing from it. Only `--rc-serve` reads the cache, so scans see changes as soon as the storage does, and Mavio's `Stat` reports the storage's current version.
+  * *Planned:* backends that find a file by listing its folder declare it with a feature of the fork, `FindByListing`. The backends are those of the last three rows of the lookup table, except union and compress. For them, a miss lists the parent folder once and caches all its objects, so the next requests for its neighbors hit; concurrent misses of one folder share the listing.
 * **What lives on with the cached `Object`:**
   * the links of pikpak, thunder and pcloud;
   * the links that premiumizeme, gofile, drime, linkbox and googlephotos take from their listings;
@@ -286,19 +288,20 @@ The fork changes the rcd and the backends as follows. Where a change can be made
   * the nonce of crypt (below).
   * union's choice of upstream.
 * **Lifetime and invalidation:**
-  * Entries live 5 minutes by default (an option).
-  * Writes through the rcd (`operations/*`, `sync/*`) drop the entries of the paths and folders they touch.
-  * While a remote whose backend has `ChangeNotify` (drive, onedrive, dropbox, box, pcloud, mega and others) is in the cache, the changes it reports drop their entries.
-  * A change made elsewhere surfaces as a fingerprint that does not match (below) or as a failed `Open`. The entry is then dropped, the object looked up again and the open retried once.
+  * Entries live 5 minutes, and the cache holds 10,000 of them, by default (the options `--rc-serve-cache-duration` and `--rc-serve-cache-size`).
+  * Writes through the rcd (`operations/*`, `sync/*`, `backend/command`) drop the entries of the paths and folders they touch, in every `Fs` of the remote whatever its root.
+  * *Planned:* while a remote whose backend has `ChangeNotify` (drive, onedrive, dropbox, box, pcloud, mega and others) is in the cache, the changes it reports drop their entries.
+  * A change made elsewhere surfaces as a version that does not match (below) or as a failed `Open`. The entry is then dropped and the object looked up again; the open is retried once unless the object's version changed.
   * Misses are not cached.
-* **Version checks:** a cached object is never older than the version Mavio opened.
-  * Mavio's reader calls `Stat` when it opens a file. It sends the result with every request to `--rc-serve`: the ID, size and modification time, and the hash where the backend's listings carry one at no cost.
-  * The rcd uses a cached object only when its fingerprint matches. Otherwise it looks the object up again.
-  * When the fresh object does not match either, the rcd answers 412. Mavio treats that as a changed file: it drops the file's block-cache item and calls `Stat` again.
-  * Backends that read by path (s3, b2, googlecloudstorage, azureblob, webdav and others) would otherwise serve new content under an old size. Where they support conditional reads by ETag, `Open` also sends `If-Match` with the object's ETag. A file replaced in the middle of a read then fails with 412 instead of mixing two versions.
+* **Version checks:** a read never mixes two versions of a file.
+  * `--rc-serve` gives every response the object's version as its ETag: a hash of the object's ID and its fingerprint (size and modification time, and the hash where the backend has one at no cost).
+  * Mavio's readers keep the ETag of a file's first response and send it as `If-Match` with every later request. The block cache keeps it with the file's item, across restarts.
+  * When a cached object does not match `If-Match`, the rcd looks the object up again. When the fresh object does not match either, it answers 412. Mavio takes that, or a response whose total size differs from the size `Stat` gave, as a changed file: the read fails with `ErrChanged`, and the file's block-cache item is dropped.
+  * Mavio's `Stat` asks the backend and so refreshes the cached object. A cached object is older than the storage only between a change made elsewhere and the next `Stat` or listing of its folder, and at most for an entry's lifetime.
+  * *Planned:* within that window, backends that read by path (s3, b2, googlecloudstorage, azureblob, webdav and others) serve new content under the old version. Where they support conditional reads by ETag, `Open` will also send `If-Match` with the storage's ETag of the object, so that a file replaced in the middle of a read fails with 412.
   * A file rewritten in place while keeping its ID, size and modification time is detected only where the hash is part of the fingerprint.
 
-**Link cache** (`lib/linkcache`): used inside `Open` by every backend that requests a link.
+**Link cache** (`lib/linkcache`, planned): used inside `Open` by every backend that requests a link.
 
 * Links are keyed by the object's ID and fingerprint (size, and hash or modification time). Each entry keeps the headers and cookies the link is bound to.
 * A link's expiry is taken from the response's expiry field (aliyundrive's `Expiration`), else from the URL's expiry parameter, else from a lifetime the backend declares. When the storage states no expiry, the declared lifetime comes from measurements (§3.5).
@@ -325,21 +328,21 @@ The fork changes the rcd and the backends as follows. Where a change can be made
 | thunder | — (the link on the cached `Object`) | an expiry check |
 | fichier | — (its tokens are single-use) | — |
 
-**Fixes to single backends:**
+**Fixes to single backends** (filelu and the "Also" column of the table above are planned):
 
 * webdav and http: when a range is asked for and the server answers 200, `Open` discards the bytes before the offset, as mailru does, so the body matches the range.
 * crypt: keeps the nonce on its `Object` after the first read, so a seek costs one request.
 
 **Through `--rc-serve` and `operations/fsinfo`:**
 
-* **Statuses:** lookups and opens answer with the status of the storage's error, not 404 and 500:
+* **Statuses:** lookups and opens answer with the status of the storage's error, which the rcd finds in the error's chain, not 404 and 500:
   * 404 when the object is not found;
-  * 412 when the object's version does not match the fingerprint Mavio sent;
+  * 412 when the object's version does not match the `If-Match` Mavio sent;
   * 403;
-  * 429 and 503, with their `Retry-After` (`fserrors.ErrorRetryAfter`);
-  * a quota (drive's `downloadQuotaExceeded`, mega's 509) as 429, with the reset where the storage states it;
+  * 429 and 503, with a `Retry-After` where the storage says when to retry (`fserrors.ErrorRetryAfter`);
+  * a quota or bandwidth limit (drive's `downloadQuotaExceeded`, mega's transfer quota, 509) as 429;
   * any other error as 502.
-* **Seeking:** `operations/fsinfo` reports remotes that read from the start to reach an offset: seafile's encrypted libraries, and archive's zip members. Mavio reads those remotes sequentially (§3.4).
+* **Seeking:** `operations/fsinfo` reports remotes that read from the start to reach an offset, with the fork's feature `SeekReadsFromStart`: seafile's encrypted libraries, and archive's zip members. Mavio reads those remotes sequentially (§3.4).
 * **One `Fs` per remote:** Mavio names objects from the remote's root (`remote:` and the full path), so every library of a remote shares one `Fs` and its caches. Mavio starts the rcd with `--fs-cache-expire-duration 1h`.
 
 ### 3.3 Connection Limits
@@ -351,19 +354,15 @@ The fork's limiter (`lib/connlimit`) caps the streams `--rc-serve` has open, for
 * **When the file's slots are full:** the stream of that file read least recently is closed and its slot given to the new open. Players seeking and browsers requesting a new range open the next stream before closing the last, whose reader has moved on. The reader of the closed stream gets an error, and reopens if it still reads.
 * **When the account's slots are full:** the open waits for a slot until its context ends. It never takes a slot of another file.
 * **Limits:**
-  * Each backend declares default limits with features of the fork (`MaxFileStreams`, `MaxStreams`). These are set from measurements (§3.5) or from the storage's documented limits, such as mailru's 4 streams to a download server.
-  * Defaults that a remote's own options already set win:
-    * ftp's `--ftp-concurrency`;
-    * sftp's `--sftp-connections`.
-  * The options `--rc-serve-max-file-streams` and `--rc-serve-max-streams` override the defaults.
-  * A backend neither measured nor documented has no limit.
+  * The options `--rc-serve-max-file-streams` and `--rc-serve-max-streams` set them. Unset, streams are not limited.
+  * *Planned:* each backend declares default limits with features of the fork (`MaxFileStreams`, `MaxStreams`), set from measurements (§3.5) or from the storage's documented limits, such as mailru's 4 streams to a download server. Limits that a remote's own options already set win: ftp's `--ftp-concurrency` and sftp's `--sftp-connections`. A backend neither measured nor documented keeps no limit.
 
 ### 3.4 Block Cache
 
 Mavio keeps the bytes it reads from rclone remotes on local disk, in `libs/rclone`. The cache sits beneath both of Mavio's read paths:
 
-* The reader of `rclone.Storage.Open`, used for direct play, probes, the container-index reads of keyframes and trickplay, and sidecars.
-* The media proxy ffmpeg reads. The proxy serves from the cache instead of forwarding.
+* The reader of `rclone.Storage.Open`, used for direct play, the container-index reads of keyframes and trickplay, and sidecars.
+* The media proxy ffmpeg and ffprobe read. The proxy serves from the cache instead of forwarding.
 
 The cache follows rclone's VFS cache (`--vfs-cache-mode full`) where that works, and departs from it where Mavio knows more:
 
@@ -371,43 +370,44 @@ The cache follows rclone's VFS cache (`--vfs-cache-mode full`) where that works,
 | :--- | :--- | :--- |
 | Data | a sparse file per object, at its full size | the same |
 | Present data | sorted, coalesced byte ranges (`lib/ranges`) | the same |
-| Metadata | JSON written at open and close; ranges not saved as data arrives | JSON with the ranges, saved at most every few seconds and at close, after the data it records is written |
-| Staleness | fingerprint (size, modification time, hash) checked at open | the fingerprint of §3.2 from `Stat`, checked at open; a size change or a 412 while reading drops the item |
-| Missing range | a downloader whose position is within `--buffer-size` (16 MiB) of it is extended; otherwise a new downloader starts | the same, with the window as an option |
-| Downloaders per file | unlimited | at most the file's connection limit (2 by default); beyond it, the downloader furthest from every waiting read is stopped |
-| Upstream requests | chunks of 128 MiB doubling without bound | chunks of 16 MiB doubling to 256 MiB, so that an abandoned read wastes little |
+| Metadata | JSON written at open and close; ranges not saved as data arrives | JSON with the ranges and the ETag, saved every 5 seconds while data arrives and at close, after syncing the data it records |
+| Staleness | fingerprint (size, modification time, hash) checked at open | items are keyed by the ID, size and modification time `Stat` gives; the ETag of the first response is kept with the item and sent as `If-Match` (§3.2); a 412 or a size change while reading drops the item |
+| Missing range | a downloader whose position is within `--buffer-size` (16 MiB) of it is extended; otherwise a new downloader starts | the same |
+| Downloaders per file | unlimited | at most 2; beyond them, the downloader furthest from every waiting read is stopped |
+| Upstream requests | chunks of 128 MiB doubling without bound | chunks of 16 MiB doubling to 256 MiB, never past the end of the read-ahead (rounded up to 1 MiB), so that an abandoned read wastes little |
 | Read-ahead | `--vfs-read-ahead`, 0 by default, plus a 16 MiB memory buffer | by intent (below); data goes to the file in 1 MiB writes without a memory buffer |
 | Downloader end | idle for 5 s, or 1 MiB of present data in a row | the same |
-| Errors | waiters fail after 10 errors in a row | the same, backing off on 403, 429 and 503 by `Retry-After` |
+| Errors | waiters fail after 10 errors in a row | the same, waiting between requests as long as `Retry-After` asks, else from 200 ms doubling to 5 s |
 | Disk reads | under the item's lock | without the lock; only the ranges are guarded |
-| Eviction | items not in use, least recently used first; open items over quota are discarded whole | items not in use first; then the ranges of open items furthest behind every reader, keeping what lies ahead of them |
+| Eviction | items not in use, least recently used first; open items over quota are discarded whole | items not in use, least recently read first; open items are kept whole |
 
-Read-ahead follows the intent of each read, which a file system cache cannot know:
+Read-ahead follows the intent of each read, which a file system cache cannot know. The intent (`core.ReadIntent`) travels in the context of `Storage.Open` and `Storage.MediaURL`:
 
-* **Probes:** the head (1 MB) and tail (256 KB) of a file are fetched at once in two requests before ffprobe runs. ffprobe then reads them from the cache.
-* **Container indexes:** the many small reads of Matroska elements and MP4 boxes are rounded out to 256 KB, so neighboring elements share one request.
-* **Seeks:** when a playback starts or seeks to a time, Mavio looks up the keyframe in the source's keyframes. It starts a downloader at that keyframe's byte position before ffmpeg or the client asks.
-* **HLS:** a request for a segment extends the downloader through the next segments' byte ranges. When the video is copied, those ranges come from the keyframes' positions; otherwise they are estimated from the bitrate.
-* **Direct play:** the downloader stays ahead of the client's latest range by 30 seconds of the source's bitrate, at most 256 MiB.
+* **Probes:** when a probe asks for a file's URL, the head (1 MiB) and tail (256 KiB) of the file are fetched at once, in two requests. ffprobe then reads them from the cache.
+* **Container indexes:** a read that misses fetches at least 256 KiB, so that the many small reads of Matroska elements and MP4 boxes share requests.
+* **Playback:** direct play, and ffmpeg's reads for a playback, stay ahead by 30 seconds of the source's bitrate, at most 256 MiB, or 32 MiB when the bitrate is unknown.
 * **Background jobs:** they read without read-ahead.
+* **Other reads:** 16 MiB.
+* *Planned:* **seeks:** when a playback starts or seeks to a time, Mavio looks up the keyframe in the source's keyframes. It starts a downloader at that keyframe's byte position before ffmpeg or the client asks.
+* *Planned:* **HLS:** a request for a segment extends the downloader through the next segments' byte ranges. When the video is copied, those ranges come from the keyframes' positions; otherwise they are estimated from the bitrate.
 
 Readers of one file share its item, such as a probe and a playback, or two viewers. A range is downloaded once, however many readers wait for it.
 
-* **Size:** a setting, `rclone-cache-size`, 10 GiB by default, with a floor of 5% free disk space.
+* **Size:** a setting, `rclone-cache-size`, 10 GiB by default, with a floor of 5% free disk space; 0 turns the cache off.
 * **Age:** items not read for 7 days are removed.
 * **Location:** `<cache>/rclone/blocks`; the cache survives restarts.
-* **Scope:** remotes of the `cloud` storage class (§2.1). rclone paths are in that class unless the library sets another.
+* **Scope:** folders of the `cloud` storage class (§2.1). rclone paths are in that class unless the library sets another, and so are rclone paths outside libraries, such as download folders.
 
 Some remotes are read sequentially:
 
 * those whose rcd reports that they read from the start (§3.2);
-* those whose storage refuses a range that does not continue an open stream, as measured (§3.5) and set on the remote.
+* *Planned:* those whose storage refuses a range that does not continue an open stream, as measured (§3.5) and set on the remote.
 
-On a sequential remote, a downloader never starts at a new position beyond the furthest one open; that one reads on to the position instead. A long seek on such a remote waits for the bytes before it.
+A file of a sequential remote has one downloader. A read ahead of it extends it, however far; a read behind it restarts it there. A long seek forward on such a remote waits for the bytes before it.
 
 ### 3.5 Measurements
 
-The limits, link lifetimes and sequential settings get their defaults from measurements. Each backend is measured through the rcd with a test account, starting with the drives of the fork and the consumer drives (drive, onedrive, dropbox, box, pcloud, mega, yandex, protondrive). The measurements:
+Planned. The limits, link lifetimes and sequential settings get their defaults from measurements. Each backend is measured through the rcd with a test account, starting with the drives of the fork and the consumer drives (drive, onedrive, dropbox, box, pcloud, mega, yandex, protondrive). The measurements:
 
 * sequential reads;
 * forward and backward jumps;
@@ -421,12 +421,12 @@ The results set each backend's stream limits, link lifetimes and whether its rem
 
 | Mechanism | Implementation | Phase |
 | :--- | :--- | :--- |
-| Object cache | mavioai/rclone `fs/objcache`; `fs/rc/rcserver` (`serveRemote`), `fs/operations/rc.go` (`list`, `stat`, the write operations), the `FindByListing` feature of the backends that list to find | P25, planned |
-| Version checks | mavioai/rclone `fs/objcache`, `lib/http/serve/serve.go` (the fingerprint and 412), `If-Match` in `Object.Open` of the backends with ETags; `libs/rclone/storage.go` (`file`), `proxy.go` (the fingerprint sent) | P25, planned |
+| Object cache | mavioai/rclone `fs/objcache`; `fs/rc/rcserver/serveobject.go` (`serveObject`), `fs/operations/lsjson.go` (`list`, `stat`), `fs/operations/rc.go` and `fs/sync/rc.go` (the write operations); the `FindByListing` feature of the backends that list to find is planned | P25, implemented |
+| Version checks | mavioai/rclone `fs/rc/rcserver/serveobject.go` (the ETag, `If-Match` and 412); `libs/rclone/version.go`, `storage.go` (`file`), `proxy.go`, `blocks.go`; `If-Match` in `Object.Open` of the backends with ETags is planned | P25, implemented |
 | Link cache | mavioai/rclone `lib/linkcache`; `Object.Open` of the backends in the table of §3.2 | P25, planned |
-| Backend fixes | mavioai/rclone `backend/webdav`, `backend/http` (ranges answered with 200), `backend/crypt` (the nonce), `backend/filelu` (ranges), and the "Also" column of §3.2 | P25, planned |
-| Statuses and seeking through the rcd | mavioai/rclone `lib/http/serve/serve.go` (`Object`), `fs/rc/rcserver`, `fs/operations/rc.go` (`fsinfo`) | P25, planned |
-| One `Fs` per remote, longer `Fs` cache | `libs/rclone/storage.go` (`Storage.fsName`, `Client.objectURL`), `daemon.go` (`Daemon.launch`) | P25, planned |
-| Connection limits | mavioai/rclone `lib/connlimit`; `lib/http/serve/serve.go`; the `MaxFileStreams` and `MaxStreams` features | P25, planned |
-| Block cache | `libs/rclone` (cache, its downloaders and ranges); `storage.go` (`file`), `proxy.go` (`Proxy.ServeHTTP`); intents from `apps/server/internal/playback` and `libs/library` (`Jobs.probeFile`) | P25, planned |
+| Backend fixes | mavioai/rclone `backend/webdav`, `backend/http` (ranges answered with 200, `lib/readers/skiprange.go`), `backend/crypt` (the nonce); `backend/filelu` (ranges) and the "Also" column of §3.2 are planned | P25, implemented |
+| Statuses and seeking through the rcd | mavioai/rclone `lib/http/serve/status.go` (`ErrorStatus`), `serve.go` (`ObjectWith`), `fs/rc/rcserver/serveobject.go`, `fs/features.go` (`SeekReadsFromStart`) | P25, implemented |
+| One `Fs` per remote, longer `Fs` cache | `libs/rclone/storage.go` (`Storage.fsName`, `Storage.abs`), `daemon.go` (`Daemon.launch`) | P25, implemented |
+| Connection limits | mavioai/rclone `lib/connlimit`, `fs/rc/rcserver/serveobject.go` (`Server.open`), `fs/rc/rc.go` (the options); the `MaxFileStreams` and `MaxStreams` features are planned | P25, implemented |
+| Block cache | `libs/rclone` (`blocks.go`, `ranges.go`, `cached.go`), `storage.go` (`Storage.Open`, `Storage.MediaURL`), `proxy.go` (`Proxy.serveCached`); `core.ReadIntent` from `libs/library` (probes, background jobs), `apps/server/internal/playback` (playback) and `apps/server/internal/acquisition` (probes of imports); `apps/server/internal/server/rclone.go` and the `rclone-cache-size` setting; read-ahead for seeks and HLS and eviction within open items are planned | P25, implemented |
 | Measurements | mavioai/rclone `MAVIO_PROVIDERS.md` | P25, planned |

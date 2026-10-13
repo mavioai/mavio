@@ -2,6 +2,7 @@ package rclone
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"io/fs"
@@ -347,5 +348,108 @@ func TestClientKeepsIdleConnections(t *testing.T) {
 	c, _ := NewClient(Endpoint{URL: "http://rclone.example"}, own)
 	if c.http.Transport != own {
 		t.Error("NewClient() replaced the transport it was given")
+	}
+}
+
+func TestStorageBlockCache(t *testing.T) {
+	d, disk := startDaemon(t)
+	ctx := t.Context()
+	data := make([]byte, 3<<20)
+	for i := range data {
+		data[i] = byte(i % 251)
+	}
+	name := filepath.Join(disk, "a.mkv")
+	if err := os.WriteFile(name, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	bc, err := NewBlockCache(d.Client(), BlockCacheOptions{Dir: t.TempDir(), MaxSize: 1 << 30})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bc.Close()
+	proxy := NewProxy(d.Client(), nil)
+	if err := proxy.Listen(); err != nil {
+		t.Fatal(err)
+	}
+	defer proxy.Close()
+	class := core.StorageCloud
+	r := &Remotes{Client: d.Client(), MediaURL: proxy.URL, Blocks: bc, Class: func(_ context.Context, p string) core.StorageClass {
+		if p != "rclone:disk:" {
+			t.Errorf("Class(%q), want = rclone:disk:", p)
+		}
+		return class
+	}}
+	st, err := r.Open(ctx, "disk", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f, err := st.Open(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadPlayback}), "a.mkv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := f.(*cachedFile); !ok {
+		t.Errorf("Open() = %T, want = a file read through the block cache", f)
+	}
+	got, err := io.ReadAll(f)
+	if err != nil || !bytes.Equal(got, data) {
+		t.Errorf("ReadAll() = %d bytes, %v, want = %d", len(got), err, len(data))
+	}
+	_ = f.Close()
+
+	// ffprobe reads through the proxy from the cache.
+	u, err := st.MediaURL(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadProbe}), "a.mkv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	req.Header.Set("Range", "bytes=1000-1009")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusPartialContent || !bytes.Equal(body, data[1000:1010]) {
+		t.Errorf("GET %s = %d %v, want = 206 and bytes 1000-1009", u, resp.StatusCode, body)
+	}
+
+	// A file replaced while it is read fails, rather than mixing versions.
+	g, err := st.Open(ctx, "a.mkv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer g.Close()
+	if err := os.WriteFile(name, bytes.Repeat([]byte("x"), len(data)), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chtimes(name, time.Now(), time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.Stat(ctx, "a.mkv"); err != nil {
+		t.Fatal(err)
+	}
+	// Forget what g's item holds, so that it fetches again.
+	it := g.(*cachedFile).it
+	it.mu.Lock()
+	it.have = nil
+	it.mu.Unlock()
+	if _, err := g.ReadAt(make([]byte, 10), 2<<20); !errors.Is(err, ErrChanged) {
+		t.Errorf("ReadAt() of a replaced file error = %v, want = %v", err, ErrChanged)
+	}
+
+	// Folders on local storage are read from the rcd.
+	class = core.StorageLocal
+	st, err = r.Open(ctx, "disk", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := st.Open(ctx, "a.mkv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer h.Close()
+	if _, ok := h.(*file); !ok {
+		t.Errorf("Open() on local storage = %T, want = a file read from the rcd", h)
 	}
 }

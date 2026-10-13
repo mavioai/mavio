@@ -54,6 +54,45 @@ type Storage interface {
 	Close() error
 }
 
+// ReadIntent tells a storage what a file is read for, so that storages
+// read over the network read ahead to suit. It travels in the context
+// of [Storage.Open] and [Storage.MediaURL]; [WithReadIntent] sets it.
+type ReadIntent struct {
+	Kind ReadKind
+	// Bitrate is the media's bitrate in bits per second, zero when
+	// unknown; playback reads ahead by it.
+	Bitrate int64
+}
+
+// ReadKind is what a file is read for.
+type ReadKind int
+
+const (
+	// ReadAny is a read nothing is known of.
+	ReadAny ReadKind = iota
+	// ReadProbe reads the head and tail of a media file, as ffprobe does.
+	ReadProbe
+	// ReadPlayback reads a file on, ahead of a player.
+	ReadPlayback
+	// ReadBackground reads for a background job, which needs no
+	// read-ahead.
+	ReadBackground
+)
+
+type readIntentKey struct{}
+
+// WithReadIntent returns ctx carrying the intent of the reads made with
+// it.
+func WithReadIntent(ctx context.Context, intent ReadIntent) context.Context {
+	return context.WithValue(ctx, readIntentKey{}, intent)
+}
+
+// ReadIntentOf returns the intent ctx carries; ReadAny when none.
+func ReadIntentOf(ctx context.Context) ReadIntent {
+	intent, _ := ctx.Value(readIntentKey{}).(ReadIntent)
+	return intent
+}
+
 // LocalPath returns the OS path of a file of a local storage, false for
 // other storages.
 func LocalPath(s Storage, name string) (string, bool) {

@@ -62,6 +62,9 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.Dev {
 		t.Error("dev = true, want false")
 	}
+	if cfg.RcloneCacheSize != 10<<30 {
+		t.Errorf("rclone-cache-size = %d, want %d", cfg.RcloneCacheSize, 10<<30)
+	}
 	for _, dir := range []string{"cache/transcodes", "plugins", "plugin-data", "metadata", "backups"} {
 		if fi, err := os.Stat(filepath.Join(home, dir)); err != nil || !fi.IsDir() {
 			t.Errorf("%s not created: %v", dir, err)
@@ -120,6 +123,7 @@ func TestLoadRejects(t *testing.T) {
 		{"nested table", "[server]\naddr = \":1\""},
 		{"malformed", `addr = `},
 		{"not a boolean", `dev = "maybe"`},
+		{"not a size", `rclone-cache-size = "lots"`},
 		{"relative folder", `plugin-dir = "plugins"`},
 		{"relative database", `database = "sqlite:mavio.db"`},
 		{"home-relative folder", `cache-dir = "~/cache"`},
@@ -130,5 +134,32 @@ func TestLoadRejects(t *testing.T) {
 				t.Error("load = nil error, want one")
 			}
 		})
+	}
+}
+
+func TestParseSize(t *testing.T) {
+	for _, tc := range []struct {
+		in   string
+		want int64
+		ok   bool
+	}{
+		{"0", 0, true},
+		{"1234", 1234, true},
+		{"10GiB", 10 << 30, true},
+		{"10G", 10 << 30, true},
+		{"512mb", 512 << 20, true},
+		{"64Ki", 64 << 10, true},
+		{"2T", 2 << 40, true},
+		{" 1 GiB ", 1 << 30, true},
+		{"", 0, false},
+		{"GiB", 0, false},
+		{"-1", 0, false},
+		{"1.5G", 0, false},
+		{"9000000000T", 0, false},
+	} {
+		got, err := parseSize(tc.in)
+		if (err == nil) != tc.ok || got != tc.want {
+			t.Errorf("parseSize(%q) = %d, %v, want = %d, ok %t", tc.in, got, err, tc.want, tc.ok)
+		}
 	}
 }

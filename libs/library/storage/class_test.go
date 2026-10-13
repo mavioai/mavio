@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"path"
 	"testing"
 
@@ -55,5 +56,25 @@ func TestClassify(t *testing.T) {
 	}
 	if got := c.Classes(lib); len(got) != 5 || got["/mnt/nas"] != core.StorageNetwork || got["/mnt/rclone"] != core.StorageCloud {
 		t.Errorf("Classes = %v", got)
+	}
+}
+
+func TestPathClasses(t *testing.T) {
+	libs := []core.Library{{Paths: []string{"rclone:pp:Movies"}, StorageClasses: map[string]core.StorageClass{"rclone:pp:Movies": core.StorageNetwork}}}
+	p := &PathClasses{
+		Classifier: NewClassifier(&Detector{Detect: func(string) (DeviceInfo, error) { return DeviceInfo{Kind: KindLocalHDD}, nil }}),
+		Libraries:  func(context.Context) ([]core.Library, error) { return libs, nil },
+	}
+	for _, tc := range []struct {
+		path string
+		want core.StorageClass
+	}{
+		{"rclone:pp:Movies/Film", core.StorageNetwork},
+		{"rclone:pp:Downloads", core.StorageCloud},
+		{"/srv/downloads", core.StorageLocal},
+	} {
+		if got := p.Class(t.Context(), tc.path); got != tc.want {
+			t.Errorf("Class(%q) = %v, want = %v", tc.path, got, tc.want)
+		}
 	}
 }

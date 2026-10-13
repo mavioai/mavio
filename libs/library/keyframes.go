@@ -73,7 +73,7 @@ func (j *Jobs) keyframes(ctx context.Context, job core.Job) ([]core.Job, error) 
 		// Without an index, reading every keyframe reads the whole file,
 		// which the policy may forbid; HLS of such files transcodes the
 		// video.
-		f, err := j.Storages.Media(ctx, src.Path)
+		f, err := j.Storages.Media(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground}), src.Path)
 		if err != nil {
 			return nil, fmt.Errorf("keyframes of %s: %w", src.Path, err)
 		}

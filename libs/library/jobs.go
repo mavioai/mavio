@@ -259,7 +259,7 @@ func (j *Jobs) probe(ctx context.Context, job core.Job) ([]core.Job, error) {
 				return nil, err
 			}
 		}
-		f, err := j.Storages.Media(ctx, src.Path)
+		f, err := j.Storages.Media(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadProbe}), src.Path)
 		if err != nil {
 			return nil, fmt.Errorf("probe %s: %w", src.Path, err)
 		}

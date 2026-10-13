@@ -60,6 +60,9 @@ type Config struct {
 	// RcloneURL is the address of an rcd the server reaches instead of
 	// running one, and RcloneUser and RclonePass its credentials.
 	RcloneURL, RcloneUser, RclonePass string
+	// RcloneCacheSize is the disk space, in bytes, the files of libraries
+	// on cloud storage are cached in, under CacheDir; zero caches none.
+	RcloneCacheSize int64
 	// TranscodeDir holds the segments of running transcodes.
 	TranscodeDir string
 	// CacheDir holds downloaded and resized images and compiled plugins.
@@ -211,7 +214,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	warmer := warming.New(warming.Config{Store: db, Keeper: keeper, Online: hub.OnlineSessions, Logger: log})
 
 	// Library paths are local folders, or folders of rclone remotes.
-	rc := startRclone(ctx, log, cfg, db.StorageJobs())
+	rc := startRclone(ctx, log, cfg, db.StorageJobs(), pathClasses.Class)
 	defer rc.Close()
 	storages := &library.Storages{}
 	// Cloud drives of rclone remotes that download magnet links themselves

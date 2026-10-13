@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/mavioai/mavio/libs/acquire"
+	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/naming"
 	"github.com/mavioai/mavio/libs/release"
@@ -121,7 +122,7 @@ func (r *Runtime) onlySamplesLeft(ctx context.Context, folder string, sample fun
 // runtime in minutes, as Radarr's and Sonarr's DetectSample.
 // probe probes a file to import.
 func (r *Runtime) probe(ctx context.Context, path string) (library.ProbeResult, error) {
-	f, err := r.Storages.Media(ctx, path)
+	f, err := r.Storages.Media(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadProbe}), path)
 	if err != nil {
 		return library.ProbeResult{}, err
 	}

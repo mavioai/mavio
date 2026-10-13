@@ -294,7 +294,7 @@ func (j *Jobs) trickplay(ctx context.Context, job core.Job) ([]core.Job, error) 
 		return nil, err
 	}
 	defer os.RemoveAll(tmp)
-	f, err := j.Storages.Media(ctx, src.Path)
+	f, err := j.Storages.Media(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground}), src.Path)
 	if err != nil {
 		return nil, err
 	}
@@ -358,7 +358,7 @@ func (j *Jobs) chapterImages(ctx context.Context, job core.Job) ([]core.Job, err
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}
-	f, err := j.Storages.Media(ctx, src.Path)
+	f, err := j.Storages.Media(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground}), src.Path)
 	if err != nil {
 		return nil, err
 	}
@@ -421,7 +421,7 @@ func (j *Jobs) loudness(ctx context.Context, job core.Job) ([]core.Job, error) {
 	if err := j.quiet(ctx); err != nil {
 		return nil, err
 	}
-	f, err := j.Storages.Media(ctx, sources[0].Path)
+	f, err := j.Storages.Media(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground}), sources[0].Path)
 	if err != nil {
 		return nil, err
 	}

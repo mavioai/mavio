@@ -875,6 +875,8 @@ func (m *Manager) resolveInputs(ctx context.Context, s *decision.Source) error {
 		}
 	}
 	s.Inputs = make(map[string]string, len(paths))
+	// ffmpeg reads on ahead of the player.
+	ctx = core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadPlayback, Bitrate: s.Bitrate})
 	for _, p := range paths {
 		f, err := m.cfg.Storages.Media(ctx, p)
 		if err != nil {

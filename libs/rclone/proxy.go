@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"mime"
 	"net"
 	"net/http"
 	"net/url"
@@ -14,6 +15,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/mavioai/mavio/libs/core"
 )
 
 // Proxy serves the objects of an rcd's remotes to ffmpeg and ffprobe on a
@@ -37,9 +40,9 @@ type Proxy struct {
 
 // target is the object a token names.
 type target struct {
-	fsName, remote string
-	used           time.Time
-	// ver is the version of the object the token reads.
+	m    Media
+	used time.Time
+	// ver is the version of the object the token reads from the rcd.
 	ver version
 }
 
@@ -79,8 +82,9 @@ func (p *Proxy) Close() error {
 	return p.srv.Close()
 }
 
-// URL returns a URL of the object remote of the rclone file system fsName.
-func (p *Proxy) URL(fsName, remote string) (string, error) {
+// URL returns a URL of the object m. A probe of an object read through
+// the block cache has its head and tail fetched at once.
+func (p *Proxy) URL(_ context.Context, m Media) (string, error) {
 	if p.base == "" {
 		return "", errors.New("rclone media proxy is not listening")
 	}
@@ -97,10 +101,17 @@ func (p *Proxy) URL(fsName, remote string) (string, error) {
 		}
 		p.swept = now
 	}
-	p.tokens[token] = &target{fsName: fsName, remote: remote, used: now}
+	p.tokens[token] = &target{m: m, used: now}
 	p.mu.Unlock()
+	if m.blocks != nil && m.Intent.Kind == core.ReadProbe {
+		if it, err := m.blocks.open(m.key, p.c.objectURL(m.FsName, m.Remote), m.size, m.seq); err == nil {
+			it.prefetch(0, probeHead)
+			it.prefetch(m.size-probeTail, m.size)
+			it.release()
+		}
+	}
 	// The name ends the URL, so that ffmpeg sees the file's extension.
-	return p.base + "/" + token + "/" + url.PathEscape(path.Base(remote)), nil
+	return p.base + "/" + token + "/" + url.PathEscape(path.Base(m.Remote)), nil
 }
 
 // ServeHTTP implements http.Handler.
@@ -118,14 +129,18 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		delete(p.tokens, token)
 		ok = false
 	}
-	var fsName, remote string
+	var m Media
 	if ok {
 		t.used = now
-		fsName, remote = t.fsName, t.remote
+		m = t.m
 	}
 	p.mu.Unlock()
 	if !ok {
 		http.NotFound(w, r)
+		return
+	}
+	fsName, remote := m.FsName, m.Remote
+	if m.blocks != nil && p.serveCached(w, r, m) {
 		return
 	}
 	req, err := p.c.request(r.Context(), r.Method, p.c.objectURL(fsName, remote), nil)
@@ -164,4 +179,24 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if _, err := io.Copy(w, resp.Body); err != nil && r.Context().Err() == nil && !errors.Is(err, context.Canceled) {
 		p.log.DebugContext(r.Context(), "rclone media proxy copy ended", "remote", remote, "err", err)
 	}
+}
+
+// serveCached serves m from the block cache, reading ahead as its intent
+// asks; false when its item does not open, for the rcd to serve it.
+func (p *Proxy) serveCached(w http.ResponseWriter, r *http.Request, m Media) bool {
+	it, err := m.blocks.open(m.key, p.c.objectURL(m.FsName, m.Remote), m.size, m.seq)
+	if err != nil {
+		p.log.WarnContext(r.Context(), "read past the block cache", "fs", m.FsName, "remote", m.Remote, "err", err)
+		return false
+	}
+	defer it.release()
+	ctype := mime.TypeByExtension(path.Ext(m.Remote))
+	if ctype == "" {
+		ctype = "application/octet-stream"
+	}
+	// ServeContent sniffs no type, which would read the head.
+	w.Header().Set("Content-Type", ctype)
+	rd := itemReader{ctx: r.Context(), it: it, ahead: aheadOf(m.Intent)}
+	http.ServeContent(w, r, "", time.Time{}, io.NewSectionReader(rd, 0, m.size))
+	return true
 }
