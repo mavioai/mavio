@@ -4,10 +4,13 @@ go 1.27.0
 
 require (
 	connectrpc.com/connect v1.21.0
+	github.com/andybalholm/cascadia v1.3.4
 	github.com/bodgit/sevenzip v1.6.5
 	github.com/mavioai/mavio/libs/plugin v0.0.0
 	github.com/mavioai/mavio/libs/proto v0.0.0
 	github.com/nwaples/rardecode/v2 v2.4.5
+	golang.org/x/net v0.61.0
+	golang.org/x/text v0.43.0
 	google.golang.org/protobuf v1.36.12
 )
 
@@ -23,7 +26,6 @@ require (
 	github.com/stangelandcl/ppmd v0.1.1 // indirect
 	github.com/ulikunitz/xz v0.5.15 // indirect
 	go4.org v0.0.0-20260112195520-a5071408f32f // indirect
-	golang.org/x/text v0.43.0 // indirect
 )
 
 replace github.com/mavioai/mavio/libs/plugin => ../../libs/plugin
