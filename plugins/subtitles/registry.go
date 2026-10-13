@@ -24,10 +24,17 @@ import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/prijevodionline"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/regielive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/soustitreseu"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subclub"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subf2m"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subs4free"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subsarr"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subscenter"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subsro"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subssabbz"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subsunacs"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subsynchro"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subtis"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subtitrarinoi"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subtitriid"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subtitulamostv"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subx"
@@ -66,10 +73,17 @@ func definitions() []provider.Definition {
 		prijevodionline.Definition(),
 		regielive.Definition(),
 		soustitreseu.Definition(),
+		subclub.Definition(),
+		subf2m.Definition(),
+		subs4free.Definition(),
 		subsarr.Definition(),
+		subscenter.Definition(),
 		subsro.Definition(),
+		subssabbz.Definition(),
+		subsunacs.Definition(),
 		subsynchro.Definition(),
 		subtis.Definition(),
+		subtitrarinoi.Definition(),
 		subtitriid.Definition(),
 		subtitulamostv.Definition(),
 		subx.Definition(),
