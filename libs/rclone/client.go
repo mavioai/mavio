@@ -34,8 +34,14 @@ type Client struct {
 	poll time.Duration
 }
 
-// NewClient returns a client of the rcd at ep; transport, nil for the
-// default, carries requests to TCP addresses.
+// maxIdlePerHost is how many idle connections to the rcd are kept: every
+// read of a media range is a request of its own, and with Go's default of
+// two, concurrent reads would open a new connection for most of them.
+const maxIdlePerHost = 16
+
+// NewClient returns a client of the rcd at ep; transport carries requests
+// to TCP addresses, a copy of http.DefaultTransport keeping more idle
+// connections when nil.
 func NewClient(ep Endpoint, transport http.RoundTripper) (*Client, error) {
 	u, err := url.Parse(ep.URL)
 	if err != nil {
@@ -51,11 +57,16 @@ func NewClient(ep Endpoint, transport http.RoundTripper) (*Client, error) {
 				var d net.Dialer
 				return d.DialContext(ctx, "unix", socket)
 			},
-			MaxIdleConnsPerHost: 16,
+			MaxIdleConnsPerHost: maxIdlePerHost,
 		}}
 	case "http", "https":
 		u.Path = strings.TrimSuffix(u.Path, "/")
 		c.base = u
+		if transport == nil {
+			t := http.DefaultTransport.(*http.Transport).Clone()
+			t.MaxIdleConnsPerHost = maxIdlePerHost
+			transport = t
+		}
 		c.http = &http.Client{Transport: transport}
 	default:
 		return nil, fmt.Errorf("rclone address %q: want http, https or unix", ep.URL)

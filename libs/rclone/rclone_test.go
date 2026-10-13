@@ -285,3 +285,20 @@ func TestClientErrors(t *testing.T) {
 		t.Error("NewClient(ftp) error = nil")
 	}
 }
+
+func TestClientKeepsIdleConnections(t *testing.T) {
+	for _, u := range []string{"https://rclone.example:5572", "unix:///tmp/rc.sock"} {
+		c, err := NewClient(Endpoint{URL: u}, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := c.http.Transport.(*http.Transport).MaxIdleConnsPerHost; got != maxIdlePerHost {
+			t.Errorf("%s: MaxIdleConnsPerHost = %d, want = %d", u, got, maxIdlePerHost)
+		}
+	}
+	own := &http.Transport{}
+	c, _ := NewClient(Endpoint{URL: "http://rclone.example"}, own)
+	if c.http.Transport != own {
+		t.Error("NewClient() replaced the transport it was given")
+	}
+}
