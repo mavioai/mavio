@@ -1,0 +1,647 @@
+edition = "2023";
+
+package mavio.acquisition.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// SubtitleService acquires the subtitles movies and episodes lack, as
+// Bazarr does: subtitle profiles and their assignments, the subtitle
+// settings, wanted subtitles and their searches, manual search,
+// download, upload, deletion, modification and synchronization, history
+// and the blocklist. Administrators only.
+service SubtitleService {
+  // ListSubtitleProfiles lists the subtitle profiles by name.
+  rpc ListSubtitleProfiles(ListSubtitleProfilesRequest) returns (ListSubtitleProfilesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // CreateSubtitleProfile fails with ALREADY_EXISTS when a profile has the
+  // name.
+  rpc CreateSubtitleProfile(CreateSubtitleProfileRequest) returns (CreateSubtitleProfileResponse);
+  rpc UpdateSubtitleProfile(UpdateSubtitleProfileRequest) returns (UpdateSubtitleProfileResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // DeleteSubtitleProfile deletes a profile and its assignments.
+  rpc DeleteSubtitleProfile(DeleteSubtitleProfileRequest) returns (DeleteSubtitleProfileResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // AssignSubtitleProfile assigns a profile to a library, a movie or a
+  // series, or removes the assignment; the movies and episodes it covers
+  // are searched for the subtitles they now lack.
+  rpc AssignSubtitleProfile(AssignSubtitleProfileRequest) returns (AssignSubtitleProfileResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+
+  rpc GetSubtitleSettings(GetSubtitleSettingsRequest) returns (GetSubtitleSettingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateSubtitleSettings replaces the settings and applies them at once.
+  rpc UpdateSubtitleSettings(UpdateSubtitleSettingsRequest) returns (UpdateSubtitleSettingsResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+
+  // ListSubtitleProviders lists the providers of the subtitle provider
+  // plugins, with their state.
+  rpc ListSubtitleProviders(ListSubtitleProvidersRequest) returns (ListSubtitleProvidersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListWantedSubtitles lists the movies or episodes lacking subtitles
+  // their profiles want.
+  rpc ListWantedSubtitles(ListWantedSubtitlesRequest) returns (ListWantedSubtitlesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SearchWantedSubtitles queues searches of the subtitles movies or
+  // episodes lack, which download the best subtitles found.
+  rpc SearchWantedSubtitles(SearchWantedSubtitlesRequest) returns (SearchWantedSubtitlesResponse);
+  // UpgradeSubtitles queues a search for better subtitles than those
+  // recently downloaded below their maximum score.
+  rpc UpgradeSubtitles(UpgradeSubtitlesRequest) returns (UpgradeSubtitlesResponse);
+
+  // GetItemSubtitles returns a movie's or episode's subtitles: its
+  // profile, the subtitles it has and those it lacks.
+  rpc GetItemSubtitles(GetItemSubtitlesRequest) returns (GetItemSubtitlesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SearchItemSubtitles asks the providers for a movie's or episode's
+  // subtitles, scored, best first, without downloading any.
+  rpc SearchItemSubtitles(SearchItemSubtitlesRequest) returns (SearchItemSubtitlesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // DownloadItemSubtitle downloads a subtitle SearchItemSubtitles found
+  // and saves it beside the video.
+  rpc DownloadItemSubtitle(DownloadItemSubtitleRequest) returns (DownloadItemSubtitleResponse);
+  // UploadSubtitle saves a subtitle file beside a movie's or episode's
+  // video.
+  rpc UploadSubtitle(UploadSubtitleRequest) returns (UploadSubtitleResponse);
+  // DeleteSubtitle deletes a subtitle file of a movie or episode.
+  rpc DeleteSubtitle(DeleteSubtitleRequest) returns (DeleteSubtitleResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // ModifySubtitle applies mods to a subtitle file of a movie or episode.
+  rpc ModifySubtitle(ModifySubtitleRequest) returns (ModifySubtitleResponse);
+  // SyncSubtitle synchronizes a subtitle file of a movie or episode with
+  // its audio, or with another subtitle file; against the audio only on
+  // local and network storage.
+  rpc SyncSubtitle(SyncSubtitleRequest) returns (SyncSubtitleResponse);
+  // BlocklistSubtitle blocklists the subtitle a history event downloaded,
+  // deletes its file and searches for another.
+  rpc BlocklistSubtitle(BlocklistSubtitleRequest) returns (BlocklistSubtitleResponse);
+
+  rpc ListSubtitleHistory(ListSubtitleHistoryRequest) returns (ListSubtitleHistoryResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc ListSubtitleBlocklist(ListSubtitleBlocklistRequest) returns (ListSubtitleBlocklistResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // DeleteSubtitleBlocklist deletes entries, or every entry when ids is
+  // empty and all is set.
+  rpc DeleteSubtitleBlocklist(DeleteSubtitleBlocklistRequest) returns (DeleteSubtitleBlocklistResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+}
+
+// SubtitleLanguageSpec is a language of subtitles with their kind, as
+// Bazarr's "en", "en:forced" and "en:hi".
+message SubtitleLanguageSpec {
+  // A BCP 47 tag, such as "en", "pt-BR" or "zh-Hant".
+  string language = 1 [(buf.validate.field).string = {
+    min_len: 2
+    max_len: 35
+  }];
+  bool forced = 2;
+  bool hearing_impaired = 3;
+}
+
+// SubtitleHearingImpaired is how a profile's language treats
+// hearing-impaired subtitles.
+enum SubtitleHearingImpaired {
+  // Normal subtitles wanted, hearing-impaired ones taken in their place.
+  SUBTITLE_HEARING_IMPAIRED_UNSPECIFIED = 0;
+  SUBTITLE_HEARING_IMPAIRED_REQUIRED = 1;
+  SUBTITLE_HEARING_IMPAIRED_EXCLUDED = 2;
+}
+
+// SubtitleProfileItem is a language a subtitle profile wants.
+message SubtitleProfileItem {
+  // Identifies the item in its profile, from 1.
+  int32 id = 1 [(buf.validate.field).int32 = {
+    gte: 1
+    lt: 65535
+  }];
+  string language = 2 [(buf.validate.field).string = {
+    min_len: 2
+    max_len: 35
+  }];
+  bool forced = 3;
+  SubtitleHearingImpaired hearing_impaired = 4 [(buf.validate.field).enum.defined_only = true];
+  // Not wanted when an audio stream has the language.
+  bool audio_exclude = 5;
+  // Wanted only when an audio stream has the language.
+  bool audio_only_include = 6;
+}
+
+// SubtitleProfile is the subtitles movies and episodes want, as Bazarr's
+// language profiles.
+message SubtitleProfile {
+  // Set by the server.
+  string id = 1;
+  string name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 100
+  }];
+  repeated SubtitleProfileItem items = 3 [(buf.validate.field).repeated.min_items = 1];
+  // The item whose subtitles end the search for the others; 65535 for any
+  // item's, 0 for none.
+  int32 cutoff = 4 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 65535
+  }];
+  // Words subtitle release names must and must not contain.
+  repeated string must_contain = 5;
+  repeated string must_not_contain = 6;
+  // Keeps subtitles in the format their provider gives instead of
+  // SubRip.
+  bool original_format = 7;
+  // Assigns the profile to movies and series with the tag, when the
+  // settings let tags assign profiles.
+  string tag = 8;
+}
+
+message ListSubtitleProfilesRequest {}
+
+message ListSubtitleProfilesResponse {
+  repeated SubtitleProfile profiles = 1;
+}
+
+message CreateSubtitleProfileRequest {
+  SubtitleProfile profile = 1 [(buf.validate.field).required = true];
+}
+
+message CreateSubtitleProfileResponse {
+  SubtitleProfile profile = 1;
+}
+
+message UpdateSubtitleProfileRequest {
+  // Its id names the profile.
+  SubtitleProfile profile = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateSubtitleProfileResponse {
+  SubtitleProfile profile = 1;
+}
+
+message DeleteSubtitleProfileRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteSubtitleProfileResponse {}
+
+message AssignSubtitleProfileRequest {
+  // A library, a movie or a series.
+  string target_id = 1 [(buf.validate.field).string.uuid = true];
+  // Unset removes the assignment.
+  string profile_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message AssignSubtitleProfileResponse {}
+
+// SubtitleFolder is where subtitles are saved, as Bazarr's subfolder
+// setting.
+enum SubtitleFolder {
+  // Beside the video.
+  SUBTITLE_FOLDER_UNSPECIFIED = 0;
+  // In a folder of the video's folder, custom_folder.
+  SUBTITLE_FOLDER_RELATIVE = 1;
+  // In an absolute folder, custom_folder.
+  SUBTITLE_FOLDER_ABSOLUTE = 2;
+}
+
+// SubtitleLanguageEquivalence counts subtitles in one language as
+// subtitles in another, as Bazarr's language_equals.
+message SubtitleLanguageEquivalence {
+  SubtitleLanguageSpec from = 1 [(buf.validate.field).required = true];
+  SubtitleLanguageSpec to = 2 [(buf.validate.field).required = true];
+}
+
+// SubtitleSyncSettings are how downloaded subtitles are synchronized, as
+// Bazarr's subsync settings.
+message SubtitleSyncSettings {
+  // Synchronizes downloaded subtitles; with use_threshold or
+  // use_movie_threshold, only episodes' below threshold or movies' below
+  // movie_threshold, percentages of the maximum score.
+  bool enabled = 1;
+  bool use_threshold = 2;
+  bool use_movie_threshold = 3;
+  int32 threshold = 4 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 100
+  }];
+  int32 movie_threshold = 5 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 100
+  }];
+  // Synchronizes against the audio even when another subtitle could
+  // serve as reference.
+  bool force_audio = 6;
+  // Synchronizes against the audio stream in the original language.
+  bool original_language = 7;
+  repeated string excluded_providers = 8;
+  repeated string excluded_languages = 9;
+  // The largest offset searched, in seconds.
+  int32 max_offset_seconds = 10 [(buf.validate.field).int32.gt = 0];
+  // Also tries the common frame rate ratios.
+  bool fix_framerate = 11;
+  // Searches for the best ratio.
+  bool golden_section = 12;
+  // Reject alignments when fix_framerate is set.
+  double min_score = 13 [(buf.validate.field).double.gte = 0];
+  int32 max_quality_offset_seconds = 14 [(buf.validate.field).int32.gte = 0];
+  double max_scale_deviation = 15 [(buf.validate.field).double.gte = 0];
+}
+
+// SubtitleSettings are how subtitles are searched, chosen, saved and
+// synchronized, as Bazarr's general settings.
+message SubtitleSettings {
+  // Percentages of the maximum score episodes' and movies' subtitles need.
+  int32 minimum_score = 1 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 100
+  }];
+  int32 minimum_score_movie = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 100
+  }];
+  // Describes videos by the release names their files came from.
+  bool use_scene_name = 3;
+  // Counts embedded subtitle streams as present, but not those of the
+  // formats ignored.
+  bool use_embedded = 4;
+  bool ignore_pgs = 5;
+  bool ignore_vobsub = 6;
+  bool ignore_ass = 7;
+  // Saves subtitles in UTF-8.
+  bool utf8 = 8;
+  // The mods applied to downloads, as Bazarr names them.
+  repeated string mods = 9;
+  // The suffix of hearing-impaired subtitles' names: "hi", "cc" or "sdh".
+  string hi_extension = 10 [(buf.validate.field).string = {
+    in: [
+      "hi",
+      "cc",
+      "sdh"
+    ]
+  }];
+  // Saves subtitles without their language in their names.
+  bool single_language = 11;
+  SubtitleFolder folder = 12 [(buf.validate.field).enum.defined_only = true];
+  string custom_folder = 13;
+  // Searches again for the subtitles downloaded in the last upgrade_days
+  // (0–30) below their maximum score, every upgrade_interval_hours;
+  // upgrade_manual includes those downloaded by hand.
+  bool upgrade = 14;
+  int32 upgrade_interval_hours = 15 [(buf.validate.field).int32.gte = 0];
+  int32 upgrade_days = 16 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 30
+  }];
+  bool upgrade_manual = 17;
+  // Searches a language that has failed, after adaptive_delay_days since
+  // the first failure, only once per adaptive_delta_days.
+  bool adaptive_searching = 18;
+  int32 adaptive_delay_days = 19 [(buf.validate.field).int32.gte = 0];
+  int32 adaptive_delta_days = 20 [(buf.validate.field).int32.gte = 0];
+  // How often episodes' and movies' wanted subtitles are searched, in
+  // hours; 0 never.
+  int32 wanted_search_interval_hours = 21 [(buf.validate.field).int32.gte = 0];
+  int32 wanted_search_interval_movie_hours = 22 [(buf.validate.field).int32.gte = 0];
+  // The languages of audio and embedded subtitle streams without one.
+  string default_audio_language = 23;
+  string default_embedded_language = 24;
+  // Does not compute videos' hashes for providers.
+  bool skip_hashing = 25;
+  repeated SubtitleLanguageEquivalence language_equals = 26;
+  // Lets tags assign movies and series subtitle profiles, or none with
+  // one of no_profile_tags.
+  bool movie_profile_tags = 27;
+  bool series_profile_tags = 28;
+  repeated string no_profile_tags = 29;
+  SubtitleSyncSettings sync = 30 [(buf.validate.field).required = true];
+}
+
+message GetSubtitleSettingsRequest {}
+
+message GetSubtitleSettingsResponse {
+  SubtitleSettings settings = 1;
+}
+
+message UpdateSubtitleSettingsRequest {
+  SubtitleSettings settings = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateSubtitleSettingsResponse {
+  SubtitleSettings settings = 1;
+}
+
+message ListSubtitleProvidersRequest {}
+
+// SubtitleProviderState is a provider of a subtitle provider plugin.
+message SubtitleProviderState {
+  // "<plugin>/<provider>".
+  string id = 1;
+  string plugin_id = 2;
+  string name = 3;
+  string display_name = 4;
+  bool enabled = 5;
+  // Set while the provider is throttled, until this time, for the
+  // failure given.
+  google.protobuf.Timestamp throttled_until = 6;
+  string throttle_reason = 7;
+  repeated string languages = 8;
+  bool movies = 9;
+  bool episodes = 10;
+}
+
+message ListSubtitleProvidersResponse {
+  repeated SubtitleProviderState providers = 1;
+  // The plugins that failed to list theirs.
+  repeated string failed_plugins = 2;
+}
+
+// SubtitleItemKind is whether wanted subtitles are movies' or episodes'.
+enum SubtitleItemKind {
+  // Movies.
+  SUBTITLE_ITEM_KIND_UNSPECIFIED = 0;
+  SUBTITLE_ITEM_KIND_MOVIE = 1;
+  SUBTITLE_ITEM_KIND_EPISODE = 2;
+}
+
+// WantedSubtitles is a movie or episode lacking subtitles.
+message WantedSubtitles {
+  string item_id = 1;
+  string name = 2;
+  // An episode's series and numbers.
+  string series_id = 3;
+  string series_name = 4;
+  int32 season_number = 5;
+  int32 episode_number = 6;
+  repeated SubtitleLanguageSpec missing = 7;
+  // The path of the video.
+  string path = 8;
+}
+
+message ListWantedSubtitlesRequest {
+  SubtitleItemKind kind = 1 [(buf.validate.field).enum.defined_only = true];
+  int32 limit = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 3 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListWantedSubtitlesResponse {
+  repeated WantedSubtitles items = 1;
+  int32 total = 2;
+}
+
+message SearchWantedSubtitlesRequest {
+  SubtitleItemKind kind = 1 [(buf.validate.field).enum.defined_only = true];
+  // The movies, episodes or series to search; empty for every wanted one
+  // of the kind.
+  repeated string item_ids = 2 [(buf.validate.field).repeated.items.string.uuid = true];
+}
+
+message SearchWantedSubtitlesResponse {
+  // The searches queued.
+  int32 queued = 1;
+}
+
+message UpgradeSubtitlesRequest {}
+
+message UpgradeSubtitlesResponse {}
+
+// ItemSubtitle is a subtitle a movie or episode has.
+message ItemSubtitle {
+  SubtitleLanguageSpec language = 1;
+  // The file of an external subtitle; empty for an embedded one.
+  string path = 2;
+  // The embedded stream's index.
+  int32 stream_index = 3;
+  string codec = 4;
+  // Counted as present under the settings.
+  bool counted = 5;
+}
+
+message GetItemSubtitlesRequest {
+  // A movie or episode.
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetItemSubtitlesResponse {
+  // The profile that applies; unset for none.
+  SubtitleProfile profile = 1;
+  // The profile assigned to the item or its series itself; unset when
+  // it comes from the library, a tag, or nothing.
+  string assigned_profile_id = 2;
+  repeated ItemSubtitle subtitles = 3;
+  repeated SubtitleLanguageSpec missing = 4;
+}
+
+// ScoredSubtitle is a candidate of a manual search.
+message ScoredSubtitle {
+  // "<plugin>/<provider>".
+  string provider = 1;
+  string subtitle_id = 2;
+  SubtitleLanguageSpec language = 3;
+  repeated string release_names = 4;
+  // The score, the most it could have, and the percentage Bazarr shows.
+  int32 score = 5;
+  int32 max_score = 6;
+  int32 percent = 7;
+  repeated string matched = 8;
+  repeated string not_matched = 9;
+  string page_link = 10;
+  string uploader = 11;
+  string format = 12;
+  // Blocklisted for the item.
+  bool blocklisted = 13;
+}
+
+message SearchItemSubtitlesRequest {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  // The languages to search; empty for the profile's.
+  repeated SubtitleLanguageSpec languages = 2;
+}
+
+message SearchItemSubtitlesResponse {
+  // Best first.
+  repeated ScoredSubtitle subtitles = 1;
+  // The providers that failed.
+  repeated string failed_providers = 2;
+}
+
+message DownloadItemSubtitleRequest {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  // As ScoredSubtitle.
+  string provider = 2 [(buf.validate.field).string.min_len = 1];
+  string subtitle_id = 3 [(buf.validate.field).string.min_len = 1];
+  SubtitleLanguageSpec language = 4 [(buf.validate.field).required = true];
+}
+
+message DownloadItemSubtitleResponse {
+  // The file saved.
+  string path = 1;
+}
+
+message UploadSubtitleRequest {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  bytes data = 2 [(buf.validate.field).bytes = {
+    min_len: 1
+    max_len: 16777216
+  }];
+  // "srt", "ass", "ssa", "vtt" or "sub".
+  string format = 3 [(buf.validate.field).string = {
+    in: [
+      "srt",
+      "ass",
+      "ssa",
+      "vtt",
+      "sub"
+    ]
+  }];
+  SubtitleLanguageSpec language = 4 [(buf.validate.field).required = true];
+}
+
+message UploadSubtitleResponse {
+  string path = 1;
+}
+
+message DeleteSubtitleRequest {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  // An external subtitle of the item.
+  string path = 2 [(buf.validate.field).string.min_len = 1];
+}
+
+message DeleteSubtitleResponse {}
+
+message ModifySubtitleRequest {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  string path = 2 [(buf.validate.field).string.min_len = 1];
+  // As SubtitleSettings.mods.
+  repeated string mods = 3 [(buf.validate.field).repeated.min_items = 1];
+}
+
+message ModifySubtitleResponse {}
+
+message SyncSubtitleRequest {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  string path = 2 [(buf.validate.field).string.min_len = 1];
+  // Another subtitle file of the item to synchronize with; empty for the
+  // audio.
+  string reference_path = 3;
+}
+
+message SyncSubtitleResponse {
+  // The offset applied, in milliseconds, and the frame rate ratio.
+  int64 offset_ms = 1;
+  double ratio = 2;
+}
+
+message BlocklistSubtitleRequest {
+  // A history event that downloaded a subtitle.
+  string history_event_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message BlocklistSubtitleResponse {}
+
+// SubtitleAction is what happened to a subtitle.
+enum SubtitleAction {
+  SUBTITLE_ACTION_UNSPECIFIED = 0;
+  SUBTITLE_ACTION_DELETED = 1;
+  SUBTITLE_ACTION_DOWNLOADED = 2;
+  // Downloaded from a manual search.
+  SUBTITLE_ACTION_MANUAL = 3;
+  SUBTITLE_ACTION_UPGRADED = 4;
+  SUBTITLE_ACTION_UPLOADED = 5;
+  SUBTITLE_ACTION_SYNCED = 6;
+  SUBTITLE_ACTION_EXTRACTED = 7;
+}
+
+// SubtitleHistoryEvent is something that happened to a subtitle.
+message SubtitleHistoryEvent {
+  string id = 1;
+  SubtitleAction action = 2;
+  string item_id = 3;
+  string series_id = 4;
+  google.protobuf.Timestamp time = 5;
+  SubtitleLanguageSpec language = 6;
+  // "<plugin>/<provider>".
+  string provider = 7;
+  string subtitle_id = 8;
+  int32 score = 9;
+  int32 max_score = 10;
+  string path = 11;
+  string video_path = 12;
+  string description = 13;
+  repeated string matched = 14;
+  repeated string not_matched = 15;
+  // The event of the download an upgrade replaced.
+  string upgraded_from = 16;
+}
+
+message ListSubtitleHistoryRequest {
+  // The events of these movies, episodes or series; empty for all.
+  repeated string item_ids = 1 [(buf.validate.field).repeated.items.string.uuid = true];
+  repeated SubtitleAction actions = 2 [(buf.validate.field).repeated.items.enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  int32 limit = 3 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 4 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListSubtitleHistoryResponse {
+  // Newest first.
+  repeated SubtitleHistoryEvent events = 1;
+  int32 total = 2;
+}
+
+// SubtitleBlocklistEntry is a subtitle not to download again for a movie
+// or episode.
+message SubtitleBlocklistEntry {
+  string id = 1;
+  string item_id = 2;
+  string series_id = 3;
+  string provider = 4;
+  string subtitle_id = 5;
+  SubtitleLanguageSpec language = 6;
+  google.protobuf.Timestamp time = 7;
+  string message = 8;
+}
+
+message ListSubtitleBlocklistRequest {
+  // The entries of a movie or episode; unset for all.
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  int32 limit = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+  int32 offset = 3 [(buf.validate.field).int32.gte = 0];
+}
+
+message ListSubtitleBlocklistResponse {
+  // Newest first.
+  repeated SubtitleBlocklistEntry entries = 1;
+  int32 total = 2;
+}
+
+message DeleteSubtitleBlocklistRequest {
+  repeated string ids = 1 [(buf.validate.field).repeated.items.string.uuid = true];
+  // Deletes every entry; ids must then be empty.
+  bool all = 2;
+}
+
+message DeleteSubtitleBlocklistResponse {}

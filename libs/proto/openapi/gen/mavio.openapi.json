@@ -413,6 +413,30 @@
         "title": "ApproveRequestResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.AssignSubtitleProfileRequest": {
+        "type": "object",
+        "properties": {
+          "targetId": {
+            "type": "string",
+            "title": "target_id",
+            "format": "uuid",
+            "description": "A library, a movie or a series."
+          },
+          "profileId": {
+            "type": "string",
+            "title": "profile_id",
+            "format": "uuid",
+            "description": "Unset removes the assignment."
+          }
+        },
+        "title": "AssignSubtitleProfileRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.AssignSubtitleProfileResponse": {
+        "type": "object",
+        "title": "AssignSubtitleProfileResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.BlockCollectionRequest": {
         "type": "object",
         "properties": {
@@ -617,6 +641,24 @@
         "title": "BlocklistEntry",
         "additionalProperties": false,
         "description": "BlocklistEntry is a release not to grab again for an item."
+      },
+      "mavio.acquisition.v1.BlocklistSubtitleRequest": {
+        "type": "object",
+        "properties": {
+          "historyEventId": {
+            "type": "string",
+            "title": "history_event_id",
+            "format": "uuid",
+            "description": "A history event that downloaded a subtitle."
+          }
+        },
+        "title": "BlocklistSubtitleRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.BlocklistSubtitleResponse": {
+        "type": "object",
+        "title": "BlocklistSubtitleResponse",
+        "additionalProperties": false
       },
       "mavio.acquisition.v1.Catalog": {
         "type": "object",
@@ -971,6 +1013,39 @@
           }
         },
         "title": "CreateRequestResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.CreateSubtitleProfileRequest": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleProfile"
+              }
+            ],
+            "title": "profile"
+          }
+        },
+        "title": "CreateSubtitleProfileRequest",
+        "required": [
+          "profile"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.CreateSubtitleProfileResponse": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleProfile"
+              }
+            ],
+            "title": "profile"
+          }
+        },
+        "title": "CreateSubtitleProfileResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.CustomFormat": {
@@ -1336,6 +1411,71 @@
       "mavio.acquisition.v1.DeleteRequestResponse": {
         "type": "object",
         "title": "DeleteRequestResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DeleteSubtitleBlocklistRequest": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "ids"
+          },
+          "all": {
+            "type": "boolean",
+            "title": "all",
+            "description": "Deletes every entry; ids must then be empty."
+          }
+        },
+        "title": "DeleteSubtitleBlocklistRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DeleteSubtitleBlocklistResponse": {
+        "type": "object",
+        "title": "DeleteSubtitleBlocklistResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DeleteSubtitleProfileRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "DeleteSubtitleProfileRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DeleteSubtitleProfileResponse": {
+        "type": "object",
+        "title": "DeleteSubtitleProfileResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DeleteSubtitleRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          },
+          "path": {
+            "type": "string",
+            "title": "path",
+            "minLength": 1,
+            "description": "An external subtitle of the item."
+          }
+        },
+        "title": "DeleteSubtitleRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DeleteSubtitleResponse": {
+        "type": "object",
+        "title": "DeleteSubtitleResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.DiscoverRequest": {
@@ -1707,6 +1847,52 @@
         "additionalProperties": false,
         "description": "DownloadClient is a download client a plugin has configured."
       },
+      "mavio.acquisition.v1.DownloadItemSubtitleRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          },
+          "provider": {
+            "type": "string",
+            "title": "provider",
+            "minLength": 1,
+            "description": "As ScoredSubtitle."
+          },
+          "subtitleId": {
+            "type": "string",
+            "title": "subtitle_id",
+            "minLength": 1
+          },
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+              }
+            ],
+            "title": "language"
+          }
+        },
+        "title": "DownloadItemSubtitleRequest",
+        "required": [
+          "language"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.DownloadItemSubtitleResponse": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "path",
+            "description": "The file saved."
+          }
+        },
+        "title": "DownloadItemSubtitleResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.DownloadProtocol": {
         "type": "string",
         "title": "DownloadProtocol",
@@ -1792,6 +1978,54 @@
         "title": "GetIssueResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.GetItemSubtitlesRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid",
+            "description": "A movie or episode."
+          }
+        },
+        "title": "GetItemSubtitlesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetItemSubtitlesResponse": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleProfile"
+              }
+            ],
+            "title": "profile",
+            "description": "The profile that applies; unset for none."
+          },
+          "assignedProfileId": {
+            "type": "string",
+            "title": "assigned_profile_id",
+            "description": "The profile assigned to the item or its series itself; unset when\n it comes from the library, a tag, or nothing."
+          },
+          "subtitles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.ItemSubtitle"
+            },
+            "title": "subtitles"
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+            },
+            "title": "missing"
+          }
+        },
+        "title": "GetItemSubtitlesResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.GetQuotaRequest": {
         "type": "object",
         "properties": {
@@ -1853,6 +2087,26 @@
           }
         },
         "title": "GetRequestResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetSubtitleSettingsRequest": {
+        "type": "object",
+        "title": "GetSubtitleSettingsRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetSubtitleSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleSettings"
+              }
+            ],
+            "title": "settings"
+          }
+        },
+        "title": "GetSubtitleSettingsResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.GetTitleRequest": {
@@ -2346,6 +2600,42 @@
           "ISSUE_TYPE_OTHER"
         ],
         "description": "IssueType is what kind of problem an issue reports."
+      },
+      "mavio.acquisition.v1.ItemSubtitle": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+              }
+            ],
+            "title": "language"
+          },
+          "path": {
+            "type": "string",
+            "title": "path",
+            "description": "The file of an external subtitle; empty for an embedded one."
+          },
+          "streamIndex": {
+            "type": "integer",
+            "title": "stream_index",
+            "format": "int32",
+            "description": "The embedded stream's index."
+          },
+          "codec": {
+            "type": "string",
+            "title": "codec"
+          },
+          "counted": {
+            "type": "boolean",
+            "title": "counted",
+            "description": "Counted as present under the settings."
+          }
+        },
+        "title": "ItemSubtitle",
+        "additionalProperties": false,
+        "description": "ItemSubtitle is a subtitle a movie or episode has."
       },
       "mavio.acquisition.v1.ListBlockedTitlesRequest": {
         "type": "object",
@@ -3048,6 +3338,154 @@
         "title": "ListRequestsResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.ListSubtitleBlocklistRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid",
+            "description": "The entries of a movie or episode; unset for all."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "limit",
+            "maximum": 1000,
+            "minimum": 0,
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "offset",
+            "minimum": 0,
+            "format": "int32"
+          }
+        },
+        "title": "ListSubtitleBlocklistRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListSubtitleBlocklistResponse": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleBlocklistEntry"
+            },
+            "title": "entries",
+            "description": "Newest first."
+          },
+          "total": {
+            "type": "integer",
+            "title": "total",
+            "format": "int32"
+          }
+        },
+        "title": "ListSubtitleBlocklistResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListSubtitleHistoryRequest": {
+        "type": "object",
+        "properties": {
+          "itemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "item_ids",
+            "description": "The events of these movies, episodes or series; empty for all."
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleAction"
+            },
+            "title": "actions"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "limit",
+            "maximum": 1000,
+            "minimum": 0,
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "offset",
+            "minimum": 0,
+            "format": "int32"
+          }
+        },
+        "title": "ListSubtitleHistoryRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListSubtitleHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleHistoryEvent"
+            },
+            "title": "events",
+            "description": "Newest first."
+          },
+          "total": {
+            "type": "integer",
+            "title": "total",
+            "format": "int32"
+          }
+        },
+        "title": "ListSubtitleHistoryResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListSubtitleProfilesRequest": {
+        "type": "object",
+        "title": "ListSubtitleProfilesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListSubtitleProfilesResponse": {
+        "type": "object",
+        "properties": {
+          "profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleProfile"
+            },
+            "title": "profiles"
+          }
+        },
+        "title": "ListSubtitleProfilesResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListSubtitleProvidersRequest": {
+        "type": "object",
+        "title": "ListSubtitleProvidersRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListSubtitleProvidersResponse": {
+        "type": "object",
+        "properties": {
+          "providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleProviderState"
+            },
+            "title": "providers"
+          },
+          "failedPlugins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "failed_plugins",
+            "description": "The plugins that failed to list theirs."
+          }
+        },
+        "title": "ListSubtitleProvidersResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.ListWantedRequest": {
         "type": "object",
         "properties": {
@@ -3117,6 +3555,54 @@
           }
         },
         "title": "ListWantedResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListWantedSubtitlesRequest": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleItemKind"
+              }
+            ],
+            "title": "kind",
+            "description": "enum.defined_only = true\n"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "limit",
+            "maximum": 1000,
+            "minimum": 0,
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "offset",
+            "minimum": 0,
+            "format": "int32"
+          }
+        },
+        "title": "ListWantedSubtitlesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListWantedSubtitlesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.WantedSubtitles"
+            },
+            "title": "items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "total",
+            "format": "int32"
+          }
+        },
+        "title": "ListWantedSubtitlesResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.ManualImportFile": {
@@ -3294,6 +3780,37 @@
           "MINIMUM_AVAILABILITY_RELEASED"
         ],
         "description": "MinimumAvailability is when a movie starts to be searched for."
+      },
+      "mavio.acquisition.v1.ModifySubtitleRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          },
+          "path": {
+            "type": "string",
+            "title": "path",
+            "minLength": 1
+          },
+          "mods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "mods",
+            "minItems": 1,
+            "description": "As SubtitleSettings.mods."
+          }
+        },
+        "title": "ModifySubtitleRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ModifySubtitleResponse": {
+        "type": "object",
+        "title": "ModifySubtitleResponse",
+        "additionalProperties": false
       },
       "mavio.acquisition.v1.MonitorSeriesRequest": {
         "type": "object",
@@ -4364,6 +4881,128 @@
         "title": "RetryRequestResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.ScoredSubtitle": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "provider",
+            "description": "\"\u003cplugin\u003e/\u003cprovider\u003e\"."
+          },
+          "subtitleId": {
+            "type": "string",
+            "title": "subtitle_id"
+          },
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+              }
+            ],
+            "title": "language"
+          },
+          "releaseNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "release_names"
+          },
+          "score": {
+            "type": "integer",
+            "title": "score",
+            "format": "int32",
+            "description": "The score, the most it could have, and the percentage Bazarr shows."
+          },
+          "maxScore": {
+            "type": "integer",
+            "title": "max_score",
+            "format": "int32"
+          },
+          "percent": {
+            "type": "integer",
+            "title": "percent",
+            "format": "int32"
+          },
+          "matched": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "matched"
+          },
+          "notMatched": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "not_matched"
+          },
+          "pageLink": {
+            "type": "string",
+            "title": "page_link"
+          },
+          "uploader": {
+            "type": "string",
+            "title": "uploader"
+          },
+          "format": {
+            "type": "string",
+            "title": "format"
+          },
+          "blocklisted": {
+            "type": "boolean",
+            "title": "blocklisted",
+            "description": "Blocklisted for the item."
+          }
+        },
+        "title": "ScoredSubtitle",
+        "additionalProperties": false,
+        "description": "ScoredSubtitle is a candidate of a manual search."
+      },
+      "mavio.acquisition.v1.SearchItemSubtitlesRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+            },
+            "title": "languages",
+            "description": "The languages to search; empty for the profile's."
+          }
+        },
+        "title": "SearchItemSubtitlesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.SearchItemSubtitlesResponse": {
+        "type": "object",
+        "properties": {
+          "subtitles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.ScoredSubtitle"
+            },
+            "title": "subtitles",
+            "description": "Best first."
+          },
+          "failedProviders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "failed_providers",
+            "description": "The providers that failed."
+          }
+        },
+        "title": "SearchItemSubtitlesResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.SearchReleasesRequest": {
         "type": "object",
         "properties": {
@@ -4607,6 +5246,44 @@
         "title": "SearchWantedResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.SearchWantedSubtitlesRequest": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleItemKind"
+              }
+            ],
+            "title": "kind",
+            "description": "enum.defined_only = true\n"
+          },
+          "itemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "item_ids",
+            "description": "The movies, episodes or series to search; empty for every wanted one\n of the kind."
+          }
+        },
+        "title": "SearchWantedSubtitlesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.SearchWantedSubtitlesResponse": {
+        "type": "object",
+        "properties": {
+          "queued": {
+            "type": "integer",
+            "title": "queued",
+            "format": "int32",
+            "description": "The searches queued."
+          }
+        },
+        "title": "SearchWantedSubtitlesResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.SeasonRequest": {
         "type": "object",
         "properties": {
@@ -4725,6 +5402,687 @@
         "title": "SetMonitoredResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.SubtitleAction": {
+        "type": "string",
+        "title": "SubtitleAction",
+        "enum": [
+          "SUBTITLE_ACTION_UNSPECIFIED",
+          "SUBTITLE_ACTION_DELETED",
+          "SUBTITLE_ACTION_DOWNLOADED",
+          "SUBTITLE_ACTION_MANUAL",
+          "SUBTITLE_ACTION_UPGRADED",
+          "SUBTITLE_ACTION_UPLOADED",
+          "SUBTITLE_ACTION_SYNCED",
+          "SUBTITLE_ACTION_EXTRACTED"
+        ],
+        "description": "SubtitleAction is what happened to a subtitle."
+      },
+      "mavio.acquisition.v1.SubtitleBlocklistEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "itemId": {
+            "type": "string",
+            "title": "item_id"
+          },
+          "seriesId": {
+            "type": "string",
+            "title": "series_id"
+          },
+          "provider": {
+            "type": "string",
+            "title": "provider"
+          },
+          "subtitleId": {
+            "type": "string",
+            "title": "subtitle_id"
+          },
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+              }
+            ],
+            "title": "language"
+          },
+          "time": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "time"
+          },
+          "message": {
+            "type": "string",
+            "title": "message"
+          }
+        },
+        "title": "SubtitleBlocklistEntry",
+        "additionalProperties": false,
+        "description": "SubtitleBlocklistEntry is a subtitle not to download again for a movie\n or episode."
+      },
+      "mavio.acquisition.v1.SubtitleFolder": {
+        "type": "string",
+        "title": "SubtitleFolder",
+        "enum": [
+          "SUBTITLE_FOLDER_UNSPECIFIED",
+          "SUBTITLE_FOLDER_RELATIVE",
+          "SUBTITLE_FOLDER_ABSOLUTE"
+        ],
+        "description": "SubtitleFolder is where subtitles are saved, as Bazarr's subfolder\n setting."
+      },
+      "mavio.acquisition.v1.SubtitleHearingImpaired": {
+        "type": "string",
+        "title": "SubtitleHearingImpaired",
+        "enum": [
+          "SUBTITLE_HEARING_IMPAIRED_UNSPECIFIED",
+          "SUBTITLE_HEARING_IMPAIRED_REQUIRED",
+          "SUBTITLE_HEARING_IMPAIRED_EXCLUDED"
+        ],
+        "description": "SubtitleHearingImpaired is how a profile's language treats\n hearing-impaired subtitles."
+      },
+      "mavio.acquisition.v1.SubtitleHistoryEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "action": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleAction"
+              }
+            ],
+            "title": "action"
+          },
+          "itemId": {
+            "type": "string",
+            "title": "item_id"
+          },
+          "seriesId": {
+            "type": "string",
+            "title": "series_id"
+          },
+          "time": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "time"
+          },
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+              }
+            ],
+            "title": "language"
+          },
+          "provider": {
+            "type": "string",
+            "title": "provider",
+            "description": "\"\u003cplugin\u003e/\u003cprovider\u003e\"."
+          },
+          "subtitleId": {
+            "type": "string",
+            "title": "subtitle_id"
+          },
+          "score": {
+            "type": "integer",
+            "title": "score",
+            "format": "int32"
+          },
+          "maxScore": {
+            "type": "integer",
+            "title": "max_score",
+            "format": "int32"
+          },
+          "path": {
+            "type": "string",
+            "title": "path"
+          },
+          "videoPath": {
+            "type": "string",
+            "title": "video_path"
+          },
+          "description": {
+            "type": "string",
+            "title": "description"
+          },
+          "matched": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "matched"
+          },
+          "notMatched": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "not_matched"
+          },
+          "upgradedFrom": {
+            "type": "string",
+            "title": "upgraded_from",
+            "description": "The event of the download an upgrade replaced."
+          }
+        },
+        "title": "SubtitleHistoryEvent",
+        "additionalProperties": false,
+        "description": "SubtitleHistoryEvent is something that happened to a subtitle."
+      },
+      "mavio.acquisition.v1.SubtitleItemKind": {
+        "type": "string",
+        "title": "SubtitleItemKind",
+        "enum": [
+          "SUBTITLE_ITEM_KIND_UNSPECIFIED",
+          "SUBTITLE_ITEM_KIND_MOVIE",
+          "SUBTITLE_ITEM_KIND_EPISODE"
+        ],
+        "description": "SubtitleItemKind is whether wanted subtitles are movies' or episodes'."
+      },
+      "mavio.acquisition.v1.SubtitleLanguageEquivalence": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+              }
+            ],
+            "title": "from"
+          },
+          "to": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+              }
+            ],
+            "title": "to"
+          }
+        },
+        "title": "SubtitleLanguageEquivalence",
+        "required": [
+          "from",
+          "to"
+        ],
+        "additionalProperties": false,
+        "description": "SubtitleLanguageEquivalence counts subtitles in one language as\n subtitles in another, as Bazarr's language_equals."
+      },
+      "mavio.acquisition.v1.SubtitleLanguageSpec": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "title": "language",
+            "maxLength": 35,
+            "minLength": 2,
+            "description": "A BCP 47 tag, such as \"en\", \"pt-BR\" or \"zh-Hant\"."
+          },
+          "forced": {
+            "type": "boolean",
+            "title": "forced"
+          },
+          "hearingImpaired": {
+            "type": "boolean",
+            "title": "hearing_impaired"
+          }
+        },
+        "title": "SubtitleLanguageSpec",
+        "additionalProperties": false,
+        "description": "SubtitleLanguageSpec is a language of subtitles with their kind, as\n Bazarr's \"en\", \"en:forced\" and \"en:hi\"."
+      },
+      "mavio.acquisition.v1.SubtitleProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "Set by the server."
+          },
+          "name": {
+            "type": "string",
+            "title": "name",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleProfileItem"
+            },
+            "title": "items",
+            "minItems": 1
+          },
+          "cutoff": {
+            "type": "integer",
+            "title": "cutoff",
+            "maximum": 65535,
+            "minimum": 0,
+            "format": "int32",
+            "description": "The item whose subtitles end the search for the others; 65535 for any\n item's, 0 for none."
+          },
+          "mustContain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "must_contain",
+            "description": "Words subtitle release names must and must not contain."
+          },
+          "mustNotContain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "must_not_contain"
+          },
+          "originalFormat": {
+            "type": "boolean",
+            "title": "original_format",
+            "description": "Keeps subtitles in the format their provider gives instead of\n SubRip."
+          },
+          "tag": {
+            "type": "string",
+            "title": "tag",
+            "description": "Assigns the profile to movies and series with the tag, when the\n settings let tags assign profiles."
+          }
+        },
+        "title": "SubtitleProfile",
+        "additionalProperties": false,
+        "description": "SubtitleProfile is the subtitles movies and episodes want, as Bazarr's\n language profiles."
+      },
+      "mavio.acquisition.v1.SubtitleProfileItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "exclusiveMaximum": 65535,
+            "type": "integer",
+            "title": "id",
+            "minimum": 1,
+            "format": "int32",
+            "description": "Identifies the item in its profile, from 1."
+          },
+          "language": {
+            "type": "string",
+            "title": "language",
+            "maxLength": 35,
+            "minLength": 2
+          },
+          "forced": {
+            "type": "boolean",
+            "title": "forced"
+          },
+          "hearingImpaired": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleHearingImpaired"
+              }
+            ],
+            "title": "hearing_impaired",
+            "description": "enum.defined_only = true\n"
+          },
+          "audioExclude": {
+            "type": "boolean",
+            "title": "audio_exclude",
+            "description": "Not wanted when an audio stream has the language."
+          },
+          "audioOnlyInclude": {
+            "type": "boolean",
+            "title": "audio_only_include",
+            "description": "Wanted only when an audio stream has the language."
+          }
+        },
+        "title": "SubtitleProfileItem",
+        "additionalProperties": false,
+        "description": "SubtitleProfileItem is a language a subtitle profile wants."
+      },
+      "mavio.acquisition.v1.SubtitleProviderState": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "\"\u003cplugin\u003e/\u003cprovider\u003e\"."
+          },
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "displayName": {
+            "type": "string",
+            "title": "display_name"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "enabled"
+          },
+          "throttledUntil": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "throttled_until",
+            "description": "Set while the provider is throttled, until this time, for the\n failure given."
+          },
+          "throttleReason": {
+            "type": "string",
+            "title": "throttle_reason"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "languages"
+          },
+          "movies": {
+            "type": "boolean",
+            "title": "movies"
+          },
+          "episodes": {
+            "type": "boolean",
+            "title": "episodes"
+          }
+        },
+        "title": "SubtitleProviderState",
+        "additionalProperties": false,
+        "description": "SubtitleProviderState is a provider of a subtitle provider plugin."
+      },
+      "mavio.acquisition.v1.SubtitleSettings": {
+        "type": "object",
+        "properties": {
+          "minimumScore": {
+            "type": "integer",
+            "title": "minimum_score",
+            "maximum": 100,
+            "minimum": 0,
+            "format": "int32",
+            "description": "Percentages of the maximum score episodes' and movies' subtitles need."
+          },
+          "minimumScoreMovie": {
+            "type": "integer",
+            "title": "minimum_score_movie",
+            "maximum": 100,
+            "minimum": 0,
+            "format": "int32"
+          },
+          "useSceneName": {
+            "type": "boolean",
+            "title": "use_scene_name",
+            "description": "Describes videos by the release names their files came from."
+          },
+          "useEmbedded": {
+            "type": "boolean",
+            "title": "use_embedded",
+            "description": "Counts embedded subtitle streams as present, but not those of the\n formats ignored."
+          },
+          "ignorePgs": {
+            "type": "boolean",
+            "title": "ignore_pgs"
+          },
+          "ignoreVobsub": {
+            "type": "boolean",
+            "title": "ignore_vobsub"
+          },
+          "ignoreAss": {
+            "type": "boolean",
+            "title": "ignore_ass"
+          },
+          "utf8": {
+            "type": "boolean",
+            "title": "utf8",
+            "description": "Saves subtitles in UTF-8."
+          },
+          "mods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "mods",
+            "description": "The mods applied to downloads, as Bazarr names them."
+          },
+          "hiExtension": {
+            "type": "string",
+            "title": "hi_extension",
+            "enum": [
+              "hi",
+              "cc",
+              "sdh"
+            ],
+            "description": "The suffix of hearing-impaired subtitles' names: \"hi\", \"cc\" or \"sdh\"."
+          },
+          "singleLanguage": {
+            "type": "boolean",
+            "title": "single_language",
+            "description": "Saves subtitles without their language in their names."
+          },
+          "folder": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleFolder"
+              }
+            ],
+            "title": "folder",
+            "description": "enum.defined_only = true\n"
+          },
+          "customFolder": {
+            "type": "string",
+            "title": "custom_folder"
+          },
+          "upgrade": {
+            "type": "boolean",
+            "title": "upgrade",
+            "description": "Searches again for the subtitles downloaded in the last upgrade_days\n (0–30) below their maximum score, every upgrade_interval_hours;\n upgrade_manual includes those downloaded by hand."
+          },
+          "upgradeIntervalHours": {
+            "type": "integer",
+            "title": "upgrade_interval_hours",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "upgradeDays": {
+            "type": "integer",
+            "title": "upgrade_days",
+            "maximum": 30,
+            "minimum": 0,
+            "format": "int32"
+          },
+          "upgradeManual": {
+            "type": "boolean",
+            "title": "upgrade_manual"
+          },
+          "adaptiveSearching": {
+            "type": "boolean",
+            "title": "adaptive_searching",
+            "description": "Searches a language that has failed, after adaptive_delay_days since\n the first failure, only once per adaptive_delta_days."
+          },
+          "adaptiveDelayDays": {
+            "type": "integer",
+            "title": "adaptive_delay_days",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "adaptiveDeltaDays": {
+            "type": "integer",
+            "title": "adaptive_delta_days",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "wantedSearchIntervalHours": {
+            "type": "integer",
+            "title": "wanted_search_interval_hours",
+            "minimum": 0,
+            "format": "int32",
+            "description": "How often episodes' and movies' wanted subtitles are searched, in\n hours; 0 never."
+          },
+          "wantedSearchIntervalMovieHours": {
+            "type": "integer",
+            "title": "wanted_search_interval_movie_hours",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "defaultAudioLanguage": {
+            "type": "string",
+            "title": "default_audio_language",
+            "description": "The languages of audio and embedded subtitle streams without one."
+          },
+          "defaultEmbeddedLanguage": {
+            "type": "string",
+            "title": "default_embedded_language"
+          },
+          "skipHashing": {
+            "type": "boolean",
+            "title": "skip_hashing",
+            "description": "Does not compute videos' hashes for providers."
+          },
+          "languageEquals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageEquivalence"
+            },
+            "title": "language_equals"
+          },
+          "movieProfileTags": {
+            "type": "boolean",
+            "title": "movie_profile_tags",
+            "description": "Lets tags assign movies and series subtitle profiles, or none with\n one of no_profile_tags."
+          },
+          "seriesProfileTags": {
+            "type": "boolean",
+            "title": "series_profile_tags"
+          },
+          "noProfileTags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "no_profile_tags"
+          },
+          "sync": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleSyncSettings"
+              }
+            ],
+            "title": "sync"
+          }
+        },
+        "title": "SubtitleSettings",
+        "required": [
+          "sync"
+        ],
+        "additionalProperties": false,
+        "description": "SubtitleSettings are how subtitles are searched, chosen, saved and\n synchronized, as Bazarr's general settings."
+      },
+      "mavio.acquisition.v1.SubtitleSyncSettings": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "enabled",
+            "description": "Synchronizes downloaded subtitles; with use_threshold or\n use_movie_threshold, only episodes' below threshold or movies' below\n movie_threshold, percentages of the maximum score."
+          },
+          "useThreshold": {
+            "type": "boolean",
+            "title": "use_threshold"
+          },
+          "useMovieThreshold": {
+            "type": "boolean",
+            "title": "use_movie_threshold"
+          },
+          "threshold": {
+            "type": "integer",
+            "title": "threshold",
+            "maximum": 100,
+            "minimum": 0,
+            "format": "int32"
+          },
+          "movieThreshold": {
+            "type": "integer",
+            "title": "movie_threshold",
+            "maximum": 100,
+            "minimum": 0,
+            "format": "int32"
+          },
+          "forceAudio": {
+            "type": "boolean",
+            "title": "force_audio",
+            "description": "Synchronizes against the audio even when another subtitle could\n serve as reference."
+          },
+          "originalLanguage": {
+            "type": "boolean",
+            "title": "original_language",
+            "description": "Synchronizes against the audio stream in the original language."
+          },
+          "excludedProviders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "excluded_providers"
+          },
+          "excludedLanguages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "excluded_languages"
+          },
+          "maxOffsetSeconds": {
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "title": "max_offset_seconds",
+            "format": "int32",
+            "description": "The largest offset searched, in seconds."
+          },
+          "fixFramerate": {
+            "type": "boolean",
+            "title": "fix_framerate",
+            "description": "Also tries the common frame rate ratios."
+          },
+          "goldenSection": {
+            "type": "boolean",
+            "title": "golden_section",
+            "description": "Searches for the best ratio."
+          },
+          "minScore": {
+            "type": "number",
+            "title": "min_score",
+            "minimum": 0,
+            "format": "double",
+            "description": "Reject alignments when fix_framerate is set."
+          },
+          "maxQualityOffsetSeconds": {
+            "type": "integer",
+            "title": "max_quality_offset_seconds",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "maxScaleDeviation": {
+            "type": "number",
+            "title": "max_scale_deviation",
+            "minimum": 0,
+            "format": "double"
+          }
+        },
+        "title": "SubtitleSyncSettings",
+        "additionalProperties": false,
+        "description": "SubtitleSyncSettings are how downloaded subtitles are synchronized, as\n Bazarr's subsync settings."
+      },
       "mavio.acquisition.v1.SyncRSSRequest": {
         "type": "object",
         "title": "SyncRSSRequest",
@@ -4733,6 +6091,46 @@
       "mavio.acquisition.v1.SyncRSSResponse": {
         "type": "object",
         "title": "SyncRSSResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.SyncSubtitleRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          },
+          "path": {
+            "type": "string",
+            "title": "path",
+            "minLength": 1
+          },
+          "referencePath": {
+            "type": "string",
+            "title": "reference_path",
+            "description": "Another subtitle file of the item to synchronize with; empty for the\n audio."
+          }
+        },
+        "title": "SyncSubtitleRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.SyncSubtitleResponse": {
+        "type": "object",
+        "properties": {
+          "offsetMs": {
+            "type": "string",
+            "title": "offset_ms",
+            "format": "int64",
+            "description": "The offset applied, in milliseconds, and the frame rate ratio."
+          },
+          "ratio": {
+            "type": "number",
+            "title": "ratio",
+            "format": "double"
+          }
+        },
+        "title": "SyncSubtitleResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.Title": {
@@ -5138,6 +6536,73 @@
         "title": "UpdateRequestResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.UpdateSubtitleProfileRequest": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleProfile"
+              }
+            ],
+            "title": "profile",
+            "description": "Its id names the profile."
+          }
+        },
+        "title": "UpdateSubtitleProfileRequest",
+        "required": [
+          "profile"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UpdateSubtitleProfileResponse": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleProfile"
+              }
+            ],
+            "title": "profile"
+          }
+        },
+        "title": "UpdateSubtitleProfileResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UpdateSubtitleSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleSettings"
+              }
+            ],
+            "title": "settings"
+          }
+        },
+        "title": "UpdateSubtitleSettingsRequest",
+        "required": [
+          "settings"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UpdateSubtitleSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleSettings"
+              }
+            ],
+            "title": "settings"
+          }
+        },
+        "title": "UpdateSubtitleSettingsResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.UpdateWantedRequest": {
         "type": "object",
         "properties": {
@@ -5169,6 +6634,69 @@
           }
         },
         "title": "UpdateWantedResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UpgradeSubtitlesRequest": {
+        "type": "object",
+        "title": "UpgradeSubtitlesRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UpgradeSubtitlesResponse": {
+        "type": "object",
+        "title": "UpgradeSubtitlesResponse",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UploadSubtitleRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          },
+          "data": {
+            "type": "string",
+            "title": "data",
+            "maxLength": 16777216,
+            "minLength": 1,
+            "format": "byte"
+          },
+          "format": {
+            "type": "string",
+            "title": "format",
+            "enum": [
+              "srt",
+              "ass",
+              "ssa",
+              "vtt",
+              "sub"
+            ],
+            "description": "\"srt\", \"ass\", \"ssa\", \"vtt\" or \"sub\"."
+          },
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+              }
+            ],
+            "title": "language"
+          }
+        },
+        "title": "UploadSubtitleRequest",
+        "required": [
+          "language"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.UploadSubtitleResponse": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "path"
+          }
+        },
+        "title": "UploadSubtitleResponse",
         "additionalProperties": false
       },
       "mavio.acquisition.v1.Wanted": {
@@ -5365,6 +6893,53 @@
         "title": "WantedMovie",
         "additionalProperties": false,
         "description": "WantedMovie is a monitored movie ListWanted lists."
+      },
+      "mavio.acquisition.v1.WantedSubtitles": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id"
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "seriesId": {
+            "type": "string",
+            "title": "series_id",
+            "description": "An episode's series and numbers."
+          },
+          "seriesName": {
+            "type": "string",
+            "title": "series_name"
+          },
+          "seasonNumber": {
+            "type": "integer",
+            "title": "season_number",
+            "format": "int32"
+          },
+          "episodeNumber": {
+            "type": "integer",
+            "title": "episode_number",
+            "format": "int32"
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleLanguageSpec"
+            },
+            "title": "missing"
+          },
+          "path": {
+            "type": "string",
+            "title": "path",
+            "description": "The path of the video."
+          }
+        },
+        "title": "WantedSubtitles",
+        "additionalProperties": false,
+        "description": "WantedSubtitles is a movie or episode lacking subtitles."
       },
       "mavio.auth.v1.ApiKey": {
         "type": "object",
@@ -15878,6 +17453,10 @@
       "description": "IssueService takes the problems users report with items, as Seerr's\n issues: users who may report issues report them and comment on their\n own; administrators see, comment on, resolve and delete all."
     },
     {
+      "name": "SubtitleService",
+      "description": "SubtitleService acquires the subtitles movies and episodes lack, as\n Bazarr does: subtitle profiles and their assignments, the subtitle\n settings, wanted subtitles and their searches, manual search,\n download, upload, deletion, modification and synchronization, history\n and the blocklist. Administrators only."
+    },
+    {
       "name": "UserService",
       "description": "UserService manages accounts. All methods except GetCurrentUser and\n UpdatePreferences require an administrator."
     },
@@ -16323,14 +17902,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetLyrics": {
+    "/mavio.auth.v1.AuthService/RevokeApiKey": {
       "post": {
         "tags": [
-          "ItemService"
+          "AuthService"
         ],
-        "summary": "GetLyrics",
-        "description": "GetLyrics returns the lyrics of a track, read from the lyric file\n beside it (.elrc, .lrc or .txt).",
-        "operationId": "mavio.library.v1.ItemService.GetLyrics",
+        "summary": "RevokeApiKey",
+        "description": "RevokeApiKey deletes an API key. Administrators only.",
+        "operationId": "mavio.auth.v1.AuthService.RevokeApiKey",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16355,7 +17934,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetLyricsRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyRequest"
               }
             }
           },
@@ -16377,7 +17956,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetLyricsResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyResponse"
                 }
               }
             }
@@ -16385,14 +17964,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/ListQualityDefinitions": {
+    "/mavio.library.v1.LibraryService/ListLibraries": {
       "post": {
         "tags": [
-          "ProfileService"
+          "LibraryService"
         ],
-        "summary": "ListQualityDefinitions",
-        "description": "ListQualityDefinitions lists the qualities of a kind with their\n sizes, Radarr's defaults for movies and Sonarr's for series until\n changed.",
-        "operationId": "mavio.acquisition.v1.ProfileService.ListQualityDefinitions",
+        "summary": "ListLibraries",
+        "operationId": "mavio.library.v1.LibraryService.ListLibraries",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16417,7 +17995,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListQualityDefinitionsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesRequest"
               }
             }
           },
@@ -16439,7 +18017,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListQualityDefinitionsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesResponse"
                 }
               }
             }
@@ -16447,14 +18025,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListNextUp": {
+    "/mavio.acquisition.v1.DiscoverService/ListFilterValues": {
       "post": {
         "tags": [
-          "ItemService"
+          "DiscoverService"
         ],
-        "summary": "ListNextUp",
-        "description": "ListNextUp lists the next episode to watch of each series the caller\n has played, the series played most recently first. Episodes being\n watched are left to continue watching: ListItems with resumable set,\n sorted by last played.",
-        "operationId": "mavio.library.v1.ItemService.ListNextUp",
+        "summary": "ListFilterValues",
+        "description": "ListFilterValues lists the values a catalog's filter takes, such as\n genres, or the keywords and studios matching a query.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.ListFilterValues",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16479,7 +18057,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListNextUpRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListFilterValuesRequest"
               }
             }
           },
@@ -16501,7 +18079,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListNextUpResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListFilterValuesResponse"
                 }
               }
             }
@@ -16940,14 +18518,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListSimilarItems": {
+    "/mavio.acquisition.v1.DownloadService/ListQueue": {
       "post": {
         "tags": [
-          "ItemService"
+          "DownloadService"
         ],
-        "summary": "ListSimilarItems",
-        "description": "ListSimilarItems lists the items most like an item, of its kind, in the\n libraries and rating the caller may access: those sharing the most\n genres, tags, studios, directors and actors with it. Episodes and\n seasons stand for their series.",
-        "operationId": "mavio.library.v1.ItemService.ListSimilarItems",
+        "summary": "ListQueue",
+        "description": "ListQueue lists the tracked downloads, with what their clients last\n told of them.",
+        "operationId": "mavio.acquisition.v1.DownloadService.ListQueue",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -16972,7 +18550,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListSimilarItemsRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListQueueRequest"
               }
             }
           },
@@ -16994,7 +18572,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListSimilarItemsResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListQueueResponse"
                 }
               }
             }
@@ -18359,14 +19937,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListPeople": {
+    "/mavio.acquisition.v1.ProfileService/ListQualityDefinitions": {
       "post": {
         "tags": [
-          "ItemService"
+          "ProfileService"
         ],
-        "summary": "ListPeople",
-        "description": "ListPeople lists the people credited on the items the caller may\n access, with the number of items crediting each.",
-        "operationId": "mavio.library.v1.ItemService.ListPeople",
+        "summary": "ListQualityDefinitions",
+        "description": "ListQualityDefinitions lists the qualities of a kind with their\n sizes, Radarr's defaults for movies and Sonarr's for series until\n changed.",
+        "operationId": "mavio.acquisition.v1.ProfileService.ListQualityDefinitions",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -18391,7 +19969,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListPeopleRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListQualityDefinitionsRequest"
               }
             }
           },
@@ -18413,7 +19991,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListPeopleResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListQualityDefinitionsResponse"
                 }
               }
             }
@@ -19964,6 +21542,1366 @@
         }
       }
     },
+    "/mavio.acquisition.v1.SubtitleService/AssignSubtitleProfile": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "AssignSubtitleProfile",
+        "description": "AssignSubtitleProfile assigns a profile to a library, a movie or a\n series, or removes the assignment; the movies and episodes it covers\n are searched for the subtitles they now lack.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.AssignSubtitleProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.AssignSubtitleProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/BlocklistSubtitle": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "BlocklistSubtitle",
+        "description": "BlocklistSubtitle blocklists the subtitle a history event downloaded,\n deletes its file and searches for another.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.BlocklistSubtitle",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.BlocklistSubtitleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.BlocklistSubtitleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/CreateSubtitleProfile": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "CreateSubtitleProfile",
+        "description": "CreateSubtitleProfile fails with ALREADY_EXISTS when a profile has the\n name.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.CreateSubtitleProfile",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateSubtitleProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateSubtitleProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/DeleteSubtitle": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "DeleteSubtitle",
+        "description": "DeleteSubtitle deletes a subtitle file of a movie or episode.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.DeleteSubtitle",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/DeleteSubtitleBlocklist": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "DeleteSubtitleBlocklist",
+        "description": "DeleteSubtitleBlocklist deletes entries, or every entry when ids is\n empty and all is set.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.DeleteSubtitleBlocklist",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleBlocklistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleBlocklistResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/DeleteSubtitleProfile": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "DeleteSubtitleProfile",
+        "description": "DeleteSubtitleProfile deletes a profile and its assignments.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.DeleteSubtitleProfile",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/DownloadItemSubtitle": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "DownloadItemSubtitle",
+        "description": "DownloadItemSubtitle downloads a subtitle SearchItemSubtitles found\n and saves it beside the video.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.DownloadItemSubtitle",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DownloadItemSubtitleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DownloadItemSubtitleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/GetItemSubtitles": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "GetItemSubtitles",
+        "description": "GetItemSubtitles returns a movie's or episode's subtitles: its\n profile, the subtitles it has and those it lacks.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.GetItemSubtitles",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetItemSubtitlesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetItemSubtitlesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/GetSubtitleSettings": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "GetSubtitleSettings",
+        "operationId": "mavio.acquisition.v1.SubtitleService.GetSubtitleSettings",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/ListSubtitleBlocklist": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "ListSubtitleBlocklist",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleBlocklist",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleBlocklistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleBlocklistResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/ListSubtitleHistory": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "ListSubtitleHistory",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleHistory",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleHistoryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleHistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/ListSubtitleProfiles": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "ListSubtitleProfiles",
+        "description": "ListSubtitleProfiles lists the subtitle profiles by name.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleProfiles",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfilesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfilesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/ListSubtitleProviders": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "ListSubtitleProviders",
+        "description": "ListSubtitleProviders lists the providers of the subtitle provider\n plugins, with their state.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleProviders",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProvidersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProvidersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/ListWantedSubtitles": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "ListWantedSubtitles",
+        "description": "ListWantedSubtitles lists the movies or episodes lacking subtitles\n their profiles want.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ListWantedSubtitles",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListWantedSubtitlesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListWantedSubtitlesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/ModifySubtitle": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "ModifySubtitle",
+        "description": "ModifySubtitle applies mods to a subtitle file of a movie or episode.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ModifySubtitle",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ModifySubtitleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ModifySubtitleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/SearchItemSubtitles": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "SearchItemSubtitles",
+        "description": "SearchItemSubtitles asks the providers for a movie's or episode's\n subtitles, scored, best first, without downloading any.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.SearchItemSubtitles",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchItemSubtitlesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchItemSubtitlesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/SearchWantedSubtitles": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "SearchWantedSubtitles",
+        "description": "SearchWantedSubtitles queues searches of the subtitles movies or\n episodes lack, which download the best subtitles found.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchWantedSubtitlesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/SyncSubtitle": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "SyncSubtitle",
+        "description": "SyncSubtitle synchronizes a subtitle file of a movie or episode with\n its audio, or with another subtitle file; against the audio only on\n local and network storage.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.SyncSubtitle",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SyncSubtitleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SyncSubtitleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/UpdateSubtitleProfile": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "UpdateSubtitleProfile",
+        "operationId": "mavio.acquisition.v1.SubtitleService.UpdateSubtitleProfile",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/UpdateSubtitleSettings": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "UpdateSubtitleSettings",
+        "description": "UpdateSubtitleSettings replaces the settings and applies them at once.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.UpdateSubtitleSettings",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/UpgradeSubtitles": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "UpgradeSubtitles",
+        "description": "UpgradeSubtitles queues a search for better subtitles than those\n recently downloaded below their maximum score.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.UpgradeSubtitles",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpgradeSubtitlesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpgradeSubtitlesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/UploadSubtitle": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "UploadSubtitle",
+        "description": "UploadSubtitle saves a subtitle file beside a movie's or episode's\n video.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.UploadSubtitle",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UploadSubtitleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UploadSubtitleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.acquisition.v1.WantedService/AddMovie": {
       "post": {
         "tags": [
@@ -20398,14 +23336,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.WantedService/SyncRSS": {
+    "/mavio.home.v1.HomeService/ListHubs": {
       "post": {
         "tags": [
-          "WantedService"
+          "HomeService"
         ],
-        "summary": "SyncRSS",
-        "description": "SyncRSS queues an RSS sync: the indexers' recent releases are checked\n against every monitored movie and episode.",
-        "operationId": "mavio.acquisition.v1.WantedService.SyncRSS",
+        "summary": "ListHubs",
+        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
+        "operationId": "mavio.home.v1.HomeService.ListHubs",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -20430,7 +23368,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SyncRSSRequest"
+                "$ref": "#/components/schemas/mavio.home.v1.ListHubsRequest"
               }
             }
           },
@@ -20452,7 +23390,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SyncRSSResponse"
+                  "$ref": "#/components/schemas/mavio.home.v1.ListHubsResponse"
                 }
               }
             }
@@ -21266,14 +24204,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/RevokeApiKey": {
+    "/mavio.acquisition.v1.DiscoverService/GetTitle": {
       "post": {
         "tags": [
-          "AuthService"
+          "DiscoverService"
         ],
-        "summary": "RevokeApiKey",
-        "description": "RevokeApiKey deletes an API key. Administrators only.",
-        "operationId": "mavio.auth.v1.AuthService.RevokeApiKey",
+        "summary": "GetTitle",
+        "description": "GetTitle returns a movie or series by its TMDB ID, as the metadata\n providers tell it, with what the server has of it and of each of its\n seasons, as Seerr's movie and series details with their media. It\n fails with PERMISSION_DENIED when the title is rated above the\n caller's limit, and NOT_FOUND when no metadata provider knows it.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetTitle",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21298,7 +24236,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetTitleRequest"
               }
             }
           },
@@ -21320,7 +24258,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetTitleResponse"
                 }
               }
             }
@@ -21514,14 +24452,14 @@
         }
       }
     },
-    "/mavio.home.v1.HomeService/ListHubs": {
+    "/mavio.acquisition.v1.WantedService/SyncRSS": {
       "post": {
         "tags": [
-          "HomeService"
+          "WantedService"
         ],
-        "summary": "ListHubs",
-        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
-        "operationId": "mavio.home.v1.HomeService.ListHubs",
+        "summary": "SyncRSS",
+        "description": "SyncRSS queues an RSS sync: the indexers' recent releases are checked\n against every monitored movie and episode.",
+        "operationId": "mavio.acquisition.v1.WantedService.SyncRSS",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21546,7 +24484,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.home.v1.ListHubsRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SyncRSSRequest"
               }
             }
           },
@@ -21568,7 +24506,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.home.v1.ListHubsResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SyncRSSResponse"
                 }
               }
             }
@@ -21576,14 +24514,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.acquisition.v1.DiscoverService/ListCatalogs": {
       "post": {
         "tags": [
-          "CollectionService"
+          "DiscoverService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "ListCatalogs",
+        "description": "ListCatalogs lists the catalogs of every discovery provider.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.ListCatalogs",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21608,7 +24546,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListCatalogsRequest"
               }
             }
           },
@@ -21630,7 +24568,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListCatalogsResponse"
                 }
               }
             }
@@ -21638,13 +24576,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
+    "/mavio.library.v1.ItemService/DownloadRemoteLyrics": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ItemService"
         ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
+        "summary": "DownloadRemoteLyrics",
+        "description": "DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the\n track, as .lrc when synced and .txt otherwise, replacing its other\n lyric files; administrators only.",
+        "operationId": "mavio.library.v1.ItemService.DownloadRemoteLyrics",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21669,7 +24608,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DownloadRemoteLyricsRequest"
               }
             }
           },
@@ -21691,7 +24630,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DownloadRemoteLyricsResponse"
                 }
               }
             }
@@ -21882,14 +24821,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/DownloadRemoteLyrics": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
-          "ItemService"
+          "CollectionService"
         ],
-        "summary": "DownloadRemoteLyrics",
-        "description": "DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the\n track, as .lrc when synced and .txt otherwise, replacing its other\n lyric files; administrators only.",
-        "operationId": "mavio.library.v1.ItemService.DownloadRemoteLyrics",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21914,7 +24852,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DownloadRemoteLyricsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -21936,7 +24874,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DownloadRemoteLyricsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -22005,14 +24943,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/GetTitle": {
+    "/mavio.library.v1.ItemService/GetLyrics": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "ItemService"
         ],
-        "summary": "GetTitle",
-        "description": "GetTitle returns a movie or series by its TMDB ID, as the metadata\n providers tell it, with what the server has of it and of each of its\n seasons, as Seerr's movie and series details with their media. It\n fails with PERMISSION_DENIED when the title is rated above the\n caller's limit, and NOT_FOUND when no metadata provider knows it.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetTitle",
+        "summary": "GetLyrics",
+        "description": "GetLyrics returns the lyrics of a track, read from the lyric file\n beside it (.elrc, .lrc or .txt).",
+        "operationId": "mavio.library.v1.ItemService.GetLyrics",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22037,7 +24975,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetTitleRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetLyricsRequest"
               }
             }
           },
@@ -22059,7 +24997,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetTitleResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetLyricsResponse"
                 }
               }
             }
@@ -22251,14 +25189,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/ListFilterValues": {
+    "/mavio.library.v1.ItemService/ListNextUp": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "ItemService"
         ],
-        "summary": "ListFilterValues",
-        "description": "ListFilterValues lists the values a catalog's filter takes, such as\n genres, or the keywords and studios matching a query.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.ListFilterValues",
+        "summary": "ListNextUp",
+        "description": "ListNextUp lists the next episode to watch of each series the caller\n has played, the series played most recently first. Episodes being\n watched are left to continue watching: ListItems with resumable set,\n sorted by last played.",
+        "operationId": "mavio.library.v1.ItemService.ListNextUp",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22283,7 +25221,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListFilterValuesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListNextUpRequest"
               }
             }
           },
@@ -22305,7 +25243,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListFilterValuesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListNextUpResponse"
                 }
               }
             }
@@ -22313,14 +25251,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/ListCatalogs": {
+    "/mavio.library.v1.ItemService/ListPeople": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "ItemService"
         ],
-        "summary": "ListCatalogs",
-        "description": "ListCatalogs lists the catalogs of every discovery provider.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.ListCatalogs",
+        "summary": "ListPeople",
+        "description": "ListPeople lists the people credited on the items the caller may\n access, with the number of items crediting each.",
+        "operationId": "mavio.library.v1.ItemService.ListPeople",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22345,7 +25283,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListCatalogsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListPeopleRequest"
               }
             }
           },
@@ -22367,7 +25305,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListCatalogsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListPeopleResponse"
                 }
               }
             }
@@ -22375,14 +25313,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DownloadService/ListQueue": {
+    "/mavio.library.v1.ItemService/ListSimilarItems": {
       "post": {
         "tags": [
-          "DownloadService"
+          "ItemService"
         ],
-        "summary": "ListQueue",
-        "description": "ListQueue lists the tracked downloads, with what their clients last\n told of them.",
-        "operationId": "mavio.acquisition.v1.DownloadService.ListQueue",
+        "summary": "ListSimilarItems",
+        "description": "ListSimilarItems lists the items most like an item, of its kind, in the\n libraries and rating the caller may access: those sharing the most\n genres, tags, studios, directors and actors with it. Episodes and\n seasons stand for their series.",
+        "operationId": "mavio.library.v1.ItemService.ListSimilarItems",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22407,7 +25345,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListQueueRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListSimilarItemsRequest"
               }
             }
           },
@@ -22429,7 +25367,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListQueueResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListSimilarItemsResponse"
                 }
               }
             }
@@ -22745,13 +25683,14 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/ListLibraries": {
+    "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
-          "LibraryService"
+          "CollectionService"
         ],
-        "summary": "ListLibraries",
-        "operationId": "mavio.library.v1.LibraryService.ListLibraries",
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22776,7 +25715,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
               }
             }
           },
@@ -22798,7 +25737,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListLibrariesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
                 }
               }
             }

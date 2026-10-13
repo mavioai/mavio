@@ -5,4 +5,5 @@ include!("mavio.acquisition.v1.request.__connect.rs");
 include!("mavio.acquisition.v1.discover.__connect.rs");
 include!("mavio.acquisition.v1.download.__connect.rs");
 include!("mavio.acquisition.v1.issue.__connect.rs");
+include!("mavio.acquisition.v1.subtitle.__connect.rs");
 include!("mavio.acquisition.v1.wanted.__connect.rs");

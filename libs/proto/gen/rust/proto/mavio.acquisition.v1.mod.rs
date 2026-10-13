@@ -6,6 +6,7 @@ include!("mavio.acquisition.v1.request.rs");
 include!("mavio.acquisition.v1.discover.rs");
 include!("mavio.acquisition.v1.download.rs");
 include!("mavio.acquisition.v1.issue.rs");
+include!("mavio.acquisition.v1.subtitle.rs");
 include!("mavio.acquisition.v1.wanted.rs");
 #[allow(
     non_camel_case_types,
@@ -30,6 +31,7 @@ pub mod __buffa {
         include!("mavio.acquisition.v1.discover.__view.rs");
         include!("mavio.acquisition.v1.download.__view.rs");
         include!("mavio.acquisition.v1.issue.__view.rs");
+        include!("mavio.acquisition.v1.subtitle.__view.rs");
         include!("mavio.acquisition.v1.wanted.__view.rs");
     }
 }
@@ -637,6 +639,230 @@ pub use self::__buffa::view::DeleteIssueRequestOwnedView;
 pub use self::__buffa::view::DeleteIssueResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DeleteIssueResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleLanguageSpecView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleLanguageSpecOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProfileItemView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProfileItemOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProfileView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProfileOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProfilesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProfilesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProfilesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProfilesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateSubtitleProfileRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateSubtitleProfileRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateSubtitleProfileResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateSubtitleProfileResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateSubtitleProfileRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateSubtitleProfileRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateSubtitleProfileResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateSubtitleProfileResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleProfileRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleProfileRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleProfileResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleProfileResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AssignSubtitleProfileRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AssignSubtitleProfileRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AssignSubtitleProfileResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AssignSubtitleProfileResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleLanguageEquivalenceView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleLanguageEquivalenceOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleSyncSettingsView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleSyncSettingsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleSettingsView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleSettingsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSubtitleSettingsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSubtitleSettingsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSubtitleSettingsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSubtitleSettingsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateSubtitleSettingsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateSubtitleSettingsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateSubtitleSettingsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateSubtitleSettingsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProvidersRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProvidersRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProviderStateView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProviderStateOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProvidersResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProvidersResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::WantedSubtitlesView;
+#[doc(inline)]
+pub use self::__buffa::view::WantedSubtitlesOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListWantedSubtitlesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListWantedSubtitlesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListWantedSubtitlesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListWantedSubtitlesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchWantedSubtitlesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchWantedSubtitlesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchWantedSubtitlesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchWantedSubtitlesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpgradeSubtitlesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpgradeSubtitlesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpgradeSubtitlesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpgradeSubtitlesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ItemSubtitleView;
+#[doc(inline)]
+pub use self::__buffa::view::ItemSubtitleOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetItemSubtitlesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetItemSubtitlesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetItemSubtitlesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetItemSubtitlesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ScoredSubtitleView;
+#[doc(inline)]
+pub use self::__buffa::view::ScoredSubtitleOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchItemSubtitlesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchItemSubtitlesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchItemSubtitlesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SearchItemSubtitlesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DownloadItemSubtitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DownloadItemSubtitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DownloadItemSubtitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DownloadItemSubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UploadSubtitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UploadSubtitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UploadSubtitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UploadSubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ModifySubtitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ModifySubtitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ModifySubtitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ModifySubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SyncSubtitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SyncSubtitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SyncSubtitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SyncSubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::BlocklistSubtitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::BlocklistSubtitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::BlocklistSubtitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::BlocklistSubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleHistoryEventView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleHistoryEventOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleHistoryRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleHistoryRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleHistoryResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleHistoryResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleBlocklistEntryView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleBlocklistEntryOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleBlocklistRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleBlocklistRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleBlocklistResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleBlocklistResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleBlocklistRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleBlocklistRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleBlocklistResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteSubtitleBlocklistResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::WantedView;
 #[doc(inline)]
