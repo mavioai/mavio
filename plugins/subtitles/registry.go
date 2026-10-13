@@ -6,12 +6,17 @@ import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animesubinfo"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animetosho"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animetoshoxyz"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/assrt"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/bayflix"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/betaseries"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/bsplayer"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/gestdown"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/greeksubs"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/greeksubtitles"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/hdbits"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/hosszupuska"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/jimaku"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/legendasnet"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/napiprojekt"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/napisy24"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/nekur"
@@ -19,10 +24,13 @@ import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/prijevodionline"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/regielive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/soustitreseu"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subsarr"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subsro"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subsynchro"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subtis"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subtitriid"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subtitulamostv"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subx"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/supersubtitles"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/titrari"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/tsukihime"
@@ -40,12 +48,17 @@ func definitions() []provider.Definition {
 		animesubinfo.Definition(),
 		animetosho.Definition(),
 		animetoshoxyz.Definition(),
+		assrt.Definition(),
 		bayflix.Definition(),
+		betaseries.Definition(),
 		bsplayer.Definition(),
 		gestdown.Definition(),
 		greeksubs.Definition(),
 		greeksubtitles.Definition(),
+		hdbits.Definition(),
 		hosszupuska.Definition(),
+		jimaku.Definition(),
+		legendasnet.Definition(),
 		napiprojekt.Definition(),
 		napisy24.Definition(),
 		nekur.Definition(),
@@ -53,10 +66,13 @@ func definitions() []provider.Definition {
 		prijevodionline.Definition(),
 		regielive.Definition(),
 		soustitreseu.Definition(),
+		subsarr.Definition(),
+		subsro.Definition(),
 		subsynchro.Definition(),
 		subtis.Definition(),
 		subtitriid.Definition(),
 		subtitulamostv.Definition(),
+		subx.Definition(),
 		supersubtitles.Definition(),
 		titrari.Definition(),
 		tsukihime.Definition(),
