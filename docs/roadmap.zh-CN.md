@@ -712,7 +712,7 @@ flowchart TD
 
 **进度**：
 - [x] 领域与存储：字幕配置及其分配、字幕历史、阻止列表与失败记录、字幕设置（`libs/core`、`libs/store`）
-- [ ] `tools/testport` 读取 pytest 用例；移植 Bazarr 的评分、修正与提供者用例
+- [x] `tools/testport` 读取 pytest 用例；移植 Bazarr 的评分、修正与提供者用例
 - [ ] `libs/acquire/subtitles`：缺少的字幕、评分、择优、升级、自适应搜索
   - [ ] guessit 为 Bazarr 评分提供而 `libs/release` 缺少的字段（流媒体服务、字幕 release 名称中的版本），补入 `libs/release`
 - [ ] 扩展 `SUBTITLE_PROVIDER`：列出提供者、查询中的视频描述与多种语言、结果中的匹配属性、失败类型

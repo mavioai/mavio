@@ -712,7 +712,7 @@ flowchart TD
 
 **Progress**:
 - [x] Domain and storage: subtitle profiles and their assignment, subtitle history, blocklist and failed attempts, the subtitle settings (`libs/core`, `libs/store`)
-- [ ] `tools/testport` reads pytest cases; Bazarr's score, mod and provider cases ported
+- [x] `tools/testport` reads pytest cases; Bazarr's score, mod and provider cases ported
 - [ ] `libs/acquire/subtitles`: wanted subtitles, scores, choice, upgrades, adaptive searching
   - [ ] The fields guessit gives Bazarr's scores that `libs/release` lacks (streaming service, edition of subtitle release names), added to it
 - [ ] `SUBTITLE_PROVIDER` extended: provider listing, video descriptions and several languages in queries, matched properties in results, kinds of failures
