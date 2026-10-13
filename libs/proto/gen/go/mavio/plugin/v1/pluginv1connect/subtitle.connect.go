@@ -33,6 +33,9 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// SubtitleProviderServiceListSubtitleProvidersProcedure is the fully-qualified name of the
+	// SubtitleProviderService's ListSubtitleProviders RPC.
+	SubtitleProviderServiceListSubtitleProvidersProcedure = "/mavio.plugin.v1.SubtitleProviderService/ListSubtitleProviders"
 	// SubtitleProviderServiceSearchSubtitlesProcedure is the fully-qualified name of the
 	// SubtitleProviderService's SearchSubtitles RPC.
 	SubtitleProviderServiceSearchSubtitlesProcedure = "/mavio.plugin.v1.SubtitleProviderService/SearchSubtitles"
@@ -44,10 +47,14 @@ const (
 // SubtitleProviderServiceClient is a client for the mavio.plugin.v1.SubtitleProviderService
 // service.
 type SubtitleProviderServiceClient interface {
-	// SearchSubtitles lists the subtitles the source has for a video in one
-	// language, best first.
+	// ListSubtitleProviders lists the providers the plugin implements, with
+	// their settings and state.
+	ListSubtitleProviders(context.Context, *v1.ListSubtitleProvidersRequest) (*v1.ListSubtitleProvidersResponse, error)
+	// SearchSubtitles asks the enabled providers for subtitles of a video in
+	// several languages.
 	SearchSubtitles(context.Context, *v1.SearchSubtitlesRequest) (*v1.SearchSubtitlesResponse, error)
-	// DownloadSubtitle returns a subtitle found by SearchSubtitles.
+	// DownloadSubtitle returns a subtitle found by SearchSubtitles,
+	// extracted from its archive.
 	DownloadSubtitle(context.Context, *v1.DownloadSubtitleRequest) (*v1.DownloadSubtitleResponse, error)
 }
 
@@ -62,6 +69,13 @@ func NewSubtitleProviderServiceClient(httpClient connect.HTTPClient, baseURL str
 	baseURL = strings.TrimRight(baseURL, "/")
 	subtitleProviderServiceMethods := v1.File_mavio_plugin_v1_subtitle_proto.Services().ByName("SubtitleProviderService").Methods()
 	return &subtitleProviderServiceClient{
+		listSubtitleProviders: connect.NewClient[v1.ListSubtitleProvidersRequest, v1.ListSubtitleProvidersResponse](
+			httpClient,
+			baseURL+SubtitleProviderServiceListSubtitleProvidersProcedure,
+			connect.WithSchema(subtitleProviderServiceMethods.ByName("ListSubtitleProviders")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		searchSubtitles: connect.NewClient[v1.SearchSubtitlesRequest, v1.SearchSubtitlesResponse](
 			httpClient,
 			baseURL+SubtitleProviderServiceSearchSubtitlesProcedure,
@@ -80,8 +94,18 @@ func NewSubtitleProviderServiceClient(httpClient connect.HTTPClient, baseURL str
 
 // subtitleProviderServiceClient implements SubtitleProviderServiceClient.
 type subtitleProviderServiceClient struct {
-	searchSubtitles  *connect.Client[v1.SearchSubtitlesRequest, v1.SearchSubtitlesResponse]
-	downloadSubtitle *connect.Client[v1.DownloadSubtitleRequest, v1.DownloadSubtitleResponse]
+	listSubtitleProviders *connect.Client[v1.ListSubtitleProvidersRequest, v1.ListSubtitleProvidersResponse]
+	searchSubtitles       *connect.Client[v1.SearchSubtitlesRequest, v1.SearchSubtitlesResponse]
+	downloadSubtitle      *connect.Client[v1.DownloadSubtitleRequest, v1.DownloadSubtitleResponse]
+}
+
+// ListSubtitleProviders calls mavio.plugin.v1.SubtitleProviderService.ListSubtitleProviders.
+func (c *subtitleProviderServiceClient) ListSubtitleProviders(ctx context.Context, req *v1.ListSubtitleProvidersRequest) (*v1.ListSubtitleProvidersResponse, error) {
+	response, err := c.listSubtitleProviders.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
 }
 
 // SearchSubtitles calls mavio.plugin.v1.SubtitleProviderService.SearchSubtitles.
@@ -105,10 +129,14 @@ func (c *subtitleProviderServiceClient) DownloadSubtitle(ctx context.Context, re
 // SubtitleProviderServiceHandler is an implementation of the
 // mavio.plugin.v1.SubtitleProviderService service.
 type SubtitleProviderServiceHandler interface {
-	// SearchSubtitles lists the subtitles the source has for a video in one
-	// language, best first.
+	// ListSubtitleProviders lists the providers the plugin implements, with
+	// their settings and state.
+	ListSubtitleProviders(context.Context, *v1.ListSubtitleProvidersRequest) (*v1.ListSubtitleProvidersResponse, error)
+	// SearchSubtitles asks the enabled providers for subtitles of a video in
+	// several languages.
 	SearchSubtitles(context.Context, *v1.SearchSubtitlesRequest) (*v1.SearchSubtitlesResponse, error)
-	// DownloadSubtitle returns a subtitle found by SearchSubtitles.
+	// DownloadSubtitle returns a subtitle found by SearchSubtitles,
+	// extracted from its archive.
 	DownloadSubtitle(context.Context, *v1.DownloadSubtitleRequest) (*v1.DownloadSubtitleResponse, error)
 }
 
@@ -119,6 +147,13 @@ type SubtitleProviderServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewSubtitleProviderServiceHandler(svc SubtitleProviderServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	subtitleProviderServiceMethods := v1.File_mavio_plugin_v1_subtitle_proto.Services().ByName("SubtitleProviderService").Methods()
+	subtitleProviderServiceListSubtitleProvidersHandler := connect.NewUnaryHandlerSimple(
+		SubtitleProviderServiceListSubtitleProvidersProcedure,
+		svc.ListSubtitleProviders,
+		connect.WithSchema(subtitleProviderServiceMethods.ByName("ListSubtitleProviders")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	subtitleProviderServiceSearchSubtitlesHandler := connect.NewUnaryHandlerSimple(
 		SubtitleProviderServiceSearchSubtitlesProcedure,
 		svc.SearchSubtitles,
@@ -134,6 +169,8 @@ func NewSubtitleProviderServiceHandler(svc SubtitleProviderServiceHandler, opts 
 	)
 	return "/mavio.plugin.v1.SubtitleProviderService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case SubtitleProviderServiceListSubtitleProvidersProcedure:
+			subtitleProviderServiceListSubtitleProvidersHandler.ServeHTTP(w, r)
 		case SubtitleProviderServiceSearchSubtitlesProcedure:
 			subtitleProviderServiceSearchSubtitlesHandler.ServeHTTP(w, r)
 		case SubtitleProviderServiceDownloadSubtitleProcedure:
@@ -146,6 +183,10 @@ func NewSubtitleProviderServiceHandler(svc SubtitleProviderServiceHandler, opts 
 
 // UnimplementedSubtitleProviderServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedSubtitleProviderServiceHandler struct{}
+
+func (UnimplementedSubtitleProviderServiceHandler) ListSubtitleProviders(context.Context, *v1.ListSubtitleProvidersRequest) (*v1.ListSubtitleProvidersResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.SubtitleProviderService.ListSubtitleProviders is not implemented"))
+}
 
 func (UnimplementedSubtitleProviderServiceHandler) SearchSubtitles(context.Context, *v1.SearchSubtitlesRequest) (*v1.SearchSubtitlesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.SubtitleProviderService.SearchSubtitles is not implemented"))

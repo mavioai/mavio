@@ -2,84 +2,310 @@
 // @generated from file mavio/plugin/v1/subtitle.proto (package mavio.plugin.v1, edition 2023)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { MediaKind } from "./metadata_pb";
 import { file_mavio_plugin_v1_metadata } from "./metadata_pb";
+import type { SettingField } from "./settings_pb";
+import { file_mavio_plugin_v1_settings } from "./settings_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file mavio/plugin/v1/subtitle.proto.
  */
 export const file_mavio_plugin_v1_subtitle: GenFile = /*@__PURE__*/
-  fileDesc("Ch5tYXZpby9wbHVnaW4vdjEvc3VidGl0bGUucHJvdG8SD21hdmlvLnBsdWdpbi52MSKXBAoNU3VidGl0bGVRdWVyeRIoCgRraW5kGAEgASgOMhoubWF2aW8ucGx1Z2luLnYxLk1lZGlhS2luZBIMCgRuYW1lGAIgASgJEgwKBHllYXIYAyABKAUSRQoMZXh0ZXJuYWxfaWRzGAQgAygLMi8ubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlUXVlcnkuRXh0ZXJuYWxJZHNFbnRyeRITCgtzZXJpZXNfbmFtZRgFIAEoCRJSChNzZXJpZXNfZXh0ZXJuYWxfaWRzGAYgAygLMjUubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlUXVlcnkuU2VyaWVzRXh0ZXJuYWxJZHNFbnRyeRIVCg1zZWFzb25fbnVtYmVyGAcgASgFEhYKDmVwaXNvZGVfbnVtYmVyGAggASgFEhAKCGxhbmd1YWdlGAkgASgJEhEKCWZpbGVfbmFtZRgKIAEoCRIRCglmaWxlX3NpemUYCyABKAMSEQoJZmlsZV9oYXNoGAwgASgJEhgKEGhlYXJpbmdfaW1wYWlyZWQYDSABKAgSDgoGZm9yY2VkGA4gASgIGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ARo4ChZTZXJpZXNFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiVgoWU2VhcmNoU3VidGl0bGVzUmVxdWVzdBItCgVxdWVyeRgBIAEoCzIeLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVF1ZXJ5Eg0KBWxpbWl0GAIgASgFIk0KF1NlYXJjaFN1YnRpdGxlc1Jlc3BvbnNlEjIKCXN1YnRpdGxlcxgBIAMoCzIfLm1hdmlvLnBsdWdpbi52MS5SZW1vdGVTdWJ0aXRsZSLCAQoOUmVtb3RlU3VidGl0bGUSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIQCghsYW5ndWFnZRgDIAEoCRIOCgZmb3JtYXQYBCABKAkSGAoQaGVhcmluZ19pbXBhaXJlZBgFIAEoCBIOCgZmb3JjZWQYBiABKAgSDQoFc2NvcmUYByABKAESFgoOZG93bmxvYWRfY291bnQYCCABKAUSEgoKaGFzaF9tYXRjaBgJIAEoCBIPCgdjb21tZW50GAogASgJIiUKF0Rvd25sb2FkU3VidGl0bGVSZXF1ZXN0EgoKAmlkGAEgASgJInQKGERvd25sb2FkU3VidGl0bGVSZXNwb25zZRIMCgRkYXRhGAEgASgMEg4KBmZvcm1hdBgCIAEoCRIQCghsYW5ndWFnZRgDIAEoCRIYChBoZWFyaW5nX2ltcGFpcmVkGAQgASgIEg4KBmZvcmNlZBgFIAEoCDLtAQoXU3VidGl0bGVQcm92aWRlclNlcnZpY2USaQoPU2VhcmNoU3VidGl0bGVzEicubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFN1YnRpdGxlc1JlcXVlc3QaKC5tYXZpby5wbHVnaW4udjEuU2VhcmNoU3VidGl0bGVzUmVzcG9uc2UiA5ACARJnChBEb3dubG9hZFN1YnRpdGxlEigubWF2aW8ucGx1Z2luLnYxLkRvd25sb2FkU3VidGl0bGVSZXF1ZXN0GikubWF2aW8ucGx1Z2luLnYxLkRvd25sb2FkU3VidGl0bGVSZXNwb25zZULHAQoTY29tLm1hdmlvLnBsdWdpbi52MUINU3VidGl0bGVQcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vcGx1Z2luL3YxO3BsdWdpbnYxogIDTVBYqgIPTWF2aW8uUGx1Z2luLlYxygIPTWF2aW9cUGx1Z2luXFYx4gIbTWF2aW9cUGx1Z2luXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlBsdWdpbjo6VjFiCGVkaXRpb25zcOgH", [file_mavio_plugin_v1_metadata]);
+  fileDesc("Ch5tYXZpby9wbHVnaW4vdjEvc3VidGl0bGUucHJvdG8SD21hdmlvLnBsdWdpbi52MSIeChxMaXN0U3VidGl0bGVQcm92aWRlcnNSZXF1ZXN0IlkKHUxpc3RTdWJ0aXRsZVByb3ZpZGVyc1Jlc3BvbnNlEjgKCXByb3ZpZGVycxgBIAMoCzIlLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVByb3ZpZGVySW5mbyK9AgoUU3VidGl0bGVQcm92aWRlckluZm8SDAoEbmFtZRgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSLwoIc2V0dGluZ3MYAyADKAsyHS5tYXZpby5wbHVnaW4udjEuU2V0dGluZ0ZpZWxkEg8KB2VuYWJsZWQYBCABKAgSMwoPdGhyb3R0bGVkX3VudGlsGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIXCg90aHJvdHRsZV9yZWFzb24YBiABKAkSEQoJbGFuZ3VhZ2VzGAcgAygJEhcKD2hhc2hfdmVyaWZpYWJsZRgIIAEoCBIjChtoZWFyaW5nX2ltcGFpcmVkX3ZlcmlmaWFibGUYCSABKAgSDgoGbW92aWVzGAogASgIEhAKCGVwaXNvZGVzGAsgASgIIlkKEFN1YnRpdGxlTGFuZ3VhZ2USGwoIbGFuZ3VhZ2UYASABKAlCCbpIBnIEEAIYIxIOCgZmb3JjZWQYAiABKAgSGAoQaGVhcmluZ19pbXBhaXJlZBgDIAEoCCK0BgoNU3VidGl0bGVWaWRlbxIoCgRraW5kGAEgASgOMhoubWF2aW8ucGx1Z2luLnYxLk1lZGlhS2luZBINCgV0aXRsZRgCIAEoCRIaChJhbHRlcm5hdGl2ZV90aXRsZXMYAyADKAkSDAoEeWVhchgEIAEoBRJFCgxleHRlcm5hbF9pZHMYBSADKAsyLy5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVWaWRlby5FeHRlcm5hbElkc0VudHJ5Eg4KBnNlcmllcxgGIAEoCRIaChJhbHRlcm5hdGl2ZV9zZXJpZXMYByADKAkSUgoTc2VyaWVzX2V4dGVybmFsX2lkcxgIIAMoCzI1Lm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVZpZGVvLlNlcmllc0V4dGVybmFsSWRzRW50cnkSDgoGc2Vhc29uGAkgASgFEg8KB2VwaXNvZGUYCiABKAUSGAoQYWJzb2x1dGVfZXBpc29kZRgLIAEoBRIXCg9vcmlnaW5hbF9zZXJpZXMYDCABKAgSDwoHc3BlY2lhbBgNIAEoCBIUCgxyZWxlYXNlX25hbWUYDiABKAkSDgoGc291cmNlGA8gASgJEhUKDXJlbGVhc2VfZ3JvdXAYECABKAkSEgoKcmVzb2x1dGlvbhgRIAEoCRITCgt2aWRlb19jb2RlYxgSIAEoCRITCgthdWRpb19jb2RlYxgTIAEoCRIPCgdlZGl0aW9uGBQgASgJEhkKEXN0cmVhbWluZ19zZXJ2aWNlGBUgASgJEhIKCmZyYW1lX3JhdGUYFiABKAESEQoJZmlsZV9uYW1lGBcgASgJEhEKCWZpbGVfc2l6ZRgYIAEoAxIRCglmaWxlX2hhc2gYGSABKAkSFwoPYXVkaW9fbGFuZ3VhZ2VzGBogAygJEhkKEW9yaWdpbmFsX2xhbmd1YWdlGBsgASgJGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ARo4ChZTZXJpZXNFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiogEKFlNlYXJjaFN1YnRpdGxlc1JlcXVlc3QSNQoFdmlkZW8YASABKAsyHi5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVWaWRlb0IGukgDyAEBEj4KCWxhbmd1YWdlcxgCIAMoCzIhLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZUxhbmd1YWdlQgi6SAWSAQIIARIRCglwcm92aWRlcnMYAyADKAkiiQEKF1NlYXJjaFN1YnRpdGxlc1Jlc3BvbnNlEjIKCXN1YnRpdGxlcxgBIAMoCzIfLm1hdmlvLnBsdWdpbi52MS5SZW1vdGVTdWJ0aXRsZRI6CghmYWlsdXJlcxgCIAMoCzIoLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVByb3ZpZGVyRmFpbHVyZSKnAgoOUmVtb3RlU3VidGl0bGUSEAoIcHJvdmlkZXIYASABKAkSCgoCaWQYAiABKAkSMwoIbGFuZ3VhZ2UYAyABKAsyIS5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVMYW5ndWFnZRIVCg1yZWxlYXNlX25hbWVzGAQgAygJEg8KB21hdGNoZXMYBSADKAkSFwoPaGFzaF92ZXJpZmlhYmxlGAYgASgIEiMKG2hlYXJpbmdfaW1wYWlyZWRfdmVyaWZpYWJsZRgHIAEoCBIOCgZmb3JtYXQYCCABKAkSEQoJcGFnZV9saW5rGAkgASgJEhAKCHVwbG9hZGVyGAogASgJEg8KB2NvbW1lbnQYCyABKAkSFgoOZG93bmxvYWRfY291bnQYDCABKAUieAoXRG93bmxvYWRTdWJ0aXRsZVJlcXVlc3QSGQoIcHJvdmlkZXIYASABKAlCB7pIBHICEAESEwoCaWQYAiABKAlCB7pIBHICEAESLQoFdmlkZW8YAyABKAsyHi5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVWaWRlbyKoAQoYRG93bmxvYWRTdWJ0aXRsZVJlc3BvbnNlEgwKBGRhdGEYASABKAwSDgoGZm9ybWF0GAIgASgJEjMKCGxhbmd1YWdlGAMgASgLMiEubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlTGFuZ3VhZ2USOQoHZmFpbHVyZRgEIAEoCzIoLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVByb3ZpZGVyRmFpbHVyZSKlAQoXU3VidGl0bGVQcm92aWRlckZhaWx1cmUSEAoIcHJvdmlkZXIYASABKAkSMgoEa2luZBgCIAEoDjIkLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZUZhaWx1cmVLaW5kEg8KB21lc3NhZ2UYAyABKAkSMwoPdGhyb3R0bGVkX3VudGlsGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCreAgoTU3VidGl0bGVGYWlsdXJlS2luZBIlCiFTVUJUSVRMRV9GQUlMVVJFX0tJTkRfVU5TUEVDSUZJRUQQABIrCidTVUJUSVRMRV9GQUlMVVJFX0tJTkRfVE9PX01BTllfUkVRVUVTVFMQARIoCiRTVUJUSVRMRV9GQUlMVVJFX0tJTkRfRE9XTkxPQURfTElNSVQQAhItCilTVUJUSVRMRV9GQUlMVVJFX0tJTkRfU0VSVklDRV9VTkFWQUlMQUJMRRADEigKJFNVQlRJVExFX0ZBSUxVUkVfS0lORF9BVVRIRU5USUNBVElPThAEEicKI1NVQlRJVExFX0ZBSUxVUkVfS0lORF9DT05GSUdVUkFUSU9OEAUSJgoiU1VCVElUTEVfRkFJTFVSRV9LSU5EX0JBRF9TVUJUSVRMRRAGEh8KG1NVQlRJVExFX0ZBSUxVUkVfS0lORF9PVEhFUhAHMuoCChdTdWJ0aXRsZVByb3ZpZGVyU2VydmljZRJ7ChVMaXN0U3VidGl0bGVQcm92aWRlcnMSLS5tYXZpby5wbHVnaW4udjEuTGlzdFN1YnRpdGxlUHJvdmlkZXJzUmVxdWVzdBouLm1hdmlvLnBsdWdpbi52MS5MaXN0U3VidGl0bGVQcm92aWRlcnNSZXNwb25zZSIDkAIBEmkKD1NlYXJjaFN1YnRpdGxlcxInLm1hdmlvLnBsdWdpbi52MS5TZWFyY2hTdWJ0aXRsZXNSZXF1ZXN0GigubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFN1YnRpdGxlc1Jlc3BvbnNlIgOQAgESZwoQRG93bmxvYWRTdWJ0aXRsZRIoLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFN1YnRpdGxlUmVxdWVzdBopLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFN1YnRpdGxlUmVzcG9uc2VCxwEKE2NvbS5tYXZpby5wbHVnaW4udjFCDVN1YnRpdGxlUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_plugin_v1_metadata, file_mavio_plugin_v1_settings]);
 
 /**
- * SubtitleQuery describes the video subtitles are searched for.
- *
- * @generated from message mavio.plugin.v1.SubtitleQuery
+ * @generated from message mavio.plugin.v1.ListSubtitleProvidersRequest
  */
-export type SubtitleQuery = Message<"mavio.plugin.v1.SubtitleQuery"> & {
+export type ListSubtitleProvidersRequest = Message<"mavio.plugin.v1.ListSubtitleProvidersRequest"> & {
+};
+
+/**
+ * Describes the message mavio.plugin.v1.ListSubtitleProvidersRequest.
+ * Use `create(ListSubtitleProvidersRequestSchema)` to create a new message.
+ */
+export const ListSubtitleProvidersRequestSchema: GenMessage<ListSubtitleProvidersRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 0);
+
+/**
+ * @generated from message mavio.plugin.v1.ListSubtitleProvidersResponse
+ */
+export type ListSubtitleProvidersResponse = Message<"mavio.plugin.v1.ListSubtitleProvidersResponse"> & {
   /**
-   * MEDIA_KIND_MOVIE, MEDIA_KIND_EPISODE or MEDIA_KIND_MUSIC_VIDEO.
+   * @generated from field: repeated mavio.plugin.v1.SubtitleProviderInfo providers = 1;
+   */
+  providers: SubtitleProviderInfo[];
+};
+
+/**
+ * Describes the message mavio.plugin.v1.ListSubtitleProvidersResponse.
+ * Use `create(ListSubtitleProvidersResponseSchema)` to create a new message.
+ */
+export const ListSubtitleProvidersResponseSchema: GenMessage<ListSubtitleProvidersResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 1);
+
+/**
+ * SubtitleProviderInfo is a provider a plugin implements.
+ *
+ * @generated from message mavio.plugin.v1.SubtitleProviderInfo
+ */
+export type SubtitleProviderInfo = Message<"mavio.plugin.v1.SubtitleProviderInfo"> & {
+  /**
+   * Stable within the plugin, such as "opensubtitlescom".
+   *
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string display_name = 2;
+   */
+  displayName: string;
+
+  /**
+   * The provider's settings, under its name in the plugin's settings.
+   *
+   * @generated from field: repeated mavio.plugin.v1.SettingField settings = 3;
+   */
+  settings: SettingField[];
+
+  /**
+   * @generated from field: bool enabled = 4;
+   */
+  enabled: boolean;
+
+  /**
+   * Set while the provider is throttled, until this time.
+   *
+   * @generated from field: google.protobuf.Timestamp throttled_until = 5;
+   */
+  throttledUntil?: Timestamp | undefined;
+
+  /**
+   * The failure that throttled it.
+   *
+   * @generated from field: string throttle_reason = 6;
+   */
+  throttleReason: string;
+
+  /**
+   * The languages the provider has subtitles in, as BCP 47 tags.
+   *
+   * @generated from field: repeated string languages = 7;
+   */
+  languages: string[];
+
+  /**
+   * Whether the provider's hash matches can be checked against the other
+   * properties, and whether it knows if subtitles are hearing-impaired.
+   *
+   * @generated from field: bool hash_verifiable = 8;
+   */
+  hashVerifiable: boolean;
+
+  /**
+   * @generated from field: bool hearing_impaired_verifiable = 9;
+   */
+  hearingImpairedVerifiable: boolean;
+
+  /**
+   * Subtitles of movies and of episodes.
+   *
+   * @generated from field: bool movies = 10;
+   */
+  movies: boolean;
+
+  /**
+   * @generated from field: bool episodes = 11;
+   */
+  episodes: boolean;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.SubtitleProviderInfo.
+ * Use `create(SubtitleProviderInfoSchema)` to create a new message.
+ */
+export const SubtitleProviderInfoSchema: GenMessage<SubtitleProviderInfo> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 2);
+
+/**
+ * SubtitleLanguage is a language of subtitles with their kind.
+ *
+ * @generated from message mavio.plugin.v1.SubtitleLanguage
+ */
+export type SubtitleLanguage = Message<"mavio.plugin.v1.SubtitleLanguage"> & {
+  /**
+   * A BCP 47 tag, such as "en", "pt-BR" or "zh-Hant".
+   *
+   * @generated from field: string language = 1;
+   */
+  language: string;
+
+  /**
+   * @generated from field: bool forced = 2;
+   */
+  forced: boolean;
+
+  /**
+   * @generated from field: bool hearing_impaired = 3;
+   */
+  hearingImpaired: boolean;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.SubtitleLanguage.
+ * Use `create(SubtitleLanguageSchema)` to create a new message.
+ */
+export const SubtitleLanguageSchema: GenMessage<SubtitleLanguage> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 3);
+
+/**
+ * SubtitleVideo describes the video subtitles are searched for.
+ *
+ * @generated from message mavio.plugin.v1.SubtitleVideo
+ */
+export type SubtitleVideo = Message<"mavio.plugin.v1.SubtitleVideo"> & {
+  /**
+   * MEDIA_KIND_MOVIE or MEDIA_KIND_EPISODE.
    *
    * @generated from field: mavio.plugin.v1.MediaKind kind = 1;
    */
   kind: MediaKind;
 
   /**
-   * @generated from field: string name = 2;
+   * The movie's or episode's title.
+   *
+   * @generated from field: string title = 2;
    */
-  name: string;
+  title: string;
 
   /**
-   * @generated from field: int32 year = 3;
+   * @generated from field: repeated string alternative_titles = 3;
+   */
+  alternativeTitles: string[];
+
+  /**
+   * @generated from field: int32 year = 4;
    */
   year: number;
 
   /**
-   * @generated from field: map<string, string> external_ids = 4;
+   * "imdb", "tmdb", "tvdb" and others, of the movie or episode.
+   *
+   * @generated from field: map<string, string> external_ids = 5;
    */
   externalIds: { [key: string]: string };
 
   /**
    * Episodes are found through their series.
    *
-   * @generated from field: string series_name = 5;
+   * @generated from field: string series = 6;
    */
-  seriesName: string;
+  series: string;
 
   /**
-   * @generated from field: map<string, string> series_external_ids = 6;
+   * @generated from field: repeated string alternative_series = 7;
+   */
+  alternativeSeries: string[];
+
+  /**
+   * @generated from field: map<string, string> series_external_ids = 8;
    */
   seriesExternalIds: { [key: string]: string };
 
   /**
-   * @generated from field: int32 season_number = 7;
+   * @generated from field: int32 season = 9;
    */
-  seasonNumber: number;
+  season: number;
 
   /**
-   * @generated from field: int32 episode_number = 8;
+   * @generated from field: int32 episode = 10;
    */
-  episodeNumber: number;
+  episode: number;
 
   /**
-   * ISO 639-1 code, or "zh-Hans" and "zh-Hant" for Chinese scripts.
+   * @generated from field: int32 absolute_episode = 11;
+   */
+  absoluteEpisode: number;
+
+  /**
+   * The series has no year in its name.
    *
-   * @generated from field: string language = 9;
+   * @generated from field: bool original_series = 12;
    */
-  language: string;
+  originalSeries: boolean;
+
+  /**
+   * A special, whose season and episode tend to be wrong at providers.
+   *
+   * @generated from field: bool special = 13;
+   */
+  special: boolean;
+
+  /**
+   * The release the file came from, and its properties as the server
+   * parsed them: source ("tv", "air", "disk-hd", "disk-sd", "web"),
+   * release group, resolution ("1080p"), codecs ("H.264", "Dolby
+   * Digital"), edition and streaming service.
+   *
+   * @generated from field: string release_name = 14;
+   */
+  releaseName: string;
+
+  /**
+   * @generated from field: string source = 15;
+   */
+  source: string;
+
+  /**
+   * @generated from field: string release_group = 16;
+   */
+  releaseGroup: string;
+
+  /**
+   * @generated from field: string resolution = 17;
+   */
+  resolution: string;
+
+  /**
+   * @generated from field: string video_codec = 18;
+   */
+  videoCodec: string;
+
+  /**
+   * @generated from field: string audio_codec = 19;
+   */
+  audioCodec: string;
+
+  /**
+   * @generated from field: string edition = 20;
+   */
+  edition: string;
+
+  /**
+   * @generated from field: string streaming_service = 21;
+   */
+  streamingService: string;
+
+  /**
+   * @generated from field: double frame_rate = 22;
+   */
+  frameRate: number;
 
   /**
    * The video's file name, without folders, and size.
    *
-   * @generated from field: string file_name = 10;
+   * @generated from field: string file_name = 23;
    */
   fileName: string;
 
   /**
-   * @generated from field: int64 file_size = 11;
+   * @generated from field: int64 file_size = 24;
    */
   fileSize: bigint;
 
@@ -88,41 +314,52 @@ export type SubtitleQuery = Message<"mavio.plugin.v1.SubtitleQuery"> & {
    * digits: its size plus the 64-bit little-endian words of its first and
    * last 64 KiB.
    *
-   * @generated from field: string file_hash = 12;
+   * @generated from field: string file_hash = 25;
    */
   fileHash: string;
 
   /**
-   * @generated from field: bool hearing_impaired = 13;
+   * The languages of the audio streams, as BCP 47 tags.
+   *
+   * @generated from field: repeated string audio_languages = 26;
    */
-  hearingImpaired: boolean;
+  audioLanguages: string[];
 
   /**
-   * @generated from field: bool forced = 14;
+   * The original language of the movie or series.
+   *
+   * @generated from field: string original_language = 27;
    */
-  forced: boolean;
+  originalLanguage: string;
 };
 
 /**
- * Describes the message mavio.plugin.v1.SubtitleQuery.
- * Use `create(SubtitleQuerySchema)` to create a new message.
+ * Describes the message mavio.plugin.v1.SubtitleVideo.
+ * Use `create(SubtitleVideoSchema)` to create a new message.
  */
-export const SubtitleQuerySchema: GenMessage<SubtitleQuery> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 0);
+export const SubtitleVideoSchema: GenMessage<SubtitleVideo> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 4);
 
 /**
  * @generated from message mavio.plugin.v1.SearchSubtitlesRequest
  */
 export type SearchSubtitlesRequest = Message<"mavio.plugin.v1.SearchSubtitlesRequest"> & {
   /**
-   * @generated from field: mavio.plugin.v1.SubtitleQuery query = 1;
+   * @generated from field: mavio.plugin.v1.SubtitleVideo video = 1;
    */
-  query?: SubtitleQuery | undefined;
+  video?: SubtitleVideo | undefined;
 
   /**
-   * @generated from field: int32 limit = 2;
+   * @generated from field: repeated mavio.plugin.v1.SubtitleLanguage languages = 2;
    */
-  limit: number;
+  languages: SubtitleLanguage[];
+
+  /**
+   * The providers to ask; empty for every enabled provider.
+   *
+   * @generated from field: repeated string providers = 3;
+   */
+  providers: string[];
 };
 
 /**
@@ -130,7 +367,7 @@ export type SearchSubtitlesRequest = Message<"mavio.plugin.v1.SearchSubtitlesReq
  * Use `create(SearchSubtitlesRequestSchema)` to create a new message.
  */
 export const SearchSubtitlesRequestSchema: GenMessage<SearchSubtitlesRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 1);
+  messageDesc(file_mavio_plugin_v1_subtitle, 5);
 
 /**
  * @generated from message mavio.plugin.v1.SearchSubtitlesResponse
@@ -140,6 +377,13 @@ export type SearchSubtitlesResponse = Message<"mavio.plugin.v1.SearchSubtitlesRe
    * @generated from field: repeated mavio.plugin.v1.RemoteSubtitle subtitles = 1;
    */
   subtitles: RemoteSubtitle[];
+
+  /**
+   * The providers that failed, which the subtitles leave out.
+   *
+   * @generated from field: repeated mavio.plugin.v1.SubtitleProviderFailure failures = 2;
+   */
+  failures: SubtitleProviderFailure[];
 };
 
 /**
@@ -147,73 +391,91 @@ export type SearchSubtitlesResponse = Message<"mavio.plugin.v1.SearchSubtitlesRe
  * Use `create(SearchSubtitlesResponseSchema)` to create a new message.
  */
 export const SearchSubtitlesResponseSchema: GenMessage<SearchSubtitlesResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 2);
+  messageDesc(file_mavio_plugin_v1_subtitle, 6);
 
 /**
- * RemoteSubtitle is a subtitle a source offers.
+ * RemoteSubtitle is a subtitle a provider offers.
  *
  * @generated from message mavio.plugin.v1.RemoteSubtitle
  */
 export type RemoteSubtitle = Message<"mavio.plugin.v1.RemoteSubtitle"> & {
   /**
-   * The source's ID, passed to DownloadSubtitle.
+   * The provider's name, and its ID for the subtitle, passed to
+   * DownloadSubtitle.
    *
-   * @generated from field: string id = 1;
+   * @generated from field: string provider = 1;
+   */
+  provider: string;
+
+  /**
+   * @generated from field: string id = 2;
    */
   id: string;
 
   /**
-   * The release or file name the subtitle was made for.
-   *
-   * @generated from field: string name = 2;
+   * @generated from field: mavio.plugin.v1.SubtitleLanguage language = 3;
    */
-  name: string;
+  language?: SubtitleLanguage | undefined;
 
   /**
-   * @generated from field: string language = 3;
+   * The release or file names the subtitle was made for.
+   *
+   * @generated from field: repeated string release_names = 4;
    */
-  language: string;
+  releaseNames: string[];
 
   /**
-   * File format: "srt", "ass", "ssa", "vtt" or "sub".
+   * The properties the provider knows the subtitle matches, as subliminal
+   * names them: "hash", "imdb_id", "series_imdb_id", "tvdb_id",
+   * "series_tvdb_id", "title", "series", "year", "season", "episode",
+   * "source", "release_group", "resolution", "video_codec",
+   * "audio_codec", "edition", "streaming_service". The server adds those
+   * the release names share with the video.
    *
-   * @generated from field: string format = 4;
+   * @generated from field: repeated string matches = 5;
+   */
+  matches: string[];
+
+  /**
+   * As SubtitleProviderInfo, for this subtitle.
+   *
+   * @generated from field: bool hash_verifiable = 6;
+   */
+  hashVerifiable: boolean;
+
+  /**
+   * @generated from field: bool hearing_impaired_verifiable = 7;
+   */
+  hearingImpairedVerifiable: boolean;
+
+  /**
+   * File format when known: "srt", "ass", "ssa", "vtt" or "sub".
+   *
+   * @generated from field: string format = 8;
    */
   format: string;
 
   /**
-   * @generated from field: bool hearing_impaired = 5;
-   */
-  hearingImpaired: boolean;
-
-  /**
-   * @generated from field: bool forced = 6;
-   */
-  forced: boolean;
-
-  /**
-   * How well the subtitle matches, from 0 to 1.
+   * The subtitle's page at the provider.
    *
-   * @generated from field: double score = 7;
+   * @generated from field: string page_link = 9;
    */
-  score: number;
+  pageLink: string;
 
   /**
-   * @generated from field: int32 download_count = 8;
+   * @generated from field: string uploader = 10;
    */
-  downloadCount: number;
+  uploader: string;
 
   /**
-   * The subtitle was made for a file with the query's hash.
-   *
-   * @generated from field: bool hash_match = 9;
-   */
-  hashMatch: boolean;
-
-  /**
-   * @generated from field: string comment = 10;
+   * @generated from field: string comment = 11;
    */
   comment: string;
+
+  /**
+   * @generated from field: int32 download_count = 12;
+   */
+  downloadCount: number;
 };
 
 /**
@@ -221,16 +483,29 @@ export type RemoteSubtitle = Message<"mavio.plugin.v1.RemoteSubtitle"> & {
  * Use `create(RemoteSubtitleSchema)` to create a new message.
  */
 export const RemoteSubtitleSchema: GenMessage<RemoteSubtitle> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 3);
+  messageDesc(file_mavio_plugin_v1_subtitle, 7);
 
 /**
  * @generated from message mavio.plugin.v1.DownloadSubtitleRequest
  */
 export type DownloadSubtitleRequest = Message<"mavio.plugin.v1.DownloadSubtitleRequest"> & {
   /**
-   * @generated from field: string id = 1;
+   * @generated from field: string provider = 1;
+   */
+  provider: string;
+
+  /**
+   * @generated from field: string id = 2;
    */
   id: string;
+
+  /**
+   * The video searched for, which providers of season packs pick the
+   * episode's subtitle from.
+   *
+   * @generated from field: mavio.plugin.v1.SubtitleVideo video = 3;
+   */
+  video?: SubtitleVideo | undefined;
 };
 
 /**
@@ -238,38 +513,37 @@ export type DownloadSubtitleRequest = Message<"mavio.plugin.v1.DownloadSubtitleR
  * Use `create(DownloadSubtitleRequestSchema)` to create a new message.
  */
 export const DownloadSubtitleRequestSchema: GenMessage<DownloadSubtitleRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 4);
+  messageDesc(file_mavio_plugin_v1_subtitle, 8);
 
 /**
  * @generated from message mavio.plugin.v1.DownloadSubtitleResponse
  */
 export type DownloadSubtitleResponse = Message<"mavio.plugin.v1.DownloadSubtitleResponse"> & {
   /**
+   * Empty when the download failed.
+   *
    * @generated from field: bytes data = 1;
    */
   data: Uint8Array;
 
   /**
-   * As RemoteSubtitle.format.
+   * As RemoteSubtitle.format; empty when unknown.
    *
    * @generated from field: string format = 2;
    */
   format: string;
 
   /**
-   * @generated from field: string language = 3;
+   * @generated from field: mavio.plugin.v1.SubtitleLanguage language = 3;
    */
-  language: string;
+  language?: SubtitleLanguage | undefined;
 
   /**
-   * @generated from field: bool hearing_impaired = 4;
+   * Set when the download failed.
+   *
+   * @generated from field: mavio.plugin.v1.SubtitleProviderFailure failure = 4;
    */
-  hearingImpaired: boolean;
-
-  /**
-   * @generated from field: bool forced = 5;
-   */
-  forced: boolean;
+  failure?: SubtitleProviderFailure | undefined;
 };
 
 /**
@@ -277,18 +551,123 @@ export type DownloadSubtitleResponse = Message<"mavio.plugin.v1.DownloadSubtitle
  * Use `create(DownloadSubtitleResponseSchema)` to create a new message.
  */
 export const DownloadSubtitleResponseSchema: GenMessage<DownloadSubtitleResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 5);
+  messageDesc(file_mavio_plugin_v1_subtitle, 9);
 
 /**
- * SubtitleProviderService finds and downloads subtitles from an external
- * source such as OpenSubtitles.
+ * SubtitleProviderFailure is a provider that failed a search or download.
+ *
+ * @generated from message mavio.plugin.v1.SubtitleProviderFailure
+ */
+export type SubtitleProviderFailure = Message<"mavio.plugin.v1.SubtitleProviderFailure"> & {
+  /**
+   * @generated from field: string provider = 1;
+   */
+  provider: string;
+
+  /**
+   * @generated from field: mavio.plugin.v1.SubtitleFailureKind kind = 2;
+   */
+  kind: SubtitleFailureKind;
+
+  /**
+   * @generated from field: string message = 3;
+   */
+  message: string;
+
+  /**
+   * Set when the provider is throttled until then.
+   *
+   * @generated from field: google.protobuf.Timestamp throttled_until = 4;
+   */
+  throttledUntil?: Timestamp | undefined;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.SubtitleProviderFailure.
+ * Use `create(SubtitleProviderFailureSchema)` to create a new message.
+ */
+export const SubtitleProviderFailureSchema: GenMessage<SubtitleProviderFailure> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 10);
+
+/**
+ * SubtitleFailureKind is why a provider failed.
+ *
+ * @generated from enum mavio.plugin.v1.SubtitleFailureKind
+ */
+export enum SubtitleFailureKind {
+  /**
+   * @generated from enum value: SUBTITLE_FAILURE_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: SUBTITLE_FAILURE_KIND_TOO_MANY_REQUESTS = 1;
+   */
+  TOO_MANY_REQUESTS = 1,
+
+  /**
+   * @generated from enum value: SUBTITLE_FAILURE_KIND_DOWNLOAD_LIMIT = 2;
+   */
+  DOWNLOAD_LIMIT = 2,
+
+  /**
+   * @generated from enum value: SUBTITLE_FAILURE_KIND_SERVICE_UNAVAILABLE = 3;
+   */
+  SERVICE_UNAVAILABLE = 3,
+
+  /**
+   * @generated from enum value: SUBTITLE_FAILURE_KIND_AUTHENTICATION = 4;
+   */
+  AUTHENTICATION = 4,
+
+  /**
+   * @generated from enum value: SUBTITLE_FAILURE_KIND_CONFIGURATION = 5;
+   */
+  CONFIGURATION = 5,
+
+  /**
+   * The subtitle cannot be used, and is to be blocklisted.
+   *
+   * @generated from enum value: SUBTITLE_FAILURE_KIND_BAD_SUBTITLE = 6;
+   */
+  BAD_SUBTITLE = 6,
+
+  /**
+   * A timeout, a parse error or another failure.
+   *
+   * @generated from enum value: SUBTITLE_FAILURE_KIND_OTHER = 7;
+   */
+  OTHER = 7,
+}
+
+/**
+ * Describes the enum mavio.plugin.v1.SubtitleFailureKind.
+ */
+export const SubtitleFailureKindSchema: GenEnum<SubtitleFailureKind> = /*@__PURE__*/
+  enumDesc(file_mavio_plugin_v1_subtitle, 0);
+
+/**
+ * SubtitleProviderService finds and downloads subtitles from the subtitle
+ * sites a plugin implements, as Bazarr's providers do. The server scores
+ * the candidates it returns from the properties they match.
  *
  * @generated from service mavio.plugin.v1.SubtitleProviderService
  */
 export const SubtitleProviderService: GenService<{
   /**
-   * SearchSubtitles lists the subtitles the source has for a video in one
-   * language, best first.
+   * ListSubtitleProviders lists the providers the plugin implements, with
+   * their settings and state.
+   *
+   * @generated from rpc mavio.plugin.v1.SubtitleProviderService.ListSubtitleProviders
+   */
+  listSubtitleProviders: {
+    methodKind: "unary";
+    input: typeof ListSubtitleProvidersRequestSchema;
+    output: typeof ListSubtitleProvidersResponseSchema;
+  },
+  /**
+   * SearchSubtitles asks the enabled providers for subtitles of a video in
+   * several languages.
    *
    * @generated from rpc mavio.plugin.v1.SubtitleProviderService.SearchSubtitles
    */
@@ -298,7 +677,8 @@ export const SubtitleProviderService: GenService<{
     output: typeof SearchSubtitlesResponseSchema;
   },
   /**
-   * DownloadSubtitle returns a subtitle found by SearchSubtitles.
+   * DownloadSubtitle returns a subtitle found by SearchSubtitles,
+   * extracted from its archive.
    *
    * @generated from rpc mavio.plugin.v1.SubtitleProviderService.DownloadSubtitle
    */

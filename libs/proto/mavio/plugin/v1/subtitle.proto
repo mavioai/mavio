@@ -2,82 +2,195 @@ edition = "2023";
 
 package mavio.plugin.v1;
 
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
 import "mavio/plugin/v1/metadata.proto";
+import "mavio/plugin/v1/settings.proto";
 
-// SubtitleProviderService finds and downloads subtitles from an external
-// source such as OpenSubtitles.
+// SubtitleProviderService finds and downloads subtitles from the subtitle
+// sites a plugin implements, as Bazarr's providers do. The server scores
+// the candidates it returns from the properties they match.
 service SubtitleProviderService {
-  // SearchSubtitles lists the subtitles the source has for a video in one
-  // language, best first.
+  // ListSubtitleProviders lists the providers the plugin implements, with
+  // their settings and state.
+  rpc ListSubtitleProviders(ListSubtitleProvidersRequest) returns (ListSubtitleProvidersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SearchSubtitles asks the enabled providers for subtitles of a video in
+  // several languages.
   rpc SearchSubtitles(SearchSubtitlesRequest) returns (SearchSubtitlesResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // DownloadSubtitle returns a subtitle found by SearchSubtitles.
+  // DownloadSubtitle returns a subtitle found by SearchSubtitles,
+  // extracted from its archive.
   rpc DownloadSubtitle(DownloadSubtitleRequest) returns (DownloadSubtitleResponse);
 }
 
-// SubtitleQuery describes the video subtitles are searched for.
-message SubtitleQuery {
-  // MEDIA_KIND_MOVIE, MEDIA_KIND_EPISODE or MEDIA_KIND_MUSIC_VIDEO.
+message ListSubtitleProvidersRequest {}
+
+message ListSubtitleProvidersResponse {
+  repeated SubtitleProviderInfo providers = 1;
+}
+
+// SubtitleProviderInfo is a provider a plugin implements.
+message SubtitleProviderInfo {
+  // Stable within the plugin, such as "opensubtitlescom".
+  string name = 1;
+  string display_name = 2;
+  // The provider's settings, under its name in the plugin's settings.
+  repeated SettingField settings = 3;
+  bool enabled = 4;
+  // Set while the provider is throttled, until this time.
+  google.protobuf.Timestamp throttled_until = 5;
+  // The failure that throttled it.
+  string throttle_reason = 6;
+  // The languages the provider has subtitles in, as BCP 47 tags.
+  repeated string languages = 7;
+  // Whether the provider's hash matches can be checked against the other
+  // properties, and whether it knows if subtitles are hearing-impaired.
+  bool hash_verifiable = 8;
+  bool hearing_impaired_verifiable = 9;
+  // Subtitles of movies and of episodes.
+  bool movies = 10;
+  bool episodes = 11;
+}
+
+// SubtitleLanguage is a language of subtitles with their kind.
+message SubtitleLanguage {
+  // A BCP 47 tag, such as "en", "pt-BR" or "zh-Hant".
+  string language = 1 [(buf.validate.field).string = {
+    min_len: 2
+    max_len: 35
+  }];
+  bool forced = 2;
+  bool hearing_impaired = 3;
+}
+
+// SubtitleVideo describes the video subtitles are searched for.
+message SubtitleVideo {
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_EPISODE.
   MediaKind kind = 1;
-  string name = 2;
-  int32 year = 3;
-  map<string, string> external_ids = 4;
+  // The movie's or episode's title.
+  string title = 2;
+  repeated string alternative_titles = 3;
+  int32 year = 4;
+  // "imdb", "tmdb", "tvdb" and others, of the movie or episode.
+  map<string, string> external_ids = 5;
   // Episodes are found through their series.
-  string series_name = 5;
-  map<string, string> series_external_ids = 6;
-  int32 season_number = 7;
-  int32 episode_number = 8;
-  // ISO 639-1 code, or "zh-Hans" and "zh-Hant" for Chinese scripts.
-  string language = 9;
+  string series = 6;
+  repeated string alternative_series = 7;
+  map<string, string> series_external_ids = 8;
+  int32 season = 9;
+  int32 episode = 10;
+  int32 absolute_episode = 11;
+  // The series has no year in its name.
+  bool original_series = 12;
+  // A special, whose season and episode tend to be wrong at providers.
+  bool special = 13;
+  // The release the file came from, and its properties as the server
+  // parsed them: source ("tv", "air", "disk-hd", "disk-sd", "web"),
+  // release group, resolution ("1080p"), codecs ("H.264", "Dolby
+  // Digital"), edition and streaming service.
+  string release_name = 14;
+  string source = 15;
+  string release_group = 16;
+  string resolution = 17;
+  string video_codec = 18;
+  string audio_codec = 19;
+  string edition = 20;
+  string streaming_service = 21;
+  double frame_rate = 22;
   // The video's file name, without folders, and size.
-  string file_name = 10;
-  int64 file_size = 11;
+  string file_name = 23;
+  int64 file_size = 24;
   // The OpenSubtitles hash of the video file, 16 lower-case hexadecimal
   // digits: its size plus the 64-bit little-endian words of its first and
   // last 64 KiB.
-  string file_hash = 12;
-  bool hearing_impaired = 13;
-  bool forced = 14;
+  string file_hash = 25;
+  // The languages of the audio streams, as BCP 47 tags.
+  repeated string audio_languages = 26;
+  // The original language of the movie or series.
+  string original_language = 27;
 }
 
 message SearchSubtitlesRequest {
-  SubtitleQuery query = 1;
-  int32 limit = 2;
+  SubtitleVideo video = 1 [(buf.validate.field).required = true];
+  repeated SubtitleLanguage languages = 2 [(buf.validate.field).repeated.min_items = 1];
+  // The providers to ask; empty for every enabled provider.
+  repeated string providers = 3;
 }
 
 message SearchSubtitlesResponse {
   repeated RemoteSubtitle subtitles = 1;
+  // The providers that failed, which the subtitles leave out.
+  repeated SubtitleProviderFailure failures = 2;
 }
 
-// RemoteSubtitle is a subtitle a source offers.
+// RemoteSubtitle is a subtitle a provider offers.
 message RemoteSubtitle {
-  // The source's ID, passed to DownloadSubtitle.
-  string id = 1;
-  // The release or file name the subtitle was made for.
-  string name = 2;
-  string language = 3;
-  // File format: "srt", "ass", "ssa", "vtt" or "sub".
-  string format = 4;
-  bool hearing_impaired = 5;
-  bool forced = 6;
-  // How well the subtitle matches, from 0 to 1.
-  double score = 7;
-  int32 download_count = 8;
-  // The subtitle was made for a file with the query's hash.
-  bool hash_match = 9;
-  string comment = 10;
+  // The provider's name, and its ID for the subtitle, passed to
+  // DownloadSubtitle.
+  string provider = 1;
+  string id = 2;
+  SubtitleLanguage language = 3;
+  // The release or file names the subtitle was made for.
+  repeated string release_names = 4;
+  // The properties the provider knows the subtitle matches, as subliminal
+  // names them: "hash", "imdb_id", "series_imdb_id", "tvdb_id",
+  // "series_tvdb_id", "title", "series", "year", "season", "episode",
+  // "source", "release_group", "resolution", "video_codec",
+  // "audio_codec", "edition", "streaming_service". The server adds those
+  // the release names share with the video.
+  repeated string matches = 5;
+  // As SubtitleProviderInfo, for this subtitle.
+  bool hash_verifiable = 6;
+  bool hearing_impaired_verifiable = 7;
+  // File format when known: "srt", "ass", "ssa", "vtt" or "sub".
+  string format = 8;
+  // The subtitle's page at the provider.
+  string page_link = 9;
+  string uploader = 10;
+  string comment = 11;
+  int32 download_count = 12;
 }
 
 message DownloadSubtitleRequest {
-  string id = 1;
+  string provider = 1 [(buf.validate.field).string.min_len = 1];
+  string id = 2 [(buf.validate.field).string.min_len = 1];
+  // The video searched for, which providers of season packs pick the
+  // episode's subtitle from.
+  SubtitleVideo video = 3;
 }
 
 message DownloadSubtitleResponse {
+  // Empty when the download failed.
   bytes data = 1;
-  // As RemoteSubtitle.format.
+  // As RemoteSubtitle.format; empty when unknown.
   string format = 2;
-  string language = 3;
-  bool hearing_impaired = 4;
-  bool forced = 5;
+  SubtitleLanguage language = 3;
+  // Set when the download failed.
+  SubtitleProviderFailure failure = 4;
+}
+
+// SubtitleProviderFailure is a provider that failed a search or download.
+message SubtitleProviderFailure {
+  string provider = 1;
+  SubtitleFailureKind kind = 2;
+  string message = 3;
+  // Set when the provider is throttled until then.
+  google.protobuf.Timestamp throttled_until = 4;
+}
+
+// SubtitleFailureKind is why a provider failed.
+enum SubtitleFailureKind {
+  SUBTITLE_FAILURE_KIND_UNSPECIFIED = 0;
+  SUBTITLE_FAILURE_KIND_TOO_MANY_REQUESTS = 1;
+  SUBTITLE_FAILURE_KIND_DOWNLOAD_LIMIT = 2;
+  SUBTITLE_FAILURE_KIND_SERVICE_UNAVAILABLE = 3;
+  SUBTITLE_FAILURE_KIND_AUTHENTICATION = 4;
+  SUBTITLE_FAILURE_KIND_CONFIGURATION = 5;
+  // The subtitle cannot be used, and is to be blocklisted.
+  SUBTITLE_FAILURE_KIND_BAD_SUBTITLE = 6;
+  // A timeout, a parse error or another failure.
+  SUBTITLE_FAILURE_KIND_OTHER = 7;
 }

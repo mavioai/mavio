@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -71,11 +72,11 @@ func (f *fakeAPI) check(r *http.Request) {
 func TestSearchAndDownload(t *testing.T) {
 	f := newFake(t)
 	p := &plugin{baseURL: f.srv.URL + "/api/v1", cfg: config{APIKey: "key", Username: "me", Password: "pw"}}
-	resp, err := p.SearchSubtitles(t.Context(), pluginv1.SearchSubtitlesRequest_builder{Query: pluginv1.SubtitleQuery_builder{
-		Kind: pluginv1.MediaKind_MEDIA_KIND_EPISODE.Enum(), Name: proto.String("Pilot"), SeriesName: proto.String("Show"),
-		SeriesExternalIds: map[string]string{keyIMDb: "tt0012345"}, SeasonNumber: proto.Int32(1), EpisodeNumber: proto.Int32(2),
-		Language: proto.String("zh-Hans"), FileHash: proto.String("0123456789abcdef"),
-	}.Build()}.Build())
+	resp, err := p.SearchSubtitles(t.Context(), pluginv1.SearchSubtitlesRequest_builder{Video: pluginv1.SubtitleVideo_builder{
+		Kind: pluginv1.MediaKind_MEDIA_KIND_EPISODE.Enum(), Title: proto.String("Pilot"), Series: proto.String("Show"),
+		SeriesExternalIds: map[string]string{keyIMDb: "tt0012345"}, Season: proto.Int32(1), Episode: proto.Int32(2),
+		FileHash: proto.String("0123456789abcdef"),
+	}.Build(), Languages: []*pluginv1.SubtitleLanguage{lang("zh-Hans", false, false)}}.Build())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,16 +85,18 @@ func TestSearchAndDownload(t *testing.T) {
 		t.Errorf("query = %v, want = %s", f.queries, want)
 	}
 	subs := resp.GetSubtitles()
-	if len(subs) != 2 || subs[0].GetName() != "Up.2009" || !subs[0].GetHashMatch() || subs[0].GetLanguage() != "zh-Hans" ||
-		subs[1].GetFormat() != "ass" {
+	// The server ranks subtitles; the plugin keeps the site's order.
+	if len(subs) != 2 || !slices.Equal(subs[1].GetReleaseNames(), []string{"Up.2009"}) ||
+		!slices.Equal(subs[1].GetMatches(), []string{"series_imdb_id", "hash"}) || subs[1].GetLanguage().GetLanguage() != "zh-Hans" ||
+		subs[1].GetProvider() != providerName || subs[0].GetFormat() != "ass" {
 		t.Fatalf("subtitles = %v", subs)
 	}
 	// The first session has expired by the download, which logs in again.
-	got, err := p.DownloadSubtitle(t.Context(), pluginv1.DownloadSubtitleRequest_builder{Id: proto.String(subs[0].GetId())}.Build())
+	got, err := p.DownloadSubtitle(t.Context(), pluginv1.DownloadSubtitleRequest_builder{Provider: proto.String(providerName), Id: proto.String(subs[1].GetId())}.Build())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.GetFormat() != "srt" || got.GetLanguage() != "zh-Hans" || !strings.Contains(string(got.GetData()), "你好") {
+	if got.GetFormat() != "srt" || got.GetLanguage().GetLanguage() != "zh-Hans" || !strings.Contains(string(got.GetData()), "你好") {
 		t.Errorf("download = %v", got)
 	}
 	if n := f.logins.Load(); n != 2 {
@@ -107,19 +110,22 @@ func TestSearchAndDownload(t *testing.T) {
 func TestMovieQuery(t *testing.T) {
 	f := newFake(t)
 	p := &plugin{baseURL: f.srv.URL + "/api/v1", cfg: config{APIKey: "key", Username: "me", Password: "pw"}}
-	if _, err := p.SearchSubtitles(t.Context(), pluginv1.SearchSubtitlesRequest_builder{Query: pluginv1.SubtitleQuery_builder{
-		Kind: pluginv1.MediaKind_MEDIA_KIND_MOVIE.Enum(), Name: proto.String("Up"), Year: proto.Int32(2009),
-		Language: proto.String("fr"), HearingImpaired: proto.Bool(true), Forced: proto.Bool(true),
-	}.Build()}.Build()); err != nil {
+	if _, err := p.SearchSubtitles(t.Context(), pluginv1.SearchSubtitlesRequest_builder{Video: pluginv1.SubtitleVideo_builder{
+		Kind: pluginv1.MediaKind_MEDIA_KIND_MOVIE.Enum(), Title: proto.String("Up"), Year: proto.Int32(2009),
+	}.Build(), Languages: []*pluginv1.SubtitleLanguage{lang("fr", true, true)}}.Build()); err != nil {
 		t.Fatal(err)
 	}
 	if want := "foreign_parts_only=only&languages=fr&query=Up&year=2009"; f.queries[0] != want {
 		t.Errorf("query = %s, want = %s", f.queries[0], want)
 	}
 	unconfigured := &plugin{baseURL: f.srv.URL}
-	if _, err := unconfigured.SearchSubtitles(t.Context(), pluginv1.SearchSubtitlesRequest_builder{Query: pluginv1.SubtitleQuery_builder{
-		Language: proto.String("fr"), Name: proto.String("Up"),
-	}.Build()}.Build()); err == nil {
+	if _, err := unconfigured.SearchSubtitles(t.Context(), pluginv1.SearchSubtitlesRequest_builder{Video: pluginv1.SubtitleVideo_builder{
+		Title: proto.String("Up"),
+	}.Build(), Languages: []*pluginv1.SubtitleLanguage{lang("fr", false, false)}}.Build()); err == nil {
 		t.Error("search without an API key: no error")
 	}
+}
+
+func lang(tag string, hearingImpaired, forced bool) *pluginv1.SubtitleLanguage {
+	return subtitleLanguage(tag, hearingImpaired, forced)
 }

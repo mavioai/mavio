@@ -46,46 +46,73 @@ func hostLanguage(s string) string {
 // formats are the subtitle formats by file extension.
 var formats = []string{"srt", "ass", "ssa", "vtt", "sub"}
 
+// providerName is the provider's name within the plugin.
+const providerName = "opensubtitlescom"
+
+func (p *plugin) ListSubtitleProviders(context.Context, *pluginv1.ListSubtitleProvidersRequest) (*pluginv1.ListSubtitleProvidersResponse, error) {
+	p.mu.Lock()
+	enabled := p.cfg.APIKey != ""
+	p.mu.Unlock()
+	return pluginv1.ListSubtitleProvidersResponse_builder{Providers: []*pluginv1.SubtitleProviderInfo{pluginv1.SubtitleProviderInfo_builder{
+		Name: proto.String(providerName), DisplayName: proto.String("OpenSubtitles.com"), Enabled: proto.Bool(enabled),
+		HearingImpairedVerifiable: proto.Bool(true), Movies: proto.Bool(true), Episodes: proto.Bool(true),
+	}.Build()}}.Build(), nil
+}
+
 func (p *plugin) SearchSubtitles(ctx context.Context, req *pluginv1.SearchSubtitlesRequest) (*pluginv1.SearchSubtitlesResponse, error) {
-	q := req.GetQuery()
-	lang := cmp.Or(languages[q.GetLanguage()], strings.ToLower(q.GetLanguage()))
+	var out []*pluginv1.RemoteSubtitle
+	for _, l := range req.GetLanguages() {
+		found, err := p.search(ctx, req.GetVideo(), l)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, found...)
+	}
+	return pluginv1.SearchSubtitlesResponse_builder{Subtitles: out}.Build(), nil
+}
+
+// search lists the subtitles of a video in one language.
+func (p *plugin) search(ctx context.Context, v *pluginv1.SubtitleVideo, l *pluginv1.SubtitleLanguage) ([]*pluginv1.RemoteSubtitle, error) {
+	lang := cmp.Or(languages[l.GetLanguage()], strings.ToLower(l.GetLanguage()))
 	if lang == "" {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("no language to search subtitles in"))
 	}
 	params := url.Values{"languages": {lang}}
-	if q.GetFileHash() != "" {
-		params.Set("moviehash", q.GetFileHash())
+	if v.GetFileHash() != "" {
+		params.Set("moviehash", v.GetFileHash())
 	}
-	ids, name := q.GetExternalIds(), q.GetName()
-	prefix := ""
-	if q.GetKind() == pluginv1.MediaKind_MEDIA_KIND_EPISODE {
-		ids, name, prefix = q.GetSeriesExternalIds(), q.GetSeriesName(), "parent_"
-		if q.HasSeasonNumber() {
-			params.Set("season_number", strconv.Itoa(int(q.GetSeasonNumber())))
+	ids, name := v.GetExternalIds(), v.GetTitle()
+	prefix, idMatch := "", "imdb_id"
+	if v.GetKind() == pluginv1.MediaKind_MEDIA_KIND_EPISODE {
+		ids, name, prefix, idMatch = v.GetSeriesExternalIds(), v.GetSeries(), "parent_", "series_imdb_id"
+		if v.GetSeason() > 0 {
+			params.Set("season_number", strconv.Itoa(int(v.GetSeason())))
 		}
-		if q.HasEpisodeNumber() {
-			params.Set("episode_number", strconv.Itoa(int(q.GetEpisodeNumber())))
+		if v.GetEpisode() > 0 {
+			params.Set("episode_number", strconv.Itoa(int(v.GetEpisode())))
 		}
 	}
+	var known []string
 	switch {
 	case ids[keyIMDb] != "":
 		params.Set(prefix+"imdb_id", strings.TrimLeft(strings.TrimPrefix(ids[keyIMDb], "tt"), "0"))
+		known = append(known, idMatch)
 	case ids[keyTMDB] != "":
 		params.Set(prefix+"tmdb_id", ids[keyTMDB])
 	case name != "":
 		params.Set("query", name)
-		if q.GetYear() > 0 && prefix == "" {
-			params.Set("year", strconv.Itoa(int(q.GetYear())))
+		if v.GetYear() > 0 && prefix == "" {
+			params.Set("year", strconv.Itoa(int(v.GetYear())))
 		}
-	case q.GetFileHash() == "":
-		return &pluginv1.SearchSubtitlesResponse{}, nil
+	case v.GetFileHash() == "":
+		return nil, nil
 	}
-	if q.GetForced() {
+	if l.GetForced() {
 		params.Set("foreign_parts_only", "only")
 	} else {
 		params.Set("foreign_parts_only", "exclude")
 	}
-	if !q.GetHearingImpaired() {
+	if !l.GetHearingImpaired() {
 		params.Set("hearing_impaired", "exclude")
 	}
 	found, err := withSession(ctx, p, func(c *client) ([]osSubtitle, error) { return c.search(ctx, params) })
@@ -100,39 +127,29 @@ func (p *plugin) SearchSubtitles(ctx context.Context, req *pluginv1.SearchSubtit
 		}
 		f := a.Files[0]
 		language := hostLanguage(a.Language)
+		matches := slices.Clone(known)
+		if a.MovieHashMatch {
+			matches = append(matches, "hash")
+		}
 		out = append(out, pluginv1.RemoteSubtitle_builder{
-			Id:              proto.String(encodeID(f.FileID, language, a.HearingImpaired, a.ForeignPartsOnly)),
-			Name:            proto.String(cmp.Or(a.Release, f.FileName)),
-			Language:        proto.String(language),
-			Format:          proto.String(format(f.FileName)),
-			HearingImpaired: proto.Bool(a.HearingImpaired),
-			Forced:          proto.Bool(a.ForeignPartsOnly),
-			Score:           proto.Float64(score(a.MovieHashMatch, a.HearingImpaired == q.GetHearingImpaired(), a.Ratings, a.DownloadCount)),
-			DownloadCount:   proto.Int32(int32(min(a.DownloadCount, math.MaxInt32))),
-			HashMatch:       proto.Bool(a.MovieHashMatch),
-			Comment:         proto.String(a.Comments),
+			Provider:                  proto.String(providerName),
+			Id:                        proto.String(encodeID(f.FileID, language, a.HearingImpaired, a.ForeignPartsOnly)),
+			ReleaseNames:              []string{cmp.Or(a.Release, f.FileName)},
+			Language:                  subtitleLanguage(language, a.HearingImpaired, a.ForeignPartsOnly),
+			Matches:                   matches,
+			HearingImpairedVerifiable: proto.Bool(true),
+			Format:                    proto.String(format(f.FileName)),
+			DownloadCount:             proto.Int32(int32(min(a.DownloadCount, math.MaxInt32))),
+			Comment:                   proto.String(a.Comments),
 		}.Build())
 	}
-	slices.SortStableFunc(out, func(a, b *pluginv1.RemoteSubtitle) int { return cmp.Compare(b.GetScore(), a.GetScore()) })
-	if limit := int(req.GetLimit()); limit > 0 && len(out) > limit {
-		out = out[:limit]
-	}
-	return pluginv1.SearchSubtitlesResponse_builder{Subtitles: out}.Build(), nil
+	return out, nil
 }
 
-// score ranks a subtitle from 0 to 1: made for the very file first, then
-// those flagged as asked, then the best rated and most downloaded.
-func score(hashMatch, flagsMatch bool, ratings float64, downloads int) float64 {
-	s := 0.0
-	if hashMatch {
-		s += 0.5
-	}
-	if flagsMatch {
-		s += 0.2
-	}
-	s += min(ratings, 10) / 10 * 0.15
-	s += min(math.Log10(float64(downloads)+1)/5, 1) * 0.15
-	return s
+func subtitleLanguage(language string, hearingImpaired, forced bool) *pluginv1.SubtitleLanguage {
+	return pluginv1.SubtitleLanguage_builder{
+		Language: proto.String(language), HearingImpaired: proto.Bool(hearingImpaired), Forced: proto.Bool(forced),
+	}.Build()
 }
 
 // format is a subtitle file's format; SubRip unless its name says.
@@ -175,8 +192,7 @@ func (p *plugin) DownloadSubtitle(ctx context.Context, req *pluginv1.DownloadSub
 		return nil, err
 	}
 	return pluginv1.DownloadSubtitleResponse_builder{
-		Data: data, Format: proto.String(format(name)), Language: proto.String(language),
-		HearingImpaired: proto.Bool(hi), Forced: proto.Bool(forced),
+		Data: data, Format: proto.String(format(name)), Language: subtitleLanguage(language, hi, forced),
 	}.Build(), nil
 }
 

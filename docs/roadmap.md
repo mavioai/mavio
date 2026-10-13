@@ -715,7 +715,7 @@ flowchart TD
 - [x] `tools/testport` reads pytest cases; Bazarr's score, mod and provider cases ported
 - [x] `libs/acquire/subtitles`: wanted subtitles, scores, choice, upgrades, adaptive searching, language equivalences, ban lists and profiles by tag, as pure functions; release names guessed by `libs/release` and matched as subliminal's `guess_matches`
   - [x] The fields guessit gives Bazarr's scores that `libs/release` lacked, added to it with guessit's patterns: streaming service, audio and video codecs (editions come from Radarr's rules); the same values as guessit for all but 4 of the 940 release names of the ported cases
-- [ ] `SUBTITLE_PROVIDER` extended: provider listing, video descriptions and several languages in queries, matched properties in results, kinds of failures
+- [x] `SUBTITLE_PROVIDER` extended: provider listing, video descriptions and several languages in queries, matched properties in results, kinds of failures
 - [ ] `plugins/subtitles`: the plugin, archives (zip, RAR, 7z), throttling, proxies and FlareSolverr, anti-captcha services (Anti-Captcha, CaptchaAI, DeathByCaptcha); OpenSubtitles.com moved in, `subtitles-opensubtitles` removed
   - [ ] JSON APIs with accounts: SubDL, SubSource, Jimaku, Assrt, BetaSeries, Titlovi, LegendasNet, SubX, Subs.ro, HDBits, Ktuvit, SubsDump, Subsarr
   - [ ] JSON APIs without accounts and other protocols: Gestdown, AnimeTosho (both), Tsukihime, Subtis, RegieLive, Bayflix, Vladoonmooo, Subsynchro, Wizdom, BSPlayer, NapiProjekt, Napisy24; AniDB and the anime lists for anime IDs

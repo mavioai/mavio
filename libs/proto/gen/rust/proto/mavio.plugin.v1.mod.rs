@@ -648,9 +648,25 @@ pub use self::__buffa::view::GetSegmentsResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetSegmentsResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::SubtitleQueryView;
+pub use self::__buffa::view::ListSubtitleProvidersRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::SubtitleQueryOwnedView;
+pub use self::__buffa::view::ListSubtitleProvidersRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProvidersResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProvidersResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProviderInfoView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProviderInfoOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleLanguageView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleLanguageOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleVideoView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleVideoOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::SearchSubtitlesRequestView;
 #[doc(inline)]
@@ -671,3 +687,7 @@ pub use self::__buffa::view::DownloadSubtitleRequestOwnedView;
 pub use self::__buffa::view::DownloadSubtitleResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DownloadSubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProviderFailureView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProviderFailureOwnedView;

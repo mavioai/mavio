@@ -1,3 +1,15 @@
+///Shorthand for `OwnedView<ListSubtitleProvidersRequestView<'static>>`.
+pub type OwnedListSubtitleProvidersRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ListSubtitleProvidersRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListSubtitleProvidersResponseView<'static>>`.
+pub type OwnedListSubtitleProvidersResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ListSubtitleProvidersResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<SearchSubtitlesRequestView<'static>>`.
 pub type OwnedSearchSubtitlesRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::SearchSubtitlesRequestView<'static>,
@@ -14,6 +26,48 @@ pub type OwnedDownloadSubtitleRequestView = ::buffa::view::OwnedView<
 pub type OwnedDownloadSubtitleResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::DownloadSubtitleResponseView<'static>,
 >;
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::plugin::v1::ListSubtitleProvidersResponse,
+>
+for crate::proto::mavio::plugin::v1::__buffa::view::ListSubtitleProvidersResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::plugin::v1::ListSubtitleProvidersResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ListSubtitleProvidersResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::SearchSubtitlesResponse>
 for crate::proto::mavio::plugin::v1::__buffa::view::SearchSubtitlesResponseView<'_> {
     fn encode(
@@ -84,6 +138,12 @@ for ::buffa::view::OwnedView<
 }
 /// Full service name for this service.
 pub const SUBTITLE_PROVIDER_SERVICE_SERVICE_NAME: &str = "mavio.plugin.v1.SubtitleProviderService";
+/// Static [`Spec`](::connectrpc::Spec) for the `ListSubtitleProviders` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SUBTITLE_PROVIDER_SERVICE_LIST_SUBTITLE_PROVIDERS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.SubtitleProviderService/ListSubtitleProviders",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `SearchSubtitles` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const SUBTITLE_PROVIDER_SERVICE_SEARCH_SUBTITLES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.plugin.v1.SubtitleProviderService/SearchSubtitles",
@@ -96,8 +156,9 @@ pub const SUBTITLE_PROVIDER_SERVICE_DOWNLOAD_SUBTITLE_SPEC: ::connectrpc::Spec =
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// SubtitleProviderService finds and downloads subtitles from an external
-/// source such as OpenSubtitles.
+/// SubtitleProviderService finds and downloads subtitles from the subtitle
+/// sites a plugin implements, as Bazarr's providers do. The server scores
+/// the candidates it returns from the properties they match.
 ///
 /// # Implementing handlers
 ///
@@ -148,8 +209,32 @@ pub const SUBTITLE_PROVIDER_SERVICE_DOWNLOAD_SUBTITLE_SPEC: ::connectrpc::Spec =
 /// example` doc.
 #[allow(clippy::type_complexity)]
 pub trait SubtitleProviderService: Send + Sync + 'static {
-    /// SearchSubtitles lists the subtitles the source has for a video in one
-    /// language, best first.
+    /// ListSubtitleProviders lists the providers the plugin implements, with
+    /// their settings and state.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_subtitle_providers<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::ListSubtitleProvidersRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::ListSubtitleProvidersResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SearchSubtitles asks the enabled providers for subtitles of a video in
+    /// several languages.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -172,7 +257,8 @@ pub trait SubtitleProviderService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// DownloadSubtitle returns a subtitle found by SearchSubtitles.
+    /// DownloadSubtitle returns a subtitle found by SearchSubtitles,
+    /// extracted from its archive.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -227,6 +313,35 @@ impl<S: SubtitleProviderService> SubtitleProviderServiceExt for S {
         router: ::connectrpc::Router,
     ) -> ::connectrpc::Router {
         router
+            .route_view_idempotent(
+                SUBTITLE_PROVIDER_SERVICE_SERVICE_NAME,
+                "ListSubtitleProviders",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::ListSubtitleProvidersRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::ListSubtitleProvidersRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_subtitle_providers(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::ListSubtitleProvidersResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SUBTITLE_PROVIDER_SERVICE_LIST_SUBTITLE_PROVIDERS_SPEC)
             .route_view_idempotent(
                 SUBTITLE_PROVIDER_SERVICE_SERVICE_NAME,
                 "SearchSubtitles",
@@ -342,6 +457,14 @@ for SubtitleProviderServiceServer<T> {
     ) -> Option<::connectrpc::dispatcher::codegen::MethodDescriptor> {
         let method = path.strip_prefix("mavio.plugin.v1.SubtitleProviderService/")?;
         match method {
+            "ListSubtitleProviders" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(
+                            SUBTITLE_PROVIDER_SERVICE_LIST_SUBTITLE_PROVIDERS_SPEC,
+                        ),
+                )
+            }
             "SearchSubtitles" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
@@ -370,6 +493,28 @@ for SubtitleProviderServiceServer<T> {
         };
         let _ = (&ctx, &request, &format);
         match method {
+            "ListSubtitleProviders" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::ListSubtitleProvidersRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::ListSubtitleProvidersRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::ListSubtitleProvidersRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_subtitle_providers(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::ListSubtitleProvidersResponse,
+                        >(format)
+                })
+            }
             "SearchSubtitles" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
@@ -484,7 +629,7 @@ for SubtitleProviderServiceServer<T> {
 /// let config = ClientConfig::new(uri).with_protocol(Protocol::Grpc);
 ///
 /// let client = SubtitleProviderServiceClient::new(conn, config);
-/// let response = client.search_subtitles(request).await?;
+/// let response = client.list_subtitle_providers(request).await?;
 /// ```
 ///
 /// # Example (Connect / HTTP/1.1 or ALPN)
@@ -496,7 +641,7 @@ for SubtitleProviderServiceServer<T> {
 /// let config = ClientConfig::new("http://localhost:8080".parse()?);
 ///
 /// let client = SubtitleProviderServiceClient::new(http, config);
-/// let response = client.search_subtitles(request).await?;
+/// let response = client.list_subtitle_providers(request).await?;
 /// ```
 ///
 /// # Working with the response
@@ -506,7 +651,7 @@ for SubtitleProviderServiceServer<T> {
 /// message, so field access is zero-copy:
 ///
 /// ```rust,ignore
-/// let resp = client.search_subtitles(request).await?;
+/// let resp = client.list_subtitle_providers(request).await?;
 /// let name: &str = resp.view().name;  // borrow into the response buffer
 /// ```
 ///
@@ -514,7 +659,7 @@ for SubtitleProviderServiceServer<T> {
 /// [`into_owned()`](::connectrpc::client::UnaryResponse::into_owned):
 ///
 /// ```rust,ignore
-/// let owned = client.search_subtitles(request).await?.into_owned();
+/// let owned = client.list_subtitle_providers(request).await?.into_owned();
 /// ```
 ///
 /// [`into_view()`](::connectrpc::client::UnaryResponse::into_view) keeps the
@@ -544,6 +689,51 @@ where
     /// Get a mutable reference to the client configuration.
     pub fn config_mut(&mut self) -> &mut ::connectrpc::client::ClientConfig {
         &mut self.config
+    }
+    /// Call the ListSubtitleProviders RPC. Sends a request to /mavio.plugin.v1.SubtitleProviderService/ListSubtitleProviders.
+    pub async fn list_subtitle_providers(
+        &self,
+        request: crate::proto::mavio::plugin::v1::ListSubtitleProvidersRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::ListSubtitleProvidersResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_subtitle_providers_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListSubtitleProviders RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_subtitle_providers_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::ListSubtitleProvidersRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::ListSubtitleProvidersResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SUBTITLE_PROVIDER_SERVICE_LIST_SUBTITLE_PROVIDERS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
     }
     /// Call the SearchSubtitles RPC. Sends a request to /mavio.plugin.v1.SubtitleProviderService/SearchSubtitles.
     pub async fn search_subtitles(

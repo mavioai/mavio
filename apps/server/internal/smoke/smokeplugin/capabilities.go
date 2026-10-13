@@ -177,16 +177,25 @@ func (lyrics) DownloadLyrics(_ context.Context, req *pluginv1.DownloadLyricsRequ
 
 type subtitles struct{}
 
+func (subtitles) ListSubtitleProviders(context.Context, *pluginv1.ListSubtitleProvidersRequest) (*pluginv1.ListSubtitleProvidersResponse, error) {
+	return pluginv1.ListSubtitleProvidersResponse_builder{Providers: []*pluginv1.SubtitleProviderInfo{pluginv1.SubtitleProviderInfo_builder{
+		Name: proto.String("smoke"), DisplayName: proto.String("Smoke"), Enabled: proto.Bool(true), Languages: []string{"en"},
+		Movies: proto.Bool(true), Episodes: proto.Bool(true),
+	}.Build()}}.Build(), nil
+}
+
 func (subtitles) SearchSubtitles(_ context.Context, req *pluginv1.SearchSubtitlesRequest) (*pluginv1.SearchSubtitlesResponse, error) {
+	title := req.GetVideo().GetTitle()
 	return pluginv1.SearchSubtitlesResponse_builder{Subtitles: []*pluginv1.RemoteSubtitle{pluginv1.RemoteSubtitle_builder{
-		Id: proto.String(req.GetQuery().GetName()), Name: proto.String(req.GetQuery().GetName()), Language: proto.String("en"),
-		Format: proto.String("srt"),
+		Provider: proto.String("smoke"), Id: proto.String(title), ReleaseNames: []string{title},
+		Language: pluginv1.SubtitleLanguage_builder{Language: proto.String("en")}.Build(), Format: proto.String("srt"),
 	}.Build()}}.Build(), nil
 }
 
 func (subtitles) DownloadSubtitle(_ context.Context, req *pluginv1.DownloadSubtitleRequest) (*pluginv1.DownloadSubtitleResponse, error) {
 	return pluginv1.DownloadSubtitleResponse_builder{
-		Data: []byte("1\n00:00:01,000 --> 00:00:02,000\n" + req.GetId() + "\n"), Format: proto.String("srt"), Language: proto.String("en"),
+		Data: []byte("1\n00:00:01,000 --> 00:00:02,000\n" + req.GetId() + "\n"), Format: proto.String("srt"),
+		Language: pluginv1.SubtitleLanguage_builder{Language: proto.String("en")}.Build(),
 	}.Build(), nil
 }
 
