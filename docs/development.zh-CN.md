@@ -27,6 +27,8 @@ mise install            # 安装锁定版本的工具链
 pnpm install            # 安装 Nx
 ```
 
+`pnpm nx` 在 `mise exec` 下运行 Nx（`package.json` 的 `nx` 脚本），因此无论 shell 是否激活了 mise，每个目标都使用锁定版本的工具，`PATH` 上的同名工具（如上游 rclone）不会被使用。在 Nx 之外运行的命令，如在模块中运行 `go test`，同样经由 `mise exec --` 运行，或在激活了 mise 的 shell 中运行。
+
 Rust 由 `libs/client-rust/rust-toolchain.toml` 固定，rustup 在该目录首次运行 `cargo` 时安装它；只需安装 rustup 本身。
 
 客户端的所有目标都在该工具链上构建，包括 tvOS 目标 `aarch64-apple-tvos` 与 `aarch64-apple-tvos-sim`，其标准库与其他目标一样由 rustup 安装（`rustup target add aarch64-apple-tvos`）。

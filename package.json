@@ -8,7 +8,7 @@
     "node": ">=26"
   },
   "scripts": {
-    "nx": "nx"
+    "nx": "mise exec -- nx"
   },
   "devDependencies": {
     "nx": "23.3.0"

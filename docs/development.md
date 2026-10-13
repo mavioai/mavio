@@ -27,6 +27,8 @@ mise install            # Install the pinned toolchain
 pnpm install            # Install Nx
 ```
 
+`pnpm nx` runs Nx under `mise exec` (the `nx` script of `package.json`), so every target runs the pinned tools whether or not the shell activates mise; a tool on `PATH` with the same name, such as an upstream rclone, is not used. Commands run outside Nx, such as `go test` in a module, run under `mise exec --` too, or in a shell that activates mise.
+
 Rust is pinned by `libs/client-rust/rust-toolchain.toml`, which rustup installs on the first `cargo` command there; only rustup itself is needed.
 
 Every target of the clients builds on that toolchain, the tvOS targets `aarch64-apple-tvos` and `aarch64-apple-tvos-sim` included, whose standard library rustup installs like the others' (`rustup target add aarch64-apple-tvos`).
