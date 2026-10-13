@@ -159,6 +159,9 @@ Acquisition ([Architecture §13](architecture.md#13-acquisition-libsacquire)) ad
 
 Both network-facing providers are process plugins: indexers and download clients are at addresses the administrator configures, which a WASM manifest's `http_hosts` cannot list, and indexers need proxies and long-lived sessions.
 
+### 8.13 Subtitle Providers
+`SUBTITLE_PROVIDER` serves subtitle acquisition ([Architecture §14](architecture.md#14-subtitle-acquisition-libsacquiresubtitles)) as Bazarr's providers serve it. `SubtitleProviderService.ListSubtitleProviders` lists the providers the plugin implements with the settings each takes (secrets marked), whether each is enabled and whether it is throttled, and until when; `SearchSubtitles` takes a video's description (names, alternative titles, IDs, season, episode and absolute number, year, release name with its source, release group, resolution, codecs, edition and streaming service, frame rate, file name, size and OpenSubtitles hash) and several languages with their forced and hearing-impaired wishes, and returns candidates with their provider, release names, language, flags and the properties the provider found matching, which the server scores; `DownloadSubtitle` returns one, extracted from its archive. Failures carry their kind (too many requests, download limit, service unavailable, authentication, configuration, a subtitle to blocklist), from which the plugin throttles the provider. `plugins/subtitles` provides it as a process plugin: its sites are behind logins, cookies, Cloudflare and captchas, some are self-hosted at addresses the administrator gives, and it keeps sessions, throttling state and captcha services' accounts in its data folder.
+
 ## 9. Runtime Differences
 | | WASM | Process |
 | :--- | :--- | :--- |

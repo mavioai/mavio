@@ -45,6 +45,7 @@ flowchart TD
     P23["P23 打包与发布<br/>libs/proto 与 libs/plugin 标签、服务端二进制与容器镜像"]
     P24["P24 存储 I/O 效率<br/>存储类别、容器索引、关键帧 trickplay、字幕缓存"]
     P25["P25 存储后端与 rclone<br/>存储端口、libs/rclone、rcd、离线下载"]
+    P26["P26 字幕获取<br/>libs/acquire/subtitles、plugins/subtitles，移植 Bazarr"]
 
     P0 --> P1
     P1 --> P2
@@ -79,6 +80,8 @@ flowchart TD
     P12 --> P24
     P24 --> P25
     P18 --> P25
+    P19 --> P26
+    P24 --> P26
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -109,6 +112,7 @@ flowchart TD
 | P23 | 打包与发布 | 未开始 |
 | P24 | 存储 I/O 效率 | 进行中 |
 | P25 | 存储后端与 rclone | 进行中 |
+| P26 | 字幕获取 | 未开始 |
 
 ---
 
@@ -694,6 +698,37 @@ flowchart TD
   - [ ] 实测 fork 的云盘与常用个人云盘（§3.5），取代估计的链接有效期与数据流限制，并找出需要顺序读取的远端；protondrive 的 SDK 能从保存的链接读取后，为其加上链接缓存
 - [ ] 后续：远端插件（运行在其他机器上的插件进程）、云盘直链、按变更通知增量扫描
 
+### P26 字幕获取
+**范围**：移植 Bazarr（[架构 §14](architecture.zh-CN.md#14-字幕获取libsacquiresubtitles)）：按字幕配置的语言，为电影与单集搜索、评分、下载、处理并升级它们缺少的字幕；`plugins/subtitles`，包含 Bazarr 设置中提供的各提供者的第一方进程插件。
+
+- 字幕配置（Bazarr 的语言配置），分配给媒体库、电影与剧集，或按标签分配；字幕历史、阻止列表与失败记录
+- `libs/acquire/subtitles`：Bazarr 的缺少字幕计算、评分、择优、升级与自适应搜索
+- 缺字幕搜索与升级作为作业，文件入库或被发现时搜索一次；手动搜索、下载、上传与删除；外挂字幕按 Bazarr 的方式命名
+- 扩展 `SUBTITLE_PROVIDER`；`plugins/subtitles` 包含 Bazarr 的提供者、其限流与验证码识别服务；`subtitles-opensubtitles` 并入其中
+- `libs/subtitle` 中的 subzero 修正、编码与语言识别；按 ffsubsync 的方式同步时间轴
+- 遵守存储类别（[架构 §14.3](architecture.zh-CN.md#143-存储类别)）：云存储上从不提取内嵌字幕，也从不读取音频
+
+**完成标准**：移植的 Bazarr 用例通过或带理由跳过；端到端测试在本机回环地址上模拟字幕提供者：入库的电影与单集得到其配置想要的字幕，一个被更好的字幕升级，一个解码失败的被阻止并替换，一个不同步的被同步。
+
+**进度**：
+- [ ] 领域与存储：字幕配置及其分配、字幕历史、阻止列表与失败记录、字幕设置（`libs/core`、`libs/store`）
+- [ ] `tools/testport` 读取 pytest 用例；移植 Bazarr 的评分、修正与提供者用例
+- [ ] `libs/acquire/subtitles`：缺少的字幕、评分、择优、升级、自适应搜索
+  - [ ] guessit 为 Bazarr 评分提供而 `libs/release` 缺少的字段（流媒体服务、字幕 release 名称中的版本），补入 `libs/release`
+- [ ] 扩展 `SUBTITLE_PROVIDER`：列出提供者、查询中的视频描述与多种语言、结果中的匹配属性、失败类型
+- [ ] `plugins/subtitles`：插件本身、压缩包（zip、RAR、7z）、限流、代理与 FlareSolverr、验证码识别服务（Anti-Captcha、CaptchaAI、DeathByCaptcha）；移入 OpenSubtitles.com，删除 `subtitles-opensubtitles`
+  - [ ] 需要账号的 JSON API：SubDL、SubSource、Jimaku、Assrt、BetaSeries、Titlovi、LegendasNet、SubX、Subs.ro、HDBits、Ktuvit、SubsDump、Subsarr
+  - [ ] 无需账号的 JSON API 与其他协议：Gestdown、AnimeTosho（两者）、Tsukihime、Subtis、RegieLive、Bayflix、Vladoonmooo、Subsynchro、Wizdom、BSPlayer、NapiProjekt、Napisy24；用于动漫 ID 的 AniDB 与 anime lists
+  - [ ] 无需账号的抓取站点：AnimeKalesi、AnimeSubInfo、GreekSubs、GreekSubtitles、Hosszupuska、Nekur、PrijevodiOnline、SousTitres.eu、SubClub、Subf2m、Subs4Free、SubsCenter、SubsSabbz、SubsUnacs、SubtitleCat、Subtitrari Noi、Subtitriid、SubtitulamosTV、SuperSubtitles、Titrari、TVSubtitles、YavkaNet、YIFY Subtitles
+  - [ ] 需要登录、cookie 或验证码的站点：Addic7ed、AvistaZ、CinemaZ、Karagarga、LegendasDivx、Pipocas、Subs4Series、Titulky、TurkceAltyazi.org、XSubs、Zimuku
+- [ ] `SubtitleService` 与作业：缺少的字幕、缺字幕搜索、升级、入库与扫描时的搜索、手动搜索、下载、上传、删除、历史、阻止列表；`subtitle.downloaded` 活动
+- [ ] 每个文件的 OpenSubtitles 哈希保存到文件变化为止
+- [ ] 内嵌字幕：按设置计为已有；本地和网络存储上手动从播放缓存提取为外挂字幕，云存储上从不提取
+- [ ] `libs/subtitle` 中的 subzero 修正（common、标签、去除听障内容、带词典的 OCR 修正、颜色、emoji、RTL、大写、偏移、帧率、两点拟合）与 UTF-8；按文本识别听障字幕；识别没有语言的外挂字幕的语言，区分中文简繁
+- [ ] 时间轴同步（`libs/media/subsync`，ffsubsync 的算法）：本地和网络存储上按音频，所有存储类别上按另一个字幕文件；下载后按设置的分数阈值同步，以及手动同步
+- [ ] 端到端测试（`apps/server/internal/server/subtitles_test.go`）
+- [ ] 后续：翻译（Google、Gemini、Lingarr）与 Whisper 转写，作为各自的提供者类型
+
 ---
 
 ## 4. 风险与待决事项
@@ -710,6 +745,8 @@ flowchart TD
 | Servarr 的服务 | 资源获取使用 Radarr、Sonarr 与 Prowlarr 所用的服务及 Radarr 的 TMDB 令牌，自身不持有密钥；服务的运营方可能变更或撤回它们 | 请求携带该服务所属应用的 User-Agent；管理员可设置自己的 TMDB 密钥；Radarr 的令牌被拒绝时由 Mavio 自己的密钥接替；`scraper-servarr` 随版本跟进这些服务 |
 | 剧集编号 | release 与文件按 TVDB 编号，TMDB 的元数据可能对同样的单集另行编号，动漫尤甚 | P15 与 P16 的显示顺序（TMDB episode groups）与单集 TVDB ID；P19 的 scene 映射与 XEM |
 | 索引器变动 | 站点会改变页面与 API | Cardigann 定义在运行时拉取；索引器插件从插件目录升级，无需发布服务端 |
+| 字幕站点变动 | Bazarr 的大多数提供者抓取的站点会改版、拦截机器人或关闭 | 提供者在 `plugins/subtitles` 中，从插件目录升级，无需发布服务端；录制的响应保证其解析器有测试覆盖 |
+| 同步所需的语音检测 | ffsubsync 用 WebRTC 的 VAD 检测语音，这是个 C 库，服务端不用 CGO 就无法链接 | 在 P26 中用 Go 实现 VAD，并在录制的样本上与 ffsubsync 的偏移量比较 |
 | 电视直播、录像与频道 | Jellyfin 中体量很大的部分，Mavio 既未采纳也未排除；插件平台不包含它们的提供者类型 | P21 之前决定 |
 | 客户端许可证与应用商店 | 客户端将与仓库其余部分一样采用 GPL-3.0，其条款与 App Store 的条款冲突；以 LGPL 构建的 FFmpeg（Apple 平台上为 AetherEngine 的框架）还要求允许用户重新链接，而 Android 应用中按 GPL-3.0 构建的 libmpv 使其受 GPL-3.0 约束 | 首次在 App Store 发布前决定：为客户端另定许可证、要求贡献者协议，或不通过 App Store 分发 |
 | AetherEngine | Apple 应用的第二引擎是一个年轻的包，主要由一位维护者开发，7.x 版本发布频繁 | P21 先做原型：macOS、iOS 与 tvOS 上 HDR10 Matroska 源的 EDR 输出、杜比视界、带样式的 ASS 字幕与画中画；固定版本并跟进其发布 |

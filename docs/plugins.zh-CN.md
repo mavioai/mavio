@@ -159,6 +159,9 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 
 两个面向网络的提供者都是进程插件：索引器与下载客户端的地址由管理员配置，WASM 清单的 `http_hosts` 无法列出它们，而且索引器需要代理与长期会话。
 
+### 8.13 字幕提供者
+`SUBTITLE_PROVIDER` 为字幕获取（[架构 §14](architecture.zh-CN.md#14-字幕获取libsacquiresubtitles)）服务，如 Bazarr 的提供者为其服务。`SubtitleProviderService.ListSubtitleProviders` 列出插件实现的提供者及各自的设置（标出机密项）、是否启用、是否被限流及限流到何时；`SearchSubtitles` 接受视频的描述（名称、别名、ID、季、集与绝对集数、年份、release 名称及其来源、发布组、分辨率、编码、版本与流媒体服务、帧率、文件名、大小与 OpenSubtitles 哈希）与多种语言及其 forced 与听障要求，返回带提供者、release 名称、语言、标记以及提供者判定匹配的属性的候选，由服务端评分；`DownloadSubtitle` 返回其中之一，已从压缩包中取出。失败带有类型（请求过多、下载额度、服务不可用、认证、配置、应阻止的字幕），插件据此限流该提供者。`plugins/subtitles` 以进程插件提供它：其站点位于登录、cookie、Cloudflare 与验证码之后，有的自托管在管理员给出的地址，且它在数据目录中保存会话、限流状态与验证码服务的账号。
+
 ## 9. 运行时差异
 | | WASM | 进程 |
 | :--- | :--- | :--- |

@@ -112,7 +112,8 @@ mavio/
 │   ├── scraper-theaudiodb/      # [Go → wasm] 音乐人简介与图片
 │   ├── scraper-fanart/          # [Go → wasm] fanart.tv 图片
 │   ├── scraper-openlibrary/     # [Go → wasm] Open Library 图书元数据
-│   ├── subtitles-opensubtitles/ # [Go → wasm] OpenSubtitles.com 字幕下载
+│   ├── subtitles-opensubtitles/ # [Go → wasm] OpenSubtitles.com 字幕下载（P26 并入 subtitles/）
+│   ├── subtitles/               # [Go → 子进程] 字幕提供者：移植 Bazarr 的各站点（自 P26）
 │   ├── scraper-servarr/         # [Go → wasm] Servarr 的元数据服务：SkyHook、Radarr 元数据、scene 映射、XEM
 │   ├── indexers/                # [Go → 子进程] 索引器：Newznab、Torznab、Cardigann、Prowlarr 的站点
 │   ├── download-clients/        # [Go → 子进程] 下载客户端：qBittorrent、Transmission、SABnzbd、NZBGet 等
@@ -525,3 +526,43 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 * **发现**把各提供者的目录合并为 `<plugin>/<catalog>`，并把一页中的每个标题标记为可用、部分可用、想要、已请求、已阻止、已删除（已完成请求的文件已不存在）或无，附带其条目、其活动请求以及用户能否请求它。`SearchTitles` 经第一个支持搜索的提供者按名称查找标题，同样标记；`GetTitle` 给出标题的详情及其各季的状态。用户的分级限制同样适用：仅当调用者指定分级或策略屏蔽未分级标题时，按认证分级过滤的目录才只被请求限制之内的分级，否则保留未分级标题；其余标题逐个查询，超出限制的被剔除。成人标题从不列出。每页统计其剔除的标题，总数为提供者的总数减去它们。
 * **问题**报告用户可访问的条目在视频、音频、字幕或其他方面的问题，可指明季与集，并带有评论串。创建者与管理员可评论、解决与重新打开；管理员，或尚无回复的问题的创建者，可删除问题。
 * **通知**是以相关用户为用户的活动：`request.pending`（面向管理员的通知器）、`request.approved`、`request.auto_approved`、`request.declined`、`request.failed`、`request.available`、`issue.created`、`issue.commented`、`issue.resolved` 与 `issue.reopened`，属性中带有请求或问题。通知器插件投递它们，`ActivityService.ListMyActivities` 列出用户自己的活动，记录时 `NotificationReceived` 事件送达相关用户的会话，待审批或失败的请求与报告的问题也送达管理员的会话。
+
+---
+
+## 14. 字幕获取（libs/acquire/subtitles）
+
+Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr 旁完成的事，但在服务端之内：Bazarr 从 Sonarr 与 Radarr 同步的，就是服务端自己的条目；它的字幕索引，就是扫描与 probe 记录的流。这部分工作是[路线图](roadmap.zh-CN.md)的 P26 阶段。
+
+### 14.1 组成
+| 部分 | 位置 | Bazarr 中的对应 |
+| :--- | :--- | :--- |
+| 字幕配置、历史、阻止列表、失败记录 | `libs/core`、`libs/store` | 语言配置、`table_history*`、`table_blacklist*`、`failedAttempts` |
+| 规则：缺少的字幕、评分、择优、升级、自适应搜索 | `libs/acquire/subtitles`（纯函数） | `list_missing_subtitles`、`subliminal_patch/score.py`、`download_best_subtitles`、`upgrade.py`、`adaptive_searching.py` |
+| 运行时与 API | `apps/server/internal/subtitles`、`SubtitleService` | `subtitles/wanted`、`upgrade`、`manual`、调度器的作业 |
+| 提供者 | `plugins/subtitles`（进程）、`SUBTITLE_PROVIDER` | `subliminal_patch/providers`、`pitcher.py`、`get_providers.py` 的限流 |
+| 修正、编码、语言识别 | `libs/subtitle` | subzero、字符集检测、`guess_language` |
+| 时间轴同步 | `libs/media/subsync` | ffsubsync |
+
+* **以服务端自己的数据代替 Bazarr 的同步。** 电影、剧集与单集是服务端的条目；文件来自的 release 是其入库所记录的抓取（Bazarr 的 `sceneName` 与历史 refiner），否则是文件名；release 名称由 `libs/release` 解析，代替 guessit；编码、分辨率与音轨语言来自已保存的 probe 结果。Bazarr 的 Sonarr 与 Radarr 同步、路径映射、Plex 与 Jellyfin 刷新、Apprise、调度器、备份与公告，分别对应入库与扫描、条目的流、活动日志与通知插件、`TaskService` 以及 P11。
+* **规则与网络分开**，如资源获取（§13）：配置、决策、历史与阻止列表属于服务端；与字幕站点通信、随站点变化的部分在插件中，从插件目录升级，无需发布服务端。
+
+### 14.2 流程
+1. **缺少的字幕**：电影或单集的文件入库、被扫描发现或 probe 时，或其字幕配置变化时，把配置想要的字幕与文件的字幕流比较：外挂的，以及设置要求计入时内嵌的，如 Bazarr 的 `list_missing_subtitles`：音轨已是该语言时排除、或仅在音轨是该语言时才要的语言，cutoff，听障字幕可代替普通字幕（配置排除时除外），以及 Bazarr 的语言等价关系。
+2. **搜索**：缺少的字幕立即搜索，并由电影与单集的缺字幕搜索作业搜索；首次失败后，自适应搜索在一段延迟之后每个间隔只搜一次该语言，如 Bazarr 的 `is_search_active`。
+3. **查询**：视频由其条目的名称、别名、ID、编号（季、集、绝对集数）、年份、release 名称及解析出的来源、发布组、分辨率、编码、版本与流媒体服务、帧率与 OpenSubtitles 哈希描述；按媒体库的顺序询问其字幕提供者（[插件 §8.11](plugins.zh-CN.md#811-按媒体库的提供者顺序)），一次询问所有缺少的语言。
+4. **评分**：每个候选带有其提供者判定匹配的属性；服务端按 Bazarr 的权重评分（单集满分 360，哈希 359；电影满分 180，哈希 179；哈希仅在其他属性也吻合时计入，IMDb 与 TVDB ID 代表其蕴含的属性），取不低于最低分的最佳者，遵守配置的听障模式、必须包含与不得包含的词，单集还要求剧集、季与集匹配。
+5. **保存**：字幕解码为 UTF-8，经设置所列的修正处理，文本显示为听障字幕时加上听障标记，经 `core.Storage` 写在视频旁（或配置的子目录中），命名为 `<视频>.<语言>[.forced|.hi|.cc|.sdh].<扩展名>`，先写到旁边再改名；它成为条目的外挂流，无需重新 probe 视频。
+6. **历史与通知**：下载连同提供者、分数与匹配项被记录，并记录一条 `subtitle.downloaded` 活动；解码失败或被管理员否决的字幕进入阻止列表，并搜索另一个。
+7. **升级**：升级作业在设置给出的天数内，为低于满分下载的字幕再次搜索，只接受更好的，如 Bazarr 的 `upgrade_subtitles`；被替换的文件删除，历史把两者关联起来。
+8. **手动**：管理员搜索视频的字幕并查看分数与匹配项，下载、上传、删除、修正与同步字幕，并在 §14.3 允许时提取内嵌字幕。
+
+### 14.3 存储类别
+字幕获取按[优化 §2.3](optimization.zh-CN.md#23-按存储类别的策略)的策略读取媒体：
+* OpenSubtitles 哈希需要两次范围读取，每个文件只计算一次，保存到文件变化为止，重复搜索不再读取。
+* 使用 probe 的媒体信息；不为字幕再次 probe。
+* 内嵌文字字幕只在手动操作时、且只在本地和网络存储上提取为外挂字幕，来源是播放的提取缓存（[优化 §2.6](optimization.zh-CN.md#26-内嵌字幕)），缓存为空时由其单次 ffmpeg 运行填充；云存储上从不提取。
+* 按音频同步需读取整条音轨，因此只在本地和网络存储上进行；云存储上的字幕只按视频旁的另一个字幕文件同步。
+* 语言识别与修正只读取字幕文件。
+
+### 14.4 字幕提供者（`plugins/subtitles`）
+移植 Bazarr 各提供者的第一方进程插件：位于 cookie、登录与 Cloudflare 之后的字幕站点（经与索引器同类的代理与 FlareSolverr），用管理员的 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 账号识别验证码，压缩包（zip、RAR、7z），以及 WASM 清单无法列出地址的自托管提供者。其配置启用各提供者并给出设置；`SubtitleProviderService` 列出它们，按多种语言为一个视频搜索，返回带 release 名称、标记与匹配属性的候选，并下载其中之一。失败的提供者按 Bazarr 按失败类型给出的时长限流（请求过多、下载额度、服务不可用、认证），有的直到其站点时区的午夜，计数类失败在两分钟内达到五次才限流；状态保存在插件的数据目录中。它取代 `subtitles-opensubtitles`。

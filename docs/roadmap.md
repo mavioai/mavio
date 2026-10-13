@@ -45,6 +45,7 @@ flowchart TD
     P23["P23 Packaging and release<br/>libs/proto and libs/plugin tags, server binaries and container images"]
     P24["P24 Storage I/O efficiency<br/>storage classes, container indexes, keyframe trickplay, subtitle caching"]
     P25["P25 Storage backends and rclone<br/>storage port, libs/rclone, rcd, offline downloads"]
+    P26["P26 Subtitle acquisition<br/>libs/acquire/subtitles, plugins/subtitles, porting Bazarr"]
 
     P0 --> P1
     P1 --> P2
@@ -79,6 +80,8 @@ flowchart TD
     P12 --> P24
     P24 --> P25
     P18 --> P25
+    P19 --> P26
+    P24 --> P26
 ```
 
 | Phase | Theme | Status |
@@ -109,6 +112,7 @@ flowchart TD
 | P23 | Packaging and release | Not started |
 | P24 | Storage I/O efficiency | In progress |
 | P25 | Storage backends and rclone | In progress |
+| P26 | Subtitle acquisition | Not started |
 
 ---
 
@@ -694,6 +698,37 @@ flowchart TD
   - [ ] Measurements of the fork's drives and the common consumer drives (§3.5), replacing the estimated link lifetimes and stream limits and finding the remotes to read sequentially; a link cache for protondrive once its SDK can read from a kept link
 - [ ] Later: remote plugins (plugin processes on other machines), direct links of cloud drives, incremental scans by change notification
 
+### P26 Subtitle Acquisition
+**Scope**: porting Bazarr ([Architecture §14](architecture.md#14-subtitle-acquisition-libsacquiresubtitles)): the subtitles movies and episodes lack in the languages of their subtitle profiles are searched, scored, downloaded, processed and upgraded; `plugins/subtitles`, a first-party process plugin with the providers Bazarr's settings offer.
+
+- Subtitle profiles (Bazarr's language profiles), assigned to libraries, movies and series and by tag; subtitle history, blocklist and failed attempts
+- `libs/acquire/subtitles`: Bazarr's wanted subtitles, scores, choice of the best subtitle, upgrades and adaptive searching
+- Searches of wanted subtitles and upgrades as jobs, a search when a file is imported or found; manual search, download, upload and deletion; sidecars named as Bazarr names them
+- `SUBTITLE_PROVIDER` extended; `plugins/subtitles` with Bazarr's providers, their throttling and the anti-captcha services; `subtitles-opensubtitles` merged into it
+- Subzero's mods, encodings and language detection in `libs/subtitle`; synchronization as ffsubsync does it
+- Storage classes respected ([Architecture §14.3](architecture.md#143-storage-classes)): embedded subtitles never extracted and audio never read on cloud storage
+
+**Done when**: Bazarr's ported cases pass or are skipped with a reason; an end-to-end test with subtitle providers simulated on the loopback interface: an imported movie and episode get the subtitles their profiles want, one is upgraded by a better subtitle, one failing to decode is blocklisted and replaced, and one out of sync is synchronized.
+
+**Progress**:
+- [ ] Domain and storage: subtitle profiles and their assignment, subtitle history, blocklist and failed attempts, the subtitle settings (`libs/core`, `libs/store`)
+- [ ] `tools/testport` reads pytest cases; Bazarr's score, mod and provider cases ported
+- [ ] `libs/acquire/subtitles`: wanted subtitles, scores, choice, upgrades, adaptive searching
+  - [ ] The fields guessit gives Bazarr's scores that `libs/release` lacks (streaming service, edition of subtitle release names), added to it
+- [ ] `SUBTITLE_PROVIDER` extended: provider listing, video descriptions and several languages in queries, matched properties in results, kinds of failures
+- [ ] `plugins/subtitles`: the plugin, archives (zip, RAR, 7z), throttling, proxies and FlareSolverr, anti-captcha services (Anti-Captcha, CaptchaAI, DeathByCaptcha); OpenSubtitles.com moved in, `subtitles-opensubtitles` removed
+  - [ ] JSON APIs with accounts: SubDL, SubSource, Jimaku, Assrt, BetaSeries, Titlovi, LegendasNet, SubX, Subs.ro, HDBits, Ktuvit, SubsDump, Subsarr
+  - [ ] JSON APIs without accounts and other protocols: Gestdown, AnimeTosho (both), Tsukihime, Subtis, RegieLive, Bayflix, Vladoonmooo, Subsynchro, Wizdom, BSPlayer, NapiProjekt, Napisy24; AniDB and the anime lists for anime IDs
+  - [ ] Sites scraped without accounts: AnimeKalesi, AnimeSubInfo, GreekSubs, GreekSubtitles, Hosszupuska, Nekur, PrijevodiOnline, SousTitres.eu, SubClub, Subf2m, Subs4Free, SubsCenter, SubsSabbz, SubsUnacs, SubtitleCat, Subtitrari Noi, Subtitriid, SubtitulamosTV, SuperSubtitles, Titrari, TVSubtitles, YavkaNet, YIFY Subtitles
+  - [ ] Sites with logins, cookies or captchas: Addic7ed, AvistaZ, CinemaZ, Karagarga, LegendasDivx, Pipocas, Subs4Series, Titulky, TurkceAltyazi.org, XSubs, Zimuku
+- [ ] `SubtitleService` and the jobs: wanted subtitles, wanted searches, upgrades, a search at import and scan, manual search, download, upload, deletion, history, blocklist; `subtitle.downloaded` activities
+- [ ] OpenSubtitles hashes kept per file until it changes
+- [ ] Embedded subtitles: counted as present where the settings say so; extracted to sidecars by hand on local and network storage from the playback cache, never on cloud storage
+- [ ] Subzero's mods (common, tags, HI removal, OCR fixes with its dictionaries, colors, emoji, RTL, upper case, offsets, frame rates, two-point fit) and UTF-8 in `libs/subtitle`; hearing-impaired detection from text; language detection of sidecars without a language, Chinese scripts told apart
+- [ ] Synchronization (`libs/media/subsync`, ffsubsync's algorithm): against the audio on local and network storage, against another subtitle file on every storage class; after downloads under the settings' score thresholds, and by hand
+- [ ] End-to-end test (`apps/server/internal/server/subtitles_test.go`)
+- [ ] Later: translation (Google, Gemini, Lingarr) and Whisper transcription, as provider types of their own
+
 ---
 
 ## 4. Risks and Open Items
@@ -710,6 +745,8 @@ flowchart TD
 | Servarr's services | Acquisition uses the services Radarr, Sonarr and Prowlarr use, and Radarr's TMDB token, without keys of its own; their operators may change or withdraw them | Requests carry the User-Agent of the application whose service it is; an administrator can set their own TMDB key, Mavio's own key stands in when Radarr's token is rejected, and `scraper-servarr` follows the services in its releases |
 | Series numbering | Releases and files follow TVDB's numbering, TMDB's metadata may number the same episodes otherwise, anime in particular | Display orders with TMDB episode groups and episode TVDB IDs in P15 and P16; scene mappings and XEM in P19 |
 | Indexer churn | Sites change their pages and APIs | Cardigann definitions are fetched at run time; the indexers plugin is upgraded from the catalog without a server release |
+| Subtitle site churn | Most of Bazarr's providers scrape sites that change their pages, block bots or close | The providers are in `plugins/subtitles`, upgraded from the catalog without a server release; recorded responses keep their parsers tested |
+| Speech detection for synchronization | ffsubsync detects speech with WebRTC's VAD, a C library the server cannot link without CGO | A VAD in Go, compared with ffsubsync's offsets on recorded samples in P26 |
 | Live TV, DVR and channels | Large parts of Jellyfin that Mavio has neither adopted nor ruled out; the plugin platform leaves out their provider types | Decide before P21 |
 | Client licensing and app stores | The clients would be GPL-3.0 like the rest of the repository, whose terms conflict with the App Store's; LGPL builds of FFmpeg (AetherEngine's frameworks on Apple platforms) also oblige letting users relink them, and the Android apps' libmpv, built as GPL-3.0, binds them to GPL-3.0 | Decide before the first App Store release: a separate license for the clients, a contributor agreement, or no App Store distribution |
 | AetherEngine | The second engine of the Apple apps is a young package, mostly by one maintainer, releasing often in 7.x | Prototype first in P21: EDR output of an HDR10 Matroska source, Dolby Vision, styled ASS subtitles and Picture in Picture on macOS, iOS and tvOS; pin the version and follow its releases |

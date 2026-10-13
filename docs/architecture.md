@@ -112,7 +112,8 @@ mavio/
 │   ├── scraper-theaudiodb/      # [Go → wasm] Music biographies and artwork
 │   ├── scraper-fanart/          # [Go → wasm] fanart.tv artwork
 │   ├── scraper-openlibrary/     # [Go → wasm] Open Library book metadata
-│   ├── subtitles-opensubtitles/ # [Go → wasm] OpenSubtitles.com subtitle downloads
+│   ├── subtitles-opensubtitles/ # [Go → wasm] OpenSubtitles.com subtitle downloads (merged into subtitles/ in P26)
+│   ├── subtitles/               # [Go → child process] Subtitle providers: Bazarr's sites (from P26)
 │   ├── scraper-servarr/         # [Go → wasm] Servarr's metadata services: SkyHook, Radarr metadata, scene mappings, XEM
 │   ├── indexers/                # [Go → child process] Indexers: Newznab, Torznab, Cardigann, Prowlarr's sites
 │   ├── download-clients/        # [Go → child process] Download clients: qBittorrent, Transmission, SABnzbd, NZBGet, …
@@ -525,3 +526,43 @@ The package `apps/server/internal/requests` carries Seerr's rules out; `Discover
 * **Discovery** merges the providers' catalogs as `<plugin>/<catalog>` and marks each title of a page as available, partially available, wanted, requested, blocklisted, deleted (a completed request's files are gone) or nothing, with its item, its active request and whether the user may request it. `SearchTitles` finds titles by name through the first provider that searches, marked alike, and `GetTitle` details a title with the status of each season. The user's rating limit applies: catalogs filtering by certification are asked only for the certifications within it when the caller asks for certifications or the policy blocks unrated titles, so that unrated titles are otherwise kept; the other titles are looked up and those above it left out. Adult titles are never listed. A page counts the titles it leaves out, and its total is the provider's less them.
 * **Issues** report a video, audio, subtitle or other problem with an item the user can access, optionally of a season and episode, with a thread of comments. Their creators and administrators comment, resolve and reopen them; administrators, or the creator of an issue without replies, delete them.
 * **Notifications** are activities whose user is the one concerned: `request.pending` (with administrators' notifiers in mind), `request.approved`, `request.auto_approved`, `request.declined`, `request.failed`, `request.available`, `issue.created`, `issue.commented`, `issue.resolved` and `issue.reopened`, with the request or issue in their attributes. Notifier plugins deliver them, `ActivityService.ListMyActivities` lists a user's own, and a `NotificationReceived` event reaches the sessions of the user concerned as they are recorded, and administrators' for requests pending or failed and issues reported to them.
+
+---
+
+## 14. Subtitle Acquisition (libs/acquire/subtitles)
+
+Mavio finds the subtitles its movies and episodes lack, as Bazarr does beside Sonarr and Radarr, in the server: what Bazarr syncs from Sonarr and Radarr are the server's own items, and its index of subtitles is the streams scans and probes record. The work is phase P26 of the [Roadmap](roadmap.md).
+
+### 14.1 Parts
+| Part | Where | Counterpart in Bazarr |
+| :--- | :--- | :--- |
+| Subtitle profiles, history, blocklist, failed attempts | `libs/core`, `libs/store` | Language profiles, `table_history*`, `table_blacklist*`, `failedAttempts` |
+| Rules: wanted subtitles, scores, the choice of the best, upgrades, adaptive searching | `libs/acquire/subtitles` (pure functions) | `list_missing_subtitles`, `subliminal_patch/score.py`, `download_best_subtitles`, `upgrade.py`, `adaptive_searching.py` |
+| Runtime and API | `apps/server/internal/subtitles`, `SubtitleService` | `subtitles/wanted`, `upgrade`, `manual`, the scheduler's jobs |
+| Providers | `plugins/subtitles` (process), `SUBTITLE_PROVIDER` | `subliminal_patch/providers`, `pitcher.py`, the throttling of `get_providers.py` |
+| Mods, encodings, language detection | `libs/subtitle` | subzero, character set detection, `guess_language` |
+| Synchronization | `libs/media/subsync` | ffsubsync |
+
+* **The server's own data stands in for Bazarr's sync.** Movies, series and episodes are the server's items; the release a file came from is the grab its import recorded (Bazarr's `sceneName` and history refiner), else the file's name; release names are parsed by `libs/release`, in place of guessit; codecs, resolution and audio languages come from the stored probe. Bazarr's Sonarr and Radarr sync, path mappings, Plex and Jellyfin refreshes, Apprise, scheduler, backup and announcements have their counterparts in imports and scans, the item's streams, the activity log with notifier plugins, `TaskService` and P11.
+* **Rules apart from networks**, as acquisition (§13): profiles, decisions, history and the blocklist are the server's; what talks to subtitle sites, and changes with them, is in the plugin, upgraded from the catalog without a server release.
+
+### 14.2 Flow
+1. **Wanted**: when a movie or episode file is imported, found by a scan or probed, or its subtitle profile changes, the subtitles the profile wants are compared with the file's subtitle streams, external and, where the settings count them, embedded, as Bazarr's `list_missing_subtitles`: languages excluded when the audio already has them or wanted only when it has them, the cutoff, hearing-impaired subtitles standing in for normal ones unless the profile excludes them, and Bazarr's language equivalences.
+2. **Search**: wanted subtitles are searched at once and by the wanted search jobs of movies and episodes; after the first failure, adaptive searching searches a language only once per interval after a delay, as Bazarr's `is_search_active`.
+3. **Query**: the video is described by its item's names, alternative titles, IDs, numbering (season, episode, absolute number), year, the release name and its parsed source, release group, resolution, codecs, edition and streaming service, the frame rate and the OpenSubtitles hash; the library's subtitle providers are asked in its order ([Plugins §8.11](plugins.md#811-provider-order-per-library)), for every wanted language at once.
+4. **Scores**: each candidate carries the properties its provider found matching; the server scores them with Bazarr's weights (episodes out of 360, the hash 359; movies out of 180, the hash 179; a hash counting only when the other properties agree, IMDb and TVDB IDs standing for what they imply), and the best one at or above the minimum score is taken, honoring the profile's hearing-impaired mode, its words that must and must not appear, and for episodes a matching series, season and episode.
+5. **Saving**: the subtitle is decoded to UTF-8, modified by the mods the settings name, flagged hearing-impaired when its text shows it, and written through `core.Storage` beside the video (or in the configured subfolder) as `<video>.<language>[.forced|.hi|.cc|.sdh].<ext>`, aside and renamed; it becomes an external stream of the item without probing the video again.
+6. **History and notification**: the download is recorded with its provider, score and matches, and a `subtitle.downloaded` activity is logged; a subtitle that fails to decode or that an administrator rejects is blocklisted, and another is searched for.
+7. **Upgrades**: the upgrade job searches again, for the days the settings give, the subtitles downloaded below their maximum score, accepting only better ones, as Bazarr's `upgrade_subtitles`; the replaced file is deleted and the history links the two.
+8. **By hand**: administrators search a video's subtitles with their scores and matches, download, upload, delete, modify and synchronize them, and extract embedded ones where §14.3 allows.
+
+### 14.3 Storage Classes
+Subtitle acquisition reads media under the policy of [Optimization §2.3](optimization.md#23-policy-by-storage-class):
+* The OpenSubtitles hash, two range reads, is computed once per file and kept until the file changes, so that repeated searches read nothing.
+* The probe's media information is used; nothing is probed again for subtitles.
+* Embedded text subtitles are extracted to sidecars only by hand and only on local and network storage, from the extraction cache of playback ([Optimization §2.6](optimization.md#26-embedded-subtitles)), filled by its single ffmpeg run when empty; on cloud storage they are never extracted.
+* Synchronization against the audio reads the whole audio track, so it runs only on local and network storage; on cloud storage a subtitle is synchronized only against another subtitle file beside the video.
+* Language detection and mods read only the subtitle files.
+
+### 14.4 Subtitle Providers (`plugins/subtitles`)
+A first-party process plugin porting Bazarr's providers: subtitle sites behind cookies, logins and Cloudflare (through the indexers' kinds of proxies and FlareSolverr), captchas solved by Anti-Captcha, CaptchaAI or DeathByCaptcha with the administrator's account, archives (zip, RAR, 7z) and self-hosted providers at addresses a WASM manifest cannot list. Its configuration enables providers with their settings; `SubtitleProviderService` lists them, searches them for a video in several languages, returning candidates with their release names, flags and matched properties, and downloads one. Providers failing are throttled for Bazarr's durations by kind of failure (too many requests, download limit, service unavailable, authentication), some until midnight in their site's time zone, counted failures only after five in two minutes; their state is kept in the plugin's data folder. It takes the place of `subtitles-opensubtitles`.

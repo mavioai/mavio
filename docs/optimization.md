@@ -139,7 +139,7 @@ Everything Mavio reads from or writes to media storage, with its cost and when i
 | Chapter images | a seek per chapter | about 3–4 MB a chapter | when the library asks for it and the policy allows samples |
 | Loudness | ffmpeg reads the whole track | the whole file | when the library asks for it and the policy allows whole-file reads |
 | NFO, artwork, lyrics, sidecar subtitles | small files | small | refreshes, scans |
-| OpenSubtitles hash | 64 KB at the head and at the tail | 2 range reads | subtitle searches |
+| OpenSubtitles hash | 64 KB at the head and at the tail | 2 range reads | subtitle searches; from P26 once per file, kept until it changes |
 | Playback | range reads for direct play, sequential reads by ffmpeg for remuxes and transcodes | proportional to what is watched | playback |
 | Embedded subtitles | local and network: ffmpeg copies every text stream out at once, into the metadata folder (§2.6); cloud: the transcode playing the video writes them as it reads | local and network: the whole file once while it is unchanged; cloud: nothing beyond the playback | playback of an embedded text subtitle the client does not demux |
 | Prefetch, keep-alive, wakes | head and tail, the start position, 4 KB heartbeats (§1.5, §1.6) | under 70 MB a playback, 4 KB a heartbeat | probes, playbacks, presence, where the policy allows speculative reads |
@@ -157,6 +157,7 @@ Everything Mavio reads from or writes to media storage, with its cost and when i
 | Pruning unchanged folders in scans | yes | no; folder modification times of cloud drives do not tell changes below them |
 | Folders a scan lists at once | by device (§1.3) | 2 |
 | Embedded text subtitles the client does not demux | extracted once, kept in the metadata folder | streamed by the HLS transcode; otherwise burned in |
+| Subtitle acquisition ([Architecture §14.3](architecture.md#143-storage-classes)): embedded subtitles extracted to sidecars by hand, synchronization against the audio | yes; extraction from the playback cache | no; synchronization only against another subtitle file |
 
 The policy is checked both when the jobs are queued and when they run, so a class changed in between takes effect at once.
 
