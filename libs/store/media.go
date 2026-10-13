@@ -57,7 +57,8 @@ func (r mediaSources) Replace(ctx context.Context, itemID core.ID, sources []cor
 				SetStreams(m.Streams).
 				SetChapters(m.Chapters).
 				SetKeyframes(m.Keyframes).
-				SetNillableProbedAt(nonZero(m.ProbedAt))
+				SetNillableProbedAt(nonZero(m.ProbedAt)).
+				SetFileHash(m.FileHash)
 		}
 		return mapErr(tx.write.MediaSource.CreateBulk(builders...).Exec(ctx), "insert media sources")
 	})
@@ -80,6 +81,7 @@ func toMediaSource(m *ent.MediaSource) core.MediaSource {
 		Chapters:  m.Chapters,
 		Keyframes: m.Keyframes,
 		ProbedAt:  zeroIfNil(m.ProbedAt),
+		FileHash:  m.FileHash,
 	}
 }
 

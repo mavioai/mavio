@@ -41,6 +41,7 @@ func (MediaSource) Fields() []ent.Field {
 		field.JSON("chapters", []core.Chapter{}).Optional(),
 		field.JSON("keyframes", []time.Duration{}).Optional(),
 		field.Time("probed_at").Optional().Nillable(),
+		field.String("file_hash").Default(""),
 	}
 }
 

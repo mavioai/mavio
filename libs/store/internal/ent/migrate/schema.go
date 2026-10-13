@@ -969,6 +969,7 @@ var (
 		{Name: "chapters", Type: field.TypeJSON, Nullable: true},
 		{Name: "keyframes", Type: field.TypeJSON, Nullable: true},
 		{Name: "probed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "file_hash", Type: field.TypeString, Default: ""},
 		{Name: "item_id", Type: field.TypeUUID},
 	}
 	// MediaSourcesTable holds the schema information for the "media_sources" table.
@@ -979,7 +980,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "media_sources_items_media_sources",
-				Columns:    []*schema.Column{MediaSourcesColumns[15]},
+				Columns:    []*schema.Column{MediaSourcesColumns[16]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -988,7 +989,7 @@ var (
 			{
 				Name:    "mediasource_item_id_ord",
 				Unique:  true,
-				Columns: []*schema.Column{MediaSourcesColumns[15], MediaSourcesColumns[1]},
+				Columns: []*schema.Column{MediaSourcesColumns[16], MediaSourcesColumns[1]},
 			},
 		},
 	}

@@ -179,6 +179,20 @@ func (_c *MediaSourceCreate) SetNillableProbedAt(v *time.Time) *MediaSourceCreat
 	return _c
 }
 
+// SetFileHash sets the "file_hash" field.
+func (_c *MediaSourceCreate) SetFileHash(v string) *MediaSourceCreate {
+	_c.mutation.SetFileHash(v)
+	return _c
+}
+
+// SetNillableFileHash sets the "file_hash" field if the given value is not nil.
+func (_c *MediaSourceCreate) SetNillableFileHash(v *string) *MediaSourceCreate {
+	if v != nil {
+		_c.SetFileHash(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *MediaSourceCreate) SetID(v core.ID) *MediaSourceCreate {
 	_c.mutation.SetID(v)
@@ -257,6 +271,10 @@ func (_c *MediaSourceCreate) defaults() {
 		v := mediasource.DefaultBitrate
 		_c.mutation.SetBitrate(v)
 	}
+	if _, ok := _c.mutation.FileHash(); !ok {
+		v := mediasource.DefaultFileHash
+		_c.mutation.SetFileHash(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := mediasource.DefaultID()
 		_c.mutation.SetID(v)
@@ -291,6 +309,9 @@ func (_c *MediaSourceCreate) check() error {
 	}
 	if _, ok := _c.mutation.Bitrate(); !ok {
 		return &ValidationError{Name: "bitrate", err: errors.New(`ent: missing required field "MediaSource.bitrate"`)}
+	}
+	if _, ok := _c.mutation.FileHash(); !ok {
+		return &ValidationError{Name: "file_hash", err: errors.New(`ent: missing required field "MediaSource.file_hash"`)}
 	}
 	if len(_c.mutation.ItemIDs()) == 0 {
 		return &ValidationError{Name: "item", err: errors.New(`ent: missing required edge "MediaSource.item"`)}
@@ -386,6 +407,10 @@ func (_c *MediaSourceCreate) createSpec() (*MediaSource, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ProbedAt(); ok {
 		_spec.SetField(mediasource.FieldProbedAt, field.TypeTime, value)
 		_node.ProbedAt = &value
+	}
+	if value, ok := _c.mutation.FileHash(); ok {
+		_spec.SetField(mediasource.FieldFileHash, field.TypeString, value)
+		_node.FileHash = value
 	}
 	if nodes := _c.mutation.ItemIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -693,6 +718,18 @@ func (u *MediaSourceUpsert) UpdateProbedAt() *MediaSourceUpsert {
 // ClearProbedAt clears the value of the "probed_at" field.
 func (u *MediaSourceUpsert) ClearProbedAt() *MediaSourceUpsert {
 	u.SetNull(mediasource.FieldProbedAt)
+	return u
+}
+
+// SetFileHash sets the "file_hash" field.
+func (u *MediaSourceUpsert) SetFileHash(v string) *MediaSourceUpsert {
+	u.Set(mediasource.FieldFileHash, v)
+	return u
+}
+
+// UpdateFileHash sets the "file_hash" field to the value that was provided on create.
+func (u *MediaSourceUpsert) UpdateFileHash() *MediaSourceUpsert {
+	u.SetExcluded(mediasource.FieldFileHash)
 	return u
 }
 
@@ -1021,6 +1058,20 @@ func (u *MediaSourceUpsertOne) UpdateProbedAt() *MediaSourceUpsertOne {
 func (u *MediaSourceUpsertOne) ClearProbedAt() *MediaSourceUpsertOne {
 	return u.Update(func(s *MediaSourceUpsert) {
 		s.ClearProbedAt()
+	})
+}
+
+// SetFileHash sets the "file_hash" field.
+func (u *MediaSourceUpsertOne) SetFileHash(v string) *MediaSourceUpsertOne {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.SetFileHash(v)
+	})
+}
+
+// UpdateFileHash sets the "file_hash" field to the value that was provided on create.
+func (u *MediaSourceUpsertOne) UpdateFileHash() *MediaSourceUpsertOne {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.UpdateFileHash()
 	})
 }
 
@@ -1516,6 +1567,20 @@ func (u *MediaSourceUpsertBulk) UpdateProbedAt() *MediaSourceUpsertBulk {
 func (u *MediaSourceUpsertBulk) ClearProbedAt() *MediaSourceUpsertBulk {
 	return u.Update(func(s *MediaSourceUpsert) {
 		s.ClearProbedAt()
+	})
+}
+
+// SetFileHash sets the "file_hash" field.
+func (u *MediaSourceUpsertBulk) SetFileHash(v string) *MediaSourceUpsertBulk {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.SetFileHash(v)
+	})
+}
+
+// UpdateFileHash sets the "file_hash" field to the value that was provided on create.
+func (u *MediaSourceUpsertBulk) UpdateFileHash() *MediaSourceUpsertBulk {
+	return u.Update(func(s *MediaSourceUpsert) {
+		s.UpdateFileHash()
 	})
 }
 

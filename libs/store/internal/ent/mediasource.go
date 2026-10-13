@@ -50,6 +50,8 @@ type MediaSource struct {
 	Keyframes []time.Duration `json:"keyframes,omitempty"`
 	// ProbedAt holds the value of the "probed_at" field.
 	ProbedAt *time.Time `json:"probed_at,omitempty"`
+	// FileHash holds the value of the "file_hash" field.
+	FileHash string `json:"file_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MediaSourceQuery when eager-loading is set.
 	Edges        MediaSourceEdges `json:"edges"`
@@ -87,7 +89,7 @@ func (*MediaSource) scanValues(columns []string) ([]any, error) {
 			values[i] = new(core.ID)
 		case mediasource.FieldOrd, mediasource.FieldSize, mediasource.FieldDuration, mediasource.FieldBitrate:
 			values[i] = new(sql.NullInt64)
-		case mediasource.FieldPath, mediasource.FieldDisc, mediasource.FieldName, mediasource.FieldContainer:
+		case mediasource.FieldPath, mediasource.FieldDisc, mediasource.FieldName, mediasource.FieldContainer, mediasource.FieldFileHash:
 			values[i] = new(sql.NullString)
 		case mediasource.FieldModified, mediasource.FieldProbedAt:
 			values[i] = new(sql.NullTime)
@@ -212,6 +214,12 @@ func (_m *MediaSource) assignValues(columns []string, values []any) error {
 				_m.ProbedAt = new(time.Time)
 				*_m.ProbedAt = value.Time
 			}
+		case mediasource.FieldFileHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field file_hash", values[i])
+			} else if value.Valid {
+				_m.FileHash = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -301,6 +309,9 @@ func (_m *MediaSource) String() string {
 		builder.WriteString("probed_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("file_hash=")
+	builder.WriteString(_m.FileHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

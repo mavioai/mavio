@@ -36,6 +36,10 @@ type MediaSource struct {
 	// nil until extracted.
 	Keyframes []time.Duration
 	ProbedAt  time.Time
+	// FileHash is the file's OpenSubtitles hash, computed when subtitles
+	// are first searched for it; empty until then. A scan that finds the
+	// file changed drops it with the rest of the source.
+	FileHash string
 }
 
 // Validate checks the source's invariants.

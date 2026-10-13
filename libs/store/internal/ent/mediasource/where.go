@@ -112,6 +112,11 @@ func ProbedAt(v time.Time) predicate.MediaSource {
 	return predicate.MediaSource(sql.FieldEQ(FieldProbedAt, v))
 }
 
+// FileHash applies equality check predicate on the "file_hash" field. It's identical to FileHashEQ.
+func FileHash(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldEQ(FieldFileHash, v))
+}
+
 // ItemIDEQ applies the EQ predicate on the "item_id" field.
 func ItemIDEQ(v core.ID) predicate.MediaSource {
 	return predicate.MediaSource(sql.FieldEQ(FieldItemID, v))
@@ -704,6 +709,71 @@ func ProbedAtIsNil() predicate.MediaSource {
 // ProbedAtNotNil applies the NotNil predicate on the "probed_at" field.
 func ProbedAtNotNil() predicate.MediaSource {
 	return predicate.MediaSource(sql.FieldNotNull(FieldProbedAt))
+}
+
+// FileHashEQ applies the EQ predicate on the "file_hash" field.
+func FileHashEQ(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldEQ(FieldFileHash, v))
+}
+
+// FileHashNEQ applies the NEQ predicate on the "file_hash" field.
+func FileHashNEQ(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldNEQ(FieldFileHash, v))
+}
+
+// FileHashIn applies the In predicate on the "file_hash" field.
+func FileHashIn(vs ...string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldIn(FieldFileHash, vs...))
+}
+
+// FileHashNotIn applies the NotIn predicate on the "file_hash" field.
+func FileHashNotIn(vs ...string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldNotIn(FieldFileHash, vs...))
+}
+
+// FileHashGT applies the GT predicate on the "file_hash" field.
+func FileHashGT(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldGT(FieldFileHash, v))
+}
+
+// FileHashGTE applies the GTE predicate on the "file_hash" field.
+func FileHashGTE(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldGTE(FieldFileHash, v))
+}
+
+// FileHashLT applies the LT predicate on the "file_hash" field.
+func FileHashLT(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldLT(FieldFileHash, v))
+}
+
+// FileHashLTE applies the LTE predicate on the "file_hash" field.
+func FileHashLTE(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldLTE(FieldFileHash, v))
+}
+
+// FileHashContains applies the Contains predicate on the "file_hash" field.
+func FileHashContains(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldContains(FieldFileHash, v))
+}
+
+// FileHashHasPrefix applies the HasPrefix predicate on the "file_hash" field.
+func FileHashHasPrefix(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldHasPrefix(FieldFileHash, v))
+}
+
+// FileHashHasSuffix applies the HasSuffix predicate on the "file_hash" field.
+func FileHashHasSuffix(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldHasSuffix(FieldFileHash, v))
+}
+
+// FileHashEqualFold applies the EqualFold predicate on the "file_hash" field.
+func FileHashEqualFold(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldEqualFold(FieldFileHash, v))
+}
+
+// FileHashContainsFold applies the ContainsFold predicate on the "file_hash" field.
+func FileHashContainsFold(v string) predicate.MediaSource {
+	return predicate.MediaSource(sql.FieldContainsFold(FieldFileHash, v))
 }
 
 // HasItem applies the HasEdge predicate on the "item" edge.

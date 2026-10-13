@@ -298,6 +298,20 @@ func (_u *MediaSourceUpdate) ClearProbedAt() *MediaSourceUpdate {
 	return _u
 }
 
+// SetFileHash sets the "file_hash" field.
+func (_u *MediaSourceUpdate) SetFileHash(v string) *MediaSourceUpdate {
+	_u.mutation.SetFileHash(v)
+	return _u
+}
+
+// SetNillableFileHash sets the "file_hash" field if the given value is not nil.
+func (_u *MediaSourceUpdate) SetNillableFileHash(v *string) *MediaSourceUpdate {
+	if v != nil {
+		_u.SetFileHash(*v)
+	}
+	return _u
+}
+
 // SetItem sets the "item" edge to the Item entity.
 func (_u *MediaSourceUpdate) SetItem(v *Item) *MediaSourceUpdate {
 	return _u.SetItemID(v.ID)
@@ -458,6 +472,9 @@ func (_u *MediaSourceUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if _u.mutation.ProbedAtCleared() {
 		_spec.ClearField(mediasource.FieldProbedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.FileHash(); ok {
+		_spec.SetField(mediasource.FieldFileHash, field.TypeString, value)
 	}
 	if _u.mutation.ItemCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -776,6 +793,20 @@ func (_u *MediaSourceUpdateOne) ClearProbedAt() *MediaSourceUpdateOne {
 	return _u
 }
 
+// SetFileHash sets the "file_hash" field.
+func (_u *MediaSourceUpdateOne) SetFileHash(v string) *MediaSourceUpdateOne {
+	_u.mutation.SetFileHash(v)
+	return _u
+}
+
+// SetNillableFileHash sets the "file_hash" field if the given value is not nil.
+func (_u *MediaSourceUpdateOne) SetNillableFileHash(v *string) *MediaSourceUpdateOne {
+	if v != nil {
+		_u.SetFileHash(*v)
+	}
+	return _u
+}
+
 // SetItem sets the "item" edge to the Item entity.
 func (_u *MediaSourceUpdateOne) SetItem(v *Item) *MediaSourceUpdateOne {
 	return _u.SetItemID(v.ID)
@@ -966,6 +997,9 @@ func (_u *MediaSourceUpdateOne) sqlSave(ctx context.Context) (_node *MediaSource
 	}
 	if _u.mutation.ProbedAtCleared() {
 		_spec.ClearField(mediasource.FieldProbedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.FileHash(); ok {
+		_spec.SetField(mediasource.FieldFileHash, field.TypeString, value)
 	}
 	if _u.mutation.ItemCleared() {
 		edge := &sqlgraph.EdgeSpec{

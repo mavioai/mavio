@@ -26314,6 +26314,7 @@ type MediaSourceMutation struct {
 	keyframes       *[]time.Duration
 	appendkeyframes []time.Duration
 	probed_at       *time.Time
+	file_hash       *string
 	clearedFields   map[string]struct{}
 	item            *core.ID
 	cleareditem     bool
@@ -27188,6 +27189,42 @@ func (m *MediaSourceMutation) ResetProbedAt() {
 	delete(m.clearedFields, mediasource.FieldProbedAt)
 }
 
+// SetFileHash sets the "file_hash" field.
+func (m *MediaSourceMutation) SetFileHash(s string) {
+	m.file_hash = &s
+}
+
+// FileHash returns the value of the "file_hash" field in the mutation.
+func (m *MediaSourceMutation) FileHash() (r string, exists bool) {
+	v := m.file_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFileHash returns the old "file_hash" field's value of the MediaSource entity.
+// If the MediaSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaSourceMutation) OldFileHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFileHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFileHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFileHash: %w", err)
+	}
+	return oldValue.FileHash, nil
+}
+
+// ResetFileHash resets all changes to the "file_hash" field.
+func (m *MediaSourceMutation) ResetFileHash() {
+	m.file_hash = nil
+}
+
 // ClearItem clears the "item" edge to the Item entity.
 func (m *MediaSourceMutation) ClearItem() {
 	m.cleareditem = true
@@ -27249,7 +27286,7 @@ func (m *MediaSourceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaSourceMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 16)
 	if m.item != nil {
 		fields = append(fields, mediasource.FieldItemID)
 	}
@@ -27295,6 +27332,9 @@ func (m *MediaSourceMutation) Fields() []string {
 	if m.probed_at != nil {
 		fields = append(fields, mediasource.FieldProbedAt)
 	}
+	if m.file_hash != nil {
+		fields = append(fields, mediasource.FieldFileHash)
+	}
 	return fields
 }
 
@@ -27333,6 +27373,8 @@ func (m *MediaSourceMutation) Field(name string) (ent.Value, bool) {
 		return m.Keyframes()
 	case mediasource.FieldProbedAt:
 		return m.ProbedAt()
+	case mediasource.FieldFileHash:
+		return m.FileHash()
 	}
 	return nil, false
 }
@@ -27372,6 +27414,8 @@ func (m *MediaSourceMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldKeyframes(ctx)
 	case mediasource.FieldProbedAt:
 		return m.OldProbedAt(ctx)
+	case mediasource.FieldFileHash:
+		return m.OldFileHash(ctx)
 	}
 	return nil, fmt.Errorf("unknown MediaSource field %s", name)
 }
@@ -27485,6 +27529,13 @@ func (m *MediaSourceMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetProbedAt(v)
+		return nil
+	case mediasource.FieldFileHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFileHash(v)
 		return nil
 	}
 	return fmt.Errorf("unknown MediaSource field %s", name)
@@ -27669,6 +27720,9 @@ func (m *MediaSourceMutation) ResetField(name string) error {
 		return nil
 	case mediasource.FieldProbedAt:
 		m.ResetProbedAt()
+		return nil
+	case mediasource.FieldFileHash:
+		m.ResetFileHash()
 		return nil
 	}
 	return fmt.Errorf("unknown MediaSource field %s", name)

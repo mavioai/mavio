@@ -606,6 +606,10 @@ func init() {
 	mediasourceDescBitrate := mediasourceFields[11].Descriptor()
 	// mediasource.DefaultBitrate holds the default value on creation for the bitrate field.
 	mediasource.DefaultBitrate = mediasourceDescBitrate.Default.(int64)
+	// mediasourceDescFileHash is the schema descriptor for file_hash field.
+	mediasourceDescFileHash := mediasourceFields[16].Descriptor()
+	// mediasource.DefaultFileHash holds the default value on creation for the file_hash field.
+	mediasource.DefaultFileHash = mediasourceDescFileHash.Default.(string)
 	// mediasourceDescID is the schema descriptor for id field.
 	mediasourceDescID := mediasourceFields[0].Descriptor()
 	// mediasource.DefaultID holds the default value on creation for the id field.

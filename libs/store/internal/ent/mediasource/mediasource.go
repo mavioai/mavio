@@ -45,6 +45,8 @@ const (
 	FieldKeyframes = "keyframes"
 	// FieldProbedAt holds the string denoting the probed_at field in the database.
 	FieldProbedAt = "probed_at"
+	// FieldFileHash holds the string denoting the file_hash field in the database.
+	FieldFileHash = "file_hash"
 	// EdgeItem holds the string denoting the item edge name in mutations.
 	EdgeItem = "item"
 	// Table holds the table name of the mediasource in the database.
@@ -76,6 +78,7 @@ var Columns = []string{
 	FieldChapters,
 	FieldKeyframes,
 	FieldProbedAt,
+	FieldFileHash,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -101,6 +104,8 @@ var (
 	DefaultDuration time.Duration
 	// DefaultBitrate holds the default value on creation for the "bitrate" field.
 	DefaultBitrate int64
+	// DefaultFileHash holds the default value on creation for the "file_hash" field.
+	DefaultFileHash string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() core.ID
 )
@@ -166,6 +171,11 @@ func ByBitrate(opts ...sql.OrderTermOption) OrderOption {
 // ByProbedAt orders the results by the probed_at field.
 func ByProbedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProbedAt, opts...).ToFunc()
+}
+
+// ByFileHash orders the results by the file_hash field.
+func ByFileHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFileHash, opts...).ToFunc()
 }
 
 // ByItemField orders the results by item field.

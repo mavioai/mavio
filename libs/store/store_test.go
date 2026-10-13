@@ -458,6 +458,7 @@ func TestMediaSourcesAndImages(t *testing.T) {
 				},
 				Chapters:  []core.Chapter{{Start: 0, Title: "Opening"}, {Start: 5 * time.Minute, Title: "Arrakis"}},
 				Keyframes: []time.Duration{0, 2 * time.Second, 4 * time.Second},
+				FileHash:  "8e245d9679d31e12",
 			},
 			{Path: "/media/Dune/Dune 1080p.mkv", Name: "1080p", Container: "matroska,webm"},
 		}
