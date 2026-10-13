@@ -31,9 +31,9 @@ func TestFFmpegPins(t *testing.T) {
 	}
 }
 
-// TestRclonePins checks that the container image builds the release of
-// mavioai/rclone mise.toml pins, and that every platform mise.toml pins
-// downloads that release.
+// TestRclonePins checks that the container image verifies mavioai/rclone
+// against the same release and SHA-256 digests mise.toml pins, and that
+// every platform mise.toml pins downloads that release.
 func TestRclonePins(t *testing.T) {
 	dockerfile, mise := pins(t)
 	version := regexp.MustCompile(`ARG RCLONE_VERSION=(\S+)`).FindSubmatch(dockerfile)
@@ -48,6 +48,18 @@ func TestRclonePins(t *testing.T) {
 	for _, u := range urls {
 		if string(u[1]) != string(pinned[1]) || string(u[2]) != string(pinned[1]) {
 			t.Errorf("mise.toml downloads rclone %s, want = %s", u[0], pinned[1])
+		}
+	}
+	for arch, asset := range map[string]string{"amd64": "linux-amd64", "arm64": "linux-arm64"} {
+		digest := regexp.MustCompile(`ARG RCLONE_SHA256_` + arch + `=([0-9a-f]{64})`).FindSubmatch(dockerfile)
+		entry := regexp.MustCompile(`rclone-v[^"]*-` + asset + `\.zip", checksum = "sha256:([0-9a-f]{64})"`).FindSubmatch(mise)
+		switch {
+		case digest == nil:
+			t.Errorf("the Dockerfile pins no rclone digest for %s", arch)
+		case entry == nil:
+			t.Errorf("mise.toml pins no rclone checksum for %s", asset)
+		case string(entry[1]) != string(digest[1]):
+			t.Errorf("rclone %s: the Dockerfile verifies %s, mise.toml pins %s", asset, digest[1], entry[1])
 		}
 	}
 }

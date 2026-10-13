@@ -24,15 +24,18 @@ windows-arm64 = { asset_pattern = "jellyfin-ffmpeg_*_portable_winarm64-clang-gpl
 
 # Mavio's fork of rclone, run as an rcd for libraries on rclone remotes
 # (docs/architecture.md §9.2): the release builds of mavioai/rclone,
-# verified against their SHA-256. apps/server/Dockerfile builds the same
-# tag from source.
+# verified against their SHA-256 (apps/server/Dockerfile pins the same Linux
+# builds).
 [tools."http:rclone"]
 version = "1.75.2-mavio"
 
 [tools."http:rclone".platforms]
-linux-x64 = { url = "https://github.com/mavioai/rclone/releases/download/v1.75.2-mavio/rclone-v1.75.2-mavio-linux-amd64.zip", checksum = "sha256:ba1030d3445d21921020e516ddfc56191b2d728650575a64d7a93a6b0867975e" }
-macos-arm64 = { url = "https://github.com/mavioai/rclone/releases/download/v1.75.2-mavio/rclone-v1.75.2-mavio-osx-arm64.zip", checksum = "sha256:b30d88a870c8405e1a2ca7830d6a79c3db0c14ddb32b88ad71fa5736eca53b40" }
-windows-x64 = { url = "https://github.com/mavioai/rclone/releases/download/v1.75.2-mavio/rclone-v1.75.2-mavio-windows-amd64.zip", checksum = "sha256:083e71ce3d6d36471f28a144c4a77eb02019507ad540005dc4db7c3e0813441b" }
+linux-x64 = { url = "https://github.com/mavioai/rclone/releases/download/v1.75.2-mavio/rclone-v1.75.2-mavio-linux-amd64.zip", checksum = "sha256:d6c5afa87ac5ab4af0df434abef17975826a1feb1726e5dc61dc13a777c0b438" }
+linux-arm64 = { url = "https://github.com/mavioai/rclone/releases/download/v1.75.2-mavio/rclone-v1.75.2-mavio-linux-arm64.zip", checksum = "sha256:5eb883371b8b7f4f41a4ce267fe04aa684c8f6e302716513cc2dd9685144e8c8" }
+macos-x64 = { url = "https://github.com/mavioai/rclone/releases/download/v1.75.2-mavio/rclone-v1.75.2-mavio-osx-amd64.zip", checksum = "sha256:1288b54fb1f32f3ab91ef594707afb68690484227bba0ee3ae49fb0be4bcef07" }
+macos-arm64 = { url = "https://github.com/mavioai/rclone/releases/download/v1.75.2-mavio/rclone-v1.75.2-mavio-osx-arm64.zip", checksum = "sha256:7917f00668ff2ef40f17420bb3d9e948f8d8cdd6094d761fd6c95d564cf80fe1" }
+windows-x64 = { url = "https://github.com/mavioai/rclone/releases/download/v1.75.2-mavio/rclone-v1.75.2-mavio-windows-amd64.zip", checksum = "sha256:4566f83c65b03005a351b0412145dd503e7b8c288a3e6922d497d766a1519ee9" }
+windows-arm64 = { url = "https://github.com/mavioai/rclone/releases/download/v1.75.2-mavio/rclone-v1.75.2-mavio-windows-arm64.zip", checksum = "sha256:69ec270efcabfdabe12467172e7a0920ddaeeb6f699507980c622d3a9ec70a8c" }
 
 
 # Rust code generation of libs/proto (libs/proto/buf.gen.yaml), the release

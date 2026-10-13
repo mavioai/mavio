@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 #
 # The Mavio server with jellyfin-ffmpeg's portable build and Mavio's fork of
-# rclone, the versions mise.toml pins. Build from the repository root, for one or more platforms:
+# rclone, the versions mise.toml pins. Build from the repository root, for one
+# or more platforms:
 #
 #   docker buildx build -f apps/server/Dockerfile --platform linux/amd64,linux/arm64 .
 #
@@ -38,18 +39,25 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 	&& cd ../download-clients && mkdir -p /out/plugins/download-clients && cp manifest.json /out/plugins/download-clients/ \
 	&& CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/plugins/download-clients/plugin .
 
-# Mavio's fork of rclone, the release mise.toml pins, built from source as
-# the release is: the commit its tag names.
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-trixie AS rclone
-ARG TARGETOS TARGETARCH RCLONE_VERSION
-ARG RCLONE_COMMIT=3f116e2d721336a984df3880b7eb509c12c86596
-WORKDIR /src
-RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
-	set -eu; \
-	git init -q . && git fetch -q --depth 1 https://github.com/mavioai/rclone.git "$RCLONE_COMMIT" \
-	&& git checkout -q FETCH_HEAD; \
-	CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath \
-		-ldflags "-s -X github.com/rclone/rclone/fs.Version=v${RCLONE_VERSION}" -o /out/rclone .
+# Mavio's fork of rclone, the release mise.toml pins.
+FROM --platform=$BUILDPLATFORM debian:trixie-slim AS rclone
+ARG TARGETARCH RCLONE_VERSION
+# GitHub's SHA-256 digests of the release's Linux builds.
+ARG RCLONE_SHA256_amd64=d6c5afa87ac5ab4af0df434abef17975826a1feb1726e5dc61dc13a777c0b438
+ARG RCLONE_SHA256_arm64=5eb883371b8b7f4f41a4ce267fe04aa684c8f6e302716513cc2dd9685144e8c8
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl unzip \
+	&& rm -rf /var/lib/apt/lists/*
+RUN set -eu; \
+	case "$TARGETARCH" in \
+		amd64) sum=$RCLONE_SHA256_amd64 ;; \
+		arm64) sum=$RCLONE_SHA256_arm64 ;; \
+		*) echo "no rclone build for $TARGETARCH" >&2; exit 1 ;; \
+	esac; \
+	name=rclone-v${RCLONE_VERSION}-linux-${TARGETARCH}; \
+	curl -fsSLo /tmp/rclone.zip \
+		"https://github.com/mavioai/rclone/releases/download/v${RCLONE_VERSION}/$name.zip"; \
+	echo "$sum  /tmp/rclone.zip" | sha256sum -c -; \
+	unzip -q /tmp/rclone.zip -d /tmp && mkdir -p /out && mv /tmp/$name/rclone /out/rclone
 
 FROM --platform=$BUILDPLATFORM debian:trixie-slim AS ffmpeg
 ARG TARGETARCH JELLYFIN_FFMPEG_VERSION

@@ -20,7 +20,7 @@
 | protoc-gen-buffa、protoc-gen-buffa-packaging、protoc-gen-connect-rust | `libs/proto` 的 Rust 代码生成，取自其发布构建 |
 | java（Temurin）+ gradle | Android 各应用与 `libs/android` |
 | jellyfin-ffmpeg | 媒体管线、测试媒体生成与集成测试（`PATH` 上的 `ffmpeg` / `ffprobe`） |
-| rclone（mavioai/rclone） | rclone 远端上的媒体库及其集成测试（`PATH` 上的 `rclone`），取自 fork 为 Linux x64、macOS arm64 与 Windows x64 发布的构建 |
+| rclone（mavioai/rclone） | rclone 远端上的媒体库及其集成测试（`PATH` 上的 `rclone`），取自 fork 的发布构建 |
 
 ```bash
 mise install            # 安装锁定版本的工具链
@@ -207,7 +207,7 @@ CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** �
 
 其余模块只在仓库内使用，不承诺对外 API 稳定。
 
-服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件，两处锁定不一致时一个测试（`apps/server/internal/buildinfo`）会失败。镜像从 `mise.toml` 锁定的 mavioai/rclone 发布版本所在的提交为两个平台构建 rclone（该发布没有 Linux arm64 构建），放在 `/usr/local/bin/rclone`；同一测试检查两处指向同一发布版本。fork 的发布版本是其标签 `v<rclone 版本>-mavio`；升级时需修改版本、摘要与 Dockerfile 中的提交。镜像还会构建 DLNA、索引器与下载客户端插件，并将它们放在插件种子目录 `/usr/lib/mavio/plugins` 中。
+服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件，两处锁定不一致时一个测试（`apps/server/internal/buildinfo`）会失败。镜像在 `/usr/local/bin/rclone` 内置 `mise.toml` 锁定的 mavioai/rclone 发布版本的 Linux 构建，并按相同的 SHA-256 摘要校验，同一测试比对两处锁定。fork 的发布版本是其 `mavio` 分支上的标签 `v<rclone 版本>-mavio`，该分支在 rclone 发布版本之上只有一个提交；推送标签会运行 fork 的 `mavio release` 工作流，它不启用 cgo，为 Linux、macOS 与 Windows 的 amd64 和 arm64 交叉编译 rclone，并把 zip 与 `SHA256SUMS.txt` 附加到该标签的发布中。升级时需同时修改两个文件中的版本与摘要。镜像还会构建 DLNA、索引器与下载客户端插件，并将它们放在插件种子目录 `/usr/lib/mavio/plugins` 中。
 
 第一方进程插件用其 `dist` 目标打包：`pnpm nx run dlna:dist`（或 `indexers:dist`、`download-clients:dist`）按清单中的版本为服务端的每个平台构建 DLNA（或索引器、下载客户端）插件到 `plugins/<name>/dist/`，每个平台一个目录 zip 包，并生成列出它们及其 SHA-256 摘要的 `catalog.json`；zip 包的 URL 相对于目录。
 
