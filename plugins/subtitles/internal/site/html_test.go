@@ -27,3 +27,13 @@ func TestNodeAll(t *testing.T) {
 		}
 	}
 }
+
+func TestParseEmpty(t *testing.T) {
+	doc, err := Parse(nil, "text/html; charset=utf-8")
+	if err != nil {
+		t.Fatalf("Parse(nil) error = %v, want = nil", err)
+	}
+	if got := doc.All("a"); len(got) != 0 {
+		t.Errorf("All(a) = %d nodes, want = 0", len(got))
+	}
+}

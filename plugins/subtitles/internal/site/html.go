@@ -13,8 +13,12 @@ import (
 type Node struct{ *html.Node }
 
 // Parse parses a page in the charset its Content-Type or content
-// declares, as BeautifulSoup does.
+// declares, as BeautifulSoup does. An empty body is an empty page.
 func Parse(body []byte, contentType string) (Node, error) {
+	if len(bytes.TrimSpace(body)) == 0 {
+		n, err := html.Parse(strings.NewReader(""))
+		return Node{n}, err
+	}
 	r, err := charset.NewReader(bytes.NewReader(body), contentType)
 	if err != nil {
 		return Node{}, err

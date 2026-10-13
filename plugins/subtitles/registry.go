@@ -2,15 +2,23 @@ package main
 
 import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animekalesi"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animesubinfo"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animetosho"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animetoshoxyz"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/bayflix"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/bsplayer"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/gestdown"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/greeksubs"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/greeksubtitles"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/hosszupuska"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/napiprojekt"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/napisy24"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/nekur"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/opensubtitlescom"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/prijevodionline"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/regielive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/soustitreseu"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subsynchro"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subtis"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subtitriid"
@@ -28,15 +36,23 @@ import (
 // definitions returns the providers the plugin implements, by name.
 func definitions() []provider.Definition {
 	return []provider.Definition{
+		animekalesi.Definition(),
+		animesubinfo.Definition(),
 		animetosho.Definition(),
 		animetoshoxyz.Definition(),
 		bayflix.Definition(),
 		bsplayer.Definition(),
 		gestdown.Definition(),
+		greeksubs.Definition(),
+		greeksubtitles.Definition(),
+		hosszupuska.Definition(),
 		napiprojekt.Definition(),
 		napisy24.Definition(),
+		nekur.Definition(),
 		opensubtitlescom.Definition(),
+		prijevodionline.Definition(),
 		regielive.Definition(),
+		soustitreseu.Definition(),
 		subsynchro.Definition(),
 		subtis.Definition(),
 		subtitriid.Definition(),
