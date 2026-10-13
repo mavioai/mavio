@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"path/filepath"
 	"reflect"
 	"slices"
 	"sync"
@@ -61,7 +60,7 @@ func TestLibraries(t *testing.T) {
 		if err := s.Libraries().Create(ctx, &lib); err != nil {
 			t.Fatal(err)
 		}
-		if lib.ID.IsZero() || lib.CreatedAt.IsZero() || lib.Paths[0] != filepath.Clean("/media/movies") {
+		if lib.ID.IsZero() || lib.CreatedAt.IsZero() || lib.Paths[0] != "/media/movies" {
 			t.Errorf("created library = %+v", lib)
 		}
 		got, err := s.Libraries().Get(ctx, lib.ID)
