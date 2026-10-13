@@ -721,12 +721,12 @@ flowchart TD
   - [ ] 无需账号的 JSON API 与其他协议：Gestdown、AnimeTosho（两者）、Tsukihime、Subtis、RegieLive、Bayflix、Vladoonmooo、Subsynchro、Wizdom、BSPlayer、NapiProjekt、Napisy24；用于动漫 ID 的 AniDB 与 anime lists
   - [ ] 无需账号的抓取站点：AnimeKalesi、AnimeSubInfo、GreekSubs、GreekSubtitles、Hosszupuska、Nekur、PrijevodiOnline、SousTitres.eu、SubClub、Subf2m、Subs4Free、SubsCenter、SubsSabbz、SubsUnacs、SubtitleCat、Subtitrari Noi、Subtitriid、SubtitulamosTV、SuperSubtitles、Titrari、TVSubtitles、YavkaNet、YIFY Subtitles
   - [ ] 需要登录、cookie 或验证码的站点：Addic7ed、AvistaZ、CinemaZ、Karagarga、LegendasDivx、Pipocas、Subs4Series、Titulky、TurkceAltyazi.org、XSubs、Zimuku
-- [ ] `SubtitleService` 与作业：缺少的字幕、缺字幕搜索、升级、入库与扫描时的搜索、手动搜索、下载、上传、删除、历史、阻止列表；`subtitle.downloaded` 活动
+- [ ] `SubtitleService` 与作业：缺少的字幕、缺字幕搜索、升级、入库与扫描时的搜索、手动搜索、下载、上传、删除、历史、阻止列表；`subtitle.downloaded` 活动；下载后按设置的分数阈值同步时间轴，以及手动同步，本地和网络存储上按音频，所有存储类别上按另一个字幕文件
 - [ ] 每个文件的 OpenSubtitles 哈希保存到文件变化为止
 - [ ] 内嵌字幕：按设置计为已有；本地和网络存储上手动从播放缓存提取为外挂字幕，云存储上从不提取
 - [ ] `libs/subtitle` 中的 subzero 修正（common、标签、去除听障内容、带词典的 OCR 修正、颜色、emoji、RTL、大写、偏移、帧率、两点拟合）与 UTF-8；按文本识别听障字幕；识别没有语言的外挂字幕的语言，区分中文简繁
 - [x] Silero VAD（`libs/media/vad`）：以 Go 实现 16 kHz 模型的推理，其权重由 `internal/cmd/silerogen` 从 Silero 的 ONNX 文件读出并嵌入，在生成的噪声和 Silero 的测试录音（`speech.wav` 样本）上，概率与 onnxruntime 的结果相差不超过 1e-5；一分钟音频在 M1 Max 的十个核心上耗时 0.16 s，单核 0.5 s
-- [ ] 时间轴同步（`libs/media/subsync`，基于 Silero 语音检测的 ffsubsync 算法）：本地和网络存储上按音频，所有存储类别上按另一个字幕文件；下载后按设置的分数阈值同步，以及手动同步
+- [x] 时间轴同步（`libs/media/subsync`，基于 Silero 语音检测的 ffsubsync 算法）：由字幕条目和由 ffmpeg 读出的音频得到语音信号，以 FFT 互相关对齐，并尝试帧率比、黄金分割搜索与推断的比例，沿用 ffsubsync 的质量门槛；在生成的字幕对上，偏移量、比例与分数与 ffsubsync 的结果相同（`testdata/golden.py`）；两小时的字幕对齐耗时 0.25 s
 - [ ] 端到端测试（`apps/server/internal/server/subtitles_test.go`）
 - [ ] 后续：翻译（Google、Gemini、Lingarr）与 Whisper 转写，作为各自的提供者类型
 

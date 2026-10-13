@@ -1,0 +1,1280 @@
+1
+00:00:08,372 --> 00:00:12,553
+Line 1 of the dialogue.
+
+2
+00:00:15,826 --> 00:00:18,589
+Line 2 of the dialogue.
+
+3
+00:00:19,593 --> 00:00:23,537
+Line 3 of the dialogue.
+
+4
+00:00:23,765 --> 00:00:27,898
+Line 4 of the dialogue.
+
+5
+00:00:29,040 --> 00:00:29,816
+Line 5 of the dialogue.
+
+6
+00:00:30,908 --> 00:00:32,596
+Line 6 of the dialogue.
+
+7
+00:00:40,519 --> 00:00:41,409
+Line 7 of the dialogue.
+
+8
+00:00:42,276 --> 00:00:46,826
+Line 8 of the dialogue.
+
+9
+00:00:47,288 --> 00:00:49,755
+Line 9 of the dialogue.
+
+10
+00:00:50,224 --> 00:00:52,755
+Line 10 of the dialogue.
+
+11
+00:00:53,237 --> 00:00:54,934
+Line 11 of the dialogue.
+
+12
+00:00:55,699 --> 00:00:57,633
+Line 12 of the dialogue.
+
+13
+00:00:58,869 --> 00:01:01,878
+Line 13 of the dialogue.
+
+14
+00:01:02,302 --> 00:01:07,067
+Line 14 of the dialogue.
+
+15
+00:01:09,375 --> 00:01:11,482
+Line 15 of the dialogue.
+
+16
+00:01:18,036 --> 00:01:22,575
+Line 16 of the dialogue.
+
+17
+00:01:23,802 --> 00:01:27,269
+Line 17 of the dialogue.
+
+18
+00:01:28,194 --> 00:01:32,516
+Line 18 of the dialogue.
+
+19
+00:01:37,588 --> 00:01:40,728
+Line 19 of the dialogue.
+
+20
+00:01:41,223 --> 00:01:45,202
+Line 20 of the dialogue.
+
+21
+00:01:45,609 --> 00:01:48,587
+Line 21 of the dialogue.
+
+22
+00:01:54,877 --> 00:01:57,154
+Line 22 of the dialogue.
+
+23
+00:01:57,979 --> 00:02:01,882
+Line 23 of the dialogue.
+
+24
+00:02:02,564 --> 00:02:05,304
+Line 24 of the dialogue.
+
+25
+00:02:05,550 --> 00:02:09,150
+Line 25 of the dialogue.
+
+26
+00:02:14,856 --> 00:02:17,208
+Line 26 of the dialogue.
+
+27
+00:02:18,026 --> 00:02:22,749
+Line 27 of the dialogue.
+
+28
+00:02:28,069 --> 00:02:32,302
+Line 28 of the dialogue.
+
+29
+00:02:33,134 --> 00:02:37,738
+Line 29 of the dialogue.
+
+30
+00:02:38,502 --> 00:02:40,354
+Line 30 of the dialogue.
+
+31
+00:02:41,739 --> 00:02:42,529
+Line 31 of the dialogue.
+
+32
+00:02:49,869 --> 00:02:54,206
+Line 32 of the dialogue.
+
+33
+00:03:01,464 --> 00:03:04,321
+Line 33 of the dialogue.
+
+34
+00:03:05,044 --> 00:03:06,037
+Line 34 of the dialogue.
+
+35
+00:03:11,576 --> 00:03:13,148
+Line 35 of the dialogue.
+
+36
+00:03:13,944 --> 00:03:16,149
+Line 36 of the dialogue.
+
+37
+00:03:17,012 --> 00:03:20,290
+Line 37 of the dialogue.
+
+38
+00:03:21,053 --> 00:03:21,933
+Line 38 of the dialogue.
+
+39
+00:03:22,346 --> 00:03:25,468
+Line 39 of the dialogue.
+
+40
+00:03:32,649 --> 00:03:36,627
+Line 40 of the dialogue.
+
+41
+00:03:39,902 --> 00:03:44,060
+Line 41 of the dialogue.
+
+42
+00:03:44,355 --> 00:03:45,190
+Line 42 of the dialogue.
+
+43
+00:03:46,323 --> 00:03:48,096
+Line 43 of the dialogue.
+
+44
+00:03:49,067 --> 00:03:51,221
+Line 44 of the dialogue.
+
+45
+00:03:51,612 --> 00:03:54,504
+Line 45 of the dialogue.
+
+46
+00:03:55,036 --> 00:03:58,669
+Line 46 of the dialogue.
+
+47
+00:03:59,262 --> 00:04:01,938
+Line 47 of the dialogue.
+
+48
+00:04:02,612 --> 00:04:05,074
+Line 48 of the dialogue.
+
+49
+00:04:05,402 --> 00:04:09,794
+Line 49 of the dialogue.
+
+50
+00:04:10,246 --> 00:04:13,453
+Line 50 of the dialogue.
+
+51
+00:04:15,041 --> 00:04:15,880
+Line 51 of the dialogue.
+
+52
+00:04:16,968 --> 00:04:18,381
+Line 52 of the dialogue.
+
+53
+00:04:24,697 --> 00:04:27,659
+Line 53 of the dialogue.
+
+54
+00:04:29,067 --> 00:04:33,048
+Line 54 of the dialogue.
+
+55
+00:04:33,518 --> 00:04:36,897
+Line 55 of the dialogue.
+
+56
+00:04:37,807 --> 00:04:39,868
+Line 56 of the dialogue.
+
+57
+00:04:40,133 --> 00:04:42,103
+Line 57 of the dialogue.
+
+58
+00:04:49,839 --> 00:04:51,841
+Line 58 of the dialogue.
+
+59
+00:04:55,512 --> 00:05:00,062
+Line 59 of the dialogue.
+
+60
+00:05:04,494 --> 00:05:06,278
+Line 60 of the dialogue.
+
+61
+00:05:07,565 --> 00:05:08,485
+Line 61 of the dialogue.
+
+62
+00:05:16,845 --> 00:05:19,909
+Line 62 of the dialogue.
+
+63
+00:05:21,183 --> 00:05:25,872
+Line 63 of the dialogue.
+
+64
+00:05:30,971 --> 00:05:33,261
+Line 64 of the dialogue.
+
+65
+00:05:33,709 --> 00:05:37,192
+Line 65 of the dialogue.
+
+66
+00:05:37,626 --> 00:05:38,813
+Line 66 of the dialogue.
+
+67
+00:05:39,374 --> 00:05:42,155
+Line 67 of the dialogue.
+
+68
+00:05:43,433 --> 00:05:47,824
+Line 68 of the dialogue.
+
+69
+00:05:48,267 --> 00:05:50,354
+Line 69 of the dialogue.
+
+70
+00:05:57,422 --> 00:05:59,555
+Line 70 of the dialogue.
+
+71
+00:06:00,588 --> 00:06:04,730
+Line 71 of the dialogue.
+
+72
+00:06:08,641 --> 00:06:12,963
+Line 72 of the dialogue.
+
+73
+00:06:13,759 --> 00:06:18,496
+Line 73 of the dialogue.
+
+74
+00:06:19,592 --> 00:06:20,700
+Line 74 of the dialogue.
+
+75
+00:06:22,028 --> 00:06:23,653
+Line 75 of the dialogue.
+
+76
+00:06:29,409 --> 00:06:33,564
+Line 76 of the dialogue.
+
+77
+00:06:34,180 --> 00:06:36,120
+Line 77 of the dialogue.
+
+78
+00:06:41,903 --> 00:06:46,514
+Line 78 of the dialogue.
+
+79
+00:06:48,926 --> 00:06:51,914
+Line 79 of the dialogue.
+
+80
+00:06:52,154 --> 00:06:53,216
+Line 80 of the dialogue.
+
+81
+00:07:00,324 --> 00:07:04,428
+Line 81 of the dialogue.
+
+82
+00:07:05,387 --> 00:07:09,304
+Line 82 of the dialogue.
+
+83
+00:07:10,207 --> 00:07:11,875
+Line 83 of the dialogue.
+
+84
+00:07:12,400 --> 00:07:16,755
+Line 84 of the dialogue.
+
+85
+00:07:18,100 --> 00:07:20,711
+Line 85 of the dialogue.
+
+86
+00:07:21,884 --> 00:07:25,986
+Line 86 of the dialogue.
+
+87
+00:07:27,013 --> 00:07:28,150
+Line 87 of the dialogue.
+
+88
+00:07:29,445 --> 00:07:30,373
+Line 88 of the dialogue.
+
+89
+00:07:31,797 --> 00:07:34,260
+Line 89 of the dialogue.
+
+90
+00:07:34,661 --> 00:07:36,401
+Line 90 of the dialogue.
+
+91
+00:07:38,579 --> 00:07:43,014
+Line 91 of the dialogue.
+
+92
+00:07:44,416 --> 00:07:48,846
+Line 92 of the dialogue.
+
+93
+00:07:49,353 --> 00:07:52,042
+Line 93 of the dialogue.
+
+94
+00:07:53,047 --> 00:07:53,973
+Line 94 of the dialogue.
+
+95
+00:07:55,390 --> 00:07:57,348
+Line 95 of the dialogue.
+
+96
+00:07:58,101 --> 00:08:00,130
+Line 96 of the dialogue.
+
+97
+00:08:01,460 --> 00:08:06,134
+Line 97 of the dialogue.
+
+98
+00:08:08,374 --> 00:08:10,008
+Line 98 of the dialogue.
+
+99
+00:08:11,421 --> 00:08:14,375
+Line 99 of the dialogue.
+
+100
+00:08:15,392 --> 00:08:17,203
+Line 100 of the dialogue.
+
+101
+00:08:17,778 --> 00:08:19,538
+Line 101 of the dialogue.
+
+102
+00:08:20,079 --> 00:08:24,808
+Line 102 of the dialogue.
+
+103
+00:08:25,812 --> 00:08:29,171
+Line 103 of the dialogue.
+
+104
+00:08:33,419 --> 00:08:35,422
+Line 104 of the dialogue.
+
+105
+00:08:36,008 --> 00:08:40,188
+Line 105 of the dialogue.
+
+106
+00:08:43,804 --> 00:08:45,918
+Line 106 of the dialogue.
+
+107
+00:08:46,832 --> 00:08:50,000
+Line 107 of the dialogue.
+
+108
+00:08:50,217 --> 00:08:51,966
+Line 108 of the dialogue.
+
+109
+00:08:52,845 --> 00:08:53,898
+Line 109 of the dialogue.
+
+110
+00:08:54,882 --> 00:08:56,821
+Line 110 of the dialogue.
+
+111
+00:09:01,807 --> 00:09:06,049
+Line 111 of the dialogue.
+
+112
+00:09:06,866 --> 00:09:10,835
+Line 112 of the dialogue.
+
+113
+00:09:12,211 --> 00:09:13,676
+Line 113 of the dialogue.
+
+114
+00:09:22,198 --> 00:09:26,275
+Line 114 of the dialogue.
+
+115
+00:09:26,600 --> 00:09:29,439
+Line 115 of the dialogue.
+
+116
+00:09:32,988 --> 00:09:37,356
+Line 116 of the dialogue.
+
+117
+00:09:38,683 --> 00:09:39,578
+Line 117 of the dialogue.
+
+118
+00:09:40,896 --> 00:09:44,901
+Line 118 of the dialogue.
+
+119
+00:09:52,386 --> 00:09:56,159
+Line 119 of the dialogue.
+
+120
+00:09:56,573 --> 00:09:59,083
+Line 120 of the dialogue.
+
+121
+00:10:00,166 --> 00:10:03,623
+Line 121 of the dialogue.
+
+122
+00:10:03,895 --> 00:10:08,543
+Line 122 of the dialogue.
+
+123
+00:10:13,932 --> 00:10:16,880
+Line 123 of the dialogue.
+
+124
+00:10:21,579 --> 00:10:23,940
+Line 124 of the dialogue.
+
+125
+00:10:24,454 --> 00:10:25,319
+Line 125 of the dialogue.
+
+126
+00:10:26,031 --> 00:10:29,096
+Line 126 of the dialogue.
+
+127
+00:10:29,731 --> 00:10:31,055
+Line 127 of the dialogue.
+
+128
+00:10:31,570 --> 00:10:35,676
+Line 128 of the dialogue.
+
+129
+00:10:36,368 --> 00:10:39,602
+Line 129 of the dialogue.
+
+130
+00:10:39,803 --> 00:10:42,700
+Line 130 of the dialogue.
+
+131
+00:10:43,701 --> 00:10:46,233
+Line 131 of the dialogue.
+
+132
+00:10:47,337 --> 00:10:49,064
+Line 132 of the dialogue.
+
+133
+00:10:49,853 --> 00:10:51,527
+Line 133 of the dialogue.
+
+134
+00:10:52,418 --> 00:10:56,838
+Line 134 of the dialogue.
+
+135
+00:11:00,256 --> 00:11:03,627
+Line 135 of the dialogue.
+
+136
+00:11:03,908 --> 00:11:06,736
+Line 136 of the dialogue.
+
+137
+00:11:09,322 --> 00:11:13,175
+Line 137 of the dialogue.
+
+138
+00:11:16,856 --> 00:11:20,413
+Line 138 of the dialogue.
+
+139
+00:11:24,524 --> 00:11:28,116
+Line 139 of the dialogue.
+
+140
+00:11:33,832 --> 00:11:38,048
+Line 140 of the dialogue.
+
+141
+00:11:46,392 --> 00:11:49,460
+Line 141 of the dialogue.
+
+142
+00:11:49,964 --> 00:11:51,608
+Line 142 of the dialogue.
+
+143
+00:11:52,745 --> 00:11:53,722
+Line 143 of the dialogue.
+
+144
+00:11:54,808 --> 00:11:56,977
+Line 144 of the dialogue.
+
+145
+00:11:57,374 --> 00:12:01,081
+Line 145 of the dialogue.
+
+146
+00:12:02,496 --> 00:12:06,518
+Line 146 of the dialogue.
+
+147
+00:12:07,043 --> 00:12:11,488
+Line 147 of the dialogue.
+
+148
+00:12:13,927 --> 00:12:17,819
+Line 148 of the dialogue.
+
+149
+00:12:24,003 --> 00:12:27,591
+Line 149 of the dialogue.
+
+150
+00:12:28,935 --> 00:12:33,615
+Line 150 of the dialogue.
+
+151
+00:12:34,807 --> 00:12:37,318
+Line 151 of the dialogue.
+
+152
+00:12:37,916 --> 00:12:39,192
+Line 152 of the dialogue.
+
+153
+00:12:47,531 --> 00:12:48,779
+Line 153 of the dialogue.
+
+154
+00:12:49,479 --> 00:12:50,722
+Line 154 of the dialogue.
+
+155
+00:12:51,224 --> 00:12:55,010
+Line 155 of the dialogue.
+
+156
+00:12:55,439 --> 00:12:57,973
+Line 156 of the dialogue.
+
+157
+00:12:58,947 --> 00:13:02,154
+Line 157 of the dialogue.
+
+158
+00:13:05,079 --> 00:13:06,993
+Line 158 of the dialogue.
+
+159
+00:13:07,525 --> 00:13:10,652
+Line 159 of the dialogue.
+
+160
+00:13:11,696 --> 00:13:15,650
+Line 160 of the dialogue.
+
+161
+00:13:24,091 --> 00:13:27,055
+Line 161 of the dialogue.
+
+162
+00:13:28,314 --> 00:13:32,179
+Line 162 of the dialogue.
+
+163
+00:13:32,849 --> 00:13:34,760
+Line 163 of the dialogue.
+
+164
+00:13:35,959 --> 00:13:37,201
+Line 164 of the dialogue.
+
+165
+00:13:42,562 --> 00:13:47,216
+Line 165 of the dialogue.
+
+166
+00:13:55,657 --> 00:13:56,974
+Line 166 of the dialogue.
+
+167
+00:13:57,880 --> 00:13:59,901
+Line 167 of the dialogue.
+
+168
+00:14:00,538 --> 00:14:03,433
+Line 168 of the dialogue.
+
+169
+00:14:04,177 --> 00:14:06,755
+Line 169 of the dialogue.
+
+170
+00:14:07,444 --> 00:14:11,366
+Line 170 of the dialogue.
+
+171
+00:14:12,171 --> 00:14:15,547
+Line 171 of the dialogue.
+
+172
+00:14:15,993 --> 00:14:16,776
+Line 172 of the dialogue.
+
+173
+00:14:17,714 --> 00:14:22,032
+Line 173 of the dialogue.
+
+174
+00:14:27,146 --> 00:14:31,889
+Line 174 of the dialogue.
+
+175
+00:14:33,121 --> 00:14:35,536
+Line 175 of the dialogue.
+
+176
+00:14:44,078 --> 00:14:46,075
+Line 176 of the dialogue.
+
+177
+00:14:47,040 --> 00:14:49,946
+Line 177 of the dialogue.
+
+178
+00:14:50,142 --> 00:14:52,477
+Line 178 of the dialogue.
+
+179
+00:14:53,174 --> 00:14:57,410
+Line 179 of the dialogue.
+
+180
+00:14:58,517 --> 00:15:02,901
+Line 180 of the dialogue.
+
+181
+00:15:07,883 --> 00:15:11,655
+Line 181 of the dialogue.
+
+182
+00:15:12,655 --> 00:15:15,959
+Line 182 of the dialogue.
+
+183
+00:15:16,935 --> 00:15:20,255
+Line 183 of the dialogue.
+
+184
+00:15:27,322 --> 00:15:31,498
+Line 184 of the dialogue.
+
+185
+00:15:38,801 --> 00:15:42,007
+Line 185 of the dialogue.
+
+186
+00:15:42,528 --> 00:15:46,148
+Line 186 of the dialogue.
+
+187
+00:15:51,501 --> 00:15:52,881
+Line 187 of the dialogue.
+
+188
+00:15:57,804 --> 00:16:00,453
+Line 188 of the dialogue.
+
+189
+00:16:01,281 --> 00:16:05,048
+Line 189 of the dialogue.
+
+190
+00:16:05,683 --> 00:16:09,096
+Line 190 of the dialogue.
+
+191
+00:16:09,920 --> 00:16:14,498
+Line 191 of the dialogue.
+
+192
+00:16:15,191 --> 00:16:18,733
+Line 192 of the dialogue.
+
+193
+00:16:19,185 --> 00:16:20,789
+Line 193 of the dialogue.
+
+194
+00:16:24,163 --> 00:16:25,232
+Line 194 of the dialogue.
+
+195
+00:16:30,434 --> 00:16:32,684
+Line 195 of the dialogue.
+
+196
+00:16:33,794 --> 00:16:35,241
+Line 196 of the dialogue.
+
+197
+00:16:36,322 --> 00:16:40,372
+Line 197 of the dialogue.
+
+198
+00:16:41,324 --> 00:16:43,026
+Line 198 of the dialogue.
+
+199
+00:16:43,433 --> 00:16:47,381
+Line 199 of the dialogue.
+
+200
+00:16:51,191 --> 00:16:52,853
+Line 200 of the dialogue.
+
+201
+00:16:59,375 --> 00:17:03,541
+Line 201 of the dialogue.
+
+202
+00:17:04,854 --> 00:17:08,129
+Line 202 of the dialogue.
+
+203
+00:17:08,859 --> 00:17:12,694
+Line 203 of the dialogue.
+
+204
+00:17:15,498 --> 00:17:18,786
+Line 204 of the dialogue.
+
+205
+00:17:20,191 --> 00:17:22,745
+Line 205 of the dialogue.
+
+206
+00:17:29,422 --> 00:17:32,631
+Line 206 of the dialogue.
+
+207
+00:17:33,480 --> 00:17:34,805
+Line 207 of the dialogue.
+
+208
+00:17:35,889 --> 00:17:38,111
+Line 208 of the dialogue.
+
+209
+00:17:41,279 --> 00:17:44,939
+Line 209 of the dialogue.
+
+210
+00:17:48,575 --> 00:17:49,771
+Line 210 of the dialogue.
+
+211
+00:17:50,577 --> 00:17:51,747
+Line 211 of the dialogue.
+
+212
+00:17:52,007 --> 00:17:55,181
+Line 212 of the dialogue.
+
+213
+00:17:58,178 --> 00:17:59,085
+Line 213 of the dialogue.
+
+214
+00:18:06,385 --> 00:18:11,035
+Line 214 of the dialogue.
+
+215
+00:18:11,654 --> 00:18:15,796
+Line 215 of the dialogue.
+
+216
+00:18:16,852 --> 00:18:18,003
+Line 216 of the dialogue.
+
+217
+00:18:18,811 --> 00:18:21,101
+Line 217 of the dialogue.
+
+218
+00:18:21,582 --> 00:18:25,652
+Line 218 of the dialogue.
+
+219
+00:18:26,567 --> 00:18:28,188
+Line 219 of the dialogue.
+
+220
+00:18:32,001 --> 00:18:35,159
+Line 220 of the dialogue.
+
+221
+00:18:43,750 --> 00:18:44,704
+Line 221 of the dialogue.
+
+222
+00:18:52,311 --> 00:18:54,365
+Line 222 of the dialogue.
+
+223
+00:18:55,280 --> 00:18:59,749
+Line 223 of the dialogue.
+
+224
+00:19:01,038 --> 00:19:04,860
+Line 224 of the dialogue.
+
+225
+00:19:06,191 --> 00:19:07,020
+Line 225 of the dialogue.
+
+226
+00:19:08,040 --> 00:19:09,038
+Line 226 of the dialogue.
+
+227
+00:19:09,392 --> 00:19:12,023
+Line 227 of the dialogue.
+
+228
+00:19:19,979 --> 00:19:20,889
+Line 228 of the dialogue.
+
+229
+00:19:22,129 --> 00:19:23,069
+Line 229 of the dialogue.
+
+230
+00:19:23,407 --> 00:19:24,541
+Line 230 of the dialogue.
+
+231
+00:19:25,528 --> 00:19:29,294
+Line 231 of the dialogue.
+
+232
+00:19:30,540 --> 00:19:33,978
+Line 232 of the dialogue.
+
+233
+00:19:34,957 --> 00:19:39,629
+Line 233 of the dialogue.
+
+234
+00:19:40,124 --> 00:19:41,134
+Line 234 of the dialogue.
+
+235
+00:19:46,820 --> 00:19:48,995
+Line 235 of the dialogue.
+
+236
+00:19:49,886 --> 00:19:52,756
+Line 236 of the dialogue.
+
+237
+00:19:53,388 --> 00:19:55,818
+Line 237 of the dialogue.
+
+238
+00:19:57,107 --> 00:19:59,582
+Line 238 of the dialogue.
+
+239
+00:20:00,664 --> 00:20:04,425
+Line 239 of the dialogue.
+
+240
+00:20:11,274 --> 00:20:13,054
+Line 240 of the dialogue.
+
+241
+00:20:15,579 --> 00:20:20,047
+Line 241 of the dialogue.
+
+242
+00:20:27,615 --> 00:20:28,595
+Line 242 of the dialogue.
+
+243
+00:20:29,800 --> 00:20:32,457
+Line 243 of the dialogue.
+
+244
+00:20:33,877 --> 00:20:34,806
+Line 244 of the dialogue.
+
+245
+00:20:35,550 --> 00:20:36,834
+Line 245 of the dialogue.
+
+246
+00:20:37,908 --> 00:20:42,229
+Line 246 of the dialogue.
+
+247
+00:20:43,075 --> 00:20:44,206
+Line 247 of the dialogue.
+
+248
+00:20:46,262 --> 00:20:47,167
+Line 248 of the dialogue.
+
+249
+00:20:48,272 --> 00:20:50,301
+Line 249 of the dialogue.
+
+250
+00:20:51,483 --> 00:20:55,500
+Line 250 of the dialogue.
+
+251
+00:20:59,124 --> 00:21:01,602
+Line 251 of the dialogue.
+
+252
+00:21:02,489 --> 00:21:04,586
+Line 252 of the dialogue.
+
+253
+00:21:05,754 --> 00:21:10,374
+Line 253 of the dialogue.
+
+254
+00:21:10,696 --> 00:21:14,092
+Line 254 of the dialogue.
+
+255
+00:21:15,515 --> 00:21:19,180
+Line 255 of the dialogue.
+
+256
+00:21:25,663 --> 00:21:28,588
+Line 256 of the dialogue.
+
+257
+00:21:36,008 --> 00:21:37,949
+Line 257 of the dialogue.
+
+258
+00:21:38,602 --> 00:21:41,468
+Line 258 of the dialogue.
+
+259
+00:21:42,091 --> 00:21:45,174
+Line 259 of the dialogue.
+
+260
+00:21:46,381 --> 00:21:49,771
+Line 260 of the dialogue.
+
+261
+00:21:50,335 --> 00:21:52,523
+Line 261 of the dialogue.
+
+262
+00:21:53,648 --> 00:21:56,433
+Line 262 of the dialogue.
+
+263
+00:21:56,810 --> 00:22:01,261
+Line 263 of the dialogue.
+
+264
+00:22:01,861 --> 00:22:02,906
+Line 264 of the dialogue.
+
+265
+00:22:07,794 --> 00:22:12,239
+Line 265 of the dialogue.
+
+266
+00:22:20,653 --> 00:22:24,705
+Line 266 of the dialogue.
+
+267
+00:22:32,778 --> 00:22:36,773
+Line 267 of the dialogue.
+
+268
+00:22:37,617 --> 00:22:40,703
+Line 268 of the dialogue.
+
+269
+00:22:47,780 --> 00:22:51,379
+Line 269 of the dialogue.
+
+270
+00:22:55,418 --> 00:22:59,981
+Line 270 of the dialogue.
+
+271
+00:23:00,675 --> 00:23:03,313
+Line 271 of the dialogue.
+
+272
+00:23:08,579 --> 00:23:10,023
+Line 272 of the dialogue.
+
+273
+00:23:11,071 --> 00:23:14,105
+Line 273 of the dialogue.
+
+274
+00:23:16,872 --> 00:23:19,295
+Line 274 of the dialogue.
+
+275
+00:23:21,094 --> 00:23:22,261
+Line 275 of the dialogue.
+
+276
+00:23:22,784 --> 00:23:23,982
+Line 276 of the dialogue.
+
+277
+00:23:24,962 --> 00:23:27,849
+Line 277 of the dialogue.
+
+278
+00:23:28,132 --> 00:23:32,325
+Line 278 of the dialogue.
+
+279
+00:23:32,733 --> 00:23:36,972
+Line 279 of the dialogue.
+
+280
+00:23:37,623 --> 00:23:41,804
+Line 280 of the dialogue.
+
+281
+00:23:45,284 --> 00:23:49,641
+Line 281 of the dialogue.
+
+282
+00:23:50,912 --> 00:23:55,275
+Line 282 of the dialogue.
+
+283
+00:23:56,309 --> 00:23:59,270
+Line 283 of the dialogue.
+
+284
+00:24:06,449 --> 00:24:10,140
+Line 284 of the dialogue.
+
+285
+00:24:18,758 --> 00:24:20,559
+Line 285 of the dialogue.
+
+286
+00:24:21,682 --> 00:24:25,552
+Line 286 of the dialogue.
+
+287
+00:24:26,351 --> 00:24:28,744
+Line 287 of the dialogue.
+
+288
+00:24:35,910 --> 00:24:39,032
+Line 288 of the dialogue.
+
+289
+00:24:40,285 --> 00:24:42,899
+Line 289 of the dialogue.
+
+290
+00:24:43,464 --> 00:24:47,016
+Line 290 of the dialogue.
+
+291
+00:24:47,357 --> 00:24:49,344
+Line 291 of the dialogue.
+
+292
+00:24:56,154 --> 00:25:00,832
+Line 292 of the dialogue.
+
+293
+00:25:01,737 --> 00:25:04,725
+Line 293 of the dialogue.
+
+294
+00:25:05,592 --> 00:25:09,657
+Line 294 of the dialogue.
+
+295
+00:25:14,032 --> 00:25:17,337
+Line 295 of the dialogue.
+
+296
+00:25:17,905 --> 00:25:20,712
+Line 296 of the dialogue.
+
+297
+00:25:21,589 --> 00:25:26,290
+Line 297 of the dialogue.
+
+298
+00:25:27,276 --> 00:25:32,049
+Line 298 of the dialogue.
+
+299
+00:25:37,558 --> 00:25:39,809
+Line 299 of the dialogue.
+
+300
+00:25:41,168 --> 00:25:45,542
+Line 300 of the dialogue.
+
+301
+00:25:46,854 --> 00:25:51,348
+Line 301 of the dialogue.
+
+302
+00:25:55,544 --> 00:25:58,182
+Line 302 of the dialogue.
+
+303
+00:26:02,301 --> 00:26:06,087
+Line 303 of the dialogue.
+
+304
+00:26:06,698 --> 00:26:09,302
+Line 304 of the dialogue.
+
+305
+00:26:09,936 --> 00:26:12,376
+Line 305 of the dialogue.
+
+306
+00:26:12,782 --> 00:26:14,598
+Line 306 of the dialogue.
+
+307
+00:26:20,277 --> 00:26:22,201
+Line 307 of the dialogue.
+
+308
+00:26:25,495 --> 00:26:28,331
+Line 308 of the dialogue.
+
+309
+00:26:34,742 --> 00:26:37,256
+Line 309 of the dialogue.
+
+310
+00:26:42,188 --> 00:26:45,838
+Line 310 of the dialogue.
+
+311
+00:26:47,241 --> 00:26:50,893
+Line 311 of the dialogue.
+
+312
+00:26:51,246 --> 00:26:55,906
+Line 312 of the dialogue.
+
+313
+00:26:56,131 --> 00:26:57,918
+Line 313 of the dialogue.
+
+314
+00:26:59,297 --> 00:27:01,672
+Line 314 of the dialogue.
+
+315
+00:27:09,112 --> 00:27:10,238
+Line 315 of the dialogue.
+
+316
+00:27:11,671 --> 00:27:14,652
+Line 316 of the dialogue.
+
+317
+00:27:15,276 --> 00:27:19,854
+Line 317 of the dialogue.
+
+318
+00:27:22,035 --> 00:27:25,029
+Line 318 of the dialogue.
+
+319
+00:27:26,058 --> 00:27:27,303
+Line 319 of the dialogue.
+
+320
+00:27:27,843 --> 00:27:30,542
+Line 320 of the dialogue.
+

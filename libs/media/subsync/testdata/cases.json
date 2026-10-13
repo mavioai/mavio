@@ -1,0 +1,138 @@
+[
+ {
+  "name": "shift_forward",
+  "args": [
+   "--max-offset-seconds",
+   "60",
+   "--output-encoding",
+   "same",
+   "--no-fix-framerate",
+   "--gss"
+  ],
+  "success": true,
+  "offset": 3.21,
+  "scale": 1.0,
+  "score": 171528.00000000006
+ },
+ {
+  "name": "shift_backward",
+  "args": [
+   "--max-offset-seconds",
+   "60",
+   "--output-encoding",
+   "same",
+   "--no-fix-framerate",
+   "--gss"
+  ],
+  "success": true,
+  "offset": -7.5,
+  "scale": 1.0,
+  "score": 172001.00000000006
+ },
+ {
+  "name": "jitter",
+  "args": [
+   "--max-offset-seconds",
+   "60",
+   "--output-encoding",
+   "same",
+   "--no-fix-framerate",
+   "--gss"
+  ],
+  "success": true,
+  "offset": -12.34,
+  "scale": 1.0,
+  "score": 137936.00000000006
+ },
+ {
+  "name": "metadata",
+  "args": [
+   "--max-offset-seconds",
+   "60",
+   "--output-encoding",
+   "same",
+   "--no-fix-framerate",
+   "--gss"
+  ],
+  "success": true,
+  "offset": -4.0,
+  "scale": 1.0,
+  "score": 172001.00000000006
+ },
+ {
+  "name": "beyond_max_offset",
+  "args": [
+   "--max-offset-seconds",
+   "60",
+   "--output-encoding",
+   "same",
+   "--no-fix-framerate",
+   "--gss"
+  ],
+  "success": true,
+  "offset": 33.97,
+  "scale": 1.0510908131069452,
+  "score": 13364.502216330182
+ },
+ {
+  "name": "framerate_pal",
+  "args": [
+   "--max-offset-seconds",
+   "60",
+   "--output-encoding",
+   "same",
+   "--skip-sync-on-low-quality",
+   "--min-score",
+   "0.0",
+   "--quality-max-offset-seconds",
+   "30",
+   "--max-framerate-deviation",
+   "0.1"
+  ],
+  "success": true,
+  "offset": -1.04,
+  "scale": 1.042705948263263,
+  "score": 163955.6647997711
+ },
+ {
+  "name": "framerate_film",
+  "args": [
+   "--max-offset-seconds",
+   "60",
+   "--output-encoding",
+   "same",
+   "--skip-sync-on-low-quality",
+   "--min-score",
+   "0.0",
+   "--quality-max-offset-seconds",
+   "30",
+   "--max-framerate-deviation",
+   "0.1"
+  ],
+  "success": true,
+  "offset": 2.0,
+  "scale": 0.9989965052712645,
+  "score": 171558.00000000006
+ },
+ {
+  "name": "gss",
+  "args": [
+   "--max-offset-seconds",
+   "60",
+   "--output-encoding",
+   "same",
+   "--skip-sync-on-low-quality",
+   "--min-score",
+   "0.0",
+   "--quality-max-offset-seconds",
+   "30",
+   "--max-framerate-deviation",
+   "0.1",
+   "--gss"
+  ],
+  "success": true,
+  "offset": 1.97,
+  "scale": 0.9871698555023269,
+  "score": 101719.00000000003
+ }
+]
