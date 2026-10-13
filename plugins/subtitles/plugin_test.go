@@ -308,3 +308,34 @@ func TestDefinitions(t *testing.T) {
 		seen[d.Name] = true
 	}
 }
+
+func TestConfigureNetwork(t *testing.T) {
+	h := newHarness(t)
+	var envs []provider.Env
+	def := &h.p.defs[0]
+	def.New = func(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
+		envs = append(envs, env)
+		return h.fakes["a"], nil
+	}
+	h.configure(t, `{"providers":[{"name":"a","enabled":true}],
+		"proxy":{"kind":"socks5","host":"proxy:1080"},
+		"flaresolverr":{"url":"http://flaresolverr:8191"},
+		"captcha":{"service":"anti-captcha","key":"k"}}`)
+	if len(envs) != 1 || envs[0].HTTP == nil || envs[0].Captcha == nil {
+		t.Fatalf("got env = %+v, want a client and a captcha solver", envs)
+	}
+	h.configure(t, `{"providers":[{"name":"a","enabled":true}]}`)
+	if envs[1].Captcha != nil {
+		t.Errorf("got captcha solver = %v, want none", envs[1].Captcha)
+	}
+	for _, cfg := range []string{
+		`{"proxy":{"kind":"ftp","host":"proxy:21"}}`,
+		`{"proxy":{"kind":"http","host":"proxy"}}`,
+		`{"flaresolverr":{"url":"flaresolverr:8191"}}`,
+		`{"captcha":{"service":"2captcha","key":"k"}}`,
+	} {
+		if _, err := h.p.Configure(t.Context(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(cfg)}.Build()); err == nil {
+			t.Errorf("Configure(%s) got = nil, want an error", cfg)
+		}
+	}
+}

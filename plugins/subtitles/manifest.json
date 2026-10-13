@@ -2,7 +2,7 @@
   "id": "org.mavio.subtitles",
   "name": "Subtitles",
   "version": "0.1.0",
-  "description": "Subtitles for movies and episodes from the subtitle sites Bazarr supports, such as OpenSubtitles.com, with their throttling.",
+  "description": "Subtitles for movies and episodes from the subtitle sites Bazarr supports, such as OpenSubtitles.com, with their throttling, through a proxy, FlareSolverr and a captcha solving service.",
   "author": "Mavio",
   "homepage": "https://github.com/mavioai/mavio",
   "license": "GPL-3.0-only",
@@ -10,6 +10,6 @@
   "capabilities": [
     "CAPABILITY_SUBTITLE_PROVIDER"
   ],
-  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"providers\":{\"type\":\"array\",\"description\":\"The subtitle providers and their settings\",\"items\":{\"type\":\"object\",\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":\"string\",\"minLength\":1,\"description\":\"The provider's name, as Bazarr names it\"},\"enabled\":{\"type\":\"boolean\",\"default\":false},\"settings\":{\"type\":\"object\",\"description\":\"The settings the provider takes\"}},\"additionalProperties\":false}}},\"additionalProperties\":false}",
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"providers\":{\"type\":\"array\",\"description\":\"The subtitle providers and their settings\",\"items\":{\"type\":\"object\",\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":\"string\",\"minLength\":1,\"description\":\"The provider's name, as Bazarr names it\"},\"enabled\":{\"type\":\"boolean\",\"default\":false},\"settings\":{\"type\":\"object\",\"description\":\"The settings the provider takes\"}},\"additionalProperties\":false}},\"proxy\":{\"type\":\"object\",\"description\":\"The proxy the subtitle sites are reached through\",\"required\":[\"kind\",\"host\"],\"properties\":{\"kind\":{\"type\":\"string\",\"enum\":[\"http\",\"socks4\",\"socks5\"]},\"host\":{\"type\":\"string\",\"minLength\":1,\"description\":\"host:port\"},\"username\":{\"type\":\"string\"},\"password\":{\"type\":\"string\"},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"description\":\"The hosts reached directly; localhost and 127.0.0.1 when unset\"}},\"additionalProperties\":false},\"flaresolverr\":{\"type\":\"object\",\"description\":\"The FlareSolverr server that solves Cloudflare's challenges\",\"required\":[\"url\"],\"properties\":{\"url\":{\"type\":\"string\",\"format\":\"uri\"},\"request_timeout\":{\"type\":\"integer\",\"minimum\":1,\"default\":60,\"description\":\"How long a challenge may take, in seconds\"}},\"additionalProperties\":false},\"captcha\":{\"type\":\"object\",\"description\":\"The captcha solving service's account\",\"required\":[\"service\"],\"properties\":{\"service\":{\"type\":\"string\",\"enum\":[\"anti-captcha\",\"captchaai\",\"death-by-captcha\"]},\"key\":{\"type\":\"string\",\"description\":\"The Anti-Captcha or CaptchaAI account key\"},\"username\":{\"type\":\"string\",\"description\":\"The DeathByCaptcha username\"},\"password\":{\"type\":\"string\",\"description\":\"The DeathByCaptcha password\"}},\"additionalProperties\":false}},\"additionalProperties\":false}",
   "apiVersion": "1.0"
 }

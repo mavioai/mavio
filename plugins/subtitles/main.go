@@ -7,9 +7,7 @@ package main
 import (
 	"context"
 	"log/slog"
-	"net/http"
 	"os"
-	"time"
 	_ "time/tzdata" // The sites' daily limits reset at midnight in their zones.
 
 	"github.com/mavioai/mavio/libs/plugin/guest"
@@ -28,7 +26,7 @@ func main() {
 	log := slog.New(slog.NewTextHandler(os.Stderr, nil))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	p, err := newPlugin(log, Version, guest.DataDir(), newHTTPClient())
+	p, err := newPlugin(log, Version, guest.DataDir(), nil)
 	if err != nil {
 		log.Error("start", "err", err)
 		os.Exit(1)
@@ -39,10 +37,4 @@ func main() {
 		log.Error("serve", "err", err)
 		os.Exit(1)
 	}
-}
-
-// newHTTPClient returns the client the sites are reached with: requests
-// time out after 30 seconds, as Bazarr's providers'.
-func newHTTPClient() *http.Client {
-	return &http.Client{Timeout: 30 * time.Second}
 }

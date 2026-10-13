@@ -105,12 +105,12 @@ type Env struct {
 	RetryWait time.Duration
 }
 
-// CaptchaSolver solves the captchas of sites.
+// CaptchaSolver solves the captchas of sites with a captcha solving
+// service, as Bazarr's pitchers.
 type CaptchaSolver interface {
-	// ReCaptchaV2 returns the token of a reCAPTCHA v2 on a page.
-	ReCaptchaV2(ctx context.Context, pageURL, siteKey string) (string, error)
-	// HCaptcha returns the token of an hCaptcha on a page.
-	HCaptcha(ctx context.Context, pageURL, siteKey string) (string, error)
+	// ReCaptchaV2 returns the response token of a reCAPTCHA v2 on a page,
+	// invisible or not.
+	ReCaptchaV2(ctx context.Context, pageURL, siteKey string, invisible bool) (string, error)
 	// Image returns the text of a captcha image.
 	Image(ctx context.Context, image []byte) (string, error)
 }
