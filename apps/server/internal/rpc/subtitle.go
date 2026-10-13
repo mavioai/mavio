@@ -200,7 +200,7 @@ func (s *SubtitleService) AssignSubtitleProfile(ctx context.Context, req *acquis
 var subtitleFolders = map[acquisitionv1.SubtitleFolder]core.SubtitleFolder{
 	acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_UNSPECIFIED: core.SubtitleFolderCurrent,
 	acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_RELATIVE:    core.SubtitleFolderRelative,
-	acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_ABSOLUTE:    core.SubtitleFolderAbsolute,
+	acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_METADATA:    core.SubtitleFolderMetadata,
 }
 
 func subtitleSettingsToProto(s *core.SubtitleSettings) *acquisitionv1.SubtitleSettings {

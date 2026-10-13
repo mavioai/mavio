@@ -5471,7 +5471,7 @@
         "enum": [
           "SUBTITLE_FOLDER_UNSPECIFIED",
           "SUBTITLE_FOLDER_RELATIVE",
-          "SUBTITLE_FOLDER_ABSOLUTE"
+          "SUBTITLE_FOLDER_METADATA"
         ],
         "description": "SubtitleFolder is where subtitles are saved, as Bazarr's subfolder\n setting."
       },
@@ -5881,7 +5881,8 @@
           },
           "customFolder": {
             "type": "string",
-            "title": "custom_folder"
+            "title": "custom_folder",
+            "description": "The name of the folder within each video's folder, for\n SUBTITLE_FOLDER_RELATIVE; empty for the others."
           },
           "upgrade": {
             "type": "boolean",

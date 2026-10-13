@@ -93,7 +93,7 @@ func TestSubtitleSettingsValidate(t *testing.T) {
 	}{
 		{"defaults", func(*SubtitleSettings) {}, true},
 		{"relative folder", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderRelative, "Subs" }, true},
-		{"absolute folder", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderAbsolute, "/subs" }, true},
+		{"metadata folder", func(s *SubtitleSettings) { s.Folder = SubtitleFolderMetadata }, true},
 		{"searches off", func(s *SubtitleSettings) { s.WantedSearchInterval = 0 }, true},
 		{"equivalence", func(s *SubtitleSettings) {
 			s.LanguageEquals = []SubtitleLanguageEquivalence{{From: SubtitleLanguage{Language: "en", HearingImpaired: true}, To: SubtitleLanguage{Language: "en"}}}
@@ -103,9 +103,8 @@ func TestSubtitleSettingsValidate(t *testing.T) {
 		{"unknown folder", func(s *SubtitleSettings) { s.Folder = "elsewhere" }, false},
 		{"relative folder escaping", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderRelative, "../subs" }, false},
 		{"relative folder absolute", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderRelative, "/subs" }, false},
-		{"absolute folder relative", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderAbsolute, "subs" }, false},
+		{"metadata folder named", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderMetadata, "/subs" }, false},
 		{"relative folder nested", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderRelative, "Subs/en" }, false},
-		{"absolute folder remote", func(s *SubtitleSettings) { s.Folder, s.CustomFolder = SubtitleFolderAbsolute, "rclone:gdrive:subs" }, true},
 		{"upgrade days", func(s *SubtitleSettings) { s.UpgradeDays = 31 }, false},
 		{"interval", func(s *SubtitleSettings) { s.UpgradeInterval = time.Minute }, false},
 		{"default language", func(s *SubtitleSettings) { s.DefaultAudioLanguage = "e n" }, false},

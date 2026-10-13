@@ -92,10 +92,8 @@ pub enum SubtitleFolder {
     /// In a folder of the video's folder, named custom_folder: a single
     /// folder name.
     SUBTITLE_FOLDER_RELATIVE = 1i32,
-    /// In one folder for every video, custom_folder: an absolute path or a
-    /// remote path, as library paths. Subtitles there are named after
-    /// their videos' file names.
-    SUBTITLE_FOLDER_ABSOLUTE = 2i32,
+    /// In the item's folder within the server's metadata folder.
+    SUBTITLE_FOLDER_METADATA = 2i32,
 }
 impl SubtitleFolder {
     ///Idiomatic alias for [`Self::SUBTITLE_FOLDER_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -104,9 +102,9 @@ impl SubtitleFolder {
     ///Idiomatic alias for [`Self::SUBTITLE_FOLDER_RELATIVE`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const Relative: Self = Self::SUBTITLE_FOLDER_RELATIVE;
-    ///Idiomatic alias for [`Self::SUBTITLE_FOLDER_ABSOLUTE`]; `Debug` prints the variant name.
+    ///Idiomatic alias for [`Self::SUBTITLE_FOLDER_METADATA`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
-    pub const Absolute: Self = Self::SUBTITLE_FOLDER_ABSOLUTE;
+    pub const Metadata: Self = Self::SUBTITLE_FOLDER_METADATA;
 }
 impl ::core::default::Default for SubtitleFolder {
     fn default() -> Self {
@@ -118,7 +116,7 @@ impl ::buffa::Enumeration for SubtitleFolder {
         match value {
             0i32 => ::core::option::Option::Some(Self::SUBTITLE_FOLDER_UNSPECIFIED),
             1i32 => ::core::option::Option::Some(Self::SUBTITLE_FOLDER_RELATIVE),
-            2i32 => ::core::option::Option::Some(Self::SUBTITLE_FOLDER_ABSOLUTE),
+            2i32 => ::core::option::Option::Some(Self::SUBTITLE_FOLDER_METADATA),
             _ => ::core::option::Option::None,
         }
     }
@@ -129,7 +127,7 @@ impl ::buffa::Enumeration for SubtitleFolder {
         match self {
             Self::SUBTITLE_FOLDER_UNSPECIFIED => "SUBTITLE_FOLDER_UNSPECIFIED",
             Self::SUBTITLE_FOLDER_RELATIVE => "SUBTITLE_FOLDER_RELATIVE",
-            Self::SUBTITLE_FOLDER_ABSOLUTE => "SUBTITLE_FOLDER_ABSOLUTE",
+            Self::SUBTITLE_FOLDER_METADATA => "SUBTITLE_FOLDER_METADATA",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -140,8 +138,8 @@ impl ::buffa::Enumeration for SubtitleFolder {
             "SUBTITLE_FOLDER_RELATIVE" => {
                 ::core::option::Option::Some(Self::SUBTITLE_FOLDER_RELATIVE)
             }
-            "SUBTITLE_FOLDER_ABSOLUTE" => {
-                ::core::option::Option::Some(Self::SUBTITLE_FOLDER_ABSOLUTE)
+            "SUBTITLE_FOLDER_METADATA" => {
+                ::core::option::Option::Some(Self::SUBTITLE_FOLDER_METADATA)
             }
             _ => ::core::option::Option::None,
         }
@@ -150,7 +148,7 @@ impl ::buffa::Enumeration for SubtitleFolder {
         &[
             Self::SUBTITLE_FOLDER_UNSPECIFIED,
             Self::SUBTITLE_FOLDER_RELATIVE,
-            Self::SUBTITLE_FOLDER_ABSOLUTE,
+            Self::SUBTITLE_FOLDER_METADATA,
         ]
     }
 }
@@ -2824,6 +2822,9 @@ pub struct SubtitleSettings {
     pub single_language: ::core::option::Option<bool>,
     /// Field 12: `folder`
     pub folder: ::core::option::Option<::buffa::EnumValue<SubtitleFolder>>,
+    /// The name of the folder within each video's folder, for
+    /// SUBTITLE_FOLDER_RELATIVE; empty for the others.
+    ///
     /// Field 13: `custom_folder`
     pub custom_folder: ::core::option::Option<::buffa::alloc::string::String>,
     /// Searches again for the subtitles downloaded in the last upgrade_days

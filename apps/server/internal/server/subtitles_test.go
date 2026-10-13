@@ -17,6 +17,8 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/server"
+	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
@@ -48,6 +50,7 @@ const frenchSubtitle = "1\n00:00:01,000 --> 00:00:02,000\nBonjour, Neo.\n"
 // a film's profile wants; the administrator lists, deletes, uploads and
 // modifies them.
 func TestSubtitles(t *testing.T) {
+	metadataDir := filepath.ToSlash(t.TempDir())
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		t.Skip("integration test: ffmpeg not found on PATH")
@@ -81,7 +84,7 @@ func TestSubtitles(t *testing.T) {
 	installProcessPlugin(t, pluginDir, "subtitles", subtitlesSource, subtitlesBuild)
 	srv := start(t, server.Config{
 		Database: "sqlite:" + filepath.Join(t.TempDir(), "mavio.db"), FFmpeg: ffmpeg, FFprobe: ffprobe,
-		TranscodeDir: t.TempDir(), CacheDir: t.TempDir(), MetadataDir: t.TempDir(),
+		TranscodeDir: t.TempDir(), CacheDir: t.TempDir(), MetadataDir: metadataDir,
 		PluginDir: pluginDir, PluginDataDir: t.TempDir(),
 	})
 	first, err := authv1connect.NewAuthServiceClient(http.DefaultClient, srv.url).CreateFirstUser(ctx, authv1.CreateFirstUserRequest_builder{
@@ -216,14 +219,13 @@ func TestSubtitles(t *testing.T) {
 		t.Errorf("modified subtitles = %q, %v", data, err)
 	}
 
-	// Subtitles are saved in a folder of the video's folder, or in one
-	// folder for every video.
+	// Subtitles are saved in a folder of the video's folder, or in the
+	// item's folder within the metadata folder.
 	settings, err := subs.GetSubtitleSettings(ctx, &acquisitionv1.GetSubtitleSettingsRequest{})
 	if err != nil {
 		t.Fatalf("GetSubtitleSettings: %v", err)
 	}
 	s := settings.GetSettings()
-	absolute := filepath.ToSlash(t.TempDir())
 	upload := func(folder acquisitionv1.SubtitleFolder, custom, lang, want string) {
 		t.Helper()
 		s.SetFolder(folder)
@@ -243,7 +245,7 @@ func TestSubtitles(t *testing.T) {
 		}
 	}
 	upload(acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_RELATIVE, "Subs", "de", filepath.ToSlash(folder)+"/Subs/The Matrix (1999).de.srt")
-	upload(acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_ABSOLUTE, absolute, "es", absolute+"/The Matrix (1999).es.srt")
+	upload(acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_METADATA, "", "es", library.SubtitleDir(metadataDir, mustID(t, movieID))+"/The Matrix (1999).es.srt")
 	s.SetFolder(acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_RELATIVE)
 	s.SetCustomFolder("Subs/de")
 	if _, err := subs.UpdateSubtitleSettings(ctx, acquisitionv1.UpdateSubtitleSettingsRequest_builder{Settings: s}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
@@ -259,4 +261,13 @@ func TestSubtitles(t *testing.T) {
 	if _, err := subs.UpdateSubtitleSettings(ctx, acquisitionv1.UpdateSubtitleSettingsRequest_builder{Settings: s}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Errorf("UpdateSubtitleSettings with an unknown mod: err = %v, want InvalidArgument", err)
 	}
+}
+
+func mustID(t *testing.T, s string) core.ID {
+	t.Helper()
+	id, err := core.ParseID(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return id
 }

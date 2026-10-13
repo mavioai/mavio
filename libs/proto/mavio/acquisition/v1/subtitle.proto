@@ -214,10 +214,8 @@ enum SubtitleFolder {
   // In a folder of the video's folder, named custom_folder: a single
   // folder name.
   SUBTITLE_FOLDER_RELATIVE = 1;
-  // In one folder for every video, custom_folder: an absolute path or a
-  // remote path, as library paths. Subtitles there are named after
-  // their videos' file names.
-  SUBTITLE_FOLDER_ABSOLUTE = 2;
+  // In the item's folder within the server's metadata folder.
+  SUBTITLE_FOLDER_METADATA = 2;
 }
 
 // SubtitleLanguageEquivalence counts subtitles in one language as
@@ -298,6 +296,8 @@ message SubtitleSettings {
   // Saves subtitles without their language in their names.
   bool single_language = 11;
   SubtitleFolder folder = 12 [(buf.validate.field).enum.defined_only = true];
+  // The name of the folder within each video's folder, for
+  // SUBTITLE_FOLDER_RELATIVE; empty for the others.
   string custom_folder = 13;
   // Searches again for the subtitles downloaded in the last upgrade_days
   // (0–30) below their maximum score, every upgrade_interval_hours;

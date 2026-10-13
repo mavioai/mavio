@@ -83,7 +83,8 @@ type Config struct {
 	// their manifests allowed; nil uses a client with a 30-second timeout.
 	PluginFetch *http.Client
 	// MetadataDir holds the artwork chosen for items of libraries that do
-	// not save metadata next to their media.
+	// not save metadata next to their media, and items' subtitles when
+	// the subtitle settings keep them there.
 	MetadataDir string
 	// BackupDir holds backups; empty makes none.
 	BackupDir string
@@ -280,7 +281,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			return err
 		},
 	}
-	subFiles := &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Folder: subtitleFolder(set), Logger: log}
+	subFiles := &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Folder: subtitleFolder(set, metadataDir), Logger: log}
 	subs := &subtitles.Runtime{
 		Store: db, Settings: func() core.SubtitleSettings { return set.Get().Subtitles }, Providers: plugs.SubtitlePlugins,
 		Subtitles: subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
@@ -392,7 +393,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		// as the series says, and episodes whose files go missing are
 		// unmonitored when the settings say to.
 		scanner.NewSeasonMonitored, scanner.OnMissing = acq.NewSeasonMonitored, acq.UnmonitorMissing
-		scanner.SubtitleFolder = subtitleFolder(set)
+		scanner.SubtitleFolder = subtitleFolder(set, metadataDir)
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err
@@ -587,9 +588,9 @@ func (l *lateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // subtitleFolder gives where the settings save subtitle files.
-func subtitleFolder(set *settings.Manager) func() library.SubtitleFolder {
+func subtitleFolder(set *settings.Manager, metadataDir string) func() library.SubtitleFolder {
 	return func() library.SubtitleFolder {
 		s := set.Get().Subtitles
-		return library.SubtitleFolder{Kind: s.Folder, Custom: s.CustomFolder}
+		return library.SubtitleFolder{Kind: s.Folder, Relative: s.CustomFolder, MetadataDir: metadataDir}
 	}
 }

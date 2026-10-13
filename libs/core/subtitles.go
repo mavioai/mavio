@@ -291,11 +291,11 @@ const (
 	// SubtitleFolderRelative saves them in a folder of the video's
 	// folder, named SubtitleSettings.CustomFolder.
 	SubtitleFolderRelative SubtitleFolder = "relative"
-	// SubtitleFolderAbsolute saves them in one folder for every video,
-	// SubtitleSettings.CustomFolder: an absolute path or a remote path,
-	// as library paths. Subtitles are named after their videos' file
-	// names, so videos named alike share them.
-	SubtitleFolderAbsolute SubtitleFolder = "absolute"
+	// SubtitleFolderMetadata saves them in the item's folder within the
+	// server's metadata folder, where artwork of libraries that do not
+	// save local metadata is kept too; it takes the place of Bazarr's
+	// absolute folder.
+	SubtitleFolderMetadata SubtitleFolder = "metadata"
 )
 
 // SubtitleLanguageEquivalence counts subtitles in one language as
@@ -427,13 +427,13 @@ func (s *SubtitleSettings) Validate() error {
 		return fmt.Errorf("%w: subtitle minimum score outside 0–100", ErrInvalid)
 	case !slices.Contains([]string{"hi", "cc", "sdh"}, s.HIExtension):
 		return fmt.Errorf("%w: hearing-impaired extension %q", ErrInvalid, s.HIExtension)
-	case s.Folder != SubtitleFolderCurrent && s.Folder != SubtitleFolderRelative && s.Folder != SubtitleFolderAbsolute:
+	case s.Folder != SubtitleFolderCurrent && s.Folder != SubtitleFolderRelative && s.Folder != SubtitleFolderMetadata:
 		return fmt.Errorf("%w: subtitle folder %q", ErrInvalid, s.Folder)
 	case s.Folder == SubtitleFolderRelative && (s.CustomFolder == "" || s.CustomFolder == "." || s.CustomFolder == ".." ||
 		strings.ContainsAny(s.CustomFolder, `/\:`)):
 		return fmt.Errorf("%w: relative subtitle folder %q", ErrInvalid, s.CustomFolder)
-	case s.Folder == SubtitleFolderAbsolute && validLibraryPath(s.CustomFolder) != nil:
-		return fmt.Errorf("%w: absolute subtitle folder %q", ErrInvalid, s.CustomFolder)
+	case s.Folder != SubtitleFolderRelative && s.CustomFolder != "":
+		return fmt.Errorf("%w: a custom subtitle folder without the relative folder setting", ErrInvalid)
 	case s.UpgradeDays < 0 || s.UpgradeDays > 30:
 		return fmt.Errorf("%w: subtitle upgrade days outside 0–30", ErrInvalid)
 	case !interval(s.UpgradeInterval) || !interval(s.WantedSearchInterval) || !interval(s.WantedSearchIntervalMovie):

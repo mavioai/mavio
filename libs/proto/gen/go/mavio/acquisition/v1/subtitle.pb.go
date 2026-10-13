@@ -79,10 +79,8 @@ const (
 	// In a folder of the video's folder, named custom_folder: a single
 	// folder name.
 	SubtitleFolder_SUBTITLE_FOLDER_RELATIVE SubtitleFolder = 1
-	// In one folder for every video, custom_folder: an absolute path or a
-	// remote path, as library paths. Subtitles there are named after
-	// their videos' file names.
-	SubtitleFolder_SUBTITLE_FOLDER_ABSOLUTE SubtitleFolder = 2
+	// In the item's folder within the server's metadata folder.
+	SubtitleFolder_SUBTITLE_FOLDER_METADATA SubtitleFolder = 2
 )
 
 // Enum value maps for SubtitleFolder.
@@ -90,12 +88,12 @@ var (
 	SubtitleFolder_name = map[int32]string{
 		0: "SUBTITLE_FOLDER_UNSPECIFIED",
 		1: "SUBTITLE_FOLDER_RELATIVE",
-		2: "SUBTITLE_FOLDER_ABSOLUTE",
+		2: "SUBTITLE_FOLDER_METADATA",
 	}
 	SubtitleFolder_value = map[string]int32{
 		"SUBTITLE_FOLDER_UNSPECIFIED": 0,
 		"SUBTITLE_FOLDER_RELATIVE":    1,
-		"SUBTITLE_FOLDER_ABSOLUTE":    2,
+		"SUBTITLE_FOLDER_METADATA":    2,
 	}
 )
 
@@ -2866,7 +2864,9 @@ type SubtitleSettings_builder struct {
 	// Saves subtitles without their language in their names.
 	SingleLanguage *bool
 	Folder         *SubtitleFolder
-	CustomFolder   *string
+	// The name of the folder within each video's folder, for
+	// SUBTITLE_FOLDER_RELATIVE; empty for the others.
+	CustomFolder *string
 	// Searches again for the subtitles downloaded in the last upgrade_days
 	// (0–30) below their maximum score, every upgrade_interval_hours;
 	// upgrade_manual includes those downloaded by hand.
@@ -8353,7 +8353,7 @@ const file_mavio_acquisition_v1_subtitle_proto_rawDesc = "" +
 	"\x0eSubtitleFolder\x12\x1f\n" +
 	"\x1bSUBTITLE_FOLDER_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SUBTITLE_FOLDER_RELATIVE\x10\x01\x12\x1c\n" +
-	"\x18SUBTITLE_FOLDER_ABSOLUTE\x10\x02*t\n" +
+	"\x18SUBTITLE_FOLDER_METADATA\x10\x02*t\n" +
 	"\x10SubtitleItemKind\x12\"\n" +
 	"\x1eSUBTITLE_ITEM_KIND_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SUBTITLE_ITEM_KIND_MOVIE\x10\x01\x12\x1e\n" +

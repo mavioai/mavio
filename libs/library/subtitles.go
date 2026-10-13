@@ -8,7 +8,9 @@ import (
 	"io"
 	"io/fs"
 	"log/slog"
+	"os"
 	"path"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -75,7 +77,8 @@ type DownloadedSubtitle struct {
 var subtitleFormats = []string{"srt", "ass", "ssa", "vtt", "sub"}
 
 // Subtitles finds subtitles for videos and saves them beside the videos,
-// or in the subtitle folder, where they become subtitle streams.
+// in a folder of theirs or in the metadata folder, where they become
+// subtitle streams.
 type Subtitles struct {
 	Store     core.Store
 	Providers []SubtitleProvider
@@ -247,8 +250,11 @@ func (s *Subtitles) Save(ctx context.Context, lib core.Library, itemID, sourceID
 	switch {
 	case folder.relative() != "":
 		dir = path.Join(dir, folder.relative())
-	case folder.absolute() != "":
-		root, dir = folder.absolute(), "."
+	case folder.metadata(itemID) != "":
+		root, dir = folder.metadata(itemID), "."
+		if err := os.MkdirAll(filepath.FromSlash(root), 0o755); err != nil {
+			return core.MediaStream{}, fmt.Errorf("save subtitle: %w", err)
+		}
 	}
 	st, err := s.Storages.Open(ctx, root)
 	if err != nil {
@@ -355,11 +361,11 @@ const maxSubtitleSize = 64 << 20
 // sees them, into the streams of sources[si], and stores the sources.
 func (s *Subtitles) refreshSidecars(ctx context.Context, lib core.Library, itemID core.ID, sources []core.MediaSource, si int) error {
 	src := &sources[si]
-	files, err := s.readSidecarDirs(ctx, lib, src.Path)
+	files, err := s.readSidecarDirs(ctx, lib, itemID, src.Path)
 	if err != nil {
 		return err
 	}
-	src.Streams = withSidecars(src.Streams, sidecars(naming.Default(), src.Path, s.folder().dirs(src.Path), files))
+	src.Streams = withSidecars(src.Streams, sidecars(naming.Default(), src.Path, s.folder().dirs(src.Path, itemID), files))
 	return s.Store.MediaSources().Replace(ctx, itemID, sources)
 }
 

@@ -4418,6 +4418,9 @@ pub struct SubtitleSettingsView<'a> {
     pub single_language: ::core::option::Option<bool>,
     /// Field 12: `folder`
     pub folder: ::core::option::Option<::buffa::EnumValue<super::super::SubtitleFolder>>,
+    /// The name of the folder within each video's folder, for
+    /// SUBTITLE_FOLDER_RELATIVE; empty for the others.
+    ///
     /// Field 13: `custom_folder`
     pub custom_folder: ::core::option::Option<&'a str>,
     /// Searches again for the subtitles downloaded in the last upgrade_days
@@ -5227,6 +5230,9 @@ impl SubtitleSettingsOwnedView {
     ) -> ::core::option::Option<::buffa::EnumValue<super::super::SubtitleFolder>> {
         self.0.reborrow().folder
     }
+    /// The name of the folder within each video's folder, for
+    /// SUBTITLE_FOLDER_RELATIVE; empty for the others.
+    ///
     /// Field 13: `custom_folder`
     #[must_use]
     pub fn custom_folder(&self) -> ::core::option::Option<&'_ str> {

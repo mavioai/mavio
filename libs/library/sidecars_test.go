@@ -89,7 +89,7 @@ func TestSubtitleFolders(t *testing.T) {
 	}
 	t.Run("relative", func(t *testing.T) {
 		f := newScan(t, core.LibraryMovies)
-		folder := SubtitleFolder{Kind: core.SubtitleFolderRelative, Custom: "Subs"}
+		folder := SubtitleFolder{Kind: core.SubtitleFolderRelative, Relative: "Subs"}
 		f.sc.SubtitleFolder = func() SubtitleFolder { return folder }
 		tree(t, f.root, "Up (2009)/Up (2009).mkv", "Up (2009)/Up (2009).en.srt", "Up (2009)/Subs/Up (2009).ja.srt", "Up (2009)/Subs/Other.srt")
 		f.scan()
@@ -123,24 +123,32 @@ func TestSubtitleFolders(t *testing.T) {
 			t.Errorf("after removing = %q", got)
 		}
 	})
-	t.Run("absolute", func(t *testing.T) {
+	t.Run("metadata", func(t *testing.T) {
 		f := newScan(t, core.LibraryMovies)
-		abs := filepath.ToSlash(t.TempDir())
-		folder := SubtitleFolder{Kind: core.SubtitleFolderAbsolute, Custom: abs}
+		meta := filepath.ToSlash(t.TempDir())
+		folder := SubtitleFolder{Kind: core.SubtitleFolderMetadata, MetadataDir: meta}
 		f.sc.SubtitleFolder = func() SubtitleFolder { return folder }
-		tree(t, f.root, "Up (2009)/Up (2009).mkv", "Cars (2006)/Cars (2006).mkv")
-		tree(t, abs, "Up (2009).en.srt", "up (2009).fr.srt", "Up (2009) extended.srt", "Cars (2006).srt", "Upside Down.srt")
+		tree(t, f.root, "Up (2009)/Up (2009).mkv", "Up (2009)/Up (2009).en.srt", "Cars (2006)/Cars (2006).mkv")
 		f.scan()
 		up := f.item("Up (2009)/Up (2009).mkv")
-		want := []string{abs + "/Up (2009) extended.srt", abs + "/Up (2009).en.srt", abs + "/up (2009).fr.srt"}
-		if got := paths(f.store.sources[up.ID][0].Streams); !slices.Equal(got, want) {
-			t.Errorf("scanned = %q, want = %q", got, want)
-		}
+		dir := SubtitleDir(meta, up.ID)
 
 		s := &Subtitles{Store: f.store, Folder: func() SubtitleFolder { return folder }}
 		st, err := s.Save(t.Context(), f.lib, up.ID, core.ID{}, func(_ fs.FS, stem string) (string, error) { return stem + ".de.srt", nil }, sub)
-		if err != nil || st.ExternalPath != abs+"/Up (2009).de.srt" {
+		if err != nil || st.ExternalPath != dir+"/Up (2009).de.srt" || st.Language != "ger" {
 			t.Fatalf("Save = %+v, %v", st, err)
+		}
+		want := []string{f.root + "/Up (2009)/Up (2009).en.srt", dir + "/Up (2009).de.srt"}
+		if got := paths(f.store.sources[up.ID][0].Streams); !slices.Equal(got, want) {
+			t.Errorf("after saving = %q, want = %q", got, want)
+		}
+		// A scan of the changed folder keeps the subtitles in the metadata
+		// folder.
+		tree(t, f.root, "Up (2009)/Up (2009).fr.srt")
+		touchLater(t, filepath.Join(f.root, "Up (2009)"), time.Minute)
+		f.scan()
+		if got := paths(f.store.sources[up.ID][0].Streams); len(got) != 3 || !slices.Contains(got, dir+"/Up (2009).de.srt") {
+			t.Errorf("after scanning = %q", got)
 		}
 		if err := s.WriteFile(t.Context(), up.ID, st.ExternalPath, []byte("changed")); err != nil {
 			t.Fatal(err)
@@ -148,15 +156,16 @@ func TestSubtitleFolders(t *testing.T) {
 		if data, err := s.ReadFile(t.Context(), up.ID, st.ExternalPath); err != nil || string(data) != "changed" {
 			t.Errorf("ReadFile = %q, %v", data, err)
 		}
-		if err := s.Remove(t.Context(), f.lib, up.ID, st.ExternalPath); err != nil || exists(abs, "Up (2009).de.srt") {
+		if err := s.Remove(t.Context(), f.lib, up.ID, st.ExternalPath); err != nil || exists(dir, "Up (2009).de.srt") {
 			t.Errorf("Remove = %v", err)
 		}
-		if got := paths(f.store.sources[up.ID][0].Streams); !slices.Equal(got, want) {
-			t.Errorf("after removing = %q, want = %q", got, want)
+		if got := paths(f.store.sources[up.ID][0].Streams); len(got) != 2 {
+			t.Errorf("after removing = %q", got)
 		}
-		// Files of other videos are no subtitles of this one.
-		if _, err := s.ReadFile(t.Context(), up.ID, abs+"/Cars (2006).srt"); !errors.Is(err, core.ErrNotFound) {
-			t.Errorf("ReadFile of another video's subtitle = %v, want ErrNotFound", err)
+		// Another item's subtitles are not this one's.
+		cars := f.item("Cars (2006)/Cars (2006).mkv")
+		if _, err := s.ReadFile(t.Context(), cars.ID, st.ExternalPath); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("ReadFile of another item's subtitle = %v, want ErrNotFound", err)
 		}
 	})
 }

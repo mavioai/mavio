@@ -130,17 +130,6 @@ func (s *Scanner) Scan(ctx context.Context, lib core.Library) (ScanStats, error)
 	if s.SubtitleFolder != nil {
 		sc.subFolder = s.SubtitleFolder()
 	}
-	sc.absSubs = sync.OnceValue(func() *sidecarIndex {
-		dir := sc.subFolder.absolute()
-		if dir == "" {
-			return nil
-		}
-		x, err := readSidecarIndex(ctx, s.Storages, dir)
-		if err != nil {
-			s.logger().WarnContext(ctx, "subtitle folder unreadable", "path", dir, "err", err)
-		}
-		return x
-	})
 	if sc.devices == nil {
 		sc.devices = &storage.Detector{}
 	}
@@ -182,10 +171,8 @@ type scan struct {
 	mu      sync.Mutex
 	stats   ScanStats
 	// subFolder is where subtitle files are found besides beside their
-	// videos; absSubs lists the absolute subtitle folder once, when the
-	// scan saves a video.
+	// videos.
 	subFolder SubtitleFolder
-	absSubs   func() *sidecarIndex
 }
 
 func (sc *scan) count(f func(*ScanStats)) {
@@ -573,15 +560,20 @@ type saver struct {
 	probes, refreshes *[]core.ID
 }
 
-// sidecarFiles returns the files a video's subtitle files are found
-// among.
-func (p *saver) sidecarFiles(video string) map[string]core.FolderEntry {
-	if p.subStats == nil && p.scan.subFolder.absolute() == "" {
+// sidecarFiles returns the files an item's video's subtitle files are
+// found among.
+func (p *saver) sidecarFiles(ctx context.Context, itemID core.ID) map[string]core.FolderEntry {
+	dir := p.scan.subFolder.metadata(itemID)
+	if p.subStats == nil && dir == "" {
 		return p.stats
 	}
 	files := maps.Clone(p.stats)
 	maps.Copy(files, p.subStats)
-	p.scan.absSubs().add(video, files)
+	if dir != "" {
+		if err := readSidecarDir(ctx, p.scan.Storages, dir, files); err != nil {
+			p.scan.logger().WarnContext(ctx, "subtitle folder unreadable", "path", dir, "err", err)
+		}
+	}
 	return files
 }
 
@@ -866,7 +858,7 @@ func (p *saver) sources(ctx context.Context, n Node, itemID core.ID, isNew bool)
 			probe = true
 		}
 		// Subtitle files come and go without probing.
-		subs := sidecars(p.scan.Resolver.Parser, v.Path, p.scan.subFolder.dirs(v.Path), p.sidecarFiles(v.Path))
+		subs := sidecars(p.scan.Resolver.Parser, v.Path, p.scan.subFolder.dirs(v.Path, itemID), p.sidecarFiles(ctx, itemID))
 		if !sameSidecars(sidecarsOf(src.Streams), subs) {
 			src.Streams = withSidecars(src.Streams, subs)
 			same = false
