@@ -728,6 +728,12 @@ flowchart TD
 - [ ] 每个文件的 OpenSubtitles 哈希保存到文件变化为止
 - [ ] 内嵌字幕：按设置计为已有；本地和网络存储上手动从播放缓存提取为外挂字幕，云存储上从不提取
 - [ ] `libs/subtitle` 中的 subzero 修正（common、标签、去除听障内容、带词典的 OCR 修正、颜色、emoji、RTL、大写、偏移、帧率、两点拟合）与 UTF-8；按文本识别听障字幕；识别没有语言的外挂字幕的语言，区分中文简繁
+  - [x] Subzero 的修正（`Subtitle.ApplyMods`）：每个修正按其 Bazarr 标识符，以 Subzero 的顺序与规则应用（互斥修正、合并的偏移、限定语言的修正、大写检查、变空的字幕条目被丢弃），Subzero 的正则表达式由 regexp2 执行；OCR 修正词典、emoji、公共后缀、guess_language 的模型与 CC-CEDICT 字符集由 `internal/cmd/subzerogen` 生成；在 25 个场景上结果与 Bazarr 自身代码一致（`testdata/mods/golden.py`）
+  - [x] UTF-8：`ToUTF8` 转换旧字符集的字幕
+  - [x] 按文本识别听障字幕（`DetectHearingImpaired`），如 Bazarr 的 `parse_for_hi_regex`
+  - [x] 语言识别（`DetectLanguage`），如不带拼写词典的 guess_language；中文按 hanzidentifier 的字符集区分（`zh-Hans`、`zh-Hant`，只出现简繁共用字符时为 `zh`；`DetectChineseScript`）
+  - [ ] ftfy 的文本修复，Bazarr 对保存的每个字幕都会执行（乱码、HTML 实体、控制字符）
+  - [ ] 修正之后保留 ASS 与 SSA 文件的样式和注释，修正只作用于字幕条目
 - [x] Silero VAD（`libs/media/vad`）：以 Go 实现 16 kHz 模型的推理，其权重由 `internal/cmd/silerogen` 从 Silero 的 ONNX 文件读出并嵌入，在生成的噪声和 Silero 的测试录音（`speech.wav` 样本）上，概率与 onnxruntime 的结果相差不超过 1e-5；一分钟音频在 M1 Max 的十个核心上耗时 0.16 s，单核 0.5 s
 - [x] 时间轴同步（`libs/media/subsync`，基于 Silero 语音检测的 ffsubsync 算法）：由字幕条目和由 ffmpeg 读出的音频得到语音信号，以 FFT 互相关对齐，并尝试帧率比、黄金分割搜索与推断的比例，沿用 ffsubsync 的质量门槛；在生成的字幕对上，偏移量、比例与分数与 ffsubsync 的结果相同（`testdata/golden.py`）；两小时的字幕对齐耗时 0.25 s
 - [ ] 端到端测试（`apps/server/internal/server/subtitles_test.go`）
