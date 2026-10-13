@@ -11,7 +11,7 @@ This is the repository working guide for AI coding agents (and new developers). 
 | [docs/development.md](docs/development.md) | Toolchain, Nx, Go module conventions, code generation, code quality, CI, releases |
 | [docs/testing.md](docs/testing.md) | Test layers, porting tests from Jellyfin, test media |
 | [docs/roadmap.md](docs/roadmap.md) | Phases, completion criteria, current status, risks |
-| [docs/optimization.md](docs/optimization.md) | Optimization topics, each with an implementation index: storage I/O latency mitigation and speculative warming |
+| [docs/optimization.md](docs/optimization.md) | Optimization topics, each with an implementation index: storage I/O latency mitigation and speculative warming, storage access by storage class, reading cloud drives through rclone |
 | [docs/plugins.md](docs/plugins.md) | Plugin platform: host API, events, HTTP routes, tasks, remote devices, provider types; the DLNA plugin |
 | [docs/clients.md](docs/clients.md) | Clients: the embedded web UI, the Apple, Android and desktop apps, the shared Rust core, the design system |
 | [docs/jellyfin-compat.md](docs/jellyfin-compat.md) | Evaluation of a Jellyfin API compatibility shim (not adopted) |

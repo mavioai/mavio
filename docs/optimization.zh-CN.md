@@ -200,3 +200,102 @@ HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需�
 | 内嵌字幕 | `apps/server/internal/playback/subcache.go`（`Manager.extracted`、`extractAll`）、`subtitles.go`（`Playback.liveSubtitles`、`liveSubtitle`、`Manager.loadSubtitle`）、`manager.go`（`Manager.Start`）；`libs/library/mediaextras.go`（`SubtitlesDir`）；`libs/media/decision/source.go`（`Source.StreamedSubtitles`）、`subtitles.go`；`libs/media/planner/command.go`（`HLSOutput.Subtitles`）；`libs/streaming/subtitles.go`（`Stream.Subtitle`） | P24 |
 | 不对云存储做推测式读取 | `libs/library/storage/keeper.go`（`Keeper.Class`）；`apps/server/internal/playback/resume.go`（`Manager.prepareStart`）；在 `apps/server/internal/server/server.go` 中装配 | P24 |
 | 存储端口 | `libs/core/storage.go`（`Storage`、`StorageCapabilities`、`StorageTransfers`、`StorageFS`、`StorageName`、`StoragePath`）；`libs/library/localstorage.go`（`Storages`、`OpenLocalStorage`、`RootOf`）、`mediafile.go`（`MediaFile`）；`libs/media/planner/inputs.go`（`InputURL`）；`apps/server/internal/acquisition/files.go`（`Runtime.transfer`） | P25 |
+
+---
+
+## 3. 通过 rclone 读取云盘（Reading Cloud Drives through rclone）
+
+状态：已设计，尚未实现（P25）。rclone 远端上的媒体库（[架构](architecture.zh-CN.md) §9.2）经 `rclone rcd` 读取媒体；本章在 mavioai/rclone 的后端中缓存文件查找与下载链接、限制连接数，并在 Mavio 中缓存媒体数据块，使这些读取对云盘的请求更少、拖动时更稳定、读过的数据可以复用。
+
+### 3.1 目前一次读取的代价
+
+每次读取一段媒体字节都要经过 Mavio → `rclone rcd`（`--rc-serve`）→ 云盘 API → 云盘 CDN，每一步的代价都超出必要：
+
+* **每个请求都重复查找文件。** `rcserver.serveRemote` 对每个 HTTP 请求调用 `NewObject`。fork 的九个云盘后端都通过分页列出整个父目录来查找文件：cloud115、baidunetdisk、cloud123、guangyadrive、quark 与 weiyun 总是列完所有页；aliyundrive、pikpak 与 thunder 找到文件即停止。`dircache` 只缓存目录 ID，而 rcd 在一个远端的 `Fs` 最后一次使用 5 分钟后将其连同 `dircache` 一起丢弃。
+* **每次打开都申请新的下载链接。** cloud115、aliyundrive、baidunetdisk、cloud123、guangyadrive、quark 与 weiyun 在每次 `Open` 时调用下载链接接口，不做任何缓存，尽管 aliyundrive 的链接有效 4 小时。pikpak 与 thunder 把链接存在 `Object` 上，而 `rcserver` 每个请求都新建 `Object`。只有 thunder 会在 CDN 拒绝过期链接时重新获取链接。
+* **没有任何连接数限制。** 没有后端限制同一文件或同一账号的下载连接数，而云盘会拒绝或限速过多的并发连接。
+* **错误被抹平。** `serve.Object` 把所有失败的 `Open` 都回应为 404，403、429 与限频错误永远到不了 Mavio，Mavio 也就无法退避。
+* **Mavio 每次 seek 都重新打开。** `rclone.Storage` 以媒体库根目录命名远端的 `Fs`（`remote:dir`），同一远端的每个媒体库各有一个 `Fs` 及其缓存。它的读取器对每次 `ReadAt`（keyframes 与 trickplay 读取容器索引时有许多小读取）和每次 seek 都发出新请求；ffmpeg 经媒体代理读取时同样如此。
+
+因此播放中的一次拖动要付出一次目录列举、一次链接申请和一次 CDN 连接，每一步都有云盘的延迟；快速连续的拖动、probe 与播放同时进行、两个人看同一个文件，这些叠加起来就会达到云盘回应 403、或暂时关闭账号下载的 API 频率与连接数。
+
+### 3.2 后端中的查找缓存与链接缓存
+
+fork 提供两个共用包，由需要它们的后端使用：
+
+* **对象缓存**（`lib/objcache`）：后端每次列目录得到的条目，以目录 ID 与文件名为键，保存后端构建并打开 `Object` 所需的信息（ID、大小、修改时间、哈希，以及后端自己的键：115 的 pick code、微云的目录 key、123 的 `S3KeyFlag`）。`NewObject` 在 `dircache` 中查父目录、在对象缓存中查文件；未命中时列一次该目录（同一目录的并发未命中共用一次列举），从而缓存其中所有文件，随后对相邻文件的请求即可命中。条目存活几分钟（各后端的选项，默认 5 分钟）；经 rclone 的上传、删除、移动与重命名会更新条目，目录变化会丢弃该目录的条目。在别处（云盘网页）做的修改表现为缓存 ID 出错，此时丢弃条目并重新查找一次。未命中不缓存。
+* **链接缓存**（`lib/linkcache`）：下载链接，以文件 ID 与指纹（大小，以及哈希或修改时间）为键，连同链接绑定的请求头与 cookie 及其过期时间：取响应中的过期字段（aliyundrive 的 `Expiration`），否则取 URL 中的过期参数（pikpak 的 `expire`），否则取后端声明的有效期。链接在有效期过去五分之四时更新；同一文件的并发打开共用一次申请。CDN 回应 401、403、404 或 410 时，丢弃链接、申请新链接并重试一次，与 thunder 现在的做法相同。
+
+| 后端 | 对象缓存 | 链接缓存 | 另外 |
+| :--- | :--- | :--- | :--- |
+| cloud115 | 是 | 是，按 pick code；绑定 user agent 与 cookie | API 调用把响应传给 `shouldRetry`，使 429 能被识别 |
+| aliyundrive | 是 | 是，4 小时（`expire_sec`） | — |
+| baidunetdisk | 是，并加上 `dircache`（它目前没有） | 是，`dlink` 及其解析出的重定向地址 | `Open` 中的 HEAD 与 GET 经过 pacer 及其重试 |
+| cloud123 | 是 | 是；列举结果中有 `DownloadURL` 时直接使用 | — |
+| guangyadrive、quark、weiyun | 是 | 是 | weiyun 的下载状态错误转为 `shouldRetry` 能识别的 HTTP 错误 |
+| pikpak | 是（其链接因此能跨请求存活） | 沿用 `Object` 上的链接 | — |
+| thunder | 是 | 沿用 `Object` 上的链接，并加上过期检查 | — |
+
+Mavio 用户最常用的上游后端 Google Drive（在服务端按名称过滤）与 OneDrive（按路径查找）已经一次请求即可找到文件，两种缓存都不需要。
+
+后端之外：
+
+* **经 `--rc-serve` 传递状态码**：`serve.Object` 对失败的 `Open` 回应云盘错误对应的状态码（403、带 `Retry-After` 的 429、503），而不是 404。
+* **每个远端一个 `Fs`**：Mavio 以远端根目录命名对象（`remote:` 加完整路径），使同一远端的所有媒体库共用一个 `Fs` 及其缓存，并以 `--fs-cache-expire-duration 1h` 启动 rcd。
+
+### 3.3 连接数限制
+
+fork 的限制器（`lib/connlimit`）按文件和按账号限制后端同时打开的下载连接：
+
+* `Open` 在请求 CDN 之前取得该文件（按 ID）的一个名额和账号的一个名额，返回的 body 经过包装，`Close` 时释放这两个名额。Mavio 的请求结束时 rcd 会关闭 body，所以名额随连接释放。
+* 文件的名额已满时，关闭该文件中最久没有读取的连接，把名额交给新的打开：播放器拖动、浏览器请求新范围时，都是先打开下一个连接再关闭上一个，而上一个的读取方已经不再读它。被关闭连接的读取方会收到错误，如果仍要读取就重新打开。
+* 账号的名额已满时，打开操作等待名额，直到其 context 结束；它从不占用其他文件的名额。
+* 限制值是各后端的选项（`--<backend>-max-file-connections`、`--<backend>-max-connections`），默认值按各云盘的实测结果设定（§3.5）；未实测的云盘不设限制。
+
+### 3.4 块缓存
+
+Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs/rclone`，处在它的两条读取路径之下：`rclone.Storage.Open` 的读取器（直接播放、probe、keyframes 与 trickplay 的容器索引读取、外挂文件）和 ffmpeg 读取的媒体代理（代理从缓存提供数据，不再直接转发）。它在 rclone VFS 缓存（`--vfs-cache-mode full`）行之有效的地方沿用其做法，在 Mavio 掌握更多信息的地方有所不同：
+
+| | rclone VFS 缓存 | Mavio 块缓存 |
+| :--- | :--- | :--- |
+| 数据 | 每个对象一个稀疏文件，大小与原文件相同 | 相同 |
+| 已有数据 | 有序、合并后的字节范围（`lib/ranges`） | 相同 |
+| 元数据 | 打开与关闭时写入 JSON；数据到达时不保存范围 | 带范围的 JSON，最多每隔几秒及关闭时保存，且在它记录的数据写入之后 |
+| 过期判断 | 打开时检查指纹（大小、修改时间、哈希） | 打开时检查 `Stat` 给出的远端 ID、大小与修改时间；读取中大小变化则丢弃该项 |
+| 缺失范围 | 若某个下载器的位置与之相距不超过 `--buffer-size`（16 MiB），就延长该下载器；否则启动新的下载器 | 相同，窗口大小可配置 |
+| 每个文件的下载器 | 不限 | 不超过该文件的连接数限制（默认 2）；超出时停止离所有等待中的读取最远的下载器 |
+| 上游请求 | 128 MiB 的块，大小无上限地翻倍 | 16 MiB 的块，翻倍至 256 MiB 为止，使放弃的读取浪费很少 |
+| 预读 | `--vfs-read-ahead`，默认 0，另有 16 MiB 内存缓冲 | 按意图预读（见下）；数据以 1 MiB 为单位直接写入文件，不经内存缓冲 |
+| 下载器结束 | 空闲 5 秒，或连续遇到 1 MiB 已有数据 | 相同 |
+| 错误 | 连续 10 次错误后，等待者失败 | 相同，并对 403、429 与 503 按 `Retry-After` 退避 |
+| 磁盘读取 | 持有该项的锁 | 不持锁；只保护范围信息 |
+| 淘汰 | 先淘汰未在使用的项，最久未用者优先；超出配额时整体丢弃已打开的项 | 先淘汰未在使用的项；再淘汰已打开项中落后于所有读取位置最远的范围，保留读取位置前方的数据 |
+
+按意图预读，这是文件系统层面的缓存无法知道的：
+
+* **probe**：在 ffprobe 运行前，用两个请求同时取回文件头（1 MB）和文件尾（256 KB），ffprobe 随后从缓存读取。
+* **容器索引**：读取 Matroska 元素与 MP4 box 的大量小读取扩展到 256 KB 对齐，使相邻元素共用一个请求。
+* **seek**：播放开始或拖动到某个时间时，在源的 keyframes 中查出对应关键帧，并在 ffmpeg 或客户端请求之前，从该关键帧的字节位置启动下载器。
+* **HLS**：请求某个分段时，下载器延伸到其后几个分段的字节范围；复制视频时由关键帧位置得出，否则按码率估算。
+* **直接播放**：下载器保持领先客户端最近一次请求的范围 30 秒的码率，最多 256 MiB。
+* **后台任务**读取时不预读。
+
+同一文件的多个读取方（如 probe 与播放，或两个观看者）共用一个缓存项，一段范围无论有多少等待者都只下载一次。缓存大小是一项设置（`rclone-cache-size`，默认 10 GiB），并保留最少空闲磁盘空间（5%）；7 天未读的项会被删除；缓存位于 `<cache>/rclone/blocks`，重启后保留。它适用于 `cloud` 存储类别（§2.1）的远端，媒体库未另行设置时 rclone 路径即属此类。
+
+如果某个远端的 CDN 拒绝不能接续已打开连接的范围请求，可以把该远端标记为顺序读取（远端的一项设置）：它的下载器不会在超出最远已打开位置的新位置启动，而是让那个连接一直读到目标位置。在这种远端上远距离拖动要等待之前的字节，所以只对实测确实需要的云盘开启（§3.5）。
+
+### 3.5 实测
+
+在为限制值和模式设定默认值之前，用测试账号经 rcd 对每个云盘实测：顺序读取、向前与向后跳转、同一文件与多个文件的并发范围请求，统计对 API 与 CDN 的请求数（`--dump headers`），并记录哪种模式会引发 403、429 或限速，在多少次请求之后发生、持续多久。实测结果决定各后端的连接数限制、链接有效期以及其远端是否需要顺序读取，并记录在 fork 的 `MAVIO_PROVIDERS.md` 中。
+
+### 3.6 实现索引
+
+| 机制 | 实现 | 阶段 |
+| :--- | :--- | :--- |
+| 对象缓存 | mavioai/rclone `lib/objcache`；`backend/{cloud115,aliyundrive,baidunetdisk,cloud123,guangyadrive,quark,weiyun,pikpak,thunder}` 的 `NewObject`、`List` 与各写操作 | P25，计划中 |
+| 链接缓存 | mavioai/rclone `lib/linkcache`；上述后端的 `Object.Open` | P25，计划中 |
+| 经 `--rc-serve` 传递状态码 | mavioai/rclone `lib/http/serve/serve.go`（`Object`） | P25，计划中 |
+| 每个远端一个 `Fs`、更长的 `Fs` 缓存 | `libs/rclone/storage.go`（`Storage.fsName`、`Client.objectURL`）、`daemon.go`（`Daemon.launch`） | P25，计划中 |
+| 连接数限制 | mavioai/rclone `lib/connlimit`；上述后端的 `Object.Open` | P25，计划中 |
+| 块缓存 | `libs/rclone`（缓存及其下载器与范围）；`storage.go`（`file`）、`proxy.go`（`Proxy.ServeHTTP`）；意图来自 `apps/server/internal/playback` 与 `libs/library`（`Jobs.probeFile`） | P25，计划中 |
+| 实测 | mavioai/rclone `MAVIO_PROVIDERS.md` | P25，计划中 |

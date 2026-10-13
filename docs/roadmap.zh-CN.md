@@ -686,7 +686,8 @@ flowchart TD
 - [x] 分发 mavioai/rclone 二进制：由 fork 的 CI 为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建发布版本，`mise.toml` 锁定这些构建，容器镜像内置之
 - [ ] Web UI：服务器设置中的远端管理、媒体库表单目录选择器中的 rclone 目录（`StorageService.ListFolders`），以及下载客户端设置中的离线下载客户端
 - [ ] Web UI 目录选择器中从远端目录手动导入
-- [ ] 后续：远端插件（运行在其他机器上的插件进程）、云盘直链、按变更通知增量扫描、媒体读取的块缓存
+- [ ] 云盘读取（[优化 §3](optimization.zh-CN.md#3-通过-rclone-读取云盘reading-cloud-drives-through-rclone)）：逐个云盘实测；mavioai/rclone 后端中的对象缓存、链接缓存与连接数限制；经 `--rc-serve` 传递云盘状态码；每个远端一个 `Fs`；`libs/rclone` 中的块缓存
+- [ ] 后续：远端插件（运行在其他机器上的插件进程）、云盘直链、按变更通知增量扫描
 
 ---
 
