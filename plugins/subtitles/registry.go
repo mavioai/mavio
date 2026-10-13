@@ -2,11 +2,13 @@ package main
 
 import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/addic7ed"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animekalesi"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animesubinfo"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animetosho"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/animetoshoxyz"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/assrt"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/avistaz"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/bayflix"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/betaseries"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/bsplayer"
@@ -16,12 +18,15 @@ import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/hdbits"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/hosszupuska"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/jimaku"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/karagarga"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/ktuvit"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/legendasdivx"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/legendasnet"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/napiprojekt"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/napisy24"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/nekur"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/opensubtitlescom"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/pipocas"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/prijevodionline"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/regielive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/soustitreseu"
@@ -29,6 +34,7 @@ import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subdl"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subf2m"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subs4free"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subs4series"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subsarr"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subscenter"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/subsdump"
@@ -46,22 +52,29 @@ import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/supersubtitles"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/titlovi"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/titrari"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/titulky"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/tsukihime"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/turkcealtyaziorg"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/tvsubtitles"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/vladoonmooo"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/wizdom"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/xsubs"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/yavkanet"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/yifysubtitles"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/zimuku"
 )
 
 // definitions returns the providers the plugin implements, by name.
 func definitions() []provider.Definition {
 	return []provider.Definition{
+		addic7ed.Definition(),
 		animekalesi.Definition(),
 		animesubinfo.Definition(),
 		animetosho.Definition(),
 		animetoshoxyz.Definition(),
 		assrt.Definition(),
+		avistaz.Definition(),
+		avistaz.CinemaZDefinition(),
 		bayflix.Definition(),
 		betaseries.Definition(),
 		bsplayer.Definition(),
@@ -71,12 +84,15 @@ func definitions() []provider.Definition {
 		hdbits.Definition(),
 		hosszupuska.Definition(),
 		jimaku.Definition(),
+		karagarga.Definition(),
 		ktuvit.Definition(),
+		legendasdivx.Definition(),
 		legendasnet.Definition(),
 		napiprojekt.Definition(),
 		napisy24.Definition(),
 		nekur.Definition(),
 		opensubtitlescom.Definition(),
+		pipocas.Definition(),
 		prijevodionline.Definition(),
 		regielive.Definition(),
 		soustitreseu.Definition(),
@@ -84,6 +100,7 @@ func definitions() []provider.Definition {
 		subdl.Definition(),
 		subf2m.Definition(),
 		subs4free.Definition(),
+		subs4series.Definition(),
 		subsarr.Definition(),
 		subscenter.Definition(),
 		subsdump.Definition(),
@@ -101,11 +118,15 @@ func definitions() []provider.Definition {
 		supersubtitles.Definition(),
 		titlovi.Definition(),
 		titrari.Definition(),
+		titulky.Definition(),
 		tsukihime.Definition(),
+		turkcealtyaziorg.Definition(),
 		tvsubtitles.Definition(),
 		vladoonmooo.Definition(),
 		wizdom.Definition(),
+		xsubs.Definition(),
 		yavkanet.Definition(),
 		yifysubtitles.Definition(),
+		zimuku.Definition(),
 	}
 }

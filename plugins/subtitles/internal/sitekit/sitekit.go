@@ -18,6 +18,9 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode/utf8"
+
+	"golang.org/x/text/encoding"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 )
@@ -65,6 +68,19 @@ func EquivalentReleaseGroups(group string) []string {
 		}
 	}
 	return []string{group}
+}
+
+// Decode returns a subtitle in UTF-8, read in a site's encoding unless it
+// is UTF-8 already, as Bazarr's subtitles' encoding hints.
+func Decode(data []byte, e encoding.Encoding) []byte {
+	if utf8.Valid(data) {
+		return data
+	}
+	out, err := e.NewDecoder().Bytes(data)
+	if err != nil {
+		return data
+	}
+	return out
 }
 
 // FramerateEqual reports whether frame rates are the same, as Bazarr's
