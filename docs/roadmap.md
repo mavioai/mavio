@@ -686,7 +686,7 @@ flowchart TD
 - [x] Distribution of the mavioai/rclone binary: release builds for Linux, macOS and Windows on amd64 and arm64 by the fork's CI, pinned in `mise.toml` and bundled into the container image
 - [ ] Web UI: remotes in the server settings, rclone folders in the library form's folder picker (`StorageService.ListFolders`), and the offline download clients in the download client settings
 - [ ] Manual imports from folders on remotes in the web UI's folder picker
-- [ ] Reads of cloud drives ([Optimization §3](optimization.md#3-reading-cloud-drives-through-rclone)): measurements of each drive; object and link caches and connection limits in mavioai/rclone's backends; drive statuses through `--rc-serve`; one `Fs` per remote; the block cache in `libs/rclone`
+- [ ] Reads of rclone remotes ([Optimization §3](optimization.md#3-reading-remote-storage-through-rclone)): measurements of each backend; in mavioai/rclone, the object cache of the rcd, the link cache of the backends that request links, the fixes of single backends, the storage's statuses and seeking through the rcd, and stream limits; one `Fs` per remote; the block cache in `libs/rclone`
 - [ ] Later: remote plugins (plugin processes on other machines), direct links of cloud drives, incremental scans by change notification
 
 ---
