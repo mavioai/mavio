@@ -13,6 +13,10 @@ import json, sys
 devices = json.load(sys.stdin)["devices"]
 print(next(d["udid"] for r, ds in sorted(devices.items()) if ".iOS-" in r for d in ds if d["name"].startswith("iPhone")))')
 
+# The simulator boots before the tests: a test runner launched on one still
+# booting can hang, and a failure then waits on the simulator's diagnostics,
+# which the tests do not need.
+xcrun simctl bootstatus "$device" -b >/dev/null
 xcodebuild test -quiet -scheme MavioApple-Package -destination "id=$device" \
     -derivedDataPath build/snapshots/derived -only-testing:MavioUITests \
-    -testLanguage en -testRegion US
+    -testLanguage en -testRegion US -collect-test-diagnostics never
