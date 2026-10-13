@@ -684,7 +684,7 @@ flowchart TD
 - [x] Managed and external `rclone rcd`; remote configuration API (`mavio.storage.v1`)
 - [x] Offline downloads as a built-in download client, with their jobs recorded in the database
 - [x] Distribution of the mavioai/rclone binary: its release builds pinned in `mise.toml`, built from source into the container image
-- [ ] A Linux arm64 build in mavioai/rclone's releases, so that `mise.toml` pins it too
+- [ ] mavioai/rclone's releases built by its CI for every platform `mise.toml` pins jellyfin-ffmpeg for (Linux arm64, macOS x64 and Windows arm64 are missing), so that `mise.toml` pins them too
 - [ ] Web UI: remotes in the server settings, rclone folders in the library form's folder picker (`StorageService.ListFolders`), and the offline download clients in the download client settings
 - [ ] Manual imports from folders on remotes in the web UI's folder picker
 - [ ] Later: remote plugins (plugin processes on other machines), direct links of cloud drives, incremental scans by change notification, a block cache for media reads

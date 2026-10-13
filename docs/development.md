@@ -20,7 +20,7 @@ Tool versions are pinned in `mise.toml`:
 | protoc-gen-buffa, protoc-gen-buffa-packaging, protoc-gen-connect-rust | Rust code generation of `libs/proto`, from their release builds |
 | java (Temurin) + gradle | The Android apps and `libs/android` |
 | jellyfin-ffmpeg | The media pipeline, test media generation and the integration tests (`ffmpeg` / `ffprobe` on `PATH`) |
-| rclone (mavioai/rclone) | Libraries on rclone remotes and their integration tests (`rclone` on `PATH`), from the fork's release builds for Linux x64, macOS and Windows x64 |
+| rclone (mavioai/rclone) | Libraries on rclone remotes and their integration tests (`rclone` on `PATH`), from the fork's release builds for Linux x64, macOS arm64 and Windows x64 |
 
 ```bash
 mise install            # Install the pinned toolchain
@@ -207,7 +207,7 @@ Toolchains in CI come from the same `mise.toml` (`jdx/mise-action`); jobs other 
 
 Other modules are used only inside the repository and promise no stable external API.
 
-The server's release binaries are built with `VERSION=v0.1.0 pnpm nx run server:dist`, and its image with `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` from the repository root. The Dockerfile pins the same jellyfin-ffmpeg version as `mise.toml`, with the SHA-256 digests of its two Linux portable builds; upgrading jellyfin-ffmpeg changes both files, and a test (`apps/server/internal/buildinfo`) fails when the two pins disagree. The image builds rclone from the commit of the mavioai/rclone release `mise.toml` pins, for both platforms (the release has no Linux arm64 build), into `/usr/local/bin/rclone`; the same test checks that the two name one release. Releases of the fork are its tags `v<rclone version>-mavio`, built by the fork's CI; upgrading changes the version, the digests and the Dockerfile's commit. The image also builds the DLNA, indexers and download clients plugins and ships them in `/usr/lib/mavio/plugins`, the plugin seed folder.
+The server's release binaries are built with `VERSION=v0.1.0 pnpm nx run server:dist`, and its image with `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` from the repository root. The Dockerfile pins the same jellyfin-ffmpeg version as `mise.toml`, with the SHA-256 digests of its two Linux portable builds; upgrading jellyfin-ffmpeg changes both files, and a test (`apps/server/internal/buildinfo`) fails when the two pins disagree. The image builds rclone from the commit of the mavioai/rclone release `mise.toml` pins, for both platforms (the release has no Linux arm64 build), into `/usr/local/bin/rclone`; the same test checks that the two name one release. Releases of the fork are its tags `v<rclone version>-mavio`; upgrading changes the version, the digests and the Dockerfile's commit. The image also builds the DLNA, indexers and download clients plugins and ships them in `/usr/lib/mavio/plugins`, the plugin seed folder.
 
 First-party process plugins are packaged with their `dist` target: `pnpm nx run dlna:dist` (or `indexers:dist`, `download-clients:dist`) builds the DLNA (or indexers, download clients) plugin, at the version in its manifest, for every server platform into `plugins/<name>/dist/`, as one catalog zip per platform and a `catalog.json` listing them with their SHA-256 digests; the zips' URLs are relative to the catalog.
 
