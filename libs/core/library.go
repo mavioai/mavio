@@ -204,12 +204,33 @@ func (l *Library) StorageClassOf(p string) StorageClass {
 }
 
 // InFolder reports whether p is folder or a path below it; '/' and '\'
-// both separate names, and a trailing separator of folder is ignored.
+// both separate names, either matching the other, and a trailing
+// separator of folder is ignored.
 func InFolder(p, folder string) bool {
+	_, ok := cutFolder(p, folder)
+	return ok
+}
+
+// cutFolder returns what follows folder in p, empty or starting with a
+// separator, false when p is neither folder nor below it. '/' and '\'
+// both separate names and match each other, as a path may join a Windows
+// library path to a slash-separated name; a trailing separator of folder
+// is ignored.
+func cutFolder(p, folder string) (string, bool) {
 	folder = strings.TrimRight(folder, `/\`)
-	if !strings.HasPrefix(p, folder) {
-		return false
+	if len(p) < len(folder) {
+		return "", false
+	}
+	for i := range len(folder) {
+		if a, b := p[i], folder[i]; a != b && (!isSeparator(a) || !isSeparator(b)) {
+			return "", false
+		}
 	}
 	rest := p[len(folder):]
-	return rest == "" || rest[0] == '/' || rest[0] == '\\' || folder == ""
+	if rest != "" && !isSeparator(rest[0]) {
+		return "", false
+	}
+	return rest, true
 }
+
+func isSeparator(c byte) bool { return c == '/' || c == '\\' }

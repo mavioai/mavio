@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -19,8 +20,10 @@ func TestClassify(t *testing.T) {
 	}
 	var detected []string
 	c := NewClassifier(&Detector{Detect: func(p string) (DeviceInfo, error) {
+		// Folders reach the detector cleaned by the OS rules.
+		p = filepath.ToSlash(p)
 		detected = append(detected, p)
-		for dir := p; dir != "/"; dir = path.Dir(dir) {
+		for dir := p; dir != "/" && dir != "."; dir = path.Dir(dir) {
 			if k, ok := kinds[dir]; ok {
 				return DeviceInfo{ID: dir, Kind: k}, nil
 			}

@@ -257,17 +257,17 @@ func isWindowsAbs(p string) bool {
 }
 
 // StorageName returns the name of the file at p within the storage of the
-// library path root, false when p is not root or below it.
+// library path root, false when p is not root or below it; '/' and '\'
+// both separate names and match each other.
 func StorageName(root, p string) (string, bool) {
-	root = strings.TrimRight(root, `/\`)
-	if p == root || strings.TrimRight(p, `/\`) == root {
-		return ".", true
-	}
-	rest, ok := strings.CutPrefix(p, root)
-	if !ok || rest == "" || (rest[0] != '/' && rest[0] != '\\') {
+	rest, ok := cutFolder(p, root)
+	if !ok {
 		return "", false
 	}
 	name := strings.ReplaceAll(strings.TrimLeft(rest, `/\`), `\`, "/")
+	if name == "" {
+		return ".", true
+	}
 	if !fs.ValidPath(name) {
 		return "", false
 	}

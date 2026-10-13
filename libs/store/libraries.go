@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -136,7 +137,7 @@ func checkPathsFree(ctx context.Context, tx *Store, lib *core.Library) error {
 func cleanPaths(paths []string) []string {
 	out := make([]string, len(paths))
 	for i, p := range paths {
-		out[i] = filepath.Clean(p)
+		out[i] = cleanPath(p)
 	}
 	return out
 }
@@ -147,17 +148,25 @@ func cleanClasses(classes map[string]core.StorageClass) map[string]core.StorageC
 	}
 	out := make(map[string]core.StorageClass, len(classes))
 	for p, c := range classes {
-		out[filepath.Clean(p)] = c
+		out[cleanPath(p)] = c
 	}
 	return out
 }
 
-func pathOverlaps(a, b string) bool {
-	within := func(child, parent string) bool {
-		return child == parent || strings.HasPrefix(child, strings.TrimSuffix(parent, string(filepath.Separator))+string(filepath.Separator))
+// cleanPath cleans a library path the way it was written, so it stays
+// valid: remote paths are clean already, slash-rooted paths keep their
+// slashes, and only other paths, of Windows, are cleaned by the OS rules.
+func cleanPath(p string) string {
+	switch {
+	case core.IsRemotePath(p):
+		return p
+	case strings.HasPrefix(p, "/") && !strings.HasPrefix(p, "//"):
+		return path.Clean(p)
 	}
-	return within(a, b) || within(b, a)
+	return filepath.Clean(p)
 }
+
+func pathOverlaps(a, b string) bool { return core.InFolder(a, b) || core.InFolder(b, a) }
 
 func toLibrary(l *ent.Library) core.Library {
 	return core.Library{

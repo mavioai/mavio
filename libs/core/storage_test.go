@@ -57,7 +57,11 @@ func TestStorageName(t *testing.T) {
 		{"/media/", "/media/a.mkv", "a.mkv", true},
 		{"/media", "/mediafiles/a.mkv", "", false},
 		{"/media", "/media/../etc/passwd", "", false},
-		{`C:\Media`, "C:/Media/a.mkv", "", false},
+		{`C:\Media`, "C:/Media/a.mkv", "a.mkv", true},
+		{"C:/Media", `C:\Media\a.mkv`, "a.mkv", true},
+		{`C:\Media\`, "C:/Media", ".", true},
+		{`C:\Media`, `C:\Media2\a.mkv`, "", false},
+		{`C:\Media`, `C:\Media\..\a.mkv`, "", false},
 		{"C:/Media", "C:/Media/a/b.mkv", "a/b.mkv", true},
 		{`C:\Media`, `C:\Media\a\b.mkv`, "a/b.mkv", true},
 		{"rclone:gdrive:Movies", "rclone:gdrive:Movies/a/b.mkv", "a/b.mkv", true},
@@ -73,6 +77,29 @@ func TestStorageName(t *testing.T) {
 		p := StoragePath(tt.root, name)
 		if back, _ := StorageName(tt.root, p); back != name {
 			t.Errorf("StorageName(%q, StoragePath() = %q) = %q, want = %q", tt.root, p, back, name)
+		}
+	}
+}
+
+func TestInFolder(t *testing.T) {
+	for _, tt := range []struct {
+		path, folder string
+		want         bool
+	}{
+		{"/media", "/media", true},
+		{"/media/a.mkv", "/media/", true},
+		{"/mediafiles", "/media", false},
+		{"/media", "/media/a", false},
+		{"/anything", "/", true},
+		{"rclone:gdrive:Movies", "/", false},
+		{`C:\Media\a.mkv`, "C:/Media", true},
+		{"C:/Media/a.mkv", `C:\Media`, true},
+		{`C:\Media2`, `C:\Media`, false},
+		{"rclone:gdrive:Movies/a.mkv", "rclone:gdrive:Movies", true},
+		{"rclone:gdrive:Movies 2", "rclone:gdrive:Movies", false},
+	} {
+		if got := InFolder(tt.path, tt.folder); got != tt.want {
+			t.Errorf("InFolder(%q, %q) = %v, want = %v", tt.path, tt.folder, got, tt.want)
 		}
 	}
 }
