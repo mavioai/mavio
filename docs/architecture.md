@@ -112,8 +112,7 @@ mavio/
 │   ├── scraper-theaudiodb/      # [Go → wasm] Music biographies and artwork
 │   ├── scraper-fanart/          # [Go → wasm] fanart.tv artwork
 │   ├── scraper-openlibrary/     # [Go → wasm] Open Library book metadata
-│   ├── subtitles-opensubtitles/ # [Go → wasm] OpenSubtitles.com subtitle downloads (merged into subtitles/ in P26)
-│   ├── subtitles/               # [Go → child process] Subtitle providers: Bazarr's sites (from P26)
+│   ├── subtitles/               # [Go → child process] Subtitle providers: OpenSubtitles.com and Bazarr's other sites
 │   ├── scraper-servarr/         # [Go → wasm] Servarr's metadata services: SkyHook, Radarr metadata, scene mappings, XEM
 │   ├── indexers/                # [Go → child process] Indexers: Newznab, Torznab, Cardigann, Prowlarr's sites
 │   ├── download-clients/        # [Go → child process] Download clients: qBittorrent, Transmission, SABnzbd, NZBGet, …
@@ -565,4 +564,4 @@ Subtitle acquisition reads media under the policy of [Optimization §2.3](optimi
 * Language detection and mods read only the subtitle files.
 
 ### 14.4 Subtitle Providers (`plugins/subtitles`)
-A first-party process plugin porting Bazarr's providers: subtitle sites behind cookies, logins and Cloudflare (through the indexers' kinds of proxies and FlareSolverr), captchas solved by Anti-Captcha, CaptchaAI or DeathByCaptcha with the administrator's account, archives (zip, RAR, 7z) and self-hosted providers at addresses a WASM manifest cannot list. Its configuration enables providers with their settings; `SubtitleProviderService` lists them, searches them for a video in several languages, returning candidates with their release names, flags and matched properties, and downloads one. Providers failing are throttled for Bazarr's durations by kind of failure (too many requests, download limit, service unavailable, authentication), some until midnight in their site's time zone, counted failures only after five in two minutes; their state is kept in the plugin's data folder. It takes the place of `subtitles-opensubtitles`.
+A first-party process plugin porting Bazarr's providers: subtitle sites behind cookies, logins and Cloudflare (through the indexers' kinds of proxies and FlareSolverr), captchas solved by Anti-Captcha, CaptchaAI or DeathByCaptcha with the administrator's account, archives (zip, RAR, 7z) and self-hosted providers at addresses a WASM manifest cannot list. Its configuration enables providers with their settings; `SubtitleProviderService` lists them, searches them for a video in several languages, returning candidates with their release names, flags and matched properties, and downloads one. Providers failing are throttled for Bazarr's durations by kind of failure (too many requests, download limit, service unavailable, authentication), some until midnight in their site's time zone, counted failures only after five in two minutes; their state is kept in the plugin's data folder. OpenSubtitles.com is one of its providers.

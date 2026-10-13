@@ -112,8 +112,7 @@ mavio/
 │   ├── scraper-theaudiodb/      # [Go → wasm] 音乐人简介与图片
 │   ├── scraper-fanart/          # [Go → wasm] fanart.tv 图片
 │   ├── scraper-openlibrary/     # [Go → wasm] Open Library 图书元数据
-│   ├── subtitles-opensubtitles/ # [Go → wasm] OpenSubtitles.com 字幕下载（P26 并入 subtitles/）
-│   ├── subtitles/               # [Go → 子进程] 字幕提供者：移植 Bazarr 的各站点（自 P26）
+│   ├── subtitles/               # [Go → 子进程] 字幕提供者：OpenSubtitles.com 与 Bazarr 的其他站点
 │   ├── scraper-servarr/         # [Go → wasm] Servarr 的元数据服务：SkyHook、Radarr 元数据、scene 映射、XEM
 │   ├── indexers/                # [Go → 子进程] 索引器：Newznab、Torznab、Cardigann、Prowlarr 的站点
 │   ├── download-clients/        # [Go → 子进程] 下载客户端：qBittorrent、Transmission、SABnzbd、NZBGet 等
@@ -565,4 +564,4 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * 语言识别与修正只读取字幕文件。
 
 ### 14.4 字幕提供者（`plugins/subtitles`）
-移植 Bazarr 各提供者的第一方进程插件：位于 cookie、登录与 Cloudflare 之后的字幕站点（经与索引器同类的代理与 FlareSolverr），用管理员的 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 账号识别验证码，压缩包（zip、RAR、7z），以及 WASM 清单无法列出地址的自托管提供者。其配置启用各提供者并给出设置；`SubtitleProviderService` 列出它们，按多种语言为一个视频搜索，返回带 release 名称、标记与匹配属性的候选，并下载其中之一。失败的提供者按 Bazarr 按失败类型给出的时长限流（请求过多、下载额度、服务不可用、认证），有的直到其站点时区的午夜，计数类失败在两分钟内达到五次才限流；状态保存在插件的数据目录中。它取代 `subtitles-opensubtitles`。
+移植 Bazarr 各提供者的第一方进程插件：位于 cookie、登录与 Cloudflare 之后的字幕站点（经与索引器同类的代理与 FlareSolverr），用管理员的 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 账号识别验证码，压缩包（zip、RAR、7z），以及 WASM 清单无法列出地址的自托管提供者。其配置启用各提供者并给出设置；`SubtitleProviderService` 列出它们，按多种语言为一个视频搜索，返回带 release 名称、标记与匹配属性的候选，并下载其中之一。失败的提供者按 Bazarr 按失败类型给出的时长限流（请求过多、下载额度、服务不可用、认证），有的直到其站点时区的午夜，计数类失败在两分钟内达到五次才限流；状态保存在插件的数据目录中。OpenSubtitles.com 是其提供者之一。

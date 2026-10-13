@@ -1,4 +1,4 @@
-module github.com/mavioai/mavio/plugins/subtitles-opensubtitles
+module github.com/mavioai/mavio/plugins/subtitles
 
 go 1.27.0
 

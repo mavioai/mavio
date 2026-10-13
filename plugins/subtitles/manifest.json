@@ -1,0 +1,15 @@
+{
+  "id": "org.mavio.subtitles",
+  "name": "Subtitles",
+  "version": "0.1.0",
+  "description": "Subtitles for movies and episodes from the subtitle sites Bazarr supports, such as OpenSubtitles.com, with their throttling.",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_PROCESS",
+  "capabilities": [
+    "CAPABILITY_SUBTITLE_PROVIDER"
+  ],
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"providers\":{\"type\":\"array\",\"description\":\"The subtitle providers and their settings\",\"items\":{\"type\":\"object\",\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":\"string\",\"minLength\":1,\"description\":\"The provider's name, as Bazarr names it\"},\"enabled\":{\"type\":\"boolean\",\"default\":false},\"settings\":{\"type\":\"object\",\"description\":\"The settings the provider takes\"}},\"additionalProperties\":false}}},\"additionalProperties\":false}",
+  "apiVersion": "1.0"
+}

@@ -27,7 +27,7 @@ use (
 	./plugins/scraper-servarr
 	./plugins/scraper-theaudiodb
 	./plugins/scraper-tmdb
-	./plugins/subtitles-opensubtitles
+	./plugins/subtitles
 	./tools/fixtures
 	./tools/testport
 )
