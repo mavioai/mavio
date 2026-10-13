@@ -686,7 +686,10 @@ flowchart TD
 - [x] 分发 mavioai/rclone 二进制：由 fork 的 CI 为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建发布版本，`mise.toml` 锁定这些构建，容器镜像内置之
 - [ ] Web UI：服务器设置中的远端管理、媒体库表单目录选择器中的 rclone 目录（`StorageService.ListFolders`），以及下载客户端设置中的离线下载客户端
 - [ ] Web UI 目录选择器中从远端目录手动导入
-- [ ] rclone 远端读取（[优化 §3](optimization.zh-CN.md#3-通过-rclone-读取远端存储reading-remote-storage-through-rclone)）：逐个后端实测；mavioai/rclone 中 rcd 的对象缓存、需申请链接的后端的链接缓存、对个别后端的修正、经 rcd 传递存储状态码与拖动方式、数据流限制；每个远端一个 `Fs`；`libs/rclone` 中的块缓存
+- [ ] rclone 远端读取（[优化 §3](optimization.zh-CN.md#3-通过-rclone-读取远端存储reading-remote-storage-through-rclone)），按以下顺序：
+  - [ ] 经 rcd 与 Mavio 惠及所有后端：mavioai/rclone 中带版本校验的对象缓存、经 `--rc-serve` 传递存储状态码与拖动方式、数据流限制，以及对 webdav 与 http（以 200 回应的范围请求）和 crypt（nonce）的修正；Mavio 中每个远端一个 `Fs`、每次读取附带指纹以及 `libs/rclone` 中的块缓存
+  - [ ] fork 的云盘与常用个人云盘：先实测，再为 cloud115、aliyundrive、baidunetdisk、cloud123、guangyadrive、quark、weiyun、pikpak 与 thunder，以及 onedrive、box、pcloud、mega、yandex、protondrive 与 iclouddrive 加上 `FindByListing`、链接缓存、默认数据流限制与 §3.2 中的修正
+  - [ ] §3.2 中的其余后端（`FindByListing`、链接缓存与修正，如 filelu 的范围请求与 shade 的第一个请求），各自在 Mavio 用户实际使用时再做
 - [ ] 后续：远端插件（运行在其他机器上的插件进程）、云盘直链、按变更通知增量扫描
 
 ---
