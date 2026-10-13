@@ -13,6 +13,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/apps/server/internal/releases"
 	"github.com/mavioai/mavio/apps/server/internal/requests"
+	"github.com/mavioai/mavio/apps/server/internal/subtitles"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
@@ -269,6 +270,18 @@ func (m *Manager) SubtitleProviders() []library.SubtitleProvider {
 	var out []library.SubtitleProvider
 	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_SUBTITLE_PROVIDER) {
 		out = append(out, &subtitleProvider{m: m, id: id})
+	}
+	return out
+}
+
+// SubtitlePlugins returns the started subtitle provider plugins for
+// subtitle acquisition.
+func (m *Manager) SubtitlePlugins() []subtitles.Provider {
+	var out []subtitles.Provider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_SUBTITLE_PROVIDER) {
+		if pl, ok := m.running(id); ok && pl.Subtitles() != nil {
+			out = append(out, subtitles.Provider{ID: id, Client: pl.Subtitles()})
+		}
 	}
 	return out
 }

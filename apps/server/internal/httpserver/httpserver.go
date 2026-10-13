@@ -29,6 +29,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
+	"github.com/mavioai/mavio/apps/server/internal/subtitles"
 	"github.com/mavioai/mavio/apps/server/internal/webui"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
@@ -126,6 +127,9 @@ type Options struct {
 	// nil uses one over Store and Acquisition without metadata or
 	// discovery providers.
 	Requests *requests.Service
+	// SubtitleRuntime acquires subtitles for SubtitleService and runs its
+	// tasks; nil uses one over Store without providers.
+	SubtitleRuntime *subtitles.Runtime
 	// Dev serves the development player at /dev/player.
 	Dev bool
 }
@@ -162,6 +166,7 @@ func Handler(opts Options) (http.Handler, error) {
 	// Acquisition jobs run only where the server runs their worker.
 	tasks.Acquisition = opts.Acquisition
 	tasks.Requests = opts.Requests != nil
+	tasks.Subtitles = opts.SubtitleRuntime
 	mux.Handle(systemv1connect.NewTaskServiceHandler(tasks, interceptors))
 	mux.Handle(systemv1connect.NewActivityServiceHandler(rpc.NewActivityService(opts.Store), interceptors))
 	mux.Handle(systemv1connect.NewBackupServiceHandler(rpc.NewBackupService(opts.Backups, opts.Activity), interceptors))
@@ -182,14 +187,14 @@ func Handler(opts Options) (http.Handler, error) {
 	items.Wake, items.ExternalIDKinds, items.Lyrics, items.Storages = opts.Wake, opts.ExternalIDKinds, opts.Lyrics, opts.Storages
 	mux.Handle(libraryv1connect.NewItemServiceHandler(items, interceptors))
 	mux.Handle(libraryv1connect.NewCollectionServiceHandler(rpc.NewCollectionService(opts.Store), interceptors))
-	refresher, subtitles := opts.Refresher, opts.Subtitles
+	refresher, subFiles := opts.Refresher, opts.Subtitles
 	if refresher == nil {
 		refresher = &library.Refresher{Store: opts.Store}
 	}
-	if subtitles == nil {
-		subtitles = &library.Subtitles{Store: opts.Store}
+	if subFiles == nil {
+		subFiles = &library.Subtitles{Store: opts.Store}
 	}
-	metadataService := rpc.NewMetadataService(opts.Store, refresher, subtitles, opts.Images.Fetch)
+	metadataService := rpc.NewMetadataService(opts.Store, refresher, subFiles, opts.Images.Fetch)
 	metadataService.Activity, metadataService.ExternalIDKinds = opts.Activity, opts.ExternalIDKinds
 	mux.Handle(libraryv1connect.NewMetadataServiceHandler(metadataService, interceptors))
 	mux.Handle(libraryv1connect.NewPlaylistServiceHandler(rpc.NewPlaylistService(opts.Store), interceptors))
@@ -223,6 +228,16 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(acquisitionv1connect.NewWantedServiceHandler(rpc.NewWantedService(acq), interceptors))
 	mux.Handle(acquisitionv1connect.NewDownloadServiceHandler(rpc.NewDownloadService(opts.Store, acq), interceptors))
 	mux.Handle(acquisitionv1connect.NewProfileServiceHandler(rpc.NewProfileService(opts.Store), interceptors))
+	subRuntime := opts.SubtitleRuntime
+	if subRuntime == nil {
+		subRuntime = &subtitles.Runtime{Store: opts.Store, Subtitles: subFiles}
+	}
+	subService := rpc.NewSubtitleService(opts.Store, subRuntime)
+	subService.Settings = opts.Settings
+	if opts.Activity != nil {
+		subService.Activity = opts.Activity
+	}
+	mux.Handle(acquisitionv1connect.NewSubtitleServiceHandler(subService, interceptors))
 	reqs := opts.Requests
 	if reqs == nil {
 		reqs = &requests.Service{Store: opts.Store, Acquisition: acq, Settings: requestSettings}
@@ -278,7 +293,7 @@ func connectHTTPStatus(err error) int {
 var services = []string{
 	acquisitionv1connect.DownloadServiceName, acquisitionv1connect.ProfileServiceName, acquisitionv1connect.ReleaseServiceName,
 	acquisitionv1connect.WantedServiceName, acquisitionv1connect.DiscoverServiceName, acquisitionv1connect.RequestServiceName,
-	acquisitionv1connect.IssueServiceName,
+	acquisitionv1connect.IssueServiceName, acquisitionv1connect.SubtitleServiceName,
 	authv1connect.AuthServiceName,
 	homev1connect.HomeServiceName,
 	libraryv1connect.LibraryServiceName, libraryv1connect.ItemServiceName, libraryv1connect.CollectionServiceName,

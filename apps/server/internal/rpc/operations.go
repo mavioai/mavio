@@ -19,6 +19,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/requests"
+	"github.com/mavioai/mavio/apps/server/internal/subtitles"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
@@ -51,6 +52,8 @@ type TaskService struct {
 	Plugins func() []plugins.Task
 	// Acquisition lists the acquisition tasks; nil lists none.
 	Acquisition *acquisition.Runtime
+	// Subtitles lists the subtitle tasks; nil lists none.
+	Subtitles *subtitles.Runtime
 	// Requests adds the requests' availability task; false leaves it
 	// out.
 	Requests bool
@@ -143,6 +146,19 @@ func (s *TaskService) tasks(ctx context.Context) ([]task, error) {
 			})
 		}
 	}
+	if s.Subtitles != nil {
+		for _, st := range s.Subtitles.Tasks() {
+			t := systemv1.Task_builder{Id: new(st.Kind), Name: new(st.Name), Kind: new(st.Kind), Description: new(st.Description)}.Build()
+			if st.Interval > 0 {
+				t.SetInterval(durationpb.New(st.Interval))
+			}
+			out = append(out, task{
+				proto:   t,
+				matches: func(j *core.Job) bool { return j.Kind == st.Kind },
+				run:     func(now time.Time) core.Job { return subtitles.RunJob(st.Kind, now) },
+			})
+		}
+	}
 	if s.Requests {
 		out = append(out, task{
 			proto: systemv1.Task_builder{
@@ -182,7 +198,7 @@ func (s *TaskService) ListTasks(ctx context.Context, _ *systemv1.ListTasksReques
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask, acquisition.JobRSS, acquisition.JobQueue, acquisition.JobRecycleBin, acquisition.JobRefreshMovies, acquisition.JobSceneMappings, requests.JobAvailability, requests.JobBlocklistedTags}
+	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask, acquisition.JobRSS, acquisition.JobQueue, acquisition.JobRecycleBin, acquisition.JobRefreshMovies, acquisition.JobSceneMappings, requests.JobAvailability, requests.JobBlocklistedTags, subtitles.JobWantedMovies, subtitles.JobWantedEpisodes, subtitles.JobUpgrade}
 	active, err := s.store.Jobs().List(ctx, core.JobQuery{Kinds: kinds, States: []core.JobState{core.JobPending}})
 	if err != nil {
 		return nil, connectError(ctx, err)

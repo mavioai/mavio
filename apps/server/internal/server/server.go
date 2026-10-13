@@ -32,6 +32,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
+	"github.com/mavioai/mavio/apps/server/internal/subtitles"
 	"github.com/mavioai/mavio/apps/server/internal/warming"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
@@ -279,15 +280,27 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			return err
 		},
 	}
-	// Imports complete the requests of what they import.
-	acq.Imported = reqs.Imported
+	subFiles := &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Logger: log}
+	subs := &subtitles.Runtime{
+		Store: db, Settings: func() core.SubtitleSettings { return set.Get().Subtitles }, Providers: plugs.SubtitlePlugins,
+		Subtitles: subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
+		Activity: activityLog, Logger: log,
+	}
+	// Imports complete the requests of what they import and search for
+	// its subtitles.
+	acq.Imported = func(ctx context.Context, itemID core.ID) {
+		reqs.Imported(ctx, itemID)
+		if _, err := subs.QueueSearch(ctx, []core.ID{itemID}); err != nil {
+			log.WarnContext(ctx, "queue subtitle search", "item", itemID, "err", err)
+		}
+	}
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline),
-		Subtitles: &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Logger: log},
-		Lyrics:    lyrics,
-		Intros:    &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
-		Settings:  set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
+		Subtitles: subFiles, SubtitleRuntime: subs,
+		Lyrics:   lyrics,
+		Intros:   &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
+		Settings: set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
 		ServerInfo: func() rpc.ServerInfo {
 			n := set.Get().Network
 			return rpc.ServerInfo{ID: serverID.String(), Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: n.HTTPSPort}
@@ -356,13 +369,17 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	// It also completes the requests whose titles became available.
 	acqHandlers := acq.Handlers()
 	maps.Copy(acqHandlers, reqs.Handlers())
+	maps.Copy(acqHandlers, subs.Handlers())
 	acqWorker := &library.Worker{
 		Queue: db.Jobs(), Owner: fmt.Sprintf("%s:%d:acquisition", hostname, os.Getpid()), Handlers: acqHandlers, Logger: log,
 	}
 	// The recurring jobs are scheduled now and whenever the settings
 	// change, as when RSS sync is turned on.
 	if err := set.Register(ctx, func(ctx context.Context, s core.ServerSettings) error {
-		return acq.Schedule(ctx, s.Acquisition)
+		if err := acq.Schedule(ctx, s.Acquisition); err != nil {
+			return err
+		}
+		return subs.Schedule(ctx, s.Subtitles)
 	}); err != nil {
 		log.ErrorContext(ctx, "schedule acquisition jobs", "err", err)
 	}
@@ -526,6 +543,18 @@ func newPlaybacks(ctx context.Context, log *slog.Logger, db core.Store, hub *eve
 		log.InfoContext(ctx, "ffmpeg found", "version", v)
 	}
 	return playback.NewManager(pc), v
+}
+
+// ffmpegPath returns the path of ffmpeg, "" when it is not found.
+func ffmpegPath(ffmpeg string) string {
+	if ffmpeg == "" {
+		return ""
+	}
+	p, err := exec.LookPath(ffmpeg)
+	if err != nil {
+		return ""
+	}
+	return p
 }
 
 // bordersOf returns the black border detector using ffmpeg, nil without
