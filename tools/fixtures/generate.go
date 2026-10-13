@@ -94,7 +94,11 @@ func Generate(ctx context.Context, opts Options) (Result, error) {
 			continue
 		}
 		log.InfoContext(ctx, "generating fixture", "name", spec.Name)
-		if err := generateOne(ctx, opts.FFmpeg, opts.Dir, spec); err != nil {
+		sources, err := fetchSources(ctx, opts.Dir, spec, log)
+		if err != nil {
+			return res, fmt.Errorf("fixture %s: %w", spec.Name, err)
+		}
+		if err := generateOne(ctx, opts.FFmpeg, opts.Dir, sources, spec); err != nil {
 			return res, fmt.Errorf("fixture %s: %w", spec.Name, err)
 		}
 		man.Fixtures[spec.Name] = manifestEntry{Key: key, Description: spec.Description}
@@ -166,8 +170,12 @@ func missingEncoders(spec Spec, available map[string]bool) []string {
 func specKey(version string, spec Spec) string {
 	h := sha256.New()
 	fmt.Fprintln(h, version)
-	for _, a := range ffmpegArgs(spec, "", "") {
+	for _, a := range ffmpegArgs(spec, "", "", "") {
 		fmt.Fprintln(h, a)
+	}
+	for _, name := range slices.Sorted(maps.Keys(spec.Sources)) {
+		fmt.Fprintln(h, name)
+		fmt.Fprintln(h, spec.Sources[name].SHA256)
 	}
 	for _, name := range slices.Sorted(maps.Keys(spec.Files)) {
 		fmt.Fprintln(h, name)
@@ -177,12 +185,15 @@ func specKey(version string, spec Spec) string {
 }
 
 // ffmpegArgs returns the full argument list for spec, with auxiliary file
-// references resolved against auxDir and the output written to out.
-func ffmpegArgs(spec Spec, auxDir, out string) []string {
+// references resolved against auxDir, source references against sourceDir
+// and the output written to out.
+func ffmpegArgs(spec Spec, auxDir, sourceDir, out string) []string {
 	args := []string{"-hide_banner", "-nostdin", "-loglevel", "error", "-y"}
 	for _, a := range spec.Args {
 		if name, ok := strings.CutPrefix(a, "{file:"); ok {
 			a = filepath.Join(auxDir, strings.TrimSuffix(name, "}"))
+		} else if name, ok := strings.CutPrefix(a, "{source:"); ok {
+			a = filepath.Join(sourceDir, spec.Sources[strings.TrimSuffix(name, "}")].SHA256)
 		}
 		args = append(args, a)
 	}
@@ -192,7 +203,7 @@ func ffmpegArgs(spec Spec, auxDir, out string) []string {
 	return append(args, "-threads", "1", "-fflags", "+bitexact", out)
 }
 
-func generateOne(ctx context.Context, ffmpeg, dir string, spec Spec) error {
+func generateOne(ctx context.Context, ffmpeg, dir, sourceDir string, spec Spec) error {
 	auxDir, err := os.MkdirTemp("", "mavio-fixture-")
 	if err != nil {
 		return err
@@ -207,7 +218,7 @@ func generateOne(ctx context.Context, ffmpeg, dir string, spec Spec) error {
 	// Write next to the destination with the same extension (ffmpeg picks the
 	// muxer from it), then rename atomically.
 	tmp := filepath.Join(dir, ".tmp-"+spec.Name)
-	cmd := exec.CommandContext(ctx, ffmpeg, ffmpegArgs(spec, auxDir, tmp)...)
+	cmd := exec.CommandContext(ctx, ffmpeg, ffmpegArgs(spec, auxDir, sourceDir, tmp)...)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {

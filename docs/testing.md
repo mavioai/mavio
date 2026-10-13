@@ -68,8 +68,9 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 `tools/fixtures` deterministically generates test media with `ffmpeg -f lavfi` (`testsrc2`, `sine`): a catalog of short clips covering multiple containers and codecs (H.264, HEVC Main10, MPEG-2, VP9, AV1, AAC, AC-3, MP2, Opus, FLAC), HDR10 signaling and metadata, interlacing, multiple audio and subtitle tracks with languages and dispositions, chapters, music tags and non-integer frame rates and durations.
 
 * `pnpm nx run fixtures:media` writes the catalog to `.fixtures/` at the repository root (git-ignored; override with `MAVIO_FIXTURES`). Binary media files are never committed.
-* Generation is incremental: `.fixtures/manifest.json` records a key per fixture (a hash of the ffmpeg version, arguments and auxiliary files), and only missing or changed fixtures are regenerated.
+* Generation is incremental: `.fixtures/manifest.json` records a key per fixture (a hash of the ffmpeg version, arguments, auxiliary files and sources), and only missing or changed fixtures are regenerated.
 * Fixtures whose encoders the local ffmpeg build lacks are skipped with a warning.
+* Where synthesized signals cannot stand in, as for speech detection, a fixture is made from a recording fetched from a pinned URL and checked against its SHA-256 (a `Spec`'s `Sources`, referenced in its arguments as `{source:<name>}`). Fetched files are kept in `.fixtures/.sources/` by hash and fetched only once; only freely licensed recordings are used, and their URLs pin a commit.
 * Tests get a fixture path with `fixtures.Require(t, "<name>")` from `github.com/mavioai/mavio/tools/fixtures`, which skips the test when the fixture has not been generated.
 * `go run ./cmd/fixtures -list` (in `tools/fixtures`) lists the catalog.
 

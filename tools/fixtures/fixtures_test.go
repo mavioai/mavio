@@ -28,6 +28,11 @@ func TestCatalog(t *testing.T) {
 					t.Errorf("%s: argument %q references an undefined file", s.Name, a)
 				}
 			}
+			if name, ok := strings.CutPrefix(a, "{source:"); ok {
+				if _, ok := s.Sources[strings.TrimSuffix(name, "}")]; !ok {
+					t.Errorf("%s: argument %q references an undefined source", s.Name, a)
+				}
+			}
 		}
 	}
 }

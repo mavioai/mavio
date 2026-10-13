@@ -2,7 +2,7 @@
 
 > English | [简体中文](README.zh-CN.md)
 
-Deterministically generates test media with `ffmpeg -f lavfi` and lets tests locate it. See `docs/testing.md` §3.
+Deterministically generates test media with `ffmpeg -f lavfi`, or from recordings fetched from pinned URLs and checked by SHA-256, and lets tests locate it. See `docs/testing.md` §3.
 
 ```bash
 pnpm nx run fixtures:media          # generate missing or changed fixtures into .fixtures/
@@ -14,7 +14,7 @@ pnpm nx run fixtures:dev-library    # a few minutes of movies and a series for t
 
 `dev-library.sh` writes `.fixtures/dev-library/{Movies,Shows}`: movies a browser plays directly, remuxed, with subtitles, several audio tracks or transcoded (HEVC HDR10), and a two-episode series, with posters named in NFO files. `mavio --dev --dev-library .fixtures/dev-library` adds them as libraries.
 
-The catalog lives in `catalog.go`; each `Spec` declares the ffmpeg arguments, the encoders it needs and any auxiliary input files.
+The catalog lives in `catalog.go`; each `Spec` declares the ffmpeg arguments, the encoders it needs and any auxiliary input files or fetched sources (kept in `.fixtures/.sources/`).
 
 In tests:
 

@@ -12,9 +12,29 @@ type Spec struct {
 	// Files are auxiliary input files (subtitles, chapter metadata, …) keyed by
 	// file name. Args reference them as "{file:<name>}".
 	Files map[string]string
+	// Sources are files fetched from the network keyed by file name, such as
+	// recordings lavfi cannot synthesize. Args reference them as
+	// "{source:<name>}".
+	Sources map[string]Source
 	// Args are the ffmpeg arguments between the global options and the output
 	// path.
 	Args []string
+}
+
+// Source is a file fetched once from a URL and checked by its SHA-256.
+type Source struct {
+	URL    string
+	SHA256 string
+}
+
+// sileroCommit is the commit of github.com/snakers4/silero-vad (MIT) whose
+// test recording the speech fixtures use.
+const sileroCommit = "1e261b036686cd0017d500ee96acd1c4ba572a9d"
+
+// sileroSpeech is a minute of English speech, 16 kHz mono.
+var sileroSpeech = Source{
+	URL:    "https://raw.githubusercontent.com/snakers4/silero-vad/" + sileroCommit + "/tests/data/test.wav",
+	SHA256: "89f17d9c94c4b31eb320f424628bcbc920abaddbee6e2760fd868bfb1d9a2e47",
 }
 
 const (
@@ -202,6 +222,13 @@ func Catalog() []Spec {
 					"-metadata", "album_artist=Mavio", "-metadata", "track=1/2", "-metadata", "disc=1/1",
 					"-metadata", "date=2026", "-metadata", "genre=Test",
 				}),
+		},
+		{
+			Name:        "speech.wav",
+			Description: "Speech detection: a minute of English speech, 16 kHz mono 16-bit PCM, Silero VAD's test recording.",
+			Encoders:    []string{"pcm_s16le"},
+			Sources:     map[string]Source{"test.wav": sileroSpeech},
+			Args:        []string{"-i", "{source:test.wav}", "-c:a", "pcm_s16le", "-ar", "16000", "-ac", "1"},
 		},
 	}
 }
