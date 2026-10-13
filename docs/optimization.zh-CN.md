@@ -276,7 +276,7 @@ fork 对 rcd 与后端做以下修改；能对所有后端统一完成的，就�
 
 * **缓存来源：**
   * `serveRemote` 在调用 `NewObject` 之前先在这里查找对象，并缓存找到的对象。
-  * `operations/list` 与 `operations/stat` 服务于 Mavio 的扫描与 `Stat`，它们返回的对象都写入缓存。
+  * `operations/list` 与 `operations/stat` 服务于 Mavio 的扫描与 `Stat`，它们总是查询后端，从不读取缓存，并用返回的对象替换对应条目。只有 `--rc-serve` 读取缓存，所以扫描能立即看到存储上的变化，Mavio 的 `Stat` 给出的也总是存储上的当前版本。
   * 通过列目录查找文件的后端，以 fork 的特性 `FindByListing` 声明这一点，即查找表中最后三行除 union 与 compress 之外的后端。对它们而言，未命中时列一次父目录并缓存其中所有对象，随后对相邻文件的请求即可命中；同一目录的并发未命中共用一次列举。
 * **随缓存的 `Object` 一起存活的数据：**
   * pikpak、thunder 与 pcloud 的链接；
@@ -289,8 +289,14 @@ fork 对 rcd 与后端做以下修改；能对所有后端统一完成的，就�
   * 条目默认存活 5 分钟（可配置）。
   * 经 rcd 的写操作（`operations/*`、`sync/*`）会丢弃所涉及路径与目录的条目。
   * 后端支持 `ChangeNotify` 的远端（drive、onedrive、dropbox、box、pcloud、mega 等）留在缓存中期间，它报告的变化会丢弃对应条目。
-  * 在别处做的修改表现为 `Open` 失败；此时丢弃条目、重新查找对象并重试一次。
+  * 在别处做的修改表现为指纹不符（见下）或 `Open` 失败；此时丢弃条目、重新查找对象并重试一次。
   * 未命中不缓存。
+* **版本校验：** 缓存的对象永远不会比 Mavio 打开文件时看到的版本更旧。
+  * Mavio 的读取器打开文件时调用 `Stat`，并把结果随每个发往 `--rc-serve` 的请求一起发送：ID、大小、修改时间，以及后端列举结果中无需额外代价即可得到的哈希。
+  * rcd 只在指纹相符时使用缓存的对象，否则重新查找。
+  * 重新查找到的对象仍不相符时，rcd 回应 412。Mavio 将其视为文件已变化：丢弃该文件的块缓存项，并重新调用 `Stat`。
+  * 按路径读取的后端（s3、b2、googlecloudstorage、azureblob、webdav 等）否则会以旧的大小提供新内容。对于支持按 ETag 条件读取的后端，`Open` 还会带上对象 ETag 的 `If-Match`。这样，读取中途被替换的文件会以 412 失败，而不会混入两个版本的数据。
+  * 原地改写且 ID、大小与修改时间都不变的文件，只有在指纹包含哈希时才能发现。
 
 **链接缓存**（`lib/linkcache`）：每个需要申请链接的后端在 `Open` 中使用。
 
@@ -328,6 +334,7 @@ fork 对 rcd 与后端做以下修改；能对所有后端统一完成的，就�
 
 * **状态码：** 查找与打开回应存储错误对应的状态码，而不是 404 与 500：
   * 对象不存在时为 404；
+  * 对象版本与 Mavio 发送的指纹不符时为 412；
   * 403；
   * 429 与 503，带上它们的 `Retry-After`（`fserrors.ErrorRetryAfter`）；
   * 配额错误（drive 的 `downloadQuotaExceeded`、mega 的 509）回应为 429，存储给出重置时间时一并带上；
@@ -365,7 +372,7 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | 数据 | 每个对象一个稀疏文件，大小与原文件相同 | 相同 |
 | 已有数据 | 有序、合并后的字节范围（`lib/ranges`） | 相同 |
 | 元数据 | 打开与关闭时写入 JSON；数据到达时不保存范围 | 带范围的 JSON，最多每隔几秒及关闭时保存，且在它记录的数据写入之后 |
-| 过期判断 | 打开时检查指纹（大小、修改时间、哈希） | 打开时检查 `Stat` 给出的远端 ID、大小与修改时间；读取中大小变化则丢弃该项 |
+| 过期判断 | 打开时检查指纹（大小、修改时间、哈希） | 打开时检查 `Stat` 给出的 §3.2 中的指纹；读取中大小变化或收到 412 则丢弃该项 |
 | 缺失范围 | 若某个下载器的位置与之相距不超过 `--buffer-size`（16 MiB），就延长该下载器；否则启动新的下载器 | 相同，窗口大小可配置 |
 | 每个文件的下载器 | 不限 | 不超过该文件的连接数限制（默认 2）；超出时停止离所有等待中的读取最远的下载器 |
 | 上游请求 | 128 MiB 的块，大小无上限地翻倍 | 16 MiB 的块，翻倍至 256 MiB 为止，使放弃的读取浪费很少 |
@@ -415,6 +422,7 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | 机制 | 实现 | 阶段 |
 | :--- | :--- | :--- |
 | 对象缓存 | mavioai/rclone `fs/objcache`；`fs/rc/rcserver`（`serveRemote`）、`fs/operations/rc.go`（`list`、`stat` 与各写操作），以及通过列目录查找文件的后端的 `FindByListing` 特性 | P25，计划中 |
+| 版本校验 | mavioai/rclone `fs/objcache`、`lib/http/serve/serve.go`（指纹与 412）、支持 ETag 的后端的 `Object.Open` 中的 `If-Match`；`libs/rclone/storage.go`（`file`）、`proxy.go`（发送指纹） | P25，计划中 |
 | 链接缓存 | mavioai/rclone `lib/linkcache`；§3.2 表中各后端的 `Object.Open` | P25，计划中 |
 | 后端修正 | mavioai/rclone `backend/webdav`、`backend/http`（以 200 回应的范围请求）、`backend/crypt`（nonce）、`backend/filelu`（范围），以及 §3.2 表中"另外"一列 | P25，计划中 |
 | 经 rcd 传递状态码与拖动方式 | mavioai/rclone `lib/http/serve/serve.go`（`Object`）、`fs/rc/rcserver`、`fs/operations/rc.go`（`fsinfo`） | P25，计划中 |

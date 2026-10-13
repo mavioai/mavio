@@ -276,7 +276,7 @@ The fork changes the rcd and the backends as follows. Where a change can be made
 
 * **Filling it:**
   * `serveRemote` looks an object up here before calling `NewObject`, and caches what it finds.
-  * `operations/list` and `operations/stat`, which serve Mavio's scans and `Stat`, fill it with the objects they return.
+  * `operations/list` and `operations/stat`, which serve Mavio's scans and `Stat`, always ask the backend and never read the cache. They replace the entries of the objects they return. Only `--rc-serve` reads the cache, so scans see changes as soon as the storage does, and Mavio's `Stat` reports the storage's current version.
   * Backends that find a file by listing its folder declare it with a feature of the fork, `FindByListing`. The backends are those of the last three rows of the lookup table, except union and compress. For them, a miss lists the parent folder once and caches all its objects, so the next requests for its neighbors hit; concurrent misses of one folder share the listing.
 * **What lives on with the cached `Object`:**
   * the links of pikpak, thunder and pcloud;
@@ -289,8 +289,14 @@ The fork changes the rcd and the backends as follows. Where a change can be made
   * Entries live 5 minutes by default (an option).
   * Writes through the rcd (`operations/*`, `sync/*`) drop the entries of the paths and folders they touch.
   * While a remote whose backend has `ChangeNotify` (drive, onedrive, dropbox, box, pcloud, mega and others) is in the cache, the changes it reports drop their entries.
-  * A change made elsewhere surfaces as a failed `Open`. The entry is then dropped, the object looked up again and the open retried once.
+  * A change made elsewhere surfaces as a fingerprint that does not match (below) or as a failed `Open`. The entry is then dropped, the object looked up again and the open retried once.
   * Misses are not cached.
+* **Version checks:** a cached object is never older than the version Mavio opened.
+  * Mavio's reader calls `Stat` when it opens a file. It sends the result with every request to `--rc-serve`: the ID, size and modification time, and the hash where the backend's listings carry one at no cost.
+  * The rcd uses a cached object only when its fingerprint matches. Otherwise it looks the object up again.
+  * When the fresh object does not match either, the rcd answers 412. Mavio treats that as a changed file: it drops the file's block-cache item and calls `Stat` again.
+  * Backends that read by path (s3, b2, googlecloudstorage, azureblob, webdav and others) would otherwise serve new content under an old size. Where they support conditional reads by ETag, `Open` also sends `If-Match` with the object's ETag. A file replaced in the middle of a read then fails with 412 instead of mixing two versions.
+  * A file rewritten in place while keeping its ID, size and modification time is detected only where the hash is part of the fingerprint.
 
 **Link cache** (`lib/linkcache`): used inside `Open` by every backend that requests a link.
 
@@ -328,6 +334,7 @@ The fork changes the rcd and the backends as follows. Where a change can be made
 
 * **Statuses:** lookups and opens answer with the status of the storage's error, not 404 and 500:
   * 404 when the object is not found;
+  * 412 when the object's version does not match the fingerprint Mavio sent;
   * 403;
   * 429 and 503, with their `Retry-After` (`fserrors.ErrorRetryAfter`);
   * a quota (drive's `downloadQuotaExceeded`, mega's 509) as 429, with the reset where the storage states it;
@@ -365,7 +372,7 @@ The cache follows rclone's VFS cache (`--vfs-cache-mode full`) where that works,
 | Data | a sparse file per object, at its full size | the same |
 | Present data | sorted, coalesced byte ranges (`lib/ranges`) | the same |
 | Metadata | JSON written at open and close; ranges not saved as data arrives | JSON with the ranges, saved at most every few seconds and at close, after the data it records is written |
-| Staleness | fingerprint (size, modification time, hash) checked at open | the remote's ID, size and modification time from `Stat`, checked at open; a size change while reading drops the item |
+| Staleness | fingerprint (size, modification time, hash) checked at open | the fingerprint of §3.2 from `Stat`, checked at open; a size change or a 412 while reading drops the item |
 | Missing range | a downloader whose position is within `--buffer-size` (16 MiB) of it is extended; otherwise a new downloader starts | the same, with the window as an option |
 | Downloaders per file | unlimited | at most the file's connection limit (2 by default); beyond it, the downloader furthest from every waiting read is stopped |
 | Upstream requests | chunks of 128 MiB doubling without bound | chunks of 16 MiB doubling to 256 MiB, so that an abandoned read wastes little |
@@ -415,6 +422,7 @@ The results set each backend's stream limits, link lifetimes and whether its rem
 | Mechanism | Implementation | Phase |
 | :--- | :--- | :--- |
 | Object cache | mavioai/rclone `fs/objcache`; `fs/rc/rcserver` (`serveRemote`), `fs/operations/rc.go` (`list`, `stat`, the write operations), the `FindByListing` feature of the backends that list to find | P25, planned |
+| Version checks | mavioai/rclone `fs/objcache`, `lib/http/serve/serve.go` (the fingerprint and 412), `If-Match` in `Object.Open` of the backends with ETags; `libs/rclone/storage.go` (`file`), `proxy.go` (the fingerprint sent) | P25, planned |
 | Link cache | mavioai/rclone `lib/linkcache`; `Object.Open` of the backends in the table of §3.2 | P25, planned |
 | Backend fixes | mavioai/rclone `backend/webdav`, `backend/http` (ranges answered with 200), `backend/crypt` (the nonce), `backend/filelu` (ranges), and the "Also" column of §3.2 | P25, planned |
 | Statuses and seeking through the rcd | mavioai/rclone `lib/http/serve/serve.go` (`Object`), `fs/rc/rcserver`, `fs/operations/rc.go` (`fsinfo`) | P25, planned |
