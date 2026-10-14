@@ -780,8 +780,9 @@ flowchart TD
 - [x] 服务端中 Lingarr 的翻译：AI 模型（`ai/<提供商>/<模型>`）经由网关，逐条附带上下文或以 JSON 回答的批次翻译，以及插件翻译器，按语言匹配排成带后备的链；重试、断行、重叠修正、校验、校对（`ProofreadSubtitle`）、自动化（`subtitles.translate_wanted`）与基于译文记录的统计（`GetSubtitleTranslationStatistics`）；端到端测试通过构建的 `plugins/agent` 与假的 OpenAI 兼容 API 翻译一集的字幕，重试一次被限速的请求，然后校对
 - [x] `plugins/subtitles` 中的翻译服务（DeepL、LibreTranslate、Google、Bing、Microsoft、Yandex）及其语言；移除 P26 的翻译器（Google 翻译的手机页面、Gemini、Lingarr）
 - [x] 由 `tools/testport` 移植 Lingarr 的测试用例（翻译、语言匹配、自动化、SSA）：矢量绘图不再送去翻译，同一语言的其他地区不再匹配（pt-BR 不匹配 pt-PT），空回答不作为上下文，格式错误的批次会重试，听障字幕排在其他字幕之后作为来源，可读取没有层的对白行
-- [ ] 端到端测试也经由 `plugins/subtitles` 以假的翻译服务翻译
-- [ ] 以后：客户端提示订阅登录的风险，交由管理员决定是否接受；校对自翻译后时间轴变化的字幕条（目前按精确时间匹配）；登录与补全改为流式而非轮询；在 Windows 上验证该插件；删除已删除会话的条目（pi-durable 仍保留它们）
+- [x] 端到端测试也经由 `plugins/subtitles` 用 LibreTranslate 翻译这一集的字幕，其服务器是回环接口上的伪造服务；Google、Bing、Microsoft 与 Yandex 的非官方端点已手动对照真实服务检查（2026-10-14）
+- [x] 校对自翻译后时间轴变化的字幕条，按顺序、精确时间或重叠与来源配对；登录（`WatchAiLogin`）、补全（`StreamAi`）与智能体回答（`StreamAgentMessage`）以流式传送；已删除会话的对话在插件下次启动时从 pi-durable 的数据库中清除
+- [ ] 以后：客户端提示订阅登录的风险，交由管理员决定是否接受；在 Windows 上验证该插件
 
 ---
 

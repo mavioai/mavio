@@ -1,6 +1,7 @@
 package server_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -203,11 +205,12 @@ func TestSubtitleFlows(t *testing.T) {
 	// Subsarr is enabled in the plugin; subtitles are downloaded whatever
 	// their scores, those of movies synchronized whatever theirs, those of
 	// episodes never.
-	subsarr, whisper := newFakeSubsarr(t), newFakeWhisper(t)
+	subsarr, whisper, libre := newFakeSubsarr(t), newFakeWhisper(t), newFakeLibreTranslate(t)
 	if _, err := s.system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("org.mavio.subtitles"),
 		ConfigJson: new(`{"providers": [{"name": "subsarr", "enabled": true, "settings": {"base_url": "` + subsarr.URL + `"}},
-			{"name": "whisperai", "enabled": true, "settings": {"endpoint": "` + whisper.URL + `"}}]}`),
+			{"name": "whisperai", "enabled": true, "settings": {"endpoint": "` + whisper.URL + `"}}],
+			"translators": [{"name": "libretranslate", "enabled": true, "settings": {"url": "` + libre.URL + `"}}]}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
@@ -430,6 +433,30 @@ func TestSubtitleFlows(t *testing.T) {
 		t.Errorf("GetSubtitleTranslationStatistics = %v, %v", stats, err)
 	}
 
+	// 4b. They are translated to German by LibreTranslate, a translator
+	// of the subtitles plugin, whose server is a fake on the loopback
+	// interface.
+	waitFor(t, "LibreTranslate translating", func() bool {
+		_, err := subs.TranslateSubtitle(ctx, acquisitionv1.TranslateSubtitleRequest_builder{
+			ItemId: new(pilot.GetId()), Path: new(pilotFrench), Translator: new("org.mavio.subtitles/libretranslate"),
+			Language: acquisitionv1.SubtitleLanguageSpec_builder{Language: new("de")}.Build(),
+		}.Build())
+		return err == nil
+	})
+	waitFor(t, "the episode's subtitles translated to German", func() bool {
+		return len(history(pilot.GetId(), acquisitionv1.SubtitleAction_SUBTITLE_ACTION_TRANSLATED)) == 2
+	}, describe(pilot.GetId()))
+	german, err := os.ReadFile(strings.TrimSuffix(episodeFile, filepath.Ext(episodeFile)) + ".de.srt")
+	if err != nil || !strings.Contains(string(german), "[de] Bonjour, Walter.") || !strings.Contains(string(german), "# Subtitles translated with LibreTranslate #") {
+		t.Errorf("translation = %q, %v; want the cue translated by LibreTranslate and credited", german, err)
+	}
+	if r := history(pilot.GetId(), acquisitionv1.SubtitleAction_SUBTITLE_ACTION_TRANSLATED)[0].GetTranslation(); strings.Join(r.GetTranslators(), ",") != "org.mavio.subtitles/libretranslate" || r.GetInputTokens() != 0 {
+		t.Errorf("translation record = %v", r)
+	}
+	if got := libre.texts(); !slices.Equal(got, []string{"Bonjour, Walter."}) {
+		t.Errorf("texts sent to LibreTranslate = %q", got)
+	}
+
 	// 5. Whisper detected the audio of the film and of the episode is
 	// French when they were searched, from their first 30 seconds the
 	// plugin gets through the host API; it translates all of the film's
@@ -465,4 +492,52 @@ func TestSubtitleFlows(t *testing.T) {
 	if data, err := os.ReadFile(filepath.Join(movies, "The Matrix (1999)", "The Matrix (1999) HDTV-720p.en.srt")); err != nil || !strings.Contains(string(data), "Hello.") {
 		t.Errorf("transcription = %q, %v; want Whisper's", data, err)
 	}
+}
+
+// fakeLibreTranslate is a LibreTranslate server translating between French
+// and German by prefixing texts with the target language.
+type fakeLibreTranslate struct {
+	*httptest.Server
+
+	mu   sync.Mutex
+	sent []string
+}
+
+func newFakeLibreTranslate(t *testing.T) *fakeLibreTranslate {
+	t.Helper()
+	f := &fakeLibreTranslate{}
+	f.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/languages":
+			_, _ = io.WriteString(w, `[{"code":"fr","name":"French"},{"code":"de","name":"German"}]`)
+		case "/translate":
+			var req struct {
+				Q      []string `json:"q"`
+				Target string   `json:"target"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			f.mu.Lock()
+			f.sent = append(f.sent, req.Q...)
+			f.mu.Unlock()
+			out := make([]string, len(req.Q))
+			for i, q := range req.Q {
+				out[i] = "[" + req.Target + "] " + q
+			}
+			_ = json.NewEncoder(w).Encode(map[string][]string{"translatedText": out})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	t.Cleanup(f.Close)
+	return f
+}
+
+func (f *fakeLibreTranslate) texts() []string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return slices.Clone(f.sent)
 }
