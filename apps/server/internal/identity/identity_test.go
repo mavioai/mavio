@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -14,7 +15,8 @@ func TestLoad(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Load (create) = %v", err)
 	}
-	if info, err := os.Stat(file); err != nil || info.Mode().Perm()&0o077 != 0 {
+	// Windows has no permission bits; the key's directory is the user's own.
+	if info, err := os.Stat(file); err != nil || runtime.GOOS != "windows" && info.Mode().Perm()&0o077 != 0 {
 		t.Errorf("key file = %v, %v; want readable by the owner only", info, err)
 	}
 	again, err := Load(file)
