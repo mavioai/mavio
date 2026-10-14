@@ -105,6 +105,18 @@ func parseSSA(lines []string, advanced bool) ([]Cue, *ssaScript) {
 }
 
 func parseDialogue(value string, format []string) (Cue, []string, bool) {
+	c, fields, ok := dialogueFields(value, format)
+	if !ok && len(format) > 1 && format[0] == "layer" {
+		// Older Aegisub and FFmpeg write dialogue without its layer.
+		if c, fields, ok := dialogueFields(value, format[1:]); ok {
+			return c, append([]string{" 0"}, fields...), true
+		}
+	}
+	return c, fields, ok
+}
+
+// dialogueFields parses a dialogue's fields in the format.
+func dialogueFields(value string, format []string) (Cue, []string, bool) {
 	fields := strings.SplitN(value, ",", len(format))
 	if len(fields) < len(format) {
 		return Cue{}, nil, false
