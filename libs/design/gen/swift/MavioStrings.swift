@@ -484,6 +484,69 @@ public enum MavioStrings {
     /// State of a user who has a PIN.
     public static var authPinOn: String { NSLocalizedString("auth.pinOn", bundle: .module, comment: "") }
 
+    /// Title of the setup screen choosing a new server's mode; server is its name.
+    public static func authChooseMode(server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.chooseMode", bundle: .module, comment: ""), server)
+    }
+
+    /// Chooses mavio.dev mode at setup.
+    public static var authModeMavioDev: String { NSLocalizedString("auth.modeMavioDev", bundle: .module, comment: "") }
+
+    /// Explanation of mavio.dev mode at setup.
+    public static var authModeMavioDevMessage: String { NSLocalizedString("auth.modeMavioDevMessage", bundle: .module, comment: "") }
+
+    /// Chooses standalone mode at setup.
+    public static var authModeStandalone: String { NSLocalizedString("auth.modeStandalone", bundle: .module, comment: "") }
+
+    /// Explanation of standalone mode at setup.
+    public static var authModeStandaloneMessage: String { NSLocalizedString("auth.modeStandaloneMessage", bundle: .module, comment: "") }
+
+    /// Title of the screen claiming a server for a Mavio account; server is its name.
+    public static func authClaim(server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.claim", bundle: .module, comment: ""), server)
+    }
+
+    /// Explanation of claiming a server.
+    public static var authClaimMessage: String { NSLocalizedString("auth.claimMessage", bundle: .module, comment: "") }
+
+    /// Opens mavio.dev's page giving claim codes.
+    public static var authGetClaimCode: String { NSLocalizedString("auth.getClaimCode", bundle: .module, comment: "") }
+
+    /// Field of the claim code from mavio.dev.
+    public static var authClaimCode: String { NSLocalizedString("auth.claimCode", bundle: .module, comment: "") }
+
+    /// Claims the server with the code entered.
+    public static var authClaimServer: String { NSLocalizedString("auth.claimServer", bundle: .module, comment: "") }
+
+    /// Signs in to a server with a Mavio account at mavio.dev.
+    public static var authSignInWithMavio: String { NSLocalizedString("auth.signInWithMavio", bundle: .module, comment: "") }
+
+    /// Explanation on the sign-in screen of a server in mavio.dev mode.
+    public static var authMavioDevMessage: String { NSLocalizedString("auth.mavioDevMessage", bundle: .module, comment: "") }
+
+    /// Shown while a sign-in through mavio.dev completes.
+    public static var authSigningIn: String { NSLocalizedString("auth.signingIn", bundle: .module, comment: "") }
+
+    /// Starts signing in again after a failure.
+    public static var authTryAgain: String { NSLocalizedString("auth.tryAgain", bundle: .module, comment: "") }
+
+    /// Section of the profile listing the sign-ins kept in this browser.
+    public static var authSignIns: String { NSLocalizedString("auth.signIns", bundle: .module, comment: "") }
+
+    /// Kind of a sign-in with a Mavio account.
+    public static var authMavioAccount: String { NSLocalizedString("auth.mavioAccount", bundle: .module, comment: "") }
+
+    /// Kind of a sign-in with a user of one standalone server; server is its name.
+    public static func authStandaloneUser(server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.standaloneUser", bundle: .module, comment: ""), server)
+    }
+
+    /// Shows the content of another kept sign-in.
+    public static var authShow: String { NSLocalizedString("auth.show", bundle: .module, comment: "") }
+
+    /// Marks the sign-in whose content is shown.
+    public static var authShown: String { NSLocalizedString("auth.shown", bundle: .module, comment: "") }
+
     /// Placeholder of the search field.
     public static var searchPlaceholder: String { NSLocalizedString("search.placeholder", bundle: .module, comment: "") }
 

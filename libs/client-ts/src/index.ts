@@ -38,6 +38,7 @@ export {
   useServers,
   useServersStore,
   useSignedIn,
+  useSignIns,
   useSimilar,
   useUserData,
 } from "./hooks.ts";
@@ -50,7 +51,7 @@ export {
   Playback,
   type PlayOptions,
 } from "./playback.ts";
-export { browserDeviceKey, type DeviceKey, memoryDeviceKey, refreshMessage } from "./device-key.ts";
+export { assertionMessage, browserDeviceKey, type DeviceKey, memoryDeviceKey, refreshMessage } from "./device-key.ts";
 export { type Server, type Session, transport, urlOf } from "./server.ts";
 export {
   normalizeUrl,
@@ -58,5 +59,7 @@ export {
   type ServerEntry,
   type ServerInfo,
   Servers,
+  type SignIn,
+  signInKey,
   type Storage,
 } from "./servers.ts";

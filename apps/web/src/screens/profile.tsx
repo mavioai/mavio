@@ -1,8 +1,9 @@
-// The profile: the servers the user signed in to, in their order, which
-// orders Home; adding, signing out and signing in again; switching users
-// and the user's passkeys, authenticator app and PIN; and authorizing a
-// device with Quick Connect.
-import { errorMessage, type ServerEntry, useServers, useServersStore, useSignedIn } from "@mavio/client-ts";
+// The profile: the sign-ins kept in this browser and the one shown
+// (docs/accounts.md §7); the servers the user signed in to, in their
+// order, which orders Home; adding, signing out and signing in again;
+// switching users and the user's passkeys, authenticator app and PIN; and
+// authorizing a device with Quick Connect.
+import { errorMessage, type ServerEntry, useServers, useServersStore, useSignedIn, useSignIns } from "@mavio/client-ts";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -23,6 +24,7 @@ export function ProfileScreen() {
   return (
     <div className="max-w-3xl">
       <ScreenTitle>{t("nav.profile")}</ScreenTitle>
+      <SignIns />
       <section className="px-margin py-4">
         <div className="flex items-center pb-3">
           <h2 className="type-title3">{t("auth.servers")}</h2>
@@ -81,6 +83,41 @@ export function ProfileScreen() {
   );
 }
 
+/** The sign-ins kept, to show another or remove one. */
+function SignIns() {
+  const servers = useServersStore();
+  const { all, shown } = useSignIns();
+  if (all.length < 2) return null;
+  return (
+    <section className="px-margin py-4">
+      <h2 className="pb-3 type-title3">{t("auth.signIns")}</h2>
+      <ul className="flex flex-col divide-y divide-border rounded-lg bg-surface">
+        {all.map((s) => (
+          <li key={s.key} className="flex flex-wrap items-center gap-3 p-4">
+            <div className="min-w-0 flex-1">
+              <div className="type-headline">{s.name}</div>
+              <div className="truncate type-footnote text-text-secondary">
+                {s.kind === "mavioDev" ? t("auth.mavioAccount") : t("auth.standaloneUser", { server: s.servers[0].name })}
+                {s.kind === "mavioDev" && ` · ${s.servers.map((x) => x.name).join(", ")}`}
+              </div>
+            </div>
+            {s.key === shown?.key ? (
+              <span className="type-callout text-text-secondary">{t("auth.shown")}</span>
+            ) : (
+              <Button variant="secondary" onClick={() => servers.show(s.key)}>
+                {t("auth.show")}
+              </Button>
+            )}
+            <Button variant="plain" className="text-danger" onClick={() => void servers.signOut(s.key)}>
+              {t("auth.signOut")}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 /** Each standalone server's users to switch to and the signed-in user's credentials. */
 function Accounts() {
   const signedIn = useSignedIn().filter((s) => s.mode !== "mavioDev");
@@ -96,10 +133,13 @@ function Accounts() {
   ));
 }
 
-/** Signs in another device showing a Quick Connect code, as the user of one of the servers. */
+/**
+ * Signs in another device showing a Quick Connect code, as the user of one
+ * of the standalone servers; mavio.dev signs in devices of Mavio accounts.
+ */
 function AuthorizeDevice() {
   const servers = useServersStore();
-  const signedIn = useSignedIn();
+  const signedIn = useSignedIn().filter((s) => s.mode !== "mavioDev");
   const [serverId, setServerId] = useState(signedIn[0]?.id);
   const [code, setCode] = useState("");
   const [state, setState] = useState<{ ok?: boolean; error?: string }>({});

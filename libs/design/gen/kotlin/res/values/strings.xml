@@ -300,6 +300,44 @@
     <string name="auth_remove_pin">Remove PIN</string>
     <!-- State of a user who has a PIN. -->
     <string name="auth_pin_on">On</string>
+    <!-- Title of the setup screen choosing a new server's mode; server is its name. -->
+    <string name="auth_choose_mode">How Do People Sign In to %s\?</string>
+    <!-- Chooses mavio.dev mode at setup. -->
+    <string name="auth_mode_mavio_dev">With Mavio Accounts</string>
+    <!-- Explanation of mavio.dev mode at setup. -->
+    <string name="auth_mode_mavio_dev_message">People sign in with their Mavio accounts, you share libraries with friends and family at mavio.dev, and the server is reachable away from home.</string>
+    <!-- Chooses standalone mode at setup. -->
+    <string name="auth_mode_standalone">Standalone</string>
+    <!-- Explanation of standalone mode at setup. -->
+    <string name="auth_mode_standalone_message">The server keeps its own users and never contacts mavio.dev.</string>
+    <!-- Title of the screen claiming a server for a Mavio account; server is its name. -->
+    <string name="auth_claim">Claim %s</string>
+    <!-- Explanation of claiming a server. -->
+    <string name="auth_claim_message">Get a claim code at mavio.dev and enter it here. Your Mavio account becomes this server\'s administrator.</string>
+    <!-- Opens mavio.dev's page giving claim codes. -->
+    <string name="auth_get_claim_code">Get a Claim Code</string>
+    <!-- Field of the claim code from mavio.dev. -->
+    <string name="auth_claim_code">Claim Code</string>
+    <!-- Claims the server with the code entered. -->
+    <string name="auth_claim_server">Claim</string>
+    <!-- Signs in to a server with a Mavio account at mavio.dev. -->
+    <string name="auth_sign_in_with_mavio">Sign In with Mavio</string>
+    <!-- Explanation on the sign-in screen of a server in mavio.dev mode. -->
+    <string name="auth_mavio_dev_message">This server signs people in with their Mavio accounts.</string>
+    <!-- Shown while a sign-in through mavio.dev completes. -->
+    <string name="auth_signing_in">Signing in…</string>
+    <!-- Starts signing in again after a failure. -->
+    <string name="auth_try_again">Try Again</string>
+    <!-- Section of the profile listing the sign-ins kept in this browser. -->
+    <string name="auth_sign_ins">Sign-Ins</string>
+    <!-- Kind of a sign-in with a Mavio account. -->
+    <string name="auth_mavio_account">Mavio account</string>
+    <!-- Kind of a sign-in with a user of one standalone server; server is its name. -->
+    <string name="auth_standalone_user">User of %s</string>
+    <!-- Shows the content of another kept sign-in. -->
+    <string name="auth_show">Show</string>
+    <!-- Marks the sign-in whose content is shown. -->
+    <string name="auth_shown">Shown</string>
     <!-- Placeholder of the search field. -->
     <string name="search_placeholder">Search movies, shows and more</string>
     <!-- Shown when a search finds nothing on any server. -->

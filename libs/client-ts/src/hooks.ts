@@ -26,7 +26,7 @@ import {
 import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 
 import { type Hubs, merge, type Section } from "./home.ts";
-import type { ServerEntry, Servers } from "./servers.ts";
+import type { ServerEntry, Servers, SignIn } from "./servers.ts";
 
 const ServersContext = createContext<Servers | undefined>(undefined);
 
@@ -46,10 +46,18 @@ export function useServers(): ServerEntry[] {
   return useSyncExternalStore(s.subscribe, s.snapshot);
 }
 
-/** The servers the user is signed in to, in their order. */
-export function useSignedIn(): ServerEntry[] {
+/** The sign-ins kept in the browser, and the one shown. */
+export function useSignIns(): { all: SignIn[]; shown?: SignIn } {
+  const s = useServersStore();
   const list = useServers();
-  return useMemo(() => list.filter((s) => s.token), [list]);
+  const shown = useSyncExternalStore(s.subscribe, s.shownSnapshot);
+  return useMemo(() => ({ all: s.signIns(), shown: s.shownSignIn() }), [s, list, shown]);
+}
+
+/** The servers of the sign-in shown, in the user's order. */
+export function useSignedIn(): ServerEntry[] {
+  const { shown } = useSignIns();
+  return useMemo(() => shown?.servers ?? [], [shown]);
 }
 
 /** One server, once it is known. */

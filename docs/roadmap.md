@@ -815,7 +815,8 @@ flowchart TD
 - [ ] Running `apps/dns` on two VMs, delegating `mavio.site` to them with glue records, and adding `mavio.site` to the Public Suffix List
 - [x] `apps/relay` and relay tickets: the relay splicing clients' connections by the ClientHello's name to servers' connections back, servers authenticated by their identity keys; `AccountService.CreateRelayTicket`, `ServerService.ListRelays` and `SetRelayRegion`; the server's `internal/relay`, which keeps a connection to the nearest relay and serves TLS on the connections it relays; tested on each side against the other's protocol, with the tickets checked against a shared vector
 - [ ] Running `apps/relay` on VMs in Europe, the United States and Singapore, with the relays' A and AAAA records in `apps/dns`'s configuration and `RELAYS` and `RELAY_TICKET_SECRET` in the Worker's
-- [ ] Every client: the choice of mode at setup, kept sign-ins, changing sign-ins and switching users; signing in with passkeys and TOTP codes, and managing passkeys, TOTP and PINs
+- [x] The web UI: the choice of mode at setup with claiming, Mavio accounts signed in through mavio.dev's authorization code flow with PKCE (`/authorize`, `AccountService.CreateAuthorizationCode`, `/api/oauth/token`), kept sign-ins changed in the profile, each showing its own servers; switching a standalone server's users with PINs; signing in with passkeys and TOTP codes, and managing passkeys, TOTP and PINs
+- [ ] The apps (Apple, Android and desktop) and the shared Rust core: the same as the web UI, Mavio accounts signing in with mavio.dev sessions of their own (bearer sessions and television codes)
 
 ---
 

@@ -815,7 +815,8 @@ flowchart TD
 - [ ] 在两台虚拟机上运行 `apps/dns`，用胶水记录把 `mavio.site` 委派给它们，并把 `mavio.site` 加入公共后缀列表
 - [x] `apps/relay` 与中转票据：中转按 ClientHello 中的名称把客户端的连接拼接到服务端回连的连接上，服务端以身份密钥认证；`AccountService.CreateRelayTicket`、`ServerService.ListRelays` 与 `SetRelayRegion`；服务端的 `internal/relay` 与最近的中转保持连接，并在中转来的连接上提供 TLS；两侧分别按对方的协议测试，票据以共享的测试向量核对
 - [ ] 在欧洲、美国和新加坡的虚拟机上运行 `apps/relay`，在 `apps/dns` 的配置中加入各中转的 A 与 AAAA 记录，在 Worker 的配置中加入 `RELAYS` 与 `RELAY_TICKET_SECRET`
-- [ ] 每个客户端：安装时选择模式、保留的登录、更换登录与用户切换；用通行密钥和 TOTP 验证码登录，以及管理通行密钥、TOTP 与 PIN
+- [x] Web UI：设置时选择模式并认领，通过 mavio.dev 带 PKCE 的授权码流程登录 Mavio 账户（`/authorize`、`AccountService.CreateAuthorizationCode`、`/api/oauth/token`），在个人资料页切换保留的登录身份，每个只显示它自己的服务器；凭 PIN 切换独立服务器的用户；用通行密钥和 TOTP 验证码登录，以及管理通行密钥、TOTP 与 PIN
+- [ ] 各应用（Apple、Android 与桌面）和共享的 Rust 核心：与 Web UI 相同，Mavio 账户以它们自己的 mavio.dev 会话登录（Bearer 会话与电视代码）
 
 ---
 

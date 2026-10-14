@@ -1,7 +1,7 @@
 import { SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
 import { afterEach, expect, test, vi } from "vitest";
 
-import { memoryDeviceKey, refreshMessage } from "./device-key.ts";
+import { assertionMessage, memoryDeviceKey, refreshMessage } from "./device-key.ts";
 import { isTotpRequired } from "./hooks.ts";
 import { normalizeUrl, type ServerEntry, Servers, type Storage } from "./servers.ts";
 
@@ -221,4 +221,63 @@ test("signs in with a TOTP code and switches users in place", async () => {
   const kid = "0193a5b0-0000-7000-8000-00000000000c";
   await servers.switchUser(entry, kid, "1234");
   expect(servers.get("den")).toMatchObject({ userId: kid, userName: "kid", token: "t", sessionId: "s" });
+});
+
+test("signs a Mavio account in through mavio.dev and groups its servers into one sign-in", async () => {
+  const key = memoryDeviceKey();
+  const storage = memory();
+  let signed: { assertion: string; signature: string } | undefined;
+  let exchanged: URLSearchParams | undefined;
+  const fetch = serve({});
+  fetch.mockImplementation(async (url: string, init: RequestInit) => {
+    const method = url.slice(url.lastIndexOf("/") + 1);
+    const server = url.startsWith("http://den") ? "den" : url.startsWith("http://attic") ? "attic" : "nas";
+    if (url === "https://mavio.dev/api/oauth/token") {
+      exchanged = init.body as URLSearchParams;
+      return Response.json({ assertion: `assertion-for-${exchanged.get("client_id")}`, account: { id: "acct-1", userName: "ann", displayName: "Ann" } });
+    }
+    if (method === "GetAuthInfo") {
+      return server === "nas"
+        ? Response.json({ serverId: "nas", serverName: "nas", version: "1.0", mode: "ACCOUNT_MODE_STANDALONE" })
+        : Response.json({ serverId: server, serverName: server, version: "1.0", mode: "ACCOUNT_MODE_MAVIO_DEV", mavioDevUrl: "https://mavio.dev/api" });
+    }
+    if (method === "SignInWithAssertion") {
+      signed = body(init) as typeof signed;
+      return Response.json({ accessToken: `${server}-token`, session: { id: "0193a5b0-0000-7000-8000-000000000001" }, user: { id: `u-${server}`, name: "ann" } });
+    }
+    if (method === "Login") return Response.json({ accessToken: "nas-token", user: { id: "u", name: "bob" } });
+    return Response.json({});
+  });
+  const servers = new Servers(storage, "http://den:8686", key);
+  const signIn = async (address: string) => {
+    const page = new URL(await servers.startMavioDevSignIn(address, "http://den:8686/sign-in/mavio-dev"));
+    expect(page.origin + page.pathname).toBe("https://mavio.dev/authorize");
+    expect(page.searchParams.get("code_challenge_method")).toBe("S256");
+    expect(page.searchParams.get("redirect_uri")).toBe("http://den:8686/sign-in/mavio-dev");
+    // A state that is not this browser's is refused.
+    return servers.finishMavioDevSignIn(new URLSearchParams({ code: "the code", state: page.searchParams.get("state")! }));
+  };
+  await signIn("den");
+  expect(exchanged?.get("client_id")).toBe("den");
+  expect(exchanged?.get("code")).toBe("the code");
+  expect(signed?.assertion).toBe("assertion-for-den");
+  const pub = await crypto.subtle.importKey("raw", (await key.publicKey()).slice(), { name: "Ed25519" }, false, ["verify"]);
+  const signature = Uint8Array.from(atob(signed!.signature), (c) => c.charCodeAt(0));
+  expect(await crypto.subtle.verify({ name: "Ed25519" }, pub, signature, assertionMessage("assertion-for-den").slice())).toBe(true);
+  await expect(servers.finishMavioDevSignIn(new URLSearchParams({ code: "again", state: "x" }))).rejects.toThrow(/not started here/);
+  await signIn("attic");
+  await servers.signIn("nas", "bob", "pw");
+
+  expect(servers.signIns().map((s) => [s.key, s.kind, s.name, s.servers.map((x) => x.id)])).toEqual([
+    ["account:acct-1", "mavioDev", "Ann", ["den", "attic"]],
+    ["server:nas", "standalone", "bob", ["nas"]],
+  ]);
+  // The latest sign-in is shown; the account's comes back when chosen.
+  expect(servers.shownSignIn()?.key).toBe("server:nas");
+  servers.show("account:acct-1");
+  expect(servers.shownSignIn()?.servers.map((s) => s.id)).toEqual(["den", "attic"]);
+  await servers.signOut("account:acct-1");
+  expect(servers.signIns().map((s) => s.key)).toEqual(["server:nas"]);
+  expect(servers.shownSignIn()?.key).toBe("server:nas");
+  expect(servers.snapshot().map((s) => s.id)).toEqual(["den", "attic", "nas"]);
 });

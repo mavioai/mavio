@@ -10,7 +10,7 @@ import { LibraryScreen } from "./screens/library.tsx";
 import { PlayerScreen } from "./screens/player.tsx";
 import { ProfileScreen } from "./screens/profile.tsx";
 import { SearchScreen } from "./screens/search.tsx";
-import { SignInScreen } from "./screens/sign-in.tsx";
+import { MavioDevCallbackScreen, SignInScreen } from "./screens/sign-in.tsx";
 
 const root = createRootRoute({ component: Layout });
 
@@ -25,6 +25,8 @@ const signIn = createRoute({
   }),
   component: SignInScreen,
 });
+
+const mavioDevCallback = createRoute({ getParentRoute: () => root, path: "/sign-in/mavio-dev", component: MavioDevCallbackScreen });
 
 const libraries = createRoute({ getParentRoute: () => root, path: "/libraries", component: LibrariesScreen });
 
@@ -68,7 +70,7 @@ const player = createRoute({
 });
 
 export const router = createRouter({
-  routeTree: root.addChildren([home, signIn, libraries, search, profile, library, hub, details, player]),
+  routeTree: root.addChildren([home, signIn, mavioDevCallback, libraries, search, profile, library, hub, details, player]),
   scrollRestoration: true,
 });
 

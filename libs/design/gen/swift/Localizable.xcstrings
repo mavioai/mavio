@@ -2647,6 +2647,348 @@
         }
       }
     },
+    "auth.chooseMode": {
+      "comment": "Title of the setup screen choosing a new server's mode; server is its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How Do People Sign In to %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如何登录 %@？"
+          }
+        }
+      }
+    },
+    "auth.modeMavioDev": {
+      "comment": "Chooses mavio.dev mode at setup.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With Mavio Accounts"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 Mavio 账户"
+          }
+        }
+      }
+    },
+    "auth.modeMavioDevMessage": {
+      "comment": "Explanation of mavio.dev mode at setup.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "People sign in with their Mavio accounts, you share libraries with friends and family at mavio.dev, and the server is reachable away from home."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大家用自己的 Mavio 账户登录，你在 mavio.dev 与亲友共享媒体库，离家时也能访问服务器。"
+          }
+        }
+      }
+    },
+    "auth.modeStandalone": {
+      "comment": "Chooses standalone mode at setup.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standalone"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "独立"
+          }
+        }
+      }
+    },
+    "auth.modeStandaloneMessage": {
+      "comment": "Explanation of standalone mode at setup.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server keeps its own users and never contacts mavio.dev."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器自己保存用户，从不联系 mavio.dev。"
+          }
+        }
+      }
+    },
+    "auth.claim": {
+      "comment": "Title of the screen claiming a server for a Mavio account; server is its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claim %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "认领 %@"
+          }
+        }
+      }
+    },
+    "auth.claimMessage": {
+      "comment": "Explanation of claiming a server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get a claim code at mavio.dev and enter it here. Your Mavio account becomes this server's administrator."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 mavio.dev 获取认领码并填写在这里。你的 Mavio 账户将成为这台服务器的管理员。"
+          }
+        }
+      }
+    },
+    "auth.getClaimCode": {
+      "comment": "Opens mavio.dev's page giving claim codes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get a Claim Code"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获取认领码"
+          }
+        }
+      }
+    },
+    "auth.claimCode": {
+      "comment": "Field of the claim code from mavio.dev.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claim Code"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "认领码"
+          }
+        }
+      }
+    },
+    "auth.claimServer": {
+      "comment": "Claims the server with the code entered.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claim"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "认领"
+          }
+        }
+      }
+    },
+    "auth.signInWithMavio": {
+      "comment": "Signs in to a server with a Mavio account at mavio.dev.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign In with Mavio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用 Mavio 账户登录"
+          }
+        }
+      }
+    },
+    "auth.mavioDevMessage": {
+      "comment": "Explanation on the sign-in screen of a server in mavio.dev mode.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This server signs people in with their Mavio accounts."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台服务器使用 Mavio 账户登录。"
+          }
+        }
+      }
+    },
+    "auth.signingIn": {
+      "comment": "Shown while a sign-in through mavio.dev completes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signing in…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在登录…"
+          }
+        }
+      }
+    },
+    "auth.tryAgain": {
+      "comment": "Starts signing in again after a failure.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try Again"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试"
+          }
+        }
+      }
+    },
+    "auth.signIns": {
+      "comment": "Section of the profile listing the sign-ins kept in this browser.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-Ins"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录身份"
+          }
+        }
+      }
+    },
+    "auth.mavioAccount": {
+      "comment": "Kind of a sign-in with a Mavio account.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mavio account"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mavio 账户"
+          }
+        }
+      }
+    },
+    "auth.standaloneUser": {
+      "comment": "Kind of a sign-in with a user of one standalone server; server is its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User of %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的用户"
+          }
+        }
+      }
+    },
+    "auth.show": {
+      "comment": "Shows the content of another kept sign-in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示"
+          }
+        }
+      }
+    },
+    "auth.shown": {
+      "comment": "Marks the sign-in whose content is shown.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shown"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前显示"
+          }
+        }
+      }
+    },
     "search.placeholder": {
       "comment": "Placeholder of the search field.",
       "extractionState": "manual",

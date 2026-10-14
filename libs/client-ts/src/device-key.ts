@@ -10,6 +10,11 @@ export interface DeviceKey {
   sign(message: Uint8Array): Promise<Uint8Array>;
 }
 
+/** What a device signs to sign in with a sign-in assertion, as the server checks it. */
+export function assertionMessage(assertion: string): Uint8Array {
+  return new TextEncoder().encode(`mavio-sign-in-assertion-v1\0${assertion}`);
+}
+
 /** What a device signs to refresh its session, as the server checks it. */
 export function refreshMessage(sessionId: string, nonce: Uint8Array): Uint8Array {
   const context = new TextEncoder().encode("mavio-session-refresh-v1\0");

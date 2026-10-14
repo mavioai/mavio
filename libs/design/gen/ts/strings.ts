@@ -142,6 +142,25 @@ export type MessageKey =
   | 'auth.setPin'
   | 'auth.removePin'
   | 'auth.pinOn'
+  | 'auth.chooseMode'
+  | 'auth.modeMavioDev'
+  | 'auth.modeMavioDevMessage'
+  | 'auth.modeStandalone'
+  | 'auth.modeStandaloneMessage'
+  | 'auth.claim'
+  | 'auth.claimMessage'
+  | 'auth.getClaimCode'
+  | 'auth.claimCode'
+  | 'auth.claimServer'
+  | 'auth.signInWithMavio'
+  | 'auth.mavioDevMessage'
+  | 'auth.signingIn'
+  | 'auth.tryAgain'
+  | 'auth.signIns'
+  | 'auth.mavioAccount'
+  | 'auth.standaloneUser'
+  | 'auth.show'
+  | 'auth.shown'
   | 'search.placeholder'
   | 'search.noResults';
 
@@ -278,6 +297,25 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.setPin": "Set PIN",
     "auth.removePin": "Remove PIN",
     "auth.pinOn": "On",
+    "auth.chooseMode": "How Do People Sign In to {server}?",
+    "auth.modeMavioDev": "With Mavio Accounts",
+    "auth.modeMavioDevMessage": "People sign in with their Mavio accounts, you share libraries with friends and family at mavio.dev, and the server is reachable away from home.",
+    "auth.modeStandalone": "Standalone",
+    "auth.modeStandaloneMessage": "The server keeps its own users and never contacts mavio.dev.",
+    "auth.claim": "Claim {server}",
+    "auth.claimMessage": "Get a claim code at mavio.dev and enter it here. Your Mavio account becomes this server's administrator.",
+    "auth.getClaimCode": "Get a Claim Code",
+    "auth.claimCode": "Claim Code",
+    "auth.claimServer": "Claim",
+    "auth.signInWithMavio": "Sign In with Mavio",
+    "auth.mavioDevMessage": "This server signs people in with their Mavio accounts.",
+    "auth.signingIn": "Signing in…",
+    "auth.tryAgain": "Try Again",
+    "auth.signIns": "Sign-Ins",
+    "auth.mavioAccount": "Mavio account",
+    "auth.standaloneUser": "User of {server}",
+    "auth.show": "Show",
+    "auth.shown": "Shown",
     "search.placeholder": "Search movies, shows and more",
     "search.noResults": "No results"
   },
@@ -412,6 +450,25 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.setPin": "设置 PIN",
     "auth.removePin": "移除 PIN",
     "auth.pinOn": "已开启",
+    "auth.chooseMode": "如何登录 {server}？",
+    "auth.modeMavioDev": "使用 Mavio 账户",
+    "auth.modeMavioDevMessage": "大家用自己的 Mavio 账户登录，你在 mavio.dev 与亲友共享媒体库，离家时也能访问服务器。",
+    "auth.modeStandalone": "独立",
+    "auth.modeStandaloneMessage": "服务器自己保存用户，从不联系 mavio.dev。",
+    "auth.claim": "认领 {server}",
+    "auth.claimMessage": "在 mavio.dev 获取认领码并填写在这里。你的 Mavio 账户将成为这台服务器的管理员。",
+    "auth.getClaimCode": "获取认领码",
+    "auth.claimCode": "认领码",
+    "auth.claimServer": "认领",
+    "auth.signInWithMavio": "用 Mavio 账户登录",
+    "auth.mavioDevMessage": "这台服务器使用 Mavio 账户登录。",
+    "auth.signingIn": "正在登录…",
+    "auth.tryAgain": "重试",
+    "auth.signIns": "登录身份",
+    "auth.mavioAccount": "Mavio 账户",
+    "auth.standaloneUser": "{server} 的用户",
+    "auth.show": "显示",
+    "auth.shown": "当前显示",
     "search.placeholder": "搜索电影、剧集等",
     "search.noResults": "没有结果"
   }

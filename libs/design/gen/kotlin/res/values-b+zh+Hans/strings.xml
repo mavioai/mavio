@@ -154,6 +154,25 @@
     <string name="auth_set_pin">设置 PIN</string>
     <string name="auth_remove_pin">移除 PIN</string>
     <string name="auth_pin_on">已开启</string>
+    <string name="auth_choose_mode">如何登录 %s？</string>
+    <string name="auth_mode_mavio_dev">使用 Mavio 账户</string>
+    <string name="auth_mode_mavio_dev_message">大家用自己的 Mavio 账户登录，你在 mavio.dev 与亲友共享媒体库，离家时也能访问服务器。</string>
+    <string name="auth_mode_standalone">独立</string>
+    <string name="auth_mode_standalone_message">服务器自己保存用户，从不联系 mavio.dev。</string>
+    <string name="auth_claim">认领 %s</string>
+    <string name="auth_claim_message">在 mavio.dev 获取认领码并填写在这里。你的 Mavio 账户将成为这台服务器的管理员。</string>
+    <string name="auth_get_claim_code">获取认领码</string>
+    <string name="auth_claim_code">认领码</string>
+    <string name="auth_claim_server">认领</string>
+    <string name="auth_sign_in_with_mavio">用 Mavio 账户登录</string>
+    <string name="auth_mavio_dev_message">这台服务器使用 Mavio 账户登录。</string>
+    <string name="auth_signing_in">正在登录…</string>
+    <string name="auth_try_again">重试</string>
+    <string name="auth_sign_ins">登录身份</string>
+    <string name="auth_mavio_account">Mavio 账户</string>
+    <string name="auth_standalone_user">%s 的用户</string>
+    <string name="auth_show">显示</string>
+    <string name="auth_shown">当前显示</string>
     <string name="search_placeholder">搜索电影、剧集等</string>
     <string name="search_no_results">没有结果</string>
 </resources>
