@@ -83,6 +83,11 @@ func (r authSessions) Touch(ctx context.Context, id core.ID, at time.Time) error
 	return mapErr(err, "touch auth session "+id.String())
 }
 
+func (r authSessions) Switch(ctx context.Context, id, userID, switcher core.ID) error {
+	err := r.s.write.AuthSession.UpdateOneID(id).SetUserID(userID).SetSwitcherID(switcher).Exec(ctx)
+	return mapErr(err, "switch auth session "+id.String())
+}
+
 func (r authSessions) Delete(ctx context.Context, id core.ID) error {
 	err := r.s.write.AuthSession.DeleteOneID(id).Exec(ctx)
 	return mapErr(err, "delete auth session "+id.String())
@@ -94,9 +99,13 @@ func (r authSessions) PurgeIdle(ctx context.Context, before time.Time) (int, err
 }
 
 func toAuthSession(s *ent.AuthSession) core.AuthSession {
-	return core.AuthSession{
+	out := core.AuthSession{
 		ID: s.ID, UserID: s.UserID, DeviceKey: s.DeviceKey,
 		DeviceID: s.DeviceID, DeviceName: s.DeviceName, Client: s.Client, ClientVersion: s.ClientVersion,
 		CreatedAt: s.CreatedAt.UTC(), LastSeenAt: s.LastSeenAt.UTC(),
 	}
+	if s.SwitcherID != nil {
+		out.SwitcherID = *s.SwitcherID
+	}
+	return out
 }

@@ -19,8 +19,18 @@ type AuthSession struct {
 	DeviceName string
 	// Client and ClientVersion name the application, e.g. "Mavio Web".
 	Client, ClientVersion string
-	CreatedAt             time.Time
-	LastSeenAt            time.Time
+	// SwitcherID is the administrator who switched the session to its
+	// user and may switch it again (docs/accounts.md §4.4); zero for a
+	// session that was never switched.
+	SwitcherID ID
+	CreatedAt  time.Time
+	LastSeenAt time.Time
+}
+
+// CanSwitch reports whether the session may switch to the server's other
+// users: it is the administrator's, or the administrator switched it.
+func (s *AuthSession) CanSwitch(u *User) bool {
+	return u.IsAdmin() || !s.SwitcherID.IsZero()
 }
 
 // Validate checks the session's invariants.

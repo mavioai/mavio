@@ -7631,6 +7631,98 @@
         "additionalProperties": false,
         "description": "WantedSubtitles is a movie or episode lacking subtitles."
       },
+      "mavio.auth.v1.AcceptInvitationRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "token",
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "title": "name",
+            "maxLength": 100,
+            "minLength": 1,
+            "description": "The member's name: required when the invitation creates a member; a\n converted user keeps its name when unset."
+          },
+          "password": {
+            "type": "string",
+            "title": "password",
+            "maxLength": 1024,
+            "minLength": 1,
+            "description": "The member's password; either it or a passkey is required."
+          },
+          "ceremonyId": {
+            "type": "string",
+            "title": "ceremony_id",
+            "maxLength": 100,
+            "description": "The passkey ceremony StartInvitationPasskey began, with the\n authenticator's response as PublicKeyCredential.toJSON gives it."
+          },
+          "credentialJson": {
+            "type": "string",
+            "title": "credential_json",
+            "maxLength": 65536
+          },
+          "passkeyName": {
+            "type": "string",
+            "title": "passkey_name",
+            "maxLength": 100,
+            "description": "What the member calls the passkey."
+          },
+          "device": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.auth.v1.Device"
+              }
+            ],
+            "title": "device"
+          }
+        },
+        "title": "AcceptInvitationRequest",
+        "required": [
+          "token",
+          "device"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.AcceptInvitationResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "title": "access_token",
+            "description": "Sent as \"Authorization: Bearer \u003caccess_token\u003e\"."
+          },
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.user.v1.User"
+              }
+            ],
+            "title": "user"
+          },
+          "session": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.auth.v1.Session"
+              }
+            ],
+            "title": "session"
+          },
+          "accessTokenExpireTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "access_token_expire_time",
+            "description": "When the access token expires."
+          }
+        },
+        "title": "AcceptInvitationResponse",
+        "additionalProperties": false
+      },
       "mavio.auth.v1.AccountMode": {
         "type": "string",
         "title": "AccountMode",
@@ -7995,6 +8087,41 @@
         "title": "GetAuthInfoResponse",
         "additionalProperties": false
       },
+      "mavio.auth.v1.GetInvitationRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "token",
+            "maxLength": 100
+          }
+        },
+        "title": "GetInvitationRequest",
+        "required": [
+          "token"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.GetInvitationResponse": {
+        "type": "object",
+        "properties": {
+          "userName": {
+            "type": "string",
+            "title": "user_name",
+            "description": "The name of the managed user the invitation converts; unset when it\n creates a member."
+          },
+          "expireTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "expire_time"
+          }
+        },
+        "title": "GetInvitationResponse",
+        "additionalProperties": false
+      },
       "mavio.auth.v1.GetQuickConnectStateRequest": {
         "type": "object",
         "properties": {
@@ -8065,6 +8192,25 @@
           }
         },
         "title": "ListSessionsResponse",
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.ListSwitchableUsersRequest": {
+        "type": "object",
+        "title": "ListSwitchableUsersRequest",
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.ListSwitchableUsersResponse": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.auth.v1.SwitchableUser"
+            },
+            "title": "users"
+          }
+        },
+        "title": "ListSwitchableUsersResponse",
         "additionalProperties": false
       },
       "mavio.auth.v1.LoginRequest": {
@@ -8364,6 +8510,43 @@
         "additionalProperties": false,
         "description": "Session is a signed-in device."
       },
+      "mavio.auth.v1.StartInvitationPasskeyRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "token",
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "title": "name",
+            "maxLength": 100,
+            "description": "The name of the member to create, shown by the authenticator; a\n converted user's own name when unset."
+          }
+        },
+        "title": "StartInvitationPasskeyRequest",
+        "required": [
+          "token"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.StartInvitationPasskeyResponse": {
+        "type": "object",
+        "properties": {
+          "ceremonyId": {
+            "type": "string",
+            "title": "ceremony_id"
+          },
+          "optionsJson": {
+            "type": "string",
+            "title": "options_json",
+            "description": "The creation options, as\n PublicKeyCredential.parseCreationOptionsFromJSON takes them."
+          }
+        },
+        "title": "StartInvitationPasskeyResponse",
+        "additionalProperties": false
+      },
       "mavio.auth.v1.StartPasskeySignInRequest": {
         "type": "object",
         "title": "StartPasskeySignInRequest",
@@ -8462,6 +8645,76 @@
         },
         "title": "StartRefreshResponse",
         "additionalProperties": false
+      },
+      "mavio.auth.v1.SwitchUserRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "format": "uuid"
+          },
+          "pin": {
+            "type": "string",
+            "title": "pin",
+            "pattern": "^[0-9]{4}$"
+          }
+        },
+        "title": "SwitchUserRequest",
+        "required": [
+          "userId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.SwitchUserResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.user.v1.User"
+              }
+            ],
+            "title": "user",
+            "description": "The user the session now acts as."
+          }
+        },
+        "title": "SwitchUserResponse",
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.SwitchableUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "admin": {
+            "type": "boolean",
+            "title": "admin"
+          },
+          "managed": {
+            "type": "boolean",
+            "title": "managed"
+          },
+          "hasPin": {
+            "type": "boolean",
+            "title": "has_pin",
+            "description": "Switching to the user needs its PIN."
+          },
+          "current": {
+            "type": "boolean",
+            "title": "current",
+            "description": "The session's current user."
+          }
+        },
+        "title": "SwitchableUser",
+        "additionalProperties": false,
+        "description": "SwitchableUser is a user a session can switch to."
       },
       "mavio.home.v1.GetHubRequest": {
         "type": "object",
@@ -18321,6 +18574,68 @@
         "title": "ConfirmTotpResponse",
         "additionalProperties": false
       },
+      "mavio.user.v1.CreateInvitationRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "format": "uuid",
+            "description": "A managed user to convert into a member; the invitation then has one\n use and access is ignored, as the user keeps its own."
+          },
+          "access": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.user.v1.UserPolicy"
+              }
+            ],
+            "title": "access",
+            "description": "The access of the members it creates; unset gives all libraries and\n downloads."
+          },
+          "maxUses": {
+            "type": "integer",
+            "title": "max_uses",
+            "maximum": 100,
+            "minimum": 1,
+            "format": "int32",
+            "description": "How many members it may create; unset is 1."
+          },
+          "validFor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Duration"
+              }
+            ],
+            "title": "valid_for",
+            "description": "How long the link lasts, up to 30 days.\nduration.gt = 0s\nduration.lte = 720h0m0s\n"
+          }
+        },
+        "title": "CreateInvitationRequest",
+        "required": [
+          "validFor"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.user.v1.CreateInvitationResponse": {
+        "type": "object",
+        "properties": {
+          "invitation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.user.v1.Invitation"
+              }
+            ],
+            "title": "invitation"
+          },
+          "token": {
+            "type": "string",
+            "title": "token",
+            "description": "The secret the link carries, returned only here."
+          }
+        },
+        "title": "CreateInvitationResponse",
+        "additionalProperties": false
+      },
       "mavio.user.v1.CreateUserRequest": {
         "type": "object",
         "properties": {
@@ -18401,6 +18716,26 @@
           }
         },
         "title": "CreateUserResponse",
+        "additionalProperties": false
+      },
+      "mavio.user.v1.DeleteInvitationRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "DeleteInvitationRequest",
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.user.v1.DeleteInvitationResponse": {
+        "type": "object",
+        "title": "DeleteInvitationResponse",
         "additionalProperties": false
       },
       "mavio.user.v1.DeletePasskeyRequest": {
@@ -18665,6 +19000,77 @@
           }
         },
         "title": "GetUserResponse",
+        "additionalProperties": false
+      },
+      "mavio.user.v1.Invitation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "description": "The managed user the invitation converts into a member; unset when it\n creates members."
+          },
+          "access": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.user.v1.UserPolicy"
+              }
+            ],
+            "title": "access",
+            "description": "The library access of the members it creates: its library and content\n fields and allow_download count, the rest are the server's defaults."
+          },
+          "maxUses": {
+            "type": "integer",
+            "title": "max_uses",
+            "format": "int32"
+          },
+          "uses": {
+            "type": "integer",
+            "title": "uses",
+            "format": "int32"
+          },
+          "expireTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "expire_time"
+          },
+          "createTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "create_time"
+          }
+        },
+        "title": "Invitation",
+        "additionalProperties": false,
+        "description": "Invitation is an invitation link (docs/accounts.md §4.3); its token is\n never shown again after CreateInvitation."
+      },
+      "mavio.user.v1.ListInvitationsRequest": {
+        "type": "object",
+        "title": "ListInvitationsRequest",
+        "additionalProperties": false
+      },
+      "mavio.user.v1.ListInvitationsResponse": {
+        "type": "object",
+        "properties": {
+          "invitations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.user.v1.Invitation"
+            },
+            "title": "invitations"
+          }
+        },
+        "title": "ListInvitationsResponse",
         "additionalProperties": false
       },
       "mavio.user.v1.ListUsersRequest": {
@@ -19415,7 +19821,7 @@
     },
     {
       "name": "UserService",
-      "description": "UserService manages accounts: the server's one administrator, members\n and managed users (docs/accounts.md §4.1). All methods except\n GetCurrentUser, UpdatePreferences, and managing one's own password, PIN,\n passkeys and TOTP require the administrator. Managed users have no\n passwords, passkeys or TOTP."
+      "description": "UserService manages accounts: the server's one administrator, members\n and managed users (docs/accounts.md §4.1), and invitation links (§4.3).\n All methods except GetCurrentUser, UpdatePreferences, and managing one's\n own password, PIN, passkeys and TOTP require the administrator. Managed users have no\n passwords, passkeys or TOTP."
     },
     {
       "name": "UserDataService",
@@ -19431,7 +19837,7 @@
     },
     {
       "name": "AuthService",
-      "description": "AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,\n Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh and\n RefreshSession are public; the other methods act on the calling user.\n\n A session belongs to a device's Ed25519 key. Its access token lasts an\n hour; before it expires, or when a call fails with UNAUTHENTICATED\n because it has, the device asks StartRefresh for a nonce and signs it\n with its key for a new token from RefreshSession."
+      "description": "AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,\n Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,\n RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,\n ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey and\n AcceptInvitation are public; the other methods act on the calling user.\n\n A session belongs to a device's Ed25519 key. Its access token lasts an\n hour; before it expires, or when a call fails with UNAUTHENTICATED\n because it has, the device asks StartRefresh for a nonce and signs it\n with its key for a new token from RefreshSession."
     },
     {
       "name": "LibraryService",
@@ -19863,14 +20269,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.home.v1.HomeService/ListHubs": {
       "post": {
         "tags": [
-          "CollectionService"
+          "HomeService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "ListHubs",
+        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
+        "operationId": "mavio.home.v1.HomeService.ListHubs",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -19895,7 +20301,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.home.v1.ListHubsRequest"
               }
             }
           },
@@ -19917,7 +20323,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.home.v1.ListHubsResponse"
                 }
               }
             }
@@ -19925,13 +20331,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/CreateRemotePathMapping": {
+    "/mavio.acquisition.v1.DownloadService/RemoveFromQueue": {
       "post": {
         "tags": [
-          "ProfileService"
+          "DownloadService"
         ],
-        "summary": "CreateRemotePathMapping",
-        "operationId": "mavio.acquisition.v1.ProfileService.CreateRemotePathMapping",
+        "summary": "RemoveFromQueue",
+        "description": "RemoveFromQueue stops tracking a download, optionally removing it\n from its client, blocklisting its release and searching again.",
+        "operationId": "mavio.acquisition.v1.DownloadService.RemoveFromQueue",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -19956,7 +20363,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRemotePathMappingRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.RemoveFromQueueRequest"
               }
             }
           },
@@ -19978,7 +20385,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRemotePathMappingResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.RemoveFromQueueResponse"
                 }
               }
             }
@@ -20665,14 +21072,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DownloadService/RemoveFromQueue": {
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
       "post": {
         "tags": [
-          "DownloadService"
+          "CollectionService"
         ],
-        "summary": "RemoveFromQueue",
-        "description": "RemoveFromQueue stops tracking a download, optionally removing it\n from its client, blocklisting its release and searching again.",
-        "operationId": "mavio.acquisition.v1.DownloadService.RemoveFromQueue",
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -20697,7 +21103,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.RemoveFromQueueRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
               }
             }
           },
@@ -20719,7 +21125,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.RemoveFromQueueResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
                 }
               }
             }
@@ -21406,13 +21812,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.acquisition.v1.ProfileService/CreateRemotePathMapping": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ProfileService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "CreateRemotePathMapping",
+        "operationId": "mavio.acquisition.v1.ProfileService.CreateRemotePathMapping",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21437,7 +21843,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRemotePathMappingRequest"
               }
             }
           },
@@ -21459,7 +21865,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRemotePathMappingResponse"
                 }
               }
             }
@@ -22759,13 +23165,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
+    "/mavio.acquisition.v1.RequestService/BlockTitle": {
       "post": {
         "tags": [
-          "CollectionService"
+          "RequestService"
         ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "summary": "BlockTitle",
+        "description": "BlockTitle blocklists a movie or series, as Seerr's blocklist: it can\n no longer be requested. It fails with ALREADY_EXISTS when the title is\n blocklisted already. Administrators only.",
+        "operationId": "mavio.acquisition.v1.RequestService.BlockTitle",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22790,7 +23197,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleRequest"
               }
             }
           },
@@ -22812,7 +23219,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleResponse"
                 }
               }
             }
@@ -23254,14 +23661,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.RequestService/RetryRequest": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
-          "RequestService"
+          "CollectionService"
         ],
-        "summary": "RetryRequest",
-        "description": "RetryRequest approves a failed request again. Administrators only.",
-        "operationId": "mavio.acquisition.v1.RequestService.RetryRequest",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -23286,7 +23692,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.RetryRequestRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -23308,7 +23714,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.RetryRequestResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -25730,6 +26136,68 @@
         }
       }
     },
+    "/mavio.auth.v1.AuthService/AcceptInvitation": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "AcceptInvitation",
+        "description": "AcceptInvitation creates a member with a password or a passkey, or\n converts the invitation's managed user into one, and signs the device\n in as it. An invitation used up or expired meanwhile is NOT_FOUND; a\n taken name is ALREADY_EXISTS; a passkey that does not verify is\n INVALID_ARGUMENT.",
+        "operationId": "mavio.auth.v1.AuthService.AcceptInvitation",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.AcceptInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.AcceptInvitationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.auth.v1.AuthService/AuthorizeQuickConnect": {
       "post": {
         "tags": [
@@ -26102,14 +26570,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/GetQuickConnectState": {
+    "/mavio.auth.v1.AuthService/GetInvitation": {
       "post": {
         "tags": [
           "AuthService"
         ],
-        "summary": "GetQuickConnectState",
-        "description": "GetQuickConnectState tells whether a request was authorized; unknown\n and expired requests are NOT_FOUND.",
-        "operationId": "mavio.auth.v1.AuthService.GetQuickConnectState",
+        "summary": "GetInvitation",
+        "description": "GetInvitation describes an invitation link before it is accepted.\n Unknown, used up and expired invitations are NOT_FOUND.",
+        "operationId": "mavio.auth.v1.AuthService.GetInvitation",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -26134,7 +26602,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.GetInvitationRequest"
               }
             }
           },
@@ -26156,7 +26624,68 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.GetInvitationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -26281,6 +26810,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.auth.v1.ListSessionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.auth.v1.AuthService/ListSwitchableUsers": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "ListSwitchableUsers",
+        "description": "ListSwitchableUsers lists the enabled users the calling session may\n switch to: on a session signed in as the administrator, or switched\n from one, every user (docs/accounts.md §4.4). Other sessions are\n PERMISSION_DENIED.",
+        "operationId": "mavio.auth.v1.AuthService.ListSwitchableUsers",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.ListSwitchableUsersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.ListSwitchableUsersResponse"
                 }
               }
             }
@@ -26722,6 +27313,68 @@
         }
       }
     },
+    "/mavio.auth.v1.AuthService/StartInvitationPasskey": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "StartInvitationPasskey",
+        "description": "StartInvitationPasskey begins creating the passkey of the member an\n invitation creates, at the origin of the request as\n UserService.StartPasskeyRegistration does; AcceptInvitation finishes\n it.",
+        "operationId": "mavio.auth.v1.AuthService.StartInvitationPasskey",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.StartInvitationPasskeyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.StartInvitationPasskeyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.auth.v1.AuthService/StartPasskeySignIn": {
       "post": {
         "tags": [
@@ -26908,6 +27561,68 @@
         }
       }
     },
+    "/mavio.auth.v1.AuthService/SwitchUser": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "SwitchUser",
+        "description": "SwitchUser makes the calling session the given user's: its access\n token and refreshes then act as that user, and the session can still\n switch. A user with a PIN needs it: without one the call is\n FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three\n wrong PINs for a user each locks it out twice as long as the one\n before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the\n session opened before switching keep their user, so the client opens\n them again.",
+        "operationId": "mavio.auth.v1.AuthService.SwitchUser",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.home.v1.HomeService/GetHub": {
       "post": {
         "tags": [
@@ -26963,68 +27678,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.home.v1.GetHubResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.home.v1.HomeService/ListHubs": {
-      "post": {
-        "tags": [
-          "HomeService"
-        ],
-        "summary": "ListHubs",
-        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
-        "operationId": "mavio.home.v1.HomeService.ListHubs",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.home.v1.ListHubsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.home.v1.ListHubsResponse"
                 }
               }
             }
@@ -27094,13 +27747,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
+    "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
           "CollectionService"
         ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -27125,7 +27779,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
               }
             }
           },
@@ -27147,7 +27801,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
                 }
               }
             }
@@ -27155,14 +27809,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.RequestService/BlockTitle": {
+    "/mavio.acquisition.v1.RequestService/RetryRequest": {
       "post": {
         "tags": [
           "RequestService"
         ],
-        "summary": "BlockTitle",
-        "description": "BlockTitle blocklists a movie or series, as Seerr's blocklist: it can\n no longer be requested. It fails with ALREADY_EXISTS when the title is\n blocklisted already. Administrators only.",
-        "operationId": "mavio.acquisition.v1.RequestService.BlockTitle",
+        "summary": "RetryRequest",
+        "description": "RetryRequest approves a failed request again. Administrators only.",
+        "operationId": "mavio.acquisition.v1.RequestService.RetryRequest",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -27187,7 +27841,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.RetryRequestRequest"
               }
             }
           },
@@ -27209,7 +27863,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.RetryRequestResponse"
                 }
               }
             }
@@ -27279,14 +27933,14 @@
         }
       }
     },
-    "/mavio.system.v1.AiService/CancelAiLogin": {
+    "/mavio.auth.v1.AuthService/GetQuickConnectState": {
       "post": {
         "tags": [
-          "AiService"
+          "AuthService"
         ],
-        "summary": "CancelAiLogin",
-        "description": "CancelAiLogin abandons a login.",
-        "operationId": "mavio.system.v1.AiService.CancelAiLogin",
+        "summary": "GetQuickConnectState",
+        "description": "GetQuickConnectState tells whether a request was authorized; unknown\n and expired requests are NOT_FOUND.",
+        "operationId": "mavio.auth.v1.AuthService.GetQuickConnectState",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -27311,7 +27965,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.CancelAiLoginRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateRequest"
               }
             }
           },
@@ -27333,7 +27987,68 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.CancelAiLoginResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.GetQuickConnectStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
                 }
               }
             }
@@ -31601,13 +32316,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
+    "/mavio.system.v1.AiService/CancelAiLogin": {
       "post": {
         "tags": [
-          "CollectionService"
+          "AiService"
         ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "summary": "CancelAiLogin",
+        "description": "CancelAiLogin abandons a login.",
+        "operationId": "mavio.system.v1.AiService.CancelAiLogin",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31632,7 +32348,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.CancelAiLoginRequest"
               }
             }
           },
@@ -31654,7 +32370,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.CancelAiLoginResponse"
                 }
               }
             }
@@ -33639,6 +34355,68 @@
         }
       }
     },
+    "/mavio.user.v1.UserService/CreateInvitation": {
+      "post": {
+        "tags": [
+          "UserService"
+        ],
+        "summary": "CreateInvitation",
+        "description": "CreateInvitation makes an invitation link, whose token is returned\n once: the invitee opens it in a client, which accepts it with\n AuthService.AcceptInvitation. An invitation either creates members, up\n to max_uses of them, or converts one managed user into a member.",
+        "operationId": "mavio.user.v1.UserService.CreateInvitation",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.user.v1.CreateInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.user.v1.CreateInvitationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.user.v1.UserService/CreateUser": {
       "post": {
         "tags": [
@@ -33693,6 +34471,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.user.v1.CreateUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.user.v1.UserService/DeleteInvitation": {
+      "post": {
+        "tags": [
+          "UserService"
+        ],
+        "summary": "DeleteInvitation",
+        "description": "DeleteInvitation revokes an invitation.",
+        "operationId": "mavio.user.v1.UserService.DeleteInvitation",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.user.v1.DeleteInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.user.v1.DeleteInvitationResponse"
                 }
               }
             }
@@ -34062,6 +34902,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.user.v1.GetUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.user.v1.UserService/ListInvitations": {
+      "post": {
+        "tags": [
+          "UserService"
+        ],
+        "summary": "ListInvitations",
+        "description": "ListInvitations lists the invitations that have not expired, newest\n first.",
+        "operationId": "mavio.user.v1.UserService.ListInvitations",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.user.v1.ListInvitationsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.user.v1.ListInvitationsResponse"
                 }
               }
             }

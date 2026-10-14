@@ -107,6 +107,26 @@ func (_u *AuthSessionUpdate) SetNillableClientVersion(v *string) *AuthSessionUpd
 	return _u
 }
 
+// SetSwitcherID sets the "switcher_id" field.
+func (_u *AuthSessionUpdate) SetSwitcherID(v core.ID) *AuthSessionUpdate {
+	_u.mutation.SetSwitcherID(v)
+	return _u
+}
+
+// SetNillableSwitcherID sets the "switcher_id" field if the given value is not nil.
+func (_u *AuthSessionUpdate) SetNillableSwitcherID(v *core.ID) *AuthSessionUpdate {
+	if v != nil {
+		_u.SetSwitcherID(*v)
+	}
+	return _u
+}
+
+// ClearSwitcherID clears the value of the "switcher_id" field.
+func (_u *AuthSessionUpdate) ClearSwitcherID() *AuthSessionUpdate {
+	_u.mutation.ClearSwitcherID()
+	return _u
+}
+
 // SetLastSeenAt sets the "last_seen_at" field.
 func (_u *AuthSessionUpdate) SetLastSeenAt(v time.Time) *AuthSessionUpdate {
 	_u.mutation.SetLastSeenAt(v)
@@ -204,6 +224,12 @@ func (_u *AuthSessionUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if value, ok := _u.mutation.ClientVersion(); ok {
 		_spec.SetField(authsession.FieldClientVersion, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SwitcherID(); ok {
+		_spec.SetField(authsession.FieldSwitcherID, field.TypeUUID, value)
+	}
+	if _u.mutation.SwitcherIDCleared() {
+		_spec.ClearField(authsession.FieldSwitcherID, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.LastSeenAt(); ok {
 		_spec.SetField(authsession.FieldLastSeenAt, field.TypeTime, value)
@@ -335,6 +361,26 @@ func (_u *AuthSessionUpdateOne) SetNillableClientVersion(v *string) *AuthSession
 	return _u
 }
 
+// SetSwitcherID sets the "switcher_id" field.
+func (_u *AuthSessionUpdateOne) SetSwitcherID(v core.ID) *AuthSessionUpdateOne {
+	_u.mutation.SetSwitcherID(v)
+	return _u
+}
+
+// SetNillableSwitcherID sets the "switcher_id" field if the given value is not nil.
+func (_u *AuthSessionUpdateOne) SetNillableSwitcherID(v *core.ID) *AuthSessionUpdateOne {
+	if v != nil {
+		_u.SetSwitcherID(*v)
+	}
+	return _u
+}
+
+// ClearSwitcherID clears the value of the "switcher_id" field.
+func (_u *AuthSessionUpdateOne) ClearSwitcherID() *AuthSessionUpdateOne {
+	_u.mutation.ClearSwitcherID()
+	return _u
+}
+
 // SetLastSeenAt sets the "last_seen_at" field.
 func (_u *AuthSessionUpdateOne) SetLastSeenAt(v time.Time) *AuthSessionUpdateOne {
 	_u.mutation.SetLastSeenAt(v)
@@ -462,6 +508,12 @@ func (_u *AuthSessionUpdateOne) sqlSave(ctx context.Context) (_node *AuthSession
 	}
 	if value, ok := _u.mutation.ClientVersion(); ok {
 		_spec.SetField(authsession.FieldClientVersion, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SwitcherID(); ok {
+		_spec.SetField(authsession.FieldSwitcherID, field.TypeUUID, value)
+	}
+	if _u.mutation.SwitcherIDCleared() {
+		_spec.ClearField(authsession.FieldSwitcherID, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.LastSeenAt(); ok {
 		_spec.SetField(authsession.FieldLastSeenAt, field.TypeTime, value)

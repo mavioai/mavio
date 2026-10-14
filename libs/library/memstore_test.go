@@ -32,17 +32,20 @@ type memStore struct {
 	clock func() time.Time
 }
 
-// memSettings serves the default settings; memSessions has no sessions.
+// memSettings serves the default settings; memSessions and memInvitations
+// are empty.
 type (
-	memSettings struct{ core.SettingsRepository }
-	memSessions struct{ core.AuthSessionRepository }
+	memSettings    struct{ core.SettingsRepository }
+	memSessions    struct{ core.AuthSessionRepository }
+	memInvitations struct{ core.InvitationRepository }
 )
 
 func (memSettings) Get(context.Context) (core.ServerSettings, error) {
 	return core.DefaultServerSettings(), nil
 }
 
-func (memSessions) PurgeIdle(context.Context, time.Time) (int, error) { return 0, nil }
+func (memSessions) PurgeIdle(context.Context, time.Time) (int, error)       { return 0, nil }
+func (memInvitations) PurgeExpired(context.Context, time.Time) (int, error) { return 0, nil }
 
 // memHistory records the items whose history moves.
 type memHistory struct{ m *memStore }
@@ -88,6 +91,7 @@ func (m *memStore) PluginConfigs() core.PluginConfigRepository            { pani
 func (m *memStore) DisplayPreferences() core.DisplayPreferencesRepository { panic("unused") }
 func (m *memStore) Settings() core.SettingsRepository                     { return memSettings{} }
 func (m *memStore) APIKeys() core.APIKeyRepository                        { panic("unused") }
+func (m *memStore) Invitations() core.InvitationRepository                { return memInvitations{} }
 func (m *memStore) Activities() core.ActivityRepository                   { panic("unused") }
 func (m *memStore) Trickplay() core.TrickplayRepository                   { return memTricks{m} }
 func (m *memStore) MediaSegments() core.MediaSegmentRepository            { return memSegs{m} }

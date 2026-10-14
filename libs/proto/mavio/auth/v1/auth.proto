@@ -7,8 +7,10 @@ import "google/protobuf/timestamp.proto";
 import "mavio/user/v1/user.proto";
 
 // AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,
-// Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh and
-// RefreshSession are public; the other methods act on the calling user.
+// Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,
+// RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,
+// ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey and
+// AcceptInvitation are public; the other methods act on the calling user.
 //
 // A session belongs to a device's Ed25519 key. Its access token lasts an
 // hour; before it expires, or when a call fails with UNAUTHENTICATED
@@ -94,6 +96,38 @@ service AuthService {
   // ResetPassword sets a new password with the PIN ForgotPassword
   // delivered, and ends the user's sessions.
   rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+  // GetInvitation describes an invitation link before it is accepted.
+  // Unknown, used up and expired invitations are NOT_FOUND.
+  rpc GetInvitation(GetInvitationRequest) returns (GetInvitationResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // StartInvitationPasskey begins creating the passkey of the member an
+  // invitation creates, at the origin of the request as
+  // UserService.StartPasskeyRegistration does; AcceptInvitation finishes
+  // it.
+  rpc StartInvitationPasskey(StartInvitationPasskeyRequest) returns (StartInvitationPasskeyResponse);
+  // AcceptInvitation creates a member with a password or a passkey, or
+  // converts the invitation's managed user into one, and signs the device
+  // in as it. An invitation used up or expired meanwhile is NOT_FOUND; a
+  // taken name is ALREADY_EXISTS; a passkey that does not verify is
+  // INVALID_ARGUMENT.
+  rpc AcceptInvitation(AcceptInvitationRequest) returns (AcceptInvitationResponse);
+  // ListSwitchableUsers lists the enabled users the calling session may
+  // switch to: on a session signed in as the administrator, or switched
+  // from one, every user (docs/accounts.md §4.4). Other sessions are
+  // PERMISSION_DENIED.
+  rpc ListSwitchableUsers(ListSwitchableUsersRequest) returns (ListSwitchableUsersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SwitchUser makes the calling session the given user's: its access
+  // token and refreshes then act as that user, and the session can still
+  // switch. A user with a PIN needs it: without one the call is
+  // FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three
+  // wrong PINs for a user each locks it out twice as long as the one
+  // before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the
+  // session opened before switching keep their user, so the client opens
+  // them again.
+  rpc SwitchUser(SwitchUserRequest) returns (SwitchUserResponse);
 }
 
 // Device identifies a client installation.
@@ -399,3 +433,99 @@ message ResetPasswordRequest {
 }
 
 message ResetPasswordResponse {}
+
+message GetInvitationRequest {
+  string token = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 100
+  ];
+}
+
+message GetInvitationResponse {
+  // The name of the managed user the invitation converts; unset when it
+  // creates a member.
+  string user_name = 1;
+  google.protobuf.Timestamp expire_time = 2;
+}
+
+message StartInvitationPasskeyRequest {
+  string token = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 100
+  ];
+  // The name of the member to create, shown by the authenticator; a
+  // converted user's own name when unset.
+  string name = 2 [(buf.validate.field).string.max_len = 100];
+}
+
+message StartInvitationPasskeyResponse {
+  string ceremony_id = 1;
+  // The creation options, as
+  // PublicKeyCredential.parseCreationOptionsFromJSON takes them.
+  string options_json = 2;
+}
+
+message AcceptInvitationRequest {
+  string token = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 100
+  ];
+  // The member's name: required when the invitation creates a member; a
+  // converted user keeps its name when unset.
+  string name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 100
+  }];
+  // The member's password; either it or a passkey is required.
+  string password = 3 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 1024
+  }];
+  // The passkey ceremony StartInvitationPasskey began, with the
+  // authenticator's response as PublicKeyCredential.toJSON gives it.
+  string ceremony_id = 4 [(buf.validate.field).string.max_len = 100];
+  string credential_json = 5 [(buf.validate.field).string.max_len = 65536];
+  // What the member calls the passkey.
+  string passkey_name = 6 [(buf.validate.field).string.max_len = 100];
+  Device device = 7 [(buf.validate.field).required = true];
+}
+
+message AcceptInvitationResponse {
+  // Sent as "Authorization: Bearer <access_token>".
+  string access_token = 1;
+  mavio.user.v1.User user = 2;
+  Session session = 3;
+  // When the access token expires.
+  google.protobuf.Timestamp access_token_expire_time = 4;
+}
+
+message ListSwitchableUsersRequest {}
+
+message ListSwitchableUsersResponse {
+  repeated SwitchableUser users = 1;
+}
+
+// SwitchableUser is a user a session can switch to.
+message SwitchableUser {
+  string id = 1;
+  string name = 2;
+  bool admin = 3;
+  bool managed = 4;
+  // Switching to the user needs its PIN.
+  bool has_pin = 5;
+  // The session's current user.
+  bool current = 6;
+}
+
+message SwitchUserRequest {
+  string user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  string pin = 2 [(buf.validate.field).string.pattern = "^[0-9]{4}$"];
+}
+
+message SwitchUserResponse {
+  // The user the session now acts as.
+  mavio.user.v1.User user = 1;
+}

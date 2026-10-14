@@ -27,6 +27,8 @@ const (
 	FieldClient = "client"
 	// FieldClientVersion holds the string denoting the client_version field in the database.
 	FieldClientVersion = "client_version"
+	// FieldSwitcherID holds the string denoting the switcher_id field in the database.
+	FieldSwitcherID = "switcher_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldLastSeenAt holds the string denoting the last_seen_at field in the database.
@@ -53,6 +55,7 @@ var Columns = []string{
 	FieldDeviceName,
 	FieldClient,
 	FieldClientVersion,
+	FieldSwitcherID,
 	FieldCreatedAt,
 	FieldLastSeenAt,
 }
@@ -113,6 +116,11 @@ func ByClient(opts ...sql.OrderTermOption) OrderOption {
 // ByClientVersion orders the results by the client_version field.
 func ByClientVersion(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClientVersion, opts...).ToFunc()
+}
+
+// BySwitcherID orders the results by the switcher_id field.
+func BySwitcherID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSwitcherID, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

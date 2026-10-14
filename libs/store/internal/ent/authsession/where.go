@@ -86,6 +86,11 @@ func ClientVersion(v string) predicate.AuthSession {
 	return predicate.AuthSession(sql.FieldEQ(FieldClientVersion, v))
 }
 
+// SwitcherID applies equality check predicate on the "switcher_id" field. It's identical to SwitcherIDEQ.
+func SwitcherID(v core.ID) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldEQ(FieldSwitcherID, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.AuthSession {
 	return predicate.AuthSession(sql.FieldEQ(FieldCreatedAt, v))
@@ -414,6 +419,56 @@ func ClientVersionEqualFold(v string) predicate.AuthSession {
 // ClientVersionContainsFold applies the ContainsFold predicate on the "client_version" field.
 func ClientVersionContainsFold(v string) predicate.AuthSession {
 	return predicate.AuthSession(sql.FieldContainsFold(FieldClientVersion, v))
+}
+
+// SwitcherIDEQ applies the EQ predicate on the "switcher_id" field.
+func SwitcherIDEQ(v core.ID) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldEQ(FieldSwitcherID, v))
+}
+
+// SwitcherIDNEQ applies the NEQ predicate on the "switcher_id" field.
+func SwitcherIDNEQ(v core.ID) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldNEQ(FieldSwitcherID, v))
+}
+
+// SwitcherIDIn applies the In predicate on the "switcher_id" field.
+func SwitcherIDIn(vs ...core.ID) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldIn(FieldSwitcherID, vs...))
+}
+
+// SwitcherIDNotIn applies the NotIn predicate on the "switcher_id" field.
+func SwitcherIDNotIn(vs ...core.ID) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldNotIn(FieldSwitcherID, vs...))
+}
+
+// SwitcherIDGT applies the GT predicate on the "switcher_id" field.
+func SwitcherIDGT(v core.ID) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldGT(FieldSwitcherID, v))
+}
+
+// SwitcherIDGTE applies the GTE predicate on the "switcher_id" field.
+func SwitcherIDGTE(v core.ID) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldGTE(FieldSwitcherID, v))
+}
+
+// SwitcherIDLT applies the LT predicate on the "switcher_id" field.
+func SwitcherIDLT(v core.ID) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldLT(FieldSwitcherID, v))
+}
+
+// SwitcherIDLTE applies the LTE predicate on the "switcher_id" field.
+func SwitcherIDLTE(v core.ID) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldLTE(FieldSwitcherID, v))
+}
+
+// SwitcherIDIsNil applies the IsNil predicate on the "switcher_id" field.
+func SwitcherIDIsNil() predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldIsNull(FieldSwitcherID))
+}
+
+// SwitcherIDNotNil applies the NotNil predicate on the "switcher_id" field.
+func SwitcherIDNotNil() predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldNotNull(FieldSwitcherID))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

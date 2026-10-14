@@ -54,10 +54,17 @@ func userToProto(u *core.User, creds []core.Credential) *userv1.User {
 			passkeys = append(passkeys, passkeyToProto(&creds[i]))
 		}
 	}
-	libraries := make([]string, len(u.Access.Libraries))
-	for i, id := range u.Access.Libraries {
-		libraries[i] = id.String()
-	}
+	policy := accessToProto(&u.Access)
+	policy.SetAllowTranscoding(u.Policy.AllowTranscoding)
+	policy.SetMaxStreamingBitrate(u.Policy.MaxStreamingBitrate)
+	policy.SetMaxSessions(int32(u.Policy.MaxSessions))
+	policy.SetRequestMovies(u.Policy.Requests.Movies)
+	policy.SetRequestSeries(u.Policy.Requests.Series)
+	policy.SetAutoApproveMovies(u.Policy.Requests.AutoApproveMovies)
+	policy.SetAutoApproveSeries(u.Policy.Requests.AutoApproveSeries)
+	policy.SetReportIssues(u.Policy.Requests.ReportIssues)
+	policy.SetMovieQuota(quotaToProto(u.Policy.MovieQuota))
+	policy.SetSeriesQuota(quotaToProto(u.Policy.SeriesQuota))
 	var lastLogin *timestamppb.Timestamp
 	if u.LastLoginAt != nil {
 		lastLogin = timestamppb.New(*u.LastLoginAt)
@@ -73,25 +80,7 @@ func userToProto(u *core.User, creds []core.Credential) *userv1.User {
 		HasTotp:      new(slices.ContainsFunc(creds, func(c core.Credential) bool { return c.Kind == core.CredentialTOTP })),
 		Passkeys:     passkeys,
 		Restriction:  new(restrictions[u.Restriction]),
-		Policy: userv1.UserPolicy_builder{
-			AllLibraries:        new(u.Access.Libraries == nil),
-			LibraryIds:          libraries,
-			MaxParentalRating:   int32Ptr(u.Access.MaxParentalRating),
-			BlockUnrated:        &u.Access.BlockUnrated,
-			AllowedLabels:       u.Access.AllowedLabels,
-			BlockedLabels:       u.Access.BlockedLabels,
-			AllowTranscoding:    &u.Policy.AllowTranscoding,
-			AllowDownload:       &u.Access.AllowDownload,
-			MaxStreamingBitrate: &u.Policy.MaxStreamingBitrate,
-			MaxSessions:         new(int32(u.Policy.MaxSessions)),
-			RequestMovies:       &u.Policy.Requests.Movies,
-			RequestSeries:       &u.Policy.Requests.Series,
-			AutoApproveMovies:   &u.Policy.Requests.AutoApproveMovies,
-			AutoApproveSeries:   &u.Policy.Requests.AutoApproveSeries,
-			ReportIssues:        &u.Policy.Requests.ReportIssues,
-			MovieQuota:          quotaToProto(u.Policy.MovieQuota),
-			SeriesQuota:         quotaToProto(u.Policy.SeriesQuota),
-		}.Build(),
+		Policy:       policy,
 		Preferences: userv1.UserPreferences_builder{
 			AudioLanguages:        u.Preferences.AudioLanguages,
 			SubtitleLanguages:     u.Preferences.SubtitleLanguages,

@@ -166,8 +166,14 @@ func Handler(opts Options) (http.Handler, error) {
 	}, interceptors))
 	passkeys := auth.NewPasskeys()
 	totp := auth.NewTOTP(opts.Identity.Derive(auth.SecretKeyPurpose))
+	requestSettings := func() core.RequestSettings {
+		if opts.Settings == nil {
+			return core.DefaultRequestSettings()
+		}
+		return opts.Settings.Get().Requests
+	}
 	authService := rpc.NewAuthService(opts.Store, tokens)
-	authService.Activity, authService.Authenticate = opts.Activity, opts.Authenticate
+	authService.Activity, authService.Authenticate, authService.Requests = opts.Activity, opts.Authenticate, requestSettings
 	authService.Passkeys, authService.TOTP = passkeys, totp
 	authService.ResetPlugin, authService.StartReset = opts.ResetPlugin, opts.StartReset
 	authService.Info = opts.ServerInfo
@@ -216,12 +222,6 @@ func Handler(opts Options) (http.Handler, error) {
 	metadataService.Activity, metadataService.ExternalIDKinds = opts.Activity, opts.ExternalIDKinds
 	mux.Handle(libraryv1connect.NewMetadataServiceHandler(metadataService, interceptors))
 	mux.Handle(libraryv1connect.NewPlaylistServiceHandler(rpc.NewPlaylistService(opts.Store), interceptors))
-	requestSettings := func() core.RequestSettings {
-		if opts.Settings == nil {
-			return core.DefaultRequestSettings()
-		}
-		return opts.Settings.Get().Requests
-	}
 	users := rpc.NewUserService(opts.Store)
 	users.Activity, users.Requests = opts.Activity, requestSettings
 	users.Passkeys, users.TOTP = passkeys, totp

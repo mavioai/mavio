@@ -126,12 +126,12 @@ User names are unique on the server, case-insensitively. Every user may have a P
 Every member and managed user has one library access record with the fields of §3.3, kept by the server and edited by the administrator. Disabling a user keeps its data; the administrator can purge it.
 
 ### 4.3 Joining and Signing In
-* **Invitation links**: the administrator creates a link with an expiry, a number of uses and a preset access record; the invitee opens it in a client and creates a member with a password or passkey.
+* **Invitation links**: the administrator creates a link with an expiry (up to 30 days), a number of uses (up to 100) and a preset access record; the invitee opens it in a client and creates a member with a password or passkey. A link made for a managed user is used once and converts that user into a member, keeping its access. Each use is counted when it is accepted, so concurrent invitees cannot exceed the number; the administrator lists and revokes links, and expired ones are deleted by the daily cleanup.
 * **Quick Connect**: a television shows a code and a user signed in to the server on another device approves it, signing the television in as that user.
 * Failed sign-ins slow down progressively per user and per address and lock the user out for a period; they never disable a user.
 
 ### 4.4 Switching Users
-On a device signed in as the administrator, a client lists all the server's users and switches to one, entering the target's PIN when it has one. The device keeps that ability after switching, so it can switch back to the administrator, with the administrator's PIN if set. This gives the administrator nothing new, since the administrator can reset any user's credentials anyway. Wrong PINs slow down progressively.
+On a device signed in as the administrator, a client lists all the server's enabled users and switches to one, entering the target's PIN when it has one. Switching changes the user of the device's session in place, so its token and refreshes act as the target from then on, and the session remembers the administrator who switched; the device keeps the ability to switch, so it can switch back to the administrator, with the administrator's PIN if set. This gives the administrator nothing new, since the administrator can reset any user's credentials anyway. Wrong PINs slow down progressively per target user, as failed sign-ins do (§4.3).
 
 ### 4.5 Recovery
 The server's command line resets the administrator's credentials (`mavio admin reset-password` and its kin), with the access to the server's files that this needs.
@@ -220,4 +220,4 @@ It is the OpenID Connect issuer of servers in mavio.dev mode, keeps their access
 * **A compromised mavio.dev** can forge assertions and access records but holds no server tokens; the administrator can take the server out of mavio.dev mode (§2.1).
 * **mavio.dev's keys** are cached with their expiry and refetched on a key ID the server does not know, at most once a minute.
 * **PINs** are four digits and guard switching between people who share devices; they are never a credential for signing in, and wrong PINs are throttled.
-* **Stored secrets** are hashes, public keys or sealed: password, PIN and API key hashes, device and passkey public keys, and TOTP secrets sealed with AES-GCM under a key derived from the server's identity key. A copy of a server's database lets nobody sign in.
+* **Stored secrets** are hashes, public keys or sealed: password, PIN, API key and invitation token hashes, device and passkey public keys, and TOTP secrets sealed with AES-GCM under a key derived from the server's identity key. A copy of a server's database lets nobody sign in.

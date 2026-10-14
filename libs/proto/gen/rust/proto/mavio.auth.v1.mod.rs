@@ -185,3 +185,47 @@ pub use self::__buffa::view::ResetPasswordRequestOwnedView;
 pub use self::__buffa::view::ResetPasswordResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ResetPasswordResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetInvitationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetInvitationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetInvitationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetInvitationResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartInvitationPasskeyRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StartInvitationPasskeyRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartInvitationPasskeyResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StartInvitationPasskeyResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptInvitationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptInvitationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptInvitationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptInvitationResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSwitchableUsersRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSwitchableUsersRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSwitchableUsersResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSwitchableUsersResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SwitchableUserView;
+#[doc(inline)]
+pub use self::__buffa::view::SwitchableUserOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SwitchUserRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SwitchUserRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SwitchUserResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SwitchUserResponseOwnedView;

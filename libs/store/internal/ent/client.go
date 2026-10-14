@@ -32,6 +32,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/invitation"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
@@ -100,6 +101,8 @@ type Client struct {
 	HistoryEvent *HistoryEventClient
 	// Image is the client for interacting with the Image builders.
 	Image *ImageClient
+	// Invitation is the client for interacting with the Invitation builders.
+	Invitation *InvitationClient
 	// Issue is the client for interacting with the Issue builders.
 	Issue *IssueClient
 	// IssueComment is the client for interacting with the IssueComment builders.
@@ -185,6 +188,7 @@ func (c *Client) init() {
 	c.FolderState = NewFolderStateClient(c.config)
 	c.HistoryEvent = NewHistoryEventClient(c.config)
 	c.Image = NewImageClient(c.config)
+	c.Invitation = NewInvitationClient(c.config)
 	c.Issue = NewIssueClient(c.config)
 	c.IssueComment = NewIssueCommentClient(c.config)
 	c.Item = NewItemClient(c.config)
@@ -322,6 +326,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		FolderState:               NewFolderStateClient(cfg),
 		HistoryEvent:              NewHistoryEventClient(cfg),
 		Image:                     NewImageClient(cfg),
+		Invitation:                NewInvitationClient(cfg),
 		Issue:                     NewIssueClient(cfg),
 		IssueComment:              NewIssueCommentClient(cfg),
 		Item:                      NewItemClient(cfg),
@@ -386,6 +391,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		FolderState:               NewFolderStateClient(cfg),
 		HistoryEvent:              NewHistoryEventClient(cfg),
 		Image:                     NewImageClient(cfg),
+		Invitation:                NewInvitationClient(cfg),
 		Issue:                     NewIssueClient(cfg),
 		IssueComment:              NewIssueCommentClient(cfg),
 		Item:                      NewItemClient(cfg),
@@ -447,10 +453,10 @@ func (c *Client) Use(hooks ...Hook) {
 		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry,
 		c.Credential, c.Credit, c.CustomFormat, c.DelayProfile, c.DisplayPreferences,
 		c.Download, c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent,
-		c.Image, c.Issue, c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job,
-		c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person,
-		c.PluginConfig, c.QualityDefinition, c.QualityProfile, c.ReleaseProfile,
-		c.RemotePathMapping, c.Request, c.Setting, c.StorageJob,
+		c.Image, c.Invitation, c.Issue, c.IssueComment, c.Item, c.ItemLink,
+		c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease,
+		c.Person, c.PluginConfig, c.QualityDefinition, c.QualityProfile,
+		c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting, c.StorageJob,
 		c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent, c.SubtitleProfile,
 		c.SubtitleProfileAssignment, c.SubtitleSearchAttempt, c.SubtitleWanted,
 		c.Trickplay, c.User, c.UserData, c.Wanted,
@@ -466,10 +472,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry,
 		c.Credential, c.Credit, c.CustomFormat, c.DelayProfile, c.DisplayPreferences,
 		c.Download, c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent,
-		c.Image, c.Issue, c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job,
-		c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person,
-		c.PluginConfig, c.QualityDefinition, c.QualityProfile, c.ReleaseProfile,
-		c.RemotePathMapping, c.Request, c.Setting, c.StorageJob,
+		c.Image, c.Invitation, c.Issue, c.IssueComment, c.Item, c.ItemLink,
+		c.ItemValue, c.Job, c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease,
+		c.Person, c.PluginConfig, c.QualityDefinition, c.QualityProfile,
+		c.ReleaseProfile, c.RemotePathMapping, c.Request, c.Setting, c.StorageJob,
 		c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent, c.SubtitleProfile,
 		c.SubtitleProfileAssignment, c.SubtitleSearchAttempt, c.SubtitleWanted,
 		c.Trickplay, c.User, c.UserData, c.Wanted,
@@ -513,6 +519,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.HistoryEvent.mutate(ctx, m)
 	case *ImageMutation:
 		return c.Image.mutate(ctx, m)
+	case *InvitationMutation:
+		return c.Invitation.mutate(ctx, m)
 	case *IssueMutation:
 		return c.Issue.mutate(ctx, m)
 	case *IssueCommentMutation:
@@ -2941,6 +2949,155 @@ func (c *ImageClient) mutate(ctx context.Context, m *ImageMutation) (Value, erro
 		return (&ImageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Image mutation op: %q", m.Op())
+	}
+}
+
+// InvitationClient is a client for the Invitation schema.
+type InvitationClient struct {
+	config
+}
+
+// NewInvitationClient returns a client for the Invitation from the given config.
+func NewInvitationClient(c config) *InvitationClient {
+	return &InvitationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `invitation.Hooks(f(g(h())))`.
+func (c *InvitationClient) Use(hooks ...Hook) {
+	c.hooks.Invitation = append(c.hooks.Invitation, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `invitation.Intercept(f(g(h())))`.
+func (c *InvitationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Invitation = append(c.inters.Invitation, interceptors...)
+}
+
+// Create returns a builder for creating a Invitation entity.
+func (c *InvitationClient) Create() *InvitationCreate {
+	mutation := newInvitationMutation(c.config, OpCreate)
+	return &InvitationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Invitation entities.
+func (c *InvitationClient) CreateBulk(builders ...*InvitationCreate) *InvitationCreateBulk {
+	return &InvitationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *InvitationClient) MapCreateBulk(slice any, setFunc func(*InvitationCreate, int)) *InvitationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &InvitationCreateBulk{err: fmt.Errorf("calling to InvitationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*InvitationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &InvitationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Invitation.
+func (c *InvitationClient) Update() *InvitationUpdate {
+	mutation := newInvitationMutation(c.config, OpUpdate)
+	return &InvitationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *InvitationClient) UpdateOne(_m *Invitation) *InvitationUpdateOne {
+	mutation := newInvitationMutation(c.config, OpUpdateOne, withInvitation(_m))
+	return &InvitationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *InvitationClient) UpdateOneID(id core.ID) *InvitationUpdateOne {
+	mutation := newInvitationMutation(c.config, OpUpdateOne, withInvitationID(id))
+	return &InvitationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Invitation.
+func (c *InvitationClient) Delete() *InvitationDelete {
+	mutation := newInvitationMutation(c.config, OpDelete)
+	return &InvitationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *InvitationClient) DeleteOne(_m *Invitation) *InvitationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *InvitationClient) DeleteOneID(id core.ID) *InvitationDeleteOne {
+	builder := c.Delete().Where(invitation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &InvitationDeleteOne{builder}
+}
+
+// Query returns a query builder for Invitation.
+func (c *InvitationClient) Query() *InvitationQuery {
+	return &InvitationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeInvitation},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Invitation entity by its id.
+func (c *InvitationClient) Get(ctx context.Context, id core.ID) (*Invitation, error) {
+	return c.Query().Where(invitation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *InvitationClient) GetX(ctx context.Context, id core.ID) *Invitation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Invitation.
+func (c *InvitationClient) QueryUser(_m *Invitation) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(invitation.Table, invitation.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, invitation.UserTable, invitation.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *InvitationClient) Hooks() []Hook {
+	return c.hooks.Invitation
+}
+
+// Interceptors returns the client interceptors.
+func (c *InvitationClient) Interceptors() []Interceptor {
+	return c.inters.Invitation
+}
+
+func (c *InvitationClient) mutate(ctx context.Context, m *InvitationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&InvitationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&InvitationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&InvitationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&InvitationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Invitation mutation op: %q", m.Op())
 	}
 }
 
@@ -7486,6 +7643,22 @@ func (c *UserClient) QueryAPIKeys(_m *User) *APIKeyQuery {
 	return query
 }
 
+// QueryInvitations queries the invitations edge of a User.
+func (c *UserClient) QueryInvitations(_m *User) *InvitationQuery {
+	query := (&InvitationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(invitation.Table, invitation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.InvitationsTable, user.InvitationsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryRequests queries the requests edge of a User.
 func (c *UserClient) QueryRequests(_m *User) *RequestQuery {
 	query := (&RequestClient{config: c.config}).Query()
@@ -7910,23 +8083,23 @@ type (
 	hooks struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credential, Credit,
 		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
-		ExtraFile, FolderState, HistoryEvent, Image, Issue, IssueComment, Item,
-		ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease,
-		Person, PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
-		RemotePathMapping, Request, Setting, StorageJob, SubtitleBlocklistEntry,
-		SubtitleHistoryEvent, SubtitleProfile, SubtitleProfileAssignment,
-		SubtitleSearchAttempt, SubtitleWanted, Trickplay, User, UserData,
-		Wanted []ent.Hook
+		ExtraFile, FolderState, HistoryEvent, Image, Invitation, Issue, IssueComment,
+		Item, ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource,
+		PendingRelease, Person, PluginConfig, QualityDefinition, QualityProfile,
+		ReleaseProfile, RemotePathMapping, Request, Setting, StorageJob,
+		SubtitleBlocklistEntry, SubtitleHistoryEvent, SubtitleProfile,
+		SubtitleProfileAssignment, SubtitleSearchAttempt, SubtitleWanted, Trickplay,
+		User, UserData, Wanted []ent.Hook
 	}
 	inters struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credential, Credit,
 		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
-		ExtraFile, FolderState, HistoryEvent, Image, Issue, IssueComment, Item,
-		ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease,
-		Person, PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
-		RemotePathMapping, Request, Setting, StorageJob, SubtitleBlocklistEntry,
-		SubtitleHistoryEvent, SubtitleProfile, SubtitleProfileAssignment,
-		SubtitleSearchAttempt, SubtitleWanted, Trickplay, User, UserData,
-		Wanted []ent.Interceptor
+		ExtraFile, FolderState, HistoryEvent, Image, Invitation, Issue, IssueComment,
+		Item, ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource,
+		PendingRelease, Person, PluginConfig, QualityDefinition, QualityProfile,
+		ReleaseProfile, RemotePathMapping, Request, Setting, StorageJob,
+		SubtitleBlocklistEntry, SubtitleHistoryEvent, SubtitleProfile,
+		SubtitleProfileAssignment, SubtitleSearchAttempt, SubtitleWanted, Trickplay,
+		User, UserData, Wanted []ent.Interceptor
 	}
 )

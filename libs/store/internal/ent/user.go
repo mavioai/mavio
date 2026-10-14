@@ -61,6 +61,8 @@ type UserEdges struct {
 	DisplayPreferences []*DisplayPreferences `json:"display_preferences,omitempty"`
 	// APIKeys holds the value of the api_keys edge.
 	APIKeys []*APIKey `json:"api_keys,omitempty"`
+	// Invitations holds the value of the invitations edge.
+	Invitations []*Invitation `json:"invitations,omitempty"`
 	// Requests holds the value of the requests edge.
 	Requests []*Request `json:"requests,omitempty"`
 	// Issues holds the value of the issues edge.
@@ -71,7 +73,7 @@ type UserEdges struct {
 	BlockedTitles []*BlockedTitle `json:"blocked_titles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [10]bool
+	loadedTypes [11]bool
 }
 
 // UserDataOrErr returns the UserData value or an error if the edge
@@ -128,10 +130,19 @@ func (e UserEdges) APIKeysOrErr() ([]*APIKey, error) {
 	return nil, &NotLoadedError{edge: "api_keys"}
 }
 
+// InvitationsOrErr returns the Invitations value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) InvitationsOrErr() ([]*Invitation, error) {
+	if e.loadedTypes[6] {
+		return e.Invitations, nil
+	}
+	return nil, &NotLoadedError{edge: "invitations"}
+}
+
 // RequestsOrErr returns the Requests value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) RequestsOrErr() ([]*Request, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.Requests, nil
 	}
 	return nil, &NotLoadedError{edge: "requests"}
@@ -140,7 +151,7 @@ func (e UserEdges) RequestsOrErr() ([]*Request, error) {
 // IssuesOrErr returns the Issues value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) IssuesOrErr() ([]*Issue, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		return e.Issues, nil
 	}
 	return nil, &NotLoadedError{edge: "issues"}
@@ -149,7 +160,7 @@ func (e UserEdges) IssuesOrErr() ([]*Issue, error) {
 // IssueCommentsOrErr returns the IssueComments value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) IssueCommentsOrErr() ([]*IssueComment, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[9] {
 		return e.IssueComments, nil
 	}
 	return nil, &NotLoadedError{edge: "issue_comments"}
@@ -158,7 +169,7 @@ func (e UserEdges) IssueCommentsOrErr() ([]*IssueComment, error) {
 // BlockedTitlesOrErr returns the BlockedTitles value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) BlockedTitlesOrErr() ([]*BlockedTitle, error) {
-	if e.loadedTypes[9] {
+	if e.loadedTypes[10] {
 		return e.BlockedTitles, nil
 	}
 	return nil, &NotLoadedError{edge: "blocked_titles"}
@@ -314,6 +325,11 @@ func (_m *User) QueryDisplayPreferences() *DisplayPreferencesQuery {
 // QueryAPIKeys queries the "api_keys" edge of the User entity.
 func (_m *User) QueryAPIKeys() *APIKeyQuery {
 	return NewUserClient(_m.config).QueryAPIKeys(_m)
+}
+
+// QueryInvitations queries the "invitations" edge of the User entity.
+func (_m *User) QueryInvitations() *InvitationQuery {
+	return NewUserClient(_m.config).QueryInvitations(_m)
 }
 
 // QueryRequests queries the "requests" edge of the User entity.

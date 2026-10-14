@@ -70,6 +70,15 @@ const (
 	// UserServiceUpdatePreferencesProcedure is the fully-qualified name of the UserService's
 	// UpdatePreferences RPC.
 	UserServiceUpdatePreferencesProcedure = "/mavio.user.v1.UserService/UpdatePreferences"
+	// UserServiceCreateInvitationProcedure is the fully-qualified name of the UserService's
+	// CreateInvitation RPC.
+	UserServiceCreateInvitationProcedure = "/mavio.user.v1.UserService/CreateInvitation"
+	// UserServiceListInvitationsProcedure is the fully-qualified name of the UserService's
+	// ListInvitations RPC.
+	UserServiceListInvitationsProcedure = "/mavio.user.v1.UserService/ListInvitations"
+	// UserServiceDeleteInvitationProcedure is the fully-qualified name of the UserService's
+	// DeleteInvitation RPC.
+	UserServiceDeleteInvitationProcedure = "/mavio.user.v1.UserService/DeleteInvitation"
 	// UserDataServiceGetUserDataProcedure is the fully-qualified name of the UserDataService's
 	// GetUserData RPC.
 	UserDataServiceGetUserDataProcedure = "/mavio.user.v1.UserDataService/GetUserData"
@@ -116,6 +125,16 @@ type UserServiceClient interface {
 	DeleteTotp(context.Context, *v1.DeleteTotpRequest) (*v1.DeleteTotpResponse, error)
 	// UpdatePreferences changes the calling user's playback preferences.
 	UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error)
+	// CreateInvitation makes an invitation link, whose token is returned
+	// once: the invitee opens it in a client, which accepts it with
+	// AuthService.AcceptInvitation. An invitation either creates members, up
+	// to max_uses of them, or converts one managed user into a member.
+	CreateInvitation(context.Context, *v1.CreateInvitationRequest) (*v1.CreateInvitationResponse, error)
+	// ListInvitations lists the invitations that have not expired, newest
+	// first.
+	ListInvitations(context.Context, *v1.ListInvitationsRequest) (*v1.ListInvitationsResponse, error)
+	// DeleteInvitation revokes an invitation.
+	DeleteInvitation(context.Context, *v1.DeleteInvitationRequest) (*v1.DeleteInvitationResponse, error)
 }
 
 // NewUserServiceClient constructs a client for the mavio.user.v1.UserService service. By default,
@@ -222,6 +241,25 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceMethods.ByName("UpdatePreferences")),
 			connect.WithClientOptions(opts...),
 		),
+		createInvitation: connect.NewClient[v1.CreateInvitationRequest, v1.CreateInvitationResponse](
+			httpClient,
+			baseURL+UserServiceCreateInvitationProcedure,
+			connect.WithSchema(userServiceMethods.ByName("CreateInvitation")),
+			connect.WithClientOptions(opts...),
+		),
+		listInvitations: connect.NewClient[v1.ListInvitationsRequest, v1.ListInvitationsResponse](
+			httpClient,
+			baseURL+UserServiceListInvitationsProcedure,
+			connect.WithSchema(userServiceMethods.ByName("ListInvitations")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		deleteInvitation: connect.NewClient[v1.DeleteInvitationRequest, v1.DeleteInvitationResponse](
+			httpClient,
+			baseURL+UserServiceDeleteInvitationProcedure,
+			connect.WithSchema(userServiceMethods.ByName("DeleteInvitation")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -242,6 +280,9 @@ type userServiceClient struct {
 	confirmTotp               *connect.Client[v1.ConfirmTotpRequest, v1.ConfirmTotpResponse]
 	deleteTotp                *connect.Client[v1.DeleteTotpRequest, v1.DeleteTotpResponse]
 	updatePreferences         *connect.Client[v1.UpdatePreferencesRequest, v1.UpdatePreferencesResponse]
+	createInvitation          *connect.Client[v1.CreateInvitationRequest, v1.CreateInvitationResponse]
+	listInvitations           *connect.Client[v1.ListInvitationsRequest, v1.ListInvitationsResponse]
+	deleteInvitation          *connect.Client[v1.DeleteInvitationRequest, v1.DeleteInvitationResponse]
 }
 
 // ListUsers calls mavio.user.v1.UserService.ListUsers.
@@ -379,6 +420,33 @@ func (c *userServiceClient) UpdatePreferences(ctx context.Context, req *v1.Updat
 	return nil, err
 }
 
+// CreateInvitation calls mavio.user.v1.UserService.CreateInvitation.
+func (c *userServiceClient) CreateInvitation(ctx context.Context, req *v1.CreateInvitationRequest) (*v1.CreateInvitationResponse, error) {
+	response, err := c.createInvitation.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListInvitations calls mavio.user.v1.UserService.ListInvitations.
+func (c *userServiceClient) ListInvitations(ctx context.Context, req *v1.ListInvitationsRequest) (*v1.ListInvitationsResponse, error) {
+	response, err := c.listInvitations.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// DeleteInvitation calls mavio.user.v1.UserService.DeleteInvitation.
+func (c *userServiceClient) DeleteInvitation(ctx context.Context, req *v1.DeleteInvitationRequest) (*v1.DeleteInvitationResponse, error) {
+	response, err := c.deleteInvitation.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // UserServiceHandler is an implementation of the mavio.user.v1.UserService service.
 type UserServiceHandler interface {
 	ListUsers(context.Context, *v1.ListUsersRequest) (*v1.ListUsersResponse, error)
@@ -417,6 +485,16 @@ type UserServiceHandler interface {
 	DeleteTotp(context.Context, *v1.DeleteTotpRequest) (*v1.DeleteTotpResponse, error)
 	// UpdatePreferences changes the calling user's playback preferences.
 	UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error)
+	// CreateInvitation makes an invitation link, whose token is returned
+	// once: the invitee opens it in a client, which accepts it with
+	// AuthService.AcceptInvitation. An invitation either creates members, up
+	// to max_uses of them, or converts one managed user into a member.
+	CreateInvitation(context.Context, *v1.CreateInvitationRequest) (*v1.CreateInvitationResponse, error)
+	// ListInvitations lists the invitations that have not expired, newest
+	// first.
+	ListInvitations(context.Context, *v1.ListInvitationsRequest) (*v1.ListInvitationsResponse, error)
+	// DeleteInvitation revokes an invitation.
+	DeleteInvitation(context.Context, *v1.DeleteInvitationRequest) (*v1.DeleteInvitationResponse, error)
 }
 
 // NewUserServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -519,6 +597,25 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(userServiceMethods.ByName("UpdatePreferences")),
 		connect.WithHandlerOptions(opts...),
 	)
+	userServiceCreateInvitationHandler := connect.NewUnaryHandlerSimple(
+		UserServiceCreateInvitationProcedure,
+		svc.CreateInvitation,
+		connect.WithSchema(userServiceMethods.ByName("CreateInvitation")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceListInvitationsHandler := connect.NewUnaryHandlerSimple(
+		UserServiceListInvitationsProcedure,
+		svc.ListInvitations,
+		connect.WithSchema(userServiceMethods.ByName("ListInvitations")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceDeleteInvitationHandler := connect.NewUnaryHandlerSimple(
+		UserServiceDeleteInvitationProcedure,
+		svc.DeleteInvitation,
+		connect.WithSchema(userServiceMethods.ByName("DeleteInvitation")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.user.v1.UserService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case UserServiceListUsersProcedure:
@@ -551,6 +648,12 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 			userServiceDeleteTotpHandler.ServeHTTP(w, r)
 		case UserServiceUpdatePreferencesProcedure:
 			userServiceUpdatePreferencesHandler.ServeHTTP(w, r)
+		case UserServiceCreateInvitationProcedure:
+			userServiceCreateInvitationHandler.ServeHTTP(w, r)
+		case UserServiceListInvitationsProcedure:
+			userServiceListInvitationsHandler.ServeHTTP(w, r)
+		case UserServiceDeleteInvitationProcedure:
+			userServiceDeleteInvitationHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -618,6 +721,18 @@ func (UnimplementedUserServiceHandler) DeleteTotp(context.Context, *v1.DeleteTot
 
 func (UnimplementedUserServiceHandler) UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.UpdatePreferences is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) CreateInvitation(context.Context, *v1.CreateInvitationRequest) (*v1.CreateInvitationResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.CreateInvitation is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) ListInvitations(context.Context, *v1.ListInvitationsRequest) (*v1.ListInvitationsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.ListInvitations is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) DeleteInvitation(context.Context, *v1.DeleteInvitationRequest) (*v1.DeleteInvitationResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.DeleteInvitation is not implemented"))
 }
 
 // UserDataServiceClient is a client for the mavio.user.v1.UserDataService service.

@@ -14,8 +14,8 @@ import (
 )
 
 // JobCleanup deletes the jobs that finished long ago, the sessions unused
-// for longer than the server settings' SessionIdleDays and the folders in
-// the metadata folder of items that no longer exist.
+// for longer than the server settings' SessionIdleDays, expired invitations
+// and the folders in the metadata folder of items that no longer exist.
 const JobCleanup = "jobs.cleanup"
 
 // Housekeeping intervals.
@@ -40,8 +40,8 @@ func CleanupJob(at time.Time, scheduled bool) core.Job {
 	return core.Job{ID: core.NewID(), Kind: JobCleanup, UniqueKey: key, MaxAttempts: 3, RunAt: at, Priority: -10}
 }
 
-// cleanup purges finished jobs, idle sessions and the metadata folders of
-// deleted items; a scheduled cleanup queues the next.
+// cleanup purges finished jobs, idle sessions, expired invitations and the
+// metadata folders of deleted items; a scheduled cleanup queues the next.
 func (j *Jobs) cleanup(ctx context.Context, job core.Job) ([]core.Job, error) {
 	n, err := j.Store.Jobs().Purge(ctx, j.now().Add(-JobRetention))
 	if err != nil {
@@ -60,6 +60,13 @@ func (j *Jobs) cleanup(ctx context.Context, job core.Job) ([]core.Job, error) {
 	}
 	if n > 0 {
 		j.logger().InfoContext(ctx, "ended idle sessions", "count", n)
+	}
+	n, err = j.Store.Invitations().PurgeExpired(ctx, j.now())
+	if err != nil {
+		return nil, err
+	}
+	if n > 0 {
+		j.logger().InfoContext(ctx, "deleted expired invitations", "count", n)
 	}
 	n, err = j.sweepMetadata(ctx)
 	if n > 0 {

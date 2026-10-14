@@ -24,6 +24,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/invitation"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
@@ -542,6 +543,33 @@ func (f TraverseImage) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.ImageQuery", q)
+}
+
+// The InvitationFunc type is an adapter to allow the use of ordinary function as a Querier.
+type InvitationFunc func(context.Context, *ent.InvitationQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f InvitationFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.InvitationQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.InvitationQuery", q)
+}
+
+// The TraverseInvitation type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseInvitation func(context.Context, *ent.InvitationQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseInvitation) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseInvitation) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.InvitationQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.InvitationQuery", q)
 }
 
 // The IssueFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -1362,6 +1390,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.HistoryEventQuery, predicate.HistoryEvent, historyevent.OrderOption]{typ: ent.TypeHistoryEvent, tq: q}, nil
 	case *ent.ImageQuery:
 		return &query[*ent.ImageQuery, predicate.Image, image.OrderOption]{typ: ent.TypeImage, tq: q}, nil
+	case *ent.InvitationQuery:
+		return &query[*ent.InvitationQuery, predicate.Invitation, invitation.OrderOption]{typ: ent.TypeInvitation, tq: q}, nil
 	case *ent.IssueQuery:
 		return &query[*ent.IssueQuery, predicate.Issue, issue.OrderOption]{typ: ent.TypeIssue, tq: q}, nil
 	case *ent.IssueCommentQuery:

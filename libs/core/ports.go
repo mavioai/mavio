@@ -27,6 +27,7 @@ type Store interface {
 	DisplayPreferences() DisplayPreferencesRepository
 	Settings() SettingsRepository
 	APIKeys() APIKeyRepository
+	Invitations() InvitationRepository
 	Activities() ActivityRepository
 	Trickplay() TrickplayRepository
 	MediaSegments() MediaSegmentRepository
@@ -181,6 +182,9 @@ type AuthSessionRepository interface {
 	ListForUser(ctx context.Context, userID ID) ([]AuthSession, error)
 	// Touch records activity.
 	Touch(ctx context.Context, id ID, at time.Time) error
+	// Switch makes the session the user's, keeping switcher as the
+	// administrator who may switch it again.
+	Switch(ctx context.Context, id, userID, switcher ID) error
 	Delete(ctx context.Context, id ID) error
 	// PurgeIdle deletes the sessions last seen before a time and returns
 	// how many it deleted.
@@ -287,6 +291,21 @@ type APIKeyRepository interface {
 	// Touch records a use.
 	Touch(ctx context.Context, id ID, at time.Time) error
 	Delete(ctx context.Context, id ID) error
+}
+
+// InvitationRepository stores invitation links.
+type InvitationRepository interface {
+	Create(ctx context.Context, inv *Invitation) error
+	// GetByTokenHash returns ErrNotFound for unknown tokens.
+	GetByTokenHash(ctx context.Context, hash []byte) (Invitation, error)
+	// List returns all invitations, newest first.
+	List(ctx context.Context) ([]Invitation, error)
+	// Use counts a use of an invitation that is usable at now; ErrNotFound
+	// when it is unknown, used up or expired.
+	Use(ctx context.Context, id ID, now time.Time) error
+	Delete(ctx context.Context, id ID) error
+	// PurgeExpired deletes the invitations that expired before a time.
+	PurgeExpired(ctx context.Context, before time.Time) (int, error)
 }
 
 // ActivityRepository stores the activity log.

@@ -126,6 +126,30 @@ pub type OwnedUpdatePreferencesRequestView = ::buffa::view::OwnedView<
 pub type OwnedUpdatePreferencesResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesResponseView<'static>,
 >;
+///Shorthand for `OwnedView<CreateInvitationRequestView<'static>>`.
+pub type OwnedCreateInvitationRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::CreateInvitationRequestView<'static>,
+>;
+///Shorthand for `OwnedView<CreateInvitationResponseView<'static>>`.
+pub type OwnedCreateInvitationResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::CreateInvitationResponseView<'static>,
+>;
+///Shorthand for `OwnedView<ListInvitationsRequestView<'static>>`.
+pub type OwnedListInvitationsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::ListInvitationsRequestView<'static>,
+>;
+///Shorthand for `OwnedView<ListInvitationsResponseView<'static>>`.
+pub type OwnedListInvitationsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::ListInvitationsResponseView<'static>,
+>;
+///Shorthand for `OwnedView<DeleteInvitationRequestView<'static>>`.
+pub type OwnedDeleteInvitationRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::DeleteInvitationRequestView<'static>,
+>;
+///Shorthand for `OwnedView<DeleteInvitationResponseView<'static>>`.
+pub type OwnedDeleteInvitationResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::DeleteInvitationResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<GetUserDataRequestView<'static>>`.
 pub type OwnedGetUserDataRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::user::v1::__buffa::view::GetUserDataRequestView<'static>,
@@ -668,6 +692,108 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::CreateInvitationResponse>
+for crate::proto::mavio::user::v1::__buffa::view::CreateInvitationResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::CreateInvitationResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::CreateInvitationResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::ListInvitationsResponse>
+for crate::proto::mavio::user::v1::__buffa::view::ListInvitationsResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::ListInvitationsResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::ListInvitationsResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::DeleteInvitationResponse>
+for crate::proto::mavio::user::v1::__buffa::view::DeleteInvitationResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::DeleteInvitationResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::DeleteInvitationResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::GetUserDataResponse>
 for crate::proto::mavio::user::v1::__buffa::view::GetUserDataResponseView<'_> {
     fn encode(
@@ -828,10 +954,28 @@ pub const USER_SERVICE_UPDATE_PREFERENCES_SPEC: ::connectrpc::Spec = ::connectrp
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `CreateInvitation` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_CREATE_INVITATION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/CreateInvitation",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListInvitations` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_LIST_INVITATIONS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/ListInvitations",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `DeleteInvitation` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_DELETE_INVITATION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/DeleteInvitation",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// UserService manages accounts: the server's one administrator, members
-/// and managed users (docs/accounts.md §4.1). All methods except
-/// GetCurrentUser, UpdatePreferences, and managing one's own password, PIN,
-/// passkeys and TOTP require the administrator. Managed users have no
+/// and managed users (docs/accounts.md §4.1), and invitation links (§4.3).
+/// All methods except GetCurrentUser, UpdatePreferences, and managing one's
+/// own password, PIN, passkeys and TOTP require the administrator. Managed users have no
 /// passwords, passkeys or TOTP.
 ///
 /// # Implementing handlers
@@ -1237,6 +1381,79 @@ pub trait UserService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::user::v1::UpdatePreferencesResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// CreateInvitation makes an invitation link, whose token is returned
+    /// once: the invitee opens it in a client, which accepts it with
+    /// AuthService.AcceptInvitation. An invitation either creates members, up
+    /// to max_uses of them, or converts one managed user into a member.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn create_invitation<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::user::v1::CreateInvitationRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::user::v1::CreateInvitationResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListInvitations lists the invitations that have not expired, newest
+    /// first.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_invitations<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::user::v1::ListInvitationsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::user::v1::ListInvitationsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// DeleteInvitation revokes an invitation.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn delete_invitation<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::user::v1::DeleteInvitationRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::user::v1::DeleteInvitationResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1707,6 +1924,93 @@ impl<S: UserService> UserServiceExt for S {
                 },
             )
             .with_spec(USER_SERVICE_UPDATE_PREFERENCES_SPEC)
+            .route_view(
+                USER_SERVICE_SERVICE_NAME,
+                "CreateInvitation",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::user::v1::__buffa::view::CreateInvitationRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::user::v1::CreateInvitationRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.create_invitation(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::user::v1::CreateInvitationResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(USER_SERVICE_CREATE_INVITATION_SPEC)
+            .route_view_idempotent(
+                USER_SERVICE_SERVICE_NAME,
+                "ListInvitations",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::user::v1::__buffa::view::ListInvitationsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::user::v1::ListInvitationsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_invitations(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::user::v1::ListInvitationsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(USER_SERVICE_LIST_INVITATIONS_SPEC)
+            .route_view(
+                USER_SERVICE_SERVICE_NAME,
+                "DeleteInvitation",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::user::v1::__buffa::view::DeleteInvitationRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::user::v1::DeleteInvitationRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.delete_invitation(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::user::v1::DeleteInvitationResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(USER_SERVICE_DELETE_INVITATION_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -1849,6 +2153,24 @@ impl<T: UserService> ::connectrpc::Dispatcher for UserServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(USER_SERVICE_UPDATE_PREFERENCES_SPEC),
+                )
+            }
+            "CreateInvitation" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(USER_SERVICE_CREATE_INVITATION_SPEC),
+                )
+            }
+            "ListInvitations" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(USER_SERVICE_LIST_INVITATIONS_SPEC),
+                )
+            }
+            "DeleteInvitation" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(USER_SERVICE_DELETE_INVITATION_SPEC),
                 )
             }
             _ => None,
@@ -2189,6 +2511,72 @@ impl<T: UserService> ::connectrpc::Dispatcher for UserServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::user::v1::UpdatePreferencesResponse,
+                        >(format)
+                })
+            }
+            "CreateInvitation" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::user::v1::CreateInvitationRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::user::v1::__buffa::view::CreateInvitationRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::user::v1::CreateInvitationRequest,
+                    >::from_parts(&req, &body);
+                    svc.create_invitation(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::user::v1::CreateInvitationResponse,
+                        >(format)
+                })
+            }
+            "ListInvitations" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::user::v1::ListInvitationsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::user::v1::__buffa::view::ListInvitationsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::user::v1::ListInvitationsRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_invitations(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::user::v1::ListInvitationsResponse,
+                        >(format)
+                })
+            }
+            "DeleteInvitation" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::user::v1::DeleteInvitationRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::user::v1::__buffa::view::DeleteInvitationRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::user::v1::DeleteInvitationRequest,
+                    >::from_parts(&req, &body);
+                    svc.delete_invitation(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::user::v1::DeleteInvitationResponse,
                         >(format)
                 })
             }
@@ -2977,6 +3365,141 @@ where
                 &self.transport,
                 &self.config,
                 USER_SERVICE_UPDATE_PREFERENCES_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the CreateInvitation RPC. Sends a request to /mavio.user.v1.UserService/CreateInvitation.
+    pub async fn create_invitation(
+        &self,
+        request: crate::proto::mavio::user::v1::CreateInvitationRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::CreateInvitationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.create_invitation_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the CreateInvitation RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn create_invitation_with_options(
+        &self,
+        request: crate::proto::mavio::user::v1::CreateInvitationRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::CreateInvitationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                USER_SERVICE_CREATE_INVITATION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListInvitations RPC. Sends a request to /mavio.user.v1.UserService/ListInvitations.
+    pub async fn list_invitations(
+        &self,
+        request: crate::proto::mavio::user::v1::ListInvitationsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::ListInvitationsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_invitations_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListInvitations RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_invitations_with_options(
+        &self,
+        request: crate::proto::mavio::user::v1::ListInvitationsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::ListInvitationsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                USER_SERVICE_LIST_INVITATIONS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the DeleteInvitation RPC. Sends a request to /mavio.user.v1.UserService/DeleteInvitation.
+    pub async fn delete_invitation(
+        &self,
+        request: crate::proto::mavio::user::v1::DeleteInvitationRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::DeleteInvitationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.delete_invitation_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the DeleteInvitation RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn delete_invitation_with_options(
+        &self,
+        request: crate::proto::mavio::user::v1::DeleteInvitationRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::DeleteInvitationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                USER_SERVICE_DELETE_INVITATION_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

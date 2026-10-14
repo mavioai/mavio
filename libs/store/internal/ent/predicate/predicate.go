@@ -54,6 +54,9 @@ type HistoryEvent func(*sql.Selector)
 // Image is the predicate function for image builders.
 type Image func(*sql.Selector)
 
+// Invitation is the predicate function for invitation builders.
+type Invitation func(*sql.Selector)
+
 // Issue is the predicate function for issue builders.
 type Issue func(*sql.Selector)
 

@@ -22,6 +22,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/invitation"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
@@ -97,11 +98,11 @@ func init() {
 	// authsession.DefaultClientVersion holds the default value on creation for the client_version field.
 	authsession.DefaultClientVersion = authsessionDescClientVersion.Default.(string)
 	// authsessionDescCreatedAt is the schema descriptor for created_at field.
-	authsessionDescCreatedAt := authsessionFields[7].Descriptor()
+	authsessionDescCreatedAt := authsessionFields[8].Descriptor()
 	// authsession.DefaultCreatedAt holds the default value on creation for the created_at field.
 	authsession.DefaultCreatedAt = authsessionDescCreatedAt.Default.(func() time.Time)
 	// authsessionDescLastSeenAt is the schema descriptor for last_seen_at field.
-	authsessionDescLastSeenAt := authsessionFields[8].Descriptor()
+	authsessionDescLastSeenAt := authsessionFields[9].Descriptor()
 	// authsession.DefaultLastSeenAt holds the default value on creation for the last_seen_at field.
 	authsession.DefaultLastSeenAt = authsessionDescLastSeenAt.Default.(func() time.Time)
 	// authsessionDescID is the schema descriptor for id field.
@@ -338,6 +339,20 @@ func init() {
 	imageDescID := imageFields[0].Descriptor()
 	// image.DefaultID holds the default value on creation for the id field.
 	image.DefaultID = imageDescID.Default.(func() core.ID)
+	invitationFields := schema.Invitation{}.Fields()
+	_ = invitationFields
+	// invitationDescUses is the schema descriptor for uses field.
+	invitationDescUses := invitationFields[5].Descriptor()
+	// invitation.DefaultUses holds the default value on creation for the uses field.
+	invitation.DefaultUses = invitationDescUses.Default.(int)
+	// invitationDescCreatedAt is the schema descriptor for created_at field.
+	invitationDescCreatedAt := invitationFields[7].Descriptor()
+	// invitation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	invitation.DefaultCreatedAt = invitationDescCreatedAt.Default.(func() time.Time)
+	// invitationDescID is the schema descriptor for id field.
+	invitationDescID := invitationFields[0].Descriptor()
+	// invitation.DefaultID holds the default value on creation for the id field.
+	invitation.DefaultID = invitationDescID.Default.(func() core.ID)
 	issueFields := schema.Issue{}.Fields()
 	_ = issueFields
 	// issueDescSeasonNumber is the schema descriptor for season_number field.

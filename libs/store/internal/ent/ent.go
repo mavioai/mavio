@@ -28,6 +28,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/folderstate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/historyevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/image"
+	"github.com/mavioai/mavio/libs/store/internal/ent/invitation"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
@@ -133,6 +134,7 @@ func checkColumn(t, c string) error {
 			folderstate.Table:               folderstate.ValidColumn,
 			historyevent.Table:              historyevent.ValidColumn,
 			image.Table:                     image.ValidColumn,
+			invitation.Table:                invitation.ValidColumn,
 			issue.Table:                     issue.ValidColumn,
 			issuecomment.Table:              issuecomment.ValidColumn,
 			item.Table:                      item.ValidColumn,

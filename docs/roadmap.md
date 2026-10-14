@@ -799,7 +799,7 @@ flowchart TD
 - [x] Standalone users: the administrator, members, managed users, PINs, restriction profiles, sign-in throttling: user kinds with one administrator, credentials in a table of their own, `UserService.SetPin`, managed users made members by a password, and failed sign-ins throttled per name and address
 - [x] Passkeys and TOTP for standalone sign-in: discoverable passkeys at the host of the request's origin, TOTP as the second factor of passwords with sealed secrets, and a software authenticator for tests
 - [x] Library access records and their enforcement: `LibraryAccess` apart from the user's policy, with allowed and blocked labels matched against the tags items inherit from their ancestors, in queries and single-item checks alike
-- [ ] Invitation links, Quick Connect and switching on the administrator's devices
+- [x] Invitation links, Quick Connect and switching on the administrator's devices: invitations stored as token hashes, creating members with a password or passkey or converting a managed user, their uses counted atomically and expired ones purged daily; switching that moves the session to the target after its PIN, throttled per user
 - [ ] Recovery of the administrator from the command line
 - [ ] Server identity keys, claiming, reclaiming and the server's connection to mavio.dev
 - [ ] mavio.dev: accounts, sign-in assertions, code sign-in for televisions, access records, invitations and revocations

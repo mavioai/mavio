@@ -7,9 +7,9 @@ import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
 // UserService manages accounts: the server's one administrator, members
-// and managed users (docs/accounts.md §4.1). All methods except
-// GetCurrentUser, UpdatePreferences, and managing one's own password, PIN,
-// passkeys and TOTP require the administrator. Managed users have no
+// and managed users (docs/accounts.md §4.1), and invitation links (§4.3).
+// All methods except GetCurrentUser, UpdatePreferences, and managing one's
+// own password, PIN, passkeys and TOTP require the administrator. Managed users have no
 // passwords, passkeys or TOTP.
 service UserService {
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
@@ -54,6 +54,18 @@ service UserService {
   rpc DeleteTotp(DeleteTotpRequest) returns (DeleteTotpResponse);
   // UpdatePreferences changes the calling user's playback preferences.
   rpc UpdatePreferences(UpdatePreferencesRequest) returns (UpdatePreferencesResponse);
+  // CreateInvitation makes an invitation link, whose token is returned
+  // once: the invitee opens it in a client, which accepts it with
+  // AuthService.AcceptInvitation. An invitation either creates members, up
+  // to max_uses of them, or converts one managed user into a member.
+  rpc CreateInvitation(CreateInvitationRequest) returns (CreateInvitationResponse);
+  // ListInvitations lists the invitations that have not expired, newest
+  // first.
+  rpc ListInvitations(ListInvitationsRequest) returns (ListInvitationsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // DeleteInvitation revokes an invitation.
+  rpc DeleteInvitation(DeleteInvitationRequest) returns (DeleteInvitationResponse);
 }
 
 // UserDataService reads and updates the calling user's per-item state.
@@ -437,3 +449,62 @@ message UpdateUserDataRequest {
 message UpdateUserDataResponse {
   UserData user_data = 1;
 }
+
+// Invitation is an invitation link (docs/accounts.md §4.3); its token is
+// never shown again after CreateInvitation.
+message Invitation {
+  string id = 1;
+  // The managed user the invitation converts into a member; unset when it
+  // creates members.
+  string user_id = 2;
+  // The library access of the members it creates: its library and content
+  // fields and allow_download count, the rest are the server's defaults.
+  UserPolicy access = 3;
+  int32 max_uses = 4;
+  int32 uses = 5;
+  google.protobuf.Timestamp expire_time = 6;
+  google.protobuf.Timestamp create_time = 7;
+}
+
+message CreateInvitationRequest {
+  // A managed user to convert into a member; the invitation then has one
+  // use and access is ignored, as the user keeps its own.
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  // The access of the members it creates; unset gives all libraries and
+  // downloads.
+  UserPolicy access = 2;
+  // How many members it may create; unset is 1.
+  int32 max_uses = 3 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 100
+  }];
+  // How long the link lasts, up to 30 days.
+  google.protobuf.Duration valid_for = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).duration = {
+      gt: {seconds: 0}
+      lte: {seconds: 2592000}
+    }
+  ];
+}
+
+message CreateInvitationResponse {
+  Invitation invitation = 1;
+  // The secret the link carries, returned only here.
+  string token = 2;
+}
+
+message ListInvitationsRequest {}
+
+message ListInvitationsResponse {
+  repeated Invitation invitations = 1;
+}
+
+message DeleteInvitationRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteInvitationResponse {}

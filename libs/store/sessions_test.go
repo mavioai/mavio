@@ -75,6 +75,24 @@ func TestAuthSessions(t *testing.T) {
 			t.Errorf("idle session: %v, want ErrNotFound", err)
 		}
 
+		// Switching changes the session's user and remembers the switcher.
+		kid := core.User{Name: "kid", Kind: core.UserManaged}
+		if err := s.Users().Create(ctx, &kid); err != nil {
+			t.Fatal(err)
+		}
+		if err := s.AuthSessions().Switch(ctx, again.ID, kid.ID, alice.ID); err != nil {
+			t.Fatal(err)
+		}
+		if got, err := s.AuthSessions().Get(ctx, again.ID); err != nil || got.UserID != kid.ID || got.SwitcherID != alice.ID {
+			t.Errorf("after Switch = %+v, %v; want kid's, switched by alice", got, err)
+		}
+		if err := s.AuthSessions().Switch(ctx, core.NewID(), kid.ID, alice.ID); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("Switch of an unknown session: %v, want ErrNotFound", err)
+		}
+		if err := s.AuthSessions().Switch(ctx, again.ID, alice.ID, alice.ID); err != nil {
+			t.Fatal(err)
+		}
+
 		// Deleting the user signs it out everywhere.
 		if err := s.Users().Delete(ctx, alice.ID); err != nil {
 			t.Fatal(err)

@@ -184,6 +184,34 @@ pub use self::__buffa::view::UpdateUserDataResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::UpdateUserDataResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::InvitationView;
+#[doc(inline)]
+pub use self::__buffa::view::InvitationOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateInvitationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateInvitationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateInvitationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateInvitationResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListInvitationsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListInvitationsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListInvitationsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListInvitationsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteInvitationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteInvitationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteInvitationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteInvitationResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::DisplayPreferencesView;
 #[doc(inline)]
 pub use self::__buffa::view::DisplayPreferencesOwnedView;

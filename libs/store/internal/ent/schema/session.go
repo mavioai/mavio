@@ -31,6 +31,9 @@ func (AuthSession) Fields() []ent.Field {
 		field.String("device_name").Default(""),
 		field.String("client").Default(""),
 		field.String("client_version").Default(""),
+		// switcher_id is the administrator who switched the session to its
+		// user, kept as a plain ID.
+		field.UUID("switcher_id", core.ID{}).Optional().Nillable(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("last_seen_at").Default(time.Now),
 	}

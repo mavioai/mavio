@@ -86,6 +86,20 @@ const (
 	// AuthServiceResetPasswordProcedure is the fully-qualified name of the AuthService's ResetPassword
 	// RPC.
 	AuthServiceResetPasswordProcedure = "/mavio.auth.v1.AuthService/ResetPassword"
+	// AuthServiceGetInvitationProcedure is the fully-qualified name of the AuthService's GetInvitation
+	// RPC.
+	AuthServiceGetInvitationProcedure = "/mavio.auth.v1.AuthService/GetInvitation"
+	// AuthServiceStartInvitationPasskeyProcedure is the fully-qualified name of the AuthService's
+	// StartInvitationPasskey RPC.
+	AuthServiceStartInvitationPasskeyProcedure = "/mavio.auth.v1.AuthService/StartInvitationPasskey"
+	// AuthServiceAcceptInvitationProcedure is the fully-qualified name of the AuthService's
+	// AcceptInvitation RPC.
+	AuthServiceAcceptInvitationProcedure = "/mavio.auth.v1.AuthService/AcceptInvitation"
+	// AuthServiceListSwitchableUsersProcedure is the fully-qualified name of the AuthService's
+	// ListSwitchableUsers RPC.
+	AuthServiceListSwitchableUsersProcedure = "/mavio.auth.v1.AuthService/ListSwitchableUsers"
+	// AuthServiceSwitchUserProcedure is the fully-qualified name of the AuthService's SwitchUser RPC.
+	AuthServiceSwitchUserProcedure = "/mavio.auth.v1.AuthService/SwitchUser"
 )
 
 // AuthServiceClient is a client for the mavio.auth.v1.AuthService service.
@@ -161,6 +175,34 @@ type AuthServiceClient interface {
 	// ResetPassword sets a new password with the PIN ForgotPassword
 	// delivered, and ends the user's sessions.
 	ResetPassword(context.Context, *v1.ResetPasswordRequest) (*v1.ResetPasswordResponse, error)
+	// GetInvitation describes an invitation link before it is accepted.
+	// Unknown, used up and expired invitations are NOT_FOUND.
+	GetInvitation(context.Context, *v1.GetInvitationRequest) (*v1.GetInvitationResponse, error)
+	// StartInvitationPasskey begins creating the passkey of the member an
+	// invitation creates, at the origin of the request as
+	// UserService.StartPasskeyRegistration does; AcceptInvitation finishes
+	// it.
+	StartInvitationPasskey(context.Context, *v1.StartInvitationPasskeyRequest) (*v1.StartInvitationPasskeyResponse, error)
+	// AcceptInvitation creates a member with a password or a passkey, or
+	// converts the invitation's managed user into one, and signs the device
+	// in as it. An invitation used up or expired meanwhile is NOT_FOUND; a
+	// taken name is ALREADY_EXISTS; a passkey that does not verify is
+	// INVALID_ARGUMENT.
+	AcceptInvitation(context.Context, *v1.AcceptInvitationRequest) (*v1.AcceptInvitationResponse, error)
+	// ListSwitchableUsers lists the enabled users the calling session may
+	// switch to: on a session signed in as the administrator, or switched
+	// from one, every user (docs/accounts.md §4.4). Other sessions are
+	// PERMISSION_DENIED.
+	ListSwitchableUsers(context.Context, *v1.ListSwitchableUsersRequest) (*v1.ListSwitchableUsersResponse, error)
+	// SwitchUser makes the calling session the given user's: its access
+	// token and refreshes then act as that user, and the session can still
+	// switch. A user with a PIN needs it: without one the call is
+	// FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three
+	// wrong PINs for a user each locks it out twice as long as the one
+	// before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the
+	// session opened before switching keep their user, so the client opens
+	// them again.
+	SwitchUser(context.Context, *v1.SwitchUserRequest) (*v1.SwitchUserResponse, error)
 }
 
 // NewAuthServiceClient constructs a client for the mavio.auth.v1.AuthService service. By default,
@@ -292,30 +334,67 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("ResetPassword")),
 			connect.WithClientOptions(opts...),
 		),
+		getInvitation: connect.NewClient[v1.GetInvitationRequest, v1.GetInvitationResponse](
+			httpClient,
+			baseURL+AuthServiceGetInvitationProcedure,
+			connect.WithSchema(authServiceMethods.ByName("GetInvitation")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		startInvitationPasskey: connect.NewClient[v1.StartInvitationPasskeyRequest, v1.StartInvitationPasskeyResponse](
+			httpClient,
+			baseURL+AuthServiceStartInvitationPasskeyProcedure,
+			connect.WithSchema(authServiceMethods.ByName("StartInvitationPasskey")),
+			connect.WithClientOptions(opts...),
+		),
+		acceptInvitation: connect.NewClient[v1.AcceptInvitationRequest, v1.AcceptInvitationResponse](
+			httpClient,
+			baseURL+AuthServiceAcceptInvitationProcedure,
+			connect.WithSchema(authServiceMethods.ByName("AcceptInvitation")),
+			connect.WithClientOptions(opts...),
+		),
+		listSwitchableUsers: connect.NewClient[v1.ListSwitchableUsersRequest, v1.ListSwitchableUsersResponse](
+			httpClient,
+			baseURL+AuthServiceListSwitchableUsersProcedure,
+			connect.WithSchema(authServiceMethods.ByName("ListSwitchableUsers")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		switchUser: connect.NewClient[v1.SwitchUserRequest, v1.SwitchUserResponse](
+			httpClient,
+			baseURL+AuthServiceSwitchUserProcedure,
+			connect.WithSchema(authServiceMethods.ByName("SwitchUser")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // authServiceClient implements AuthServiceClient.
 type authServiceClient struct {
-	getAuthInfo           *connect.Client[v1.GetAuthInfoRequest, v1.GetAuthInfoResponse]
-	createFirstUser       *connect.Client[v1.CreateFirstUserRequest, v1.CreateFirstUserResponse]
-	login                 *connect.Client[v1.LoginRequest, v1.LoginResponse]
-	startPasskeySignIn    *connect.Client[v1.StartPasskeySignInRequest, v1.StartPasskeySignInResponse]
-	finishPasskeySignIn   *connect.Client[v1.FinishPasskeySignInRequest, v1.FinishPasskeySignInResponse]
-	startRefresh          *connect.Client[v1.StartRefreshRequest, v1.StartRefreshResponse]
-	refreshSession        *connect.Client[v1.RefreshSessionRequest, v1.RefreshSessionResponse]
-	logout                *connect.Client[v1.LogoutRequest, v1.LogoutResponse]
-	listSessions          *connect.Client[v1.ListSessionsRequest, v1.ListSessionsResponse]
-	revokeSession         *connect.Client[v1.RevokeSessionRequest, v1.RevokeSessionResponse]
-	startQuickConnect     *connect.Client[v1.StartQuickConnectRequest, v1.StartQuickConnectResponse]
-	getQuickConnectState  *connect.Client[v1.GetQuickConnectStateRequest, v1.GetQuickConnectStateResponse]
-	authorizeQuickConnect *connect.Client[v1.AuthorizeQuickConnectRequest, v1.AuthorizeQuickConnectResponse]
-	loginWithQuickConnect *connect.Client[v1.LoginWithQuickConnectRequest, v1.LoginWithQuickConnectResponse]
-	createApiKey          *connect.Client[v1.CreateApiKeyRequest, v1.CreateApiKeyResponse]
-	listApiKeys           *connect.Client[v1.ListApiKeysRequest, v1.ListApiKeysResponse]
-	revokeApiKey          *connect.Client[v1.RevokeApiKeyRequest, v1.RevokeApiKeyResponse]
-	forgotPassword        *connect.Client[v1.ForgotPasswordRequest, v1.ForgotPasswordResponse]
-	resetPassword         *connect.Client[v1.ResetPasswordRequest, v1.ResetPasswordResponse]
+	getAuthInfo            *connect.Client[v1.GetAuthInfoRequest, v1.GetAuthInfoResponse]
+	createFirstUser        *connect.Client[v1.CreateFirstUserRequest, v1.CreateFirstUserResponse]
+	login                  *connect.Client[v1.LoginRequest, v1.LoginResponse]
+	startPasskeySignIn     *connect.Client[v1.StartPasskeySignInRequest, v1.StartPasskeySignInResponse]
+	finishPasskeySignIn    *connect.Client[v1.FinishPasskeySignInRequest, v1.FinishPasskeySignInResponse]
+	startRefresh           *connect.Client[v1.StartRefreshRequest, v1.StartRefreshResponse]
+	refreshSession         *connect.Client[v1.RefreshSessionRequest, v1.RefreshSessionResponse]
+	logout                 *connect.Client[v1.LogoutRequest, v1.LogoutResponse]
+	listSessions           *connect.Client[v1.ListSessionsRequest, v1.ListSessionsResponse]
+	revokeSession          *connect.Client[v1.RevokeSessionRequest, v1.RevokeSessionResponse]
+	startQuickConnect      *connect.Client[v1.StartQuickConnectRequest, v1.StartQuickConnectResponse]
+	getQuickConnectState   *connect.Client[v1.GetQuickConnectStateRequest, v1.GetQuickConnectStateResponse]
+	authorizeQuickConnect  *connect.Client[v1.AuthorizeQuickConnectRequest, v1.AuthorizeQuickConnectResponse]
+	loginWithQuickConnect  *connect.Client[v1.LoginWithQuickConnectRequest, v1.LoginWithQuickConnectResponse]
+	createApiKey           *connect.Client[v1.CreateApiKeyRequest, v1.CreateApiKeyResponse]
+	listApiKeys            *connect.Client[v1.ListApiKeysRequest, v1.ListApiKeysResponse]
+	revokeApiKey           *connect.Client[v1.RevokeApiKeyRequest, v1.RevokeApiKeyResponse]
+	forgotPassword         *connect.Client[v1.ForgotPasswordRequest, v1.ForgotPasswordResponse]
+	resetPassword          *connect.Client[v1.ResetPasswordRequest, v1.ResetPasswordResponse]
+	getInvitation          *connect.Client[v1.GetInvitationRequest, v1.GetInvitationResponse]
+	startInvitationPasskey *connect.Client[v1.StartInvitationPasskeyRequest, v1.StartInvitationPasskeyResponse]
+	acceptInvitation       *connect.Client[v1.AcceptInvitationRequest, v1.AcceptInvitationResponse]
+	listSwitchableUsers    *connect.Client[v1.ListSwitchableUsersRequest, v1.ListSwitchableUsersResponse]
+	switchUser             *connect.Client[v1.SwitchUserRequest, v1.SwitchUserResponse]
 }
 
 // GetAuthInfo calls mavio.auth.v1.AuthService.GetAuthInfo.
@@ -489,6 +568,51 @@ func (c *authServiceClient) ResetPassword(ctx context.Context, req *v1.ResetPass
 	return nil, err
 }
 
+// GetInvitation calls mavio.auth.v1.AuthService.GetInvitation.
+func (c *authServiceClient) GetInvitation(ctx context.Context, req *v1.GetInvitationRequest) (*v1.GetInvitationResponse, error) {
+	response, err := c.getInvitation.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// StartInvitationPasskey calls mavio.auth.v1.AuthService.StartInvitationPasskey.
+func (c *authServiceClient) StartInvitationPasskey(ctx context.Context, req *v1.StartInvitationPasskeyRequest) (*v1.StartInvitationPasskeyResponse, error) {
+	response, err := c.startInvitationPasskey.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// AcceptInvitation calls mavio.auth.v1.AuthService.AcceptInvitation.
+func (c *authServiceClient) AcceptInvitation(ctx context.Context, req *v1.AcceptInvitationRequest) (*v1.AcceptInvitationResponse, error) {
+	response, err := c.acceptInvitation.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListSwitchableUsers calls mavio.auth.v1.AuthService.ListSwitchableUsers.
+func (c *authServiceClient) ListSwitchableUsers(ctx context.Context, req *v1.ListSwitchableUsersRequest) (*v1.ListSwitchableUsersResponse, error) {
+	response, err := c.listSwitchableUsers.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// SwitchUser calls mavio.auth.v1.AuthService.SwitchUser.
+func (c *authServiceClient) SwitchUser(ctx context.Context, req *v1.SwitchUserRequest) (*v1.SwitchUserResponse, error) {
+	response, err := c.switchUser.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // AuthServiceHandler is an implementation of the mavio.auth.v1.AuthService service.
 type AuthServiceHandler interface {
 	// GetAuthInfo tells clients how to sign in.
@@ -562,6 +686,34 @@ type AuthServiceHandler interface {
 	// ResetPassword sets a new password with the PIN ForgotPassword
 	// delivered, and ends the user's sessions.
 	ResetPassword(context.Context, *v1.ResetPasswordRequest) (*v1.ResetPasswordResponse, error)
+	// GetInvitation describes an invitation link before it is accepted.
+	// Unknown, used up and expired invitations are NOT_FOUND.
+	GetInvitation(context.Context, *v1.GetInvitationRequest) (*v1.GetInvitationResponse, error)
+	// StartInvitationPasskey begins creating the passkey of the member an
+	// invitation creates, at the origin of the request as
+	// UserService.StartPasskeyRegistration does; AcceptInvitation finishes
+	// it.
+	StartInvitationPasskey(context.Context, *v1.StartInvitationPasskeyRequest) (*v1.StartInvitationPasskeyResponse, error)
+	// AcceptInvitation creates a member with a password or a passkey, or
+	// converts the invitation's managed user into one, and signs the device
+	// in as it. An invitation used up or expired meanwhile is NOT_FOUND; a
+	// taken name is ALREADY_EXISTS; a passkey that does not verify is
+	// INVALID_ARGUMENT.
+	AcceptInvitation(context.Context, *v1.AcceptInvitationRequest) (*v1.AcceptInvitationResponse, error)
+	// ListSwitchableUsers lists the enabled users the calling session may
+	// switch to: on a session signed in as the administrator, or switched
+	// from one, every user (docs/accounts.md §4.4). Other sessions are
+	// PERMISSION_DENIED.
+	ListSwitchableUsers(context.Context, *v1.ListSwitchableUsersRequest) (*v1.ListSwitchableUsersResponse, error)
+	// SwitchUser makes the calling session the given user's: its access
+	// token and refreshes then act as that user, and the session can still
+	// switch. A user with a PIN needs it: without one the call is
+	// FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three
+	// wrong PINs for a user each locks it out twice as long as the one
+	// before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the
+	// session opened before switching keep their user, so the client opens
+	// them again.
+	SwitchUser(context.Context, *v1.SwitchUserRequest) (*v1.SwitchUserResponse, error)
 }
 
 // NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -689,6 +841,38 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceMethods.ByName("ResetPassword")),
 		connect.WithHandlerOptions(opts...),
 	)
+	authServiceGetInvitationHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceGetInvitationProcedure,
+		svc.GetInvitation,
+		connect.WithSchema(authServiceMethods.ByName("GetInvitation")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceStartInvitationPasskeyHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceStartInvitationPasskeyProcedure,
+		svc.StartInvitationPasskey,
+		connect.WithSchema(authServiceMethods.ByName("StartInvitationPasskey")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceAcceptInvitationHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceAcceptInvitationProcedure,
+		svc.AcceptInvitation,
+		connect.WithSchema(authServiceMethods.ByName("AcceptInvitation")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceListSwitchableUsersHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceListSwitchableUsersProcedure,
+		svc.ListSwitchableUsers,
+		connect.WithSchema(authServiceMethods.ByName("ListSwitchableUsers")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceSwitchUserHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceSwitchUserProcedure,
+		svc.SwitchUser,
+		connect.WithSchema(authServiceMethods.ByName("SwitchUser")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.auth.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AuthServiceGetAuthInfoProcedure:
@@ -729,6 +913,16 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceForgotPasswordHandler.ServeHTTP(w, r)
 		case AuthServiceResetPasswordProcedure:
 			authServiceResetPasswordHandler.ServeHTTP(w, r)
+		case AuthServiceGetInvitationProcedure:
+			authServiceGetInvitationHandler.ServeHTTP(w, r)
+		case AuthServiceStartInvitationPasskeyProcedure:
+			authServiceStartInvitationPasskeyHandler.ServeHTTP(w, r)
+		case AuthServiceAcceptInvitationProcedure:
+			authServiceAcceptInvitationHandler.ServeHTTP(w, r)
+		case AuthServiceListSwitchableUsersProcedure:
+			authServiceListSwitchableUsersHandler.ServeHTTP(w, r)
+		case AuthServiceSwitchUserProcedure:
+			authServiceSwitchUserHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -812,4 +1006,24 @@ func (UnimplementedAuthServiceHandler) ForgotPassword(context.Context, *v1.Forgo
 
 func (UnimplementedAuthServiceHandler) ResetPassword(context.Context, *v1.ResetPasswordRequest) (*v1.ResetPasswordResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.ResetPassword is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) GetInvitation(context.Context, *v1.GetInvitationRequest) (*v1.GetInvitationResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.GetInvitation is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) StartInvitationPasskey(context.Context, *v1.StartInvitationPasskeyRequest) (*v1.StartInvitationPasskeyResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.StartInvitationPasskey is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) AcceptInvitation(context.Context, *v1.AcceptInvitationRequest) (*v1.AcceptInvitationResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.AcceptInvitation is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) ListSwitchableUsers(context.Context, *v1.ListSwitchableUsersRequest) (*v1.ListSwitchableUsersResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.ListSwitchableUsers is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) SwitchUser(context.Context, *v1.SwitchUserRequest) (*v1.SwitchUserResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.SwitchUser is not implemented"))
 }

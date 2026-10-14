@@ -85,6 +85,20 @@ func (_c *AuthSessionCreate) SetNillableClientVersion(v *string) *AuthSessionCre
 	return _c
 }
 
+// SetSwitcherID sets the "switcher_id" field.
+func (_c *AuthSessionCreate) SetSwitcherID(v core.ID) *AuthSessionCreate {
+	_c.mutation.SetSwitcherID(v)
+	return _c
+}
+
+// SetNillableSwitcherID sets the "switcher_id" field if the given value is not nil.
+func (_c *AuthSessionCreate) SetNillableSwitcherID(v *core.ID) *AuthSessionCreate {
+	if v != nil {
+		_c.SetSwitcherID(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *AuthSessionCreate) SetCreatedAt(v time.Time) *AuthSessionCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -278,6 +292,10 @@ func (_c *AuthSessionCreate) createSpec() (*AuthSession, *sqlgraph.CreateSpec) {
 		_spec.SetField(authsession.FieldClientVersion, field.TypeString, value)
 		_node.ClientVersion = value
 	}
+	if value, ok := _c.mutation.SwitcherID(); ok {
+		_spec.SetField(authsession.FieldSwitcherID, field.TypeUUID, value)
+		_node.SwitcherID = &value
+	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(authsession.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -427,6 +445,24 @@ func (u *AuthSessionUpsert) UpdateClientVersion() *AuthSessionUpsert {
 	return u
 }
 
+// SetSwitcherID sets the "switcher_id" field.
+func (u *AuthSessionUpsert) SetSwitcherID(v core.ID) *AuthSessionUpsert {
+	u.Set(authsession.FieldSwitcherID, v)
+	return u
+}
+
+// UpdateSwitcherID sets the "switcher_id" field to the value that was provided on create.
+func (u *AuthSessionUpsert) UpdateSwitcherID() *AuthSessionUpsert {
+	u.SetExcluded(authsession.FieldSwitcherID)
+	return u
+}
+
+// ClearSwitcherID clears the value of the "switcher_id" field.
+func (u *AuthSessionUpsert) ClearSwitcherID() *AuthSessionUpsert {
+	u.SetNull(authsession.FieldSwitcherID)
+	return u
+}
+
 // SetLastSeenAt sets the "last_seen_at" field.
 func (u *AuthSessionUpsert) SetLastSeenAt(v time.Time) *AuthSessionUpsert {
 	u.Set(authsession.FieldLastSeenAt, v)
@@ -571,6 +607,27 @@ func (u *AuthSessionUpsertOne) SetClientVersion(v string) *AuthSessionUpsertOne 
 func (u *AuthSessionUpsertOne) UpdateClientVersion() *AuthSessionUpsertOne {
 	return u.Update(func(s *AuthSessionUpsert) {
 		s.UpdateClientVersion()
+	})
+}
+
+// SetSwitcherID sets the "switcher_id" field.
+func (u *AuthSessionUpsertOne) SetSwitcherID(v core.ID) *AuthSessionUpsertOne {
+	return u.Update(func(s *AuthSessionUpsert) {
+		s.SetSwitcherID(v)
+	})
+}
+
+// UpdateSwitcherID sets the "switcher_id" field to the value that was provided on create.
+func (u *AuthSessionUpsertOne) UpdateSwitcherID() *AuthSessionUpsertOne {
+	return u.Update(func(s *AuthSessionUpsert) {
+		s.UpdateSwitcherID()
+	})
+}
+
+// ClearSwitcherID clears the value of the "switcher_id" field.
+func (u *AuthSessionUpsertOne) ClearSwitcherID() *AuthSessionUpsertOne {
+	return u.Update(func(s *AuthSessionUpsert) {
+		s.ClearSwitcherID()
 	})
 }
 
@@ -887,6 +944,27 @@ func (u *AuthSessionUpsertBulk) SetClientVersion(v string) *AuthSessionUpsertBul
 func (u *AuthSessionUpsertBulk) UpdateClientVersion() *AuthSessionUpsertBulk {
 	return u.Update(func(s *AuthSessionUpsert) {
 		s.UpdateClientVersion()
+	})
+}
+
+// SetSwitcherID sets the "switcher_id" field.
+func (u *AuthSessionUpsertBulk) SetSwitcherID(v core.ID) *AuthSessionUpsertBulk {
+	return u.Update(func(s *AuthSessionUpsert) {
+		s.SetSwitcherID(v)
+	})
+}
+
+// UpdateSwitcherID sets the "switcher_id" field to the value that was provided on create.
+func (u *AuthSessionUpsertBulk) UpdateSwitcherID() *AuthSessionUpsertBulk {
+	return u.Update(func(s *AuthSessionUpsert) {
+		s.UpdateSwitcherID()
+	})
+}
+
+// ClearSwitcherID clears the value of the "switcher_id" field.
+func (u *AuthSessionUpsertBulk) ClearSwitcherID() *AuthSessionUpsertBulk {
+	return u.Update(func(s *AuthSessionUpsert) {
+		s.ClearSwitcherID()
 	})
 }
 

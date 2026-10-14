@@ -164,6 +164,52 @@ pub type OwnedResetPasswordRequestView = ::buffa::view::OwnedView<
 pub type OwnedResetPasswordResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::auth::v1::__buffa::view::ResetPasswordResponseView<'static>,
 >;
+///Shorthand for `OwnedView<GetInvitationRequestView<'static>>`.
+pub type OwnedGetInvitationRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::GetInvitationRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetInvitationResponseView<'static>>`.
+pub type OwnedGetInvitationResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::GetInvitationResponseView<'static>,
+>;
+///Shorthand for `OwnedView<StartInvitationPasskeyRequestView<'static>>`.
+pub type OwnedStartInvitationPasskeyRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartInvitationPasskeyRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<StartInvitationPasskeyResponseView<'static>>`.
+pub type OwnedStartInvitationPasskeyResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartInvitationPasskeyResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<AcceptInvitationRequestView<'static>>`.
+pub type OwnedAcceptInvitationRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::AcceptInvitationRequestView<'static>,
+>;
+///Shorthand for `OwnedView<AcceptInvitationResponseView<'static>>`.
+pub type OwnedAcceptInvitationResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::AcceptInvitationResponseView<'static>,
+>;
+///Shorthand for `OwnedView<ListSwitchableUsersRequestView<'static>>`.
+pub type OwnedListSwitchableUsersRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::ListSwitchableUsersRequestView<'static>,
+>;
+///Shorthand for `OwnedView<ListSwitchableUsersResponseView<'static>>`.
+pub type OwnedListSwitchableUsersResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::ListSwitchableUsersResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<SwitchUserRequestView<'static>>`.
+pub type OwnedSwitchUserRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::SwitchUserRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SwitchUserResponseView<'static>>`.
+pub type OwnedSwitchUserResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::SwitchUserResponseView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::GetAuthInfoResponse>
 for crate::proto::mavio::auth::v1::__buffa::view::GetAuthInfoResponseView<'_> {
     fn encode(
@@ -826,6 +872,186 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::GetInvitationResponse>
+for crate::proto::mavio::auth::v1::__buffa::view::GetInvitationResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::GetInvitationResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::GetInvitationResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::auth::v1::StartInvitationPasskeyResponse,
+>
+for crate::proto::mavio::auth::v1::__buffa::view::StartInvitationPasskeyResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::auth::v1::StartInvitationPasskeyResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartInvitationPasskeyResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::AcceptInvitationResponse>
+for crate::proto::mavio::auth::v1::__buffa::view::AcceptInvitationResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::AcceptInvitationResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::AcceptInvitationResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::ListSwitchableUsersResponse>
+for crate::proto::mavio::auth::v1::__buffa::view::ListSwitchableUsersResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::ListSwitchableUsersResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::ListSwitchableUsersResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::SwitchUserResponse>
+for crate::proto::mavio::auth::v1::__buffa::view::SwitchUserResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::SwitchUserResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::SwitchUserResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const AUTH_SERVICE_SERVICE_NAME: &str = "mavio.auth.v1.AuthService";
 /// Static [`Spec`](::connectrpc::Spec) for the `GetAuthInfo` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -942,9 +1168,41 @@ pub const AUTH_SERVICE_RESET_PASSWORD_SPEC: ::connectrpc::Spec = ::connectrpc::S
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetInvitation` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_GET_INVITATION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/GetInvitation",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `StartInvitationPasskey` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_START_INVITATION_PASSKEY_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/StartInvitationPasskey",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `AcceptInvitation` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_ACCEPT_INVITATION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/AcceptInvitation",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListSwitchableUsers` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_LIST_SWITCHABLE_USERS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/ListSwitchableUsers",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `SwitchUser` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_SWITCH_USER_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/SwitchUser",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,
-/// Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh and
-/// RefreshSession are public; the other methods act on the calling user.
+/// Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,
+/// RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,
+/// ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey and
+/// AcceptInvitation are public; the other methods act on the calling user.
 ///
 /// A session belongs to a device's Ed25519 key. Its access token lasts an
 /// hour; before it expires, or when a call fails with UNAUTHENTICATED
@@ -1467,6 +1725,139 @@ pub trait AuthService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::auth::v1::ResetPasswordResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetInvitation describes an invitation link before it is accepted.
+    /// Unknown, used up and expired invitations are NOT_FOUND.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_invitation<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::auth::v1::GetInvitationRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::auth::v1::GetInvitationResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// StartInvitationPasskey begins creating the passkey of the member an
+    /// invitation creates, at the origin of the request as
+    /// UserService.StartPasskeyRegistration does; AcceptInvitation finishes
+    /// it.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn start_invitation_passkey<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::auth::v1::StartInvitationPasskeyRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::auth::v1::StartInvitationPasskeyResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// AcceptInvitation creates a member with a password or a passkey, or
+    /// converts the invitation's managed user into one, and signs the device
+    /// in as it. An invitation used up or expired meanwhile is NOT_FOUND; a
+    /// taken name is ALREADY_EXISTS; a passkey that does not verify is
+    /// INVALID_ARGUMENT.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn accept_invitation<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::auth::v1::AcceptInvitationRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::auth::v1::AcceptInvitationResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListSwitchableUsers lists the enabled users the calling session may
+    /// switch to: on a session signed in as the administrator, or switched
+    /// from one, every user (docs/accounts.md §4.4). Other sessions are
+    /// PERMISSION_DENIED.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_switchable_users<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::auth::v1::ListSwitchableUsersRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::auth::v1::ListSwitchableUsersResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SwitchUser makes the calling session the given user's: its access
+    /// token and refreshes then act as that user, and the session can still
+    /// switch. A user with a PIN needs it: without one the call is
+    /// FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three
+    /// wrong PINs for a user each locks it out twice as long as the one
+    /// before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the
+    /// session opened before switching keep their user, so the client opens
+    /// them again.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn switch_user<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::auth::v1::SwitchUserRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::auth::v1::SwitchUserResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -2053,6 +2444,151 @@ impl<S: AuthService> AuthServiceExt for S {
                 },
             )
             .with_spec(AUTH_SERVICE_RESET_PASSWORD_SPEC)
+            .route_view_idempotent(
+                AUTH_SERVICE_SERVICE_NAME,
+                "GetInvitation",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::auth::v1::__buffa::view::GetInvitationRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::auth::v1::GetInvitationRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_invitation(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::auth::v1::GetInvitationResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_GET_INVITATION_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "StartInvitationPasskey",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::auth::v1::__buffa::view::StartInvitationPasskeyRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::auth::v1::StartInvitationPasskeyRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.start_invitation_passkey(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::auth::v1::StartInvitationPasskeyResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_START_INVITATION_PASSKEY_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "AcceptInvitation",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::auth::v1::__buffa::view::AcceptInvitationRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::auth::v1::AcceptInvitationRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.accept_invitation(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::auth::v1::AcceptInvitationResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_ACCEPT_INVITATION_SPEC)
+            .route_view_idempotent(
+                AUTH_SERVICE_SERVICE_NAME,
+                "ListSwitchableUsers",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::auth::v1::__buffa::view::ListSwitchableUsersRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::auth::v1::ListSwitchableUsersRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_switchable_users(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::auth::v1::ListSwitchableUsersResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_LIST_SWITCHABLE_USERS_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "SwitchUser",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::auth::v1::__buffa::view::SwitchUserRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::auth::v1::SwitchUserRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.switch_user(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::auth::v1::SwitchUserResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_SWITCH_USER_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -2219,6 +2755,36 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AUTH_SERVICE_RESET_PASSWORD_SPEC),
+                )
+            }
+            "GetInvitation" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(AUTH_SERVICE_GET_INVITATION_SPEC),
+                )
+            }
+            "StartInvitationPasskey" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_START_INVITATION_PASSKEY_SPEC),
+                )
+            }
+            "AcceptInvitation" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_ACCEPT_INVITATION_SPEC),
+                )
+            }
+            "ListSwitchableUsers" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(AUTH_SERVICE_LIST_SWITCHABLE_USERS_SPEC),
+                )
+            }
+            "SwitchUser" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_SWITCH_USER_SPEC),
                 )
             }
             _ => None,
@@ -2647,6 +3213,116 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::auth::v1::ResetPasswordResponse,
+                        >(format)
+                })
+            }
+            "GetInvitation" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::auth::v1::GetInvitationRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::GetInvitationRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::auth::v1::GetInvitationRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_invitation(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::auth::v1::GetInvitationResponse,
+                        >(format)
+                })
+            }
+            "StartInvitationPasskey" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::auth::v1::StartInvitationPasskeyRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::StartInvitationPasskeyRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::auth::v1::StartInvitationPasskeyRequest,
+                    >::from_parts(&req, &body);
+                    svc.start_invitation_passkey(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::auth::v1::StartInvitationPasskeyResponse,
+                        >(format)
+                })
+            }
+            "AcceptInvitation" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::auth::v1::AcceptInvitationRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::AcceptInvitationRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::auth::v1::AcceptInvitationRequest,
+                    >::from_parts(&req, &body);
+                    svc.accept_invitation(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::auth::v1::AcceptInvitationResponse,
+                        >(format)
+                })
+            }
+            "ListSwitchableUsers" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::auth::v1::ListSwitchableUsersRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::ListSwitchableUsersRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::auth::v1::ListSwitchableUsersRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_switchable_users(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::auth::v1::ListSwitchableUsersResponse,
+                        >(format)
+                })
+            }
+            "SwitchUser" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::auth::v1::SwitchUserRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::SwitchUserRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::auth::v1::SwitchUserRequest,
+                    >::from_parts(&req, &body);
+                    svc.switch_user(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::auth::v1::SwitchUserResponse,
                         >(format)
                 })
             }
@@ -3611,6 +4287,231 @@ where
                 &self.transport,
                 &self.config,
                 AUTH_SERVICE_RESET_PASSWORD_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetInvitation RPC. Sends a request to /mavio.auth.v1.AuthService/GetInvitation.
+    pub async fn get_invitation(
+        &self,
+        request: crate::proto::mavio::auth::v1::GetInvitationRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::GetInvitationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_invitation_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetInvitation RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_invitation_with_options(
+        &self,
+        request: crate::proto::mavio::auth::v1::GetInvitationRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::GetInvitationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_GET_INVITATION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the StartInvitationPasskey RPC. Sends a request to /mavio.auth.v1.AuthService/StartInvitationPasskey.
+    pub async fn start_invitation_passkey(
+        &self,
+        request: crate::proto::mavio::auth::v1::StartInvitationPasskeyRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::StartInvitationPasskeyResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.start_invitation_passkey_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the StartInvitationPasskey RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn start_invitation_passkey_with_options(
+        &self,
+        request: crate::proto::mavio::auth::v1::StartInvitationPasskeyRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::StartInvitationPasskeyResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_START_INVITATION_PASSKEY_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the AcceptInvitation RPC. Sends a request to /mavio.auth.v1.AuthService/AcceptInvitation.
+    pub async fn accept_invitation(
+        &self,
+        request: crate::proto::mavio::auth::v1::AcceptInvitationRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::AcceptInvitationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.accept_invitation_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the AcceptInvitation RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn accept_invitation_with_options(
+        &self,
+        request: crate::proto::mavio::auth::v1::AcceptInvitationRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::AcceptInvitationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_ACCEPT_INVITATION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListSwitchableUsers RPC. Sends a request to /mavio.auth.v1.AuthService/ListSwitchableUsers.
+    pub async fn list_switchable_users(
+        &self,
+        request: crate::proto::mavio::auth::v1::ListSwitchableUsersRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::ListSwitchableUsersResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_switchable_users_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListSwitchableUsers RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_switchable_users_with_options(
+        &self,
+        request: crate::proto::mavio::auth::v1::ListSwitchableUsersRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::ListSwitchableUsersResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_LIST_SWITCHABLE_USERS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SwitchUser RPC. Sends a request to /mavio.auth.v1.AuthService/SwitchUser.
+    pub async fn switch_user(
+        &self,
+        request: crate::proto::mavio::auth::v1::SwitchUserRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::SwitchUserResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.switch_user_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SwitchUser RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn switch_user_with_options(
+        &self,
+        request: crate::proto::mavio::auth::v1::SwitchUserRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::SwitchUserResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_SWITCH_USER_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

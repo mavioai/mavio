@@ -66,7 +66,10 @@ type ceremony struct {
 	rp      RelyingParty
 	session webauthn.SessionData
 	user    core.ID
-	expires time.Time
+	// invitation is the invitation an enrollment creates the user through;
+	// zero for registrations of existing users.
+	invitation core.ID
+	expires    time.Time
 }
 
 // passkey is the data of a passkey credential.
@@ -84,6 +87,16 @@ func NewPasskeys() *Passkeys {
 // passkeys u has there, and returns the ceremony's ID and the creation
 // options, as PublicKeyCredential.parseCreationOptionsFromJSON takes them.
 func (p *Passkeys) StartRegistration(rp RelyingParty, u core.User, creds []core.Credential) (string, []byte, error) {
+	return p.startRegistration(rp, u, creds, core.ID{})
+}
+
+// StartEnrollment begins creating the passkey of u, a user that an
+// invitation creates or converts, at rp; FinishEnrollment ends it.
+func (p *Passkeys) StartEnrollment(rp RelyingParty, u core.User, invitation core.ID) (string, []byte, error) {
+	return p.startRegistration(rp, u, nil, invitation)
+}
+
+func (p *Passkeys) startRegistration(rp RelyingParty, u core.User, creds []core.Credential, invitation core.ID) (string, []byte, error) {
 	wa, err := relyingParty(rp)
 	if err != nil {
 		return "", nil, err
@@ -104,16 +117,21 @@ func (p *Passkeys) StartRegistration(rp RelyingParty, u core.User, creds []core.
 	if err != nil {
 		return "", nil, err
 	}
-	return p.start(ceremony{rp: rp, session: *session, user: u.ID}), options, nil
+	return p.start(ceremony{rp: rp, session: *session, user: u.ID, invitation: invitation}), options, nil
 }
 
 // FinishRegistration verifies the response, PublicKeyCredential.toJSON,
 // to a registration of user, and returns the data of the new passkey.
 func (p *Passkeys) FinishRegistration(id string, user core.User, response []byte) (string, error) {
 	c, ok := p.end(id)
-	if !ok || c.user != user.ID {
+	if !ok || c.user != user.ID || !c.invitation.IsZero() {
 		return "", ErrPasskey
 	}
+	return finishRegistration(c, response)
+}
+
+// finishRegistration verifies the response to the registration c began.
+func finishRegistration(c ceremony, response []byte) (string, error) {
 	parsed, err := protocol.ParseCredentialCreationResponseBytes(response)
 	if err != nil {
 		return "", fmt.Errorf("%w: %w", ErrPasskey, err)
@@ -122,12 +140,24 @@ func (p *Passkeys) FinishRegistration(id string, user core.User, response []byte
 	if err != nil {
 		return "", err
 	}
-	cred, err := wa.CreateCredential(passkeyUser{user: user}, c.session, parsed)
+	cred, err := wa.CreateCredential(passkeyUser{user: core.User{ID: c.user}}, c.session, parsed)
 	if err != nil {
 		return "", fmt.Errorf("%w: %w", ErrPasskey, err)
 	}
 	data, err := json.Marshal(passkey{RPID: c.rp.ID, Credential: *cred})
 	return string(data), err
+}
+
+// FinishEnrollment verifies the response to an enrollment through the
+// invitation and returns the ID of its user, which need not exist yet,
+// with the data of the new passkey.
+func (p *Passkeys) FinishEnrollment(id string, invitation core.ID, response []byte) (core.ID, string, error) {
+	c, ok := p.end(id)
+	if !ok || invitation.IsZero() || c.invitation != invitation {
+		return core.ID{}, "", ErrPasskey
+	}
+	data, err := finishRegistration(c, response)
+	return c.user, data, err
 }
 
 // StartSignIn begins signing in with a passkey at rp and returns the

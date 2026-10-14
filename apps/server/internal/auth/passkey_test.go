@@ -100,3 +100,49 @@ func TestPasskeys(t *testing.T) {
 		t.Errorf("sign-in with a removed passkey: %v, want ErrPasskey", err)
 	}
 }
+
+func TestPasskeyEnrollment(t *testing.T) {
+	rp := auth.RelyingParty{ID: "media.example.com", Origin: "https://media.example.com"}
+	p := auth.NewPasskeys()
+	device := passkeytest.New(rp.Origin)
+	invitation := core.NewID()
+	bob := core.User{ID: core.NewID(), Name: "bob"}
+
+	enroll := func() (string, []byte) {
+		t.Helper()
+		id, options, err := p.StartEnrollment(rp, bob, invitation)
+		if err != nil {
+			t.Fatal(err)
+		}
+		response, err := device.Create(options)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return id, response
+	}
+	id, response := enroll()
+	if _, _, err := p.FinishEnrollment(id, core.NewID(), response); !errors.Is(err, auth.ErrPasskey) {
+		t.Errorf("enrollment through another invitation: %v, want ErrPasskey", err)
+	}
+	id, response = enroll()
+	if _, err := p.FinishRegistration(id, bob, response); !errors.Is(err, auth.ErrPasskey) {
+		t.Errorf("enrollment finished as a registration: %v, want ErrPasskey", err)
+	}
+	id, response = enroll()
+	user, data, err := p.FinishEnrollment(id, invitation, response)
+	if err != nil || user != bob.ID || data == "" {
+		t.Fatalf("FinishEnrollment = %v, %q, %v; want bob's passkey", user, data, err)
+	}
+
+	// A registration of an existing user cannot enroll.
+	id, options, err := p.StartRegistration(rp, bob, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response, err = device.Create(options); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := p.FinishEnrollment(id, invitation, response); !errors.Is(err, auth.ErrPasskey) {
+		t.Errorf("registration finished as an enrollment: %v, want ErrPasskey", err)
+	}
+}

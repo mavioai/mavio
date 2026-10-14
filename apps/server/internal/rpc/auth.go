@@ -44,6 +44,9 @@ var AuthPublicProcedures = []string{
 	authv1connect.AuthServiceLoginWithQuickConnectProcedure,
 	authv1connect.AuthServiceForgotPasswordProcedure,
 	authv1connect.AuthServiceResetPasswordProcedure,
+	authv1connect.AuthServiceGetInvitationProcedure,
+	authv1connect.AuthServiceStartInvitationPasskeyProcedure,
+	authv1connect.AuthServiceAcceptInvitationProcedure,
 }
 
 // UserBoundProcedures act on the caller's own state, so a plugin calls them
@@ -71,6 +74,8 @@ var UserBoundProcedures = []string{
 // do not have (auth.Interceptor.RequireSession).
 var SessionBoundProcedures = []string{
 	authv1connect.AuthServiceLogoutProcedure,
+	authv1connect.AuthServiceListSwitchableUsersProcedure,
+	authv1connect.AuthServiceSwitchUserProcedure,
 	userv1connect.UserServiceStartPasskeyRegistrationProcedure,
 	userv1connect.UserServiceFinishPasskeyRegistrationProcedure,
 	userv1connect.UserServiceStartTotpProcedure,
@@ -84,7 +89,8 @@ type AuthService struct {
 	store  core.Store
 	tokens *auth.AccessTokens
 	nonces *auth.Nonces
-	// throttle slows down failed sign-ins per user name and address.
+	// throttle slows down failed sign-ins per user name and address, and
+	// wrong PINs per user.
 	throttle *auth.Throttle
 	now      func() time.Time
 	// firstUser serializes CreateFirstUser, so that two concurrent calls
@@ -109,7 +115,10 @@ type AuthService struct {
 	ResetPlugin func() string
 	// StartReset has a plugin deliver a password reset PIN to a user.
 	StartReset func(ctx context.Context, pluginID string, user core.User, pin string, expires time.Time) error
-	resets     *auth.PasswordResets
+	// Requests returns the request settings, whose default permissions
+	// members joining through invitations get; nil uses the defaults.
+	Requests func() core.RequestSettings
+	resets   *auth.PasswordResets
 }
 
 var _ authv1connect.AuthServiceHandler = (*AuthService)(nil)

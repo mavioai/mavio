@@ -4803,6 +4803,749 @@ func (b0 UpdateUserDataResponse_builder) Build() *UpdateUserDataResponse {
 	return m0
 }
 
+// Invitation is an invitation link (docs/accounts.md §4.3); its token is
+// never shown again after CreateInvitation.
+type Invitation struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_UserId      *string                `protobuf:"bytes,2,opt,name=user_id,json=userId"`
+	xxx_hidden_Access      *UserPolicy            `protobuf:"bytes,3,opt,name=access"`
+	xxx_hidden_MaxUses     int32                  `protobuf:"varint,4,opt,name=max_uses,json=maxUses"`
+	xxx_hidden_Uses        int32                  `protobuf:"varint,5,opt,name=uses"`
+	xxx_hidden_ExpireTime  *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=expire_time,json=expireTime"`
+	xxx_hidden_CreateTime  *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=create_time,json=createTime"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *Invitation) Reset() {
+	*x = Invitation{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Invitation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Invitation) ProtoMessage() {}
+
+func (x *Invitation) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *Invitation) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Invitation) GetUserId() string {
+	if x != nil {
+		if x.xxx_hidden_UserId != nil {
+			return *x.xxx_hidden_UserId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Invitation) GetAccess() *UserPolicy {
+	if x != nil {
+		return x.xxx_hidden_Access
+	}
+	return nil
+}
+
+func (x *Invitation) GetMaxUses() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaxUses
+	}
+	return 0
+}
+
+func (x *Invitation) GetUses() int32 {
+	if x != nil {
+		return x.xxx_hidden_Uses
+	}
+	return 0
+}
+
+func (x *Invitation) GetExpireTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_ExpireTime
+	}
+	return nil
+}
+
+func (x *Invitation) GetCreateTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_CreateTime
+	}
+	return nil
+}
+
+func (x *Invitation) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+}
+
+func (x *Invitation) SetUserId(v string) {
+	x.xxx_hidden_UserId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
+}
+
+func (x *Invitation) SetAccess(v *UserPolicy) {
+	x.xxx_hidden_Access = v
+}
+
+func (x *Invitation) SetMaxUses(v int32) {
+	x.xxx_hidden_MaxUses = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+}
+
+func (x *Invitation) SetUses(v int32) {
+	x.xxx_hidden_Uses = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
+}
+
+func (x *Invitation) SetExpireTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_ExpireTime = v
+}
+
+func (x *Invitation) SetCreateTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_CreateTime = v
+}
+
+func (x *Invitation) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *Invitation) HasUserId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *Invitation) HasAccess() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Access != nil
+}
+
+func (x *Invitation) HasMaxUses() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *Invitation) HasUses() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *Invitation) HasExpireTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_ExpireTime != nil
+}
+
+func (x *Invitation) HasCreateTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_CreateTime != nil
+}
+
+func (x *Invitation) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *Invitation) ClearUserId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_UserId = nil
+}
+
+func (x *Invitation) ClearAccess() {
+	x.xxx_hidden_Access = nil
+}
+
+func (x *Invitation) ClearMaxUses() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_MaxUses = 0
+}
+
+func (x *Invitation) ClearUses() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Uses = 0
+}
+
+func (x *Invitation) ClearExpireTime() {
+	x.xxx_hidden_ExpireTime = nil
+}
+
+func (x *Invitation) ClearCreateTime() {
+	x.xxx_hidden_CreateTime = nil
+}
+
+type Invitation_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id *string
+	// The managed user the invitation converts into a member; unset when it
+	// creates members.
+	UserId *string
+	// The library access of the members it creates: its library and content
+	// fields and allow_download count, the rest are the server's defaults.
+	Access     *UserPolicy
+	MaxUses    *int32
+	Uses       *int32
+	ExpireTime *timestamppb.Timestamp
+	CreateTime *timestamppb.Timestamp
+}
+
+func (b0 Invitation_builder) Build() *Invitation {
+	m0 := &Invitation{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		x.xxx_hidden_Id = b.Id
+	}
+	if b.UserId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
+		x.xxx_hidden_UserId = b.UserId
+	}
+	x.xxx_hidden_Access = b.Access
+	if b.MaxUses != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		x.xxx_hidden_MaxUses = *b.MaxUses
+	}
+	if b.Uses != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
+		x.xxx_hidden_Uses = *b.Uses
+	}
+	x.xxx_hidden_ExpireTime = b.ExpireTime
+	x.xxx_hidden_CreateTime = b.CreateTime
+	return m0
+}
+
+type CreateInvitationRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_UserId      *string                `protobuf:"bytes,1,opt,name=user_id,json=userId"`
+	xxx_hidden_Access      *UserPolicy            `protobuf:"bytes,2,opt,name=access"`
+	xxx_hidden_MaxUses     int32                  `protobuf:"varint,3,opt,name=max_uses,json=maxUses"`
+	xxx_hidden_ValidFor    *durationpb.Duration   `protobuf:"bytes,4,opt,name=valid_for,json=validFor"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *CreateInvitationRequest) Reset() {
+	*x = CreateInvitationRequest{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateInvitationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateInvitationRequest) ProtoMessage() {}
+
+func (x *CreateInvitationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateInvitationRequest) GetUserId() string {
+	if x != nil {
+		if x.xxx_hidden_UserId != nil {
+			return *x.xxx_hidden_UserId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateInvitationRequest) GetAccess() *UserPolicy {
+	if x != nil {
+		return x.xxx_hidden_Access
+	}
+	return nil
+}
+
+func (x *CreateInvitationRequest) GetMaxUses() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaxUses
+	}
+	return 0
+}
+
+func (x *CreateInvitationRequest) GetValidFor() *durationpb.Duration {
+	if x != nil {
+		return x.xxx_hidden_ValidFor
+	}
+	return nil
+}
+
+func (x *CreateInvitationRequest) SetUserId(v string) {
+	x.xxx_hidden_UserId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+}
+
+func (x *CreateInvitationRequest) SetAccess(v *UserPolicy) {
+	x.xxx_hidden_Access = v
+}
+
+func (x *CreateInvitationRequest) SetMaxUses(v int32) {
+	x.xxx_hidden_MaxUses = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *CreateInvitationRequest) SetValidFor(v *durationpb.Duration) {
+	x.xxx_hidden_ValidFor = v
+}
+
+func (x *CreateInvitationRequest) HasUserId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *CreateInvitationRequest) HasAccess() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Access != nil
+}
+
+func (x *CreateInvitationRequest) HasMaxUses() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *CreateInvitationRequest) HasValidFor() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_ValidFor != nil
+}
+
+func (x *CreateInvitationRequest) ClearUserId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_UserId = nil
+}
+
+func (x *CreateInvitationRequest) ClearAccess() {
+	x.xxx_hidden_Access = nil
+}
+
+func (x *CreateInvitationRequest) ClearMaxUses() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_MaxUses = 0
+}
+
+func (x *CreateInvitationRequest) ClearValidFor() {
+	x.xxx_hidden_ValidFor = nil
+}
+
+type CreateInvitationRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// A managed user to convert into a member; the invitation then has one
+	// use and access is ignored, as the user keeps its own.
+	UserId *string
+	// The access of the members it creates; unset gives all libraries and
+	// downloads.
+	Access *UserPolicy
+	// How many members it may create; unset is 1.
+	MaxUses *int32
+	// How long the link lasts, up to 30 days.
+	ValidFor *durationpb.Duration
+}
+
+func (b0 CreateInvitationRequest_builder) Build() *CreateInvitationRequest {
+	m0 := &CreateInvitationRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.UserId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		x.xxx_hidden_UserId = b.UserId
+	}
+	x.xxx_hidden_Access = b.Access
+	if b.MaxUses != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		x.xxx_hidden_MaxUses = *b.MaxUses
+	}
+	x.xxx_hidden_ValidFor = b.ValidFor
+	return m0
+}
+
+type CreateInvitationResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Invitation  *Invitation            `protobuf:"bytes,1,opt,name=invitation"`
+	xxx_hidden_Token       *string                `protobuf:"bytes,2,opt,name=token"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *CreateInvitationResponse) Reset() {
+	*x = CreateInvitationResponse{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateInvitationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateInvitationResponse) ProtoMessage() {}
+
+func (x *CreateInvitationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateInvitationResponse) GetInvitation() *Invitation {
+	if x != nil {
+		return x.xxx_hidden_Invitation
+	}
+	return nil
+}
+
+func (x *CreateInvitationResponse) GetToken() string {
+	if x != nil {
+		if x.xxx_hidden_Token != nil {
+			return *x.xxx_hidden_Token
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateInvitationResponse) SetInvitation(v *Invitation) {
+	x.xxx_hidden_Invitation = v
+}
+
+func (x *CreateInvitationResponse) SetToken(v string) {
+	x.xxx_hidden_Token = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *CreateInvitationResponse) HasInvitation() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Invitation != nil
+}
+
+func (x *CreateInvitationResponse) HasToken() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *CreateInvitationResponse) ClearInvitation() {
+	x.xxx_hidden_Invitation = nil
+}
+
+func (x *CreateInvitationResponse) ClearToken() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Token = nil
+}
+
+type CreateInvitationResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Invitation *Invitation
+	// The secret the link carries, returned only here.
+	Token *string
+}
+
+func (b0 CreateInvitationResponse_builder) Build() *CreateInvitationResponse {
+	m0 := &CreateInvitationResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Invitation = b.Invitation
+	if b.Token != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Token = b.Token
+	}
+	return m0
+}
+
+type ListInvitationsRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListInvitationsRequest) Reset() {
+	*x = ListInvitationsRequest{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListInvitationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListInvitationsRequest) ProtoMessage() {}
+
+func (x *ListInvitationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[43]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type ListInvitationsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 ListInvitationsRequest_builder) Build() *ListInvitationsRequest {
+	m0 := &ListInvitationsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type ListInvitationsResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Invitations *[]*Invitation         `protobuf:"bytes,1,rep,name=invitations"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ListInvitationsResponse) Reset() {
+	*x = ListInvitationsResponse{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListInvitationsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListInvitationsResponse) ProtoMessage() {}
+
+func (x *ListInvitationsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListInvitationsResponse) GetInvitations() []*Invitation {
+	if x != nil {
+		if x.xxx_hidden_Invitations != nil {
+			return *x.xxx_hidden_Invitations
+		}
+	}
+	return nil
+}
+
+func (x *ListInvitationsResponse) SetInvitations(v []*Invitation) {
+	x.xxx_hidden_Invitations = &v
+}
+
+type ListInvitationsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Invitations []*Invitation
+}
+
+func (b0 ListInvitationsResponse_builder) Build() *ListInvitationsResponse {
+	m0 := &ListInvitationsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Invitations = &b.Invitations
+	return m0
+}
+
+type DeleteInvitationRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *DeleteInvitationRequest) Reset() {
+	*x = DeleteInvitationRequest{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteInvitationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteInvitationRequest) ProtoMessage() {}
+
+func (x *DeleteInvitationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DeleteInvitationRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DeleteInvitationRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *DeleteInvitationRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *DeleteInvitationRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+type DeleteInvitationRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id *string
+}
+
+func (b0 DeleteInvitationRequest_builder) Build() *DeleteInvitationRequest {
+	m0 := &DeleteInvitationRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
+type DeleteInvitationResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteInvitationResponse) Reset() {
+	*x = DeleteInvitationResponse{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteInvitationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteInvitationResponse) ProtoMessage() {}
+
+func (x *DeleteInvitationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type DeleteInvitationResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 DeleteInvitationResponse_builder) Build() *DeleteInvitationResponse {
+	m0 := &DeleteInvitationResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 var File_mavio_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_mavio_user_v1_user_proto_rawDesc = "" +
@@ -4967,7 +5710,34 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\bposition\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\bposition\x12/\n" +
 	"\x06rating\x18\x05 \x01(\x01B\x17\xbaH\x14\x12\x12\x19\x00\x00\x00\x00\x00\x00$@)\x00\x00\x00\x00\x00\x00\x00\x00R\x06rating\"N\n" +
 	"\x16UpdateUserDataResponse\x124\n" +
-	"\tuser_data\x18\x01 \x01(\v2\x17.mavio.user.v1.UserDataR\buserData*\xad\x01\n" +
+	"\tuser_data\x18\x01 \x01(\v2\x17.mavio.user.v1.UserDataR\buserData\"\x91\x02\n" +
+	"\n" +
+	"Invitation\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x121\n" +
+	"\x06access\x18\x03 \x01(\v2\x19.mavio.user.v1.UserPolicyR\x06access\x12\x19\n" +
+	"\bmax_uses\x18\x04 \x01(\x05R\amaxUses\x12\x12\n" +
+	"\x04uses\x18\x05 \x01(\x05R\x04uses\x12;\n" +
+	"\vexpire_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"expireTime\x12;\n" +
+	"\vcreate_time\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"createTime\"\xe1\x01\n" +
+	"\x17CreateInvitationRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x121\n" +
+	"\x06access\x18\x02 \x01(\v2\x19.mavio.user.v1.UserPolicyR\x06access\x12$\n" +
+	"\bmax_uses\x18\x03 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\amaxUses\x12J\n" +
+	"\tvalid_for\x18\x04 \x01(\v2\x19.google.protobuf.DurationB\x12\xbaH\x0f\xc8\x01\x01\xaa\x01\t\"\x05\b\x80\x9a\x9e\x01*\x00R\bvalidFor\"k\n" +
+	"\x18CreateInvitationResponse\x129\n" +
+	"\n" +
+	"invitation\x18\x01 \x01(\v2\x19.mavio.user.v1.InvitationR\n" +
+	"invitation\x12\x14\n" +
+	"\x05token\x18\x02 \x01(\tR\x05token\"\x18\n" +
+	"\x16ListInvitationsRequest\"V\n" +
+	"\x17ListInvitationsResponse\x12;\n" +
+	"\vinvitations\x18\x01 \x03(\v2\x19.mavio.user.v1.InvitationR\vinvitations\"6\n" +
+	"\x17DeleteInvitationRequest\x12\x1b\n" +
+	"\x02id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\"\x1a\n" +
+	"\x18DeleteInvitationResponse*\xad\x01\n" +
 	"\fSubtitleMode\x12\x1d\n" +
 	"\x19SUBTITLE_MODE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14SUBTITLE_MODE_ALWAYS\x10\x01\x12\x19\n" +
@@ -4979,8 +5749,7 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x1fRESTRICTION_PROFILE_UNSPECIFIED\x10\x00\x12%\n" +
 	"!RESTRICTION_PROFILE_YOUNGER_CHILD\x10\x01\x12#\n" +
 	"\x1fRESTRICTION_PROFILE_OLDER_CHILD\x10\x02\x12\x1c\n" +
-	"\x18RESTRICTION_PROFILE_TEEN\x10\x032\xe5\n" +
-	"\n" +
+	"\x18RESTRICTION_PROFILE_TEEN\x10\x032\x96\r\n" +
 	"\vUserService\x12S\n" +
 	"\tListUsers\x12\x1f.mavio.user.v1.ListUsersRequest\x1a .mavio.user.v1.ListUsersResponse\"\x03\x90\x02\x01\x12M\n" +
 	"\aGetUser\x12\x1d.mavio.user.v1.GetUserRequest\x1a\x1e.mavio.user.v1.GetUserResponse\"\x03\x90\x02\x01\x12b\n" +
@@ -5000,14 +5769,17 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\vConfirmTotp\x12!.mavio.user.v1.ConfirmTotpRequest\x1a\".mavio.user.v1.ConfirmTotpResponse\x12Q\n" +
 	"\n" +
 	"DeleteTotp\x12 .mavio.user.v1.DeleteTotpRequest\x1a!.mavio.user.v1.DeleteTotpResponse\x12f\n" +
-	"\x11UpdatePreferences\x12'.mavio.user.v1.UpdatePreferencesRequest\x1a(.mavio.user.v1.UpdatePreferencesResponse2\xcb\x01\n" +
+	"\x11UpdatePreferences\x12'.mavio.user.v1.UpdatePreferencesRequest\x1a(.mavio.user.v1.UpdatePreferencesResponse\x12c\n" +
+	"\x10CreateInvitation\x12&.mavio.user.v1.CreateInvitationRequest\x1a'.mavio.user.v1.CreateInvitationResponse\x12e\n" +
+	"\x0fListInvitations\x12%.mavio.user.v1.ListInvitationsRequest\x1a&.mavio.user.v1.ListInvitationsResponse\"\x03\x90\x02\x01\x12c\n" +
+	"\x10DeleteInvitation\x12&.mavio.user.v1.DeleteInvitationRequest\x1a'.mavio.user.v1.DeleteInvitationResponse2\xcb\x01\n" +
 	"\x0fUserDataService\x12Y\n" +
 	"\vGetUserData\x12!.mavio.user.v1.GetUserDataRequest\x1a\".mavio.user.v1.GetUserDataResponse\"\x03\x90\x02\x01\x12]\n" +
 	"\x0eUpdateUserData\x12$.mavio.user.v1.UpdateUserDataRequest\x1a%.mavio.user.v1.UpdateUserDataResponseB\xb5\x01\n" +
 	"\x11com.mavio.user.v1B\tUserProtoP\x01Z?github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1;userv1\xa2\x02\x03MUX\xaa\x02\rMavio.User.V1\xca\x02\rMavio\\User\\V1\xe2\x02\x19Mavio\\User\\V1\\GPBMetadata\xea\x02\x0fMavio::User::V1b\beditionsp\xe8\a"
 
 var file_mavio_user_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_mavio_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
+var file_mavio_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 47)
 var file_mavio_user_v1_user_proto_goTypes = []any{
 	(SubtitleMode)(0),                         // 0: mavio.user.v1.SubtitleMode
 	(RestrictionProfile)(0),                   // 1: mavio.user.v1.RestrictionProfile
@@ -5051,23 +5823,30 @@ var file_mavio_user_v1_user_proto_goTypes = []any{
 	(*GetUserDataResponse)(nil),               // 39: mavio.user.v1.GetUserDataResponse
 	(*UpdateUserDataRequest)(nil),             // 40: mavio.user.v1.UpdateUserDataRequest
 	(*UpdateUserDataResponse)(nil),            // 41: mavio.user.v1.UpdateUserDataResponse
-	(*timestamppb.Timestamp)(nil),             // 42: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),               // 43: google.protobuf.Duration
+	(*Invitation)(nil),                        // 42: mavio.user.v1.Invitation
+	(*CreateInvitationRequest)(nil),           // 43: mavio.user.v1.CreateInvitationRequest
+	(*CreateInvitationResponse)(nil),          // 44: mavio.user.v1.CreateInvitationResponse
+	(*ListInvitationsRequest)(nil),            // 45: mavio.user.v1.ListInvitationsRequest
+	(*ListInvitationsResponse)(nil),           // 46: mavio.user.v1.ListInvitationsResponse
+	(*DeleteInvitationRequest)(nil),           // 47: mavio.user.v1.DeleteInvitationRequest
+	(*DeleteInvitationResponse)(nil),          // 48: mavio.user.v1.DeleteInvitationResponse
+	(*timestamppb.Timestamp)(nil),             // 49: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),               // 50: google.protobuf.Duration
 }
 var file_mavio_user_v1_user_proto_depIdxs = []int32{
 	4,  // 0: mavio.user.v1.User.policy:type_name -> mavio.user.v1.UserPolicy
 	6,  // 1: mavio.user.v1.User.preferences:type_name -> mavio.user.v1.UserPreferences
-	42, // 2: mavio.user.v1.User.create_time:type_name -> google.protobuf.Timestamp
-	42, // 3: mavio.user.v1.User.last_login_time:type_name -> google.protobuf.Timestamp
+	49, // 2: mavio.user.v1.User.create_time:type_name -> google.protobuf.Timestamp
+	49, // 3: mavio.user.v1.User.last_login_time:type_name -> google.protobuf.Timestamp
 	1,  // 4: mavio.user.v1.User.restriction:type_name -> mavio.user.v1.RestrictionProfile
 	3,  // 5: mavio.user.v1.User.passkeys:type_name -> mavio.user.v1.Passkey
-	42, // 6: mavio.user.v1.Passkey.create_time:type_name -> google.protobuf.Timestamp
-	42, // 7: mavio.user.v1.Passkey.last_use_time:type_name -> google.protobuf.Timestamp
+	49, // 6: mavio.user.v1.Passkey.create_time:type_name -> google.protobuf.Timestamp
+	49, // 7: mavio.user.v1.Passkey.last_use_time:type_name -> google.protobuf.Timestamp
 	5,  // 8: mavio.user.v1.UserPolicy.movie_quota:type_name -> mavio.user.v1.RequestQuota
 	5,  // 9: mavio.user.v1.UserPolicy.series_quota:type_name -> mavio.user.v1.RequestQuota
 	0,  // 10: mavio.user.v1.UserPreferences.subtitle_mode:type_name -> mavio.user.v1.SubtitleMode
-	43, // 11: mavio.user.v1.UserData.position:type_name -> google.protobuf.Duration
-	42, // 12: mavio.user.v1.UserData.last_played_time:type_name -> google.protobuf.Timestamp
+	50, // 11: mavio.user.v1.UserData.position:type_name -> google.protobuf.Duration
+	49, // 12: mavio.user.v1.UserData.last_played_time:type_name -> google.protobuf.Timestamp
 	2,  // 13: mavio.user.v1.ListUsersResponse.users:type_name -> mavio.user.v1.User
 	2,  // 14: mavio.user.v1.GetUserResponse.user:type_name -> mavio.user.v1.User
 	2,  // 15: mavio.user.v1.GetCurrentUserResponse.user:type_name -> mavio.user.v1.User
@@ -5082,47 +5861,60 @@ var file_mavio_user_v1_user_proto_depIdxs = []int32{
 	6,  // 24: mavio.user.v1.UpdatePreferencesRequest.preferences:type_name -> mavio.user.v1.UserPreferences
 	6,  // 25: mavio.user.v1.UpdatePreferencesResponse.preferences:type_name -> mavio.user.v1.UserPreferences
 	7,  // 26: mavio.user.v1.GetUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
-	43, // 27: mavio.user.v1.UpdateUserDataRequest.position:type_name -> google.protobuf.Duration
+	50, // 27: mavio.user.v1.UpdateUserDataRequest.position:type_name -> google.protobuf.Duration
 	7,  // 28: mavio.user.v1.UpdateUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
-	8,  // 29: mavio.user.v1.UserService.ListUsers:input_type -> mavio.user.v1.ListUsersRequest
-	10, // 30: mavio.user.v1.UserService.GetUser:input_type -> mavio.user.v1.GetUserRequest
-	12, // 31: mavio.user.v1.UserService.GetCurrentUser:input_type -> mavio.user.v1.GetCurrentUserRequest
-	14, // 32: mavio.user.v1.UserService.CreateUser:input_type -> mavio.user.v1.CreateUserRequest
-	16, // 33: mavio.user.v1.UserService.UpdateUser:input_type -> mavio.user.v1.UpdateUserRequest
-	18, // 34: mavio.user.v1.UserService.DeleteUser:input_type -> mavio.user.v1.DeleteUserRequest
-	20, // 35: mavio.user.v1.UserService.SetPassword:input_type -> mavio.user.v1.SetPasswordRequest
-	22, // 36: mavio.user.v1.UserService.SetPin:input_type -> mavio.user.v1.SetPinRequest
-	24, // 37: mavio.user.v1.UserService.StartPasskeyRegistration:input_type -> mavio.user.v1.StartPasskeyRegistrationRequest
-	26, // 38: mavio.user.v1.UserService.FinishPasskeyRegistration:input_type -> mavio.user.v1.FinishPasskeyRegistrationRequest
-	28, // 39: mavio.user.v1.UserService.DeletePasskey:input_type -> mavio.user.v1.DeletePasskeyRequest
-	30, // 40: mavio.user.v1.UserService.StartTotp:input_type -> mavio.user.v1.StartTotpRequest
-	32, // 41: mavio.user.v1.UserService.ConfirmTotp:input_type -> mavio.user.v1.ConfirmTotpRequest
-	34, // 42: mavio.user.v1.UserService.DeleteTotp:input_type -> mavio.user.v1.DeleteTotpRequest
-	36, // 43: mavio.user.v1.UserService.UpdatePreferences:input_type -> mavio.user.v1.UpdatePreferencesRequest
-	38, // 44: mavio.user.v1.UserDataService.GetUserData:input_type -> mavio.user.v1.GetUserDataRequest
-	40, // 45: mavio.user.v1.UserDataService.UpdateUserData:input_type -> mavio.user.v1.UpdateUserDataRequest
-	9,  // 46: mavio.user.v1.UserService.ListUsers:output_type -> mavio.user.v1.ListUsersResponse
-	11, // 47: mavio.user.v1.UserService.GetUser:output_type -> mavio.user.v1.GetUserResponse
-	13, // 48: mavio.user.v1.UserService.GetCurrentUser:output_type -> mavio.user.v1.GetCurrentUserResponse
-	15, // 49: mavio.user.v1.UserService.CreateUser:output_type -> mavio.user.v1.CreateUserResponse
-	17, // 50: mavio.user.v1.UserService.UpdateUser:output_type -> mavio.user.v1.UpdateUserResponse
-	19, // 51: mavio.user.v1.UserService.DeleteUser:output_type -> mavio.user.v1.DeleteUserResponse
-	21, // 52: mavio.user.v1.UserService.SetPassword:output_type -> mavio.user.v1.SetPasswordResponse
-	23, // 53: mavio.user.v1.UserService.SetPin:output_type -> mavio.user.v1.SetPinResponse
-	25, // 54: mavio.user.v1.UserService.StartPasskeyRegistration:output_type -> mavio.user.v1.StartPasskeyRegistrationResponse
-	27, // 55: mavio.user.v1.UserService.FinishPasskeyRegistration:output_type -> mavio.user.v1.FinishPasskeyRegistrationResponse
-	29, // 56: mavio.user.v1.UserService.DeletePasskey:output_type -> mavio.user.v1.DeletePasskeyResponse
-	31, // 57: mavio.user.v1.UserService.StartTotp:output_type -> mavio.user.v1.StartTotpResponse
-	33, // 58: mavio.user.v1.UserService.ConfirmTotp:output_type -> mavio.user.v1.ConfirmTotpResponse
-	35, // 59: mavio.user.v1.UserService.DeleteTotp:output_type -> mavio.user.v1.DeleteTotpResponse
-	37, // 60: mavio.user.v1.UserService.UpdatePreferences:output_type -> mavio.user.v1.UpdatePreferencesResponse
-	39, // 61: mavio.user.v1.UserDataService.GetUserData:output_type -> mavio.user.v1.GetUserDataResponse
-	41, // 62: mavio.user.v1.UserDataService.UpdateUserData:output_type -> mavio.user.v1.UpdateUserDataResponse
-	46, // [46:63] is the sub-list for method output_type
-	29, // [29:46] is the sub-list for method input_type
-	29, // [29:29] is the sub-list for extension type_name
-	29, // [29:29] is the sub-list for extension extendee
-	0,  // [0:29] is the sub-list for field type_name
+	4,  // 29: mavio.user.v1.Invitation.access:type_name -> mavio.user.v1.UserPolicy
+	49, // 30: mavio.user.v1.Invitation.expire_time:type_name -> google.protobuf.Timestamp
+	49, // 31: mavio.user.v1.Invitation.create_time:type_name -> google.protobuf.Timestamp
+	4,  // 32: mavio.user.v1.CreateInvitationRequest.access:type_name -> mavio.user.v1.UserPolicy
+	50, // 33: mavio.user.v1.CreateInvitationRequest.valid_for:type_name -> google.protobuf.Duration
+	42, // 34: mavio.user.v1.CreateInvitationResponse.invitation:type_name -> mavio.user.v1.Invitation
+	42, // 35: mavio.user.v1.ListInvitationsResponse.invitations:type_name -> mavio.user.v1.Invitation
+	8,  // 36: mavio.user.v1.UserService.ListUsers:input_type -> mavio.user.v1.ListUsersRequest
+	10, // 37: mavio.user.v1.UserService.GetUser:input_type -> mavio.user.v1.GetUserRequest
+	12, // 38: mavio.user.v1.UserService.GetCurrentUser:input_type -> mavio.user.v1.GetCurrentUserRequest
+	14, // 39: mavio.user.v1.UserService.CreateUser:input_type -> mavio.user.v1.CreateUserRequest
+	16, // 40: mavio.user.v1.UserService.UpdateUser:input_type -> mavio.user.v1.UpdateUserRequest
+	18, // 41: mavio.user.v1.UserService.DeleteUser:input_type -> mavio.user.v1.DeleteUserRequest
+	20, // 42: mavio.user.v1.UserService.SetPassword:input_type -> mavio.user.v1.SetPasswordRequest
+	22, // 43: mavio.user.v1.UserService.SetPin:input_type -> mavio.user.v1.SetPinRequest
+	24, // 44: mavio.user.v1.UserService.StartPasskeyRegistration:input_type -> mavio.user.v1.StartPasskeyRegistrationRequest
+	26, // 45: mavio.user.v1.UserService.FinishPasskeyRegistration:input_type -> mavio.user.v1.FinishPasskeyRegistrationRequest
+	28, // 46: mavio.user.v1.UserService.DeletePasskey:input_type -> mavio.user.v1.DeletePasskeyRequest
+	30, // 47: mavio.user.v1.UserService.StartTotp:input_type -> mavio.user.v1.StartTotpRequest
+	32, // 48: mavio.user.v1.UserService.ConfirmTotp:input_type -> mavio.user.v1.ConfirmTotpRequest
+	34, // 49: mavio.user.v1.UserService.DeleteTotp:input_type -> mavio.user.v1.DeleteTotpRequest
+	36, // 50: mavio.user.v1.UserService.UpdatePreferences:input_type -> mavio.user.v1.UpdatePreferencesRequest
+	43, // 51: mavio.user.v1.UserService.CreateInvitation:input_type -> mavio.user.v1.CreateInvitationRequest
+	45, // 52: mavio.user.v1.UserService.ListInvitations:input_type -> mavio.user.v1.ListInvitationsRequest
+	47, // 53: mavio.user.v1.UserService.DeleteInvitation:input_type -> mavio.user.v1.DeleteInvitationRequest
+	38, // 54: mavio.user.v1.UserDataService.GetUserData:input_type -> mavio.user.v1.GetUserDataRequest
+	40, // 55: mavio.user.v1.UserDataService.UpdateUserData:input_type -> mavio.user.v1.UpdateUserDataRequest
+	9,  // 56: mavio.user.v1.UserService.ListUsers:output_type -> mavio.user.v1.ListUsersResponse
+	11, // 57: mavio.user.v1.UserService.GetUser:output_type -> mavio.user.v1.GetUserResponse
+	13, // 58: mavio.user.v1.UserService.GetCurrentUser:output_type -> mavio.user.v1.GetCurrentUserResponse
+	15, // 59: mavio.user.v1.UserService.CreateUser:output_type -> mavio.user.v1.CreateUserResponse
+	17, // 60: mavio.user.v1.UserService.UpdateUser:output_type -> mavio.user.v1.UpdateUserResponse
+	19, // 61: mavio.user.v1.UserService.DeleteUser:output_type -> mavio.user.v1.DeleteUserResponse
+	21, // 62: mavio.user.v1.UserService.SetPassword:output_type -> mavio.user.v1.SetPasswordResponse
+	23, // 63: mavio.user.v1.UserService.SetPin:output_type -> mavio.user.v1.SetPinResponse
+	25, // 64: mavio.user.v1.UserService.StartPasskeyRegistration:output_type -> mavio.user.v1.StartPasskeyRegistrationResponse
+	27, // 65: mavio.user.v1.UserService.FinishPasskeyRegistration:output_type -> mavio.user.v1.FinishPasskeyRegistrationResponse
+	29, // 66: mavio.user.v1.UserService.DeletePasskey:output_type -> mavio.user.v1.DeletePasskeyResponse
+	31, // 67: mavio.user.v1.UserService.StartTotp:output_type -> mavio.user.v1.StartTotpResponse
+	33, // 68: mavio.user.v1.UserService.ConfirmTotp:output_type -> mavio.user.v1.ConfirmTotpResponse
+	35, // 69: mavio.user.v1.UserService.DeleteTotp:output_type -> mavio.user.v1.DeleteTotpResponse
+	37, // 70: mavio.user.v1.UserService.UpdatePreferences:output_type -> mavio.user.v1.UpdatePreferencesResponse
+	44, // 71: mavio.user.v1.UserService.CreateInvitation:output_type -> mavio.user.v1.CreateInvitationResponse
+	46, // 72: mavio.user.v1.UserService.ListInvitations:output_type -> mavio.user.v1.ListInvitationsResponse
+	48, // 73: mavio.user.v1.UserService.DeleteInvitation:output_type -> mavio.user.v1.DeleteInvitationResponse
+	39, // 74: mavio.user.v1.UserDataService.GetUserData:output_type -> mavio.user.v1.GetUserDataResponse
+	41, // 75: mavio.user.v1.UserDataService.UpdateUserData:output_type -> mavio.user.v1.UpdateUserDataResponse
+	56, // [56:76] is the sub-list for method output_type
+	36, // [36:56] is the sub-list for method input_type
+	36, // [36:36] is the sub-list for extension type_name
+	36, // [36:36] is the sub-list for extension extendee
+	0,  // [0:36] is the sub-list for field type_name
 }
 
 func init() { file_mavio_user_v1_user_proto_init() }
@@ -5136,7 +5928,7 @@ func file_mavio_user_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_user_v1_user_proto_rawDesc), len(file_mavio_user_v1_user_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   40,
+			NumMessages:   47,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

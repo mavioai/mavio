@@ -220,7 +220,8 @@ erDiagram
 * 播放条目时按 Jellyfin 的规则更新其 `UserData`（`RecordPosition`）：位于时长前 5% 的位置不保留；超过 90% 或距结尾不足一秒时标记为已播放并清除位置；短于五分钟的条目越过前 5% 即标记为已播放。有声书改用距开头与距结尾各五分钟。没有时长的条目任何一次播放都算播完。只有视频、有声书与书籍保留续播位置；音乐曲目只标记已播放；其他类型两者都不支持。每次播放到结束，`PlayCount` 加一。
 * **下一集**（`NextEpisode`），与 Jellyfin 相同：剧集的下一集是按季号与集号排在最后一个已播放单集之后的第一个未播放的常规单集（位于更后的季，或同一季中更后的位置即算在其后）；一集都没有播放过时是第一集。特别篇（第 0 季）不参与，除非用 `AirsBeforeSeasonNumber` 或 `AirsAfterSeasonNumber` 标明了位置；这些特别篇按播出顺序插入其间，播放后即被跳过。有续播位置的单集除非明确要求，否则不提供：它属于继续观看。
 * **播出顺序**（`CompareAiredOrder`），即 Jellyfin 的规则：常规单集按季号与集号排序，再按首播日期；特别篇按它在哪一季之前或之后播出以及在哪一集之前播出（`AirsBeforeEpisodeNumber`）排位，给出了集号时排在该集之前，否则排在该季之前；特别篇之间按这一位置及其自身编号排序；其他条目排在单集之后。
-* `AuthSession` 是一个已登录的客户端：用户某一台设备（`DeviceID`、`DeviceName`、`Client`、`ClientVersion`）的会话，绑定该设备 32 字节的 Ed25519 公钥（`DeviceKey`），带有 `CreatedAt` 与 `LastSeenAt`。其访问令牌不保存。从同一设备再次登录会替换该设备的会话；删除用户会删除其会话。
+* `AuthSession` 是一个已登录的客户端：用户某一台设备（`DeviceID`、`DeviceName`、`Client`、`ClientVersion`）的会话，绑定该设备 32 字节的 Ed25519 公钥（`DeviceKey`），带有 `CreatedAt` 与 `LastSeenAt`。其访问令牌不保存。从同一设备再次登录会替换该设备的会话；删除用户会删除其会话。`SwitcherID` 是把会话切换到当前用户的管理员；会话的用户是管理员或 `SwitcherID` 已设置时，`CanSwitch` 允许它切换用户（[账户 §4.4](accounts.zh-CN.md#44-用户切换)）。
+* `Invitation` 是邀请链接（[账户 §4.3](accounts.zh-CN.md#43-加入与登录)）：其令牌的 SHA-256 散列 `TokenHash`、它创建的成员的访问记录 `Access`、`MaxUses`（1 到 100）与 `Uses`、`ExpiresAt` 与 `CreatedAt`。带 `UserID` 时它改为把该托管用户转为成员，只能使用一次；删除该用户会删除它。`Usable` 表示它是否仍可接受。
 
 ---
 
@@ -234,7 +235,7 @@ erDiagram
 * `Extend`、`Complete` 与 `Fail` 要求调用者持有租约；租约已过期并被接管的工作者会得到 `ErrConflict`。
 * 一次尝试失败后，在 `RetryDelay(attempts)` 之后重试——30 秒，此后翻倍（1 分钟、2 分钟……），最长一小时——直到达到 `MaxAttempts`，此时任务变为 `failed`。若在其执行期间已有同 key 的任务入队，则由后者代替重试，该任务立即变为 `failed`。
 * 状态流转：`pending` → `running` → `succeeded` / 重试时回到 `pending` / `failed`。
-* `JobQuery` 按类型与状态列出任务，最近创建的在前；已结束的任务在一周后由每日运行的 `jobs.cleanup` 任务清除，该任务还会删除元数据目录中已不存在的条目的目录（在其最后一次改动一天之后）。
+* `JobQuery` 按类型与状态列出任务，最近创建的在前；已结束的任务在一周后由每日运行的 `jobs.cleanup` 任务清除，该任务还会删除空闲的会话与过期的邀请，以及元数据目录中已不存在的条目的目录（在其最后一次改动一天之后）。
 
 ---
 
@@ -252,7 +253,8 @@ erDiagram
 | `UserRepository` | 增删改查，以及不区分大小写的 `GetByName` |
 | `CredentialRepository` | 用户的凭据：`List`（按创建先后）、按单一种类 `Get`、`Put`（添加凭据，或更新同 ID 的凭据；单一种类的凭据替换该用户原有的那个）、按种类 `Delete`、`Remove` 单个凭据 |
 | `UserDataRepository` | `Get`（不存在时返回 `ErrNotFound`）、按一组条目 `GetMany`、`Put` |
-| `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`Get`、`ListForUser`（按最近活动排序）、`Touch`、`Delete`、`PurgeIdle`（某一时间之前最后活动的会话） |
+| `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`Get`、`ListForUser`（按最近活动排序）、`Touch`、`Switch`（把会话转给另一个用户并记录切换者）、`Delete`、`PurgeIdle`（某一时间之前最后活动的会话） |
+| `InvitationRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Use`（原子地计入一次使用；未知、已用完或已过期时返回 `ErrNotFound`）、`Delete`、`PurgeExpired`（某一时间之前过期的邀请） |
 | `JobQueue` | `Enqueue`（报告是否入队）、`Lease`、`Extend`、`Complete`、`Fail`、`List`（分页，见 §8）、`Purge` 清除某时间之前结束的任务 |
 | `ScanRepository` | 媒体库扫描的 `NextGeneration`；每个已扫描文件夹的 `FolderState`（`ModTime`、`FileID`、`Entries`），由 `PutFolders` 记录，文件夹消失后由 `DeleteFolders` 移除 |
 | `ItemRepository`（整理类） | `Links` 按顺序列出合集或播放列表的条目项；`ReplaceLinks` 设置它们，保留给定的 ID，并为没有 ID 的条目项分配新 ID |

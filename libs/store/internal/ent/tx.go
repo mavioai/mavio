@@ -44,6 +44,8 @@ type Tx struct {
 	HistoryEvent *HistoryEventClient
 	// Image is the client for interacting with the Image builders.
 	Image *ImageClient
+	// Invitation is the client for interacting with the Invitation builders.
+	Invitation *InvitationClient
 	// Issue is the client for interacting with the Issue builders.
 	Issue *IssueClient
 	// IssueComment is the client for interacting with the IssueComment builders.
@@ -249,6 +251,7 @@ func (tx *Tx) init() {
 	tx.FolderState = NewFolderStateClient(tx.config)
 	tx.HistoryEvent = NewHistoryEventClient(tx.config)
 	tx.Image = NewImageClient(tx.config)
+	tx.Invitation = NewInvitationClient(tx.config)
 	tx.Issue = NewIssueClient(tx.config)
 	tx.IssueComment = NewIssueCommentClient(tx.config)
 	tx.Item = NewItemClient(tx.config)

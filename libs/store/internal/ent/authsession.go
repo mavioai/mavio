@@ -31,6 +31,8 @@ type AuthSession struct {
 	Client string `json:"client,omitempty"`
 	// ClientVersion holds the value of the "client_version" field.
 	ClientVersion string `json:"client_version,omitempty"`
+	// SwitcherID holds the value of the "switcher_id" field.
+	SwitcherID *core.ID `json:"switcher_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// LastSeenAt holds the value of the "last_seen_at" field.
@@ -66,6 +68,8 @@ func (*AuthSession) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case authsession.FieldSwitcherID:
+			values[i] = &sql.NullScanner{S: new(core.ID)}
 		case authsession.FieldDeviceKey:
 			values[i] = new([]byte)
 		case authsession.FieldID, authsession.FieldUserID:
@@ -130,6 +134,13 @@ func (_m *AuthSession) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field client_version", values[i])
 			} else if value.Valid {
 				_m.ClientVersion = value.String
+			}
+		case authsession.FieldSwitcherID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field switcher_id", values[i])
+			} else if value.Valid {
+				_m.SwitcherID = new(core.ID)
+				*_m.SwitcherID = *value.S.(*core.ID)
 			}
 		case authsession.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -201,6 +212,11 @@ func (_m *AuthSession) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("client_version=")
 	builder.WriteString(_m.ClientVersion)
+	builder.WriteString(", ")
+	if v := _m.SwitcherID; v != nil {
+		builder.WriteString("switcher_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

@@ -65,6 +65,7 @@ var (
 		{Name: "device_name", Type: field.TypeString, Default: ""},
 		{Name: "client", Type: field.TypeString, Default: ""},
 		{Name: "client_version", Type: field.TypeString, Default: ""},
+		{Name: "switcher_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "last_seen_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUUID},
@@ -77,7 +78,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "auth_sessions_users_auth_sessions",
-				Columns:    []*schema.Column{AuthSessionsColumns[8]},
+				Columns:    []*schema.Column{AuthSessionsColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -86,7 +87,7 @@ var (
 			{
 				Name:    "authsession_user_id_device_id",
 				Unique:  true,
-				Columns: []*schema.Column{AuthSessionsColumns[8], AuthSessionsColumns[2]},
+				Columns: []*schema.Column{AuthSessionsColumns[9], AuthSessionsColumns[2]},
 			},
 		},
 	}
@@ -569,6 +570,31 @@ var (
 				Name:    "image_person_id_kind_index",
 				Unique:  false,
 				Columns: []*schema.Column{ImagesColumns[10], ImagesColumns[1], ImagesColumns[2]},
+			},
+		},
+	}
+	// InvitationsColumns holds the columns for the "invitations" table.
+	InvitationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "token_hash", Type: field.TypeBytes, Unique: true},
+		{Name: "access", Type: field.TypeJSON},
+		{Name: "max_uses", Type: field.TypeInt},
+		{Name: "uses", Type: field.TypeInt, Default: 0},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// InvitationsTable holds the schema information for the "invitations" table.
+	InvitationsTable = &schema.Table{
+		Name:       "invitations",
+		Columns:    InvitationsColumns,
+		PrimaryKey: []*schema.Column{InvitationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "invitations_users_invitations",
+				Columns:    []*schema.Column{InvitationsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -1645,6 +1671,7 @@ var (
 		FolderStatesTable,
 		HistoryEventsTable,
 		ImagesTable,
+		InvitationsTable,
 		IssuesTable,
 		IssueCommentsTable,
 		ItemsTable,
@@ -1740,6 +1767,10 @@ func init() {
 	ImagesTable.ForeignKeys[1].RefTable = PeopleTable
 	ImagesTable.Annotation = &entsql.Annotation{
 		Table: "images",
+	}
+	InvitationsTable.ForeignKeys[0].RefTable = UsersTable
+	InvitationsTable.Annotation = &entsql.Annotation{
+		Table: "invitations",
 	}
 	IssuesTable.ForeignKeys[0].RefTable = ItemsTable
 	IssuesTable.ForeignKeys[1].RefTable = UsersTable

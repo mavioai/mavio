@@ -58,10 +58,40 @@ func (User) Edges() []ent.Edge {
 		edge.To("playlists", Item.Type).Annotations(cascade()),
 		edge.To("display_preferences", DisplayPreferences.Type).Annotations(cascade()),
 		edge.To("api_keys", APIKey.Type).Annotations(cascade()),
+		edge.To("invitations", Invitation.Type).Annotations(cascade()),
 		edge.To("requests", Request.Type).Annotations(cascade()),
 		edge.To("issues", Issue.Type).Annotations(cascade()),
 		edge.To("issue_comments", IssueComment.Type).Annotations(cascade()),
 		edge.To("blocked_titles", BlockedTitle.Type).Annotations(entsql.Annotation{OnDelete: entsql.SetNull}),
+	}
+}
+
+// Invitation holds the schema of core.Invitation.
+type Invitation struct{ ent.Schema }
+
+// Annotations of Invitation.
+func (Invitation) Annotations() []schema.Annotation {
+	return []schema.Annotation{entsql.Annotation{Table: "invitations"}}
+}
+
+// Fields of Invitation.
+func (Invitation) Fields() []ent.Field {
+	return []ent.Field{
+		idField(),
+		field.Bytes("token_hash").Unique().Sensitive(),
+		field.UUID("user_id", core.ID{}).Optional().Nillable(),
+		field.JSON("access", core.LibraryAccess{}),
+		field.Int("max_uses"),
+		field.Int("uses").Default(0),
+		field.Time("expires_at"),
+		field.Time("created_at").Default(time.Now).Immutable(),
+	}
+}
+
+// Edges of Invitation.
+func (Invitation) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("user", User.Type).Ref("invitations").Field("user_id").Unique(),
 	}
 }
 
