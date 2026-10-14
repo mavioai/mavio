@@ -109,6 +109,78 @@
         }
       }
     },
+    "nav.collapseSidebar": {
+      "comment": "Button that collapses the sidebar to a rail of icons.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide Sidebar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收起边栏"
+          }
+        }
+      }
+    },
+    "nav.expandSidebar": {
+      "comment": "Button that expands the sidebar from its rail of icons.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Sidebar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "展开边栏"
+          }
+        }
+      }
+    },
+    "nav.userMenu": {
+      "comment": "Accessible label of the button opening the user menu; name is the signed-in user's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, User Menu"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，用户菜单"
+          }
+        }
+      }
+    },
+    "nav.navigation": {
+      "comment": "Accessible label of the main navigation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navigation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导航"
+          }
+        }
+      }
+    },
     "home.continueWatching": {
       "comment": "Shelf of items whose playback was left unfinished.",
       "extractionState": "manual",
@@ -451,6 +523,24 @@
         }
       }
     },
+    "home.notOnServers": {
+      "comment": "Line beside the Trending shelf: titles the user's servers do not have.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not on your servers yet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还不在你的服务器上"
+          }
+        }
+      }
+    },
     "library.sort": {
       "comment": "Button opening the sort options of a library.",
       "extractionState": "manual",
@@ -735,6 +825,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "收藏"
+          }
+        }
+      }
+    },
+    "library.sortBy": {
+      "comment": "Button opening the sort menu; sort is the current order.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sort: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排序：%@"
           }
         }
       }
@@ -1149,6 +1257,186 @@
           "stringUnit": {
             "state": "translated",
             "value": "移除下载"
+          }
+        }
+      }
+    },
+    "item.details": {
+      "comment": "Button opening an item's details.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Details"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "详细信息"
+          }
+        }
+      }
+    },
+    "item.resumeAt": {
+      "comment": "Play button of a partly watched item; time is the position, as 47:12.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume from %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 %@ 继续"
+          }
+        }
+      }
+    },
+    "item.timeLeft": {
+      "comment": "How much of a partly watched item is left; time as 1 h 21 min.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ left"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩 %@"
+          }
+        }
+      }
+    },
+    "item.more": {
+      "comment": "Button opening more actions of an item.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多"
+          }
+        }
+      }
+    },
+    "item.director": {
+      "comment": "Label of an item's directors.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Director"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导演"
+          }
+        }
+      }
+    },
+    "item.writers": {
+      "comment": "Label of an item's writers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Writers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编剧"
+          }
+        }
+      }
+    },
+    "item.studio": {
+      "comment": "Label of an item's studios.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Studio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "制片厂"
+          }
+        }
+      }
+    },
+    "item.audioTracks": {
+      "comment": "Label of an item's audio tracks.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音频"
+          }
+        }
+      }
+    },
+    "item.subtitleTracks": {
+      "comment": "Label of an item's subtitles.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕"
+          }
+        }
+      }
+    },
+    "item.file": {
+      "comment": "Label of an item's file.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件"
           }
         }
       }
@@ -1621,6 +1909,186 @@
         }
       }
     },
+    "player.quality": {
+      "comment": "Tab of the player's quality options.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quality"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "画质"
+          }
+        }
+      }
+    },
+    "player.qualityAuto": {
+      "comment": "Quality limited only by what this device plays well.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动"
+          }
+        }
+      }
+    },
+    "player.qualityOriginal": {
+      "comment": "Quality of the original file, without lowering its bitrate.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原画"
+          }
+        }
+      }
+    },
+    "player.info": {
+      "comment": "Tab of how the item plays.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Info"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "信息"
+          }
+        }
+      }
+    },
+    "player.directPlay": {
+      "comment": "How an item plays: the file as is.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playing the file directly"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直接播放文件"
+          }
+        }
+      }
+    },
+    "player.directStream": {
+      "comment": "How an item plays: its streams copied into another container.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remuxing for this browser"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为这个浏览器转封装"
+          }
+        }
+      }
+    },
+    "player.transcode": {
+      "comment": "How an item plays: re-encoded.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcoding for this browser"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为这个浏览器转码"
+          }
+        }
+      }
+    },
+    "player.source": {
+      "comment": "Label of the file playing.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "来源"
+          }
+        }
+      }
+    },
+    "player.method": {
+      "comment": "Label of how the item plays.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放方式"
+          }
+        }
+      }
+    },
+    "player.options": {
+      "comment": "Accessible label of the player's side panel.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback Options"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放选项"
+          }
+        }
+      }
+    },
     "state.loading": {
       "comment": "Shown while content loads.",
       "extractionState": "manual",
@@ -1779,6 +2247,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存"
+          }
+        }
+      }
+    },
+    "action.back": {
+      "comment": "Button that goes back one step.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "返回"
+          }
+        }
+      }
+    },
+    "action.close": {
+      "comment": "Button that closes a menu or a sheet.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
           }
         }
       }
@@ -2989,6 +3493,258 @@
         }
       }
     },
+    "auth.welcomeMessage": {
+      "comment": "Explanation on the first screen of sign-in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in with a Mavio account to see every server it reaches, or connect to a standalone server directly."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录 Mavio 账户，就能看到它能访问的所有服务器；也可以直接连接一台独立服务器。"
+          }
+        }
+      }
+    },
+    "auth.connectToServer": {
+      "comment": "Button and title of signing in to a server by its address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to a Server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接到服务器"
+          }
+        }
+      }
+    },
+    "auth.lastAccount": {
+      "comment": "Line under the title of signing in with Mavio.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The account last used on this device"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次在这台设备上使用的账户"
+          }
+        }
+      }
+    },
+    "auth.continue": {
+      "comment": "Button that signs in with the account shown.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续"
+          }
+        }
+      }
+    },
+    "auth.otherAccount": {
+      "comment": "Button that signs in with a Mavio account other than the last one.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign In with Another Account"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用其他账户登录"
+          }
+        }
+      }
+    },
+    "auth.recentServers": {
+      "comment": "Heading of the servers this device signed in to before.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servers Signed In Before"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录过的服务器"
+          }
+        }
+      }
+    },
+    "auth.newServer": {
+      "comment": "Button and title of signing in to a server not signed in to before.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to a New Server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接新服务器"
+          }
+        }
+      }
+    },
+    "auth.serverAddress": {
+      "comment": "Placeholder of the server address field.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server address, such as https://media.example.net"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器地址，如 https://media.example.net"
+          }
+        }
+      }
+    },
+    "auth.connect": {
+      "comment": "Button that connects to the server address entered.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接"
+          }
+        }
+      }
+    },
+    "auth.signInTo": {
+      "comment": "Title of signing in to a server; server is its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign In to %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录 %@"
+          }
+        }
+      }
+    },
+    "auth.standaloneServer": {
+      "comment": "Describes a server that keeps its own users.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standalone server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "独立服务器"
+          }
+        }
+      }
+    },
+    "auth.or": {
+      "comment": "Separates the password from the other ways of signing in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "or"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或"
+          }
+        }
+      }
+    },
+    "auth.quickConnectTitle": {
+      "comment": "Title of signing in by entering a code on a signed-in device.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quick Connect"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quick Connect"
+          }
+        }
+      }
+    },
+    "auth.waiting": {
+      "comment": "Shown while a Quick Connect code waits to be entered.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for authorization…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待授权…"
+          }
+        }
+      }
+    },
     "search.placeholder": {
       "comment": "Placeholder of the search field.",
       "extractionState": "manual",
@@ -3021,6 +3777,762 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有结果"
+          }
+        }
+      }
+    },
+    "menu.manageAccount": {
+      "comment": "User menu item opening the Mavio account's page at mavio.dev.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage Account at mavio.dev"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 mavio.dev 管理账户"
+          }
+        }
+      }
+    },
+    "menu.manageServers": {
+      "comment": "User menu item opening the servers' settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage Servers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理服务器"
+          }
+        }
+      }
+    },
+    "menu.serverCount": {
+      "comment": "How many servers a Mavio account reaches, under its name in the user menu.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld server"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld servers"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 台服务器"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings.thisDevice": {
+      "comment": "Group of the settings that only affect this device.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Device"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台设备"
+          }
+        }
+      }
+    },
+    "settings.accountAndServers": {
+      "comment": "Group of the settings of the account and its servers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account and Servers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账户与服务器"
+          }
+        }
+      }
+    },
+    "settings.appearance": {
+      "comment": "Settings section of the color theme and TV mode.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外观"
+          }
+        }
+      }
+    },
+    "settings.appearanceMessage": {
+      "comment": "Explanation under the Appearance title.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only affects this device."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只影响这台设备。"
+          }
+        }
+      }
+    },
+    "settings.system": {
+      "comment": "Appearance that follows the system's light or dark setting.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟随系统"
+          }
+        }
+      }
+    },
+    "settings.light": {
+      "comment": "The light appearance.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浅色"
+          }
+        }
+      }
+    },
+    "settings.dark": {
+      "comment": "The dark appearance.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "深色"
+          }
+        }
+      }
+    },
+    "settings.tvMode": {
+      "comment": "Setting that switches to the television layout.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TV Mode"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电视模式"
+          }
+        }
+      }
+    },
+    "settings.tvModeMessage": {
+      "comment": "Explanation of TV mode.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full screen with navigation at the top, used with a remote or the arrow keys: for a computer connected to a TV."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全屏、顶部导航、用遥控器或方向键操作，适合接在电视上的电脑。"
+          }
+        }
+      }
+    },
+    "settings.tvModeNote": {
+      "comment": "Note under the TV mode setting.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TV mode looks like the Apple TV and Android TV apps. Turn it off here to leave it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电视模式与 Apple TV、Android TV 上的界面相同。在这里关掉即可退出。"
+          }
+        }
+      }
+    },
+    "settings.playback": {
+      "comment": "Settings section of playback.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放"
+          }
+        }
+      }
+    },
+    "settings.maxQuality": {
+      "comment": "Setting of the highest quality streamed to this device.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maximum Quality"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最高画质"
+          }
+        }
+      }
+    },
+    "settings.autoplayNext": {
+      "comment": "Setting that starts the next episode when one ends.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play the Next Episode Automatically"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动播放下一集"
+          }
+        }
+      }
+    },
+    "settings.subtitlesAudio": {
+      "comment": "Settings section of the preferred audio and subtitles.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitles and Audio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕与音频"
+          }
+        }
+      }
+    },
+    "settings.subtitlesAudioMessage": {
+      "comment": "Explanation under the Subtitles and Audio title.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved with your user on each server, for all your devices."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随你的用户保存在每台服务器上，在你所有的设备上生效。"
+          }
+        }
+      }
+    },
+    "settings.audioLanguages": {
+      "comment": "Setting of the audio languages in order of preference.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferred Audio Languages"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "首选音频语言"
+          }
+        }
+      }
+    },
+    "settings.subtitleLanguages": {
+      "comment": "Setting of the subtitle languages in order of preference.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferred Subtitle Languages"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "首选字幕语言"
+          }
+        }
+      }
+    },
+    "settings.languagesHint": {
+      "comment": "Hint under a field of preferred languages.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Three-letter language codes such as eng, chi or jpn, separated by commas."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "三个字母的语言代码，如 eng、chi、jpn，以逗号分隔。"
+          }
+        }
+      }
+    },
+    "settings.subtitleMode": {
+      "comment": "Setting of when subtitles show.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When to Show Subtitles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "何时显示字幕"
+          }
+        }
+      }
+    },
+    "settings.subtitleModeDefault": {
+      "comment": "Subtitle mode following the streams' default and forced flags.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As the Video Marks Them"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按视频的标记"
+          }
+        }
+      }
+    },
+    "settings.subtitleModeAlways": {
+      "comment": "Subtitle mode showing subtitles always.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "总是"
+          }
+        }
+      }
+    },
+    "settings.subtitleModeForeign": {
+      "comment": "Subtitle mode showing subtitles when the audio is not in a preferred language.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When the Audio Is in Another Language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音频是其他语言时"
+          }
+        }
+      }
+    },
+    "settings.subtitleModeForced": {
+      "comment": "Subtitle mode showing only forced subtitles.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forced Only"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅强制字幕"
+          }
+        }
+      }
+    },
+    "settings.subtitleModeNone": {
+      "comment": "Subtitle mode never showing subtitles.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Never"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从不"
+          }
+        }
+      }
+    },
+    "settings.subtitleModeSmart": {
+      "comment": "Subtitle mode showing subtitles when the audio differs from the preferred languages, and forced ones otherwise.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smart"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "智能"
+          }
+        }
+      }
+    },
+    "settings.signInsMessage": {
+      "comment": "Explanation under the Sign-Ins title.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sign-ins kept on this device. One shows at a time; switching between them needs no password."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台设备上保留的登录。一次只显示一个，切换时不用重新输入密码。"
+          }
+        }
+      }
+    },
+    "settings.addSignIn": {
+      "comment": "Button that signs in with another account or to another server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a Sign-In"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加登录"
+          }
+        }
+      }
+    },
+    "settings.serversMavioMessage": {
+      "comment": "Explanation under the Servers title in mavio.dev mode.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The servers your Mavio account reaches. Their order arranges Home."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的 Mavio 账户能访问的服务器。顺序决定首页上各服务器内容的排列。"
+          }
+        }
+      }
+    },
+    "settings.serversMessage": {
+      "comment": "Explanation under the Servers title.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The servers this device signed in to. Their order arranges Home."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台设备登录过的服务器。顺序决定首页上各服务器内容的排列。"
+          }
+        }
+      }
+    },
+    "settings.copyAddress": {
+      "comment": "Button that copies a server's address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Address"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制地址"
+          }
+        }
+      }
+    },
+    "settings.devices": {
+      "comment": "Settings section of the devices signed in as the user.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Devices"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设备"
+          }
+        }
+      }
+    },
+    "settings.devicesMessage": {
+      "comment": "Explanation under the Devices title; server is its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The devices signed in to %@ as you."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以你的身份登录 %@ 的设备。"
+          }
+        }
+      }
+    },
+    "settings.thisBrowser": {
+      "comment": "Marks the session of this browser in the devices list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This browser"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个浏览器"
+          }
+        }
+      }
+    },
+    "settings.account": {
+      "comment": "Settings section of the signed-in account.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账户"
+          }
+        }
+      }
+    },
+    "settings.mavioAccountMessage": {
+      "comment": "Explanation under the Account title in mavio.dev mode.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Mavio account. Its password, passkeys, two-step verification, Home and friends are managed at mavio.dev."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的 Mavio 账户。密码、通行密钥、两步验证、家庭与好友都在 mavio.dev 上管理。"
+          }
+        }
+      }
+    },
+    "settings.standaloneAccountMessage": {
+      "comment": "Explanation under the Account title on a standalone server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User %1$@ of %2$@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ 上的用户 %2$@。"
+          }
+        }
+      }
+    },
+    "settings.manageAtMavio": {
+      "comment": "Button opening the account at mavio.dev.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage at mavio.dev"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 mavio.dev 管理"
+          }
+        }
+      }
+    },
+    "settings.admin": {
+      "comment": "Marks the user as the server's administrator.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administrator"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理员"
           }
         }
       }

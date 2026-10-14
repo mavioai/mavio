@@ -17,6 +17,10 @@ export type MessageKey =
   | 'nav.search'
   | 'nav.profile'
   | 'nav.settings'
+  | 'nav.collapseSidebar'
+  | 'nav.expandSidebar'
+  | 'nav.userMenu'
+  | 'nav.navigation'
   | 'home.continueWatching'
   | 'home.nextUp'
   | 'home.latest'
@@ -36,6 +40,7 @@ export type MessageKey =
   | 'home.offline'
   | 'home.serverUnreachable'
   | 'home.more'
+  | 'home.notOnServers'
   | 'library.sort'
   | 'library.filter'
   | 'library.itemCount'
@@ -51,6 +56,7 @@ export type MessageKey =
   | 'library.filterUnplayed'
   | 'library.filterPlayed'
   | 'library.filterFavorites'
+  | 'library.sortBy'
   | 'item.play'
   | 'item.resume'
   | 'item.favorite'
@@ -68,6 +74,16 @@ export type MessageKey =
   | 'item.versions'
   | 'item.onServer'
   | 'item.unplayedCount'
+  | 'item.details'
+  | 'item.resumeAt'
+  | 'item.timeLeft'
+  | 'item.more'
+  | 'item.director'
+  | 'item.writers'
+  | 'item.studio'
+  | 'item.audioTracks'
+  | 'item.subtitleTracks'
+  | 'item.file'
   | 'player.play'
   | 'player.pause'
   | 'player.seekBack'
@@ -86,6 +102,16 @@ export type MessageKey =
   | 'player.copyLink'
   | 'player.mute'
   | 'player.unmute'
+  | 'player.quality'
+  | 'player.qualityAuto'
+  | 'player.qualityOriginal'
+  | 'player.info'
+  | 'player.directPlay'
+  | 'player.directStream'
+  | 'player.transcode'
+  | 'player.source'
+  | 'player.method'
+  | 'player.options'
   | 'state.loading'
   | 'state.empty'
   | 'state.error'
@@ -95,6 +121,8 @@ export type MessageKey =
   | 'action.done'
   | 'action.delete'
   | 'action.save'
+  | 'action.back'
+  | 'action.close'
   | 'auth.signIn'
   | 'auth.server'
   | 'auth.username'
@@ -161,8 +189,63 @@ export type MessageKey =
   | 'auth.standaloneUser'
   | 'auth.show'
   | 'auth.shown'
+  | 'auth.welcomeMessage'
+  | 'auth.connectToServer'
+  | 'auth.lastAccount'
+  | 'auth.continue'
+  | 'auth.otherAccount'
+  | 'auth.recentServers'
+  | 'auth.newServer'
+  | 'auth.serverAddress'
+  | 'auth.connect'
+  | 'auth.signInTo'
+  | 'auth.standaloneServer'
+  | 'auth.or'
+  | 'auth.quickConnectTitle'
+  | 'auth.waiting'
   | 'search.placeholder'
-  | 'search.noResults';
+  | 'search.noResults'
+  | 'menu.manageAccount'
+  | 'menu.manageServers'
+  | 'menu.serverCount'
+  | 'settings.thisDevice'
+  | 'settings.accountAndServers'
+  | 'settings.appearance'
+  | 'settings.appearanceMessage'
+  | 'settings.system'
+  | 'settings.light'
+  | 'settings.dark'
+  | 'settings.tvMode'
+  | 'settings.tvModeMessage'
+  | 'settings.tvModeNote'
+  | 'settings.playback'
+  | 'settings.maxQuality'
+  | 'settings.autoplayNext'
+  | 'settings.subtitlesAudio'
+  | 'settings.subtitlesAudioMessage'
+  | 'settings.audioLanguages'
+  | 'settings.subtitleLanguages'
+  | 'settings.languagesHint'
+  | 'settings.subtitleMode'
+  | 'settings.subtitleModeDefault'
+  | 'settings.subtitleModeAlways'
+  | 'settings.subtitleModeForeign'
+  | 'settings.subtitleModeForced'
+  | 'settings.subtitleModeNone'
+  | 'settings.subtitleModeSmart'
+  | 'settings.signInsMessage'
+  | 'settings.addSignIn'
+  | 'settings.serversMavioMessage'
+  | 'settings.serversMessage'
+  | 'settings.copyAddress'
+  | 'settings.devices'
+  | 'settings.devicesMessage'
+  | 'settings.thisBrowser'
+  | 'settings.account'
+  | 'settings.mavioAccountMessage'
+  | 'settings.standaloneAccountMessage'
+  | 'settings.manageAtMavio'
+  | 'settings.admin';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -172,6 +255,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "nav.search": "Search",
     "nav.profile": "Profile",
     "nav.settings": "Settings",
+    "nav.collapseSidebar": "Hide Sidebar",
+    "nav.expandSidebar": "Show Sidebar",
+    "nav.userMenu": "{name}, User Menu",
+    "nav.navigation": "Navigation",
     "home.continueWatching": "Continue Watching",
     "home.nextUp": "Next Up",
     "home.latest": "Latest in {library}",
@@ -191,6 +278,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "home.offline": "Offline",
     "home.serverUnreachable": "{server} is unreachable",
     "home.more": "See All",
+    "home.notOnServers": "Not on your servers yet",
     "library.sort": "Sort",
     "library.filter": "Filter",
     "library.itemCount": "{count, plural, one {# item} other {# items}}",
@@ -206,6 +294,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "library.filterUnplayed": "Unplayed",
     "library.filterPlayed": "Played",
     "library.filterFavorites": "Favorites",
+    "library.sortBy": "Sort: {sort}",
     "item.play": "Play",
     "item.resume": "Resume",
     "item.favorite": "Favorite",
@@ -223,6 +312,16 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "item.versions": "Versions",
     "item.onServer": "On {server}",
     "item.unplayedCount": "{count, plural, one {# unplayed} other {# unplayed}}",
+    "item.details": "Details",
+    "item.resumeAt": "Resume from {time}",
+    "item.timeLeft": "{time} left",
+    "item.more": "More",
+    "item.director": "Director",
+    "item.writers": "Writers",
+    "item.studio": "Studio",
+    "item.audioTracks": "Audio",
+    "item.subtitleTracks": "Subtitles",
+    "item.file": "File",
     "player.play": "Play",
     "player.pause": "Pause",
     "player.seekBack": "Back {count, plural, one {# second} other {# seconds}}",
@@ -241,6 +340,16 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.copyLink": "Copy Stream Link",
     "player.mute": "Mute",
     "player.unmute": "Unmute",
+    "player.quality": "Quality",
+    "player.qualityAuto": "Automatic",
+    "player.qualityOriginal": "Original",
+    "player.info": "Info",
+    "player.directPlay": "Playing the file directly",
+    "player.directStream": "Remuxing for this browser",
+    "player.transcode": "Transcoding for this browser",
+    "player.source": "Source",
+    "player.method": "Playback",
+    "player.options": "Playback Options",
     "state.loading": "Loading…",
     "state.empty": "Nothing here yet",
     "state.error": "Something went wrong",
@@ -250,6 +359,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.done": "Done",
     "action.delete": "Delete",
     "action.save": "Save",
+    "action.back": "Back",
+    "action.close": "Close",
     "auth.signIn": "Sign In",
     "auth.server": "Server",
     "auth.username": "Username",
@@ -316,8 +427,63 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.standaloneUser": "User of {server}",
     "auth.show": "Show",
     "auth.shown": "Shown",
+    "auth.welcomeMessage": "Sign in with a Mavio account to see every server it reaches, or connect to a standalone server directly.",
+    "auth.connectToServer": "Connect to a Server",
+    "auth.lastAccount": "The account last used on this device",
+    "auth.continue": "Continue",
+    "auth.otherAccount": "Sign In with Another Account",
+    "auth.recentServers": "Servers Signed In Before",
+    "auth.newServer": "Connect to a New Server",
+    "auth.serverAddress": "Server address, such as https://media.example.net",
+    "auth.connect": "Connect",
+    "auth.signInTo": "Sign In to {server}",
+    "auth.standaloneServer": "Standalone server",
+    "auth.or": "or",
+    "auth.quickConnectTitle": "Quick Connect",
+    "auth.waiting": "Waiting for authorization…",
     "search.placeholder": "Search movies, shows and more",
-    "search.noResults": "No results"
+    "search.noResults": "No results",
+    "menu.manageAccount": "Manage Account at mavio.dev",
+    "menu.manageServers": "Manage Servers",
+    "menu.serverCount": "{count, plural, one {# server} other {# servers}}",
+    "settings.thisDevice": "This Device",
+    "settings.accountAndServers": "Account and Servers",
+    "settings.appearance": "Appearance",
+    "settings.appearanceMessage": "Only affects this device.",
+    "settings.system": "System",
+    "settings.light": "Light",
+    "settings.dark": "Dark",
+    "settings.tvMode": "TV Mode",
+    "settings.tvModeMessage": "Full screen with navigation at the top, used with a remote or the arrow keys: for a computer connected to a TV.",
+    "settings.tvModeNote": "TV mode looks like the Apple TV and Android TV apps. Turn it off here to leave it.",
+    "settings.playback": "Playback",
+    "settings.maxQuality": "Maximum Quality",
+    "settings.autoplayNext": "Play the Next Episode Automatically",
+    "settings.subtitlesAudio": "Subtitles and Audio",
+    "settings.subtitlesAudioMessage": "Saved with your user on each server, for all your devices.",
+    "settings.audioLanguages": "Preferred Audio Languages",
+    "settings.subtitleLanguages": "Preferred Subtitle Languages",
+    "settings.languagesHint": "Three-letter language codes such as eng, chi or jpn, separated by commas.",
+    "settings.subtitleMode": "When to Show Subtitles",
+    "settings.subtitleModeDefault": "As the Video Marks Them",
+    "settings.subtitleModeAlways": "Always",
+    "settings.subtitleModeForeign": "When the Audio Is in Another Language",
+    "settings.subtitleModeForced": "Forced Only",
+    "settings.subtitleModeNone": "Never",
+    "settings.subtitleModeSmart": "Smart",
+    "settings.signInsMessage": "The sign-ins kept on this device. One shows at a time; switching between them needs no password.",
+    "settings.addSignIn": "Add a Sign-In",
+    "settings.serversMavioMessage": "The servers your Mavio account reaches. Their order arranges Home.",
+    "settings.serversMessage": "The servers this device signed in to. Their order arranges Home.",
+    "settings.copyAddress": "Copy Address",
+    "settings.devices": "Devices",
+    "settings.devicesMessage": "The devices signed in to {server} as you.",
+    "settings.thisBrowser": "This browser",
+    "settings.account": "Account",
+    "settings.mavioAccountMessage": "Your Mavio account. Its password, passkeys, two-step verification, Home and friends are managed at mavio.dev.",
+    "settings.standaloneAccountMessage": "User {name} of {server}.",
+    "settings.manageAtMavio": "Manage at mavio.dev",
+    "settings.admin": "Administrator"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -325,6 +491,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "nav.search": "搜索",
     "nav.profile": "个人资料",
     "nav.settings": "设置",
+    "nav.collapseSidebar": "收起边栏",
+    "nav.expandSidebar": "展开边栏",
+    "nav.userMenu": "{name}，用户菜单",
+    "nav.navigation": "导航",
     "home.continueWatching": "继续观看",
     "home.nextUp": "下一集",
     "home.latest": "{library}最新内容",
@@ -344,6 +514,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "home.offline": "离线",
     "home.serverUnreachable": "无法连接{server}",
     "home.more": "查看全部",
+    "home.notOnServers": "还不在你的服务器上",
     "library.sort": "排序",
     "library.filter": "筛选",
     "library.itemCount": "{count, plural, other {# 个项目}}",
@@ -359,6 +530,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "library.filterUnplayed": "未看",
     "library.filterPlayed": "已看",
     "library.filterFavorites": "收藏",
+    "library.sortBy": "排序：{sort}",
     "item.play": "播放",
     "item.resume": "继续播放",
     "item.favorite": "收藏",
@@ -376,6 +548,16 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "item.versions": "版本",
     "item.onServer": "位于{server}",
     "item.unplayedCount": "{count, plural, other {# 集未看}}",
+    "item.details": "详细信息",
+    "item.resumeAt": "从 {time} 继续",
+    "item.timeLeft": "剩 {time}",
+    "item.more": "更多",
+    "item.director": "导演",
+    "item.writers": "编剧",
+    "item.studio": "制片厂",
+    "item.audioTracks": "音频",
+    "item.subtitleTracks": "字幕",
+    "item.file": "文件",
     "player.play": "播放",
     "player.pause": "暂停",
     "player.seekBack": "{count, plural, other {后退 # 秒}}",
@@ -394,6 +576,16 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.copyLink": "复制串流链接",
     "player.mute": "静音",
     "player.unmute": "取消静音",
+    "player.quality": "画质",
+    "player.qualityAuto": "自动",
+    "player.qualityOriginal": "原画",
+    "player.info": "信息",
+    "player.directPlay": "直接播放文件",
+    "player.directStream": "为这个浏览器转封装",
+    "player.transcode": "为这个浏览器转码",
+    "player.source": "来源",
+    "player.method": "播放方式",
+    "player.options": "播放选项",
     "state.loading": "正在载入…",
     "state.empty": "这里还没有内容",
     "state.error": "出了点问题",
@@ -403,6 +595,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.done": "完成",
     "action.delete": "删除",
     "action.save": "保存",
+    "action.back": "返回",
+    "action.close": "关闭",
     "auth.signIn": "登录",
     "auth.server": "服务器",
     "auth.username": "用户名",
@@ -469,7 +663,62 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.standaloneUser": "{server} 的用户",
     "auth.show": "显示",
     "auth.shown": "当前显示",
+    "auth.welcomeMessage": "登录 Mavio 账户，就能看到它能访问的所有服务器；也可以直接连接一台独立服务器。",
+    "auth.connectToServer": "连接到服务器",
+    "auth.lastAccount": "上次在这台设备上使用的账户",
+    "auth.continue": "继续",
+    "auth.otherAccount": "使用其他账户登录",
+    "auth.recentServers": "登录过的服务器",
+    "auth.newServer": "连接新服务器",
+    "auth.serverAddress": "服务器地址，如 https://media.example.net",
+    "auth.connect": "连接",
+    "auth.signInTo": "登录 {server}",
+    "auth.standaloneServer": "独立服务器",
+    "auth.or": "或",
+    "auth.quickConnectTitle": "Quick Connect",
+    "auth.waiting": "等待授权…",
     "search.placeholder": "搜索电影、剧集等",
-    "search.noResults": "没有结果"
+    "search.noResults": "没有结果",
+    "menu.manageAccount": "在 mavio.dev 管理账户",
+    "menu.manageServers": "管理服务器",
+    "menu.serverCount": "{count, plural, other {# 台服务器}}",
+    "settings.thisDevice": "这台设备",
+    "settings.accountAndServers": "账户与服务器",
+    "settings.appearance": "外观",
+    "settings.appearanceMessage": "只影响这台设备。",
+    "settings.system": "跟随系统",
+    "settings.light": "浅色",
+    "settings.dark": "深色",
+    "settings.tvMode": "电视模式",
+    "settings.tvModeMessage": "全屏、顶部导航、用遥控器或方向键操作，适合接在电视上的电脑。",
+    "settings.tvModeNote": "电视模式与 Apple TV、Android TV 上的界面相同。在这里关掉即可退出。",
+    "settings.playback": "播放",
+    "settings.maxQuality": "最高画质",
+    "settings.autoplayNext": "自动播放下一集",
+    "settings.subtitlesAudio": "字幕与音频",
+    "settings.subtitlesAudioMessage": "随你的用户保存在每台服务器上，在你所有的设备上生效。",
+    "settings.audioLanguages": "首选音频语言",
+    "settings.subtitleLanguages": "首选字幕语言",
+    "settings.languagesHint": "三个字母的语言代码，如 eng、chi、jpn，以逗号分隔。",
+    "settings.subtitleMode": "何时显示字幕",
+    "settings.subtitleModeDefault": "按视频的标记",
+    "settings.subtitleModeAlways": "总是",
+    "settings.subtitleModeForeign": "音频是其他语言时",
+    "settings.subtitleModeForced": "仅强制字幕",
+    "settings.subtitleModeNone": "从不",
+    "settings.subtitleModeSmart": "智能",
+    "settings.signInsMessage": "这台设备上保留的登录。一次只显示一个，切换时不用重新输入密码。",
+    "settings.addSignIn": "添加登录",
+    "settings.serversMavioMessage": "你的 Mavio 账户能访问的服务器。顺序决定首页上各服务器内容的排列。",
+    "settings.serversMessage": "这台设备登录过的服务器。顺序决定首页上各服务器内容的排列。",
+    "settings.copyAddress": "复制地址",
+    "settings.devices": "设备",
+    "settings.devicesMessage": "以你的身份登录 {server} 的设备。",
+    "settings.thisBrowser": "这个浏览器",
+    "settings.account": "账户",
+    "settings.mavioAccountMessage": "你的 Mavio 账户。密码、通行密钥、两步验证、家庭与好友都在 mavio.dev 上管理。",
+    "settings.standaloneAccountMessage": "{server} 上的用户 {name}。",
+    "settings.manageAtMavio": "在 mavio.dev 管理",
+    "settings.admin": "管理员"
   }
 };

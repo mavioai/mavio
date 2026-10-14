@@ -13,6 +13,14 @@
     <string name="nav_profile">Profile</string>
     <!-- Screen of the app's and the user's settings. -->
     <string name="nav_settings">Settings</string>
+    <!-- Button that collapses the sidebar to a rail of icons. -->
+    <string name="nav_collapse_sidebar">Hide Sidebar</string>
+    <!-- Button that expands the sidebar from its rail of icons. -->
+    <string name="nav_expand_sidebar">Show Sidebar</string>
+    <!-- Accessible label of the button opening the user menu; name is the signed-in user's. -->
+    <string name="nav_user_menu">%s, User Menu</string>
+    <!-- Accessible label of the main navigation. -->
+    <string name="nav_navigation">Navigation</string>
     <!-- Shelf of items whose playback was left unfinished. -->
     <string name="home_continue_watching">Continue Watching</string>
     <!-- Shelf of the next episodes of the series being watched. -->
@@ -51,6 +59,8 @@
     <string name="home_server_unreachable">%s is unreachable</string>
     <!-- Action opening all the items of a shelf. -->
     <string name="home_more">See All</string>
+    <!-- Line beside the Trending shelf: titles the user's servers do not have. -->
+    <string name="home_not_on_servers">Not on your servers yet</string>
     <!-- Button opening the sort options of a library. -->
     <string name="library_sort">Sort</string>
     <!-- Button opening the filters of a library. -->
@@ -84,6 +94,8 @@
     <string name="library_filter_played">Played</string>
     <!-- Filter option: the user's favorites. -->
     <string name="library_filter_favorites">Favorites</string>
+    <!-- Button opening the sort menu; sort is the current order. -->
+    <string name="library_sort_by">Sort: %s</string>
     <!-- Starts playback of an item from the beginning. -->
     <string name="item_play">Play</string>
     <!-- Resumes playback of an item where it was left. -->
@@ -134,6 +146,26 @@
     <string name="item_download">Download</string>
     <!-- Deletes the downloaded file of an item. -->
     <string name="item_remove_download">Remove Download</string>
+    <!-- Button opening an item's details. -->
+    <string name="item_details">Details</string>
+    <!-- Play button of a partly watched item; time is the position, as 47:12. -->
+    <string name="item_resume_at">Resume from %s</string>
+    <!-- How much of a partly watched item is left; time as 1 h 21 min. -->
+    <string name="item_time_left">%s left</string>
+    <!-- Button opening more actions of an item. -->
+    <string name="item_more">More</string>
+    <!-- Label of an item's directors. -->
+    <string name="item_director">Director</string>
+    <!-- Label of an item's writers. -->
+    <string name="item_writers">Writers</string>
+    <!-- Label of an item's studios. -->
+    <string name="item_studio">Studio</string>
+    <!-- Label of an item's audio tracks. -->
+    <string name="item_audio_tracks">Audio</string>
+    <!-- Label of an item's subtitles. -->
+    <string name="item_subtitle_tracks">Subtitles</string>
+    <!-- Label of an item's file. -->
+    <string name="item_file">File</string>
     <!-- State of a download not started yet. -->
     <string name="download_waiting">Waiting</string>
     <!-- State of a download interrupted, to be resumed. -->
@@ -186,6 +218,26 @@
     <string name="player_mute">Mute</string>
     <!-- Accessibility label of the button restoring the sound. -->
     <string name="player_unmute">Unmute</string>
+    <!-- Tab of the player's quality options. -->
+    <string name="player_quality">Quality</string>
+    <!-- Quality limited only by what this device plays well. -->
+    <string name="player_quality_auto">Automatic</string>
+    <!-- Quality of the original file, without lowering its bitrate. -->
+    <string name="player_quality_original">Original</string>
+    <!-- Tab of how the item plays. -->
+    <string name="player_info">Info</string>
+    <!-- How an item plays: the file as is. -->
+    <string name="player_direct_play">Playing the file directly</string>
+    <!-- How an item plays: its streams copied into another container. -->
+    <string name="player_direct_stream">Remuxing for this browser</string>
+    <!-- How an item plays: re-encoded. -->
+    <string name="player_transcode">Transcoding for this browser</string>
+    <!-- Label of the file playing. -->
+    <string name="player_source">Source</string>
+    <!-- Label of how the item plays. -->
+    <string name="player_method">Playback</string>
+    <!-- Accessible label of the player's side panel. -->
+    <string name="player_options">Playback Options</string>
     <!-- Shown while content loads. -->
     <string name="state_loading">Loading…</string>
     <!-- Title of an empty list or library. -->
@@ -204,6 +256,10 @@
     <string name="action_delete">Delete</string>
     <!-- Saves what was entered. -->
     <string name="action_save">Save</string>
+    <!-- Button that goes back one step. -->
+    <string name="action_back">Back</string>
+    <!-- Button that closes a menu or a sheet. -->
+    <string name="action_close">Close</string>
     <!-- Signs in to a server. -->
     <string name="auth_sign_in">Sign In</string>
     <!-- Field of the server's address on the sign-in screen. -->
@@ -338,8 +394,121 @@
     <string name="auth_show">Show</string>
     <!-- Marks the sign-in whose content is shown. -->
     <string name="auth_shown">Shown</string>
+    <!-- Explanation on the first screen of sign-in. -->
+    <string name="auth_welcome_message">Sign in with a Mavio account to see every server it reaches, or connect to a standalone server directly.</string>
+    <!-- Button and title of signing in to a server by its address. -->
+    <string name="auth_connect_to_server">Connect to a Server</string>
+    <!-- Line under the title of signing in with Mavio. -->
+    <string name="auth_last_account">The account last used on this device</string>
+    <!-- Button that signs in with the account shown. -->
+    <string name="auth_continue">Continue</string>
+    <!-- Button that signs in with a Mavio account other than the last one. -->
+    <string name="auth_other_account">Sign In with Another Account</string>
+    <!-- Heading of the servers this device signed in to before. -->
+    <string name="auth_recent_servers">Servers Signed In Before</string>
+    <!-- Button and title of signing in to a server not signed in to before. -->
+    <string name="auth_new_server">Connect to a New Server</string>
+    <!-- Placeholder of the server address field. -->
+    <string name="auth_server_address">Server address, such as https://media.example.net</string>
+    <!-- Button that connects to the server address entered. -->
+    <string name="auth_connect">Connect</string>
+    <!-- Title of signing in to a server; server is its name. -->
+    <string name="auth_sign_in_to">Sign In to %s</string>
+    <!-- Describes a server that keeps its own users. -->
+    <string name="auth_standalone_server">Standalone server</string>
+    <!-- Separates the password from the other ways of signing in. -->
+    <string name="auth_or">or</string>
+    <!-- Title of signing in by entering a code on a signed-in device. -->
+    <string name="auth_quick_connect_title">Quick Connect</string>
+    <!-- Shown while a Quick Connect code waits to be entered. -->
+    <string name="auth_waiting">Waiting for authorization…</string>
     <!-- Placeholder of the search field. -->
     <string name="search_placeholder">Search movies, shows and more</string>
     <!-- Shown when a search finds nothing on any server. -->
     <string name="search_no_results">No results</string>
+    <!-- User menu item opening the Mavio account's page at mavio.dev. -->
+    <string name="menu_manage_account">Manage Account at mavio.dev</string>
+    <!-- User menu item opening the servers' settings. -->
+    <string name="menu_manage_servers">Manage Servers</string>
+    <!-- How many servers a Mavio account reaches, under its name in the user menu. -->
+    <plurals name="menu_server_count">
+        <item quantity="one">%d server</item>
+        <item quantity="other">%d servers</item>
+    </plurals>
+    <!-- Group of the settings that only affect this device. -->
+    <string name="settings_this_device">This Device</string>
+    <!-- Group of the settings of the account and its servers. -->
+    <string name="settings_account_and_servers">Account and Servers</string>
+    <!-- Settings section of the color theme and TV mode. -->
+    <string name="settings_appearance">Appearance</string>
+    <!-- Explanation under the Appearance title. -->
+    <string name="settings_appearance_message">Only affects this device.</string>
+    <!-- Appearance that follows the system's light or dark setting. -->
+    <string name="settings_system">System</string>
+    <!-- The light appearance. -->
+    <string name="settings_light">Light</string>
+    <!-- The dark appearance. -->
+    <string name="settings_dark">Dark</string>
+    <!-- Setting that switches to the television layout. -->
+    <string name="settings_tv_mode">TV Mode</string>
+    <!-- Explanation of TV mode. -->
+    <string name="settings_tv_mode_message">Full screen with navigation at the top, used with a remote or the arrow keys: for a computer connected to a TV.</string>
+    <!-- Note under the TV mode setting. -->
+    <string name="settings_tv_mode_note">TV mode looks like the Apple TV and Android TV apps. Turn it off here to leave it.</string>
+    <!-- Settings section of playback. -->
+    <string name="settings_playback">Playback</string>
+    <!-- Setting of the highest quality streamed to this device. -->
+    <string name="settings_max_quality">Maximum Quality</string>
+    <!-- Setting that starts the next episode when one ends. -->
+    <string name="settings_autoplay_next">Play the Next Episode Automatically</string>
+    <!-- Settings section of the preferred audio and subtitles. -->
+    <string name="settings_subtitles_audio">Subtitles and Audio</string>
+    <!-- Explanation under the Subtitles and Audio title. -->
+    <string name="settings_subtitles_audio_message">Saved with your user on each server, for all your devices.</string>
+    <!-- Setting of the audio languages in order of preference. -->
+    <string name="settings_audio_languages">Preferred Audio Languages</string>
+    <!-- Setting of the subtitle languages in order of preference. -->
+    <string name="settings_subtitle_languages">Preferred Subtitle Languages</string>
+    <!-- Hint under a field of preferred languages. -->
+    <string name="settings_languages_hint">Three-letter language codes such as eng, chi or jpn, separated by commas.</string>
+    <!-- Setting of when subtitles show. -->
+    <string name="settings_subtitle_mode">When to Show Subtitles</string>
+    <!-- Subtitle mode following the streams' default and forced flags. -->
+    <string name="settings_subtitle_mode_default">As the Video Marks Them</string>
+    <!-- Subtitle mode showing subtitles always. -->
+    <string name="settings_subtitle_mode_always">Always</string>
+    <!-- Subtitle mode showing subtitles when the audio is not in a preferred language. -->
+    <string name="settings_subtitle_mode_foreign">When the Audio Is in Another Language</string>
+    <!-- Subtitle mode showing only forced subtitles. -->
+    <string name="settings_subtitle_mode_forced">Forced Only</string>
+    <!-- Subtitle mode never showing subtitles. -->
+    <string name="settings_subtitle_mode_none">Never</string>
+    <!-- Subtitle mode showing subtitles when the audio differs from the preferred languages, and forced ones otherwise. -->
+    <string name="settings_subtitle_mode_smart">Smart</string>
+    <!-- Explanation under the Sign-Ins title. -->
+    <string name="settings_sign_ins_message">The sign-ins kept on this device. One shows at a time; switching between them needs no password.</string>
+    <!-- Button that signs in with another account or to another server. -->
+    <string name="settings_add_sign_in">Add a Sign-In</string>
+    <!-- Explanation under the Servers title in mavio.dev mode. -->
+    <string name="settings_servers_mavio_message">The servers your Mavio account reaches. Their order arranges Home.</string>
+    <!-- Explanation under the Servers title. -->
+    <string name="settings_servers_message">The servers this device signed in to. Their order arranges Home.</string>
+    <!-- Button that copies a server's address. -->
+    <string name="settings_copy_address">Copy Address</string>
+    <!-- Settings section of the devices signed in as the user. -->
+    <string name="settings_devices">Devices</string>
+    <!-- Explanation under the Devices title; server is its name. -->
+    <string name="settings_devices_message">The devices signed in to %s as you.</string>
+    <!-- Marks the session of this browser in the devices list. -->
+    <string name="settings_this_browser">This browser</string>
+    <!-- Settings section of the signed-in account. -->
+    <string name="settings_account">Account</string>
+    <!-- Explanation under the Account title in mavio.dev mode. -->
+    <string name="settings_mavio_account_message">Your Mavio account. Its password, passkeys, two-step verification, Home and friends are managed at mavio.dev.</string>
+    <!-- Explanation under the Account title on a standalone server. -->
+    <string name="settings_standalone_account_message">User %1$s of %2$s.</string>
+    <!-- Button opening the account at mavio.dev. -->
+    <string name="settings_manage_at_mavio">Manage at mavio.dev</string>
+    <!-- Marks the user as the server's administrator. -->
+    <string name="settings_admin">Administrator</string>
 </resources>

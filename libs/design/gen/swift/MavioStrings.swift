@@ -24,6 +24,20 @@ public enum MavioStrings {
     /// Screen of the app's and the user's settings.
     public static var navSettings: String { NSLocalizedString("nav.settings", bundle: .module, comment: "") }
 
+    /// Button that collapses the sidebar to a rail of icons.
+    public static var navCollapseSidebar: String { NSLocalizedString("nav.collapseSidebar", bundle: .module, comment: "") }
+
+    /// Button that expands the sidebar from its rail of icons.
+    public static var navExpandSidebar: String { NSLocalizedString("nav.expandSidebar", bundle: .module, comment: "") }
+
+    /// Accessible label of the button opening the user menu; name is the signed-in user's.
+    public static func navUserMenu(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("nav.userMenu", bundle: .module, comment: ""), name)
+    }
+
+    /// Accessible label of the main navigation.
+    public static var navNavigation: String { NSLocalizedString("nav.navigation", bundle: .module, comment: "") }
+
     /// Shelf of items whose playback was left unfinished.
     public static var homeContinueWatching: String { NSLocalizedString("home.continueWatching", bundle: .module, comment: "") }
 
@@ -107,6 +121,9 @@ public enum MavioStrings {
     /// Action opening all the items of a shelf.
     public static var homeMore: String { NSLocalizedString("home.more", bundle: .module, comment: "") }
 
+    /// Line beside the Trending shelf: titles the user's servers do not have.
+    public static var homeNotOnServers: String { NSLocalizedString("home.notOnServers", bundle: .module, comment: "") }
+
     /// Button opening the sort options of a library.
     public static var librarySort: String { NSLocalizedString("library.sort", bundle: .module, comment: "") }
 
@@ -153,6 +170,11 @@ public enum MavioStrings {
 
     /// Filter option: the user's favorites.
     public static var libraryFilterFavorites: String { NSLocalizedString("library.filterFavorites", bundle: .module, comment: "") }
+
+    /// Button opening the sort menu; sort is the current order.
+    public static func librarySortBy(sort: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("library.sortBy", bundle: .module, comment: ""), sort)
+    }
 
     /// Starts playback of an item from the beginning.
     public static var itemPlay: String { NSLocalizedString("item.play", bundle: .module, comment: "") }
@@ -222,6 +244,40 @@ public enum MavioStrings {
 
     /// Deletes the downloaded file of an item.
     public static var itemRemoveDownload: String { NSLocalizedString("item.removeDownload", bundle: .module, comment: "") }
+
+    /// Button opening an item's details.
+    public static var itemDetails: String { NSLocalizedString("item.details", bundle: .module, comment: "") }
+
+    /// Play button of a partly watched item; time is the position, as 47:12.
+    public static func itemResumeAt(time: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("item.resumeAt", bundle: .module, comment: ""), time)
+    }
+
+    /// How much of a partly watched item is left; time as 1 h 21 min.
+    public static func itemTimeLeft(time: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("item.timeLeft", bundle: .module, comment: ""), time)
+    }
+
+    /// Button opening more actions of an item.
+    public static var itemMore: String { NSLocalizedString("item.more", bundle: .module, comment: "") }
+
+    /// Label of an item's directors.
+    public static var itemDirector: String { NSLocalizedString("item.director", bundle: .module, comment: "") }
+
+    /// Label of an item's writers.
+    public static var itemWriters: String { NSLocalizedString("item.writers", bundle: .module, comment: "") }
+
+    /// Label of an item's studios.
+    public static var itemStudio: String { NSLocalizedString("item.studio", bundle: .module, comment: "") }
+
+    /// Label of an item's audio tracks.
+    public static var itemAudioTracks: String { NSLocalizedString("item.audioTracks", bundle: .module, comment: "") }
+
+    /// Label of an item's subtitles.
+    public static var itemSubtitleTracks: String { NSLocalizedString("item.subtitleTracks", bundle: .module, comment: "") }
+
+    /// Label of an item's file.
+    public static var itemFile: String { NSLocalizedString("item.file", bundle: .module, comment: "") }
 
     /// State of a download not started yet.
     public static var downloadWaiting: String { NSLocalizedString("download.waiting", bundle: .module, comment: "") }
@@ -301,6 +357,36 @@ public enum MavioStrings {
     /// Accessibility label of the button restoring the sound.
     public static var playerUnmute: String { NSLocalizedString("player.unmute", bundle: .module, comment: "") }
 
+    /// Tab of the player's quality options.
+    public static var playerQuality: String { NSLocalizedString("player.quality", bundle: .module, comment: "") }
+
+    /// Quality limited only by what this device plays well.
+    public static var playerQualityAuto: String { NSLocalizedString("player.qualityAuto", bundle: .module, comment: "") }
+
+    /// Quality of the original file, without lowering its bitrate.
+    public static var playerQualityOriginal: String { NSLocalizedString("player.qualityOriginal", bundle: .module, comment: "") }
+
+    /// Tab of how the item plays.
+    public static var playerInfo: String { NSLocalizedString("player.info", bundle: .module, comment: "") }
+
+    /// How an item plays: the file as is.
+    public static var playerDirectPlay: String { NSLocalizedString("player.directPlay", bundle: .module, comment: "") }
+
+    /// How an item plays: its streams copied into another container.
+    public static var playerDirectStream: String { NSLocalizedString("player.directStream", bundle: .module, comment: "") }
+
+    /// How an item plays: re-encoded.
+    public static var playerTranscode: String { NSLocalizedString("player.transcode", bundle: .module, comment: "") }
+
+    /// Label of the file playing.
+    public static var playerSource: String { NSLocalizedString("player.source", bundle: .module, comment: "") }
+
+    /// Label of how the item plays.
+    public static var playerMethod: String { NSLocalizedString("player.method", bundle: .module, comment: "") }
+
+    /// Accessible label of the player's side panel.
+    public static var playerOptions: String { NSLocalizedString("player.options", bundle: .module, comment: "") }
+
     /// Shown while content loads.
     public static var stateLoading: String { NSLocalizedString("state.loading", bundle: .module, comment: "") }
 
@@ -327,6 +413,12 @@ public enum MavioStrings {
 
     /// Saves what was entered.
     public static var actionSave: String { NSLocalizedString("action.save", bundle: .module, comment: "") }
+
+    /// Button that goes back one step.
+    public static var actionBack: String { NSLocalizedString("action.back", bundle: .module, comment: "") }
+
+    /// Button that closes a menu or a sheet.
+    public static var actionClose: String { NSLocalizedString("action.close", bundle: .module, comment: "") }
 
     /// Signs in to a server.
     public static var authSignIn: String { NSLocalizedString("auth.signIn", bundle: .module, comment: "") }
@@ -547,9 +639,182 @@ public enum MavioStrings {
     /// Marks the sign-in whose content is shown.
     public static var authShown: String { NSLocalizedString("auth.shown", bundle: .module, comment: "") }
 
+    /// Explanation on the first screen of sign-in.
+    public static var authWelcomeMessage: String { NSLocalizedString("auth.welcomeMessage", bundle: .module, comment: "") }
+
+    /// Button and title of signing in to a server by its address.
+    public static var authConnectToServer: String { NSLocalizedString("auth.connectToServer", bundle: .module, comment: "") }
+
+    /// Line under the title of signing in with Mavio.
+    public static var authLastAccount: String { NSLocalizedString("auth.lastAccount", bundle: .module, comment: "") }
+
+    /// Button that signs in with the account shown.
+    public static var authContinue: String { NSLocalizedString("auth.continue", bundle: .module, comment: "") }
+
+    /// Button that signs in with a Mavio account other than the last one.
+    public static var authOtherAccount: String { NSLocalizedString("auth.otherAccount", bundle: .module, comment: "") }
+
+    /// Heading of the servers this device signed in to before.
+    public static var authRecentServers: String { NSLocalizedString("auth.recentServers", bundle: .module, comment: "") }
+
+    /// Button and title of signing in to a server not signed in to before.
+    public static var authNewServer: String { NSLocalizedString("auth.newServer", bundle: .module, comment: "") }
+
+    /// Placeholder of the server address field.
+    public static var authServerAddress: String { NSLocalizedString("auth.serverAddress", bundle: .module, comment: "") }
+
+    /// Button that connects to the server address entered.
+    public static var authConnect: String { NSLocalizedString("auth.connect", bundle: .module, comment: "") }
+
+    /// Title of signing in to a server; server is its name.
+    public static func authSignInTo(server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.signInTo", bundle: .module, comment: ""), server)
+    }
+
+    /// Describes a server that keeps its own users.
+    public static var authStandaloneServer: String { NSLocalizedString("auth.standaloneServer", bundle: .module, comment: "") }
+
+    /// Separates the password from the other ways of signing in.
+    public static var authOr: String { NSLocalizedString("auth.or", bundle: .module, comment: "") }
+
+    /// Title of signing in by entering a code on a signed-in device.
+    public static var authQuickConnectTitle: String { NSLocalizedString("auth.quickConnectTitle", bundle: .module, comment: "") }
+
+    /// Shown while a Quick Connect code waits to be entered.
+    public static var authWaiting: String { NSLocalizedString("auth.waiting", bundle: .module, comment: "") }
+
     /// Placeholder of the search field.
     public static var searchPlaceholder: String { NSLocalizedString("search.placeholder", bundle: .module, comment: "") }
 
     /// Shown when a search finds nothing on any server.
     public static var searchNoResults: String { NSLocalizedString("search.noResults", bundle: .module, comment: "") }
+
+    /// User menu item opening the Mavio account's page at mavio.dev.
+    public static var menuManageAccount: String { NSLocalizedString("menu.manageAccount", bundle: .module, comment: "") }
+
+    /// User menu item opening the servers' settings.
+    public static var menuManageServers: String { NSLocalizedString("menu.manageServers", bundle: .module, comment: "") }
+
+    /// How many servers a Mavio account reaches, under its name in the user menu.
+    public static func menuServerCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("menu.serverCount", bundle: .module, comment: ""), count)
+    }
+
+    /// Group of the settings that only affect this device.
+    public static var settingsThisDevice: String { NSLocalizedString("settings.thisDevice", bundle: .module, comment: "") }
+
+    /// Group of the settings of the account and its servers.
+    public static var settingsAccountAndServers: String { NSLocalizedString("settings.accountAndServers", bundle: .module, comment: "") }
+
+    /// Settings section of the color theme and TV mode.
+    public static var settingsAppearance: String { NSLocalizedString("settings.appearance", bundle: .module, comment: "") }
+
+    /// Explanation under the Appearance title.
+    public static var settingsAppearanceMessage: String { NSLocalizedString("settings.appearanceMessage", bundle: .module, comment: "") }
+
+    /// Appearance that follows the system's light or dark setting.
+    public static var settingsSystem: String { NSLocalizedString("settings.system", bundle: .module, comment: "") }
+
+    /// The light appearance.
+    public static var settingsLight: String { NSLocalizedString("settings.light", bundle: .module, comment: "") }
+
+    /// The dark appearance.
+    public static var settingsDark: String { NSLocalizedString("settings.dark", bundle: .module, comment: "") }
+
+    /// Setting that switches to the television layout.
+    public static var settingsTvMode: String { NSLocalizedString("settings.tvMode", bundle: .module, comment: "") }
+
+    /// Explanation of TV mode.
+    public static var settingsTvModeMessage: String { NSLocalizedString("settings.tvModeMessage", bundle: .module, comment: "") }
+
+    /// Note under the TV mode setting.
+    public static var settingsTvModeNote: String { NSLocalizedString("settings.tvModeNote", bundle: .module, comment: "") }
+
+    /// Settings section of playback.
+    public static var settingsPlayback: String { NSLocalizedString("settings.playback", bundle: .module, comment: "") }
+
+    /// Setting of the highest quality streamed to this device.
+    public static var settingsMaxQuality: String { NSLocalizedString("settings.maxQuality", bundle: .module, comment: "") }
+
+    /// Setting that starts the next episode when one ends.
+    public static var settingsAutoplayNext: String { NSLocalizedString("settings.autoplayNext", bundle: .module, comment: "") }
+
+    /// Settings section of the preferred audio and subtitles.
+    public static var settingsSubtitlesAudio: String { NSLocalizedString("settings.subtitlesAudio", bundle: .module, comment: "") }
+
+    /// Explanation under the Subtitles and Audio title.
+    public static var settingsSubtitlesAudioMessage: String { NSLocalizedString("settings.subtitlesAudioMessage", bundle: .module, comment: "") }
+
+    /// Setting of the audio languages in order of preference.
+    public static var settingsAudioLanguages: String { NSLocalizedString("settings.audioLanguages", bundle: .module, comment: "") }
+
+    /// Setting of the subtitle languages in order of preference.
+    public static var settingsSubtitleLanguages: String { NSLocalizedString("settings.subtitleLanguages", bundle: .module, comment: "") }
+
+    /// Hint under a field of preferred languages.
+    public static var settingsLanguagesHint: String { NSLocalizedString("settings.languagesHint", bundle: .module, comment: "") }
+
+    /// Setting of when subtitles show.
+    public static var settingsSubtitleMode: String { NSLocalizedString("settings.subtitleMode", bundle: .module, comment: "") }
+
+    /// Subtitle mode following the streams' default and forced flags.
+    public static var settingsSubtitleModeDefault: String { NSLocalizedString("settings.subtitleModeDefault", bundle: .module, comment: "") }
+
+    /// Subtitle mode showing subtitles always.
+    public static var settingsSubtitleModeAlways: String { NSLocalizedString("settings.subtitleModeAlways", bundle: .module, comment: "") }
+
+    /// Subtitle mode showing subtitles when the audio is not in a preferred language.
+    public static var settingsSubtitleModeForeign: String { NSLocalizedString("settings.subtitleModeForeign", bundle: .module, comment: "") }
+
+    /// Subtitle mode showing only forced subtitles.
+    public static var settingsSubtitleModeForced: String { NSLocalizedString("settings.subtitleModeForced", bundle: .module, comment: "") }
+
+    /// Subtitle mode never showing subtitles.
+    public static var settingsSubtitleModeNone: String { NSLocalizedString("settings.subtitleModeNone", bundle: .module, comment: "") }
+
+    /// Subtitle mode showing subtitles when the audio differs from the preferred languages, and forced ones otherwise.
+    public static var settingsSubtitleModeSmart: String { NSLocalizedString("settings.subtitleModeSmart", bundle: .module, comment: "") }
+
+    /// Explanation under the Sign-Ins title.
+    public static var settingsSignInsMessage: String { NSLocalizedString("settings.signInsMessage", bundle: .module, comment: "") }
+
+    /// Button that signs in with another account or to another server.
+    public static var settingsAddSignIn: String { NSLocalizedString("settings.addSignIn", bundle: .module, comment: "") }
+
+    /// Explanation under the Servers title in mavio.dev mode.
+    public static var settingsServersMavioMessage: String { NSLocalizedString("settings.serversMavioMessage", bundle: .module, comment: "") }
+
+    /// Explanation under the Servers title.
+    public static var settingsServersMessage: String { NSLocalizedString("settings.serversMessage", bundle: .module, comment: "") }
+
+    /// Button that copies a server's address.
+    public static var settingsCopyAddress: String { NSLocalizedString("settings.copyAddress", bundle: .module, comment: "") }
+
+    /// Settings section of the devices signed in as the user.
+    public static var settingsDevices: String { NSLocalizedString("settings.devices", bundle: .module, comment: "") }
+
+    /// Explanation under the Devices title; server is its name.
+    public static func settingsDevicesMessage(server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("settings.devicesMessage", bundle: .module, comment: ""), server)
+    }
+
+    /// Marks the session of this browser in the devices list.
+    public static var settingsThisBrowser: String { NSLocalizedString("settings.thisBrowser", bundle: .module, comment: "") }
+
+    /// Settings section of the signed-in account.
+    public static var settingsAccount: String { NSLocalizedString("settings.account", bundle: .module, comment: "") }
+
+    /// Explanation under the Account title in mavio.dev mode.
+    public static var settingsMavioAccountMessage: String { NSLocalizedString("settings.mavioAccountMessage", bundle: .module, comment: "") }
+
+    /// Explanation under the Account title on a standalone server.
+    public static func settingsStandaloneAccountMessage(name: String, server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("settings.standaloneAccountMessage", bundle: .module, comment: ""), name, server)
+    }
+
+    /// Button opening the account at mavio.dev.
+    public static var settingsManageAtMavio: String { NSLocalizedString("settings.manageAtMavio", bundle: .module, comment: "") }
+
+    /// Marks the user as the server's administrator.
+    public static var settingsAdmin: String { NSLocalizedString("settings.admin", bundle: .module, comment: "") }
 }
