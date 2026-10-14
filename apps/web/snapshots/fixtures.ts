@@ -82,9 +82,9 @@ function item(id: string, user: { progressMinutes?: number; played?: boolean } =
     indexNumber: i.episode ?? 0,
     images: [
       i.kind === "episode"
-        ? { id: `${id}-thumb`, kind: ImageKind.PRIMARY, width: 1920, height: 1080 }
-        : { id: `${id}-poster`, kind: ImageKind.PRIMARY, width: 1000, height: 1500 },
-      { id: `${id}-backdrop`, kind: ImageKind.BACKDROP, width: 1920, height: 1080 },
+        ? { id: `${id}-thumb`, kind: ImageKind.PRIMARY, width: 1920, height: 1080, url: `images/${id}-thumb` }
+        : { id: `${id}-poster`, kind: ImageKind.PRIMARY, width: 1000, height: 1500, url: `images/${id}-poster` },
+      { id: `${id}-backdrop`, kind: ImageKind.BACKDROP, width: 1920, height: 1080, url: `images/${id}-backdrop` },
     ],
     userData: {
       itemId: id,
