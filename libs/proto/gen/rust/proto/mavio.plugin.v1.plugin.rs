@@ -119,6 +119,10 @@ pub enum Capability {
     CAPABILITY_DOWNLOAD_CLIENT_PROVIDER = 24i32,
     /// Implements SubtitleTranslatorService.
     CAPABILITY_SUBTITLE_TRANSLATOR = 25i32,
+    /// Implements AiGatewayService.
+    CAPABILITY_AI_GATEWAY = 26i32,
+    /// Implements AgentSessionService.
+    CAPABILITY_AGENT_SESSION = 27i32,
 }
 impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -199,6 +203,12 @@ impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_SUBTITLE_TRANSLATOR`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const SubtitleTranslator: Self = Self::CAPABILITY_SUBTITLE_TRANSLATOR;
+    ///Idiomatic alias for [`Self::CAPABILITY_AI_GATEWAY`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const AiGateway: Self = Self::CAPABILITY_AI_GATEWAY;
+    ///Idiomatic alias for [`Self::CAPABILITY_AGENT_SESSION`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const AgentSession: Self = Self::CAPABILITY_AGENT_SESSION;
 }
 impl ::core::default::Default for Capability {
     fn default() -> Self {
@@ -238,6 +248,8 @@ impl ::buffa::Enumeration for Capability {
                 ::core::option::Option::Some(Self::CAPABILITY_DOWNLOAD_CLIENT_PROVIDER)
             }
             25i32 => ::core::option::Option::Some(Self::CAPABILITY_SUBTITLE_TRANSLATOR),
+            26i32 => ::core::option::Option::Some(Self::CAPABILITY_AI_GATEWAY),
+            27i32 => ::core::option::Option::Some(Self::CAPABILITY_AGENT_SESSION),
             _ => ::core::option::Option::None,
         }
     }
@@ -276,6 +288,8 @@ impl ::buffa::Enumeration for Capability {
                 "CAPABILITY_DOWNLOAD_CLIENT_PROVIDER"
             }
             Self::CAPABILITY_SUBTITLE_TRANSLATOR => "CAPABILITY_SUBTITLE_TRANSLATOR",
+            Self::CAPABILITY_AI_GATEWAY => "CAPABILITY_AI_GATEWAY",
+            Self::CAPABILITY_AGENT_SESSION => "CAPABILITY_AGENT_SESSION",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -358,6 +372,12 @@ impl ::buffa::Enumeration for Capability {
             "CAPABILITY_SUBTITLE_TRANSLATOR" => {
                 ::core::option::Option::Some(Self::CAPABILITY_SUBTITLE_TRANSLATOR)
             }
+            "CAPABILITY_AI_GATEWAY" => {
+                ::core::option::Option::Some(Self::CAPABILITY_AI_GATEWAY)
+            }
+            "CAPABILITY_AGENT_SESSION" => {
+                ::core::option::Option::Some(Self::CAPABILITY_AGENT_SESSION)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -389,6 +409,8 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_INDEXER_PROVIDER,
             Self::CAPABILITY_DOWNLOAD_CLIENT_PROVIDER,
             Self::CAPABILITY_SUBTITLE_TRANSLATOR,
+            Self::CAPABILITY_AI_GATEWAY,
+            Self::CAPABILITY_AGENT_SESSION,
         ]
     }
 }

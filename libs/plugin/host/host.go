@@ -47,6 +47,8 @@ type Plugin interface {
 	Indexers() pluginv1connect.IndexerProviderServiceClient
 	DownloadClients() pluginv1connect.DownloadClientProviderServiceClient
 	Translators() pluginv1connect.SubtitleTranslatorServiceClient
+	AI() pluginv1connect.AiGatewayServiceClient
+	Agents() pluginv1connect.AgentSessionServiceClient
 	// HTTP returns the handler of the plugin's HTTP routes, or nil without
 	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
 	HTTP() http.Handler

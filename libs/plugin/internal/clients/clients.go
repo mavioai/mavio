@@ -39,6 +39,8 @@ type Set struct {
 	indexers  pluginv1connect.IndexerProviderServiceClient
 	downloads pluginv1connect.DownloadClientProviderServiceClient
 	translate pluginv1connect.SubtitleTranslatorServiceClient
+	ai        pluginv1connect.AiGatewayServiceClient
+	agents    pluginv1connect.AgentSessionServiceClient
 }
 
 // New builds the clients for m over c.
@@ -115,6 +117,12 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_SUBTITLE_TRANSLATOR) {
 		s.translate = pluginv1connect.NewSubtitleTranslatorServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_AI_GATEWAY) {
+		s.ai = pluginv1connect.NewAiGatewayServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_AGENT_SESSION) {
+		s.agents = pluginv1connect.NewAgentSessionServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -198,3 +206,9 @@ func (s Set) DownloadClients() pluginv1connect.DownloadClientProviderServiceClie
 
 // Translators returns the SubtitleTranslatorService client, or nil.
 func (s Set) Translators() pluginv1connect.SubtitleTranslatorServiceClient { return s.translate }
+
+// AI returns the AiGatewayService client, or nil.
+func (s Set) AI() pluginv1connect.AiGatewayServiceClient { return s.ai }
+
+// Agents returns the AgentSessionService client, or nil.
+func (s Set) Agents() pluginv1connect.AgentSessionServiceClient { return s.agents }

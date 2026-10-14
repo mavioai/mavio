@@ -92,6 +92,10 @@ enum Capability {
   CAPABILITY_DOWNLOAD_CLIENT_PROVIDER = 24;
   // Implements SubtitleTranslatorService.
   CAPABILITY_SUBTITLE_TRANSLATOR = 25;
+  // Implements AiGatewayService.
+  CAPABILITY_AI_GATEWAY = 26;
+  // Implements AgentSessionService.
+  CAPABILITY_AGENT_SESSION = 27;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin

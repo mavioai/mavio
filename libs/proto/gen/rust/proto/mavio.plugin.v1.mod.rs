@@ -2,6 +2,7 @@
 
 include!("mavio.plugin.v1.metadata.rs");
 include!("mavio.plugin.v1.discovery.rs");
+include!("mavio.plugin.v1.ai.rs");
 include!("mavio.plugin.v1.device.rs");
 include!("mavio.plugin.v1.settings.rs");
 include!("mavio.plugin.v1.indexer.rs");
@@ -42,6 +43,7 @@ pub mod __buffa {
         use super::*;
         include!("mavio.plugin.v1.metadata.__view.rs");
         include!("mavio.plugin.v1.discovery.__view.rs");
+        include!("mavio.plugin.v1.ai.__view.rs");
         include!("mavio.plugin.v1.device.__view.rs");
         include!("mavio.plugin.v1.settings.__view.rs");
         include!("mavio.plugin.v1.indexer.__view.rs");
@@ -66,12 +68,14 @@ pub mod __buffa {
         pub mod oneof {
             #[allow(unused_imports)]
             use super::*;
+            include!("mavio.plugin.v1.ai.__view_oneof.rs");
             include!("mavio.plugin.v1.device.__view_oneof.rs");
         }
     }
     pub mod oneof {
         #[allow(unused_imports)]
         use super::*;
+        include!("mavio.plugin.v1.ai.__oneof.rs");
         include!("mavio.plugin.v1.device.__oneof.rs");
     }
 }
@@ -155,6 +159,174 @@ pub use self::__buffa::view::SearchTitlesRequestOwnedView;
 pub use self::__buffa::view::SearchTitlesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SearchTitlesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiProvidersRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiProvidersRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiProvidersResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiProvidersResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiProviderView;
+#[doc(inline)]
+pub use self::__buffa::view::AiProviderOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiModelsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiModelsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiModelsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiModelsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiModelView;
+#[doc(inline)]
+pub use self::__buffa::view::AiModelOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiModelCostView;
+#[doc(inline)]
+pub use self::__buffa::view::AiModelCostOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAiApiKeyRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAiApiKeyRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAiApiKeyResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAiApiKeyResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartAiLoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StartAiLoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartAiLoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StartAiLoginResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiLoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiLoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiLoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiLoginResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginEventView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginEventOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginInfoView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginInfoOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginLinkView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginLinkOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginUrlView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginUrlOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginDeviceCodeView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginDeviceCodeOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginPromptView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginPromptOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginOptionView;
+#[doc(inline)]
+pub use self::__buffa::view::AiLoginOptionOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerAiLoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerAiLoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerAiLoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerAiLoginResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelAiLoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelAiLoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelAiLoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelAiLoginResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LogoutAiRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::LogoutAiRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LogoutAiResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::LogoutAiResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CompleteAiRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CompleteAiRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiMessageView;
+#[doc(inline)]
+pub use self::__buffa::view::AiMessageOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CompleteAiResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CompleteAiResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AiUsageView;
+#[doc(inline)]
+pub use self::__buffa::view::AiUsageOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AgentSessionView;
+#[doc(inline)]
+pub use self::__buffa::view::AgentSessionOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AgentMessageView;
+#[doc(inline)]
+pub use self::__buffa::view::AgentMessageOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAgentSessionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAgentSessionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAgentSessionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAgentSessionResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAgentSessionsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAgentSessionsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAgentSessionsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAgentSessionsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAgentSessionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAgentSessionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAgentSessionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAgentSessionResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SendAgentMessageRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SendAgentMessageRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SendAgentMessageResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SendAgentMessageResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteAgentSessionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteAgentSessionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteAgentSessionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteAgentSessionResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::DeviceView;
 #[doc(inline)]

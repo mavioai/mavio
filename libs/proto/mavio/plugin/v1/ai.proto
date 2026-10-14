@@ -1,0 +1,394 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// AiGatewayService reaches AI model providers on the server's behalf. The
+// plugin keeps the providers' credentials, API keys and subscription
+// logins, lists their models and runs completions; the server and its
+// features (subtitle translation, assistants) never hold a credential.
+//
+// Failures carry Connect codes: resource exhausted when the provider rate
+// limits, unauthenticated when a provider has no usable credential or its
+// login expired, failed precondition for an unknown provider or model,
+// invalid argument for a request the model cannot take, unavailable when
+// the provider fails.
+service AiGatewayService {
+  // ListAiProviders lists the providers with how they authenticate and
+  // whether they can be used.
+  rpc ListAiProviders(ListAiProvidersRequest) returns (ListAiProvidersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListAiModels lists the providers' models.
+  rpc ListAiModels(ListAiModelsRequest) returns (ListAiModelsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SetAiApiKey stores a provider's API key, or removes it.
+  rpc SetAiApiKey(SetAiApiKeyRequest) returns (SetAiApiKeyResponse);
+  // StartAiLogin starts a provider's OAuth login, such as a subscription's
+  // sign in. The login runs in the plugin; GetAiLogin follows it and
+  // AnswerAiLogin answers what it asks.
+  rpc StartAiLogin(StartAiLoginRequest) returns (StartAiLoginResponse);
+  // GetAiLogin returns a login's state: what to show the user, what it
+  // asks and whether it ended.
+  rpc GetAiLogin(GetAiLoginRequest) returns (GetAiLoginResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // AnswerAiLogin answers a login's prompt.
+  rpc AnswerAiLogin(AnswerAiLoginRequest) returns (AnswerAiLoginResponse);
+  // CancelAiLogin abandons a login.
+  rpc CancelAiLogin(CancelAiLoginRequest) returns (CancelAiLoginResponse);
+  // LogoutAi removes a provider's stored credential.
+  rpc LogoutAi(LogoutAiRequest) returns (LogoutAiResponse);
+  // CompleteAi asks a model for one answer.
+  rpc CompleteAi(CompleteAiRequest) returns (CompleteAiResponse);
+}
+
+message ListAiProvidersRequest {}
+
+message ListAiProvidersResponse {
+  repeated AiProvider providers = 1;
+}
+
+// AiProvider is a model provider.
+message AiProvider {
+  // Stable, such as "anthropic" or "openai".
+  string id = 1;
+  string name = 2;
+  // Whether it takes an API key.
+  bool api_key = 3;
+  // Whether it has an OAuth login.
+  bool oauth = 4;
+  // Whether its OAuth login signs in to a subscription, such as Claude
+  // Pro or ChatGPT Plus, rather than to an API account.
+  bool subscription = 5;
+  // What its OAuth login is called, such as "Claude Pro/Max".
+  string oauth_label = 6;
+  // The credential stored for it.
+  AiCredential credential = 7;
+  // Whether it can be used: a credential is stored, or one is found
+  // elsewhere, such as in the plugin's environment.
+  bool available = 8;
+  // Where its credential comes from, such as "stored" or an environment
+  // variable's name.
+  string source = 9;
+  // Whether it is configured in the plugin's settings, such as an
+  // OpenAI-compatible server.
+  bool custom = 10;
+}
+
+// AiCredential is a kind of stored credential.
+enum AiCredential {
+  AI_CREDENTIAL_UNSPECIFIED = 0;
+  AI_CREDENTIAL_API_KEY = 1;
+  AI_CREDENTIAL_OAUTH = 2;
+}
+
+message ListAiModelsRequest {
+  // The provider whose models are listed; every provider's when empty.
+  string provider = 1;
+  // Only models of providers that can be used.
+  bool available = 2;
+}
+
+message ListAiModelsResponse {
+  repeated AiModel models = 1;
+}
+
+// AiModel is a provider's model.
+message AiModel {
+  string provider = 1;
+  // The provider's ID of the model.
+  string id = 2;
+  string name = 3;
+  // Whether it can think before answering.
+  bool reasoning = 4;
+  // Whether it takes images.
+  bool images = 5;
+  // Its context window and longest answer, in tokens.
+  int64 context_window = 6;
+  int64 max_output_tokens = 7;
+  // Its prices in US dollars per million tokens.
+  AiModelCost cost = 8;
+}
+
+// AiModelCost is a model's prices in US dollars per million tokens.
+message AiModelCost {
+  double input = 1;
+  double output = 2;
+  double cache_read = 3;
+  double cache_write = 4;
+}
+
+message SetAiApiKeyRequest {
+  string provider = 1 [(buf.validate.field).required = true];
+  // The key; empty removes the stored one.
+  string key = 2;
+}
+
+message SetAiApiKeyResponse {}
+
+message StartAiLoginRequest {
+  string provider = 1 [(buf.validate.field).required = true];
+}
+
+message StartAiLoginResponse {
+  // Identifies the login while it runs and briefly after it ends.
+  string login_id = 1;
+}
+
+message GetAiLoginRequest {
+  string login_id = 1 [(buf.validate.field).required = true];
+}
+
+message GetAiLoginResponse {
+  AiLoginState state = 1;
+  // What the login showed so far, oldest first.
+  repeated AiLoginEvent events = 2;
+  // What the login asks now, if anything.
+  AiLoginPrompt prompt = 3;
+  // Why it failed.
+  string error = 4;
+}
+
+// AiLoginState is a login's progress.
+enum AiLoginState {
+  AI_LOGIN_STATE_UNSPECIFIED = 0;
+  AI_LOGIN_STATE_RUNNING = 1;
+  AI_LOGIN_STATE_SUCCEEDED = 2;
+  AI_LOGIN_STATE_FAILED = 3;
+  AI_LOGIN_STATE_CANCELED = 4;
+}
+
+// AiLoginEvent is something a login shows the user.
+message AiLoginEvent {
+  oneof event {
+    // A message, with links.
+    AiLoginInfo info = 1;
+    // A page to open in a browser and sign in on.
+    AiLoginUrl url = 2;
+    // A code to enter on a page.
+    AiLoginDeviceCode device_code = 3;
+    // Progress, such as "Exchanging the code".
+    string progress = 4;
+  }
+}
+
+message AiLoginInfo {
+  string message = 1;
+  repeated AiLoginLink links = 2;
+}
+
+message AiLoginLink {
+  string url = 1;
+  string label = 2;
+}
+
+message AiLoginUrl {
+  string url = 1;
+  string instructions = 2;
+}
+
+message AiLoginDeviceCode {
+  string user_code = 1;
+  string verification_uri = 2;
+  int32 expires_in_seconds = 3;
+}
+
+// AiLoginPrompt is what a login asks the user.
+message AiLoginPrompt {
+  // Identifies the prompt among the login's.
+  string id = 1;
+  AiLoginPromptKind kind = 2;
+  string message = 3;
+  string placeholder = 4;
+  // The choices of a selection.
+  repeated AiLoginOption options = 5;
+}
+
+// AiLoginPromptKind is the kind of answer a prompt takes.
+enum AiLoginPromptKind {
+  AI_LOGIN_PROMPT_KIND_UNSPECIFIED = 0;
+  AI_LOGIN_PROMPT_KIND_TEXT = 1;
+  // Text not to show, such as a key.
+  AI_LOGIN_PROMPT_KIND_SECRET = 2;
+  // One of the options' IDs.
+  AI_LOGIN_PROMPT_KIND_SELECT = 3;
+  // The code, or the address the browser was sent to, after signing in on
+  // a page whose redirect cannot reach the plugin.
+  AI_LOGIN_PROMPT_KIND_MANUAL_CODE = 4;
+}
+
+message AiLoginOption {
+  string id = 1;
+  string label = 2;
+  string description = 3;
+}
+
+message AnswerAiLoginRequest {
+  string login_id = 1 [(buf.validate.field).required = true];
+  string prompt_id = 2 [(buf.validate.field).required = true];
+  string value = 3;
+}
+
+message AnswerAiLoginResponse {}
+
+message CancelAiLoginRequest {
+  string login_id = 1 [(buf.validate.field).required = true];
+}
+
+message CancelAiLoginResponse {}
+
+message LogoutAiRequest {
+  string provider = 1 [(buf.validate.field).required = true];
+}
+
+message LogoutAiResponse {}
+
+message CompleteAiRequest {
+  string provider = 1 [(buf.validate.field).required = true];
+  string model = 2 [(buf.validate.field).required = true];
+  // The instructions.
+  string system = 3;
+  // The conversation so far, oldest first, ending with the user's.
+  repeated AiMessage messages = 4 [(buf.validate.field).repeated.min_items = 1];
+  // A JSON schema of an object the answer must be, which the model
+  // returns through a tool it is made to call; the answer is then in
+  // output_json.
+  string output_schema = 5;
+  AiThinking thinking = 6;
+  // The longest answer, in tokens; the model's when 0.
+  int32 max_tokens = 7;
+  // The sampling temperature, if set.
+  double temperature = 8;
+}
+
+// AiMessage is a message of a conversation with a model.
+message AiMessage {
+  AiRole role = 1;
+  string text = 2;
+}
+
+// AiRole is who wrote a message.
+enum AiRole {
+  AI_ROLE_UNSPECIFIED = 0;
+  AI_ROLE_USER = 1;
+  AI_ROLE_ASSISTANT = 2;
+}
+
+// AiThinking is how much a reasoning model thinks before answering.
+enum AiThinking {
+  // The model's default.
+  AI_THINKING_UNSPECIFIED = 0;
+  AI_THINKING_OFF = 1;
+  AI_THINKING_MINIMAL = 2;
+  AI_THINKING_LOW = 3;
+  AI_THINKING_MEDIUM = 4;
+  AI_THINKING_HIGH = 5;
+}
+
+message CompleteAiResponse {
+  // The answer's text.
+  string text = 1;
+  // The answer as JSON, when the request gave an output schema.
+  string output_json = 2;
+  AiUsage usage = 3;
+  // Why the model stopped, such as "stop", "length" or "toolUse".
+  string stop_reason = 4;
+}
+
+// AiUsage is what a request used.
+message AiUsage {
+  int64 input_tokens = 1;
+  int64 output_tokens = 2;
+  int64 cache_read_tokens = 3;
+  int64 cache_write_tokens = 4;
+  // What it cost in US dollars, from the model's prices.
+  double cost = 5;
+}
+
+// AgentSessionService keeps conversations with a model, durably: each
+// message and answer is stored before it is returned, and a conversation
+// interrupted by a restart continues.
+service AgentSessionService {
+  // CreateAgentSession starts a conversation.
+  rpc CreateAgentSession(CreateAgentSessionRequest) returns (CreateAgentSessionResponse);
+  // ListAgentSessions lists the conversations, newest first.
+  rpc ListAgentSessions(ListAgentSessionsRequest) returns (ListAgentSessionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetAgentSession returns a conversation with its messages.
+  rpc GetAgentSession(GetAgentSessionRequest) returns (GetAgentSessionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SendAgentMessage sends a message and returns the answer.
+  rpc SendAgentMessage(SendAgentMessageRequest) returns (SendAgentMessageResponse);
+  // DeleteAgentSession deletes a conversation.
+  rpc DeleteAgentSession(DeleteAgentSessionRequest) returns (DeleteAgentSessionResponse);
+}
+
+// AgentSession is a conversation with a model.
+message AgentSession {
+  string id = 1;
+  string title = 2;
+  string provider = 3;
+  string model = 4;
+  google.protobuf.Timestamp created = 5;
+  google.protobuf.Timestamp updated = 6;
+  // What its messages used.
+  AiUsage usage = 7;
+}
+
+// AgentMessage is a message of a conversation.
+message AgentMessage {
+  AiRole role = 1;
+  string text = 2;
+  google.protobuf.Timestamp time = 3;
+}
+
+message CreateAgentSessionRequest {
+  string provider = 1 [(buf.validate.field).required = true];
+  string model = 2 [(buf.validate.field).required = true];
+  // The instructions the model follows.
+  string instructions = 3;
+  string title = 4;
+}
+
+message CreateAgentSessionResponse {
+  AgentSession session = 1;
+}
+
+message ListAgentSessionsRequest {}
+
+message ListAgentSessionsResponse {
+  repeated AgentSession sessions = 1;
+}
+
+message GetAgentSessionRequest {
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message GetAgentSessionResponse {
+  AgentSession session = 1;
+  repeated AgentMessage messages = 2;
+}
+
+message SendAgentMessageRequest {
+  string session_id = 1 [(buf.validate.field).required = true];
+  string text = 2 [(buf.validate.field).required = true];
+  // Makes a retried message the same message instead of a second one.
+  string request_id = 3;
+}
+
+message SendAgentMessageResponse {
+  AgentMessage answer = 1;
+  AiUsage usage = 2;
+}
+
+message DeleteAgentSessionRequest {
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message DeleteAgentSessionResponse {}
