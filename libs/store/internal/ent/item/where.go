@@ -3867,6 +3867,29 @@ func HasSubtitleSearchAttemptsWith(preds ...predicate.SubtitleSearchAttempt) pre
 	})
 }
 
+// HasSubtitleWanted applies the HasEdge predicate on the "subtitle_wanted" edge.
+func HasSubtitleWanted() predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, SubtitleWantedTable, SubtitleWantedColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSubtitleWantedWith applies the HasEdge predicate on the "subtitle_wanted" edge with a given conditions (other predicates).
+func HasSubtitleWantedWith(preds ...predicate.SubtitleWanted) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		step := newSubtitleWantedStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Item) predicate.Item {
 	return predicate.Item(sql.AndPredicates(predicates...))

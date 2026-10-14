@@ -46,6 +46,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlewanted"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -888,6 +889,12 @@ func init() {
 	subtitlesearchattemptDescID := subtitlesearchattemptFields[0].Descriptor()
 	// subtitlesearchattempt.DefaultID holds the default value on creation for the id field.
 	subtitlesearchattempt.DefaultID = subtitlesearchattemptDescID.Default.(func() core.ID)
+	subtitlewantedFields := schema.SubtitleWanted{}.Fields()
+	_ = subtitlewantedFields
+	// subtitlewantedDescID is the schema descriptor for id field.
+	subtitlewantedDescID := subtitlewantedFields[0].Descriptor()
+	// subtitlewanted.DefaultID holds the default value on creation for the id field.
+	subtitlewanted.DefaultID = subtitlewantedDescID.Default.(func() core.ID)
 	trickplayFields := schema.Trickplay{}.Fields()
 	_ = trickplayFields
 	// trickplayDescBandwidth is the schema descriptor for bandwidth field.

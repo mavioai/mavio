@@ -25,6 +25,9 @@ const (
 	// WantedSearchIntervalMovie and WantedSearchInterval.
 	JobWantedMovies   = "subtitles.wanted_movies"
 	JobWantedEpisodes = "subtitles.wanted_episodes"
+	// JobWantedRefresh finds anew what every movie and episode is
+	// missing, after profiles, their assignments or the settings change.
+	JobWantedRefresh = "subtitles.wanted_refresh"
 	// JobUpgrade searches for better subtitles than those downloaded
 	// lately, every UpgradeInterval.
 	JobUpgrade = "subtitles.upgrade"
@@ -146,6 +149,7 @@ func (r *Runtime) Handlers() map[string]library.Handler {
 			func(ctx context.Context) error { return r.SearchWanted(ctx, core.KindMovie) }),
 		JobWantedEpisodes: r.recurring(JobWantedEpisodes, func(s core.SubtitleSettings) time.Duration { return s.WantedSearchInterval },
 			func(ctx context.Context) error { return r.SearchWanted(ctx, core.KindEpisode) }),
+		JobWantedRefresh: r.recurring(JobWantedRefresh, func(core.SubtitleSettings) time.Duration { return 0 }, r.RefreshWanted),
 		JobUpgrade: r.recurring(JobUpgrade, func(s core.SubtitleSettings) time.Duration {
 			if !s.Upgrade {
 				return 0
@@ -205,7 +209,9 @@ func SearchJob(itemID core.ID, at time.Time) core.Job {
 // must not read the settings through Settings.
 func (r *Runtime) Schedule(ctx context.Context, s core.SubtitleSettings) error {
 	now := r.now()
-	var jobs []core.Job
+	// What is wanted depends on the settings; it is found anew at
+	// startup too, for what changed while the server was stopped.
+	jobs := []core.Job{RunJob(JobWantedRefresh, now)}
 	if s.WantedSearchIntervalMovie > 0 {
 		jobs = append(jobs, scheduledJob(JobWantedMovies, now.Add(s.WantedSearchIntervalMovie), true))
 	}

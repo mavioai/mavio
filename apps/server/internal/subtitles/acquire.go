@@ -24,6 +24,9 @@ func (r *Runtime) SearchItem(ctx context.Context, itemID core.ID) ([]core.Subtit
 		return nil, err
 	}
 	missing := t.missing(&s)
+	if err := r.keepWanted(ctx, t, missing); err != nil {
+		return nil, err
+	}
 	if len(missing) == 0 {
 		return nil, nil
 	}
@@ -192,11 +195,13 @@ func percent(score, maxScore int) int {
 	return score * 100 / maxScore
 }
 
-// record adds a history event and publishes it as an activity.
+// record adds a history event, publishes it as an activity and finds
+// anew what the item is missing.
 func (r *Runtime) record(ctx context.Context, t *target, e *core.SubtitleHistoryEvent) error {
 	if err := r.Store.SubtitleHistory().Add(ctx, *e); err != nil {
 		return fmt.Errorf("record subtitle history: %w", err)
 	}
+	r.updateWanted(ctx, t.item.ID)
 	attrs := map[string]string{"language": e.Language.String(), "action": string(e.Action), "path": e.Path}
 	if e.Provider != "" {
 		attrs["provider"], attrs["subtitle"] = e.Provider, e.SubtitleID
@@ -223,6 +228,8 @@ func titleOf(a core.SubtitleAction) string {
 		return "Synchronized a subtitle of"
 	case core.SubtitleDeleted:
 		return "Deleted a subtitle of"
+	case core.SubtitleExtracted:
+		return "Extracted a subtitle of"
 	}
 	return "Changed a subtitle of"
 }

@@ -315,3 +315,78 @@ func TestSubtitleSearchAttempts(t *testing.T) {
 		}
 	})
 }
+
+func TestSubtitleWanted(t *testing.T) {
+	eachBackend(t, func(t *testing.T, s *store.Store) {
+		ctx := t.Context()
+		lib := newLibrary(t, s, "/media")
+		series, episodes := showTree(t, s, lib)
+		heat, alien := newItem(lib, core.KindMovie, "Heat"), newItem(lib, core.KindMovie, "Alien")
+		upsert(t, s, heat, alien)
+		at := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
+		en, fr := core.SubtitleLanguage{Language: "en"}, core.SubtitleLanguage{Language: "fr", Forced: true}
+		repo := s.SubtitleWanted()
+		wanted := []core.SubtitleWanted{
+			{ItemID: heat.ID, Kind: core.KindMovie, LibraryID: lib.ID, Path: "/media/Heat.mkv", Missing: []core.SubtitleLanguage{en}, Updated: at},
+			{ItemID: alien.ID, Kind: core.KindMovie, LibraryID: lib.ID, Path: "/media/Alien.mkv", Missing: []core.SubtitleLanguage{en, fr}, Updated: at},
+			{ItemID: episodes[0].ID, Kind: core.KindEpisode, LibraryID: lib.ID, ParentID: series.ID, Path: "/media/e.mkv", Missing: []core.SubtitleLanguage{fr}, Updated: at},
+		}
+		for _, w := range wanted {
+			if err := repo.Put(ctx, w); err != nil {
+				t.Fatal(err)
+			}
+		}
+		list := func(kind core.ItemKind) []core.SubtitleWanted {
+			t.Helper()
+			page, err := repo.List(ctx, core.SubtitleWantedQuery{Kind: kind})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if page.Total != len(page.Items) {
+				t.Errorf("List(%s).Total = %d, want = %d", kind, page.Total, len(page.Items))
+			}
+			return page.Items
+		}
+		if got, want := list(core.KindMovie), []core.SubtitleWanted{wanted[1], wanted[0]}; !reflect.DeepEqual(got, want) {
+			t.Errorf("List(movies) = %+v, want = %+v", got, want)
+		}
+		if got := list(core.KindEpisode); !reflect.DeepEqual(got, wanted[2:]) {
+			t.Errorf("List(episodes) = %+v, want = %+v", got, wanted[2:])
+		}
+
+		// Put replaces an entry, and deletes it when nothing is missing.
+		wanted[1].Missing, wanted[1].Updated = []core.SubtitleLanguage{fr}, at.Add(time.Hour)
+		wanted[0].Missing = nil
+		for _, w := range wanted[:2] {
+			if err := repo.Put(ctx, w); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if got := list(core.KindMovie); !reflect.DeepEqual(got, wanted[1:2]) {
+			t.Errorf("List after Put = %+v, want = %+v", got, wanted[1:2])
+		}
+
+		// Missing items are left out until found again; deleted ones
+		// take their entries with them.
+		alien.MissingSince = &at
+		upsert(t, s, alien)
+		if got := list(core.KindMovie); len(got) != 0 {
+			t.Errorf("List with Alien missing = %+v, want none", got)
+		}
+		if err := s.Items().Delete(ctx, alien.ID, episodes[0].ID); err != nil {
+			t.Fatal(err)
+		}
+		alien.MissingSince = nil
+		upsert(t, s, alien)
+		if got := list(core.KindMovie); len(got) != 0 {
+			t.Errorf("List after deleting Alien = %+v, want none", got)
+		}
+		if got := list(core.KindEpisode); len(got) != 0 {
+			t.Errorf("List after deleting the episode = %+v, want none", got)
+		}
+		bad := core.SubtitleWanted{ItemID: series.ID, Kind: core.KindSeries, LibraryID: lib.ID, Missing: []core.SubtitleLanguage{en}, Updated: at}
+		if err := repo.Put(ctx, bad); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("Put of a series: %v, want ErrInvalid", err)
+		}
+	})
+}

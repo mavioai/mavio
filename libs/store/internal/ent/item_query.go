@@ -33,6 +33,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlehistoryevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlewanted"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -73,6 +74,7 @@ type ItemQuery struct {
 	withSubtitleHistory        *SubtitleHistoryEventQuery
 	withSubtitleBlocklist      *SubtitleBlocklistEntryQuery
 	withSubtitleSearchAttempts *SubtitleSearchAttemptQuery
+	withSubtitleWanted         *SubtitleWantedQuery
 	modifiers                  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -704,6 +706,28 @@ func (_q *ItemQuery) QuerySubtitleSearchAttempts() *SubtitleSearchAttemptQuery {
 	return query
 }
 
+// QuerySubtitleWanted chains the current query on the "subtitle_wanted" edge.
+func (_q *ItemQuery) QuerySubtitleWanted() *SubtitleWantedQuery {
+	query := (&SubtitleWantedClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, selector),
+			sqlgraph.To(subtitlewanted.Table, subtitlewanted.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, item.SubtitleWantedTable, item.SubtitleWantedColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Item entity from the query.
 // Returns a *NotFoundError when no Item was found.
 func (_q *ItemQuery) First(ctx context.Context) (*Item, error) {
@@ -923,6 +947,7 @@ func (_q *ItemQuery) Clone() *ItemQuery {
 		withSubtitleHistory:        _q.withSubtitleHistory.Clone(),
 		withSubtitleBlocklist:      _q.withSubtitleBlocklist.Clone(),
 		withSubtitleSearchAttempts: _q.withSubtitleSearchAttempts.Clone(),
+		withSubtitleWanted:         _q.withSubtitleWanted.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -1227,6 +1252,17 @@ func (_q *ItemQuery) WithSubtitleSearchAttempts(opts ...func(*SubtitleSearchAtte
 	return _q
 }
 
+// WithSubtitleWanted tells the query-builder to eager-load the nodes that are connected to
+// the "subtitle_wanted" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ItemQuery) WithSubtitleWanted(opts ...func(*SubtitleWantedQuery)) *ItemQuery {
+	query := (&SubtitleWantedClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSubtitleWanted = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -1305,7 +1341,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	var (
 		nodes       = []*Item{}
 		_spec       = _q.querySpec()
-		loadedTypes = [27]bool{
+		loadedTypes = [28]bool{
 			_q.withLibrary != nil,
 			_q.withParent != nil,
 			_q.withChildren != nil,
@@ -1333,6 +1369,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 			_q.withSubtitleHistory != nil,
 			_q.withSubtitleBlocklist != nil,
 			_q.withSubtitleSearchAttempts != nil,
+			_q.withSubtitleWanted != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -1540,6 +1577,12 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 			func(n *Item, e *SubtitleSearchAttempt) {
 				n.Edges.SubtitleSearchAttempts = append(n.Edges.SubtitleSearchAttempts, e)
 			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSubtitleWanted; query != nil {
+		if err := _q.loadSubtitleWanted(ctx, query, nodes, nil,
+			func(n *Item, e *SubtitleWanted) { n.Edges.SubtitleWanted = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -2352,6 +2395,33 @@ func (_q *ItemQuery) loadSubtitleSearchAttempts(ctx context.Context, query *Subt
 	}
 	query.Where(predicate.SubtitleSearchAttempt(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(item.SubtitleSearchAttemptsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ItemID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "item_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ItemQuery) loadSubtitleWanted(ctx context.Context, query *SubtitleWantedQuery, nodes []*Item, init func(*Item), assign func(*Item, *SubtitleWanted)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*Item)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(subtitlewanted.FieldItemID)
+	}
+	query.Where(predicate.SubtitleWanted(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(item.SubtitleWantedColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

@@ -220,6 +220,82 @@ func TestSearchItemMinimumScore(t *testing.T) {
 	}
 }
 
+func TestWantedKept(t *testing.T) {
+	e := newEnv(t)
+	missing := func() []string {
+		t.Helper()
+		wanted, total, err := e.rt.Wanted(e.ctx, core.KindMovie, 0, 0)
+		if err != nil || total != len(wanted) {
+			t.Fatalf("Wanted = %+v, %d, %v", wanted, total, err)
+		}
+		var out []string
+		for _, w := range wanted {
+			for _, l := range w.Missing {
+				out = append(out, w.Item.Name+" "+l.String())
+			}
+		}
+		return out
+	}
+	if got := missing(); len(got) != 0 {
+		t.Errorf("Wanted before a refresh = %q, want none", got)
+	}
+	if err := e.rt.RefreshWanted(e.ctx); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := missing(), []string{"The Matrix fr"}; !slices.Equal(got, want) {
+		t.Errorf("Wanted after a refresh = %q, want = %q", got, want)
+	}
+
+	// Subtitles uploaded, deleted or extracted change it at once.
+	p, err := e.rt.Upload(e.ctx, e.movie.ID, []byte("1\n00:00:01,000 --> 00:00:02,000\nSalut\n"), "srt", core.SubtitleLanguage{Language: "fr"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := missing(); len(got) != 0 {
+		t.Errorf("Wanted after an upload = %q, want none", got)
+	}
+	if err := e.rt.Delete(e.ctx, e.movie.ID, p); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := missing(), []string{"The Matrix fr"}; !slices.Equal(got, want) {
+		t.Errorf("Wanted after a deletion = %q, want = %q", got, want)
+	}
+
+	// So does a file a scan found.
+	src, err := e.db.MediaSources().ListForItem(e.ctx, e.movie.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	src[0].Streams = append(src[0].Streams, core.MediaStream{
+		Index: 3, Kind: core.StreamSubtitle, Codec: "subrip", Language: "fre", ExternalPath: filepath.Join(e.dir, "The Matrix (1999).fr.srt"),
+	})
+	if err := e.db.MediaSources().Replace(e.ctx, e.movie.ID, src); err != nil {
+		t.Fatal(err)
+	}
+	e.rt.Sidecars(e.ctx, e.lib, []core.ID{e.movie.ID})
+	if got := missing(); len(got) != 0 {
+		t.Errorf("Wanted after a scan found French = %q, want none", got)
+	}
+
+	// Profiles and settings changing take a refresh.
+	e.s.UseEmbedded = false
+	if err := e.rt.RefreshWanted(e.ctx); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := missing(), []string{"The Matrix en"}; !slices.Equal(got, want) {
+		t.Errorf("Wanted without embedded subtitles = %q, want = %q", got, want)
+	}
+	if err := e.db.SubtitleProfileAssignments().Delete(e.ctx, e.lib.ID); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.rt.RefreshWanted(e.ctx); err != nil {
+		t.Fatal(err)
+	}
+	if got := missing(); len(got) != 0 {
+		t.Errorf("Wanted without a profile = %q, want none", got)
+	}
+}
+
 func TestSearchItemBadSubtitle(t *testing.T) {
 	e := newEnv(t)
 	e.plugin.found = []*pluginv1.RemoteSubtitle{

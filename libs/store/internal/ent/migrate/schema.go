@@ -1420,6 +1420,38 @@ var (
 			},
 		},
 	}
+	// SubtitleWantedColumns holds the columns for the "subtitle_wanted" table.
+	SubtitleWantedColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeString},
+		{Name: "library_id", Type: field.TypeUUID},
+		{Name: "parent_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "path", Type: field.TypeString, Size: 2147483647},
+		{Name: "missing", Type: field.TypeJSON},
+		{Name: "updated", Type: field.TypeTime},
+		{Name: "item_id", Type: field.TypeUUID, Unique: true},
+	}
+	// SubtitleWantedTable holds the schema information for the "subtitle_wanted" table.
+	SubtitleWantedTable = &schema.Table{
+		Name:       "subtitle_wanted",
+		Columns:    SubtitleWantedColumns,
+		PrimaryKey: []*schema.Column{SubtitleWantedColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subtitle_wanted_items_subtitle_wanted",
+				Columns:    []*schema.Column{SubtitleWantedColumns[7]},
+				RefColumns: []*schema.Column{ItemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subtitlewanted_kind_library_id_path",
+				Unique:  false,
+				Columns: []*schema.Column{SubtitleWantedColumns[1], SubtitleWantedColumns[2], SubtitleWantedColumns[4]},
+			},
+		},
+	}
 	// TrickplayColumns holds the columns for the "trickplay" table.
 	TrickplayColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1588,6 +1620,7 @@ var (
 		SubtitleProfilesTable,
 		SubtitleProfileAssignmentsTable,
 		SubtitleSearchAttemptsTable,
+		SubtitleWantedTable,
 		TrickplayTable,
 		UsersTable,
 		UserDataTable,
@@ -1747,6 +1780,10 @@ func init() {
 	SubtitleSearchAttemptsTable.ForeignKeys[0].RefTable = ItemsTable
 	SubtitleSearchAttemptsTable.Annotation = &entsql.Annotation{
 		Table: "subtitle_search_attempts",
+	}
+	SubtitleWantedTable.ForeignKeys[0].RefTable = ItemsTable
+	SubtitleWantedTable.Annotation = &entsql.Annotation{
+		Table: "subtitle_wanted",
 	}
 	TrickplayTable.ForeignKeys[0].RefTable = ItemsTable
 	TrickplayTable.Annotation = &entsql.Annotation{

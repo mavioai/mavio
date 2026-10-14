@@ -90,6 +90,8 @@ type Tx struct {
 	SubtitleProfileAssignment *SubtitleProfileAssignmentClient
 	// SubtitleSearchAttempt is the client for interacting with the SubtitleSearchAttempt builders.
 	SubtitleSearchAttempt *SubtitleSearchAttemptClient
+	// SubtitleWanted is the client for interacting with the SubtitleWanted builders.
+	SubtitleWanted *SubtitleWantedClient
 	// Trickplay is the client for interacting with the Trickplay builders.
 	Trickplay *TrickplayClient
 	// User is the client for interacting with the User builders.
@@ -268,6 +270,7 @@ func (tx *Tx) init() {
 	tx.SubtitleProfile = NewSubtitleProfileClient(tx.config)
 	tx.SubtitleProfileAssignment = NewSubtitleProfileAssignmentClient(tx.config)
 	tx.SubtitleSearchAttempt = NewSubtitleSearchAttemptClient(tx.config)
+	tx.SubtitleWanted = NewSubtitleWantedClient(tx.config)
 	tx.Trickplay = NewTrickplayClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserData = NewUserDataClient(tx.config)

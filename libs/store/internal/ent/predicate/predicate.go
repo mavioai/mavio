@@ -123,6 +123,9 @@ type SubtitleProfileAssignment func(*sql.Selector)
 // SubtitleSearchAttempt is the predicate function for subtitlesearchattempt builders.
 type SubtitleSearchAttempt func(*sql.Selector)
 
+// SubtitleWanted is the predicate function for subtitlewanted builders.
+type SubtitleWanted func(*sql.Selector)
+
 // Trickplay is the predicate function for trickplay builders.
 type Trickplay func(*sql.Selector)
 

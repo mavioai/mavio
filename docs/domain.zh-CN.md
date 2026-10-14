@@ -51,6 +51,7 @@ erDiagram
 | `Issue` / `IssueComment` | 用户就某个条目报告的问题及其讨论（§13.7） |
 | `SubtitleProfile` / `SubtitleProfileAssignment` | 电影与单集想要的字幕，以及它被指派到的媒体库、电影与剧集（§14） |
 | `SubtitleHistoryEvent` / `SubtitleBlocklistEntry` / `SubtitleSearchAttempt` | 字幕发生的事情、不再下载的字幕、某种语言的失败搜索（§14） |
+| `SubtitleWanted` | 电影或单集缺少的字幕，为缺字幕列表保存（§14） |
 | `DisplayPreferences` | 用户对某个客户端如何显示某个视图的设置 |
 
 ---
@@ -275,6 +276,7 @@ erDiagram
 | `SubtitleHistoryRepository` | `Add`、`List`（分页，最新在前，可按条目或其剧集、动作与时间筛选）、`Purge` 某时间之前的事件 |
 | `SubtitleBlocklistRepository` | `Add`、`List`（分页，最新在前，某条目的或全部）、`Delete`、`Clear` |
 | `SubtitleSearchAttemptRepository` | 按语言 `List` 某条目的记录、`Record` 一次失败搜索（保留首次时间，替换最近时间） |
+| `SubtitleWantedRepository` | `Put` 某条目的行（无缺少时删除）、`Delete`、按媒体库与路径 `List` 现存条目中电影或单集的行 |
 | `BlockedTitleRepository` | 按类型与 TMDB ID `Get`、`List`（分页，最新在前，按标题搜索，可只列手动或按标签阻止的作品）、`Add`（已在阻止列表时返回 `ErrConflict`）、`Delete`、`DeleteTagged`（删除按标签阻止的作品）；删除阻止作品的用户不会删除其条目 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
@@ -400,6 +402,7 @@ erDiagram
 * `SubtitleHistoryEvent` 记录电影或单集（单集以其剧集为 `ParentID`）的某个字幕被 `deleted`、`downloaded`、从 `manual` 手动搜索下载、`upgraded`、`uploaded`、`synced` 或 `extracted`，对应 Bazarr 的历史动作：其语言、`Provider` 与提供者的 `SubtitleID`、`Score` 与满分 `MaxScore`（未评分时为 0）、字幕与视频的路径 `Path` 和 `VideoPath`、描述 `Description`、它匹配（`Matched`）与未匹配（`NotMatched`）的视频属性，以及升级时所替换下载的事件（`UpgradedFrom`）。
 * `SubtitleBlocklistEntry` 是某部电影或某一集不再下载的字幕：其提供者、字幕 ID、语言与被列入黑名单的原因。
 * `SubtitleSearchAttempt` 为某部电影或某一集的某种语言保存首次（`First`）与最近（`Last`）失败的搜索，对应 Bazarr 的 `failedAttempts`，供自适应搜索使用。
+* `SubtitleWanted` 保存某部电影或某一集缺少的字幕（`Missing`），以及其类型、媒体库、所属剧集（`ParentID`）、视频路径与求出时间（`Updated`），对应 Bazarr 的 `missing_subtitles` 列；删除条目时一并删除。
 * 删除条目会删除其字幕历史、黑名单条目与失败尝试。
 
 ### 14.3 设置

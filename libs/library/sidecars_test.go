@@ -1,6 +1,7 @@
 package library
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -67,10 +68,15 @@ func TestScanSidecarSubtitles(t *testing.T) {
 	// A subtitle added later is found without probing the unchanged video.
 	src[0].ProbedAt = f.clock
 	f.store.sources[up.ID] = src
+	var told []core.ID
+	f.sc.OnSidecars = func(_ context.Context, _ core.Library, ids []core.ID) { told = append(told, ids...) }
 	tree(t, f.root, "Up (2009)/Up (2009).fr.srt")
 	touchLater(t, filepath.Join(f.root, "Up (2009)"), time.Minute)
 	if st := f.scan(); st.Probes != 0 {
 		t.Errorf("probes = %d, want none for a new subtitle", st.Probes)
+	}
+	if !slices.Equal(told, []core.ID{up.ID}) {
+		t.Errorf("OnSidecars told of %v, want = %v", told, up.ID)
 	}
 	if got := describe(f.store.sources[up.ID][0].Streams); len(got) != 6 || !slices.Contains(got, "1 Up (2009).fr.srt subrip fre") {
 		t.Errorf("after adding a subtitle = %q", got)

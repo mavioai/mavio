@@ -52,6 +52,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlewanted"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -106,6 +107,7 @@ const (
 	TypeSubtitleProfile           = "SubtitleProfile"
 	TypeSubtitleProfileAssignment = "SubtitleProfileAssignment"
 	TypeSubtitleSearchAttempt     = "SubtitleSearchAttempt"
+	TypeSubtitleWanted            = "SubtitleWanted"
 	TypeTrickplay                 = "Trickplay"
 	TypeUser                      = "User"
 	TypeUserData                  = "UserData"
@@ -14830,6 +14832,8 @@ type ItemMutation struct {
 	subtitle_search_attempts        map[core.ID]struct{}
 	removedsubtitle_search_attempts map[core.ID]struct{}
 	clearedsubtitle_search_attempts bool
+	subtitle_wanted                 *core.ID
+	clearedsubtitle_wanted          bool
 	done                            bool
 	oldValue                        func(context.Context) (*Item, error)
 	predicates                      []predicate.Item
@@ -19268,6 +19272,45 @@ func (m *ItemMutation) ResetSubtitleSearchAttempts() {
 	m.removedsubtitle_search_attempts = nil
 }
 
+// SetSubtitleWantedID sets the "subtitle_wanted" edge to the SubtitleWanted entity by id.
+func (m *ItemMutation) SetSubtitleWantedID(id core.ID) {
+	m.subtitle_wanted = &id
+}
+
+// ClearSubtitleWanted clears the "subtitle_wanted" edge to the SubtitleWanted entity.
+func (m *ItemMutation) ClearSubtitleWanted() {
+	m.clearedsubtitle_wanted = true
+}
+
+// SubtitleWantedCleared reports if the "subtitle_wanted" edge to the SubtitleWanted entity was cleared.
+func (m *ItemMutation) SubtitleWantedCleared() bool {
+	return m.clearedsubtitle_wanted
+}
+
+// SubtitleWantedID returns the "subtitle_wanted" edge ID in the mutation.
+func (m *ItemMutation) SubtitleWantedID() (id core.ID, exists bool) {
+	if m.subtitle_wanted != nil {
+		return *m.subtitle_wanted, true
+	}
+	return
+}
+
+// SubtitleWantedIDs returns the "subtitle_wanted" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SubtitleWantedID instead. It exists only for internal usage by the builders.
+func (m *ItemMutation) SubtitleWantedIDs() (ids []core.ID) {
+	if id := m.subtitle_wanted; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSubtitleWanted resets all changes to the "subtitle_wanted" edge.
+func (m *ItemMutation) ResetSubtitleWanted() {
+	m.subtitle_wanted = nil
+	m.clearedsubtitle_wanted = false
+}
+
 // Where appends a list predicates to the ItemMutation builder.
 func (m *ItemMutation) Where(ps ...predicate.Item) {
 	m.predicates = append(m.predicates, ps...)
@@ -20798,7 +20841,7 @@ func (m *ItemMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ItemMutation) AddedEdges() []string {
-	edges := make([]string, 0, 27)
+	edges := make([]string, 0, 28)
 	if m.library != nil {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -20879,6 +20922,9 @@ func (m *ItemMutation) AddedEdges() []string {
 	}
 	if m.subtitle_search_attempts != nil {
 		edges = append(edges, item.EdgeSubtitleSearchAttempts)
+	}
+	if m.subtitle_wanted != nil {
+		edges = append(edges, item.EdgeSubtitleWanted)
 	}
 	return edges
 }
@@ -21037,13 +21083,17 @@ func (m *ItemMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case item.EdgeSubtitleWanted:
+		if id := m.subtitle_wanted; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ItemMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 27)
+	edges := make([]string, 0, 28)
 	if m.removedchildren != nil {
 		edges = append(edges, item.EdgeChildren)
 	}
@@ -21246,7 +21296,7 @@ func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ItemMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 27)
+	edges := make([]string, 0, 28)
 	if m.clearedlibrary {
 		edges = append(edges, item.EdgeLibrary)
 	}
@@ -21328,6 +21378,9 @@ func (m *ItemMutation) ClearedEdges() []string {
 	if m.clearedsubtitle_search_attempts {
 		edges = append(edges, item.EdgeSubtitleSearchAttempts)
 	}
+	if m.clearedsubtitle_wanted {
+		edges = append(edges, item.EdgeSubtitleWanted)
+	}
 	return edges
 }
 
@@ -21389,6 +21442,8 @@ func (m *ItemMutation) EdgeCleared(name string) bool {
 		return m.clearedsubtitle_blocklist
 	case item.EdgeSubtitleSearchAttempts:
 		return m.clearedsubtitle_search_attempts
+	case item.EdgeSubtitleWanted:
+		return m.clearedsubtitle_wanted
 	}
 	return false
 }
@@ -21414,6 +21469,9 @@ func (m *ItemMutation) ClearEdge(name string) error {
 		return nil
 	case item.EdgeSubtitleProfile:
 		m.ClearSubtitleProfile()
+		return nil
+	case item.EdgeSubtitleWanted:
+		m.ClearSubtitleWanted()
 		return nil
 	}
 	return fmt.Errorf("unknown Item unique edge %s", name)
@@ -21503,6 +21561,9 @@ func (m *ItemMutation) ResetEdge(name string) error {
 		return nil
 	case item.EdgeSubtitleSearchAttempts:
 		m.ResetSubtitleSearchAttempts()
+		return nil
+	case item.EdgeSubtitleWanted:
+		m.ResetSubtitleWanted()
 		return nil
 	}
 	return fmt.Errorf("unknown Item edge %s", name)
@@ -40044,6 +40105,754 @@ func (m *SubtitleSearchAttemptMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown SubtitleSearchAttempt edge %s", name)
+}
+
+// SubtitleWantedMutation represents an operation that mutates the SubtitleWanted nodes in the graph.
+type SubtitleWantedMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *core.ID
+	kind          *string
+	library_id    *core.ID
+	parent_id     *core.ID
+	_path         *string
+	missing       *[]core.SubtitleLanguage
+	appendmissing []core.SubtitleLanguage
+	updated       *time.Time
+	clearedFields map[string]struct{}
+	item          *core.ID
+	cleareditem   bool
+	done          bool
+	oldValue      func(context.Context) (*SubtitleWanted, error)
+	predicates    []predicate.SubtitleWanted
+}
+
+var _ ent.Mutation = (*SubtitleWantedMutation)(nil)
+
+// subtitlewantedOption allows management of the mutation configuration using functional options.
+type subtitlewantedOption func(*SubtitleWantedMutation)
+
+// newSubtitleWantedMutation creates new mutation for the SubtitleWanted entity.
+func newSubtitleWantedMutation(c config, op Op, opts ...subtitlewantedOption) *SubtitleWantedMutation {
+	m := &SubtitleWantedMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubtitleWanted,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubtitleWantedID sets the ID field of the mutation.
+func withSubtitleWantedID(id core.ID) subtitlewantedOption {
+	return func(m *SubtitleWantedMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SubtitleWanted
+		)
+		m.oldValue = func(ctx context.Context) (*SubtitleWanted, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SubtitleWanted.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubtitleWanted sets the old SubtitleWanted of the mutation.
+func withSubtitleWanted(node *SubtitleWanted) subtitlewantedOption {
+	return func(m *SubtitleWantedMutation) {
+		m.oldValue = func(context.Context) (*SubtitleWanted, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubtitleWantedMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubtitleWantedMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SubtitleWanted entities.
+func (m *SubtitleWantedMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubtitleWantedMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubtitleWantedMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SubtitleWanted.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetItemID sets the "item_id" field.
+func (m *SubtitleWantedMutation) SetItemID(c core.ID) {
+	m.item = &c
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *SubtitleWantedMutation) ItemID() (r core.ID, exists bool) {
+	v := m.item
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the SubtitleWanted entity.
+// If the SubtitleWanted object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleWantedMutation) OldItemID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *SubtitleWantedMutation) ResetItemID() {
+	m.item = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *SubtitleWantedMutation) SetKind(s string) {
+	m.kind = &s
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *SubtitleWantedMutation) Kind() (r string, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the SubtitleWanted entity.
+// If the SubtitleWanted object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleWantedMutation) OldKind(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *SubtitleWantedMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetLibraryID sets the "library_id" field.
+func (m *SubtitleWantedMutation) SetLibraryID(c core.ID) {
+	m.library_id = &c
+}
+
+// LibraryID returns the value of the "library_id" field in the mutation.
+func (m *SubtitleWantedMutation) LibraryID() (r core.ID, exists bool) {
+	v := m.library_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLibraryID returns the old "library_id" field's value of the SubtitleWanted entity.
+// If the SubtitleWanted object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleWantedMutation) OldLibraryID(ctx context.Context) (v core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLibraryID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLibraryID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLibraryID: %w", err)
+	}
+	return oldValue.LibraryID, nil
+}
+
+// ResetLibraryID resets all changes to the "library_id" field.
+func (m *SubtitleWantedMutation) ResetLibraryID() {
+	m.library_id = nil
+}
+
+// SetParentID sets the "parent_id" field.
+func (m *SubtitleWantedMutation) SetParentID(c core.ID) {
+	m.parent_id = &c
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *SubtitleWantedMutation) ParentID() (r core.ID, exists bool) {
+	v := m.parent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the SubtitleWanted entity.
+// If the SubtitleWanted object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleWantedMutation) OldParentID(ctx context.Context) (v *core.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (m *SubtitleWantedMutation) ClearParentID() {
+	m.parent_id = nil
+	m.clearedFields[subtitlewanted.FieldParentID] = struct{}{}
+}
+
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *SubtitleWantedMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[subtitlewanted.FieldParentID]
+	return ok
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *SubtitleWantedMutation) ResetParentID() {
+	m.parent_id = nil
+	delete(m.clearedFields, subtitlewanted.FieldParentID)
+}
+
+// SetPath sets the "path" field.
+func (m *SubtitleWantedMutation) SetPath(s string) {
+	m._path = &s
+}
+
+// Path returns the value of the "path" field in the mutation.
+func (m *SubtitleWantedMutation) Path() (r string, exists bool) {
+	v := m._path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPath returns the old "path" field's value of the SubtitleWanted entity.
+// If the SubtitleWanted object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleWantedMutation) OldPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPath: %w", err)
+	}
+	return oldValue.Path, nil
+}
+
+// ResetPath resets all changes to the "path" field.
+func (m *SubtitleWantedMutation) ResetPath() {
+	m._path = nil
+}
+
+// SetMissing sets the "missing" field.
+func (m *SubtitleWantedMutation) SetMissing(cl []core.SubtitleLanguage) {
+	m.missing = &cl
+	m.appendmissing = nil
+}
+
+// Missing returns the value of the "missing" field in the mutation.
+func (m *SubtitleWantedMutation) Missing() (r []core.SubtitleLanguage, exists bool) {
+	v := m.missing
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMissing returns the old "missing" field's value of the SubtitleWanted entity.
+// If the SubtitleWanted object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleWantedMutation) OldMissing(ctx context.Context) (v []core.SubtitleLanguage, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMissing is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMissing requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMissing: %w", err)
+	}
+	return oldValue.Missing, nil
+}
+
+// AppendMissing adds cl to the "missing" field.
+func (m *SubtitleWantedMutation) AppendMissing(cl []core.SubtitleLanguage) {
+	m.appendmissing = append(m.appendmissing, cl...)
+}
+
+// AppendedMissing returns the list of values that were appended to the "missing" field in this mutation.
+func (m *SubtitleWantedMutation) AppendedMissing() ([]core.SubtitleLanguage, bool) {
+	if len(m.appendmissing) == 0 {
+		return nil, false
+	}
+	return m.appendmissing, true
+}
+
+// ResetMissing resets all changes to the "missing" field.
+func (m *SubtitleWantedMutation) ResetMissing() {
+	m.missing = nil
+	m.appendmissing = nil
+}
+
+// SetUpdated sets the "updated" field.
+func (m *SubtitleWantedMutation) SetUpdated(t time.Time) {
+	m.updated = &t
+}
+
+// Updated returns the value of the "updated" field in the mutation.
+func (m *SubtitleWantedMutation) Updated() (r time.Time, exists bool) {
+	v := m.updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdated returns the old "updated" field's value of the SubtitleWanted entity.
+// If the SubtitleWanted object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleWantedMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
+	}
+	return oldValue.Updated, nil
+}
+
+// ResetUpdated resets all changes to the "updated" field.
+func (m *SubtitleWantedMutation) ResetUpdated() {
+	m.updated = nil
+}
+
+// ClearItem clears the "item" edge to the Item entity.
+func (m *SubtitleWantedMutation) ClearItem() {
+	m.cleareditem = true
+	m.clearedFields[subtitlewanted.FieldItemID] = struct{}{}
+}
+
+// ItemCleared reports if the "item" edge to the Item entity was cleared.
+func (m *SubtitleWantedMutation) ItemCleared() bool {
+	return m.cleareditem
+}
+
+// ItemIDs returns the "item" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ItemID instead. It exists only for internal usage by the builders.
+func (m *SubtitleWantedMutation) ItemIDs() (ids []core.ID) {
+	if id := m.item; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetItem resets all changes to the "item" edge.
+func (m *SubtitleWantedMutation) ResetItem() {
+	m.item = nil
+	m.cleareditem = false
+}
+
+// Where appends a list predicates to the SubtitleWantedMutation builder.
+func (m *SubtitleWantedMutation) Where(ps ...predicate.SubtitleWanted) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubtitleWantedMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubtitleWantedMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SubtitleWanted, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubtitleWantedMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubtitleWantedMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SubtitleWanted).
+func (m *SubtitleWantedMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubtitleWantedMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.item != nil {
+		fields = append(fields, subtitlewanted.FieldItemID)
+	}
+	if m.kind != nil {
+		fields = append(fields, subtitlewanted.FieldKind)
+	}
+	if m.library_id != nil {
+		fields = append(fields, subtitlewanted.FieldLibraryID)
+	}
+	if m.parent_id != nil {
+		fields = append(fields, subtitlewanted.FieldParentID)
+	}
+	if m._path != nil {
+		fields = append(fields, subtitlewanted.FieldPath)
+	}
+	if m.missing != nil {
+		fields = append(fields, subtitlewanted.FieldMissing)
+	}
+	if m.updated != nil {
+		fields = append(fields, subtitlewanted.FieldUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubtitleWantedMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subtitlewanted.FieldItemID:
+		return m.ItemID()
+	case subtitlewanted.FieldKind:
+		return m.Kind()
+	case subtitlewanted.FieldLibraryID:
+		return m.LibraryID()
+	case subtitlewanted.FieldParentID:
+		return m.ParentID()
+	case subtitlewanted.FieldPath:
+		return m.Path()
+	case subtitlewanted.FieldMissing:
+		return m.Missing()
+	case subtitlewanted.FieldUpdated:
+		return m.Updated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubtitleWantedMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subtitlewanted.FieldItemID:
+		return m.OldItemID(ctx)
+	case subtitlewanted.FieldKind:
+		return m.OldKind(ctx)
+	case subtitlewanted.FieldLibraryID:
+		return m.OldLibraryID(ctx)
+	case subtitlewanted.FieldParentID:
+		return m.OldParentID(ctx)
+	case subtitlewanted.FieldPath:
+		return m.OldPath(ctx)
+	case subtitlewanted.FieldMissing:
+		return m.OldMissing(ctx)
+	case subtitlewanted.FieldUpdated:
+		return m.OldUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown SubtitleWanted field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleWantedMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subtitlewanted.FieldItemID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case subtitlewanted.FieldKind:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case subtitlewanted.FieldLibraryID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLibraryID(v)
+		return nil
+	case subtitlewanted.FieldParentID:
+		v, ok := value.(core.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
+		return nil
+	case subtitlewanted.FieldPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPath(v)
+		return nil
+	case subtitlewanted.FieldMissing:
+		v, ok := value.([]core.SubtitleLanguage)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMissing(v)
+		return nil
+	case subtitlewanted.FieldUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleWanted field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubtitleWantedMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubtitleWantedMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubtitleWantedMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SubtitleWanted numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubtitleWantedMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(subtitlewanted.FieldParentID) {
+		fields = append(fields, subtitlewanted.FieldParentID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubtitleWantedMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubtitleWantedMutation) ClearField(name string) error {
+	switch name {
+	case subtitlewanted.FieldParentID:
+		m.ClearParentID()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleWanted nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubtitleWantedMutation) ResetField(name string) error {
+	switch name {
+	case subtitlewanted.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case subtitlewanted.FieldKind:
+		m.ResetKind()
+		return nil
+	case subtitlewanted.FieldLibraryID:
+		m.ResetLibraryID()
+		return nil
+	case subtitlewanted.FieldParentID:
+		m.ResetParentID()
+		return nil
+	case subtitlewanted.FieldPath:
+		m.ResetPath()
+		return nil
+	case subtitlewanted.FieldMissing:
+		m.ResetMissing()
+		return nil
+	case subtitlewanted.FieldUpdated:
+		m.ResetUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleWanted field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubtitleWantedMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.item != nil {
+		edges = append(edges, subtitlewanted.EdgeItem)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubtitleWantedMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case subtitlewanted.EdgeItem:
+		if id := m.item; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubtitleWantedMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubtitleWantedMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubtitleWantedMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareditem {
+		edges = append(edges, subtitlewanted.EdgeItem)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubtitleWantedMutation) EdgeCleared(name string) bool {
+	switch name {
+	case subtitlewanted.EdgeItem:
+		return m.cleareditem
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubtitleWantedMutation) ClearEdge(name string) error {
+	switch name {
+	case subtitlewanted.EdgeItem:
+		m.ClearItem()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleWanted unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubtitleWantedMutation) ResetEdge(name string) error {
+	switch name {
+	case subtitlewanted.EdgeItem:
+		m.ResetItem()
+		return nil
+	}
+	return fmt.Errorf("unknown SubtitleWanted edge %s", name)
 }
 
 // TrickplayMutation represents an operation that mutates the Trickplay nodes in the graph.

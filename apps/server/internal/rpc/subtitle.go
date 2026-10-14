@@ -162,6 +162,15 @@ func (s *SubtitleService) putProfile(ctx context.Context, p *core.SubtitleProfil
 	if err := s.store.SubtitleProfiles().Put(ctx, p); err != nil {
 		return connectError(ctx, err)
 	}
+	return s.profilesChanged(ctx)
+}
+
+// profilesChanged has what movies and episodes are missing found anew
+// after profiles or their assignments change.
+func (s *SubtitleService) profilesChanged(ctx context.Context) error {
+	if err := s.rt.Queue(ctx, subtitles.JobWantedRefresh); err != nil {
+		return connectError(ctx, err)
+	}
 	return nil
 }
 
@@ -172,6 +181,9 @@ func (s *SubtitleService) DeleteSubtitleProfile(ctx context.Context, req *acquis
 	}
 	if err := s.store.SubtitleProfiles().Delete(ctx, core.MustParseID(req.GetId())); err != nil && !errors.Is(err, core.ErrNotFound) {
 		return nil, connectError(ctx, err)
+	}
+	if err := s.profilesChanged(ctx); err != nil {
+		return nil, err
 	}
 	return &acquisitionv1.DeleteSubtitleProfileResponse{}, nil
 }
@@ -193,6 +205,9 @@ func (s *SubtitleService) AssignSubtitleProfile(ctx context.Context, req *acquis
 	}
 	if err != nil {
 		return nil, connectError(ctx, err)
+	}
+	if err := s.profilesChanged(ctx); err != nil {
+		return nil, err
 	}
 	return &acquisitionv1.AssignSubtitleProfileResponse{}, nil
 }

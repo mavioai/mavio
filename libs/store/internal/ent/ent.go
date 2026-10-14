@@ -51,6 +51,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlewanted"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -154,6 +155,7 @@ func checkColumn(t, c string) error {
 			subtitleprofile.Table:           subtitleprofile.ValidColumn,
 			subtitleprofileassignment.Table: subtitleprofileassignment.ValidColumn,
 			subtitlesearchattempt.Table:     subtitlesearchattempt.ValidColumn,
+			subtitlewanted.Table:            subtitlewanted.ValidColumn,
 			trickplay.Table:                 trickplay.ValidColumn,
 			user.Table:                      user.ValidColumn,
 			userdata.Table:                  userdata.ValidColumn,

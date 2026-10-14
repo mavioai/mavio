@@ -97,6 +97,7 @@ func (m *memStore) SubtitleProfileAssignments() core.SubtitleProfileAssignmentRe
 func (m *memStore) SubtitleHistory() core.SubtitleHistoryRepository              { panic("unused") }
 func (m *memStore) SubtitleBlocklist() core.SubtitleBlocklistRepository          { panic("unused") }
 func (m *memStore) SubtitleSearchAttempts() core.SubtitleSearchAttemptRepository { panic("unused") }
+func (m *memStore) SubtitleWanted() core.SubtitleWantedRepository                { panic("unused") }
 func (m *memStore) Requests() core.RequestRepository                             { panic("unused") }
 func (m *memStore) Issues() core.IssueRepository                                 { panic("unused") }
 func (m *memStore) BlockedTitles() core.BlockedTitleRepository                   { panic("unused") }

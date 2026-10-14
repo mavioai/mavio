@@ -55,6 +55,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlewanted"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -144,6 +145,8 @@ type Client struct {
 	SubtitleProfileAssignment *SubtitleProfileAssignmentClient
 	// SubtitleSearchAttempt is the client for interacting with the SubtitleSearchAttempt builders.
 	SubtitleSearchAttempt *SubtitleSearchAttemptClient
+	// SubtitleWanted is the client for interacting with the SubtitleWanted builders.
+	SubtitleWanted *SubtitleWantedClient
 	// Trickplay is the client for interacting with the Trickplay builders.
 	Trickplay *TrickplayClient
 	// User is the client for interacting with the User builders.
@@ -202,6 +205,7 @@ func (c *Client) init() {
 	c.SubtitleProfile = NewSubtitleProfileClient(c.config)
 	c.SubtitleProfileAssignment = NewSubtitleProfileAssignmentClient(c.config)
 	c.SubtitleSearchAttempt = NewSubtitleSearchAttemptClient(c.config)
+	c.SubtitleWanted = NewSubtitleWantedClient(c.config)
 	c.Trickplay = NewTrickplayClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserData = NewUserDataClient(c.config)
@@ -337,6 +341,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		SubtitleProfile:           NewSubtitleProfileClient(cfg),
 		SubtitleProfileAssignment: NewSubtitleProfileAssignmentClient(cfg),
 		SubtitleSearchAttempt:     NewSubtitleSearchAttemptClient(cfg),
+		SubtitleWanted:            NewSubtitleWantedClient(cfg),
 		Trickplay:                 NewTrickplayClient(cfg),
 		User:                      NewUserClient(cfg),
 		UserData:                  NewUserDataClient(cfg),
@@ -399,6 +404,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		SubtitleProfile:           NewSubtitleProfileClient(cfg),
 		SubtitleProfileAssignment: NewSubtitleProfileAssignmentClient(cfg),
 		SubtitleSearchAttempt:     NewSubtitleSearchAttemptClient(cfg),
+		SubtitleWanted:            NewSubtitleWantedClient(cfg),
 		Trickplay:                 NewTrickplayClient(cfg),
 		User:                      NewUserClient(cfg),
 		UserData:                  NewUserDataClient(cfg),
@@ -440,7 +446,8 @@ func (c *Client) Use(hooks ...Hook) {
 		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
 		c.Request, c.Setting, c.StorageJob, c.SubtitleBlocklistEntry,
 		c.SubtitleHistoryEvent, c.SubtitleProfile, c.SubtitleProfileAssignment,
-		c.SubtitleSearchAttempt, c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.SubtitleSearchAttempt, c.SubtitleWanted, c.Trickplay, c.User, c.UserData,
+		c.Wanted,
 	} {
 		n.Use(hooks...)
 	}
@@ -458,7 +465,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
 		c.Request, c.Setting, c.StorageJob, c.SubtitleBlocklistEntry,
 		c.SubtitleHistoryEvent, c.SubtitleProfile, c.SubtitleProfileAssignment,
-		c.SubtitleSearchAttempt, c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.SubtitleSearchAttempt, c.SubtitleWanted, c.Trickplay, c.User, c.UserData,
+		c.Wanted,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -545,6 +553,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SubtitleProfileAssignment.mutate(ctx, m)
 	case *SubtitleSearchAttemptMutation:
 		return c.SubtitleSearchAttempt.mutate(ctx, m)
+	case *SubtitleWantedMutation:
+		return c.SubtitleWanted.mutate(ctx, m)
 	case *TrickplayMutation:
 		return c.Trickplay.mutate(ctx, m)
 	case *UserMutation:
@@ -3656,6 +3666,22 @@ func (c *ItemClient) QuerySubtitleSearchAttempts(_m *Item) *SubtitleSearchAttemp
 			sqlgraph.From(item.Table, item.FieldID, id),
 			sqlgraph.To(subtitlesearchattempt.Table, subtitlesearchattempt.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, item.SubtitleSearchAttemptsTable, item.SubtitleSearchAttemptsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySubtitleWanted queries the subtitle_wanted edge of a Item.
+func (c *ItemClient) QuerySubtitleWanted(_m *Item) *SubtitleWantedQuery {
+	query := (&SubtitleWantedClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(item.Table, item.FieldID, id),
+			sqlgraph.To(subtitlewanted.Table, subtitlewanted.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, item.SubtitleWantedTable, item.SubtitleWantedColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -6801,6 +6827,155 @@ func (c *SubtitleSearchAttemptClient) mutate(ctx context.Context, m *SubtitleSea
 	}
 }
 
+// SubtitleWantedClient is a client for the SubtitleWanted schema.
+type SubtitleWantedClient struct {
+	config
+}
+
+// NewSubtitleWantedClient returns a client for the SubtitleWanted from the given config.
+func NewSubtitleWantedClient(c config) *SubtitleWantedClient {
+	return &SubtitleWantedClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subtitlewanted.Hooks(f(g(h())))`.
+func (c *SubtitleWantedClient) Use(hooks ...Hook) {
+	c.hooks.SubtitleWanted = append(c.hooks.SubtitleWanted, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subtitlewanted.Intercept(f(g(h())))`.
+func (c *SubtitleWantedClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubtitleWanted = append(c.inters.SubtitleWanted, interceptors...)
+}
+
+// Create returns a builder for creating a SubtitleWanted entity.
+func (c *SubtitleWantedClient) Create() *SubtitleWantedCreate {
+	mutation := newSubtitleWantedMutation(c.config, OpCreate)
+	return &SubtitleWantedCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubtitleWanted entities.
+func (c *SubtitleWantedClient) CreateBulk(builders ...*SubtitleWantedCreate) *SubtitleWantedCreateBulk {
+	return &SubtitleWantedCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubtitleWantedClient) MapCreateBulk(slice any, setFunc func(*SubtitleWantedCreate, int)) *SubtitleWantedCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubtitleWantedCreateBulk{err: fmt.Errorf("calling to SubtitleWantedClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubtitleWantedCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubtitleWantedCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubtitleWanted.
+func (c *SubtitleWantedClient) Update() *SubtitleWantedUpdate {
+	mutation := newSubtitleWantedMutation(c.config, OpUpdate)
+	return &SubtitleWantedUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubtitleWantedClient) UpdateOne(_m *SubtitleWanted) *SubtitleWantedUpdateOne {
+	mutation := newSubtitleWantedMutation(c.config, OpUpdateOne, withSubtitleWanted(_m))
+	return &SubtitleWantedUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubtitleWantedClient) UpdateOneID(id core.ID) *SubtitleWantedUpdateOne {
+	mutation := newSubtitleWantedMutation(c.config, OpUpdateOne, withSubtitleWantedID(id))
+	return &SubtitleWantedUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubtitleWanted.
+func (c *SubtitleWantedClient) Delete() *SubtitleWantedDelete {
+	mutation := newSubtitleWantedMutation(c.config, OpDelete)
+	return &SubtitleWantedDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubtitleWantedClient) DeleteOne(_m *SubtitleWanted) *SubtitleWantedDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubtitleWantedClient) DeleteOneID(id core.ID) *SubtitleWantedDeleteOne {
+	builder := c.Delete().Where(subtitlewanted.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubtitleWantedDeleteOne{builder}
+}
+
+// Query returns a query builder for SubtitleWanted.
+func (c *SubtitleWantedClient) Query() *SubtitleWantedQuery {
+	return &SubtitleWantedQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubtitleWanted},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubtitleWanted entity by its id.
+func (c *SubtitleWantedClient) Get(ctx context.Context, id core.ID) (*SubtitleWanted, error) {
+	return c.Query().Where(subtitlewanted.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubtitleWantedClient) GetX(ctx context.Context, id core.ID) *SubtitleWanted {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryItem queries the item edge of a SubtitleWanted.
+func (c *SubtitleWantedClient) QueryItem(_m *SubtitleWanted) *ItemQuery {
+	query := (&ItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subtitlewanted.Table, subtitlewanted.FieldID, id),
+			sqlgraph.To(item.Table, item.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, subtitlewanted.ItemTable, subtitlewanted.ItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SubtitleWantedClient) Hooks() []Hook {
+	return c.hooks.SubtitleWanted
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubtitleWantedClient) Interceptors() []Interceptor {
+	return c.inters.SubtitleWanted
+}
+
+func (c *SubtitleWantedClient) mutate(ctx context.Context, m *SubtitleWantedMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubtitleWantedCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubtitleWantedUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubtitleWantedUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubtitleWantedDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubtitleWanted mutation op: %q", m.Op())
+	}
+}
+
 // TrickplayClient is a client for the Trickplay schema.
 type TrickplayClient struct {
 	config
@@ -7567,7 +7742,8 @@ type (
 		Person, PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
 		RemotePathMapping, Request, Setting, StorageJob, SubtitleBlocklistEntry,
 		SubtitleHistoryEvent, SubtitleProfile, SubtitleProfileAssignment,
-		SubtitleSearchAttempt, Trickplay, User, UserData, Wanted []ent.Hook
+		SubtitleSearchAttempt, SubtitleWanted, Trickplay, User, UserData,
+		Wanted []ent.Hook
 	}
 	inters struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credit,
@@ -7577,6 +7753,7 @@ type (
 		Person, PluginConfig, QualityDefinition, QualityProfile, ReleaseProfile,
 		RemotePathMapping, Request, Setting, StorageJob, SubtitleBlocklistEntry,
 		SubtitleHistoryEvent, SubtitleProfile, SubtitleProfileAssignment,
-		SubtitleSearchAttempt, Trickplay, User, UserData, Wanted []ent.Interceptor
+		SubtitleSearchAttempt, SubtitleWanted, Trickplay, User, UserData,
+		Wanted []ent.Interceptor
 	}
 )

@@ -191,3 +191,39 @@ func (SubtitleSearchAttempt) Edges() []ent.Edge {
 func (SubtitleSearchAttempt) Indexes() []ent.Index {
 	return []ent.Index{index.Fields("item_id", "language", "forced", "hearing_impaired").Unique()}
 }
+
+// SubtitleWanted holds the schema of core.SubtitleWanted, one row per
+// item. The parent (the series of an episode) is a plain ID; the missing
+// languages are read and written whole, as JSON.
+type SubtitleWanted struct{ ent.Schema }
+
+// Annotations of SubtitleWanted.
+func (SubtitleWanted) Annotations() []schema.Annotation {
+	return []schema.Annotation{entsql.Annotation{Table: "subtitle_wanted"}}
+}
+
+// Fields of SubtitleWanted.
+func (SubtitleWanted) Fields() []ent.Field {
+	return []ent.Field{
+		idField(),
+		field.UUID("item_id", core.ID{}).Unique(),
+		field.String("kind"),
+		field.UUID("library_id", core.ID{}),
+		field.UUID("parent_id", core.ID{}).Optional().Nillable(),
+		field.Text("path"),
+		field.JSON("missing", []core.SubtitleLanguage{}),
+		field.Time("updated"),
+	}
+}
+
+// Edges of SubtitleWanted.
+func (SubtitleWanted) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("item", Item.Type).Ref("subtitle_wanted").Field("item_id").Unique().Required(),
+	}
+}
+
+// Indexes of SubtitleWanted.
+func (SubtitleWanted) Indexes() []ent.Index {
+	return []ent.Index{index.Fields("kind", "library_id", "path")}
+}

@@ -15,6 +15,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlewanted"
 )
 
 type subtitleProfiles struct{ s *Store }
@@ -380,4 +381,67 @@ func (r subtitleSearchAttempts) Record(ctx context.Context, itemID core.ID, lang
 		UpdateLast().
 		Exec(ctx)
 	return mapErr(err, "record subtitle search attempt")
+}
+
+type subtitleWanted struct{ s *Store }
+
+// SubtitleWanted returns the movies and episodes missing subtitles.
+func (s *Store) SubtitleWanted() core.SubtitleWantedRepository { return subtitleWanted{s} }
+
+func (r subtitleWanted) Put(ctx context.Context, w core.SubtitleWanted) error {
+	if len(w.Missing) == 0 {
+		return r.Delete(ctx, w.ItemID)
+	}
+	if err := w.Validate(); err != nil {
+		return err
+	}
+	err := r.s.write.SubtitleWanted.Create().
+		SetID(core.NewID()).
+		SetItemID(w.ItemID).
+		SetKind(string(w.Kind)).
+		SetLibraryID(w.LibraryID).
+		SetNillableParentID(nonZeroID(w.ParentID)).
+		SetPath(w.Path).
+		SetMissing(w.Missing).
+		SetUpdated(w.Updated).
+		OnConflictColumns(subtitlewanted.FieldItemID).
+		Update(func(u *ent.SubtitleWantedUpsert) {
+			u.UpdateKind().UpdateLibraryID().UpdateParentID().UpdatePath().UpdateMissing().UpdateUpdated()
+		}).
+		Exec(ctx)
+	return mapErr(err, "put wanted subtitles")
+}
+
+func (r subtitleWanted) Delete(ctx context.Context, itemIDs ...core.ID) error {
+	if len(itemIDs) == 0 {
+		return nil
+	}
+	_, err := r.s.write.SubtitleWanted.Delete().Where(subtitlewanted.ItemIDIn(itemIDs...)).Exec(ctx)
+	return mapErr(err, "delete wanted subtitles")
+}
+
+func (r subtitleWanted) List(ctx context.Context, q core.SubtitleWantedQuery) (core.Page[core.SubtitleWanted], error) {
+	limit, err := pageSize(q.Limit, q.Offset)
+	if err != nil {
+		return core.Page[core.SubtitleWanted]{}, err
+	}
+	query := r.s.read.SubtitleWanted.Query().Where(
+		subtitlewanted.Kind(string(q.Kind)), subtitlewanted.HasItemWith(item.MissingSinceIsNil()))
+	total, err := query.Clone().Count(ctx)
+	if err != nil {
+		return core.Page[core.SubtitleWanted]{}, mapErr(err, "count wanted subtitles")
+	}
+	rows, err := query.Order(ent.Asc(subtitlewanted.FieldLibraryID), ent.Asc(subtitlewanted.FieldPath), ent.Asc(subtitlewanted.FieldItemID)).
+		Limit(limit).Offset(q.Offset).All(ctx)
+	if err != nil {
+		return core.Page[core.SubtitleWanted]{}, mapErr(err, "list wanted subtitles")
+	}
+	out := core.Page[core.SubtitleWanted]{Total: total, Items: make([]core.SubtitleWanted, len(rows))}
+	for i, w := range rows {
+		out.Items[i] = core.SubtitleWanted{
+			ItemID: w.ItemID, Kind: core.ItemKind(w.Kind), LibraryID: w.LibraryID, ParentID: zeroIDIfNil(w.ParentID),
+			Path: w.Path, Missing: w.Missing, Updated: w.Updated.UTC(),
+		}
+	}
+	return out, nil
 }

@@ -394,6 +394,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		// unmonitored when the settings say to.
 		scanner.NewSeasonMonitored, scanner.OnMissing = acq.NewSeasonMonitored, acq.UnmonitorMissing
 		scanner.SubtitleFolder = subtitleFolder(set, metadataDir)
+		// Subtitle files a scan finds or loses change what is wanted.
+		scanner.OnSidecars = subs.Sidecars
 		g.Go(func() error {
 			if err := worker.Run(ctx); !errors.Is(err, context.Canceled) {
 				return err

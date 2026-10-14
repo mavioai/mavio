@@ -47,6 +47,7 @@ type Store interface {
 	SubtitleHistory() SubtitleHistoryRepository
 	SubtitleBlocklist() SubtitleBlocklistRepository
 	SubtitleSearchAttempts() SubtitleSearchAttemptRepository
+	SubtitleWanted() SubtitleWantedRepository
 	Requests() RequestRepository
 	Issues() IssueRepository
 	BlockedTitles() BlockedTitleRepository

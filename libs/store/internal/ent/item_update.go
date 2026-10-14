@@ -33,6 +33,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlehistoryevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlewanted"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -1548,6 +1549,25 @@ func (_u *ItemUpdate) AddSubtitleSearchAttempts(v ...*SubtitleSearchAttempt) *It
 	return _u.AddSubtitleSearchAttemptIDs(ids...)
 }
 
+// SetSubtitleWantedID sets the "subtitle_wanted" edge to the SubtitleWanted entity by ID.
+func (_u *ItemUpdate) SetSubtitleWantedID(id core.ID) *ItemUpdate {
+	_u.mutation.SetSubtitleWantedID(id)
+	return _u
+}
+
+// SetNillableSubtitleWantedID sets the "subtitle_wanted" edge to the SubtitleWanted entity by ID if the given value is not nil.
+func (_u *ItemUpdate) SetNillableSubtitleWantedID(id *core.ID) *ItemUpdate {
+	if id != nil {
+		_u = _u.SetSubtitleWantedID(*id)
+	}
+	return _u
+}
+
+// SetSubtitleWanted sets the "subtitle_wanted" edge to the SubtitleWanted entity.
+func (_u *ItemUpdate) SetSubtitleWanted(v *SubtitleWanted) *ItemUpdate {
+	return _u.SetSubtitleWantedID(v.ID)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_u *ItemUpdate) Mutation() *ItemMutation {
 	return _u.mutation
@@ -2028,6 +2048,12 @@ func (_u *ItemUpdate) RemoveSubtitleSearchAttempts(v ...*SubtitleSearchAttempt) 
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveSubtitleSearchAttemptIDs(ids...)
+}
+
+// ClearSubtitleWanted clears the "subtitle_wanted" edge to the SubtitleWanted entity.
+func (_u *ItemUpdate) ClearSubtitleWanted() *ItemUpdate {
+	_u.mutation.ClearSubtitleWanted()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -3519,6 +3545,35 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subtitlesearchattempt.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleWantedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.SubtitleWantedTable,
+			Columns: []string{item.SubtitleWantedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlewanted.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleWantedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.SubtitleWantedTable,
+			Columns: []string{item.SubtitleWantedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlewanted.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -5043,6 +5098,25 @@ func (_u *ItemUpdateOne) AddSubtitleSearchAttempts(v ...*SubtitleSearchAttempt) 
 	return _u.AddSubtitleSearchAttemptIDs(ids...)
 }
 
+// SetSubtitleWantedID sets the "subtitle_wanted" edge to the SubtitleWanted entity by ID.
+func (_u *ItemUpdateOne) SetSubtitleWantedID(id core.ID) *ItemUpdateOne {
+	_u.mutation.SetSubtitleWantedID(id)
+	return _u
+}
+
+// SetNillableSubtitleWantedID sets the "subtitle_wanted" edge to the SubtitleWanted entity by ID if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableSubtitleWantedID(id *core.ID) *ItemUpdateOne {
+	if id != nil {
+		_u = _u.SetSubtitleWantedID(*id)
+	}
+	return _u
+}
+
+// SetSubtitleWanted sets the "subtitle_wanted" edge to the SubtitleWanted entity.
+func (_u *ItemUpdateOne) SetSubtitleWanted(v *SubtitleWanted) *ItemUpdateOne {
+	return _u.SetSubtitleWantedID(v.ID)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_u *ItemUpdateOne) Mutation() *ItemMutation {
 	return _u.mutation
@@ -5523,6 +5597,12 @@ func (_u *ItemUpdateOne) RemoveSubtitleSearchAttempts(v ...*SubtitleSearchAttemp
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveSubtitleSearchAttemptIDs(ids...)
+}
+
+// ClearSubtitleWanted clears the "subtitle_wanted" edge to the SubtitleWanted entity.
+func (_u *ItemUpdateOne) ClearSubtitleWanted() *ItemUpdateOne {
+	_u.mutation.ClearSubtitleWanted()
+	return _u
 }
 
 // Where appends a list predicates to the ItemUpdate builder.
@@ -7044,6 +7124,35 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subtitlesearchattempt.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubtitleWantedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.SubtitleWantedTable,
+			Columns: []string{item.SubtitleWantedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlewanted.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitleWantedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.SubtitleWantedTable,
+			Columns: []string{item.SubtitleWantedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlewanted.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

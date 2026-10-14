@@ -32,6 +32,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlehistoryevent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlewanted"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -1197,6 +1198,25 @@ func (_c *ItemCreate) AddSubtitleSearchAttempts(v ...*SubtitleSearchAttempt) *It
 	return _c.AddSubtitleSearchAttemptIDs(ids...)
 }
 
+// SetSubtitleWantedID sets the "subtitle_wanted" edge to the SubtitleWanted entity by ID.
+func (_c *ItemCreate) SetSubtitleWantedID(id core.ID) *ItemCreate {
+	_c.mutation.SetSubtitleWantedID(id)
+	return _c
+}
+
+// SetNillableSubtitleWantedID sets the "subtitle_wanted" edge to the SubtitleWanted entity by ID if the given value is not nil.
+func (_c *ItemCreate) SetNillableSubtitleWantedID(id *core.ID) *ItemCreate {
+	if id != nil {
+		_c = _c.SetSubtitleWantedID(*id)
+	}
+	return _c
+}
+
+// SetSubtitleWanted sets the "subtitle_wanted" edge to the SubtitleWanted entity.
+func (_c *ItemCreate) SetSubtitleWanted(v *SubtitleWanted) *ItemCreate {
+	return _c.SetSubtitleWantedID(v.ID)
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (_c *ItemCreate) Mutation() *ItemMutation {
 	return _c.mutation
@@ -2161,6 +2181,22 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subtitlesearchattempt.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SubtitleWantedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   item.SubtitleWantedTable,
+			Columns: []string{item.SubtitleWantedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitlewanted.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

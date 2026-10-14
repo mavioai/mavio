@@ -193,6 +193,8 @@ const (
 	EdgeSubtitleBlocklist = "subtitle_blocklist"
 	// EdgeSubtitleSearchAttempts holds the string denoting the subtitle_search_attempts edge name in mutations.
 	EdgeSubtitleSearchAttempts = "subtitle_search_attempts"
+	// EdgeSubtitleWanted holds the string denoting the subtitle_wanted edge name in mutations.
+	EdgeSubtitleWanted = "subtitle_wanted"
 	// Table holds the table name of the item in the database.
 	Table = "items"
 	// LibraryTable is the table that holds the library relation/edge.
@@ -372,6 +374,13 @@ const (
 	SubtitleSearchAttemptsInverseTable = "subtitle_search_attempts"
 	// SubtitleSearchAttemptsColumn is the table column denoting the subtitle_search_attempts relation/edge.
 	SubtitleSearchAttemptsColumn = "item_id"
+	// SubtitleWantedTable is the table that holds the subtitle_wanted relation/edge.
+	SubtitleWantedTable = "subtitle_wanted"
+	// SubtitleWantedInverseTable is the table name for the SubtitleWanted entity.
+	// It exists in this package in order to avoid circular dependency with the "subtitlewanted" package.
+	SubtitleWantedInverseTable = "subtitle_wanted"
+	// SubtitleWantedColumn is the table column denoting the subtitle_wanted relation/edge.
+	SubtitleWantedColumn = "item_id"
 )
 
 // Columns holds all SQL columns for item fields.
@@ -1132,6 +1141,13 @@ func BySubtitleSearchAttempts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderO
 		sqlgraph.OrderByNeighborTerms(s, newSubtitleSearchAttemptsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySubtitleWantedField orders the results by subtitle_wanted field.
+func BySubtitleWantedField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSubtitleWantedStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newLibraryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -1319,5 +1335,12 @@ func newSubtitleSearchAttemptsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SubtitleSearchAttemptsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SubtitleSearchAttemptsTable, SubtitleSearchAttemptsColumn),
+	)
+}
+func newSubtitleWantedStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SubtitleWantedInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, SubtitleWantedTable, SubtitleWantedColumn),
 	)
 }

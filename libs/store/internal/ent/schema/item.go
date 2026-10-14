@@ -139,6 +139,7 @@ func (Item) Edges() []ent.Edge {
 		edge.To("subtitle_history", SubtitleHistoryEvent.Type).Annotations(cascade()),
 		edge.To("subtitle_blocklist", SubtitleBlocklistEntry.Type).Annotations(cascade()),
 		edge.To("subtitle_search_attempts", SubtitleSearchAttempt.Type).Annotations(cascade()),
+		edge.To("subtitle_wanted", SubtitleWanted.Type).Annotations(cascade()).Unique(),
 	}
 }
 

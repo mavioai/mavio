@@ -14,6 +14,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/item"
 	"github.com/mavioai/mavio/libs/store/internal/ent/library"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlewanted"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/wanted"
 )
@@ -209,9 +210,11 @@ type ItemEdges struct {
 	SubtitleBlocklist []*SubtitleBlocklistEntry `json:"subtitle_blocklist,omitempty"`
 	// SubtitleSearchAttempts holds the value of the subtitle_search_attempts edge.
 	SubtitleSearchAttempts []*SubtitleSearchAttempt `json:"subtitle_search_attempts,omitempty"`
+	// SubtitleWanted holds the value of the subtitle_wanted edge.
+	SubtitleWanted *SubtitleWanted `json:"subtitle_wanted,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [27]bool
+	loadedTypes [28]bool
 }
 
 // LibraryOrErr returns the Library value or an error if the edge
@@ -467,6 +470,17 @@ func (e ItemEdges) SubtitleSearchAttemptsOrErr() ([]*SubtitleSearchAttempt, erro
 		return e.SubtitleSearchAttempts, nil
 	}
 	return nil, &NotLoadedError{edge: "subtitle_search_attempts"}
+}
+
+// SubtitleWantedOrErr returns the SubtitleWanted value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ItemEdges) SubtitleWantedOrErr() (*SubtitleWanted, error) {
+	if e.SubtitleWanted != nil {
+		return e.SubtitleWanted, nil
+	} else if e.loadedTypes[27] {
+		return nil, &NotFoundError{label: subtitlewanted.Label}
+	}
+	return nil, &NotLoadedError{edge: "subtitle_wanted"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -1063,6 +1077,11 @@ func (_m *Item) QuerySubtitleBlocklist() *SubtitleBlocklistEntryQuery {
 // QuerySubtitleSearchAttempts queries the "subtitle_search_attempts" edge of the Item entity.
 func (_m *Item) QuerySubtitleSearchAttempts() *SubtitleSearchAttemptQuery {
 	return NewItemClient(_m.config).QuerySubtitleSearchAttempts(_m)
+}
+
+// QuerySubtitleWanted queries the "subtitle_wanted" edge of the Item entity.
+func (_m *Item) QuerySubtitleWanted() *SubtitleWantedQuery {
+	return NewItemClient(_m.config).QuerySubtitleWanted(_m)
 }
 
 // Update returns a builder for updating this Item.

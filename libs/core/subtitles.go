@@ -280,6 +280,46 @@ type SubtitleSearchAttempt struct {
 	First, Last time.Time
 }
 
+// SubtitleWanted is a movie or an episode whose subtitle profile wants
+// subtitles its video lacks, as Bazarr's missing_subtitles columns. The
+// subtitle runtime keeps it as files, profiles and settings change, so
+// that listing what is wanted reads no item's streams.
+type SubtitleWanted struct {
+	ItemID    ID
+	Kind      ItemKind
+	LibraryID ID
+	// ParentID is the episode's series.
+	ParentID ID
+	// Path is the video file's.
+	Path    string
+	Missing []SubtitleLanguage
+	Updated time.Time
+}
+
+// Validate checks an entry of wanted subtitles.
+func (w *SubtitleWanted) Validate() error {
+	switch {
+	case w.ItemID.IsZero() || w.LibraryID.IsZero() || w.Updated.IsZero():
+		return fmt.Errorf("%w: wanted subtitles require an item, a library and a time", ErrInvalid)
+	case w.Kind != KindMovie && w.Kind != KindEpisode:
+		return fmt.Errorf("%w: only movies and episodes want subtitles, not %s", ErrInvalid, w.Kind)
+	}
+	for _, l := range w.Missing {
+		if err := l.Validate(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// SubtitleWantedQuery selects wanted subtitles.
+type SubtitleWantedQuery struct {
+	// Kind is KindMovie or KindEpisode.
+	Kind ItemKind
+	// Limit 0 returns a page of MaxPageSize.
+	Limit, Offset int
+}
+
 // SubtitleFolder is where subtitles are saved, as Bazarr's subfolder
 // setting.
 type SubtitleFolder string
@@ -514,6 +554,18 @@ type (
 		Delete(ctx context.Context, ids ...ID) error
 		// Clear deletes every entry.
 		Clear(ctx context.Context) error
+	}
+
+	// SubtitleWantedRepository stores the movies and episodes missing
+	// subtitles; deleting the item deletes its entry.
+	SubtitleWantedRepository interface {
+		// Put stores what an item wants, replacing its entry, or deletes
+		// the entry when nothing is missing.
+		Put(ctx context.Context, w SubtitleWanted) error
+		Delete(ctx context.Context, itemIDs ...ID) error
+		// List returns the entries q selects of items present, by
+		// library and path.
+		List(ctx context.Context, q SubtitleWantedQuery) (Page[SubtitleWanted], error)
 	}
 
 	// SubtitleSearchAttemptRepository stores failed subtitle searches;

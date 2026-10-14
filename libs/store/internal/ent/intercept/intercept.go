@@ -48,6 +48,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleprofileassignment"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlesearchattempt"
+	"github.com/mavioai/mavio/libs/store/internal/ent/subtitlewanted"
 	"github.com/mavioai/mavio/libs/store/internal/ent/trickplay"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
@@ -1163,6 +1164,33 @@ func (f TraverseSubtitleSearchAttempt) Traverse(ctx context.Context, q ent.Query
 	return fmt.Errorf("unexpected query type %T. expect *ent.SubtitleSearchAttemptQuery", q)
 }
 
+// The SubtitleWantedFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SubtitleWantedFunc func(context.Context, *ent.SubtitleWantedQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f SubtitleWantedFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.SubtitleWantedQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.SubtitleWantedQuery", q)
+}
+
+// The TraverseSubtitleWanted type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSubtitleWanted func(context.Context, *ent.SubtitleWantedQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSubtitleWanted) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSubtitleWanted) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.SubtitleWantedQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.SubtitleWantedQuery", q)
+}
+
 // The TrickplayFunc type is an adapter to allow the use of ordinary function as a Querier.
 type TrickplayFunc func(context.Context, *ent.TrickplayQuery) (ent.Value, error)
 
@@ -1352,6 +1380,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.SubtitleProfileAssignmentQuery, predicate.SubtitleProfileAssignment, subtitleprofileassignment.OrderOption]{typ: ent.TypeSubtitleProfileAssignment, tq: q}, nil
 	case *ent.SubtitleSearchAttemptQuery:
 		return &query[*ent.SubtitleSearchAttemptQuery, predicate.SubtitleSearchAttempt, subtitlesearchattempt.OrderOption]{typ: ent.TypeSubtitleSearchAttempt, tq: q}, nil
+	case *ent.SubtitleWantedQuery:
+		return &query[*ent.SubtitleWantedQuery, predicate.SubtitleWanted, subtitlewanted.OrderOption]{typ: ent.TypeSubtitleWanted, tq: q}, nil
 	case *ent.TrickplayQuery:
 		return &query[*ent.TrickplayQuery, predicate.Trickplay, trickplay.OrderOption]{typ: ent.TypeTrickplay, tq: q}, nil
 	case *ent.UserQuery:

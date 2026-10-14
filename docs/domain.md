@@ -52,6 +52,7 @@ erDiagram
 | `Issue` / `IssueComment` | A problem a user reports with an item, and its thread (§13.7) |
 | `SubtitleProfile` / `SubtitleProfileAssignment` | The subtitles movies and episodes want, and the libraries, movies and series they are assigned to (§14) |
 | `SubtitleHistoryEvent` / `SubtitleBlocklistEntry` / `SubtitleSearchAttempt` | What happened to a subtitle, a subtitle not to download again, the failed searches of a language (§14) |
+| `SubtitleWanted` | The subtitles a movie or an episode is missing, kept for the wanted lists (§14) |
 
 ---
 
@@ -275,6 +276,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `SubtitleHistoryRepository` | `Add`, `List` (paged, newest first, by items or their series, actions and time), `Purge` of events before a time |
 | `SubtitleBlocklistRepository` | `Add`, `List` (paged, newest first, an item's or all), `Delete`, `Clear` |
 | `SubtitleSearchAttemptRepository` | `List` an item's by language, `Record` a failed search (keeping the first time, replacing the latest) |
+| `SubtitleWantedRepository` | `Put` an item's row (deleting it when nothing is missing), `Delete`, `List` the movies' or episodes' of present items by library and path |
 | `BlockedTitleRepository` | `Get` by kind and TMDB ID, `List` (paged, newest first, searched by title, of the titles blocklisted by hand or by tags), `Add` (`ErrConflict` when blocklisted already), `Delete`, `DeleteTagged` (the titles blocklisted by tags); deleting the user who blocklisted a title keeps it |
 
 * **Transactions**: `Store.InTx` runs a function with a `Store` bound to one transaction; returning an error rolls it back.
@@ -400,6 +402,7 @@ The server keeps what `libs/acquire/subtitles` decides with and what happens to 
 * A `SubtitleHistoryEvent` records a subtitle of a movie or an episode (with its series as `ParentID`) `deleted`, `downloaded`, downloaded from a `manual` search, `upgraded`, `uploaded`, `synced` or `extracted`, as Bazarr's history actions: its language, `Provider` and the provider's `SubtitleID`, its `Score` out of `MaxScore` (0 when not scored), the subtitle's and the video's `Path` and `VideoPath`, a `Description`, the properties of the video it `Matched` and did not (`NotMatched`), and for an upgrade the event of the download it replaced (`UpgradedFrom`).
 * A `SubtitleBlocklistEntry` is a subtitle not to download again for a movie or an episode: its provider, subtitle ID, language and why it was blocklisted.
 * A `SubtitleSearchAttempt` keeps, for a movie or an episode and a language, the `First` and `Last` failed searches, as Bazarr's `failedAttempts`, for adaptive searching.
+* A `SubtitleWanted` keeps what a movie or an episode is missing (`Missing`), with its kind, library, series (`ParentID`), video path and when it was found (`Updated`), as Bazarr's `missing_subtitles` columns; deleting the item deletes it.
 * Deleting an item deletes its subtitle history, blocklist entries and failed attempts.
 
 ### 14.3 Settings

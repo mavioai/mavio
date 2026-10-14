@@ -75,6 +75,10 @@ type Scanner struct {
 	// OnMissing is told of the items a scan marked missing; nil ignores
 	// them.
 	OnMissing func(ctx context.Context, lib core.Library, ids []core.ID)
+	// OnSidecars is told of the items whose subtitle files a scan found
+	// changed while their media files were not, which are not probed;
+	// nil ignores them.
+	OnSidecars func(ctx context.Context, lib core.Library, ids []core.ID)
 	// SubtitleFolder gives where subtitle files are found besides beside
 	// their videos; nil finds them beside their videos only.
 	SubtitleFolder func() SubtitleFolder
@@ -492,10 +496,10 @@ func (sc *scan) subtitleFiles(ctx context.Context, rfs rootFS, res Result, stats
 func (sc *scan) save(ctx context.Context, rfs rootFS, res Result, parent core.ID, stats map[string]core.FolderEntry) (core.ID, error) {
 	folderParent := parent
 	subStats := sc.subtitleFiles(ctx, rfs, res, stats)
-	var probes, refreshes []core.ID
+	var probes, refreshes, sidecars []core.ID
 	err := sc.Store.InTx(ctx, func(tx core.Store) error {
-		probes, refreshes = nil, nil
-		p := saver{scan: sc, tx: tx, rfs: rfs, stats: stats, subStats: subStats, probes: &probes, refreshes: &refreshes}
+		probes, refreshes, sidecars = nil, nil, nil
+		p := saver{scan: sc, tx: tx, rfs: rfs, stats: stats, subStats: subStats, probes: &probes, refreshes: &refreshes, sidecars: &sidecars}
 		if res.Item != nil {
 			id, err := p.node(ctx, *res.Item, parent, core.NilID)
 			if err != nil {
@@ -543,6 +547,9 @@ func (sc *scan) save(ctx context.Context, rfs rootFS, res Result, parent core.ID
 			return core.NilID, err
 		}
 	}
+	if len(sidecars) > 0 && sc.OnSidecars != nil {
+		sc.OnSidecars(ctx, sc.lib, sidecars)
+	}
 	return folderParent, nil
 }
 
@@ -556,8 +563,9 @@ type saver struct {
 	// gives them.
 	subStats map[string]core.FolderEntry
 	saved    int
-	// probes and refreshes collect the items to probe and to refresh.
-	probes, refreshes *[]core.ID
+	// probes and refreshes collect the items to probe and to refresh,
+	// sidecars those whose subtitle files alone changed.
+	probes, refreshes, sidecars *[]core.ID
 }
 
 // sidecarFiles returns the files an item's video's subtitle files are
@@ -691,6 +699,8 @@ func (p *saver) node(ctx context.Context, n Node, parent, owner core.ID) (core.I
 		*p.probes = append(*p.probes, it.ID)
 	case isNew && !playable[n.Kind]:
 		*p.refreshes = append(*p.refreshes, it.ID)
+	case sources != nil && !isNew:
+		*p.sidecars = append(*p.sidecars, it.ID)
 	}
 	return it.ID, nil
 }
