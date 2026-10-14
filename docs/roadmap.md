@@ -807,7 +807,7 @@ flowchart TD
 - [ ] mavio.dev's e-mail through Cloudflare Email Service: verifying addresses, resetting passwords, and telling accounts of invitations
 - [ ] Suspending accounts by mavio.dev's staff, which sends the suspension to the account's servers
 - [ ] Deploying `apps/website` from CI: the Hyperdrive configuration, the secret and the migrations
-- [ ] Translations of mavio.dev's pages with Lingui
+- [ ] Translations of mavio.dev's pages, with their strings in `libs/design/strings` as the web UI's
 - [ ] mavio.dev: friends, Homes, managed accounts and their conversion, switching, Mavio Pass and frozen Homes
 - [ ] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor
 - [ ] `apps/dns` and servers' certificates through ACME DNS-01 challenges

@@ -807,7 +807,7 @@ flowchart TD
 - [ ] 通过 Cloudflare Email Service 发送 mavio.dev 的邮件：验证邮箱地址、重置密码、通知账户收到邀请
 - [ ] mavio.dev 工作人员停用账户，并把停用发送给账户能访问的服务端
 - [ ] 从 CI 部署 `apps/website`：Hyperdrive 配置、机密与迁移
-- [ ] 用 Lingui 翻译 mavio.dev 的页面
+- [ ] 翻译 mavio.dev 的页面，其字符串与 Web UI 一样放在 `libs/design/strings` 中
 - [ ] mavio.dev：好友、Home、托管账户及其转换、切换、Mavio Pass 与冻结的 Home
 - [ ] mavio.dev：通过 Durable Object 向服务端推送，按游标取回变更
 - [ ] `apps/dns` 与通过 ACME DNS-01 质询获取的服务端证书
