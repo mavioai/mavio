@@ -35,7 +35,7 @@ export function SignInScreen() {
   // The mode a new server's setup chose.
   const [setupMode, setSetupMode] = useState<"standalone" | "mavioDev">();
 
-  const done = () => navigate({ to: adding ? "/profile" : "/" });
+  const done = () => navigate({ to: adding ? "/settings" : "/" });
 
   // Goes to mavio.dev, which comes back to /sign-in/mavio-dev.
   const toMavioDev = async (url: string) => {
@@ -126,7 +126,7 @@ export function SignInScreen() {
             {error && <p className="type-callout text-danger">{error}</p>}
             <div className="flex gap-2">
               {adding && (
-                <Button variant="secondary" onClick={() => navigate({ to: "/profile" })}>
+                <Button variant="secondary" onClick={() => navigate({ to: "/settings" })}>
                   {t("action.cancel")}
                 </Button>
               )}

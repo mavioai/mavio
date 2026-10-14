@@ -130,3 +130,64 @@ body {
   outline: 2px solid var(--mavio-color-focus);
   outline-offset: 2px;
 }
+
+/* TV mode (docs/clients.md §6.3): the television's layout and type scale
+   of the tokens, and focus shown by scale and color rather than a ring. */
+:root[data-tv] {
+  --mavio-layout-margin: 80px;
+  --mavio-layout-gutter: 40px;
+  --mavio-layout-poster: 240px;
+  --mavio-layout-thumbnail: 480px;
+  --mavio-layout-sidebar: 0px;
+  --mavio-layout-rail: 0px;
+  --mavio-type-display-size: 52px;
+  --mavio-type-display-line-height: 60px;
+  --mavio-type-title1-size: 42px;
+  --mavio-type-title1-line-height: 50px;
+  --mavio-type-title2-size: 34px;
+  --mavio-type-title2-line-height: 40px;
+  --mavio-type-title3-size: 30px;
+  --mavio-type-title3-line-height: 36px;
+  --mavio-type-headline-size: 26px;
+  --mavio-type-headline-line-height: 32px;
+  --mavio-type-body-size: 24px;
+  --mavio-type-body-line-height: 32px;
+  --mavio-type-callout-size: 22px;
+  --mavio-type-callout-line-height: 28px;
+  --mavio-type-footnote-size: 20px;
+  --mavio-type-footnote-line-height: 26px;
+  --mavio-type-caption-size: 18px;
+  --mavio-type-caption-line-height: 24px;
+
+  & :focus,
+  & :focus-visible {
+    outline: none;
+  }
+  /* Rows leave room for a focused card to grow. */
+  & .scroll-row {
+    padding-block: 24px;
+    margin-block: -16px;
+  }
+  & .scroll-row > a {
+    opacity: 0.75;
+    transition:
+      transform 160ms ease-out,
+      opacity 160ms ease-out;
+  }
+  & .scroll-row > a:focus {
+    opacity: 1;
+    transform: scale(1.1);
+    position: relative;
+    z-index: 1;
+  }
+  & .scroll-row > a:focus [data-art] {
+    box-shadow: 0 18px 40px rgb(0 0 0 / 0.6);
+  }
+  & :is(input, select, textarea):focus {
+    box-shadow: 0 0 0 3px #fff;
+  }
+  & :is(button, .tv-pill, [data-tv-button]):focus {
+    background: #fff;
+    color: #000;
+  }
+}

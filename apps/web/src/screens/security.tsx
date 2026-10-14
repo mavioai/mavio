@@ -1,4 +1,4 @@
-// The profile's sections of one standalone server's sign-in: switching to
+// The account settings of one standalone server's sign-in: switching to
 // another of its users (docs/accounts.md §4.4), and the signed-in user's
 // passkeys, authenticator app and PIN.
 import { timestampDate } from "@bufbuild/protobuf/wkt";

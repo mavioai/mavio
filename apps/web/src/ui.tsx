@@ -3,9 +3,10 @@
 import { durationMs, timestampDate } from "@bufbuild/protobuf/wkt";
 import type { Item } from "@mavio/proto/mavio/library/v1/item_pb";
 import { ImageKind, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
+import { LibraryKind } from "@mavio/proto/mavio/library/v1/library_pb";
 import { artwork, type Server, thumbOf } from "@mavio/client-ts";
 import { Link } from "@tanstack/react-router";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
 
 import { t } from "./i18n.ts";
 import { Icon, type IconName } from "./icon.tsx";
@@ -89,7 +90,7 @@ export function Artwork({ src, alt, className }: { src?: string; alt: string; cl
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   return (
-    <div className={`relative overflow-hidden bg-surface-raised ${className ?? ""}`}>
+    <div data-art className={`relative overflow-hidden bg-surface-raised ${className ?? ""}`}>
       {src && !failed ? (
         <img
           src={src}
@@ -306,4 +307,147 @@ export function ScreenTitle({ children }: { children: ReactNode }) {
 /** The loading state of a screen. */
 export function Loading() {
   return <div className="px-margin py-16 text-center type-body text-text-secondary">{t("state.loading")}</div>;
+}
+
+/** The icon of a library of a kind. */
+export function libraryIcon(kind: LibraryKind): IconName {
+  switch (kind) {
+    case LibraryKind.MOVIES:
+      return "movies";
+    case LibraryKind.SHOWS:
+      return "shows";
+    case LibraryKind.MUSIC:
+    case LibraryKind.MUSIC_VIDEOS:
+      return "music";
+    case LibraryKind.HOME_VIDEOS:
+      return "homeVideos";
+    case LibraryKind.BOOKS:
+      return "books";
+    case LibraryKind.PHOTOS:
+      return "photos";
+    case LibraryKind.COLLECTIONS:
+      return "collections";
+    case LibraryKind.PLAYLISTS:
+      return "playlists";
+    default:
+      return "folder";
+  }
+}
+
+/** A person's initial on a color their name picks. */
+export function Avatar({ name, size = 32, className }: { name: string; size?: number; className?: string }) {
+  let hue = 0;
+  for (const c of name) hue = (hue * 31 + c.codePointAt(0)!) % 360;
+  return (
+    <span
+      aria-hidden
+      className={`inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white ${className ?? ""}`}
+      style={{ width: size, height: size, fontSize: size * 0.42, background: `hsl(${hue} 42% 44%)` }}
+    >
+      {[...name][0]?.toUpperCase()}
+    </span>
+  );
+}
+
+/** Calls onClose on Escape and on a press outside ref, while open. */
+export function useDismiss(ref: RefObject<HTMLElement | null>, open: boolean, onClose: () => void) {
+  useEffect(() => {
+    if (!open) return;
+    const down = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    // Before other handlers of Escape, such as going back on a television.
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      onClose();
+    };
+    document.addEventListener("pointerdown", down);
+    document.addEventListener("keydown", key, true);
+    return () => {
+      document.removeEventListener("pointerdown", down);
+      document.removeEventListener("keydown", key, true);
+    };
+  }, [ref, open, onClose]);
+}
+
+/** A group of rows on a raised surface, as in the settings. */
+export function Group({ title, footer, children }: { title?: ReactNode; footer?: ReactNode; children: ReactNode }) {
+  return (
+    <section className="flex flex-col gap-2">
+      {title && <h2 className="px-1 type-headline">{title}</h2>}
+      <div className="flex flex-col divide-y divide-border overflow-hidden rounded-[14px] bg-surface">{children}</div>
+      {footer && <p className="px-1 type-footnote text-text-secondary">{footer}</p>}
+    </section>
+  );
+}
+
+/** A row of a group: a label, a line under it and its control or value. */
+export function Row({
+  label,
+  detail,
+  leading,
+  children,
+}: {
+  label: ReactNode;
+  detail?: ReactNode;
+  leading?: ReactNode;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="flex min-h-13 flex-wrap items-center gap-3 px-4 py-2.5">
+      {leading}
+      <div className="min-w-0 flex-1">
+        <div className="type-body">{label}</div>
+        {detail && <div className="truncate type-footnote text-text-secondary">{detail}</div>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/** A switch, green when on as Apple's are. */
+export function Toggle({ on, onChange, label }: { on: boolean; onChange: (on: boolean) => void; label: string }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={() => onChange(!on)}
+      className={`relative h-[31px] w-[51px] shrink-0 rounded-full transition-colors ${on ? "bg-[#34C759]" : "bg-fill-selected"}`}
+    >
+      <span
+        className={`absolute top-[2px] left-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-level1 transition-transform ${on ? "translate-x-5" : ""}`}
+      />
+    </button>
+  );
+}
+
+/** A choice among options, drawn as a native select. */
+export function Select<T extends string>({
+  value,
+  options,
+  onChange,
+  label,
+}: {
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (v: T) => void;
+  label: string;
+}) {
+  return (
+    <select
+      value={value}
+      aria-label={label}
+      onChange={(e) => onChange(e.target.value as T)}
+      className="min-h-9 max-w-full rounded-md bg-fill px-2 type-callout text-on-background"
+    >
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
 }

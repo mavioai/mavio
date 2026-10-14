@@ -5,6 +5,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { locale } from "./i18n.ts";
+import { applyTheme } from "./prefs.ts";
 import { router } from "./router.tsx";
 import "./styles.css";
 
@@ -22,6 +23,7 @@ const queryClient = new QueryClient({
 const servers = new Servers(localStorage, location.origin);
 
 document.documentElement.lang = locale;
+applyTheme();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

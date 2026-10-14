@@ -1,0 +1,114 @@
+// The settings of this browser (docs/clients.md §6.1, §6.3): appearance, TV
+// mode, the sidebar and playback. They are kept in localStorage, which may
+// be unavailable; the defaults apply then.
+import { breakpoints } from "@mavio/design/tokens";
+import { useSyncExternalStore } from "react";
+
+/** The color theme: the system's, or one chosen. */
+export type Appearance = "system" | "light" | "dark";
+
+/** The highest bitrate streamed to this browser, by name. */
+export type Quality = "original" | "auto" | "1080p" | "720p" | "480p";
+
+/** The bitrate each quality allows, in bits per second. */
+export const qualityBitrates: Record<Quality, number> = {
+  original: 200_000_000,
+  auto: 40_000_000,
+  "1080p": 10_000_000,
+  "720p": 4_000_000,
+  "480p": 1_500_000,
+};
+
+export interface Prefs {
+  appearance: Appearance;
+  /** The television layout, for a computer connected to a TV. */
+  tv: boolean;
+  /** Whether the desktop layout's sidebar is expanded, where the window is wide enough. */
+  sidebar: boolean;
+  quality: Quality;
+  autoplayNext: boolean;
+}
+
+const key = "mavio.prefs";
+const defaults: Prefs = { appearance: "system", tv: false, sidebar: true, quality: "auto", autoplayNext: true };
+
+function read(): Prefs {
+  try {
+    return { ...defaults, ...(JSON.parse(localStorage.getItem(key) ?? "{}") as Partial<Prefs>) };
+  } catch {
+    return defaults;
+  }
+}
+
+let current = read();
+const listeners = new Set<() => void>();
+
+function subscribe(l: () => void) {
+  listeners.add(l);
+  return () => listeners.delete(l);
+}
+
+/** This browser's settings. */
+export function usePrefs(): Prefs {
+  return useSyncExternalStore(subscribe, () => current);
+}
+
+/** The settings now, outside React. */
+export function prefs(): Prefs {
+  return current;
+}
+
+/** Changes some of this browser's settings. */
+export function setPrefs(change: Partial<Prefs>) {
+  current = { ...current, ...change };
+  try {
+    localStorage.setItem(key, JSON.stringify(current));
+  } catch {
+    // Kept for this page only.
+  }
+  applyTheme();
+  for (const l of listeners) l();
+}
+
+/**
+ * Sets the root element's data-theme and data-tv, which tokens.css and the
+ * styles read: television starts dark unless a theme is chosen.
+ */
+export function applyTheme() {
+  const root = document.documentElement;
+  const theme = current.appearance === "system" ? (current.tv ? "dark" : undefined) : current.appearance;
+  if (theme) root.dataset.theme = theme;
+  else delete root.dataset.theme;
+  if (current.tv) root.dataset.tv = "";
+  else delete root.dataset.tv;
+}
+
+/** The layout a window's width chooses (docs/clients.md §6.3). */
+export type WidthClass = "compact" | "medium" | "expanded";
+
+const queries =
+  typeof matchMedia === "undefined"
+    ? undefined
+    : {
+        medium: matchMedia(`(min-width: ${breakpoints.tablet}px)`),
+        expanded: matchMedia(`(min-width: ${breakpoints.expanded}px)`),
+      };
+
+function widthClass(): WidthClass {
+  if (!queries) return "expanded";
+  return queries.expanded.matches ? "expanded" : queries.medium.matches ? "medium" : "compact";
+}
+
+function subscribeWidth(l: () => void) {
+  queries?.medium.addEventListener("change", l);
+  queries?.expanded.addEventListener("change", l);
+  return () => {
+    queries?.medium.removeEventListener("change", l);
+    queries?.expanded.removeEventListener("change", l);
+  };
+}
+
+/** The width class of the window, which follows its resizing. */
+export function useWidthClass(): WidthClass {
+  return useSyncExternalStore(subscribeWidth, widthClass);
+}

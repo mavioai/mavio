@@ -1,18 +1,18 @@
-import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
+import { createRootRoute, createRoute, createRouter, redirect } from "@tanstack/react-router";
 import type { Filter, Sort } from "@mavio/client-ts";
 
 import { Details } from "./screens/details.tsx";
 import { HomeScreen } from "./screens/home.tsx";
 import { HubScreen } from "./screens/hub.tsx";
-import { Layout } from "./screens/layout.tsx";
 import { LibrariesScreen } from "./screens/libraries.tsx";
 import { LibraryScreen } from "./screens/library.tsx";
 import { PlayerScreen } from "./screens/player.tsx";
-import { ProfileScreen } from "./screens/profile.tsx";
 import { SearchScreen } from "./screens/search.tsx";
+import { SettingsScreen } from "./screens/settings.tsx";
 import { MavioDevCallbackScreen, SignInScreen } from "./screens/sign-in.tsx";
+import { Shell } from "./shell/shell.tsx";
 
-const root = createRootRoute({ component: Layout });
+const root = createRootRoute({ component: Shell });
 
 const home = createRoute({ getParentRoute: () => root, path: "/", component: HomeScreen });
 
@@ -39,7 +39,18 @@ const search = createRoute({
   component: SearchScreen,
 });
 
-const profile = createRoute({ getParentRoute: () => root, path: "/profile", component: ProfileScreen });
+const settings = createRoute({ getParentRoute: () => root, path: "/settings", component: SettingsScreen });
+
+const settingsSection = createRoute({ getParentRoute: () => root, path: "/settings/$section", component: SettingsScreen });
+
+// The profile became the settings.
+const profile = createRoute({
+  getParentRoute: () => root,
+  path: "/profile",
+  beforeLoad: () => {
+    throw redirect({ to: "/settings" });
+  },
+});
 
 const sorts: Sort[] = ["name", "dateAdded", "released", "rating", "lastPlayed", "random"];
 const filters: Filter[] = ["all", "unplayed", "played", "favorites"];
@@ -70,7 +81,20 @@ const player = createRoute({
 });
 
 export const router = createRouter({
-  routeTree: root.addChildren([home, signIn, mavioDevCallback, libraries, search, profile, library, hub, details, player]),
+  routeTree: root.addChildren([
+    home,
+    signIn,
+    mavioDevCallback,
+    libraries,
+    search,
+    settings,
+    settingsSection,
+    profile,
+    library,
+    hub,
+    details,
+    player,
+  ]),
   scrollRestoration: true,
 });
 

@@ -1,0 +1,310 @@
+// The user of the shown sign-in and the menu it opens (docs/clients.md
+// §6.3): switching to another user of the server, the settings, the
+// sign-ins, the account at mavio.dev or the servers, and signing out.
+import { errorMessage, type ServerEntry, serverKey, type SignIn, useServersStore, useSignIns } from "@mavio/client-ts";
+import type { SwitchableUser } from "@mavio/proto/mavio/auth/v1/auth_pb";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, useLocation } from "@tanstack/react-router";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
+import { t } from "../i18n.ts";
+import { Icon, type IconName } from "../icon.tsx";
+import { Avatar, useDismiss } from "../ui.tsx";
+
+/** The shown sign-in as the user menu presents it. */
+export function useAccount(): { shown?: SignIn; count: number; name: string; line: string } {
+  const { all, shown } = useSignIns();
+  if (!shown) return { count: all.length, name: "", line: "" };
+  return {
+    shown,
+    count: all.length,
+    name: shown.name,
+    line:
+      shown.kind === "mavioDev"
+        ? t("menu.serverCount", { count: shown.servers.length })
+        : (shown.servers[0]?.name ?? ""),
+  };
+}
+
+/** The address of the account's page at mavio.dev, which its servers tell. */
+export function useMavioDevAccountUrl(shown?: SignIn): string | undefined {
+  const servers = useServersStore();
+  const server = shown?.kind === "mavioDev" ? shown.servers[0] : undefined;
+  const info = useQuery({
+    queryKey: ["authInfo", server?.url],
+    queryFn: () => servers.probe(server!.url),
+    enabled: !!server,
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+  const site = info.data?.mavioDevUrl?.replace(/\/api\/?$/, "");
+  return site ? `${site}/account` : undefined;
+}
+
+/**
+ * The users the shown standalone server's session may switch to
+ * (docs/accounts.md §4.4), and switching to one.
+ */
+export function useSwitchUsers(server?: ServerEntry) {
+  const servers = useServersStore();
+  const queryClient = useQueryClient();
+  const users = useQuery({
+    queryKey: serverKey(server?.id ?? "", "switchable", server?.userId),
+    queryFn: () => servers.switchableUsers(server!),
+    enabled: !!server && server.mode !== "mavioDev",
+    retry: false,
+  });
+  const switchTo = useMutation({
+    mutationFn: ({ user, pin }: { user: SwitchableUser; pin?: string }) => servers.switchUser(server!, user.id, pin),
+    // Everything the server answered was the previous user's.
+    onSuccess: () => queryClient.removeQueries({ queryKey: serverKey(server!.id) }),
+  });
+  return { users: users.data && users.data.length > 1 ? users.data : [], switchTo };
+}
+
+/** The button with the user's avatar and name, which opens the user menu. */
+export function UserButton({ compact = false, placement = "above" }: { compact?: boolean; placement?: "above" | "below" }) {
+  const account = useAccount();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  useDismiss(ref, open, close);
+  const { pathname } = useLocation();
+  useEffect(close, [pathname, close]);
+  if (!account.shown) return null;
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={t("nav.userMenu", { name: account.name })}
+        title={compact ? account.name : undefined}
+        onClick={() => setOpen(!open)}
+        className={`flex w-full items-center gap-2.5 rounded-[10px] text-left hover:bg-fill ${compact ? "justify-center p-1.5" : "p-2"} ${open ? "bg-fill" : ""}`}
+      >
+        <Avatar name={account.name} size={compact ? 36 : 32} />
+        {!compact && (
+          <>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate type-callout font-semibold">{account.name}</span>
+              <span className="block truncate type-caption text-text-secondary">{account.line}</span>
+            </span>
+            <Icon name="selector" size={16} className="text-text-tertiary" />
+          </>
+        )}
+      </button>
+      {open && <UserMenu placement={placement} onClose={close} />}
+    </div>
+  );
+}
+
+/** The glass menu of the user. */
+function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClose: () => void }) {
+  const servers = useServersStore();
+  const account = useAccount();
+  const shown = account.shown!;
+  const server = shown.kind === "standalone" ? shown.servers[0] : undefined;
+  const { users, switchTo } = useSwitchUsers(server);
+  const [asking, setAsking] = useState<SwitchableUser>();
+  const manage = useMavioDevAccountUrl(shown);
+
+  return (
+    <div
+      role="menu"
+      className={`absolute z-50 w-[280px] rounded-[14px] border border-border bg-surface-overlay/85 p-1.5 shadow-level3 backdrop-blur-xl ${
+        placement === "above" ? "bottom-full left-0 mb-2" : "top-full right-0 mt-2"
+      }`}
+    >
+      <div className="flex items-center gap-3 px-2.5 py-2">
+        <Avatar name={account.name} size={36} />
+        <div className="min-w-0">
+          <div className="truncate type-headline">{account.name}</div>
+          <div className="truncate type-footnote text-text-secondary">
+            {shown.kind === "mavioDev" ? t("auth.mavioAccount") : t("auth.standaloneUser", { server: account.line })}
+          </div>
+        </div>
+      </div>
+      {users.length > 0 && (
+        <>
+          <Divider />
+          <div className="px-2.5 pt-1.5 pb-1 type-caption text-text-secondary">{t("auth.switchUser")}</div>
+          {users.map((u) => (
+            <button
+              key={u.id}
+              type="button"
+              role="menuitem"
+              disabled={u.current || switchTo.isPending}
+              onClick={() => (u.hasPin ? setAsking(u) : switchTo.mutate({ user: u }, { onSuccess: onClose }))}
+              className="flex min-h-10 w-full items-center gap-2.5 rounded-lg px-2.5 text-left type-body hover:bg-fill disabled:hover:bg-transparent"
+            >
+              <Avatar name={u.name} size={24} />
+              <span className="min-w-0 flex-1 truncate">{u.name}</span>
+              {u.current ? (
+                <Icon name="check" size={16} className="text-accent-text" />
+              ) : (
+                u.hasPin && <Icon name="lock" size={14} className="text-text-tertiary" />
+              )}
+            </button>
+          ))}
+        </>
+      )}
+      <Divider />
+      <MenuLink icon="settings" to="/settings" onClose={onClose} shortcut="⌘,">
+        {t("nav.settings")}
+      </MenuLink>
+      <MenuLink icon="users" to="/settings/$section" section="sign-ins" onClose={onClose} shortcut={String(account.count)}>
+        {t("auth.signIns")}
+      </MenuLink>
+      {shown.kind === "mavioDev" ? (
+        manage && (
+          <a role="menuitem" href={manage} target="_blank" rel="noreferrer" onClick={onClose} className={itemClass}>
+            <Icon name="external" size={18} className="text-text-secondary" />
+            <span className="flex-1">{t("menu.manageAccount")}</span>
+          </a>
+        )
+      ) : (
+        <MenuLink icon="server" to="/settings/$section" section="servers" onClose={onClose}>
+          {t("menu.manageServers")}
+        </MenuLink>
+      )}
+      <Divider />
+      <button
+        type="button"
+        role="menuitem"
+        onClick={() => {
+          onClose();
+          void servers.signOut(shown.key);
+        }}
+        className={itemClass}
+      >
+        <Icon name="signOut" size={18} className="text-text-secondary" />
+        <span className="flex-1">{t("auth.signOut")}</span>
+      </button>
+      {asking && (
+        <PinPad
+          name={asking.name}
+          busy={switchTo.isPending}
+          error={switchTo.error ? errorMessage(switchTo.error) : undefined}
+          onCancel={() => (setAsking(undefined), switchTo.reset())}
+          onPin={(pin) => switchTo.mutate({ user: asking, pin }, { onSuccess: () => (setAsking(undefined), onClose()) })}
+        />
+      )}
+    </div>
+  );
+}
+
+const itemClass = "flex min-h-10 w-full items-center gap-2.5 rounded-lg px-2.5 text-left type-body hover:bg-fill";
+
+function Divider() {
+  return <div className="mx-2.5 my-1 h-px bg-border" />;
+}
+
+function MenuLink({
+  icon,
+  to,
+  section,
+  shortcut,
+  onClose,
+  children,
+}: {
+  icon: IconName;
+  to: "/settings" | "/settings/$section";
+  section?: string;
+  shortcut?: string;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <Link role="menuitem" to={to} params={section ? { section } : undefined} onClick={onClose} className={itemClass}>
+      <Icon name={icon} size={18} className="text-text-secondary" />
+      <span className="flex-1">{children}</span>
+      {shortcut && <span className="type-footnote text-text-tertiary">{shortcut}</span>}
+    </Link>
+  );
+}
+
+/** The dialog asking for a user's four-digit PIN, with a keypad and the keyboard. */
+export function PinPad({
+  name,
+  busy,
+  error,
+  onPin,
+  onCancel,
+}: {
+  name: string;
+  busy: boolean;
+  error?: string;
+  onPin: (pin: string) => void;
+  onCancel: () => void;
+}) {
+  const [pin, setPin] = useState("");
+  const press = useCallback(
+    (k: string) => {
+      if (busy) return;
+      const next = k === "⌫" ? pin.slice(0, -1) : (pin + k).slice(0, 4);
+      setPin(next);
+      if (next.length === 4 && pin.length < 4) onPin(next);
+    },
+    [busy, pin, onPin],
+  );
+  // A wrong PIN clears the dots for another try.
+  useEffect(() => {
+    if (error) setPin("");
+  }, [error]);
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (/^\d$/.test(e.key)) press(e.key);
+      else if (e.key === "Backspace") press("⌫");
+      else if (e.key === "Escape") onCancel();
+      else return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    };
+    document.addEventListener("keydown", key, true);
+    return () => document.removeEventListener("keydown", key, true);
+  }, [press, onCancel]);
+  // In the body, outside the menu: its backdrop filter would hold a fixed
+  // element, and a press on the keypad must not close the menu.
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim backdrop-blur-sm"
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        if (e.target === e.currentTarget) onCancel();
+      }}
+    >
+      <div role="dialog" aria-modal aria-label={t("auth.enterPin", { name })} className="w-[300px] rounded-[22px] bg-surface p-6 text-center shadow-level3">
+        <Avatar name={name} size={56} className="mx-auto" />
+        <h2 className="mt-3 type-title3">{t("auth.enterPin", { name })}</h2>
+        <div className="my-5 flex justify-center gap-4" aria-live="polite">
+          {[0, 1, 2, 3].map((i) => (
+            <span key={i} className={`h-3 w-3 rounded-full border-2 border-on-background ${i < pin.length ? "bg-on-background" : ""}`} />
+          ))}
+        </div>
+        {error && <p className="-mt-2 mb-3 type-footnote text-danger">{error}</p>}
+        <div className="grid grid-cols-3 gap-3">
+          {["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"].map((k) =>
+            k === "" ? (
+              <span key="blank" />
+            ) : (
+              <button
+                key={k}
+                type="button"
+                aria-label={k === "⌫" ? t("action.delete") : k}
+                onClick={() => press(k)}
+                className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-fill type-title2 hover:bg-fill-selected active:opacity-70"
+              >
+                {k === "⌫" ? <Icon name="backspace" /> : k}
+              </button>
+            ),
+          )}
+        </div>
+        <button type="button" onClick={onCancel} className="mt-4 type-body text-accent-text">
+          {t("action.cancel")}
+        </button>
+      </div>
+    </div>,
+    document.body,
+  );
+}

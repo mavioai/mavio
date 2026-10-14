@@ -1,0 +1,93 @@
+// Focus that moves with the arrow keys to the nearest element in their
+// direction, as a remote moves it on a television (docs/clients.md §6.3).
+import { useEffect } from "react";
+
+type Direction = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight";
+
+const focusable =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea, [tabindex]:not([tabindex="-1"])';
+
+function visible(el: HTMLElement): boolean {
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== "hidden" && !el.closest("[inert],[aria-hidden=true]");
+}
+
+/**
+ * The element nearest to from in a direction: of those wholly beyond its
+ * edge, the one with the least distance along the direction plus twice
+ * its offset across it, so that rows and columns are kept.
+ */
+export function nearest(from: DOMRect, dir: Direction, candidates: HTMLElement[]): HTMLElement | undefined {
+  const cx = from.left + from.width / 2;
+  const cy = from.top + from.height / 2;
+  let best: HTMLElement | undefined;
+  let bestScore = Number.POSITIVE_INFINITY;
+  for (const el of candidates) {
+    const r = el.getBoundingClientRect();
+    const x = r.left + r.width / 2;
+    const y = r.top + r.height / 2;
+    let along: number;
+    let across: number;
+    switch (dir) {
+      case "ArrowRight":
+        along = r.left - from.right;
+        across = Math.abs(y - cy);
+        break;
+      case "ArrowLeft":
+        along = from.left - r.right;
+        across = Math.abs(y - cy);
+        break;
+      case "ArrowDown":
+        along = r.top - from.bottom;
+        across = Math.abs(x - cx);
+        break;
+      case "ArrowUp":
+        along = from.top - r.bottom;
+        across = Math.abs(x - cx);
+        break;
+    }
+    if (along < -1) continue;
+    const score = along + across * 2;
+    if (score < bestScore) {
+      bestScore = score;
+      best = el;
+    }
+  }
+  return best;
+}
+
+/** Moves focus with the arrow keys; Escape and Backspace go back. */
+export function useSpatialNavigation() {
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const active = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
+      const typing = active?.matches("input, textarea, select") ?? false;
+      if ((e.key === "Escape" || (e.key === "Backspace" && !typing)) && location.pathname !== "/") {
+        e.preventDefault();
+        history.back();
+        return;
+      }
+      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
+      // The caret of a field moves sideways.
+      if (typing && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
+      const all = [...document.querySelectorAll<HTMLElement>(focusable)].filter(visible);
+      e.preventDefault();
+      if (!active || active === document.body || !all.includes(active)) {
+        (document.querySelector<HTMLElement>("main " + focusable.split(",")[0]) ?? all[0])?.focus();
+        return;
+      }
+      const next = nearest(
+        active.getBoundingClientRect(),
+        e.key as Direction,
+        all.filter((el) => el !== active && !el.contains(active) && !active.contains(el)),
+      );
+      if (next) {
+        next.focus({ preventScroll: true });
+        next.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+      }
+    };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, []);
+}
